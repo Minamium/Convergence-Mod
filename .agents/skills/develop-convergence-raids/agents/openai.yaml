@@ -1,0 +1,4 @@
+interface:
+  display_name: "Develop Convergence Raids"
+  short_description: "Build and review authoritative multiplayer raids"
+  default_prompt: "Use $develop-convergence-raids to implement or review this Convergence Raid change safely."

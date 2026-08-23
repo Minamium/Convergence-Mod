@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research tModLoader Sources"
+  short_description: "Research public tModLoader mod implementations"
+  default_prompt: "Use $research-tmodloader-sources to investigate prior art for this Terraria mod feature."

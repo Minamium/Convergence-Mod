@@ -13,6 +13,7 @@ Describe the player-facing or architectural outcome.
 
 - [ ] `python3 tools/repository_checks.py`
 - [ ] `python3 tools/validate_yaml.py`, or no YAML changed
+- [ ] `dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj`, or no Raid-domain code changed
 - [ ] `dotnet build ConvergenceMod.csproj`, or no C# changed
 - [ ] tModLoader build + reload
 - [ ] Single Player smoke test, or not applicable

@@ -35,10 +35,12 @@ Content/Encounters/             feature-first Boss/Raid modules
 Client/                         client-only presentation
 Assets/                         reviewed runtime exports
 docs/adr/                       architectural decision history
+.agents/skills/                 reusable Raid-development and source-research workflows
+Tests/Convergence.DomainTests/  tModLoader-free authoritative domain harness
 tools/repository_checks.py      local and CI policy checks
 ```
 
-The first module is `Content/Encounters/ThirdSeverance`. It currently registers metadata and an inert, cleanup-safe bootstrap runtime. A feature policy deliberately rejects activation until Milestone 1 supplies server-resolved Core/Arena/progression/roster validation; packets, Arena objects, NPCs, phases, and rewards are not implemented yet.
+The first module is `Content/Encounters/ThirdSeverance`. It registers metadata, an inert cleanup-safe bootstrap runtime, an immutable Core-anchored arena/Boss/mechanic plan, and a disconnected boundary around the pure Raid Downed/Revive domain. A feature policy deliberately rejects activation until server-resolved Core/Arena/progression/roster validation and the required authority adapters exist. No Tile Core, live Barrier, NPC/Projectile actor, phase executor, packet codec, reward, or production asset is playable yet.
 
 ## Local verification
 
@@ -46,9 +48,10 @@ The first module is `Content/Encounters/ThirdSeverance`. It currently registers 
 python3 tools/repository_checks.py
 python3 -m pip install --requirement tools/requirements-ci.txt
 python3 tools/validate_yaml.py
+dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj
 ```
 
-For a real build, clone the repository as `ModSources/Convergence` under the pinned tModLoader installation, then run:
+The standalone harness exercises production Downed/Revive and immutable Arena/Boss-plan types, but is not a tModLoader build. For a real build, clone the repository as `ModSources/Convergence` under the pinned tModLoader installation, then run:
 
 ```bash
 dotnet build ConvergenceMod.csproj
@@ -78,6 +81,8 @@ Full instructions and limitations are in [Development Setup](docs/DEVELOPMENT.md
 - [Architecture Decisions](docs/adr/README.md)
 - [Version Matrix](docs/VERSION_MATRIX.md)
 - [Research Sources](docs/SOURCES.md)
+- [Multiplayer Raid prior-art research](docs/research/MULTIPLAYER_RAID_PRIOR_ART.md)
+- [Codex Skills survey](docs/research/CODEX_SKILLS_SURVEY.md)
 
 ### Art, audio, and rights
 

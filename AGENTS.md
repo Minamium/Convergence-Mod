@@ -8,6 +8,12 @@ This file applies to the entire repository.
 2. State the implementation plan, affected files, synchronization policy, and unresolved decisions.
 3. Keep work inside the requested milestone; do not pre-build later boss phases or production assets.
 
+## Repository Skills
+
+- Use `.agents/skills/develop-convergence-raids` for Boss/Raid implementation or review. It contains the authority, cleanup, module-routing, and multiplayer verification checklists.
+- Use `.agents/skills/research-tmodloader-sources` when API behavior or another public Mod implementation must be investigated. Record exact versions, source paths, licenses, observations, and independent design decisions.
+- Keep always-on rules here and task-specific procedures in Skills. Repository Skills are development material and must remain excluded from the `.tmod` package.
+
 ## Non-negotiable boundaries
 
 - Gameplay state and outcomes are server/Single Player authoritative.
@@ -22,6 +28,7 @@ This file applies to the entire repository.
 ## Verification
 
 - Always run `python3 tools/repository_checks.py` and `python3 tools/validate_yaml.py` (install `tools/requirements-ci.txt`).
+- For Raid-domain changes, run `dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj`; this does not replace a tModLoader build.
 - For C# changes, run both `dotnet build ConvergenceMod.csproj` and tModLoader Build + Reload in the pinned `ModSources/Convergence` environment.
 - Multiplayer changes require relevant Single Player, Host & Play, Dedicated Server, 2/3/4-player, latency, disconnect, and cleanup evidence.
 - If the pinned runtime is unavailable, report the missing verification explicitly; never claim a successful compile.

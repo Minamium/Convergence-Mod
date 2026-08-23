@@ -24,6 +24,8 @@ Exit: clean build and load on the pinned client/server environment.
 
 ## Milestone 1 — Arena Infrastructure
 
+Foundation completed early: an immutable, non-world-mutating 320x140 blueprint now derives the floor-center Core anchor, four deterministic Pylon slots, a 2-tile logical Barrier, and outsider-response policy. It does not satisfy this milestone's runtime exit criteria.
+
 - typed activation/ready/cancel/snapshot packet handlers
 - server-resolved Core/anchor and request nonce/replay/rate validation
 - Third Severance progression policy and removal of the temporary availability deny
@@ -54,6 +56,8 @@ Exit: clients recover from stale/reordered state without changing authoritative 
 
 ## Milestone 3 — Basic Encounter Vertical Slice
 
+Foundation completed early: an inert typed plan now describes multipart forms, Pylon/part/DPS objectives, Stack, Spread, Targeted Line, Personal Effigy, Weak Point, loop/enrage, and Last Stand. No executor, actor, damage collector, or synchronized cue is live.
+
 - Boss Dummy
 - Stack
 - Spread
@@ -65,6 +69,8 @@ Exit: clients recover from stale/reordered state without changing authoritative 
 Exit: 2～4 players can clear or fail a short deterministic encounter.
 
 ## Milestone 4 — Downed and Revive
+
+Foundation completed early: the pure server/SP domain, stable participant binding, channel lease nonce, token accounting, same-tick commit, reconnect grace, wipe reasons, projections, snapshot, cleanup, and standalone deterministic harness are implemented behind a disconnected feature boundary. The tModLoader/Calamity adapters and all real multiplayer evidence remain blocking work.
 
 - standard death interception
 - Downed state and timer

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Parse and minimally validate repository-owned GitHub YAML files."""
+"""Parse and minimally validate repository-owned YAML files."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parents[1]
 GITHUB_ROOT = ROOT / ".github"
+SKILLS_ROOT = ROOT / ".agents" / "skills"
 
 
 def require_mapping(value: object, path: Path) -> dict[object, object]:
@@ -40,12 +41,32 @@ def validate(path: Path) -> None:
                 raise ValueError(f"{relative} must define {field}")
     elif path.name == "dependabot.yml" and document.get("version") != 2:
         raise ValueError(".github/dependabot.yml must use version 2")
+    elif relative.endswith("/agents/openai.yaml"):
+        interface = document.get("interface")
+        if not isinstance(interface, dict):
+            raise ValueError(f"{relative} must define an interface mapping")
+        for field in ("display_name", "short_description", "default_prompt"):
+            if not isinstance(interface.get(field), str) or not interface[field].strip():
+                raise ValueError(f"{relative} must define interface.{field}")
+
+        skill_name = path.parent.parent.name
+        if f"${skill_name}" not in interface["default_prompt"]:
+            raise ValueError(
+                f"{relative} default_prompt must explicitly invoke ${skill_name}"
+            )
 
 
 def main() -> int:
-    files = sorted((*GITHUB_ROOT.rglob("*.yml"), *GITHUB_ROOT.rglob("*.yaml")))
+    files = sorted(
+        (
+            *GITHUB_ROOT.rglob("*.yml"),
+            *GITHUB_ROOT.rglob("*.yaml"),
+            *SKILLS_ROOT.rglob("*.yml"),
+            *SKILLS_ROOT.rglob("*.yaml"),
+        )
+    )
     if not files:
-        print("No GitHub YAML files found", file=sys.stderr)
+        print("No repository YAML files found", file=sys.stderr)
         return 1
 
     try:

@@ -29,6 +29,8 @@
 ├─ Localization/
 ├─ docs/
 │  └─ adr/                        # immutable decision history
+├─ .agents/skills/                # repository-scoped development workflows
+├─ Tests/                         # standalone tModLoader-free domain harnesses
 ├─ tools/                         # dependency-free repository checks
 └─ .github/                       # review, issue, ownership, and CI policy
 ```
@@ -56,4 +58,11 @@ tModLoader source folders should be checked out as `ModSources/Convergence`, eve
 
 ## Packaging
 
-`buildIgnore` excludes repository governance, docs, tools, concept/raw assets, and working files from `.tmod`. Calamity `.tmod` files, source mirrors, logs, local settings, and dependency binaries never enter this repository.
+`buildIgnore` excludes repository governance, `.agents` Skills, standalone `Tests`, docs, tools, concept/raw assets, and working files from `.tmod`. Calamity `.tmod` files, source mirrors, logs, local settings, and dependency binaries never enter this repository.
+
+## Repository Skills
+
+- `develop-convergence-raids` routes Raid implementation through server authority, bounded replication, idempotent cleanup, and the required multiplayer matrix.
+- `research-tmodloader-sources` standardizes exact-source, versioned, license-aware API and public-Mod investigation.
+
+`AGENTS.md` remains the concise always-on contract. Skills hold procedures that are only useful for a matching task, and link back to the repository documents as the source of truth.

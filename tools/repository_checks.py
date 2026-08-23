@@ -26,12 +26,18 @@ REQUIRED_PATHS = (
     ".github/ISSUE_TEMPLATE/content-proposal.yml",
     ".github/ISSUE_TEMPLATE/multiplayer-desync.yml",
     ".github/workflows/repository-checks.yml",
+    ".agents/skills/develop-convergence-raids/SKILL.md",
+    ".agents/skills/develop-convergence-raids/agents/openai.yaml",
+    ".agents/skills/research-tmodloader-sources/SKILL.md",
+    ".agents/skills/research-tmodloader-sources/agents/openai.yaml",
     "AGENTS.md",
     "ConvergenceMod.csproj",
     "ConvergenceMod.cs",
     "build.txt",
     "description.txt",
     "global.json",
+    "Tests/Convergence.DomainTests/Convergence.DomainTests.csproj",
+    "Tests/Convergence.DomainTests/Program.cs",
     "tools/requirements-ci.txt",
     "tools/validate_yaml.py",
     "README.md",
@@ -188,6 +194,8 @@ FORBIDDEN_PATH_PREFIXES = (
     "Assets/Sounds/Source/",
 )
 
+SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
 REQUIRED_BUILD_IGNORE_MASKS = {
     "*.tmod",
     "*.pdb",
@@ -229,6 +237,7 @@ REQUIRED_BUILD_IGNORE_MASKS = {
     "obj\\*",
     ".git\\*",
     ".github\\*",
+    ".agents\\*",
     "*\\__pycache__\\*",
     "docs\\*",
     "tools\\*",
@@ -239,6 +248,7 @@ REQUIRED_BUILD_IGNORE_MASKS = {
     "compile_temp\\*",
     "ModAssemblies\\*",
     "TestResults\\*",
+    "Tests\\*",
     "coverage\\*",
     "Assets\\Concept\\*",
     "Assets\\Source\\*",
@@ -408,6 +418,35 @@ def check_structured_text(files: list[Path], errors: list[str]) -> None:
                 errors.append(f"invalid XML in {relative(path)}: {exc}")
 
 
+def check_test_project_links(errors: list[str]) -> None:
+    for project_path in sorted((ROOT / "Tests").rglob("*.csproj")):
+        try:
+            project = ElementTree.parse(project_path)
+        except (ElementTree.ParseError, OSError):
+            continue
+
+        for compile_node in project.findall(".//Compile"):
+            include = compile_node.get("Include")
+            if not include:
+                continue
+
+            resolved = (project_path.parent / include).resolve()
+            try:
+                resolved.relative_to(ROOT.resolve())
+            except ValueError:
+                errors.append(
+                    f"test project Compile link escapes repository: "
+                    f"{relative(project_path)} -> {include}"
+                )
+                continue
+
+            if not resolved.is_file():
+                errors.append(
+                    f"test project Compile link is missing: "
+                    f"{relative(project_path)} -> {include}"
+                )
+
+
 def check_tmod_identity(files: list[Path], errors: list[str]) -> None:
     project_path = ROOT / "ConvergenceMod.csproj"
     if not project_path.is_file():
@@ -475,6 +514,55 @@ def check_build_ignore(errors: list[str]) -> None:
     )
     if not has_source_license and include_source != "false":
         errors.append("includeSource must remain false until a source license exists")
+
+
+def check_repository_skills(errors: list[str]) -> None:
+    skills_root = ROOT / ".agents" / "skills"
+    if not skills_root.is_dir():
+        errors.append("missing repository Skills directory: .agents/skills")
+        return
+
+    skill_directories = sorted(
+        (path for path in skills_root.iterdir() if path.is_dir()),
+        key=lambda path: path.name.casefold(),
+    )
+    if not skill_directories:
+        errors.append(".agents/skills must contain at least one Skill")
+        return
+
+    for directory in skill_directories:
+        relative_directory = relative(directory)
+        if not SKILL_NAME_PATTERN.fullmatch(directory.name):
+            errors.append(f"invalid Skill directory name: {relative_directory}")
+
+        skill_path = directory / "SKILL.md"
+        if not skill_path.is_file():
+            errors.append(f"Skill is missing SKILL.md: {relative_directory}")
+            continue
+
+        content = read_utf8(skill_path, errors)
+        if content is None:
+            continue
+        if not content.startswith("---\n") or "\n---\n" not in content[4:]:
+            errors.append(f"Skill has invalid YAML frontmatter delimiters: {relative(skill_path)}")
+            continue
+
+        frontmatter = content[4:].split("\n---\n", 1)[0]
+        fields: dict[str, str] = {}
+        for line in frontmatter.splitlines():
+            if not line.strip() or ":" not in line:
+                continue
+            key, value = line.split(":", 1)
+            fields[key.strip()] = value.strip()
+
+        if fields.get("name") != directory.name:
+            errors.append(
+                f"Skill frontmatter name must match its directory in {relative(skill_path)}"
+            )
+        if not fields.get("description"):
+            errors.append(f"Skill frontmatter requires a description: {relative(skill_path)}")
+        if not (directory / "agents" / "openai.yaml").is_file():
+            errors.append(f"Skill is missing agents/openai.yaml: {relative_directory}")
 
 
 def check_architecture_boundaries(files: list[Path], errors: list[str]) -> None:
@@ -618,8 +706,10 @@ def main() -> int:
     check_text(files, errors)
     check_markdown_links(files, errors)
     check_structured_text(files, errors)
+    check_test_project_links(errors)
     check_tmod_identity(files, errors)
     check_build_ignore(errors)
+    check_repository_skills(errors)
     check_architecture_boundaries(files, errors)
     check_asset_attribution(files, errors)
 
