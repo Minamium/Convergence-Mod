@@ -1,36 +1,34 @@
-# Architecture Decisions and Open Questions
+# Decisions and Open Questions
 
-## Accepted decisions
+Long-lived structural decisions use immutable records in [`docs/adr`](adr/README.md). This document tracks reversible bootstrap constraints and unresolved production choices; it does not create a second ADR numbering scheme.
 
-### ADR-001: Multiplayer-first and server authoritative
+## Accepted architecture index
 
-戦闘状態、割当、タイマー、勝敗、Arena lifecycleはサーバーのみが更新する。クライアントは要求と表示を担当する。
+| Record | Decision |
+|---|---|
+| [ADR-0001](adr/0001-modular-monolith.md) | Modular monolith with feature-first content modules |
+| [ADR-0002](adr/0002-server-authoritative-encounters.md) | Server/SP authority and read-only client replication |
+| [ADR-0003](adr/0003-in-world-logical-arena.md) | Normal World, logical Barrier, one managed Boss/Raid at a time |
+| [ADR-0004](adr/0004-calamity-compatibility-boundary.md) | Isolated Calamity adapter and tested-version gate |
 
-### ADR-002: No Subworld
+Accepted consequences shared by those ADRs:
 
-Arenaは通常World内へ展開する。途中参加、帰還、他Modとの互換性、Dedicated Serverの単純性を優先する。
+- active Encounter state is ephemeral and is not resumed after World load;
+- every fight has a `FightId`, a World-monotonic Encounter Sequence, and revisions;
+- Raid-only Ready/Roster/Revive state is not part of the generic Encounter lifecycle;
+- Calamity-specific APIs and types do not leak into feature logic;
+- generated Tile walls, Subworlds, client-decided outcomes, and vendored Calamity assets/code are excluded.
 
-### ADR-003: No generated tile wall
+## Current bootstrap constraints
 
-境界は大量のTile生成ではなく、論理的なRectangle、クライアント描画、サーバー位置補正で表現する。
+- Internal assembly/root namespace: provisional development identity `Convergence`.
+- Entry class/project filename: `ConvergenceMod` / `ConvergenceMod.csproj`.
+- One coordinator-managed Boss or Raid per World; World Events will have a separate lifecycle.
+- Third Severance activation is intentionally denied until Milestone 1 installs server-resolved Core, Arena, progression, roster, nonce, and transport validation.
+- Initial music implementation uses phase-specific mixes/transitions before sample-accurate dynamic stems.
+- Current packet protocol and any future save schema version independently from the Mod version.
 
-### ADR-004: Single active raid
-
-初期リリースではWorldごとに同時進行可能なRaidは1つだけ。すべての一時EntityにFight IDを関連付ける。
-
-### ADR-005: Ephemeral fight state is not persisted
-
-進行中FightはWorld saveを跨いで再開しない。World load後は必ずIdleから始める。永続化対象は将来の撃破フラグと恒久的設定のみ。
-
-### ADR-006: Compatibility adapter
-
-Calamity固有APIは`Common/Compatibility/Calamity/`へ隔離し、Encounterロジックから直接参照しない。
-
-### ADR-007: Phase-specific mixes before dynamic stems
-
-初期音楽はフェーズ別完成ミックスとTransitionを使用する。複数Stemのサンプル精度同期は後回しにする。
-
-## Provisional decisions
+## Provisional production choices
 
 ### Arena anchor
 
@@ -45,29 +43,25 @@ top    = coreBaseY - 140
 
 CoreをArena中央に置く方がテストしやすい場合はMilestone 1開始前に変更する。
 
-### Fight ID
-
-`Guid`を使用し、各state updateへ単調増加する`uint Revision`を付ける。packetにはprotocol versionも含める。
-
 ### Ready timeout
 
-起動者がCoreを操作した後、参加者確定とReadyに60秒を与える。全員Readyまたは起動者のcancelで遷移する。数値はplaytestで変更する。
+起動者がCoreを操作した後、参加者確定とReadyに60秒を与える。Readyはgeneric lifecycleではなくRaidの`Preparing` substateである。数値はplaytestで変更する。
 
-## Open questions before code
+## Open questions before affected feature implementation
 
-1. 内部Mod名、公開名、root namespace。
-2. リポジトリ名`Minamium/tmod`を維持するか、固有名へ変更するか。
-3. Addon自体のライセンス。Calamityの独自ライセンスは継承せず、別途選ぶ必要がある。
-4. Coreの最終サイズ、recipe、設置可能な進行条件。
-5. Arena anchorを下端中央にするか完全中央にするか。
-6. 既存Tile、platform、rope、liquidをどこまで許可するか。
-7. Journey Mode、Mediumcore、Hardcoreを初期対応範囲へ含めるか。
-8. 2人未満でのCore起動を拒否するか、開発用overrideを用意するか。
-9. Calamity difficulty（Revengeance / Death）の扱い。
-10. 音楽を本体Addonへ同梱するか、将来Music Modへ分離するか。
-11. Last Stand中のUI非表示範囲とアクセシビリティ代替表示。
-12. AI生成assetを完成版へ利用する場合の開示・制作記録方針。
+1. 公開名とrepository名をいつ固有名へ変更するか。
+2. Source codeとassetのライセンス、および外部contribution同意方式。
+3. Coreの最終サイズ、recipe、設置可能な進行条件。
+4. Arena anchorを下端中央にするか完全中央にするか。
+5. 既存Tile、platform、rope、liquidをどこまで許可するか。
+6. Journey Mode、Mediumcore、Hardcoreを初期対応範囲へ含めるか。
+7. 2人未満でのCore起動を拒否するか、development overrideを用意するか。
+8. Calamity difficulty（Revengeance / Death）の扱い。
+9. 音楽を本体Addonへ同梱するか、将来Music Modへ分離するか。
+10. Last Stand中のUI非表示範囲とアクセシビリティ代替表示。
+11. AI生成assetを完成版へ利用する場合の開示・制作記録方針。
+12. Rejoin時に同一participantと認定するserver-side identity。
 
 ## Decision workflow
 
-未確定事項は、実装commitへ暗黙に埋め込まない。決定時にこの文書を更新し、必要なら新しいADRを追加する。
+未確定事項は実装commitへ暗黙に埋め込まない。authority、module direction、protocol、persistence、external dependency、release/rightsを変える場合は新しいADRを追加し、既存ADRを必要に応じてSupersededへ変更する。可逆なbalance/production値はこの文書またはfeature specで更新する。

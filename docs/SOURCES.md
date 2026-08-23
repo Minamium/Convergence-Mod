@@ -19,6 +19,7 @@ Last reviewed: **2026-08-23**
 - [ExampleMod networking](https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/ExampleMod.Networking.cs) — `HandlePacket` pattern。
 - [ExampleMod BasicTileEntity](https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/TileEntities/BasicTileEntity.cs) — server mutationとTE sync。
 - [Stable tMLMod.targets](https://github.com/tModLoader/tModLoader/blob/stable/patches/tModLoader/Terraria/release_extras/tMLMod.targets) — .NET 8、C# 12、build command。
+- [Pinned Mod template project](https://github.com/tModLoader/tModLoader/blob/v2026.06.3.6/patches/tModLoader/Terraria/ModLoader/Templates/%7B%7BModName%7D%7D.csproj) — minimal project and targets import。
 - [Stable MusicLoader source](https://github.com/tModLoader/tModLoader/blob/stable/patches/tModLoader/Terraria/ModLoader/MusicLoader.cs) — `.mp3/.ogg/.wav` support。
 - [OGG loop tag implementation](https://github.com/tModLoader/tModLoader/blob/stable/patches/tModLoader/Terraria/Audio/OGGAudioTrack.cs.patch) — `LOOPSTART`/`LOOPEND`。
 
@@ -36,6 +37,14 @@ Last reviewed: **2026-08-23**
 - [Image generation in Codex](https://learn.chatgpt.com/docs/image-generation) — concept art、UI asset、background、sprite sheet、placeholderの生成・編集。
 - [OpenAI image generation API](https://developers.openai.com/api/docs/guides/image-generation) — image generation/editing capabilities。
 - [OpenAI audio and speech](https://developers.openai.com/api/docs/guides/audio) — available audio APIs are speech-oriented; this project does not assume a release-ready music generator。
+
+## Repository operations
+
+- [GitHub Actions secure use](https://docs.github.com/en/actions/reference/security/secure-use) — least privilege、untrusted pull request、action pinning。
+- [GitHub Actions workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax) — workflow structureとpermissions。
+- [CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) — path ownership policy。
+- [Issue Form syntax](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms) — structured issue forms。
+- [actions/checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1) — CIでfull SHA固定したcheckout action。
 
 ## Music rights
 

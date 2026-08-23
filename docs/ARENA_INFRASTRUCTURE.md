@@ -25,14 +25,15 @@ bounds     = Rectangle(left, top, width, height)
 
 ## Activation flow
 
-1. clientがCoreを操作し`RequestActivateCore`を送る。
-2. serverがCore存在、player距離、進行条件、global Raid stateを検証する。
-3. serverが副作用のない`ArenaValidator.Validate`を実行する。
-4. 失敗時はissue code一覧を起動者へ返す。
-5. 成功時はFight IDを発行し`Ready`へ遷移する。
-6. eligible playerへ参加UIを表示する。
-7. 2～4人が確定し全員Readyになったら`Starting`へ進む。
-8. Milestone 1ではBossを出さず、debug countdown後にBarrier動作を確認できる。
+1. clientがCoreを操作し`RequestActivate`を送る。
+2. serverがsender、request nonce/rate、requested coordinateの基本条件を検証する。
+3. accepted requestから`Validating` runtimeを作り、server上のCore Tile Entityを解決する。requested coordinateを実anchorとして信用しない。
+4. serverが進行条件、競合するWorld state、参加候補を確認し、副作用のない`ArenaValidator.Validate`を実行する。
+5. 失敗時はissue code一覧を起動者へ返してCleanupする。
+6. 成功時はgeneric lifecycleを`Preparing`へ遷移し、Raid substateを`AwaitingParticipants`にする。
+7. eligible playerへ参加UIを表示する。
+8. 2～4人が確定し全員ReadyになったらRaid substateを`Countdown`へ進める。
+9. Milestone 1ではBossを出さず、debug countdown後にgeneric `Active`へ入りBarrier動作を確認できる。
 
 ## Validator contract
 
@@ -81,7 +82,7 @@ issueはlocalized textではなく安定したenum codeと座標を返し、UI�
 ## Participant selection
 
 - candidateは同一worldでactive、生存、Coreから参加半径内のplayer。
-- 2～4人のみReady phaseを開始できる。
+- 2～4人のみ`Preparing/AwaitingReady` substateへ進める。
 - 5人以上いる場合は自動選択せず、明示的な参加UIを使う。
 - Ready後の装備変更を初期段階では禁止しない。
 - Ready中に2人未満になった場合はtimeoutを待たずcancelする。
@@ -114,7 +115,7 @@ Milestone 1では、BarrierとCleanupの安定化を優先し、全Mod teleport�
 
 ## Core destruction
 
-- `Ready`中のCore破壊はcancelとしてCleanupする。
+- `Preparing`中のCore破壊はcancelとしてCleanupする。
 - `Active`中は通常破壊を拒否するか、管理者/debug操作だけ中断を許可する。
 - TileとTile Entityの削除順序に依存せず、どちらのhookからでも同じCleanup APIを呼ぶ。
 - serverのみがfight終了を確定する。

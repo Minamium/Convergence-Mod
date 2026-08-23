@@ -17,6 +17,8 @@ Shadowspec級装備の2～4人パーティーが、南極の終末研究基地�
 
 Soloは初期リリースの対象外とする。将来対応する場合は、協力ギミックを削るだけでなく独立した個人Superbossとして再設計する。
 
+最初のRaidは基盤の実証対象であり、Addon全体の設計境界ではない。長期的には独立Boss、追加Raid、World content、進行要素、Item、Utility、演出基盤まで拡張し、大型Content Mod級の規模を目指す。共通基盤へThird Severance固有の名称やルールを持ち込まず、逆に実利用が一つしかない機能を早期に過剰共通化しない。
+
 ## Design pillars
 
 1. **Execution** — 回避、ダッシュ、位置取り、火力維持。
@@ -61,6 +63,7 @@ Shadowspecを単純に数値で超えるTierは作らない。報酬は特殊挙
 - Tileを大量生成しない境界Barrier
 - 単一Raid制約とFight ID
 - 中断、Core破壊、World unload時の完全Cleanup
+- modular source boundary、protocol guard、repository policy、asset provenance
 
 頭割り、Spread、Boss Dummy、Downed／Reviveは、この土台が安定した後のVertical Sliceへ含める。
 

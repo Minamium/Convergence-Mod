@@ -39,12 +39,16 @@ AI生成画像は完成品と決め打ちせず、concept -> silhouette -> key a
 6. **Export** — transparent PNG、固定frame size、nearest-neighbor前提。
 7. **In-game QA** — 100% UI scale、各resolution、色覚差、4人分marker重複を確認。
 
-### Recommended asset separation
+### Repository and working-source separation
 
 ```text
-Assets/
+external working storage/     # repository外、制作台帳とbackupを別管理
+  Concepts/
+  Editable/
+  DAW/
+
+repository/Assets/            # review済みruntime exportのみ
   Textures/
-    Concept/        # 配布buildから除外
     NPCs/
     Projectiles/
     Tiles/
@@ -55,7 +59,7 @@ Assets/
   Sounds/
 ```
 
-Concept source、prompt、license/creator、生成日、human editsを`Assets/ATTRIBUTION.md`へ記録する。
+Concept batch、editable source、DAW project、raw recordingはこのrepositoryへcommitしない。外部制作台帳でprompt、tool/model、creator、生成日、license、human editsを保持し、選別したruntime exportをcommitするときに必要なprovenance要約を`Assets/ATTRIBUTION.md`へ転記する。ATTRIBUTIONは配布fileだけを厳密に追跡する。
 
 大型Bossは一枚の巨大animationへせず、本体、Crown、Wings、Heart/Core、glow maskを別spriteにし、code transformとVFXで組み合わせる。これにより部位破壊、network state、animation差分を一致させやすい。
 

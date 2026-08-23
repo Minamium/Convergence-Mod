@@ -5,10 +5,17 @@
 - [x] Empty repository identified
 - [x] Project documentation drafted
 - [x] Initial tModLoader/Calamity version research
-- [ ] Internal Mod name and namespace decision
+- [x] Provisional internal Mod name and namespace decision (`Convergence` / `Convergence`)
 - [ ] Addon license decision
-- [ ] Minimal Mod skeleton
-- [ ] `build.txt` with Calamity dependency
+- [x] Minimal Mod skeleton
+- [x] `build.txt` with Calamity dependency
+- [x] Modular source boundaries and first feature registration
+- [x] Global versus definition-scoped activation policy and feature runtime factory boundaries
+- [x] Runtime transition/end update port and partial-construction cleanup registrar
+- [x] Exception-safe cleanup retry, terminal snapshot outbox, Encounter Sequence, and replica tombstone skeleton
+- [x] Versioned packet envelope parser and direction guard
+- [x] Repository policy checks and GitHub workflow
+- [x] Contribution, security, release, and provenance policy
 - [ ] Client build/load
 - [ ] Dedicated Server build/load
 - [ ] Version freeze promoted from Candidate to Confirmed
@@ -17,6 +24,9 @@ Exit: clean build and load on the pinned client/server environment.
 
 ## Milestone 1 — Arena Infrastructure
 
+- typed activation/ready/cancel/snapshot packet handlers
+- server-resolved Core/anchor and request nonce/replay/rate validation
+- Third Severance progression policy and removal of the temporary availability deny
 - Polar Foundation Core item/tile/entity
 - pure Arena Validator
 - 320x140 default bounds
@@ -33,7 +43,7 @@ Exit: repeated start/cancel/destroy/disconnect cycles leave no stale state in 2�
 
 ## Milestone 2 — Multiplayer State Foundation
 
-- packet envelope and protocol version
+- packet delta schemas and dispatch registration
 - snapshot/delta/revision
 - phase and timer synchronization
 - assignment and seed synchronization

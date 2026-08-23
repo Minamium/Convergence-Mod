@@ -15,22 +15,25 @@
 | Calamity Mod | `2.2.2` | Candidate | 公開mirrorの`build.txt` |
 | Calamity source reference | `1a8cebd27ec5615316b78f71973446b5528d2b78` | Confirmed | `Merge Update 2.2.2 into release branch` |
 | Calamity internal name | `CalamityMod` | Confirmed | `build.txt`とnamespace |
-| Addon dependency | `CalamityMod@2.2.2` | Proposed | 最低バージョンを明示し、互換性を固定 |
+| Addon dependency | `CalamityMod@2.2.2` | Configured, unverified | `build.txt`へ設定済み。実機Build + Reload待ち |
 
-`build.txt`の初期案:
+現在の`build.txt`:
 
 ```text
-displayName = Calamity Multiplayer Raid Addon
+displayName = Convergence (Development Build)
 author = Minamium
 version = 0.1.0
 modReferences = CalamityMod@2.2.2
 side = Both
+playableOnPreview = false
 hideCode = false
 hideResources = false
-includeSource = true
+includeSource = false
 ```
 
-内部Mod名と公開名は未決定のため、このファイルはまだ作成しない。tModLoaderは`ModReference`の`Name@Version`形式を、指定版以上かつ同じmajor versionとして判定する。したがって`CalamityMod@2.2.2`は2.2.3や2.3.0を許可し、3.0.0を拒否する。
+Source/asset licenseが未決定のため、accidental `.tmod` source distributionを避ける目的で`includeSource = false`に固定する。ライセンス決定後に配布方針と合わせて再審査する。
+
+内部Mod/assembly名とroot namespaceは開発コードネーム`Convergence`とした。entry class/project filenameは`ConvergenceMod`である。公開名は未決定であり、`displayName`はdevelopment用である。tModLoaderは`ModReference`の`Name@Version`形式を、指定版以上かつ同じmajor versionとして判定する。したがって`CalamityMod@2.2.2`は2.2.3や2.3.0を許可し、3.0.0を拒否する。
 
 企画上の対応範囲を2.2.xへ限定するため、Compatibility層で実行時に`2.2.2 <= version < 2.3.0`を検査する。範囲外ではMod全体をcrashさせず、Raid起動を無効化して必要versionを表示する。
 
@@ -42,13 +45,15 @@ stable ExampleModと同じく、プロジェクトはtModLoader配下の`../tMod
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\tModLoader.targets" />
   <PropertyGroup>
-    <AssemblyName>__INTERNAL_MOD_NAME__</AssemblyName>
-    <LangVersion>12.0</LangVersion>
+    <AssemblyName>Convergence</AssemblyName>
+    <RootNamespace>Convergence</RootNamespace>
   </PropertyGroup>
 </Project>
 ```
 
-`tModLoader.targets`の場所に依存するため、リポジトリ単体の一般的な`dotnet build`は標準の成功条件にしない。正式な検証コマンドは、tModLoaderのMod Sources配下または同等の明示的な`tmlPath`設定で実行する。
+Target FrameworkとC# versionは固定tModLoader targetsが提供するためAddon側で上書きしない。nullable、implicit usings、analysis levelだけを`Directory.Build.props`で指定する。
+
+`tModLoader.targets`の場所に依存するため、リポジトリ単体の一般的な`dotnet build`は標準の成功条件にしない。正式な検証は`ModSources/Convergence`へcheckoutし、固定tModLoader環境で実行する。folder、assembly、namespace先頭を一致させる。
 
 ## Calamity integration boundary
 
@@ -73,6 +78,8 @@ Calamityへのアクセスは`Common/Compatibility/Calamity/`へ隔離する。
 5. `start-tModLoaderServer`相当でDedicated Serverを起動する。
 6. 2クライアントが接続し、Addonのpacket round-tripを確認する。
 7. 実行ログからTerraria、tModLoader、Calamity、Addonのversionを記録する。
+
+現時点ではrepository policy checkのみ完了している。bootstrap環境に.NET SDK、tModLoader、Terraria、Calamity binaryが無いため、build/loadは未検証でありCandidateを維持する。
 
 失敗した場合、latestへ無条件追従せず、動作した組み合わせをこの表へ固定する。
 

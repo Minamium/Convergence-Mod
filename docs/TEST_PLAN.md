@@ -34,16 +34,19 @@ compile error、unknown packet exception、server crash、stale Raid stateを残
 - clientがModをreloadできる。
 - Dedicated Serverがheadlessでloadできる。
 - clientとserverでMod version mismatchが拒否される。
-- Calamity進行判定adapterがExo Mechs/Supreme Calamitasのflagを安全に取得する。
+- 非対応Calamity versionでEncounter activation policyが拒否する。
+- Third Severance availability policyが未実装Raidの起動を拒否する。
 
 ## Arena validator tests
 
+Milestone 1でExo Mechs/Supreme Calamitas進行adapterを実装し、未達・API failure・予期しないreturn typeを安全に拒否する。
+
 | Case | Expected |
 |---|---|
-| valid 320x140 space | Readyへ遷移 |
+| valid 320x140 space | `Preparing/AwaitingReady`へ遷移 |
 | world edge overlap | issue code付きで拒否 |
 | invalid/missing Core TE | 拒否、state unchanged |
-| second Core activation | single-Raid error |
+| second Core activation | single-managed-Encounter error |
 | chest in bounds | 拒否 |
 | protected structure tile | 拒否 |
 | broken foundation | 拒否 |
@@ -56,6 +59,8 @@ Validatorは失敗時にTile、liquid、wire、entityを変更してはならな
 
 ## Ready and lifecycle tests
 
+以下のReadyはgeneric lifecycleではなく、Raidの`Preparing` substateを指す。
+
 - 2人、3人、4人で全員Ready。
 - 一人がReadyを解除。
 - Ready timeout。
@@ -64,7 +69,7 @@ Validatorは失敗時にTile、liquid、wire、entityを変更してはならな
 - Ready中に起動者disconnect。
 - Ready中にparticipantが2人未満になる。
 - lifecycle transitionとRevisionが全clientで一致。
-- 古いFight IDのpacketが無視される。
+- 古いEncounter Sequence/Fight IDのpacketが無視される。
 
 ## Barrier tests
 
