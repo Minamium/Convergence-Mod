@@ -1,0 +1,84 @@
+# tModLoader / .NET build output
+bin/
+obj/
+*.tmod
+*.pdb
+*.deps.json
+*.runtimeconfig.json
+*.binlog
+compile_temp/
+ModAssemblies/
+
+# tModLoader local state and dependency binaries
+.tmodloader/
+Mods/
+*.tmod.sha256
+build-record.local.json
+tml-save/
+ci-dependencies/
+Logs/
+*.plr
+*.tplr
+*.wld
+*.twld
+*.bak
+*.pyc
+*.pyo
+
+# Credentials and private signing material
+.env
+.env.*
+*.env
+*.env.*
+*credentials*.json
+*secrets*.json
+*.pem
+*.key
+*.pfx
+*.p12
+
+# IDE and editor state
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs, profiling, and crash output
+*.log
+*.dmp
+*.trace
+TestResults/
+coverage/
+__pycache__/
+*.py[cod]
+
+# Asset source and audio working files are not distribution assets.
+Assets/Concept/
+Assets/Source/
+Assets/Textures/Concept/
+Assets/Music/Source/
+Assets/Sounds/Source/
+
+# Editable art/audio project formats use the approved external source store.
+*.als
+*.ase
+*.aseprite
+*.aup3
+*.blend
+*.flp
+*.kra
+*.logicx
+*.mid
+*.midi
+*.musicxml
+*.mxl
+*.psd
+*.ptx
+*.rpp

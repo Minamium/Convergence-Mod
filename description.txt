@@ -1,0 +1,6 @@
+A multiplayer-first Calamity Mod addon under active development.
+
+The first vertical slice is a 2-4 player post-Exo Mechs and post-Supreme Calamitas raid. The architecture is designed to support additional bosses, raids, world content, items, and presentation systems without coupling them to the first encounter.
+
+This is not currently a playable release.
+

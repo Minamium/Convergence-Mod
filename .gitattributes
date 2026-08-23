@@ -1,0 +1,24 @@
+* text=auto eol=lf
+
+*.cs text diff=csharp
+*.csproj text
+*.props text
+*.targets text
+*.txt text
+*.md text
+*.hjson text
+*.json text
+*.yml text
+*.yaml text
+*.py text
+global.json text
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ogg binary
+*.wav binary
+*.mp3 binary
+*.ttf binary
+*.otf binary
