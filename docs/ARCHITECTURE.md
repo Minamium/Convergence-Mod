@@ -23,7 +23,7 @@ Allowed dependencies:
 |---|---|---|
 | `Common/Foundation` | .NET primitives | Terraria, Calamity, Content, Client |
 | `Common/Encounters/Abstractions` | Foundation and .NET primitives | Runtime implementation, tML, specific encounters, presentation |
-| `Common/Encounters/Runtime` / future `Common/Raids` | Encounter abstractions and narrow ports | specific encounters, UI, audio |
+| `Common/Encounters/Runtime` / `Common/Raids` | Encounter abstractions and narrow ports | specific encounters, UI, audio |
 | `Common/Networking` | Foundation, runtime commands, read-only replicas, tML transport | specific encounter behavior |
 | `Common/Compatibility` | tML and the named dependency | Content, presentation |
 | `Content/<Feature>` | Common | Client and unrelated content modules |
@@ -60,6 +60,10 @@ The common foundation currently owns:
 - a versioned packet envelope and direction validation;
 - the Calamity version compatibility boundary.
 
+`Common/Raids/Revive` additionally owns the first Raid-only domain service. It is
+not part of the generic Boss lifecycle and has no Terraria, packet, UI, or
+Third Severance dependency.
+
 It deliberately does **not** yet own:
 
 - a general mechanic DSL;
@@ -95,6 +99,62 @@ NPC `ai[]`, Tile Entities, `ModPlayer`, and UI are projections or adapters, not 
 Server/SP authority decides lifecycle, roster, assignments, timers, random results, actor spawn, damage checks, Downed/Revive, and victory. Clients submit bounded requests and render snapshots/events. `EncounterReplica` can only accept or reset snapshots; it orders `(EncounterSequence, Revision, AuthorityTick)` and retains a terminal tombstone so delayed older fights cannot revive.
 
 Client-only systems may predict movement against the Barrier and interpolate telegraphs. The server corrects final positions. Audio, particles, trails, subtitles, and screen effects never control gameplay clocks.
+
+## Downed and Revive authority boundary
+
+`RaidReviveService` is a pure server/SP state machine composed by a Raid feature
+after its authoritative roster is frozen. It owns Downed deadlines, two-second
+channel completion, shared-token reservation and consumption, disconnect/rejoin
+state, wipe detection, revisions, and bounded 2–4-player projections. Initial
+token counts are 1/2/3 for 2/3/4 participants. A disconnected Alive participant
+has an initial 1,800-tick reconnect grace; the encounter cannot wait forever for
+an abandoned slot.
+
+The stable Raid `ParticipantId` is paired with a server-assigned player slot and
+monotonic connection epoch. All commands must match the Fight ID and the complete
+binding. A delayed packet or callback from a previous Fight, a disconnected
+connection, or a reused Terraria player slot therefore cannot mutate the current
+participant. Rejoin preserves the participant's combat state and requires a
+strictly newer authority-assigned epoch. Rejoin at or after the disconnect
+deadline is rejected even if that tick has not yet been committed.
+
+The future Terraria adapters have narrow responsibilities:
+
+- a server damage/death hook converts eligible lethal damage into an
+  `AuthoritativeParticipantDownedCommand`;
+- a `ModPlayer` adapter applies the read-only control projection, restores life
+  after a `ParticipantRevived` event, and reports authoritative movement/damage
+  interrupts;
+- transport resolves the sender from `whoAmI`, supplies its current binding, and
+  forwards only bounded target/nonce input;
+- feature replication serializes snapshots/events; clients never run the service.
+
+Authority adapters apply lethal, movement/damage interrupt, and connection
+commands before `CommitTick`. Terminal wipe evaluation occurs only at that one
+end-of-tick boundary; no individual Downed/disconnect call can end a Raid before
+the rest of its tick's authority commands are applied. Commit cancels invalid or
+deadline-expired channels, completes the remaining eligible channels, processes
+Downed/disconnect timeouts, then evaluates failure. A command submitted after its
+tick was committed is rejected. This ordering is deterministic and must be
+identical in Single Player, Host & Play, and Dedicated Server.
+
+The accepted Start request nonce becomes the channel lease nonce. Interrupts
+must match both the current participant binding and that exact lease. Channel
+events and snapshots expose the nonce, so a delayed Cancel from an older channel
+cannot terminate a newer channel belonging to the same reviver.
+
+The production death hook is a blocking compatibility gate, not a missing line
+of glue. Pinned tModLoader source shows that every Mod's `PreKill` body runs even
+after another returned `false`; Calamity can therefore consume a personal revive
+or mutate life/cooldowns during the same lethal event. ADR-0005 requires runtime
+instrumentation and an explicit precedence/normalization policy before this
+adapter may be registered.
+
+Until those adapters and the validated Third Severance roster exist, the feature
+boundary is inert and activation remains denied. It must not partially replace
+Terraria death handling. Exact-Fight cleanup clears channels, bindings, tokens,
+and projections idempotently; a stale cleanup Fight ID is treated as an internal
+failure so the coordinator retry backlog does not silently discard owned state.
 
 ## Encounter versus Raid versus World Event
 

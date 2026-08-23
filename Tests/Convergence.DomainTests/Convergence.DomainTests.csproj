@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Common/Encounters/Abstractions/EncounterCleanupContext.cs"
+             Link="Domain/EncounterCleanupContext.cs" />
+    <Compile Include="../../Common/Encounters/Abstractions/EncounterEndReason.cs"
+             Link="Domain/EncounterEndReason.cs" />
+    <Compile Include="../../Common/Encounters/Abstractions/EncounterLifecycle.cs"
+             Link="Domain/EncounterLifecycle.cs" />
+    <Compile Include="../../Common/Encounters/Abstractions/EncounterRuntimeContext.cs"
+             Link="Domain/EncounterRuntimeContext.cs" />
+    <Compile Include="../../Common/Encounters/Abstractions/EncounterRuntimeUpdate.cs"
+             Link="Domain/EncounterRuntimeUpdate.cs" />
+    <Compile Include="../../Common/Encounters/Abstractions/IEncounterCleanupParticipant.cs"
+             Link="Domain/IEncounterCleanupParticipant.cs" />
+    <Compile Include="../../Common/Foundation/Identifiers/FightId.cs"
+             Link="Domain/FightId.cs" />
+    <Compile Include="../../Common/Foundation/Identifiers/ParticipantId.cs"
+             Link="Domain/ParticipantId.cs" />
+    <Compile Include="../../Common/Foundation/Geometry/ArenaProfile.cs"
+             Link="Domain/ArenaProfile.cs" />
+    <Compile Include="../../Common/Foundation/Geometry/TilePoint.cs"
+             Link="Domain/TilePoint.cs" />
+    <Compile Include="../../Common/Foundation/Geometry/TileRectangle.cs"
+             Link="Domain/TileRectangle.cs" />
+    <Compile Include="../../Common/Raids/Revive/RaidParticipantBinding.cs"
+             Link="Domain/RaidParticipantBinding.cs" />
+    <Compile Include="../../Common/Raids/Revive/RaidReviveCommands.cs"
+             Link="Domain/RaidReviveCommands.cs" />
+    <Compile Include="../../Common/Raids/Revive/RaidReviveResults.cs"
+             Link="Domain/RaidReviveResults.cs" />
+    <Compile Include="../../Common/Raids/Revive/RaidReviveService.cs"
+             Link="Domain/RaidReviveService.cs" />
+    <Compile Include="../../Common/Raids/Revive/RaidReviveSettings.cs"
+             Link="Domain/RaidReviveSettings.cs" />
+    <Compile Include="../../Common/Raids/Revive/RaidReviveSnapshot.cs"
+             Link="Domain/RaidReviveSnapshot.cs" />
+    <Compile Include="../../Content/Encounters/ThirdSeverance/Revive/ThirdSeveranceReviveBoundary.cs"
+             Link="Domain/ThirdSeveranceReviveBoundary.cs" />
+    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceArenaAccessPolicy.cs"
+             Link="Domain/ThirdSeveranceArenaAccessPolicy.cs" />
+    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceArenaBlueprint.cs"
+             Link="Domain/ThirdSeveranceArenaBlueprint.cs" />
+    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceBossPlan.cs"
+             Link="Domain/ThirdSeveranceBossPlan.cs" />
+    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceEncounterPlan.cs"
+             Link="Domain/ThirdSeveranceEncounterPlan.cs" />
+    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceMechanicPlan.cs"
+             Link="Domain/ThirdSeveranceMechanicPlan.cs" />
+    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeverancePlanCollections.cs"
+             Link="Domain/ThirdSeverancePlanCollections.cs" />
+  </ItemGroup>
+</Project>

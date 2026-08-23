@@ -10,6 +10,7 @@ Long-lived structural decisions use immutable records in [`docs/adr`](adr/README
 | [ADR-0002](adr/0002-server-authoritative-encounters.md) | Server/SP authority and read-only client replication |
 | [ADR-0003](adr/0003-in-world-logical-arena.md) | Normal World, logical Barrier, one managed Boss/Raid at a time |
 | [ADR-0004](adr/0004-calamity-compatibility-boundary.md) | Isolated Calamity adapter and tested-version gate |
+| [ADR-0005](adr/0005-server-authoritative-downed-revive.md) | Authority-owned Raid Downed/Revive state; gameplay hook gated by runtime evidence |
 
 Accepted consequences shared by those ADRs:
 
@@ -17,6 +18,7 @@ Accepted consequences shared by those ADRs:
 - every fight has a `FightId`, a World-monotonic Encounter Sequence, and revisions;
 - Raid-only Ready/Roster/Revive state is not part of the generic Encounter lifecycle;
 - Calamity-specific APIs and types do not leak into feature logic;
+- Raid Downed/Revive lives in a pure authority domain and does not connect to `PreKill` until the pinned Calamity coexistence spike passes;
 - generated Tile walls, Subworlds, client-decided outcomes, and vendored Calamity assets/code are excluded.
 
 ## Current bootstrap constraints
