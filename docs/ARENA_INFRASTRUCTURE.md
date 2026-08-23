@@ -95,10 +95,24 @@ BarrierはTileを生成しない。
 - client: 半透明line/plane、警告色、接近時のVFXを描画。
 - client: local playerへpredictive clampまたは内向きvelocityを適用。
 - server: participantがbounds外へ出た場合、最も近い安全点へ補正。
-- non-participant: Milestone 1では通過可能。Active encounter開始前にspectator policyを決める。
+- non-participant: Active Raidのlogical boundsへ侵入した場合はserver警告後に安全なArena外へ退去させ、反復侵入者をFight中の対象外として扱う。
 - NPC/Projectile: Milestone 1では対象外。Encounter entity側でArena boundsを参照する。
 
 Barrierは即死させず、内側へ戻す。連続補正が発生した場合はログとUI警告を出し、rubber-bandingを観測できるようにする。
+
+`ResolvedThirdSeveranceCoreAnchor`はserver resolverが発見したCore中心、foundation base Y、Tile Entity IDを運ぶDTOであり、「検証済み」を意味しない。`ThirdSeveranceArenaBlueprint.TryCreateLayout`は別途serverのWorld boundsを必須入力とし、非負かつoverflowしないWorld矩形、Core TE identity、Core論理中心、Core base点、320x140のprospective Arena全域と20-tile edge marginを検査する。Core論理中心はWorldとArenaの双方、base点はWorld内に存在しなければならない。
+
+layoutはresolved CoreのXを水平中心、Core foundation baseのYをArena下端として算出する。Coreは幾何学的な中央ではなく床中央の基準点である。2 tiles insetのlogical Barrierと、Arena四隅から14 tiles insetした4つのPylon slotを返す。Coreの`(centerX, baseY)`からのoffsetはNW=`(-146,-126)`、NE=`(+145,-126)`、SW=`(-146,-15)`、SE=`(+145,-15)`で決定的に算出する。Tile壁は生成しない。
+
+`ThirdSeveranceArenaAccessPolicy`の初期response chain:
+
+- participantの外逸: 1 tickでwarning、6 continuous ticksで最寄りsafe pointへ補正。
+- outsiderの侵入: 1 tickでwarningとRaid actorへのinteraction抑止、120 continuous ticksでArena外へ退去。
+- 反復侵入: 3回目からFight中のArena対象外としてexcludeし、safe exteriorへ補正。
+
+`warning + interaction suppression -> correction/ejection -> exclusion`はserver authority adapterの契約であり、damageまたは即死処理を含まない。outsiderからRaid actorへのdamage/hitを無効化するcombat adapter、safe point探索、spectator UI、join-in-progress本人性、他Mod teleportとの競合処理は未実装である。
+
+player slotはTerrariaの`Main.player`範囲である0～254だけを許可し、255はserver/non-player sentinelとして拒否する。participant/outsiderの双方にserver割当のconnection epochを持たせ、slot再利用後の古いepisode responseを拒否する。実際のresponse直前にも現在のepochと位置を再検証する。Response kindは一つのrule内で重複不可とし、continuous ticksとviolation countの両thresholdを単調非減少にする。同一thresholdでは`warning -> interaction suppression -> correction -> ejection -> exclusion`の固定順で評価する。authority executorは返されたeligible responseをviolation episodeごとに一度だけ適用する。
 
 ## World manipulation restrictions
 

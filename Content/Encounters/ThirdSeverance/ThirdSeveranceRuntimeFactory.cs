@@ -24,6 +24,7 @@ internal sealed class ThirdSeveranceRuntimeFactory : IEncounterRuntimeFactory
 
         return new ThirdSeveranceBootstrapRuntime(
             context.FightId,
-            context.Start.RequestedAnchor);
+            ThirdSeveranceEncounterPlan.Instance,
+            InertThirdSeveranceWorldAdapter.Instance);
     }
 }

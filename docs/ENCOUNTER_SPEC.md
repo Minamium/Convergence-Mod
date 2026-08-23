@@ -124,3 +124,18 @@ class特性は小さな攻略差に留め、必須条件にしない。
 - 一人がDowned、別playerがReviveできる。
 - 高pingでもtelegraph時間と判定が矛盾しない。
 - 勝利、wipe、cancel、disconnectの全経路でCleanupされる。
+
+## Inert encounter-plan skeleton
+
+`Content/Encounters/ThirdSeverance/`には、実entityを生成しないimmutable planを置く。これは完成AIではなく、authority実装が検証すべき入力仕様である。
+
+- 形態: `sealed`、`manifest`、`convergence`、`exposed`、`last_stand`
+- 部位: `crown`、`wings`、`heart_casing`と、通常target不能な`collective_core`
+- phase graph: Base ActivationからSeal Release、Part Break、Coordination、Personal Effigies、Weak Point loop。Boss lifeが2%へ到達するとinterruptible phaseから暗黙edgeでLast Standへ入る
+- typed mechanic: Pylon DPS check、Part Break、Stack、Spread、Targeted Line、Personal Effigy、Weak Point、Boss attack pattern
+- 2/3/4人差分: Pylon数、Stack必要人数などを`ThirdSeveranceParticipantScaledInt`で明示
+- DPS成否: client申告値ではなく、将来serverがbalance keyをHP/damage budgetへ解決して判定
+
+Last Standは単一visitかつterminalで、通常phaseはresolutionとsoft-failureの両targetを必須とする。plan validationは暗黙Last Stand edgeを含む全phaseの到達性とcycleを検査する。`MaximumVisits`はphase entry数で、1～16の有限値に限定する。authority executorは次のentryが上限を超える前に`LoopExhaustionOutcome`（初期値Hard Enrage）を適用しなければならない。現在値はactivation/Seal/Last Standが1、loop対象が3である。
+
+現行`ThirdSeveranceAvailabilityPolicy`は起動を拒否し、world adapterもinertである。Core Tile Entity解決、roster、damage集計、phase executor、NPC/Projectile adapter、snapshot codecが揃うまでplayableとは扱わない。特にraw `RequestedAnchor`はruntimeへ渡さない。server resolverの`ResolvedThirdSeveranceCoreAnchor`にも検証済みという意味はなく、server World boundsとCore論理中心/base点、prospective Arena全域の検査に成功した場合だけlayoutを生成する。

@@ -1,6 +1,5 @@
 using System;
 using Convergence.Common.Encounters.Abstractions;
-using Convergence.Common.Foundation.Geometry;
 using Convergence.Common.Foundation.Identifiers;
 
 namespace Convergence.Content.Encounters.ThirdSeverance;
@@ -8,9 +7,14 @@ namespace Convergence.Content.Encounters.ThirdSeverance;
 internal sealed class ThirdSeveranceBootstrapRuntime : IEncounterRuntime
 {
     private readonly FightId fightId;
+    private readonly ThirdSeveranceEncounterPlan plan;
+    private readonly IThirdSeveranceWorldAdapter worldAdapter;
     private bool isCleaned;
 
-    public ThirdSeveranceBootstrapRuntime(FightId fightId, TilePoint requestedAnchor)
+    public ThirdSeveranceBootstrapRuntime(
+        FightId fightId,
+        ThirdSeveranceEncounterPlan plan,
+        IThirdSeveranceWorldAdapter worldAdapter)
     {
         if (fightId.IsNone)
         {
@@ -18,12 +22,11 @@ internal sealed class ThirdSeveranceBootstrapRuntime : IEncounterRuntime
         }
 
         this.fightId = fightId;
-        RequestedAnchor = requestedAnchor;
+        this.plan = plan ?? throw new ArgumentNullException(nameof(plan));
+        this.worldAdapter = worldAdapter ?? throw new ArgumentNullException(nameof(worldAdapter));
     }
 
-    // This is request data, not a validated arena anchor. Milestone 1 must resolve
-    // the server-side Core Tile Entity before any world mutation is allowed.
-    internal TilePoint RequestedAnchor { get; }
+    internal ThirdSeveranceEncounterPlan Plan => plan;
 
     public EncounterRuntimeUpdate Tick(in EncounterRuntimeContext context)
     {
@@ -37,7 +40,16 @@ internal sealed class ThirdSeveranceBootstrapRuntime : IEncounterRuntime
             throw new InvalidOperationException("Encounter runtime context has the wrong Fight ID.");
         }
 
-        // Milestone 1 adds Core ownership, arena validation, readiness, and barriers here.
+        // The availability policy currently prevents construction. If another code
+        // path bypasses it, fail closed rather than calculating from RequestedAnchor
+        // or mutating the World through an unimplemented adapter.
+        if (!worldAdapter.IsOperational)
+        {
+            return EncounterRuntimeUpdate.End(EncounterEndReason.Invalidated);
+        }
+
+        // Milestone 1 replaces this bootstrap with server-side Core resolution,
+        // validation, readiness, and a typed schedule executor.
         return EncounterRuntimeUpdate.None;
     }
 
@@ -48,8 +60,12 @@ internal sealed class ThirdSeveranceBootstrapRuntime : IEncounterRuntime
             return;
         }
 
+        if (context.FightId != fightId)
+        {
+            throw new InvalidOperationException("Cleanup context has the wrong Fight ID.");
+        }
+
+        worldAdapter.Cleanup(context);
         isCleaned = true;
-        // The bootstrap runtime owns no world objects yet. Future owned resources must
-        // be released here so cancellation, wipe, unload, and internal failures converge.
     }
 }

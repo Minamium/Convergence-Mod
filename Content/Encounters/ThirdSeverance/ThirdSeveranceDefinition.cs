@@ -29,7 +29,9 @@ internal sealed class ThirdSeveranceDefinition : EncounterDefinition
 
     public override int MaximumParticipants => 4;
 
-    public override ArenaProfile? DefaultArena => new ArenaProfile(320, 140);
+    public override ArenaProfile? DefaultArena => ThirdSeveranceEncounterPlan.Instance.Arena.Profile;
+
+    internal ThirdSeveranceEncounterPlan Plan => ThirdSeveranceEncounterPlan.Instance;
 
     public override IReadOnlyList<IEncounterActivationPolicy> ActivationPolicies =>
         FeatureActivationPolicies;
