@@ -11,6 +11,9 @@ Last reviewed: **2026-08-23**
 - [1.4.5 development FAQ](https://github.com/tModLoader/tModLoader/issues/5070) — 1.4.4 maintenance方針。
 - [Stable API documentation](https://docs.tmodloader.net/docs/stable/) — v2026.06 API reference。
 - [ModSystem API](https://docs.tmodloader.net/docs/stable/class_mod_system.html) — world data hooks、server/client call sites。
+- [Pinned ModSystem source](https://github.com/tModLoader/tModLoader/blob/29bf9785f5f4de8cd305be002c4cc48aa1177b20/patches/tModLoader/Terraria/ModLoader/ModSystem.cs#L230-L236) — `PostUpdateWorld`のSingle Player/server-only contractを固定commentで確認する再現可能な根拠。`docs/stable`はmoving supplementary referenceとして扱う。
+- [Pinned PlayerLoader death-hook aggregation](https://github.com/tModLoader/tModLoader/blob/29bf9785f5f4de8cd305be002c4cc48aa1177b20/patches/tModLoader/Terraria/ModLoader/PlayerLoader.cs) — `PreKill`が全`ModPlayer` hookを非短絡で合成する固定source。
+- [Pinned Player.KillMe integration patch](https://github.com/tModLoader/tModLoader/blob/29bf9785f5f4de8cd305be002c4cc48aa1177b20/patches/tModLoader/Terraria/Player.cs.patch) — `PreKill`がfalseの場合にvanilla death pathへ入らない呼び出し位置。
 - [ModTileEntity API](https://docs.tmodloader.net/docs/stable/class_mod_tile_entity.html) — Core entityの基礎。
 - [MusicLoader API](https://docs.tmodloader.net/docs/stable/class_music_loader.html) — music registration。
 - [SoundStyle API](https://docs.tmodloader.net/docs/stable/struct_sound_style.html) — SFX properties。
