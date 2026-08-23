@@ -1,0 +1,48 @@
+name: Multiplayer desync
+description: Report clients or server observing different Raid state.
+title: "[Desync]: "
+labels:
+  - bug
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Addon commit, tModLoader, and Calamity versions
+      placeholder: commit abc1234; tML v2026.06.3.6; Calamity 2.2.2
+    validations:
+      required: true
+  - type: dropdown
+    id: topology
+    attributes:
+      label: Server topology
+      options:
+        - Host & Play
+        - Dedicated Server
+    validations:
+      required: true
+  - type: textarea
+    id: participants
+    attributes:
+      label: Participant roles and latency
+      description: Identify host, mechanic target, Downed players, reconnecting players, and approximate ping.
+    validations:
+      required: true
+  - type: textarea
+    id: observations
+    attributes:
+      label: What each client and server observed
+      description: Include Fight ID, Phase, Revision, or server tick when available.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps and frequency
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Correlated server/client log excerpts
+      description: Remove usernames, IP addresses, tokens, and unrelated data.
+

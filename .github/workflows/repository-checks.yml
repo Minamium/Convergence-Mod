@@ -1,0 +1,31 @@
+name: Repository checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run repository policy checks
+        run: python3 tools/repository_checks.py
+      - name: Install YAML validator dependency
+        run: python3 -m pip install --disable-pip-version-check --requirement tools/requirements-ci.txt
+      - name: Validate GitHub YAML
+        run: python3 tools/validate_yaml.py

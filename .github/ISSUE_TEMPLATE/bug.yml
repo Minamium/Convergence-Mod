@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a reproducible gameplay, network, build, or cleanup defect.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach proprietary mod binaries or logs containing personal information.
+  - type: input
+    id: commit
+    attributes:
+      label: Addon version or commit
+      placeholder: e3ec891 or 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: tml
+    attributes:
+      label: tModLoader version
+      placeholder: v2026.06.3.6
+    validations:
+      required: true
+  - type: input
+    id: calamity
+    attributes:
+      label: Calamity version
+      placeholder: 2.2.2
+    validations:
+      required: true
+  - type: dropdown
+    id: topology
+    attributes:
+      label: Multiplayer topology
+      options:
+        - Single Player
+        - Host & Play
+        - Dedicated Server
+    validations:
+      required: true
+  - type: input
+    id: players
+    attributes:
+      label: Player count and approximate latency
+      placeholder: 4 players, 20-110 ms
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: Numbered, minimal steps from world load.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log excerpt
+      description: Remove usernames, IP addresses, tokens, and unrelated log data.
+

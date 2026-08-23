@@ -1,0 +1,40 @@
+name: Content proposal
+description: Propose a boss, raid, mechanic, item, presentation feature, or shared system.
+title: "[Proposal]: "
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Encounter or raid
+        - Shared mechanic
+        - Item or reward
+        - World content
+        - Visual or audio presentation
+        - Developer infrastructure
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Player outcome
+      description: Explain the experience or problem, not only the implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: ownership
+    attributes:
+      label: State ownership and failure behavior
+      description: For gameplay, identify authority, player-count scaling, soft failure, disconnect, and cleanup implications.
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and asset provenance
+      description: List Calamity APIs, other mods, samples, scores, references, or generated assets.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
