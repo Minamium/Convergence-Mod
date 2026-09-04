@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - development.general_policy
 aliases:
@@ -28,16 +28,16 @@ Use the Windows desktop as the primary tModLoader/Calamity build, Host & Play, a
 
 macOS can support tModLoader development when its runtime is installed, but the audited MacBook did not contain Terraria, tModLoader, .NET SDK, Calamity, or a valid `ModSources` checkout. It remains useful for documentation, Git, review, and platform-independent work. Never transfer an unverified Mac result into the version matrix as a successful Mod build.
 
-## Candidate environment
+## Confirmed environment
 
 Use [Version Matrix](VERSION_MATRIX.md) as the compatibility source:
 
 - Terraria 1.4.4.9;
-- tModLoader stable `v2026.06.3.6`;
-- Calamity Mod `2.2.2` plus required official Music dependency;
+- tModLoader stable `v2026.07.3.0`;
+- Calamity Mod `2.2.4` plus official Music Mod `2.1`;
 - .NET SDK `8.0.424`, with .NET 8/C# 12 owned by tModLoader targets.
 
-These runtime pins remain Candidate until real build/load/server evidence passes. Do not silently upgrade one dependency.
+These pins were confirmed by the Windows build/load/server baseline on 2026-09-05. Do not silently upgrade one dependency; re-run the complete compatibility gate for any future runtime change.
 
 ## Checkout invariant
 

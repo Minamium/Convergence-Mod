@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-09-04T16:07:16Z",
+  "git": {
+    "commit": "b34adbc18fc5191280e5681a041686699255068b",
+    "branch": "main",
+    "workingTreeClean": true
+  },
+  "host": {
+    "os": "Windows 11 10.0.26200.0",
+    "architecture": "x64",
+    "notes": "Dedicated Server and two client processes ran on one Windows host over loopback. Host & Play was not run. A redundant concurrent Build action hit the expected loaded-file lock after the isolated Build + Reload had already passed; both clients subsequently joined the server."
+  },
+  "toolchain": {
+    "dotnetSdk": "8.0.424",
+    "ide": "VS Code 1.133.0",
+    "python": "3.13.15"
+  },
+  "runtime": {
+    "terraria": "1.4.4.9",
+    "tModLoader": "v2026.07.3.0",
+    "tModLoaderBranch": "stable",
+    "tModLoaderSourceCommit": "666f69962d3bdffde54fc14025f02634965b4e7c",
+    "calamity": "2.2.4",
+    "calamityMusic": "2.1",
+    "calamityTmodSha256": "d50fea9025f88ee2073c00e3482976ca1e6ea54d0b8770eb7810bb7b280397d6",
+    "convergence": "0.1.0",
+    "enabledMods": [
+      "CalamityModMusic@2.1",
+      "CalamityMod@2.2.4",
+      "Convergence@0.1.0"
+    ]
+  },
+  "checks": {
+    "docsCatalog": "passed",
+    "repositoryPolicy": "passed",
+    "yaml": "passed",
+    "domainHarness": "passed",
+    "dotnetBuild": "passed",
+    "buildAndReload": "passed",
+    "singlePlayerLoad": "passed",
+    "hostAndPlay": "not_run",
+    "dedicatedServerLoad": "passed",
+    "twoClientJoin": "passed"
+  },
+  "multiplayer": {
+    "participantCount": 2,
+    "latencyMs": 0,
+    "packetLossPercent": 0,
+    "result": "passed"
+  },
+  "failure": {
+    "issue": null,
+    "firstError": null
+  }
+}

@@ -29,12 +29,12 @@ Part Break, Targeted Line, Personal Effigies, Split Reality, Last Stand, multipa
 
 ## Target environment
 
-- Terraria 1.4.4.9 — candidate
-- tModLoader 1.4.4 stable `v2026.06.3.6` — candidate
-- Calamity Mod `2.2.2` plus its required official Music dependency — candidate
-- .NET SDK 8.0.424 / tModLoader-owned .NET 8 and C# 12 baseline
+- Terraria `1.4.4.9` — confirmed
+- tModLoader stable `v2026.07.3.0` — confirmed
+- Calamity Mod `2.2.4` plus official Music Mod `2.1` — confirmed
+- .NET SDK `8.0.424` / tModLoader-owned .NET 8 and C# 12 baseline
 
-Candidate pins remain unconfirmed until command build, Build + Reload, Single Player, and Dedicated Server/two-client smoke pass in a real `ModSources/Convergence` checkout. See [Version Matrix](docs/VERSION_MATRIX.md).
+This Windows baseline passed command build, Build + Reload, Single Player, Dedicated Server, and two-client smoke at commit `b34adbc`. See the [Version Matrix](docs/VERSION_MATRIX.md) and [sanitized evidence](docs/evidence/2026-09-05-windows-baseline.json).
 
 Windows is the primary implementation and runtime-verification workstation. macOS is supported as a secondary Git/docs/review environment and can perform Mod work only when the same pinned runtime is actually installed and tested.
 

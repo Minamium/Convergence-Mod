@@ -4,12 +4,12 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: a7959fcc9fe97abfb6a7858642158512c493b0caf4a5472727f8e58c31ba9066
+  content_sha256: 380a2247e7aa0b639d18143259aad22115adc87cff56684ee066d93f6068c11c
   document_type: policy
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - compatibility.version_matrix
   aliases:
@@ -27,12 +27,12 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: bcf76fd59b8be184e8eeacfe885190d3096f2001cfb245948115ed03181d43bc
+  content_sha256: f76016159809a701e6aa4a0eafd49c44679283c5765135e4b3c13f26a4e27bd7
   document_type: index
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - architecture.adr_index
   aliases:
@@ -45,12 +45,12 @@ documents:
 - doc_id: development.general
   path: docs/DEVELOPMENT.md
   title: Development Setup
-  content_sha256: 8e1148739147d2593f1abc31243795b9f454870880717863a39774c61ada24cc
+  content_sha256: 9ed1b4dbb0a41e4e116b566c99fd76191f567ad61d93ff98976cc7d86ce3535e
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - development.general_policy
   aliases:
@@ -67,12 +67,12 @@ documents:
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: 5303513160bcc61ab5961833888a0c3946330af8e1da248c46814fb7a5db2837
+  content_sha256: ebf7f7d2e4dd58d4ba82022be7c1e697039e1aa6dd00a4cd6e33981b7052afc7
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - development.windows_setup
   aliases:
@@ -188,13 +188,13 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 7fdd38eefdacaffb27e619d39fa6b1e442b7734b24c28fde32b4b3c0152e78cb
+  content_sha256: 5c61924ee8d3583b5d0ea9bd8521866b97c35c4d5b70fe07e2c6f4327af4dd1e
   document_type: plan
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - first_severance.implementation_sequence
   aliases:
@@ -544,12 +544,12 @@ documents:
 - doc_id: project.milestones
   path: docs/MILESTONES.md
   title: Milestones
-  content_sha256: 491d0fa0ef1648a9e30998e29d1062601b99d0d12072f5d0521be69131833c7f
+  content_sha256: 49a0f612b1717a9c8a54e09845559058320125d0d514740ee7b92c4db8b4dcd0
   document_type: plan
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - project.roadmap
   aliases:
@@ -610,12 +610,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 03e4b34af162370e522781484d9ade3e9f0b38d02da00f90abbe8159fbfb15f6
+  content_sha256: b7f7a75770be9d09d19eb771f9c6f9b3be7fca1ab294bc0b7f1b4b81d3c008a6
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -719,12 +719,12 @@ documents:
 - doc_id: verification.evidence
   path: docs/evidence/README.md
   title: Verification Evidence
-  content_sha256: 4eed96cb99de2b98cdb901bd55e90f8efb507f0e13cb30cbf0f58b1fd6cf8207
+  content_sha256: 8afb2d8f627da3587643c7af5dd9628bf8799e5f8982596df881a75b4a599a26
   document_type: evidence
   status: accepted
   owners:
   - quality
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - verification.evidence_format
   aliases:
@@ -773,6 +773,8 @@ excluded_documents:
 - path: docs/adr/0006-staged-calamity-independence.md
   reason: ADRs retain their established body metadata until catalog migration.
 - path: docs/adr/0007-first-severance-vertical-slice.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/adr/0008-confirmed-2026-07-runtime-baseline.md
   reason: ADRs retain their established body metadata until catalog migration.
 - path: docs/catalog/README.md
   reason: Catalog operator documentation is deliberately outside its generated index.

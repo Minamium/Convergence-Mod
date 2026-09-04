@@ -21,6 +21,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 - Accepted First Severance as the first Raid target, with the minimum repeated Pylon → Stack → Spread → Core-exposure loop, simple single-NPC visual, and Downed/Revive in the first playable acceptance scope.
 - Classified the existing Third Severance multipart plan as an inert legacy bootstrap to be renamed and simplified in isolated Windows commits.
+- Confirmed the Windows runtime baseline at Terraria 1.4.4.9, tModLoader v2026.07.3.0, Calamity 2.2.4, and Calamity Music 2.1; raised the compatibility floor to the verified Calamity build.
 
 ## [0.1.0] - Unreleased
 

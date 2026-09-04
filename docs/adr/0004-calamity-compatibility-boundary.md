@@ -1,6 +1,6 @@
 # ADR-0004: Isolated Calamity Compatibility Boundary
 
-- Status: Accepted
+- Status: Accepted; numerical version floor superseded by ADR-0008
 - Date: 2026-08-23
 - Decider: Minamium
 
@@ -13,6 +13,8 @@ Calamity is a required dependency whose public API, public source mirror, intern
 All Calamity access lives under `Common/Compatibility/Calamity`. Prefer documented Mod Calls and type-check every result. Use direct public types only inside the adapter when necessary. Do not use reflection, IL patches, publicizers, copied implementation, or vendored Calamity assets/binaries.
 
 `build.txt` declares a minimum of 2.2.2. Runtime compatibility additionally requires `2.2.2 <= version < 2.3.0`; outside the range, Encounter activation is disabled.
+
+The original decision above is retained as history. [ADR-0008](0008-confirmed-2026-07-runtime-baseline.md) raises only the confirmed numerical floor to 2.2.4 after Windows runtime verification; all compatibility-boundary rules in this record remain accepted.
 
 ## Consequences
 
@@ -33,4 +35,3 @@ Costs and risks:
 - Direct Calamity references in each feature: rejected as cross-cutting ABI coupling.
 - Copying Calamity code: rejected for maintenance and license reasons.
 - Reflection/IL patching internals: rejected for initial releases due to fragility.
-

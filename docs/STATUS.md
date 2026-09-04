@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -21,11 +21,11 @@ related_docs:
 
 # Project Status
 
-As of 2026-09-04, Convergence is a documented architecture bootstrap with tested dependency-free domains. It does **not** contain a playable Raid boss, and the encounter activation path intentionally fails closed.
+As of 2026-09-05, Convergence is a documented architecture bootstrap with tested dependency-free domains and a confirmed Windows runtime baseline. It does **not** contain a playable Raid boss, and the encounter activation path intentionally fails closed.
 
 ## Implemented and connected
 
-- tModLoader Mod source skeleton, feature registration, project metadata, Calamity hard reference for Stage A, and compatibility-version policy.
+- tModLoader Mod source skeleton, feature registration, project metadata, Calamity hard reference for Stage A, and a Windows-confirmed compatibility-version policy.
 - Generic encounter identifiers, definitions, catalog, lifecycle transitions, one-session authority coordinator, runtime/factory boundary, cleanup scope, retry backlog, and terminal snapshot outbox.
 - Versioned packet envelope parsing, explicit packet IDs, direction guard, bounded rejection behavior, and a safe no-op route. No gameplay packet handler is connected yet.
 - Read-only encounter replica ordering by Encounter Sequence, revision, and authority tick, including terminal tombstones.
@@ -46,7 +46,7 @@ As of 2026-09-04, Convergence is a documented architecture bootstrap with tested
 - Boss NPC, Pylon NPCs, authoritative phase executor, damage gate/collector, Stack/Spread resolver, projectiles, synchronized feature snapshot/deltas, or client presentation.
 - Feature-neutral terminal descriptor, definition-owned external end mapping, or coordinator bridge that preserves a First Severance cause across World unload/runtime exception/fatal protocol shutdown.
 - `Resuscitation Kit` ModItem, typed revive transport, tModLoader `ModPlayer` death/control adapter, life restoration projection, or Calamity death-hook coexistence behavior.
-- Rewards, localization, production sprites/audio/VFX, tuning, release packaging, and a confirmed dependency matrix.
+- Rewards, localization, production sprites/audio/VFX, tuning, and release packaging.
 - Optional local SQLite/FTS/embedding cache generator; the committed Markdown/front-matter catalog exists, but no binary-search database is built or required.
 - Standalone progression/content that would replace the current hard Calamity dependency.
 
@@ -54,17 +54,18 @@ As of 2026-09-04, Convergence is a documented architecture bootstrap with tested
 
 | Gate | State |
 |---|---|
-| Repository policy checks | Passed on the Mac bootstrap before this handoff; rerun after checkout |
-| YAML checks | Passed on the Mac bootstrap before this handoff; rerun after checkout |
-| Dependency-free domain tests | Previously wired into CI; local Mac did not have the pinned .NET SDK for rerun |
-| `dotnet build ConvergenceMod.csproj` under `ModSources/Convergence` | Not run |
-| tModLoader Build + Reload | Not run |
-| Single Player load | Not run |
+| Documentation catalog | Passed on Windows at `b34adbc` |
+| Repository policy checks | Passed on Windows at `b34adbc` |
+| YAML checks | Passed on Windows at `b34adbc` |
+| Dependency-free domain tests | 24 passed on Windows at `b34adbc` |
+| `dotnet build ConvergenceMod.csproj` under `ModSources/Convergence` | Passed, 0 warnings/errors |
+| tModLoader Build + Reload | Passed |
+| Single Player load | Passed |
 | Host & Play | Not run |
-| Dedicated Server load/2-client smoke | Not run |
+| Dedicated Server load/2-client smoke | Passed with two local clients on loopback |
 | Calamity lethal-hook instrumentation | Not run; blocks the live Downed adapter |
 
-Candidate versions remain unconfirmed until Windows produces evidence. See [Windows Handoff](handoff/WINDOWS.md).
+The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, Calamity `2.2.4`, and Calamity Music `2.1`. See the [sanitized Windows baseline](evidence/2026-09-05-windows-baseline.json). Host & Play remains explicitly `not_run` and is not inferred from the Dedicated Server result.
 
 ## Current accepted direction
 
@@ -78,4 +79,4 @@ Candidate versions remain unconfirmed until Windows produces evidence. See [Wind
 
 ## Next change
 
-On Windows, first establish the real Build + Reload and Dedicated Server baseline. Then rename `ThirdSeverance` to `FirstSeverance` in one isolated commit while activation remains denied. Do not combine the rename with live actor spawning or death-hook interception.
+Rename `ThirdSeverance` to `FirstSeverance` in one isolated commit while activation remains denied. Do not combine the rename with plan simplification, live actor spawning, or death-hook interception.

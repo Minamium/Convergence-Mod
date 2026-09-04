@@ -4,7 +4,7 @@ document_type: evidence
 status: accepted
 owners:
   - quality
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - verification.evidence_format
 aliases:
@@ -33,5 +33,7 @@ A sanitized record may be committed here only when it:
 - contains no usernames, Steam IDs, credentials, public/private IPs, world/player files, full personal paths, raw `.tmod` files, or secrets.
 
 One successful path must not be generalized to another. In particular, the dependency-free harness is not a tModLoader build, command-line build is not Build + Reload, and Host & Play is not Dedicated Server.
+
+The current confirmed compatibility run is [2026-09-05 Windows baseline](2026-09-05-windows-baseline.json). It records Host & Play as `not_run` instead of inferring it from the successful Dedicated Server/two-client topology.
 
 Committed filenames should be stable and sortable, for example `2026-09-04-windows-baseline.json`. Update [Status](../STATUS.md) only after the corresponding evidence exists.

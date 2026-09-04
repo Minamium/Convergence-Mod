@@ -9,7 +9,7 @@ namespace Convergence.Common.Compatibility.Calamity;
 internal sealed class CalamityCompatibilitySystem : ModSystem
 {
     private const string CalamityInternalName = "CalamityMod";
-    private static readonly Version MinimumSupportedVersion = new(2, 2, 2);
+    private static readonly Version MinimumSupportedVersion = new(2, 2, 4);
     private static readonly Version MaximumExclusiveVersion = new(2, 3, 0);
 
     internal static Version? DetectedVersion { get; private set; }

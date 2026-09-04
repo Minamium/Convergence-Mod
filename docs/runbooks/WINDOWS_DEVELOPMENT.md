@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - development.windows_setup
 aliases:
@@ -29,8 +29,8 @@ Windows is the primary implementation and multiplayer-verification workstation f
 Install on the same Windows user profile:
 
 - Steam Terraria matching the [Version Matrix](../VERSION_MATRIX.md);
-- tModLoader stable matching the candidate pin;
-- Calamity Mod `2.2.2` candidate plus its required official Music Mod;
+- tModLoader stable `v2026.07.3.0`;
+- Calamity Mod `2.2.4` plus official Music Mod `2.1`;
 - Git and a configured GitHub authentication method;
 - Python 3.10 or newer for repository checks;
 - ripgrep (`rg`) for the documented cross-repository search commands;
@@ -154,7 +154,7 @@ Do not commit Steam credentials, IP addresses, player identities, full personal 
 
 Copy [`../evidence/build-record.example.json`](../evidence/build-record.example.json) to the ignored root file `build-record.local.json`, fill it from actual logs, and keep it local until sanitized evidence is intentionally reviewed for commit.
 
-Candidate matrix entries become Confirmed only after:
+Future matrix entries become Confirmed only after:
 
 - command-line build;
 - Build + Reload;
@@ -179,7 +179,7 @@ Multiplayer/authority changes additionally require host/non-host, 2/3/4-player, 
 
 - Missing `..\tModLoader.targets`: checkout is not directly under the correct `ModSources` directory.
 - Calamity reference failure: verify enabled/installed exact dependency and Music dependency; do not vendor `.tmod` files.
-- Calamity `2.2.2` unavailable from the official Workshop: do not obtain an unofficial binary. Record the actually available official version and create a compatibility branch; keep the version-matrix candidate unchanged until the full gate passes.
+- Pinned Calamity version unavailable from the official Workshop: do not obtain an unofficial binary. Record the actually available official version and create a compatibility branch; keep the confirmed version matrix unchanged until the full gate passes.
 - SDK selection failure: inspect `dotnet --info` and `global.json`; do not edit the target framework to bypass tModLoader.
 - Build works but reload fails: treat the in-game error as a real blocker; do not mark the version confirmed.
 - Client works but server fails: inspect dedicated-only graphics/audio/static initialization and side guards.
@@ -190,6 +190,6 @@ Record deviations in the handoff/evidence documents rather than leaving machine-
 ## Upstream references
 
 - [tModLoader repository and developer entry points](https://github.com/tModLoader/tModLoader)
-- [ExampleMod at the candidate source commit](https://github.com/tModLoader/tModLoader/tree/29bf9785f5f4de8cd305be002c4cc48aa1177b20/ExampleMod)
-- [Server configuration at the candidate source commit](https://github.com/tModLoader/tModLoader/blob/29bf9785f5f4de8cd305be002c4cc48aa1177b20/patches/tModLoader/Terraria/release_extras/serverconfig.txt)
+- [ExampleMod at the confirmed source commit](https://github.com/tModLoader/tModLoader/tree/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod)
+- [Server configuration at the confirmed source commit](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/release_extras/serverconfig.txt)
 - [Starting a modded server](https://github.com/tModLoader/tModLoader/wiki/Starting-a-modded-server)

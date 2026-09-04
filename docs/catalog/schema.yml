@@ -52,4 +52,5 @@ excluded_paths:
   docs/adr/0005-server-authoritative-downed-revive.md: ADRs retain their established body metadata until catalog migration.
   docs/adr/0006-staged-calamity-independence.md: ADRs retain their established body metadata until catalog migration.
   docs/adr/0007-first-severance-vertical-slice.md: ADRs retain their established body metadata until catalog migration.
+  docs/adr/0008-confirmed-2026-07-runtime-baseline.md: ADRs retain their established body metadata until catalog migration.
   docs/catalog/README.md: Catalog operator documentation is deliberately outside its generated index.

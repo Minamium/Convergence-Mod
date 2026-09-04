@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - first_severance.implementation_sequence
 aliases:
@@ -52,6 +52,8 @@ The first slice assumes cooperative multiplayer with unmodified clients. Terrari
 Do not build a generic mechanic DSL for this first consumer.
 
 ## Slice 0 — Windows baseline and evidence
+
+Status: **Complete (2026-09-05).** The confirmed versions and sanitized run are recorded in the [Version Matrix](../../VERSION_MATRIX.md) and [Windows baseline evidence](../../evidence/2026-09-05-windows-baseline.json). Host & Play remains a later gameplay-integration gate; the Slice 0 Dedicated Server/two-client baseline passed.
 
 1. Follow [Windows Development](../../runbooks/WINDOWS_DEVELOPMENT.md) and place the checkout at `ModSources/Convergence`.
 2. Record exact installed versions and commit with the build-record template.

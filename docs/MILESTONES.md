@@ -4,7 +4,7 @@ document_type: plan
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - project.roadmap
 aliases:
@@ -35,9 +35,9 @@ The implementation sequence within the first Raid is defined in the [First Sever
 - [x] Inert legacy arena/Boss plan and activation fail-closed policy.
 - [x] Documentation index/catalog, First Severance decision/specs, Windows handoff/runbook.
 - [ ] Source/asset license decision.
-- [ ] Windows command build and Build + Reload.
-- [ ] Dedicated Server/two-client baseline.
-- [ ] Candidate versions promoted to Confirmed.
+- [x] Windows command build and Build + Reload.
+- [x] Dedicated Server/two-client baseline.
+- [x] Candidate versions promoted to Confirmed.
 
 Exit: clean pinned client/server baseline with sanitized evidence.
 

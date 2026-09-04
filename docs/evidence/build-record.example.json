@@ -18,12 +18,18 @@
   },
   "runtime": {
     "terraria": "1.4.4.9",
-    "tModLoader": "v2026.06.3.6",
+    "tModLoader": "v2026.07.3.0",
     "tModLoaderBranch": "stable",
-    "calamity": "2.2.2",
-    "calamityMusic": "observed version",
+    "tModLoaderSourceCommit": "40-character commit SHA",
+    "calamity": "2.2.4",
+    "calamityMusic": "2.1",
     "calamityTmodSha256": "64 lowercase hexadecimal characters",
-    "convergence": "0.1.0"
+    "convergence": "0.1.0",
+    "enabledMods": [
+      "CalamityModMusic@2.1",
+      "CalamityMod@2.2.4",
+      "Convergence@0.1.0"
+    ]
   },
   "checks": {
     "docsCatalog": "not_run",

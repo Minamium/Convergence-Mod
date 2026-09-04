@@ -4,7 +4,7 @@ document_type: policy
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - compatibility.version_matrix
 aliases:
@@ -23,22 +23,23 @@ related_docs:
 
 # Version Matrix
 
-調査基準日: **2026-08-23**
+調査・実機確定日: **2026-09-05**
 
-## Initial compatibility freeze
+## Confirmed Windows compatibility baseline
 
-| Component | Initial target | Status | Rationale |
+| Component | Pinned target | Status | Rationale |
 |---|---:|---|---|
-| Terraria | 1.4.4.9 | Candidate | tModLoader 1.4.4系のゲーム基盤 |
-| tModLoader | `v2026.06.3.6`, 1.4.4 stable | Candidate | 2026-08-13公開のlatest stable |
-| tModLoader source | `29bf9785f5f4de8cd305be002c4cc48aa1177b20` | Confirmed | tagのsource commit。Calamity向けmitigation patchを含む |
-| tModLoader API docs | `v2026.06` | Confirmed for research | stable API docsの表示バージョン |
+| Terraria | `1.4.4.9` | Confirmed | tModLoader実行ログとSingle Player/Dedicated Serverで確認 |
+| tModLoader | `v2026.07.3.0`, stable | Confirmed | 2026-09-01公開releaseを実機Build + Reload/Serverで確認 |
+| tModLoader source | `666f69962d3bdffde54fc14025f02634965b4e7c` | Confirmed | release/runtimeが報告したsource commit |
+| tModLoader API docs | `v2026.07` | Confirmed for research | pinned stable release family |
 | Runtime | .NET 8 | Confirmed from stable targets | `TargetFramework=net8.0` |
 | C# | 12.0 | Confirmed from stable targets | `LangVersion=12.0`（個別csprojで`latest`に上書きしない） |
-| Calamity Mod | `2.2.2` | Candidate | 公開mirrorの`build.txt` |
-| Calamity source reference | `1a8cebd27ec5615316b78f71973446b5528d2b78` | Confirmed | `Merge Update 2.2.2 into release branch` |
+| Calamity Mod | `2.2.4` | Confirmed | 公式Workshop binaryをBuild + Reload/Server/2-clientで確認 |
+| Calamity Music | `2.1` | Confirmed | 公式必須依存を同じ実機runで確認 |
+| Calamity source reference | `1a8cebd27ec5615316b78f71973446b5528d2b78` (`2.2.2`) | Reference only | 公開mirrorに2.2.4相当sourceが無いため、binaryとの同一性は主張しない |
 | Calamity internal name | `CalamityMod` | Confirmed | `build.txt`とnamespace |
-| Addon dependency | `CalamityMod@2.2.2` | Configured, unverified | `build.txt`へ設定済み。実機Build + Reload待ち |
+| Addon dependency | `CalamityMod@2.2.4` | Confirmed | `build.txt`の下限とruntime gateを実機確認 |
 
 This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calamity-independence.md); it is not a permanent commitment to a hard Calamity dependency.
 
@@ -48,7 +49,7 @@ This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calami
 displayName = Convergence (Development Build)
 author = Minamium
 version = 0.1.0
-modReferences = CalamityMod@2.2.2
+modReferences = CalamityMod@2.2.4
 side = Both
 playableOnPreview = false
 hideCode = false
@@ -58,9 +59,9 @@ includeSource = false
 
 Source/asset licenseが未決定のため、accidental `.tmod` source distributionを避ける目的で`includeSource = false`に固定する。ライセンス決定後に配布方針と合わせて再審査する。
 
-内部Mod/assembly名とroot namespaceは開発コードネーム`Convergence`とした。entry class/project filenameは`ConvergenceMod`である。公開名は未決定であり、`displayName`はdevelopment用である。tModLoaderは`ModReference`の`Name@Version`形式を、指定版以上かつ同じmajor versionとして判定する。したがって`CalamityMod@2.2.2`は2.2.3や2.3.0を許可し、3.0.0を拒否する。
+内部Mod/assembly名とroot namespaceは開発コードネーム`Convergence`とした。entry class/project filenameは`ConvergenceMod`である。公開名は未決定であり、`displayName`はdevelopment用である。tModLoaderは`ModReference`の`Name@Version`形式を、指定版以上かつ同じmajor versionとして判定する。したがって`CalamityMod@2.2.4`はloaderの依存解決では後続2.xを許可し、3.0.0を拒否する。
 
-企画上の対応範囲を2.2.xへ限定するため、Compatibility層で実行時に`2.2.2 <= version < 2.3.0`を検査する。範囲外ではMod全体をcrashさせず、Raid起動を無効化して必要versionを表示する。
+企画上の対応範囲を2.2.xへ限定するため、Compatibility層で実行時に`2.2.4 <= version < 2.3.0`を検査する。範囲外ではMod全体をcrashさせず、Raid起動を無効化して必要versionを表示する。この数値下限だけは[ADR-0008](adr/0008-confirmed-2026-07-runtime-baseline.md)が[ADR-0004](adr/0004-calamity-compatibility-boundary.md)の旧下限を更新し、adapter境界そのものは維持する。
 
 ## Build project policy
 
@@ -90,27 +91,27 @@ Calamityへのアクセスは`Common/Compatibility/Calamity/`へ隔離する。
 - コンパイル時にCalamityを直接参照するファイルを限定し、更新時の修正面積を小さくする。
 - Calamityソースをコピーしない。参照目的で利用し、コードを移植する場合はライセンス条件とクレジットを個別確認する。
 - `Mod.Call`が返す値は必ず型検査する。不正引数時に`Exception` object、不明Call時に`null`が返る可能性を扱う。
-- Calamity `2.2.2`本体は`CalamityModMusic`を必須参照する。開発環境へ公式Music Modも導入するが、本Addonから音楽APIを直接使わない限り重複して`modReferences`へ追加しない。
+- Calamity `2.2.4`本体は`CalamityModMusic`を必須参照する。開発環境へ公式Music Mod `2.1`も導入するが、本Addonから音楽APIを直接使わない限り重複して`modReferences`へ追加しない。
 
-## Freeze gate
+## Confirmation evidence
 
-候補を確定値へ変更する条件:
+2026-09-05にcommit `b34adbc18fc5191280e5681a041686699255068b`のclean checkoutで次を完了した:
 
-1. 対象tModLoaderをfresh installする。
-2. Calamity `2.2.2`と必須依存ModをWorkshopから導入する。
-3. 最小AddonをBuild + Reloadする。
-4. Single PlayerでWorldへ入る。
-5. `start-tModLoaderServer`相当でDedicated Serverを起動する。
-6. 2クライアントが接続し、Addonのpacket round-tripを確認する。
-7. 実行ログからTerraria、tModLoader、Calamity、Addonのversionを記録する。
+1. repository/catalog/YAML checksとdependency-free domain harness（24 tests）。
+2. `dotnet build ConvergenceMod.csproj`（0 warnings/errors）。
+3. tModLoader Build + Reload。
+4. Single PlayerでWorldへ入って退出。
+5. Dedicated Serverを起動し、同一Windows host上の2クライアントで接続・退出・保存終了。
+6. 実行ログからTerraria、tModLoader、Calamity、Music、Addonのversionを記録。
+7. Calamity `.tmod`のSHA-256を記録し、binary/log/player/worldはrepositoryへ保存しない。
 
-現時点ではrepository policy checkのみ完了している。bootstrap環境に.NET SDK、tModLoader、Terraria、Calamity binaryが無いため、build/loadは未検証でありCandidateを維持する。
+結果は[2026-09-05 Windows baseline](evidence/2026-09-05-windows-baseline.json)に保存した。Host & Playは`not_run`であり、Dedicated Server結果から推定しない。baselineのenabled ModはCalamity Music、Calamity、Convergenceだけで、任意の開発補助Modは互換性確定根拠へ含めない。
 
-失敗した場合、latestへ無条件追従せず、動作した組み合わせをこの表へ固定する。
+公開source参照は2.2.2時点で、確認したCalamity 2.2.4 Workshop binaryと同一sourceであるとは証明できない。2.2.4固有APIへ依存する変更は、公開・許諾された対応sourceまたは公式API根拠が得られるまで行わない。
 
 ## Upgrade policy
 
-- tModLoader monthly stableまたはCalamity patch releaseへは自動追従しない。
+- tModLoader monthly stableまたはCalamity patch releaseへは自動追従しない。この表の「latest」は確定日現在の意味であり、moving targetではない。
 - 更新は専用branchでbuild、Dedicated Server、2人smoke testを通してから行う。
 - 互換性修正とEncounter変更を同じcommitへ混在させない。
 - 1.4.5 portは別milestone・別branchとし、1.4.4の完成前には開始しない。
