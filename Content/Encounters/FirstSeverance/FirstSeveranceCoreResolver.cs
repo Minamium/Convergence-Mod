@@ -120,8 +120,14 @@ internal sealed class FirstSeveranceCoreResolver
             eligibleCandidateCount: selectableCandidateCount,
             metrics,
             evidence);
+        // The current Development Build cannot enter combat or deploy a Barrier.
+        // Keep identity, bounds, roster, duplicate-Core, and World-conflict errors
+        // strict, while allowing an ordinary World to exercise multiplayer
+        // preparation without first constructing a 320-tile test foundation.
         FirstSeveranceArenaValidationResult validation =
-            FirstSeveranceArenaValidator.Instance.Validate(survey);
+            FirstSeveranceArenaValidator.Instance.Validate(
+                survey,
+                FirstSeveranceArenaValidationMode.DevelopmentPreparationSmoke);
         if (!validation.IsValid)
         {
             failureCode = validation.FirstErrorCode;

@@ -14,9 +14,6 @@ public sealed class FoundationCoreTile : ModTile
     private const int TileWidth = 2;
     private const int TileHeight = 2;
 
-    // Development placeholder: the 2x2 Crystal Ball sheet matches this TileObjectData.
-    public override string Texture => $"Terraria/Images/Tiles_{TileID.CrystalBall}";
-
     public override void SetStaticDefaults()
     {
         Main.tileFrameImportant[Type] = true;

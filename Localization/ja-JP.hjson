@@ -14,6 +14,8 @@ Mods: {
     UI: {
       FirstSeverance: {
         ActivationRejected: "ファウンデーション・コアの起動条件を満たしていません: {0}"
+        PreparationStatus: "第一断絶の準備中 — Ready: {0}/{1}。コアを右クリックするとReadyを切り替えます。"
+        AllReady: "第一断絶 Ready完了 — {0}/{1}。マルチ準備の同期は成功です。このビルドでは戦闘はまだロック中です。"
       }
     }
   }

@@ -6,9 +6,6 @@ namespace Convergence.Content.Encounters.FirstSeverance.FoundationCore;
 
 public sealed class FoundationCoreItem : ModItem
 {
-    // Development placeholder: reference a shipped Terraria asset without copying it.
-    public override string Texture => $"Terraria/Images/Item_{ItemID.CrystalBall}";
-
     public override void SetDefaults()
     {
         Item.DefaultToPlaceableTile(ModContent.TileType<FoundationCoreTile>());

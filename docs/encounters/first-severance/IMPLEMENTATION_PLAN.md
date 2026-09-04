@@ -112,6 +112,8 @@ Implement the first real tModLoader adapters:
 
 All validation completes before world mutation. The Foundation Core does not own the encounter. During Preparing, a valid Foundation Core Tile/TE break cancels and cleans the session. During Active, normal player break/explosion/wiring/liquid attempts are rejected; an unexpected Tile/TE loss invalidates and aborts the exact Fight, while an explicit admin/debug abort uses the same cleanup path. Keep the actual combat transition disabled until actor ownership and feature replication exist.
 
+For the current Development Build only, `DevelopmentPreparationSmoke` downgrades incomplete foundation plus existing container/foreign-TE/protected content from fatal to warning so two clients can exercise transport and Ready state in an ordinary World. Core identity, World bounds/conflict, requester range, duplicate Core, and the 2–4 roster remain strict. The default validator remains strict, and this relaxation must be removed before Barrier or combat world mutation is enabled.
+
 Exit: repeat start/Ready/cancel/Foundation-Core-break/disconnect/unload cycles leave no stale state on Dedicated Server; protected Active break is rejected and injected unexpected Tile/TE loss aborts cleanly.
 
 ## Slice 4 — Boss, Pylons, measured hit pipeline, and replication foundation

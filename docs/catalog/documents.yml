@@ -188,7 +188,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: a57ab3db97d32008ae53c72089454cd692a88b2d3f159f8b9ffa3dd973d1a9b3
+  content_sha256: fcaabcddc1e9b94ad7f2e1a68686783fcc2c7e4b402a933c07346f31980a0b2c
   document_type: plan
   status: accepted
   owners:
@@ -616,7 +616,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: a69a5af7afef6c6158b210cbcb0ae2fa34cc25af85a960e3435b91ebfc208643
+  content_sha256: b7ab4563a996438777d1346d75cd02e2f030fa80f254821a27c9c96b75116abd
   document_type: status
   status: accepted
   owners:

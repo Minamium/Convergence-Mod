@@ -5,6 +5,7 @@ using Convergence.Common.Encounters.Runtime;
 using Convergence.Common.Networking.Replication;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
@@ -14,6 +15,8 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     private FirstSeverancePreparationProjection? preparation;
     private uint lastValidationNonce;
     private bool requestedInitialSnapshot;
+    private ulong displayedPreparationSequence;
+    private int displayedReadyCount = -1;
 
     internal FirstSeverancePreparationProjection? Preparation => preparation;
 
@@ -23,12 +26,44 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         in EncounterSnapshot snapshot,
         FirstSeverancePreparationProjection? incomingPreparation)
     {
-        preparation = snapshot.Lifecycle == EncounterLifecycle.Preparing
+        FirstSeverancePreparationProjection? nextPreparation =
+            snapshot.Lifecycle == EncounterLifecycle.Preparing
             && incomingPreparation is not null
             && incomingPreparation.EncounterSequence == snapshot.EncounterSequence
             && incomingPreparation.FightId == snapshot.FightId
                 ? incomingPreparation
                 : null;
+        preparation = nextPreparation;
+        if (Main.netMode == NetmodeID.Server || nextPreparation is null)
+        {
+            if (nextPreparation is null)
+            {
+                displayedPreparationSequence = 0;
+                displayedReadyCount = -1;
+            }
+
+            return;
+        }
+
+        int readyCount = CountReady(nextPreparation);
+        if (displayedPreparationSequence == nextPreparation.EncounterSequence
+            && displayedReadyCount == readyCount)
+        {
+            return;
+        }
+
+        displayedPreparationSequence = nextPreparation.EncounterSequence;
+        displayedReadyCount = readyCount;
+        string message = nextPreparation.AreAllReady
+            ? Language.GetTextValue(
+                "Mods.Convergence.UI.FirstSeverance.AllReady",
+                readyCount,
+                nextPreparation.Members.Count)
+            : Language.GetTextValue(
+                "Mods.Convergence.UI.FirstSeverance.PreparationStatus",
+                readyCount,
+                nextPreparation.Members.Count);
+        Main.NewText($"[Convergence] {message}", 86, 210, 229);
     }
 
     internal void ApplyValidation(in FirstSeveranceValidationMessage validation)
@@ -92,6 +127,22 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         lastValidationNonce = 0;
         LastValidation = null;
         requestedInitialSnapshot = false;
+        displayedPreparationSequence = 0;
+        displayedReadyCount = -1;
         FirstSeveranceClientActions.Reset();
+    }
+
+    private static int CountReady(FirstSeverancePreparationProjection projection)
+    {
+        int count = 0;
+        for (int index = 0; index < projection.Members.Count; index++)
+        {
+            if (projection.Members[index].IsReady)
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 }

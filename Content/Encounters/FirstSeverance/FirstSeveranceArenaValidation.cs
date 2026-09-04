@@ -12,6 +12,12 @@ internal enum FirstSeveranceArenaIssueSeverity : byte
     Error = 2,
 }
 
+internal enum FirstSeveranceArenaValidationMode : byte
+{
+    Strict = 0,
+    DevelopmentPreparationSmoke = 1,
+}
+
 internal static class FirstSeveranceArenaIssueCodes
 {
     public const string ScanIncomplete = "first_severance.arena_scan_incomplete";
@@ -243,13 +249,23 @@ internal sealed class FirstSeveranceArenaValidator
     {
     }
 
-    public FirstSeveranceArenaValidationResult Validate(FirstSeveranceArenaSurvey survey)
+    public FirstSeveranceArenaValidationResult Validate(
+        FirstSeveranceArenaSurvey survey,
+        FirstSeveranceArenaValidationMode mode = FirstSeveranceArenaValidationMode.Strict)
     {
         ArgumentNullException.ThrowIfNull(survey);
+        if (!Enum.IsDefined(mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        }
 
         FirstSeveranceArenaScanMetrics metrics = survey.Metrics;
         FirstSeveranceArenaScanEvidence evidence = survey.Evidence;
         var issues = new List<FirstSeveranceArenaIssue>();
+        FirstSeveranceArenaIssueSeverity constructionSeverity =
+            mode == FirstSeveranceArenaValidationMode.DevelopmentPreparationSmoke
+                ? FirstSeveranceArenaIssueSeverity.Warning
+                : FirstSeveranceArenaIssueSeverity.Error;
         long expectedScanCount = (long)survey.Layout.ArenaBounds.Width
             * survey.Layout.ArenaBounds.Height;
 
@@ -292,13 +308,13 @@ internal sealed class FirstSeveranceArenaValidator
         AddWhen(
             metrics.SolidFoundationTileCount != survey.Layout.ArenaBounds.Width,
             FirstSeveranceArenaIssueCodes.FoundationIncomplete,
-            FirstSeveranceArenaIssueSeverity.Error,
+            constructionSeverity,
             evidence.FirstFoundationGap,
             issues);
         AddWhen(
             metrics.ContainerTileCount > 0,
             FirstSeveranceArenaIssueCodes.ContainerPresent,
-            FirstSeveranceArenaIssueSeverity.Error,
+            constructionSeverity,
             evidence.FirstContainer,
             issues);
         AddWhen(
@@ -310,13 +326,13 @@ internal sealed class FirstSeveranceArenaValidator
         AddWhen(
             metrics.ForeignTileEntityCount > 0,
             FirstSeveranceArenaIssueCodes.ForeignTileEntityPresent,
-            FirstSeveranceArenaIssueSeverity.Error,
+            constructionSeverity,
             evidence.FirstForeignTileEntity,
             issues);
         AddWhen(
             metrics.ProtectedTileCount > 0,
             FirstSeveranceArenaIssueCodes.ProtectedTilePresent,
-            FirstSeveranceArenaIssueSeverity.Error,
+            constructionSeverity,
             evidence.FirstProtectedTile,
             issues);
 

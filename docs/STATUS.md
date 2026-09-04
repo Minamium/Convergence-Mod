@@ -37,10 +37,11 @@ As of 2026-09-05, Convergence is a documented architecture bootstrap with tested
 ## Implemented First Severance foundation
 
 - `Content/Encounters/FirstSeverance` contains an immutable 320x140 Core-anchored arena blueprint, four deterministic Pylon slots, logical outsider policy, a cleanup-safe inert runtime, and a boundary around the revive service.
-- Slice 3 adds a development Foundation Core ModItem/2x2 ModTile/ModTileEntity using a vanilla placeholder texture, active-only mine/explosion protection projection, and an authority-owned exact-Fight lease. The item has no recipe; right-click now submits a server/SP activation request and reports validation rejection in chat.
+- Slice 3 adds a development Foundation Core ModItem/2x2 ModTile/ModTileEntity with dedicated prototype pixel art, active-only mine/explosion protection projection, and an authority-owned exact-Fight lease. The item has no recipe; right-click submits a server/SP activation request and reports validation or Ready-count state in chat.
 - An authority-only resolver derives the exact server TE from any Core coordinate, checks a 320x140 prospective arena without mutation, records deterministic fatal issues/warnings/metrics, and rejects requester distance, World conflict, foundation/protected/container/foreign-TE/Core conflicts, incomplete scans, and ambiguous participant counts.
 - Current server-slot connection epochs feed a deterministic frozen 2–4 roster. The pure preparation state supports Ready/unready, per-participant nonce and exact binding checks, a provisional 60-second timeout, initiator cancel, Core loss, participant loss, a permanently closed combat gate, and exact-Fight idempotent cleanup.
 - The coordinator now resolves Core/Arena/roster before acceptance, enters `Validating -> Preparing`, applies Ready/cancel intents on authority ticks, publishes bounded preparation snapshots, and releases the exact Core lease on cancel, timeout, Core loss, participant loss, unload, or failure.
+- The current Development Build uses an explicit preparation-smoke validation mode: Core identity, bounds, requester, World conflict, 2–4 roster, and duplicate Core remain fatal, while unfinished foundation and existing container/Tile Entity/protected content are warnings because combat and Barrier mutation remain disabled. Strict validation remains the default API and must return before combat opens.
 - The Calamity boundary queries only public `GetBossDowned`/`GetDifficultyActive` calls for Exo Mechs, Supreme Calamitas, and Boss Rush, validates boolean returns, and fails closed on missing/changed behavior. Public `2.2.2` source is reference-only for the installed `2.2.4` binary, so runtime call verification remains required.
 - The feature owns a validated `SpawnIntro -> PylonCheck -> Stack -> Spread -> CoreExposure -> Reset` plan and pure high-level loop state machine. It encodes 2/3/4-player Pylons, provisional Stack shares `2/2/3`, persistent Boss life, normal/penalized exposure deadlines, three-Overload Defeat, eight-exposure `Defeat + LoopCapExceeded`, and no damage quota or enrage phase.
 - `FirstSeveranceTerminalCause` has append-only byte values `0..13` and exact generic mappings. Feature-owned runtime End, World unload, runtime exception, and queued fatal-protocol termination preserve the descriptor through terminal snapshot, cleanup context, outbox, and retained replica tombstone.
@@ -64,8 +65,8 @@ As of 2026-09-05, Convergence is a documented architecture bootstrap with tested
 | YAML checks | Passed for Slice 3A on Windows |
 | Dependency-free domain tests | 48 passed for Slice 3A on Windows |
 | `dotnet build ConvergenceMod.csproj` | Passed for the Slice 3 preparation transport with 0 warnings/errors |
-| tModLoader Build + Reload | Pending for Slice 3A; prior Slice 2 passed |
-| Single Player load | Pending for Slice 3A; prior Slice 2 passed |
+| tModLoader Build + Reload | Passed for Foundation Core preparation transport |
+| Single Player load | Passed; Core placed/right-clicked and correctly returned `roster_too_small` for one player |
 | Host & Play | Not run |
 | Dedicated Server load/2-client smoke | Slice 3A 8-Mod server load/save/exit passed; two-client join not rerun; Slice 0 two-client baseline passed |
 | Calamity lethal-hook instrumentation | Not run; blocks the live Downed adapter |
@@ -84,4 +85,4 @@ The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, C
 
 ## Next change
 
-Run one in-game smoke check: obtain the Foundation Core through Cheat Sheet, place it, and right-click it to observe a preparation start or a concrete validation rejection. After that checkpoint, continue Slice 3 with logical Barrier presentation/correction; keep the combat transition closed until Slice 4 actor ownership and replication exist.
+Run Host & Play with one Steam friend: keep both players alive within 80 tiles of the Core, start preparation, then have both right-click until chat reports `Ready: 2/2`. This validates the current Raid-start boundary only; combat remains closed. Afterward, continue Slice 3 with logical Barrier presentation/correction.
