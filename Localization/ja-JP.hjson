@@ -1,0 +1,16 @@
+Mods: {
+  Convergence: {
+    Items: {
+      FoundationCoreItem: {
+        DisplayName: ファウンデーション・コア
+        Tooltip: "第一断絶の候補アリーナを固定する\n開発ビルド：起動はまだロックされています"
+      }
+    }
+    Tiles: {
+      FoundationCoreTile: {
+        MapEntry: ファウンデーション・コア
+        ActivationUnavailableText: "このビルドでは第一断絶をまだ起動できません。"
+      }
+    }
+  }
+}

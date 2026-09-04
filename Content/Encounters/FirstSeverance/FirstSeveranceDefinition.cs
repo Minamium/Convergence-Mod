@@ -11,9 +11,12 @@ internal sealed class FirstSeveranceDefinition : EncounterDefinition
     private static readonly IEncounterActivationPolicy[] FeatureActivationPolicies =
     {
         FirstSeveranceAvailabilityPolicy.Instance,
+        FirstSeveranceProgressionActivationPolicy.Instance,
     };
 
     public const string EncounterKey = "first_severance";
+    public const int MinimumRosterSize = FirstSeveranceRoster.MinimumCount;
+    public const int MaximumRosterSize = FirstSeveranceRoster.MaximumCount;
 
     public static FirstSeveranceDefinition Instance { get; } = new();
 
@@ -28,9 +31,9 @@ internal sealed class FirstSeveranceDefinition : EncounterDefinition
 
     public override EncounterKind Kind => EncounterKind.Raid;
 
-    public override int MinimumParticipants => 2;
+    public override int MinimumParticipants => MinimumRosterSize;
 
-    public override int MaximumParticipants => 4;
+    public override int MaximumParticipants => MaximumRosterSize;
 
     public override ArenaProfile? DefaultArena => FirstSeveranceEncounterPlan.Instance.Arena.Profile;
 

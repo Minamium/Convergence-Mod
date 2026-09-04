@@ -1,0 +1,16 @@
+Mods: {
+  Convergence: {
+    Items: {
+      FoundationCoreItem: {
+        DisplayName: Foundation Core
+        Tooltip: "Anchors a prospective First Severance arena\nDevelopment build: activation remains locked"
+      }
+    }
+    Tiles: {
+      FoundationCoreTile: {
+        MapEntry: Foundation Core
+        ActivationUnavailableText: "First Severance activation is not available in this build."
+      }
+    }
+  }
+}

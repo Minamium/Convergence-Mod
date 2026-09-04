@@ -4,7 +4,7 @@ document_type: research
 status: historical
 owners:
   - research
-last_reviewed: 2026-08-23
+last_reviewed: 2026-09-05
 source_of_truth_for: []
 aliases:
   - research sources
@@ -14,22 +14,25 @@ related_docs:
   - compatibility.version-matrix
   - research.codex-skills-survey
   - research.multiplayer-raid-prior-art
+  - research.first-severance-slice3-apis
 ---
 
 # Research Sources
 
-Last reviewed: **2026-08-23**
+Last reviewed: **2026-09-05**
 
 一次資料を優先する。sourceの存在はAPI安定性や再利用許可を意味しない。
 
 ## tModLoader
 
-- [tModLoader v2026.06.3.6](https://github.com/tModLoader/tModLoader/releases/tag/v2026.06.3.6) — 固定対象の1.4.4 stable release。
-- [tModLoader fixed source commit](https://github.com/tModLoader/tModLoader/commit/29bf9785f5f4de8cd305be002c4cc48aa1177b20) — Calamity向けmitigationを含むsource基準点。
+- [tModLoader v2026.07.3.0](https://github.com/tModLoader/tModLoader/releases/tag/v2026.07.3.0) — Windows実機で確認した現行固定対象の1.4.4 stable release。
+- [Confirmed tModLoader source commit](https://github.com/tModLoader/tModLoader/commit/666f69962d3bdffde54fc14025f02634965b4e7c) — runtimeが報告した現行source基準点。
+- [Pinned ExampleMod BasicTileEntity](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod/Content/TileEntities/BasicTileEntity.cs) — multitile TE配置・削除・同期patternの現行根拠。
+- [tModLoader v2026.06.3.6](https://github.com/tModLoader/tModLoader/releases/tag/v2026.06.3.6) / [former source commit](https://github.com/tModLoader/tModLoader/commit/29bf9785f5f4de8cd305be002c4cc48aa1177b20) — bootstrap時点の履歴基準。現在の固定対象ではない。
 - [1.4.5 development FAQ](https://github.com/tModLoader/tModLoader/issues/5070) — 1.4.4 maintenance方針。
 - [Stable API documentation](https://docs.tmodloader.net/docs/stable/) — v2026.06 API reference。
 - [ModSystem API](https://docs.tmodloader.net/docs/stable/class_mod_system.html) — world data hooks、server/client call sites。
-- [Pinned ModSystem source](https://github.com/tModLoader/tModLoader/blob/29bf9785f5f4de8cd305be002c4cc48aa1177b20/patches/tModLoader/Terraria/ModLoader/ModSystem.cs#L230-L236) — `PostUpdateWorld`のSingle Player/server-only contractを固定commentで確認する再現可能な根拠。`docs/stable`はmoving supplementary referenceとして扱う。
+- [Pinned ModSystem source](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModSystem.cs) — 現行固定source。`docs/stable`はmoving supplementary referenceとして扱う。
 - [Pinned PlayerLoader death-hook aggregation](https://github.com/tModLoader/tModLoader/blob/29bf9785f5f4de8cd305be002c4cc48aa1177b20/patches/tModLoader/Terraria/ModLoader/PlayerLoader.cs) — `PreKill`が全`ModPlayer` hookを非短絡で合成する固定source。
 - [Pinned Player.KillMe integration patch](https://github.com/tModLoader/tModLoader/blob/29bf9785f5f4de8cd305be002c4cc48aa1177b20/patches/tModLoader/Terraria/Player.cs.patch) — `PreKill`がfalseの場合にvanilla death pathへ入らない呼び出し位置。
 - [ModTileEntity API](https://docs.tmodloader.net/docs/stable/class_mod_tile_entity.html) — Core entityの基礎。
@@ -38,7 +41,7 @@ Last reviewed: **2026-08-23**
 - [ExampleMod build.txt](https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/build.txt) — stable template。
 - [ExampleMod project](https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/ExampleMod.csproj) — project import pattern。
 - [ExampleMod networking](https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/ExampleMod.Networking.cs) — `HandlePacket` pattern。
-- [ExampleMod BasicTileEntity](https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/TileEntities/BasicTileEntity.cs) — server mutationとTE sync。
+- [ExampleMod BasicTileEntity (moving stable)](https://github.com/tModLoader/tModLoader/blob/stable/ExampleMod/Content/TileEntities/BasicTileEntity.cs) — 補助参照。互換判断には上記pinned linkを使う。
 - [Stable tMLMod.targets](https://github.com/tModLoader/tModLoader/blob/stable/patches/tModLoader/Terraria/release_extras/tMLMod.targets) — .NET 8、C# 12、build command。
 - [Pinned Mod template project](https://github.com/tModLoader/tModLoader/blob/v2026.06.3.6/patches/tModLoader/Terraria/ModLoader/Templates/%7B%7BModName%7D%7D.csproj) — minimal project and targets import。
 - [Stable MusicLoader source](https://github.com/tModLoader/tModLoader/blob/stable/patches/tModLoader/Terraria/ModLoader/MusicLoader.cs) — `.mp3/.ogg/.wav` support。

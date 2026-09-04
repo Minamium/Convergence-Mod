@@ -16,6 +16,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Dependency-free .NET domain harness for revive ordering, stale leases/ticks, wipe terminality, Core/Arena geometry, outsider escalation, and legacy Boss-plan validation.
 - Versioned multiplayer prior-art research and repository Skills for authoritative Raid development and license-aware tModLoader source investigation.
 - Windows handoff/runbook, current implementation inventory, First Severance feature specifications, documentation search index, and generated knowledge catalog.
+- Development Foundation Core Item/Tile/Tile Entity, read-only prospective-Arena resolver, immutable scan diagnostics, frozen 2–4-player roster/Ready domain, connection epochs, and exact-Fight Core lease.
+- Fail-closed Calamity public-call boundary for the Exo Mechs, Supreme Calamitas, and Boss Rush activation facts, with pinned Slice 3 API evidence.
 
 ### Changed
 
@@ -25,6 +27,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Renamed the unpublished `ThirdSeverance` source identity, stable key, failure-code prefix, and tests to `FirstSeverance` / `first_severance` while preserving the activation denial and inert world adapter.
 - Replaced the obsolete multipart/Last Stand plan with a validated six-state Pylon → Stack → Spread → Core-exposure loop, persistent Boss life, roster-scaled Pylons/Stack shares, and direct loop-cap Defeat.
 - Added feature-neutral terminal descriptors, append-only First Severance terminal causes, definition-owned external failure mappings, coordinator preemption, and terminal tombstone validation.
+- Expanded the dependency-free domain harness to 48 tests covering Arena warnings/errors, deterministic roster identity, Ready/cancel/timeout safety, slot epochs/nonces, exact Core cleanup, and progression-result invariants.
 
 ## [0.1.0] - Unreleased
 

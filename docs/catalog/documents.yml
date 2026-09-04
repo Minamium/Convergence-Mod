@@ -167,7 +167,7 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: e2ef78e71cc32af83391db3a5b689ec00c9153590301487ae1ee88b128a55e0f
+  content_sha256: 5185d75c7ba5f9736fde65cbe560f297d18ee8820079d96fdf24ecc2f9241374
   document_type: overview
   status: accepted
   owners:
@@ -188,7 +188,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: e7fcd7dfab993edbab5b3d6e7bd4f1fe6600a235103ec04250ad711df6616dbd
+  content_sha256: 02b87be0d9f66f8149a81c54ea8860745f34793428fadefb042c46bea21d0aa7
   document_type: plan
   status: accepted
   owners:
@@ -367,7 +367,7 @@ documents:
 - doc_id: project.arena-infrastructure
   path: docs/ARENA_INFRASTRUCTURE.md
   title: Arena Infrastructure
-  content_sha256: 51662dbb87fccdb43245b065aa3d19affb2580bd81013f9c6cbef7222686cf56
+  content_sha256: 850d6a83c551292ccb453886da9aa4e3e4a7c369d6da1cc65556b31e68666dc7
   document_type: spec
   status: accepted
   owners:
@@ -383,9 +383,15 @@ documents:
   related_code:
   - Content/Encounters/FirstSeverance/FirstSeveranceArenaBlueprint.cs
   - Content/Encounters/FirstSeverance/FirstSeveranceArenaAccessPolicy.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaValidation.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceCoreResolver.cs
+  - Content/Encounters/FirstSeverance/FirstSeverancePreparationStateMachine.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceRoster.cs
+  - Content/Encounters/FirstSeverance/FoundationCore
   related_docs:
   - encounter.first-severance.plan
   - project.architecture
+  - research.first-severance-slice3-apis
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
@@ -610,7 +616,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 2ebf7e45921f6ce1bae9770b23c9ea2ec0000b68b37915a5e5cc3855f83bb3ad
+  content_sha256: 8cdd9de9032eb61094970bed1e5b8a9706c8ce9c22b8f6bdebe2e895b0776cfb
   document_type: status
   status: accepted
   owners:
@@ -679,6 +685,29 @@ documents:
   related_docs:
   - docs.system
   - research.sources
+- doc_id: research.first-severance-slice3-apis
+  path: docs/research/FIRST_SEVERANCE_SLICE3_APIS.md
+  title: First Severance Slice 3 API Evidence
+  content_sha256: 3e917cb241156a7e862553415984bc8dce9ad5f2d7bc01c1b83babc99a8112e6
+  document_type: research
+  status: historical
+  owners:
+  - research
+  - gameplay
+  last_reviewed: '2026-09-05'
+  source_of_truth_for: []
+  aliases:
+  - First Severance Slice 3 API research
+  - Foundation Core API evidence
+  related_code:
+  - Common/Compatibility/Calamity/CalamityCompatibilitySystem.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceCoreResolver.cs
+  - Content/Encounters/FirstSeverance/FoundationCore
+  related_docs:
+  - research.sources
+  - compatibility.version-matrix
+  - project.arena-infrastructure
+  - encounter.first-severance.plan
 - doc_id: research.multiplayer-raid-prior-art
   path: docs/research/MULTIPLAYER_RAID_PRIOR_ART.md
   title: Multiplayer Raid Prior Art
@@ -701,12 +730,12 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 6b81338e4051f2dc243cec4850391cdcb540e2a65d36e2303d89d87727042f00
+  content_sha256: f1d34d9d57745b424d7bff4a5fedd256a430ce1cc0bb864fcd4ff07f793163e3
   document_type: research
   status: historical
   owners:
   - research
-  last_reviewed: '2026-08-23'
+  last_reviewed: '2026-09-05'
   source_of_truth_for: []
   aliases:
   - research sources
@@ -716,6 +745,7 @@ documents:
   - compatibility.version-matrix
   - research.codex-skills-survey
   - research.multiplayer-raid-prior-art
+  - research.first-severance-slice3-apis
 - doc_id: verification.evidence
   path: docs/evidence/README.md
   title: Verification Evidence
@@ -739,7 +769,7 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: f932633acd1987c5de4186163a2345f25075f28eec2a9e600df6187106bbb4ff
+  content_sha256: a07c597f2f1e9e50ee45771abe4a31957e62fb6f0a0fe48d72f995f6b5960f39
   document_type: plan
   status: accepted
   owners:
@@ -755,6 +785,8 @@ documents:
   - Tests/Convergence.DomainTests
   - tools/repository_checks.py
   - Common/Raids/Revive
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaValidation.cs
+  - Content/Encounters/FirstSeverance/FirstSeverancePreparationStateMachine.cs
   related_docs:
   - verification.evidence
   - encounter.first-severance.spec

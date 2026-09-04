@@ -69,6 +69,8 @@
              Link="Domain/EncounterSnapshotOutbox.cs" />
     <Compile Include="../../Common/Networking/Replication/EncounterReplica.cs"
              Link="Domain/EncounterReplica.cs" />
+    <Compile Include="../../Common/Compatibility/Calamity/CalamityFirstSeveranceGateResult.cs"
+             Link="Domain/CalamityFirstSeveranceGateResult.cs" />
     <Compile Include="../../Common/Foundation/Identifiers/FightId.cs"
              Link="Domain/FightId.cs" />
     <Compile Include="../../Common/Foundation/Identifiers/ParticipantId.cs"
@@ -99,6 +101,10 @@
              Link="Domain/FirstSeveranceArenaBlueprint.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBossPlan.cs"
              Link="Domain/FirstSeveranceBossPlan.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceArenaValidation.cs"
+             Link="Domain/FirstSeveranceArenaValidation.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCoreLeaseRegistry.cs"
+             Link="Domain/FirstSeveranceCoreLeaseRegistry.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceEncounterPlan.cs"
              Link="Domain/FirstSeveranceEncounterPlan.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceLoopStateMachine.cs"
@@ -107,6 +113,10 @@
              Link="Domain/FirstSeveranceMechanicPlan.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePlanCollections.cs"
              Link="Domain/FirstSeverancePlanCollections.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePreparationStateMachine.cs"
+             Link="Domain/FirstSeverancePreparationStateMachine.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceRoster.cs"
+             Link="Domain/FirstSeveranceRoster.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceTermination.cs"
              Link="Domain/FirstSeveranceTermination.cs" />
   </ItemGroup>

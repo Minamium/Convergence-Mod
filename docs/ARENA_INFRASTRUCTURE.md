@@ -15,9 +15,15 @@ aliases:
 related_code:
   - Content/Encounters/FirstSeverance/FirstSeveranceArenaBlueprint.cs
   - Content/Encounters/FirstSeverance/FirstSeveranceArenaAccessPolicy.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaValidation.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceCoreResolver.cs
+  - Content/Encounters/FirstSeverance/FirstSeverancePreparationStateMachine.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceRoster.cs
+  - Content/Encounters/FirstSeverance/FoundationCore
 related_docs:
   - encounter.first-severance.plan
   - project.architecture
+  - research.first-severance-slice3-apis
 ---
 
 # Arena Infrastructure
@@ -26,7 +32,9 @@ related_docs:
 
 This document covers Foundation Core activation, server arena validation, roster/Ready, logical Barrier, Pylon placement inputs, and cleanup. Combat rules remain in the First Severance spec.
 
-Current code provides a pure 320x140 blueprint, four corner Pylon slots, and outsider response policy under `FirstSeverance` names. It does not resolve a real Core TE or mutate the World. The plan-simplification slice must preserve tested geometry/ownership invariants while deriving active Pylon positions for 2/3/4 rosters.
+Slice 3A now provides a development Foundation Core Item/2x2 Tile/Tile Entity, an authority-only read-only resolver, immutable validator results, a frozen roster, a Ready state machine, and an exact-Fight Core projection lease. The Core uses a shipped vanilla texture as an explicit development placeholder and has no recipe; Cheat Sheet may supply it for tests. Right-click reports that activation is unavailable.
+
+These adapters remain disconnected from encounter creation and custom packets. No logical Barrier correction or combat transition is enabled, and a successful pure Ready state still reports a closed combat gate. The existing four-corner Pylon slots remain layout inputs to revise when active roster-scaled actors are implemented.
 
 ## Provisional coordinate model
 
@@ -35,6 +43,11 @@ Current code provides a pure 320x140 blueprint, four corner Pylon slots, and out
 - Core anchor: floor center/base Y;
 - World edge safety margin: 20 tiles;
 - logical Barrier inset: 2 tiles.
+- requester interaction range: 12 tiles;
+- candidate participation radius: 80 tiles;
+- Ready timeout: 60 seconds at 60 ticks/second.
+
+The ranges and Ready timeout are provisional tuning, not protocol identity.
 
 ```text
 coreCenter = logical center of authority-resolved Core Tile Entity
@@ -46,6 +59,8 @@ bounds     = Rectangle(left, top, width, height)
 Perform geometry in tile coordinates and convert at the rendering/position adapter boundary. Exact size/anchor may be tuned before live implementation, but must change in code/spec/tests together.
 
 ## Activation flow
+
+Slice 3A implements steps 3–5 and the pure preparation domain only. Slice 3B must connect the complete flow below before availability denial may be reconsidered.
 
 1. Client Core interaction sends bounded `RequestActivate` intent with candidate coordinate/nonce.
 2. Server derives sender, validates side/rate/basic coordinate, and creates only the validation path.
@@ -79,7 +94,7 @@ Required checks:
 - requester is within allowed server-measured range;
 - 2–4 eligible selected participants.
 
-Interior solidity, liquids, wire/actuator, platforms/rope, spawn/bed, and NPC housing start as explicit warning/TBD policies rather than silent assumptions.
+Interior solidity, liquids, wire/actuator, platforms/rope, World spawn, and NPC housing are explicit non-blocking warnings in Slice 3A. Containers, another Core, a foreign Tile Entity, dungeon/Lihzahrd protected tiles, foundation gaps, World conflicts, incomplete scans, Core mismatch, distance failure, and invalid/ambiguous roster size are fatal errors. This is prototype policy and must be retested before activation.
 
 ## Participant/Ready policy
 
@@ -88,6 +103,7 @@ Interior solidity, liquids, wire/actuator, platforms/rope, spawn/bed, and NPC ho
 - Five or more candidates require explicit selection; never silently choose four.
 - Freeze 2–4 stable Participant IDs and current binding epochs before combat.
 - Ready belongs to Raid `Preparing`, supports unready, timeout, allowed initiator cancel, Foundation Core break/removal, and participant-loss cleanup.
+- Ready/cancel commands bind the exact server slot plus connection epoch and a monotonic per-participant nonce. Rejected identity/nonce commands do not advance authority time.
 - After `Active`, join-in-progress is spectator/next-pull until a separate accepted rule exists. Rejoin of a frozen participant uses the stable ID plus a newer server epoch.
 
 ## Pylon placement input
@@ -114,7 +130,7 @@ Authority adapters must cover ordinary movement, dash, hook, mount, knockback, r
 
 ## World protection
 
-Before enabling combat, add authority-side protection for relevant placement/break/explosion/wiring/liquid paths plus a clear client reason. Do not claim every direct third-party `WorldGen` call can be intercepted. The final defense is validation/correction and cleanup, not destructive restoration from an unversioned snapshot.
+The development Core rejects block replacement and hammer/wire effects. Its replicated projection allows normal removal in Idle/Preparing and rejects ordinary mining/explosion while Active; water/lava do not destroy the object. Preparing removal is intentionally allowed so the connected runtime can convert the observed TE loss into cancellation. Do not claim every direct third-party `WorldGen` call can be intercepted. The final defense is exact-Core validation and cleanup, not destructive restoration from an unversioned snapshot.
 
 ## Foundation Core Tile/TE break and loss
 

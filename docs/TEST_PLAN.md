@@ -15,6 +15,8 @@ related_code:
   - Tests/Convergence.DomainTests
   - tools/repository_checks.py
   - Common/Raids/Revive
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaValidation.cs
+  - Content/Encounters/FirstSeverance/FirstSeverancePreparationStateMachine.cs
 related_docs:
   - verification.evidence
   - encounter.first-severance.spec
@@ -135,6 +137,8 @@ The validator never mutates the World on failure.
 | injected unexpected Foundation Core Tile/TE loss during Active | one Invalidated/Abort and exact-Fight cleanup |
 | explicit admin/debug abort | ordinary Abort cleanup; no special resource path |
 | old Encounter Sequence/Fight packet | ignored/rejected |
+
+The Slice 3A dependency-free harness covers warning-only validity, ordered fatal diagnostics, full-scan/foundation counts, deterministic Participant IDs, 1/5+/duplicate/initiator rejection, exact slot+epoch resolution, Ready/unready and shared per-participant nonce behavior, exact timeout/Core-loss/participant-loss cancellation, initiator-only cancel, exact-Fight cleanup, active/missing Core lease state, and progression-result invariants. Live Tile/TE hooks, transport, Barrier behavior, and installed Calamity `Mod.Call` remain integration gates rather than inferred passes.
 
 Barrier cases: all edges, dash, hook, mount, knockback, recall/pylon/bed/Calamity teleport, server correction, outsiders, connection-epoch/slot reuse, and 100/200/300 ms RTT with loss. It must correct rather than kill and must not permanently rubber-band a valid participant.
 

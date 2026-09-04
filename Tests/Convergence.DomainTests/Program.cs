@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Convergence.Common.Compatibility.Calamity;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Encounters.Runtime;
 using Convergence.Common.Foundation.Geometry;
@@ -144,6 +145,15 @@ internal static class Program
             new("Arena rejects a World-edge Core", ArenaRejectsWorldEdgeCore),
             new("Arena occupant identity rejects slot reuse", ArenaOccupantIdentityRejectsSlotReuse),
             new("Outsider responses are deterministic", OutsiderResponsesAreDeterministic),
+            new("Arena warnings remain non-blocking", ArenaWarningsRemainNonBlocking),
+            new("Arena fatal ordering is stable", ArenaFatalOrderingIsStable),
+            new("Pull roster identity is deterministic", PullRosterIdentityIsDeterministic),
+            new("Pull roster rejects ambiguous membership", PullRosterRejectsAmbiguousMembership),
+            new("Ready validates exact binding and nonce", ReadyValidatesExactBindingAndNonce),
+            new("Preparation safety exits are deterministic", PreparationSafetyExitsAreDeterministic),
+            new("Preparation cancel and cleanup are exact", PreparationCancelAndCleanupAreExact),
+            new("Core lease cleanup requires the exact Fight", CoreLeaseCleanupRequiresExactFight),
+            new("Calamity progression result preserves evidence", CalamityProgressionResultPreservesEvidence),
             new("Default First Severance plans validate", DefaultFirstSeverancePlansValidate),
             new("Invalid First Severance plans are rejected", InvalidFirstSeverancePlansAreRejected),
             new("Pylons complete early and at the deadline", PylonsCompleteWithoutOverload),
@@ -834,6 +844,423 @@ internal static class Program
         AssertEqual(false, currentOutsider.IsParticipant, "outsider participant flag");
     }
 
+    private static void ArenaWarningsRemainNonBlocking()
+    {
+        FirstSeveranceArenaLayout layout = CreateValidArenaLayout();
+        var metrics = new FirstSeveranceArenaScanMetrics(
+            scannedTileCount: layout.ArenaBounds.Width * layout.ArenaBounds.Height,
+            solidInteriorTileCount: 2,
+            liquidTileCount: 3,
+            containerTileCount: 0,
+            foreignTileEntityCount: 0,
+            additionalCoreCount: 0,
+            protectedTileCount: 0,
+            wireOrActuatorTileCount: 4,
+            platformOrRopeTileCount: 5,
+            spawnOrHousingConflictCount: 1,
+            solidFoundationTileCount: layout.ArenaBounds.Width,
+            scanDurationMicroseconds: 750);
+        var firstSolid = new TilePoint(layout.ArenaBounds.Left + 1, layout.ArenaBounds.Top + 1);
+        var evidence = new FirstSeveranceArenaScanEvidence(
+            FirstFoundationGap: null,
+            FirstSolidInterior: firstSolid,
+            FirstLiquid: new TilePoint(firstSolid.X + 1, firstSolid.Y),
+            FirstContainer: null,
+            FirstForeignTileEntity: null,
+            FirstAdditionalCore: null,
+            FirstProtectedTile: null,
+            FirstWireOrActuator: new TilePoint(firstSolid.X + 2, firstSolid.Y),
+            FirstPlatformOrRope: new TilePoint(firstSolid.X + 3, firstSolid.Y),
+            FirstSpawnOrHousingConflict: new TilePoint(firstSolid.X + 4, firstSolid.Y));
+        var survey = new FirstSeveranceArenaSurvey(
+            layout,
+            coreMatches: true,
+            requesterIsWithinRange: true,
+            hasWorldConflict: false,
+            eligibleCandidateCount: 3,
+            metrics,
+            evidence);
+
+        FirstSeveranceArenaValidationResult result =
+            FirstSeveranceArenaValidator.Instance.Validate(survey);
+        AssertEqual(true, result.IsValid, "warning-only Arena validity");
+        AssertEqual(string.Empty, result.FirstErrorCode, "warning-only first error");
+        AssertEqual(5, result.Issues.Count, "warning count");
+        AssertEqual(
+            FirstSeveranceArenaIssueCodes.InteriorSolidWarning,
+            result.Issues[0].Code,
+            "first warning code");
+        AssertEqual(firstSolid, result.Issues[0].FirstCoordinate, "first warning coordinate");
+        AssertEqual(
+            FirstSeveranceArenaIssueCodes.SpawnOrHousingWarning,
+            result.Issues[4].Code,
+            "last warning code");
+        AssertEqual(750L, result.Metrics.ScanDurationMicroseconds, "scan duration evidence");
+    }
+
+    private static void ArenaFatalOrderingIsStable()
+    {
+        FirstSeveranceArenaLayout layout = CreateValidArenaLayout();
+        var point = new TilePoint(layout.ArenaBounds.Left, layout.ArenaBounds.Bottom - 1);
+        var metrics = new FirstSeveranceArenaScanMetrics(
+            scannedTileCount: (layout.ArenaBounds.Width * layout.ArenaBounds.Height) - 1,
+            solidInteriorTileCount: 0,
+            liquidTileCount: 0,
+            containerTileCount: 1,
+            foreignTileEntityCount: 1,
+            additionalCoreCount: 1,
+            protectedTileCount: 1,
+            wireOrActuatorTileCount: 0,
+            platformOrRopeTileCount: 0,
+            spawnOrHousingConflictCount: 0,
+            solidFoundationTileCount: layout.ArenaBounds.Width - 1,
+            scanDurationMicroseconds: 900);
+        var evidence = new FirstSeveranceArenaScanEvidence(
+            FirstFoundationGap: point,
+            FirstSolidInterior: null,
+            FirstLiquid: null,
+            FirstContainer: point,
+            FirstForeignTileEntity: point,
+            FirstAdditionalCore: point,
+            FirstProtectedTile: point,
+            FirstWireOrActuator: null,
+            FirstPlatformOrRope: null,
+            FirstSpawnOrHousingConflict: null);
+        var survey = new FirstSeveranceArenaSurvey(
+            layout,
+            coreMatches: false,
+            requesterIsWithinRange: false,
+            hasWorldConflict: true,
+            eligibleCandidateCount: 5,
+            metrics,
+            evidence);
+
+        FirstSeveranceArenaValidationResult result =
+            FirstSeveranceArenaValidator.Instance.Validate(survey);
+        string[] expectedCodes =
+        {
+            FirstSeveranceArenaIssueCodes.ScanIncomplete,
+            FirstSeveranceArenaIssueCodes.CoreMismatch,
+            FirstSeveranceArenaIssueCodes.RequesterOutOfRange,
+            FirstSeveranceArenaIssueCodes.WorldConflict,
+            FirstSeveranceArenaIssueCodes.SelectionRequired,
+            FirstSeveranceArenaIssueCodes.FoundationIncomplete,
+            FirstSeveranceArenaIssueCodes.ContainerPresent,
+            FirstSeveranceArenaIssueCodes.AdditionalCorePresent,
+            FirstSeveranceArenaIssueCodes.ForeignTileEntityPresent,
+            FirstSeveranceArenaIssueCodes.ProtectedTilePresent,
+        };
+
+        AssertEqual(false, result.IsValid, "fatal Arena validity");
+        AssertEqual(expectedCodes.Length, result.Issues.Count, "fatal issue count");
+        AssertEqual(expectedCodes[0], result.FirstErrorCode, "first fatal code");
+        for (int index = 0; index < expectedCodes.Length; index++)
+        {
+            AssertEqual(expectedCodes[index], result.Issues[index].Code, $"fatal issue[{index}]");
+            AssertEqual(
+                FirstSeveranceArenaIssueSeverity.Error,
+                result.Issues[index].Severity,
+                $"fatal severity[{index}]");
+        }
+    }
+
+    private static void PullRosterIdentityIsDeterministic()
+    {
+        FirstSeveranceRosterCandidate[] candidates =
+        {
+            SelectableCandidate(serverWhoAmI: 9, connectionEpoch: 90),
+            SelectableCandidate(serverWhoAmI: 2, connectionEpoch: 20),
+            SelectableCandidate(serverWhoAmI: 7, connectionEpoch: 70),
+        };
+
+        bool created = FirstSeveranceRoster.TryCreate(
+            candidates,
+            initiatorWhoAmI: 7,
+            initiatorConnectionEpoch: 70,
+            out FirstSeveranceRoster? roster,
+            out string failureCode);
+        if (!created || roster is null)
+        {
+            throw new InvalidOperationException($"Expected a frozen roster, got '{failureCode}'.");
+        }
+
+        AssertEqual(3, roster.Count, "roster count");
+        AssertEqual(2, roster.Members[0].ServerWhoAmI, "Participant 0 slot");
+        AssertEqual(new ParticipantId(0), roster.Members[0].ParticipantId, "Participant 0 identity");
+        AssertEqual(7, roster.Members[1].ServerWhoAmI, "Participant 1 slot");
+        AssertEqual(new ParticipantId(1), roster.InitiatorParticipantId, "initiator identity");
+        AssertEqual(9, roster.Members[2].ServerWhoAmI, "Participant 2 slot");
+        AssertEqual(
+            false,
+            roster.TryResolveCurrentBinding(7, 71, out _),
+            "slot reuse with a new epoch");
+        AssertEqual(
+            true,
+            roster.TryResolveCurrentBinding(7, 70, out FirstSeveranceRosterMember initiator),
+            "exact initiator binding");
+        AssertEqual(new ParticipantId(1), initiator.ParticipantId, "resolved initiator");
+    }
+
+    private static void PullRosterRejectsAmbiguousMembership()
+    {
+        FirstSeveranceRosterCandidate[] tooMany =
+        {
+            SelectableCandidate(0, 10),
+            SelectableCandidate(1, 11),
+            SelectableCandidate(2, 12),
+            SelectableCandidate(3, 13),
+            SelectableCandidate(4, 14),
+        };
+        AssertRosterRejected(
+            tooMany,
+            initiatorWhoAmI: 0,
+            initiatorConnectionEpoch: 10,
+            FirstSeveranceArenaIssueCodes.SelectionRequired);
+
+        FirstSeveranceRosterCandidate[] duplicateSlot =
+        {
+            SelectableCandidate(3, 30),
+            SelectableCandidate(3, 31),
+        };
+        AssertRosterRejected(
+            duplicateSlot,
+            initiatorWhoAmI: 3,
+            initiatorConnectionEpoch: 30,
+            "first_severance.roster_candidate_invalid");
+
+        FirstSeveranceRosterCandidate[] tooFew =
+        {
+            SelectableCandidate(1, 10),
+        };
+        AssertRosterRejected(
+            tooFew,
+            initiatorWhoAmI: 1,
+            initiatorConnectionEpoch: 10,
+            FirstSeveranceArenaIssueCodes.TooFewParticipants);
+
+        FirstSeveranceRosterCandidate[] initiatorOutside =
+        {
+            SelectableCandidate(1, 10),
+            SelectableCandidate(2, 20),
+            new FirstSeveranceRosterCandidate(
+                ServerWhoAmI: 3,
+                ConnectionEpoch: 30,
+                IsConnected: true,
+                IsEligible: true,
+                IsWithinParticipationRegion: false),
+        };
+        AssertRosterRejected(
+            initiatorOutside,
+            initiatorWhoAmI: 3,
+            initiatorConnectionEpoch: 30,
+            "first_severance.roster_initiator_not_eligible");
+    }
+
+    private static void ReadyValidatesExactBindingAndNonce()
+    {
+        FirstSeveranceRoster roster = CreatePreparationRoster();
+        FightId fightId = TestFightId("11111111-1111-1111-1111-111111111111");
+        var machine = new FirstSeverancePreparationStateMachine(
+            fightId,
+            roster,
+            enteredTick: 100,
+            new FirstSeverancePreparationSettings(readyTimeoutTicks: 10));
+
+        FirstSeverancePreparationSnapshot initial = machine.CreateSnapshot();
+        AssertEqual(110UL, initial.DeadlineTick, "Ready deadline");
+        AssertEqual(true, initial.CombatGateClosed, "preparation combat gate");
+        AssertEqual(false, initial.AreAllReady, "initial Ready aggregate");
+
+        FirstSeverancePreparationUpdate first = machine.ApplySetReady(
+            new FirstSeveranceSetReadyCommand(2, 20, true, 1, 101));
+        AssertEqual(true, first.IsAccepted, "first Ready acceptance");
+        AssertEqual(true, first.HasObservableChange, "first Ready change");
+
+        FirstSeverancePreparationUpdate wrongEpoch = machine.ApplySetReady(
+            new FirstSeveranceSetReadyCommand(7, 71, true, 99, 108));
+        AssertPreparationRejected(
+            wrongEpoch,
+            "first_severance.preparation_sender_not_bound");
+
+        FirstSeverancePreparationUpdate staleNonce = machine.ApplySetReady(
+            new FirstSeveranceSetReadyCommand(2, 20, false, 1, 102));
+        AssertPreparationRejected(staleNonce, "first_severance.preparation_stale_nonce");
+
+        AssertEqual(
+            true,
+            machine.ApplySetReady(new FirstSeveranceSetReadyCommand(7, 70, true, 1, 102))
+                .HasObservableChange,
+            "second participant Ready");
+        AssertEqual(
+            true,
+            machine.ApplySetReady(new FirstSeveranceSetReadyCommand(9, 90, true, 1, 103))
+                .HasObservableChange,
+            "third participant Ready");
+        AssertEqual(true, machine.CreateSnapshot().AreAllReady, "all Ready aggregate");
+
+        FirstSeverancePreparationUpdate unready = machine.ApplySetReady(
+            new FirstSeveranceSetReadyCommand(7, 70, false, 2, 104));
+        AssertEqual(true, unready.HasObservableChange, "Ready reversal change");
+        AssertEqual(false, machine.CreateSnapshot().AreAllReady, "Ready reversal aggregate");
+
+        FirstSeverancePreparationUpdate live = machine.Advance(
+            authorityTick: 109,
+            coreIsPresent: true,
+            CurrentPreparationConnections());
+        AssertEqual(true, live.IsAccepted, "pre-deadline advance");
+        AssertEqual(false, live.RequestsEnd, "pre-deadline remains open");
+
+        AssertThrows<ArgumentOutOfRangeException>(
+            () => _ = new FirstSeverancePreparationStateMachine(
+                fightId,
+                roster,
+                enteredTick: 0,
+                default),
+            "default Ready settings");
+    }
+
+    private static void PreparationSafetyExitsAreDeterministic()
+    {
+        FirstSeveranceRoster roster = CreatePreparationRoster();
+        var settings = new FirstSeverancePreparationSettings(readyTimeoutTicks: 10);
+
+        var timeout = new FirstSeverancePreparationStateMachine(
+            TestFightId("22222222-2222-2222-2222-222222222222"),
+            roster,
+            enteredTick: 100,
+            settings);
+        FirstSeverancePreparationUpdate timeoutUpdate = timeout.Advance(
+            authorityTick: 110,
+            coreIsPresent: true,
+            CurrentPreparationConnections());
+        AssertPreparationEnded(timeoutUpdate, "first_severance.preparation_timeout");
+
+        var coreLost = new FirstSeverancePreparationStateMachine(
+            TestFightId("33333333-3333-3333-3333-333333333333"),
+            roster,
+            enteredTick: 100,
+            settings);
+        FirstSeverancePreparationUpdate coreUpdate = coreLost.Advance(
+            authorityTick: 101,
+            coreIsPresent: false,
+            CurrentPreparationConnections());
+        AssertPreparationEnded(coreUpdate, "first_severance.preparation_core_removed");
+
+        FirstSeveranceConnectionObservation[] staleConnections =
+        {
+            new(2, 20, true),
+            new(7, 71, true),
+            new(9, 90, true),
+        };
+        var participantLost = new FirstSeverancePreparationStateMachine(
+            TestFightId("44444444-4444-4444-4444-444444444444"),
+            roster,
+            enteredTick: 100,
+            settings);
+        FirstSeverancePreparationUpdate participantUpdate = participantLost.Advance(
+            authorityTick: 101,
+            coreIsPresent: true,
+            staleConnections);
+        AssertPreparationEnded(
+            participantUpdate,
+            "first_severance.preparation_participant_lost");
+    }
+
+    private static void PreparationCancelAndCleanupAreExact()
+    {
+        FirstSeveranceRoster roster = CreatePreparationRoster();
+        FightId fightId = TestFightId("55555555-5555-5555-5555-555555555555");
+        var machine = new FirstSeverancePreparationStateMachine(
+            fightId,
+            roster,
+            enteredTick: 10,
+            new FirstSeverancePreparationSettings(readyTimeoutTicks: 20));
+
+        FirstSeverancePreparationUpdate outsiderCancel = machine.ApplyCancel(
+            new FirstSeveranceCancelPreparationCommand(2, 20, 1, 11));
+        AssertPreparationRejected(
+            outsiderCancel,
+            "first_severance.preparation_cancel_not_initiator");
+
+        FirstSeverancePreparationUpdate cancel = machine.ApplyCancel(
+            new FirstSeveranceCancelPreparationCommand(7, 70, 1, 12));
+        AssertPreparationEnded(cancel, "first_severance.preparation_cancelled");
+        AssertEqual(true, machine.IsClosed, "cancel closes preparation");
+
+        FirstSeverancePreparationUpdate afterClose = machine.ApplySetReady(
+            new FirstSeveranceSetReadyCommand(2, 20, true, 1, 13));
+        AssertPreparationRejected(afterClose, "first_severance.preparation_closed");
+
+        AssertEqual(
+            false,
+            machine.Cleanup(TestFightId("66666666-6666-6666-6666-666666666666")),
+            "foreign Fight cleanup");
+        AssertEqual(true, machine.Cleanup(fightId), "exact Fight cleanup");
+        AssertEqual(true, machine.Cleanup(fightId), "idempotent exact Fight cleanup");
+        AssertPreparationRejected(
+            machine.Advance(14, coreIsPresent: true, CurrentPreparationConnections()),
+            "first_severance.preparation_cleaned");
+    }
+
+    private static void CoreLeaseCleanupRequiresExactFight()
+    {
+        FightId firstFight = TestFightId("77777777-7777-7777-7777-777777777777");
+        FightId secondFight = TestFightId("88888888-8888-8888-8888-888888888888");
+        var registry = new FirstSeveranceCoreLeaseRegistry();
+        var topLeft = new TilePoint(400, 500);
+
+        AssertEqual(true, registry.TryClaim(12, topLeft, 3, firstFight), "initial Core claim");
+        AssertEqual(true, registry.TryClaim(12, topLeft, 3, firstFight), "idempotent Core claim");
+        AssertEqual(false, registry.TryClaim(12, topLeft, 4, secondFight), "competing Core claim");
+        AssertEqual(
+            FirstSeveranceCoreProtectionState.Preparing,
+            registry.Current!.Value.ProtectionState,
+            "preparation protection state");
+        AssertEqual(false, registry.TryEnterActive(12, secondFight), "foreign Fight activation");
+        AssertEqual(true, registry.TryEnterActive(12, firstFight), "exact Fight activation");
+        AssertEqual(true, registry.IsActivelyProtected(12), "active Core protection");
+        AssertEqual(false, registry.TryRelease(12, secondFight), "foreign Fight release");
+        AssertEqual(true, registry.IsActivelyProtected(12), "foreign release preserves lease");
+        AssertEqual(false, registry.TryRecordMissing(13), "foreign Core missing event");
+        AssertEqual(true, registry.TryRecordMissing(12), "exact Core missing event");
+        AssertEqual(false, registry.IsActivelyProtected(12), "missing Core projection");
+        AssertEqual(true, registry.TryRelease(12, firstFight), "exact Fight release");
+        AssertEqual<FirstSeveranceCoreLease?>(null, registry.Current, "released Core lease");
+        AssertEqual(true, registry.TryRelease(12, firstFight), "idempotent released cleanup");
+
+        AssertEqual(true, registry.TryClaim(14, topLeft, 5, secondFight), "next Core claim");
+        registry.ClearWorld();
+        AssertEqual<FirstSeveranceCoreLease?>(null, registry.Current, "World unload cleanup");
+    }
+
+    private static void CalamityProgressionResultPreservesEvidence()
+    {
+        CalamityFirstSeveranceGateResult allowed = CalamityFirstSeveranceGateResult.Allow();
+        AssertEqual(true, allowed.IsAllowed, "allowed progression");
+        AssertEqual(true, allowed.ExoMechsDefeated, "allowed Exo Mechs evidence");
+        AssertEqual(true, allowed.SupremeCalamitasDefeated, "allowed SCal evidence");
+        AssertEqual(false, allowed.BossRushActive, "allowed Boss Rush evidence");
+        AssertEqual(string.Empty, allowed.FailureCode, "allowed failure code");
+
+        CalamityFirstSeveranceGateResult rejected =
+            CalamityFirstSeveranceGateResult.Reject(
+                "first_severance.progression_boss_rush_active",
+                exoMechsDefeated: true,
+                supremeCalamitasDefeated: true,
+                bossRushActive: true);
+        AssertEqual(false, rejected.IsAllowed, "rejected progression");
+        AssertEqual(true, rejected.ExoMechsDefeated, "rejected Exo Mechs evidence");
+        AssertEqual(true, rejected.SupremeCalamitasDefeated, "rejected SCal evidence");
+        AssertEqual(true, rejected.BossRushActive, "rejected Boss Rush evidence");
+        AssertEqual(
+            "first_severance.progression_boss_rush_active",
+            rejected.FailureCode,
+            "rejected failure code");
+        AssertThrows<ArgumentException>(
+            () => _ = CalamityFirstSeveranceGateResult.Reject(string.Empty),
+            "empty progression rejection code");
+    }
+
     private static void DefaultFirstSeverancePlansValidate()
     {
         FirstSeveranceEncounterPlan plan = FirstSeveranceEncounterPlan.Instance;
@@ -1487,6 +1914,118 @@ internal static class Program
             false,
             replica.ApplyFullSnapshot(unknownSnapshot with { Termination = incompatible }, contract),
             "incompatible feature cause");
+    }
+
+    private static FirstSeveranceArenaLayout CreateValidArenaLayout()
+    {
+        var worldBounds = new TileRectangle(0, 0, 8_400, 2_400);
+        var core = new ResolvedFirstSeveranceCoreAnchor(
+            new TilePoint(4_200, 1_250),
+            BaseY: 1_300,
+            ServerTileEntityId: 7);
+        if (!FirstSeveranceArenaBlueprint.Instance.TryCreateLayout(
+                core,
+                worldBounds,
+                out FirstSeveranceArenaLayout? layout,
+                out string failureCode)
+            || layout is null)
+        {
+            throw new InvalidOperationException(
+                $"Test Arena layout could not be created: '{failureCode}'.");
+        }
+
+        return layout;
+    }
+
+    private static FirstSeveranceRosterCandidate SelectableCandidate(
+        int serverWhoAmI,
+        ulong connectionEpoch)
+    {
+        return new FirstSeveranceRosterCandidate(
+            serverWhoAmI,
+            connectionEpoch,
+            IsConnected: true,
+            IsEligible: true,
+            IsWithinParticipationRegion: true);
+    }
+
+    private static FirstSeveranceRoster CreatePreparationRoster()
+    {
+        FirstSeveranceRosterCandidate[] candidates =
+        {
+            SelectableCandidate(9, 90),
+            SelectableCandidate(2, 20),
+            SelectableCandidate(7, 70),
+        };
+        if (!FirstSeveranceRoster.TryCreate(
+                candidates,
+                initiatorWhoAmI: 7,
+                initiatorConnectionEpoch: 70,
+                out FirstSeveranceRoster? roster,
+                out string failureCode)
+            || roster is null)
+        {
+            throw new InvalidOperationException(
+                $"Test preparation roster could not be created: '{failureCode}'.");
+        }
+
+        return roster;
+    }
+
+    private static FirstSeveranceConnectionObservation[] CurrentPreparationConnections()
+    {
+        return
+        [
+            new FirstSeveranceConnectionObservation(2, 20, true),
+            new FirstSeveranceConnectionObservation(7, 70, true),
+            new FirstSeveranceConnectionObservation(9, 90, true),
+        ];
+    }
+
+    private static FightId TestFightId(string value)
+    {
+        return FightId.FromWire(Guid.Parse(value));
+    }
+
+    private static void AssertRosterRejected(
+        IReadOnlyList<FirstSeveranceRosterCandidate> candidates,
+        int initiatorWhoAmI,
+        ulong initiatorConnectionEpoch,
+        string expectedFailureCode)
+    {
+        bool created = FirstSeveranceRoster.TryCreate(
+            candidates,
+            initiatorWhoAmI,
+            initiatorConnectionEpoch,
+            out FirstSeveranceRoster? roster,
+            out string failureCode);
+        AssertEqual(false, created, $"roster rejection '{expectedFailureCode}'");
+        AssertEqual<FirstSeveranceRoster?>(null, roster, "rejected roster");
+        AssertEqual(expectedFailureCode, failureCode, "roster rejection code");
+    }
+
+    private static void AssertPreparationRejected(
+        in FirstSeverancePreparationUpdate update,
+        string expectedFailureCode)
+    {
+        AssertEqual(false, update.IsAccepted, "preparation rejection acceptance");
+        AssertEqual(false, update.HasObservableChange, "preparation rejection change");
+        AssertEqual(false, update.RequestsEnd, "preparation rejection terminal");
+        AssertEqual(expectedFailureCode, update.FailureCode, "preparation rejection code");
+    }
+
+    private static void AssertPreparationEnded(
+        in FirstSeverancePreparationUpdate update,
+        string expectedDiagnosticCode)
+    {
+        AssertEqual(true, update.IsAccepted, "preparation end acceptance");
+        AssertEqual(true, update.HasObservableChange, "preparation end change");
+        AssertEqual(true, update.RequestsEnd, "preparation end terminal");
+        AssertEqual(expectedDiagnosticCode, update.FailureCode, "preparation end diagnostics");
+        AssertTermination(
+            update.RequestedTermination,
+            EncounterEndReason.Cancelled,
+            FirstSeveranceTerminalCause.UserCancelled);
     }
 
     private static FirstSeveranceLoopStateMachine CreateLoopMachine(
