@@ -78,4 +78,4 @@ Copy [the build-record template](evidence/build-record.example.json) to ignored 
 
 ## Current safety gate
 
-`FirstSeveranceAvailabilityPolicy` currently rejects activation and `InertFirstSeveranceWorldAdapter` cannot mutate the World. Do not remove those gates until the implementation slice owning Core/Arena/roster/transport, actor ownership/replication, and Downed adapter evidence has passed its declared exit criteria.
+`FirstSeveranceAvailabilityPolicy` currently permits validation and Ready preparation only. The preparation runtime keeps its combat gate closed, and `InertFirstSeveranceWorldAdapter` cannot mutate combat actors. Do not open the combat transition until the slice owning actor ownership/replication and Downed adapter evidence has passed its declared exit criteria.

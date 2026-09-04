@@ -3,13 +3,17 @@ Mods: {
     Items: {
       FoundationCoreItem: {
         DisplayName: ファウンデーション・コア
-        Tooltip: "第一断絶の候補アリーナを固定する\n開発ビルド：起動はまだロックされています"
+        Tooltip: "第一断絶の候補アリーナを固定する\n開発ビルド：準備のみ。戦闘開始はまだロックされています"
       }
     }
     Tiles: {
       FoundationCoreTile: {
         MapEntry: ファウンデーション・コア
-        ActivationUnavailableText: "このビルドでは第一断絶をまだ起動できません。"
+      }
+    }
+    UI: {
+      FirstSeverance: {
+        ActivationRejected: "ファウンデーション・コアの起動条件を満たしていません: {0}"
       }
     }
   }

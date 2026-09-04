@@ -45,8 +45,16 @@ internal sealed class FoundationCoreProtectionSystem : ModSystem
             return false;
         }
 
-        SetProjection(core, FirstSeveranceCoreProtectionState.Preparing);
-        return true;
+        try
+        {
+            SetProjection(core, FirstSeveranceCoreProtectionState.Preparing);
+            return true;
+        }
+        catch
+        {
+            Registry.TryRelease(core.ID, fightId);
+            throw;
+        }
     }
 
     internal static bool TryEnterActive(int serverTileEntityId, FightId fightId)
@@ -74,6 +82,29 @@ internal sealed class FoundationCoreProtectionSystem : ModSystem
         {
             Registry.TryRecordMissing(serverTileEntityId);
         }
+    }
+
+    internal static bool TryResolveOwnedCore(
+        int serverTileEntityId,
+        FightId fightId,
+        out FoundationCoreTileEntity core)
+    {
+        FirstSeveranceCoreLease? current = Registry.Current;
+        if (current is { IsMissing: false } lease
+            && lease.ServerTileEntityId == serverTileEntityId
+            && lease.FightId == fightId
+            && TileEntity.ByID.TryGetValue(serverTileEntityId, out TileEntity? entity)
+            && entity is FoundationCoreTileEntity candidate
+            && candidate.Position.X == lease.TopLeft.X
+            && candidate.Position.Y == lease.TopLeft.Y
+            && candidate.IsTileValidForEntity(candidate.Position.X, candidate.Position.Y))
+        {
+            core = candidate;
+            return true;
+        }
+
+        core = null!;
+        return false;
     }
 
     internal static bool TryRelease(int serverTileEntityId, FightId fightId)

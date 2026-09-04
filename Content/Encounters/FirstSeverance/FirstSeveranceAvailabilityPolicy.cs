@@ -16,6 +16,8 @@ internal sealed class FirstSeveranceAvailabilityPolicy : IEncounterActivationPol
     {
         _ = command;
         _ = definition;
-        return EncounterActivationDecision.Reject("first_severance.activation_not_implemented");
+        // Slice 3 permits validation and Ready preparation only. The preparation
+        // runtime keeps its combat gate closed and cannot enter Active.
+        return EncounterActivationDecision.Allow;
     }
 }

@@ -49,4 +49,16 @@ internal static class EncounterPacketCodec
             return false;
         }
     }
+
+    public static void WriteHeader(
+        BinaryWriter writer,
+        in EncounterPacketHeader header)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+        writer.Write(header.ProtocolVersion);
+        writer.Write((byte)header.PacketType);
+        writer.Write(header.EncounterSequence);
+        writer.Write(header.FightId.Value.ToByteArray());
+        writer.Write(header.Revision);
+    }
 }

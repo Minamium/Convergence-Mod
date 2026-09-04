@@ -37,6 +37,8 @@
              Link="Domain/EncounterSnapshot.cs" />
     <Compile Include="../../Common/Encounters/Abstractions/EncounterStartCommand.cs"
              Link="Domain/EncounterStartCommand.cs" />
+    <Compile Include="../../Common/Encounters/Abstractions/EncounterStartRejectedException.cs"
+             Link="Domain/EncounterStartRejectedException.cs" />
     <Compile Include="../../Common/Encounters/Abstractions/EncounterTerminationDescriptor.cs"
              Link="Domain/EncounterTerminationDescriptor.cs" />
     <Compile Include="../../Common/Encounters/Abstractions/IEncounterActivationPolicy.cs"

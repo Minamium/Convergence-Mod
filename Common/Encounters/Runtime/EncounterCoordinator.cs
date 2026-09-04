@@ -123,6 +123,12 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
             failureCode = string.Empty;
             return true;
         }
+        catch (EncounterStartRejectedException rejection)
+        {
+            activeSession = null;
+            failureCode = rejection.FailureCode;
+            return false;
+        }
         catch (Exception exception)
         {
             SafeReport(exception);

@@ -22,9 +22,18 @@ internal sealed class FirstSeveranceRuntimeFactory : IEncounterRuntimeFactory
                 nameof(definition));
         }
 
-        return new FirstSeveranceBootstrapRuntime(
+        if (!FirstSeveranceCoreResolver.Instance.TryResolve(
+                context.Start,
+                out FirstSeveranceResolvedPreparation? resolved,
+                out string failureCode)
+            || resolved is null)
+        {
+            throw new EncounterStartRejectedException(failureCode);
+        }
+
+        return new FirstSeverancePreparationRuntime(
+            context.EncounterSequence,
             context.FightId,
-            FirstSeveranceEncounterPlan.Instance,
-            InertFirstSeveranceWorldAdapter.Instance);
+            resolved);
     }
 }

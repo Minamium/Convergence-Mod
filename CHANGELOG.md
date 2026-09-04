@@ -18,6 +18,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Windows handoff/runbook, current implementation inventory, First Severance feature specifications, documentation search index, and generated knowledge catalog.
 - Development Foundation Core Item/Tile/Tile Entity, read-only prospective-Arena resolver, immutable scan diagnostics, frozen 2–4-player roster/Ready domain, connection epochs, and exact-Fight Core lease.
 - Fail-closed Calamity public-call boundary for the Exo Mechs, Supreme Calamitas, and Boss Rush activation facts, with pinned Slice 3 API evidence.
+- Foundation Core right-click activation, authority-owned `Validating -> Preparing` runtime, Ready/cancel commands, bounded preparation snapshots, and exact Core/participant-loss cleanup; combat remains locked.
 
 ### Changed
 

@@ -25,9 +25,9 @@ related_docs:
 
 ## Implementation status
 
-Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, safe no-op routing, typed authority foundations, feature-neutral terminal descriptors/external mappings, and ordered read-only replica/tombstone behavior.
+Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, typed handler routing, First Severance activate/Ready/cancel/full-preparation-snapshot transport, feature-neutral terminal descriptors/external mappings, and ordered read-only replica/tombstone behavior.
 
-Not implemented: payload DTO codecs/handlers, server transport/broadcast, First Severance feature snapshot/deltas, revive packets, real multiplayer mutation, or join/rejoin snapshot delivery. No current packet changes gameplay. See [Status](STATUS.md).
+Not implemented: combat-state deltas/events, revive packets, actor mutation, Barrier correction, or a complete rejoin policy beyond the current bounded full snapshot request. Current custom requests can change only the preparation state; no packet can start combat or report combat outcomes. See [Status](STATUS.md).
 
 ## Goals
 
@@ -82,14 +82,14 @@ Existing packet IDs are explicit and reserved:
 
 | ID | Direction | Name | Current behavior |
 |---:|---|---|---|
-| 1 | C → S | `RequestActivate` | direction parsed; handler not implemented |
-| 2 | C → S | `RequestSetReady` | direction parsed; handler not implemented |
-| 3 | C → S | `RequestCancel` | direction parsed; handler not implemented |
-| 4 | C → S | `RequestSnapshot` | direction parsed; handler not implemented |
-| 64 | S → C | `Snapshot` | direction parsed; transport not implemented |
+| 1 | C → S | `RequestActivate` | implemented for Foundation Core candidate anchor + request nonce |
+| 2 | C → S | `RequestSetReady` | implemented for exact-Fight Ready/unready intent |
+| 3 | C → S | `RequestCancel` | implemented for exact-Fight initiator cancel intent |
+| 4 | C → S | `RequestSnapshot` | implemented with sender/rate validation |
+| 64 | S → C | `Snapshot` | implemented for generic lifecycle + bounded preparation projection |
 | 65 | S → C | `StateChanged` | direction parsed; transport not implemented |
 | 66 | S → C | `ParticipantChanged` | direction parsed; transport not implemented |
-| 67 | S → C | `ValidationResult` | direction parsed; transport not implemented |
+| 67 | S → C | `ValidationResult` | implemented for accepted/rejected request response |
 | 68 | S → C | `EncounterEnded` | direction parsed; transport not implemented |
 
 Future revive intent needs logical `RequestStartRevive(targetParticipantId, requestNonce)` and `RequestCancelRevive(channelNonce)` forms. Assign new unused explicit numeric IDs only in their implementation commit; never renumber existing values. Completion is server-to-client state/event, never a client request.

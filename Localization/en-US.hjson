@@ -3,13 +3,17 @@ Mods: {
     Items: {
       FoundationCoreItem: {
         DisplayName: Foundation Core
-        Tooltip: "Anchors a prospective First Severance arena\nDevelopment build: activation remains locked"
+        Tooltip: "Anchors a prospective First Severance arena\nDevelopment build: preparation only; combat remains locked"
       }
     }
     Tiles: {
       FoundationCoreTile: {
         MapEntry: Foundation Core
-        ActivationUnavailableText: "First Severance activation is not available in this build."
+      }
+    }
+    UI: {
+      FirstSeverance: {
+        ActivationRejected: "Foundation Core activation was rejected: {0}"
       }
     }
   }

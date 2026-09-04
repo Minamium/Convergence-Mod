@@ -12,6 +12,20 @@ internal static class EncounterPacketRouter
     private const ulong RejectionWindowTicks = 10 * 60;
     private const int RejectionLogLimit = 4;
     private static readonly Dictionary<int, RejectionWindow> RejectionWindows = new();
+    private static readonly Dictionary<EncounterPacketType, IEncounterPacketHandler> Handlers = new();
+
+    internal static void Register(
+        EncounterPacketType packetType,
+        IEncounterPacketHandler handler)
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+        if (!Enum.IsDefined(typeof(EncounterPacketType), packetType)
+            || !Handlers.TryAdd(packetType, handler))
+        {
+            throw new InvalidOperationException(
+                $"Encounter packet type '{packetType}' is invalid or already registered.");
+        }
+    }
 
     public static void Handle(BinaryReader reader, int whoAmI)
     {
@@ -43,15 +57,41 @@ internal static class EncounterPacketRouter
             return;
         }
 
-        // Typed fixed/bounded decoders are added with Milestone 1. BinaryReader wraps
-        // tModLoader's shared receive buffer, so BaseStream.Length is not a safe packet bound.
-        // No payload is decoded and no state can mutate until a complete DTO is validated.
-        WarnRejected(whoAmI, $"packet.handler_not_implemented:{header.PacketType}");
+        if (!Handlers.TryGetValue(header.PacketType, out IEncounterPacketHandler? handler))
+        {
+            WarnRejected(whoAmI, $"packet.handler_not_implemented:{header.PacketType}");
+            return;
+        }
+
+        try
+        {
+            if (!handler.TryHandle(reader, whoAmI, header, out failureCode))
+            {
+                WarnRejected(whoAmI, failureCode);
+            }
+        }
+        catch (EndOfStreamException)
+        {
+            WarnRejected(whoAmI, $"packet.truncated_payload:{header.PacketType}");
+        }
+        catch (IOException)
+        {
+            WarnRejected(whoAmI, $"packet.payload_io_failure:{header.PacketType}");
+        }
+        catch (Exception exception)
+        {
+            global::Convergence.ConvergenceMod.Instance.Logger.Error(
+                $"Encounter packet handler failed safely for type={header.PacketType} "
+                + $"player={whoAmI}.",
+                exception);
+            WarnRejected(whoAmI, $"packet.handler_failure:{header.PacketType}");
+        }
     }
 
     internal static void Reset()
     {
         RejectionWindows.Clear();
+        Handlers.Clear();
     }
 
     private static bool IsDirectionAllowed(EncounterPacketType packetType)

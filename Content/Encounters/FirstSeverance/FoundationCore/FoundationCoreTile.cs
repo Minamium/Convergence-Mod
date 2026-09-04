@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
@@ -17,8 +16,6 @@ public sealed class FoundationCoreTile : ModTile
 
     // Development placeholder: the 2x2 Crystal Ball sheet matches this TileObjectData.
     public override string Texture => $"Terraria/Images/Tiles_{TileID.CrystalBall}";
-
-    internal static LocalizedText ActivationUnavailableText { get; private set; } = null!;
 
     public override void SetStaticDefaults()
     {
@@ -42,7 +39,6 @@ public sealed class FoundationCoreTile : ModTile
 
         DustType = DustID.Electric;
         AddMapEntry(new Color(86, 210, 229), CreateMapEntryName());
-        ActivationUnavailableText = this.GetLocalization(nameof(ActivationUnavailableText));
     }
 
     public override bool CanKillTile(int i, int j, ref bool blockDamaged)
@@ -94,11 +90,10 @@ public sealed class FoundationCoreTile : ModTile
 
     public override bool RightClick(int i, int j)
     {
-        _ = i;
-        _ = j;
         if (Main.netMode != NetmodeID.Server)
         {
-            Main.NewText(ActivationUnavailableText.Value, new Color(86, 210, 229));
+            Point16 topLeft = TileObjectData.TopLeft(i, j);
+            FirstSeveranceClientActions.InteractWithCore(topLeft.X, topLeft.Y);
         }
 
         return true;

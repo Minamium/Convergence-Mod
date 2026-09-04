@@ -97,9 +97,9 @@ Exit: dependency-free tests cover 2/3/4-player plans, the `2 / 2 / 3` Stack tabl
 
 ## Slice 3 — Arena, Core, roster, and preparation
 
-Status: **In progress (Slice 3A implemented, 2026-09-05).** The source now contains the development Foundation Core Item/Tile/TE, authority-only prospective-Arena resolver, immutable scan result, Calamity public-call progression boundary, deterministic 2–4 roster, Ready/cancel/timeout domain, connection epochs, and exact-Fight Core projection lease. The 48-test dependency-free harness covers the pure boundaries. Availability still rejects every start, the Core right-click does not emit a request, and no runtime/packet/Barrier adapter consumes these components yet.
+Status: **In progress (preparation transport connected, 2026-09-05).** The development Foundation Core right-click now enters the server/SP activation path. Authority resolves the prospective Arena and deterministic 2–4 roster before acceptance, transitions `Validating -> Preparing`, consumes Ready/cancel intents, observes Core/participant loss and timeout, publishes bounded snapshots/validation results, and performs exact-Fight cleanup. The combat gate remains closed and logical Barrier presentation/correction is still pending.
 
-Slice 3B must connect typed activate/ready/cancel/snapshot transport, the Validating → Preparing runtime path, logical Barrier projection/correction, and exact cleanup observations. It must preserve the closed combat gate; actor ownership and feature replication remain prerequisites owned by Slice 4.
+The remaining Slice 3 work is logical Barrier presentation/correction plus repeated runtime cleanup smoke checks. It must preserve the closed combat gate; actor ownership and combat replication remain prerequisites owned by Slice 4.
 
 Implement the first real tModLoader adapters:
 

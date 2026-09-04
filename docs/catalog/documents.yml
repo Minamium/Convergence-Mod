@@ -45,7 +45,7 @@ documents:
 - doc_id: development.general
   path: docs/DEVELOPMENT.md
   title: Development Setup
-  content_sha256: 1816179b0bb917a27486e369778e576757b9281199ec7f93facd62f34e43c6bd
+  content_sha256: 00b52ebe2f5b1b9b8e259d638b03a980d4651cc2d74da510ab4ff42708e9e3f9
   document_type: runbook
   status: accepted
   owners:
@@ -167,7 +167,7 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: 5185d75c7ba5f9736fde65cbe560f297d18ee8820079d96fdf24ecc2f9241374
+  content_sha256: d7cf9fa67cc0a9b3dd8203a966a1a8e1443867f74ffb5c2679111a2a3ca06584
   document_type: overview
   status: accepted
   owners:
@@ -188,7 +188,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 02b87be0d9f66f8149a81c54ea8860745f34793428fadefb042c46bea21d0aa7
+  content_sha256: a57ab3db97d32008ae53c72089454cd692a88b2d3f159f8b9ffa3dd973d1a9b3
   document_type: plan
   status: accepted
   owners:
@@ -571,7 +571,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 579e0782bc9e5536cd818d166147f346ce5d36e4e2aa06b1843fdc973aae6843
+  content_sha256: 68e41fe65fea56c12a7aaa37b324c6e6366ca24f6fcd2417a90d39a95c202037
   document_type: governance
   status: accepted
   owners:
@@ -616,7 +616,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8cdd9de9032eb61094970bed1e5b8a9706c8ce9c22b8f6bdebe2e895b0776cfb
+  content_sha256: a69a5af7afef6c6158b210cbcb0ae2fa34cc25af85a960e3435b91ebfc208643
   document_type: status
   status: accepted
   owners:

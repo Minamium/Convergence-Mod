@@ -1,0 +1,383 @@
+#nullable enable
+
+using System;
+using System.Collections.Generic;
+using Convergence.Common.Encounters.Abstractions;
+using Convergence.Common.Foundation.Geometry;
+using Convergence.Common.Foundation.Identifiers;
+using Convergence.Content.Encounters.FirstSeverance.FoundationCore;
+using Terraria;
+
+namespace Convergence.Content.Encounters.FirstSeverance;
+
+internal enum FirstSeverancePreparationIntentKind : byte
+{
+    Cancel = 1,
+    SetReady = 2,
+}
+
+internal readonly record struct FirstSeveranceQueuedPreparationIntent(
+    FirstSeverancePreparationIntentKind Kind,
+    ParticipantId ParticipantId,
+    int SenderWhoAmI,
+    ulong ConnectionEpoch,
+    bool IsReady,
+    uint RequestNonce);
+
+internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
+{
+    private const int MaximumPendingIntents = 16;
+
+    private readonly ulong encounterSequence;
+    private readonly FightId fightId;
+    private readonly FirstSeveranceArenaValidationResult arena;
+    private readonly FirstSeveranceRoster roster;
+    private readonly int serverTileEntityId;
+    private readonly TilePoint coreTopLeft;
+    private readonly uint[] lastQueuedNonces;
+    private readonly List<FirstSeveranceQueuedPreparationIntent> pendingIntents = new();
+    private FirstSeverancePreparationStateMachine? preparation;
+    private bool isAttached;
+    private bool isCleaned;
+
+    public FirstSeverancePreparationRuntime(
+        ulong encounterSequence,
+        FightId fightId,
+        FirstSeveranceResolvedPreparation resolved)
+    {
+        if (encounterSequence == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(encounterSequence));
+        }
+
+        if (fightId.IsNone)
+        {
+            throw new ArgumentException("A preparation runtime requires a Fight ID.", nameof(fightId));
+        }
+
+        ArgumentNullException.ThrowIfNull(resolved);
+        this.encounterSequence = encounterSequence;
+        this.fightId = fightId;
+        arena = resolved.Arena;
+        roster = resolved.Roster;
+        serverTileEntityId = resolved.Core.ID;
+        coreTopLeft = new TilePoint(resolved.Core.Position.X, resolved.Core.Position.Y);
+        lastQueuedNonces = new uint[roster.Count];
+
+        // This is intentionally the final constructor action. A successful claim
+        // is therefore followed immediately by returning a cleanup-owning runtime.
+        if (!FoundationCoreProtectionSystem.TryClaim(
+                resolved.Core,
+                encounterSequence,
+                fightId))
+        {
+            throw new EncounterStartRejectedException("first_severance.core_busy");
+        }
+    }
+
+    internal bool Matches(ulong candidateSequence, FightId candidateFightId)
+    {
+        return !isCleaned
+            && encounterSequence == candidateSequence
+            && fightId == candidateFightId;
+    }
+
+    internal bool TryQueueReady(
+        int senderWhoAmI,
+        ulong connectionEpoch,
+        bool isReady,
+        uint requestNonce,
+        out string failureCode)
+    {
+        if (!TryValidateIntent(
+                senderWhoAmI,
+                connectionEpoch,
+                requestNonce,
+                out FirstSeveranceRosterMember member,
+                out failureCode))
+        {
+            return false;
+        }
+
+        pendingIntents.Add(new FirstSeveranceQueuedPreparationIntent(
+            FirstSeverancePreparationIntentKind.SetReady,
+            member.ParticipantId,
+            senderWhoAmI,
+            connectionEpoch,
+            isReady,
+            requestNonce));
+        lastQueuedNonces[member.ParticipantId.Value] = requestNonce;
+        failureCode = string.Empty;
+        return true;
+    }
+
+    internal bool TryQueueCancel(
+        int senderWhoAmI,
+        ulong connectionEpoch,
+        uint requestNonce,
+        out string failureCode)
+    {
+        if (!TryValidateIntent(
+                senderWhoAmI,
+                connectionEpoch,
+                requestNonce,
+                out FirstSeveranceRosterMember member,
+                out failureCode))
+        {
+            return false;
+        }
+
+        if (member.ParticipantId != roster.InitiatorParticipantId)
+        {
+            failureCode = "first_severance.preparation_cancel_not_initiator";
+            return false;
+        }
+
+        pendingIntents.Add(new FirstSeveranceQueuedPreparationIntent(
+            FirstSeverancePreparationIntentKind.Cancel,
+            member.ParticipantId,
+            senderWhoAmI,
+            connectionEpoch,
+            IsReady: false,
+            requestNonce));
+        lastQueuedNonces[member.ParticipantId.Value] = requestNonce;
+        failureCode = string.Empty;
+        return true;
+    }
+
+    internal bool TryCreateProjection(
+        out FirstSeverancePreparationProjection? projection)
+    {
+        if (isCleaned || preparation is null)
+        {
+            projection = null;
+            return false;
+        }
+
+        FirstSeverancePreparationSnapshot snapshot = preparation.CreateSnapshot();
+        projection = new FirstSeverancePreparationProjection(
+            encounterSequence,
+            fightId,
+            serverTileEntityId,
+            coreTopLeft,
+            arena.Layout.ArenaBounds,
+            snapshot.EnteredTick,
+            snapshot.DeadlineTick,
+            snapshot.CombatGateClosed,
+            snapshot.Members);
+        return true;
+    }
+
+    public EncounterRuntimeUpdate Tick(in EncounterRuntimeContext context)
+    {
+        if (isCleaned)
+        {
+            throw new InvalidOperationException("A cleaned preparation runtime cannot be ticked.");
+        }
+
+        if (context.EncounterSequence != encounterSequence || context.FightId != fightId)
+        {
+            throw new InvalidOperationException("Preparation runtime context has the wrong identity.");
+        }
+
+        return context.Lifecycle switch
+        {
+            EncounterLifecycle.Validating => EnterPreparing(context.AuthorityTick),
+            EncounterLifecycle.Preparing => TickPreparing(context.AuthorityTick),
+            _ => EncounterRuntimeUpdate.End(
+                FirstSeveranceTerminationContract.Instance.Create(
+                    FirstSeveranceTerminalCause.RuntimeInvariantBroken)),
+        };
+    }
+
+    public void Cleanup(in EncounterCleanupContext context)
+    {
+        if (isCleaned)
+        {
+            return;
+        }
+
+        if (context.EncounterSequence != encounterSequence || context.FightId != fightId)
+        {
+            throw new InvalidOperationException("Preparation cleanup has the wrong identity.");
+        }
+
+        preparation?.Cleanup(fightId);
+        pendingIntents.Clear();
+        Array.Clear(lastQueuedNonces);
+        if (isAttached)
+        {
+            FirstSeverancePreparationAuthority.Detach(this);
+            isAttached = false;
+        }
+
+        if (!FoundationCoreProtectionSystem.TryRelease(serverTileEntityId, fightId))
+        {
+            throw new InvalidOperationException("Exact-Fight Foundation Core cleanup was rejected.");
+        }
+
+        isCleaned = true;
+    }
+
+    private EncounterRuntimeUpdate EnterPreparing(ulong authorityTick)
+    {
+        if (preparation is not null || isAttached)
+        {
+            return EncounterRuntimeUpdate.End(
+                FirstSeveranceTerminationContract.Instance.Create(
+                    FirstSeveranceTerminalCause.RuntimeInvariantBroken));
+        }
+
+        preparation = new FirstSeverancePreparationStateMachine(
+            fightId,
+            roster,
+            authorityTick,
+            FirstSeverancePreparationSettings.Default);
+        if (!FirstSeverancePreparationAuthority.TryAttach(this))
+        {
+            return EncounterRuntimeUpdate.End(
+                FirstSeveranceTerminationContract.Instance.Create(
+                    FirstSeveranceTerminalCause.RuntimeInvariantBroken));
+        }
+
+        isAttached = true;
+        return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Preparing);
+    }
+
+    private EncounterRuntimeUpdate TickPreparing(ulong authorityTick)
+    {
+        if (preparation is null || !isAttached)
+        {
+            return EncounterRuntimeUpdate.End(
+                FirstSeveranceTerminationContract.Instance.Create(
+                    FirstSeveranceTerminalCause.RuntimeInvariantBroken));
+        }
+
+        bool hasObservableChange = false;
+        if (pendingIntents.Count > 0)
+        {
+            pendingIntents.Sort(CompareIntents);
+            for (int index = 0; index < pendingIntents.Count; index++)
+            {
+                FirstSeveranceQueuedPreparationIntent intent = pendingIntents[index];
+                FirstSeverancePreparationUpdate applied = intent.Kind switch
+                {
+                    FirstSeverancePreparationIntentKind.Cancel => preparation.ApplyCancel(
+                        new FirstSeveranceCancelPreparationCommand(
+                            intent.SenderWhoAmI,
+                            intent.ConnectionEpoch,
+                            intent.RequestNonce,
+                            authorityTick)),
+                    FirstSeverancePreparationIntentKind.SetReady => preparation.ApplySetReady(
+                        new FirstSeveranceSetReadyCommand(
+                            intent.SenderWhoAmI,
+                            intent.ConnectionEpoch,
+                            intent.IsReady,
+                            intent.RequestNonce,
+                            authorityTick)),
+                    _ => FirstSeverancePreparationUpdate.Reject(
+                        "first_severance.preparation_intent_invalid"),
+                };
+
+                hasObservableChange |= applied.HasObservableChange;
+                if (applied.RequestsEnd)
+                {
+                    pendingIntents.Clear();
+                    return EncounterRuntimeUpdate.End(applied.RequestedTermination);
+                }
+            }
+
+            pendingIntents.Clear();
+        }
+
+        bool coreIsPresent = FoundationCoreProtectionSystem.TryResolveOwnedCore(
+            serverTileEntityId,
+            fightId,
+            out _);
+        FirstSeverancePreparationUpdate update = preparation.Advance(
+            authorityTick,
+            coreIsPresent,
+            ObserveConnections());
+        if (update.RequestsEnd)
+        {
+            return EncounterRuntimeUpdate.End(update.RequestedTermination);
+        }
+
+        hasObservableChange |= update.HasObservableChange;
+        return hasObservableChange
+            ? EncounterRuntimeUpdate.ObservableChange()
+            : EncounterRuntimeUpdate.None;
+    }
+
+    private bool TryValidateIntent(
+        int senderWhoAmI,
+        ulong connectionEpoch,
+        uint requestNonce,
+        out FirstSeveranceRosterMember member,
+        out string failureCode)
+    {
+        if (isCleaned || preparation is null || !isAttached || preparation.IsClosed)
+        {
+            member = default;
+            failureCode = "first_severance.preparation_not_available";
+            return false;
+        }
+
+        if (pendingIntents.Count >= MaximumPendingIntents)
+        {
+            member = default;
+            failureCode = "first_severance.preparation_intent_queue_full";
+            return false;
+        }
+
+        if (!roster.TryResolveCurrentBinding(senderWhoAmI, connectionEpoch, out member))
+        {
+            failureCode = "first_severance.preparation_sender_not_bound";
+            return false;
+        }
+
+        int participantIndex = member.ParticipantId.Value;
+        if (requestNonce == 0 || requestNonce <= lastQueuedNonces[participantIndex])
+        {
+            failureCode = "first_severance.preparation_stale_nonce";
+            return false;
+        }
+
+        failureCode = string.Empty;
+        return true;
+    }
+
+    private FirstSeveranceConnectionObservation[] ObserveConnections()
+    {
+        var observations = new FirstSeveranceConnectionObservation[roster.Count];
+        for (int index = 0; index < roster.Count; index++)
+        {
+            FirstSeveranceRosterMember member = roster.Members[index];
+            bool connected = FirstSeveranceConnectionEpochSystem.TryGetCurrentEpoch(
+                member.ServerWhoAmI,
+                out ulong currentEpoch);
+            observations[index] = new FirstSeveranceConnectionObservation(
+                member.ServerWhoAmI,
+                currentEpoch,
+                connected && Main.player[member.ServerWhoAmI].active);
+        }
+
+        return observations;
+    }
+
+    private static int CompareIntents(
+        FirstSeveranceQueuedPreparationIntent left,
+        FirstSeveranceQueuedPreparationIntent right)
+    {
+        int kindOrder = left.Kind.CompareTo(right.Kind);
+        if (kindOrder != 0)
+        {
+            return kindOrder;
+        }
+
+        int participantOrder = left.ParticipantId.Value.CompareTo(right.ParticipantId.Value);
+        return participantOrder != 0
+            ? participantOrder
+            : left.RequestNonce.CompareTo(right.RequestNonce);
+    }
+}
