@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using Convergence.Common.Foundation.Identifiers;
 
-namespace Convergence.Content.Encounters.ThirdSeverance;
+namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal enum ThirdSeveranceBoundaryViolationKind : byte
+internal enum FirstSeveranceBoundaryViolationKind : byte
 {
     ParticipantOutsideBarrier = 1,
     OutsiderInsideBarrier = 2,
 }
 
-internal enum ThirdSeveranceBoundaryResponse : byte
+internal enum FirstSeveranceBoundaryResponse : byte
 {
     ServerWarning = 1,
     MoveToNearestSafePoint = 2,
@@ -19,7 +19,7 @@ internal enum ThirdSeveranceBoundaryResponse : byte
     SuppressEncounterInteraction = 5,
 }
 
-internal readonly record struct ThirdSeveranceArenaOccupant(
+internal readonly record struct FirstSeveranceArenaOccupant(
     int ServerWhoAmI,
     ulong ConnectionEpoch,
     ParticipantId ParticipantId)
@@ -34,10 +34,10 @@ internal readonly record struct ThirdSeveranceArenaOccupant(
     public bool IsParticipant => ParticipantId.IsValid;
 }
 
-internal readonly record struct ThirdSeveranceBoundaryResponseStep(
+internal readonly record struct FirstSeveranceBoundaryResponseStep(
     int MinimumContinuousTicks,
     int MinimumViolationCount,
-    ThirdSeveranceBoundaryResponse Response)
+    FirstSeveranceBoundaryResponse Response)
 {
     public bool IsValid => MinimumContinuousTicks >= 0
         && MinimumViolationCount > 0
@@ -45,11 +45,11 @@ internal readonly record struct ThirdSeveranceBoundaryResponseStep(
 
     public int DeterministicOrder => Response switch
     {
-        ThirdSeveranceBoundaryResponse.ServerWarning => 0,
-        ThirdSeveranceBoundaryResponse.SuppressEncounterInteraction => 1,
-        ThirdSeveranceBoundaryResponse.MoveToNearestSafePoint => 2,
-        ThirdSeveranceBoundaryResponse.EjectToArenaExterior => 3,
-        ThirdSeveranceBoundaryResponse.ExcludeFromArena => 4,
+        FirstSeveranceBoundaryResponse.ServerWarning => 0,
+        FirstSeveranceBoundaryResponse.SuppressEncounterInteraction => 1,
+        FirstSeveranceBoundaryResponse.MoveToNearestSafePoint => 2,
+        FirstSeveranceBoundaryResponse.EjectToArenaExterior => 3,
+        FirstSeveranceBoundaryResponse.ExcludeFromArena => 4,
         _ => int.MaxValue,
     };
 
@@ -61,11 +61,11 @@ internal readonly record struct ThirdSeveranceBoundaryResponseStep(
     }
 }
 
-internal sealed class ThirdSeveranceBoundaryRule
+internal sealed class FirstSeveranceBoundaryRule
 {
-    public ThirdSeveranceBoundaryRule(
-        ThirdSeveranceBoundaryViolationKind violationKind,
-        IReadOnlyList<ThirdSeveranceBoundaryResponseStep> responses)
+    public FirstSeveranceBoundaryRule(
+        FirstSeveranceBoundaryViolationKind violationKind,
+        IReadOnlyList<FirstSeveranceBoundaryResponseStep> responses)
     {
         ArgumentNullException.ThrowIfNull(responses);
 
@@ -82,10 +82,10 @@ internal sealed class ThirdSeveranceBoundaryRule
         int previousTickThreshold = -1;
         int previousViolationThreshold = -1;
         int previousDeterministicOrder = -1;
-        var responseKinds = new HashSet<ThirdSeveranceBoundaryResponse>();
+        var responseKinds = new HashSet<FirstSeveranceBoundaryResponse>();
         for (int index = 0; index < responses.Count; index++)
         {
-            ThirdSeveranceBoundaryResponseStep response = responses[index];
+            FirstSeveranceBoundaryResponseStep response = responses[index];
             bool hasSameThresholds = response.MinimumContinuousTicks == previousTickThreshold
                 && response.MinimumViolationCount == previousViolationThreshold;
             if (!response.IsValid
@@ -107,29 +107,29 @@ internal sealed class ThirdSeveranceBoundaryRule
         }
 
         ViolationKind = violationKind;
-        Responses = ThirdSeverancePlanCollections.Copy(responses, nameof(responses));
+        Responses = FirstSeverancePlanCollections.Copy(responses, nameof(responses));
     }
 
-    public ThirdSeveranceBoundaryViolationKind ViolationKind { get; }
+    public FirstSeveranceBoundaryViolationKind ViolationKind { get; }
 
-    public IReadOnlyList<ThirdSeveranceBoundaryResponseStep> Responses { get; }
+    public IReadOnlyList<FirstSeveranceBoundaryResponseStep> Responses { get; }
 
     // Results are returned in the constructor-validated deterministic order.
     // The authority executor records which response kinds were already applied
     // during the current violation episode to keep effects idempotent.
-    public IReadOnlyList<ThirdSeveranceBoundaryResponse> GetEligibleResponses(
+    public IReadOnlyList<FirstSeveranceBoundaryResponse> GetEligibleResponses(
         int continuousTicks,
         int violationCount)
     {
         if (continuousTicks < 0 || violationCount <= 0)
         {
-            return Array.Empty<ThirdSeveranceBoundaryResponse>();
+            return Array.Empty<FirstSeveranceBoundaryResponse>();
         }
 
-        var eligible = new List<ThirdSeveranceBoundaryResponse>(Responses.Count);
+        var eligible = new List<FirstSeveranceBoundaryResponse>(Responses.Count);
         for (int index = 0; index < Responses.Count; index++)
         {
-            ThirdSeveranceBoundaryResponseStep step = Responses[index];
+            FirstSeveranceBoundaryResponseStep step = Responses[index];
             if (step.IsEligible(continuousTicks, violationCount))
             {
                 eligible.Add(step.Response);
@@ -140,57 +140,57 @@ internal sealed class ThirdSeveranceBoundaryRule
     }
 }
 
-internal sealed class ThirdSeveranceArenaAccessPolicy
+internal sealed class FirstSeveranceArenaAccessPolicy
 {
-    private static readonly IReadOnlyList<ThirdSeveranceBoundaryRule> DefaultRules =
+    private static readonly IReadOnlyList<FirstSeveranceBoundaryRule> DefaultRules =
         Array.AsReadOnly(
             new[]
             {
-                new ThirdSeveranceBoundaryRule(
-                    ThirdSeveranceBoundaryViolationKind.ParticipantOutsideBarrier,
+                new FirstSeveranceBoundaryRule(
+                    FirstSeveranceBoundaryViolationKind.ParticipantOutsideBarrier,
                     Array.AsReadOnly(
                         new[]
                         {
-                            new ThirdSeveranceBoundaryResponseStep(
+                            new FirstSeveranceBoundaryResponseStep(
                                 1,
                                 1,
-                                ThirdSeveranceBoundaryResponse.ServerWarning),
-                            new ThirdSeveranceBoundaryResponseStep(
+                                FirstSeveranceBoundaryResponse.ServerWarning),
+                            new FirstSeveranceBoundaryResponseStep(
                                 6,
                                 1,
-                                ThirdSeveranceBoundaryResponse.MoveToNearestSafePoint),
+                                FirstSeveranceBoundaryResponse.MoveToNearestSafePoint),
                         })),
-                new ThirdSeveranceBoundaryRule(
-                    ThirdSeveranceBoundaryViolationKind.OutsiderInsideBarrier,
+                new FirstSeveranceBoundaryRule(
+                    FirstSeveranceBoundaryViolationKind.OutsiderInsideBarrier,
                     Array.AsReadOnly(
                         new[]
                         {
-                            new ThirdSeveranceBoundaryResponseStep(
+                            new FirstSeveranceBoundaryResponseStep(
                                 1,
                                 1,
-                                ThirdSeveranceBoundaryResponse.ServerWarning),
-                            new ThirdSeveranceBoundaryResponseStep(
+                                FirstSeveranceBoundaryResponse.ServerWarning),
+                            new FirstSeveranceBoundaryResponseStep(
                                 1,
                                 1,
-                                ThirdSeveranceBoundaryResponse.SuppressEncounterInteraction),
-                            new ThirdSeveranceBoundaryResponseStep(
+                                FirstSeveranceBoundaryResponse.SuppressEncounterInteraction),
+                            new FirstSeveranceBoundaryResponseStep(
                                 120,
                                 1,
-                                ThirdSeveranceBoundaryResponse.EjectToArenaExterior),
-                            new ThirdSeveranceBoundaryResponseStep(
+                                FirstSeveranceBoundaryResponse.EjectToArenaExterior),
+                            new FirstSeveranceBoundaryResponseStep(
                                 120,
                                 3,
-                                ThirdSeveranceBoundaryResponse.ExcludeFromArena),
+                                FirstSeveranceBoundaryResponse.ExcludeFromArena),
                         })),
             });
 
-    public static ThirdSeveranceArenaAccessPolicy Instance { get; } = new();
+    public static FirstSeveranceArenaAccessPolicy Instance { get; } = new();
 
-    private ThirdSeveranceArenaAccessPolicy()
+    private FirstSeveranceArenaAccessPolicy()
     {
     }
 
-    public IReadOnlyList<ThirdSeveranceBoundaryRule> Rules => DefaultRules;
+    public IReadOnlyList<FirstSeveranceBoundaryRule> Rules => DefaultRules;
 
     // No response in this policy damages or kills a player. The authority adapter
     // will warn first, then resolve a safe correction/ejection destination.

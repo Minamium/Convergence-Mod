@@ -2,7 +2,7 @@
 
 Player-facing content is organized by feature rather than tModLoader base type.
 
-The target first module is `Encounters/FirstSeverance/`. Current source remains under `Encounters/ThirdSeverance/` until the isolated Windows rename commit; it is an inert legacy bootstrap and must not be treated as the active encounter specification.
+The first module is `Encounters/FirstSeverance/`. Its identity rename is complete, but its multipart plan remains an inert legacy bootstrap and must not be treated as the active encounter specification.
 
 NPCs, Tiles, Projectiles, phases, rewards, and presentation cue contracts owned only by First Severance remain in that feature. Graphics/audio implementations belong in `Client/Encounters/FirstSeverance` after the rename.
 

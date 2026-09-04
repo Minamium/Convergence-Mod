@@ -4,14 +4,14 @@ document_type: glossary
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - project.terminology
 aliases:
   - names
   - identifiers
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
 related_docs:
   - encounter.first-severance.overview
   - encounter.first-severance.plan
@@ -22,9 +22,9 @@ related_docs:
 | Concept | Current term | Status / rule |
 |---|---|---|
 | First Raid display name | `First Severance` / `第一断絶` | Accepted for development; public branding may still change before release |
-| Target feature directory/namespace | `FirstSeverance` | Accepted target; not implemented yet |
-| Target stable key | `first_severance` | Accepted target; change in the dedicated rename commit |
-| Legacy implementation name | `ThirdSeverance`, `Third Severance`, `third_severance` | Current code only; superseded product name, no compatibility alias required before publication |
+| Feature directory/namespace | `FirstSeverance` | Current identity; module remains inert while later slices are unimplemented |
+| Stable encounter key | `first_severance` | Current unpublished key |
+| Legacy implementation name | `ThirdSeverance`, `Third Severance`, `third_severance` | Historical records and completed-rename instructions only; no source alias or compatibility mapping |
 | Boss working title | `The Null Cantor` / `無響の唱導者` | Provisional; do not encode into stable protocol/save IDs |
 | Collective/lore name | `The Choir Beneath the Ice` / `氷下の合唱体` | Provisional lore term, not the current boss name |
 | Facility | Polar containment/research facility | Concept accepted; `Erebus Polar Citadel` and `Pale Meridian Containment Complex` are both unconfirmed names |

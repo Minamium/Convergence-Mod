@@ -43,7 +43,7 @@ Exit: clean pinned client/server baseline with sanitized evidence.
 
 ## Milestone 1 — First Severance identity and arena preparation
 
-- atomic legacy `ThirdSeverance` → `FirstSeverance` source/key/failure-prefix rename while inert;
+- [x] atomic legacy `ThirdSeverance` → `FirstSeverance` source/key/failure-prefix rename while inert;
 - Foundation Core Item/Tile/Tile Entity;
 - server-resolved Core/anchor and side/range/nonce/rate validation;
 - Calamity progression adapter for Exo Mechs and Supreme Calamitas;

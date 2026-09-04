@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using Convergence.Common.Foundation.Geometry;
 
-namespace Convergence.Content.Encounters.ThirdSeverance;
+namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal enum ThirdSeverancePylonSlot : byte
+internal enum FirstSeverancePylonSlot : byte
 {
     NorthWest = 1,
     NorthEast = 2,
@@ -16,7 +16,7 @@ internal enum ThirdSeverancePylonSlot : byte
 
 // This DTO records what the future server-side resolver found. Its name does not
 // claim that the Core or prospective Arena has passed validation.
-internal readonly record struct ResolvedThirdSeveranceCoreAnchor(
+internal readonly record struct ResolvedFirstSeveranceCoreAnchor(
     TilePoint LogicalCenter,
     int BaseY,
     int ServerTileEntityId)
@@ -24,18 +24,18 @@ internal readonly record struct ResolvedThirdSeveranceCoreAnchor(
     public bool HasServerTileEntityIdentity => ServerTileEntityId >= 0;
 }
 
-internal readonly record struct ThirdSeverancePylonPosition(
-    ThirdSeverancePylonSlot Slot,
+internal readonly record struct FirstSeverancePylonPosition(
+    FirstSeverancePylonSlot Slot,
     TilePoint TilePosition);
 
-internal sealed class ThirdSeveranceArenaLayout
+internal sealed class FirstSeveranceArenaLayout
 {
-    public ThirdSeveranceArenaLayout(
-        in ResolvedThirdSeveranceCoreAnchor core,
+    public FirstSeveranceArenaLayout(
+        in ResolvedFirstSeveranceCoreAnchor core,
         in TileRectangle worldBounds,
         in TileRectangle arenaBounds,
         in TileRectangle barrierBounds,
-        IReadOnlyList<ThirdSeverancePylonPosition> pylons)
+        IReadOnlyList<FirstSeverancePylonPosition> pylons)
     {
         if (!core.HasServerTileEntityIdentity)
         {
@@ -56,7 +56,7 @@ internal sealed class ThirdSeveranceArenaLayout
             || !ContainsRectangleWithInset(
                 worldBounds,
                 arenaBounds,
-                ThirdSeveranceArenaBlueprint.WorldEdgeSafetyMarginInTiles)
+                FirstSeveranceArenaBlueprint.WorldEdgeSafetyMarginInTiles)
             || !HasExpectedGeometry(core, arenaBounds, barrierBounds)
             || !worldBounds.Contains(core.LogicalCenter)
             || !worldBounds.Contains(coreBasePoint)
@@ -66,7 +66,7 @@ internal sealed class ThirdSeveranceArenaLayout
                 "The resolved Core and complete prospective Arena must satisfy World bounds and edge margin.");
         }
 
-        if (pylons is null || pylons.Count != ThirdSeveranceArenaBlueprint.RequiredPylonSlotCount)
+        if (pylons is null || pylons.Count != FirstSeveranceArenaBlueprint.RequiredPylonSlotCount)
         {
             throw new ArgumentException("The arena layout requires four logical Pylon slots.", nameof(pylons));
         }
@@ -77,11 +77,11 @@ internal sealed class ThirdSeveranceArenaLayout
             throw new ArgumentException("The logical Barrier must be inside the Arena.", nameof(barrierBounds));
         }
 
-        var pylonCopy = new ThirdSeverancePylonPosition[pylons.Count];
-        var slots = new HashSet<ThirdSeverancePylonSlot>();
+        var pylonCopy = new FirstSeverancePylonPosition[pylons.Count];
+        var slots = new HashSet<FirstSeverancePylonSlot>();
         for (int index = 0; index < pylons.Count; index++)
         {
-            ThirdSeverancePylonPosition pylon = pylons[index];
+            FirstSeverancePylonPosition pylon = pylons[index];
             if (!Enum.IsDefined(pylon.Slot)
                 || !slots.Add(pylon.Slot)
                 || !barrierBounds.Contains(pylon.TilePosition)
@@ -102,7 +102,7 @@ internal sealed class ThirdSeveranceArenaLayout
         Pylons = Array.AsReadOnly(pylonCopy);
     }
 
-    public ResolvedThirdSeveranceCoreAnchor Core { get; }
+    public ResolvedFirstSeveranceCoreAnchor Core { get; }
 
     public TileRectangle WorldBounds { get; }
 
@@ -111,7 +111,7 @@ internal sealed class ThirdSeveranceArenaLayout
     // This is a logical movement/admission boundary. It is not a generated Tile wall.
     public TileRectangle BarrierBounds { get; }
 
-    public IReadOnlyList<ThirdSeverancePylonPosition> Pylons { get; }
+    public IReadOnlyList<FirstSeverancePylonPosition> Pylons { get; }
 
     private static bool HasIntSafeEdges(in TileRectangle bounds)
     {
@@ -155,36 +155,36 @@ internal sealed class ThirdSeveranceArenaLayout
     }
 
     private static bool HasExpectedGeometry(
-        in ResolvedThirdSeveranceCoreAnchor core,
+        in ResolvedFirstSeveranceCoreAnchor core,
         in TileRectangle arenaBounds,
         in TileRectangle barrierBounds)
     {
-        return arenaBounds.Width == ThirdSeveranceArenaBlueprint.WidthInTiles
-            && arenaBounds.Height == ThirdSeveranceArenaBlueprint.HeightInTiles
+        return arenaBounds.Width == FirstSeveranceArenaBlueprint.WidthInTiles
+            && arenaBounds.Height == FirstSeveranceArenaBlueprint.HeightInTiles
             && (long)arenaBounds.Left + (arenaBounds.Width / 2) == core.LogicalCenter.X
             && (long)arenaBounds.Top + arenaBounds.Height == core.BaseY
-            && barrierBounds.Left == arenaBounds.Left + ThirdSeveranceArenaBlueprint.BarrierInsetInTiles
-            && barrierBounds.Top == arenaBounds.Top + ThirdSeveranceArenaBlueprint.BarrierInsetInTiles
+            && barrierBounds.Left == arenaBounds.Left + FirstSeveranceArenaBlueprint.BarrierInsetInTiles
+            && barrierBounds.Top == arenaBounds.Top + FirstSeveranceArenaBlueprint.BarrierInsetInTiles
             && barrierBounds.Width == arenaBounds.Width
-                - (ThirdSeveranceArenaBlueprint.BarrierInsetInTiles * 2)
+                - (FirstSeveranceArenaBlueprint.BarrierInsetInTiles * 2)
             && barrierBounds.Height == arenaBounds.Height
-                - (ThirdSeveranceArenaBlueprint.BarrierInsetInTiles * 2);
+                - (FirstSeveranceArenaBlueprint.BarrierInsetInTiles * 2);
     }
 
     private static bool HasExpectedPylonPosition(
-        in ThirdSeverancePylonPosition pylon,
+        in FirstSeverancePylonPosition pylon,
         in TileRectangle arenaBounds)
     {
-        int westX = arenaBounds.Left + ThirdSeveranceArenaBlueprint.PylonInsetInTiles;
-        int eastX = arenaBounds.Right - ThirdSeveranceArenaBlueprint.PylonInsetInTiles - 1;
-        int northY = arenaBounds.Top + ThirdSeveranceArenaBlueprint.PylonInsetInTiles;
-        int southY = arenaBounds.Bottom - ThirdSeveranceArenaBlueprint.PylonInsetInTiles - 1;
+        int westX = arenaBounds.Left + FirstSeveranceArenaBlueprint.PylonInsetInTiles;
+        int eastX = arenaBounds.Right - FirstSeveranceArenaBlueprint.PylonInsetInTiles - 1;
+        int northY = arenaBounds.Top + FirstSeveranceArenaBlueprint.PylonInsetInTiles;
+        int southY = arenaBounds.Bottom - FirstSeveranceArenaBlueprint.PylonInsetInTiles - 1;
         TilePoint expected = pylon.Slot switch
         {
-            ThirdSeverancePylonSlot.NorthWest => new TilePoint(westX, northY),
-            ThirdSeverancePylonSlot.NorthEast => new TilePoint(eastX, northY),
-            ThirdSeverancePylonSlot.SouthWest => new TilePoint(westX, southY),
-            ThirdSeverancePylonSlot.SouthEast => new TilePoint(eastX, southY),
+            FirstSeverancePylonSlot.NorthWest => new TilePoint(westX, northY),
+            FirstSeverancePylonSlot.NorthEast => new TilePoint(eastX, northY),
+            FirstSeverancePylonSlot.SouthWest => new TilePoint(westX, southY),
+            FirstSeverancePylonSlot.SouthEast => new TilePoint(eastX, southY),
             _ => default,
         };
 
@@ -192,7 +192,7 @@ internal sealed class ThirdSeveranceArenaLayout
     }
 }
 
-internal sealed class ThirdSeveranceArenaBlueprint
+internal sealed class FirstSeveranceArenaBlueprint
 {
     public const int WidthInTiles = 320;
     public const int HeightInTiles = 140;
@@ -201,25 +201,25 @@ internal sealed class ThirdSeveranceArenaBlueprint
     public const int WorldEdgeSafetyMarginInTiles = 20;
     public const int RequiredPylonSlotCount = 4;
 
-    public static ThirdSeveranceArenaBlueprint Instance { get; } = new();
+    public static FirstSeveranceArenaBlueprint Instance { get; } = new();
 
-    private ThirdSeveranceArenaBlueprint()
+    private FirstSeveranceArenaBlueprint()
     {
     }
 
     public ArenaProfile Profile => new(WidthInTiles, HeightInTiles);
 
     public bool TryCreateLayout(
-        in ResolvedThirdSeveranceCoreAnchor resolvedCore,
+        in ResolvedFirstSeveranceCoreAnchor resolvedCore,
         in TileRectangle worldBounds,
-        out ThirdSeveranceArenaLayout? layout,
+        out FirstSeveranceArenaLayout? layout,
         out string failureCode)
     {
         layout = null;
 
         if (!resolvedCore.HasServerTileEntityIdentity)
         {
-            failureCode = "third_severance.arena_core_not_resolved";
+            failureCode = "first_severance.arena_core_not_resolved";
             return false;
         }
 
@@ -232,7 +232,7 @@ internal sealed class ThirdSeveranceArenaBlueprint
             || worldLeft < 0
             || worldTop < 0)
         {
-            failureCode = "third_severance.arena_world_bounds_invalid";
+            failureCode = "first_severance.arena_world_bounds_invalid";
             return false;
         }
 
@@ -243,14 +243,14 @@ internal sealed class ThirdSeveranceArenaBlueprint
                 worldBottom,
                 resolvedCore.LogicalCenter))
         {
-            failureCode = "third_severance.arena_core_center_outside_world";
+            failureCode = "first_severance.arena_core_center_outside_world";
             return false;
         }
 
         var coreBasePoint = new TilePoint(resolvedCore.LogicalCenter.X, resolvedCore.BaseY);
         if (!ContainsPoint(worldLeft, worldTop, worldRight, worldBottom, coreBasePoint))
         {
-            failureCode = "third_severance.arena_core_base_outside_world";
+            failureCode = "first_severance.arena_core_base_outside_world";
             return false;
         }
 
@@ -272,7 +272,7 @@ internal sealed class ThirdSeveranceArenaBlueprint
         }
         catch (OverflowException)
         {
-            failureCode = "third_severance.arena_bounds_overflow";
+            failureCode = "first_severance.arena_bounds_overflow";
             return false;
         }
 
@@ -285,7 +285,7 @@ internal sealed class ThirdSeveranceArenaBlueprint
             || arenaRight > safeWorldRight
             || arenaBottom > safeWorldBottom)
         {
-            failureCode = "third_severance.arena_world_edge_margin_violation";
+            failureCode = "first_severance.arena_world_edge_margin_violation";
             return false;
         }
 
@@ -296,7 +296,7 @@ internal sealed class ThirdSeveranceArenaBlueprint
             HeightInTiles);
         if (!arenaBounds.Contains(resolvedCore.LogicalCenter))
         {
-            failureCode = "third_severance.arena_core_center_outside_arena";
+            failureCode = "first_severance.arena_core_center_outside_arena";
             return false;
         }
 
@@ -309,13 +309,13 @@ internal sealed class ThirdSeveranceArenaBlueprint
         var pylons = Array.AsReadOnly(
             new[]
             {
-                CreatePylonPosition(ThirdSeverancePylonSlot.NorthWest, arenaBounds),
-                CreatePylonPosition(ThirdSeverancePylonSlot.NorthEast, arenaBounds),
-                CreatePylonPosition(ThirdSeverancePylonSlot.SouthWest, arenaBounds),
-                CreatePylonPosition(ThirdSeverancePylonSlot.SouthEast, arenaBounds),
+                CreatePylonPosition(FirstSeverancePylonSlot.NorthWest, arenaBounds),
+                CreatePylonPosition(FirstSeverancePylonSlot.NorthEast, arenaBounds),
+                CreatePylonPosition(FirstSeverancePylonSlot.SouthWest, arenaBounds),
+                CreatePylonPosition(FirstSeverancePylonSlot.SouthEast, arenaBounds),
             });
 
-        layout = new ThirdSeveranceArenaLayout(
+        layout = new FirstSeveranceArenaLayout(
             resolvedCore,
             worldBounds,
             arenaBounds,
@@ -371,8 +371,8 @@ internal sealed class ThirdSeveranceArenaBlueprint
             && point.Y < bottom;
     }
 
-    private static ThirdSeverancePylonPosition CreatePylonPosition(
-        ThirdSeverancePylonSlot slot,
+    private static FirstSeverancePylonPosition CreatePylonPosition(
+        FirstSeverancePylonSlot slot,
         in TileRectangle bounds)
     {
         int westX = bounds.Left + PylonInsetInTiles;
@@ -382,13 +382,13 @@ internal sealed class ThirdSeveranceArenaBlueprint
 
         TilePoint position = slot switch
         {
-            ThirdSeverancePylonSlot.NorthWest => new TilePoint(westX, northY),
-            ThirdSeverancePylonSlot.NorthEast => new TilePoint(eastX, northY),
-            ThirdSeverancePylonSlot.SouthWest => new TilePoint(westX, southY),
-            ThirdSeverancePylonSlot.SouthEast => new TilePoint(eastX, southY),
+            FirstSeverancePylonSlot.NorthWest => new TilePoint(westX, northY),
+            FirstSeverancePylonSlot.NorthEast => new TilePoint(eastX, northY),
+            FirstSeverancePylonSlot.SouthWest => new TilePoint(westX, southY),
+            FirstSeverancePylonSlot.SouthEast => new TilePoint(eastX, southY),
             _ => throw new ArgumentOutOfRangeException(nameof(slot)),
         };
 
-        return new ThirdSeverancePylonPosition(slot, position);
+        return new FirstSeverancePylonPosition(slot, position);
     }
 }

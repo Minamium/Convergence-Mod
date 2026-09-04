@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace Convergence.Content.Encounters.ThirdSeverance;
+namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal enum ThirdSeverancePhaseId : byte
+internal enum FirstSeverancePhaseId : byte
 {
     None = 0,
     BaseActivation = 1,
@@ -17,7 +17,7 @@ internal enum ThirdSeverancePhaseId : byte
     LastStand = 7,
 }
 
-internal enum ThirdSeverancePhaseExitRule : byte
+internal enum FirstSeverancePhaseExitRule : byte
 {
     PreparationComplete = 1,
     MechanicResolvedOrDeadline = 2,
@@ -26,7 +26,7 @@ internal enum ThirdSeverancePhaseExitRule : byte
     FixedSequenceComplete = 5,
 }
 
-internal enum ThirdSeveranceMechanicKind : byte
+internal enum FirstSeveranceMechanicKind : byte
 {
     PylonDpsCheck = 1,
     PartBreakWindow = 2,
@@ -38,7 +38,7 @@ internal enum ThirdSeveranceMechanicKind : byte
     BossAttackPattern = 8,
 }
 
-internal enum ThirdSeveranceTargetRule : byte
+internal enum FirstSeveranceTargetRule : byte
 {
     None = 0,
     AllParticipants = 1,
@@ -48,7 +48,7 @@ internal enum ThirdSeveranceTargetRule : byte
     HighestRecentServerDamageParticipant = 5,
 }
 
-internal enum ThirdSeveranceFailureOutcome : byte
+internal enum FirstSeveranceFailureOutcome : byte
 {
     None = 0,
     ApplyOverload = 1,
@@ -58,12 +58,12 @@ internal enum ThirdSeveranceFailureOutcome : byte
     AdvanceHardEnrage = 5,
 }
 
-internal enum ThirdSeverancePylonSelectionRule : byte
+internal enum FirstSeverancePylonSelectionRule : byte
 {
     RosterMappedSymmetricSlots = 1,
 }
 
-internal readonly record struct ThirdSeveranceParticipantScaledInt(
+internal readonly record struct FirstSeveranceParticipantScaledInt(
     int TwoParticipants,
     int ThreeParticipants,
     int FourParticipants)
@@ -86,20 +86,20 @@ internal readonly record struct ThirdSeveranceParticipantScaledInt(
             4 => FourParticipants,
             _ => throw new ArgumentOutOfRangeException(
                 nameof(participantCount),
-                "Third Severance supports exactly two to four participants."),
+                "First Severance supports exactly two to four participants."),
         };
     }
 }
 
-internal abstract class ThirdSeveranceMechanicDefinition
+internal abstract class FirstSeveranceMechanicDefinition
 {
-    protected ThirdSeveranceMechanicDefinition(
+    protected FirstSeveranceMechanicDefinition(
         string key,
-        ThirdSeveranceMechanicKind kind,
+        FirstSeveranceMechanicKind kind,
         int startOffsetTicks,
         int durationTicks,
-        ThirdSeveranceTargetRule targetRule,
-        ThirdSeveranceFailureOutcome failureOutcome)
+        FirstSeveranceTargetRule targetRule,
+        FirstSeveranceFailureOutcome failureOutcome)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -130,7 +130,7 @@ internal abstract class ThirdSeveranceMechanicDefinition
 
     public string Key { get; }
 
-    public ThirdSeveranceMechanicKind Kind { get; }
+    public FirstSeveranceMechanicKind Kind { get; }
 
     public int StartOffsetTicks { get; }
 
@@ -138,32 +138,32 @@ internal abstract class ThirdSeveranceMechanicDefinition
 
     public int EndOffsetTicks => StartOffsetTicks + DurationTicks;
 
-    public ThirdSeveranceTargetRule TargetRule { get; }
+    public FirstSeveranceTargetRule TargetRule { get; }
 
-    public ThirdSeveranceFailureOutcome FailureOutcome { get; }
+    public FirstSeveranceFailureOutcome FailureOutcome { get; }
 }
 
-internal sealed class ThirdSeverancePylonDpsCheckDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeverancePylonDpsCheckDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeverancePylonDpsCheckDefinition(
+    public FirstSeverancePylonDpsCheckDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
-        in ThirdSeveranceParticipantScaledInt activePylons,
-        ThirdSeverancePylonSelectionRule slotSelectionRule,
+        in FirstSeveranceParticipantScaledInt activePylons,
+        FirstSeverancePylonSelectionRule slotSelectionRule,
         string serverDamageBudgetKey,
         bool usesParticipantAffinity,
-        ThirdSeveranceFailureOutcome failureOutcome)
+        FirstSeveranceFailureOutcome failureOutcome)
         : base(
             key,
-            ThirdSeveranceMechanicKind.PylonDpsCheck,
+            FirstSeveranceMechanicKind.PylonDpsCheck,
             startOffsetTicks,
             durationTicks,
-            ThirdSeveranceTargetRule.AssignedParticipant,
+            FirstSeveranceTargetRule.AssignedParticipant,
             failureOutcome)
     {
         if (!activePylons.FitsParticipantCount
-            || activePylons.FourParticipants > ThirdSeveranceArenaBlueprint.RequiredPylonSlotCount)
+            || activePylons.FourParticipants > FirstSeveranceArenaBlueprint.RequiredPylonSlotCount)
         {
             throw new ArgumentOutOfRangeException(nameof(activePylons));
         }
@@ -184,9 +184,9 @@ internal sealed class ThirdSeverancePylonDpsCheckDefinition : ThirdSeveranceMech
         UsesParticipantAffinity = usesParticipantAffinity;
     }
 
-    public ThirdSeveranceParticipantScaledInt ActivePylons { get; }
+    public FirstSeveranceParticipantScaledInt ActivePylons { get; }
 
-    public ThirdSeverancePylonSelectionRule SlotSelectionRule { get; }
+    public FirstSeverancePylonSelectionRule SlotSelectionRule { get; }
 
     // Future authority code resolves this key to tuned HP. Clients never report DPS success.
     public string ServerDamageBudgetKey { get; }
@@ -194,9 +194,9 @@ internal sealed class ThirdSeverancePylonDpsCheckDefinition : ThirdSeveranceMech
     public bool UsesParticipantAffinity { get; }
 }
 
-internal sealed class ThirdSeverancePartBreakDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeverancePartBreakDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeverancePartBreakDefinition(
+    public FirstSeverancePartBreakDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
@@ -204,11 +204,11 @@ internal sealed class ThirdSeverancePartBreakDefinition : ThirdSeveranceMechanic
         int maximumStrategicBreaks)
         : base(
             key,
-            ThirdSeveranceMechanicKind.PartBreakWindow,
+            FirstSeveranceMechanicKind.PartBreakWindow,
             startOffsetTicks,
             durationTicks,
-            ThirdSeveranceTargetRule.AllParticipants,
-            ThirdSeveranceFailureOutcome.None)
+            FirstSeveranceTargetRule.AllParticipants,
+            FirstSeveranceFailureOutcome.None)
     {
         ArgumentNullException.ThrowIfNull(eligiblePartKeys);
 
@@ -222,7 +222,7 @@ internal sealed class ThirdSeverancePartBreakDefinition : ThirdSeveranceMechanic
             throw new ArgumentOutOfRangeException(nameof(maximumStrategicBreaks));
         }
 
-        EligiblePartKeys = ThirdSeverancePlanCollections.Copy(eligiblePartKeys, nameof(eligiblePartKeys));
+        EligiblePartKeys = FirstSeverancePlanCollections.Copy(eligiblePartKeys, nameof(eligiblePartKeys));
         MaximumStrategicBreaks = maximumStrategicBreaks;
     }
 
@@ -231,22 +231,22 @@ internal sealed class ThirdSeverancePartBreakDefinition : ThirdSeveranceMechanic
     public int MaximumStrategicBreaks { get; }
 }
 
-internal sealed class ThirdSeveranceStackDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeveranceStackDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeveranceStackDefinition(
+    public FirstSeveranceStackDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
         int radiusInTiles,
-        in ThirdSeveranceParticipantScaledInt requiredParticipants,
+        in FirstSeveranceParticipantScaledInt requiredParticipants,
         int successWeaknessStacks)
         : base(
             key,
-            ThirdSeveranceMechanicKind.Stack,
+            FirstSeveranceMechanicKind.Stack,
             startOffsetTicks,
             durationTicks,
-            ThirdSeveranceTargetRule.DeterministicRandomParticipant,
-            ThirdSeveranceFailureOutcome.ApplyRaidDamageDown)
+            FirstSeveranceTargetRule.DeterministicRandomParticipant,
+            FirstSeveranceFailureOutcome.ApplyRaidDamageDown)
     {
         if (radiusInTiles <= 0
             || !requiredParticipants.FitsParticipantCount
@@ -262,14 +262,14 @@ internal sealed class ThirdSeveranceStackDefinition : ThirdSeveranceMechanicDefi
 
     public int RadiusInTiles { get; }
 
-    public ThirdSeveranceParticipantScaledInt RequiredParticipants { get; }
+    public FirstSeveranceParticipantScaledInt RequiredParticipants { get; }
 
     public int SuccessWeaknessStacks { get; }
 }
 
-internal sealed class ThirdSeveranceSpreadDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeveranceSpreadDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeveranceSpreadDefinition(
+    public FirstSeveranceSpreadDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
@@ -277,11 +277,11 @@ internal sealed class ThirdSeveranceSpreadDefinition : ThirdSeveranceMechanicDef
         int markerRadiusInTiles)
         : base(
             key,
-            ThirdSeveranceMechanicKind.Spread,
+            FirstSeveranceMechanicKind.Spread,
             startOffsetTicks,
             durationTicks,
-            ThirdSeveranceTargetRule.AllParticipants,
-            ThirdSeveranceFailureOutcome.ApplyParticipantDebuff)
+            FirstSeveranceTargetRule.AllParticipants,
+            FirstSeveranceFailureOutcome.ApplyParticipantDebuff)
     {
         if (minimumSeparationInTiles <= 0 || markerRadiusInTiles <= 0)
         {
@@ -297,24 +297,24 @@ internal sealed class ThirdSeveranceSpreadDefinition : ThirdSeveranceMechanicDef
     public int MarkerRadiusInTiles { get; }
 }
 
-internal sealed class ThirdSeveranceTargetedLineDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeveranceTargetedLineDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeveranceTargetedLineDefinition(
+    public FirstSeveranceTargetedLineDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
         int telegraphTicks,
         int lineWidthInTiles,
-        ThirdSeveranceTargetRule targetRule)
+        FirstSeveranceTargetRule targetRule)
         : base(
             key,
-            ThirdSeveranceMechanicKind.TargetedLine,
+            FirstSeveranceMechanicKind.TargetedLine,
             startOffsetTicks,
             durationTicks,
             targetRule,
-            ThirdSeveranceFailureOutcome.ApplyParticipantDebuff)
+            FirstSeveranceFailureOutcome.ApplyParticipantDebuff)
     {
-        if (targetRule is ThirdSeveranceTargetRule.None or ThirdSeveranceTargetRule.AllParticipants)
+        if (targetRule is FirstSeveranceTargetRule.None or FirstSeveranceTargetRule.AllParticipants)
         {
             throw new ArgumentOutOfRangeException(nameof(targetRule));
         }
@@ -333,9 +333,9 @@ internal sealed class ThirdSeveranceTargetedLineDefinition : ThirdSeveranceMecha
     public int LineWidthInTiles { get; }
 }
 
-internal sealed class ThirdSeverancePersonalEffigyDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeverancePersonalEffigyDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeverancePersonalEffigyDefinition(
+    public FirstSeverancePersonalEffigyDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
@@ -346,11 +346,11 @@ internal sealed class ThirdSeverancePersonalEffigyDefinition : ThirdSeveranceMec
         IReadOnlyList<string> attackArchetypeKeys)
         : base(
             key,
-            ThirdSeveranceMechanicKind.PersonalEffigy,
+            FirstSeveranceMechanicKind.PersonalEffigy,
             startOffsetTicks,
             durationTicks,
-            ThirdSeveranceTargetRule.AllParticipants,
-            ThirdSeveranceFailureOutcome.StrengthenBoss)
+            FirstSeveranceTargetRule.AllParticipants,
+            FirstSeveranceFailureOutcome.StrengthenBoss)
     {
         ArgumentNullException.ThrowIfNull(attackArchetypeKeys);
 
@@ -371,7 +371,7 @@ internal sealed class ThirdSeverancePersonalEffigyDefinition : ThirdSeveranceMec
         AssistDamagePermille = assistDamagePermille;
         FailureStrengthStacks = failureStrengthStacks;
         ServerClassResolutionKey = serverClassResolutionKey;
-        AttackArchetypeKeys = ThirdSeverancePlanCollections.Copy(
+        AttackArchetypeKeys = FirstSeverancePlanCollections.Copy(
             attackArchetypeKeys,
             nameof(attackArchetypeKeys));
     }
@@ -387,21 +387,21 @@ internal sealed class ThirdSeverancePersonalEffigyDefinition : ThirdSeveranceMec
     public IReadOnlyList<string> AttackArchetypeKeys { get; }
 }
 
-internal sealed class ThirdSeveranceWeakPointExposureDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeveranceWeakPointExposureDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeveranceWeakPointExposureDefinition(
+    public FirstSeveranceWeakPointExposureDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
         string weakPointKey,
         string serverDamageBudgetKey,
-        ThirdSeveranceFailureOutcome failureOutcome)
+        FirstSeveranceFailureOutcome failureOutcome)
         : base(
             key,
-            ThirdSeveranceMechanicKind.WeakPointExposure,
+            FirstSeveranceMechanicKind.WeakPointExposure,
             startOffsetTicks,
             durationTicks,
-            ThirdSeveranceTargetRule.AllParticipants,
+            FirstSeveranceTargetRule.AllParticipants,
             failureOutcome)
     {
         if (string.IsNullOrWhiteSpace(weakPointKey) || string.IsNullOrWhiteSpace(serverDamageBudgetKey))
@@ -418,18 +418,18 @@ internal sealed class ThirdSeveranceWeakPointExposureDefinition : ThirdSeverance
     public string ServerDamageBudgetKey { get; }
 }
 
-internal sealed class ThirdSeveranceBossAttackPatternDefinition : ThirdSeveranceMechanicDefinition
+internal sealed class FirstSeveranceBossAttackPatternDefinition : FirstSeveranceMechanicDefinition
 {
-    public ThirdSeveranceBossAttackPatternDefinition(
+    public FirstSeveranceBossAttackPatternDefinition(
         string key,
         int startOffsetTicks,
         int durationTicks,
         string patternKey,
-        ThirdSeveranceTargetRule targetRule,
-        ThirdSeveranceFailureOutcome failureOutcome)
+        FirstSeveranceTargetRule targetRule,
+        FirstSeveranceFailureOutcome failureOutcome)
         : base(
             key,
-            ThirdSeveranceMechanicKind.BossAttackPattern,
+            FirstSeveranceMechanicKind.BossAttackPattern,
             startOffsetTicks,
             durationTicks,
             targetRule,
@@ -446,26 +446,26 @@ internal sealed class ThirdSeveranceBossAttackPatternDefinition : ThirdSeverance
     public string PatternKey { get; }
 }
 
-internal sealed class ThirdSeverancePhaseDefinition
+internal sealed class FirstSeverancePhaseDefinition
 {
     // A phase-entry count is deliberately bounded. The authority executor must
     // apply the plan's LoopExhaustionOutcome before exceeding this per-phase cap.
     public const int MaximumSupportedVisits = 16;
 
-    public ThirdSeverancePhaseDefinition(
-        ThirdSeverancePhaseId id,
+    public FirstSeverancePhaseDefinition(
+        FirstSeverancePhaseId id,
         string bossFormKey,
         int maximumDurationTicks,
-        ThirdSeverancePhaseExitRule exitRule,
-        ThirdSeverancePhaseId nextPhaseOnResolution,
-        ThirdSeverancePhaseId nextPhaseOnSoftFailure,
+        FirstSeverancePhaseExitRule exitRule,
+        FirstSeverancePhaseId nextPhaseOnResolution,
+        FirstSeverancePhaseId nextPhaseOnSoftFailure,
         int maximumVisits,
         bool canBeInterruptedByLastStand,
-        IReadOnlyList<ThirdSeveranceMechanicDefinition> mechanics)
+        IReadOnlyList<FirstSeveranceMechanicDefinition> mechanics)
     {
         ArgumentNullException.ThrowIfNull(mechanics);
 
-        if (id == ThirdSeverancePhaseId.None || !Enum.IsDefined(id))
+        if (id == FirstSeverancePhaseId.None || !Enum.IsDefined(id))
         {
             throw new ArgumentOutOfRangeException(nameof(id));
         }
@@ -508,24 +508,24 @@ internal sealed class ThirdSeverancePhaseDefinition
         NextPhaseOnSoftFailure = nextPhaseOnSoftFailure;
         MaximumVisits = maximumVisits;
         CanBeInterruptedByLastStand = canBeInterruptedByLastStand;
-        Mechanics = ThirdSeverancePlanCollections.Copy(mechanics, nameof(mechanics));
+        Mechanics = FirstSeverancePlanCollections.Copy(mechanics, nameof(mechanics));
     }
 
-    public ThirdSeverancePhaseId Id { get; }
+    public FirstSeverancePhaseId Id { get; }
 
     public string BossFormKey { get; }
 
     public int MaximumDurationTicks { get; }
 
-    public ThirdSeverancePhaseExitRule ExitRule { get; }
+    public FirstSeverancePhaseExitRule ExitRule { get; }
 
-    public ThirdSeverancePhaseId NextPhaseOnResolution { get; }
+    public FirstSeverancePhaseId NextPhaseOnResolution { get; }
 
-    public ThirdSeverancePhaseId NextPhaseOnSoftFailure { get; }
+    public FirstSeverancePhaseId NextPhaseOnSoftFailure { get; }
 
     public int MaximumVisits { get; }
 
     public bool CanBeInterruptedByLastStand { get; }
 
-    public IReadOnlyList<ThirdSeveranceMechanicDefinition> Mechanics { get; }
+    public IReadOnlyList<FirstSeveranceMechanicDefinition> Mechanics { get; }
 }

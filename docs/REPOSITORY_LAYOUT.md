@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - architecture.repository_layout
 aliases:
@@ -64,10 +64,9 @@ The repository root is the tModLoader Mod Source root. Do not move code into `sr
 
 ## Feature-name transition
 
-- Target first feature: `Content/Encounters/FirstSeverance`.
-- Current source: `Content/Encounters/ThirdSeverance`, an inert legacy bootstrap.
-- Rename directory/files/types/namespaces/key/failure prefixes/tests together in an isolated commit.
-- Do not add empty target directories early, preserve compatibility aliases for unpublished identifiers, or globally rewrite historical ADR/research/changelog content.
+- Current first feature: `Content/Encounters/FirstSeverance`, still an inert bootstrap until later slices connect world adapters.
+- The directory/files/types/namespaces/key/failure prefixes/tests were renamed together in one isolated commit.
+- Do not add compatibility aliases for the unpublished legacy identifier or globally rewrite historical ADR/research/changelog content.
 
 ## Naming and type rules
 

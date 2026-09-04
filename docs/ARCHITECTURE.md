@@ -5,7 +5,7 @@ status: accepted
 owners:
   - engineering
   - networking
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - architecture.module_boundaries
   - architecture.runtime_ownership
@@ -32,7 +32,7 @@ The architecture is a modular monolith: one tModLoader assembly with enforced so
 
 ## Current implementation note
 
-The source currently contains an inert `Content/Encounters/ThirdSeverance` bootstrap. The accepted target is `FirstSeverance`, but the atomic rename and replacement of its obsolete multipart plan have not occurred. [Status](STATUS.md) is authoritative; the current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
+The source currently contains an inert `Content/Encounters/FirstSeverance` bootstrap. The atomic identity rename is complete, but replacement of its obsolete multipart plan has not occurred. [Status](STATUS.md) is authoritative; the current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
 
 ## Dependency direction
 
@@ -66,8 +66,7 @@ Feature-local `ModSystem` code registers immutable `EncounterDefinition` objects
 Current-to-target migration:
 
 ```text
-ThirdSeveranceRegistrationSystem (current inert code)
-  -> atomic rename to FirstSeveranceRegistrationSystem
+FirstSeveranceRegistrationSystem (current inert code)
   -> EncounterCatalogSystem.Registry
   -> FirstSeveranceDefinition
   -> FirstSeveranceRuntimeFactory
@@ -145,7 +144,7 @@ The same exact-Fight cleanup can be called repeatedly; stale-Fight cleanup never
 
 `Content/Encounters/FirstSeverance` will own the simple Boss, Pylons, active-loop executor, typed tuning, mechanics, arena adapters, and feature snapshot. Ring/arms are presentation components of one Boss NPC. Pylons are separately owned NPCs.
 
-The current `ThirdSeverance` immutable plan with parts/effigies/Last Stand is not reusable Common infrastructure. Replace it in the feature; do not generalize it.
+The current `FirstSeverance` immutable plan still carries legacy parts/effigies/Last Stand assumptions and is not reusable Common infrastructure. Replace it in the feature; do not generalize it.
 
 ## Downed and Revive boundary
 

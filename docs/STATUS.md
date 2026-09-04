@@ -12,7 +12,7 @@ aliases:
   - implementation inventory
 related_code:
   - Common
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Tests/Convergence.DomainTests
 related_docs:
   - handoff.windows
@@ -35,13 +35,12 @@ As of 2026-09-05, Convergence is a documented architecture bootstrap with tested
 
 ## Implemented as a disconnected or obsolete bootstrap
 
-- `Content/Encounters/ThirdSeverance` contains an immutable 320x140 Core-anchored arena blueprint, four deterministic Pylon slots, logical outsider policy, a cleanup-safe inert runtime, and a boundary around the revive service.
-- The same module also contains a multipart seven-phase plan with Part Break, Targeted Line, Effigies, damage-budget exposure, and Last Stand. That plan is superseded as a product specification by [ADR-0007](adr/0007-first-severance-vertical-slice.md) and the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md); it remains code until the controlled Windows rename/simplification slice.
-- `ThirdSeveranceAvailabilityPolicy` rejects activation. `InertThirdSeveranceWorldAdapter` does not spawn or mutate Terraria entities. These safety gates must remain until their replacement adapters are tested.
+- `Content/Encounters/FirstSeverance` contains an immutable 320x140 Core-anchored arena blueprint, four deterministic Pylon slots, logical outsider policy, a cleanup-safe inert runtime, and a boundary around the revive service.
+- The same module also contains a multipart seven-phase plan with Part Break, Targeted Line, Effigies, damage-budget exposure, and Last Stand. That plan is superseded as a product specification by [ADR-0007](adr/0007-first-severance-vertical-slice.md) and the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md); its identity is renamed, but its behavior remains until the isolated plan-simplification slice.
+- `FirstSeveranceAvailabilityPolicy` rejects activation. `InertFirstSeveranceWorldAdapter` does not spawn or mutate Terraria entities. These safety gates must remain until their replacement adapters are tested.
 
 ## Not implemented
 
-- `FirstSeverance` directory, namespace, types, stable key, and failure-code rename.
 - Foundation Core Item/Tile/Tile Entity; server Core resolution; world/progression/roster validation; Ready flow; live Barrier.
 - Boss NPC, Pylon NPCs, authoritative phase executor, damage gate/collector, Stack/Spread resolver, projectiles, synchronized feature snapshot/deltas, or client presentation.
 - Feature-neutral terminal descriptor, definition-owned external end mapping, or coordinator bridge that preserves a First Severance cause across World unload/runtime exception/fatal protocol shutdown.
@@ -79,4 +78,4 @@ The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, C
 
 ## Next change
 
-Rename `ThirdSeverance` to `FirstSeverance` in one isolated commit while activation remains denied. Do not combine the rename with plan simplification, live actor spawning, or death-hook interception.
+Replace the obsolete multipart immutable plan and tests with the accepted repeated Pylon → Stack → Spread → Core-exposure loop in a separate Slice 2 commit. Keep activation denied and do not combine the plan change with live actor spawning or death-hook interception.

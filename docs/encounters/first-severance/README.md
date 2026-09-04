@@ -4,7 +4,7 @@ document_type: overview
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - first_severance.document_map
 aliases:
@@ -12,7 +12,7 @@ aliases:
   - 第一断絶
   - first_severance
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
 related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.plan
@@ -21,7 +21,7 @@ related_docs:
 
 # First Severance
 
-`First Severance`（第一断絶）は、Convergenceで最初に完成させる2～4人向けRaidです。現在のコードは旧名`ThirdSeverance`の不活性bootstrapであり、Windowsの独立したrename commitで`FirstSeverance` / `first_severance`へ移行します。
+`First Severance`（第一断絶）は、Convergenceで最初に完成させる2～4人向けRaidです。現在のコードは`FirstSeverance` / `first_severance`へrename済みですが、不活性bootstrapと旧multipart planのままであり、まだplayableではありません。
 
 ## Current slice
 

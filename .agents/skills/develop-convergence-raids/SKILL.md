@@ -11,7 +11,7 @@ Preserve Convergence's modular-monolith boundaries while adding multiplayer Raid
 
 1. Locate the repository root from `AGENTS.md` and `ConvergenceMod.csproj`.
 2. Read `AGENTS.md`, `docs/README.md`, `docs/STATUS.md`, `docs/VERSION_MATRIX.md`, `docs/ARCHITECTURE.md`, and `docs/NETWORK_ARCHITECTURE.md` completely.
-3. For First Severance work, read `docs/encounters/first-severance/README.md` and the current spec/implementation plan. Current source named `ThirdSeverance` is legacy until the isolated rename; never infer that old phase plan is still the product target.
+3. For First Severance work, read `docs/encounters/first-severance/README.md` and the current spec/implementation plan. Source now uses `FirstSeverance`, but its old multipart phase plan remains until Slice 2; never infer that plan is still the product target.
 4. For Downed/Revive work, also read ADR-0005, the feature Revive spec, and `docs/TEST_PLAN.md`. For arena work, also read `docs/ARENA_INFRASTRUCTURE.md` and ADR-0003.
 5. State the planned files, authoritative owner, client request path, replicated output, cleanup owner, and unresolved adapters before editing.
 6. Keep candidate tModLoader/Calamity versions unverified until real Build + Reload and Dedicated Server evidence succeeds.

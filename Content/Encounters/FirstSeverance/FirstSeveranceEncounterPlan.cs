@@ -3,184 +3,184 @@
 using System;
 using System.Collections.Generic;
 
-namespace Convergence.Content.Encounters.ThirdSeverance;
+namespace Convergence.Content.Encounters.FirstSeverance;
 
 // Immutable feature-owned configuration. A future authority-only executor consumes
 // this schedule and replicates assignments/results; clients never advance it.
-internal sealed class ThirdSeveranceEncounterPlan
+internal sealed class FirstSeveranceEncounterPlan
 {
-    public static ThirdSeveranceEncounterPlan Instance { get; } = CreateDefault();
+    public static FirstSeveranceEncounterPlan Instance { get; } = CreateDefault();
 
-    private ThirdSeveranceEncounterPlan(
-        ThirdSeveranceArenaBlueprint arena,
-        ThirdSeveranceArenaAccessPolicy accessPolicy,
-        ThirdSeveranceBossPlan boss,
-        IReadOnlyList<ThirdSeverancePhaseDefinition> phases)
+    private FirstSeveranceEncounterPlan(
+        FirstSeveranceArenaBlueprint arena,
+        FirstSeveranceArenaAccessPolicy accessPolicy,
+        FirstSeveranceBossPlan boss,
+        IReadOnlyList<FirstSeverancePhaseDefinition> phases)
     {
         Arena = arena ?? throw new ArgumentNullException(nameof(arena));
         AccessPolicy = accessPolicy ?? throw new ArgumentNullException(nameof(accessPolicy));
         Boss = boss ?? throw new ArgumentNullException(nameof(boss));
-        Phases = ThirdSeverancePlanCollections.Copy(phases, nameof(phases));
+        Phases = FirstSeverancePlanCollections.Copy(phases, nameof(phases));
 
         ValidatePlan();
     }
 
-    public ThirdSeveranceArenaBlueprint Arena { get; }
+    public FirstSeveranceArenaBlueprint Arena { get; }
 
-    public ThirdSeveranceArenaAccessPolicy AccessPolicy { get; }
+    public FirstSeveranceArenaAccessPolicy AccessPolicy { get; }
 
-    public ThirdSeveranceBossPlan Boss { get; }
+    public FirstSeveranceBossPlan Boss { get; }
 
-    public IReadOnlyList<ThirdSeverancePhaseDefinition> Phases { get; }
+    public IReadOnlyList<FirstSeverancePhaseDefinition> Phases { get; }
 
-    public ThirdSeverancePhaseId FirstPhase => ThirdSeverancePhaseId.BaseActivation;
+    public FirstSeverancePhaseId FirstPhase => FirstSeverancePhaseId.BaseActivation;
 
     public int HardEnrageOverloadThreshold => 3;
 
-    public ThirdSeveranceFailureOutcome LoopExhaustionOutcome =>
-        ThirdSeveranceFailureOutcome.AdvanceHardEnrage;
+    public FirstSeveranceFailureOutcome LoopExhaustionOutcome =>
+        FirstSeveranceFailureOutcome.AdvanceHardEnrage;
 
-    private static ThirdSeveranceEncounterPlan CreateDefault()
+    private static FirstSeveranceEncounterPlan CreateDefault()
     {
         var strategicPartKeys = Array.AsReadOnly(
             new[]
             {
-                ThirdSeveranceBossKeys.CrownPart,
-                ThirdSeveranceBossKeys.WingsPart,
-                ThirdSeveranceBossKeys.HeartCasingPart,
+                FirstSeveranceBossKeys.CrownPart,
+                FirstSeveranceBossKeys.WingsPart,
+                FirstSeveranceBossKeys.HeartCasingPart,
             });
 
         var phases = Array.AsReadOnly(
             new[]
             {
-                new ThirdSeverancePhaseDefinition(
-                    ThirdSeverancePhaseId.BaseActivation,
-                    ThirdSeveranceBossKeys.SealedForm,
+                new FirstSeverancePhaseDefinition(
+                    FirstSeverancePhaseId.BaseActivation,
+                    FirstSeveranceBossKeys.SealedForm,
                     360,
-                    ThirdSeverancePhaseExitRule.PreparationComplete,
-                    ThirdSeverancePhaseId.SealRelease,
-                    ThirdSeverancePhaseId.SealRelease,
+                    FirstSeverancePhaseExitRule.PreparationComplete,
+                    FirstSeverancePhaseId.SealRelease,
+                    FirstSeverancePhaseId.SealRelease,
                     1,
                     false,
-                    Array.AsReadOnly<ThirdSeveranceMechanicDefinition>(
-                        new ThirdSeveranceMechanicDefinition[]
+                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
+                        new FirstSeveranceMechanicDefinition[]
                         {
-                            new ThirdSeveranceBossAttackPatternDefinition(
+                            new FirstSeveranceBossAttackPatternDefinition(
                                 "base_activation_warning",
                                 0,
                                 300,
                                 "sealed_observation",
-                                ThirdSeveranceTargetRule.None,
-                                ThirdSeveranceFailureOutcome.None),
+                                FirstSeveranceTargetRule.None,
+                                FirstSeveranceFailureOutcome.None),
                         })),
-                new ThirdSeverancePhaseDefinition(
-                    ThirdSeverancePhaseId.SealRelease,
-                    ThirdSeveranceBossKeys.SealedForm,
+                new FirstSeverancePhaseDefinition(
+                    FirstSeverancePhaseId.SealRelease,
+                    FirstSeveranceBossKeys.SealedForm,
                     1800,
-                    ThirdSeverancePhaseExitRule.MechanicResolvedOrDeadline,
-                    ThirdSeverancePhaseId.PartBreak,
-                    ThirdSeverancePhaseId.PartBreak,
+                    FirstSeverancePhaseExitRule.MechanicResolvedOrDeadline,
+                    FirstSeverancePhaseId.PartBreak,
+                    FirstSeverancePhaseId.PartBreak,
                     1,
                     false,
-                    Array.AsReadOnly<ThirdSeveranceMechanicDefinition>(
-                        new ThirdSeveranceMechanicDefinition[]
+                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
+                        new FirstSeveranceMechanicDefinition[]
                         {
-                            new ThirdSeverancePylonDpsCheckDefinition(
+                            new FirstSeverancePylonDpsCheckDefinition(
                                 "seal_release_pylon_dps_check",
                                 180,
                                 1200,
-                                new ThirdSeveranceParticipantScaledInt(2, 3, 4),
-                                ThirdSeverancePylonSelectionRule.RosterMappedSymmetricSlots,
+                                new FirstSeveranceParticipantScaledInt(2, 3, 4),
+                                FirstSeverancePylonSelectionRule.RosterMappedSymmetricSlots,
                                 "balance_pylon_damage_per_participant",
                                 true,
-                                ThirdSeveranceFailureOutcome.ApplyOverload),
-                            new ThirdSeveranceBossAttackPatternDefinition(
+                                FirstSeveranceFailureOutcome.ApplyOverload),
+                            new FirstSeveranceBossAttackPatternDefinition(
                                 "seal_release_pylon_crossfire",
                                 300,
                                 1200,
                                 "pylon_crossfire",
-                                ThirdSeveranceTargetRule.AllParticipants,
-                                ThirdSeveranceFailureOutcome.ApplyParticipantDebuff),
+                                FirstSeveranceTargetRule.AllParticipants,
+                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
                         })),
-                new ThirdSeverancePhaseDefinition(
-                    ThirdSeverancePhaseId.PartBreak,
-                    ThirdSeveranceBossKeys.ManifestForm,
+                new FirstSeverancePhaseDefinition(
+                    FirstSeverancePhaseId.PartBreak,
+                    FirstSeveranceBossKeys.ManifestForm,
                     1800,
-                    ThirdSeverancePhaseExitRule.MechanicResolvedOrDeadline,
-                    ThirdSeverancePhaseId.Coordination,
-                    ThirdSeverancePhaseId.Coordination,
+                    FirstSeverancePhaseExitRule.MechanicResolvedOrDeadline,
+                    FirstSeverancePhaseId.Coordination,
+                    FirstSeverancePhaseId.Coordination,
                     3,
                     true,
-                    Array.AsReadOnly<ThirdSeveranceMechanicDefinition>(
-                        new ThirdSeveranceMechanicDefinition[]
+                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
+                        new FirstSeveranceMechanicDefinition[]
                         {
-                            new ThirdSeverancePartBreakDefinition(
+                            new FirstSeverancePartBreakDefinition(
                                 "part_break_strategic_choice",
                                 120,
                                 1320,
                                 strategicPartKeys,
                                 1),
-                            new ThirdSeveranceBossAttackPatternDefinition(
+                            new FirstSeveranceBossAttackPatternDefinition(
                                 "part_break_wing_crossing",
                                 300,
                                 1200,
                                 "wing_crossing",
-                                ThirdSeveranceTargetRule.FarthestParticipant,
-                                ThirdSeveranceFailureOutcome.ApplyParticipantDebuff),
+                                FirstSeveranceTargetRule.FarthestParticipant,
+                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
                         })),
-                new ThirdSeverancePhaseDefinition(
-                    ThirdSeverancePhaseId.Coordination,
-                    ThirdSeveranceBossKeys.ManifestForm,
+                new FirstSeverancePhaseDefinition(
+                    FirstSeverancePhaseId.Coordination,
+                    FirstSeveranceBossKeys.ManifestForm,
                     1800,
-                    ThirdSeverancePhaseExitRule.AllScheduledMechanicsResolved,
-                    ThirdSeverancePhaseId.PersonalEffigies,
-                    ThirdSeverancePhaseId.PersonalEffigies,
+                    FirstSeverancePhaseExitRule.AllScheduledMechanicsResolved,
+                    FirstSeverancePhaseId.PersonalEffigies,
+                    FirstSeverancePhaseId.PersonalEffigies,
                     3,
                     true,
-                    Array.AsReadOnly<ThirdSeveranceMechanicDefinition>(
-                        new ThirdSeveranceMechanicDefinition[]
+                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
+                        new FirstSeveranceMechanicDefinition[]
                         {
-                            new ThirdSeveranceStackDefinition(
+                            new FirstSeveranceStackDefinition(
                                 "coordination_stack",
                                 120,
                                 300,
                                 10,
-                                new ThirdSeveranceParticipantScaledInt(2, 2, 3),
+                                new FirstSeveranceParticipantScaledInt(2, 2, 3),
                                 1),
-                            new ThirdSeveranceSpreadDefinition(
+                            new FirstSeveranceSpreadDefinition(
                                 "coordination_spread",
                                 600,
                                 300,
                                 16,
                                 7),
-                            new ThirdSeveranceTargetedLineDefinition(
+                            new FirstSeveranceTargetedLineDefinition(
                                 "coordination_targeted_line",
                                 1080,
                                 360,
                                 120,
                                 9,
-                                ThirdSeveranceTargetRule.HighestRecentServerDamageParticipant),
-                            new ThirdSeveranceBossAttackPatternDefinition(
+                                FirstSeveranceTargetRule.HighestRecentServerDamageParticipant),
+                            new FirstSeveranceBossAttackPatternDefinition(
                                 "coordination_choir_sweep",
                                 60,
                                 1560,
                                 "choir_sweep",
-                                ThirdSeveranceTargetRule.AllParticipants,
-                                ThirdSeveranceFailureOutcome.ApplyParticipantDebuff),
+                                FirstSeveranceTargetRule.AllParticipants,
+                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
                         })),
-                new ThirdSeverancePhaseDefinition(
-                    ThirdSeverancePhaseId.PersonalEffigies,
-                    ThirdSeveranceBossKeys.ConvergenceForm,
+                new FirstSeverancePhaseDefinition(
+                    FirstSeverancePhaseId.PersonalEffigies,
+                    FirstSeveranceBossKeys.ConvergenceForm,
                     1800,
-                    ThirdSeverancePhaseExitRule.MechanicResolvedOrDeadline,
-                    ThirdSeverancePhaseId.WeakPointExposure,
-                    ThirdSeverancePhaseId.WeakPointExposure,
+                    FirstSeverancePhaseExitRule.MechanicResolvedOrDeadline,
+                    FirstSeverancePhaseId.WeakPointExposure,
+                    FirstSeverancePhaseId.WeakPointExposure,
                     3,
                     true,
-                    Array.AsReadOnly<ThirdSeveranceMechanicDefinition>(
-                        new ThirdSeveranceMechanicDefinition[]
+                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
+                        new FirstSeveranceMechanicDefinition[]
                         {
-                            new ThirdSeverancePersonalEffigyDefinition(
+                            new FirstSeverancePersonalEffigyDefinition(
                                 "personal_effigies_owner_trial",
                                 120,
                                 1320,
@@ -198,109 +198,109 @@ internal sealed class ThirdSeveranceEncounterPlan
                                         "rogue_false_telegraph",
                                         "classless_fallback",
                                     })),
-                            new ThirdSeveranceBossAttackPatternDefinition(
+                            new FirstSeveranceBossAttackPatternDefinition(
                                 "personal_effigies_identity_pressure",
                                 300,
                                 1200,
                                 "identity_pressure",
-                                ThirdSeveranceTargetRule.AllParticipants,
-                                ThirdSeveranceFailureOutcome.StrengthenBoss),
+                                FirstSeveranceTargetRule.AllParticipants,
+                                FirstSeveranceFailureOutcome.StrengthenBoss),
                         })),
-                new ThirdSeverancePhaseDefinition(
-                    ThirdSeverancePhaseId.WeakPointExposure,
-                    ThirdSeveranceBossKeys.ExposedForm,
+                new FirstSeverancePhaseDefinition(
+                    FirstSeverancePhaseId.WeakPointExposure,
+                    FirstSeveranceBossKeys.ExposedForm,
                     900,
-                    ThirdSeverancePhaseExitRule.BossLifeOrDeadline,
-                    ThirdSeverancePhaseId.PartBreak,
-                    ThirdSeverancePhaseId.PartBreak,
+                    FirstSeverancePhaseExitRule.BossLifeOrDeadline,
+                    FirstSeverancePhaseId.PartBreak,
+                    FirstSeverancePhaseId.PartBreak,
                     3,
                     true,
-                    Array.AsReadOnly<ThirdSeveranceMechanicDefinition>(
-                        new ThirdSeveranceMechanicDefinition[]
+                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
+                        new FirstSeveranceMechanicDefinition[]
                         {
-                            new ThirdSeveranceWeakPointExposureDefinition(
+                            new FirstSeveranceWeakPointExposureDefinition(
                                 "weak_point_core_burst",
                                 120,
                                 780,
-                                ThirdSeveranceBossKeys.CoreWeakPoint,
+                                FirstSeveranceBossKeys.CoreWeakPoint,
                                 "balance_core_burst_damage_per_participant",
-                                ThirdSeveranceFailureOutcome.ApplyOverload),
-                            new ThirdSeveranceBossAttackPatternDefinition(
+                                FirstSeveranceFailureOutcome.ApplyOverload),
+                            new FirstSeveranceBossAttackPatternDefinition(
                                 "weak_point_sustained_beam",
                                 120,
                                 780,
                                 "sustained_exposure_beam",
-                                ThirdSeveranceTargetRule.AllParticipants,
-                                ThirdSeveranceFailureOutcome.ApplyParticipantDebuff),
+                                FirstSeveranceTargetRule.AllParticipants,
+                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
                         })),
-                new ThirdSeverancePhaseDefinition(
-                    ThirdSeverancePhaseId.LastStand,
-                    ThirdSeveranceBossKeys.LastStandForm,
+                new FirstSeverancePhaseDefinition(
+                    FirstSeverancePhaseId.LastStand,
+                    FirstSeveranceBossKeys.LastStandForm,
                     2400,
-                    ThirdSeverancePhaseExitRule.FixedSequenceComplete,
-                    ThirdSeverancePhaseId.None,
-                    ThirdSeverancePhaseId.None,
+                    FirstSeverancePhaseExitRule.FixedSequenceComplete,
+                    FirstSeverancePhaseId.None,
+                    FirstSeverancePhaseId.None,
                     1,
                     false,
-                    Array.AsReadOnly<ThirdSeveranceMechanicDefinition>(
-                        new ThirdSeveranceMechanicDefinition[]
+                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
+                        new FirstSeveranceMechanicDefinition[]
                         {
-                            new ThirdSeveranceBossAttackPatternDefinition(
+                            new FirstSeveranceBossAttackPatternDefinition(
                                 "last_stand_individual_judgment",
                                 0,
                                 1800,
                                 "final_individual_judgment",
-                                ThirdSeveranceTargetRule.AllParticipants,
-                                ThirdSeveranceFailureOutcome.ApplyParticipantDebuff),
-                            new ThirdSeveranceTargetedLineDefinition(
+                                FirstSeveranceTargetRule.AllParticipants,
+                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
+                            new FirstSeveranceTargetedLineDefinition(
                                 "last_stand_targeted_line",
                                 120,
                                 420,
                                 150,
                                 8,
-                                ThirdSeveranceTargetRule.DeterministicRandomParticipant),
-                            new ThirdSeveranceSpreadDefinition(
+                                FirstSeveranceTargetRule.DeterministicRandomParticipant),
+                            new FirstSeveranceSpreadDefinition(
                                 "last_stand_spread",
                                 720,
                                 360,
                                 18,
                                 7),
-                            new ThirdSeveranceStackDefinition(
+                            new FirstSeveranceStackDefinition(
                                 "last_stand_stack",
                                 1260,
                                 360,
                                 9,
-                                new ThirdSeveranceParticipantScaledInt(2, 3, 4),
+                                new FirstSeveranceParticipantScaledInt(2, 3, 4),
                                 1),
-                            new ThirdSeveranceWeakPointExposureDefinition(
+                            new FirstSeveranceWeakPointExposureDefinition(
                                 "last_stand_final_core",
                                 1800,
                                 600,
-                                ThirdSeveranceBossKeys.CoreWeakPoint,
+                                FirstSeveranceBossKeys.CoreWeakPoint,
                                 "balance_last_stand_core_damage",
-                                ThirdSeveranceFailureOutcome.AdvanceHardEnrage),
+                                FirstSeveranceFailureOutcome.AdvanceHardEnrage),
                         })),
             });
 
-        return new ThirdSeveranceEncounterPlan(
-            ThirdSeveranceArenaBlueprint.Instance,
-            ThirdSeveranceArenaAccessPolicy.Instance,
-            ThirdSeveranceBossPlan.CreateDefault(),
+        return new FirstSeveranceEncounterPlan(
+            FirstSeveranceArenaBlueprint.Instance,
+            FirstSeveranceArenaAccessPolicy.Instance,
+            FirstSeveranceBossPlan.CreateDefault(),
             phases);
     }
 
     private void ValidatePlan()
     {
-        if (Arena.Profile.WidthInTiles != ThirdSeveranceArenaBlueprint.WidthInTiles
-            || Arena.Profile.HeightInTiles != ThirdSeveranceArenaBlueprint.HeightInTiles)
+        if (Arena.Profile.WidthInTiles != FirstSeveranceArenaBlueprint.WidthInTiles
+            || Arena.Profile.HeightInTiles != FirstSeveranceArenaBlueprint.HeightInTiles)
         {
-            throw new InvalidOperationException("Third Severance requires the 320x140 arena profile.");
+            throw new InvalidOperationException("First Severance requires the 320x140 arena profile.");
         }
 
-        var formsByKey = new Dictionary<string, ThirdSeveranceBossFormDefinition>(StringComparer.Ordinal);
+        var formsByKey = new Dictionary<string, FirstSeveranceBossFormDefinition>(StringComparer.Ordinal);
         for (int formIndex = 0; formIndex < Boss.Forms.Count; formIndex++)
         {
-            ThirdSeveranceBossFormDefinition form = Boss.Forms[formIndex];
+            FirstSeveranceBossFormDefinition form = Boss.Forms[formIndex];
             formsByKey.Add(form.Key, form);
         }
 
@@ -310,17 +310,17 @@ internal sealed class ThirdSeveranceEncounterPlan
             partKeys.Add(Boss.Parts[partIndex].Key);
         }
 
-        var phasesById = new Dictionary<ThirdSeverancePhaseId, ThirdSeverancePhaseDefinition>();
+        var phasesById = new Dictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition>();
         var mechanicKeys = new HashSet<string>(StringComparer.Ordinal);
         for (int phaseIndex = 0; phaseIndex < Phases.Count; phaseIndex++)
         {
-            ThirdSeverancePhaseDefinition phase = Phases[phaseIndex];
+            FirstSeverancePhaseDefinition phase = Phases[phaseIndex];
             if (!phasesById.TryAdd(phase.Id, phase))
             {
                 throw new InvalidOperationException($"Duplicate phase '{phase.Id}'.");
             }
 
-            if (!formsByKey.TryGetValue(phase.BossFormKey, out ThirdSeveranceBossFormDefinition? form))
+            if (!formsByKey.TryGetValue(phase.BossFormKey, out FirstSeveranceBossFormDefinition? form))
             {
                 throw new InvalidOperationException(
                     $"Phase '{phase.Id}' references unknown form '{phase.BossFormKey}'.");
@@ -339,14 +339,14 @@ internal sealed class ThirdSeveranceEncounterPlan
         }
 
         if (!phasesById.ContainsKey(FirstPhase)
-            || !phasesById.ContainsKey(ThirdSeverancePhaseId.LastStand))
+            || !phasesById.ContainsKey(FirstSeverancePhaseId.LastStand))
         {
             throw new InvalidOperationException("The plan requires activation and Last Stand phases.");
         }
 
         for (int phaseIndex = 0; phaseIndex < Phases.Count; phaseIndex++)
         {
-            ThirdSeverancePhaseDefinition phase = Phases[phaseIndex];
+            FirstSeverancePhaseDefinition phase = Phases[phaseIndex];
             ValidateDestination(phase.Id, phase.NextPhaseOnResolution, phasesById);
             ValidateDestination(phase.Id, phase.NextPhaseOnSoftFailure, phasesById);
             ValidateTerminalContract(phase);
@@ -355,15 +355,15 @@ internal sealed class ThirdSeveranceEncounterPlan
         ValidateReachabilityAndFiniteCycles(phasesById);
     }
 
-    private static void ValidateTerminalContract(ThirdSeverancePhaseDefinition phase)
+    private static void ValidateTerminalContract(FirstSeverancePhaseDefinition phase)
     {
-        if (phase.Id == ThirdSeverancePhaseId.LastStand)
+        if (phase.Id == FirstSeverancePhaseId.LastStand)
         {
-            if (phase.NextPhaseOnResolution != ThirdSeverancePhaseId.None
-                || phase.NextPhaseOnSoftFailure != ThirdSeverancePhaseId.None
+            if (phase.NextPhaseOnResolution != FirstSeverancePhaseId.None
+                || phase.NextPhaseOnSoftFailure != FirstSeverancePhaseId.None
                 || phase.MaximumVisits != 1
                 || phase.CanBeInterruptedByLastStand
-                || phase.ExitRule != ThirdSeverancePhaseExitRule.FixedSequenceComplete)
+                || phase.ExitRule != FirstSeverancePhaseExitRule.FixedSequenceComplete)
             {
                 throw new InvalidOperationException(
                     "Last Stand must be a single-visit terminal fixed sequence.");
@@ -372,8 +372,8 @@ internal sealed class ThirdSeveranceEncounterPlan
             return;
         }
 
-        if (phase.NextPhaseOnResolution == ThirdSeverancePhaseId.None
-            || phase.NextPhaseOnSoftFailure == ThirdSeverancePhaseId.None)
+        if (phase.NextPhaseOnResolution == FirstSeverancePhaseId.None
+            || phase.NextPhaseOnSoftFailure == FirstSeverancePhaseId.None)
         {
             throw new InvalidOperationException(
                 $"Non-terminal phase '{phase.Id}' requires resolution and soft-failure targets.");
@@ -381,11 +381,11 @@ internal sealed class ThirdSeveranceEncounterPlan
     }
 
     private static void ValidateDestination(
-        ThirdSeverancePhaseId source,
-        ThirdSeverancePhaseId destination,
-        IReadOnlyDictionary<ThirdSeverancePhaseId, ThirdSeverancePhaseDefinition> knownPhases)
+        FirstSeverancePhaseId source,
+        FirstSeverancePhaseId destination,
+        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> knownPhases)
     {
-        if (destination != ThirdSeverancePhaseId.None && !knownPhases.ContainsKey(destination))
+        if (destination != FirstSeverancePhaseId.None && !knownPhases.ContainsKey(destination))
         {
             throw new InvalidOperationException(
                 $"Phase '{source}' references unknown destination '{destination}'.");
@@ -393,17 +393,17 @@ internal sealed class ThirdSeveranceEncounterPlan
     }
 
     private void ValidateReachabilityAndFiniteCycles(
-        IReadOnlyDictionary<ThirdSeverancePhaseId, ThirdSeverancePhaseDefinition> phasesById)
+        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> phasesById)
     {
-        var reachable = new HashSet<ThirdSeverancePhaseId>();
-        var pending = new Queue<ThirdSeverancePhaseId>();
+        var reachable = new HashSet<FirstSeverancePhaseId>();
+        var pending = new Queue<FirstSeverancePhaseId>();
         reachable.Add(FirstPhase);
         pending.Enqueue(FirstPhase);
 
         while (pending.Count > 0)
         {
-            ThirdSeverancePhaseId current = pending.Dequeue();
-            ThirdSeverancePhaseDefinition phase = phasesById[current];
+            FirstSeverancePhaseId current = pending.Dequeue();
+            FirstSeverancePhaseDefinition phase = phasesById[current];
             EnqueueReachable(phase.NextPhaseOnResolution, reachable, pending);
             EnqueueReachable(phase.NextPhaseOnSoftFailure, reachable, pending);
 
@@ -411,11 +411,11 @@ internal sealed class ThirdSeveranceEncounterPlan
             // interruptible phases into Last Stand; it is part of graph validity.
             if (phase.CanBeInterruptedByLastStand)
             {
-                EnqueueReachable(ThirdSeverancePhaseId.LastStand, reachable, pending);
+                EnqueueReachable(FirstSeverancePhaseId.LastStand, reachable, pending);
             }
         }
 
-        foreach (ThirdSeverancePhaseId phaseId in phasesById.Keys)
+        foreach (FirstSeverancePhaseId phaseId in phasesById.Keys)
         {
             if (!reachable.Contains(phaseId))
             {
@@ -423,10 +423,10 @@ internal sealed class ThirdSeveranceEncounterPlan
             }
         }
 
-        var visiting = new HashSet<ThirdSeverancePhaseId>();
-        var visited = new HashSet<ThirdSeverancePhaseId>();
+        var visiting = new HashSet<FirstSeverancePhaseId>();
+        var visited = new HashSet<FirstSeverancePhaseId>();
         bool hasCycle = HasCycleFrom(FirstPhase, phasesById, visiting, visited);
-        if (hasCycle && LoopExhaustionOutcome == ThirdSeveranceFailureOutcome.None)
+        if (hasCycle && LoopExhaustionOutcome == FirstSeveranceFailureOutcome.None)
         {
             throw new InvalidOperationException(
                 "A cyclic phase graph requires a non-empty loop exhaustion outcome.");
@@ -434,21 +434,21 @@ internal sealed class ThirdSeveranceEncounterPlan
     }
 
     private static void EnqueueReachable(
-        ThirdSeverancePhaseId destination,
-        HashSet<ThirdSeverancePhaseId> reachable,
-        Queue<ThirdSeverancePhaseId> pending)
+        FirstSeverancePhaseId destination,
+        HashSet<FirstSeverancePhaseId> reachable,
+        Queue<FirstSeverancePhaseId> pending)
     {
-        if (destination != ThirdSeverancePhaseId.None && reachable.Add(destination))
+        if (destination != FirstSeverancePhaseId.None && reachable.Add(destination))
         {
             pending.Enqueue(destination);
         }
     }
 
     private static bool HasCycleFrom(
-        ThirdSeverancePhaseId phaseId,
-        IReadOnlyDictionary<ThirdSeverancePhaseId, ThirdSeverancePhaseDefinition> phasesById,
-        HashSet<ThirdSeverancePhaseId> visiting,
-        HashSet<ThirdSeverancePhaseId> visited)
+        FirstSeverancePhaseId phaseId,
+        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> phasesById,
+        HashSet<FirstSeverancePhaseId> visiting,
+        HashSet<FirstSeverancePhaseId> visited)
     {
         if (visited.Contains(phaseId))
         {
@@ -460,7 +460,7 @@ internal sealed class ThirdSeveranceEncounterPlan
             return true;
         }
 
-        ThirdSeverancePhaseDefinition phase = phasesById[phaseId];
+        FirstSeverancePhaseDefinition phase = phasesById[phaseId];
         if (HasCycleAtDestination(
                 phase.NextPhaseOnResolution,
                 phasesById,
@@ -473,7 +473,7 @@ internal sealed class ThirdSeveranceEncounterPlan
                 visited)
             || (phase.CanBeInterruptedByLastStand
                 && HasCycleAtDestination(
-                    ThirdSeverancePhaseId.LastStand,
+                    FirstSeverancePhaseId.LastStand,
                     phasesById,
                     visiting,
                     visited)))
@@ -487,22 +487,22 @@ internal sealed class ThirdSeveranceEncounterPlan
     }
 
     private static bool HasCycleAtDestination(
-        ThirdSeverancePhaseId destination,
-        IReadOnlyDictionary<ThirdSeverancePhaseId, ThirdSeverancePhaseDefinition> phasesById,
-        HashSet<ThirdSeverancePhaseId> visiting,
-        HashSet<ThirdSeverancePhaseId> visited)
+        FirstSeverancePhaseId destination,
+        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> phasesById,
+        HashSet<FirstSeverancePhaseId> visiting,
+        HashSet<FirstSeverancePhaseId> visited)
     {
-        return destination != ThirdSeverancePhaseId.None
+        return destination != FirstSeverancePhaseId.None
             && HasCycleFrom(destination, phasesById, visiting, visited);
     }
 
     private void ValidateMechanicReferences(
-        ThirdSeverancePhaseDefinition phase,
-        ThirdSeveranceBossFormDefinition form,
-        ThirdSeveranceMechanicDefinition mechanic,
+        FirstSeverancePhaseDefinition phase,
+        FirstSeveranceBossFormDefinition form,
+        FirstSeveranceMechanicDefinition mechanic,
         HashSet<string> knownPartKeys)
     {
-        if (mechanic is ThirdSeverancePartBreakDefinition partBreak)
+        if (mechanic is FirstSeverancePartBreakDefinition partBreak)
         {
             for (int partIndex = 0; partIndex < partBreak.EligiblePartKeys.Count; partIndex++)
             {
@@ -522,14 +522,14 @@ internal sealed class ThirdSeveranceEncounterPlan
             }
         }
 
-        if (mechanic is ThirdSeveranceWeakPointExposureDefinition exposure
+        if (mechanic is FirstSeveranceWeakPointExposureDefinition exposure
             && !string.Equals(exposure.WeakPointKey, Boss.WeakPoint.Key, StringComparison.Ordinal))
         {
             throw new InvalidOperationException(
                 $"Mechanic '{mechanic.Key}' references unknown weak point '{exposure.WeakPointKey}'.");
         }
 
-        if (mechanic is ThirdSeveranceBossAttackPatternDefinition attack
+        if (mechanic is FirstSeveranceBossAttackPatternDefinition attack
             && !ContainsOrdinal(form.AttackPatternKeys, attack.PatternKey))
         {
             throw new InvalidOperationException(

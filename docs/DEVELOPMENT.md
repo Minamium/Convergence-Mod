@@ -78,4 +78,4 @@ Copy [the build-record template](evidence/build-record.example.json) to ignored 
 
 ## Current safety gate
 
-`ThirdSeveranceAvailabilityPolicy` currently rejects activation and its world adapter is inert. During the rename it becomes the equivalent `FirstSeverance` denial. Do not remove that gate until the implementation slice owning Core/Arena/roster/transport, actor ownership/replication, and Downed adapter evidence has passed its declared exit criteria.
+`FirstSeveranceAvailabilityPolicy` currently rejects activation and `InertFirstSeveranceWorldAdapter` cannot mutate the World. Do not remove those gates until the implementation slice owning Core/Arena/roster/transport, actor ownership/replication, and Downed adapter evidence has passed its declared exit criteria.

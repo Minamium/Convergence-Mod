@@ -43,19 +43,19 @@
              Link="Domain/RaidReviveSettings.cs" />
     <Compile Include="../../Common/Raids/Revive/RaidReviveSnapshot.cs"
              Link="Domain/RaidReviveSnapshot.cs" />
-    <Compile Include="../../Content/Encounters/ThirdSeverance/Revive/ThirdSeveranceReviveBoundary.cs"
-             Link="Domain/ThirdSeveranceReviveBoundary.cs" />
-    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceArenaAccessPolicy.cs"
-             Link="Domain/ThirdSeveranceArenaAccessPolicy.cs" />
-    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceArenaBlueprint.cs"
-             Link="Domain/ThirdSeveranceArenaBlueprint.cs" />
-    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceBossPlan.cs"
-             Link="Domain/ThirdSeveranceBossPlan.cs" />
-    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceEncounterPlan.cs"
-             Link="Domain/ThirdSeveranceEncounterPlan.cs" />
-    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeveranceMechanicPlan.cs"
-             Link="Domain/ThirdSeveranceMechanicPlan.cs" />
-    <Compile Include="../../Content/Encounters/ThirdSeverance/ThirdSeverancePlanCollections.cs"
-             Link="Domain/ThirdSeverancePlanCollections.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Revive/FirstSeveranceReviveBoundary.cs"
+             Link="Domain/FirstSeveranceReviveBoundary.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceArenaAccessPolicy.cs"
+             Link="Domain/FirstSeveranceArenaAccessPolicy.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceArenaBlueprint.cs"
+             Link="Domain/FirstSeveranceArenaBlueprint.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBossPlan.cs"
+             Link="Domain/FirstSeveranceBossPlan.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceEncounterPlan.cs"
+             Link="Domain/FirstSeveranceEncounterPlan.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceMechanicPlan.cs"
+             Link="Domain/FirstSeveranceMechanicPlan.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePlanCollections.cs"
+             Link="Domain/FirstSeverancePlanCollections.cs" />
   </ItemGroup>
 </Project>

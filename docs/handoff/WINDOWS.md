@@ -11,7 +11,7 @@ aliases:
   - Windows handoff
   - desktop migration
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Common/Raids/Revive
   - Tests/Convergence.DomainTests
 related_docs:

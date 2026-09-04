@@ -4,14 +4,14 @@ document_type: backlog
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - first_severance.deferred_scope
 aliases:
   - deferred mechanics
   - old Third Severance plan
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
 related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.visual

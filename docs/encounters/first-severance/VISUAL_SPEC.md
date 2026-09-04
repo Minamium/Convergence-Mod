@@ -5,14 +5,14 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - first_severance.visual_mvp
 aliases:
   - First Severance boss visual
   - Null Cantor visual
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
 related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.backlog

@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - engineering.content_authoring
 aliases:
@@ -29,7 +29,7 @@ Content/Encounters/<Name>/
   Activation/ Arena/ Actors/ Phases/ Mechanics/ Rewards/ Cues/
 ```
 
-Create a directory only when it owns a real file. The target first feature is `FirstSeverance`; source currently uses legacy `ThirdSeverance` until the planned atomic rename.
+Create a directory only when it owns a real file. The first feature is `FirstSeverance`; its source identity rename is complete, while its obsolete immutable plan remains to be replaced in the next isolated slice.
 
 ## Encounter definition and runtime
 

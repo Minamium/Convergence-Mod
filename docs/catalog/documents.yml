@@ -45,7 +45,7 @@ documents:
 - doc_id: development.general
   path: docs/DEVELOPMENT.md
   title: Development Setup
-  content_sha256: 9ed1b4dbb0a41e4e116b566c99fd76191f567ad61d93ff98976cc7d86ce3535e
+  content_sha256: 1816179b0bb917a27486e369778e576757b9281199ec7f93facd62f34e43c6bd
   document_type: runbook
   status: accepted
   owners:
@@ -108,12 +108,12 @@ documents:
 - doc_id: docs.search-index
   path: docs/INDEX.md
   title: Documentation Search Index
-  content_sha256: 84d5b0ba74a2199c4f0dc4f9e7764ad0e598390831f1fc0a4e87d4b9a8d8e803
+  content_sha256: 46fcaa161e225c052a314c6968afd9d1847a12e621c00b24cfd347ea89290aab
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - documentation.search_index
   aliases:
@@ -127,12 +127,12 @@ documents:
 - doc_id: docs.system
   path: docs/DOCUMENTATION_SYSTEM.md
   title: Documentation and Knowledge-Base Design
-  content_sha256: 3f5177599fbad79c894516188b98ac07460acb3611de94ee3ee1a39a93cea0d1
+  content_sha256: 2f0d7923ac361db7e02e7e3edd120c1bba92007340e8024b214b64428611a6db
   document_type: governance
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - documentation.data_model
   aliases:
@@ -148,31 +148,31 @@ documents:
 - doc_id: encounter.first-severance.backlog
   path: docs/encounters/first-severance/BACKLOG.md
   title: First Severance Deferred Backlog
-  content_sha256: f30d72331165f1fd69c10efc8858c091f5d760abcc319592c0595e3ba7bb2efa
+  content_sha256: e76e52a834b45302c3f94b56f90e66c8d77cfe9b71e0961d8b27f2a21a6fbee4
   document_type: backlog
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - first_severance.deferred_scope
   aliases:
   - deferred mechanics
   - old Third Severance plan
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.visual
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: 83cc772834f6955c6fa46d8354277da135994440ed6bcb49d3b0d13a91ec3126
+  content_sha256: 71c4ab65cb10d9d02c8503d61622e5263be67f616dbf57b3f2728b7433f58eb2
   document_type: overview
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - first_severance.document_map
   aliases:
@@ -180,7 +180,7 @@ documents:
   - 第一断絶
   - first_severance
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.plan
@@ -188,7 +188,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 5c61924ee8d3583b5d0ea9bd8521866b97c35c4d5b70fe07e2c6f4327af4dd1e
+  content_sha256: e7ab6996c9b2e338282d6f05902ffc482db189869cee69f47929a91ed1091e33
   document_type: plan
   status: accepted
   owners:
@@ -201,7 +201,7 @@ documents:
   - First Severance implementation plan
   - Windows implementation queue
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Common/Encounters
   - Common/Raids/Revive
   - Common/Networking
@@ -212,13 +212,13 @@ documents:
 - doc_id: encounter.first-severance.revive
   path: docs/encounters/first-severance/REVIVE_SPEC.md
   title: First Severance Downed and Revive Specification
-  content_sha256: 3a345d356bcae1138f3ce79602ae2fb8ff9d0713e2c47dbff6ab28866976e0b8
+  content_sha256: 21bd75e48b0342dec9e0af3de4725b68fb222a26965999c327641c590525a34b
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - first_severance.player_recovery
   aliases:
@@ -227,20 +227,20 @@ documents:
   - 蘇生キット
   related_code:
   - Common/Raids/Revive
-  - Content/Encounters/ThirdSeverance/Revive
+  - Content/Encounters/FirstSeverance/Revive
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.plan
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: c1c366cb5a546aa62c2e86df0f5298f96f74dc8ac185a923a879ec20d238c08a
+  content_sha256: 1059ef4aa94a96fac901538179bbf1f949e5e6b07410ed61e03373028fdf6510
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -250,7 +250,7 @@ documents:
   - 第一断絶
   - Pylon Stack Spread Core
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Common/Raids/Revive
   related_docs:
   - encounter.first-severance.plan
@@ -259,27 +259,27 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance Minimum Visual Specification
-  content_sha256: 0b0c3963a31ec5d3c420da7cb1cc133aaf4c3d77ee55e9710b107d25e2f5bf15
+  content_sha256: dc731bdbc37ef70426778fa16e776eadbf7f885919276a1730ebd9038b7c8cf8
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
   - First Severance boss visual
   - Null Cantor visual
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.backlog
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Handoff — 2026-09-04
-  content_sha256: be200f88e7a66cbfa19a5d34cf3501b43b8f8bbebfa030813f522e390b289069
+  content_sha256: 83f72f038e2e3728d3ccfa32371229ff663d801770e8d39efeff769c9ff95d88
   document_type: handoff
   status: accepted
   owners:
@@ -291,7 +291,7 @@ documents:
   - Windows handoff
   - desktop migration
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Common/Raids/Revive
   - Tests/Convergence.DomainTests
   related_docs:
@@ -343,13 +343,13 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: 9c7e4bb80510c70c621237a1edbbb7843196b9d62d642f6d601ebbf6eac3fe47
+  content_sha256: 78622e97e944ab02785f39fd42b8403bf73b55188e77cd2690f9dcb56e34bbef
   document_type: governance
   status: accepted
   owners:
   - engineering
   - networking
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - architecture.module_boundaries
   - architecture.runtime_ownership
@@ -367,13 +367,13 @@ documents:
 - doc_id: project.arena-infrastructure
   path: docs/ARENA_INFRASTRUCTURE.md
   title: Arena Infrastructure
-  content_sha256: c6369bee36a3e0f96d011fd914959b256222835dcc1e9014be811fa5b001acb1
+  content_sha256: 51662dbb87fccdb43245b065aa3d19affb2580bd81013f9c6cbef7222686cf56
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - first_severance.arena_infrastructure
   aliases:
@@ -381,8 +381,8 @@ documents:
   - Foundation Core
   - logical Barrier
   related_code:
-  - Content/Encounters/ThirdSeverance/ThirdSeveranceArenaBlueprint.cs
-  - Content/Encounters/ThirdSeverance/ThirdSeveranceArenaAccessPolicy.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaBlueprint.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaAccessPolicy.cs
   related_docs:
   - encounter.first-severance.plan
   - project.architecture
@@ -447,12 +447,12 @@ documents:
 - doc_id: project.brief
   path: docs/PROJECT_BRIEF.md
   title: Project Brief
-  content_sha256: fce9a416b09dc17d42a80df16bdaf973f36bcf8ae0573758924b31283ce14922
+  content_sha256: bc506175678420955ca09422602feae15e280837717ac5997f9798271faa0d44
   document_type: overview
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - project.product_scope
   aliases:
@@ -467,12 +467,12 @@ documents:
 - doc_id: project.coding-standards
   path: docs/CODING_STANDARDS.md
   title: Coding Standards
-  content_sha256: f47b85c71f23c4b3754ff70739698106d4f0f60230dda9f6a83ba2239a1744ba
+  content_sha256: 35742452016c71657bae587fdb45805e33d1e57bf7bd2e075063c1716d10e334
   document_type: governance
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - engineering.coding_standards
   aliases:
@@ -487,12 +487,12 @@ documents:
 - doc_id: project.content-authoring
   path: docs/CONTENT_AUTHORING.md
   title: Content Authoring
-  content_sha256: 598db9f82c332be3f1ec9399dfafd489501da5a0bf2ea0c2ede0a3f53cdc9739
+  content_sha256: c938f40cd3ece9defe289d689d9304f27d1cf3533169b4b9e0fbfc28ace526b7
   document_type: governance
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - engineering.content_authoring
   aliases:
@@ -507,12 +507,12 @@ documents:
 - doc_id: project.decisions
   path: docs/DECISIONS.md
   title: Decisions and Open Questions
-  content_sha256: 238620fd778c3f60e74cd02c5f252ec46548fa88b89068f61463a97f1dd4c05e
+  content_sha256: daa3901534b4cdb38d1f53ef8d66970b84b6caa374ddd9c937fd798b5c71de96
   document_type: governance
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - project.open_decisions
   aliases:
@@ -525,26 +525,26 @@ documents:
 - doc_id: project.glossary
   path: docs/GLOSSARY.md
   title: Glossary and Identifier Registry
-  content_sha256: 265da018250c3c23ac7d36ef6731c4e5b1affd7ac3e8557175d4a066f4224f2a
+  content_sha256: 58a26ae288e4c1e563762ea9ef7d9373a70d95a0d8b7644ffb6ff85a8776f57c
   document_type: glossary
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - project.terminology
   aliases:
   - names
   - identifiers
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   related_docs:
   - encounter.first-severance.overview
   - encounter.first-severance.plan
 - doc_id: project.milestones
   path: docs/MILESTONES.md
   title: Milestones
-  content_sha256: 49a0f612b1717a9c8a54e09845559058320125d0d514740ee7b92c4db8b4dcd0
+  content_sha256: 86344afb590006f0048e5fdb9b04619be2e6b5f9b407c2828c315f9dd2a601d8
   document_type: plan
   status: accepted
   owners:
@@ -588,12 +588,12 @@ documents:
 - doc_id: project.repository-layout
   path: docs/REPOSITORY_LAYOUT.md
   title: Repository Layout
-  content_sha256: b799a21badec1ab5e63c845ac1052bb749ab089e292de03ab7a14557abecd68a
+  content_sha256: bbe5aba23fe512e5fd92a9df612b1e8704e19b1c47461739387200c9654c04a9
   document_type: governance
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - architecture.repository_layout
   aliases:
@@ -610,7 +610,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b7f7a75770be9d09d19eb771f9c6f9b3be7fca1ab294bc0b7f1b4b81d3c008a6
+  content_sha256: b40c5e25f828a54f53d85ab27838945873b9a1a65bb9f46d42144d1a5edbe443
   document_type: status
   status: accepted
   owners:
@@ -623,7 +623,7 @@ documents:
   - implementation inventory
   related_code:
   - Common
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Tests/Convergence.DomainTests
   related_docs:
   - handoff.windows
@@ -631,17 +631,17 @@ documents:
 - doc_id: redirect.encounter-spec
   path: docs/ENCOUNTER_SPEC.md
   title: Encounter Specification
-  content_sha256: 7dceb7b8e52b0c0ae8cd2baad6e7a812e03bc4b9212a79672baf105e86cfe2a0
+  content_sha256: 89430a24ddececa347b66b2333ee41b93edcd2d90fac389f326ed3868b7f8897
   document_type: redirect
   status: superseded
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for: []
   aliases:
   - legacy encounter specification path
   related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.plan

@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - documentation.search_index
 aliases:
@@ -25,7 +25,7 @@ Search by `doc_id`, topic, alias, or source path. Machine-readable metadata is g
 
 ```bash
 # Current truth and the next executable slice
-rg -n "implementation_status|## Next change|Slice 1" docs
+rg -n "implementation_status|## Next change|Slice 2" docs
 
 # Stable ID, alias, mechanic, or code owner
 rg -ni "encounter\.first-severance|第一断絶|頭割り|Common/Raids/Revive" docs
@@ -58,7 +58,7 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 |---|---|---|
 | Authority and replica | [Architecture](ARCHITECTURE.md), [ADR-0002](adr/0002-server-authoritative-encounters.md) | `Common/Encounters`, `Common/Networking/Replication` |
 | Packet validation | [Network Architecture](NETWORK_ARCHITECTURE.md) | `Common/Networking` |
-| Arena and Barrier | [Arena Infrastructure](ARENA_INFRASTRUCTURE.md), [ADR-0003](adr/0003-in-world-logical-arena.md) | current `Content/Encounters/ThirdSeverance/*Arena*` |
+| Arena and Barrier | [Arena Infrastructure](ARENA_INFRASTRUCTURE.md), [ADR-0003](adr/0003-in-world-logical-arena.md) | current `Content/Encounters/FirstSeverance/*Arena*` |
 | Downed/Revive authority | [ADR-0005](adr/0005-server-authoritative-downed-revive.md), [Revive Spec](encounters/first-severance/REVIVE_SPEC.md) | `Common/Raids/Revive`, legacy feature `Revive/` boundary |
 | Calamity isolation/removal | [ADR-0004](adr/0004-calamity-compatibility-boundary.md), [ADR-0006](adr/0006-staged-calamity-independence.md) | `Common/Compatibility/Calamity`, `build.txt` |
 | Feature ownership | [Repository Layout](REPOSITORY_LAYOUT.md), [Content Authoring](CONTENT_AUTHORING.md) | `Content/Encounters/<Feature>`, `Client/Encounters/<Feature>` |
@@ -69,9 +69,9 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 ## Name and migration searches
 
 - Target feature name: `First Severance`, `FirstSeverance`, `first_severance`, `第一断絶`.
-- Current legacy implementation name: `Third Severance`, `ThirdSeverance`, `third_severance`.
+- Historical implementation names: `Third Severance`, `ThirdSeverance`, `third_severance`.
 - Working boss name: `The Null Cantor`, `無響の唱導者`; it is provisional, not accepted branding.
 - Working revive item: `Resuscitation Kit`, `蘇生キット`; it is provisional.
 - Removed-from-MVP concepts: `Part Break`, `Targeted Line`, `Personal Effigy`, `Split Reality`, `Last Stand`, `Crown`, `Wings`, `Heart Casing`.
 
-Do not globally replace legacy strings. Code, tests, historical ADRs, research, and changelog entries describe what existed. Follow the migration sequence in the implementation plan.
+Do not globally replace legacy strings in historical ADRs, research, changelog entries, or completed-rename instructions. Current code and tests use the `FirstSeverance` identity; follow the remaining sequence in the implementation plan.

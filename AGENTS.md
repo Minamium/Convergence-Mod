@@ -9,7 +9,7 @@ This file applies to the entire repository.
 3. State the implementation slice, affected files, server/client ownership, cleanup path, verification, and unresolved decisions.
 4. Keep work inside the requested slice; do not pull backlog mechanics or production assets into the MVP.
 
-Current target feature naming is `FirstSeverance` / `first_severance`. Source still named `ThirdSeverance` is legacy until the isolated rename commit; do not assume the rename has already happened and do not globally rewrite history.
+Current feature naming is `FirstSeverance` / `first_severance`. The isolated source/key/failure-prefix rename is complete; `ThirdSeverance` forms may remain only in deliberately historical records or completed-rename instructions, and no compatibility alias is required for the unpublished identifier.
 
 ## Repository Skills
 

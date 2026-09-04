@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -15,7 +15,7 @@ aliases:
   - 第一断絶
   - Pylon Stack Spread Core
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Common/Raids/Revive
 related_docs:
   - encounter.first-severance.plan

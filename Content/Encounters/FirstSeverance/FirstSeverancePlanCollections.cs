@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace Convergence.Content.Encounters.ThirdSeverance;
+namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal static class ThirdSeverancePlanCollections
+internal static class FirstSeverancePlanCollections
 {
     public static IReadOnlyList<T> Copy<T>(IReadOnlyList<T> source, string parameterName)
     {

@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - engineering.coding_standards
 aliases:
@@ -55,7 +55,7 @@ related_docs:
 
 ## Naming
 
-- Target first feature identifiers are `FirstSeverance` and `first_severance`; current `ThirdSeverance` forms are legacy until the atomic rename.
+- Current first-feature identifiers are `FirstSeverance` and `first_severance`; legacy forms may appear only in deliberately historical records or completed-rename instructions.
 - Stable keys use lowercase ASCII underscores, e.g. `first_severance`.
 - Failure codes are namespaced, e.g. `first_severance.revive_not_initialized`.
 - Boolean names start with `Is`, `Has`, `Can`, or `Should`.

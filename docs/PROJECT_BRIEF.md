@@ -4,7 +4,7 @@ document_type: overview
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - project.product_scope
 aliases:
@@ -58,7 +58,7 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 
 ## First Raid
 
-最初のRaidは`First Severance` / `第一断絶`。target code name/keyは`FirstSeverance` / `first_severance`。現行コードの`ThirdSeverance`は未改名のlegacy bootstrapである。
+最初のRaidは`First Severance` / `第一断絶`。current code name/keyは`FirstSeverance` / `first_severance`。identity renameは完了したが、現行コードには置換前のlegacy multipart planが残る。
 
 最初のplayable loop:
 
@@ -86,8 +86,8 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 
 ## Initial implementation scope
 
-- Windowsでの候補version build/load/Dedicated Server確定;
-- atomic `ThirdSeverance` → `FirstSeverance` rename;
+- completed: Windowsでのversion build/load/Dedicated Server確定;
+- completed: atomic `ThirdSeverance` → `FirstSeverance` rename;
 - Core/Arena/roster/Ready/logical Barrier/cleanup;
 - bounded transport、feature snapshot、client replica;
 - simple Boss/Pylons and repeated loop;

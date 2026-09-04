@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - first_severance.player_recovery
 aliases:
@@ -14,7 +14,7 @@ aliases:
   - 蘇生キット
 related_code:
   - Common/Raids/Revive
-  - Content/Encounters/ThirdSeverance/Revive
+  - Content/Encounters/FirstSeverance/Revive
 related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.plan

@@ -6,8 +6,8 @@ using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Geometry;
 using Convergence.Common.Foundation.Identifiers;
 using Convergence.Common.Raids.Revive;
-using Convergence.Content.Encounters.ThirdSeverance;
-using Convergence.Content.Encounters.ThirdSeverance.Revive;
+using Convergence.Content.Encounters.FirstSeverance;
+using Convergence.Content.Encounters.FirstSeverance.Revive;
 
 namespace Convergence.DomainTests;
 
@@ -579,7 +579,7 @@ internal static class Program
     private static void BoundaryCarriesApplyDirtyState()
     {
         TestContext context = CreateContext(3);
-        ThirdSeveranceReviveBoundary boundary = new(context.FightId);
+        FirstSeveranceReviveBoundary boundary = new(context.FightId);
         if (!boundary.TryInitialize(context.Roster, out string failureCode))
         {
             throw new InvalidOperationException($"Boundary initialization failed: '{failureCode}'.");
@@ -641,15 +641,15 @@ internal static class Program
     private static void ArenaLayoutIsCoreAnchored()
     {
         var worldBounds = new TileRectangle(0, 0, 8_400, 2_400);
-        var core = new ResolvedThirdSeveranceCoreAnchor(
+        var core = new ResolvedFirstSeveranceCoreAnchor(
             new TilePoint(4_200, 1_250),
             BaseY: 1_300,
             ServerTileEntityId: 7);
 
-        bool created = ThirdSeveranceArenaBlueprint.Instance.TryCreateLayout(
+        bool created = FirstSeveranceArenaBlueprint.Instance.TryCreateLayout(
             core,
             worldBounds,
-            out ThirdSeveranceArenaLayout? layout,
+            out FirstSeveranceArenaLayout? layout,
             out string failureCode);
         if (!created || layout is null)
         {
@@ -666,32 +666,32 @@ internal static class Program
     private static void ArenaRejectsWorldEdgeCore()
     {
         var worldBounds = new TileRectangle(0, 0, 320, 141);
-        var core = new ResolvedThirdSeveranceCoreAnchor(
+        var core = new ResolvedFirstSeveranceCoreAnchor(
             new TilePoint(160, 70),
             BaseY: 140,
             ServerTileEntityId: 1);
 
-        bool created = ThirdSeveranceArenaBlueprint.Instance.TryCreateLayout(
+        bool created = FirstSeveranceArenaBlueprint.Instance.TryCreateLayout(
             core,
             worldBounds,
-            out ThirdSeveranceArenaLayout? layout,
+            out FirstSeveranceArenaLayout? layout,
             out string failureCode);
         AssertEqual(false, created, "World-edge layout creation");
-        AssertEqual<ThirdSeveranceArenaLayout?>(null, layout, "rejected Arena layout");
+        AssertEqual<FirstSeveranceArenaLayout?>(null, layout, "rejected Arena layout");
         AssertEqual(
-            "third_severance.arena_world_edge_margin_violation",
+            "first_severance.arena_world_edge_margin_violation",
             failureCode,
             "Arena rejection code");
     }
 
     private static void OutsiderResponsesAreDeterministic()
     {
-        ThirdSeveranceBoundaryRule? outsiderRule = null;
-        IReadOnlyList<ThirdSeveranceBoundaryRule> rules =
-            ThirdSeveranceArenaAccessPolicy.Instance.Rules;
+        FirstSeveranceBoundaryRule? outsiderRule = null;
+        IReadOnlyList<FirstSeveranceBoundaryRule> rules =
+            FirstSeveranceArenaAccessPolicy.Instance.Rules;
         for (int index = 0; index < rules.Count; index++)
         {
-            if (rules[index].ViolationKind == ThirdSeveranceBoundaryViolationKind.OutsiderInsideBarrier)
+            if (rules[index].ViolationKind == FirstSeveranceBoundaryViolationKind.OutsiderInsideBarrier)
             {
                 outsiderRule = rules[index];
                 break;
@@ -703,28 +703,28 @@ internal static class Program
             throw new InvalidOperationException("Outsider boundary rule is missing.");
         }
 
-        IReadOnlyList<ThirdSeveranceBoundaryResponse> initial =
+        IReadOnlyList<FirstSeveranceBoundaryResponse> initial =
             outsiderRule.GetEligibleResponses(continuousTicks: 1, violationCount: 1);
         AssertEqual(2, initial.Count, "initial outsider response count");
-        AssertEqual(ThirdSeveranceBoundaryResponse.ServerWarning, initial[0], "first outsider response");
+        AssertEqual(FirstSeveranceBoundaryResponse.ServerWarning, initial[0], "first outsider response");
         AssertEqual(
-            ThirdSeveranceBoundaryResponse.SuppressEncounterInteraction,
+            FirstSeveranceBoundaryResponse.SuppressEncounterInteraction,
             initial[1],
             "second outsider response");
 
-        IReadOnlyList<ThirdSeveranceBoundaryResponse> escalated =
+        IReadOnlyList<FirstSeveranceBoundaryResponse> escalated =
             outsiderRule.GetEligibleResponses(continuousTicks: 120, violationCount: 3);
         AssertEqual(4, escalated.Count, "escalated outsider response count");
         AssertEqual(
-            ThirdSeveranceBoundaryResponse.ExcludeFromArena,
+            FirstSeveranceBoundaryResponse.ExcludeFromArena,
             escalated[3],
             "final outsider response");
-        AssertEqual(false, ThirdSeveranceArenaAccessPolicy.Instance.UsesLethalExclusion, "lethal exclusion");
+        AssertEqual(false, FirstSeveranceArenaAccessPolicy.Instance.UsesLethalExclusion, "lethal exclusion");
     }
 
     private static void ArenaOccupantIdentityRejectsSlotReuse()
     {
-        var currentOutsider = new ThirdSeveranceArenaOccupant(
+        var currentOutsider = new FirstSeveranceArenaOccupant(
             ServerWhoAmI: 8,
             ConnectionEpoch: 42,
             ParticipantId.Invalid);
@@ -739,18 +739,18 @@ internal static class Program
 
     private static void DefaultBossEncounterPlanValidates()
     {
-        ThirdSeveranceEncounterPlan plan = ThirdSeveranceEncounterPlan.Instance;
-        AssertEqual(ThirdSeverancePhaseId.BaseActivation, plan.FirstPhase, "first phase");
+        FirstSeveranceEncounterPlan plan = FirstSeveranceEncounterPlan.Instance;
+        AssertEqual(FirstSeverancePhaseId.BaseActivation, plan.FirstPhase, "first phase");
         AssertEqual(7, plan.Phases.Count, "phase count");
         AssertEqual(320, plan.Arena.Profile.WidthInTiles, "Arena width profile");
         AssertEqual(140, plan.Arena.Profile.HeightInTiles, "Arena height profile");
         AssertEqual(3, plan.HardEnrageOverloadThreshold, "Hard Enrage threshold");
         AssertEqual(
-            ThirdSeveranceFailureOutcome.AdvanceHardEnrage,
+            FirstSeveranceFailureOutcome.AdvanceHardEnrage,
             plan.LoopExhaustionOutcome,
             "loop exhaustion outcome");
         AssertEqual(
-            ThirdSeverancePhaseId.LastStand,
+            FirstSeverancePhaseId.LastStand,
             plan.Phases[plan.Phases.Count - 1].Id,
             "terminal phase");
     }

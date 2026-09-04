@@ -12,7 +12,7 @@ aliases:
   - First Severance implementation plan
   - Windows implementation queue
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
   - Common/Encounters
   - Common/Raids/Revive
   - Common/Networking
@@ -24,7 +24,7 @@ related_docs:
 
 # First Severance Implementation Plan
 
-This plan takes the current inert `ThirdSeverance` bootstrap to the first playable `FirstSeverance` vertical slice without weakening server authority, cleanup, or multiplayer evidence. Activation remains denied until the slice that owns each required adapter can prove it safe.
+This plan takes the current inert `FirstSeverance` bootstrap to its first playable vertical slice without weakening server authority, cleanup, or multiplayer evidence. The identity rename is complete; activation remains denied until the slice that owns each required adapter can prove it safe.
 
 ## Non-negotiable boundaries
 
@@ -64,6 +64,8 @@ Status: **Complete (2026-09-05).** The confirmed versions and sanitized run are 
 Exit: a reproducible baseline exists. Candidate runtime versions may be marked confirmed only from this evidence.
 
 ## Slice 1 — Atomic feature rename, still inert
+
+Status: **Complete (2026-09-05).** Directory, files, namespaces, types, tests, stable key, failure-code prefix, and active documentation now use the target identity. The availability policy still rejects activation and the world adapter remains inert.
 
 Use `git mv` and update the whole identifier family in one commit:
 

@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace Convergence.Content.Encounters.ThirdSeverance;
+namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal static class ThirdSeveranceBossKeys
+internal static class FirstSeveranceBossKeys
 {
     public const string CrownPart = "crown";
     public const string WingsPart = "wings";
@@ -19,9 +19,9 @@ internal static class ThirdSeveranceBossKeys
     public const string LastStandForm = "last_stand";
 }
 
-internal sealed class ThirdSeveranceBossPartDefinition
+internal sealed class FirstSeveranceBossPartDefinition
 {
-    public ThirdSeveranceBossPartDefinition(
+    public FirstSeveranceBossPartDefinition(
         string key,
         string responsibilityKey,
         int relativeDurabilityPermille,
@@ -56,9 +56,9 @@ internal sealed class ThirdSeveranceBossPartDefinition
     public string DestroyedEffectKey { get; }
 }
 
-internal sealed class ThirdSeveranceWeakPointDefinition
+internal sealed class FirstSeveranceWeakPointDefinition
 {
-    public ThirdSeveranceWeakPointDefinition(
+    public FirstSeveranceWeakPointDefinition(
         string key,
         int exposedDamageTakenPermille,
         bool isTargetableOutsideExposure)
@@ -85,9 +85,9 @@ internal sealed class ThirdSeveranceWeakPointDefinition
     public bool IsTargetableOutsideExposure { get; }
 }
 
-internal sealed class ThirdSeveranceBossFormDefinition
+internal sealed class FirstSeveranceBossFormDefinition
 {
-    public ThirdSeveranceBossFormDefinition(
+    public FirstSeveranceBossFormDefinition(
         string key,
         bool isBodyDamageable,
         bool isWeakPointExposed,
@@ -102,8 +102,8 @@ internal sealed class ThirdSeveranceBossFormDefinition
         Key = key;
         IsBodyDamageable = isBodyDamageable;
         IsWeakPointExposed = isWeakPointExposed;
-        EnabledPartKeys = ThirdSeverancePlanCollections.Copy(enabledPartKeys, nameof(enabledPartKeys));
-        AttackPatternKeys = ThirdSeverancePlanCollections.Copy(attackPatternKeys, nameof(attackPatternKeys));
+        EnabledPartKeys = FirstSeverancePlanCollections.Copy(enabledPartKeys, nameof(enabledPartKeys));
+        AttackPatternKeys = FirstSeverancePlanCollections.Copy(attackPatternKeys, nameof(attackPatternKeys));
     }
 
     public string Key { get; }
@@ -117,12 +117,12 @@ internal sealed class ThirdSeveranceBossFormDefinition
     public IReadOnlyList<string> AttackPatternKeys { get; }
 }
 
-internal sealed class ThirdSeveranceBossPlan
+internal sealed class FirstSeveranceBossPlan
 {
-    private ThirdSeveranceBossPlan(
-        IReadOnlyList<ThirdSeveranceBossPartDefinition> parts,
-        ThirdSeveranceWeakPointDefinition weakPoint,
-        IReadOnlyList<ThirdSeveranceBossFormDefinition> forms,
+    private FirstSeveranceBossPlan(
+        IReadOnlyList<FirstSeveranceBossPartDefinition> parts,
+        FirstSeveranceWeakPointDefinition weakPoint,
+        IReadOnlyList<FirstSeveranceBossFormDefinition> forms,
         int lastStandLifeThresholdPermille)
     {
         if (lastStandLifeThresholdPermille <= 0 || lastStandLifeThresholdPermille >= 1000)
@@ -141,7 +141,7 @@ internal sealed class ThirdSeveranceBossPlan
 
         for (int formIndex = 0; formIndex < forms.Count; formIndex++)
         {
-            ThirdSeveranceBossFormDefinition form = forms[formIndex];
+            FirstSeveranceBossFormDefinition form = forms[formIndex];
             for (int partIndex = 0; partIndex < form.EnabledPartKeys.Count; partIndex++)
             {
                 if (!knownPartKeys.Contains(form.EnabledPartKeys[partIndex]))
@@ -153,37 +153,37 @@ internal sealed class ThirdSeveranceBossPlan
             }
         }
 
-        Parts = ThirdSeverancePlanCollections.Copy(parts, nameof(parts));
+        Parts = FirstSeverancePlanCollections.Copy(parts, nameof(parts));
         WeakPoint = weakPoint;
-        Forms = ThirdSeverancePlanCollections.Copy(forms, nameof(forms));
+        Forms = FirstSeverancePlanCollections.Copy(forms, nameof(forms));
         LastStandLifeThresholdPermille = lastStandLifeThresholdPermille;
     }
 
-    public static ThirdSeveranceBossPlan CreateDefault()
+    public static FirstSeveranceBossPlan CreateDefault()
     {
         IReadOnlyList<string> strategicParts = Array.AsReadOnly(
             new[]
             {
-                ThirdSeveranceBossKeys.CrownPart,
-                ThirdSeveranceBossKeys.WingsPart,
-                ThirdSeveranceBossKeys.HeartCasingPart,
+                FirstSeveranceBossKeys.CrownPart,
+                FirstSeveranceBossKeys.WingsPart,
+                FirstSeveranceBossKeys.HeartCasingPart,
             });
 
         var parts = Array.AsReadOnly(
             new[]
             {
-                new ThirdSeveranceBossPartDefinition(
-                    ThirdSeveranceBossKeys.CrownPart,
+                new FirstSeveranceBossPartDefinition(
+                    FirstSeveranceBossKeys.CrownPart,
                     "targeting_precision",
                     850,
                     "extend_target_telegraphs"),
-                new ThirdSeveranceBossPartDefinition(
-                    ThirdSeveranceBossKeys.WingsPart,
+                new FirstSeveranceBossPartDefinition(
+                    FirstSeveranceBossKeys.WingsPart,
                     "field_traversal",
                     1000,
                     "reduce_charge_frequency"),
-                new ThirdSeveranceBossPartDefinition(
-                    ThirdSeveranceBossKeys.HeartCasingPart,
+                new FirstSeveranceBossPartDefinition(
+                    FirstSeveranceBossKeys.HeartCasingPart,
                     "weak_point_containment",
                     1150,
                     "extend_weak_point_exposure"),
@@ -192,53 +192,53 @@ internal sealed class ThirdSeveranceBossPlan
         var forms = Array.AsReadOnly(
             new[]
             {
-                new ThirdSeveranceBossFormDefinition(
-                    ThirdSeveranceBossKeys.SealedForm,
+                new FirstSeveranceBossFormDefinition(
+                    FirstSeveranceBossKeys.SealedForm,
                     false,
                     false,
                     Array.Empty<string>(),
                     Array.AsReadOnly(new[] { "sealed_observation", "pylon_crossfire" })),
-                new ThirdSeveranceBossFormDefinition(
-                    ThirdSeveranceBossKeys.ManifestForm,
+                new FirstSeveranceBossFormDefinition(
+                    FirstSeveranceBossKeys.ManifestForm,
                     true,
                     false,
                     strategicParts,
                     Array.AsReadOnly(new[] { "crown_lattice", "wing_crossing", "choir_sweep" })),
-                new ThirdSeveranceBossFormDefinition(
-                    ThirdSeveranceBossKeys.ConvergenceForm,
+                new FirstSeveranceBossFormDefinition(
+                    FirstSeveranceBossKeys.ConvergenceForm,
                     false,
                     false,
                     strategicParts,
                     Array.AsReadOnly(new[] { "effigy_analysis", "identity_pressure" })),
-                new ThirdSeveranceBossFormDefinition(
-                    ThirdSeveranceBossKeys.ExposedForm,
+                new FirstSeveranceBossFormDefinition(
+                    FirstSeveranceBossKeys.ExposedForm,
                     false,
                     true,
                     strategicParts,
                     Array.AsReadOnly(new[] { "sustained_exposure_beam" })),
-                new ThirdSeveranceBossFormDefinition(
-                    ThirdSeveranceBossKeys.LastStandForm,
+                new FirstSeveranceBossFormDefinition(
+                    FirstSeveranceBossKeys.LastStandForm,
                     false,
                     false,
                     Array.Empty<string>(),
                     Array.AsReadOnly(new[] { "final_individual_judgment", "final_core_opening" })),
             });
 
-        return new ThirdSeveranceBossPlan(
+        return new FirstSeveranceBossPlan(
             parts,
-            new ThirdSeveranceWeakPointDefinition(
-                ThirdSeveranceBossKeys.CoreWeakPoint,
+            new FirstSeveranceWeakPointDefinition(
+                FirstSeveranceBossKeys.CoreWeakPoint,
                 2500,
                 false),
             forms,
             20);
     }
 
-    public IReadOnlyList<ThirdSeveranceBossPartDefinition> Parts { get; }
+    public IReadOnlyList<FirstSeveranceBossPartDefinition> Parts { get; }
 
-    public ThirdSeveranceWeakPointDefinition WeakPoint { get; }
+    public FirstSeveranceWeakPointDefinition WeakPoint { get; }
 
-    public IReadOnlyList<ThirdSeveranceBossFormDefinition> Forms { get; }
+    public IReadOnlyList<FirstSeveranceBossFormDefinition> Forms { get; }
 
     // 20 permille is 2%; tuning remains a server-owned balance decision.
     public int LastStandLifeThresholdPermille { get; }

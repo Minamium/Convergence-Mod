@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - documentation.data_model
 aliases:
@@ -62,7 +62,7 @@ aliases:
   - First Severance
   - 第一断絶
 related_code:
-  - Content/Encounters/ThirdSeverance
+  - Content/Encounters/FirstSeverance
 related_docs:
   - project.status
 ---

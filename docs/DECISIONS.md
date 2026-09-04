@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - project.open_decisions
 aliases:
@@ -29,7 +29,7 @@ Long-lived structural decisions use immutable records in [`docs/adr`](adr/README
 - Internal assembly/root namespace: provisional development identity `Convergence`.
 - Entry class/project filename: `ConvergenceMod` / `ConvergenceMod.csproj`.
 - One coordinator-managed Boss or Raid per World; World Events will have a separate lifecycle.
-- Current legacy `ThirdSeverance` activation is intentionally denied. The target `FirstSeverance` feature remains denied until server-resolved Core/Arena/progression/roster/transport, actors, feature replication, and required recovery adapters satisfy their gates.
+- Current `FirstSeverance` activation is intentionally denied until server-resolved Core/Arena/progression/roster/transport, actors, feature replication, and required recovery adapters satisfy their gates.
 - Initial music implementation uses phase-specific mixes/transitions before sample-accurate dynamic stems.
 - Current packet protocol and any future save schema version independently from the Mod version.
 - Windows is the primary implementation and runtime-verification workstation; the MacBook remains a secondary docs/review environment.

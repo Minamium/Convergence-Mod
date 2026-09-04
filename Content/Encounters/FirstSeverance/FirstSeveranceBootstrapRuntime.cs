@@ -2,19 +2,19 @@ using System;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Identifiers;
 
-namespace Convergence.Content.Encounters.ThirdSeverance;
+namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal sealed class ThirdSeveranceBootstrapRuntime : IEncounterRuntime
+internal sealed class FirstSeveranceBootstrapRuntime : IEncounterRuntime
 {
     private readonly FightId fightId;
-    private readonly ThirdSeveranceEncounterPlan plan;
-    private readonly IThirdSeveranceWorldAdapter worldAdapter;
+    private readonly FirstSeveranceEncounterPlan plan;
+    private readonly IFirstSeveranceWorldAdapter worldAdapter;
     private bool isCleaned;
 
-    public ThirdSeveranceBootstrapRuntime(
+    public FirstSeveranceBootstrapRuntime(
         FightId fightId,
-        ThirdSeveranceEncounterPlan plan,
-        IThirdSeveranceWorldAdapter worldAdapter)
+        FirstSeveranceEncounterPlan plan,
+        IFirstSeveranceWorldAdapter worldAdapter)
     {
         if (fightId.IsNone)
         {
@@ -26,7 +26,7 @@ internal sealed class ThirdSeveranceBootstrapRuntime : IEncounterRuntime
         this.worldAdapter = worldAdapter ?? throw new ArgumentNullException(nameof(worldAdapter));
     }
 
-    internal ThirdSeveranceEncounterPlan Plan => plan;
+    internal FirstSeveranceEncounterPlan Plan => plan;
 
     public EncounterRuntimeUpdate Tick(in EncounterRuntimeContext context)
     {

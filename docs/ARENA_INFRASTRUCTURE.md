@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - first_severance.arena_infrastructure
 aliases:
@@ -13,8 +13,8 @@ aliases:
   - Foundation Core
   - logical Barrier
 related_code:
-  - Content/Encounters/ThirdSeverance/ThirdSeveranceArenaBlueprint.cs
-  - Content/Encounters/ThirdSeverance/ThirdSeveranceArenaAccessPolicy.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaBlueprint.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceArenaAccessPolicy.cs
 related_docs:
   - encounter.first-severance.plan
   - project.architecture
@@ -26,7 +26,7 @@ related_docs:
 
 This document covers Foundation Core activation, server arena validation, roster/Ready, logical Barrier, Pylon placement inputs, and cleanup. Combat rules remain in the First Severance spec.
 
-Current legacy code provides a pure 320x140 blueprint, four corner Pylon slots, and outsider response policy under `ThirdSeverance` names. It does not resolve a real Core TE or mutate the World. The target rename/simplification must preserve tested geometry/ownership invariants while deriving active Pylon positions for 2/3/4 rosters.
+Current code provides a pure 320x140 blueprint, four corner Pylon slots, and outsider response policy under `FirstSeverance` names. It does not resolve a real Core TE or mutate the World. The plan-simplification slice must preserve tested geometry/ownership invariants while deriving active Pylon positions for 2/3/4 rosters.
 
 ## Provisional coordinate model
 

@@ -4,7 +4,7 @@ A multiplayer-first Calamity addon for Terraria, with a staged long-term path to
 
 `Convergence` is the provisional internal Mod/assembly/root-namespace identity; `ConvergenceMod` is the entry class/project filename. Public branding and most story proper nouns remain provisional.
 
-> Current status: architecture bootstrap, not a playable Mod. The source still uses the legacy feature name `ThirdSeverance`, the world adapter is inert, and activation is deliberately rejected. See [Project Status](docs/STATUS.md).
+> Current status: architecture bootstrap, not a playable Mod. The feature now uses the `FirstSeverance` identity, but its obsolete multipart plan remains, the world adapter is inert, and activation is deliberately rejected. See [Project Status](docs/STATUS.md).
 
 ## Start here
 
@@ -63,7 +63,7 @@ Tests/Convergence.DomainTests/  tModLoader-free authoritative domain harness
 tools/                          repository, documentation-catalog, and YAML checks
 ```
 
-The current `Content/Encounters/ThirdSeverance` module contains an inert arena/Boss plan and disconnected boundary around the pure Downed/Revive service. Its old multipart plan is no longer the active product specification. The first Windows code change will rename and simplify it while keeping activation denied.
+The current `Content/Encounters/FirstSeverance` module contains an inert arena/Boss plan and disconnected boundary around the pure Downed/Revive service. Its old multipart plan is no longer the active product specification. The next isolated slice will replace that plan while keeping activation denied.
 
 ## Local verification
 
