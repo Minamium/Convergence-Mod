@@ -22,8 +22,13 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     private FirstSeveranceCombatProjection? combat;
     private ulong lastAuthorityTick;
     private ulong receivedAtLocalTick;
+    private string? combatEndMessage;
+    private ulong showCombatEndUntilTick;
 
     internal FirstSeveranceCombatProjection? Combat => combat;
+
+    internal string? CombatEndMessage => Main.GameUpdateCount < showCombatEndUntilTick
+        ? combatEndMessage : null;
 
     internal ulong EstimatedAuthorityTick => lastAuthorityTick
         + (Main.GameUpdateCount >= receivedAtLocalTick ? Main.GameUpdateCount - receivedAtLocalTick : 0);
@@ -92,11 +97,22 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         if (previous is not null && (combat is null || combat.FightId != previous.FightId))
         {
             ClearCombatPlayers(previous);
-            Say("CombatEnded", snapshot.Termination.EndReason.ToString());
+            FirstSeveranceTerminationContract contract = FirstSeveranceTerminationContract.Instance;
+            string cause = contract.IsValid(snapshot.Termination)
+                ? contract.GetCause(snapshot.Termination).ToString() : "Unknown";
+            string explanation = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.End" + cause);
+            combatEndMessage = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.CombatEnded",
+                snapshot.Termination.EndReason.ToString(), explanation);
+            showCombatEndUntilTick = Main.GameUpdateCount + 600;
+            Say("CombatEnded", snapshot.Termination.EndReason.ToString(), explanation);
+            Mod.Logger.Info($"FirstSeverance client_end seq={snapshot.EncounterSequence} fight={snapshot.FightId} reason={snapshot.Termination.EndReason} cause={cause}");
             previous = null;
         }
         if (combat is null)
             return;
+
+        combatEndMessage = null;
+        showCombatEndUntilTick = 0;
 
         foreach (FirstSeveranceCombatParticipantProjection participant in combat.Participants)
         {
@@ -213,6 +229,8 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     {
         ClearCombatPlayers(combat);
         combat = null;
+        combatEndMessage = null;
+        showCombatEndUntilTick = 0;
         lastAuthorityTick = 0;
         receivedAtLocalTick = 0;
         preparation = null;

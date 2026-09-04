@@ -28,6 +28,8 @@ The `0.1.1` exception in [ADR-0009](../../adr/0009-development-combat-experiment
 
 ## Player experience
 
+Development `0.1.2` makes Down instructions more prominent, labels Down-timeout elimination separately, and keeps the localized terminal cause visible for 10 seconds after cleanup. The small red rings and particles have no hitbox or damage. All participants Downed still means immediate Defeat; the 30-second deadline is only a recovery window while a standing ally remains. Server diagnostics record recovery transitions and interruption/ending causes.
+
 During an active Raid, an eligible lethal event transitions the participant to `Downed` instead of immediately performing normal Terraria death. Another Alive participant equips and uses a dedicated non-consumable revival item on the Downed target, remains nearby for a channel, and receives a server-confirmed success or cancellation.
 
 `Resuscitation Kit` / `蘇生キット` is the provisional item name. The item name and art may change without changing protocol or domain semantics.

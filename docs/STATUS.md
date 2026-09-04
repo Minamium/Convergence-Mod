@@ -21,7 +21,16 @@ related_docs:
 
 # Project Status
 
-As of 2026-09-05, Convergence `0.1.1` contains a development-only First Severance combat experiment on the confirmed Windows baseline. All Ready now starts a Boss/Pylon loop with Stack/Spread markers, vanilla Boss 3 music, experimental Downed, and an ally-held revive kit. This is a multiplayer playtest build, not the completed production Raid. The preceding `0.1.0` preparation build reached Ready with the user's Steam friend; the new combat/revive runtime still requires their in-game check.
+As of 2026-09-05, Convergence `0.1.2` fixes recovery-request decoding and circle rendering in the development-only First Severance combat experiment. The user reported a two-player Steam Raid clear on `0.1.1` after separating during Spread. That is user-reported gameplay evidence, not proof of successful revival or production completion. The hotfix still needs their GUI reload and targeted revive/render check.
+
+## Playtest hotfix 0.1.2
+
+- `0.1.1` server logs confirmed repeated `first_severance.revive_payload_size` rejection with `Read underflow 31 of 35 bytes`. Down and revive readers incorrectly treated the shared receive stream's remaining length as the packet payload size. Both now read exactly one uint nonce; header/sender/rate checks follow decoding. IDs, payloads and protocol version 2 are unchanged.
+- The screenshot shows screen-length orange spokes during **Spread**, not a Down attack. Circle segments were stretching the full MagicPixel texture; drawing now samples an explicit 1x1 source rectangle. Rings and Down particles are presentation only. Spread still deals damage once to players closer than 16 tiles at resolution; damage tuning is unchanged.
+- Authority logs now record phase transitions, damage source/life, Down/revive/cancellation/timeout events and exact terminal cause. No player names, addresses, positions or per-frame records are added. Diagnostics cannot interrupt cleanup or domain transitions.
+- The client displays the localized ending cause in chat and for 10 seconds on the HUD, with more prominent Down instructions and a separate eliminated state. All-Downed still ends immediately; it does not wait for the 30-second personal deadline.
+- Focused compiled-code checks reproduced both old shared-buffer failures and passed the fixed standalone/shared-buffer, zero-nonce and truncated-input cases. Rendering and the full live held-use revival remain user-run checks.
+- Separate `0.1.1` logs also showed caught exceptions in Simple Whip `GoldRush_Shot` and Calamity `SepulcherMinion`. Their relationship to this fight is unproven; no third-party code or enabled-Mod settings were changed.
 
 ## Development combat experiment
 
@@ -75,15 +84,15 @@ As of 2026-09-05, Convergence `0.1.1` contains a development-only First Severanc
 | Repository policy checks | Passed for the experiment |
 | YAML checks | Passed for the experiment |
 | Dependency-free domain tests | 48 passed; validates reused domains, not the new Terraria adapters |
-| `dotnet build ConvergenceMod.csproj` | `0.1.1` packaged successfully from code commit `ba95762`, 0 warnings/errors |
-| tModLoader Build + Reload | Prior preparation transport passed; `0.1.1` awaits user GUI reload |
+| `dotnet build ConvergenceMod.csproj` | `0.1.2` packaged successfully from the actual ModSources checkout, 0 warnings/errors |
+| tModLoader Build + Reload | `0.1.1` confirmed in client log (0 errors, 2 nullable-context warnings); `0.1.2` awaits user GUI reload |
 | Single Player load | Passed; Core placed/right-clicked and correctly returned `roster_too_small` for one player |
-| Steam-friend preparation | User reported Ready reached; exact topology/logs not independently captured |
-| Combat/BGM/Down/revive in game | Not run for `0.1.1`; user controls the GUI |
+| Steam-friend preparation | `0.1.1` logs confirm local Host & Play server and two joined players |
+| Combat/BGM/Down/revive in game | `0.1.1` clear user-reported; Spread screenshot inspected. Revival failed at packet decode; BGM and `0.1.2` live behavior remain unverified |
 | Dedicated Server load/2-client smoke | Slice 3A 8-Mod server load/save/exit passed; two-client join not rerun; Slice 0 two-client baseline passed |
 | Calamity lethal-hook instrumentation | Not run; blocks the live Downed adapter |
 
-The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, Calamity `2.2.4`, and Calamity Music `2.1`. See the [sanitized Windows baseline](evidence/2026-09-05-windows-baseline.json). The latest local development pack also loads Simple Whip Addon `1.15.12`, WingSlot Extra `1.4.5`, Cheat Sheet `0.7.8.1`, Magic Storage `0.7.0.11`, and its Serous Common Library `1.0.6.2` dependency. Host & Play remains explicitly `not_run` and is not inferred from the Dedicated Server result.
+The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, Calamity `2.2.4`, and Calamity Music `2.1`. See the [sanitized Windows baseline](evidence/2026-09-05-windows-baseline.json). The latest local development pack also loads Simple Whip Addon `1.15.12`, WingSlot Extra `1.4.5`, Cheat Sheet `0.7.8.1`, Magic Storage `0.7.0.11`, and its Serous Common Library `1.0.6.2` dependency. The subsequent `0.1.1` Host & Play observation above is separate from that earlier Dedicated Server baseline; it does not establish the full compatibility matrix.
 
 ## Current accepted direction
 
@@ -97,4 +106,4 @@ The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, C
 
 ## Next change
 
-Reload `0.1.1` on the host and let the Steam friend synchronize the updated Mod. Both Ready starts the experiment. Observe one loop, have one player run `/convergence-down`, then let the other hold the kit within 8 tiles for 2 seconds. The initiator may end with `/convergence-cancel`. Do not infer production or expanded multiplayer compatibility from this one playtest.
+Reload `0.1.2` on the host and let the Steam friend synchronize the updated Mod. Check that Spread shows small circles, then have only one player run `/convergence-down` and the other hold the kit within 8 tiles for 2 seconds. If it fails, inspect the authority's `FirstSeverance` event lines and the displayed ending cause. The initiator may end with `/convergence-cancel`; GUI operations belong to the user. Do not rerun the expanded matrix for this scoped hotfix.

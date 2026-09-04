@@ -14,11 +14,12 @@ namespace Convergence.Content.Encounters.FirstSeverance.Revive;
 internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipant
 {
     private readonly FightId fightId;
+    private readonly Action<RaidReviveEvent>? observeEvent;
     private RaidReviveService? service;
     private bool hasPendingObservableChange;
     private bool isCleaned;
 
-    public FirstSeveranceReviveBoundary(FightId fightId)
+    public FirstSeveranceReviveBoundary(FightId fightId, Action<RaidReviveEvent>? observeEvent = null)
     {
         if (fightId.IsNone)
         {
@@ -26,6 +27,7 @@ internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipan
         }
 
         this.fightId = fightId;
+        this.observeEvent = observeEvent;
     }
 
     public bool IsInitialized => service is not null;
@@ -118,6 +120,7 @@ internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipan
         RaidReviveCommandResult result = service.CommitTick(
             context.FightId,
             context.AuthorityTick);
+        ObserveEvents(result);
         bool hasObservableChange = hasPendingObservableChange || result.HasObservableChange;
         hasPendingObservableChange = false;
         if (service.FailureReason != RaidReviveFailureReason.None)
@@ -186,6 +189,7 @@ internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipan
     private RaidReviveCommandResult TrackObservableChange(RaidReviveCommandResult result)
     {
         hasPendingObservableChange |= result.HasObservableChange;
+        ObserveEvents(result);
         return result;
     }
 
@@ -193,6 +197,20 @@ internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipan
         RaidReviveStartBatchResult result)
     {
         hasPendingObservableChange |= result.HasObservableChange;
+        foreach (RaidReviveCommandResult command in result.CommandResults)
+            ObserveEvents(command);
         return result;
+    }
+
+    private void ObserveEvents(RaidReviveCommandResult result)
+    {
+        if (observeEvent is null)
+            return;
+        foreach (RaidReviveEvent entry in result.Events)
+        {
+            // Diagnostics must never affect a committed gameplay transition.
+            try { observeEvent(entry); }
+            catch (Exception) { }
+        }
     }
 }

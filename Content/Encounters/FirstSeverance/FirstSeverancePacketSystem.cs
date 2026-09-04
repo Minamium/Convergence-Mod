@@ -249,6 +249,10 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         in EncounterPacketHeader header,
         out string failureCode)
     {
+        if (!FirstSeverancePacketCodec.TryReadPrototypeDownRequest(
+                reader, out uint requestNonce, out failureCode))
+            return false;
+
         if (!IsLiveHeader(header) || !IsCurrentPlayer(whoAmI))
         {
             return Reject("first_severance.prototype_down_header_invalid", out failureCode);
@@ -257,14 +261,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         if (!TryConsumeRate(whoAmI, header.PacketType, FastRequestWindowTicks, 4))
         {
             return Reject("first_severance.prototype_down_rate_limited", out failureCode);
-        }
-
-        if (!FirstSeverancePacketCodec.TryReadPrototypeDownRequest(
-                reader,
-                out uint requestNonce,
-                out failureCode))
-        {
-            return false;
         }
 
         bool accepted = FirstSeveranceServerCommands.TryPrototypeDown(
@@ -284,6 +280,10 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         in EncounterPacketHeader header,
         out string failureCode)
     {
+        if (!FirstSeverancePacketCodec.TryReadReviveNearestRequest(
+                reader, out uint requestNonce, out failureCode))
+            return false;
+
         if (!IsLiveHeader(header) || !IsCurrentPlayer(whoAmI))
         {
             return Reject("first_severance.revive_header_invalid", out failureCode);
@@ -292,14 +292,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         if (!TryConsumeRate(whoAmI, header.PacketType, FastRequestWindowTicks, 8))
         {
             return Reject("first_severance.revive_rate_limited", out failureCode);
-        }
-
-        if (!FirstSeverancePacketCodec.TryReadReviveNearestRequest(
-                reader,
-                out uint requestNonce,
-                out failureCode))
-        {
-            return false;
         }
 
         bool accepted = FirstSeveranceServerCommands.TryReviveNearest(

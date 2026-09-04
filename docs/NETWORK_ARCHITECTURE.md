@@ -29,6 +29,8 @@ Development `0.1.1` adds request IDs 5 (`RequestPrototypeDown`) and 6 (`RequestR
 
 ## Implementation status
 
+The `0.1.2` recovery hotfix does not change protocol v2 or packet layouts. Requests 5 and 6 decode their fixed uint nonce before header/sender/rate validation. The receiver must not compare `BaseStream.Length - Position` to 4: the supplied reader can belong to a shared buffer. See the pinned-source evidence in [First Severance API research](research/FIRST_SEVERANCE_SLICE3_APIS.md).
+
 Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, typed handler routing, First Severance activate/Ready/cancel/full-preparation-snapshot transport, feature-neutral terminal descriptors/external mappings, and ordered read-only replica/tombstone behavior.
 
 Not implemented: combat-state deltas/events, revive packets, actor mutation, Barrier correction, or a complete rejoin policy beyond the current bounded full snapshot request. Current custom requests can change only the preparation state; no packet can start combat or report combat outcomes. See [Status](STATUS.md).

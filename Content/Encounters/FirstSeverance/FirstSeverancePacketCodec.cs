@@ -125,12 +125,8 @@ internal static class FirstSeverancePacketCodec
         out uint requestNonce,
         out string failureCode)
     {
-        if (reader.BaseStream.Length - reader.BaseStream.Position != sizeof(uint))
-        {
-            requestNonce = 0;
-            failureCode = "first_severance.prototype_down_payload_size";
-            return false;
-        }
+        // tML supplies a shared receive stream, not a packet-sized stream.
+        // Read only our fixed field; the router handles truncated reads.
         requestNonce = reader.ReadUInt32();
         if (requestNonce == 0)
         {
@@ -156,12 +152,7 @@ internal static class FirstSeverancePacketCodec
         out uint requestNonce,
         out string failureCode)
     {
-        if (reader.BaseStream.Length - reader.BaseStream.Position != sizeof(uint))
-        {
-            requestNonce = 0;
-            failureCode = "first_severance.revive_payload_size";
-            return false;
-        }
+        // Do not use BaseStream.Length as the ModPacket boundary.
         requestNonce = reader.ReadUInt32();
         if (requestNonce == 0)
         {

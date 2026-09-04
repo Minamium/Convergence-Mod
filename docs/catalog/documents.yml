@@ -25,7 +25,7 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: 735fafeba004c2cbe5e4a1868c7d960f0b46be3de370dccd10e2eef47e487a40
+  content_sha256: 8f8027021ab5b5782ef4e0e667a49d5fe31275b110e964c6fca2bc0653112030
   document_type: policy
   status: accepted
   owners:
@@ -233,7 +233,7 @@ documents:
 - doc_id: encounter.first-severance.revive
   path: docs/encounters/first-severance/REVIVE_SPEC.md
   title: First Severance Downed and Revive Specification
-  content_sha256: 8ed78972a2207d99f60972ecd1f76e28216dc6d455f08a695526f31fa069fa2b
+  content_sha256: afa9c1d918608d37c4ddfeaa13211dccd53988300fc67712e46fbd6202f923a6
   document_type: spec
   status: accepted
   owners:
@@ -322,7 +322,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 9def8495fdd9aa7b3282d973b38ad580683bdbade882976772fb70ac01453d6a
+  content_sha256: 4bfbc4d71128e6a5669eccd1ce0f8d52d627370e578faa092adc2fc927cc1bc8
   document_type: policy
   status: accepted
   owners:
@@ -592,7 +592,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 03e892c39add6fc663f48dd682a04d507714947955a8c2ff55779426366c5a8a
+  content_sha256: 7edf26d6fb797b8c432e0c1df671eea06d172ed08cfefa5b813fb7b04e3858c2
   document_type: governance
   status: accepted
   owners:
@@ -637,7 +637,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b715f5438e1ee1b1baef0a68b20c42aed74aadcee1fa9f934933d4ef8d23343e
+  content_sha256: 298fb82cc3b1aeb8b43a38d9cc467841eeda82d2f45c50914e17ab4cbae7a77d
   document_type: status
   status: accepted
   owners:
@@ -709,7 +709,7 @@ documents:
 - doc_id: research.first-severance-slice3-apis
   path: docs/research/FIRST_SEVERANCE_SLICE3_APIS.md
   title: First Severance Slice 3 API Evidence
-  content_sha256: 95b46a846cccb5f1705cf7c610b71f7398e73b448ae23a7c6dab723139e45667
+  content_sha256: e691e4cd27e2a2716337c16aa08d32b8a200d0d12a4dab66bd9f370e562e5618
   document_type: research
   status: historical
   owners:
@@ -751,7 +751,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 6913318d21a5fd8b9049f8ff8da7bdf52bad706a88a7b24afdf7fe7c7c9eff7c
+  content_sha256: 31a78a16761e875f043cb02a946d23f14ea04df852b5c8fda870dde3a6991ef5
   document_type: research
   status: historical
   owners:

@@ -77,6 +77,8 @@ Reviewer and review date
 
 ## Release audit
 
+The `0.1.2` recovery transport fix follows the official pinned `ModNet.HandleModPacket` reader contract without copying its implementation. The marker correction uses the existing runtime MagicPixel texture with a one-texel source rectangle; no texture or other external asset was extracted or added. See [API evidence](research/FIRST_SEVERANCE_SLICE3_APIS.md).
+
 The 2026-09-05 First Severance experiment uses independently written adapters informed by official tModLoader API behavior; no external source implementation was copied. Foundation Core prototype texture provenance is recorded in [Asset Attribution](../Assets/ATTRIBUTION.md). Boss 3 is a Terraria runtime music reference, not a bundled audio recording.
 
 Release candidateごとに次を確認する。

@@ -23,6 +23,16 @@ related_docs:
 
 # First Severance Slice 3 API Evidence
 
+## Recovery packet and marker hotfix evidence (2026-09-05)
+
+- Question/scope: `Mod.HandlePacket`, `ModNet.HandleModPacket`, shared reader length and underflow; local `FirstSeverancePacketCodec` and `DrawRing`. Target remains Terraria 1.4.4.9, tModLoader v2026.07.3.0 / `666f69962d3bdffde54fc14025f02634965b4e7c`, Calamity 2.2.4, .NET 8 / C# 12.
+- Official source: [pinned ModNet.cs](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNet.cs), `HandleModPacket`; [current v2026.07 Mod API](https://docs.tmodloader.net/docs/stable/class_mod.html), `HandlePacket` and `Logger`. Both read on 2026-09-05. The tModLoader organization owns the repository. The previously recorded MIT [license URL](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/LICENSE) and its raw counterpart were unavailable during this recheck; no license change is inferred and no source is copied.
+- Observation: tModLoader passes the existing reader to the Mod, records its starting position, and separately compares consumed bytes with the actual message length. It does not turn `BaseStream.Length` into a ModPacket boundary. Local multiplayer logs corroborated a valid 35-byte message rejected after only the 31-byte envelope.
+- Decision: independently read the declared four-byte nonce, retain nonzero checks and router handling of truncated reads, then validate request eligibility. Do not seek to the shared stream end or bypass tModLoader's underflow diagnostics. No protocol change, external code or new dependency.
+- Focused reproduction: invoke both compiled decoders at offset 31 with an exact four-byte field and with 128 trailing shared-buffer bytes. The old binary rejects only the shared-buffer cases; the hotfix consumes four bytes in both. Zero and three-byte truncated nonces remain rejected. This checks the decoder, not full live revival.
+- Visual evidence: the user's local screenshot shows 64-segment orange Spread rings extended into screen-length spokes. Source used the full MagicPixel texture with pixel-length scale. The independent fix selects a 1x1 source texel before scaling; geometry, damage and timing are unchanged. Live rendering remains to be rechecked by the user.
+- Provenance: API behavior only; no Terraria/Calamity implementation, texture or audio copied. No third-party combat implementation was consulted for this fix.
+
 Accessed: **2026-09-05**
 
 This record fixes the external API evidence used by the first Foundation Core,

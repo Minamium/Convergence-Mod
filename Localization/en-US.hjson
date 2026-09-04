@@ -40,9 +40,24 @@ Mods: {
 				ParticipantRevived: "{0} revived at 35% life. Shared tokens left: {1}."
 				ReviveStarted: "{0} is reviving — hold use and remain still."
 				ReviveCancelled: "{0}'s revive was interrupted. No token consumed."
-				CombatEnded: "Raid ended ({0}). Actors and Downed state cleared."
+				CombatEnded: "Raid ended ({0}): {1}"
+				EndBossLifeZero: Boss defeated. Raid cleared!
+				EndOverloadLimit: Pylons failed 3 times (Overload limit).
+				EndAllParticipantsDowned: All players are Downed. No standing ally remains to revive.
+				EndRecoveryImpossible: No recovery remains (Down timeout or no standing participant).
+				EndLoopCapExceeded: The Boss survived 8 exposure windows.
+				EndUserCancelled: Cancelled by the initiator.
+				EndFoundationCoreLost: The Foundation Core disappeared.
+				EndBossActorMissing: The Boss disappeared unexpectedly.
+				EndRuntimeInvariantBroken: Encounter state became invalid. Check server.log.
+				EndAdministrativeAbort: A participant died normally or disconnected.
+				EndWorldUnload: World closed.
+				EndProtocolFailure: Network protocol failure. Check server.log.
+				EndInternalFailure: Runtime error. Check server.log.
+				EndUnknown: Encounter closed. Check server.log.
 				CombatHud: "{0}  |  {1}s  |  Revive tokens: {2}"
-				DownedHud: "DOWNED — {0}s remaining. Wait for an ally's kit."
+				DownedHud: "DOWNED — {0}s. Ally: hold the kit within 8 tiles for 2 seconds!"
+				EliminatedHud: DOWN TIMEOUT — out until this Raid ends.
 				ReviveHud: "REVIVING — hold use, stay still: {0}s"
 				NameSpawnIntro: FIRST SEVERANCE
 				NamePylonCheck: PYLONS

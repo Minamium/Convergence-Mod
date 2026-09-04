@@ -38,9 +38,24 @@ Mods: {
         ParticipantRevived: "{0} がHP35%で復帰。共有蘇生トークン残り: {1}。"
         ReviveStarted: "{0} が蘇生中 — 動かず使用ボタンを押し続けてください。"
         ReviveCancelled: "{0} の蘇生が中断されました。トークンは消費していません。"
-        CombatEnded: "Raid終了（{0}）。試作NPCとDown状態を解除しました。"
+        CombatEnded: "Raid終了（{0}）：{1}"
+        EndBossLifeZero: Boss撃破。Raidクリア！
+        EndOverloadLimit: パイロン破壊に3回失敗しました（Overload上限）。
+        EndAllParticipantsDowned: 全員がDOWN。蘇生できる味方がいないため敗北しました。
+        EndRecoveryImpossible: DOWN時間切れ、または動ける参加者がいないため復帰できません。
+        EndLoopCapExceeded: 8回のコア露出が終わってもBossが残りました。
+        EndUserCancelled: 起動者がキャンセルしました。
+        EndFoundationCoreLost: ファウンデーション・コアが失われました。
+        EndBossActorMissing: Bossが想定外に消失しました。
+        EndRuntimeInvariantBroken: 戦闘状態に不整合が発生しました。server.logを確認してください。
+        EndAdministrativeAbort: 参加者の通常死亡、または切断で中止しました。
+        EndWorldUnload: ワールドを終了しました。
+        EndProtocolFailure: 通信エラーで中止しました。server.logを確認してください。
+        EndInternalFailure: 実行エラーで中止しました。server.logを確認してください。
+        EndUnknown: 戦闘を終了しました。server.logを確認してください。
         CombatHud: "{0}  |  残り{1}秒  |  蘇生トークン: {2}"
-        DownedHud: "DOWN — 残り{0}秒。味方の蘇生キットを待ってください。"
+        DownedHud: "DOWN — 残り{0}秒。味方は8タイル以内で蘇生キットを2秒長押し！"
+        EliminatedHud: DOWN時間切れ — このRaidが終わるまで行動できません。
         ReviveHud: "蘇生中 — 静止して長押し: 残り{0}秒"
         NameSpawnIntro: 第一断絶
         NamePylonCheck: パイロン破壊

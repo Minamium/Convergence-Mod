@@ -48,7 +48,7 @@ This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calami
 ```text
 displayName = Convergence (Development Build)
 author = Minamium
-version = 0.1.1
+version = 0.1.2
 modReferences = CalamityMod@2.2.4
 side = Both
 playableOnPreview = false

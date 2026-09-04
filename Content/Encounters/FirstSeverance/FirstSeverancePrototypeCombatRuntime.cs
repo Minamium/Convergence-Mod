@@ -92,7 +92,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         this.serverTileEntityId = serverTileEntityId;
         this.coreTopLeft = coreTopLeft;
         plan = FirstSeveranceEncounterPlan.Instance;
-        revive = new FirstSeveranceReviveBoundary(fightId);
+        revive = new FirstSeveranceReviveBoundary(fightId, LogReviveEvent);
         lastQueuedNonces = new uint[roster.Count];
         observedConnected = new bool[roster.Count];
         projectedCombatStates = new RaidParticipantCombatState[roster.Count];
@@ -167,6 +167,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         isAttached = true;
         isStarted = true;
         GrantPrototypeReviveKits();
+        Log(authorityTick, $"event=CombatStarted participants={roster.Count} stack_pool={stackDamagePool}");
         failureCode = string.Empty;
         return true;
     }
@@ -342,7 +343,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             {
                 if (TryGetPlayer(member, out Player player))
                     ApplyRaidDamage(member, Math.Min(player.statLife - 1,
-                        player.statLifeMax2 / 4), context.AuthorityTick);
+                        player.statLifeMax2 / 4), context.AuthorityTick, "PylonPulse");
             }
         }
 
@@ -369,6 +370,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         {
             return End(FirstSeveranceTerminalCause.RuntimeInvariantBroken);
         }
+
+        if (before.Substate != after.Substate)
+            Log(context.AuthorityTick, $"event=PhaseChanged phase={after.Substate} loop={after.ZeroBasedLoopIndex + 1} overload={after.Overload} boss_life={after.BossLife}");
 
         UpdateDamageWindows(after, context.AuthorityTick);
         SynchronizeBossLife(after);
@@ -432,6 +436,10 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         {
             throw new InvalidOperationException("Combat cleanup has the wrong identity.");
         }
+
+        string terminalCause = FirstSeveranceTerminationContract.Instance.IsValid(context.Termination)
+            ? FirstSeveranceTerminationContract.Instance.GetCause(context.Termination).ToString() : "Unknown";
+        Log(Main.GameUpdateCount, $"event=CombatEnded reason={context.EndReason} cause={terminalCause} phase={loop?.State.Substate} overload={loop?.State.Overload}");
 
         CleanupPylons();
         CleanupNpc(bossNpcIndex, ModContent.NPCType<FirstSeverancePrototypeBoss>());
@@ -533,6 +541,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                 continue;
             if (intent.Kind == FirstSeveranceCombatIntentKind.PrototypeDown)
             {
+                Log(authorityTick, $"event=DownRequested source=DebugCommand participant={intent.Member.ParticipantId.Value} slot={intent.Member.ServerWhoAmI}");
                 revive.Apply(new AuthoritativeParticipantDownedCommand(
                     fightId,
                     binding,
@@ -703,13 +712,15 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         healthRevisions[index]++;
     }
 
-    private void ApplyRaidDamage(FirstSeveranceRosterMember member, int damage, ulong authorityTick)
+    private void ApplyRaidDamage(FirstSeveranceRosterMember member, int damage, ulong authorityTick, string source)
     {
         if (damage <= 0 || !TryGetPlayer(member, out Player player) || player.dead
             || !TryGetReviveParticipant(member.ParticipantId, out RaidParticipantReviveSnapshot state)
             || state.CombatState != RaidParticipantCombatState.Alive
             || authorityTick < state.InvulnerabilityUntilTick)
             return;
+
+        Log(authorityTick, $"event=RaidDamage source={source} participant={member.ParticipantId.Value} slot={member.ServerWhoAmI} damage={damage} life_before={player.statLife} max_life={player.statLifeMax2} lethal={damage >= player.statLife}");
 
         // Experimental encounter-owned damage, not an interception of another Mod's hit.
         // This path never sends a lethal HP value or invokes Terraria's death hooks.
@@ -756,7 +767,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             {
                 int share = stackDamagePool / occupants.Count
                     + (index < stackDamagePool % occupants.Count ? 1 : 0);
-                ApplyRaidDamage(occupants[index], share, authorityTick);
+                ApplyRaidDamage(occupants[index], share, authorityTick, "Stack");
             }
         }
         else if (state.Substate == FirstSeveranceSubstate.Spread)
@@ -794,7 +805,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             foreach (FirstSeveranceRosterMember member in roster.Members)
                 if (failedSlots.Contains(member.ServerWhoAmI)
                     && TryGetPlayer(member, out Player player))
-                    ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 2 / 5), authorityTick);
+                    ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 2 / 5), authorityTick, "Spread");
         }
     }
 
@@ -1246,6 +1257,21 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     {
         nextActorToken = nextActorToken >= 1_000_000 ? 1 : nextActorToken + 1;
         return nextActorToken;
+    }
+
+    private void LogReviveEvent(RaidReviveEvent entry)
+    {
+        Log(entry.AuthorityTick, $"event={entry.Kind} participant={entry.Subject.Value} actor={entry.Actor.Value} cancel={entry.CancelReason} failure={entry.FailureReason} elimination={entry.EliminationReason}");
+    }
+
+    private void Log(ulong tick, string detail)
+    {
+        try
+        {
+            global::Convergence.ConvergenceMod.Instance.Logger.Info(
+                $"FirstSeverance seq={encounterSequence} fight={fightId} tick={tick} {detail}");
+        }
+        catch (Exception) { } // A failed log sink cannot interrupt gameplay or cleanup.
     }
 
     private static EncounterRuntimeUpdate End(FirstSeveranceTerminalCause cause)

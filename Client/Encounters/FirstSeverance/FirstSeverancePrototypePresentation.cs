@@ -82,7 +82,14 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             return;
         FirstSeveranceClientStateSystem state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
         FirstSeveranceCombatProjection? combat = state.Combat;
-        if (combat is null || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local))
+        if (combat is null)
+        {
+            if (state.CombatEndMessage is { } ended)
+                Utils.DrawBorderString(spriteBatch, ended,
+                    new Vector2(Main.screenWidth / 2f, 108f), Color.LightGoldenrodYellow, 0.9f, 0.5f);
+            return;
+        }
+        if (!combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local))
             return;
 
         string phase = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.Name" + combat.Substate);
@@ -95,6 +102,8 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         if (local.CombatState == RaidParticipantCombatState.Downed)
             text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.DownedHud",
                 SecondsLeft(local.DownedDeadlineTick, state.EstimatedAuthorityTick).ToString("0.0"));
+        else if (local.CombatState == RaidParticipantCombatState.Eliminated)
+            text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.EliminatedHud");
         else if (local.IsReviving)
             text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.ReviveHud",
                 SecondsLeft(local.ReviveCompletesTick, state.EstimatedAuthorityTick).ToString("0.0"));
@@ -102,7 +111,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             return;
 
         Utils.DrawBorderString(spriteBatch, text,
-            new Vector2(Main.screenWidth / 2f, 108f), Color.Orange, 0.9f, 0.5f);
+            new Vector2(Main.screenWidth / 2f, 112f), Color.Orange, 1.1f, 0.5f);
     }
 
     private static float SecondsLeft(ulong deadline, ulong tick)
@@ -118,7 +127,9 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             Vector2 next = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * radius
                 - Main.screenPosition;
             Vector2 delta = next - previous;
-            batch.Draw(TextureAssets.MagicPixel.Value, previous, null, color,
+            // Sample one texel: scaling the whole MagicPixel texture stretches
+            // each circle segment into a screen-length spoke.
+            batch.Draw(TextureAssets.MagicPixel.Value, previous, new Rectangle(0, 0, 1, 1), color,
                 MathF.Atan2(delta.Y, delta.X), Vector2.Zero,
                 new Vector2(delta.Length(), 2f), SpriteEffects.None, 0f);
             previous = next;
