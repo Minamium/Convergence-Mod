@@ -4,7 +4,7 @@ document_type: spec
 status: accepted
 owners:
   - art
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - project.art_direction
 aliases:
@@ -25,7 +25,7 @@ related_docs:
 
 ## First Severance MVP
 
-The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). Its accepted boundary is one simple Boss NPC/body, one life pool, no separately damageable presentation parts, and readable shielded/exposed states. The central Core/body, one broken ring, two short side arms, exact state names, and their motions are provisional placeholders. Crown/Wings/Heart Casing and other multipart designs are deferred, even though the legacy code plan still mentions them.
+The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). Its accepted boundary is one simple Boss NPC/body, one life pool, no separately damageable presentation parts, and readable shielded/exposed states. The central Core/body, one broken ring, two short side arms, exact state names, and their motions are provisional placeholders. Crown/Wings/Heart Casing and other multipart designs are deferred and no longer shape the active code plan.
 
 ## Shape language
 
@@ -85,4 +85,4 @@ Boss scale may be visually large, but hitbox and damage gate must be obvious. De
 6. grayscale/color-vision/reduced-VFX/multiplayer QA;
 7. provenance entry before merge.
 
-Do not produce elaborate multipart art to match code scheduled for deletion.
+Do not produce elaborate multipart art for deferred backlog mechanics.

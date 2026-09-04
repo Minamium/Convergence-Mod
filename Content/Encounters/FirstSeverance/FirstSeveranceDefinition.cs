@@ -18,6 +18,9 @@ internal sealed class FirstSeveranceDefinition : EncounterDefinition
     public static FirstSeveranceDefinition Instance { get; } = new();
 
     private FirstSeveranceDefinition()
+        : base(
+            FirstSeveranceTerminationContract.Instance,
+            FirstSeveranceTerminationContract.Instance.ExternalTerminations)
     {
     }
 

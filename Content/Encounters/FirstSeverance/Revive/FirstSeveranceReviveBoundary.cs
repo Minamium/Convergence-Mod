@@ -122,12 +122,19 @@ internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipan
         hasPendingObservableChange = false;
         if (service.FailureReason != RaidReviveFailureReason.None)
         {
-            return EncounterRuntimeUpdate.End(EncounterEndReason.Defeat);
+            FirstSeveranceTerminalCause cause = service.FailureReason
+                == RaidReviveFailureReason.AllParticipantsDowned
+                    ? FirstSeveranceTerminalCause.AllParticipantsDowned
+                    : FirstSeveranceTerminalCause.RecoveryImpossible;
+            return EncounterRuntimeUpdate.End(
+                FirstSeveranceTerminationContract.Instance.Create(cause));
         }
 
         if (!result.IsAccepted)
         {
-            return EncounterRuntimeUpdate.End(EncounterEndReason.InternalFailure);
+            return EncounterRuntimeUpdate.End(
+                FirstSeveranceTerminationContract.Instance.Create(
+                    FirstSeveranceTerminalCause.RuntimeInvariantBroken));
         }
 
         return hasObservableChange

@@ -45,7 +45,9 @@ internal sealed class FirstSeveranceBootstrapRuntime : IEncounterRuntime
         // or mutating the World through an unimplemented adapter.
         if (!worldAdapter.IsOperational)
         {
-            return EncounterRuntimeUpdate.End(EncounterEndReason.Invalidated);
+            return EncounterRuntimeUpdate.End(
+                plan.TerminationContract.Create(
+                    FirstSeveranceTerminalCause.RuntimeInvariantBroken));
         }
 
         // Milestone 1 replaces this bootstrap with server-side Core resolution,

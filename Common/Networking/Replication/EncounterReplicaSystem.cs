@@ -1,6 +1,7 @@
 #nullable enable
 
 using Convergence.Common.Encounters.Abstractions;
+using Convergence.Common.Encounters.Runtime;
 using Terraria.ModLoader;
 
 namespace Convergence.Common.Networking.Replication;
@@ -15,7 +16,19 @@ internal sealed class EncounterReplicaSystem : ModSystem
 
     internal bool ApplyFullSnapshot(in EncounterSnapshot snapshot)
     {
-        return replica.ApplyFullSnapshot(snapshot);
+        if (snapshot.Lifecycle == EncounterLifecycle.Idle)
+        {
+            return replica.ApplyFullSnapshot(snapshot, null);
+        }
+
+        if (!EncounterCatalogSystem.Registry.TryGet(
+            snapshot.DefinitionKey,
+            out EncounterDefinition definition))
+        {
+            return false;
+        }
+
+        return replica.ApplyFullSnapshot(snapshot, definition.TerminationContract);
     }
 
     public override void ClearWorld()

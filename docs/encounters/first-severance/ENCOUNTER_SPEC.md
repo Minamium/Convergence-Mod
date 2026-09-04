@@ -58,7 +58,7 @@ Idle projection -> Validating -> Preparing -> Active
                                                         -> Cleanup -> Idle projection
 ```
 
-First Severance uses the direct `End(reason)` path for every first-slice terminal. The runtime stores the selected feature terminal cause and returns `EncounterRuntimeUpdate.End` from `Preparing` or `Active`; the current coordinator enters `Cleanup`, publishes the terminal projection, and starts cleanup. It does **not** request `Resolving` and End on the same update. `Resolving` remains available only for a future separately specified result/reward stage that transitions on one tick and ends on a later tick.
+First Severance uses the direct `End(termination)` path for every first-slice terminal. The runtime stores the selected feature terminal cause in the immutable descriptor and returns `EncounterRuntimeUpdate.End` from `Preparing` or `Active`; the current coordinator enters `Cleanup`, publishes the terminal projection, and starts cleanup. It does **not** request `Resolving` and End on the same update. `Resolving` remains available only for a future separately specified result/reward stage that transitions on one tick and ends on a later tick.
 
 `Active` owns this repeated sequence:
 
@@ -152,7 +152,7 @@ The feature runtime settles one authority tick in this order:
 4. sample the resulting connected Alive set and server positions, resolve the due Pylon/Stack/Spread/exposure edge once, and immediately apply any mechanic-created lethal transitions to the Revive domain in stable Participant-ID order;
 5. apply the one complete, stably ordered revive-start batch after all invalidations, then call `RaidReviveService.CommitTick` exactly once; late commands for that tick are rejected;
 6. gather actor/invariant, Boss-life, Overload/loop-cap, and Revive terminal candidates observed by the feature and choose exactly one by the feature priority below;
-7. if no terminal exists, commit at most one nonterminal substate edge; otherwise store the generic end reason and bounded feature terminal cause and return direct `End(reason)`;
+7. if no terminal exists, commit at most one nonterminal substate edge; otherwise store the generic end reason and bounded feature terminal cause and return one direct End descriptor;
 8. publish one coherent feature/generic terminal projection and tombstone before cleanup releases actors or player projections.
 
 This ordering makes a target that becomes Downed or disconnected exactly on a Stack/Spread resolve tick invalid **before** that mechanic samples participants, while mechanic damage can still create an all-Downed Defeat candidate in the same single commit. Boss HP reaching zero still wins a gameplay Defeat candidate, including all-Downed or timeout. A nested Revive failure may remain diagnostic state but never publishes a second `EncounterEnded`.
@@ -171,7 +171,7 @@ EncounterActorMissing
 
 Safety/validity endings therefore override a coincident gameplay result whose authority can no longer be trusted. `Cancelled` is accepted only during its declared preparation state; an active-fight cancel request is rejected rather than competing with Victory/Defeat.
 
-`WorldUnload`, an unhandled `InternalFailure`, and a fatal `ProtocolFailure` originate outside this reducer and unconditionally preempt an uncommitted feature result in that order. The coordinator must synthesize their generic/cause pair from the immutable mapping registered with the encounter definition; it must not re-enter a failed feature tick. The planned external-termination bridge publishes the combined terminal projection before cleanup. Until that bridge exists, feature replication and activation remain disabled.
+`WorldUnload`, an unhandled `InternalFailure`, and a fatal `ProtocolFailure` originate outside this reducer and unconditionally preempt an uncommitted feature result in that order. The coordinator synthesizes their generic/cause pair from the immutable mapping registered with the encounter definition; it does not re-enter a failed feature tick. The implemented external-termination bridge publishes the combined terminal projection before cleanup. Feature replication and activation remain disabled until their later Core/roster/actor/transport gates pass.
 
 ## Player-count rules
 

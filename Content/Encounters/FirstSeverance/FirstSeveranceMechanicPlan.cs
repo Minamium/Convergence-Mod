@@ -1,66 +1,27 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal enum FirstSeverancePhaseId : byte
+internal enum FirstSeveranceSubstate : byte
 {
     None = 0,
-    BaseActivation = 1,
-    SealRelease = 2,
-    PartBreak = 3,
-    Coordination = 4,
-    PersonalEffigies = 5,
-    WeakPointExposure = 6,
-    LastStand = 7,
-}
-
-internal enum FirstSeverancePhaseExitRule : byte
-{
-    PreparationComplete = 1,
-    MechanicResolvedOrDeadline = 2,
-    AllScheduledMechanicsResolved = 3,
-    BossLifeOrDeadline = 4,
-    FixedSequenceComplete = 5,
+    SpawnIntro = 1,
+    PylonCheck = 2,
+    Stack = 3,
+    Spread = 4,
+    CoreExposure = 5,
+    Reset = 6,
 }
 
 internal enum FirstSeveranceMechanicKind : byte
 {
-    PylonDpsCheck = 1,
-    PartBreakWindow = 2,
-    Stack = 3,
-    Spread = 4,
-    TargetedLine = 5,
-    PersonalEffigy = 6,
-    WeakPointExposure = 7,
-    BossAttackPattern = 8,
-}
-
-internal enum FirstSeveranceTargetRule : byte
-{
     None = 0,
-    AllParticipants = 1,
-    AssignedParticipant = 2,
-    DeterministicRandomParticipant = 3,
-    FarthestParticipant = 4,
-    HighestRecentServerDamageParticipant = 5,
-}
-
-internal enum FirstSeveranceFailureOutcome : byte
-{
-    None = 0,
-    ApplyOverload = 1,
-    ApplyRaidDamageDown = 2,
-    ApplyParticipantDebuff = 3,
-    StrengthenBoss = 4,
-    AdvanceHardEnrage = 5,
-}
-
-internal enum FirstSeverancePylonSelectionRule : byte
-{
-    RosterMappedSymmetricSlots = 1,
+    PylonCheck = 1,
+    Stack = 2,
+    Spread = 3,
+    CoreExposure = 4,
 }
 
 internal readonly record struct FirstSeveranceParticipantScaledInt(
@@ -68,11 +29,11 @@ internal readonly record struct FirstSeveranceParticipantScaledInt(
     int ThreeParticipants,
     int FourParticipants)
 {
-    public bool IsNonNegative => TwoParticipants >= 0
-        && ThreeParticipants >= 0
-        && FourParticipants >= 0;
+    public bool IsPositive => TwoParticipants > 0
+        && ThreeParticipants > 0
+        && FourParticipants > 0;
 
-    public bool FitsParticipantCount => IsNonNegative
+    public bool FitsParticipantCount => IsPositive
         && TwoParticipants <= 2
         && ThreeParticipants <= 3
         && FourParticipants <= 4;
@@ -84,448 +45,182 @@ internal readonly record struct FirstSeveranceParticipantScaledInt(
             2 => TwoParticipants,
             3 => ThreeParticipants,
             4 => FourParticipants,
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(participantCount),
-                "First Severance supports exactly two to four participants."),
+            _ => throw new ArgumentOutOfRangeException(nameof(participantCount)),
         };
     }
 }
 
-internal abstract class FirstSeveranceMechanicDefinition
+internal sealed class FirstSeveranceTimingPlan
 {
-    protected FirstSeveranceMechanicDefinition(
-        string key,
-        FirstSeveranceMechanicKind kind,
-        int startOffsetTicks,
-        int durationTicks,
-        FirstSeveranceTargetRule targetRule,
-        FirstSeveranceFailureOutcome failureOutcome)
+    public const int MaximumSubstateDurationTicks = 36_000;
+
+    public FirstSeveranceTimingPlan(
+        int spawnIntroTicks,
+        int pylonTelegraphTicks,
+        int pylonActiveTicks,
+        int stackTelegraphTicks,
+        int spreadTelegraphTicks,
+        int normalExposureTicks,
+        int penalizedExposureTicks,
+        int resetTicks)
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new ArgumentException("A mechanic requires a stable key.", nameof(key));
-        }
-
-        if (!Enum.IsDefined(kind) || !Enum.IsDefined(targetRule) || !Enum.IsDefined(failureOutcome))
-        {
-            throw new ArgumentOutOfRangeException(nameof(kind), "Mechanic enum values must be defined.");
-        }
-
-        if (startOffsetTicks < 0 || durationTicks <= 0)
+        if (spawnIntroTicks <= 0
+            || pylonTelegraphTicks <= 0
+            || pylonActiveTicks <= 0
+            || stackTelegraphTicks <= 0
+            || spreadTelegraphTicks <= 0
+            || normalExposureTicks <= 0
+            || penalizedExposureTicks <= 0
+            || resetTicks <= 0)
         {
             throw new ArgumentOutOfRangeException(
-                nameof(startOffsetTicks),
-                "Mechanic timing must use a non-negative offset and positive duration.");
+                nameof(spawnIntroTicks),
+                "Every First Severance duration must be positive.");
         }
 
-        Key = key;
-        Kind = kind;
-        StartOffsetTicks = startOffsetTicks;
-        DurationTicks = durationTicks;
-        TargetRule = targetRule;
-        FailureOutcome = failureOutcome;
+        if (spawnIntroTicks > MaximumSubstateDurationTicks
+            || pylonTelegraphTicks > MaximumSubstateDurationTicks
+            || pylonActiveTicks > MaximumSubstateDurationTicks
+            || stackTelegraphTicks > MaximumSubstateDurationTicks
+            || spreadTelegraphTicks > MaximumSubstateDurationTicks
+            || normalExposureTicks > MaximumSubstateDurationTicks
+            || penalizedExposureTicks > MaximumSubstateDurationTicks
+            || resetTicks > MaximumSubstateDurationTicks)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(spawnIntroTicks),
+                "Every First Severance duration must be bounded to ten minutes.");
+        }
 
-        _ = checked(startOffsetTicks + durationTicks);
+        if (penalizedExposureTicks >= normalExposureTicks)
+        {
+            throw new ArgumentException(
+                "The penalized exposure must be shorter than the normal exposure.",
+                nameof(penalizedExposureTicks));
+        }
+
+        SpawnIntroTicks = spawnIntroTicks;
+        PylonTelegraphTicks = pylonTelegraphTicks;
+        PylonActiveTicks = pylonActiveTicks;
+        StackTelegraphTicks = stackTelegraphTicks;
+        SpreadTelegraphTicks = spreadTelegraphTicks;
+        NormalExposureTicks = normalExposureTicks;
+        PenalizedExposureTicks = penalizedExposureTicks;
+        ResetTicks = resetTicks;
+
+        int pylonCheckTicks = checked(pylonTelegraphTicks + pylonActiveTicks);
+        if (pylonCheckTicks > MaximumSubstateDurationTicks)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(pylonActiveTicks),
+                "The complete Pylon check must be bounded to ten minutes.");
+        }
     }
 
-    public string Key { get; }
+    public int SpawnIntroTicks { get; }
 
-    public FirstSeveranceMechanicKind Kind { get; }
+    public int PylonTelegraphTicks { get; }
 
-    public int StartOffsetTicks { get; }
+    public int PylonActiveTicks { get; }
+
+    public int PylonCheckTicks => checked(PylonTelegraphTicks + PylonActiveTicks);
+
+    public int StackTelegraphTicks { get; }
+
+    public int SpreadTelegraphTicks { get; }
+
+    public int NormalExposureTicks { get; }
+
+    public int PenalizedExposureTicks { get; }
+
+    public int ResetTicks { get; }
+}
+
+internal readonly record struct FirstSeveranceStateEdge
+{
+    private FirstSeveranceStateEdge(
+        FirstSeveranceSubstate nextSubstate,
+        FirstSeveranceTerminalCause terminalCause)
+    {
+        NextSubstate = nextSubstate;
+        TerminalCause = terminalCause;
+    }
+
+    public FirstSeveranceSubstate NextSubstate { get; }
+
+    public FirstSeveranceTerminalCause TerminalCause { get; }
+
+    public bool IsTerminal => TerminalCause != FirstSeveranceTerminalCause.None;
+
+    public static FirstSeveranceStateEdge TransitionTo(FirstSeveranceSubstate next)
+    {
+        if (next == FirstSeveranceSubstate.None || !Enum.IsDefined(next))
+        {
+            throw new ArgumentOutOfRangeException(nameof(next));
+        }
+
+        return new FirstSeveranceStateEdge(next, FirstSeveranceTerminalCause.None);
+    }
+
+    public static FirstSeveranceStateEdge End(FirstSeveranceTerminalCause cause)
+    {
+        if (!FirstSeveranceTerminationContract.IsFeatureOwned(cause))
+        {
+            throw new ArgumentOutOfRangeException(nameof(cause));
+        }
+
+        return new FirstSeveranceStateEdge(FirstSeveranceSubstate.None, cause);
+    }
+}
+
+internal sealed class FirstSeveranceSubstateDefinition
+{
+    public FirstSeveranceSubstateDefinition(
+        FirstSeveranceSubstate substate,
+        FirstSeveranceMechanicKind mechanic,
+        int durationTicks,
+        FirstSeveranceStateEdge successEdge,
+        FirstSeveranceStateEdge failureEdge)
+    {
+        if (substate == FirstSeveranceSubstate.None || !Enum.IsDefined(substate))
+        {
+            throw new ArgumentOutOfRangeException(nameof(substate));
+        }
+
+        if (!Enum.IsDefined(mechanic))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mechanic));
+        }
+
+        if (durationTicks <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationTicks));
+        }
+
+        if (!successEdge.IsTerminal && successEdge.NextSubstate == FirstSeveranceSubstate.None)
+        {
+            throw new ArgumentException("A success edge requires a destination.", nameof(successEdge));
+        }
+
+        if (!failureEdge.IsTerminal && failureEdge.NextSubstate == FirstSeveranceSubstate.None)
+        {
+            throw new ArgumentException("A failure edge requires a destination.", nameof(failureEdge));
+        }
+
+        Substate = substate;
+        Mechanic = mechanic;
+        DurationTicks = durationTicks;
+        SuccessEdge = successEdge;
+        FailureEdge = failureEdge;
+    }
+
+    public FirstSeveranceSubstate Substate { get; }
+
+    public FirstSeveranceMechanicKind Mechanic { get; }
 
     public int DurationTicks { get; }
 
-    public int EndOffsetTicks => StartOffsetTicks + DurationTicks;
+    public FirstSeveranceStateEdge SuccessEdge { get; }
 
-    public FirstSeveranceTargetRule TargetRule { get; }
-
-    public FirstSeveranceFailureOutcome FailureOutcome { get; }
-}
-
-internal sealed class FirstSeverancePylonDpsCheckDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeverancePylonDpsCheckDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        in FirstSeveranceParticipantScaledInt activePylons,
-        FirstSeverancePylonSelectionRule slotSelectionRule,
-        string serverDamageBudgetKey,
-        bool usesParticipantAffinity,
-        FirstSeveranceFailureOutcome failureOutcome)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.PylonDpsCheck,
-            startOffsetTicks,
-            durationTicks,
-            FirstSeveranceTargetRule.AssignedParticipant,
-            failureOutcome)
-    {
-        if (!activePylons.FitsParticipantCount
-            || activePylons.FourParticipants > FirstSeveranceArenaBlueprint.RequiredPylonSlotCount)
-        {
-            throw new ArgumentOutOfRangeException(nameof(activePylons));
-        }
-
-        if (!Enum.IsDefined(slotSelectionRule))
-        {
-            throw new ArgumentOutOfRangeException(nameof(slotSelectionRule));
-        }
-
-        if (string.IsNullOrWhiteSpace(serverDamageBudgetKey))
-        {
-            throw new ArgumentException("A server-owned damage budget key is required.", nameof(serverDamageBudgetKey));
-        }
-
-        ActivePylons = activePylons;
-        SlotSelectionRule = slotSelectionRule;
-        ServerDamageBudgetKey = serverDamageBudgetKey;
-        UsesParticipantAffinity = usesParticipantAffinity;
-    }
-
-    public FirstSeveranceParticipantScaledInt ActivePylons { get; }
-
-    public FirstSeverancePylonSelectionRule SlotSelectionRule { get; }
-
-    // Future authority code resolves this key to tuned HP. Clients never report DPS success.
-    public string ServerDamageBudgetKey { get; }
-
-    public bool UsesParticipantAffinity { get; }
-}
-
-internal sealed class FirstSeverancePartBreakDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeverancePartBreakDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        IReadOnlyList<string> eligiblePartKeys,
-        int maximumStrategicBreaks)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.PartBreakWindow,
-            startOffsetTicks,
-            durationTicks,
-            FirstSeveranceTargetRule.AllParticipants,
-            FirstSeveranceFailureOutcome.None)
-    {
-        ArgumentNullException.ThrowIfNull(eligiblePartKeys);
-
-        if (eligiblePartKeys.Count == 0)
-        {
-            throw new ArgumentException("A part break window requires eligible parts.", nameof(eligiblePartKeys));
-        }
-
-        if (maximumStrategicBreaks <= 0 || maximumStrategicBreaks > eligiblePartKeys.Count)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maximumStrategicBreaks));
-        }
-
-        EligiblePartKeys = FirstSeverancePlanCollections.Copy(eligiblePartKeys, nameof(eligiblePartKeys));
-        MaximumStrategicBreaks = maximumStrategicBreaks;
-    }
-
-    public IReadOnlyList<string> EligiblePartKeys { get; }
-
-    public int MaximumStrategicBreaks { get; }
-}
-
-internal sealed class FirstSeveranceStackDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeveranceStackDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        int radiusInTiles,
-        in FirstSeveranceParticipantScaledInt requiredParticipants,
-        int successWeaknessStacks)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.Stack,
-            startOffsetTicks,
-            durationTicks,
-            FirstSeveranceTargetRule.DeterministicRandomParticipant,
-            FirstSeveranceFailureOutcome.ApplyRaidDamageDown)
-    {
-        if (radiusInTiles <= 0
-            || !requiredParticipants.FitsParticipantCount
-            || successWeaknessStacks < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(radiusInTiles));
-        }
-
-        RadiusInTiles = radiusInTiles;
-        RequiredParticipants = requiredParticipants;
-        SuccessWeaknessStacks = successWeaknessStacks;
-    }
-
-    public int RadiusInTiles { get; }
-
-    public FirstSeveranceParticipantScaledInt RequiredParticipants { get; }
-
-    public int SuccessWeaknessStacks { get; }
-}
-
-internal sealed class FirstSeveranceSpreadDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeveranceSpreadDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        int minimumSeparationInTiles,
-        int markerRadiusInTiles)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.Spread,
-            startOffsetTicks,
-            durationTicks,
-            FirstSeveranceTargetRule.AllParticipants,
-            FirstSeveranceFailureOutcome.ApplyParticipantDebuff)
-    {
-        if (minimumSeparationInTiles <= 0 || markerRadiusInTiles <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(minimumSeparationInTiles));
-        }
-
-        MinimumSeparationInTiles = minimumSeparationInTiles;
-        MarkerRadiusInTiles = markerRadiusInTiles;
-    }
-
-    public int MinimumSeparationInTiles { get; }
-
-    public int MarkerRadiusInTiles { get; }
-}
-
-internal sealed class FirstSeveranceTargetedLineDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeveranceTargetedLineDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        int telegraphTicks,
-        int lineWidthInTiles,
-        FirstSeveranceTargetRule targetRule)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.TargetedLine,
-            startOffsetTicks,
-            durationTicks,
-            targetRule,
-            FirstSeveranceFailureOutcome.ApplyParticipantDebuff)
-    {
-        if (targetRule is FirstSeveranceTargetRule.None or FirstSeveranceTargetRule.AllParticipants)
-        {
-            throw new ArgumentOutOfRangeException(nameof(targetRule));
-        }
-
-        if (telegraphTicks <= 0 || telegraphTicks >= durationTicks || lineWidthInTiles <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(telegraphTicks));
-        }
-
-        TelegraphTicks = telegraphTicks;
-        LineWidthInTiles = lineWidthInTiles;
-    }
-
-    public int TelegraphTicks { get; }
-
-    public int LineWidthInTiles { get; }
-}
-
-internal sealed class FirstSeverancePersonalEffigyDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeverancePersonalEffigyDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        int ownerDamagePermille,
-        int assistDamagePermille,
-        int failureStrengthStacks,
-        string serverClassResolutionKey,
-        IReadOnlyList<string> attackArchetypeKeys)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.PersonalEffigy,
-            startOffsetTicks,
-            durationTicks,
-            FirstSeveranceTargetRule.AllParticipants,
-            FirstSeveranceFailureOutcome.StrengthenBoss)
-    {
-        ArgumentNullException.ThrowIfNull(attackArchetypeKeys);
-
-        if (ownerDamagePermille <= 0
-            || assistDamagePermille < 0
-            || assistDamagePermille > ownerDamagePermille
-            || failureStrengthStacks <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(ownerDamagePermille));
-        }
-
-        if (string.IsNullOrWhiteSpace(serverClassResolutionKey) || attackArchetypeKeys.Count == 0)
-        {
-            throw new ArgumentException("Effigies require a server class resolver and attack archetypes.");
-        }
-
-        OwnerDamagePermille = ownerDamagePermille;
-        AssistDamagePermille = assistDamagePermille;
-        FailureStrengthStacks = failureStrengthStacks;
-        ServerClassResolutionKey = serverClassResolutionKey;
-        AttackArchetypeKeys = FirstSeverancePlanCollections.Copy(
-            attackArchetypeKeys,
-            nameof(attackArchetypeKeys));
-    }
-
-    public int OwnerDamagePermille { get; }
-
-    public int AssistDamagePermille { get; }
-
-    public int FailureStrengthStacks { get; }
-
-    public string ServerClassResolutionKey { get; }
-
-    public IReadOnlyList<string> AttackArchetypeKeys { get; }
-}
-
-internal sealed class FirstSeveranceWeakPointExposureDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeveranceWeakPointExposureDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        string weakPointKey,
-        string serverDamageBudgetKey,
-        FirstSeveranceFailureOutcome failureOutcome)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.WeakPointExposure,
-            startOffsetTicks,
-            durationTicks,
-            FirstSeveranceTargetRule.AllParticipants,
-            failureOutcome)
-    {
-        if (string.IsNullOrWhiteSpace(weakPointKey) || string.IsNullOrWhiteSpace(serverDamageBudgetKey))
-        {
-            throw new ArgumentException("Weak point and damage budget keys are required.");
-        }
-
-        WeakPointKey = weakPointKey;
-        ServerDamageBudgetKey = serverDamageBudgetKey;
-    }
-
-    public string WeakPointKey { get; }
-
-    public string ServerDamageBudgetKey { get; }
-}
-
-internal sealed class FirstSeveranceBossAttackPatternDefinition : FirstSeveranceMechanicDefinition
-{
-    public FirstSeveranceBossAttackPatternDefinition(
-        string key,
-        int startOffsetTicks,
-        int durationTicks,
-        string patternKey,
-        FirstSeveranceTargetRule targetRule,
-        FirstSeveranceFailureOutcome failureOutcome)
-        : base(
-            key,
-            FirstSeveranceMechanicKind.BossAttackPattern,
-            startOffsetTicks,
-            durationTicks,
-            targetRule,
-            failureOutcome)
-    {
-        if (string.IsNullOrWhiteSpace(patternKey))
-        {
-            throw new ArgumentException("An attack pattern requires a stable key.", nameof(patternKey));
-        }
-
-        PatternKey = patternKey;
-    }
-
-    public string PatternKey { get; }
-}
-
-internal sealed class FirstSeverancePhaseDefinition
-{
-    // A phase-entry count is deliberately bounded. The authority executor must
-    // apply the plan's LoopExhaustionOutcome before exceeding this per-phase cap.
-    public const int MaximumSupportedVisits = 16;
-
-    public FirstSeverancePhaseDefinition(
-        FirstSeverancePhaseId id,
-        string bossFormKey,
-        int maximumDurationTicks,
-        FirstSeverancePhaseExitRule exitRule,
-        FirstSeverancePhaseId nextPhaseOnResolution,
-        FirstSeverancePhaseId nextPhaseOnSoftFailure,
-        int maximumVisits,
-        bool canBeInterruptedByLastStand,
-        IReadOnlyList<FirstSeveranceMechanicDefinition> mechanics)
-    {
-        ArgumentNullException.ThrowIfNull(mechanics);
-
-        if (id == FirstSeverancePhaseId.None || !Enum.IsDefined(id))
-        {
-            throw new ArgumentOutOfRangeException(nameof(id));
-        }
-
-        if (string.IsNullOrWhiteSpace(bossFormKey))
-        {
-            throw new ArgumentException("A phase requires a boss form key.", nameof(bossFormKey));
-        }
-
-        if (maximumDurationTicks <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maximumDurationTicks));
-        }
-
-        if (maximumVisits is <= 0 or > MaximumSupportedVisits)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maximumVisits));
-        }
-
-        if (!Enum.IsDefined(exitRule))
-        {
-            throw new ArgumentOutOfRangeException(nameof(exitRule));
-        }
-
-        for (int index = 0; index < mechanics.Count; index++)
-        {
-            if (mechanics[index].EndOffsetTicks > maximumDurationTicks)
-            {
-                throw new ArgumentException(
-                    $"Mechanic '{mechanics[index].Key}' exceeds phase '{id}'.",
-                    nameof(mechanics));
-            }
-        }
-
-        Id = id;
-        BossFormKey = bossFormKey;
-        MaximumDurationTicks = maximumDurationTicks;
-        ExitRule = exitRule;
-        NextPhaseOnResolution = nextPhaseOnResolution;
-        NextPhaseOnSoftFailure = nextPhaseOnSoftFailure;
-        MaximumVisits = maximumVisits;
-        CanBeInterruptedByLastStand = canBeInterruptedByLastStand;
-        Mechanics = FirstSeverancePlanCollections.Copy(mechanics, nameof(mechanics));
-    }
-
-    public FirstSeverancePhaseId Id { get; }
-
-    public string BossFormKey { get; }
-
-    public int MaximumDurationTicks { get; }
-
-    public FirstSeverancePhaseExitRule ExitRule { get; }
-
-    public FirstSeverancePhaseId NextPhaseOnResolution { get; }
-
-    public FirstSeverancePhaseId NextPhaseOnSoftFailure { get; }
-
-    public int MaximumVisits { get; }
-
-    public bool CanBeInterruptedByLastStand { get; }
-
-    public IReadOnlyList<FirstSeveranceMechanicDefinition> Mechanics { get; }
+    public FirstSeveranceStateEdge FailureEdge { get; }
 }

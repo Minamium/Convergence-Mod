@@ -8,6 +8,17 @@ namespace Convergence.Common.Encounters.Abstractions;
 
 internal abstract class EncounterDefinition
 {
+    protected EncounterDefinition(
+        IEncounterTerminationContract terminationContract,
+        IReadOnlyList<EncounterTerminationDescriptor> externalTerminations)
+    {
+        TerminationContract = terminationContract
+            ?? throw new ArgumentNullException(nameof(terminationContract));
+        ExternalTerminations = new EncounterExternalTerminationMap(
+            terminationContract,
+            externalTerminations);
+    }
+
     public abstract string Key { get; }
 
     public abstract EncounterKind Kind { get; }
@@ -20,6 +31,10 @@ internal abstract class EncounterDefinition
 
     public virtual IReadOnlyList<IEncounterActivationPolicy> ActivationPolicies =>
         Array.Empty<IEncounterActivationPolicy>();
+
+    public IEncounterTerminationContract TerminationContract { get; }
+
+    public EncounterExternalTerminationMap ExternalTerminations { get; }
 
     public abstract IEncounterRuntimeFactory RuntimeFactory { get; }
 }

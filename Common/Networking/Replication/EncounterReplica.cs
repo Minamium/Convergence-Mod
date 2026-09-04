@@ -12,9 +12,12 @@ internal sealed class EncounterReplica
 
     public EncounterSnapshot? LastTerminalSnapshot { get; private set; }
 
-    public bool ApplyFullSnapshot(in EncounterSnapshot incoming)
+    public bool ApplyFullSnapshot(
+        in EncounterSnapshot incoming,
+        IEncounterTerminationContract? terminationContract)
     {
-        if (!HasValidShape(incoming) || !IsNewerThanCurrent(incoming))
+        if (!HasValidShape(incoming, terminationContract)
+            || !IsNewerThanCurrent(incoming))
         {
             return false;
         }
@@ -86,27 +89,31 @@ internal sealed class EncounterReplica
         return incoming.AuthorityTick > Snapshot.AuthorityTick;
     }
 
-    private static bool HasValidShape(in EncounterSnapshot snapshot)
+    private static bool HasValidShape(
+        in EncounterSnapshot snapshot,
+        IEncounterTerminationContract? terminationContract)
     {
         if (snapshot.Lifecycle == EncounterLifecycle.Idle)
         {
             return snapshot.FightId.IsNone
                 && string.IsNullOrEmpty(snapshot.DefinitionKey)
-                && snapshot.EndReason == EncounterEndReason.None;
+                && snapshot.Termination.IsNone;
         }
 
         if (snapshot.EncounterSequence == 0
             || snapshot.FightId.IsNone
-            || string.IsNullOrWhiteSpace(snapshot.DefinitionKey))
+            || string.IsNullOrWhiteSpace(snapshot.DefinitionKey)
+            || terminationContract is null)
         {
             return false;
         }
 
         if (snapshot.Lifecycle == EncounterLifecycle.Cleanup)
         {
-            return snapshot.IsTerminal;
+            return snapshot.IsTerminal
+                && terminationContract.IsValid(snapshot.Termination);
         }
 
-        return snapshot.EndReason == EncounterEndReason.None;
+        return snapshot.Termination.IsNone;
     }
 }

@@ -21,7 +21,7 @@ related_docs:
 
 # First Severance
 
-`First Severance`（第一断絶）は、Convergenceで最初に完成させる2～4人向けRaidです。現在のコードは`FirstSeverance` / `first_severance`へrename済みですが、不活性bootstrapと旧multipart planのままであり、まだplayableではありません。
+`First Severance`（第一断絶）は、Convergenceで最初に完成させる2～4人向けRaidです。現在のコードは`FirstSeverance` / `first_severance` identity、immutable six-state plan、feature terminal-cause contractまで実装済みですが、world adapterとactivationは不活性であり、まだplayableではありません。
 
 ## Current slice
 

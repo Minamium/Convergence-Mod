@@ -5,4 +5,7 @@ namespace Convergence.Common.Encounters.Abstractions;
 internal readonly record struct EncounterCleanupContext(
     ulong EncounterSequence,
     FightId FightId,
-    EncounterEndReason EndReason);
+    EncounterTerminationDescriptor Termination)
+{
+    public EncounterEndReason EndReason => Termination.EndReason;
+}

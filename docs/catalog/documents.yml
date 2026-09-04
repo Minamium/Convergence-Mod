@@ -167,7 +167,7 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: 71c4ab65cb10d9d02c8503d61622e5263be67f616dbf57b3f2728b7433f58eb2
+  content_sha256: e2ef78e71cc32af83391db3a5b689ec00c9153590301487ae1ee88b128a55e0f
   document_type: overview
   status: accepted
   owners:
@@ -188,7 +188,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: e7ab6996c9b2e338282d6f05902ffc482db189869cee69f47929a91ed1091e33
+  content_sha256: e7fcd7dfab993edbab5b3d6e7bd4f1fe6600a235103ec04250ad711df6616dbd
   document_type: plan
   status: accepted
   owners:
@@ -234,7 +234,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 1059ef4aa94a96fac901538179bbf1f949e5e6b07410ed61e03373028fdf6510
+  content_sha256: c40050846de8c19c27e2745de154d44d14e4e8ef9e66e9e7f2710ab959c3fa1b
   document_type: spec
   status: accepted
   owners:
@@ -279,12 +279,12 @@ documents:
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Handoff — 2026-09-04
-  content_sha256: 83f72f038e2e3728d3ccfa32371229ff663d801770e8d39efeff769c9ff95d88
+  content_sha256: 45cbdbe0d3271bdc2629d9326f263e0b8b49c5ab58ac906f563b8b0bd2fe8426
   document_type: handoff
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - handoff.windows.2026-09-04
   aliases:
@@ -343,7 +343,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: 78622e97e944ab02785f39fd42b8403bf73b55188e77cd2690f9dcb56e34bbef
+  content_sha256: a41a99319e197a9fdd77d7b2daf2786b733a0278e904106151f48a95ee56711f
   document_type: governance
   status: accepted
   owners:
@@ -389,12 +389,12 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: 71f1b4b2544a376b5b4cbfa42e1d1527a74f438f5bd052a6f1ccae2cb3a8fe4b
+  content_sha256: dbd045b78b51e0bc11b8a36441e8cc94b23a7b35fe3fdb2ae7345d6d167585a6
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - project.art_direction
   aliases:
@@ -447,7 +447,7 @@ documents:
 - doc_id: project.brief
   path: docs/PROJECT_BRIEF.md
   title: Project Brief
-  content_sha256: bc506175678420955ca09422602feae15e280837717ac5997f9798271faa0d44
+  content_sha256: be3989a7ba02b31be7f3aacffd2dbd64b44114ffe4390188b51ca068ece0147d
   document_type: overview
   status: accepted
   owners:
@@ -487,7 +487,7 @@ documents:
 - doc_id: project.content-authoring
   path: docs/CONTENT_AUTHORING.md
   title: Content Authoring
-  content_sha256: c938f40cd3ece9defe289d689d9304f27d1cf3533169b4b9e0fbfc28ace526b7
+  content_sha256: 6c96fa761044b8323751254eafef6c06b0640db70a46b53bee47b8dbca5aebe4
   document_type: governance
   status: accepted
   owners:
@@ -544,7 +544,7 @@ documents:
 - doc_id: project.milestones
   path: docs/MILESTONES.md
   title: Milestones
-  content_sha256: 86344afb590006f0048e5fdb9b04619be2e6b5f9b407c2828c315f9dd2a601d8
+  content_sha256: 69a422e785c75366248dc15a7d9cb20f974938633afc30f3dbb10fc14c630fd9
   document_type: plan
   status: accepted
   owners:
@@ -565,12 +565,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: c9f59ea90ff84f73b44f8c0117f05ce365e29d36fcfd9838c99c6eb8e66e8fcd
+  content_sha256: 579e0782bc9e5536cd818d166147f346ce5d36e4e2aa06b1843fdc973aae6843
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -610,7 +610,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b40c5e25f828a54f53d85ab27838945873b9a1a65bb9f46d42144d1a5edbe443
+  content_sha256: 2ebf7e45921f6ce1bae9770b23c9ea2ec0000b68b37915a5e5cc3855f83bb3ad
   document_type: status
   status: accepted
   owners:
@@ -739,13 +739,13 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: b77902f8752d5418537dd5743263157974385e920f4ae7cd5fdfa544a76f790e
+  content_sha256: f932633acd1987c5de4186163a2345f25075f28eec2a9e600df6187106bbb4ff
   document_type: plan
   status: accepted
   owners:
   - quality
   - networking
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-05'
   source_of_truth_for:
   - verification.test_matrix
   aliases:

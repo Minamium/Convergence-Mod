@@ -81,6 +81,8 @@ Exit: source and domain harness compile under the target name with no active wor
 
 ## Slice 2 — Replace the obsolete immutable plan
 
+Status: **Complete (2026-09-05).** The active source now contains only the bounded six-state loop, persistent Boss life policy, roster-scaled Pylon/Stack values, append-only feature terminal causes, and the feature-neutral coordinator termination bridge. Activation and the world adapter remain fail-closed.
+
 Delete the multipart/Part Break/Effigy/Last Stand assumptions from the active plan and tests. Introduce typed feature state for:
 
 ```text

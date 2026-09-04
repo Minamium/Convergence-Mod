@@ -58,7 +58,7 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 
 ## First Raid
 
-最初のRaidは`First Severance` / `第一断絶`。current code name/keyは`FirstSeverance` / `first_severance`。identity renameは完了したが、現行コードには置換前のlegacy multipart planが残る。
+最初のRaidは`First Severance` / `第一断絶`。current code name/keyは`FirstSeverance` / `first_severance`。identity renameとimmutable six-state loopは実装済みで、live world adapterとactivationは未接続のまま維持する。
 
 最初のplayable loop:
 
@@ -88,6 +88,7 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 
 - completed: Windowsでのversion build/load/Dedicated Server確定;
 - completed: atomic `ThirdSeverance` → `FirstSeverance` rename;
+- completed: obsolete multipart planからbounded six-state loop・feature terminal mappingへの置換;
 - Core/Arena/roster/Ready/logical Barrier/cleanup;
 - bounded transport、feature snapshot、client replica;
 - simple Boss/Pylons and repeated loop;

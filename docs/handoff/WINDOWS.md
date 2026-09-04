@@ -4,7 +4,7 @@ document_type: handoff
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - handoff.windows.2026-09-04
 aliases:
@@ -23,6 +23,8 @@ related_docs:
 # Windows Handoff — 2026-09-04
 
 This checkpoint transfers Convergence from planning/bootstrap work on the MacBook to primary implementation on minami's Windows desktop.
+
+Post-transfer update (2026-09-05): the Windows baseline, atomic identity rename, and Slice 2 immutable-loop/termination work are complete. The historical transfer details below are retained for provenance; [Status](../STATUS.md) and the [implementation plan](../encounters/first-severance/IMPLEMENTATION_PLAN.md) own the current next action.
 
 ## Repository checkpoint
 
@@ -66,14 +68,14 @@ The network design assumes cooperative play with unmodified clients. No Converge
 
 ## Current implementation truth
 
-There is no playable Boss. The current source uses the legacy name `ThirdSeverance` and deliberately rejects activation. It contains:
+There is no playable Boss. The current source uses `FirstSeverance` / `first_severance` and deliberately rejects activation. It contains:
 
-- a robust generic encounter/runtime/cleanup and replica bootstrap;
-- an inert Core-anchored arena/Boss plan;
+- a generic encounter/runtime/cleanup and replica bootstrap with feature-neutral terminal descriptors and definition-owned external failure mappings;
+- an inert Core-anchored arena plus the validated six-state Pylon/Stack/Spread/Core loop;
 - a pure, substantially tested Downed/Revive domain;
 - repository checks and a dependency-free domain harness.
 
-It does not contain the Core Tile/TE, Boss/Pylon NPCs, phase executor, Stack/Spread resolution, live transport/snapshots, revive item, death/control adapter, production presentation, rewards, or runtime evidence. See [Status](../STATUS.md) for the exact inventory.
+It does not contain the Core Tile/TE, Boss/Pylon NPCs, live Stack/Spread resolution, live transport/feature snapshots, revive item, death/control adapter, production presentation, or rewards. The pinned Windows build/load/server baseline is recorded separately; see [Status](../STATUS.md) for the exact inventory.
 
 ## MacBook environment audit
 
@@ -89,15 +91,16 @@ tModLoader can be developed on macOS, but this machine was not prepared for it a
 
 ## First Windows session
 
-1. Install/confirm the tools and candidate versions in the [runbook](../runbooks/WINDOWS_DEVELOPMENT.md).
-2. Clone/pull as `ModSources\Convergence`.
-3. Run catalog, repository, YAML, and domain checks.
-4. Run command-line build, Build + Reload, Single Player, Dedicated Server, and two-client baseline.
-5. Fill `build-record.local.json` from the template; update the version matrix only with observed evidence.
-6. Perform the isolated `ThirdSeverance` → `FirstSeverance` rename while activation remains denied.
-7. Replace the obsolete immutable plan with the simple repeated loop and update domain tests.
-8. Before enabling Boss/Pylon damage, record the normal-hit pipeline for host/non-host and Dedicated Server as required by the implementation/test plans.
-9. Continue slices in the [implementation plan](../encounters/first-severance/IMPLEMENTATION_PLAN.md).
+1. [x] Install/confirm the tools and candidate versions in the [runbook](../runbooks/WINDOWS_DEVELOPMENT.md).
+2. [x] Clone/pull as `ModSources\Convergence`.
+3. [x] Run catalog, repository, YAML, and domain checks.
+4. [x] Run command-line build, Build + Reload, Single Player, Dedicated Server, and two-client baseline.
+5. [x] Fill `build-record.local.json` from the template; update the version matrix only with observed evidence.
+6. [x] Perform the isolated `ThirdSeverance` → `FirstSeverance` rename while activation remains denied.
+7. [x] Replace the obsolete immutable plan with the simple repeated loop and update domain tests.
+8. Begin Slice 3 Core/Arena/roster/Ready preparation while keeping combat activation denied.
+9. Before enabling Boss/Pylon damage, record the normal-hit pipeline for host/non-host and Dedicated Server as required by the implementation/test plans.
+10. Continue slices in the [implementation plan](../encounters/first-severance/IMPLEMENTATION_PLAN.md).
 
 ## Blocking runtime research
 
@@ -113,4 +116,4 @@ This exclusion narrows implementation order only; it does not cap the eventual C
 
 ## Handoff completion check
 
-The transfer is complete when the Windows checkout is clean, the exact commit/version evidence is recorded, the candidate toolchain either passes or has one reproducible blocker, and the next task begins from Slice 1 without relying on this chat history.
+The transfer is complete: the Windows checkout and exact baseline evidence were established without relying on chat history. Continued work begins from Slice 3 after Slice 2 verification is committed; current truth remains in [Status](../STATUS.md).

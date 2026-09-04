@@ -9,11 +9,11 @@ internal readonly struct EncounterRuntimeUpdate
     private EncounterRuntimeUpdate(
         bool hasObservableChange,
         EncounterLifecycle? requestedLifecycle,
-        EncounterEndReason requestedEndReason)
+        EncounterTerminationDescriptor requestedTermination)
     {
         HasObservableChange = hasObservableChange;
         RequestedLifecycle = requestedLifecycle;
-        RequestedEndReason = requestedEndReason;
+        RequestedTermination = requestedTermination;
     }
 
     public static EncounterRuntimeUpdate None => default;
@@ -22,11 +22,11 @@ internal readonly struct EncounterRuntimeUpdate
 
     public EncounterLifecycle? RequestedLifecycle { get; }
 
-    public EncounterEndReason RequestedEndReason { get; }
+    public EncounterTerminationDescriptor RequestedTermination { get; }
 
     public static EncounterRuntimeUpdate ObservableChange()
     {
-        return new EncounterRuntimeUpdate(true, null, EncounterEndReason.None);
+        return new EncounterRuntimeUpdate(true, null, EncounterTerminationDescriptor.None);
     }
 
     public static EncounterRuntimeUpdate TransitionTo(
@@ -40,16 +40,21 @@ internal readonly struct EncounterRuntimeUpdate
                 "Runtimes request a normal lifecycle or End; they do not enter Idle/Cleanup directly.");
         }
 
-        return new EncounterRuntimeUpdate(hasObservableChange, next, EncounterEndReason.None);
+        return new EncounterRuntimeUpdate(
+            hasObservableChange,
+            next,
+            EncounterTerminationDescriptor.None);
     }
 
-    public static EncounterRuntimeUpdate End(EncounterEndReason reason)
+    public static EncounterRuntimeUpdate End(EncounterTerminationDescriptor termination)
     {
-        if (reason == EncounterEndReason.None)
+        if (termination.IsNone)
         {
-            throw new ArgumentOutOfRangeException(nameof(reason), "Ending an encounter requires a reason.");
+            throw new ArgumentException(
+                "Ending an encounter requires a termination descriptor.",
+                nameof(termination));
         }
 
-        return new EncounterRuntimeUpdate(true, null, reason);
+        return new EncounterRuntimeUpdate(true, null, termination);
     }
 }

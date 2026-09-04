@@ -44,10 +44,9 @@ internal interface IFirstSeveranceWorldAdapter : IEncounterCleanupParticipant
         in FirstSeveranceArenaOccupant occupant,
         FirstSeveranceBoundaryResponse response);
 
-    FirstSeveranceWorldMutationDecision TrySetWeakPointExposure(
+    FirstSeveranceWorldMutationDecision TrySetBossDamageGate(
         FightId fightId,
-        string weakPointKey,
-        bool isExposed);
+        bool canTakeDamage);
 }
 
 internal sealed class InertFirstSeveranceWorldAdapter : IFirstSeveranceWorldAdapter
@@ -93,14 +92,12 @@ internal sealed class InertFirstSeveranceWorldAdapter : IFirstSeveranceWorldAdap
         return FirstSeveranceWorldMutationDecision.Reject(InertFailureCode);
     }
 
-    public FirstSeveranceWorldMutationDecision TrySetWeakPointExposure(
+    public FirstSeveranceWorldMutationDecision TrySetBossDamageGate(
         FightId fightId,
-        string weakPointKey,
-        bool isExposed)
+        bool canTakeDamage)
     {
         _ = fightId;
-        _ = weakPointKey;
-        _ = isExposed;
+        _ = canTakeDamage;
         return FirstSeveranceWorldMutationDecision.Reject(InertFailureCode);
     }
 

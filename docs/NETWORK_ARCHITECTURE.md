@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -25,7 +25,7 @@ related_docs:
 
 ## Implementation status
 
-Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, safe no-op routing, typed authority foundations, and ordered read-only replica/tombstone behavior.
+Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, safe no-op routing, typed authority foundations, feature-neutral terminal descriptors/external mappings, and ordered read-only replica/tombstone behavior.
 
 Not implemented: payload DTO codecs/handlers, server transport/broadcast, First Severance feature snapshot/deltas, revive packets, real multiplayer mutation, or join/rejoin snapshot delivery. No current packet changes gameplay. See [Status](STATUS.md).
 
@@ -157,9 +157,9 @@ Thus a participant who becomes Downed/disconnected on a Stack/Spread deadline is
 
 World unload, an unhandled runtime exception, and a future fatal protocol failure originate outside the feature reducer. They are unconditional coordinator preemptions in the order `WorldUnload > InternalFailure > ProtocolFailure`; they are not fabricated as same-tick feature inputs and the coordinator never re-enters a failed `Tick` to obtain metadata.
 
-Slice 2 introduces a feature-neutral immutable termination descriptor: generic `EncounterEndReason`, feature terminal schema/version, and bounded opaque feature-cause byte. A runtime supplies a validated descriptor for a feature-owned End. Each `EncounterDefinition` also supplies a constructor-validated data mapping for the three external generic reasons, allowing the coordinator to synthesize `WorldUnload`, `InternalFailure`, or `ProtocolFailure` feature metadata without calling mutable feature logic. Missing, duplicate, `None`, or incompatible mappings reject registration/plan construction while activation remains denied.
+Slice 2 implements a feature-neutral immutable termination descriptor: generic `EncounterEndReason`, `ushort` feature terminal schema ID, byte schema version, and bounded opaque feature-cause byte. A runtime supplies a contract-validated descriptor for a feature-owned End. Each `EncounterDefinition` also supplies a constructor-validated data mapping for the three external generic reasons, allowing the coordinator to synthesize `WorldUnload`, `InternalFailure`, or `ProtocolFailure` feature metadata without calling mutable feature logic. Missing, duplicate, `None`, or incompatible mappings reject definition construction while activation remains denied.
 
-`EncounterCoordinator.Reset`, the runtime-exception catch, and any fatal-protocol entry point use that mapping, discard any uncommitted runtime update, then publish the combined generic/feature terminal snapshot and tombstone before exact-Fight cleanup. Session-creation failure occurs before an encounter is accepted and therefore returns a bounded activation failure rather than pretending that a live feature tombstone existed. The current coordinator carries only a generic reason; this bridge is planned work and must land before feature replication or activation.
+`EncounterCoordinator.Reset`, the runtime-exception catch, and the bounded queued external-termination entry point use that mapping, discard any uncommitted runtime update, then publish the combined generic/feature terminal snapshot and tombstone before exact-Fight cleanup. Competing queued external requests resolve `WorldUnload > InternalFailure > ProtocolFailure`. Session-creation failure occurs before an encounter is accepted and therefore returns a bounded activation failure rather than pretending that a live feature tombstone existed.
 
 First Severance terminal replication carries the generic `EncounterEndReason` and the append-only feature cause defined in the encounter specification. Full snapshot, terminal delta/event, and retained tombstone must round-trip both fields. `Defeat + LoopCapExceeded` must survive reconnect/snapshot repair; unknown feature-cause values are rejected as protocol-invalid rather than coerced to another result.
 

@@ -5,7 +5,7 @@ status: accepted
 owners:
   - quality
   - networking
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-05
 source_of_truth_for:
   - verification.test_matrix
 aliases:
@@ -253,7 +253,7 @@ Run:
 dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
 ```
 
-Current harness assertions for multipart forms/Last Stand document obsolete code and must be replaced in the plan-simplification commit, not falsely reclassified as current feature tests.
+The Slice 2 harness no longer links or asserts multipart forms/Last Stand. Future mechanic-executor tests extend the six-state plan without reintroducing those obsolete types.
 
 ## Lethal-hook instrumentation gate
 

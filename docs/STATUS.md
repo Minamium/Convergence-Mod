@@ -21,29 +21,30 @@ related_docs:
 
 # Project Status
 
-As of 2026-09-05, Convergence is a documented architecture bootstrap with tested dependency-free domains and a confirmed Windows runtime baseline. It does **not** contain a playable Raid boss, and the encounter activation path intentionally fails closed.
+As of 2026-09-05, Convergence is a documented architecture bootstrap with tested dependency-free domains, the accepted First Severance loop encoded as immutable authority state, and a confirmed Windows runtime baseline. It does **not** contain a playable Raid boss, and the encounter activation path intentionally fails closed.
 
 ## Implemented and connected
 
 - tModLoader Mod source skeleton, feature registration, project metadata, Calamity hard reference for Stage A, and a Windows-confirmed compatibility-version policy.
 - Generic encounter identifiers, definitions, catalog, lifecycle transitions, one-session authority coordinator, runtime/factory boundary, cleanup scope, retry backlog, and terminal snapshot outbox.
+- Feature-neutral immutable termination descriptors carrying generic reason plus bounded schema/version/cause data; constructor-validated definition-owned mappings for World unload, internal failure, and fatal protocol failure; external preemption and replica/tombstone validation.
 - Versioned packet envelope parsing, explicit packet IDs, direction guard, bounded rejection behavior, and a safe no-op route. No gameplay packet handler is connected yet.
 - Read-only encounter replica ordering by Encounter Sequence, revision, and authority tick, including terminal tombstones.
 - Pure server/SP `Common/Raids/Revive` state machine: stable participants and connection epochs, Downed deadlines, batched revive arbitration, channel leases/nonces, token reservation/consumption, reconnect grace, same-tick wipe commit, bounded snapshots, projections, and exact-Fight cleanup.
-- Dependency-free domain harness covering the revive domain and current immutable arena/Boss-plan objects.
+- Dependency-free domain harness covering the revive domain, immutable arena objects, six-state loop policy/deadline behavior, terminal mapping, coordinator external endings, creation failure, and retained tombstones.
 - Repository policy, YAML validation, CI, ADRs, provenance rules, and repository-local Raid/source-research Skills.
 
-## Implemented as a disconnected or obsolete bootstrap
+## Implemented as a disconnected bootstrap
 
 - `Content/Encounters/FirstSeverance` contains an immutable 320x140 Core-anchored arena blueprint, four deterministic Pylon slots, logical outsider policy, a cleanup-safe inert runtime, and a boundary around the revive service.
-- The same module also contains a multipart seven-phase plan with Part Break, Targeted Line, Effigies, damage-budget exposure, and Last Stand. That plan is superseded as a product specification by [ADR-0007](adr/0007-first-severance-vertical-slice.md) and the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md); its identity is renamed, but its behavior remains until the isolated plan-simplification slice.
+- The feature owns a validated `SpawnIntro -> PylonCheck -> Stack -> Spread -> CoreExposure -> Reset` plan and pure high-level loop state machine. It encodes 2/3/4-player Pylons, provisional Stack shares `2/2/3`, persistent Boss life, normal/penalized exposure deadlines, three-Overload Defeat, eight-exposure `Defeat + LoopCapExceeded`, and no damage quota or enrage phase.
+- `FirstSeveranceTerminalCause` has append-only byte values `0..13` and exact generic mappings. Feature-owned runtime End, World unload, runtime exception, and queued fatal-protocol termination preserve the descriptor through terminal snapshot, cleanup context, outbox, and retained replica tombstone.
 - `FirstSeveranceAvailabilityPolicy` rejects activation. `InertFirstSeveranceWorldAdapter` does not spawn or mutate Terraria entities. These safety gates must remain until their replacement adapters are tested.
 
 ## Not implemented
 
 - Foundation Core Item/Tile/Tile Entity; server Core resolution; world/progression/roster validation; Ready flow; live Barrier.
 - Boss NPC, Pylon NPCs, authoritative phase executor, damage gate/collector, Stack/Spread resolver, projectiles, synchronized feature snapshot/deltas, or client presentation.
-- Feature-neutral terminal descriptor, definition-owned external end mapping, or coordinator bridge that preserves a First Severance cause across World unload/runtime exception/fatal protocol shutdown.
 - `Resuscitation Kit` ModItem, typed revive transport, tModLoader `ModPlayer` death/control adapter, life restoration projection, or Calamity death-hook coexistence behavior.
 - Rewards, localization, production sprites/audio/VFX, tuning, and release packaging.
 - Optional local SQLite/FTS/embedding cache generator; the committed Markdown/front-matter catalog exists, but no binary-search database is built or required.
@@ -53,10 +54,10 @@ As of 2026-09-05, Convergence is a documented architecture bootstrap with tested
 
 | Gate | State |
 |---|---|
-| Documentation catalog | Passed on Windows at `b34adbc` |
-| Repository policy checks | Passed on Windows at `b34adbc` |
-| YAML checks | Passed on Windows at `b34adbc` |
-| Dependency-free domain tests | 24 passed on Windows at `b34adbc` |
+| Documentation catalog | Passed for Slice 2 on Windows |
+| Repository policy checks | Passed for Slice 2 on Windows |
+| YAML checks | Passed for Slice 2 on Windows |
+| Dependency-free domain tests | 39 passed for Slice 2 on Windows |
 | `dotnet build ConvergenceMod.csproj` under `ModSources/Convergence` | Passed, 0 warnings/errors |
 | tModLoader Build + Reload | Passed |
 | Single Player load | Passed |
@@ -78,4 +79,4 @@ The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, C
 
 ## Next change
 
-Replace the obsolete multipart immutable plan and tests with the accepted repeated Pylon → Stack → Spread → Core-exposure loop in a separate Slice 2 commit. Keep activation denied and do not combine the plan change with live actor spawning or death-hook interception.
+Begin Slice 3 with Foundation Core, server-resolved arena validation, frozen 2–4-player roster/Ready preparation, and exact cleanup diagnostics. Keep combat activation denied; Boss/Pylon actors and the measured hit pipeline remain Slice 4 work.

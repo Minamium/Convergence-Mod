@@ -19,6 +19,7 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
     private ulong authorityTick;
     private ulong encounterSequence;
     private uint idleRevision;
+    private EncounterEndReason pendingExternalTermination;
 
     public EncounterCoordinator(
         EncounterRegistry registry,
@@ -116,6 +117,7 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
             activeSession = candidateSession;
             encounterSequence = nextSequence;
             idleRevision = 0;
+            pendingExternalTermination = EncounterEndReason.None;
             LastTerminalSnapshot = null;
             snapshotOutbox.Publish(snapshot);
             failureCode = string.Empty;
@@ -125,10 +127,12 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
         {
             SafeReport(exception);
             activeSession = null;
+            EncounterTerminationDescriptor termination = definition.ExternalTerminations.Get(
+                EncounterEndReason.InternalFailure);
             EncounterCleanupContext cleanupContext = new(
                 nextSequence,
                 fightId,
-                EncounterEndReason.InternalFailure);
+                termination);
             cleanupScope.CleanupPending(cleanupContext, SafeReport);
             AddCleanupBacklog(cleanupScope, cleanupContext);
             failureCode = "encounter.runtime_creation_failure";
@@ -146,6 +150,14 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
             return;
         }
 
+        if (pendingExternalTermination != EncounterEndReason.None)
+        {
+            EncounterEndReason reason = pendingExternalTermination;
+            pendingExternalTermination = EncounterEndReason.None;
+            TryEndFromExternal(activeSession.FightId, reason, out _);
+            return;
+        }
+
         EncounterRuntimeUpdate update;
         try
         {
@@ -154,13 +166,28 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
         catch (Exception exception)
         {
             SafeReport(exception);
-            TryEnd(activeSession.FightId, EncounterEndReason.InternalFailure, out _);
+            TryEndFromExternal(
+                activeSession.FightId,
+                EncounterEndReason.InternalFailure,
+                out _);
             return;
         }
 
-        if (update.RequestedEndReason != EncounterEndReason.None)
+        if (!update.RequestedTermination.IsNone)
         {
-            TryEnd(activeSession.FightId, update.RequestedEndReason, out _);
+            if (!activeSession.Definition.TerminationContract.IsValid(
+                update.RequestedTermination))
+            {
+                SafeReport(new InvalidOperationException(
+                    "Runtime returned an incompatible termination descriptor."));
+                TryEndFromExternal(
+                    activeSession.FightId,
+                    EncounterEndReason.InternalFailure,
+                    out _);
+                return;
+            }
+
+            TryEndCore(activeSession.FightId, update.RequestedTermination, out _);
             return;
         }
 
@@ -171,7 +198,10 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
                 SafeReport(new InvalidOperationException(
                     $"Runtime requested an invalid transition from {activeSession.Lifecycle} "
                     + $"to {update.RequestedLifecycle.Value}."));
-                TryEnd(activeSession.FightId, EncounterEndReason.InternalFailure, out _);
+                TryEndFromExternal(
+                    activeSession.FightId,
+                    EncounterEndReason.InternalFailure,
+                    out _);
             }
 
             return;
@@ -191,9 +221,19 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
 
     public void Reset(EncounterEndReason reason)
     {
+        if (!EncounterExternalTerminationMap.IsExternalReason(reason))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(reason),
+                "Coordinator reset requires an external terminal reason.");
+        }
+
         if (activeSession is not null)
         {
-            TryEnd(activeSession.FightId, reason, out _);
+            QueueExternalTermination(reason);
+            EncounterEndReason selected = pendingExternalTermination;
+            pendingExternalTermination = EncounterEndReason.None;
+            TryEndFromExternal(activeSession.FightId, selected, out _);
         }
 
         ProcessCleanupBacklog(force: true);
@@ -205,14 +245,43 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
 
         cleanupBacklog.Clear();
         snapshotOutbox.Clear();
+        pendingExternalTermination = EncounterEndReason.None;
     }
 
-    internal bool TryEnd(
+    internal bool RequestExternalTermination(EncounterEndReason reason)
+    {
+        if (activeSession is null || !EncounterExternalTerminationMap.IsExternalReason(reason))
+        {
+            return false;
+        }
+
+        QueueExternalTermination(reason);
+        return true;
+    }
+
+    private bool TryEndFromExternal(
         FightId expectedFightId,
         EncounterEndReason reason,
         out EncounterSnapshot terminalSnapshot)
     {
-        if (reason == EncounterEndReason.None
+        if (activeSession is null || activeSession.FightId != expectedFightId)
+        {
+            terminalSnapshot = LastTerminalSnapshot ?? Snapshot;
+            return false;
+        }
+
+        EncounterTerminationDescriptor termination = activeSession.Definition
+            .ExternalTerminations
+            .Get(reason);
+        return TryEndCore(expectedFightId, termination, out terminalSnapshot);
+    }
+
+    private bool TryEndCore(
+        FightId expectedFightId,
+        EncounterTerminationDescriptor termination,
+        out EncounterSnapshot terminalSnapshot)
+    {
+        if (termination.IsNone
             || activeSession is null
             || activeSession.FightId != expectedFightId)
         {
@@ -221,7 +290,7 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
         }
 
         EncounterSession endingSession = activeSession;
-        if (!endingSession.TryEnterCleanup(reason, authorityTick))
+        if (!endingSession.TryEnterCleanup(termination, authorityTick))
         {
             terminalSnapshot = endingSession.CreateSnapshot(authorityTick);
             return false;
@@ -255,6 +324,20 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
         }
 
         return true;
+    }
+
+    private void QueueExternalTermination(EncounterEndReason reason)
+    {
+        if (!EncounterExternalTerminationMap.IsExternalReason(reason))
+        {
+            throw new ArgumentOutOfRangeException(nameof(reason));
+        }
+
+        if (EncounterExternalTerminationMap.GetPriority(reason)
+            > EncounterExternalTerminationMap.GetPriority(pendingExternalTermination))
+        {
+            pendingExternalTermination = reason;
+        }
     }
 
     private bool TryTransition(

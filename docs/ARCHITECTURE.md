@@ -32,7 +32,7 @@ The architecture is a modular monolith: one tModLoader assembly with enforced so
 
 ## Current implementation note
 
-The source currently contains an inert `Content/Encounters/FirstSeverance` bootstrap. The atomic identity rename is complete, but replacement of its obsolete multipart plan has not occurred. [Status](STATUS.md) is authoritative; the current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
+The source currently contains an inert `Content/Encounters/FirstSeverance` bootstrap. The atomic identity rename and immutable six-state loop replacement are complete, while live world mutation and activation remain disabled. [Status](STATUS.md) is authoritative; the current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
 
 ## Dependency direction
 
@@ -94,9 +94,9 @@ It intentionally does not own a general mechanic DSL, feature phase graph, Boss 
 Idle projection -> Validating -> Preparing -> Active -> [optional Resolving] -> End -> Cleanup -> Idle
 ```
 
-`EncounterRuntimeUpdate.End(reason)` may enter Cleanup directly from a live state. `Resolving` is an optional separately ticked stage, not a mandatory terminal waypoint and not something a runtime can request together with End in one update. First Severance's initial slice stores its feature terminal cause and uses direct End; a future reward/result ceremony may specify `Active -> Resolving` on one tick and `Resolving -> End` later.
+`EncounterRuntimeUpdate.End(termination)` may enter Cleanup directly from a live state. `Resolving` is an optional separately ticked stage, not a mandatory terminal waypoint and not something a runtime can request together with End in one update. First Severance's initial slice stores its feature terminal cause in that descriptor and uses direct End; a future reward/result ceremony may specify `Active -> Resolving` on one tick and `Resolving -> End` later.
 
-The current coordinator's `TryEnd`/`Reset` path carries only a generic end reason, so external World-unload and exception endings cannot yet preserve a feature cause. Before First Severance feature replication, introduce a feature-neutral immutable termination descriptor and a constructor-validated, definition-owned mapping from external generic reasons to opaque feature schema/cause values. Runtime-owned endings supply the descriptor directly; coordinator Reset/exception/fatal-protocol paths synthesize it from immutable definition data without re-entering a failed runtime tick. External shutdown preempts an uncommitted feature update, then the combined terminal projection is published before cleanup. A runtime-creation failure happens before session acceptance and has no live feature tombstone.
+The coordinator End boundary carries a feature-neutral immutable termination descriptor containing the generic reason plus bounded feature schema/version/cause data. Every definition owns a constructor-validated immutable mapping for `WorldUnload`, `InternalFailure`, and `ProtocolFailure`. Runtime-owned endings supply a contract-validated descriptor directly; coordinator Reset, exception, and queued fatal-protocol paths synthesize it from definition data without re-entering failed mutable logic. External shutdown preempts an uncommitted feature update, then the combined terminal projection is published before cleanup. A runtime-creation failure happens before session acceptance, uses the mapped descriptor only for partial-construction cleanup, and creates no live tombstone.
 
 `EncounterSession` is decomposed rather than a global state bag:
 
@@ -144,7 +144,7 @@ The same exact-Fight cleanup can be called repeatedly; stale-Fight cleanup never
 
 `Content/Encounters/FirstSeverance` will own the simple Boss, Pylons, active-loop executor, typed tuning, mechanics, arena adapters, and feature snapshot. Ring/arms are presentation components of one Boss NPC. Pylons are separately owned NPCs.
 
-The current `FirstSeverance` immutable plan still carries legacy parts/effigies/Last Stand assumptions and is not reusable Common infrastructure. Replace it in the feature; do not generalize it.
+The current `FirstSeverance` immutable plan owns only SpawnIntro, PylonCheck, Stack, Spread, CoreExposure, and Reset. Its bounded high-level state machine, timings, roster-scaled counts, Overload/cap policy, and append-only terminal causes stay feature-local; do not generalize them into a mechanic DSL.
 
 ## Downed and Revive boundary
 

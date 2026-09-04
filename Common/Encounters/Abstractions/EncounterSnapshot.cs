@@ -11,12 +11,16 @@ internal readonly record struct EncounterSnapshot(
     ulong AuthorityTick,
     ulong LifecycleEnteredTick,
     ulong ActiveFightTick,
-    EncounterEndReason EndReason)
+    EncounterTerminationDescriptor Termination)
 {
     public static EncounterSnapshot Idle => CreateIdle(0, 0, 0);
 
+    public EncounterEndReason EndReason => Termination.EndReason;
+
+    public EncounterFeatureTermination FeatureTermination => Termination.Feature;
+
     public bool IsTerminal => Lifecycle == EncounterLifecycle.Cleanup
-        && EndReason != EncounterEndReason.None;
+        && !Termination.IsNone;
 
     public static EncounterSnapshot CreateIdle(
         ulong encounterSequence,
@@ -32,6 +36,6 @@ internal readonly record struct EncounterSnapshot(
             authorityTick,
             authorityTick,
             0,
-            EncounterEndReason.None);
+            EncounterTerminationDescriptor.None);
     }
 }

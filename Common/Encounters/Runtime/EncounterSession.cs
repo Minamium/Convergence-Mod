@@ -53,7 +53,9 @@ internal sealed class EncounterSession
 
     public ulong ActiveFightTick { get; private set; }
 
-    public EncounterEndReason EndReason { get; private set; }
+    public EncounterTerminationDescriptor Termination { get; private set; }
+
+    public EncounterEndReason EndReason => Termination.EndReason;
 
     public EncounterRuntimeUpdate Tick(ulong authorityTick)
     {
@@ -85,16 +87,20 @@ internal sealed class EncounterSession
         return true;
     }
 
-    public bool TryEnterCleanup(EncounterEndReason reason, ulong authorityTick)
+    public bool TryEnterCleanup(
+        EncounterTerminationDescriptor termination,
+        ulong authorityTick)
     {
-        if (reason == EncounterEndReason.None || Lifecycle == EncounterLifecycle.Cleanup)
+        if (termination.IsNone
+            || !Definition.TerminationContract.IsValid(termination)
+            || Lifecycle == EncounterLifecycle.Cleanup)
         {
             return false;
         }
 
         Lifecycle = EncounterLifecycle.Cleanup;
         LifecycleEnteredTick = authorityTick;
-        EndReason = reason;
+        Termination = termination;
         MarkObservableChange();
         return true;
     }
@@ -109,7 +115,7 @@ internal sealed class EncounterSession
 
     public void Cleanup(Action<Exception> onFailure)
     {
-        EncounterCleanupContext context = new(EncounterSequence, FightId, EndReason);
+        EncounterCleanupContext context = new(EncounterSequence, FightId, Termination);
         cleanupScope.CleanupPending(context, onFailure);
     }
 
@@ -120,7 +126,7 @@ internal sealed class EncounterSession
             return null;
         }
 
-        EncounterCleanupContext context = new(EncounterSequence, FightId, EndReason);
+        EncounterCleanupContext context = new(EncounterSequence, FightId, Termination);
         return new EncounterCleanupWork(cleanupScope, context, nextAttemptTick);
     }
 
@@ -135,6 +141,6 @@ internal sealed class EncounterSession
             authorityTick,
             LifecycleEnteredTick,
             ActiveFightTick,
-            EndReason);
+            Termination);
     }
 }

@@ -29,7 +29,7 @@ Content/Encounters/<Name>/
   Activation/ Arena/ Actors/ Phases/ Mechanics/ Rewards/ Cues/
 ```
 
-Create a directory only when it owns a real file. The first feature is `FirstSeverance`; its source identity rename is complete, while its obsolete immutable plan remains to be replaced in the next isolated slice.
+Create a directory only when it owns a real file. The first feature is `FirstSeverance`; its source identity and immutable six-state loop plan are implemented, while live adapters remain isolated behind activation denial.
 
 ## Encounter definition and runtime
 

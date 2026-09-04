@@ -2,28 +2,67 @@
 
 using System;
 using System.Collections.Generic;
+using Convergence.Common.Encounters.Abstractions;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-// Immutable feature-owned configuration. A future authority-only executor consumes
-// this schedule and replicates assignments/results; clients never advance it.
 internal sealed class FirstSeveranceEncounterPlan
 {
-    public static FirstSeveranceEncounterPlan Instance { get; } = CreateDefault();
+    public const int MaximumSupportedExposures = 16;
 
-    private FirstSeveranceEncounterPlan(
+    private readonly IReadOnlyDictionary<
+        FirstSeveranceSubstate,
+        FirstSeveranceSubstateDefinition> definitionsBySubstate;
+
+    public FirstSeveranceEncounterPlan(
         FirstSeveranceArenaBlueprint arena,
         FirstSeveranceArenaAccessPolicy accessPolicy,
         FirstSeveranceBossPlan boss,
-        IReadOnlyList<FirstSeverancePhaseDefinition> phases)
+        FirstSeveranceTimingPlan timing,
+        in FirstSeveranceParticipantScaledInt pylonCount,
+        in FirstSeveranceParticipantScaledInt stackRequiredShares,
+        int overloadThreshold,
+        int maximumCompletedExposures,
+        IReadOnlyList<FirstSeveranceSubstateDefinition> substates,
+        FirstSeveranceTerminationContract terminationContract)
     {
         Arena = arena ?? throw new ArgumentNullException(nameof(arena));
         AccessPolicy = accessPolicy ?? throw new ArgumentNullException(nameof(accessPolicy));
         Boss = boss ?? throw new ArgumentNullException(nameof(boss));
-        Phases = FirstSeverancePlanCollections.Copy(phases, nameof(phases));
+        Timing = timing ?? throw new ArgumentNullException(nameof(timing));
+        TerminationContract = terminationContract
+            ?? throw new ArgumentNullException(nameof(terminationContract));
 
-        ValidatePlan();
+        if (!pylonCount.FitsParticipantCount
+            || pylonCount.FourParticipants > FirstSeveranceArenaBlueprint.RequiredPylonSlotCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pylonCount));
+        }
+
+        if (!stackRequiredShares.FitsParticipantCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(stackRequiredShares));
+        }
+
+        if (overloadThreshold is <= 0 or > byte.MaxValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(overloadThreshold));
+        }
+
+        if (maximumCompletedExposures is <= 0 or > MaximumSupportedExposures)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumCompletedExposures));
+        }
+
+        PylonCount = pylonCount;
+        StackRequiredShares = stackRequiredShares;
+        OverloadThreshold = overloadThreshold;
+        MaximumCompletedExposures = maximumCompletedExposures;
+        Substates = FirstSeverancePlanCollections.Copy(substates, nameof(substates));
+        definitionsBySubstate = ValidatePlan(Substates);
     }
+
+    public static FirstSeveranceEncounterPlan Instance { get; } = CreateDefault();
 
     public FirstSeveranceArenaBlueprint Arena { get; }
 
@@ -31,522 +70,339 @@ internal sealed class FirstSeveranceEncounterPlan
 
     public FirstSeveranceBossPlan Boss { get; }
 
-    public IReadOnlyList<FirstSeverancePhaseDefinition> Phases { get; }
+    public FirstSeveranceTimingPlan Timing { get; }
 
-    public FirstSeverancePhaseId FirstPhase => FirstSeverancePhaseId.BaseActivation;
+    public FirstSeveranceParticipantScaledInt PylonCount { get; }
 
-    public int HardEnrageOverloadThreshold => 3;
+    public FirstSeveranceParticipantScaledInt StackRequiredShares { get; }
 
-    public FirstSeveranceFailureOutcome LoopExhaustionOutcome =>
-        FirstSeveranceFailureOutcome.AdvanceHardEnrage;
+    public int OverloadThreshold { get; }
+
+    public int MaximumCompletedExposures { get; }
+
+    public FirstSeveranceSubstate FirstSubstate => FirstSeveranceSubstate.SpawnIntro;
+
+    public IReadOnlyList<FirstSeveranceSubstateDefinition> Substates { get; }
+
+    public FirstSeveranceTerminationContract TerminationContract { get; }
+
+    public FirstSeveranceSubstateDefinition GetSubstate(FirstSeveranceSubstate substate)
+    {
+        if (!definitionsBySubstate.TryGetValue(
+            substate,
+            out FirstSeveranceSubstateDefinition? definition))
+        {
+            throw new ArgumentOutOfRangeException(nameof(substate));
+        }
+
+        return definition;
+    }
+
+    public int GetDurationTicks(
+        FirstSeveranceSubstate substate,
+        bool isPenalizedExposure)
+    {
+        if (substate == FirstSeveranceSubstate.CoreExposure && isPenalizedExposure)
+        {
+            return Timing.PenalizedExposureTicks;
+        }
+
+        return GetSubstate(substate).DurationTicks;
+    }
 
     private static FirstSeveranceEncounterPlan CreateDefault()
     {
-        var strategicPartKeys = Array.AsReadOnly(
-            new[]
-            {
-                FirstSeveranceBossKeys.CrownPart,
-                FirstSeveranceBossKeys.WingsPart,
-                FirstSeveranceBossKeys.HeartCasingPart,
-            });
+        var timing = new FirstSeveranceTimingPlan(
+            spawnIntroTicks: 180,
+            pylonTelegraphTicks: 60,
+            pylonActiveTicks: 600,
+            stackTelegraphTicks: 180,
+            spreadTelegraphTicks: 180,
+            normalExposureTicks: 720,
+            penalizedExposureTicks: 360,
+            resetTicks: 90);
 
-        var phases = Array.AsReadOnly(
+        IReadOnlyList<FirstSeveranceSubstateDefinition> substates = Array.AsReadOnly(
             new[]
             {
-                new FirstSeverancePhaseDefinition(
-                    FirstSeverancePhaseId.BaseActivation,
-                    FirstSeveranceBossKeys.SealedForm,
-                    360,
-                    FirstSeverancePhaseExitRule.PreparationComplete,
-                    FirstSeverancePhaseId.SealRelease,
-                    FirstSeverancePhaseId.SealRelease,
-                    1,
-                    false,
-                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
-                        new FirstSeveranceMechanicDefinition[]
-                        {
-                            new FirstSeveranceBossAttackPatternDefinition(
-                                "base_activation_warning",
-                                0,
-                                300,
-                                "sealed_observation",
-                                FirstSeveranceTargetRule.None,
-                                FirstSeveranceFailureOutcome.None),
-                        })),
-                new FirstSeverancePhaseDefinition(
-                    FirstSeverancePhaseId.SealRelease,
-                    FirstSeveranceBossKeys.SealedForm,
-                    1800,
-                    FirstSeverancePhaseExitRule.MechanicResolvedOrDeadline,
-                    FirstSeverancePhaseId.PartBreak,
-                    FirstSeverancePhaseId.PartBreak,
-                    1,
-                    false,
-                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
-                        new FirstSeveranceMechanicDefinition[]
-                        {
-                            new FirstSeverancePylonDpsCheckDefinition(
-                                "seal_release_pylon_dps_check",
-                                180,
-                                1200,
-                                new FirstSeveranceParticipantScaledInt(2, 3, 4),
-                                FirstSeverancePylonSelectionRule.RosterMappedSymmetricSlots,
-                                "balance_pylon_damage_per_participant",
-                                true,
-                                FirstSeveranceFailureOutcome.ApplyOverload),
-                            new FirstSeveranceBossAttackPatternDefinition(
-                                "seal_release_pylon_crossfire",
-                                300,
-                                1200,
-                                "pylon_crossfire",
-                                FirstSeveranceTargetRule.AllParticipants,
-                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
-                        })),
-                new FirstSeverancePhaseDefinition(
-                    FirstSeverancePhaseId.PartBreak,
-                    FirstSeveranceBossKeys.ManifestForm,
-                    1800,
-                    FirstSeverancePhaseExitRule.MechanicResolvedOrDeadline,
-                    FirstSeverancePhaseId.Coordination,
-                    FirstSeverancePhaseId.Coordination,
-                    3,
-                    true,
-                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
-                        new FirstSeveranceMechanicDefinition[]
-                        {
-                            new FirstSeverancePartBreakDefinition(
-                                "part_break_strategic_choice",
-                                120,
-                                1320,
-                                strategicPartKeys,
-                                1),
-                            new FirstSeveranceBossAttackPatternDefinition(
-                                "part_break_wing_crossing",
-                                300,
-                                1200,
-                                "wing_crossing",
-                                FirstSeveranceTargetRule.FarthestParticipant,
-                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
-                        })),
-                new FirstSeverancePhaseDefinition(
-                    FirstSeverancePhaseId.Coordination,
-                    FirstSeveranceBossKeys.ManifestForm,
-                    1800,
-                    FirstSeverancePhaseExitRule.AllScheduledMechanicsResolved,
-                    FirstSeverancePhaseId.PersonalEffigies,
-                    FirstSeverancePhaseId.PersonalEffigies,
-                    3,
-                    true,
-                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
-                        new FirstSeveranceMechanicDefinition[]
-                        {
-                            new FirstSeveranceStackDefinition(
-                                "coordination_stack",
-                                120,
-                                300,
-                                10,
-                                new FirstSeveranceParticipantScaledInt(2, 2, 3),
-                                1),
-                            new FirstSeveranceSpreadDefinition(
-                                "coordination_spread",
-                                600,
-                                300,
-                                16,
-                                7),
-                            new FirstSeveranceTargetedLineDefinition(
-                                "coordination_targeted_line",
-                                1080,
-                                360,
-                                120,
-                                9,
-                                FirstSeveranceTargetRule.HighestRecentServerDamageParticipant),
-                            new FirstSeveranceBossAttackPatternDefinition(
-                                "coordination_choir_sweep",
-                                60,
-                                1560,
-                                "choir_sweep",
-                                FirstSeveranceTargetRule.AllParticipants,
-                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
-                        })),
-                new FirstSeverancePhaseDefinition(
-                    FirstSeverancePhaseId.PersonalEffigies,
-                    FirstSeveranceBossKeys.ConvergenceForm,
-                    1800,
-                    FirstSeverancePhaseExitRule.MechanicResolvedOrDeadline,
-                    FirstSeverancePhaseId.WeakPointExposure,
-                    FirstSeverancePhaseId.WeakPointExposure,
-                    3,
-                    true,
-                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
-                        new FirstSeveranceMechanicDefinition[]
-                        {
-                            new FirstSeverancePersonalEffigyDefinition(
-                                "personal_effigies_owner_trial",
-                                120,
-                                1320,
-                                1000,
-                                100,
-                                1,
-                                "combat_resolve_primary_damage_class",
-                                Array.AsReadOnly(
-                                    new[]
-                                    {
-                                        "melee_pursuit",
-                                        "ranged_sightline",
-                                        "magic_delayed_burst",
-                                        "summoner_hostile_minions",
-                                        "rogue_false_telegraph",
-                                        "classless_fallback",
-                                    })),
-                            new FirstSeveranceBossAttackPatternDefinition(
-                                "personal_effigies_identity_pressure",
-                                300,
-                                1200,
-                                "identity_pressure",
-                                FirstSeveranceTargetRule.AllParticipants,
-                                FirstSeveranceFailureOutcome.StrengthenBoss),
-                        })),
-                new FirstSeverancePhaseDefinition(
-                    FirstSeverancePhaseId.WeakPointExposure,
-                    FirstSeveranceBossKeys.ExposedForm,
-                    900,
-                    FirstSeverancePhaseExitRule.BossLifeOrDeadline,
-                    FirstSeverancePhaseId.PartBreak,
-                    FirstSeverancePhaseId.PartBreak,
-                    3,
-                    true,
-                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
-                        new FirstSeveranceMechanicDefinition[]
-                        {
-                            new FirstSeveranceWeakPointExposureDefinition(
-                                "weak_point_core_burst",
-                                120,
-                                780,
-                                FirstSeveranceBossKeys.CoreWeakPoint,
-                                "balance_core_burst_damage_per_participant",
-                                FirstSeveranceFailureOutcome.ApplyOverload),
-                            new FirstSeveranceBossAttackPatternDefinition(
-                                "weak_point_sustained_beam",
-                                120,
-                                780,
-                                "sustained_exposure_beam",
-                                FirstSeveranceTargetRule.AllParticipants,
-                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
-                        })),
-                new FirstSeverancePhaseDefinition(
-                    FirstSeverancePhaseId.LastStand,
-                    FirstSeveranceBossKeys.LastStandForm,
-                    2400,
-                    FirstSeverancePhaseExitRule.FixedSequenceComplete,
-                    FirstSeverancePhaseId.None,
-                    FirstSeverancePhaseId.None,
-                    1,
-                    false,
-                    Array.AsReadOnly<FirstSeveranceMechanicDefinition>(
-                        new FirstSeveranceMechanicDefinition[]
-                        {
-                            new FirstSeveranceBossAttackPatternDefinition(
-                                "last_stand_individual_judgment",
-                                0,
-                                1800,
-                                "final_individual_judgment",
-                                FirstSeveranceTargetRule.AllParticipants,
-                                FirstSeveranceFailureOutcome.ApplyParticipantDebuff),
-                            new FirstSeveranceTargetedLineDefinition(
-                                "last_stand_targeted_line",
-                                120,
-                                420,
-                                150,
-                                8,
-                                FirstSeveranceTargetRule.DeterministicRandomParticipant),
-                            new FirstSeveranceSpreadDefinition(
-                                "last_stand_spread",
-                                720,
-                                360,
-                                18,
-                                7),
-                            new FirstSeveranceStackDefinition(
-                                "last_stand_stack",
-                                1260,
-                                360,
-                                9,
-                                new FirstSeveranceParticipantScaledInt(2, 3, 4),
-                                1),
-                            new FirstSeveranceWeakPointExposureDefinition(
-                                "last_stand_final_core",
-                                1800,
-                                600,
-                                FirstSeveranceBossKeys.CoreWeakPoint,
-                                "balance_last_stand_core_damage",
-                                FirstSeveranceFailureOutcome.AdvanceHardEnrage),
-                        })),
+                new FirstSeveranceSubstateDefinition(
+                    FirstSeveranceSubstate.SpawnIntro,
+                    FirstSeveranceMechanicKind.None,
+                    timing.SpawnIntroTicks,
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.PylonCheck),
+                    FirstSeveranceStateEdge.End(
+                        FirstSeveranceTerminalCause.RuntimeInvariantBroken)),
+                new FirstSeveranceSubstateDefinition(
+                    FirstSeveranceSubstate.PylonCheck,
+                    FirstSeveranceMechanicKind.PylonCheck,
+                    timing.PylonCheckTicks,
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Stack),
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Stack)),
+                new FirstSeveranceSubstateDefinition(
+                    FirstSeveranceSubstate.Stack,
+                    FirstSeveranceMechanicKind.Stack,
+                    timing.StackTelegraphTicks,
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Spread),
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Spread)),
+                new FirstSeveranceSubstateDefinition(
+                    FirstSeveranceSubstate.Spread,
+                    FirstSeveranceMechanicKind.Spread,
+                    timing.SpreadTelegraphTicks,
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.CoreExposure),
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.CoreExposure)),
+                new FirstSeveranceSubstateDefinition(
+                    FirstSeveranceSubstate.CoreExposure,
+                    FirstSeveranceMechanicKind.CoreExposure,
+                    timing.NormalExposureTicks,
+                    FirstSeveranceStateEdge.End(FirstSeveranceTerminalCause.BossLifeZero),
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Reset)),
+                new FirstSeveranceSubstateDefinition(
+                    FirstSeveranceSubstate.Reset,
+                    FirstSeveranceMechanicKind.None,
+                    timing.ResetTicks,
+                    FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.PylonCheck),
+                    FirstSeveranceStateEdge.End(
+                        FirstSeveranceTerminalCause.RuntimeInvariantBroken)),
             });
 
         return new FirstSeveranceEncounterPlan(
             FirstSeveranceArenaBlueprint.Instance,
             FirstSeveranceArenaAccessPolicy.Instance,
             FirstSeveranceBossPlan.CreateDefault(),
-            phases);
+            timing,
+            new FirstSeveranceParticipantScaledInt(2, 3, 4),
+            new FirstSeveranceParticipantScaledInt(2, 2, 3),
+            overloadThreshold: 3,
+            maximumCompletedExposures: 8,
+            substates,
+            FirstSeveranceTerminationContract.Instance);
     }
 
-    private void ValidatePlan()
+    private IReadOnlyDictionary<
+        FirstSeveranceSubstate,
+        FirstSeveranceSubstateDefinition> ValidatePlan(
+            IReadOnlyList<FirstSeveranceSubstateDefinition> substates)
     {
-        if (Arena.Profile.WidthInTiles != FirstSeveranceArenaBlueprint.WidthInTiles
-            || Arena.Profile.HeightInTiles != FirstSeveranceArenaBlueprint.HeightInTiles)
+        int expectedStateCount = Enum.GetValues<FirstSeveranceSubstate>().Length - 1;
+        if (substates.Count != expectedStateCount)
         {
-            throw new InvalidOperationException("First Severance requires the 320x140 arena profile.");
+            throw new ArgumentException(
+                "The plan must define every active substate exactly once.",
+                nameof(substates));
         }
 
-        var formsByKey = new Dictionary<string, FirstSeveranceBossFormDefinition>(StringComparer.Ordinal);
-        for (int formIndex = 0; formIndex < Boss.Forms.Count; formIndex++)
-        {
-            FirstSeveranceBossFormDefinition form = Boss.Forms[formIndex];
-            formsByKey.Add(form.Key, form);
-        }
+        var definitions = new Dictionary<
+            FirstSeveranceSubstate,
+            FirstSeveranceSubstateDefinition>();
+        var mechanicOwners = new Dictionary<
+            FirstSeveranceMechanicKind,
+            FirstSeveranceSubstate>();
 
-        var partKeys = new HashSet<string>(StringComparer.Ordinal);
-        for (int partIndex = 0; partIndex < Boss.Parts.Count; partIndex++)
+        for (int index = 0; index < substates.Count; index++)
         {
-            partKeys.Add(Boss.Parts[partIndex].Key);
-        }
-
-        var phasesById = new Dictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition>();
-        var mechanicKeys = new HashSet<string>(StringComparer.Ordinal);
-        for (int phaseIndex = 0; phaseIndex < Phases.Count; phaseIndex++)
-        {
-            FirstSeverancePhaseDefinition phase = Phases[phaseIndex];
-            if (!phasesById.TryAdd(phase.Id, phase))
+            FirstSeveranceSubstateDefinition definition = substates[index]
+                ?? throw new ArgumentException("A substate definition cannot be null.", nameof(substates));
+            if (!definitions.TryAdd(definition.Substate, definition))
             {
-                throw new InvalidOperationException($"Duplicate phase '{phase.Id}'.");
+                throw new ArgumentException(
+                    $"Substate '{definition.Substate}' is defined more than once.",
+                    nameof(substates));
             }
 
-            if (!formsByKey.TryGetValue(phase.BossFormKey, out FirstSeveranceBossFormDefinition? form))
+            if (definition.Mechanic != FirstSeveranceMechanicKind.None
+                && !mechanicOwners.TryAdd(definition.Mechanic, definition.Substate))
             {
-                throw new InvalidOperationException(
-                    $"Phase '{phase.Id}' references unknown form '{phase.BossFormKey}'.");
-            }
-
-            for (int mechanicIndex = 0; mechanicIndex < phase.Mechanics.Count; mechanicIndex++)
-            {
-                if (!mechanicKeys.Add(phase.Mechanics[mechanicIndex].Key))
-                {
-                    throw new InvalidOperationException(
-                        $"Duplicate mechanic key '{phase.Mechanics[mechanicIndex].Key}'.");
-                }
-
-                ValidateMechanicReferences(phase, form, phase.Mechanics[mechanicIndex], partKeys);
+                throw new ArgumentException(
+                    $"Mechanic '{definition.Mechanic}' has more than one owner.",
+                    nameof(substates));
             }
         }
 
-        if (!phasesById.ContainsKey(FirstPhase)
-            || !phasesById.ContainsKey(FirstSeverancePhaseId.LastStand))
-        {
-            throw new InvalidOperationException("The plan requires activation and Last Stand phases.");
-        }
+        ValidateMechanicOwnership(definitions, mechanicOwners);
+        ValidateDurations(definitions);
+        ValidateAcceptedEdges(definitions);
+        ValidateReachabilityAndBoundedCycle(definitions);
+        ValidateTerminationContract();
 
-        for (int phaseIndex = 0; phaseIndex < Phases.Count; phaseIndex++)
-        {
-            FirstSeverancePhaseDefinition phase = Phases[phaseIndex];
-            ValidateDestination(phase.Id, phase.NextPhaseOnResolution, phasesById);
-            ValidateDestination(phase.Id, phase.NextPhaseOnSoftFailure, phasesById);
-            ValidateTerminalContract(phase);
-        }
-
-        ValidateReachabilityAndFiniteCycles(phasesById);
+        return new System.Collections.ObjectModel.ReadOnlyDictionary<
+            FirstSeveranceSubstate,
+            FirstSeveranceSubstateDefinition>(definitions);
     }
 
-    private static void ValidateTerminalContract(FirstSeverancePhaseDefinition phase)
+    private static void ValidateMechanicOwnership(
+        IReadOnlyDictionary<FirstSeveranceSubstate, FirstSeveranceSubstateDefinition> definitions,
+        IReadOnlyDictionary<FirstSeveranceMechanicKind, FirstSeveranceSubstate> mechanicOwners)
     {
-        if (phase.Id == FirstSeverancePhaseId.LastStand)
+        var expectedOwners = new Dictionary<FirstSeveranceMechanicKind, FirstSeveranceSubstate>
         {
-            if (phase.NextPhaseOnResolution != FirstSeverancePhaseId.None
-                || phase.NextPhaseOnSoftFailure != FirstSeverancePhaseId.None
-                || phase.MaximumVisits != 1
-                || phase.CanBeInterruptedByLastStand
-                || phase.ExitRule != FirstSeverancePhaseExitRule.FixedSequenceComplete)
+            [FirstSeveranceMechanicKind.PylonCheck] = FirstSeveranceSubstate.PylonCheck,
+            [FirstSeveranceMechanicKind.Stack] = FirstSeveranceSubstate.Stack,
+            [FirstSeveranceMechanicKind.Spread] = FirstSeveranceSubstate.Spread,
+            [FirstSeveranceMechanicKind.CoreExposure] = FirstSeveranceSubstate.CoreExposure,
+        };
+
+        if (mechanicOwners.Count != expectedOwners.Count)
+        {
+            throw new ArgumentException("Every mechanic requires one exact substate owner.");
+        }
+
+        foreach (KeyValuePair<FirstSeveranceMechanicKind, FirstSeveranceSubstate> expected in
+            expectedOwners)
+        {
+            if (!mechanicOwners.TryGetValue(expected.Key, out FirstSeveranceSubstate owner)
+                || owner != expected.Value)
             {
-                throw new InvalidOperationException(
-                    "Last Stand must be a single-visit terminal fixed sequence.");
+                throw new ArgumentException(
+                    $"Mechanic '{expected.Key}' must be owned by '{expected.Value}'.");
             }
-
-            return;
         }
 
-        if (phase.NextPhaseOnResolution == FirstSeverancePhaseId.None
-            || phase.NextPhaseOnSoftFailure == FirstSeverancePhaseId.None)
+        if (definitions[FirstSeveranceSubstate.SpawnIntro].Mechanic
+                != FirstSeveranceMechanicKind.None
+            || definitions[FirstSeveranceSubstate.Reset].Mechanic
+                != FirstSeveranceMechanicKind.None)
         {
-            throw new InvalidOperationException(
-                $"Non-terminal phase '{phase.Id}' requires resolution and soft-failure targets.");
+            throw new ArgumentException("SpawnIntro and Reset cannot own a mechanic.");
         }
     }
 
-    private static void ValidateDestination(
-        FirstSeverancePhaseId source,
-        FirstSeverancePhaseId destination,
-        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> knownPhases)
+    private void ValidateDurations(
+        IReadOnlyDictionary<FirstSeveranceSubstate, FirstSeveranceSubstateDefinition> definitions)
     {
-        if (destination != FirstSeverancePhaseId.None && !knownPhases.ContainsKey(destination))
+        var expected = new Dictionary<FirstSeveranceSubstate, int>
         {
-            throw new InvalidOperationException(
-                $"Phase '{source}' references unknown destination '{destination}'.");
+            [FirstSeveranceSubstate.SpawnIntro] = Timing.SpawnIntroTicks,
+            [FirstSeveranceSubstate.PylonCheck] = Timing.PylonCheckTicks,
+            [FirstSeveranceSubstate.Stack] = Timing.StackTelegraphTicks,
+            [FirstSeveranceSubstate.Spread] = Timing.SpreadTelegraphTicks,
+            [FirstSeveranceSubstate.CoreExposure] = Timing.NormalExposureTicks,
+            [FirstSeveranceSubstate.Reset] = Timing.ResetTicks,
+        };
+
+        foreach (KeyValuePair<FirstSeveranceSubstate, int> item in expected)
+        {
+            if (definitions[item.Key].DurationTicks != item.Value)
+            {
+                throw new ArgumentException(
+                    $"Substate '{item.Key}' does not own its configured duration.");
+            }
         }
     }
 
-    private void ValidateReachabilityAndFiniteCycles(
-        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> phasesById)
+    private static void ValidateAcceptedEdges(
+        IReadOnlyDictionary<FirstSeveranceSubstate, FirstSeveranceSubstateDefinition> definitions)
     {
-        var reachable = new HashSet<FirstSeverancePhaseId>();
-        var pending = new Queue<FirstSeverancePhaseId>();
-        reachable.Add(FirstPhase);
-        pending.Enqueue(FirstPhase);
+        ValidateEdges(
+            definitions[FirstSeveranceSubstate.SpawnIntro],
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.PylonCheck),
+            FirstSeveranceStateEdge.End(FirstSeveranceTerminalCause.RuntimeInvariantBroken));
+        ValidateEdges(
+            definitions[FirstSeveranceSubstate.PylonCheck],
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Stack),
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Stack));
+        ValidateEdges(
+            definitions[FirstSeveranceSubstate.Stack],
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Spread),
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Spread));
+        ValidateEdges(
+            definitions[FirstSeveranceSubstate.Spread],
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.CoreExposure),
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.CoreExposure));
+        ValidateEdges(
+            definitions[FirstSeveranceSubstate.CoreExposure],
+            FirstSeveranceStateEdge.End(FirstSeveranceTerminalCause.BossLifeZero),
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.Reset));
+        ValidateEdges(
+            definitions[FirstSeveranceSubstate.Reset],
+            FirstSeveranceStateEdge.TransitionTo(FirstSeveranceSubstate.PylonCheck),
+            FirstSeveranceStateEdge.End(FirstSeveranceTerminalCause.RuntimeInvariantBroken));
+    }
+
+    private static void ValidateEdges(
+        FirstSeveranceSubstateDefinition definition,
+        FirstSeveranceStateEdge expectedSuccess,
+        FirstSeveranceStateEdge expectedFailure)
+    {
+        if (definition.SuccessEdge != expectedSuccess
+            || definition.FailureEdge != expectedFailure)
+        {
+            throw new ArgumentException(
+                $"Substate '{definition.Substate}' has an unsupported edge.");
+        }
+    }
+
+    private void ValidateReachabilityAndBoundedCycle(
+        IReadOnlyDictionary<FirstSeveranceSubstate, FirstSeveranceSubstateDefinition> definitions)
+    {
+        var reachable = new HashSet<FirstSeveranceSubstate>();
+        var pending = new Queue<FirstSeveranceSubstate>();
+        pending.Enqueue(FirstSubstate);
 
         while (pending.Count > 0)
         {
-            FirstSeverancePhaseId current = pending.Dequeue();
-            FirstSeverancePhaseDefinition phase = phasesById[current];
-            EnqueueReachable(phase.NextPhaseOnResolution, reachable, pending);
-            EnqueueReachable(phase.NextPhaseOnSoftFailure, reachable, pending);
-
-            // Boss life crossing the threshold is an implicit authority edge from
-            // interruptible phases into Last Stand; it is part of graph validity.
-            if (phase.CanBeInterruptedByLastStand)
+            FirstSeveranceSubstate current = pending.Dequeue();
+            if (!reachable.Add(current))
             {
-                EnqueueReachable(FirstSeverancePhaseId.LastStand, reachable, pending);
+                continue;
+            }
+
+            FirstSeveranceSubstateDefinition definition = definitions[current];
+            EnqueueDestination(definition.SuccessEdge, definitions, pending);
+            EnqueueDestination(definition.FailureEdge, definitions, pending);
+        }
+
+        if (reachable.Count != definitions.Count)
+        {
+            throw new ArgumentException("Every active substate must be reachable.");
+        }
+
+        FirstSeveranceSubstateDefinition reset = definitions[FirstSeveranceSubstate.Reset];
+        if (reset.SuccessEdge.NextSubstate != FirstSeveranceSubstate.PylonCheck
+            || MaximumCompletedExposures <= 0)
+        {
+            throw new ArgumentException("The repeated loop must have a bounded Reset edge.");
+        }
+    }
+
+    private void ValidateTerminationContract()
+    {
+        var seenDescriptors = new HashSet<EncounterTerminationDescriptor>();
+        foreach (FirstSeveranceTerminalCause cause in Enum.GetValues<FirstSeveranceTerminalCause>())
+        {
+            if (cause == FirstSeveranceTerminalCause.None)
+            {
+                continue;
+            }
+
+            EncounterTerminationDescriptor descriptor = TerminationContract.Create(cause);
+            if (!TerminationContract.IsValid(descriptor) || !seenDescriptors.Add(descriptor))
+            {
+                throw new ArgumentException(
+                    $"Terminal cause '{cause}' does not have one valid mapping.");
             }
         }
 
-        foreach (FirstSeverancePhaseId phaseId in phasesById.Keys)
-        {
-            if (!reachable.Contains(phaseId))
-            {
-                throw new InvalidOperationException($"Phase '{phaseId}' is unreachable.");
-            }
-        }
-
-        var visiting = new HashSet<FirstSeverancePhaseId>();
-        var visited = new HashSet<FirstSeverancePhaseId>();
-        bool hasCycle = HasCycleFrom(FirstPhase, phasesById, visiting, visited);
-        if (hasCycle && LoopExhaustionOutcome == FirstSeveranceFailureOutcome.None)
-        {
-            throw new InvalidOperationException(
-                "A cyclic phase graph requires a non-empty loop exhaustion outcome.");
-        }
+        _ = new EncounterExternalTerminationMap(
+            TerminationContract,
+            TerminationContract.ExternalTerminations);
     }
 
-    private static void EnqueueReachable(
-        FirstSeverancePhaseId destination,
-        HashSet<FirstSeverancePhaseId> reachable,
-        Queue<FirstSeverancePhaseId> pending)
+    private static void EnqueueDestination(
+        FirstSeveranceStateEdge edge,
+        IReadOnlyDictionary<FirstSeveranceSubstate, FirstSeveranceSubstateDefinition> definitions,
+        Queue<FirstSeveranceSubstate> pending)
     {
-        if (destination != FirstSeverancePhaseId.None && reachable.Add(destination))
+        if (edge.IsTerminal)
         {
-            pending.Enqueue(destination);
-        }
-    }
-
-    private static bool HasCycleFrom(
-        FirstSeverancePhaseId phaseId,
-        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> phasesById,
-        HashSet<FirstSeverancePhaseId> visiting,
-        HashSet<FirstSeverancePhaseId> visited)
-    {
-        if (visited.Contains(phaseId))
-        {
-            return false;
+            return;
         }
 
-        if (!visiting.Add(phaseId))
+        if (!definitions.ContainsKey(edge.NextSubstate))
         {
-            return true;
+            throw new ArgumentException(
+                $"Edge references undefined substate '{edge.NextSubstate}'.");
         }
 
-        FirstSeverancePhaseDefinition phase = phasesById[phaseId];
-        if (HasCycleAtDestination(
-                phase.NextPhaseOnResolution,
-                phasesById,
-                visiting,
-                visited)
-            || HasCycleAtDestination(
-                phase.NextPhaseOnSoftFailure,
-                phasesById,
-                visiting,
-                visited)
-            || (phase.CanBeInterruptedByLastStand
-                && HasCycleAtDestination(
-                    FirstSeverancePhaseId.LastStand,
-                    phasesById,
-                    visiting,
-                    visited)))
-        {
-            return true;
-        }
-
-        visiting.Remove(phaseId);
-        visited.Add(phaseId);
-        return false;
-    }
-
-    private static bool HasCycleAtDestination(
-        FirstSeverancePhaseId destination,
-        IReadOnlyDictionary<FirstSeverancePhaseId, FirstSeverancePhaseDefinition> phasesById,
-        HashSet<FirstSeverancePhaseId> visiting,
-        HashSet<FirstSeverancePhaseId> visited)
-    {
-        return destination != FirstSeverancePhaseId.None
-            && HasCycleFrom(destination, phasesById, visiting, visited);
-    }
-
-    private void ValidateMechanicReferences(
-        FirstSeverancePhaseDefinition phase,
-        FirstSeveranceBossFormDefinition form,
-        FirstSeveranceMechanicDefinition mechanic,
-        HashSet<string> knownPartKeys)
-    {
-        if (mechanic is FirstSeverancePartBreakDefinition partBreak)
-        {
-            for (int partIndex = 0; partIndex < partBreak.EligiblePartKeys.Count; partIndex++)
-            {
-                if (!knownPartKeys.Contains(partBreak.EligiblePartKeys[partIndex]))
-                {
-                    throw new InvalidOperationException(
-                        $"Mechanic '{mechanic.Key}' references unknown part "
-                        + $"'{partBreak.EligiblePartKeys[partIndex]}'.");
-                }
-
-                if (!ContainsOrdinal(form.EnabledPartKeys, partBreak.EligiblePartKeys[partIndex]))
-                {
-                    throw new InvalidOperationException(
-                        $"Mechanic '{mechanic.Key}' references part "
-                        + $"'{partBreak.EligiblePartKeys[partIndex]}' disabled in form '{form.Key}'.");
-                }
-            }
-        }
-
-        if (mechanic is FirstSeveranceWeakPointExposureDefinition exposure
-            && !string.Equals(exposure.WeakPointKey, Boss.WeakPoint.Key, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                $"Mechanic '{mechanic.Key}' references unknown weak point '{exposure.WeakPointKey}'.");
-        }
-
-        if (mechanic is FirstSeveranceBossAttackPatternDefinition attack
-            && !ContainsOrdinal(form.AttackPatternKeys, attack.PatternKey))
-        {
-            throw new InvalidOperationException(
-                $"Phase '{phase.Id}' form '{form.Key}' does not allow pattern '{attack.PatternKey}'.");
-        }
-    }
-
-    private static bool ContainsOrdinal(IReadOnlyList<string> values, string expected)
-    {
-        for (int index = 0; index < values.Count; index++)
-        {
-            if (string.Equals(values[index], expected, StringComparison.Ordinal))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        pending.Enqueue(edge.NextSubstate);
     }
 }

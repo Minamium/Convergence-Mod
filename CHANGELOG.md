@@ -23,6 +23,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Classified the existing Third Severance multipart plan as an inert legacy bootstrap to be renamed and simplified in isolated Windows commits.
 - Confirmed the Windows runtime baseline at Terraria 1.4.4.9, tModLoader v2026.07.3.0, Calamity 2.2.4, and Calamity Music 2.1; raised the compatibility floor to the verified Calamity build.
 - Renamed the unpublished `ThirdSeverance` source identity, stable key, failure-code prefix, and tests to `FirstSeverance` / `first_severance` while preserving the activation denial and inert world adapter.
+- Replaced the obsolete multipart/Last Stand plan with a validated six-state Pylon → Stack → Spread → Core-exposure loop, persistent Boss life, roster-scaled Pylons/Stack shares, and direct loop-cap Defeat.
+- Added feature-neutral terminal descriptors, append-only First Severance terminal causes, definition-owned external failure mappings, coordinator preemption, and terminal tombstone validation.
 
 ## [0.1.0] - Unreleased
 

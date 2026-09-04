@@ -30,6 +30,7 @@ The implementation sequence within the first Raid is defined in the [First Sever
 - [x] Modular source boundaries, feature registration, and compatibility adapter boundary.
 - [x] Generic authority lifecycle, runtime/factory/update boundary, exact-Fight cleanup/retry.
 - [x] Encounter Sequence, bounded terminal-priority snapshots, replica/tombstone bootstrap.
+- [x] Feature-neutral termination descriptor and definition-owned external termination mapping.
 - [x] Versioned packet envelope parser and direction guard.
 - [x] Pure Downed/Revive domain and dependency-free harness.
 - [x] Inert legacy arena/Boss plan and activation fail-closed policy.
@@ -67,7 +68,7 @@ Exit: clients recover from stale/reordered state without deciding or changing au
 
 ## Milestone 3 — Basic repeated encounter loop
 
-- replace obsolete multipart immutable plan/tests;
+- [x] replace obsolete multipart immutable plan/tests;
 - one simple Boss NPC and the provisional 2/3/4-Pylon prototype layout;
 - authoritative damage gate and persistent Boss life;
 - Spawn → Pylon → Stack → Spread → Core exposure → Reset loop;
