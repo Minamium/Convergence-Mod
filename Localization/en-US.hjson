@@ -12,8 +12,13 @@ Mods: {
 		}
 
 		Tiles.FoundationCoreTile.MapEntry: Foundation Core
-		UI.FirstSeverance.ActivationRejected: "Foundation Core activation was rejected: {0}"
-		UI.FirstSeverance.PreparationStatus: "First Severance preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready."
-		UI.FirstSeverance.AllReady: "First Severance is ready — Ready: {0}/{1}. Multiplayer preparation confirmed; combat is still locked in this build."
+
+		UI: {
+			FirstSeverance: {
+				ActivationRejected: Foundation Core activation was rejected: {0}
+				PreparationStatus: First Severance preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready.
+				AllReady: First Severance is ready — Ready: {0}/{1}. Multiplayer preparation confirmed; combat is still locked in this build.
+			}
+		}
 	}
 }
