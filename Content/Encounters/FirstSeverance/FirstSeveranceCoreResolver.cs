@@ -64,7 +64,7 @@ internal sealed class FirstSeveranceCoreResolver
             return false;
         }
 
-        if (!TryResolveCore(start.RequestedAnchor, out FoundationCoreTileEntity? core))
+        if (!TryResolveCore(start.RequestedAnchor, out FoundationCoreTileEntity core))
         {
             failureCode = "first_severance.arena_core_not_resolved";
             return false;
@@ -146,9 +146,9 @@ internal sealed class FirstSeveranceCoreResolver
 
     private static bool TryResolveCore(
         in TilePoint requestedAnchor,
-        out FoundationCoreTileEntity? core)
+        out FoundationCoreTileEntity core)
     {
-        core = null;
+        core = null!;
         if (!WorldGen.InWorld(requestedAnchor.X, requestedAnchor.Y, 1))
         {
             return false;
