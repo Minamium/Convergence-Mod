@@ -17,6 +17,8 @@
 | Calamity internal name | `CalamityMod` | Confirmed | `build.txt`とnamespace |
 | Addon dependency | `CalamityMod@2.2.2` | Configured, unverified | `build.txt`へ設定済み。実機Build + Reload待ち |
 
+This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calamity-independence.md); it is not a permanent commitment to a hard Calamity dependency.
+
 現在の`build.txt`:
 
 ```text

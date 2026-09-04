@@ -5,4 +5,9 @@
     <AssemblyName>Convergence</AssemblyName>
     <RootNamespace>Convergence</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The standalone harness links selected production files explicitly. -->
+    <Compile Remove="Tests/**/*.cs" />
+  </ItemGroup>
 </Project>

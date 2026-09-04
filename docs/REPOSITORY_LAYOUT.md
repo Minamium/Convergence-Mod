@@ -58,7 +58,7 @@ tModLoader source folders should be checked out as `ModSources/Convergence`, eve
 
 ## Packaging
 
-`buildIgnore` excludes repository governance, `.agents` Skills, standalone `Tests`, docs, tools, concept/raw assets, and working files from `.tmod`. Calamity `.tmod` files, source mirrors, logs, local settings, and dependency binaries never enter this repository.
+`buildIgnore` excludes repository governance, `.agents` Skills, standalone `Tests`, docs, tools, concept/raw assets, and working files from tModLoader compilation/packaging. `ConvergenceMod.csproj` separately removes `Tests/**/*.cs` from SDK compilation, while the domain-test project explicitly links only the production files it exercises. Calamity `.tmod` files, source mirrors, logs, local settings, and dependency binaries never enter this repository.
 
 ## Repository Skills
 

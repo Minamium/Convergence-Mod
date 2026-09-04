@@ -418,6 +418,27 @@ def check_structured_text(files: list[Path], errors: list[str]) -> None:
                 errors.append(f"invalid XML in {relative(path)}: {exc}")
 
 
+def check_test_source_isolation(errors: list[str]) -> None:
+    project_path = ROOT / "ConvergenceMod.csproj"
+    if not project_path.is_file():
+        return
+
+    try:
+        project = ElementTree.parse(project_path)
+    except (ElementTree.ParseError, OSError):
+        return
+
+    removed_sources = {
+        (compile_node.get("Remove") or "").replace("\\", "/")
+        for compile_node in project.findall(".//Compile")
+        if compile_node.get("Remove")
+    }
+    if "Tests/**/*.cs" not in removed_sources:
+        errors.append(
+            "ConvergenceMod.csproj must remove Tests/**/*.cs from SDK compilation"
+        )
+
+
 def check_test_project_links(errors: list[str]) -> None:
     for project_path in sorted((ROOT / "Tests").rglob("*.csproj")):
         try:
@@ -706,6 +727,7 @@ def main() -> int:
     check_text(files, errors)
     check_markdown_links(files, errors)
     check_structured_text(files, errors)
+    check_test_source_isolation(errors)
     check_test_project_links(errors)
     check_tmod_identity(files, errors)
     check_build_ignore(errors)

@@ -1,6 +1,6 @@
 # Convergence Mod
 
-A multiplayer-first Calamity addon for Terraria. The first vertical slice is a 2-4 player Raid after Exo Mechs and Supreme Calamitas; the long-term architecture supports additional bosses, Raids, world content, items, and presentation systems.
+A multiplayer-first Calamity addon for Terraria. The first vertical slice is a 2-4 player Raid after Exo Mechs and Supreme Calamitas; the long-term architecture supports additional bosses, Raids, world content, items, presentation systems, and a staged path to removing the hard Calamity dependency.
 
 `Convergence` is the provisional internal identity and root namespace; `ConvergenceMod` is only the entry class/project filename. The public title, story terms, and release branding remain changeable.
 
@@ -57,7 +57,7 @@ The standalone harness exercises production Downed/Revive and immutable Arena/Bo
 dotnet build ConvergenceMod.csproj
 ```
 
-Full instructions and limitations are in [Development Setup](docs/DEVELOPMENT.md). GitHub Actions currently validates repository policy only; it does not pretend to compile without pinned tModLoader and private dependency binaries.
+Full instructions and limitations are in [Development Setup](docs/DEVELOPMENT.md). GitHub Actions runs repository policy checks and the Terraria-independent domain harness; it does not pretend to compile the Mod without pinned tModLoader and private dependency binaries.
 
 ## Documentation
 

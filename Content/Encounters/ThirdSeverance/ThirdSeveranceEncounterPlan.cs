@@ -320,7 +320,7 @@ internal sealed class ThirdSeveranceEncounterPlan
                 throw new InvalidOperationException($"Duplicate phase '{phase.Id}'.");
             }
 
-            if (!formsByKey.TryGetValue(phase.BossFormKey, out ThirdSeveranceBossFormDefinition form))
+            if (!formsByKey.TryGetValue(phase.BossFormKey, out ThirdSeveranceBossFormDefinition? form))
             {
                 throw new InvalidOperationException(
                     $"Phase '{phase.Id}' references unknown form '{phase.BossFormKey}'.");
@@ -385,7 +385,7 @@ internal sealed class ThirdSeveranceEncounterPlan
         ThirdSeverancePhaseId destination,
         IReadOnlyDictionary<ThirdSeverancePhaseId, ThirdSeverancePhaseDefinition> knownPhases)
     {
-        if (destination != ThirdSeverancePhaseId.None && !knownPhases.Contains(destination))
+        if (destination != ThirdSeverancePhaseId.None && !knownPhases.ContainsKey(destination))
         {
             throw new InvalidOperationException(
                 $"Phase '{source}' references unknown destination '{destination}'.");

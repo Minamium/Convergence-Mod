@@ -2,7 +2,7 @@
 
 ## Objective
 
-Build a multiplayer-first Calamity addon that can grow from one post-Exo Mechs/Supreme Calamitas Raid into multiple bosses, encounters, items, world features, and presentation systems without making the first Raid a global dependency.
+Build a multiplayer-first Calamity addon that can grow from one post-Exo Mechs/Supreme Calamitas Raid into multiple bosses, encounters, items, world features, and presentation systems without making the first Raid or the initial Calamity integration a permanent global dependency.
 
 The architecture is a **modular monolith**: one tModLoader assembly with enforced source boundaries. This keeps the initial build and reload workflow simple while preserving seams that can become separate assemblies only when scale justifies it.
 
@@ -163,6 +163,12 @@ failure so the coordinator retry backlog does not silently discard owned state.
 Long-running invasions or world events will receive a separate coordinator. They may reuse identifiers, transport, ownership, and diagnostics, but they will not be forced through the Raid lifecycle.
 
 ## Compatibility boundary
+
+[ADR-0006](adr/0006-staged-calamity-independence.md) defines three dependency stages.
+
+- Stage A keeps the current hard Calamity dependency behind the compatibility boundary.
+- Stage B introduces project-owned progression, class-category, and balance-tier ports without rewriting the encounter runtime.
+- Stage C removes the hard dependency only after original progression/content and a replacement compatibility matrix exist. Any Calamity coexistence path is optional and must remain outside authoritative encounter rules.
 
 Only `Common/Compatibility/Calamity` may call Calamity APIs or reference Calamity types. Initial integrations prefer documented `Mod.Call` contracts with explicit result type checks. Reflection, IL patches, publicizers, copied Calamity code, and reliance on private fields are out of scope.
 

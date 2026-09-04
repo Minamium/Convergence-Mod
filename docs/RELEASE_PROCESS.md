@@ -33,7 +33,7 @@ These versions change independently. A protocol or save break must be called out
 | Tier | Purpose | Current status |
 |---|---|---|
 | L0 | Repository structure, links, provenance, boundaries | Automated |
-| L1 | Terraria-independent domain tests | Planned after test project strategy is verified with tML globbing |
+| L1 | Terraria-independent domain tests | Automated in GitHub Actions |
 | L2 | Pinned tML + Calamity build/load | Manual until legal and reproducible dependency provisioning exists |
 | L3 | Dedicated Server multiplayer smoke/soak | Manual; later protected runner/nightly |
 

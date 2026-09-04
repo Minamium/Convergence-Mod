@@ -19,6 +19,21 @@ Soloは初期リリースの対象外とする。将来対応する場合は、�
 
 最初のRaidは基盤の実証対象であり、Addon全体の設計境界ではない。長期的には独立Boss、追加Raid、World content、進行要素、Item、Utility、演出基盤まで拡張し、大型Content Mod級の規模を目指す。共通基盤へThird Severance固有の名称やルールを持ち込まず、逆に実利用が一つしかない機能を早期に過剰共通化しない。
 
+## Staged dependency strategy
+
+The initial release is a Calamity addon, but Calamity is not the permanent owner of the Raid architecture.
+
+- **Stage A — Calamity addon:** use Calamity progression, class integration, and Shadowspec-level balance through the compatibility boundary.
+- **Stage B — Portable Raid core:** replace progression, class, and balance assumptions with project-owned ports so Encounter, Networking, Arena, and Raid domains do not know Calamity types.
+- **Stage C — Standalone content Mod:** provide original progression, materials, equipment, World content, and balance, then remove the hard dependency. Any remaining Calamity support becomes an optional adapter.
+
+Stage transitions are explicit milestones rather than an early rewrite:
+
+- Calamity APIs remain isolated in `Common/Compatibility/Calamity`.
+- Encounter and Raid code consume project-owned contracts, never copied Calamity implementation or assets.
+- Removing `modReferences = CalamityMod` is gated by replacement content and a new compatibility/release matrix.
+- Milestone 9 inventories the remaining coupling and defines the Standalone roadmap after the first addon release is stable.
+
 ## Design pillars
 
 1. **Execution** — 回避、ダッシュ、位置取り、火力維持。

@@ -129,6 +129,20 @@ Exit: presentation never obscures gameplay state and all asset rights are docume
 
 Exit: release candidate builds reproducibly and passes the mandatory matrix.
 
+## Milestone 9 — Standalone Preparation
+
+Initial Calamity dependency removal begins only after the addon release path is stable.
+
+- inventory every Calamity progression, class, item, recipe, balance, and compatibility dependency
+- define project-owned progression, class-category, and balance-tier ports
+- replace Calamity-specific Boss gates, materials, recipes, and reward assumptions
+- produce a Standalone content and migration roadmap
+- decide whether Calamity coexistence remains an optional adapter or moves to a separate compatibility package
+
+Exit: Encounter, Networking, Arena, and Raid-domain code have no Calamity type dependency; the work required to remove the hard `build.txt` reference is enumerated; and an original progression path is defined.
+
+This milestone does not mark the Mod Standalone. Removing the hard dependency requires its own implementation, build matrix, multiplayer regression pass, packaging review, and release decision.
+
 ## Commit discipline
 
 - one concern per commit where practical

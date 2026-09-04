@@ -37,7 +37,7 @@ python3 tools/validate_yaml.py
 
 This checks required policy files, UTF-8/LF text, broken relative Markdown links, generated binaries and sensitive filenames, case-colliding paths, required `.tmod` packaging masks, coarse dependency direction, file size, and attribution record completeness.
 
-GitHub Actions runs the same dependency-free core check plus pinned PyYAML syntax/minimal-schema validation for its workflow, Dependabot, and Issue Forms. It intentionally does not claim to compile the Mod.
+GitHub Actions runs the same dependency-free core check, pinned PyYAML syntax/minimal-schema validation, and the Terraria-independent domain harness with the SDK pinned by `global.json`. It intentionally does not claim to compile or load the Mod.
 
 ## Build and reload
 
