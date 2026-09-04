@@ -1,3 +1,22 @@
+---
+doc_id: research.multiplayer-raid-prior-art
+document_type: research
+status: historical
+owners:
+  - research
+last_reviewed: 2026-08-23
+source_of_truth_for: []
+aliases:
+  - multiplayer Raid prior art
+  - tModLoader Raid research
+related_code:
+  - Common/Raids/Revive
+related_docs:
+  - project.network-architecture
+  - encounter.first-severance.spec
+  - research.sources
+---
+
 # Multiplayer Raid Prior Art
 
 Last reviewed: **2026-08-23**

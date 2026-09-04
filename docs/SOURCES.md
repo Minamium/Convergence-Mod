@@ -1,3 +1,21 @@
+---
+doc_id: research.sources
+document_type: research
+status: historical
+owners:
+  - research
+last_reviewed: 2026-08-23
+source_of_truth_for: []
+aliases:
+  - research sources
+  - source ledger
+related_code: []
+related_docs:
+  - compatibility.version-matrix
+  - research.codex-skills-survey
+  - research.multiplayer-raid-prior-art
+---
+
 # Research Sources
 
 Last reviewed: **2026-08-23**

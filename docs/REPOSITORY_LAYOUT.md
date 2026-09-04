@@ -1,68 +1,87 @@
+---
+doc_id: project.repository-layout
+document_type: governance
+status: accepted
+owners:
+  - engineering
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - architecture.repository_layout
+aliases:
+  - repository layout
+  - directory structure
+related_code:
+  - Common
+  - Content
+  - Client
+  - tools
+related_docs:
+  - docs.system
+  - project.architecture
+---
+
 # Repository Layout
 
 ```text
 /
-├─ ConvergenceMod.cs              # Mod entry point only
-├─ ConvergenceMod.csproj          # tModLoader build entry
-├─ build.txt / description.txt    # tML metadata
+├─ ConvergenceMod.cs / .csproj   Mod entry and tModLoader build entry
+├─ build.txt / description.txt   tModLoader metadata
 ├─ Common/
-│  ├─ Foundation/                 # Terraria-independent value objects
+│  ├─ Foundation/                Terraria-independent value objects
 │  ├─ Encounters/
-│  │  ├─ Abstractions/            # implementation/tML-independent contracts
-│  │  └─ Runtime/                 # authority coordinator, lifecycle, cleanup
-│  ├─ Raids/                      # Raid-only services, added incrementally
-│  ├─ Networking/                 # envelope, router, replication, transport
-│  ├─ Compatibility/              # one adapter directory per external Mod
-│  ├─ Diagnostics/                # structured logs and debug inspection
-│  └─ Players/                    # per-player adapter/cache, never global truth
+│  │  ├─ Abstractions/           implementation/tML-independent contracts
+│  │  └─ Runtime/                authority coordinator/lifecycle/cleanup
+│  ├─ Raids/                     reusable Raid-only domains such as Revive
+│  ├─ Networking/                envelope/router/replication/transport
+│  ├─ Compatibility/             one isolated adapter per external Mod
+│  ├─ Diagnostics/
+│  └─ Players/                   player adapters/projections, never global truth
 ├─ Content/
-│  ├─ Encounters/<Feature>/       # vertical feature modules
-│  ├─ WorldEvents/                # separate lifecycle from Raids
-│  └─ Shared/                     # truly shared player-facing content
+│  ├─ Encounters/<Feature>/      vertical feature modules
+│  ├─ WorldEvents/               lifecycle separate from Raids
+│  └─ Shared/                    proven shared player-facing content
 ├─ Client/
-│  ├─ Encounters/<Feature>/       # feature cue -> presentation adapters
-│  ├─ UI/
-│  ├─ Rendering/
-│  ├─ Audio/
+│  ├─ Encounters/<Feature>/      feature cue-to-presentation adapters
+│  ├─ UI/ Rendering/ Audio/
 │  └─ Accessibility/
-├─ Assets/                        # reviewed runtime exports only
+├─ Assets/                       reviewed runtime exports only
 ├─ Localization/
 ├─ docs/
-│  └─ adr/                        # immutable decision history
-├─ .agents/skills/                # repository-scoped development workflows
-├─ Tests/                         # standalone tModLoader-free domain harnesses
-├─ tools/                         # dependency-free repository checks
-└─ .github/                       # review, issue, ownership, and CI policy
+│  ├─ README.md / INDEX.md       entry and curated search map
+│  ├─ STATUS.md / GLOSSARY.md    implementation truth and names
+│  ├─ encounters/<feature>/      active feature spec/plan/visual/revive/backlog
+│  ├─ runbooks/ / handoff/       repeatable procedure vs point-in-time transfer
+│  ├─ evidence/ / catalog/       verification format and generated metadata index
+│  ├─ adr/ / research/           decisions and supporting observations
+│  └─ stable root documents      project-wide policies kept at existing paths
+├─ .agents/skills/               repository-local repeatable workflows
+├─ Tests/                        tModLoader-free domain harnesses
+├─ tools/                        repository/catalog/YAML checks
+└─ .github/                      review, issue, ownership, and CI policy
 ```
 
-The repository root is the tModLoader Mod Source root. Do not move the Mod into `src/`; tModLoader expects `build.txt` and the project under the source directory imported through `../tModLoader.targets`.
+The repository root is the tModLoader Mod Source root. Do not move code into `src/`; tModLoader expects `build.txt` and imports `../tModLoader.targets` from a checkout named `ModSources/Convergence`.
 
-## Naming
+## Feature-name transition
 
-- Internal Mod/assembly name: `Convergence`.
-- Root namespace: `Convergence`.
-- Entry class/project filename: `ConvergenceMod` / `ConvergenceMod.csproj`.
-- First feature module: `Content/Encounters/ThirdSeverance`.
-- Public title remains provisional and can change without renaming every namespace.
+- Target first feature: `Content/Encounters/FirstSeverance`.
+- Current source: `Content/Encounters/ThirdSeverance`, an inert legacy bootstrap.
+- Rename directory/files/types/namespaces/key/failure prefixes/tests together in an isolated commit.
+- Do not add empty target directories early, preserve compatibility aliases for unpublished identifiers, or globally rewrite historical ADR/research/changelog content.
 
-tModLoader source folders should be checked out as `ModSources/Convergence`, even though the GitHub repository is currently named `tmod`. tModLoader verifies that at least one loaded type starts with the internal Mod namespace, so the folder, assembly, and namespace identity must remain aligned.
+## Naming and type rules
 
-## Type rules
-
-- Prefer one meaningful type per C# file.
+- Internal Mod/assembly/root namespace: `Convergence`.
+- Entry class/project: `ConvergenceMod` / `ConvergenceMod.csproj`.
 - tModLoader types use role suffixes: `NPC`, `Item`, `Tile`, `TileEntity`, `System`, `UIState`.
-- Domain types use descriptive nouns without tML suffixes.
-- Avoid vague `Manager`, `Helper`, `Utils`, and `Data` names.
-- Protocol enum values are explicit and never renumbered.
-- Stable IDs and failure codes are English machine strings; localization happens at the client boundary.
+- Domain types use descriptive nouns; avoid vague `Manager`, `Helper`, `Utils`, `Data`.
+- Stable IDs/failure codes are lowercase English machine strings; localization is client-side.
+- Packet enum values are explicit and never renumbered.
 
 ## Packaging
 
-`buildIgnore` excludes repository governance, `.agents` Skills, standalone `Tests`, docs, tools, concept/raw assets, and working files from tModLoader compilation/packaging. `ConvergenceMod.csproj` separately removes `Tests/**/*.cs` from SDK compilation, while the domain-test project explicitly links only the production files it exercises. Calamity `.tmod` files, source mirrors, logs, local settings, and dependency binaries never enter this repository.
+`buildIgnore` excludes governance, Skills, tests, docs, tools, local/build output, raw/editable assets, logs, worlds/players, and dependency binaries. `ConvergenceMod.csproj` excludes standalone test source while the test project links only production files it exercises. Calamity `.tmod` binaries and source mirrors never enter this repository.
 
-## Repository Skills
+## Documentation storage
 
-- `develop-convergence-raids` routes Raid implementation through server authority, bounded replication, idempotent cleanup, and the required multiplayer matrix.
-- `research-tmodloader-sources` standardizes exact-source, versioned, license-aware API and public-Mod investigation.
-
-`AGENTS.md` remains the concise always-on contract. Skills hold procedures that are only useful for a matching task, and link back to the repository documents as the source of truth.
+Markdown/front matter is canonical. `docs/catalog/documents.yml` is generated and validated, while any SQLite/embedding index is ignored local cache. See [Documentation System](DOCUMENTATION_SYSTEM.md).

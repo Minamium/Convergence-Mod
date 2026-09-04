@@ -4,30 +4,43 @@ This file applies to the entire repository.
 
 ## Before changing code
 
-1. Read `docs/VERSION_MATRIX.md`, `docs/ARCHITECTURE.md`, and `docs/NETWORK_ARCHITECTURE.md`.
-2. State the implementation plan, affected files, synchronization policy, and unresolved decisions.
-3. Keep work inside the requested milestone; do not pre-build later boss phases or production assets.
+1. Read `docs/README.md`, `docs/STATUS.md`, `docs/VERSION_MATRIX.md`, `docs/ARCHITECTURE.md`, and `docs/NETWORK_ARCHITECTURE.md`.
+2. For the first Raid, also read `docs/encounters/first-severance/README.md` and its implementation plan.
+3. State the implementation slice, affected files, server/client ownership, cleanup path, verification, and unresolved decisions.
+4. Keep work inside the requested slice; do not pull backlog mechanics or production assets into the MVP.
+
+Current target feature naming is `FirstSeverance` / `first_severance`. Source still named `ThirdSeverance` is legacy until the isolated rename commit; do not assume the rename has already happened and do not globally rewrite history.
 
 ## Repository Skills
 
-- Use `.agents/skills/develop-convergence-raids` for Boss/Raid implementation or review. It contains the authority, cleanup, module-routing, and multiplayer verification checklists.
+- Use `.agents/skills/develop-convergence-raids` for Boss/Raid implementation or review. It contains authority, cleanup, module-routing, and multiplayer-verification checklists.
 - Use `.agents/skills/research-tmodloader-sources` when API behavior or another public Mod implementation must be investigated. Record exact versions, source paths, licenses, observations, and independent design decisions.
-- Keep always-on rules here and task-specific procedures in Skills. Repository Skills are development material and must remain excluded from the `.tmod` package.
+- Keep always-on rules here and task-specific repeatable procedures in Skills. Repository Skills are excluded from `.tmod` packaging.
 
 ## Non-negotiable boundaries
 
 - Gameplay state and outcomes are server/Single Player authoritative.
 - Clients send bounded requests and consume read-only snapshots/events.
 - `Common` never depends on `Content` or presentation-only `Client` code.
-- Encounter-specific behavior enters through definition-scoped policies and runtime factories; do not add feature switches to the global policy catalog, coordinator, or packet router.
+- Encounter-specific behavior enters through definition-scoped policies and runtime factories; do not add feature switches to global policy, coordinator, or packet-router code.
 - Calamity access stays in `Common/Compatibility/Calamity`.
-- Every transient world resource has one owning runtime and an idempotent cleanup path.
-- Active encounters are ephemeral and at most one may exist per World in the initial architecture.
+- Every transient world resource has one exact-Fight owning runtime and an idempotent cleanup path.
+- Active encounters are ephemeral and at most one may exist per World initially.
 - Dedicated Server paths must not initialize graphics or audio.
+- Explicit packet IDs are never renumbered; parse bounded DTOs completely before authority validation/mutation.
+
+## Documentation contract
+
+- `docs/STATUS.md` is the canonical implementation-state record. Other documents may include a short context summary only when they link back to `docs/STATUS.md`; conflicting or detailed status belongs there.
+- Feature spec owns player-visible behavior; feature plan owns work order; backlog cannot expand current scope.
+- Accepted ADRs own structural decisions and are superseded, not silently rewritten.
+- Indexed docs use the front-matter model in `docs/DOCUMENTATION_SYSTEM.md`.
+- After indexed-doc changes, run `python3 tools/docs_catalog.py --write` and commit the generated catalog.
+- Never commit personal absolute paths, credentials, raw logs, worlds/players, `.tmod` binaries, or local semantic-search databases.
 
 ## Verification
 
-- Always run `python3 tools/repository_checks.py` and `python3 tools/validate_yaml.py` (install `tools/requirements-ci.txt`).
+- Always run `python3 tools/docs_catalog.py --check`, `python3 tools/repository_checks.py`, and `python3 tools/validate_yaml.py` after documentation/repository changes.
 - For Raid-domain changes, run `dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj`; this does not replace a tModLoader build.
 - For C# changes, run both `dotnet build ConvergenceMod.csproj` and tModLoader Build + Reload in the pinned `ModSources/Convergence` environment.
 - Multiplayer changes require relevant Single Player, Host & Play, Dedicated Server, 2/3/4-player, latency, disconnect, and cleanup evidence.

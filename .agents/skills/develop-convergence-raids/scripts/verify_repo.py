@@ -33,6 +33,7 @@ def main() -> int:
     required = (
         root / "AGENTS.md",
         root / "ConvergenceMod.csproj",
+        root / "tools" / "docs_catalog.py",
         root / "tools" / "repository_checks.py",
         root / "tools" / "validate_yaml.py",
     )
@@ -47,12 +48,20 @@ def main() -> int:
         parser.error("--audit-only and --with-dotnet cannot be combined")
 
     commands = [
+        [sys.executable, "tools/docs_catalog.py", "--check"],
         [sys.executable, "tools/repository_checks.py"],
         [sys.executable, "tools/validate_yaml.py"],
     ]
     if not args.audit_only:
         commands.append(
-            [sys.executable, "-m", "py_compile", "tools/repository_checks.py", "tools/validate_yaml.py"]
+            [
+                sys.executable,
+                "-m",
+                "py_compile",
+                "tools/docs_catalog.py",
+                "tools/repository_checks.py",
+                "tools/validate_yaml.py",
+            ]
         )
     if args.with_dotnet:
         commands.append(["dotnet", "build", "ConvergenceMod.csproj"])

@@ -1,46 +1,66 @@
+---
+doc_id: project.coding-standards
+document_type: governance
+status: accepted
+owners:
+  - engineering
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - engineering.coding_standards
+aliases:
+  - coding standards
+related_code:
+  - Directory.Build.props
+  - Common
+  - Content
+related_docs:
+  - project.architecture
+  - project.network-architecture
+---
+
 # Coding Standards
 
 ## Correctness before density
 
-- Prefer small explicit state transitions over clever inheritance.
-- Make invalid protocol values and lifecycle transitions rejectable.
+- Prefer explicit bounded state transitions over clever inheritance.
+- Make invalid protocol values, lifecycle transitions, and stale identities rejectable.
 - Keep gameplay state server-owned and presentation state disposable.
-- Use stable value objects for Fight and participant identity.
-- Do not store localized strings in authoritative state or wire messages.
+- Use stable value objects for Fight/participant identity and connection epoch.
+- Do not store localized/display strings in authority state or wire messages.
 
-## Dependency rules
+## Dependency and ownership
 
-- `Common` cannot import `Content` or `Client`.
-- `Content` cannot import `Client`.
+- `Common` cannot import `Content` or `Client`; `Content` cannot import `Client`.
 - Only the Calamity compatibility layer accesses Calamity APIs.
-- Individual actors do not call the packet transport directly.
-- World mutation is performed through an authoritative runtime service, not from UI or VFX.
+- Individual actors do not call packet transport directly.
+- World mutation is performed through the authoritative feature runtime/ports.
+- Every spawned actor/resource is registered immediately to one exact Fight and has idempotent cleanup.
 
 ## tModLoader boundaries
 
-- Every hook is reviewed for the sides on which tModLoader calls it.
-- `RightClick` sends a request; it does not start an Encounter locally.
-- `ModTileEntity` anchors content but does not own the whole Encounter.
-- Static registries and event handlers are cleared in `Unload`.
-- Dedicated Server code must not initialize graphics or audio assets.
+- Review every hook for Single Player, multiplayer client, and Dedicated Server sides.
+- `RightClick` or item use sends intent; it never starts/finishes gameplay locally.
+- `ModTileEntity` anchors content but does not own the encounter.
+- Clear static registries/event handlers in `Unload`; defensively reset player projections.
+- Dedicated Server code never initializes graphics/audio.
 
 ## Network code
 
-- Assign explicit numeric packet IDs and never reuse retired values.
-- Validate protocol, direction, length, enums, counts, coordinates, sender, distance, lifecycle, and rate limit.
-- Use `whoAmI` as the sender; do not trust a player index in payload.
-- Synchronize transitions and results, not decorative particles or every timer tick.
-- Unknown/stale/malformed packets are logged at a bounded rate and ignored safely.
+- Give packet IDs explicit numeric values and never reuse/renumber retired values.
+- Bound sizes and parse complete DTOs before validating/mutating authority.
+- Derive sender from `whoAmI`; never trust a payload player index.
+- Validate protocol, direction, encounter identity, binding/epoch, lifecycle, nonce, range/state, and rate.
+- Synchronize coarse transitions/results/deadlines, not particles or every tick/hit.
+- Unknown/stale/malformed packets are bounded-log rejections, not server crashes.
 
 ## Naming
 
-- Public API is avoided before its compatibility contract is deliberate.
-- Boolean names begin with `Is`, `Has`, `Can`, or `Should`.
-- Stable keys use lowercase ASCII with underscores, such as `third_severance`.
-- Failure codes are namespaced, such as `arena.protected_tile`.
-- `Manager`, `Helper`, `Utils`, and `Data` require a more specific responsibility name.
+- Target first feature identifiers are `FirstSeverance` and `first_severance`; current `ThirdSeverance` forms are legacy until the atomic rename.
+- Stable keys use lowercase ASCII underscores, e.g. `first_severance`.
+- Failure codes are namespaced, e.g. `first_severance.revive_not_initialized`.
+- Boolean names start with `Is`, `Has`, `Can`, or `Should`.
+- Public API is avoided until its compatibility contract is deliberate.
 
 ## Comments and documentation
 
-Comments explain authority, invariants, lifecycle, unusual API constraints, or why an apparently simpler solution is unsafe. They do not narrate obvious syntax. Accepted structural decisions live in ADRs.
-
+Comments explain authority, invariant, lifecycle, cleanup, or unusual API constraints—not obvious syntax. `STATUS.md` owns implementation truth, feature specs own player behavior, plans own sequence, and ADRs own structural decisions.

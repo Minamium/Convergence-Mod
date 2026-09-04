@@ -1,3 +1,25 @@
+---
+doc_id: policy.release-process
+document_type: policy
+status: accepted
+owners:
+  - project
+  - quality
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - policy.release_process
+aliases:
+  - release process
+  - release gate
+related_code:
+  - build.txt
+  - .github/workflows/repository-checks.yml
+related_docs:
+  - policy.ip-provenance
+  - verification.test-plan
+  - project.status
+---
+
 # Release Process
 
 There is no release artifact yet. This policy prevents a green repository check from being mistaken for a playable build.

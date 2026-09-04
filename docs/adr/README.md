@@ -1,6 +1,24 @@
+---
+doc_id: decisions.adr-index
+document_type: index
+status: accepted
+owners:
+  - engineering
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - architecture.adr_index
+aliases:
+  - ADR index
+  - architecture decisions
+related_code: []
+related_docs:
+  - project.decisions
+  - project.status
+---
+
 # Architecture Decision Records
 
-ADRs record decisions that are expensive to reverse: authority, dependency direction, protocol compatibility, persistence, external dependencies, release safety, and asset rights.
+ADRs record decisions that are expensive to reverse: authority, dependency direction, protocol compatibility, persistence, external dependencies, release safety, asset rights, and accepted scope boundaries that invalidate an existing implementation plan.
 
 | ADR | Status | Decision |
 |---|---|---|
@@ -10,5 +28,6 @@ ADRs record decisions that are expensive to reverse: authority, dependency direc
 | [0004](0004-calamity-compatibility-boundary.md) | Accepted | Isolated Calamity compatibility adapter |
 | [0005](0005-server-authoritative-downed-revive.md) | Accepted; adapter gated | Server-authoritative Raid Downed/Revive domain |
 | [0006](0006-staged-calamity-independence.md) | Accepted | Staged path from Calamity addon to Standalone Mod |
+| [0007](0007-first-severance-vertical-slice.md) | Accepted | First Severance name, simple repeated loop/visual, and Revive in the first playable slice |
 
-Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark the old record superseded.
+Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark the old record superseded. Current implementation status remains in [`../STATUS.md`](../STATUS.md), not in this index.

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "YYYY-MM-DDTHH:MM:SSZ",
+  "git": {
+    "commit": "40-character commit SHA",
+    "branch": "main",
+    "workingTreeClean": true
+  },
+  "host": {
+    "os": "Windows 11",
+    "architecture": "x64",
+    "notes": "No username or absolute personal path"
+  },
+  "toolchain": {
+    "dotnetSdk": "8.0.424",
+    "ide": "VS Code or Rider",
+    "python": "version"
+  },
+  "runtime": {
+    "terraria": "1.4.4.9",
+    "tModLoader": "v2026.06.3.6",
+    "tModLoaderBranch": "stable",
+    "calamity": "2.2.2",
+    "calamityMusic": "observed version",
+    "calamityTmodSha256": "64 lowercase hexadecimal characters",
+    "convergence": "0.1.0"
+  },
+  "checks": {
+    "docsCatalog": "not_run",
+    "repositoryPolicy": "not_run",
+    "yaml": "not_run",
+    "domainHarness": "not_run",
+    "dotnetBuild": "not_run",
+    "buildAndReload": "not_run",
+    "singlePlayerLoad": "not_run",
+    "hostAndPlay": "not_run",
+    "dedicatedServerLoad": "not_run",
+    "twoClientJoin": "not_run"
+  },
+  "multiplayer": {
+    "participantCount": 0,
+    "latencyMs": 0,
+    "packetLossPercent": 0,
+    "result": "not_run"
+  },
+  "failure": {
+    "issue": null,
+    "firstError": null
+  }
+}

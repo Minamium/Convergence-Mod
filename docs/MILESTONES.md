@@ -1,153 +1,155 @@
+---
+doc_id: project.milestones
+document_type: plan
+status: accepted
+owners:
+  - project
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - project.roadmap
+aliases:
+  - milestones
+  - roadmap
+related_code:
+  - Common
+  - Content
+  - Tests
+related_docs:
+  - project.status
+  - encounter.first-severance.plan
+---
+
 # Milestones
 
-## Milestone 0 — Repository and Compatibility
+The implementation sequence within the first Raid is defined in the [First Severance plan](encounters/first-severance/IMPLEMENTATION_PLAN.md). This file describes project-level gates. A checked bootstrap item is not proof that the corresponding playable integration exists; [Status](STATUS.md) owns that distinction.
 
-- [x] Empty repository identified
-- [x] Project documentation drafted
-- [x] Initial tModLoader/Calamity version research
-- [x] Provisional internal Mod name and namespace decision (`Convergence` / `Convergence`)
-- [ ] Addon license decision
-- [x] Minimal Mod skeleton
-- [x] `build.txt` with Calamity dependency
-- [x] Modular source boundaries and first feature registration
-- [x] Global versus definition-scoped activation policy and feature runtime factory boundaries
-- [x] Runtime transition/end update port and partial-construction cleanup registrar
-- [x] Exception-safe cleanup retry, terminal snapshot outbox, Encounter Sequence, and replica tombstone skeleton
-- [x] Versioned packet envelope parser and direction guard
-- [x] Repository policy checks and GitHub workflow
-- [x] Contribution, security, release, and provenance policy
-- [ ] Client build/load
-- [ ] Dedicated Server build/load
-- [ ] Version freeze promoted from Candidate to Confirmed
+## Milestone 0 — Repository and compatibility bootstrap
 
-Exit: clean build and load on the pinned client/server environment.
+- [x] Repository policy, contribution/security/release/provenance documents.
+- [x] Minimal tModLoader source skeleton and Calamity Stage A reference.
+- [x] Modular source boundaries, feature registration, and compatibility adapter boundary.
+- [x] Generic authority lifecycle, runtime/factory/update boundary, exact-Fight cleanup/retry.
+- [x] Encounter Sequence, bounded terminal-priority snapshots, replica/tombstone bootstrap.
+- [x] Versioned packet envelope parser and direction guard.
+- [x] Pure Downed/Revive domain and dependency-free harness.
+- [x] Inert legacy arena/Boss plan and activation fail-closed policy.
+- [x] Documentation index/catalog, First Severance decision/specs, Windows handoff/runbook.
+- [ ] Source/asset license decision.
+- [ ] Windows command build and Build + Reload.
+- [ ] Dedicated Server/two-client baseline.
+- [ ] Candidate versions promoted to Confirmed.
 
-## Milestone 1 — Arena Infrastructure
+Exit: clean pinned client/server baseline with sanitized evidence.
 
-Foundation completed early: an immutable, non-world-mutating 320x140 blueprint now derives the floor-center Core anchor, four deterministic Pylon slots, a 2-tile logical Barrier, and outsider-response policy. It does not satisfy this milestone's runtime exit criteria.
+## Milestone 1 — First Severance identity and arena preparation
 
-- typed activation/ready/cancel/snapshot packet handlers
-- server-resolved Core/anchor and request nonce/replay/rate validation
-- Third Severance progression policy and removal of the temporary availability deny
-- Polar Foundation Core item/tile/entity
-- pure Arena Validator
-- 320x140 default bounds
-- structured validation issues
-- server-owned lifecycle and Fight ID
-- 2～4 participant selection
-- Join/Ready/cancel/timeout
-- client visual Barrier
-- server position correction
-- idempotent Cleanup
-- debug status and invariant commands
+- atomic legacy `ThirdSeverance` → `FirstSeverance` source/key/failure-prefix rename while inert;
+- Foundation Core Item/Tile/Tile Entity;
+- server-resolved Core/anchor and side/range/nonce/rate validation;
+- Calamity progression adapter for Exo Mechs and Supreme Calamitas;
+- pure 320x140 Arena validation and structured issues;
+- frozen 2–4 participant roster, Join/Ready/cancel/timeout;
+- logical Barrier presentation plus server correction/outsider policy;
+- repeated cancel/Foundation-Core-break/unexpected-TE-loss/disconnect/unload cleanup diagnostics.
 
-Exit: repeated start/cancel/destroy/disconnect cycles leave no stale state in 2～4 player Dedicated Server tests.
+Exit: preparation cycles are deterministic and leave no stale state on Dedicated Server; combat activation remains gated if actor/replication work is incomplete.
 
-## Milestone 2 — Multiplayer State Foundation
+## Milestone 2 — Multiplayer feature state
 
-- packet delta schemas and dispatch registration
-- snapshot/delta/revision
-- phase and timer synchronization
-- assignment and seed synchronization
-- join/rejoin/disconnect policy
-- network logging and fault injection
+- typed activation/Ready/cancel/snapshot handlers;
+- full bounded snapshot and revisioned state/delta dispatch;
+- stable participant binding/connection epoch and rejoin policy;
+- feature clock, substate, assignment, actor-handle, and outcome replication;
+- stale/reordered/duplicate recovery and rate-limited diagnostics;
+- packet fault/latency injection.
 
-Exit: clients recover from stale/reordered state without changing authoritative results.
+Exit: clients recover from stale/reordered state without deciding or changing authority outcomes.
 
-## Milestone 3 — Basic Encounter Vertical Slice
+## Milestone 3 — Basic repeated encounter loop
 
-Foundation completed early: an inert typed plan now describes multipart forms, Pylon/part/DPS objectives, Stack, Spread, Targeted Line, Personal Effigy, Weak Point, loop/enrage, and Last Stand. No executor, actor, damage collector, or synchronized cue is live.
+- replace obsolete multipart immutable plan/tests;
+- one simple Boss NPC and the provisional 2/3/4-Pylon prototype layout;
+- authoritative damage gate and persistent Boss life;
+- Spawn → Pylon → Stack → Spread → Core exposure → Reset loop;
+- early Pylon success and the provisional failed-Pylon Overload/pulse/short-exposure/third-Overload-Defeat policy;
+- server position resolution and client-only telegraphs;
+- exact-Fight actor registration and cleanup.
 
-- Boss Dummy
-- Stack
-- Spread
-- Targeted Line
-- one Weak Point window
-- one DPS check
-- Soft Failure and Overload
+Exit: 2–4 players can reach Victory or Defeat through the intended loop with identical state on server/clients. This is not yet first-playable acceptance without recovery.
 
-Exit: 2～4 players can clear or fail a short deterministic encounter.
+## Milestone 4 — Downed and Revive integration
 
-## Milestone 4 — Downed and Revive
+Foundation already implemented: pure authority state, stable binding/epoch, channel lease/nonce, 1/2/3 shared tokens, same-tick wipe commit, reconnect grace, projections, snapshots, cleanup, and domain tests.
 
-Foundation completed early: the pure server/SP domain, stable participant binding, channel lease nonce, token accounting, same-tick commit, reconnect grace, wipe reasons, projections, snapshot, cleanup, and standalone deterministic harness are implemented behind a disconnected feature boundary. The tModLoader/Calamity adapters and all real multiplayer evidence remain blocking work.
+Remaining:
 
-- standard death interception
-- Downed state and timer
-- Revive channel
-- shared token
-- weakness/invulnerability
-- wipe detection
-- UI and compatibility tests
+- pinned tModLoader/Calamity lethal-hook instrumentation in Single Player, Host & Play, Dedicated Server;
+- accepted coexistence/body-normalization policy;
+- authority-only death interception and ModPlayer control/targeting projection;
+- non-consumable revival item and held-use/range/movement adapter;
+- typed start/cancel transport and nested feature snapshot;
+- server life restore, immunity, weakness, and defensive resets;
+- host/non-host, simultaneous death, damage/movement cancel, disconnect/rejoin/slot reuse matrix.
 
-Exit: simultaneous deaths, host death, disconnect, revive damage all resolve consistently.
+Exit: every tested lethal/revive/cleanup path resolves once without duplicated resources, ordinary-death conflicts, or permanent player state.
 
-## Milestone 5 — Parts and Personal Effigies
+## Milestone 5 — First playable Raid acceptance
 
-- Crown/Wings/Heart Casing
-- route-dependent later mechanics
-- primary Damage Class detection
-- one Clone per participant
-- owner damage rule
-- post-clear support actions
-- Clone failure absorption
+- integrated Core/Arena/Barrier/Ready/loop/Downed/Revive;
+- candidate timings/HP/damage tuned from representative Calamity loadouts;
+- Single Player diagnostics, Host & Play, Dedicated Server 2/3/4 players;
+- latency/loss/reorder, join/rejoin/disconnect, host/non-host, cleanup fault matrix;
+- placeholder visuals with accessible Pylon/Stack/Spread/Core cues;
+- no release-critical warnings or stale state.
 
-Exit: part choice changes the later test, and every class can complete its Clone.
+Exit: First Severance satisfies its Definition of Done. Only here may it be called playable.
 
-## Milestone 6 — Full Encounter
+## Milestone 6 — Encounter expansion decisions
 
-- all core phases
-- player-count variants
-- loop and Hard Enrage
-- optional Split Reality decision
-- Last Stand
-- difficulty tuning
+Re-evaluate deferred mechanics only from playtest needs:
 
-Exit: full 8～12 minute fight is clearable and failure causes are readable.
+- Part Break/route choice;
+- Targeted Line/Bait;
+- Personal Effigies;
+- Split Reality;
+- Last Stand;
+- more complex Boss forms/attacks.
+
+Each promoted item needs its own spec, authority/replication/cleanup model, and test evidence. It is valid to reject all of them.
 
 ## Milestone 7 — Presentation
 
-- production sprites
-- primitive trails and shaders
-- warning typography
-- custom SFX
-- phase score and transitions
-- screen effects and accessibility options
-- localization
+- production sprites and animations;
+- primitive trails/shaders and reduced-VFX mode;
+- warning typography, localization, accessibility;
+- custom SFX, score, transitions, and rights records.
 
-Exit: presentation never obscures gameplay state and all asset rights are documented.
+Exit: presentation never obscures gameplay state and every asset has provenance.
 
-## Milestone 8 — Rewards and Release QA
+## Milestone 8 — Rewards and addon release QA
 
-- class weapons, whip, accessories, utility
-- recipes and progression gating
-- lore, trophy, relic, vanity
-- multiplayer soak test
-- Dedicated Server soak test
-- compatibility matrix
-- packaging, attribution, release notes
+- class-neutral viable reward set and progression recipes;
+- lore/trophy/relic/vanity as approved;
+- multiplayer and Dedicated Server soak;
+- Windows x64 release matrix plus a pinned macOS client/build smoke and one mixed supported-platform topology when hardware is available;
+- compatibility/release matrix, packaging, attribution, notes.
 
-Exit: release candidate builds reproducibly and passes the mandatory matrix.
+Exit: the Calamity-addon release candidate builds reproducibly and passes the mandatory matrix.
 
-## Milestone 9 — Standalone Preparation
+## Milestone 9 — Standalone preparation and migration
 
-Initial Calamity dependency removal begins only after the addon release path is stable.
+- inventory all Calamity progression/class/item/recipe/balance coupling;
+- introduce project-owned ports and dependency-free consumers;
+- design original progression/materials/equipment/World content;
+- decide optional Calamity coexistence and packaging;
+- remove the hard dependency only after a separate Standalone build/load/multiplayer/release gate.
 
-- inventory every Calamity progression, class, item, recipe, balance, and compatibility dependency
-- define project-owned progression, class-category, and balance-tier ports
-- replace Calamity-specific Boss gates, materials, recipes, and reward assumptions
-- produce a Standalone content and migration roadmap
-- decide whether Calamity coexistence remains an optional adapter or moves to a separate compatibility package
-
-Exit: Encounter, Networking, Arena, and Raid-domain code have no Calamity type dependency; the work required to remove the hard `build.txt` reference is enumerated; and an original progression path is defined.
-
-This milestone does not mark the Mod Standalone. Removing the hard dependency requires its own implementation, build matrix, multiplayer regression pass, packaging review, and release decision.
+Exit: the portable core is independent and the remaining original-content migration is fully enumerated. This milestone alone does not declare the Mod standalone.
 
 ## Commit discipline
 
-- one concern per commit where practical
-- docs/decision changes before or with implementation
-- compile after each code commit
-- no mass asset import without attribution manifest
-- compatibility updates separate from encounter tuning
-- generated files and local build output are ignored
+- one concern per commit where practical;
+- version/compatibility changes separate from encounter behavior;
+- rename separate from plan simplification, and both separate from first live activation;
+- documentation/ADR and tests accompany their owning change;
+- generated/local assets, binaries, logs, and credentials never enter commits.

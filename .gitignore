@@ -25,6 +25,12 @@ Logs/
 *.pyc
 *.pyo
 
+# Local documentation/search databases are disposable generated caches.
+docs/.cache/
+*.sqlite
+*.sqlite3
+*.db
+
 # Credentials and private signing material
 .env
 .env.*

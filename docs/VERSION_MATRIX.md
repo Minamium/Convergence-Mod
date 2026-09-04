@@ -1,3 +1,26 @@
+---
+doc_id: compatibility.version-matrix
+document_type: policy
+status: accepted
+owners:
+  - engineering
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - compatibility.version_matrix
+aliases:
+  - version matrix
+  - dependency pin
+related_code:
+  - build.txt
+  - global.json
+  - ConvergenceMod.csproj
+  - Common/Compatibility/Calamity
+related_docs:
+  - development.windows
+  - policy.release-process
+  - project.status
+---
+
 # Version Matrix
 
 調査基準日: **2026-08-23**

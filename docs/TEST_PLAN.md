@@ -1,243 +1,330 @@
+---
+doc_id: verification.test-plan
+document_type: plan
+status: accepted
+owners:
+  - quality
+  - networking
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - verification.test_matrix
+aliases:
+  - test plan
+  - multiplayer matrix
+related_code:
+  - Tests/Convergence.DomainTests
+  - tools/repository_checks.py
+  - Common/Raids/Revive
+related_docs:
+  - verification.evidence
+  - encounter.first-severance.spec
+  - project.status
+---
+
 # Test Plan
 
-## Quality gates
+## Gate order
 
-各milestoneは次の順で通す。
+Run the applicable gates in this order:
 
-1. compile
-2. client load
-3. Single Player smoke
-4. Dedicated Server load
-5. 2-player smoke
-6. feature-specific matrix
-7. Cleanup invariant check
+1. documentation catalog/YAML and repository policy;
+2. dependency-free domain harness;
+3. command-line tModLoader build;
+4. tModLoader Build + Reload;
+5. Single Player load/smoke;
+6. Host & Play;
+7. Dedicated Server load and two-client smoke;
+8. feature-specific 2/3/4-player, fault, latency, and cleanup matrix.
 
-compile error、unknown packet exception、server crash、stale Raid stateを残したまま次のmilestoneへ進まない。
+Do not progress with compile errors, unknown-packet exceptions, server crashes, stale Raid state, or unrecorded version drift. Store results using [Verification Evidence](evidence/README.md).
 
-## Version evidence
+## Documentation/repository checks
 
-各test runでlogから次を記録する。
+```bash
+python3 tools/docs_catalog.py --check
+python3 tools/repository_checks.py
+python3 tools/validate_yaml.py
+```
 
-- OS
-- Terraria version
-- tModLoader full version and branch
-- Calamity version
-- Addon commit SHA and version
-- enabled Mod list
-- client count
-- network condition
+Required outcomes:
 
-## Milestone 0 tests
+- no duplicate `doc_id` or `source_of_truth_for` topic;
+- no stale generated catalog, unknown status/type, missing relation/path, or malformed front matter;
+- no broken relative Markdown links, case collisions, secrets/binaries/logs, invalid JSON/XML/YAML, dependency-direction regression, or missing packaging masks.
 
-- minimal Modがbuildされる。
-- Calamity `2.2.2`へのhard referenceが解決する。
-- clientがModをreloadできる。
-- Dedicated Serverがheadlessでloadできる。
-- clientとserverでMod version mismatchが拒否される。
-- 非対応Calamity versionでEncounter activation policyが拒否する。
-- Third Severance availability policyが未実装Raidの起動を拒否する。
+## Version and environment evidence
 
-## Arena validator tests
+Every runtime run records:
 
-Milestone 1でExo Mechs/Supreme Calamitas進行adapterを実装し、未達・API failure・予期しないreturn typeを安全に拒否する。
+- exact Git commit/cleanliness;
+- OS and architecture;
+- Terraria, full tModLoader version/branch, Calamity, Calamity Music, Addon version;
+- .NET SDK and enabled Mod list;
+- Calamity `.tmod` SHA-256 without redistributing it;
+- client count and network conditions;
+- an explicit result for each distinct gate.
+
+Candidate versions become Confirmed only after command build, Build + Reload, Single Player, Dedicated Server, and two-client connection pass together.
+
+Windows x64 is the primary implementation and first acceptance environment. macOS remains a valid tModLoader target rather than a forbidden platform: after the Windows baseline is stable and before a public release, run a pinned macOS Build + Reload/client-join smoke when hardware is available, then add at least one mixed supported-platform client/server topology. A Mac result never replaces the Windows Dedicated Server matrix, and an unaudited Mac setup remains `not_run`.
+
+## Current bootstrap tests
+
+- minimal Mod compiles against the candidate dependency set;
+- client reload and Dedicated Server load are clean;
+- unsupported Calamity version rejects encounter activation without crashing the Mod;
+- the legacy/current availability policy rejects unimplemented activation;
+- unload/reload leaves no coordinator/replica state;
+- packet envelope rejects wrong protocol, direction, unknown type, and truncated Fight ID;
+- no packet currently mutates gameplay until typed handlers are added.
+
+## Rename slice tests
+
+After `ThirdSeverance` → `FirstSeverance`:
+
+- no current production/test/project reference retains the legacy namespace/key/failure prefix except deliberately historical docs/changelog;
+- `FirstSeverance` definition registers exactly once with `first_severance`;
+- all linked source files remain included/excluded correctly in Mod and domain projects;
+- numeric packet IDs are identical before/after rename;
+- activation remains rejected and world adapter remains inert;
+- repository, domain, build, reload, and server baselines still pass.
+
+## Immutable loop/domain tests
+
+Replace legacy multipart/Last Stand assertions with:
 
 | Case | Expected |
 |---|---|
-| valid 320x140 space | `Preparing/AwaitingReady`へ遷移 |
-| world edge overlap | issue code付きで拒否 |
-| invalid/missing Core TE | 拒否、state unchanged |
-| second Core activation | single-managed-Encounter error |
-| chest in bounds | 拒否 |
-| protected structure tile | 拒否 |
-| broken foundation | 拒否 |
-| active boss/event | 拒否 |
-| requester too far away | 拒否 |
-| 1 eligible player | 参加人数error |
-| 5+ candidates | 明示選択要求、自動startしない |
+| default 2/3/4-player plan | reachable bounded Spawn/Pylon/Stack/Spread/Exposure/Reset graph |
+| invalid timing/count/threshold | construction/validation rejection |
+| Pylons all destroyed early | advance once to Stack |
+| Pylon deadline with survivors | one failure pulse, one Overload, penalized exposure flag |
+| third Overload | one Defeat, no next mechanic |
+| Stack roster 2/3/4 | provisional required share count is exactly 2/2/3 |
+| Stack pool arithmetic | fixed integer pool is distributed once across valid occupants in stable order; exact total is conserved |
+| first Stack target invalidation | one new assignment revision, circular-forward frozen-roster replacement, and a fresh 180-tick telegraph |
+| no replacement or second Stack target invalidation | one `TargetUnavailable` soft failure and then Spread; no further reissue |
+| Spread overlapping pairs | each failed participant applied once |
+| participant Downed before resolve | excluded from assignment/occupant/divisor; frozen required share threshold does not shrink |
+| clean/penalized exposure deadline | gate closes and one Reset/next loop if HP remains |
+| HP zero on exposure deadline tick | Victory takes precedence over closing/reloop |
+| HP input outside exposure | no Boss life change |
+| eight-exposure loop cap with HP remaining | one `Defeat(LoopCapExceeded)`; no hard-enrage/Last Stand edge |
+| every feature terminal cause | exact generic/cause mapping, append-only byte value, and declared total priority |
+| feature-owned first-slice terminal update | one direct End descriptor with generic reason + cause; no same-update transition and no mandatory `Resolving` tick |
+| external terminal mapping | definition construction requires exact WorldUnload/InternalFailure/ProtocolFailure generic/cause mappings |
+| terminal state receives later command/tick | no mutation |
 
-Validatorは失敗時にTile、liquid、wire、entityを変更してはならない。
+## Arena/Core/preparation tests
 
-## Ready and lifecycle tests
+The validator never mutates the World on failure.
 
-以下のReadyはgeneric lifecycleではなく、Raidの`Preparing` substateを指す。
+| Case | Expected |
+|---|---|
+| valid 320x140 prospective area/Core TE | Preparing/AwaitingReady |
+| world edge or safety-margin overlap | structured rejection |
+| missing/mismatched Core TE or foundation | rejection; state unchanged |
+| second managed encounter/Core activation | explicit exclusivity rejection |
+| chest/important TE/protected tile/conflicting event | structured rejection |
+| requester too far or stale nonce | rejection |
+| 1 eligible player | roster-size rejection |
+| 5+ candidates | explicit selection required; no automatic start |
+| 2/3/4 participants Ready | one frozen roster/countdown/start |
+| unready/timeout/cancel/Foundation Core break/disconnect | declared cleanup route |
+| Active player break/explosion/wiring/liquid attempt on Foundation Core | rejected; Fight remains Active |
+| injected unexpected Foundation Core Tile/TE loss during Active | one Invalidated/Abort and exact-Fight cleanup |
+| explicit admin/debug abort | ordinary Abort cleanup; no special resource path |
+| old Encounter Sequence/Fight packet | ignored/rejected |
 
-- 2人、3人、4人で全員Ready。
-- 一人がReadyを解除。
-- Ready timeout。
-- 起動者cancel。
-- Ready中にCore破壊。
-- Ready中に起動者disconnect。
-- Ready中にparticipantが2人未満になる。
-- lifecycle transitionとRevisionが全clientで一致。
-- 古いEncounter Sequence/Fight IDのpacketが無視される。
+Barrier cases: all edges, dash, hook, mount, knockback, recall/pylon/bed/Calamity teleport, server correction, outsiders, connection-epoch/slot reuse, and 100/200/300 ms RTT with loss. It must correct rather than kill and must not permanently rubber-band a valid participant.
 
-## Barrier tests
+## Normal-hit pipeline instrumentation gate
 
-- 左右上下の各edgeへ通常移動。
-- dash、hook、mount、knockback。
-- recall、pylon、bed、Calamity teleport item。
-- serverによる強制teleport。
-- 100/200/300 ms RTTとpacket loss。
-- client predictionとserver correctionで永久rubber-bandしない。
-- non-participantへの影響が仕様どおり。
+Before enabling Boss/Pylon damage, record Single Player, Host & Play (host and non-host attacker), and Dedicated Server behavior for representative melee, ranged, magic, summon/minion, rogue, projectile, penetration/multihit, crit, and Calamity-modified hits. For each row capture which process/hook observes permission, damage modification, actor life change, death/check-dead, ownership metadata, and `netUpdate`.
 
-## Mandatory multiplayer matrix
+Acceptance requires that the chosen server/SP-observed seam consistently rejects wrong-Fight actors, nonparticipants, Pylon hits outside `PylonCheck`, and Boss hits outside `CoreExposure`, and counts a permitted actor life/death result once. No `ReportDamage` packet is introduced. Ambiguous behavior keeps activation denied. This matrix covers cooperative play with unmodified clients; it does not claim protection against arbitrary modified-client movement or hit replication.
 
-- hostが対象。
-- non-hostが対象。
-- hostがDowned（後続milestone）。
-- non-hostがDowned。
-- 同時に2人Downed。
-- Revive channel中に被弾。
-- phase transition tickで死亡。
-- 途中離脱。
-- 途中参加。
-- boss kill直前のdisconnect。
-- boss despawn条件。
-- Arena外へのexternal teleport。
-- Projectile上限付近。
-- 他大型Content Mod併用。
-- server再起動後に一時stateが残らない。
+## First Severance mechanic matrix
 
-## Downed and Revive domain tests
+Run every relevant row for 2, 3, and 4 frozen pull participants on Host & Play and Dedicated Server. Repeat role-sensitive rows with host and non-host as target.
 
-Run the pure service tests before attaching Terraria hooks, then repeat the same
-cases in Single Player, Host & Play, and Dedicated Server. Initial timings are
-120 ticks to channel, 1,800 ticks before Downed timeout, and 1,800 ticks of
-disconnect grace.
+### Pylons
 
-The dependency-free console harness at
-[`Tests/Convergence.DomainTests`](../Tests/Convergence.DomainTests/) links the
-production revive sources, tModLoader-free feature boundary, Arena blueprint,
-outsider policy, and immutable Boss/phase plan directly. It therefore exercises
-the same internal types without requiring Terraria or tModLoader:
+- correct 2/3/4 spawn count and symmetric server positions;
+- any connected Alive participant can damage any Pylon through the measured normal-hit pipeline; nonparticipants and custom damage reports cannot advance it;
+- simultaneous final hits produce one completion;
+- deadline removes leftovers once and does not double-count Overload/pulse;
+- count/health do not rescale after Downed/disconnect;
+- Pylon entity missing/incorrect owner causes bounded abort/cleanup, not orphaned progress;
+- third Overload defeats and publishes terminal state before actor removal.
+
+### Stack
+
+- zero-based loop-index/frozen-roster round-robin target, assignment revision, reissue-used flag, and resolve tick are identical on every client;
+- frozen roster 2/3/4 requires 2/2/3 valid occupants respectively; Downed, Eliminated, and disconnected players never enter the count/divisor;
+- the fixed raw damage pool is split by stable participant order using integer quotient/remainder, conserves the exact pool, and then uses normal mitigation per assigned share;
+- exactly required, more than required, one-under, and target-only layouts resolve once; under-soak increases shares naturally, records soft failure, and adds no Overload or separate wipe command;
+- target Downed/disconnect at assignment, before deadline, and exactly on deadline triggers one deterministic replacement with a new revision and full 180 ticks;
+- no candidate or reissued target invalidation commits one `TargetUnavailable` soft failure/debuff, advances after terminal selection, and never reissues twice;
+- latency/interpolation does not change the authority process's sampled position/result under the documented cooperative-client trust model.
+
+### Spread
+
+- all connected Alive receive unique participant assignments;
+- no overlaps succeeds;
+- one pair, chain, and all-overlap layouts fail each affected participant once;
+- Downed/disconnected participant is removed before resolution;
+- 7-tile marker/16-tile center-separation defaults are measured for arena feasibility;
+- client-only marker drift does not affect authority.
+
+### Core exposure
+
+- shielded Boss rejects damage in intro/Pylon/Stack/Spread/Reset;
+- clean Pylons grant 720 ticks and failed Pylons 360 ticks initially;
+- HP persists over loops and no “missed damage budget” Overload occurs;
+- Boss HP zero commits Victory once, including the exact closing tick;
+- hits arriving after closure are rejected normally;
+- expected representative party clears in roughly 4–6 clean exposures and about 2–4 minutes after tuning; 5–12 minutes is the eventual expanded-Raid target;
+- missing Boss/damage-gate invariant routes through safe abort/cleanup.
+
+## Cross-domain tick and terminal collisions
+
+Run these through the owning feature reducer rather than calling a mechanic or Revive boundary as an independent coordinator owner:
+
+| Same authority tick | Required result |
+|---|---|
+| permitted Boss hit reaches zero + exposure deadline | one Victory; no Reset/reloop |
+| permitted Boss hit reaches zero + all participants become Downed | one Victory; no Defeat `EncounterEnded` |
+| permitted Boss hit reaches zero + Downed/disconnect timeout | one Victory; Revive reason may remain diagnostic only |
+| permitted Boss hit reaches zero + explicit admin/debug abort | one `Invalidated(AdministrativeAbort)`; no Victory |
+| permitted Boss hit reaches zero + unexpected Foundation Core loss | one `AnchorDestroyed(FoundationCoreLost)`; no Victory |
+| permitted Boss hit reaches zero + required Boss actor missing | one `EncounterActorMissing(BossActorMissing)`; no Victory |
+| permitted Boss hit reaches zero + runtime invariant break | one `Invalidated(RuntimeInvariantBroken)`; no Victory |
+| Stack/Spread lethal makes all available participants Downed + mechanic edge due | one Defeat; no next substate |
+| third Overload + Pylon-to-Stack edge due | one Defeat; no Stack assignment |
+| loop cap + Reset/Pylon edge due | one `Defeat(LoopCapExceeded)`; no enrage/Pylon |
+| revive completion due + reviver becomes Downed before commit | channel invalidation wins, then the single commit decides failure |
+| revive completion due + target deadline equality | existing domain deadline rule wins; no completion |
+| valid preparation cancel + later nonterminal edge | one `Cancelled(UserCancelled)`; no activation |
+| active-fight cancel request + Boss zero | cancel is rejected; ordinary terminal selection yields Victory |
+| ordinary nonterminal mechanic result + no terminal candidate | exactly one declared next substate |
+
+The feature-reducer suite must exercise every adjacent pair in its declared priority, not only the examples above. Every feature-owned terminal returns one direct End descriptor; it never requests `Resolving` and End in the same update. The terminal snapshot is published before actor/player cleanup and a delayed live revision cannot replace its tombstone.
+
+## External coordinator termination tests
+
+These bypass the feature reducer and exercise the planned immutable termination mapping and coordinator boundary:
+
+| Coordinator event | Required result |
+|---|---|
+| `Reset(WorldUnload)` with an active Fight | one `WorldUnload + WorldUnload`; terminal projection before cleanup |
+| runtime `Tick` throws after mutating no committed projection | discard any uncommitted gameplay result; one `InternalFailure + InternalFailure` |
+| fatal protocol decision before a pending feature update is committed | one `ProtocolFailure + ProtocolFailure`; no gameplay terminal event |
+| two external shutdown requests are injected at the same controlled boundary | `WorldUnload > InternalFailure > ProtocolFailure`; one terminal only |
+| missing, duplicate, `None`, or incompatible external mapping | definition/plan construction rejection while activation remains denied |
+| external terminal followed by delayed live revision | retained terminal tombstone wins; stale live state is rejected |
+| runtime construction throws before session acceptance | bounded activation failure and cleanup; no fabricated live feature tombstone |
+
+The coordinator must obtain external feature-cause metadata from immutable definition data and must not call a failed runtime `Tick` again. External endings do not return `EncounterRuntimeUpdate` and do not pass through `Resolving`.
+
+For every `FirstSeveranceTerminalCause` value, round-trip the exact generic reason plus byte-valued feature cause through the full snapshot, terminal event/delta, and retained tombstone. In particular, a reconnect after loop-cap defeat must still render `Defeat + LoopCapExceeded`, not an undifferentiated Defeat. `None` is valid only while live; unknown/out-of-range values, an incompatible generic/cause pair, or a live terminal cause are rejected without mutation. The explicit numeric values are compatibility fixtures and may only be appended, never renumbered.
+
+## Downed/Revive pure-domain tests
+
+The existing harness must continue covering:
+
+- 2/3/4 roster → 1/2/3 shared tokens;
+- one idempotent lethal transition and same-tick all-Downed terminal commit;
+- commands after a committed/stale tick rejected without ratcheting authority time;
+- bounded complete revive-start batch, one stable reviver per tick, deterministic race winner independent of arrival order;
+- channel completion at 120 ticks, not 119; deadline/interrupt wins at exact collision;
+- token reservation prevents overcommit and consumption occurs only on completion;
+- movement/damage/target/reviver invalidity cancels and releases reservation;
+- exact channel nonce protects a newer lease from delayed cancel;
+- Downed timeout, elimination, zero-token failure, disconnect/reconnect grace;
+- newer epoch preserves stable participant state and defeats stale disconnect/slot reuse;
+- terminal failure is the final event for its tick;
+- exact-Fight cleanup twice succeeds; stale-Fight cleanup cannot clear current state;
+- bounded projections/snapshots never expose mutable authority.
+
+Run:
 
 ```bash
-dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj
+dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
 ```
 
-The project must remain excluded from `.tmod` packaging through `build.txt`.
+Current harness assertions for multipart forms/Last Stand document obsolete code and must be replaced in the plan-simplification commit, not falsely reclassified as current feature tests.
 
-| Case | Expected authoritative result |
-|---|---|
-| 2/3/4-player roster creation | 1/2/3 shared tokens |
-| authority lethal event | death is represented as `Downed` once; duplicate is no-op |
-| all roster members Downed on same/different ticks | one terminal `AllParticipantsDowned` failure |
-| final Downed command before tick commit | no terminal result until `CommitTick` |
-| command for an already committed tick | rejection and no state/revision change |
-| same-tick competing revive starts submitted in either order | lower stable reviver `ParticipantId` wins the target reservation in both runs |
-| empty revive-start batch | rejected; no batch boundary or state mutation |
-| revive-start batch larger than the frozen roster | whole batch rejected before sorting or mutation |
-| one batch repeats a stable reviver `ParticipantId` | whole batch rejected before any channel reservation |
-| revive-start batch mixes Fight IDs or authority ticks | whole batch rejected before its boundary is marked or any command is applied |
-| second non-empty revive-start batch after one start was accepted for that tick | `revive.start_batch_already_processed`; no command is applied |
-| successful 120-tick channel | one token consumed, target Alive, restore/invulnerability/weakness event data |
-| channel at tick 119 | no completion |
-| interrupt or Downed deadline exactly on completion tick | cancellation/timeout wins deterministically |
-| movement or damage interrupt | channel cancelled, reservation released, no token consumed |
-| delayed Cancel for an older channel nonce | newer channel remains active |
-| target disconnects or becomes invalid | channel cancelled and cannot complete |
-| reviver disconnects or becomes Downed | channel cancelled and cannot complete |
-| two simultaneous channels | tokens reserved atomically; no overcommit |
-| Downed timeout with zero available tokens | terminal `DownedTimeoutWithoutToken` failure |
-| Downed timeout with tokens remaining | participant Eliminated; remaining party may continue |
-| no connected Alive participant within reconnect grace | encounter remains recoverable |
-| reconnect grace expires with no Alive participant | terminal `NoAvailableParticipants` failure |
-| terminal failure before Cleanup | Downed/Eliminated control locks remain projected |
-| timeout and disconnect expiry on the same tick | `RaidFailed` is the final event; no later mutation event |
-| old Fight ID command | machine-readable rejection, no revision/state change |
-| rejected command carrying a far-future tick | a later valid lower-tick command is still accepted |
-| old connection epoch after rejoin | binding rejection, no participant control projection |
-| Terraria slot reused by a different connection | no mutation without the current epoch and Participant ID |
-| duplicate/older revive nonce | rejection and no second channel |
-| reconnect with newer epoch | stable Participant ID and prior combat state retained |
-| reconnect at/after grace deadline before commit | explicit grace-expired rejection |
-| newer rejoin arrives before an old disconnect callback | newer binding supersedes; old callback is rejected |
-| stale authority tick | rejection and no deadline rollback |
-| undefined interrupt reason | rejection, no channel mutation, no authority-tick ratchet |
-| zero-nonce or no-active-channel interrupt at a future tick | rejection/no-op respectively; neither makes an earlier valid command stale |
-| Apply emits an event before boundary Tick | next Active Tick returns observable change |
-| start batch emits one or more events before boundary Tick | next Active Tick returns observable change across the whole batch |
-| exact-Fight Cleanup called twice | success and empty state both times |
-| stale-Fight Cleanup | rejected/internal failure; owning state is not silently released |
-| valid Core/world geometry | exact 320x140 Arena, inset Barrier, and four deterministic Pylon slots |
-| Arena fits the World but violates the 20-tile edge margin | layout rejection before any World mutation |
-| outsider threshold escalation | warning/suppression/ejection/exclusion returned in deterministic order |
-| default Boss/phase plan construction | form/part references, reachability, terminal Last Stand, and finite loop policy validate |
+## Lethal-hook instrumentation gate
 
-Terraria integration adds the following mandatory fault tests:
+Before live death interception, record Single Player, Host & Play (host/non-host), and Dedicated Server behavior for:
 
-- lethal damage interception does not run on multiplayer clients;
-- Downed projection blocks movement, item use, combat, and further damage without
-  setting permanent vanilla/Calamity flags;
-- an Eliminated participant remains control-locked until encounter cleanup;
-- moving, taking damage, teleporting, changing mount/hook state, or losing the
-  target emits at most one channel cancellation;
-- revive applies server-owned life restoration and synchronizes it once;
-- a disconnect callback captured before slot reuse cannot Down, revive, cancel,
-  or clear the replacement player;
-- wipe requests `EncounterEndReason.Defeat`, publishes the terminal snapshot,
-  and then releases every participant projection during normal cleanup and World unload.
+- all relevant tModLoader death-hook calls/order and return behavior;
+- Calamity personal revive consumption, life/cooldown/immunity mutation;
+- duplicate callbacks, same-tick multiple damage, combat text/death reason;
+- player life/control/network sync and disconnect/rejoin;
+- disarming interception during Defeat/body normalization.
 
-The death hook, `ModPlayer` control adapter, typed revive packet DTOs, and feature
-snapshot codec are not present in the bootstrap implementation. Their absence is
-a release blocker, and activation remains safely denied until they are tested.
+If behavior is ambiguous, keep the adapter disconnected and activation denied.
 
-## Cleanup fault injection
+## Revive integration matrix
 
-各stepで例外またはmissing entityを模擬し、それでも最終invariantを満たすことを確認する。
-
-- Coreが先に消える。
-- Barrier VFXが既に消えている。
-- participant slotが再利用される。
-- temporary NPCが手動kill済み。
-- duplicate Cleanup call。
-- stale Fight IDでCleanup要求。
-- World unload中のCleanup。
+- authority interception never runs as client truth;
+- Downed blocks movement/item/combat/hook/mount/damage and Boss/mechanic targeting;
+- valid item held-use within 8 tiles completes once;
+- while channeling, control suppression blocks weapons/tools/other items but preserves the accepted revival-item lease/animation; applying `SuppressItemUse` never self-cancels;
+- raw item switch/release observed before suppression cancels the exact lease once; repeated use cannot extend or complete it;
+- move, damage, teleport, item change/release, mount/hook, range loss, target invalid, disconnect, or fight end cancels once;
+- forged target, old Fight, old epoch, reused slot, old/zero nonce, no token, wrong item, and nonparticipant reject without mutation;
+- two revivers racing for one target and one reviver switching targets remain deterministic;
+- server restores 35% life, 180-tick invulnerability, 600-tick weakness once;
+- host Downed, non-host Downed, two simultaneous Downed, all simultaneous Downed;
+- the cross-domain collision table above passes with the same result on host and Dedicated Server;
+- victory/cancel/Defeat/unload safely normalize Downed and Eliminated bodies;
+- no permanent vanilla/Calamity flags after cleanup/reload.
 
 ## Packet robustness
 
-- unknown PacketType。
-- truncated payload。
-- enum範囲外。
-- oversized count。
-- invalid tile coordinate。
-- participant以外からのReady。
-- spammed activation/ready request。
-- reordered snapshot/delta。
-- duplicate delta。
-- previous fightのdelayed packet。
+- unknown type/protocol/direction and truncated/oversized/invalid enum/count/coordinate;
+- custom payloads spoofing player, participant, Core, distance, item, DPS, life, result, or completion;
+- spammed Activate/Ready/Snapshot/Revive with bounded logging and rate;
+- duplicate/reordered/stale delta and old Fight/revision/epoch/nonce;
+- snapshot gap recovery and late join/rejoin;
+- malicious input never throws out of the server thread or partially mutates state.
 
-不正packetでserver threadを例外終了させない。
+Packet robustness proves the Convergence protocol boundary, not anti-cheat for Terraria's ordinary movement/combat replication. Any stronger adversarial-client requirement needs a separate threat model and acceptance matrix.
 
-## Performance budgets (initial)
+## Cleanup fault injection
 
-| Metric | Initial budget |
+Inject missing/exceptional cleanup participants: Foundation Core Tile/TE unexpectedly lost, Boss/Pylon already dead, projectile missing, Barrier absent, player slot reused, revive channel active, duplicate cleanup, stale Fight cleanup, World unload, and cleanup logger failure.
+
+Final invariants:
+
+- no active session/Fight/roster/assignment/channel/reservation;
+- no owned NPC/Projectile or Barrier/player control projection;
+- Foundation Core Idle if its Tile/TE still exists;
+- terminal snapshot/tombstone remains observable;
+- retry backlog blocks a new encounter until resolved, then a new Core can start;
+- second exact cleanup is harmless and stale cleanup never touches a new Fight.
+
+## Performance budgets
+
+| Metric | Initial target |
 |---|---:|
-| Arena validation | activation時 10 ms未満を目標、50 msで要調査 |
-| Active server update | average 1 ms/tick未満 |
-| Raid custom traffic | steady state 5 KB/s/client未満を目標 |
-| Networked projectiles | player数に比例して4倍化しない |
-| Cleanup | 1 tick内、重い場合も新規fightをblockして完了 |
+| Arena validation | <10 ms goal; investigate ≥50 ms |
+| Active server update | <1 ms/tick average |
+| Custom Raid traffic | <5 KB/s/client steady-state goal |
+| Actor/projectile count | bounded; does not multiply decorative density by players |
+| Cleanup | normally one tick; new fight blocked while retry remains |
 
-数値はprofilingで更新する。見た目のparticle数をserver entity数として数えない。
+Profile before optimizing. Client particles are not server actors.
 
-## Visual and accessibility QA
+## Visual/audio accessibility
 
-- 1920x1080、2560x1440、ultrawide。
-- UI scale 100～150%。
-- color-only assignmentが存在しない。
-- markerがboss、projectile、damage textに埋もれない。
-- flash、shake、afterimage軽減設定。
-- 4人分のSpread markerが判別可能。
-- phase titleがgameplay telegraphを隠さない。
-
-## Audio QA
-
-- loop click/popなし。
-- phase switchで二重再生または無音が続かない。
-- music volume sliderに従う。
-- unfocus/pause/resumeの挙動。
-- Dedicated Serverでaudio accessしない。
-- 途中参加でgameplay stateは正しく、音楽がずれても判定へ影響しない。
-- 使用assetのsource/license/creditが記録されている。
+- 1080p, 1440p, ultrawide; UI scale 100–150%;
+- grayscale/color-vision and Reduced/Minimal VFX;
+- no color-only Pylon/Stack/Spread/Downed marker;
+- four-player marker readability over Boss/projectiles/damage text;
+- audio disabled or desynchronized never changes results;
+- Dedicated Server never initializes audio/graphics;
+- every runtime asset has a provenance record.

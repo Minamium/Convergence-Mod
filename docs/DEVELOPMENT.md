@@ -1,89 +1,81 @@
+---
+doc_id: development.general
+document_type: runbook
+status: accepted
+owners:
+  - engineering
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - development.general_policy
+aliases:
+  - development setup
+  - build policy
+related_code:
+  - ConvergenceMod.csproj
+  - global.json
+  - build.txt
+related_docs:
+  - development.windows
+  - verification.evidence
+  - project.status
+---
+
 # Development Setup
 
-## Pinned environment
+## Primary workstation
 
-Use [VERSION_MATRIX.md](VERSION_MATRIX.md) as the single compatibility source. The current candidate environment is:
+Use the Windows desktop as the primary tModLoader/Calamity build, Host & Play, and Dedicated Server environment. Follow [Windows Development Runbook](runbooks/WINDOWS_DEVELOPMENT.md) and the point-in-time [Windows Handoff](handoff/WINDOWS.md).
+
+macOS can support tModLoader development when its runtime is installed, but the audited MacBook did not contain Terraria, tModLoader, .NET SDK, Calamity, or a valid `ModSources` checkout. It remains useful for documentation, Git, review, and platform-independent work. Never transfer an unverified Mac result into the version matrix as a successful Mod build.
+
+## Candidate environment
+
+Use [Version Matrix](VERSION_MATRIX.md) as the compatibility source:
 
 - Terraria 1.4.4.9;
 - tModLoader stable `v2026.06.3.6`;
-- Calamity Mod `2.2.2` plus its official Music dependency;
-- .NET 8 / C# 12.
+- Calamity Mod `2.2.2` plus required official Music dependency;
+- .NET SDK `8.0.424`, with .NET 8/C# 12 owned by tModLoader targets.
 
-The repository requests .NET SDK `8.0.424` through `global.json` and permits newer patches in the same feature band. tModLoader still owns the target framework and language baseline.
+These runtime pins remain Candidate until real build/load/server evidence passes. Do not silently upgrade one dependency.
 
-Do not silently upgrade one dependency. Compatibility changes use a dedicated branch/PR and rerun the multiplayer matrix.
+## Checkout invariant
 
-## Checkout location
+Clone the repository directly as the internal Mod directory:
 
-tModLoader creates `tModLoader.targets` in its `ModSources` directory. Clone or create a worktree with the exact internal Mod directory name:
-
-```bash
-cd "<tModLoader user data>/ModSources"
-git clone https://github.com/Minamium/tmod.git Convergence
-cd Convergence
+```text
+<tModLoader user data>/ModSources/Convergence/
+  build.txt
+  ConvergenceMod.csproj
+  ../tModLoader.targets
 ```
 
-The GitHub repository name may remain `tmod`; the local source directory must be `Convergence`. The assembly and root namespace use the same internal identity because tModLoader verifies the namespace against the internal Mod name.
+The remote repository name may remain `tmod`; the local directory, assembly, and root namespace must align with `Convergence`. A clone elsewhere cannot resolve `../tModLoader.targets` and is not a valid real-build environment.
 
 ## Repository checks
 
-Run before every push:
-
 ```bash
-python3 tools/repository_checks.py
 python3 -m pip install --requirement tools/requirements-ci.txt
+python3 tools/docs_catalog.py --check
+python3 tools/repository_checks.py
 python3 tools/validate_yaml.py
+dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
 ```
 
-This checks required policy files, UTF-8/LF text, broken relative Markdown links, generated binaries and sensitive filenames, case-colliding paths, required `.tmod` packaging masks, coarse dependency direction, file size, and attribution record completeness.
+The standalone harness exercises linked production domain sources without Terraria. It is not a Mod build.
 
-GitHub Actions runs the same dependency-free core check, pinned PyYAML syntax/minimal-schema validation, and the Terraria-independent domain harness with the SDK pinned by `global.json`. It intentionally does not claim to compile or load the Mod.
-
-## Build and reload
-
-With the repository under the pinned tModLoader `ModSources` directory, run the project build:
+## Real build/load gates
 
 ```bash
 dotnet build ConvergenceMod.csproj
 ```
 
-Then run the interactive tModLoader path:
+Then run tModLoader Build + Reload, enter/exit Single Player, load Dedicated Server, and join with two clients using identical Mods. Both command build and Build + Reload are required. C# changes also run feature-specific 2/3/4-player cases when relevant.
 
-1. Start the pinned tModLoader.
-2. Open `Workshop -> Develop Mods`.
-3. Run `Build + Reload` for Convergence.
-4. Confirm the detected tModLoader and Calamity versions in the log.
+## Evidence
 
-Both checks are required. `dotnet build` uses `ConvergenceMod.csproj` and `Directory.Build.props` for nullable and analyzer policy. tModLoader's in-game Build + Reload performs its own Mod source compilation and packaging and does not use those project properties as a substitute. A success in either path alone is incomplete evidence.
+Copy [the build-record template](evidence/build-record.example.json) to ignored `build-record.local.json`. Record exact commit, OS/architecture, runtime versions, Calamity binary checksum without the binary, each gate result, participant count, and network conditions. Sanitized records must follow [Evidence](evidence/README.md).
 
-A plain clone outside `ModSources` does not contain `../tModLoader.targets` and is not a valid build environment.
+## Current safety gate
 
-## Minimum smoke test
-
-For every C# change:
-
-1. Build + Reload without warnings introduced by the change.
-2. Enter a Single Player World and exit cleanly.
-3. Start a Dedicated Server with the Mod, Calamity, and Calamity Music enabled.
-4. Join with two clients using identical Mod versions.
-5. Confirm load/unload/reload leaves no active Encounter state.
-6. Save the version evidence described in [TEST_PLAN.md](TEST_PLAN.md).
-
-Milestone-specific changes must also run their relevant 2/3/4-player cases.
-
-## Build records
-
-Local reproducibility evidence belongs in `build-record.local.json`, which is ignored because it may contain machine-specific paths. Record:
-
-- Git commit;
-- OS and architecture;
-- Terraria/tModLoader/Calamity versions;
-- Calamity `.tmod` SHA-256 without copying the binary;
-- build result;
-- client and Dedicated Server load result.
-
-Release evidence will use a sanitized, committed record once the first build succeeds.
-
-## Current limitation
-
-The repository bootstrap environment did not have the .NET SDK, tModLoader installation, Calamity binary, or Terraria runtime available. Repository checks pass locally, but the candidate version matrix remains unconfirmed until the smoke test above is executed in a real ModSources environment.
+`ThirdSeveranceAvailabilityPolicy` currently rejects activation and its world adapter is inert. During the rename it becomes the equivalent `FirstSeverance` denial. Do not remove that gate until the implementation slice owning Core/Arena/roster/transport, actor ownership/replication, and Downed adapter evidence has passed its declared exit criteria.

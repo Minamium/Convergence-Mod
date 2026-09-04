@@ -1,201 +1,173 @@
+---
+doc_id: project.architecture
+document_type: governance
+status: accepted
+owners:
+  - engineering
+  - networking
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - architecture.module_boundaries
+  - architecture.runtime_ownership
+aliases:
+  - architecture
+  - authority architecture
+related_code:
+  - Common
+  - Content
+  - Client
+related_docs:
+  - project.network-architecture
+  - project.repository-layout
+  - project.status
+---
+
 # Architecture
 
 ## Objective
 
-Build a multiplayer-first Calamity addon that can grow from one post-Exo Mechs/Supreme Calamitas Raid into multiple bosses, encounters, items, world features, and presentation systems without making the first Raid or the initial Calamity integration a permanent global dependency.
+Build a multiplayer-first Calamity addon that can grow from one post-Exo Mechs/Supreme Calamitas Raid into multiple Bosses, Raids, items, World features, and presentation systems without making the first Raid or Calamity integration a permanent global dependency.
 
-The architecture is a **modular monolith**: one tModLoader assembly with enforced source boundaries. This keeps the initial build and reload workflow simple while preserving seams that can become separate assemblies only when scale justifies it.
+The architecture is a modular monolith: one tModLoader assembly with enforced source boundaries. Assembly splitting happens only when demonstrated ownership/build needs justify it.
+
+## Current implementation note
+
+The source currently contains an inert `Content/Encounters/ThirdSeverance` bootstrap. The accepted target is `FirstSeverance`, but the atomic rename and replacement of its obsolete multipart plan have not occurred. [Status](STATUS.md) is authoritative; the current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
 
 ## Dependency direction
 
 ```mermaid
 flowchart TD
-    Client["Client UI / VFX / Audio"] --> Replica["Replication read model"]
-    Content["Feature modules"] --> Abstractions["Encounter abstractions"]
-    Runtime["Authority runtime"] --> Abstractions
-    Adapters["tML / Network / Calamity adapters"] --> Runtime
-    Abstractions --> Foundation["Foundation values"]
+    Client["Client UI / VFX / Audio"] --> Replica["Read-only replication model"]
+    Content["Feature modules"] --> Common["Common contracts/domains"]
+    Adapters["tML / transport / Calamity adapters"] --> Runtime["Authority runtime"]
+    Runtime --> Contracts["Encounter abstractions"]
+    Common --> Foundation["Foundation values"]
 ```
-
-Allowed dependencies:
 
 | Layer | May depend on | Must not depend on |
 |---|---|---|
 | `Common/Foundation` | .NET primitives | Terraria, Calamity, Content, Client |
-| `Common/Encounters/Abstractions` | Foundation and .NET primitives | Runtime implementation, tML, specific encounters, presentation |
-| `Common/Encounters/Runtime` / `Common/Raids` | Encounter abstractions and narrow ports | specific encounters, UI, audio |
-| `Common/Networking` | Foundation, runtime commands, read-only replicas, tML transport | specific encounter behavior |
-| `Common/Compatibility` | tML and the named dependency | Content, presentation |
-| `Content/<Feature>` | Common | Client and unrelated content modules |
-| `Client` | replication read models and feature cue contracts | authoritative mutation |
+| `Common/Encounters/Abstractions` | Foundation/.NET | Runtime implementation, tML, feature, presentation |
+| `Common/Encounters/Runtime`, `Common/Raids` | abstractions and narrow ports | feature names/behavior, UI/audio |
+| `Common/Networking` | Foundation, commands, replicas, tML transport | feature behavior switches |
+| `Common/Compatibility/<Mod>` | tML and named dependency | Content/presentation |
+| `Content/Encounters/<Feature>` | Common | Client or unrelated features |
+| `Client` | read models and cue contracts | authority mutation |
 
-`tools/repository_checks.py` rejects direct `Common -> Content/Client`, `Content -> Client`, `Encounter Abstractions -> Runtime/Networking/tML`, and `Encounter Runtime -> Networking` imports. This is a coarse guard; review still checks indirect coupling.
+Repository checks provide a coarse import guard; review remains responsible for indirect coupling.
 
-## Composition root
+## Composition root and feature registration
 
-`ConvergenceMod` is intentionally small. It owns Mod load/unload identity and delegates packets to the common router. It does not contain encounter selection, balance data, recipes, or UI state.
+`ConvergenceMod` owns Mod identity/load/unload and delegates packet input. It does not contain encounter selection, balance, recipes, or UI.
 
-Feature modules register immutable `EncounterDefinition` objects through their own `ModSystem`. A definition supplies feature-scoped activation policies and an `IEncounterRuntimeFactory`, so adding an encounter must not require a switch statement in the packet router or coordinator. Global policies are reserved for cross-cutting authority and compatibility checks.
+Feature-local `ModSystem` code registers immutable `EncounterDefinition` objects. A definition supplies its key, participant bounds, feature-scoped activation policies, and runtime factory. Adding an encounter must not add a switch to the global coordinator/router.
 
-Current example:
+Current-to-target migration:
 
 ```text
-ThirdSeveranceRegistrationSystem
+ThirdSeveranceRegistrationSystem (current inert code)
+  -> atomic rename to FirstSeveranceRegistrationSystem
   -> EncounterCatalogSystem.Registry
-  -> ThirdSeveranceDefinition
-  -> ThirdSeveranceRuntimeFactory
+  -> FirstSeveranceDefinition
+  -> FirstSeveranceRuntimeFactory
 ```
 
-## Common encounter foundation
+## Generic encounter foundation
 
-The common foundation currently owns:
+Common currently owns:
 
-- `FightId`, `ParticipantId`, and tile-space geometry value objects;
-- immutable encounter definitions and their registry;
-- legal lifecycle transitions;
-- one authoritative active session per World;
-- typed start commands and activation policies;
-- runtime update, factory, partial-construction cleanup registrar, and cleanup contracts;
-- World-monotonic Encounter Sequence, live/terminal snapshots, a bounded terminal-priority/coalescing outbox, and read-only replica ordering/tombstones;
-- a versioned packet envelope and direction validation;
-- the Calamity version compatibility boundary.
+- `FightId`, `ParticipantId`, and tile-space value objects;
+- encounter definition registry and legal lifecycle transitions;
+- one authoritative managed session per World;
+- typed start command and activation-policy boundaries;
+- runtime update/factory/partial-construction cleanup contracts;
+- World-monotonic Encounter Sequence, live/terminal snapshots, bounded/coalescing outbox;
+- replica ordering/tombstones and packet envelope/direction guard;
+- isolated Calamity compatibility/version gate;
+- pure Raid Downed/Revive domain under `Common/Raids/Revive`.
 
-`Common/Raids/Revive` additionally owns the first Raid-only domain service. It is
-not part of the generic Boss lifecycle and has no Terraria, packet, UI, or
-Third Severance dependency.
+It intentionally does not own a general mechanic DSL, feature phase graph, Boss AI, UI/audio, arbitrary World events, or persisted active fights.
 
-It deliberately does **not** yet own:
+## Lifecycle and state decomposition
 
-- a general mechanic DSL;
-- phase scripting;
-- arbitrary world events;
-- UI or sound playback;
-- Boss AI;
-- persistence of active fights.
+```text
+Idle projection -> Validating -> Preparing -> Active -> [optional Resolving] -> End -> Cleanup -> Idle
+```
 
-Those abstractions will be extracted only after the first implementation supplies concrete requirements.
+`EncounterRuntimeUpdate.End(reason)` may enter Cleanup directly from a live state. `Resolving` is an optional separately ticked stage, not a mandatory terminal waypoint and not something a runtime can request together with End in one update. First Severance's initial slice stores its feature terminal cause and uses direct End; a future reward/result ceremony may specify `Active -> Resolving` on one tick and `Resolving -> End` later.
 
-## Runtime ownership
+The current coordinator's `TryEnd`/`Reset` path carries only a generic end reason, so external World-unload and exception endings cannot yet preserve a feature cause. Before First Severance feature replication, introduce a feature-neutral immutable termination descriptor and a constructor-validated, definition-owned mapping from external generic reasons to opaque feature schema/cause values. Runtime-owned endings supply the descriptor directly; coordinator Reset/exception/fatal-protocol paths synthesize it from immutable definition data without re-entering a failed runtime tick. External shutdown preempts an uncommitted feature update, then the combined terminal projection is published before cleanup. A runtime-creation failure happens before session acceptance and has no live feature tombstone.
 
-`EncounterCoordinatorSystem` is the tModLoader hook adapter. It creates and ticks `EncounterCoordinator` only in Single Player or on the server. A multiplayer client never receives a mutable authoritative coordinator.
+`EncounterSession` is decomposed rather than a global state bag:
 
-The coordinator owns at most one managed Boss/Raid `EncounterSession` per World in the initial architecture. This exclusivity does not claim ownership of arbitrary vanilla or third-party NPCs; activation policies must reject conflicting World activity. Each session owns exactly one feature runtime and releases it through a reverse-order cleanup scope. Factory-created resources can register immediately, so partial construction failures are covered. Failed cleanup participants are retained in a retry backlog and block the next managed encounter. Creation failures, runtime exceptions, cancel, wipe, Core destruction, and World unload converge on that same boundary.
+```text
+Identity     Encounter Sequence, Fight ID, definition/protocol/schema
+Lifecycle    state, revision, end reason, authority tick
+RaidRoster   stable Participant ID, player slot, connection epoch, Ready
+Arena        Core identity, bounds, validation, Barrier
+Feature      substate, loop, Overload, assignments, Boss/Pylon state
+Revive       Downed/Alive/Eliminated, tokens, channels, deadlines
+Ownership    compact token to NPC/Projectile/resource registry
+```
 
-Feature runtimes return `EncounterRuntimeUpdate` from `Tick`; they do not reach back into a global coordinator. The update may request a legal generic lifecycle transition, a terminal reason, or one observable revision. Raid-specific state remains decomposed instead of becoming one global bag:
+NPC `ai[]`, Tile Entities, `ModPlayer`, and UI are adapters/projections, never the whole Raid's source of truth.
 
-- session identity;
-- roster and stable participant IDs;
-- arena state;
-- phase state;
-- mechanic state;
-- owned entity registry;
-- outcome and cleanup state;
-- feature-specific snapshot payload.
+## Authority split
 
-NPC `ai[]`, Tile Entities, `ModPlayer`, and UI are projections or adapters, not the source of truth for the whole Raid.
+Server or Single Player local authority alone decides:
 
-## Server and client split
+- lifecycle, roster, bindings/epochs, Ready, phase ticks, random assignments;
+- actor spawn, hit/damage checks, Boss life/gate, Pylon result;
+- Stack/Spread result, Downed/Revive, Overload, victory/Defeat;
+- exact-Fight ownership, terminal snapshot, and cleanup.
 
-Server/SP authority decides lifecycle, roster, assignments, timers, random results, actor spawn, damage checks, Downed/Revive, and victory. Clients submit bounded requests and render snapshots/events. `EncounterReplica` can only accept or reset snapshots; it orders `(EncounterSequence, Revision, AuthorityTick)` and retains a terminal tombstone so delayed older fights cannot revive.
+Clients submit bounded input and render snapshots/cues. Barrier movement may be predicted and telegraphs interpolated, but the server corrects position/results. Audio/particles/camera cannot control gameplay time.
 
-Client-only systems may predict movement against the Barrier and interpolate telegraphs. The server corrects final positions. Audio, particles, trails, subtitles, and screen effects never control gameplay clocks.
+## Runtime and cleanup ownership
 
-## Downed and Revive authority boundary
+`EncounterCoordinatorSystem` creates/ticks mutable authority only in Single Player or server mode. A runtime returns `EncounterRuntimeUpdate`; it does not reach back through a global coordinator.
 
-`RaidReviveService` is a pure server/SP state machine composed by a Raid feature
-after its authoritative roster is frozen. It owns Downed deadlines, two-second
-channel completion, shared-token reservation and consumption, disconnect/rejoin
-state, wipe detection, revisions, and bounded 2–4-player projections. Initial
-token counts are 1/2/3 for 2/3/4 participants. A disconnected Alive participant
-has an initial 1,800-tick reconnect grace; the encounter cannot wait forever for
-an abandoned slot.
+Each feature runtime registers every transient resource immediately. Construction failure, tick exception, user cancel, Defeat, Victory, Foundation Core Tile/TE loss, Boss loss, and World unload converge on the same cleanup boundary. Feature-observed terminal candidates are reduced inside the runtime; World unload, an unhandled tick exception, and a fatal protocol decision are coordinator-owned preemptions delivered through the termination descriptor rather than fake feature commands. Cleanup:
 
-The stable Raid `ParticipantId` is paired with a server-assigned player slot and
-monotonic connection epoch. All commands must match the Fight ID and the complete
-binding. A delayed packet or callback from a previous Fight, a disconnected
-connection, or a reused Terraria player slot therefore cannot mutate the current
-participant. Rejoin preserves the participant's combat state and requires a
-strictly newer authority-assigned epoch. Rejoin at or after the disconnect
-deadline is rejected even if that tick has not yet been committed.
+1. validates the exact expected Fight ID;
+2. stops transitions/spawns and commits terminal state;
+3. publishes the final snapshot/outcome;
+4. removes owned actors/projectiles/assignments/Barrier;
+5. restores or normalizes participant projections;
+6. clears revive channels/reservations and Core busy state;
+7. releases session state in `finally`;
+8. retains failed cleanup participants for retry and blocks new encounters until resolved.
 
-The future Terraria adapters have narrow responsibilities:
+The same exact-Fight cleanup can be called repeatedly; stale-Fight cleanup never releases a different current session.
 
-- a server damage/death hook converts eligible lethal damage into an
-  `AuthoritativeParticipantDownedCommand`;
-- a `ModPlayer` adapter applies the read-only control projection, restores life
-  after a `ParticipantRevived` event, and reports authoritative movement/damage
-  interrupts;
-- transport resolves the sender from `whoAmI`, supplies its current binding, and
-  forwards only bounded target/nonce input;
-- feature replication serializes snapshots/events; clients never run the service.
+## First Severance feature boundary
 
-Authority adapters apply lethal, movement/damage interrupt, and connection
-commands before `CommitTick`. Terminal wipe evaluation occurs only at that one
-end-of-tick boundary; no individual Downed/disconnect call can end a Raid before
-the rest of its tick's authority commands are applied. Commit cancels invalid or
-deadline-expired channels, completes the remaining eligible channels, processes
-Downed/disconnect timeouts, then evaluates failure. A command submitted after its
-tick was committed is rejected. This ordering is deterministic and must be
-identical in Single Player, Host & Play, and Dedicated Server.
+`Content/Encounters/FirstSeverance` will own the simple Boss, Pylons, active-loop executor, typed tuning, mechanics, arena adapters, and feature snapshot. Ring/arms are presentation components of one Boss NPC. Pylons are separately owned NPCs.
 
-The accepted Start request nonce becomes the channel lease nonce. Interrupts
-must match both the current participant binding and that exact lease. Channel
-events and snapshots expose the nonce, so a delayed Cancel from an older channel
-cannot terminate a newer channel belonging to the same reviver.
+The current `ThirdSeverance` immutable plan with parts/effigies/Last Stand is not reusable Common infrastructure. Replace it in the feature; do not generalize it.
 
-The production death hook is a blocking compatibility gate, not a missing line
-of glue. Pinned tModLoader source shows that every Mod's `PreKill` body runs even
-after another returned `false`; Calamity can therefore consume a personal revive
-or mutate life/cooldowns during the same lethal event. ADR-0005 requires runtime
-instrumentation and an explicit precedence/normalization policy before this
-adapter may be registered.
+## Downed and Revive boundary
 
-Until those adapters and the validated Third Severance roster exist, the feature
-boundary is inert and activation remains denied. It must not partially replace
-Terraria death handling. Exact-Fight cleanup clears channels, bindings, tokens,
-and projections idempotently; a stale cleanup Fight ID is treated as an internal
-failure so the coordinator retry backlog does not silently discard owned state.
+`RaidReviveService` is a pure authority state machine composed after the frozen Raid roster exists. It owns Downed deadlines, stable participant/binding validation, batched revive arbitration, exact channel leases/nonces, token reservation/consumption, reconnect grace, end-of-tick wipe evaluation, bounded snapshots/projections, and cleanup.
 
-## Encounter versus Raid versus World Event
+Terraria adapters remain narrow:
 
-`EncounterDefinition` is the smallest common catalog entry for a normal Boss or Raid. Its generic lifecycle is `Validating -> Preparing -> Active -> Resolving -> Cleanup`. Raid-only concepts such as Ready, roster, revive tokens, and coordinated mechanics will live under `Common/Raids` or the owning Raid feature as substates of `Preparing`/`Active`; they are not generic lifecycle values.
+- authority death hook submits eligible lethal events;
+- `ModPlayer` applies control/targeting/life projections and reports authoritative interrupts;
+- transport derives sender from `whoAmI` and forwards bounded target/nonce input;
+- feature replication carries read-only revive state/events.
 
-Long-running invasions or world events will receive a separate coordinator. They may reuse identifiers, transport, ownership, and diagnostics, but they will not be forced through the Raid lifecycle.
+The pinned tModLoader/Calamity death-hook interaction is a blocking compatibility spike. Do not connect it by bypassing evidence.
 
-## Compatibility boundary
+## Persistence
 
-[ADR-0006](adr/0006-staged-calamity-independence.md) defines three dependency stages.
+Active Encounter/Raid state is ephemeral and is not resumed after World load. Only future stable progression/settings may use versioned tModLoader World/Player save schemas. A new persistence design requires an ADR. The documentation catalog/database is unrelated to runtime game state.
 
-- Stage A keeps the current hard Calamity dependency behind the compatibility boundary.
-- Stage B introduces project-owned progression, class-category, and balance-tier ports without rewriting the encounter runtime.
-- Stage C removes the hard dependency only after original progression/content and a replacement compatibility matrix exist. Any Calamity coexistence path is optional and must remain outside authoritative encounter rules.
+## Calamity boundary and independence
 
-Only `Common/Compatibility/Calamity` may call Calamity APIs or reference Calamity types. Initial integrations prefer documented `Mod.Call` contracts with explicit result type checks. Reflection, IL patches, publicizers, copied Calamity code, and reliance on private fields are out of scope.
+Stage A keeps the hard dependency but only `Common/Compatibility/Calamity` touches its APIs/types. Feature code consumes project-owned concepts. Stage B formalizes portable ports; Stage C adds original progression/content and removes the hard reference only after a separate matrix. Never copy/vend Calamity source, binaries, or assets.
 
-Unsupported Calamity versions disable encounter activation rather than allowing an untested fight to mutate World state.
+## Extension rule
 
-## Persistence policy
-
-An active session is ephemeral. Save/load does not resume a fight. World unload always performs cleanup, and the next load begins Idle. Future permanent progression flags and configuration receive independent schema versions; protocol, save schema, and Mod version are not coupled.
-
-## Extension recipes
-
-### Add another Raid
-
-1. Create `Content/Encounters/<Name>/`.
-2. Define an immutable `EncounterDefinition` and registration system.
-3. Add its Raid session factory, arena profile, phase plan, and feature snapshot codec.
-4. Keep NPCs, projectiles, tiles, rewards, and tuning within that module.
-5. Extract shared mechanics only after a second encounter uses them.
-
-### Add a normal Boss
-
-Use an Encounter definition without Raid roster/Ready/Revive services. It still participates in the initial one-managed-encounter exclusivity policy. Reuse ownership, diagnostics, and snapshot infrastructure where useful.
-
-### Add shared combat behavior
-
-First implement it inside the owning feature. Move it to `Common/Combat` only when its API can be described without feature-specific names or assumptions.
-
-## Architecture change rule
-
-Changes to dependency direction, authority, protocol compatibility, persistence, external dependencies, or asset rights require an ADR. Accepted ADRs are superseded by new records rather than silently rewritten.
+Extract a Common abstraction only when a second concrete feature requires it and both use cases fit without feature flags. Changes to authority, module direction, protocol compatibility, persistence, external dependencies, or asset rights require a new ADR rather than silent edits.

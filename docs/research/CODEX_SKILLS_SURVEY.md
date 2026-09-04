@@ -1,3 +1,21 @@
+---
+doc_id: research.codex-skills-survey
+document_type: research
+status: historical
+owners:
+  - research
+last_reviewed: 2026-08-23
+source_of_truth_for: []
+aliases:
+  - Codex Skills survey
+  - repository Skills research
+related_code:
+  - .agents/skills
+related_docs:
+  - docs.system
+  - research.sources
+---
+
 # Codex Skills Survey
 
 Accessed: 2026-08-23

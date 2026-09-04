@@ -10,66 +10,67 @@ Preserve Convergence's modular-monolith boundaries while adding multiplayer Raid
 ## Start from repository truth
 
 1. Locate the repository root from `AGENTS.md` and `ConvergenceMod.csproj`.
-2. Read `AGENTS.md`, `docs/VERSION_MATRIX.md`, `docs/ARCHITECTURE.md`, and `docs/NETWORK_ARCHITECTURE.md` completely.
-3. Read only the feature documents and source directories needed for the task. For Downed/Revive work, also read ADR-0005 and `docs/TEST_PLAN.md`. For arena or encounter-plan work, also read `docs/ARENA_INFRASTRUCTURE.md`, `docs/ENCOUNTER_SPEC.md`, and the applicable arena ADR.
-4. State the planned files, authoritative owner, client request path, replicated output, cleanup owner, and unresolved adapters before editing.
-5. Keep candidate tModLoader and Calamity versions labeled unverified until a real Build + Reload and Dedicated Server load succeeds.
+2. Read `AGENTS.md`, `docs/README.md`, `docs/STATUS.md`, `docs/VERSION_MATRIX.md`, `docs/ARCHITECTURE.md`, and `docs/NETWORK_ARCHITECTURE.md` completely.
+3. For First Severance work, read `docs/encounters/first-severance/README.md` and the current spec/implementation plan. Current source named `ThirdSeverance` is legacy until the isolated rename; never infer that old phase plan is still the product target.
+4. For Downed/Revive work, also read ADR-0005, the feature Revive spec, and `docs/TEST_PLAN.md`. For arena work, also read `docs/ARENA_INFRASTRUCTURE.md` and ADR-0003.
+5. State the planned files, authoritative owner, client request path, replicated output, cleanup owner, and unresolved adapters before editing.
+6. Keep candidate tModLoader/Calamity versions unverified until real Build + Reload and Dedicated Server evidence succeeds.
 
-Choose an operating mode before running commands:
+Choose an operating mode before commands:
 
-- **Implementation mode:** edits and generated build output are allowed within the task scope.
-- **Audit-only mode:** do not edit, format, compile, or create bytecode/build output. Capture a baseline with Git when available; otherwise record a sorted SHA-256 inventory of relevant files and compare it at the end. State that changes by concurrent workers cannot be attributed when Git metadata is absent.
+- **Implementation mode:** edits and generated build output are allowed within scope.
+- **Audit-only mode:** do not edit, format, compile, or create bytecode/build output. Capture a Git baseline when available; otherwise record a sorted SHA-256 inventory and compare it at the end. Concurrent-worker changes cannot be attributed without Git metadata.
 
-Read [architecture-map.md](references/architecture-map.md) when choosing a module. Read [raid-authority-checklist.md](references/raid-authority-checklist.md) for any gameplay or networking change. Read [verification-matrix.md](references/verification-matrix.md) before declaring completion.
+Read [architecture-map.md](references/architecture-map.md) when choosing a module, [raid-authority-checklist.md](references/raid-authority-checklist.md) for gameplay/networking changes, and [verification-matrix.md](references/verification-matrix.md) before declaring completion.
 
 ## Place responsibility deliberately
 
-- Put dependency-free value objects and contracts in `Common/Foundation` or `Common/Encounters/Abstractions`.
-- Put reusable Raid-domain rules in `Common/Raids`; keep them free of Terraria, Calamity, network transport, UI, and encounter-specific names.
-- Put authority coordination in `Common/Encounters/Runtime` or a narrow adapter beside the owning common domain.
+- Put dependency-free values/contracts in `Common/Foundation` or `Common/Encounters/Abstractions`.
+- Put reusable Raid-domain rules in `Common/Raids`, free of Terraria, Calamity, transport, UI, and encounter-specific names.
+- Put authority coordination in `Common/Encounters/Runtime` or a narrow adapter beside its common domain.
 - Put Calamity calls only in `Common/Compatibility/Calamity`.
-- Put one encounter's phase plan, parts, mechanics, NPCs, projectiles, tiles, rewards, and tuning under `Content/Encounters/<Feature>`.
-- Put client-only UI, VFX, audio, accessibility, and prediction under `Client`; consume read-only replicas or cue contracts.
-- Never add a feature switch to the global coordinator or packet router. Register through `EncounterDefinition`, policies, and runtime factories.
+- Put one encounter's phase plan, mechanics, NPCs, projectiles, tiles, rewards, tuning, and cue contracts under `Content/Encounters/<Feature>`.
+- Put client-only UI/VFX/audio/accessibility/prediction under `Client`, consuming read-only replicas/cues.
+- Never add feature switches to global coordinator/router code. Register through definitions, policies, and factories.
 
 ## Design authority before implementation
 
-For each new state, answer:
+For each state, answer:
 
-1. Who creates it?
-2. Which stable identity scopes it: Encounter Sequence, Fight ID, Participant ID, connection generation, entity identity, or Core identity?
-3. Which client command can request a change?
-4. What does the server revalidate from its own World state?
-5. Which snapshot or bounded event exposes the result?
-6. What happens on duplicate, stale, reordered, truncated, or malicious input?
-7. Who owns cleanup, and is cleanup idempotent after partial construction?
-8. What happens on disconnect, rejoin, World unload, and Dedicated Server?
+1. Who creates and mutates it?
+2. Which stable identity scopes it: Encounter Sequence, Fight ID, Participant ID, connection epoch, actor, or Core?
+3. Which bounded client command may request a change?
+4. What does the server revalidate from World/player/item state?
+5. Which snapshot/event exposes the result?
+6. What happens to duplicate, stale, reordered, truncated, oversized, or malicious input?
+7. Who owns cleanup, including partial construction and a second call?
+8. What happens on Downed, disconnect/rejoin, slot reuse, terminal transition, unload, and Dedicated Server?
 
-Use machine-readable rejection codes. Never trust player IDs, positions, damage, timers, Fight IDs, Core coordinates, or mechanic success received from a client. Build `SenderWhoAmI` from tModLoader's trusted packet sender argument.
+Use machine-readable rejection codes. Derive sender from tModLoader's trusted `whoAmI`; never trust payload identity, positions, damage, timers, Fight IDs, Core coordinates, held item, or mechanic success.
 
 ## Implement in safe slices
 
-1. Add pure domain values and transitions first.
-2. Add server/SP adapters second.
-3. Add bounded packet DTOs and parse-complete-then-validate handling third.
-4. Add read-only replication and client presentation last.
-5. Keep activation denied when a required authority adapter, Tile Entity resolution, roster validation, or cleanup path is missing.
-6. Register every transient resource with the cleanup scope immediately after creation.
-7. Prefer full convergent snapshots for recovery and bounded events for presentation; never make VFX/audio authoritative.
+1. Add/update accepted docs and pure domain values/transitions.
+2. Add server/SP adapters.
+3. Add fixed/bounded DTOs with parse-complete-then-validate handling.
+4. Add bounded replication and read-only client presentation.
+5. Keep activation denied whenever a required authority/Core/roster/actor/death/cleanup adapter is missing.
+6. Register each transient resource immediately after creation.
+7. Prefer convergent full snapshots for repair and bounded events for presentation; never make VFX/audio authority.
 
-For a Raid mechanic, encode assignment, telegraph start, resolution tick, server result, failure policy, and cleanup. Do not derive success from what a client rendered.
+For each mechanic encode assignment, telegraph start, resolve tick, authority result, soft-failure policy, Downed interaction, and cleanup. First Severance's MVP contains only Pylon, Stack, Spread, and Core exposure; backlog does not expand it.
 
 ## Preserve multiplayer invariants
 
-- One coordinator-managed Boss or Raid per World until an ADR changes the policy.
-- Active encounters are ephemeral; World unload ends and cleans them instead of resuming.
-- A terminal snapshot is published before authority releases the active session.
-- Delayed packets from an older Encounter Sequence cannot revive stale state.
-- Player slot reuse cannot inherit participant state; use stable participant identity plus connection generation.
-- Downed is not ordinary death. Only the Raid authority may enter, revive, expire, or clear it.
-- All-participant Downed and unrecoverable timeout conditions resolve through an explicit Raid failure, never a client-local decision.
-- Outsider handling and arena barriers use warnings, deterministic correction, and bounded escalation; do not spawn unbounded network entities.
-- Dedicated Server code never initializes graphics, shaders, audio, or screen effects.
+- One coordinator-managed Boss/Raid per World until an ADR changes it.
+- Active encounters are ephemeral; unload ends/cleans instead of resuming.
+- Terminal snapshot publishes before the session/projections release.
+- Delayed older Sequence/Fight/revision/epoch/nonce cannot revive/mutate current state.
+- Player-slot reuse cannot inherit participant state.
+- Downed is not ordinary death; only Raid authority enters/revives/expires/clears it.
+- All-Downed/unrecoverable timeout resolves through explicit authority failure.
+- Barrier/outsider response is bounded warning/correction/escalation, not unbounded actors or instant death.
+- Dedicated Server never initializes graphics/shaders/audio/screen effects.
 
 ## Verify honestly
 
@@ -79,24 +80,24 @@ Run the deterministic wrapper:
 python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
 ```
 
-For a read-only review, use the non-writing path:
+For a read-only review:
 
 ```bash
 python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py --audit-only .
 ```
 
-When the pure Raid-domain test project exists, run:
+For pure Raid-domain work:
 
 ```bash
-dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj
+dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
 ```
 
-Then follow `docs/DEVELOPMENT.md` from an exact `ModSources/Convergence` checkout for the pinned project build, interactive Build + Reload, and Dedicated Server smoke tests. Record the enabled Mod versions and client/server log paths described there. If the environment is unavailable, report that verification as missing; static checks and the standalone domain harness are not a successful tModLoader build.
+Then follow `docs/runbooks/WINDOWS_DEVELOPMENT.md` from an exact `ModSources/Convergence` checkout for command build, Build + Reload, Single Player, Host & Play, and Dedicated Server. Missing runtime evidence is `not_run`/`blocked`, never a pass.
 
-Review the final diff for authority leaks, reverse dependencies, unbounded payloads, missing cleanup registration, client-only access on servers, and accidental third-party assets or source.
+Review the final diff for authority leaks, reverse dependencies, unbounded payloads, missing cleanup registration, client-only access on servers, stale documentation catalog/status, and accidental third-party assets/source.
 
-Classify review findings consistently:
+Classify findings:
 
-- **Blocker:** unsafe activation, data/world corruption, security/authority bypass, unrecoverable cleanup, or a missing production adapter required to call the feature playable.
-- **Major:** deterministic correctness, synchronization, compatibility, or testability defect that must be fixed before integration.
-- **Minor:** bounded robustness, documentation, maintainability, or future-proofing issue that does not invalidate the current fail-closed path.
+- **Blocker:** unsafe activation, corruption, authority/security bypass, unrecoverable cleanup, or missing adapter/evidence required to call the feature playable.
+- **Major:** deterministic correctness, synchronization, compatibility, or testability defect required before integration.
+- **Minor:** bounded robustness, documentation, maintainability, or future-proofing issue that does not invalidate fail-closed behavior.

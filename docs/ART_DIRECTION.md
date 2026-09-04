@@ -1,73 +1,88 @@
+---
+doc_id: project.art-direction
+document_type: spec
+status: accepted
+owners:
+  - art
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - project.art_direction
+aliases:
+  - art direction
+  - visual language
+related_code:
+  - Assets
+related_docs:
+  - encounter.first-severance.visual
+  - encounter.first-severance.backlog
+---
+
 # Art Direction
 
 ## Core statement
 
-南極の巨大研究基地が、拘束していた超常存在の覚醒によって「工業設備から儀式装置へ読み替わる」瞬間を描く。機械Bossではなく、観測・封印・分解されていた存在を中心にする。
+極地の巨大研究・収容施設が、封印対象の起動により工業設備から儀式装置へ読み替わる瞬間を描く。既存作品やCalamity assetの形・構図を借りず、低密度でも読める独自の幾何学表現から始める。
+
+## First Severance MVP
+
+The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). Its accepted boundary is one simple Boss NPC/body, one life pool, no separately damageable presentation parts, and readable shielded/exposed states. The central Core/body, one broken ring, two short side arms, exact state names, and their motions are provisional placeholders. Crown/Wings/Heart Casing and other multipart designs are deferred, even though the legacy code plan still mentions them.
 
 ## Shape language
 
-- Arena: 水平・垂直、巨大な柱、計測grid、反復する構造。
-- Boss: 非対称、有機曲線、裂け目、浮遊部位、観測不能な空白。
-- Seal: 円環、同心円、放射線、四方向anchor。
-- Danger: 鋭い三角、断続線、収束するbeam。
-- Safe/assigned: 明確なcircle、diamond、cross、数字・runeの組み合わせ。
+- Arena: horizontal/vertical industrial structure, columns, grids, repeated measurements.
+- Boss MVP: central circle/Core, incomplete ring, two locking arms, strong negative space.
+- Seal: concentric circles, radial anchors, broken continuity.
+- Danger: triangles, segmented lines, converging motion.
+- Stack: circle plus inward motion.
+- Spread: diamond/radial marker plus outward motion.
+- Pylon: stable numbered/shape glyphs distinguishable without color.
+- Revive: restrained cross/linked-pulse language that cannot be mistaken for a damage marker.
 
 ## Palette
 
-基調:
+- ice white / pale cyan;
+- charcoal / black metal;
+- warning red;
+- restrained oxidized dark gold.
 
-- ice white / pale cyan
-- charcoal / black metal
-- warning red
-- oxidized dark gold
+Assignment markers must separate from both arena and Boss palette. Shape, motion, cadence, and text/icon reinforce color.
 
-assignment markerは背景paletteから独立させる。色だけに依存せず、形状とanimation cadenceも変える。
+## Readability hierarchy
 
-## Scale hierarchy
+1. Player and gameplay telegraph.
+2. Assignment/resolve countdown and safe/danger shape.
+3. Boss damageable/undamageable state.
+4. Pylon and revival interactable state.
+5. Decorative particles/background/architecture.
 
-1. Arena architecture: 画面外へ続く最大scale。
-2. Boss silhouette: playerの20～40倍に見えるが、hit areaは読みやすく分割。
-3. Breakable parts: 画面上で常に識別可能。
-4. Telegraph: gameplay上の最優先layer。
-5. Decoration: telegraphより暗く、低contrast。
+Boss scale may be visually large, but hitbox and damage gate must be obvious. Decoration is darker/lower contrast than telegraphs. Reduced/Minimal VFX must preserve all mechanics.
 
-## Boss construction proposal
+## UI and accessibility
 
-- central body / void
-- Crown part
-- left/right Wingsまたはmembrane assemblies
-- Heart Casing
-- exposed Core
-- separate emissive masks
-- code-driven appendages and primitive trails
-
-部位は別NPC/描画componentとして扱える構造にし、sprite designもhitboxと破壊状態に対応させる。
-
-## UI and typography
-
-- phase titleは短い英語名 + localization。
-- countdownは遠距離から読める太い数字。
-- Stack、Spread、Baitは固有shapeを固定。
-- warning textは装飾より情報階層を優先。
-- 大字幕中もplayer、marker、safe areaを隠さない。
+- short localized phase/substate names;
+- readable countdown at 100–150% UI scale;
+- distinct Stack, Spread, Pylon, Downed, and Revive shapes;
+- no color-only assignment;
+- warnings do not cover players, markers, or safe areas;
+- screen shake, flash, chromatic effects, and dense particles are reducible;
+- test 2/3/4-player overlap at 1080p, 1440p, ultrawide, and supported UI scales.
 
 ## Forbidden references
 
-- EVA機体に似た頭部、顎、肩、拘束具の組合せ
-- NERVに似たleaf/logo/seal
-- 使徒の顔・core・maskの直接再現
-- 映画の構図、字幕文言、固有名詞、camera timingの再現
-- Calamity既存Bossのsprite/texture/particleの抽出・加工
-- 特定の存命artist名をstyle promptとして指定
+- recognizable EVA-like head/jaw/shoulder/restraint combinations;
+- NERV-like logos/seals or other trademarked iconography;
+- direct reproduction of existing angel/face/Core/mask motifs, cinematic framing, timing, or subtitles;
+- extraction, repainting, tracing, or remixing Calamity sprites/textures/particles;
+- prompts requesting a living artist's exact style.
 
-## Production checklist
+## Production order
 
-- concept 3～5案
-- silhouette-only review
-- 100% scale readability review
-- parts-separated key art
-- grayscale telegraph test
-- color-vision test
-- 2/3/4-player marker overlap test
-- Reduced/Minimal VFX mode
-- provenance entry before asset merge
+1. placeholder body/ring/Core/Pylon and mechanic primitives;
+2. in-game silhouette/hitbox/telegraph test;
+3. 3–5 original concept options after mechanics are stable;
+4. selected key poses and component separation;
+5. pixel cleanup and animation;
+6. grayscale/color-vision/reduced-VFX/multiplayer QA;
+7. provenance entry before merge.
+
+Do not produce elaborate multipart art to match code scheduled for deletion.

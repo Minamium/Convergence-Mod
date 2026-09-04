@@ -1,96 +1,109 @@
+---
+doc_id: project.brief
+document_type: overview
+status: accepted
+owners:
+  - project
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - project.product_scope
+aliases:
+  - project brief
+  - product direction
+related_code:
+  - build.txt
+  - Common/Compatibility/Calamity
+related_docs:
+  - project.status
+  - encounter.first-severance.overview
+---
+
 # Project Brief
 
 ## One-line concept
 
-Shadowspec級装備の2～4人パーティーが、南極の終末研究基地に展開された固定Raidフィールドで、世界規模の収束現象を止める最終決戦。
+Shadowspec級装備の2～4人パーティーが、極地の終末研究・収容施設に展開された固定Raidフィールドで、DPSと位置取りを協力して処理する最終決戦。
 
 ## Product position
 
-本Addonは、Calamity終盤の個人回避と火力最適化を土台に、MMORPG Raid型の協力ギミックをTerrariaの2D移動へ翻訳する。単純に弾幕密度とHPを増やしたSuperbossにはしない。
+Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、MMORPG Raid型の協力ギミックをTerrariaの2D移動とserver authorityへ翻訳する。弾幕密度とHPだけを増やしたSuperbossにはしない。
 
-想定プレイヤーは次の条件を満たす。
+想定party:
 
-- Exo MechsおよびSupreme Calamitas撃破済み
-- Shadowspec級装備を利用可能
-- 2～4人の固定または準固定パーティー
-- 5～12分程度の反復攻略を受け入れられる
+- Exo MechsおよびSupreme Calamitas撃破済み;
+- Shadowspec級装備を利用可能;
+- 2～4人の固定または準固定party;
+- 5～12分程度の反復攻略を受け入れられる。
 
-Soloは初期リリースの対象外とする。将来対応する場合は、協力ギミックを削るだけでなく独立した個人Superbossとして再設計する。
+5～12分は将来拡張したRaid全体のproduct goalであり、最初のvertical sliceは2～4分を暫定目標とする。Soloは初期release対象外。将来対応するなら協力ギミックの数値を縮めるだけでなく、独立した個人Superbossとして設計する。
 
-最初のRaidは基盤の実証対象であり、Addon全体の設計境界ではない。長期的には独立Boss、追加Raid、World content、進行要素、Item、Utility、演出基盤まで拡張し、大型Content Mod級の規模を目指す。共通基盤へThird Severance固有の名称やルールを持ち込まず、逆に実利用が一つしかない機能を早期に過剰共通化しない。
+最初のRaidは基盤の実証対象であってAddon全体の上限ではない。長期的には独立Boss、追加Raid、World content、進行、Item、Utility、演出まで広げ、Calamity級の独自Content Modを目指す。
 
-## Staged dependency strategy
+## Dependency strategy
 
-The initial release is a Calamity addon, but Calamity is not the permanent owner of the Raid architecture.
+- **Stage A — Calamity addon:** Calamityの進行、class連携、Shadowspec級balanceを隔離adapter越しに利用し、最初のRaidを完成させる。
+- **Stage B — Portable Raid core:** project-ownedな進行/class/balance capabilityへ置換し、Encounter、Networking、Arena、Raid domainからCalamity型と名称を排除する。
+- **Stage C — Standalone Content Mod:** 独自進行、素材、装備、recipe、World content、balanceを実装し、hard dependencyを外す。残す場合のCalamity対応はoptional adapterとして再決定する。
 
-- **Stage A — Calamity addon:** use Calamity progression, class integration, and Shadowspec-level balance through the compatibility boundary.
-- **Stage B — Portable Raid core:** replace progression, class, and balance assumptions with project-owned ports so Encounter, Networking, Arena, and Raid domains do not know Calamity types.
-- **Stage C — Standalone content Mod:** provide original progression, materials, equipment, World content, and balance, then remove the hard dependency. Any remaining Calamity support becomes an optional adapter.
-
-Stage transitions are explicit milestones rather than an early rewrite:
-
-- Calamity APIs remain isolated in `Common/Compatibility/Calamity`.
-- Encounter and Raid code consume project-owned contracts, never copied Calamity implementation or assets.
-- Removing `modReferences = CalamityMod` is gated by replacement content and a new compatibility/release matrix.
-- Milestone 9 inventories the remaining coupling and defines the Standalone roadmap after the first addon release is stable.
+`modReferences`の削除だけでStandaloneにはならない。各stageはbuild/load/multiplayer/release matrixを持つ。詳細は [ADR-0006](adr/0006-staged-calamity-independence.md)。
 
 ## Design pillars
 
-1. **Execution** — 回避、ダッシュ、位置取り、火力維持。
-2. **Coordination** — 頭割り、散開、ペア処理、誘導、同時攻撃。
-3. **Optimization** — 複数DPSチェック、Burst Window、装備とクラス構成。
-4. **Strategy** — 部位破壊による後続ギミックの選択的弱体化。
-5. **Adaptation** — 対象指定、人数別役割、失敗・死亡・離脱後の立て直し。
+1. **Execution** — 回避、dash、位置取り、火力維持。
+2. **Coordination** — 頭割り、散開、蘇生、将来のpair/誘導。
+3. **Optimization** — Pylon DPS、Core burst、装備とparty構成。
+4. **Clarity** — 死因、assignment、成功/失敗、次の改善が読める。
+5. **Recovery** — 軽微な失敗とDownedを立て直せるが、立て直しには機会費用がある。
+6. **Extensibility** — feature ownershipとserver/client境界が追加Boss/Raidを妨げない。
+
+## First Raid
+
+最初のRaidは`First Severance` / `第一断絶`。target code name/keyは`FirstSeverance` / `first_severance`。現行コードの`ThirdSeverance`は未改名のlegacy bootstrapである。
+
+最初のplayable loop:
+
+```text
+起動 -> Boss出現 -> Pylon DPS -> 頭割り -> 散開 -> Core露出
+                                           -> HPが残ればPylonへ戻る
+```
+
+頭割りはserver-owned damage poolを必要人数で分配する。Raid中のeligible lethalはDownedへ変換し、他playerが専用itemを使ってchannelして蘇生する。BossのAccepted境界は単純な単一NPC/bodyであることまでで、中央Core、破損円環1本、左右アーム2本は最初のprovisional placeholderとする。
 
 ## Player experience goals
 
-- 死因と改善方法を戦闘中または直後に理解できる。
-- 一人の軽微なミスはSoft Failureとなり、回復可能な不利へ変換される。
-- 全員生存と正確な連携は、より短い戦闘時間と完成した演出で報われる。
-- クラス構成は攻略方法を変えるが、特定クラスを必須にはしない。
-- 部位破壊の選択により、同じボスに複数の攻略ルートが生まれる。
+- 2～4人で同じphase、timer、assignment、結果が見える。
+- 一人の通常ミスはsoft failureになり、即座に全滅させない。
+- DPSを出す時間、mechanicへ移動する時間、蘇生する時間が意味あるtradeoffになる。
+- 特定classがいなければ処理不能、という設計にしない。
+- host/non-host、高ping、途中切断でauthority結果を変えない。
+- 演出を減らしてもtelegraphとstateが読める。
 
 ## Setting and presentation
 
-舞台は仮称 `Erebus Polar Citadel`。氷床下の巨大工業基地で、観測・拘束されていた超常存在 `The Choir Beneath the Ice` が起動する。
+舞台は極地の巨大工業研究・収容施設。氷、暗い金属、白、赤、黒、円環、封印柱、観測装置、無機質な警告を視覚語彙とする。
 
-視覚言語は、氷、暗い金属、白、赤、黒、巨大な円環、封印柱、観測装置、無機質な警告表示を中心とする。生物的・宗教的形状と工業設備を融合するが、既存作品の機体、ロゴ、顔、固有用語、構図を再現しない。
+`The Null Cantor`、`The Choir Beneath the Ice`、`Erebus Polar Citadel`、`Pale Meridian Containment Complex`などはすべてprovisional。既存作品の機体、logo、顔、固有語、構図やCalamity assetを再現・抽出しない。
 
-## Music direction
+## Initial implementation scope
 
-クラシックの構造感と終末的な合唱・管弦楽を用い、フェーズごとの音楽的役割を明確にする。ベートーヴェン第九を素材にする場合も、保護期間が満了した原曲そのものから新規に編曲・打ち込み・録音する。既存の録音、映画音源、現代編曲、既存MIDIを流用しない。
+- Windowsでの候補version build/load/Dedicated Server確定;
+- atomic `ThirdSeverance` → `FirstSeverance` rename;
+- Core/Arena/roster/Ready/logical Barrier/cleanup;
+- bounded transport、feature snapshot、client replica;
+- simple Boss/Pylons and repeated loop;
+- server-resolved Stack/Spread/Core damage window;
+- instrumented and tested Downed/Revive adapter/item;
+- 2/3/4-player multiplayer acceptance evidence。
 
-初期実装はリアルタイム作曲を行わず、フェーズ別の完成ミックスと短いTransition/Stingerを切り替える。Stem同期は、戦闘同期が安定した後に再評価する。
+## Non-goals for the first playable slice
 
-## Reward direction
+- Part Break、Targeted Line/Bait、Personal Effigies、Split Reality、Last Stand;
+- multipart Crown/Wings/Heart Casing;
+- complete Boss attack catalog、final balance、reward、music、shader、production sprite;
+- Subworld/dimension、Solo、multiple simultaneous arenas;
+- Calamity内部実装/assetのcopyまたはredistribution;
+- Stage C standalone content。
 
-Shadowspecを単純に数値で超えるTierは作らない。報酬は特殊挙動、Party Mark、部位破壊補助、攻撃履歴の模倣、支援Utilityなど、最終装備環境へ新しいビルドと遊び方を追加する。
+## Viable first-Raid definition
 
-## Initial scope
-
-最初の実装範囲はMilestone 0とMilestone 1のみ。
-
-- 正確な互換バージョンの固定
-- 最小Modのクライアント／Dedicated Serverビルド
-- Polar Foundation Core
-- Arena validation
-- 2～4人のJoin／Ready
-- Tileを大量生成しない境界Barrier
-- 単一Raid制約とFight ID
-- 中断、Core破壊、World unload時の完全Cleanup
-- modular source boundary、protocol guard、repository policy、asset provenance
-
-頭割り、Spread、Boss Dummy、Downed／Reviveは、この土台が安定した後のVertical Sliceへ含める。
-
-## Non-goals for the first implementation
-
-- 完成版Boss AI、報酬、楽曲、Shader、Sprite
-- SubworldまたはDimension
-- Soloバランス
-- 複数Arenaの同時進行
-- リアルタイム音楽合成
-- Calamity内部実装のコピーまたは再配布
-
-## Definition of a viable foundation
-
-Milestone 1は、2～4人とDedicated Serverで同一のArena状態が見え、Core起動、Ready、Barrier、キャンセル、Core破壊、切断、World unloadのどの経路でも一時状態が残らないときに完了する。
+The slice is viable only when 2–4 players can activate, Ready, clear/fail, Down/revive, disconnect, cancel, and unload on Dedicated Server with identical server-owned outcomes and zero stale exact-Fight state. “The domain class exists” or “one client loads” is not completion.

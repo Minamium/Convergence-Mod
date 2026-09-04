@@ -1,57 +1,72 @@
-# Audio Cue Sheet
+---
+doc_id: project.audio-cues
+document_type: spec
+status: provisional
+owners:
+  - audio
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - first_severance.audio_cues
+aliases:
+  - audio cue sheet
+  - First Severance music
+related_code:
+  - Assets
+related_docs:
+  - project.asset-pipeline
+  - encounter.first-severance.spec
+---
 
-初期の作曲・実装用working sheet。秒数と小節数はprototype後に固定する。
+# First Severance Audio Cue Sheet
+
+Audio is deferred from the first gameplay acceptance gate. This sheet reserves a minimal cue vocabulary without locking composition, duration, or final names.
 
 ## Global rules
 
-- gameplay clockはserver tick。音声再生位置を判定へ使わない。
-- cueは`CueId`、`CueStartTick`、`TransitionType`でclientへ通知する。
-- telegraphには必ず視覚情報を併用する。
-- masterは48 kHz / 24-bit WAV、game assetはloop metadata付きOGGを第一候補とする。
-- loudness targetは実機でCalamity music/SFXと比較して決定する。
+- Gameplay clock and mechanic resolution use server ticks only.
+- Server replicates cue ID/start tick or a feature-state transition; playback position never controls gameplay.
+- Every gameplay audio signal has a visual/shape/text equivalent.
+- Client may restart/approximate audio after join/rejoin without changing state.
+- Dedicated Server never initializes audio.
+- Final runtime assets require provenance and license review.
 
-## Proposed cues
+## Provisional cues
 
-| Cue ID | Phase | Tempo concept | Loop | Transition |
-|---|---|---:|---|---|
-| `ACTIVATION_01` | Base Activation | free -> 60 BPM | no | silenceからfade in |
-| `SEAL_01` | Seal Release | 120 BPM, scherzo | yes | downbeatで開始 |
-| `PARTS_01` | Part Break | 120 BPM | yes | short stinger |
-| `COORD_01` | Coordination | 120 BPM | modular | mechanic phrase境界 |
-| `EFFIGY_01` | Personal Effigies | 90/120 BPM | yes | player motifsを統合 |
-| `WEAK_01` | Weak Point | 60 BPM chorale | no/short | exposed eventでhit |
-| `ENRAGE_01` | Hard Enrage | 150 BPM | yes | hard cut + impact |
-| `LAST_01` | Last Stand | 120 BPM fixed form | no | server sequence start |
-| `VICTORY_01` | Clear | free | no | final core hit |
-| `WIPE_01` | Wipe | free | no | harmony collapse |
+| Cue ID | Use | Loop | Required sync |
+|---|---|---|---|
+| `ACTIVATION_01` | Core activation/Boss spawn | no | accepted encounter start/intro |
+| `PYLON_01` | Pylon DPS check | yes | substate start and deadline |
+| `STACK_01` | Stack marker lock/resolve accent | no | assignment and resolve cue |
+| `SPREAD_01` | Spread marker lock/resolve accent | no | assignment and resolve cue |
+| `CORE_OPEN_01` | Core exposure/burst | short or loop | authoritative gate open/close |
+| `OVERLOAD_01` | Pylon failure/escalation | no | committed Overload change |
+| `REVIVE_START_01` | local channel feedback | loop/short | accepted lease only |
+| `REVIVE_COMPLETE_01` | restrained recovery cue | no | authority completion only |
+| `VICTORY_01` | Boss life-zero Victory | no | terminal outcome |
+| `DEFEAT_01` | Raid Defeat | no | terminal outcome |
 
-## Motif plan
+Do not author active cues for Part Break, Personal Effigies, or Last Stand unless those backlog mechanics are separately promoted.
 
-- Foundation motif: open fifth + rising semitone cluster。
-- Identity motif: playerごとにinterval/orderを変えられる4音cell。
-- Convergence motif: 複数cellが同じcadenceへ集まる。
-- Overload motif: bass noteを半音ずつ上げ、安定和音を侵食。
-- Weak Point: chorale textureへ一時的に完全なthirdを導入。
-- Last Stand: public-domain原曲から採譜した素材を、新規harmony/rhythm/orchestrationで変奏。
+## Motif direction
 
-## Mechanic accents
+- facility/Foundation: open fifth, mechanical pulse, measured grid;
+- containment/Core: narrow semitone cluster opening into a clearer interval;
+- Overload: progressively destabilized bass/harmony without requiring pitch recognition for gameplay;
+- revive: concise linked/consonant response, rate-limited to avoid overlap;
+- victory/defeat: terminal contrast that follows, never announces before, authority outcome.
 
-- Stack marker lock: low percussion + unified choir consonant。
-- Spread marker lock: four spatially distinct high attacks。ただしstereo定位だけに依存しない。
-- Bait target: short identifiable pulse。
-- Pylon timeout: remaining barsを明確にするostinato reduction。
-- Revive complete: restrained consonant cue。連続再生を制限。
+## Archived composition direction
 
-## Deliverables per cue
+The original brief proposed a newly authored arc inspired by the public-domain composition of Beethoven's Ninth: sparse low-register formation for activation, scherzo-like percussion for coordination/DPS pressure, a slower chorale character for Core exposure, participant-specific fragments for Personal Effigies, and a final transformed theme whose harmony reflects mechanic failures or full-party survival. This is a creative seed, not a required score or a request to imitate an existing film arrangement.
 
-- MIDI source
-- MusicXMLまたはscore PDF
-- DAW project and version
-- tempo map
-- full mix WAV
-- game OGG
-- optional stems
-- loop sample positions
-- composer/performer/library attribution
-- license record
-- in-game test notes
+If retained, work must begin from a verified public-domain score and a new project-owned arrangement, orchestration/MIDI, performance or render, and master. Never reuse or closely reproduce a film, CD, stream, modern arrangement, MIDI, sample library, choir recording, or SoundFont without separately verified rights. See [Asset Pipeline](ASSET_PIPELINE.md) and `Assets/ATTRIBUTION.md` before production.
+
+## Deliverables when production begins
+
+- project-owned composition source (MIDI/MusicXML/score as applicable);
+- tempo map and cue-to-tick notes;
+- DAW/tool/library/version/license record;
+- full mix master and reviewed game export;
+- loop sample positions and transition tails;
+- composer/performer credits and `Assets/ATTRIBUTION.md` entry;
+- in-game client/join/reload/accessibility notes.

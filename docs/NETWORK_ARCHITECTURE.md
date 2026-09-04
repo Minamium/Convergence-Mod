@@ -1,184 +1,196 @@
+---
+doc_id: project.network-architecture
+document_type: governance
+status: accepted
+owners:
+  - networking
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - architecture.network_authority
+  - architecture.packet_policy
+aliases:
+  - network architecture
+  - replication
+related_code:
+  - Common/Networking
+  - Common/Encounters/Runtime
+  - Common/Raids/Revive
+related_docs:
+  - project.architecture
+  - encounter.first-severance.plan
+  - verification.test-plan
+---
+
 # Network Architecture
 
-Implementation status: Milestone 0 includes the protocol version, explicit packet IDs, Fight ID envelope parsing, direction checks, bounded rejection logs, a safe no-op router, typed authority commands, and a read-only client replica. Typed fixed/bounded packet decoders and serialization begin in Milestone 1; no packet currently mutates gameplay state.
+## Implementation status
+
+Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, safe no-op routing, typed authority foundations, and ordered read-only replica/tombstone behavior.
+
+Not implemented: payload DTO codecs/handlers, server transport/broadcast, First Severance feature snapshot/deltas, revive packets, real multiplayer mutation, or join/rejoin snapshot delivery. No current packet changes gameplay. See [Status](STATUS.md).
 
 ## Goals
 
-- 2～4人とDedicated Serverで同一のRaid状態を維持する。
-- 高pingやpacketの遅延・重複で勝敗が変わらない。
-- クライアントが割当、ダメージ判定、勝敗を確定できない。
-- 途中参加者へ完全snapshotを送れる。
-- Cleanupを何度呼んでも安全にIdleへ戻せる。
-- 見た目の密度を上げてもnetwork trafficを比例増加させない。
+- 2–4 players and Dedicated Server observe the same Raid state.
+- Delay, duplication, reordering, stale fights, or high ping cannot change authority outcomes.
+- No custom feature packet can directly declare participant identity, DPS, position-check success, assignment, revive completion, life, or victory.
+- Join/rejoin/revision gaps recover from a bounded full snapshot.
+- Cleanup and terminal state remain observable even after the active runtime releases.
+- Presentation density does not scale custom traffic every tick/particle.
 
-## Authority model
+## Threat model and inherited Terraria trust
 
-サーバーまたはSingle Playerのlocal authorityのみが次を更新する。
+The first slice targets cooperative multiplayer with unmodified tModLoader/Calamity clients. Convergence authenticates custom-message direction/sender bindings and owns feature results, but Terraria's ordinary player movement, item, projectile, hit, and life replication still supplies some server-observed facts. “Server-observed” does not mean cryptographically trustworthy or cheat-proof against a modified client.
 
-- Raid lifecycleとFight ID
-- Arena boundsとCore identity
-- 参加者、Ready、Downed、Revive
-- Phase、phase start tick、mechanic assignment
-- Pylon、part、clone、weak pointの状態
-- Weakness、Overload、Revive Token
-- DPS checkと勝敗
-- 当たり判定を持つentityのspawn
+The implementation must not overclaim anti-cheat. It prevents custom Convergence packets from directly setting outcomes and validates exact Fight, actor ownership, lifecycle, damage gate, arena bounds, stable bindings, and plausible state at the latest measured authority seam. Full movement/hit anti-cheat, client attestation, and reconciliation against arbitrary modified clients are outside the first slice unless separately specified and tested.
 
-クライアントが担当するもの:
+## Authority state
 
-- input request
-- UI、字幕、marker、screen shake
-- 当たり判定を持たないparticle、trail、背景弾幕
-- server eventから再構築できる音響演出
-- 境界の予測的なmovement clamp
+Server/SP owns lifecycle/Fight identity, Core/Arena, frozen roster and epochs, Ready, active substate/deadlines/assignments, Boss/Pylon actor state, Stack/Spread resolution, Boss life/damage gate, Downed/Revive/tokens, Overload, outcome, and owned actor spawn. Normal combat enters through the measured Terraria/tModLoader hit pipeline; the feature authority decides whether the exact-Fight actor may accept that observed hit and derives progress only from committed actor life, never from a custom DPS report.
 
-## Raid state machine
+Clients own input intent, UI/subtitles/markers, decorative VFX/audio, presentation interpolation, and optional predictive Barrier clamp. Prediction never becomes truth.
+
+## Lifecycle
 
 ```text
-Idle
-  -> Validating
-  -> Preparing
-  -> Active
-  -> Resolving
-  -> Cleanup
-  -> Idle
+Idle -> Validating -> Preparing -> Active
+                       |           | \
+                       |           |  +-> [optional Resolving] -> End
+                       +-----------+-----------------------------> End
+External forced end ---------------------------------------------> End
+                                                                   |
+                                                                   v
+                                                               Cleanup -> Idle
 ```
 
-`Idle`はactive sessionが存在しないprojectionであり、Session内部の遷移先ではない。Raidの参加選択、Ready、開始countdownはgeneric `Preparing`内のRaid substateとする。
-
-`Validating`失敗、Ready timeout、起動者cancel、Core破壊、参加者不足、全滅、Boss消失、World unloadはすべて`Cleanup`へ入る。例外経路から直接`Idle`へ戻さない。Cleanup時のEncounter Sequence、Fight ID、最終Revision、End Reasonをterminal snapshot/outboxへ確定してからactive sessionを外す。
-
-Runtimeは`Tick`から`EncounterRuntimeUpdate`を返し、legal transition、end reason、observable changeをauthorityへ要求する。Coordinatorへのglobal逆参照や、非terminal lifecycleへEnd Reasonを直接書く経路は持たない。
-
-## Runtime state decomposition
-
-単一の巨大な`RaidRuntimeState`を作らず、責任ごとに分割する。
-
-```text
-EncounterSession
-  Identity      : EncounterSequence, FightId, definition key, protocol/schema identity
-  Lifecycle     : lifecycle, revision, end reason
-  RaidRoster    : stable ParticipantId <-> current player slot
-  Arena         : tile bounds, Core anchor, validation state
-  Phase         : phase ID, start tick, loop, random stream
-  Mechanics     : assignments and authoritative results
-  Ownership     : compact owner token -> NPC/Projectile registry
-  FeatureState  : Third Severance-owned snapshot payload
-```
-
-Common Encounter stateは通常Bossへも適用できる最小部分だけを持つ。Ready、Roster、Revive等はRaid sessionの`Preparing`/`Active` substateへ置き、通常Bossへ強制しない。
-
-player nameやdisplay stringを権威状態に保存しない。Fight内で固定した`ParticipantId`と現在のplayer slotをRosterが対応させ、切断時に明示的に無効化する。client申告のUUIDや名前だけでRejoin本人性を決めない。
+Raid Ready/roster is a `Preparing` substate, not a generic lifecycle addition. `Resolving` is optional and requires its own later tick; First Severance uses direct End for the initial slice. Every failure/cancel/unload reaches Cleanup; no exception path jumps directly to Idle. Terminal Encounter Sequence/Fight ID/revision/end reason is published before release.
 
 ## Packet envelope
 
-すべてのcustom packetは共通headerを持つ。
+Every custom packet begins with:
 
 ```text
 ProtocolVersion : ushort
 PacketType      : byte
-EncounterSeq    : ulong (World内で単調増加)
-FightId         : 16 bytes (active fightに関係する場合)
+EncounterSeq    : ulong
+FightId         : 16 bytes
 Revision        : uint
-Payload         : type-specific fixed/bounded schema
+Payload         : fixed/bounded per-type data
 ```
 
-Packet IDは明示値を持ち、廃止後も再利用しない。初期PacketType:
+Existing packet IDs are explicit and reserved:
 
-| Direction | Packet | Purpose |
-|---|---|---|
-| C -> S | `RequestActivate` | Core位置を指定して検査を要求 |
-| C -> S | `RequestSetReady` | 自分のReady状態だけを要求 |
-| C -> S | `RequestCancel` | 起動者によるReady中のcancel要求 |
-| C -> S | `RequestSnapshot` | join/rejoinまたはrevision mismatchからの復旧 |
-| S -> C | `Snapshot` | 完全なruntime state |
-| S -> C | `StateChanged` | lifecycle/phaseなど小さなdelta |
-| S -> C | `ParticipantChanged` | join/ready/disconnect |
-| S -> C | `ValidationResult` | structured issue list |
-| S -> C | `EncounterEnded` | reasonと最後のrevision |
+| ID | Direction | Name | Current behavior |
+|---:|---|---|---|
+| 1 | C → S | `RequestActivate` | direction parsed; handler not implemented |
+| 2 | C → S | `RequestSetReady` | direction parsed; handler not implemented |
+| 3 | C → S | `RequestCancel` | direction parsed; handler not implemented |
+| 4 | C → S | `RequestSnapshot` | direction parsed; handler not implemented |
+| 64 | S → C | `Snapshot` | direction parsed; transport not implemented |
+| 65 | S → C | `StateChanged` | direction parsed; transport not implemented |
+| 66 | S → C | `ParticipantChanged` | direction parsed; transport not implemented |
+| 67 | S → C | `ValidationResult` | direction parsed; transport not implemented |
+| 68 | S → C | `EncounterEnded` | direction parsed; transport not implemented |
 
-クライアントから送られたplayer ID、Fight ID、Core位置を信用しない。`whoAmI`、server上のTile Entity、距離、現在state、rate limitから再検証する。
+Future revive intent needs logical `RequestStartRevive(targetParticipantId, requestNonce)` and `RequestCancelRevive(channelNonce)` forms. Assign new unused explicit numeric IDs only in their implementation commit; never renumber existing values. Completion is server-to-client state/event, never a client request.
 
-`EncounterStartCommand.RequestedAnchor`はraw requestである。global authority policy通過後も`AcceptedEncounterStart.RequestedAnchor`のままであり、まだArena/Core検証済みとは呼ばない。`Validating` runtimeがserver上のCore Tile Entityから実anchor/boundsを解決し、structured validation resultが成功するまでWorldを変更しない。Third Severanceはこの実装が入るまでfeature policyで起動不能にしている。
+## Decode and validation order
 
-## Snapshot and delta policy
+1. bound and parse the complete type-specific DTO without mutation;
+2. validate protocol, packet type, direction, enum/count/coordinate/string ranges;
+3. derive sender from `whoAmI` and reject non-player/sentinel slots;
+4. validate Encounter Sequence, exact Fight ID, revision/nonce, lifecycle;
+5. resolve stable Participant ID and current server binding/connection epoch;
+6. validate feature-specific Core/range/item/state/rate conditions;
+7. submit an authority command for deterministic tick processing.
 
-- WorldDataの`ModSystem.NetSend/NetReceive`には、永続world flagと「active fightが存在するか」の最小情報だけを置く。
-- 完全なactive fight stateは`EncounterSnapshot`とfeature/Raid-specific bounded payloadで送る。
-- clientは未知PacketType、不正なshape、同じEncounter Sequenceなのに異なるFight IDを受信したらstateを書き換えない。delta/eventのunknown Fight IDまたはrevision gapではsnapshotを再要求する。この復旧transportはMilestone 2で実装する。
-- full snapshotは、より大きいEncounter Sequenceへの切替とrevision jumpを受理する。replicaは`(EncounterSequence, Revision, AuthorityTick)`を辞書順で適用し、同SequenceのFight ID差異とterminal後の非Idle stateを拒否する。
-- serverはphase、roster、mechanic result等の粗いstate変更ごとにRevisionを1増やす。毎hitや毎tickのHP変化には使わない。
-- deltaは同じFight IDかつ新しいRevisionの場合だけ適用する。
-- timerを毎tick同期せず、`PhaseStartTick`と定期的な低頻度clock correctionを送る。
+Never trust a player index/name/UUID, Core coordinate, distance, DPS/hit, mechanic success, life value, or timer carried by a custom payload. `RequestedAnchor` remains a candidate until the server resolves a real Foundation Core TE and validates prospective bounds. Range and position checks use the authority process's current Terraria state under the cooperative-client threat model above, not coordinates copied from the feature request.
 
-## Tick and random policy
+Do not use `BinaryReader.BaseStream.Length` as a Mod packet boundary: tModLoader may expose a shared receive buffer. Fixed fields and individually bounded counts/strings are the safe contract.
 
-- mechanicsの乱数はserverのみが消費する。
-- clientへは結果またはVFX再生用seedを送る。
-- `Main.GameUpdateCount`を直接永続化しない。Fight内のserver tickを基準にする。
-- client clockは表示用に補間してよいが、判定tickはserver値を使用する。
+## First Severance full snapshot
 
-server-side Raid tickの第一候補は`ModSystem.PostUpdateWorld()`とする。これはSingle Playerまたはserverで呼ばれるため、state transitionの入口を一か所に集約しやすい。
+The feature snapshot is bounded by the 2–4 roster and actor caps. Minimum content:
 
-Milestone 0ではSingle Player projectionだけがbounded snapshot outboxをread-only replicaへ接続する。live full snapshotは最新値へcoalesceし、terminal snapshotを優先して最大64件保持する。これは無制限のevent journalではないため、Milestone 1のserver transportは毎tick消費し、Milestone 2ではack/rejoin snapshotで配送保証を完成させる。Multiplayerのserialize/send/typed dispatch/join snapshotは未実装であり、Third Severance activationも無効である。
+- generic sequence/Fight/lifecycle/revision/authority tick/end reason plus the explicit byte-valued `FirstSeveranceTerminalCause` (`None` while live);
+- frozen participant IDs, current slots/epochs, connection/Ready/combat state;
+- validated arena/Core identity and Barrier state;
+- active substate, start/resolve tick, loop index, Overload;
+- Boss compact handle, life ratio, damage-gate and visual state;
+- at most four Pylon handles and states;
+- current Stack target/assignment revision/reissue state or Spread participant set, resolve tick, committed result;
+- normal/penalized exposure state;
+- bounded `RaidReviveSnapshot`: tokens, combat states/deadlines, current leases/nonces;
+- owned actor/schema version needed to reject stale references.
 
-## Tile Entity synchronization
+Player names/display strings are presentation lookup, not authority identity.
 
-Polar Foundation Coreは`ModTileEntity`とし、永続情報と表示に必要な最小stateのみ`NetSend/NetReceive`する。Core操作によるitem spawnやstate changeはserverで実行する。Tile EntityはArena encounterそのものを所有せず、`EncounterCoordinatorSystem`へ渡すrequest anchorとして扱う。
+## Snapshot/delta policy
 
-tModLoader 1.4.4の`ModTileEntity`に汎用の`netUpdate` flagはない。設置は`Generic_HookPostPlaceMyPlayer`、破壊は`KillMultiTile`から明示的なTE削除、更新は`MessageID.TileEntitySharing`またはcustom packetで同期する。
+- Full snapshot accepts a newer Encounter Sequence and repairs revision gaps.
+- Delta/event applies only to exact current sequence/Fight and expected newer revision.
+- Replica orders `(EncounterSequence, Revision, AuthorityTick)` and retains terminal tombstones so delayed live state cannot revive an ended fight.
+- Unknown/stale/duplicate messages do not mutate state; revision gaps request a snapshot.
+- Server increments revision on observable coarse changes, not every hit/tick.
+- Send phase start/resolve ticks and occasional clock correction; clients interpolate countdowns.
+- Sync authoritative actor handles/states, not decorative particles/trails/audio samples.
+- Live snapshots may coalesce, but terminal state has priority and bounded retention.
 
-## Entity ownership
+## Deterministic tick policy
 
-一時NPCとProjectileはserver-side registryでFight内compact owner tokenへ関連付ける。`Guid`を`ai[]`へ格納しない。
+Authority alone consumes gameplay randomness and transmits assignments or presentation seeds. Feature commands for one tick are collected/bounded and resolved in stable order where arrival order would matter, as already done for competing revive starts. The owning First Severance runtime—not an individual mechanic or the Revive boundary—selects the single transition returned to the generic coordinator.
 
-- `GlobalNPC` / `GlobalProjectile`のper-entity dataへcompact tokenを保持
-- server側registryでtoken、`whoAmI`、Fight IDを対応付ける
-- `ai` / `localAI`を使用する場合もtokenだけとし、registryを正本にする
+One authority tick settles in this order:
 
-文字列tagや全entity scanへ依存しない。Cleanupはregistryを主に使い、defensive scanを補助にする。
+1. collect complete bounded feature intent and server-observed Terraria hit, position, connection/epoch, and control facts;
+2. validate exact-Fight actors/damage gates, apply accepted Boss/Pylon hit results, and collect participant lethal facts without resolving a due Stack/Spread;
+3. apply pre-mechanic lethal transitions, channel interrupts, and final observed connection/epoch changes in deterministic type/Participant-ID order;
+4. sample the now-current connected Alive set/positions, resolve the one due mechanic, and apply its resulting lethal transitions in Participant-ID order;
+5. apply one complete stably ordered revive-start batch, then call `RaidReviveService.CommitTick` exactly once;
+6. gather feature-observed terminal candidates and select `EncounterActorMissing > AnchorDestroyed > Invalidated > Victory > Defeat > Cancelled > nonterminal`;
+7. commit at most one nonterminal edge, or store generic + feature terminal cause and return direct `EncounterRuntimeUpdate.End` without first requesting `Resolving`;
+8. increment/publish one coherent feature/generic revision and terminal tombstone before cleanup releases state.
 
-## Barrier synchronization
+Thus a participant who becomes Downed/disconnected on a Stack/Spread deadline is excluded before sampling, while mechanic-created lethal damage still participates in the one Revive commit. Allowed Boss damage reducing life to zero wins gameplay Defeat candidates, but an actor/invariant failure observed by the feature takes priority because the gameplay result is no longer trustworthy. The Revive boundary may expose a failure fact to the feature snapshot, but it must not independently publish a competing `EncounterEnded` or return an early coordinator transition.
 
-- clientは自分の移動をArena内へ予測的に制限し、視覚Barrierを描く。
-- serverは参加者位置を検査し、外へ出た場合に安全な内側位置へ補正する。
-- 補正にはFight IDとRevisionを含むeventを使い、古いfightのteleportを適用しない。
-- 他Modのteleportを完全に列挙して禁止せず、「外へ出た結果を補正する」ことを最終防衛線にする。
+## External termination bridge
 
-## Security and validation
+World unload, an unhandled runtime exception, and a future fatal protocol failure originate outside the feature reducer. They are unconditional coordinator preemptions in the order `WorldUnload > InternalFailure > ProtocolFailure`; they are not fabricated as same-tick feature inputs and the coordinator never re-enters a failed `Tick` to obtain metadata.
 
-- Packet payload長、enum範囲、player slot、tile座標を検証する。
-- client requestはplayerごとにrate limitする。
-- Coreから遠いplayerのActivate/Ready要求を拒否する。
-- 参加者以外の戦闘packetを拒否する。
-- serverはclientが報告したDPS、hit、mechanic successを採用しない。
-- unknown packetはwarningを記録して無視し、serverを停止させない。
-- `BinaryReader.BaseStream.Length`はtModLoader共有受信bufferの末尾なので、Mod側のpacket境界やtrailing判定には使わない。各PacketTypeのdecoderは固定fieldと個別のcount/string上限だけを読み、DTO全体の構築・検証完了後に初めてcommandへ変換する。外側packet長との消費量照合はtModLoaderへ任せる。
+Slice 2 introduces a feature-neutral immutable termination descriptor: generic `EncounterEndReason`, feature terminal schema/version, and bounded opaque feature-cause byte. A runtime supplies a validated descriptor for a feature-owned End. Each `EncounterDefinition` also supplies a constructor-validated data mapping for the three external generic reasons, allowing the coordinator to synthesize `WorldUnload`, `InternalFailure`, or `ProtocolFailure` feature metadata without calling mutable feature logic. Missing, duplicate, `None`, or incompatible mappings reject registration/plan construction while activation remains denied.
 
-## Cleanup contract
+`EncounterCoordinator.Reset`, the runtime-exception catch, and any fatal-protocol entry point use that mapping, discard any uncommitted runtime update, then publish the combined generic/feature terminal snapshot and tombstone before exact-Fight cleanup. Session-creation failure occurs before an encounter is accepted and therefore returns a bounded activation failure rather than pretending that a live feature tombstone existed. The current coordinator carries only a generic reason; this bridge is planned work and must land before feature replication or activation.
 
-`Cleanup(FightId expected, RaidEndReason reason)`は冪等でなければならない。
+First Severance terminal replication carries the generic `EncounterEndReason` and the append-only feature cause defined in the encounter specification. Full snapshot, terminal delta/event, and retained tombstone must round-trip both fields. `Defeat + LoopCapExceeded` must survive reconnect/snapshot repair; unknown feature-cause values are rejected as protocol-invalid rather than coerced to another result.
 
-1. 現在Fight IDが一致するか確認する。
-2. lifecycleを`Cleanup`へ変更し、新規spawnを停止する。
-3. server上のowned NPC/Projectile/temporary stateを除去する。
-4. participantのRaid固有Player stateを解除する。
-5. CoreをIdleへ戻す。Coreが無くても継続する。
-6. terminal snapshotを保持し、`EncounterEnded`をbroadcastする。
-7. registry、assignment、timer、seedを破棄する。
-8. authoritative active sessionを外し、通常snapshotを`Idle`へ戻す。
+## Measured normal-hit pipeline
 
-一つの除去処理またはfailure loggerが失敗しても残りを実行し、active sessionは`finally`で必ず外す。失敗したcleanup participantはretry backlogへ残し、完了まで次のEncounterをblockする。World unloadでは最終retryと未完数のdiagnosticを行って参照を破棄し、active runtimeを保存・復元しない。将来の`ModPlayer`/静的flagはWorld load時にもdefensive resetする。
+Do not add a `ReportDamage` packet. Before Boss/Pylon damage is enabled, instrument the pinned versions in Single Player, Host & Play host/non-host, and Dedicated Server for representative melee, ranged, magic, summon/minion, rogue, projectile, penetration/multihit, crit, and Calamity-modified hits. Record which process and hook order observe permission, damage modification, life mutation, death/check-dead, ownership metadata, and `netUpdate`.
 
-## Logging
+The selected adapter must reject stale/wrong-Fight actors, nonparticipants, Pylon hits outside `PylonCheck`, and Boss hits outside `CoreExposure` at a server/SP-observed seam proven by that evidence. Progress reads committed actor life/death once. If the pinned pipeline cannot enforce the feature gate consistently for ordinary unmodified clients, activation remains denied. Passing this gate proves encounter correctness for the stated threat model; it does not prove resistance to a modified Terraria client.
 
-server logへ次を構造化して残す。
+## Actor identity and ownership
 
-- Fight start/end、Fight ID、participant count
-- lifecycle transitionとrevision
-- validation failure code
-- packet rejection reason（spamを集約）
-- disconnect/rejoin
-- Cleanup開始・完了・残存entity数
+Do not put GUIDs or strings in NPC/Projectile `ai[]`. Use a compact per-Fight owner token/actor ID in per-entity data and a server registry mapping it to exact Fight and `whoAmI`. Cleanup uses the registry first and a bounded defensive scan only as fallback.
 
-playerの個人情報や毎tickのpositionは記録しない。
+## Barrier and player corrections
+
+Clients may predict movement inside bounds. Authority samples its current Terraria position for the bound player, validates arena bounds/current epoch, and sends an exact-Fight correction. Other-Mod teleport is handled by validating the observed result, not an impossible exhaustive blacklist. This correction protects encounter geometry for cooperative clients; it is not a complete movement anti-cheat. Downed control state is a projection from authority and is defensively cleared on cleanup/load.
+
+## Revive transport
+
+Start request carries target stable Participant ID and request nonce only. Server validates sender/binding/held item/range/states/tokens and submits a bounded same-tick batch. Cancel must include the exact accepted channel nonce; stale cancel cannot affect a new channel. Movement/damage/teleport/item/hook/mount/disconnect interrupts originate from server-observed adapters. Raw held-item use/release is sampled before applying the reviver control projection: `SuppressItemUse` blocks non-revive actions but must preserve the accepted revive lease and must not self-cancel it. Server alone emits completion, life restore, immunity/weakness, and token change.
+
+## Security and failure behavior
+
+- Bound all payloads and request rates before allocation/work.
+- Parse then validate then mutate; partial DTOs never reach the domain.
+- Unknown/stale/malformed input is ignored with rate-limited structured logs.
+- Feature packets from non-participants or multiplayer clients attempting S→C types are rejected.
+- Ordinary Terraria movement/combat replication is handled under the cooperative unmodified-client threat model; log it as inherited trust rather than claiming custom-packet validation makes it cheat-proof.
+- Never let a bad packet throw out of the server thread.
+- Logs include Fight identity/reason/counts, not personal data or per-tick positions.
+
+## Cleanup publication
+
+On terminal outcome, stop new commands/spawns, commit the final feature/revive state, enqueue/broadcast terminal snapshot/`EncounterEnded`, then remove actors/projections and release the session. Cleanup is exact-Fight and idempotent. Delayed packets for the ended Fight hit the replica tombstone or server identity check and cannot mutate a new encounter.

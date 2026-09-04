@@ -1,3 +1,23 @@
+---
+doc_id: policy.ip-provenance
+document_type: policy
+status: accepted
+owners:
+  - project
+  - art
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - policy.ip_provenance
+aliases:
+  - IP provenance
+  - asset rights policy
+related_code:
+  - Assets
+related_docs:
+  - project.asset-pipeline
+  - policy.release-process
+---
+
 # IP and Asset Provenance Policy
 
 この文書は制作管理方針であり、法的助言ではない。

@@ -1,0 +1,778 @@
+schema_version: 1
+generated_from: validated Markdown under docs/
+documents:
+- doc_id: compatibility.version-matrix
+  path: docs/VERSION_MATRIX.md
+  title: Version Matrix
+  content_sha256: a7959fcc9fe97abfb6a7858642158512c493b0caf4a5472727f8e58c31ba9066
+  document_type: policy
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - compatibility.version_matrix
+  aliases:
+  - version matrix
+  - dependency pin
+  related_code:
+  - build.txt
+  - global.json
+  - ConvergenceMod.csproj
+  - Common/Compatibility/Calamity
+  related_docs:
+  - development.windows
+  - policy.release-process
+  - project.status
+- doc_id: decisions.adr-index
+  path: docs/adr/README.md
+  title: Architecture Decision Records
+  content_sha256: bcf76fd59b8be184e8eeacfe885190d3096f2001cfb245948115ed03181d43bc
+  document_type: index
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - architecture.adr_index
+  aliases:
+  - ADR index
+  - architecture decisions
+  related_code: []
+  related_docs:
+  - project.decisions
+  - project.status
+- doc_id: development.general
+  path: docs/DEVELOPMENT.md
+  title: Development Setup
+  content_sha256: 8e1148739147d2593f1abc31243795b9f454870880717863a39774c61ada24cc
+  document_type: runbook
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - development.general_policy
+  aliases:
+  - development setup
+  - build policy
+  related_code:
+  - ConvergenceMod.csproj
+  - global.json
+  - build.txt
+  related_docs:
+  - development.windows
+  - verification.evidence
+  - project.status
+- doc_id: development.windows
+  path: docs/runbooks/WINDOWS_DEVELOPMENT.md
+  title: Windows Development Runbook
+  content_sha256: 5303513160bcc61ab5961833888a0c3946330af8e1da248c46814fb7a5db2837
+  document_type: runbook
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - development.windows_setup
+  aliases:
+  - Windows setup
+  - ModSources setup
+  related_code:
+  - ConvergenceMod.csproj
+  - global.json
+  - build.txt
+  related_docs:
+  - handoff.windows
+  - verification.evidence
+  - project.status
+- doc_id: docs.entrypoint
+  path: docs/README.md
+  title: Documentation Home
+  content_sha256: 9e022fb46ec780ca44ce8414a74049e07270247a2acc82bc8166c05020822ecc
+  document_type: index
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - documentation.read_order
+  aliases:
+  - documentation home
+  - start here
+  related_code: []
+  related_docs:
+  - docs.search-index
+  - project.status
+  - handoff.windows
+- doc_id: docs.search-index
+  path: docs/INDEX.md
+  title: Documentation Search Index
+  content_sha256: 84d5b0ba74a2199c4f0dc4f9e7764ad0e598390831f1fc0a4e87d4b9a8d8e803
+  document_type: index
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - documentation.search_index
+  aliases:
+  - document index
+  - search map
+  related_code:
+  - tools/docs_catalog.py
+  related_docs:
+  - docs.entrypoint
+  - docs.system
+- doc_id: docs.system
+  path: docs/DOCUMENTATION_SYSTEM.md
+  title: Documentation and Knowledge-Base Design
+  content_sha256: 3f5177599fbad79c894516188b98ac07460acb3611de94ee3ee1a39a93cea0d1
+  document_type: governance
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - documentation.data_model
+  aliases:
+  - documentation database
+  - knowledge base design
+  related_code:
+  - tools/docs_catalog.py
+  - tools/repository_checks.py
+  - tools/validate_yaml.py
+  related_docs:
+  - docs.entrypoint
+  - docs.search-index
+- doc_id: encounter.first-severance.backlog
+  path: docs/encounters/first-severance/BACKLOG.md
+  title: First Severance Deferred Backlog
+  content_sha256: f30d72331165f1fd69c10efc8858c091f5d760abcc319592c0595e3ba7bb2efa
+  document_type: backlog
+  status: accepted
+  owners:
+  - gameplay
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.deferred_scope
+  aliases:
+  - deferred mechanics
+  - old Third Severance plan
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  related_docs:
+  - encounter.first-severance.spec
+  - encounter.first-severance.visual
+- doc_id: encounter.first-severance.overview
+  path: docs/encounters/first-severance/README.md
+  title: First Severance
+  content_sha256: 83cc772834f6955c6fa46d8354277da135994440ed6bcb49d3b0d13a91ec3126
+  document_type: overview
+  status: accepted
+  owners:
+  - gameplay
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.document_map
+  aliases:
+  - First Severance
+  - 第一断絶
+  - first_severance
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  related_docs:
+  - encounter.first-severance.spec
+  - encounter.first-severance.plan
+  - project.status
+- doc_id: encounter.first-severance.plan
+  path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
+  title: First Severance Implementation Plan
+  content_sha256: 7fdd38eefdacaffb27e619d39fa6b1e442b7734b24c28fde32b4b3c0152e78cb
+  document_type: plan
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.implementation_sequence
+  aliases:
+  - First Severance implementation plan
+  - Windows implementation queue
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  - Common/Encounters
+  - Common/Raids/Revive
+  - Common/Networking
+  related_docs:
+  - encounter.first-severance.spec
+  - project.status
+  - handoff.windows
+- doc_id: encounter.first-severance.revive
+  path: docs/encounters/first-severance/REVIVE_SPEC.md
+  title: First Severance Downed and Revive Specification
+  content_sha256: 3a345d356bcae1138f3ce79602ae2fb8ff9d0713e2c47dbff6ab28866976e0b8
+  document_type: spec
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.player_recovery
+  aliases:
+  - Downed and Revive
+  - Resuscitation Kit
+  - 蘇生キット
+  related_code:
+  - Common/Raids/Revive
+  - Content/Encounters/ThirdSeverance/Revive
+  related_docs:
+  - encounter.first-severance.spec
+  - encounter.first-severance.plan
+- doc_id: encounter.first-severance.spec
+  path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
+  title: First Severance Encounter Specification
+  content_sha256: c1c366cb5a546aa62c2e86df0f5298f96f74dc8ac185a923a879ec20d238c08a
+  document_type: spec
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.encounter_loop
+  - first_severance.mechanics
+  - first_severance.terminal_outcomes
+  aliases:
+  - First Severance
+  - 第一断絶
+  - Pylon Stack Spread Core
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  - Common/Raids/Revive
+  related_docs:
+  - encounter.first-severance.plan
+  - encounter.first-severance.visual
+  - encounter.first-severance.revive
+- doc_id: encounter.first-severance.visual
+  path: docs/encounters/first-severance/VISUAL_SPEC.md
+  title: First Severance Minimum Visual Specification
+  content_sha256: 0b0c3963a31ec5d3c420da7cb1cc133aaf4c3d77ee55e9710b107d25e2f5bf15
+  document_type: spec
+  status: provisional
+  owners:
+  - art
+  - gameplay
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.visual_mvp
+  aliases:
+  - First Severance boss visual
+  - Null Cantor visual
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  related_docs:
+  - encounter.first-severance.spec
+  - encounter.first-severance.backlog
+- doc_id: handoff.windows
+  path: docs/handoff/WINDOWS.md
+  title: Windows Handoff — 2026-09-04
+  content_sha256: be200f88e7a66cbfa19a5d34cf3501b43b8f8bbebfa030813f522e390b289069
+  document_type: handoff
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - handoff.windows.2026-09-04
+  aliases:
+  - Windows handoff
+  - desktop migration
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  - Common/Raids/Revive
+  - Tests/Convergence.DomainTests
+  related_docs:
+  - project.status
+  - development.windows
+  - encounter.first-severance.plan
+- doc_id: policy.ip-provenance
+  path: docs/IP_PROVENANCE.md
+  title: IP and Asset Provenance Policy
+  content_sha256: f3c9c66fcf0d62a82eed685afb1ad6dcb6a63c2da025d25b136a24da74a892bd
+  document_type: policy
+  status: accepted
+  owners:
+  - project
+  - art
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - policy.ip_provenance
+  aliases:
+  - IP provenance
+  - asset rights policy
+  related_code:
+  - Assets
+  related_docs:
+  - project.asset-pipeline
+  - policy.release-process
+- doc_id: policy.release-process
+  path: docs/RELEASE_PROCESS.md
+  title: Release Process
+  content_sha256: 01909ee76cb1bdbe54e47ad4a49cceae9d1bdaba2641183cdac0615b256804b3
+  document_type: policy
+  status: accepted
+  owners:
+  - project
+  - quality
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - policy.release_process
+  aliases:
+  - release process
+  - release gate
+  related_code:
+  - build.txt
+  - .github/workflows/repository-checks.yml
+  related_docs:
+  - policy.ip-provenance
+  - verification.test-plan
+  - project.status
+- doc_id: project.architecture
+  path: docs/ARCHITECTURE.md
+  title: Architecture
+  content_sha256: 9c7e4bb80510c70c621237a1edbbb7843196b9d62d642f6d601ebbf6eac3fe47
+  document_type: governance
+  status: accepted
+  owners:
+  - engineering
+  - networking
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - architecture.module_boundaries
+  - architecture.runtime_ownership
+  aliases:
+  - architecture
+  - authority architecture
+  related_code:
+  - Common
+  - Content
+  - Client
+  related_docs:
+  - project.network-architecture
+  - project.repository-layout
+  - project.status
+- doc_id: project.arena-infrastructure
+  path: docs/ARENA_INFRASTRUCTURE.md
+  title: Arena Infrastructure
+  content_sha256: c6369bee36a3e0f96d011fd914959b256222835dcc1e9014be811fa5b001acb1
+  document_type: spec
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.arena_infrastructure
+  aliases:
+  - arena infrastructure
+  - Foundation Core
+  - logical Barrier
+  related_code:
+  - Content/Encounters/ThirdSeverance/ThirdSeveranceArenaBlueprint.cs
+  - Content/Encounters/ThirdSeverance/ThirdSeveranceArenaAccessPolicy.cs
+  related_docs:
+  - encounter.first-severance.plan
+  - project.architecture
+- doc_id: project.art-direction
+  path: docs/ART_DIRECTION.md
+  title: Art Direction
+  content_sha256: 71f1b4b2544a376b5b4cbfa42e1d1527a74f438f5bd052a6f1ccae2cb3a8fe4b
+  document_type: spec
+  status: accepted
+  owners:
+  - art
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - project.art_direction
+  aliases:
+  - art direction
+  - visual language
+  related_code:
+  - Assets
+  related_docs:
+  - encounter.first-severance.visual
+  - encounter.first-severance.backlog
+- doc_id: project.asset-pipeline
+  path: docs/ASSET_PIPELINE.md
+  title: Asset and Audio Pipeline
+  content_sha256: f2740d4465fadef0bd0860b4057d5c8ca9ce4e691ed00104ae3e2e95e3c1d1e7
+  document_type: governance
+  status: accepted
+  owners:
+  - art
+  - audio
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - assets.production_pipeline
+  aliases:
+  - asset pipeline
+  - audio pipeline
+  related_code:
+  - Assets
+  related_docs:
+  - project.art-direction
+  - project.audio-cues
+- doc_id: project.audio-cues
+  path: docs/AUDIO_CUE_SHEET.md
+  title: First Severance Audio Cue Sheet
+  content_sha256: c43e1009ec630282fc38261393b3c36b11533a514abe39a8df11b1a23af83912
+  document_type: spec
+  status: provisional
+  owners:
+  - audio
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - first_severance.audio_cues
+  aliases:
+  - audio cue sheet
+  - First Severance music
+  related_code:
+  - Assets
+  related_docs:
+  - project.asset-pipeline
+  - encounter.first-severance.spec
+- doc_id: project.brief
+  path: docs/PROJECT_BRIEF.md
+  title: Project Brief
+  content_sha256: fce9a416b09dc17d42a80df16bdaf973f36bcf8ae0573758924b31283ce14922
+  document_type: overview
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - project.product_scope
+  aliases:
+  - project brief
+  - product direction
+  related_code:
+  - build.txt
+  - Common/Compatibility/Calamity
+  related_docs:
+  - project.status
+  - encounter.first-severance.overview
+- doc_id: project.coding-standards
+  path: docs/CODING_STANDARDS.md
+  title: Coding Standards
+  content_sha256: f47b85c71f23c4b3754ff70739698106d4f0f60230dda9f6a83ba2239a1744ba
+  document_type: governance
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - engineering.coding_standards
+  aliases:
+  - coding standards
+  related_code:
+  - Directory.Build.props
+  - Common
+  - Content
+  related_docs:
+  - project.architecture
+  - project.network-architecture
+- doc_id: project.content-authoring
+  path: docs/CONTENT_AUTHORING.md
+  title: Content Authoring
+  content_sha256: 598db9f82c332be3f1ec9399dfafd489501da5a0bf2ea0c2ede0a3f53cdc9739
+  document_type: governance
+  status: accepted
+  owners:
+  - gameplay
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - engineering.content_authoring
+  aliases:
+  - content authoring
+  - feature placement
+  related_code:
+  - Content
+  - Client
+  related_docs:
+  - project.repository-layout
+  - encounter.first-severance.plan
+- doc_id: project.decisions
+  path: docs/DECISIONS.md
+  title: Decisions and Open Questions
+  content_sha256: 238620fd778c3f60e74cd02c5f252ec46548fa88b89068f61463a97f1dd4c05e
+  document_type: governance
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - project.open_decisions
+  aliases:
+  - decisions
+  - open questions
+  related_code: []
+  related_docs:
+  - decisions.adr-index
+  - project.status
+- doc_id: project.glossary
+  path: docs/GLOSSARY.md
+  title: Glossary and Identifier Registry
+  content_sha256: 265da018250c3c23ac7d36ef6731c4e5b1affd7ac3e8557175d4a066f4224f2a
+  document_type: glossary
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - project.terminology
+  aliases:
+  - names
+  - identifiers
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  related_docs:
+  - encounter.first-severance.overview
+  - encounter.first-severance.plan
+- doc_id: project.milestones
+  path: docs/MILESTONES.md
+  title: Milestones
+  content_sha256: 491d0fa0ef1648a9e30998e29d1062601b99d0d12072f5d0521be69131833c7f
+  document_type: plan
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - project.roadmap
+  aliases:
+  - milestones
+  - roadmap
+  related_code:
+  - Common
+  - Content
+  - Tests
+  related_docs:
+  - project.status
+  - encounter.first-severance.plan
+- doc_id: project.network-architecture
+  path: docs/NETWORK_ARCHITECTURE.md
+  title: Network Architecture
+  content_sha256: c9f59ea90ff84f73b44f8c0117f05ce365e29d36fcfd9838c99c6eb8e66e8fcd
+  document_type: governance
+  status: accepted
+  owners:
+  - networking
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - architecture.network_authority
+  - architecture.packet_policy
+  aliases:
+  - network architecture
+  - replication
+  related_code:
+  - Common/Networking
+  - Common/Encounters/Runtime
+  - Common/Raids/Revive
+  related_docs:
+  - project.architecture
+  - encounter.first-severance.plan
+  - verification.test-plan
+- doc_id: project.repository-layout
+  path: docs/REPOSITORY_LAYOUT.md
+  title: Repository Layout
+  content_sha256: b799a21badec1ab5e63c845ac1052bb749ab089e292de03ab7a14557abecd68a
+  document_type: governance
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - architecture.repository_layout
+  aliases:
+  - repository layout
+  - directory structure
+  related_code:
+  - Common
+  - Content
+  - Client
+  - tools
+  related_docs:
+  - docs.system
+  - project.architecture
+- doc_id: project.status
+  path: docs/STATUS.md
+  title: Project Status
+  content_sha256: 03e4b34af162370e522781484d9ade3e9f0b38d02da00f90abbe8159fbfb15f6
+  document_type: status
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - project.implementation_status
+  aliases:
+  - current state
+  - implementation inventory
+  related_code:
+  - Common
+  - Content/Encounters/ThirdSeverance
+  - Tests/Convergence.DomainTests
+  related_docs:
+  - handoff.windows
+  - encounter.first-severance.plan
+- doc_id: redirect.encounter-spec
+  path: docs/ENCOUNTER_SPEC.md
+  title: Encounter Specification
+  content_sha256: 7dceb7b8e52b0c0ae8cd2baad6e7a812e03bc4b9212a79672baf105e86cfe2a0
+  document_type: redirect
+  status: superseded
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for: []
+  aliases:
+  - legacy encounter specification path
+  related_code:
+  - Content/Encounters/ThirdSeverance
+  related_docs:
+  - encounter.first-severance.spec
+  - encounter.first-severance.plan
+  - project.status
+- doc_id: redirect.first-severance-plan
+  path: docs/FIRST_SEVERANCE_IMPLEMENTATION_PLAN.md
+  title: First Severance Implementation Plan
+  content_sha256: bdb6a5d7ff347259fc29afdf03c27fba67b3f4adfd6bc1fb5a2bdb769f98236c
+  document_type: redirect
+  status: superseded
+  owners:
+  - project
+  last_reviewed: '2026-09-04'
+  source_of_truth_for: []
+  aliases:
+  - legacy First Severance plan path
+  related_code: []
+  related_docs:
+  - encounter.first-severance.plan
+- doc_id: research.codex-skills-survey
+  path: docs/research/CODEX_SKILLS_SURVEY.md
+  title: Codex Skills Survey
+  content_sha256: 9f62803672cd11fe1fbd18fd54c8dc48ede6e895c0f2755f85a9984312d2da8e
+  document_type: research
+  status: historical
+  owners:
+  - research
+  last_reviewed: '2026-08-23'
+  source_of_truth_for: []
+  aliases:
+  - Codex Skills survey
+  - repository Skills research
+  related_code:
+  - .agents/skills
+  related_docs:
+  - docs.system
+  - research.sources
+- doc_id: research.multiplayer-raid-prior-art
+  path: docs/research/MULTIPLAYER_RAID_PRIOR_ART.md
+  title: Multiplayer Raid Prior Art
+  content_sha256: 9fdae0ed1f69163a76049f4dddb0cb6bbe5e20af3b63b934717b738fa09bb00c
+  document_type: research
+  status: historical
+  owners:
+  - research
+  last_reviewed: '2026-08-23'
+  source_of_truth_for: []
+  aliases:
+  - multiplayer Raid prior art
+  - tModLoader Raid research
+  related_code:
+  - Common/Raids/Revive
+  related_docs:
+  - project.network-architecture
+  - encounter.first-severance.spec
+  - research.sources
+- doc_id: research.sources
+  path: docs/SOURCES.md
+  title: Research Sources
+  content_sha256: 6b81338e4051f2dc243cec4850391cdcb540e2a65d36e2303d89d87727042f00
+  document_type: research
+  status: historical
+  owners:
+  - research
+  last_reviewed: '2026-08-23'
+  source_of_truth_for: []
+  aliases:
+  - research sources
+  - source ledger
+  related_code: []
+  related_docs:
+  - compatibility.version-matrix
+  - research.codex-skills-survey
+  - research.multiplayer-raid-prior-art
+- doc_id: verification.evidence
+  path: docs/evidence/README.md
+  title: Verification Evidence
+  content_sha256: 4eed96cb99de2b98cdb901bd55e90f8efb507f0e13cb30cbf0f58b1fd6cf8207
+  document_type: evidence
+  status: accepted
+  owners:
+  - quality
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - verification.evidence_format
+  aliases:
+  - build record
+  - test evidence
+  related_code:
+  - Tests/Convergence.DomainTests
+  - tools/repository_checks.py
+  related_docs:
+  - development.windows
+  - project.status
+- doc_id: verification.test-plan
+  path: docs/TEST_PLAN.md
+  title: Test Plan
+  content_sha256: b77902f8752d5418537dd5743263157974385e920f4ae7cd5fdfa544a76f790e
+  document_type: plan
+  status: accepted
+  owners:
+  - quality
+  - networking
+  last_reviewed: '2026-09-04'
+  source_of_truth_for:
+  - verification.test_matrix
+  aliases:
+  - test plan
+  - multiplayer matrix
+  related_code:
+  - Tests/Convergence.DomainTests
+  - tools/repository_checks.py
+  - Common/Raids/Revive
+  related_docs:
+  - verification.evidence
+  - encounter.first-severance.spec
+  - project.status
+excluded_documents:
+- path: docs/adr/0001-modular-monolith.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/adr/0002-server-authoritative-encounters.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/adr/0003-in-world-logical-arena.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/adr/0004-calamity-compatibility-boundary.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/adr/0005-server-authoritative-downed-revive.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/adr/0006-staged-calamity-independence.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/adr/0007-first-severance-vertical-slice.md
+  reason: ADRs retain their established body metadata until catalog migration.
+- path: docs/catalog/README.md
+  reason: Catalog operator documentation is deliberately outside its generated index.

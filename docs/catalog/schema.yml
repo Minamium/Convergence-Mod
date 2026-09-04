@@ -1,0 +1,55 @@
+schema_version: 1
+document_types:
+  - adr
+  - backlog
+  - evidence
+  - glossary
+  - governance
+  - handoff
+  - index
+  - overview
+  - plan
+  - policy
+  - redirect
+  - research
+  - runbook
+  - spec
+  - status
+statuses:
+  - accepted
+  - draft
+  - historical
+  - provisional
+  - superseded
+authority_topic_statuses:
+  - accepted
+  - provisional
+required_fields:
+  - doc_id
+  - document_type
+  - status
+  - owners
+  - last_reviewed
+  - source_of_truth_for
+  - aliases
+  - related_code
+  - related_docs
+allowed_fields:
+  - doc_id
+  - document_type
+  - status
+  - owners
+  - last_reviewed
+  - source_of_truth_for
+  - aliases
+  - related_code
+  - related_docs
+excluded_paths:
+  docs/adr/0001-modular-monolith.md: ADRs retain their established body metadata until catalog migration.
+  docs/adr/0002-server-authoritative-encounters.md: ADRs retain their established body metadata until catalog migration.
+  docs/adr/0003-in-world-logical-arena.md: ADRs retain their established body metadata until catalog migration.
+  docs/adr/0004-calamity-compatibility-boundary.md: ADRs retain their established body metadata until catalog migration.
+  docs/adr/0005-server-authoritative-downed-revive.md: ADRs retain their established body metadata until catalog migration.
+  docs/adr/0006-staged-calamity-independence.md: ADRs retain their established body metadata until catalog migration.
+  docs/adr/0007-first-severance-vertical-slice.md: ADRs retain their established body metadata until catalog migration.
+  docs/catalog/README.md: Catalog operator documentation is deliberately outside its generated index.

@@ -1,36 +1,38 @@
+---
+doc_id: project.decisions
+document_type: governance
+status: accepted
+owners:
+  - project
+last_reviewed: 2026-09-04
+source_of_truth_for:
+  - project.open_decisions
+aliases:
+  - decisions
+  - open questions
+related_code: []
+related_docs:
+  - decisions.adr-index
+  - project.status
+---
+
 # Decisions and Open Questions
 
 Long-lived structural decisions use immutable records in [`docs/adr`](adr/README.md). This document tracks reversible bootstrap constraints and unresolved production choices; it does not create a second ADR numbering scheme.
 
-## Accepted architecture index
+## Accepted architecture records
 
-| Record | Decision |
-|---|---|
-| [ADR-0001](adr/0001-modular-monolith.md) | Modular monolith with feature-first content modules |
-| [ADR-0002](adr/0002-server-authoritative-encounters.md) | Server/SP authority and read-only client replication |
-| [ADR-0003](adr/0003-in-world-logical-arena.md) | Normal World, logical Barrier, one managed Boss/Raid at a time |
-| [ADR-0004](adr/0004-calamity-compatibility-boundary.md) | Isolated Calamity adapter and tested-version gate |
-| [ADR-0005](adr/0005-server-authoritative-downed-revive.md) | Authority-owned Raid Downed/Revive state; gameplay hook gated by runtime evidence |
-| [ADR-0006](adr/0006-staged-calamity-independence.md) | Stage A addon, Stage B portable Raid core, Stage C removal of the hard Calamity dependency |
-
-Accepted consequences shared by those ADRs:
-
-- active Encounter state is ephemeral and is not resumed after World load;
-- every fight has a `FightId`, a World-monotonic Encounter Sequence, and revisions;
-- Raid-only Ready/Roster/Revive state is not part of the generic Encounter lifecycle;
-- Calamity-specific APIs and types do not leak into feature logic;
-- Raid Downed/Revive lives in a pure authority domain and does not connect to `PreKill` until the pinned Calamity coexistence spike passes;
-- the current hard Calamity reference is a Stage A product constraint, not a permanent owner of Encounter, Networking, Arena, or Raid-domain design;
-- generated Tile walls, Subworlds, client-decided outcomes, and vendored Calamity assets/code are excluded.
+[`docs/adr/README.md`](adr/README.md) is the only ADR index and records every accepted or superseded structural decision. Do not duplicate that table here; this page is limited to reversible bootstrap constraints, provisional production values, and unresolved questions.
 
 ## Current bootstrap constraints
 
 - Internal assembly/root namespace: provisional development identity `Convergence`.
 - Entry class/project filename: `ConvergenceMod` / `ConvergenceMod.csproj`.
 - One coordinator-managed Boss or Raid per World; World Events will have a separate lifecycle.
-- Third Severance activation is intentionally denied until Milestone 1 installs server-resolved Core, Arena, progression, roster, nonce, and transport validation.
+- Current legacy `ThirdSeverance` activation is intentionally denied. The target `FirstSeverance` feature remains denied until server-resolved Core/Arena/progression/roster/transport, actors, feature replication, and required recovery adapters satisfy their gates.
 - Initial music implementation uses phase-specific mixes/transitions before sample-accurate dynamic stems.
 - Current packet protocol and any future save schema version independently from the Mod version.
+- Windows is the primary implementation and runtime-verification workstation; the MacBook remains a secondary docs/review environment.
 
 ## Provisional production choices
 
@@ -45,7 +47,7 @@ left   = coreCenterX - 160
 top    = coreBaseY - 140
 ```
 
-CoreをArena中央に置く方がテストしやすい場合はMilestone 1開始前に変更する。
+CoreをArena中央に置く方がテストしやすい場合はlive Arena実装前に変更する。
 
 ### Ready timeout
 
@@ -54,7 +56,7 @@ CoreをArena中央に置く方がテストしやすい場合はMilestone 1開始
 ## Open questions before affected feature implementation
 
 1. 公開名とrepository名をいつ固有名へ変更するか。
-2. Source codeとassetのライセンス、および外部contribution同意方式。
+2. Source codeとassetのlicense、および外部contribution同意方式。
 3. Coreの最終サイズ、recipe、設置可能な進行条件。
 4. Arena anchorを下端中央にするか完全中央にするか。
 5. 既存Tile、platform、rope、liquidをどこまで許可するか。
@@ -62,10 +64,12 @@ CoreをArena中央に置く方がテストしやすい場合はMilestone 1開始
 7. 2人未満でのCore起動を拒否するか、development overrideを用意するか。
 8. Calamity difficulty（Revengeance / Death）の扱い。
 9. 音楽を本体Addonへ同梱するか、将来Music Modへ分離するか。
-10. Last Stand中のUI非表示範囲とアクセシビリティ代替表示。
-11. AI生成assetを完成版へ利用する場合の開示・制作記録方針。
-12. Rejoin時に同一participantと認定するserver-side identity。
+10. AI生成assetを完成版へ利用する場合の開示・制作記録方針。
+11. Rejoin時に同一participantと認定するserver-side identity。
+12. Boss、施設、集合意識、Core、蘇生itemの最終公開名。
+13. Downed/Eliminated bodyをVictory、Cancel、Defeatでどう正規化するか（Windows死亡hook spike後）。
+14. Pylon HP、Boss HP、Stack/Spread damage/radii、loop capの実機tuning値。
 
 ## Decision workflow
 
-未確定事項は実装commitへ暗黙に埋め込まない。authority、module direction、protocol、persistence、external dependency、release/rightsを変える場合は新しいADRを追加し、既存ADRを必要に応じてSupersededへ変更する。可逆なbalance/production値はこの文書またはfeature specで更新する。
+未確定事項は実装commitへ暗黙に埋め込まない。authority、module direction、protocol、persistence、external dependency、release/rightsを変える場合は新しいADRを追加し、既存ADRを必要に応じてSupersededへ変更する。可逆なbalance/production値はfeature specで`Provisional`として更新する。現在の実装有無は必ず[`STATUS.md`](STATUS.md)へ反映する。
