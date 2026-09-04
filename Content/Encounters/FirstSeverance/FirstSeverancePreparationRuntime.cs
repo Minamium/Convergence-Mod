@@ -37,6 +37,7 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
     private readonly uint[] lastQueuedNonces;
     private readonly List<FirstSeveranceQueuedPreparationIntent> pendingIntents = new();
     private FirstSeverancePreparationStateMachine? preparation;
+    private FirstSeverancePrototypeCombatRuntime? combat;
     private bool isAttached;
     private bool isCleaned;
 
@@ -184,6 +185,7 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
         {
             EncounterLifecycle.Validating => EnterPreparing(context.AuthorityTick),
             EncounterLifecycle.Preparing => TickPreparing(context.AuthorityTick),
+            EncounterLifecycle.Active => TickActive(context),
             _ => EncounterRuntimeUpdate.End(
                 FirstSeveranceTerminationContract.Instance.Create(
                     FirstSeveranceTerminalCause.RuntimeInvariantBroken)),
@@ -202,6 +204,7 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
             throw new InvalidOperationException("Preparation cleanup has the wrong identity.");
         }
 
+        combat?.Cleanup(context);
         preparation?.Cleanup(fightId);
         pendingIntents.Clear();
         Array.Clear(lastQueuedNonces);
@@ -304,9 +307,40 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
         }
 
         hasObservableChange |= update.HasObservableChange;
+        if (preparation.CreateSnapshot().AreAllReady)
+        {
+            combat = new FirstSeverancePrototypeCombatRuntime(
+                encounterSequence,
+                fightId,
+                roster,
+                serverTileEntityId,
+                coreTopLeft);
+            if (!combat.TryStart(authorityTick, out _))
+            {
+                return EncounterRuntimeUpdate.End(
+                    FirstSeveranceTerminationContract.Instance.Create(
+                        FirstSeveranceTerminalCause.RuntimeInvariantBroken));
+            }
+
+            preparation.Cleanup(fightId);
+            preparation = null;
+            FirstSeverancePreparationAuthority.Detach(this);
+            isAttached = false;
+            pendingIntents.Clear();
+            return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Active);
+        }
+
         return hasObservableChange
             ? EncounterRuntimeUpdate.ObservableChange()
             : EncounterRuntimeUpdate.None;
+    }
+
+    private EncounterRuntimeUpdate TickActive(in EncounterRuntimeContext context)
+    {
+        return combat?.Tick(context)
+            ?? EncounterRuntimeUpdate.End(
+                FirstSeveranceTerminationContract.Instance.Create(
+                    FirstSeveranceTerminalCause.RuntimeInvariantBroken));
     }
 
     private bool TryValidateIntent(

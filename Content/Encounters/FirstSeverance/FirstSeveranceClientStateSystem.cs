@@ -3,6 +3,8 @@
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Encounters.Runtime;
 using Convergence.Common.Networking.Replication;
+using Convergence.Common.Raids.Revive;
+using Convergence.Content.Encounters.FirstSeverance.Revive;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -17,6 +19,14 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     private bool requestedInitialSnapshot;
     private ulong displayedPreparationSequence;
     private int displayedReadyCount = -1;
+    private FirstSeveranceCombatProjection? combat;
+    private ulong lastAuthorityTick;
+    private ulong receivedAtLocalTick;
+
+    internal FirstSeveranceCombatProjection? Combat => combat;
+
+    internal ulong EstimatedAuthorityTick => lastAuthorityTick
+        + (Main.GameUpdateCount >= receivedAtLocalTick ? Main.GameUpdateCount - receivedAtLocalTick : 0);
 
     internal FirstSeverancePreparationProjection? Preparation => preparation;
 
@@ -24,8 +34,12 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
 
     internal void ApplySnapshot(
         in EncounterSnapshot snapshot,
-        FirstSeverancePreparationProjection? incomingPreparation)
+        FirstSeverancePreparationProjection? incomingPreparation,
+        FirstSeveranceCombatProjection? incomingCombat)
     {
+        lastAuthorityTick = snapshot.AuthorityTick;
+        receivedAtLocalTick = Main.GameUpdateCount;
+        ApplyCombat(snapshot, incomingCombat);
         FirstSeverancePreparationProjection? nextPreparation =
             snapshot.Lifecycle == EncounterLifecycle.Preparing
             && incomingPreparation is not null
@@ -66,6 +80,76 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         Main.NewText($"[Convergence] {message}", 86, 210, 229);
     }
 
+    private void ApplyCombat(in EncounterSnapshot snapshot, FirstSeveranceCombatProjection? incoming)
+    {
+        if (Main.netMode == NetmodeID.Server)
+            return;
+        FirstSeveranceCombatProjection? previous = combat;
+        combat = snapshot.Lifecycle == EncounterLifecycle.Active
+            && incoming is not null && incoming.FightId == snapshot.FightId
+            && incoming.EncounterSequence == snapshot.EncounterSequence ? incoming : null;
+
+        if (previous is not null && (combat is null || combat.FightId != previous.FightId))
+        {
+            ClearCombatPlayers(previous);
+            Say("CombatEnded", snapshot.Termination.EndReason.ToString());
+            previous = null;
+        }
+        if (combat is null)
+            return;
+
+        foreach (FirstSeveranceCombatParticipantProjection participant in combat.Participants)
+        {
+            Player player = Main.player[participant.ServerWhoAmI];
+            if (player.active)
+                player.GetModPlayer<FirstSeveranceRaidPlayer>().ApplyProjection(
+                    combat.FightId, participant, snapshot.AuthorityTick);
+
+            FirstSeveranceCombatParticipantProjection before = default;
+            bool hadPrevious = previous is not null
+                && previous.TryGetParticipantByServerSlot(participant.ServerWhoAmI, out before);
+            if (participant.CombatState == RaidParticipantCombatState.Downed
+                && (!hadPrevious || before.CombatState != RaidParticipantCombatState.Downed))
+                Say("ParticipantDowned", player.name);
+            else if (hadPrevious && before.CombatState == RaidParticipantCombatState.Downed
+                && participant.CombatState == RaidParticipantCombatState.Alive)
+                Say("ParticipantRevived", player.name, combat.RemainingReviveTokens);
+
+            if (participant.IsReviving && (!hadPrevious || !before.IsReviving))
+                Say("ReviveStarted", player.name);
+            else if (hadPrevious && before.IsReviving && !participant.IsReviving
+                && previous!.RemainingReviveTokens == combat.RemainingReviveTokens)
+                Say("ReviveCancelled", player.name);
+        }
+
+        if (previous is null || previous.Substate != combat.Substate
+            || previous.ZeroBasedLoopIndex != combat.ZeroBasedLoopIndex)
+        {
+            string target = combat.StackTargetSlot >= 0
+                ? Main.player[combat.StackTargetSlot].name : "?";
+            int seconds = combat.ResolveTick > snapshot.AuthorityTick
+                ? (int)((combat.ResolveTick - snapshot.AuthorityTick + 59) / 60) : 0;
+            Say("Phase" + combat.Substate, combat.Participants.Count, target, seconds,
+                FirstSeveranceEncounterPlan.Instance.StackRequiredShares.GetValue(combat.Participants.Count));
+        }
+        if (combat.MechanicRevision > 0 && previous?.MechanicRevision != combat.MechanicRevision)
+            Say("Result" + combat.LastMechanicResult);
+    }
+
+    private static void Say(string key, params object[] args)
+    {
+        Main.NewText("[Convergence] " + Language.GetTextValue(
+            "Mods.Convergence.UI.FirstSeverance." + key, args), 86, 210, 229);
+    }
+
+    private static void ClearCombatPlayers(FirstSeveranceCombatProjection? previous)
+    {
+        if (previous is null)
+            return;
+        foreach (FirstSeveranceCombatParticipantProjection participant in previous.Participants)
+            Main.player[participant.ServerWhoAmI].GetModPlayer<FirstSeveranceRaidPlayer>().ClearRaidState();
+    }
+
     internal void ApplyValidation(in FirstSeveranceValidationMessage validation)
     {
         if (validation.RequestNonce <= lastValidationNonce)
@@ -96,7 +180,11 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
                 authority.Snapshot.EncounterSequence,
                 authority.Snapshot.FightId,
                 out FirstSeverancePreparationProjection? projection);
-            ApplySnapshot(authority.Snapshot, projection);
+            FirstSeveranceCombatAuthority.TryCreateProjection(
+                authority.Snapshot.EncounterSequence,
+                authority.Snapshot.FightId,
+                out FirstSeveranceCombatProjection? combatProjection);
+            ApplySnapshot(authority.Snapshot, projection, combatProjection);
             return;
         }
 
@@ -123,6 +211,10 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
 
     private void ResetState()
     {
+        ClearCombatPlayers(combat);
+        combat = null;
+        lastAuthorityTick = 0;
+        receivedAtLocalTick = 0;
         preparation = null;
         lastValidationNonce = 0;
         LastValidation = null;

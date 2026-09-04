@@ -2,7 +2,33 @@
 
 ## Records
 
-There are currently no distributable image, audio, music, or font assets in the repository.
+- Runtime file: `Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem.png`
+- Asset ID: foundation-core-item-prototype-2026-09-05
+- Asset type: texture
+- Creator: project-generated prototype with OpenAI ImageGen assistance
+- Creation/acquisition date: 2026-09-05
+- Source type: generated
+- Source work and URL: original task concept; no external artwork used
+- Tool/model/version: OpenAI built-in ImageGen; exact backend model not surfaced
+- Human modifications: local low-resolution pixel cleanup and Terraria item layout export
+- License and redistribution terms: project source/asset license remains undecided; development use only, no public release approved
+- Required attribution: none externally specified; preserve this provenance record
+- Reviewer and review date: Codex task, 2026-09-05
+- Notes: Also reused as the experimental Boss/Pylon/kit placeholder.
+
+- Runtime file: `Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreTile.png`
+- Asset ID: foundation-core-prototype-2026-09-05
+- Asset type: texture
+- Creator: project-generated prototype with OpenAI ImageGen assistance
+- Creation/acquisition date: 2026-09-05
+- Source type: generated
+- Source work and URL: original task concept; no external artwork used
+- Tool/model/version: OpenAI built-in ImageGen; exact backend model not surfaced
+- Human modifications: local low-resolution pixel cleanup and Terraria item/tile layout export
+- License and redistribution terms: project source/asset license remains undecided; development use only, no public release approved
+- Required attribution: none externally specified; preserve this provenance record
+- Reviewer and review date: Codex task, 2026-09-05
+- Notes: Item sprite is also reused as the experimental Boss/Pylon/kit placeholder. Boss 3 music is a Terraria runtime ID reference; no recording/audio asset is copied into this repository.
 
 ## Record template
 

@@ -26,6 +26,8 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         EncounterPacketRouter.Register(EncounterPacketType.RequestSetReady, this);
         EncounterPacketRouter.Register(EncounterPacketType.RequestCancel, this);
         EncounterPacketRouter.Register(EncounterPacketType.RequestSnapshot, this);
+        EncounterPacketRouter.Register(EncounterPacketType.RequestPrototypeDown, this);
+        EncounterPacketRouter.Register(EncounterPacketType.RequestReviveNearest, this);
         EncounterPacketRouter.Register(EncounterPacketType.Snapshot, this);
         EncounterPacketRouter.Register(EncounterPacketType.ValidationResult, this);
     }
@@ -55,6 +57,16 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
                 out failureCode),
             EncounterPacketType.RequestSnapshot => HandleSnapshotRequest(
                 whoAmI,
+                out failureCode),
+            EncounterPacketType.RequestPrototypeDown => HandlePrototypeDown(
+                reader,
+                whoAmI,
+                header,
+                out failureCode),
+            EncounterPacketType.RequestReviveNearest => HandleReviveNearest(
+                reader,
+                whoAmI,
+                header,
                 out failureCode),
             EncounterPacketType.Snapshot => HandleSnapshot(
                 reader,
@@ -231,6 +243,76 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         return true;
     }
 
+    private static bool HandlePrototypeDown(
+        BinaryReader reader,
+        int whoAmI,
+        in EncounterPacketHeader header,
+        out string failureCode)
+    {
+        if (!IsLiveHeader(header) || !IsCurrentPlayer(whoAmI))
+        {
+            return Reject("first_severance.prototype_down_header_invalid", out failureCode);
+        }
+
+        if (!TryConsumeRate(whoAmI, header.PacketType, FastRequestWindowTicks, 4))
+        {
+            return Reject("first_severance.prototype_down_rate_limited", out failureCode);
+        }
+
+        if (!FirstSeverancePacketCodec.TryReadPrototypeDownRequest(
+                reader,
+                out uint requestNonce,
+                out failureCode))
+        {
+            return false;
+        }
+
+        bool accepted = FirstSeveranceServerCommands.TryPrototypeDown(
+            header.EncounterSequence,
+            header.FightId,
+            whoAmI,
+            requestNonce,
+            out string downFailureCode);
+        SendValidation(whoAmI, requestNonce, accepted, downFailureCode);
+        failureCode = string.Empty;
+        return true;
+    }
+
+    private static bool HandleReviveNearest(
+        BinaryReader reader,
+        int whoAmI,
+        in EncounterPacketHeader header,
+        out string failureCode)
+    {
+        if (!IsLiveHeader(header) || !IsCurrentPlayer(whoAmI))
+        {
+            return Reject("first_severance.revive_header_invalid", out failureCode);
+        }
+
+        if (!TryConsumeRate(whoAmI, header.PacketType, FastRequestWindowTicks, 8))
+        {
+            return Reject("first_severance.revive_rate_limited", out failureCode);
+        }
+
+        if (!FirstSeverancePacketCodec.TryReadReviveNearestRequest(
+                reader,
+                out uint requestNonce,
+                out failureCode))
+        {
+            return false;
+        }
+
+        bool accepted = FirstSeveranceServerCommands.TryReviveNearest(
+            header.EncounterSequence,
+            header.FightId,
+            whoAmI,
+            requestNonce,
+            out string reviveFailureCode);
+        SendValidation(whoAmI, requestNonce, accepted, reviveFailureCode);
+        failureCode = string.Empty;
+        return true;
+    }
+
     private static bool HandleSnapshot(
         BinaryReader reader,
         in EncounterPacketHeader header,
@@ -241,6 +323,7 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
                 header,
                 out EncounterSnapshot snapshot,
                 out FirstSeverancePreparationProjection? preparation,
+                out FirstSeveranceCombatProjection? combat,
                 out failureCode))
         {
             return false;
@@ -250,7 +333,7 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         if (replica.ApplyFullSnapshot(snapshot))
         {
             ModContent.GetInstance<FirstSeveranceClientStateSystem>()
-                .ApplySnapshot(snapshot, preparation);
+                .ApplySnapshot(snapshot, preparation, combat);
         }
 
         failureCode = string.Empty;
@@ -279,8 +362,12 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
             snapshot.EncounterSequence,
             snapshot.FightId,
             out FirstSeverancePreparationProjection? preparation);
+        FirstSeveranceCombatAuthority.TryCreateProjection(
+            snapshot.EncounterSequence,
+            snapshot.FightId,
+            out FirstSeveranceCombatProjection? combat);
         ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
-        FirstSeverancePacketCodec.WriteSnapshot(packet, snapshot, preparation);
+        FirstSeverancePacketCodec.WriteSnapshot(packet, snapshot, preparation, combat);
         packet.Send(toClient);
     }
 

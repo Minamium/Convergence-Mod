@@ -6,6 +6,8 @@ internal enum EncounterPacketType : byte
     RequestSetReady = 2,
     RequestCancel = 3,
     RequestSnapshot = 4,
+    RequestPrototypeDown = 5,
+    RequestReviveNearest = 6,
 
     Snapshot = 64,
     StateChanged = 65,
@@ -13,4 +15,3 @@ internal enum EncounterPacketType : byte
     ValidationResult = 67,
     EncounterEnded = 68,
 }
-

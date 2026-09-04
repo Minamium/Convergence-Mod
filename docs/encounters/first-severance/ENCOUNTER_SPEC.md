@@ -25,6 +25,10 @@ related_docs:
 
 # First Severance Encounter Specification
 
+## Development experiment override
+
+For `0.1.1`, the user-authorized experiment in [ADR-0009](../../adr/0009-development-combat-experiment.md) runs the loop before production integration is complete. Stack uses a fixed 90%-of-average-pull-maximum-HP pool without armor mitigation; Spread overlaps receive 40% maximum HP once; failed Pylons pulse 25% clamped nonlethal. Stack chooses its round-robin Alive target at cast start but does not yet reissue a lost target. These are experiment-only values and behavior, not a replacement for the production hit-pipeline and reissue rules below. General Terraria lethal events are not intercepted. [Status](../../STATUS.md) owns implementation and test results.
+
 ## Identity and scope
 
 | Field | Value | Decision state |

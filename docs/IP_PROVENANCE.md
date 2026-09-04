@@ -77,6 +77,8 @@ Reviewer and review date
 
 ## Release audit
 
+The 2026-09-05 First Severance experiment uses independently written adapters informed by official tModLoader API behavior; no external source implementation was copied. Foundation Core prototype texture provenance is recorded in [Asset Attribution](../Assets/ATTRIBUTION.md). Boss 3 is a Terraria runtime music reference, not a bundled audio recording.
+
 Release candidateごとに次を確認する。
 
 - untracked asset 0

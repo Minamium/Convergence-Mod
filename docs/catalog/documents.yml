@@ -1,10 +1,31 @@
 schema_version: 1
 generated_from: validated Markdown under docs/
 documents:
+- doc_id: adr.0009
+  path: docs/adr/0009-development-combat-experiment.md
+  title: 'ADR-0009: Bounded development combat experiment'
+  content_sha256: 0e4dcaa6e48c4976d91770bc51b505158e1eb2137d3b1163e1a4433e5c078a66
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-05'
+  source_of_truth_for:
+  - first_severance.development_experiment_boundary
+  aliases:
+  - Development combat experiment
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeverancePrototypeCombatRuntime.cs
+  - Common/Networking/Protocol/EncounterProtocol.cs
+  related_docs:
+  - project.status
+  - encounter.first-severance.spec
+  - encounter.first-severance.revive
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: 380a2247e7aa0b639d18143259aad22115adc87cff56684ee066d93f6068c11c
+  content_sha256: 735fafeba004c2cbe5e4a1868c7d960f0b46be3de370dccd10e2eef47e487a40
   document_type: policy
   status: accepted
   owners:
@@ -89,7 +110,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 9e022fb46ec780ca44ce8414a74049e07270247a2acc82bc8166c05020822ecc
+  content_sha256: 48461f34cb2d06296d3faef5e51b997280059d0dfc4b897b9cbe33449ff65701
   document_type: index
   status: accepted
   owners:
@@ -167,7 +188,7 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: d7cf9fa67cc0a9b3dd8203a966a1a8e1443867f74ffb5c2679111a2a3ca06584
+  content_sha256: 3a373e7089d298cbf59a5c1ff572300899912b37f1987b836d85cae5a3ecc31f
   document_type: overview
   status: accepted
   owners:
@@ -188,7 +209,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: fcaabcddc1e9b94ad7f2e1a68686783fcc2c7e4b402a933c07346f31980a0b2c
+  content_sha256: 635d5f60c22b25f51ecd10229f3d4664760014b1d80a33ffb7b9a71d57d36354
   document_type: plan
   status: accepted
   owners:
@@ -212,7 +233,7 @@ documents:
 - doc_id: encounter.first-severance.revive
   path: docs/encounters/first-severance/REVIVE_SPEC.md
   title: First Severance Downed and Revive Specification
-  content_sha256: 21bd75e48b0342dec9e0af3de4725b68fb222a26965999c327641c590525a34b
+  content_sha256: 8ed78972a2207d99f60972ecd1f76e28216dc6d455f08a695526f31fa069fa2b
   document_type: spec
   status: accepted
   owners:
@@ -234,7 +255,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: c40050846de8c19c27e2745de154d44d14e4e8ef9e66e9e7f2710ab959c3fa1b
+  content_sha256: 80c8b2853f45a6611a7a944a86b6de33b5847e0a092cf01f2efa692404c78125
   document_type: spec
   status: accepted
   owners:
@@ -301,7 +322,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: f3c9c66fcf0d62a82eed685afb1ad6dcb6a63c2da025d25b136a24da74a892bd
+  content_sha256: 9def8495fdd9aa7b3282d973b38ad580683bdbade882976772fb70ac01453d6a
   document_type: policy
   status: accepted
   owners:
@@ -343,7 +364,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: a41a99319e197a9fdd77d7b2daf2786b733a0278e904106151f48a95ee56711f
+  content_sha256: fac31ed45f70aad4bb22c0e35bceb408170913830080c5a920f6d06ec081a5a3
   document_type: governance
   status: accepted
   owners:
@@ -571,7 +592,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 68e41fe65fea56c12a7aaa37b324c6e6366ca24f6fcd2417a90d39a95c202037
+  content_sha256: 03e892c39add6fc663f48dd682a04d507714947955a8c2ff55779426366c5a8a
   document_type: governance
   status: accepted
   owners:
@@ -616,7 +637,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b7ab4563a996438777d1346d75cd02e2f030fa80f254821a27c9c96b75116abd
+  content_sha256: a9d7dfbe4408d6c7f57553f7c4d73971f44783954c12b76f98254e45601d1602
   document_type: status
   status: accepted
   owners:
@@ -688,7 +709,7 @@ documents:
 - doc_id: research.first-severance-slice3-apis
   path: docs/research/FIRST_SEVERANCE_SLICE3_APIS.md
   title: First Severance Slice 3 API Evidence
-  content_sha256: 3e917cb241156a7e862553415984bc8dce9ad5f2d7bc01c1b83babc99a8112e6
+  content_sha256: 95b46a846cccb5f1705cf7c610b71f7398e73b448ae23a7c6dab723139e45667
   document_type: research
   status: historical
   owners:
@@ -730,7 +751,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: f1d34d9d57745b424d7bff4a5fedd256a430ce1cc0bb864fcd4ff07f793163e3
+  content_sha256: 6913318d21a5fd8b9049f8ff8da7bdf52bad706a88a7b24afdf7fe7c7c9eff7c
   document_type: research
   status: historical
   owners:

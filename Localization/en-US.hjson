@@ -6,18 +6,50 @@ Mods: {
 				Tooltip:
 					'''
 					Anchors a prospective First Severance arena
-					Development build: preparation only; combat remains locked
+					Development build: all Ready starts the experimental Raid loop
 					'''
 			}
+			ResuscitationKitItem: {
+				DisplayName: Resuscitation Kit
+				Tooltip: "Hold use for 2 seconds beside a Downed ally (8 tiles)\nRemain still; consumes one shared Raid token on success, not the item"
+			}
+		}
+		NPCs: {
+			FirstSeverancePrototypeBoss.DisplayName: Null Cantor — Prototype
+			FirstSeverancePrototypePylon.DisplayName: Severance Pylon
 		}
 
 		Tiles.FoundationCoreTile.MapEntry: Foundation Core
 
 		UI: {
 			FirstSeverance: {
-				ActivationRejected: Foundation Core activation was rejected: {0}
-				PreparationStatus: First Severance preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready.
-				AllReady: First Severance is ready — Ready: {0}/{1}. Multiplayer preparation confirmed; combat is still locked in this build.
+				ActivationRejected: "Foundation Core activation was rejected: {0}"
+				PreparationStatus: "First Severance preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready."
+				AllReady: "First Severance Ready: {0}/{1}. Starting the experimental Raid."
+				PhaseSpawnIntro: "Raid started. Pick up your Resuscitation Kit. /convergence-down tests Downed; the initiator can end with /convergence-cancel."
+				PhasePylonCheck: "PYLONS — destroy all {0}. The Boss remains shielded."
+				PhaseStack: "STACK — gather within 7 tiles of {1}. Required shares: {3}. {2} seconds!"
+				PhaseSpread: "SPREAD — separate by at least 16 tiles. {2} seconds!"
+				PhaseCoreExposure: "CORE EXPOSED — attack the Boss! {2} seconds."
+				PhaseReset: "Loop complete. Boss shields restore; the next Pylons follow. /convergence-cancel ends the experiment."
+				ResultStackPassed: Stack successful — damage shared.
+				ResultStackFailed: Stack failed — too few players shared the hit.
+				ResultSpreadPassed: Spread successful.
+				ResultSpreadFailed: Spread failed — overlapping players took a hit.
+				ParticipantDowned: "{0} is DOWNED. An ally can hold the kit nearby for 2 seconds."
+				ParticipantRevived: "{0} revived at 35% life. Shared tokens left: {1}."
+				ReviveStarted: "{0} is reviving — hold use and remain still."
+				ReviveCancelled: "{0}'s revive was interrupted. No token consumed."
+				CombatEnded: "Raid ended ({0}). Actors and Downed state cleared."
+				CombatHud: "{0}  |  {1}s  |  Revive tokens: {2}"
+				DownedHud: "DOWNED — {0}s remaining. Wait for an ally's kit."
+				ReviveHud: "REVIVING — hold use, stay still: {0}s"
+				NameSpawnIntro: FIRST SEVERANCE
+				NamePylonCheck: PYLONS
+				NameStack: STACK
+				NameSpread: SPREAD
+				NameCoreExposure: CORE EXPOSED
+				NameReset: RESET
 			}
 		}
 	}

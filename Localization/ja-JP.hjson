@@ -3,8 +3,16 @@ Mods: {
     Items: {
       FoundationCoreItem: {
         DisplayName: ファウンデーション・コア
-        Tooltip: "第一断絶の候補アリーナを固定する\n開発ビルド：準備のみ。戦闘開始はまだロックされています"
+        Tooltip: "第一断絶の候補アリーナを固定する\n開発ビルド：全員Readyで実験用Raidを開始"
       }
+      ResuscitationKitItem: {
+        DisplayName: 蘇生キット
+        Tooltip: "Downした味方の8タイル以内で、使用ボタンを2秒間長押し\n静止して使用。成功時に共有蘇生トークンを1消費（アイテムは消費しない）"
+      }
+    }
+    NPCs: {
+      FirstSeverancePrototypeBoss.DisplayName: 零の詠唱者 — 試作体
+      FirstSeverancePrototypePylon.DisplayName: 断絶のパイロン
     }
     Tiles: {
       FoundationCoreTile: {
@@ -15,7 +23,31 @@ Mods: {
       FirstSeverance: {
         ActivationRejected: "ファウンデーション・コアの起動条件を満たしていません: {0}"
         PreparationStatus: "第一断絶の準備中 — Ready: {0}/{1}。コアを右クリックするとReadyを切り替えます。"
-        AllReady: "第一断絶 Ready完了 — {0}/{1}。マルチ準備の同期は成功です。このビルドでは戦闘はまだロック中です。"
+        AllReady: "第一断絶 Ready完了 — {0}/{1}。実験用Raidを開始します。"
+        PhaseSpawnIntro: "Raid開始。足元の蘇生キットを拾ってください。/convergence-down でDownを実験できます。起動者の /convergence-cancel で終了。"
+        PhasePylonCheck: "パイロン — {0}基すべてを破壊！ Bossはまだ無敵です。"
+        PhaseStack: "頭割り — {1} の7タイル以内に集合！ 必要人数: {3}。あと{2}秒。"
+        PhaseSpread: "散開 — お互いに16タイル以上離れて！ あと{2}秒。"
+        PhaseCoreExposure: "コア露出 — Bossを攻撃！ 残り{2}秒。"
+        PhaseReset: "1周完了。Bossの盾が戻り、次のパイロンへ。実験を終える場合は /convergence-cancel。"
+        ResultStackPassed: 頭割り成功 — ダメージを分担しました。
+        ResultStackFailed: 頭割り失敗 — 分担人数が足りませんでした。
+        ResultSpreadPassed: 散開成功。
+        ResultSpreadFailed: 散開失敗 — 重なったプレイヤーにダメージ。
+        ParticipantDowned: "{0} がDOWN。味方が8タイル以内で蘇生キットを2秒間長押ししてください。"
+        ParticipantRevived: "{0} がHP35%で復帰。共有蘇生トークン残り: {1}。"
+        ReviveStarted: "{0} が蘇生中 — 動かず使用ボタンを押し続けてください。"
+        ReviveCancelled: "{0} の蘇生が中断されました。トークンは消費していません。"
+        CombatEnded: "Raid終了（{0}）。試作NPCとDown状態を解除しました。"
+        CombatHud: "{0}  |  残り{1}秒  |  蘇生トークン: {2}"
+        DownedHud: "DOWN — 残り{0}秒。味方の蘇生キットを待ってください。"
+        ReviveHud: "蘇生中 — 静止して長押し: 残り{0}秒"
+        NameSpawnIntro: 第一断絶
+        NamePylonCheck: パイロン破壊
+        NameStack: 頭割り
+        NameSpread: 散開
+        NameCoreExposure: コア露出
+        NameReset: リセット
       }
     }
   }

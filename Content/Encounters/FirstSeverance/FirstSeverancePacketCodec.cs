@@ -8,6 +8,7 @@ using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Geometry;
 using Convergence.Common.Foundation.Identifiers;
 using Convergence.Common.Networking.Protocol;
+using Convergence.Common.Raids.Revive;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
@@ -110,10 +111,73 @@ internal static class FirstSeverancePacketCodec
         return true;
     }
 
+    internal static void WritePrototypeDownRequest(
+        BinaryWriter writer,
+        in EncounterPacketHeader header,
+        uint requestNonce)
+    {
+        EncounterPacketCodec.WriteHeader(writer, header);
+        writer.Write(requestNonce);
+    }
+
+    internal static bool TryReadPrototypeDownRequest(
+        BinaryReader reader,
+        out uint requestNonce,
+        out string failureCode)
+    {
+        if (reader.BaseStream.Length - reader.BaseStream.Position != sizeof(uint))
+        {
+            requestNonce = 0;
+            failureCode = "first_severance.prototype_down_payload_size";
+            return false;
+        }
+        requestNonce = reader.ReadUInt32();
+        if (requestNonce == 0)
+        {
+            failureCode = "first_severance.prototype_down_nonce_invalid";
+            return false;
+        }
+
+        failureCode = string.Empty;
+        return true;
+    }
+
+    internal static void WriteReviveNearestRequest(
+        BinaryWriter writer,
+        in EncounterPacketHeader header,
+        uint requestNonce)
+    {
+        EncounterPacketCodec.WriteHeader(writer, header);
+        writer.Write(requestNonce);
+    }
+
+    internal static bool TryReadReviveNearestRequest(
+        BinaryReader reader,
+        out uint requestNonce,
+        out string failureCode)
+    {
+        if (reader.BaseStream.Length - reader.BaseStream.Position != sizeof(uint))
+        {
+            requestNonce = 0;
+            failureCode = "first_severance.revive_payload_size";
+            return false;
+        }
+        requestNonce = reader.ReadUInt32();
+        if (requestNonce == 0)
+        {
+            failureCode = "first_severance.revive_nonce_invalid";
+            return false;
+        }
+
+        failureCode = string.Empty;
+        return true;
+    }
+
     internal static void WriteSnapshot(
         BinaryWriter writer,
         in EncounterSnapshot snapshot,
-        FirstSeverancePreparationProjection? preparation)
+        FirstSeverancePreparationProjection? preparation,
+        FirstSeveranceCombatProjection? combat)
     {
         var header = new EncounterPacketHeader(
             EncounterProtocol.CurrentVersion,
@@ -133,12 +197,20 @@ internal static class FirstSeverancePacketCodec
             && preparation.FightId == snapshot.FightId
             && snapshot.Lifecycle == EncounterLifecycle.Preparing;
         WriteBoolean(writer, hasPreparation);
-        if (!hasPreparation)
+        if (hasPreparation)
         {
-            return;
+            WritePreparation(writer, preparation!);
         }
 
-        WritePreparation(writer, preparation!);
+        bool hasCombat = combat is not null
+            && combat.EncounterSequence == snapshot.EncounterSequence
+            && combat.FightId == snapshot.FightId
+            && snapshot.Lifecycle == EncounterLifecycle.Active;
+        WriteBoolean(writer, hasCombat);
+        if (hasCombat)
+        {
+            WriteCombat(writer, combat!);
+        }
     }
 
     internal static bool TryReadSnapshot(
@@ -146,10 +218,12 @@ internal static class FirstSeverancePacketCodec
         in EncounterPacketHeader header,
         out EncounterSnapshot snapshot,
         out FirstSeverancePreparationProjection? preparation,
+        out FirstSeveranceCombatProjection? combat,
         out string failureCode)
     {
         snapshot = default;
         preparation = null;
+        combat = null;
         var lifecycle = (EncounterLifecycle)reader.ReadByte();
         ulong authorityTick = reader.ReadUInt64();
         ulong lifecycleEnteredTick = reader.ReadUInt64();
@@ -176,18 +250,13 @@ internal static class FirstSeverancePacketCodec
             activeFightTick,
             termination);
 
-        if (!hasPreparation)
-        {
-            failureCode = string.Empty;
-            return true;
-        }
-
-        if (lifecycle != EncounterLifecycle.Preparing
-            || !TryReadPreparation(
-                reader,
-                header.EncounterSequence,
-                header.FightId,
-                out preparation))
+        if (hasPreparation
+            && (lifecycle != EncounterLifecycle.Preparing
+                || !TryReadPreparation(
+                    reader,
+                    header.EncounterSequence,
+                    header.FightId,
+                    out preparation)))
         {
             snapshot = default;
             preparation = null;
@@ -195,8 +264,171 @@ internal static class FirstSeverancePacketCodec
             return false;
         }
 
+        if (!TryReadBoolean(reader, out bool hasCombat))
+        {
+            snapshot = default;
+            preparation = null;
+            failureCode = "first_severance.snapshot_combat_marker_invalid";
+            return false;
+        }
+
+        if (hasCombat
+            && (lifecycle != EncounterLifecycle.Active
+                || !TryReadCombat(
+                reader,
+                header.EncounterSequence,
+                header.FightId,
+                out combat)))
+        {
+            snapshot = default;
+            preparation = null;
+            combat = null;
+            failureCode = "first_severance.snapshot_combat_invalid";
+            return false;
+        }
+
         failureCode = string.Empty;
         return true;
+    }
+
+    private static void WriteCombat(
+        BinaryWriter writer,
+        FirstSeveranceCombatProjection combat)
+    {
+        writer.Write((byte)combat.Substate);
+        writer.Write(combat.ResolveTick);
+        writer.Write(combat.ZeroBasedLoopIndex);
+        writer.Write(combat.RemainingPylons);
+        writer.Write(combat.BossLife);
+        writer.Write(combat.BossMaximumLife);
+        writer.Write(combat.RemainingReviveTokens);
+        writer.Write(combat.ReviveRevision);
+        writer.Write(combat.StackTargetSlot);
+        writer.Write(combat.CoreX);
+        writer.Write(combat.CoreY);
+        writer.Write((byte)combat.LastMechanicResult);
+        writer.Write(combat.MechanicRevision);
+        writer.Write(checked((byte)combat.Participants.Count));
+        for (int index = 0; index < combat.Participants.Count; index++)
+        {
+            FirstSeveranceCombatParticipantProjection participant = combat.Participants[index];
+            writer.Write(participant.ParticipantId.Value);
+            writer.Write(checked((byte)participant.ServerWhoAmI));
+            WriteBoolean(writer, participant.IsConnected);
+            writer.Write((byte)participant.CombatState);
+            WriteBoolean(writer, participant.IsReviving);
+            writer.Write(participant.DownedDeadlineTick);
+            writer.Write(participant.ReviveCompletesTick);
+            writer.Write(participant.HealthRevision);
+            writer.Write(participant.Life);
+            writer.Write(participant.AnchorX);
+            writer.Write(participant.AnchorY);
+            writer.Write(participant.InvulnerabilityUntilTick);
+            writer.Write(participant.WeaknessUntilTick);
+        }
+    }
+
+    private static bool TryReadCombat(
+        BinaryReader reader,
+        ulong encounterSequence,
+        FightId fightId,
+        out FirstSeveranceCombatProjection? combat)
+    {
+        combat = null;
+        var substate = (FirstSeveranceSubstate)reader.ReadByte();
+        ulong resolveTick = reader.ReadUInt64();
+        int zeroBasedLoopIndex = reader.ReadInt32();
+        int remainingPylons = reader.ReadInt32();
+        int bossLife = reader.ReadInt32();
+        int bossMaximumLife = reader.ReadInt32();
+        int remainingReviveTokens = reader.ReadInt32();
+        uint reviveRevision = reader.ReadUInt32();
+        int stackTargetSlot = reader.ReadInt32();
+        float coreX = reader.ReadSingle();
+        float coreY = reader.ReadSingle();
+        var mechanicResult = (FirstSeveranceMechanicResult)reader.ReadByte();
+        uint mechanicRevision = reader.ReadUInt32();
+        int participantCount = reader.ReadByte();
+        if (participantCount is < FirstSeveranceRoster.MinimumCount
+            or > FirstSeveranceRoster.MaximumCount)
+        {
+            return false;
+        }
+
+        var participants = new FirstSeveranceCombatParticipantProjection[participantCount];
+        var seenSlots = new HashSet<int>();
+        var seenParticipants = new HashSet<ParticipantId>();
+        for (int index = 0; index < participantCount; index++)
+        {
+            var participantId = new ParticipantId(reader.ReadByte());
+            int serverWhoAmI = reader.ReadByte();
+            if (!TryReadBoolean(reader, out bool isConnected))
+                return false;
+            var combatState = (RaidParticipantCombatState)reader.ReadByte();
+            if (!TryReadBoolean(reader, out bool isReviving))
+            {
+                return false;
+            }
+
+            ulong downedDeadlineTick = reader.ReadUInt64();
+            ulong reviveCompletesTick = reader.ReadUInt64();
+            uint healthRevision = reader.ReadUInt32();
+            int life = reader.ReadInt32();
+            float anchorX = reader.ReadSingle();
+            float anchorY = reader.ReadSingle();
+            ulong invulnerabilityUntilTick = reader.ReadUInt64();
+            ulong weaknessUntilTick = reader.ReadUInt64();
+            if (!participantId.IsValid
+                || participantId.Value >= participantCount || serverWhoAmI >= 255
+                || !Enum.IsDefined(combatState)
+                || life < 1 || !float.IsFinite(anchorX) || !float.IsFinite(anchorY)
+                || !seenSlots.Add(serverWhoAmI)
+                || !seenParticipants.Add(participantId))
+            {
+                return false;
+            }
+
+            participants[index] = new FirstSeveranceCombatParticipantProjection(
+                participantId,
+                serverWhoAmI,
+                isConnected,
+                combatState,
+                isReviving,
+                downedDeadlineTick,
+                reviveCompletesTick,
+                healthRevision,
+                life,
+                anchorX,
+                anchorY,
+                invulnerabilityUntilTick,
+                weaknessUntilTick);
+        }
+
+        try
+        {
+            combat = new FirstSeveranceCombatProjection(
+                encounterSequence,
+                fightId,
+                substate,
+                resolveTick,
+                zeroBasedLoopIndex,
+                remainingPylons,
+                bossLife,
+                bossMaximumLife,
+                remainingReviveTokens,
+                reviveRevision,
+                stackTargetSlot,
+                coreX,
+                coreY,
+                mechanicResult,
+                mechanicRevision,
+                Array.AsReadOnly(participants));
+            return true;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
     }
 
     internal static void WriteValidation(

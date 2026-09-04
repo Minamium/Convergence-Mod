@@ -10,7 +10,7 @@ public sealed class FirstSeveranceCancelCommand : ModCommand
 
     public override string Usage => "/convergence-cancel";
 
-    public override string Description => "Cancel your current First Severance preparation as its initiator.";
+    public override string Description => "End your First Severance preparation or experimental combat as its initiator.";
 
     public override void Action(CommandCaller caller, string input, string[] args)
     {

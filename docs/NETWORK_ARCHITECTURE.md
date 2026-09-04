@@ -23,6 +23,10 @@ related_docs:
 
 # Network Architecture
 
+## Development protocol v2
+
+Development `0.1.1` adds request IDs 5 (`RequestPrototypeDown`) and 6 (`RequestReviveNearest`), each a single nonzero uint nonce after the existing envelope. Full snapshots gain a bounded combat section for phase/deadline, Boss life, tokens, Stack target and at most four participant control/health projections. Each HP correction has a monotonic participant revision; clients apply it once. Health, success and positions are never accepted from these request payloads. Existing IDs and terminal ordering stay unchanged. See [ADR-0009](adr/0009-development-combat-experiment.md) for the experimental exception and [Status](STATUS.md) for unverified seams.
+
 ## Implementation status
 
 Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, typed handler routing, First Severance activate/Ready/cancel/full-preparation-snapshot transport, feature-neutral terminal descriptors/external mappings, and ordered read-only replica/tombstone behavior.

@@ -94,7 +94,60 @@ internal static class FirstSeveranceServerCommands
             return false;
         }
 
+        EncounterSnapshot snapshot = ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot;
+        if (snapshot.Lifecycle == EncounterLifecycle.Active)
+            return FirstSeveranceCombatAuthority.TryQueueCancel(encounterSequence, fightId,
+                senderWhoAmI, connectionEpoch, requestNonce, out failureCode);
+
         return FirstSeverancePreparationAuthority.TryQueueCancel(
+            encounterSequence,
+            fightId,
+            senderWhoAmI,
+            connectionEpoch,
+            requestNonce,
+            out failureCode);
+    }
+
+    internal static bool TryPrototypeDown(
+        ulong encounterSequence,
+        FightId fightId,
+        int senderWhoAmI,
+        uint requestNonce,
+        out string failureCode)
+    {
+        if (!FirstSeveranceConnectionEpochSystem.TryGetCurrentEpoch(
+                senderWhoAmI,
+                out ulong connectionEpoch))
+        {
+            failureCode = "first_severance.connection_epoch_unavailable";
+            return false;
+        }
+
+        return FirstSeveranceCombatAuthority.TryQueuePrototypeDown(
+            encounterSequence,
+            fightId,
+            senderWhoAmI,
+            connectionEpoch,
+            requestNonce,
+            out failureCode);
+    }
+
+    internal static bool TryReviveNearest(
+        ulong encounterSequence,
+        FightId fightId,
+        int senderWhoAmI,
+        uint requestNonce,
+        out string failureCode)
+    {
+        if (!FirstSeveranceConnectionEpochSystem.TryGetCurrentEpoch(
+                senderWhoAmI,
+                out ulong connectionEpoch))
+        {
+            failureCode = "first_severance.connection_epoch_unavailable";
+            return false;
+        }
+
+        return FirstSeveranceCombatAuthority.TryQueueReviveNearest(
             encounterSequence,
             fightId,
             senderWhoAmI,

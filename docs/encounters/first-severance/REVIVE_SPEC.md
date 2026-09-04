@@ -22,6 +22,10 @@ related_docs:
 
 # First Severance Downed and Revive Specification
 
+## Development experiment
+
+The `0.1.1` exception in [ADR-0009](../../adr/0009-development-combat-experiment.md) tests recovery through `/convergence-down` and encounter-owned experimental HP damage. It does not install ordinary lethal interception. The request uses a nonce only and authority chooses the nearest unreserved Downed ally. Keep the kit selected, hold use for two seconds, stay within eight tiles and do not move more than one tile; damage, release, item change, hook/mount use or range loss cancels without consuming the reserved token. A ten-tick ingress allowance accommodates initial held-use replication. Cleanup returns incapacitated participants to at least 35% HP; ordinary death or disconnect aborts this experiment. General lethal-hook and rejoin behavior below remain production requirements, not completed implementation.
+
 ## Player experience
 
 During an active Raid, an eligible lethal event transitions the participant to `Downed` instead of immediately performing normal Terraria death. Another Alive participant equips and uses a dedicated non-consumable revival item on the Downed target, remains nearby for a channel, and receives a server-confirmed success or cancellation.

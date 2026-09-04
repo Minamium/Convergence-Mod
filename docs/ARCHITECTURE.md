@@ -32,7 +32,7 @@ The architecture is a modular monolith: one tModLoader assembly with enforced so
 
 ## Current implementation note
 
-The source currently contains an inert `Content/Encounters/FirstSeverance` bootstrap. The atomic identity rename and immutable six-state loop replacement are complete, while live world mutation and activation remain disabled. [Status](STATUS.md) is authoritative; the current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
+The source contains a First Severance development experiment composing the loop and revive domains. [Status](STATUS.md) is authoritative; [ADR-0009](adr/0009-development-combat-experiment.md) distinguishes its temporary NPC/HP adapter from the unfinished production hit/death/Barrier integration. The product loop remains in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
 
 ## Dependency direction
 

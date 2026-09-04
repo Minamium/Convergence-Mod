@@ -99,7 +99,9 @@ internal static class EncounterPacketRouter
         bool isClientRequest = packetType is EncounterPacketType.RequestActivate
             or EncounterPacketType.RequestSetReady
             or EncounterPacketType.RequestCancel
-            or EncounterPacketType.RequestSnapshot;
+            or EncounterPacketType.RequestSnapshot
+            or EncounterPacketType.RequestPrototypeDown
+            or EncounterPacketType.RequestReviveNearest;
         bool isServerEvent = packetType is EncounterPacketType.Snapshot
             or EncounterPacketType.StateChanged
             or EncounterPacketType.ParticipantChanged

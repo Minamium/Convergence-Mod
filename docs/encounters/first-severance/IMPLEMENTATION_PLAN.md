@@ -24,6 +24,10 @@ related_docs:
 
 # First Severance Implementation Plan
 
+## Immediate development experiment
+
+The user requested one in-game combat loop, vanilla Boss music, and Down/revive after reaching Ready with a Steam friend. Development `0.1.1` therefore composes a bounded experimental adapter ahead of the production gates below. [ADR-0009](../../adr/0009-development-combat-experiment.md) and the [Status](../../STATUS.md) record its scope: temporary NPCs, no terrain/Barrier mutation, no ordinary lethal interception, no rewards, and no claim that Slices 3–7 are complete. GUI playtesting belongs to the user; verification for this iteration is limited to compilation, a focused existing domain run and the requested two-player experiment.
+
 This plan takes the current inert `FirstSeverance` bootstrap to its first playable vertical slice without weakening server authority, cleanup, or multiplayer evidence. The identity rename is complete; activation remains denied until the slice that owns each required adapter can prove it safe.
 
 ## Non-negotiable boundaries

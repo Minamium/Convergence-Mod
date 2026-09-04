@@ -19,7 +19,7 @@ related_docs:
 
 # Documentation Home
 
-This page is the starting point for humans and coding agents. The repository is currently an architecture bootstrap, not a playable Mod. Do not infer implementation from a design document; verify current state in [Status](STATUS.md).
+This page is the starting point for humans and coding agents. The repository includes an experimental Raid playtest build; do not infer production completeness from a design document. Verify current implementation and evidence in [Status](STATUS.md).
 
 ## Fast read for a new workstation
 

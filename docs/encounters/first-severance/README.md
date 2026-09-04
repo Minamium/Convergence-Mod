@@ -21,7 +21,7 @@ related_docs:
 
 # First Severance
 
-`First Severance`（第一断絶）は、Convergenceで最初に完成させる2～4人向けRaidです。現在のコードは`FirstSeverance` / `first_severance` identity、immutable six-state plan、feature terminal-cause contractに加え、Foundation Core右クリックからserver-owned Arena検証・roster/Ready準備・typed snapshotまで接続済みです。実機ではCoreの設置と起動条件の応答を確認できますが、combat gateとworld adapterは不活性のため、まだBoss戦は始まりません。
+`First Severance`（第一断絶）は、Convergenceで最初に完成させる2～4人向けRaidです。現在はReadyから戦闘ループ・BGM・実験Down／蘇生までを確認する開発ビルドです。実装済み範囲と未検証事項は[Status](../../STATUS.md)を参照してください。
 
 ## Current slice
 

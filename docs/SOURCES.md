@@ -79,4 +79,6 @@ Last reviewed: **2026-09-05**
 
 ## Revalidation rule
 
+Development combat references accessed 2026-09-05: [ModNPC](https://docs.tmodloader.net/docs/stable/class_mod_n_p_c.html), [ModPlayer](https://docs.tmodloader.net/docs/stable/class_mod_player.html), and [ModSceneEffect](https://docs.tmodloader.net/docs/stable/class_mod_scene_effect.html). These moving v2026.07 pages are paired with the installed pinned runtime XML; exact observations and limitations are in [First Severance API evidence](research/FIRST_SEVERANCE_SLICE3_APIS.md).
+
 実装開始日、Workshop公開前、tModLoader/Calamity更新時に再確認する。リンク切れやbranch移動があっても、当時の判断とversionはcommit historyへ残す。

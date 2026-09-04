@@ -65,10 +65,10 @@ internal static class FirstSeveranceClientActions
         }
 
         EncounterSnapshot snapshot = CurrentSnapshot();
-        if (snapshot.Lifecycle != EncounterLifecycle.Preparing
+        if (snapshot.Lifecycle is not (EncounterLifecycle.Preparing or EncounterLifecycle.Active)
             || snapshot.FightId.IsNone)
         {
-            Main.NewText("[Convergence] There is no preparation to cancel.", 235, 180, 90);
+            Main.NewText("[Convergence] There is no active Raid to cancel.", 235, 180, 90);
             return;
         }
 
@@ -108,6 +108,70 @@ internal static class FirstSeveranceClientActions
         EncounterPacketCodec.WriteHeader(
             packet,
             RequestHeader(EncounterPacketType.RequestSnapshot, snapshot));
+        packet.Send();
+    }
+
+    internal static void RequestPrototypeDown()
+    {
+        if (!TryGetActiveCombatSnapshot(out EncounterSnapshot snapshot))
+        {
+            Main.NewText("[Convergence] First Severance combat is not active.", 235, 180, 90);
+            return;
+        }
+
+        uint nonce = NextNonce();
+        if (Main.netMode == NetmodeID.SinglePlayer)
+        {
+            if (!FirstSeveranceServerCommands.TryPrototypeDown(
+                    snapshot.EncounterSequence,
+                    snapshot.FightId,
+                    Main.myPlayer,
+                    nonce,
+                    out string failureCode))
+            {
+                ShowRejected(failureCode);
+            }
+
+            return;
+        }
+
+        ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
+        FirstSeverancePacketCodec.WritePrototypeDownRequest(
+            packet,
+            RequestHeader(EncounterPacketType.RequestPrototypeDown, snapshot),
+            nonce);
+        packet.Send();
+    }
+
+    internal static void RequestReviveNearest()
+    {
+        if (!TryGetActiveCombatSnapshot(out EncounterSnapshot snapshot))
+        {
+            Main.NewText("[Convergence] First Severance combat is not active.", 235, 180, 90);
+            return;
+        }
+
+        uint nonce = NextNonce();
+        if (Main.netMode == NetmodeID.SinglePlayer)
+        {
+            if (!FirstSeveranceServerCommands.TryReviveNearest(
+                    snapshot.EncounterSequence,
+                    snapshot.FightId,
+                    Main.myPlayer,
+                    nonce,
+                    out string failureCode))
+            {
+                ShowRejected(failureCode);
+            }
+
+            return;
+        }
+
+        ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
+        FirstSeverancePacketCodec.WriteReviveNearestRequest(
+            packet,
+            RequestHeader(EncounterPacketType.RequestReviveNearest, snapshot),
+            nonce);
         packet.Send();
     }
 
@@ -183,6 +247,18 @@ internal static class FirstSeveranceClientActions
         return Main.netMode == NetmodeID.SinglePlayer
             ? ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot
             : ModContent.GetInstance<EncounterReplicaSystem>().Snapshot;
+    }
+
+    private static bool TryGetActiveCombatSnapshot(out EncounterSnapshot snapshot)
+    {
+        snapshot = CurrentSnapshot();
+        return Main.netMode != NetmodeID.Server
+            && snapshot.Lifecycle == EncounterLifecycle.Active
+            && !snapshot.FightId.IsNone
+            && string.Equals(
+                snapshot.DefinitionKey,
+                FirstSeveranceDefinition.EncounterKey,
+                System.StringComparison.Ordinal);
     }
 
     private static bool TryGetPreparation(
