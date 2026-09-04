@@ -16,8 +16,8 @@ internal sealed class FirstSeveranceAvailabilityPolicy : IEncounterActivationPol
     {
         _ = command;
         _ = definition;
-        // Slice 3 permits validation and Ready preparation only. The preparation
-        // runtime keeps its combat gate closed and cannot enter Active.
+        // The development build admits Core validation and Ready. Its composing
+        // runtime then starts the explicitly scoped combat experiment (ADR-0009).
         return EncounterActivationDecision.Allow;
     }
 }

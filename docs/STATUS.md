@@ -71,12 +71,12 @@ As of 2026-09-05, Convergence `0.1.1` contains a development-only First Severanc
 
 | Gate | State |
 |---|---|
-| Documentation catalog | Passed for Slice 3A on Windows |
-| Repository policy checks | Passed for Slice 3A on Windows |
-| YAML checks | Passed for Slice 3A on Windows |
-| Dependency-free domain tests | 48 passed for Slice 3A on Windows |
-| `dotnet build ConvergenceMod.csproj` | Combat experiment: pending final packaging; preliminary compile passed |
-| tModLoader Build + Reload | Passed for Foundation Core preparation transport |
+| Documentation catalog | Passed for the experiment (39 documents) |
+| Repository policy checks | Passed for the experiment |
+| YAML checks | Passed for the experiment |
+| Dependency-free domain tests | 48 passed; validates reused domains, not the new Terraria adapters |
+| `dotnet build ConvergenceMod.csproj` | `0.1.1` packaged successfully from code commit `ba95762`, 0 warnings/errors |
+| tModLoader Build + Reload | Prior preparation transport passed; `0.1.1` awaits user GUI reload |
 | Single Player load | Passed; Core placed/right-clicked and correctly returned `roster_too_small` for one player |
 | Steam-friend preparation | User reported Ready reached; exact topology/logs not independently captured |
 | Combat/BGM/Down/revive in game | Not run for `0.1.1`; user controls the GUI |
