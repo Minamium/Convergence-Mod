@@ -22,6 +22,8 @@ related_docs:
 
 ## First-slice priority
 
+Exception for the explicit 2026-09-06 user request: [ADR-0010](adr/0010-giant-boss-observation-lances.md) authorizes a giant original first-pass Boss export and layered VFX now. It remains development art requiring live readability review and later hand cleanup, not final/release art. Large logical beam rectangles may be owned directly by the Fight runtime (no projectile slots); clients render the corresponding bounded ray snapshots.
+
 Use simple original placeholders until authority, hitboxes, telegraphs, and multiplayer timing are stable. For the provisional First Severance silhouette, prefer separate runtime exports for central body/Core, broken ring, emissive mask, Pylon, and mechanic/UI primitives. If ring/arms are retained, they are code-positioned presentation on one Boss NPC; do not create Crown/Wings/Heart Casing art for the obsolete multipart plan.
 
 ## Appropriate generated/assisted work

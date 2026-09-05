@@ -25,7 +25,7 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: 8f8027021ab5b5782ef4e0e667a49d5fe31275b110e964c6fca2bc0653112030
+  content_sha256: 9b40d3405b494bc08be26a3a5c4c9783dd6efdc8154b3e6c4d7641124b7e264b
   document_type: policy
   status: accepted
   owners:
@@ -45,10 +45,31 @@ documents:
   - development.windows
   - policy.release-process
   - project.status
+- doc_id: decision.giant-boss-observation-lances
+  path: docs/adr/0010-giant-boss-observation-lances.md
+  title: 'ADR-0010: Giant original Boss pass and bounded observation lances'
+  content_sha256: 0eddc1b3ab3fea6f9e87799e7334217638becc6b3ca9db6eb4b6bc3767fa9605
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - gameplay
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.observation_lance_snapshot
+  aliases:
+  - ADR-0010
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceLance.cs
+  - Common/Networking/Protocol/EncounterProtocol.cs
+  related_docs:
+  - encounter.first-severance.spec
+  - encounter.first-severance.visual
+  - project.network-architecture
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: f76016159809a701e6aa4a0eafd49c44679283c5765135e4b3c13f26a4e27bd7
+  content_sha256: ddb9aed3fea33e4374fbe541ea1085b317080d58fb3b337d72228d4cee3fb7c1
   document_type: index
   status: accepted
   owners:
@@ -188,7 +209,7 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: 3a373e7089d298cbf59a5c1ff572300899912b37f1987b836d85cae5a3ecc31f
+  content_sha256: 6de21ddcf4bc730802c39e1f5eb3448e184e39b526687151436fc9db36410afe
   document_type: overview
   status: accepted
   owners:
@@ -209,13 +230,13 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 635d5f60c22b25f51ecd10229f3d4664760014b1d80a33ffb7b9a71d57d36354
+  content_sha256: 5282abab6bebd2f3ac6dda44c079ef1c90d8cc96e64509889f81cf13e5922e73
   document_type: plan
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - first_severance.implementation_sequence
   aliases:
@@ -255,13 +276,13 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 80c8b2853f45a6611a7a944a86b6de33b5847e0a092cf01f2efa692404c78125
+  content_sha256: a175b64a98c6a9b77bf54d1e819d3d408d60e589b61d71d85dd0624c2a2215bb
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -279,14 +300,14 @@ documents:
   - encounter.first-severance.revive
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
-  title: First Severance Minimum Visual Specification
-  content_sha256: dc731bdbc37ef70426778fa16e776eadbf7f885919276a1730ebd9038b7c8cf8
+  title: First Severance — Null Cantor Visual Pass
+  content_sha256: e9c94a57599ef2bd8582cea1d96ef7132d2f5e632c6d87e81918e121193c562e
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -322,7 +343,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 4bfbc4d71128e6a5669eccd1ce0f8d52d627370e578faa092adc2fc927cc1bc8
+  content_sha256: 8bdbfbc0f7db5008d5277cd0955f3e05a0324f06f854b32563aec844025f4bea
   document_type: policy
   status: accepted
   owners:
@@ -416,12 +437,12 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: dbd045b78b51e0bc11b8a36441e8cc94b23a7b35fe3fdb2ae7345d6d167585a6
+  content_sha256: 3b278bdf204be098e85df1d88cf6c4e2db3123b6adf313cd43e0a923de9ac1d4
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - project.art_direction
   aliases:
@@ -435,7 +456,7 @@ documents:
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
-  content_sha256: f2740d4465fadef0bd0860b4057d5c8ca9ce4e691ed00104ae3e2e95e3c1d1e7
+  content_sha256: dd91e08933a7a19143c3e0f00976340332bdfda4df935c2e29a48b22a001511a
   document_type: governance
   status: accepted
   owners:
@@ -592,12 +613,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 7edf26d6fb797b8c432e0c1df671eea06d172ed08cfefa5b813fb7b04e3858c2
+  content_sha256: 2d8f8c891f3a5a985a614e0acfee2f48eabc3f1b53075bcc1934b58786425d65
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -637,12 +658,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 298fb82cc3b1aeb8b43a38d9cc467841eeda82d2f45c50914e17ab4cbae7a77d
+  content_sha256: 42b869a3cbd5b30b538edc108f3ce5cfb2989ad67cca5867089098f8df233669
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -706,6 +727,27 @@ documents:
   related_docs:
   - docs.system
   - research.sources
+- doc_id: research.first-severance-giant-visuals
+  path: docs/research/FIRST_SEVERANCE_GIANT_VISUALS.md
+  title: Giant Boss / observation lance implementation evidence
+  content_sha256: e09ace41ff04bd031c87f8554e20c3bad08648a0a24d582e6562d17a049a695b
+  document_type: research
+  status: accepted
+  owners:
+  - engineering
+  - art
+  last_reviewed: '2026-09-06'
+  source_of_truth_for: []
+  aliases:
+  - observation lance rendering
+  - giant Null Cantor source evidence
+  related_code:
+  - Client/Encounters/FirstSeverance
+  - Content/Encounters/FirstSeverance/FirstSeveranceLance.cs
+  related_docs:
+  - encounter.first-severance.visual
+  - encounter.first-severance.spec
+  - compatibility.version-matrix
 - doc_id: research.first-severance-slice3-apis
   path: docs/research/FIRST_SEVERANCE_SLICE3_APIS.md
   title: First Severance Slice 3 API Evidence
@@ -751,7 +793,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 31a78a16761e875f043cb02a946d23f14ea04df852b5c8fda870dde3a6991ef5
+  content_sha256: f76af68eb5cb0d90be5f2e9e717b25f8e54d84debc6616564d4e74ef15350f04
   document_type: research
   status: historical
   owners:

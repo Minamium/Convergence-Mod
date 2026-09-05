@@ -24,8 +24,8 @@ public sealed class FirstSeverancePrototypePylon : ModNPC
 
     public override void SetDefaults()
     {
-        NPC.width = 38;
-        NPC.height = 38;
+        NPC.width = 56;
+        NPC.height = 88;
         NPC.lifeMax = MaximumLife;
         NPC.damage = 0;
         NPC.defense = 30;
@@ -38,7 +38,7 @@ public sealed class FirstSeverancePrototypePylon : ModNPC
         NPC.netAlways = true;
         NPC.dontTakeDamage = true;
         NPC.chaseable = false;
-        NPC.scale = 1.25f;
+        NPC.scale = 1f;
     }
 
     public override bool CheckActive() => false;

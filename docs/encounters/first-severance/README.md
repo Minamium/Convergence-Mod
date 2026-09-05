@@ -36,7 +36,7 @@ Activation
        -> HP reaches zero: Victory
 ```
 
-Stackはserver-owned damage poolを必要人数で分ける実際の頭割りです。Raid中の致死はDownedへ変換し、別の参加者が専用アイテムでchannelして蘇生します。Bossは単純な単一NPC/bodyから始めます。中央Core、破損円環、左右アームは最初の暫定placeholderであり、確定したproduction designではありません。
+Stackはserver-owned damage poolを分ける実際の頭割りです。Raid独自ダメージの致死はDownedへ変換し、別の参加者が専用アイテムで蘇生します。`0.2.0`では巨大な黒氷のBoss・拘束装置の初稿と、予測線の後に繰り返し発射する観測の槍を追加します。単一NPC/bodyとはHP・判定の所有単位であり、外見を小さく制限する意味ではありません。実装・確認状態は[Status](../../STATUS.md)に集約します。
 
 ## Read by purpose
 

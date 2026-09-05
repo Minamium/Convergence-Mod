@@ -317,6 +317,20 @@ internal static class FirstSeverancePacketCodec
             writer.Write(participant.InvulnerabilityUntilTick);
             writer.Write(participant.WeaknessUntilTick);
         }
+        WriteBoolean(writer, combat.LanceVolley is not null);
+        if (combat.LanceVolley is { } volley)
+        {
+            writer.Write(volley.Serial);
+            writer.Write(volley.StartTick);
+            writer.Write(checked((byte)volley.Rays.Count));
+            foreach (FirstSeveranceLanceRay ray in volley.Rays)
+            {
+                writer.Write(ray.X);
+                writer.Write(ray.Y);
+                writer.Write(ray.DirectionX);
+                writer.Write(ray.DirectionY);
+            }
+        }
     }
 
     private static bool TryReadCombat(
@@ -395,6 +409,30 @@ internal static class FirstSeverancePacketCodec
                 weaknessUntilTick);
         }
 
+        if (!TryReadBoolean(reader, out bool hasLance))
+            return false;
+        FirstSeveranceLanceVolley? lance = null;
+        if (hasLance)
+        {
+            uint serial = reader.ReadUInt32();
+            ulong startTick = reader.ReadUInt64();
+            int rayCount = reader.ReadByte();
+            if (rayCount is < 1 or > FirstSeveranceLanceTuning.MaximumRays)
+                return false;
+            var rays = new FirstSeveranceLanceRay[rayCount];
+            for (int index = 0; index < rayCount; index++)
+                rays[index] = new FirstSeveranceLanceRay(reader.ReadSingle(), reader.ReadSingle(),
+                    reader.ReadSingle(), reader.ReadSingle());
+            try
+            {
+                lance = new FirstSeveranceLanceVolley(serial, startTick, Array.AsReadOnly(rays));
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
+
         try
         {
             combat = new FirstSeveranceCombatProjection(
@@ -413,7 +451,8 @@ internal static class FirstSeverancePacketCodec
                 coreY,
                 mechanicResult,
                 mechanicRevision,
-                Array.AsReadOnly(participants));
+                Array.AsReadOnly(participants),
+                lance);
             return true;
         }
         catch (ArgumentException)

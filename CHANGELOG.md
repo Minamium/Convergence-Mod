@@ -6,6 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Development 0.2.0 — Null Cantor first design pass
+
+- Giant original black-ice/ceramic Boss body with animated restraints, orbital seals, subdued aurora, exposure cues, larger Pylon cages and reducible client VFX.
+- Large Spread circles (14-tile radius / 28-tile separation); Stack remains a 7-tile shared hit.
+- Repeated locked-aim observation lances: 1.2-second full-corridor warning, 0.3-second beam, 1.7-second cadence; alternating single/double shots, one 35%-maximum-HP hit per participant per volley, integrated with experimental Down/revive.
+- Protocol v3 carries bounded authoritative ray assignments. Host and clients must update together; no new request IDs or external dependencies.
+- The `0.1.2` two-player follow-up confirmed readable shrinking rings and one logged two-second revive. The new `0.2.0` game-facing pass still requires user GUI reload/playtesting.
+
 ### Added
 
 - Repository architecture and development policy.

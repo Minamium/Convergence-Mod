@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceLance.cs"
+             Link="Domain/FirstSeveranceLance.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCombatProjection.cs"
+             Link="Domain/FirstSeveranceCombatProjection.cs" />
     <Compile Include="../../Common/Encounters/Abstractions/AcceptedEncounterStart.cs"
              Link="Domain/AcceptedEncounterStart.cs" />
     <Compile Include="../../Common/Encounters/Abstractions/EncounterActivationDecision.cs"

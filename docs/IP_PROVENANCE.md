@@ -77,6 +77,8 @@ Reviewer and review date
 
 ## Release audit
 
+The `0.2.0` giant Null Cantor pass is an original polar black-ice/ceramic containment design produced with built-in ImageGen assistance, then independently animated/layered in C#. WotG's named Bosses are a user-provided scale/spectacle benchmark; no source, textures, rigs or shaders were reused. The beam's high-energy contrast is a broad user reference, not a film frame/silhouette/timing/audio reproduction. Official tModLoader hook names/behavior inform independent implementation. See [visual research](research/FIRST_SEVERANCE_GIANT_VISUALS.md) and [exact asset record](../Assets/ATTRIBUTION.md). Source and asset licenses remain undecided; this pass does not authorize release.
+
 The `0.1.2` recovery transport fix follows the official pinned `ModNet.HandleModPacket` reader contract without copying its implementation. The marker correction uses the existing runtime MagicPixel texture with a one-texel source rectangle; no texture or other external asset was extracted or added. See [API evidence](research/FIRST_SEVERANCE_SLICE3_APIS.md).
 
 The 2026-09-05 First Severance experiment uses independently written adapters informed by official tModLoader API behavior; no external source implementation was copied. Foundation Core prototype texture provenance is recorded in [Asset Attribution](../Assets/ATTRIBUTION.md). Boss 3 is a Terraria runtime music reference, not a bundled audio recording.

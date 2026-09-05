@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -24,8 +25,8 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
 
     public override void SetDefaults()
     {
-        NPC.width = 78;
-        NPC.height = 78;
+        NPC.width = 144;
+        NPC.height = 144;
         NPC.lifeMax = MaximumLife;
         NPC.damage = 0;
         NPC.defense = 80;
@@ -39,10 +40,14 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
         NPC.netAlways = true;
         NPC.dontTakeDamage = true;
         NPC.chaseable = false;
-        NPC.scale = 2.25f;
+        NPC.scale = 1f;
     }
 
     public override bool CheckActive() => false;
+
+    // The client presentation system draws the enormous silhouette independently
+    // of NPC culling. This NPC is only its clearly marked central damageable core.
+    public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
 
     public override bool? CanBeHitByItem(Player player, Item item)
         => FirstSeveranceCombatAuthority.CanHitActor(NPC, player.whoAmI) ? null : false;

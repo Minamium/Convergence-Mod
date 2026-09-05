@@ -49,7 +49,8 @@ internal sealed class FirstSeveranceCombatProjection
         float coreY,
         FirstSeveranceMechanicResult lastMechanicResult,
         uint mechanicRevision,
-        IReadOnlyList<FirstSeveranceCombatParticipantProjection> participants)
+        IReadOnlyList<FirstSeveranceCombatParticipantProjection> participants,
+        FirstSeveranceLanceVolley? lanceVolley = null)
     {
         if (encounterSequence == 0
             || fightId.IsNone
@@ -84,6 +85,10 @@ internal sealed class FirstSeveranceCombatProjection
         LastMechanicResult = lastMechanicResult;
         MechanicRevision = mechanicRevision;
         Participants = FirstSeverancePlanCollections.Copy(participants, nameof(participants));
+        if (lanceVolley is not null
+            && (!FirstSeveranceLanceTuning.IsAttackPhase(substate) || lanceVolley.EndTick > resolveTick))
+            throw new ArgumentException("A lance cannot outlive its attack phase.");
+        LanceVolley = lanceVolley;
     }
 
     public ulong EncounterSequence { get; }
@@ -117,6 +122,8 @@ internal sealed class FirstSeveranceCombatProjection
     public uint MechanicRevision { get; }
 
     public IReadOnlyList<FirstSeveranceCombatParticipantProjection> Participants { get; }
+
+    public FirstSeveranceLanceVolley? LanceVolley { get; }
 
     public bool TryGetParticipantByServerSlot(
         int serverWhoAmI,

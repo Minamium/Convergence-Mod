@@ -33,8 +33,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 {
     private const int MaximumPendingIntents = 16;
     private const float ReviveRangePixels = 8f * 16f;
-    private const float StackRadiusPixels = 7f * 16f;
-    private const float SpreadSeparationPixels = 16f * 16f;
+    private const float StackRadiusPixels = FirstSeveranceLanceTuning.StackRadius;
+    private const float SpreadSeparationPixels = FirstSeveranceLanceTuning.SpreadSeparation;
 
     private static int nextActorToken;
 
@@ -68,6 +68,10 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     private bool isAttached;
     private bool isStarted;
     private bool isCleaned;
+    private FirstSeveranceLanceVolley? lanceVolley;
+    private uint lanceSerial;
+    private ulong nextLanceTick;
+    private readonly HashSet<ParticipantId> lanceHitParticipants = new();
 
     internal FirstSeverancePrototypeCombatRuntime(
         ulong encounterSequence,
@@ -326,6 +330,11 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return End(FirstSeveranceTerminalCause.BossActorMissing);
         }
 
+        bool lanceChanged = UpdateLances(before, context.AuthorityTick,
+            acceptedBossDamage >= before.BossLife
+                || (before.Substate == FirstSeveranceSubstate.PylonCheck
+                    && destroyedPylons >= before.RemainingPylons));
+
         FirstSeveranceLoopUpdate loopUpdate = loop.Advance(
             new FirstSeveranceLoopInput(
                 context.AuthorityTick,
@@ -381,7 +390,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             || before.RemainingPylons != after.RemainingPylons
             || before.ZeroBasedLoopIndex != after.ZeroBasedLoopIndex
             || context.AuthorityTick % 30 == 0;
-        return reviveUpdate.HasObservableChange || combatObservable
+        return reviveUpdate.HasObservableChange || combatObservable || lanceChanged
             ? EncounterRuntimeUpdate.ObservableChange()
             : EncounterRuntimeUpdate.None;
     }
@@ -421,7 +430,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             CoreWorldCenter.Y,
             lastMechanicResult,
             mechanicRevision,
-            Array.AsReadOnly(participants));
+            Array.AsReadOnly(participants),
+            lanceVolley);
         return true;
     }
 
@@ -455,6 +465,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
         revive.Cleanup(context);
         channelObservations.Clear();
+        lanceVolley = null;
+        lanceHitParticipants.Clear();
+        nextLanceTick = 0;
         pendingIntents.Clear();
         Array.Clear(lastQueuedNonces);
         if (isAttached)
@@ -877,6 +890,11 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         FirstSeveranceSubstate after,
         ulong authorityTick)
     {
+        // Warning, hit ledger and next cast belong to this Fight and phase only.
+        lanceVolley = null;
+        lanceHitParticipants.Clear();
+        nextLanceTick = authorityTick + (after == FirstSeveranceSubstate.PylonCheck
+            ? (ulong)plan.Timing.PylonTelegraphTicks : 24UL);
         if (before == FirstSeveranceSubstate.PylonCheck)
         {
             CleanupPylons();
@@ -961,7 +979,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
     private bool TrySpawnBoss(out int npcIndex)
     {
-        Vector2 center = CoreWorldCenter + new Vector2(0f, -160f);
+        Vector2 center = CoreWorldCenter + new Vector2(0f, -FirstSeveranceLanceTuning.BossHeightAboveCore);
         npcIndex = SpawnNpc(
             ModContent.NPCType<FirstSeverancePrototypeBoss>(),
             center,
@@ -975,10 +993,10 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         CleanupPylons();
         Vector2[] offsets =
         {
-            new(-190f, -38f),
-            new(190f, -38f),
-            new(-94f, -148f),
-            new(94f, -148f),
+            new(-360f, -100f),
+            new(360f, -100f),
+            new(-530f, -290f),
+            new(530f, -290f),
         };
         for (int index = 0; index < count; index++)
         {
@@ -1080,6 +1098,88 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         {
             NetMessage.SendData(MessageID.SyncNPC, number: npcIndex);
         }
+    }
+
+    private bool UpdateLances(in FirstSeveranceLoopState state, ulong tick, bool phaseComplete)
+    {
+        if (phaseComplete || !FirstSeveranceLanceTuning.IsAttackPhase(state.Substate)
+            || tick >= state.ResolveTick)
+        {
+            bool hadVolley = lanceVolley is not null;
+            lanceVolley = null;
+            lanceHitParticipants.Clear();
+            return hadVolley;
+        }
+
+        bool changed = false;
+        if (lanceVolley is not null && tick >= lanceVolley.EndTick)
+        {
+            lanceVolley = null;
+            lanceHitParticipants.Clear();
+            changed = true;
+        }
+
+        // Never truncate a new telegraph at the phase boundary. Do not catch up
+        // missed casts in a burst; scheduling is relative to the actual start.
+        if (lanceVolley is null && tick >= nextLanceTick
+            && state.ResolveTick - tick > FirstSeveranceLanceTuning.TelegraphTicks
+                + FirstSeveranceLanceTuning.ActiveTicks)
+        {
+            var targets = new List<Player>(roster.Count);
+            int first = (int)(lanceSerial % (uint)roster.Count);
+            for (int offset = 0; offset < roster.Count; offset++)
+            {
+                FirstSeveranceRosterMember member = roster.Members[(first + offset) % roster.Count];
+                if (IsAlive(member.ParticipantId) && TryGetPlayer(member, out Player player))
+                    targets.Add(player);
+            }
+            if (targets.Count > 0)
+            {
+                // Alternate single / double shots, independent of party size.
+                int count = Math.Min(targets.Count, (lanceSerial & 1) == 0 ? 1 : 2);
+                var rays = new FirstSeveranceLanceRay[count];
+                Vector2 origin = CoreWorldCenter
+                    - new Vector2(0f, FirstSeveranceLanceTuning.BossHeightAboveCore);
+                for (int index = 0; index < count; index++)
+                {
+                    Vector2 direction = targets[index].Center - origin;
+                    if (direction.LengthSquared() < 1f)
+                        direction = Vector2.UnitY;
+                    direction.Normalize();
+                    rays[index] = new FirstSeveranceLanceRay(origin.X, origin.Y, direction.X, direction.Y);
+                }
+                lanceVolley = new FirstSeveranceLanceVolley(++lanceSerial, tick, Array.AsReadOnly(rays));
+                nextLanceTick = tick + FirstSeveranceLanceTuning.CadenceTicks;
+                lanceHitParticipants.Clear();
+                changed = true; // Publish the locked aim immediately, not on the 30-tick heartbeat.
+                Log(tick, $"event=LanceTelegraph cast={lanceSerial} rays={count} fire_tick={lanceVolley.FireTick}");
+            }
+        }
+
+        if (lanceVolley is null || !lanceVolley.IsFiring(tick))
+            return changed;
+        if (tick == lanceVolley.FireTick)
+        {
+            changed = true;
+            Log(tick, $"event=LanceFired cast={lanceVolley.Serial} rays={lanceVolley.Rays.Count}");
+        }
+        foreach (FirstSeveranceRosterMember member in roster.Members)
+        {
+            if (lanceHitParticipants.Contains(member.ParticipantId) || !IsAlive(member.ParticipantId)
+                || !TryGetPlayer(member, out Player player))
+                continue;
+            foreach (FirstSeveranceLanceRay ray in lanceVolley.Rays)
+            {
+                if (!ray.Intersects(player.Center.X, player.Center.Y, player.width * 0.5f, player.height * 0.5f))
+                    continue;
+                // One hit per volley even at a crossing or during all 18 live ticks.
+                lanceHitParticipants.Add(member.ParticipantId);
+                ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 35 / 100), tick, "ObservationLance");
+                changed = true;
+                break;
+            }
+        }
+        return changed;
     }
 
     private void GrantPrototypeReviveKits()

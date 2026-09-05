@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,9 @@ related_docs:
 
 # Network Architecture
 
-## Development protocol v2
+## Development protocol v3
+
+Development `0.2.0` appends a nullable observation-lance section after combat participants: one Boolean byte, then (when present) nonzero uint serial, ulong start tick, byte ray count `1..2`, and four finite float values per ray (origin X/Y and unit direction X/Y). Fire/end ticks and length/width come from the same versioned feature tuning on both sides. Maximum addition is 46 bytes. Constructor validation rejects invalid normalization, nonfinite/out-of-bound origins, invalid ticks, attacks outside Pylon/Exposure, and a volley extending beyond its phase. No new request or packet ID is added. Protocol v2 peers must reload the same `0.2.0` build. See [ADR-0010](adr/0010-giant-boss-observation-lances.md).
 
 Development `0.1.1` adds request IDs 5 (`RequestPrototypeDown`) and 6 (`RequestReviveNearest`), each a single nonzero uint nonce after the existing envelope. Full snapshots gain a bounded combat section for phase/deadline, Boss life, tokens, Stack target and at most four participant control/health projections. Each HP correction has a monotonic participant revision; clients apply it once. Health, success and positions are never accepted from these request payloads. Existing IDs and terminal ordering stay unchanged. See [ADR-0009](adr/0009-development-combat-experiment.md) for the experimental exception and [Status](STATUS.md) for unverified seams.
 
@@ -33,7 +35,7 @@ The `0.1.2` recovery hotfix does not change protocol v2 or packet layouts. Reque
 
 Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, typed handler routing, First Severance activate/Ready/cancel/full-preparation-snapshot transport, feature-neutral terminal descriptors/external mappings, and ordered read-only replica/tombstone behavior.
 
-Not implemented: combat-state deltas/events, revive packets, actor mutation, Barrier correction, or a complete rejoin policy beyond the current bounded full snapshot request. Current custom requests can change only the preparation state; no packet can start combat or report combat outcomes. See [Status](STATUS.md).
+Not implemented: combat-state deltas/events, production hit/death integration, Barrier correction, or a complete rejoin policy. The development requests start combat after all Ready and request Down/revive intent, but never report hit or completion outcomes. See [Status](STATUS.md).
 
 ## Goals
 
@@ -92,6 +94,8 @@ Existing packet IDs are explicit and reserved:
 | 2 | C → S | `RequestSetReady` | implemented for exact-Fight Ready/unready intent |
 | 3 | C → S | `RequestCancel` | implemented for exact-Fight initiator cancel intent |
 | 4 | C → S | `RequestSnapshot` | implemented with sender/rate validation |
+| 5 | C → S | `RequestPrototypeDown` | single nonzero nonce; development-only self-Down intent |
+| 6 | C → S | `RequestReviveNearest` | single nonzero nonce; authority chooses nearest eligible ally |
 | 64 | S → C | `Snapshot` | implemented for generic lifecycle + bounded preparation projection |
 | 65 | S → C | `StateChanged` | direction parsed; transport not implemented |
 | 66 | S → C | `ParticipantChanged` | direction parsed; transport not implemented |
@@ -128,6 +132,8 @@ The feature snapshot is bounded by the 2–4 roster and actor caps. Minimum cont
 - normal/penalized exposure state;
 - bounded `RaidReviveSnapshot`: tokens, combat states/deadlines, current leases/nonces;
 - owned actor/schema version needed to reject stale references.
+
+The development v3 snapshot additionally carries the currently locked observation-lance volley described above. The exact-Fight runtime owns an at-most-four-participant once-per-volley hit ledger; it clears on phase exit and Fight cleanup. No client supplies a ray, target position or hit report. Assignments and first firing tick trigger immediate observable changes, with existing 30-tick snapshots as repair. Animation, particles and audio do not emit packets.
 
 Player names/display strings are presentation lookup, not authority identity.
 

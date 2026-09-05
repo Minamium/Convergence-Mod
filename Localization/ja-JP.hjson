@@ -11,7 +11,7 @@ Mods: {
       }
     }
     NPCs: {
-      FirstSeverancePrototypeBoss.DisplayName: 零の詠唱者 — 試作体
+      FirstSeverancePrototypeBoss.DisplayName: 無響の唱導者
       FirstSeverancePrototypePylon.DisplayName: 断絶のパイロン
     }
     Tiles: {
@@ -27,8 +27,10 @@ Mods: {
         PhaseSpawnIntro: "Raid開始。足元の蘇生キットを拾ってください。/convergence-down でDownを実験できます。起動者の /convergence-cancel で終了。"
         PhasePylonCheck: "パイロン — {0}基すべてを破壊！ Bossはまだ無敵です。"
         PhaseStack: "頭割り — {1} の7タイル以内に集合！ 必要人数: {3}。あと{2}秒。"
-        PhaseSpread: "散開 — お互いに16タイル以上離れて！ あと{2}秒。"
-        PhaseCoreExposure: "コア露出 — Bossを攻撃！ 残り{2}秒。"
+        PhaseSpread: "散開 — 大きな円を重ねない！ お互いに28タイル以上離れて。あと{2}秒。"
+        PhaseCoreExposure: "コア露出 — 枠で囲まれた中央の空洞を攻撃！ ビームの予測線を避けよう。残り{2}秒。"
+        LanceWarning: "観測の槍 — 射線固定。破線の帯から退避！ あと{0}秒"
+        LanceFire: 観測の槍 — 発射
         PhaseReset: "1周完了。Bossの盾が戻り、次のパイロンへ。実験を終える場合は /convergence-cancel。"
         ResultStackPassed: 頭割り成功 — ダメージを分担しました。
         ResultStackFailed: 頭割り失敗 — 分担人数が足りませんでした。
@@ -63,6 +65,17 @@ Mods: {
         NameSpread: 散開
         NameCoreExposure: コア露出
         NameReset: リセット
+      }
+    }
+    Configs.FirstSeveranceVisualConfig: {
+      DisplayName: 第一断絶の視覚効果
+      ReducedEffects: {
+        Label: 装飾演出を軽減
+        Tooltip: オーロラ・発光・破片・暗転を軽減し、画面揺れを無効化します。危険範囲・予測線・ビームは消えません。
+      }
+      ScreenShake: {
+        Label: ビーム発射時の画面揺れ
+        Tooltip: 発射時に短く小さく揺れます。射線やダメージ判定には影響しません。
       }
     }
   }

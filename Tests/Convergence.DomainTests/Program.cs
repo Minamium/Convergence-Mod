@@ -122,6 +122,9 @@ internal static class Program
     {
         TestCase[] tests =
         {
+            new("Lance finite corridor geometry", LanceFiniteCorridorGeometry),
+            new("Lance telegraph and active deadlines", LanceTelegraphAndActiveDeadlines),
+            new("Lance snapshot bounds and immutable rays", LanceSnapshotBoundsAndImmutableRays),
             new("Token scaling", TokenScaling),
             new("All Downed fails only on commit", AllDownedFailsOnlyOnCommit),
             new("120-tick revive consumes one token", ReviveCompletesAtOneHundredTwentyTicks),
@@ -189,6 +192,62 @@ internal static class Program
 
         Console.WriteLine($"Executed {tests.Length} deterministic domain tests; failures: {failures}.");
         return failures == 0 ? 0 : 1;
+    }
+
+    private static void LanceFiniteCorridorGeometry()
+    {
+        var horizontal = new FirstSeveranceLanceRay(100, 200, 1, 0);
+        AssertEqual(true, horizontal.Intersects(300, 200, 10, 20), "inside horizontal beam");
+        AssertEqual(true, horizontal.Intersects(300, 264, 10, 20), "touching visible edge");
+        AssertEqual(false, horizontal.Intersects(300, 265, 10, 20), "beyond visible edge");
+        AssertEqual(false, horizontal.Intersects(89, 200, 10, 20), "behind muzzle");
+        AssertEqual(false, horizontal.Intersects(2711, 200, 10, 20), "beyond finite end");
+        var vertical = new FirstSeveranceLanceRay(100, 200, 0, -1);
+        AssertEqual(true, vertical.Intersects(100, -500, 10, 20), "upward beam");
+        AssertEqual(false, vertical.Intersects(155, -500, 10, 20), "outside vertical beam");
+        float diagonal = MathF.Sqrt(0.5f);
+        var ray = new FirstSeveranceLanceRay(0, 0, diagonal, diagonal);
+        AssertEqual(true, ray.Intersects(500, 500, 10, 20), "diagonal target");
+        AssertEqual(false, ray.Intersects(500, 650, 10, 20), "diagonal safe lane");
+        AssertEqual(FirstSeveranceLanceTuning.SpreadRadius * 2,
+            FirstSeveranceLanceTuning.SpreadSeparation, "spread visual/authority boundary");
+    }
+
+    private static void LanceTelegraphAndActiveDeadlines()
+    {
+        var volley = new FirstSeveranceLanceVolley(1, 100, new[] { new FirstSeveranceLanceRay(0, 0, 0, 1) });
+        AssertEqual(false, volley.IsFiring(99), "before assignment");
+        AssertEqual(false, volley.IsFiring(171), "last warning tick");
+        AssertEqual(true, volley.IsFiring(172), "first firing tick");
+        AssertEqual(true, volley.IsFiring(189), "last firing tick");
+        AssertEqual(false, volley.IsFiring(190), "end excludes damage");
+        AssertEqual(false, FirstSeveranceLanceTuning.IsAttackPhase(FirstSeveranceSubstate.Stack), "stack rest");
+        AssertEqual(false, FirstSeveranceLanceTuning.IsAttackPhase(FirstSeveranceSubstate.Spread), "spread rest");
+    }
+
+    private static void LanceSnapshotBoundsAndImmutableRays()
+    {
+        var rays = new[] { new FirstSeveranceLanceRay(100, 200, 0, 1) };
+        var volley = new FirstSeveranceLanceVolley(1, 100, rays);
+        rays[0] = default;
+        AssertEqual(true, volley.Rays[0].IsValid, "copied locked direction");
+        AssertThrows<ArgumentException>(() => new FirstSeveranceLanceVolley(0, 100, rays), "zero serial");
+        AssertThrows<ArgumentException>(() => new FirstSeveranceLanceVolley(1, ulong.MaxValue, rays), "tick overflow");
+        AssertThrows<ArgumentException>(() => new FirstSeveranceLanceVolley(1, 100,
+            new FirstSeveranceLanceRay[3]), "bounded ray count");
+        AssertThrows<ArgumentException>(() => new FirstSeveranceLanceVolley(1, 100,
+            new[] { new FirstSeveranceLanceRay(float.NaN, 0, 0, 1) }), "nonfinite origin");
+        AssertThrows<ArgumentException>(() => new FirstSeveranceLanceVolley(1, 100,
+            new[] { new FirstSeveranceLanceRay(0, 0, 0, 2) }), "nonunit direction");
+        var context = CreateContext(2);
+        AssertThrows<ArgumentException>(() => new FirstSeveranceCombatProjection(1, context.FightId,
+            FirstSeveranceSubstate.Stack, 300, 0, 0, 1000, 1000, 1, 1, -1, 100, 200,
+            FirstSeveranceMechanicResult.None, 0, Array.Empty<FirstSeveranceCombatParticipantProjection>(), volley),
+            "lance in rest phase");
+        AssertThrows<ArgumentException>(() => new FirstSeveranceCombatProjection(1, context.FightId,
+            FirstSeveranceSubstate.CoreExposure, 189, 0, 0, 1000, 1000, 1, 1, -1, 100, 200,
+            FirstSeveranceMechanicResult.None, 0, Array.Empty<FirstSeveranceCombatParticipantProjection>(), volley),
+            "lance outliving phase");
     }
 
     private static void TokenScaling()

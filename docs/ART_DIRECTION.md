@@ -4,7 +4,7 @@ document_type: spec
 status: accepted
 owners:
   - art
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - project.art_direction
 aliases:
@@ -25,12 +25,12 @@ related_docs:
 
 ## First Severance MVP
 
-The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). Its accepted boundary is one simple Boss NPC/body, one life pool, no separately damageable presentation parts, and readable shielded/exposed states. The central Core/body, one broken ring, two short side arms, exact state names, and their motions are provisional placeholders. Crown/Wings/Heart Casing and other multipart designs are deferred and no longer shape the active code plan.
+The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). The user requested a giant original art/VFX pass after the recovery experiment. One NPC/life pool means one logical damage target, not a small silhouette: `0.2.0` uses a colossal black-ice/ceramic containment body, four caliper-like restraints and orbiting industrial seals. Shield/exposure readability remains mandatory; separately damageable multipart mechanics remain deferred.
 
 ## Shape language
 
 - Arena: horizontal/vertical industrial structure, columns, grids, repeated measurements.
-- Boss MVP: central circle/Core, incomplete ring, two locking arms, strong negative space.
+- Boss: central dark aperture, vertical fractured keel, four restraint calipers, broken orbital seals and strong negative space.
 - Seal: concentric circles, radial anchors, broken continuity.
 - Danger: triangles, segmented lines, converging motion.
 - Stack: circle plus inward motion.

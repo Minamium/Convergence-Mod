@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -27,6 +27,8 @@ related_docs:
 
 ## Development experiment override
 
+The user-requested `0.2.0` expansion in [ADR-0010](../../adr/0010-giant-boss-observation-lances.md) adds the original giant Boss presentation and the observation-lance attack below. It supersedes the small-placeholder-only visual scope and the broad first-slice exclusion of beam attacks, not the single-NPC life pool, authority, recovery or release boundaries. All new numbers are provisional playtest tuning.
+
 For `0.1.1`, the user-authorized experiment in [ADR-0009](../../adr/0009-development-combat-experiment.md) runs the loop before production integration is complete. Stack uses a fixed 90%-of-average-pull-maximum-HP pool without armor mitigation; Spread overlaps receive 40% maximum HP once; failed Pylons pulse 25% clamped nonlethal. Stack chooses its round-robin Alive target at cast start but does not yet reissue a lost target. These are experiment-only values and behavior, not a replacement for the production hit-pipeline and reissue rules below. General Terraria lethal events are not intercepted. [Status](../../STATUS.md) owns implementation and test results.
 
 ## Identity and scope
@@ -42,7 +44,7 @@ For `0.1.1`, the user-authorized experiment in [ADR-0009](../../adr/0009-develop
 | First-slice duration | About 2–4 minutes | Provisional vertical-slice playtest target |
 | Eventual full-Raid duration | About 5–12 minutes | Product goal; not a first-slice acceptance claim |
 
-The first implementation proves a multiplayer Raid loop, not final encounter complexity. Solo is out of scope. Rewards, production art/audio, and final tuning are out of scope.
+The development implementation proves a multiplayer Raid loop plus a first original giant-Boss art/attack pass, not final encounter complexity. Solo, rewards, final production art/audio and final tuning remain out of scope.
 
 ## Decision boundary
 
@@ -124,11 +126,22 @@ Marker radius, damage pool, and failure-debuff duration are provisional tuning i
 
 - Every connected Alive participant at assignment receives a marker and the same server resolve tick.
 - A participant who becomes Downed or invalid before resolution is removed from the required set.
-- At the deadline, authority performs pairwise position checks. Initial presentation radius is 7 tiles and initial minimum center separation is 16 tiles; both are provisional.
+- At the deadline, authority performs pairwise position checks. Current experimental presentation radius is 14 tiles and minimum center separation is 28 tiles: the two visible danger discs must not overlap. Exact equality is safe. Stack retains its separate 7-tile radius.
 - Each failed participant receives the failure result once even if overlapping multiple players. Pair iteration order must not multiply damage.
 - Success or soft failure advances to Core exposure.
 
 ## Core exposure and victory
+
+### Observation lance / 観測の槍 (development 0.2.0)
+
+- Repeated attack during Pylon active windows and Core exposure only. The first cast starts after the Pylon's one-second shield cue, or 24 ticks after exposure opens. Stack/Spread/intro/Reset remain beam-free recovery and assignment windows.
+- Authority selects connected Alive participants in frozen-roster round-robin order and captures their current centers at warning start. Shots alternate one ray and up to two rays; two is a global cap, not a per-player multiplier. Downed players are never targeted.
+- Each ray starts at the stationary Boss aperture 360 pixels above the Foundation Core, extends 2,600 pixels in its locked unit direction, and has an 88-pixel full damage width. The complete strip has visible dashed boundary rails immediately; a bright center line and moving chevrons reinforce its direction. Terrain does not block or get destroyed by a lance.
+- Charge: 72 ticks / 1.2 s. Fire: 18 ticks / 0.3 s. Cast cadence: 102 ticks / 1.7 s. No tracking during charge or firing. No newly scheduled cast may extend beyond the current phase; early Pylon completion cancels the pending warning/beam. No catch-up burst after a delayed tick.
+- Server/SP samples each Alive participant's observed rectangular hitbox against the same finite ray rectangle each live tick. A participant takes at most one hit per entire volley, including intersecting double rays. Experimental damage is 35% maximum HP, with the existing post-revive immunity and Raid-owned lethal-to-Down behavior. Further Downed hits and outsider damage are excluded. This does not introduce ordinary `PreKill` interception or claim normal armor mitigation.
+- The exact-Fight runtime owns the current assignment and hit ledger. Full snapshots carry one bounded read-only volley; client sound, muzzle bloom, particles and small camera shake are non-authoritative. Phase exit and every existing Fight cleanup discard the volley/ledger. No extra NPC or Projectile slot is allocated.
+
+### Exposure rules
 
 - Exposure changes the Boss visual state to `Exposed` and opens the authoritative damage gate.
 - A clean Pylon check grants the normal 720-tick window; a failed check grants 360 ticks.
@@ -219,4 +232,4 @@ Normal player attempts to break the Foundation Core during Active are rejected b
 
 ## First-slice exclusions
 
-Part Break, Targeted Line/Bait, Personal Effigies, Split Reality, Last Stand, multiple Boss parts, route selection, finished rewards, final music, and production VFX are not part of this loop. They are preserved in [Backlog](BACKLOG.md), not silently implemented.
+Part Break, the separate targeted-bait mechanic/phase from the historical backlog, Personal Effigies, Split Reality, Last Stand, multiple Boss parts, route selection, finished rewards and final music remain deferred. The explicitly requested giant first-pass art and repeated observation lances above are now in the development scope; they do not import the remaining [Backlog](BACKLOG.md).

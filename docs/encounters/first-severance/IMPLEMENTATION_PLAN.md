@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - first_severance.implementation_sequence
 aliases:
@@ -25,6 +25,8 @@ related_docs:
 # First Severance Implementation Plan
 
 ## Immediate development experiment
+
+The next user-authorized pass is `0.2.0`: original giant Null Cantor body/rig, readable shield/exposure transformation, large Spread circles, and frequent locked-aim observation lances. [ADR-0010](../../adr/0010-giant-boss-observation-lances.md) extends the experiment without pulling in multipart gameplay, rewards, dependency removal or ordinary lethal hooks. Implementation is feature-local ray assignments/collision plus client-only art/VFX. Verification is a focused geometry/timing/bounds run, repository checks, one actual packaged build, then a user-operated two-player loop; broad acceptance gates below remain future work.
 
 The user requested one in-game combat loop, vanilla Boss music, and Down/revive after reaching Ready with a Steam friend. Development `0.1.1` therefore composes a bounded experimental adapter ahead of the production gates below. [ADR-0009](../../adr/0009-development-combat-experiment.md) and the [Status](../../STATUS.md) record its scope: temporary NPCs, no terrain/Barrier mutation, no ordinary lethal interception, no rewards, and no claim that Slices 3–7 are complete. GUI playtesting belongs to the user; verification for this iteration is limited to compilation, a focused existing domain run and the requested two-player experiment.
 

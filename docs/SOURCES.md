@@ -79,6 +79,8 @@ Last reviewed: **2026-09-05**
 
 ## Revalidation rule
 
+Giant visual/beam pass, 2026-09-06: [pinned ModSystem](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModSystem.cs), [pinned ModNPC](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNPC.cs), [pinned MIT license](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/LICENSE) and the [WotG public README](https://github.com/TheFifthCircle/WrathOfTheGodsPublic). Exact scope, independent decisions and reference-license limits are in [giant visual evidence](research/FIRST_SEVERANCE_GIANT_VISUALS.md).
+
 Recovery transport rechecked 2026-09-05: [ModNet.HandleModPacket at the confirmed commit](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNet.cs) and [Mod.HandlePacket / Logger API](https://docs.tmodloader.net/docs/stable/class_mod.html). Shared-stream boundary observations and the local reproduction are recorded in [First Severance API evidence](research/FIRST_SEVERANCE_SLICE3_APIS.md).
 
 Development combat references accessed 2026-09-05: [ModNPC](https://docs.tmodloader.net/docs/stable/class_mod_n_p_c.html), [ModPlayer](https://docs.tmodloader.net/docs/stable/class_mod_player.html), and [ModSceneEffect](https://docs.tmodloader.net/docs/stable/class_mod_scene_effect.html). These moving v2026.07 pages are paired with the installed pinned runtime XML; exact observations and limitations are in [First Severance API evidence](research/FIRST_SEVERANCE_SLICE3_APIS.md).

@@ -2,6 +2,21 @@
 
 ## Records
 
+- Runtime file: `Assets/Textures/NPCs/NullCantorBody.png`
+- Asset ID: null-cantor-body-first-pass-2026-09-06
+- Asset type: texture
+- Creator: project-directed original design with OpenAI ImageGen assistance
+- Creation/acquisition date: 2026-09-06
+- Source type: generated
+- Source work and URL: original polar containment brief; no external image input or extracted artwork
+- Tool/model/version: OpenAI built-in ImageGen; exact backend model not surfaced by the tool contract
+- Prompt or brief location: external working storage, `null-cantor-art-brief.md`; summarized in `docs/encounters/first-severance/VISUAL_SPEC.md`
+- Human modifications: no manual raster edits; agent inspected the output/alpha and authored source-rectangle side-group animation, pivot alignment, tinting, seals and VFX in C#; user in-game review pending
+- License and redistribution terms: project source/asset license remains undecided; development use only, no public release approved
+- Required attribution: none externally specified; preserve this provenance record
+- Reviewer and review date: Codex task visual inspection, 2026-09-06; final human art review pending
+- Notes: 1254x1254 RGBA; transparent exterior, dark aperture; first runtime art pass rather than final hand-cleaned pixel animation. WotG scale and film-like beam intensity are broad user benchmarks only. No third-party shapes, code, audio or image files are copied. One procedural falloff texture is generated and disposed in client memory; there is no additional exported VFX asset.
+
 - Runtime file: `Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem.png`
 - Asset ID: foundation-core-item-prototype-2026-09-05
 - Asset type: texture

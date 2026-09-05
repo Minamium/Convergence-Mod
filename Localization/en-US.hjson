@@ -15,7 +15,7 @@ Mods: {
 			}
 		}
 		NPCs: {
-			FirstSeverancePrototypeBoss.DisplayName: Null Cantor — Prototype
+			FirstSeverancePrototypeBoss.DisplayName: The Null Cantor
 			FirstSeverancePrototypePylon.DisplayName: Severance Pylon
 		}
 
@@ -29,8 +29,10 @@ Mods: {
 				PhaseSpawnIntro: "Raid started. Pick up your Resuscitation Kit. /convergence-down tests Downed; the initiator can end with /convergence-cancel."
 				PhasePylonCheck: "PYLONS — destroy all {0}. The Boss remains shielded."
 				PhaseStack: "STACK — gather within 7 tiles of {1}. Required shares: {3}. {2} seconds!"
-				PhaseSpread: "SPREAD — separate by at least 16 tiles. {2} seconds!"
-				PhaseCoreExposure: "CORE EXPOSED — attack the Boss! {2} seconds."
+				PhaseSpread: "SPREAD — large circles! Separate by at least 28 tiles. {2} seconds!"
+				PhaseCoreExposure: "CORE EXPOSED — attack the framed central aperture; dodge the predicted beams! {2} seconds."
+				LanceWarning: "OBSERVATION LANCE — aim locked. Clear the dashed corridor! {0}s"
+				LanceFire: OBSERVATION LANCE — FIRING
 				PhaseReset: "Loop complete. Boss shields restore; the next Pylons follow. /convergence-cancel ends the experiment."
 				ResultStackPassed: Stack successful — damage shared.
 				ResultStackFailed: Stack failed — too few players shared the hit.
@@ -65,6 +67,17 @@ Mods: {
 				NameSpread: SPREAD
 				NameCoreExposure: CORE EXPOSED
 				NameReset: RESET
+			}
+		}
+		Configs.FirstSeveranceVisualConfig: {
+			DisplayName: First Severance visuals
+			ReducedEffects: {
+				Label: Reduce decorative effects
+				Tooltip: Reduces aurora, glow, particles and darkness; disables shake. All danger markers and beams remain visible.
+			}
+			ScreenShake: {
+				Label: Beam camera shake
+				Tooltip: Brief, mild camera shake when an observation lance fires. Does not change aim or damage.
 			}
 		}
 	}

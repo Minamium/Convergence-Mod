@@ -30,5 +30,7 @@ ADRs record decisions that are expensive to reverse: authority, dependency direc
 | [0006](0006-staged-calamity-independence.md) | Accepted | Staged path from Calamity addon to Standalone Mod |
 | [0007](0007-first-severance-vertical-slice.md) | Accepted | First Severance name, simple repeated loop/visual, and Revive in the first playable slice |
 | [0008](0008-confirmed-2026-07-runtime-baseline.md) | Accepted | Windows-verified 2026.07 runtime baseline and Calamity 2.2.4 floor |
+| [0009](0009-development-combat-experiment.md) | Accepted for development experiment | Ready-to-combat experiment, Raid-owned HP damage and recovery before production gates |
+| [0010](0010-giant-boss-observation-lances.md) | Accepted for development experiment | Giant original Boss/VFX and bounded aimed lances; protocol v3; extends 0009 and the visual/attack scope of 0007 |
 
 Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark the old record superseded. Current implementation status remains in [`../STATUS.md`](../STATUS.md), not in this index.

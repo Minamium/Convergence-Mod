@@ -30,20 +30,62 @@ internal sealed class FirstSeverancePrototypeMusic : ModSceneEffect
 
 internal sealed class FirstSeverancePrototypePresentation : ModSystem
 {
+    private readonly FirstSeveranceBossVisuals visuals = new();
+
+    public override void PostUpdateEverything()
+    {
+        if (!Main.dedServ && !Main.gameMenu)
+            visuals.Update(ModContent.GetInstance<FirstSeveranceClientStateSystem>());
+    }
+
+    public override void OnWorldUnload() => visuals.Reset();
+
+    public override void Unload() => visuals.Reset(unload: true);
+
+    public override void ModifySunLightColor(ref Color tileColor, ref Color backgroundColor)
+    {
+        if (Main.dedServ || Main.gameMenu
+            || ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat is not { } combat
+            || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out _))
+            return;
+        bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+        backgroundColor = Color.Lerp(backgroundColor, new Color(31, 53, 77), reduced ? 0.15f : 0.55f);
+        tileColor = Color.Lerp(tileColor, new Color(133, 164, 179), reduced ? 0.05f : 0.16f);
+    }
+
+    public override void ModifyScreenPosition()
+    {
+        if (Main.dedServ || Main.gameMenu)
+            return;
+        var config = ModContent.GetInstance<FirstSeveranceVisualConfig>();
+        var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
+        if (!config.ScreenShake || config.ReducedEffects || state.Combat is not { } combat
+            || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out _)
+            || combat.LanceVolley is not { } volley || !volley.IsFiring(state.EstimatedAuthorityTick))
+            return;
+        float age = (state.EstimatedAuthorityTick - volley.FireTick) / (float)FirstSeveranceLanceTuning.ActiveTicks;
+        float amount = 4f * (1f - age);
+        float t = Main.GameUpdateCount % 3600;
+        Main.screenPosition += new Vector2(MathF.Sin(t * 2.1f), MathF.Cos(t * 1.7f)) * amount;
+    }
+
     public override void PostDrawTiles()
     {
         if (Main.dedServ || Main.gameMenu)
             return;
         FirstSeveranceClientStateSystem state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
         FirstSeveranceCombatProjection? combat = state.Combat;
-        if (combat is null)
-            return;
-
         SpriteBatch batch = Main.spriteBatch;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         try
         {
+            if (combat is null)
+            {
+                visuals.DrawEnding(batch);
+                return;
+            }
+            visuals.Draw(batch, combat, state.EstimatedAuthorityTick);
             double left = combat.ResolveTick > state.EstimatedAuthorityTick
                 ? combat.ResolveTick - state.EstimatedAuthorityTick : 0;
             float progress = Math.Clamp((float)(left / 180d), 0f, 1f);
@@ -61,10 +103,33 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                     || (combat.Substate == FirstSeveranceSubstate.Stack
                         && participant.ServerWhoAmI == combat.StackTargetSlot))
                 {
-                    Color color = combat.Substate == FirstSeveranceSubstate.Stack
-                        ? Color.Cyan : Color.OrangeRed;
-                    DrawRing(batch, player.Center, 7 * 16f, color * 0.85f);
-                    DrawRing(batch, player.Center, 7 * 16f * progress, color * 0.4f);
+                    bool stack = combat.Substate == FirstSeveranceSubstate.Stack;
+                    Color color = stack ? Color.Cyan : Color.OrangeRed;
+                    float radius = stack ? FirstSeveranceLanceTuning.StackRadius : FirstSeveranceLanceTuning.SpreadRadius;
+                    DrawRing(batch, player.Center, radius, Color.Black * 0.85f, 6f);
+                    DrawRing(batch, player.Center, radius, color * 0.95f, 2.5f);
+                    DrawRing(batch, player.Center, radius * progress, color * 0.5f);
+                    // Inward circular stack vs outward chevrons and a diamond.
+                    for (int index = 0; index < 8; index++)
+                    {
+                        float angle = index * MathHelper.TwoPi / 8f;
+                        Vector2 direction = new(MathF.Cos(angle), MathF.Sin(angle));
+                        Vector2 tangent = new(-direction.Y, direction.X);
+                        float travel = (state.EstimatedAuthorityTick % 60) / 60f;
+                        Vector2 tip = player.Center + direction * radius * (stack ? 1f - travel * 0.25f : 0.75f + travel * 0.25f);
+                        Vector2 tail = tip + direction * (stack ? 13 : -13);
+                        FirstSeveranceBossVisuals.Line(batch, tail + tangent * 7, tip, color * 0.8f, 2.5f);
+                        FirstSeveranceBossVisuals.Line(batch, tail - tangent * 7, tip, color * 0.8f, 2.5f);
+                    }
+                    if (!stack)
+                        for (int index = 0; index < 4; index++)
+                        {
+                            float a = index * MathHelper.PiOver2;
+                            float b = (index + 1) * MathHelper.PiOver2;
+                            FirstSeveranceBossVisuals.Line(batch,
+                                player.Center + new Vector2(MathF.Cos(a), MathF.Sin(a)) * 27,
+                                player.Center + new Vector2(MathF.Cos(b), MathF.Sin(b)) * 27, color, 2.5f);
+                        }
                 }
                 if (participant.IsReviving)
                     DrawRing(batch, player.Center, 35f, Color.LightGreen);
@@ -99,6 +164,23 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         Utils.DrawBorderString(spriteBatch, text,
             new Vector2(Main.screenWidth / 2f, 82f), Color.LightCyan, 0.9f, 0.5f);
 
+        if (combat.LanceVolley is { } volley && state.EstimatedAuthorityTick < volley.EndTick)
+        {
+            string lance = state.EstimatedAuthorityTick >= volley.FireTick
+                ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.LanceFire")
+                : Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.LanceWarning",
+                    SecondsLeft(volley.FireTick, state.EstimatedAuthorityTick).ToString("0.0"));
+            Utils.DrawBorderString(spriteBatch, lance,
+                new Vector2(Main.screenWidth / 2f, 143f), Color.LightSalmon, 0.85f, 0.5f);
+        }
+
+        if (combat.Substate == FirstSeveranceSubstate.SpawnIntro)
+        {
+            Utils.DrawBorderString(spriteBatch,
+                Language.GetTextValue("Mods.Convergence.NPCs.FirstSeverancePrototypeBoss.DisplayName"),
+                new Vector2(Main.screenWidth / 2f, Main.screenHeight * 0.25f), Color.LightCyan, 1.45f, 0.5f);
+        }
+
         if (local.CombatState == RaidParticipantCombatState.Downed)
             text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.DownedHud",
                 SecondsLeft(local.DownedDeadlineTick, state.EstimatedAuthorityTick).ToString("0.0"));
@@ -117,22 +199,6 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     private static float SecondsLeft(ulong deadline, ulong tick)
         => deadline > tick ? (deadline - tick) / 60f : 0f;
 
-    private static void DrawRing(SpriteBatch batch, Vector2 center, float radius, Color color)
-    {
-        const int segments = 64;
-        Vector2 previous = center + new Vector2(radius, 0f) - Main.screenPosition;
-        for (int index = 1; index <= segments; index++)
-        {
-            float angle = index * MathHelper.TwoPi / segments;
-            Vector2 next = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * radius
-                - Main.screenPosition;
-            Vector2 delta = next - previous;
-            // Sample one texel: scaling the whole MagicPixel texture stretches
-            // each circle segment into a screen-length spoke.
-            batch.Draw(TextureAssets.MagicPixel.Value, previous, new Rectangle(0, 0, 1, 1), color,
-                MathF.Atan2(delta.Y, delta.X), Vector2.Zero,
-                new Vector2(delta.Length(), 2f), SpriteEffects.None, 0f);
-            previous = next;
-        }
-    }
+    private static void DrawRing(SpriteBatch batch, Vector2 center, float radius, Color color, float width = 2f)
+        => FirstSeveranceBossVisuals.Ring(batch, center, radius, color, width);
 }
