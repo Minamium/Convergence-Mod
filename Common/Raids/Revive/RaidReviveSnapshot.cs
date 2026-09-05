@@ -10,7 +10,8 @@ internal readonly record struct RaidParticipantReviveSnapshot(
     ulong DownedDeadlineTick,
     ulong DisconnectDeadlineTick,
     ulong InvulnerabilityUntilTick,
-    ulong WeaknessUntilTick);
+    ulong WeaknessUntilTick,
+    ulong ReviveLockoutUntilTick = 0);
 
 internal readonly record struct RaidReviveChannelSnapshot(
     ParticipantId Reviver,

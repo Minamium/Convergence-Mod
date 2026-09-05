@@ -9,9 +9,9 @@ namespace Convergence.Content.Encounters.FirstSeverance;
 // constructs assignments or applies hits; a snapshot carries the locked rays.
 internal static class FirstSeveranceLanceTuning
 {
-    internal const int TelegraphTicks = 72;
-    internal const int ActiveTicks = 18;
-    internal const int CadenceTicks = 102;
+    internal const int TelegraphTicks = 42;
+    internal const int ActiveTicks = 14;
+    internal const int CadenceTicks = 66;
     internal const int MaximumRays = 2;
     internal const float Length = 2600f;
     internal const float HalfWidth = 44f;

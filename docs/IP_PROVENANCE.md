@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -76,6 +76,8 @@ Reviewer and review date
 - CI secretや有償assetを公開artifactへ含めない。
 
 ## Release audit
+
+The `0.2.1` Foundation Core monument is an original generated polar containment prism, selected unedited as a provisional runtime asset and independently integrated with a lit control base/placement preview. Its exact output, external prompt path, tool disclosure and release limits are in [Attribution](../Assets/ATTRIBUTION.md). The faster VFX use original geometry and existing vanilla runtime sound IDs, not WotG/film code, images or recordings. Revival/debuff/tile integration follows official pinned API contracts with independent code; [source evidence](research/INSTANT_REVIVAL_CORE_APIS.md) distinguishes observations from unverified multiplayer ordering inferences. This remains development use, not release approval.
 
 The `0.2.0` giant Null Cantor pass is an original polar black-ice/ceramic containment design produced with built-in ImageGen assistance, then independently animated/layered in C#. WotG's named Bosses are a user-provided scale/spectacle benchmark; no source, textures, rigs or shaders were reused. The beam's high-energy contrast is a broad user reference, not a film frame/silhouette/timing/audio reproduction. Official tModLoader hook names/behavior inform independent implementation. See [visual research](research/FIRST_SEVERANCE_GIANT_VISUALS.md) and [exact asset record](../Assets/ATTRIBUTION.md). Source and asset licenses remain undecided; this pass does not authorize release.
 

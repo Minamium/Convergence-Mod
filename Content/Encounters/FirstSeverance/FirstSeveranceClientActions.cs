@@ -172,6 +172,11 @@ internal static class FirstSeveranceClientActions
             packet,
             RequestHeader(EncounterPacketType.RequestReviveNearest, snapshot),
             nonce);
+        // Publish this local player's selected slot before the custom request.
+        // The server still checks the resulting inventory/held-item state itself.
+        NetMessage.SendData(MessageID.SyncEquipment, number: Main.myPlayer,
+            number2: Main.LocalPlayer.selectedItem);
+        NetMessage.SendData(MessageID.PlayerControls, number: Main.myPlayer);
         packet.Send();
     }
 
@@ -301,8 +306,23 @@ internal static class FirstSeveranceClientActions
 
     internal static void ShowRejected(string failureCode)
     {
+        string? reviveReason = failureCode switch
+        {
+            "first_severance.revive_sender_not_alive" or "revive.reviver_not_alive" => "ReviveNotAlive",
+            "first_severance.revive_kit_not_selected" => "ReviveSelectKit",
+            "first_severance.revive_no_downed_ally_in_range" => "ReviveNoTarget",
+            "first_severance.revive_target_recovery_locked" or "revive.target_recovery_locked" => "ReviveLocked",
+            "revive.target_already_reserved" or "revive.target_not_revivable" => "ReviveTargetUnavailable",
+            _ => null,
+        };
+        if (reviveReason is not null)
+        {
+            Main.NewText("[Convergence] " + Language.GetTextValue(
+                "Mods.Convergence.UI.FirstSeverance." + reviveReason), 235, 170, 110);
+            return;
+        }
         string message = Language.GetTextValue(
-            "Mods.Convergence.UI.FirstSeverance.ActivationRejected",
+            "Mods.Convergence.UI.FirstSeverance.RequestRejected",
             failureCode);
         Main.NewText($"[Convergence] {message}", 235, 110, 110);
     }

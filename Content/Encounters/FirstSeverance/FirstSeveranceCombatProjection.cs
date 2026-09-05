@@ -29,7 +29,8 @@ internal readonly record struct FirstSeveranceCombatParticipantProjection(
     float AnchorX,
     float AnchorY,
     ulong InvulnerabilityUntilTick,
-    ulong WeaknessUntilTick);
+    ulong WeaknessUntilTick,
+    ulong ReviveLockoutUntilTick = 0);
 
 internal sealed class FirstSeveranceCombatProjection
 {

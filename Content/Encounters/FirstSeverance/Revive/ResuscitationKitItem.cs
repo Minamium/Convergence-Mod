@@ -15,14 +15,14 @@ public sealed class ResuscitationKitItem : ModItem
         Item.height = 28;
         Item.maxStack = 1;
         Item.useStyle = ItemUseStyleID.HoldUp;
-        Item.useTime = 30;
-        Item.useAnimation = 30;
+        Item.useTime = 20;
+        Item.useAnimation = 20;
         Item.UseSound = SoundID.Item4;
         Item.rare = ItemRarityID.Cyan;
         Item.value = 0;
         Item.noMelee = true;
         Item.consumable = false;
-        Item.channel = true;
+        Item.channel = false;
     }
 
     public override bool? UseItem(Player player)

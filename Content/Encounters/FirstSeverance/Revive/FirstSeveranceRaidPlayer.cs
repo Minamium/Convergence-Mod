@@ -16,6 +16,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
     private Vector2 downedPosition;
     private ulong immunityUntilLocalTick;
     private ulong weaknessUntilLocalTick;
+    private ulong reviveLockoutUntilLocalTick;
 
     internal bool IsRaidDowned { get; private set; }
 
@@ -49,6 +50,9 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
             + Remaining(participant.InvulnerabilityUntilTick, authorityTick, 180);
         weaknessUntilLocalTick = Main.GameUpdateCount
             + Remaining(participant.WeaknessUntilTick, authorityTick, 600);
+        reviveLockoutUntilLocalTick = Main.GameUpdateCount
+            + Remaining(participant.ReviveLockoutUntilTick, authorityTick, 3_600);
+        RefreshRecoveryLockoutBuff();
 
         if (participant.HealthRevision > healthRevision)
         {
@@ -95,6 +99,8 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
         healthRevision = 0;
         immunityUntilLocalTick = 0;
         weaknessUntilLocalTick = 0;
+        reviveLockoutUntilLocalTick = 0;
+        Player.ClearBuff(ModContent.BuffType<RecoveryLockoutDebuff>());
     }
 
     public override void SetControls()
@@ -177,6 +183,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
 
     public override void PostUpdate()
     {
+        RefreshRecoveryLockoutBuff();
         if (IsRaidDowned || IsRaidEliminated)
         {
             Player.position = downedPosition;
@@ -206,4 +213,19 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
 
     private static ulong Remaining(ulong deadline, ulong tick, ulong maximum)
         => deadline > tick ? Math.Min(maximum, deadline - tick) : 0;
+
+    private void RefreshRecoveryLockoutBuff()
+    {
+        int type = ModContent.BuffType<RecoveryLockoutDebuff>();
+        int ticks = (int)Remaining(reviveLockoutUntilLocalTick, Main.GameUpdateCount, 3_600);
+        if (ticks > 0)
+        {
+            // This icon is a projection, not the authority predicate. Clearing it
+            // through another Mod cannot remove the server-owned recovery lockout.
+            Player.buffImmune[type] = false;
+            Player.AddBuff(type, ticks, quiet: true);
+        }
+        else if (Player.HasBuff(type))
+            Player.ClearBuff(type);
+    }
 }

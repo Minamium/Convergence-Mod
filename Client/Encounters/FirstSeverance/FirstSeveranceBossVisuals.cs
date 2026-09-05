@@ -31,6 +31,9 @@ internal sealed class FirstSeveranceBossVisuals
     private float exposure;
     private Vector2 lastCenter;
     private int endingTicks;
+    private int phaseImpactTicks;
+
+    internal float PhaseShake => 9f * MathF.Pow(phaseImpactTicks / 24f, 2f);
 
     internal static Vector2 CoreCenter(FirstSeveranceCombatProjection combat)
         => new(combat.CoreX, combat.CoreY - FirstSeveranceLanceTuning.BossHeightAboveCore);
@@ -42,6 +45,7 @@ internal sealed class FirstSeveranceBossVisuals
         FirstSeveranceCombatProjection? combat = state.Combat;
         if (combat is null)
         {
+            phaseImpactTicks = 0;
             if (!fight.IsNone)
             {
                 fight = FightId.None;
@@ -59,15 +63,21 @@ internal sealed class FirstSeveranceBossVisuals
             previousPhase = FirstSeveranceSubstate.None;
             exposure = 0f;
             endingTicks = 0;
+            phaseImpactTicks = 0;
         }
+        if (phaseImpactTicks > 0)
+            phaseImpactTicks--;
         lastCenter = CoreCenter(combat);
         exposure = MathHelper.Lerp(exposure,
-            combat.Substate == FirstSeveranceSubstate.CoreExposure ? 1f : 0f, 0.09f);
+            combat.Substate == FirstSeveranceSubstate.CoreExposure ? 1f : 0f, 0.32f);
         bool nearby = Vector2.DistanceSquared(Main.LocalPlayer.Center, lastCenter) < 2400f * 2400f;
         if (previousPhase != combat.Substate)
         {
             if (nearby && combat.Substate == FirstSeveranceSubstate.CoreExposure)
-                SoundEngine.PlaySound(SoundID.Item29 with { Volume = 0.65f, Pitch = -0.45f }, lastCenter);
+            {
+                phaseImpactTicks = 24;
+                SoundEngine.PlaySound(SoundID.Item29 with { Volume = 0.95f, Pitch = -0.25f }, lastCenter);
+            }
             previousPhase = combat.Substate;
         }
         if (combat.LanceVolley is not { } volley)
@@ -77,14 +87,17 @@ internal sealed class FirstSeveranceBossVisuals
         {
             soundedCharge = volley.Serial;
             if (nearby && tick >= volley.StartTick && tick < volley.FireTick)
-                SoundEngine.PlaySound(SoundID.Item15 with { Volume = 0.42f, Pitch = -0.65f }, lastCenter);
+                SoundEngine.PlaySound(SoundID.Item15 with { Volume = 0.6f, Pitch = 0.1f }, lastCenter);
         }
         if (volley.Serial != soundedFire && tick >= volley.FireTick)
         {
             soundedFire = volley.Serial;
             // Do not replay an expired shot after a snapshot repair or pause.
             if (nearby && volley.IsFiring(tick))
-                SoundEngine.PlaySound(SoundID.Item33 with { Volume = 0.85f, Pitch = -0.55f }, lastCenter);
+            {
+                SoundEngine.PlaySound(SoundID.Item33 with { Volume = 1f, Pitch = -0.3f }, lastCenter);
+                SoundEngine.PlaySound(SoundID.Item14 with { Volume = 0.35f, Pitch = -0.5f }, lastCenter);
+            }
         }
     }
 
@@ -95,9 +108,13 @@ internal sealed class FirstSeveranceBossVisuals
         Vector2 center = CoreCenter(combat);
         float time = (float)(tick % 216000) / 60f;
         float intro = combat.Substate == FirstSeveranceSubstate.SpawnIntro
-            ? 1f - Math.Clamp((float)((double)combat.ResolveTick - tick) / 180f, 0f, 1f) : 1f;
-        float reveal = MathHelper.SmoothStep(0f, 1f, Math.Min(1f, intro * 1.8f));
-        float breath = MathF.Sin(time * 0.8f);
+            ? 1f - Math.Clamp((float)((double)combat.ResolveTick - tick)
+                / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0f, 1f) : 1f;
+        float reveal = 1f - MathF.Pow(1f - Math.Min(1f, intro * 2.5f), 3f);
+        float breath = MathF.Sin(time * 2.2f);
+        float recoil = combat.LanceVolley is { } shot && shot.IsFiring(tick)
+            ? MathF.Pow(1f - (tick - shot.FireTick) / (float)FirstSeveranceLanceTuning.ActiveTicks, 3f)
+            : 0f;
 
         if (!reduced)
         {
@@ -106,6 +123,14 @@ internal sealed class FirstSeveranceBossVisuals
             DrawAurora(batch, center, time, reveal);
         }
         DrawSeal(batch, center, time, reveal, reduced);
+        if (!reduced && phaseImpactTicks > 0)
+        {
+            float impact = 1f - phaseImpactTicks / 24f;
+            float spread = 1f - MathF.Pow(1f - impact, 3f);
+            Ring(batch, center, 100 + spread * 780, Ice * (1f - impact) * 0.85f, 5f);
+            Ring(batch, center, 85 + spread * 590, Gold * (1f - impact), 3f, time, 12);
+            Glow(batch, center, 600 * (1f - impact), Additive(Ice, (1f - impact) * 0.8f));
+        }
 
         Texture2D texture = body!.Value;
         // The generated core is at (50%, 44%), not the canvas midpoint. Keep the
@@ -116,11 +141,13 @@ internal sealed class FirstSeveranceBossVisuals
         float rotation = breath * 0.008f;
         int split = (int)(texture.Width * 0.3f);
         DrawSlice(batch, texture, new Rectangle(0, 0, split, texture.Height), center,
-            origin, scale, rotation - exposure * 0.022f, tint, new Vector2(-exposure * 40f, breath * 4f));
+            origin, scale, rotation - exposure * 0.032f, tint,
+            new Vector2(-exposure * 65f - recoil * 18f, breath * 3f));
         DrawSlice(batch, texture, new Rectangle(split, 0, texture.Width - split * 2, texture.Height),
             center, origin, scale, rotation, tint, Vector2.Zero);
         DrawSlice(batch, texture, new Rectangle(texture.Width - split, 0, split, texture.Height),
-            center, origin, scale, rotation + exposure * 0.022f, tint, new Vector2(exposure * 40f, -breath * 4f));
+            center, origin, scale, rotation + exposure * 0.032f, tint,
+            new Vector2(exposure * 65f + recoil * 18f, -breath * 3f));
 
         // A dark aperture makes the single damage target readable over any biome.
         Glow(batch, center, 183f, Color.Black * reveal);
@@ -139,14 +166,14 @@ internal sealed class FirstSeveranceBossVisuals
         }
         DrawCoreCorners(batch, center, coreColor * reveal, exposure);
 
-        int shards = reduced ? 8 : 28;
+        int shards = reduced ? 8 : 40;
         for (int index = 0; index < shards; index++)
         {
-            float angle = index * 2.399963f + time * (index % 2 == 0 ? 0.035f : -0.025f);
+            float angle = index * 2.399963f + time * (index % 2 == 0 ? 0.2f : -0.15f);
             float radius = 300f + index % 5 * 39f + exposure * 38f;
             Vector2 point = center + Unit(angle) * radius + new Vector2(0, MathF.Sin(time + index) * 14f);
             Line(batch, point - Unit(angle + 0.4f) * 9f, point + Unit(angle + 0.4f) * 9f,
-                Ice * (0.18f * reveal), index % 3 + 2f);
+                Ice * (0.3f * reveal), index % 3 + 2f);
         }
         DrawLances(batch, combat.LanceVolley, tick, reduced);
     }
@@ -154,7 +181,7 @@ internal sealed class FirstSeveranceBossVisuals
     private void DrawSeal(SpriteBatch batch, Vector2 center, float time, float reveal, bool reduced)
     {
         float radius = (460f + exposure * 38f) * (0.7f + 0.3f * reveal);
-        float spin = time * 0.026f;
+        float spin = time * 0.18f;
         Ring(batch, center, radius, new Color(19, 37, 46) * reveal, 14f, spin, 12);
         Ring(batch, center, radius - 9f, Ice * (0.26f * reveal), 1.8f, spin, 12);
         Ring(batch, center, radius + 7f, Gold * (0.33f * reveal), 2f, spin, 12);
@@ -221,19 +248,21 @@ internal sealed class FirstSeveranceBossVisuals
             if (!firing)
             {
                 // Whole future hit corridor is visible from the first warning tick.
-                Line(batch, start, end, Danger * (0.07f + charge * 0.08f), halfWidth * 2);
-                Line(batch, start, end, Color.Lerp(Danger, Color.White, charge * 0.65f) * 0.85f, 1.5f + charge);
+                Line(batch, start, end, Danger * (0.12f + charge * 0.12f), halfWidth * 2);
+                Line(batch, start, end, Color.Lerp(Danger, Color.White, charge * 0.75f), 2f + charge * 2f);
                 DashedLine(batch, start + normal * halfWidth, end + normal * halfWidth, Danger * 0.85f, 1.8f);
                 DashedLine(batch, start - normal * halfWidth, end - normal * halfWidth, Danger * 0.85f, 1.8f);
                 // Travelling chevrons show direction without changing the locked aim.
                 for (int index = 1; index < 10; index++)
                 {
-                    Vector2 point = start + direction * (index * 180f + charge * 100f);
+                    Vector2 point = start + direction * (index * 180f + charge * 280f);
                     Line(batch, point - direction * 14 + normal * 9, point, Danger * 0.55f, 2f);
                     Line(batch, point - direction * 14 - normal * 9, point, Danger * 0.55f, 2f);
                 }
-                Glow(batch, start, 110f + charge * 170f, Additive(Danger, 0.5f * charge));
-                Ring(batch, start, 100f - charge * 66f, Danger * (0.5f + charge * 0.4f), 2f);
+                Glow(batch, start, 110f + charge * 220f, Additive(Danger, 0.75f * charge));
+                Ring(batch, start, 160f - MathF.Sqrt(charge) * 130f, Danger * (0.6f + charge * 0.4f), 3f);
+                if (!reduced)
+                    Ring(batch, start, 80f + charge * 20f, Gold * charge, 4f, charge * 1.5f, 8);
                 continue;
             }
 
@@ -241,25 +270,28 @@ internal sealed class FirstSeveranceBossVisuals
             float intensity = 1f - age * 0.4f;
             if (!reduced)
             {
-                Line(batch, start, end, Additive(Danger, 0.12f * intensity), 210f);
-                Line(batch, start, end, Additive(Danger, 0.25f * intensity), 142f);
+                Line(batch, start, end, Additive(Danger, 0.18f * intensity), 250f);
+                Line(batch, start, end, Additive(Danger, 0.35f * intensity), 154f);
             }
             Line(batch, start, end, new Color(246, 82, 59) * intensity, halfWidth * 2f);
             Line(batch, start, end, new Color(255, 205, 168) * intensity, 66f);
             Line(batch, start, end, Color.White * intensity, 38f);
             Line(batch, start + normal * halfWidth, end + normal * halfWidth, Color.White * 0.9f, 2f);
             Line(batch, start - normal * halfWidth, end - normal * halfWidth, Color.White * 0.9f, 2f);
-            Glow(batch, start, reduced ? 170f : 390f, Additive(new Color(255, 194, 147), intensity));
+            Glow(batch, start, reduced ? 170f : 560f, Additive(new Color(255, 194, 147), intensity));
             Ellipse(batch, start + direction * (65f + age * 100f), new Vector2(20, 60 + age * 70),
                 MathF.Atan2(direction.Y, direction.X), Color.White * (1f - age), 3f);
             if (!reduced)
             {
-                for (int index = 0; index < 16; index++)
+                float shock = 1f - MathF.Pow(1f - age, 3f);
+                Ring(batch, start, 60f + shock * 370f, Danger * (1f - age) * 0.8f, 5f);
+                for (int index = 0; index < 28; index++)
                 {
                     float side = index % 2 == 0 ? 1f : -1f;
-                    Vector2 p = start + direction * (index * 110f + age * 280f)
-                        + normal * side * (58f + age * (20 + index % 4 * 13));
-                    Line(batch, p, p + direction * (28 + index % 3 * 15), Additive(Danger, intensity * 0.75f), 2f);
+                    Vector2 p = start + direction * (index * 85f + shock * 520f)
+                        + normal * side * (58f + shock * (28 + index % 4 * 18));
+                    Line(batch, p, p + direction * (65 + index % 3 * 28),
+                        Additive(Danger, intensity * 0.8f), 3f);
                 }
             }
         }
@@ -369,6 +401,7 @@ internal sealed class FirstSeveranceBossVisuals
         previousPhase = FirstSeveranceSubstate.None;
         soundedCharge = soundedFire = 0;
         endingTicks = 0;
+        phaseImpactTicks = 0;
         exposure = 0;
         if (unload)
         {

@@ -10,18 +10,18 @@ internal readonly record struct RaidReviveSettings(
     ulong DisconnectGraceTicks,
     ulong InvulnerabilityTicks,
     ulong WeaknessTicks,
-    float RestoredLifeRatio)
+    float RestoredLifeRatio,
+    bool UsesSharedTokens = true,
+    ulong ReviveLockoutTicks = 0)
 {
     public const int MinimumParticipantCount = 2;
     public const int MaximumParticipantCount = 4;
 
     public bool IsValid => ParticipantCount is >= MinimumParticipantCount and <= MaximumParticipantCount
-        && InitialTokenCount == ParticipantCount - 1
-        && ChannelDurationTicks > 0
+        && InitialTokenCount == (UsesSharedTokens ? ParticipantCount - 1 : 0)
         && DownedTimeoutTicks > ChannelDurationTicks
         && DisconnectGraceTicks > 0
         && InvulnerabilityTicks > 0
-        && WeaknessTicks > 0
         && float.IsFinite(RestoredLifeRatio)
         && RestoredLifeRatio is > 0f and <= 1f;
 
@@ -44,4 +44,14 @@ internal readonly record struct RaidReviveSettings(
             WeaknessTicks: 600,
             RestoredLifeRatio: 0.35f);
     }
+
+    public static RaidReviveSettings CreateInstantUnlimited(int participantCount)
+        => CreateInitial(participantCount) with
+        {
+            InitialTokenCount = 0,
+            UsesSharedTokens = false,
+            ChannelDurationTicks = 0,
+            WeaknessTicks = 0,
+            ReviveLockoutTicks = 3_600,
+        };
 }

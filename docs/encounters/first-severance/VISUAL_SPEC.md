@@ -22,6 +22,12 @@ related_docs:
 
 The user requested giant scale and spectacle comparable in ambition to Avatar of Emptiness / Nameless Deity, combined with this project's polar containment/ritual theme. `0.2.0` implements an original first pass, not a reproduction of those Bosses or a claim of equivalent finished animation/shader quality. The original small-placeholder scope is superseded for this pass by [ADR-0010](../../adr/0010-giant-boss-observation-lances.md).
 
+`0.2.1` increases speed and impact without changing the one-body boundary: rapid eased reveal/opening, 18-pixel decorative recoil, faster orbital motion, brief exposure shock rings, layered fire sounds, speed streaks, stronger short camera kicks (up to 12 pixels on firing / 9 on exposure) and narrow warm screen-edge accents. No gameplay pause, forced zoom or full-screen white flash is introduced. This is a user-requested high-intensity prototype, not a completed WotG-quality presentation claim.
+
+## Foundation Core monument
+
+An original ice-white/graphite/gold containment prism with a cyan suspended core now draws from `Assets/Textures/Tiles/FoundationCoreMonument.png` (1058x1487 RGBA). Its canvas is 176 world pixels tall, with a large matching placement preview and a lit control base. The original 2x2 Tile/TE, click target, save format, collision and exact-Fight ownership remain unchanged. The decorative upper body is not a larger clickable or solid tile; click the base. Existing placed Cores do not require replacement. A client-only `GlobalTile` registers the top-left tile for special drawing and uses the supplied SpriteBatch; Dedicated Server requests no texture. See [API evidence](../../research/INSTANT_REVIVAL_CORE_APIS.md) and [Attribution](../../../Assets/ATTRIBUTION.md).
+
 ## Accepted visual boundary
 
 - one logical Boss NPC/body and one authority-owned Boss life pool, without a visual-size cap;
@@ -71,7 +77,8 @@ Retain ice white/pale cyan, charcoal/black metal, warning red and restrained dar
 
 - Stack: 7-tile cyan circle, shrinking countdown ring and inward chevrons.
 - Spread: 14-tile orange-red circles, shrinking countdown, outward chevrons and central diamonds. No two circles should overlap (28-tile center separation).
-- Observation lance: thin locked center line, dashed edges marking the full future 88-pixel corridor, direction chevrons and a closing charge ring. After 72 ticks, a white-hot inner beam, warm outer beam and optional bloom fire for 18 ticks. Decorative bloom extends beyond the sharply marked actual width; the live core never visually shrinks below that width while damage is active.
+- Observation lance: thin locked center line, dashed edges marking the full future 88-pixel corridor, fast direction chevrons and a snapping charge iris. After 42 ticks, a white-hot inner beam, warm outer beam and optional bloom fire for 14 ticks, repeated every 66 ticks. Decorative bloom, shock ring and speed streaks extend beyond the sharply marked actual width; the live core never visually shrinks below that width while damage is active.
+- Stack/Spread shrinking rings follow the current 135-tick tuning. Revival markers show an instant kit action or the remaining recipient-only lockout, not channel progress or shared tokens.
 - Render body/seals first, lance effects next, and player mechanic/revive markers last. Draw all line primitives from an explicit one-texel MagicPixel source to preserve the `0.1.2` spoke fix.
 - Reduced Effects lowers rings/aurora/shards/glow/darkening and disables shake. All danger rails, live beams, assignment shapes and damage-window structure remain. Screen Shake can be independently disabled. No full-screen white flash or forced camera zoom.
 - Vanilla Boss 3 remains music; charge/fire use runtime vanilla sound IDs. No external recording is included.

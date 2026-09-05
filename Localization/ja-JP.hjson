@@ -3,16 +3,20 @@ Mods: {
     Items: {
       FoundationCoreItem: {
         DisplayName: ファウンデーション・コア
-        Tooltip: "第一断絶の候補アリーナを固定する\n開発ビルド：全員Readyで実験用Raidを開始"
+        Tooltip: "第一断絶の候補アリーナを固定する大型封印装置\n足元の発光コンソールを右クリック\n開発ビルド：全員Readyで実験用Raidを開始"
       }
       ResuscitationKitItem: {
         DisplayName: 蘇生キット
-        Tooltip: "Downした味方の8タイル以内で、使用ボタンを2秒間長押し\n静止して使用。成功時に共有蘇生トークンを1消費（アイテムは消費しない）"
+        Tooltip: "Downした味方の8タイル以内で使用すると、HP35％で即時蘇生\n消費・共有トークンなし。移動中や空中でも使用可能\n蘇生された本人は60秒間、再蘇生を受けられない"
       }
     }
     NPCs: {
       FirstSeverancePrototypeBoss.DisplayName: 無響の唱導者
       FirstSeverancePrototypePylon.DisplayName: 断絶のパイロン
+    }
+    Buffs.RecoveryLockoutDebuff: {
+      DisplayName: 再構成不応期
+      Description: 蘇生後60秒間、再び蘇生を受けることができない。味方を蘇生することはできる。
     }
     Tiles: {
       FoundationCoreTile: {
@@ -22,6 +26,12 @@ Mods: {
     UI: {
       FirstSeverance: {
         ActivationRejected: "ファウンデーション・コアの起動条件を満たしていません: {0}"
+        RequestRejected: "操作できません: {0}"
+        ReviveNotAlive: 蘇生できるのは、行動可能なRaid参加者だけです。
+        ReviveSelectKit: 蘇生キットを選択して、もう一度使用してください。
+        ReviveNoTarget: 8タイル以内にダウン中の味方がいません。
+        ReviveLocked: この味方はまだ再蘇生を受けられません。頭上の残り時間を確認してください。
+        ReviveTargetUnavailable: この味方はすでに復帰中、または蘇生できない状態です。
         PreparationStatus: "第一断絶の準備中 — Ready: {0}/{1}。コアを右クリックするとReadyを切り替えます。"
         AllReady: "第一断絶 Ready完了 — {0}/{1}。実験用Raidを開始します。"
         PhaseSpawnIntro: "Raid開始。足元の蘇生キットを拾ってください。/convergence-down でDownを実験できます。起動者の /convergence-cancel で終了。"
@@ -36,8 +46,8 @@ Mods: {
         ResultStackFailed: 頭割り失敗 — 分担人数が足りませんでした。
         ResultSpreadPassed: 散開成功。
         ResultSpreadFailed: 散開失敗 — 重なったプレイヤーにダメージ。
-        ParticipantDowned: "{0} がDOWN。味方が8タイル以内で蘇生キットを2秒間長押ししてください。"
-        ParticipantRevived: "{0} がHP35%で復帰。共有蘇生トークン残り: {1}。"
+        ParticipantDowned: "{0} がDOWN。再蘇生可能なら、味方が8タイル以内でキットを使用すると即時復帰します。"
+        ParticipantRevived: "{0} がHP35％で復帰。本人は60秒間、再蘇生を受けられません。"
         ReviveStarted: "{0} が蘇生中 — 動かず使用ボタンを押し続けてください。"
         ReviveCancelled: "{0} の蘇生が中断されました。トークンは消費していません。"
         CombatEnded: "Raid終了（{0}）：{1}"
@@ -55,8 +65,13 @@ Mods: {
         EndProtocolFailure: 通信エラーで中止しました。server.logを確認してください。
         EndInternalFailure: 実行エラーで中止しました。server.logを確認してください。
         EndUnknown: 戦闘を終了しました。server.logを確認してください。
-        CombatHud: "{0}  |  残り{1}秒  |  蘇生トークン: {2}"
-        DownedHud: "DOWN — 残り{0}秒。味方は8タイル以内で蘇生キットを2秒長押し！"
+        CombatHud: "{0}  |  残り{1}秒"
+        DownedHud: "DOWN — 残り{0}秒。味方は8タイル以内で蘇生キットを使用！"
+        DownedLockedHud: "DOWN — 猶予{0}秒。あと{1}秒は再蘇生不可。"
+        RecoveryLockoutHud: "再蘇生を受けられるまで：{0}秒"
+        BodyRevivable: キット使用で即時蘇生
+        BodyLocked: "再蘇生不可：あと{0}秒"
+        BodyEliminated: 復帰不可
         EliminatedHud: DOWN時間切れ — このRaidが終わるまで行動できません。
         ReviveHud: "蘇生中 — 静止して長押し: 残り{0}秒"
         NameSpawnIntro: 第一断絶

@@ -2,6 +2,21 @@
 
 ## Records
 
+- Runtime file: `Assets/Textures/Tiles/FoundationCoreMonument.png`
+- Asset ID: foundation-core-monument-2026-09-06
+- Asset type: texture
+- Creator: project-directed original design with OpenAI ImageGen assistance
+- Creation/acquisition date: 2026-09-06
+- Source type: generated
+- Source work and URL: original polar containment-monument brief; no external reference image or extracted art
+- Tool/model/version: OpenAI built-in ImageGen; exact backend model not surfaced
+- Prompt or brief location: external working storage, `foundation-core-art-brief.md`; original cyan black-ice prism held by ivory/graphite uprights and gold restraints, orthographic pixel-art sprite, transparent RGBA
+- Human modifications: no raster edits; output selected and alpha-inspected, independently aligned/scaled and given a pulsing clickable-base light in C#
+- License and redistribution terms: project source/asset license undecided; development use only, no public release approved
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex visual/alpha inspection, 2026-09-06; human in-game review pending
+- Notes: 1058x1487 RGBA, transparent corners; rendered on a 176-pixel-high canvas. Decoration does not expand the persistent 2x2 footprint. Existing FoundationCoreItem texture is also reused by the temporary recovery-lockout buff; no additional raster file is exported for it.
+
 - Runtime file: `Assets/Textures/NPCs/NullCantorBody.png`
 - Asset ID: null-cantor-body-first-pass-2026-09-06
 - Asset type: texture

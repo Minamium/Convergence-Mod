@@ -25,12 +25,12 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: 9b40d3405b494bc08be26a3a5c4c9783dd6efdc8154b3e6c4d7641124b7e264b
+  content_sha256: cc7a738b81aaa5185e4b0afb70adf86b059af9a4f21df263ce447d174e0e3b9d
   document_type: policy
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - compatibility.version_matrix
   aliases:
@@ -66,6 +66,27 @@ documents:
   - encounter.first-severance.spec
   - encounter.first-severance.visual
   - project.network-architecture
+- doc_id: decision.instant-revival-recipient-lockout
+  path: docs/adr/0011-instant-revival-and-recipient-lockout.md
+  title: 'ADR-0011: Reusable instant revival with recipient-only lockout'
+  content_sha256: 8f945905fbe03c7cac1efbc4754934cda2e5bcc95858b212c2e11f4a2636aef4
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - gameplay
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.instant_revival
+  aliases:
+  - ADR-0011
+  related_code:
+  - Common/Raids/Revive
+  - Content/Encounters/FirstSeverance/Revive
+  related_docs:
+  - encounter.first-severance.revive
+  - project.network-architecture
+  - project.status
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
@@ -209,7 +230,7 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: 6de21ddcf4bc730802c39e1f5eb3448e184e39b526687151436fc9db36410afe
+  content_sha256: 8d77bd07da3fddf59fbe496d1e256ad9be6ec6429e6f7ccb631ac3ab14b609fb
   document_type: overview
   status: accepted
   owners:
@@ -230,7 +251,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 5282abab6bebd2f3ac6dda44c079ef1c90d8cc96e64509889f81cf13e5922e73
+  content_sha256: 50474bd229d73f8b798020ef397ff6858b38e405f3006eea1d780e94ac2f7789
   document_type: plan
   status: accepted
   owners:
@@ -254,13 +275,13 @@ documents:
 - doc_id: encounter.first-severance.revive
   path: docs/encounters/first-severance/REVIVE_SPEC.md
   title: First Severance Downed and Revive Specification
-  content_sha256: afa9c1d918608d37c4ddfeaa13211dccd53988300fc67712e46fbd6202f923a6
+  content_sha256: d4f5ece6f6881d505b65f7c894c96c73dc21b3aed7cade8b5ee21f0b2475eb47
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - first_severance.player_recovery
   aliases:
@@ -273,10 +294,11 @@ documents:
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.plan
+  - decision.instant-revival-recipient-lockout
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: a175b64a98c6a9b77bf54d1e819d3d408d60e589b61d71d85dd0624c2a2215bb
+  content_sha256: af2b94cba5dfa6e8cb94708fa7d10c93eebcb165ebb75f3453f34116faac27c2
   document_type: spec
   status: accepted
   owners:
@@ -301,7 +323,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: e9c94a57599ef2bd8582cea1d96ef7132d2f5e632c6d87e81918e121193c562e
+  content_sha256: 71c0100feb9beb222d49f31e39e8ed8bbcf16521e06be7b41a18a8d210355814
   document_type: spec
   status: provisional
   owners:
@@ -343,13 +365,13 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 8bdbfbc0f7db5008d5277cd0955f3e05a0324f06f854b32563aec844025f4bea
+  content_sha256: 456b89a3d829a34a342b5f198a036e756ca3ba010c09bc2d8f87c996d1b0210c
   document_type: policy
   status: accepted
   owners:
   - project
   - art
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - policy.ip_provenance
   aliases:
@@ -385,7 +407,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: fac31ed45f70aad4bb22c0e35bceb408170913830080c5a920f6d06ec081a5a3
+  content_sha256: 74451b9a8c62f8ab2fd2a4decc6aac026d8445713a5c84c07885434a9fcec95e
   document_type: governance
   status: accepted
   owners:
@@ -613,7 +635,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 2d8f8c891f3a5a985a614e0acfee2f48eabc3f1b53075bcc1934b58786425d65
+  content_sha256: 7c4cac6f667b8673d9dec3df14d751ffa4fb3ae8c68859df03b6cde168c81f11
   document_type: governance
   status: accepted
   owners:
@@ -658,7 +680,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 42b869a3cbd5b30b538edc108f3ce5cfb2989ad67cca5867089098f8df233669
+  content_sha256: 91eb84cf021fad3474a9f09e64ee301ebf98a18b20b3b0b07355be32fc5080e6
   document_type: status
   status: accepted
   owners:
@@ -771,6 +793,29 @@ documents:
   - compatibility.version-matrix
   - project.arena-infrastructure
   - encounter.first-severance.plan
+- doc_id: research.instant-revival-core-apis
+  path: docs/research/INSTANT_REVIVAL_CORE_APIS.md
+  title: Instant revival / Foundation Core API evidence
+  content_sha256: 1d0f0d4be176b5df25d71eee64acb9b36befa5545191b724b7cba4d23499d746
+  document_type: research
+  status: accepted
+  owners:
+  - engineering
+  - art
+  last_reviewed: '2026-09-06'
+  source_of_truth_for: []
+  aliases:
+  - instant revive API evidence
+  - Foundation Core special draw
+  related_code:
+  - Content/Encounters/FirstSeverance/Revive
+  - Content/Encounters/FirstSeverance/FirstSeveranceClientActions.cs
+  - Client/Encounters/FirstSeverance/FoundationCoreVisuals.cs
+  related_docs:
+  - decision.instant-revival-recipient-lockout
+  - encounter.first-severance.revive
+  - encounter.first-severance.visual
+  - compatibility.version-matrix
 - doc_id: research.multiplayer-raid-prior-art
   path: docs/research/MULTIPLAYER_RAID_PRIOR_ART.md
   title: Multiplayer Raid Prior Art
@@ -793,12 +838,12 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: f76af68eb5cb0d90be5f2e9e717b25f8e54d84debc6616564d4e74ef15350f04
+  content_sha256: 050dedd918a161c639cc8e6d8c9150e9f7e483ca779b6c0c38b4101f635cdd57
   document_type: research
   status: historical
   owners:
   - research
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for: []
   aliases:
   - research sources
@@ -809,6 +854,7 @@ documents:
   - research.codex-skills-survey
   - research.multiplayer-raid-prior-art
   - research.first-severance-slice3-apis
+  - research.instant-revival-core-apis
 - doc_id: verification.evidence
   path: docs/evidence/README.md
   title: Verification Evidence
@@ -832,13 +878,13 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: a07c597f2f1e9e50ee45771abe4a31957e62fb6f0a0fe48d72f995f6b5960f39
+  content_sha256: 3ad6006036fcf3c1709c45993016611723e9383b10d5daf5312aeced786541c4
   document_type: plan
   status: accepted
   owners:
   - quality
   - networking
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - verification.test_matrix
   aliases:

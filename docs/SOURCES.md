@@ -4,7 +4,7 @@ document_type: research
 status: historical
 owners:
   - research
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for: []
 aliases:
   - research sources
@@ -15,11 +15,12 @@ related_docs:
   - research.codex-skills-survey
   - research.multiplayer-raid-prior-art
   - research.first-severance-slice3-apis
+  - research.instant-revival-core-apis
 ---
 
 # Research Sources
 
-Last reviewed: **2026-09-05**
+Last reviewed: **2026-09-06**
 
 一次資料を優先する。sourceの存在はAPI安定性や再利用許可を意味しない。
 
@@ -78,6 +79,8 @@ Last reviewed: **2026-09-05**
 - [Library of Congress: Beethoven Symphony No. 9 autograph score](https://www.loc.gov/item/2021668114/) — 原典資料。
 
 ## Revalidation rule
+
+Instant revival/Core pass, 2026-09-06: pinned tModLoader `ModBuff`, `GlobalTile`, `ModTile`, `ModBlockType` and `MessageID` contracts were inspected. Exact links, confirmed behavior, item-selection ordering inference and focused checks are recorded in [instant revival/Core evidence](research/INSTANT_REVIVAL_CORE_APIS.md). No engine implementation was copied or decompiled.
 
 Giant visual/beam pass, 2026-09-06: [pinned ModSystem](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModSystem.cs), [pinned ModNPC](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNPC.cs), [pinned MIT license](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/LICENSE) and the [WotG public README](https://github.com/TheFifthCircle/WrathOfTheGodsPublic). Exact scope, independent decisions and reference-license limits are in [giant visual evidence](research/FIRST_SEVERANCE_GIANT_VISUALS.md).
 

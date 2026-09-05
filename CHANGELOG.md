@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Development 0.2.1 — instant recovery and high-intensity experiment
+
+- Reusable instant ally revival within eight tiles, including airborne use. No shared tokens or item consumption. The recipient gets a visible 60-second re-revival lockout; restored HP35%/three-second immunity remain, old damage weakness removed.
+- Explicit localized rejection reasons and body/debuff/HUD countdowns; protocol v4 carries the authority deadline, and queued validation no longer hides a later rejection.
+- Large original containment monument over existing Core placements, with an illuminated clickable base.
+- Deliberately excessive Boss HP60,000,000/defense240 and Pylon HP1,000,000/defense120; stronger direct Raid damage, faster phase transitions and 0.7-second warning / 1.1-second beam cadence.
+- Snapping restraints, bright muzzle shocks, faster shards, layered stock impact sounds and stronger short camera impulses; reduced decoration and shake-off remain available.
+- User-run reload/two-player visuals, controls and tuning remain separate from compile/domain evidence.
+
 ### Development 0.2.0 — Null Cantor first design pass
 
 - Giant original black-ice/ceramic Boss body with animated restraints, orbital seals, subdued aurora, exposure cues, larger Pylon cages and reducible client VFX.

@@ -122,6 +122,11 @@ internal static class Program
     {
         TestCase[] tests =
         {
+            new("Instant unlimited revive commits in the request tick", InstantUnlimitedRevive),
+            new("Recipient lockout expires at exactly sixty seconds", RecipientLockoutDeadline),
+            new("Locked recipient may still revive another ally", LockoutDoesNotBlockRescuer),
+            new("Instant revival race has one winner", InstantRevivalRace),
+            new("Unlimited recovery still honors Down timeout and cleanup", UnlimitedRecoveryTimeoutAndCleanup),
             new("Lance finite corridor geometry", LanceFiniteCorridorGeometry),
             new("Lance telegraph and active deadlines", LanceTelegraphAndActiveDeadlines),
             new("Lance snapshot bounds and immutable rays", LanceSnapshotBoundsAndImmutableRays),
@@ -217,10 +222,12 @@ internal static class Program
     {
         var volley = new FirstSeveranceLanceVolley(1, 100, new[] { new FirstSeveranceLanceRay(0, 0, 0, 1) });
         AssertEqual(false, volley.IsFiring(99), "before assignment");
-        AssertEqual(false, volley.IsFiring(171), "last warning tick");
-        AssertEqual(true, volley.IsFiring(172), "first firing tick");
-        AssertEqual(true, volley.IsFiring(189), "last firing tick");
-        AssertEqual(false, volley.IsFiring(190), "end excludes damage");
+        AssertEqual(142ul, volley.FireTick, "fast experimental fire deadline");
+        AssertEqual(156ul, volley.EndTick, "short explosive live window");
+        AssertEqual(false, volley.IsFiring(volley.FireTick - 1), "last warning tick");
+        AssertEqual(true, volley.IsFiring(volley.FireTick), "first firing tick");
+        AssertEqual(true, volley.IsFiring(volley.EndTick - 1), "last firing tick");
+        AssertEqual(false, volley.IsFiring(volley.EndTick), "end excludes damage");
         AssertEqual(false, FirstSeveranceLanceTuning.IsAttackPhase(FirstSeveranceSubstate.Stack), "stack rest");
         AssertEqual(false, FirstSeveranceLanceTuning.IsAttackPhase(FirstSeveranceSubstate.Spread), "spread rest");
     }
@@ -245,7 +252,7 @@ internal static class Program
             FirstSeveranceMechanicResult.None, 0, Array.Empty<FirstSeveranceCombatParticipantProjection>(), volley),
             "lance in rest phase");
         AssertThrows<ArgumentException>(() => new FirstSeveranceCombatProjection(1, context.FightId,
-            FirstSeveranceSubstate.CoreExposure, 189, 0, 0, 1000, 1000, 1, 1, -1, 100, 200,
+            FirstSeveranceSubstate.CoreExposure, volley.EndTick - 1, 0, 0, 1000, 1000, 1, 1, -1, 100, 200,
             FirstSeveranceMechanicResult.None, 0, Array.Empty<FirstSeveranceCombatParticipantProjection>(), volley),
             "lance outliving phase");
     }
@@ -262,6 +269,95 @@ internal static class Program
                 context.Service.CreateSnapshot().InitialTokenCount,
                 "snapshot initial token count");
         }
+    }
+
+    private static void InstantUnlimitedRevive()
+    {
+        TestContext context = CreateContext(2, RaidReviveSettings.CreateInstantUnlimited(2));
+        AssertApplied(Down(context, 0, 10));
+        AssertApplied(StartRevive(context, 1, 0, 1, 10));
+        RaidReviveCommandResult commit = context.Service.CommitTick(context.FightId, 10);
+        AssertApplied(commit);
+        AssertEqual(1, commit.Events.Count, "one instant completion");
+        AssertEqual(RaidReviveEventKind.ParticipantRevived, commit.Events[0].Kind, "completion event");
+        RaidParticipantReviveSnapshot target = ParticipantSnapshot(context, 0);
+        AssertEqual(RaidParticipantCombatState.Alive, target.CombatState, "alive in request tick");
+        AssertEqual(3_610ul, target.ReviveLockoutUntilTick, "sixty-second authority deadline");
+        AssertEqual(190ul, target.InvulnerabilityUntilTick, "three-second immunity retained");
+        AssertEqual(0, context.Service.RemainingTokenCount, "no artificial unlimited-token balance");
+        AssertEqual(0, context.Service.ReservedTokenCount, "no shared token reservation");
+        AssertEqual(0, context.Service.CreateSnapshot().Channels.Count, "no held-use lease remains");
+    }
+
+    private static void RecipientLockoutDeadline()
+    {
+        TestContext context = CreateContext(2, RaidReviveSettings.CreateInstantUnlimited(2));
+        AssertApplied(Down(context, 0, 1));
+        AssertApplied(StartRevive(context, 1, 0, 1, 2));
+        AssertApplied(context.Service.CommitTick(context.FightId, 2));
+        AssertApplied(Down(context, 0, 3_590));
+        AssertEqual(3_602ul, ParticipantSnapshot(context, 0).ReviveLockoutUntilTick,
+            "Down must not erase the recipient lockout");
+        RaidReviveCommandResult early = StartRevive(context, 1, 0, 2, 3_601);
+        AssertEqual("revive.target_recovery_locked", early.FailureCode, "one tick early rejected");
+        AssertApplied(StartRevive(context, 1, 0, 2, 3_602));
+        AssertApplied(context.Service.CommitTick(context.FightId, 3_602));
+        AssertEqual(7_202ul, ParticipantSnapshot(context, 0).ReviveLockoutUntilTick, "new lockout");
+        AssertApplied(Down(context, 0, 7_190));
+        AssertApplied(StartRevive(context, 1, 0, 3, 7_202));
+        AssertApplied(context.Service.CommitTick(context.FightId, 7_202));
+        AssertEqual(0, context.Service.RemainingTokenCount, "repeated revives never spend tokens");
+    }
+
+    private static void LockoutDoesNotBlockRescuer()
+    {
+        TestContext context = CreateContext(3, RaidReviveSettings.CreateInstantUnlimited(3));
+        AssertApplied(Down(context, 0, 1));
+        AssertApplied(StartRevive(context, 1, 0, 1, 2));
+        AssertApplied(context.Service.CommitTick(context.FightId, 2));
+        AssertApplied(Down(context, 2, 3));
+        AssertApplied(StartRevive(context, 0, 2, 1, 3));
+        AssertApplied(context.Service.CommitTick(context.FightId, 3));
+        AssertEqual(RaidParticipantCombatState.Alive, ParticipantSnapshot(context, 2).CombatState,
+            "recently revived participant can rescue someone else");
+        AssertEqual(0ul, ParticipantSnapshot(context, 1).ReviveLockoutUntilTick,
+            "using the kit does not give the rescuer a lockout");
+    }
+
+    private static void InstantRevivalRace()
+    {
+        TestContext context = CreateContext(3, RaidReviveSettings.CreateInstantUnlimited(3));
+        AssertApplied(Down(context, 2, 1));
+        RaidReviveStartBatchResult batch = context.Service.ApplyStartBatch(new[]
+        {
+            CreateStartCommand(context, 1, 2, 1, 2),
+            CreateStartCommand(context, 0, 2, 1, 2),
+        });
+        AssertAccepted(batch);
+        AssertApplied(batch.CommandResults[0]);
+        AssertEqual("revive.target_already_reserved", batch.CommandResults[1].FailureCode,
+            "second rescuer does not duplicate the revive");
+        RaidReviveCommandResult commit = context.Service.CommitTick(context.FightId, 2);
+        AssertEqual(1, commit.Events.Count, "one completion");
+        AssertEqual(context.Roster[0].ParticipantId, commit.Events[0].Actor,
+            "stable ID wins rather than packet arrival order");
+    }
+
+    private static void UnlimitedRecoveryTimeoutAndCleanup()
+    {
+        TestContext context = CreateContext(2, RaidReviveSettings.CreateInstantUnlimited(2));
+        AssertApplied(Down(context, 0, 1));
+        AssertApplied(StartRevive(context, 1, 0, 1, 2));
+        AssertApplied(context.Service.CommitTick(context.FightId, 2));
+        AssertApplied(Down(context, 0, 200));
+        AssertApplied(context.Service.CommitTick(context.FightId, 2_000));
+        AssertEqual(RaidParticipantCombatState.Eliminated, ParticipantSnapshot(context, 0).CombatState,
+            "thirty-second Down deadline still applies during lockout");
+        AssertEqual(RaidReviveFailureReason.None, context.Service.FailureReason,
+            "zero legacy tokens do not create an unlimited-mode timeout wipe");
+        if (!context.Service.TryCleanup(context.FightId) || !context.Service.TryCleanup(context.FightId))
+            throw new InvalidOperationException("Cleanup must remain idempotent.");
+        AssertEqual(0, context.Service.CreateSnapshot().Participants.Count, "cleanup clears lockouts");
     }
 
     private static void AllDownedFailsOnlyOnCommit()
@@ -1345,13 +1441,13 @@ internal static class Program
                 $"{participantCount}-player Stack shares");
         }
 
-        AssertEqual(180, plan.Timing.SpawnIntroTicks, "SpawnIntro duration");
-        AssertEqual(660, plan.Timing.PylonCheckTicks, "Pylon duration");
-        AssertEqual(180, plan.Timing.StackTelegraphTicks, "Stack duration");
-        AssertEqual(180, plan.Timing.SpreadTelegraphTicks, "Spread duration");
-        AssertEqual(720, plan.Timing.NormalExposureTicks, "normal exposure duration");
-        AssertEqual(360, plan.Timing.PenalizedExposureTicks, "penalized exposure duration");
-        AssertEqual(90, plan.Timing.ResetTicks, "Reset duration");
+        AssertEqual(90, plan.Timing.SpawnIntroTicks, "SpawnIntro duration");
+        AssertEqual(510, plan.Timing.PylonCheckTicks, "Pylon duration");
+        AssertEqual(135, plan.Timing.StackTelegraphTicks, "Stack duration");
+        AssertEqual(135, plan.Timing.SpreadTelegraphTicks, "Spread duration");
+        AssertEqual(600, plan.Timing.NormalExposureTicks, "normal exposure duration");
+        AssertEqual(300, plan.Timing.PenalizedExposureTicks, "penalized exposure duration");
+        AssertEqual(30, plan.Timing.ResetTicks, "Reset duration");
 
         FirstSeveranceSubstate[] expectedSubstates =
         {

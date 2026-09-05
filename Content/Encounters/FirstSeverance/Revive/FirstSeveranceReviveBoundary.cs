@@ -59,7 +59,7 @@ internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipan
         {
             service = new RaidReviveService(
                 fightId,
-                RaidReviveSettings.CreateInitial(authoritativeRoster.Count),
+                RaidReviveSettings.CreateInstantUnlimited(authoritativeRoster.Count),
                 authoritativeRoster);
             failureCode = string.Empty;
             return true;

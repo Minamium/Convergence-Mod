@@ -300,7 +300,9 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
             whoAmI,
             requestNonce,
             out string reviveFailureCode);
-        SendValidation(whoAmI, requestNonce, accepted, reviveFailureCode);
+        // A queued instant revive receives its result after the authority tick revalidation.
+        if (!accepted)
+            SendValidation(whoAmI, requestNonce, false, reviveFailureCode);
         failureCode = string.Empty;
         return true;
     }
@@ -363,12 +365,18 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         packet.Send(toClient);
     }
 
-    private static void SendValidation(
+    internal static void SendValidation(
         int toClient,
         uint requestNonce,
         bool isAccepted,
         string failureCode)
     {
+        if (Main.netMode == NetmodeID.SinglePlayer)
+        {
+            if (!isAccepted)
+                FirstSeveranceClientActions.ShowRejected(failureCode);
+            return;
+        }
         EncounterSnapshot snapshot =
             ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot;
         ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();

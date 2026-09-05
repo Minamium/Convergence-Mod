@@ -21,9 +21,22 @@ related_docs:
 
 # Project Status
 
-As of 2026-09-06, development `0.2.0` adds the user-requested giant original Null Cantor design and high-cadence, telegraphed observation lances. This is an implemented first art/combat pass, not a claim of finished Wrath of the Gods-level production polish. GUI playtesting belongs to the user.
+As of 2026-09-06, development `0.2.1` implements instant, reusable-item revival with a recipient-only 60-second lockout; a large Foundation Core monument; deliberately excessive stats; and faster, stronger client presentation. The user requested over-tuning before subsequent playtest adjustment, not a balanced or guaranteed-clear encounter. GUI playtesting belongs to the user.
 
-## Giant Boss and observation lances — 0.2.0
+## Instant revival and high-intensity pass — 0.2.1
+
+- An Alive participant uses the reusable Resuscitation Kit within 8 tiles of the nearest eligible Downed ally. Authority revalidates after this tick's damage and resolves the stable request batch instantly: no held channel, movement interruption, shared token or item consumption. HP returns to 35% with 3 seconds of protection.
+- The recipient cannot receive another revival for 3,600 ticks / 60 seconds. Down does not clear the deadline; the visible non-cancellable debuff reflects server-owned state. The recipient may still revive someone else. Fight cleanup clears it. Down still expires after 30 seconds, so a second Down while locked may become unrecoverable.
+- Kit requests send ordinary inventory/control synchronization first; wrong-item/alive/range/lockout failures now have distinct localized messages. This is not yet proof that every multiplayer item-switch race is fixed. Protocol v4 appends a bounded recipient deadline to each participant projection; both players need this build. See [ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md).
+- Foundation Core has a new original 176-world-pixel-tall visual canvas and placement preview. The existing 2x2 Tile/TE, saved coordinates and right-click base remain unchanged; no replacement/migration is required. Dedicated Server never loads the image.
+- Boss HP/defense: **60,000,000 / 240**. Each Pylon: **1,000,000 / 120**. Stack pool: 140% of average pull maximum HP; failed Spread: 70% maximum HP; failed Pylon pulse: 35%, clamped nonlethal; lance: 60%. The enormous decorative body still has no contact damage.
+- Intro 1.5 s, Pylon cue 0.5 s plus 8 s active, Stack/Spread 2.25 s each, exposure 10 s or penalized 5 s, Reset 0.5 s. Lances warn for 42 ticks / 0.7 s, fire for 14 ticks, and repeat every 66 ticks / 1.1 s. The two-ray cap and exact locked 88-pixel damage corridor are unchanged. The existing eight-exposure/three-Overload caps may make this intentional over-tuning impractical to clear.
+- Faster casing opening/orbits, recoil, exposure shock rings, brighter charge/fire, speed streaks, layered vanilla impacts and short stronger camera kicks replace the softer motion. Camera Shake OFF and Reduced Effects remain available without hiding danger information. There is no full-screen white flash or gameplay hit-stop.
+- Checks: 56 domain tests passed, including five focused instant-revival/lockout/race/cleanup cases; actual ModSources `0.2.1` packaged with 0 warnings/errors. Compiled codec and repository results are recorded below. No `0.2.1` game session has been operated or verified by the agent.
+
+## Historical giant Boss and observation lances — 0.2.0
+
+The following records the preceding build; `0.2.1` values and recovery rules above supersede its timings, damage, protocol and channel behavior.
 
 - Original generated black-ice/ceramic containment body, approximately 820 pixels tall at full reveal, with a roughly 1,100-pixel orbital apparatus. Side structures open on exposure; broken seals, faint aurora, drifting shards, core brackets, charge/fire effects and terminal dissipation are client-only. The body source is RGBA with a transparent exterior, not extracted artwork.
 - One stationary authority-owned Boss NPC remains. Its 144x144 central aperture is the only Boss hitbox, 360 pixels above the Foundation Core. Decorative mass has no contact damage. Boss/Pylon HP and the six-state loop are unchanged. Pylons use larger original code-drawn containment cages and wider placement.
@@ -48,7 +61,9 @@ The user reported readable shrinking circles. The two-player Host & Play authori
 - Focused compiled-code checks reproduced both old shared-buffer failures and passed the fixed standalone/shared-buffer, zero-nonce and truncated-input cases. The subsequent user render confirmation and logged held-use revival are recorded above.
 - Separate `0.1.1` logs also showed caught exceptions in Simple Whip `GoldRush_Shot` and Calamity `SepulcherMinion`. Their relationship to this fight is unproven; no third-party code or enabled-Mod settings were changed.
 
-## Development combat experiment
+## Historical initial development combat experiment — 0.1.1
+
+These are the initial implementation values, not the current balance or recovery contract. See the `0.2.1` section and current encounter/revival specs for active rules.
 
 - Authority composes the existing loop and revive domains after Ready; Boss/Pylons are tracked by NPC slot/type and a per-Fight token. Observed `OnKill`, not arbitrary disappearance, supplies actor deaths. Normal NPC hit gating is provisional for cooperative clients, not a verified anti-cheat boundary.
 - `SpawnIntro -> PylonCheck -> Stack -> Spread -> CoreExposure -> Reset` runs with the existing timers. Boss HP is 1,200,000 and each Pylon has 25,000 HP for this experiment. Only exposed Boss/current Pylons accept player hits.
@@ -96,16 +111,16 @@ The user reported readable shrinking circles. The two-player Host & Play authori
 
 | Gate | State |
 |---|---|
-| Documentation catalog | Passed for this pass (41 documents) |
-| Repository policy checks | Passed for the experiment |
-| YAML checks | Passed for the experiment |
-| Dependency-free domain tests | 51 passed, including three focused lance geometry/timing/bounds checks |
-| Compiled combat codec | Absent / one / two rays round-trip; shared-buffer boundary and locked direction preserved |
-| `dotnet build ConvergenceMod.csproj` | `0.2.0` packaged successfully from actual ModSources; 0 warnings/errors |
-| tModLoader Build + Reload | `0.1.2` loaded in the inspected playtest logs; `0.2.0` awaits user GUI reload |
+| Documentation catalog | Passed for this pass (43 documents) |
+| Repository policy checks | Passed for this pass (209 files inspected) |
+| YAML checks | Passed for this pass (10 files inspected) |
+| Dependency-free domain tests | 56 passed, including instant revival, recipient-only deadline, arbitration and cleanup |
+| Compiled combat codec | v4 absent / one / two rays round-trip; exact shared-buffer boundary, locked aim and recipient deadlines preserved |
+| `dotnet build ConvergenceMod.csproj` | `0.2.1` packaged successfully from actual ModSources; 0 warnings/errors |
+| tModLoader Build + Reload | Earlier builds loaded in inspected logs; `0.2.1` awaits user GUI reload |
 | Single Player load | Passed; Core placed/right-clicked and correctly returned `roster_too_small` for one player |
 | Steam-friend preparation | `0.1.1` logs confirm local Host & Play server and two joined players |
-| Combat/BGM/Down/revive in game | `0.1.1` clear user-reported; `0.1.2` shrinking circles user-confirmed and two-second revive log-confirmed. `0.2.0` visuals/lances not yet game-tested |
+| Combat/BGM/Down/revive in game | `0.1.1` clear user-reported; `0.1.2` shrinking circles user-confirmed and two-second revive log-confirmed. Later `0.2.0` logs include movement/damage-interrupted attempts and a successful held revival. New `0.2.1` behavior/visuals are not game-verified |
 | Dedicated Server load/2-client smoke | Slice 3A 8-Mod server load/save/exit passed; two-client join not rerun; Slice 0 two-client baseline passed |
 | Calamity lethal-hook instrumentation | Not run; blocks the live Downed adapter |
 
@@ -118,9 +133,9 @@ The confirmed runtime is Terraria `1.4.4.9`, tModLoader stable `v2026.07.3.0`, C
 - First playable Raid: `First Severance` for 2–4 players after Exo Mechs and Supreme Calamitas.
 - Active loop: Pylon DPS check → Stack → Spread → Core exposure → repeat while boss HP remains.
 - Boss accepted boundary: one logical NPC/life pool, with user-requested giant original presentation. The one-body boundary does not limit visual size or decorative complexity.
-- Recovery: Raid-only Downed plus an ally-used dedicated item, with server-owned channel and shared tokens.
+- Recovery: Raid-only Downed plus an ally-used, nonconsumed instant item, with a server-owned recipient-only 60-second revival lockout; no shared tokens.
 - Long term: ship/validate the Calamity addon first, then migrate through the accepted staged path toward a standalone Content Mod.
 
 ## Next change
 
-Reload `0.2.0` on the host, restart Host & Play and let the Steam friend synchronize the new Mod. Play one loop: share Stack, separate the large Spread circles, and step out of the locked dashed beam corridors during exposure. Check the central hitbox/frame, visual load and one controlled beam hit/Down/revive if desired. The initiator may end with `/convergence-cancel`. Report a screenshot/log if readability or synchronization fails; do not rerun the expanded release matrix for this first design pass.
+Reload `0.2.1` on the host, restart Host & Play and let the Steam friend synchronize the new Mod. Try one short loop and one controlled airborne Down → kit click → instant revival, observing the recipient's 60-second debuff. Check the large Core at its original clickable base, the faster beam warnings and visual load. A full clear is not a requirement for this deliberate over-tuning pass. The initiator may end with `/convergence-cancel`; report a screenshot/log if recovery or readability fails. Do not rerun the expanded release matrix for this iteration.

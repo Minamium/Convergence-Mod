@@ -316,6 +316,7 @@ internal static class FirstSeverancePacketCodec
             writer.Write(participant.AnchorY);
             writer.Write(participant.InvulnerabilityUntilTick);
             writer.Write(participant.WeaknessUntilTick);
+            writer.Write(participant.ReviveLockoutUntilTick);
         }
         WriteBoolean(writer, combat.LanceVolley is not null);
         if (combat.LanceVolley is { } volley)
@@ -383,6 +384,7 @@ internal static class FirstSeverancePacketCodec
             float anchorY = reader.ReadSingle();
             ulong invulnerabilityUntilTick = reader.ReadUInt64();
             ulong weaknessUntilTick = reader.ReadUInt64();
+            ulong reviveLockoutUntilTick = reader.ReadUInt64();
             if (!participantId.IsValid
                 || participantId.Value >= participantCount || serverWhoAmI >= 255
                 || !Enum.IsDefined(combatState)
@@ -406,7 +408,8 @@ internal static class FirstSeverancePacketCodec
                 anchorX,
                 anchorY,
                 invulnerabilityUntilTick,
-                weaknessUntilTick);
+                weaknessUntilTick,
+                reviveLockoutUntilTick);
         }
 
         if (!TryReadBoolean(reader, out bool hasLance))

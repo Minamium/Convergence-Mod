@@ -43,7 +43,7 @@ Stackはserver-owned damage poolを分ける実際の頭割りです。Raid独�
 - [Encounter Specification](ENCOUNTER_SPEC.md): player-visible loop, authority outcomes, timing defaults, 2/3/4-player behavior.
 - [Implementation Plan](IMPLEMENTATION_PLAN.md): safe rename, adapters, slices, gates, and Definition of Done.
 - [Visual Specification](VISUAL_SPEC.md): minimum Boss silhouette and three visual states.
-- [Revive Specification](REVIVE_SPEC.md): Downed, item channel, shared tokens, cancellation, and compatibility blocker.
+- [Revive Specification](REVIVE_SPEC.md): Downed, reusable instant recovery, recipient lockout, and the ordinary-lethal-hook compatibility blocker.
 - [Backlog](BACKLOG.md): preserved old ideas explicitly excluded from the first slice.
 
 Project-wide authority, networking, arena, compatibility, and test constraints remain in the root documents and ADRs. This directory does not redefine them.

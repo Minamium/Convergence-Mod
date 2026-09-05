@@ -27,16 +27,16 @@ related_docs:
 
 ## Development experiment override
 
-The user-requested `0.2.0` expansion in [ADR-0010](../../adr/0010-giant-boss-observation-lances.md) adds the original giant Boss presentation and the observation-lance attack below. It supersedes the small-placeholder-only visual scope and the broad first-slice exclusion of beam attacks, not the single-NPC life pool, authority, recovery or release boundaries. All new numbers are provisional playtest tuning.
+The user-requested `0.2.0` expansion in [ADR-0010](../../adr/0010-giant-boss-observation-lances.md) adds the original giant Boss presentation and observation lances. `0.2.1` deliberately over-tunes stats and accelerates attacks/presentation; [ADR-0011](../../adr/0011-instant-revival-and-recipient-lockout.md) replaces held revival/shared tokens with an instant reusable kit and recipient-only 60-second lockout. These changes preserve one logical Boss life pool, authority and release boundaries. All damage/timing numbers are provisional, not a guarantee of a fair or clearable fight.
 
-For `0.1.1`, the user-authorized experiment in [ADR-0009](../../adr/0009-development-combat-experiment.md) runs the loop before production integration is complete. Stack uses a fixed 90%-of-average-pull-maximum-HP pool without armor mitigation; Spread overlaps receive 40% maximum HP once; failed Pylons pulse 25% clamped nonlethal. Stack chooses its round-robin Alive target at cast start but does not yet reissue a lost target. These are experiment-only values and behavior, not a replacement for the production hit-pipeline and reissue rules below. General Terraria lethal events are not intercepted. [Status](../../STATUS.md) owns implementation and test results.
+The user-authorized experiment in [ADR-0009](../../adr/0009-development-combat-experiment.md) runs before production integration is complete. Current `0.2.1` Boss HP/defense is 60,000,000 / 240; each Pylon is 1,000,000 / 120. Stack uses a fixed 140%-of-average-pull-maximum-HP pool without armor mitigation; Spread overlaps receive 70% maximum HP once; failed Pylons pulse 35%, clamped nonlethal. Stack chooses its round-robin Alive target at cast start but does not yet reissue a lost target. These are experiment-only behavior, not the production mitigation/reissue rules below. General Terraria lethal events are not intercepted. [Status](../../STATUS.md) owns implementation and test results.
 
 ## Identity and scope
 
 | Field | Value | Decision state |
 |---|---|---|
 | Event | `First Severance` / `第一断絶` | Accepted development name |
-| Target key | `first_severance` | Accepted; code rename pending |
+| Target key | `first_severance` | Accepted; code rename completed |
 | Party | 2–4 frozen pull participants | Accepted |
 | Progression | Post Exo Mechs and Supreme Calamitas, Shadowspec-level loadouts | Accepted for Calamity Stage A |
 | Boss | `The Null Cantor` / `無響の唱導者` | Provisional working title |
@@ -86,14 +86,14 @@ All timers are server ticks at 60 ticks/second. They are prototype defaults, not
 
 | Substate | Duration | Early exit |
 |---|---:|---|
-| `SpawnIntro` | 180 ticks / 3 s | none |
-| Pylon telegraph | 60 ticks / 1 s | none |
-| Pylon active window | 600 ticks / 10 s | all current-loop Pylons destroyed |
-| Stack telegraph | 180 ticks / 3 s | none |
-| Spread telegraph | 180 ticks / 3 s | none |
-| Normal Core exposure | 720 ticks / 12 s | Boss HP reaches zero |
-| Penalized Core exposure after failed Pylons | 360 ticks / 6 s | Boss HP reaches zero |
-| `Reset` | 90 ticks / 1.5 s | none |
+| `SpawnIntro` | 90 ticks / 1.5 s | none |
+| Pylon telegraph | 30 ticks / 0.5 s | none |
+| Pylon active window | 480 ticks / 8 s | all current-loop Pylons destroyed |
+| Stack telegraph | 135 ticks / 2.25 s | none |
+| Spread telegraph | 135 ticks / 2.25 s | none |
+| Normal Core exposure | 600 ticks / 10 s | Boss HP reaches zero |
+| Penalized Core exposure after failed Pylons | 300 ticks / 5 s | Boss HP reaches zero |
+| `Reset` | 30 ticks / 0.5 s | none |
 
 The provisional initial safety cap is eight completed exposures. If Boss HP remains when that cap is reached, authority immediately commits `Defeat` with reason `LoopCapExceeded`. The first slice has no hard-enrage or Last Stand transition; those remain deferred. Playtest data may change or remove the cap, but the implemented edge must never be an outcome OR.
 
@@ -117,7 +117,7 @@ Pylon HP is a typed feature tuning value. Set it from Windows telemetry so a cle
 - The provisional required share count is frozen from the pull roster: `2 / 2 / 3` occupants for `2 / 3 / 4` participants. The target counts if still valid and inside. Connected Alive participants outside the marker do not share the hit.
 - Stack owns one fixed server-side integer raw-damage pool. Authority computes quotient/remainder by occupant count, orders occupants by stable Participant ID, gives the first `remainder` occupants one extra raw point, and then applies normal mitigation to each assigned share through the measured Terraria hit pipeline. The exact pool is conserved; the client never reports occupant count, divisor, damage, or success.
 - Meeting the required share count is success. An under-soak is a soft failure: the same pool is divided among the smaller valid occupant set, so each share is larger, but it adds no Overload and has no separate instant-wipe command. The pool is tuned so one ordinary miss is recoverable for representative gear.
-- The first time the target becomes invalid before or on resolution, authority cancels the old assignment, scans forward from that target's frozen-roster position to the next connected Alive participant, increments the assignment revision, and grants a new full 180-tick telegraph. Each Stack cast may be reissued only once.
+- The first time the target becomes invalid before or on resolution, authority cancels the old assignment, scans forward from that target's frozen-roster position to the next connected Alive participant, increments the assignment revision, and grants a new full telegraph (current tuning: 135 ticks). Each Stack cast may be reissued only once. This production reissue remains unconnected in the development runtime.
 - If no replacement exists, or the reissued target also becomes invalid, authority commits one `TargetUnavailable` soft-failure result, applies the provisional short Stack-failure debuff once to the remaining connected Alive participants, and advances to Spread after terminal resolution. It never loops or extends the cast again.
 
 Marker radius, damage pool, and failure-debuff duration are provisional tuning inputs. The round-robin ordering, one-reissue limit, revision change, and full-telegraph behavior are protocol-visible first-slice rules; changing them requires matching spec/snapshot/test updates.
@@ -132,30 +132,30 @@ Marker radius, damage pool, and failure-debuff duration are provisional tuning i
 
 ## Core exposure and victory
 
-### Observation lance / 観測の槍 (development 0.2.0)
+### Observation lance / 観測の槍 (development 0.2.1)
 
-- Repeated attack during Pylon active windows and Core exposure only. The first cast starts after the Pylon's one-second shield cue, or 24 ticks after exposure opens. Stack/Spread/intro/Reset remain beam-free recovery and assignment windows.
+- Repeated attack during Pylon active windows and Core exposure only. The first cast starts after the Pylon's half-second shield cue, or 24 ticks after exposure opens. Stack/Spread/intro/Reset remain beam-free recovery and assignment windows.
 - Authority selects connected Alive participants in frozen-roster round-robin order and captures their current centers at warning start. Shots alternate one ray and up to two rays; two is a global cap, not a per-player multiplier. Downed players are never targeted.
 - Each ray starts at the stationary Boss aperture 360 pixels above the Foundation Core, extends 2,600 pixels in its locked unit direction, and has an 88-pixel full damage width. The complete strip has visible dashed boundary rails immediately; a bright center line and moving chevrons reinforce its direction. Terrain does not block or get destroyed by a lance.
-- Charge: 72 ticks / 1.2 s. Fire: 18 ticks / 0.3 s. Cast cadence: 102 ticks / 1.7 s. No tracking during charge or firing. No newly scheduled cast may extend beyond the current phase; early Pylon completion cancels the pending warning/beam. No catch-up burst after a delayed tick.
-- Server/SP samples each Alive participant's observed rectangular hitbox against the same finite ray rectangle each live tick. A participant takes at most one hit per entire volley, including intersecting double rays. Experimental damage is 35% maximum HP, with the existing post-revive immunity and Raid-owned lethal-to-Down behavior. Further Downed hits and outsider damage are excluded. This does not introduce ordinary `PreKill` interception or claim normal armor mitigation.
-- The exact-Fight runtime owns the current assignment and hit ledger. Full snapshots carry one bounded read-only volley; client sound, muzzle bloom, particles and small camera shake are non-authoritative. Phase exit and every existing Fight cleanup discard the volley/ledger. No extra NPC or Projectile slot is allocated.
+- Charge: 42 ticks / 0.7 s. Fire: 14 ticks / approximately 0.23 s. Cast cadence: 66 ticks / 1.1 s. No tracking during charge or firing. No newly scheduled cast may extend beyond the current phase; early Pylon completion cancels the pending warning/beam. No catch-up burst after a delayed tick.
+- Server/SP samples each Alive participant's observed rectangular hitbox against the same finite ray rectangle each live tick. A participant takes at most one hit per entire volley, including intersecting double rays. Experimental damage is 60% maximum HP, with the existing post-revive immunity and Raid-owned lethal-to-Down behavior. Further Downed hits and outsider damage are excluded. This does not introduce ordinary `PreKill` interception or claim normal armor mitigation.
+- The exact-Fight runtime owns the current assignment and hit ledger. Full snapshots carry one bounded read-only volley; client sound, muzzle bloom, particles and camera shake are non-authoritative. Phase exit and every existing Fight cleanup discard the volley/ledger. No extra NPC or Projectile slot is allocated.
 
 ### Exposure rules
 
 - Exposure changes the Boss visual state to `Exposed` and opens the authoritative damage gate.
-- A clean Pylon check grants the normal 720-tick window; a failed check grants 360 ticks.
+- A clean Pylon check grants the normal 600-tick window; a failed check grants 300 ticks.
 - Boss life is one persistent authority-owned pool. Any provisional ring or arm visuals are not hitable parts.
 - On each authority tick, permitted hits and life changes resolve before the exposure deadline closes. If Boss HP reaches zero, authority commits Victory and never starts another loop.
 - If HP remains at the deadline, close the damage gate, clear loop actors/assignments, run `Reset`, and begin another Pylon check.
-- Balance target: a clean representative group should need roughly 4–6 successful exposures. This is a playtest metric, not a separate authority DPS check.
+- Eventual balance target: a clean representative group should need roughly 4–6 successful exposures. The deliberately excessive `0.2.1` pass does not claim that target or even practical clearability within the existing eight-exposure cap.
 
 ## Downed and recovery interaction
 
-Downed/Revive follows [Revive Specification](REVIVE_SPEC.md) and ADR-0005.
+Downed/Revive follows [Revive Specification](REVIVE_SPEC.md) and ADR-0011; the latter supersedes ADR-0005's held channel/shared tokens for this feature.
 
 - Downed participants cannot attack, move normally, use items, hook, mount, take encounter damage, or be selected for Pylons/Stack/Spread/Boss targeting.
-- Revive may be attempted in every `Active` substate. The opportunity cost is lost movement and damage uptime, not an arbitrary phase lock.
+- An Alive participant may use the nonconsumed kit within 8 tiles in every `Active` substate. Authority resolves it instantly; flight/movement does not cancel a channel because no held channel exists. The recipient gets 35% health, 3-second protection and a 60-second cannot-receive-revival deadline; it does not stop that player rescuing someone else. No shared tokens or damage-weakness debuff apply.
 - The frozen pull roster does not shrink. A revived participant returns to the same stable Participant ID.
 - If every current participant becomes Downed in the same committed authority tick, Revive produces one Defeat candidate; absent a same-tick Boss Victory, the encounter ends in Defeat once and later revive input cannot undo it.
 
@@ -165,9 +165,9 @@ The feature runtime settles one authority tick in this order:
 
 1. collect the complete bounded client-intent batch and server-observed Terraria hit, position, connection/epoch, and control facts without committing a phase edge;
 2. validate exact-Fight actor ownership/damage gates and apply accepted Boss/Pylon hit results; collect Boss/Pylon terminal candidates and any participant lethal facts, but do not resolve a due Stack/Spread yet;
-3. apply pre-mechanic participant facts to the Revive domain in deterministic event-type and stable-Participant-ID order: lethal transitions, channel interrupts, then the final observed connection/epoch changes for the tick;
-4. sample the resulting connected Alive set and server positions, resolve the due Pylon/Stack/Spread/exposure edge once, and immediately apply any mechanic-created lethal transitions to the Revive domain in stable Participant-ID order;
-5. apply the one complete, stably ordered revive-start batch after all invalidations, then call `RaidReviveService.CommitTick` exactly once; late commands for that tick are rejected;
+3. apply pre-mechanic participant lethal transitions and final observed connection/epoch facts in stable Participant-ID order; the current instant feature does not collect channel interrupts;
+4. sample the resulting connected Alive set and server positions, resolve due Pylon/Stack/Spread/exposure edges and active lances once, and apply mechanic-created lethal transitions before revival requests;
+5. revalidate the one complete, stably ordered revive-start batch after all invalidations (sender, held kit, nearest eligible target/range/lockout), then call `RaidReviveService.CommitTick` exactly once; instant completions and same-tick failure settle there;
 6. gather actor/invariant, Boss-life, Overload/loop-cap, and Revive terminal candidates observed by the feature and choose exactly one by the feature priority below;
 7. if no terminal exists, commit at most one nonterminal substate edge; otherwise store the generic end reason and bounded feature terminal cause and return one direct End descriptor;
 8. publish one coherent feature/generic terminal projection and tombstone before cleanup releases actors or player projections.
@@ -192,11 +192,11 @@ Safety/validity endings therefore override a coincident gameplay result whose au
 
 ## Player-count rules
 
-| Pull roster | Pylons | Shared revive tokens | Stack | Spread |
+| Pull roster | Pylons | Revival limit | Stack | Spread |
 |---:|---:|---:|---|---|
-| 2 | 2 | 1 | 2 required shares | all connected Alive assigned |
-| 3 | 3 | 2 | 2 required shares | all connected Alive assigned |
-| 4 | 4 | 3 | 3 required shares | all connected Alive assigned |
+| 2 | 2 | recipient-only 60 s | 2 required shares | all connected Alive assigned |
+| 3 | 3 | recipient-only 60 s | 2 required shares | all connected Alive assigned |
+| 4 | 4 | recipient-only 60 s | 3 required shares | all connected Alive assigned |
 
 The encounter does not scale by Boss HP alone. Pylon count, actor density, safe space, and tuning may vary by roster, but the sequence and authority rules remain identical.
 
@@ -226,7 +226,7 @@ Normal player attempts to break the Foundation Core during Active are rejected b
 
 - Every mechanic has a server resolve tick and redundant shape/motion/text or sound language; never color-only.
 - Client clocks interpolate presentation only. Latency must not move the authority deadline.
-- A single ordinary Stack/Spread error is recoverable and readable.
+- Eventual balance should make a single ordinary Stack/Spread error recoverable and readable; the current intentionally excessive damage is not accepted final balance.
 - No frame-perfect input, invisible off-screen hit, required class, or fourfold projectile multiplication.
 - Damage numbers, telegraph radii, and exact HP remain provisional until 2/3/4-player Windows telemetry exists.
 

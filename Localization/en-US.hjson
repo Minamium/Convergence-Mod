@@ -7,16 +7,21 @@ Mods: {
 					'''
 					Anchors a prospective First Severance arena
 					Development build: all Ready starts the experimental Raid loop
+					Large containment monument; right-click the glowing console at its base
 					'''
 			}
 			ResuscitationKitItem: {
 				DisplayName: Resuscitation Kit
-				Tooltip: "Hold use for 2 seconds beside a Downed ally (8 tiles)\nRemain still; consumes one shared Raid token on success, not the item"
+				Tooltip: "Use beside a Downed ally (8 tiles) to revive instantly at 35% life\nReusable: no item or shared token cost; usable while moving or airborne\nThe recipient cannot be revived again for 60 seconds"
 			}
 		}
 		NPCs: {
 			FirstSeverancePrototypeBoss.DisplayName: The Null Cantor
 			FirstSeverancePrototypePylon.DisplayName: Severance Pylon
+		}
+		Buffs.RecoveryLockoutDebuff: {
+			DisplayName: Reconstitution Lockout
+			Description: Cannot receive another revival for 60 seconds after recovery. You can still revive allies.
 		}
 
 		Tiles.FoundationCoreTile.MapEntry: Foundation Core
@@ -24,6 +29,12 @@ Mods: {
 		UI: {
 			FirstSeverance: {
 				ActivationRejected: "Foundation Core activation was rejected: {0}"
+				RequestRejected: "Request rejected: {0}"
+				ReviveNotAlive: Only a standing Raid participant can revive an ally.
+				ReviveSelectKit: Select the Resuscitation Kit, then use it again.
+				ReviveNoTarget: No Downed ally is within 8 tiles.
+				ReviveLocked: That ally cannot receive another revival yet. Check the countdown above their body.
+				ReviveTargetUnavailable: That ally is already recovering or can no longer be revived.
 				PreparationStatus: "First Severance preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready."
 				AllReady: "First Severance Ready: {0}/{1}. Starting the experimental Raid."
 				PhaseSpawnIntro: "Raid started. Pick up your Resuscitation Kit. /convergence-down tests Downed; the initiator can end with /convergence-cancel."
@@ -38,8 +49,8 @@ Mods: {
 				ResultStackFailed: Stack failed — too few players shared the hit.
 				ResultSpreadPassed: Spread successful.
 				ResultSpreadFailed: Spread failed — overlapping players took a hit.
-				ParticipantDowned: "{0} is DOWNED. An ally can hold the kit nearby for 2 seconds."
-				ParticipantRevived: "{0} revived at 35% life. Shared tokens left: {1}."
+				ParticipantDowned: "{0} is DOWNED. Use the kit within 8 tiles for instant revival; check their recovery lockout."
+				ParticipantRevived: "{0} revived at 35% life. Cannot receive another revival for 60 seconds."
 				ReviveStarted: "{0} is reviving — hold use and remain still."
 				ReviveCancelled: "{0}'s revive was interrupted. No token consumed."
 				CombatEnded: "Raid ended ({0}): {1}"
@@ -57,8 +68,13 @@ Mods: {
 				EndProtocolFailure: Network protocol failure. Check server.log.
 				EndInternalFailure: Runtime error. Check server.log.
 				EndUnknown: Encounter closed. Check server.log.
-				CombatHud: "{0}  |  {1}s  |  Revive tokens: {2}"
-				DownedHud: "DOWNED — {0}s. Ally: hold the kit within 8 tiles for 2 seconds!"
+				CombatHud: "{0}  |  {1}s"
+				DownedHud: "DOWNED — {0}s. Ally: use the kit within 8 tiles to revive instantly!"
+				DownedLockedHud: "DOWNED — expires in {0}s. Revival locked for {1}s."
+				RecoveryLockoutHud: "Cannot receive another revival: {0}s"
+				BodyRevivable: KIT → INSTANT REVIVE
+				BodyLocked: "REVIVAL LOCKED: {0}s"
+				BodyEliminated: ELIMINATED
 				EliminatedHud: DOWN TIMEOUT — out until this Raid ends.
 				ReviveHud: "REVIVING — hold use, stay still: {0}s"
 				NameSpawnIntro: FIRST SEVERANCE

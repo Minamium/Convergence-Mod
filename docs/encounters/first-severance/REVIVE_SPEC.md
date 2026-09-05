@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - first_severance.player_recovery
 aliases:
@@ -18,106 +18,61 @@ related_code:
 related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.plan
+  - decision.instant-revival-recipient-lockout
 ---
 
 # First Severance Downed and Revive Specification
 
-## Development experiment
+## Accepted current experience — development 0.2.1
 
-The `0.1.1` exception in [ADR-0009](../../adr/0009-development-combat-experiment.md) tests recovery through `/convergence-down` and encounter-owned experimental HP damage. It does not install ordinary lethal interception. The request uses a nonce only and authority chooses the nearest unreserved Downed ally. Keep the kit selected, hold use for two seconds, stay within eight tiles and do not move more than one tile; damage, release, item change, hook/mount use or range loss cancels without consuming the reserved token. A ten-tick ingress allowance accommodates initial held-use replication. Cleanup returns incapacitated participants to at least 35% HP; ordinary death or disconnect aborts this experiment. General lethal-hook and rejoin behavior below remain production requirements, not completed implementation.
+The user's explicit decision replaces two-second channeling and shared tokens with a reusable instant revival tool and a recipient-only 60-second debuff. [ADR-0011](../../adr/0011-instant-revival-and-recipient-lockout.md) supersedes the relevant gameplay choices in ADR-0005/0009. [Status](../../STATUS.md) owns implementation and verification evidence.
 
-## Player experience
+A standing participant selects the Resuscitation Kit and clicks once within eight tiles of a Downed ally. Authority selects the nearest eligible ally and completes recovery in the accepted authority tick. No holding, standing still, resource, item consumption or shared token is required. Movement and airborne use are allowed; mounting/grappling do not create a custom rejection, although ordinary Terraria item-use restrictions still apply. Self-revival is not allowed.
 
-Development `0.1.2` makes Down instructions more prominent, labels Down-timeout elimination separately, and keeps the localized terminal cause visible for 10 seconds after cleanup. The small red rings and particles have no hitbox or damage. All participants Downed still means immediate Defeat; the 30-second deadline is only a recovery window while a standing ally remains. Server diagnostics record recovery transitions and interruption/ending causes.
+The kit currently has no recipe. It remains available through the development item browser and the existing missing-kit grant when combat starts. Prepare and select it before rescuing; it does not throw a projectile or require hitting the ally.
 
-During an active Raid, an eligible lethal event transitions the participant to `Downed` instead of immediately performing normal Terraria death. Another Alive participant equips and uses a dedicated non-consumable revival item on the Downed target, remains nearby for a channel, and receives a server-confirmed success or cancellation.
+## Rules
 
-`Resuscitation Kit` / `蘇生キット` is the provisional item name. The item name and art may change without changing protocol or domain semantics.
-
-## Current domain defaults
-
-These values already exist in the pure authority service and are accepted as first-prototype defaults, not final balance:
-
-| Rule | Value |
+| Rule | Current value |
 |---|---:|
+| Party | 2–4 frozen participants |
 | Downed deadline | 1,800 ticks / 30 s |
-| Reconnect grace | 1,800 ticks / 30 s |
-| Revive channel | 120 ticks / 2 s |
-| Range | at most 8 tiles, adapter-level provisional value |
-| Shared tokens for 2/3/4 pull roster | 1 / 2 / 3 |
-| Restored life | 35% |
-| Post-revive invulnerability | 180 ticks / 3 s |
-| Post-revive weakness | 600 ticks / 10 s |
+| Channel duration | 0 ticks; same authority-tick completion |
+| Range | at most 8 tiles between observed player centers |
+| Item consumption / shared tokens | none / none |
+| Restored HP | 35%, rounded up |
+| Post-revive immunity | 180 ticks / 3 s |
+| Recipient re-revival lockout | 3,600 ticks / 60 s after successful recovery |
+| Old damage weakness | removed from First Severance |
 
-Tokens are frozen from the pull roster, reserved atomically while channels compete, and consumed only on successful server completion.
+The visible debuff is Reconstitution Lockout / 再構成不応期. It blocks receiving another revival, not rescuing someone else, movement, attacks or healing. Its deadline survives becoming Downed again and cannot be cleared by clicking/removing the buff. At exact deadline equality the player is eligible again, provided their Down deadline has not expired.
 
-## Downed projection
+The 30-second Down deadline is not paused by the lockout. A second Down soon after recovery can therefore expire before the recipient becomes eligible again. This is intentional under the requested one-minute restriction, not a failed channel. All participants Downed still ends the Raid immediately; there is no self-rescue grace.
 
-A Downed participant:
+## Authority and multiplayer
 
-- remains bound to the same stable Participant ID and connection epoch;
-- cannot move normally, attack, use items, use hooks/mounts, or take further encounter damage;
-- is excluded from Boss/Pylon targeting, Stack target/occupant/divisor calculation, and new Spread assignments; the Stack threshold frozen from the pull roster does not shrink;
-- remains visible and targetable by the revival interaction;
-- never decides locally whether lethal damage was intercepted.
+- Client sends the existing bounded nonzero nonce only. It first sends its ordinary selected-slot equipment/control state; the server still derives the sender from trusted transport and validates its observed state.
+- Validate exact Encounter Sequence/Fight, current binding/epoch, request nonce/rate, sender Alive and actual held kit, connected Downed target, range, Down deadline and recipient lockout.
+- Targets are chosen by the authority, not by client coordinates, health, timers or a success packet.
+- After same-tick damage/invalidations, revalidate queued intent and submit one bounded stable-Participant-ID batch. One target has one accepted recovery when two rescuers race.
+- The reusable domain retains a zero-duration reservation internally, resolved by the same tick's single commit. No held-use lease persists into a later tick and no movement/damage channel observer runs.
+- Successful authority commit restores HP, applies immunity and the new deadline, and publishes an immediate read-only snapshot. A per-target recovery-deadline increase also drives health correction when Down and revival happen in the same tick.
+- Protocol v4 appends one ulong deadline to each participant record, at most four. The legacy token field is reserved zero. Both peers must update.
+- Queued validation is answered after revalidation, so a premature acceptance cannot hide a same-nonce failure.
 
-The exact Terraria body/death presentation is adapter work. Victory/cancel should restore a valid player safely; Defeat should disarm interception before resolving ordinary death or another explicitly tested normalization. This choice must be recorded after the Windows hook spike.
+## Feedback
 
-## Revival request and validation
+- Kit tooltip describes click-to-revive, eight-tile range, no resource cost, and the recipient lockout.
+- The recipient sees a timed debuff and HUD countdown.
+- A Downed body shows either instant-revive availability or remaining lockout seconds; elimination is labeled separately.
+- Rejections distinguish sender not Alive, wrong selected item, no nearby Downed ally, locked recipient and unavailable target. They are not mislabeled as Foundation Core activation failures.
+- Successful recovery announces HP35% and the 60-second restriction.
+- Server diagnostics record accepted instant requests, actual revival, lockout deadline, Down/timeout and terminal cause. They do not log personal positions every tick.
 
-The client sends only a target stable Participant ID and request nonce while using the item. The server derives the sender from `whoAmI` and validates, in order:
+## Cleanup and existing boundaries
 
-- protocol/direction and bounded payload;
-- active Encounter Sequence and exact Fight ID;
-- current stable participant, player slot, and connection epoch;
-- sender connected and Alive; target connected and Downed;
-- held item is the authoritative revival item and use is still maintained;
-- sender/target are within the provisional 8-tile range;
-- token is available and neither participant conflicts with another lease;
-- request nonce is newer and the authority tick is valid.
+Downed participants retain their stable identity and cannot move, attack, use items, hook/mount or take Raid damage. Boss/mechanic targeting excludes them. They remain visible and eligible for ally recovery subject to the lockout.
 
-Valid starts for one authority tick are adjudicated as a bounded batch using stable ordering. Packet arrival order cannot decide two revivers racing for one target.
+Exact-Fight cleanup clears service reservations, deadlines, projections and the visible debuff, and safely normalizes incapacitated bodies. Nothing persists into a new Raid or saved world. A stale Fight or slot/epoch cannot clear or revive another participant.
 
-## Channel and cancellation
-
-Authority cancels the channel on any of these observations:
-
-- reviver movement beyond the accepted tolerance or range loss;
-- reviver damage or becoming Downed;
-- teleport, hook, or mount-state change;
-- item change, release, or invalid item state;
-- target no longer Downed, target disconnect, or binding/epoch change;
-- reviver disconnect, fight end, cleanup, stale Fight, or deadline conflict.
-
-Cancellation carries the exact current channel lease nonce. A delayed cancel for an older lease cannot terminate a newer channel. Cancellation releases reservations and spends no token.
-
-On successful completion, authority consumes one token, restores 35% life, returns the target Alive, applies invulnerability/weakness, increments the snapshot revision, and synchronizes one result. The item/client never sends `complete`, life, duration, distance, or success.
-
-### Held-use lease and control projection
-
-Accepting a revive start creates an authority-owned lease for that exact revival-item use. The current pure-domain projection sets `SuppressItemUse=true` while `IsReviving=true`; the live `ModPlayer` adapter must interpret that as “suppress every non-revive item/combat action,” not “erase the accepted revive use.” Applying the projection must never make a valid channel cancel itself.
-
-The adapter must observe the raw held-item identity and use/release state before it applies control suppression, or replace the coarse projection with an explicit `SuppressNonReviveItemUse` equivalent. It then preserves only the accepted revival-item animation/lease while blocking weapon, tool, consumable, item-switch, hook, and mount starts. Release or item change submits one server-observed interrupt for the current channel nonce; repeated use packets never complete or extend the lease. If the pinned runtime cannot distinguish genuine release from its own suppression, the adapter stays disconnected and Raid activation remains denied.
-
-## Failure and encounter interaction
-
-- Revive is allowed during any `Active` substate; channeling naturally costs DPS and movement uptime.
-- All-participants-Downed is evaluated once at the end-of-tick commit after all lethal commands for that tick, producing one Defeat candidate. The owning feature commits it unless a same-tick Boss Victory has higher precedence.
-- A Downed timeout with tokens available may eliminate that participant while the party continues; the existing pure service owns the exact rule.
-- A timeout with no recovery path or no available connected Alive participants can request Defeat under the existing bounded domain rules.
-- No event from an older Fight, connection epoch, Terraria slot occupant, or channel nonce may affect the current participant.
-
-The Revive domain reports a same-tick failure candidate to the owning feature; it does not independently publish the encounter's terminal packet. The owning feature applies the [encounter terminal precedence](ENCOUNTER_SPEC.md#authority-tick-and-terminal-precedence), so a same-tick Boss Victory produces one Victory even if the final Revive snapshot also records why the roster would otherwise have failed.
-
-## Blocking integration decision
-
-The pure domain is implemented and tested, but the live tModLoader/Calamity adapter is not. Before connecting a lethal hook, Windows must instrument the pinned Single Player, Host & Play, and Dedicated Server paths to observe:
-
-- tModLoader `PreKill` ordering across Mods;
-- Calamity personal-revival items/effects and any life/cooldown mutation;
-- repeated callbacks, immunity, death reason, sync, and dedicated-server behavior;
-- how interception is disabled during Defeat cleanup.
-
-Activation remains fail-closed until that evidence produces an explicit coexistence policy and all adapter tests pass.
-
-If no reliable supported coexistence seam exists, stop rather than weakening the contract implicitly. Ordinary Terraria death plus deterministic Raid re-entry is a preserved contingency in [Backlog](BACKLOG.md), but adopting it requires an explicit user decision and a new/superseding ADR with its own authority, replication, fairness, and cleanup tests. A failed spike alone does not activate that fallback.
+The development adapter uses Raid-owned HP damage and the debug Down command, not a general Terraria PreKill interception. Ordinary Terraria death/disconnect still aborts the experiment. The pinned tModLoader/Calamity lethal-hook and production rejoin integration remain separately gated; this change does not claim to implement or verify them.

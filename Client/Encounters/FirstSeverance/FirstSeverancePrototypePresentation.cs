@@ -60,11 +60,16 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         var config = ModContent.GetInstance<FirstSeveranceVisualConfig>();
         var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
         if (!config.ScreenShake || config.ReducedEffects || state.Combat is not { } combat
-            || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out _)
-            || combat.LanceVolley is not { } volley || !volley.IsFiring(state.EstimatedAuthorityTick))
+            || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out _))
             return;
-        float age = (state.EstimatedAuthorityTick - volley.FireTick) / (float)FirstSeveranceLanceTuning.ActiveTicks;
-        float amount = 4f * (1f - age);
+        float amount = visuals.PhaseShake;
+        if (combat.LanceVolley is { } volley && volley.IsFiring(state.EstimatedAuthorityTick))
+        {
+            float age = (state.EstimatedAuthorityTick - volley.FireTick) / (float)FirstSeveranceLanceTuning.ActiveTicks;
+            amount = Math.Max(amount, 12f * MathF.Pow(1f - age, 2f));
+        }
+        if (amount <= 0)
+            return;
         float t = Main.GameUpdateCount % 3600;
         Main.screenPosition += new Vector2(MathF.Sin(t * 2.1f), MathF.Cos(t * 1.7f)) * amount;
     }
@@ -88,7 +93,10 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             visuals.Draw(batch, combat, state.EstimatedAuthorityTick);
             double left = combat.ResolveTick > state.EstimatedAuthorityTick
                 ? combat.ResolveTick - state.EstimatedAuthorityTick : 0;
-            float progress = Math.Clamp((float)(left / 180d), 0f, 1f);
+            int telegraph = combat.Substate == FirstSeveranceSubstate.Stack
+                ? FirstSeveranceEncounterPlan.Instance.Timing.StackTelegraphTicks
+                : FirstSeveranceEncounterPlan.Instance.Timing.SpreadTelegraphTicks;
+            float progress = Math.Clamp((float)(left / telegraph), 0f, 1f);
             foreach (FirstSeveranceCombatParticipantProjection participant in combat.Participants)
             {
                 Player player = Main.player[participant.ServerWhoAmI];
@@ -98,6 +106,16 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                 {
                     DrawRing(batch, player.Center, 30f, Color.IndianRed);
                     DrawRing(batch, player.Center, 8 * 16f, Color.IndianRed * 0.35f);
+                    string recovery = participant.CombatState == RaidParticipantCombatState.Eliminated
+                        ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.BodyEliminated")
+                        : participant.ReviveLockoutUntilTick > state.EstimatedAuthorityTick
+                            ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.BodyLocked",
+                                Math.Ceiling(SecondsLeft(participant.ReviveLockoutUntilTick,
+                                    state.EstimatedAuthorityTick)))
+                            : Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.BodyRevivable");
+                    Utils.DrawBorderString(batch, recovery,
+                        player.Center - Main.screenPosition - new Vector2(0, 45),
+                        Color.LightGoldenrodYellow, 0.75f, 0.5f);
                 }
                 else if (combat.Substate == FirstSeveranceSubstate.Spread
                     || (combat.Substate == FirstSeveranceSubstate.Stack
@@ -157,10 +175,24 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         if (!combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local))
             return;
 
+        // A brief edge accent gives the shot impact without a full-screen white flash.
+        if (!ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects
+            && combat.LanceVolley is { } impact && impact.IsFiring(state.EstimatedAuthorityTick))
+        {
+            float power = 1f - (state.EstimatedAuthorityTick - impact.FireTick)
+                / (float)FirstSeveranceLanceTuning.ActiveTicks;
+            Color edge = new Color(255, 91, 57) * (power * 0.8f);
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, 5),
+                new Rectangle(0, 0, 1, 1), edge);
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value,
+                new Rectangle(0, Main.screenHeight - 5, Main.screenWidth, 5),
+                new Rectangle(0, 0, 1, 1), edge);
+        }
+
         string phase = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.Name" + combat.Substate);
         float remaining = SecondsLeft(combat.ResolveTick, state.EstimatedAuthorityTick);
         string text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.CombatHud",
-            phase, remaining.ToString("0.0"), combat.RemainingReviveTokens);
+            phase, remaining.ToString("0.0"));
         Utils.DrawBorderString(spriteBatch, text,
             new Vector2(Main.screenWidth / 2f, 82f), Color.LightCyan, 0.9f, 0.5f);
 
@@ -182,13 +214,17 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         }
 
         if (local.CombatState == RaidParticipantCombatState.Downed)
-            text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.DownedHud",
-                SecondsLeft(local.DownedDeadlineTick, state.EstimatedAuthorityTick).ToString("0.0"));
+            text = local.ReviveLockoutUntilTick > state.EstimatedAuthorityTick
+                ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.DownedLockedHud",
+                    SecondsLeft(local.DownedDeadlineTick, state.EstimatedAuthorityTick).ToString("0.0"),
+                    SecondsLeft(local.ReviveLockoutUntilTick, state.EstimatedAuthorityTick).ToString("0"))
+                : Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.DownedHud",
+                    SecondsLeft(local.DownedDeadlineTick, state.EstimatedAuthorityTick).ToString("0.0"));
         else if (local.CombatState == RaidParticipantCombatState.Eliminated)
             text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.EliminatedHud");
-        else if (local.IsReviving)
-            text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.ReviveHud",
-                SecondsLeft(local.ReviveCompletesTick, state.EstimatedAuthorityTick).ToString("0.0"));
+        else if (local.ReviveLockoutUntilTick > state.EstimatedAuthorityTick)
+            text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.RecoveryLockoutHud",
+                SecondsLeft(local.ReviveLockoutUntilTick, state.EstimatedAuthorityTick).ToString("0"));
         else
             return;
 

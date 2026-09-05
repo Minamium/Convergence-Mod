@@ -8,7 +8,7 @@ namespace Convergence.Content.Encounters.FirstSeverance.Actors;
 
 public sealed class FirstSeverancePrototypeBoss : ModNPC
 {
-    internal const int MaximumLife = 1_200_000;
+    internal const int MaximumLife = 60_000_000;
 
     public override string Texture =>
         "Convergence/Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem";
@@ -29,7 +29,7 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
         NPC.height = 144;
         NPC.lifeMax = MaximumLife;
         NPC.damage = 0;
-        NPC.defense = 80;
+        NPC.defense = 240;
         NPC.knockBackResist = 0f;
         NPC.value = 0f;
         NPC.aiStyle = -1;

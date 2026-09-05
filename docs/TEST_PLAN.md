@@ -5,7 +5,7 @@ status: accepted
 owners:
   - quality
   - networking
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - verification.test_matrix
 aliases:
@@ -24,6 +24,14 @@ related_docs:
 ---
 
 # Test Plan
+
+## Current development iteration scope — 0.2.1
+
+The user requested efficient implementation, not a repeat of the release matrix. This pass uses the existing domain harness (five additional focused instant-revival/recipient-lockout cases), compiled protocol-v4 round-trip, repository metadata checks and one actual ModSources build. GUI reload and a short two-player playtest belong to the user. No full balance, latency, 3/4-player or production death-hook claim follows from these checks.
+
+[ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md) and the current [revival specification](encounters/first-severance/REVIVE_SPEC.md) supersede channel/token/weakness expectations below for First Severance: immediate same-tick completion, no resources, 60-second recipient-only lockout, 35% health and 3-second protection. The legacy-config domain tests remain useful regression cases but do not describe the active feature. Current encounter timers in [Encounter Specification](encounters/first-severance/ENCOUNTER_SPEC.md) also supersede the earlier numeric examples below.
+
+Focused cases: immediate completion without an open channel; exact lockout expiry and persistence through Down; locked recipient still able to rescue another; stable winner of simultaneous rescues; 30-second Down expiry without false zero-token wipe; idempotent cleanup; bounded deadline preserved alongside absent/single/double lance snapshots.
 
 ## Gate order
 

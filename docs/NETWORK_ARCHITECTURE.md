@@ -23,6 +23,12 @@ related_docs:
 
 # Network Architecture
 
+## Current development protocol v4
+
+`0.2.1` appends `ReviveLockoutUntilTick : ulong` after WeaknessUntilTick in each bounded combat participant record (at most 32 extra bytes). The authority owns the 60-second recipient deadline. Existing numeric packet IDs, nonce-only client requests and the bounded lance section are unchanged; the legacy token counter is reserved zero. Host and clients must reload together.
+
+First Severance selects reusable, instant, resource-free revival under [ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md). The old channel/token transport discussion below is historical/future adapter context, not current held-use behavior. After same-tick damage, authority revalidates the collected requests and submits one stable batch, then commits zero-duration recoveries in that same tick. A queued request gets its validation reply only after revalidation. Local equipment/control sync precedes custom revive intent; neither it nor a buff icon is an authoritative completion claim.
+
 ## Development protocol v3
 
 Development `0.2.0` appends a nullable observation-lance section after combat participants: one Boolean byte, then (when present) nonzero uint serial, ulong start tick, byte ray count `1..2`, and four finite float values per ray (origin X/Y and unit direction X/Y). Fire/end ticks and length/width come from the same versioned feature tuning on both sides. Maximum addition is 46 bytes. Constructor validation rejects invalid normalization, nonfinite/out-of-bound origins, invalid ticks, attacks outside Pylon/Exposure, and a volley extending beyond its phase. No new request or packet ID is added. Protocol v2 peers must reload the same `0.2.0` build. See [ADR-0010](adr/0010-giant-boss-observation-lances.md).

@@ -51,7 +51,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     private readonly uint[] healthRevisions;
     private readonly int[] correctedLife;
     private readonly Vector2[] downedPositions;
-    private readonly Dictionary<ParticipantId, (uint Nonce, Vector2 Position, int Life)> channelObservations = new();
+    private readonly ulong[] projectedReviveLockouts;
     private readonly HashSet<int> killedPylons = new();
     private readonly List<FirstSeveranceQueuedCombatIntent> pendingIntents = new();
     private readonly List<int> pylonNpcIndices = new();
@@ -103,6 +103,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         healthRevisions = new uint[roster.Count];
         correctedLife = new int[roster.Count];
         downedPositions = new Vector2[roster.Count];
+        projectedReviveLockouts = new ulong[roster.Count];
         Array.Fill(observedConnected, true);
         Array.Fill(projectedCombatStates, RaidParticipantCombatState.Alive);
     }
@@ -161,7 +162,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         int totalLife = 0;
         foreach (FirstSeveranceRosterMember member in roster.Members)
             totalLife += Main.player[member.ServerWhoAmI].statLifeMax2;
-        stackDamagePool = Math.Max(100, totalLife / roster.Count * 9 / 10);
+        stackDamagePool = Math.Max(100, totalLife / roster.Count * 14 / 10);
         if (!FirstSeveranceCombatAuthority.TryAttach(this))
         {
             failureCode = "first_severance.combat_authority_busy";
@@ -258,29 +259,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return false;
         }
 
-        RaidReviveSnapshot? state = revive.CreateSnapshot();
-        if (!TryGetPlayer(member, out Player player) || player.dead
-            || player.HeldItem.type != ModContent.ItemType<ResuscitationKitItem>()
-            || player.mount.Active || !IsAlive(member.ParticipantId))
-        {
-            failureCode = "first_severance.revive_requires_held_kit_and_alive_sender";
+        if (!TryValidateRevive(member, Main.GameUpdateCount, out _, out failureCode))
             return false;
-        }
-        if (state is null || state.Value.RemainingTokenCount <= state.Value.ReservedTokenCount)
-        {
-            failureCode = "first_severance.revive_no_available_token";
-            return false;
-        }
-        if (IsReviver(state.Value, member.ParticipantId))
-        {
-            failureCode = "first_severance.revive_already_channeling";
-            return false;
-        }
-        if (!TryFindNearestDowned(member, out _))
-        {
-            failureCode = "first_severance.revive_no_downed_ally_in_range";
-            return false;
-        }
 
         QueueIntent(FirstSeveranceCombatIntentKind.ReviveNearest, member, requestNonce);
         failureCode = string.Empty;
@@ -315,7 +295,6 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         ApplyPendingIntents(context.AuthorityTick);
         if (cancelRequested)
             return End(FirstSeveranceTerminalCause.UserCancelled);
-        InterruptOutOfRangeChannels(context.AuthorityTick);
 
         FirstSeveranceLoopState before = loop.State;
         ResolveMechanicIfDue(before, context.AuthorityTick);
@@ -352,11 +331,12 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             {
                 if (TryGetPlayer(member, out Player player))
                     ApplyRaidDamage(member, Math.Min(player.statLife - 1,
-                        player.statLifeMax2 / 4), context.AuthorityTick, "PylonPulse");
+                        player.statLifeMax2 * 35 / 100), context.AuthorityTick, "PylonPulse");
             }
         }
 
-        InterruptOutOfRangeChannels(context.AuthorityTick);
+        // Instant starts are adjudicated after all same-tick damage/invalidations.
+        ApplyPendingRevives(context.AuthorityTick);
         EncounterRuntimeUpdate reviveUpdate = revive.Tick(context);
         SynchronizeRevivePlayers(context.AuthorityTick);
         if (after.IsTerminal)
@@ -464,7 +444,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
 
         revive.Cleanup(context);
-        channelObservations.Clear();
+        Array.Clear(projectedReviveLockouts);
         lanceVolley = null;
         lanceHitParticipants.Clear();
         nextLanceTick = 0;
@@ -540,7 +520,6 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
 
         pendingIntents.Sort(CompareIntents);
-        var starts = new List<RaidReviveStartCommand>(roster.Count);
         for (int index = 0; index < pendingIntents.Count; index++)
         {
             FirstSeveranceQueuedCombatIntent intent = pendingIntents[index];
@@ -560,25 +539,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                     binding,
                     authorityTick));
             }
-            else if (intent.Kind == FirstSeveranceCombatIntentKind.ReviveNearest
-                && sender.HeldItem.type == ModContent.ItemType<ResuscitationKitItem>()
-                && TryFindNearestDowned(intent.Member, out ParticipantId target))
-            {
-                starts.Add(new RaidReviveStartCommand(
-                    fightId,
-                    binding,
-                    target,
-                    intent.RequestNonce,
-                    authorityTick));
-            }
         }
-
-        if (starts.Count > 0)
-        {
-            revive.ApplyStartBatch(starts);
-        }
-
-        pendingIntents.Clear();
     }
 
     private void ApplyConnectionChanges(ulong authorityTick)
@@ -604,53 +565,36 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
     }
 
-    private void InterruptOutOfRangeChannels(ulong authorityTick)
+    private void ApplyPendingRevives(ulong authorityTick)
     {
-        RaidReviveSnapshot? snapshot = revive.CreateSnapshot();
-        if (snapshot is null)
+        var starts = new List<RaidReviveStartCommand>(roster.Count);
+        foreach (FirstSeveranceQueuedCombatIntent intent in pendingIntents)
         {
-            return;
-        }
-
-        float rangeSquared = ReviveRangePixels * ReviveRangePixels;
-        for (int index = 0; index < snapshot.Value.Channels.Count; index++)
-        {
-            RaidReviveChannelSnapshot channel = snapshot.Value.Channels[index];
-            if (!roster.TryGet(channel.Reviver, out FirstSeveranceRosterMember reviver))
+            if (intent.Kind != FirstSeveranceCombatIntentKind.ReviveNearest)
                 continue;
-            RaidReviveCancelReason reason = RaidReviveCancelReason.None;
-            if (!roster.TryGet(channel.Target, out FirstSeveranceRosterMember target)
-                || !TryGetPlayer(reviver, out Player reviverPlayer)
-                || !TryGetPlayer(target, out Player targetPlayer)
-                || Vector2.DistanceSquared(reviverPlayer.Center, targetPlayer.Center) > rangeSquared)
+            if (!TryValidateRevive(intent.Member, authorityTick, out ParticipantId target,
+                    out string failureCode))
             {
-                reason = RaidReviveCancelReason.ReviverMoved;
+                FirstSeverancePacketSystem.SendValidation(intent.Member.ServerWhoAmI,
+                    intent.RequestNonce, false, failureCode);
+                continue;
             }
-            else
+            starts.Add(new RaidReviveStartCommand(fightId, ToReviveBinding(intent.Member),
+                target, intent.RequestNonce, authorityTick));
+        }
+        if (starts.Count > 0)
+        {
+            RaidReviveStartBatchResult result = revive.ApplyStartBatch(starts);
+            for (int index = 0; index < starts.Count; index++)
             {
-                if (!channelObservations.TryGetValue(channel.Reviver, out var observation)
-                    || observation.Nonce != channel.ChannelNonce)
-                    observation = (channel.ChannelNonce, reviverPlayer.position, reviverPlayer.statLife);
-                if (reviverPlayer.statLife < observation.Life)
-                    reason = RaidReviveCancelReason.ReviverDamaged;
-                else if (Vector2.DistanceSquared(reviverPlayer.position, observation.Position) > 16f * 16f
-                    || reviverPlayer.mount.Active || reviverPlayer.grapCount > 0)
-                    reason = RaidReviveCancelReason.ReviverMoved;
-                else if (reviverPlayer.HeldItem.type != ModContent.ItemType<ResuscitationKitItem>()
-                    || (authorityTick > channel.StartedTick + 10
-                        && !reviverPlayer.controlUseItem))
-                    reason = RaidReviveCancelReason.Manual;
-                channelObservations[channel.Reviver] =
-                    (observation.Nonce, observation.Position, reviverPlayer.statLife);
-            }
-
-            if (reason != RaidReviveCancelReason.None)
-            {
-                revive.Apply(new RaidReviveInterruptCommand(fightId, ToReviveBinding(reviver),
-                    channel.ChannelNonce, reason, authorityTick));
-                channelObservations.Remove(channel.Reviver);
+                // Both the ingress list and the domain batch are ordered by stable reviver ID.
+                RaidReviveCommandResult command = result.IsAccepted ? result.CommandResults[index]
+                    : RaidReviveCommandResult.Rejected(result.FailureCode);
+                FirstSeverancePacketSystem.SendValidation(starts[index].Reviver.PlayerSlot,
+                    starts[index].RequestNonce, command.IsAccepted, command.FailureCode);
             }
         }
+        pendingIntents.Clear();
     }
 
     private void SynchronizeRevivePlayers(ulong authorityTick)
@@ -682,7 +626,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                 lifeChanged = true;
             }
             else if (participant.CombatState == RaidParticipantCombatState.Alive
-                && before == RaidParticipantCombatState.Downed)
+                && (before == RaidParticipantCombatState.Downed
+                    || participant.ReviveLockoutUntilTick > projectedReviveLockouts[index]))
             {
                 int restoredLife = Math.Max(1, (int)Math.Ceiling(player.statLifeMax2 * 0.35f));
                 SetCorrectedLife(index, player, restoredLife);
@@ -700,6 +645,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             }
 
             projectedCombatStates[index] = participant.CombatState;
+            projectedReviveLockouts[index] = participant.ReviveLockoutUntilTick;
         }
     }
 
@@ -715,7 +661,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             participant.IsConnected, participant.CombatState, completesTick > 0,
             participant.DownedDeadlineTick, completesTick, healthRevisions[index],
             Math.Max(1, correctedLife[index]), downedPositions[index].X, downedPositions[index].Y,
-            participant.InvulnerabilityUntilTick, participant.WeaknessUntilTick);
+            participant.InvulnerabilityUntilTick, participant.WeaknessUntilTick,
+            participant.ReviveLockoutUntilTick);
     }
 
     private void SetCorrectedLife(int index, Player player, int life)
@@ -818,7 +765,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             foreach (FirstSeveranceRosterMember member in roster.Members)
                 if (failedSlots.Contains(member.ServerWhoAmI)
                     && TryGetPlayer(member, out Player player))
-                    ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 2 / 5), authorityTick, "Spread");
+                    ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 70 / 100), authorityTick, "Spread");
         }
     }
 
@@ -1174,7 +1121,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                     continue;
                 // One hit per volley even at a crossing or during all 18 live ticks.
                 lanceHitParticipants.Add(member.ParticipantId);
-                ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 35 / 100), tick, "ObservationLance");
+                ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 60 / 100), tick, "ObservationLance");
                 changed = true;
                 break;
             }
@@ -1196,17 +1143,28 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
     }
 
-    private bool TryFindNearestDowned(
+    private bool TryValidateRevive(
         FirstSeveranceRosterMember reviver,
-        out ParticipantId target)
+        ulong authorityTick,
+        out ParticipantId target,
+        out string failureCode)
     {
         target = ParticipantId.Invalid;
-        if (!TryGetPlayer(reviver, out Player reviverPlayer))
+        failureCode = "first_severance.revive_sender_not_alive";
+        if (!TryGetPlayer(reviver, out Player reviverPlayer) || reviverPlayer.dead
+            || !IsAlive(reviver.ParticipantId))
         {
+            return false;
+        }
+        if (reviverPlayer.HeldItem.type != ModContent.ItemType<ResuscitationKitItem>()
+            || reviverPlayer.HeldItem.stack < 1)
+        {
+            failureCode = "first_severance.revive_kit_not_selected";
             return false;
         }
 
         RaidReviveSnapshot? snapshot = revive.CreateSnapshot();
+        failureCode = "first_severance.revive_no_downed_ally_in_range";
         if (snapshot is null)
         {
             return false;
@@ -1232,6 +1190,14 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             float distanceSquared = Vector2.DistanceSquared(
                 reviverPlayer.Center,
                 targetPlayer.Center);
+            if (candidate.DownedDeadlineTick <= authorityTick)
+                continue;
+            if (candidate.ReviveLockoutUntilTick > authorityTick)
+            {
+                if (distanceSquared <= ReviveRangePixels * ReviveRangePixels)
+                    failureCode = "first_severance.revive_target_recovery_locked";
+                continue;
+            }
             if (distanceSquared <= nearestDistanceSquared)
             {
                 nearestDistanceSquared = distanceSquared;
@@ -1239,6 +1205,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             }
         }
 
+        if (target.IsValid)
+            failureCode = string.Empty;
         return target.IsValid;
     }
 
@@ -1361,7 +1329,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
     private void LogReviveEvent(RaidReviveEvent entry)
     {
-        Log(entry.AuthorityTick, $"event={entry.Kind} participant={entry.Subject.Value} actor={entry.Actor.Value} cancel={entry.CancelReason} failure={entry.FailureReason} elimination={entry.EliminationReason}");
+        Log(entry.AuthorityTick, $"event={entry.Kind} participant={entry.Subject.Value} actor={entry.Actor.Value} cancel={entry.CancelReason} failure={entry.FailureReason} elimination={entry.EliminationReason} recovery_lockout_until={entry.ReviveLockoutUntilTick}");
     }
 
     private void Log(ulong tick, string detail)

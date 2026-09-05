@@ -32,6 +32,8 @@ internal sealed class RaidReviveService
 
         public ulong WeaknessUntilTick { get; set; }
 
+        public ulong ReviveLockoutUntilTick { get; set; }
+
         public bool HasAcceptedRequestNonce { get; set; }
 
         public uint LastAcceptedRequestNonce { get; set; }
@@ -111,7 +113,7 @@ internal sealed class RaidReviveService
 
     public int RemainingTokenCount => remainingTokenCount;
 
-    public int ReservedTokenCount => channelsByReviver.Count;
+    public int ReservedTokenCount => settings.UsesSharedTokens ? channelsByReviver.Count : 0;
 
     public int AvailableTokenCount => Math.Max(0, remainingTokenCount - ReservedTokenCount);
 
@@ -293,12 +295,17 @@ internal sealed class RaidReviveService
             return RaidReviveCommandResult.Rejected("revive.reviver_already_channeling");
         }
 
+        if (command.AuthorityTick < target.ReviveLockoutUntilTick)
+        {
+            return RaidReviveCommandResult.Rejected("revive.target_recovery_locked");
+        }
+
         if (IsTargetReserved(command.Target))
         {
             return RaidReviveCommandResult.Rejected("revive.target_already_reserved");
         }
 
-        if (AvailableTokenCount <= 0)
+        if (settings.UsesSharedTokens && AvailableTokenCount <= 0)
         {
             return RaidReviveCommandResult.Rejected("revive.no_available_token");
         }
@@ -325,7 +332,8 @@ internal sealed class RaidReviveService
         AddEvent(
             events,
             command.AuthorityTick,
-            RaidReviveEventKind.ChannelStarted,
+            settings.ChannelDurationTicks == 0
+                ? RaidReviveEventKind.InstantReviveAccepted : RaidReviveEventKind.ChannelStarted,
             channel.Target,
             channel.Reviver,
             channelNonce: channel.ChannelNonce);
@@ -555,7 +563,8 @@ internal sealed class RaidReviveService
                 participant.DownedDeadlineTick,
                 participant.DisconnectDeadlineTick,
                 participant.InvulnerabilityUntilTick,
-                participant.WeaknessUntilTick);
+                participant.WeaknessUntilTick,
+                participant.ReviveLockoutUntilTick);
         }
 
         RaidReviveChannelSnapshot[] channelSnapshots =
@@ -794,18 +803,22 @@ internal sealed class RaidReviveService
                 || !participants.TryGetValue(channel.Target, out ParticipantState? target)
                 || target.CombatState != RaidParticipantCombatState.Downed
                 || !target.IsConnected
-                || remainingTokenCount <= 0)
+                || authorityTick < target.ReviveLockoutUntilTick
+                || (settings.UsesSharedTokens && remainingTokenCount <= 0))
             {
                 continue;
             }
 
-            remainingTokenCount--;
+            if (settings.UsesSharedTokens)
+                remainingTokenCount--;
             target.CombatState = RaidParticipantCombatState.Alive;
             target.DownedDeadlineTick = 0;
             target.InvulnerabilityUntilTick = SaturatingAdd(
                 authorityTick,
                 settings.InvulnerabilityTicks);
             target.WeaknessUntilTick = SaturatingAdd(authorityTick, settings.WeaknessTicks);
+            target.ReviveLockoutUntilTick = settings.ReviveLockoutTicks == 0
+                ? 0 : SaturatingAdd(authorityTick, settings.ReviveLockoutTicks);
             AddEvent(
                 events,
                 authorityTick,
@@ -815,7 +828,8 @@ internal sealed class RaidReviveService
                 channelNonce: channel.ChannelNonce,
                 restoredLifeRatio: settings.RestoredLifeRatio,
                 invulnerabilityUntilTick: target.InvulnerabilityUntilTick,
-                weaknessUntilTick: target.WeaknessUntilTick);
+                weaknessUntilTick: target.WeaknessUntilTick,
+                reviveLockoutUntilTick: target.ReviveLockoutUntilTick);
         }
     }
 
@@ -835,7 +849,7 @@ internal sealed class RaidReviveService
                 RaidReviveCancelReason.TargetInvalid,
                 authorityTick,
                 events);
-            if (AvailableTokenCount <= 0)
+            if (settings.UsesSharedTokens && AvailableTokenCount <= 0)
             {
                 SetFailure(
                     RaidReviveFailureReason.DownedTimeoutWithoutToken,
@@ -1003,7 +1017,8 @@ internal sealed class RaidReviveService
         RaidParticipantEliminationReason eliminationReason = RaidParticipantEliminationReason.None,
         float restoredLifeRatio = 0f,
         ulong invulnerabilityUntilTick = 0,
-        ulong weaknessUntilTick = 0)
+        ulong weaknessUntilTick = 0,
+        ulong reviveLockoutUntilTick = 0)
     {
         if (revision < uint.MaxValue)
         {
@@ -1023,7 +1038,8 @@ internal sealed class RaidReviveService
             eliminationReason,
             restoredLifeRatio,
             invulnerabilityUntilTick,
-            weaknessUntilTick));
+            weaknessUntilTick,
+            reviveLockoutUntilTick));
     }
 
     private IEnumerable<KeyValuePair<ParticipantId, ParticipantState>> SortedParticipants()

@@ -127,15 +127,9 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
             if (participant.CombatState == RaidParticipantCombatState.Downed
                 && (!hadPrevious || before.CombatState != RaidParticipantCombatState.Downed))
                 Say("ParticipantDowned", player.name);
-            else if (hadPrevious && before.CombatState == RaidParticipantCombatState.Downed
-                && participant.CombatState == RaidParticipantCombatState.Alive)
-                Say("ParticipantRevived", player.name, combat.RemainingReviveTokens);
-
-            if (participant.IsReviving && (!hadPrevious || !before.IsReviving))
-                Say("ReviveStarted", player.name);
-            else if (hadPrevious && before.IsReviving && !participant.IsReviving
-                && previous!.RemainingReviveTokens == combat.RemainingReviveTokens)
-                Say("ReviveCancelled", player.name);
+            else if (hadPrevious && participant.CombatState == RaidParticipantCombatState.Alive
+                && participant.ReviveLockoutUntilTick > before.ReviveLockoutUntilTick)
+                Say("ParticipantRevived", player.name);
         }
 
         if (previous is null || previous.Substate != combat.Substate

@@ -35,6 +35,7 @@ internal enum RaidReviveEventKind : byte
     ParticipantDisconnected = 6,
     ParticipantRejoined = 7,
     RaidFailed = 8,
+    InstantReviveAccepted = 9,
 }
 
 internal enum RaidReviveFailureReason : byte
@@ -72,7 +73,8 @@ internal readonly record struct RaidReviveEvent(
     RaidParticipantEliminationReason EliminationReason,
     float RestoredLifeRatio,
     ulong InvulnerabilityUntilTick,
-    ulong WeaknessUntilTick);
+    ulong WeaknessUntilTick,
+    ulong ReviveLockoutUntilTick = 0);
 
 internal readonly record struct RaidReviveCommandResult(
     RaidReviveCommandDisposition Disposition,

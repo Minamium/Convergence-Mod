@@ -113,14 +113,14 @@ internal sealed class FirstSeveranceEncounterPlan
     private static FirstSeveranceEncounterPlan CreateDefault()
     {
         var timing = new FirstSeveranceTimingPlan(
-            spawnIntroTicks: 180,
-            pylonTelegraphTicks: 60,
-            pylonActiveTicks: 600,
-            stackTelegraphTicks: 180,
-            spreadTelegraphTicks: 180,
-            normalExposureTicks: 720,
-            penalizedExposureTicks: 360,
-            resetTicks: 90);
+            spawnIntroTicks: 90,
+            pylonTelegraphTicks: 30,
+            pylonActiveTicks: 480,
+            stackTelegraphTicks: 135,
+            spreadTelegraphTicks: 135,
+            normalExposureTicks: 600,
+            penalizedExposureTicks: 300,
+            resetTicks: 30);
 
         IReadOnlyList<FirstSeveranceSubstateDefinition> substates = Array.AsReadOnly(
             new[]

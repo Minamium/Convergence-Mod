@@ -148,6 +148,8 @@ The current `FirstSeverance` immutable plan owns only SpawnIntro, PylonCheck, St
 
 ## Downed and Revive boundary
 
+First Severance now selects the explicit instant/unlimited settings in [ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md). Recipient lockout deadlines remain pure-domain authority and enter bounded client projections; a visible buff is not the predicate. The legacy channel/token settings remain a tested reusable configuration, not this feature's active rules.
+
 `RaidReviveService` is a pure authority state machine composed after the frozen Raid roster exists. It owns Downed deadlines, stable participant/binding validation, batched revive arbitration, exact channel leases/nonces, token reservation/consumption, reconnect grace, end-of-tick wipe evaluation, bounded snapshots/projections, and cleanup.
 
 Terraria adapters remain narrow:

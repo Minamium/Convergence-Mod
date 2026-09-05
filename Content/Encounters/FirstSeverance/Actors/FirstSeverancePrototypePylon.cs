@@ -7,7 +7,7 @@ namespace Convergence.Content.Encounters.FirstSeverance.Actors;
 
 public sealed class FirstSeverancePrototypePylon : ModNPC
 {
-    internal const int MaximumLife = 25_000;
+    internal const int MaximumLife = 1_000_000;
 
     public override string Texture =>
         "Convergence/Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem";
@@ -28,7 +28,7 @@ public sealed class FirstSeverancePrototypePylon : ModNPC
         NPC.height = 88;
         NPC.lifeMax = MaximumLife;
         NPC.damage = 0;
-        NPC.defense = 30;
+        NPC.defense = 120;
         NPC.knockBackResist = 0f;
         NPC.value = 0f;
         NPC.aiStyle = -1;
