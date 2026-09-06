@@ -25,7 +25,7 @@ internal static class FirstSeveranceAttackPatterns
         => phase == FirstSeveranceSubstate.PylonCheck
             ? FirstSeveranceLanceTuning.PrismTelegraphTicks + FirstSeveranceLanceTuning.PatternActiveTicks
             : step % 2 == 1
-                ? FirstSeveranceLanceTuning.StillnessTelegraphTicks + FirstSeveranceLanceTuning.PatternActiveTicks
+                ? FirstSeveranceLanceTuning.StillnessTelegraphTicks + FirstSeveranceCurtainComb.ActiveTicks
                 : FirstSeveranceLanceTuning.TelegraphTicks + FirstSeveranceLanceTuning.ChargeActiveTicks;
     internal static int PrismColorIndex(int step) => step < 4 ? step : 7 - step;
 

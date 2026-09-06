@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.19**, protocol **18**. Sanctuary Stack/Spread, longer Final warnings, natural-spawn suppression, flowing beam/crush materials and the Null Refrain victory weapon are implemented; HP is unchanged. Version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); exact mechanics/tuning belong to the linked specifications/code.
+Development **0.2.20**, protocol **19**. Center-out narrow Stillness curtains, clearer lattice/flood volumes, removed forecast arrows/Stack count text and Phase-II Spread-only mechanics are implemented. Longer Final warnings, natural-spawn suppression and Null Refrain remain; HP is unchanged. Version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); exact mechanics/tuning belong to the linked specifications/code.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -35,9 +35,9 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-[Current check record](evidence/2026-09-07-sanctuaries-reward-checks.json): domain contracts, actual Mod codec and successful packaging/source identity. [Pre-change playtests](evidence/2026-09-07-pre-0219-playtests.json) establish that solo0.2.18 reached Final and preserve distinct two/three-player observations. [Consolidation](evidence/2026-09-07-development-consolidation.json) and [0.2.17](evidence/2026-09-07-recovery-tempo-checks.json) evidence remain historical, not fresh0.2.19 playtests.
+[Current check record](evidence/2026-09-07-beam-readability-checks.json) owns the scoped domain/codec/build results and pending visual acceptance. The user accepted0.2.19's narrow Phase-I beams and rejected its broad/grid readability; the latest change targets those observations. [0.2.19 checks](evidence/2026-09-07-sanctuaries-reward-checks.json), [preceding playtests](evidence/2026-09-07-pre-0219-playtests.json), [consolidation](evidence/2026-09-07-development-consolidation.json) and [0.2.17 checks](evidence/2026-09-07-recovery-tempo-checks.json) remain historical evidence.
 
-**Not run / user-owned:** matching0.2.19 load, multiplayer sanctuary timing/positions, normal-spawn suppression/recovery, live beam/crush readability, extended Final audio timing, weapon drop/use/save behavior and end-to-new-Raid cleanup. No GUI, game or server was launched for this change. Prior Stack synchronization was user-confirmed; this does not prove the new overlapping mechanics. Compilation is not audiovisual, performance, latency or multiplayer proof. The manual self-hosted Mod-build CI runner remains unprovisioned.
+**Not run / user-owned:** matching0.2.20 multiplayer load, center-out forecast/hit alignment, lattice/flood danger-edge readability, retained Spread timing and interrupted-cast light/audio cleanup. No GUI, game or server was launched for this change. Compilation is not audiovisual, performance, latency or multiplayer proof. Previous weapon/Final/spawn checks not explicitly observed remain pending in their evidence record; no blanket retest is required. The manual self-hosted Mod-build CI runner remains unprovisioned.
 
 ## Constraints and deferred work
 
@@ -48,7 +48,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Next change
 
-User-owned0.2.19 Host & Play: check safe-window grouping/separation, warning-to-hit alignment, natural spawns, weapon drops/combo and ending-to-next-Raid cleanup. Discuss HP using [pre-change observations](evidence/2026-09-07-pre-0219-playtests.json); do not silently raise it. Consolidation is complete; the [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) separates completed work from production backlog.
+User-owned0.2.20 Host & Play: compare the center-out curtains, lattice and broad flood forecasts/releases, check the central safe column and Phase-II Spread without Stack, then confirm cancellation does not leave damaging-looking light. Discuss HP from distinct build/roster playtests; do not silently raise it. Consolidation is complete; the [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) separates completed work from production backlog.
 
 ## History
 

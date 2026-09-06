@@ -26,18 +26,18 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Lattice sanctuaries fit a full Stack circle and four separated player bodies")]
+    [DomainTest("Lattice preserves four Spread pockets and rejects retired Stack layouts")]
     private static void LatticeSanctuaries()
     {
-        for (byte pattern = 4; pattern < 12; pattern++)
+        for (byte pattern = 8; pattern < 12; pattern++)
         {
             var grid = new FirstSeveranceGridVolley(3, 100, pattern, 4000, 4000);
             var pockets = FirstSeveranceSafeWindows.Pockets(pattern, 4000, 4000);
-            AssertEqual(pattern < 8 ? 1 : 4, pockets.Count, "explicit bounded sanctuary layout");
+            AssertEqual(4, pockets.Count, "explicit bounded sanctuary layout");
             AssertEqual(true, grid.Rays.Count <= FirstSeveranceGridVolley.MaximumLines, "bounded post-cut segments");
             foreach (var pocket in pockets)
             {
-                float acceptance = pattern < 8 ? FirstSeveranceLanceTuning.StackRadius : 36;
+                const float acceptance = 36;
                 for (float angle = 0; angle < MathF.Tau; angle += .1f)
                     AssertEqual(false, grid.Intersects(grid.FireTick, pocket.X + MathF.Cos(angle) * acceptance,
                         pocket.Y + MathF.Sin(angle) * acceptance, 10, 21), "the entire visible acceptance circle is safe for a body");
@@ -52,9 +52,11 @@ internal static partial class Program
                 new[] { FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 4200, 3200) }), "no aimed core salvo through a sanctuary");
         }
         AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(3, 100, 12, 4000, 4000), "both sanctuary bits invalid");
+        for (byte retired = 4; retired < 8; retired++)
+            AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(3, 100, retired, 4000, 4000), "Stack layout retired");
         for (uint serial = 1; serial < 13; serial++)
         {
-            AssertEqual((byte)(4 | ((serial - 1) % 4)), FirstSeveranceSafeWindows.GridPattern(serial, 60), "first volley Stack");
+            AssertEqual((byte)((serial - 1) % 4), FirstSeveranceSafeWindows.GridPattern(serial, 60), "first volley now ordinary");
             AssertEqual((byte)((serial - 1) % 4), FirstSeveranceSafeWindows.GridPattern(serial, 162), "second volley ordinary");
             AssertEqual((byte)(8 | ((serial - 1) % 4)), FirstSeveranceSafeWindows.GridPattern(serial, 264), "third volley Spread");
         }
@@ -66,10 +68,17 @@ internal static partial class Program
         const ulong start = 1000;
         AssertEqual(false, FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.Lattice, 0, start, start - 1, 4000, 4000).HasValue, "future state harmless");
         AssertEqual(false, FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.PhaseTransition, 0, start, start + 132, 4000, 4000).HasValue, "no transition mechanic");
-        foreach (int local in new[] { 132, 336 })
+        for (ulong age = 0; age < 450; age++)
+        {
+            var task = FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.Lattice, 0, start, start + age, 4000, 4000);
+            AssertEqual(false, task is { Kind: FirstSeveranceSafeMechanic.Stack }, "Phase II never assigns Stack");
+        }
+        foreach (var action in FirstSeveranceChoreography.Unbound)
+            AssertEqual(false, action.State == FirstSeveranceSubstate.Stack, "no standalone Phase II Stack");
+        foreach (int local in new[] { 336 })
         {
             var window = FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.Lattice, 0, start, start + (ulong)local, 4000, 4000)!.Value;
-            ulong volleyAge = local == 132 ? 60ul : 264ul;
+            const ulong volleyAge = 264;
             var grid = new FirstSeveranceGridVolley(3, start + volleyAge,
                 FirstSeveranceSafeWindows.GridPattern(3, volleyAge), 4000, 4000);
             AssertEqual(window.ResolveTick, start + (ulong)local, "deadline derived from authority action epoch");

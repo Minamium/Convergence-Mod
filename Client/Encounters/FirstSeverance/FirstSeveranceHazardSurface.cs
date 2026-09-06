@@ -14,7 +14,7 @@ internal static class FirstSeveranceHazardSurface
         Vector2 origin, Vector2 direction, float length, float halfWidth, double age,
         float charge, float emission, float opacity, Color color, bool reduced)
     {
-        FirstSeveranceBeamMaterial.Draw(batch, accents, origin, direction, length, halfWidth,
+        FirstSeveranceBeamMaterial.DrawVolume(batch, accents, origin, direction, length, halfWidth,
             age, charge, emission, opacity, color, reduced);
     }
 }

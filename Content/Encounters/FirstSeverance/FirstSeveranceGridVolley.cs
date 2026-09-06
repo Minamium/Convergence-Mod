@@ -22,7 +22,7 @@ internal sealed class FirstSeveranceGridVolley
     internal FirstSeveranceGridVolley(uint serial, ulong startTick, byte pattern, float coreX, float groundY,
         IReadOnlyList<FirstSeveranceLanceRay>? coreBeams = null)
     {
-        if (serial == 0 || startTick == 0 || startTick > ulong.MaxValue - 128 || pattern > 11
+        if (serial == 0 || startTick == 0 || startTick > ulong.MaxValue - 128 || pattern > 11 || (pattern & 4) != 0
             || !float.IsFinite(coreX) || !float.IsFinite(groundY)
             || Math.Abs(coreX) > 1_000_000 || Math.Abs(groundY) > 1_000_000)
             throw new ArgumentException("Invalid lattice descriptor.");

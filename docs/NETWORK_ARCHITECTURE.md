@@ -23,9 +23,13 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v18
+## Current development protocol v19
 
-The existing grid `Pattern` byte uses low bits0–1 for layout, bit2 for a Stack sanctuary and bit3 for four Spread sanctuaries. Values0–11 are accepted; both sanctuary bits, unknown bits and sanctuary descriptors carrying Core salvos are rejected. Bounded geometry is derived after descriptor validation; no serialized ray list, new request, operation ID or saved Raid state is added. The accepted action epoch schedules server/SP mechanics and client telegraphs. Final timing changes also require matching peers. [The encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#safe-window-mechanics-and-victory-weapon--0219) owns behavior; [Status](STATUS.md) owns evidence.
+Packet IDs, field layouts and Fight ownership are unchanged. Stillness retains two locked footprint descriptors; [CurtainComb](../Content/Encounters/FirstSeverance/FirstSeveranceCurtainComb.cs) derives bounded center-out teeth and individual reveal/fire/end clocks. Authority hits and client presentation use the same helper; the volley/phase deadline includes the last tooth. No per-tooth actors or packets are added. Grid pattern bit2 is retired with Phase-II Stack: only0–3 and8–11 are accepted; Spread-pocket descriptors cannot carry Core salvos. All peers must update together because the derived geometry/timing and validation changed. [The encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#center-out-curtains-and-phase-ii-spread-only-override) owns behavior; [Status](STATUS.md) owns evidence.
+
+## Preceding development protocol v18
+
+The grid `Pattern` byte introduced low bits0–1 for layout, bit2 for a Stack sanctuary and bit3 for four Spread sanctuaries. v18 accepted0–11; v19 retires the Stack bit above. Bounded geometry derives from the validated descriptor and action epoch, without serialized grid rays, new requests or saved Raid state. v18 also changed Final's derived timing.
 
 ## Preceding development protocol v17
 

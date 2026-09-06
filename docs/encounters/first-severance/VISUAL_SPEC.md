@@ -26,7 +26,15 @@ The user requested giant scale and spectacle comparable in ambition to Avatar of
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
-## Flowing material and sanctuary readability — 0.2.19
+## Beam readability and clutter reduction
+
+Retain the accepted Phase-I narrow Prism emission, removing its traveling forecast chevrons. Grid/Core forecasts likewise use light rather than arrow stamps. Stack markers keep the one true acceptance circle and inward gathering guidance, but no ordinal/count fraction. No SAFE/Gather labels or thick boundary rails return.
+
+Stillness presents center-out ranks of tightly adjoining narrow lasers, with each rank's own forecast, pearl-hot release and dim cooling wake on the [shared curtain clock](../../../Content/Encounters/FirstSeverance/FirstSeveranceCurtainComb.cs). Only live teeth are damaging; do not illuminate an entire slab early. The lattice uses brighter fine pearl spines and saturated full-width auras, keeping its actual clipped safe pockets clear.
+
+Broad floods, half-field lasers and Core salvos use dense laminar plasma: fine wavering filaments over closely packed soft light layers. Texture masks end at the real footprint; internal flow stays inside it. The full future flood volume is strongly visible before deployment/growth, while live energy brightens toward white. The expanding front no longer spills a round halo into the surviving strip. Reduced Effects preserves danger coverage and reduces decorative segment density. Live quality, contrast, latency and frame cost still need user playtesting; static drawing changes do not prove them.
+
+## Retained flowing material and sanctuary readability — 0.2.19
 
 [Beam material](../../../Client/Encounters/FirstSeverance/FirstSeveranceBeamMaterial.cs) gives narrow forecasts/lasers, lattice/Core salvos, Final combs and broad volumes a common low-density footprint, drifting plasma bands and finer luminous filaments. Internal brightness/width fluctuate inside the authoritative corridor without moving its hitbox. Counts are bounded and Reduced Effects lowers them. Flow segments share one pixel texture to avoid per-segment texture switches; actual FPS remains unmeasured.
 

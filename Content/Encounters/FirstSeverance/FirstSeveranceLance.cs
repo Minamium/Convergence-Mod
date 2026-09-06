@@ -121,7 +121,8 @@ internal sealed class FirstSeveranceLanceVolley
     internal ulong LockTick => FireTick - FirstSeveranceLanceTuning.ChargeLockLeadTicks;
     internal int TelegraphTicks => Kind == FirstSeveranceAttackKind.PursuitPrism ? FirstSeveranceLanceTuning.PrismTelegraphTicks
         : Kind == FirstSeveranceAttackKind.Stillness ? FirstSeveranceLanceTuning.StillnessTelegraphTicks : FirstSeveranceLanceTuning.TelegraphTicks;
-    internal int ActiveTicks => Kind == FirstSeveranceAttackKind.ObservationLance
+    internal int ActiveTicks => Kind == FirstSeveranceAttackKind.Stillness ? FirstSeveranceCurtainComb.ActiveTicks
+        : Kind == FirstSeveranceAttackKind.ObservationLance
         ? FirstSeveranceLanceTuning.ActiveTicks : IsCharge ? FirstSeveranceLanceTuning.ChargeActiveTicks : FirstSeveranceLanceTuning.PatternActiveTicks;
     internal ulong FireTick => StartTick + (ulong)TelegraphTicks;
     internal ulong EndTick => FireTick + (ulong)ActiveTicks;

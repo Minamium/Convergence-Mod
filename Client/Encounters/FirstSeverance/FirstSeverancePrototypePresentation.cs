@@ -188,13 +188,6 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                 Vector2 anchor = safeStack && safeWindow is { } site ? new(site.X, site.Y) : new(combat.StackX, combat.StackY);
                 visuals.Accents.Marker(batch, anchor, FirstSeveranceLanceTuning.StackRadius, true,
                     visuals.RenderTick, mechanicResolve, telegraph, reduced);
-                if (!safeStack && combat.ActionIndex >= 0)
-                {
-                    int point = FirstSeveranceChoreography.For(combat.BossPhase)[combat.ActionIndex].ClockPoint;
-                    int count = combat.BossPhase == FirstSeveranceBossPhase.Final ? 8 : 4;
-                    Utils.DrawBorderString(batch, $"{point + 1} / {count}  >>", anchor - Main.screenPosition + new Vector2(0, 65),
-                        Color.LightCyan, .78f, .5f);
-                }
             }
             foreach (FirstSeveranceCombatParticipantProjection participant in combat.Participants)
             {

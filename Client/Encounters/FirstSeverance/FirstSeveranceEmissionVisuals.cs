@@ -138,6 +138,11 @@ internal sealed class FirstSeveranceEmissionVisuals
                 DrawCharge(batch, e, now, authorityTick, open, emission, warning, cooling, color, reduced);
                 continue;
             }
+            if (v.Kind == FirstSeveranceAttackKind.Stillness)
+            {
+                DrawCurtainComb(batch, e, now, authorityTick, color, reduced);
+                continue;
+            }
             for (int r = 0; r < v.Rays.Count; r++)
             {
                 var ray = v.Rays[r];
@@ -201,6 +206,41 @@ internal sealed class FirstSeveranceEmissionVisuals
                         FirstSeveranceAttackAccents.Neon(color, shock * .85f), new(.5f));
             }
         }
+    }
+
+    private void DrawCurtainComb(SpriteBatch batch, Emitter e, double now, ulong authorityTick,
+        Color color, bool reduced)
+    {
+        var v = e.Volley;
+        double clock = e.CancelledAt is { } cancelled ? Math.Min(now, cancelled) : now;
+        float cancelledFade = e.CancelledAt is { } ended ? 1 - Window(now, ended, ended + 18d) : 1;
+        foreach (var curtain in v.Rays)
+            for (int lane = 0; lane < FirstSeveranceCurtainComb.LaneCount; lane++)
+            {
+                ulong start = FirstSeveranceCurtainComb.RevealTick(v, lane);
+                ulong fire = FirstSeveranceCurtainComb.FireTick(v, lane);
+                ulong end = FirstSeveranceCurtainComb.EndTick(v, lane);
+                if (clock < start) continue;
+                var ray = FirstSeveranceCurtainComb.Ray(curtain, lane);
+                Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
+                bool live = e.CancelledAt is null && FirstSeveranceCurtainComb.IsLive(v, lane, authorityTick);
+                float charge = Window(clock, start, fire);
+                float release = Emission(clock, fire, end);
+                float born = .65f + .35f * Window(clock, start, start + 2d);
+                float power = (clock < fire ? born : live ? 1 : release * .10f) * cancelledFade;
+                Color tint = Color.Lerp(color, new Color(174, 152, 255), MathF.Abs(lane - FirstSeveranceCurtainComb.CenterLane) / 36f);
+                FirstSeveranceBeamMaterial.DrawTooth(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
+                    clock - start, charge, live ? release : 0, power, tint, reduced);
+                // Each tooth launches its own bounded luminous knot along the
+                // axis. Its narrow mask never blooms across the central safe gap.
+                float shock = Window(clock, fire, fire + 2d) * (1 - Window(clock, fire + 5d, end));
+                if (shock > 0 && e.CancelledAt is null)
+                {
+                    float travel = Math.Clamp((float)(clock - fire) * 180, 0, ray.Length - 100);
+                    Accents.Ribbon(batch, origin + direction * travel, direction, 100,
+                        ray.HalfWidth * 1.5f, Color.White, shock * .85f);
+                }
+            }
     }
 
     private void DrawCharge(SpriteBatch batch, Emitter e, double now, ulong authorityTick,
@@ -292,7 +332,6 @@ internal sealed class FirstSeveranceEmissionVisuals
     private void DrawWarning(SpriteBatch batch, Vector2 origin, Vector2 direction, float length,
         float halfWidth, double tick, FirstSeveranceLanceVolley v, Color color, float warning, bool reduced)
     {
-        Vector2 normal = new(-direction.Y, direction.X);
         float gather = Window(tick, v.StartTick, v.FireTick);
         if (halfWidth >= 120)
         {
@@ -302,17 +341,6 @@ internal sealed class FirstSeveranceEmissionVisuals
         }
         FirstSeveranceBeamMaterial.Draw(batch, Accents, origin, direction, length, halfWidth,
             tick - v.StartTick, gather, 0, warning, color, reduced);
-        for (float d = 100; d < length - 60; d += reduced ? 350 : 220)
-        {
-            float travel = Cycle(tick - v.StartTick, 28, d / length);
-            float fade = MathF.Sin(travel * MathF.PI) * warning;
-            Vector2 cursor = origin + direction * Math.Min(length - 18, d + travel * 95);
-            float chevron = Math.Min(halfWidth * .4f, 18);
-            Line(batch, cursor - direction * 14 + normal * chevron, cursor,
-                FirstSeveranceAttackAccents.Neon(color, fade * .85f), 2.2f);
-            Line(batch, cursor - direction * 14 - normal * chevron, cursor,
-                FirstSeveranceAttackAccents.Neon(color, fade * .85f), 2.2f);
-        }
     }
 
     private void Sprite(SpriteBatch batch, Rectangle source, Vector2 position, Vector2 size, float angle, Color color, Vector2 pivot)

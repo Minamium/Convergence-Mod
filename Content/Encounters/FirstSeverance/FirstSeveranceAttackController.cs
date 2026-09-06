@@ -202,7 +202,10 @@ internal sealed class FirstSeveranceAttackController
                 changed = true; // Publish the locked aim immediately, not on the 30-tick heartbeat.
                 string assignedSlots = lanceVolley.Kind == FirstSeveranceAttackKind.PursuitPrism
                     ? string.Join(",", targets.ConvertAll(player => player.whoAmI)) : target.whoAmI.ToString();
-                Log(tick, $"event=LanceTelegraph cast={lanceSerial} kind={lanceVolley.Kind} step={lanceVolley.Step + 1} target_slot={target.whoAmI} target_slots={assignedSlots} rays={lanceVolley.Rays.Count} fire_tick={lanceVolley.FireTick}");
+                string curtain = lanceVolley.Kind == FirstSeveranceAttackKind.Stillness
+                    ? $" pattern=CenterOut teeth={lanceVolley.Rays.Count * FirstSeveranceCurtainComb.LaneCount} last_fire_tick={lanceVolley.FireTick + FirstSeveranceCurtainComb.StaggerTicks} end_tick={lanceVolley.EndTick}"
+                    : string.Empty;
+                Log(tick, $"event=LanceTelegraph cast={lanceSerial} kind={lanceVolley.Kind} step={lanceVolley.Step + 1} target_slot={target.whoAmI} target_slots={assignedSlots} rays={lanceVolley.Rays.Count} fire_tick={lanceVolley.FireTick}{curtain}");
             }
         }
 
@@ -234,17 +237,22 @@ internal sealed class FirstSeveranceAttackController
             // Stack/Spread remain authority percentage mechanics, not dodgeable hits.
             if (lanceVolley.IsCharge && player.immune && player.immuneTime > 0)
                 continue;
-            for (int index = 0; index < lanceVolley.Rays.Count; index++)
+            bool hit = lanceVolley.Kind == FirstSeveranceAttackKind.Stillness
+                && FirstSeveranceCurtainComb.Intersects(lanceVolley, tick,
+                    player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f);
+            for (int index = 0; !hit && lanceVolley.Kind != FirstSeveranceAttackKind.Stillness
+                && index < lanceVolley.Rays.Count; index++)
             {
                 FirstSeveranceLanceRay ray = lanceVolley.RayAt(index, tick);
-                if (!ray.Intersects(player.Center.X, player.Center.Y, player.width * 0.5f, player.height * 0.5f))
-                    continue;
+                hit = ray.Intersects(player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f);
+            }
+            if (hit)
+            {
                 // One hit per step, including overlapping curtains or moving blades.
                 lanceHitParticipants.Add(member.ParticipantId);
                 recovery.ApplyRaidDamage(member, FirstSeveranceCombatRules.AttackDamage(
                     lanceVolley.Kind, player.statLifeMax2), tick, lanceVolley.Kind.ToString());
                 changed = true;
-                break;
             }
         }
         return changed;

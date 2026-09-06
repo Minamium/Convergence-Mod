@@ -6,10 +6,89 @@ using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceBossVisu
 
 namespace Convergence.Client.Encounters.FirstSeverance;
 
-// One client material for narrow lasers, combs and broad curtains. Flow changes
+// Client materials for narrow lasers, combs and broad curtains. Flow changes
 // radiance INSIDE the authoritative corridor, never the gameplay footprint.
 internal static class FirstSeveranceBeamMaterial
 {
+    // Bright, compact optics for dense comb teeth and the fine lattice. The
+    // entire footprint stays visible; the thin hot filament is not the hitbox.
+    internal static void DrawTooth(SpriteBatch batch, FirstSeveranceAttackAccents accents,
+        Vector2 origin, Vector2 direction, float length, float halfWidth, double clock,
+        float charge, float emission, float opacity, Color color, bool reduced)
+    {
+        if (Main.dedServ || opacity <= .001f || halfWidth <= 0 || length <= 0) return;
+        Vector2 normal = new(-direction.Y, direction.X), end = origin + direction * length;
+        float time = (float)(clock % 36000);
+        Line(batch, origin, end, new Color(10, 13, 28) * opacity * .46f, halfWidth * 2);
+        accents.Ribbon(batch, origin, direction, length, halfWidth * 2, color,
+            opacity * (.48f + emission * .45f));
+        // A fine pearl spine remains readable at zoom-out even before release.
+        Line(batch, origin, end, FirstSeveranceAttackAccents.Neon(color,
+            opacity * (.26f + charge * .25f + emission * .34f)), Math.Min(halfWidth, 2 + emission * 3));
+        int segments = Math.Clamp((int)(length / (reduced ? 180 : 100)), 2, reduced ? 20 : 32);
+        for (int strand = 0; strand < (reduced ? 1 : 2); strand++)
+        {
+            Vector2 last = origin;
+            for (int n = 1; n <= segments; n++)
+            {
+                float t = n / (float)segments;
+                float flow = MathF.Sin(t * 22 - time * (.10f + emission * .30f) + strand * MathF.PI);
+                Vector2 next = origin + direction * (length * t)
+                    + normal * (flow * halfWidth * .42f * MathF.Sin(MathF.PI * t));
+                float pulse = .72f + .28f * MathF.Sin(t * 14 - time * .22f + strand);
+                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(Color.Lerp(color, Color.White, .65f),
+                    opacity * pulse * (.32f + emission * .65f)), Math.Min(halfWidth * .32f, 1.3f + emission * 2.4f));
+                last = next;
+            }
+        }
+    }
+
+    // Dense, laminar plasma: continuous occupied volume under fine wavering
+    // threads, not a flat slab or a few large bands that resemble safe gaps.
+    // Cell masks stop exactly at the rectangle's sides; no boundary rails/bloom.
+    internal static void DrawVolume(SpriteBatch batch, FirstSeveranceAttackAccents accents,
+        Vector2 origin, Vector2 direction, float length, float halfWidth, double clock,
+        float charge, float emission, float opacity, Color color, bool reduced)
+    {
+        if (Main.dedServ || opacity <= .001f || halfWidth <= 0 || length <= 0) return;
+        Vector2 normal = new(-direction.Y, direction.X);
+        float time = (float)(clock % 36000);
+        int lanes = Math.Max(1, (int)MathF.Ceiling(halfWidth * 2 / 24));
+        float pitch = halfWidth * 2 / lanes;
+        // Texture draws first, then all pixel filaments, avoiding texture switches
+        // for each small segment. ReducedEffects keeps the same visible footprint.
+        Line(batch, origin, origin + direction * length, new Color(12, 16, 30) * opacity * .34f, halfWidth * 2);
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            float offset = -halfWidth + (lane + .5f) * pitch;
+            float wave = .80f + .20f * MathF.Sin(lane * .73f - time * .055f);
+            accents.Ribbon(batch, origin + normal * offset, direction, length, pitch, color,
+                opacity * wave * (.30f + charge * .10f + emission * .30f));
+        }
+        int segments = Math.Clamp((int)(length / (reduced ? 240 : 120)), 2, reduced ? 14 : 28);
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            float center = -halfWidth + (lane + .5f) * pitch;
+            Vector2 last = origin + normal * center;
+            for (int n = 1; n <= segments; n++)
+            {
+                float t = n / (float)segments;
+                float phase = t * 19 - time * (.065f + emission * .22f) + lane * 1.71f;
+                float wave = MathF.Sin(phase) + MathF.Sin(phase * 1.37f + time * .031f) * .35f;
+                float offset = center + wave * pitch * .16f * MathF.Sin(MathF.PI * t);
+                Vector2 next = origin + direction * (length * t) + normal * offset;
+                float shimmer = .78f + .22f * MathF.Sin(phase * .73f);
+                Color tint = Color.Lerp(color, Color.White, .18f + emission * .40f);
+                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(color,
+                    opacity * shimmer * (.18f + emission * .32f)), pitch * .38f);
+                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(tint,
+                    opacity * shimmer * (.38f + charge * .10f + emission * .46f)),
+                    Math.Min(pitch * .20f, 1.2f + emission * 2.1f));
+                last = next;
+            }
+        }
+    }
+
     internal static void Draw(SpriteBatch batch, FirstSeveranceAttackAccents accents,
         Vector2 origin, Vector2 direction, float length, float halfWidth, double clock,
         float charge, float emission, float opacity, Color color, bool reduced)

@@ -85,7 +85,7 @@ internal sealed class FirstSeveranceStageVisuals
         if (combat.Substate != FirstSeveranceSubstate.Lattice) { fadingGrid = null; return; }
         if (combat.GridVolley is { } received) fadingGrid = received;
         if (fadingGrid is not { } grid || tick >= grid.EndTick + 20d) return;
-        float born = Window(tick, grid.StartTick, grid.StartTick + 10d);
+        float born = .75f + .25f * Window(tick, grid.StartTick, grid.StartTick + 6d);
         float gather = Window(tick, grid.StartTick, grid.FireTick);
         float emission = Emission(tick, grid.FireTick, grid.EndTick);
         bool active = combat.GridVolley is not null && grid.IsFiring(authorityTick);
@@ -94,30 +94,20 @@ internal sealed class FirstSeveranceStageVisuals
         foreach (var ray in grid.Rays)
         {
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-            Vector2 end = origin + direction * ray.Length;
-            float power = warning ? born * (.22f + gather * .2f) : active ? .95f : emission * .12f;
-            FirstSeveranceBeamMaterial.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                tick - grid.StartTick, gather, active ? emission : 0, warning ? born : power, color, reduced);
-            if (warning)
-                for (float distance = 80; distance < ray.Length; distance += reduced ? 480 : 240)
-                {
-                    float flow = Cycle(tick, 35, distance / ray.Length);
-                    Vector2 head = origin + direction * (distance + flow * 45);
-                    Vector2 normal = new(-direction.Y, direction.X);
-                    Line(batch, head - direction * 9 + normal * 7, head, color * born, 3);
-                    Line(batch, head - direction * 9 - normal * 7, head, color * born, 3);
-                }
+            float power = warning ? born : active ? 1 : emission * .10f;
+            FirstSeveranceBeamMaterial.DrawTooth(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                tick - grid.StartTick, gather, active ? emission : 0, power, color, reduced);
         }
         Vector2 core = CoreCenter(combat);
         accents.CastSeal(batch, core, tick, grid.StartTick, grid.FireTick, color, reduced, 1.6f);
         foreach (var ray in grid.CoreBeams)
         {
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-            Vector2 end = origin + direction * ray.Length, normal = new(-direction.Y, direction.X);
+            Vector2 normal = new(-direction.Y, direction.X);
             Color hot = new(255, 87, 190), inner = new(225, 206, 255);
             float release = active ? Math.Max(.7f, emission) : warning ? 0 : emission * .10f;
             // Entire 144px corridor is foretold; the outer bloom is not a hitbox.
-            FirstSeveranceBeamMaterial.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+            FirstSeveranceBeamMaterial.DrawVolume(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
                 tick - grid.StartTick, gather, active ? emission : 0, warning ? born : release, hot, reduced);
             if (!warning)
             {
@@ -135,14 +125,6 @@ internal sealed class FirstSeveranceStageVisuals
                     }
                 }
             }
-            else
-                for (float distance = 150; distance < ray.Length; distance += reduced ? 560 : 280)
-                {
-                    float sweep = Cycle(tick - grid.StartTick, 30, distance / ray.Length);
-                    Vector2 tip = origin + direction * (distance + sweep * 95);
-                    Line(batch, tip - direction * 24 + normal * 19, tip, hot * born, 4);
-                    Line(batch, tip - direction * 24 - normal * 19, tip, hot * born, 4);
-                }
             accents.Halo(batch, origin, new Vector2(180 + gather * 150), inner,
                 (warning ? born * gather * .34f : release * .75f) * (reduced ? .4f : 1));
         }

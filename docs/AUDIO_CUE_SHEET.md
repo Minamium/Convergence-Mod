@@ -25,6 +25,8 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
 ## Safe-window and reward articulation — 0.2.19
 
+Current curtain override: the two center-out Stillness fans share four bounded LanceFire accents across their launch, with a modest rising pitch. They do not create a voice for every tooth or replay missed transients after a delayed snapshot. Existing masters, global mix and BGM are unchanged. Phase-II Stack cues disappear with its retired assignment; the remaining Spread cues retain their deadline identity.
+
 Sanctuary Stack/Spread summons and countdowns reuse existing masters once per accepted deadline; duplicate snapshots do not replay the summon. Fire follows the extended Final clock used by collision. Null Refrain reuses project-authored BladeUnsheathe/BladeSweep and PylonBreak/CoreSalvoFire at bounded positional volume, one impact cue per stroke and at most two instances per cue. No global slider or other-Mod mix changes.
 
 TerminalLiturgy is retimed from the same PCM24 source to cover the longer score plus the existing entry/tail, avoiding a premature return to its slow beginning. [Attribution](../Assets/ATTRIBUTION.md) owns export/recipe details. Other masters and mix settings are unchanged; the preceding duration is historical.

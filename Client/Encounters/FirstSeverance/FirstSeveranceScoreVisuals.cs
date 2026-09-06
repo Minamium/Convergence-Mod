@@ -210,7 +210,7 @@ internal sealed class FirstSeveranceScoreVisuals
         int pulse = (int)age / FirstSeveranceScoreGeometry.FloodInterval;
         double local = age - pulse * FirstSeveranceScoreGeometry.FloodInterval;
         if (pulse >= 3 || local >= FirstSeveranceScoreGeometry.FloodFadeTick) return;
-        float born = Window(local, 0, 9), charge = Window(local, 0, FirstSeveranceScoreGeometry.FloodFireTick);
+        float born = .75f + .25f * Window(local, 0, 6), charge = Window(local, 0, FirstSeveranceScoreGeometry.FloodFireTick);
         float growth = FirstSeveranceScoreGeometry.FloodGrowth(local);
         float emission = Window(local, FirstSeveranceScoreGeometry.FloodFireTick, FirstSeveranceScoreGeometry.FloodFireTick + 8)
             * (1 - Window(local, FirstSeveranceScoreGeometry.FloodEndTick, FirstSeveranceScoreGeometry.FloodFadeTick));
@@ -224,7 +224,7 @@ internal sealed class FirstSeveranceScoreVisuals
             // Foretell the final occupied volume and the genuine surviving pocket.
             // The bright layer then advances and widens using the exact authority curve.
             FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, full.Length, full.HalfWidth,
-                local, charge, 0, born * (1 - growth) * .44f, color, reduced);
+                local, charge, 0, born * (1 - growth) * .90f, color, reduced);
             if (local < FirstSeveranceScoreGeometry.FloodFireTick)
             {
                 accents.Ribbon(batch, origin, direction, full.Length, 24, color, born * (.40f + charge * .30f));
@@ -233,10 +233,13 @@ internal sealed class FirstSeveranceScoreVisuals
             else
             {
                 FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    local, 1, emission, emission, color, reduced);
+                    local, 1, emission, rays[band].Live ? 1 : emission * .12f, color, reduced);
 
-                accents.Halo(batch, origin + direction * ray.Length,
-                    new Vector2(80, Math.Max(30, ray.HalfWidth * 2)), color, emission * .65f);
+                // Keep the bright moving front inside the same volume; a round
+                // end-halo used to wash over the safe strip and obscure its edge.
+                float front = Math.Min(36, ray.Length);
+                accents.Ribbon(batch, origin + direction * (ray.Length - front), direction,
+                    front, ray.HalfWidth * 2, Color.White, emission * .65f);
             }
             accents.CastSeal(batch, origin + direction * 24, local, 0, FirstSeveranceScoreGeometry.FloodFireTick,
                 color, reduced, .75f + charge * .28f);

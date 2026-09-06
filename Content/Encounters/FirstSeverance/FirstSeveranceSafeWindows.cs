@@ -18,7 +18,6 @@ internal static class FirstSeveranceSafeWindows
         ulong age = tick - started;
         if (state == FirstSeveranceSubstate.Lattice)
         {
-            if (age < 140) return new(FirstSeveranceSafeMechanic.Stack, started, started + 132, x, groundY - 880);
             if (age >= 180 && age < 344) return new(FirstSeveranceSafeMechanic.Spread, started + 180, started + 336, x, groundY - 560);
         }
         if (state == FirstSeveranceSubstate.RemoteClaws && age < 600)
@@ -34,12 +33,11 @@ internal static class FirstSeveranceSafeWindows
     internal static byte GridPattern(uint serial, ulong actionAge)
     {
         int index = actionAge < 60 ? -1 : (int)((actionAge - 60) / FirstSeveranceGridVolley.CadenceTicks);
-        return (byte)(((serial - 1) % 4) | (index == 0 ? 4u : index == 2 ? 8u : 0u));
+        return (byte)(((serial - 1) % 4) | (index == 2 ? 8u : 0u));
     }
 
     internal static IReadOnlyList<(float X, float Y, float Half)> Pockets(byte pattern, float x, float groundY)
     {
-        if ((pattern & 12) == 4) return new[] { (x, groundY - 880, 148f) };
         if ((pattern & 12) == 8) return new[]
         {
             (x - 820, groundY - 890, 64f), (x + 820, groundY - 890, 64f),

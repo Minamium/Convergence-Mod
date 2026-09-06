@@ -23,6 +23,7 @@ internal sealed class FirstSeveranceFeedback
     private readonly List<Vector2> impacts = new(4);
     private readonly List<ReLogic.Utilities.SlotId> voices = new(24);
     private uint chargeSerial, lockSerial, fireSerial;
+    private int curtainBeat = -1;
     private uint gridChargeSerial, gridFireSerial;
     private bool shellBroken;
     private int countdown = -1, resultTicks;
@@ -57,6 +58,7 @@ internal sealed class FirstSeveranceFeedback
         {
             StopVoices();
             chargeSerial = lockSerial = fireSerial = 0;
+            curtainBeat = -1;
             gridChargeSerial = gridFireSerial = 0;
             shellBroken = false;
             countdown = -1;
@@ -142,14 +144,28 @@ internal sealed class FirstSeveranceFeedback
             if (chargeSerial != volley.Serial)
             {
                 chargeSerial = volley.Serial;
+                curtainBeat = -1;
                 if (tick >= volley.StartTick && tick < volley.FireTick)
                     Play(volley.IsCharge ? "EnergyGather" : "LanceCharge", .98f);
             }
             if (fireSerial != volley.Serial && tick >= volley.FireTick)
             {
                 fireSerial = volley.Serial;
-                if (volley.IsFiring(tick))
+                if (volley.IsFiring(tick) && volley.Kind != FirstSeveranceAttackKind.Stillness)
                     Play(volley.IsCharge ? "EnergyCharge" : "LanceFire", .96f);
+            }
+            if (volley.Kind == FirstSeveranceAttackKind.Stillness && tick >= volley.FireTick)
+            {
+                int beat = (int)Math.Min((tick - volley.FireTick) / 4, 3ul);
+                if (beat > curtainBeat)
+                {
+                    curtainBeat = beat;
+                    // Four restrained transients for both curtains together, not
+                    // fifty competing voices. Late snapshots never catch up a burst.
+                    ulong cueTick = volley.FireTick + (ulong)(beat * 4);
+                    if (tick < cueTick + 3 && volley.IsFiring(tick))
+                        Play("LanceFire", .64f, -.08f + beat * .045f);
+                }
             }
             if (volley.IsCharge && lockSerial != volley.Serial && tick >= volley.LockTick)
             {
@@ -283,6 +299,7 @@ internal sealed class FirstSeveranceFeedback
         resultTicks = 0;
         scoreImpactTicks = 0;
         chargeSerial = lockSerial = fireSerial = 0;
+        curtainBeat = -1;
         gridChargeSerial = gridFireSerial = 0;
         shellBroken = false;
         countdown = -1;

@@ -25,11 +25,17 @@ related_docs:
 
 # First Severance Encounter Specification
 
+## Center-out curtains and Phase-II Spread-only override
+
+Phase-I Stillness uses dense narrow teeth instead of two instantly filled slabs. The same locked side footprints are partitioned by [CurtainComb](../../../Content/Encounters/FirstSeverance/FirstSeveranceCurtainComb.cs): each side reveals from its center outward, and fires in that order after each tooth's complete warning. Adjacent teeth leave no player-sized safe gaps; the central safe column is unchanged. Shared geometry/epochs control both authority collision and client light. One fixed beam-damage hit per participant per cast remains the cap, not one hit per tooth. The scheduler budgets the last tooth without changing the step cadence or category rests. No new actors, target tracking, HP adjustment or client damage claim is introduced.
+
+Phase II has **no Stack**, either as a grid overlay or standalone action. Its first grid is ordinary; the Spread pocket/resolve on the third grid and the between-action Spreads remain. Phase-I, Phase-III and Final Stack rules are unchanged. This supersedes the former first-grid Stack assignment below and in historical evidence.
+
 ## Safe-window mechanics and victory weapon — 0.2.19
 
 These changes preserve HP, beam damage, Stack/Spread failure rules and ordered phase gates. The [sanctuary schedule](../../../Content/Encounters/FirstSeverance/FirstSeveranceSafeWindows.cs) owns exact timing/placement:
 
-- Phase II: the first lattice volley leaves a complete Stack sanctuary above the Boss; the third leaves four widely separated Spread pockets. Indicators resolve **while the matching grid is live**. Intervening ordinary volleys retain aimed Core salvos from serial three; sanctuary volleys omit those salvos. Actual clipped rays and rendering share the same pockets, sized for whole player bodies.
+- Phase II: the third lattice volley leaves four widely separated Spread pockets. Indicators resolve **while the matching grid is live**. Ordinary volleys retain aimed Core salvos from serial three; Spread-pocket volleys omit those salvos. Actual clipped rays and rendering share the same pockets, sized for whole player bodies. The former first-grid Stack is retired by the current override.
 - Phase III expanding floods: Stack → Spread → Stack resolves during the three fully expanded safe-strip holds. Stack strips fit the complete acceptance circle plus a player body. The next pulse changes the strip only after the current hold; [score geometry](../../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs) owns current widths/hold/cooling deadlines.
 - Final slicing combs gain exactly15 harmless ticks per forecast. Their action budgets extend so all six shots retain the original live/recovery duration, changing lanes and accelerating progression. Stack/Spread/bullet pacing is unchanged.
 - Server/SP suppresses ordinary natural NPC/critter spawning world-wide during the active Fight via `EditSpawnRate` (`maxSpawns=0`, effectively infinite interval) and an empty `EditSpawnPool`. Existing NPCs/town residents are not deleted. Explicit scripted/statue/other-Mod spawns may bypass these hooks. Cleanup revokes the runtime predicate; no saved toggle.

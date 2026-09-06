@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-07",
+  "build": "0.2.20",
+  "protocol": 19,
+  "scope": "Center-out Stillness combs, clearer lattice/broad beam materials, forecast arrow and Stack ordinal removal, Phase-II Spread only. HP and fixed damage unchanged.",
+  "source": {
+    "base_commit": "d93c34baec7fa6080b1e66ee1982874622571739",
+    "branch": "main",
+    "worktree": "dirty at build; identified by ignored local source manifest",
+    "source_manifest_sha256": "64b537fed1dadac4158d3492cd9e105f20d48316225789e42a5d48c3253be47c",
+    "build_record": ".local/builds/20260906T201823126013Z/record.json",
+    "source_changed_during_build": false,
+    "after_build": "Only verification evidence and generated documentation catalog updated; compiled code/assets unchanged."
+  },
+  "artifact": {
+    "name": "Convergence.tmod",
+    "bytes": 33021010,
+    "sha256": "7fb59cfab25393c05bdca888bdafe437b77e9bc914f1b726ba322c577d359f28",
+    "dll_sha256": "8babd2cf84f6bb8b6636b81619241b3519231966e3cf4f9a50955a7caceac174"
+  },
+  "checks": {
+    "domain": {
+      "result": "passed across full run and scoped rerun",
+      "cases_validated": 99,
+      "detail": "98 passed initially; the old four-step budget assertion264 was updated280 to include the last staggered tooth, then that one case passed. Unchanged passing cases were not rerun."
+    },
+    "build": {
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "command": "python tools/dev.py build",
+      "development_solo": true
+    },
+    "compiled_codec": {
+      "result": "passed",
+      "round_trips": 324,
+      "rejected_malformed": 50,
+      "command": "pwsh -NoProfile -NonInteractive -File tools/check-codec.ps1 -AssemblyPath bin/Debug/net8.0/Convergence.dll"
+    },
+    "repository": {
+      "result": "passed; catalog59 documents, repository356 files, YAML10 files",
+      "command": "python .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog"
+    }
+  },
+  "runtime": {
+    "result": "not_run; user-owned GUI/Host & Play",
+    "remaining": [
+      "All peers load0.2.20; center-out forecast and release align with hit ticks, full central body corridor stays safe, no false gaps between adjacent teeth.",
+      "Lattice/flood forecast extent, growing live width and cooling are distinguishable; no arrows or Stack count text; Phase-II Spread remains with no Stack.",
+      "Two/three-player overlapping effects, Reduced Effects, camera zoom and latency; frame cost and subjective visual/audio quality remain unmeasured.",
+      "Defeat/cancel clears current light and sounds before a new Fight without a catch-up burst."
+    ]
+  },
+  "retained": "Existing source/art/audio and previous packages preserved. No game/server startup, save changes, HP tuning or new third-party assets."
+}
