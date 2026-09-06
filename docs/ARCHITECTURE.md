@@ -76,6 +76,18 @@ FirstSeveranceRegistrationSystem
 
 ## Generic encounter foundation
 
+First Severance's combat orchestrator owns the single authority tick, terminal selection and ordered exact-Fight cleanup. Its private collaborators own state, not generic lifecycle transitions:
+
+| Component | Responsibility |
+|---|---|
+| `FirstSeverancePrototypeCombatRuntime` | Core/session guard, tick order, Stack/Spread, loop transition, terminal and cleanup ordering |
+| `FirstSeveranceAttackController` | Cast scheduling, lance/grid/score descriptors and hit ledgers |
+| `FirstSeveranceRecoveryController` | Bounded intents, revive boundary, player health/control projections and recipient checks |
+| `FirstSeveranceActorSet` | Spawned NPC handles/token, damage gates, life observations and owned cleanup |
+| `FirstSeveranceCombatTelemetry` | Passive window accounting from supplied state/actor observations; cannot advance the loop |
+
+The root remains the cleanup participant registered with the Fight; collaborators belong to that instance, including partial startup failures. Recovery commits once after damage. Telemetry completes before actors are removed; Raid protection clears before terminal player-death handling. This is responsibility extraction, not partial-file splitting or a generic mechanic framework. Pure rules and shared geometry remain Terraria-independent.
+
 Common currently owns:
 
 - `FightId`, `ParticipantId`, and tile-space value objects;

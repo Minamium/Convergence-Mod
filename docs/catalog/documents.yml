@@ -688,7 +688,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: cdb2580654d8a1d04f72a0dcfb2ab6a51655f7a962e8638f3e911caa0d8f02a2
+  content_sha256: a4976023d666f5b8a5993a428675729c142d0f9a292ded68735bc95ec8f93882
   document_type: governance
   status: accepted
   owners:
