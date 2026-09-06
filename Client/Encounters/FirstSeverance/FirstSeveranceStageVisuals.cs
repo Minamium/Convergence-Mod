@@ -96,10 +96,8 @@ internal sealed class FirstSeveranceStageVisuals
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
             Vector2 end = origin + direction * ray.Length;
             float power = warning ? born * (.22f + gather * .2f) : active ? .95f : emission * .12f;
-            accents.Ribbon(batch, origin, direction, ray.Length, ray.HalfWidth * 2, color, power);
-            Line(batch, origin, end, Color.Black * (warning ? born * .9f : 0), 11);
-            Line(batch, origin, end, color * (warning ? born * .95f : power), warning ? 5 : 10);
-            Line(batch, origin, end, Color.White * (warning ? born * gather * .6f : power), warning ? 1.8f : 4);
+            FirstSeveranceBeamMaterial.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                tick - grid.StartTick, gather, active ? emission : 0, warning ? born : power, color, reduced);
             if (warning)
                 for (float distance = 80; distance < ray.Length; distance += reduced ? 480 : 240)
                 {
@@ -119,13 +117,11 @@ internal sealed class FirstSeveranceStageVisuals
             Color hot = new(255, 87, 190), inner = new(225, 206, 255);
             float release = active ? Math.Max(.7f, emission) : warning ? 0 : emission * .10f;
             // Entire 144px corridor is foretold; the outer bloom is not a hitbox.
-            accents.Ribbon(batch, origin, direction, ray.Length, ray.HalfWidth * 2, hot,
-                warning ? born * (.22f + gather * .22f) : release);
-            Line(batch, origin, end, inner * (warning ? born * .9f : release), warning ? 6 : 38);
+            FirstSeveranceBeamMaterial.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                tick - grid.StartTick, gather, active ? emission : 0, warning ? born : release, hot, reduced);
             if (!warning)
             {
-                accents.Ribbon(batch, origin, direction, ray.Length, 205, hot, release * (reduced ? .12f : .35f));
-                Line(batch, origin, end, Color.White * release, 12);
+
                 for (int strand = -1; strand <= 1; strand += 2)
                 {
                     Vector2 last = origin;

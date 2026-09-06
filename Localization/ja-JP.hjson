@@ -1,6 +1,10 @@
 Mods: {
   Convergence: {
     Items: {
+      NullRefrain: {
+        DisplayName: 断唱 — Null Refrain
+        Tooltip: "沈黙を断つ、黒曜の刃\n左右の斬撃から、三撃目で大きく断ち切る\n第一断絶を最後まで生き延びた者への報酬"
+      }
       FoundationCoreItem: {
         DisplayName: ファウンデーション・コア
         Tooltip: "第一断絶の候補アリーナを固定する大型封印装置\n足元の発光コンソールを右クリック\n開発ビルド：全員Readyで実験用Raidを開始"
@@ -10,6 +14,7 @@ Mods: {
         Tooltip: "Downした味方の8タイル以内で使用すると、HP35％で即時蘇生\n消費・共有トークンなし。移動中や空中でも使用可能\n蘇生された本人は60秒間、再蘇生を受けられない"
       }
     }
+    Projectiles.NullRefrainSlash.DisplayName: 断唱
     NPCs: {
       FirstSeverancePrototypeBoss.DisplayName: 無響の唱導者
       FirstSeverancePrototypePylon.DisplayName: 断絶のパイロン

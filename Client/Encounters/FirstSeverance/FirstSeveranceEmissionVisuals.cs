@@ -160,10 +160,9 @@ internal sealed class FirstSeveranceEmissionVisuals
                 float width = ray.HalfWidth * (0.08f + .92f * emission);
                 // Saturated plasma skin, white-hot inner spine, soft gradient
                 // strictly INSIDE the authority corridor, even on broad curtains.
-                Accents.Ribbon(batch, origin, direction, ray.Length, ray.HalfWidth * 2, color, light * .9f);
-                Accents.Ribbon(batch, origin, direction, ray.Length, ray.HalfWidth * .95f, color, light);
-                Accents.Ribbon(batch, origin, direction, ray.Length, Math.Min(30, ray.HalfWidth * .46f), Color.White, light);
-                Line(batch, origin, end, Color.White * light * .92f, active ? 4.5f : 1.2f);
+                if (ray.HalfWidth < 120)
+                    FirstSeveranceBeamMaterial.Draw(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
+                        now - v.StartTick, 1, emission, light, color, reduced);
                 // Flowing, tapered strands; the same converging fibers survive
                 // the launch and accelerate down the barrel. No static stretch.
                 int strands = reduced ? 3 : 7;
@@ -294,7 +293,6 @@ internal sealed class FirstSeveranceEmissionVisuals
         float halfWidth, double tick, FirstSeveranceLanceVolley v, Color color, float warning, bool reduced)
     {
         Vector2 normal = new(-direction.Y, direction.X);
-        float imminent = PreRelease(tick, v.FireTick, Math.Min(12, v.TelegraphTicks));
         float gather = Window(tick, v.StartTick, v.FireTick);
         if (halfWidth >= 120)
         {
@@ -302,11 +300,8 @@ internal sealed class FirstSeveranceEmissionVisuals
                 tick - v.StartTick, gather, 0, warning, color, reduced);
             return;
         }
-        Accents.Ribbon(batch, origin, direction, length, halfWidth * 2, color, warning * (.24f + imminent * .16f));
-        // A luminous center and full-width aura form together; no outer rails.
-        Line(batch, origin, origin + direction * length, Color.Black * warning * .65f, 8);
-        Line(batch, origin, origin + direction * length, color * warning * (.7f + imminent * .3f), 5.5f);
-        Line(batch, origin, origin + direction * length, Color.White * warning * (.2f + imminent * .5f), 1.6f);
+        FirstSeveranceBeamMaterial.Draw(batch, Accents, origin, direction, length, halfWidth,
+            tick - v.StartTick, gather, 0, warning, color, reduced);
         for (float d = 100; d < length - 60; d += reduced ? 350 : 220)
         {
             float travel = Cycle(tick - v.StartTick, 28, d / length);

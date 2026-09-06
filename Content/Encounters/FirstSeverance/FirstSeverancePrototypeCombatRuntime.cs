@@ -42,6 +42,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
     private FirstSeveranceMechanicResult lastMechanicResult;
     private uint mechanicRevision;
+    private ulong lastAuthorityTick, lastSafeResolveTick;
+    private int rewardsAttempted;
     private bool isAttached;
     private bool isStarted;
     private bool isCleaned;
@@ -142,6 +144,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
         isAttached = true;
         isStarted = true;
+        lastAuthorityTick = authorityTick;
         recovery.GrantPrototypeReviveKits();
         recovery.SynchronizeRevivePlayers(authorityTick);
         telemetry.Start(loop.State, authorityTick);
@@ -192,6 +195,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return End(FirstSeveranceTerminalCause.FoundationCoreLost);
         }
 
+        lastAuthorityTick = context.AuthorityTick;
         recovery.ApplyConnectionChanges(context.AuthorityTick);
         foreach (FirstSeveranceRosterMember member in roster.Members)
         {
@@ -205,7 +209,16 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return End(FirstSeveranceTerminalCause.UserCancelled);
 
         FirstSeveranceLoopState before = loop.State;
+        uint oldMechanicRevision = mechanicRevision;
         ResolveMechanicIfDue(before, context.AuthorityTick);
+        var safeWindow = FirstSeveranceSafeWindows.At(before.Substate, before.ActionIndex,
+            before.SubstateEnteredTick, context.AuthorityTick, groundCenter.X, groundCenter.Y);
+        if (safeWindow is { } sanctuary && context.AuthorityTick >= sanctuary.ResolveTick
+            && lastSafeResolveTick != sanctuary.ResolveTick)
+        {
+            lastSafeResolveTick = sanctuary.ResolveTick;
+            ResolveMechanicIfDue(before, context.AuthorityTick, sanctuary);
+        }
 
         if (before.Substate == FirstSeveranceSubstate.PylonCheck)
             telemetry.ObservePylonProgress(context.AuthorityTick,
@@ -284,7 +297,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         actors.UpdateDamageWindows(after, context.AuthorityTick, loop.DamageFloor);
         actors.SynchronizeBossLife(after);
 
-        bool combatObservable = windowChanged
+        bool combatObservable = mechanicRevision != oldMechanicRevision || windowChanged
             || before.RemainingPylons != after.RemainingPylons
             || before.ZeroBasedLoopIndex != after.ZeroBasedLoopIndex
             || context.AuthorityTick % 30 == 0;
@@ -305,6 +318,10 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         var participants = recovery.CreateParticipants(reviveSnapshot);
 
         FirstSeveranceLoopState state = loop.State;
+        var sanctuary = FirstSeveranceSafeWindows.At(state.Substate, state.ActionIndex,
+            state.SubstateEnteredTick, lastAuthorityTick, groundCenter.X, groundCenter.Y);
+        Vector2 stackCenter = sanctuary is { Kind: FirstSeveranceSafeMechanic.Stack } site
+            ? new(site.X, site.Y) : StackWorldCenter;
         projection = new FirstSeveranceCombatProjection(
             encounterSequence,
             fightId,
@@ -316,8 +333,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             state.BossMaximumLife,
             reviveSnapshot.RemainingTokenCount,
             reviveSnapshot.Revision,
-            StackWorldCenter.X,
-            StackWorldCenter.Y,
+            stackCenter.X,
+            stackCenter.Y,
             CoreWorldCenter.X,
             CoreWorldCenter.Y,
             lastMechanicResult,
@@ -345,6 +362,27 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         Log(Main.GameUpdateCount, $"event=CombatEnded reason={context.EndReason} cause={terminalCause} phase={loop?.State.Substate} overload={loop?.State.Overload}");
         telemetry.FinishDamageProgress(Main.GameUpdateCount, terminalCause);
 
+        if (context.EndReason == EncounterEndReason.Victory)
+        {
+            // The actor remains at technical 1 HP in Final. Reward the accepted
+            // terminal, never NPC.CheckDead/HP zero. Mark each attempt before calling
+            // external item hooks so cleanup retries cannot duplicate a partial grant.
+            while (rewardsAttempted < roster.Count)
+            {
+                int index = rewardsAttempted++;
+                try
+                {
+                    int item = Item.NewItem(new EntitySource_Misc("Convergence:FirstSeveranceVictory"),
+                        new Rectangle((int)groundCenter.X + index * 36 - roster.Count * 18,
+                            (int)groundCenter.Y - 180, 32, 32), ModContent.ItemType<Rewards.NullRefrain>());
+                    Log(lastAuthorityTick, $"event={(item >= 0 && item < Main.maxItems ? "VictoryRewardDropped" : "VictoryRewardFailed")} reward=NullRefrain index={index + 1} total={roster.Count}");
+                }
+                catch (Exception error)
+                {
+                    Log(lastAuthorityTick, $"event=VictoryRewardFailed reward=NullRefrain index={index + 1} error={error.GetType().Name}");
+                }
+            }
+        }
         actors.Cleanup(context);
         recovery.Cleanup(context);
         attacks.Cleanup();
@@ -359,18 +397,23 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
     private void ResolveMechanicIfDue(
         in FirstSeveranceLoopState state,
-        ulong authorityTick)
+        ulong authorityTick, FirstSeveranceSafeWindow? sanctuary = null)
     {
-        if (authorityTick < state.ResolveTick)
+        if (authorityTick < (sanctuary?.ResolveTick ?? state.ResolveTick))
         {
             return;
         }
 
-        if (state.Substate == FirstSeveranceSubstate.Stack)
+        FirstSeveranceSubstate mechanic = sanctuary is { } paired
+            ? paired.Kind == FirstSeveranceSafeMechanic.Stack ? FirstSeveranceSubstate.Stack : FirstSeveranceSubstate.Spread
+            : state.Substate;
+        if (sanctuary is { } window)
+            Log(authorityTick, $"event=SafeWindowResolved phase={state.Substate} mechanic={window.Kind} start_tick={window.StartTick} resolve_tick={window.ResolveTick}");
+        if (mechanic == FirstSeveranceSubstate.Stack)
         {
             int required = roster.Count;
             int stacked = 0;
-            Vector2 center = StackWorldCenter;
+            Vector2 center = sanctuary is { } site ? new(site.X, site.Y) : StackWorldCenter;
             float radiusSquared = StackRadiusPixels * StackRadiusPixels;
             for (int index = 0; index < roster.Count; index++)
             {
@@ -386,7 +429,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             SetMechanicResult(stacked >= required
                 ? FirstSeveranceMechanicResult.StackPassed
                 : FirstSeveranceMechanicResult.StackFailed);
-            Log(authorityTick, FormattableString.Invariant($"event=StackResolved anchor=ClockSite action={state.ActionIndex} x={center.X:F1} y={center.Y:F1} present={stacked} required={required} missing={required - stacked} radius={StackRadiusPixels}"));
+            Log(authorityTick, FormattableString.Invariant($"event=StackResolved anchor={(sanctuary.HasValue ? "Sanctuary" : "ClockSite")} action={state.ActionIndex} x={center.X:F1} y={center.Y:F1} present={stacked} required={required} missing={required - stacked} radius={StackRadiusPixels}"));
             foreach (var member in roster.Members)
                 if (recovery.TryGetPlayer(member, out Player measured))
                     Log(authorityTick, FormattableString.Invariant($"event=StackAttendance participant={member.ParticipantId.Value} slot={member.ServerWhoAmI} alive={recovery.IsAlive(member.ParticipantId)} x={measured.Center.X:F1} y={measured.Center.Y:F1} vx={measured.velocity.X:F2} vy={measured.velocity.Y:F2} left={measured.controlLeft} right={measured.controlRight} jump={measured.controlJump} distance={Vector2.Distance(measured.Center, center):F1} inside={Vector2.DistanceSquared(measured.Center, center) <= radiusSquared}"));
@@ -397,7 +440,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                     recovery.ApplyRaidDamage(member, FirstSeveranceCombatRules.StackDamage(
                         player.statLifeMax2, required, stacked), authorityTick, "Stack");
         }
-        else if (state.Substate == FirstSeveranceSubstate.Spread)
+        else if (mechanic == FirstSeveranceSubstate.Spread)
         {
             var alive = new List<Player>(roster.Count);
             for (int index = 0; index < roster.Count; index++)

@@ -26,7 +26,15 @@ The user requested giant scale and spectacle comparable in ambition to Avatar of
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
-## Continuous borderless danger materials — 0.2.17
+## Flowing material and sanctuary readability — 0.2.19
+
+[Beam material](../../../Client/Encounters/FirstSeverance/FirstSeveranceBeamMaterial.cs) gives narrow forecasts/lasers, lattice/Core salvos, Final combs and broad volumes a common low-density footprint, drifting plasma bands and finer luminous filaments. Internal brightness/width fluctuate inside the authoritative corridor without moving its hitbox. Counts are bounded and Reduced Effects lowers them. Flow segments share one pixel texture to avoid per-segment texture switches; actual FPS remains unmeasured.
+
+Crush warnings form a translucent pressure membrane: bowed stress filaments pull inward as hands brace/close, followed by concentrated compression light. No boxed outline, repeated white arrows or world-space instructional text. Stack retains its true acceptance circle/inward guidance. Safe pockets/strips use negative space and directional cues, never SAFE/安全地帯/Gather labels. Their dimensions derive from collision geometry.
+
+Null Refrain's original high-resolution sprite is independently scaled for inventory/world/held use. Anticipated left/right cuts lead to the extended third stroke, with gold/cyan afterimages, moving arc filaments and a brief impact burst. Local shake obeys shake-off/Reduced Effects; no new overlay or input state. [Attribution](../../../Assets/ATTRIBUTION.md) records provenance. Live appearance, feel, hit alignment and mix remain user-owned acceptance.
+
+## Preceding continuous borderless danger materials — 0.2.17
 
 Remove the paired heavy black/color/white edge rails from every beam forecast and emission, including Stillness curtains, observation/Prism lanes, charge bodies, grid/Core salvos, score combs, half-field/crush surfaces and rotating swords. Preserve the full-volume tint/aura, luminous center, inward-moving cues and internal fibers; do not reduce a broad danger volume to an ambiguous hairline. Filled boundaries and feathered light replace boxed outlines. Stack's accepted single valid circle and Spread circles are not beam rails and remain unchanged.
 

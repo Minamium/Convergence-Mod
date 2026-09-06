@@ -45,7 +45,7 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: e6ebe3c1a2b14d736ddbb01aed097a172295b22ff7bc75f93e6925e8aab252c5
+  content_sha256: c367881905dfced5df9835267d8235e327fa96cfd109aaac810f8dab8800f71b
   document_type: policy
   status: accepted
   owners:
@@ -563,7 +563,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 665970f28bc57b253234058627b0e93c4a917dc952155a2e46bca80e31e1991c
+  content_sha256: 870ec3b6ebc76ae672a26e941bdd88d9886e74a7e35cecf1deeb500830bf6ca1
   document_type: spec
   status: accepted
   owners:
@@ -588,7 +588,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: 2a34c24621134ce83b2710903239dc561a341a40a4ceefdc6aa1dc6854ab4cbc
+  content_sha256: 237abbdd774963f4cd6ca51504abbec4881023b9af1ba74134b0b1ece830c3dc
   document_type: spec
   status: provisional
   owners:
@@ -779,7 +779,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: 627b0a619138ff04fad65acd669e779379e255ce1e9403d1818728b59067c99e
+  content_sha256: d4ee20b49e18bcdd39532b3d6bd87f7d6eb2c796be1cf9d23b0a626267e06a4b
   document_type: spec
   status: provisional
   owners:
@@ -916,7 +916,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: cff73323fc27907111ededed05feace3fed692379ee91835baefbcce580de5d6
+  content_sha256: 58dbec14215f5dc1a3ddb721238d66c7375d848a2515b370b191b20cea99377e
   document_type: governance
   status: accepted
   owners:
@@ -961,7 +961,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 5f810539387b4d3460469d1a185505a6f569883245d14ccf453a3ad41eefeaa4
+  content_sha256: 74c8f76bfd74398907637824804af075b0688f4082bf0008626e629b9d6d1ddc
   document_type: status
   status: accepted
   owners:

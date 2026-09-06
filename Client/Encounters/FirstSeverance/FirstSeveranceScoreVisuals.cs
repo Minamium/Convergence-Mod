@@ -53,23 +53,13 @@ internal sealed class FirstSeveranceScoreVisuals
                 : slicer ? Window(local, slicerFire - 2, slicerFire) * (1 - Window(local, slicerEnd, slicerCadence)) * .2f : 0;
             if (half || crush)
             {
-                FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    age, item.Charge, emission, born * fade, color, reduced);
                 if (crush)
-                {
-                    Vector2 center = (origin + end) * .5f;
-                    float impact = Window(age, 161, 164) * (1 - Window(age, 164, 201));
-                    accents.Halo(batch, center, new Vector2(800 * (1 - impact * .7f), 580), color, impact * .8f);
-                    for (int side = -1; side <= 1; side += 2)
-                        for (int i = 0; i < 3; i++)
-                        {
-                            float travel = Cycle(age, 45, i / 3d);
-                            Vector2 tip = center + new Vector2(side * (65 + (1 - travel) * 240), 0);
-                            float alpha = MathF.Sin(travel * MathF.PI) * born * fade;
-                            Line(batch, tip + new Vector2(side * 32, -32), tip, Color.White * alpha, 4);
-                            Line(batch, tip + new Vector2(side * 32, 32), tip, Color.White * alpha, 4);
-                        }
-                }
+                    FirstSeveranceBeamMaterial.CrushMembrane(batch, accents, (origin + end) * .5f,
+                        ray.Length * .5f, ray.HalfWidth, age, item.Charge, live ? 1 : 0,
+                        born * fade, color, reduced);
+                else
+                    FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                        age, item.Charge, emission, born * fade, color, reduced);
                 continue;
             }
             if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
@@ -78,7 +68,8 @@ internal sealed class FirstSeveranceScoreVisuals
                 continue;
             }
             float power = live ? .92f : (.20f + item.Charge * .30f) * born * fade;
-            accents.Ribbon(batch, origin, direction, ray.Length, ray.HalfWidth * 2, color, power);
+            FirstSeveranceBeamMaterial.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                local, item.Charge, live ? 1 : 0, power, color, reduced);
             if (slicer)
             {
                 // Form a lens at each field edge before it unfolds into a full comb tooth.
@@ -98,7 +89,6 @@ internal sealed class FirstSeveranceScoreVisuals
                         }
                     }
             }
-            Line(batch, origin, end, Color.White * (live ? .98f : .48f * item.Charge * fade), live ? 13 : 3);
             accents.Halo(batch, origin, new Vector2(100 + item.Charge * 90), color, power);
         }
         if (combat.Substate == FirstSeveranceSubstate.FinalBullets)
@@ -244,8 +234,7 @@ internal sealed class FirstSeveranceScoreVisuals
             {
                 FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
                     local, 1, emission, emission, color, reduced);
-                accents.Ribbon(batch, origin, direction, ray.Length, Math.Max(8, ray.HalfWidth * .72f),
-                    new Color(231, 247, 255), emission * .82f);
+
                 accents.Halo(batch, origin + direction * ray.Length,
                     new Vector2(80, Math.Max(30, ray.HalfWidth * 2)), color, emission * .65f);
             }
@@ -261,7 +250,6 @@ internal sealed class FirstSeveranceScoreVisuals
             Line(batch, tip + new Vector2(side * 16, -12), tip, new Color(200, 252, 237) * fade, 2.5f);
             Line(batch, tip + new Vector2(side * 16, 12), tip, new Color(200, 252, 237) * fade, 2.5f);
         }
-        Utils.DrawBorderString(batch, Terraria.Localization.Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.FloodSafeGuide"),
-            safe - Main.screenPosition, new Color(200, 252, 237) * fade, .75f, .5f, .5f);
+
     }
 }

@@ -43,19 +43,7 @@ related_docs:
 
 This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calamity-independence.md); it is not a permanent commitment to a hard Calamity dependency.
 
-現在の`build.txt`:
-
-```text
-displayName = Convergence (Development Build)
-author = Minamium
-version = 0.2.17
-modReferences = CalamityMod@2.2.4
-side = Both
-playableOnPreview = false
-hideCode = false
-hideResources = false
-includeSource = false
-```
+現在のパッケージ宣言は[build.txt](../build.txt)、実装・検証状態は[Status](STATUS.md)を正本とする。この互換性表に開発版番号を重複記載しない。
 
 Source/asset licenseが未決定のため、accidental `.tmod` source distributionを避ける目的で`includeSource = false`に固定する。ライセンス決定後に配布方針と合わせて再審査する。
 

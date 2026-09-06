@@ -55,7 +55,7 @@ internal static partial class Program
                     var rays = FirstSeveranceScoreGeometry.Rays(state, step, pulse * 200 + local, 4000, 4000);
                     foreach (var item in rays)
                     {
-                        AssertEqual(local >= 48 && local < 142, item.Live, "exact harmless anticipation and decay");
+                        AssertEqual(local >= 48 && local < FirstSeveranceScoreGeometry.FloodEndTick, item.Live, "exact harmless anticipation and decay");
                         foreach (float x in new[] { 2730f, 4000f, 5270f })
                             AssertEqual(false, FirstSeveranceScoreGeometry.RayHits(state, item, pulse * 200 + local,
                                 x, safeY, 10, 21), "whole body safe throughout deployment and widening");
@@ -91,10 +91,11 @@ internal static partial class Program
         var score = FirstSeveranceChoreography.Final;
         for (int station = 1; station < 8; station++)
             for (int action = 0; action < 3; action++)
-                AssertEqual(true, score[station * 3 + action].Ticks < score[(station - 1) * 3 + action].Ticks,
-                    "each category accelerates with terminal progress");
-        AssertEqual(40, FirstSeveranceScoreGeometry.SlicerCadence(2), "initial beam cadence");
-        AssertEqual(28, FirstSeveranceScoreGeometry.SlicerCadence(23), "final beam cadence");
+                if (action < 2 || station >= 2)
+                    AssertEqual(true, score[station * 3 + action].Ticks < score[(station - (action == 2 ? 2 : 1)) * 3 + action].Ticks,
+                        "each category accelerates with terminal progress (compare slicers to slicers)");
+        AssertEqual(55, FirstSeveranceScoreGeometry.SlicerCadence(2), "initial beam cadence includes 15 warning ticks");
+        AssertEqual(43, FirstSeveranceScoreGeometry.SlicerCadence(23), "final beam cadence includes 15 warning ticks");
         AssertEqual(true, FirstSeveranceScoreGeometry.BulletSpeed(20) > FirstSeveranceScoreGeometry.BulletSpeed(2), "bullet motion accelerates too");
         foreach (int step in new[] { 5, 11, 17, 23 })
         {

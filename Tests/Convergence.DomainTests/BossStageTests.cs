@@ -110,7 +110,7 @@ internal static partial class Program
             AssertEqual(false, grid.Intersects(180, x, y, 10, 21), "end tick harmless");
             AssertEqual(false, grid.Intersects(160, x + 80, y + 80, 10, 21), "whole body fits clear cell");
         }
-        AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(1, 100, 4, 4000, 4000), "unknown pattern");
+        AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(1, 100, 12, 4000, 4000), "unknown pattern");
         AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(1, ulong.MaxValue, 0, 4000, 4000), "overflow");
         AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(1, 100, 0, float.NaN, 4000), "nonfinite field");
     }

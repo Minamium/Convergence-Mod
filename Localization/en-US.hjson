@@ -1,6 +1,16 @@
 Mods: {
 	Convergence: {
 		Items: {
+			NullRefrain: {
+				DisplayName: Null Refrain
+				Tooltip:
+					'''
+					An obsidian edge that cuts the silence
+					Alternating slashes culminate in an empowered third stroke
+					Awarded to the survivors of First Severance
+					'''
+			}
+
 			FoundationCoreItem: {
 				DisplayName: Foundation Core
 				Tooltip:
@@ -21,6 +31,8 @@ Mods: {
 					'''
 			}
 		}
+
+		Projectiles.NullRefrainSlash.DisplayName: Null Refrain
 
 		Buffs: {
 			RecoveryLockoutDebuff: {

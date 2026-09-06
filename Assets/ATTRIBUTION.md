@@ -2,6 +2,24 @@
 
 ## Records
 
+### Sanctuary build — 0.2.19 / 2026-09-07
+
+- Runtime file: `Assets/Textures/Items/NullRefrain.png`
+- Asset ID: null-refrain-0219-2026-09-07
+- Asset type: weapon texture
+- Creator: project-directed original design with OpenAI ImageGen assistance
+- Creation/acquisition date: 2026-09-07
+- Source type: generated
+- Source work and URL: original obsidian/platinum weapon brief; no third-party reference/extracted asset
+- Tool/model/version: built-in OpenAI ImageGen; backend model not surfaced
+- Human modifications: none; unchanged2172x724 RGBA export, client-side scale/pose/filaments only
+- License and redistribution terms: project asset license undecided; development only, no public release approved
+- Required attribution: no external requirement specified; retain provenance
+- Reviewer and review date: Codex visual selection and alpha inspection,2026-09-07; human in-game review pending
+- Notes: original retained externally; exact prompt/original/runtime mapping in ignored playtest weapon-provenance.md. No raster processing.
+
+The existing exact `Assets/Music/TerminalLiturgy.ogg` record retains its source/arrangement/performance/library terms. The external audio0219 parameterized recipe retimes the original DistantLiturgy PCM24 master to the longer Final score, preserving1.00→1.55× acceleration, prior gain/peak knee,4s entry and2.5s tail. Export81.067s,48kHz stereo Vorbis; finite decoded samples, peak0.9068 and4× peak0.9074. Predecessor, PCM24 audition, source/recipe/export hashes and dependency versions remain external. This accommodates timing, not new music or a louder mix; listening remains pending.
+
 ### Mix and temporal articulation revision — 0.2.17 / 2026-09-07
 
 The exact records below retain their creator, source/library license and unresolved project-release terms. This revision supersedes their older master/duration notes only; no new third-party source or raster edit is introduced. Agent-authored external audio0217/render.py uses the previously documented NumPy/SciPy/SoundFile DSP toolchain. Codex checked finite decode, stereo/mono layout and four-times oversampled peaks on2026-09-07; human listening/in-game review remains pending. External PCM24 auditions are retained, with the0.80× SFX playback mix applied to the previews only.

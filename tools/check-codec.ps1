@@ -168,8 +168,8 @@ foreach ($rosterCount in 1, 2, 3, 4) {
         $id = New-Record ($ids + 'ParticipantId') @([byte]$i)
         $members.SetValue((New-Record ($feature + 'FirstSeveranceCombatParticipantProjection') @($id, [int]$i, $true, $alive, $false, [ulong]0, [ulong]0, [uint]1, [int]500, [float]4000, [float]3120, [ulong]0, [ulong]0, [ulong]3600, $false)), $i)
     }
-    foreach ($pattern in -2, -1, 0, 1, 2, 3) {
-        $counts = if ($pattern -ge 0) { @(0, 1, $rosterCount) } else { @(0) }
+    foreach ($pattern in -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11) {
+        $counts = if ($pattern -ge 0 -and $pattern -le 3) { @(0, 1, $rosterCount) } else { @(0) }
         foreach ($coreCount in $counts) {
         $phaseName = if ($pattern -eq -2) { 'PhaseTransition' } else { 'Lattice' }
         $phase = Enum-Value ($feature + 'FirstSeveranceSubstate') $phaseName
@@ -215,13 +215,14 @@ foreach ($rosterCount in 1, 2, 3, 4) {
         if ($pattern -eq 0 -and $rosterCount -eq 2 -and $coreCount -eq $rosterCount) {
             $original = $stream.ToArray()
             $phaseOffset = 5 + 55 + 62 * $rosterCount + 1 # null Lance byte
-            foreach ($case in 'phase', 'epoch', 'grid_bool', 'pattern', 'serial', 'grid_start', 'stack_nan', 'grid_truncated', 'core_count', 'core_early', 'core_nan', 'core_nonunit', 'core_roster') {
+            foreach ($case in 'phase', 'epoch', 'grid_bool', 'pattern', 'sanctuary_core', 'serial', 'grid_start', 'stack_nan', 'grid_truncated', 'core_count', 'core_early', 'core_nan', 'core_nonunit', 'core_roster') {
                 [byte[]]$bad = $original.Clone()
                 switch ($case) {
                     'phase' { $bad[$phaseOffset] = 255 }
                     'epoch' { [BitConverter]::GetBytes([ulong]0).CopyTo($bad, $phaseOffset + 1) }
                     'grid_bool' { $bad[$phaseOffset + 19] = 2 }
-                    'pattern' { $bad[$phaseOffset + 32] = 4 }
+                    'pattern' { $bad[$phaseOffset + 32] = 12 }
+                    'sanctuary_core' { $bad[$phaseOffset + 32] = 4 }
                     'serial' { [BitConverter]::GetBytes([uint]0).CopyTo($bad, $phaseOffset + 20) }
                     'grid_start' { [BitConverter]::GetBytes([ulong]999).CopyTo($bad, $phaseOffset + 24) }
                     'stack_nan' { [BitConverter]::GetBytes([float]::NaN).CopyTo($bad, 5 + 33) }

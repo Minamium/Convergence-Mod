@@ -176,13 +176,19 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             visuals.Draw(batch, combat, state.EstimatedAuthorityTick);
             bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
             feedback.Draw(batch, reduced);
-            int telegraph = (int)Math.Min(3600UL, combat.ResolveTick - combat.ActionStartedTick);
-            if (combat.Substate == FirstSeveranceSubstate.Stack)
+            var safeWindow = FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex,
+                combat.ActionStartedTick, state.EstimatedAuthorityTick, combat.CoreX, combat.CoreY);
+            if (safeWindow is { } expired && state.EstimatedAuthorityTick >= expired.ResolveTick) safeWindow = null;
+            bool safeStack = safeWindow is { Kind: FirstSeveranceSafeMechanic.Stack };
+            bool safeSpread = safeWindow is { Kind: FirstSeveranceSafeMechanic.Spread };
+            ulong mechanicResolve = safeWindow?.ResolveTick ?? combat.ResolveTick;
+            int telegraph = safeWindow is { } warning ? (int)(warning.ResolveTick - warning.StartTick) : (int)Math.Min(3600UL, combat.ResolveTick - combat.ActionStartedTick);
+            if (combat.Substate == FirstSeveranceSubstate.Stack || safeStack)
             {
-                Vector2 anchor = new(combat.StackX, combat.StackY);
+                Vector2 anchor = safeStack && safeWindow is { } site ? new(site.X, site.Y) : new(combat.StackX, combat.StackY);
                 visuals.Accents.Marker(batch, anchor, FirstSeveranceLanceTuning.StackRadius, true,
-                    visuals.RenderTick, combat.ResolveTick, telegraph, reduced);
-                if (combat.ActionIndex >= 0)
+                    visuals.RenderTick, mechanicResolve, telegraph, reduced);
+                if (!safeStack && combat.ActionIndex >= 0)
                 {
                     int point = FirstSeveranceChoreography.For(combat.BossPhase)[combat.ActionIndex].ClockPoint;
                     int count = combat.BossPhase == FirstSeveranceBossPhase.Final ? 8 : 4;
@@ -208,13 +214,13 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                         player.Center - Main.screenPosition - new Vector2(0, 45),
                         Color.LightGoldenrodYellow, 0.75f, 0.5f);
                 }
-                if (combat.Substate == FirstSeveranceSubstate.Spread
+                if ((combat.Substate == FirstSeveranceSubstate.Spread || safeSpread)
                         && participant.CombatState == RaidParticipantCombatState.Alive)
                 {
                     bool stack = false;
                     float radius = stack ? FirstSeveranceLanceTuning.StackRadius : FirstSeveranceLanceTuning.SpreadRadius;
                     visuals.Accents.Marker(batch, player.Center, radius, stack, visuals.RenderTick,
-                        combat.ResolveTick, telegraph, reduced);
+                        mechanicResolve, telegraph, reduced);
                 }
                 if (participant.IsReviving)
                     DrawRing(batch, player.Center, 35f, Color.LightGreen);
@@ -243,14 +249,6 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         }
         if (!combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local))
             return;
-        if (combat.Substate == FirstSeveranceSubstate.Stack)
-        {
-            Vector2 anchor = WorldUi(new(combat.StackX, combat.StackY));
-            float width = Main.screenWidth / Main.UIScale, height = Main.screenHeight / Main.UIScale;
-            Vector2 guide = Vector2.Clamp(anchor, new(80, 150), new(Math.Max(80, width - 80), Math.Max(150, height - 100)));
-            Utils.DrawBorderString(spriteBatch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.FixedStackGuide"),
-                guide - new Vector2(0, 28), FirstSeveranceAttackAccents.Cyan, .9f, .5f);
-        }
         if (combat.GridVolley is { } grid)
             Utils.DrawBorderString(spriteBatch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.GridInstruction"),
                 new Vector2(Main.screenWidth / Main.UIScale / 2, 135), grid.IsFiring(state.EstimatedAuthorityTick) ? Color.White : Color.LightCyan, .85f, .5f);

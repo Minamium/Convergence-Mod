@@ -23,7 +23,13 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
-## Rebalanced mix and continuous flood articulation — 0.2.17
+## Safe-window and reward articulation — 0.2.19
+
+Sanctuary Stack/Spread summons and countdowns reuse existing masters once per accepted deadline; duplicate snapshots do not replay the summon. Fire follows the extended Final clock used by collision. Null Refrain reuses project-authored BladeUnsheathe/BladeSweep and PylonBreak/CoreSalvoFire at bounded positional volume, one impact cue per stroke and at most two instances per cue. No global slider or other-Mod mix changes.
+
+TerminalLiturgy is retimed from the same PCM24 source to cover the longer score plus the existing entry/tail, avoiding a premature return to its slow beginning. [Attribution](../Assets/ATTRIBUTION.md) owns export/recipe details. Other masters and mix settings are unchanged; the preceding duration is historical.
+
+## Preceding rebalanced mix and continuous flood articulation — 0.2.17
 
 Apply0.80× to the existing feature SFX playback gains (−1.94dB), retaining their relative warning/result balance, limited voices and sound-slider control. Re-render all four original music assets from existing PCM24 masters with1.25× gain (+1.94dB) and a gentle stereo-linked peak knee; no global music/sound slider, other Mod track or game setting is changed. This is a measured gain revision, not a perceived-loudness guarantee.
 

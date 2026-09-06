@@ -17,6 +17,7 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 // local positions or sound playback. No packets, world actors or gameplay writes.
 internal sealed class FirstSeveranceFeedback
 {
+    private ulong safeCueResolve;
     private const string Root = "Convergence/Assets/Sounds/FirstSeverance/";
     private FirstSeveranceCombatProjection? previous;
     private readonly List<Vector2> impacts = new(4);
@@ -59,6 +60,7 @@ internal sealed class FirstSeveranceFeedback
             gridChargeSerial = gridFireSerial = 0;
             shellBroken = false;
             countdown = -1;
+            safeCueResolve = 0;
             impacts.Clear();
             resultTicks = 0;
             scoreImpactTicks = 0;
@@ -118,9 +120,19 @@ internal sealed class FirstSeveranceFeedback
             else if (down) Play("Downed", .72f);
         }
         ulong tick = state.EstimatedAuthorityTick;
-        if (combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread && tick < combat.ResolveTick)
+        var safe = FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex,
+            combat.ActionStartedTick, tick, combat.CoreX, combat.CoreY);
+        if (safe is { } companion && tick < companion.ResolveTick && safeCueResolve != companion.ResolveTick)
         {
-            int beat = (int)((combat.ResolveTick - tick + 29) / 30);
+            safeCueResolve = companion.ResolveTick;
+            countdown = -1;
+            if (!fresh || tick < companion.StartTick + 30)
+                Play(companion.Kind == FirstSeveranceSafeMechanic.Stack ? "StackSummon" : "SpreadSummon", .98f);
+        }
+        ulong deadline = safe?.ResolveTick ?? combat.ResolveTick;
+        if ((safe is not null || combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread) && tick < deadline)
+        {
+            int beat = (int)((deadline - tick + 29) / 30);
             if (beat <= 3 && beat != countdown)
                 Play("MechanicTick", .95f);
             countdown = beat;

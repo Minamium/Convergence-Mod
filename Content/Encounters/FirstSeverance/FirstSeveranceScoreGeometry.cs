@@ -18,7 +18,7 @@ internal static class FirstSeveranceScoreGeometry
     internal const float CrushHalfWidth = 360, CrushHalfHeight = 300;
     internal const int SlicerPulses = 6;
     internal const int FloodInterval = 200, FloodFireTick = 48, FloodDeployTicks = 12,
-        FloodGrowTicks = 42, FloodEndTick = 142, FloodFadeTick = 180;
+        FloodGrowTicks = 42, FloodEndTick = 182, FloodFadeTick = 196;
     internal const float FloodSafeHalfHeight = 96;
     internal const int BulletWaves = 5, BulletsPerWave = 24;
     internal static bool HasHazards(FirstSeveranceSubstate state) => state is FirstSeveranceSubstate.RotatingBlade
@@ -34,8 +34,10 @@ internal static class FirstSeveranceScoreGeometry
     internal static int BladeTurn(double age) => Math.Min(FirstSeveranceChoreography.BladeTurns - 1, (int)BladeTravel(age));
     internal static float BladeExtension(double age) => Smooth((float)((age - 144) / 12))
         * (1 - Smooth((float)((age - FirstSeveranceChoreography.BladeEnd - 12) / 45)));
-    internal static int SlicerCadence(int step) => 40 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
-    internal static int SlicerFire(int step) => (int)Math.Ceiling(SlicerCadence(step) * .7);
+    internal const int SlicerExtraWarningTicks = 15;
+    private static int OriginalSlicerCadence(int step) => 40 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
+    internal static int SlicerCadence(int step) => OriginalSlicerCadence(step) + SlicerExtraWarningTicks;
+    internal static int SlicerFire(int step) => (int)Math.Ceiling(OriginalSlicerCadence(step) * .7) + SlicerExtraWarningTicks;
     internal static int SlicerEnd(int step) => SlicerCadence(step) - 4;
     internal static float SlicerOffset(int step, int pulse) => ((pulse / 2 * 53 + Math.Max(0, step / 3) * 37) % 160) - 80;
     internal static int BulletStartTick(int step, int wave) => 36 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 8)
@@ -44,11 +46,15 @@ internal static class FirstSeveranceScoreGeometry
     internal static float FloodSafeY(int step, int pulse) => ((pulse + (step >= 4 ? 1 : 0)) % 3) switch
         { 0 => -260, 1 => 200, _ => -40 };
 
+    internal static float FloodSafeHalfHeightFor(int pulse)
+        => pulse % 2 == 0 ? FirstSeveranceLanceTuning.StackRadius + 36 : FloodSafeHalfHeight;
+
     internal static FirstSeveranceLanceRay FloodBand(int step, int pulse, int band, float groundX, float groundY)
     {
         float safeY = FloodSafeY(step, pulse);
-        float top = band == 0 ? -FieldHalfHeight : safeY + FloodSafeHalfHeight;
-        float bottom = band == 0 ? safeY - FloodSafeHalfHeight : FieldHalfHeight;
+        float safeHalf = FloodSafeHalfHeightFor(pulse);
+        float top = band == 0 ? -FieldHalfHeight : safeY + safeHalf;
+        float bottom = band == 0 ? safeY - safeHalf : FieldHalfHeight;
         int side = pulse % 2 == 0 ? -1 : 1;
         return new(groundX + side * FieldHalfWidth, groundY - FieldHalfHeight + (top + bottom) * .5f,
             -side, 0, FieldHalfWidth * 2, (bottom - top) * .5f);

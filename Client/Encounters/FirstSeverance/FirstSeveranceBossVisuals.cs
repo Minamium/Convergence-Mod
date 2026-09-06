@@ -281,7 +281,7 @@ internal sealed class FirstSeveranceBossVisuals
         bool flooding = combat.Substate == FirstSeveranceSubstate.RemoteClaws;
         double floodAge = age % FirstSeveranceScoreGeometry.FloodInterval;
         int emittingSide = (int)(age / FirstSeveranceScoreGeometry.FloodInterval) % 2 == 0 ? -1 : 1;
-        float grasp = flooding ? Window(floodAge, 0, 42) * (1 - Window(floodAge, 142, 198)) : .18f;
+        float grasp = flooding ? Window(floodAge, 0, 42) * (1 - Window(floodAge, FirstSeveranceScoreGeometry.FloodEndTick, 198)) : .18f;
         float recoil = flooding ? Window(floodAge, 48, 60) * (1 - Window(floodAge, 70, 132)) : 0;
         float flood = combat.Substate == FirstSeveranceSubstate.HalfField ? Window(age, 0, 180) * (1 - Window(age, 240, 298)) : 0;
         bool crushing = combat.Substate == FirstSeveranceSubstate.RemoteCrush;
@@ -331,7 +331,7 @@ internal sealed class FirstSeveranceBossVisuals
                 Vector2 tip = new(finger.Ray.X, finger.Ray.Y);
                 int side = finger.Ray.DirectionX < 0 ? 1 : -1;
                 Vector2 root = Wrist(side), prior = root;
-                float material = appear * Window(floodAge, 0, 10) * (1 - Window(floodAge, 142, 180));
+                float material = appear * Window(floodAge, 0, 10) * (1 - Window(floodAge, FirstSeveranceScoreGeometry.FloodEndTick, FirstSeveranceScoreGeometry.FloodFadeTick));
                 for (int n = 1; n <= 20; n++)
                 {
                     float t = n / 20f;

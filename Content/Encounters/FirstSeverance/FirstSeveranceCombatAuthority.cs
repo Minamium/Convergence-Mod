@@ -12,6 +12,8 @@ internal static class FirstSeveranceCombatAuthority
 {
     private static FirstSeverancePrototypeCombatRuntime? current;
 
+    internal static bool IsActive => Main.netMode != NetmodeID.MultiplayerClient && current is not null;
+
     internal static bool TryAttach(FirstSeverancePrototypeCombatRuntime runtime)
     {
         if (current is not null && !ReferenceEquals(current, runtime))

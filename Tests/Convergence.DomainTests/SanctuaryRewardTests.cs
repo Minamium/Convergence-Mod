@@ -1,0 +1,120 @@
+using System;
+using Convergence.Content.Encounters.FirstSeverance;
+using Convergence.Content.Encounters.FirstSeverance.Rewards;
+
+namespace Convergence.DomainTests;
+
+internal static partial class Program
+{
+    [DomainTest("Final slicers add exactly 15 harmless ticks without losing a pulse")]
+    private static void SlicerWarningExtension()
+    {
+        foreach (int step in new[] { 5, 11, 17, 23 })
+        {
+            int oldCadence = 40 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
+            int oldFire = (int)Math.Ceiling(oldCadence * .7);
+            AssertEqual(oldFire + 15, FirstSeveranceScoreGeometry.SlicerFire(step), "exact quarter-second grace");
+            AssertEqual(oldCadence - 4 - oldFire,
+                FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "unchanged live interval");
+            for (int pulse = 0; pulse < 6; pulse++)
+            {
+                int fire = pulse * FirstSeveranceScoreGeometry.SlicerCadence(step) + FirstSeveranceScoreGeometry.SlicerFire(step);
+                foreach (var ray in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer, step, fire - 1, 4000, 4000))
+                    AssertEqual(false, ray.Live, "last warning frame harmless");
+                AssertEqual(true, fire < FirstSeveranceChoreography.Final[step].Ticks, "sixth shot not truncated");
+            }
+        }
+    }
+
+    [DomainTest("Lattice sanctuaries fit a full Stack circle and four separated player bodies")]
+    private static void LatticeSanctuaries()
+    {
+        for (byte pattern = 4; pattern < 12; pattern++)
+        {
+            var grid = new FirstSeveranceGridVolley(3, 100, pattern, 4000, 4000);
+            var pockets = FirstSeveranceSafeWindows.Pockets(pattern, 4000, 4000);
+            AssertEqual(pattern < 8 ? 1 : 4, pockets.Count, "explicit bounded sanctuary layout");
+            AssertEqual(true, grid.Rays.Count <= FirstSeveranceGridVolley.MaximumLines, "bounded post-cut segments");
+            foreach (var pocket in pockets)
+            {
+                float acceptance = pattern < 8 ? FirstSeveranceLanceTuning.StackRadius : 36;
+                for (float angle = 0; angle < MathF.Tau; angle += .1f)
+                    AssertEqual(false, grid.Intersects(grid.FireTick, pocket.X + MathF.Cos(angle) * acceptance,
+                        pocket.Y + MathF.Sin(angle) * acceptance, 10, 21), "the entire visible acceptance circle is safe for a body");
+            }
+            for (int a = 0; a < pockets.Count; a++)
+                for (int b = a + 1; b < pockets.Count; b++)
+                    AssertEqual(true, MathF.Sqrt(MathF.Pow(pockets[a].X - pockets[b].X, 2)
+                        + MathF.Pow(pockets[a].Y - pockets[b].Y, 2)) >= FirstSeveranceLanceTuning.SpreadSeparation,
+                        "four spread destinations do not overlap at their centers");
+            AssertEqual(true, grid.Intersects(grid.FireTick, grid.Rays[0].X, grid.Rays[0].Y, 10, 21), "hazards remain outside sanctuaries");
+            AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(3, 100, pattern, 4000, 4000,
+                new[] { FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 4200, 3200) }), "no aimed core salvo through a sanctuary");
+        }
+        AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(3, 100, 12, 4000, 4000), "both sanctuary bits invalid");
+        for (uint serial = 1; serial < 13; serial++)
+        {
+            AssertEqual((byte)(4 | ((serial - 1) % 4)), FirstSeveranceSafeWindows.GridPattern(serial, 60), "first volley Stack");
+            AssertEqual((byte)((serial - 1) % 4), FirstSeveranceSafeWindows.GridPattern(serial, 162), "second volley ordinary");
+            AssertEqual((byte)(8 | ((serial - 1) % 4)), FirstSeveranceSafeWindows.GridPattern(serial, 264), "third volley Spread");
+        }
+    }
+
+    [DomainTest("Stack and Spread resolve during the matching safe hold, never in transitions")]
+    private static void SafeWindowClock()
+    {
+        const ulong start = 1000;
+        AssertEqual(false, FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.Lattice, 0, start, start - 1, 4000, 4000).HasValue, "future state harmless");
+        AssertEqual(false, FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.PhaseTransition, 0, start, start + 132, 4000, 4000).HasValue, "no transition mechanic");
+        foreach (int local in new[] { 132, 336 })
+        {
+            var window = FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.Lattice, 0, start, start + (ulong)local, 4000, 4000)!.Value;
+            ulong volleyAge = local == 132 ? 60ul : 264ul;
+            var grid = new FirstSeveranceGridVolley(3, start + volleyAge,
+                FirstSeveranceSafeWindows.GridPattern(3, volleyAge), 4000, 4000);
+            AssertEqual(window.ResolveTick, start + (ulong)local, "deadline derived from authority action epoch");
+            AssertEqual(true, grid.IsFiring(window.ResolveTick), "resolve during safe hold, not after it");
+        }
+        foreach (int step in new[] { 0, 5 })
+            for (int pulse = 0; pulse < 3; pulse++)
+            {
+                var window = FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.RemoteClaws, step, start,
+                    start + (ulong)(pulse * 200 + 170), 4000, 4000)!.Value;
+                AssertEqual(pulse % 2 == 0 ? FirstSeveranceSafeMechanic.Stack : FirstSeveranceSafeMechanic.Spread,
+                    window.Kind, "alternating safe-strip tasks");
+                for (int local = 102; local < FirstSeveranceScoreGeometry.FloodEndTick; local++)
+                    foreach (var item in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.RemoteClaws, step, pulse * 200 + local, 4000, 4000))
+                    {
+                        float dy = window.Kind == FirstSeveranceSafeMechanic.Stack ? FirstSeveranceLanceTuning.StackRadius : 0;
+                        AssertEqual(false, item.Ray.Intersects(window.X, window.Y + dy, 10, 21), "whole Stack circle fits below");
+                        AssertEqual(false, item.Ray.Intersects(window.X, window.Y - dy, 10, 21), "whole Stack circle fits above");
+                        foreach (int dx in new[] { -990, -330, 330, 990 })
+                            AssertEqual(false, item.Ray.Intersects(window.X + dx, window.Y, 10, 21), "four spread centers fit the horizontal strip");
+                    }
+            }
+    }
+
+    [DomainTest("Null Refrain has bounded smooth strokes and no anticipation/recovery damage")]
+    private static void RewardStrokeMotion()
+    {
+        AssertEqual(false, NullRefrainMotion.Live(.239f), "windup harmless");
+        AssertEqual(true, NullRefrainMotion.Live(.24f), "stroke starts");
+        AssertEqual(false, NullRefrainMotion.Live(.76f), "recovery harmless");
+        for (int combo = 0; combo < 3; combo++)
+        {
+            foreach (float speed in new[] { .1f, 1, 2, 8 })
+                AssertEqual(true, NullRefrainMotion.Duration(combo, speed) is >= 10 and <= 90, "duration bounded with attack speed");
+            foreach (int facing in new[] { -1, 1 })
+            {
+                float previous = NullRefrainMotion.Angle(combo, facing, 1, 0);
+                for (int tick = 1; tick <= 1000; tick++)
+                {
+                    float angle = NullRefrainMotion.Angle(combo, facing, 1, tick / 1000f);
+                    AssertEqual(true, float.IsFinite(angle) && Math.Abs(angle - previous) < .02f, "continuous finite stroke pose");
+                    previous = angle;
+                }
+            }
+        }
+        AssertEqual(true, NullRefrainMotion.Reach(2) > NullRefrainMotion.Reach(0), "finisher extends physical reach");
+    }
+}

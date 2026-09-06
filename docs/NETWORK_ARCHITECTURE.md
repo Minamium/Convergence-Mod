@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v17
+## Current development protocol v18
+
+The existing grid `Pattern` byte uses low bits0–1 for layout, bit2 for a Stack sanctuary and bit3 for four Spread sanctuaries. Values0–11 are accepted; both sanctuary bits, unknown bits and sanctuary descriptors carrying Core salvos are rejected. Bounded geometry is derived after descriptor validation; no serialized ray list, new request, operation ID or saved Raid state is added. The accepted action epoch schedules server/SP mechanics and client telegraphs. Final timing changes also require matching peers. [The encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#safe-window-mechanics-and-victory-weapon--0219) owns behavior; [Status](STATUS.md) owns evidence.
+
+## Preceding development protocol v17
 
 [ADR-0022](adr/0022-definition-routed-encounter-transport.md) replaces feature-global operation registration with bounded definition routes and a common active-session snapshot publisher. The fixed header and operation IDs are unchanged; routed packets add one length byte plus 1–64 ASCII key bytes. Empty key is the common Idle Snapshot (one ulong authority tick); RequestSnapshot is header-only and always repairs the server's current session. All peers update together. First Severance's feature-body bounds and gameplay are unchanged.
 

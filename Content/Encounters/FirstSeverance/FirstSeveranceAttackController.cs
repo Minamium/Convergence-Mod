@@ -104,15 +104,15 @@ internal sealed class FirstSeveranceAttackController
             && state.ResolveTick - tick >= FirstSeveranceGridVolley.TelegraphTicks + FirstSeveranceGridVolley.ActiveTicks)
         {
             uint serial = ++gridSerial;
+            byte pattern = FirstSeveranceSafeWindows.GridPattern(serial, tick - state.SubstateEnteredTick);
             var beams = new List<FirstSeveranceLanceRay>(roster.Count);
-            if (serial >= FirstSeveranceGridVolley.CoreSalvoFirstSerial)
+            if (pattern < 4 && serial >= FirstSeveranceGridVolley.CoreSalvoFirstSerial)
                 foreach (var member in roster.Members)
                     if (recovery.IsAlive(member.ParticipantId) && recovery.TryGetPlayer(member, out Player target))
                         beams.Add(FirstSeveranceGridVolley.AimCoreBeam(groundCenter.X, groundCenter.Y,
                             target.Center.X, target.Center.Y));
-            gridVolley = new(serial, tick, (byte)((serial - 1) % 4), groundCenter.X, groundCenter.Y, beams);
+            gridVolley = new(serial, tick, pattern, groundCenter.X, groundCenter.Y, beams);
             nextGridTick = tick + FirstSeveranceGridVolley.CadenceTicks;
-            if (serial % 4 == 0) nextGridTick += 60;
             changed = true;
             Log(tick, $"event=GridTelegraph cast={serial} pattern={gridVolley.Pattern} lines={gridVolley.Rays.Count} core_beams={gridVolley.CoreBeams.Count} fire_tick={gridVolley.FireTick} end_tick={gridVolley.EndTick}");
         }

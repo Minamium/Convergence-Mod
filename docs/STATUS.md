@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.18**, protocol **17**. This is an implementation-structure build with unchanged combat tuning. Current version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); this page records implementation/evidence, not tuning.
+Development **0.2.19**, protocol **18**. Sanctuary Stack/Spread, longer Final warnings, natural-spawn suppression, flowing beam/crush materials and the Null Refrain victory weapon are implemented; HP is unchanged. Version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); exact mechanics/tuning belong to the linked specifications/code.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -35,20 +35,20 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-[Consolidation check record](evidence/2026-09-07-development-consolidation.json): current automated results and source/package identity, including the real Mod codec check. The [0.2.17 record](evidence/2026-09-07-recovery-tempo-checks.json) retains prior gameplay-build evidence; unchanged inputs were reused during preservation.
+[Current check record](evidence/2026-09-07-sanctuaries-reward-checks.json): domain contracts, actual Mod codec and successful packaging/source identity. [Pre-change playtests](evidence/2026-09-07-pre-0219-playtests.json) establish that solo0.2.18 reached Final and preserve distinct two/three-player observations. [Consolidation](evidence/2026-09-07-development-consolidation.json) and [0.2.17](evidence/2026-09-07-recovery-tempo-checks.json) evidence remain historical, not fresh0.2.19 playtests.
 
-**Not run / user-owned:** matching 0.2.18 load, join/Ready/common snapshot repair, combat/revival and end-to-new-Raid cleanup in Host & Play. The preceding untimed recovery, simultaneous Prism, two blade turns, changing flood safe strips, accelerating Final and audio balance still need live observation. Prior Stack synchronization was confirmed by the user; do not reopen it without new evidence. Compilation is not live audiovisual, latency or multiplayer proof. The manual self-hosted Mod-build CI runner is not provisioned by this change.
+**Not run / user-owned:** matching0.2.19 load, multiplayer sanctuary timing/positions, normal-spawn suppression/recovery, live beam/crush readability, extended Final audio timing, weapon drop/use/save behavior and end-to-new-Raid cleanup. No GUI, game or server was launched for this change. Prior Stack synchronization was user-confirmed; this does not prove the new overlapping mechanics. Compilation is not audiovisual, performance, latency or multiplayer proof. The manual self-hosted Mod-build CI runner remains unprovisioned.
 
 ## Constraints and deferred work
 
 - General Terraria/Calamity lethal-hit interception, robust rejoin/observer identity, outsider admission/ejection and adversarial movement handling are not production-complete.
 - Current Raid-owned damage/recovery and participant containment are enabled experiments, not blocked by the deferred production adapters.
-- Rewards, final balance/art/audio, release packaging and standalone progression replacing the hard Calamity dependency remain deferred.
+- A final production loot table, balance/art/audio acceptance, release packaging and standalone progression replacing the hard Calamity dependency remain deferred. Null Refrain is a development reward, not final progression.
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
 
-The requested preservation, current docs/skills, reproducible local build, definition-routed transport, combat collaborators and repository-runnable tests/CI are implemented. Next is the scoped user-owned smoke above, followed by evidence-driven fixes or the next requested gameplay change; do not replay consolidation or the old bootstrap queue. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) separates completed work from deferred production work.
+User-owned0.2.19 Host & Play: check safe-window grouping/separation, warning-to-hit alignment, natural spawns, weapon drops/combo and ending-to-next-Raid cleanup. Discuss HP using [pre-change observations](evidence/2026-09-07-pre-0219-playtests.json); do not silently raise it. Consolidation is complete; the [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) separates completed work from production backlog.
 
 ## History
 

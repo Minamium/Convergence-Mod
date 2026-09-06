@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-07",
+  "build": "0.2.19",
+  "protocol": 18,
+  "scope": "Final warning grace, natural spawn suppression, sanctuary Stack/Spread, fluid beam/crush materials and the Null Refrain victory weapon. No HP changes.",
+  "source": {
+    "base_commit": "28a276dcfece12ae79f4f56c06b5eff177eb4d86",
+    "branch": "main",
+    "worktree": "dirty at build; identified by the source manifest in the ignored local build record",
+    "source_manifest_sha256": "cdfdfee720e96630330ce39d9752a9d874a914a0efe11feef039d2efe2bbc4a4",
+    "changed_during_build": false,
+    "after_build": "All compiled code/assets remained identical. A user-triggered tML load later reformatted en-US.hjson (CRLF/multiline tooltip only); reversing those formatting changes reproduces the exact built hash c94f2d53257b531f717eadf80ee8e64b88327b8f075fea6ec245607468d86e4f. The formatter output is preserved; no rebuild of unchanged behavior.",
+    "formatted_en_us_sha256": "839a190abf040d01296674fd106cac9fd313ff11be84976e05f65450c3c30d1e"
+  },
+  "artifact": {
+    "name": "Convergence.tmod",
+    "bytes": 33018966,
+    "sha256": "7ed2233bb771b799356aaacc677c78dee071c8b48139076d4ff6cc914ddcee7a",
+    "dll_sha256": "9a469879a6a12d39b86809a3c1923f685c8a5060155c6c6d9426600e23b2bbf9"
+  },
+  "checks": {
+    "domain": {
+      "cases_validated": 98,
+      "result": "passed across full run plus targeted rerun",
+      "detail": "Initial run97 passed; one legacy expectation that grid pattern4 is invalid failed. Updated expectation to12, then reran that case successfully. Passing unchanged cases were not repeated.",
+      "command": "dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release",
+      "targeted": "-- --filter \"Lattice warnings\""
+    },
+    "build": {
+      "result": "passed",
+      "warnings": 0,
+      "errors": 0,
+      "command": "python tools/dev.py build",
+      "development_solo": true,
+      "detail": "Initial compile found two missing Revive namespace imports; corrected before successful packaging."
+    },
+    "codec": {
+      "result": "passed",
+      "round_trips": 340,
+      "rejected_malformed": 49,
+      "command": "pwsh -NoProfile -NonInteractive -File tools/check-codec.ps1 -AssemblyPath bin/Debug/net8.0/Convergence.dll"
+    },
+    "repository": {
+      "result": "passed; catalog59 documents, repository353 files, YAML10 files",
+      "command": "python .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog"
+    },
+    "weapon_asset": {
+      "width": 2172,
+      "height": 724,
+      "corner_alpha": 0,
+      "sha256": "db9a1eef3c474b52de11993c0a5da3cf9eeb333127aee938c8e99078b9585dbe",
+      "visual_selection": "passed; unchanged built-in imagegen export"
+    },
+    "music": {
+      "score_ticks": 4474,
+      "seconds": 81.0666666667,
+      "peak": 0.9067646,
+      "true_peak_4x": 0.9073418,
+      "sha256": "18acd29ee6e004fb3fa685682c879c0d2f3be08ae9a36471adb30b4ff76bb512",
+      "finite_decode": true,
+      "human_listening": "not_run",
+      "detail": "Same original PCM24 source and gain, longer acceleration score; external recipe uses chunked Vorbis writes. Initial whole-buffer encoder output was incomplete and retained externally, not packaged."
+    }
+  },
+  "runtime": {
+    "client_content_load": "User-triggered client log04:42:46–04:42:59 selected/configured/finalized0.2.19; observed read-only, not an agent GUI test or proof of multiplayer/world/weapon behavior.",
+    "gui_reload": "not_run; user-owned",
+    "host_and_play": "not_run for0.2.19; all peers must update",
+    "checks_remaining": [
+      "Load0.2.19 on all clients/server; natural spawns stop only during Fight, return after Victory/Defeat/cancel. Existing/scripted NPCs are not mass-removed.",
+      "Phase-II sanctuary markers align for every client and resolve inside live grid pockets; test two/three participants, leaving/entering at deadline, successful/failed Stack and Spread.",
+      "Phase-III safe strip fits Stack circle plus full body; Spread is possible in the strip; hand-crush membrane matches lethal footprint.",
+      "Final comb forecast has extra quarter-second at early/late stations; no truncated last shot, late BGM restart or misleading cue.",
+      "Victory after Final drops exactly roster count; no drops on HP zero/Defeat/cancel. Weapon combo/attack speed, remote visuals, hitbox, sound, inventory/world sprite and subsequent save/load.",
+      "Success/Defeat/cancel followed by another Raid; no leaked marker, spawn suppression, reward retry duplicates or input effects.",
+      "Live visual quality, performance/Reduced Effects, shake-off, audio mix and multiplayer latency remain unmeasured."
+    ]
+  },
+  "logs": "2026-09-07-pre-0219-playtests.json",
+  "retained": "Previous package, music export, originals, audio recipe/audition and raw logs remain in ignored/external storage; no old checkout or source originals removed."
+}

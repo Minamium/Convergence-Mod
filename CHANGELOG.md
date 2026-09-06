@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Development 0.2.19 — flowing beams, sanctuaries and Null Refrain
+
+- Final comb forecasts gain0.25s without truncating the six-shot sequence; existing Final BGM retimed to fit.
+- Lattice/flood safe holds carry authority-clocked Stack/Spread with actual whole-body safe pockets; HP unchanged.
+- Ordinary natural NPC/critter spawning suppressed during the Fight, without deleting existing residents.
+- Fluctuating beam material, pressure-membrane crush warning and no SAFE/Gather labels.
+- Original Null Refrain melee combo weapon drops in party quantity only after accepted Final Victory; retry-safe grant attempts cannot block cleanup.
+- Protocol18 reuses the grid-pattern byte for sanctuary variants; peers must update. No new packet IDs or saved Raid fields.
+
 ### Development 0.2.17 — recoverable Down and accelerating borderless attacks
 
 - Remove First Severance Down expiry/Eliminated; an ally may wait out the recipient's60-second lockout and rescue them. All-Down Defeat, instant kit and no resource cost remain.
