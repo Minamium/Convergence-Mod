@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v16
+## Current development protocol v17
+
+[ADR-0022](adr/0022-definition-routed-encounter-transport.md) replaces feature-global operation registration with bounded definition routes and a common active-session snapshot publisher. The fixed header and operation IDs are unchanged; routed packets add one length byte plus 1–64 ASCII key bytes. Empty key is the common Idle Snapshot (one ulong authority tick); RequestSnapshot is header-only and always repairs the server's current session. All peers update together. First Severance's feature-body bounds and gameplay are unchanged.
+
+## Preceding development protocol v16
 
 [ADR-0021](adr/0021-untimed-recovery-and-simultaneous-prism.md) keeps the field layout but permits1–4 locked rays in a PursuitPrism volley, additionally bounded by the combat roster count. Its maximum attack section grows74→122bytes; other attack kinds retain their original shape/count constraints. TargetSlot is only Prism's representative pose focus. Authority supplies every ray simultaneously; clients never infer another target from local positions. The feature rejects Eliminated combat projections and treats zero DownedDeadlineTick as untimed Down when CombatState is Downed. The same shared geometry/timing defines expanding horizontal floods, two blade turns and accelerating/shifting Final attacks. All peers must update; packet IDs, nonce requests, persistence and exact-Fight ownership are unchanged.
 

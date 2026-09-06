@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../../Common/Networking/Protocol/EncounterPacketCodec.cs" Link="Domain/EncounterPacketCodec.cs" />
+    <Compile Include="../../Common/Networking/Protocol/EncounterPacketHeader.cs" Link="Domain/EncounterPacketHeader.cs" />
+    <Compile Include="../../Common/Networking/Protocol/EncounterPacketType.cs" Link="Domain/EncounterPacketType.cs" />
+    <Compile Include="../../Common/Networking/Protocol/EncounterProtocol.cs" Link="Domain/EncounterProtocol.cs" />
+    <Compile Include="../../Common/Networking/Protocol/EncounterRouteCodec.cs" Link="Domain/EncounterRouteCodec.cs" />
+    <Compile Include="../../Common/Networking/IEncounterPacketHandler.cs" Link="Domain/IEncounterPacketHandler.cs" />
+    <Compile Include="../../Common/Networking/EncounterPacketRoutes.cs" Link="Domain/EncounterPacketRoutes.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePacketCodec.cs" Link="Domain/FirstSeverancePacketCodec.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceIdentity.cs" Link="Domain/FirstSeveranceIdentity.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePreparationProjection.cs" Link="Domain/FirstSeverancePreparationProjection.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceMovementSyncCadence.cs" Link="Domain/FirstSeveranceMovementSyncCadence.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Development/FirstSeveranceDevelopmentPolicy.cs" Link="Domain/FirstSeveranceDevelopmentPolicy.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEndingTimeline.cs" Link="Domain/FirstSeveranceEndingTimeline.cs" />

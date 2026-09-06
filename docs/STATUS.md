@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.17**, protocol **16**. Current version declarations live in [build.txt](../build.txt) and [the packet header](../Common/Networking/Protocol/EncounterPacketHeader.cs); this page records implementation/evidence, not tuning.
+Development **0.2.18**, protocol **17**. This is an implementation-structure build with unchanged combat tuning. Current version declarations live in [build.txt](../build.txt) and [the packet header](../Common/Networking/Protocol/EncounterPacketHeader.cs); this page records implementation/evidence, not tuning.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -37,7 +37,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 [0.2.17 check record](evidence/2026-09-07-recovery-tempo-checks.json): 93 domain cases, 308 compiled codec round trips / 48 malformed cases, static checks and actual Mod package build passed. These unchanged-input results were reused when preserving the source and unpublished Git history.
 
-**Not run / user-owned:** 0.2.17 load and Host & Play observation of untimed recovery, simultaneous Prism, two blade turns, changing flood safe strips, accelerating Final and audio balance. Prior Stack synchronization was confirmed by the user; do not reopen it without new evidence. Compilation is not live audiovisual, latency or multiplayer proof.
+**Not run / user-owned:** matching 0.2.18 load/Ready/common snapshot repair and 0.2.17 gameplay changes and Host & Play observation of untimed recovery, simultaneous Prism, two blade turns, changing flood safe strips, accelerating Final and audio balance. Prior Stack synchronization was confirmed by the user; do not reopen it without new evidence. Compilation is not live audiovisual, latency or multiplayer proof.
 
 ## Constraints and deferred work
 
@@ -48,7 +48,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Next change
 
-Development-foundation consolidation: current docs/skills → reproducible local environment → common packet dispatch, combat responsibilities and repeatable tests. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) owns that queue. No new gameplay, GUI launch or broad runtime matrix is requested.
+Preservation/GitHub, current docs/skills and source-identified local builds are complete. Definition-routed packet dispatch is implemented with focused regression coverage; combat responsibility extraction and repeatable test cleanup follow. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) owns that queue. No new gameplay, GUI launch or broad runtime matrix is requested.
 
 ## History
 

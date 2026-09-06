@@ -20,18 +20,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
     private const ulong ActivationWindowTicks = 10 * 60;
     private static readonly Dictionary<RequestRateKey, RequestRateWindow> RequestWindows = new();
 
-    public override void Load()
-    {
-        EncounterPacketRouter.Register(EncounterPacketType.RequestActivate, this);
-        EncounterPacketRouter.Register(EncounterPacketType.RequestSetReady, this);
-        EncounterPacketRouter.Register(EncounterPacketType.RequestCancel, this);
-        EncounterPacketRouter.Register(EncounterPacketType.RequestSnapshot, this);
-        EncounterPacketRouter.Register(EncounterPacketType.RequestPrototypeDown, this);
-        EncounterPacketRouter.Register(EncounterPacketType.RequestReviveNearest, this);
-        EncounterPacketRouter.Register(EncounterPacketType.Snapshot, this);
-        EncounterPacketRouter.Register(EncounterPacketType.ValidationResult, this);
-    }
-
     public bool TryHandle(
         BinaryReader reader,
         int whoAmI,
@@ -55,9 +43,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
                 whoAmI,
                 header,
                 out failureCode),
-            EncounterPacketType.RequestSnapshot => HandleSnapshotRequest(
-                whoAmI,
-                out failureCode),
             EncounterPacketType.RequestPrototypeDown => HandlePrototypeDown(
                 reader,
                 whoAmI,
@@ -77,21 +62,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
                 out failureCode),
             _ => Reject("first_severance.packet_type_unhandled", out failureCode),
         };
-    }
-
-    public override void PostUpdateWorld()
-    {
-        if (Main.netMode != NetmodeID.Server)
-        {
-            return;
-        }
-
-        EncounterCoordinatorSystem authority =
-            ModContent.GetInstance<EncounterCoordinatorSystem>();
-        while (authority.TryTakePublishedSnapshot(out EncounterSnapshot snapshot))
-        {
-            SendSnapshot(snapshot, toClient: -1);
-        }
     }
 
     public override void ClearWorld()
@@ -208,29 +178,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         return true;
     }
 
-    private static bool HandleSnapshotRequest(int whoAmI, out string failureCode)
-    {
-        if (!IsCurrentPlayer(whoAmI))
-        {
-            return Reject("first_severance.snapshot_sender_invalid", out failureCode);
-        }
-
-        if (!TryConsumeRate(
-                whoAmI,
-                EncounterPacketType.RequestSnapshot,
-                FastRequestWindowTicks,
-                4))
-        {
-            return Reject("first_severance.snapshot_rate_limited", out failureCode);
-        }
-
-        SendSnapshot(
-            ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot,
-            whoAmI);
-        failureCode = string.Empty;
-        return true;
-    }
-
     private static bool HandlePrototypeDown(
         BinaryReader reader,
         int whoAmI,
@@ -338,7 +285,10 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         return true;
     }
 
-    private static void SendSnapshot(in EncounterSnapshot snapshot, int toClient)
+    public void ApplyIdleSnapshot(in EncounterSnapshot snapshot)
+        => ModContent.GetInstance<FirstSeveranceClientStateSystem>().ApplySnapshot(snapshot, null, null);
+
+    public void PublishSnapshot(in EncounterSnapshot snapshot, int toClient)
     {
         FirstSeverancePreparationAuthority.TryCreateProjection(
             snapshot.EncounterSequence,

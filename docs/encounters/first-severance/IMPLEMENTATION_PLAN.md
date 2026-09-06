@@ -29,8 +29,8 @@ Current implementation/evidence is in [Status](../../STATUS.md). This is the for
 ## Current sequence
 
 1. **Preservation complete:** checkpoint latest 0.2.17 and prior history on GitHub; establish one canonical checkout and retain all former copies.
-2. Consolidate current docs and the already-integrated targeted-reading/verification workflow. Archive old instructions without losing evidence; generate the catalog once after the edit batch.
-3. Make local toolchain discovery, configuration and source/package identification reproducible, with private paths and binaries excluded.
+2. **Complete:** consolidate current docs and the already-integrated targeted-reading/verification workflow. Archive old instructions without losing evidence; generate the catalog once after the edit batch.
+3. **Complete:** make local toolchain discovery, configuration and source/package identification reproducible, with private paths and binaries excluded.
 4. Separate common packet registration from definition-specific dispatch. Preserve bounds, direction/identity checks and server/SP authority; no second Raid or global feature switch.
 5. Extract meaningful combat collaborators while retaining one explicit authoritative tick/termination/cleanup orchestrator.
 6. Make feature/domain and compiled codec checks reproducible from the repository; separate lightweight CI from environment-dependent Mod/integration checks.

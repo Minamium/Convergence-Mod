@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Convergence.Common.Networking.Protocol;
+using Convergence.Common.Encounters.Runtime;
+using Terraria.ModLoader;
 using Terraria;
 using Terraria.ID;
 
@@ -12,20 +14,7 @@ internal static class EncounterPacketRouter
     private const ulong RejectionWindowTicks = 10 * 60;
     private const int RejectionLogLimit = 4;
     private static readonly Dictionary<int, RejectionWindow> RejectionWindows = new();
-    private static readonly Dictionary<EncounterPacketType, IEncounterPacketHandler> Handlers = new();
-
-    internal static void Register(
-        EncounterPacketType packetType,
-        IEncounterPacketHandler handler)
-    {
-        ArgumentNullException.ThrowIfNull(handler);
-        if (!Enum.IsDefined(typeof(EncounterPacketType), packetType)
-            || !Handlers.TryAdd(packetType, handler))
-        {
-            throw new InvalidOperationException(
-                $"Encounter packet type '{packetType}' is invalid or already registered.");
-        }
-    }
+    internal static EncounterPacketRoutes Routes { get; } = new();
 
     public static void Handle(BinaryReader reader, int whoAmI)
     {
@@ -57,14 +46,35 @@ internal static class EncounterPacketRouter
             return;
         }
 
-        if (!Handlers.TryGetValue(header.PacketType, out IEncounterPacketHandler? handler))
-        {
-            WarnRejected(whoAmI, $"packet.handler_not_implemented:{header.PacketType}");
-            return;
-        }
-
         try
         {
+            // Snapshot repair addresses the active session, not whichever feature requested it.
+            if (header.PacketType == EncounterPacketType.RequestSnapshot)
+            {
+                if (!EncounterSnapshotTransport.HandleRequest(whoAmI, out failureCode)) WarnRejected(whoAmI, failureCode);
+                return;
+            }
+            if (!EncounterRouteCodec.TryRead(reader, out string key))
+            {
+                WarnRejected(whoAmI, "packet.route_invalid");
+                return;
+            }
+            if (key.Length == 0 && header.PacketType == EncounterPacketType.Snapshot)
+            {
+                if (!EncounterSnapshotTransport.ApplyIdle(reader, header, out failureCode)) WarnRejected(whoAmI, failureCode);
+                return;
+            }
+            if (!Routes.TryGet(key, out IEncounterPacketHandler handler))
+            {
+                WarnRejected(whoAmI, "packet.route_unknown");
+                return;
+            }
+            if (Main.netMode == NetmodeID.Server && header.PacketType != EncounterPacketType.RequestActivate
+                && !EncounterPacketRoutes.MatchesSession(key, header, ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot))
+            {
+                WarnRejected(whoAmI, "packet.route_session_mismatch");
+                return;
+            }
             if (!handler.TryHandle(reader, whoAmI, header, out failureCode))
             {
                 WarnRejected(whoAmI, failureCode);
@@ -91,7 +101,7 @@ internal static class EncounterPacketRouter
     internal static void Reset()
     {
         RejectionWindows.Clear();
-        Handlers.Clear();
+        Routes.Clear();
     }
 
     private static bool IsDirectionAllowed(EncounterPacketType packetType)

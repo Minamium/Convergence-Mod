@@ -27,7 +27,7 @@ internal static class FirstSeverancePacketCodec
         in TilePoint requestedAnchor,
         uint requestNonce)
     {
-        EncounterPacketCodec.WriteHeader(writer, header);
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
         writer.Write(requestedAnchor.X);
         writer.Write(requestedAnchor.Y);
         writer.Write(requestNonce);
@@ -57,7 +57,7 @@ internal static class FirstSeverancePacketCodec
         bool isReady,
         uint requestNonce)
     {
-        EncounterPacketCodec.WriteHeader(writer, header);
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
         WriteBoolean(writer, isReady);
         writer.Write(requestNonce);
     }
@@ -91,7 +91,7 @@ internal static class FirstSeverancePacketCodec
         in EncounterPacketHeader header,
         uint requestNonce)
     {
-        EncounterPacketCodec.WriteHeader(writer, header);
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
         writer.Write(requestNonce);
     }
 
@@ -116,7 +116,7 @@ internal static class FirstSeverancePacketCodec
         in EncounterPacketHeader header,
         uint requestNonce)
     {
-        EncounterPacketCodec.WriteHeader(writer, header);
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
         writer.Write(requestNonce);
     }
 
@@ -143,7 +143,7 @@ internal static class FirstSeverancePacketCodec
         in EncounterPacketHeader header,
         uint requestNonce)
     {
-        EncounterPacketCodec.WriteHeader(writer, header);
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
         writer.Write(requestNonce);
     }
 
@@ -176,7 +176,7 @@ internal static class FirstSeverancePacketCodec
             snapshot.EncounterSequence,
             snapshot.FightId,
             snapshot.Revision);
-        EncounterPacketCodec.WriteHeader(writer, header);
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
         writer.Write((byte)snapshot.Lifecycle);
         writer.Write(snapshot.AuthorityTick);
         writer.Write(snapshot.LifecycleEnteredTick);
@@ -229,7 +229,7 @@ internal static class FirstSeverancePacketCodec
 
         string definitionKey = lifecycle == EncounterLifecycle.Idle
             ? string.Empty
-            : FirstSeveranceDefinition.EncounterKey;
+            : FirstSeveranceIdentity.EncounterKey;
         snapshot = new EncounterSnapshot(
             header.EncounterSequence,
             header.FightId,
@@ -533,7 +533,7 @@ internal static class FirstSeverancePacketCodec
             authoritySnapshot.EncounterSequence,
             authoritySnapshot.FightId,
             authoritySnapshot.Revision);
-        EncounterPacketCodec.WriteHeader(writer, header);
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
         writer.Write(validation.RequestNonce);
         WriteBoolean(writer, validation.IsAccepted);
         WriteBoundedString(writer, validation.FailureCode);

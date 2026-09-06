@@ -19,7 +19,6 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
 {
     private FirstSeverancePreparationProjection? preparation;
     private uint lastValidationNonce;
-    private bool requestedInitialSnapshot;
     private ulong displayedPreparationSequence;
     private int displayedReadyCount = -1;
     private FirstSeveranceCombatProjection? combat;
@@ -266,15 +265,6 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
             return;
         }
 
-        if (Main.netMode == NetmodeID.MultiplayerClient
-            && !requestedInitialSnapshot
-            && Main.myPlayer >= 0
-            && Main.myPlayer < Main.maxPlayers
-            && Main.player[Main.myPlayer].active)
-        {
-            requestedInitialSnapshot = true;
-            FirstSeveranceClientActions.RequestSnapshot();
-        }
     }
 
     public override void OnWorldUnload()
@@ -302,7 +292,6 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         preparation = null;
         lastValidationNonce = 0;
         LastValidation = null;
-        requestedInitialSnapshot = false;
         displayedPreparationSequence = 0;
         displayedReadyCount = -1;
         FirstSeveranceClientActions.Reset();

@@ -15,7 +15,7 @@ internal sealed class FirstSeveranceDefinition : EncounterDefinition
         FirstSeveranceProgressionActivationPolicy.Instance,
     };
 
-    public const string EncounterKey = "first_severance";
+    public const string EncounterKey = FirstSeveranceIdentity.EncounterKey;
     public static int MinimumRosterSize => FirstSeveranceDevelopmentPolicy.MinimumParticipants;
     public const int MaximumRosterSize = FirstSeveranceRoster.MaximumCount;
 

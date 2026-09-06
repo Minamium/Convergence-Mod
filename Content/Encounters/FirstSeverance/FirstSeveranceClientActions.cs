@@ -97,19 +97,7 @@ internal static class FirstSeveranceClientActions
     }
 
     internal static void RequestSnapshot()
-    {
-        if (Main.netMode != NetmodeID.MultiplayerClient)
-        {
-            return;
-        }
-
-        EncounterSnapshot snapshot = CurrentSnapshot();
-        ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
-        EncounterPacketCodec.WriteHeader(
-            packet,
-            RequestHeader(EncounterPacketType.RequestSnapshot, snapshot));
-        packet.Send();
-    }
+        => Convergence.Common.Networking.EncounterSnapshotTransport.RequestSnapshot();
 
     internal static void RequestPrototypeDown()
     {

@@ -45,4 +45,6 @@ ADRs record decisions that are expensive to reverse: authority, dependency direc
 
 | [0021](0021-untimed-recovery-and-simultaneous-prism.md) | Accepted for development; supersedes active timed Down and single-focus Prism | Untimed recoverable Down and bounded simultaneous Prism; protocol v16 |
 
+| [0022](0022-definition-routed-encounter-transport.md) | Accepted; replaces feature-global packet registration/outbox consumption | Definition-routed common transport, shared operation IDs and generic snapshot repair; protocol v17 |
+
 Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark the old record superseded. Current implementation status remains in [`../STATUS.md`](../STATUS.md), not in this index.

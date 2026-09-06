@@ -123,6 +123,7 @@ internal static partial class Program
     {
         TestCase[] tests =
         {
+            new("Packet routes are bounded, definition-scoped and reject stale sessions", PacketRouteContracts),
             new("Solo debug admission is authority-opted-in with unchanged invalid roster rejection", SoloDebugAdmission),
             new("Initial admission and Ready revalidation share the compiled solo policy", SoloStartRevalidation),
             new("Raid owner movement heartbeat is bounded and clears on capability loss", RaidMovementHeartbeat),

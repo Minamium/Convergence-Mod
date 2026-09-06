@@ -63,6 +63,8 @@ Repository checks provide a coarse import guard; review remains responsible for 
 
 Feature-local `ModSystem` code registers immutable `EncounterDefinition` objects. A definition supplies its key, participant bounds, feature-scoped activation policies, and runtime factory. Adding an encounter must not add a switch to the global coordinator/router.
 
+[ADR-0022](adr/0022-definition-routed-encounter-transport.md) gives Common the single snapshot publisher/repair path and a definition-key packet registry. A feature registers its packet adapter with its definition; another feature reuses the common operation IDs without changing the router or consuming another feature's outbox.
+
 Current registration:
 
 ```text

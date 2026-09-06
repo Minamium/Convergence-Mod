@@ -22,6 +22,26 @@ documents:
   - project.status
   - encounter.first-severance.spec
   - encounter.first-severance.revive
+- doc_id: adr.0022
+  path: docs/adr/0022-definition-routed-encounter-transport.md
+  title: 'ADR-0022: Definition-routed encounter transport'
+  content_sha256: 042ace7ad44f41bdc6c677cae9b81ddeba89c6d7875a254f1ce515b4f010bd77
+  document_type: adr
+  status: accepted
+  owners:
+  - networking
+  last_reviewed: '2026-09-07'
+  source_of_truth_for:
+  - architecture.definition_routed_transport
+  aliases:
+  - definition packet routes
+  related_code:
+  - Common/Networking/EncounterPacketRoutes.cs
+  - Common/Networking/EncounterSnapshotTransport.cs
+  - Common/Networking/Protocol/EncounterRouteCodec.cs
+  related_docs:
+  - project.network-architecture
+  - project.architecture
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -308,7 +328,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: 593ec2b7f3e28f852d73c77519ae50a05cba4072b0a14c72ae53eed30335ebb1
+  content_sha256: a0dbec65784bcdbfd59ce6f6825ebf281e52e0028b862e362658a4481c492729
   document_type: index
   status: accepted
   owners:
@@ -495,7 +515,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: fd508e60e3cda9735cceaef5cae63708fc7f1458f5512b81a93578f0302f984f
+  content_sha256: 7bb71d2deaef982212d4d6e4c5d644b1b4f9132dd13e811f43958aaa755856db
   document_type: plan
   status: accepted
   owners:
@@ -668,7 +688,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: 6e98259830dac94508d8dae804d9e1035f73c0f4bd6a29c23edf2400047c968d
+  content_sha256: cdb2580654d8a1d04f72a0dcfb2ab6a51655f7a962e8638f3e911caa0d8f02a2
   document_type: governance
   status: accepted
   owners:
@@ -896,7 +916,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: cc6d0be8d345685a3d064f5eda10871e504f3c8112daeab176b32ba3cb6d42da
+  content_sha256: cff73323fc27907111ededed05feace3fed692379ee91835baefbcce580de5d6
   document_type: governance
   status: accepted
   owners:
@@ -941,7 +961,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 44c7cfc529c30bb7b3068766d3c37c9a98b51f5c1033dab0af39c2308146a613
+  content_sha256: 67b40b99f940afbfcaee15e9e7122d0782d5ceaeb79397f2bbf86a8604564676
   document_type: status
   status: accepted
   owners:
