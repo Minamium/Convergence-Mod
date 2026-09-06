@@ -1,0 +1,1005 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-07",
+  "scope": "Pre-0.2.19 playtest analysis; frozen server/archived server logs only.",
+  "measurement": "Authority net HP loss divided by damageable time, not equipment DPS, total-fight DPS or per-player contribution. Requested Raid damage includes overkill and excludes vanilla/other-Mod hits and healing.",
+  "sources": [
+    {
+      "name": "server.log",
+      "sha256": "3281ca97d86f591fd715df78798ccf24027fd06dd6e20976d9f87c76b148f9fc",
+      "version": "0.2.18"
+    },
+    {
+      "name": "2026-09-07-4.zip",
+      "sha256": "2cb7dea393563b099b47801c81d0ff93dd0819c771b75d977b2074c9d634263c",
+      "version": "0.2.17"
+    },
+    {
+      "name": "2026-09-07-2.zip",
+      "sha256": "537ba60d1ebc8ddc318353cf2dcf12d5fe9eed2a58e0e48a24d69898cba76c78",
+      "version": "0.2.16"
+    }
+  ],
+  "runs": [
+    {
+      "id": 1,
+      "source": "server.log",
+      "version": "0.2.18",
+      "participants": "1",
+      "elapsed_seconds": "381.95",
+      "core_effective_damage": "5000000",
+      "core_open_seconds": "109.15",
+      "core_window_dps": "45808.5",
+      "pylon_effective_damage": "2400000",
+      "pylon_open_seconds": "45.60",
+      "pylon_window_dps": "52631.6",
+      "boss_life": "0",
+      "boss_max_life": "5000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "AllParticipantsDowned",
+        "phase": "FinalSlicer"
+      },
+      "downs": 1,
+      "revival_events": [],
+      "stack": {
+        "resolved": 24,
+        "failed": 0
+      },
+      "spread": {
+        "resolved": 27,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "11.85",
+          "effective_damage": "600000",
+          "window_dps": "50632.9",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "2",
+          "outcome": "Cleared",
+          "open_seconds": "12.30",
+          "effective_damage": "600000",
+          "window_dps": "48780.5",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "3",
+          "outcome": "Cleared",
+          "open_seconds": "10.43",
+          "effective_damage": "600000",
+          "window_dps": "57508.0",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "4",
+          "outcome": "Cleared",
+          "open_seconds": "11.02",
+          "effective_damage": "600000",
+          "window_dps": "54462.9",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "CoreSalvo",
+          "hits": 2,
+          "requested_damage": 240,
+          "lethal": 0
+        },
+        {
+          "source": "FinalBullets",
+          "hits": 4,
+          "requested_damage": 480,
+          "lethal": 0
+        },
+        {
+          "source": "FinalSlicer",
+          "hits": 10,
+          "requested_damage": 1200,
+          "lethal": 1
+        },
+        {
+          "source": "Lattice",
+          "hits": 1,
+          "requested_damage": 120,
+          "lethal": 0
+        },
+        {
+          "source": "PursuitPrism",
+          "hits": 12,
+          "requested_damage": 1440,
+          "lethal": 0
+        },
+        {
+          "source": "RotatingBlade",
+          "hits": 1,
+          "requested_damage": 120,
+          "lethal": 0
+        },
+        {
+          "source": "Stillness",
+          "hits": 9,
+          "requested_damage": 1080,
+          "lethal": 0
+        },
+        {
+          "source": "SweepLeft",
+          "hits": 1,
+          "requested_damage": 387,
+          "lethal": 0
+        },
+        {
+          "source": "SweepRight",
+          "hits": 1,
+          "requested_damage": 387,
+          "lethal": 0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "source": "2026-09-07-4.zip",
+      "version": "0.2.17",
+      "participants": "2",
+      "elapsed_seconds": "224.72",
+      "core_effective_damage": "5000000",
+      "core_open_seconds": "59.73",
+      "core_window_dps": "83705.4",
+      "pylon_effective_damage": "1200000",
+      "pylon_open_seconds": "14.22",
+      "pylon_window_dps": "84408.0",
+      "boss_life": "0",
+      "boss_max_life": "5000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "AllParticipantsDowned",
+        "phase": "Spread"
+      },
+      "downs": 4,
+      "revival_events": [
+        {
+          "Name": "InstantReviveAccepted",
+          "Count": 2
+        },
+        {
+          "Name": "ParticipantRevived",
+          "Count": 2
+        }
+      ],
+      "stack": {
+        "resolved": 12,
+        "failed": 2
+      },
+      "spread": {
+        "resolved": 14,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "7.78",
+          "effective_damage": "600000",
+          "window_dps": "77087.8",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "2",
+          "outcome": "Cleared",
+          "open_seconds": "6.43",
+          "effective_damage": "600000",
+          "window_dps": "93264.2",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "FinalBullets",
+          "hits": 10,
+          "requested_damage": 1200,
+          "lethal": 1
+        },
+        {
+          "source": "FinalSlicer",
+          "hits": 9,
+          "requested_damage": 1080,
+          "lethal": 1
+        },
+        {
+          "source": "Lattice",
+          "hits": 6,
+          "requested_damage": 720,
+          "lethal": 0
+        },
+        {
+          "source": "PursuitPrism",
+          "hits": 8,
+          "requested_damage": 960,
+          "lethal": 0
+        },
+        {
+          "source": "RemoteClaws",
+          "hits": 1,
+          "requested_damage": 120,
+          "lethal": 0
+        },
+        {
+          "source": "RotatingBlade",
+          "hits": 3,
+          "requested_damage": 360,
+          "lethal": 0
+        },
+        {
+          "source": "Stack",
+          "hits": 2,
+          "requested_damage": 636,
+          "lethal": 1
+        },
+        {
+          "source": "Stillness",
+          "hits": 6,
+          "requested_damage": 720,
+          "lethal": 0
+        },
+        {
+          "source": "SweepLeft",
+          "hits": 2,
+          "requested_damage": 762,
+          "lethal": 1
+        },
+        {
+          "source": "SweepRight",
+          "hits": 3,
+          "requested_damage": 1149,
+          "lethal": 0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "source": "2026-09-07-4.zip",
+      "version": "0.2.17",
+      "participants": "2",
+      "elapsed_seconds": "215.08",
+      "core_effective_damage": "5000000",
+      "core_open_seconds": "58.93",
+      "core_window_dps": "84841.6",
+      "pylon_effective_damage": "1200000",
+      "pylon_open_seconds": "13.47",
+      "pylon_window_dps": "89108.9",
+      "boss_life": "0",
+      "boss_max_life": "5000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "AllParticipantsDowned",
+        "phase": "Spread"
+      },
+      "downs": 2,
+      "revival_events": [],
+      "stack": {
+        "resolved": 11,
+        "failed": 1
+      },
+      "spread": {
+        "resolved": 13,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "7.92",
+          "effective_damage": "600000",
+          "window_dps": "75789.5",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "2",
+          "outcome": "Cleared",
+          "open_seconds": "5.55",
+          "effective_damage": "600000",
+          "window_dps": "108108.1",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "FinalBullets",
+          "hits": 5,
+          "requested_damage": 600,
+          "lethal": 0
+        },
+        {
+          "source": "FinalSlicer",
+          "hits": 9,
+          "requested_damage": 1080,
+          "lethal": 1
+        },
+        {
+          "source": "PursuitPrism",
+          "hits": 8,
+          "requested_damage": 960,
+          "lethal": 0
+        },
+        {
+          "source": "Stack",
+          "hits": 1,
+          "requested_damage": 313,
+          "lethal": 1
+        },
+        {
+          "source": "Stillness",
+          "hits": 3,
+          "requested_damage": 360,
+          "lethal": 0
+        },
+        {
+          "source": "SweepRight",
+          "hits": 1,
+          "requested_damage": 375,
+          "lethal": 0
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "source": "2026-09-07-4.zip",
+      "version": "0.2.17",
+      "participants": "2",
+      "elapsed_seconds": "227.13",
+      "core_effective_damage": "5000000",
+      "core_open_seconds": "59.30",
+      "core_window_dps": "84317.0",
+      "pylon_effective_damage": "1200000",
+      "pylon_open_seconds": "11.18",
+      "pylon_window_dps": "107302.5",
+      "boss_life": "0",
+      "boss_max_life": "5000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "AllParticipantsDowned",
+        "phase": "FinalSlicer"
+      },
+      "downs": 3,
+      "revival_events": [
+        {
+          "Name": "InstantReviveAccepted",
+          "Count": 1
+        },
+        {
+          "Name": "ParticipantRevived",
+          "Count": 1
+        }
+      ],
+      "stack": {
+        "resolved": 12,
+        "failed": 0
+      },
+      "spread": {
+        "resolved": 15,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "5.83",
+          "effective_damage": "600000",
+          "window_dps": "102857.1",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "2",
+          "outcome": "Cleared",
+          "open_seconds": "5.35",
+          "effective_damage": "600000",
+          "window_dps": "112149.5",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "FinalBullets",
+          "hits": 7,
+          "requested_damage": 840,
+          "lethal": 0
+        },
+        {
+          "source": "FinalSlicer",
+          "hits": 17,
+          "requested_damage": 2040,
+          "lethal": 2
+        },
+        {
+          "source": "PursuitPrism",
+          "hits": 6,
+          "requested_damage": 720,
+          "lethal": 0
+        },
+        {
+          "source": "RemoteCrush",
+          "hits": 1,
+          "requested_damage": 645,
+          "lethal": 1
+        },
+        {
+          "source": "Stillness",
+          "hits": 7,
+          "requested_damage": 840,
+          "lethal": 0
+        },
+        {
+          "source": "SweepLeft",
+          "hits": 1,
+          "requested_damage": 387,
+          "lethal": 0
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "source": "2026-09-07-2.zip",
+      "version": "0.2.16",
+      "participants": "3",
+      "elapsed_seconds": "50.75",
+      "core_effective_damage": "2568583",
+      "core_open_seconds": "18.00",
+      "core_window_dps": "142699.1",
+      "pylon_effective_damage": "1500000",
+      "pylon_open_seconds": "8.75",
+      "pylon_window_dps": "171428.6",
+      "boss_life": "6431417",
+      "boss_max_life": "9000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "AllParticipantsDowned",
+        "phase": "Spread"
+      },
+      "downs": 4,
+      "revival_events": [
+        {
+          "Name": "InstantReviveAccepted",
+          "Count": 1
+        },
+        {
+          "Name": "ParticipantRevived",
+          "Count": 1
+        }
+      ],
+      "stack": {
+        "resolved": 3,
+        "failed": 2
+      },
+      "spread": {
+        "resolved": 2,
+        "failed": 1
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "8.75",
+          "effective_damage": "1500000",
+          "window_dps": "171428.6",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "PursuitPrism",
+          "hits": 3,
+          "requested_damage": 360,
+          "lethal": 0
+        },
+        {
+          "source": "Spread",
+          "hits": 2,
+          "requested_damage": 787,
+          "lethal": 1
+        },
+        {
+          "source": "Stack",
+          "hits": 4,
+          "requested_damage": 1008,
+          "lethal": 2
+        },
+        {
+          "source": "Stillness",
+          "hits": 6,
+          "requested_damage": 720,
+          "lethal": 1
+        },
+        {
+          "source": "SweepLeft",
+          "hits": 2,
+          "requested_damage": 687,
+          "lethal": 0
+        },
+        {
+          "source": "SweepRight",
+          "hits": 1,
+          "requested_damage": 375,
+          "lethal": 0
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "source": "2026-09-07-2.zip",
+      "version": "0.2.16",
+      "participants": "3",
+      "elapsed_seconds": "64.57",
+      "core_effective_damage": "2213415",
+      "core_open_seconds": "18.00",
+      "core_window_dps": "122967.5",
+      "pylon_effective_damage": "1500000",
+      "pylon_open_seconds": "11.57",
+      "pylon_window_dps": "129683.0",
+      "boss_life": "6786585",
+      "boss_max_life": "9000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "AllParticipantsDowned",
+        "phase": "Spread"
+      },
+      "downs": 5,
+      "revival_events": [
+        {
+          "Name": "InstantReviveAccepted",
+          "Count": 2
+        },
+        {
+          "Name": "ParticipantRevived",
+          "Count": 2
+        }
+      ],
+      "stack": {
+        "resolved": 5,
+        "failed": 3
+      },
+      "spread": {
+        "resolved": 4,
+        "failed": 1
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "11.57",
+          "effective_damage": "1500000",
+          "window_dps": "129683.0",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "PursuitPrism",
+          "hits": 4,
+          "requested_damage": 480,
+          "lethal": 0
+        },
+        {
+          "source": "Spread",
+          "hits": 2,
+          "requested_damage": 787,
+          "lethal": 2
+        },
+        {
+          "source": "Stack",
+          "hits": 3,
+          "requested_damage": 1492,
+          "lethal": 2
+        },
+        {
+          "source": "Stillness",
+          "hits": 4,
+          "requested_damage": 480,
+          "lethal": 1
+        },
+        {
+          "source": "SweepRight",
+          "hits": 2,
+          "requested_damage": 675,
+          "lethal": 0
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "source": "2026-09-07-2.zip",
+      "version": "0.2.16",
+      "participants": "1",
+      "elapsed_seconds": "17.55",
+      "core_effective_damage": "0",
+      "core_open_seconds": "0.00",
+      "core_window_dps": "0.0",
+      "pylon_effective_damage": "600000",
+      "pylon_open_seconds": "6.05",
+      "pylon_window_dps": "99173.6",
+      "boss_life": "5000000",
+      "boss_max_life": "5000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "AllParticipantsDowned",
+        "phase": "Spread"
+      },
+      "downs": 1,
+      "revival_events": [],
+      "stack": {
+        "resolved": 1,
+        "failed": 1
+      },
+      "spread": {
+        "resolved": 0,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "6.05",
+          "effective_damage": "600000",
+          "window_dps": "99173.6",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "PursuitPrism",
+          "hits": 3,
+          "requested_damage": 360,
+          "lethal": 0
+        },
+        {
+          "source": "Stack",
+          "hits": 1,
+          "requested_damage": 500,
+          "lethal": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "source": "2026-09-07-2.zip",
+      "version": "0.2.16",
+      "participants": "3",
+      "elapsed_seconds": "85.33",
+      "core_effective_damage": "1367752",
+      "core_open_seconds": "18.00",
+      "core_window_dps": "75986.2",
+      "pylon_effective_damage": "2600269",
+      "pylon_open_seconds": "21.83",
+      "pylon_window_dps": "119096.3",
+      "boss_life": "7632248",
+      "boss_max_life": "9000000",
+      "overload": "1",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "RecoveryImpossible",
+        "phase": "Spread"
+      },
+      "downs": 5,
+      "revival_events": [
+        {
+          "Name": "InstantReviveAccepted",
+          "Count": 2
+        },
+        {
+          "Name": "ParticipantRevived",
+          "Count": 2
+        }
+      ],
+      "stack": {
+        "resolved": 6,
+        "failed": 5
+      },
+      "spread": {
+        "resolved": 5,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "7.83",
+          "effective_damage": "1500000",
+          "window_dps": "191489.4",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "2",
+          "outcome": "Deadline",
+          "open_seconds": "14.00",
+          "effective_damage": "1100269",
+          "window_dps": "78590.6",
+          "target_hp_remaining": "399731"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "PursuitPrism",
+          "hits": 8,
+          "requested_damage": 960,
+          "lethal": 1
+        },
+        {
+          "source": "PylonPulse",
+          "hits": 1,
+          "requested_damage": 218,
+          "lethal": 0
+        },
+        {
+          "source": "Stack",
+          "hits": 11,
+          "requested_damage": 3668,
+          "lethal": 3
+        },
+        {
+          "source": "Stillness",
+          "hits": 4,
+          "requested_damage": 480,
+          "lethal": 1
+        },
+        {
+          "source": "SweepRight",
+          "hits": 1,
+          "requested_damage": 300,
+          "lethal": 0
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "source": "2026-09-07-2.zip",
+      "version": "0.2.16",
+      "participants": "3",
+      "elapsed_seconds": "116.30",
+      "core_effective_damage": "1444235",
+      "core_open_seconds": "36.00",
+      "core_window_dps": "40117.6",
+      "pylon_effective_damage": "3000000",
+      "pylon_open_seconds": "22.30",
+      "pylon_window_dps": "134529.1",
+      "boss_life": "7555765",
+      "boss_max_life": "9000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "RecoveryImpossible",
+        "phase": "Spread"
+      },
+      "downs": 5,
+      "revival_events": [
+        {
+          "Name": "InstantReviveAccepted",
+          "Count": 2
+        },
+        {
+          "Name": "ParticipantRevived",
+          "Count": 2
+        }
+      ],
+      "stack": {
+        "resolved": 8,
+        "failed": 7
+      },
+      "spread": {
+        "resolved": 7,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "9.98",
+          "effective_damage": "1500000",
+          "window_dps": "150250.4",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "2",
+          "outcome": "Cleared",
+          "open_seconds": "12.32",
+          "effective_damage": "1500000",
+          "window_dps": "121786.2",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "PursuitPrism",
+          "hits": 3,
+          "requested_damage": 360,
+          "lethal": 0
+        },
+        {
+          "source": "Stack",
+          "hits": 13,
+          "requested_damage": 4015,
+          "lethal": 2
+        },
+        {
+          "source": "Stillness",
+          "hits": 7,
+          "requested_damage": 840,
+          "lethal": 1
+        },
+        {
+          "source": "SweepLeft",
+          "hits": 1,
+          "requested_damage": 300,
+          "lethal": 1
+        },
+        {
+          "source": "SweepRight",
+          "hits": 2,
+          "requested_damage": 687,
+          "lethal": 1
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "source": "2026-09-07-2.zip",
+      "version": "0.2.16",
+      "participants": "3",
+      "elapsed_seconds": "230.83",
+      "core_effective_damage": "9000000",
+      "core_open_seconds": "78.10",
+      "core_window_dps": "115236.9",
+      "pylon_effective_damage": "3000000",
+      "pylon_open_seconds": "20.33",
+      "pylon_window_dps": "147541.0",
+      "boss_life": "0",
+      "boss_max_life": "9000000",
+      "overload": "0",
+      "terminal": {
+        "reason": "Defeat",
+        "cause": "RecoveryImpossible",
+        "phase": "Spread"
+      },
+      "downs": 4,
+      "revival_events": [
+        {
+          "Name": "InstantReviveAccepted",
+          "Count": 1
+        },
+        {
+          "Name": "ParticipantRevived",
+          "Count": 1
+        }
+      ],
+      "stack": {
+        "resolved": 12,
+        "failed": 8
+      },
+      "spread": {
+        "resolved": 14,
+        "failed": 0
+      },
+      "pylon_windows": [
+        {
+          "phase": "PylonCheck",
+          "loop": "1",
+          "outcome": "Cleared",
+          "open_seconds": "12.43",
+          "effective_damage": "1500000",
+          "window_dps": "120643.4",
+          "target_hp_remaining": "0"
+        },
+        {
+          "phase": "PylonCheck",
+          "loop": "2",
+          "outcome": "Cleared",
+          "open_seconds": "7.90",
+          "effective_damage": "1500000",
+          "window_dps": "189873.4",
+          "target_hp_remaining": "0"
+        }
+      ],
+      "raid_damage": [
+        {
+          "source": "CoreSalvo",
+          "hits": 1,
+          "requested_damage": 120,
+          "lethal": 1
+        },
+        {
+          "source": "FinalBullets",
+          "hits": 6,
+          "requested_damage": 720,
+          "lethal": 0
+        },
+        {
+          "source": "FinalSlicer",
+          "hits": 3,
+          "requested_damage": 360,
+          "lethal": 0
+        },
+        {
+          "source": "Lattice",
+          "hits": 5,
+          "requested_damage": 600,
+          "lethal": 0
+        },
+        {
+          "source": "PursuitPrism",
+          "hits": 4,
+          "requested_damage": 480,
+          "lethal": 0
+        },
+        {
+          "source": "RotatingBlade",
+          "hits": 1,
+          "requested_damage": 120,
+          "lethal": 0
+        },
+        {
+          "source": "Stack",
+          "hits": 18,
+          "requested_damage": 4149,
+          "lethal": 2
+        },
+        {
+          "source": "Stillness",
+          "hits": 9,
+          "requested_damage": 1080,
+          "lethal": 1
+        },
+        {
+          "source": "SweepLeft",
+          "hits": 1,
+          "requested_damage": 387,
+          "lethal": 0
+        },
+        {
+          "source": "SweepRight",
+          "hits": 3,
+          "requested_damage": 1062,
+          "lethal": 0
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "Latest0.2.18 solo run lasted381.95s, reached zero Core HP, failed FinalSlicer. Stack24/24 and Spread27/27 passed; one Down, no revive attempt.",
+    "Last solo slicer segment hit for120 at ticks23590/23621/23652/23683: four hits over1.55s. Life before hits378/268/152/42, max645. FinalSlicer accounts for10 logged hits and the sole lethal event.",
+    "First solo18-second exposure records zero net HP loss, later active windows mostly52–62k DPS. No hit-attempt/aim instrumentation; cannot conclude invulnerability bug from zero loss.",
+    "Two-player0.2.17: all three runs reached zero Core HP and failed in Final. Core aggregate about84.3k DPS over damageable windows. Pylon pools cleared in5.35–7.92s against14s, no Overload.",
+    "Two-player terminal substate Spread is not necessarily the damaging attack: runs2/3 end after a lethal preceding Stack with a Downed member; the tick advances the action before recovery commit. The accepted cause remains AllParticipantsDowned. Three accepted revivals have matching ParticipantRevived events.",
+    "Three-player0.2.16: five runs, one reached zero Core HP. Core open-window DPS40.1–142.7k; completed run115.2k. Pylon clear windows7.83–12.43s, one failed14s window. Old recovery/attack behavior prevents treating these as current0.2.19 balance acceptance.",
+    "Pylons have zero contact damage/no offensive AI. In Phase I they shield Core until all are broken and provide a timed target-switch/DPS check. Failure pulses35% max HP nonlethally, increases Overload, shortens the next exposure, and the third failure defeats the Raid. No Pylons in later scores.",
+    "No HP edits in0.2.19. Recommend retain Boss5m(two)/9m(three), Pylon300k(two)/500k(three) initially while new overlap pressure is evaluated. Two-player Pylon400k would estimate8.6s at aggregate92.6k, but inherited solo workload would take about15.2s and exceed14s; do not silently introduce that difficulty change.",
+    "Prefer a future Pylon tactical role (e.g. each broken Pylon disables an emitter) over HP inflation alone. This is discussion only, not implemented.",
+    "Raw sources and complete per-window private summary were preserved in ignored local playtest storage. No usernames, character slots, Steam IDs, IP addresses or Fight GUIDs are included here."
+  ]
+}
