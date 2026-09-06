@@ -18,6 +18,16 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("repository", nargs="?", default=".")
     parser.add_argument(
+        "--write-catalog",
+        action="store_true",
+        help="regenerate the documentation catalog before checking the final edit batch",
+    )
+    parser.add_argument(
+        "--with-domain",
+        action="store_true",
+        help="also run the Terraria-independent domain harness in Release configuration",
+    )
+    parser.add_argument(
         "--with-dotnet",
         action="store_true",
         help="also run the project build when pinned tModLoader targets are available",
@@ -44,23 +54,23 @@ def main() -> int:
             print(f"- {path}", file=sys.stderr)
         return 2
 
-    if args.audit_only and args.with_dotnet:
-        parser.error("--audit-only and --with-dotnet cannot be combined")
+    if args.audit_only and (args.write_catalog or args.with_domain or args.with_dotnet):
+        parser.error("--audit-only cannot be combined with --write-catalog, --with-domain, or --with-dotnet")
 
-    commands = [
-        [sys.executable, "tools/docs_catalog.py", "--check"],
-        [sys.executable, "tools/repository_checks.py"],
-        [sys.executable, "tools/validate_yaml.py"],
-    ]
-    if not args.audit_only:
+    commands = []
+    if args.write_catalog:
+        commands.append([sys.executable, "-B", "tools/docs_catalog.py", "--write"])
+    commands.extend([
+        [sys.executable, "-B", "tools/docs_catalog.py", "--check"],
+        [sys.executable, "-B", "tools/repository_checks.py"],
+        [sys.executable, "-B", "tools/validate_yaml.py"],
+    ])
+    if args.with_domain:
         commands.append(
             [
-                sys.executable,
-                "-m",
-                "py_compile",
-                "tools/docs_catalog.py",
-                "tools/repository_checks.py",
-                "tools/validate_yaml.py",
+                "dotnet", "run", "--project",
+                "Tests/Convergence.DomainTests/Convergence.DomainTests.csproj",
+                "--configuration", "Release",
             ]
         )
     if args.with_dotnet:
@@ -77,8 +87,8 @@ def main() -> int:
 
     if args.audit_only:
         print("Audit-only repository checks passed without intentional bytecode/build output.")
-    elif not args.with_dotnet:
-        print("Static repository checks passed. Real tModLoader build/load remains a separate gate.")
+    else:
+        print("Selected automated checks passed. Runtime load/playtest evidence remains separate.")
     return 0
 
 

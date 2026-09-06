@@ -9,6 +9,8 @@ Produce reproducible, license-aware prior-art research before changing Convergen
 
 ## Establish the question
 
+Start with existing scoped research and source/version evidence. Reuse findings when the target version and relevant source still match; check freshness for mutable or compatibility-critical claims. Search only unresolved mechanisms rather than repeating a broad prior-art survey.
+
 1. Convert the request into a small set of mechanisms, such as lethal-damage interception, revive channel authority, arena ejection, part ownership, or DPS-window timing.
 2. Record the target Terraria, tModLoader, Calamity, .NET, and C# versions from the repository's `docs/VERSION_MATRIX.md`, `build.txt`, project/props files, and dependency manifests. Record conflicts or missing declarations instead of guessing.
 3. Define what evidence would change the design. Avoid browsing unrelated showcase content.
@@ -22,7 +24,7 @@ Produce reproducible, license-aware prior-art research before changing Convergen
 4. Use release tags or commit SHAs that match the target version when available.
 5. Use secondary discussion only to locate primary code or to document an unresolved behavior; label it secondary.
 
-For every finding, capture repository URL, exact file path or documentation page, tag/commit/branch, access date, relevant type/member, observation, inference, applicability, and license. Use the template in [evidence-template.md](references/evidence-template.md).
+For a narrow official-API lookup, record the pinned version/source URL, type/member, verified behavior, applicability, and any uncertainty in a short note; include the access date for remote verification. Use the full [evidence-template.md](references/evidence-template.md) for cross-Mod comparisons, design-changing findings, or copying/provenance questions. Shared repository/version/license details can be recorded once per survey and referenced by its findings.
 
 Record the exact repositories, paths, symbols, and search terms examined for a negative result. Write “not found in this scoped survey,” never “no prior art exists” or a legal novelty claim. Verify every cited URL before finalizing the report. If a primary URL is unavailable, blocked, or rate-limited, label the status and access date, try a release/tag page or another official mirror, and keep the claim unverified unless a pinned primary source can support it.
 
@@ -46,11 +48,11 @@ Determine each surveyed commit's target versions from its `build.txt`, project f
 - Treat missing or ambiguous license terms as no permission to copy.
 - Prefer independently written contracts and algorithms based on documented behavior.
 - Quote only the minimum needed to identify an API or prove a finding.
-- Record ideas influenced by another project in Convergence's research and IP provenance documents.
+- Record material design influence from another project in Convergence's research and IP provenance documents; a routine official API signature lookup does not require a new provenance entry.
 
 ## Synthesize for Convergence
 
-Separate the report into:
+For design-changing research, distinguish these categories where applicable; omit empty sections. A narrow API answer needs only the supported fact, source/version, and consequence for the task:
 
 1. Confirmed API facts.
 2. Observed prior-art patterns.
@@ -64,4 +66,4 @@ Do not declare multiplayer correctness from source inspection alone. Recommend a
 
 ## Update durable knowledge
 
-In implementation mode, place task-specific research under `docs/research/`. Update `docs/SOURCES.md` for durable external sources and `docs/IP_PROVENANCE.md` when a design is materially influenced by another project. Keep links direct and include version/commit evidence. In audit-only mode, return the same structured material without writing it.
+In implementation mode, extend an existing relevant research note when the finding will be reused; create a new `docs/research/` report only for a distinct durable question. Routine lookups can remain in the task result or the owning document. Update `docs/SOURCES.md` for new durable external sources and `docs/IP_PROVENANCE.md` for material design influence, using links rather than repeating the full finding. In audit-only mode, return findings without writing them.

@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.5",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 7,
+  "runtime": "tModLoader v2026.07.3.0 / Terraria 1.4.4.9 / Calamity 2.2.4",
+  "scope": "Solemn original score and SFX, high-resolution original art, longer anticipation and harmless prelaunch charge lock",
+  "checks": {
+    "audio_assets": "passed: 80s stereo 48kHz BGM, 18 mono 48kHz PCM16 effects, finite decode and peak below -3dB; original PCM24 preview masters and 72.4s reel exported. PCM loop delta zero; Vorbis boundary step 0.00096. Human listening not_run",
+    "image_exports": "passed: visually inspected original body 1254x1254 RGBA, lance 2172x724 RGBA and background 1672x941 RGB; copied exports into Assets, preserved alpha; no game render claim",
+    "domain": "passed: 62 deterministic cases, including prelaunch origin/heading freeze, 24-tick harmless margin, first-fire projection/swept hitbox, complete sequence fit in shortest phase and updated deadlines",
+    "codec": "passed: compiled protocol v7; 42 pattern/absent/locked-hold/live round trips for 2/3/4 players, 8 malformed/truncated cases rejected, exact buffer and recovery deadlines preserved",
+    "static_wrapper": "passed once in live ModSources: 47 indexed documents, 241 repository files, 10 YAML files; final git diff --check passed (only an existing CRLF normalization warning)",
+    "actual_build_package": "passed: live ModSources 0.2.5 compiled and packaged, zero warnings/errors; Convergence.tmod 14030691 bytes. No GUI or world launched",
+    "client_load_hostplay_and_visual_smoke": "not_run: user owns all tModLoader launch, GUI and playtesting",
+    "dedicated_server_two_clients_and_latency": "not_run: no new server initialization or transport fields; real v7 prelaunch cue timing and dash compatibility still need user multiplayer smoke",
+    "prior_runtime_observation": "0.2.4: world join and six two-player pulls observed; no old spawn exception. Six AllParticipantsDowned defeats, two zero-damage full Stacks, no Spread damage or successful revive recorded. Caught Calamity Sepulcher exception once. Not evidence of 0.2.5 behavior"
+  }
+}

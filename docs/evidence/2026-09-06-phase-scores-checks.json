@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.13",
+  "protocol": 13,
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "environment_reference": "2026-09-06-eclosion-salvos-checks.json",
+  "scope": "Ordered phase scores, wider spreads/clock stacks, phase HP gates, rotating blade, remote arms, HP-zero Final, original shell and audio",
+  "authority": "Exact-Fight feature loop/runtime; clients render bounded timed facts, never determine outcomes",
+  "domain": {"status": "passed", "cases": 84, "counts": [2,3,4], "coverage": "First complete action lists, overkill/floors, eight-site Final, duplicate tick/terminal, practical travel budget, sword/hand/half-field/bullet/slicer timing and geometry; retained recovery and cleanup regressions"},
+  "compiled_codec": {"status": "passed", "round_trips": 222, "malformed_or_truncated": 40, "coverage": "All phase/action descriptors, HP-zero Final, 2/3/4 members, bounded stage/action timing, prior grids/Core rays, shared-buffer boundaries, recovery fields"},
+  "package": {"status": "passed", "actual_modsources": true, "warnings": 0, "errors": 0, "bytes": 31026406, "sha256": "176ED9B3E9C950FC66AF99B3B816067D53068562447BD27595E151EE08481943"},
+  "asset_checks": {"status": "passed", "shell_rgba_size": [1254,1254], "transparent_corner_alpha": 0, "new_music_files": 2, "new_or_replaced_sfx": 12, "audio_sample_rate": 48000, "decoded_finite_unclipped": true, "human_listening": "not_run", "visual_acceptance": "not_run"},
+  "static_wrapper": {"status": "passed", "catalog_documents": 54, "repository_files": 300, "yaml_files": 10, "command": "python .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog", "location": "Scoped staging copy; final catalog and documentation deployed with source"},
+  "deployment": {"status": "normal_profile_packaged", "existing_profile_copy": "passed", "profiles": ["ConvergenceServer", "LocalRaidSolo/server", "LocalRaidSolo/client-a", "LocalRaidSolo/client-b"], "package_hash_matches": 5, "previous_profile_packages_backed_up": true, "scope": "Changed files only with baseline/deployed hash checks; preserves user changes, no deletes"},
+  "runtime": {"game_load": "not_run", "host_and_play_all_stages": "not_run", "dedicated_server_all_stages": "not_run", "three_four_player_latency": "not_run", "cancel_defeat_unload_new_visuals": "not_run", "note": "User-owned GUI plus friend remains default; no game/server launched, no public debug or save/Mod-list change"},
+  "limitations": ["Movement budget assumes 10 pixels/tick plus 30 reaction and 6 settling ticks; real acceleration, equipment and latency unmeasured", "Art/audio procedural and numeric checks are not WotG-equivalent visual quality certification", "Final soundtrack accelerates offline; no sample-accurate late-join seek", "Source/asset public-release licenses remain unresolved"],
+  "preceding_0212_two_player_pull": {"result": "Victory", "seconds": 88.92, "core_window_dps": 110660.3, "stack_attendance": ["2/2","2/2"], "downed": 2, "revived": 1, "grid_fires": 12, "battle_exception": false}
+}

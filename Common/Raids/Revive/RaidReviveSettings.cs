@@ -14,12 +14,12 @@ internal readonly record struct RaidReviveSettings(
     bool UsesSharedTokens = true,
     ulong ReviveLockoutTicks = 0)
 {
-    public const int MinimumParticipantCount = 2;
+    public const int MinimumParticipantCount = 1;
     public const int MaximumParticipantCount = 4;
 
     public bool IsValid => ParticipantCount is >= MinimumParticipantCount and <= MaximumParticipantCount
         && InitialTokenCount == (UsesSharedTokens ? ParticipantCount - 1 : 0)
-        && DownedTimeoutTicks > ChannelDurationTicks
+        && (DownedTimeoutTicks == 0 || DownedTimeoutTicks > ChannelDurationTicks)
         && DisconnectGraceTicks > 0
         && InvulnerabilityTicks > 0
         && float.IsFinite(RestoredLifeRatio)
@@ -27,7 +27,7 @@ internal readonly record struct RaidReviveSettings(
 
     public static RaidReviveSettings CreateInitial(int participantCount)
     {
-        if (participantCount is < MinimumParticipantCount or > MaximumParticipantCount)
+        if (participantCount is < 2 or > MaximumParticipantCount)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(participantCount),
@@ -46,12 +46,20 @@ internal readonly record struct RaidReviveSettings(
     }
 
     public static RaidReviveSettings CreateInstantUnlimited(int participantCount)
-        => CreateInitial(participantCount) with
+    {
+        if (participantCount is < MinimumParticipantCount or > MaximumParticipantCount)
+            throw new ArgumentOutOfRangeException(nameof(participantCount));
+        // The generic service needs no solo switch: one Downed member already
+        // means all participants are Downed at the ordinary authority commit.
+        return CreateInitial(Math.Max(2, participantCount)) with
         {
+            ParticipantCount = participantCount,
             InitialTokenCount = 0,
             UsesSharedTokens = false,
             ChannelDurationTicks = 0,
+            DownedTimeoutTicks = 0, // No elimination timer; an ally can outlast recipient lockout.
             WeaknessTicks = 0,
             ReviveLockoutTicks = 3_600,
         };
+    }
 }

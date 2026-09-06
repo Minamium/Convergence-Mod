@@ -8,6 +8,7 @@ using Convergence.Common.Foundation.Identifiers;
 using Convergence.Common.Raids.Revive;
 using Convergence.Content.Encounters.FirstSeverance.Actors;
 using Convergence.Content.Encounters.FirstSeverance.FoundationCore;
+using Convergence.Content.Encounters.FirstSeverance.Development;
 using Convergence.Content.Encounters.FirstSeverance.Revive;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -41,10 +42,14 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     private readonly ulong encounterSequence;
     private readonly FightId fightId;
     private readonly FirstSeveranceRoster roster;
+    private readonly FirstSeverancePartyScaling partyScaling;
     private readonly int serverTileEntityId;
     private readonly TilePoint coreTopLeft;
+    private readonly Vector2 groundCenter;
+    private readonly FirstSeveranceArenaLayout fieldLayout;
     private readonly FirstSeveranceEncounterPlan plan;
     private readonly FirstSeveranceReviveBoundary revive;
+    private readonly FirstSeveranceDebugAssistLease? debugAssist;
     private readonly uint[] lastQueuedNonces;
     private readonly bool[] observedConnected;
     private readonly RaidParticipantCombatState[] projectedCombatStates;
@@ -59,9 +64,14 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     private int actorToken;
     private int bossNpcIndex = -1;
     private int lastObservedBossLife;
-    private int stackTargetSlot = -1;
-    private int stackDamagePool;
+    private FirstSeveranceGridVolley? gridVolley;
+    private uint gridSerial;
+    private ulong nextGridTick;
+    private readonly HashSet<ParticipantId> gridHitParticipants = new();
     private bool bossKilled;
+    private int boundaryDamage;
+    private readonly HashSet<(int Pulse, ParticipantId Participant)> scoreHits = new();
+    private readonly HashSet<int> scoreFires = new();
     private bool cancelRequested;
     private FirstSeveranceMechanicResult lastMechanicResult;
     private uint mechanicRevision;
@@ -71,14 +81,32 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     private FirstSeveranceLanceVolley? lanceVolley;
     private uint lanceSerial;
     private ulong nextLanceTick;
+    private byte attackStep;
+    private int attackTargetSlot = -1;
+    private uint attackSequence;
     private readonly HashSet<ParticipantId> lanceHitParticipants = new();
+    private FirstSeveranceDamageWindow? damageWindow;
+    private FirstSeveranceSubstate damageWindowPhase;
+    private int damageWindowLoop;
+    private int damageWindowFloor;
+    private ulong nextProgressTick;
+    private ulong combatStartedTick;
+    private int[] progressPylonSlots = Array.Empty<int>();
+    private int[] progressPylonLife = Array.Empty<int>();
+    private bool progressObservationMissing;
+    private long totalPylonDamage;
+    private long totalCoreDamage;
+    private ulong totalPylonOpenTicks;
+    private ulong totalCoreOpenTicks;
 
     internal FirstSeverancePrototypeCombatRuntime(
         ulong encounterSequence,
         FightId fightId,
         FirstSeveranceRoster roster,
         int serverTileEntityId,
-        TilePoint coreTopLeft)
+        TilePoint coreTopLeft,
+        FirstSeveranceArenaLayout arena,
+        FirstSeveranceDebugAssistLease? debugAssist = null)
     {
         if (encounterSequence == 0)
         {
@@ -93,8 +121,12 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         this.encounterSequence = encounterSequence;
         this.fightId = fightId;
         this.roster = roster ?? throw new ArgumentNullException(nameof(roster));
+        partyScaling = FirstSeverancePartyScaling.ForCount(roster.Count);
         this.serverTileEntityId = serverTileEntityId;
         this.coreTopLeft = coreTopLeft;
+        groundCenter = new(arena.Core.LogicalCenter.X * 16f, arena.Core.BaseY * 16f);
+        fieldLayout = arena;
+        this.debugAssist = debugAssist;
         plan = FirstSeveranceEncounterPlan.Instance;
         revive = new FirstSeveranceReviveBoundary(fightId, LogReviveEvent);
         lastQueuedNonces = new uint[roster.Count];
@@ -127,8 +159,18 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         if (!FoundationCoreProtectionSystem.TryResolveOwnedCore(
                 serverTileEntityId,
                 fightId,
-                out _)
-            || !FoundationCoreProtectionSystem.TryEnterActive(serverTileEntityId, fightId))
+                out var ownedCore))
+        {
+            failureCode = "first_severance.combat_core_unavailable";
+            return false;
+        }
+
+        if (!FirstSeveranceCoreResolver.RevalidateForCombat(ownedCore, fieldLayout, roster.Count, out failureCode))
+        {
+            Log(authorityTick, "event=ContainmentActivationRejected failure=" + failureCode);
+            return false;
+        }
+        if (!FoundationCoreProtectionSystem.TryEnterActive(serverTileEntityId, fightId))
         {
             failureCode = "first_severance.combat_core_unavailable";
             return false;
@@ -156,13 +198,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         loop = new FirstSeveranceLoopStateMachine(
             plan,
             roster.Count,
-            FirstSeverancePrototypeBoss.MaximumLife,
-            authorityTick);
-        lastObservedBossLife = FirstSeverancePrototypeBoss.MaximumLife;
-        int totalLife = 0;
-        foreach (FirstSeveranceRosterMember member in roster.Members)
-            totalLife += Main.player[member.ServerWhoAmI].statLifeMax2;
-        stackDamagePool = Math.Max(100, totalLife / roster.Count * 14 / 10);
+            partyScaling.BossLife,
+            authorityTick, FirstSeveranceBossPhasePlan.Instance);
+        lastObservedBossLife = partyScaling.BossLife;
         if (!FirstSeveranceCombatAuthority.TryAttach(this))
         {
             failureCode = "first_severance.combat_authority_busy";
@@ -172,7 +210,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         isAttached = true;
         isStarted = true;
         GrantPrototypeReviveKits();
-        Log(authorityTick, $"event=CombatStarted participants={roster.Count} stack_pool={stackDamagePool}");
+        SynchronizeRevivePlayers(authorityTick);
+        combatStartedTick = authorityTick;
+        Log(authorityTick, $"event=CombatStarted participants={roster.Count} solo_debug={roster.Count == 1} solo_start_enabled={FirstSeveranceDevelopmentPolicy.AllowSoloDebugStart} hp_policy=FrozenRosterDevelopment stack_policy=MissingRosterFraction boss_max_life={partyScaling.BossLife} pylon_max_life={partyScaling.PylonLife} pylon_count={plan.PylonCount.GetValue(roster.Count)} pylon_open_ticks={plan.Timing.PylonActiveTicks} core_open_ticks={plan.Timing.NormalExposureTicks} core_penalized_ticks={plan.Timing.PenalizedExposureTicks} dps_basis=AuthorityNetHpLoss");
         failureCode = string.Empty;
         return true;
     }
@@ -198,7 +238,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return;
         if (npc.whoAmI == bossNpcIndex
             && npc.type == ModContent.NPCType<FirstSeverancePrototypeBoss>()
-            && loop.State.Substate == FirstSeveranceSubstate.CoreExposure)
+            && FirstSeveranceBossPhasePlan.IsDamageState(loop.State.Substate))
             bossKilled = true;
         else if (npc.type == ModContent.NPCType<FirstSeverancePrototypePylon>()
             && pylonNpcIndices.Contains(npc.whoAmI))
@@ -213,6 +253,17 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return false;
         return projectedCombatStates[member.ParticipantId.Value] == RaidParticipantCombatState.Alive
             && !Main.player[playerSlot].GetModPlayer<FirstSeveranceRaidPlayer>().IsReviving;
+    }
+
+    internal bool ProtectBossPhaseBoundary(NPC npc)
+    {
+        if (!isStarted || isCleaned || loop is null || npc.whoAmI != bossNpcIndex
+            || (int)npc.ai[0] != actorToken)
+            return false;
+        boundaryDamage = Math.Max(boundaryDamage, Math.Max(0, loop.State.BossLife - loop.DamageFloor));
+        npc.life = Math.Max(1, loop.DamageFloor);
+        npc.netUpdate = true;
+        return true;
     }
 
     internal bool TryQueuePrototypeDown(
@@ -310,9 +361,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
 
         bool lanceChanged = UpdateLances(before, context.AuthorityTick,
-            acceptedBossDamage >= before.BossLife
-                || (before.Substate == FirstSeveranceSubstate.PylonCheck
-                    && destroyedPylons >= before.RemainingPylons));
+            before.Substate == FirstSeveranceSubstate.PylonCheck && destroyedPylons >= before.RemainingPylons);
+        lanceChanged |= UpdateGrid(before, context.AuthorityTick, false);
+        UpdateScoreHazards(before, context.AuthorityTick);
 
         FirstSeveranceLoopUpdate loopUpdate = loop.Advance(
             new FirstSeveranceLoopInput(
@@ -325,6 +376,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
 
         FirstSeveranceLoopState after = loop.State;
+        if (before.BossLife > loop.DamageFloor && after.BossLife == loop.DamageFloor)
+            Log(context.AuthorityTick, $"event=HpGateReached boss_phase={after.BossPhase} life={after.BossLife} completed_cycles={after.CompletedPhaseCycles} action={after.ActionIndex}");
+        PublishDamageProgress(after, context.AuthorityTick);
         if (after.Overload > before.Overload)
         {
             foreach (FirstSeveranceRosterMember member in roster.Members)
@@ -354,19 +408,23 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         if (!reviveUpdate.RequestedTermination.IsNone)
             return reviveUpdate;
 
-        if (before.Substate != after.Substate
+        bool windowChanged = before.SubstateEnteredTick != after.SubstateEnteredTick;
+        if (windowChanged
             && !ApplySubstateTransition(before.Substate, after.Substate, context.AuthorityTick))
         {
             return End(FirstSeveranceTerminalCause.RuntimeInvariantBroken);
         }
 
-        if (before.Substate != after.Substate)
-            Log(context.AuthorityTick, $"event=PhaseChanged phase={after.Substate} loop={after.ZeroBasedLoopIndex + 1} overload={after.Overload} boss_life={after.BossLife}");
+        if (windowChanged)
+        {
+            Log(context.AuthorityTick, $"event=PhaseChanged phase={after.Substate} boss_phase={after.BossPhase} phase_start_tick={after.BossPhaseStartedTick} action={after.ActionIndex} completed_cycles={after.CompletedPhaseCycles} resolve_tick={after.ResolveTick} loop={after.ZeroBasedLoopIndex + 1} overload={after.Overload} boss_life={after.BossLife}");
+            BeginDamageProgress(after);
+        }
 
         UpdateDamageWindows(after, context.AuthorityTick);
         SynchronizeBossLife(after);
 
-        bool combatObservable = before.Substate != after.Substate
+        bool combatObservable = windowChanged
             || before.RemainingPylons != after.RemainingPylons
             || before.ZeroBasedLoopIndex != after.ZeroBasedLoopIndex
             || context.AuthorityTick % 30 == 0;
@@ -405,13 +463,15 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             state.BossMaximumLife,
             reviveSnapshot.RemainingTokenCount,
             reviveSnapshot.Revision,
-            stackTargetSlot,
+            StackWorldCenter.X,
+            StackWorldCenter.Y,
             CoreWorldCenter.X,
             CoreWorldCenter.Y,
             lastMechanicResult,
             mechanicRevision,
             Array.AsReadOnly(participants),
-            lanceVolley);
+            lanceVolley, state.BossPhase, state.BossPhaseStartedTick, gridVolley,
+            state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles);
         return true;
     }
 
@@ -430,24 +490,36 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         string terminalCause = FirstSeveranceTerminationContract.Instance.IsValid(context.Termination)
             ? FirstSeveranceTerminationContract.Instance.GetCause(context.Termination).ToString() : "Unknown";
         Log(Main.GameUpdateCount, $"event=CombatEnded reason={context.EndReason} cause={terminalCause} phase={loop?.State.Substate} overload={loop?.State.Overload}");
+        FinishDamageProgress(Main.GameUpdateCount, terminalCause);
 
         CleanupPylons();
         CleanupNpc(bossNpcIndex, ModContent.NPCType<FirstSeverancePrototypeBoss>());
         bossNpcIndex = -1;
+        debugAssist?.Revoke(); // Clear protection before any terminal player death.
         for (int index = 0; index < roster.Count; index++)
         {
             FirstSeveranceRosterMember member = roster.Members[index];
             if (TryGetPlayer(member, out Player player))
             {
                 player.GetModPlayer<FirstSeveranceRaidPlayer>().ClearRaidState();
+                if (context.EndReason == EncounterEndReason.Defeat)
+                    Log(Main.GameUpdateCount, $"event=DefeatDeathOrdered participant={member.ParticipantId.Value} slot={member.ServerWhoAmI}");
             }
         }
 
         revive.Cleanup(context);
+        scoreHits.Clear();
+        scoreFires.Clear();
+        boundaryDamage = 0;
         Array.Clear(projectedReviveLockouts);
         lanceVolley = null;
         lanceHitParticipants.Clear();
+        gridVolley = null;
+        gridHitParticipants.Clear();
         nextLanceTick = 0;
+        attackStep = 0;
+        attackTargetSlot = -1;
+        attackSequence = 0;
         pendingIntents.Clear();
         Array.Clear(lastQueuedNonces);
         if (isAttached)
@@ -638,6 +710,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                 CreateParticipantProjection(snapshot.Value, participant, index);
             player.GetModPlayer<FirstSeveranceRaidPlayer>().ApplyProjection(
                 fightId, projection, authorityTick);
+            player.GetModPlayer<FirstSeveranceContainmentPlayer>().Refresh(fightId,
+                FirstSeveranceContainmentBounds.FromGround(groundCenter.X, groundCenter.Y), member.ConnectionEpoch);
 
             if (lifeChanged && Main.netMode == NetmodeID.Server)
             {
@@ -662,7 +736,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             participant.DownedDeadlineTick, completesTick, healthRevisions[index],
             Math.Max(1, correctedLife[index]), downedPositions[index].X, downedPositions[index].Y,
             participant.InvulnerabilityUntilTick, participant.WeaknessUntilTick,
-            participant.ReviveLockoutUntilTick);
+            participant.ReviveLockoutUntilTick,
+            debugAssist?.Protects(fightId, roster.Members[index]) == true
+                && participant.IsConnected && participant.CombatState == RaidParticipantCombatState.Alive);
     }
 
     private void SetCorrectedLife(int index, Player player, int life)
@@ -679,6 +755,12 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             || state.CombatState != RaidParticipantCombatState.Alive
             || authorityTick < state.InvulnerabilityUntilTick)
             return;
+
+        if (debugAssist?.Protects(fightId, member) == true)
+        {
+            Log(authorityTick, $"event=DebugAssistWouldHit source={source} participant={member.ParticipantId.Value} damage={damage} life_before={player.statLife}");
+            return;
+        }
 
         Log(authorityTick, $"event=RaidDamage source={source} participant={member.ParticipantId.Value} slot={member.ServerWhoAmI} damage={damage} life_before={player.statLife} max_life={player.statLifeMax2} lethal={damage >= player.statLife}");
 
@@ -702,11 +784,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
         if (state.Substate == FirstSeveranceSubstate.Stack)
         {
-            int required = plan.StackRequiredShares.GetValue(roster.Count);
+            int required = roster.Count;
             int stacked = 0;
-            Vector2 center = stackTargetSlot >= 0 && Main.player[stackTargetSlot].active
-                ? Main.player[stackTargetSlot].Center : CoreWorldCenter;
-            var occupants = new List<FirstSeveranceRosterMember>(roster.Count);
+            Vector2 center = StackWorldCenter;
             float radiusSquared = StackRadiusPixels * StackRadiusPixels;
             for (int index = 0; index < roster.Count; index++)
             {
@@ -716,19 +796,22 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                     && Vector2.DistanceSquared(player.Center, center) <= radiusSquared)
                 {
                     stacked++;
-                    occupants.Add(member);
                 }
             }
 
             SetMechanicResult(stacked >= required
                 ? FirstSeveranceMechanicResult.StackPassed
                 : FirstSeveranceMechanicResult.StackFailed);
-            for (int index = 0; index < occupants.Count; index++)
-            {
-                int share = stackDamagePool / occupants.Count
-                    + (index < stackDamagePool % occupants.Count ? 1 : 0);
-                ApplyRaidDamage(occupants[index], share, authorityTick, "Stack");
-            }
+            Log(authorityTick, FormattableString.Invariant($"event=StackResolved anchor=ClockSite action={state.ActionIndex} x={center.X:F1} y={center.Y:F1} present={stacked} required={required} missing={required - stacked} radius={StackRadiusPixels}"));
+            foreach (var member in roster.Members)
+                if (TryGetPlayer(member, out Player measured))
+                    Log(authorityTick, FormattableString.Invariant($"event=StackAttendance participant={member.ParticipantId.Value} slot={member.ServerWhoAmI} alive={IsAlive(member.ParticipantId)} x={measured.Center.X:F1} y={measured.Center.Y:F1} vx={measured.velocity.X:F2} vy={measured.velocity.Y:F2} left={measured.controlLeft} right={measured.controlRight} jump={measured.controlJump} distance={Vector2.Distance(measured.Center, center):F1} inside={Vector2.DistanceSquared(measured.Center, center) <= radiusSquared}"));
+            // Failure is the missing fraction of each survivor's own maximum HP.
+            // This includes missed soakers so abandoning the group is not immunity.
+            foreach (FirstSeveranceRosterMember member in roster.Members)
+                if (TryGetPlayer(member, out Player player))
+                    ApplyRaidDamage(member, FirstSeveranceCombatRules.StackDamage(
+                        player.statLifeMax2, required, stacked), authorityTick, "Stack");
         }
         else if (state.Substate == FirstSeveranceSubstate.Spread)
         {
@@ -742,7 +825,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                 }
             }
 
-            bool passed = alive.Count > 1;
+            bool passed = true;
             var failedSlots = new HashSet<int>();
             float separationSquared = SpreadSeparationPixels * SpreadSeparationPixels;
             for (int left = 0; left < alive.Count; left++)
@@ -762,6 +845,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             SetMechanicResult(passed
                 ? FirstSeveranceMechanicResult.SpreadPassed
                 : FirstSeveranceMechanicResult.SpreadFailed);
+            Log(authorityTick, $"event=SpreadResolved alive={alive.Count} overlapped={failedSlots.Count} separation={SpreadSeparationPixels} passed={passed}");
             foreach (FirstSeveranceRosterMember member in roster.Members)
                 if (failedSlots.Contains(member.ServerWhoAmI)
                     && TryGetPlayer(member, out Player player))
@@ -782,6 +866,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
         bool damageWindowOpen = authorityTick >= state.SubstateEnteredTick
             + (ulong)plan.Timing.PylonTelegraphTicks;
+        ObservePylonProgress(authorityTick, damageWindowOpen);
         for (int index = pylonNpcIndices.Count - 1; index >= 0; index--)
         {
             int npcIndex = pylonNpcIndices[index];
@@ -809,7 +894,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         acceptedBossDamage = 0;
         if (!TryResolveOwnedNpc<FirstSeverancePrototypeBoss>(bossNpcIndex, out NPC boss))
         {
-            if (state.Substate == FirstSeveranceSubstate.CoreExposure && bossKilled)
+            if (FirstSeveranceBossPhasePlan.IsDamageState(state.Substate) && bossKilled)
             {
                 acceptedBossDamage = lastObservedBossLife;
                 return true;
@@ -819,16 +904,17 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
 
         int observedLife = Math.Clamp(boss.life, 0, state.BossMaximumLife);
-        if (state.Substate == FirstSeveranceSubstate.CoreExposure)
+        if (FirstSeveranceBossPhasePlan.IsDamageState(state.Substate))
         {
-            acceptedBossDamage = Math.Max(0, lastObservedBossLife - observedLife);
+            acceptedBossDamage = Math.Max(boundaryDamage, Math.Max(0, lastObservedBossLife - observedLife));
         }
         else if (observedLife != state.BossLife)
         {
-            boss.life = state.BossLife;
+            boss.life = Math.Max(1, state.BossLife);
             boss.netUpdate = true;
         }
 
+        boundaryDamage = 0;
         return true;
     }
 
@@ -840,8 +926,12 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         // Warning, hit ledger and next cast belong to this Fight and phase only.
         lanceVolley = null;
         lanceHitParticipants.Clear();
+        scoreHits.Clear();
+        scoreFires.Clear();
         nextLanceTick = authorityTick + (after == FirstSeveranceSubstate.PylonCheck
-            ? (ulong)plan.Timing.PylonTelegraphTicks : 24UL);
+            ? (ulong)plan.Timing.PylonTelegraphTicks : (ulong)FirstSeveranceAttackPatterns.ExposureOpeningRestTicks);
+        attackStep = 0;
+        attackTargetSlot = -1;
         if (before == FirstSeveranceSubstate.PylonCheck)
         {
             CleanupPylons();
@@ -852,20 +942,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return TrySpawnPylons(plan.PylonCount.GetValue(roster.Count), authorityTick);
         }
 
-        stackTargetSlot = -1;
-        if (after == FirstSeveranceSubstate.Stack)
-        {
-            int start = loop!.State.ZeroBasedLoopIndex % roster.Count;
-            for (int offset = 0; offset < roster.Count; offset++)
-            {
-                FirstSeveranceRosterMember member = roster.Members[(start + offset) % roster.Count];
-                if (IsAlive(member.ParticipantId) && TryGetPlayer(member, out _))
-                {
-                    stackTargetSlot = member.ServerWhoAmI;
-                    break;
-                }
-            }
-        }
+        gridVolley = null;
+        gridHitParticipants.Clear();
+        nextGridTick = authorityTick + 60;
 
         return true;
     }
@@ -876,7 +955,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     {
         if (TryResolveOwnedNpc<FirstSeverancePrototypeBoss>(bossNpcIndex, out NPC boss))
         {
-            bool shielded = !plan.Boss.CanTakeDamage(state.Substate);
+            bool shielded = !plan.Boss.CanTakeDamage(state.Substate) || state.BossLife <= loop!.DamageFloor
+                || state.BossPhase == FirstSeveranceBossPhase.Final;
             if (boss.dontTakeDamage != shielded || boss.chaseable == shielded)
             {
                 boss.dontTakeDamage = shielded;
@@ -940,10 +1020,10 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         CleanupPylons();
         Vector2[] offsets =
         {
-            new(-360f, -100f),
-            new(360f, -100f),
-            new(-530f, -290f),
-            new(530f, -290f),
+            new(-500f, -470f),
+            new(500f, -470f),
+            new(-650f, -810f),
+            new(650f, -810f),
         };
         for (int index = 0; index < count; index++)
         {
@@ -984,8 +1064,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             pylonNpcIndices.Add(npcIndex);
 
         NPC npc = Main.npc[npcIndex];
-        npc.lifeMax = npcType == ModContent.NPCType<FirstSeverancePrototypeBoss>()
-            ? FirstSeverancePrototypeBoss.MaximumLife : FirstSeverancePrototypePylon.MaximumLife;
+        if (npc.ModNPC is FirstSeverancePrototypeBoss boss) boss.ConfigureParty(partyScaling.ParticipantCount);
+        else if (npc.ModNPC is FirstSeverancePrototypePylon pylon) pylon.ConfigureParty(partyScaling.ParticipantCount);
         npc.life = npc.lifeMax;
         npc.Center = center;
         npc.ai[0] = actorToken;
@@ -1047,6 +1127,59 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         }
     }
 
+    private bool UpdateGrid(in FirstSeveranceLoopState state, ulong tick, bool bossDead)
+    {
+        if (state.Substate != FirstSeveranceSubstate.Lattice || tick >= state.ResolveTick || bossDead)
+        {
+            bool had = gridVolley is not null;
+            gridVolley = null;
+            gridHitParticipants.Clear();
+            return had;
+        }
+        bool changed = false;
+        if (gridVolley is not null && tick >= gridVolley.EndTick)
+        {
+            gridVolley = null;
+            gridHitParticipants.Clear();
+            changed = true;
+        }
+        if (gridVolley is null && tick >= nextGridTick
+            && state.ResolveTick - tick >= FirstSeveranceGridVolley.TelegraphTicks + FirstSeveranceGridVolley.ActiveTicks)
+        {
+            uint serial = ++gridSerial;
+            var beams = new List<FirstSeveranceLanceRay>(roster.Count);
+            if (serial >= FirstSeveranceGridVolley.CoreSalvoFirstSerial)
+                foreach (var member in roster.Members)
+                    if (IsAlive(member.ParticipantId) && TryGetPlayer(member, out Player target))
+                        beams.Add(FirstSeveranceGridVolley.AimCoreBeam(groundCenter.X, groundCenter.Y,
+                            target.Center.X, target.Center.Y));
+            gridVolley = new(serial, tick, (byte)((serial - 1) % 4), groundCenter.X, groundCenter.Y, beams);
+            nextGridTick = tick + FirstSeveranceGridVolley.CadenceTicks;
+            if (serial % 4 == 0) nextGridTick += 60;
+            changed = true;
+            Log(tick, $"event=GridTelegraph cast={serial} pattern={gridVolley.Pattern} lines={gridVolley.Rays.Count} core_beams={gridVolley.CoreBeams.Count} fire_tick={gridVolley.FireTick} end_tick={gridVolley.EndTick}");
+        }
+        if (gridVolley is null || !gridVolley.IsFiring(tick)) return changed;
+        if (tick == gridVolley.FireTick)
+        {
+            changed = true;
+            Log(tick, $"event=GridFired cast={gridVolley.Serial} pattern={gridVolley.Pattern} core_beams={gridVolley.CoreBeams.Count} fixed_damage={FirstSeveranceCombatRules.BeamDamage} hit_cap=OnePerVolley");
+        }
+        foreach (var member in roster.Members)
+        {
+            if (gridHitParticipants.Contains(member.ParticipantId) || !IsAlive(member.ParticipantId)
+                || !TryGetPlayer(member, out Player player)
+                || !gridVolley.Intersects(tick, player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f))
+                continue;
+            gridHitParticipants.Add(member.ParticipantId); // Crossings cannot double-hit a participant.
+            string source = gridVolley.CoreIntersects(tick, player.Center.X, player.Center.Y,
+                player.width * .5f, player.height * .5f) ? "CoreSalvo" : "Lattice";
+            ApplyRaidDamage(member, FirstSeveranceCombatRules.BeamDamage, tick, source);
+            changed = true;
+        }
+        return changed;
+    }
+
     private bool UpdateLances(in FirstSeveranceLoopState state, ulong tick, bool phaseComplete)
     {
         if (phaseComplete || !FirstSeveranceLanceTuning.IsAttackPhase(state.Substate)
@@ -1068,12 +1201,12 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
         // Never truncate a new telegraph at the phase boundary. Do not catch up
         // missed casts in a burst; scheduling is relative to the actual start.
-        if (lanceVolley is null && tick >= nextLanceTick
-            && state.ResolveTick - tick > FirstSeveranceLanceTuning.TelegraphTicks
-                + FirstSeveranceLanceTuning.ActiveTicks)
+        int neededTicks = attackStep == 0 ? FirstSeveranceAttackPatterns.SequenceTicks(state.Substate)
+            : FirstSeveranceAttackPatterns.StepTicks(state.Substate, attackStep);
+        if (lanceVolley is null && tick >= nextLanceTick && state.ResolveTick - tick >= (ulong)neededTicks)
         {
             var targets = new List<Player>(roster.Count);
-            int first = (int)(lanceSerial % (uint)roster.Count);
+            int first = (int)(attackSequence % (uint)roster.Count);
             for (int offset = 0; offset < roster.Count; offset++)
             {
                 FirstSeveranceRosterMember member = roster.Members[(first + offset) % roster.Count];
@@ -1082,27 +1215,52 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             }
             if (targets.Count > 0)
             {
-                // Alternate single / double shots, independent of party size.
-                int count = Math.Min(targets.Count, (lanceSerial & 1) == 0 ? 1 : 2);
-                var rays = new FirstSeveranceLanceRay[count];
-                Vector2 origin = CoreWorldCenter
-                    - new Vector2(0f, FirstSeveranceLanceTuning.BossHeightAboveCore);
-                for (int index = 0; index < count; index++)
+                Player target = attackStep == 0 ? targets[0]
+                    : targets.Find(player => player.whoAmI == attackTargetSlot) ?? targets[0];
+                if (attackStep == 0)
+                    attackSequence++;
+                attackTargetSlot = target.whoAmI;
+                if (state.Substate == FirstSeveranceSubstate.PylonCheck)
                 {
-                    Vector2 direction = targets[index].Center - origin;
-                    if (direction.LengthSquared() < 1f)
-                        direction = Vector2.UnitY;
-                    direction.Normalize();
-                    rays[index] = new FirstSeveranceLanceRay(origin.X, origin.Y, direction.X, direction.Y);
+                    var aims = new List<FirstSeverancePrismTarget>(targets.Count);
+                    foreach (Player participant in targets)
+                        aims.Add(new(participant.whoAmI, participant.Center.X, participant.Center.Y,
+                            participant.velocity.X, participant.velocity.Y));
+                    // One simultaneous, locked ray per standing participant. A crossed
+                    // group of rays is still capped to one hit per player per step.
+                    lanceVolley = FirstSeveranceAttackPatterns.CreatePrism(++lanceSerial, tick, attackStep, aims);
                 }
-                lanceVolley = new FirstSeveranceLanceVolley(++lanceSerial, tick, Array.AsReadOnly(rays));
-                nextLanceTick = tick + FirstSeveranceLanceTuning.CadenceTicks;
+                else
+                    lanceVolley = FirstSeveranceAttackPatterns.Create(++lanceSerial, tick,
+                        state.Substate, attackStep, target.whoAmI, target.Center.X, target.Center.Y,
+                        target.velocity.X, target.velocity.Y);
+                nextLanceTick = tick + (ulong)FirstSeveranceAttackPatterns.StepCadence(state.Substate);
+                attackStep++;
+                if (attackStep >= FirstSeveranceAttackPatterns.StepCount(state.Substate))
+                {
+                    attackStep = 0;
+                    nextLanceTick += (ulong)FirstSeveranceAttackPatterns.SequenceRestTicks;
+                }
                 lanceHitParticipants.Clear();
                 changed = true; // Publish the locked aim immediately, not on the 30-tick heartbeat.
-                Log(tick, $"event=LanceTelegraph cast={lanceSerial} rays={count} fire_tick={lanceVolley.FireTick}");
+                string assignedSlots = lanceVolley.Kind == FirstSeveranceAttackKind.PursuitPrism
+                    ? string.Join(",", targets.ConvertAll(player => player.whoAmI)) : target.whoAmI.ToString();
+                Log(tick, $"event=LanceTelegraph cast={lanceSerial} kind={lanceVolley.Kind} step={lanceVolley.Step + 1} target_slot={target.whoAmI} target_slots={assignedSlots} rays={lanceVolley.Rays.Count} fire_tick={lanceVolley.FireTick}");
             }
         }
 
+        if (lanceVolley is { IsCharge: true } body)
+        {
+            Player focus = Main.player[body.TargetSlot];
+            // No target replacement mid-charge. If the focus is Down, pursue its
+            // last anchor and finish the same bounded trajectory, never an outsider.
+            lanceVolley = body.AdvanceCharge(tick, focus.Center.X, focus.Center.Y,
+                focus.velocity.X, focus.velocity.Y);
+            changed |= (tick < body.LockTick && tick % 4ul == 0)
+                || tick == body.LockTick;
+            if (tick == body.LockTick)
+                Log(tick, $"event=EnergyChargeLocked cast={body.Serial} speed=104 target_slot={body.TargetSlot}");
+        }
         if (lanceVolley is null || !lanceVolley.IsFiring(tick))
             return changed;
         if (tick == lanceVolley.FireTick)
@@ -1115,13 +1273,19 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             if (lanceHitParticipants.Contains(member.ParticipantId) || !IsAlive(member.ParticipantId)
                 || !TryGetPlayer(member, out Player player))
                 continue;
-            foreach (FirstSeveranceLanceRay ray in lanceVolley.Rays)
+            // Contact-style energy charges respect legitimate engine/dash i-frames.
+            // Stack/Spread remain authority percentage mechanics, not dodgeable hits.
+            if (lanceVolley.IsCharge && player.immune && player.immuneTime > 0)
+                continue;
+            for (int index = 0; index < lanceVolley.Rays.Count; index++)
             {
+                FirstSeveranceLanceRay ray = lanceVolley.RayAt(index, tick);
                 if (!ray.Intersects(player.Center.X, player.Center.Y, player.width * 0.5f, player.height * 0.5f))
                     continue;
-                // One hit per volley even at a crossing or during all 18 live ticks.
+                // One hit per step, including overlapping curtains or moving blades.
                 lanceHitParticipants.Add(member.ParticipantId);
-                ApplyRaidDamage(member, Math.Max(1, player.statLifeMax2 * 60 / 100), tick, "ObservationLance");
+                ApplyRaidDamage(member, FirstSeveranceCombatRules.AttackDamage(
+                    lanceVolley.Kind, player.statLifeMax2), tick, lanceVolley.Kind.ToString());
                 changed = true;
                 break;
             }
@@ -1190,7 +1354,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             float distanceSquared = Vector2.DistanceSquared(
                 reviverPlayer.Center,
                 targetPlayer.Center);
-            if (candidate.DownedDeadlineTick <= authorityTick)
+            if (candidate.DownedDeadlineTick != 0 && candidate.DownedDeadlineTick <= authorityTick)
                 continue;
             if (candidate.ReviveLockoutUntilTick > authorityTick)
             {
@@ -1300,9 +1464,48 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             : mechanicRevision + 1;
     }
 
-    private Vector2 CoreWorldCenter => new(
-        (coreTopLeft.X + 1f) * 16f,
-        (coreTopLeft.Y + 1f) * 16f);
+    private Vector2 CoreWorldCenter => groundCenter;
+    private Vector2 StackWorldCenter
+    {
+        get
+        {
+            var point = FirstSeveranceChoreography.StackPosition(groundCenter.X, groundCenter.Y,
+                loop?.State.BossPhase ?? FirstSeveranceBossPhase.Sealed, loop?.State.ActionIndex ?? -1);
+            return new(point.X, point.Y);
+        }
+    }
+
+    private void UpdateScoreHazards(in FirstSeveranceLoopState state, ulong tick)
+    {
+        if (!FirstSeveranceScoreGeometry.HasHazards(state.Substate) || tick >= state.ResolveTick) return;
+        double age = tick - state.SubstateEnteredTick;
+        var rays = FirstSeveranceScoreGeometry.Rays(state.Substate, state.ActionIndex, age, groundCenter.X, groundCenter.Y);
+        var bullets = state.Substate == FirstSeveranceSubstate.FinalBullets
+            ? FirstSeveranceScoreGeometry.Bullets(state.ActionIndex, age, groundCenter.X, groundCenter.Y) : null;
+        bool lethal = state.Substate == FirstSeveranceSubstate.RemoteCrush;
+        foreach (var ray in rays)
+            if (ray.Live && scoreFires.Add(ray.Pulse))
+                Log(tick, $"event=ScoreAttackFired boss_phase={state.BossPhase} attack={state.Substate} action={state.ActionIndex} pulse={ray.Pulse} damage_kind={(lethal ? "LethalToDown" : "Fixed")} fixed_damage={(lethal ? 0 : FirstSeveranceScoreGeometry.FixedDamage)}");
+        foreach (var member in roster.Members)
+        {
+            if (!IsAlive(member.ParticipantId) || !TryGetPlayer(member, out Player player)) continue;
+            int pulse = -1;
+            foreach (var ray in rays)
+                if (ray.Live && !scoreHits.Contains((ray.Pulse, member.ParticipantId))
+                    && FirstSeveranceScoreGeometry.RayHits(state.Substate, ray, age,
+                        player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f))
+                { pulse = ray.Pulse; break; }
+            if (bullets is not null)
+                foreach (var bullet in bullets)
+                    if (!scoreHits.Contains((bullet.Wave, member.ParticipantId))
+                        && FirstSeveranceScoreGeometry.BulletHits(bullet, player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f))
+                    { pulse = bullet.Wave; break; }
+            if (pulse < 0) continue;
+            scoreHits.Add((pulse, member.ParticipantId));
+            ApplyRaidDamage(member, lethal ? Math.Max(player.statLife, player.statLifeMax2)
+                : FirstSeveranceScoreGeometry.FixedDamage, tick, state.Substate.ToString());
+        }
+    }
 
     private static int CompareIntents(
         FirstSeveranceQueuedCombatIntent left,
@@ -1325,6 +1528,139 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
     {
         nextActorToken = nextActorToken >= 1_000_000 ? 1 : nextActorToken + 1;
         return nextActorToken;
+    }
+
+    private void BeginDamageProgress(in FirstSeveranceLoopState state)
+    {
+        try
+        {
+            if (state.Substate != FirstSeveranceSubstate.PylonCheck && !FirstSeveranceBossPhasePlan.IsDamageState(state.Substate))
+                return;
+            damageWindowFloor = state.Substate == FirstSeveranceSubstate.PylonCheck ? 0 : loop!.DamageFloor;
+            if (state.Substate != FirstSeveranceSubstate.PylonCheck && state.BossLife <= damageWindowFloor) return;
+            damageWindowPhase = state.Substate;
+            damageWindowLoop = state.ZeroBasedLoopIndex + 1;
+            progressObservationMissing = false;
+            ulong open = state.SubstateEnteredTick;
+            int life = state.BossLife - damageWindowFloor;
+            if (state.Substate == FirstSeveranceSubstate.PylonCheck)
+            {
+                open += (ulong)plan.Timing.PylonTelegraphTicks;
+                progressPylonSlots = pylonNpcIndices.ToArray();
+                progressPylonLife = new int[progressPylonSlots.Length];
+                Array.Fill(progressPylonLife, partyScaling.PylonLife);
+                life = progressPylonSlots.Length * partyScaling.PylonLife;
+            }
+            damageWindow = new(life, open, state.ResolveTick);
+            nextProgressTick = open + 120;
+            Log(state.SubstateEnteredTick, $"event=DamageWindowStarted phase={damageWindowPhase} loop={damageWindowLoop} open_tick={open} close_tick={state.ResolveTick} target_hp={life} boss_life={state.BossLife} boss_max_life={state.BossMaximumLife} penalized={state.IsPenalizedExposure}");
+        }
+        catch (Exception) { damageWindow = null; } // Diagnostics never drive combat.
+    }
+
+    private void ObservePylonProgress(ulong tick, bool damageWindowOpen)
+    {
+        try
+        {
+            if (damageWindow is null || damageWindowPhase != FirstSeveranceSubstate.PylonCheck || !damageWindowOpen)
+                return;
+            for (int index = 0; index < progressPylonSlots.Length; index++)
+            {
+                if (progressPylonLife[index] == 0)
+                    continue;
+                int slot = progressPylonSlots[index];
+                if (killedPylons.Contains(slot))
+                {
+                    progressPylonLife[index] = 0;
+                    Log(tick, $"event=PylonDestroyed loop={damageWindowLoop} pylon={index + 1} open_elapsed_ticks={tick - damageWindow.OpenTick}");
+                }
+                else if (TryResolveOwnedNpc<FirstSeverancePrototypePylon>(slot, out NPC npc))
+                    // Only confirmed OnKill may represent completion; disappearance is not a kill.
+                    progressPylonLife[index] = Math.Clamp(npc.life, 1, partyScaling.PylonLife);
+                else
+                    progressObservationMissing = true;
+            }
+        }
+        catch (Exception) { progressObservationMissing = true; }
+    }
+
+    private void PublishDamageProgress(in FirstSeveranceLoopState state, ulong tick)
+    {
+        try
+        {
+            if (damageWindow is null)
+                return;
+            bool gated = damageWindowPhase != FirstSeveranceSubstate.PylonCheck && state.BossLife <= damageWindowFloor;
+            bool ended = gated || state.Substate != damageWindowPhase || state.IsTerminal || tick >= damageWindow.CloseTick;
+            if (ended || tick >= nextProgressTick)
+            {
+                int remaining = DamageProgressRemainingLife();
+                string outcome = gated ? "HpGateReached" : remaining == 0 ? "Cleared"
+                    : state.Substate == FirstSeveranceSubstate.PhaseTransition ? "PhaseTransition"
+                    : tick >= damageWindow.CloseTick ? "Deadline" : "Interrupted";
+                WriteDamageProgress(tick, ended, ended ? outcome : "Open");
+                nextProgressTick = tick + 120;
+            }
+        }
+        catch (Exception) { } // Never change an accepted gameplay transition for logging.
+    }
+
+    private int DamageProgressRemainingLife()
+    {
+        if (FirstSeveranceBossPhasePlan.IsDamageState(damageWindowPhase))
+            return Math.Max(0, loop!.State.BossLife - damageWindowFloor);
+        int remaining = 0;
+        foreach (int life in progressPylonLife)
+            remaining += life;
+        return remaining;
+    }
+
+    private void WriteDamageProgress(ulong tick, bool end, string outcome)
+    {
+        if (damageWindow is null)
+            return;
+        FirstSeveranceDamageSample sample = damageWindow.Sample(tick, DamageProgressRemainingLife());
+        string required = sample.RequiredDps?.ToString("F1", System.Globalization.CultureInfo.InvariantCulture) ?? "unavailable";
+        string pylons = damageWindowPhase == FirstSeveranceSubstate.PylonCheck
+            ? string.Join(",", progressPylonLife) : "none";
+        string kind = end ? "DamageWindowEnded" : "DamageProgress";
+        Log(tick, FormattableString.Invariant($"event={kind} phase={damageWindowPhase} loop={damageWindowLoop} outcome={outcome} hp_observation={(progressObservationMissing ? "Incomplete" : "Complete")} open_seconds={sample.ElapsedTicks / 60d:F2} remaining_seconds={sample.RemainingTicks / 60d:F2} effective_damage={sample.EffectiveDamage} target_hp_start={damageWindow.StartingLife} target_hp_remaining={sample.RemainingLife} window_progress_pct={sample.ProgressPercent:F2} window_dps={sample.WindowDps:F1} recent_dps={sample.RecentDps:F1} required_dps_by_deadline={required} pylon_hp={pylons} boss_life={loop!.State.BossLife} boss_remaining_pct={100d * loop.State.BossLife / loop.State.BossMaximumLife:F2} overload={loop.State.Overload}"));
+        if (!end)
+            return;
+        if (damageWindowPhase == FirstSeveranceSubstate.PylonCheck)
+        {
+            totalPylonDamage += sample.EffectiveDamage;
+            totalPylonOpenTicks += sample.ElapsedTicks;
+        }
+        else
+        {
+            totalCoreDamage += sample.EffectiveDamage;
+            totalCoreOpenTicks += sample.ElapsedTicks;
+        }
+        damageWindow = null; // Final sample and totals are emitted once, including terminal cleanup.
+        progressPylonSlots = Array.Empty<int>();
+        progressPylonLife = Array.Empty<int>();
+    }
+
+    private void FinishDamageProgress(ulong tick, string cause)
+    {
+        try
+        {
+            if (!isStarted || loop is null)
+                return;
+            WriteDamageProgress(tick, end: true, outcome: cause);
+            double coreDps = FirstSeveranceDamageWindow.Rate(totalCoreDamage, totalCoreOpenTicks);
+            double pylonDps = FirstSeveranceDamageWindow.Rate(totalPylonDamage, totalPylonOpenTicks);
+            ulong elapsed = tick >= combatStartedTick ? tick - combatStartedTick : 0;
+            Log(tick, FormattableString.Invariant($"event=CombatDpsSummary cause={cause} participants={roster.Count} elapsed_seconds={elapsed / 60d:F2} completed_exposures={loop.State.CompletedExposures} overload={loop.State.Overload} core_effective_damage={totalCoreDamage} core_open_seconds={totalCoreOpenTicks / 60d:F2} core_window_dps={coreDps:F1} pylon_effective_damage={totalPylonDamage} pylon_open_seconds={totalPylonOpenTicks / 60d:F2} pylon_window_dps={pylonDps:F1} boss_life={loop.State.BossLife} boss_max_life={loop.State.BossMaximumLife} boss_remaining_pct={100d * loop.State.BossLife / loop.State.BossMaximumLife:F2} dps_basis=AuthorityNetHpLoss"));
+        }
+        catch (Exception) { }
+        finally
+        {
+            damageWindow = null;
+            progressPylonSlots = Array.Empty<int>();
+            progressPylonLife = Array.Empty<int>();
+        }
     }
 
     private void LogReviveEvent(RaidReviveEvent entry)

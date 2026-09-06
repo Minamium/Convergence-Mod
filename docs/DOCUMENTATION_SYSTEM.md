@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - documentation.data_model
 aliases:
@@ -106,12 +106,13 @@ classified.
 
 ## Catalog workflow
 
-Run after adding or changing indexed documents:
+After an indexed-document edit batch is settled, regenerate and verify once through the shared wrapper:
 
 ```bash
-python3 tools/docs_catalog.py --write
-python3 tools/docs_catalog.py --check
+python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py --write-catalog .
 ```
+
+This also runs repository and YAML checks; repeating the individual commands is unnecessary. During editing, update only the document owning a changed fact and leave generation until the final batch. Use `tools/docs_catalog.py --write` or `--check` directly only for catalog-specific work.
 
 The tool parses all Markdown under `docs/`, rejects undeclared exclusions,
 duplicate YAML keys, unknown fields, duplicate IDs and authority topics, checks

@@ -1,32 +1,11 @@
 ## Summary
 
-Describe the player-facing or architectural outcome.
-
-## Authority and lifecycle
-
-- Authoritative owner:
-- Client request/replica changes:
-- Snapshot or rejoin behavior:
-- Cleanup path:
+Describe the outcome and why it is needed.
 
 ## Verification
 
-- [ ] `python3 tools/repository_checks.py`
-- [ ] `python3 tools/validate_yaml.py`, or no YAML changed
-- [ ] `dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj`, or no Raid-domain code changed
-- [ ] `dotnet build ConvergenceMod.csproj`, or no C# changed
-- [ ] tModLoader build + reload
-- [ ] Single Player smoke test, or not applicable
-- [ ] Host & Play smoke test, or not applicable
-- [ ] Dedicated Server smoke test, or not applicable
-- [ ] 2/3/4-player behavior considered
-- [ ] High-latency/disconnect behavior considered
-- [ ] Documentation or ADR updated
-- [ ] Asset attribution updated, or no assets changed
+Use the applicable rows in [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). List checks actually run and their results; record relevant `not_run` checks with the remaining action. Include build/environment/player-count details only for runtime checks.
 
-## Test environment
+## Authority and lifecycle
 
-- tModLoader:
-- Calamity Mod:
-- Other content mods:
-- Player count / latency:
+For changes to gameplay state, requests, replication, or cleanup, describe the affected owner, snapshot/rejoin behavior, and cleanup path. Remove this section when those responsibilities are unchanged.

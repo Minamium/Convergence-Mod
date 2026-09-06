@@ -48,7 +48,7 @@ internal sealed class FirstSeveranceBossPlan
 
     public bool CanTakeDamage(FirstSeveranceSubstate substate)
     {
-        return substate == FirstSeveranceSubstate.CoreExposure;
+        return FirstSeveranceBossPhasePlan.IsDamageState(substate);
     }
 
     public FirstSeveranceBossVisualState GetVisualState(FirstSeveranceSubstate substate)

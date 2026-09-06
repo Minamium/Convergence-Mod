@@ -152,7 +152,7 @@ internal sealed class RaidReviveService
             command.AuthorityTick,
             events);
         participant.CombatState = RaidParticipantCombatState.Downed;
-        participant.DownedDeadlineTick = SaturatingAdd(
+        participant.DownedDeadlineTick = settings.DownedTimeoutTicks == 0 ? 0 : SaturatingAdd(
             command.AuthorityTick,
             settings.DownedTimeoutTicks);
         participant.InvulnerabilityUntilTick = 0;
@@ -285,7 +285,7 @@ internal sealed class RaidReviveService
         if (!participants.TryGetValue(command.Target, out ParticipantState? target)
             || !target.IsConnected
             || target.CombatState != RaidParticipantCombatState.Downed
-            || target.DownedDeadlineTick <= command.AuthorityTick)
+            || (target.DownedDeadlineTick != 0 && target.DownedDeadlineTick <= command.AuthorityTick))
         {
             return RaidReviveCommandResult.Rejected("revive.target_not_revivable");
         }
@@ -778,7 +778,7 @@ internal sealed class RaidReviveService
             if (!participants.TryGetValue(channel.Target, out ParticipantState? target)
                 || !target.IsConnected
                 || target.CombatState != RaidParticipantCombatState.Downed
-                || target.DownedDeadlineTick <= authorityTick)
+                || (target.DownedDeadlineTick != 0 && target.DownedDeadlineTick <= authorityTick))
             {
                 channelsByReviver.Remove(channel.Reviver);
                 AddCancellationEvent(
@@ -839,6 +839,7 @@ internal sealed class RaidReviveService
         {
             ParticipantState participant = pair.Value;
             if (participant.CombatState != RaidParticipantCombatState.Downed
+                || participant.DownedDeadlineTick == 0
                 || participant.DownedDeadlineTick > authorityTick)
             {
                 continue;

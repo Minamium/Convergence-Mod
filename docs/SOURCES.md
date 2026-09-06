@@ -16,6 +16,8 @@ related_docs:
   - research.multiplayer-raid-prior-art
   - research.first-severance-slice3-apis
   - research.instant-revival-core-apis
+  - research.wotg-raid-benchmark
+  - development.single-operator-testing
 ---
 
 # Research Sources
@@ -57,6 +59,18 @@ Last reviewed: **2026-09-06**
 - [Calamity license at 2.2.2](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/LICENSE.md) — source/reference/redistribution conditions。
 - [Calamity official wiki](https://calamitymod.wiki.gg/) — player-facing progression reference。
 
+## Wrath of the Gods benchmark — 2026-09-06
+
+- [User reference: Avatar showcase at 00:40](https://www.youtube.com/watch?v=LIFVyjz0T3k&t=40s) and [all-Boss no-hit video at 14:02](https://www.youtube.com/watch?v=LoHvGScaZYU&t=842s) — YouTube public oEmbed/player metadata verified for title, author, dates and chapters. Video/audio were not directly observed; exact attack identification and quality evaluation remain unverified.
+- [Author's Workshop listing](https://steamcommunity.com/sharedfiles/filedetails/?id=2995193002) — project/creator credits and current dependency listing; not a multiplayer runtime verification record.
+- [Pinned public WotG build metadata](https://raw.githubusercontent.com/TheFifthCircle/WrathOfTheGodsPublic/7cb5b86c770e73d6853749b2b688d478ba3326a7/build.txt) — declares 1.2.24, not proven identical to current Workshop. [Pinned description](https://raw.githubusercontent.com/TheFifthCircle/WrathOfTheGodsPublic/7cb5b86c770e73d6853749b2b688d478ba3326a7/description.txt) declares multiplayer incompatibility for this reference version; do not generalize to today's binary.
+- [Detailed evidence and exact source paths](research/WOTG_RAID_BENCHMARK.md) — multipart render composition, depth, state choreography, off-body portals, telegraph/collision separation, sound/sky, timed DR, multiplayer-specific branch and Solyn. Public repository license was not established; no implementation/assets copied.
+
+## One-person multiplayer development — 2026-09-06
+
+- [Official local multiplayer testing guide](https://github.com/tModLoader/tModLoader/wiki/Basic-Netcode#testing-multiplayer-locally) — two clients, Host & Play plus localhost, and background-focus caveat. Moving guidance, not a completed local experiment.
+- [Official launch options](https://github.com/tModLoader/tModLoader/wiki/Command-Line) — paired with pinned `Program.TML.cs`, `SocialAPI.cs.patch`, server wrapper/config and `Logging.cs` in [single-operator testing](runbooks/SINGLE_OPERATOR_TESTING.md#6-一次資料と再現条件). Save separation and server `-nosteam` are distinguished from the DEBUG-only client switch. No new launcher or debug-assist implementation was added.
+
 ## OpenAI / Codex asset capability
 
 - [Image generation in Codex](https://learn.chatgpt.com/docs/image-generation) — concept art、UI asset、background、sprite sheet、placeholderの生成・編集。
@@ -71,6 +85,11 @@ Last reviewed: **2026-09-06**
 - [Issue Form syntax](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms) — structured issue forms。
 - [actions/checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1) — CIでfull SHA固定したcheckout action。
 
+## Orchestral sample source — 0.2.5
+
+- [VSCO 2 CE official distribution](https://versilian-studios.com/vsco-community/) — identifies the raw WAV library, links the author's repository and states CC0; accessed 2026-09-06.
+- [Pinned CC0 license](https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE) — exact sample revision used for the independently authored music render. Raw samples/manifest remain external; see [Attribution](../Assets/ATTRIBUTION.md).
+
 ## Music rights
 
 - [文化庁: ここが知りたい著作権](https://www.bunka.go.jp/seisaku/chosakuken/taisetsu/point/index.html) — 保護期間満了曲の利用と録音物の別権利。
@@ -79,6 +98,8 @@ Last reviewed: **2026-09-06**
 - [Library of Congress: Beethoven Symphony No. 9 autograph score](https://www.loc.gov/item/2021668114/) — 原典資料。
 
 ## Revalidation rule
+
+Drawing/Defeat/intro pass, 2026-09-06: the same pinned official `Player.KillMe`, `ModSystem.ModifyInterfaceLayers` and `Main` layer-draw path were inspected. [Focused API evidence](research/INSTANT_REVIVAL_CORE_APIS.md#022-narrow-lookup-normal-defeat-death-and-temporary-hud-suppression) records the normal death-hook cancellation boundary, frame-local UI decision, and remaining multiplayer observations.
 
 Instant revival/Core pass, 2026-09-06: pinned tModLoader `ModBuff`, `GlobalTile`, `ModTile`, `ModBlockType` and `MessageID` contracts were inspected. Exact links, confirmed behavior, item-selection ordering inference and focused checks are recorded in [instant revival/Core evidence](research/INSTANT_REVIVAL_CORE_APIS.md). No engine implementation was copied or decompiled.
 
@@ -89,3 +110,5 @@ Recovery transport rechecked 2026-09-05: [ModNet.HandleModPacket at the confirme
 Development combat references accessed 2026-09-05: [ModNPC](https://docs.tmodloader.net/docs/stable/class_mod_n_p_c.html), [ModPlayer](https://docs.tmodloader.net/docs/stable/class_mod_player.html), and [ModSceneEffect](https://docs.tmodloader.net/docs/stable/class_mod_scene_effect.html). These moving v2026.07 pages are paired with the installed pinned runtime XML; exact observations and limitations are in [First Severance API evidence](research/FIRST_SEVERANCE_SLICE3_APIS.md).
 
 実装開始日、Workshop公開前、tModLoader/Calamity更新時に再確認する。リンク切れやbranch移動があっても、当時の判断とversionはcommit historyへ残す。
+
+Continuous-emission/containment recheck, 2026-09-06: the pinned WotG Avatar rendering utilities, Nameless portal state/laser, Calamity ArenaWallSystem/SupremeCalamitas and tML ModPlayer/ModBlockType/GlobalTile contracts are linked and evaluated in [benchmark finding F11](research/WOTG_RAID_BENCHMARK.md). Reuse that fixed-source table rather than interpreting current branches as the tested runtime.

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-09-05T19:52:00Z",
+  "git": { "commit": "9b939b5e3a759e4f311d76c10884a12f29440b52", "workingTreeClean": false, "notes": "0.2.2 source changes applied on this base; not committed. Game launched via Steam for user-requested load handoff." },
+  "host": { "os": "Windows 11", "architecture": "x64" },
+  "runtime": {
+    "terraria": "1.4.4.9",
+    "tModLoader": "v2026.07.3.0",
+    "tModLoaderSourceCommit": "666f69962d3bdffde54fc14025f02634965b4e7c",
+    "calamity": "2.2.4",
+    "convergenceSource": "0.2.2",
+    "lastObservedConvergenceLoaded": "0.2.2",
+    "calamityTmodSha256": "d50fea9025f88ee2073c00e3482976ca1e6ea54d0b8770eb7810bb7b280397d6",
+    "provenance": "Unchanged pinned environment; Calamity digest inherited from 2026-09-05-windows-baseline.json, not re-hashed in this pass. Current development Mod pack is listed in STATUS.md."
+  },
+  "checks": {
+    "repositoryWrapper": { "status": "passed", "documents": 44, "repositoryFiles": 212, "yamlFiles": 10, "notes": "Static wrapper ran once, including user-edited Skill validation. Catalog refreshed for the later user-requested successful packaging/client-load evidence; domain and codec inputs remained unchanged." },
+    "domain": { "status": "passed", "cases": 61 },
+    "compiledCodec": { "status": "passed", "roundTrips": 42, "malformedCases": 7, "rosterCounts": [2, 3, 4], "notes": "All new pattern steps and absent sections; shared-buffer consumption and recipient deadlines. Truncated body raises EOF before a projection, caught by the existing packet-router boundary." },
+    "csharpCompilation": { "status": "passed", "warnings": 0 },
+    "modPackaging": { "status": "passed", "warnings": 0, "errors": 0, "notes": "Initial TML003 was a running-game file lock. User closed the game, then the retry packaged successfully.", "task": "../STATUS.md#next-change" },
+    "clientLoad": { "status": "passed", "notes": "Steam launch; client finalized Convergence v0.2.2 and logged Mod Load Completed at 04:51:29 JST. User began Host & Play afterwards; no further agent GUI input." },
+    "buildAndReloadButton": { "status": "not_run", "notes": "Equivalent build and load completed through command build plus full restart; no redundant GUI rebuild." },
+    "singlePlayer": { "status": "not_run" },
+    "hostAndPlay": { "status": "not_run", "plannedParticipants": 2, "network": "Steam friend connection; latency not measured" },
+    "dedicatedServer": { "status": "not_run" },
+    "threeFourPlayerRuntimeAndLatency": { "status": "not_run" }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.3",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 6,
+  "runtime": "tModLoader v2026.07.3.0 / Terraria 1.4.4.9",
+  "checks": {
+    "static_wrapper": "passed once on actual ModSources: 46 indexed documents, 235 repository files, 10 YAML files; git diff --check passed",
+    "domain": "passed: 62 deterministic cases, zero failures",
+    "compiled_codec": "passed: 42 absent/pattern/tracking/locked round-trips over 2/3/4-player records; 8 malformed/truncated rejections; shared buffer and revive deadlines preserved",
+    "audio_exports": "passed: 17 mono PCM16 WAV and 1 stereo Vorbis OGG decoded at 48000 Hz; finite, unclipped; BGM 80 seconds, decoded peak -1.23 dBFS, RMS -14.42 dBFS, loop endpoint difference 0.00655",
+    "actual_build_package": "passed: 0.2.3 compiled and packaged in actual ModSources with zero warnings/errors; Convergence.tmod 7111926 bytes",
+    "client_load": "passed Mod loading, subsequently failed initial player spawn: NullReferenceException in ManageSpecialBiomeVisuals from Convergence SpecialVisuals; user reported inability to control immediately after world join. Fixed in 0.2.4; loading to menu was insufficient evidence",
+    "no_more_tombs_enabled_load": "passed client/server loading of already-downloaded v2.1 in the nine-Mod pack; tombstone suppression behavior not yet played through",
+    "two_player_charge_dash_audio_sky_smoke": "blocked by 0.2.3 initial-spawn exception before Raid testing",
+    "dedicated_server_two_client_latency_rejoin": "not_run",
+    "human_listening_reduced_effects_and_scene_restore": "not_run"
+  }
+}

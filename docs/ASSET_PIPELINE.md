@@ -22,6 +22,8 @@ related_docs:
 
 ## First-slice priority
 
+The latest 0.2.5 user request explicitly authorizes high-resolution painterly runtime textures and a solemn original orchestral-textural sketch now; the feature [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) supersede the earlier pixel/chiptune choice for these exports. Retain original generated alpha and use linear sampling for those high-resolution assets. Raw CC0 instrument samples, recipe, MIDI, audition reel and PCM24 masters remain external; only the new rendered music and reviewed runtime images/effects enter Assets. Human audiovisual acceptance and public-release licensing remain pending.
+
 Exception for the explicit 2026-09-06 user request: [ADR-0010](adr/0010-giant-boss-observation-lances.md) authorizes a giant original first-pass Boss export and layered VFX now. It remains development art requiring live readability review and later hand cleanup, not final/release art. Large logical beam rectangles may be owned directly by the Fight runtime (no projectile slots); clients render the corresponding bounded ray snapshots.
 
 Use simple original placeholders until authority, hitboxes, telegraphs, and multiplayer timing are stable. For the provisional First Severance silhouette, prefer separate runtime exports for central body/Core, broken ring, emissive mask, Pylon, and mechanic/UI primitives. If ring/arms are retained, they are code-positioned presentation on one Boss NPC; do not create Crown/Wings/Heart Casing art for the obsolete multipart plan.

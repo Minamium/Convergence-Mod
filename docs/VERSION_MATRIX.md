@@ -4,7 +4,7 @@ document_type: policy
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - compatibility.version_matrix
 aliases:
@@ -48,7 +48,7 @@ This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calami
 ```text
 displayName = Convergence (Development Build)
 author = Minamium
-version = 0.2.1
+version = 0.2.17
 modReferences = CalamityMod@2.2.4
 side = Both
 playableOnPreview = false

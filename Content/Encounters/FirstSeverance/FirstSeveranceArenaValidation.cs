@@ -16,6 +16,7 @@ internal enum FirstSeveranceArenaValidationMode : byte
 {
     Strict = 0,
     DevelopmentPreparationSmoke = 1,
+    DevelopmentContainment = 2,
 }
 
 internal static class FirstSeveranceArenaIssueCodes
@@ -32,6 +33,7 @@ internal static class FirstSeveranceArenaIssueCodes
     public const string ForeignTileEntityPresent = "first_severance.arena_foreign_tile_entity_present";
     public const string ProtectedTilePresent = "first_severance.arena_protected_tile_present";
     public const string InteriorSolidWarning = "first_severance.arena_interior_solid_warning";
+    public const string InteriorBlocked = "first_severance.arena_airspace_blocked";
     public const string LiquidWarning = "first_severance.arena_liquid_warning";
     public const string WireOrActuatorWarning = "first_severance.arena_wire_or_actuator_warning";
     public const string PlatformOrRopeWarning = "first_severance.arena_platform_or_rope_warning";
@@ -251,7 +253,8 @@ internal sealed class FirstSeveranceArenaValidator
 
     public FirstSeveranceArenaValidationResult Validate(
         FirstSeveranceArenaSurvey survey,
-        FirstSeveranceArenaValidationMode mode = FirstSeveranceArenaValidationMode.Strict)
+        FirstSeveranceArenaValidationMode mode = FirstSeveranceArenaValidationMode.Strict,
+        bool allowSoloDebug = false)
     {
         ArgumentNullException.ThrowIfNull(survey);
         if (!Enum.IsDefined(mode))
@@ -294,7 +297,7 @@ internal sealed class FirstSeveranceArenaValidator
             null,
             issues);
         AddWhen(
-            survey.EligibleCandidateCount < FirstSeveranceRoster.MinimumCount,
+            survey.EligibleCandidateCount < Development.FirstSeveranceDevelopmentPolicy.MinimumFor(allowSoloDebug),
             FirstSeveranceArenaIssueCodes.TooFewParticipants,
             FirstSeveranceArenaIssueSeverity.Error,
             null,
@@ -308,7 +311,7 @@ internal sealed class FirstSeveranceArenaValidator
         AddWhen(
             metrics.SolidFoundationTileCount != survey.Layout.ArenaBounds.Width,
             FirstSeveranceArenaIssueCodes.FoundationIncomplete,
-            constructionSeverity,
+            mode == FirstSeveranceArenaValidationMode.DevelopmentContainment ? FirstSeveranceArenaIssueSeverity.Warning : constructionSeverity,
             evidence.FirstFoundationGap,
             issues);
         AddWhen(
@@ -338,8 +341,8 @@ internal sealed class FirstSeveranceArenaValidator
 
         AddWhen(
             metrics.SolidInteriorTileCount > 0,
-            FirstSeveranceArenaIssueCodes.InteriorSolidWarning,
-            FirstSeveranceArenaIssueSeverity.Warning,
+            mode == FirstSeveranceArenaValidationMode.DevelopmentContainment ? FirstSeveranceArenaIssueCodes.InteriorBlocked : FirstSeveranceArenaIssueCodes.InteriorSolidWarning,
+            mode == FirstSeveranceArenaValidationMode.DevelopmentContainment ? FirstSeveranceArenaIssueSeverity.Error : FirstSeveranceArenaIssueSeverity.Warning,
             evidence.FirstSolidInterior,
             issues);
         AddWhen(

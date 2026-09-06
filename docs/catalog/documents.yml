@@ -25,12 +25,12 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: cc7a738b81aaa5185e4b0afb70adf86b059af9a4f21df263ce447d174e0e3b9d
+  content_sha256: e6ebe3c1a2b14d736ddbb01aed097a172295b22ff7bc75f93e6925e8aab252c5
   document_type: policy
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - compatibility.version_matrix
   aliases:
@@ -45,6 +45,96 @@ documents:
   - development.windows
   - policy.release-process
   - project.status
+- doc_id: decision.boss-stages-lattice
+  path: docs/adr/0017-boss-stages-fixed-stack-and-lattice.md
+  title: 'ADR-0017: Feature-owned Boss stages, fixed Stack and bounded lattice'
+  content_sha256: 2ece298367d043de6432f59f9a3ddc5db2c5d283595a33c174a9ad7fba027751
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - networking
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.boss_stages_lattice
+  aliases:
+  - ADR-0017
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceBossPhases.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceGridVolley.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceStageVisuals.cs
+  related_docs:
+  - encounter.first-severance.spec
+  - encounter.first-severance.visual
+  - project.status
+- doc_id: decision.deliberate-anticipation
+  path: docs/adr/0014-deliberate-anticipation-and-solemn-presentation.md
+  title: 'ADR-0014: Deliberate anticipation and solemn presentation'
+  content_sha256: 0246e291e7f83ab057254c0159d69ec22ba360976742653ddf8bf4bd07a28c01
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - gameplay
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.deliberate_anticipation
+  aliases:
+  - ADR-0014
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceLance.cs
+  - Client/Encounters/FirstSeverance
+  related_docs:
+  - decision.energy-charge-feedback
+  - encounter.first-severance.spec
+  - encounter.first-severance.visual
+  - project.audio-cues
+- doc_id: decision.development-solo-admission
+  path: docs/adr/0020-development-solo-admission-and-terminal-hud.md
+  title: 'ADR-0020: Build-gated solo debug admission and disposable terminal HUD'
+  content_sha256: 93715aadafc93d5cbb3ef646fcc1a4b033b295a77811f70fd0962b38885f60d1
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - networking
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.development_solo_admission
+  aliases:
+  - ADR-0020
+  related_code:
+  - Directory.Build.props
+  - Content/Encounters/FirstSeverance/Development/FirstSeveranceDevelopmentPolicy.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceCoreResolver.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceEndingTimeline.cs
+  related_docs:
+  - development.single-operator-testing
+  - encounter.first-severance.spec
+  - encounter.first-severance.visual
+  - policy.release-process
+  - project.status
+- doc_id: decision.energy-charge-feedback
+  path: docs/adr/0013-energy-charge-and-client-feedback.md
+  title: 'ADR-0013: Bounded semi-homing energy body and local Raid feedback'
+  content_sha256: c13fc5041435628c62d007b767f717e259083c277da201609ee335eb37aea13a
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - gameplay
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.energy_charge_feedback
+  aliases:
+  - ADR-0013
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceLance.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceFeedback.cs
+  related_docs:
+  - project.network-architecture
+  - encounter.first-severance.spec
+  - project.audio-cues
 - doc_id: decision.giant-boss-observation-lances
   path: docs/adr/0010-giant-boss-observation-lances.md
   title: 'ADR-0010: Giant original Boss pass and bounded observation lances'
@@ -66,6 +156,26 @@ documents:
   - encounter.first-severance.spec
   - encounter.first-severance.visual
   - project.network-architecture
+- doc_id: decision.ground-containment-emission
+  path: docs/adr/0016-ground-containment-and-continuous-emission.md
+  title: 'ADR-0016: Ground containment and continuous emission'
+  content_sha256: 8f2e438098234899b4b75475389f6f5048e82b44e7fb04da02328e0d4f16a31a
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - networking
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.ground_containment_emission
+  aliases:
+  - ADR-0016
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceContainmentPlayer.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceEmissionVisuals.cs
+  related_docs:
+  - encounter.first-severance.spec
+  - research.wotg-raid-benchmark
 - doc_id: decision.instant-revival-recipient-lockout
   path: docs/adr/0011-instant-revival-and-recipient-lockout.md
   title: 'ADR-0011: Reusable instant revival with recipient-only lockout'
@@ -87,15 +197,123 @@ documents:
   - encounter.first-severance.revive
   - project.network-architecture
   - project.status
+- doc_id: decision.pattern-sequences-defeat-death
+  path: docs/adr/0012-pattern-sequences-and-defeat-death.md
+  title: 'ADR-0012: Bounded spatial sequences and ordinary death on Raid Defeat'
+  content_sha256: f4a36ff31e7983fa47d893be664fddae3af5ddb60077a8a39f7a875ec0864b81
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - gameplay
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.pattern_sequences_defeat_death
+  aliases:
+  - ADR-0012
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceAttackPatterns.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceClientStateSystem.cs
+  related_docs:
+  - encounter.first-severance.spec
+  - project.network-architecture
+  - project.status
+- doc_id: decision.phase-scores-terminal-survival
+  path: docs/adr/0019-phase-scores-and-terminal-survival.md
+  title: 'ADR-0019: Ordered phase scores and HP-zero survival'
+  content_sha256: d2d2be5307b746f69865519fe6c1fb2d813c7c676b57f6560b26bbcc1300cd62
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.phase_scores_terminal_survival
+  aliases:
+  - ADR-0019
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceChoreography.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceLoopStateMachine.cs
+  related_docs:
+  - decision.roster-health-core-salvos
+  - encounter.first-severance.spec
+  - project.status
+- doc_id: decision.roster-health-core-salvos
+  path: docs/adr/0018-roster-health-and-core-salvos.md
+  title: 'ADR-0018: Frozen-roster health and bounded Core salvos'
+  content_sha256: e52c1e7a0fd2ae393cdd7acaa9798d5fc19cdb89827745f73086f1903dee5485
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - networking
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.roster_health_core_salvos
+  aliases:
+  - ADR-0018
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeverancePartyScaling.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceGridVolley.cs
+  - Content/Encounters/FirstSeverance/Actors
+  related_docs:
+  - decision.boss-stages-lattice
+  - encounter.first-severance.spec
+  - project.status
+- doc_id: decision.single-pull-debug-assist
+  path: docs/adr/0015-console-only-single-pull-assist.md
+  title: 'ADR-0015: Console-only, exact-Fight auxiliary protection'
+  content_sha256: a0256a43c64a498889d514791c5d34e8601ff02adfcb6002fca8353d0cc08d4d
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - networking
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - architecture.single_pull_debug_assist
+  aliases:
+  - ADR-0015
+  related_code:
+  - Content/Encounters/FirstSeverance/Development
+  - Content/Encounters/FirstSeverance/Revive/FirstSeveranceRaidPlayer.cs
+  related_docs:
+  - development.single-operator-testing
+  - encounter.first-severance.spec
+  - project.network-architecture
+- doc_id: decision.untimed-recovery-simultaneous-prism
+  path: docs/adr/0021-untimed-recovery-and-simultaneous-prism.md
+  title: 'ADR-0021: Untimed Down and simultaneous bounded Prism assignments'
+  content_sha256: afd41b9df3952e09db289029e3b11e6dc5a85bf870c13fe1ab20e2f3f582355b
+  document_type: adr
+  status: accepted
+  owners:
+  - engineering
+  - gameplay
+  last_reviewed: '2026-09-07'
+  source_of_truth_for:
+  - architecture.untimed_raid_recovery
+  - architecture.simultaneous_prism_replication
+  aliases:
+  - ADR-0021
+  related_code:
+  - Common/Raids/Revive
+  - Content/Encounters/FirstSeverance
+  related_docs:
+  - encounter.first-severance.revive
+  - project.network-architecture
+  - project.status
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: ddb9aed3fea33e4374fbe541ea1085b317080d58fb3b337d72228d4cee3fb7c1
+  content_sha256: 4dc1bfe7a13f68e2e0ed878acdc8485b5ebb26786275f8077ac983932edd63ff
   document_type: index
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - architecture.adr_index
   aliases:
@@ -108,12 +326,12 @@ documents:
 - doc_id: development.general
   path: docs/DEVELOPMENT.md
   title: Development Setup
-  content_sha256: 00b52ebe2f5b1b9b8e259d638b03a980d4651cc2d74da510ab4ff42708e9e3f9
+  content_sha256: 0501fb3ad3cc5a2b8ee88c0f1c2fc670783957cd19b73b951bfcfe00856b311e
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - development.general_policy
   aliases:
@@ -127,15 +345,41 @@ documents:
   - development.windows
   - verification.evidence
   - project.status
+- doc_id: development.single-operator-testing
+  path: docs/runbooks/SINGLE_OPERATOR_TESTING.md
+  title: 一人でマルチRaidを検証する方法
+  content_sha256: b711b906ca754aada0d4b9c4a11944446f92682ec88594864cb276a3a930b331
+  document_type: runbook
+  status: provisional
+  owners:
+  - engineering
+  - gameplay
+  last_reviewed: '2026-09-06'
+  source_of_truth_for: []
+  aliases:
+  - 一人マルチ検証
+  - two local clients
+  - solo raid testing
+  - debug sidecar
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceDownCommand.cs
+  - Content/Encounters/FirstSeverance/FirstSeverancePrototypeCombatRuntime.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceRoster.cs
+  related_docs:
+  - project.status
+  - development.windows
+  - verification.evidence
+  - encounter.first-severance.revive
+  - research.wotg-raid-benchmark
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: ebf7f7d2e4dd58d4ba82022be7c1e697039e1aa6dd00a4cd6e33981b7052afc7
+  content_sha256: 07056847acb9dbe2336877f3df56d7ae411adbed19f8bc38805adf7b2eae6f83
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - development.windows_setup
   aliases:
@@ -152,12 +396,12 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 48461f34cb2d06296d3faef5e51b997280059d0dfc4b897b9cbe33449ff65701
+  content_sha256: 3ee90753638600045e7105f84dd428ef0eecc1b1af871e4ceebcc920c9091071
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - documentation.read_order
   aliases:
@@ -171,12 +415,12 @@ documents:
 - doc_id: docs.search-index
   path: docs/INDEX.md
   title: Documentation Search Index
-  content_sha256: 46fcaa161e225c052a314c6968afd9d1847a12e621c00b24cfd347ea89290aab
+  content_sha256: e9647a74936268584638a1841a9a89f3116d74da09585cf7c8f91a582d84cf63
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - documentation.search_index
   aliases:
@@ -190,12 +434,12 @@ documents:
 - doc_id: docs.system
   path: docs/DOCUMENTATION_SYSTEM.md
   title: Documentation and Knowledge-Base Design
-  content_sha256: 2f0d7923ac361db7e02e7e3edd120c1bba92007340e8024b214b64428611a6db
+  content_sha256: f5b107a396b932bf75b28606181bb0884dd9ac210645a65ec578eac62ebcb570
   document_type: governance
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - documentation.data_model
   aliases:
@@ -251,13 +495,13 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 50474bd229d73f8b798020ef397ff6858b38e405f3006eea1d780e94ac2f7789
+  content_sha256: f91d681711d3b7ae95966b8e63fa3d42458f1e3a195d4f03afa909e7adcb86e2
   document_type: plan
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - first_severance.implementation_sequence
   aliases:
@@ -275,13 +519,13 @@ documents:
 - doc_id: encounter.first-severance.revive
   path: docs/encounters/first-severance/REVIVE_SPEC.md
   title: First Severance Downed and Revive Specification
-  content_sha256: d4f5ece6f6881d505b65f7c894c96c73dc21b3aed7cade8b5ee21f0b2475eb47
+  content_sha256: 14ce3092174f3427d69d65912725d8bb3e18d58a30260d29cf41f07102cecd45
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - first_severance.player_recovery
   aliases:
@@ -295,16 +539,17 @@ documents:
   - encounter.first-severance.spec
   - encounter.first-severance.plan
   - decision.instant-revival-recipient-lockout
+  - decision.untimed-recovery-simultaneous-prism
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: af2b94cba5dfa6e8cb94708fa7d10c93eebcb165ebb75f3453f34116faac27c2
+  content_sha256: 04ad360ab0a4992317731d002836b76c65b9b2895d84bd454d9e6c976e5176b4
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -323,13 +568,13 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: 71c0100feb9beb222d49f31e39e8ed8bbcf16521e06be7b41a18a8d210355814
+  content_sha256: 0604bafed7f4752418eda3822a055dbcd733b99c4da98768fb867156c04de87c
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -365,7 +610,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 456b89a3d829a34a342b5f198a036e756ca3ba010c09bc2d8f87c996d1b0210c
+  content_sha256: f03eb6c72e6be9486dd95517d0df7db7b7bc84a898f4408b474fa2cafeb4bdda
   document_type: policy
   status: accepted
   owners:
@@ -385,13 +630,13 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: 01909ee76cb1bdbe54e47ad4a49cceae9d1bdaba2641183cdac0615b256804b3
+  content_sha256: ee479ec937c4637d5974c285ba35f1b83b83f0b09f0ea59d33c220c87f1ece65
   document_type: policy
   status: accepted
   owners:
   - project
   - quality
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-06'
   source_of_truth_for:
   - policy.release_process
   aliases:
@@ -431,7 +676,7 @@ documents:
 - doc_id: project.arena-infrastructure
   path: docs/ARENA_INFRASTRUCTURE.md
   title: Arena Infrastructure
-  content_sha256: 850d6a83c551292ccb453886da9aa4e3e4a7c369d6da1cc65556b31e68666dc7
+  content_sha256: 29a58233524de47cf24352b2877f0a10dd379c5c7cae95063f8e3c1186829735
   document_type: spec
   status: accepted
   owners:
@@ -478,7 +723,7 @@ documents:
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
-  content_sha256: dd91e08933a7a19143c3e0f00976340332bdfda4df935c2e29a48b22a001511a
+  content_sha256: ad38bf10575eb2ecbf69cadee50ce7c39c61d313d8a4ea9c7fbfdbaca2c2e19a
   document_type: governance
   status: accepted
   owners:
@@ -498,12 +743,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: c43e1009ec630282fc38261393b3c36b11533a514abe39a8df11b1a23af83912
+  content_sha256: 07b441bd75fe70ed3ec42c8e4d735e5fb32b1acc849f52aced50a3ff3c7dca6b
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -635,12 +880,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 7c4cac6f667b8673d9dec3df14d751ffa4fb3ae8c68859df03b6cde168c81f11
+  content_sha256: 77ec49d3a332bd421edd9547407dbe676660ff6858e675cd9c7a69fd31f73bd0
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -680,12 +925,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 91eb84cf021fad3474a9f09e64ee301ebf98a18b20b3b0b07355be32fc5080e6
+  content_sha256: 8ff84c169df4c3d02cc39136cf6afc04c7bd2e0e12b19875bb0662a0fa6e20fe
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -749,6 +994,24 @@ documents:
   related_docs:
   - docs.system
   - research.sources
+- doc_id: research.energy-audio-sky-apis
+  path: docs/research/ENERGY_AUDIO_SKY_APIS.md
+  title: Energy, audio and sky API evidence
+  content_sha256: 1efde7f422e7e5f54a10a197197bc7c5bbaa717a3f8d7e8728566ae93ec80ac1
+  document_type: research
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-06'
+  source_of_truth_for:
+  - evidence.energy_audio_sky_apis
+  aliases:
+  - energy audio sky API evidence
+  related_code:
+  - Client/Encounters/FirstSeverance
+  related_docs:
+  - compatibility.version-matrix
+  - decision.energy-charge-feedback
 - doc_id: research.first-severance-giant-visuals
   path: docs/research/FIRST_SEVERANCE_GIANT_VISUALS.md
   title: Giant Boss / observation lance implementation evidence
@@ -796,7 +1059,7 @@ documents:
 - doc_id: research.instant-revival-core-apis
   path: docs/research/INSTANT_REVIVAL_CORE_APIS.md
   title: Instant revival / Foundation Core API evidence
-  content_sha256: 1d0f0d4be176b5df25d71eee64acb9b36befa5545191b724b7cba4d23499d746
+  content_sha256: b9fd1ba9691b140b5fc4433340c258e3e1dd2082f55de9ed13142ef096f37a00
   document_type: research
   status: accepted
   owners:
@@ -835,10 +1098,31 @@ documents:
   - project.network-architecture
   - encounter.first-severance.spec
   - research.sources
+- doc_id: research.raid-movement-sync-apis
+  path: docs/research/RAID_MOVEMENT_SYNC_APIS.md
+  title: Raid movement synchronization investigation
+  content_sha256: 82717a7a5f8306dead352f04816448e4f203225c6af28e5bc78cf4b03de0c8e9
+  document_type: research
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-06'
+  source_of_truth_for: []
+  aliases:
+  - Raid movement heartbeat
+  - Stack replica drift investigation
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceContainmentPlayer.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceClientStateSystem.cs
+  - Content/Encounters/FirstSeverance/FirstSeverancePacketSystem.cs
+  related_docs:
+  - project.status
+  - compatibility.version-matrix
+  - encounter.first-severance.spec
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 050dedd918a161c639cc8e6d8c9150e9f7e483ca779b6c0c38b4101f635cdd57
+  content_sha256: a621ea9a7f0fda29fd35fd883067105afdb2989dbaf44a327aaa7b577d404839
   document_type: research
   status: historical
   owners:
@@ -855,6 +1139,35 @@ documents:
   - research.multiplayer-raid-prior-art
   - research.first-severance-slice3-apis
   - research.instant-revival-core-apis
+  - research.wotg-raid-benchmark
+  - development.single-operator-testing
+- doc_id: research.wotg-raid-benchmark
+  path: docs/research/WOTG_RAID_BENCHMARK.md
+  title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
+  content_sha256: 794bd23a28682d072a9ee3dbaba5f396b457d0328c1f65044d5fee64b47dfed0
+  document_type: research
+  status: provisional
+  owners:
+  - research
+  - art
+  - gameplay
+  last_reviewed: '2026-09-06'
+  source_of_truth_for: []
+  aliases:
+  - Wrath of the Gods benchmark
+  - Avatar of Emptiness
+  - Nameless Deity
+  - WotG quality target
+  related_code:
+  - Client/Encounters/FirstSeverance
+  - Content/Encounters/FirstSeverance
+  related_docs:
+  - project.status
+  - encounter.first-severance.visual
+  - encounter.first-severance.spec
+  - research.sources
+  - policy.ip-provenance
+  - development.single-operator-testing
 - doc_id: verification.evidence
   path: docs/evidence/README.md
   title: Verification Evidence
@@ -878,7 +1191,7 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: 3ad6006036fcf3c1709c45993016611723e9383b10d5daf5312aeced786541c4
+  content_sha256: d3184d7300a9af8e90a7213333fb07f90b336805034954cf2d5669b23a4ffd8d
   document_type: plan
   status: accepted
   owners:

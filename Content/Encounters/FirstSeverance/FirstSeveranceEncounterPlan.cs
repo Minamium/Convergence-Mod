@@ -102,6 +102,10 @@ internal sealed class FirstSeveranceEncounterPlan
         FirstSeveranceSubstate substate,
         bool isPenalizedExposure)
     {
+        if (substate == FirstSeveranceSubstate.PhaseTransition)
+            return FirstSeveranceBossPhasePlan.RuptureTicks;
+        if (substate == FirstSeveranceSubstate.Lattice)
+            return FirstSeveranceBossPhasePlan.GridWindowTicks;
         if (substate == FirstSeveranceSubstate.CoreExposure && isPenalizedExposure)
         {
             return Timing.PenalizedExposureTicks;
@@ -113,14 +117,14 @@ internal sealed class FirstSeveranceEncounterPlan
     private static FirstSeveranceEncounterPlan CreateDefault()
     {
         var timing = new FirstSeveranceTimingPlan(
-            spawnIntroTicks: 90,
-            pylonTelegraphTicks: 30,
-            pylonActiveTicks: 480,
-            stackTelegraphTicks: 135,
-            spreadTelegraphTicks: 135,
-            normalExposureTicks: 600,
-            penalizedExposureTicks: 300,
-            resetTicks: 30);
+            spawnIntroTicks: 360,
+            pylonTelegraphTicks: 90,
+            pylonActiveTicks: 840,
+            stackTelegraphTicks: 240,
+            spreadTelegraphTicks: 240,
+            normalExposureTicks: 1080,
+            penalizedExposureTicks: 720,
+            resetTicks: 120);
 
         IReadOnlyList<FirstSeveranceSubstateDefinition> substates = Array.AsReadOnly(
             new[]
@@ -171,7 +175,7 @@ internal sealed class FirstSeveranceEncounterPlan
             FirstSeveranceBossPlan.CreateDefault(),
             timing,
             new FirstSeveranceParticipantScaledInt(2, 3, 4),
-            new FirstSeveranceParticipantScaledInt(2, 2, 3),
+            new FirstSeveranceParticipantScaledInt(2, 3, 4),
             overloadThreshold: 3,
             maximumCompletedExposures: 8,
             substates,
@@ -183,7 +187,9 @@ internal sealed class FirstSeveranceEncounterPlan
         FirstSeveranceSubstateDefinition> ValidatePlan(
             IReadOnlyList<FirstSeveranceSubstateDefinition> substates)
     {
-        int expectedStateCount = Enum.GetValues<FirstSeveranceSubstate>().Length - 1;
+        // This is the sealed Raid-cycle plan. Later Boss stages have their own
+        // ordered phase plan, rather than pretending to be edges in this cycle.
+        const int expectedStateCount = 6;
         if (substates.Count != expectedStateCount)
         {
             throw new ArgumentException(

@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - documentation.search_index
 aliases:
@@ -24,8 +24,8 @@ Search by `doc_id`, topic, alias, or source path. Machine-readable metadata is g
 ## Thirty-second lookup
 
 ```bash
-# Current truth and the next executable slice
-rg -n "implementation_status|## Next change|Slice 2" docs
+# Locate current-state sections without searching historical slices
+rg -n "^## (Current build|Verification state|Next change)" docs/STATUS.md
 
 # Stable ID, alias, mechanic, or code owner
 rg -ni "encounter\.first-severance|第一断絶|頭割り|Common/Raids/Revive" docs
@@ -41,14 +41,16 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 | Document ID | Type / status | Owns | Useful search terms |
 |---|---|---|---|
 | `project.status` | status / accepted | implementation inventory | implemented, missing, inert, verification, playable |
-| `handoff.windows` | handoff / accepted | 2026-09-04 Windows transfer | clone, pull, ModSources, first task, Mac audit |
+| `handoff.windows` | handoff / accepted | historical 2026-09-04 Windows transfer checkpoint | transfer history, ModSources, Mac audit |
 | `encounter.first-severance.overview` | overview / accepted | feature reading map | First Severance, 第一断絶, legacy ThirdSeverance |
 | `encounter.first-severance.spec` | spec / accepted | active encounter loop and outcomes | Pylon, DPS check, Stack, 頭割り, Spread, 散開, Core exposure |
 | `encounter.first-severance.plan` | plan / accepted | implementation order and gates | slice, rename, adapter, executor, Definition of Done |
 | `encounter.first-severance.visual` | spec / provisional | prototype boss appearance within the accepted one-body/readability boundary | central Core, broken ring, side arms, Shielded, Exposed |
-| `encounter.first-severance.revive` | spec / accepted | Downed/Revive player rules | Resuscitation Kit, 蘇生キット, channel, token, PreKill |
+| `encounter.first-severance.revive` | spec / accepted | Downed/Revive player rules | Resuscitation Kit, 蘇生キット, instant revival, recipient lockout, PreKill |
 | `encounter.first-severance.backlog` | backlog / accepted | deferred ideas | Part Break, Effigy, Last Stand, Split Reality |
 | `development.windows` | runbook / accepted | repeatable workstation setup | tModLoader, Calamity, .NET 8, Build + Reload, Dedicated Server |
+| `research.wotg-raid-benchmark` | research / provisional | reference evidence, not gameplay authority | [WotG](research/WOTG_RAID_BENCHMARK.md), Avatar, Nameless, composite, telegraph, audio, video chapters |
+| `development.single-operator-testing` | runbook / provisional | proposed local testing method, not runtime evidence | [一人二窓](runbooks/SINGLE_OPERATOR_TESTING.md), localhost, debug Down, God Mode, NPC limitations |
 | `verification.evidence` | evidence / accepted | build/test record format | commit SHA, versions, checksums, logs |
 | `docs.system` | governance / accepted | documentation data model | front matter, catalog, SQLite, semantic search, doc_id |
 
@@ -59,7 +61,7 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 | Authority and replica | [Architecture](ARCHITECTURE.md), [ADR-0002](adr/0002-server-authoritative-encounters.md) | `Common/Encounters`, `Common/Networking/Replication` |
 | Packet validation | [Network Architecture](NETWORK_ARCHITECTURE.md) | `Common/Networking` |
 | Arena and Barrier | [Arena Infrastructure](ARENA_INFRASTRUCTURE.md), [ADR-0003](adr/0003-in-world-logical-arena.md) | current `Content/Encounters/FirstSeverance/*Arena*` |
-| Downed/Revive authority | [ADR-0005](adr/0005-server-authoritative-downed-revive.md), [Revive Spec](encounters/first-severance/REVIVE_SPEC.md) | `Common/Raids/Revive`, legacy feature `Revive/` boundary |
+| Downed/Revive authority | [Revive Spec](encounters/first-severance/REVIVE_SPEC.md), [ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md), [ADR-0005 foundation](adr/0005-server-authoritative-downed-revive.md) | `Common/Raids/Revive`, feature `Revive/` boundary |
 | Calamity isolation/removal | [ADR-0004](adr/0004-calamity-compatibility-boundary.md), [ADR-0006](adr/0006-staged-calamity-independence.md) | `Common/Compatibility/Calamity`, `build.txt` |
 | Feature ownership | [Repository Layout](REPOSITORY_LAYOUT.md), [Content Authoring](CONTENT_AUTHORING.md) | `Content/Encounters/<Feature>`, `Client/Encounters/<Feature>` |
 | Testing | [Test Plan](TEST_PLAN.md), [Evidence](evidence/README.md) | `Tests/Convergence.DomainTests`, `.github/workflows` |

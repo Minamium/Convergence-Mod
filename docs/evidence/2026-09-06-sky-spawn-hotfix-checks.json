@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.4",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 6,
+  "runtime": "tModLoader v2026.07.3.0 / Terraria 1.4.4.9",
+  "scope": "Client-only sky activation hotfix; gameplay, network schema and assets unchanged",
+  "cause": "0.2.3 InitialSpawn(49) interrupted by an unregistered Filters.Scene lookup inside Player.ManageSpecialBiomeVisuals, despite inactive Raid",
+  "checks": {
+    "installed_api_inspection": "passed: confirmed unguarded filter access in Player helper, safe missing-key manager lookup and active-list reactivation behavior in exact installed binary",
+    "isolated_production_callback": "passed: exact production callback compiled against API doubles; inactive spawn, absent/wrong sky binding, server/menu/nonlocal guards, idempotent start/stop, fade-tail restart and null manager. Not a real game session",
+    "compiled_callback_boundary": "passed: actual built method contains sky activation/deactivation and requested-state check, with no Player combined helper or filter call",
+    "static_wrapper": "passed once: 46 indexed documents, 236 repository files, 10 YAML files; git diff --check passed",
+    "actual_build_package": "passed: actual ModSources 0.2.4 compiled/packaged with zero warnings/errors; Convergence.tmod 7112071 bytes",
+    "domain_and_codec": "not repeated: unchanged from passing 0.2.3 checks",
+    "client_spawn_movement_and_raid_sky": "not_run: user owns tModLoader launch and GUI; no agent launch or UI automation"
+  }
+}

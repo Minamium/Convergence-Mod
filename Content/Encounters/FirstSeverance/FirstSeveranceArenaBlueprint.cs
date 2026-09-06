@@ -194,8 +194,8 @@ internal sealed class FirstSeveranceArenaLayout
 
 internal sealed class FirstSeveranceArenaBlueprint
 {
-    public const int WidthInTiles = 320;
-    public const int HeightInTiles = 140;
+    public const int WidthInTiles = 160;
+    public const int HeightInTiles = 70;
     public const int BarrierInsetInTiles = 2;
     public const int PylonInsetInTiles = 14;
     public const int WorldEdgeSafetyMarginInTiles = 20;
@@ -263,7 +263,7 @@ internal sealed class FirstSeveranceArenaBlueprint
             checked
             {
                 // The resolved Core is the horizontal origin and lower foundation
-                // anchor. The 320x140 playable volume extends upward from BaseY.
+                // anchor. The 160x70 playable volume extends upward from BaseY.
                 arenaLeft = resolvedCore.LogicalCenter.X - (WidthInTiles / 2);
                 arenaTop = resolvedCore.BaseY - HeightInTiles;
                 arenaRight = arenaLeft + WidthInTiles;

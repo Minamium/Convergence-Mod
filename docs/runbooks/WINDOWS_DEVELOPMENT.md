@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - development.windows_setup
 aliases:
@@ -23,6 +23,8 @@ related_docs:
 # Windows Development Runbook
 
 Windows is the primary implementation and multiplayer-verification workstation for the first Raid. macOS remains usable for documentation, Git, code review, platform-independent edits, and its own runtime smoke when fully installed, but macOS evidence never substitutes for the Windows/Dedicated Server gate.
+
+This runbook contains setup and baseline procedures. For routine edits, use [Read by task](../README.md#read-by-task) and the [Verification Matrix](../../.agents/skills/develop-convergence-raids/references/verification-matrix.md) to select only the needed procedures; reading this page does not require rerunning the entire baseline.
 
 ## Required tools and content
 
@@ -116,7 +118,7 @@ Then:
 5. Enter and exit a Single Player world.
 6. Record exact runtime versions and the first relevant error/warning if a gate fails.
 
-Both command-line build and in-game Build + Reload are required because they exercise different packaging/load paths.
+Both command-line build and in-game Build + Reload are required for this baseline because they exercise different packaging/load paths. Routine development records applicable user-owned GUI checks as pending until performed, as described in the Verification Matrix.
 
 ## Dedicated Server baseline
 
@@ -164,16 +166,14 @@ Future matrix entries become Confirmed only after:
 
 ## Edit/verify loop
 
-For each C# concern:
+For each bounded change:
 
-1. read [Status](../STATUS.md), the feature spec/plan, architecture/network docs, and relevant ADRs;
-2. make one bounded change while activation stays fail-closed unless that slice owns activation;
-3. update tests and documentation in the same concern;
-4. run catalog, repository, YAML, domain, build, and relevant tModLoader checks;
-5. inspect `git diff --check` and `git status --short`;
-6. commit with a narrow message and attach the build-record summary to the task/PR.
+1. select only the context needed using [Read by task](../README.md#read-by-task); reuse context already read;
+2. implement the current scope and update only affected tests/document owners;
+3. run the wrapper once with the applicable flags and perform the runtime checks selected by the Verification Matrix;
+4. inspect the final diff and report results plus any concrete remaining user playtest; use a narrow commit when committing.
 
-Multiplayer/authority changes additionally require host/non-host, 2/3/4-player, latency, disconnect, and cleanup cases from [Test Plan](../TEST_PLAN.md).
+Use [Test Plan](../TEST_PLAN.md) for the affected multiplayer/authority cases. Repeat passing checks only if their inputs/environment change or a failure/uncertainty warrants it. Full compatibility and release gates retain their complete evidence requirements.
 
 ## Troubleshooting boundaries
 

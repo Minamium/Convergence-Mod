@@ -1,16 +1,19 @@
 #nullable enable
 
 using System;
+using System.Diagnostics;
+using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Identifiers;
 using Convergence.Content.Encounters.FirstSeverance;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
+using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualCurves;
 
 namespace Convergence.Client.Encounters.FirstSeverance;
 
@@ -18,22 +21,41 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 // facts come from the read-only snapshot; animation is disposable client state.
 internal sealed class FirstSeveranceBossVisuals
 {
-    private const string BodyPath = "Convergence/Assets/Textures/NPCs/NullCantorBody";
-    private static readonly Color Ice = new(128, 231, 246);
-    private static readonly Color Gold = new(155, 132, 88);
-    private static readonly Color Danger = new(255, 92, 62);
+    private const string BodyPath = "Convergence/Assets/Textures/NPCs/NullCantorRigAtlas";
+    private readonly FirstSeveranceEmissionVisuals emissions = new();
+    private readonly FirstSeveranceStageVisuals stages = new();
+    private readonly FirstSeveranceScoreVisuals scoreVisuals = new();
+    private Vector2 rigOrigin;
+    private float rigScale = .66f;
+    internal static readonly Color Ice = new(195, 213, 215);
+    internal static readonly Color Gold = new(173, 151, 110);
+    internal static readonly Color Danger = new(181, 85, 79);
     private Asset<Texture2D>? body;
     private Texture2D? glow;
     private FightId fight;
-    private uint soundedCharge;
-    private uint soundedFire;
     private FirstSeveranceSubstate previousPhase;
     private float exposure;
     private Vector2 lastCenter;
-    private int endingTicks;
+    private readonly FirstSeveranceEndingTimeline ending = new();
+    private bool endingParticipant;
+    private long endingStamp;
+    private float lastCast, lastKick, lastBreath;
     private int phaseImpactTicks;
+    private float mechanicPose;
+    private FirstSeveranceCombatProjection? lastCombat;
+
+    internal double RenderTick => emissions.RenderTick;
+    internal FirstSeveranceAttackAccents Accents => emissions.Accents;
 
     internal float PhaseShake => 9f * MathF.Pow(phaseImpactTicks / 24f, 2f);
+    internal bool IsEnding => ending.IsActive(Main.GameUpdateCount);
+    internal bool EndingVictory => ending.Reason == EncounterEndReason.Victory;
+    internal Vector2 EndingCenter => lastCenter;
+    internal float EndingAge => ending.Age(Main.GameUpdateCount, Main.gamePaused ? 0 :
+        (Stopwatch.GetTimestamp() - endingStamp) * 60d / Stopwatch.Frequency);
+    internal float EndingShake => !IsEnding ? 0 : EndingVictory
+        ? 24 * Window(EndingAge, .69, .80) * (1 - Window(EndingAge, .80, .91))
+        : 15 * (1 - Window(EndingAge, .02, .34));
 
     internal static Vector2 CoreCenter(FirstSeveranceCombatProjection combat)
         => new(combat.CoreX, combat.CoreY - FirstSeveranceLanceTuning.BossHeightAboveCore);
@@ -46,59 +68,53 @@ internal sealed class FirstSeveranceBossVisuals
         if (combat is null)
         {
             phaseImpactTicks = 0;
+            emissions.Clear();
+            stages.Reset();
             if (!fight.IsNone)
             {
                 fight = FightId.None;
-                endingTicks = 45;
+                ending.Begin(state.LastCombatEndReason, endingParticipant, Main.GameUpdateCount);
             }
-            if (endingTicks > 0)
-                endingTicks--;
+            if (!IsEnding)
+            {
+                ending.Clear();
+                lastCombat = null;
+                endingParticipant = false;
+            }
+            endingStamp = Stopwatch.GetTimestamp();
             return;
         }
 
         if (fight != combat.FightId)
         {
             fight = combat.FightId;
-            soundedCharge = soundedFire = 0;
+            emissions.Clear();
+            stages.Reset();
             previousPhase = FirstSeveranceSubstate.None;
             exposure = 0f;
-            endingTicks = 0;
+            ending.Clear();
             phaseImpactTicks = 0;
         }
         if (phaseImpactTicks > 0)
             phaseImpactTicks--;
         lastCenter = CoreCenter(combat);
+        lastCombat = combat;
+        endingParticipant = combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) && local.IsConnected;
         exposure = MathHelper.Lerp(exposure,
-            combat.Substate == FirstSeveranceSubstate.CoreExposure ? 1f : 0f, 0.32f);
-        bool nearby = Vector2.DistanceSquared(Main.LocalPlayer.Center, lastCenter) < 2400f * 2400f;
+            combat.IsCoreOpen ? 1f : 0f, 0.32f);
         if (previousPhase != combat.Substate)
         {
-            if (nearby && combat.Substate == FirstSeveranceSubstate.CoreExposure)
-            {
+            if (combat.Substate == FirstSeveranceSubstate.CoreExposure)
                 phaseImpactTicks = 24;
-                SoundEngine.PlaySound(SoundID.Item29 with { Volume = 0.95f, Pitch = -0.25f }, lastCenter);
-            }
             previousPhase = combat.Substate;
         }
-        if (combat.LanceVolley is not { } volley)
-            return;
-        ulong tick = state.EstimatedAuthorityTick;
-        if (volley.Serial != soundedCharge)
-        {
-            soundedCharge = volley.Serial;
-            if (nearby && tick >= volley.StartTick && tick < volley.FireTick)
-                SoundEngine.PlaySound(SoundID.Item15 with { Volume = 0.6f, Pitch = 0.1f }, lastCenter);
-        }
-        if (volley.Serial != soundedFire && tick >= volley.FireTick)
-        {
-            soundedFire = volley.Serial;
-            // Do not replay an expired shot after a snapshot repair or pause.
-            if (nearby && volley.IsFiring(tick))
-            {
-                SoundEngine.PlaySound(SoundID.Item33 with { Volume = 1f, Pitch = -0.3f }, lastCenter);
-                SoundEngine.PlaySound(SoundID.Item14 with { Volume = 0.35f, Pitch = -0.5f }, lastCenter);
-            }
-        }
+        emissions.Update(combat.LanceVolley, state.EstimatedAuthorityTick);
+        double renderTick = emissions.RenderTick;
+        double lead = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread ? 120 : 90;
+        float requestedPose = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread
+            || (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0)
+            ? FirstSeveranceVisualCurves.Window(renderTick, combat.ResolveTick - lead, combat.ResolveTick) : 0;
+        mechanicPose = MathHelper.Lerp(mechanicPose, requestedPose, .14f);
     }
 
     internal void Draw(SpriteBatch batch, FirstSeveranceCombatProjection combat, ulong tick)
@@ -106,23 +122,34 @@ internal sealed class FirstSeveranceBossVisuals
         EnsureAssets();
         bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
         Vector2 center = CoreCenter(combat);
-        float time = (float)(tick % 216000) / 60f;
+        double renderTick = emissions.RenderTick;
+        float time = (float)(renderTick % 216000) / 60f;
         float intro = combat.Substate == FirstSeveranceSubstate.SpawnIntro
             ? 1f - Math.Clamp((float)((double)combat.ResolveTick - tick)
                 / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0f, 1f) : 1f;
-        float reveal = 1f - MathF.Pow(1f - Math.Min(1f, intro * 2.5f), 3f);
-        float breath = MathF.Sin(time * 2.2f);
-        float recoil = combat.LanceVolley is { } shot && shot.IsFiring(tick)
-            ? MathF.Pow(1f - (tick - shot.FireTick) / (float)FirstSeveranceLanceTuning.ActiveTicks, 3f)
-            : 0f;
+        float reveal = MathHelper.SmoothStep(0f, 1f, Math.Min(1f, intro * 1.25f));
+        float breath = MathF.Sin(time * .72f);
+        float recoil = emissions.Kick;
+        float castPose = Math.Max(emissions.Pose, mechanicPose);
+        if (combat.GridVolley is { } grid)
+        {
+            castPose = Math.Max(castPose, FirstSeveranceVisualCurves.CastPose(renderTick, grid.StartTick, grid.FireTick, grid.EndTick));
+            recoil = Math.Max(recoil, Recoil(renderTick, grid.FireTick, grid.EndTick) * (grid.CoreBeams.Count > 0 ? 1 : .45f));
+        }
+        if (combat.Substate == FirstSeveranceSubstate.PhaseTransition) { castPose = 0; recoil = 0; }
+        lastCast = castPose; lastKick = recoil; lastBreath = breath;
+        float cast = castPose;
 
         if (!reduced)
         {
-            Glow(batch, center, 1250f, new Color(1, 7, 16) * (0.85f * reveal));
-            Glow(batch, center, 980f, new Color(7, 19, 30) * (0.7f * reveal));
+            Glow(batch, center, 1250f, new Color(5, 5, 7) * (0.7f * reveal));
+            Glow(batch, center, 980f, new Color(16, 16, 20) * (0.4f * reveal));
             DrawAurora(batch, center, time, reveal);
         }
-        DrawSeal(batch, center, time, reveal, reduced);
+        float shellScale = combat.BossPhase == FirstSeveranceBossPhase.Sealed ? .80f
+            : combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Unbound
+                ? MathHelper.Lerp(.80f, 1, EclosionUnfurl(FirstSeveranceStageVisuals.RuptureAge(combat, renderTick))) : 1;
+        DrawSeal(batch, center, time, reveal, reduced, shellScale);
         if (!reduced && phaseImpactTicks > 0)
         {
             float impact = 1f - phaseImpactTicks / 24f;
@@ -132,22 +159,47 @@ internal sealed class FirstSeveranceBossVisuals
             Glow(batch, center, 600 * (1f - impact), Additive(Ice, (1f - impact) * 0.8f));
         }
 
-        Texture2D texture = body!.Value;
-        // The generated core is at (50%, 44%), not the canvas midpoint. Keep the
-        // live hitbox fixed there; only the decorative casing/side structures move.
-        Vector2 origin = new(texture.Width * 0.5f, texture.Height * 0.44f);
-        float scale = 820f / texture.Height * (0.82f + 0.18f * reveal);
-        Color tint = Color.Lerp(new Color(127, 157, 171), Color.White, exposure * 0.85f) * reveal;
-        float rotation = breath * 0.008f;
-        int split = (int)(texture.Width * 0.3f);
-        DrawSlice(batch, texture, new Rectangle(0, 0, split, texture.Height), center,
-            origin, scale, rotation - exposure * 0.032f, tint,
-            new Vector2(-exposure * 65f - recoil * 18f, breath * 3f));
-        DrawSlice(batch, texture, new Rectangle(split, 0, texture.Width - split * 2, texture.Height),
-            center, origin, scale, rotation, tint, Vector2.Zero);
-        DrawSlice(batch, texture, new Rectangle(texture.Width - split, 0, split, texture.Height),
-            center, origin, scale, rotation + exposure * 0.032f, tint,
-            new Vector2(exposure * 65f + recoil * 18f, -breath * 3f));
+        bool hatching = combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Unbound;
+        float hatchAge = hatching ? FirstSeveranceStageVisuals.RuptureAge(combat, renderTick) : 1;
+        float unseal = hatching ? Window(hatchAge, .06, .19) : combat.BossPhase != FirstSeveranceBossPhase.Sealed ? 1 : 0;
+        bool remote = combat.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
+        float retreat = remote ? combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Distant
+            ? Window(FirstSeveranceStageVisuals.RuptureAge(combat, renderTick), .08, .64) : 1 : 0;
+        if (unseal > 0) DrawRig(batch, center - new Vector2(0, retreat * 190), reveal * unseal * (1 - retreat * .5f), breath, castPose, recoil,
+            EclosionUnfurl(hatchAge), EclosionEmerge(hatchAge), EclosionPry(hatchAge), hideHands: hatching,
+            depth: 1 - retreat * .76f);
+        if (remote) DrawRemoteArms(batch, combat, center, renderTick, reveal, retreat, reduced);
+        stages.DrawShell(batch, combat, center, renderTick, reveal, castPose, Accents, reduced);
+        if (hatching && unseal > 0)
+            DrawRig(batch, center, reveal * unseal, breath, 0, 0,
+                EclosionUnfurl(hatchAge), EclosionEmerge(hatchAge), EclosionPry(hatchAge), handsOnly: true);
+        Color castColor = combat.LanceVolley is { } attack
+            ? FirstSeveranceEmissionVisuals.AttackColor(attack)
+            : combat.Substate == FirstSeveranceSubstate.Stack ? FirstSeveranceAttackAccents.Cyan
+            : FirstSeveranceAttackAccents.Magenta;
+        if (combat.LanceVolley is { } current)
+            Accents.CastSeal(batch, center, renderTick, current.StartTick, current.FireTick, castColor, reduced, 1.6f);
+        if (combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread
+            || (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0))
+        {
+            double lead = combat.Substate == FirstSeveranceSubstate.PylonCheck ? 90 : 120;
+            Accents.CastSeal(batch, center, renderTick, combat.ResolveTick - lead, combat.ResolveTick, castColor, reduced, 1.7f);
+        }
+        if (cast > 0f || recoil > 0f)
+        {
+            Ring(batch, center, 185f - castPose * 92f + recoil * 170f,
+                castColor * Math.Max(cast, recoil), 2.4f, -castPose * 0.7f, 8);
+            // Tall, slow-closing calipers make the cast silhouette readable even
+            // when the actual attack originates at a player across the arena.
+            for (int side = -1; side <= 1; side += 2)
+            {
+                Vector2 arm = center + new Vector2(side * (180 + 120 * castPose), -150 * castPose);
+                Line(batch, arm + new Vector2(0, -100), arm + new Vector2(0, 95), castColor * cast, 3f);
+                Line(batch, arm, arm + new Vector2(-side * 44, 0), Color.White * cast, 2.5f);
+            }
+            Glow(batch, center, 240f + recoil * 320f,
+                Additive(Ice, (cast * 0.18f + recoil * 0.45f) * (reduced ? 0.4f : 1f)));
+        }
 
         // A dark aperture makes the single damage target readable over any biome.
         Glow(batch, center, 183f, Color.Black * reveal);
@@ -166,25 +218,159 @@ internal sealed class FirstSeveranceBossVisuals
         }
         DrawCoreCorners(batch, center, coreColor * reveal, exposure);
 
-        int shards = reduced ? 8 : 40;
+        int shards = reduced ? 4 : 16;
         for (int index = 0; index < shards; index++)
         {
-            float angle = index * 2.399963f + time * (index % 2 == 0 ? 0.2f : -0.15f);
+            float angle = index * 2.399963f + time * (index % 2 == 0 ? 0.04f : -0.03f);
             float radius = 300f + index % 5 * 39f + exposure * 38f;
             Vector2 point = center + Unit(angle) * radius + new Vector2(0, MathF.Sin(time + index) * 14f);
             Line(batch, point - Unit(angle + 0.4f) * 9f, point + Unit(angle + 0.4f) * 9f,
                 Ice * (0.3f * reveal), index % 3 + 2f);
         }
-        DrawLances(batch, combat.LanceVolley, tick, reduced);
+        emissions.Draw(batch, tick, reduced);
+        stages.DrawGrid(batch, combat, renderTick, tick, Accents, reduced);
+        scoreVisuals.Draw(batch, combat, renderTick, tick, Accents, reduced);
     }
 
-    private void DrawSeal(SpriteBatch batch, Vector2 center, float time, float reveal, bool reduced)
+    private void DrawRig(SpriteBatch batch, Vector2 center, float reveal, float breath, float cast, float kick,
+        float unfurl = 1, float emergence = 1, float pry = 1, bool handsOnly = false, bool hideHands = false, float collapse = 0, float depth = 1)
     {
-        float radius = (460f + exposure * 38f) * (0.7f + 0.3f * reveal);
-        float spin = time * 0.18f;
-        Ring(batch, center, radius, new Color(19, 37, 46) * reveal, 14f, spin, 12);
-        Ring(batch, center, radius - 9f, Ice * (0.26f * reveal), 1.8f, spin, 12);
-        Ring(batch, center, radius + 7f, Gold * (0.33f * reveal), 2f, spin, 12);
+        center += new Vector2(0, 85 * (1 - emergence));
+        rigOrigin = center;
+        rigScale = .66f * (.78f + .22f * emergence) * (1 - collapse * .995f) * depth;
+        Color tint = Color.Lerp(new Color(188, 190, 201), Color.White, exposure * .6f) * reveal;
+        float scale = 1.25f * (.92f + .08f * reveal);
+        // Separate authored bones, with shared joint coordinates. Forearms and
+        // hands inherit parent rotation, so wrists cannot detach during casting.
+        for (int side = -1; side <= 1; side += 2)
+        {
+            Vector2 shoulder = center + new Vector2(side * MathHelper.Lerp(150, 210, unfurl), 12);
+            Vector2 folded = new(side * MathHelper.Lerp(150, 455, pry), MathHelper.Lerp(-75, -235, pry));
+            Vector2 expanded = new(side * (620 + cast * 38 - kick * 55), 110 - cast * 220 + kick * 70 + breath * 9);
+            Vector2 wrist = center + Vector2.Lerp(folded, expanded, unfurl);
+            var joint = Elbow(new(shoulder.X, shoulder.Y), new(wrist.X, wrist.Y), side);
+            Vector2 elbowPoint = new(joint.X, joint.Y);
+            float upper = MathF.Atan2(elbowPoint.Y - shoulder.Y, elbowPoint.X - shoulder.X) - MathHelper.PiOver2;
+            float elbow = MathF.Atan2(wrist.Y - elbowPoint.Y, wrist.X - elbowPoint.X) - MathHelper.PiOver2;
+            if (!handsOnly)
+            {
+                Bone(batch, new(470, 0, 236, 651), shoulder, new(85, 53), new Vector2(140, 370), upper, tint);
+                Bone(batch, new(740, 0, 205, 651), elbowPoint, new(104, 52), new Vector2(115, 320), elbow, tint);
+                Bone(batch, new(957, 787, 297, 318), shoulder, new(148, 155), new Vector2(76), upper, tint);
+                Bone(batch, new(465, 655, 241, 599), center + new Vector2(side * 165, 40), new(120, 40),
+                    new Vector2(130, MathHelper.Lerp(220, 580, emergence)),
+                    -side * (.08f + unfurl * .12f + cast * .13f), tint);
+            }
+            if (!hideHands)
+                Bone(batch, new(953, 0, 301, 655), wrist, new(186, 40), new Vector2(150, 300),
+                    elbow + side * (cast * .42f + (1 - unfurl) * .38f), tint);
+        }
+        if (handsOnly) return;
+        Bone(batch, new(745, 660, 189, 585), center + new Vector2(0, MathHelper.Lerp(90, 330, emergence)),
+            new(95, 15), new Vector2(110, MathHelper.Lerp(160, 420, emergence)), breath * .009f, tint);
+        Bone(batch, new(0, 0, 448, 657), center, new(220, 260), new Vector2(448, 657) * scale * (.84f + .16f * emergence), breath * .005f, tint);
+        Bone(batch, new(0, 675, 445, 495), center + new Vector2(0, MathHelper.Lerp(-65, -355, emergence) - cast * 42 + kick * 18), new(222, 248),
+            new Vector2(540, 400) * (.48f + emergence * .52f), breath * -.012f + (1 - emergence) * .22f, tint);
+    }
+
+    private void DrawRemoteArms(SpriteBatch batch, FirstSeveranceCombatProjection combat, Vector2 center,
+        double tick, float reveal, float retreat, bool reduced)
+    {
+        float appear = Window(retreat, .4, 1);
+        double age = tick - combat.ActionStartedTick;
+        bool flooding = combat.Substate == FirstSeveranceSubstate.RemoteClaws;
+        double floodAge = age % FirstSeveranceScoreGeometry.FloodInterval;
+        int emittingSide = (int)(age / FirstSeveranceScoreGeometry.FloodInterval) % 2 == 0 ? -1 : 1;
+        float grasp = flooding ? Window(floodAge, 0, 42) * (1 - Window(floodAge, 142, 198)) : .18f;
+        float recoil = flooding ? Window(floodAge, 48, 60) * (1 - Window(floodAge, 70, 132)) : 0;
+        float flood = combat.Substate == FirstSeveranceSubstate.HalfField ? Window(age, 0, 180) * (1 - Window(age, 240, 298)) : 0;
+        bool crushing = combat.Substate == FirstSeveranceSubstate.RemoteCrush;
+        float closure = crushing ? FirstSeveranceScoreGeometry.CrushClosure(age) : 0;
+        float brace = crushing ? Window(age, 0, 125) * (1 - Window(age, 190, 270)) : 0;
+        if (crushing) grasp = brace * .7f + closure * .3f;
+        Color color = combat.BossPhase == FirstSeveranceBossPhase.Final ? new(231, 117, 184) : new(156, 212, 226);
+        rigOrigin = center; rigScale = 1;
+        for (int side = -1; side <= 1; side += 2)
+        {
+            Vector2 wrist = Wrist(side);
+            Vector2 elbow = wrist + new Vector2(side * (160 + grasp * 50), -250 - grasp * 70);
+            Vector2 shoulder = elbow + new Vector2(side * 100, 290);
+            float upper = (elbow - shoulder).ToRotation() - MathHelper.PiOver2;
+            float fore = (wrist - elbow).ToRotation() - MathHelper.PiOver2;
+            Color tint = Color.White * (appear * reveal);
+            Bone(batch, new(470, 0, 236, 651), shoulder, new(85, 53), new(185, 350), upper, tint);
+            Bone(batch, new(740, 0, 205, 651), elbow, new(104, 52), new(150, 340), fore, tint);
+            Bone(batch, new(953, 0, 301, 655), wrist, new(186, 40),
+                new(200 + brace * 400, 380 + brace * 80),
+                (crushing ? side : -side) * MathHelper.PiOver2 - side * grasp * (crushing ? .07f : .22f), tint);
+            if (crushing)
+            {
+                Accents.CastSeal(batch, wrist, age, 0, FirstSeveranceScoreGeometry.CrushRushTick, new Color(255, 91, 145), reduced, 1.2f);
+                // Smooth stretched wake during the 0.2 s inward strike, not held animation frames.
+                float rush = Window(age, 150, 154) * (1 - Window(age, 162, 176));
+                Accents.Ribbon(batch, wrist, new Vector2(side, 0), 320 + closure * 220, 170,
+                    new Color(217, 150, 255), rush * .6f);
+            }
+            Accents.Halo(batch, wrist, new Vector2(165 + grasp * 90, 210 + flood * 200), color, appear * (.24f + flood * .4f));
+            if (!reduced)
+            {
+                Vector2 last = center - new Vector2(0, 190);
+                for (int n = 1; n <= 40; n++)
+                {
+                    float t = n / 40f;
+                    Vector2 next = Vector2.Lerp(center - new Vector2(0, 190), wrist, t)
+                        + new Vector2(0, MathF.Sin(t * MathF.PI) * (85 + grasp * 35));
+                    Line(batch, last, next, Additive(color, appear * .19f), 1.6f);
+                    last = next;
+                }
+            }
+        }
+        if (combat.Substate == FirstSeveranceSubstate.RemoteClaws)
+            foreach (var finger in FirstSeveranceScoreGeometry.Rays(combat.Substate, combat.ActionIndex, age, combat.CoreX, combat.CoreY))
+            {
+                Vector2 tip = new(finger.Ray.X, finger.Ray.Y);
+                int side = finger.Ray.DirectionX < 0 ? 1 : -1;
+                Vector2 root = Wrist(side), prior = root;
+                float material = appear * Window(floodAge, 0, 10) * (1 - Window(floodAge, 142, 180));
+                for (int n = 1; n <= 20; n++)
+                {
+                    float t = n / 20f;
+                    Vector2 next = Vector2.Lerp(root, tip, t)
+                        + new Vector2(side * MathF.Sin(t * MathF.PI) * (75 + grasp * 45 - recoil * 35), 0);
+                    Line(batch, prior, next, new Color(28, 28, 42) * material, 18 - t * 9);
+                    Line(batch, prior, next, Additive(color, material * (.25f + finger.Charge * .65f)), 3);
+                    prior = next;
+                }
+            }
+        Vector2 Wrist(int side)
+        {
+            if (crushing) return center + new Vector2(side * MathHelper.Lerp(1110 - brace * 80, 330, closure),
+                -40 * brace + 40 * closure);
+            float flex = flooding && side == emittingSide ? grasp * 45 + recoil * 50 : 0;
+            return center + new Vector2(side * (MathHelper.Lerp(250, 1110, appear) + flex), 20 - flood * 90 - grasp * 30);
+        }
+    }
+
+    private void Bone(SpriteBatch batch, Rectangle source, Vector2 position, Vector2 pivot, Vector2 size, float rotation, Color tint)
+    {
+        Texture2D texture = body!.Value;
+        // Keep the existing long-limbed form inside the more intimate field.
+        position = rigOrigin + (position - rigOrigin) * rigScale;
+        size *= rigScale;
+        float factor = texture.Width / 1254f;
+        Vector2 originalSize = new(source.Width, source.Height);
+        source = new((int)(source.X * factor), (int)(source.Y * factor), (int)(source.Width * factor), (int)(source.Height * factor));
+        batch.Draw(texture, position - Main.screenPosition, source, tint, rotation, pivot * factor,
+            size / originalSize / factor, SpriteEffects.None, 0);
+    }
+
+    private void DrawSeal(SpriteBatch batch, Vector2 center, float time, float reveal, bool reduced, float size = 1)
+    {
+        float radius = (460f + exposure * 38f) * (0.7f + 0.3f * reveal) * size;
+        float spin = time * 0.035f;
+        Ring(batch, center, radius, new Color(25, 24, 27) * reveal, 6f, spin, 12);
+        Ring(batch, center, radius - 9f, Ice * (0.18f * reveal), 1.2f, spin, 12);
+        Ring(batch, center, radius + 7f, Gold * (0.24f * reveal), 1.2f, spin, 12);
         if (!reduced)
         {
             Ellipse(batch, center, new Vector2(radius + 80f, radius * 0.38f), -0.55f + spin,
@@ -226,85 +412,68 @@ internal sealed class FirstSeveranceBossVisuals
                 float y = MathF.Sin(x * 0.004f + time * 0.15f + ribbon * 0.8f) * 110f - 240f + ribbon * 78f;
                 Vector2 next = center + new Vector2(x, y);
                 if (index > 0)
-                    Line(batch, previous, next, new Color(55, 150, 174) * (0.022f * opacity), 42f);
+                    Line(batch, previous, next, new Color(125, 120, 115) * (0.010f * opacity), 26f);
                 previous = next;
-            }
-        }
-    }
-
-    private void DrawLances(SpriteBatch batch, FirstSeveranceLanceVolley? volley, ulong tick, bool reduced)
-    {
-        if (volley is null || tick < volley.StartTick || tick >= volley.EndTick)
-            return;
-        bool firing = volley.IsFiring(tick);
-        float charge = Math.Clamp((float)(tick - volley.StartTick) / FirstSeveranceLanceTuning.TelegraphTicks, 0f, 1f);
-        foreach (FirstSeveranceLanceRay ray in volley.Rays)
-        {
-            Vector2 start = new(ray.X, ray.Y);
-            Vector2 direction = new(ray.DirectionX, ray.DirectionY);
-            Vector2 normal = new(-ray.DirectionY, ray.DirectionX);
-            Vector2 end = start + direction * FirstSeveranceLanceTuning.Length;
-            float halfWidth = FirstSeveranceLanceTuning.HalfWidth;
-            if (!firing)
-            {
-                // Whole future hit corridor is visible from the first warning tick.
-                Line(batch, start, end, Danger * (0.12f + charge * 0.12f), halfWidth * 2);
-                Line(batch, start, end, Color.Lerp(Danger, Color.White, charge * 0.75f), 2f + charge * 2f);
-                DashedLine(batch, start + normal * halfWidth, end + normal * halfWidth, Danger * 0.85f, 1.8f);
-                DashedLine(batch, start - normal * halfWidth, end - normal * halfWidth, Danger * 0.85f, 1.8f);
-                // Travelling chevrons show direction without changing the locked aim.
-                for (int index = 1; index < 10; index++)
-                {
-                    Vector2 point = start + direction * (index * 180f + charge * 280f);
-                    Line(batch, point - direction * 14 + normal * 9, point, Danger * 0.55f, 2f);
-                    Line(batch, point - direction * 14 - normal * 9, point, Danger * 0.55f, 2f);
-                }
-                Glow(batch, start, 110f + charge * 220f, Additive(Danger, 0.75f * charge));
-                Ring(batch, start, 160f - MathF.Sqrt(charge) * 130f, Danger * (0.6f + charge * 0.4f), 3f);
-                if (!reduced)
-                    Ring(batch, start, 80f + charge * 20f, Gold * charge, 4f, charge * 1.5f, 8);
-                continue;
-            }
-
-            float age = (tick - volley.FireTick) / (float)FirstSeveranceLanceTuning.ActiveTicks;
-            float intensity = 1f - age * 0.4f;
-            if (!reduced)
-            {
-                Line(batch, start, end, Additive(Danger, 0.18f * intensity), 250f);
-                Line(batch, start, end, Additive(Danger, 0.35f * intensity), 154f);
-            }
-            Line(batch, start, end, new Color(246, 82, 59) * intensity, halfWidth * 2f);
-            Line(batch, start, end, new Color(255, 205, 168) * intensity, 66f);
-            Line(batch, start, end, Color.White * intensity, 38f);
-            Line(batch, start + normal * halfWidth, end + normal * halfWidth, Color.White * 0.9f, 2f);
-            Line(batch, start - normal * halfWidth, end - normal * halfWidth, Color.White * 0.9f, 2f);
-            Glow(batch, start, reduced ? 170f : 560f, Additive(new Color(255, 194, 147), intensity));
-            Ellipse(batch, start + direction * (65f + age * 100f), new Vector2(20, 60 + age * 70),
-                MathF.Atan2(direction.Y, direction.X), Color.White * (1f - age), 3f);
-            if (!reduced)
-            {
-                float shock = 1f - MathF.Pow(1f - age, 3f);
-                Ring(batch, start, 60f + shock * 370f, Danger * (1f - age) * 0.8f, 5f);
-                for (int index = 0; index < 28; index++)
-                {
-                    float side = index % 2 == 0 ? 1f : -1f;
-                    Vector2 p = start + direction * (index * 85f + shock * 520f)
-                        + normal * side * (58f + shock * (28 + index % 4 * 18));
-                    Line(batch, p, p + direction * (65 + index % 3 * 28),
-                        Additive(Danger, intensity * 0.8f), 3f);
-                }
             }
         }
     }
 
     internal void DrawEnding(SpriteBatch batch)
     {
-        if (endingTicks <= 0 || glow is null)
+        if (!IsEnding || glow is null)
             return;
-        float progress = 1f - endingTicks / 45f;
-        Ring(batch, lastCenter, 80f + progress * 620f, Ice * (1f - progress) * 0.75f, 3f);
-        Ring(batch, lastCenter, 80f + progress * 460f, Gold * (1f - progress) * 0.4f, 2f);
-        Glow(batch, lastCenter, 440f * (1f - progress), Additive(Ice, (1f - progress) * 0.45f));
+        if (EndingVictory)
+        {
+            float age = EndingAge;
+            bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+            float fold = Window(age, .03, .40), pinch = Window(age, .15, .79);
+            float dissolve = 1 - Window(age, .76, .80);
+            bool remote = lastCombat?.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
+            DrawRig(batch, lastCenter - new Vector2(0, remote ? 190 * (1 - pinch) : 0), dissolve, lastBreath * (1 - fold), lastCast * (1 - fold),
+                lastKick * (1 - fold), 1 - fold * .88f, collapse: pinch, depth: remote ? .24f : 1);
+            if (remote && lastCombat is { } remnant && age < .8f)
+                DrawRemoteArms(batch, remnant, lastCenter, remnant.ResolveTick, dissolve, 1 - pinch, reduced);
+            Color ion = new(210, 164, 255);
+            float tension = Window(age, .06, .45) * (1 - Window(age, .79, .805));
+            Accents.Halo(batch, lastCenter, new Vector2(620 - pinch * 610), ion, tension * (reduced ? .28f : .95f));
+            // Filaments accelerate inward; one optical snap erases the point.
+            for (int n = 0; n < (reduced ? 16 : 72); n++)
+            {
+                float angle = n * 2.399963f + pinch * 1.1f;
+                Vector2 direction = Unit(angle);
+                float radius = (240 + n % 11 * 87) * (1 - pinch);
+                float tail = (25 + n % 7 * 18) * (1 - pinch);
+                Vector2 point = lastCenter + direction * radius;
+                Line(batch, point, lastCenter + direction * (radius + tail), Additive(ion, tension * .65f), 1.5f + n % 3);
+                if (!reduced && n % 3 == 0) Accents.Halo(batch, point, new Vector2(11), Ice, tension * .75f);
+            }
+            float sever = Window(age, .79, .802) * (1 - Window(age, .802, .87));
+            Accents.Ribbon(batch, lastCenter - new Vector2(1100, 0), Vector2.UnitX, 2200,
+                3 + sever * 17, ion, sever * (reduced ? .30f : 1));
+            Accents.Halo(batch, lastCenter, new Vector2(320 * sever), Color.White, sever * (reduced ? .25f : .95f));
+            Line(batch, lastCenter - new Vector2(740 * sever, 0), lastCenter + new Vector2(740 * sever, 0), Color.White * sever, 3);
+            float inscription = Window(age, .85, .90) * (1 - Window(age, .96, 1));
+            Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.VictorySeal"),
+                lastCenter - Main.screenPosition + new Vector2(0, 105), Ice * inscription, .82f, .5f);
+            return;
+        }
+        float progress = EndingAge;
+        float closure = Window(progress, .04, .55);
+        float opacity = 1 - Window(progress, .18, .60);
+        bool distant = lastCombat?.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
+        DrawRig(batch, lastCenter - new Vector2(0, distant ? 190 : 0), opacity,
+            lastBreath * (1 - closure), lastCast * (1 - closure), lastKick * (1 - closure),
+            1 - closure * .4f, depth: distant ? .24f : 1);
+        // The surviving entity recedes behind two closing geometric shutters.
+        // All of this is a cached image pose, never an active or damageable actor.
+        Color extinguish = new(168, 67, 94);
+        for (int side = -1; side <= 1; side += 2)
+        {
+            Vector2 point = lastCenter + new Vector2(side * (620 * (1 - closure) + 10), 0);
+            Line(batch, point - new Vector2(0, 620), point + new Vector2(0, 620),
+                extinguish * opacity * .75f, 3 + closure * 22);
+            Glow(batch, point, 130 * (1 - closure), Additive(extinguish, opacity * .4f));
+        }
     }
 
     internal static void DrawCoreCorners(SpriteBatch batch, Vector2 center, Color color, float open)
@@ -393,16 +562,22 @@ internal sealed class FirstSeveranceBossVisuals
             }
         glow = new Texture2D(Main.instance.GraphicsDevice, size, size);
         glow.SetData(pixels);
+
     }
 
     internal void Reset(bool unload = false)
     {
         fight = FightId.None;
+        emissions.Clear(unload);
+        stages.Reset(unload);
+        if (unload) scoreVisuals.Unload();
         previousPhase = FirstSeveranceSubstate.None;
-        soundedCharge = soundedFire = 0;
-        endingTicks = 0;
+        ending.Clear();
+        endingParticipant = false;
+        lastCombat = null;
         phaseImpactTicks = 0;
         exposure = 0;
+        mechanicPose = 0;
         if (unload)
         {
             Texture2D? oldGlow = glow;

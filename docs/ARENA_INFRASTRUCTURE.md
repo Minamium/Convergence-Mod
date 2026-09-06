@@ -32,9 +32,7 @@ related_docs:
 
 This document covers Foundation Core activation, server arena validation, roster/Ready, logical Barrier, Pylon placement inputs, and cleanup. Combat rules remain in the First Severance spec.
 
-Slice 3A now provides a development Foundation Core Item/2x2 Tile/Tile Entity, an authority-only read-only resolver, immutable validator results, a frozen roster, a Ready state machine, and an exact-Fight Core projection lease. The Core uses a shipped vanilla texture as an explicit development placeholder and has no recipe; Cheat Sheet may supply it for tests. Right-click reports that activation is unavailable.
-
-These adapters remain disconnected from encounter creation and custom packets. No logical Barrier correction or combat transition is enabled, and a successful pure Ready state still reports a closed combat gate. The existing four-corner Pylon slots remain layout inputs to revise when active roster-scaled actors are implemented.
+Current implementation and evidence belong to [Status](STATUS.md). The active development containment expansion in [ADR-0016](adr/0016-ground-containment-and-continuous-emission.md) and [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) supersedes the earlier disconnected Slice 3A state, fixed 2x2-only placement and warning-only interior policy. No terrain is generated or removed. General outsider admission below remains the intended broader contract, not a claim of implemented development enforcement.
 
 ## Provisional coordinate model
 
@@ -42,7 +40,7 @@ These adapters remain disconnected from encounter creation and custom packets. N
 - height: 140 tiles;
 - Core anchor: floor center/base Y;
 - World edge safety margin: 20 tiles;
-- logical Barrier inset: 2 tiles.
+- legacy logical Barrier inset: 2 tiles; active development containment uses full ArenaBounds, flush to the ground floor.
 - requester interaction range: 12 tiles;
 - candidate participation radius: 80 tiles;
 - Ready timeout: 60 seconds at 60 ticks/second.
@@ -60,7 +58,7 @@ Perform geometry in tile coordinates and convert at the rendering/position adapt
 
 ## Activation flow
 
-Slice 3A implements steps 3–5 and the pure preparation domain only. Slice 3B must connect the complete flow below before availability denial may be reconsidered.
+The definition-scoped resolver/preparation/combat adapters own this flow. The active development override, not historical slice gating, determines availability; see the owning feature spec.
 
 1. Client Core interaction sends bounded `RequestActivate` intent with candidate coordinate/nonce.
 2. Server derives sender, validates side/rate/basic coordinate, and creates only the validation path.
@@ -87,7 +85,7 @@ ArenaValidationResult
 Required checks:
 
 - prospective bounds and safety margin fit the World without overflow;
-- exact valid Core TE/logical center/base and continuous foundation;
+- exact valid Core TE/logical center/base; active containment requires clear solid-block interior and supported plinth, not a manufactured full-width foundation;
 - no second managed encounter/Core activation;
 - no chest, another Core, important TE, protected structure, or forbidden conflict;
 - no active Boss/invasion/Boss Rush conflict under the compatibility policy;
@@ -122,8 +120,8 @@ No wall Tiles are generated.
 
 - Client draws the boundary and may predictively clamp/inward-bias its local participant.
 - Server validates resulting position and corrects to a safe inside point with exact Fight/binding identity.
-- Participant escape: bounded warning then correction; never instant death.
-- Outsider entry: warning and Raid-interaction suppression, then safe ejection/exclusion for repeated violations.
+- Participant escape: the current physical-containment override immediately clips the body inward without damage; it does not allow an escape-warning grace.
+- Future general outsider entry policy: warning and Raid-interaction suppression, then safe ejection/exclusion for repeated violations; not enabled by the participant-only development field.
 - Other-Mod teleport is handled by post-result validation; do not attempt an exhaustive item blacklist.
 
 Authority adapters must cover ordinary movement, dash, hook, mount, knockback, recall/pylon/bed, server teleport, and Calamity/other-Mod teleport in tests. Correction revalidates current epoch immediately before applying.

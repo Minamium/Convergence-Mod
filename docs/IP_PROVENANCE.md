@@ -75,7 +75,15 @@ Reviewer and review date
 - source file再配布が禁止される場合、repositoryへ入れず再現手順だけを記録する。
 - CI secretや有償assetを公開artifactへ含めない。
 
+## WotG research influence — 2026-09-06
+
+[WotG benchmark research](research/WOTG_RAID_BENCHMARK.md) records the two user-shared YouTube references and public source revision `7cb5b86c770e73d6853749b2b688d478ba3326a7` (declared 1.2.24). Video metadata/chapters were read, not the audiovisual content itself. Composite body/depth, staged anticipation, off-body attacks, sky/audio choreography and accessibility informed independent proposals for Convergence; none of those proposals was implemented in this documentation pass.
+
+No license permission was established in the inspected repository tree/metadata. Do not treat public visibility, `includeSource` or a filename in `buildIgnore` as permission. No WotG code, shaders, textures, rigs, recordings, videos, or downloaded worlds entered the repository. The report cites behavior and symbols only, preserves version limits, and rejects adopting its single-player assumptions as multiplayer Raid authority. This is research influence, not an asset attribution or release approval.
+
 ## Release audit
+
+The `0.2.2` attack choreography follows two user-supplied diagrams: a four-color out-and-back predicted beam sequence and mirrored dash/stillness steps. Their raw images are not distributed; all geometry, timing and animation are independently implemented in C#. No third-party film or Mod assets/code were imported. The original Boss texture and existing vanilla sound references are reused. See [encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) and [focused public-API evidence](research/INSTANT_REVIVAL_CORE_APIS.md) for design and integration boundaries.
 
 The `0.2.1` Foundation Core monument is an original generated polar containment prism, selected unedited as a provisional runtime asset and independently integrated with a lit control base/placement preview. Its exact output, external prompt path, tool disclosure and release limits are in [Attribution](../Assets/ATTRIBUTION.md). The faster VFX use original geometry and existing vanilla runtime sound IDs, not WotG/film code, images or recordings. Revival/debuff/tile integration follows official pinned API contracts with independent code; [source evidence](research/INSTANT_REVIVAL_CORE_APIS.md) distinguishes observations from unverified multiplayer ordering inferences. This remains development use, not release approval.
 
@@ -85,6 +93,8 @@ The `0.1.2` recovery transport fix follows the official pinned `ModNet.HandleMod
 
 The 2026-09-05 First Severance experiment uses independently written adapters informed by official tModLoader API behavior; no external source implementation was copied. Foundation Core prototype texture provenance is recorded in [Asset Attribution](../Assets/ATTRIBUTION.md). Boss 3 is a Terraria runtime music reference, not a bundled audio recording.
 
+The 0.2.5 solemn pass replaces the rejected Ninth arrangement with an independently authored composition/render. VSCO 2 CE instrumental samples are CC0 at revision `440300901dfe9275fd84e0b7763af1f8443ae62e`, verified via the official Versilian distribution page and pinned license. Only the new mixed music recording enters the Mod; the raw library stays external. All 18 effects are original synthesis without samples. Boss, cathedral and lance textures were generated from original basalt/ivory/bronze briefs with built-in ImageGen, without external visual inputs. Exact creator/source/tool records and the music rights layers are in [Attribution](../Assets/ATTRIBUTION.md). This changes development assets, not the unresolved public-release license policy.
+
 Release candidateごとに次を確認する。
 
 - untracked asset 0
@@ -93,3 +103,5 @@ Release candidateごとに次を確認する。
 - required creditsがREADME/Workshop pageへ反映済み
 - source-only/non-redistributable fileがpackageへ混入していない
 - license選択とcontributor agreement方針が確定済み
+
+The 0.2.8 continuous-emission/ground-containment pass is materially informed by WotG's timed portal-laser layers and articulated rendering, and Calamity's logical arena-wall pattern. [The pinned F11 evidence](research/WOTG_RAID_BENCHMARK.md) records versions, authorship/license limits, observed behavior and independent decisions. No external implementation, shader, atlas, recording or source mirror is copied. Three original generated atlases are used unedited through measured C# source rectangles; exact assets and briefs are in [Attribution](../Assets/ATTRIBUTION.md). Development use does not resolve the project's release-license gate.

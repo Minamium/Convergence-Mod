@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.10",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 10,
+  "scope": "Boss/Core and Pylon HP calibration, passive authority effective-DPS/progress diagnostics",
+  "environment_reference": "2026-09-06-fluorescent-beams-checks.json",
+  "checks": {
+    "domain": "passed: 72 cases, including active-time/deadline/overkill limits, 2/3/4-player Pylon pool rates, interval vs window DPS and persistent boss life",
+    "actual_build_package": "passed: actual ModSources, zero warnings/errors, 21011111 bytes; SHA256 6F85FB11EEEA92B89C644FC563FAE609234BA7FC1CFFF1FF2A1C2A4F8314AC1D",
+    "package_deployment": "passed: normal profile and four existing local test profiles match the new package hash; Mod selection unchanged; previous normal package retained outside the repository",
+    "static_wrapper": "passed once with existing local PyYAML path: 51 indexed documents, 264 files, 10 YAML files; first invocation stopped before checks because the bundled interpreter could not see PyYAML",
+    "protocol": "unchanged: v10, existing packet IDs/layout/authority retained; no codec rerun",
+    "client_load_and_friend_smoke": "not_run: user-owned restart, lowered Pylon/Core HP and final damage-window summary observation",
+    "dedicated_server": "not_run: no server launch requested; diagnostic state stays in the existing authority runtime and has no graphics/audio initialization"
+  }
+}

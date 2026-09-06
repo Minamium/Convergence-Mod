@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.11",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 11,
+  "scope": "Fixed Stack, reduced black-masked field, sealed/unbound Boss stages and bounded grid, stronger warnings/SFX, original faster Phase-II BGM",
+  "environment_reference": "2026-09-06-hp-telemetry-checks.json",
+  "preceding_runtime_log": {
+    "build": "0.2.10",
+    "participants": 2,
+    "outcome": "Victory/BossLifeZero",
+    "elapsed_seconds": 109.43,
+    "pylon_checks_cleared": 3,
+    "pylon_effective_damage": 1500000,
+    "pylon_open_seconds": 18.50,
+    "pylon_window_dps": 81081.1,
+    "core_effective_damage": 4000000,
+    "core_open_seconds": 52.43,
+    "core_window_dps": 76287.3,
+    "stack_attendance": ["1/2", "2/2", "1/2"],
+    "spread_overlap_hits": 0,
+    "downed": 1,
+    "completed_revives": 1,
+    "revive_delay_seconds": 7.7,
+    "recipient_lockout_seconds": 60,
+    "battle_convergence_exceptions": 0,
+    "later_disconnect_caught_exceptions": "2 ObjectDisposedException in Terraria NetMessage tile-section MemoryStream path; Convergence causation unestablished"
+  },
+  "checks": {
+    "domain": "passed: 77 cases, including phase threshold/overkill, cinematic damage gate, terminal/window cap, fixed anchor and lattice geometry/ticks for 2/3/4 participants",
+    "compiled_codec": "passed: protocol v11, 60 round trips and 19 malformed/truncated cases; fixed assembly, phase epoch, all grid patterns, recovery/debug fields and exact shared-buffer consumption",
+    "actual_build_package": "passed: actual ModSources, zero warnings/errors, 23016178 bytes; SHA256 F842A87D0C2C66B3C1BA7033E0F8C3EDE3583FA4780B6449CC5BF9441D9A7273",
+    "package_deployment": "passed: normal and four existing local profiles match; old package retained externally, Mod selections untouched",
+    "audio_exports": "passed: 17 exports decode at 48kHz, finite with peak below full scale (maximum 0.88); new OGG stereo 3200000 frames, 144 BPM/40 bars; PCM music seam delta zero; no human listening approval",
+    "static_wrapper": "passed: catalog regenerated once and checked (52 indexed documents); repository policy 275 files and YAML 10 files. Wrapper initially stopped at a new attribution subheading parsed as a section boundary; corrected that heading, then reran only the failed repository check and not-yet-run YAML check. Passing domain/build/codec/catalog checks were not repeated.",
+    "host_and_friend_smoke": "not_run: user-owned restart; fixed Stack attendance, reduced bounds/mask, half-HP NPC survival, one rupture/camera return, grid safe cell/crossing, cleanup and live mix",
+    "dedicated_server": "not_run: no persistent server/game session launched; authoritative grid/stage code remains resource-free"
+  }
+}

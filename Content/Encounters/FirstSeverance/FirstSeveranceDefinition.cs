@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Geometry;
+using Convergence.Content.Encounters.FirstSeverance.Development;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
@@ -15,7 +16,7 @@ internal sealed class FirstSeveranceDefinition : EncounterDefinition
     };
 
     public const string EncounterKey = "first_severance";
-    public const int MinimumRosterSize = FirstSeveranceRoster.MinimumCount;
+    public static int MinimumRosterSize => FirstSeveranceDevelopmentPolicy.MinimumParticipants;
     public const int MaximumRosterSize = FirstSeveranceRoster.MaximumCount;
 
     public static FirstSeveranceDefinition Instance { get; } = new();

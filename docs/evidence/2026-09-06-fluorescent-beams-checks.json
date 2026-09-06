@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.9",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 10,
+  "scope": "Fluorescent beam bodies, continuous targeting rails and stronger smooth anticipation; fixed 120 beam damage; synchronize local testing Mod selection to the user's current world",
+  "checks": {
+    "domain": "passed: 70 cases; maximum-life-independent damage for all fixed beam kinds, unchanged charge/share rules, bounded smooth pre-release envelopes",
+    "actual_build_package": "passed: actual ModSources build/package, zero warnings/errors, 21005951 bytes",
+    "static_wrapper": "passed once: 51 indexed documents, 260 repository files, 10 YAML files",
+    "protocol": "unchanged; existing v10 wire layout/IDs, geometry, deadlines and exact-Fight ownership retained; no codec rerun for presentation/tuning only",
+    "local_profile_selection": "normal profile and four local testing profiles contain the same 20 selected Mods; existing local-only packages synchronized; no new dependency code imported",
+    "client_load_and_friend_smoke": "not_run: user owns restart/Host & Play, 120 damage observation, bright danger corridor, empty Stillness lane, Stack/Spread, Reduced Effects and terminal marker cleanup",
+    "dedicated_server": "not_run: no server launch requested; authority damage application changes only its amount, graphics initialization remains client-only",
+    "visual_acceptance": "not_run: mathematical continuity and compilation do not establish subjective polish or frame pacing"
+  },
+  "local_selected_mods": [
+    "CalamityModMusic", "CalamityMod", "Convergence", "CheatSheet", "MagicStorage",
+    "WingSlotExtra", "SerousCommonLib", "NoMoreTombs", "CalamitySimpleWhipAddon",
+    "RecipeBrowser", "SummonsUI", "SylaResourcePackLib", "SharedMap", "CalValEX",
+    "BossChecklist", "WMITF", "OreExcavator", "AutoReroll", "AlchemistNPCLite", "CalamityHunt"
+  ]
+}

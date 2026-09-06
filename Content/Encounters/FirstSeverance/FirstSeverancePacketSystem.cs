@@ -115,6 +115,12 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         in EncounterPacketHeader header,
         out string failureCode)
     {
+        // Even a rate-limited/stale request must consume its bounded payload.
+        // tML gives us a shared receive stream, not a stream we may drain to EOF.
+        if (!FirstSeverancePacketCodec.TryReadActivateRequest(
+                reader, out TilePoint requestedAnchor, out uint requestNonce, out failureCode))
+            return false;
+
         if (!IsCurrentPlayer(whoAmI)
             || header.EncounterSequence != 0
             || !header.FightId.IsNone
@@ -126,15 +132,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         if (!TryConsumeRate(whoAmI, header.PacketType, ActivationWindowTicks, 3))
         {
             return Reject("first_severance.activate_rate_limited", out failureCode);
-        }
-
-        if (!FirstSeverancePacketCodec.TryReadActivateRequest(
-                reader,
-                out TilePoint requestedAnchor,
-                out uint requestNonce,
-                out failureCode))
-        {
-            return false;
         }
 
         bool accepted = FirstSeveranceServerCommands.TryActivate(
@@ -154,6 +151,10 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         in EncounterPacketHeader header,
         out string failureCode)
     {
+        if (!FirstSeverancePacketCodec.TryReadReadyRequest(
+                reader, out bool isReady, out uint requestNonce, out failureCode))
+            return false;
+
         if (!IsLiveHeader(header) || !IsCurrentPlayer(whoAmI))
         {
             return Reject("first_severance.ready_header_invalid", out failureCode);
@@ -162,15 +163,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         if (!TryConsumeRate(whoAmI, header.PacketType, FastRequestWindowTicks, 12))
         {
             return Reject("first_severance.ready_rate_limited", out failureCode);
-        }
-
-        if (!FirstSeverancePacketCodec.TryReadReadyRequest(
-                reader,
-                out bool isReady,
-                out uint requestNonce,
-                out failureCode))
-        {
-            return false;
         }
 
         bool accepted = FirstSeveranceServerCommands.TrySetReady(
@@ -191,6 +183,10 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         in EncounterPacketHeader header,
         out string failureCode)
     {
+        if (!FirstSeverancePacketCodec.TryReadCancelRequest(
+                reader, out uint requestNonce, out failureCode))
+            return false;
+
         if (!IsLiveHeader(header) || !IsCurrentPlayer(whoAmI))
         {
             return Reject("first_severance.cancel_header_invalid", out failureCode);
@@ -199,14 +195,6 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
         if (!TryConsumeRate(whoAmI, header.PacketType, FastRequestWindowTicks, 4))
         {
             return Reject("first_severance.cancel_rate_limited", out failureCode);
-        }
-
-        if (!FirstSeverancePacketCodec.TryReadCancelRequest(
-                reader,
-                out uint requestNonce,
-                out failureCode))
-        {
-            return false;
         }
 
         bool accepted = FirstSeveranceServerCommands.TryCancel(

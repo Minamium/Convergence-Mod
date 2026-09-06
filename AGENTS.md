@@ -2,18 +2,19 @@
 
 This file applies to the entire repository.
 
-## Before changing code
+## Start with the smallest useful context
 
-1. Read `docs/README.md`, `docs/STATUS.md`, `docs/VERSION_MATRIX.md`, `docs/ARCHITECTURE.md`, and `docs/NETWORK_ARCHITECTURE.md`.
-2. For the first Raid, also read `docs/encounters/first-severance/README.md` and its implementation plan.
-3. State the implementation slice, affected files, server/client ownership, cleanup path, verification, and unresolved decisions.
-4. Keep work inside the requested slice; do not pull backlog mechanics or production assets into the MVP.
+1. Read this agreement once per task. For code/behavior work, read only `docs/STATUS.md`'s Current build, Verification state, and Next change sections, then inspect the affected code.
+2. Use the task table in `docs/README.md` to select additional sections. No blanket full-document, architecture, ADR, handoff, or research reading is required. Text-only corrections need only the affected passage and its conventions.
+3. Reuse context already read in this task; reread only when relevant files change, scope expands, or a concrete uncertainty remains. Search headings/symbols with `rg` before opening long files.
+4. Briefly state the change and applicable verification. Identify authority, replication, and cleanup owners when those responsibilities change; omit unrelated checklist fields.
+5. Follow the current user-requested scope and active specification. Historical slices and backlog do not add work or reinstate superseded gates.
 
 Current feature naming is `FirstSeverance` / `first_severance`. The isolated source/key/failure-prefix rename is complete; `ThirdSeverance` forms may remain only in deliberately historical records or completed-rename instructions, and no compatibility alias is required for the unpublished identifier.
 
 ## Repository Skills
 
-- Use `.agents/skills/develop-convergence-raids` for Boss/Raid implementation or review. It contains authority, cleanup, module-routing, and multiplayer-verification checklists.
+- Use `.agents/skills/develop-convergence-raids` for Boss/Raid code or behavior implementation/review. Documentation wording and repository housekeeping do not need the gameplay workflow.
 - Use `.agents/skills/research-tmodloader-sources` when API behavior or another public Mod implementation must be investigated. Record exact versions, source paths, licenses, observations, and independent design decisions.
 - Keep always-on rules here and task-specific repeatable procedures in Skills. Repository Skills are excluded from `.tmod` packaging.
 
@@ -35,16 +36,15 @@ Current feature naming is `FirstSeverance` / `first_severance`. The isolated sou
 - Feature spec owns player-visible behavior; feature plan owns work order; backlog cannot expand current scope.
 - Accepted ADRs own structural decisions and are superseded, not silently rewritten.
 - Indexed docs use the front-matter model in `docs/DOCUMENTATION_SYSTEM.md`.
-- After indexed-doc changes, run `python3 tools/docs_catalog.py --write` and commit the generated catalog.
+- Update only the document owning the changed fact; add links rather than repeating status, tuning, or procedures elsewhere. Small tuning/text changes do not require a new ADR or research report.
+- Regenerate the catalog once after the indexed-doc edits are settled; include it with the change. Do not regenerate after every individual edit.
 - Never commit personal absolute paths, credentials, raw logs, worlds/players, `.tmod` binaries, or local semantic-search databases.
 
 ## Verification
 
-- Always run `python3 tools/docs_catalog.py --check`, `python3 tools/repository_checks.py`, and `python3 tools/validate_yaml.py` after documentation/repository changes.
-- For Raid-domain changes, run `dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj`; this does not replace a tModLoader build.
-- For C# changes, run both `dotnet build ConvergenceMod.csproj` and tModLoader Build + Reload in the pinned `ModSources/Convergence` environment.
-- Multiplayer changes require relevant Single Player, Host & Play, Dedicated Server, 2/3/4-player, latency, disconnect, and cleanup evidence.
-- If the pinned runtime is unavailable, report the missing verification explicitly; never claim a successful compile.
+- The command entry point and change-based requirements live in [.agents/skills/develop-convergence-raids/references/verification-matrix.md](.agents/skills/develop-convergence-raids/references/verification-matrix.md). Run its static wrapper once at completion, adding domain/build/runtime checks for the affected behavior.
+- Do not repeat passing checks for unchanged inputs/environment without a failure or unresolved concern. Full release and compatibility matrices belong to their declared gates, not every edit.
+- Record relevant runtime checks as passed, failed, or `not_run` with the remaining action. A build is not a playtest; missing evidence cannot satisfy an activation, compatibility, or release gate that depends on it.
 
 ## Assets and external material
 

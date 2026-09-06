@@ -10,54 +10,83 @@ Mods: {
 					Large containment monument; right-click the glowing console at its base
 					'''
 			}
+
 			ResuscitationKitItem: {
 				DisplayName: Resuscitation Kit
-				Tooltip: "Use beside a Downed ally (8 tiles) to revive instantly at 35% life\nReusable: no item or shared token cost; usable while moving or airborne\nThe recipient cannot be revived again for 60 seconds"
+				Tooltip:
+					'''
+					Use beside a Downed ally (8 tiles) to revive instantly at 35% life
+					Reusable: no item or shared token cost; usable while moving or airborne
+					The recipient cannot be revived again for 60 seconds
+					'''
 			}
 		}
+
+		Buffs: {
+			RecoveryLockoutDebuff: {
+				DisplayName: Reconstitution Lockout
+				Description: Cannot receive another revival for 60 seconds after recovery. You can still revive allies.
+			}
+		}
+
 		NPCs: {
 			FirstSeverancePrototypeBoss.DisplayName: The Null Cantor
 			FirstSeverancePrototypePylon.DisplayName: Severance Pylon
 		}
-		Buffs.RecoveryLockoutDebuff: {
-			DisplayName: Reconstitution Lockout
-			Description: Cannot receive another revival for 60 seconds after recovery. You can still revive allies.
-		}
 
-		Tiles.FoundationCoreTile.MapEntry: Foundation Core
+		Tiles: {
+			FoundationCoreTile.MapEntry: Foundation Core
+			FoundationPlinthTile.MapEntry: Foundation Plinth Tile
+		}
 
 		UI: {
 			FirstSeverance: {
-				ActivationRejected: "Foundation Core activation was rejected: {0}"
-				RequestRejected: "Request rejected: {0}"
+				VictorySeal: NULL CANTOR // SIGNAL SILENCED
+				SoloDebugNotice: SOLO DEBUG — two-player HP and attacks, one real participant. Ready manually; being Downed ends the Raid. Not multiplayer validation.
+				ResultVictory: RAID COMPLETE
+				ResultDefeat: RAID FAILED
+				ResultVictoryDetail: "[ NULL CANTOR // SIGNAL SILENCED ]"
+				ResultDefeatDetail: "[ CONNECTION SEVERED // CONTAINMENT RELEASED ]"
+				ActivationRejected: Foundation Core activation was rejected: {0}
+				RequestRejected: Request rejected: {0}
 				ReviveNotAlive: Only a standing Raid participant can revive an ally.
 				ReviveSelectKit: Select the Resuscitation Kit, then use it again.
 				ReviveNoTarget: No Downed ally is within 8 tiles.
 				ReviveLocked: That ally cannot receive another revival yet. Check the countdown above their body.
 				ReviveTargetUnavailable: That ally is already recovering or can no longer be revived.
-				PreparationStatus: "First Severance preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready."
-				AllReady: "First Severance Ready: {0}/{1}. Starting the experimental Raid."
-				PhaseSpawnIntro: "Raid started. Pick up your Resuscitation Kit. /convergence-down tests Downed; the initiator can end with /convergence-cancel."
-				PhasePylonCheck: "PYLONS — destroy all {0}. The Boss remains shielded."
-				PhaseStack: "STACK — gather within 7 tiles of {1}. Required shares: {3}. {2} seconds!"
-				PhaseSpread: "SPREAD — large circles! Separate by at least 28 tiles. {2} seconds!"
-				PhaseCoreExposure: "CORE EXPOSED — attack the framed central aperture; dodge the predicted beams! {2} seconds."
-				LanceWarning: "OBSERVATION LANCE — aim locked. Clear the dashed corridor! {0}s"
+				DownedLockedHud: DOWNED — revival available in {0}s. No Down timeout.
+				RecoveryLockoutHud: Cannot receive another revival: {0}s
+				BodyRevivable: KIT → INSTANT REVIVE
+				BodyLocked: REVIVAL LOCKED: {0}s
+				PreparationStatus: First Severance preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready.
+				AllReady: First Severance Ready: {0}/{1}. Starting the experimental Raid.
+				PhaseSpawnIntro: Raid started. Pick up your Resuscitation Kit. /convergence-down tests Downed; the initiator can end with /convergence-cancel.
+				PhasePylonCheck: PYLONS — destroy all {0}. The Boss remains shielded.
+				PhaseStack: STACK — gather within 7 tiles of {1}. Required shares: {3}. {2} seconds!
+				PhaseSpread: SPREAD — large circles! Separate by at least 40 tiles. {2} seconds!
+				PhaseCoreExposure: CORE EXPOSED — attack the framed central aperture; dodge the predicted beams! {2} seconds.
+				LanceWarning: OBSERVATION LANCE — aim locked. Clear the dashed corridor! {0}s
 				LanceFire: OBSERVATION LANCE — FIRING
-				PhaseReset: "Loop complete. Boss shields restore; the next Pylons follow. /convergence-cancel ends the experiment."
-				ResultStackPassed: Stack successful — damage shared.
-				ResultStackFailed: Stack failed — too few players shared the hit.
-				ResultSpreadPassed: Spread successful.
+				PrismInstruction: PRISM {0}/8 — EVERYONE targeted. Keep dodging!
+				DashRightInstruction: SEQUENCE {0}/4 — ENERGY CHARGE → Dash right as it commits!
+				DashLeftInstruction: SEQUENCE {0}/4 — ← ENERGY CHARGE! Dash left as it commits!
+				StillnessInstruction: SEQUENCE {0}/4 — STOP inside the empty column
+				IntroRaidName: FIRST SEVERANCE
+				DefeatDeathReason: "{0} was erased by the First Severance."
+				PhaseReset: Loop complete. Boss shields restore; the next Pylons follow. /convergence-cancel ends the experiment.
+				ResultStackPassed: Stack successful — everyone gathered. Zero damage.
+				ResultStackFailed: Stack incomplete — standing participants lose max-life percentage equal to the missing roster fraction.
+				ResultSpreadPassed: Spread successful — no overlap, zero damage.
 				ResultSpreadFailed: Spread failed — overlapping players took a hit.
 				ParticipantDowned: "{0} is DOWNED. Use the kit within 8 tiles for instant revival; check their recovery lockout."
 				ParticipantRevived: "{0} revived at 35% life. Cannot receive another revival for 60 seconds."
 				ReviveStarted: "{0} is reviving — hold use and remain still."
 				ReviveCancelled: "{0}'s revive was interrupted. No token consumed."
-				CombatEnded: "Raid ended ({0}): {1}"
+				CombatEnded: Raid ended ({0}): {1}
 				EndBossLifeZero: Boss defeated. Raid cleared!
 				EndOverloadLimit: Pylons failed 3 times (Overload limit).
 				EndAllParticipantsDowned: All players are Downed. No standing ally remains to revive.
-				EndRecoveryImpossible: No recovery remains (Down timeout or no standing participant).
+				EndRecoveryImpossible: No standing participant remains to revive the others.
 				EndLoopCapExceeded: The Boss survived 8 exposure windows.
 				EndUserCancelled: Cancelled by the initiator.
 				EndFoundationCoreLost: The Foundation Core disappeared.
@@ -69,31 +98,59 @@ Mods: {
 				EndInternalFailure: Runtime error. Check server.log.
 				EndUnknown: Encounter closed. Check server.log.
 				CombatHud: "{0}  |  {1}s"
-				DownedHud: "DOWNED — {0}s. Ally: use the kit within 8 tiles to revive instantly!"
-				DownedLockedHud: "DOWNED — expires in {0}s. Revival locked for {1}s."
-				RecoveryLockoutHud: "Cannot receive another revival: {0}s"
-				BodyRevivable: KIT → INSTANT REVIVE
-				BodyLocked: "REVIVAL LOCKED: {0}s"
-				BodyEliminated: ELIMINATED
-				EliminatedHud: DOWN TIMEOUT — out until this Raid ends.
-				ReviveHud: "REVIVING — hold use, stay still: {0}s"
+				DownedHud: DOWNED — no timeout. Ally: use the kit within 8 tiles to revive instantly!
+				ReviveHud: REVIVING — hold use, stay still: {0}s
 				NameSpawnIntro: FIRST SEVERANCE
 				NamePylonCheck: PYLONS
 				NameStack: STACK
+				FixedStackTarget: the fixed illuminated assembly beacon
+				FixedStackGuide: ▼ EVERYONE GATHER HERE ▼
+				NamePhaseTransition: SEAL RUPTURE
+				NameLattice: PHASE II — LATTICE
+				NameRotatingBlade: AXIOM BLADE
+				NameRemoteClaws: REMOTE CLASP
+				NameHalfField: HEMISPHERE ERASURE
+				NameFinalBullets: TERMINAL RAIN
+				NameFinalSlicer: SLICING COMB
+				BladeGuide: TWO BLADES / TWO TURNS — move inward; orbit clockwise through the acceleration.
+				NameRemoteCrush: AXIOM OF COMPRESSION
+				CrushGuide: LEAVE THE RED CENTER — the closing hands instantly Down anyone inside.
+				ClawsGuide: THE BEAMS WIDEN — find the shifting safe strip before they engulf the field.
+				FloodSafeGuide: SAFE
+				HalfGuide: LEAVE THE COLORED HALF — the entire highlighted region will fire.
+				FinalGuide: HP ZERO — survive the full score. Revival remains available.
+				DistantTitle: NULL CANTOR // DISTANT PRESENCE
+				FinalTitle: NULL CANTOR // TERMINAL SCORE
+				PhaseRotatingBlade: Axiom Blade — move inward and orbit clockwise after the extension.
+				PhaseRemoteClaws: Remote Clasp — both hands are preparing to close.
+				PhaseHalfField: Half-field erasure — move to the uncolored half!
+				PhaseFinalBullets: Terminal rain — dodge the inward projectiles.
+				PhaseFinalSlicer: Slicing comb — step between the predicted lanes.
+				PhaseRemoteTransition: Presence receding — the hands remain inside the field.
+				PhaseFinalTransition: Vital signal zero — survive the final score to finish the Raid!
+				PhasePhaseTransition: Seal rupture — attacks suspended. The true form emerges.
+				PhaseLattice: PHASE II — move between the predicted grid lines and attack the Core!
+				GridInstruction: LATTICE — move into the cells between the luminous lines
+				UnboundTitle: NULL CANTOR // UNBOUND
 				NameSpread: SPREAD
 				NameCoreExposure: CORE EXPOSED
 				NameReset: RESET
 			}
 		}
-		Configs.FirstSeveranceVisualConfig: {
-			DisplayName: First Severance visuals
-			ReducedEffects: {
-				Label: Reduce decorative effects
-				Tooltip: Reduces aurora, glow, particles and darkness; disables shake. All danger markers and beams remain visible.
-			}
-			ScreenShake: {
-				Label: Beam camera shake
-				Tooltip: Brief, mild camera shake when an observation lance fires. Does not change aim or damage.
+
+		Configs: {
+			FirstSeveranceVisualConfig: {
+				DisplayName: First Severance visuals
+
+				ReducedEffects: {
+					Label: Reduce decorative effects
+					Tooltip: Reduces aurora, glow, particles and darkness; disables shake. All danger markers and beams remain visible.
+				}
+
+				ScreenShake: {
+					Label: Beam camera shake
+					Tooltip: Brief, mild camera shake when an observation lance fires. Does not change aim or damage.
+				}
 			}
 		}
 	}

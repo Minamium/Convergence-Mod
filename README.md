@@ -4,12 +4,12 @@ A multiplayer-first Calamity addon for Terraria, with a staged long-term path to
 
 `Convergence` is the provisional internal Mod/assembly/root-namespace identity; `ConvergenceMod` is the entry class/project filename. Public branding and most story proper nouns remain provisional.
 
-> Current status: architecture bootstrap, not a playable Mod. The feature identity and immutable six-state loop are in place, but the world adapter is inert and activation is deliberately rejected. See [Project Status](docs/STATUS.md).
+> Development includes an experimental Raid playtest build. See [Project Status](docs/STATUS.md#current-build) for the current implementation, observed verification, and remaining playtest; this overview does not track version-by-version state.
 
 ## Start here
 
 - New developer or coding agent: [Documentation Home](docs/README.md)
-- Moving to the Windows desktop: [Windows Handoff](docs/handoff/WINDOWS.md)
+- Preparing the Windows desktop: [Windows Development](docs/runbooks/WINDOWS_DEVELOPMENT.md)
 - Exact implementation inventory: [Project Status](docs/STATUS.md)
 - Current Raid loop: [First Severance Specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md)
 - Safe work sequence: [First Severance Implementation Plan](docs/encounters/first-severance/IMPLEMENTATION_PLAN.md)
@@ -23,7 +23,7 @@ Activation -> Boss spawn -> Pylon DPS -> Stack -> Spread -> Core exposure
                                                    |--- HP > 0 -----|
 ```
 
-The accepted Boss boundary is one simple NPC/body and life pool. A central Core/body, one broken ring, and two side arms are only the provisional placeholder silhouette. Damage is accepted only during Core exposure. Raid participants enter a recoverable Downed state on eligible lethal damage; allies use a dedicated item and server-validated channel to revive them.
+The Boss has one logical NPC/body and life pool; presentation can extend beyond its hitbox. Damage is accepted only during Core exposure. The [encounter](docs/encounters/first-severance/ENCOUNTER_SPEC.md), [visual](docs/encounters/first-severance/VISUAL_SPEC.md), and [recovery](docs/encounters/first-severance/REVIVE_SPEC.md) specifications own the active gameplay and presentation rules.
 
 Part Break, Targeted Line, Personal Effigies, Split Reality, Last Stand, multipart production art, rewards, and final tuning are deferred.
 
@@ -63,19 +63,15 @@ Tests/Convergence.DomainTests/  tModLoader-free authoritative domain harness
 tools/                          repository, documentation-catalog, and YAML checks
 ```
 
-The current `Content/Encounters/FirstSeverance` module contains a tested immutable SpawnIntro → Pylon → Stack → Spread → Core-exposure → Reset plan, a pure high-level loop state machine, an inert world adapter, and a disconnected boundary around the pure Downed/Revive service. Live actors, transport, and activation remain deliberately unavailable.
+`Content/Encounters/FirstSeverance` owns the Raid implementation. Read only the relevant code/specification sections using [Read by task](docs/README.md#read-by-task); completed bootstrap and rename instructions are historical context.
 
 ## Local verification
 
 ```bash
-python3 -m pip install --requirement tools/requirements-ci.txt
-python3 tools/docs_catalog.py --check
-python3 tools/repository_checks.py
-python3 tools/validate_yaml.py
-dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
+python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
 ```
 
-The domain harness does not compile/load tModLoader. For real verification, clone as `ModSources/Convergence` and follow [Windows Development](docs/runbooks/WINDOWS_DEVELOPMENT.md).
+Install `tools/requirements-ci.txt` once per Python environment. The [Verification Matrix](.agents/skills/develop-convergence-raids/references/verification-matrix.md) selects catalog, domain, build, and runtime checks by change; combine its flags in one invocation. A domain run does not compile/load tModLoader. Use [Windows Development](docs/runbooks/WINDOWS_DEVELOPMENT.md) when actual runtime verification applies.
 
 ## Repository Skills
 

@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.7",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 9,
+  "scope": "Restore fast intra-combo steps; retain deliberate category timing and harmless charge lock; diagnose animation stepping without rewriting rendering",
+  "checks": {
+    "domain": "passed: 66 deterministic cases, including scheduler/volley deadline agreement, complete sequence fit, 24-tick harmless hold and unchanged major-phase timing",
+    "codec": "passed: compiled protocol v9; 42 round trips for 2/3/4 players, tracking/live charge records and exact buffer consumption; 11 malformed/truncated cases rejected; recovery deadlines and auxiliary-only flag preserved",
+    "actual_build_package": "passed: actual ModSources 0.2.7 compiled and packaged, zero warnings/errors; Convergence.tmod 14034112 bytes",
+    "static_wrapper": "passed once: 50 indexed documents, 248 repository files, 10 YAML files; no game/reload or broad runtime matrix",
+    "game_load_and_cadence_smoke": "not_run: user owns GUI and multiplayer playtesting; no game or server launched",
+    "animation": "read-only diagnosis: four-tick tracking snapshots drawn without windup interpolation; cast pose and recoil transforms jump at FireTick. No frame-time trace available; rendering unchanged",
+    "assist_and_revive": "not_run for 0.2.7: unchanged permit/lease/recovery behavior. Prior 0.2.6 observed pull was unprotected after the old preparation expired, with no revive request logged"
+  }
+}

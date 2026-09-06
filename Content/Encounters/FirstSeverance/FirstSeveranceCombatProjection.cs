@@ -30,7 +30,8 @@ internal readonly record struct FirstSeveranceCombatParticipantProjection(
     float AnchorY,
     ulong InvulnerabilityUntilTick,
     ulong WeaknessUntilTick,
-    ulong ReviveLockoutUntilTick = 0);
+    ulong ReviveLockoutUntilTick = 0,
+    bool DebugAssistProtected = false);
 
 internal sealed class FirstSeveranceCombatProjection
 {
@@ -45,13 +46,18 @@ internal sealed class FirstSeveranceCombatProjection
         int bossMaximumLife,
         int remainingReviveTokens,
         uint reviveRevision,
-        int stackTargetSlot,
+        float stackX,
+        float stackY,
         float coreX,
         float coreY,
         FirstSeveranceMechanicResult lastMechanicResult,
         uint mechanicRevision,
         IReadOnlyList<FirstSeveranceCombatParticipantProjection> participants,
-        FirstSeveranceLanceVolley? lanceVolley = null)
+        FirstSeveranceLanceVolley? lanceVolley = null,
+        FirstSeveranceBossPhase bossPhase = FirstSeveranceBossPhase.Sealed,
+        ulong bossPhaseStartedTick = 0,
+        FirstSeveranceGridVolley? gridVolley = null,
+        ulong actionStartedTick = 0, int actionIndex = -1, int completedPhaseCycles = 0)
     {
         if (encounterSequence == 0
             || fightId.IsNone
@@ -63,8 +69,15 @@ internal sealed class FirstSeveranceCombatProjection
             || bossMaximumLife <= 0
             || bossLife is < 0 || bossLife > bossMaximumLife
             || remainingReviveTokens < 0
-            || stackTargetSlot is < -1 or >= 255
+            || !float.IsFinite(stackX) || !float.IsFinite(stackY)
+            || Math.Abs(stackX) > 1_000_000 || Math.Abs(stackY) > 1_000_000
+            || !Enum.IsDefined(bossPhase)
+            || !FirstSeveranceChoreography.IsValidStep(bossPhase, substate, actionIndex)
+            || actionStartedTick >= resolveTick || completedPhaseCycles is < 0 or > 255
+            || (bossPhase != FirstSeveranceBossPhase.Sealed && (bossPhaseStartedTick == 0 || bossPhaseStartedTick >= resolveTick))
+            || (bossPhase == FirstSeveranceBossPhase.Final && bossLife != 0)
             || !float.IsFinite(coreX) || !float.IsFinite(coreY)
+            || Math.Abs(coreX) > 1_000_000 || Math.Abs(coreY) > 1_000_000
             || !Enum.IsDefined(lastMechanicResult))
         {
             throw new ArgumentException("The First Severance combat projection is invalid.");
@@ -80,16 +93,30 @@ internal sealed class FirstSeveranceCombatProjection
         BossMaximumLife = bossMaximumLife;
         RemainingReviveTokens = remainingReviveTokens;
         ReviveRevision = reviveRevision;
-        StackTargetSlot = stackTargetSlot;
+        StackX = stackX;
+        StackY = stackY;
+        BossPhase = bossPhase;
+        BossPhaseStartedTick = bossPhaseStartedTick;
+        ActionStartedTick = actionStartedTick;
+        ActionIndex = actionIndex;
+        CompletedPhaseCycles = completedPhaseCycles;
         CoreX = coreX;
         CoreY = coreY;
         LastMechanicResult = lastMechanicResult;
         MechanicRevision = mechanicRevision;
         Participants = FirstSeverancePlanCollections.Copy(participants, nameof(participants));
+        foreach (var participant in Participants)
+            if (participant.CombatState is not (RaidParticipantCombatState.Alive or RaidParticipantCombatState.Downed))
+                throw new ArgumentException("First Severance has no eliminated participant state.");
         if (lanceVolley is not null
-            && (!FirstSeveranceLanceTuning.IsAttackPhase(substate) || lanceVolley.EndTick > resolveTick))
+            && (!FirstSeveranceLanceTuning.IsAttackPhase(substate) || lanceVolley.EndTick > resolveTick
+                || (lanceVolley.Kind == FirstSeveranceAttackKind.PursuitPrism && lanceVolley.Rays.Count > Participants.Count)))
             throw new ArgumentException("A lance cannot outlive its attack phase.");
         LanceVolley = lanceVolley;
+        if (gridVolley is not null && (substate != FirstSeveranceSubstate.Lattice
+            || gridVolley.EndTick > resolveTick || lanceVolley is not null || gridVolley.CoreBeams.Count > Participants.Count))
+            throw new ArgumentException("A grid cannot outlive its owning stage/window.");
+        GridVolley = gridVolley;
     }
 
     public ulong EncounterSequence { get; }
@@ -112,7 +139,18 @@ internal sealed class FirstSeveranceCombatProjection
 
     public uint ReviveRevision { get; }
 
-    public int StackTargetSlot { get; }
+    public float StackX { get; }
+    public float StackY { get; }
+    public FirstSeveranceBossPhase BossPhase { get; }
+    public ulong BossPhaseStartedTick { get; }
+    public ulong ActionStartedTick { get; }
+    public int ActionIndex { get; }
+    public int CompletedPhaseCycles { get; }
+    public bool IsHpGated => BossPhase == FirstSeveranceBossPhase.Final
+        || (FirstSeveranceBossPhasePlan.Instance.TryGetNext(BossPhase, out var next)
+            && BossLife <= FirstSeveranceBossPhasePlan.LifeThreshold(BossMaximumLife, next));
+    public bool IsCoreOpen => !IsHpGated && FirstSeveranceBossPhasePlan.IsDamageState(Substate);
+    public FirstSeveranceGridVolley? GridVolley { get; }
 
     public float CoreX { get; }
 

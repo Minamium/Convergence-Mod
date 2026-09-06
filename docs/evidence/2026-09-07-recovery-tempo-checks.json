@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-07",
+  "build": "0.2.17",
+  "protocol": 16,
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "environment_reference": "2026-09-06-attack-intensity-checks.json",
+  "scope": "Untimed Down, simultaneous Prism, faster two-turn blades, continuous horizontal floods, borderless danger materials, shifting accelerating Final and audio rebalance",
+  "preserved": ["Stack synchronization and full-roster shares", "Spread separation and damage", "frozen HP and field size", "instant resource-free kit and recipient60s lockout", "all-Down Defeat", "existing solo flag", "other Mods and saves"],
+  "domain": {"status": "passed", "cases": 93, "coverage": "Untimed Down after30s and ten-minute wait, exact60s rescue and repeated lockout, all-Down commit,1-4 immutable simultaneous Prism rays, flood deployment/growth/safe-band body clearance, two-turn pulse identity, accelerated Final travel budget and no fixed safe comb lane"},
+  "compiled_codec": {"status": "passed", "round_trips": 308, "malformed_or_truncated": 48, "coverage": "Preparation and every phase/action with1-4participants, simultaneous1-4-ray Prisms, untimed Down fields, Eliminated and oversized roster-ray rejection, shared-buffer consumption"},
+  "compiled_solo_flag_enabled": true,
+  "package": {"status": "passed", "actual_modsources": true, "warnings": 0, "errors": 0, "bytes": 31939686, "sha256": "EFDEEFE03617F9BA7341C484D46B1625B5DC6E4A3BC45FEE249E9E2D87CF9A1A"},
+  "assets": {"new_external_sources": false, "raster_edits": false, "revised_music": 4, "revised_effects": 3, "sample_rate": 48000, "finite_decode": "passed", "maximum_4x_oversampled_peak_below": 0.902, "music_gain_db": [1.942, 1.942, 1.937], "sfx_playback_multiplier": 0.8, "terminal_score_ticks": 4114, "terminal_music_seconds": 75.067, "external_auditions": "PCM24, SFX previews include the new runtime multiplier"},
+  "static_wrapper": {"status": "passed", "catalog_documents": 57, "repository_files": 319, "yaml_files": 10, "diff_whitespace": "passed", "note": "One final wrapper; passing domain/compiled build checks reused at unchanged code state"},
+  "deployment": {"normal_profile": "packaged", "existing_profiles": "passed", "package_hash_matches": 5, "scoped_changed_files": 42, "scope": "Hash-guarded changes and Convergence package only, previous packages retained externally, no removals"},
+  "runtime": {"game_load": "not_run", "live_revival_after_lockout": "not_run", "multiplayer_contact_alignment": "not_run", "visual_readability_and_reduced_effects": "not_run", "in_game_audio_mix": "not_run", "dodgeability": "not_run", "cancel_end_cleanup": "not_run", "gui_or_process_launch": false},
+  "limitations": ["A package, geometry or waveform check is not a playtest", "The common timed recovery configuration and numeric IDs remain legacy-only; First Severance rejects Eliminated", "No production lethal hook or rejoin support added", "Matching protocol16 required on all peers", "Human multiplayer/audiovisual review belongs to the user"]
+}

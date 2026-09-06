@@ -17,6 +17,10 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
     private ulong immunityUntilLocalTick;
     private ulong weaknessUntilLocalTick;
     private ulong reviveLockoutUntilLocalTick;
+    private ulong debugAssistUntilLocalTick;
+
+    internal bool IsDebugAssistProtected => !fightId.IsNone && !IsRaidDowned && !IsRaidEliminated
+        && Main.GameUpdateCount < debugAssistUntilLocalTick;
 
     internal bool IsRaidDowned { get; private set; }
 
@@ -45,6 +49,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
         IsRaidDowned = participant.CombatState == RaidParticipantCombatState.Downed;
         IsRaidEliminated = participant.CombatState == RaidParticipantCombatState.Eliminated;
         IsReviving = participant.IsReviving;
+        debugAssistUntilLocalTick = participant.DebugAssistProtected ? Main.GameUpdateCount + 300 : 0;
         downedPosition = new Vector2(participant.AnchorX, participant.AnchorY);
         immunityUntilLocalTick = Main.GameUpdateCount
             + Remaining(participant.InvulnerabilityUntilTick, authorityTick, 180);
@@ -84,6 +89,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
 
     internal void ClearRaidState()
     {
+        Player.GetModPlayer<FirstSeveranceContainmentPlayer>().Clear();
         if ((IsRaidDowned || IsRaidEliminated) && Player.active && !Player.dead)
         {
             Player.statLife = Math.Max(Player.statLife,
@@ -100,6 +106,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
         immunityUntilLocalTick = 0;
         weaknessUntilLocalTick = 0;
         reviveLockoutUntilLocalTick = 0;
+        debugAssistUntilLocalTick = 0;
         Player.ClearBuff(ModContent.BuffType<RecoveryLockoutDebuff>());
     }
 
@@ -148,12 +155,12 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
 
     public override bool ImmuneTo(PlayerDeathReason damageSource, int cooldownCounter, bool dodgeable)
     {
-        return IsRaidDowned || IsRaidEliminated || Main.GameUpdateCount < immunityUntilLocalTick;
+        return IsDebugAssistProtected || IsRaidDowned || IsRaidEliminated || Main.GameUpdateCount < immunityUntilLocalTick;
     }
 
     public override void UpdateBadLifeRegen()
     {
-        if (IsRaidDowned || IsRaidEliminated)
+        if (IsDebugAssistProtected || IsRaidDowned || IsRaidEliminated)
         {
             Player.lifeRegen = 0;
             Player.lifeRegenCount = 0;
@@ -165,6 +172,17 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
     {
         if (Main.GameUpdateCount < weaknessUntilLocalTick)
             Player.GetDamage(DamageClass.Generic) *= 0.8f;
+    }
+
+    public override bool PreKill(double damage, int hitDirection, bool pvp,
+        ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource)
+    {
+        // Not a production lethal-hit adapter. Only an authority-issued, short-lived
+        // development projection may suppress death. Terminal cleanup clears it first.
+        if (!IsDebugAssistProtected)
+            return true;
+        Player.statLife = Math.Max(1, Player.statLife);
+        return false;
     }
 
     public override bool? CanHitNPCWithItem(Item item, NPC target)

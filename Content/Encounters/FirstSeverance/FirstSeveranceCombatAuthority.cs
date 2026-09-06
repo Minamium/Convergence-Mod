@@ -37,6 +37,18 @@ internal static class FirstSeveranceCombatAuthority
             current?.RecordActorDeath(npc);
     }
 
+    internal static bool ProtectBossPhaseBoundary(NPC npc)
+    {
+        if (Main.netMode != NetmodeID.MultiplayerClient)
+            return current?.ProtectBossPhaseBoundary(npc) == true;
+        // Mirror the already accepted stage only; this never advances a stage.
+        if (ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat is not { } combat)
+            return false;
+        npc.life = FirstSeveranceBossPhasePlan.Instance.TryGetNext(combat.BossPhase, out var next)
+            ? System.Math.Max(1, FirstSeveranceBossPhasePlan.LifeThreshold(combat.BossMaximumLife, next)) : 1;
+        return true;
+    }
+
     internal static bool CanHitActor(NPC npc, int playerSlot)
     {
         if (playerSlot < 0 || playerSlot >= Main.maxPlayers || npc.dontTakeDamage)

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Convergence.Common.Foundation.Identifiers;
+using Convergence.Content.Encounters.FirstSeverance.Development;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
@@ -35,7 +36,9 @@ internal readonly record struct FirstSeveranceRosterMember(
 
 internal sealed class FirstSeveranceRoster
 {
-    public const int MinimumCount = 2;
+    // Wire/runtime capacity is separate from the authority's admission policy.
+    public const int MinimumCount = 1;
+    public const int ProductionMinimumCount = 2;
     public const int MaximumCount = 4;
 
     private FirstSeveranceRoster(
@@ -57,7 +60,8 @@ internal sealed class FirstSeveranceRoster
         int initiatorWhoAmI,
         ulong initiatorConnectionEpoch,
         out FirstSeveranceRoster? roster,
-        out string failureCode)
+        out string failureCode,
+        bool allowSoloDebug = false)
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
@@ -87,7 +91,7 @@ internal sealed class FirstSeveranceRoster
                 : left.ConnectionEpoch.CompareTo(right.ConnectionEpoch);
         });
 
-        if (selectable.Count < MinimumCount)
+        if (selectable.Count < FirstSeveranceDevelopmentPolicy.MinimumFor(allowSoloDebug))
         {
             failureCode = FirstSeveranceArenaIssueCodes.TooFewParticipants;
             return false;

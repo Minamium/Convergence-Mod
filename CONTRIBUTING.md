@@ -4,25 +4,21 @@ The project is in its architecture and compatibility phase. Design feedback, rep
 
 ## Before opening a change
 
-1. Read [Architecture](docs/ARCHITECTURE.md) and [Development setup](docs/DEVELOPMENT.md).
-2. Open an issue for changes to protocol, save data, dependencies, public APIs, progression, or asset licensing.
+1. Follow [Read by task](docs/README.md#read-by-task); read architecture/setup details only when the change needs them.
+2. Establish scope for protocol, save data, dependencies, public APIs, progression, or asset licensing before implementation. An existing issue or explicit user request can establish it; routine local work does not need a duplicate issue.
 3. Keep one concern per pull request.
 4. Do not include Calamity binaries, extracted assets, decompiled code, third-party recordings, or unlicensed samples.
 
 ## Required evidence
 
-- Run `python3 tools/repository_checks.py`.
-- Run `python3 tools/validate_yaml.py` when YAML changes.
-- Run `dotnet build ConvergenceMod.csproj` when C# changes.
-- Build and reload with the pinned tModLoader/Calamity versions when C# changes.
-- State whether the change was tested in Single Player, Host & Play, and Dedicated Server.
-- Include player count, latency conditions, and relevant logs for multiplayer changes.
+- Use the shared [Verification Matrix](.agents/skills/develop-convergence-raids/references/verification-matrix.md) and its single command entry point. Run the applicable checks once for the final inputs.
+- Report actual results and relevant `not_run` checks with the remaining action. Include environment/player-count details for runtime checks, not for prose-only work.
 - Update an ADR when changing an accepted architectural decision.
 - Update `Assets/ATTRIBUTION.md` for every distributable asset.
 
 ## Multiplayer review rule
 
-Every gameplay pull request must identify:
+For changes to gameplay state, requests, or lifecycle, describe only the affected responsibilities:
 
 - the authoritative owner of the new state;
 - the client request, if any;

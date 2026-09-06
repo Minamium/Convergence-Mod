@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - development.general_policy
 aliases:
@@ -24,7 +24,7 @@ related_docs:
 
 ## Primary workstation
 
-Use the Windows desktop as the primary tModLoader/Calamity build, Host & Play, and Dedicated Server environment. Follow [Windows Development Runbook](runbooks/WINDOWS_DEVELOPMENT.md) and the point-in-time [Windows Handoff](handoff/WINDOWS.md).
+Use the Windows desktop as the primary tModLoader/Calamity build, Host & Play, and Dedicated Server environment. Read the relevant [Windows Development Runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure when preparing or using that environment. The point-in-time [Windows Handoff](handoff/WINDOWS.md) is historical context, not an edit prerequisite.
 
 macOS can support tModLoader development when its runtime is installed, but the audited MacBook did not contain Terraria, tModLoader, .NET SDK, Calamity, or a valid `ModSources` checkout. It remains useful for documentation, Git, review, and platform-independent work. Never transfer an unverified Mac result into the version matrix as a successful Mod build.
 
@@ -54,15 +54,13 @@ The remote repository name may remain `tmod`; the local directory, assembly, and
 
 ## Repository checks
 
+Install `tools/requirements-ci.txt` once per Python environment. Routine verification uses the [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md):
+
 ```bash
-python3 -m pip install --requirement tools/requirements-ci.txt
-python3 tools/docs_catalog.py --check
-python3 tools/repository_checks.py
-python3 tools/validate_yaml.py
-dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
+python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
 ```
 
-The standalone harness exercises linked production domain sources without Terraria. It is not a Mod build.
+Add `--write-catalog` after indexed-doc edits, `--with-domain` for affected pure/linked domain code, and `--with-dotnet` for C# compiled into the Mod. Combine applicable flags in one invocation. The standalone domain harness is not a Mod build.
 
 ## Real build/load gates
 
@@ -70,12 +68,12 @@ The standalone harness exercises linked production domain sources without Terrar
 dotnet build ConvergenceMod.csproj
 ```
 
-Then run tModLoader Build + Reload, enter/exit Single Player, load Dedicated Server, and join with two clients using identical Mods. Both command build and Build + Reload are required. C# changes also run feature-specific 2/3/4-player cases when relevant.
+The command build can instead run through the wrapper's `--with-dotnet`; do not run both command paths for unchanged inputs. Use the Verification Matrix to select matching Build + Reload, affected-behavior smoke, and multiplayer cases. Full build/load/server/two-client baseline confirmation is required for runtime/dependency changes; it is not the default loop for every edit. User-owned GUI checks remain explicitly `not_run` until observed.
 
 ## Evidence
 
-Copy [the build-record template](evidence/build-record.example.json) to ignored `build-record.local.json`. Record exact commit, OS/architecture, runtime versions, Calamity binary checksum without the binary, each gate result, participant count, and network conditions. Sanitized records must follow [Evidence](evidence/README.md).
+For runtime/baseline evidence, use [the build-record template](evidence/build-record.example.json) as ignored `build-record.local.json`. Record exact commit, OS/architecture, runtime versions, Calamity binary checksum without the binary, each applicable gate result, participant count, and network conditions. Link unchanged environment evidence instead of copying it into each document. Text-only work needs the static-check result, not a runtime record. Sanitized records follow [Evidence](evidence/README.md).
 
-## Current safety gate
+## Feature activation gates
 
-`FirstSeveranceAvailabilityPolicy` currently permits validation and Ready preparation only. The preparation runtime keeps its combat gate closed, and `InertFirstSeveranceWorldAdapter` cannot mutate combat actors. Do not open the combat transition until the slice owning actor ownership/replication and Downed adapter evidence has passed its declared exit criteria.
+Use [Status](STATUS.md) and the active feature specification/ADRs for enabled development paths and remaining adapter gates. Historical bootstrap instructions do not disable an accepted experiment. Enabling a new path still requires that path's authority, ownership, replication, and cleanup contract plus its declared verification.

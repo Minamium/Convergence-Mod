@@ -1,103 +1,38 @@
 ---
 name: develop-convergence-raids
-description: Implement or review multiplayer-first Terraria/tModLoader content in the Convergence repository, especially server-authoritative Boss/Raid lifecycle, Downed/Revive, arena barriers, participant identity, mechanics, packets, snapshots, cleanup, Calamity compatibility, and Dedicated Server behavior. Use for C# or design changes under Common, Content/Encounters, Client, networking, Raid documentation, or multiplayer tests. Do not use for unrelated Terraria mods or general game design without repository changes.
+description: Implement or review Convergence Boss/Raid code and behavior, including authority, networking, recovery, arena logic, and client presentation. Use for gameplay, C#, and behavior-specification changes in this repository; ordinary documentation wording and repository housekeeping do not need this workflow.
 ---
 
 # Develop Convergence Raids
 
-Preserve Convergence's modular-monolith boundaries while adding multiplayer Raid features. Treat the server or Single Player process as the only gameplay authority.
+## Select context for the change
 
-## Start from repository truth
+- Locate the repository using `AGENTS.md` and `ConvergenceMod.csproj`. Follow the agreement already in context; do not reload it and every linked document.
+- Start with the Current build, Verification state, and Next change sections of [Status](../../../docs/STATUS.md). Use [Read by task](../../../docs/README.md#read-by-task) to select only the affected specification/design sections and code.
+- Read the implementation plan when choosing or changing work order, the version matrix when building/researching APIs, and historical records only to resolve a specific question. Current scope and recovery rules come from the active feature spec and its superseding ADRs, not a frozen MVP list in this skill.
+- Existing source/version evidence can answer unchanged questions. Investigate only remaining uncertainty; use the source-research skill for API or prior-art questions that actually need research.
 
-1. Locate the repository root from `AGENTS.md` and `ConvergenceMod.csproj`.
-2. Read `AGENTS.md`, `docs/README.md`, `docs/STATUS.md`, `docs/VERSION_MATRIX.md`, `docs/ARCHITECTURE.md`, and `docs/NETWORK_ARCHITECTURE.md` completely.
-3. For First Severance work, read `docs/encounters/first-severance/README.md` and the current spec/implementation plan. Source uses `FirstSeverance` and the Slice 2 six-state plan; deferred multipart mechanics exist only in deliberate history/backlog and must not shape the active runtime.
-4. For Downed/Revive work, also read ADR-0005, the feature Revive spec, and `docs/TEST_PLAN.md`. For arena work, also read `docs/ARENA_INFRASTRUCTURE.md` and ADR-0003.
-5. State the planned files, authoritative owner, client request path, replicated output, cleanup owner, and unresolved adapters before editing.
-6. Keep candidate tModLoader/Calamity versions unverified until real Build + Reload and Dedicated Server evidence succeeds.
+Choose the mode implied by the request; no separate confirmation is needed:
 
-Choose an operating mode before commands:
+- **Implementation:** make the requested bounded change and its applicable checks.
+- **Audit-only:** inspect without editing, formatting, compiling, or producing build/bytecode output. Use Git status/diff to distinguish existing changes; use a scoped file inventory if Git is unavailable. Run static checks only when they help answer the review question.
 
-- **Implementation mode:** edits and generated build output are allowed within scope.
-- **Audit-only mode:** do not edit, format, compile, or create bytecode/build output. Capture a Git baseline when available; otherwise record a sorted SHA-256 inventory and compare it at the end. Concurrent-worker changes cannot be attributed without Git metadata.
+## Load references only when needed
 
-Read [architecture-map.md](references/architecture-map.md) when choosing a module, [raid-authority-checklist.md](references/raid-authority-checklist.md) for gameplay/networking changes, and [verification-matrix.md](references/verification-matrix.md) before declaring completion.
+| Change | Reference |
+|---|---|
+| Choosing a module or changing dependency direction | [Architecture map](references/architecture-map.md); follow the relevant architecture section if the boundary is unclear |
+| Gameplay state, requests, actors, recovery, or cleanup | Relevant sections of [Raid authority checklist](references/raid-authority-checklist.md) |
+| Selecting checks or reporting completion | Applicable rows and commands in [Verification matrix](references/verification-matrix.md) |
 
-## Place responsibility deliberately
+Reuse references already read in this task until relevant inputs or scope change. A display/text edit does not require a full multiplayer review.
 
-- Put dependency-free values/contracts in `Common/Foundation` or `Common/Encounters/Abstractions`.
-- Put reusable Raid-domain rules in `Common/Raids`, free of Terraria, Calamity, transport, UI, and encounter-specific names.
-- Put authority coordination in `Common/Encounters/Runtime` or a narrow adapter beside its common domain.
-- Put Calamity calls only in `Common/Compatibility/Calamity`.
-- Put one encounter's phase plan, mechanics, NPCs, projectiles, tiles, rewards, tuning, and cue contracts under `Content/Encounters/<Feature>`.
-- Put client-only UI/VFX/audio/accessibility/prediction under `Client`, consuming read-only replicas/cues.
-- Never add feature switches to global coordinator/router code. Register through definitions, policies, and factories.
+## Implement the affected responsibility
 
-## Design authority before implementation
+For gameplay changes, identify the authority owner, bounded request and replica (if any), stable identity, and exact-Fight cleanup path. For client-only changes, check the read-only input and Dedicated Server guard. Keep the explanation proportional to what changes.
 
-For each state, answer:
+For new mechanics, define assignment, telegraph/resolve ticks, authority result, failure policy, recovery interaction, and cleanup in the owning spec/domain. Add adapters, DTOs, and presentation only as the feature needs them. Register transient resources immediately; keep an incomplete path unavailable until its required adapters and evidence exist. Apply the current development scope without reopening unrelated production gates.
 
-1. Who creates and mutates it?
-2. Which stable identity scopes it: Encounter Sequence, Fight ID, Participant ID, connection epoch, actor, or Core?
-3. Which bounded client command may request a change?
-4. What does the server revalidate from World/player/item state?
-5. Which snapshot/event exposes the result?
-6. What happens to duplicate, stale, reordered, truncated, oversized, or malicious input?
-7. Who owns cleanup, including partial construction and a second call?
-8. What happens on Downed, disconnect/rejoin, slot reuse, terminal transition, unload, and Dedicated Server?
+Update the document that owns each changed fact. Do not copy the same implementation report into the spec, plan, README, and skill. Review the final diff for the affected invariants and use the verification matrix once at completion.
 
-Use machine-readable rejection codes. Derive sender from tModLoader's trusted `whoAmI`; never trust payload identity, positions, damage, timers, Fight IDs, Core coordinates, held item, or mechanic success.
-
-## Implement in safe slices
-
-1. Add/update accepted docs and pure domain values/transitions.
-2. Add server/SP adapters.
-3. Add fixed/bounded DTOs with parse-complete-then-validate handling.
-4. Add bounded replication and read-only client presentation.
-5. Keep activation denied whenever a required authority/Core/roster/actor/death/cleanup adapter is missing.
-6. Register each transient resource immediately after creation.
-7. Prefer convergent full snapshots for repair and bounded events for presentation; never make VFX/audio authority.
-
-For each mechanic encode assignment, telegraph start, resolve tick, authority result, soft-failure policy, Downed interaction, and cleanup. First Severance's MVP contains only Pylon, Stack, Spread, and Core exposure; backlog does not expand it.
-
-## Preserve multiplayer invariants
-
-- One coordinator-managed Boss/Raid per World until an ADR changes it.
-- Active encounters are ephemeral; unload ends/cleans instead of resuming.
-- Terminal snapshot publishes before the session/projections release.
-- Delayed older Sequence/Fight/revision/epoch/nonce cannot revive/mutate current state.
-- Player-slot reuse cannot inherit participant state.
-- Downed is not ordinary death; only Raid authority enters/revives/expires/clears it.
-- All-Downed/unrecoverable timeout resolves through explicit authority failure.
-- Barrier/outsider response is bounded warning/correction/escalation, not unbounded actors or instant death.
-- Dedicated Server never initializes graphics/shaders/audio/screen effects.
-
-## Verify honestly
-
-Run the deterministic wrapper:
-
-```bash
-python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
-```
-
-For a read-only review:
-
-```bash
-python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py --audit-only .
-```
-
-For pure Raid-domain work:
-
-```bash
-dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
-```
-
-Then follow `docs/runbooks/WINDOWS_DEVELOPMENT.md` from an exact `ModSources/Convergence` checkout for command build, Build + Reload, Single Player, Host & Play, and Dedicated Server. Missing runtime evidence is `not_run`/`blocked`, never a pass.
-
-Review the final diff for authority leaks, reverse dependencies, unbounded payloads, missing cleanup registration, client-only access on servers, stale documentation catalog/status, and accidental third-party assets/source.
-
-Classify findings:
-
-- **Blocker:** unsafe activation, corruption, authority/security bypass, unrecoverable cleanup, or missing adapter/evidence required to call the feature playable.
-- **Major:** deterministic correctness, synchronization, compatibility, or testability defect required before integration.
-- **Minor:** bounded robustness, documentation, maintainability, or future-proofing issue that does not invalidate fail-closed behavior.
+Report concrete defects and missing applicable evidence. Distinguish an implementation defect from a future release gate or a user-owned playtest that has not run.

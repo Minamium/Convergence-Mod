@@ -68,14 +68,14 @@ internal static class FirstSeverancePacketCodec
         out uint requestNonce,
         out string failureCode)
     {
-        if (!TryReadBoolean(reader, out isReady))
+        bool validReady = TryReadBoolean(reader, out isReady);
+        requestNonce = reader.ReadUInt32();
+        if (!validReady)
         {
-            requestNonce = 0;
             failureCode = "first_severance.ready_value_invalid";
             return false;
         }
 
-        requestNonce = reader.ReadUInt32();
         if (requestNonce == 0)
         {
             failureCode = "first_severance.ready_nonce_invalid";
@@ -294,7 +294,8 @@ internal static class FirstSeverancePacketCodec
         writer.Write(combat.BossMaximumLife);
         writer.Write(combat.RemainingReviveTokens);
         writer.Write(combat.ReviveRevision);
-        writer.Write(combat.StackTargetSlot);
+        writer.Write(combat.StackX);
+        writer.Write(combat.StackY);
         writer.Write(combat.CoreX);
         writer.Write(combat.CoreY);
         writer.Write((byte)combat.LastMechanicResult);
@@ -317,17 +318,42 @@ internal static class FirstSeverancePacketCodec
             writer.Write(participant.InvulnerabilityUntilTick);
             writer.Write(participant.WeaknessUntilTick);
             writer.Write(participant.ReviveLockoutUntilTick);
+            WriteBoolean(writer, participant.DebugAssistProtected);
         }
         WriteBoolean(writer, combat.LanceVolley is not null);
         if (combat.LanceVolley is { } volley)
         {
             writer.Write(volley.Serial);
             writer.Write(volley.StartTick);
+            writer.Write((byte)volley.Kind);
+            writer.Write(volley.Step);
+            writer.Write((short)volley.TargetSlot);
+            writer.Write(volley.MotionTick);
             writer.Write(checked((byte)volley.Rays.Count));
             foreach (FirstSeveranceLanceRay ray in volley.Rays)
             {
                 writer.Write(ray.X);
                 writer.Write(ray.Y);
+                writer.Write(ray.DirectionX);
+                writer.Write(ray.DirectionY);
+                writer.Write(ray.Length);
+                writer.Write(ray.HalfWidth);
+            }
+        }
+        writer.Write((byte)combat.BossPhase);
+        writer.Write(combat.BossPhaseStartedTick);
+        writer.Write(combat.ActionStartedTick);
+        writer.Write(checked((sbyte)combat.ActionIndex));
+        writer.Write(checked((byte)combat.CompletedPhaseCycles));
+        WriteBoolean(writer, combat.GridVolley is not null);
+        if (combat.GridVolley is { } grid)
+        {
+            writer.Write(grid.Serial);
+            writer.Write(grid.StartTick);
+            writer.Write(grid.Pattern);
+            writer.Write(checked((byte)grid.CoreBeams.Count));
+            foreach (var ray in grid.CoreBeams)
+            {
                 writer.Write(ray.DirectionX);
                 writer.Write(ray.DirectionY);
             }
@@ -349,7 +375,8 @@ internal static class FirstSeverancePacketCodec
         int bossMaximumLife = reader.ReadInt32();
         int remainingReviveTokens = reader.ReadInt32();
         uint reviveRevision = reader.ReadUInt32();
-        int stackTargetSlot = reader.ReadInt32();
+        float stackX = reader.ReadSingle();
+        float stackY = reader.ReadSingle();
         float coreX = reader.ReadSingle();
         float coreY = reader.ReadSingle();
         var mechanicResult = (FirstSeveranceMechanicResult)reader.ReadByte();
@@ -385,6 +412,9 @@ internal static class FirstSeverancePacketCodec
             ulong invulnerabilityUntilTick = reader.ReadUInt64();
             ulong weaknessUntilTick = reader.ReadUInt64();
             ulong reviveLockoutUntilTick = reader.ReadUInt64();
+            if (!TryReadBoolean(reader, out bool debugAssistProtected)
+                || (debugAssistProtected && (!isConnected || combatState != RaidParticipantCombatState.Alive)))
+                return false;
             if (!participantId.IsValid
                 || participantId.Value >= participantCount || serverWhoAmI >= 255
                 || !Enum.IsDefined(combatState)
@@ -409,7 +439,8 @@ internal static class FirstSeverancePacketCodec
                 anchorY,
                 invulnerabilityUntilTick,
                 weaknessUntilTick,
-                reviveLockoutUntilTick);
+                reviveLockoutUntilTick,
+                debugAssistProtected);
         }
 
         if (!TryReadBoolean(reader, out bool hasLance))
@@ -419,16 +450,20 @@ internal static class FirstSeverancePacketCodec
         {
             uint serial = reader.ReadUInt32();
             ulong startTick = reader.ReadUInt64();
+            var kind = (FirstSeveranceAttackKind)reader.ReadByte();
+            byte step = reader.ReadByte();
+            int targetSlot = reader.ReadInt16();
+            ulong motionTick = reader.ReadUInt64();
             int rayCount = reader.ReadByte();
             if (rayCount is < 1 or > FirstSeveranceLanceTuning.MaximumRays)
                 return false;
             var rays = new FirstSeveranceLanceRay[rayCount];
             for (int index = 0; index < rayCount; index++)
                 rays[index] = new FirstSeveranceLanceRay(reader.ReadSingle(), reader.ReadSingle(),
-                    reader.ReadSingle(), reader.ReadSingle());
+                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
             try
             {
-                lance = new FirstSeveranceLanceVolley(serial, startTick, Array.AsReadOnly(rays));
+                lance = new FirstSeveranceLanceVolley(serial, startTick, Array.AsReadOnly(rays), kind, step, targetSlot, motionTick);
             }
             catch (ArgumentException)
             {
@@ -436,6 +471,28 @@ internal static class FirstSeverancePacketCodec
             }
         }
 
+        var bossPhase = (FirstSeveranceBossPhase)reader.ReadByte();
+        ulong bossPhaseStartedTick = reader.ReadUInt64();
+        ulong actionStartedTick = reader.ReadUInt64();
+        int actionIndex = reader.ReadSByte();
+        int completedPhaseCycles = reader.ReadByte();
+        if (!TryReadBoolean(reader, out bool hasGrid)) return false;
+        FirstSeveranceGridVolley? grid = null;
+        if (hasGrid)
+        {
+            uint serial = reader.ReadUInt32();
+            ulong startTick = reader.ReadUInt64();
+            byte pattern = reader.ReadByte();
+            byte count = reader.ReadByte();
+            if (count > FirstSeveranceGridVolley.MaximumCoreBeams) return false;
+            var beams = new FirstSeveranceLanceRay[count];
+            for (int index = 0; index < count; index++)
+                beams[index] = new(coreX, coreY - FirstSeveranceLanceTuning.BossHeightAboveCore,
+                    reader.ReadSingle(), reader.ReadSingle(), FirstSeveranceGridVolley.CoreBeamLength,
+                    FirstSeveranceGridVolley.CoreBeamHalfWidth);
+            try { grid = new(serial, startTick, pattern, coreX, coreY, beams); }
+            catch (ArgumentException) { return false; }
+        }
         try
         {
             combat = new FirstSeveranceCombatProjection(
@@ -449,13 +506,14 @@ internal static class FirstSeverancePacketCodec
                 bossMaximumLife,
                 remainingReviveTokens,
                 reviveRevision,
-                stackTargetSlot,
+                stackX,
+                stackY,
                 coreX,
                 coreY,
                 mechanicResult,
                 mechanicRevision,
                 Array.AsReadOnly(participants),
-                lance);
+                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles);
             return true;
         }
         catch (ArgumentException)

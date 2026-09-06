@@ -10,13 +10,19 @@ namespace Convergence.Content.Encounters.FirstSeverance.FoundationCore;
 
 public sealed class FoundationCoreTileEntity : ModTileEntity
 {
+    internal static bool IsCoreType(int type) => type == ModContent.TileType<FoundationCoreTile>()
+        || type == ModContent.TileType<FoundationPlinthTile>();
+    internal int FootprintWidth => Main.tile[Position.X, Position.Y].TileType == ModContent.TileType<FoundationPlinthTile>() ? 12 : 2;
+    internal int FootprintHeight => FootprintWidth == 12 ? 4 : 2;
+    internal Microsoft.Xna.Framework.Vector2 GroundCenter => new((Position.X + FootprintWidth * .5f) * 16f,
+        (Position.Y + FootprintHeight) * 16f);
     internal FirstSeveranceCoreProtectionState ProtectionState { get; private set; }
 
     public override bool IsTileValidForEntity(int x, int y)
     {
         Tile tile = Main.tile[x, y];
         return tile.HasTile
-            && tile.TileType == ModContent.TileType<FoundationCoreTile>();
+            && IsCoreType(tile.TileType);
     }
 
     public override void NetSend(BinaryWriter writer)

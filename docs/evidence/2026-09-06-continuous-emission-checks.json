@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.8",
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "protocol": 10,
+  "scope": "Continuous complete firing process, independent rig and plinth atlases, ground containment, temporary participant flight; local server and two-client menu handoff",
+  "checks": {
+    "domain": "passed: 68 deterministic cases; continuous fire/end envelopes, finite body clamp/corners/hysteresis, solid-airspace rejection; prior mechanics retained",
+    "codec": "passed: compiled v10 assertion, 42 round trips over 2/3/4 participant projections, 11 malformed/truncated cases; no new packet IDs",
+    "actual_build_package": "passed: actual ModSources package, zero warnings/errors, 21002047 bytes",
+    "static_wrapper": "passed once: 51 indexed documents, 258 repository files, 10 YAML files; git diff --check clean apart from pre-existing line-ending notice",
+    "dedicated_server": "passed: Convergence 0.2.8 and Simple Whip Addon 1.15.12 loaded; copied world loaded and server listening",
+    "two_client_menu": "passed: separate operator/auxiliary profiles loaded matching package and reached menu; no joining or auto-Ready",
+    "startup_warnings": "pre-existing missing optional icon_small and third-party immediate asset-load timing warnings; no error-level exception in inspected startup interval",
+    "field_flight_and_legacy_placement": "not_run: user-owned test of new 12x4 placement/old 2x2 recovery, edge dash/recall/mount, flight, terminal/unload cleanup and outsider independence",
+    "animation_quality": "not_run: user-owned live beam/charge observation, safe-lane readability, reduced effects and dual-client frame pacing; code continuity does not prove WotG-equivalent quality",
+    "assist_revive": "not_run: unchanged one-pull console permit must be armed after auxiliary joins; no permission persisted or automatically granted"
+  }
+}

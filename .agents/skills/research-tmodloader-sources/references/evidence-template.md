@@ -1,6 +1,6 @@
 # Source Evidence Template
 
-Use one entry per independently verifiable finding.
+Use this full template for design-changing findings, cross-Mod comparisons, or copying/provenance questions. A narrow official-API lookup uses the short record described in SKILL.md. Shared repository/version/license details may be recorded once per survey and linked from each independently verifiable finding.
 
 ```markdown
 ## Finding title

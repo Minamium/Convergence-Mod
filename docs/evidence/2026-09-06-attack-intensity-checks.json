@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.16",
+  "protocol": 15,
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "environment_reference": "2026-09-06-solo-stack-sync-checks.json",
+  "scope": "Warning audibility, rigid twin accelerating blades, broad-volume anticipation, phase-three lethal central crush and denser Final",
+  "user_observation": {"preceding_stack_sync": "reported_resolved", "new_audiovisual_pass": "not_yet_reviewed"},
+  "preserved": ["Stack authority/movement synchronization", "frozen roster HP", "Spread rules", "instant reusable revival and recipient lockout", "solo development admission", "music", "Mods and saves"],
+  "domain": {"status": "passed", "cases": 90, "coverage": "1-4-member full score/HP gates, new crush warning/live/recovery/pockets, twin blade timing/acceleration, Final bounds/gaps/swept beads, unchanged Stack and recovery"},
+  "compiled_codec": {"status": "passed", "round_trips": 308, "malformed_or_truncated": 46, "coverage": "Preparation and every score action including RemoteCrush for 1-4 members, HP-zero Final, bounded shared streams, recovery fields"},
+  "compiled_solo_flag_enabled": true,
+  "package": {"status": "passed", "actual_modsources": true, "warnings": 0, "errors": 0, "bytes": 32221196, "sha256": "FF2ED86C50D955E6DBF76BE47528219A5A81FDF54759E3F6750D77758BB24466"},
+  "assets": {"generated_blade": "2172x724 RGBA, visually inspected and alpha0-255 preserved, no raster edits", "new_or_revised_effects": 16, "sample_rate": 48000, "channels": 1, "runtime_format": "PCM16 WAV", "finite_decode": "passed", "maximum_absolute_sample_below": 0.911, "external_auditions": "PCM24 individual and composite reel", "stack_source_rms_gain_db": 5.17, "spread_source_rms_gain_db": 4.92, "stack_spread_playback_gain": {"before": 0.78, "after": 0.98}, "music_changed": false},
+  "static_wrapper": {"status": "passed", "catalog_documents": 56, "repository_files": 316, "yaml_files": 10, "note": "Initial attribution validation required individual metadata records for each new cue; corrected before passing rerun"},
+  "deployment": {"normal_profile": "packaged", "existing_profiles": "passed", "package_hash_matches": 5, "scope": "Hash-guarded changed files and Convergence package only; previous packages retained externally; no deletions"},
+  "runtime": {"game_load": "not_run", "multiplayer_contact_alignment": "not_run", "visual_readability_and_reduced_effects": "not_run", "in_game_audio_mix": "not_run", "dodgeability": "not_run", "cancel_end_cleanup": "not_run", "solo_actual_combat_start": "not_run", "gui_or_process_launch": false},
+  "limitations": ["Technical compile/geometry/waveform checks do not establish human audiovisual acceptance", "Crush uses existing lethal-to-Down, not a new normal death hook", "No change to Stack rules to mask synchronization", "Matching protocol15 package required for every peer", "No new authority, persistence or dependency boundary; ADR0019 score model retained"]
+}

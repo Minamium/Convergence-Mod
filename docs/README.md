@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - documentation.read_order
 aliases:
@@ -21,18 +21,25 @@ related_docs:
 
 This page is the starting point for humans and coding agents. The repository includes an experimental Raid playtest build; do not infer production completeness from a design document. Verify current implementation and evidence in [Status](STATUS.md).
 
-## Fast read for a new workstation
+## Read by task
 
-Read these in order:
+For code/behavior work, start with [Current build](STATUS.md#current-build), [Verification state](STATUS.md#verification-state), and [Next change](STATUS.md#next-change), then inspect the affected code. Text-only fixes need only the affected passage and its conventions. This page is a routing map, not a mandatory reading queue.
 
-1. [Repository README](../README.md) — product and repository overview.
-2. [Windows handoff](handoff/WINDOWS.md) — current checkpoint and exact next actions.
-3. [Status](STATUS.md) — what exists, what is disconnected, and what is unverified.
-4. [First Severance overview](encounters/first-severance/README.md) — feature document map.
-5. [Version matrix](VERSION_MATRIX.md) and [Windows development runbook](runbooks/WINDOWS_DEVELOPMENT.md).
-6. [Architecture](ARCHITECTURE.md), [Network architecture](NETWORK_ARCHITECTURE.md), and the linked ADRs before editing authority code.
+| Task | Additional context, only as relevant |
+|---|---|
+| Markdown, wording, repository housekeeping | Target file; [documentation schema](DOCUMENTATION_SYSTEM.md#front-matter-record) only if metadata/structure changes |
+| VFX, UI, assets | Target code and affected [visual spec](encounters/first-severance/VISUAL_SPEC.md) section; [asset pipeline](ASSET_PIPELINE.md) and attribution rules for distributable assets |
+| HP, timing, radius, damage tuning | Target constants, callers, and affected [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) section |
+| Combat, recovery, arena | Affected feature spec and code; [revive spec](encounters/first-severance/REVIVE_SPEC.md) or [arena rules](ARENA_INFRASTRUCTURE.md) for that subsystem; follow linked active ADRs only where a decision matters |
+| Authority, protocol, lifecycle, module boundaries | Relevant [architecture](ARCHITECTURE.md) / [network](NETWORK_ARCHITECTURE.md) sections and the ADRs governing the changed contract |
+| Work order or new feature scope | Current section of the [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md); backlog only when explicitly promoting an idea |
+| API research, real build, new workstation | [Version matrix](VERSION_MATRIX.md), existing scoped research, and relevant [Windows runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure |
+| WotG-level presentation without losing multiplayer Raid mechanics | [WotG benchmark](research/WOTG_RAID_BENCHMARK.md): video metadata/access limits, pinned public source, independent design proposals |
+| Playtesting when only one person is available | [Single-operator testing](runbooks/SINGLE_OPERATOR_TESTING.md): two real clients, safe save separation, existing debug Down, proposed assistance |
 
-Use [Search Index](INDEX.md) when looking for a topic, stable document ID, alias, or related source path. Use [Glossary](GLOSSARY.md) whenever `FirstSeverance` and the legacy `ThirdSeverance` names appear together.
+Use `rg` for headings, symbols, and topic names before opening a long document. Reuse sections already read until relevant files or scope change. [Search Index](INDEX.md) and [Glossary](GLOSSARY.md) help only when locating an unfamiliar topic/name. The [Windows handoff](handoff/WINDOWS.md) and completed slices are historical context, not prerequisites for routine edits.
+
+Select checks from the shared [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). Detailed test cases are references, not an instruction to run every case.
 
 ## Sources of truth
 
@@ -42,7 +49,7 @@ Use [Search Index](INDEX.md) when looking for a topic, stable document ID, alias
 | What is the current first Raid? | [First Severance encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) |
 | What gets implemented, and in what order? | [First Severance implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) |
 | How does Downed/Revive feel to players? | [Revive specification](encounters/first-severance/REVIVE_SPEC.md) |
-| What authority invariants are mandatory? | [ADR-0002](adr/0002-server-authoritative-encounters.md) and [ADR-0005](adr/0005-server-authoritative-downed-revive.md) |
+| What authority invariants are mandatory? | [ADR-0002](adr/0002-server-authoritative-encounters.md), [ADR-0005 foundation](adr/0005-server-authoritative-downed-revive.md), and [ADR-0011 recovery policy](adr/0011-instant-revival-and-recipient-lockout.md) |
 | What is deliberately postponed? | [First Severance backlog](encounters/first-severance/BACKLOG.md) |
 | How should Windows be prepared? | [Windows development runbook](runbooks/WINDOWS_DEVELOPMENT.md) |
 | How are documents indexed? | [Documentation system](DOCUMENTATION_SYSTEM.md) |
@@ -62,13 +69,12 @@ If two active documents disagree, the document declaring the relevant `source_of
 
 ## Maintenance rule
 
-Update [Status](STATUS.md) whenever implementation state changes. Update the feature plan when work order changes, the feature spec when player-visible behavior changes, and an ADR when a structural invariant changes. Then run:
+Update only the owner of a changed fact: [Status](STATUS.md) for implementation/verification state, feature spec for behavior, plan for work order, ADR for a structural decision. A wording fix or tuning adjustment does not require updating all of them or writing a new report. Other documents link to the owner instead of copying its state.
+
+After indexed-document edits are settled, regenerate and check once:
 
 ```bash
-python3 tools/docs_catalog.py --write
-python3 tools/docs_catalog.py --check
-python3 tools/repository_checks.py
-python3 tools/validate_yaml.py
+python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py --write-catalog .
 ```
 
 The generated YAML catalog is an index, not a second source of truth.

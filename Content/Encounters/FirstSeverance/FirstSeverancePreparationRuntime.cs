@@ -6,6 +6,7 @@ using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Geometry;
 using Convergence.Common.Foundation.Identifiers;
 using Convergence.Content.Encounters.FirstSeverance.FoundationCore;
+using Convergence.Content.Encounters.FirstSeverance.Development;
 using Terraria;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
@@ -38,6 +39,7 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
     private readonly List<FirstSeveranceQueuedPreparationIntent> pendingIntents = new();
     private FirstSeverancePreparationStateMachine? preparation;
     private FirstSeverancePrototypeCombatRuntime? combat;
+    private FirstSeveranceDebugAssistLease? debugAssist;
     private bool isAttached;
     private bool isCleaned;
 
@@ -205,6 +207,8 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
         }
 
         combat?.Cleanup(context);
+        FirstSeveranceDebugAssistSystem.Release(debugAssist);
+        debugAssist = null;
         preparation?.Cleanup(fightId);
         pendingIntents.Clear();
         Array.Clear(lastQueuedNonces);
@@ -231,11 +235,14 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
                     FirstSeveranceTerminalCause.RuntimeInvariantBroken));
         }
 
+        debugAssist = FirstSeveranceDebugAssistSystem.Claim(fightId, roster);
         preparation = new FirstSeverancePreparationStateMachine(
             fightId,
             roster,
             authorityTick,
-            FirstSeverancePreparationSettings.Default);
+            debugAssist is not null
+                ? new FirstSeverancePreparationSettings(10 * 60 * 60)
+                : FirstSeverancePreparationSettings.Default);
         if (!FirstSeverancePreparationAuthority.TryAttach(this))
         {
             return EncounterRuntimeUpdate.End(
@@ -314,7 +321,9 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
                 fightId,
                 roster,
                 serverTileEntityId,
-                coreTopLeft);
+                coreTopLeft,
+                arena.Layout,
+                debugAssist);
             if (!combat.TryStart(authorityTick, out _))
             {
                 return EncounterRuntimeUpdate.End(

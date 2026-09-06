@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,45 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v4
+## Current development protocol v16
+
+[ADR-0021](adr/0021-untimed-recovery-and-simultaneous-prism.md) keeps the field layout but permits1–4 locked rays in a PursuitPrism volley, additionally bounded by the combat roster count. Its maximum attack section grows74→122bytes; other attack kinds retain their original shape/count constraints. TargetSlot is only Prism's representative pose focus. Authority supplies every ray simultaneously; clients never infer another target from local positions. The feature rejects Eliminated combat projections and treats zero DownedDeadlineTick as untimed Down when CombatState is Downed. The same shared geometry/timing defines expanding horizontal floods, two blade turns and accelerating/shifting Final attacks. All peers must update; packet IDs, nonce requests, persistence and exact-Fight ownership are unchanged.
+
+Preceding v15 appended `RemoteCrush = 14` to the stable substate enum without changing the DTO. The score/phase indices remain bounded and constructor-validated, including after the current timing revisions. [Status](STATUS.md) owns verification.
+
+## Preceding development protocol v14
+
+The one-member debug admission in [ADR-0020](adr/0020-development-solo-admission-and-terminal-hud.md) changes the accepted preparation/combat roster bounds to **1–4**, without changing v13 field layout, packet IDs or client request shapes. NPC extra-AI accepts the same real count. Admission remains server/SP build-policy controlled; parsing one-member observations does not authorize a client to lower the server minimum. All peers require v14. Result cinematics are local consequences of existing accepted terminals, not new packets or delayed cleanup. [Status](STATUS.md) owns verification.
+
+## Preceding development protocol v13
+
+The stage/ordered-action descriptor in [ADR-0019](adr/0019-phase-scores-and-terminal-survival.md) extends v12 by10 bytes after BossPhaseStartedTick: ActionStartedTick (`ulong`), ActionIndex (`sbyte`, -1 or a score-bounded index), CompletedPhaseCycles (`byte`). The existing optional grid/Core payload follows unchanged. Stage/action compatibility, ordered ticks, finite core/Stack positions and zero Final HP are validated before snapshot application. Stable enum values are appended, not renumbered; all packet IDs/requests remain unchanged. Both sides derive new fixed geometry/timing from this matching version, never from client actions or audio playback. Later intermediate phases can precede the explicit Final stage.
+
+The preceding v10–v12 field and ownership changes are recorded in [ADR-0016](adr/0016-ground-containment-and-continuous-emission.md), [ADR-0017](adr/0017-boss-stages-fixed-stack-and-lattice.md) and [ADR-0018](adr/0018-roster-health-and-core-salvos.md). Current results belong to [Status](STATUS.md).
+
+## Preceding development protocol v9
+
+`0.2.7` retains the entire v8 field layout, numeric packet IDs and request shapes. The protocol bumps because both peers derive warning/fire/lock/end deadlines from shared tuning, and the user restored fast steps inside attack combos while retaining the deliberate category-opening and full-combo pauses. All peers must update together; old timing must not silently render against new authority collision. See the [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) for current timing. Auxiliary permissions, snapshot bounds, ownership and cleanup are unchanged.
+
+## Preceding development protocol v8
+
+`0.2.6` appends `DebugAssistProtected : bool` after `ReviveLockoutUntilTick` in each combat participant record: 62 bytes per participant, at most four additional bytes for the roster. Decode reads a strict byte (`0` or `1`), rejects other values and rejects `true` on disconnected/non-Alive projections. All packet IDs, client requests, attack layout and v7 tuning are unchanged. All peers must update together.
+
+This flag reflects an exact-Fight, console-granted developer lease, not a client request or persisted permission. The ordinary repair snapshots renew a five-second owner-client TTL; termination and invalid membership clear it immediately. Command/lease authority and cleanup are specified in [ADR-0015](adr/0015-console-only-single-pull-assist.md). `Common` receives no feature switch and no grant packet is exposed.
+
+## Preceding development protocol v7
+
+`0.2.5` retains the v6 field layout but bumps the protocol because peers derive new charge fire/lock deadlines and ray geometry from shared tuning. v6 peers must update; packet IDs are unchanged. `0.2.3` originally inserted `MotionTick : ulong` after attack target slot and before ray count. It is zero for fixed beams, or inside `[StartTick, EndTick)` for an energy charge. Charge rays encode head position, unit heading and fixed body dimensions (length 164 / half-width 50); `RayAt` produces the swept collision rectangle. Maximum attack section is 74 bytes (50 for one charge). Existing kind values and packet IDs are retained; v5 peers must update. The exact-Fight authority samples charge motion, publishes every four tracking ticks, at the prelaunch lock and at fire; the locked position/heading remain still for 24 harmless ticks, then straight motion extrapolates from that sample. All other phase, identity, terminal, bounded decoding and cleanup rules remain intact. See [ADR-0013](adr/0013-energy-charge-and-client-feedback.md).
+
+## Preceding development protocol v5
+
+`0.2.2` extends the nullable bounded attack section: present byte; nonzero uint serial; ulong start tick; byte kind (`ObservationLance=0`, `PursuitPrism=1`, `SweepRight=2`, `Stillness=3`, `SweepLeft=4`); byte step (`0..7`, validated per kind); signed short target slot (`-1..254`, nonnegative for new patterns); byte ray count (`1..2`); six floats per ray (origin X/Y, unit direction X/Y, length, half-width). Maximum section size is 66 bytes, 20 more than v4. Finite coordinates (absolute value ≤1,000,000), length 32..3,600, half-width 4..320, normalized direction, compatible kind/step/ray shape, phase and phase deadline are constructor-validated. Sweep motion is derived from server start tick, never sent per frame. Exact shared-buffer consumption remains mandatory.
+
+All numeric packet IDs and nonce-only client requests are unchanged. Both peers must reload the same build; the header rejects old protocol versions. The same immutable attack descriptor drives authoritative hit geometry and client drawing, capped at two global rays for all roster sizes. A sequence holds an authority-selected Alive focus, re-locking each step; clients do not choose targets or outcomes.
+
+The existing accepted terminal is also the Defeat death order, not a new client-to-server command. The owner checks its previous connected combat membership, exact sequence/Fight match and generic Defeat, marks that sequence executed, clears local Raid protection, and invokes normal `Player.KillMe` once. Subsequent snapshots cannot repeat it. Ordinary Terraria death synchronization remains inherited, not an anti-cheat guarantee; a client can violate Terraria's cooperative trust. Server cleanup logs valid bound recipients, and the owner logs whether a third-party `PreKill` hook cancelled death. A tombstone received without a preceding local combat, a stale/wrong Fight, outsiders, Victory, cancellation and unload never cause this action. See [ADR-0012](adr/0012-pattern-sequences-and-defeat-death.md).
+
+## Development protocol v4
 
 `0.2.1` appends `ReviveLockoutUntilTick : ulong` after WeaknessUntilTick in each bounded combat participant record (at most 32 extra bytes). The authority owns the 60-second recipient deadline. Existing numeric packet IDs, nonce-only client requests and the bounded lance section are unchanged; the legacy token counter is reserved zero. Host and clients must reload together.
 

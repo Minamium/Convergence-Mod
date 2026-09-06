@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.15",
+  "protocol": 14,
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "environment_reference": "2026-09-06-solo-debug-results-checks.json",
+  "scope": "Solo Ready-to-combat revalidation, owner movement sync, Stack diagnostics and fixed request rejection consumption",
+  "observed_build": "0.2.14",
+  "observed_topology": "Two-player Steam Host & Play, then one-member retries; host client and server logs available, friend log unavailable",
+  "observed_pulls": [
+    {
+      "sequence": 2, "participants": 2, "elapsed_seconds": 43.95,
+      "outcome": "Defeat", "cause": "AllParticipantsDowned",
+      "stacks": [{"present": 1, "required": 2, "distances": [40.3,669.4], "alive": [true,true]}, {"present": 0, "required": 2, "distances": [433.2,473.3], "alive": [true,true]}],
+      "stack_radius": 112, "spread_passed": 1, "spread_failed": 0,
+      "down_events": 3, "revives": 1, "revive_lockout_ticks": 3600,
+      "pylon_damage": 600000, "pylon_open_seconds": 7.45, "pylon_dps": 80536.9,
+      "core_damage": 692773, "core_open_seconds": 18, "core_dps": 38487.4,
+      "boss_life": 4307227, "boss_max_life": 5000000, "reached_phase_two": false,
+      "host_defeat_death": true
+    },
+    {
+      "sequence": 3, "participants": 2, "elapsed_seconds": 43.45,
+      "outcome": "Defeat", "cause": "AllParticipantsDowned",
+      "stacks": [{"present": 1, "required": 2, "distances": [22.8,710.3], "alive": [true,true]}, {"present": 0, "required": 2, "distances": [614.5,360.9], "alive": [false,true]}],
+      "stack_radius": 112, "spread_passed": 1, "spread_failed": 0,
+      "down_events": 3, "revives": 1, "revive_lockout_ticks": 3600,
+      "pylon_damage": 600000, "pylon_open_seconds": 6.95, "pylon_dps": 86330.9,
+      "core_damage": 798232, "core_open_seconds": 18, "core_dps": 44346.2,
+      "boss_life": 4201768, "boss_max_life": 5000000, "reached_phase_two": false,
+      "host_defeat_death": true
+    }
+  ],
+  "solo_revalidation_rejections": 13,
+  "post_combat_activation_rate_warnings": 7,
+  "post_combat_read_underflow_records": 1,
+  "battle_exceptions_in_two_pull_intervals": 0,
+  "cause_confidence": {
+    "solo": "confirmed_missing_flag_in_live_second_scan",
+    "read_underflow": "confirmed_fixed_payload_decode_after_rate_rejection",
+    "stack": "authority_distances_confirmed; movement_asymmetry_corrected_but_exact_reported_peer_drift_unproven_without_client_coordinates"
+  },
+  "domain": {"status": "passed", "cases": 90, "enabled_and_disabled_builds": true},
+  "compiled_requests": {"status": "passed", "cases": 28, "coverage": "valid/zero nonce, invalid Ready boolean, all fixed-payload truncations, nonzero-offset shared-stream sentinels"},
+  "retained_codec_evidence": "Protocol14 combat/preparation layouts unchanged; preceding304 round trips and46 malformed cases remain applicable",
+  "compiled_solo_flag_enabled": true,
+  "package": {"status": "passed", "actual_modsources": true, "warnings": 0, "errors": 0, "bytes": 31030224, "sha256": "0B9633966445C76C55A5B16CFA0DCFBDDFAE4F7ECC5227250D656491C3C63004"},
+  "static_wrapper": {"status": "passed", "catalog_documents": 56, "repository_files": 309, "yaml_files": 10},
+  "deployment": {"normal_profile": "packaged", "existing_profiles": "passed", "package_hash_matches": 5, "scope": "Hash-guarded edited files only, old packages retained externally, no deletions"},
+  "runtime": {"game_load": "not_run", "one_client_host_and_play": "not_run", "two_client_stack_alignment": "not_run", "movement_flight_field_cleanup": "not_run", "dedicated_latency_rejoin": "not_run", "gui_or_process_launch": false},
+  "limitations": ["Old logs have no owner/remote coordinate samples; Spread success does not prove synchronized movement", "No HP, Stack radius, damage or party rules were relaxed to mask the report", "Heartbeat is ordinary player movement transport, not a new client authority over Raid outcomes", "Solo compile flag must still be disabled before release"]
+}

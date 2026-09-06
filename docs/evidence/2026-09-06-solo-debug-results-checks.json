@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-06",
+  "build": "0.2.14",
+  "protocol": 14,
+  "source_base_commit": "9b939b5e3a759e4f311d76c10884a12f29440b52",
+  "working_tree_dirty": true,
+  "environment_reference": "2026-09-06-phase-scores-checks.json",
+  "scope": "Build-gated single-member development admission and disposable success/failure HUD cinematics",
+  "domain": {"status": "passed", "cases": 88, "enabled_and_disabled_builds": true, "coverage": "Explicit solo arena/roster opt-in, invalid counts and stale identity, manual Ready, same-tick solo AllParticipantsDowned, two-player workload, full scores with 1/2/3/4 members, result expiry/reset/outsiders/cancel"},
+  "compiled_codec": {"status": "passed", "round_trips": 304, "malformed_or_truncated": 46, "counts": [1,2,3,4], "coverage": "Preparation/Ready and all score descriptors, bounded counts/epochs, malformed/truncated payloads, shared-buffer boundaries and retained recovery/grid fields"},
+  "compiled_flags": {"installed_mod_solo_enabled": true, "release_off_domain_harness_solo_enabled": false, "verified_by_reflection": true},
+  "package": {"status": "passed", "actual_modsources": true, "warnings": 0, "errors": 0, "bytes": 31028948, "sha256": "1893CB287CDD959FE7F3BD22D0E392E9BDA2C49CF896C6DE92E6F32994D91300"},
+  "static_wrapper": {"status": "passed", "catalog_documents": 55, "repository_files": 306, "yaml_files": 10},
+  "deployment": {"normal_profile": "packaged", "existing_profiles": "passed", "package_hash_matches": 5, "profiles": ["ConvergenceServer", "LocalRaidSolo/server", "LocalRaidSolo/client-a", "LocalRaidSolo/client-b"], "scope": "Baseline/deployed hash-guarded changes only; previous packages backed up, no deletions"},
+  "runtime": {"game_load": "not_run", "one_client_host_and_play": "not_run", "solo_death_and_hud_return": "not_run", "victory_hud_and_camera": "not_run", "cancel_unload_new_fight": "not_run", "multiplayer_regression": "not_run", "note": "User-owned GUI and friend remains default; no process launch, invulnerability, NPC, save or Mod-list change"},
+  "limitations": ["Solo admission is not a balanced public solo mode", "Solo cannot establish multiplayer sync, revival, latency or party balance", "Other Mods may cancel normal Terraria death or draw their own post-interface HUD; live interaction is unmeasured", "Public release must compile the solo flag off and verify actual one-player rejection", "Reused art/audio have no new human acceptance claim"]
+}

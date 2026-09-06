@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Geometry;
 using Convergence.Content.Encounters.FirstSeverance.FoundationCore;
+using Convergence.Content.Encounters.FirstSeverance.Development;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -77,10 +78,10 @@ internal sealed class FirstSeveranceCoreResolver
         }
 
         Point16 topLeft = core.Position;
-        var logicalCenter = new TilePoint(topLeft.X + 1, topLeft.Y + 1);
+        var logicalCenter = new TilePoint(topLeft.X + core.FootprintWidth / 2, topLeft.Y + core.FootprintHeight - 1);
         var resolvedCore = new ResolvedFirstSeveranceCoreAnchor(
             logicalCenter,
-            BaseY: topLeft.Y + 2,
+            BaseY: topLeft.Y + core.FootprintHeight,
             ServerTileEntityId: core.ID);
         var worldBounds = new TileRectangle(0, 0, Main.maxTilesX, Main.maxTilesY);
         if (!FirstSeveranceArenaBlueprint.Instance.TryCreateLayout(
@@ -120,14 +121,10 @@ internal sealed class FirstSeveranceCoreResolver
             eligibleCandidateCount: selectableCandidateCount,
             metrics,
             evidence);
-        // The current Development Build cannot enter combat or deploy a Barrier.
-        // Keep identity, bounds, roster, duplicate-Core, and World-conflict errors
-        // strict, while allowing an ordinary World to exercise multiplayer
-        // preparation without first constructing a 320-tile test foundation.
+        // A closed field needs genuinely empty flight space. The broad ground
+        // does not need to be a manufactured flat 320-tile foundation.
         FirstSeveranceArenaValidationResult validation =
-            FirstSeveranceArenaValidator.Instance.Validate(
-                survey,
-                FirstSeveranceArenaValidationMode.DevelopmentPreparationSmoke);
+            FirstSeveranceDevelopmentPolicy.ValidateStartArena(survey);
         if (!validation.IsValid)
         {
             failureCode = validation.FirstErrorCode;
@@ -139,7 +136,8 @@ internal sealed class FirstSeveranceCoreResolver
                 start.RequesterWhoAmI,
                 requesterEpoch,
                 out FirstSeveranceRoster? roster,
-                out failureCode)
+                out failureCode,
+                allowSoloDebug: FirstSeveranceDevelopmentPolicy.AllowSoloDebugStart)
             || roster is null)
         {
             return false;
@@ -162,7 +160,7 @@ internal sealed class FirstSeveranceCoreResolver
 
         Tile tile = Main.tile[requestedAnchor.X, requestedAnchor.Y];
         if (!tile.HasTile
-            || tile.TileType != ModContent.TileType<FoundationCoreTile>()
+            || !FoundationCoreTileEntity.IsCoreType(tile.TileType)
             || !TileEntity.TryGet(
                 requestedAnchor.X,
                 requestedAnchor.Y,
@@ -252,6 +250,16 @@ internal sealed class FirstSeveranceCoreResolver
         return false;
     }
 
+    internal static bool RevalidateForCombat(FoundationCoreTileEntity core, FirstSeveranceArenaLayout layout, int count, out string failureCode)
+    {
+        var metrics = ScanArena(core, layout, out var evidence);
+        var survey = new FirstSeveranceArenaSurvey(layout, core.IsTileValidForEntity(core.Position.X, core.Position.Y),
+            true, HasWorldConflict(), count, metrics, evidence);
+        var result = FirstSeveranceDevelopmentPolicy.ValidateStartArena(survey);
+        failureCode = result.FirstErrorCode;
+        return result.IsValid;
+    }
+
     private static FirstSeveranceArenaScanMetrics ScanArena(
         FoundationCoreTileEntity core,
         FirstSeveranceArenaLayout layout,
@@ -259,7 +267,6 @@ internal sealed class FirstSeveranceCoreResolver
     {
         long started = Stopwatch.GetTimestamp();
         TileRectangle bounds = layout.ArenaBounds;
-        int coreTileType = ModContent.TileType<FoundationCoreTile>();
         int scanned = 0;
         int solidInterior = 0;
         int liquids = 0;
@@ -339,7 +346,7 @@ internal sealed class FirstSeveranceCoreResolver
                     firstContainer ??= coordinate;
                 }
 
-                if (type == coreTileType
+                if (FoundationCoreTileEntity.IsCoreType(type)
                     && TileObjectData.IsTopLeft(x, y)
                     && (x != core.Position.X || y != core.Position.Y))
                 {

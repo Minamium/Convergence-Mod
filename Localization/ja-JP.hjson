@@ -25,6 +25,12 @@ Mods: {
     }
     UI: {
       FirstSeverance: {
+        VictorySeal: "NULL CANTOR // 信号途絶"
+        SoloDebugNotice: "SOLO DEBUG — HPと攻撃は2人用、参加者は自分1人です。Readyは手動。ダウンで敗北終了します。マルチ同期の確認にはなりません。"
+        ResultVictory: RAID COMPLETE // 制圧完了
+        ResultDefeat: RAID FAILED // 接続断絶
+        ResultVictoryDetail: "[ NULL CANTOR // 信号途絶 ]"
+        ResultDefeatDetail: "[ 生命反応消失 // 封鎖解除 ]"
         ActivationRejected: "ファウンデーション・コアの起動条件を満たしていません: {0}"
         RequestRejected: "操作できません: {0}"
         ReviveNotAlive: 蘇生できるのは、行動可能なRaid参加者だけです。
@@ -37,14 +43,20 @@ Mods: {
         PhaseSpawnIntro: "Raid開始。足元の蘇生キットを拾ってください。/convergence-down でDownを実験できます。起動者の /convergence-cancel で終了。"
         PhasePylonCheck: "パイロン — {0}基すべてを破壊！ Bossはまだ無敵です。"
         PhaseStack: "頭割り — {1} の7タイル以内に集合！ 必要人数: {3}。あと{2}秒。"
-        PhaseSpread: "散開 — 大きな円を重ねない！ お互いに28タイル以上離れて。あと{2}秒。"
+        PhaseSpread: "散開 — 大きな円を重ねない！ お互いに40タイル以上離れて。あと{2}秒。"
         PhaseCoreExposure: "コア露出 — 枠で囲まれた中央の空洞を攻撃！ ビームの予測線を避けよう。残り{2}秒。"
         LanceWarning: "観測の槍 — 射線固定。破線の帯から退避！ あと{0}秒"
         LanceFire: 観測の槍 — 発射
+        PrismInstruction: "追跡分光 {0}/8 — 全員同時に狙われる。連続回避！"
+        DashRightInstruction: "連撃 {0}/4 — エネルギー突進！ 進路固定に合わせ右へダッシュ →"
+        DashLeftInstruction: "連撃 {0}/4 — ← エネルギー突進！ 進路固定に合わせ左へダッシュ"
+        StillnessInstruction: "連撃 {0}/4 — 空いた柱の中で静止"
+        IntroRaidName: 第一断絶
+        DefeatDeathReason: "{0} は第一断絶により抹消された。"
         PhaseReset: "1周完了。Bossの盾が戻り、次のパイロンへ。実験を終える場合は /convergence-cancel。"
-        ResultStackPassed: 頭割り成功 — ダメージを分担しました。
-        ResultStackFailed: 頭割り失敗 — 分担人数が足りませんでした。
-        ResultSpreadPassed: 散開成功。
+        ResultStackPassed: 頭割り成功 — 全員集合。ダメージなし。
+        ResultStackFailed: 頭割り人数不足 — 不足人数の割合分、生存参加者全員に最大HP割合ダメージ。
+        ResultSpreadPassed: 散開成功 — 重なりなし。ダメージなし。
         ResultSpreadFailed: 散開失敗 — 重なったプレイヤーにダメージ。
         ParticipantDowned: "{0} がDOWN。再蘇生可能なら、味方が8タイル以内でキットを使用すると即時復帰します。"
         ParticipantRevived: "{0} がHP35％で復帰。本人は60秒間、再蘇生を受けられません。"
@@ -54,7 +66,7 @@ Mods: {
         EndBossLifeZero: Boss撃破。Raidクリア！
         EndOverloadLimit: パイロン破壊に3回失敗しました（Overload上限）。
         EndAllParticipantsDowned: 全員がDOWN。蘇生できる味方がいないため敗北しました。
-        EndRecoveryImpossible: DOWN時間切れ、または動ける参加者がいないため復帰できません。
+        EndRecoveryImpossible: 蘇生を行える参加者が残っていません。
         EndLoopCapExceeded: 8回のコア露出が終わってもBossが残りました。
         EndUserCancelled: 起動者がキャンセルしました。
         EndFoundationCoreLost: ファウンデーション・コアが失われました。
@@ -66,20 +78,47 @@ Mods: {
         EndInternalFailure: 実行エラーで中止しました。server.logを確認してください。
         EndUnknown: 戦闘を終了しました。server.logを確認してください。
         CombatHud: "{0}  |  残り{1}秒"
-        DownedHud: "DOWN — 残り{0}秒。味方は8タイル以内で蘇生キットを使用！"
-        DownedLockedHud: "DOWN — 猶予{0}秒。あと{1}秒は再蘇生不可。"
+        DownedHud: "DOWN — 時間制限なし。味方は8タイル以内で蘇生キットを使用！"
+        DownedLockedHud: "DOWN — あと{0}秒で蘇生可能。Downの時間制限なし。"
         RecoveryLockoutHud: "再蘇生を受けられるまで：{0}秒"
         BodyRevivable: キット使用で即時蘇生
         BodyLocked: "再蘇生不可：あと{0}秒"
-        BodyEliminated: 復帰不可
-        EliminatedHud: DOWN時間切れ — このRaidが終わるまで行動できません。
         ReviveHud: "蘇生中 — 静止して長押し: 残り{0}秒"
         NameSpawnIntro: 第一断絶
         NamePylonCheck: パイロン破壊
         NameStack: 頭割り
+        FixedStackTarget: 光っている固定集合地点
+        FixedStackGuide: "▼ 全員ここに集合 ▼"
+        NamePhaseTransition: 封印崩壊
+        NameLattice: "PHASE II — 格子光線"
+        PhasePhaseTransition: "封印崩壊 — 攻撃停止。真の姿が現れる。"
+        PhaseLattice: "PHASE II — 予告された格子を避け、光線の間のマスへ。コアを攻撃！"
+        GridInstruction: "格子光線 — 光る線を避けてマスの中へ"
+        UnboundTitle: "NULL CANTOR // 封印解除"
         NameSpread: 散開
         NameCoreExposure: コア露出
         NameReset: リセット
+        NameRotatingBlade: 公理の剣
+        NameRemoteClaws: 遠隔挟撃
+        NameHalfField: 半域消去
+        NameFinalBullets: 終端弾幕
+        NameFinalSlicer: 千切りの光
+        BladeGuide: 二枚の刃が高速で二周する。内側へ寄り、時計回りに旋回。
+        NameRemoteCrush: 圧殺公理
+        CrushGuide: 中央の赤い領域から退避 — 両手が閉じると即ダウン。
+        ClawsGuide: ビームが急速に拡がる。移動する退避帯へ！
+        FloodSafeGuide: 安全地帯
+        HalfGuide: 色のない半面へ！ 着色された領域全体にビームが来る。
+        FinalGuide: HPはゼロ。最後の行動リストを避けきろう。蘇生は引き続き使用可能。
+        DistantTitle: 無響の唱導者 // 遠隔顕現
+        FinalTitle: 無響の唱導者 // 終端楽譜
+        PhaseRotatingBlade: 公理の剣 — 伸展後は内側に寄って時計回りに旋回！
+        PhaseRemoteClaws: 遠隔挟撃 — 左右の腕が閉じる。予測線を避けよう。
+        PhaseHalfField: 半域消去 — 色のない半面へ移動！
+        PhaseFinalBullets: 終端弾幕 — 内側へ向かう飛翔物を回避。
+        PhaseFinalSlicer: 千切りの光 — 予測線の隙間に入ろう。
+        PhaseRemoteTransition: 本体が遠方へ離脱 — 両腕がフィールド内に顕現する。
+        PhaseFinalTransition: 生命反応ゼロ — 最後の行動リストを避けきれば勝利！
       }
     }
     Configs.FirstSeveranceVisualConfig: {

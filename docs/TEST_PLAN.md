@@ -35,7 +35,9 @@ Focused cases: immediate completion without an open channel; exact lockout expir
 
 ## Gate order
 
-Run the applicable gates in this order:
+Select routine checks with the shared [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). This document is a case library and acceptance plan, not an every-edit checklist. Read the sections for the changed behavior; completed bootstrap/rename cases and legacy recovery configurations do not redefine current feature policy.
+
+When multiple gates apply, use this order; full baseline/release verification applies the complete required set:
 
 1. documentation catalog/YAML and repository policy;
 2. dependency-free domain harness;
@@ -51,10 +53,10 @@ Do not progress with compile errors, unknown-packet exceptions, server crashes, 
 ## Documentation/repository checks
 
 ```bash
-python3 tools/docs_catalog.py --check
-python3 tools/repository_checks.py
-python3 tools/validate_yaml.py
+python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
 ```
+
+Add `--write-catalog` once after indexed-doc edits are settled. The wrapper already runs the three static checks; do not repeat them individually for the same inputs.
 
 Required outcomes:
 

@@ -9,6 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceMovementSyncCadence.cs" Link="Domain/FirstSeveranceMovementSyncCadence.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Development/FirstSeveranceDevelopmentPolicy.cs" Link="Domain/FirstSeveranceDevelopmentPolicy.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEndingTimeline.cs" Link="Domain/FirstSeveranceEndingTimeline.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceChoreography.cs" Link="Domain/FirstSeveranceChoreography.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs" Link="Domain/FirstSeveranceScoreGeometry.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePartyScaling.cs" Link="Domain/FirstSeverancePartyScaling.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBossPhases.cs" Link="Domain/FirstSeveranceBossPhases.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceGridVolley.cs" Link="Domain/FirstSeveranceGridVolley.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceDamageWindow.cs" Link="Domain/FirstSeveranceDamageWindow.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceVisualCurves.cs" Link="Domain/FirstSeveranceVisualCurves.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceContainmentBounds.cs" Link="Domain/FirstSeveranceContainmentBounds.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Development/FirstSeveranceDebugAssistPermit.cs"
+             Link="Domain/FirstSeveranceDebugAssistPermit.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceAttackPatterns.cs"
+             Link="Domain/FirstSeveranceAttackPatterns.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceLance.cs"
              Link="Domain/FirstSeveranceLance.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCombatProjection.cs"

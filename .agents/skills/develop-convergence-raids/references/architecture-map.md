@@ -1,6 +1,6 @@
 # Convergence Architecture Map
 
-Use this routing map after reading the repository's current architecture documents. Repository documents override this summary.
+Use this map when choosing a module. Read only the relevant architecture section if ownership remains unclear; repository documents override this summary.
 
 | Concern | Owner | Forbidden coupling |
 |---|---|---|

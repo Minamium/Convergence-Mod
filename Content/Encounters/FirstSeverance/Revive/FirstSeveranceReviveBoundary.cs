@@ -49,7 +49,7 @@ internal sealed class FirstSeveranceReviveBoundary : IEncounterCleanupParticipan
         }
 
         ArgumentNullException.ThrowIfNull(authoritativeRoster);
-        if (authoritativeRoster.Count is < 2 or > 4)
+        if (authoritativeRoster.Count is < FirstSeveranceRoster.MinimumCount or > FirstSeveranceRoster.MaximumCount)
         {
             failureCode = "first_severance.revive_roster_size_invalid";
             return false;

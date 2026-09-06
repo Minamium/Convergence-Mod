@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -8,7 +9,32 @@ namespace Convergence.Content.Encounters.FirstSeverance.Actors;
 
 public sealed class FirstSeverancePrototypeBoss : ModNPC
 {
-    internal const int MaximumLife = 60_000_000;
+    private byte partyCount = 2;
+
+    internal void ConfigureParty(int count)
+    {
+        var tuning = FirstSeverancePartyScaling.ForCount(count);
+        partyCount = tuning.ParticipantCount;
+        NPC.lifeMax = tuning.BossLife;
+    }
+
+    public override void SendExtraAI(BinaryWriter writer)
+    {
+        writer.Write(partyCount);
+        writer.Write(System.Math.Clamp(NPC.life, 0, NPC.lifeMax));
+    }
+
+    public override void ReceiveExtraAI(BinaryReader reader)
+    {
+        byte count = reader.ReadByte();
+        int life = reader.ReadInt32();
+        if (count is < FirstSeveranceRoster.MinimumCount or > FirstSeveranceRoster.MaximumCount || life < 0 || life > FirstSeverancePartyScaling.ForCount(count).BossLife)
+            throw new InvalidDataException("Invalid First Severance Boss health.");
+        ConfigureParty(count);
+        // SyncNPC may encode full life implicitly using the local default max.
+        // The bounded authority value avoids a false partial bar on first spawn.
+        NPC.life = life;
+    }
 
     public override string Texture =>
         "Convergence/Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem";
@@ -27,7 +53,7 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
     {
         NPC.width = 144;
         NPC.height = 144;
-        NPC.lifeMax = MaximumLife;
+        ConfigureParty(2);
         NPC.damage = 0;
         NPC.defense = 240;
         NPC.knockBackResist = 0f;
@@ -44,6 +70,7 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
     }
 
     public override bool CheckActive() => false;
+    public override bool CheckDead() => !FirstSeveranceCombatAuthority.ProtectBossPhaseBoundary(NPC);
 
     // The client presentation system draws the enormous silhouette independently
     // of NPC culling. This NPC is only its clearly marked central damageable core.

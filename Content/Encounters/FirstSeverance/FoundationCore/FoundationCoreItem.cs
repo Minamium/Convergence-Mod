@@ -8,8 +8,8 @@ public sealed class FoundationCoreItem : ModItem
 {
     public override void SetDefaults()
     {
-        Item.DefaultToPlaceableTile(ModContent.TileType<FoundationCoreTile>());
-        Item.width = 24;
+        Item.DefaultToPlaceableTile(ModContent.TileType<FoundationPlinthTile>());
+        Item.width = 48;
         Item.height = 24;
         Item.maxStack = 1;
         Item.rare = ItemRarityID.Red;

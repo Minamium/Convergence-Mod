@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - quality
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-06
 source_of_truth_for:
   - policy.release_process
 aliases:
@@ -49,6 +49,7 @@ These versions change independently. A protocol or save break must be called out
 12. Changelog and release notes describe compatibility and known limitations.
 13. Artifact checksum is recorded.
 14. Workshop upload remains manual until credential and rollback policy are reviewed.
+15. Disable development solo admission with `-p:ConvergenceDevelopmentSolo=false` on the public-candidate build. Verify the compiled flag is false and one-player Core activation returns `first_severance.roster_too_small`, while normal two-player preparation still works. Do not publish the default development package. [ADR-0020](adr/0020-development-solo-admission-and-terminal-hud.md) owns this temporary development exception; a balanced public solo mode requires a separate decision.
 
 ## CI tiers
 

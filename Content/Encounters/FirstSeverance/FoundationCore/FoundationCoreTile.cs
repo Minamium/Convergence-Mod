@@ -3,16 +3,18 @@
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.Enums;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
 namespace Convergence.Content.Encounters.FirstSeverance.FoundationCore;
 
-public sealed class FoundationCoreTile : ModTile
+public class FoundationCoreTile : ModTile
 {
-    private const int TileWidth = 2;
-    private const int TileHeight = 2;
+    protected virtual int TileWidth => 2;
+    protected virtual int TileHeight => 2;
 
     public override void SetStaticDefaults()
     {
@@ -26,7 +28,14 @@ public sealed class FoundationCoreTile : ModTile
         TileID.Sets.PreventsTileHammeringIfOnTopOfIt[Type] = true;
 
         TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
-        TileObjectData.newTile.CoordinateHeights = [16, 18];
+        TileObjectData.newTile.Width = TileWidth;
+        TileObjectData.newTile.Height = TileHeight;
+        TileObjectData.newTile.Origin = new Point16(TileWidth / 2, TileHeight - 1);
+        TileObjectData.newTile.CoordinateHeights = new int[TileHeight];
+        System.Array.Fill(TileObjectData.newTile.CoordinateHeights, 16);
+        TileObjectData.newTile.CoordinateHeights[TileHeight - 1] = 18;
+        TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile | AnchorType.SolidWithTop,
+            TileWidth, 0);
         TileObjectData.newTile.LavaDeath = false;
         TileObjectData.newTile.WaterDeath = false;
         TileObjectData.newTile.HookPostPlaceMyPlayer = ModContent
@@ -35,6 +44,7 @@ public sealed class FoundationCoreTile : ModTile
         TileObjectData.addTile(Type);
 
         DustType = DustID.Electric;
+        RegisterItemDrop(ModContent.ItemType<FoundationCoreItem>());
         AddMapEntry(new Color(86, 210, 229), CreateMapEntryName());
     }
 
@@ -105,4 +115,14 @@ public sealed class FoundationCoreTile : ModTile
         player.cursorItemIconEnabled = true;
         player.cursorItemIconID = ModContent.ItemType<FoundationCoreItem>();
     }
+}
+
+// New footprint has its own tile identity: old 2x2 saves are not reinterpreted.
+public sealed class FoundationPlinthTile : FoundationCoreTile
+{
+    protected override int TileWidth => 12;
+    protected override int TileHeight => 4;
+    public override string Texture => "Terraria/Images/Tiles_0";
+    public override bool CanPlace(int i, int j) => FoundationPlinthSpace.IsOpen(i, j + 1);
+    public override bool PreDraw(int i, int j, SpriteBatch spriteBatch) => false;
 }

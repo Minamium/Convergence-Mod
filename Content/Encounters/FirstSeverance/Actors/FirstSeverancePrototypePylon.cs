@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -7,7 +8,30 @@ namespace Convergence.Content.Encounters.FirstSeverance.Actors;
 
 public sealed class FirstSeverancePrototypePylon : ModNPC
 {
-    internal const int MaximumLife = 1_000_000;
+    private byte partyCount = 2;
+
+    internal void ConfigureParty(int count)
+    {
+        var tuning = FirstSeverancePartyScaling.ForCount(count);
+        partyCount = tuning.ParticipantCount;
+        NPC.lifeMax = tuning.PylonLife;
+    }
+
+    public override void SendExtraAI(BinaryWriter writer)
+    {
+        writer.Write(partyCount);
+        writer.Write(System.Math.Clamp(NPC.life, 0, NPC.lifeMax));
+    }
+
+    public override void ReceiveExtraAI(BinaryReader reader)
+    {
+        byte count = reader.ReadByte();
+        int life = reader.ReadInt32();
+        if (count is < FirstSeveranceRoster.MinimumCount or > FirstSeveranceRoster.MaximumCount || life < 0 || life > FirstSeverancePartyScaling.ForCount(count).PylonLife)
+            throw new InvalidDataException("Invalid First Severance Pylon health.");
+        ConfigureParty(count);
+        NPC.life = life;
+    }
 
     public override string Texture =>
         "Convergence/Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem";
@@ -26,7 +50,7 @@ public sealed class FirstSeverancePrototypePylon : ModNPC
     {
         NPC.width = 56;
         NPC.height = 88;
-        NPC.lifeMax = MaximumLife;
+        ConfigureParty(2);
         NPC.damage = 0;
         NPC.defense = 120;
         NPC.knockBackResist = 0f;

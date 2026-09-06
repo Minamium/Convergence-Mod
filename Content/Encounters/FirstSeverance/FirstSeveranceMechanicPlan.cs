@@ -13,6 +13,14 @@ internal enum FirstSeveranceSubstate : byte
     Spread = 4,
     CoreExposure = 5,
     Reset = 6,
+    PhaseTransition = 7,
+    Lattice = 8,
+    RotatingBlade = 9,
+    RemoteClaws = 10,
+    HalfField = 11,
+    FinalBullets = 12,
+    FinalSlicer = 13,
+    RemoteCrush = 14,
 }
 
 internal enum FirstSeveranceMechanicKind : byte
@@ -42,6 +50,7 @@ internal readonly record struct FirstSeveranceParticipantScaledInt(
     {
         return participantCount switch
         {
+            1 => TwoParticipants, // Keep the two-player mechanic workload for debug admission.
             2 => TwoParticipants,
             3 => ThreeParticipants,
             4 => FourParticipants,
