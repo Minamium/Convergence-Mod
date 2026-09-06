@@ -21,6 +21,8 @@ related_docs:
 
 The accepted direction is ominous, solemn original orchestral-textural music, not the discarded Ninth/chiptune arrangement. The latest request reduces excessive SFX while raising BGM slightly. Human listening/mix approval remains user-owned. Implementation/build/load evidence belongs to [Status](STATUS.md).
 
+
+Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
 ## Rebalanced mix and continuous flood articulation — 0.2.17
 
 Apply0.80× to the existing feature SFX playback gains (−1.94dB), retaining their relative warning/result balance, limited voices and sound-slider control. Re-render all four original music assets from existing PCM24 masters with1.25× gain (+1.94dB) and a gentle stereo-linked peak knee; no global music/sound slider, other Mod track or game setting is changed. This is a measured gain revision, not a perceived-loudness guarantee.
@@ -44,7 +46,7 @@ Music is unchanged. Ten existing warning masters receive an immediate metallic t
 
 All new SFX are independently synthesized, without borrowed recordings or samples. External audio0216/render.py owns the reproducible recipe, PCM24 individual auditions and Warnings_and_Actions reel. Exact distributable files and revised asset families are recorded in [Attribution](../Assets/ATTRIBUTION.md). The exact-Fight client owns bounded per-action sound keys and voice cleanup; Dedicated Server loads none. Human audition and in-game mix remain pending.
 
-## Distant urgency and terminal acceleration — 0.2.13
+## Historical distant urgency and terminal acceleration — 0.2.13
 
 Phase III selects **DistantLiturgy**, an original176-BPM,40-bar,54.545s orchestral-textural loop. Interlocked fast string attacks, asymmetrical3+3+2 accents, low brass/pedal, synthetic choir and short high glass/string responses retain the ominous ritual mood while increasing urgency. The same already-attributed local CC0 VSCO instruments are used; no new external recording, melody or sample library is acquired.
 

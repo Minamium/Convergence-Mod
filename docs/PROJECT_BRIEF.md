@@ -4,7 +4,7 @@ document_type: overview
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - project.product_scope
 aliases:
@@ -58,7 +58,7 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 
 ## First Raid
 
-最初のRaidは`First Severance` / `第一断絶`。current code name/keyは`FirstSeverance` / `first_severance`。identity renameとimmutable six-state loopは実装済みで、live world adapterとactivationは未接続のまま維持する。
+最初のRaidは`First Severance` / `第一断絶`。current code name/keyは`FirstSeverance` / `first_severance`。現行の開発版は起動・戦闘可能。実装状況は[STATUS](STATUS.md)、行動とフェーズは[現行仕様](encounters/first-severance/ENCOUNTER_SPEC.md)を参照する。
 
 最初のplayable loop:
 

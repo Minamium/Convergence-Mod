@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - documentation.read_order
 aliases:
@@ -35,9 +35,9 @@ For code/behavior work, start with [Current build](STATUS.md#current-build), [Ve
 | Work order or new feature scope | Current section of the [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md); backlog only when explicitly promoting an idea |
 | API research, real build, new workstation | [Version matrix](VERSION_MATRIX.md), existing scoped research, and relevant [Windows runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure |
 | WotG-level presentation without losing multiplayer Raid mechanics | [WotG benchmark](research/WOTG_RAID_BENCHMARK.md): video metadata/access limits, pinned public source, independent design proposals |
-| Playtesting when only one person is available | [Single-operator testing](runbooks/SINGLE_OPERATOR_TESTING.md): two real clients, safe save separation, existing debug Down, proposed assistance |
+| Playtesting when only one person is available | [Single-operator testing](runbooks/SINGLE_OPERATOR_TESTING.md): build-gated one-member start or separately authorized two-client assistance |
 
-Use `rg` for headings, symbols, and topic names before opening a long document. Reuse sections already read until relevant files or scope change. [Search Index](INDEX.md) and [Glossary](GLOSSARY.md) help only when locating an unfamiliar topic/name. The [Windows handoff](handoff/WINDOWS.md) and completed slices are historical context, not prerequisites for routine edits.
+Use `rg` for headings, symbols, and topic names before opening a long document. Reuse sections already read until relevant files or scope change. [Search Index](INDEX.md) and [Glossary](GLOSSARY.md) help only when locating an unfamiliar topic/name. The [Windows handoff](handoff/WINDOWS.md) is a brief resume entry; completed slices are [historical context](history/2026-09-07-pre-consolidation.md), not prerequisites.
 
 Select checks from the shared [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). Detailed test cases are references, not an instruction to run every case.
 

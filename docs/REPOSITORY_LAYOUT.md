@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - architecture.repository_layout
 aliases:
@@ -64,7 +64,7 @@ The repository root is the tModLoader Mod Source root. Do not move code into `sr
 
 ## Feature-name transition
 
-- Current first feature: `Content/Encounters/FirstSeverance`, still an inert bootstrap until later slices connect world adapters.
+- Current first feature: `Content/Encounters/FirstSeverance`, an active development encounter; current adapters and deferred production seams are listed in [Status](STATUS.md).
 - The directory/files/types/namespaces/key/failure prefixes/tests were renamed together in one isolated commit.
 - Do not add compatibility aliases for the unpublished legacy identifier or globally rewrite historical ADR/research/changelog content.
 

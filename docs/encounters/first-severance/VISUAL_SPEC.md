@@ -24,6 +24,8 @@ The user requested giant scale and spectacle comparable in ambition to Avatar of
 
 `0.2.1` increases speed and impact without changing the one-body boundary: rapid eased reveal/opening, 18-pixel decorative recoil, faster orbital motion, brief exposure shock rings, layered fire sounds, speed streaks, stronger short camera kicks (up to 12 pixels on firing / 9 on exposure) and narrow warm screen-edge accents. No gameplay pause, forced zoom or full-screen white flash is introduced. This is a user-requested high-intensity prototype, not a completed WotG-quality presentation claim.
 
+
+Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
 ## Continuous borderless danger materials — 0.2.17
 
 Remove the paired heavy black/color/white edge rails from every beam forecast and emission, including Stillness curtains, observation/Prism lanes, charge bodies, grid/Core salvos, score combs, half-field/crush surfaces and rotating swords. Preserve the full-volume tint/aura, luminous center, inward-moving cues and internal fibers; do not reduce a broad danger volume to an ambiguous hairline. Filled boundaries and feathered light replace boxed outlines. Stack's accepted single valid circle and Spread circles are not beam rails and remain unchanged.

@@ -79,7 +79,7 @@ The `0.1.2` recovery hotfix does not change protocol v2 or packet layouts. Reque
 
 Implemented: protocol version/header codec, explicit packet-type values, direction checks, bounded rejection logging, typed handler routing, First Severance activate/Ready/cancel/full-preparation-snapshot transport, feature-neutral terminal descriptors/external mappings, and ordered read-only replica/tombstone behavior.
 
-Not implemented: combat-state deltas/events, production hit/death integration, Barrier correction, or a complete rejoin policy. The development requests start combat after all Ready and request Down/revive intent, but never report hit or completion outcomes. See [Status](STATUS.md).
+Not implemented: combat-state deltas/events, production hit/death integration, general outsider correction, or a complete rejoin policy. Participant containment and owning-client prediction are implemented. The development requests start combat after all Ready and request Down/revive intent, but never report hit or completion outcomes. See [Status](STATUS.md).
 
 ## Goals
 
@@ -194,26 +194,13 @@ Player names/display strings are presentation lookup, not authority identity.
 
 ## Deterministic tick policy
 
-Authority alone consumes gameplay randomness and transmits assignments or presentation seeds. Feature commands for one tick are collected/bounded and resolved in stable order where arrival order would matter, as already done for competing revive starts. The owning First Severance runtime—not an individual mechanic or the Revive boundary—selects the single transition returned to the generic coordinator.
-
-One authority tick settles in this order:
-
-1. collect complete bounded feature intent and server-observed Terraria hit, position, connection/epoch, and control facts;
-2. validate exact-Fight actors/damage gates, apply accepted Boss/Pylon hit results, and collect participant lethal facts without resolving a due Stack/Spread;
-3. apply pre-mechanic lethal transitions, channel interrupts, and final observed connection/epoch changes in deterministic type/Participant-ID order;
-4. sample the now-current connected Alive set/positions, resolve the one due mechanic, and apply its resulting lethal transitions in Participant-ID order;
-5. apply one complete stably ordered revive-start batch, then call `RaidReviveService.CommitTick` exactly once;
-6. gather feature-observed terminal candidates and select `EncounterActorMissing > AnchorDestroyed > Invalidated > Victory > Defeat > Cancelled > nonterminal`;
-7. commit at most one nonterminal edge, or store generic + feature terminal cause and return direct `EncounterRuntimeUpdate.End` without first requesting `Resolving`;
-8. increment/publish one coherent feature/generic revision and terminal tombstone before cleanup releases state.
-
-Thus a participant who becomes Downed/disconnected on a Stack/Spread deadline is excluded before sampling, while mechanic-created lethal damage still participates in the one Revive commit. Allowed Boss damage reducing life to zero wins gameplay Defeat candidates, but an actor/invariant failure observed by the feature takes priority because the gameplay result is no longer trustworthy. The Revive boundary may expose a failure fact to the feature snapshot, but it must not independently publish a competing `EncounterEnded` or return an early coordinator transition.
+The [feature specification](encounters/first-severance/ENCOUNTER_SPEC.md#authority-tick-and-terminal-precedence) and its combat orchestrator own the actual tick order. Parse complete bounded intents before mutation; settle damage before the single recovery commit; select one terminal; publish its snapshot/tombstone before cleanup. No network callback, actor, or recovery service independently ends the generic session. Do not duplicate the feature's evolving phase order here.
 
 ## External termination bridge
 
 World unload, an unhandled runtime exception, and a future fatal protocol failure originate outside the feature reducer. They are unconditional coordinator preemptions in the order `WorldUnload > InternalFailure > ProtocolFailure`; they are not fabricated as same-tick feature inputs and the coordinator never re-enters a failed `Tick` to obtain metadata.
 
-Slice 2 implements a feature-neutral immutable termination descriptor: generic `EncounterEndReason`, `ushort` feature terminal schema ID, byte schema version, and bounded opaque feature-cause byte. A runtime supplies a contract-validated descriptor for a feature-owned End. Each `EncounterDefinition` also supplies a constructor-validated data mapping for the three external generic reasons, allowing the coordinator to synthesize `WorldUnload`, `InternalFailure`, or `ProtocolFailure` feature metadata without calling mutable feature logic. Missing, duplicate, `None`, or incompatible mappings reject definition construction while activation remains denied.
+Slice 2 implements a feature-neutral immutable termination descriptor: generic `EncounterEndReason`, `ushort` feature terminal schema ID, byte schema version, and bounded opaque feature-cause byte. A runtime supplies a contract-validated descriptor for a feature-owned End. Each `EncounterDefinition` also supplies a constructor-validated data mapping for the three external generic reasons, allowing the coordinator to synthesize `WorldUnload`, `InternalFailure`, or `ProtocolFailure` feature metadata without calling mutable feature logic. Missing, duplicate, `None`, or incompatible mappings reject definition construction before that definition can register.
 
 `EncounterCoordinator.Reset`, the runtime-exception catch, and the bounded queued external-termination entry point use that mapping, discard any uncommitted runtime update, then publish the combined generic/feature terminal snapshot and tombstone before exact-Fight cleanup. Competing queued external requests resolve `WorldUnload > InternalFailure > ProtocolFailure`. Session-creation failure occurs before an encounter is accepted and therefore returns a bounded activation failure rather than pretending that a live feature tombstone existed.
 
@@ -221,9 +208,9 @@ First Severance terminal replication carries the generic `EncounterEndReason` an
 
 ## Measured normal-hit pipeline
 
-Do not add a `ReportDamage` packet. Before Boss/Pylon damage is enabled, instrument the pinned versions in Single Player, Host & Play host/non-host, and Dedicated Server for representative melee, ranged, magic, summon/minion, rogue, projectile, penetration/multihit, crit, and Calamity-modified hits. Record which process and hook order observe permission, damage modification, life mutation, death/check-dead, ownership metadata, and `netUpdate`.
+Do not add a `ReportDamage` packet. Before claiming production-complete Boss/Pylon hit handling, instrument the pinned versions in Single Player, Host & Play host/non-host, and Dedicated Server for representative melee, ranged, magic, summon/minion, rogue, projectile, penetration/multihit, crit, and Calamity-modified hits. Record which process and hook order observe permission, damage modification, life mutation, death/check-dead, ownership metadata, and `netUpdate`.
 
-The selected adapter must reject stale/wrong-Fight actors, nonparticipants, Pylon hits outside `PylonCheck`, and Boss hits outside `CoreExposure` at a server/SP-observed seam proven by that evidence. Progress reads committed actor life/death once. If the pinned pipeline cannot enforce the feature gate consistently for ordinary unmodified clients, activation remains denied. Passing this gate proves encounter correctness for the stated threat model; it does not prove resistance to a modified Terraria client.
+The selected adapter must reject stale/wrong-Fight actors, nonparticipants, Pylon hits outside `PylonCheck`, and Boss hits outside the feature's current damage states and HP gate at a server/SP-observed seam proven by that evidence. Progress reads committed actor life/death once. If the pinned pipeline cannot enforce the feature gate consistently for ordinary unmodified clients, that production adapter must remain disabled. The authorized development adapter is not a production-completeness claim. Passing this gate proves encounter correctness for the stated threat model; it does not prove resistance to a modified Terraria client.
 
 ## Actor identity and ownership
 

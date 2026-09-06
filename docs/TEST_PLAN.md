@@ -5,7 +5,7 @@ status: accepted
 owners:
   - quality
   - networking
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - verification.test_matrix
 aliases:
@@ -25,13 +25,9 @@ related_docs:
 
 # Test Plan
 
-## Current development iteration scope — 0.2.1
+## Current development scope
 
-The user requested efficient implementation, not a repeat of the release matrix. This pass uses the existing domain harness (five additional focused instant-revival/recipient-lockout cases), compiled protocol-v4 round-trip, repository metadata checks and one actual ModSources build. GUI reload and a short two-player playtest belong to the user. No full balance, latency, 3/4-player or production death-hook claim follows from these checks.
-
-[ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md) and the current [revival specification](encounters/first-severance/REVIVE_SPEC.md) supersede channel/token/weakness expectations below for First Severance: immediate same-tick completion, no resources, 60-second recipient-only lockout, 35% health and 3-second protection. The legacy-config domain tests remain useful regression cases but do not describe the active feature. Current encounter timers in [Encounter Specification](encounters/first-severance/ENCOUNTER_SPEC.md) also supersede the earlier numeric examples below.
-
-Focused cases: immediate completion without an open channel; exact lockout expiry and persistence through Down; locked recipient still able to rescue another; stable winner of simultaneous rescues; 30-second Down expiry without false zero-token wipe; idempotent cleanup; bounded deadline preserved alongside absent/single/double lance snapshots.
+Use the [verification selector](../.agents/skills/develop-convergence-raids/references/verification-matrix.md) for the changed contract; [Status](STATUS.md) owns actual results. Current encounter/recovery specifications supersede historical numerical examples and legacy channel/token/expiry cases below. Those remain reference cases for the reusable domain, not commands to restore them to active First Severance.
 
 ## Gate order
 
@@ -156,7 +152,7 @@ Barrier cases: all edges, dash, hook, mount, knockback, recall/pylon/bed/Calamit
 
 Before enabling Boss/Pylon damage, record Single Player, Host & Play (host and non-host attacker), and Dedicated Server behavior for representative melee, ranged, magic, summon/minion, rogue, projectile, penetration/multihit, crit, and Calamity-modified hits. For each row capture which process/hook observes permission, damage modification, actor life change, death/check-dead, ownership metadata, and `netUpdate`.
 
-Acceptance requires that the chosen server/SP-observed seam consistently rejects wrong-Fight actors, nonparticipants, Pylon hits outside `PylonCheck`, and Boss hits outside `CoreExposure`, and counts a permitted actor life/death result once. No `ReportDamage` packet is introduced. Ambiguous behavior keeps activation denied. This matrix covers cooperative play with unmodified clients; it does not claim protection against arbitrary modified-client movement or hit replication.
+Acceptance requires that the chosen server/SP-observed seam consistently rejects wrong-Fight actors, nonparticipants, Pylon hits outside `PylonCheck`, and Boss hits outside `CoreExposure`, and counts a permitted actor life/death result once. No `ReportDamage` packet is introduced. Ambiguous behavior keeps the affected production adapter disabled. This matrix covers cooperative play with unmodified clients; it does not claim protection against arbitrary modified-client movement or hit replication.
 
 ## First Severance mechanic matrix
 
@@ -279,9 +275,11 @@ Before live death interception, record Single Player, Host & Play (host/non-host
 - player life/control/network sync and disconnect/rejoin;
 - disarming interception during Defeat/body normalization.
 
-If behavior is ambiguous, keep the adapter disconnected and activation denied.
+If behavior is ambiguous, keep general lethal-hit interception disconnected; this does not disable existing Raid-owned damage.
 
 ## Revive integration matrix
+
+This wider acceptance list includes legacy channel/token modes. Current First Severance follows the [instant, untimed recovery spec](encounters/first-severance/REVIVE_SPEC.md); channel-duration and timeout expectations do not apply to it. Select affected cases for normal development.
 
 - authority interception never runs as client truth;
 - Downed blocks movement/item/combat/hook/mount/damage and Boss/mechanic targeting;

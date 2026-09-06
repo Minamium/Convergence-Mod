@@ -8,14 +8,14 @@ Run the static wrapper once after a completed edit batch. Add every applicable r
 
 | Change | Additional verification |
 |---|---|
-| Markdown, Skills, repository configuration | Static checks; validate edited Skills. No domain run, Mod build, or game session for text-only work |
-| Python verification tooling | Exercise changed command/failure behavior as well as static checks |
-| Pure Raid rules or linked domain sources/tests | `--with-domain`; add focused regression cases for changed behavior/boundaries. Changes compiled into the Mod also need the C# row |
-| C# including VFX and tuning | `--with-dotnet` in the pinned checkout; matching Build + Reload and a smoke of the changed behavior. Run domain checks if domain behavior or linked sources change |
-| Presentation or runtime assets | Check loading, placement/readability, accessibility, attribution and Dedicated Server guards as affected; headless load if server initialization/load paths change |
-| Gameplay, recovery, or multiplayer state | A relevant two-player Host & Play smoke; Dedicated Server for affected authority/transport/lifecycle paths. Add player-count, latency, disconnect/rejoin, and cleanup cases where the changed behavior depends on them |
-| Protocol, identity, persistence, or shared lifecycle | Bounds/round-trip, stale/duplicate input, compatibility, rejoin/slot reuse, and cleanup cases for affected paths; persistence changes also need save/load/migration evidence |
-| Runtime/dependency baseline or release | Complete the declared compatibility/release matrix, including required build/load, server, player-count and platform evidence |
+| Wording, docs, Skills, repository configuration | Static checks; validate edited Skill structure when affected. No domain run, Mod build or game session for text-only edits |
+| Python verification tooling | Exercise the changed command/failure branches plus static checks |
+| Display/VFX C# or assets | Build changed C#; check affected loading/readability/accessibility and client-only guards. Domain tests only if shared geometry/rules change |
+| Tuning values | Build changed C#; focused domain boundaries only if rule/geometry/scaling input changed. Hand off the changed tuning for user playtesting |
+| Combat/recovery rules or linked domain sources/tests | `--with-domain --with-dotnet`; focused contracts and relevant user-owned Host & Play smoke |
+| Communication, authority, identity, lifecycle or saving | Bounded codec/round-trip and affected stale/duplicate/cleanup contracts; matching build. Add latency/rejoin/slot-reuse or save migration cases only when affected |
+| Local source/build environment | Resolve source/targets/dependencies and verify the changed setup/build path. Do not require an unrelated full gameplay matrix |
+| Runtime/dependency upgrades or public release | Separate complete compatibility/release gates for the declared versions/platforms/player counts |
 
 A 3/4-player case is required when roster scaling, assignment, bounds, or the changed contract depends on that count. Latency/fault cases follow affected timing, replication, or recovery behavior; do not rerun the whole matrix for unrelated decoration or wording.
 

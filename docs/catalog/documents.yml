@@ -308,12 +308,12 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: 4dc1bfe7a13f68e2e0ed878acdc8485b5ebb26786275f8077ac983932edd63ff
+  content_sha256: 593ec2b7f3e28f852d73c77519ae50a05cba4072b0a14c72ae53eed30335ebb1
   document_type: index
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - architecture.adr_index
   aliases:
@@ -396,12 +396,12 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 3ee90753638600045e7105f84dd428ef0eecc1b1af871e4ceebcc920c9091071
+  content_sha256: 0fd4df98d3c2cef5691b7f50e00967cb667f6a5b8b7fb18866eddd8366fdfec7
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - documentation.read_order
   aliases:
@@ -415,7 +415,7 @@ documents:
 - doc_id: docs.search-index
   path: docs/INDEX.md
   title: Documentation Search Index
-  content_sha256: e9647a74936268584638a1841a9a89f3116d74da09585cf7c8f91a582d84cf63
+  content_sha256: 64f834da52d1729c18a3a9a5db434eb7590403a246c3dcb0b4f1173f3cfd1005
   document_type: index
   status: accepted
   owners:
@@ -434,12 +434,12 @@ documents:
 - doc_id: docs.system
   path: docs/DOCUMENTATION_SYSTEM.md
   title: Documentation and Knowledge-Base Design
-  content_sha256: f5b107a396b932bf75b28606181bb0884dd9ac210645a65ec578eac62ebcb570
+  content_sha256: 177175ca8393de9525faac2d32762efc98d4040dbb459508108d292e516976c9
   document_type: governance
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - documentation.data_model
   aliases:
@@ -495,7 +495,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: f91d681711d3b7ae95966b8e63fa3d42458f1e3a195d4f03afa909e7adcb86e2
+  content_sha256: fd508e60e3cda9735cceaef5cae63708fc7f1458f5512b81a93578f0302f984f
   document_type: plan
   status: accepted
   owners:
@@ -543,7 +543,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 04ad360ab0a4992317731d002836b76c65b9b2895d84bd454d9e6c976e5176b4
+  content_sha256: 50e9c11b8135fc562fd631fc9dd67c00ddad9ff12d546a5576d397cc4b60cbeb
   document_type: spec
   status: accepted
   owners:
@@ -568,7 +568,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: 0604bafed7f4752418eda3822a055dbcd733b99c4da98768fb867156c04de87c
+  content_sha256: 2a34c24621134ce83b2710903239dc561a341a40a4ceefdc6aa1dc6854ab4cbc
   document_type: spec
   status: provisional
   owners:
@@ -587,13 +587,13 @@ documents:
   - encounter.first-severance.backlog
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
-  title: Windows Handoff — 2026-09-04
-  content_sha256: 45cbdbe0d3271bdc2629d9326f263e0b8b49c5ab58ac906f563b8b0bd2fe8426
+  title: Windows Development Handoff
+  content_sha256: 25e65d9db1dbd5ac63387bdc5a710c23d7f18cdbb713a2d444fd48353394e631
   document_type: handoff
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - handoff.windows.2026-09-04
   aliases:
@@ -606,6 +606,22 @@ documents:
   related_docs:
   - project.status
   - development.windows
+  - encounter.first-severance.plan
+- doc_id: history.pre-consolidation
+  path: docs/history/2026-09-07-pre-consolidation.md
+  title: Pre-consolidation development record
+  content_sha256: 86107647f65da3d0a4b69d3865fabd29d272cc7a089d82d225432478bb6ba2b5
+  document_type: evidence
+  status: historical
+  owners:
+  - engineering
+  last_reviewed: '2026-09-07'
+  source_of_truth_for: []
+  aliases:
+  - development history through 0.2.17
+  related_code: []
+  related_docs:
+  - project.status
   - encounter.first-severance.plan
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
@@ -652,13 +668,13 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: 74451b9a8c62f8ab2fd2a4decc6aac026d8445713a5c84c07885434a9fcec95e
+  content_sha256: 6e98259830dac94508d8dae804d9e1035f73c0f4bd6a29c23edf2400047c968d
   document_type: governance
   status: accepted
   owners:
   - engineering
   - networking
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - architecture.module_boundaries
   - architecture.runtime_ownership
@@ -743,7 +759,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: 07b441bd75fe70ed3ec42c8e4d735e5fb32b1acc849f52aced50a3ff3c7dca6b
+  content_sha256: 627b0a619138ff04fad65acd669e779379e255ce1e9403d1818728b59067c99e
   document_type: spec
   status: provisional
   owners:
@@ -762,12 +778,12 @@ documents:
 - doc_id: project.brief
   path: docs/PROJECT_BRIEF.md
   title: Project Brief
-  content_sha256: be3989a7ba02b31be7f3aacffd2dbd64b44114ffe4390188b51ca068ece0147d
+  content_sha256: 588cb052d95364e9cb5e02f2b7d5f0b23e2e4c5e5af0e3c0a5d09f872f40a3f5
   document_type: overview
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - project.product_scope
   aliases:
@@ -822,12 +838,12 @@ documents:
 - doc_id: project.decisions
   path: docs/DECISIONS.md
   title: Decisions and Open Questions
-  content_sha256: daa3901534b4cdb38d1f53ef8d66970b84b6caa374ddd9c937fd798b5c71de96
+  content_sha256: 6bbe17e37d0af078a7bcb2a9472cf82352c01b8e6e2617f1eea02c303deb1063
   document_type: governance
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - project.open_decisions
   aliases:
@@ -840,12 +856,12 @@ documents:
 - doc_id: project.glossary
   path: docs/GLOSSARY.md
   title: Glossary and Identifier Registry
-  content_sha256: 58a26ae288e4c1e563762ea9ef7d9373a70d95a0d8b7644ffb6ff85a8776f57c
+  content_sha256: 5a3f06552cb7c1b48a9536e52dda7259ca522317eb5f3e9e7e789d6c406ac07a
   document_type: glossary
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - project.terminology
   aliases:
@@ -880,7 +896,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 77ec49d3a332bd421edd9547407dbe676660ff6858e675cd9c7a69fd31f73bd0
+  content_sha256: cc6d0be8d345685a3d064f5eda10871e504f3c8112daeab176b32ba3cb6d42da
   document_type: governance
   status: accepted
   owners:
@@ -903,12 +919,12 @@ documents:
 - doc_id: project.repository-layout
   path: docs/REPOSITORY_LAYOUT.md
   title: Repository Layout
-  content_sha256: bbe5aba23fe512e5fd92a9df612b1e8704e19b1c47461739387200c9654c04a9
+  content_sha256: 85b09d1514afd54b46eb6fe1ebd353cdcf0da26ff03adb614dab5641565c7775
   document_type: governance
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - architecture.repository_layout
   aliases:
@@ -925,7 +941,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8ff84c169df4c3d02cc39136cf6afc04c7bd2e0e12b19875bb0662a0fa6e20fe
+  content_sha256: 44c7cfc529c30bb7b3068766d3c37c9a98b51f5c1033dab0af39c2308146a613
   document_type: status
   status: accepted
   owners:
@@ -946,12 +962,12 @@ documents:
 - doc_id: redirect.encounter-spec
   path: docs/ENCOUNTER_SPEC.md
   title: Encounter Specification
-  content_sha256: 89430a24ddececa347b66b2333ee41b93edcd2d90fac389f326ed3868b7f8897
+  content_sha256: fee80c846975bc0b5c2780b42755a2510f0bec89eb823574ba892f5980919fab
   document_type: redirect
   status: superseded
   owners:
   - project
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for: []
   aliases:
   - legacy encounter specification path
@@ -1191,13 +1207,13 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: d3184d7300a9af8e90a7213333fb07f90b336805034954cf2d5669b23a4ffd8d
+  content_sha256: db32a3ab91ef965b4fd7bf42180fcf3a48074ac340228be63a1c51b47e435e25
   document_type: plan
   status: accepted
   owners:
   - quality
   - networking
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - verification.test_matrix
   aliases:

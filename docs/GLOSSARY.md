@@ -4,7 +4,7 @@ document_type: glossary
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - project.terminology
 aliases:
@@ -22,7 +22,7 @@ related_docs:
 | Concept | Current term | Status / rule |
 |---|---|---|
 | First Raid display name | `First Severance` / `第一断絶` | Accepted for development; public branding may still change before release |
-| Feature directory/namespace | `FirstSeverance` | Current identity; module remains inert while later slices are unimplemented |
+| Feature directory/namespace | `FirstSeverance` | Current playable development feature; see [Status](STATUS.md) |
 | Stable encounter key | `first_severance` | Current unpublished key |
 | Legacy implementation name | `ThirdSeverance`, `Third Severance`, `third_severance` | Historical records and completed-rename instructions only; no source alias or compatibility mapping |
 | Boss working title | `The Null Cantor` / `無響の唱導者` | Provisional; do not encode into stable protocol/save IDs |

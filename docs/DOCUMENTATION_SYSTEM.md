@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - documentation.data_model
 aliases:
@@ -130,85 +130,9 @@ rg -n "source_of_truth_for|first_severance|PreKill" docs
 python3 tools/docs_catalog.py --check
 ```
 
-## Why no committed SQLite database
+## Search tooling
 
-Markdown and YAML produce reviewable diffs, survive branch merges, work offline,
-and are readable by both people and coding agents. SQLite, embeddings, or a local
-full-text/semantic index may be generated from the catalog later, but it is
-disposable cache. Store it below the dedicated ignored cache directory, for
-example `docs/.cache/docs-index.sqlite`; never make a binary index the only copy
-of knowledge.
-
-Recommended future local tables, if search volume justifies them:
-
-| Table | Key fields | Source |
-|---|---|---|
-| `documents` | `doc_id`, path, type, status, reviewed date, content hash | front matter and normalized full document |
-| `topics` | topic key, owning `doc_id` | `source_of_truth_for` |
-| `aliases` | composite primary key `(normalized_alias, doc_id)` | `aliases` |
-| `relations` | from `doc_id`, to `doc_id`, fixed relation `related` | `related_docs` |
-| `chunks` | `doc_id`, heading, text hash, optional embedding | generated Markdown sections |
-
-One compact optional SQLite schema is:
-
-```sql
-PRAGMA foreign_keys = ON;
-
-CREATE TABLE index_meta (
-    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
-    schema_version INTEGER NOT NULL,
-    source_commit TEXT NOT NULL CHECK (length(source_commit) = 40)
-);
-CREATE TABLE documents (
-    doc_id TEXT PRIMARY KEY,
-    path TEXT NOT NULL UNIQUE,
-    document_type TEXT NOT NULL,
-    status TEXT NOT NULL,
-    last_reviewed TEXT NOT NULL,
-    content_sha256 TEXT NOT NULL CHECK (length(content_sha256) = 64)
-);
-CREATE TABLE owners (
-    doc_id TEXT NOT NULL REFERENCES documents(doc_id) ON DELETE CASCADE,
-    owner TEXT NOT NULL,
-    PRIMARY KEY (doc_id, owner)
-);
-CREATE TABLE topics (
-    topic TEXT PRIMARY KEY,
-    doc_id TEXT NOT NULL REFERENCES documents(doc_id) ON DELETE CASCADE
-);
-CREATE TABLE aliases (
-    normalized_alias TEXT NOT NULL,
-    doc_id TEXT NOT NULL REFERENCES documents(doc_id) ON DELETE CASCADE,
-    PRIMARY KEY (normalized_alias, doc_id)
-);
-CREATE TABLE relations (
-    from_doc_id TEXT NOT NULL REFERENCES documents(doc_id) ON DELETE CASCADE,
-    to_doc_id TEXT NOT NULL REFERENCES documents(doc_id) ON DELETE CASCADE,
-    relation TEXT NOT NULL DEFAULT 'related' CHECK (relation = 'related'),
-    PRIMARY KEY (from_doc_id, to_doc_id, relation)
-);
-CREATE TABLE chunks (
-    doc_id TEXT NOT NULL REFERENCES documents(doc_id) ON DELETE CASCADE,
-    ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
-    heading TEXT NOT NULL,
-    body TEXT NOT NULL,
-    chunk_sha256 TEXT NOT NULL CHECK (length(chunk_sha256) = 64),
-    PRIMARY KEY (doc_id, ordinal)
-);
-```
-
-Normalize aliases in the generator with Unicode NFKC, case folding, and
-whitespace collapse before insertion; the composite key intentionally permits
-one alias to find more than one document. FTS5 may be generated over
-`chunks.heading` and `chunks.body` when the local SQLite build supports it.
-
-Before opening the cache for search, run the catalog check. Rebuild the cache in
-one transaction when `index_meta.schema_version` differs from the generator
-schema, `index_meta.source_commit` differs from the current 40-character
-`HEAD`, or the set of `(doc_id, path, content_sha256)` rows differs from
-`documents.yml`. This also invalidates a cache for checked but uncommitted
-document edits through `content_sha256`. Never write tokens, credentials,
-private logs, or absolute personal paths.
+Use rg and the generated catalog. No SQLite, embeddings or additional search service is implemented or required. The former optional database sketch is [archived](history/2026-09-07-pre-consolidation.md#optional-search-design-sketch-not-implemented), outside normal development reading. Any future index must be disposable, ignored cache justified by actual search cost.
 
 ## Game-state data is separate
 

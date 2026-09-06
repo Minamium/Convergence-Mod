@@ -5,7 +5,7 @@ status: accepted
 owners:
   - engineering
   - networking
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - architecture.module_boundaries
   - architecture.runtime_ownership
@@ -63,10 +63,10 @@ Repository checks provide a coarse import guard; review remains responsible for 
 
 Feature-local `ModSystem` code registers immutable `EncounterDefinition` objects. A definition supplies its key, participant bounds, feature-scoped activation policies, and runtime factory. Adding an encounter must not add a switch to the global coordinator/router.
 
-Current-to-target migration:
+Current registration:
 
 ```text
-FirstSeveranceRegistrationSystem (current inert code)
+FirstSeveranceRegistrationSystem
   -> EncounterCatalogSystem.Registry
   -> FirstSeveranceDefinition
   -> FirstSeveranceRuntimeFactory

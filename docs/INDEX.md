@@ -52,7 +52,7 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 | `research.wotg-raid-benchmark` | research / provisional | reference evidence, not gameplay authority | [WotG](research/WOTG_RAID_BENCHMARK.md), Avatar, Nameless, composite, telegraph, audio, video chapters |
 | `development.single-operator-testing` | runbook / provisional | proposed local testing method, not runtime evidence | [一人二窓](runbooks/SINGLE_OPERATOR_TESTING.md), localhost, debug Down, God Mode, NPC limitations |
 | `verification.evidence` | evidence / accepted | build/test record format | commit SHA, versions, checksums, logs |
-| `docs.system` | governance / accepted | documentation data model | front matter, catalog, SQLite, semantic search, doc_id |
+| `docs.system` | governance / accepted | documentation data model | front matter, catalog, rg, doc_id |
 
 ## Architecture and policy map
 
@@ -61,7 +61,7 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 | Authority and replica | [Architecture](ARCHITECTURE.md), [ADR-0002](adr/0002-server-authoritative-encounters.md) | `Common/Encounters`, `Common/Networking/Replication` |
 | Packet validation | [Network Architecture](NETWORK_ARCHITECTURE.md) | `Common/Networking` |
 | Arena and Barrier | [Arena Infrastructure](ARENA_INFRASTRUCTURE.md), [ADR-0003](adr/0003-in-world-logical-arena.md) | current `Content/Encounters/FirstSeverance/*Arena*` |
-| Downed/Revive authority | [Revive Spec](encounters/first-severance/REVIVE_SPEC.md), [ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md), [ADR-0005 foundation](adr/0005-server-authoritative-downed-revive.md) | `Common/Raids/Revive`, feature `Revive/` boundary |
+| Downed/Revive authority | [Revive Spec](encounters/first-severance/REVIVE_SPEC.md), [ADR-0021](adr/0021-untimed-recovery-and-simultaneous-prism.md), [ADR-0011](adr/0011-instant-revival-and-recipient-lockout.md), [ADR-0005 foundation](adr/0005-server-authoritative-downed-revive.md) | `Common/Raids/Revive`, feature `Revive/` boundary |
 | Calamity isolation/removal | [ADR-0004](adr/0004-calamity-compatibility-boundary.md), [ADR-0006](adr/0006-staged-calamity-independence.md) | `Common/Compatibility/Calamity`, `build.txt` |
 | Feature ownership | [Repository Layout](REPOSITORY_LAYOUT.md), [Content Authoring](CONTENT_AUTHORING.md) | `Content/Encounters/<Feature>`, `Client/Encounters/<Feature>` |
 | Testing | [Test Plan](TEST_PLAN.md), [Evidence](evidence/README.md) | `Tests/Convergence.DomainTests`, `.github/workflows` |
