@@ -7,6 +7,7 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Development HP scales from the frozen two/three/four-player roster")]
     private static void DevelopmentPartyHp()
     {
         var boss = new[] { 5_000_000, 9_000_000, 13_000_000 };
@@ -31,6 +32,7 @@ internal static partial class Program
             AssertThrows<ArgumentOutOfRangeException>(() => FirstSeverancePartyScaling.ForCount(count), "invalid party count");
     }
 
+    [DomainTest("Core salvos begin on grid three with bounded immutable directions")]
     private static void CoreSalvoBounds()
     {
         var ray = FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 5000, 3440);
@@ -51,6 +53,7 @@ internal static partial class Program
         AssertEqual(true, FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 4000, 3440).IsValid, "overlapping center has finite fallback");
     }
 
+    [DomainTest("Core salvos use the full warning and shared active collision window")]
     private static void CoreSalvoGeometry()
     {
         var ray = FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 5000, 3440);
@@ -63,6 +66,7 @@ internal static partial class Program
         AssertEqual(false, grid.CoreIntersects(160, 3989, 3440, 10, 21), "no attack behind source");
     }
 
+    [DomainTest("Eclosion pose curves and connected arm joints are continuous")]
     private static void EclosionContinuity()
     {
         foreach (Func<float, float> curve in new Func<float, float>[] { EclosionPry, EclosionPeel, EclosionEmerge, EclosionUnfurl })

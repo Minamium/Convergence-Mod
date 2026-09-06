@@ -24,7 +24,7 @@ related_docs:
 
 # First Severance Downed and Revive Specification
 
-## Accepted current experience — development 0.2.17
+## Accepted current experience
 
 The user's explicit decision replaces two-second channeling and shared tokens with a reusable instant revival tool and a recipient-only 60-second debuff. [ADR-0011](../../adr/0011-instant-revival-and-recipient-lockout.md) supersedes the relevant gameplay choices in ADR-0005/0009. [Status](../../STATUS.md) owns implementation and verification evidence.
 
@@ -60,7 +60,7 @@ There is no countdown to removal: if a player is revived and Downed again 12 sec
 - After same-tick damage/invalidations, revalidate queued intent and submit one bounded stable-Participant-ID batch. One target has one accepted recovery when two rescuers race.
 - The reusable domain retains a zero-duration reservation internally, resolved by the same tick's single commit. No held-use lease persists into a later tick and no movement/damage channel observer runs.
 - Successful authority commit restores HP, applies immunity and the new deadline, and publishes an immediate read-only snapshot. A per-target recovery-deadline increase also drives health correction when Down and revival happen in the same tick.
-- Protocol16 retains the bounded participant fields and represents untimed Down with deadline zero. Combat state distinguishes it from Alive. The legacy token field remains reserved zero. Both peers must update; [Network Architecture](../../NETWORK_ARCHITECTURE.md) owns the wire layout.
+- The bounded participant body represents untimed Down with deadline zero. Combat state distinguishes it from Alive; the legacy token field remains reserved zero. Both peers must use the current protocol; [Network Architecture](../../NETWORK_ARCHITECTURE.md) owns the envelope/route and wire contract.
 - Queued validation is answered after revalidation, so a premature acceptance cannot hide a same-nonce failure.
 
 ## Feedback

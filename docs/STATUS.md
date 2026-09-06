@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.18**, protocol **17**. This is an implementation-structure build with unchanged combat tuning. Current version declarations live in [build.txt](../build.txt) and [the packet header](../Common/Networking/Protocol/EncounterPacketHeader.cs); this page records implementation/evidence, not tuning.
+Development **0.2.18**, protocol **17**. This is an implementation-structure build with unchanged combat tuning. Current version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); this page records implementation/evidence, not tuning.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -35,9 +35,9 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-[0.2.17 check record](evidence/2026-09-07-recovery-tempo-checks.json): 93 domain cases, 308 compiled codec round trips / 48 malformed cases, static checks and actual Mod package build passed. These unchanged-input results were reused when preserving the source and unpublished Git history.
+[Consolidation check record](evidence/2026-09-07-development-consolidation.json): current automated results and source/package identity, including the real Mod codec check. The [0.2.17 record](evidence/2026-09-07-recovery-tempo-checks.json) retains prior gameplay-build evidence; unchanged inputs were reused during preservation.
 
-**Not run / user-owned:** matching 0.2.18 load/Ready/common snapshot repair and 0.2.17 gameplay changes and Host & Play observation of untimed recovery, simultaneous Prism, two blade turns, changing flood safe strips, accelerating Final and audio balance. Prior Stack synchronization was confirmed by the user; do not reopen it without new evidence. Compilation is not live audiovisual, latency or multiplayer proof.
+**Not run / user-owned:** matching 0.2.18 load, join/Ready/common snapshot repair, combat/revival and end-to-new-Raid cleanup in Host & Play. The preceding untimed recovery, simultaneous Prism, two blade turns, changing flood safe strips, accelerating Final and audio balance still need live observation. Prior Stack synchronization was confirmed by the user; do not reopen it without new evidence. Compilation is not live audiovisual, latency or multiplayer proof. The manual self-hosted Mod-build CI runner is not provisioned by this change.
 
 ## Constraints and deferred work
 
@@ -48,7 +48,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Next change
 
-Preservation/GitHub, current docs/skills and source-identified local builds are complete. Definition-routed packet dispatch is implemented with focused regression coverage; combat responsibility extraction and repeatable test cleanup follow. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) owns that queue. No new gameplay, GUI launch or broad runtime matrix is requested.
+The requested preservation, current docs/skills, reproducible local build, definition-routed transport, combat collaborators and repository-runnable tests/CI are implemented. Next is the scoped user-owned smoke above, followed by evidence-driven fixes or the next requested gameplay change; do not replay consolidation or the old bootstrap queue. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) separates completed work from deferred production work.
 
 ## History
 

@@ -4,19 +4,4 @@ Only distributable, reviewed runtime assets belong in this directory. Concept ba
 
 Every PNG, OGG, WAV, MP3, font, or other distributable asset must have an entry in [ATTRIBUTION.md](ATTRIBUTION.md) before it is committed. The entry must identify its creator, origin, license, creation or acquisition date, modifications, and redistribution restrictions.
 
-Planned runtime layout:
-
-```text
-Assets/
-  Music/
-  Sounds/
-  Textures/
-    Encounters/
-    Items/
-    Tiles/
-    UI/
-    VFX/
-```
-
-Large source assets will move to a separately governed storage workflow if they become necessary. Git LFS is not enabled yet.
-
+Runtime music, sounds and textures are already present. [Asset Pipeline](../docs/ASSET_PIPELINE.md#external-originals-and-regeneration) owns the external-original manifest, preservation, backup and regeneration procedure. Do not put editable originals or raw batches here. Git LFS is not enabled; no new asset store is required for routine development.

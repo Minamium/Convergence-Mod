@@ -12,6 +12,7 @@ internal static partial class Program
 {
     private static void AssertTrue(bool condition, string message) => AssertEqual(true, condition, message);
 
+    [DomainTest("Packet routes are bounded, definition-scoped and reject stale sessions")]
     private static void PacketRouteContracts()
     {
         var registry = new EncounterPacketRoutes();

@@ -26,16 +26,16 @@ related_docs:
 
 Current implementation/evidence is in [Status](../../STATUS.md). This is the forward queue, not a requirement to replay completed slices.
 
-## Current sequence
+## Completed consolidation
 
 1. **Preservation complete:** checkpoint latest 0.2.17 and prior history on GitHub; establish one canonical checkout and retain all former copies.
 2. **Complete:** consolidate current docs and the already-integrated targeted-reading/verification workflow. Archive old instructions without losing evidence; generate the catalog once after the edit batch.
 3. **Complete:** make local toolchain discovery, configuration and source/package identification reproducible, with private paths and binaries excluded.
-4. Separate common packet registration from definition-specific dispatch. Preserve bounds, direction/identity checks and server/SP authority; no second Raid or global feature switch.
-5. Extract meaningful combat collaborators while retaining one explicit authoritative tick/termination/cleanup orchestrator.
-6. Make feature/domain and compiled codec checks reproducible from the repository; separate lightweight CI from environment-dependent Mod/integration checks.
+4. **Complete:** common packet registration and bounded definition-specific dispatch, with matching-session guards. No second Raid or global feature switch.
+5. **Complete:** fight-owned recovery, actor, attack and passive telemetry collaborators; one authoritative tick/termination/cleanup orchestrator.
+6. **Complete:** auto-discovered feature tests, compiled codec and tooling checks; lightweight CI separated from an optional pinned-environment Mod-build job. Provisioning that runner and live integration remain unrun, not implied successes.
 
-Validate the affected contracts and commit/push at each boundary. Do not copy old files over newer implementation, delete backups, or combine unrelated structural changes with tuning.
+These stages were committed/pushed independently. Evidence and remaining user-owned smoke are linked from [Status](../../STATUS.md). Continue from current main; no copied checkout or completed migration step is required.
 
 ## Invariants
 

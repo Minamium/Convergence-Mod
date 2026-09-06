@@ -4,7 +4,7 @@ document_type: evidence
 status: accepted
 owners:
   - quality
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - verification.evidence_format
 aliases:
@@ -21,6 +21,8 @@ related_docs:
 # Verification Evidence
 
 Use [`build-record.example.json`](build-record.example.json) as the local build/smoke template. Copy it to repository-root `build-record.local.json`; that filename is ignored and may contain local machine details during investigation.
+
+Source-identified CLI builds now produce ignored `.local/builds/<timestamp>/record.json` plus the complete file-hash manifest, prior package and build log. Use those records directly; no duplicate manual transcription is required. A concise committed summary may reference an unchanged environment record and include only the changed source/dirty identity, artifact hash and applicable checks. Never commit its local absolute paths or full build log.
 
 A sanitized record may be committed here only when it:
 

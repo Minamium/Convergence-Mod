@@ -4,6 +4,7 @@ using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualCu
 namespace Convergence.DomainTests;
 internal static partial class Program
 {
+    [DomainTest("Beams use fixed damage while charges and raid shares retain their rules")]
     private static void FixedBeamDamage()
     {
         foreach (int life in new[] { 1, 100, 500, 625, 1000, int.MaxValue })
@@ -16,6 +17,7 @@ internal static partial class Program
         AssertEqual(313, FirstSeveranceCombatRules.StackDamage(625, 2, 1), "missing share unchanged");
     }
 
+    [DomainTest("Anticipation is bounded and continuous without loop-reset flashes")]
     private static void SmoothAnticipation()
     {
         const double fire = 128;
@@ -35,6 +37,7 @@ internal static partial class Program
             AssertEqual(true, Cycle(tick, 64) is >= 0 and < 1, "bounded render-cycle phase");
     }
 
+    [DomainTest("Emission envelopes remain continuous through firing and cooling")]
     private static void ContinuousEmissionEnvelopes()
     {
         const ulong start = 100, fire = 128, end = 140;
@@ -51,6 +54,7 @@ internal static partial class Program
         var to = new System.Numerics.Vector2(90, 30);
         AssertEqual(to, Hermite(System.Numerics.Vector2.Zero, new(10, 5), to, 4, 1), "settled position");
     }
+    [DomainTest("Containment is ground anchored and clamps the complete body")]
     private static void GroundContainmentBounds()
     {
         var b = FirstSeveranceContainmentBounds.FromGround(4000, 4000);

@@ -10,6 +10,7 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Solo debug admission is authority-opted-in with unchanged invalid roster rejection")]
     private static void SoloDebugAdmission()
     {
         AssertEqual(1, FirstSeveranceDevelopmentPolicy.MinimumFor(true), "enabled admission");
@@ -42,6 +43,7 @@ internal static partial class Program
             FirstSeveranceArenaValidator.Instance.Validate(invalid, allowSoloDebug: true).FirstErrorCode, "debug never skips Core/field checks");
     }
 
+    [DomainTest("One-player Ready remains manual and one Down ends the Raid on the authority tick")]
     private static void SoloReadyAndDefeat()
     {
         var context = CreateContext(1, RaidReviveSettings.CreateInstantUnlimited(1));
@@ -62,6 +64,7 @@ internal static partial class Program
             FirstSeveranceTerminationContract.Instance.GetCause(end.RequestedTermination), "no special gameplay terminal");
     }
 
+    [DomainTest("Initial admission and Ready revalidation share the compiled solo policy")]
     private static void SoloStartRevalidation()
     {
         var layout = CreateValidArenaLayout();
@@ -86,6 +89,7 @@ internal static partial class Program
             FirstSeveranceDevelopmentPolicy.ValidateStartArena(conflict).FirstErrorCode, "new world conflict remains rejected");
     }
 
+    [DomainTest("Raid owner movement heartbeat is bounded and clears on capability loss")]
     private static void RaidMovementHeartbeat()
     {
         var cadence = new FirstSeveranceMovementSyncCadence();
@@ -106,6 +110,7 @@ internal static partial class Program
         AssertEqual(true, cadence.TryAdvance(0, true), "clock wrap does not stall movement sync");
     }
 
+    [DomainTest("Solo debug keeps the two-player workload with one real Stack participant")]
     private static void SoloDebugWorkload()
     {
         var solo = FirstSeverancePartyScaling.ForCount(1);
@@ -121,6 +126,7 @@ internal static partial class Program
         AssertThrows<ArgumentOutOfRangeException>(() => RaidReviveSettings.CreateInstantUnlimited(0), "empty recovery forbidden");
     }
 
+    [DomainTest("Terminal HUD cinematics expire and clear without any future packet")]
     private static void TerminalPresentationLifetime()
     {
         var timeline = new FirstSeveranceEndingTimeline();

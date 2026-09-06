@@ -56,11 +56,11 @@ related_docs:
 │  └─ stable root documents      project-wide policies kept at existing paths
 ├─ .agents/skills/               repository-local repeatable workflows
 ├─ Tests/                        tModLoader-free domain harnesses
-├─ tools/                        repository/catalog/YAML checks
+├─ tools/                        local build/provenance, static/codec/tool checks
 └─ .github/                      review, issue, ownership, and CI policy
 ```
 
-The repository root is the tModLoader Mod Source root. Do not move code into `src/`; tModLoader expects `build.txt` and imports `../tModLoader.targets` from a checkout named `ModSources/Convergence`.
+The repository root is the tModLoader Mod Source root, named `Convergence`; do not add a `src/` nesting layer. The actual checkout may live outside ModSources, whose entry can be a junction to it. Targets resolve through explicit/ignored local configuration or the traditional parent-targets fallback; [Windows setup](runbooks/WINDOWS_DEVELOPMENT.md#one-canonical-source-and-local-setup) owns the procedure. A worktree is a separate, explicitly selected build source, not a recurring copy to merge by hand.
 
 ## Feature-name transition
 

@@ -6,6 +6,11 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+    inputs:
+      mod_build:
+        description: 'Build on the separately provisioned pinned Windows runner (main only)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -27,13 +32,28 @@ jobs:
         uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
         with:
           dotnet-version: 8.0.424
-      - name: Run Terraria-independent domain tests
-        run: dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
-      - name: Run repository policy checks
-        run: python3 tools/repository_checks.py
       - name: Install YAML validator dependency
         run: python3 -m pip install --disable-pip-version-check --requirement tools/requirements-ci.txt
-      - name: Validate documentation catalog
-        run: python3 tools/docs_catalog.py --check
-      - name: Validate repository YAML
-        run: python3 tools/validate_yaml.py
+      - name: Check verifier command and failure contracts
+        run: python3 -m unittest discover -s tools/tests
+      - name: Static, linked domain and compiled codec checks (no Terraria install)
+        run: python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --with-domain --with-codec
+
+  mod-build:
+    if: github.event_name == 'workflow_dispatch' && inputs.mod_build && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Windows, X64, convergence-tml]
+    timeout-minutes: 15
+    steps:
+      - name: Check out trusted main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          path: Convergence
+      - name: Build only against the explicitly provisioned disposable profile
+        shell: pwsh
+        working-directory: Convergence
+        run: |
+          if (-not $env:TML_PATH -or -not $env:TML_SAVE_PATH) { throw 'Set pinned TML_PATH and disposable TML_SAVE_PATH on this runner' }
+          python tools/dev.py build --tml "$env:TML_PATH" --save "$env:TML_SAVE_PATH" --release-candidate
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./tools/check-codec.ps1 -AssemblyPath bin/Debug/net8.0/Convergence.dll -ExpectedSoloDebug disabled

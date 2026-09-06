@@ -6,6 +6,7 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Prism targets every standing member with bounded immutable rays")]
     private static void SimultaneousPrismRoster()
     {
         for (int count = 1; count <= 4; count++)
@@ -40,6 +41,7 @@ internal static partial class Program
             new[] { valid with { VelocityY = float.NaN } }), "invalid target motion");
     }
 
+    [DomainTest("Horizontal floods share deployment, widening and moving safe pockets")]
     private static void FloodSafePockets()
     {
         var state = FirstSeveranceSubstate.RemoteClaws;
@@ -83,6 +85,7 @@ internal static partial class Program
         AssertEqual(true, middle > early * 2, "width grows with acceleration before easing into full hold");
     }
 
+    [DomainTest("Final cadence accelerates and repeated grids have no fixed safe cell")]
     private static void FinalAccelerationAndShifts()
     {
         var score = FirstSeveranceChoreography.Final;

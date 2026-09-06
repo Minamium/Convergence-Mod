@@ -156,9 +156,9 @@ The same exact-Fight cleanup can be called repeatedly; stale-Fight cleanup never
 
 ## First Severance feature boundary
 
-`Content/Encounters/FirstSeverance` will own the simple Boss, Pylons, active-loop executor, typed tuning, mechanics, arena adapters, and feature snapshot. Ring/arms are presentation components of one Boss NPC. Pylons are separately owned NPCs.
+`Content/Encounters/FirstSeverance` owns the Boss, Pylons, active-loop executor, typed tuning, mechanics, arena adapters and feature snapshot. Shell/ring/arms are presentation components of one logical Boss; Pylons are separately owned NPCs.
 
-The current `FirstSeverance` immutable plan owns only SpawnIntro, PylonCheck, Stack, Spread, CoreExposure, and Reset. Its bounded high-level state machine, timings, roster-scaled counts, Overload/cap policy, and append-only terminal causes stay feature-local; do not generalize them into a mechanic DSL.
+The original six-state plan is extended by feature-local ordered phase scores, HP floors, transition states and Final survival. The [encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) owns current behavior and links the plan/tuning code. The old exposure cap remains a legacy domain mode, not a staged-Fight limit. Do not generalize these feature rules into a mechanic DSL.
 
 ## Downed and Revive boundary
 
@@ -168,9 +168,9 @@ First Severance now selects the explicit instant/unlimited settings in [ADR-0011
 
 Terraria adapters remain narrow:
 
-- authority death hook submits eligible lethal events;
+- the active Raid-owned damage adapter submits eligible Down events; general Terraria lethal interception remains separately gated;
 - `ModPlayer` applies control/targeting/life projections and reports authoritative interrupts;
-- transport derives sender from `whoAmI` and forwards bounded target/nonce input;
+- transport derives sender from `whoAmI` and forwards bounded nonce intent; authority chooses the eligible target;
 - feature replication carries read-only revive state/events.
 
 The pinned tModLoader/Calamity death-hook interaction is a blocking compatibility spike. Do not connect it by bypassing evidence.

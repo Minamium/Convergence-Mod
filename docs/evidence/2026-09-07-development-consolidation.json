@@ -1,0 +1,102 @@
+{
+  "date": "2026-09-07",
+  "build": "0.2.18",
+  "protocol": 17,
+  "scope": "Source/Git preservation, current documentation, reproducible local packaging, definition-routed transport, fight-owned combat collaborators and repository-runnable tests/CI; no combat tuning change.",
+  "environment_reference": "2026-09-07-recovery-tempo-checks.json",
+  "preservation": {
+    "status": "passed",
+    "previous_unpushed_commits_preserved": 15,
+    "checkpoint_commit": "e52f6bac70555108721d958da2a4888130771800",
+    "docs_commit": "859ce27a50d5b5b7bcae7cbc5d5529bec3178384",
+    "environment_commit": "cbd3c2d20d5526f85df84498e631d9e04df56981",
+    "routing_commit": "7241f6cb245d20595ffb4fbab6a0493fa7e8d7bc",
+    "combat_commit": "4f9a17bff9a136f8b73f5e30292c3b840a94288f",
+    "canonical_source": "One main checkout named Convergence; the existing ModSources entry is a junction to it. Machine paths are in ignored local records.",
+    "copies": "All prior checkout/snapshot folders and the full pre-consolidation repository retained; no copy/backup deletion.",
+    "copy_only_material": "Retained obsolete music export and raw Foundation Core concept externally; no newer required source missing after comparison.",
+    "excluded": "Local settings, raw logs, saves, dependency binaries, build outputs, editable originals and credentials are not committed.",
+    "previous_efficiency_work": "Latest source already contained the shortened main Skills, targeted-reading rules and verifier aggregation. Compared and retained; no wholesale old-file overlay."
+  },
+  "package": {
+    "status": "passed",
+    "source_base_commit": "7241f6cb245d20595ffb4fbab6a0493fa7e8d7bc",
+    "working_tree_dirty": true,
+    "dirty_changes": "Combat collaborator extraction and accompanying architecture/catalog edits subsequently committed as 4f9a17b.",
+    "source_manifest_sha256": "aaf4a31624c153598df8c7672ce3cc810745f5a7aad2f4d1e63f0f34fca70317",
+    "local_record_id": "20260906T181503417727Z",
+    "source_changed_during_build": false,
+    "later_test_tool_doc_changes": "201 recorded production/build/resource inputs compared unchanged; current source diff outside those inputs is excluded from Mod compilation/packaging. No redundant rebuild.",
+    "sdk": "8.0.424",
+    "configuration": "Debug",
+    "solo_debug": true,
+    "targets_sha256": "9cb10a22c3a0a5a8d56b7b863a51e52ada2baf41e30da5148b13b951a280df62",
+    "tml_assembly_sha256": "d530e508b2841e66d880ce279a609624b5ab66ce8093eedfa04f47c3d12d485c",
+    "warnings": 0,
+    "errors": 0,
+    "bytes": 31944090,
+    "sha256": "2f1eaa48df223e02508a9aa8064d35eb2f88f04c12e43f8d417c3d37f1f1442a",
+    "deployment": "Normal user Mods profile only. Existing alternative test profiles were not synchronized in this task."
+  },
+  "automated": {
+    "domain": {
+      "status": "passed",
+      "cases": 94,
+      "scope": "Existing cases preserved under automatic feature-grouped discovery; bounded route and exact-session contract included."
+    },
+    "discovery": {
+      "status": "passed",
+      "listed_cases": 94,
+      "unmatched_filter_exit_code": 2
+    },
+    "compiled_codec": {
+      "status": "passed",
+      "round_trips_per_assembly": 308,
+      "malformed_or_truncated_per_assembly": 48,
+      "assemblies": [
+        {
+          "kind": "linked production codec",
+          "sha256": "fa348266693308d15277e4d6035d9ff84c34dbb23e4275713ccb1c08bee4248b"
+        },
+        {
+          "kind": "actual Mod",
+          "sha256": "c93c1534d524193bd62b8ea6a9918629dcfa08abd7b14c5f82f1bf45697aa6e6"
+        }
+      ],
+      "protocol_and_solo_flag": "17 / enabled, checked from each compiled assembly",
+      "boundary": "Bodies and shared-buffer consumption plus pure route/header cases; not live network delivery."
+    },
+    "tool_tests": {
+      "status": "passed",
+      "test_methods": 8,
+      "scope": "Audit/option exclusion, combined-command build reuse, each selected-stage failure, missing executable/repository and content/deletion source identity."
+    },
+    "static": {
+      "status": "passed",
+      "catalog_documents": 59,
+      "repository_files": 342,
+      "yaml_files": 10,
+      "diff_whitespace": "passed",
+      "note": "One final consolidated static/catalog invocation; no repeat of unchanged domain/build/codec inputs."
+    },
+    "ci": "Lightweight hosted CI now includes tools/domain/compiled codec. Manual pinned Windows Mod-build job is separate; no runner was provisioned or dispatched."
+  },
+  "runtime": {
+    "game_or_server_launched": false,
+    "build_and_reload_gui": "not_run",
+    "single_player": "not_run",
+    "host_and_play": "not_run",
+    "dedicated_server_two_clients": "not_run",
+    "user_owned_smoke": [
+      "Matching 0.2.18 peers: join, Ready, common snapshot/Idle repair",
+      "Combat, instant revival and terminal-to-new-Fight cleanup",
+      "Previously changed untimed Down, simultaneous Prism, blades/floods/Final cadence and audio/VFX"
+    ],
+    "performance_or_load_measurement": "not_run"
+  },
+  "limitations": [
+    "Production lethal hooks, durable rejoin/outsider policy remain deferred; not introduced by this refactor.",
+    "No off-device backup or bit-identical asset regeneration verified; preserve external originals and follow the asset pipeline before destructive work/release.",
+    "Compile solo admission off and perform the separate compatibility/release gates before public distribution."
+  ]
+}

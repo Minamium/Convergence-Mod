@@ -33,6 +33,11 @@ def main() -> int:
         help="also run the project build when pinned tModLoader targets are available",
     )
     parser.add_argument(
+        "--with-codec",
+        action="store_true",
+        help="check compiled packet bodies (PowerShell 7); use the Mod assembly if --with-dotnet, otherwise linked domain sources",
+    )
+    parser.add_argument(
         "--audit-only",
         action="store_true",
         help="run checks that do not intentionally create bytecode or build output",
@@ -54,8 +59,8 @@ def main() -> int:
             print(f"- {path}", file=sys.stderr)
         return 2
 
-    if args.audit_only and (args.write_catalog or args.with_domain or args.with_dotnet):
-        parser.error("--audit-only cannot be combined with --write-catalog, --with-domain, or --with-dotnet")
+    if args.audit_only and (args.write_catalog or args.with_domain or args.with_dotnet or args.with_codec):
+        parser.error("--audit-only cannot be combined with --write-catalog, --with-domain, --with-dotnet, or --with-codec")
 
     commands = []
     if args.write_catalog:
@@ -75,6 +80,12 @@ def main() -> int:
         )
     if args.with_dotnet:
         commands.append(["dotnet", "build", "ConvergenceMod.csproj"])
+    if args.with_codec:
+        if not args.with_dotnet and not args.with_domain:
+            commands.append(["dotnet", "build", "Tests/Convergence.DomainTests/Convergence.DomainTests.csproj", "--configuration", "Release"])
+        assembly = ("bin/Debug/net8.0/Convergence.dll" if args.with_dotnet else
+                    "Tests/Convergence.DomainTests/bin/Release/net8.0/Convergence.DomainTests.dll")
+        commands.append(["pwsh", "-NoProfile", "-NonInteractive", "-File", "tools/check-codec.ps1", "-AssemblyPath", assembly])
 
     for command in commands:
         try:

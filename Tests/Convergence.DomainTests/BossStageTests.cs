@@ -18,6 +18,7 @@ internal static partial class Program
         return loop;
     }
 
+    [DomainTest("Boss stages transition at half life without skipping the rupture")]
     private static void BossStageThresholdAndOverkill()
     {
         foreach (int count in new[] { 2, 3, 4 })
@@ -54,6 +55,7 @@ internal static partial class Program
         }
     }
 
+    [DomainTest("Lattice, spread and blade repeat as one phase score")]
     private static void BossStageWindowAndCap()
     {
         var loop = CreateStagedExposure(2);
@@ -75,6 +77,7 @@ internal static partial class Program
         }
     }
 
+    [DomainTest("Fixed stack anchor is above the Boss and independent of players")]
     private static void FixedStackWorldAnchor()
     {
         var anchor = FirstSeveranceStackAnchor.FromGround(4000, 4000);
@@ -89,6 +92,7 @@ internal static partial class Program
         AssertEqual((4000f, 3120f), FirstSeveranceStackAnchor.FromGround(4000, 4000), "no player dependency");
     }
 
+    [DomainTest("Lattice warnings, cells and exact hit deadlines share bounded geometry")]
     private static void LatticeGeometryAndTiming()
     {
         var field = FirstSeveranceContainmentBounds.FromGround(4000, 4000);
@@ -111,6 +115,7 @@ internal static partial class Program
         AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(1, 100, 0, float.NaN, 4000), "nonfinite field");
     }
 
+    [DomainTest("Stage snapshots reject incompatible or malformed grid state")]
     private static void StageProjectionBounds()
     {
         var fight = CreateContext(2).FightId;

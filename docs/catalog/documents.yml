@@ -515,7 +515,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 7bb71d2deaef982212d4d6e4c5d644b1b4f9132dd13e811f43958aaa755856db
+  content_sha256: 342547e5ff58bc42ef1b544b9fda89ac7f0009f4b96aff1161c440df75e99ada
   document_type: plan
   status: accepted
   owners:
@@ -539,7 +539,7 @@ documents:
 - doc_id: encounter.first-severance.revive
   path: docs/encounters/first-severance/REVIVE_SPEC.md
   title: First Severance Downed and Revive Specification
-  content_sha256: 14ce3092174f3427d69d65912725d8bb3e18d58a30260d29cf41f07102cecd45
+  content_sha256: f1d3ce746d9994ef03e52dfad694372c6904f19b2f4d200e30b3b3e114875b64
   document_type: spec
   status: accepted
   owners:
@@ -563,7 +563,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 50e9c11b8135fc562fd631fc9dd67c00ddad9ff12d546a5576d397cc4b60cbeb
+  content_sha256: 665970f28bc57b253234058627b0e93c4a917dc952155a2e46bca80e31e1991c
   document_type: spec
   status: accepted
   owners:
@@ -688,7 +688,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: a4976023d666f5b8a5993a428675729c142d0f9a292ded68735bc95ec8f93882
+  content_sha256: d919241cb1e080813f4d9c2f945f51f9b7d8319a9f8a0de45de9f34449855a94
   document_type: governance
   status: accepted
   owners:
@@ -939,7 +939,7 @@ documents:
 - doc_id: project.repository-layout
   path: docs/REPOSITORY_LAYOUT.md
   title: Repository Layout
-  content_sha256: 85b09d1514afd54b46eb6fe1ebd353cdcf0da26ff03adb614dab5641565c7775
+  content_sha256: f2792c04bb08b52a3085465ab65cd80e7ece70c2aef390cf6046ad9c69df8c51
   document_type: governance
   status: accepted
   owners:
@@ -961,7 +961,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 67b40b99f940afbfcaee15e9e7122d0782d5ceaeb79397f2bbf86a8604564676
+  content_sha256: 5f810539387b4d3460469d1a185505a6f569883245d14ccf453a3ad41eefeaa4
   document_type: status
   status: accepted
   owners:
@@ -1207,12 +1207,12 @@ documents:
 - doc_id: verification.evidence
   path: docs/evidence/README.md
   title: Verification Evidence
-  content_sha256: 8afb2d8f627da3587643c7af5dd9628bf8799e5f8982596df881a75b4a599a26
+  content_sha256: db47149f72a08bc6b878179880c4434a8430f0940173c5ba0f2ea9e1d9bfbf79
   document_type: evidence
   status: accepted
   owners:
   - quality
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - verification.evidence_format
   aliases:
@@ -1227,7 +1227,7 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: db32a3ab91ef965b4fd7bf42180fcf3a48074ac340228be63a1c51b47e435e25
+  content_sha256: 70832588feeb1b280be093b663b2a9546a800ed61f04a7e7747835e84bbdaf91
   document_type: plan
   status: accepted
   owners:

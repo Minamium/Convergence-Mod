@@ -35,12 +35,15 @@ Add flags to the same invocation as needed:
 |---|---|
 | `--write-catalog` | Regenerate indexed-doc metadata once, then check it; use after the document edit batch is settled |
 | `--with-domain` | Run the Terraria-independent domain harness in Release configuration |
+| `--with-codec` | Run bounded compiled packet checks using PowerShell 7+. Reuse the selected domain/Mod build; if neither was selected, build only the linked-source harness |
 | `--with-dotnet` | Run `dotnet build ConvergenceMod.csproj` against pinned tModLoader targets |
-| `--audit-only` | Read-only static verification; cannot combine with catalog writing or builds/domain execution |
+| `--audit-only` | Read-only static verification; cannot combine with catalog writing, domain/codec execution or builds |
 
 For example, a domain change with indexed-doc updates uses `--write-catalog --with-domain --with-dotnet` in one invocation. No bytecode compilation pass is needed after successfully executing the Python checkers. Review `git diff --check` and the final diff once before completion.
 
 For source-identified packages, use `python tools/dev.py build` instead of `--with-dotnet`, not in addition to it. `python tools/dev.py doctor` checks only the local environment. Reload the resulting package; do not recompile unchanged source just to enter Host & Play.
+
+For packet changes, combine `--with-domain --with-codec` for the game-independent suite. To inspect an already-built Mod, run `pwsh -NoProfile -File tools/check-codec.ps1 -AssemblyPath bin/Debug/net8.0/Convergence.dll` without another build. [Test Plan](../../../../docs/TEST_PLAN.md#repository-runnable-checks-and-ci) owns filtered-case discovery, tooling tests and the separate CI jobs.
 
 ## Runtime evidence and development completion
 

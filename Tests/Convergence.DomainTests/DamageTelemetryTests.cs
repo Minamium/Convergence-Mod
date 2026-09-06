@@ -5,6 +5,7 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Damage telemetry excludes shielding and clamps deadline/overkill")]
     private static void DamageWindowBoundaries()
     {
         foreach (int participants in new[] { 2, 3, 4 })
@@ -27,6 +28,7 @@ internal static partial class Program
         AssertEqual(0UL, aborted.ElapsedTicks, "abort in shield has no open time");
     }
 
+    [DomainTest("Damage telemetry separates recent and whole-window DPS")]
     private static void DamageWindowRates()
     {
         var window = new FirstSeveranceDamageWindow(4_000_000, 100, 1180);

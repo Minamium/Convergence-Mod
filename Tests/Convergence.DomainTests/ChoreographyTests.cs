@@ -6,6 +6,7 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Every phase completes its score and zero HP starts the terminal survival score")]
     private static void FullChoreographyAndFinal()
     {
         foreach (int count in new[] { 1, 2, 3, 4 })
@@ -40,6 +41,7 @@ internal static partial class Program
         }
     }
 
+    [DomainTest("Clockwise sites, wider spreads and practical travel budgets fit the field")]
     private static void ClockAndTravelBudgets()
     {
         AssertEqual(640f, FirstSeveranceLanceTuning.SpreadSeparation, "40-tile separation");
@@ -75,6 +77,7 @@ internal static partial class Program
         AssertEqual(2, FirstSeveranceScoreGeometry.BladeCount, "two opposite blades");
     }
 
+    [DomainTest("Sword, hands, half-field, bullets and slicers have harmless warnings and bounded hits")]
     private static void ScoreHazardBoundaries()
     {
         foreach (var state in new[] {FirstSeveranceSubstate.RotatingBlade,FirstSeveranceSubstate.RemoteClaws,
