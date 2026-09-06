@@ -1,5 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\tModLoader.targets" />
+  <!-- Machine paths stay in ignored local configuration or explicit MSBuild properties. -->
+  <Import Project="Convergence.local.props" Condition="Exists('Convergence.local.props')" />
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <TModLoaderPath Condition="'$(TModLoaderPath)' == ''">$(TML_PATH)</TModLoaderPath>
+    <TModLoaderTargets Condition="'$(TModLoaderPath)' != ''">$(TModLoaderPath)/tMLMod.targets</TModLoaderTargets>
+    <TModLoaderTargets Condition="'$(TModLoaderTargets)' == ''">../tModLoader.targets</TModLoaderTargets>
+    <ExtraBuildModFlags Condition="'$(TModLoaderSavePath)' != ''">$(ExtraBuildModFlags) -tmlsavedirectory &quot;$(TModLoaderSavePath)&quot;</ExtraBuildModFlags>
+  </PropertyGroup>
+  <Import Project="$(TModLoaderTargets)" Condition="Exists('$(TModLoaderTargets)')" />
+  <Target Name="RequireTModLoader" BeforeTargets="PrepareForBuild" Condition="!Exists('$(TModLoaderTargets)')">
+    <Error Text="tModLoader targets not found. Configure Convergence.local.props (see tools/local.example.props), TML_PATH or -p:TModLoaderPath=...; run python tools/dev.py doctor." />
+  </Target>
 
   <PropertyGroup>
     <AssemblyName>Convergence</AssemblyName>

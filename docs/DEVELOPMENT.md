@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - development.general_policy
 aliases:
@@ -24,33 +24,19 @@ related_docs:
 
 ## Primary workstation
 
-Use the Windows desktop as the primary tModLoader/Calamity build, Host & Play, and Dedicated Server environment. Read the relevant [Windows Development Runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure when preparing or using that environment. The point-in-time [Windows Handoff](handoff/WINDOWS.md) is historical context, not an edit prerequisite.
+Use the Windows desktop as the primary tModLoader/Calamity build, Host & Play, and Dedicated Server environment. Read the relevant [Windows Development Runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure when preparing or using that environment. The [Windows Handoff](handoff/WINDOWS.md) is a short resume entry, not an edit prerequisite.
 
 macOS can support tModLoader development when its runtime is installed, but the audited MacBook did not contain Terraria, tModLoader, .NET SDK, Calamity, or a valid `ModSources` checkout. It remains useful for documentation, Git, review, and platform-independent work. Never transfer an unverified Mac result into the version matrix as a successful Mod build.
 
 ## Confirmed environment
 
-Use [Version Matrix](VERSION_MATRIX.md) as the compatibility source:
+The [Version Matrix](VERSION_MATRIX.md) is the only compatibility baseline. A source-path change is not a dependency upgrade.
 
-- Terraria 1.4.4.9;
-- tModLoader stable `v2026.07.3.0`;
-- Calamity Mod `2.2.4` plus official Music Mod `2.1`;
-- .NET SDK `8.0.424`, with .NET 8/C# 12 owned by tModLoader targets.
+## Checkout and local configuration
 
-These pins were confirmed by the Windows build/load/server baseline on 2026-09-05. Do not silently upgrade one dependency; re-run the complete compatibility gate for any future runtime change.
+Use one canonical Git checkout named Convergence; the ModSources entry may be an NTFS junction to it. The [Windows runbook](runbooks/WINDOWS_DEVELOPMENT.md#one-canonical-source-and-local-setup) owns local configuration and build procedures. Branches/worktrees replace per-edit copies, and each build must identify its actual source. Never overwrite a newer checkout with a historical snapshot.
 
-## Checkout invariant
-
-Clone the repository directly as the internal Mod directory:
-
-```text
-<tModLoader user data>/ModSources/Convergence/
-  build.txt
-  ConvergenceMod.csproj
-  ../tModLoader.targets
-```
-
-The remote repository name may remain `tmod`; the local directory, assembly, and root namespace must align with `Convergence`. A clone elsewhere cannot resolve `../tModLoader.targets` and is not a valid real-build environment.
+`python tools/dev.py doctor` resolves the environment read-only; `python tools/dev.py build` packages and records source/dirty delta/output identity. Personal paths live in ignored local props, not committed targets.
 
 ## Repository checks
 

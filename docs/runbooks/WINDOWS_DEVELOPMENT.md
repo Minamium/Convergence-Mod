@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - development.windows_setup
 aliases:
@@ -43,82 +43,37 @@ Install on the same Windows user profile:
 
 Do not silently update tModLoader or Calamity mid-feature. If Steam updates a dependency, capture the new exact versions and validate them on a compatibility branch before changing the matrix.
 
-## Clone in the correct source directory
+## One canonical source and local setup
 
-tModLoader expects the repository root under its user-data `ModSources` directory and imports `..\tModLoader.targets`. Use tModLoader's Develop Mods UI to locate/open the source folder if Windows Documents is redirected by OneDrive.
+Choose one Git checkout named `Convergence` inside an authorized writable workspace. The usual `<user-data>/ModSources/Convergence` may be that checkout or an NTFS junction to it; both editing and tModLoader must resolve to the same files. Do not make another ConvergenceEdit copy for each change. Preserve/commit local work before pulling; use branches or purpose-named worktrees only for genuinely parallel work, with a final source directory named Convergence and an explicit build target.
 
-Authenticate once. The recommended path is:
+Copy [tools/local.example.props](../../tools/local.example.props) to the ignored repository-root `Convergence.local.props`, and set:
 
-```powershell
-gh auth login
-gh auth status
-```
+- `TModLoaderPath`: installed pinned tModLoader directory containing `tMLMod.targets`.
+- `TModLoaderSavePath`: existing user-data directory containing `Mods`; never silently create an empty alternate profile.
 
-From PowerShell in `ModSources`, use one of the following clone paths:
+The project prefers explicit local/MSBuild paths, then `TML_PATH`, with the traditional parent `../tModLoader.targets` as fallback. It fails clearly if no targets exist. Do not commit local props, dependency binaries or personal paths, or broaden global permissions to make a checkout writable. A new machine clones GitHub once (`gh repo clone Minamium/tmod Convergence`); authenticate through Git/gh, never tracked credentials.
 
-```powershell
-gh repo clone Minamium/tmod Convergence
-Set-Location Convergence
-git switch main
-git pull --ff-only origin main
-```
-
-If GitHub CLI is not installed, HTTPS also works:
+## Diagnose or build
 
 ```powershell
-git clone https://github.com/Minamium/tmod.git Convergence
-Set-Location Convergence
+python tools/dev.py doctor
+python tools/dev.py build
 ```
 
-Use `git@github.com:Minamium/tmod.git` only after an SSH key has been registered and `ssh -T git@github.com` succeeds. Never copy a token into a tracked script or configuration file.
+Use the available Python 3 interpreter. Doctor is read-only and identifies the resolved checkout, branch, dirty state, SDK and installed targets. Build uses that source and normal tML packaging, preserving the previous package in ignored `.local/builds/<timestamp>`. Its JSON record contains the exact commit, dirty status, SHA256 source-file manifest, resolved environment, command/log and output package hash; a source change during the build fails attribution. `--tml` and `--save` are explicit overrides; `--release-candidate` compiles out solo admission but does not approve a release.
 
-The GitHub repository may be named `tmod`, but the local directory must be `Convergence` so the internal Mod name, assembly, and root namespace agree. Do not nest another repository directory beneath it.
+`dotnet build ConvergenceMod.csproj` remains supported (also via the static wrapper's `--with-dotnet`), but use the recorded build when handing off a package. Do not run both on unchanged compiled inputs.
 
-For an existing checkout, first run `git status --short`. Preserve or commit local work before `git pull --ff-only`; never reset it away as a setup shortcut.
+Installed `tMLMod.targets` was inspected during consolidation: it sets .NET 8/C#12 and calls the bundled server build command with ProjectDir, TargetPath and ExtraBuildModFlags. No copied third-party build targets or hard-coded Steam directory is committed.
 
-## Verify the toolchain
+## Routine checks and user handoff
 
-```powershell
-git --version
-gh auth status
-py -3 --version
-rg --version
-dotnet --info
-dotnet --list-sdks
-git rev-parse HEAD
-git status --short
-```
+Install `tools/requirements-ci.txt` once per Python environment. Select the affected static/domain/codec checks using the [Verification Matrix](../../.agents/skills/develop-convergence-raids/references/verification-matrix.md); generate the catalog once after the documentation batch.
 
-`gh auth status` may be skipped when using HTTPS or an already configured SSH remote. If `py` is unavailable, verify `python --version` instead. Confirm that SDK `8.0.424` or an allowed patch in the same feature band is selected. Confirm `..\tModLoader.targets` exists from the repository root. Never copy tModLoader or Calamity binaries into this repository.
+A successful recorded build has already packaged the Mod in the selected profile. Stop/restart or Reload Mods to load it; **another Build + Reload compilation is not required for unchanged source**. The user owns the actual load and affected Host & Play observation unless GUI control is explicitly requested. Record those as not_run until observed; packaging is not a runtime success claim.
 
-## Repository and domain checks
-
-```powershell
-python -m pip install --requirement tools/requirements-ci.txt
-python tools/docs_catalog.py --check
-python tools/repository_checks.py
-python tools/validate_yaml.py
-dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release
-```
-
-If `python` is unavailable but `py` is installed, use `py -3` consistently. These checks do not replace a real Mod build.
-
-## Real Mod build and reload
-
-```powershell
-dotnet build ConvergenceMod.csproj
-```
-
-Then:
-
-1. Start the pinned tModLoader stable build.
-2. Enable Calamity and its official Music dependency.
-3. Open `Workshop -> Develop Mods`.
-4. Run `Build + Reload` for Convergence.
-5. Enter and exit a Single Player world.
-6. Record exact runtime versions and the first relevant error/warning if a gate fails.
-
-Both command-line build and in-game Build + Reload are required for this baseline because they exercise different packaging/load paths. Routine development records applicable user-owned GUI checks as pending until performed, as described in the Verification Matrix.
+The dedicated baseline below applies to toolchain changes/full acceptance, not every edit. Preserve the user's current Mod pack and saves; use a disposable profile only when that test explicitly needs one.
 
 ## Dedicated Server baseline
 
@@ -154,7 +109,7 @@ Do not commit Steam credentials, IP addresses, player identities, full personal 
 
 ## Build record
 
-Copy [`../evidence/build-record.example.json`](../evidence/build-record.example.json) to the ignored root file `build-record.local.json`, fill it from actual logs, and keep it local until sanitized evidence is intentionally reviewed for commit.
+The recorded build writes ignored .local/builds records automatically. Use [the evidence template](../evidence/build-record.example.json) only for additional runtime/baseline observations; sanitize before committing. Link unchanged baseline evidence instead of repeating it.
 
 Future matrix entries become Confirmed only after:
 

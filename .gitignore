@@ -1,4 +1,6 @@
 # tModLoader / .NET build output
+Convergence.local.props
+.local/
 bin/
 obj/
 *.tmod

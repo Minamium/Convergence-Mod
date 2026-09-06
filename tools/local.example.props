@@ -1,0 +1,7 @@
+<Project>
+  <!-- Copy to the repository root as Convergence.local.props and set local paths. Never commit that file. -->
+  <PropertyGroup>
+    <TModLoaderPath>REPLACE_WITH_TMODLOADER_INSTALL_DIRECTORY</TModLoaderPath>
+    <TModLoaderSavePath>REPLACE_WITH_TMODLOADER_USER_DATA_DIRECTORY</TModLoaderSavePath>
+  </PropertyGroup>
+</Project>

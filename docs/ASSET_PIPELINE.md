@@ -5,7 +5,7 @@ status: accepted
 owners:
   - art
   - audio
-last_reviewed: 2026-09-04
+last_reviewed: 2026-09-07
 source_of_truth_for:
   - assets.production_pipeline
 aliases:
@@ -20,13 +20,17 @@ related_docs:
 
 # Asset and Audio Pipeline
 
-## First-slice priority
+## Current production boundary
 
-The latest 0.2.5 user request explicitly authorizes high-resolution painterly runtime textures and a solemn original orchestral-textural sketch now; the feature [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) supersede the earlier pixel/chiptune choice for these exports. Retain original generated alpha and use linear sampling for those high-resolution assets. Raw CC0 instrument samples, recipe, MIDI, audition reel and PCM24 masters remain external; only the new rendered music and reviewed runtime images/effects enter Assets. Human audiovisual acceptance and public-release licensing remain pending.
+The active [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own development presentation. High-resolution original runtime exports and full phase mixes are already implemented; they are not final human-accepted release assets. Do not revert to historical pixel/chiptune instructions.
 
-Exception for the explicit 2026-09-06 user request: [ADR-0010](adr/0010-giant-boss-observation-lances.md) authorizes a giant original first-pass Boss export and layered VFX now. It remains development art requiring live readability review and later hand cleanup, not final/release art. Large logical beam rectangles may be owned directly by the Fight runtime (no projectile slots); clients render the corresponding bounded ray snapshots.
+## External originals and regeneration
 
-Use simple original placeholders until authority, hitboxes, telegraphs, and multiplayer timing are stable. For the provisional First Severance silhouette, prefer separate runtime exports for central body/Core, broken ring, emissive mask, Pylon, and mechanic/UI primitives. If ring/arms are retained, they are code-positioned presentation on one Boss NPC; do not create Crown/Wings/Heart Casing art for the obsolete multipart plan.
+Runtime exports in Assets are versioned; raw recordings/samples, PCM24 auditions, generation references and editable projects stay external. Existing source folders/copies are retained, not recreated or deleted during routine development.
+
+For each new export batch, keep a small external manifest mapping runtime asset IDs/hashes to source folders, exact generator/recipe version, tool/library versions, seed/parameters and licensing/provenance. Preserve the predecessor and reproduce to a new audition/output directory before replacing a reviewed export. Scripts must take explicit source/output paths; no source deletion is part of regeneration.
+
+Local consolidation found the previous audio recipes/masters and image working originals in retained external work folders. Their existence is not an off-device backup or bit-identical-regeneration claim. Keep the machine-specific inventory in ignored .local records; before destructive asset work or release, copy originals plus manifest to an owner-approved independent backup and verify hashes. No cloud account/upload is assumed authorized. If the generator/tool version is missing, mark that export non-reproducible until recovered; never invent provenance.
 
 ## Appropriate generated/assisted work
 

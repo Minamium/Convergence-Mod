@@ -40,6 +40,8 @@ Add flags to the same invocation as needed:
 
 For example, a domain change with indexed-doc updates uses `--write-catalog --with-domain --with-dotnet` in one invocation. No bytecode compilation pass is needed after successfully executing the Python checkers. Review `git diff --check` and the final diff once before completion.
 
+For source-identified packages, use `python tools/dev.py build` instead of `--with-dotnet`, not in addition to it. `python tools/dev.py doctor` checks only the local environment. Reload the resulting package; do not recompile unchanged source just to enter Host & Play.
+
 ## Runtime evidence and development completion
 
 Use [Windows Development](../../../../docs/runbooks/WINDOWS_DEVELOPMENT.md) for actual setup/build/load procedures, only when those checks apply. A pure domain run is not a Mod build; a packaged Mod is not proof of rendering or multiplayer behavior.

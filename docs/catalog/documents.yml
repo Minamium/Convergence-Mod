@@ -326,12 +326,12 @@ documents:
 - doc_id: development.general
   path: docs/DEVELOPMENT.md
   title: Development Setup
-  content_sha256: 0501fb3ad3cc5a2b8ee88c0f1c2fc670783957cd19b73b951bfcfe00856b311e
+  content_sha256: 140f3167d97ee63c36621ca652609e08df3ffaf0406ec1c909254d4d84694b8f
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - development.general_policy
   aliases:
@@ -374,12 +374,12 @@ documents:
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: 07056847acb9dbe2336877f3df56d7ae411adbed19f8bc38805adf7b2eae6f83
+  content_sha256: 4d8e314f59d1dcd3afebd0298b5f6cb7a8af4c8a508fdc7be67c3a6a331f6859
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - development.windows_setup
   aliases:
@@ -739,13 +739,13 @@ documents:
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
-  content_sha256: ad38bf10575eb2ecbf69cadee50ce7c39c61d313d8a4ea9c7fbfdbaca2c2e19a
+  content_sha256: 61676c1f90708690f15977ecb8f1f425ae1ea1c318612286fa13b19f5e8a14d3
   document_type: governance
   status: accepted
   owners:
   - art
   - audio
-  last_reviewed: '2026-09-04'
+  last_reviewed: '2026-09-07'
   source_of_truth_for:
   - assets.production_pipeline
   aliases:
