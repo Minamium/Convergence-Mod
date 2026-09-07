@@ -26,6 +26,14 @@ The user requested giant scale and spectacle comparable in ambition to Avatar of
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
+## Boss-linked release and mechanic verdicts
+
+The accepted broad plasma material remains. Boss-origin lattice Core salvos replace the square-cut first segment with a graduated filament neck, a contracting chest lens and inward gathering threads. The same cast clock drives the neck, full-width forecast, live body and dim recovery. Geometry, warning time and damage are unchanged.
+
+Spread resolves as an instantaneous thin ruby ray from the Boss to each server-sampled standing participant. Overlapped recipients receive the sharp full-length ray/impact; successful recipients see a weaker ray stop short and disperse into fine mist. A mixed result is drawn per recipient, never inferred from locally observed positions. These are result animations, not dodgeable projectiles or new damage.
+
+Stack retains its accepted gathering circle. Eight irregularly timed groups of faceted, high-resolution shell splinters snap into place around each standing participant. The fragments sample the project's existing NullCantorShell texture through disposable runtime masks. On failure they contract sharply, fracture and scatter; on success they do not contract and instead tumble down under a weak gravity-like curve. Sub-tick interpolation connects the quick poses. Result recipients/positions are frozen by authority before damage; even a same-tick Defeat may display its short result without reactivating combat. Textures/voices reset on unload and effects never change input, immunity or gameplay.
+
 ## Beam readability and clutter reduction
 
 Retain the accepted Phase-I narrow Prism emission, removing its traveling forecast chevrons. Grid/Core forecasts likewise use light rather than arrow stamps. Stack markers keep the one true acceptance circle and inward gathering guidance, but no ordinal/count fraction. No SAFE/Gather labels or thick boundary rails return.

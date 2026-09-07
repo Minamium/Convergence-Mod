@@ -19,6 +19,7 @@ function New-Record([string]$name, [object[]]$values) {
         $step = if ($values[18].ToString() -eq 'Sealed' -or $values[2].ToString() -eq 'PhaseTransition') { -1 } else { 0 }
         $values = $values + @([ulong]100, [int]$step, [int]0)
     }
+    if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 24) { $values = $values + @([ulong]0, $null) }
     $ctor = $assembly.GetType($name, $true).GetConstructors($instanceFlags) | Where-Object { $_.GetParameters().Count -eq $values.Count } | Select-Object -First 1
     if ($null -eq $ctor) { throw "Constructor missing: $name" }
     return $ctor.Invoke($values)

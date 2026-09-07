@@ -31,6 +31,7 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     private bool hasStackDiagnostic;
 
     internal FirstSeveranceCombatProjection? Combat => combat;
+    internal FirstSeveranceCombatProjection? TerminalMechanic { get; private set; }
     internal EncounterEndReason LastCombatEndReason { get; private set; }
 
     internal string? CombatEndMessage => Main.GameUpdateCount < showCombatEndUntilTick
@@ -99,6 +100,16 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         if (Main.netMode == NetmodeID.Server)
             return;
         FirstSeveranceCombatProjection? previous = combat;
+        if (snapshot.Lifecycle == EncounterLifecycle.Cleanup
+            && snapshot.Termination.EndReason == EncounterEndReason.Defeat
+            && previous is not null && incoming is not null && previous.FightId == incoming.FightId
+            && previous.EncounterSequence == incoming.EncounterSequence
+            && incoming.MechanicTick == snapshot.AuthorityTick)
+            TerminalMechanic = incoming;
+        else if (snapshot.Lifecycle == EncounterLifecycle.Active)
+            TerminalMechanic = null;
+        // Keep a just-received verdict through a same-frame Idle snapshot.
+        // Feedback consumes it once by exact Fight/revision; new Active/world clears it.
         combat = snapshot.Lifecycle == EncounterLifecycle.Active
             && incoming is not null && incoming.FightId == snapshot.FightId
             && incoming.EncounterSequence == snapshot.EncounterSequence ? incoming : null;
@@ -261,6 +272,9 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
                 authority.Snapshot.EncounterSequence,
                 authority.Snapshot.FightId,
                 out FirstSeveranceCombatProjection? combatProjection);
+            if (combatProjection is null && authority.Snapshot.Lifecycle == EncounterLifecycle.Cleanup)
+                FirstSeveranceCombatAuthority.TryGetTerminalPresentation(authority.Snapshot.EncounterSequence,
+                    authority.Snapshot.FightId, authority.Snapshot.AuthorityTick, out combatProjection);
             ApplySnapshot(authority.Snapshot, projection, combatProjection);
             return;
         }
@@ -280,6 +294,7 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     private void ResetState()
     {
         ClearCombatPlayers(combat);
+        TerminalMechanic = null;
         combat = null;
         combatEndMessage = null;
         showCombatEndUntilTick = 0;

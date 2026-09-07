@@ -42,6 +42,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
     private FirstSeveranceMechanicResult lastMechanicResult;
     private uint mechanicRevision;
+    private ulong mechanicTick;
+    private readonly List<FirstSeveranceMechanicImpact> mechanicImpacts = new(4);
     private ulong lastAuthorityTick, lastSafeResolveTick;
     private int rewardsAttempted;
     private bool isAttached;
@@ -341,7 +343,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             mechanicRevision,
             Array.AsReadOnly(participants),
             attacks.Lance, state.BossPhase, state.BossPhaseStartedTick, attacks.Grid,
-            state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles);
+            state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles, mechanicTick, mechanicImpacts);
         return true;
     }
 
@@ -361,6 +363,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             ? FirstSeveranceTerminationContract.Instance.GetCause(context.Termination).ToString() : "Unknown";
         Log(Main.GameUpdateCount, $"event=CombatEnded reason={context.EndReason} cause={terminalCause} phase={loop?.State.Substate} overload={loop?.State.Overload}");
         telemetry.FinishDamageProgress(Main.GameUpdateCount, terminalCause);
+        if (context.EndReason == EncounterEndReason.Defeat && mechanicTick == lastAuthorityTick
+            && mechanicImpacts.Count > 0 && TryCreateProjection(out var terminalPresentation))
+            FirstSeveranceCombatAuthority.RetainTerminalPresentation(terminalPresentation!);
 
         if (context.EndReason == EncounterEndReason.Victory)
         {
@@ -392,6 +397,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             isAttached = false;
         }
 
+        mechanicImpacts.Clear();
         isCleaned = true;
     }
 
@@ -428,7 +434,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
             SetMechanicResult(stacked >= required
                 ? FirstSeveranceMechanicResult.StackPassed
-                : FirstSeveranceMechanicResult.StackFailed);
+                : FirstSeveranceMechanicResult.StackFailed, authorityTick);
             Log(authorityTick, FormattableString.Invariant($"event=StackResolved anchor={(sanctuary.HasValue ? "Sanctuary" : "ClockSite")} action={state.ActionIndex} x={center.X:F1} y={center.Y:F1} present={stacked} required={required} missing={required - stacked} radius={StackRadiusPixels}"));
             foreach (var member in roster.Members)
                 if (recovery.TryGetPlayer(member, out Player measured))
@@ -471,7 +477,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
             SetMechanicResult(passed
                 ? FirstSeveranceMechanicResult.SpreadPassed
-                : FirstSeveranceMechanicResult.SpreadFailed);
+                : FirstSeveranceMechanicResult.SpreadFailed, authorityTick, failedSlots);
             Log(authorityTick, $"event=SpreadResolved alive={alive.Count} overlapped={failedSlots.Count} separation={SpreadSeparationPixels} passed={passed}");
             foreach (FirstSeveranceRosterMember member in roster.Members)
                 if (failedSlots.Contains(member.ServerWhoAmI)
@@ -499,9 +505,15 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         return true;
     }
 
-    private void SetMechanicResult(FirstSeveranceMechanicResult result)
+    private void SetMechanicResult(FirstSeveranceMechanicResult result, ulong tick, HashSet<int>? failedSlots = null)
     {
         lastMechanicResult = result;
+        mechanicTick = tick;
+        mechanicImpacts.Clear();
+        foreach (var member in roster.Members)
+            if (recovery.IsAlive(member.ParticipantId) && recovery.TryGetPlayer(member, out Player player))
+                mechanicImpacts.Add(new(member.ParticipantId, player.Center.X, player.Center.Y,
+                    result == FirstSeveranceMechanicResult.StackFailed || failedSlots?.Contains(member.ServerWhoAmI) == true));
         mechanicRevision = mechanicRevision == uint.MaxValue
             ? 1
             : mechanicRevision + 1;

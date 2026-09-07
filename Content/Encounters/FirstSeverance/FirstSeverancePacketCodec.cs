@@ -196,7 +196,9 @@ internal static class FirstSeverancePacketCodec
         bool hasCombat = combat is not null
             && combat.EncounterSequence == snapshot.EncounterSequence
             && combat.FightId == snapshot.FightId
-            && snapshot.Lifecycle == EncounterLifecycle.Active;
+            && (snapshot.Lifecycle == EncounterLifecycle.Active
+                || (snapshot.Lifecycle == EncounterLifecycle.Cleanup && snapshot.Termination.EndReason == EncounterEndReason.Defeat
+                    && combat.MechanicTick == snapshot.AuthorityTick && combat.MechanicImpacts.Count > 0));
         WriteBoolean(writer, hasCombat);
         if (hasCombat)
         {
@@ -264,12 +266,14 @@ internal static class FirstSeverancePacketCodec
         }
 
         if (hasCombat
-            && (lifecycle != EncounterLifecycle.Active
-                || !TryReadCombat(
+            && (!TryReadCombat(
                 reader,
                 header.EncounterSequence,
                 header.FightId,
-                out combat)))
+                out combat) || combat!.MechanicTick > authorityTick
+                || (lifecycle != EncounterLifecycle.Active
+                    && !(lifecycle == EncounterLifecycle.Cleanup && termination.EndReason == EncounterEndReason.Defeat
+                        && combat.MechanicTick == authorityTick && combat.MechanicImpacts.Count > 0))))
         {
             snapshot = default;
             preparation = null;
@@ -357,6 +361,15 @@ internal static class FirstSeverancePacketCodec
                 writer.Write(ray.DirectionX);
                 writer.Write(ray.DirectionY);
             }
+        }
+        writer.Write(combat.MechanicTick);
+        writer.Write(checked((byte)combat.MechanicImpacts.Count));
+        foreach (var impact in combat.MechanicImpacts)
+        {
+            writer.Write(impact.ParticipantId.Value);
+            writer.Write(impact.X);
+            writer.Write(impact.Y);
+            WriteBoolean(writer, impact.Failed);
         }
     }
 
@@ -493,6 +506,17 @@ internal static class FirstSeverancePacketCodec
             try { grid = new(serial, startTick, pattern, coreX, coreY, beams); }
             catch (ArgumentException) { return false; }
         }
+        ulong mechanicTick = reader.ReadUInt64();
+        int impactCount = reader.ReadByte();
+        if (impactCount > participantCount) return false;
+        var impacts = new FirstSeveranceMechanicImpact[impactCount];
+        for (int index = 0; index < impactCount; index++)
+        {
+            var id = new ParticipantId(reader.ReadByte());
+            float x = reader.ReadSingle(), y = reader.ReadSingle();
+            if (!TryReadBoolean(reader, out bool failed)) return false;
+            impacts[index] = new(id, x, y, failed);
+        }
         try
         {
             combat = new FirstSeveranceCombatProjection(
@@ -513,7 +537,7 @@ internal static class FirstSeverancePacketCodec
                 mechanicResult,
                 mechanicRevision,
                 Array.AsReadOnly(participants),
-                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles);
+                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles, mechanicTick, impacts);
             return true;
         }
         catch (ArgumentException)

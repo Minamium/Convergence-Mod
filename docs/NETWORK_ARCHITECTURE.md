@@ -23,7 +23,13 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v19
+## Current development protocol v20
+
+The bounded combat snapshot appends a cosmetic mechanic result: authority tick (`ulong`), target count (`byte`,0–4 and at most the roster), then participant ID (`byte`), sampled X/Y (`float` each) and failed flag (strict Boolean) for each target. Maximum addition49 bytes. Identity must belong to the snapshot roster, IDs are unique, positions finite/bounded, and a success cannot mark a failed recipient. Gameplay damage/assignment/deadlines are unchanged; no client result/hit request or new operation ID is added.
+
+The feature keeps at most one immutable same-tick Defeat presentation snapshot after runtime cleanup because common snapshot transport drains later. Only the exact terminal Sequence/Fight/tick can read it; attachment of a new Fight and world reset clear it. `Cleanup + Defeat` may carry this bounded combat-shaped **presentation record**, but the client never installs it as Active combat or reapplies its health/input protection. It is used only after a preceding matching local combat and is not replayed on fresh join. Existing authority terminals, one-Fight cleanup and lifecycle priority remain unchanged. All peers must update; [visual spec](encounters/first-severance/VISUAL_SPEC.md) owns the effect, [Status](STATUS.md) the evidence.
+
+## Preceding development protocol v19
 
 Packet IDs, field layouts and Fight ownership are unchanged. Stillness retains two locked footprint descriptors; [CurtainComb](../Content/Encounters/FirstSeverance/FirstSeveranceCurtainComb.cs) derives bounded center-out teeth and individual reveal/fire/end clocks. Authority hits and client presentation use the same helper; the volley/phase deadline includes the last tooth. No per-tooth actors or packets are added. Grid pattern bit2 is retired with Phase-II Stack: only0–3 and8–11 are accepted; Spread-pocket descriptors cannot carry Core salvos. All peers must update together because the derived geometry/timing and validation changed. [The encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#center-out-curtains-and-phase-ii-spread-only-override) owns behavior; [Status](STATUS.md) owns evidence.
 

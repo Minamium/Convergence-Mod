@@ -298,6 +298,9 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
             snapshot.EncounterSequence,
             snapshot.FightId,
             out FirstSeveranceCombatProjection? combat);
+        if (combat is null && snapshot.Lifecycle == EncounterLifecycle.Cleanup)
+            FirstSeveranceCombatAuthority.TryGetTerminalPresentation(snapshot.EncounterSequence, snapshot.FightId,
+                snapshot.AuthorityTick, out combat);
         ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
         FirstSeverancePacketCodec.WriteSnapshot(packet, snapshot, preparation, combat);
         packet.Send(toClient);

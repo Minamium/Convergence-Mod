@@ -87,7 +87,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     public override void Unload()
     {
         visuals.Reset(unload: true);
-        feedback.Reset();
+        feedback.Reset(true);
         sky?.Reset();
         sky = null;
     }
@@ -171,6 +171,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             if (combat is null)
             {
                 visuals.DrawEnding(batch);
+                feedback.Draw(batch, ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects);
                 return;
             }
             visuals.Draw(batch, combat, state.EstimatedAuthorityTick);

@@ -20,7 +20,9 @@ internal sealed class FirstSeveranceFeedback
     private ulong safeCueResolve;
     private const string Root = "Convergence/Assets/Sounds/FirstSeverance/";
     private FirstSeveranceCombatProjection? previous;
-    private readonly List<Vector2> impacts = new(4);
+    private readonly FirstSeveranceMechanicVisuals mechanics = new();
+    private ulong shardDeadline;
+    private int shardBeat = -1;
     private readonly List<ReLogic.Utilities.SlotId> voices = new(24);
     private uint chargeSerial, lockSerial, fireSerial;
     private int curtainBeat = -1;
@@ -30,7 +32,6 @@ internal sealed class FirstSeveranceFeedback
     private int scoreImpactTicks;
     private readonly HashSet<int> scoreSounds = new();
     private bool failed, stack;
-    private float radius;
 
     internal float Shake => Math.Max(resultTicks > 0 ? (failed ? 17f : 9f) * MathF.Pow(resultTicks / 32f, 2f) : 0f,
         22f * MathF.Pow(scoreImpactTicks / 24f, 2f));
@@ -42,11 +43,16 @@ internal sealed class FirstSeveranceFeedback
         if (scoreImpactTicks > 0) scoreImpactTicks--;
         voices.RemoveAll(id => !SoundEngine.TryGetActiveSound(id, out var sound) || !sound.IsPlaying);
         var combat = state.Combat;
+        mechanics.Update(combat, state.EstimatedAuthorityTick);
         if (combat is null || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) || !local.IsConnected)
         {
             if (previous is not null)
             {
                 StopVoices();
+                if (state.TerminalMechanic is { } terminal && terminal.FightId == previous.FightId
+                    && terminal.MechanicRevision != previous.MechanicRevision)
+                    AcceptResult(terminal, state.EstimatedAuthorityTick);
+                else mechanics.Reset();
                 if (state.LastCombatEndReason is EncounterEndReason.Defeat or EncounterEndReason.Victory)
                     Play(state.LastCombatEndReason == EncounterEndReason.Defeat ? "RaidDefeat" : "RaidVictory", .86f);
             }
@@ -63,7 +69,10 @@ internal sealed class FirstSeveranceFeedback
             shellBroken = false;
             countdown = -1;
             safeCueResolve = 0;
-            impacts.Clear();
+            mechanics.Reset();
+            mechanics.Update(combat, state.EstimatedAuthorityTick);
+            shardDeadline = 0;
+            shardBeat = -1;
             resultTicks = 0;
             scoreImpactTicks = 0;
         }
@@ -97,16 +106,7 @@ internal sealed class FirstSeveranceFeedback
         {
             if (combat.MechanicRevision != before.MechanicRevision && combat.MechanicRevision > 0)
             {
-                stack = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackPassed or FirstSeveranceMechanicResult.StackFailed;
-                failed = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.SpreadFailed;
-                Play(failed ? "MechanicFailure" : stack ? "StackRelease" : "SpreadRelease", .82f);
-                impacts.Clear();
-                if (stack) impacts.Add(new(before.StackX, before.StackY));
-                foreach (var member in before.Participants)
-                    if (!stack && member.IsConnected)
-                        impacts.Add(Main.player[member.ServerWhoAmI].Center);
-                radius = stack ? FirstSeveranceLanceTuning.StackRadius : FirstSeveranceLanceTuning.SpreadRadius;
-                resultTicks = 32;
+                AcceptResult(combat, state.EstimatedAuthorityTick);
             }
             if (combat.Substate == FirstSeveranceSubstate.PylonCheck && before.Substate == combat.Substate
                 && combat.RemainingPylons < before.RemainingPylons)
@@ -132,6 +132,17 @@ internal sealed class FirstSeveranceFeedback
                 Play(companion.Kind == FirstSeveranceSafeMechanic.Stack ? "StackSummon" : "SpreadSummon", .98f);
         }
         ulong deadline = safe?.ResolveTick ?? combat.ResolveTick;
+        if ((safe?.Kind == FirstSeveranceSafeMechanic.Stack || combat.Substate == FirstSeveranceSubstate.Stack) && tick < deadline)
+        {
+            if (shardDeadline != deadline) { shardDeadline = deadline; shardBeat = -1; }
+            ulong start = safe?.StartTick ?? combat.ActionStartedTick;
+            int beat = FirstSeveranceMechanicVisuals.ShardBeat((double)tick - start, deadline - start);
+            if (beat > shardBeat)
+            {
+                shardBeat = beat;
+                if (!fresh) Play("ShellLatch", .54f, beat * .027f - .10f);
+            }
+        }
         if ((safe is not null || combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread) && tick < deadline)
         {
             int beat = (int)((deadline - tick + 29) / 30);
@@ -247,40 +258,22 @@ internal sealed class FirstSeveranceFeedback
         voices.Add(SoundEngine.PlaySound(style));
     }
 
-    internal void Draw(SpriteBatch batch, bool reduced)
+    internal void Draw(SpriteBatch batch, bool reduced) => mechanics.Draw(batch, reduced);
+
+    private void AcceptResult(FirstSeveranceCombatProjection combat, ulong tick)
     {
-        if (resultTicks <= 0) return;
-        float age = 1f - resultTicks / 32f, fade = 1f - age;
-        Color color = failed ? FirstSeveranceBossVisuals.Danger : stack ? FirstSeveranceBossVisuals.Ice : FirstSeveranceBossVisuals.Gold;
-        foreach (var center in impacts)
+        if (combat.MechanicImpacts.Count == 0 || tick < combat.MechanicTick || tick - combat.MechanicTick > 30) return;
+        stack = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackPassed or FirstSeveranceMechanicResult.StackFailed;
+        failed = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.SpreadFailed;
+        mechanics.Accept(combat);
+        resultTicks = 32;
+        if (stack) Play(failed ? "ShellCollapse" : "ShellShed", failed ? .88f : .62f);
+        else
         {
-            float shock = 1f - MathF.Pow(1f - age, 3f);
-            FirstSeveranceBossVisuals.Ring(batch, center, radius, color * fade, 4f);
-            if (stack)
-            {
-                // A resolved Stack retains the one true circle, not shockwave rings.
-                for (int i = 0; i < 4; i++)
-                {
-                    float a = i * MathF.PI * .5f;
-                    Vector2 direction = new(MathF.Cos(a), MathF.Sin(a)), tangent = new(-direction.Y, direction.X);
-                    Vector2 tip = center + direction * (radius + 12 + shock * 25);
-                    FirstSeveranceBossVisuals.Line(batch, tip + direction * 26 + tangent * 18, tip, color * fade, 5);
-                    FirstSeveranceBossVisuals.Line(batch, tip + direction * 26 - tangent * 18, tip, color * fade, 5);
-                }
-                continue;
-            }
-            FirstSeveranceBossVisuals.Ring(batch, center, 20 + shock * radius, Color.White * fade, reduced ? 2f : 6f);
-            if (!reduced)
-            {
-                FirstSeveranceBossVisuals.Ring(batch, center, radius * (.8f + shock * .4f), color * fade * .7f, 3f);
-                for (int i = 0; i < 12; i++)
-                {
-                    float angle = i * MathF.Tau / 12;
-                    Vector2 direction = new(MathF.Cos(angle), MathF.Sin(angle));
-                    Vector2 start = center + direction * (radius * .28f + shock * radius * .6f);
-                    FirstSeveranceBossVisuals.Line(batch, start, start + direction * (22 + 30 * fade), color * fade, 3f);
-                }
-            }
+            bool hit = false, dissipate = false;
+            foreach (var impact in combat.MechanicImpacts) { hit |= impact.Failed; dissipate |= !impact.Failed; }
+            if (hit) Play("SpreadExecution", .90f);
+            if (dissipate) Play("SpreadDissolve", hit ? .36f : .68f);
         }
     }
 
@@ -291,11 +284,13 @@ internal sealed class FirstSeveranceFeedback
         voices.Clear();
     }
 
-    internal void Reset()
+    internal void Reset(bool unload = false)
     {
         StopVoices();
         previous = null;
-        impacts.Clear();
+        mechanics.Reset(unload);
+        shardDeadline = 0;
+        shardBeat = -1;
         resultTicks = 0;
         scoreImpactTicks = 0;
         chargeSerial = lockSerial = fireSerial = 0;

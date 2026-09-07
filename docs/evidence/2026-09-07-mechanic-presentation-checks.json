@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-07",
+  "build": "0.2.21",
+  "protocol": 20,
+  "scope": "Presentation/audio only: beam mouths, per-recipient Spread rays, Stack fragments, five original SFX and louder BGM. Existing damage, timing, HP and assignment unchanged; bounded cosmetic result transport added.",
+  "checks": {
+    "domain": "99 existing cases passed; 2 new focused presentation/terminal/partial-Spread bounds and round-trip cases passed separately",
+    "build": "passed source-identified tModLoader build/package, zero warnings/errors; installed development solo flag remains enabled; source unchanged during build",
+    "codec": "passed compiled protocol 20: 324 round-trips and 50 rejected malformed/truncated payloads; new partial-recipient/terminal cases covered by focused domain checks",
+    "static": "passed catalog generation/check (59 documents), repository policy (364 files), YAML (10 files). Initial attribution table failed the exact-record format; converted five entries to required field records and reran only the affected/remaining static checks.",
+    "audio": {
+      "result": "passed finite decode, duration/frame count, maximum four-times peak0.9783; nine exports",
+      "music_rms_gain_db": [4.5706, 4.4873, 4.4110, 4.4122],
+      "recipe_sha256": "334aa1a0bea8e37393e8299850dbf505e06dd62de587c76104da0cb672fac98d",
+      "detail": "The first export exceeded the post-Vorbis peak ceiling; retained externally and not installed. Added encoding headroom and exported a fresh successful batch. Original/current predecessor masters retained.",
+      "human_listening": "not_run"
+    }
+  },
+  "build_identity": {
+    "base_commit": "7631f034d40e8c0394cf8291928d1944c425fef8",
+    "working_changes": "0.2.21 presentation/audio/protocol edits; full local source manifest retained",
+    "record": ".local/builds/20260907T060949862996Z/record.json",
+    "source_sha256": "78c7a16d86fd301d67e745c6a76e69601f5e4131647e9b8c255635fb09ec20af",
+    "assembly_sha256": "ac8d8e0d28bbf3ceb9ab697f49cdc19a4234e5a449901a805f11d7fa29141291",
+    "package_sha256": "990f2b9a629130a1554d8dac606e0ecb3835089ec6b269a4bdd0f30c94146b17",
+    "package_bytes": 33356499,
+    "post_build_edits": "Documentation/evidence/catalog only; compiled code and runtime assets unchanged."
+  },
+  "runtime": {
+    "result": "not_run; user-owned Host & Play/GUI",
+    "remaining": [
+      "Boss Core-salvo mouth connects smoothly during warning, release and cooldown; accepted broad material unaffected.",
+      "Three-player Spread partial failure: two overlapped players receive red impacts, the separated player's ray stops short; sounds are not multiplied by target count.",
+      "Stack success sheds fragments without contraction; failure contracts/fractures; immediate lethal solo Defeat retains its brief result.",
+      "No replay on duplicate/stale snapshots, fresh join, cancellation or next Fight; no terminal restoration of combat/health/input protection.",
+      "Music slider/focus/pause/loop seams, live multi-Mod mix, Reduced Effects and frame cost."
+    ]
+  },
+  "prior_playtest": "Read-only0.2.20 server log14:15–14:28 on2026-09-07: four solo runs, last Victory after272.35s; Stack20/20, Spread23/23, Down0 and one Null Refrain drop. Not evidence for new0.2.21 presentation or multiplayer behavior.",
+  "retained": "No GUI/game/server launch, save changes, HP tuning, old-copy cleanup or deletion of source assets."
+}

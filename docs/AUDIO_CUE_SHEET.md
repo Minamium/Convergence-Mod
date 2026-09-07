@@ -19,11 +19,23 @@ related_docs:
 
 # First Severance Audio Cue Sheet
 
-The accepted direction is ominous, solemn original orchestral-textural music, not the discarded Ninth/chiptune arrangement. The latest request reduces excessive SFX while raising BGM slightly. Human listening/mix approval remains user-owned. Implementation/build/load evidence belongs to [Status](STATUS.md).
+The accepted direction is ominous, solemn original orchestral-textural music, not the discarded Ninth/chiptune arrangement. The current mix and cue overrides are below. Human listening/mix approval remains user-owned. Implementation/build/load evidence belongs to [Status](STATUS.md).
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
-## Safe-window and reward articulation — 0.2.19
+## Mechanic verdicts and music presence — 0.2.21
+
+The four phase BGM masters retain their arrangements, tempo, frame counts and existing loop/entry/tail envelopes. A1.7× input lift with a stereo-linked soft peak knee increases decoded RMS by4.41–4.57dB relative to0.2.20; encoded four-times peaks stay below0.99. This is measured signal gain, not a subjective in-game loudness guarantee. The user's music slider, other-Mod audio and existing feature SFX master gain are unchanged.
+
+- SpreadExecution: short high metallic/needle onset for failed recipients; one shared voice for simultaneous failures, not one per player.
+- SpreadDissolve: softer air/glass tail for successful recipients; attenuated when a mixed result also fires the failure cue.
+- ShellLatch: dry irregular clacks aligned to the shell-piece appearances, shared across participants.
+- ShellCollapse: compression/low impact and fractured high components for a failed Stack.
+- ShellShed: detached, diminishing metallic fragments for a successful Stack, without the compression transient.
+
+All five cues are original deterministic DSP,48kHz mono PCM16. Success/failure share the accepted mechanic revision and server-sampled recipients; delayed snapshots never replay a backlog. A same-tick lethal verdict remains available as cosmetic terminal data. [Attribution](../Assets/ATTRIBUTION.md) owns exact file/provenance records; external PCM24 auditions include the0.80 SFX playback multiplier. Human listening and live multi-Mod mix remain pending.
+
+## Preceding safe-window and reward articulation — 0.2.19
 
 Current curtain override: the two center-out Stillness fans share four bounded LanceFire accents across their launch, with a modest rising pitch. They do not create a voice for every tooth or replay missed transients after a delayed snapshot. Existing masters, global mix and BGM are unchanged. Phase-II Stack cues disappear with its retired assignment; the remaining Spread cues retain their deadline identity.
 

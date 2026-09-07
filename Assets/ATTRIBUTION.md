@@ -2,6 +2,84 @@
 
 ## Records
 
+### Mechanic verdicts and music-presence revision — 0.2.21 / 2026-09-07
+
+The four existing exact music records (`Assets/Music/ObsidianLiturgy.ogg`, `Assets/Music/UnboundLiturgy.ogg`, `Assets/Music/DistantLiturgy.ogg`, `Assets/Music/TerminalLiturgy.ogg`) retain their original composition, performance, instrument-source/CC0 terms and unresolved project-release license. Original PCM24 mixes from audio0217 and Terminal's extended audio0219 master were lifted1.7× with a stereo-linked soft peak knee; decoded RMS gains4.41–4.57dB, unchanged durations, maximum4× peak0.9783. No new melody, recording, samples or raster edit. Existing runtime files and originals are preserved externally.
+
+The following exact new files are project-directed original DSP by Codex,2026-09-07, with no third-party source/sample/recording. Recipe: external audio0221/render.py (`334aa1a0bea8e37393e8299850dbf505e06dd62de587c76104da0cb672fac98d`), explicit input/output arguments, deterministic seeds2211–2237; NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0. Format48kHz mono PCM16. PCM24 auditions, predecessor files, source/export hashes and machine-specific paths are retained in the external export2 manifest. Codex checked finite decoded samples, duration and4× peaks; human listening pending. No external attribution requirement; project redistribution license undecided/development only, no public release approved.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/SpreadExecution.wav`
+- Asset ID: spreadexecution-0221-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: Inharmonic high needle chirp/metal impact,0.62s; no external sample/recording
+- Tool/model/version: audio0221 recipe and deterministic DSP versions recorded above
+- Human modifications: none; human listening pending
+- License and redistribution terms: project asset license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex decoded finite/duration/4x peak checks,2026-09-07
+- Notes: PCM24 audition, exact source/export hashes and reproducible recipe retained externally as recorded above.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/SpreadDissolve.wav`
+- Asset ID: spreaddissolve-0221-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: Softer filtered air and falling glass tone,0.70s; no external sample/recording
+- Tool/model/version: audio0221 recipe and deterministic DSP versions recorded above
+- Human modifications: none; human listening pending
+- License and redistribution terms: project asset license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex decoded finite/duration/4x peak checks,2026-09-07
+- Notes: PCM24 audition, exact source/export hashes and reproducible recipe retained externally as recorded above.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellLatch.wav`
+- Asset ID: shelllatch-0221-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: Dry faceted-metal clack,0.23s; no external sample/recording
+- Tool/model/version: audio0221 recipe and deterministic DSP versions recorded above
+- Human modifications: none; human listening pending
+- License and redistribution terms: project asset license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex decoded finite/duration/4x peak checks,2026-09-07
+- Notes: PCM24 audition, exact source/export hashes and reproducible recipe retained externally as recorded above.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellCollapse.wav`
+- Asset ID: shellcollapse-0221-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: Low pressure collapse with staggered metallic fractures,0.85s; no external sample/recording
+- Tool/model/version: audio0221 recipe and deterministic DSP versions recorded above
+- Human modifications: none; human listening pending
+- License and redistribution terms: project asset license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex decoded finite/duration/4x peak checks,2026-09-07
+- Notes: PCM24 audition, exact source/export hashes and reproducible recipe retained externally as recorded above.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellShed.wav`
+- Asset ID: shellshed-0221-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: Irregular diminishing shard impacts without compression,1.10s; no external sample/recording
+- Tool/model/version: audio0221 recipe and deterministic DSP versions recorded above
+- Human modifications: none; human listening pending
+- License and redistribution terms: project asset license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex decoded finite/duration/4x peak checks,2026-09-07
+- Notes: PCM24 audition, exact source/export hashes and reproducible recipe retained externally as recorded above.
+
+NullCantorShell's existing texture is unchanged. Runtime faceted fragment masks sample that already-attributed source; no new distributable raster or borrowed texture is introduced.
+
 ### Sanctuary build — 0.2.19 / 2026-09-07
 
 - Runtime file: `Assets/Textures/Items/NullRefrain.png`

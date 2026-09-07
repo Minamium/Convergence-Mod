@@ -115,6 +115,10 @@ internal sealed class FirstSeveranceBossVisuals
             || (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0)
             ? FirstSeveranceVisualCurves.Window(renderTick, combat.ResolveTick - lead, combat.ResolveTick) : 0;
         mechanicPose = MathHelper.Lerp(mechanicPose, requestedPose, .14f);
+        var safe = FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex, combat.ActionStartedTick,
+            state.EstimatedAuthorityTick, combat.CoreX, combat.CoreY);
+        if (safe is { } cue && state.EstimatedAuthorityTick < cue.ResolveTick)
+            mechanicPose = Math.Max(mechanicPose, Window(renderTick, cue.ResolveTick - 70d, cue.ResolveTick));
     }
 
     internal void Draw(SpriteBatch batch, FirstSeveranceCombatProjection combat, ulong tick)

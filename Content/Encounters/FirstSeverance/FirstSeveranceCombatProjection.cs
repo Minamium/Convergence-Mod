@@ -33,6 +33,9 @@ internal readonly record struct FirstSeveranceCombatParticipantProjection(
     ulong ReviveLockoutUntilTick = 0,
     bool DebugAssistProtected = false);
 
+// Cosmetic result recipients sampled BEFORE damage/teleports. Never a hit request.
+internal readonly record struct FirstSeveranceMechanicImpact(ParticipantId ParticipantId, float X, float Y, bool Failed);
+
 internal sealed class FirstSeveranceCombatProjection
 {
     public FirstSeveranceCombatProjection(
@@ -57,7 +60,8 @@ internal sealed class FirstSeveranceCombatProjection
         FirstSeveranceBossPhase bossPhase = FirstSeveranceBossPhase.Sealed,
         ulong bossPhaseStartedTick = 0,
         FirstSeveranceGridVolley? gridVolley = null,
-        ulong actionStartedTick = 0, int actionIndex = -1, int completedPhaseCycles = 0)
+        ulong actionStartedTick = 0, int actionIndex = -1, int completedPhaseCycles = 0,
+        ulong mechanicTick = 0, IReadOnlyList<FirstSeveranceMechanicImpact>? mechanicImpacts = null)
     {
         if (encounterSequence == 0
             || fightId.IsNone
@@ -105,6 +109,22 @@ internal sealed class FirstSeveranceCombatProjection
         LastMechanicResult = lastMechanicResult;
         MechanicRevision = mechanicRevision;
         Participants = FirstSeverancePlanCollections.Copy(participants, nameof(participants));
+        MechanicTick = mechanicTick;
+        MechanicImpacts = FirstSeverancePlanCollections.Copy(mechanicImpacts ?? Array.Empty<FirstSeveranceMechanicImpact>(), nameof(mechanicImpacts));
+        if (MechanicImpacts.Count > Participants.Count || MechanicImpacts.Count > 4
+            || (MechanicImpacts.Count > 0 && (mechanicTick == 0 || mechanicRevision == 0 || lastMechanicResult == FirstSeveranceMechanicResult.None)))
+            throw new ArgumentException("Invalid mechanic presentation result.");
+        var impactIds = new HashSet<ParticipantId>();
+        foreach (var impact in MechanicImpacts)
+        {
+            bool member = false;
+            foreach (var participant in Participants) member |= participant.ParticipantId == impact.ParticipantId;
+            if (!member || !impactIds.Add(impact.ParticipantId) || !float.IsFinite(impact.X) || !float.IsFinite(impact.Y)
+                || Math.Abs(impact.X) > 1_000_000 || Math.Abs(impact.Y) > 1_000_000
+                || (impact.Failed && lastMechanicResult is not (FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.SpreadFailed))
+                || (!impact.Failed && lastMechanicResult == FirstSeveranceMechanicResult.StackFailed))
+                throw new ArgumentException("Invalid mechanic presentation target.");
+        }
         foreach (var participant in Participants)
             if (participant.CombatState is not (RaidParticipantCombatState.Alive or RaidParticipantCombatState.Downed))
                 throw new ArgumentException("First Severance has no eliminated participant state.");
@@ -159,6 +179,8 @@ internal sealed class FirstSeveranceCombatProjection
     public FirstSeveranceMechanicResult LastMechanicResult { get; }
 
     public uint MechanicRevision { get; }
+    public ulong MechanicTick { get; }
+    public IReadOnlyList<FirstSeveranceMechanicImpact> MechanicImpacts { get; }
 
     public IReadOnlyList<FirstSeveranceCombatParticipantProjection> Participants { get; }
 

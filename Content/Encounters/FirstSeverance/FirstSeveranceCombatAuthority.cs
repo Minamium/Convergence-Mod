@@ -11,6 +11,9 @@ namespace Convergence.Content.Encounters.FirstSeverance;
 internal static class FirstSeveranceCombatAuthority
 {
     private static FirstSeverancePrototypeCombatRuntime? current;
+    // Snapshot transport drains after runtime cleanup. Keep only the last
+    // immutable cosmetic terminal, never the runtime/actors or live capability.
+    private static FirstSeveranceCombatProjection? terminalPresentation;
 
     internal static bool IsActive => Main.netMode != NetmodeID.MultiplayerClient && current is not null;
 
@@ -22,6 +25,7 @@ internal static class FirstSeveranceCombatAuthority
         }
 
         current = runtime;
+        terminalPresentation = null;
         return true;
     }
 
@@ -133,6 +137,20 @@ internal static class FirstSeveranceCombatAuthority
     internal static void Reset()
     {
         current = null;
+        terminalPresentation = null;
+    }
+
+    internal static void RetainTerminalPresentation(FirstSeveranceCombatProjection projection)
+        => terminalPresentation = projection;
+
+    internal static bool TryGetTerminalPresentation(ulong sequence, FightId fight, ulong tick,
+        out FirstSeveranceCombatProjection? projection)
+    {
+        projection = terminalPresentation;
+        if (projection is not null && projection.EncounterSequence == sequence && projection.FightId == fight
+            && projection.MechanicTick == tick) return true;
+        projection = null;
+        return false;
     }
 }
 
