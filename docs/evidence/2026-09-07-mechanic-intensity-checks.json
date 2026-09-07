@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-07",
+  "build": "0.2.22",
+  "protocol": 20,
+  "scope": "Client-only Stack vibration/friction arcs and failed Spread local white cross/original high ping. No domain, transport, timing, damage, BGM or gameplay randomness changes.",
+  "checks": {
+    "build": "passed source-identified tModLoader package; zero warnings/errors; installed in existing Mods; no source changed during build",
+    "static": "passed catalog generation/check (59 documents), repository checks (365 files), YAML (10 files) and diff whitespace review",
+    "audio": "passed: original oscillator master, mono PCM16/48000Hz/0.62s, finite decoded samples, four-times peak 0.82002; predecessor and PCM24 audition retained externally",
+    "audio_sha256": "44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220",
+    "domain_codec": "not repeated; unchanged source/contracts, preceding 0.2.21 checks retained",
+    "review": "Dedicated Server draw guard, bounded eight-fragment local effects, one cross per failed verdict rather than per player, reduced-effects attenuation and existing cleanup retained"
+  },
+  "build_identity": {
+    "base_commit": "0742437cda7ac22673f51cb68b7e2af4c45d5c60",
+    "working_changes": "0.2.22 presentation/audio edits; full local source manifest retained",
+    "record": ".local/builds/20260907T113025807971Z/record.json",
+    "source_sha256": "e575418aa6541a9ec2b842d2977f38968a8bf838bdb15f7ab95f0d8f483a5aaf",
+    "package_sha256": "91a24efa66b179cdebba1094d8d6bb2a681d30f13dc65013091967b18140a670",
+    "package_bytes": 33363562,
+    "post_build_edits": "Evidence/catalog only; code and runtime assets unchanged."
+  },
+  "runtime": {
+    "result": "not_run; user-owned GUI/Host & Play",
+    "remaining": "Stack surfaces remain readable through irregular fine vibration and branching arcs; success loses tension, failure contracts; failed Spread cross/ping visible once, successful rays still dissipate; reduced effects, live sound mix and frame cost."
+  },
+  "preceding_playtest": "0.2.21, 2026-09-07 18:35:29-18:38:25, one solo run: 175.97s, Phase III Stack failure at distance 524.8px versus radius112; 745 lethal damage, all Down and Defeat death reflected on client. Stack7/8 passed, Spread14/14 passed; no combat warnings/errors. User broadly accepted appearance and praised shell material. Not multiplayer or new-presentation evidence."
+}

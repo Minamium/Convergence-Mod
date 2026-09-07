@@ -85,12 +85,39 @@ internal sealed class FirstSeveranceMechanicVisuals
         if (result is not { } resolved) return;
         float age = Main.GameUpdateCount - resultStarted + fraction;
         bool wasStack = resolved.LastMechanicResult is FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.StackPassed;
+        if (!wasStack)
+            foreach (var hit in resolved.MechanicImpacts)
+                if (hit.Failed) { DrawExecutionFlash(batch, Source(resolved), age, reduced); break; }
         foreach (var hit in resolved.MechanicImpacts)
         {
             Vector2 target = new(hit.X, hit.Y);
             if (wasStack) DrawShards(batch, target, hit.ParticipantId.Value, 1, 1, age, hit.Failed, reduced);
             else DrawVerdictRay(batch, Source(resolved), target, hit.Failed, age, reduced);
         }
+    }
+
+    private void DrawExecutionFlash(SpriteBatch batch, Vector2 mouth, float age, bool reduced)
+    {
+        // One local flash per verdict, never multiplied by failed player count.
+        if (age >= 7) return;
+        float flash = (1 - Window(age, 1, 7)) * (reduced ? .30f : 1);
+        float reach = 90 + 90 * Window(age, 0, 3);
+        for (int axis = 0; axis < 2; axis++)
+        {
+            Vector2 direction = axis == 0 ? Vector2.UnitX : Vector2.UnitY;
+            float length = reach * (axis == 0 ? 1 : .73f);
+            accents.Halo(batch, mouth, new Vector2(length * 2.4f, 12), Color.White,
+                flash * .85f, axis * MathF.PI * .5f);
+            for (int side = -1; side <= 1; side += 2)
+                for (int n = 0; n < 10; n++)
+                {
+                    float t = n / 10f;
+                    Line(batch, mouth + direction * (length * t * side),
+                        mouth + direction * (length * (n + 1) / 10 * side),
+                        FirstSeveranceAttackAccents.Neon(Color.White, flash * (1 - t)), 1 + (1 - t) * 4);
+                }
+        }
+        accents.Halo(batch, mouth, new Vector2(46), Color.White, flash);
     }
 
     private void DrawVerdictRay(SpriteBatch batch, Vector2 origin, Vector2 target, bool failed, float age, bool reduced)
@@ -124,6 +151,11 @@ internal sealed class FirstSeveranceMechanicVisuals
         float releaseAge, bool failed, bool reduced)
     {
         EnsureFragments();
+        Span<Vector2> positions = stackalloc Vector2[8];
+        Span<float> opacity = stackalloc float[8];
+        opacity.Clear();
+        float clock = (float)(releaseAge < 0 ? age : releaseAge);
+        float agitation = releaseAge < 0 ? 1 : failed ? 1 - Window(releaseAge, 0, 9) : 0;
         for (int i = 0; i < 8; i++)
         {
             double birth = Births[i] * duration;
@@ -145,7 +177,16 @@ internal sealed class FirstSeveranceMechanicVisuals
                 scale *= 1 - Window(fall, 0, 40) * (failed ? .65f : .22f);
                 fade = 1 - Window(releaseAge, failed ? 15 : 28, failed ? 48 : 70);
             }
+            // Independent, smoothly interpolated stick/slip vibration. Keep the
+            // authored shell texture readable instead of covering it in bloom.
+            float seed = i * 31.7f + identity * 93.1f;
+            float tension = .35f + .65f * Window(age, duration * .45, duration);
+            float chatter = agitation * tension * (reduced ? .4f : 1);
+            offset += new Vector2(Noise(clock * .61f + seed), Noise(clock * .79f + seed + 9)) * chatter * 5;
+            rotation += Noise(clock * .43f + seed + 19) * chatter * .065f;
             Vector2 position = center + offset;
+            positions[i] = position;
+            opacity[i] = fade;
             Texture2D texture = fragments![i];
             Color light = failed && releaseAge >= 0 ? new(255, 135, 156) : new(210, 215, 231);
             if (!reduced)
@@ -155,9 +196,54 @@ internal sealed class FirstSeveranceMechanicVisuals
             float glint = releaseAge < 0 ? 1 - Window(age, birth + 2, birth + 10) : failed ? 1 - Window(releaseAge, 6, 15) : 0;
             accents.Halo(batch, position, new Vector2(55, 6), Color.White, fade * glint * .75f, rotation);
         }
+        if (agitation > 0)
+            for (int i = 0; i < 8; i++)
+            {
+                int next = (i + 1) % 8;
+                if (opacity[i] <= 0 || opacity[next] <= 0 || (reduced && i % 2 != 0)) continue;
+                float seed = i * 31.7f + identity * 93.1f;
+                float contact = Window(Noise(clock * .19f + seed), -.05, .6);
+                float strength = contact * Math.Min(opacity[i], opacity[next]) * agitation * (reduced ? .4f : 1);
+                if (strength < .03f) continue;
+                Vector2 gap = positions[next] - positions[i];
+                // Short filament starts/ends on the shard edges, not a solid ring.
+                Vector2 start = positions[i] + gap * .23f, end = positions[next] - gap * .23f;
+                DrawFrictionArc(batch, start, end, clock, seed, strength);
+                if (!reduced)
+                    DrawFrictionArc(batch, Vector2.Lerp(start, end, .48f),
+                        Vector2.Lerp(start, end, .68f) + (start - center) * .21f,
+                        clock + 7, seed + 13, strength * .55f);
+            }
         if (failed && releaseAge >= 4)
             accents.Halo(batch, center, new Vector2(100, 145), new Color(255, 85, 113),
                 Window(releaseAge, 4, 7) * (1 - Window(releaseAge, 8, 23)) * .9f);
+    }
+
+    private void DrawFrictionArc(SpriteBatch batch, Vector2 start, Vector2 end, float clock, float seed, float strength)
+    {
+        Vector2 delta = end - start;
+        float length = delta.Length();
+        if (length < 1) return;
+        Vector2 normal = new(-delta.Y / length, delta.X / length), last = start;
+        Color cold = new(161, 193, 255);
+        for (int n = 1; n <= 7; n++)
+        {
+            float t = n / 7f;
+            Vector2 point = Vector2.Lerp(start, end, t) + normal *
+                (Noise(clock * .37f + seed + n * 9.37f) * 9 * MathF.Sin(t * MathF.PI));
+            Line(batch, last, point, FirstSeveranceAttackAccents.Neon(cold, strength * .24f), 4);
+            Line(batch, last, point, FirstSeveranceAttackAccents.Neon(Color.White, strength * .95f), .85f);
+            last = point;
+        }
+        accents.Halo(batch, start, new Vector2(19, 4), cold, strength * .65f, delta.ToRotation());
+    }
+
+    private static float Noise(float time)
+    {
+        float cell = MathF.Floor(time), blend = time - cell;
+        blend = blend * blend * (3 - 2 * blend);
+        static float Hash(float x) { float v = MathF.Sin(x * 12.9898f + 78.233f) * 43758.5453f; return (v - MathF.Floor(v)) * 2 - 1; }
+        return MathHelper.Lerp(Hash(cell), Hash(cell + 1), blend);
     }
 
     private void EnsureFragments()

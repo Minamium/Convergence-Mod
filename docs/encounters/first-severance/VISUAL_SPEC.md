@@ -32,7 +32,11 @@ The accepted broad plasma material remains. Boss-origin lattice Core salvos repl
 
 Spread resolves as an instantaneous thin ruby ray from the Boss to each server-sampled standing participant. Overlapped recipients receive the sharp full-length ray/impact; successful recipients see a weaker ray stop short and disperse into fine mist. A mixed result is drawn per recipient, never inferred from locally observed positions. These are result animations, not dodgeable projectiles or new damage.
 
+A failed Spread adds one brief, tapered white cross at the Boss's mouth, regardless of failed-recipient count. It fades within seven ticks, remains local rather than a full-screen flash, and is strongly attenuated by Reduced Effects. Successful Spread retains its quiet dissolution without this execution flash.
+
 Stack retains its accepted gathering circle. Eight irregularly timed groups of faceted, high-resolution shell splinters snap into place around each standing participant. The fragments sample the project's existing NullCantorShell texture through disposable runtime masks. On failure they contract sharply, fracture and scatter; on success they do not contract and instead tumble down under a weak gravity-like curve. Sub-tick interpolation connects the quick poses. Result recipients/positions are frozen by authority before damage; even a same-tick Defeat may display its short result without reactivating combat. Textures/voices reset on unload and effects never change input, immunity or gameplay.
+
+During anticipation, each existing splinter has independent smoothly interpolated stick/slip vibration, increasing subtly toward resolve. Intermittent thin, branching cold-white arcs bridge neighboring shard edges; no solid ring or filled lightning sheet obscures the authored surface. Successful release immediately loses tension; failed contraction briefly retains it. Reduced Effects reduces vibration, contacts and glow; deterministic visual noise never consumes gameplay randomness.
 
 ## Beam readability and clutter reduction
 

@@ -27,7 +27,7 @@ Current implementation is governed by the first section's overrides and the shar
 
 The four phase BGM masters retain their arrangements, tempo, frame counts and existing loop/entry/tail envelopes. A1.7× input lift with a stereo-linked soft peak knee increases decoded RMS by4.41–4.57dB relative to0.2.20; encoded four-times peaks stay below0.99. This is measured signal gain, not a subjective in-game loudness guarantee. The user's music slider, other-Mod audio and existing feature SFX master gain are unchanged.
 
-- SpreadExecution: short high metallic/needle onset for failed recipients; one shared voice for simultaneous failures, not one per player.
+- SpreadExecution: a brief focused high metallic "ping", with a fast pitch scoop settling into a clear ringing tail, synchronized to the failed verdict's white cross. One shared voice for simultaneous failures, not one per player. The0.2.22 original oscillator master replaces the noisier onset; duration and existing cue/master gains are retained.
 - SpreadDissolve: softer air/glass tail for successful recipients; attenuated when a mixed result also fires the failure cue.
 - ShellLatch: dry irregular clacks aligned to the shell-piece appearances, shared across participants.
 - ShellCollapse: compression/low impact and fractured high components for a failed Stack.

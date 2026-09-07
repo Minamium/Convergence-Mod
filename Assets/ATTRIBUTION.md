@@ -2,6 +2,10 @@
 
 ## Records
 
+### Execution ping revision — 0.2.22 / 2026-09-07
+
+The existing exact `Assets/Sounds/FirstSeverance/SpreadExecution.wav` record below retains its project-original source and unresolved release-license terms. Its new0.62s/48kHz mono PCM16 master uses only analytic oscillators: a fast focusing pitch scoop,2350Hz settled tone, inharmonic upper partials and a short low onset. No samples, recordings, randomness or external source. Original Codex-authored external audio0222/render.py (`e074a1fbdc40ae201951c4b6095c5c09f832a1693563318bb487dec4959cc205`), NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0. Output SHA256 `44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220`; finite decode and duration passed,4x peak0.82002. Predecessor master, manifest and PCM24 audition with actual cue/master gains remain external in audio0222/export. Human listening pending. Other audio and the original shell texture are unchanged.
+
 ### Mechanic verdicts and music-presence revision — 0.2.21 / 2026-09-07
 
 The four existing exact music records (`Assets/Music/ObsidianLiturgy.ogg`, `Assets/Music/UnboundLiturgy.ogg`, `Assets/Music/DistantLiturgy.ogg`, `Assets/Music/TerminalLiturgy.ogg`) retain their original composition, performance, instrument-source/CC0 terms and unresolved project-release license. Original PCM24 mixes from audio0217 and Terminal's extended audio0219 master were lifted1.7× with a stereo-linked soft peak knee; decoded RMS gains4.41–4.57dB, unchanged durations, maximum4× peak0.9783. No new melody, recording, samples or raster edit. Existing runtime files and originals are preserved externally.
