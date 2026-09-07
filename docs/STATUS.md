@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.23**, protocol **20**. Every Spread now shares the white muzzle cross, high firing ping and ray strength; success bursts into a larger split plume before the player instead of impacting. Stack's accepted shell fragments and friction arcs are enlarged, with original electrical contact audio. The accepted beam materials, BGM mix and gameplay remain unchanged. Version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); exact mechanics/tuning belong to the linked specifications/code.
+Development **0.2.24**, protocol **21**. Iron Interdict replaces Phase-III half-field erasure with staggered top/bottom swords: one gapless half and tight gaps in the other. Final combs are denser with0.05s less warning; Spread has a wider true radius and larger brief firing flash. Original sword, shell/core and pylon hit sounds are added. HP, damage amounts, other attacks, BGM and phase schedules are unchanged. Version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); exact mechanics/tuning belong to the linked specifications/code.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -35,9 +35,9 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-[Current check record](evidence/2026-09-07-shared-spread-shell-checks.json) owns scoped automated results and pending visual/audio acceptance. Logs and artifact hash confirmed both client/server loaded0.2.22; its solo Spread succeeded, so the then-failure-only flash did not appear. This restriction is now removed. [0.2.22 checks](evidence/2026-09-07-mechanic-intensity-checks.json), [0.2.21 checks](evidence/2026-09-07-mechanic-presentation-checks.json) and [consolidation](evidence/2026-09-07-development-consolidation.json) retain preceding evidence/history.
+[Current check record](evidence/2026-09-07-iron-interdict-checks.json) owns scoped automated results and pending runtime checks. The user accepted0.2.23 visuals; its latest solo run reached Final and failed the fifth Stack, with no combat warnings/errors. Its shared Spread launch and shell surface are retained. [0.2.23 checks](evidence/2026-09-07-shared-spread-shell-checks.json), [0.2.22 checks](evidence/2026-09-07-mechanic-intensity-checks.json), [0.2.21 checks](evidence/2026-09-07-mechanic-presentation-checks.json) and [consolidation](evidence/2026-09-07-development-consolidation.json) retain preceding evidence/history.
 
-**Not run / user-owned:** matching0.2.23 load, enlarged shell/lightning readability, electrical audio mix and reduced-effects behavior; successful Spread cross/ping and split plume. Three-player partial failures remain unobserved; solo results do not substitute. No GUI, game or server was launched for this change. Compilation is not audiovisual, performance, latency or multiplayer proof. Previous checks not explicitly observed remain pending in their evidence record; no blanket retest is required. The manual self-hosted Mod-build CI runner remains unprovisioned.
+**Not run / user-owned:** matching0.2.24 client/server load, sword gap/forecast/insertion readability, native material-hit sounds, wider four-player Spread pockets, intensified local flash and Final density. Three-player mixed failures/revival remain unobserved by the latest solo run. No GUI, game or server was launched for this change. Compilation is not audiovisual, performance, latency or multiplayer proof. Previous checks not explicitly observed remain pending in their evidence record; no blanket retest is required. The manual self-hosted Mod-build CI runner remains unprovisioned.
 
 ## Constraints and deferred work
 
@@ -48,7 +48,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Next change
 
-User-owned0.2.23 Host & Play: solo can now show the common Spread firing flash/ping plus the successful plume, and enlarged electrified Stack shells. Failure/mixed endpoints still need multiplayer. Discuss HP separately from distinct build/roster playtests; no implicit retuning. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) owns production backlog.
+User-owned0.2.24 Host & Play: confirm Iron Interdict's sparse half remains readable/dodgeable, Final spacing, Spread radius/flash and the distinct damage sounds. All peers must update together. No further HP adjustment implied. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) owns production backlog.
 
 ## History
 

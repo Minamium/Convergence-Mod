@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v20
+## Current development protocol v21
+
+The wire layout, operation IDs, ownership and terminal contract remain v20. Version21 requires matching peers because Iron Interdict sword geometry, denser/earlier Final slicers and wider Spread/lattice pockets derive locally from the accepted action epoch. A peer with older geometry must not render a different warning from authority collision. No per-sword packet or actor is added. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#iron-interdict-and-current-spacing-override) owns the changed behavior.
+
+## Preceding development protocol v20
 
 The bounded combat snapshot appends a cosmetic mechanic result: authority tick (`ulong`), target count (`byte`,0–4 and at most the roster), then participant ID (`byte`), sampled X/Y (`float` each) and failed flag (strict Boolean) for each target. Maximum addition49 bytes. Identity must belong to the snapshot roster, IDs are unique, positions finite/bounded, and a success cannot mark a failed recipient. Gameplay damage/assignment/deadlines are unchanged; no client result/hit request or new operation ID is added.
 

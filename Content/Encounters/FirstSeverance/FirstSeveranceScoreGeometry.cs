@@ -37,9 +37,10 @@ internal static class FirstSeveranceScoreGeometry
     internal const int SlicerExtraWarningTicks = 15;
     private static int OriginalSlicerCadence(int step) => 40 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
     internal static int SlicerCadence(int step) => OriginalSlicerCadence(step) + SlicerExtraWarningTicks;
-    internal static int SlicerFire(int step) => (int)Math.Ceiling(OriginalSlicerCadence(step) * .7) + SlicerExtraWarningTicks;
+    internal static int SlicerFire(int step) => (int)Math.Ceiling(OriginalSlicerCadence(step) * .7) + SlicerExtraWarningTicks - 3;
     internal static int SlicerEnd(int step) => SlicerCadence(step) - 4;
-    internal static float SlicerOffset(int step, int pulse) => ((pulse / 2 * 53 + Math.Max(0, step / 3) * 37) % 160) - 80;
+    internal const int SlicerPitch = 136;
+    internal static float SlicerOffset(int step, int pulse) => ((pulse / 2 * 45 + Math.Max(0, step / 3) * 37) % SlicerPitch) - SlicerPitch / 2;
     internal static int BulletStartTick(int step, int wave) => 36 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 8)
         + wave * (32 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 10));
     internal static float BulletSpeed(int step) => 10 + FirstSeveranceChoreography.FinalProgress(step) * 3.5f;
@@ -111,9 +112,9 @@ internal static class FirstSeveranceScoreGeometry
         }
         else if (state == FirstSeveranceSubstate.HalfField && age < 300)
         {
-            float side = step < 4 ? -1 : 1;
-            rays.Add(new(new(groundX + side * 640, cy - 560, 0, 1, 1120, 640),
-                age >= 180 && age < 240, 0, Smooth((float)age / 180)));
+            foreach (var sword in FirstSeveranceImpalingSwords.At(step, age, groundX, groundY))
+                rays.Add(new(sword.FullRay with { Length = Math.Max(1, sword.FullRay.Length * sword.Extension) },
+                    sword.Live, sword.Wave, sword.Charge));
         }
         else if (state == FirstSeveranceSubstate.RemoteCrush && age < 300)
         {
@@ -127,13 +128,13 @@ internal static class FirstSeveranceScoreGeometry
             if (pulse >= SlicerPulses) return rays;
             double local = age - pulse * SlicerCadence(step);
             bool vertical = pulse % 2 == 0;
-            // 160 px pitch / 56 px beam leaves 104 px clear lanes. Axes never fire together.
-            // Each repeated axis shifts by 53px: its three pulses cover any fixed
+            // 136 px pitch / 56 px beam leaves 80 px clear lanes. Axes never fire together.
+            // Each repeated axis shifts by 45px: its three pulses cover any fixed
             // player position, including arena-edge cells. No per-axis fixed parity.
             float extent = vertical ? FieldHalfWidth : FieldHalfHeight;
-            for (int i = -9; i <= 9; i++)
+            for (int i = -11; i <= 11; i++)
             {
-                float offset = i * 160 + SlicerOffset(step, pulse);
+                float offset = i * SlicerPitch + SlicerOffset(step, pulse);
                 if (Math.Abs(offset) > extent + 28) continue;
                 rays.Add(new(vertical ? new(groundX + offset, cy - 560, 0, 1, 1120, 28)
                     : new(groundX - 1280, cy + offset, 1, 0, 2560, 28), local >= SlicerFire(step) && local < SlicerEnd(step),

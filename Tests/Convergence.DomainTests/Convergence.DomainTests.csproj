@@ -27,6 +27,7 @@
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEndingTimeline.cs" Link="Domain/FirstSeveranceEndingTimeline.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceChoreography.cs" Link="Domain/FirstSeveranceChoreography.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs" Link="Domain/FirstSeveranceScoreGeometry.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceImpalingSwords.cs" Link="Domain/FirstSeveranceImpalingSwords.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePartyScaling.cs" Link="Domain/FirstSeverancePartyScaling.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBossPhases.cs" Link="Domain/FirstSeveranceBossPhases.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceGridVolley.cs" Link="Domain/FirstSeveranceGridVolley.cs" />

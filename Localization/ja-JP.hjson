@@ -48,7 +48,7 @@ Mods: {
         PhaseSpawnIntro: "Raid開始。足元の蘇生キットを拾ってください。/convergence-down でDownを実験できます。起動者の /convergence-cancel で終了。"
         PhasePylonCheck: "パイロン — {0}基すべてを破壊！ Bossはまだ無敵です。"
         PhaseStack: "頭割り — {1} の7タイル以内に集合！ 必要人数: {3}。あと{2}秒。"
-        PhaseSpread: "散開 — 大きな円を重ねない！ お互いに40タイル以上離れて。あと{2}秒。"
+        PhaseSpread: "散開 — 大きな円を重ねない！ お互いに44タイル以上離れて。あと{2}秒。"
         PhaseCoreExposure: "コア露出 — 枠で囲まれた中央の空洞を攻撃！ ビームの予測線を避けよう。残り{2}秒。"
         LanceWarning: "観測の槍 — 射線固定。破線の帯から退避！ あと{0}秒"
         LanceFire: 観測の槍 — 発射
@@ -105,7 +105,7 @@ Mods: {
         NameReset: リセット
         NameRotatingBlade: 公理の剣
         NameRemoteClaws: 遠隔挟撃
-        NameHalfField: 半域消去
+        NameHalfField: 鉄の禁域
         NameFinalBullets: 終端弾幕
         NameFinalSlicer: 千切りの光
         BladeGuide: 二枚の刃が高速で二周する。内側へ寄り、時計回りに旋回。
@@ -113,13 +113,13 @@ Mods: {
         CrushGuide: 中央の赤い領域から退避 — 両手が閉じると即ダウン。
         ClawsGuide: ビームが急速に拡がる。移動する退避帯へ！
         FloodSafeGuide: 安全地帯
-        HalfGuide: 色のない半面へ！ 着色された領域全体にビームが来る。
+        HalfGuide: 密集した半面から離れ、上下から刺さる剣の隙間へ。
         FinalGuide: HPはゼロ。最後の行動リストを避けきろう。蘇生は引き続き使用可能。
         DistantTitle: 無響の唱導者 // 遠隔顕現
         FinalTitle: 無響の唱導者 // 終端楽譜
         PhaseRotatingBlade: 公理の剣 — 伸展後は内側に寄って時計回りに旋回！
         PhaseRemoteClaws: 遠隔挟撃 — 左右の腕が閉じる。予測線を避けよう。
-        PhaseHalfField: 半域消去 — 色のない半面へ移動！
+        PhaseHalfField: 鉄の禁域 — 密集した半面を離れ、剣の隙間を抜けろ！
         PhaseFinalBullets: 終端弾幕 — 内側へ向かう飛翔物を回避。
         PhaseFinalSlicer: 千切りの光 — 予測線の隙間に入ろう。
         PhaseRemoteTransition: 本体が遠方へ離脱 — 両腕がフィールド内に顕現する。

@@ -75,7 +75,7 @@ Mods: {
 				PhaseSpawnIntro: Raid started. Pick up your Resuscitation Kit. /convergence-down tests Downed; the initiator can end with /convergence-cancel.
 				PhasePylonCheck: PYLONS — destroy all {0}. The Boss remains shielded.
 				PhaseStack: STACK — gather within 7 tiles of {1}. Required shares: {3}. {2} seconds!
-				PhaseSpread: SPREAD — large circles! Separate by at least 40 tiles. {2} seconds!
+				PhaseSpread: SPREAD — large circles! Separate by at least 44 tiles. {2} seconds!
 				PhaseCoreExposure: CORE EXPOSED — attack the framed central aperture; dodge the predicted beams! {2} seconds.
 				LanceWarning: OBSERVATION LANCE — aim locked. Clear the dashed corridor! {0}s
 				LanceFire: OBSERVATION LANCE — FIRING
@@ -121,7 +121,7 @@ Mods: {
 				NameLattice: PHASE II — LATTICE
 				NameRotatingBlade: AXIOM BLADE
 				NameRemoteClaws: REMOTE CLASP
-				NameHalfField: HEMISPHERE ERASURE
+				NameHalfField: IRON INTERDICT
 				NameFinalBullets: TERMINAL RAIN
 				NameFinalSlicer: SLICING COMB
 				BladeGuide: TWO BLADES / TWO TURNS — move inward; orbit clockwise through the acceleration.
@@ -129,13 +129,13 @@ Mods: {
 				CrushGuide: LEAVE THE RED CENTER — the closing hands instantly Down anyone inside.
 				ClawsGuide: THE BEAMS WIDEN — find the shifting safe strip before they engulf the field.
 				FloodSafeGuide: SAFE
-				HalfGuide: LEAVE THE COLORED HALF — the entire highlighted region will fire.
+				HalfGuide: Leave the dense half. Find a gap between the descending and rising blades.
 				FinalGuide: HP ZERO — survive the full score. Revival remains available.
 				DistantTitle: NULL CANTOR // DISTANT PRESENCE
 				FinalTitle: NULL CANTOR // TERMINAL SCORE
 				PhaseRotatingBlade: Axiom Blade — move inward and orbit clockwise after the extension.
 				PhaseRemoteClaws: Remote Clasp — both hands are preparing to close.
-				PhaseHalfField: Half-field erasure — move to the uncolored half!
+				PhaseHalfField: Iron Interdict — escape the dense half and weave between the blades!
 				PhaseFinalBullets: Terminal rain — dodge the inward projectiles.
 				PhaseFinalSlicer: Slicing comb — step between the predicted lanes.
 				PhaseRemoteTransition: Presence receding — the hands remain inside the field.

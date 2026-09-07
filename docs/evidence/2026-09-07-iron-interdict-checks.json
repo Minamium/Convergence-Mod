@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-07",
+  "build": "0.2.24",
+  "protocol": 21,
+  "scope": "Phase-III HalfField replacement by shared staggered sword geometry; denser Final and3-tick earlier fire; wider Spread and adjusted four-player pockets; larger local muzzle flash; four original sword/actor sounds. No HP/damage-amount/BGM changes.",
+  "checks": {
+    "domain": "103 deterministic tests passed, including two new sword coverage/insertion cases; subsequent strengthened full-disc Spread separation passed focused Lattice preserves four test",
+    "build": "tModLoader build and package passed with zero warnings/errors; source unchanged during build; installed Mods/Convergence.tmod",
+    "codec": "Compiled protocol 21 assembly: 324 roundtrips passed; 50 malformed/truncated packets rejected; solo development flag true",
+    "static": "verify_repo.py --write-catalog passed: 59 documents, repository checks over 376 files, 10 YAML files; git diff --check passed",
+    "audio": "Four original seeded-modal DSP exports passed finite decode,48kHz mono PCM16, exact durations and4x peaks below0.781; PCM24 auditions and manifest/recipe preserved externally; human listening pending",
+    "review": "Shared geometry/epochs, existing per-wave authority hit cap/cleanup, no per-sword actors or packet counts, native bounded material hit sounds, Dedicated Server guards"
+  },
+  "build_identity": {
+    "local_record": ".local/builds/20260907T122942938673Z/record.json",
+    "base_commit": "c270e81a14b454ed470574b5924d4791eb65d73b",
+    "dirty_source_sha256": "05a8b3ad5291d87c3693e34d7627ca0edf8f77837db3bf8e38dd112fe15dea9c",
+    "assembly_sha256": "34f125ec758f838a1c9600bb4c307ea0484da1e4b49a4b941933031173216998",
+    "package_sha256": "3aaeecf2c356319c460f75c5c95c20f1c05ba03f05b2dfff4fe5dd53e9a1961a",
+    "package_bytes": 33498197,
+    "post_build_changes": "Documentation, evidence and generated catalog only; no gameplay code or shipped asset changes"
+  },
+  "runtime": "not_run; user-owned Host & Play/GUI. Check both sword halves and insertion/retraction, dense Final readability, widened Spread with four bodies/pockets, material hit sounds on all clients, local flash/reduced effects and live frame cost.",
+  "prior_playtest": "User accepted0.2.23 visuals. Solo20:53:05–20:57:09: Final reached,243.73s, Stack16/17, Spread19/19, defeated at Final fifth Stack distance293.4px versus112px; core5M damage/60.85s open=82169.3DPS; no combat warnings/errors. Not new-build or multiplayer evidence."
+}

@@ -67,6 +67,7 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
         NPC.dontTakeDamage = true;
         NPC.chaseable = false;
         NPC.scale = 1f;
+        if (!Main.dedServ) NPC.HitSound = FirstSeveranceHitSounds.Shell;
     }
 
     public override bool CheckActive() => false;
@@ -89,6 +90,12 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
         NPC.chaseable = !NPC.dontTakeDamage;
         NPC.rotation = 0.025f * (float)System.Math.Sin(Main.GameUpdateCount / 25d);
         NPC.timeLeft = NPC.activeTime;
+        if (!Main.dedServ)
+        {
+            var combat = ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat;
+            NPC.HitSound = combat is not null && combat.BossPhase != FirstSeveranceBossPhase.Sealed
+                ? FirstSeveranceHitSounds.Core : FirstSeveranceHitSounds.Shell;
+        }
 
         if (!Main.dedServ && Main.rand.Next(3) == 0)
         {

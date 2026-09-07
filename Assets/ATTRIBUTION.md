@@ -2,6 +2,64 @@
 
 ## Records
 
+### Sword and actor impacts — 0.2.24 / 2026-09-07
+
+- Runtime file: `Assets/Sounds/FirstSeverance/SwordImpale.wav`
+- Asset ID: swordimpale-0224-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: .34s sliding metal insertion with brittle transient; no imported samples/recordings
+- Tool/model/version: external audio0224/render.py; NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0, deterministic seeds22401–22404
+- Human modifications: none; human listening pending
+- License and redistribution terms: project license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex finite decode/duration/4x peak checks,2026-09-07
+- Notes:48kHz mono PCM16,4x peak below0.781. Recipe SHA256 `4f75c9d12878da04738e4c2aff66746bc01a7c6da6cb7518f0a4a6655affa79b`; PCM24 auditions with actual cue/master gains, manifests and export hashes retained externally in audio0224/export.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellHit.wav`
+- Asset ID: shellhit-0224-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: .28s close dissonant hard-metal modes; no imported samples/recordings
+- Tool/model/version: external audio0224/render.py; NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0, deterministic seeds22401–22404
+- Human modifications: none; human listening pending
+- License and redistribution terms: project license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex finite decode/duration/4x peak checks,2026-09-07
+- Notes:48kHz mono PCM16,4x peak below0.781. Recipe SHA256 `4f75c9d12878da04738e4c2aff66746bc01a7c6da6cb7518f0a4a6655affa79b`; PCM24 auditions with actual cue/master gains, manifests and export hashes retained externally in audio0224/export.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/CoreHit.wav`
+- Asset ID: corehit-0224-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: .22s bright glass modes with staggered microcracks; no imported samples/recordings
+- Tool/model/version: external audio0224/render.py; NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0, deterministic seeds22401–22404
+- Human modifications: none; human listening pending
+- License and redistribution terms: project license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex finite decode/duration/4x peak checks,2026-09-07
+- Notes:48kHz mono PCM16,4x peak below0.781. Recipe SHA256 `4f75c9d12878da04738e4c2aff66746bc01a7c6da6cb7518f0a4a6655affa79b`; PCM24 auditions with actual cue/master gains, manifests and export hashes retained externally in audio0224/export.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/PylonHit.wav`
+- Asset ID: pylonhit-0224-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: .24s low metal-plate knock; no imported samples/recordings
+- Tool/model/version: external audio0224/render.py; NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0, deterministic seeds22401–22404
+- Human modifications: none; human listening pending
+- License and redistribution terms: project license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex finite decode/duration/4x peak checks,2026-09-07
+- Notes:48kHz mono PCM16,4x peak below0.781. Recipe SHA256 `4f75c9d12878da04738e4c2aff66746bc01a7c6da6cb7518f0a4a6655affa79b`; PCM24 auditions with actual cue/master gains, manifests and export hashes retained externally in audio0224/export.
+
 ### Shell friction audio — 0.2.23 / 2026-09-07
 
 - Runtime file: `Assets/Sounds/FirstSeverance/ShellArc.wav`

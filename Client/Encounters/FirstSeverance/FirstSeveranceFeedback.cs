@@ -93,7 +93,7 @@ internal sealed class FirstSeveranceFeedback
                     : combat.BossPhase == FirstSeveranceBossPhase.Final ? "TerminalEntry" : "PhaseRupture",
                 FirstSeveranceSubstate.Lattice => "CoreExposure",
                 FirstSeveranceSubstate.RotatingBlade => "BladeGather",
-                FirstSeveranceSubstate.HalfField => "HalfFieldCharge",
+                FirstSeveranceSubstate.HalfField => "BladeGather",
                 FirstSeveranceSubstate.RemoteCrush => "HandCrushGather",
                 FirstSeveranceSubstate.FinalBullets => "FinalGather",
                 FirstSeveranceSubstate.FinalSlicer => "FinalGather",
@@ -215,6 +215,10 @@ internal sealed class FirstSeveranceFeedback
         double age = (double)tick - combat.ActionStartedTick;
         if (tick < combat.ResolveTick && age >= 0)
         {
+            if (combat.Substate == FirstSeveranceSubstate.HalfField)
+                foreach (var sword in FirstSeveranceImpalingSwords.At(combat.ActionIndex, age, combat.CoreX, combat.CoreY))
+                    if (age >= sword.Fire && age < sword.Fire + 8 && scoreSounds.Add(1000 + sword.Fire))
+                        Play("SwordImpale", .72f, sword.Slot % 3 * .035f - .035f);
             if (combat.Substate == FirstSeveranceSubstate.RemoteClaws)
             {
                 int pulse = (int)age / FirstSeveranceScoreGeometry.FloodInterval;
@@ -225,15 +229,14 @@ internal sealed class FirstSeveranceFeedback
             {
                 int soundPulse = combat.Substate == FirstSeveranceSubstate.RotatingBlade
                     ? ray.Pulse / FirstSeveranceScoreGeometry.BladeCount : ray.Pulse;
-                if (!ray.Live && ray.Charge >= .65f && ray.Charge < 1 && scoreSounds.Add(soundPulse - 128))
+                if (combat.Substate != FirstSeveranceSubstate.HalfField && !ray.Live && ray.Charge >= .65f && ray.Charge < 1 && scoreSounds.Add(soundPulse - 128))
                     Play("ExecutionLock", .98f);
-                if (ray.Live && scoreSounds.Add(soundPulse))
+                if (combat.Substate != FirstSeveranceSubstate.HalfField && ray.Live && scoreSounds.Add(soundPulse))
                 {
                     Play(combat.Substate switch
                     {
                         FirstSeveranceSubstate.RotatingBlade => "BladeSweep",
                         FirstSeveranceSubstate.RemoteClaws => "HandClasp",
-                        FirstSeveranceSubstate.HalfField => "HalfFieldFire",
                         FirstSeveranceSubstate.RemoteCrush => "HandCrushImpact",
                         _ => "FinalSlicerFire",
                     }, .98f);

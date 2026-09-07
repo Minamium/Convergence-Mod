@@ -6,16 +6,16 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Final slicers add exactly 15 harmless ticks without losing a pulse")]
+    [DomainTest("Final slicers shorten warning by exactly 3 ticks without losing a pulse")]
     private static void SlicerWarningExtension()
     {
         foreach (int step in new[] { 5, 11, 17, 23 })
         {
             int oldCadence = 40 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
             int oldFire = (int)Math.Ceiling(oldCadence * .7);
-            AssertEqual(oldFire + 15, FirstSeveranceScoreGeometry.SlicerFire(step), "exact quarter-second grace");
-            AssertEqual(oldCadence - 4 - oldFire,
-                FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "unchanged live interval");
+            AssertEqual(oldFire + 12, FirstSeveranceScoreGeometry.SlicerFire(step), "0.05s less than prior quarter-second extension");
+            AssertEqual(oldCadence - 4 - oldFire + 3,
+                FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "earlier fire retains prior end/cadence");
             for (int pulse = 0; pulse < 6; pulse++)
             {
                 int fire = pulse * FirstSeveranceScoreGeometry.SlicerCadence(step) + FirstSeveranceScoreGeometry.SlicerFire(step);
@@ -45,8 +45,8 @@ internal static partial class Program
             for (int a = 0; a < pockets.Count; a++)
                 for (int b = a + 1; b < pockets.Count; b++)
                     AssertEqual(true, MathF.Sqrt(MathF.Pow(pockets[a].X - pockets[b].X, 2)
-                        + MathF.Pow(pockets[a].Y - pockets[b].Y, 2)) >= FirstSeveranceLanceTuning.SpreadSeparation,
-                        "four spread destinations do not overlap at their centers");
+                        + MathF.Pow(pockets[a].Y - pockets[b].Y, 2)) >= FirstSeveranceLanceTuning.SpreadSeparation + 72,
+                        "four spread destinations retain separation throughout both 36px acceptance discs");
             AssertEqual(true, grid.Intersects(grid.FireTick, grid.Rays[0].X, grid.Rays[0].Y, 10, 21), "hazards remain outside sanctuaries");
             AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(3, 100, pattern, 4000, 4000,
                 new[] { FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 4200, 3200) }), "no aimed core salvo through a sanctuary");
@@ -97,7 +97,7 @@ internal static partial class Program
                         float dy = window.Kind == FirstSeveranceSafeMechanic.Stack ? FirstSeveranceLanceTuning.StackRadius : 0;
                         AssertEqual(false, item.Ray.Intersects(window.X, window.Y + dy, 10, 21), "whole Stack circle fits below");
                         AssertEqual(false, item.Ray.Intersects(window.X, window.Y - dy, 10, 21), "whole Stack circle fits above");
-                        foreach (int dx in new[] { -990, -330, 330, 990 })
+                        foreach (int dx in new[] { -1110, -370, 370, 1110 })
                             AssertEqual(false, item.Ray.Intersects(window.X + dx, window.Y, 10, 21), "four spread centers fit the horizontal strip");
                     }
             }

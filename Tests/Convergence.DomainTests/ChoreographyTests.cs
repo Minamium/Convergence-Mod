@@ -44,7 +44,7 @@ internal static partial class Program
     [DomainTest("Clockwise sites, wider spreads and practical travel budgets fit the field")]
     private static void ClockAndTravelBudgets()
     {
-        AssertEqual(640f, FirstSeveranceLanceTuning.SpreadSeparation, "40-tile separation");
+        AssertEqual(704f, FirstSeveranceLanceTuning.SpreadSeparation, "44-tile separation");
         var field = FirstSeveranceContainmentBounds.FromGround(4000, 4000);
         foreach (var phase in new[] { FirstSeveranceBossPhase.Sealed, FirstSeveranceBossPhase.Final })
         {
@@ -60,9 +60,9 @@ internal static partial class Program
                 if (angle < previousAngle) angle += Math.Tau;
                 AssertEqual(true, angle > previousAngle, "clockwise top/right/bottom/left progression");
                 previousAngle = angle;
-                // Four practical spread stations: x +/-330, y +/-330 around field center.
-                // Nearest-neighbor distance 660 > 640; worst next Stack travel is budgeted.
-                foreach (int x in new[] {-330,330}) foreach (int y in new[] {-330,330})
+                // Four practical spread stations: x/y +/-370 around field center.
+                // Nearest-neighbor distance 740 > 704; next Stack travel is budgeted.
+                foreach (int x in new[] {-370,370}) foreach (int y in new[] {-370,370})
                 {
                     double distance = Math.Sqrt(Math.Pow(p.X-4000-x,2)+Math.Pow(p.Y-3440-y,2));
                     double ticks = Math.Max(0,distance-112)/10 + 30 + 6;
@@ -91,7 +91,7 @@ internal static partial class Program
             for (int tick=0;tick<end;tick++)
             {
                 var rays=FirstSeveranceScoreGeometry.Rays(state,0,tick,4000,4000);
-                AssertEqual(true,rays.Count<=17,"bounded geometry");
+                AssertEqual(true,rays.Count<=28,"bounded geometry including impaling blades");
                 foreach(var r in rays) AssertEqual(true,float.IsFinite(r.Ray.X)&&float.IsFinite(r.Ray.Y)&&r.Ray.Length>0,"finite rays");
             }
         }
@@ -105,9 +105,6 @@ internal static partial class Program
         AssertEqual(1f,FirstSeveranceScoreGeometry.BladeExtension(156),"12 tick unsheathing complete before harm");
         AssertEqual(true,FirstSeveranceScoreGeometry.BladeAngle(419)-FirstSeveranceScoreGeometry.BladeAngle(418)
             > 2*(FirstSeveranceScoreGeometry.BladeAngle(181)-FirstSeveranceScoreGeometry.BladeAngle(180)),"angular acceleration");
-        var half=FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.HalfField,1,180,4000,4000)[0].Ray;
-        AssertEqual(true,half.Intersects(3300,3440,10,21),"highlighted half hit");
-        AssertEqual(false,half.Intersects(4700,3440,10,21),"other half safe");
         for(int tick=0;tick<240;tick++)
         {
             var bullets=FirstSeveranceScoreGeometry.Bullets(2,tick,4000,4000);
@@ -126,9 +123,9 @@ internal static partial class Program
         AssertEqual(false,FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.RemoteCrush,8,180,4000,4000)[0].Live,"crush recovery harmless");
         AssertEqual(true,FirstSeveranceChoreography.IsValidStep(FirstSeveranceBossPhase.Distant,FirstSeveranceSubstate.RemoteCrush,8),"crush is phase-local score step");
         var comb=FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,2,28,4000,4000);
-        AssertEqual(16,comb.Count,"sixteen vertical teeth");
+        AssertEqual(20,comb.Count,"denser vertical teeth including boundary cells");
         float gap=(comb[0].Ray.X+comb[1].Ray.X)*.5f;
-        foreach(var tooth in comb) AssertEqual(false,tooth.Ray.Intersects(gap,3440,10,21),"104 px lane fits standing player");
+        foreach(var tooth in comb) AssertEqual(false,tooth.Ray.Intersects(gap,3440,10,21),"80 px lane fits standing player");
         AssertEqual(8,FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,2,68,4000,4000).Count,"horizontal comb includes the boundary cells");
         AssertEqual(96,FirstSeveranceScoreGeometry.Bullets(2,132,4000,4000).Count,"four overlapping 24-bullet waves");
     }

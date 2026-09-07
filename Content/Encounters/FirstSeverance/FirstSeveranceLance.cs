@@ -31,7 +31,7 @@ internal static class FirstSeveranceLanceTuning
     internal const float HalfWidth = 44f;
     internal const float BossHeightAboveCore = 560f;
     internal const float StackRadius = 112f;
-    internal const float SpreadRadius = 320f;
+    internal const float SpreadRadius = 352f;
     internal const float SpreadSeparation = SpreadRadius * 2f;
 
     internal static bool IsAttackPhase(FirstSeveranceSubstate phase)

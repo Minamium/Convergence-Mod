@@ -40,8 +40,8 @@ internal static class FirstSeveranceSafeWindows
     {
         if ((pattern & 12) == 8) return new[]
         {
-            (x - 820, groundY - 890, 64f), (x + 820, groundY - 890, 64f),
-            (x - 820, groundY - 230, 64f), (x + 820, groundY - 230, 64f)
+            (x - 820, groundY - 960, 64f), (x + 820, groundY - 960, 64f),
+            (x - 820, groundY - 160, 64f), (x + 820, groundY - 160, 64f)
         };
         return Array.Empty<(float, float, float)>();
     }

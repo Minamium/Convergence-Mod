@@ -287,7 +287,14 @@ internal sealed class FirstSeveranceBossVisuals
         int emittingSide = (int)(age / FirstSeveranceScoreGeometry.FloodInterval) % 2 == 0 ? -1 : 1;
         float grasp = flooding ? Window(floodAge, 0, 42) * (1 - Window(floodAge, FirstSeveranceScoreGeometry.FloodEndTick, 198)) : .18f;
         float recoil = flooding ? Window(floodAge, 48, 60) * (1 - Window(floodAge, 70, 132)) : 0;
-        float flood = combat.Substate == FirstSeveranceSubstate.HalfField ? Window(age, 0, 180) * (1 - Window(age, 240, 298)) : 0;
+        bool impaling = combat.Substate == FirstSeveranceSubstate.HalfField;
+        int swordWave = age < FirstSeveranceImpalingSwords.WarningStart(1) ? 0 : 1;
+        int swordFire = FirstSeveranceImpalingSwords.FireBase(swordWave);
+        float flood = impaling ? Window(age, FirstSeveranceImpalingSwords.WarningStart(swordWave), swordFire)
+            * (1 - Window(age, swordFire + 24, swordFire + 70)) : 0;
+        float stabKick = impaling ? Window(age, swordFire, swordFire + 6)
+            * (1 - Window(age, swordFire + 16, swordFire + 38)) : 0;
+        if (impaling) grasp = .18f + flood * .65f;
         bool crushing = combat.Substate == FirstSeveranceSubstate.RemoteCrush;
         float closure = crushing ? FirstSeveranceScoreGeometry.CrushClosure(age) : 0;
         float brace = crushing ? Window(age, 0, 125) * (1 - Window(age, 190, 270)) : 0;
@@ -351,7 +358,8 @@ internal sealed class FirstSeveranceBossVisuals
             if (crushing) return center + new Vector2(side * MathHelper.Lerp(1110 - brace * 80, 330, closure),
                 -40 * brace + 40 * closure);
             float flex = flooding && side == emittingSide ? grasp * 45 + recoil * 50 : 0;
-            return center + new Vector2(side * (MathHelper.Lerp(250, 1110, appear) + flex), 20 - flood * 90 - grasp * 30);
+            return center + new Vector2(side * (MathHelper.Lerp(250, 1110, appear) + flex),
+                20 - flood * 90 - grasp * 30 + (impaling ? side * (flood * 145 - stabKick * 105) : 0));
         }
     }
 

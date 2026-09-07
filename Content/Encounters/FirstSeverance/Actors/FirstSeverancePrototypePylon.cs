@@ -63,6 +63,7 @@ public sealed class FirstSeverancePrototypePylon : ModNPC
         NPC.dontTakeDamage = true;
         NPC.chaseable = false;
         NPC.scale = 1f;
+        if (!Main.dedServ) NPC.HitSound = FirstSeveranceHitSounds.Pylon;
     }
 
     public override bool CheckActive() => false;

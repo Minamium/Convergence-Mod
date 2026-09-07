@@ -98,14 +98,14 @@ internal sealed class FirstSeveranceMechanicVisuals
     private void DrawExecutionFlash(SpriteBatch batch, Vector2 mouth, float age, bool reduced)
     {
         // Same launch on success/failure, once per verdict rather than per player.
-        if (age >= 7) return;
-        float flash = (1 - Window(age, 1, 7)) * (reduced ? .30f : 1);
-        float reach = 90 + 90 * Window(age, 0, 3);
+        if (age >= 6) return;
+        float flash = (1 - Window(age, 1, 6)) * (reduced ? .22f : 1);
+        float reach = 175 + 165 * Window(age, 0, 2);
         for (int axis = 0; axis < 2; axis++)
         {
             Vector2 direction = axis == 0 ? Vector2.UnitX : Vector2.UnitY;
             float length = reach * (axis == 0 ? 1 : .73f);
-            accents.Halo(batch, mouth, new Vector2(length * 2.4f, 12), Color.White,
+            accents.Halo(batch, mouth, new Vector2(length * 2.4f, 20), Color.White,
                 flash * .85f, axis * MathF.PI * .5f);
             for (int side = -1; side <= 1; side += 2)
                 for (int n = 0; n < 10; n++)
@@ -116,7 +116,7 @@ internal sealed class FirstSeveranceMechanicVisuals
                         FirstSeveranceAttackAccents.Neon(Color.White, flash * (1 - t)), 1 + (1 - t) * 4);
                 }
         }
-        accents.Halo(batch, mouth, new Vector2(46), Color.White, flash);
+        accents.Halo(batch, mouth, new Vector2(90), Color.White, flash);
     }
 
     private void DrawVerdictRay(SpriteBatch batch, Vector2 origin, Vector2 target, bool failed, float age, bool reduced)

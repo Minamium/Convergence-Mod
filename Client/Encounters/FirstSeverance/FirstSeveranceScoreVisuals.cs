@@ -27,6 +27,13 @@ internal sealed class FirstSeveranceScoreVisuals
             DrawFlood(batch, accents, combat, age, reduced);
             return;
         }
+        if (combat.Substate == FirstSeveranceSubstate.HalfField)
+        {
+            blade ??= ModContent.Request<Texture2D>("Convergence/Assets/Textures/VFX/SeveranceBlade");
+            FirstSeveranceImpalingSwordVisuals.Draw(batch, accents, blade.Value, combat, age,
+                Math.Max(0, (double)authorityTick - combat.ActionStartedTick), reduced);
+            return;
+        }
         var rays = FirstSeveranceScoreGeometry.Rays(combat.Substate, combat.ActionIndex, age, combat.CoreX, combat.CoreY);
         var authority = FirstSeveranceScoreGeometry.Rays(combat.Substate, combat.ActionIndex,
             Math.Max(0, (double)authorityTick - combat.ActionStartedTick), combat.CoreX, combat.CoreY);
@@ -36,10 +43,9 @@ internal sealed class FirstSeveranceScoreVisuals
             bool live = index < authority.Count && authority[index].Live && authority[index].Pulse == item.Pulse;
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY), normal = new(-direction.Y, direction.X);
             Vector2 end = origin + direction * ray.Length;
-            bool half = combat.Substate == FirstSeveranceSubstate.HalfField;
             bool crush = combat.Substate == FirstSeveranceSubstate.RemoteCrush;
             bool slicer = combat.Substate == FirstSeveranceSubstate.FinalSlicer;
-            Color color = half || crush ? new(255, 96, 163)
+            Color color = crush ? new(255, 96, 163)
                 : combat.Substate == FirstSeveranceSubstate.RemoteClaws ? new(107, 230, 238)
                 : slicer && item.Pulse % 2 == 0 ? new(92, 233, 255) : new(194, 146, 255);
             int slicerFire = FirstSeveranceScoreGeometry.SlicerFire(combat.ActionIndex);
@@ -47,19 +53,13 @@ internal sealed class FirstSeveranceScoreVisuals
             int slicerCadence = FirstSeveranceScoreGeometry.SlicerCadence(combat.ActionIndex);
             double local = slicer ? age % slicerCadence : age;
             float born = Window(local, 0, slicer ? 4 : 12);
-            float fade = half ? 1 - Window(age, 240, 282) : crush ? 1 - Window(age, 180, 240)
+            float fade = crush ? 1 - Window(age, 180, 240)
                 : slicer ? 1 - Window(local, slicerEnd, slicerCadence) : 1;
-            float emission = live ? 1 : half ? Window(age, 176, 180) * (1 - Window(age, 240, 264)) * .28f
-                : slicer ? Window(local, slicerFire - 2, slicerFire) * (1 - Window(local, slicerEnd, slicerCadence)) * .2f : 0;
-            if (half || crush)
+            if (crush)
             {
-                if (crush)
-                    FirstSeveranceBeamMaterial.CrushMembrane(batch, accents, (origin + end) * .5f,
-                        ray.Length * .5f, ray.HalfWidth, age, item.Charge, live ? 1 : 0,
-                        born * fade, color, reduced);
-                else
-                    FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                        age, item.Charge, emission, born * fade, color, reduced);
+                FirstSeveranceBeamMaterial.CrushMembrane(batch, accents, (origin + end) * .5f,
+                    ray.Length * .5f, ray.HalfWidth, age, item.Charge, live ? 1 : 0,
+                    born * fade, color, reduced);
                 continue;
             }
             if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)

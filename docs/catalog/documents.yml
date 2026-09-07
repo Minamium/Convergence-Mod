@@ -563,7 +563,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: bc09a0b1cd83ee6e4ae311f99a9bda681a1fd450252cfe8df991798eea753b77
+  content_sha256: 2403f728f10a68058f4beae8bb5d469875c8d6ca539153356fd27f9f74c67b62
   document_type: spec
   status: accepted
   owners:
@@ -588,7 +588,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: 7549c111b69d3a8b1006e1040a8773f697ff121eabda6d04be65d5f44c2cdfcb
+  content_sha256: 7871d98a86a38b6d6fcff13d829a8e9e0a499dac4938b960c891ae707c7c54e6
   document_type: spec
   status: provisional
   owners:
@@ -779,7 +779,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: 64c9392b8f56aa5b163494d1e156499b7e4815b9ec95fcf0883929b032a5704c
+  content_sha256: ed41f56b214d605b50cb1def41c0cd8b0248150c12c7ab41b16f731736bc8b78
   document_type: spec
   status: provisional
   owners:
@@ -916,7 +916,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: ef3418e546b1543425ae87e2bf48acda9f65d2a792867a58a73a755364b599d2
+  content_sha256: 1f285e94960bbece1215d1124f2350f2358a05feeb39896c99c0d66bb0190fb2
   document_type: governance
   status: accepted
   owners:
@@ -961,7 +961,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: bb8b9a15b05bf43e0e39efd6df3f08d61c9bdf9028f98890c91ba71c641ac876
+  content_sha256: 676ef5789e967b2f87af31348d3a0ae8b6f0f5ae3474839dfe1760c4c0b040af
   document_type: status
   status: accepted
   owners:
