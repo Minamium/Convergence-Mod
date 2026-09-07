@@ -2,6 +2,22 @@
 
 ## Records
 
+### Shell friction audio — 0.2.23 / 2026-09-07
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellArc.wav`
+- Asset ID: shellarc-0223-2026-09-07
+- Asset type: sound effect
+- Creator: project-directed original DSP by Codex
+- Creation/acquisition date: 2026-09-07
+- Source type: original
+- Source work and URL: original filtered-noise sparks, sputtering carrier and frequency-modulated buzz; no third-party samples or recording
+- Tool/model/version: external audio0223/render.py; NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0; deterministic seed22301
+- Human modifications: none; human listening pending
+- License and redistribution terms: project asset license undecided; development only, no public release approved
+- Required attribution: no external requirement; retain provenance
+- Reviewer and review date: Codex finite decode/duration/4x peak checks,2026-09-07
+- Notes:0.38s/48kHz mono PCM16,4x peak0.75999. Recipe SHA256 `1156aa64851576b6b9f5754d7436eee5c868662bdd29a7110edf7729dc076f91`; export SHA256 `bc5a549b2fb42119dc2c743f4c9e4d46740f0ddd4b8580a6b71c6ad443d3b429`. Recipe, manifest and PCM24 audition with actual cue/master gains remain external in audio0223/export. Existing music, sound masters and shell texture are unchanged.
+
 ### Execution ping revision — 0.2.22 / 2026-09-07
 
 The existing exact `Assets/Sounds/FirstSeverance/SpreadExecution.wav` record below retains its project-original source and unresolved release-license terms. Its new0.62s/48kHz mono PCM16 master uses only analytic oscillators: a fast focusing pitch scoop,2350Hz settled tone, inharmonic upper partials and a short low onset. No samples, recordings, randomness or external source. Original Codex-authored external audio0222/render.py (`e074a1fbdc40ae201951c4b6095c5c09f832a1693563318bb487dec4959cc205`), NumPy2.3.5/SciPy1.16.1/SoundFile0.14.0. Output SHA256 `44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220`; finite decode and duration passed,4x peak0.82002. Predecessor master, manifest and PCM24 audition with actual cue/master gains remain external in audio0222/export. Human listening pending. Other audio and the original shell texture are unchanged.

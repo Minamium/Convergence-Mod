@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-07",
+  "build": "0.2.23",
+  "protocol": 20,
+  "scope": "Client-only common Spread launch on success/failure, larger successful dissipation, enlarged Stack shell/arcs and original shared electrical audio. Gameplay, transport and BGM unchanged.",
+  "checks": {
+    "build": "passed source-identified tModLoader package, zero warnings/errors; installed existing Mods; no source changed during build",
+    "static": "passed catalog (59 documents), repository policy (367 files), YAML (10 files), diff whitespace review",
+    "audio": "passed ShellArc.wav: original deterministic DSP, finite mono PCM16/48000Hz/0.38s, four-times peak0.75999; source/manifest/PCM24 audition retained externally",
+    "domain_codec": "not repeated: no changed domain or transport inputs; prior checks retained",
+    "review": "Client-only draw/audio guards, common launch once per verdict, electrical cue once per new shard beat with no backlog/per-player multiplication, existing two-voice cap/cleanup and Reduced Effects attenuation retained"
+  },
+  "build_identity": {
+    "base_commit": "147be6b90c8e3d9e94b48e1a1fdca3b036c25fe2",
+    "record": ".local/builds/20260907T115006313065Z/record.json",
+    "source_sha256": "dbf03b171d43d56281121d2dff6f883eac9ca8c8f8a8dc16aa8f9602fb6732c6",
+    "package_sha256": "e2f7f839d88a80effe22fcf3c5a4b41650560ba621c5d0f0b67ae0b88f1116bc",
+    "package_bytes": 33400121,
+    "post_build_edits": "Documentation/evidence/catalog only; compiled code and runtime assets unchanged."
+  },
+  "runtime": "not_run; user owns GUI/Host & Play. Check solo successful Spread flash/ping/plume, enlarged electrified shell readability and live audio; multiplayer mixed endpoints and frame cost remain unverified.",
+  "preceding_observation": "0.2.22 client/server logs selected version0.2.22 and installed package matched build SHA; one solo successful Spread had no failure-only flash by design, not evidence of an older package loading."
+}

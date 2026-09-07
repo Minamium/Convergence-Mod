@@ -140,7 +140,11 @@ internal sealed class FirstSeveranceFeedback
             if (beat > shardBeat)
             {
                 shardBeat = beat;
-                if (!fresh) Play("ShellLatch", .54f, beat * .027f - .10f);
+                if (!fresh)
+                {
+                    Play("ShellLatch", .54f, beat * .027f - .10f);
+                    if (beat > 0) Play("ShellArc", .65f, beat * .023f - .08f);
+                }
             }
         }
         if ((safe is not null || combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread) && tick < deadline)
@@ -270,10 +274,10 @@ internal sealed class FirstSeveranceFeedback
         if (stack) Play(failed ? "ShellCollapse" : "ShellShed", failed ? .88f : .62f);
         else
         {
-            bool hit = false, dissipate = false;
-            foreach (var impact in combat.MechanicImpacts) { hit |= impact.Failed; dissipate |= !impact.Failed; }
-            if (hit) Play("SpreadExecution", .90f);
-            if (dissipate) Play("SpreadDissolve", hit ? .36f : .68f);
+            bool dissipate = false;
+            foreach (var impact in combat.MechanicImpacts) dissipate |= !impact.Failed;
+            Play("SpreadExecution", .90f);
+            if (dissipate) Play("SpreadDissolve", .68f);
         }
     }
 

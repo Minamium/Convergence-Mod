@@ -27,9 +27,10 @@ Current implementation is governed by the first section's overrides and the shar
 
 The four phase BGM masters retain their arrangements, tempo, frame counts and existing loop/entry/tail envelopes. A1.7× input lift with a stereo-linked soft peak knee increases decoded RMS by4.41–4.57dB relative to0.2.20; encoded four-times peaks stay below0.99. This is measured signal gain, not a subjective in-game loudness guarantee. The user's music slider, other-Mod audio and existing feature SFX master gain are unchanged.
 
-- SpreadExecution: a brief focused high metallic "ping", with a fast pitch scoop settling into a clear ringing tail, synchronized to the failed verdict's white cross. One shared voice for simultaneous failures, not one per player. The0.2.22 original oscillator master replaces the noisier onset; duration and existing cue/master gains are retained.
-- SpreadDissolve: softer air/glass tail for successful recipients; attenuated when a mixed result also fires the failure cue.
+- SpreadExecution: a brief focused high metallic "ping", with a fast pitch scoop settling into a clear ringing tail, synchronized to every Spread verdict's white cross. Success and failure share the same firing cue once, not one per player. The0.2.22 original oscillator master, duration and gains are retained.
+- SpreadDissolve: air/glass endpoint tail for successful recipients, accompanying the brighter split plume; same gain for mixed or fully successful results.
 - ShellLatch: dry irregular clacks aligned to the shell-piece appearances, shared across participants.
+- ShellArc: short original sputtering electrical buzz/sparks on irregular shell appearances after the first piece; one shared cue per new appearance beat, no delayed backlog, bounded by the existing two-instance limit and voice cleanup. This adds texture rather than boosting global SFX gain.
 - ShellCollapse: compression/low impact and fractured high components for a failed Stack.
 - ShellShed: detached, diminishing metallic fragments for a successful Stack, without the compression transient.
 

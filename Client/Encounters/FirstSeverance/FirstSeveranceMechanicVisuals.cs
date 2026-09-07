@@ -85,9 +85,8 @@ internal sealed class FirstSeveranceMechanicVisuals
         if (result is not { } resolved) return;
         float age = Main.GameUpdateCount - resultStarted + fraction;
         bool wasStack = resolved.LastMechanicResult is FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.StackPassed;
-        if (!wasStack)
-            foreach (var hit in resolved.MechanicImpacts)
-                if (hit.Failed) { DrawExecutionFlash(batch, Source(resolved), age, reduced); break; }
+        if (!wasStack && resolved.MechanicImpacts.Count > 0)
+            DrawExecutionFlash(batch, Source(resolved), age, reduced);
         foreach (var hit in resolved.MechanicImpacts)
         {
             Vector2 target = new(hit.X, hit.Y);
@@ -98,7 +97,7 @@ internal sealed class FirstSeveranceMechanicVisuals
 
     private void DrawExecutionFlash(SpriteBatch batch, Vector2 mouth, float age, bool reduced)
     {
-        // One local flash per verdict, never multiplied by failed player count.
+        // Same launch on success/failure, once per verdict rather than per player.
         if (age >= 7) return;
         float flash = (1 - Window(age, 1, 7)) * (reduced ? .30f : 1);
         float reach = 90 + 90 * Window(age, 0, 3);
@@ -126,14 +125,19 @@ internal sealed class FirstSeveranceMechanicVisuals
         float length = delta.Length();
         if (length < 1) return;
         Vector2 direction = delta / length, normal = new(-direction.Y, direction.X);
-        float stop = failed ? length : Math.Max(0, length - 65);
-        float release = (1 - Window(age, failed ? 4 : 2, failed ? 17 : 11));
+        float stop = failed ? length : Math.Max(0, length - 100);
+        float release = 1 - Window(age, 4, 17);
         Color red = new(255, 22, 62);
         // Instant full-length hairline, not a travelling projectile or hit test.
-        accents.Ribbon(batch, origin, direction, stop, failed ? 18 : 7, red, release * (failed ? .95f : .45f));
-        Line(batch, origin, origin + direction * stop, FirstSeveranceAttackAccents.Neon(red, release), failed ? 3.2f : 1.4f);
-        Line(batch, origin, origin + direction * stop, FirstSeveranceAttackAccents.Neon(Color.White, release * (failed ? .9f : .35f)), failed ? 1.1f : .6f);
-        accents.Halo(batch, origin, new Vector2(failed ? 125 : 62), red, release * .7f);
+        accents.Ribbon(batch, origin, direction, stop, 18, red, release * .95f);
+        Line(batch, origin, origin + direction * stop, FirstSeveranceAttackAccents.Neon(red, release), 3.2f);
+        Line(batch, origin, origin + direction * stop, FirstSeveranceAttackAccents.Neon(Color.White, release * .9f), 1.1f);
+        accents.Halo(batch, origin, new Vector2(125), red, release * .7f);
+        if (!failed)
+        {
+            DrawDissipation(batch, origin + direction * stop, direction, age, reduced);
+            return;
+        }
         float decay = 1 - Window(age, 12, failed ? 38 : 32);
         Vector2 impact = origin + direction * stop;
         for (int i = 0; i < (reduced ? 5 : 13); i++)
@@ -145,6 +149,37 @@ internal sealed class FirstSeveranceMechanicVisuals
             accents.Halo(batch, point, new Vector2(failed ? 17 : 24), failed ? red : new Color(188, 100, 137), decay * (failed ? .65f : .24f));
             if (failed) Line(batch, point, point - Vector2.Normalize(drift + new Vector2(.001f)) * 9, FirstSeveranceAttackAccents.Neon(red, decay), 1.5f);
         }
+    }
+
+    private void DrawDissipation(SpriteBatch batch, Vector2 center, Vector2 direction, float age, bool reduced)
+    {
+        if (age >= 60) return;
+        Vector2 normal = new(-direction.Y, direction.X);
+        float opening = 1 - MathF.Exp(-age * .14f), fade = 1 - Window(age, 18, 60);
+        Color rose = new(255, 92, 147);
+        // A split, transverse plume catches the ray before the body. Fine
+        // curling trails and glass sparks retain negative space, not a filled ball.
+        for (int i = 0; i < (reduced ? 10 : 28); i++)
+        {
+            float seed = i * 2.39996f;
+            float side = i % 2 == 0 ? 1 : -1;
+            float reach = (45 + i % 7 * 13) * opening;
+            Vector2 point = center + normal * (side * reach)
+                - direction * (age * (.45f + i % 4 * .24f) + (1 - MathF.Cos(seed)) * 16);
+            Vector2 last = center;
+            for (int n = 1; n <= 8; n++)
+            {
+                float t = n / 8f;
+                Vector2 next = Vector2.Lerp(center, point, t) - direction *
+                    (MathF.Sin(t * MathF.PI) * (13 + i % 5 * 6) * opening);
+                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(rose, fade * .25f * t), 4);
+                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(Color.White, fade * .65f * t), 1.1f);
+                last = next;
+            }
+            accents.Halo(batch, point, new Vector2(22, 5), rose, fade * .65f, seed + age * .06f);
+        }
+        accents.Halo(batch, center, new Vector2(22, 80 + opening * 145), rose,
+            (1 - Window(age, 3, 22)) * (reduced ? .3f : .8f), direction.ToRotation());
     }
 
     private void DrawShards(SpriteBatch batch, Vector2 center, int identity, double age, double duration,
@@ -163,10 +198,10 @@ internal sealed class FirstSeveranceMechanicVisuals
             float a = i * MathF.Tau / 8 + .19f * identity + .12f * MathF.Sin(i * 7.3f);
             Vector2 radial = new(MathF.Cos(a), MathF.Sin(a));
             float snap = releaseAge >= 0 ? 1 : Window(age, birth, birth + 3);
-            float radius = 89 + i % 3 * 14 + (1 - snap) * 35;
+            float radius = 110 + i % 3 * 18 + (1 - snap) * 35;
             Vector2 offset = radial * new Vector2(radius, radius * .84f);
             float rotation = a + .6f + MathF.Sin(i * 9) * .35f;
-            float fade = snap, scale = .43f + i % 3 * .08f;
+            float fade = snap, scale = .71f + i % 3 * .13f;
             if (releaseAge >= 0)
             {
                 float collapse = failed ? Window(releaseAge, 0, 7) : 0;
@@ -182,7 +217,7 @@ internal sealed class FirstSeveranceMechanicVisuals
             float seed = i * 31.7f + identity * 93.1f;
             float tension = .35f + .65f * Window(age, duration * .45, duration);
             float chatter = agitation * tension * (reduced ? .4f : 1);
-            offset += new Vector2(Noise(clock * .61f + seed), Noise(clock * .79f + seed + 9)) * chatter * 5;
+            offset += new Vector2(Noise(clock * .61f + seed), Noise(clock * .79f + seed + 9)) * chatter * 8;
             rotation += Noise(clock * .43f + seed + 19) * chatter * .065f;
             Vector2 position = center + offset;
             positions[i] = position;
@@ -203,7 +238,7 @@ internal sealed class FirstSeveranceMechanicVisuals
                 if (opacity[i] <= 0 || opacity[next] <= 0 || (reduced && i % 2 != 0)) continue;
                 float seed = i * 31.7f + identity * 93.1f;
                 float contact = Window(Noise(clock * .19f + seed), -.05, .6);
-                float strength = contact * Math.Min(opacity[i], opacity[next]) * agitation * (reduced ? .4f : 1);
+                float strength = contact * Math.Min(opacity[i], opacity[next]) * agitation * (reduced ? .4f : 1.2f);
                 if (strength < .03f) continue;
                 Vector2 gap = positions[next] - positions[i];
                 // Short filament starts/ends on the shard edges, not a solid ring.
@@ -211,8 +246,8 @@ internal sealed class FirstSeveranceMechanicVisuals
                 DrawFrictionArc(batch, start, end, clock, seed, strength);
                 if (!reduced)
                     DrawFrictionArc(batch, Vector2.Lerp(start, end, .48f),
-                        Vector2.Lerp(start, end, .68f) + (start - center) * .21f,
-                        clock + 7, seed + 13, strength * .55f);
+                        Vector2.Lerp(start, end, .68f) + (start - center) * .48f,
+                        clock + 7, seed + 13, strength * .8f);
             }
         if (failed && releaseAge >= 4)
             accents.Halo(batch, center, new Vector2(100, 145), new Color(255, 85, 113),
@@ -230,12 +265,12 @@ internal sealed class FirstSeveranceMechanicVisuals
         {
             float t = n / 7f;
             Vector2 point = Vector2.Lerp(start, end, t) + normal *
-                (Noise(clock * .37f + seed + n * 9.37f) * 9 * MathF.Sin(t * MathF.PI));
-            Line(batch, last, point, FirstSeveranceAttackAccents.Neon(cold, strength * .24f), 4);
-            Line(batch, last, point, FirstSeveranceAttackAccents.Neon(Color.White, strength * .95f), .85f);
+                (Noise(clock * .37f + seed + n * 9.37f) * 18 * MathF.Sin(t * MathF.PI));
+            Line(batch, last, point, FirstSeveranceAttackAccents.Neon(cold, strength * .30f), 8);
+            Line(batch, last, point, FirstSeveranceAttackAccents.Neon(Color.White, strength * .95f), 1.8f);
             last = point;
         }
-        accents.Halo(batch, start, new Vector2(19, 4), cold, strength * .65f, delta.ToRotation());
+        accents.Halo(batch, start, new Vector2(35, 7), cold, strength * .75f, delta.ToRotation());
     }
 
     private static float Noise(float time)
