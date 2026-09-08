@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-08
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.24**, protocol **21**. Iron Interdict replaces Phase-III half-field erasure with staggered top/bottom swords: one gapless half and tight gaps in the other. Final combs are denser with0.05s less warning; Spread has a wider true radius and larger brief firing flash. Original sword, shell/core and pylon hit sounds are added. HP, damage amounts, other attacks, BGM and phase schedules are unchanged. Version declarations live in [build.txt](../build.txt) and [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs); exact mechanics/tuning belong to the linked specifications/code.
+Development **0.2.25**, protocol **21**. The weapon-only branch adds five ritual armament forms, strong bounded homing, continuous client animation, original approved-concept texture exports and one-for-one Work Bench conversions from the existing Victory reward. Boss logic, phase schedules, mechanics, recovery, world data and all music/SFX masters are unchanged. Native weapon projectiles use ordinary tModLoader replication, not a new encounter packet. See [weapon specification](encounters/first-severance/WEAPONS.md). Damage is initial tuning, not measured Calamity-endgame superiority.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -34,6 +34,10 @@ Development **0.2.24**, protocol **21**. Iron Interdict replaces Phase-III half-
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+Weapon-branch checks and unrun build acceptance are recorded in [weapon evidence](evidence/2026-09-08-ritual-armaments.json). The initial implementation's existing GitHub Actions checks passed, including the added pure-domain cases. Full Mod compilation, native Rogue integration and visual/DPS acceptance remain user/Codex-owned; neither pure tests nor the source assembly imply they passed.
+
+The following is retained Boss-build evidence, not a weapon-build claim:
 
 [Current check record](evidence/2026-09-07-iron-interdict-checks.json) owns scoped automated results and pending runtime checks. The user accepted0.2.23 visuals; its latest solo run reached Final and failed the fifth Stack, with no combat warnings/errors. Its shared Spread launch and shell surface are retained. [0.2.23 checks](evidence/2026-09-07-shared-spread-shell-checks.json), [0.2.22 checks](evidence/2026-09-07-mechanic-intensity-checks.json), [0.2.21 checks](evidence/2026-09-07-mechanic-presentation-checks.json) and [consolidation](evidence/2026-09-07-development-consolidation.json) retain preceding evidence/history.
 
@@ -47,6 +51,8 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User/Codex-owned0.2.25: build/load the weapon branch, inspect the five silhouettes/continuous motion, native Rogue stealth and minion behavior, then tune the central damage seeds against matched Calamity2.2.4 equipment. Target roughly1.10x a selected class-endgame benchmark, not dominance over every weapon/target. Keep the remaining Boss-only check below separate.
 
 User-owned0.2.24 Host & Play: confirm Iron Interdict's sparse half remains readable/dodgeable, Final spacing, Spread radius/flash and the distinct damage sounds. All peers must update together. No further HP adjustment implied. The [implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) owns production backlog.
 

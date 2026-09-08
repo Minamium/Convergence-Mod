@@ -25,6 +25,10 @@ related_docs:
 
 # First Severance Encounter Specification
 
+## Weapon-only reward extension — 0.2.25
+
+[Five Ritual Armaments](WEAPONS.md) owns current reward mechanics, art and initial damage budgets. Existing Victory still drops Null Refrain; twenty one-for-one Work Bench exchanges let every class choose a form without changing the Boss loot executor. The older no-recipe/three-stroke tuning below is historical where it conflicts with that weapon specification. Boss actions, HP, damage, field and recovery are unchanged.
+
 ## Iron Interdict and current spacing override
 
 This supersedes the older half-field erasure, Spread spacing and Final forecast values below. The stable `HalfField` substate now presents **Iron Interdict**, defined by [ImpalingSwords](../../../Content/Encounters/FirstSeverance/FirstSeveranceImpalingSwords.cs): two irregularly staggered waves of top/bottom swords during the same five-second action. The first occurrence seals the left half; the second seals the right. Overlapping dense-side auras leave no safe gaps when fully inserted; the opposite side has narrow body-passable gaps whose positions change on the second wave. Whole future blade corridors are warned, then rigid blades insert in six ticks. Authority damage extends only as far as the visible tip; retraction is harmless. The existing fixed-damage, once-per-participant/per-wave cap is retained. No new actors, client targeting or saved state are introduced. The other RemoteClaws horizontal floods and safe-window mechanics remain.

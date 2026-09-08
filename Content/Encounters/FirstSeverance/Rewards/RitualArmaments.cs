@@ -15,7 +15,7 @@ public interface IRitualArmament { RitualArmamentKind Kind { get; } }
 
 internal static class RitualArmamentItems
 {
-    internal const string TexturePath = "Convergence/Assets/Textures/Items/RitualArmaments";
+    internal const string TexturePath = "Convergence/Assets/Textures/Items/RitualArmaments/NullRefrain";
     internal static bool Usable(Player player) => player.active && !player.dead
         && !player.GetModPlayer<FirstSeveranceRaidPlayer>().IsRaidDowned
         && !player.GetModPlayer<FirstSeveranceRaidPlayer>().IsRaidEliminated;
@@ -62,7 +62,7 @@ internal static class RitualArmamentItems
 public abstract class RitualArmament : ModItem, IRitualArmament
 {
     public abstract RitualArmamentKind Kind { get; }
-    public override string Texture => RitualArmamentItems.TexturePath;
+    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/" + Name;
     public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments." + Name + ".Name");
     public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments." + Name + ".Tooltip");
     public override bool CanUseItem(Player player) => RitualArmamentItems.Usable(player);
@@ -85,7 +85,7 @@ public sealed class PaleMeridian : RitualArmament
         int shot = player.GetModPlayer<RitualArmamentPlayer>().Next(Kind, 6);
         Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
         // Ammo contributes its standard damage; its projectile is deliberately converted.
-        Projectile.NewProjectile(source, player.MountedCenter, aim * 19,
+        Projectile.NewProjectile(source, player.MountedCenter + aim * 136, aim * 19,
             ModContent.ProjectileType<MeridianNeedle>(),
             RitualArmamentRules.ScaledDamage(damage, RitualArmamentRules.RangedMultiplier(shot)),
             knockback, player.whoAmI, 0, -1, shot == 5 ? 1 : 0);
@@ -151,7 +151,7 @@ public sealed class ChoirOfTheUnmade : RitualArmament
 public sealed class LastWitness : CalamityRogueArmament, IRitualArmament
 {
     public RitualArmamentKind Kind => RitualArmamentKind.Rogue;
-    public override string Texture => RitualArmamentItems.TexturePath;
+    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/" + Name;
     public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Name");
     public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Tooltip");
     public override void SetDefaults()

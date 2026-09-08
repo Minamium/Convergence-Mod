@@ -563,7 +563,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 2403f728f10a68058f4beae8bb5d469875c8d6ca539153356fd27f9f74c67b62
+  content_sha256: 29ac115104c2c15594c7cafed0fe9165b98476aaa993159592ddfa65c738bec7
   document_type: spec
   status: accepted
   owners:
@@ -588,7 +588,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: 7871d98a86a38b6d6fcff13d829a8e9e0a499dac4938b960c891ae707c7c54e6
+  content_sha256: fb4332562c0b08dbc965fadc4fa156949b62bdc3c722530c6ec0802f7b453460
   document_type: spec
   status: provisional
   owners:
@@ -605,6 +605,28 @@ documents:
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.backlog
+- doc_id: encounter.first-severance.weapons
+  path: docs/encounters/first-severance/WEAPONS.md
+  title: First Severance — Five Ritual Armaments
+  content_sha256: 5cf05e70387763bd101ed8903cda030aec1e052751cab1842a517edf55a2c227
+  document_type: spec
+  status: provisional
+  owners:
+  - gameplay
+  - art
+  last_reviewed: '2026-09-08'
+  source_of_truth_for:
+  - first_severance.reward_weapons
+  aliases:
+  - ritual armaments
+  - raid reward weapons
+  related_code:
+  - Content/Encounters/FirstSeverance/Rewards
+  - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
+  - Common/Compatibility/Calamity/CalamityRogueArmament.cs
+  related_docs:
+  - project.status
+  - encounter.first-severance.spec
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Development Handoff
@@ -779,7 +801,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: ed41f56b214d605b50cb1def41c0cd8b0248150c12c7ab41b16f731736bc8b78
+  content_sha256: 69fc10361ac07c7ed1e02d713d0bb2a05b15380ed2595b204ad5ae8f88ccbbad
   document_type: spec
   status: provisional
   owners:
@@ -961,12 +983,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 676ef5789e967b2f87af31348d3a0ae8b6f0f5ae3474839dfe1760c4c0b040af
+  content_sha256: de34583d9adef2b942c379cf8a6caa5d31df90317d0ee8a4adbccf64eca4ee66
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-08'
   source_of_truth_for:
   - project.implementation_status
   aliases:

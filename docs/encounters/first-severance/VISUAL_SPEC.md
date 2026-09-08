@@ -20,6 +20,8 @@ related_docs:
 
 # First Severance — Null Cantor Visual Pass
 
+Weapon-only0.2.25: [Five Ritual Armaments](WEAPONS.md) owns the approved-concept drop-weapon silhouettes, continuous animation and homing presentation. This supersedes only older Null Refrain weapon descriptions below; all Boss presentation is retained.
+
 The user requested giant scale and spectacle comparable in ambition to Avatar of Emptiness / Nameless Deity, combined with this project's polar containment/ritual theme. `0.2.0` implements an original first pass, not a reproduction of those Bosses or a claim of equivalent finished animation/shader quality. The original small-placeholder scope is superseded for this pass by [ADR-0010](../../adr/0010-giant-boss-observation-lances.md).
 
 `0.2.1` increases speed and impact without changing the one-body boundary: rapid eased reveal/opening, 18-pixel decorative recoil, faster orbital motion, brief exposure shock rings, layered fire sounds, speed streaks, stronger short camera kicks (up to 12 pixels on firing / 9 on exposure) and narrow warm screen-edge accents. No gameplay pause, forced zoom or full-screen white flash is introduced. This is a user-requested high-intensity prototype, not a completed WotG-quality presentation claim.

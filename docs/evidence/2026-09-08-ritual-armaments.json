@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-08",
+  "build": "0.2.25",
+  "protocol": 21,
+  "scope": "Five reward weapon forms, native homing projectiles, client animation, approved-concept texture exports and workbench conversions. Boss and music unchanged.",
+  "checks": {
+    "initial_ci": "Repository checks run34215395425 passed on e86f2859e1c623fd0e81d987a5132c53d70f9f44; includes five new pure-domain cases. Final assembly checked separately by the one-shot workflow before commit.",
+    "asset_bytes": "Every runtime export compared with its expected Git blob SHA before assembly; no corrupted upload is accepted.",
+    "mod_build": "not_run; full pinned tModLoader/Calamity environment is user/Codex-owned",
+    "runtime_fps_dps_audio": "not_run; not inferred from domain/codec checks or arithmetic budgets",
+    "final_assembly": "Passed repository/catalog/YAML, tooling unit tests, linked domain tests and compiled codec checks before this feature-branch commit. Full Mod build remains not_run."
+  },
+  "power_target": "Approximately +10% versus selected matched class-endgame benchmarks; initial seeds are provisional, not measured evidence.",
+  "art_source": {
+    "generation": "d492a069-958c-4f23-9747-c26693b26d66",
+    "sha256": "c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797"
+  },
+  "main_changed": false
+}

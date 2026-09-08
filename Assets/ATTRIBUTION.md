@@ -2,6 +2,92 @@
 
 ## Records
 
+### Five ritual armaments — 0.2.25 / 2026-09-08
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/NullRefrain.png`
+- Asset ID: ritual-nullrefrain-0225-2026-09-08
+- Asset type: weapon texture
+- Creator: project-directed original concept with built-in OpenAI ImageGen assistance; assistant runtime export
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: user-approved CONVERGENCE / CONCEPT 01 board, generation d492a069-958c-4f23-9747-c26693b26d66; no third-party reference or extracted game asset
+- Tool/model/version: built-in ImageGen backend not surfaced; Python/Pillow 12.3.0
+- Human modifications: user approved concept; assistant cropped and alpha-masked silhouettes, rotated the staff, made 32-color transparent runtime exports; gun/book use compact exports for their draw sizes
+- License and redistribution terms: project asset license undecided; development branch only, no public release approval
+- Required attribution: no external requirement specified; preserve provenance
+- Reviewer and review date: assistant alpha/silhouette inspection and exact-byte verification, 2026-09-08; in-game review pending
+- Notes: source board SHA256 c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797; export SHA256 2fa5b7fdc4527b2e1de211eb21053a4b1b2a1dd6e93f2419d3da93c088c2f284. Original concept and extraction recipe remain outside the repository. Existing NullRefrain.png and all Boss/audio assets are retained unchanged.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/PaleMeridian.png`
+- Asset ID: ritual-palemeridian-0225-2026-09-08
+- Asset type: weapon texture
+- Creator: project-directed original concept with built-in OpenAI ImageGen assistance; assistant runtime export
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: user-approved CONVERGENCE / CONCEPT 01 board, generation d492a069-958c-4f23-9747-c26693b26d66; no third-party reference or extracted game asset
+- Tool/model/version: built-in ImageGen backend not surfaced; Python/Pillow 12.3.0
+- Human modifications: user approved concept; assistant cropped and alpha-masked silhouettes, rotated the staff, made 32-color transparent runtime exports; gun/book use compact exports for their draw sizes
+- License and redistribution terms: project asset license undecided; development branch only, no public release approval
+- Required attribution: no external requirement specified; preserve provenance
+- Reviewer and review date: assistant alpha/silhouette inspection and exact-byte verification, 2026-09-08; in-game review pending
+- Notes: source board SHA256 c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797; export SHA256 ce1699f9ec033e10ba0bbfafee1b815913fb38a105e8ed3aa3c5f77340562395. Original concept and extraction recipe remain outside the repository. Existing NullRefrain.png and all Boss/audio assets are retained unchanged.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/LacunaTestament.png`
+- Asset ID: ritual-lacunatestament-0225-2026-09-08
+- Asset type: weapon texture
+- Creator: project-directed original concept with built-in OpenAI ImageGen assistance; assistant runtime export
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: user-approved CONVERGENCE / CONCEPT 01 board, generation d492a069-958c-4f23-9747-c26693b26d66; no third-party reference or extracted game asset
+- Tool/model/version: built-in ImageGen backend not surfaced; Python/Pillow 12.3.0
+- Human modifications: user approved concept; assistant cropped and alpha-masked silhouettes, rotated the staff, made 32-color transparent runtime exports; gun/book use compact exports for their draw sizes
+- License and redistribution terms: project asset license undecided; development branch only, no public release approval
+- Required attribution: no external requirement specified; preserve provenance
+- Reviewer and review date: assistant alpha/silhouette inspection and exact-byte verification, 2026-09-08; in-game review pending
+- Notes: source board SHA256 c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797; export SHA256 04291d4f16e10d848d9a222f5ec675a69b06b7f3629e09679919f64ade2fc158. Original concept and extraction recipe remain outside the repository. Existing NullRefrain.png and all Boss/audio assets are retained unchanged.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/ChoirOfTheUnmade.png`
+- Asset ID: ritual-choiroftheunmade-0225-2026-09-08
+- Asset type: weapon texture
+- Creator: project-directed original concept with built-in OpenAI ImageGen assistance; assistant runtime export
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: user-approved CONVERGENCE / CONCEPT 01 board, generation d492a069-958c-4f23-9747-c26693b26d66; no third-party reference or extracted game asset
+- Tool/model/version: built-in ImageGen backend not surfaced; Python/Pillow 12.3.0
+- Human modifications: user approved concept; assistant cropped and alpha-masked silhouettes, rotated the staff, made 32-color transparent runtime exports; gun/book use compact exports for their draw sizes
+- License and redistribution terms: project asset license undecided; development branch only, no public release approval
+- Required attribution: no external requirement specified; preserve provenance
+- Reviewer and review date: assistant alpha/silhouette inspection and exact-byte verification, 2026-09-08; in-game review pending
+- Notes: source board SHA256 c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797; export SHA256 28c3a51232756ed0148884d8e58c4a7600ea6f86412ea7d2d73db98bdb5e1a17. Original concept and extraction recipe remain outside the repository. Existing NullRefrain.png and all Boss/audio assets are retained unchanged.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/LastWitness.png`
+- Asset ID: ritual-lastwitness-0225-2026-09-08
+- Asset type: weapon texture
+- Creator: project-directed original concept with built-in OpenAI ImageGen assistance; assistant runtime export
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: user-approved CONVERGENCE / CONCEPT 01 board, generation d492a069-958c-4f23-9747-c26693b26d66; no third-party reference or extracted game asset
+- Tool/model/version: built-in ImageGen backend not surfaced; Python/Pillow 12.3.0
+- Human modifications: user approved concept; assistant cropped and alpha-masked silhouettes, rotated the staff, made 32-color transparent runtime exports; gun/book use compact exports for their draw sizes
+- License and redistribution terms: project asset license undecided; development branch only, no public release approval
+- Required attribution: no external requirement specified; preserve provenance
+- Reviewer and review date: assistant alpha/silhouette inspection and exact-byte verification, 2026-09-08; in-game review pending
+- Notes: source board SHA256 c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797; export SHA256 2717a20b66cda737a0c0e84fcec1c1ddee46c57852cdad6b2e9552ee697f9f94. Original concept and extraction recipe remain outside the repository. Existing NullRefrain.png and all Boss/audio assets are retained unchanged.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/ChoirSentinel.png`
+- Asset ID: ritual-choirsentinel-0225-2026-09-08
+- Asset type: minion texture
+- Creator: project-directed original concept with built-in OpenAI ImageGen assistance; assistant runtime export
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: user-approved CONVERGENCE / CONCEPT 01 board, generation d492a069-958c-4f23-9747-c26693b26d66; no third-party reference or extracted game asset
+- Tool/model/version: built-in ImageGen backend not surfaced; Python/Pillow 12.3.0
+- Human modifications: user approved concept; assistant cropped and alpha-masked silhouettes, rotated the staff, made 32-color transparent runtime exports; gun/book use compact exports for their draw sizes
+- License and redistribution terms: project asset license undecided; development branch only, no public release approval
+- Required attribution: no external requirement specified; preserve provenance
+- Reviewer and review date: assistant alpha/silhouette inspection and exact-byte verification, 2026-09-08; in-game review pending
+- Notes: source board SHA256 c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797; export SHA256 d8131088aed007fefebff9724f9896e88e23d319d3bfdefc0adfc154e9ea7e47. Original concept and extraction recipe remain outside the repository. Existing NullRefrain.png and all Boss/audio assets are retained unchanged.
+
 ### Sword and actor impacts — 0.2.24 / 2026-09-07
 
 - Runtime file: `Assets/Sounds/FirstSeverance/SwordImpale.wav`

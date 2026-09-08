@@ -16,23 +16,18 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 // neither a trailing blade nor a lens decides whether a target is hit.
 internal static class RitualArmamentArt
 {
-    private static Asset<Texture2D>? atlas;
+    private static readonly Asset<Texture2D>?[] textures = new Asset<Texture2D>?[6];
     internal static readonly Color Ivory = new(232, 224, 208);
     internal static readonly Color Gold = new(177, 145, 97);
     internal static readonly Color Ice = new(134, 208, 227);
     internal static bool Reduced => ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
-    internal static Texture2D Atlas => (atlas ??= ModContent.Request<Texture2D>(RitualArmamentItems.TexturePath)).Value;
-    internal static void Unload() => atlas = null;
-    // Exact source bounds from the approved, alpha-masked concept export.
-    internal static Rectangle Source(int row) => row switch
-    {
-        0 => new(4, 39, 279, 49),
-        1 => new(7, 163, 274, 57),
-        2 => new(89, 262, 110, 116),
-        3 => new(56, 426, 175, 43),
-        4 => new(94, 521, 100, 109),
-        _ => new(117, 654, 54, 100),
-    };
+    private static readonly string[] Names = { "NullRefrain", "PaleMeridian", "LacunaTestament", "ChoirOfTheUnmade", "LastWitness", "ChoirSentinel" };
+    // Pivots were measured in the approved concept crops, independently of export resolution.
+    private static readonly Vector2[] DesignSizes = { new(279, 49), new(274, 57), new(110, 116), new(175, 43), new(100, 109), new(54, 100) };
+    internal static Texture2D Texture(int row) => (textures[row] ??= ModContent.Request<Texture2D>(
+        "Convergence/Assets/Textures/Items/RitualArmaments/" + Names[row])).Value;
+    internal static void Unload() => Array.Clear(textures);
+    internal static Rectangle Source(int row) => Texture(row).Bounds;
     internal static Color ColorFor(RitualArmamentKind kind) => kind switch
     {
         RitualArmamentKind.Ranged => Ice,
@@ -44,9 +39,26 @@ internal static class RitualArmamentArt
         Color tint, bool flip = false, Vector2? pivot = null)
     {
         Rectangle source = Source(row);
-        batch.Draw(Atlas, world - Main.screenPosition, source, tint, angle,
-            pivot ?? new Vector2(source.Width * .5f, source.Height * .5f),
+        batch.Draw(Texture(row), world - Main.screenPosition, source, tint, angle,
+            pivot is { } measured ? measured * source.Size() / DesignSizes[row] : source.Size() * .5f,
             length / source.Width, flip ? SpriteEffects.FlipVertically : SpriteEffects.None, 0);
+    }
+    internal static void Blade(SpriteBatch batch, Vector2 world, float angle, float length, Color tint, float open)
+    {
+        Texture2D image = Texture(0);
+        float scale = length / image.Width;
+        Vector2 origin = new(42, 26), hinge = new(68, image.Height * .5f);
+        Rectangle root = new(0, 0, 68, image.Height);
+        batch.Draw(image, world - Main.screenPosition, root, tint, angle, origin, scale, SpriteEffects.None, 0);
+        Vector2 pivot = world + ((hinge - origin) * scale).RotatedBy(angle);
+        for (int side = -1; side <= 1; side += 2)
+        {
+            int y = side < 0 ? 0 : image.Height / 2;
+            int height = side < 0 ? image.Height / 2 : image.Height - y;
+            Rectangle plate = new(68, y, image.Width - 68, height);
+            batch.Draw(image, pivot - Main.screenPosition, plate, tint, angle + side * open * .045f,
+                hinge - new Vector2(plate.X, plate.Y), scale, SpriteEffects.None, 0);
+        }
     }
     internal static void Line(SpriteBatch batch, Vector2 a, Vector2 b, Color color, float width)
         => FirstSeveranceBossVisuals.Line(batch, a, b, color, Math.Max(.2f, width));
@@ -72,7 +84,7 @@ public sealed class RitualArmamentItemVisuals : GlobalItem
     {
         int row = (int)((IRitualArmament)item.ModItem).Kind;
         Rectangle source = RitualArmamentArt.Source(row);
-        spriteBatch.Draw(RitualArmamentArt.Atlas, position, source, Color.White, row < 2 ? -.20f : 0,
+        spriteBatch.Draw(RitualArmamentArt.Texture(row), position, source, Color.White, row < 2 ? -.20f : 0,
             source.Size() * .5f, Math.Min(1, scale) * 54 / Math.Max(source.Width, source.Height), SpriteEffects.None, 0);
         return false;
     }
@@ -189,9 +201,9 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                     previous = next;
                 }
             }
-        RitualArmamentArt.Sprite(batch, 0, center, angle, reach + 50, Color.White * fade,
-            slash.Facing < 0, new Vector2(42, 26));
         float open = RitualArmamentRules.Envelope(progress, .22f, .72f, .95f);
+        RitualArmamentArt.Blade(batch, center, angle, reach + 50, Color.White * fade,
+            open * (slash.Combo == 2 ? 1 : .28f));
         Vector2 along = angle.ToRotationVector2();
         RitualArmamentArt.Line(batch, center + along * 62, center + along * (reach - 15),
             RitualArmamentArt.Light(color, open * .65f), 1.5f);

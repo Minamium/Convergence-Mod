@@ -19,6 +19,8 @@ related_docs:
 
 # First Severance Audio Cue Sheet
 
+Weapon-only0.2.25: the five ritual armaments reuse existing SFX masters with a separate `Convergence:RitualWeapon:` sound Identifier group, bounded positional volume, two-voice limits and unload cleanup. Weapon playback does not evict Boss cue voices. All Boss/music masters and cues remain unchanged; [weapon specification](encounters/first-severance/WEAPONS.md) owns the new timing.
+
 The accepted direction is ominous, solemn original orchestral-textural music, not the discarded Ninth/chiptune arrangement. The current mix and cue overrides are below. Human listening/mix approval remains user-owned. Implementation/build/load evidence belongs to [Status](STATUS.md).
 
 
