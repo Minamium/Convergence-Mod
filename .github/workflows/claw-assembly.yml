@@ -1,0 +1,51 @@
+name: Assemble and check authorized dual-claw branch
+on:
+  push:
+    branches: [feat/null-cantor-claws]
+permissions:
+  contents: write
+concurrency:
+  group: null-cantor-claw-assembly
+  cancel-in-progress: true
+jobs:
+  finish:
+    if: github.repository == 'Minamium/tmod' && github.ref == 'refs/heads/feat/null-cantor-claws'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d
+        with:
+          dotnet-version: 8.0.424
+      - name: Guard the exact branch and assemble only the approved weapon
+        run: |
+          test "$(git rev-parse HEAD)" = "$(git ls-remote origin refs/heads/feat/null-cantor-claws | cut -f1)"
+          python3 -m pip install --disable-pip-version-check -r tools/requirements-ci.txt Pillow==11.3.0
+          python3 tools/assemble_claws.py
+          python3 tools/check_claw_compile.py
+      - name: Remove task scaffolding and check the final source tree
+        run: |
+          git rm .github/workflows/claw-assembly.yml tools/assemble_claws.py tools/check_claw_compile.py
+          git add --all
+          python3 -m unittest discover -s tools/tests
+          python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --with-domain --with-codec
+          git diff --cached --check
+      - name: Record evidence and push only the same authorized branch
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path('docs/evidence/2026-09-09-null-cantor-claws.json')
+          p.write_text(json.dumps({'build':'0.2.29','protocol':23,'base_commit':'fa392b7ba44695cb2055b63a9da67ff96571518b','assembly_input':os.environ['GITHUB_SHA'],'checks':{'static':'passed','domain':'passed; includes six new claw contracts','codec':'passed','tooling':'passed','native_tml_api_compile':'passed against SHA256-pinned v2026.07.3.0 engine/FNA/ReLogic; unchanged Rogue adapter substituted by a compile-only facade'},'not_run':['full Calamity integration/package build','game audiovisual acceptance','multiplayer weapon acceptance','DPS comparison'],'scope':'Only Null Refrain melee form, its artwork/presentation, docs and focused tests. Other classes and Boss unchanged.'},indent=2)+'\n')
+          PY
+          git add docs/evidence/2026-09-09-null-cantor-claws.json
+          test "$(git rev-parse HEAD)" = "$(git ls-remote origin refs/heads/feat/null-cantor-claws | cut -f1)"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "feat: finish full-color dual-claw export and verified branch handoff"
+          git push origin HEAD:refs/heads/feat/null-cantor-claws
+          git archive --format=tar HEAD > "$RUNNER_TEMP/claw-final-source.tar"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: null-cantor-claw-final-source
+          path: ${{ runner.temp }}/claw-final-source.tar
+          retention-days: 1
