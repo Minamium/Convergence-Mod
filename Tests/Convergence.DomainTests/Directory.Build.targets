@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/RitualArmamentRules.cs" Link="Domain/RitualArmamentRules.cs" />
+  </ItemGroup>
+</Project>

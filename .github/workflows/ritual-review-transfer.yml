@@ -1,0 +1,19 @@
+name: Temporary read-only weapon review source
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  review-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Export tracked review inputs only
+        run: git archive HEAD > /tmp/ritual-review-source.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ritual-review-source
+          path: /tmp/ritual-review-source.tar
+          retention-days: 1

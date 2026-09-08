@@ -1,0 +1,210 @@
+#nullable enable
+using System;
+using Convergence.Common.Compatibility.Calamity;
+using Convergence.Content.Encounters.FirstSeverance.Revive;
+using Microsoft.Xna.Framework;
+using Terraria;
+using Terraria.DataStructures;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
+
+namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
+
+public interface IRitualArmament { RitualArmamentKind Kind { get; } }
+
+internal static class RitualArmamentItems
+{
+    internal const string TexturePath = "Convergence/Assets/Textures/Items/RitualArmaments";
+    internal static bool Usable(Player player) => player.active && !player.dead
+        && !player.GetModPlayer<FirstSeveranceRaidPlayer>().IsRaidDowned
+        && !player.GetModPlayer<FirstSeveranceRaidPlayer>().IsRaidEliminated;
+    internal static DamageClass DamageClassFor(RitualArmamentKind kind) => kind switch
+    {
+        RitualArmamentKind.Melee => DamageClass.Melee,
+        RitualArmamentKind.Ranged => DamageClass.Ranged,
+        RitualArmamentKind.Magic => DamageClass.Magic,
+        RitualArmamentKind.Summon => DamageClass.Summon,
+        _ => CalamityRogueArmamentDamage.Class,
+    };
+    internal static int TypeFor(RitualArmamentKind kind) => kind switch
+    {
+        RitualArmamentKind.Melee => ModContent.ItemType<NullRefrain>(),
+        RitualArmamentKind.Ranged => ModContent.ItemType<PaleMeridian>(),
+        RitualArmamentKind.Magic => ModContent.ItemType<LacunaTestament>(),
+        RitualArmamentKind.Summon => ModContent.ItemType<ChoirOfTheUnmade>(),
+        _ => ModContent.ItemType<LastWitness>(),
+    };
+    internal static void Defaults(Item item, RitualArmamentKind kind)
+    {
+        item.width = 58; item.height = 28;
+        item.damage = RitualArmamentRules.Damage(kind);
+        item.DamageType = DamageClassFor(kind);
+        item.useTime = item.useAnimation = RitualArmamentRules.UseTicks(kind);
+        item.useStyle = ItemUseStyleID.Shoot;
+        item.autoReuse = true; item.noMelee = true; item.noUseGraphic = true;
+        item.knockBack = 6; item.crit = kind == RitualArmamentKind.Summon ? 0 : 8;
+        item.rare = ItemRarityID.Red; item.value = Item.sellPrice(gold: 40);
+    }
+    internal static Vector2 Aim(Vector2 velocity, int facing)
+        => velocity.LengthSquared() > .001f && float.IsFinite(velocity.X) && float.IsFinite(velocity.Y)
+            ? Vector2.Normalize(velocity) : new Vector2(facing == -1 ? -1 : 1, 0);
+    internal static void Pose(Player player, IEntitySource source, RitualArmamentKind kind, Vector2 aim, int ticks, int accent)
+    {
+        foreach (Projectile old in Main.ActiveProjectiles)
+            if (old.owner == player.whoAmI && old.type == ModContent.ProjectileType<RitualArmamentPose>()) old.Kill();
+        Projectile.NewProjectile(source, player.MountedCenter, aim,
+            ModContent.ProjectileType<RitualArmamentPose>(), 0, 0, player.whoAmI,
+            (float)kind, Math.Clamp(ticks, 6, 90), accent);
+    }
+}
+
+public abstract class RitualArmament : ModItem, IRitualArmament
+{
+    public abstract RitualArmamentKind Kind { get; }
+    public override string Texture => RitualArmamentItems.TexturePath;
+    public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments." + Name + ".Name");
+    public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments." + Name + ".Tooltip");
+    public override bool CanUseItem(Player player) => RitualArmamentItems.Usable(player);
+}
+
+public sealed class PaleMeridian : RitualArmament
+{
+    public override RitualArmamentKind Kind => RitualArmamentKind.Ranged;
+    public override void SetDefaults()
+    {
+        RitualArmamentItems.Defaults(Item, Kind);
+        Item.shoot = ModContent.ProjectileType<MeridianNeedle>();
+        Item.shootSpeed = 19; Item.useAmmo = AmmoID.Bullet;
+    }
+    public override bool CanConsumeAmmo(Item ammo, Player player) => Main.rand.Next(4) == 0;
+    public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
+        Vector2 velocity, int type, int damage, float knockback)
+    {
+        if (player.whoAmI != Main.myPlayer) return false;
+        int shot = player.GetModPlayer<RitualArmamentPlayer>().Next(Kind, 6);
+        Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
+        // Ammo contributes its standard damage; its projectile is deliberately converted.
+        Projectile.NewProjectile(source, player.MountedCenter, aim * 19,
+            ModContent.ProjectileType<MeridianNeedle>(),
+            RitualArmamentRules.ScaledDamage(damage, RitualArmamentRules.RangedMultiplier(shot)),
+            knockback, player.whoAmI, 0, -1, shot == 5 ? 1 : 0);
+        RitualArmamentItems.Pose(player, source, Kind, aim, player.itemAnimationMax, shot == 5 ? 1 : 0);
+        return false;
+    }
+}
+
+public sealed class LacunaTestament : RitualArmament
+{
+    public override RitualArmamentKind Kind => RitualArmamentKind.Magic;
+    public override void SetDefaults()
+    {
+        RitualArmamentItems.Defaults(Item, Kind);
+        Item.mana = 18; Item.shootSpeed = 13;
+        Item.shoot = ModContent.ProjectileType<LacunaRay>();
+    }
+    public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
+        Vector2 velocity, int type, int damage, float knockback)
+    {
+        if (player.whoAmI != Main.myPlayer) return false;
+        Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
+        for (int lens = 0; lens < 3; lens++)
+            Projectile.NewProjectile(source, player.MountedCenter, aim.RotatedBy((lens - 1) * .24f) * 13,
+                Item.shoot, RitualArmamentRules.ScaledDamage(damage, .75f), knockback, player.whoAmI,
+                -9 + lens * 3, -1, lens);
+        RitualArmamentItems.Pose(player, source, Kind, aim, player.itemAnimationMax, 1);
+        return false;
+    }
+}
+
+public sealed class ChoirOfTheUnmade : RitualArmament
+{
+    public override RitualArmamentKind Kind => RitualArmamentKind.Summon;
+    public override void SetStaticDefaults()
+    {
+        ItemID.Sets.StaffMinionSlotsRequired[Type] = 1;
+        ItemID.Sets.LockOnIgnoresCollision[Type] = true;
+        ItemID.Sets.GamepadWholeScreenUseRange[Type] = true;
+    }
+    public override void SetDefaults()
+    {
+        RitualArmamentItems.Defaults(Item, Kind);
+        Item.mana = 10; Item.shootSpeed = 1;
+        Item.buffType = ModContent.BuffType<ChoirOfTheUnmadeBuff>();
+        Item.shoot = ModContent.ProjectileType<ChoirSentinel>();
+    }
+    public override bool CanUseItem(Player player) => base.CanUseItem(player) && player.maxMinions >= 1;
+    public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
+        Vector2 velocity, int type, int damage, float knockback)
+    {
+        if (player.whoAmI != Main.myPlayer) return false;
+        player.AddBuff(Item.buffType, 2);
+        // Spawn near the owner, not at an unchecked distant cursor coordinate.
+        int index = Projectile.NewProjectile(source, player.MountedCenter - new Vector2(0, 80),
+            Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, 0, -1, 0);
+        if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].originalDamage = Item.damage;
+        RitualArmamentItems.Pose(player, source, Kind, RitualArmamentItems.Aim(velocity, player.direction), player.itemAnimationMax, 1);
+        return false;
+    }
+}
+
+public sealed class LastWitness : CalamityRogueArmament, IRitualArmament
+{
+    public RitualArmamentKind Kind => RitualArmamentKind.Rogue;
+    public override string Texture => RitualArmamentItems.TexturePath;
+    public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Name");
+    public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Tooltip");
+    public override void SetDefaults()
+    {
+        RitualArmamentItems.Defaults(Item, Kind);
+        Item.DamageType = RogueClass;
+        Item.shootSpeed = 14; Item.shoot = ModContent.ProjectileType<WitnessBlade>();
+    }
+    public override bool CanUseItem(Player player) => RitualArmamentItems.Usable(player);
+    public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
+        Vector2 velocity, int type, int damage, float knockback)
+    {
+        if (player.whoAmI != Main.myPlayer) return false;
+        bool stealth = HasStealthStrike(player);
+        Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
+        int index = Projectile.NewProjectile(source, player.MountedCenter, aim * 14, Item.shoot,
+            damage, knockback, player.whoAmI, 0, -1, stealth ? 1 : 0);
+        MarkStealthStrike(index, stealth);
+        RitualArmamentItems.Pose(player, source, Kind, aim, player.itemAnimationMax, stealth ? 1 : 0);
+        return false;
+    }
+}
+
+public sealed class RitualArmamentPlayer : ModPlayer
+{
+    private readonly int[] sequence = new int[5];
+    private int previousItem;
+    private int idle;
+    internal int Next(RitualArmamentKind kind, int count)
+    {
+        int value = sequence[(int)kind];
+        sequence[(int)kind] = (value + 1) % count; idle = 0;
+        return value;
+    }
+    public override void PostUpdate()
+    {
+        if (previousItem != Player.HeldItem.type || !RitualArmamentItems.Usable(Player) || ++idle > 90)
+        { Array.Clear(sequence); idle = 91; }
+        previousItem = Player.HeldItem.type;
+    }
+}
+
+// Every form costs exactly one existing raid weapon. No new progression bypass,
+// world flag or reward hook; existing one-item-per-participant Victory stays intact.
+public sealed class RitualArmamentRecipes : ModSystem
+{
+    public override void AddRecipes()
+    {
+        for (int to = 0; to < 5; to++)
+            for (int from = 0; from < 5; from++)
+                if (to != from)
+                    Recipe.Create(RitualArmamentItems.TypeFor((RitualArmamentKind)to))
+                        .AddIngredient(RitualArmamentItems.TypeFor((RitualArmamentKind)from))
+                        .AddTile(TileID.WorkBenches).Register();
+    }
+}

@@ -1,54 +1,34 @@
-using System;
-using Convergence.Content.Encounters.FirstSeverance.Revive;
+#nullable enable
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
 
-public sealed class NullRefrain : ModItem
+// Retains the existing item identity and Victory drop. All five forms can be
+// exchanged one-for-one at a workbench; no extra item is created by conversion.
+public sealed class NullRefrain : RitualArmament
 {
-    public override string Texture => "Convergence/Assets/Textures/Items/NullRefrain";
-
+    public override RitualArmamentKind Kind => RitualArmamentKind.Melee;
     public override void SetDefaults()
     {
-        Item.width = 58; Item.height = 28;
-        Item.damage = 7800; Item.DamageType = DamageClass.Melee;
-        Item.knockBack = 8; Item.crit = 8;
-        Item.useStyle = ItemUseStyleID.Shoot;
-        Item.useTime = Item.useAnimation = 24;
-        Item.autoReuse = true; Item.noMelee = true; Item.noUseGraphic = true;
-        Item.shoot = ModContent.ProjectileType<NullRefrainSlash>(); Item.shootSpeed = 1;
-        Item.rare = ItemRarityID.Red; Item.value = Item.sellPrice(gold: 40);
+        RitualArmamentItems.Defaults(Item, Kind);
+        Item.shoot = ModContent.ProjectileType<NullRefrainSlash>();
+        Item.shootSpeed = 1; Item.knockBack = 8;
     }
-
-    public override bool CanUseItem(Player player) => player.ownedProjectileCounts[Item.shoot] == 0
-        && !player.GetModPlayer<FirstSeveranceRaidPlayer>().IsRaidDowned;
-
+    public override bool CanUseItem(Player player) => base.CanUseItem(player)
+        && player.ownedProjectileCounts[Item.shoot] == 0;
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
         Vector2 velocity, int type, int damage, float knockback)
     {
         if (player.whoAmI != Main.myPlayer) return false;
-        int combo = player.GetModPlayer<NullRefrainCombo>().TakeStroke();
-        float aim = velocity.LengthSquared() > .001f ? MathF.Atan2(velocity.Y, velocity.X)
-            : player.direction == 1 ? 0 : MathF.PI;
-        Projectile.NewProjectile(source, player.MountedCenter, Vector2.Zero, type,
-            combo == 2 ? (int)(damage * 2.3f) : damage, knockback, player.whoAmI,
-            combo, aim, NullRefrainMotion.Duration(combo, player.GetTotalAttackSpeed(DamageClass.Melee)));
+        int combo = player.GetModPlayer<RitualArmamentPlayer>().Next(Kind, 3);
+        Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
+        Projectile.NewProjectile(source, player.MountedCenter, Vector2.Zero, Item.shoot,
+            RitualArmamentRules.ScaledDamage(damage, combo == 2 ? 1.7f : 1), knockback,
+            player.whoAmI, combo, aim.ToRotation(),
+            NullRefrainMotion.Duration(combo, player.GetTotalAttackSpeed(DamageClass.Melee)));
         return false;
-    }
-}
-
-public sealed class NullRefrainCombo : ModPlayer
-{
-    private int next, idle;
-    internal int TakeStroke() { int result = next; next = (next + 1) % 3; idle = 0; return result; }
-    public override void PostUpdate()
-    {
-        if (Player.HeldItem.type != ModContent.ItemType<NullRefrain>() || Player.dead || ++idle > 90)
-        { next = 0; idle = 91; }
-        if (Player.ownedProjectileCounts[ModContent.ProjectileType<NullRefrainSlash>()] > 0) idle = 0;
     }
 }
