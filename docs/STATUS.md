@@ -35,7 +35,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-Weapon-branch checks and unrun build acceptance are recorded in [weapon evidence](evidence/2026-09-08-ritual-armaments.json). The initial implementation's existing GitHub Actions checks passed, including the added pure-domain cases. Full Mod compilation, native Rogue integration and visual/DPS acceptance remain user/Codex-owned; neither pure tests nor the source assembly imply they passed.
+Weapon-branch checks and main integration are recorded in [weapon evidence](evidence/2026-09-08-ritual-armaments.json). The branch fast-forwarded without conflicts. The pinned native Mod compiler built and packaged0.2.25 after correcting Rogue damage-class lookup (zero errors; four existing nullable-context warnings). Existing pure-domain/codec evidence is retained. In-game Rogue behavior, weapon visuals/DPS, conversions and multiplayer acceptance remain user-owned and untested by this build.
 
 The following is retained Boss-build evidence, not a weapon-build claim:
 

@@ -10,7 +10,7 @@ namespace Convergence.Common.Compatibility.Calamity;
 // armor/prefix/stealth consumption behavior; no reflection or private API.
 public abstract class CalamityRogueArmament : RogueWeapon
 {
-    protected static DamageClass RogueClass => RogueDamageClass.Instance;
+    protected static DamageClass RogueClass => ModContent.GetInstance<RogueDamageClass>();
     protected static bool HasStealthStrike(Player player) => player.Calamity().StealthStrikeAvailable();
     protected static void MarkStealthStrike(int index, bool enabled)
     {
@@ -21,5 +21,5 @@ public abstract class CalamityRogueArmament : RogueWeapon
 
 internal static class CalamityRogueArmamentDamage
 {
-    internal static DamageClass Class => RogueDamageClass.Instance;
+    internal static DamageClass Class => ModContent.GetInstance<RogueDamageClass>();
 }

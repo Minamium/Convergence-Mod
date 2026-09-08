@@ -7,7 +7,7 @@
   "checks": {
     "initial_ci": "Repository checks run34215395425 passed on e86f2859e1c623fd0e81d987a5132c53d70f9f44; includes five new pure-domain cases. Final assembly checked separately by the one-shot workflow before commit.",
     "asset_bytes": "Every runtime export compared with its expected Git blob SHA before assembly; no corrupted upload is accepted.",
-    "mod_build": "not_run; full pinned tModLoader/Calamity environment is user/Codex-owned",
+    "mod_build": "Passed on main using tools/dev.py build --native against pinned tModLoader and installed Calamity2.2.4; zero errors, four existing CS8632 nullable-context warnings. Corrected missing RogueDamageClass.Instance to ModContent.GetInstance<RogueDamageClass>().",
     "runtime_fps_dps_audio": "not_run; not inferred from domain/codec checks or arithmetic budgets",
     "final_assembly": "Passed repository/catalog/YAML, tooling unit tests, linked domain tests and compiled codec checks before this feature-branch commit. Full Mod build remains not_run."
   },
@@ -16,5 +16,16 @@
     "generation": "d492a069-958c-4f23-9747-c26693b26d66",
     "sha256": "c833eeba1fc06d53951df33bce597efb29c0b52cc0fb221e73acd3586e93c797"
   },
-  "main_changed": false
+  "main_changed": true,
+  "integration": {
+    "merged_tip": "1f288ddcf13b98d1bbceef3c7ca2775cc29c97dc",
+    "merge": "Fast-forward; no conflicts; weapon branch retained",
+    "local_build_record": ".local/builds/20260908T125149431993Z/record.json",
+    "dirty_source_sha256": "5def32b76da74a82d14a692beb3dceb2c84225f7e926f8e6c6a0d22b9ce3f3ba",
+    "package_sha256": "245f215b00d95c98ce388a78a702e454428ec082f57a3ad378a512ecceedf72b",
+    "package_bytes": 33534381,
+    "source_changed_during_build": false,
+    "post_build_edits": "Documentation/evidence/catalog only; no game or server session launched",
+    "tooling": "Native failure propagation exercised, empty define filtered, successful build/package and source identity recorded; prior domain/codec checks reused"
+  }
 }

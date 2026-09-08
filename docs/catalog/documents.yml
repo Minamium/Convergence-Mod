@@ -394,7 +394,7 @@ documents:
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: 4d8e314f59d1dcd3afebd0298b5f6cb7a8af4c8a508fdc7be67c3a6a331f6859
+  content_sha256: 594f0f508176de710293f5b486701ce394d908c752fed26b30ace6c3e6a99ea6
   document_type: runbook
   status: accepted
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: de34583d9adef2b942c379cf8a6caa5d31df90317d0ee8a4adbccf64eca4ee66
+  content_sha256: f4dd08c121c46886be5aeb3fbe1d8b02cc5acb1aa95d829670cb857afe8d917e
   document_type: status
   status: accepted
   owners:

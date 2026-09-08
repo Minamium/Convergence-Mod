@@ -54,6 +54,7 @@ def main() -> int:
     parser.add_argument("--save", help="explicit existing tModLoader user-data directory")
     parser.add_argument("--configuration", choices=("Debug", "Release"), default="Debug")
     parser.add_argument("--release-candidate", action="store_true", help="compile out solo debug admission; not a release approval")
+    parser.add_argument("--native", action="store_true", help="use tModLoader's compiler to resolve installed modReferences without extracting permanent DLL references")
     args = parser.parse_args()
     properties = [f"-p:Configuration={args.configuration}"]
     for name, value in (("TModLoaderPath", args.tml), ("TModLoaderSavePath", args.save)):
@@ -79,10 +80,15 @@ def main() -> int:
             import shutil
             shutil.copy2(package, record_dir / "Convergence.previous.tmod")
         command = ["dotnet", "build", "ConvergenceMod.csproj", *properties]
+        build_cwd = ROOT
+        if args.native:
+            build_cwd = Path(env["tMLSteamPath"])
+            command = ["dotnet", str(build_cwd / "tModLoader.dll"), "-server", "-build", str(ROOT),
+                       "-define", ";".join(filter(None, env["DefineConstants"].split(";"))), "-tmlsavedirectory", str(save)]
         record = {"started_utc": stamp, "source": source, "environment": env, "command": command,
                   "runtime_checks": "not_run; user-owned"}
         with (record_dir / "build.log").open("w", encoding="utf-8") as log:
-            process = subprocess.Popen(command, cwd=ROOT, text=True, encoding="utf-8", errors="replace",
+            process = subprocess.Popen(command, cwd=build_cwd, text=True, encoding="utf-8", errors="replace",
                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                        env=os.environ | {"DOTNET_CLI_UI_LANGUAGE": "en"})
             for line in process.stdout:

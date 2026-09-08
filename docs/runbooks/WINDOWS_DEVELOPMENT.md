@@ -58,12 +58,14 @@ The project prefers explicit local/MSBuild paths, then `TML_PATH`, with the trad
 
 ```powershell
 python tools/dev.py doctor
-python tools/dev.py build
+python tools/dev.py build --native
 ```
 
 Use the available Python 3 interpreter. Doctor is read-only and identifies the resolved checkout, branch, dirty state, SDK and installed targets. Build uses that source and normal tML packaging, preserving the previous package in ignored `.local/builds/<timestamp>`. Its JSON record contains the exact commit, dirty status, SHA256 source-file manifest, resolved environment, command/log and output package hash; a source change during the build fails attribution. `--tml` and `--save` are explicit overrides; `--release-candidate` compiles out solo admission but does not approve a release.
 
-`dotnet build ConvergenceMod.csproj` remains supported (also via the static wrapper's `--with-dotnet`), but use the recorded build when handing off a package. Do not run both on unchanged compiled inputs.
+Use `--native` for the current direct Calamity weapon references: the installed tModLoader compiler resolves `modReferences` from installed Mods/Workshop and removes its temporary reference DLLs. This is a non-GUI build, not a running game server. It does not refresh `bin/Debug` DLLs; do not use an older MSBuild DLL as this package's codec evidence. Bare `dotnet build`/the wrapper's `--with-dotnet` require separately configured local Calamity assembly references; the previous project-only setup is insufficient for0.2.25. Do not vendor those DLLs or run both compilers on unchanged inputs.
+
+Verified2026-09-08 against pinned [ModCompile.cs](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/Core/ModCompile.cs): `CompileMod` resolves installed dependencies whereas `-eac` packages a precompiled assembly. Native compilation uses tML's parser settings rather than the project nullable context (currently four annotation warnings).
 
 Installed `tMLMod.targets` was inspected during consolidation: it sets .NET 8/C#12 and calls the bundled server build command with ProjectDir, TargetPath and ExtraBuildModFlags. No copied third-party build targets or hard-coded Steam directory is committed.
 
