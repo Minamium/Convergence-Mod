@@ -33,7 +33,8 @@ internal static partial class Program
                 AssertEqual(FirstSeveranceGridVolley.HalfWidth,ray.HalfWidth,"grid collision width");
                 float mx=ray.X+ray.DirectionX*ray.Length*.5f, my=ray.Y+ray.DirectionY*ray.Length*.5f;
                 AssertEqual(true,ray.Intersects(mx,my,10,21),"beam center hits");
-                AssertEqual(false,ray.Intersects(mx-ray.DirectionY*48,my+ray.DirectionX*48,10,21),"half-pitch gap fits full player even diagonally");
+                float gap = FirstSeveranceScoreGeometry.SlicerPitch * .5f;
+                AssertEqual(false,ray.Intersects(mx-ray.DirectionY*gap,my+ray.DirectionX*gap,10,21),"half-pitch gap fits full player even diagonally");
             }
             foreach(var ray in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,step,
                 pulse*cadence+FirstSeveranceScoreGeometry.SlicerEnd(step),4000,4000,seed))

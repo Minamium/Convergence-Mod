@@ -2,6 +2,36 @@
 
 ## Records
 
+### Publication emblem — 0.2.28 / 2026-09-08
+
+- Runtime file: `icon.png`
+- Asset ID: convergence-publication-icon-small
+- Asset type: texture
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: no external image; original prompt in docs/evidence/2026-09-08-spacing-publication-materials.json
+- Tool/model/version: built-in image_gen tool; model version not exposed; System.Drawing high-quality bicubic size export
+- Human modifications: no hand retouching; proportional fit to80×80 RGBA
+- License and redistribution terms: project asset license undecided; preparation only, no public release approval
+- Required attribution: retain this provenance record; no external credit specified
+- Reviewer and review date: Codex master and80px thumbnail visual inspection, 2026-09-08; owner acceptance pending
+- Notes: SHA25642feb67ff7ece58378ab77b8141becb26ec89bf68a3baae22c1ce706b1e8b8d4; generated master retained outside source
+
+- Runtime file: `icon_workshop.png`
+- Asset ID: convergence-publication-icon-workshop
+- Asset type: texture
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-08
+- Source type: generated
+- Source work and URL: same original emblem master; no external image
+- Tool/model/version: built-in image_gen tool; model version not exposed; System.Drawing high-quality bicubic size export
+- Human modifications: no hand retouching; proportional fit to512×512 RGBA
+- License and redistribution terms: project asset license undecided; preparation only, no public release approval
+- Required attribution: retain this provenance record; no external credit specified
+- Reviewer and review date: Codex master/thumbnail inspection, 2026-09-08; owner acceptance pending
+- Notes: SHA256764b07ac79589c81f2963be1f070d171053300aa227197dbf1a61b8c3a62a0cc; promotional art, not a gameplay screenshot
+
 ### Five ritual armaments — 0.2.25 / 2026-09-08
 
 - Runtime file: `Assets/Textures/Items/RitualArmaments/NullRefrain.png`

@@ -30,7 +30,7 @@ internal static class FirstSeveranceRandomComb
         float dx = axis == 0 ? 0 : axis == 1 ? 1 : diagonal;
         float dy = axis == 0 ? 1 : axis == 1 ? 0 : axis == 2 ? diagonal : -diagonal;
         float nx = -dy, ny = dx;
-        float offset = (Sample(seed, step, pulse) >> 10) % 96 - 48f;
+        float offset = (Sample(seed, step, pulse) >> 10) % FirstSeveranceScoreGeometry.SlicerPitch - FirstSeveranceScoreGeometry.SlicerPitch * .5f;
         for (int i = -20; i <= 20; i++)
         {
             float x = nx * (i * FirstSeveranceScoreGeometry.SlicerPitch + offset);

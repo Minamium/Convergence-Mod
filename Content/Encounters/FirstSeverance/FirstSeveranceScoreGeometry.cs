@@ -37,7 +37,7 @@ internal static class FirstSeveranceScoreGeometry
     internal static int SlicerFire(int step) => 28 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 6);
     internal static int SlicerEnd(int step) => SlicerFire(step) + 6;
     internal static int SlicerCadence(int step) => SlicerEnd(step) + 2;
-    internal const int SlicerPitch = 96;
+    internal const int SlicerPitch = 112;
     internal static int BulletStartTick(int step, int wave) => 36 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 8)
         + wave * (32 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 10));
     internal static float BulletSpeed(int step) => 10 + FirstSeveranceChoreography.FinalProgress(step) * 3.5f;

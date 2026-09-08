@@ -27,6 +27,10 @@ related_docs:
 
 ## Random Final triples
 
+Current0.2.28 overrides pitch only:112px pitch with the same24px full beam width leaves88px clear lanes. Three-pulse random selection, warning/fire/recovery and120damage remain unchanged.
+
+Iron Interdict sparse sword offsets are now-16px in wave one and+64px in wave two (80px displacement, versus the previous32px). The dense half, stagger and warning schedule stay fixed. Authority and visuals use the same helper; whole-player positions safe in wave one are covered by wave two, requiring lateral repositioning. New gaps keep the same40–72px width.
+
 Current0.2.27 overrides previous FinalSlicer descriptions: each slicer action has three pulses, each choosing vertical, horizontal or diagonal (either slope) by shared seeded pseudorandom selection; repeats are possible. Seed is the server-assigned action entry tick already in snapshots, mixed with step/pulse. Full width matches the lattice24px; pitch96px leaves72px clear lanes. Rays are clipped to the arena (tiny corner fragments below32px are omitted). Telegraph28→22ticks with terminal progress, active6ticks, recovery2ticks; cadence36→30ticks. The action ends after exactly three cadences, without the former six-pulse wait. Fixed120damage and once-per-participant-per-pulse authority damage remain. No new actors, resources or client input. Final bullets, Stack/Spread and phase gates are unchanged. Random triples do not promise that every stationary position is hit during each individual triple.
 
 ## Weapon-only reward extension — 0.2.25

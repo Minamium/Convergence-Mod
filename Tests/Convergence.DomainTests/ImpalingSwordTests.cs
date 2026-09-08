@@ -6,6 +6,24 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Impaling second wave displaces every first-wave standing safe position")]
+    private static void ImpalingSecondWaveShift()
+    {
+        foreach (int step in new[] {1,4})
+        {
+            var first = FirstSeveranceImpalingSwords.At(step,132,4000,4000);
+            var second = FirstSeveranceImpalingSwords.At(step,238,4000,4000);
+            int safe = 0;
+            for (float x = 2730; x <= 5270; x += 2)
+            {
+                if (first.Any(s => s.FullRay.Intersects(x,3440,10,21))) continue;
+                safe++;
+                AssertEqual(true, second.Any(s => s.FullRay.Intersects(x,3440,10,21)), "must move from first-wave gap");
+            }
+            AssertEqual(true,safe > 0,"first wave still dodgeable");
+        }
+    }
+
     [DomainTest("Impaling swords close one half and preserve tight warned gaps in the other")]
     private static void ImpalingSwordCoverage()
     {

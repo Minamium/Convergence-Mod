@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "build": "0.2.28",
+  "protocol": 23,
+  "scope": "Final pitch112; sword second sparse wave displacement80; public-development descriptions and icons only, no publication/license grant",
+  "prior_playtest": {
+    "build": "0.2.27",
+    "time": "2026-09-08 22:38:01.743-22:42:00.313 JST",
+    "participants": 2,
+    "elapsed_seconds": 238.57,
+    "result": "Defeat AllParticipantsDowned; final missed Stack resolved before the state label advanced to Spread",
+    "stack_pass_total": "17/19",
+    "spread_pass_total": "21/21",
+    "downs": 3,
+    "successful_revives": 1,
+    "final_beam_hits": 8,
+    "sword_hits": 3,
+    "core_window_dps": 95419.8,
+    "pylon_window_dps": 134579.4,
+    "warnings_errors_after_combat_start": 0,
+    "server_log_sha256": "3fa455c575869034df55326a63d227c65c5e3ab7c3396a2dea2a78caa42c3fbe"
+  },
+  "checks": "110 deterministic domain tests passed including forced reposition between sword waves; native build passed with0errors/4existingCS8632warnings; linked-source protocol23 codec324roundtrips/50rejections passed; static/catalog/YAML/diff passed; icons decoded and measured80x80/512x512RGBA, thumbnail inspected",
+  "build_identity": {
+    "base_commit": "23e6747be5b625efe6e64ca9b5bcc4dcc7490b52",
+    "local_record": ".local/builds/20260908T135314996771Z/record.json",
+    "source_sha256": "20cab58822241d4e50c6a6d95c79b5abb82c91278ac97aabe7b9524919d59926",
+    "package_sha256": "0c5523d71c3762741a7467a67273e742e734365aa10147ee7c830321ffa6cb87",
+    "source_changed_during_build": false,
+    "post_build_changes": "Evidence only; existing local English localization changes preserved and packaged, not included in this commit"
+  },
+  "publication": {
+    "published": false,
+    "repository_visibility": "PRIVATE, verified through authenticated gh; no changes made",
+    "report_channel": "Workshop comments after owner publication; no inaccessible private Issues link advertised",
+    "remaining": "Owner art acceptance, current gameplay screenshots, distribution terms and solo-public-test policy approval, package/load acceptance; no license or Steam terms accepted"
+  },
+  "art": {
+    "tool": "built-in image_gen; exact model not exposed",
+    "master_file": "exec-ca04cb1d-a198-4545-96ba-3c8218ff027e.png",
+    "master_sha256": "17d931e6c1be73a2b79e8d372c799e8afa66e4b0260073ddae99d8a5a22a093c",
+    "prompt": "Use case: logo-brand. Asset type: square Steam Workshop and 80px game mod icon for Convergence, an original ominous multiplayer ritual raid. Generate one square 1024x1024 raster master, no text. Subject: a single monumental broken black-metal spherical shell framing a tiny piercing white-cyan core, three asymmetric blade-like shell fragments forming a severe circular sigil. Dark charcoal background. Restrained platinum edge highlights, cold cyan and faint violet internal energy. Mood: unsettling, solemn, inhuman, premium high-resolution metal material, no cute fantasy cartoon. Icon silhouette must remain bold and legible reduced to 80x80: central object fills 80 percent, clean negative space, minimal micro-detail outside the shell. No letters, title, watermark, UI, characters, third-party logos or franchise motifs. No frame.",
+    "export": "Proportional high-quality bicubic80px/512px RGBA, no creative retouch; original retained in generated_images and export script in ignored .local"
+  },
+  "runtime": "not_run for0.2.28; user-owned; no GUI/play server launched",
+  "preserved_local_changes": ["Localization/en-US.hjson", "Localization/RitualArmaments/en-US.hjson"]
+}

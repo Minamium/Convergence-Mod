@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v22
+## Current development protocol v23
+
+No wire fields change. Version23 requires identical peers for the wider Final comb pitch and shifted second sword wave; both still reconstruct through shared authority geometry.
+
+## Preceding development protocol v22
 
 Wire layout remains unchanged. Random Final geometry uses the already replicated server-owned `ActionStartedTick` (authority `SubstateEnteredTick`), step and pulse as an explicitly mixed integer seed, not client RNG. Identical seed reconstructs the same three orientations/offsets on authority, visual and sound paths. Version22 rejects older peers because derived geometry and action duration changed. No per-ray packet/resource or new global routing is introduced.
 

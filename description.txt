@@ -1,6 +1,11 @@
-A multiplayer-first Calamity Mod addon under active development.
+Convergence (Development Build)
+An experimental multiplayer-first raid for Calamity endgame equipment.
 
-The first vertical slice is a 2-4 player post-Exo Mechs and post-Supreme Calamitas raid. The architecture is designed to support additional bosses, raids, world content, items, and presentation systems without coupling them to the first encounter.
+First Severance pits your party against Null Cantor: gathering and spreading mechanics, resurrection, multiple boss phases, dense beam patterns and a final survival sequence. Victory awards a weapon convertible into five class forms at a Work Bench.
 
-This is not currently a playable release.
+Requires Calamity Mod 2.2.4 on the tested tModLoader 2026.07 / Terraria 1.4.4.9 baseline. Use Calamity's required dependencies, including its official music mod where required. Other installed addons are not Convergence dependencies.
+Recommended: 2-4 players with endgame gear, in a world with Exo Mechs and Supreme Calamitas defeated. Current balance is provisional; all peers must use the same Convergence version.
 
+This build has no normal crafting recipe for Foundation Core or Resuscitation Kit. Obtain them using an item browser/spawner such as Cheat Sheet (setup aid, not a hard dependency). On a backed-up test world, place Foundation Core on solid ground with ample open space around/above it. Gather the party nearby, right-click to prepare, then each participant right-clicks to mark Ready. Follow the on-screen validation messages. Use Resuscitation Kit near a downed ally; the item is reusable and the revived player has a 60-second revival lockout. All participants down means defeat.
+
+Solo activation is enabled only as a development convenience, not balanced solo content. Rapid flashes, screen shake and loud effects: reduced-effects settings are available. Balance, artwork, performance and multiplayer edge cases remain in development. Back up worlds/characters; avoid valuable main saves. Report bugs in the Workshop comments after publication with version, player count, enabled Mods and reproduction steps; redact personal information from any logs.

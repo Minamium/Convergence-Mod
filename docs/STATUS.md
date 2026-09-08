@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.27**, protocol **22**. Final slicers are three fast random lattice-width volleys, using the server-owned action epoch as a shared deterministic seed. Vertical, horizontal and both diagonal orientations use the same material/collision footprint. This supersedes0.2.26's presentation-only pass; [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns timing/geometry. All other attacks and the five ritual armaments are retained.
+Development **0.2.28**, protocol **23**. Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. Other timing/damage and the five ritual armaments are retained. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. Public-development descriptions and icons are prepared, not published or release-approved; see [publication preparation](RELEASE_PROCESS.md#development-publication-preparation).
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -34,6 +34,8 @@ Development **0.2.27**, protocol **22**. Final slicers are three fast random lat
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Spacing/publication-material evidence](evidence/2026-09-08-spacing-publication-materials.json) records0.2.28 checks and the latest0.2.27 two-player run: Final reached, one successful revival, subsequent missed Stack caused all-Down Defeat. Current user-owned checks: wider random gaps and forced second sword dodge on matching peers; public rights/solo-policy/package acceptance remain separate.
 
 [Random triple checks](evidence/2026-09-08-random-final-triples.json) owns0.2.27 results. User-owned check: matching peers, three-shot direction changes/diagonal warning readability, tight safe gaps and faster final survival. No GUI/server session is launched by this implementation.
 

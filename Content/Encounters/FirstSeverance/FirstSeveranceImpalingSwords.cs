@@ -33,7 +33,7 @@ internal static class FirstSeveranceImpalingSwords
             // 160px pitch / 104px aura leaves narrow irregular clear slots.
             float jitter = dense ? 0 : ((lane * 7 + wave * 5 + step) % 5 - 2) * 4;
             float x = dense ? denseStart + 32 + lane * 64
-                : sparseStart + 80 + lane * 160 + jitter + (wave == 0 ? -16 : 16);
+                : sparseStart + 80 + lane * 160 + jitter + (wave == 0 ? -16 : 64);
             int fire = fireBase + Stagger[(lane * 5 + step + wave * 3) % Stagger.Length];
             bool fromTop = (lane * 3 + wave + step) % 4 < 2;
             var ray = new FirstSeveranceLanceRay(groundX + x, fromTop ? groundY - 1120 : groundY,

@@ -563,7 +563,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 1e17058e6b1627daf72a25e121ac80be19837dc48a8a67acd21ae6db3a44dc46
+  content_sha256: db1865afb5a1f7c53bd62244848f0b2d603e59dc25b5eedaac1ff9eec8948dfb
   document_type: spec
   status: accepted
   owners:
@@ -688,7 +688,7 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: ee479ec937c4637d5974c285ba35f1b83b83f0b09f0ea59d33c220c87f1ece65
+  content_sha256: 917898aa5bdcc3d777c360169511fb4b468e982cbc3bcf770e1ee91af08cd296
   document_type: policy
   status: accepted
   owners:
@@ -938,7 +938,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: fc1468be078edf4e1a841750473bfaca5bc92cb2614479ab74366f15365973ba
+  content_sha256: 630fb6115c669ccf7890f851de3edd6b54eeb9f05b8ed7f09d3b5190e65fae33
   document_type: governance
   status: accepted
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8c4e13c42ef78b4efb4c82fe5fe7b4c98b86fbcdc0c176cdb68b478cff0c4322
+  content_sha256: 98e973b9ff6c83848b504507f4da635eedc4e4ae69be7adf191336e973fa1d39
   document_type: status
   status: accepted
   owners:
