@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "build": "0.2.26",
+  "protocol": 21,
+  "scope": "Client FinalSlicer material and pulse selection only; no damage, width, spacing, schedule or replication changes",
+  "prior_playtest": {
+    "version": "0.2.25",
+    "date": "2026-09-08",
+    "time": "21:59:58.835-22:03:49.806 JST",
+    "participants": 2,
+    "result": "Victory",
+    "elapsed_seconds": 230.98,
+    "stack_pass_total": "19/19",
+    "spread_pass_total": "21/22",
+    "downs": 0,
+    "revives": 0,
+    "reward_drops": 2,
+    "core_window_dps": 92393.0,
+    "pylon_window_dps": 101408.5,
+    "final_slicer_hits": 22,
+    "final_slicer_hits_by_participant": [10, 12],
+    "hit_ticks_after_pulse_fire": {"0": 19, "1": 1, "3": 1, "6": 1},
+    "combat_and_postcombat_warnings_errors": "none in available server/client logs",
+    "server_log_sha256": "c576cc647a987d1d75918d36360c2a87a8d9263288f6f7b8fb60b91179c3175c"
+  },
+  "diagnosis": "Hits are recorded at/after authority fire, not early. Old warning multiplies several low opacity factors; pulse geometry uses render time while live selection uses integer authority time, permitting a boundary mismatch. These are code observations, not proof of the remote client's rendered frames.",
+  "checks": "Native build/package passed: zero errors, four existing CS8632 warnings. Static/catalog/YAML passed (60 documents,396 files,10 YAML); diff check passed. Gameplay tests reused because gameplay inputs unchanged.",
+  "build_identity": {
+    "base_commit": "ea2536051709cef22a7391495954af2528fd9b98",
+    "local_record": ".local/builds/20260908T131130655703Z/record.json",
+    "source_sha256": "29ce80437c7617a9cda4c09c8c261aaebb5997a826dd7ee8d636a00f753308a5",
+    "package_sha256": "f138ae9cacb0d498aab51e616659881cf09cb6413633cfb0de2e2800704a2baf",
+    "source_changed_during_build": false,
+    "post_build_changes": "Evidence only; preserved local localization changes included in package but not in this commit"
+  },
+  "runtime": "not_run; user-owned both-client readability, high/low-FPS release and reduced-effects check; no FPS or latency guarantee",
+  "preserved_local_changes": ["Localization/en-US.hjson", "Localization/RitualArmaments/en-US.hjson"]
+}

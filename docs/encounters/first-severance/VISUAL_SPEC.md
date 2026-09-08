@@ -20,6 +20,8 @@ related_docs:
 
 # First Severance — Null Cantor Visual Pass
 
+Current0.2.26 Final slicing override: use the opening pursuit beam's plasma material and converging filaments, with a full-width colored forecast visible from its first frame, an immediate full-length release flash, and low-intensity harmless decay. Authority tick selects the same pulse, axis, offset and active state as collision; fractional draw time animates only that pulse's surface. No large endpoint halos, arrows or extra side rails. The existing56px damage width,136px pitch,120damage and warning/cadence remain unchanged. Reduced effects keeps the footprint and lowers filaments/flash. All other beam materials remain unchanged.
+
 Weapon-only0.2.25: [Five Ritual Armaments](WEAPONS.md) owns the approved-concept drop-weapon silhouettes, continuous animation and homing presentation. This supersedes only older Null Refrain weapon descriptions below; all Boss presentation is retained.
 
 The user requested giant scale and spectacle comparable in ambition to Avatar of Emptiness / Nameless Deity, combined with this project's polar containment/ritual theme. `0.2.0` implements an original first pass, not a reproduction of those Bosses or a claim of equivalent finished animation/shader quality. The original small-placeholder scope is superseded for this pass by [ADR-0010](../../adr/0010-giant-boss-observation-lances.md).

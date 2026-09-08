@@ -588,7 +588,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: fb4332562c0b08dbc965fadc4fa156949b62bdc3c722530c6ec0802f7b453460
+  content_sha256: 53f834a896d6c6e9838f4203088484af6df866d3a470ade0daeb97e1c9cd8980
   document_type: spec
   status: provisional
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: f4dd08c121c46886be5aeb3fbe1d8b02cc5acb1aa95d829670cb857afe8d917e
+  content_sha256: 981ba486961c5f6f6ab0f9dfc3641e4e913181c6a37c71db247dc224ab2d2fc9
   document_type: status
   status: accepted
   owners:

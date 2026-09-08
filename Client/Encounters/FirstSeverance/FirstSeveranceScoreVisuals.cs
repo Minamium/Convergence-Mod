@@ -22,6 +22,11 @@ internal sealed class FirstSeveranceScoreVisuals
     {
         if (Main.dedServ || tick < combat.ActionStartedTick || authorityTick >= combat.ResolveTick) return;
         double age = tick - combat.ActionStartedTick;
+        if (combat.Substate == FirstSeveranceSubstate.FinalSlicer)
+        {
+            FirstSeveranceFinalBeamVisuals.Draw(batch, accents, combat, tick, authorityTick, reduced);
+            return;
+        }
         if (combat.Substate == FirstSeveranceSubstate.RemoteClaws)
         {
             DrawFlood(batch, accents, combat, age, reduced);
@@ -44,17 +49,11 @@ internal sealed class FirstSeveranceScoreVisuals
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY), normal = new(-direction.Y, direction.X);
             Vector2 end = origin + direction * ray.Length;
             bool crush = combat.Substate == FirstSeveranceSubstate.RemoteCrush;
-            bool slicer = combat.Substate == FirstSeveranceSubstate.FinalSlicer;
             Color color = crush ? new(255, 96, 163)
                 : combat.Substate == FirstSeveranceSubstate.RemoteClaws ? new(107, 230, 238)
-                : slicer && item.Pulse % 2 == 0 ? new(92, 233, 255) : new(194, 146, 255);
-            int slicerFire = FirstSeveranceScoreGeometry.SlicerFire(combat.ActionIndex);
-            int slicerEnd = FirstSeveranceScoreGeometry.SlicerEnd(combat.ActionIndex);
-            int slicerCadence = FirstSeveranceScoreGeometry.SlicerCadence(combat.ActionIndex);
-            double local = slicer ? age % slicerCadence : age;
-            float born = Window(local, 0, slicer ? 4 : 12);
-            float fade = crush ? 1 - Window(age, 180, 240)
-                : slicer ? 1 - Window(local, slicerEnd, slicerCadence) : 1;
+                : new(194, 146, 255);
+            float born = Window(age, 0, 12);
+            float fade = crush ? 1 - Window(age, 180, 240) : 1;
             if (crush)
             {
                 FirstSeveranceBeamMaterial.CrushMembrane(batch, accents, (origin + end) * .5f,
@@ -69,26 +68,7 @@ internal sealed class FirstSeveranceScoreVisuals
             }
             float power = live ? .92f : (.20f + item.Charge * .30f) * born * fade;
             FirstSeveranceBeamMaterial.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                local, item.Charge, live ? 1 : 0, power, color, reduced);
-            if (slicer)
-            {
-                // Form a lens at each field edge before it unfolds into a full comb tooth.
-                accents.CastSeal(batch, origin + direction * 20, local, 0, slicerFire, color, reduced, .38f);
-                accents.Halo(batch, end - direction * 10, new Vector2(95), color, power * .5f);
-                if (!reduced)
-                    for (int strand = -1; strand <= 1; strand++)
-                    {
-                        Vector2 prior = origin;
-                        for (int segment = 1; segment <= 20; segment++)
-                        {
-                            float p = segment / 20f;
-                            Vector2 next = origin + direction * (ray.Length * p)
-                                + normal * (MathF.Sin(p * 16 + (float)local * .2f + strand) * 9 + strand * 9);
-                            Line(batch, prior, next, FirstSeveranceAttackAccents.Neon(color, power * .38f), live ? 3 : 1.2f);
-                            prior = next;
-                        }
-                    }
-            }
+                age, item.Charge, live ? 1 : 0, power, color, reduced);
             accents.Halo(batch, origin, new Vector2(100 + item.Charge * 90), color, power);
         }
         if (combat.Substate == FirstSeveranceSubstate.FinalBullets)

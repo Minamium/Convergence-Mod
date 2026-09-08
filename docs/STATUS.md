@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.25**, protocol **21**. The weapon-only branch adds five ritual armament forms, strong bounded homing, continuous client animation, original approved-concept texture exports and one-for-one Work Bench conversions from the existing Victory reward. Boss logic, phase schedules, mechanics, recovery, world data and all music/SFX masters are unchanged. Native weapon projectiles use ordinary tModLoader replication, not a new encounter packet. See [weapon specification](encounters/first-severance/WEAPONS.md). Damage is initial tuning, not measured Calamity-endgame superiority.
+Development **0.2.26**, protocol **21**. Final slicing beams now use pursuit-style continuous plasma with a brighter full-width warning and authority-selected pulse/axis through release. This is client presentation only: damage, geometry, warning durations and cadence are unchanged. The five ritual armament forms and Work Bench conversions from0.2.25 are retained; see [weapon specification](encounters/first-severance/WEAPONS.md). Damage is initial tuning, not measured Calamity-endgame superiority.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -34,6 +34,8 @@ Development **0.2.25**, protocol **21**. The weapon-only branch adds five ritual
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Final beam readability evidence](evidence/2026-09-08-final-beam-readability.json) records the latest0.2.25 two-player Victory and this presentation-only pass. User-owned0.2.26 check: visible warning/active footprint and release/decay at high/low FPS and both clients; no latency or visual correctness claim from a build. Existing local English localization changes are preserved, not rewritten by this pass.
 
 Weapon-branch checks and main integration are recorded in [weapon evidence](evidence/2026-09-08-ritual-armaments.json). The branch fast-forwarded without conflicts. The pinned native Mod compiler built and packaged0.2.25 after correcting Rogue damage-class lookup (zero errors; four existing nullable-context warnings). Existing pure-domain/codec evidence is retained. In-game Rogue behavior, weapon visuals/DPS, conversions and multiplayer acceptance remain user-owned and untested by this build.
 
