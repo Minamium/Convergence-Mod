@@ -2,6 +2,23 @@
 
 ## Records
 
+### Null Cantor claw inventory icon — 0.2.29
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/NullCantorClaws.png`
+- Asset ID: null-cantor-claws-icon-2026-09-09
+- Asset type: weapon texture
+- Creator: project original P3 rig with ImageGen assistance; independent project-authored icon composition
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: existing `Assets/Textures/NPCs/NullCantorRigAtlas.png`, original record retained; no third-party input
+- Tool/model/version: Pillow11.3.0, RGBA crop, reflection, bicubic rotation and Lanczos128x128 export
+- Human modifications: user-directed P3 dual-claw design; agent composed the inventory-only derivative; original atlas unchanged
+- License and redistribution terms: existing project asset terms remain undecided; development branch only, no publication approval
+- Required attribution: retain original P3 rig provenance and this derivative record
+- Reviewer and review date: source alpha/region inspection and output decode,2026-09-09; in-game acceptance pending
+- Notes: no palette reduction; SHA256 `634fabd74d575c5126284b1f4c68b8cde76d8f8c3cf773acc600027c037d24bc`. Runtime hand animation samples the original high-resolution atlas, not this inventory icon. Recipe is retained in the feature-branch assembly commit history and the external task working files.
+
+
 ### Publication emblem — 0.2.28 / 2026-09-08
 
 - Runtime file: `icon.png`

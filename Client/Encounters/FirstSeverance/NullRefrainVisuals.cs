@@ -78,7 +78,7 @@ internal static class RitualArmamentArt
 [Autoload(Side = ModSide.Client)]
 public sealed class RitualArmamentItemVisuals : GlobalItem
 {
-    public override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.ModItem is IRitualArmament;
+    public override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.ModItem is IRitualArmament && entity.ModItem is not NullRefrain;
     public override bool PreDrawInInventory(Item item, SpriteBatch spriteBatch, Vector2 position,
         Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
     {

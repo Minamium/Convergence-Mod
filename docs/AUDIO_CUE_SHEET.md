@@ -176,3 +176,5 @@ If retained, work must begin from a verified public-domain score and a new proje
 - loop sample positions and transition tails;
 - composer/performer credits and `Assets/ATTRIBUTION.md` entry;
 - in-game client/join/reload/accessibility notes.
+
+The0.2.29 [dual-claw weapon specification](encounters/first-severance/WEAPONS.md) owns the new P3-derived hand animation and separately grouped weapon playback. Boss art, timing and audio master files are unchanged.

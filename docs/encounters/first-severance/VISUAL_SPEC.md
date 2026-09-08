@@ -231,3 +231,5 @@ Retain ice white/pale cyan, charcoal/black metal, warning red and restrained dar
 ## Explicitly deferred
 
 Separate damageable Crown/Wings/Heart Casing, humanoid masks, multipart break states, elaborate phase transformations, final music production and hand-cleaned animation remain in [Backlog](BACKLOG.md). The development chiptune and decorative structures are in the explicit user-requested pass and do not promote those deferred mechanics.
+
+The0.2.29 [dual-claw weapon specification](WEAPONS.md) owns the new P3-derived hand animation and separately grouped weapon playback. Boss art, timing and audio master files are unchanged.

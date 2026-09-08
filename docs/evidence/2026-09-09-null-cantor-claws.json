@@ -1,0 +1,20 @@
+{
+  "build": "0.2.29",
+  "protocol": 23,
+  "base_commit": "fa392b7ba44695cb2055b63a9da67ff96571518b",
+  "assembly_input": "c32a4c11c79bdaffaef13c33bdd012b6587e4f3c",
+  "checks": {
+    "static": "passed",
+    "domain": "passed; includes six new claw contracts",
+    "codec": "passed",
+    "tooling": "passed",
+    "native_tml_api_compile": "passed against SHA256-pinned v2026.07.3.0 engine/FNA/ReLogic; unchanged Rogue adapter substituted by a compile-only facade"
+  },
+  "not_run": [
+    "full Calamity integration/package build",
+    "game audiovisual acceptance",
+    "multiplayer weapon acceptance",
+    "DPS comparison"
+  ],
+  "scope": "Only Null Refrain melee form, its artwork/presentation, docs and focused tests. Other classes and Boss unchanged."
+}

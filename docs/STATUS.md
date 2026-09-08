@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Development **0.2.28**, protocol **23**. Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. Other timing/damage and the five ritual armaments are retained. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. Public-development descriptions and icons are prepared, not published or release-approved; see [publication preparation](RELEASE_PROCESS.md#development-publication-preparation).
+Development **0.2.29**, protocol **23**. Null Refrain is now the user-requested giant dual-claw weapon with alternating true-melee sweeps and a six-second charged remote crush; other four weapons and Boss behavior remain unchanged. [Weapon specification](encounters/first-severance/WEAPONS.md#null-cantors-claws--accepted-melee-redesign-0229) owns the revised controls, presentation and tuning.
+
+Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. Other timing/damage and the five ritual armaments are retained. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. Public-development descriptions and icons are prepared, not published or release-approved; see [publication preparation](RELEASE_PROCESS.md#development-publication-preparation).
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -34,6 +36,8 @@ Development **0.2.28**, protocol **23**. Final random triples have wider gaps; P
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Dual-claw evidence](evidence/2026-09-09-null-cantor-claws.json) records this branch's automatic checks and their limits. Actual game audiovisual acceptance and matched DPS remain user/Codex-owned. The tModLoader compile probe excludes the unchanged native Rogue adapter; it is not a full Calamity integration build.
 
 [Spacing/publication-material evidence](evidence/2026-09-08-spacing-publication-materials.json) records0.2.28 checks and the latest0.2.27 two-player run: Final reached, one successful revival, subsequent missed Stack caused all-Down Defeat. Current user-owned checks: wider random gaps and forced second sword dodge on matching peers; public rights/solo-policy/package acceptance remain separate.
 
@@ -57,6 +61,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User/Codex-owned0.2.29: reload the claw branch; confirm giant alternating hands, normal true-melee bonuses, single six-second charge use, clicked-location compression, both clients' silhouettes and the new full-color icon. No FPS/log-collection system or unrelated Boss retuning is added.
 
 User/Codex-owned0.2.25: build/load the weapon branch, inspect the five silhouettes/continuous motion, native Rogue stealth and minion behavior, then tune the central damage seeds against matched Calamity2.2.4 equipment. Target roughly1.10x a selected class-endgame benchmark, not dominance over every weapon/target. Keep the remaining Boss-only check below separate.
 
