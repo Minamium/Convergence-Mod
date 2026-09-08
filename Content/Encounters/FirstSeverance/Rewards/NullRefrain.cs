@@ -2,8 +2,10 @@
 using System;
 using Convergence.Common.Compatibility.Calamity;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
@@ -13,6 +15,17 @@ public sealed class NullRefrain : RitualArmament
 {
     public override RitualArmamentKind Kind => RitualArmamentKind.Melee;
     public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/NullCantorClaws";
+    public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame,
+        Color drawColor, Color itemColor, Vector2 origin, float scale)
+    {
+        // Exclude the export's transparent padding, preserving the original artwork.
+        // Use the same longest-edge slot fit as the other ritual weapon icons.
+        Rectangle artwork = new(21, 26, 86, 87);
+        float fittedScale = scale * Math.Max(frame.Width, frame.Height) / Math.Max(artwork.Width, artwork.Height);
+        spriteBatch.Draw(TextureAssets.Item[Type].Value, position, artwork, Item.GetAlpha(drawColor),
+            0f, new Vector2(artwork.Width, artwork.Height) * .5f, fittedScale, SpriteEffects.None, 0f);
+        return false;
+    }
     public override void SetDefaults()
     {
         RitualArmamentItems.Defaults(Item, Kind);

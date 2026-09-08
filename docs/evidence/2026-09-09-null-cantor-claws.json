@@ -11,10 +11,19 @@
     "native_tml_api_compile": "passed against SHA256-pinned v2026.07.3.0 engine/FNA/ReLogic; unchanged Rogue adapter substituted by a compile-only facade"
   },
   "not_run": [
-    "full Calamity integration/package build",
     "game audiovisual acceptance",
     "multiplayer weapon acceptance",
     "DPS comparison"
   ],
-  "scope": "Only Null Refrain melee form, its artwork/presentation, docs and focused tests. Other classes and Boss unchanged."
+  "scope": "Only Null Refrain melee form, its artwork/presentation, docs and focused tests. Other classes and Boss unchanged.",
+  "main_integration": {
+    "branch_tip": "d202e21cab521e23d171cdfd15064252fd9742a2",
+    "merge": "fast-forward; local localization formatting restored with updated claw wording; pre-merge stash retained",
+    "native_package": "passed; full installed Calamity references; zero errors, four pre-existing CS8632 warnings",
+    "source_sha256": "6f2c55115e41d88b87c610b3a5e6223eda6fd86c48cc278c51ad5a7042e03fc7",
+    "artifact_sha256": "ea993569065261c2268286501a19343539699cd40b95af7de3a068ad45167502",
+    "icon": "Original 128x128 inspected alongside other ritual weapons; all nontransparent pixels within (21,26,86,87). Inventory-only source rectangle and 128/87 scale correction match normal longest-edge fit. No original pixels modified; in-game inspection not_run.",
+    "api": "Installed pinned tModLoader 2026.07.3.0 XML: ModItem.PreDrawInInventory is client-only, position is slot center, scale is frame-to-slot fit. Independently implemented padding correction; no third-party assets/code copied.",
+    "checks_reused": "Branch domain/codec evidence unchanged by inventory-only correction."
+  }
 }

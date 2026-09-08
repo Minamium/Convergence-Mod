@@ -37,7 +37,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-[Dual-claw evidence](evidence/2026-09-09-null-cantor-claws.json) records this branch's automatic checks and their limits. Actual game audiovisual acceptance and matched DPS remain user/Codex-owned. The tModLoader compile probe excludes the unchanged native Rogue adapter; it is not a full Calamity integration build.
+[Dual-claw evidence](evidence/2026-09-09-null-cantor-claws.json) records branch checks and main integration. The complete native Calamity-dependent package now builds successfully (zero errors, four existing nullable warnings). Inventory-only padding correction fits the claws to the same slot envelope as other weapons; original artwork is preserved. Actual game audiovisual acceptance, multiplayer behavior and matched DPS remain user-owned.
 
 [Spacing/publication-material evidence](evidence/2026-09-08-spacing-publication-materials.json) records0.2.28 checks and the latest0.2.27 two-player run: Final reached, one successful revival, subsequent missed Stack caused all-Down Defeat. Current user-owned checks: wider random gaps and forced second sword dodge on matching peers; public rights/solo-policy/package acceptance remain separate.
 
