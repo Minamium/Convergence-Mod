@@ -6,22 +6,19 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Final slicers shorten warning by exactly 3 ticks without losing a pulse")]
+    [DomainTest("Final slicers complete three fast warned pulses")]
     private static void SlicerWarningExtension()
     {
         foreach (int step in new[] { 5, 11, 17, 23 })
         {
-            int oldCadence = 40 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
-            int oldFire = (int)Math.Ceiling(oldCadence * .7);
-            AssertEqual(oldFire + 12, FirstSeveranceScoreGeometry.SlicerFire(step), "0.05s less than prior quarter-second extension");
-            AssertEqual(oldCadence - 4 - oldFire + 3,
-                FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "earlier fire retains prior end/cadence");
-            for (int pulse = 0; pulse < 6; pulse++)
+            AssertEqual(6, FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "six live ticks");
+            AssertEqual(2, FirstSeveranceScoreGeometry.SlicerCadence(step) - FirstSeveranceScoreGeometry.SlicerEnd(step), "two recovery ticks");
+            for (int pulse = 0; pulse < 3; pulse++)
             {
                 int fire = pulse * FirstSeveranceScoreGeometry.SlicerCadence(step) + FirstSeveranceScoreGeometry.SlicerFire(step);
                 foreach (var ray in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer, step, fire - 1, 4000, 4000))
                     AssertEqual(false, ray.Live, "last warning frame harmless");
-                AssertEqual(true, fire < FirstSeveranceChoreography.Final[step].Ticks, "sixth shot not truncated");
+                AssertEqual(true, fire < FirstSeveranceChoreography.Final[step].Ticks, "third shot not truncated");
             }
         }
     }

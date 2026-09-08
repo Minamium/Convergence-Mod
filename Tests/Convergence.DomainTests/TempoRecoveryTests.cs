@@ -85,7 +85,7 @@ internal static partial class Program
         AssertEqual(true, middle > early * 2, "width grows with acceleration before easing into full hold");
     }
 
-    [DomainTest("Final cadence accelerates and repeated grids have no fixed safe cell")]
+    [DomainTest("Final cadence accelerates and random grids retain bounded shared geometry")]
     private static void FinalAccelerationAndShifts()
     {
         var score = FirstSeveranceChoreography.Final;
@@ -94,27 +94,16 @@ internal static partial class Program
                 if (action < 2 || station >= 2)
                     AssertEqual(true, score[station * 3 + action].Ticks < score[(station - (action == 2 ? 2 : 1)) * 3 + action].Ticks,
                         "each category accelerates with terminal progress (compare slicers to slicers)");
-        AssertEqual(55, FirstSeveranceScoreGeometry.SlicerCadence(2), "initial beam cadence includes 15 warning ticks");
-        AssertEqual(43, FirstSeveranceScoreGeometry.SlicerCadence(23), "final beam cadence includes 15 warning ticks");
+        AssertEqual(36, FirstSeveranceScoreGeometry.SlicerCadence(2), "initial fast cadence");
+        AssertEqual(30, FirstSeveranceScoreGeometry.SlicerCadence(23), "terminal fast cadence");
         AssertEqual(true, FirstSeveranceScoreGeometry.BulletSpeed(20) > FirstSeveranceScoreGeometry.BulletSpeed(2), "bullet motion accelerates too");
         foreach (int step in new[] { 5, 11, 17, 23 })
         {
             AssertEqual(true, FirstSeveranceScoreGeometry.SlicerPulses * FirstSeveranceScoreGeometry.SlicerCadence(step)
                 <= score[step].Ticks, "last full telegraph and recovery fit the action");
-            // For each axis, its three changing offsets must eventually catch a
-            // stationary whole player, including positions adjacent to the wall.
-            for (int axis = 0; axis < 2; axis++)
-                for (float at = axis == 0 ? -1270 : -539; at <= (axis == 0 ? 1270 : 539); at += 4)
-                {
-                    bool everHit = false;
-                    for (int pulse = axis; pulse < 6; pulse += 2)
-                    {
-                        double age = pulse * FirstSeveranceScoreGeometry.SlicerCadence(step) + FirstSeveranceScoreGeometry.SlicerFire(step);
-                        foreach (var item in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer, step, age, 4000, 4000))
-                            everHit |= item.Live && item.Ray.Intersects(4000 + (axis == 0 ? at : 0), 3440 + (axis == 1 ? at : 0), 10, 21);
-                    }
-                    AssertEqual(true, everHit, "no permanent stationary safe lane");
-                }
+            for (int pulse = 0; pulse < 3; pulse++)
+                foreach (var item in FirstSeveranceRandomComb.Rays(75123, step, pulse, 4000, 3440))
+                    AssertEqual(true, item.IsValid, "finite normalized clipped rays");
         }
     }
 }

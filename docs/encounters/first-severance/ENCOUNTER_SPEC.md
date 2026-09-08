@@ -25,6 +25,10 @@ related_docs:
 
 # First Severance Encounter Specification
 
+## Random Final triples
+
+Current0.2.27 overrides previous FinalSlicer descriptions: each slicer action has three pulses, each choosing vertical, horizontal or diagonal (either slope) by shared seeded pseudorandom selection; repeats are possible. Seed is the server-assigned action entry tick already in snapshots, mixed with step/pulse. Full width matches the lattice24px; pitch96px leaves72px clear lanes. Rays are clipped to the arena (tiny corner fragments below32px are omitted). Telegraph28→22ticks with terminal progress, active6ticks, recovery2ticks; cadence36→30ticks. The action ends after exactly three cadences, without the former six-pulse wait. Fixed120damage and once-per-participant-per-pulse authority damage remain. No new actors, resources or client input. Final bullets, Stack/Spread and phase gates are unchanged. Random triples do not promise that every stationary position is hit during each individual triple.
+
 ## Weapon-only reward extension — 0.2.25
 
 [Five Ritual Armaments](WEAPONS.md) owns current reward mechanics, art and initial damage budgets. Existing Victory still drops Null Refrain; twenty one-for-one Work Bench exchanges let every class choose a form without changing the Boss loot executor. The older no-recipe/three-stroke tuning below is historical where it conflicts with that weapon specification. Boss actions, HP, damage, field and recovery are unchanged.

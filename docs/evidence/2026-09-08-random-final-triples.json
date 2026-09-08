@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "build": "0.2.27",
+  "protocol": 22,
+  "scope": "Three random fast Final lattice-width volleys; server-owned shared epoch seed, bounded diagonals and matching tooth material",
+  "domain": "109 deterministic tests passed; 128 seeds over four steps/three pulses check reconstruction, all orientations, clipped valid rays, first-live/last-warning/recovery boundaries and full-player diagonal gaps",
+  "build_codec_static": "Native package passed (zero errors,four existing CS8632 warnings); linked-source protocol22 codec passed324 roundtrips and50 malformed/truncated rejections; static/catalog/YAML and diff check passed",
+  "build_identity": {
+    "base_commit": "770f236fb3cef9198f2a8d92bc74b38ea52f4316",
+    "record": ".local/builds/20260908T133327101160Z/record.json",
+    "source_sha256": "95ff1d302aaa310cdbc45b0ae67981e57baa8d4f2a45f29c5001314710ec1a9c",
+    "package_sha256": "9e20e9b4f3c29329f28b77bdb1a119045837364dcaa45baa43a4b29791448fc9",
+    "source_changed_during_build": false,
+    "post_build_changes": "Evidence only; existing local localization edits included in package, excluded from this commit"
+  },
+  "runtime": "not_run; user-owned matching multiplayer peers, three-shot sequence, diagonal safe gaps, readability and tempo; no measured FPS claim",
+  "preserved_local_changes": ["Localization/en-US.hjson", "Localization/RitualArmaments/en-US.hjson"]
+}

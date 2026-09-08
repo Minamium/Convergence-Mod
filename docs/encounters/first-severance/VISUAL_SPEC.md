@@ -20,6 +20,8 @@ related_docs:
 
 # First Severance — Null Cantor Visual Pass
 
+Current0.2.27 supersedes the pursuit-style Final material below: random triples use `DrawTooth`, exactly the lattice's narrow plasma/pearl spine material and24px full footprint. No added broad white flash/overlay/aperture. Authority-selected geometry is held through warning/release; sub-tick time animates surface only. [Random Final triples](ENCOUNTER_SPEC.md#random-final-triples) owns speed/density and seeded orientation rules.
+
 Current0.2.26 Final slicing override: use the opening pursuit beam's plasma material and converging filaments, with a full-width colored forecast visible from its first frame, an immediate full-length release flash, and low-intensity harmless decay. Authority tick selects the same pulse, axis, offset and active state as collision; fractional draw time animates only that pulse's surface. No large endpoint halos, arrows or extra side rails. The existing56px damage width,136px pitch,120damage and warning/cadence remain unchanged. Reduced effects keeps the footprint and lowers filaments/flash. All other beam materials remain unchanged.
 
 Weapon-only0.2.25: [Five Ritual Armaments](WEAPONS.md) owns the approved-concept drop-weapon silhouettes, continuous animation and homing presentation. This supersedes only older Null Refrain weapon descriptions below; all Boss presentation is retained.

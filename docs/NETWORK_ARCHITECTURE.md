@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v21
+## Current development protocol v22
+
+Wire layout remains unchanged. Random Final geometry uses the already replicated server-owned `ActionStartedTick` (authority `SubstateEnteredTick`), step and pulse as an explicitly mixed integer seed, not client RNG. Identical seed reconstructs the same three orientations/offsets on authority, visual and sound paths. Version22 rejects older peers because derived geometry and action duration changed. No per-ray packet/resource or new global routing is introduced.
+
+## Preceding development protocol v21
 
 The wire layout, operation IDs, ownership and terminal contract remain v20. Version21 requires matching peers because Iron Interdict sword geometry, denser/earlier Final slicers and wider Spread/lattice pockets derive locally from the accepted action epoch. A peer with older geometry must not render a different warning from authority collision. No per-sword packet or actor is added. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#iron-interdict-and-current-spacing-override) owns the changed behavior.
 

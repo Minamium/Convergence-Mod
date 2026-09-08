@@ -225,7 +225,7 @@ internal sealed class FirstSeveranceFeedback
                 if (age % FirstSeveranceScoreGeometry.FloodInterval < 12 && scoreSounds.Add(pulse - 800))
                     Play("HandGather", .98f);
             }
-            foreach (var ray in FirstSeveranceScoreGeometry.Rays(combat.Substate, combat.ActionIndex, age, combat.CoreX, combat.CoreY))
+            foreach (var ray in FirstSeveranceScoreGeometry.Rays(combat.Substate, combat.ActionIndex, age, combat.CoreX, combat.CoreY, combat.ActionStartedTick))
             {
                 int soundPulse = combat.Substate == FirstSeveranceSubstate.RotatingBlade
                     ? ray.Pulse / FirstSeveranceScoreGeometry.BladeCount : ray.Pulse;

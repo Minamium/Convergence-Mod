@@ -16,7 +16,7 @@ internal static class FirstSeveranceScoreGeometry
     internal const int BladeCount = 2;
     internal const int CrushRushTick = 150, CrushImpactTick = 162, CrushReleaseTick = 180;
     internal const float CrushHalfWidth = 360, CrushHalfHeight = 300;
-    internal const int SlicerPulses = 6;
+    internal const int SlicerPulses = 3;
     internal const int FloodInterval = 200, FloodFireTick = 48, FloodDeployTicks = 12,
         FloodGrowTicks = 42, FloodEndTick = 182, FloodFadeTick = 196;
     internal const float FloodSafeHalfHeight = 96;
@@ -34,13 +34,10 @@ internal static class FirstSeveranceScoreGeometry
     internal static int BladeTurn(double age) => Math.Min(FirstSeveranceChoreography.BladeTurns - 1, (int)BladeTravel(age));
     internal static float BladeExtension(double age) => Smooth((float)((age - 144) / 12))
         * (1 - Smooth((float)((age - FirstSeveranceChoreography.BladeEnd - 12) / 45)));
-    internal const int SlicerExtraWarningTicks = 15;
-    private static int OriginalSlicerCadence(int step) => 40 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
-    internal static int SlicerCadence(int step) => OriginalSlicerCadence(step) + SlicerExtraWarningTicks;
-    internal static int SlicerFire(int step) => (int)Math.Ceiling(OriginalSlicerCadence(step) * .7) + SlicerExtraWarningTicks - 3;
-    internal static int SlicerEnd(int step) => SlicerCadence(step) - 4;
-    internal const int SlicerPitch = 136;
-    internal static float SlicerOffset(int step, int pulse) => ((pulse / 2 * 45 + Math.Max(0, step / 3) * 37) % SlicerPitch) - SlicerPitch / 2;
+    internal static int SlicerFire(int step) => 28 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 6);
+    internal static int SlicerEnd(int step) => SlicerFire(step) + 6;
+    internal static int SlicerCadence(int step) => SlicerEnd(step) + 2;
+    internal const int SlicerPitch = 96;
     internal static int BulletStartTick(int step, int wave) => 36 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 8)
         + wave * (32 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 10));
     internal static float BulletSpeed(int step) => 10 + FirstSeveranceChoreography.FinalProgress(step) * 3.5f;
@@ -75,7 +72,7 @@ internal static class FirstSeveranceScoreGeometry
         Math.Abs(dy) < .00001f ? float.MaxValue : FieldHalfHeight / Math.Abs(dy));
 
     internal static IReadOnlyList<FirstSeveranceScoreRay> Rays(FirstSeveranceSubstate state, int step,
-        double age, float groundX, float groundY)
+        double age, float groundX, float groundY, ulong actionSeed = 0)
     {
         var rays = new List<FirstSeveranceScoreRay>(16);
         float cy = groundY - FieldHalfHeight;
@@ -127,19 +124,9 @@ internal static class FirstSeveranceScoreGeometry
             int pulse = (int)age / SlicerCadence(step);
             if (pulse >= SlicerPulses) return rays;
             double local = age - pulse * SlicerCadence(step);
-            bool vertical = pulse % 2 == 0;
-            // 136 px pitch / 56 px beam leaves 80 px clear lanes. Axes never fire together.
-            // Each repeated axis shifts by 45px: its three pulses cover any fixed
-            // player position, including arena-edge cells. No per-axis fixed parity.
-            float extent = vertical ? FieldHalfWidth : FieldHalfHeight;
-            for (int i = -11; i <= 11; i++)
-            {
-                float offset = i * SlicerPitch + SlicerOffset(step, pulse);
-                if (Math.Abs(offset) > extent + 28) continue;
-                rays.Add(new(vertical ? new(groundX + offset, cy - 560, 0, 1, 1120, 28)
-                    : new(groundX - 1280, cy + offset, 1, 0, 2560, 28), local >= SlicerFire(step) && local < SlicerEnd(step),
+            foreach (var ray in FirstSeveranceRandomComb.Rays(actionSeed, step, pulse, groundX, cy))
+                rays.Add(new(ray, local >= SlicerFire(step) && local < SlicerEnd(step),
                     pulse, Smooth((float)local / SlicerFire(step))));
-            }
         }
         return rays;
     }

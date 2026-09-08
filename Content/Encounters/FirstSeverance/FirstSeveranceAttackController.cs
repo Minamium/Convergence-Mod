@@ -262,7 +262,7 @@ internal sealed class FirstSeveranceAttackController
     {
         if (!FirstSeveranceScoreGeometry.HasHazards(state.Substate) || tick >= state.ResolveTick) return;
         double age = tick - state.SubstateEnteredTick;
-        var rays = FirstSeveranceScoreGeometry.Rays(state.Substate, state.ActionIndex, age, groundCenter.X, groundCenter.Y);
+        var rays = FirstSeveranceScoreGeometry.Rays(state.Substate, state.ActionIndex, age, groundCenter.X, groundCenter.Y, state.SubstateEnteredTick);
         var bullets = state.Substate == FirstSeveranceSubstate.FinalBullets
             ? FirstSeveranceScoreGeometry.Bullets(state.ActionIndex, age, groundCenter.X, groundCenter.Y) : null;
         bool lethal = state.Substate == FirstSeveranceSubstate.RemoteCrush;

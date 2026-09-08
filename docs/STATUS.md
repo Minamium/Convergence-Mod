@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.26**, protocol **21**. Final slicing beams now use pursuit-style continuous plasma with a brighter full-width warning and authority-selected pulse/axis through release. This is client presentation only: damage, geometry, warning durations and cadence are unchanged. The five ritual armament forms and Work Bench conversions from0.2.25 are retained; see [weapon specification](encounters/first-severance/WEAPONS.md). Damage is initial tuning, not measured Calamity-endgame superiority.
+Development **0.2.27**, protocol **22**. Final slicers are three fast random lattice-width volleys, using the server-owned action epoch as a shared deterministic seed. Vertical, horizontal and both diagonal orientations use the same material/collision footprint. This supersedes0.2.26's presentation-only pass; [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns timing/geometry. All other attacks and the five ritual armaments are retained.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -34,6 +34,8 @@ Development **0.2.26**, protocol **21**. Final slicing beams now use pursuit-sty
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Random triple checks](evidence/2026-09-08-random-final-triples.json) owns0.2.27 results. User-owned check: matching peers, three-shot direction changes/diagonal warning readability, tight safe gaps and faster final survival. No GUI/server session is launched by this implementation.
 
 [Final beam readability evidence](evidence/2026-09-08-final-beam-readability.json) records the latest0.2.25 two-player Victory and this presentation-only pass. User-owned0.2.26 check: visible warning/active footprint and release/decay at high/low FPS and both clients; no latency or visual correctness claim from a build. Existing local English localization changes are preserved, not rewritten by this pass.
 
