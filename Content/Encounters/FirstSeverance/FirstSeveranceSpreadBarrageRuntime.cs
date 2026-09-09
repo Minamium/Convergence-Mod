@@ -6,11 +6,11 @@ using Terraria;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-// Exact-Fight authority owner. Eight immutable casts, one hit per cast/member;
+// Exact-Fight authority owner. Up to four immutable casts, one hit per cast/member;
 // neither client positions nor presentation clocks can resolve their damage.
 internal sealed class FirstSeveranceSpreadBarrageRuntime
 {
-    private readonly List<FirstSeveranceLanceVolley> casts = new(8);
+    private readonly List<FirstSeveranceLanceVolley> casts = new(FirstSeveranceSpreadBarrage.Count);
     private readonly HashSet<(uint, ParticipantId)> hits = new();
     private ulong windowStart;
     private int nextStep;
@@ -26,10 +26,11 @@ internal sealed class FirstSeveranceSpreadBarrageRuntime
         if (window is not { } w) { bool had = casts.Count > 0; Clear(); return had; }
         if (windowStart != w.StartTick) { Clear(); windowStart = w.StartTick; }
         bool changed = false;
-        if (nextStep < FirstSeveranceSpreadBarrage.Count && tick >= FirstSeveranceSpreadBarrage.Start(w, nextStep))
+        int shotCount = FirstSeveranceSpreadBarrage.ShotCount(w);
+        if (nextStep < shotCount && tick >= FirstSeveranceSpreadBarrage.Start(w, nextStep))
         {
             // Skip missed steps instead of catch-up bursts. Never compress a warning.
-            while (nextStep + 1 < FirstSeveranceSpreadBarrage.Count
+            while (nextStep + 1 < shotCount
                 && tick >= FirstSeveranceSpreadBarrage.Start(w, nextStep + 1)) nextStep++;
             if (w.ResolveTick - tick >= FirstSeveranceSpreadBarrage.CastTicks + FirstSeveranceSpreadBarrage.Settle)
             {

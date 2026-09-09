@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v25
+## Current development protocol v26
+
+The Spread descriptor layout is unchanged, but its count bound is now0–4 (maximum449bytes including count), with3casts in short windows and4in ordinary windows. Shared window validation accepts only standalone Spread, never embedded lattice/flood windows. Start validation uses the window-specific shot count and wider spacing. Matching peers are required for these changed bounds/timing; existing IDs, server ownership, hit caps and cleanup are retained. The preceding v25 values below are historical.
+
+## Preceding development protocol v25
 
 Combat snapshots append `SpreadCastCount : byte` (0–8) after mechanic impacts. Each cast contains `Serial:uint`, `StartTick:ulong`, `Step:byte`, `TargetSlot:int16`, `RayCount:byte` (1–roster count, maximum4), followed by that many six-float immutable lance rays. Kind is implicitly PursuitPrism and MotionTick is zero. Maximum added section:897bytes. Counts are checked before allocation; projection validation rejects duplicate serials, non-increasing steps/ticks, foreign focus slots, nonfinite rays, early starts, incompatible windows and casts intruding on the final Spread-settle interval. Truncated packets are rejected by the existing router boundary. Normal P1 casts and concurrent Spread casts share the Fight-owned serial allocator.
 

@@ -563,7 +563,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: eeb916937f0daedac912f1eebb1869aa155e3187ef8d4a1106659ff647fa9774
+  content_sha256: 22f7acba67fcd3c072b3e8457a3f0abe36e281014dbed9a5272168d412bf9665
   document_type: spec
   status: accepted
   owners:
@@ -801,7 +801,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: 42e98b37f0e213ae7f274fe740b57c5e2a2230959e7d23ab56f587628ecc86a4
+  content_sha256: fc095aca3dadc9b7991b96b75568be2d999fd3998fb574b3c2e40a1337abaffe
   document_type: spec
   status: provisional
   owners:
@@ -938,7 +938,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 465f74038e9b00b1912c21af646a95b1bbd06384b272df0976a2cce67b5e299e
+  content_sha256: 520aee63e0f8a694cc0c31606851b883d6d39ff4c102a7700e92f0919f84d450
   document_type: governance
   status: accepted
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 3bf095d53249bc8558896b7652e2fcb0d185546800a22924b05192f2480eb041
+  content_sha256: a0d7347ce4da0b22447ab8828405b17605094317720031f67e188e7601161b0c
   document_type: status
   status: accepted
   owners:

@@ -161,8 +161,8 @@ internal sealed class FirstSeveranceFeedback
                 shardBeat = beat;
                 if (!fresh)
                 {
-                    Play("ShellMassLatch", .62f, beat * .012f - .06f);
-                    if (beat > 0) Play("ShellMassArc", .36f, beat * .012f - .04f);
+                    Play("ShellMassLatch", 1f, beat * .012f - .06f);
+                    if (beat > 0) Play("ShellMassArc", .60f, beat * .012f - .04f);
                 }
             }
         }
@@ -322,7 +322,7 @@ internal sealed class FirstSeveranceFeedback
         failed = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.SpreadFailed;
         mechanics.Accept(combat);
         resultTicks = 32;
-        if (stack) Play(failed ? "ShellMassCollapse" : "ShellMassShed", failed ? .88f : .72f);
+        if (stack) Play(failed ? "ShellMassCollapse" : "ShellMassShed", 1.1f);
         else
         {
             bool dissipate = false;

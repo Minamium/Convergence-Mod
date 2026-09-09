@@ -11,18 +11,21 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("All Spread windows fit eight uncompressed pursuit warnings and a final settle")]
+    [DomainTest("Standalone Spread fits three or four spaced pursuits; embedded mechanics suppress them")]
     private static void SpreadBarrageSchedule()
     {
         foreach (int duration in new[] { 138, 144, 150, 156, 162, 168, 170, 174, 180, 240 })
         {
             var w = new FirstSeveranceSafeWindow(FirstSeveranceSafeMechanic.Spread, 1000, (ulong)(1000 + duration), 0, 0);
             ulong previous = 0;
-            for (byte i = 0; i < 8; i++)
+            int shots = FirstSeveranceSpreadBarrage.ShotCount(w);
+            AssertEqual(duration >= 180 ? 4 : 3, shots, "short windows use fewer casts");
+            AssertThrows<ArgumentException>(() => FirstSeveranceSpreadBarrage.Start(w, shots), "no extra shot squeezed into the window");
+            for (byte i = 0; i < shots; i++)
             {
                 ulong start = FirstSeveranceSpreadBarrage.Start(w, i);
                 var cast = FirstSeveranceAttackPatterns.CreatePrism((uint)i + 1, start, i, new[] { new FirstSeverancePrismTarget(0, 4000, 3000, 12, -4) });
-                AssertEqual(true, start >= previous + 9, "no sub-nine-tick compressed steps");
+                AssertEqual(true, start >= previous + 34, "minimum34-tick start spacing");
                 AssertEqual(28ul, cast.FireTick - start, "P1 reading window unchanged");
                 AssertEqual(true, cast.EndTick <= w.ResolveTick - 24, "settle before Spread");
                 AssertEqual(false, cast.IsFiring(cast.FireTick - 1), "warning harmless");
@@ -38,12 +41,10 @@ internal static partial class Program
             for (ulong age = 0; age < (ulong)actions[i].Ticks; age++)
             {
                 var a = actions[i];
-                var companion = FirstSeveranceSafeWindows.At(a.State, i, 1000, 1000 + age, 0, 0);
-                bool expected = a.State == FirstSeveranceSubstate.Spread
-                    || companion is { Kind: FirstSeveranceSafeMechanic.Spread } s && 1000 + age < s.ResolveTick;
+                bool expected = a.State == FirstSeveranceSubstate.Spread;
                 var actual = FirstSeveranceSpreadBarrage.Window(a.State, i, 1000, (ulong)(1000 + a.Ticks), 1000 + age);
-                AssertEqual(expected, actual.HasValue, "standalone/embedded coverage, no Stack/terminal leak");
-                if (actual is { } w) _ = FirstSeveranceSpreadBarrage.Start(w, 7);
+                AssertEqual(expected, actual.HasValue, "standalone only; no pursuit during lattice/flood/other attacks");
+                if (actual is { } w) _ = FirstSeveranceSpreadBarrage.Start(w, FirstSeveranceSpreadBarrage.ShotCount(w) - 1);
             }
         }
     }
@@ -58,13 +59,13 @@ internal static partial class Program
                 new ParticipantId((byte)i), i, true, RaidParticipantCombatState.Alive, false, 0, 0, 0, 500, 4000, 3000, 0, 0)).ToArray();
             var targets = Enumerable.Range(0, count).Select(i => new FirstSeverancePrismTarget(i, 4000 + i * 300, 3000, 10, -3)).ToArray();
             var w = new FirstSeveranceSafeWindow(FirstSeveranceSafeMechanic.Spread, 1000, 1180, 0, 0);
-            var casts = Enumerable.Range(0, 8).Select(i => FirstSeveranceAttackPatterns.CreatePrism((uint)i + 1,
+            var casts = Enumerable.Range(0, 4).Select(i => FirstSeveranceAttackPatterns.CreatePrism((uint)i + 1,
                 FirstSeveranceSpreadBarrage.Start(w, i), (byte)i, targets)).ToArray();
             FirstSeveranceCombatProjection Project(FirstSeveranceLanceVolley[] list) => new(1, fight, FirstSeveranceSubstate.Spread,
                 1180, 0, 0, 5000, 5000, 0, 0, 4000, 3000, 4000, 4000, FirstSeveranceMechanicResult.None, 0,
                 members, actionStartedTick: 1000, spreadLances: list);
             var projection = Project(casts);
-            AssertThrows<ArgumentException>(() => Project(casts.Concat(new[] { casts[0] }).ToArray()), "nine casts");
+            AssertThrows<ArgumentException>(() => Project(casts.Concat(new[] { casts[0] }).ToArray()), "five casts");
             AssertThrows<ArgumentException>(() => Project(new[] { casts[0], casts[0] }), "duplicate serial/step");
             AssertThrows<ArgumentException>(() => Project(new[] { FirstSeveranceAttackPatterns.CreatePrism(99, 1150, 0, targets) }), "no truncated final warning");
             AssertThrows<ArgumentException>(() => Project(new[] { FirstSeveranceAttackPatterns.CreatePrism(99, 1001, 0, targets) }), "not before scheduled reveal");
@@ -88,13 +89,13 @@ internal static partial class Program
                 return ok;
             }
             AssertEqual(true, Read(bytes, out var decoded), "full pursuit history");
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
                 AssertEqual(casts[i].FireTick, decoded.SpreadLances[i].FireTick, "same release clock");
                 for (int j = 0; j < count; j++) AssertEqual(casts[i].Rays[j], decoded.SpreadLances[i].Rays[j], "locked peer geometry");
             }
-            int section = end - (1 + 8 * (16 + 24 * count));
-            var corrupt = (byte[])bytes.Clone(); corrupt[section] = 9;
+            int section = end - (1 + 4 * (16 + 24 * count));
+            var corrupt = (byte[])bytes.Clone(); corrupt[section] = 5;
             AssertEqual(false, Read(corrupt, out _), "reject count before allocation");
             corrupt = (byte[])bytes.Clone(); corrupt[section + 16] = (byte)(count + 1);
             AssertEqual(false, Read(corrupt, out _), "reject ray count before allocation");

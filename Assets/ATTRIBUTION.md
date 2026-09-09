@@ -1458,6 +1458,8 @@ The same external0.2.16 recipe revises the already-recorded StackSummon, SpreadS
 - Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
 - Notes: 2.15-second low-air collapse and dense struck-metal terminal crush. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
 
+0.2.39 Stack-only remaster: `ShellMassLatch.wav`, `ShellMassArc.wav`, `ShellMassShed.wav` and `ShellMassCollapse.wav` above retain original provenance and durations. `tools/generate_raid_weight_sfx.py --stack-only` adds240–2200Hz presence and controlled saturation; seed/PCM format and0.780peak remain. Decode/finite/endpoint checks passed2026-09-09; human listening pending. External0.2.37 originals and new auditions retained. Only these four masters are modified; other sound assets remain byte-identical.
+
 ## Record template
 
 Copy this section for each asset family. In the Records section above, add one exact Markdown entry in the form `- Runtime file: \`path/from/repository/root\`` for every exported file. The repository check parses only that section and verifies both directions.

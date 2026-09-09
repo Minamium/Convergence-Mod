@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.38**, protocol **25** (unchanged). The Boss now registers its compact head emblem for the vanilla common boss bar; the claw's normal swipe retains luminous trails and hands without the dark trail underlay or radial debris. See [visual contract](encounters/first-severance/VISUAL_SPEC.md#vanilla-boss-bar--0238) and [claw contract](encounters/first-severance/WEAPONS.md#claw-swipe-cleanup--0238). Prior read-ahead Final, all-Spread pursuits and heavy Raid cues remain; HP, damage, timing, networking and right-click crush are unchanged.
+Development **0.2.39**, protocol **26**. [Spread pursuits](encounters/first-severance/ENCOUNTER_SPEC.md#pursuit-during-every-spread--0237) are now standalone-only with3–4spaced shots, excluded from lattice/flood overlap. [Audio mix](AUDIO_CUE_SHEET.md#audible-weaponstack-mix--0239) removes the claw's extra long sweep layer, lifts non-melee cue/sustain presence and remasters Stack for audible weight. Accepted claw visuals, vanilla boss-head registration, read-ahead Final, HP/damage and right-click crush remain intact.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[0.2.39 checks](evidence/2026-09-09-audio-standalone-spread.json):7focused Spread domain cases,7presentation guards, protocol26codec324round-trips/50malformed cases and native packaging passed. Four remastered audio exports passed PCM/peak checks. User audio mix and actual standalone-vs-embedded Spread behavior are `not_run`; no GUI/server started.
 
 [0.2.38 checks](evidence/2026-09-09-vanilla-bar-claw.json): five presentation integration guards and native package build passed (zero errors, four existing warnings). No domain/codec rerun for unchanged gameplay/wire contracts. Actual vanilla-style bar, shielded/exposed/Final states, normal/reduced claw trail and both-client display remain user-owned `not_run`.
 
@@ -81,6 +83,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.39: reload all peers together, no Build + Reload needed. Listen for a single clean claw swing, non-melee assembly/lock/fire/sustain contrast and audible Stack births/results. Confirm3–4pursuits only in standalone Spread, none during lattice/flood combinations. Preserve the accepted visual settings; compare Reduced Effects audio if used.
 
 User-owned0.2.38: reload Mods/restart (no Build + Reload needed). Select vanilla boss bar, start the Raid and inspect it while shielded/exposed and in Final. Swing claws into empty space and an enemy: light/hand remain, radial lines and dark trail mass should be absent; compare Reduced Effects. No GUI/server was launched.
 

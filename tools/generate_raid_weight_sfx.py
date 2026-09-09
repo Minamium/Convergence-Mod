@@ -105,7 +105,12 @@ def render(name, seconds):
         raise ValueError(name)
     out = room(out)
     out -= np.mean(out)
-    out = np.tanh(out * 1.15)
+    if name.startswith("ShellMass"):
+        # Audible contact/friction on normal speakers, not only sub-bass energy.
+        f = np.fft.rfftfreq(len(out), 1 / RATE)
+        presence = (1 - np.exp(-(f / 240) ** 4)) * np.exp(-(f / 2200) ** 2)
+        out = np.fft.irfft(np.fft.rfft(out) * (1 + 2.2 * presence), n=len(out))
+    out = np.tanh(out * (2.0 if name.startswith("ShellMass") else 1.15))
     # Remove DC/subsonics, taper endpoints and leave headroom for overlapping cues.
     f = np.fft.rfftfreq(len(out), 1 / RATE)
     out = np.fft.irfft(np.fft.rfft(out) * (1 - np.exp(-(f / 24) ** 4)), n=len(out))
@@ -117,12 +122,15 @@ def render(name, seconds):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--stack-only", action="store_true", help="Export only the revised Stack cues, preserving the shared random sequence")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     for name, seconds in (("IronPressure", .65), ("IronDescent", 1.1), ("ShellMassLatch", .86), ("ShellMassArc", .5),
                           ("ShellMassShed", 1.55), ("ShellMassCollapse", 1.7),
                           ("CrushPressure", 2.5), ("CrushCataclysm", 2.15)):
         data = render(name, seconds)
+        if args.stack_only and not name.startswith("ShellMass"):
+            continue
         assert np.all(np.isfinite(data))
         path = args.output / f"{name}.wav"
         with wave.open(str(path), "wb") as out:

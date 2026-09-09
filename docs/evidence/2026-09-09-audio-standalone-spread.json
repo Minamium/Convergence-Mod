@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-09",
+  "version": "0.2.39",
+  "protocol": 26,
+  "base_commit": "31fdbf94cd6f663a86169d577f8cb5aa8b5b6ff5",
+  "verification": {
+    "focused_spread_domain": "7 passed; all phase action windows,3/4shot boundaries,1-4participant codec bounds",
+    "presentation_guards": "7 passed",
+    "codec": "324 round-trips,50 malformed/truncated rejections",
+    "native_build": "Passed,0errors,4existing CS8632 warnings",
+    "record": ".local/builds/20260909T111758958511Z/record.json",
+    "source_sha256": "0dbd678630f359c4f174f1a542675441dfe5cfe007f81501ac3e23da0128ccd9",
+    "artifact_bytes": 39978082,
+    "artifact_sha256": "6d6c224573ad01afcfc33039b0f59007b6e72d53ac37ddc6e4e10e4af8e051cf",
+    "audio": "Four Stack masters decoded PCM16 mono48kHz; peak0.780; finite/tapered endpoints. RMS Latch0.3898/Arc0.2764/Shed0.3325/Collapse0.3026. Other audio binaries unchanged.",
+    "runtime": "not_run: human audio mix, short/ordinary standalone Spread3/4shots and no lattice/flood pursuits. No GUI/server launched.",
+    "post_build_edits": "Documentation/evidence/catalog only"
+  },
+  "preserved": "User-accepted visual assets, claw unsheathe and contact cue, right-click crush, all other attacks/damage/HP, BGM and two preexisting localization edits. Original audio masters remain outside repository."
+}

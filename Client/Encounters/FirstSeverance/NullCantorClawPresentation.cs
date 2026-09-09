@@ -31,7 +31,6 @@ public sealed class NullCantorClawVisualState : GlobalProjectile
         if (claw is NullCantorClawSwipe swipe && Crossed(swipe.Duration * NullCantorClawMotion.SweepStart))
         {
             system.Play("BladeUnsheathe", p.Center, .64f, -.16f + swipe.Hand * .10f);
-            system.Play("BladeSweep", p.Center, .38f, .32f);
         }
         if (claw is NullCantorClawCrush)
         {

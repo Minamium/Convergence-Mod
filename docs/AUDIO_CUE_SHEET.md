@@ -25,7 +25,13 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
-## Heavy Raid cue overrides — 0.2.37
+## Audible weapon/Stack mix — 0.2.39
+
+Claw normal swipe retains `BladeUnsheathe` unchanged and drops the long overlapping `BladeSweep` layer. Contact sound and right-click crush are retained. Non-melee ritual assembly/lock/fire accents keep their existing beat hierarchy with2× playback gain capped at0.95; continuous Magic/Ranged/Summon voices rise to0.65/0.52/0.56 before their existing envelopes. Reduced visual effects no longer attenuate these weapon cues. Voice caps, focus/pause, position, user sound slider and projectile/world cleanup remain; BGM and weapon timing/damage are unchanged.
+
+Stack's four `ShellMass` masters retain bass weight but gain240–2200Hz contact/friction presence and controlled saturation. The generator's `--stack-only` export preserves unrelated masters. All peaks remain0.780; measured RMS is0.3898Latch,0.2764Arc,0.3325Shed,0.3026Collapse. Arrival/friction and both result gains also rise; the existing0.80Raid master still applies. This changes clarity and body, not repeated cue count. Subjective loudness/mix remains user-owned.
+
+## Heavy Raid cue overrides — 0.2.37 (preceding)
 
 Eight new independent masters replace only the specified Raid cues; old shared weapon/Victory assets and BGM remain untouched. [Generator](../tools/generate_raid_weight_sfx.py) owns the deterministic recipe, seed and mastering; [attribution](../Assets/ATTRIBUTION.md#heavy-raid-cues--0237) owns exact provenance. Low pressure noise, dense inharmonic metal, restrained upper transients and irregular reflections replace thin isolated tones. This is a timbre rebuild, not a global gain increase. PCM16 mono48kHz exports peak at0.780; numerical checks are not listening approval.
 

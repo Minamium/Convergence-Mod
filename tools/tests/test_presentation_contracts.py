@@ -17,6 +17,16 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_claw_swipe_keeps_unsheathe_without_long_sweep_layer(self):
+        source = (CLIENT / "NullCantorClawPresentation.cs").read_text(encoding="utf-8")
+        self.assertIn('system.Play("BladeUnsheathe"', source)
+        self.assertNotIn('system.Play("BladeSweep"', source)
+
+    def test_weapon_audio_is_not_muted_by_reduced_visual_effects(self):
+        source = (CLIENT / "NullRefrainVisuals.cs").read_text(encoding="utf-8")
+        self.assertNotIn("RitualArmamentArt.Reduced", body(source, "private void UpdateSustain"))
+        self.assertNotIn("RitualArmamentArt.Reduced", body(source, "internal static void Sound"))
+
     def test_boss_registers_a_compact_existing_head_for_vanilla_bar(self):
         source = (ROOT / "Content/Encounters/FirstSeverance/Actors/FirstSeverancePrototypeBoss.cs").read_text(encoding="utf-8")
         self.assertIn("[AutoloadBossHead]", source)

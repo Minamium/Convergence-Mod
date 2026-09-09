@@ -2,11 +2,11 @@ using System;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-// Same pursuit casts as P1, overlapped rather than shortening their warning.
+// Standalone Spread only: do not layer pursuit over lattice/flood mechanics.
 // Reserve a quiet final 0.4 s for the actual Spread check in every window.
 internal static class FirstSeveranceSpreadBarrage
 {
-    internal const int Count = 8, Opening = 6, Settle = 24;
+    internal const int Count = 4, Opening = 6, Settle = 24;
     internal const int CastTicks = FirstSeveranceLanceTuning.PrismTelegraphTicks + FirstSeveranceLanceTuning.PatternActiveTicks;
 
     internal static FirstSeveranceSafeWindow? Window(FirstSeveranceSubstate state, int action,
@@ -15,16 +15,19 @@ internal static class FirstSeveranceSpreadBarrage
         if (tick < started || tick >= resolve) return null;
         if (state == FirstSeveranceSubstate.Spread)
             return new(FirstSeveranceSafeMechanic.Spread, started, resolve, 0, 0);
-        var embedded = FirstSeveranceSafeWindows.At(state, action, started, tick, 0, 0);
-        return embedded is { Kind: FirstSeveranceSafeMechanic.Spread } w && tick < w.ResolveTick ? w : null;
+        return null;
     }
+
+    internal static int ShotCount(in FirstSeveranceSafeWindow window)
+        => window.ResolveTick > window.StartTick && window.ResolveTick - window.StartTick >= 180 ? 4 : 3;
 
     internal static ulong Start(in FirstSeveranceSafeWindow window, int step)
     {
-        if (step is < 0 or >= Count || window.ResolveTick <= window.StartTick
-            || window.ResolveTick - window.StartTick < Opening + CastTicks + Settle + (Count - 1) * 9)
-            throw new ArgumentException("Spread window cannot fit eight fair pursuit warnings.");
+        int count = ShotCount(window);
+        if (step < 0 || step >= count || window.ResolveTick <= window.StartTick
+            || window.ResolveTick - window.StartTick < (ulong)(Opening + CastTicks + Settle + (count - 1) * 34))
+            throw new ArgumentException("Spread window cannot fit the spaced pursuit warnings.");
         ulong span = window.ResolveTick - window.StartTick - Opening - CastTicks - Settle;
-        return window.StartTick + Opening + span * (ulong)step / (Count - 1);
+        return window.StartTick + Opening + span * (ulong)step / (ulong)(count - 1);
     }
 }

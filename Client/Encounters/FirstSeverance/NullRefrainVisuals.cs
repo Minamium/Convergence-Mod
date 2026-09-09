@@ -122,7 +122,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                 RitualWeaponFeedback.Sound("GridFire", beam.Muzzle, .55f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 5);
             }
-            UpdateSustain(p, beam.Empowered && p.ai[2] >= 0, "LacunaSustain", .37f);
+            UpdateSustain(p, beam.Empowered && p.ai[2] >= 0, "LacunaSustain", .65f);
             lastAge = beam.Age;
         }
         else if (p.ModProjectile is MeridianBastion gun)
@@ -140,7 +140,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
             int lane = RitualGrandScore.BatteryLane((int)gun.Age);
             if (lane >= 0 && p.ai[2] >= 0 && (!gun.Overdrive || (int)gun.Age % 9 == 0))
                 RitualWeaponFeedback.Sound("LanceFire", gun.Muzzle(lane), gun.Overdrive ? .16f : .25f);
-            UpdateSustain(p, gun.Overdrive && p.ai[2] >= 0, "MeridianSustain", .25f);
+            UpdateSustain(p, gun.Overdrive && p.ai[2] >= 0, "MeridianSustain", .52f);
             lastAge = gun.Age;
         }
         else if (p.ModProjectile is WitnessLitany litany)
@@ -163,7 +163,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                 RitualWeaponFeedback.Sound("CoreSalvoFire", p.Center, .5f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 3);
             }
-            UpdateSustain(p, true, "ChoirSustain", .3f * requiem.Fade);
+            UpdateSustain(p, true, "ChoirSustain", .56f * requiem.Fade);
             lastAge = requiem.Age;
         }
         else if (p.ModProjectile is WitnessVerdict verdict)
@@ -203,7 +203,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
         {
             sound.Position = p.Center;
             // ActiveSound.Volume multiplies Style.Volume; do not square the gain.
-            sound.Volume = volume * (RitualArmamentArt.Reduced ? .6f : 1) / Math.Max(.0001f, sound.Style.Volume);
+            sound.Volume = volume / Math.Max(.0001f, sound.Style.Volume);
             return;
         }
         // A persistent looping voice, not a repeated launch sample or per-hit cue.
@@ -211,7 +211,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
         sustain = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + name)
         {
             Identifier = $"Convergence:Sustain:{owner}:{identity}:{type}", IsLooped = true, MaxInstances = 1,
-            Volume = volume * (RitualArmamentArt.Reduced ? .6f : 1),
+            Volume = volume,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
         }, p.Center, _ => p.active && p.identity == identity && p.type == type && p.owner == owner);
         ModContent.GetInstance<RitualWeaponFeedback>().Track(sustain);
@@ -262,7 +262,9 @@ public sealed class RitualWeaponFeedback : ModSystem
         { if (SoundEngine.TryGetActiveSound(system.voices[0], out var old)) old.Stop(); system.voices.RemoveAt(0); }
         system.voices.Add(SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + name)
         {
-            Identifier = "Convergence:RitualWeapon:" + name, Volume = volume * (RitualArmamentArt.Reduced ? .65f : 1),
+            // Preserve the existing quiet-assembly / sharp-lock / loud-release
+            // hierarchy. Reduced visual effects must not mute these audible beats.
+            Identifier = "Convergence:RitualWeapon:" + name, Volume = Math.Min(.95f, volume * 2f),
             PitchVariance = .055f, MaxInstances = 3, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
         }, at));
