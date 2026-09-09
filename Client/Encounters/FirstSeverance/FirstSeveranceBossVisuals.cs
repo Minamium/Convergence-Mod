@@ -116,12 +116,13 @@ internal sealed class FirstSeveranceBossVisuals
         double lead = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread ? 120 : 90;
         float requestedPose = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread
             || (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0)
-            ? FirstSeveranceVisualCurves.Window(renderTick, combat.ResolveTick - lead, combat.ResolveTick) : 0;
-        mechanicPose = MathHelper.Lerp(mechanicPose, requestedPose, .14f);
+            ? CastTension(renderTick, combat.ResolveTick - lead, combat.ResolveTick) : 0;
+        // Do not low-pass away the arrival/brake beats. Only the retired pose decays.
+        mechanicPose = requestedPose > 0 ? requestedPose : mechanicPose * .80f;
         var safe = FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex, combat.ActionStartedTick,
             state.EstimatedAuthorityTick, combat.CoreX, combat.CoreY);
         if (safe is { } cue && state.EstimatedAuthorityTick < cue.ResolveTick)
-            mechanicPose = Math.Max(mechanicPose, Window(renderTick, cue.ResolveTick - 70d, cue.ResolveTick));
+            mechanicPose = Math.Max(mechanicPose, CastTension(renderTick, cue.ResolveTick - 70d, cue.ResolveTick));
     }
 
     internal void Draw(SpriteBatch batch, FirstSeveranceCombatProjection combat, ulong tick)
@@ -295,19 +296,20 @@ internal sealed class FirstSeveranceBossVisuals
         bool flooding = combat.Substate == FirstSeveranceSubstate.RemoteClaws;
         double floodAge = age % FirstSeveranceScoreGeometry.FloodInterval;
         int emittingSide = (int)(age / FirstSeveranceScoreGeometry.FloodInterval) % 2 == 0 ? -1 : 1;
-        float grasp = flooding ? Window(floodAge, 0, 42) * (1 - Window(floodAge, FirstSeveranceScoreGeometry.FloodEndTick, 198)) : .18f;
-        float recoil = flooding ? Window(floodAge, 48, 60) * (1 - Window(floodAge, 70, 132)) : 0;
+        float grasp = flooding ? CastTension(floodAge, 0, FirstSeveranceScoreGeometry.FloodFireTick)
+            * (1 - Window(floodAge, FirstSeveranceScoreGeometry.FloodEndTick, FirstSeveranceScoreGeometry.FloodFadeTick)) : .18f;
+        float recoil = flooding ? ReleaseImpulse(floodAge, FirstSeveranceScoreGeometry.FloodFireTick, 32) : 0;
         bool impaling = combat.Substate == FirstSeveranceSubstate.HalfField;
         int swordWave = age < FirstSeveranceImpalingSwords.WarningStart(1) ? 0 : 1;
         int swordFire = FirstSeveranceImpalingSwords.FireBase(swordWave);
-        float flood = impaling ? Window(age, FirstSeveranceImpalingSwords.WarningStart(swordWave), swordFire)
+        float flood = impaling ? CastTension(age, FirstSeveranceImpalingSwords.WarningStart(swordWave), swordFire)
             * (1 - Window(age, swordFire + 24, swordFire + 70)) : 0;
-        float stabKick = impaling ? Window(age, swordFire, swordFire + 6)
-            * (1 - Window(age, swordFire + 16, swordFire + 38)) : 0;
+        float stabKick = impaling ? ReleaseImpulse(age, swordFire, 28) : 0;
         if (impaling) grasp = .18f + flood * .65f;
         bool crushing = combat.Substate == FirstSeveranceSubstate.RemoteCrush;
         float closure = crushing ? FirstSeveranceScoreGeometry.CrushClosure(age) : 0;
-        float brace = crushing ? Window(age, 0, 125) * (1 - Window(age, 190, 270)) : 0;
+        float brace = crushing ? CastTension(age, 0, FirstSeveranceScoreGeometry.CrushRushTick)
+            * (1 - Window(age, 190, 270)) : 0;
         if (crushing) grasp = brace * .7f + closure * .3f;
         Color color = combat.BossPhase == FirstSeveranceBossPhase.Final ? new(231, 117, 184) : new(156, 212, 226);
         rigOrigin = center; rigScale = 1;

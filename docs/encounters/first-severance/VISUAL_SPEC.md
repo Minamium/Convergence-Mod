@@ -20,6 +20,22 @@ related_docs:
 
 # First Severance — Null Cantor Visual Pass
 
+## Connected kinetic Raid pass — 0.2.35
+
+The current pass reviews the whole playable score, preserving accepted materials and authority warning/fire/collision clocks. `FirstSeveranceVisualCurves.CastTension` gives the existing cast window a rapid assembly, short elastic settling and final loading beat; `ReleaseImpulse` supplies fast recoil with shaped recovery. Do not speed up gameplay merely to make a pose energetic.
+
+| Area | Review result / change |
+|---|---|
+| Core activation | Existing atlas/framework retained; latch/lift/upper lock have distinct beats and fractional rendering instead of one uniform lift. Full containment outline remains visible immediately. |
+| P1 pursuit/charge/curtains | Accepted beam footprint/material retained; common aperture and Boss pose now load/brake/release together. Pressure fibers no longer multiply elapsed time by changing emission. |
+| Pylons / exposure | Static line cages replaced by articulated pieces of the existing rig atlas; flowing conduits visibly feed the shielded Core. Timeout loading shares the cast beat. Existing exposure impact/sounds retained. |
+| Stack / Spread | Accepted irregular shell shards, friction/lightning and impact/dissipation retained. Spread's ruby source gains the same collapsing aperture before the existing white cross flash. |
+| P2 lattice / twin blades / eclosion | Existing rigid rotation and material retained. Lattice source neck keeps continuous fibers through release. Eclosion now pries, catches, peels and unfurls in separate segments without exceeding the existing elbow-continuity bound. |
+| P3 hands / impalement / flood / crush | Hand load and recoil reference the actual corresponding attack deadlines. Waiting sword tip reaches the field plane and matches opacity before insertion; no tip-to-body replacement jump. Full danger aura and authority insertion stay unchanged. Obsolete safe-pocket arrows removed. |
+| Final / ending / scene | Fine triple beams retain exact lattice footprints; shared flow repair applies. Bullet lancets assemble/brace at their actual future spawn before flight. Accepted progressive unmaking, oblique-rift Victory, Defeat, layered cathedral and physical-pixel cinematics remain intact. |
+
+The flow fix is structural, not extra bloom: previously `elapsedTime * (baseRate + emission * speed)` shifted the same filament abruptly at fire, particularly after long warnings. Flow now uses a persistent phase plus a bounded release offset. Decorative energy never changes collision width/axis, marks a false safe lane or delays the live footprint. No new raster/audio assets, native control changes, screen strobe or per-frame texture allocation. Reduced Effects lowers decorative layers/local flashes; shake-off and107% viewport fixes are retained. Source/math checks cannot establish actual smoothness or FPS; [Status](../../STATUS.md) owns the playtest handoff.
+
 ## Containment mask coordinate contract
 
 Start designation, all phase-transition letterboxes, Victory and Defeat now also use an unscaled (`None`) composition layer and physical `GraphicsDevice.Viewport` dimensions. Their black bands, full-screen tint/flash and text alignment are therefore independent of HUD scale. Do not use `Main.screenWidth/Height / UIScale` in these callbacks: the UI callback has already scaled the dimensions. Ordinary inventory/HUD sizing remains user-controlled. This extends the exterior-mask fix to the previously missed cinematic paths.

@@ -563,7 +563,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: db1865afb5a1f7c53bd62244848f0b2d603e59dc25b5eedaac1ff9eec8948dfb
+  content_sha256: 1234495bd482c6d88e0131179777c4187673eff8008fd3ac79bb220f30bbe48c
   document_type: spec
   status: accepted
   owners:
@@ -588,7 +588,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: c91e682a973bc84527153afd72d59740f204cdb7b6e02a1252ae6cc95c6bead4
+  content_sha256: 3297eda5c55a56619a5ef6942493cd2da0781c1cc56462d3a2b73bf6c8158603
   document_type: spec
   status: provisional
   owners:
@@ -938,12 +938,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 630fb6115c669ccf7890f851de3edd6b54eeb9f05b8ed7f09d3b5190e65fae33
+  content_sha256: 9092f85b159135e60035ab4ff624295dbc9ed22c3383eda17e058192bba18a2b
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-09'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: e2e078529299bf83edaeb78a704e523a574a5adbf16069352ae2d278c799239d
+  content_sha256: f8bbd40bce489ee69d81c43cf093bef35ec10874b1a487dde0654f1b0ab69504
   document_type: status
   status: accepted
   owners:

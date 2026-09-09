@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceHitReceipt.cs" Link="Domain/FirstSeveranceHitReceipt.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/RitualKineticMotion.cs" Link="Domain/RitualKineticMotion.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceFieldMaskLayout.cs" Link="Presentation/FirstSeveranceFieldMaskLayout.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceRandomComb.cs" Link="Domain/FirstSeveranceRandomComb.cs" />

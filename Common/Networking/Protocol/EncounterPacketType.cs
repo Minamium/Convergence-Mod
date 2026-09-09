@@ -14,4 +14,5 @@ internal enum EncounterPacketType : byte
     ParticipantChanged = 66,
     ValidationResult = 67,
     EncounterEnded = 68,
+    RaidHit = 69,
 }

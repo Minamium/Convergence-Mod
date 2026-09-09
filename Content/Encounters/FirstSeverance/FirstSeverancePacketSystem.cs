@@ -5,6 +5,8 @@ using System.IO;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Encounters.Runtime;
 using Convergence.Common.Foundation.Geometry;
+using Convergence.Common.Foundation.Identifiers;
+using Convergence.Content.Encounters.FirstSeverance.Revive;
 using Convergence.Common.Networking;
 using Convergence.Common.Networking.Protocol;
 using Convergence.Common.Networking.Replication;
@@ -60,6 +62,7 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
             EncounterPacketType.ValidationResult => HandleValidation(
                 reader,
                 out failureCode),
+            EncounterPacketType.RaidHit => HandleRaidHit(reader, header, out failureCode),
             _ => Reject("first_severance.packet_type_unhandled", out failureCode),
         };
     }
@@ -267,6 +270,28 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
 
         failureCode = string.Empty;
         return true;
+    }
+
+    private static bool HandleRaidHit(BinaryReader reader, in EncounterPacketHeader header, out string failureCode)
+    {
+        if (!FirstSeverancePacketCodec.TryReadRaidHit(reader, out int damage, out failureCode)) return false;
+        var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
+        var combat = state.Combat;
+        if (combat is null || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out var member)
+            || !member.IsConnected) return true;
+        Main.LocalPlayer.GetModPlayer<FirstSeveranceRaidPlayer>().ApplyRaidHit(header,
+            combat.FightId, combat.EncounterSequence, damage);
+        return true;
+    }
+
+    internal static void SendRaidHit(int toClient, FightId fight, uint revision, int damage)
+    {
+        var snapshot = ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot;
+        if (Main.netMode != NetmodeID.Server || snapshot.FightId != fight) return;
+        ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
+        FirstSeverancePacketCodec.WriteRaidHit(packet, new(EncounterProtocol.CurrentVersion,
+            EncounterPacketType.RaidHit, snapshot.EncounterSequence, fight, revision), damage);
+        packet.Send(toClient);
     }
 
     private static bool HandleValidation(BinaryReader reader, out string failureCode)

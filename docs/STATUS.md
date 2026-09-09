@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.34**, protocol **23**. Non-melee weapons now use multi-second evolving scores: seven-sigil Magic into mana-limited continuous irradiation; five-cannon Ranged into sustained crossfire; a shared Summon concert/chorus; and six-witness Rogue into one amplified returning relic. [Weapons](encounters/first-severance/WEAPONS.md#long-form-non-melee-rituals--0234) owns timings, resources, damage and native ownership. Four new text-only generated icon/apparatus sets and three original looping sound beds are included. Built-in image model identifier was unavailable; the owner accepted this route. Melee, Raid rules, rewards, Boss music and the previous viewport fixes are unchanged.
+Development **0.2.35**, protocol **24**. Accepted Raid hits now reset stored standard Calamity Adrenaline through an owner-only receipt; active-burst/Nanomachines exceptions are retained. [Hit behavior](encounters/first-severance/ENCOUNTER_SPEC.md#raid-damage-and-adrenaline) and [transport](NETWORK_ARCHITECTURE.md#current-development-protocol-v24) own the contract. A [whole-score presentation pass](encounters/first-severance/VISUAL_SPEC.md#connected-kinetic-raid-pass--0235) reconnects cast loading/recoil, fixes emission-phase jumps, joins sword anticipation and refreshes Pylons/Core deployment. HP, damage amounts, geometry, warning durations, weapons, loot, music and viewport fixes are unchanged. The preceding [long-form non-melee weapons](encounters/first-severance/WEAPONS.md#long-form-non-melee-rituals--0234) and new original assets remain included.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Raid hit/kinetic evidence](evidence/2026-09-09-raid-hit-kinetics.json):137 domain cases passed across the suite and scoped eclosion/flow reruns; compiled codec324 round-trips and50 malformed cases passed. Native package compilation passed, zero errors/four existing nullable warnings. Actual Calamity gauge behavior, remote-owner/terminal hit delivery and visual acceptance are **not_run**, user-owned. The source fix is not an in-game success or measured performance claim.
 
 [Grand armament evidence](evidence/2026-09-09-grand-armaments.json):133 deterministic domain cases passed, including four new macro-score/resource tests; native package compilation passed with zero errors/four existing warnings. Four new alpha-preserved icons were inspected at128px and40px. User-owned checks: held-trigger/empty-resource behavior, item-switch/Down cancellation, one vs multiple minions/retarget/sacrifice, Rogue stealth, matching-peer aim/audio continuity, reduced effects and actual DPS/readability. No GUI/gameplay/FPS acceptance is claimed.
 
@@ -71,6 +73,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.35: reload/restart **all** peers before Host & Play (protocol changed; no second Build + Reload required). With standard stored Adrenaline, take a Raid beam hit and check the gauge clears; confirm zero-damage successful mechanics do not clear it. Check a Down-causing/final Defeat hit, active burst and Draedon's Heart separately. For visuals, inspect pursuit launch, lattice source, P3 sword tips/hands, Pylons and eclosion with normal/reduced effects; retained107% viewport and weapon checks below remain outstanding, not repeated automated gates.
 
 User-owned0.2.34: restart/reload matching peers; hold Magic for about7 seconds to see its continuous final beam, and Ranged for about6 seconds for overdrive. Allow the Summon concert to complete; check Rogue enrollment/final blade and release cancellation. Compare Reduced Effects and inspect remaining107% cinematic alignment without changing the accepted melee. No additional Build + Reload is needed for the already-packaged source.
 

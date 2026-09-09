@@ -25,6 +25,14 @@ related_docs:
 
 # First Severance Encounter Specification
 
+## Raid damage and Adrenaline
+
+Positive, accepted encounter damage clears **stored standard Adrenaline**, including a hit converted into Down, and pauses accumulation. Zero-damage Stack/Spread success, invulnerability and the auxiliary debug lease do not count as hits. Healing/replication does not replay this effect. Calamity's active Adrenaline burst remains unaffected by a hit; Draedon's Heart/Nanomachines pauses instead of clearing. Ordinary Terraria hits remain Calamity-owned. This Raid-specific reset intentionally applies even to very small accepted HP losses; it does not reproduce Calamity's tiny-hit partial-loss curve, shield absorption, Chalice or retaliation hooks. Fixed Raid damage and recovery rules are otherwise unchanged.
+
+The cause was `ApplyRaidDamage`'s intentional direct HP/Down path bypassing native `OnHurt`. The isolated [compatibility bridge](../../../Common/Compatibility/Calamity/CalamityRaidHit.cs) performs only the gauge side effect; calling `Player.Hurt` or all of Calamity's `OnHurt` would replay unrelated damage/defense/death effects. [Network architecture](../../NETWORK_ARCHITECTURE.md#current-development-protocol-v24) owns delivery and duplicate protection.
+
+Scoped API research: Calamity public source **2.2.2**, commit `1a8cebd27ec5615316b78f71973446b5528d2b78`, [CalamityPlayerHitHurt.cs](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/CalPlayer/CalamityPlayerHitHurt.cs) (`OnHurt` / private `LoseAdrenalineOnHurt`) establishes burst/Nanomachines exceptions; [CalamityPlayer.cs](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/CalPlayer/CalamityPlayer.cs) exposes the gauge, pause and sound fields. Normal-hit pause in `Balancing/BalancingConstants.cs` and Nanomachine pause in `Items/Accessories/DraedonsHeart.cs` are private 60-tick values; the bridge explicitly owns that compatibility constant. Installed **2.2.4** compiles against those public members, but live behavior still requires the owner smoke check. This is not a claim that the public checkout equals the installed version. [Custom license](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/LICENSE.md): reference use allowed, proprietary assets/code; no foreign function or asset is vendored. Calamity sound styles are borrowed at runtime from the required dependency.
+
 ## Random Final triples
 
 Current0.2.28 overrides pitch only:112px pitch with the same24px full beam width leaves88px clear lanes. Three-pulse random selection, warning/fire/recovery and120damage remain unchanged.

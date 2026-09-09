@@ -141,7 +141,7 @@ internal sealed class FirstSeveranceStageVisuals
         float opacity, float emission, Color color, bool reduced)
     {
         Vector2 normal = new(-direction.Y, direction.X);
-        float charge = Window(tick, grid.StartTick, grid.FireTick);
+        float charge = CastTension(tick, grid.StartTick, grid.FireTick);
         float open = Aperture(tick, grid.StartTick, grid.FireTick, grid.EndTick);
         float time = (float)(tick - grid.StartTick);
         // The dim full-width substrate still declares the exact danger volume;
@@ -155,7 +155,7 @@ internal sealed class FirstSeveranceStageVisuals
             {
                 float t = n / 24f;
                 float opening = Window(t, 0, 1);
-                float wave = MathF.Sin(t * 14 - time * (.10f + emission * .34f) + lane * 1.73f)
+                float wave = MathF.Sin(t * 14 - FlowPhase(time, .25f, emission) + lane * 1.73f)
                     * MathF.Sin(t * MathF.PI) * 7;
                 Vector2 next = origin + direction * (-20 + (neck + 20) * t)
                     + normal * (across * (.08f + .92f * opening) + wave);

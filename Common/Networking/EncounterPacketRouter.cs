@@ -116,7 +116,8 @@ internal static class EncounterPacketRouter
             or EncounterPacketType.StateChanged
             or EncounterPacketType.ParticipantChanged
             or EncounterPacketType.ValidationResult
-            or EncounterPacketType.EncounterEnded;
+            or EncounterPacketType.EncounterEnded
+            or EncounterPacketType.RaidHit;
 
         return Main.netMode switch
         {

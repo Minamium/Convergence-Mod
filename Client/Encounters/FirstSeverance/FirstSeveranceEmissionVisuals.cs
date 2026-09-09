@@ -178,7 +178,7 @@ internal sealed class FirstSeveranceEmissionVisuals
                     for (int s = 1; s <= segments; s++)
                     {
                         float t = s / (float)segments;
-                        float phase = t * 23 - (float)(now - v.StartTick) * (.10f + emission * .8f) + fiber * 2.4f;
+                        float phase = t * 23 - FlowPhase(now - v.StartTick, .42f, emission) + fiber * 2.4f;
                         float taper = MathF.Sin(MathF.PI * t) * .55f + .15f;
                         float offset = (MathF.Sin(phase) * .28f + (fiber / (float)strands - .5f)) * width * taper;
                         Vector2 next = origin + direction * (ray.Length * t) + normal * offset;
@@ -258,7 +258,7 @@ internal sealed class FirstSeveranceEmissionVisuals
         DrawAperture(batch, mouth, direction, now, v, open, emission, color, reduced);
         if (now < v.FireTick && e.CancelledAt is null)
             DrawWarning(batch, head, direction, 1600, 50, now, v, color, Math.Max(.6f, warning), reduced);
-        float charge = Window(now, v.StartTick, v.FireTick);
+        float charge = CastTension(now, v.StartTick, v.FireTick);
         // The gathered body deforms continuously into a long needle at launch.
         float stretch = 1 + emission * 1.35f;
         float opacity = Window(now, v.StartTick, v.StartTick + 5d) * cooling;

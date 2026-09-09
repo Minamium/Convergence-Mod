@@ -23,8 +23,9 @@ internal static class FirstSeveranceImpalingSwordVisuals
                 FirstSeveranceImpalingSwords.WarningStart(sword.Wave) + 9) * sword.Fade;
             Color color = sword.Slot < FirstSeveranceImpalingSwords.DenseCount ? new(205, 142, 244) : new(134, 220, 255);
             bool warning = age < sword.Fire;
-            float arrival = 1 - MathF.Pow(1 - Math.Clamp((float)(age - FirstSeveranceImpalingSwords.WarningStart(sword.Wave)) / 5, 0, 1), 3);
+            float arrival = Arrive(age - FirstSeveranceImpalingSwords.WarningStart(sword.Wave), 5);
             float brake = Window(age, sword.Fire - 16, sword.Fire - 7);
+            float commit = Window(age, sword.Fire - 5, sword.Fire);
             // Held aura forecasts the whole blade volume. A rigid textured sword
             // then translates through the field plane; it never scales in length.
             float length = warning ? ray.Length : ray.Length * sword.Extension;
@@ -59,11 +60,11 @@ internal static class FirstSeveranceImpalingSwordVisuals
                 // Harmless tip OUTSIDE the arena: snap from the slit, settle into
                 // tension, then the existing shared six-tick insertion takes over.
                 float scaleX = ray.Length / 2131;
-                Vector2 point = origin - direction * (2 + (1 - arrival) * 140 + brake * 14);
+                Vector2 point = origin - direction * ((2 + (1 - arrival) * 140 + brake * 14) * (1 - commit));
                 int tipWidth = Math.Min(420, texture.Width);
                 batch.Draw(texture, point - Main.screenPosition,
                     new Rectangle(texture.Width - tipWidth, 0, tipWidth, texture.Height),
-                    Color.White * (born * .45f), angle, new Vector2(tipWidth, 362),
+                    Color.White * (born * (.45f + commit * .55f)), angle, new Vector2(tipWidth, 362),
                     new Vector2(scaleX, ray.HalfWidth * 2 / 300), SpriteEffects.None, 0);
             }
             // Edge rifts gather/close continuously; no hard forecast rails.

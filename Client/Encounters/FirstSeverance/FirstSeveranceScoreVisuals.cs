@@ -177,9 +177,19 @@ internal sealed class FirstSeveranceScoreVisuals
             }
             else
             {
-                float charge = Window(age - FirstSeveranceScoreGeometry.BulletStartTick(combat.ActionIndex, b.Wave), -24, 0);
+                double local = age - FirstSeveranceScoreGeometry.BulletStartTick(combat.ActionIndex, b.Wave);
+                float charge = CastTension(local, -24, 0);
                 Ring(batch, point, 28 - charge * 14, color * .90f, 2.5f);
                 accents.Halo(batch, point, new Vector2(65), color, charge * .55f);
+                // Two halves of the live lancet assemble around its actual spawn
+                // position, brake, then meet before release; no extra fake bullets.
+                float join = Window(local, -5, 0);
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    Vector2 tip = point + normal * (side * (1 - join) * (34 - charge * 16));
+                    Line(batch, tip - direction * 13, tip + direction * 8,
+                        FirstSeveranceAttackAccents.Neon(color, .45f + charge * .5f), 2);
+                }
             }
         }
     }
@@ -224,15 +234,6 @@ internal sealed class FirstSeveranceScoreVisuals
             accents.CastSeal(batch, origin + direction * 24, local, 0, FirstSeveranceScoreGeometry.FloodFireTick,
                 color, reduced, .75f + charge * .28f);
         }
-        float fade = born * (1 - Window(local, FirstSeveranceScoreGeometry.FloodEndTick, FirstSeveranceScoreGeometry.FloodFadeTick));
-        Vector2 safe = new(combat.CoreX, combat.CoreY - 560 + FirstSeveranceScoreGeometry.FloodSafeY(combat.ActionIndex, pulse));
-        // Discrete inward arrows in the safe band: no outer boundary rails.
-        for (int side = -1; side <= 1; side += 2)
-        {
-            Vector2 tip = safe + new Vector2(side * (70 + 12 * (1 - charge)), 0);
-            Line(batch, tip + new Vector2(side * 16, -12), tip, new Color(200, 252, 237) * fade, 2.5f);
-            Line(batch, tip + new Vector2(side * 16, 12), tip, new Color(200, 252, 237) * fade, 2.5f);
-        }
-
+        // The negative space itself denotes safety; no floating arrow labels.
     }
 }

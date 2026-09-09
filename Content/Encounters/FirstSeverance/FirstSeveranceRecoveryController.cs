@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Convergence.Common.Compatibility.Calamity;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Geometry;
 using Convergence.Common.Foundation.Identifiers;
@@ -45,6 +46,7 @@ internal sealed class FirstSeveranceRecoveryController
     private readonly bool[] observedConnected;
     private readonly RaidParticipantCombatState[] projectedCombatStates;
     private readonly uint[] healthRevisions;
+    private readonly uint[] hitRevisions;
     private readonly int[] correctedLife;
     private readonly Vector2[] downedPositions;
     private readonly ulong[] projectedReviveLockouts;
@@ -68,6 +70,7 @@ internal sealed class FirstSeveranceRecoveryController
         observedConnected = new bool[roster.Count];
         projectedCombatStates = new RaidParticipantCombatState[roster.Count];
         healthRevisions = new uint[roster.Count];
+        hitRevisions = new uint[roster.Count];
         correctedLife = new int[roster.Count];
         downedPositions = new Vector2[roster.Count];
         projectedReviveLockouts = new ulong[roster.Count];
@@ -419,6 +422,13 @@ internal sealed class FirstSeveranceRecoveryController
         }
 
         Log(authorityTick, $"event=RaidDamage source={source} participant={member.ParticipantId.Value} slot={member.ServerWhoAmI} damage={damage} life_before={player.statLife} max_life={player.statLifeMax2} lethal={damage >= player.statLife}");
+
+        // Accepted hits only, including lethal-to-Down. Send before any terminal
+        // cleanup; a periodic HP snapshot alone can lose the final hit or a heal.
+        CalamityRaidHit.Apply(player);
+        if (Main.netMode == NetmodeID.Server)
+            FirstSeverancePacketSystem.SendRaidHit(member.ServerWhoAmI, fightId,
+                ++hitRevisions[member.ParticipantId.Value], damage);
 
         // Experimental encounter-owned damage, not an interception of another Mod's hit.
         // This path never sends a lethal HP value or invokes Terraria's death hooks.

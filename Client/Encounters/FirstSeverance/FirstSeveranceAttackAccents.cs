@@ -139,23 +139,31 @@ internal sealed class FirstSeveranceAttackAccents
     internal void CastSeal(SpriteBatch batch, Vector2 center, double tick, double start, double fire,
         Color color, bool reduced, float scale = 1)
     {
-        float gather = Window(tick, start, fire) * (1 - Window(tick, fire, fire + 20));
+        float tension = CastTension(tick, start, fire);
+        float release = ReleaseImpulse(tick, fire);
+        float gather = tension * (1 - Window(tick, fire, fire + 20));
         float imminent = PreRelease(tick, fire, Math.Min(24, fire - start));
-        float born = Window(tick, start, start + 5) * (1 - Window(tick, fire, fire + 20));
-        float radius = (145 - 65 * gather + 15 * imminent) * scale;
+        float arrival = Arrive(tick - start, Math.Min(7, (fire - start) * .2));
+        float born = arrival * (1 - Window(tick, fire + 2, fire + 20));
+        float collapse = Window(tick, fire - Math.Min(5, (fire - start) * .15), fire + 2);
+        float radius = (188 - 43 * arrival - 56 * tension - 35 * collapse + 92 * release) * scale;
         Halo(batch, center, new Vector2((180 + gather * 140) * scale), color, born * (reduced ? .18f : .42f));
         for (int i = 0; i < (reduced ? 3 : 6); i++)
         {
-            float angle = i * MathHelper.TwoPi / (reduced ? 3 : 6) + gather * 1.4f;
+            float angle = i * MathHelper.TwoPi / (reduced ? 3 : 6) + tension * 1.4f + collapse * .42f;
             Arc(batch, center, radius, angle, .62f, Neon(color, born * .9f), 3 * scale);
             Vector2 outside = center + Unit(angle + .31f) * (radius + (38 - 22 * imminent) * scale);
             Vector2 inside = center + Unit(angle + .31f) * radius;
             Line(batch, outside, inside, Color.White * born * (.45f + imminent * .45f), 2 * scale);
         }
+        // The same gathered aperture flares and sheds its edges; no replacement
+        // sprite/pose at fire. Small local exposure only, not a screen strobe.
+        Halo(batch, center, new Vector2(190, 38) * scale, Color.White,
+            release * (reduced ? .12f : .52f), -.32f);
         if (!reduced)
             for (int i = 0; i < 12; i++)
             {
-                float p = Cycle(tick - start, 35, i / 12d);
+                float p = Cycle(tick - start + collapse * 12, 35, i / 12d);
                 float angle = i * 2.399963f + gather * 1.2f;
                 float fade = MathF.Sin(p * MathF.PI) * born;
                 Vector2 point = center + Unit(angle) * ((1 - Ease(p)) * 190 + 25) * scale;

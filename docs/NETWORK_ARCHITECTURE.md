@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-09
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,13 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v23
+## Current development protocol v24
+
+`RaidHit = 69` is a definition-routed, **server-to-owning-client only** event for accepted encounter HP damage. Its existing header carries exact Sequence/Fight and a per-participant positive hit revision; its entire body is one positive `Int32` damage amount. No client-provided hit, HP mutation or new saved state is introduced. The router rejects the reverse direction; the feature parses the bounded payload before checking its current connected local participant. The player's per-Fight receipt rejects wrong versions/Fights/sequences and duplicate/stale revisions; cleanup resets it. Calamity-specific effects remain in the compatibility adapter.
+
+Authority sends the receipt immediately after invulnerability/debug/zero-damage rejection and before the HP/Down transition, including a terminal lethal hit. Reliable ordered Mod packets deliver it before that same connection's cleanup snapshot. It is deliberately independent of periodic HP corrections: a heal can mask a loss, and a terminal presentation snapshot must not reapply player state. Single Player applies directly once; remote-player projections do not repeat it. `RaidHitApplied` on the owning client can be correlated with authority `RaidDamage`. It is a receipt log, not proof that a disabled/active-burst/Nanomachine gauge should clear. Matching peers are required; existing IDs, geometry, HP and recovery contracts remain unchanged.
+
+## Preceding development protocol v23
 
 No wire fields change. Version23 requires identical peers for the wider Final comb pitch and shifted second sword wave; both still reconstruct through shared authority geometry.
 

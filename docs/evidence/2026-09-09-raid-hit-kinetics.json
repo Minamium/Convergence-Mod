@@ -1,0 +1,27 @@
+{
+  "build": "0.2.35",
+  "protocol": 24,
+  "base_commit": "0425f234605fa2b95c4984ab330c4d3905752462",
+  "scope": "Calamity Adrenaline bridge for accepted scripted Raid hits; connected kinetic casting and a whole-score presentation review. No weapon/gameplay timing/geometry retuning.",
+  "checks": {
+    "domain": "137 cases passed across full suite and scoped reruns. Initial eclosion speed exceeded existing continuity bounds; adjusted the curve, retained the checks, and reran eclosion/flow successfully.",
+    "codec": "passed; compiled protocol24,324 round-trips and50 malformed/truncated cases; four new domain cases cover receipt identity/replay, positive bounded codec and motion/flow contracts",
+    "native_package": "passed;0 errors,4 pre-existing CS8632 warnings",
+    "static": "passed;60-document catalog,461-file repository policy scan,10 YAML files; git diff --check passed"
+  },
+  "not_run": [
+    "Calamity2.2.4 standard stored Adrenaline reset and accumulation pause on SP/Host & Play owning client",
+    "Successful mechanics/debug immunity cause no reset; Down/terminal hit arrives before cleanup; no duplicate reset after healing",
+    "Active Adrenaline burst and Draedon's Heart exceptions in game",
+    "In-game motion/readability/Reduced Effects/shake-off/107% viewport acceptance and measured FPS"
+  ],
+  "preserved": "Pre-existing changes in both English localization files; all weapons, original raster/audio assets, external originals, gameplay clocks, HP, damage and collision. No GUI/server launch or Workshop upload.",
+  "build_identity": {
+    "source_sha256": "97ca27c99c1971a3e38151179f30f2b62623fd4ac4eff9ea44aeea1c4ac99281",
+    "package_sha256": "0069a2b537c534174127bd2998a78a606fd0e51cb68916c4df9d036648746a56",
+    "package_bytes": 39007388,
+    "source_changed_during_build": false,
+    "local_record": "20260909T091225183639Z",
+    "post_build_changes": "Documentation/evidence only; no packaged runtime input changed."
+  }
+}

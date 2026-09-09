@@ -75,8 +75,9 @@ internal sealed class FirstSeveranceMechanicVisuals
                 // pretending the unavoidable result ray is a dodgeable telegraph.
                 if (spread)
                 {
-                    float charge = Window(tick, end - 55, end);
+                    float charge = CastTension(tick, end - 55, end);
                     Vector2 mouth = Source(combat);
+                    accents.CastSeal(batch, mouth, tick, end - 55, end, new Color(255, 24, 66), reduced, .55f);
                     accents.Halo(batch, mouth, new Vector2(150 - charge * 88), new Color(255, 24, 66), .8f * charge);
                     Ring(batch, mouth, 18 - charge * 11, new Color(255, 130, 154) * charge, 2);
                 }

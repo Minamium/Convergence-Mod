@@ -48,9 +48,10 @@ public sealed class FoundationCoreVisuals : GlobalTile
         }
         if (state.Combat is { } combat)
         {
+            double renderTick = ModContent.GetInstance<FirstSeverancePrototypePresentation>().RenderTick;
             float intro = combat.Substate == FirstSeveranceSubstate.SpawnIntro
-                ? 1 - Math.Clamp((float)((double)combat.ResolveTick - state.EstimatedAuthorityTick) / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0, 1) : 1;
-            DrawField(batch, new(combat.CoreX, combat.CoreY), intro, state.EstimatedAuthorityTick);
+                ? 1 - Math.Clamp((float)(combat.ResolveTick - renderTick) / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0, 1) : 1;
+            DrawField(batch, new(combat.CoreX, combat.CoreY), intro, renderTick);
         }
         else if (Main.LocalPlayer.HeldItem.type == ModContent.ItemType<FoundationCoreItem>())
         {
@@ -69,11 +70,14 @@ public sealed class FoundationCoreVisuals : GlobalTile
             Line(batch, foot + new Vector2(-width * .30f, -14), foot + new Vector2(width * .30f, -14), Ice * .6f, 2);
     }
 
-    private void DrawField(SpriteBatch batch, Vector2 ground, float intro, ulong tick)
+    private void DrawField(SpriteBatch batch, Vector2 ground, float intro, double tick)
     {
-        float rise = Ease(Math.Clamp((intro - .04f) / .54f, 0, 1));
-        float ignition = Ease(Math.Clamp((intro - .42f) / .32f, 0, 1));
-        float age = tick % 36000 / 60f;
+        // Latches arrive, the lift catches its weight, then the upper stage
+        // engages. Cosmetic only: the complete containment outline exists at t0.
+        float rise = .14f * Arrive(intro - .04, .035) + .68f * Window(intro, .16, .38)
+            + .18f * Window(intro, .47, .58);
+        float ignition = .78f * Arrive(intro - .42, .11) + .22f * Window(intro, .64, .74);
+        float age = (float)(tick % 36000) / 60f;
         var field = FirstSeveranceContainmentBounds.FromGround(ground.X, ground.Y);
         Vector2 center = new(field.CenterX, field.CenterY);
         // Full faint outline is present immediately: the collision never hides

@@ -21,6 +21,19 @@ internal static class FirstSeverancePacketCodec
 {
     private const int MaximumFailureCodeBytes = 120;
 
+    internal static void WriteRaidHit(BinaryWriter writer, in EncounterPacketHeader header, int damage)
+    {
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
+        writer.Write(damage);
+    }
+
+    internal static bool TryReadRaidHit(BinaryReader reader, out int damage, out string failureCode)
+    {
+        damage = reader.ReadInt32();
+        failureCode = damage > 0 ? string.Empty : "first_severance.hit_damage_invalid";
+        return damage > 0;
+    }
+
     internal static void WriteActivateRequest(
         BinaryWriter writer,
         in EncounterPacketHeader header,

@@ -1,4 +1,6 @@
 using System;
+using Convergence.Common.Compatibility.Calamity;
+using Convergence.Common.Networking.Protocol;
 using Convergence.Common.Foundation.Identifiers;
 using Convergence.Common.Raids.Revive;
 using Microsoft.Xna.Framework;
@@ -13,6 +15,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
 {
     private FightId fightId;
     private uint healthRevision;
+    private FirstSeveranceHitReceipt hitReceipt;
     private Vector2 downedPosition;
     private ulong immunityUntilLocalTick;
     private ulong weaknessUntilLocalTick;
@@ -87,6 +90,14 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
         }
     }
 
+    internal void ApplyRaidHit(in EncounterPacketHeader header, FightId owner, ulong sequence, int damage)
+    {
+        if (Main.netMode != NetmodeID.MultiplayerClient || Player.whoAmI != Main.myPlayer
+            || fightId != owner || !hitReceipt.TryAccept(header, owner, sequence, damage)) return;
+        CalamityRaidHit.Apply(Player);
+        Mod.Logger.Info($"FirstSeverance event=RaidHitApplied fight={owner} revision={header.Revision} damage={damage} slot={Player.whoAmI}");
+    }
+
     internal void ClearRaidState()
     {
         Player.GetModPlayer<FirstSeveranceContainmentPlayer>().Clear();
@@ -103,6 +114,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
         IsReviving = false;
         fightId = FightId.None;
         healthRevision = 0;
+        hitReceipt = default;
         immunityUntilLocalTick = 0;
         weaknessUntilLocalTick = 0;
         reviveLockoutUntilLocalTick = 0;

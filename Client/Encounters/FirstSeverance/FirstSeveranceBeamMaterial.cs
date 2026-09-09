@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceBossVisuals;
+using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualCurves;
 
 namespace Convergence.Client.Encounters.FirstSeverance;
 
@@ -32,7 +33,7 @@ internal static class FirstSeveranceBeamMaterial
             for (int n = 1; n <= segments; n++)
             {
                 float t = n / (float)segments;
-                float flow = MathF.Sin(t * 22 - time * (.10f + emission * .30f) + strand * MathF.PI);
+                float flow = MathF.Sin(t * 22 - FlowPhase(time, .28f, emission) + strand * MathF.PI);
                 Vector2 next = origin + direction * (length * t)
                     + normal * (flow * halfWidth * .42f * MathF.Sin(MathF.PI * t));
                 float pulse = .72f + .28f * MathF.Sin(t * 14 - time * .22f + strand);
@@ -73,7 +74,7 @@ internal static class FirstSeveranceBeamMaterial
             for (int n = 1; n <= segments; n++)
             {
                 float t = n / (float)segments;
-                float phase = t * 19 - time * (.065f + emission * .22f) + lane * 1.71f;
+                float phase = t * 19 - FlowPhase(time, .17f, emission) + lane * 1.71f;
                 float wave = MathF.Sin(phase) + MathF.Sin(phase * 1.37f + time * .031f) * .35f;
                 float offset = center + wave * pitch * .16f * MathF.Sin(MathF.PI * t);
                 Vector2 next = origin + direction * (length * t) + normal * offset;
@@ -109,7 +110,7 @@ internal static class FirstSeveranceBeamMaterial
             for (int n = 0; n <= segments; n++)
             {
                 float t = n / (float)segments;
-                float phase = t * 17 + band * 2.31f - time * (.072f + emission * .11f);
+                float phase = t * 17 + band * 2.31f - FlowPhase(time, .15f, emission);
                 float turbulence = MathF.Sin(phase) * .105f + MathF.Sin(phase * 1.71f + time * .043f) * .045f;
                 float envelope = .28f + .72f * MathF.Sin(MathF.PI * t);
                 float offset = Math.Clamp(halfWidth * (lane + turbulence * envelope), -halfWidth * .84f, halfWidth * .84f);
