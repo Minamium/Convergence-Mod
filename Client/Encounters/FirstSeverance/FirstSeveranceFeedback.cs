@@ -24,6 +24,12 @@ internal sealed class FirstSeveranceFeedback
     private ulong shardDeadline;
     private int shardBeat = -1;
     private readonly List<ReLogic.Utilities.SlotId> voices = new(24);
+    private readonly HashSet<ReLogic.Utilities.SlotId> impactTails = new();
+    private readonly FirstSeveranceAudioCueClock criticalClock = new();
+    private FirstSeveranceCombatProjection? pendingResult;
+    private ReLogic.Utilities.SlotId orbitVoice;
+    private static readonly int SecondTurnTick = FindSecondTurnTick();
+    private readonly List<(ReLogic.Utilities.SlotId Id, string Name, ulong CheckAt)> audioChecks = new(16);
     private uint chargeSerial, lockSerial, fireSerial;
     private int curtainBeat = -1;
     private uint gridChargeSerial, gridFireSerial;
@@ -32,7 +38,6 @@ internal sealed class FirstSeveranceFeedback
     private int scoreImpactTicks;
     private readonly HashSet<int> scoreSounds = new();
     private readonly HashSet<uint> spreadCharges = new(), spreadFires = new();
-    private ulong lastSwordSoundTick;
     private bool failed, stack;
     private float previousEndingAge = -1;
 
@@ -57,22 +62,40 @@ internal sealed class FirstSeveranceFeedback
         if (Main.dedServ) return;
         if (resultTicks > 0) resultTicks--;
         if (scoreImpactTicks > 0) scoreImpactTicks--;
-        voices.RemoveAll(id => !SoundEngine.TryGetActiveSound(id, out var sound) || !sound.IsPlaying);
+        CheckAudioVoices();
+        voices.RemoveAll(id =>
+        {
+            if (SoundEngine.TryGetActiveSound(id, out var sound) && sound.IsPlaying) return false;
+            impactTails.Remove(id);
+            return true;
+        });
         var combat = state.Combat;
         mechanics.Update(combat, state.EstimatedAuthorityTick);
         if (combat is null || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) || !local.IsConnected)
         {
             if (previous is not null)
             {
-                StopVoices();
+                StopVoices(preserveImpacts: true);
+                // Cleanup can arrive instead of the short-lived active impact
+                // snapshot. Use its accepted authority tick, not a guessed defeat cause.
+                if (state.TerminalCombat is { } ended && ended.FightId == previous.FightId
+                    && ended.Substate is FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RemoteCrush)
+                {
+                    if (ended.ActionStartedTick != previous.ActionStartedTick || ended.Substate != previous.Substate)
+                        criticalClock.Reset();
+                    PlayCriticalAction(ended, state.TerminalAuthorityTick);
+                }
                 if (state.TerminalMechanic is { } terminal && terminal.FightId == previous.FightId
                     && terminal.MechanicRevision != previous.MechanicRevision)
-                    AcceptResult(terminal, state.EstimatedAuthorityTick);
+                    AcceptResult(terminal, state.TerminalAuthorityTick);
+                else if (pendingResult is { } pending && pending.FightId == previous.FightId)
+                    AcceptResult(pending, Math.Max(state.TerminalAuthorityTick, pending.MechanicTick));
                 else mechanics.Reset();
                 if (state.LastCombatEndReason is EncounterEndReason.Defeat or EncounterEndReason.Victory)
                     Play(state.LastCombatEndReason == EncounterEndReason.Defeat ? "RaidDefeat" : "RaidVictory", .86f);
             }
             previous = null;
+            pendingResult = null;
             return;
         }
         bool fresh = previous is null || previous.FightId != combat.FightId;
@@ -91,6 +114,7 @@ internal sealed class FirstSeveranceFeedback
             shardBeat = -1;
             resultTicks = 0;
             scoreImpactTicks = 0;
+            pendingResult = null;
         }
         bool phaseChanged = fresh || previous!.Substate != combat.Substate
             || previous.ZeroBasedLoopIndex != combat.ZeroBasedLoopIndex || previous.ActionStartedTick != combat.ActionStartedTick;
@@ -98,9 +122,10 @@ internal sealed class FirstSeveranceFeedback
         {
             countdown = -1;
             scoreSounds.Clear();
+            criticalClock.Reset();
+            if (SoundEngine.TryGetActiveSound(orbitVoice, out var orbit)) orbit.Stop();
             spreadCharges.Clear();
             spreadFires.Clear();
-            lastSwordSoundTick = 0;
             shellBroken = false;
             string? cue = combat.Substate switch
             {
@@ -113,7 +138,7 @@ internal sealed class FirstSeveranceFeedback
                 FirstSeveranceSubstate.Lattice => "CoreExposure",
                 FirstSeveranceSubstate.RotatingBlade => "BladeGather",
                 FirstSeveranceSubstate.HalfField => "ShellMassLatch",
-                FirstSeveranceSubstate.RemoteCrush => "CrushPressure",
+                FirstSeveranceSubstate.RemoteCrush => null, // owned by the critical cue clock
                 FirstSeveranceSubstate.FinalBullets => "FinalGather",
                 FirstSeveranceSubstate.FinalSlicer => null,
                 _ => null,
@@ -125,7 +150,7 @@ internal sealed class FirstSeveranceFeedback
         {
             if (combat.MechanicRevision != before.MechanicRevision && combat.MechanicRevision > 0)
             {
-                AcceptResult(combat, state.EstimatedAuthorityTick);
+                pendingResult = combat;
             }
             if (combat.Substate == FirstSeveranceSubstate.PylonCheck && before.Substate == combat.Substate
                 && combat.RemainingPylons < before.RemainingPylons)
@@ -141,6 +166,12 @@ internal sealed class FirstSeveranceFeedback
             else if (down) Play("Downed", .72f);
         }
         ulong tick = state.EstimatedAuthorityTick;
+        if (pendingResult is { } result && tick >= result.MechanicTick)
+        {
+            AcceptResult(result, tick);
+            pendingResult = null;
+        }
+        PlayCriticalAction(combat, tick);
         var safe = FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex,
             combat.ActionStartedTick, tick, combat.CoreX, combat.CoreY);
         if (safe is { } companion && tick < companion.ResolveTick && safeCueResolve != companion.ResolveTick)
@@ -241,24 +272,6 @@ internal sealed class FirstSeveranceFeedback
         double age = (double)tick - combat.ActionStartedTick;
         if (tick < combat.ResolveTick && age >= 0)
         {
-            if (combat.Substate == FirstSeveranceSubstate.HalfField)
-            {
-                for (int wave = 0; wave < 2; wave++)
-                {
-                    int brace = FirstSeveranceImpalingSwords.FireBase(wave) - 39;
-                    if (age >= brace && scoreSounds.Add(-1100 - wave) && age < brace + 8)
-                        Play("IronPressure", .68f);
-                }
-                foreach (var sword in FirstSeveranceImpalingSwords.At(combat.ActionIndex, age, combat.CoreX, combat.CoreY))
-                    if (age >= sword.Fire && age < sword.Fire + 8 && scoreSounds.Add(1000 + sword.Fire))
-                    {
-                        if (tick >= lastSwordSoundTick + 8)
-                        {
-                            Play("IronDescent", .72f, sword.Slot % 3 * .025f - .025f);
-                            lastSwordSoundTick = tick;
-                        }
-                    }
-            }
             if (combat.Substate == FirstSeveranceSubstate.FinalSlicer)
                 for (int pulse = 0; pulse < FirstSeveranceScoreGeometry.SlicerPulses; pulse++)
                 {
@@ -279,16 +292,14 @@ internal sealed class FirstSeveranceFeedback
                 if (combat.Substate is not (FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RemoteCrush or FirstSeveranceSubstate.FinalSlicer)
                     && !ray.Live && ray.Charge >= .65f && ray.Charge < 1 && scoreSounds.Add(soundPulse - 128))
                     Play("ExecutionLock", .98f);
-                if (combat.Substate != FirstSeveranceSubstate.HalfField && ray.Live && scoreSounds.Add(soundPulse))
+                if (combat.Substate is not (FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RotatingBlade or FirstSeveranceSubstate.RemoteCrush)
+                    && ray.Live && scoreSounds.Add(soundPulse))
                 {
                     Play(combat.Substate switch
                     {
-                        FirstSeveranceSubstate.RotatingBlade => "BladeSweep",
                         FirstSeveranceSubstate.RemoteClaws => "HandClasp",
-                        FirstSeveranceSubstate.RemoteCrush => "CrushCataclysm",
                         _ => "FinalSlicerFire",
                     }, .98f);
-                    if (combat.Substate == FirstSeveranceSubstate.RemoteCrush) scoreImpactTicks = 24;
                 }
             }
             if (combat.Substate == FirstSeveranceSubstate.RotatingBlade && age >= 144 && age < 162 && scoreSounds.Add(-500))
@@ -300,7 +311,81 @@ internal sealed class FirstSeveranceFeedback
         previous = combat;
     }
 
-    private void Play(string name, float volume, float pitch = 0f)
+    private static int FindSecondTurnTick()
+    {
+        for (int age = FirstSeveranceChoreography.BladeWindup; age < FirstSeveranceChoreography.BladeEnd; age++)
+            if (FirstSeveranceScoreGeometry.BladeTurn(age) == 1) return age;
+        throw new InvalidOperationException("The two-turn audio requires a second blade turn.");
+    }
+
+    private void PlayCriticalAction(FirstSeveranceCombatProjection combat, ulong tick)
+    {
+        void Cue(int key, int offset, string name, float gain = 1.25f, bool impact = true)
+        {
+            ulong due = combat.ActionStartedTick + (ulong)offset;
+            if (!criticalClock.Take(key, tick, due)) return;
+            var voice = PlayCritical(name, combat, tick, due, gain, impact);
+            if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
+            {
+                if (SoundEngine.TryGetActiveSound(orbitVoice, out var old)) old.Stop();
+                orbitVoice = voice;
+            }
+        }
+        if (combat.Substate == FirstSeveranceSubstate.HalfField)
+            for (int wave = 0; wave < 2; wave++)
+            {
+                int strike = FirstSeveranceImpalingSwords.FireBase(wave);
+                Cue(wave * 3, strike - 39, "IronPressure", 1f, false);
+                // Two substantial contacts per field wave, not 28 competing voices.
+                Cue(wave * 3 + 1, strike, "IronDescent");
+                Cue(wave * 3 + 2, strike + 12, "IronDescent", 1.05f);
+            }
+        else if (combat.Substate == FirstSeveranceSubstate.RemoteCrush)
+        {
+            Cue(0, 0, "CrushPressure", 1.1f, false);
+            ulong due = combat.ActionStartedTick + FirstSeveranceScoreGeometry.CrushImpactTick;
+            if (criticalClock.Take(1, tick, due))
+            {
+                PlayCritical("CrushCataclysm", combat, tick, due);
+                scoreImpactTicks = 24;
+            }
+        }
+        else if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
+        {
+            Cue(0, FirstSeveranceChoreography.BladeWindup, "BladeOrbitFirst", .85f, false);
+            Cue(1, SecondTurnTick, "BladeOrbitSecond", .95f, false);
+            if (tick >= combat.ActionStartedTick + FirstSeveranceChoreography.BladeEnd
+                && SoundEngine.TryGetActiveSound(orbitVoice, out var orbit)) orbit.Stop();
+        }
+    }
+
+    private ReLogic.Utilities.SlotId PlayCritical(string name, FirstSeveranceCombatProjection combat,
+        ulong tick, ulong due, float gain = 1.25f, bool finishOnTerminal = true)
+    {
+        var id = Play(name, gain);
+        bool accepted = SoundEngine.TryGetActiveSound(id, out var sound) && sound.IsPlaying;
+        if (accepted && finishOnTerminal) impactTails.Add(id);
+        ModContent.GetInstance<FirstSeveranceClientStateSystem>().Mod.Logger.Info(FormattableString.Invariant(
+            $"FirstSeverance event=AudioCue seq={combat.EncounterSequence} fight={combat.FightId} cue={name} action={combat.Substate} tick={tick} due={due} late_ticks={tick - due} accepted={accepted} gain={Math.Min(1, gain * .8f):F3} slider={Main.soundVolume:F3} focused={Main.instance.IsActive}"));
+        if (accepted && audioChecks.Count < 32) audioChecks.Add((id, name, Main.GameUpdateCount + 2));
+        return id;
+    }
+
+    private void CheckAudioVoices()
+    {
+        for (int i = audioChecks.Count - 1; i >= 0; i--)
+        {
+            var check = audioChecks[i];
+            if (Main.GameUpdateCount < check.CheckAt) continue;
+            bool tracked = SoundEngine.TryGetActiveSound(check.Id, out var sound);
+            float deviceGain = tracked && sound!.Sound is { IsDisposed: false } output ? output.Volume : 0;
+            ModContent.GetInstance<FirstSeveranceClientStateSystem>().Mod.Logger.Info(FormattableString.Invariant(
+                $"FirstSeverance event=AudioVoice cue={check.Name} playing={tracked && sound!.IsPlaying} device_gain={deviceGain:F3} slider={Main.soundVolume:F3}"));
+            audioChecks.RemoveAt(i);
+        }
+    }
+
+    private ReLogic.Utilities.SlotId Play(string name, float volume, float pitch = 0f)
     {
         // No position: raid-critical cues remain audible in a very large arena.
         // Main.soundVolume still applies; music uses Main.musicVolume separately.
@@ -310,19 +395,26 @@ internal sealed class FirstSeveranceFeedback
             SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
         };
-        voices.Add(SoundEngine.PlaySound(style));
+        var id = SoundEngine.PlaySound(style);
+        voices.Add(id);
+        return id;
     }
 
     internal void Draw(SpriteBatch batch, bool reduced) => mechanics.Draw(batch, reduced);
 
     private void AcceptResult(FirstSeveranceCombatProjection combat, ulong tick)
     {
-        if (combat.MechanicImpacts.Count == 0 || tick < combat.MechanicTick || tick - combat.MechanicTick > 30) return;
+        if (tick < combat.MechanicTick || combat.LastMechanicResult == FirstSeveranceMechanicResult.None) return;
+        if (tick - combat.MechanicTick > 60)
+        {
+            ModContent.GetInstance<FirstSeveranceClientStateSystem>().Mod.Logger.Info($"FirstSeverance event=AudioCueExpired seq={combat.EncounterSequence} result={combat.LastMechanicResult} late_ticks={tick - combat.MechanicTick}");
+            return;
+        }
         stack = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackPassed or FirstSeveranceMechanicResult.StackFailed;
         failed = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.SpreadFailed;
         mechanics.Accept(combat);
         resultTicks = 32;
-        if (stack) Play(failed ? "ShellMassCollapse" : "ShellMassShed", 1.1f);
+        if (stack) PlayCritical(failed ? "ShellMassCollapse" : "ShellMassShed", combat, tick, combat.MechanicTick);
         else
         {
             bool dissipate = false;
@@ -332,17 +424,25 @@ internal sealed class FirstSeveranceFeedback
         }
     }
 
-    private void StopVoices()
+    private void StopVoices(bool preserveImpacts = false)
     {
-        foreach (var id in voices)
+        for (int i = voices.Count - 1; i >= 0; i--)
+        {
+            var id = voices[i];
+            if (preserveImpacts && impactTails.Contains(id)) continue;
             if (SoundEngine.TryGetActiveSound(id, out var sound)) sound.Stop();
-        voices.Clear();
+            impactTails.Remove(id);
+            voices.RemoveAt(i);
+        }
+        if (!preserveImpacts) audioChecks.Clear();
     }
 
     internal void Reset(bool unload = false)
     {
         StopVoices();
         previous = null;
+        pendingResult = null;
+        criticalClock.Reset();
         mechanics.Reset(unload);
         previousEndingAge = -1;
         shardDeadline = 0;

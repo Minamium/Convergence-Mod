@@ -211,7 +211,7 @@ internal static class FirstSeverancePacketCodec
             && combat.FightId == snapshot.FightId
             && (snapshot.Lifecycle == EncounterLifecycle.Active
                 || (snapshot.Lifecycle == EncounterLifecycle.Cleanup && snapshot.Termination.EndReason == EncounterEndReason.Defeat
-                    && combat.MechanicTick == snapshot.AuthorityTick && combat.MechanicImpacts.Count > 0));
+                    && combat.IsTerminalPresentationAt(snapshot.AuthorityTick)));
         WriteBoolean(writer, hasCombat);
         if (hasCombat)
         {
@@ -286,7 +286,7 @@ internal static class FirstSeverancePacketCodec
                 out combat) || combat!.MechanicTick > authorityTick
                 || (lifecycle != EncounterLifecycle.Active
                     && !(lifecycle == EncounterLifecycle.Cleanup && termination.EndReason == EncounterEndReason.Defeat
-                        && combat.MechanicTick == authorityTick && combat.MechanicImpacts.Count > 0))))
+                        && combat.IsTerminalPresentationAt(authorityTick)))))
         {
             snapshot = default;
             preparation = null;

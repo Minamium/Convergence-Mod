@@ -17,6 +17,20 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_critical_audio_is_not_owned_by_short_live_ray_windows(self):
+        source = (CLIENT / "FirstSeveranceFeedback.cs").read_text(encoding="utf-8")
+        cues = body(source, "private void PlayCriticalAction")
+        self.assertIn("criticalClock.Take", cues)
+        self.assertIn('"CrushCataclysm"', cues)
+        self.assertIn('"IronDescent"', cues)
+        self.assertIn('"BladeOrbitSecond"', cues)
+        self.assertNotIn("ray.Live", cues)
+        self.assertIn("StopVoices(preserveImpacts: true)", source)
+        self.assertIn("state.TerminalCombat", source)
+        self.assertIn("pendingResult = combat", source)
+        self.assertIn("tick >= result.MechanicTick", source)
+        self.assertIn("orbit.Stop()", source)
+
     def test_claw_swipe_keeps_unsheathe_without_long_sweep_layer(self):
         source = (CLIENT / "NullCantorClawPresentation.cs").read_text(encoding="utf-8")
         self.assertIn('system.Play("BladeUnsheathe"', source)

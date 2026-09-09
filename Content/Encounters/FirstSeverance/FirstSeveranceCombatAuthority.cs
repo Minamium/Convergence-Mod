@@ -14,6 +14,7 @@ internal static class FirstSeveranceCombatAuthority
     // Snapshot transport drains after runtime cleanup. Keep only the last
     // immutable cosmetic terminal, never the runtime/actors or live capability.
     private static FirstSeveranceCombatProjection? terminalPresentation;
+    private static ulong terminalPresentationTick;
 
     internal static bool IsActive => Main.netMode != NetmodeID.MultiplayerClient && current is not null;
 
@@ -140,15 +141,18 @@ internal static class FirstSeveranceCombatAuthority
         terminalPresentation = null;
     }
 
-    internal static void RetainTerminalPresentation(FirstSeveranceCombatProjection projection)
-        => terminalPresentation = projection;
+    internal static void RetainTerminalPresentation(FirstSeveranceCombatProjection projection, ulong tick)
+    {
+        terminalPresentation = projection;
+        terminalPresentationTick = tick;
+    }
 
     internal static bool TryGetTerminalPresentation(ulong sequence, FightId fight, ulong tick,
         out FirstSeveranceCombatProjection? projection)
     {
         projection = terminalPresentation;
         if (projection is not null && projection.EncounterSequence == sequence && projection.FightId == fight
-            && projection.MechanicTick == tick) return true;
+            && terminalPresentationTick == tick && projection.IsTerminalPresentationAt(tick)) return true;
         projection = null;
         return false;
     }

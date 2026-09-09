@@ -235,11 +235,17 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             return End(FirstSeveranceTerminalCause.BossActorMissing);
         }
 
-        bool lanceChanged = attacks.UpdateLances(before, context.AuthorityTick,
-            before.Substate == FirstSeveranceSubstate.PylonCheck && destroyedPylons >= before.RemainingPylons);
-        lanceChanged |= attacks.UpdateGrid(before, context.AuthorityTick, false);
-        lanceChanged |= attacks.UpdateSpread(before, context.AuthorityTick);
-        attacks.UpdateScoreHazards(before, context.AuthorityTick);
+        // The first score is compulsory. Later HP crossings interrupt immediately;
+        // do not release a last old-action hazard on that same authority tick.
+        bool lanceChanged = false;
+        if (!loop.WillChangeStage(acceptedBossDamage))
+        {
+            lanceChanged = attacks.UpdateLances(before, context.AuthorityTick,
+                before.Substate == FirstSeveranceSubstate.PylonCheck && destroyedPylons >= before.RemainingPylons);
+            lanceChanged |= attacks.UpdateGrid(before, context.AuthorityTick, false);
+            lanceChanged |= attacks.UpdateSpread(before, context.AuthorityTick);
+            attacks.UpdateScoreHazards(before, context.AuthorityTick);
+        }
 
         FirstSeveranceLoopUpdate loopUpdate = loop.Advance(
             new FirstSeveranceLoopInput(
@@ -364,9 +370,9 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             ? FirstSeveranceTerminationContract.Instance.GetCause(context.Termination).ToString() : "Unknown";
         Log(Main.GameUpdateCount, $"event=CombatEnded reason={context.EndReason} cause={terminalCause} phase={loop?.State.Substate} overload={loop?.State.Overload}");
         telemetry.FinishDamageProgress(Main.GameUpdateCount, terminalCause);
-        if (context.EndReason == EncounterEndReason.Defeat && mechanicTick == lastAuthorityTick
-            && mechanicImpacts.Count > 0 && TryCreateProjection(out var terminalPresentation))
-            FirstSeveranceCombatAuthority.RetainTerminalPresentation(terminalPresentation!);
+        if (context.EndReason == EncounterEndReason.Defeat && TryCreateProjection(out var terminalPresentation)
+            && terminalPresentation!.IsTerminalPresentationAt(lastAuthorityTick))
+            FirstSeveranceCombatAuthority.RetainTerminalPresentation(terminalPresentation, lastAuthorityTick);
 
         if (context.EndReason == EncounterEndReason.Victory)
         {

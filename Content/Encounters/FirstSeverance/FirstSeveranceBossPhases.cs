@@ -19,8 +19,8 @@ internal sealed class FirstSeveranceBossPhasePlan
     internal IReadOnlyList<FirstSeveranceBossPhaseDefinition> Stages { get; } = Array.AsReadOnly(new[]
     {
         new FirstSeveranceBossPhaseDefinition(FirstSeveranceBossPhase.Sealed, 1000, 0, FirstSeveranceSubstate.CoreExposure, 1080),
-        new FirstSeveranceBossPhaseDefinition(FirstSeveranceBossPhase.Unbound, 500, RuptureTicks, FirstSeveranceSubstate.Lattice, GridWindowTicks),
-        new FirstSeveranceBossPhaseDefinition(FirstSeveranceBossPhase.Distant, 250, 300, FirstSeveranceSubstate.RemoteClaws, 600),
+        new FirstSeveranceBossPhaseDefinition(FirstSeveranceBossPhase.Unbound, 800, RuptureTicks, FirstSeveranceSubstate.Lattice, GridWindowTicks),
+        new FirstSeveranceBossPhaseDefinition(FirstSeveranceBossPhase.Distant, 400, 300, FirstSeveranceSubstate.RemoteClaws, 600),
         new FirstSeveranceBossPhaseDefinition(FirstSeveranceBossPhase.Final, 0, 240, FirstSeveranceSubstate.Stack, 180),
     });
 

@@ -25,7 +25,7 @@ internal static partial class Program
             loop.Advance(new(loop.State.ResolveTick, 0, 0));
             loop.Advance(new(loop.State.ResolveTick, 0, 0));
             loop.Advance(new(loop.State.LastAuthorityTick + 1, 0, int.MaxValue));
-            AssertEqual(tuning.BossLife / 2, loop.State.BossLife, "scaled half-HP floor");
+            AssertEqual(tuning.BossLife * 4 / 5, loop.State.BossLife, "scaled eighty-percent floor");
             AssertEqual(FirstSeveranceSubstate.CoreExposure, loop.State.Substate, "scaled overkill waits for the full score");
         }
         foreach (int count in new[] { -1, 0, 5, 255 })

@@ -18,21 +18,21 @@ internal static partial class Program
         return loop;
     }
 
-    [DomainTest("Boss stages transition at half life without skipping the rupture")]
+    [DomainTest("Boss stages gate at 80 and 40 percent without skipping the rupture")]
     private static void BossStageThresholdAndOverkill()
     {
         foreach (int count in new[] { 2, 3, 4 })
         {
             var loop = CreateStagedExposure(count);
             ulong tick = loop.State.LastAuthorityTick;
-            loop.Advance(new(++tick, 0, 1_999_999));
-            AssertEqual(FirstSeveranceBossPhase.Sealed, loop.State.BossPhase, "above half remains sealed");
+            loop.Advance(new(++tick, 0, 799_999));
+            AssertEqual(FirstSeveranceBossPhase.Sealed, loop.State.BossPhase, "above eighty percent remains sealed");
             AssertEqual(false, loop.WillChangeStage(0), "no premature transition");
             AssertEqual(false, loop.WillChangeStage(1), "first score must finish before transition");
             loop.Advance(new(++tick, 0, 1));
-            AssertEqual(FirstSeveranceSubstate.CoreExposure, loop.State.Substate, "half waits at floor");
+            AssertEqual(FirstSeveranceSubstate.CoreExposure, loop.State.Substate, "eighty percent waits at floor");
             loop.Advance(new(++tick, 0, int.MaxValue));
-            AssertEqual(2_000_000, loop.State.BossLife, "cannot reduce below floor while waiting");
+            AssertEqual(3_200_000, loop.State.BossLife, "cannot reduce below floor while waiting");
             while (loop.State.BossPhase == FirstSeveranceBossPhase.Sealed)
                 loop.Advance(new(loop.State.ResolveTick, 0, int.MaxValue));
             tick = loop.State.LastAuthorityTick;
@@ -40,18 +40,18 @@ internal static partial class Program
             AssertEqual(tick, loop.State.BossPhaseStartedTick, "one authority animation epoch");
             AssertEqual(tick + 360, loop.State.ResolveTick, "six second transformation");
             loop.Advance(new(++tick, 0, int.MaxValue));
-            AssertEqual(2_000_000, loop.State.BossLife, "cinematic invulnerability");
+            AssertEqual(3_200_000, loop.State.BossLife, "cinematic invulnerability");
             loop.Advance(new(loop.State.ResolveTick, 0, int.MaxValue));
             AssertEqual(FirstSeveranceSubstate.Lattice, loop.State.Substate, "transition ends in grid");
-            AssertEqual(2_000_000, loop.State.BossLife, "transition deadline not damageable");
+            AssertEqual(3_200_000, loop.State.BossLife, "transition deadline not damageable");
             loop.Advance(new(loop.State.LastAuthorityTick + 1, 0, int.MaxValue));
             AssertEqual(false, loop.State.IsTerminal, "Unbound cannot die or skip its score");
-            AssertEqual(1_000_000, loop.State.BossLife, "second phase quarter-HP floor");
+            AssertEqual(1_600_000, loop.State.BossLife, "second phase forty-percent floor");
 
             loop = CreateStagedExposure(count);
             loop.Advance(new(loop.State.LastAuthorityTick + 1, 0, int.MaxValue));
             AssertEqual(false, loop.State.IsTerminal, "one huge hit cannot skip transformation");
-            AssertEqual(2_000_000, loop.State.BossLife, "overkill clamped at phase floor");
+            AssertEqual(3_200_000, loop.State.BossLife, "overkill clamped at phase floor");
         }
     }
 

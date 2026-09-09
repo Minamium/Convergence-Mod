@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v26
+## Current development protocol v27
+
+The field layout and packet IDs are unchanged. Matching peers are required for the revised HP floors and immediate post-first-cycle transitions. Cleanup/Defeat may retain a bounded cosmetic combat projection for an in-progress HalfField or RemoteCrush action even without a same-tick Stack/Spread verdict. The authority cache binds exact sequence/Fight/terminal tick; codec validates the action interval, and clients never install this terminal payload as Active combat. This closes the same-tick lethal-impact audio hole. Existing mechanic-terminal rules remain. New Active/world cleanup clears the cosmetic cache; no actors, requests or capabilities survive.
+
+## Preceding development protocol v26
 
 The Spread descriptor layout is unchanged, but its count bound is now0–4 (maximum449bytes including count), with3casts in short windows and4in ordinary windows. Shared window validation accepts only standalone Spread, never embedded lattice/flood windows. Start validation uses the window-specific shot count and wider spacing. Matching peers are required for these changed bounds/timing; existing IDs, server ownership, hit caps and cleanup are retained. The preceding v25 values below are historical.
 

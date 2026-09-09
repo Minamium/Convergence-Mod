@@ -101,16 +101,34 @@ def render(name, seconds):
         place(out, mass(1.4, 62, .85, 1.3), .029, .50)
         place(out, mass(1.0, 92, .6, .95), .096, .25)
         out += bed(len(t), 24, 210) * (1 - np.exp(-t / .03)) * np.exp(-t / .45) * .3
+    elif name in ("BladeOrbitFirst", "BladeOrbitSecond"):
+        # Actual twin-blade law: two turns in five seconds with accelerating
+        # travel .55*u+.45*u*u. Second turn crosses at tick183 (3.05s).
+        spin_time = t + (3.05 if name.endswith("Second") else 0)
+        u = spin_time / 5
+        travel = 2 * (.55 * u + .45 * u * u)
+        pressure = .22 + .56 * np.sin(np.pi * travel) ** 2
+        out += bed(len(t), 45, 1100) * pressure
+        out += bed(len(t), 240, 2600) * (.12 + .11 * np.sin(np.pi * travel * 2) ** 2)
+        for i, root in enumerate((54.7, 89.3, 137.1, 213.8)):
+            phase = 2 * np.pi * root * (t + .12 * t * t / seconds)
+            out += np.sin(phase + .15 * np.sin(2 * np.pi * 18 * t)) * pressure * .20 / (1 + i * .35)
+        place(out, mass(.8, 53, 1.2, 1.0), .004, .9)
+        # Uneven loaded-metal contacts under a continuous turbulent sweep.
+        for at, gain in ((.37, .35), (.91, .28), (1.43, .38), (2.12, .25), (2.73, .30)):
+            if at < seconds - .15:
+                place(out, mass(.45, 68, .50, .90), at, gain)
     else:
         raise ValueError(name)
     out = room(out)
     out -= np.mean(out)
-    if name.startswith("ShellMass"):
+    critical = name not in ("ShellMassLatch", "ShellMassArc")
+    if name.startswith("ShellMass") or critical:
         # Audible contact/friction on normal speakers, not only sub-bass energy.
         f = np.fft.rfftfreq(len(out), 1 / RATE)
         presence = (1 - np.exp(-(f / 240) ** 4)) * np.exp(-(f / 2200) ** 2)
-        out = np.fft.irfft(np.fft.rfft(out) * (1 + 2.2 * presence), n=len(out))
-    out = np.tanh(out * (2.0 if name.startswith("ShellMass") else 1.15))
+        out = np.fft.irfft(np.fft.rfft(out) * (1 + (3.0 if critical else 2.2) * presence), n=len(out))
+    out = np.tanh(out * (2.6 if critical else 2.0))
     # Remove DC/subsonics, taper endpoints and leave headroom for overlapping cues.
     f = np.fft.rfftfreq(len(out), 1 / RATE)
     out = np.fft.irfft(np.fft.rfft(out) * (1 - np.exp(-(f / 24) ** 4)), n=len(out))
@@ -123,13 +141,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--stack-only", action="store_true", help="Export only the revised Stack cues, preserving the shared random sequence")
+    parser.add_argument("--critical-only", action="store_true", help="Preserve accepted shard birth/arc exports; update impacts and two-turn orbit")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     for name, seconds in (("IronPressure", .65), ("IronDescent", 1.1), ("ShellMassLatch", .86), ("ShellMassArc", .5),
                           ("ShellMassShed", 1.55), ("ShellMassCollapse", 1.7),
-                          ("CrushPressure", 2.5), ("CrushCataclysm", 2.15)):
+                          ("CrushPressure", 2.5), ("CrushCataclysm", 2.15),
+                          ("BladeOrbitFirst", 3.05), ("BladeOrbitSecond", 1.95)):
         data = render(name, seconds)
         if args.stack_only and not name.startswith("ShellMass"):
+            continue
+        if args.critical_only and name in ("ShellMassLatch", "ShellMassArc"):
             continue
         assert np.all(np.isfinite(data))
         path = args.output / f"{name}.wav"

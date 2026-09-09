@@ -201,6 +201,10 @@ internal sealed class FirstSeveranceCombatProjection
     public FirstSeveranceMechanicResult LastMechanicResult { get; }
 
     public uint MechanicRevision { get; }
+    internal bool IsTerminalPresentationAt(ulong tick)
+        => (MechanicTick == tick && MechanicImpacts.Count > 0)
+            || (Substate is FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RemoteCrush
+                && tick >= ActionStartedTick && tick < ResolveTick);
     public ulong MechanicTick { get; }
     public IReadOnlyList<FirstSeveranceMechanicImpact> MechanicImpacts { get; }
 

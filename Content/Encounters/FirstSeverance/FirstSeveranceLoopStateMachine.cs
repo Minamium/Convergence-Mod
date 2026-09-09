@@ -145,7 +145,7 @@ internal sealed class FirstSeveranceLoopStateMachine
             return inputResult;
         }
 
-        if (bossPhases is not null && State.CompletedPhaseCycles > 0 && input.AuthorityTick >= State.ResolveTick
+        if (bossPhases is not null && State.CompletedPhaseCycles > 0
             && FirstSeveranceBossPhasePlan.IsDamageState(State.Substate)
             && bossPhases.TryGetNext(State.BossPhase, out var next)
             && State.BossLife <= FirstSeveranceBossPhasePlan.LifeThreshold(State.BossMaximumLife, next))

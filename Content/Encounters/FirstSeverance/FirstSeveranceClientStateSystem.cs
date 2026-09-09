@@ -32,6 +32,8 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
 
     internal FirstSeveranceCombatProjection? Combat => combat;
     internal FirstSeveranceCombatProjection? TerminalMechanic { get; private set; }
+    internal FirstSeveranceCombatProjection? TerminalCombat { get; private set; }
+    internal ulong TerminalAuthorityTick { get; private set; }
     internal EncounterEndReason LastCombatEndReason { get; private set; }
 
     internal string? CombatEndMessage => Main.GameUpdateCount < showCombatEndUntilTick
@@ -100,6 +102,17 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         if (Main.netMode == NetmodeID.Server)
             return;
         FirstSeveranceCombatProjection? previous = combat;
+        if (snapshot.Lifecycle == EncounterLifecycle.Cleanup && previous is not null && incoming is not null
+            && incoming.FightId == previous.FightId && incoming.EncounterSequence == previous.EncounterSequence)
+        {
+            TerminalCombat = incoming;
+            TerminalAuthorityTick = snapshot.AuthorityTick;
+        }
+        else if (snapshot.Lifecycle == EncounterLifecycle.Active)
+        {
+            TerminalCombat = null;
+            TerminalAuthorityTick = 0;
+        }
         if (snapshot.Lifecycle == EncounterLifecycle.Cleanup
             && snapshot.Termination.EndReason == EncounterEndReason.Defeat
             && previous is not null && incoming is not null && previous.FightId == incoming.FightId
@@ -295,6 +308,8 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     {
         ClearCombatPlayers(combat);
         TerminalMechanic = null;
+        TerminalCombat = null;
+        TerminalAuthorityTick = 0;
         combat = null;
         combatEndMessage = null;
         showCombatEndUntilTick = 0;

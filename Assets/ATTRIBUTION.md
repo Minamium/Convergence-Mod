@@ -1460,6 +1460,40 @@ The same external0.2.16 recipe revises the already-recorded StackSummon, SpreadS
 
 0.2.39 Stack-only remaster: `ShellMassLatch.wav`, `ShellMassArc.wav`, `ShellMassShed.wav` and `ShellMassCollapse.wav` above retain original provenance and durations. `tools/generate_raid_weight_sfx.py --stack-only` adds240–2200Hz presence and controlled saturation; seed/PCM format and0.780peak remain. Decode/finite/endpoint checks passed2026-09-09; human listening pending. External0.2.37 originals and new auditions retained. Only these four masters are modified; other sound assets remain byte-identical.
 
+### Critical impacts and orbit — 0.2.40
+
+IronPressure, IronDescent, ShellMassShed, ShellMassCollapse, CrushPressure and CrushCataclysm retain their exact runtime records above. The same original generator remasters their presence/pressure without changing duration or provenance. Accepted ShellMassLatch and ShellMassArc exports remain byte-identical to0.2.39. New audition masters and previous originals remain externally archived; `--critical-only` regenerates the changed set. Peak0.780PCM, finite/endpoints/decode checked2026-09-09; in-game mix pending.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/BladeOrbitFirst.wav`
+- Asset ID: blade-orbit-first-20260909
+- Asset type: sound effect
+- Creator: project-directed original DSP synthesis
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples or recordings
+- Tool/model/version: Python3.12 / NumPy, tools/generate_raid_weight_sfx.py, seed2370909, PCM16 mono48kHz
+- Human modifications: no human editing; modal metal, band-limited pressure, reflections and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain provenance
+- Reviewer and review date: Codex, 2026-09-09; PCM/finite/endpoint/peak checks passed; game listening pending
+- Notes: 3.05-second first accelerating orbit; no imported work. External auditions/originals retained.
+
+
+- Runtime file: `Assets/Sounds/FirstSeverance/BladeOrbitSecond.wav`
+- Asset ID: blade-orbit-second-20260909
+- Asset type: sound effect
+- Creator: project-directed original DSP synthesis
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples or recordings
+- Tool/model/version: Python3.12 / NumPy, tools/generate_raid_weight_sfx.py, seed2370909, PCM16 mono48kHz
+- Human modifications: no human editing; modal metal, band-limited pressure, reflections and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain provenance
+- Reviewer and review date: Codex, 2026-09-09; PCM/finite/endpoint/peak checks passed; game listening pending
+- Notes: 1.95-second second accelerating orbit; no imported work. External auditions/originals retained.
+
+
 ## Record template
 
 Copy this section for each asset family. In the Records section above, add one exact Markdown entry in the form `- Runtime file: \`path/from/repository/root\`` for every exported file. The repository check parses only that section and verifies both directions.

@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-09",
+  "version": "0.2.40",
+  "protocol": 27,
+  "base_commit": "02cde16",
+  "observed_log": {
+    "client_build": "Convergence0.2.39, finalized20:23:03; not an old0.2.38 package.",
+    "fight": "8f899fbb-5bee-48a3-af6a-cea6f179cc62",
+    "rotation": "Authority fire ticks11567 and11750,183ticks apart; old asset lasts4.1s at both turns.",
+    "sword": "HalfField starts13637/14297; wave fires13746/13852 and14406/14512.",
+    "crush": "RemoteCrush starts15527,impact15689,exact162ticks.",
+    "limitation": "These prove authority attacks, not client audio playback. Old client has no per-cue accepted/device-gain trace; no specific external-Mod interference is established."
+  },
+  "defects": [
+    "Result event checked only on revision change; ahead-of-estimate snapshot could be discarded permanently.",
+    "Sword audio used8-tick reception window; score impact audio depended on short live-ray intervals.",
+    "Cleanup terminal payload only carried same-tick Stack/Spread; lethal sword/crush could lose impact presentation, and cleanup stopped ongoing critical tails.",
+    "Reducer still awaited ResolveTick after a completed score although WillChangeStage predicted immediate transition."
+  ],
+  "verification": {
+    "domain": "141-case run:140passed,one obsolete half-HP scaling expectation failed. Corrected scaling test passed; added lethal-score terminal codec test passed.142distinct cases across runs.",
+    "codec": "Protocol27:324round-trips and50malformed/truncated rejections passed; targeted lethal-crush/expiry boundary passed again after narrowing terminal support to swords/crush.",
+    "presentation": "8integration guards passed; critical cue clock covers future/late/duplicate/backward/expired/action-reset cases.",
+    "audio": "8exports PCM16 mono48kHz,finite/tapered endpoints,peak0.780. Six impact masters remastered; two new3.05s/1.95s orbit masters. Accepted shard birth/arc binaries untouched.",
+    "native_build": "Passed,0errors,4existing CS8632 warnings",
+    "record": ".local/builds/20260909T115823596587Z/record.json",
+    "source_sha256": "a214f0240cf13e704a2a9de86a41a4cfe168ff8e9d21eb58cc8db4bc3fa2b0bc",
+    "artifact_bytes": 40432889,
+    "artifact_sha256": "4a14feab36cee001869d52eec31ba927ba146d2df01ee94b16e84daa50031d04",
+    "post_build_edits": "Documentation/evidence/catalog only",
+    "runtime": "not_run: human mix/actual dual-client playback, immediate lethal crush audio and phase interruption. No GUI/server launched."
+  },
+  "preserved": "Accepted artwork/animations, weapon audio/behavior, BGM, shard birth/arc assets and gains, maxHP/damage/recovery, preexisting two localization files. External originals retained."
+}
