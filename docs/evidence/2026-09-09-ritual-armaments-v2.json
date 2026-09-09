@@ -13,12 +13,20 @@
   },
   "user_report": "0.2.29 claw artwork accepted; slight animation stutter reported, not attributed to machine",
   "not_run": [
-    "full native Calamity package build",
     "in-game animation acceptance",
     "multiplayer acceptance",
     "matched DPS comparison"
   ],
   "image_model_generation": "unavailable; original material composition and deterministic PNG generation used instead",
+  "main_integration": {
+    "branch_tip": "f5e7f2acbfdb452ea048d4d7f0c0f11977e7c560",
+    "merge": "fast-forward; pre-existing local English formatting restored with new weapon text; safety stash retained",
+    "native_package": "passed with installed Calamity references; zero errors, four existing CS8632 warnings; source unchanged during build",
+    "source_sha256": "84dfd2e83ea7f172d94de41216df79b3aae5949cf272d1dff2a8f2d178830536",
+    "package_sha256": "5855ac4384e2d8364ddf50c51223603b4ac1bc1cda926c6b9b81f77409526b5e",
+    "icon_review": "Viewed all four V2 icons. Each canvas is128x128; nonzero-alpha bounds: Choir(6,7,114,109), Lacuna(6,10,116,107), Witness(8,6,111,116), Meridian(6,28,116,71). Longest visible edges occupy89-91% of canvas, comparable slot fit without excessive padding or clipping. Prior claw slot correction retained. No asset change required; actual in-game UI not_run.",
+    "reused_checks": "Branch124 domain cases and324 codec round-trips retained; no gameplay or protocol edits during integration."
+  },
   "scope": "Only weapon implementations/presentation, six runtime exports, localization, focused tests and owning docs. Boss, raid, recovery, music and drop/exchange rules unchanged.",
   "assembly_input": "4829527a492c732ff1e8194a5401c8a05398757e",
   "workflow_run": "34295021751",

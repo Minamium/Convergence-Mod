@@ -37,7 +37,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-[Apparatus v2 evidence](evidence/2026-09-09-ritual-armaments-v2.json) records the feature branch's selected checks and limits. The user accepted the0.2.29 claw design and reported mild animation stutter; the new continuity pass targets identified presentation seams. Native Calamity package compilation and audiovisual/multiplayer/DPS acceptance of0.2.30 remain user/Codex-owned until observed. No GUI session or FPS/log subsystem is added.
+[Apparatus v2 evidence](evidence/2026-09-09-ritual-armaments-v2.json) records branch checks and main integration. Full native Calamity package compilation passed with zero errors and four existing nullable warnings. Four V2 icon images and transparent bounds were inspected; prior claw slot correction is retained. The user accepted the0.2.29 claw design and reported mild animation stutter; the continuity pass targets presentation seams. In-game icon/animation, multiplayer and DPS acceptance of0.2.30 remain user-owned. No GUI session or FPS/log subsystem is added.
 
 [Dual-claw evidence](evidence/2026-09-09-null-cantor-claws.json) records branch checks and main integration. The complete native Calamity-dependent package now builds successfully (zero errors, four existing nullable warnings). Inventory-only padding correction fits the claws to the same slot envelope as other weapons; original artwork is preserved. Actual game audiovisual acceptance, multiplayer behavior and matched DPS remain user-owned.
 
