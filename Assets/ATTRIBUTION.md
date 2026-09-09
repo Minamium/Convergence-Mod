@@ -2,6 +2,175 @@
 
 ## Records
 
+### Ritual grand apparatus v3 — 2026-09-09
+
+Four separate built-in image generations, text only. No input/reference images; model identifier unavailable and the owner explicitly accepted that limitation. Original PNGs remain in the local generated-image archive. Mechanical export via `tools/export_ritual_icons.py` preserves alpha and fits128px icons/512px apparatus to116px/464px envelopes; no image-to-image step or reuse of older art. Older assets remain untouched. The following is the exact shared prompt, with `{SUBJECT}` replaced by the per-item brief below:
+
+```text
+Use case: stylized-concept. Asset type: single high-resolution 2D game inventory weapon icon for an original sinister and solemn cosmic ritual action game. Generate a brand-new design from text only, no reference images and no adaptation of previous images. Subject: {SUBJECT} Style: exquisitely detailed painted hard-surface artifact, sharp bevel highlights, complex but coherent material, strong thick silhouette that remains readable reduced to 40 pixels. Composition: exactly one isolated complete object centered in a square, fills roughly 85% of frame, full object unclipped, slight 3/4 orthographic view. Background: genuinely transparent alpha including gaps in the object. No cast shadow, no floor, no environment, no checkerboard baked into pixels, no border, no words, no labels, no watermarks, no particles or diffuse glow outside the silhouette, no hands or people. Keep all fine detail inside strong large material masses. Original design only, not matching any franchise weapon or palette.
+```
+
+- LacunaTestament subject: a levitating forbidden mechanical grimoire. An open asymmetric folio of smoked silver metal leaves frames a vertical black glass slit, with precisely engraved concentric ultraviolet iris mechanisms, chunky pale broken-porcelain corners, two lifted metal pages. Compact broad silhouette, three-quarter view. Restrained violet and frosted silver highlights; no yellow or gold.
+- PaleMeridian subject: an ominous folded siege railgun relic. A long diagonal gun silhouette with a dense offset double rail, three interlocking metal ribs, dark ceramic stock and broken ivory casing, narrow cyan luminous induction coils. Mechanical gothic space weapon, not a real firearm replica, no sword. Powerful readable long silhouette, barrel points upper-right.
+- ChoirOfTheUnmade subject: a summoning censer shaped like a suspended inhuman pipe-organ reliquary. Seven uneven narrow silver organ towers embrace a milky glass heart inside a fractured porcelain oval cage, short black metal handle beneath. Cold ivory light and very restrained antique bronze hardware, no flame, no background. Distinct tall compact crown silhouette.
+- LastWitness subject: an occult throwing weapon: a dense obsidian triangular prism with three asymmetric hooked silver cutting fins, a faceted violet glass chamber and fine mechanical perforations. Compact three-armed bladed relic, not a sword, not a shuriken from any existing series. Heavy irregular silver and black material, tiny electric lavender fissures.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/LacunaTestament.png`
+- Asset ID: ritual-v3-lacunatestament-20260909
+- Asset type: weapon icon
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and LacunaTestament brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `8be34b90881b51fd8937814513d721612c277571492f94374b619dda81748f8c`; export SHA256 `0c174c91813448d50d7a865e925760c7ab2e9c37c539f5374ce0f35522cdefcc`. Original retained externally.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/LacunaTestament_Apparatus.png`
+- Asset ID: ritual-v3-lacunatestament_apparatus-20260909
+- Asset type: weapon apparatus texture
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and LacunaTestament brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `8be34b90881b51fd8937814513d721612c277571492f94374b619dda81748f8c`; export SHA256 `486f3fdcc0ded56f784c803a17279ab91f53a627d11bb50e076d4d183ae9b52c`. Original retained externally.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/PaleMeridian.png`
+- Asset ID: ritual-v3-palemeridian-20260909
+- Asset type: weapon icon
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and PaleMeridian brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `559e6d6d996983baa8238637e285f823ae812577e7e47664f2ac724a131ead95`; export SHA256 `4622f88829533fae9bdc77efdf08be8927a4223e9f8c9fb68f6930323e5cfeaf`. Original retained externally.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/PaleMeridian_Apparatus.png`
+- Asset ID: ritual-v3-palemeridian_apparatus-20260909
+- Asset type: weapon apparatus texture
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and PaleMeridian brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `559e6d6d996983baa8238637e285f823ae812577e7e47664f2ac724a131ead95`; export SHA256 `4d795916d56846f66e6f75b252639c26284d94b88eaf5d2d4d93d570df44a683`. Original retained externally.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/ChoirOfTheUnmade.png`
+- Asset ID: ritual-v3-choiroftheunmade-20260909
+- Asset type: weapon icon
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and ChoirOfTheUnmade brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `588cda85f4084cb953af73804eef4253e9f21f1004f812e6c3782d5772c781e9`; export SHA256 `95f03d977dd90ec03b6f705f6d45f3e7be91ecde1a6cc9a4dd39ac05c73153c0`. Original retained externally.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/ChoirOfTheUnmade_Apparatus.png`
+- Asset ID: ritual-v3-choiroftheunmade_apparatus-20260909
+- Asset type: weapon apparatus texture
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and ChoirOfTheUnmade brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `588cda85f4084cb953af73804eef4253e9f21f1004f812e6c3782d5772c781e9`; export SHA256 `f97db6ad21c24a4a0d0bc78c9d1cda3754097d2ab100b764eeac2c5aa9e9258a`. Original retained externally.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/LastWitness.png`
+- Asset ID: ritual-v3-lastwitness-20260909
+- Asset type: weapon icon
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and LastWitness brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `b2e22b99f49b64c0ce1fe25037e3224b02315f4ded53c7c94b0e6b4bc7a730ce`; export SHA256 `a8eea9d2f9f67721fc40deeb90a187746a5018f0fce062c92a620a9b17380ab4`. Original retained externally.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V3/LastWitness_Apparatus.png`
+- Asset ID: ritual-v3-lastwitness_apparatus-20260909
+- Asset type: weapon apparatus texture
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: new text-only original; shared prompt and LastWitness brief above
+- Tool/model/version: built-in image_gen; backend model not exposed; Python3/Pillow mechanical export
+- Human modifications: user concept/direction; agent prompt and alpha-preserving size integration, no old image input
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance; no third-party work imported
+- Reviewer and review date: Codex, 2026-09-09; native PNG alpha/dimensions and40px silhouette preview inspected; game acceptance pending
+- Notes: original SHA256 `b2e22b99f49b64c0ce1fe25037e3224b02315f4ded53c7c94b0e6b4bc7a730ce`; export SHA256 `07fae58c1ef765981c3e3fadb5af1183dcd6afa4c6615304fd7093d3085bdffb`. Original retained externally.
+
+### Ritual sustained voices — 2026-09-09
+
+- Runtime file: `Assets/Sounds/FirstSeverance/LacunaSustain.wav`
+- Asset ID: ritual-lacunasustain-20260909
+- Asset type: weapon sound loop
+- Creator: project-authored independent synthesis by Codex
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no samples or third-party recordings
+- Tool/model/version: Python3/NumPy; `tools/generate_ritual_sustain.py`
+- Human modifications: original periodic harmonic/noise-band design, stereo placement, bounded gain
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex PCM/finite/peak/loop-boundary checks,2026-09-09; human mix review pending
+- Notes: four-second stereo44.1kHz PCM16; periodic frequencies; peak0.68. Continuous body, not repeated launch accents.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/MeridianSustain.wav`
+- Asset ID: ritual-meridiansustain-20260909
+- Asset type: weapon sound loop
+- Creator: project-authored independent synthesis by Codex
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no samples or third-party recordings
+- Tool/model/version: Python3/NumPy; `tools/generate_ritual_sustain.py`
+- Human modifications: original periodic harmonic/noise-band design, stereo placement, bounded gain
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex PCM/finite/peak/loop-boundary checks,2026-09-09; human mix review pending
+- Notes: four-second stereo44.1kHz PCM16; periodic frequencies; peak0.68. Continuous body, not repeated launch accents.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ChoirSustain.wav`
+- Asset ID: ritual-choirsustain-20260909
+- Asset type: weapon sound loop
+- Creator: project-authored independent synthesis by Codex
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no samples or third-party recordings
+- Tool/model/version: Python3/NumPy; `tools/generate_ritual_sustain.py`
+- Human modifications: original periodic harmonic/noise-band design, stereo placement, bounded gain
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex PCM/finite/peak/loop-boundary checks,2026-09-09; human mix review pending
+- Notes: four-second stereo44.1kHz PCM16; periodic frequencies; peak0.68. Continuous body, not repeated launch accents.
+
 ### Ritual apparatus v2 — full-color material assemblies / 2026-09-09
 
 - Runtime file: `Assets/Textures/Items/RitualArmaments/V2/ChoirOfTheUnmade.png`
