@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.32**, protocol **23**. The containment exterior now captures the boundary's world transform and composites in physical viewport pixels, independent of UI scale. This removes the double-scaled screen dimensions exposed by the107% peer report; [Visual Spec](encounters/first-severance/VISUAL_SPEC.md#containment-mask-coordinate-contract) owns the coordinate contract. The preceding claw priority/kinetic timing, Final dissolution/rift, sword anticipation and layered cathedral remain unchanged, as do Raid rules, weapon forms and rewards.
+Development **0.2.33**, protocol **23**. Start/phase/result cinematics join the exterior mask in unscaled physical-viewport composition, fixing the remaining107% double-scale paths. Non-melee apparatus gains fast arrival, short tension, accelerating release and connected recoil; Magic now releases one real charged beam from five sequential sigils. [Weapons](encounters/first-severance/WEAPONS.md#kinetic-release-override--0233) owns its changed targeting/hit window; [Visual Spec](encounters/first-severance/VISUAL_SPEC.md#containment-mask-coordinate-contract) owns screen coordinates. Melee, Raid rules/timing, rewards and original assets are unchanged.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Cinematic/non-melee evidence](evidence/2026-09-09-cinematics-kinetic-armaments.json):131 domain cases, two cinematic integration guards and native packaging passed (zero errors, four existing warnings). Actual107% peer cinematic alignment, repeated/empowered Magic casts, item-switch/Down interruption and multiplayer audiovisual continuity remain user-owned. No measured FPS/DPS claim.
 
 [Containment mask evidence](evidence/2026-09-09-containment-mask.json): three focused coordinate tests and native packaging passed (zero errors, four existing warnings). User-owned check: both peers on0.2.32, keep takeura's UI at107%, inspect all four edges during movement, camera shake and phase transitions; change game zoom independently. A compile or numerical projection test does not establish actual peer rendering.
 
@@ -67,6 +69,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.33: with107% UI inspect Raid start, each phase, Victory/Defeat bands/title alignment; test each non-melee form, including repeated Magic casts and fourth release, ranged sixth shot, choir accent and stealth verdict. Do not rebuild unchanged source just to reload.
 
 User-owned0.2.32: confirm mask/outline agreement and full outside coverage at107% UI (plus100% comparison), without changing other presentation or gameplay settings. No additional combat/codec gate is required for this client-only correction.
 

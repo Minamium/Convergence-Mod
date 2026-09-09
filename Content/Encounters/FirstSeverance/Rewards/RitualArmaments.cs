@@ -106,7 +106,7 @@ public sealed class LacunaTestament : RitualArmament
     {
         RitualArmamentItems.Defaults(Item, Kind);
         Item.mana = 18; Item.shootSpeed = 13;
-        Item.shoot = ModContent.ProjectileType<LacunaRay>();
+        Item.shoot = ModContent.ProjectileType<LacunaConvergence>();
     }
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
         Vector2 velocity, int type, int damage, float knockback)
@@ -114,14 +114,9 @@ public sealed class LacunaTestament : RitualArmament
         if (player.whoAmI != Main.myPlayer) return false;
         Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
         int cast = player.GetModPlayer<RitualArmamentPlayer>().Next(Kind, 4);
-        for (int lens = 0; lens < 3; lens++)
-        {
-            var offset = RitualArmamentChoreography.LensMuzzle(lens);
-            Vector2 at = player.MountedCenter + new Vector2(offset.X, offset.Y).RotatedBy(aim.ToRotation());
-            Projectile.NewProjectile(source, at, aim * 13, Item.shoot,
-                RitualArmamentRules.ScaledDamage(damage, RitualArmamentChoreography.MagicRayShare(cast)),
-                knockback, player.whoAmI, -6 - lens * 3, -1, lens | (cast == 3 ? 4 : 0));
-        }
+        Projectile.NewProjectile(source, player.MountedCenter, aim, Item.shoot,
+            RitualArmamentRules.ScaledDamage(damage, RitualKineticMotion.MagicShare(cast)),
+            knockback, player.whoAmI, 0, -1, cast == 3 ? 1 : 0);
         RitualArmamentItems.Pose(player, source, Kind, aim, player.itemAnimationMax, cast == 3 ? 1 : 0);
         return false;
     }

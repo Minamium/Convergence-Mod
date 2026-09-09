@@ -351,7 +351,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                 FirstSeveranceResultVisuals.Draw(Main.spriteBatch, visuals.EndingVictory, visuals.EndingAge,
                     ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects);
                 return false;
-            }, InterfaceScaleType.UI));
+            }, InterfaceScaleType.None));
             return;
         }
         if (state.Combat is not { } combat || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) || !local.IsConnected)
@@ -371,7 +371,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             if (rupture) DrawRupture(Main.spriteBatch, combat, state.EstimatedAuthorityTick);
             else DrawIntro(Main.spriteBatch, combat, state.EstimatedAuthorityTick);
             return false;
-        }, InterfaceScaleType.UI));
+        }, InterfaceScaleType.None));
     }
 
     private static bool IsIntro(FirstSeveranceClientStateSystem state, out FirstSeveranceCombatProjection? intro)
@@ -411,7 +411,8 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     {
         float age = FirstSeveranceStageVisuals.RuptureAge(combat, tick);
         float fade = FirstSeveranceStageVisuals.CameraWeight(age);
-        int w = (int)(Main.screenWidth / Main.UIScale), h = (int)(Main.screenHeight / Main.UIScale);
+        var viewport = Main.instance.GraphicsDevice.Viewport;
+        int w = viewport.Width, h = viewport.Height;
         var pixel = new Rectangle(0, 0, 1, 1);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, w, h / 9), pixel, Color.Black * fade);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, h * 8 / 9, w, h / 9 + 1), pixel, Color.Black * fade);
@@ -436,7 +437,8 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     {
         float age = IntroAge(intro, tick);
         float fade = Math.Min(Math.Clamp(age * 9f, 0f, 1f), Math.Clamp((1f - age) * 7f, 0f, 1f));
-        float width = Main.screenWidth / Main.UIScale, height = Main.screenHeight / Main.UIScale;
+        var viewport = Main.instance.GraphicsDevice.Viewport;
+        float width = viewport.Width, height = viewport.Height;
         var pixel = new Rectangle(0, 0, 1, 1);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)width, (int)height), pixel,
             new Color(4, 3, 9) * (fade * 0.36f));

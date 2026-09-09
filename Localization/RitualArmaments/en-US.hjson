@@ -12,7 +12,7 @@
         },
         "LacunaTestament": {
           "Name": "Lacuna Testament",
-          "Tooltip": "Unfold a floating archive and three lenses that release homing rays.\nEvery fourth cast opens the archive fully for an empowered convergence.\nExchange one-for-one with other ritual armaments at a Work Bench."
+          "Tooltip": "Unfold five sigils in sequence, briefly charge, then discharge a broad aimed beam.\nEvery fourth cast is wider and stronger. Each cast strikes one enemy root once.\nAim locks on casting. Switching items or incapacitation cancels the ritual.\nExchange one-for-one with other ritual armaments at a Work Bench."
         },
         "ChoirOfTheUnmade": {
           "Name": "Choir of the Unmade",

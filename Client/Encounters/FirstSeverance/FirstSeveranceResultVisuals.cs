@@ -11,8 +11,10 @@ internal static class FirstSeveranceResultVisuals
 {
     internal static void Draw(SpriteBatch batch, bool victory, float age, bool reduced)
     {
-        int width = (int)Math.Ceiling(Main.screenWidth / Main.UIScale);
-        int height = (int)Math.Ceiling(Main.screenHeight / Main.UIScale);
+        // Cinematics compose in physical pixels with InterfaceScaleType.None.
+        // UI callbacks may already rescale Main.screenWidth/Height: never divide again.
+        var viewport = Main.instance.GraphicsDevice.Viewport;
+        int width = viewport.Width, height = viewport.Height;
         float enter = FirstSeveranceVisualCurves.Window(age, 0, .10);
         float leave = 1 - FirstSeveranceVisualCurves.Window(age, .87, 1);
         float fade = enter * leave;

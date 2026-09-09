@@ -48,6 +48,12 @@ Accepted Victory still drops one Null Refrain for each frozen-roster participant
 
 ## Apparatus redesign — 0.2.30
 
+### Kinetic release override — 0.2.33
+
+This supersedes the Magic row below; other class budgets, projectile timing, acquisition and melee geometry are retained. **Lacuna Testament** deploys five spatial sigils at2-tick offsets, with fast3-tick arrivals, a10–16-tick charge, and a real beam during16–22. Its reach opens from0 to1800px over2 ticks; full widths are72px/112px for ordinary/fourth casts. Casting direction is fixed on use; the origin follows the owner during charge then freezes on release. One native owner-created projectile spends the old combined three-ray budget (1.8x ordinary /3.6x fourth cast), hitting at most one NPC root once. Armor/crit affect one combined hit rather than three; measured damage equivalence is not claimed. Mana18 and base20-tick use cadence remain; strong fire does not spend mana again. Each paid ritual has its own age so rearming the persistent book cannot reset a previous release. Death/Down, CC/no-items, item switch or34-tick expiry clears it. No homing after casting and no PvP damage. The beam's last12 ticks are harmless, visibly fading residue.
+
+The existing authored metal/glass parts and connected plasma surfaces are retained. Magic circles engrave in sequence, compress toward one muzzle, then release a wavering violet/white beam with a localized aperture flash and recoil. Ranged bodies snap their buttresses open, briefly brace, kick backward quickly and vent on both sides before recovering; the physical muzzle stays connected by a telescoping energy throat. The choir's crown and three seal tiers arrive in sequence, brace before its existing88-tick accent, then flare with the pipes' recoil. Rogue seals appear quickly, brake at the existing locked envelope, and accelerate sharply during23–28 into the unchanged185px triangular footprint; contact remains28–31. Continuous fractional curves connect all beats. Sounds follow the same arrival/lock/release times, bounded by existing client voice limits; Reduced Effects reduces ornament, voices and local shake. No new raster/audio export, Boss balance, Raid protocol or loot change is included.
+
 The four ranged forms are now large, material-bearing weapon rituals rather than small icon sprites with thin lines. Existing item names/IDs, class identities, Work Bench exchanges, ammo/mana cost and base damage are retained. The accepted claw geometry is not retuned.
 
 | Form | Current behavior |

@@ -1,0 +1,29 @@
+{
+  "build": "0.2.33",
+  "protocol": 23,
+  "base_commit": "195dc20e1dbba1e7c1cf6bae74c3360f5ecf0786",
+  "scope": "Start/phase/result cinematic screen coordinates; non-melee kinetic apparatus and cues; real charged Magic beam replaces three homing rays.",
+  "cinematics": "All three interface layers use None. Start, rupture and result draw from physical graphics viewport dimensions, never UI-scaled Main.screenWidth/Height. Existing exterior world-pass mask is retained. No UI settings, camera authority, control flags or Raid state are changed.",
+  "weapon_ownership": "Magic uses one native owner-created projectile per paid cast, no new Encounter packet. Direction locks on cast; origin follows owner during windup and freezes/syncs on release. One NPC root hit consumes the combined three-ray budget; projectile persists visually but cannot deal repeated damage. Holding another item, unusable owner or34-tick expiry cancels. Other weapon projectile budgets/timing and melee are unchanged.",
+  "motion": "Five sequential Magic sigils charge into one wavering beam. Battery buttresses snap/brake/recoil/vent around retained muzzles. Choir crown/seal tiers build toward its existing shared accent. Rogue arrival and23-28 accelerating closure retain the existing lock and28-31 triangular strike. Existing authored atlas and sound masters are reused, with bounded client voices and Reduced Effects.",
+  "checks": {
+    "domain": "passed;131 cases including three new kinetic geometry/timing/budget cases",
+    "cinematic_regression": "passed;2 source integration guards covering unscaled layer registration and physical-viewport dimensions across start/phase/result; automatically discovered by existing CI",
+    "native_package": "passed;zero errors, four existing CS8632 warnings; final build includes empowered Magic hit accent and smoothly enveloped Rogue vibration",
+    "static": "passed;60-document catalog,436-file policy scan,10 YAML files;git diff --check passed"
+  },
+  "build_identity": {
+    "source_sha256": "96a5b713cb8ca46742357539c2e8d78a5f2bbe72cbb96390735aa6241e0ea364",
+    "package_sha256": "c3086ff0afff60c9edd0ae84b24ea9147f927de536845c7f4c57a14ed0c265b8",
+    "package_bytes": 35773271,
+    "source_changed_during_build": false,
+    "preserved_local_changes": ["Localization/en-US.hjson", "Localization/RitualArmaments/en-US.hjson: pre-existing formatting/content retained; only the new Magic tooltip is staged"]
+  },
+  "not_run": [
+    "Both peers at107%/100% UI: start, all phases, Victory/Defeat bands and text",
+    "Native Magic collision/root-hit integration, moving cast origins, fourth-cast strength and fast-repeat behavior",
+    "Item switching/Down/CC interruption on matching multiplayer peers",
+    "All four non-melee audiovisual acceptance, Reduced Effects and actual GPU/FPS measurement"
+  ],
+  "limitations": "One combined Magic hit changes native armor/crit interaction and removes homing; preserved base budget is not a measured final-DPS equivalence. No GUI session, publishing, game/server restart, copied external asset or new license claim."
+}
