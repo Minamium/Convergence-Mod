@@ -42,6 +42,8 @@ internal sealed class FirstSeveranceBossVisuals
     private float lastCast, lastKick, lastBreath;
     private int phaseImpactTicks;
     private float mechanicPose;
+    private float breakup, consumption, fractureTime;
+    private bool fractureReduced;
     private FirstSeveranceCombatProjection? lastCombat;
 
     internal double RenderTick => emissions.RenderTick;
@@ -54,7 +56,8 @@ internal sealed class FirstSeveranceBossVisuals
     internal float EndingAge => ending.Age(Main.GameUpdateCount, Main.gamePaused ? 0 :
         (Stopwatch.GetTimestamp() - endingStamp) * 60d / Stopwatch.Frequency);
     internal float EndingShake => !IsEnding ? 0 : EndingVictory
-        ? 24 * Window(EndingAge, .69, .80) * (1 - Window(EndingAge, .80, .91))
+        ? (9 * Window(EndingAge, .03, .09) * (1 - Window(EndingAge, .09, .23))
+            + 30 * Window(EndingAge, .28, .78) * (1 - Window(EndingAge, .80, .92)))
         : 15 * (1 - Window(EndingAge, .02, .34));
 
     internal static Vector2 CoreCenter(FirstSeveranceCombatProjection combat)
@@ -128,6 +131,13 @@ internal sealed class FirstSeveranceBossVisuals
         Vector2 center = CoreCenter(combat);
         double renderTick = emissions.RenderTick;
         float time = (float)(renderTick % 216000) / 60f;
+        fractureTime = (float)(renderTick % 216000);
+        fractureReduced = reduced;
+        consumption = 0;
+        float scoreAge = combat.ActionIndex < 0 ? 0 : (combat.ActionIndex +
+            (float)Math.Clamp((renderTick - combat.ActionStartedTick) /
+                Math.Max(1, (double)combat.ResolveTick - combat.ActionStartedTick), 0, 1)) / FirstSeveranceChoreography.Final.Count;
+        breakup = combat.BossPhase == FirstSeveranceBossPhase.Final ? .78f * Window(scoreAge, .02, 1) : 0;
         float intro = combat.Substate == FirstSeveranceSubstate.SpawnIntro
             ? 1f - Math.Clamp((float)((double)combat.ResolveTick - tick)
                 / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0f, 1f) : 1f;
@@ -372,6 +382,13 @@ internal sealed class FirstSeveranceBossVisuals
         float factor = texture.Width / 1254f;
         Vector2 originalSize = new(source.Width, source.Height);
         source = new((int)(source.X * factor), (int)(source.Y * factor), (int)(source.Width * factor), (int)(source.Height * factor));
+        if (breakup > .001f || consumption > 0)
+        {
+            FirstSeveranceDissolutionVisuals.Bone(batch, texture, source, position, pivot * factor,
+                size / originalSize / factor, rotation, tint, breakup, consumption, lastCenter,
+                fractureTime, fractureReduced);
+            return;
+        }
         batch.Draw(texture, position - Main.screenPosition, source, tint, rotation, pivot * factor,
             size / originalSize / factor, SpriteEffects.None, 0);
     }
@@ -438,16 +455,22 @@ internal sealed class FirstSeveranceBossVisuals
         {
             float age = EndingAge;
             bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+            fractureReduced = reduced;
+            fractureTime = (float)(Main.GameUpdateCount % 216000);
+            breakup = Math.Max(breakup, .78f + .22f * Window(age, .03, .35));
+            consumption = Window(age, .16, .79);
+            FirstSeveranceDissolutionVisuals.Rift(batch, Accents, lastCenter, age, reduced);
             float fold = Window(age, .03, .40), pinch = Window(age, .15, .79);
             float dissolve = 1 - Window(age, .76, .80);
             bool remote = lastCombat?.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
             DrawRig(batch, lastCenter - new Vector2(0, remote ? 190 * (1 - pinch) : 0), dissolve, lastBreath * (1 - fold), lastCast * (1 - fold),
-                lastKick * (1 - fold), 1 - fold * .88f, collapse: pinch, depth: remote ? .24f : 1);
+                lastKick * (1 - fold), 1 - fold * .35f, depth: remote ? .24f : 1);
             if (remote && lastCombat is { } remnant && age < .8f)
-                DrawRemoteArms(batch, remnant, lastCenter, remnant.ResolveTick, dissolve, 1 - pinch, reduced);
+                DrawRemoteArms(batch, remnant, lastCenter, remnant.ResolveTick, dissolve, 1, reduced);
             Color ion = new(210, 164, 255);
             float tension = Window(age, .06, .45) * (1 - Window(age, .79, .805));
-            Accents.Halo(batch, lastCenter, new Vector2(620 - pinch * 610), ion, tension * (reduced ? .28f : .95f));
+            Accents.Halo(batch, lastCenter, new Vector2(600, 32 + pinch * 55), ion,
+                tension * (reduced ? .12f : .5f), FirstSeveranceDissolutionVisuals.RiftAxis.ToRotation());
             // Filaments accelerate inward; one optical snap erases the point.
             for (int n = 0; n < (reduced ? 16 : 72); n++)
             {
@@ -460,16 +483,18 @@ internal sealed class FirstSeveranceBossVisuals
                 if (!reduced && n % 3 == 0) Accents.Halo(batch, point, new Vector2(11), Ice, tension * .75f);
             }
             float sever = Window(age, .79, .802) * (1 - Window(age, .802, .87));
-            Accents.Ribbon(batch, lastCenter - new Vector2(1100, 0), Vector2.UnitX, 2200,
+            Vector2 riftAxis = FirstSeveranceDissolutionVisuals.RiftAxis;
+            Accents.Ribbon(batch, lastCenter - riftAxis * 1100, riftAxis, 2200,
                 3 + sever * 17, ion, sever * (reduced ? .30f : 1));
             Accents.Halo(batch, lastCenter, new Vector2(320 * sever), Color.White, sever * (reduced ? .25f : .95f));
-            Line(batch, lastCenter - new Vector2(740 * sever, 0), lastCenter + new Vector2(740 * sever, 0), Color.White * sever, 3);
+            Line(batch, lastCenter - riftAxis * (740 * sever), lastCenter + riftAxis * (740 * sever), Color.White * sever, 3);
             float inscription = Window(age, .85, .90) * (1 - Window(age, .96, 1));
             Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.VictorySeal"),
                 lastCenter - Main.screenPosition + new Vector2(0, 105), Ice * inscription, .82f, .5f);
             return;
         }
         float progress = EndingAge;
+        consumption = 0;
         float closure = Window(progress, .04, .55);
         float opacity = 1 - Window(progress, .18, .60);
         bool distant = lastCombat?.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
@@ -590,6 +615,7 @@ internal sealed class FirstSeveranceBossVisuals
         phaseImpactTicks = 0;
         exposure = 0;
         mechanicPose = 0;
+        breakup = consumption = fractureTime = 0;
         if (unload)
         {
             Texture2D? oldGlow = glow;

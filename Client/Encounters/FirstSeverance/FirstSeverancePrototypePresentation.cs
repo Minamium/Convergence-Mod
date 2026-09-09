@@ -33,6 +33,7 @@ internal sealed class FirstSeverancePrototypeMusic : ModSceneEffect
     {
         if (Main.dedServ || Main.gameMenu || player.whoAmI != Main.myPlayer)
             return;
+        isActive |= ModContent.GetInstance<FirstSeverancePrototypePresentation>().IsEnding;
         // This callback also runs during initial spawn when the Raid is inactive.
         // ManageSpecialBiomeVisuals requires a same-key Filters.Scene entry;
         // this feature owns only a CustomSky, so use its manager directly.
@@ -61,6 +62,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     private readonly FirstSeveranceFeedback feedback = new();
     private FirstSeveranceSky? sky;
     internal double RenderTick => visuals.RenderTick;
+    internal bool IsEnding => visuals.IsEnding;
 
     public override void Load()
     {
@@ -74,6 +76,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         {
             visuals.Update(ModContent.GetInstance<FirstSeveranceClientStateSystem>());
             feedback.Update(ModContent.GetInstance<FirstSeveranceClientStateSystem>());
+            feedback.UpdateEnding(visuals.IsEnding && visuals.EndingVictory, visuals.EndingAge);
         }
     }
 
@@ -88,7 +91,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     {
         visuals.Reset(unload: true);
         feedback.Reset(true);
-        sky?.Reset();
+        sky?.Unload();
         sky = null;
     }
 

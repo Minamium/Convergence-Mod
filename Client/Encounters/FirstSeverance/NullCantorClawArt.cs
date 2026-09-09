@@ -156,9 +156,9 @@ internal static class NullCantorClawArt
     internal static void DrawCrush(SpriteBatch b, NullCantorClawCrush p, float age)
     {
         Vector2 center = p.Projectile.Center;
-        float emerge = NullCantorClawMotion.Smooth(age / 16);
-        float close = NullCantorClawMotion.Smooth((age - NullCantorClawMotion.CrushCloseTick) / 12);
-        float fade = 1 - NullCantorClawMotion.Smooth((age - 49) / 23);
+        float emerge = NullCantorClawMotion.CrushArrival(age);
+        float close = NullCantorClawMotion.CrushClosure(age);
+        float fade = 1 - NullCantorClawMotion.Smooth((age - 22) / 20);
         // Clearly locate the actual strike ellipse before the remote hands close.
         if (age < NullCantorClawMotion.CrushImpactTick)
         {
@@ -183,12 +183,12 @@ internal static class NullCantorClawArt
         for (int hand = 0; hand < 2; hand++)
         {
             var pose = NullCantorClawMotion.CrushPose(age, hand);
-            Vector2 wrist = center + new Vector2(hand == 0 ? -600 : 600, 10);
-            Ring(b, wrist, new(26, 160 * emerge * fade), 0, 12, Light(Violet, .9f * fade));
+            Vector2 wrist = center + new Vector2(hand == 0 ? -600 : 600, 10).RotatedBy(NullCantorClawMotion.CrushTilt);
+            Ring(b, wrist, new(26, 160 * emerge * fade), NullCantorClawMotion.CrushTilt, 12, Light(Violet, .9f * fade));
             // The wrist comes from a slit; fingers remain independent physical parts.
             Vector2 palm = center + new Vector2(pose.Palm.X, pose.Palm.Y);
             Material(b, ArmSource, wrist, palm, 75 * emerge, new Color(237, 226, 211) * fade, hand != 0);
-            if (age >= NullCantorClawMotion.CrushCloseTick && age < 46)
+            if (age >= NullCantorClawMotion.CrushCloseTick && age < NullCantorClawMotion.CrushEndHitTick + 2)
             {
                 for (int echo = 4; echo > 0; echo--)
                 {

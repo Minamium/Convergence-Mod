@@ -64,16 +64,33 @@ internal static partial class Program
     [DomainTest("Remote crush has one bounded impact window and harmless arrival and departure")]
     private static void ClawCrushClock()
     {
-        AssertEqual(false, NullCantorClawMotion.CrushLive(39.99f), "approach is harmless");
-        AssertEqual(true, NullCantorClawMotion.CrushLive(40), "impact");
-        AssertEqual(false, NullCantorClawMotion.CrushLive(44), "residual flash is harmless");
+        AssertEqual(false, NullCantorClawMotion.CrushLive(15.99f), "approach is harmless");
+        AssertEqual(true, NullCantorClawMotion.CrushLive(16), "impact");
+        AssertEqual(false, NullCantorClawMotion.CrushLive(20), "residual flash is harmless");
         for (int hand = 0; hand < 2; hand++)
-            for (int tick = 0; tick <= 72; tick++)
+            for (int tick = 0; tick <= NullCantorClawMotion.CrushTicks; tick++)
             {
                 var pose = NullCantorClawMotion.CrushPose(tick, hand);
                 AssertEqual(true, NullCantorClawMotion.Finite(pose.Palm) && pose.Scale > 0 && pose.Scale <= 3.101f, "bounded remote rig");
             }
         AssertEqual(true, NullCantorClawMotion.CrushMultiplier < 5, "execution motif, not a literal NPC deletion");
+    }
+    [DomainTest("Claw execution snaps in, brakes briefly and accelerates into one diagonal impact")]
+    private static void ClawExecutionContrast()
+    {
+        float Distance(float a, float b) => Vector2.Distance(NullCantorClawMotion.CrushPose(a, 0).Palm,
+            NullCantorClawMotion.CrushPose(b, 0).Palm);
+        AssertEqual(true, Distance(0, 1) > Distance(7, 8) * 12, "arrival faster than held tension");
+        AssertEqual(true, Distance(15, 16) > Distance(11, 12) * 10, "terminal closure accelerates");
+        foreach (float seam in new[] { 5f, 11f, 16f, 22f, 42f })
+            AssertEqual(true, Distance(seam - .0001f, seam + .0001f) < .1f, "position continuous at beat boundaries");
+        var left = NullCantorClawMotion.CrushPose(8, 0);
+        var right = NullCantorClawMotion.CrushPose(8, 1);
+        AssertEqual(true, left.Palm.Y > 80 && right.Palm.Y < -80, "opposing hands use a diagonal axis");
+        AssertEqual(true, (left.Palm + right.Palm).Length() < .001f, "target stays between hands");
+        int live = 0;
+        for (int i = 0; i < NullCantorClawMotion.CrushTicks; i++) if (NullCantorClawMotion.CrushLive(i)) live++;
+        AssertEqual(4, live, "duration changed without adding more hits");
     }
     [DomainTest("Crush target is finite range-limited and independent of later pointer movement")]
     private static void ClawTargetContract()

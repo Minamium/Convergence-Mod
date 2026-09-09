@@ -36,6 +36,7 @@ public sealed class NullCantorClawVisualState : GlobalProjectile
         if (claw is NullCantorClawCrush)
         {
             if (Crossed(0)) { system.Play("ExecutionLock", p.Center, .50f, -.18f); system.Play("HandGather", p.Center, .52f, .2f); }
+            if (Crossed(NullCantorClawMotion.CrushCloseTick)) system.Play("BladeUnsheathe", p.Center, .68f, .32f);
             if (Crossed(NullCantorClawMotion.CrushImpactTick))
             {
                 system.Play("HandCrushImpact", p.Center, .85f, -.20f);

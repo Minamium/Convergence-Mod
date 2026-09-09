@@ -22,6 +22,16 @@ internal static class FirstSeveranceResultVisuals
         float pressure = victory ? .16f : .38f + .40f * FirstSeveranceVisualCurves.Window(age, .02, .45);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, width, height), pixel,
             new Color(3, 2, 7) * (pressure * fade * (reduced ? .65f : 1)));
+        if (victory)
+        {
+            // Two shaped exposure pulses, not a repeating screen-wide strobe.
+            float rupture = FirstSeveranceVisualCurves.Window(age, .035, .046)
+                * (1 - FirstSeveranceVisualCurves.Window(age, .046, .105));
+            float extinction = FirstSeveranceVisualCurves.Window(age, .785, .798)
+                * (1 - FirstSeveranceVisualCurves.Window(age, .798, .90));
+            batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, width, height), pixel,
+                new Color(233, 222, 255) * ((rupture * .28f + extinction * .65f) * (reduced ? .06f : 1)));
+        }
         int bars = (int)(height * .15f * fade);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, width, bars), pixel, Color.Black);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, height - bars, width, bars), pixel, Color.Black);

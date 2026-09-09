@@ -32,6 +32,20 @@ internal sealed class FirstSeveranceFeedback
     private int scoreImpactTicks;
     private readonly HashSet<int> scoreSounds = new();
     private bool failed, stack;
+    private float previousEndingAge = -1;
+
+    internal void UpdateEnding(bool victory, float age)
+    {
+        if (!victory) { previousEndingAge = -1; return; }
+        bool Crossed(float at) => previousEndingAge < at && age >= at && age - at < .035f;
+        bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+        float gain = reduced ? .45f : .85f;
+        if (Crossed(.04f)) Play("PhaseRupture", gain, -.28f);
+        if (Crossed(.29f)) Play("RemoteDeparture", gain * .75f, -.15f);
+        if (Crossed(.68f)) Play("EnergyLock", gain * .7f, .30f);
+        if (Crossed(.795f)) { Play("HandCrushImpact", gain, -.20f); Play("ShellBreak", gain * .7f, .28f); }
+        previousEndingAge = age;
+    }
 
     internal float Shake => Math.Max(resultTicks > 0 ? (failed ? 17f : 9f) * MathF.Pow(resultTicks / 32f, 2f) : 0f,
         22f * MathF.Pow(scoreImpactTicks / 24f, 2f));
@@ -296,6 +310,7 @@ internal sealed class FirstSeveranceFeedback
         StopVoices();
         previous = null;
         mechanics.Reset(unload);
+        previousEndingAge = -1;
         shardDeadline = 0;
         shardBeat = -1;
         resultTicks = 0;

@@ -1,0 +1,31 @@
+{
+  "build": "0.2.31",
+  "protocol": 23,
+  "base_commit": "4162388f8c080e9fb6808bb56a26ccdb0be2e859",
+  "scope": "Claw execution timing/input priority; Final material breakup and oblique-rift ending; harmless sword anticipation and layered sky; concise conditional presentation skill reference.",
+  "unchanged": "Raid warning/live geometry, damage, phase/Victory authority, cleanup, rewards, weapon damage multiplier/ellipse/charge duration, original raster assets.",
+  "owners": {
+    "weapon": "Native owner-created projectile path; fresh gameplay right click records a point for same-player PostUpdate. Both native alternate-use and priority path share TryCrush and one saturating charge spend. Only owning swipe is killed; CC/Downed/dead/UI/map/unfocused gating retained.",
+    "raid": "Accepted action snapshot drives Final progress. Existing participant-only terminal timeline gates cached rendering/sounds; gameplay session ends independently. New fight/world unload clear ending state. Sky requested lifecycle extends through that same terminal timeline; owned mist texture disposed on Mod unload."
+  },
+  "api_note": "Pinned installed tModLoader2026.07.3.0 tModLoader.xml ModPlayer.ProcessTriggers: local-client gameplay-only callback. Used as an owner input hook, not a new Raid command or server input source. Existing native item damage/knockback hooks calculate priority execution damage; no third-party code or asset copying.",
+  "checks": {
+    "domain": "passed;125 deterministic cases; includes16-20 tick crush live boundary, continuous fast/brake/accelerate beats, unchanged charge/ellipse and existing lifecycle/terminal contracts",
+    "skill": "quick_validate.py passed; short conditional reference added rather than another mandatory skill",
+    "native_package": "passed; full installed Calamity references; zero errors, four existing CS8632 warnings; prior type-conversion error corrected",
+    "static": "passed;60-document catalog,427-file repository policy check,10 YAML files"
+  },
+  "build_identity": {
+    "source_sha256": "1413e677811a34f0c7df5400c65b28cee7ac8dc85c0d9a57fa3ff673b02a74b1",
+    "package_sha256": "cbfe529888aa7e2f0652ae5fc6ea3e599ba1b073603c50633b949f531fcc8bac",
+    "package_bytes": 35766677,
+    "source_changed_during_build": false,
+    "preserved_local_changes": ["Localization/en-US.hjson", "Localization/RitualArmaments/en-US.hjson"]
+  },
+  "not_run": [
+    "GUI/game load and left-held/right-tap integration including UI/chat/focus transitions",
+    "matching-peer weapon timing and one-charge consumption",
+    "Final breakup/rift, sword anticipation and background audiovisual acceptance",
+    "reduced-effects, shake-off, high/low FPS and GPU cost measurement"
+  ]
+}

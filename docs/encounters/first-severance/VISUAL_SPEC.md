@@ -32,6 +32,14 @@ The user requested giant scale and spectacle comparable in ambition to Avatar of
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
+## Kinetic contrast, terminal unmaking and living scene — 0.2.31
+
+Accepted motion direction: fast emergence, a very short decelerated tension beat, then an abruptly accelerating strike. Smoothness means connected poses/sub-tick motion, not uniform slow easing. Apply this to new presentation and relevant revisions while preserving established artwork and gameplay warning windows. The development skill's [presentation direction](../../../.agents/skills/develop-convergence-raids/references/presentation-direction.md) owns the reusable workflow and retained readability/accessibility boundaries.
+
+The Final score progressively separates the existing body's and remote arms' textured material into independently displaced fragments. Progress derives from accepted action index and action time, not elapsed local fight duration or invented HP. Victory retains the participant-only ending timeline: a long oblique dimensional slit snaps open, fragments hang briefly then accelerate into it, its edges collapse, and one major exposure/impact extinguishes the form. Supporting filaments, two bounded light pulses, camera impulses and staged original sound cues share that ending clock. No enemy, reward, control flag or authority timer is retained by the picture. Reduced Effects attenuates flash/movement/layers; shake-off remains honored.
+
+Phase-III impalement keeps its existing warning/fire/insertion/collision clocks. A dim rigid tip appears quickly outside each field-edge slit, draws back slightly into tension, and gives way to the existing rapid insertion. The complete aura still forecasts the true future footprint. The cathedral remains the scene anchor but gains independent breathing/parallax, seven procedural drifting mist layers and faint warped distant orbits; these are below terrain/players/forecasts and fade after terminal presentation. No raster originals are replaced.
+
 ## Boss-linked release and mechanic verdicts
 
 Iron Interdict replaces only the `HalfField` erasure surface: textured rigid SeveranceBlade swords translate quickly through upper/lower rifts after held, wavering sword-aura forecasts, borrowing the accepted rotating-blade material. Unequal insertion offsets and opposing directions break the old uniform beam-strip look. The dense and sparse halves are visible from the complete warned aura footprints; the field-sized material is clipped at its entry plane instead of stretching during insertion. The distant arms brace and snap on the two shared wave clocks. No new raster processing or borrowed asset.

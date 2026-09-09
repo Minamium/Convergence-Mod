@@ -23,9 +23,9 @@ related_docs:
 
 ## Current build
 
-Development **0.2.30**, protocol **23**. The remaining four ritual weapon forms now deploy a three-cannon battery, folio/lens archive, assembling choir organ and triangular stealth verdict. Claw artwork/attack balance are retained; its idle/active hand seams and trail rendering are revised for continuity. [Weapon specification](encounters/first-severance/WEAPONS.md#apparatus-redesign--0230) owns controls, timelines and power budgets. Boss behavior and reward exchanges remain unchanged.
+Development **0.2.31**, protocol **23**. Claw execution now prioritizes a right click during a left swing and uses a diagonal fast-arrival / brief-brake / accelerating-crush timeline. The Final silhouette progressively breaks apart and Victory consumes it into an oblique dimensional rift. Phase-III sword anticipation and layered cathedral motion retain existing Raid damage clocks. [Weapons](encounters/first-severance/WEAPONS.md) owns timing/input; [Visual Spec](encounters/first-severance/VISUAL_SPEC.md#kinetic-contrast-terminal-unmaking-and-living-scene--0231) owns presentation. Other weapon forms, Raid rules and reward exchanges are retained.
 
-Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. Other timing/damage and the five ritual armaments are retained. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. Public-development descriptions and icons are prepared, not published or release-approved; see [publication preparation](RELEASE_PROCESS.md#development-publication-preparation).
+Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
 - First Severance is playable: Core placement/validation, Ready, server-owned combat, participant containment/infinite flight, fixed-site Stack and player-centered Spread.
 - Ordered phases: sealed opening and clockwise relay; lattice/twin blades; distant arms/floods/crush; HP-zero Final survival. Required first scores gate phase transitions and Victory.
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Kinetic presentation evidence](evidence/2026-09-09-kinetic-unmaking.json) records125 passing domain cases, skill validation and native packaging (zero errors, four existing warnings). Actual dual-button input, shared-client impact timing, Final breakup/rift readability, sword anticipation, scenery and reduced-effects acceptance remain user-owned; no FPS/smoothness claim from compilation.
 
 [Apparatus v2 evidence](evidence/2026-09-09-ritual-armaments-v2.json) records branch checks and main integration. Full native Calamity package compilation passed with zero errors and four existing nullable warnings. Four V2 icon images and transparent bounds were inspected; prior claw slot correction is retained. The user accepted the0.2.29 claw design and reported mild animation stutter; the continuity pass targets presentation seams. In-game icon/animation, multiplayer and DPS acceptance of0.2.30 remain user-owned. No GUI session or FPS/log subsystem is added.
 
@@ -63,6 +65,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.31: while charged, hold left click and tap right; verify one execution/canceled swipe on both clients. Check Final's progressive breakup and Victory suction/flash/shake, Phase-III forecast readability and background movement; compare Reduced Effects/shake-off. Do not repeat unchanged whole-release gates for this presentation pass.
 
 User/Codex-owned0.2.30: build/load matching peers; inspect repeated left/right claw cycles (including left-facing and high attack speed), battery muzzle alignment, archive fourth-cast accent, choir assembly/retarget/despawn, and the stealth verdict's track/lock/strike. Compare matched class-endgame damage only after loading; no Boss HP adjustment implied.
 

@@ -588,7 +588,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: 87c2f2b124a962ad4f70cd570a35d0f872a79569e7a3d904d55e924f7af2d426
+  content_sha256: c19a97c5999a1d047b007c4911509a99eb35ce1ed5a488c6d9921da8efe55c82
   document_type: spec
   status: provisional
   owners:
@@ -608,7 +608,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: First Severance — Five Ritual Armaments
-  content_sha256: 2d830b522f5052be7671039d8718aa7373154a509550f27b67959065248f06be
+  content_sha256: 9b53410e20277a3450ccf5f6a75ed25a8b64ac128436b5dca7c545fa0941da8c
   document_type: spec
   status: provisional
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: c2619548adcb904e610d1772b21fd6808d8b9adc7882972f34ec1ddef571150d
+  content_sha256: 792a38696417f080af29161f60c352ef43a4bf732a91366f0a01133b53be2850
   document_type: status
   status: accepted
   owners:

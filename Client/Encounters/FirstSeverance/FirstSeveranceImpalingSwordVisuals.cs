@@ -23,6 +23,8 @@ internal static class FirstSeveranceImpalingSwordVisuals
                 FirstSeveranceImpalingSwords.WarningStart(sword.Wave) + 9) * sword.Fade;
             Color color = sword.Slot < FirstSeveranceImpalingSwords.DenseCount ? new(205, 142, 244) : new(134, 220, 255);
             bool warning = age < sword.Fire;
+            float arrival = 1 - MathF.Pow(1 - Math.Clamp((float)(age - FirstSeveranceImpalingSwords.WarningStart(sword.Wave)) / 5, 0, 1), 3);
+            float brake = Window(age, sword.Fire - 16, sword.Fire - 7);
             // Held aura forecasts the whole blade volume. A rigid textured sword
             // then translates through the field plane; it never scales in length.
             float length = warning ? ray.Length : ray.Length * sword.Extension;
@@ -52,11 +54,24 @@ internal static class FirstSeveranceImpalingSwordVisuals
                 Vector2 tip = origin + direction * length;
                 accents.Halo(batch, tip, new Vector2(90, 10), Color.White, stab * (reduced ? .2f : .75f), angle + MathF.PI * .5f);
             }
+            else if (warning)
+            {
+                // Harmless tip OUTSIDE the arena: snap from the slit, settle into
+                // tension, then the existing shared six-tick insertion takes over.
+                float scaleX = ray.Length / 2131;
+                Vector2 point = origin - direction * (2 + (1 - arrival) * 140 + brake * 14);
+                int tipWidth = Math.Min(420, texture.Width);
+                batch.Draw(texture, point - Main.screenPosition,
+                    new Rectangle(texture.Width - tipWidth, 0, tipWidth, texture.Height),
+                    Color.White * (born * .45f), angle, new Vector2(tipWidth, 362),
+                    new Vector2(scaleX, ray.HalfWidth * 2 / 300), SpriteEffects.None, 0);
+            }
             // Edge rifts gather/close continuously; no hard forecast rails.
             accents.CastSeal(batch, origin + direction * 12, age,
                 FirstSeveranceImpalingSwords.WarningStart(sword.Wave), sword.Fire, color, reduced, .35f);
             float rift = born * (1 - Window(age, sword.Retract, sword.Retract + 24));
-            accents.Halo(batch, origin, new Vector2(32, ray.HalfWidth * 2.5f), color, rift * .65f, angle);
+            accents.Halo(batch, origin, new Vector2(32 - brake * 21, ray.HalfWidth * (2.5f + brake)), color,
+                rift * (.45f + brake * .4f), angle);
         }
     }
 }

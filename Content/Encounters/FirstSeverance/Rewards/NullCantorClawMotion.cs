@@ -14,10 +14,11 @@ internal static class NullCantorClawMotion
     internal const int BaseDamage = 7700;
     internal const int SwingTicks = 28;
     internal const int ChargeTicks = 360;
-    internal const int CrushTicks = 72;
-    internal const int CrushCloseTick = 28;
-    internal const int CrushImpactTick = 40;
-    internal const int CrushEndHitTick = 44;
+    internal const int CrushTicks = 42;
+    internal const int CrushCloseTick = 11;
+    internal const int CrushImpactTick = 16;
+    internal const int CrushEndHitTick = 20;
+    internal const float CrushTilt = -.30f;
     internal const float CrushMultiplier = 4.2f;
     internal const float TargetRange = 1120;
     internal const float SweepStart = .20f, SweepEnd = .72f;
@@ -53,13 +54,18 @@ internal static class NullCantorClawMotion
     }
     internal static CantorClawPose CrushPose(float age, int hand)
     {
-        float emerge = Smooth(age / 18), close = Smooth((age - CrushCloseTick) / (CrushImpactTick - CrushCloseTick));
-        float depart = Smooth((age - 49) / 23);
+        float emerge = CrushArrival(age), close = CrushClosure(age);
+        float depart = Smooth((age - 22) / 20);
         float side = hand == 0 ? -1 : 1;
-        return new(new Vector2(side * (420 - 266 * close + 90 * depart), -24 * MathF.Sin(close * MathF.PI)),
-            hand == 0 ? .12f * (1 - close) : MathF.PI - .12f * (1 - close),
+        float brace = Smooth((age - 5) / 6);
+        return new(Rotate(new Vector2(side * (570 - 150 * emerge + 14 * brace - 280 * close + 90 * depart),
+                -24 * MathF.Sin(close * MathF.PI)), CrushTilt),
+            CrushTilt + (hand == 0 ? .12f * (1 - close) : MathF.PI - .12f * (1 - close)),
             (1.2f + 1.9f * emerge) * (1 - .24f * depart), .12f + .88f * close, hand == 0 ? 1 : -1);
     }
+    internal static float CrushArrival(float age) => 1 - MathF.Pow(1 - Math.Clamp(age / 5, 0, 1), 3);
+    internal static float CrushClosure(float age) => MathF.Pow(Math.Clamp(
+        (age - CrushCloseTick) / (CrushImpactTick - CrushCloseTick), 0, 1), 3);
     internal static Vector2 Joint(in CantorClawPose pose, int finger, int joint)
     {
         finger = Math.Clamp(finger, 0, 4); joint = Math.Clamp(joint, 0, 3);

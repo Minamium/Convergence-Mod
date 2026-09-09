@@ -21,6 +21,7 @@ Choose the mode implied by the request; no separate confirmation is needed:
 
 | Change | Reference |
 |---|---|
+| Animation, VFX, texture integration or background scenes | [Presentation direction](references/presentation-direction.md); apply beat contrast and preserve gameplay readability |
 | Choosing a module or changing dependency direction | [Architecture map](references/architecture-map.md); follow the relevant architecture section if the boundary is unclear |
 | Gameplay state, requests, actors, recovery, or cleanup | Relevant sections of [Raid authority checklist](references/raid-authority-checklist.md) |
 | Selecting checks or reporting completion | Applicable rows and commands in [Verification matrix](references/verification-matrix.md) |
