@@ -88,7 +88,7 @@ internal static class NullCantorClawArt
             new Vector2(source.Width * .5f, 0), new Vector2(width / source.Width, d.Length() / source.Height),
             mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
     }
-    internal static void Hand(SpriteBatch b, in CantorClawPose pose, Vector2 root, float aim, int facing, float opacity, bool arm = true)
+    internal static void Hand(SpriteBatch b, in CantorClawPose pose, Vector2 root, float aim, int facing, float opacity, bool arm = true, float armOpacity = 1)
     {
         Vector2 palm = Transform(pose.Palm, root, aim, facing);
         Color material = new Color(244, 235, 224) * opacity;
@@ -96,8 +96,8 @@ internal static class NullCantorClawArt
         {
             Vector2 elbow = Vector2.Lerp(root, palm, .50f) + (palm - root).SafeNormalize(Vector2.UnitX)
                 .RotatedBy(MathHelper.PiOver2) * (22 * pose.Scale * pose.Mirror * facing);
-            Material(b, ArmSource, root, elbow, 27 * pose.Scale, material, pose.Mirror < 0);
-            Material(b, BoneSource, elbow, palm, 34 * pose.Scale, material, pose.Mirror < 0);
+            Material(b, ArmSource, root, elbow, 27 * pose.Scale, material * armOpacity, pose.Mirror < 0);
+            Material(b, BoneSource, elbow, palm, 34 * pose.Scale, material * armOpacity, pose.Mirror < 0);
         }
         Glow(b, palm, new Vector2(90, 73) * pose.Scale, Light(Violet, .85f * opacity));
         for (int finger = 4; finger >= 0; finger--)
@@ -116,44 +116,42 @@ internal static class NullCantorClawArt
         Glow(b, palm, new Vector2(32 * pose.Scale), new Color(0, 0, 4, 255) * opacity);
         Ring(b, palm, new Vector2(19 * pose.Scale), 0, 4 * pose.Scale, Light(Pale, opacity));
     }
+    internal static void QueueSwipeTrail(NullCantorClawSwipe p, float age)
+    {
+        float progress = Math.Clamp(age / p.Duration, 0, 1);
+        if (progress < NullCantorClawMotion.SweepStart) return;
+        float fade = 1 - NullCantorClawMotion.Smooth((progress - .74f) / .22f);
+        Vector2 root = Main.player[p.Projectile.owner].MountedCenter;
+        int count = Reduced ? 40 : 96;
+        Span<Vector2> points = stackalloc Vector2[96];
+        // No clamped run of coincident points: resample only the actual swept arc.
+        float end = Math.Min(progress, NullCantorClawMotion.SweepEnd);
+        float begin = Math.Max(NullCantorClawMotion.SweepStart, end - .32f);
+        if (end <= begin) return;
+        for (int finger = 0; finger < 5; finger++)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                float sample = MathHelper.Lerp(begin, end, i / (float)(count - 1));
+                var pose = NullCantorClawMotion.SwingPose(sample, p.Hand);
+                points[i] = Transform(NullCantorClawMotion.Joint(pose, finger, 3), root, p.Aim, p.Facing);
+            }
+            RitualSurfacePass.Flame(points[..count], (Reduced ? 74 : 108) * NullCantorClawMotion.Smooth((end - begin) / .14f), Violet, fade);
+        }
+    }
     internal static void DrawSwipe(SpriteBatch b, NullCantorClawSwipe p, float age)
     {
         float progress = Math.Clamp(age / p.Duration, 0, 1);
         Vector2 root = Main.player[p.Projectile.owner].MountedCenter;
-        float fade = NullCantorClawMotion.Envelope(progress, .07f, .86f, 1);
-        var offhand = NullCantorClawMotion.SwingPose(.91f, 1 - p.Hand);
-        Hand(b, offhand, root, p.Aim, p.Facing, fade * .65f);
-        if (progress >= NullCantorClawMotion.SweepStart)
+        for (int pass = 0; pass < 2; pass++)
         {
-            int points = Reduced ? 44 : 88;
-            for (int finger = 0; finger < 5; finger++)
-            {
-                Vector2 last = root;
-                for (int i = 0; i <= points; i++)
-                {
-                    float t = i / (float)points;
-                    float sample = Math.Clamp(progress - .31f + .31f * t, NullCantorClawMotion.SweepStart, NullCantorClawMotion.SweepEnd);
-                    var old = NullCantorClawMotion.SwingPose(sample, p.Hand);
-                    Vector2 at = Transform(NullCantorClawMotion.Joint(old, finger, 3), root, p.Aim, p.Facing);
-                    float power = MathF.Sin(t * MathF.PI * .87f) * fade;
-                    if (i > 0)
-                    {
-                        // Broad dark body, saturated violet volume, white cutting edge.
-                        // This is a moving surface, not a handful of thin dust lines.
-                        Beam(b, last, at, 112 * power, new Color(9, 3, 24, 218) * power);
-                        Beam(b, last, at, 82 * power, Light(Violet, power * .85f));
-                        Beam(b, last, at, 31 * power, Light(Pale, power));
-                        Beam(b, last, at, 10 * power, Light(Color.White, power));
-                    }
-                    last = at;
-                }
-            }
-            if (!Reduced) Shards(b, root, age, p.Projectile.identity, p.Aim, fade, 28, 370);
+            int hand = pass == 0 ? 1 - p.Hand : p.Hand;
+            var pose = RitualArmamentChoreography.PresentedHand(progress, p.Hand, hand, p.Aim, p.Facing, RitualRenderClock.Time);
+            Hand(b, pose, root, 0, 1, 1, hand == p.Hand, NullCantorClawMotion.Envelope(progress, .12f, .82f, 1));
         }
-        var pose = NullCantorClawMotion.SwingPose(progress, p.Hand);
-        Hand(b, pose, root, p.Aim, p.Facing, fade);
-        if (p.HasImpact)
-            Impact(b, p.Impact, age - p.ImpactAge, p.Projectile.identity, false);
+        float flash = NullCantorClawMotion.Envelope(progress, .20f, .70f, .98f);
+        if (!Reduced && progress > .20f) Shards(b, root, age, p.Projectile.identity, p.Aim, flash, 28, 370);
+        if (p.HasImpact) Impact(b, p.Impact, age - p.ImpactAge, p.Projectile.identity, false);
     }
     internal static void DrawCrush(SpriteBatch b, NullCantorClawCrush p, float age)
     {

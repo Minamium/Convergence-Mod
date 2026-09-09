@@ -2,6 +2,93 @@
 
 ## Records
 
+### Ritual apparatus v2 — full-color material assemblies / 2026-09-09
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V2/ChoirOfTheUnmade.png`
+- Asset ID: ritual-v2-choiroftheunmade-2026-09-09
+- Asset type: weapon icon
+- Creator: project-directed independent geometry/composition by ChatGPT; original P3 material credits retained
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: existing project Assets/Textures/NPCs/NullCantorRigAtlas.png; see its original ImageGen provenance; source SHA256 b3485d1f3a7d66f99f78fed01da34f1e6e52ec32fcd57e9aa46afb6584afe640
+- Tool/model/version: Python3 / Pillow11.3.0; no new image-generation model was available or invoked
+- Human modifications: minami direction; agent-authored composition, masking, rigid-part layout and full RGBA export; no palette reduction
+- License and redistribution terms: existing project rights undecided; development branch only, no public-release approval
+- Required attribution: retain original P3 source and this derivative entry; no new third-party requirement
+- Reviewer and review date: ChatGPT PNG decode, dimensions/alpha and visual atlas inspection,2026-09-09; game review pending
+- Notes: export SHA256 `d4c71e0a83582f063bf17834a4b836d7529ac6067a2884d0b38fe9c8fdc799e4`. External explicit-input/output recipe `make_art.py` SHA256 `673e8f8832eb4bf5221f35ac607d9c1edfbf7069a32483b98c4b8ec55ddc4f65`. All predecessors preserved. Runtime code animates independent atlas regions, never the small icon.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V2/LacunaTestament.png`
+- Asset ID: ritual-v2-lacunatestament-2026-09-09
+- Asset type: weapon icon
+- Creator: project-directed independent geometry/composition by ChatGPT; original P3 material credits retained
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: existing project Assets/Textures/NPCs/NullCantorRigAtlas.png; see its original ImageGen provenance; source SHA256 b3485d1f3a7d66f99f78fed01da34f1e6e52ec32fcd57e9aa46afb6584afe640
+- Tool/model/version: Python3 / Pillow11.3.0; no new image-generation model was available or invoked
+- Human modifications: minami direction; agent-authored composition, masking, rigid-part layout and full RGBA export; no palette reduction
+- License and redistribution terms: existing project rights undecided; development branch only, no public-release approval
+- Required attribution: retain original P3 source and this derivative entry; no new third-party requirement
+- Reviewer and review date: ChatGPT PNG decode, dimensions/alpha and visual atlas inspection,2026-09-09; game review pending
+- Notes: export SHA256 `3a50b74415971088b0abd0e5477156a163cd80917adee731072edef2ee7b8bb5`. External explicit-input/output recipe `make_art.py` SHA256 `673e8f8832eb4bf5221f35ac607d9c1edfbf7069a32483b98c4b8ec55ddc4f65`. All predecessors preserved. Runtime code animates independent atlas regions, never the small icon.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V2/LastWitness.png`
+- Asset ID: ritual-v2-lastwitness-2026-09-09
+- Asset type: weapon icon
+- Creator: project-directed independent geometry/composition by ChatGPT; original P3 material credits retained
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: existing project Assets/Textures/NPCs/NullCantorRigAtlas.png; see its original ImageGen provenance; source SHA256 b3485d1f3a7d66f99f78fed01da34f1e6e52ec32fcd57e9aa46afb6584afe640
+- Tool/model/version: Python3 / Pillow11.3.0; no new image-generation model was available or invoked
+- Human modifications: minami direction; agent-authored composition, masking, rigid-part layout and full RGBA export; no palette reduction
+- License and redistribution terms: existing project rights undecided; development branch only, no public-release approval
+- Required attribution: retain original P3 source and this derivative entry; no new third-party requirement
+- Reviewer and review date: ChatGPT PNG decode, dimensions/alpha and visual atlas inspection,2026-09-09; game review pending
+- Notes: export SHA256 `b015acd90c146e681e9c64ed3cddc4e36f2a19b5fb05546e04dfac8f3d83afcd`. External explicit-input/output recipe `make_art.py` SHA256 `673e8f8832eb4bf5221f35ac607d9c1edfbf7069a32483b98c4b8ec55ddc4f65`. All predecessors preserved. Runtime code animates independent atlas regions, never the small icon.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V2/PaleMeridian.png`
+- Asset ID: ritual-v2-palemeridian-2026-09-09
+- Asset type: weapon icon
+- Creator: project-directed independent geometry/composition by ChatGPT; original P3 material credits retained
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: existing project Assets/Textures/NPCs/NullCantorRigAtlas.png; see its original ImageGen provenance; source SHA256 b3485d1f3a7d66f99f78fed01da34f1e6e52ec32fcd57e9aa46afb6584afe640
+- Tool/model/version: Python3 / Pillow11.3.0; no new image-generation model was available or invoked
+- Human modifications: minami direction; agent-authored composition, masking, rigid-part layout and full RGBA export; no palette reduction
+- License and redistribution terms: existing project rights undecided; development branch only, no public-release approval
+- Required attribution: retain original P3 source and this derivative entry; no new third-party requirement
+- Reviewer and review date: ChatGPT PNG decode, dimensions/alpha and visual atlas inspection,2026-09-09; game review pending
+- Notes: export SHA256 `3b2d26190e28e9629e7fca02291f51f00c9400245bd141dbe04ae005b5101ea5`. External explicit-input/output recipe `make_art.py` SHA256 `673e8f8832eb4bf5221f35ac607d9c1edfbf7069a32483b98c4b8ec55ddc4f65`. All predecessors preserved. Runtime code animates independent atlas regions, never the small icon.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V2/ReliquaryAssemblies.png`
+- Asset ID: ritual-v2-reliquaryassemblies-2026-09-09
+- Asset type: weapon assembly atlas
+- Creator: project-directed independent geometry/composition by ChatGPT; original P3 material credits retained
+- Creation/acquisition date: 2026-09-09
+- Source type: generated
+- Source work and URL: existing project Assets/Textures/NPCs/NullCantorRigAtlas.png; see its original ImageGen provenance; source SHA256 b3485d1f3a7d66f99f78fed01da34f1e6e52ec32fcd57e9aa46afb6584afe640
+- Tool/model/version: Python3 / Pillow11.3.0; no new image-generation model was available or invoked
+- Human modifications: minami direction; agent-authored composition, masking, rigid-part layout and full RGBA export; no palette reduction
+- License and redistribution terms: existing project rights undecided; development branch only, no public-release approval
+- Required attribution: retain original P3 source and this derivative entry; no new third-party requirement
+- Reviewer and review date: ChatGPT PNG decode, dimensions/alpha and visual atlas inspection,2026-09-09; game review pending
+- Notes: export SHA256 `fceaf736393efec231944657e935cd09a060f7c9b1d6d7000d0726721be5efcd`. External explicit-input/output recipe `make_art.py` SHA256 `673e8f8832eb4bf5221f35ac607d9c1edfbf7069a32483b98c4b8ec55ddc4f65`. All predecessors preserved. Runtime code animates independent atlas regions, never the small icon.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/V2/RibbonFeather.png`
+- Asset ID: ritual-v2-ribbonfeather-2026-09-09
+- Asset type: VFX feather texture
+- Creator: project-directed independent geometry/composition by ChatGPT; original P3 material credits retained
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: analytic edge feather and deterministic sinusoidal grain, no imported material
+- Tool/model/version: Python3 / Pillow11.3.0; no new image-generation model was available or invoked
+- Human modifications: minami direction; agent-authored composition, masking, rigid-part layout and full RGBA export; no palette reduction
+- License and redistribution terms: existing project rights undecided; development branch only, no public-release approval
+- Required attribution: retain original P3 source and this derivative entry; no new third-party requirement
+- Reviewer and review date: ChatGPT PNG decode, dimensions/alpha and visual atlas inspection,2026-09-09; game review pending
+- Notes: export SHA256 `095d2942363202822d2ffa0a8695e42790950652b3b6f1a544a5b212a23bb4a2`. External explicit-input/output recipe `make_art.py` SHA256 `673e8f8832eb4bf5221f35ac607d9c1edfbf7069a32483b98c4b8ec55ddc4f65`. All predecessors preserved. Runtime code animates independent atlas regions, never the small icon.
+
+
 ### Null Cantor claw inventory icon — 0.2.29
 
 - Runtime file: `Assets/Textures/Items/RitualArmaments/NullCantorClaws.png`

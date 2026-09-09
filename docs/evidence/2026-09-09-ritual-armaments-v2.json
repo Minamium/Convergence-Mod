@@ -1,0 +1,33 @@
+{
+  "build": "0.2.30",
+  "protocol": 23,
+  "base_commit": "2561251cd459b997391dbaededbf6c62b2aed9bf",
+  "checks": {
+    "static": "passed; documentation catalog, repository policy and YAML",
+    "domain": "passed; 124 deterministic cases",
+    "codec": "passed; 324 round-trips, 50 malformed/truncated input rejections",
+    "tooling": "passed; 8 cases",
+    "native_tml_api_compile": "passed against hash-pinned tModLoader v2026.07.3.0, FNA and ReLogic; ONLY unchanged native Rogue adapter replaced by compile-time facade, not full Calamity/package build",
+    "asset_pixels": "passed; all six RGBA pixel hashes match locally inspected exports",
+    "diff_whitespace": "passed"
+  },
+  "user_report": "0.2.29 claw artwork accepted; slight animation stutter reported, not attributed to machine",
+  "not_run": [
+    "full native Calamity package build",
+    "in-game animation acceptance",
+    "multiplayer acceptance",
+    "matched DPS comparison"
+  ],
+  "image_model_generation": "unavailable; original material composition and deterministic PNG generation used instead",
+  "scope": "Only weapon implementations/presentation, six runtime exports, localization, focused tests and owning docs. Boss, raid, recovery, music and drop/exchange rules unchanged.",
+  "assembly_input": "4829527a492c732ff1e8194a5401c8a05398757e",
+  "workflow_run": "34295021751",
+  "asset_sha256": {
+    "Assets/Textures/Items/RitualArmaments/V2/ReliquaryAssemblies.png": "fceaf736393efec231944657e935cd09a060f7c9b1d6d7000d0726721be5efcd",
+    "Assets/Textures/Items/RitualArmaments/V2/RibbonFeather.png": "095d2942363202822d2ffa0a8695e42790950652b3b6f1a544a5b212a23bb4a2",
+    "Assets/Textures/Items/RitualArmaments/V2/PaleMeridian.png": "3b2d26190e28e9629e7fca02291f51f00c9400245bd141dbe04ae005b5101ea5",
+    "Assets/Textures/Items/RitualArmaments/V2/ChoirOfTheUnmade.png": "d4c71e0a83582f063bf17834a4b836d7529ac6067a2884d0b38fe9c8fdc799e4",
+    "Assets/Textures/Items/RitualArmaments/V2/LacunaTestament.png": "3a50b74415971088b0abd0e5477156a163cd80917adee731072edef2ee7b8bb5",
+    "Assets/Textures/Items/RitualArmaments/V2/LastWitness.png": "b015acd90c146e681e9c64ed3cddc4e36f2a19b5fb05546e04dfac8f3d83afcd"
+  }
+}

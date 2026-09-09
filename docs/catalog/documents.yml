@@ -608,13 +608,13 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: First Severance — Five Ritual Armaments
-  content_sha256: ef8ca59d2cf0865f8f7f2c50dfdabdf283fd0b13fd10df7d92fabaa5d4f1ceff
+  content_sha256: 2d830b522f5052be7671039d8718aa7373154a509550f27b67959065248f06be
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - art
-  last_reviewed: '2026-09-08'
+  last_reviewed: '2026-09-09'
   source_of_truth_for:
   - first_severance.reward_weapons
   aliases:
@@ -983,12 +983,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: df35a18e0f1df0a5cc51b99ba7570020fece1d133832cb4afd4ada7dbca72b50
+  content_sha256: ba9d50723f303d5f3d0ac16c1da67d36103ad7817bf049ec0633ce7718b66398
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-08'
+  last_reviewed: '2026-09-09'
   source_of_truth_for:
   - project.implementation_status
   aliases:

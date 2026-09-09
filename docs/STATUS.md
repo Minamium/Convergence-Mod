@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-08
+last_reviewed: 2026-09-09
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.29**, protocol **23**. Null Refrain is now the user-requested giant dual-claw weapon with alternating true-melee sweeps and a six-second charged remote crush; other four weapons and Boss behavior remain unchanged. [Weapon specification](encounters/first-severance/WEAPONS.md#null-cantors-claws--accepted-melee-redesign-0229) owns the revised controls, presentation and tuning.
+Development **0.2.30**, protocol **23**. The remaining four ritual weapon forms now deploy a three-cannon battery, folio/lens archive, assembling choir organ and triangular stealth verdict. Claw artwork/attack balance are retained; its idle/active hand seams and trail rendering are revised for continuity. [Weapon specification](encounters/first-severance/WEAPONS.md#apparatus-redesign--0230) owns controls, timelines and power budgets. Boss behavior and reward exchanges remain unchanged.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. Other timing/damage and the five ritual armaments are retained. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. Public-development descriptions and icons are prepared, not published or release-approved; see [publication preparation](RELEASE_PROCESS.md#development-publication-preparation).
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[Apparatus v2 evidence](evidence/2026-09-09-ritual-armaments-v2.json) records the feature branch's selected checks and limits. The user accepted the0.2.29 claw design and reported mild animation stutter; the new continuity pass targets identified presentation seams. Native Calamity package compilation and audiovisual/multiplayer/DPS acceptance of0.2.30 remain user/Codex-owned until observed. No GUI session or FPS/log subsystem is added.
 
 [Dual-claw evidence](evidence/2026-09-09-null-cantor-claws.json) records branch checks and main integration. The complete native Calamity-dependent package now builds successfully (zero errors, four existing nullable warnings). Inventory-only padding correction fits the claws to the same slot envelope as other weapons; original artwork is preserved. Actual game audiovisual acceptance, multiplayer behavior and matched DPS remain user-owned.
 
@@ -61,6 +63,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User/Codex-owned0.2.30: build/load matching peers; inspect repeated left/right claw cycles (including left-facing and high attack speed), battery muzzle alignment, archive fourth-cast accent, choir assembly/retarget/despawn, and the stealth verdict's track/lock/strike. Compare matched class-endgame damage only after loading; no Boss HP adjustment implied.
 
 User/Codex-owned0.2.29: reload the claw branch; confirm giant alternating hands, normal true-melee bonuses, single six-second charge use, clicked-location compression, both clients' silhouettes and the new full-color icon. No FPS/log-collection system or unrelated Boss retuning is added.
 

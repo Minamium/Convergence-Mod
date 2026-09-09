@@ -52,7 +52,8 @@ internal static class RitualArmamentItems
     internal static void Pose(Player player, IEntitySource source, RitualArmamentKind kind, Vector2 aim, int ticks, int accent)
     {
         foreach (Projectile old in Main.ActiveProjectiles)
-            if (old.owner == player.whoAmI && old.type == ModContent.ProjectileType<RitualArmamentPose>()) old.Kill();
+            if (old.owner == player.whoAmI && old.ModProjectile is RitualArmamentPose pose && pose.Kind == kind)
+            { pose.Rearm(aim, ticks, accent); return; }
         Projectile.NewProjectile(source, player.MountedCenter, aim,
             ModContent.ProjectileType<RitualArmamentPose>(), 0, 0, player.whoAmI,
             (float)kind, Math.Clamp(ticks, 6, 90), accent);
@@ -62,7 +63,7 @@ internal static class RitualArmamentItems
 public abstract class RitualArmament : ModItem, IRitualArmament
 {
     public abstract RitualArmamentKind Kind { get; }
-    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/" + Name;
+    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/V2/" + Name;
     public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments." + Name + ".Name");
     public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments." + Name + ".Tooltip");
     public override bool CanUseItem(Player player) => RitualArmamentItems.Usable(player);
@@ -84,11 +85,15 @@ public sealed class PaleMeridian : RitualArmament
         if (player.whoAmI != Main.myPlayer) return false;
         int shot = player.GetModPlayer<RitualArmamentPlayer>().Next(Kind, 6);
         Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
-        // Ammo contributes its standard damage; its projectile is deliberately converted.
-        Projectile.NewProjectile(source, player.MountedCenter + aim * 136, aim * 19,
-            ModContent.ProjectileType<MeridianNeedle>(),
-            RitualArmamentRules.ScaledDamage(damage, RitualArmamentRules.RangedMultiplier(shot)),
-            knockback, player.whoAmI, 0, -1, shot == 5 ? 1 : 0);
+        // Three physical emitters, one budget. Sixth shot still totals 2.1x, not 6.3x.
+        for (int barrel = 0; barrel < 3; barrel++)
+        {
+            var offset = RitualArmamentChoreography.CannonMuzzle(barrel);
+            Vector2 at = player.MountedCenter + new Vector2(offset.X, offset.Y).RotatedBy(aim.ToRotation());
+            Projectile.NewProjectile(source, at, aim * 19, ModContent.ProjectileType<MeridianNeedle>(),
+                RitualArmamentRules.ScaledDamage(damage, RitualArmamentChoreography.RangedRayShare(shot)),
+                knockback, player.whoAmI, -4 - barrel * 2, -1, barrel | (shot == 5 ? 4 : 0));
+        }
         RitualArmamentItems.Pose(player, source, Kind, aim, player.itemAnimationMax, shot == 5 ? 1 : 0);
         return false;
     }
@@ -108,11 +113,16 @@ public sealed class LacunaTestament : RitualArmament
     {
         if (player.whoAmI != Main.myPlayer) return false;
         Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
+        int cast = player.GetModPlayer<RitualArmamentPlayer>().Next(Kind, 4);
         for (int lens = 0; lens < 3; lens++)
-            Projectile.NewProjectile(source, player.MountedCenter, aim.RotatedBy((lens - 1) * .24f) * 13,
-                Item.shoot, RitualArmamentRules.ScaledDamage(damage, .75f), knockback, player.whoAmI,
-                -9 + lens * 3, -1, lens);
-        RitualArmamentItems.Pose(player, source, Kind, aim, player.itemAnimationMax, 1);
+        {
+            var offset = RitualArmamentChoreography.LensMuzzle(lens);
+            Vector2 at = player.MountedCenter + new Vector2(offset.X, offset.Y).RotatedBy(aim.ToRotation());
+            Projectile.NewProjectile(source, at, aim * 13, Item.shoot,
+                RitualArmamentRules.ScaledDamage(damage, RitualArmamentChoreography.MagicRayShare(cast)),
+                knockback, player.whoAmI, -6 - lens * 3, -1, lens | (cast == 3 ? 4 : 0));
+        }
+        RitualArmamentItems.Pose(player, source, Kind, aim, player.itemAnimationMax, cast == 3 ? 1 : 0);
         return false;
     }
 }
@@ -140,8 +150,12 @@ public sealed class ChoirOfTheUnmade : RitualArmament
         if (player.whoAmI != Main.myPlayer) return false;
         player.AddBuff(Item.buffType, 2);
         // Spawn near the owner, not at an unchecked distant cursor coordinate.
+        float clock = 0;
+        foreach (Projectile existing in Main.ActiveProjectiles)
+            if (existing.owner == player.whoAmI && existing.ModProjectile is ChoirSentinel)
+            { clock = existing.ai[0]; break; }
         int index = Projectile.NewProjectile(source, player.MountedCenter - new Vector2(0, 80),
-            Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, 0, -1, 0);
+            Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, clock, -1, 0);
         if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].originalDamage = Item.damage;
         RitualArmamentItems.Pose(player, source, Kind, RitualArmamentItems.Aim(velocity, player.direction), player.itemAnimationMax, 1);
         return false;
@@ -151,7 +165,7 @@ public sealed class ChoirOfTheUnmade : RitualArmament
 public sealed class LastWitness : CalamityRogueArmament, IRitualArmament
 {
     public RitualArmamentKind Kind => RitualArmamentKind.Rogue;
-    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/" + Name;
+    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/V2/" + Name;
     public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Name");
     public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Tooltip");
     public override void SetDefaults()

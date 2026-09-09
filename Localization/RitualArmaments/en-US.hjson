@@ -8,19 +8,19 @@
         },
         "PaleMeridian": {
           "Name": "Pale Meridian",
-          "Tooltip": "Converts bullets into strongly homing ivory needles.\nEvery sixth shot is a stronger verdict that pierces up to three enemies.\n75% chance not to consume ammunition.\nExchange one-for-one with any other ritual armament at a Work Bench."
+          "Tooltip": "Deploy three floating ritual cannons and convert bullets into homing lances.\nEvery sixth volley converges with greater power and piercing.\n75% chance not to consume ammunition.\nExchange one-for-one with other ritual armaments at a Work Bench."
         },
         "LacunaTestament": {
           "Name": "Lacuna Testament",
-          "Tooltip": "Three floating lenses open in sequence and release homing rays.\nEach lens contributes to the same shot damage budget.\nExchange one-for-one with any other ritual armament at a Work Bench."
+          "Tooltip": "Unfold a floating archive and three lenses that release homing rays.\nEvery fourth cast opens the archive fully for an empowered convergence.\nExchange one-for-one with other ritual armaments at a Work Bench."
         },
         "ChoirOfTheUnmade": {
           "Name": "Choir of the Unmade",
-          "Tooltip": "Summons an articulated sentinel, using one minion slot.\nSentinels form a choir and fire staggered homing notes; every third note is stronger.\nUses the normal minion target command.\nExchange one-for-one with any other ritual armament at a Work Bench."
+          "Tooltip": "Summon a one-slot voice chamber.\nThe choir assembles into a great organ for its empowered third note.\nSupports normal minion target commands.\nExchange one-for-one with other ritual armaments at a Work Bench."
         },
         "LastWitness": {
           "Name": "Last Witness",
-          "Tooltip": "A strongly homing ritual blade returns along a smooth arc.\nIts damage is split between the outward and returning passes.\nStealth strikes release three additional homing witnesses.\nExchange one-for-one with any other ritual armament at a Work Bench."
+          "Tooltip": "Cast a homing triangular blade that tears a dark path and returns.\nStealth strikes manifest three colossal seals around the target.\nThe seals briefly track, lock, then converge into one triangular execution.\nExchange one-for-one with other ritual armaments at a Work Bench."
         }
       },
       "Buffs": {

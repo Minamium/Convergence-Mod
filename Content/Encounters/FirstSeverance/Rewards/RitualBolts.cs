@@ -14,11 +14,14 @@ public abstract class RitualBolt : ModProjectile
     internal abstract RitualArmamentKind Kind { get; }
     internal virtual float Speed => 36;
     internal float Age => Projectile.ai[0];
-    internal bool Empowered => Projectile.ai[2] > .5f;
+    internal bool Empowered => Kind is RitualArmamentKind.Ranged or RitualArmamentKind.Magic
+        ? ((int)Projectile.ai[2] & 4) != 0 : Projectile.ai[2] > .5f;
+    internal int Lane => Math.Clamp((int)Projectile.ai[2] & 3, 0, 2);
     public override string Texture => RitualArmamentItems.TexturePath;
     public override void SetStaticDefaults()
     {
-        ProjectileID.Sets.TrailCacheLength[Type] = 20;
+        ProjectileID.Sets.TrailCacheLength[Type] = 42;
+        ProjectileID.Sets.DrawScreenCheckFluff[Type] = 1800;
         ProjectileID.Sets.TrailingMode[Type] = 2;
     }
     public override void SetDefaults()
@@ -29,6 +32,7 @@ public abstract class RitualBolt : ModProjectile
         Projectile.extraUpdates = 1; Projectile.timeLeft = 300;
         Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = -1;
     }
+    public override bool ShouldUpdatePosition() => Age >= 0;
     public override bool CanHitPvp(Player target) => false;
     public override bool? CanHitNPC(NPC target) => hitRoots.Contains(RitualTargeting.Root(target)) ? false : null;
     public override bool? CanDamage() => Age >= 0 ? null : false;
@@ -42,7 +46,9 @@ public abstract class RitualBolt : ModProjectile
         if (previous < 0)
         {
             // Lens opening is real windup, with no damaging stationary projectile.
-            Projectile.Center = owner.MountedCenter + Projectile.velocity.SafeNormalize(Vector2.UnitX) * 64;
+            var local = Kind == RitualArmamentKind.Ranged
+                ? RitualArmamentChoreography.CannonMuzzle(Lane) : RitualArmamentChoreography.LensMuzzle(Lane);
+            Projectile.Center = owner.MountedCenter + new Vector2(local.X, local.Y).RotatedBy(Projectile.velocity.ToRotation());
             Projectile.rotation = Projectile.velocity.ToRotation();
             return;
         }
@@ -79,7 +85,7 @@ public sealed class WitnessEcho : RitualBolt { internal override RitualArmamentK
 public sealed class WitnessBlade : ModProjectile
 {
     private readonly HashSet<int> hits = new();
-    private bool returning, echoesReleased;
+    private bool returning, sealReleased;
     internal bool Returning => returning;
     internal bool Stealth => ((int)Projectile.ai[2] & 1) != 0;
     internal float Age => Projectile.ai[0];
@@ -106,15 +112,17 @@ public sealed class WitnessBlade : ModProjectile
         if (!RitualArmamentItems.Usable(owner)) { Projectile.Kill(); return; }
         Projectile.ai[0] += 1f / Projectile.MaxUpdates;
         Projectile.rotation += .22f / Projectile.MaxUpdates;
-        if (!echoesReleased && Age >= 12)
+        if (!sealReleased && Age >= 14 && Stealth && Projectile.owner == Main.myPlayer)
         {
-            echoesReleased = true;
-            if (Stealth && Projectile.owner == Main.myPlayer)
-                for (int i = 0; i < 3; i++)
-                    Projectile.NewProjectile(Projectile.GetSource_FromThis(), Projectile.Center,
-                        Projectile.velocity.RotatedBy((i - 1) * .65f), ModContent.ProjectileType<WitnessEcho>(),
-                        RitualArmamentRules.ScaledDamage(Projectile.damage, .20f), Projectile.knockBack * .4f,
-                        Projectile.owner, 0, -1, 1);
+            NPC? sealTarget = RitualTargeting.Acquire(Projectile, owner);
+            if (sealTarget is not null || Age >= 30)
+            {
+                sealReleased = true;
+                Vector2 at = sealTarget?.Center ?? Projectile.Center;
+                Projectile.NewProjectile(Projectile.GetSource_FromThis(), at, Vector2.Zero,
+                    ModContent.ProjectileType<WitnessVerdict>(), RitualArmamentRules.ScaledDamage(Projectile.damage, .60f),
+                    Projectile.knockBack, Projectile.owner, 0, sealTarget?.whoAmI ?? -1, 0);
+            }
         }
         bool returnRequested = Age >= 42 || ((int)Projectile.ai[2] & 2) != 0;
         if (!returning && returnRequested)

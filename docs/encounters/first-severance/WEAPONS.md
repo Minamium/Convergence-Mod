@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - art
-last_reviewed: 2026-09-08
+last_reviewed: 2026-09-09
 source_of_truth_for:
   - first_severance.reward_weapons
 aliases:
@@ -24,7 +24,7 @@ related_docs:
 
 ## Null Cantor's Claws — accepted melee redesign, 0.2.29
 
-This section supersedes the sword/echo row and melee budget below. Internal item identity `NullRefrain`, the accepted Victory drop and all one-for-one exchanges are unchanged. Other four weapons, Boss attacks, Raid timing, recovery, music and protocol23 are untouched. The old sword projectile remains only as an unused legacy type; the item cannot fire it.
+This section replaces the original sword/echo prototype. Internal item identity `NullRefrain`, the accepted Victory drop and all one-for-one exchanges are unchanged. Boss attacks, Raid timing, recovery, music and protocol23 are untouched. The other four forms follow the v2 specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it.
 
 **Left click:** alternate independently articulated left/right five-finger claws using the actual P3 rig material. The hand expands from0.68x to2.30x during the stroke, then retracts; the whole attack stays inside560 world pixels of the player. Base duration28ticks, bounded10–90 after native true-melee speed. Only the palm and swept finger capsules damage, once per logical NPC root per swipe. No homing echo projectiles: this is the user's replacement true-melee design. Calamity's registered `TrueMeleeDamageClass` is resolved through the compatibility adapter, without using its internal singleton.
 
@@ -46,23 +46,39 @@ User-approved concept: obsidian/ivory/aged-gold ritual machinery, hollow apertur
 
 Accepted Victory still drops one Null Refrain for each frozen-roster participant as ordinary shared world items. At a Work Bench, any one armament converts into any other, consuming exactly one input and producing one output. The20 directed recipes neither multiply rewards nor allow pre-Raid crafting. No recipes use vanilla materials alone. The prior statement that the reward has no recipe is superseded only for these exchanges.
 
-## Five play styles
+## Apparatus redesign — 0.2.30
 
-| Form | Behavior |
+The four ranged forms are now large, material-bearing weapon rituals rather than small icon sprites with thin lines. Existing item names/IDs, class identities, Work Bench exchanges, ammo/mana cost and base damage are retained. The accepted claw geometry is not retuned.
+
+| Form | Current behavior |
 |---|---|
-| Null Refrain / 断唱 |22/22/32-tick base three-cut cycle;310/405px reach. First two cuts each release one0.40x homing echo; third physical cut is1.7x and releases three0.30x base-damage echoes. Quintic pose and swept physical collision; only the real blade and echo heads damage. |
-| Pale Meridian / 蒼白の子午線 |12-tick bullet-converting rifle,75% ammunition conservation. Sixth shot2.1x and up to three distinct NPC roots. Physical muzzle origin, recoil, split rail light and long harmless wake. |
-| Lacuna Testament / 欠落の遺言 |20-tick cast,18 base mana. Three0.75x rays open over3/6/9-tick windups; the floating book and lenses are harmless. |
-| Choir of the Unmade / 未成の聖歌隊 |One minion slot per sentinel. Smooth formation/approach,36-tick notes staggered by formation position; every third note1.4x. Normal minion targeting and sacrifice; idle bodies do not deal contact damage. |
-| Last Witness / 最後の証人 |40-tick reusable Rogue throw. Damage shares0.70 outbound/0.30 return, once per logical NPC root on each pass. Native Calamity stealth strike adds three0.20x echoes. Smooth targeted outbound flight and recall, not a forced player dash. |
+| Null Refrain / 断唱・虚掌 | The giant alternating true-melee claws described above. Six-second charge and remote crush are unchanged. Presentation now enters/exits the same parked two-hand poses. |
+| Pale Meridian / 蒼白の子午線 | Three large floating cannon bodies behind the player open hinged buttresses and fire from three shared physical muzzle coordinates. Each 12-tick use consumes at most one bullet, retaining 75% conservation. Its three needles launch after4/6/8 ticks and each carries one third of the use's budget. Sixth use totals2.1x and each needle can pierce three distinct roots; no needle hits one root three times. |
+| Lacuna Testament / 欠落の遺言 | A two-cover codex opens inside an orbiting folio archive. Three large lenses fire from distinct matching coordinates after6/9/12 ticks. Uses20 ticks and18 base mana. First three casts use3x0.60 damage; fourth cast uses3x1.20 with larger release surfaces. Four-cast mean remains3x0.75 per cast. |
+| Choir of the Unmade / 未成の聖歌隊 | Each 1-slot sentinel carries an articulated pipe/wing assembly. Over108 ticks each fires two staggered notes, then moves into a common organ formation for a shared third accent at tick88. Third notes retain1.4x damage per slot. Large shared crown/rings are ornamental, not extra damage. Normal minion sacrifice/manual targeting remain. |
+| Last Witness / 最後の証人 | A much larger rotating triangular key trails a broad dark/violet fracture ribbon. Outbound/return shares remain0.70/0.30. A native stealth strike replaces its old3x0.20 echo budget with ONE0.60 triangular verdict: briefly follows the selected target, locks at16 ticks, converges, strikes at28–31 and dissipates by56. Radius185 triangle vs AABB is the real footprint, not a large square or each blade prop separately. |
 
-## Homing and presentation
+Ranged/magic cast apparatus persists across repeated uses instead of being killed and recreated. A serial distinguishes rearming from repeated snapshots. It folds away after use stops, and is canceled on death/Down/incapacitation/item switch. Damage projectiles use native owner creation/replication, not new Encounter requests. Summon bodies stop attacking during Down; existing summoned slots are not forcibly deleted. Damage notes and verdicts terminate for unusable owners.
 
-Acquire at1800px, retain at2100px, honor line of sight and chaseable targets. Target identity is selected only by the ordinary projectile owner and synchronized through NPC indices in native projectile AI; observers do not independently switch targets. Manual minion targets take priority. Smooth turn cap0.24rad per game tick and exponential speed response are normalized by extraUpdates; predictive lead is capped to10 ticks. Head sweeps cover fast motion; decorative trails never enlarge damage. Segmented enemies share root hit ledgers to avoid multiplying a single strike across every body segment. These weapons disable PvP damage.
+### Claw continuity correction
 
-Native player weapon projectiles follow the existing cooperative tModLoader ownership model; this is not an anti-cheat guarantee or a new server-owned Raid damage adapter. No custom encounter packet/ID is added and protocol21 is retained. Participants must nevertheless load the same Mod content build.
+The old drawing jumped between a fixed off-hand `SwingPose(.91)`, a faded projectile-local active hand, and an unrelated idle pose whenever an attack projectile started/ended. New shared `PresentedHand` blends only the harmless windup/recovery to a common world-space parked pose. Both hands remain visible. During the live window, all finger joints match the unchanged collision pose exactly; player-root lag is not introduced. Mirroring follows facing. The attack's actual duration, growth, damage and live ticks do not change.
 
-Client-only visuals use fractional rendering, tapered connected trails, layered low-opacity blade echoes and local bounded impact accents. Ordinary gunfire stays narrow; sixth shot, third cut and stealth strike carry stronger punctuation. Reduced Effects and Screen Shake remain respected. No game pause, forced zoom, input lock, persistent global flag or full-screen white flash. Effects reset on world/unload, and source textures remain ReLogic-owned. Existing sounds are reused through a separate weapon Identifier group, so weapon playback does not evict Boss cues. No master audio file changes.
+A single fractional render clock drives all five weapons. Flight centers interpolate between completed game ticks; persistent apparatus aim uses short-angle interpolation. Claw trails sample only the actual traversed arc rather than clamping many samples to one endpoint. Continuous tapered mesh strips replace disconnected line-sprite caps; dark volume, saturated glow and white core have separate widths. This addresses identified code discontinuities; user-reported stutter resolution still needs in-game confirmation, not a claim based on a benchmark.
+
+### Presentation constraints
+
+Claws keep their accepted original P3 artwork. Other forms use a new full-color2048x1024 assembly atlas: cannon, buttress, cover, folio lens, pipe, crown, triangular blade and relic. Each rigid part is transformed independently. New128x128 icons replace the previous32-color concept thumbnails for the other four forms. Source images and older exports remain preserved.
+
+The export method in this session is project-owned P3 material composition plus independently authored geometry/PNG generation, **not a new image-model generation**. No new model output or model-version claim is made. The external recipe takes explicit input/output paths; exact assets/hashes/provenance are in `Assets/ATTRIBUTION.md`. No Calamity/HotOG/WotG art or shaders are imported.
+
+Major attacks occupy hundreds of world pixels: three-barrel battery, folio/lens archive, concert organ, triangular verdict. Brightness is localized; there is no white-screen fill, forced zoom, real hitstop or input lock. Reduced Effects keeps major silhouettes and real strike footprints, but reduces trail intensity, ornamental folios, shards and shake. Native weapon audio uses a separate bounded Identifier group; existing Boss/music masters are unchanged. Procedural GPU objects are disposed on Mod unload; per-world impacts/voices are cleared on world unload. Sprite and mesh passes restore render state.
+
+## Homing and synchronization
+
+Acquire at1800px, retain at2100px, honor line of sight and chaseable targets. The projectile owner chooses targets through native projectile AI; replicas follow the chosen index. Manual minion targets take priority. Turn cap0.24rad per real tick, exponential speed response, and10-tick maximum predictive lead remain normalized by extraUpdates. Swept head collision prevents fast needles skipping a target; decorative wake width is not hit width. NPC segments use shared-root hit ledgers. These weapons do not damage PvP players.
+
+The cooperative native projectile ownership model is unchanged; this is not an anti-cheat guarantee or server-owned Raid weapon rewrite. The encounter protocol stays23 because no Encounter DTO/ID changes. The native pose ExtraAI and content set changed: **all peers must update to the same0.2.30 build**, even though the Encounter protocol number did not change.
 
 ## Initial power budget — not measured DPS
 
@@ -72,7 +88,7 @@ Goal: approximately5–15% above a selected same-class Calamity2.2.4 endgame ben
 
 | Class | Initial base damage | Nominal raw output/sec |
 |---|---:|---:|
-| Melee |4235 |18054, all physical cuts and echoes connect,76 base ticks |
+| Melee |7700 |16500 in continuous claw contact; about18.2k including charged-crush occupation/refill |
 | Ranged |2002 |11845, six-shot cycle, before ammunition contribution |
 | Magic |2024 |13662, all three rays connect |
 | Summon |968 |1828 per slot;18284 for10 slots |
@@ -82,10 +98,10 @@ These are arithmetic budgets, not in-game expected DPS: no defense, crits, armor
 
 ## Provenance and engine seams
 
-Textures are alpha-masked exports of the user-approved original concept board, generation d492a069-958c-4f23-9747-c26693b26d66. Compact32-color runtime exports are initial game silhouettes, not newly painted production atlases. The original board, extraction script and full-color exports are retained outside the repository. Every shipped PNG is recorded in Assets/ATTRIBUTION.md; previous Boss/weapon/audio files are preserved.
+The old32-color concept-derived exports are retained as historical assets but no longer draw the four active weapon forms. The current P3-derived atlas/icons and independent ribbon PNG have separate exact attribution entries. Existing original P3 provenance remains authoritative for the material source. Current implementation/verification status is in [Status](../../STATUS.md).
 
 Runtime target: pinned tModLoader2026.07.3.0 / source666f69962d3bdffde54fc14025f02634965b4e7c, Calamity2.2.4. Hook/reference research used official ModItem/ModProjectile/SoundStyle documentation and pinned public Calamity source1a8cebd27ec5615316b78f71973446b5528d2b78 (2.2.2), including RogueWeapon, ScarletDevil, Exoblade, Photoviscerator, Eternity and Endogenesis. That source is **not proven identical** to the2.2.4 runtime. No external implementation/asset is copied. The narrow Rogue bridge retains native RogueWeapon hooks and marks native stealth projectiles only inside Common/Compatibility/Calamity.
 
 ## Verification and handoff
 
-Pure tests cover bounded easing, active-window continuity, homing turn/speed bounds, extra-update invariance and burst/return budget accounting. Existing domain/codec CI is not a full Mod build. User/Codex should build/load on the pinned environment and check all five forms, native stealth consumption, minion slots/targeting, texture pivots, projectile cancellation on Down/death and matched single-target damage. Do not mark those checks passed until observed.
+Pure tests additionally cover every claw/idle seam, live joint equality, blend boundary continuity, three-muzzle budget conservation, fourth-cast budget accounting,40-slot choir schedules, and the bounded triangular verdict. Existing bounded easing, homing and codec tests remain. Existing domain/codec CI is not a full Mod build. User/Codex should build/load on the pinned environment and check all five forms, native stealth consumption, minion slots/targeting, texture pivots, projectile cancellation on Down/death and matched single-target damage. Do not mark those checks passed until observed.

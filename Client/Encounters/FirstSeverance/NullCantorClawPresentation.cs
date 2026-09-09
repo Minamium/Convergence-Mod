@@ -86,6 +86,11 @@ public sealed class NullCantorClawPresentation : ModSystem
     {
         if (Main.dedServ || Main.gameMenu) return;
         Array.Clear(attacking);
+        RitualSurfacePass.Begin();
+        foreach (var projectile in Main.ActiveProjectiles)
+            if (projectile.ModProjectile is NullCantorClawSwipe swipe && swipe.ValidOwner)
+                NullCantorClawArt.QueueSwipeTrail(swipe, RitualRenderClock.Sample(swipe.Age));
+        RitualSurfacePass.Flush();
         SpriteBatch b = Main.spriteBatch;
         b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
@@ -95,10 +100,7 @@ public sealed class NullCantorClawPresentation : ModSystem
             {
                 if (p.ModProjectile is not NullCantorClawProjectile claw || !claw.ValidOwner) continue;
                 if (p.owner < attacking.Length) attacking[p.owner] = true;
-                var state = p.GetGlobalProjectile<NullCantorClawVisualState>();
-                float fraction = Main.gamePaused || state.Stamp == 0 ? 0 : (float)Math.Clamp(
-                    (Stopwatch.GetTimestamp() - state.Stamp) * 60d / Stopwatch.Frequency, 0, 1);
-                float age = claw.Age + fraction;
+                float age = RitualRenderClock.Sample(claw.Age);
                 if (claw is NullCantorClawSwipe swipe) NullCantorClawArt.DrawSwipe(b, swipe, age);
                 else NullCantorClawArt.DrawCrush(b, (NullCantorClawCrush)claw, age);
             }
@@ -109,9 +111,7 @@ public sealed class NullCantorClawPresentation : ModSystem
                 if (!attacking[slot])
                     for (int hand = 0; hand < 2; hand++)
                     {
-                        float side = hand == 0 ? -1 : 1;
-                        var pose = new CantorClawPose(new(side * 30, 1 + MathF.Sin(Main.GlobalTimeWrappedHourly * 2 + hand) * 3),
-                            hand == 0 ? 2.4f : .74f, .38f, .25f, hand == 0 ? 1 : -1);
+                        var pose = RitualArmamentChoreography.ParkedHand(hand, RitualRenderClock.Time, player.direction);
                         NullCantorClawArt.Hand(b, pose, player.MountedCenter, 0, 1, 1, false);
                     }
                 if (slot == Main.myPlayer)
@@ -139,21 +139,13 @@ public sealed class NullCantorClawPresentation : ModSystem
         foreach (var id in voices) if (SoundEngine.TryGetActiveSound(id, out var s)) s.Stop();
         voices.Clear(); Array.Clear(attacking);
     }
-    public override void Unload() { OnWorldUnload(); NullCantorClawArt.Dispose(); }
+    public override void Unload() { OnWorldUnload(); NullCantorClawArt.Dispose(); RitualSurfacePass.Dispose(); }
 }
 
 [Autoload(Side = ModSide.Client)]
 public sealed class NullCantorClawItemVisuals : GlobalItem
 {
     public override bool AppliesToEntity(Item item, bool lateInstantiation) => item.ModItem is NullRefrain;
-    public override bool PreDrawInInventory(Item item, SpriteBatch b, Vector2 position, Rectangle frame,
-        Color drawColor, Color itemColor, Vector2 origin, float scale)
-    {
-        Texture2D texture = NullCantorClawArt.Icon;
-        b.Draw(texture, position, null, Color.White, 0, texture.Size() * .5f,
-            52f / texture.Width * Math.Min(1, scale * texture.Width / 52), SpriteEffects.None, 0);
-        return false;
-    }
     public override bool PreDrawInWorld(Item item, SpriteBatch b, Color lightColor, Color alphaColor,
         ref float rotation, ref float scale, int whoAmI)
     {
