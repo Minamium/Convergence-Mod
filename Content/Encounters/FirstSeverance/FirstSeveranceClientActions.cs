@@ -42,6 +42,8 @@ internal static class FirstSeveranceClientActions
                 return;
             }
 
+            if (ModContent.GetInstance<FirstSeveranceClientStateSystem>().EstimatedAuthorityTick < preparation.ReadyOpensTick)
+                return;
             RequestSetReady(snapshot, !member.IsReady);
             return;
         }
@@ -294,6 +296,19 @@ internal static class FirstSeveranceClientActions
 
     internal static void ShowRejected(string failureCode)
     {
+        string? preparationReason = failureCode switch
+        {
+            "first_severance.roster_player_not_alive" => "PlayerUnavailable",
+            FirstSeveranceArenaIssueCodes.SelectionRequired => "TooManyPlayers",
+            "first_severance.preparation_field_deploying" => "Deploying",
+            _ => null,
+        };
+        if (preparationReason is not null)
+        {
+            Main.NewText("[Convergence] " + Language.GetTextValue(
+                "Mods.Convergence.UI.PreparationDeployment." + preparationReason), 235, 170, 110);
+            return;
+        }
         string? reviveReason = failureCode switch
         {
             "first_severance.revive_sender_not_alive" or "revive.reviver_not_alive" => "ReviveNotAlive",

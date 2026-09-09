@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-09",
+  "version": "0.2.41",
+  "protocol": 28,
+  "base_commit": "8eee6d3",
+  "finding": "Old resolver selected only alive/non-ghost players within80tiles. A distant/unavailable active server player could be omitted while ordinary NPC replication still showed the Boss. This is a source-confirmed exclusion path; the historical three-player incidents have no matching retained per-slot preparation trace.",
+  "changes": "Full current-world active server roster, fail-closed capacity/eligibility, destination-section loading and gathering,180tick deployment before Ready,45tick all-Ready hold, per-player Ready labels/button, same field/mask through both cinematics, exact-Fight cleanup and membership-change cancellation.",
+  "verification": {
+    "domain": "10focused cases passed across preparation, Ready and roster runs; includes1-4distant players,5-player rejection,dead/epoch failures,early Ready,unready,cleanup,join/leave/slot reuse.",
+    "codec": "Protocol28:324round-trips and50malformed/truncated cases passed; no wire-layout change.",
+    "presentation": "9integration guards passed including shared world-mask capture and unscaled preparation UI.",
+    "native_build": "passed: native package0.2.41,0errors and4existing CS8632 warnings; source did not change during build.",
+    "build_record": ".local/builds/20260909T133622288772Z/record.json",
+    "source_hash": "f4c1bcf5bfb04d8f9759851394345191aad81c1dcfe3a0332469bfb96340d79d",
+    "artifact_sha256": "0c7c6429af5432737208ae640ab5f24c44324873642a90e4450d3ef5f8b95f11",
+    "artifact_bytes": 40439361,
+    "runtime": "not_run: distant3-player Host & Play,107% UI button hitbox,first/second cinematic continuity,late section loading and cancellation movement cleanup. No GUI/server launched."
+  },
+  "preserved": "User-accepted Raid combat/visual/audio baseline and original assets; existing two English localization modifications remain unstaged and unmodified. No old copies or assets deleted."
+}

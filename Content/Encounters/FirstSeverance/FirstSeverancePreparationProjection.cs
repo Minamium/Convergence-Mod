@@ -7,6 +7,12 @@ using Convergence.Common.Foundation.Identifiers;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
+internal static class FirstSeverancePreparationTimeline
+{
+    internal const int DeploymentTicks = 180;
+    internal const int ReadyHoldTicks = 45;
+}
+
 internal sealed class FirstSeverancePreparationProjection
 {
     public FirstSeverancePreparationProjection(
@@ -79,6 +85,9 @@ internal sealed class FirstSeverancePreparationProjection
     public TileRectangle ArenaBounds { get; }
 
     public ulong EnteredTick { get; }
+    public ulong ReadyOpensTick => EnteredTick + FirstSeverancePreparationTimeline.DeploymentTicks;
+    public float GroundX => (ArenaBounds.Left + ArenaBounds.Width / 2) * 16f;
+    public float GroundY => ArenaBounds.Bottom * 16f;
 
     public ulong DeadlineTick { get; }
 

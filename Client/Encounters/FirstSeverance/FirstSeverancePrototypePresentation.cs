@@ -60,6 +60,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
 {
     private readonly FirstSeveranceBossVisuals visuals = new();
     private readonly FirstSeveranceFeedback feedback = new();
+    private readonly FirstSeverancePreparationVisuals preparationVisuals = new();
     private FirstSeveranceSky? sky;
     internal double RenderTick => visuals.RenderTick;
     internal bool IsEnding => visuals.IsEnding;
@@ -74,9 +75,12 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     {
         if (!Main.dedServ && !Main.gameMenu)
         {
-            visuals.Update(ModContent.GetInstance<FirstSeveranceClientStateSystem>());
-            feedback.Update(ModContent.GetInstance<FirstSeveranceClientStateSystem>());
+            var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
+            if (state.Preparation is not null && visuals.IsEnding) visuals.Reset();
+            visuals.Update(state);
+            feedback.Update(state);
             feedback.UpdateEnding(visuals.IsEnding && visuals.EndingVictory, visuals.EndingAge);
+            preparationVisuals.Update(state);
         }
     }
 
@@ -84,6 +88,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     {
         fieldMask = null;
         visuals.Reset();
+        preparationVisuals.Reset();
         feedback.Reset();
         sky?.Reset();
     }
@@ -92,6 +97,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     {
         fieldMask = null;
         visuals.Reset(unload: true);
+        preparationVisuals.Reset();
         feedback.Reset(true);
         sky?.Unload();
         sky = null;
@@ -114,6 +120,20 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             return;
         var config = ModContent.GetInstance<FirstSeveranceVisualConfig>();
         var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
+        if (state.Preparation is { } preparing && preparing.TryGetMemberByServerSlot(Main.myPlayer, out _))
+        {
+            float age = Math.Clamp((float)((double)state.EstimatedAuthorityTick - preparing.EnteredTick)
+                / FirstSeverancePreparationTimeline.DeploymentTicks, 0, 1);
+            if (age < 1)
+            {
+                float weight = FirstSeveranceStageVisuals.CameraWeight(age);
+                Vector2 target = new Vector2(preparing.GroundX, preparing.GroundY - 560) - new Vector2(Main.screenWidth, Main.screenHeight) * .5f;
+                Main.screenPosition = Vector2.Lerp(Main.screenPosition, target, weight * .75f);
+                if (config.ScreenShake && !config.ReducedEffects)
+                    Main.screenPosition += new Vector2(MathF.Sin(age * 210), MathF.Cos(age * 177))
+                        * (8 * FirstSeveranceVisualCurves.PreRelease(state.EstimatedAuthorityTick, preparing.EnteredTick + 108, 24, 55));
+            }
+        }
         if (state.Combat is null && visuals.IsEnding)
         {
             float focus = FirstSeveranceStageVisuals.CameraWeight(visuals.EndingAge);
@@ -168,9 +188,13 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             return;
         FirstSeveranceClientStateSystem state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
         FirstSeveranceCombatProjection? combat = state.Combat;
+        FirstSeveranceContainmentBounds? visibleField = null;
         if (combat is not null && combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) && local.IsConnected)
+            visibleField = FirstSeveranceContainmentBounds.FromGround(combat.CoreX, combat.CoreY);
+        else if (state.Preparation is { } preparing && preparing.TryGetMemberByServerSlot(Main.myPlayer, out _))
+            visibleField = FirstSeveranceContainmentBounds.FromGround(preparing.GroundX, preparing.GroundY);
+        if (visibleField is { } field)
         {
-            var field = FirstSeveranceContainmentBounds.FromGround(combat.CoreX, combat.CoreY);
             Matrix view = Main.GameViewMatrix.TransformationMatrix;
             var transform = System.Numerics.Matrix3x2.CreateTranslation(-Main.screenPosition.X, -Main.screenPosition.Y)
                 * new System.Numerics.Matrix3x2(view.M11, view.M12, view.M21, view.M22, view.M41, view.M42);
@@ -184,6 +208,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         try
         {
             ModContent.GetInstance<FoundationCoreVisuals>().DrawWorld(batch, state);
+            preparationVisuals.DrawReadyLabels(batch, state);
             if (combat is null)
             {
                 visuals.DrawEnding(batch);
@@ -342,6 +367,17 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         if (Main.dedServ || Main.gameMenu)
             return;
         var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
+        if (state.Preparation is { } preparing && preparing.TryGetMemberByServerSlot(Main.myPlayer, out _))
+        {
+            layers.Insert(0, new LegacyGameInterfaceLayer("Convergence: Preparation field", () =>
+            {
+                DrawFieldMask(Main.spriteBatch);
+                return true;
+            }, InterfaceScaleType.None));
+            layers.Insert(1, new LegacyGameInterfaceLayer("Convergence: Preparation assembly", () =>
+                preparationVisuals.DrawOverlay(Main.spriteBatch, preparing, state.EstimatedAuthorityTick), InterfaceScaleType.None));
+            return;
+        }
         // Accepted terminal, including the dead local player. The frame-local
         // layer expires even if no more server packets arrive; it changes no controls.
         if (state.Combat is null && visuals.IsEnding)

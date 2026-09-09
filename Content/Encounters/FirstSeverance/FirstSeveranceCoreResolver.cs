@@ -45,7 +45,6 @@ internal sealed class FirstSeveranceResolvedPreparation
 internal sealed class FirstSeveranceCoreResolver
 {
     internal const int RequesterRangeInTiles = 12;
-    internal const int ParticipationRadiusInTiles = 80;
 
     public static FirstSeveranceCoreResolver Instance { get; } = new();
 
@@ -102,8 +101,8 @@ internal sealed class FirstSeveranceCoreResolver
             return false;
         }
 
-        IReadOnlyList<FirstSeveranceRosterCandidate> candidates = BuildCandidates(logicalCenter);
-        int selectableCandidateCount = CountSelectable(candidates);
+        IReadOnlyList<FirstSeveranceRosterCandidate> candidates = BuildCandidates();
+        int selectableCandidateCount = candidates.Count;
         bool requesterInRange = IsPlayerWithinTiles(
             Main.player[start.RequesterWhoAmI],
             logicalCenter,
@@ -137,7 +136,8 @@ internal sealed class FirstSeveranceCoreResolver
                 requesterEpoch,
                 out FirstSeveranceRoster? roster,
                 out failureCode,
-                allowSoloDebug: FirstSeveranceDevelopmentPolicy.AllowSoloDebugStart)
+                allowSoloDebug: FirstSeveranceDevelopmentPolicy.AllowSoloDebugStart,
+                requireAllConnected: true)
             || roster is null)
         {
             return false;
@@ -173,31 +173,26 @@ internal sealed class FirstSeveranceCoreResolver
         return true;
     }
 
-    private static IReadOnlyList<FirstSeveranceRosterCandidate> BuildCandidates(
-        in TilePoint logicalCenter)
+    private static IReadOnlyList<FirstSeveranceRosterCandidate> BuildCandidates()
     {
         var candidates = new List<FirstSeveranceRosterCandidate>(
             FirstSeveranceRoster.MaximumCount + 1);
         for (int slot = 0; slot < Main.maxPlayers; slot++)
         {
             Player player = Main.player[slot];
-            if (!player.active
-                || !FirstSeveranceConnectionEpochSystem.TryGetCurrentEpoch(
-                    slot,
-                    out ulong epoch))
+            if (!player.active)
             {
                 continue;
             }
 
+            // Never silently omit a joining player whose epoch is not ready yet.
+            FirstSeveranceConnectionEpochSystem.TryGetCurrentEpoch(slot, out ulong epoch);
             candidates.Add(new FirstSeveranceRosterCandidate(
                 slot,
                 epoch,
                 IsConnected: true,
                 IsEligible: !player.dead && !player.ghost,
-                IsWithinParticipationRegion: IsPlayerWithinTiles(
-                    player,
-                    logicalCenter,
-                    ParticipationRadiusInTiles)));
+                IsWithinParticipationRegion: true));
         }
 
         return candidates.AsReadOnly();

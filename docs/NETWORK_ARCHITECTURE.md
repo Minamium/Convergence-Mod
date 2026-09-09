@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v27
+## Current development protocol v28
+
+Packet IDs and layouts are unchanged. Preparation uses the full active server roster rather than radius-filtered candidates. Its shared180-tick deployment clock delays Ready acceptance and starts the Ready timeout afterward. Existing EnteredTick/ArenaBounds determine deployment and field geometry; no client submits a roster/teleport target. The server cancels on membership change before processing Ready/start, publishes30-tick preparation repairs, and retains all-Ready for45ticks before Active. All Ready flags are exact-slot/epoch/nonce authoritative. Both cinematic/field presentation and the new head labels consume those snapshots; matching peers are required. [Arena infrastructure](ARENA_INFRASTRUCTURE.md#deployment-and-presentation--0241) owns the behavior and cleanup.
+
+## Preceding development protocol v27
 
 The field layout and packet IDs are unchanged. Matching peers are required for the revised HP floors and immediate post-first-cycle transitions. Cleanup/Defeat may retain a bounded cosmetic combat projection for an in-progress HalfField or RemoteCrush action even without a same-tick Stack/Spread verdict. The authority cache binds exact sequence/Fight/terminal tick; codec validates the action interval, and clients never install this terminal payload as Active combat. This closes the same-tick lethal-impact audio hole. Existing mechanic-terminal rules remain. New Active/world cleanup clears the cosmetic cache; no actors, requests or capabilities survive.
 

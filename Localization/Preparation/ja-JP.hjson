@@ -1,0 +1,8 @@
+Mods.Convergence.UI.PreparationDeployment: {
+    Deploying: "領域展開中 — 展開完了後にReadyを受け付けます"
+    Ready: "準備完了 / READY"
+    PlayerUnavailable: "サーバー内の全員が生存・参加可能である必要があります。復活後に再起動してください。"
+    TooManyPlayers: "現在のRaidは4人まで対応しています。一部だけを選んで開始することはできません。"
+    Unready: "READY — クリックで解除"
+    RosterChanged: "[Convergence] 入退室または参加不能なプレイヤーを検出したため、準備を中止しました。全員が揃ってからCoreを再起動してください。"
+}

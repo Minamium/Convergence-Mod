@@ -17,6 +17,26 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_preparation_field_ready_and_cinematic_share_unscaled_geometry(self):
+        source = (CLIENT / "FirstSeverancePreparationVisuals.cs").read_text(encoding="utf-8")
+        overlay = body(source, "internal bool DrawOverlay")
+        self.assertIn("GraphicsDevice.Viewport", overlay)
+        self.assertNotIn("Main.UIScale", overlay)
+        self.assertIn("prep.ReadyOpensTick", overlay)
+        self.assertIn('"Ready!"', source)
+        presentation = (CLIENT / "FirstSeverancePrototypePresentation.cs").read_text(encoding="utf-8")
+        capture = body(presentation, "public override void PostDrawTiles")
+        self.assertIn("preparing.GroundX", capture)
+        self.assertIn("FirstSeveranceFieldMaskLayout.Capture", capture)
+        runtime = (ROOT / "Content/Encounters/FirstSeverance/FirstSeverancePreparationRuntime.cs").read_text(encoding="utf-8")
+        self.assertLess(runtime.index("if (!ServerRosterMatches())"), runtime.index("pendingIntents.Sort"))
+        self.assertIn("ReadyHoldTicks", runtime)
+        self.assertIn("RemoteClient.CheckSection", runtime)
+        self.assertIn("Clear(fightId)", runtime)
+        resolver = (ROOT / "Content/Encounters/FirstSeverance/FirstSeveranceCoreResolver.cs").read_text(encoding="utf-8")
+        self.assertIn("requireAllConnected: true", resolver)
+        self.assertNotIn("ParticipationRadiusInTiles", resolver)
+
     def test_critical_audio_is_not_owned_by_short_live_ray_windows(self):
         source = (CLIENT / "FirstSeveranceFeedback.cs").read_text(encoding="utf-8")
         cues = body(source, "private void PlayCriticalAction")
@@ -72,7 +92,7 @@ class CinematicCoordinates(unittest.TestCase):
     def test_all_cinematic_layers_are_unscaled(self):
         source = (CLIENT / "FirstSeverancePrototypePresentation.cs").read_text(encoding="utf-8")
         layers = body(source, "public override void ModifyInterfaceLayers")
-        self.assertEqual(3, layers.count("InterfaceScaleType.None"))
+        self.assertEqual(5, layers.count("InterfaceScaleType.None"))
         self.assertNotIn("InterfaceScaleType.UI", layers)
         self.assertNotIn("InterfaceScaleType.Game", layers)
 

@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.40**, protocol **27**. [Critical audio](AUDIO_CUE_SHEET.md#critical-impact-delivery-and-two-turn-orbit--0240) repairs result/short-impact scheduling and lethal sword/crush terminal delivery, adds bounded playback diagnostics and two-turn rotation masters, preserving accepted shard-birth audio. [Phase rules](encounters/first-severance/ENCOUNTER_SPEC.md#ordered-phase-scores-and-terminal-survival--0213) now use80%/40% floors; the first complete score remains mandatory, then later HP crossings interrupt immediately. Accepted visuals/weapons, maximum HP, damage, revival and standalone3–4-shot Spread remain intact.
+Development **0.2.41**, protocol **28**. The owner accepts the Raid combat body as the current development baseline. [Server-wide preparation](ARENA_INFRASTRUCTURE.md#deployment-and-presentation--0241) replaces proximity selection: gather all active players, deploy field/black exterior with a first cinematic, accept manual Ready with head labels/panel, then start the existing second cinematic. Membership changes cancel preparation instead of silently excluding someone. Broader background-animation work remains separate; combat, weapons, damage, phase/audio rules are unchanged.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[0.2.41 checks](evidence/2026-09-09-server-wide-preparation.json) owns preparation/domain/codec/build evidence. Actual3-player distant join, both cinematics,107% UI button alignment and cancellation cleanup remain user-owned `not_run`.
 
 [0.2.40 checks](evidence/2026-09-09-critical-audio-phase-gates.json):142distinct domain cases passed across the suite/scoped corrections,8presentation guards, protocol27codec324round-trips/50rejections and eight audio exports checked. Native packaging passed with zero errors/four existing warnings. Actual listening and Host & Play remain user-owned `not_run`; diagnostic playback acceptance is not acoustic proof.
 
@@ -85,6 +87,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.41: restart/reload every peer together, then Host & Play. With3players, leave one well beyond the old80-tile radius and activate the Core. Confirm all3arrive inside the same field, first cinematic/black exterior,3-person Ready denominator, overhead Ready/unready and second cinematic only after all agree. Keep one client at107% UI scale. During a separate preparation, join/leave or cancel and verify no field/input capability remains. No GUI/server launched.
 
 User-owned0.2.40: reload/restart all peers together (protocol27), then Host & Play; no second Build + Reload for the packaged source. Listen for Stack pass/fail, both sword waves, the fatal crush (including immediate Defeat) and both accelerating blade turns. Check first-score HP lock, then mid-action80%/40% transitions on a slower-DPS/repeated cycle. If a cue is still missing, its `AudioCue`/`AudioVoice` lines identify scheduling/focus/device gain. No GUI/server launched.
 

@@ -55,13 +55,28 @@ internal sealed class FirstSeveranceRoster
 
     public int Count => Members.Count;
 
+    internal bool MatchesConnected(IReadOnlyList<FirstSeveranceConnectionObservation> connections)
+    {
+        int count = 0;
+        var seen = new HashSet<int>();
+        foreach (var connection in connections)
+        {
+            if (!connection.IsConnected) continue;
+            if (!seen.Add(connection.ServerWhoAmI)
+                || !TryResolveCurrentBinding(connection.ServerWhoAmI, connection.ConnectionEpoch, out _)) return false;
+            count++;
+        }
+        return count == Count;
+    }
+
     public static bool TryCreate(
         IReadOnlyList<FirstSeveranceRosterCandidate> candidates,
         int initiatorWhoAmI,
         ulong initiatorConnectionEpoch,
         out FirstSeveranceRoster? roster,
         out string failureCode,
-        bool allowSoloDebug = false)
+        bool allowSoloDebug = false,
+        bool requireAllConnected = false)
     {
         ArgumentNullException.ThrowIfNull(candidates);
 
@@ -77,7 +92,12 @@ internal sealed class FirstSeveranceRoster
                 return false;
             }
 
-            if (candidate.IsSelectable)
+            if (requireAllConnected && candidate.IsConnected && !candidate.IsEligible)
+            {
+                failureCode = "first_severance.roster_player_not_alive";
+                return false;
+            }
+            if (requireAllConnected ? candidate.IsConnected && candidate.IsEligible : candidate.IsSelectable)
             {
                 selectable.Add(candidate);
             }

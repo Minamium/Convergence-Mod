@@ -158,7 +158,8 @@ internal sealed class FirstSeverancePreparationStateMachine
         FightId fightId,
         FirstSeveranceRoster roster,
         ulong enteredTick,
-        in FirstSeverancePreparationSettings settings)
+        in FirstSeverancePreparationSettings settings,
+        int deploymentTicks = 0)
     {
         if (fightId.IsNone)
         {
@@ -181,7 +182,9 @@ internal sealed class FirstSeverancePreparationStateMachine
 
         FightId = fightId;
         EnteredTick = enteredTick;
-        DeadlineTick = checked(enteredTick + (ulong)settings.ReadyTimeoutTicks);
+        if (deploymentTicks < 0) throw new ArgumentOutOfRangeException(nameof(deploymentTicks));
+        ReadyOpensTick = checked(enteredTick + (ulong)deploymentTicks);
+        DeadlineTick = checked(ReadyOpensTick + (ulong)settings.ReadyTimeoutTicks);
         lastAuthorityTick = enteredTick;
         ready = new bool[roster.Count];
         lastRequestNonces = new uint[roster.Count];
@@ -192,6 +195,8 @@ internal sealed class FirstSeverancePreparationStateMachine
     public ulong EnteredTick { get; }
 
     public ulong DeadlineTick { get; }
+
+    public ulong ReadyOpensTick { get; }
 
     public bool CombatGateClosed => true;
 
@@ -245,6 +250,8 @@ internal sealed class FirstSeverancePreparationStateMachine
     public FirstSeverancePreparationUpdate ApplySetReady(
         in FirstSeveranceSetReadyCommand command)
     {
+        if (command.AuthorityTick < ReadyOpensTick)
+            return FirstSeverancePreparationUpdate.Reject("first_severance.preparation_field_deploying");
         if (!CanApplyCommand(command.AuthorityTick, out string failureCode))
         {
             return FirstSeverancePreparationUpdate.Reject(failureCode);

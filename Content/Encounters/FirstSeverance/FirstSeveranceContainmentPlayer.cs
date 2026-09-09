@@ -42,6 +42,11 @@ public sealed class FirstSeveranceContainmentPlayer : ModPlayer
         movementSync.Clear();
     }
 
+    internal void Clear(FightId fight)
+    {
+        if (owner == fight) Clear();
+    }
+
     public override void PreUpdateMovement()
     {
         if (!Active || !OwnsMovement) return;

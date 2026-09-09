@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-09
 source_of_truth_for:
   - first_severance.arena_infrastructure
 aliases:
@@ -36,14 +36,13 @@ Current implementation and evidence belong to [Status](STATUS.md). The active de
 
 ## Provisional coordinate model
 
-- width: 320 tiles;
-- height: 140 tiles;
+- width/height: current [arena blueprint](../Content/Encounters/FirstSeverance/FirstSeveranceArenaBlueprint.cs), shared by validation and presentation;
 - Core anchor: floor center/base Y;
 - World edge safety margin: 20 tiles;
 - legacy logical Barrier inset: 2 tiles; active development containment uses full ArenaBounds, flush to the ground floor.
 - requester interaction range: 12 tiles;
-- candidate participation radius: 80 tiles;
-- Ready timeout: 60 seconds at 60 ticks/second.
+- participation: every active current-world server player, independent of distance;
+- Ready timeout: 60 seconds after the initial field deployment finishes.
 
 The ranges and Ready timeout are provisional tuning, not protocol identity.
 
@@ -65,8 +64,8 @@ The definition-scoped resolver/preparation/combat adapters own this flow. The ac
 3. Feature resolves the actual server Core Tile Entity; request coordinates never become trusted anchors.
 4. Authority checks Calamity progression, conflicting World activity, participant candidates, and pure prospective Arena validation.
 5. Failure returns structured issue codes and cleanup without World mutation.
-6. Success enters generic `Preparing` with Raid roster selection/Ready/countdown.
-7. A frozen 2–4 roster and all Ready may progress only when the owning implementation slice is enabled.
+6. Success enters generic `Preparing`, gathers the entire server roster into the validated field, and deploys the field/black exterior with a short HUD-suppressed cinematic.
+7. After deployment, show the Ready panel; all members must manually accept. The server holds the all-Ready state briefly, then enters Active and the separate existing Boss-introduction cinematic.
 
 The Core anchors/requests an encounter; it does not own lifecycle, actors, roster, or cleanup.
 
@@ -96,13 +95,23 @@ Interior solidity, liquids, wire/actuator, platforms/rope, World spawn, and NPC 
 
 ## Participant/Ready policy
 
-- Candidate: connected/current-world/eligible and server-measured within the participation region.
+- Candidate: every active current-world server player, independent of distance. Dead/ghost players or unresolved connection epochs block the whole start, rather than being silently omitted. Transport connections still loading their player into the world are not counted as active players.
 - One player cannot start the release feature; development override, if any, must be explicit/non-release.
-- Five or more candidates require explicit selection; never silently choose four.
+- Five or more active players reject the whole start with an explicit capacity message; selection UI/partial-group launch is not implemented.
 - Freeze 2–4 stable Participant IDs and current binding epochs before combat.
-- Ready belongs to Raid `Preparing`, supports unready, timeout, allowed initiator cancel, Foundation Core break/removal, and participant-loss cleanup.
+- Ready belongs to Raid `Preparing`, supports unready, timeout, allowed initiator cancel, Foundation Core break/removal, and participant-loss cleanup. Any join/leave, epoch replacement or death during preparation cancels it with an explanation; reactivate the Core for a new complete roster. The denominator never shrinks behind the user's Ready consent.
 - Ready/cancel commands bind the exact server slot plus connection epoch and a monotonic per-participant nonce. Rejected identity/nonce commands do not advance authority time.
-- After `Active`, join-in-progress is spectator/next-pull until a separate accepted rule exists. Rejoin of a frozen participant uses the stable ID plus a newer server epoch.
+- After `Active`, join-in-progress remains outside the frozen fight/next-pull; this change does not implement combat rejoin.
+
+### Deployment and presentation — 0.2.41
+
+The Fight-owned preparation runtime teleports every roster member to a separate slot above the plinth, requests the destination world sections first, and refreshes the same containment/infinite-flight capability used during combat. Geometry comes from authoritative ArenaBounds, never the client's Core sprite size. No NPC Boss is spawned until all Ready. Cleanup releases only matching-Fight movement capabilities on authority and replica; new world entry also clears them. Preparation snapshots refresh every30ticks for clock/lease repair.
+
+The shared preparation timeline gives field deployment180ticks, then the full Ready window. Early Ready is rejected without changing the count. Each accepted Ready appears as a small world-anchored `Ready!` above that player's head. A physical-pixel Ready/unready button works anywhere within the field; Core right-click still works. All-Ready holds45ticks so the last acceptance remains visible; an unready or membership change cancels the hold. The field remains deployed when the second, combat-start HUD suppression begins instead of retracting and rebuilding.
+
+The deployment cinematic and black exterior reuse the validated world-to-physical-pixel capture and `InterfaceScaleType.None`; head labels use the world transform. No persistent hideUI, zoom, inventory or control flag is changed. Reduced Effects/shake-off are respected. The current Boss body is the user-accepted development baseline; broader animated-background work remains separate.
+
+Narrow API evidence: installed tModLoader2026.07.3.0/source666f69962d3bdffde54fc14025f02634965b4e7c XML, inspected2026-09-09: `RemoteClient.CheckSection(int,Vector2,int)` is server-only and must precede long-distance teleport; `Player.Teleport` uses top-left coordinates, and `MessageID.TeleportEntity` alone does not ensure destination sections exist. Independent assembly code calls CheckSection with surrounding sections, then Teleport and its normal broadcast. No third-party code/assets copied. Actual far-client loading and107% UI input remain user-owned checks.
 
 ## Pylon placement input
 

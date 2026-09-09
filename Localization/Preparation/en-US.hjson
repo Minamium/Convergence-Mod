@@ -1,0 +1,8 @@
+Mods.Convergence.UI.PreparationDeployment: {
+    Deploying: "FIELD DEPLOYING — Ready check opens after assembly"
+    Ready: "READY"
+    PlayerUnavailable: "Every server player must be alive and available. Wait for respawn, then activate again."
+    TooManyPlayers: "This Raid supports up to four players. All server players are included; no partial group will start."
+    Unready: "READY — click to cancel"
+    RosterChanged: "[Convergence] Server players changed or a player became unavailable. Preparation cancelled; activate the Core again with everyone present."
+}

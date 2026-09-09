@@ -49,9 +49,15 @@ public sealed class FoundationCoreVisuals : GlobalTile
         if (state.Combat is { } combat)
         {
             double renderTick = ModContent.GetInstance<FirstSeverancePrototypePresentation>().RenderTick;
-            float intro = combat.Substate == FirstSeveranceSubstate.SpawnIntro
-                ? 1 - Math.Clamp((float)(combat.ResolveTick - renderTick) / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0, 1) : 1;
-            DrawField(batch, new(combat.CoreX, combat.CoreY), intro, renderTick);
+            // Preparation already deployed the field; do not collapse/rebuild it
+            // when the second cinematic (Boss introduction) begins.
+            DrawField(batch, new(combat.CoreX, combat.CoreY), 1, renderTick);
+        }
+        else if (state.Preparation is { } preparation && preparation.TryGetMemberByServerSlot(Main.myPlayer, out _))
+        {
+            double tick = state.EstimatedAuthorityTick;
+            float deployment = Math.Clamp((float)((tick - preparation.EnteredTick) / FirstSeverancePreparationTimeline.DeploymentTicks), 0, 1);
+            DrawField(batch, new(preparation.GroundX, preparation.GroundY), deployment, tick);
         }
         else if (Main.LocalPlayer.HeldItem.type == ModContent.ItemType<FoundationCoreItem>())
         {

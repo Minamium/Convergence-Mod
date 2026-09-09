@@ -8,6 +8,11 @@ using Convergence.Common.Foundation.Identifiers;
 using Convergence.Content.Encounters.FirstSeverance.FoundationCore;
 using Convergence.Content.Encounters.FirstSeverance.Development;
 using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.Chat;
+using Terraria.Localization;
+using Microsoft.Xna.Framework;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
@@ -42,6 +47,7 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
     private FirstSeveranceDebugAssistLease? debugAssist;
     private bool isAttached;
     private bool isCleaned;
+    private ulong allReadySince;
 
     public FirstSeverancePreparationRuntime(
         ulong encounterSequence,
@@ -207,6 +213,8 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
         }
 
         combat?.Cleanup(context);
+        foreach (var member in roster.Members)
+            Main.player[member.ServerWhoAmI].GetModPlayer<FirstSeveranceContainmentPlayer>().Clear(fightId);
         FirstSeveranceDebugAssistSystem.Release(debugAssist);
         debugAssist = null;
         preparation?.Cleanup(fightId);
@@ -242,7 +250,8 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
             authorityTick,
             debugAssist is not null
                 ? new FirstSeverancePreparationSettings(10 * 60 * 60)
-                : FirstSeverancePreparationSettings.Default);
+                : FirstSeverancePreparationSettings.Default,
+            FirstSeverancePreparationTimeline.DeploymentTicks);
         if (!FirstSeverancePreparationAuthority.TryAttach(this))
         {
             return EncounterRuntimeUpdate.End(
@@ -251,6 +260,9 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
         }
 
         isAttached = true;
+        RefreshPreparationField(gather: true);
+        ModContent.GetInstance<FirstSeveranceClientStateSystem>().Mod.Logger.Info(
+            $"FirstSeverance event=PreparationStarted seq={encounterSequence} fight={fightId} participants={roster.Count} ready_opens={preparation.ReadyOpensTick} slots={string.Join(',', System.Linq.Enumerable.Select(roster.Members, m => m.ServerWhoAmI))}");
         return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Preparing);
     }
 
@@ -264,6 +276,18 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
         }
 
         bool hasObservableChange = false;
+        // No late join, disconnect, death or slot replacement may silently shrink
+        // the group behind an already displayed Ready denominator.
+        if (!ServerRosterMatches())
+        {
+            ModContent.GetInstance<FirstSeveranceClientStateSystem>().Mod.Logger.Info(
+                $"FirstSeverance event=PreparationCancelled seq={encounterSequence} reason=RosterChanged tick={authorityTick}");
+            var message = NetworkText.FromKey("Mods.Convergence.UI.PreparationDeployment.RosterChanged");
+            if (Main.netMode == NetmodeID.Server) ChatHelper.BroadcastChatMessage(message, Color.Orange);
+            else Main.NewText(message.ToString(), Color.Orange);
+            return EncounterRuntimeUpdate.End(FirstSeveranceTerminationContract.Instance.Create(FirstSeveranceTerminalCause.UserCancelled));
+        }
+        RefreshPreparationField(gather: false);
         if (pendingIntents.Count > 0)
         {
             pendingIntents.Sort(CompareIntents);
@@ -290,6 +314,9 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
                 };
 
                 hasObservableChange |= applied.HasObservableChange;
+                if (applied.IsAccepted && intent.Kind == FirstSeverancePreparationIntentKind.SetReady)
+                    ModContent.GetInstance<FirstSeveranceClientStateSystem>().Mod.Logger.Info(
+                        $"FirstSeverance event=PreparationReady seq={encounterSequence} slot={intent.SenderWhoAmI} ready={intent.IsReady} tick={authorityTick}");
                 if (applied.RequestsEnd)
                 {
                     pendingIntents.Clear();
@@ -314,7 +341,10 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
         }
 
         hasObservableChange |= update.HasObservableChange;
-        if (preparation.CreateSnapshot().AreAllReady)
+        bool allReady = preparation.CreateSnapshot().AreAllReady;
+        if (!allReady) allReadySince = 0;
+        else if (allReadySince == 0) allReadySince = authorityTick;
+        if (allReady && authorityTick >= allReadySince + FirstSeverancePreparationTimeline.ReadyHoldTicks)
         {
             combat = new FirstSeverancePrototypeCombatRuntime(
                 encounterSequence,
@@ -339,7 +369,7 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
             return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Active);
         }
 
-        return hasObservableChange
+        return hasObservableChange || authorityTick % 30 == 0
             ? EncounterRuntimeUpdate.ObservableChange()
             : EncounterRuntimeUpdate.None;
     }
@@ -350,6 +380,40 @@ internal sealed class FirstSeverancePreparationRuntime : IEncounterRuntime
             ?? EncounterRuntimeUpdate.End(
                 FirstSeveranceTerminationContract.Instance.Create(
                     FirstSeveranceTerminalCause.RuntimeInvariantBroken));
+    }
+
+    private bool ServerRosterMatches()
+    {
+        var connections = new List<FirstSeveranceConnectionObservation>(roster.Count + 1);
+        for (int slot = 0; slot < Main.maxPlayers; slot++)
+        {
+            Player player = Main.player[slot];
+            if (!player.active) continue;
+            if (player.dead || player.ghost || !FirstSeveranceConnectionEpochSystem.TryGetCurrentEpoch(slot, out ulong epoch)) return false;
+            connections.Add(new(slot, epoch, true));
+        }
+        return roster.MatchesConnected(connections);
+    }
+
+    private void RefreshPreparationField(bool gather)
+    {
+        Vector2 ground = new(arena.Layout.Core.LogicalCenter.X * 16f, arena.Layout.Core.BaseY * 16f);
+        var field = FirstSeveranceContainmentBounds.FromGround(ground.X, ground.Y);
+        foreach (var member in roster.Members)
+        {
+            Player player = Main.player[member.ServerWhoAmI];
+            if (gather)
+            {
+                Vector2 destination = ground + new Vector2((member.ParticipantId.Value - (roster.Count - 1) * .5f) * 96 - player.width * .5f, -160 - player.height);
+                if (Main.netMode == NetmodeID.Server) RemoteClient.CheckSection(player.whoAmI, destination, 1);
+                player.Teleport(destination, 1);
+                player.velocity = Vector2.Zero;
+                if (Main.netMode == NetmodeID.Server)
+                    NetMessage.SendData(MessageID.TeleportEntity, number: 0, number2: player.whoAmI,
+                        number3: destination.X, number4: destination.Y, number5: 1);
+            }
+            player.GetModPlayer<FirstSeveranceContainmentPlayer>().Refresh(fightId, field, member.ConnectionEpoch);
+        }
     }
 
     private bool TryValidateIntent(

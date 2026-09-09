@@ -734,13 +734,13 @@ documents:
 - doc_id: project.arena-infrastructure
   path: docs/ARENA_INFRASTRUCTURE.md
   title: Arena Infrastructure
-  content_sha256: 29a58233524de47cf24352b2877f0a10dd379c5c7cae95063f8e3c1186829735
+  content_sha256: efb1daa897ee56777190cd399c83e2cec6011390db05be7828ec351afcda813b
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-09'
   source_of_truth_for:
   - first_severance.arena_infrastructure
   aliases:
@@ -938,7 +938,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 52e22b155098a5f2216c1993bd1e768e03652f50c0747144d8423e4cec0119e8
+  content_sha256: 68f8861b4a3c5f47560e0e9864dec4863f55bdee76ad7584cfd509a1eb8d56ad
   document_type: governance
   status: accepted
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 1624d20e3165c9829380daea9da540e7c01f6a7ee794ccfd82727d751bdb5fb3
+  content_sha256: f7a7ad92f47b19b201adff6f662563e5ea1e24f879cb3b3d8737c658d52f079b
   document_type: status
   status: accepted
   owners:

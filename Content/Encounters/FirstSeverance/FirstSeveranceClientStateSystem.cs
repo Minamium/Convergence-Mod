@@ -61,7 +61,14 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
             && incomingPreparation.FightId == snapshot.FightId
                 ? incomingPreparation
                 : null;
+        if (preparation is { } oldPreparation && nextPreparation is null && combat is null)
+            foreach (var member in oldPreparation.Members)
+                Main.player[member.ServerWhoAmI].GetModPlayer<FirstSeveranceContainmentPlayer>().Clear(oldPreparation.FightId);
         preparation = nextPreparation;
+        if (nextPreparation is { } fieldPreparation && Main.netMode == NetmodeID.MultiplayerClient)
+            foreach (var member in fieldPreparation.Members)
+                Main.player[member.ServerWhoAmI].GetModPlayer<FirstSeveranceContainmentPlayer>().Refresh(fieldPreparation.FightId,
+                    FirstSeveranceContainmentBounds.FromGround(fieldPreparation.GroundX, fieldPreparation.GroundY));
         if (Main.netMode == NetmodeID.Server || nextPreparation is null)
         {
             if (nextPreparation is null)
@@ -73,6 +80,7 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
             return;
         }
 
+        if (snapshot.AuthorityTick < nextPreparation.ReadyOpensTick) return;
         int readyCount = CountReady(nextPreparation);
         if (displayedPreparationSequence == nextPreparation.EncounterSequence
             && displayedReadyCount == readyCount)
@@ -306,6 +314,9 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
 
     private void ResetState()
     {
+        if (preparation is { } oldPreparation)
+            foreach (var member in oldPreparation.Members)
+                Main.player[member.ServerWhoAmI].GetModPlayer<FirstSeveranceContainmentPlayer>().Clear(oldPreparation.FightId);
         ClearCombatPlayers(combat);
         TerminalMechanic = null;
         TerminalCombat = null;
