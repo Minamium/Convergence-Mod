@@ -14,6 +14,7 @@ internal static class RitualArmamentArt
 {
     private static Asset<Texture2D>? assembly;
     private static readonly Asset<Texture2D>?[] icons = new Asset<Texture2D>?[5];
+    private static readonly Asset<Texture2D>?[] grandArt = new Asset<Texture2D>?[5];
     private static readonly string[] names = { "NullCantorClaws", "PaleMeridian", "LacunaTestament", "ChoirOfTheUnmade", "LastWitness" };
     internal static readonly Color Gold = new(207, 167, 104);
     internal static readonly Color Ivory = new(232, 225, 218);
@@ -26,7 +27,14 @@ internal static class RitualArmamentArt
     };
     internal static Color Light(Color c, float power) => NullCantorClawArt.Light(c, power);
     internal static Texture2D Icon(RitualArmamentKind kind) => (icons[(int)kind] ??= ModContent.Request<Texture2D>(
-        "Convergence/Assets/Textures/Items/RitualArmaments/" + (kind == RitualArmamentKind.Melee ? "" : "V2/") + names[(int)kind])).Value;
+        "Convergence/Assets/Textures/Items/RitualArmaments/" + (kind == RitualArmamentKind.Melee ? "" : "V3/") + names[(int)kind])).Value;
+    internal static void Relic(SpriteBatch batch, RitualArmamentKind kind, Vector2 center, float angle, float size, Color tint)
+    {
+        var texture = (grandArt[(int)kind] ??= ModContent.Request<Texture2D>(
+            "Convergence/Assets/Textures/Items/RitualArmaments/V3/" + names[(int)kind] + "_Apparatus")).Value;
+        batch.Draw(texture, center - Main.screenPosition, null, tint, angle, texture.Size() * .5f,
+            size / texture.Width, SpriteEffects.None, 0);
+    }
     internal static void Part(SpriteBatch b, int part, Vector2 center, float angle, float size, Color tint,
         bool mirror = false, Vector2? origin = null)
     {
@@ -66,11 +74,9 @@ internal static class RitualArmamentArt
             * (1 - Q((age - p.Duration - 18) / 24));
         if (open <= 0) return;
         Color light = ColorFor(p.Kind);
-        if (p.Kind == RitualArmamentKind.Ranged) DrawBattery(b, p, age, aim, root, open, light);
-        else if (p.Kind == RitualArmamentKind.Magic) DrawArchive(b, p, age, aim, root, open, light);
-        else if (p.Kind == RitualArmamentKind.Summon)
+        if (p.Kind == RitualArmamentKind.Summon)
         {
-            Part(b, 7, root, aim + MathHelper.PiOver2, 138, Color.White * open, origin: new(256, 412));
+            Relic(b, RitualArmamentKind.Summon, root - new Vector2(0, 25), -.10f, 138, Color.White * open);
             Ring(b, root - new Vector2(0, 85), new(70, 17), -.2f, Light(light, open), 5);
         }
         else
@@ -79,109 +85,6 @@ internal static class RitualArmamentArt
             Part(b, 6, root + aim.ToRotationVector2() * (35 + snap * 120), aim + snap * .8f,
                 75 + snap * 145, Light(light, release * .8f));
             RitualKineticArt.Vent(b, root, aim.ToRotationVector2(), age, light, p.Empowered);
-        }
-    }
-    private static void DrawBattery(SpriteBatch b, RitualArmamentPose p, float age, float aim, Vector2 root, float open, Color light)
-    {
-        Vector2 axis = aim.ToRotationVector2(), normal = axis.RotatedBy(MathHelper.PiOver2);
-        Ring(b, root - axis * 135, new Vector2(70, 203) * open, aim, Light(light, open * .55f), 5, true);
-        Part(b, 7, root + axis * 12, aim + MathHelper.PiOver2, 110, Color.White * open, origin: new(256, 410));
-        for (int barrel = 0; barrel < 3; barrel++)
-        {
-            float sinceFire = age - (4 + barrel * 2);
-            float recoil = RitualKineticMotion.Recoil(sinceFire);
-            Vector2 anchor = root + Rotate(RitualArmamentChoreography.CannonRoot(barrel), aim);
-            Vector2 body = anchor - axis * (recoil * (p.Empowered ? 58 : 35) + (1 - open) * 145);
-            float hatch = .22f + .58f * RitualKineticMotion.Arrive((sinceFire + 4) / 2) + recoil * .3f;
-            for (int side = -1; side <= 1; side += 2)
-            {
-                Vector2 hinge = body + axis * 45 + normal * side * (18 + open * 21);
-                Part(b, 1, hinge, aim + side * hatch - MathHelper.PiOver2, 130 * open, Color.White * open, side < 0, new(256, 372));
-            }
-            Part(b, 0, body, aim, 284 * open, Color.White * open, origin: new(79, 256));
-            Vector2 muzzle = anchor + axis * 224;
-            Line(b, body + axis * 200, muzzle, Light(light, open * (.3f + recoil * .5f)), 11 + recoil * 7);
-            RitualKineticArt.Vent(b, body + axis * 45, axis, sinceFire, light, p.Empowered);
-            Ring(b, muzzle - axis * 6, new(11, 31 + (p.Empowered ? 12 : 0)), aim,
-                Light(light, .8f * open), 5);
-            float flash = sinceFire < 0 ? .2f * Q((sinceFire + 4) / 4) : RitualKineticMotion.Recoil(sinceFire);
-            Glow(b, muzzle, new Vector2(p.Empowered ? 116 : 69), Light(light, flash * open));
-            Line(b, muzzle, muzzle + axis * flash * (p.Empowered ? 480 : 185), Light(Ivory, flash), p.Empowered ? 19 : 8);
-            Line(b, muzzle - normal * 66 * flash, muzzle + normal * 66 * flash, Light(light, flash), 5);
-        }
-        if (p.Empowered)
-            Ring(b, root + axis * 96, new Vector2(27, 215) * (1 + Q(age / 18) * .6f), aim,
-                Light(light, open * (1 - Q(age / 22))), 9, true);
-    }
-    private static void DrawArchive(SpriteBatch b, RitualArmamentPose p, float age, float aim, Vector2 root, float open, Color light)
-    {
-        Vector2 axis = aim.ToRotationVector2();
-        Vector2 book = root + new Vector2(-24, -66);
-        float clock = RitualRenderClock.Time;
-        int pages = Reduced ? 6 : 10;
-        float charge = RitualKineticMotion.MagicCharge(age);
-        float kick = RitualKineticMotion.Recoil(age - RitualKineticMotion.MagicFire);
-        float spread = open * ((p.Empowered ? 212 : 170) - charge * 28 + kick * 68);
-        Ring(b, book, new(spread + 18, spread * .53f), -.23f, Light(light, .55f * open), 4, true);
-        for (int i = 0; i < pages; i++)
-        {
-            float orbit = clock * .014f + MathF.Tau * i / pages + kick * .18f;
-            Vector2 at = book + new Vector2(MathF.Cos(orbit) * spread, MathF.Sin(orbit) * spread * .55f);
-            float depth = .72f + .18f * MathF.Sin(orbit);
-            Part(b, 3, at, .14f * MathF.Sin(orbit), 76 * depth * open, Color.White * (open * depth));
-            Line(b, at, book, Light(light, open * .12f), 2);
-        }
-        for (int side = -1; side <= 1; side += 2)
-            Part(b, 2, book + new Vector2(side * (20 + kick * 20) * open, 0), side * (.08f + open * .36f + kick * .32f),
-                155 * open, Color.White * open, side < 0, new(150, 256));
-        Glow(b, book, new(90), Light(light, open * .7f));
-        // Each cast owns its five sigils, muzzle and release clock separately,
-        // so rearming the persistent book cannot reset an in-flight ritual.
-    }
-    internal static void DrawChoir(SpriteBatch b, ChoirSentinel s, Vector2 center, float age)
-    {
-        float assemble = RitualArmamentChoreography.ChoirAssembly(age);
-        float phase = RitualArmamentChoreography.Mod(age, RitualArmamentChoreography.ChoirCycle);
-        float release = RitualKineticMotion.ChoirFlare(phase);
-        if (s.IsLeader && assemble > .001f)
-        {
-            Vector2 organ = s.ConcertCenter;
-            float size = Math.Min(660, 340 + s.ChoirCount * 29);
-            float arrival = RitualKineticMotion.Arrive((phase - 53) / 7), brace = Q((phase - 78) / 10);
-            Part(b, 5, organ + new Vector2(0, -37 - (1 - arrival) * 120 - release * 30),
-                (1 - arrival) * -.18f, size * (.65f + arrival * .35f + release * .1f), Color.White * assemble);
-            for (int tier = 0; tier < 3; tier++)
-            {
-                float born = RitualKineticMotion.Arrive((phase - 55 - tier * 5) / 4) * assemble;
-                RitualKineticArt.Seal(b, organ + new Vector2(0, -55 - tier * 62 + brace * 18),
-                    (size * .43f - tier * 32) * (1 + release * .4f), tier * .14f,
-                    Gold, born * (.35f + brace * .4f) * (1 - release * .35f));
-            }
-            Ring(b, organ, new(size * .48f, size * .20f), -.1f, Light(Gold, assemble * .6f), 6, true);
-            Glow(b, organ, new(170, 90), Light(Gold, assemble * .45f));
-            if (release > 0)
-            {
-                float radius = 65 + (1 - release) * 430;
-                Ring(b, organ + new Vector2(0, 105), new(radius, radius * .50f), 0, Light(Ivory, release), 16 * release, true);
-                Line(b, organ - new Vector2(0, 190), organ + new Vector2(0, 390 * release), Light(Gold, release), 12 * release);
-            }
-        }
-        int stagger = Math.Abs(s.Ordinal % 6) * 2;
-        float localKick = Math.Max(RitualKineticMotion.Recoil(phase - 8 - stagger),
-            Math.Max(RitualKineticMotion.Recoil(phase - 44 - stagger), release));
-        float breathe = MathF.Sin(age * .036f + s.Ordinal) * .05f + localKick * .42f;
-        Part(b, 4, center, s.Projectile.rotation, 146 + assemble * 46, Color.White);
-        for (int side = -1; side <= 1; side += 2)
-            Part(b, 1, center + new Vector2(side * (27 + assemble * 20), 8), side * (.15f + assemble * .4f + breathe),
-                95, Color.White * .95f, side < 0, new(256, 370));
-        Vector2 mouth = center + new Vector2(0, -22);
-        Ring(b, mouth, new(25 + assemble * 10, 12 + assemble * 3), 0, Light(Gold, .8f), 4);
-        Glow(b, mouth, new(40 + release * 30), Light(Ivory, .3f + release * .6f));
-        if (localKick > .001f)
-        {
-            Ring(b, mouth, new(24 + localKick * 64, 10 + localKick * 22), -.1f,
-                Light(Ivory, localKick), 5 * localKick, true);
-            Line(b, mouth - new Vector2(0, 95 * localKick), mouth + new Vector2(0, 95 * localKick), Light(Gold, localKick), 5);
         }
     }
     internal static void DrawFlight(SpriteBatch b, Projectile p, Vector2 center, float age)
@@ -193,7 +96,7 @@ internal static class RitualArmamentArt
         {
             float size = (witness.Stealth ? 225 : 158) * (.64f + .36f * Q(age / 9));
             float angle = p.rotation + RitualRenderClock.Fraction * .22f;
-            Part(b, 6, center, angle, size, Color.White);
+            Relic(b, RitualArmamentKind.Rogue, center, angle, size, Color.White);
             Ring(b, center, new(size * .43f), -angle, Light(light, .6f), 4, true);
             Glow(b, center, new(size * .33f), Light(light, .5f));
             return;
@@ -272,5 +175,5 @@ internal static class RitualArmamentArt
             Line(b, at, at + axis * (24 * fade), Light(i % 3 == 0 ? Ivory : color, fade), i % 3 == 0 ? 4 : 2);
         }
     }
-    internal static void Unload() { assembly = null; Array.Clear(icons); }
+    internal static void Unload() { assembly = null; Array.Clear(icons); Array.Clear(grandArt); }
 }

@@ -1,0 +1,31 @@
+{
+  "build": "0.2.34",
+  "protocol": 23,
+  "base_commit": "540ff5fa6d7383ee491771b3945cc07bd2db147f",
+  "scope": "Long-form mechanics, presentation and text-only new artwork for all non-melee armaments; melee and Raid unchanged.",
+  "specification": "docs/encounters/first-severance/WEAPONS.md",
+  "ownership": "Native owner-only weapon input/resource spending/child creation. Existing server-owned Raid outcomes untouched. No new Encounter packets. Identity-bound single choir conductor/beam; root-scoped cooldown for continuous beam hits.",
+  "checks": {
+    "domain": "passed;133 cases, including4 new macro-score/resource cadence cases; obsolete short Magic tests removed",
+    "native_package": "passed final native compilation and packaging, zero errors/four existing CS8632 warnings",
+    "assets": "passed PNG alpha/dimensions and128px/40px silhouette inspection; stereo PCM16 loop finite/peak checks",
+    "static": "passed;60-document catalog,457-file policy scan,10 YAML files; git diff --check passed"
+  },
+  "image_generation": "Four independent built-in text-only generations. No input images. Backend model not exposed; owner explicitly accepted this route. Original PNGs retained; exact prompts/provenance in Assets/ATTRIBUTION.md.",
+  "not_run": [
+    "Host & Play matching-peer held-trigger/aim/latency and sustained hit cadence",
+    "Empty mana/bullets, manual potion interaction and equipment/CC/Down cancellation",
+    "One and multiple minion concert targeting/leader sacrifice/rejoin",
+    "Native Rogue stealth consumption/final verdict integration",
+    "In-game icon/material/audio/Reduced Effects acceptance, measured FPS and matched Calamity DPS"
+  ],
+  "preserved": "Existing Localization/en-US.hjson and unrelated RitualArmaments English formatting/melee edits; all prior assets and external originals. No GUI/server launch, publishing or license changes.",
+  "build_identity": {
+    "source_sha256": "2a835b196cbc7fb5d4f2f533f60c58880cd0801b22f8a4c9ea4b12041824f346",
+    "package_sha256": "6b3a67ec7778eb0583b38899ff4815c939a6aa72c4075ca479f9eef3f416bfad",
+    "package_bytes": 39004942,
+    "source_changed_during_build": false,
+    "local_record": "20260909T071610583088Z",
+    "post_build_changes": "Evidence metadata only; no packaged runtime inputs changed."
+  }
+}

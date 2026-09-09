@@ -8,19 +8,19 @@
         },
         "PaleMeridian": {
           "Name": "Pale Meridian",
-          "Tooltip": "Deploy three floating ritual cannons and convert bullets into homing lances.\nEvery sixth volley converges with greater power and piercing.\n75% chance not to consume ammunition.\nExchange one-for-one with other ritual armaments at a Work Bench."
+          "Tooltip": "Hold to unfold five siege cannons over several seconds, firing as each joins.\nThe battery locks and charges, then maintains a rapid armor-piercing crossfire.\nRelease or switch items to stop. Uses bullets; 75% ammo conservation.\nExchange one-for-one with other ritual armaments at a Work Bench."
         },
         "LacunaTestament": {
           "Name": "Lacuna Testament",
-          "Tooltip": "Unfold five sigils in sequence, briefly charge, then discharge a broad aimed beam.\nEvery fourth cast is wider and stronger. Each cast strikes one enemy root once.\nAim locks on casting. Switching items or incapacitation cancels the ritual.\nExchange one-for-one with other ritual armaments at a Work Bench."
+          "Tooltip": "Hold to attack from one sigil, then unfold six more at accelerating intervals.\nThe array merges and charges for 0.8 seconds, then sustains one powerful beam.\nAim while channeling. Release, switch items, or run out of mana to stop.\nBuilds over 6.8 seconds. Continuous mana drain; no forced automatic mana potions.\nExchange one-for-one with other ritual armaments at a Work Bench."
         },
         "ChoirOfTheUnmade": {
           "Name": "Choir of the Unmade",
-          "Tooltip": "Summon a one-slot voice chamber.\nThe choir assembles into a great organ for its empowered third note.\nSupports normal minion target commands.\nExchange one-for-one with other ritual armaments at a Work Bench."
+          "Tooltip": "Summon a one-slot chorister that attacks independently while the ritual grows.\nAn eleven-second concert: skirmish, assemble, charge, then a three-second chorus beam.\nAll voices power one shared organ; supports normal minion target commands.\nExchange one-for-one with other ritual armaments at a Work Bench."
         },
         "LastWitness": {
           "Name": "Last Witness",
-          "Tooltip": "Cast a homing triangular blade that tears a dark path and returns.\nStealth strikes manifest three colossal seals around the target.\nThe seals briefly track, lock, then converge into one triangular execution.\nExchange one-for-one with other ritual armaments at a Work Bench."
+          "Tooltip": "Hold to accumulate six witnesses, each casting a seeking shard.\nThey fold into one heavy relic and release a devastating returning blade.\nStealth empowers the final blade and its converging execution seal.\nRelease early to cancel; the full ritual lasts about 4.7 seconds.\nExchange one-for-one with other ritual armaments at a Work Bench."
         }
       },
       "Buffs": {

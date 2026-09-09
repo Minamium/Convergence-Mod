@@ -44,8 +44,10 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
     private Vector2 previousCenter, currentCenter;
     private float previousAngle, angle, lastAge = -1;
     private uint serial;
+    private SlotId sustain = SlotId.Invalid;
+    private int impactCooldown;
     public override bool InstancePerEntity => true;
-    internal static bool Matches(Projectile p) => p.ModProjectile is RitualBolt or WitnessBlade or ChoirSentinel or RitualArmamentPose or WitnessVerdict or LacunaConvergence;
+    internal static bool Matches(Projectile p) => p.ModProjectile is RitualBolt or WitnessBlade or ChoirSentinel or RitualArmamentPose or WitnessVerdict or LacunaConvergence or MeridianBastion or ChoirRequiem or WitnessLitany;
     public override bool AppliesToEntity(Projectile projectile, bool lateInstantiation) => Matches(projectile);
     internal Vector2 Center(Projectile p) => initialized
         ? Vector2.Lerp(previousCenter, currentCenter, RitualRenderClock.Fraction) : p.Center;
@@ -53,20 +55,23 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
         ? previousAngle + MathF.IEEERemainder(angle - previousAngle, MathF.Tau) * RitualRenderClock.Fraction : p.rotation;
     internal static RitualArmamentKind Kind(Projectile p) => p.ModProjectile switch
     {
-        RitualBolt bolt => bolt.Kind, WitnessBlade or WitnessVerdict => RitualArmamentKind.Rogue,
-        ChoirSentinel => RitualArmamentKind.Summon, LacunaConvergence => RitualArmamentKind.Magic,
+        RitualBolt bolt => bolt.Kind, WitnessBlade or WitnessVerdict or WitnessLitany => RitualArmamentKind.Rogue,
+        ChoirSentinel or ChoirRequiem => RitualArmamentKind.Summon, MeridianBastion => RitualArmamentKind.Ranged, LacunaConvergence => RitualArmamentKind.Magic,
         RitualArmamentPose pose => pose.Kind, _ => RitualArmamentKind.Melee,
     };
     public override void PostAI(Projectile p)
     {
         if (p.numUpdates != 0) return;
+        if (impactCooldown > 0) impactCooldown--;
         if (!initialized || Vector2.DistanceSquared(currentCenter, p.Center) > 1800 * 1800)
         { previousCenter = currentCenter = p.Center; previousAngle = angle = p.rotation; initialized = true; }
         else
         {
             previousCenter = currentCenter; currentCenter = p.Center;
             previousAngle = angle;
-            angle += MathF.IEEERemainder(p.rotation - angle, MathF.Tau) * (p.ModProjectile is RitualArmamentPose ? .46f : 1);
+            bool nativeChannel = p.ModProjectile is LacunaConvergence or MeridianBastion or WitnessLitany or ChoirRequiem;
+            angle += MathF.IEEERemainder(p.rotation - angle, MathF.Tau)
+                * (p.ModProjectile is RitualArmamentPose || nativeChannel && p.owner != Main.myPlayer ? .46f : 1);
         }
         if (p.ModProjectile is RitualArmamentPose pose)
         {
@@ -100,21 +105,66 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
         }
         else if (p.ModProjectile is LacunaConvergence beam)
         {
-            for (int sigil = 0; sigil < 5; sigil++)
+            for (int i = 0; i < 7; i++)
             {
-                float tick = 1 + sigil * 2;
-                if (lastAge < tick && beam.Age >= tick && beam.Age < tick + 2)
-                    RitualWeaponFeedback.Sound("ShellHit", p.Center, .10f + sigil * .018f);
+                float birth = RitualGrandScore.SigilBirth(i) + 2;
+                if (Crossed(birth, beam.Age)) RitualWeaponFeedback.Sound("ShellHit", beam.Sigil(i, beam.Age), .19f + i * .016f);
+                int tick = (int)beam.Age;
+                if (beam.Projectile.ai[2] >= 0 && RitualGrandScore.MagicBoltAt(tick, i))
+                    RitualWeaponFeedback.Sound("LanceFire", beam.Sigil(i, beam.Age), .12f);
             }
-            if (lastAge < 10 && beam.Age >= 10 && beam.Age < 12)
-                RitualWeaponFeedback.Sound("ExecutionLock", beam.Muzzle, .23f);
-            if (lastAge < RitualKineticMotion.MagicFire && beam.Age >= RitualKineticMotion.MagicFire && beam.Age < RitualKineticMotion.MagicFire + 2)
+            if (Crossed(RitualGrandScore.MagicMerge, beam.Age))
+                RitualWeaponFeedback.Sound("CoreExposure", beam.Muzzle, .35f);
+            if (Crossed(RitualGrandScore.MagicCharge, beam.Age))
+                RitualWeaponFeedback.Sound("ExecutionLock", beam.Muzzle, .4f);
+            if (Crossed(RitualGrandScore.MagicFire, beam.Age))
             {
-                RitualWeaponFeedback.Sound("GridFire", beam.Muzzle, beam.Empowered ? .58f : .36f);
-                RitualWeaponFeedback.Sound("CoreSalvoFire", beam.Muzzle, beam.Empowered ? .40f : .22f);
-                ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, beam.Empowered ? 5 : 2);
+                RitualWeaponFeedback.Sound("GridFire", beam.Muzzle, .55f);
+                ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 5);
             }
+            UpdateSustain(p, beam.Empowered && p.ai[2] >= 0, "LacunaSustain", .37f);
             lastAge = beam.Age;
+        }
+        else if (p.ModProjectile is MeridianBastion gun)
+        {
+            for (int i = 0; i < 5; i++)
+                if (Crossed(RitualGrandScore.BatteryBirth(i) + 2, gun.Age))
+                    RitualWeaponFeedback.Sound("PylonHit", gun.Muzzle(i), .25f);
+            if (Crossed(RitualGrandScore.BatteryLock, gun.Age))
+                RitualWeaponFeedback.Sound("ExecutionLock", p.Center, .42f);
+            if (Crossed(RitualGrandScore.BatteryFire, gun.Age))
+            {
+                RitualWeaponFeedback.Sound("CoreSalvoFire", p.Center, .57f);
+                ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 4);
+            }
+            int lane = RitualGrandScore.BatteryLane((int)gun.Age);
+            if (lane >= 0 && p.ai[2] >= 0 && (!gun.Overdrive || (int)gun.Age % 9 == 0))
+                RitualWeaponFeedback.Sound("LanceFire", gun.Muzzle(lane), gun.Overdrive ? .16f : .25f);
+            UpdateSustain(p, gun.Overdrive && p.ai[2] >= 0, "MeridianSustain", .25f);
+            lastAge = gun.Age;
+        }
+        else if (p.ModProjectile is WitnessLitany litany)
+        {
+            for (int i = 0; i < 6; i++)
+                if (Crossed(i * 29 + 2, litany.Age)) RitualWeaponFeedback.Sound("BladeUnsheathe", litany.Crown, .22f);
+            if (Crossed(RitualGrandScore.WitnessMerge, litany.Age))
+                RitualWeaponFeedback.Sound("ExecutionLock", litany.Crown, .43f);
+            if (Crossed(RitualGrandScore.WitnessFire, litany.Age))
+            {
+                RitualWeaponFeedback.Sound("HandCrushImpact", litany.Crown, .5f);
+                ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 4.5f);
+            }
+            lastAge = litany.Age;
+        }
+        else if (p.ModProjectile is ChoirRequiem requiem)
+        {
+            if (Crossed(1, requiem.Age))
+            {
+                RitualWeaponFeedback.Sound("CoreSalvoFire", p.Center, .5f);
+                ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 3);
+            }
+            UpdateSustain(p, true, "ChoirSustain", .3f * requiem.Fade);
+            lastAge = requiem.Age;
         }
         else if (p.ModProjectile is WitnessVerdict verdict)
         {
@@ -131,28 +181,52 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
         }
         else if (p.ModProjectile is ChoirSentinel s)
         {
-            float phase = RitualArmamentChoreography.Mod(s.Age, RitualArmamentChoreography.ChoirCycle);
-            if (s.IsLeader && phase >= 76 && phase < 78 && (lastAge < 76 || lastAge > 100))
-                RitualWeaponFeedback.Sound("ExecutionLock", s.ConcertCenter, .30f);
-            if (s.IsLeader && phase >= 88 && phase < 90 && (lastAge < 88 || lastAge > 100))
-            {
-                RitualWeaponFeedback.Sound("CoreSalvoFire", p.Center, .48f);
-                ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 3.5f);
-            }
-            lastAge = phase;
+            if (s.Age < lastAge) lastAge = -1;
+            if (s.IsLeader && Crossed(RitualGrandScore.ChoirAssemble, s.Age))
+                RitualWeaponFeedback.Sound("CoreExposure", s.ConcertCenter, .30f);
+            if (s.IsLeader && Crossed(RitualGrandScore.ChoirCharge, s.Age))
+                RitualWeaponFeedback.Sound("ExecutionLock", s.ConcertCenter, .38f);
+            lastAge = s.Age;
         }
         else if (!sounded && p.ModProjectile is ChoirNote)
         { sounded = true; RitualWeaponFeedback.Sound("SpreadExecution", p.Center, .16f); }
     }
+    private bool Crossed(float beat, float now) => lastAge < beat && now >= beat && now < beat + 3;
+    private void UpdateSustain(Projectile p, bool active, string name, float volume)
+    {
+        if (!active)
+        {
+            if (SoundEngine.TryGetActiveSound(sustain, out var old)) old.Stop();
+            return;
+        }
+        if (SoundEngine.TryGetActiveSound(sustain, out var sound) && sound.IsPlaying)
+        {
+            sound.Position = p.Center;
+            // ActiveSound.Volume multiplies Style.Volume; do not square the gain.
+            sound.Volume = volume * (RitualArmamentArt.Reduced ? .6f : 1) / Math.Max(.0001f, sound.Style.Volume);
+            return;
+        }
+        // A persistent looping voice, not a repeated launch sample or per-hit cue.
+        int identity = p.identity, type = p.type, owner = p.owner;
+        sustain = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + name)
+        {
+            Identifier = $"Convergence:Sustain:{owner}:{identity}:{type}", IsLooped = true, MaxInstances = 1,
+            Volume = volume * (RitualArmamentArt.Reduced ? .6f : 1),
+            PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
+        }, p.Center, _ => p.active && p.identity == identity && p.type == type && p.owner == owner);
+        ModContent.GetInstance<RitualWeaponFeedback>().Track(sustain);
+    }
     public override void OnHitNPC(Projectile p, NPC target, NPC.HitInfo hit, int damageDone)
     {
-        if (impactSeen || p.ModProjectile is WitnessVerdict) return;
-        impactSeen = true;
+        bool continuous = p.ModProjectile is LacunaConvergence or ChoirRequiem;
+        if (impactCooldown > 0 || (!continuous && impactSeen) || p.ModProjectile is WitnessVerdict) return;
+        impactSeen = true; impactCooldown = continuous ? 20 : 0;
         ModContent.GetInstance<RitualWeaponFeedback>().Burst(target.Center, Kind(p), p.owner == Main.myPlayer,
             p.ModProjectile is RitualBolt { Empowered: true } or WitnessBlade { Stealth: true } or LacunaConvergence { Empowered: true });
     }
     public override void OnKill(Projectile p, int timeLeft)
     {
+        if (SoundEngine.TryGetActiveSound(sustain, out var sound)) sound.Stop();
         if (!impactSeen && p.ModProjectile is RitualBolt && !Main.gameMenu)
             ModContent.GetInstance<RitualWeaponFeedback>().Burst(p.Center, Kind(p), false, false);
     }
@@ -172,6 +246,13 @@ public sealed class RitualWeaponFeedback : ModSystem
     private readonly List<Impact> impacts = new(40);
     private readonly List<SlotId> voices = new(32);
     private float shake;
+    internal void Track(SlotId id)
+    {
+        voices.RemoveAll(old => !SoundEngine.TryGetActiveSound(old, out var sound) || !sound.IsPlaying);
+        if (voices.Count >= 40)
+        { if (SoundEngine.TryGetActiveSound(voices[0], out var oldest)) oldest.Stop(); voices.RemoveAt(0); }
+        voices.Add(id);
+    }
     internal static void Sound(string name, Vector2 at, float volume)
     {
         if (Main.dedServ || Main.gameMenu) return;
@@ -219,7 +300,10 @@ public sealed class RitualWeaponFeedback : ModSystem
             var state = p.GetGlobalProjectile<RitualArmamentProjectileVisuals>();
             RitualArmamentArt.QueueFlight(p, state.Center(p));
             if (p.ModProjectile is WitnessVerdict v) RitualArmamentArt.QueueVerdict(v, RitualRenderClock.Sample(v.Age));
-            if (p.ModProjectile is LacunaConvergence beam) RitualKineticArt.QueueMagic(beam, RitualRenderClock.Sample(beam.Age));
+            if (p.ModProjectile is LacunaConvergence beam) RitualGrandArt.QueueMagic(beam, RitualRenderClock.Sample(beam.Age));
+            if (p.ModProjectile is ChoirRequiem requiem)
+                RitualGrandArt.QueueBeam(p.Center, requiem.Axis, requiem.Reach, requiem.Width, RitualRenderClock.Sample(requiem.Age),
+                    RitualArmamentArt.ColorFor(RitualArmamentKind.Summon), requiem.Fade * (RitualArmamentArt.Reduced ? .7f : 1));
         }
         RitualSurfacePass.Flush();
         SpriteBatch b = Main.spriteBatch;
@@ -237,11 +321,17 @@ public sealed class RitualWeaponFeedback : ModSystem
                     case RitualArmamentPose pose:
                         RitualArmamentArt.DrawApparatus(b, pose, RitualRenderClock.Sample(pose.Age), state.Angle(p), center); break;
                     case ChoirSentinel s:
-                        RitualArmamentArt.DrawChoir(b, s, center, RitualRenderClock.Sample(s.Age)); break;
+                        RitualGrandArt.Choir(b, s, center, RitualRenderClock.Sample(s.Age)); break;
                     case WitnessVerdict v:
                         RitualArmamentArt.DrawVerdict(b, v, RitualRenderClock.Sample(v.Age)); break;
                     case LacunaConvergence beam:
-                        RitualKineticArt.DrawMagic(b, beam, RitualRenderClock.Sample(beam.Age)); break;
+                        RitualGrandArt.Magic(b, beam, RitualRenderClock.Sample(beam.Age)); break;
+                    case MeridianBastion gun:
+                        RitualGrandArt.Battery(b, gun, RitualRenderClock.Sample(gun.Age)); break;
+                    case ChoirRequiem requiem:
+                        RitualGrandArt.Requiem(b, requiem, RitualRenderClock.Sample(requiem.Age)); break;
+                    case WitnessLitany litany:
+                        RitualGrandArt.Witness(b, litany, RitualRenderClock.Sample(litany.Age)); break;
                     case RitualBolt bolt:
                         RitualArmamentArt.DrawFlight(b, p, center, RitualRenderClock.Sample(bolt.Age)); break;
                     case WitnessBlade blade:

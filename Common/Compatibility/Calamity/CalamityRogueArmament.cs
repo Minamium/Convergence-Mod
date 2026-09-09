@@ -22,4 +22,8 @@ public abstract class CalamityRogueArmament : RogueWeapon
 internal static class CalamityRogueArmamentDamage
 {
     internal static DamageClass Class => ModContent.GetInstance<RogueDamageClass>();
+    internal static void Mark(int index, bool stealth)
+    {
+        if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].Calamity().stealthStrike = stealth;
+    }
 }

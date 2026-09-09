@@ -56,17 +56,28 @@ public sealed class ChoirSentinel : ModProjectile
         if (!owner.active || owner.dead) { owner.ClearBuff(buff); Projectile.Kill(); return; }
         if (!owner.HasBuff(buff)) { Projectile.Kill(); return; }
         Projectile.timeLeft = 2;
-        Projectile.ai[0] = (Projectile.ai[0] + 1) % (RitualArmamentChoreography.ChoirCycle * 100);
         Ordinal = 0; ChoirCount = 0;
+        Projectile conductor = Projectile;
         // Stable within one owner; unrelated vanilla minionPos cannot reorder the choir.
         foreach (Projectile p in Main.ActiveProjectiles)
             if (p.owner == Projectile.owner && p.type == Type)
-            { ChoirCount++; if (p.identity < Projectile.identity) Ordinal++; }
+            {
+                ChoirCount++;
+                if (p.identity < Projectile.identity) Ordinal++;
+                if (p.identity < conductor.identity) conductor = p;
+            }
         float phase = Ordinal * 2.399963f;
         Vector2 home = owner.MountedCenter + new Vector2(MathF.Cos(phase) * (128 + Ordinal % 3 * 28),
             -120 + MathF.Sin(phase) * 45 + MathF.Sin(Age * .03f + phase) * 9);
-        NPC? target = RitualTargeting.Acquire(Projectile, owner, manual: true);
+        NPC? target = IsLeader ? RitualTargeting.Acquire(Projectile, owner, manual: true) : RitualTargeting.Current(conductor);
+        if (!IsLeader) Projectile.ai[1] = conductor.ai[1];
         bool usable = RitualArmamentItems.Usable(owner) && !owner.noItems && !owner.CCed;
+        // A complete eleven-second concert, not a repeated short accent. A lost
+        // target or disabled owner cancels the concert rather than banking a shot.
+        float before = Age;
+        Projectile.ai[0] = target is not null && usable
+            ? IsLeader ? (Age + 1) % RitualGrandScore.ChoirCycle : conductor.ai[0] : 0;
+        if (Projectile.owner == Main.myPlayer && ((int)Age % 60 == 0 || before > 0 && Age == 0)) Projectile.netUpdate = true;
         Vector2 orbit = target is not null && usable
             ? target.Center + new Vector2(MathF.Cos(phase) * 270, -220 + MathF.Sin(phase) * 110) : home;
         Vector2 desiredCenter = (target is not null && usable ? target.Center : owner.MountedCenter) - new Vector2(0, 260);
@@ -74,7 +85,7 @@ public sealed class ChoirSentinel : ModProjectile
             ConcertCenter = desiredCenter;
         else ConcertCenter = Vector2.Lerp(ConcertCenter, desiredCenter, .14f);
         var seat = RitualArmamentChoreography.ChoirSeat(Ordinal, ChoirCount);
-        float assemble = usable ? RitualArmamentChoreography.ChoirAssembly(Age) : 0;
+        float assemble = usable ? RitualGrandScore.ChoirAssembly(Age) : 0;
         Vector2 destination = Vector2.Lerp(orbit, ConcertCenter + new Vector2(seat.X, seat.Y), assemble);
         Vector2 desired = (destination - Projectile.Center) * .12f;
         if (desired.LengthSquared() > 38 * 38) desired = Vector2.Normalize(desired) * 38;
@@ -85,14 +96,17 @@ public sealed class ChoirSentinel : ModProjectile
             Projectile.Center = home; Projectile.velocity = Vector2.Zero;
             if (Projectile.owner == Main.myPlayer) Projectile.netUpdate = true;
         }
-        int shot = RitualArmamentChoreography.ChoirShotAt((int)Age % RitualArmamentChoreography.ChoirCycle, Ordinal);
-        if (target is null || !usable || Projectile.owner != Main.myPlayer || shot < 0) return;
-        Projectile.ai[2] = shot;
+        if (target is null || !usable || Projectile.owner != Main.myPlayer) return;
+        if (IsLeader && before < RitualGrandScore.ChoirFire && Age >= RitualGrandScore.ChoirFire)
+            Projectile.NewProjectile(Projectile.GetSource_FromThis(), ConcertCenter, Vector2.UnitY,
+                ModContent.ProjectileType<ChoirRequiem>(), Projectile.damage, Projectile.knockBack,
+                Projectile.owner, 0, target.whoAmI, Projectile.identity);
+        if (!RitualGrandScore.ChoirNoteAt((int)Age, Ordinal)) return;
         Vector2 at = Projectile.Center + new Vector2(0, -22);
         Vector2 aim = RitualArmamentItems.Aim(target.Center - at, owner.direction);
         Projectile.NewProjectile(Projectile.GetSource_FromThis(), at, aim * 16,
             ModContent.ProjectileType<ChoirNote>(), RitualArmamentRules.ScaledDamage(Projectile.damage,
-                RitualArmamentRules.ChoirMultiplier(shot)), Projectile.knockBack, Projectile.owner, 0, target.whoAmI, shot == 2 ? 1 : 0);
+                .85f), Projectile.knockBack, Projectile.owner, 0, target.whoAmI, 0);
         Projectile.netUpdate = true;
     }
 }

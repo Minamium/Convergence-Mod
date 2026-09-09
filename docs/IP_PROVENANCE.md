@@ -55,6 +55,8 @@ Reviewer and review date
 
 ## Calamity dependency
 
+The0.2.34 weapon score design uses behavior-only study of Yharim's Crystal, Drataliornus and Midnight Sun UFO. [Pinned findings and independent decisions](encounters/first-severance/WEAPONS.md#prior-art-findings-and-engine-seams) record official authorship, version mismatch, verified paths and license. No third-party code or media was imported. Four new text-only built-in image generations and three independently synthesized sustain beds have separate [asset records](../Assets/ATTRIBUTION.md#ritual-grand-apparatus-v3--2026-09-09); the built-in model version was not exposed.
+
 - Calamityのsource、`.tmod`、texture、audioをvendorまたは再配布しない。
 - 公開sourceはAPI調査と挙動理解のreferenceとして使う。
 - codeを持ち込む必要が生じた場合は、Calamity licenseのcredit/link条件を満たすか確認し、可能なら独立実装を選ぶ。

@@ -608,7 +608,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: First Severance — Five Ritual Armaments
-  content_sha256: 767319939617055b408131792cba1d76836a20017db09f51d9cb4cdbfef98c47
+  content_sha256: aa74044e70a7545fd4ada0625e4f194dbf4ef12a50464f71ffda18a430eff47b
   document_type: spec
   status: provisional
   owners:
@@ -668,7 +668,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: f03eb6c72e6be9486dd95517d0df7db7b7bc84a898f4408b474fa2cafeb4bdda
+  content_sha256: e3b166c5d274f289d55771fe86a31b245a79c0980299d50a118b25d127ae21ed
   document_type: policy
   status: accepted
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 6be70c51fd06ea9d1b7aef4ad6a5fc89b133fa19d9362726c686fff3ba1683c9
+  content_sha256: e2e078529299bf83edaeb78a704e523a574a5adbf16069352ae2d278c799239d
   document_type: status
   status: accepted
   owners:
@@ -1180,7 +1180,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: a621ea9a7f0fda29fd35fd883067105afdb2989dbaf44a327aaa7b577d404839
+  content_sha256: 0555c0d9a2fd491d5c6b25ddb346d1d35e5c2ad4250872e104ba57895fd1995a
   document_type: research
   status: historical
   owners:
