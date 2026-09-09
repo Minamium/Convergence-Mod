@@ -20,6 +20,12 @@ related_docs:
 
 # First Severance — Null Cantor Visual Pass
 
+## Vanilla boss bar — 0.2.38
+
+Use the engine's selected boss-bar style, not a second custom overlay. The Boss has `AutoloadBossHead` and an explicit `BossHeadTexture` pointing to the existing32×34 Foundation Core emblem. The previous actor set `NPC.boss` but registered no head, so the vanilla common bar had no eligible head index. Existing engine NPC health replication remains the source; HP, shielding and Final survival are unchanged.
+
+Narrow API check,2026-09-09: installed tML2026.07.3.0 XML `BigProgressBarSystem.TryGetSpecialVanillaBossBar` documents the common bar's head-index requirement; [pinned ModNPC registration](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNPC.cs) confirms the attribute registers `BossHeadTexture` against the NPC type. Independent metadata-only integration, no copied engine code/assets or runtime graphics setup. In-game style/phase visibility still needs the user check in [Status](../../STATUS.md).
+
 ## Connected kinetic Raid pass — 0.2.35
 
 The current pass reviews the whole playable score, preserving accepted materials and authority warning/fire/collision clocks. `FirstSeveranceVisualCurves.CastTension` gives the existing cast window a rapid assembly, short elastic settling and final loading beat; `ReleaseImpulse` supplies fast recoil with shaped recovery. Do not speed up gameplay merely to make a pose energetic.

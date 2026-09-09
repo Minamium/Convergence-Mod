@@ -7,6 +7,7 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.FirstSeverance.Actors;
 
+[AutoloadBossHead]
 public sealed class FirstSeverancePrototypeBoss : ModNPC
 {
     private byte partyCount = 2;
@@ -38,6 +39,10 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
 
     public override string Texture =>
         "Convergence/Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem";
+
+    // The common vanilla bar requires a registered boss head, not just NPC.boss.
+    // Reuse the existing compact 32x34 Core emblem; no full-size body atlas in UI.
+    public override string BossHeadTexture => Texture;
 
     public override void SetStaticDefaults()
     {

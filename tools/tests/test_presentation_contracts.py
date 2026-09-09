@@ -17,6 +17,25 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_boss_registers_a_compact_existing_head_for_vanilla_bar(self):
+        source = (ROOT / "Content/Encounters/FirstSeverance/Actors/FirstSeverancePrototypeBoss.cs").read_text(encoding="utf-8")
+        self.assertIn("[AutoloadBossHead]", source)
+        self.assertIn("public override string BossHeadTexture => Texture;", source)
+        self.assertIn("NPC.boss = true;", source)
+        self.assertTrue((ROOT / "Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem.png").is_file())
+
+    def test_claw_keeps_light_without_dark_trail_or_swipe_debris(self):
+        source = (CLIENT / "NullCantorClawArt.cs").read_text(encoding="utf-8")
+        self.assertIn("darkUnderlay: false", body(source, "internal static void QueueSwipeTrail"))
+        swipe = body(source, "internal static void DrawSwipe")
+        self.assertIn("Hand(b,", swipe)
+        self.assertIn("Impact(b,", swipe)
+        self.assertNotIn("Shards(b,", swipe)
+        self.assertIn("if (crush) Shards", body(source, "internal static void Impact"))
+        surface = (CLIENT / "RitualSurfacePass.cs").read_text(encoding="utf-8")
+        self.assertIn("bool darkUnderlay = true", surface)  # Other weapons unchanged.
+        self.assertIn("if (darkUnderlay) Ribbon", body(surface, "internal static void Flame"))
+
     def test_shared_pylon_renderer_has_no_instance_caches(self):
         source = (CLIENT / "FirstSeverancePylonVisuals.cs").read_text(encoding="utf-8")
         self.assertIn("private static Asset<Texture2D> cage;", source)

@@ -44,9 +44,9 @@ internal static class RitualSurfacePass
         }
     }
     private static void Add(Vector2 p, Vector2 uv, Color c) => vertices![used++] = new(new Vector3(p, 0), c, uv);
-    internal static void Flame(ReadOnlySpan<Vector2> points, float width, Color tint, float opacity)
+    internal static void Flame(ReadOnlySpan<Vector2> points, float width, Color tint, float opacity, bool darkUnderlay = true)
     {
-        Ribbon(points, width * 1.16f, new Color(10, 3, 23, 215) * opacity);
+        if (darkUnderlay) Ribbon(points, width * 1.16f, new Color(10, 3, 23, 215) * opacity);
         Ribbon(points, width, new Color(tint.R, tint.G, tint.B, 0) * (opacity * .9f));
         Ribbon(points, width * .36f, new Color(228, 217, 255, 0) * opacity);
         Ribbon(points, width * .10f, new Color(255, 252, 246, 0) * opacity);

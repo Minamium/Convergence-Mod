@@ -136,7 +136,7 @@ internal static class NullCantorClawArt
                 var pose = NullCantorClawMotion.SwingPose(sample, p.Hand);
                 points[i] = Transform(NullCantorClawMotion.Joint(pose, finger, 3), root, p.Aim, p.Facing);
             }
-            RitualSurfacePass.Flame(points[..count], (Reduced ? 74 : 108) * NullCantorClawMotion.Smooth((end - begin) / .14f), Violet, fade);
+            RitualSurfacePass.Flame(points[..count], (Reduced ? 74 : 108) * NullCantorClawMotion.Smooth((end - begin) / .14f), Violet, fade, darkUnderlay: false);
         }
     }
     internal static void DrawSwipe(SpriteBatch b, NullCantorClawSwipe p, float age)
@@ -149,8 +149,7 @@ internal static class NullCantorClawArt
             var pose = RitualArmamentChoreography.PresentedHand(progress, p.Hand, hand, p.Aim, p.Facing, RitualRenderClock.Time);
             Hand(b, pose, root, 0, 1, 1, hand == p.Hand, NullCantorClawMotion.Envelope(progress, .12f, .82f, 1));
         }
-        float flash = NullCantorClawMotion.Envelope(progress, .20f, .70f, .98f);
-        if (!Reduced && progress > .20f) Shards(b, root, age, p.Projectile.identity, p.Aim, flash, 28, 370);
+        // Keep the hands and luminous sweep; no radial line/debris spray.
         if (p.HasImpact) Impact(b, p.Impact, age - p.ImpactAge, p.Projectile.identity, false);
     }
     internal static void DrawCrush(SpriteBatch b, NullCantorClawCrush p, float age)
@@ -224,7 +223,7 @@ internal static class NullCantorClawArt
             (crush ? 24 : 9) * fade, Light(Violet, fade), true);
         Ring(b, center, new Vector2(extent * .82f * release, extent * .36f * release), .28f,
             7 * fade, Light(Color.White, fade), true);
-        Shards(b, center, age, seed, 0, fade, Reduced ? 8 : crush ? 44 : 18, extent * release);
+        if (crush) Shards(b, center, age, seed, 0, fade, Reduced ? 8 : 44, extent * release);
         if (crush)
         {
             Glow(b, center, new Vector2(75 * fade), new Color(0, 0, 4, 255) * fade);

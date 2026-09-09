@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-09",
+  "version": "0.2.38",
+  "protocol": 25,
+  "base_commit": "6825350df488f795ede69dae68c0f03a2f79bdc5",
+  "changes": ["Register existing32x34 emblem through AutoloadBossHead/BossHeadTexture for vanilla bar discovery", "Claw normal swipe retains luminous ribbon/hands/impact flash, removes dark ribbon underlay and radial line/shard spray"],
+  "unchanged": "Authority, HP, attack timing/collision, protocol, right-click crush, other weapons and audio",
+  "checks": {
+    "presentation_guards": "5 passed",
+    "native_build": "0 errors,4existing CS8632 warnings",
+    "record": ".local/builds/20260909T104846340585Z/record.json",
+    "source_sha256": "3fa01427eaa0d83d3c03c449459ac8be6cb6d271d68fd829091238af3688313d",
+    "artifact_bytes": 39944491,
+    "artifact_sha256": "4b574bd7973e22064d499654dfe662ac6757848e7a1118af5d28f8f9d1b17b82",
+    "post_build_edits": "Documentation/evidence/catalog only",
+    "runtime": "not_run; user owns reload, vanilla-style shielded/exposed/Final bar and normal/reduced swipe checks; no GUI/server launched"
+  },
+  "preserved": "Preexisting two English localization diffs remain unstaged. No source assets deleted or replaced."
+}

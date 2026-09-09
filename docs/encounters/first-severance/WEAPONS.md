@@ -22,6 +22,10 @@ related_docs:
 
 # First Severance — Five Ritual Armaments
 
+## Claw swipe cleanup — 0.2.38
+
+Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. Normal swipes no longer emit radial line/shard sprays, including their normal-hit aftermath; their ribbon omits its dark opaque underlay. The palm's existing aperture and the entire right-click crush remain unchanged. The shared ribbon helper defaults to its old behavior for other weapons. Motion, hitboxes, damage, resources and audio are untouched.
+
 ## Null Cantor's Claws — accepted melee redesign, 0.2.29
 
 This section replaces the original sword/echo prototype. Internal item identity `NullRefrain`, the accepted Victory drop and all one-for-one exchanges are unchanged. Boss attacks, Raid timing, recovery, music and protocol23 are untouched. The other four forms follow the v2 specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it.

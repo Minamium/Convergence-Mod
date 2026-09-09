@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.37**, protocol **25**. [Final triples](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) now reveal all three locked forecasts before the first release. [Every Spread](encounters/first-severance/ENCOUNTER_SPEC.md#pursuit-during-every-spread--0237), including embedded windows, adds eight P1 pursuit casts with unchanged individual warning time and a final settle. [Heavy Raid audio](AUDIO_CUE_SHEET.md#heavy-raid-cue-overrides--0237) replaces sword, Stack fragment and P3 crush cues. Existing load hotfix, Adrenaline receipt bridge, accepted visuals, long-form weapons and unrelated local changes remain intact. HP/base damage are not retuned.
+Development **0.2.38**, protocol **25** (unchanged). The Boss now registers its compact head emblem for the vanilla common boss bar; the claw's normal swipe retains luminous trails and hands without the dark trail underlay or radial debris. See [visual contract](encounters/first-severance/VISUAL_SPEC.md#vanilla-boss-bar--0238) and [claw contract](encounters/first-severance/WEAPONS.md#claw-swipe-cleanup--0238). Prior read-ahead Final, all-Spread pursuits and heavy Raid cues remain; HP, damage, timing, networking and right-click crush are unchanged.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[0.2.38 checks](evidence/2026-09-09-vanilla-bar-claw.json): five presentation integration guards and native package build passed (zero errors, four existing warnings). No domain/codec rerun for unchanged gameplay/wire contracts. Actual vanilla-style bar, shielded/exposed/Final states, normal/reduced claw trail and both-client display remain user-owned `not_run`.
 
 [Latest log/build record](evidence/2026-09-09-read-ahead-spread-score.json):0.2.36 successfully loaded and completed a two-player Victory in251.48s;20Stack checks (one failure),23Spread successes,36accepted Raid hits (14FinalSlicer), no Down/revive or logged exception. Client0's19hit receipts match its authority hits; actual Adrenaline values remain unobserved. This supersedes the pending0.2.36 reload below, not unrelated manual checks.
 
@@ -79,6 +81,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.38: reload Mods/restart (no Build + Reload needed). Select vanilla boss bar, start the Raid and inspect it while shielded/exposed and in Final. Swing claws into empty space and an enemy: light/hand remain, radial lines and dark trail mass should be absent; compare Reduced Effects. No GUI/server was launched.
 
 User-owned0.2.37: reload/restart all peers before Host & Play (protocol25); the package is already built, no second Build + Reload needed. Check three forecast arrivals and reading pause before ordered Final shots; pursuit during standalone/embedded Spread and its quiet resolution margin; heavy sword/Stack/crush sound balance. No GUI/server was launched. Previous load issue is confirmed resolved by the0.2.36 run; outstanding unrelated checks below are historical handoff items, not mandatory repeats for this change.
 
