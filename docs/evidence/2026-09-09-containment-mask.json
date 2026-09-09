@@ -1,0 +1,29 @@
+{
+  "build": "0.2.32",
+  "protocol": 23,
+  "base_commit": "fb33eb34c8d4d0f74e7dd53f7a083a17763bced5",
+  "scope": "Client-only black exterior mask: world-pass projection capture and unscaled foreground composition; no authority, gameplay bounds, timing, packets or assets changed.",
+  "reported": "Remote participant takeura observed a mask/field mismatch with UI scale107%; physical containment still worked. Remote screenshot/runtime reproduction not available in this task.",
+  "diagnosis": "Installed GameInterfaceLayer.Draw calls SetZoom_UI, which calls SetZoom_Scaled(1/UIScale). That method overwrites Main.screenWidth/Height with original dimensions multiplied by that factor. The former mask divides them by UIScale again, causing viewport undercoverage and premature clamping. Method-body inspection verified the dispatch and dimension writes without starting Terraria; the reported mismatch is consistent with this confirmed defect.",
+  "api": {
+    "version": "tModLoader2026.07.3.0 / Terraria1.4.4.9; baseline in docs/VERSION_MATRIX.md",
+    "source": "https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/UI/GameInterfaceLayer.cs.patch",
+    "accessed": "2026-09-09",
+    "binary_sha256": "d530e508b2841e66d880ce279a609624b5ab66ce8093eedfa04f47c3d12d485c",
+    "members": ["GameInterfaceLayer.Draw", "PlayerInput.SetZoom_UI", "PlayerInput.SetZoom_Scaled"],
+    "note": "Game layer selects ZoomMatrix whereas world drawing uses TransformationMatrix. None layer selects identity. No third-party implementation or decompiled source is distributed."
+  },
+  "checks": {
+    "focused": "passed;3 Field mask tests:72 resolution/game-zoom/UI-scale combinations including107%, offscreen viewport partitions, flipped view and fractional camera offsets; numerical checks, not an actual engine render",
+    "native_package": "passed;zero errors and four pre-existing CS8632 warnings",
+    "static": "passed;60-document catalog,430-file repository policy check,10 YAML files;git diff --check passed"
+  },
+  "build_identity": {
+    "source_sha256": "435274ff9d2954265d24e7c7f984dfc3fc8231718d9121f6fd06439b42b1cb9e",
+    "package_sha256": "81bf4240ef7deb2d7c0f7319ba5022cb7094fdb89cfbf4f13ed635d5c8efbfb7",
+    "package_bytes": 35769156,
+    "source_changed_during_build": false,
+    "preserved_local_changes": ["Localization/en-US.hjson", "Localization/RitualArmaments/en-US.hjson"]
+  },
+  "not_run": ["Matching peers on0.2.32:107% UI,100% comparison, independent game zoom, all four boundaries during movement/shake/phase transition", "Actual gravity-flip rendering and other-Mod postprocessing compatibility"]
+}

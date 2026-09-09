@@ -82,6 +82,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
 
     public override void OnWorldUnload()
     {
+        fieldMask = null;
         visuals.Reset();
         feedback.Reset();
         sky?.Reset();
@@ -89,6 +90,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
 
     public override void Unload()
     {
+        fieldMask = null;
         visuals.Reset(unload: true);
         feedback.Reset(true);
         sky?.Unload();
@@ -161,10 +163,21 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
 
     public override void PostDrawTiles()
     {
+        fieldMask = null;
         if (Main.dedServ || Main.gameMenu)
             return;
         FirstSeveranceClientStateSystem state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
         FirstSeveranceCombatProjection? combat = state.Combat;
+        if (combat is not null && combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) && local.IsConnected)
+        {
+            var field = FirstSeveranceContainmentBounds.FromGround(combat.CoreX, combat.CoreY);
+            Matrix view = Main.GameViewMatrix.TransformationMatrix;
+            var transform = System.Numerics.Matrix3x2.CreateTranslation(-Main.screenPosition.X, -Main.screenPosition.Y)
+                * new System.Numerics.Matrix3x2(view.M11, view.M12, view.M21, view.M22, view.M41, view.M42);
+            var viewport = Main.instance.GraphicsDevice.Viewport;
+            fieldMask = FirstSeveranceFieldMaskLayout.Capture(field.Left, field.Top, field.Right, field.Bottom,
+                transform, viewport.Width, viewport.Height);
+        }
         SpriteBatch batch = Main.spriteBatch;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
@@ -345,9 +358,9 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             return;
         layers.Insert(0, new LegacyGameInterfaceLayer("Convergence: Black outside containment", () =>
         {
-            DrawFieldMask(Main.spriteBatch, combat);
+            DrawFieldMask(Main.spriteBatch);
             return true;
-        }, InterfaceScaleType.UI));
+        }, InterfaceScaleType.None));
         bool rupture = IsRupture(state, out _);
         if (!rupture && !IsIntro(state, out _)) return;
         // The engine copies this list every frame. Preserve other Mods' layer
@@ -377,21 +390,21 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             && combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) && local.IsConnected && !Main.LocalPlayer.dead;
     }
 
-    private static Vector2 WorldUi(Vector2 point)
-        => Vector2.Transform(point - Main.screenPosition, Main.GameViewMatrix.TransformationMatrix) / Main.UIScale;
+    private FirstSeveranceFieldMaskLayout? fieldMask;
 
-    private static void DrawFieldMask(SpriteBatch batch, FirstSeveranceCombatProjection combat)
+    private void DrawFieldMask(SpriteBatch batch)
     {
-        var field = FirstSeveranceContainmentBounds.FromGround(combat.CoreX, combat.CoreY);
-        Vector2 tl = WorldUi(new(field.Left, field.Top)), br = WorldUi(new(field.Right, field.Bottom));
-        int w = (int)Math.Ceiling(Main.screenWidth / Main.UIScale), h = (int)Math.Ceiling(Main.screenHeight / Main.UIScale);
-        int left = Math.Clamp((int)Math.Floor(tl.X), 0, w), right = Math.Clamp((int)Math.Ceiling(br.X), 0, w);
-        int top = Math.Clamp((int)Math.Floor(tl.Y), 0, h), bottom = Math.Clamp((int)Math.Ceiling(br.Y), 0, h);
-        var pixel = new Rectangle(0, 0, 1, 1);
-        batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, w, top), pixel, Color.Black);
-        batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, bottom, w, h - bottom), pixel, Color.Black);
-        batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, top, left, Math.Max(0, bottom - top)), pixel, Color.Black);
-        batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(right, top, w - right, Math.Max(0, bottom - top)), pixel, Color.Black);
+        // GameInterfaceLayer(UI) calls SetZoom_UI before DrawSelf, which already
+        // scales Main.screenWidth/Height. Dividing them by UIScale again shrinks
+        // coverage. Use the world-pass capture in an identity/unscaled layer instead.
+        if (fieldMask is not { } mask) return;
+        Draw(mask.Top); Draw(mask.Bottom); Draw(mask.Left); Draw(mask.Right);
+        void Draw(FirstSeveranceMaskRect rect)
+        {
+            if (rect.Width <= 0 || rect.Height <= 0) return;
+            batch.Draw(TextureAssets.MagicPixel.Value, new Vector2(rect.X, rect.Y), new Rectangle(0, 0, 1, 1),
+                Color.Black, 0, Vector2.Zero, new Vector2(rect.Width, rect.Height), SpriteEffects.None, 0);
+        }
     }
 
     private static void DrawRupture(SpriteBatch batch, FirstSeveranceCombatProjection combat, ulong tick)

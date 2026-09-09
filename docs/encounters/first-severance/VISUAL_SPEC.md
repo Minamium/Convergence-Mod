@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-09
 source_of_truth_for:
   - first_severance.visual_mvp
 aliases:
@@ -19,6 +19,12 @@ related_docs:
 ---
 
 # First Severance — Null Cantor Visual Pass
+
+## Containment mask coordinate contract
+
+The black exterior is a world-attached foreground mask, not scaled HUD content. Capture its four projected corners using the boundary's current world camera/transformation matrix and physical graphics viewport in `PostDrawTiles`; composite the resulting subpixel rectangles before the HUD with `InterfaceScaleType.None`. Do not read UI-layer screen dimensions or divide by `UIScale` for this mask. Normal HUD/designation scaling is separate. Recompute each world frame and clear on World/Mod unload; only connected participants in an active combat receive the mask. Gameplay bounds, packets and recovery remain unchanged.
+
+The reported107% mismatch exposed a double division: the installed baseline's `GameInterfaceLayer.Draw` calls `PlayerInput.SetZoom_UI`, whose `SetZoom_Scaled` already replaces `Main.screenWidth/Height` with UI-scaled values. The old mask divided those dimensions by UI scale again. This causes missing right/bottom coverage and premature boundary clipping (about126px of horizontal coverage at1920px/107%). The [pinned interface-layer source](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/UI/GameInterfaceLayer.cs.patch) identifies the scale dispatch; installed assembly method-body inspection on2026-09-09 verified the UI and scaled branches. The game's interface layer uses `ZoomMatrix`, not the full world transformation, so changing only the enum to `Game` is not the fix. Regression coverage exercises fractional projection, viewport partitions, offscreen arenas and gravity flips; actual107% peer rendering remains a user-owned smoke check in [Status](../../STATUS.md).
 
 Current0.2.27 supersedes the pursuit-style Final material below: random triples use `DrawTooth`, exactly the lattice's narrow plasma/pearl spine material and24px full footprint. No added broad white flash/overlay/aperture. Authority-selected geometry is held through warning/release; sub-tick time animates surface only. [Random Final triples](ENCOUNTER_SPEC.md#random-final-triples) owns speed/density and seeded orientation rules.
 
