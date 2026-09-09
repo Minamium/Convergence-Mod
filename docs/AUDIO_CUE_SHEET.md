@@ -4,7 +4,7 @@ document_type: spec
 status: provisional
 owners:
   - audio
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-09
 source_of_truth_for:
   - first_severance.audio_cues
 aliases:
@@ -25,7 +25,18 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
-## Mechanic verdicts and music presence — 0.2.21
+## Heavy Raid cue overrides — 0.2.37
+
+Eight new independent masters replace only the specified Raid cues; old shared weapon/Victory assets and BGM remain untouched. [Generator](../tools/generate_raid_weight_sfx.py) owns the deterministic recipe, seed and mastering; [attribution](../Assets/ATTRIBUTION.md#heavy-raid-cues--0237) owns exact provenance. Low pressure noise, dense inharmonic metal, restrained upper transients and irregular reflections replace thin isolated tones. This is a timbre rebuild, not a global gain increase. PCM16 mono48kHz exports peak at0.780; numerical checks are not listening approval.
+
+- Iron Interdict: a heavy latch at entry, `IronPressure` in each wave's last39 harmless ticks, then `IronDescent` at insertion. One shared accent at most every8ticks avoids28 competing blade voices.
+- Stack fragment arrivals: `ShellMassLatch` plus a quieter `ShellMassArc` friction layer follow the existing irregular visual birth beats. `ShellMassShed` releases pressure with diminishing uneven debris on success; `ShellMassCollapse` compresses and impacts on failure. No damage/recipient changes.
+- Final P3 crush: `CrushPressure` loads during the brace; `CrushCataclysm` strikes at the shared actual collision tick. The old generic high lock beep is removed from this attack.
+- Read-ahead Final: three short, pitched arrival accents accompany the three forecast groups, followed by existing fire accents. Spread pursuit cues are deduplicated per cast and suppressed when a delayed packet misses their short playback window.
+
+Existing SFX slider/master, focus/pause and exact-Fight voice cleanup remain. In-game mix and subjective weight/readability are user-owned; no clipping or performance claim is inferred from perceived loudness.
+
+## Mechanic verdicts and music presence — 0.2.21 (preceding)
 
 Current sword/impact additions: Iron Interdict uses the existing BladeGather at entry and original SwordImpale metallic insertion bursts, deduplicated by the stagger's fire tick with a two-voice limit. ShellHit is an unsettling hard-metal impact while the Boss remains sealed; CoreHit uses glass microfractures after eclosion; PylonHit is a low metal-plate knock. Native NPC hit playback is capped to one concurrent voice per material with IgnoreNew, so high-DPS hits do not continuously restart or multiply the sample. All retain sound-slider, focus and pause behavior; no hit request, damage change or new damageable shell NPC. Shielded/non-hittable actors do not invent fake hits. Existing music masters and Final action durations are unchanged.
 

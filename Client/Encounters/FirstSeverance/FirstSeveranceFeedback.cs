@@ -31,6 +31,8 @@ internal sealed class FirstSeveranceFeedback
     private int countdown = -1, resultTicks;
     private int scoreImpactTicks;
     private readonly HashSet<int> scoreSounds = new();
+    private readonly HashSet<uint> spreadCharges = new(), spreadFires = new();
+    private ulong lastSwordSoundTick;
     private bool failed, stack;
     private float previousEndingAge = -1;
 
@@ -96,6 +98,9 @@ internal sealed class FirstSeveranceFeedback
         {
             countdown = -1;
             scoreSounds.Clear();
+            spreadCharges.Clear();
+            spreadFires.Clear();
+            lastSwordSoundTick = 0;
             shellBroken = false;
             string? cue = combat.Substate switch
             {
@@ -107,10 +112,10 @@ internal sealed class FirstSeveranceFeedback
                     : combat.BossPhase == FirstSeveranceBossPhase.Final ? "TerminalEntry" : "PhaseRupture",
                 FirstSeveranceSubstate.Lattice => "CoreExposure",
                 FirstSeveranceSubstate.RotatingBlade => "BladeGather",
-                FirstSeveranceSubstate.HalfField => "BladeGather",
-                FirstSeveranceSubstate.RemoteCrush => "HandCrushGather",
+                FirstSeveranceSubstate.HalfField => "ShellMassLatch",
+                FirstSeveranceSubstate.RemoteCrush => "CrushPressure",
                 FirstSeveranceSubstate.FinalBullets => "FinalGather",
-                FirstSeveranceSubstate.FinalSlicer => "FinalGather",
+                FirstSeveranceSubstate.FinalSlicer => null,
                 _ => null,
             };
             if (cue is not null && state.EstimatedAuthorityTick < combat.ActionStartedTick + 30) Play(cue, .98f);
@@ -156,8 +161,8 @@ internal sealed class FirstSeveranceFeedback
                 shardBeat = beat;
                 if (!fresh)
                 {
-                    Play("ShellLatch", .54f, beat * .027f - .10f);
-                    if (beat > 0) Play("ShellArc", .65f, beat * .023f - .08f);
+                    Play("ShellMassLatch", .62f, beat * .012f - .06f);
+                    if (beat > 0) Play("ShellMassArc", .36f, beat * .012f - .04f);
                 }
             }
         }
@@ -167,6 +172,13 @@ internal sealed class FirstSeveranceFeedback
             if (beat <= 3 && beat != countdown)
                 Play("MechanicTick", .95f);
             countdown = beat;
+        }
+        foreach (var cast in combat.SpreadLances)
+        {
+            if (tick >= cast.StartTick && spreadCharges.Add(cast.Serial) && tick < cast.StartTick + 8)
+                Play("LanceCharge", .52f, cast.Step * .015f);
+            if (tick >= cast.FireTick && spreadFires.Add(cast.Serial) && tick < cast.FireTick + 8)
+                Play("LanceFire", .62f);
         }
         if (combat.LanceVolley is { } volley)
         {
@@ -230,9 +242,30 @@ internal sealed class FirstSeveranceFeedback
         if (tick < combat.ResolveTick && age >= 0)
         {
             if (combat.Substate == FirstSeveranceSubstate.HalfField)
+            {
+                for (int wave = 0; wave < 2; wave++)
+                {
+                    int brace = FirstSeveranceImpalingSwords.FireBase(wave) - 39;
+                    if (age >= brace && scoreSounds.Add(-1100 - wave) && age < brace + 8)
+                        Play("IronPressure", .68f);
+                }
                 foreach (var sword in FirstSeveranceImpalingSwords.At(combat.ActionIndex, age, combat.CoreX, combat.CoreY))
                     if (age >= sword.Fire && age < sword.Fire + 8 && scoreSounds.Add(1000 + sword.Fire))
-                        Play("SwordImpale", .72f, sword.Slot % 3 * .035f - .035f);
+                    {
+                        if (tick >= lastSwordSoundTick + 8)
+                        {
+                            Play("IronDescent", .72f, sword.Slot % 3 * .025f - .025f);
+                            lastSwordSoundTick = tick;
+                        }
+                    }
+            }
+            if (combat.Substate == FirstSeveranceSubstate.FinalSlicer)
+                for (int pulse = 0; pulse < FirstSeveranceScoreGeometry.SlicerPulses; pulse++)
+                {
+                    int reveal = FirstSeveranceScoreGeometry.SlicerReveal(pulse);
+                    if (age >= reveal && scoreSounds.Add(-1000 - pulse) && age < reveal + 8)
+                        Play("LanceCharge", .62f, -.12f + pulse * .12f);
+                }
             if (combat.Substate == FirstSeveranceSubstate.RemoteClaws)
             {
                 int pulse = (int)age / FirstSeveranceScoreGeometry.FloodInterval;
@@ -243,7 +276,8 @@ internal sealed class FirstSeveranceFeedback
             {
                 int soundPulse = combat.Substate == FirstSeveranceSubstate.RotatingBlade
                     ? ray.Pulse / FirstSeveranceScoreGeometry.BladeCount : ray.Pulse;
-                if (combat.Substate != FirstSeveranceSubstate.HalfField && !ray.Live && ray.Charge >= .65f && ray.Charge < 1 && scoreSounds.Add(soundPulse - 128))
+                if (combat.Substate is not (FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RemoteCrush or FirstSeveranceSubstate.FinalSlicer)
+                    && !ray.Live && ray.Charge >= .65f && ray.Charge < 1 && scoreSounds.Add(soundPulse - 128))
                     Play("ExecutionLock", .98f);
                 if (combat.Substate != FirstSeveranceSubstate.HalfField && ray.Live && scoreSounds.Add(soundPulse))
                 {
@@ -251,7 +285,7 @@ internal sealed class FirstSeveranceFeedback
                     {
                         FirstSeveranceSubstate.RotatingBlade => "BladeSweep",
                         FirstSeveranceSubstate.RemoteClaws => "HandClasp",
-                        FirstSeveranceSubstate.RemoteCrush => "HandCrushImpact",
+                        FirstSeveranceSubstate.RemoteCrush => "CrushCataclysm",
                         _ => "FinalSlicerFire",
                     }, .98f);
                     if (combat.Substate == FirstSeveranceSubstate.RemoteCrush) scoreImpactTicks = 24;
@@ -288,7 +322,7 @@ internal sealed class FirstSeveranceFeedback
         failed = combat.LastMechanicResult is FirstSeveranceMechanicResult.StackFailed or FirstSeveranceMechanicResult.SpreadFailed;
         mechanics.Accept(combat);
         resultTicks = 32;
-        if (stack) Play(failed ? "ShellCollapse" : "ShellShed", failed ? .88f : .62f);
+        if (stack) Play(failed ? "ShellMassCollapse" : "ShellMassShed", failed ? .88f : .72f);
         else
         {
             bool dissipate = false;
@@ -321,5 +355,7 @@ internal sealed class FirstSeveranceFeedback
         shellBroken = false;
         countdown = -1;
         scoreSounds.Clear();
+        spreadCharges.Clear();
+        spreadFires.Clear();
     }
 }

@@ -384,6 +384,21 @@ internal static class FirstSeverancePacketCodec
             writer.Write(impact.Y);
             WriteBoolean(writer, impact.Failed);
         }
+        writer.Write(checked((byte)combat.SpreadLances.Count));
+        foreach (var cast in combat.SpreadLances)
+        {
+            writer.Write(cast.Serial);
+            writer.Write(cast.StartTick);
+            writer.Write(cast.Step);
+            writer.Write((short)cast.TargetSlot);
+            writer.Write(checked((byte)cast.Rays.Count));
+            foreach (var ray in cast.Rays)
+            {
+                writer.Write(ray.X); writer.Write(ray.Y);
+                writer.Write(ray.DirectionX); writer.Write(ray.DirectionY);
+                writer.Write(ray.Length); writer.Write(ray.HalfWidth);
+            }
+        }
     }
 
     private static bool TryReadCombat(
@@ -530,6 +545,23 @@ internal static class FirstSeverancePacketCodec
             if (!TryReadBoolean(reader, out bool failed)) return false;
             impacts[index] = new(id, x, y, failed);
         }
+        int spreadCount = reader.ReadByte();
+        if (spreadCount > FirstSeveranceSpreadBarrage.Count) return false;
+        var spread = new FirstSeveranceLanceVolley[spreadCount];
+        for (int i = 0; i < spreadCount; i++)
+        {
+            uint serial = reader.ReadUInt32();
+            ulong start = reader.ReadUInt64();
+            byte step = reader.ReadByte();
+            int target = reader.ReadInt16(), rayCount = reader.ReadByte();
+            if (rayCount < 1 || rayCount > participantCount || step >= FirstSeveranceSpreadBarrage.Count) return false;
+            var rays = new FirstSeveranceLanceRay[rayCount];
+            for (int j = 0; j < rayCount; j++)
+                rays[j] = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            try { spread[i] = new(serial, start, rays, FirstSeveranceAttackKind.PursuitPrism, step, target); }
+            catch (ArgumentException) { return false; }
+        }
         try
         {
             combat = new FirstSeveranceCombatProjection(
@@ -550,7 +582,7 @@ internal static class FirstSeverancePacketCodec
                 mechanicResult,
                 mechanicRevision,
                 Array.AsReadOnly(participants),
-                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles, mechanicTick, impacts);
+                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles, mechanicTick, impacts, spread);
             return true;
         }
         catch (ArgumentException)

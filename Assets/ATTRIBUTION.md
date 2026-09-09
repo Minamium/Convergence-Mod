@@ -1344,6 +1344,120 @@ The existing exact records for `StackSummon.wav`, `StackRelease.wav`, `SpreadSum
 
 The same external0.2.16 recipe revises the already-recorded StackSummon, SpreadSummon, LanceCharge, EnergyGather, EnergyLock, GridCharge, BladeGather, HandGather, HalfFieldCharge and FinalGather masters with an early metallic warning and reduced crest factor. MechanicTick is replaced by a0.33s original bell/low-impact warning; BladeSweep becomes a4.1s original accelerating air/metal body. All preserve original provenance above, use48kHz mono PCM16, and have external PCM24 auditions. No music or third-party source layer changes. RMS measurements are technical evidence, not perceived-loudness acceptance.
 
+### Heavy Raid cues — 0.2.37
+
+- Runtime file: `Assets/Sounds/FirstSeverance/IronPressure.wav`
+- Asset ID: ironpressure-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 0.65-second restrained blade-loading pressure before each insertion wave. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/IronDescent.wav`
+- Asset ID: irondescent-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 1.10-second struck inharmonic slab with low pressure and a short edge transient. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellMassLatch.wav`
+- Asset ID: shellmasslatch-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 0.86-second double-contact heavy fragment latch. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellMassArc.wav`
+- Asset ID: shellmassarc-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 0.50-second irregular low-mid electrical friction; reduced layer gain. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellMassShed.wav`
+- Asset ID: shellmassshed-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 1.55-second uneven falling debris and pressure release, without implosion. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellMassCollapse.wav`
+- Asset ID: shellmasscollapse-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 1.70-second compression and massive fractured-metal impact. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/CrushPressure.wav`
+- Asset ID: crushpressure-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 2.50-second bracing load and accelerating final pressure rise. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/CrushCataclysm.wav`
+- Asset ID: crushcataclysm-0237-2026-09-09
+- Asset type: sound effect
+- Creator: project-authored original DSP
+- Creation/acquisition date: 2026-09-09
+- Source type: original
+- Source work and URL: none; no external samples, recordings or compositions
+- Tool/model/version: Python3.12 / NumPy; tools/generate_raid_weight_sfx.py, seed2370909,48kHz PCM16 mono
+- Human modifications: no human editing; independent synthesis, modal/noise layering, diffuse reflections, spectral DC cut and peak mastering
+- License and redistribution terms: project asset terms not selected; retain existing publication gate
+- Required attribution: none externally specified; retain this record
+- Reviewer and review date: Codex finite/PCM decode/endpoint/peak checks,2026-09-09; human mix acceptance pending
+- Notes: 2.15-second low-air collapse and dense struck-metal terminal crush. Decoded peak0.780; external auditions retained. Earlier shared weapon/victory cues are not overwritten.
+
 ## Record template
 
 Copy this section for each asset family. In the Records section above, add one exact Markdown entry in the form `- Runtime file: \`path/from/repository/root\`` for every exported file. The repository check parses only that section and verifies both directions.

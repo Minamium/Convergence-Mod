@@ -16,6 +16,7 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCurtainComb.cs" Link="Domain/FirstSeveranceCurtainComb.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/NullRefrainMotion.cs" Link="Domain/NullRefrainMotion.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceSafeWindows.cs" Link="Domain/FirstSeveranceSafeWindows.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceSpreadBarrage.cs" Link="Domain/FirstSeveranceSpreadBarrage.cs" />
     <Compile Include="../../Common/Networking/Protocol/EncounterPacketCodec.cs" Link="Domain/EncounterPacketCodec.cs" />
     <Compile Include="../../Common/Networking/Protocol/EncounterPacketHeader.cs" Link="Domain/EncounterPacketHeader.cs" />
     <Compile Include="../../Common/Networking/Protocol/EncounterPacketType.cs" Link="Domain/EncounterPacketType.cs" />

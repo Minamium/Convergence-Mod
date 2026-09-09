@@ -61,7 +61,8 @@ internal sealed class FirstSeveranceCombatProjection
         ulong bossPhaseStartedTick = 0,
         FirstSeveranceGridVolley? gridVolley = null,
         ulong actionStartedTick = 0, int actionIndex = -1, int completedPhaseCycles = 0,
-        ulong mechanicTick = 0, IReadOnlyList<FirstSeveranceMechanicImpact>? mechanicImpacts = null)
+        ulong mechanicTick = 0, IReadOnlyList<FirstSeveranceMechanicImpact>? mechanicImpacts = null,
+        IReadOnlyList<FirstSeveranceLanceVolley>? spreadLances = null)
     {
         if (encounterSequence == 0
             || fightId.IsNone
@@ -137,6 +138,27 @@ internal sealed class FirstSeveranceCombatProjection
             || gridVolley.EndTick > resolveTick || lanceVolley is not null || gridVolley.CoreBeams.Count > Participants.Count))
             throw new ArgumentException("A grid cannot outlive its owning stage/window.");
         GridVolley = gridVolley;
+        if (spreadLances is { Count: > FirstSeveranceSpreadBarrage.Count })
+            throw new ArgumentException("Too many Spread pursuit casts.");
+        SpreadLances = FirstSeverancePlanCollections.Copy(spreadLances ?? Array.Empty<FirstSeveranceLanceVolley>(), nameof(spreadLances));
+        var serials = new HashSet<uint>();
+        int previousStep = -1;
+        ulong previousStart = 0;
+        foreach (var cast in SpreadLances)
+        {
+            var window = FirstSeveranceSpreadBarrage.Window(substate, actionIndex, actionStartedTick, resolveTick, cast.StartTick);
+            bool targetMember = false;
+            foreach (var p in Participants) targetMember |= p.ServerWhoAmI == cast.TargetSlot;
+            if (window is not { } w || cast.Kind != FirstSeveranceAttackKind.PursuitPrism
+                || cast.Step >= FirstSeveranceSpreadBarrage.Count || cast.Step <= previousStep
+                || cast.StartTick <= previousStart || cast.StartTick < FirstSeveranceSpreadBarrage.Start(w, cast.Step)
+                || cast.EndTick > w.ResolveTick - FirstSeveranceSpreadBarrage.Settle
+                || cast.Rays.Count > Participants.Count || !targetMember || !serials.Add(cast.Serial)
+                || cast.Serial == lanceVolley?.Serial)
+                throw new ArgumentException("Invalid Spread pursuit cast.");
+            previousStep = cast.Step;
+            previousStart = cast.StartTick;
+        }
     }
 
     public ulong EncounterSequence { get; }
@@ -185,6 +207,7 @@ internal sealed class FirstSeveranceCombatProjection
     public IReadOnlyList<FirstSeveranceCombatParticipantProjection> Participants { get; }
 
     public FirstSeveranceLanceVolley? LanceVolley { get; }
+    public IReadOnlyList<FirstSeveranceLanceVolley> SpreadLances { get; }
 
     public bool TryGetParticipantByServerSlot(
         int serverWhoAmI,

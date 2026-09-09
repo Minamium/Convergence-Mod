@@ -63,7 +63,8 @@ internal static class FirstSeveranceChoreography
 
     internal static float FinalProgress(int step) => Math.Clamp(step / 3, 0, 7) / 7f;
     internal static int FinalHazardTicks(int step) => step / 3 % 2 == 1
-        ? FirstSeveranceScoreGeometry.SlicerPulses * FirstSeveranceScoreGeometry.SlicerCadence(step)
+        ? FirstSeveranceScoreGeometry.SlicerFire(step) + (FirstSeveranceScoreGeometry.SlicerPulses - 1)
+            * FirstSeveranceScoreGeometry.SlicerCadence(step) + 18
         : 240 - Math.Clamp(step / 3, 0, 7) * 8;
 
     internal static (float X, float Y) StackPosition(float groundX, float groundY, FirstSeveranceBossPhase phase, int step)

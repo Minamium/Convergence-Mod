@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.36**, protocol **24**. Hotfix: the shared Pylon `GlobalNPC` now uses static texture/effect caches, retaining explicit unload disposal. The previous0.2.35 failed tML load-time validation because it had instance fields without `InstancePerEntity`; compilation had not caught this. The preceding [Raid hit bridge](encounters/first-severance/ENCOUNTER_SPEC.md#raid-damage-and-adrenaline), [kinetic presentation](encounters/first-severance/VISUAL_SPEC.md#connected-kinetic-raid-pass--0235) and [long-form weapons](encounters/first-severance/WEAPONS.md#long-form-non-melee-rituals--0234) remain included. No gameplay, protocol or asset changes in this hotfix.
+Development **0.2.37**, protocol **25**. [Final triples](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) now reveal all three locked forecasts before the first release. [Every Spread](encounters/first-severance/ENCOUNTER_SPEC.md#pursuit-during-every-spread--0237), including embedded windows, adds eight P1 pursuit casts with unchanged individual warning time and a final settle. [Heavy Raid audio](AUDIO_CUE_SHEET.md#heavy-raid-cue-overrides--0237) replaces sword, Stack fragment and P3 crush cues. Existing load hotfix, Adrenaline receipt bridge, accepted visuals, long-form weapons and unrelated local changes remain intact. HP/base damage are not retuned.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -37,7 +37,11 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-0.2.35 client load **failed**, confirmed in `client.log` at2026-09-09 18:20:49: `FirstSeverancePylonVisuals instance fields but InstancePerEntity returns false`. The0.2.36 cache fix and regression guard are in place; actual client reload remains user-owned. Do not treat the previous compilation/codec passes as a successful Mod load.
+[Latest log/build record](evidence/2026-09-09-read-ahead-spread-score.json):0.2.36 successfully loaded and completed a two-player Victory in251.48s;20Stack checks (one failure),23Spread successes,36accepted Raid hits (14FinalSlicer), no Down/revive or logged exception. Client0's19hit receipts match its authority hits; actual Adrenaline values remain unobserved. This supersedes the pending0.2.36 reload below, not unrelated manual checks.
+
+0.2.37:139 distinct domain cases passed across the suite and scoped correction of a legacy preview-count expectation; protocol codec324round-trips/50malformed cases and new concurrent1–4-player Spread tests passed. Eight new audio files passed PCM decode/finite/peak checks. Native packaging passed with zero errors/four existing nullable warnings. Actual0.2.37 load, audiovisual mix and multiplayer dodgeability remain **not_run**, user-owned.
+
+Historical0.2.35 load failure (`GlobalNPC` instance fields without `InstancePerEntity`) and the static-cache0.2.36 hotfix remain recorded in the preceding evidence; compilation alone did not establish that fix's success.
 
 [Raid hit/kinetic evidence](evidence/2026-09-09-raid-hit-kinetics.json):137 domain cases passed across the suite and scoped eclosion/flow reruns; compiled codec324 round-trips and50 malformed cases passed. Native package compilation passed, zero errors/four existing nullable warnings. Actual Calamity gauge behavior, remote-owner/terminal hit delivery and visual acceptance are **not_run**, user-owned. The source fix is not an in-game success or measured performance claim.
 
@@ -76,7 +80,7 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 
 ## Next change
 
-User-owned0.2.36: re-enable Convergence if tML disabled it after the failure, then reload Mods/restart. No Build + Reload is needed. Confirm the Mod reaches the main menu before resuming the0.2.35 gameplay checks below.
+User-owned0.2.37: reload/restart all peers before Host & Play (protocol25); the package is already built, no second Build + Reload needed. Check three forecast arrivals and reading pause before ordered Final shots; pursuit during standalone/embedded Spread and its quiet resolution margin; heavy sword/Stack/crush sound balance. No GUI/server was launched. Previous load issue is confirmed resolved by the0.2.36 run; outstanding unrelated checks below are historical handoff items, not mandatory repeats for this change.
 
 User-owned0.2.35: reload/restart **all** peers before Host & Play (protocol changed; no second Build + Reload required). With standard stored Adrenaline, take a Raid beam hit and check the gauge clears; confirm zero-damage successful mechanics do not clear it. Check a Down-causing/final Defeat hit, active burst and Draedon's Heart separately. For visuals, inspect pursuit launch, lattice source, P3 sword tips/hands, Pylons and eclosion with normal/reduced effects; retained107% viewport and weapon checks below remain outstanding, not repeated automated gates.
 

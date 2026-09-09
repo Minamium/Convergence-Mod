@@ -23,7 +23,13 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v24
+## Current development protocol v25
+
+Combat snapshots append `SpreadCastCount : byte` (0–8) after mechanic impacts. Each cast contains `Serial:uint`, `StartTick:ulong`, `Step:byte`, `TargetSlot:int16`, `RayCount:byte` (1–roster count, maximum4), followed by that many six-float immutable lance rays. Kind is implicitly PursuitPrism and MotionTick is zero. Maximum added section:897bytes. Counts are checked before allocation; projection validation rejects duplicate serials, non-increasing steps/ticks, foreign focus slots, nonfinite rays, early starts, incompatible windows and casts intruding on the final Spread-settle interval. Truncated packets are rejected by the existing router boundary. Normal P1 casts and concurrent Spread casts share the Fight-owned serial allocator.
+
+The feature-local Spread runtime owns at most eight descriptors and32 cast/member hit keys. It runs alongside the existing lance/grid/score update in the same authority tick, publishes locked targets immediately, and clears on action change, window end and exact-Fight cleanup. Renderer emitters (maximum12 including cooling casts) and bounded sound cursors consume these descriptors without retargeting. Existing packet IDs, requests, ownership, HP/recovery and persistence are unchanged. The shared Final read-ahead timing also requires matching peers. [Encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns the timing and all-Spread behavior.
+
+## Preceding development protocol v24
 
 `RaidHit = 69` is a definition-routed, **server-to-owning-client only** event for accepted encounter HP damage. Its existing header carries exact Sequence/Fight and a per-participant positive hit revision; its entire body is one positive `Int32` damage amount. No client-provided hit, HP mutation or new saved state is introduced. The router rejects the reverse direction; the feature parses the bounded payload before checking its current connected local participant. The player's per-Fight receipt rejects wrong versions/Fights/sequences and duplicate/stale revisions; cleanup resets it. Calamity-specific effects remain in the compatibility adapter.
 

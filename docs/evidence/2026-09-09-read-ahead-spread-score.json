@@ -1,0 +1,182 @@
+{
+  "date": "2026-09-09",
+  "source_base_commit": "e22cd53a1d51acc55937f465bb0a8626c8df0d72",
+  "previous_playtest": {
+    "version": "0.2.36",
+    "topology": "Host & Play, two real participants, no auxiliary protection",
+    "fight": "cb330734-6202-42fc-9de2-415f9ee0e8f5",
+    "local_start": "18:41:42.111",
+    "local_end": "18:45:53.600",
+    "duration_ticks": 15089,
+    "duration_seconds": 251.483,
+    "result": "Victory / BossLifeZero, FinalSlicer",
+    "logs": "server.log plus client.log; server2.log startup only, excluded from encounter totals; raw logs not committed",
+    "load": "0.2.36 successfully loaded and completed a Raid; previous 0.2.35 GlobalNPC load failure not reproduced",
+    "stack": {
+      "checks": 20,
+      "passed": 19,
+      "failed": 1,
+      "failed_check": {
+        "action": 2,
+        "tick": 6861,
+        "present": 1,
+        "required": 2,
+        "missing": 1
+      }
+    },
+    "spread": {
+      "checks": 23,
+      "passed": 23,
+      "failed": 0
+    },
+    "raid_hits": {
+      "count": 36,
+      "damage": 5093,
+      "lethal": 0,
+      "by_source": [
+        {
+          "source": "FinalSlicer",
+          "hits": 14,
+          "damage": 1680
+        },
+        {
+          "source": "FinalBullets",
+          "hits": 9,
+          "damage": 1080
+        },
+        {
+          "source": "PursuitPrism",
+          "hits": 4,
+          "damage": 480
+        },
+        {
+          "source": "HalfField",
+          "hits": 2,
+          "damage": 240
+        },
+        {
+          "source": "RotatingBlade",
+          "hits": 2,
+          "damage": 240
+        },
+        {
+          "source": "Stack",
+          "hits": 2,
+          "damage": 686
+        },
+        {
+          "source": "Lattice",
+          "hits": 1,
+          "damage": 120
+        },
+        {
+          "source": "Stillness",
+          "hits": 1,
+          "damage": 120
+        },
+        {
+          "source": "SweepRight",
+          "hits": 1,
+          "damage": 447
+        }
+      ],
+      "by_participant": [
+        {
+          "id": 0,
+          "hits": 19,
+          "damage": 2860
+        },
+        {
+          "id": 1,
+          "hits": 17,
+          "damage": 2233
+        }
+      ]
+    },
+    "recovery": "No Down or revive events observed; this run does not exercise revival/terminal lethal receipts.",
+    "hit_receipts": "Client slot0 has19 RaidHitApplied receipts, matching its19 authority damage events. Actual before/after Adrenaline values are not logged; gauge behavior is not established.",
+    "errors": "No ERROR/exception found in inspected session logs.",
+    "damage_windows": [
+      {
+        "target": "Pylons",
+        "loop": 1,
+        "seconds": 4.05,
+        "damage": 600000,
+        "dps": 148148.1
+      },
+      {
+        "target": "Core",
+        "loop": 1,
+        "seconds": 18,
+        "damage": 2048469,
+        "dps": 113803.8,
+        "end": "Deadline"
+      },
+      {
+        "target": "Pylons",
+        "loop": 2,
+        "seconds": 6.23,
+        "damage": 600000,
+        "dps": 96256.7
+      },
+      {
+        "target": "Core",
+        "loop": 2,
+        "seconds": 3.6,
+        "damage": 451531,
+        "dps": 125425.3,
+        "end": "50% HP gate"
+      },
+      {
+        "target": "P2 Lattice",
+        "seconds": 6.82,
+        "damage": 1250000,
+        "dps": 183374.1,
+        "end": "25% HP gate"
+      },
+      {
+        "target": "P3 RemoteClaws",
+        "seconds": 10,
+        "damage": 1139483,
+        "dps": 113948.3,
+        "end": "Deadline"
+      },
+      {
+        "target": "P3 HalfField",
+        "seconds": 2.48,
+        "damage": 110517,
+        "dps": 44503.5,
+        "end": "HP zero gate; remaining score and Final still required"
+      }
+    ],
+    "balance": "No HP or damage retune in this task. Final14 hits are an observation, not proof of randomness or latency cause."
+  },
+  "implementation": {
+    "version": "0.2.37",
+    "protocol": 25,
+    "final": "Three persistent seeded forecasts, shared reading interval, three ordered releases; no release-time RNG or hit-width change.",
+    "spread": "Eight P1 pursuit casts in every standalone/embedded Spread, frozen authority target rays, full28-tick warnings,24-tick settle, max8 descriptors, same-Fight serials/cleanup.",
+    "audio": "Eight original heavy pressure/inharmonic-metal assets, only selected Raid cues remapped. Prior weapon/BGM/Victory assets retained.",
+    "audio_generator": "tools/generate_raid_weight_sfx.py",
+    "audio_checks": "All8 decoded PCM16 mono48kHz; finite samples; peak0.780; tapered endpoints. RMS0.1404–0.2523,30–300Hz energy52.2–91.3%. Human listening pending."
+  },
+  "verification": {
+    "domain": "139 distinct domain cases passed across full run plus scoped correction of the old single-comb count expectation; no production fix was needed for that test expectation.",
+    "codec": "Protocol25:324 compiled round-trips and50 malformed/truncated cases. New domain round-trips additionally cover8 concurrent Spread casts for1–4 players, malformed counts/order/deadlines and truncation.",
+    "native_build": "Passed:0errors,4existing CS8632 warnings; game/server not launched.",
+    "build_record": ".local/builds/20260909T100950832126Z/record.json",
+    "source_sha256": "06463d3273412a65f5bb9cc4224ec9cfa20790cca158cc4adc8b53ca7002f2cc",
+    "artifact_bytes": 39944464,
+    "artifact_sha256": "877144a65187118b4dca9fea8e68f361463216cb83b733e1d8f20174cece073b",
+    "post_build_changes": "Documentation/evidence/catalog only; runtime sources and assets unchanged.",
+    "static": "Passed: catalog60documents, repository474files, YAML10files; git diff --check clean.",
+    "not_run": [
+      "0.2.37 Mod load and matching-peer Host & Play",
+      "Final triple forecast readability and dodgeability under latency",
+      "Spread pursuits in P2 pockets/P3 flood holds and3/4-player crossings",
+      "Heavy SFX in-game/listening mix",
+      "Normal/reduced-effects perceptual acceptance and measured FPS"
+    ]
+  },
+  "preserved": "Preexisting dirty Localization/en-US.hjson and Localization/RitualArmaments/en-US.hjson not staged. Old originals/copies and all unrelated weapon work retained."
+}

@@ -91,7 +91,8 @@ internal static partial class Program
             for (int tick=0;tick<end;tick++)
             {
                 var rays=FirstSeveranceScoreGeometry.Rays(state,0,tick,4000,4000);
-                AssertEqual(true,rays.Count<=28,"bounded geometry including impaling blades");
+                AssertEqual(true,rays.Count <= (state == FirstSeveranceSubstate.FinalSlicer ? 3 * 32 : 28),
+                    "bounded geometry including three retained previews");
                 foreach(var r in rays) AssertEqual(true,float.IsFinite(r.Ray.X)&&float.IsFinite(r.Ray.Y)&&r.Ray.Length>0,"finite rays");
             }
         }
@@ -123,7 +124,7 @@ internal static partial class Program
         AssertEqual(false,FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.RemoteCrush,8,180,4000,4000)[0].Live,"crush recovery harmless");
         AssertEqual(true,FirstSeveranceChoreography.IsValidStep(FirstSeveranceBossPhase.Distant,FirstSeveranceSubstate.RemoteCrush,8),"crush is phase-local score step");
         var comb=FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,2,28,4000,4000);
-        AssertEqual(true,comb.Count > 0 && comb.Count <= 32,"bounded random comb");
+        AssertEqual(true,comb.Count > 0 && comb.Count <= 3 * 32,"bounded read-ahead combs");
         foreach(var tooth in comb) AssertEqual(FirstSeveranceGridVolley.HalfWidth,tooth.Ray.HalfWidth,"lattice hit width");
         AssertEqual(96,FirstSeveranceScoreGeometry.Bullets(2,132,4000,4000).Count,"four overlapping 24-bullet waves");
     }

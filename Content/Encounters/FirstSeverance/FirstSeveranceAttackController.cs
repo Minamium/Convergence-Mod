@@ -39,6 +39,7 @@ internal sealed class FirstSeveranceAttackController
     private uint attackSequence;
     private readonly HashSet<ParticipantId> lanceHitParticipants = new();
     private readonly FirstSeveranceRecoveryController recovery;
+    private readonly FirstSeveranceSpreadBarrageRuntime spread = new();
     private readonly Action<ulong, string> Log;
 
     internal FirstSeveranceAttackController(FirstSeveranceRoster roster, Vector2 groundCenter,
@@ -53,9 +54,13 @@ internal sealed class FirstSeveranceAttackController
 
     internal FirstSeveranceLanceVolley? Lance => lanceVolley;
     internal FirstSeveranceGridVolley? Grid => gridVolley;
+    internal IReadOnlyList<FirstSeveranceLanceVolley> SpreadLances => spread.Casts;
+    internal bool UpdateSpread(in FirstSeveranceLoopState state, ulong tick)
+        => spread.Update(state, tick, roster, recovery, ref lanceSerial, Log);
 
     internal void EnterSubstate(FirstSeveranceSubstate after, ulong authorityTick)
     {
+        spread.Clear();
         lanceVolley = null;
         lanceHitParticipants.Clear();
         scoreHits.Clear();
@@ -72,6 +77,7 @@ internal sealed class FirstSeveranceAttackController
 
     internal void Cleanup()
     {
+        spread.Clear();
         lanceVolley = null;
         gridVolley = null;
         lanceHitParticipants.Clear();

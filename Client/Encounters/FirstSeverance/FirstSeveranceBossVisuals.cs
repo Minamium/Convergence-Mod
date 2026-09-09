@@ -111,7 +111,7 @@ internal sealed class FirstSeveranceBossVisuals
                 phaseImpactTicks = 24;
             previousPhase = combat.Substate;
         }
-        emissions.Update(combat.LanceVolley, state.EstimatedAuthorityTick);
+        emissions.Update(combat.LanceVolley, state.EstimatedAuthorityTick, combat.SpreadLances);
         double renderTick = emissions.RenderTick;
         double lead = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread ? 120 : 90;
         float requestedPose = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread

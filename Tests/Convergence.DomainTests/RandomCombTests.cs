@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Convergence.Content.Encounters.FirstSeverance;
 
 namespace Convergence.DomainTests;
@@ -17,12 +18,13 @@ internal static partial class Program
             seen[axis] = true;
             int cadence = FirstSeveranceScoreGeometry.SlicerCadence(step);
             int fire = pulse * cadence + FirstSeveranceScoreGeometry.SlicerFire(step);
-            var warning = FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,step,fire-1,4000,4000,seed);
-            var live = FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,step,fire,4000,4000,seed);
-            var replica = FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,step,fire,4000,4000,seed);
-            AssertEqual(true,live.Count > 0 && live.Count <= 32,"bounded field-wide comb");
-            AssertEqual(live.Count,warning.Count,"warning includes every tooth");
-            for (int i=0;i<live.Count;i++)
+            var warning = FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,step,fire-1,4000,4000,seed).Where(r => r.Pulse == pulse).ToArray();
+            var live = FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,step,fire,4000,4000,seed).Where(r => r.Pulse == pulse).ToArray();
+            var replica = FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,step,FirstSeveranceScoreGeometry.SlicerReveal(pulse),4000,4000,seed).Where(r => r.Pulse == pulse).ToArray();
+            AssertEqual(true,live.Length > 0 && live.Length <= 32,"bounded field-wide comb");
+            AssertEqual(live.Length,warning.Length,"warning includes every tooth");
+            AssertEqual(live.Length,replica.Length,"full shape already shown at initial reveal");
+            for (int i=0;i<live.Length;i++)
             {
                 var ray=live[i].Ray;
                 AssertEqual(true,ray.IsValid,"finite clipped ray");

@@ -64,7 +64,7 @@ internal sealed class FirstSeveranceEmissionVisuals
         }
     }
 
-    private readonly List<Emitter> emitters = new(4);
+    private readonly List<Emitter> emitters = new(12);
     internal readonly FirstSeveranceAttackAccents Accents = new();
     private Asset<Texture2D>? atlas;
     private double clockTick;
@@ -78,20 +78,29 @@ internal sealed class FirstSeveranceEmissionVisuals
         foreach (var emitter in emitters) result = Math.Max(result, value(emitter));
         return result;
     }
-    internal void Update(FirstSeveranceLanceVolley? volley, ulong tick)
+    internal void Update(FirstSeveranceLanceVolley? volley, ulong tick, IReadOnlyList<FirstSeveranceLanceVolley> spread)
     {
         clockTick = tick;
         clockStamp = Stopwatch.GetTimestamp();
         emitters.RemoveAll(e => tick > e.Volley.EndTick + 28);
         foreach (var emitter in emitters)
-            if (emitter.Volley.Serial != volley?.Serial && tick < emitter.Volley.EndTick)
+        {
+            bool currentSpread = false;
+            foreach (var cast in spread) currentSpread |= emitter.Volley.Serial == cast.Serial;
+            if (!currentSpread && emitter.Volley.Serial != volley?.Serial && tick < emitter.Volley.EndTick)
                 emitter.CancelledAt ??= tick;
-        if (volley is null) return;
+        }
+        if (volley is not null) Accept(volley, tick);
+        foreach (var cast in spread)
+            if (tick <= cast.EndTick + 28) Accept(cast, tick);
+    }
+    private void Accept(FirstSeveranceLanceVolley volley, ulong tick)
+    {
         var existing = emitters.Find(e => e.Volley.Serial == volley.Serial);
         if (existing is not null) existing.Accept(volley, tick);
         else
         {
-            if (emitters.Count == 4) emitters.RemoveAt(0);
+            if (emitters.Count == 12) emitters.RemoveAt(0);
             emitters.Add(new Emitter(volley, tick));
         }
     }

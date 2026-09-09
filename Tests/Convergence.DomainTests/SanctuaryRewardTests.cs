@@ -12,7 +12,18 @@ internal static partial class Program
         foreach (int step in new[] { 5, 11, 17, 23 })
         {
             AssertEqual(6, FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "six live ticks");
-            AssertEqual(2, FirstSeveranceScoreGeometry.SlicerCadence(step) - FirstSeveranceScoreGeometry.SlicerEnd(step), "two recovery ticks");
+            AssertEqual(true, FirstSeveranceScoreGeometry.SlicerFire(step) - FirstSeveranceScoreGeometry.SlicerReveal(2) >= 42,
+                "full reading grace after third reveal");
+            for (int age = 0; age < FirstSeveranceScoreGeometry.SlicerFire(step); age++)
+            {
+                var seen = new System.Collections.Generic.HashSet<int>();
+                foreach (var ray in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer, step, age, 4000, 4000))
+                {
+                    AssertEqual(false, ray.Live, "all three previews harmless");
+                    seen.Add(ray.Pulse);
+                }
+                AssertEqual(Math.Min(3, age / 12 + 1), seen.Count, "one then two then three retained previews");
+            }
             for (int pulse = 0; pulse < 3; pulse++)
             {
                 int fire = pulse * FirstSeveranceScoreGeometry.SlicerCadence(step) + FirstSeveranceScoreGeometry.SlicerFire(step);

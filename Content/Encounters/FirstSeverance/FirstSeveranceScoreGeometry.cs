@@ -34,9 +34,12 @@ internal static class FirstSeveranceScoreGeometry
     internal static int BladeTurn(double age) => Math.Min(FirstSeveranceChoreography.BladeTurns - 1, (int)BladeTravel(age));
     internal static float BladeExtension(double age) => Smooth((float)((age - 144) / 12))
         * (1 - Smooth((float)((age - FirstSeveranceChoreography.BladeEnd - 12) / 45)));
-    internal static int SlicerFire(int step) => 28 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 6);
+    // Reveal all three locked combs before the first can hurt. The last reveal
+    // always gets a full 0.7–0.9 second reading window, even late in Final.
+    internal static int SlicerReveal(int pulse) => pulse * 12;
+    internal static int SlicerFire(int step) => SlicerReveal(2) + 54 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
     internal static int SlicerEnd(int step) => SlicerFire(step) + 6;
-    internal static int SlicerCadence(int step) => SlicerEnd(step) + 2;
+    internal static int SlicerCadence(int step) => 24 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 6);
     internal const int SlicerPitch = 112;
     internal static int BulletStartTick(int step, int wave) => 36 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 8)
         + wave * (32 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 10));
@@ -121,12 +124,14 @@ internal static class FirstSeveranceScoreGeometry
         }
         else if (state == FirstSeveranceSubstate.FinalSlicer && age < FirstSeveranceChoreography.FinalHazardTicks(step))
         {
-            int pulse = (int)age / SlicerCadence(step);
-            if (pulse >= SlicerPulses) return rays;
-            double local = age - pulse * SlicerCadence(step);
-            foreach (var ray in FirstSeveranceRandomComb.Rays(actionSeed, step, pulse, groundX, cy))
-                rays.Add(new(ray, local >= SlicerFire(step) && local < SlicerEnd(step),
-                    pulse, Smooth((float)local / SlicerFire(step))));
+            for (int pulse = 0; pulse < SlicerPulses; pulse++)
+            {
+                int reveal = SlicerReveal(pulse), fire = SlicerFire(step) + pulse * SlicerCadence(step);
+                if (age < reveal || age >= fire + 18) continue;
+                foreach (var ray in FirstSeveranceRandomComb.Rays(actionSeed, step, pulse, groundX, cy))
+                    rays.Add(new(ray, age >= fire && age < fire + 6, pulse,
+                        Smooth((float)(age - reveal) / (fire - reveal))));
+            }
         }
         return rays;
     }

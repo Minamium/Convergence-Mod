@@ -563,13 +563,13 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 1234495bd482c6d88e0131179777c4187673eff8008fd3ac79bb220f30bbe48c
+  content_sha256: eeb916937f0daedac912f1eebb1869aa155e3187ef8d4a1106659ff647fa9774
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-09'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -801,12 +801,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: d26bed15468df4e6ff81111f8962fb6a68b44f753695fd6437ca48e86c3f65c3
+  content_sha256: 42e98b37f0e213ae7f274fe740b57c5e2a2230959e7d23ab56f587628ecc86a4
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-09'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -938,7 +938,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 9092f85b159135e60035ab4ff624295dbc9ed22c3383eda17e058192bba18a2b
+  content_sha256: 465f74038e9b00b1912c21af646a95b1bbd06384b272df0976a2cce67b5e299e
   document_type: governance
   status: accepted
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 4111ced08f92e35e71c961d21b4fe809dc395de29a50ef4503bc90f6bfa67afc
+  content_sha256: 9398caa089d4e690644ac94d6dc67264bfc66cc021371ecdaa7002a6d1ee43fd
   document_type: status
   status: accepted
   owners:
