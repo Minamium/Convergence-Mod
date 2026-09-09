@@ -1,6 +1,15 @@
 {
   "build": "0.2.35",
   "protocol": 24,
+  "load_failure_and_hotfix": {
+    "observed": "0.2.35 client.log 2026-09-09 18:20:49: FirstSeverancePylonVisuals instance fields but InstancePerEntity returns false; Convergence automatically disabled",
+    "hotfix_build": "0.2.36",
+    "fix": "Make both shared GlobalNPC drawing caches static, retaining unload disposal; no per-NPC state or gameplay change",
+    "checks": "3 presentation integration guards passed; native compilation/package passed with0 errors and4 existing warnings; static catalog/policy/YAML and whitespace checks passed",
+    "local_record": "20260909T092245696006Z",
+    "source_sha256": "6b1afdf6767da0e630acc25dc77761404dee678de3e88ddbdb13528a99459bfe",
+    "client_reload": "not_run; user re-enables Convergence and reloads, without rebuilding"
+  },
   "base_commit": "0425f234605fa2b95c4984ab330c4d3905752462",
   "scope": "Calamity Adrenaline bridge for accepted scripted Raid hits; connected kinetic casting and a whole-score presentation review. No weapon/gameplay timing/geometry retuning.",
   "checks": {

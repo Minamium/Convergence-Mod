@@ -1,6 +1,6 @@
 displayName = Convergence (Development Build)
 author = Minamium
-version = 0.2.35
+version = 0.2.36
 modReferences = CalamityMod@2.2.4
 side = Both
 playableOnPreview = false

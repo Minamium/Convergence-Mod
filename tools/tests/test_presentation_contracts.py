@@ -17,6 +17,15 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_shared_pylon_renderer_has_no_instance_caches(self):
+        source = (CLIENT / "FirstSeverancePylonVisuals.cs").read_text(encoding="utf-8")
+        self.assertIn("private static Asset<Texture2D> cage;", source)
+        self.assertIn("private static readonly FirstSeveranceAttackAccents accents", source)
+        self.assertNotIn("InstancePerEntity => true", source)
+        unload = body(source, "public override void Unload")
+        self.assertIn("cage = null", unload)
+        self.assertIn("accents.Unload()", unload)
+
     def test_all_cinematic_layers_are_unscaled(self):
         source = (CLIENT / "FirstSeverancePrototypePresentation.cs").read_text(encoding="utf-8")
         layers = body(source, "public override void ModifyInterfaceLayers")

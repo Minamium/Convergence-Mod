@@ -12,8 +12,10 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 
 internal sealed class FirstSeverancePylonVisuals : GlobalNPC
 {
-    private Asset<Texture2D> cage;
-    private readonly FirstSeveranceAttackAccents accents = new();
+    // GlobalNPC is shared, not InstancePerEntity. These caches contain no NPC
+    // state and must be static to satisfy tML's load-time GlobalType validation.
+    private static Asset<Texture2D> cage;
+    private static readonly FirstSeveranceAttackAccents accents = new();
     public override void Unload() { cage = null; accents.Unload(); }
 
     public override bool AppliesToEntity(NPC entity, bool lateInstantiation)
