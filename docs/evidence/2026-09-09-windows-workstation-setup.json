@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-09",
+  "scope": "New Windows workstation preparation only; no gameplay, source, dependency-policy or asset changes.",
+  "upstream_commit": "6825350df488f795ede69dae68c0f03a2f79bdc5",
+  "upstream_version": "0.2.37",
+  "protocol": 25,
+  "initial_checkout": "clean; previous HEAD e22cd53; fetched latest origin/main before creating setup branch",
+  "source_layout": "Single canonical checkout named Convergence inside the workspace; existing user-data ModSources/Convergence is a junction to that checkout. No second source copy.",
+  "local_configuration": "Ignored Convergence.local.props selects the observed Steam install and existing OneDrive user-data profile. Ignored .local/env.ps1 selects local SDK, Python dependencies and Git helpers. Personal paths and raw records remain untracked.",
+  "toolchain": {
+    "sdk": "8.0.424, Microsoft archive SHA512 verified; installed under ignored .local/tools",
+    "python": "3.12 bundled interpreter",
+    "PyYAML": "6.0.3",
+    "tmodloader": "2026.07.3.0",
+    "terraria": "1.4.4.9",
+    "calamity": "2.2.4",
+    "calamity_music": "2.1",
+    "dependency_evidence": "Existing client log identifies these versions; selected local Calamity and Music copies differ in hash from installed Workshop copies. They were preserved; official binary provenance and a fresh runtime compatibility gate were not established."
+  },
+  "verification": {
+    "doctor": "passed",
+    "native_build": {
+      "result": "passed",
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "source_dirty": "",
+      "source_changed_during_build": false,
+      "source_sha256": "202111e91f8f35cc3738f9c36cf9e97cf8c852a0c3711767c8f6fc20c4a0defb",
+      "package_sha256": "db97c5ec2c102844128e79e2b1ee1a5318a9e0bd4ad67e2c300db64ab2a86c54",
+      "previous_package_backup": true
+    },
+    "game_load": "not_run; user-owned",
+    "multiplayer": "not_run; user-owned",
+    "game_or_server_session_started": false,
+    "static_checks": "passed: catalog (60 documents), repository policy (475 files), YAML (10 files); executed with normal access because sandbox could not read installed PyYAML"
+  },
+  "documentation_observations": [
+    "Current build.txt and EncounterProtocol match STATUS: 0.2.37 / protocol 25.",
+    "VERSION_MATRIX Build project policy retains the old parent-target-only example; current csproj and WINDOWS_DEVELOPMENT support explicit local targets and a junction. Follow the current Windows runbook.",
+    "STATUS says the package was already built on the prior workstation; that did not establish installation here. Existing local client log loaded 0.2.27; current source was built on this workstation during preparation."
+  ],
+  "handoff": "Reload Mods or restart to load the packaged 0.2.37; no second Build + Reload for unchanged source. First verify menu load. For multiplayer, all peers need matching 0.2.37/protocol 25. Runtime checks from STATUS remain user-owned; no full repeat requested."
+}
