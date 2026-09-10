@@ -71,7 +71,9 @@ public sealed class FoundationCoreVisuals : GlobalTile
 
     internal void DrawPlinth(SpriteBatch batch, Vector2 foot, Color color, float width, bool screenSpace = false)
     {
-        Sprite(batch, new(0, 230, 850, 226), foot, new(width, width / 3), 0, color, new(.5f, 1), screenSpace);
+        // Crop to the solid bottom course, not the atlas's transparent gutter.
+        // One pixel of ground overlap avoids a sampling seam in world/preview.
+        Sprite(batch, new(0, 230, 850, 212), foot + Vector2.UnitY, new(width, width / 3), 0, color, new(.5f, 1), screenSpace);
         if (!screenSpace)
             Line(batch, foot + new Vector2(-width * .30f, -14), foot + new Vector2(width * .30f, -14), Ice * .6f, 2);
     }
@@ -92,36 +94,41 @@ public sealed class FoundationCoreVisuals : GlobalTile
         Outline(batch, field, Gold * (.28f + ignition * .5f), 2.5f);
         for (int side = -1; side <= 1; side += 2)
         {
-            float x = ground.X + side * (150 + rise * 280);
-            Vector2 foot = new(x, ground.Y);
-            DrawPlinth(batch, foot, new Color(170, 167, 172) * rise, 164);
-            float height = 70 + rise * ((field.Bottom - field.Top) * .5f + 230);
-            for (float h = 0; h < height; h += 256)
+            // Two independent, single-piece posts on each side. Outer posts
+            // are taller/wider; never stack a whole capped column as a module.
+            for (int tier = 0; tier < 2; tier++)
             {
-                float segment = Math.Min(256, height - h);
-                Sprite(batch, new(946, 0, 207, 748), foot - new Vector2(0, h), new(92, segment), 0,
+                bool outer = tier == 0;
+                float x = ground.X + side * (outer ? 230 + rise * 340 : 140 + rise * 190);
+                Vector2 foot = new(x, ground.Y);
+                float baseWidth = outer ? 196 : 144;
+                float height = 70 + rise * ((field.Bottom - field.Top) * .5f + (outer ? 320 : 190));
+                float seat = baseWidth / 3 * .68f;
+                Sprite(batch, new(957, 10, 172, 720), foot - new Vector2(0, seat),
+                    new(outer ? 128 : 84, height - seat), 0,
                     new Color(170, 172, 184), new(.5f, 1));
-            }
-            Vector2 top = foot - new Vector2(0, height);
-            // Textured horizontal gantry, then thin hanging cables. No diagonal
-            // solid braces: both shoulders really hang from the raised capitals.
-            Vector2 hanger = new(MathHelper.Lerp(top.X, lifted.X + side * 112, ignition), top.Y);
-            Sprite(batch, new(836, 762, 402, 475), top, new(116, 96), 0,
-                new Color(181, 180, 190), new(.5f));
-            if (ignition > .001f)
-            {
-                Sprite(batch, new(946, 0, 207, 748), (top + hanger) * .5f,
-                    new(32, Math.Abs(top.X - hanger.X) + 24), MathHelper.PiOver2,
-                    new Color(169, 171, 184) * ignition, new(.5f));
-                Vector2 shoulder = lifted + new Vector2(side * 112, -106);
-                for (int cable = 0; cable < 3; cable++)
+                // Draw the base in front: the foot socket overlaps the top course.
+                DrawPlinth(batch, foot, new Color(170, 167, 172) * rise, baseWidth);
+                Vector2 top = foot - new Vector2(0, height);
+                // Textured horizontal gantry, then thin hanging cables. No diagonal
+                // solid braces: both shoulders really hang from the raised capitals.
+                float shoulderX = outer ? 136 : 112;
+                Vector2 hanger = new(MathHelper.Lerp(top.X, lifted.X + side * shoulderX, ignition), top.Y + 16);
+                if (ignition > .001f)
                 {
-                    Vector2 offset = new(side * cable * 7, 0);
-                    DrawSuspension(batch, hanger + offset, shoulder + offset,
-                        ignition, age, side, cable);
+                    Sprite(batch, new(1002, 90, 90, 570), (top + new Vector2(0, 16) + hanger) * .5f,
+                        new(outer ? 28 : 22, Math.Abs(top.X - hanger.X) + 24), MathHelper.PiOver2,
+                        new Color(169, 171, 184) * ignition, new(.5f));
+                    Vector2 shoulder = lifted + new Vector2(side * shoulderX, outer ? -78 : -106);
+                    for (int cable = 0; cable < 3; cable++)
+                    {
+                        Vector2 offset = new(side * cable * 7, 0);
+                        DrawSuspension(batch, hanger + offset, shoulder + offset,
+                            ignition, age, side, cable);
+                    }
+                    Sprite(batch, new(836, 762, 402, 475), shoulder, new(28, 38), 0,
+                        Color.White * ignition, new(.5f));
                 }
-                Sprite(batch, new(836, 762, 402, 475), shoulder, new(28, 38), 0,
-                    Color.White * ignition, new(.5f));
             }
             float wallX = side < 0 ? field.Left : field.Right;
             Line(batch, new(wallX, field.Bottom), new(wallX, field.Bottom - (field.Bottom - field.Top) * rise), new Color(15, 13, 20), 30);

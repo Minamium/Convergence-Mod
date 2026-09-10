@@ -25,6 +25,12 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
+## Attack-bounded tails and restored salvo — 0.2.44
+
+The full61-file First Severance SFX inventory was decoded and compared with cue call sites and authored windows. The CoreSalvoFire master was2.45s for a20-tick grid/core firing window; GridFire, EnergyCharge, LanceCharge/Fire, FinalSlicerFire and several mechanic forecasts also outlived their visual window. CoreSalvoFire returns to the pre-rebuild0.2.41 master (also shared by weapon fire); the other current timbres and0.2.43 music remain.
+
+Raid beam/charge voices now carry their accepted descriptor deadline: charge ends at fire, live beam ends with a6-tick fade after the live window, Final uses each pulse's end, and remote floods use their own visual fade boundary. Stack/Spread summoning, shard birth/friction and countdown voices retire at the verdict; preparation assembly fades when Ready opens. Early action transitions shorten old timed voices to6ticks. Deadlines are client presentation only, bounded to64voices, and clear with existing Fight cleanup. Accepted verdict/impact tails, Victory/Defeat/revival stingers and projectile-owned sustained voices retain their distinct existing lifecycle, rather than being treated as sustained beams. Unreferenced historical assets remain preserved. In-game listening remains user-owned; duration/energy measurement is not subjective approval.
+
 ## Measured loudness recovery — 0.2.43
 
 The 0.2.42 composition/timbres remain, but the four BGM and eleven one-shot SFX masters receive stereo-linked lookahead gain management. Measured active RMS had fallen roughly 8dB in Phase II/III/Final and up to17dB in individual one-shot cues against0.2.41; matching peaks alone did not maintain body level. The new export raises BGM about2.8–6.0dB and affected SFX2.6–10.3dB relative to0.2.42, while retaining encoded headroom and avoiding hard sample clipping. The old most compressed SFX level is not blindly restored. Three sustain voices were already comparable and remain byte-identical, as do all unlisted sounds. Exact measurements/provenance live in [integration evidence](evidence/2026-09-10-audio-preparation-polish.json).

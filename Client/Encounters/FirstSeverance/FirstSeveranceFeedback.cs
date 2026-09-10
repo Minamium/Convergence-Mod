@@ -25,6 +25,7 @@ internal sealed class FirstSeveranceFeedback
     private int shardBeat = -1;
     private readonly List<ReLogic.Utilities.SlotId> voices = new(24);
     private readonly HashSet<ReLogic.Utilities.SlotId> impactTails = new();
+    private readonly List<(ReLogic.Utilities.SlotId Id, ulong End)> timedVoices = new(24);
     private readonly FirstSeveranceAudioCueClock criticalClock = new();
     private FirstSeveranceCombatProjection? pendingResult;
     private ReLogic.Utilities.SlotId orbitVoice;
@@ -63,6 +64,7 @@ internal sealed class FirstSeveranceFeedback
         if (resultTicks > 0) resultTicks--;
         if (scoreImpactTicks > 0) scoreImpactTicks--;
         CheckAudioVoices();
+        UpdateTimedVoices(state.EstimatedAuthorityTick);
         voices.RemoveAll(id =>
         {
             if (SoundEngine.TryGetActiveSound(id, out var sound) && sound.IsPlaying) return false;
@@ -120,6 +122,10 @@ internal sealed class FirstSeveranceFeedback
             || previous.ZeroBasedLoopIndex != combat.ZeroBasedLoopIndex || previous.ActionStartedTick != combat.ActionStartedTick;
         if (phaseChanged)
         {
+            // An HP-gated transition may interrupt an action before its planned
+            // end. Retire only that action's sounds, not accepted verdict tails.
+            for (int i = 0; i < timedVoices.Count; i++)
+                timedVoices[i] = (timedVoices[i].Id, Math.Min(timedVoices[i].End, state.EstimatedAuthorityTick + 6));
             countdown = -1;
             scoreSounds.Clear();
             criticalClock.Reset();
@@ -143,7 +149,8 @@ internal sealed class FirstSeveranceFeedback
                 FirstSeveranceSubstate.FinalSlicer => null,
                 _ => null,
             };
-            if (cue is not null && state.EstimatedAuthorityTick < combat.ActionStartedTick + 30) Play(cue, .98f);
+            if (cue is not null && state.EstimatedAuthorityTick < combat.ActionStartedTick + 30)
+                PlayTimed(cue, .98f, state.EstimatedAuthorityTick, combat.ResolveTick);
         }
         // Do not announce an old result or revive when joining/catching up.
         if (!fresh && previous is { } before)
@@ -179,7 +186,7 @@ internal sealed class FirstSeveranceFeedback
             safeCueResolve = companion.ResolveTick;
             countdown = -1;
             if (!fresh || tick < companion.StartTick + 30)
-                Play(companion.Kind == FirstSeveranceSafeMechanic.Stack ? "StackSummon" : "SpreadSummon", .98f);
+                PlayTimed(companion.Kind == FirstSeveranceSafeMechanic.Stack ? "StackSummon" : "SpreadSummon", .98f, tick, companion.ResolveTick);
         }
         ulong deadline = safe?.ResolveTick ?? combat.ResolveTick;
         if ((safe?.Kind == FirstSeveranceSafeMechanic.Stack || combat.Substate == FirstSeveranceSubstate.Stack) && tick < deadline)
@@ -192,8 +199,8 @@ internal sealed class FirstSeveranceFeedback
                 shardBeat = beat;
                 if (!fresh)
                 {
-                    Play("ShellMassLatch", 1f, beat * .012f - .06f);
-                    if (beat > 0) Play("ShellMassArc", .60f, beat * .012f - .04f);
+                    PlayTimed("ShellMassLatch", 1f, tick, deadline, beat * .012f - .06f);
+                    if (beat > 0) PlayTimed("ShellMassArc", .60f, tick, deadline, beat * .012f - .04f);
                 }
             }
         }
@@ -201,15 +208,15 @@ internal sealed class FirstSeveranceFeedback
         {
             int beat = (int)((deadline - tick + 29) / 30);
             if (beat <= 3 && beat != countdown)
-                Play("MechanicTick", .95f);
+                PlayTimed("MechanicTick", .95f, tick, deadline);
             countdown = beat;
         }
         foreach (var cast in combat.SpreadLances)
         {
             if (tick >= cast.StartTick && spreadCharges.Add(cast.Serial) && tick < cast.StartTick + 8)
-                Play("LanceCharge", .52f, cast.Step * .015f);
+                PlayTimed("LanceCharge", .52f, tick, cast.FireTick, cast.Step * .015f);
             if (tick >= cast.FireTick && spreadFires.Add(cast.Serial) && tick < cast.FireTick + 8)
-                Play("LanceFire", .62f);
+                PlayTimed("LanceFire", .62f, tick, cast.EndTick + 6);
         }
         if (combat.LanceVolley is { } volley)
         {
@@ -218,13 +225,13 @@ internal sealed class FirstSeveranceFeedback
                 chargeSerial = volley.Serial;
                 curtainBeat = -1;
                 if (tick >= volley.StartTick && tick < volley.FireTick)
-                    Play(volley.IsCharge ? "EnergyGather" : "LanceCharge", .98f);
+                    PlayTimed(volley.IsCharge ? "EnergyGather" : "LanceCharge", .98f, tick, volley.FireTick);
             }
             if (fireSerial != volley.Serial && tick >= volley.FireTick)
             {
                 fireSerial = volley.Serial;
                 if (volley.IsFiring(tick) && volley.Kind != FirstSeveranceAttackKind.Stillness)
-                    Play(volley.IsCharge ? "EnergyCharge" : "LanceFire", .96f);
+                    PlayTimed(volley.IsCharge ? "EnergyCharge" : "LanceFire", .96f, tick, volley.EndTick + 6);
             }
             if (volley.Kind == FirstSeveranceAttackKind.Stillness && tick >= volley.FireTick)
             {
@@ -236,13 +243,13 @@ internal sealed class FirstSeveranceFeedback
                     // fifty competing voices. Late snapshots never catch up a burst.
                     ulong cueTick = volley.FireTick + (ulong)(beat * 4);
                     if (tick < cueTick + 3 && volley.IsFiring(tick))
-                        Play("LanceFire", .64f, -.08f + beat * .045f);
+                        PlayTimed("LanceFire", .64f, tick, volley.EndTick + 6, -.08f + beat * .045f);
                 }
             }
             if (volley.IsCharge && lockSerial != volley.Serial && tick >= volley.LockTick)
             {
                 lockSerial = volley.Serial;
-                if (tick < volley.FireTick) Play("EnergyLock", .98f);
+                if (tick < volley.FireTick) PlayTimed("EnergyLock", .98f, tick, volley.FireTick);
             }
         }
         if (combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Unbound && !shellBroken
@@ -256,7 +263,7 @@ internal sealed class FirstSeveranceFeedback
             if (gridChargeSerial != grid.Serial)
             {
                 gridChargeSerial = grid.Serial;
-                if (tick >= grid.StartTick && tick < grid.FireTick) Play("GridCharge", .98f);
+                if (tick >= grid.StartTick && tick < grid.FireTick) PlayTimed("GridCharge", .98f, tick, grid.FireTick);
             }
             if (gridFireSerial != grid.Serial && tick >= grid.FireTick)
             {
@@ -265,7 +272,7 @@ internal sealed class FirstSeveranceFeedback
                 {
                     // Salvo asset includes the grid impact, mastered as one
                     // pressure-rich voice instead of summing two clipped peaks.
-                    Play(grid.CoreBeams.Count > 0 ? "CoreSalvoFire" : "GridFire", 1f);
+                    PlayTimed(grid.CoreBeams.Count > 0 ? "CoreSalvoFire" : "GridFire", 1f, tick, grid.EndTick + 6);
                 }
             }
         }
@@ -277,13 +284,15 @@ internal sealed class FirstSeveranceFeedback
                 {
                     int reveal = FirstSeveranceScoreGeometry.SlicerReveal(pulse);
                     if (age >= reveal && scoreSounds.Add(-1000 - pulse) && age < reveal + 8)
-                        Play("LanceCharge", .62f, -.12f + pulse * .12f);
+                        PlayTimed("LanceCharge", .62f, tick,
+                            combat.ActionStartedTick + (ulong)FirstSeveranceScoreGeometry.SlicerFire(combat.ActionIndex), -.12f + pulse * .12f);
                 }
             if (combat.Substate == FirstSeveranceSubstate.RemoteClaws)
             {
                 int pulse = (int)age / FirstSeveranceScoreGeometry.FloodInterval;
                 if (age % FirstSeveranceScoreGeometry.FloodInterval < 12 && scoreSounds.Add(pulse - 800))
-                    Play("HandGather", .98f);
+                    PlayTimed("HandGather", .98f, tick,
+                        combat.ActionStartedTick + (ulong)(pulse * FirstSeveranceScoreGeometry.FloodInterval + FirstSeveranceScoreGeometry.FloodFireTick));
             }
             foreach (var ray in FirstSeveranceScoreGeometry.Rays(combat.Substate, combat.ActionIndex, age, combat.CoreX, combat.CoreY, combat.ActionStartedTick))
             {
@@ -291,22 +300,26 @@ internal sealed class FirstSeveranceFeedback
                     ? ray.Pulse / FirstSeveranceScoreGeometry.BladeCount : ray.Pulse;
                 if (combat.Substate is not (FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RemoteCrush or FirstSeveranceSubstate.FinalSlicer)
                     && !ray.Live && ray.Charge >= .65f && ray.Charge < 1 && scoreSounds.Add(soundPulse - 128))
-                    Play("ExecutionLock", .98f);
+                    PlayTimed("ExecutionLock", .98f, tick, Math.Min(combat.ResolveTick, tick + 18));
                 if (combat.Substate is not (FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RotatingBlade or FirstSeveranceSubstate.RemoteCrush)
                     && ray.Live && scoreSounds.Add(soundPulse))
                 {
-                    Play(combat.Substate switch
+                    ulong soundEnd = combat.Substate == FirstSeveranceSubstate.RemoteClaws
+                        ? combat.ActionStartedTick + (ulong)(ray.Pulse * FirstSeveranceScoreGeometry.FloodInterval + FirstSeveranceScoreGeometry.FloodFadeTick)
+                        : combat.ActionStartedTick + (ulong)(FirstSeveranceScoreGeometry.SlicerEnd(combat.ActionIndex)
+                            + ray.Pulse * FirstSeveranceScoreGeometry.SlicerCadence(combat.ActionIndex) + 6);
+                    PlayTimed(combat.Substate switch
                     {
                         FirstSeveranceSubstate.RemoteClaws => "HandClasp",
                         _ => "FinalSlicerFire",
-                    }, .98f);
+                    }, .98f, tick, Math.Min(combat.ResolveTick + 6, soundEnd));
                 }
             }
             if (combat.Substate == FirstSeveranceSubstate.RotatingBlade && age >= 144 && age < 162 && scoreSounds.Add(-500))
-                Play("BladeUnsheathe", .98f);
+                PlayTimed("BladeUnsheathe", .98f, tick, combat.ActionStartedTick + FirstSeveranceChoreography.BladeWindup);
             if (combat.Substate == FirstSeveranceSubstate.FinalBullets)
                 foreach (var bullet in FirstSeveranceScoreGeometry.Bullets(combat.ActionIndex, age, combat.CoreX, combat.CoreY))
-                    if (bullet.Live && scoreSounds.Add(bullet.Wave)) Play("FinalBulletRelease", .94f, bullet.Wave * .025f);
+                    if (bullet.Live && scoreSounds.Add(bullet.Wave)) PlayTimed("FinalBulletRelease", .94f, tick, combat.ResolveTick + 6, bullet.Wave * .025f);
         }
         previous = combat;
     }
@@ -400,6 +413,32 @@ internal sealed class FirstSeveranceFeedback
         return id;
     }
 
+    private void PlayTimed(string name, float volume, ulong tick, ulong endTick, float pitch = 0f)
+    {
+        if (tick >= endTick) return;
+        var id = Play(name, volume, pitch);
+        if (timedVoices.Count >= 64)
+        {
+            if (SoundEngine.TryGetActiveSound(timedVoices[0].Id, out var oldest)) oldest.Stop();
+            timedVoices.RemoveAt(0);
+        }
+        timedVoices.Add((id, endTick));
+    }
+
+    private void UpdateTimedVoices(ulong tick)
+    {
+        for (int i = timedVoices.Count - 1; i >= 0; i--)
+        {
+            var voice = timedVoices[i];
+            if (!SoundEngine.TryGetActiveSound(voice.Id, out var sound) || !sound.IsPlaying)
+            { timedVoices.RemoveAt(i); continue; }
+            if (tick >= voice.End)
+            { sound.Stop(); timedVoices.RemoveAt(i); continue; }
+            // ActiveSound.Volume is a multiplier, not the SoundStyle gain.
+            sound.Volume = Math.Min(sound.Volume, Math.Clamp((voice.End - tick) / 6f, 0, 1));
+        }
+    }
+
     internal void Draw(SpriteBatch batch, bool reduced) => mechanics.Draw(batch, reduced);
 
     private void AcceptResult(FirstSeveranceCombatProjection combat, ulong tick)
@@ -426,6 +465,7 @@ internal sealed class FirstSeveranceFeedback
 
     private void StopVoices(bool preserveImpacts = false)
     {
+        timedVoices.Clear();
         for (int i = voices.Count - 1; i >= 0; i--)
         {
             var id = voices[i];

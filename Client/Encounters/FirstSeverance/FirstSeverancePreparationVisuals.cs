@@ -24,6 +24,13 @@ internal sealed class FirstSeverancePreparationVisuals
             Reset();
             return;
         }
+        if (state.EstimatedAuthorityTick >= prep.ReadyOpensTick
+            && SoundEngine.TryGetActiveSound(deploymentSound, out var deploying))
+        {
+            float gain = 1 - Math.Clamp((state.EstimatedAuthorityTick - prep.ReadyOpensTick) / 6f, 0, 1);
+            deploying.Volume = gain;
+            if (gain <= 0) deploying.Stop();
+        }
         if (fight == prep.FightId) return;
         Reset();
         fight = prep.FightId;

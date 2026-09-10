@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-10",
+  "version": "0.2.44",
+  "protocol": 28,
+  "base_commit": "fb0fccc",
+  "playtest": {
+    "version": "0.2.43",
+    "fight": "ce2084dd-55a5-447e-916b-a25576660ded",
+    "topology": "Host & Play, one participant, development solo",
+    "result": "Defeat, AllParticipantsDowned during PhaseIII RemoteClaws",
+    "elapsed_seconds": 120.68,
+    "stack": "6pass,1fail: missed fixed sanctuary;645damage at645life caused Down and solo defeat",
+    "spread": "11pass,0fail",
+    "accepted_hits": 12,
+    "core_damage": 3730585,
+    "core_window_dps": 109241.1,
+    "pylon_window_dps": 53651.3,
+    "remaining_boss_hp": 1269415,
+    "remaining_boss_percent": 25.39,
+    "audio": "9instrumented critical cues accepted and9voices playing; no cue expiry/rejection observed. Not proof of subjective mix or all uninstrumented sounds.",
+    "other_errors": "Client localhost7777 refusal before connection; auxiliary SubworldLibrary EndOfStreamException after exit, as preceding run. No relation to these rendering/audio changes established."
+  },
+  "visual_finding": "Atlas plinth source rows448-455 are transparent; broad solid bottom ends at441. Complete column image has top/bottom padding and was repeated every256world pixels. Corrected tight crop/ground overlap and four single-piece posts. Existing atlas bytes unchanged.",
+  "audio_audit": {
+    "files_decoded": 61,
+    "source_inventory": "output/raid-audio-0244/audit-before.json (external local record)",
+    "measure": "duration and99percent-energy endpoint per master; compared with Raid, weapon, hit and preparation call sites",
+    "finding": "Grid/core window20ticks vs old2.45second CoreSalvoFire; uncapped grid/lance/charge and mechanic forecast tails",
+    "restored": "Assets/Sounds/FirstSeverance/CoreSalvoFire.wav from5fba4d7",
+    "restored_sha256": "cb9b1ca7a14de74b288e5f229dc84962b6fa76b24e59d135c8774076dd3c1d2d",
+    "new_policy": "Accepted charge/fire/pulse/verdict end ticks with6tick amplitude fades; action interruption retires old timed voices. Critical verdict tails and notification/sustain lifecycles retained.",
+    "masters": "Predecessor/restored bytes and pinned-input recipe retained in output/raid-audio-0244. No originals deleted. BGM unchanged."
+  },
+  "verification": {
+    "presentation": "12source integration guards passed; numerical alpha crop inspection; not a game-render acceptance",
+    "native_build": "passed:0errors,4existing CS8632 warnings; no source changes during build",
+    "build_record": ".local/builds/20260910T144653337164Z/record.json",
+    "source_sha256": "null",
+    "artifact_sha256": "dd6ff94d6af0e79deaeedfd50fa2bf464d1bc590eedeca696d91d3eca4f287fb",
+    "runtime": "not_run: four-column silhouette, all ground/joint contacts at varied zoom, beam cutoff/fade and phase-interrupt sound continuity. No GUI/server launched."
+  },
+  "preserved": "Three preexisting English localization changes remain unstaged; all old copies, textures and original masters retained. No gameplay or wire-layout change."
+}

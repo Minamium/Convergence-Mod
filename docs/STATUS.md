@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.43**, protocol **28**. [Measured audio recovery](AUDIO_CUE_SHEET.md#measured-loudness-recovery--0243) preserves the new orchestral/SFX content while restoring body level in four music and eleven one-shot masters; three comparable sustain voices stay unchanged. [Preparation presentation](encounters/first-severance/VISUAL_SPEC.md#suspended-preparation-and-minimal-ready--0243) is reduced to one Ready toggle/count, with the central iris suspended from larger paired columns instead of solid diagonal braces. The owner accepts the Raid combat body as the development baseline; server-wide preparation, damage, weapons, timings and protocol are unchanged.
+Development **0.2.44**, protocol **28**. [Four grounded columns](encounters/first-severance/VISUAL_SPEC.md#grounded-four-column-suspension--0244) correct the plinth's transparent ground gap and remove repeated capped-post seams; each side now has a larger outer and smaller inner post. [Attack-bounded sound tails](AUDIO_CUE_SHEET.md#attack-bounded-tails-and-restored-salvo--0244) restore the pre-rebuild wide/core salvo timbre and retire beam/forecast sounds at their accepted visual deadlines. The0.2.43 BGM and minimal Ready UI remain. Gameplay, arena geometry, preparation authority and protocol are unchanged.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[0.2.44 evidence](evidence/2026-09-10-grounded-posts-audio-tails.json): latest0.2.43 solo run ended at120.68s in PhaseIII after a missed Stack;6Stack passes/1failure,11Spread passes,12hits. All9instrumented critical sounds played. The record owns the61-master audit, crop findings and build checks. Four-post ground contacts and actual attack-tail listening remain user-owned `not_run`.
 
 [0.2.43 integration and latest playtest](evidence/2026-09-10-audio-preparation-polish.json):0.2.42 completed solo Victory in222.62s,19Stack/22Spread successes,33accepted hits and no Down;35instrumented audio cues played. The evidence owns the measured asset-level regression, remaster exports and current checks. Multiplayer preparation and in-game0.2.43 listening/visual acceptance remain user-owned `not_run`.
 
@@ -93,6 +95,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.44: reload matching peers, check plinth/column foot contact at game zoom and four differently sized posts, then listen to charge-to-fire transitions, short grid/core salvo, Final pulse endings and interrupted-action fade. Keep the outstanding multiplayer Ready check; no GUI/server was launched here.
 
 User-owned0.2.43: reload matching peers, compare BGM/SFX at unchanged sliders, listen through music seams, and inspect the hanging iris throughout deployment. Toggle the compact Ready button at107% UI scale. Keep the outstanding distant3-player preparation check below; solo logs do not establish it.
 

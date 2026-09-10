@@ -1796,3 +1796,6 @@ Reviewer: Codex decode/finite/peak/frame-length/hash checks on2026-09-10; user l
 | `Assets/Sounds/FirstSeverance/ShellMassLatch.wav` | `f2f952c2c9c4a733199e720fee7991e3b5cba0a5d13b78091d21bce661de2f7e` |
 | `Assets/Sounds/FirstSeverance/ShellMassShed.wav` | `b08a728aa38ba7da425481f89e58c9bde862e986ec71c06761d2d77a5cf84f63` |
 | `Assets/Sounds/FirstSeverance/ShellMassCollapse.wav` | `d8c1628c9b28f9d7dabd90c2b479705117e7bba20ec2c9ef8b40bb208f356fbd` |
+# Restored wide/core salvo — 2026-09-10 / 0.2.44
+
+Runtime `Assets/Sounds/FirstSeverance/CoreSalvoFire.wav` is restored byte-for-byte from project commit `5fba4d7` (SHA256 `cb9b1ca7a14de74b288e5f229dc84962b6fa76b24e59d135c8774076dd3c1d2d`). The original project synthesis provenance/license remains in the preceding CoreSalvoFire entry; no new external asset is introduced. User requested the old wide-beam sound. Codex checked decode and source hash; actual listening is pending. Both predecessor and restored bytes plus the pinned-input restoration recipe are retained externally in `output/raid-audio-0244`. Raid playback now has a descriptor-owned end/fade; the file also remains shared by weapon fire. All other sound/music masters remain unchanged in this pass.

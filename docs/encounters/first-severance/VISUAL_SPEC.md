@@ -20,6 +20,10 @@ related_docs:
 
 # First Severance — Null Cantor Visual Pass
 
+## Grounded four-column suspension — 0.2.44
+
+The requested arrangement is two columns **per side**: outer columns are taller/wider, inner columns shorter/slimmer. Each is a single tight-cropped atlas post seated inside its foreground base, not a stack of complete capped posts with transparent seams. The central plinth uses the solid bottom course as its ground pivot, plus one pixel of sampling overlap; the same crop applies to placement preview and both legacy/current footprints. All four posts use the existing lift clock and attached gantry/cable rig. No tiles, collision, footprint, arena dimensions or existing saves change.
+
 ## Suspended preparation and minimal Ready — 0.2.43
 
 Deployment keeps its first HUD-free cinematic, but removes both explanatory captions in favor of a quiet progress hairline. Manual Ready is one compact `READY` toggle with an illuminated state indicator and ready/total count; overhead `Ready!` remains. It uses the same physical-pixel composition and mouse coordinates, not UI-scale conversion. The all-Ready hold and second start cinematic remain unchanged.

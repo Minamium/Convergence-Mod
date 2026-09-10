@@ -17,6 +17,33 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_audio_windows_end_and_do_not_own_verdict_tails(self):
+        source = (CLIENT / "FirstSeveranceFeedback.cs").read_text(encoding="utf-8")
+        update = body(source, "internal void Update(")
+        self.assertIn("UpdateTimedVoices(state.EstimatedAuthorityTick)", update)
+        self.assertIn("grid.EndTick + 6", update)
+        self.assertIn("volley.EndTick + 6", update)
+        self.assertIn("cast.EndTick + 6", update)
+        self.assertIn("SlicerEnd(combat.ActionIndex)", update)
+        timed = body(source, "private void UpdateTimedVoices")
+        self.assertIn("tick >= voice.End", timed)
+        self.assertIn("sound.Stop()", timed)
+        self.assertIn("sound.Volume = Math.Min(sound.Volume", timed)
+        critical = body(source, "private ReLogic.Utilities.SlotId PlayCritical")
+        self.assertNotIn("timedVoices", critical)
+        self.assertIn("impactTails.Add(id)", critical)
+
+    def test_plinth_and_four_posts_do_not_stack_transparent_caps(self):
+        source = (CLIENT / "FoundationCoreVisuals.cs").read_text(encoding="utf-8")
+        plinth = body(source, "internal void DrawPlinth")
+        self.assertIn("new(0, 230, 850, 212)", plinth)
+        self.assertIn("foot + Vector2.UnitY", plinth)
+        field = body(source, "private void DrawField")
+        self.assertIn("tier < 2", field)
+        self.assertIn("outer ? 128 : 84", field)
+        self.assertIn("outer ? 320 : 190", field)
+        self.assertNotIn("h += 256", field)
+
     def test_preparation_is_compact_and_suspension_has_attached_endpoints(self):
         source = (CLIENT / "FirstSeverancePreparationVisuals.cs").read_text(encoding="utf-8")
         overlay = body(source, "internal bool DrawOverlay")
