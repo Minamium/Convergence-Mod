@@ -44,10 +44,14 @@ jobs:
           for step in steps:
               if step.get('name') in wanted:
                   subprocess.run(['bash', '-euo', 'pipefail', '-c', step['run']], check=True)
+
           evidence = Path('docs/evidence/2026-09-10-orchestral-bgm-abc.json')
-          text = evidence.read_text(encoding='utf-8')
-          if not text.endswith('\n'):
-              evidence.write_text(text + '\n', encoding='utf-8')
+          text = evidence.read_text(encoding='utf-8').rstrip('\n') + '\n'
+          evidence.write_text(text, encoding='utf-8')
+
+          attribution = Path('Assets/ATTRIBUTION.md')
+          text = attribution.read_text(encoding='utf-8').rstrip('\n') + '\n'
+          attribution.write_text(text, encoding='utf-8')
           PY
 
       - name: Static repository verification and catalog refresh
