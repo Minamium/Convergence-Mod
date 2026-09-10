@@ -1,0 +1,94 @@
+{
+  "date": "2026-09-10",
+  "version": "0.2.42",
+  "protocol": 28,
+  "base_commit": "5fba4d75dc814657c9fe69bbfbfbe19bb1b554b0",
+  "branch": "audio/orchestral-abc-0.2.42",
+  "scope": "BGM assets and owning docs only; SFX/gameplay/network unchanged",
+  "accepted_direction": "Owner accepted V13 orchestral composition/orchestration direction; this revision repairs A-to-B continuity without reintroducing synth/EDM/retro instrumentation.",
+  "music": [
+    {
+      "phase": 1,
+      "bpm": 96.0,
+      "duration_seconds": 120.0,
+      "A_seconds": 40.0,
+      "B_seconds": 40.0,
+      "C_seconds": 40.0,
+      "band_match_gains": [
+        1.5848931924611136,
+        1.3010053450661672,
+        0.6309573444801932
+      ],
+      "peak": 0.9649999737739563,
+      "rms": 0.12738132368950764,
+      "runtime_file": "Assets/Music/ObsidianLiturgy.ogg",
+      "encoded_bytes": 1850090,
+      "sha256": "16750eb81764cb11357dbbd5ec8e9aa7c941a4d5cd64a1e40cf26aaf935ddb64",
+      "decoded_peak": 0.9693806767463684
+    },
+    {
+      "phase": 2,
+      "bpm": 144.0,
+      "duration_seconds": 80.0,
+      "A_seconds": 26.666666666666668,
+      "B_seconds": 26.666666666666668,
+      "C_seconds": 26.666666666666668,
+      "band_match_gains": [
+        1.5848931924611136,
+        1.5848931924611136,
+        1.5848931924611136
+      ],
+      "peak": 0.9650000333786011,
+      "rms": 0.10962417490319737,
+      "runtime_file": "Assets/Music/UnboundLiturgy.ogg",
+      "encoded_bytes": 1285402,
+      "sha256": "518ec160eab9b461f17564019bdc37252210e5b96b051594b7120fed62031681",
+      "decoded_peak": 0.9626773595809937
+    },
+    {
+      "phase": 3,
+      "bpm": 176.0,
+      "duration_seconds": 65.45454166666667,
+      "A_seconds": 21.818181818181817,
+      "B_seconds": 21.818181818181817,
+      "C_seconds": 21.818181818181817,
+      "band_match_gains": [
+        1.5848931924611136,
+        1.5848931924611136,
+        1.5848931924611136
+      ],
+      "peak": 0.9649999737739563,
+      "rms": 0.10783507026432848,
+      "runtime_file": "Assets/Music/DistantLiturgy.ogg",
+      "encoded_bytes": 1052111,
+      "sha256": "be09b9847d6986c300bd21087de438a627a3148b872f2d1b18ec0e8a7d0d1ffb",
+      "decoded_peak": 0.9721324443817139
+    },
+    {
+      "phase": 4,
+      "bpm": 178.62595419847327,
+      "duration_seconds": 69.86666666666666,
+      "A_seconds": 16.123076923076926,
+      "B_seconds": 21.4974358974359,
+      "C_seconds": 32.24615384615385,
+      "band_match_gains": [
+        1.5848931924611136,
+        1.5848931924611136,
+        1.5848931924611136
+      ],
+      "peak": 0.9649999737739563,
+      "rms": 0.11849856457781709,
+      "runtime_file": "Assets/Music/TerminalLiturgy.ogg",
+      "encoded_bytes": 1141710,
+      "sha256": "b9e3a7c89e9ab9eb87688f175de94da74b7d604b619a677d3aecb6eff50b94f3",
+      "decoded_peak": 0.9677574038505554
+    }
+  ],
+  "verification": {
+    "audio": "passed: all four runtime OGGs decode finite stereo 48kHz with bounded encoded peaks and expected durations",
+    "repository_static": "passed if this evidence is committed; workflow aborts before commit on static-wrapper failure",
+    "native_mod_build": "not_run: no C# or dependency/runtime contract changed in this asset-only branch",
+    "runtime": "not_run: user-owned in-game A-B-C continuity, loop seam, phase transition and multiplayer mix review"
+  },
+  "preserved": "SFX, combat authority/timing, protocol28, weapon behavior, damage/recovery, visuals and preparation flow"
+}

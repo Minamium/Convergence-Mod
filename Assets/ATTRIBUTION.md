@@ -1515,3 +1515,62 @@ Copy this section for each asset family. In the Records section above, add one e
 ```
 
 For music, record the composition, edition or score, arrangement, performance or MIDI, sample library, recording, and final master separately. A public-domain composition does not make a modern edition, arrangement, performance, recording, or sample library public domain.
+
+
+### Continuous orchestral A/B/C BGM rebuild — 0.2.42 / 2026-09-10
+
+- Runtime file: `Assets/Music/ObsidianLiturgy.ogg`
+- Asset ID: obsidian-liturgy-abc-0242-20260910
+- Asset type: music
+- Creator: project-directed original composition/orchestration/render by Codex; instrumental sample recordings by Sam Gossner and Simon Dalzell / Versilian Studios, sample cutting by Elan Hickler
+- Creation/acquisition date: 2026-09-10
+- Source type: original continuation/re-orchestration of the existing project composition
+- Source work and URL: existing Convergence A master plus new project-authored B/C note events; instrumental library [VSCO 2 CE official distribution](https://versilian-studios.com/vsco-community/), pinned revision `440300901dfe9275fd84e0b7763af1f8443ae62e`, [CC0 license](https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE)
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile, pyloudnorm 0.1.1, FFmpeg/libvorbis; independent sample player, original formant synthesis and diffuse reflection mix
+- Human modifications: owner accepted V13 composition direction and requested A-to-B continuity repair; agent retained A through the B downbeat, authored B/C note events, articulation progression, dynamics and mix
+- License and redistribution terms: instrumental samples CC0-1.0; project composition/recording terms remain under the existing development publication gate
+- Required attribution: retain this provenance; no WotG/Calamity music or recording imported
+- Reviewer and review date: Codex automated decode/finite/48kHz/stereo/duration/peak checks, 2026-09-10; owner in-game final mix/loop review pending
+- Notes: Phase 1; 96.000 BPM; 120.000000s; encoded bytes 1850090; decoded peak 0.969381; SHA256 `16750eb81764cb11357dbbd5ec8e9aa7c941a4d5cd64a1e40cf26aaf935ddb64`.
+
+- Runtime file: `Assets/Music/UnboundLiturgy.ogg`
+- Asset ID: unbound-liturgy-abc-0242-20260910
+- Asset type: music
+- Creator: project-directed original composition/orchestration/render by Codex; instrumental sample recordings by Sam Gossner and Simon Dalzell / Versilian Studios, sample cutting by Elan Hickler
+- Creation/acquisition date: 2026-09-10
+- Source type: original continuation/re-orchestration of the existing project composition
+- Source work and URL: existing Convergence A master plus new project-authored B/C note events; instrumental library [VSCO 2 CE official distribution](https://versilian-studios.com/vsco-community/), pinned revision `440300901dfe9275fd84e0b7763af1f8443ae62e`, [CC0 license](https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE)
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile, pyloudnorm 0.1.1, FFmpeg/libvorbis; independent sample player, original formant synthesis and diffuse reflection mix
+- Human modifications: owner accepted V13 composition direction and requested A-to-B continuity repair; agent retained A through the B downbeat, authored B/C note events, articulation progression, dynamics and mix
+- License and redistribution terms: instrumental samples CC0-1.0; project composition/recording terms remain under the existing development publication gate
+- Required attribution: retain this provenance; no WotG/Calamity music or recording imported
+- Reviewer and review date: Codex automated decode/finite/48kHz/stereo/duration/peak checks, 2026-09-10; owner in-game final mix/loop review pending
+- Notes: Phase 2; 144.000 BPM; 80.000000s; encoded bytes 1285402; decoded peak 0.962677; SHA256 `518ec160eab9b461f17564019bdc37252210e5b96b051594b7120fed62031681`.
+
+- Runtime file: `Assets/Music/DistantLiturgy.ogg`
+- Asset ID: distant-liturgy-abc-0242-20260910
+- Asset type: music
+- Creator: project-directed original composition/orchestration/render by Codex; instrumental sample recordings by Sam Gossner and Simon Dalzell / Versilian Studios, sample cutting by Elan Hickler
+- Creation/acquisition date: 2026-09-10
+- Source type: original continuation/re-orchestration of the existing project composition
+- Source work and URL: existing Convergence A master plus new project-authored B/C note events; instrumental library [VSCO 2 CE official distribution](https://versilian-studios.com/vsco-community/), pinned revision `440300901dfe9275fd84e0b7763af1f8443ae62e`, [CC0 license](https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE)
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile, pyloudnorm 0.1.1, FFmpeg/libvorbis; independent sample player, original formant synthesis and diffuse reflection mix
+- Human modifications: owner accepted V13 composition direction and requested A-to-B continuity repair; agent retained A through the B downbeat, authored B/C note events, articulation progression, dynamics and mix
+- License and redistribution terms: instrumental samples CC0-1.0; project composition/recording terms remain under the existing development publication gate
+- Required attribution: retain this provenance; no WotG/Calamity music or recording imported
+- Reviewer and review date: Codex automated decode/finite/48kHz/stereo/duration/peak checks, 2026-09-10; owner in-game final mix/loop review pending
+- Notes: Phase 3; 176.000 BPM; 65.454542s; encoded bytes 1052111; decoded peak 0.972132; SHA256 `be09b9847d6986c300bd21087de438a627a3148b872f2d1b18ec0e8a7d0d1ffb`.
+
+- Runtime file: `Assets/Music/TerminalLiturgy.ogg`
+- Asset ID: terminal-liturgy-abc-0242-20260910
+- Asset type: music
+- Creator: project-directed original composition/orchestration/render by Codex; instrumental sample recordings by Sam Gossner and Simon Dalzell / Versilian Studios, sample cutting by Elan Hickler
+- Creation/acquisition date: 2026-09-10
+- Source type: original continuation/re-orchestration of the existing project composition
+- Source work and URL: existing Convergence A master plus new project-authored B/C note events; instrumental library [VSCO 2 CE official distribution](https://versilian-studios.com/vsco-community/), pinned revision `440300901dfe9275fd84e0b7763af1f8443ae62e`, [CC0 license](https://raw.githubusercontent.com/sgossner/VSCO-2-CE/440300901dfe9275fd84e0b7763af1f8443ae62e/LICENSE)
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile, pyloudnorm 0.1.1, FFmpeg/libvorbis; independent sample player, original formant synthesis and diffuse reflection mix
+- Human modifications: owner accepted V13 composition direction and requested A-to-B continuity repair; agent retained A through the B downbeat, authored B/C note events, articulation progression, dynamics and mix
+- License and redistribution terms: instrumental samples CC0-1.0; project composition/recording terms remain under the existing development publication gate
+- Required attribution: retain this provenance; no WotG/Calamity music or recording imported
+- Reviewer and review date: Codex automated decode/finite/48kHz/stereo/duration/peak checks, 2026-09-10; owner in-game final mix/loop review pending
+- Notes: Phase 4; 178.626 BPM; 69.866667s; encoded bytes 1141710; decoded peak 0.967757; SHA256 `b9e3a7c89e9ab9eb87688f175de94da74b7d604b619a677d3aecb6eff50b94f3`.

@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-10
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.41**, protocol **28**. The owner accepts the Raid combat body as the current development baseline. [Server-wide preparation](ARENA_INFRASTRUCTURE.md#deployment-and-presentation--0241) replaces proximity selection: gather all active players, deploy field/black exterior with a first cinematic, accept manual Ready with head labels/panel, then start the existing second cinematic. Membership changes cancel preparation instead of silently excluding someone. Broader background-animation work remains separate; combat, weapons, damage, phase/audio rules are unchanged.
+Development **0.2.42**, protocol **28**. The BGM-only orchestral pass replaces all four phase masters with continuous A/B/C development using the existing musical language; Phase I-III are no longer action-cycle-length loops, while Final alone remains fitted to its current score. The A-to-B handoff preserves the accepted intro through the downbeat and changes articulation/density rather than fading the master out. Combat, network protocol, damage, weapons, SFX and server-wide preparation are unchanged. The owner accepts the Raid combat body as the current development baseline. [Server-wide preparation](ARENA_INFRASTRUCTURE.md#deployment-and-presentation--0241) replaces proximity selection: gather all active players, deploy field/black exterior with a first cinematic, accept manual Ready with head labels/panel, then start the existing second cinematic. Membership changes cancel preparation instead of silently excluding someone. Broader background-animation work remains separate; combat, weapons, damage, phase/audio rules are unchanged.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[0.2.42 BGM checks](evidence/2026-09-10-orchestral-bgm-abc.json) own the four-master decode/finite/stereo/48kHz/duration/peak evidence and repository static verification. The owner accepted the preceding V13 composition/orchestration direction; 0.2.42 additionally removes the multi-bar A-to-B fade by carrying A to the B downbeat. Actual in-game loop seam, phase-change mix and multiplayer listening remain user-owned `not_run`; no gameplay or protocol contract changed.
 
 [0.2.41 checks](evidence/2026-09-09-server-wide-preparation.json) owns preparation/domain/codec/build evidence. Actual3-player distant join, both cinematics,107% UI button alignment and cancellation cleanup remain user-owned `not_run`.
 
@@ -87,6 +89,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned 0.2.42: reload/restart matching peers, enter each Boss phase and listen through A -> B -> C. Confirm the B downbeat no longer reads as a master fade, Phase I remains restrained, Phase II/III gain urgency through acoustic articulation rather than retro/electronic timbre, and Final reaches its ending before the encounter resolves. Also listen across each ordinary loop seam. SFX are intentionally unchanged in this branch.
 
 User-owned0.2.41: restart/reload every peer together, then Host & Play. With3players, leave one well beyond the old80-tile radius and activate the Core. Confirm all3arrive inside the same field, first cinematic/black exterior,3-person Ready denominator, overhead Ready/unready and second cinematic only after all agree. Keep one client at107% UI scale. During a separate preparation, join/leave or cancel and verify no field/input capability remains. No GUI/server launched.
 

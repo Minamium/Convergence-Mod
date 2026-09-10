@@ -801,12 +801,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: b7fef87094b04c371159c2dc6d7bf006a7e1fd2132677bc81a14a7412a0d9e86
+  content_sha256: b5f3193911506805f85dab3ffd29bed347fd66044be73be8b1c2762177953ddb
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-09'
+  last_reviewed: '2026-09-10'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -983,12 +983,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: f7a7ad92f47b19b201adff6f662563e5ea1e24f879cb3b3d8737c658d52f079b
+  content_sha256: 8fd6414171b74c8f6c82216a66ec1b2c9d581b916139deb279a90229d1ce08a7
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-09'
+  last_reviewed: '2026-09-10'
   source_of_truth_for:
   - project.implementation_status
   aliases:

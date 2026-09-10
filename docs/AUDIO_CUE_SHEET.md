@@ -4,7 +4,7 @@ document_type: spec
 status: provisional
 owners:
   - audio
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-10
 source_of_truth_for:
   - first_severance.audio_cues
 aliases:
@@ -25,6 +25,14 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
+## Continuous orchestral A/B/C phase masters — 0.2.42
+
+The four phase masters are rebuilt as continuous orchestral A/B/C forms while retaining the accepted ominous/solemn instrumental language. The existing A introduction remains byte-source-derived until the B downbeat; the handoff is only a short anti-click overlap, not a multi-bar master fade. B begins by inheriting the A downbeat and orchestral weight, relaxes after entry, then accelerates by articulation density: sustained/pedal strings -> tremolo -> eighth-note short bows -> sixteenth-note short bows, with horn, low-brass and timpani joining late. C develops the same D-E-flat-A interval DNA and C-sharp-to-D return tension instead of switching to an electronic or retro palette. No synth lead, electronic drum kit or chiptune layer is added.
+
+Phase I is 96 BPM / 48 bars / 120.000s and keeps the restrained ritual opening before a cantabile/inverted C development. Phase II is 144 BPM / 48 bars / 80.000s and moves into imitative violin/cello/horn writing. Phase III is 176 BPM / 48 bars / 65.455s and carries the established 3+3+2 urgency through acoustic short-string accents. Phase I-III music length is intentionally independent of the encounter action cycle. Final is 178.626 BPM / 52 bars / 69.866667s, covering the current 3,802-tick Final score plus the existing four-second entry and 2.5-second safety tail. Music playback still never drives authority timing or gameplay.
+
+The render reuses the already documented pinned CC0 VSCO 2 CE source family at revision `440300901dfe9275fd84e0b7763af1f8443ae62e`, including violin-section sustained/tremolo/spiccato, cello/viola sustained material, F-horn sustained/staccato and orchestral bass drum. The choir role remains independently synthesized. New note events, articulation changes, dynamics, spatial placement and the mix are project-authored; no third-party composition, recording outside that existing library, or WotG/Calamity asset is imported. Human in-game transition/mix acceptance remains user-owned.
+
 ## Critical impact delivery and two-turn orbit — 0.2.40
 
 Preserve the accepted ShellMassLatch/ShellMassArc masters and gains byte-for-byte. Stack verdicts wait for their accepted event tick instead of being dropped if a snapshot arrives ahead of the local estimate. A pending result is consumed once, with a60-tick age bound and an explicit expiry log. Sword/Crush/orbit accents use an action-local once-only cue clock with30-tick catch-up, not the short live-ray interval or an8-tick sword window. Stale events are discarded; clock rollback cannot replay consumed events.
