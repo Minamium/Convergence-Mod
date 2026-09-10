@@ -801,7 +801,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: b5f3193911506805f85dab3ffd29bed347fd66044be73be8b1c2762177953ddb
+  content_sha256: 0e3d4b123ecf327b61d616c82465df222379f5d5b9567e7ae1f06e9ea61188fd
   document_type: spec
   status: provisional
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8fd6414171b74c8f6c82216a66ec1b2c9d581b916139deb279a90229d1ce08a7
+  content_sha256: 39c9cff1ebbca0cb53ad1f1c5e109fc539433a9ae1b9664050f9426451a1fe45
   document_type: status
   status: accepted
   owners:

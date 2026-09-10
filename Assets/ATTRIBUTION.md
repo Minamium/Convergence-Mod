@@ -1574,3 +1574,202 @@ For music, record the composition, edition or score, arrangement, performance or
 - Required attribution: retain this provenance; no WotG/Calamity music or recording imported
 - Reviewer and review date: Codex automated decode/finite/48kHz/stereo/duration/peak checks, 2026-09-10; owner in-game final mix/loop review pending
 - Notes: Phase 4; 178.626 BPM; 69.866667s; encoded bytes 1141710; decoded peak 0.967757; SHA256 `b9e3a7c89e9ab9eb87688f175de94da74b7d604b619a677d3aecb6eff50b94f3`.
+
+
+### Prismatic / dimensional SFX rebuild — 0.2.42 / 2026-09-10
+
+- Runtime file: `Assets/Sounds/FirstSeverance/EnergyCharge.wav`
+- Asset ID: first-severance-energycharge-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Radiant; use Phase-I energy-charge launch; duration 3.200000s; peak 0.699982; RMS 0.174925; bytes 614444; SHA256 `07a454645d307c19beecfa2813b306fe777b7541a78f10066ef49418136995b6`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/LanceFire.wav`
+- Asset ID: first-severance-lancefire-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Radiant; use Observation-lance / shared beam fire; duration 1.150000s; peak 0.700012; RMS 0.085969; bytes 220844; SHA256 `0b6d7fcaa956bdbfe9e103530df297309533ac2bcafce94e94fb6e6af38c2c37`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/CoreSalvoFire.wav`
+- Asset ID: first-severance-coresalvofire-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Radiant; use Grid-plus-Core combined salvo / empowered shared fire; duration 2.450000s; peak 0.700012; RMS 0.067120; bytes 470444; SHA256 `75995b342014e62f5b25c60c5bb1f81d559aeea92172525ce137f79f7e3bfafd`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/FinalSlicerFire.wav`
+- Asset ID: first-severance-finalslicerfire-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Radiant; use Final slicer live-fire edge; duration 0.920000s; peak 0.699982; RMS 0.086021; bytes 176684; SHA256 `1c69c4472463638b08a87c9ed73092747e3ec5707a717ba84e9cbd9bec5386dc`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/PhaseRupture.wav`
+- Asset ID: first-severance-phaserupture-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Void; use phase-transition rupture / eclosion strain; duration 3.700000s; peak 0.700012; RMS 0.128116; bytes 710444; SHA256 `79454e7dc86a0f2dbef01dbee2c05d9dffc23fdf6a39310a55425e6a0c3ae556`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/HandClasp.wav`
+- Asset ID: first-severance-handclasp-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Void; use Phase-III RemoteClaws flood deployment; duration 1.550000s; peak 0.700012; RMS 0.120298; bytes 297644; SHA256 `9ddbad37cb415bd5e8048802436a0566b90660f9b62e8e42bdce90a4c8fc3225`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/CrushCataclysm.wav`
+- Asset ID: first-severance-crushcataclysm-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Void; use RemoteCrush actual collision impact; duration 2.250000s; peak 0.700012; RMS 0.094300; bytes 432044; SHA256 `7574cf9f4b6afbb7e9808164f5888061a78cb40802ac762b4a7c635c6106d98d`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/StackSummon.wav`
+- Asset ID: first-severance-stacksummon-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Mass; use Stack gather / sanctuary formation; duration 2.850000s; peak 0.700012; RMS 0.152377; bytes 547244; SHA256 `edc5fd84b6e4b0096c3ca2532aa0503f2f14b8e7535b30c9cf080b08b16a3171`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellMassLatch.wav`
+- Asset ID: first-severance-shellmasslatch-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Mass; use Stack shell-fragment birth latch; duration 0.720000s; peak 0.699982; RMS 0.104792; bytes 138284; SHA256 `301b9e651700b598c2f71840ee1f3b53ea60b2137e28bd93812f3d96b57879bb`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellMassShed.wav`
+- Asset ID: first-severance-shellmassshed-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Mass; use Stack success shell shedding; duration 1.280000s; peak 0.699982; RMS 0.093898; bytes 245804; SHA256 `2838d915d99934b1fad3cdfa43e53f5982c399f9740b823f11af3ed6f4026b30`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ShellMassCollapse.wav`
+- Asset ID: first-severance-shellmasscollapse-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Mass; use Stack failure compression/collapse; duration 1.620000s; peak 0.700012; RMS 0.115942; bytes 311084; SHA256 `ee575df82ad8948fab182901fa9e06f5026dfb2fbb8baa8cc266c1b1395f94a1`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/MeridianSustain.wav`
+- Asset ID: first-severance-meridiansustain-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Sustain; use Pale Meridian overdrive continuous voice; duration 4.000000s; peak 0.699982; RMS 0.264451; bytes 768044; SHA256 `e7e73236cbd8e1f5f141a1dbba36800c1c294fafa43e26c80397dae247d540b8`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/LacunaSustain.wav`
+- Asset ID: first-severance-lacunasustain-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Sustain; use Lacuna Testament empowered beam continuous voice; duration 4.000000s; peak 0.699982; RMS 0.255009; bytes 768044; SHA256 `6eccdf0abddebc24a279c287aaf2d7d4375975e59f8d7d32b116b23443f7fc60`.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/ChoirSustain.wav`
+- Asset ID: first-severance-choirsustain-prismatic-0242-20260910
+- Asset type: audio
+- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creation/acquisition date: 2026-09-10
+- Source type: original
+- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only
+- Tool/model/version: Python 3.12; NumPy 2.3.5, SciPy 1.16.1, SoundFile 0.14.0/libsndfile; 96kHz synthesis/DSP -> 48kHz stereo PCM16 runtime export
+- Human modifications: owner selected the proposed sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
+- Notes: family Sustain; use Choir of the Unmade / Requiem continuous voice; duration 4.000000s; peak 0.699982; RMS 0.229518; bytes 768044; SHA256 `56d6f90be0058f911dad86621fa3239bd774ccc3f3a96d4c77278321f26aff95`.
