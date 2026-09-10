@@ -1799,3 +1799,18 @@ Reviewer: Codex decode/finite/peak/frame-length/hash checks on2026-09-10; user l
 # Restored wide/core salvo — 2026-09-10 / 0.2.44
 
 Runtime `Assets/Sounds/FirstSeverance/CoreSalvoFire.wav` is restored byte-for-byte from project commit `5fba4d7` (SHA256 `cb9b1ca7a14de74b288e5f229dc84962b6fa76b24e59d135c8774076dd3c1d2d`). The original project synthesis provenance/license remains in the preceding CoreSalvoFire entry; no new external asset is introduced. User requested the old wide-beam sound. Codex checked decode and source hash; actual listening is pending. Both predecessor and restored bytes plus the pinned-input restoration recipe are retained externally in `output/raid-audio-0244`. Raid playback now has a descriptor-owned end/fade; the file also remains shared by weapon fire. All other sound/music masters remain unchanged in this pass.
+# Selective non-Stack restoration — 2026-09-11 / 0.2.45
+
+User-directed restoration of these exact project-owned runtime masters from commit `5fba4d7`; their original synthesis/source/license entries remain applicable. No new composition, sample, processing or third-party source is introduced. Codex verified original Git bytes and finite PCM decode (original44.1/48kHz formats retained). Accepted Stack masters and all BGM are unchanged. Before/restored files and the restoration recipe remain in external `output/raid-audio-0245`; metadata is recorded in `docs/evidence/2026-09-11-selective-sfx-rollback.json`. Runtime listening review pending.
+
+| Runtime file | Restored SHA256 |
+|---|---|
+| `Assets/Sounds/FirstSeverance/ChoirSustain.wav` | `4e2e0bd06665f06839f9e70c4f461a8fa540578100264d65fce49069fd92cb68` |
+| `Assets/Sounds/FirstSeverance/CrushCataclysm.wav` | `d15748b793652312ae956528a9057419aeb0bab33eba99bf3cdd4fd36a3bcef6` |
+| `Assets/Sounds/FirstSeverance/EnergyCharge.wav` | `8cefc0827dbe8c9efed6abd5466dcafba5ae78a61337b6b3a4480b7a68199157` |
+| `Assets/Sounds/FirstSeverance/FinalSlicerFire.wav` | `79715ec6bceb56a799c9fda5ea8918517113aa172165d0ed1c8f594a7ee4f4f1` |
+| `Assets/Sounds/FirstSeverance/HandClasp.wav` | `e3e87ccc900fe78cee0c0733fd01c667b29a4144e239ee19e855a0bfdce78582` |
+| `Assets/Sounds/FirstSeverance/LacunaSustain.wav` | `c40271d14be754a2021ee2def8407b44f1be8b51fb8e65a6030c4c35d6a1cc98` |
+| `Assets/Sounds/FirstSeverance/LanceFire.wav` | `9ac2dd7a976b4afbe9687162bfc0468ffd0be63b494a6d7975e07d7ddf1d71bb` |
+| `Assets/Sounds/FirstSeverance/MeridianSustain.wav` | `6753c47585bb7d5447b3b55de7e832803a35c13c91670c21ad6655a9dbcc0274` |
+| `Assets/Sounds/FirstSeverance/PhaseRupture.wav` | `b3f0280827ea4c8377c89c1f3b0b3866cb35a9ea41484d3b104fcc3b04576a79` |

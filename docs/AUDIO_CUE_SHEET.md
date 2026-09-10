@@ -4,7 +4,7 @@ document_type: spec
 status: provisional
 owners:
   - audio
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - first_severance.audio_cues
 aliases:
@@ -25,6 +25,12 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
+## Accepted Stack, restored other SFX, silent preparation — 0.2.45
+
+Keep the accepted0.2.43/44 StackSummon and ShellMassLatch/Arc/Shed/Collapse masters and all four BGM byte-for-byte. All other SFX now match the pre-rebuild0.2.41 masters; nine remaining changed files are restored, including the three weapon sustain voices. The0.2.44 attack-window end/fade correction remains, so this rollback restores timbres without restoring unbounded Raid beam tails.
+
+A separate client-only scene effect selects silence while the local player belongs to an accepted preparation and combat has not started. It changes no music/SFX slider and does not activate the combat sky. On start, cancellation or loss of preparation, the ordinary scene selector takes over. Narrow pinned API check: installed tModLoader2026.07.3.0 XML `ModSceneEffect.Music` documents0as silence and-1as permitting other music; inspected2026-09-11. In-game handoff/cancel listening is user-owned `not_run`.
+
 ## Attack-bounded tails and restored salvo — 0.2.44
 
 The full61-file First Severance SFX inventory was decoded and compared with cue call sites and authored windows. The CoreSalvoFire master was2.45s for a20-tick grid/core firing window; GridFire, EnergyCharge, LanceCharge/Fire, FinalSlicerFire and several mechanic forecasts also outlived their visual window. CoreSalvoFire returns to the pre-rebuild0.2.41 master (also shared by weapon fire); the other current timbres and0.2.43 music remain.

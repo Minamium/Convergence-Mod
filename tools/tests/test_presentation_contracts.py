@@ -17,6 +17,16 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_preparation_silence_does_not_change_volume_or_combat_music(self):
+        source = (CLIENT / "FirstSeverancePreparationSilence.cs").read_text(encoding="utf-8")
+        self.assertIn("public override int Music => 0", source)
+        self.assertIn("state.Combat is null", source)
+        self.assertIn("state.Preparation is { } preparation", source)
+        self.assertIn("TryGetMemberByServerSlot", source)
+        self.assertIn("Main.dedServ || Main.gameMenu", source)
+        self.assertNotIn("musicVolume", source)
+        self.assertNotIn("SpecialVisuals", source)
+
     def test_audio_windows_end_and_do_not_own_verdict_tails(self):
         source = (CLIENT / "FirstSeveranceFeedback.cs").read_text(encoding="utf-8")
         update = body(source, "internal void Update(")

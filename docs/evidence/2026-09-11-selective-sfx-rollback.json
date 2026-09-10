@@ -1,0 +1,89 @@
+{
+  "date": "2026-09-11",
+  "version": "0.2.45",
+  "protocol": 28,
+  "base_commit": "2590b35",
+  "scope": "Restore non-Stack sound masters to0.2.41; preserve accepted Stack and music. Silence music only for local participating preparation.",
+  "assets": {
+    "restored_from": "5fba4d7",
+    "restored": [
+      {
+        "path": "Assets/Sounds/FirstSeverance/ChoirSustain.wav",
+        "sha256": "4e2e0bd06665f06839f9e70c4f461a8fa540578100264d65fce49069fd92cb68",
+        "sample_rate": 44100,
+        "seconds": 4
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/CrushCataclysm.wav",
+        "sha256": "d15748b793652312ae956528a9057419aeb0bab33eba99bf3cdd4fd36a3bcef6",
+        "sample_rate": 48000,
+        "seconds": 2.15
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/EnergyCharge.wav",
+        "sha256": "8cefc0827dbe8c9efed6abd5466dcafba5ae78a61337b6b3a4480b7a68199157",
+        "sample_rate": 48000,
+        "seconds": 3.999979166666667
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/FinalSlicerFire.wav",
+        "sha256": "79715ec6bceb56a799c9fda5ea8918517113aa172165d0ed1c8f594a7ee4f4f1",
+        "sample_rate": 48000,
+        "seconds": 0.85
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/HandClasp.wav",
+        "sha256": "e3e87ccc900fe78cee0c0733fd01c667b29a4144e239ee19e855a0bfdce78582",
+        "sample_rate": 48000,
+        "seconds": 1.6
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/LacunaSustain.wav",
+        "sha256": "c40271d14be754a2021ee2def8407b44f1be8b51fb8e65a6030c4c35d6a1cc98",
+        "sample_rate": 44100,
+        "seconds": 4
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/LanceFire.wav",
+        "sha256": "9ac2dd7a976b4afbe9687162bfc0468ffd0be63b494a6d7975e07d7ddf1d71bb",
+        "sample_rate": 48000,
+        "seconds": 3.999979166666667
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/MeridianSustain.wav",
+        "sha256": "6753c47585bb7d5447b3b55de7e832803a35c13c91670c21ad6655a9dbcc0274",
+        "sample_rate": 44100,
+        "seconds": 4
+      },
+      {
+        "path": "Assets/Sounds/FirstSeverance/PhaseRupture.wav",
+        "sha256": "b3f0280827ea4c8377c89c1f3b0b3866cb35a9ea41484d3b104fcc3b04576a79",
+        "sample_rate": 48000,
+        "seconds": 4.5999791666666665
+      }
+    ],
+    "protected": {
+      "Assets\\Music\\DistantLiturgy.ogg": "eada0cbb9a39ccef20c827a5bd064f408cfc6cccf9bfc2385bb2738928a92f09",
+      "Assets\\Music\\ObsidianLiturgy.ogg": "9f0e9e4b6434908ed3e7f5401fd1936e326df1dc27776c5ab818b615cd67219f",
+      "Assets\\Music\\TerminalLiturgy.ogg": "e2e644db1f5f171b780c1912a1a856872d38eaa4f328036c5cc9b87d93209981",
+      "Assets\\Music\\UnboundLiturgy.ogg": "61745a5f44dda89620e064402a45a0aa0fe094e5404714c7186689ce2adca808",
+      "Assets\\Sounds\\FirstSeverance\\ShellMassArc.wav": "313f706e340aacde6f0deebad40f373abca2d937f1d6abdd01d29a0630b8741b",
+      "Assets\\Sounds\\FirstSeverance\\ShellMassCollapse.wav": "d8c1628c9b28f9d7dabd90c2b479705117e7bba20ec2c9ef8b40bb208f356fbd",
+      "Assets\\Sounds\\FirstSeverance\\ShellMassLatch.wav": "f2f952c2c9c4a733199e720fee7991e3b5cba0a5d13b78091d21bce661de2f7e",
+      "Assets\\Sounds\\FirstSeverance\\ShellMassShed.wav": "b08a728aa38ba7da425481f89e58c9bde862e986ec71c06761d2d77a5cf84f63",
+      "Assets\\Sounds\\FirstSeverance\\StackSummon.wav": "e32d93796b6ab0a8378e5f9158848f92471adafe3d75219c146c189300cefdf2"
+    },
+    "checks": "finite44.1/48kHz decode; original format and exact Git bytes; music and Stack hashes unchanged"
+  },
+  "api_evidence": "Installed pinned tModLoader2026.07.3.0 XML, ModSceneEffect.Music:0 selects silence,-1 lets other music play. Independently authored client-only scene effect; no user volume mutation or combat sky change. Local inspection2026-09-11.",
+  "verification": {
+    "assets": "9restored masters decode finite; hashes match5fba4d7. All4BGM and5Stack masters byte-identical.",
+    "presentation": "passed:13source integration guards",
+    "native_build": "passed:0errors,4existing CS8632 warnings; source unchanged during packaging",
+    "build_record": ".local/builds/20260910T165300549376Z/record.json",
+    "source_sha256": "null",
+    "artifact_sha256": "b339e5ea59dcf947495ed3a38585224885eac4b4cc380cd9dbc9e7c81dab156f",
+    "runtime": "not_run: preparation silence, immediate combat music handoff, cancel/timeout/disconnect/world-exit return to normal music, user listening. No GUI/server launched."
+  },
+  "preserved": "0.2.44 attack-tail limits, all combat and visual logic, audio sliders;3preexisting English localization modifications remain unstaged. Before/restored masters and recipe kept outside source in output/raid-audio-0245."
+}
