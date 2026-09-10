@@ -1,0 +1,497 @@
+name: Temporary prismatic SFX 0.2.42
+
+on:
+  push:
+    branches:
+      - audio/orchestral-abc-0.2.42
+
+permissions:
+  contents: write
+
+jobs:
+  render-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audio/orchestral-abc-0.2.42
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deterministic audio tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 scipy==1.16.1 soundfile==0.14.0
+
+      - name: Render approved prismatic and dimensional SFX
+        shell: bash
+        run: |
+          cat > /tmp/render_sfx.py <<'PY'
+          from pathlib import Path
+          import hashlib, json, math, subprocess
+          import numpy as np
+          import soundfile as sf
+          from scipy.signal import butter, sosfilt, resample_poly, fftconvolve
+
+          SRH=96000
+          SR=48000
+          rng=np.random.default_rng(20260910)
+          root=Path('.').resolve()
+          out=root/'Assets/Sounds/FirstSeverance'
+          audition=Path('/tmp/convergence-sfx-0242')
+          audition.mkdir(parents=True,exist_ok=True)
+
+          def filt(x, lo=None, hi=None, sr=SRH, order=4):
+              x=np.asarray(x)
+              if lo is not None and hi is not None:
+                  sos=butter(order,[lo,hi],btype='bandpass',fs=sr,output='sos')
+              elif lo is not None:
+                  sos=butter(order,lo,btype='highpass',fs=sr,output='sos')
+              elif hi is not None:
+                  sos=butter(order,hi,btype='lowpass',fs=sr,output='sos')
+              else:
+                  return x
+              return sosfilt(sos,x,axis=0)
+
+          def env_ar(n, attack=.01, decay=None, release=.2, sr=SRH):
+              t=np.arange(n)/sr
+              e=np.ones(n)
+              if attack>0:
+                  a=min(n,max(1,int(attack*sr)))
+                  e[:a]=np.sin(np.linspace(0,np.pi/2,a))**1.6
+              if decay is not None:
+                  e*=np.exp(-t/decay)
+              if release>0:
+                  r=min(n,max(1,int(release*sr)))
+                  e[-r:]*=np.cos(np.linspace(0,np.pi/2,r))**1.4
+              return e
+
+          def colored_noise(n, lo, hi, stereo=True, decay=None, attack=.0):
+              shape=(n,2) if stereo else n
+              x=rng.standard_normal(shape)
+              x=filt(x,lo,hi)
+              if decay is not None:
+                  e=np.exp(-np.arange(n)/SRH/decay)
+                  x*=e[:,None] if stereo else e
+              if attack:
+                  a=min(n,int(attack*SRH))
+                  if a>1:
+                      ramp=np.sin(np.linspace(0,np.pi/2,a))**2
+                      x[:a]*=ramp[:,None] if stereo else ramp
+              p=np.max(np.abs(x))+1e-12
+              return (x/p).astype(np.float64)
+
+          def modal_bank(n, freqs, amps, decays, stereo=False):
+              t=np.arange(n)/SRH
+              out=np.zeros((n,2)) if stereo else np.zeros(n)
+              for i,(f,a,d) in enumerate(zip(freqs,amps,decays)):
+                  phase=rng.uniform(0,2*np.pi)
+                  sig=a*np.sin(2*np.pi*f*t+phase)*np.exp(-t/d)
+                  if stereo:
+                      pan=np.clip((-0.5+(i%5)/4)+rng.normal(0,.06),-.7,.7)
+                      l=np.cos((pan+1)*np.pi/4); r=np.sin((pan+1)*np.pi/4)
+                      out[:,0]+=sig*l; out[:,1]+=sig*r
+                  else:
+                      out+=sig
+              return out
+
+          def gliss(n, f0, f1, amp=1, curve=1.0, phase0=0):
+              t=np.arange(n)/SRH
+              p=(t/max(t[-1] if n>1 else 1,1e-9))**curve
+              f=f0*(f1/f0)**p
+              ph=phase0+2*np.pi*np.cumsum(f)/SRH
+              return amp*np.sin(ph)
+
+          def fm_tone(n, carrier, mod, index, decay=None, attack=.005):
+              t=np.arange(n)/SRH
+              ph=2*np.pi*carrier*t+index*np.sin(2*np.pi*mod*t)
+              y=np.sin(ph)
+              y*=env_ar(n,attack,decay,.12)
+              return y
+
+          def sub_pulse(n, f0=58, f1=39, amp=1, decay=.45, delay=0):
+              y=np.zeros(n)
+              d=int(delay*SRH)
+              if d>=n:
+                  return y
+              m=n-d
+              t=np.arange(m)/SRH
+              f=f0*np.exp(np.log(f1/f0)*np.minimum(t,.5)/.5)
+              ph=2*np.pi*np.cumsum(f)/SRH
+              e=(1-np.exp(-t*120))*np.exp(-t/decay)
+              y[d:]=amp*np.sin(ph)*e
+              return y
+
+          def stereoize(mono, delay_ms=7):
+              mono=np.asarray(mono)
+              n=len(mono); d=int(delay_ms/1000*SRH)
+              left=mono.copy(); right=np.zeros(n)
+              if d<n:
+                  right[d:]=mono[:-d]
+              return np.column_stack([left,right])*.7
+
+          def sparse_hall(x, wet=.17, decay=1.3):
+              if x.ndim==1:
+                  x=np.column_stack([x,x])
+              n=len(x); y=x.copy()
+              taps=[(.029,.11),(.047,.08),(.073,.075),(.109,.06),(.163,.045),(.239,.036),(.347,.025)]
+              for i,(sec,g) in enumerate(taps):
+                  d=int(sec*SRH)
+                  if d<n:
+                      z=np.zeros_like(x); z[d:]=x[:-d]*g
+                      if i%2:
+                          z=z[:,::-1]
+                      y+=z
+              irn=int(min(2.1,decay*1.65)*SRH)
+              t=np.arange(irn)/SRH
+              outs=[]
+              for ch in range(2):
+                  ir=rng.standard_normal(irn)
+                  ir=filt(ir,lo=600,hi=15000)
+                  ir*=np.exp(-t/decay)
+                  ir[:int(.018*SRH)]*=0
+                  ir/=np.sqrt(np.sum(ir**2)+1e-12)
+                  outs.append(fftconvolve(x[:,ch],ir,mode='full')[:n])
+              return y+wet*np.column_stack(outs)
+
+          def reverse_swell(n, lo=180, hi=6000, power=2.1, stereo=True):
+              x=colored_noise(n,lo,hi,stereo=stereo)
+              e=np.linspace(0,1,n)**power
+              return x*e[:,None] if stereo else x*e
+
+          def crack(n, gain=1.0):
+              y=np.zeros((n,2))
+              m=min(n,int(.13*SRH))
+              noise=colored_noise(m,1800,16000,True)
+              e=np.exp(-np.arange(m)/SRH/.026)
+              y[:m]+=noise*e[:,None]*gain
+              for dsec,g in [(.025,.28),(.047,.17),(.083,.10)]:
+                  d=int(dsec*SRH); m2=min(n-d,int(.05*SRH))
+                  if m2>0:
+                      zz=colored_noise(m2,2600,15000,True)*np.exp(-np.arange(m2)/SRH/.012)[:,None]
+                      y[d:d+m2]+=zz*g*gain
+              return y
+
+          def resonance_chime(n, base=880, amp=.4, decay=.5):
+              freqs=[base,base*1.498,base*2.12,base*2.73,base*3.71]
+              amps=[amp,amp*.55,amp*.30,amp*.17,amp*.09]
+              decs=[decay,decay*.75,decay*.55,decay*.42,decay*.32]
+              return modal_bank(n,freqs,amps,decs,stereo=True)
+
+          def master(y, peak=.70, loop=False):
+              if y.ndim==1:
+                  y=np.column_stack([y,y])
+              y=filt(y,lo=22,hi=18500)
+              n=len(y)
+              if not loop:
+                  a=min(n,int(.0025*SRH)); r=min(n,int(.035*SRH))
+                  if a>1:
+                      y[:a]*=np.sin(np.linspace(0,np.pi/2,a))[:,None]**2
+                  if r>1:
+                      y[-r:]*=np.cos(np.linspace(0,np.pi/2,r))[:,None]**2
+              y=resample_poly(y,1,2,axis=0,window=('kaiser',9.0)).astype(np.float64)
+              p=np.max(np.abs(y))+1e-12
+              return (y*(peak/p)).astype(np.float32)
+
+          def radiant_charge(dur=3.2):
+              n=int(dur*SRH); t=np.arange(n)/SRH; y=np.zeros((n,2))
+              sw=reverse_swell(n,220,12500,1.7,True)
+              sw*= (.18+.82*(t/dur)**1.7)[:,None]
+              y+=sw*.28
+              for f0,f1,g,pan in [(148,740,.22,-.25),(221,1110,.15,.25),(333,1665,.10,-.05),(505,2525,.06,.18)]:
+                  s=gliss(n,f0,f1,g,curve=.75)*env_ar(n,.22,None,.06)
+                  l=np.cos((pan+1)*np.pi/4); r=np.sin((pan+1)*np.pi/4)
+                  y[:,0]+=s*l; y[:,1]+=s*r
+              for sec in np.geomspace(.65,dur-.18,8):
+                  d=int(sec*SRH); m=min(n-d,int(.22*SRH))
+                  if m>0:
+                      q=fm_tone(m,310+sec*90,37,2.2,decay=.10)
+                      y[d:d+m]+=stereoize(q,3)*.12
+              return sparse_hall(y,.14,1.1)
+
+          def prismatic_release(dur=1.15, heavy=False):
+              n=int(dur*SRH); y=np.zeros((n,2)); y+=crack(n,.42 if heavy else .34)
+              m=min(n,int(.8*SRH)); body=np.zeros((m,2))
+              for f0,f1,g,pan in [(3200,520,.22,-.18),(2100,380,.18,.18),(1150,245,.14,0)]:
+                  s=gliss(m,f0,f1,g,curve=.43)*np.exp(-np.arange(m)/SRH/.28)
+                  l=np.cos((pan+1)*np.pi/4); r=np.sin((pan+1)*np.pi/4)
+                  body[:,0]+=s*l; body[:,1]+=s*r
+              y[:m]+=body
+              y+=stereoize(sub_pulse(n,72 if heavy else 64,38,.28 if heavy else .20,.45 if heavy else .45,.014),2)
+              y+=resonance_chime(n,1160 if heavy else 1450,.13,.38)
+              return sparse_hall(y,.15,1.0)
+
+          def core_obliteration(dur=2.45):
+              n=int(dur*SRH); y=prismatic_release(dur,True); t=np.arange(n)/SRH
+              for f,g in [(210,.13),(315,.10),(468,.07),(707,.05),(1057,.03)]:
+                  ph=2*np.pi*f*t+1.9*np.sin(2*np.pi*(6.1+f/400)*t)
+                  e=(1-np.exp(-t*90))*np.exp(-t/1.05)
+                  y+=stereoize(np.sin(ph)*e*g,5+int(f)%6)
+              noise=colored_noise(n,900,15000,True)
+              y+=noise*((1-np.exp(-t*35))*np.exp(-t/.75))[:,None]*.12
+              return sparse_hall(y,.20,1.55)
+
+          def cosmic_slash(dur=.92):
+              n=int(dur*SRH); y=np.zeros((n,2)); pre=int(.16*SRH)
+              y[:pre]+=reverse_swell(pre,700,15000,2.3,True)*.24
+              d=pre; m=n-d
+              if m>0:
+                  wh=colored_noise(m,1400,17500,True)*np.exp(-np.arange(m)/SRH/.12)[:,None]
+                  y[d:]+=wh*.22
+                  for f,g in [(4600,.10),(2910,.09),(1710,.07)]:
+                      sig=np.sin(2*np.pi*f*np.arange(m)/SRH)*np.exp(-np.arange(m)/SRH/.18)*g
+                      y[d:]+=stereoize(sig,2)*.8
+              y+=stereoize(sub_pulse(n,52,34,.11,.22,.17),1)
+              return sparse_hall(y,.12,.8)
+
+          def phase_rupture(dur=3.7):
+              n=int(dur*SRH); y=reverse_swell(n,90,6500,2.2,True)*.27
+              s1=gliss(n,610,58,.16,curve=.63)*env_ar(n,.04,None,.18)
+              s2=gliss(n,91,790,.10,curve=1.45)*env_ar(n,.20,None,.25)
+              y+=stereoize(s1,9)+stereoize(s2,13)
+              d=int(dur*.58*SRH); m=n-d
+              if m>0:
+                  y[d:]+=crack(m,.33)
+                  y[d:]+=resonance_chime(m,520,.19,.9)
+                  y[d:]+=stereoize(sub_pulse(m,60,31,.30,.65,0),2)
+              return sparse_hall(y,.23,1.7)
+
+          def void_clasp(dur=1.55):
+              n=int(dur*SRH); y=np.zeros((n,2)); d=int(.47*SRH)
+              y[:d]+=reverse_swell(d,75,3200,2.8,True)*.33
+              start=min(n,d+int(.012*SRH)); m=n-start
+              if m>0:
+                  y[start:]+=crack(m,.24)
+                  y[start:]+=stereoize(sub_pulse(m,74,29,.34,.38),2)
+                  y[start:]+=resonance_chime(m,650,.14,.48)
+              return sparse_hall(y,.16,1.05)
+
+          def catastrophe(dur=2.25):
+              n=int(dur*SRH); y=np.zeros((n,2))
+              y+=crack(n,.44)
+              y+=stereoize(sub_pulse(n,77,31,.42,.58,.008),2)
+              y+=modal_bank(n,[96,137,209,331,509,817,1321,2190],
+                            [.24,.18,.14,.10,.08,.055,.035,.022],
+                            [.95,.78,.66,.55,.45,.34,.25,.18],stereo=True)
+              for sec,g in [(.08,.13),(.17,.10),(.31,.07),(.52,.05),(.79,.03)]:
+                  d=int(sec*SRH); m=min(n-d,int(.20*SRH))
+                  if m>0:
+                      y[d:d+m]+=crack(m,g)
+              return sparse_hall(y,.21,1.65)
+
+          def stack_manifest(dur=2.85):
+              n=int(dur*SRH); y=reverse_swell(n,140,9200,1.9,True)*.16
+              for f0,f1,g,pan in [(1300,312,.13,-.2),(870,208,.12,.18),(620,147,.10,-.05)]:
+                  s=gliss(n,f0,f1,g,curve=.82)*env_ar(n,.1,None,.15)
+                  l=np.cos((pan+1)*np.pi/4); r=np.sin((pan+1)*np.pi/4)
+                  y[:,0]+=s*l; y[:,1]+=s*r
+              for sec,base,g in [(1.18,1040,.10),(1.72,830,.12),(2.22,650,.15)]:
+                  d=int(sec*SRH); m=n-d
+                  if m>0:
+                      y[d:]+=resonance_chime(m,base,g,.38)
+              y+=stereoize(sub_pulse(n,55,36,.18,.65,2.12),2)
+              return sparse_hall(y,.18,1.4)
+
+          def metal_latch(dur=.72):
+              n=int(dur*SRH); y=crack(n,.20)
+              y+=modal_bank(n,[484,731,1087,1653,2471,3679],
+                            [.18,.16,.12,.09,.055,.03],
+                            [.34,.29,.24,.19,.14,.10],stereo=True)
+              y+=stereoize(sub_pulse(n,92,56,.10,.18,.004),1)
+              return sparse_hall(y,.10,.58)
+
+          def mass_shed(dur=1.28):
+              n=int(dur*SRH); y=np.zeros((n,2)); y+=resonance_chime(n,970,.13,.52)
+              for sec,base,g in [(.05,720,.11),(.17,1080,.09),(.33,1640,.07),(.55,2460,.05)]:
+                  d=int(sec*SRH); m=n-d
+                  if m>0:
+                      y[d:]+=modal_bank(m,[base,base*1.47,base*2.21],[g,g*.55,g*.28],[.26,.18,.12],stereo=True)
+              air=colored_noise(n,1900,15000,True)*np.exp(-np.arange(n)/SRH/.48)[:,None]
+              y+=air*.10
+              return sparse_hall(y,.17,1.1)
+
+          def mass_collapse(dur=1.62):
+              n=int(dur*SRH); y=np.zeros((n,2)); d=int(.31*SRH)
+              y[:d]+=reverse_swell(d,90,2800,2.3,True)*.22
+              m=n-d
+              y[d:]+=catastrophe(m/SRH)[:m]*.92
+              return sparse_hall(y,.15,1.2)
+
+          def loop_energy(kind, dur=4.0):
+              n=int(dur*SRH); t=np.arange(n)/SRH
+              if kind=='Meridian':
+                  freqs=[105.0,210.0,315.0,630.0,1260.0]; amps=[.10,.08,.055,.032,.018]; spread=.20
+              elif kind=='Lacuna':
+                  freqs=[82.0,164.0,246.0,492.0,738.0]; amps=[.11,.075,.055,.028,.018]; spread=.28
+              else:
+                  freqs=[110.0,165.0,220.0,330.0,440.0,660.0]; amps=[.075,.065,.055,.045,.030,.018]; spread=.36
+              y=np.zeros((n,2))
+              for i,(f,a) in enumerate(zip(freqs,amps)):
+                  f=round(f*dur)/dur
+                  am=.84+.16*np.sin(2*np.pi*(.25*(i%3+1))*t+i*.7)
+                  sig=a*np.sin(2*np.pi*f*t+i*.43)*am
+                  pan=-spread+2*spread*(i/max(1,len(freqs)-1))
+                  l=np.cos((pan+1)*np.pi/4); r=np.sin((pan+1)*np.pi/4)
+                  y[:,0]+=sig*l; y[:,1]+=sig*r
+              for ch in range(2):
+                  bins=n//2+1; spec=np.zeros(bins,dtype=np.complex128)
+                  freqs_fft=np.fft.rfftfreq(n,1/SRH)
+                  mask=(freqs_fft>800)&(freqs_fft<9500)
+                  phases=rng.uniform(0,2*np.pi,mask.sum())
+                  amp=np.zeros_like(freqs_fft)
+                  amp[mask]=1/(1+(freqs_fft[mask]/2600)**1.5)
+                  spec[mask]=amp[mask]*np.exp(1j*phases)
+                  noise=np.fft.irfft(spec,n=n)
+                  noise/=np.max(np.abs(noise))+1e-12
+                  y[:,ch]+=noise*.018
+              return y
+
+          specs=[
+              ('EnergyCharge',radiant_charge(),False,'Radiant','Phase-I energy-charge launch'),
+              ('LanceFire',prismatic_release(),False,'Radiant','Observation-lance / shared beam fire'),
+              ('CoreSalvoFire',core_obliteration(),False,'Radiant','Grid-plus-Core combined salvo / empowered shared fire'),
+              ('FinalSlicerFire',cosmic_slash(),False,'Radiant','Final slicer live-fire edge'),
+              ('PhaseRupture',phase_rupture(),False,'Void','phase-transition rupture / eclosion strain'),
+              ('HandClasp',void_clasp(),False,'Void','Phase-III RemoteClaws flood deployment'),
+              ('CrushCataclysm',catastrophe(),False,'Void','RemoteCrush actual collision impact'),
+              ('StackSummon',stack_manifest(),False,'Mass','Stack gather / sanctuary formation'),
+              ('ShellMassLatch',metal_latch(),False,'Mass','Stack shell-fragment birth latch'),
+              ('ShellMassShed',mass_shed(),False,'Mass','Stack success shell shedding'),
+              ('ShellMassCollapse',mass_collapse(),False,'Mass','Stack failure compression/collapse'),
+              ('MeridianSustain',loop_energy('Meridian'),True,'Sustain','Pale Meridian overdrive continuous voice'),
+              ('LacunaSustain',loop_energy('Lacuna'),True,'Sustain','Lacuna Testament empowered beam continuous voice'),
+              ('ChoirSustain',loop_energy('Choir'),True,'Sustain','Choir of the Unmade / Requiem continuous voice'),
+          ]
+
+          reports=[]
+          chunks=[]
+          silence=np.zeros((int(.28*SR),2),np.float32)
+          for name,raw,is_loop,family,use in specs:
+              y=master(raw,loop=is_loop)
+              dest=out/f'{name}.wav'
+              sf.write(dest,y,SR,subtype='PCM_16')
+              dec,sr=sf.read(dest,always_2d=True,dtype='float32')
+              if sr!=SR or dec.shape[1]!=2 or not np.isfinite(dec).all():
+                  raise RuntimeError(f'{dest}: decode/format verification failed')
+              peak=float(np.max(np.abs(dec)))
+              if peak>=.73:
+                  raise RuntimeError(f'{dest}: peak too high {peak}')
+              info=sf.info(dest)
+              if info.subtype!='PCM_16':
+                  raise RuntimeError(f'{dest}: expected PCM_16, got {info.subtype}')
+              report={
+                  'runtime_file':str(dest.relative_to(root)).replace('\\','/'),
+                  'name':name,'family':family,'use':use,'duration_seconds':len(dec)/SR,
+                  'sample_rate':sr,'channels':dec.shape[1],'subtype':info.subtype,
+                  'sample_peak':peak,'rms':float(np.sqrt(np.mean(dec.astype(np.float64)**2))),
+                  'bytes':dest.stat().st_size,'sha256':hashlib.sha256(dest.read_bytes()).hexdigest(),
+              }
+              reports.append(report)
+              chunks.extend([dec,silence])
+
+          reel=np.vstack(chunks[:-1])
+          reelwav=audition/'SFX_0.2.42_new14.wav'
+          reelmp3=audition/'SFX_0.2.42_new14.mp3'
+          sf.write(reelwav,reel,SR,subtype='PCM_16')
+          subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',str(reelwav),'-c:a','libmp3lame','-q:a','2',str(reelmp3)],check=True)
+          (audition/'audio_report.json').write_text(json.dumps(reports,indent=2),encoding='utf-8')
+          PY
+          python /tmp/render_sfx.py
+
+      - name: Update owning audio docs, attribution and evidence
+        shell: bash
+        run: |
+          cat > /tmp/update_sfx_docs.py <<'PY'
+          from pathlib import Path
+          import json
+
+          report=json.loads(Path('/tmp/convergence-sfx-0242/audio_report.json').read_text())
+          by={r['name']:r for r in report}
+
+          cue=Path('docs/AUDIO_CUE_SHEET.md')
+          text=cue.read_text(encoding='utf-8')
+          anchor='## Critical impact delivery and two-turn orbit — 0.2.40'
+          section='''## Prismatic / dimensional SFX rebuild — 0.2.42\n\nFourteen existing runtime masters are rebuilt in place while retaining every current cue trigger, gain, voice limit, authority relationship and cleanup path. Radiant cues (`EnergyCharge`, `LanceFire`, `CoreSalvoFire`, `FinalSlicerFire`) use a clean light transient, pitched energy body and delayed low pressure instead of clipped broadband impact. Dimensional cues (`PhaseRupture`, `HandClasp`, `CrushCataclysm`) use inward air/pressure motion, opposed pitch movement and a single physical closure. Mass cues (`StackSummon`, `ShellMassLatch`, `ShellMassShed`, `ShellMassCollapse`) use inharmonic shell resonances and separate latch/shed/collapse material behavior. The three ritual sustain voices (`MeridianSustain`, `LacunaSustain`, `ChoirSustain`) are dedicated four-second continuous energy bodies with no repeated launch transient. `ShellMassArc` and every unlisted First Severance sound remain unchanged.\n\nThe approved audition recipe is reproduced deterministically at96kHz, band-limited and downsampled to48kHz stereo PCM16 for the runtime. Masters target about0.70 sample peak and do not use hard clipping, bitcrush or a brickwall loudness stage. This is an asset-content replacement only: `FirstSeveranceFeedback`, `RitualWeaponFeedback`, cue names, playback gains and network/gameplay timing are untouched. WotG/Nameless Deity/Avatar of Emptiness informed only the high-level separation of pre-motion, transient, body, resonance and space; no third-party recording, sample, code or exact sound design is imported. Human in-game mix and audibility remain user-owned.\n\n'''
+          if '## Prismatic / dimensional SFX rebuild — 0.2.42' not in text:
+              if anchor not in text:
+                  raise RuntimeError('audio cue anchor missing')
+              text=text.replace(anchor,section+anchor,1)
+          cue.write_text(text,encoding='utf-8')
+
+          status=Path('docs/STATUS.md')
+          text=status.read_text(encoding='utf-8')
+          old='Development **0.2.42**, protocol **28**. The BGM-only orchestral pass replaces all four phase masters with continuous A/B/C development using the existing musical language; Phase I-III are no longer action-cycle-length loops, while Final alone remains fitted to its current score. The A-to-B handoff preserves the accepted intro through the downbeat and changes articulation/density rather than fading the master out. Combat, network protocol, damage, weapons, SFX and server-wide preparation are unchanged.'
+          new='Development **0.2.42**, protocol **28**. The orchestral audio pass replaces all four phase masters with continuous A/B/C development using the existing musical language; Phase I-III are no longer action-cycle-length loops, while Final alone remains fitted to its current score. The A-to-B handoff preserves the accepted intro through the downbeat and changes articulation/density rather than fading the master out. Fourteen selected First Severance SFX masters are also rebuilt with separate radiant, dimensional, shell-mass and sustained-energy material grammars. Combat, network protocol, damage, weapon behavior and server-wide preparation are unchanged; only the selected audio assets change.'
+          if old not in text:
+              raise RuntimeError('status current-build paragraph drifted')
+          text=text.replace(old,new,1)
+          text=text.replace('combat, weapons, damage, phase/audio rules are unchanged.','combat, weapons, damage and phase rules are unchanged; audio asset content is the 0.2.42 scope.',1)
+          vhead='## Verification state\n\n'
+          vpara='[0.2.42 SFX checks](evidence/2026-09-10-prismatic-sfx-rebuild.json) own the14-master deterministic export/decode/finite/stereo/48kHz/PCM16/duration/peak/SHA evidence and repository static verification. Cue scheduling, gains, voice limits, C# behavior and protocol remain unchanged. Actual boss/weapon listening, loop audibility and multi-client mix remain user-owned `not_run`; numerical headroom is not acoustic approval.\n\n'
+          if '2026-09-10-prismatic-sfx-rebuild.json' not in text:
+              if vhead not in text:
+                  raise RuntimeError('verification heading missing')
+              text=text.replace(vhead,vhead+vpara,1)
+          text=text.replace('SFX are intentionally unchanged in this branch.','In the same run, listen to the rebuilt radiant/beam, dimensional/crush, Stack/shell and three sustained-weapon voices; confirm no cheap clipping texture, missing cue, loop dip or BGM masking.',1)
+          status.write_text(text,encoding='utf-8')
+
+          attr=Path('Assets/ATTRIBUTION.md')
+          text=attr.read_text(encoding='utf-8')
+          heading='### Prismatic / dimensional SFX rebuild — 0.2.42 / 2026-09-10'
+          if heading not in text:
+              records=[]
+              for r in report:
+                  records.append(f'''- Runtime file: `{r['runtime_file']}`\n- Asset ID: first-severance-{r['name'].lower()}-prismatic-0242-20260910\n- Asset type: audio\n- Creator: project-directed original deterministic DSP synthesis by Codex\n- Creation/acquisition date: 2026-09-10\n- Source type: original\n- Source work and URL: none; no third-party recording/sample imported; WotG/Nameless Deity/Avatar references are high-level sound-design principles only\n- Tool/model/version: Python3.12; NumPy2.3.5, SciPy1.16.1, SoundFile0.14.0/libsndfile;96kHz synthesis/DSP ->48kHz stereo PCM16 runtime export\n- Human modifications: owner selected the proposed V10 sound direction and requested implementation; agent authored the independent pre-motion/transient/body/resonance/space recipe\n- License and redistribution terms: project asset terms remain under the existing development publication gate\n- Required attribution: retain this provenance\n- Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks,2026-09-10; human in-game mix review pending\n- Notes: family {r['family']}; use {r['use']}; duration {r['duration_seconds']:.6f}s; peak {r['sample_peak']:.6f}; RMS {r['rms']:.6f}; bytes {r['bytes']}; SHA256 `{r['sha256']}`.\n''')
+              text+='\n\n'+heading+'\n\n'+'\n'.join(records)+'\n'
+              attr.write_text(text,encoding='utf-8')
+
+          evidence={
+              'date':'2026-09-10','version':'0.2.42','protocol':28,
+              'main_merge_base':'5fba4d75dc814657c9fe69bbfbfbe19bb1b554b0',
+              'sfx_parent_commit':'a6b7658d6e0f5d56424da378cb2a8eef3ebcd696',
+              'branch':'audio/orchestral-abc-0.2.42',
+              'scope':'14 First Severance runtime SFX masters plus owning docs/evidence; no cue-code, gameplay, network or BGM edit in this SFX commit',
+              'design':'approved V10 independent DSP: radiant / dimensional / shell-mass / sustain families; no third-party recordings or copied WotG assets',
+              'assets':report,
+              'verification':{
+                  'audio':'passed: deterministic export; finite decode; stereo48kHz PCM16; expected duration; sample peaks below0.73; SHA256 recorded',
+                  'repository_static':'passed if workflow reaches commit; verify_repo --write-catalog and git diff --check are pre-commit gates',
+                  'native_mod_build':'not_run: no C# or dependency/protocol contract changed; runtime format remains WAV through the existing SoundStyle paths',
+                  'runtime':'not_run: user-owned boss/weapon audibility, sustain-loop perception, BGM masking and multiplayer listening'
+              },
+              'preserved':'0.2.42 BGM masters, combat authority/timing, protocol28, playback cue names/gains/voice caps, damage/recovery, visuals and preparation flow'
+          }
+          Path('docs/evidence/2026-09-10-prismatic-sfx-rebuild.json').write_text(json.dumps(evidence,indent=2),encoding='utf-8')
+          PY
+          python /tmp/update_sfx_docs.py
+
+      - name: Static repository verification and catalog refresh
+        run: |
+          python -m pip install -r tools/requirements-ci.txt
+          python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog
+          git diff --check
+
+      - name: Remove temporary workflow and commit SFX implementation
+        shell: bash
+        run: |
+          rm .github/workflows/tmp-prismatic-sfx-0242.yml
+          git config user.name 'OpenAI Codex'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Rebuild First Severance prismatic and dimensional SFX (0.2.42)'
+          git push origin HEAD:audio/orchestral-abc-0.2.42
+
+      - name: Upload SFX audition evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: convergence-sfx-0242-audition
+          path: |
+            /tmp/convergence-sfx-0242/SFX_0.2.42_new14.mp3
+            /tmp/convergence-sfx-0242/audio_report.json
+          if-no-files-found: error
