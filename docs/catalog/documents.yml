@@ -588,13 +588,13 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Null Cantor Visual Pass
-  content_sha256: 9808657243c49f56e3b96111b1534e735add1e04a25bc1276b2c8a27cdb4d79f
+  content_sha256: cfad1b7a07e40cfaed26b1a516358dadba21f0a2cf8cef76bbacef3943b36792
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-09'
+  last_reviewed: '2026-09-10'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -801,7 +801,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: 0e3d4b123ecf327b61d616c82465df222379f5d5b9567e7ae1f06e9ea61188fd
+  content_sha256: 3202e01df07349f6b2509efe934c880573648f246ef5e9f03986f7793ffeaecd
   document_type: spec
   status: provisional
   owners:
@@ -983,7 +983,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 39c9cff1ebbca0cb53ad1f1c5e109fc539433a9ae1b9664050f9426451a1fe45
+  content_sha256: fdca8baa4c059de539662fc7246971e8808cfd1caeef006a7de887c8d8a8b8a4
   document_type: status
   status: accepted
   owners:

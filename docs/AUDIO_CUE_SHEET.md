@@ -25,6 +25,12 @@ The accepted direction is ominous, solemn original orchestral-textural music, no
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
+## Measured loudness recovery — 0.2.43
+
+The 0.2.42 composition/timbres remain, but the four BGM and eleven one-shot SFX masters receive stereo-linked lookahead gain management. Measured active RMS had fallen roughly 8dB in Phase II/III/Final and up to17dB in individual one-shot cues against0.2.41; matching peaks alone did not maintain body level. The new export raises BGM about2.8–6.0dB and affected SFX2.6–10.3dB relative to0.2.42, while retaining encoded headroom and avoiding hard sample clipping. The old most compressed SFX level is not blindly restored. Three sustain voices were already comparable and remain byte-identical, as do all unlisted sounds. Exact measurements/provenance live in [integration evidence](evidence/2026-09-10-audio-preparation-polish.json).
+
+No playback gains, cue timing/limits, user music/SFX sliders or authority clocks are changed. Active RMS is not LUFS or subjective listening approval. In-game mix/loop review remains user-owned.
+
 ## Continuous orchestral A/B/C phase masters — 0.2.42
 
 The four phase masters are rebuilt as continuous orchestral A/B/C forms while retaining the accepted ominous/solemn instrumental language. The existing A introduction remains byte-source-derived until the B downbeat; the handoff is only a short anti-click overlap, not a multi-bar master fade. B begins by inheriting the A downbeat and orchestral weight, relaxes after entry, then accelerates by articulation density: sustained/pedal strings -> tremolo -> eighth-note short bows -> sixteenth-note short bows, with horn, low-brass and timpani joining late. C develops the same D-E-flat-A interval DNA and C-sharp-to-D return tension instead of switching to an electronic or retro palette. No synth lead, electronic drum kit or chiptune layer is added.

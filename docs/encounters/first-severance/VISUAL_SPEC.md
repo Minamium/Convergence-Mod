@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-10
 source_of_truth_for:
   - first_severance.visual_mvp
 aliases:
@@ -19,6 +19,12 @@ related_docs:
 ---
 
 # First Severance — Null Cantor Visual Pass
+
+## Suspended preparation and minimal Ready — 0.2.43
+
+Deployment keeps its first HUD-free cinematic, but removes both explanatory captions in favor of a quiet progress hairline. Manual Ready is one compact `READY` toggle with an illuminated state indicator and ready/total count; overhead `Ready!` remains. It uses the same physical-pixel composition and mouse coordinates, not UI-scale conversion. The all-Ready hold and second start cinematic remain unchanged.
+
+The central iris hangs from two wider, taller flanking steel columns with enlarged feet, textured horizontal gantries and three fine tension cables per shoulder. The solid diagonal struts are removed. The iris casing remains upright so the shoulder fixings cannot rotate away from the cables; its surrounding energy seal still moves. Cable endpoints follow the common lift clock, with bounded interior micro-motion. Existing authored metal atlas parts are reused; collision, arena dimensions, camera policy and deployment duration do not change.
 
 ## Vanilla boss bar — 0.2.38
 

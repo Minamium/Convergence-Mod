@@ -1773,3 +1773,26 @@ For music, record the composition, edition or score, arrangement, performance or
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex deterministic export/decode/finite/format/peak checks, 2026-09-10; human in-game mix review pending
 - Notes: family Sustain; use Choir of the Unmade / Requiem continuous voice; duration 4.000000s; peak 0.699982; RMS 0.229518; bytes 768044; SHA256 `56d6f90be0058f911dad86621fa3239bd774ccc3f3a96d4c77278321f26aff95`.
+# Loudness recovery exports — 2026-09-10 / 0.2.43
+
+These exact runtime exports supersede only the masters below. Source: project 0.2.42 commit `70b990dea58f4430a05a540f17a678189d26d6ef`; original composition, independent SFX synthesis and pinned CC0 VSCO provenance remain as recorded in the corresponding preceding entries. No new third-party source or recording is introduced. Creator: project-directed Codex mastering; user requested recovery of reduced volume. Toolchain: Python, NumPy2.3.5, SciPy1.16.1, SoundFile0.14.0/libsndfile1.2.2. Stereo-linked lookahead gain control, preserved sample count/stereo balance, .86 pre-encode peak ceiling; PCM16 WAV and Vorbis OGG exports. No hard clipping or gameplay gain changes. Existing license/redistribution terms and attribution obligations remain unchanged.
+
+Reviewer: Codex decode/finite/peak/frame-length/hash checks on2026-09-10; user listening review pending. Prior bytes, PCM24 auditions, pinned-input recipe and tool manifest are retained externally under `output/raid-audio-0243` (local workspace inventory; not an off-device-backup claim). Exact input/output identity and RMS measurements: `docs/evidence/2026-09-10-audio-preparation-polish.json`.
+
+| Runtime file | Export SHA256 |
+|---|---|
+| `Assets/Music/ObsidianLiturgy.ogg` | `9f0e9e4b6434908ed3e7f5401fd1936e326df1dc27776c5ab818b615cd67219f` |
+| `Assets/Music/UnboundLiturgy.ogg` | `61745a5f44dda89620e064402a45a0aa0fe094e5404714c7186689ce2adca808` |
+| `Assets/Music/DistantLiturgy.ogg` | `eada0cbb9a39ccef20c827a5bd064f408cfc6cccf9bfc2385bb2738928a92f09` |
+| `Assets/Music/TerminalLiturgy.ogg` | `e2e644db1f5f171b780c1912a1a856872d38eaa4f328036c5cc9b87d93209981` |
+| `Assets/Sounds/FirstSeverance/EnergyCharge.wav` | `00a33a37454cda1714ba2691355b8496b883f2a7d62d65f2e1c812c69b32fad0` |
+| `Assets/Sounds/FirstSeverance/LanceFire.wav` | `d66df0063e30faccf41e26fdf2c2d6c8c7c83f495370fec6a50742173c3e2864` |
+| `Assets/Sounds/FirstSeverance/CoreSalvoFire.wav` | `acddb121e15752c43210c1d6dd2fafc062d5adc51df2a674d445fda81cb9717d` |
+| `Assets/Sounds/FirstSeverance/FinalSlicerFire.wav` | `82e4488143395a1ab98e58239431c4137693946e773af0aa12d1766c236dfa28` |
+| `Assets/Sounds/FirstSeverance/PhaseRupture.wav` | `e57055844dfb5b32b734dda766fcbd0bc06ef317e2ba2d006f5e8e6ecaf76691` |
+| `Assets/Sounds/FirstSeverance/HandClasp.wav` | `48c536641c16257db90bc1c69b4dd5cf9be4f362c5948d1b8892def86ff6509b` |
+| `Assets/Sounds/FirstSeverance/CrushCataclysm.wav` | `f092c7ab49d482b52874c14a8e1c08117fcef2983c9b5caf4a069709f46a1cc0` |
+| `Assets/Sounds/FirstSeverance/StackSummon.wav` | `e32d93796b6ab0a8378e5f9158848f92471adafe3d75219c146c189300cefdf2` |
+| `Assets/Sounds/FirstSeverance/ShellMassLatch.wav` | `f2f952c2c9c4a733199e720fee7991e3b5cba0a5d13b78091d21bce661de2f7e` |
+| `Assets/Sounds/FirstSeverance/ShellMassShed.wav` | `b08a728aa38ba7da425481f89e58c9bde862e986ec71c06761d2d77a5cf84f63` |
+| `Assets/Sounds/FirstSeverance/ShellMassCollapse.wav` | `d8c1628c9b28f9d7dabd90c2b479705117e7bba20ec2c9ef8b40bb208f356fbd` |

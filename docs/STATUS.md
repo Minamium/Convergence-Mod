@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.42**, protocol **28**. The orchestral audio pass replaces all four phase masters with continuous A/B/C development using the existing musical language; Phase I-III are no longer action-cycle-length loops, while Final alone remains fitted to its current score. The A-to-B handoff preserves the accepted intro through the downbeat and changes articulation/density rather than fading the master out. Fourteen selected First Severance SFX masters are also rebuilt with separate radiant, dimensional, shell-mass and sustained-energy material grammars. Combat, network protocol, damage, weapon behavior and server-wide preparation are unchanged; only the selected audio assets change. The owner accepts the Raid combat body as the current development baseline. [Server-wide preparation](ARENA_INFRASTRUCTURE.md#deployment-and-presentation--0241) replaces proximity selection: gather all active players, deploy field/black exterior with a first cinematic, accept manual Ready with head labels/panel, then start the existing second cinematic. Membership changes cancel preparation instead of silently excluding someone. Broader background-animation work remains separate; combat, weapons, damage and phase rules are unchanged; audio asset content is the 0.2.42 scope.
+Development **0.2.43**, protocol **28**. [Measured audio recovery](AUDIO_CUE_SHEET.md#measured-loudness-recovery--0243) preserves the new orchestral/SFX content while restoring body level in four music and eleven one-shot masters; three comparable sustain voices stay unchanged. [Preparation presentation](encounters/first-severance/VISUAL_SPEC.md#suspended-preparation-and-minimal-ready--0243) is reduced to one Ready toggle/count, with the central iris suspended from larger paired columns instead of solid diagonal braces. The owner accepts the Raid combat body as the development baseline; server-wide preparation, damage, weapons, timings and protocol are unchanged.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[0.2.43 integration and latest playtest](evidence/2026-09-10-audio-preparation-polish.json):0.2.42 completed solo Victory in222.62s,19Stack/22Spread successes,33accepted hits and no Down;35instrumented audio cues played. The evidence owns the measured asset-level regression, remaster exports and current checks. Multiplayer preparation and in-game0.2.43 listening/visual acceptance remain user-owned `not_run`.
 
 [0.2.42 SFX checks](evidence/2026-09-10-prismatic-sfx-rebuild.json) own the 14-master deterministic export/decode/finite/stereo/48kHz/PCM16/duration/peak/SHA evidence and repository static verification. Cue scheduling, gains, voice limits, C# behavior and protocol remain unchanged. Actual boss/weapon listening, sustain-loop perception and multi-client mix remain user-owned `not_run`; numerical headroom is not acoustic approval.
 
@@ -91,6 +93,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.43: reload matching peers, compare BGM/SFX at unchanged sliders, listen through music seams, and inspect the hanging iris throughout deployment. Toggle the compact Ready button at107% UI scale. Keep the outstanding distant3-player preparation check below; solo logs do not establish it.
 
 User-owned 0.2.42: reload/restart matching peers, enter each Boss phase and listen through A -> B -> C. Confirm the B downbeat no longer reads as a master fade, Phase I remains restrained, Phase II/III gain urgency through acoustic articulation rather than retro/electronic timbre, and Final reaches its ending before the encounter resolves. Also listen across each ordinary loop seam. In the same run, listen to the rebuilt radiant/beam, dimensional/crush, Stack/shell and three sustained-weapon voices; confirm no cheap clipping texture, missing cue, loop dip or BGM masking.
 

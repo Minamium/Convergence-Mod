@@ -86,25 +86,43 @@ public sealed class FoundationCoreVisuals : GlobalTile
         float age = (float)(tick % 36000) / 60f;
         var field = FirstSeveranceContainmentBounds.FromGround(ground.X, ground.Y);
         Vector2 center = new(field.CenterX, field.CenterY);
+        Vector2 lifted = Vector2.Lerp(ground - new Vector2(0, 50), center, rise);
         // Full faint outline is present immediately: the collision never hides
         // behind the rising decorative segments.
         Outline(batch, field, Gold * (.28f + ignition * .5f), 2.5f);
         for (int side = -1; side <= 1; side += 2)
         {
-            float x = ground.X + side * (72 + rise * 265);
+            float x = ground.X + side * (150 + rise * 280);
             Vector2 foot = new(x, ground.Y);
-            DrawPlinth(batch, foot, new Color(170, 167, 172) * rise, 100);
-            float height = 70 + rise * (field.Bottom - field.Top) * .5f;
+            DrawPlinth(batch, foot, new Color(170, 167, 172) * rise, 164);
+            float height = 70 + rise * ((field.Bottom - field.Top) * .5f + 230);
             for (float h = 0; h < height; h += 256)
             {
                 float segment = Math.Min(256, height - h);
-                Sprite(batch, new(946, 0, 207, 748), foot - new Vector2(0, h), new(60, segment), 0,
-                    Color.White, new(.5f, 1));
+                Sprite(batch, new(946, 0, 207, 748), foot - new Vector2(0, h), new(92, segment), 0,
+                    new Color(170, 172, 184), new(.5f, 1));
             }
             Vector2 top = foot - new Vector2(0, height);
-            Vector2 latch = Vector2.Lerp(top, center + new Vector2(side * 145, -35), ignition);
-            Line(batch, top, latch, new Color(30, 28, 34), 25);
-            Line(batch, top, latch, Gold * .55f, 3);
+            // Textured horizontal gantry, then thin hanging cables. No diagonal
+            // solid braces: both shoulders really hang from the raised capitals.
+            Vector2 hanger = new(MathHelper.Lerp(top.X, lifted.X + side * 112, ignition), top.Y);
+            Sprite(batch, new(836, 762, 402, 475), top, new(116, 96), 0,
+                new Color(181, 180, 190), new(.5f));
+            if (ignition > .001f)
+            {
+                Sprite(batch, new(946, 0, 207, 748), (top + hanger) * .5f,
+                    new(32, Math.Abs(top.X - hanger.X) + 24), MathHelper.PiOver2,
+                    new Color(169, 171, 184) * ignition, new(.5f));
+                Vector2 shoulder = lifted + new Vector2(side * 112, -106);
+                for (int cable = 0; cable < 3; cable++)
+                {
+                    Vector2 offset = new(side * cable * 7, 0);
+                    DrawSuspension(batch, hanger + offset, shoulder + offset,
+                        ignition, age, side, cable);
+                }
+                Sprite(batch, new(836, 762, 402, 475), shoulder, new(28, 38), 0,
+                    Color.White * ignition, new(.5f));
+            }
             float wallX = side < 0 ? field.Left : field.Right;
             Line(batch, new(wallX, field.Bottom), new(wallX, field.Bottom - (field.Bottom - field.Top) * rise), new Color(15, 13, 20), 30);
             Line(batch, new(wallX, field.Bottom), new(wallX, field.Top), Ice * (.3f + ignition * .3f), 2);
@@ -114,8 +132,7 @@ public sealed class FoundationCoreVisuals : GlobalTile
                 Line(batch, new(wallX - 10, y + 15), new(wallX + 10, y - 15), Gold * brightness * ignition, 2);
             }
         }
-        Vector2 lifted = Vector2.Lerp(ground - new Vector2(0, 50), center, rise);
-        Sprite(batch, new(40, 469, 780, 780), lifted, new(265 + ignition * 55), age * .014f,
+        Sprite(batch, new(40, 469, 780, 780), lifted, new(265 + ignition * 55), 0,
             Color.White * (.35f + rise * .65f), new(.5f));
         if (ignition > 0)
         {
@@ -126,6 +143,23 @@ public sealed class FoundationCoreVisuals : GlobalTile
         }
         foreach (Vector2 corner in new[] { new Vector2(field.Left, field.Top), new Vector2(field.Right, field.Top), new Vector2(field.Left, field.Bottom), new Vector2(field.Right, field.Bottom) })
             Sprite(batch, new(836, 762, 402, 475), corner, new(88, 105), 0, Color.White * ignition, new(.5f));
+    }
+
+    private static void DrawSuspension(SpriteBatch batch, Vector2 from, Vector2 to,
+        float opacity, float age, int side, int cable)
+    {
+        Vector2 previous = from;
+        // Endpoints stay attached; only the tensioned cable's interior breathes.
+        for (int segment = 1; segment <= 12; segment++)
+        {
+            float t = segment / 12f;
+            Vector2 next = Vector2.Lerp(from, to, t);
+            next.X += MathF.Sin(t * MathF.PI) * MathF.Sin(age * 1.4f + cable + side) * 1.3f;
+            Line(batch, previous, next, new Color(34, 38, 47) * opacity, 4);
+            Line(batch, previous + new Vector2(-.8f, 0), next + new Vector2(-.8f, 0),
+                new Color(166, 187, 195) * (.52f * opacity), 1);
+            previous = next;
+        }
     }
 
     private static void Outline(SpriteBatch batch, FirstSeveranceContainmentBounds b, Color color, float width)

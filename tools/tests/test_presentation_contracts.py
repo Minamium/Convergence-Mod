@@ -17,6 +17,20 @@ def body(source, signature):
 
 
 class CinematicCoordinates(unittest.TestCase):
+    def test_preparation_is_compact_and_suspension_has_attached_endpoints(self):
+        source = (CLIENT / "FirstSeverancePreparationVisuals.cs").read_text(encoding="utf-8")
+        overlay = body(source, "internal bool DrawOverlay")
+        self.assertNotIn("CONTAINMENT // ESTABLISHING", overlay)
+        self.assertNotIn('Text("Deploying")', overlay)
+        self.assertIn("button.Contains(Main.mouseX, Main.mouseY)", overlay)
+        self.assertIn("FirstSeveranceClientActions.InteractWithCore", overlay)
+        field = (CLIENT / "FoundationCoreVisuals.cs").read_text(encoding="utf-8")
+        self.assertNotIn("Line(batch, top, latch", field)
+        self.assertIn("DrawSuspension(batch, hanger + offset, shoulder + offset", field)
+        cable = body(field, "private static void DrawSuspension")
+        self.assertIn("segment <= 12", cable)
+        self.assertIn("MathF.Sin(t * MathF.PI)", cable)
+
     def test_preparation_field_ready_and_cinematic_share_unscaled_geometry(self):
         source = (CLIENT / "FirstSeverancePreparationVisuals.cs").read_text(encoding="utf-8")
         overlay = body(source, "internal bool DrawOverlay")

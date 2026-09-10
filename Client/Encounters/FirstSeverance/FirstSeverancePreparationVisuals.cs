@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
-using Terraria.Localization;
 
 namespace Convergence.Client.Encounters.FirstSeverance;
 
@@ -62,18 +61,23 @@ internal sealed class FirstSeverancePreparationVisuals
             float fade = Math.Min(Math.Clamp(age * 12, 0, 1), Math.Clamp((1 - age) * 8, 0, 1));
             Fill(new Rectangle(0, 0, width, height / 9), Color.Black * fade);
             Fill(new Rectangle(0, height * 8 / 9, width, height / 9 + 1), Color.Black * fade);
-            Utils.DrawBorderString(batch, "[ CONTAINMENT // ESTABLISHING ]", new(width * .5f, height * .06f), Color.Silver * fade, 1f, .5f);
-            Utils.DrawBorderString(batch, Text("Deploying"), new(width * .5f, height * .91f), Color.White * fade, .95f, .5f);
+            // Let the structure explain deployment; no duplicate status captions.
+            Fill(new Rectangle(width / 2 - 38, (int)(height * .94f), (int)(76 * age), 1),
+                new Color(177, 208, 209) * fade);
             return false; // Frame-local HUD suppression, no persistent hideUI/control flags.
         }
         int ready = 0;
         foreach (var member in prep.Members) if (member.IsReady) ready++;
-        Utils.DrawBorderString(batch, $"READY  {ready} / {prep.Members.Count}", new(width * .5f, 72), Color.Silver, .9f, .5f);
         if (!prep.TryGetMemberByServerSlot(Main.myPlayer, out var local)) return true;
-        var button = new Rectangle(width / 2 - 115, 105, 230, 42);
+        // One compact pill: reversible Ready action + count, no second header.
+        var button = new Rectangle(width / 2 - 100, 64, 200, 36);
         bool hover = button.Contains(Main.mouseX, Main.mouseY);
-        Fill(button, (hover ? new Color(38, 61, 63) : new Color(15, 23, 28)) * .94f);
-        Utils.DrawBorderString(batch, Text(local.IsReady ? "Unready" : "Ready"), new(width * .5f, 114), new Color(177, 238, 226), .85f, .5f);
+        Color accent = local.IsReady ? new Color(177, 238, 226) : new Color(190, 203, 211);
+        Fill(button, (hover ? new Color(28, 40, 45) : new Color(10, 15, 20)) * .92f);
+        Fill(new Rectangle(button.X + 12, button.Bottom - 1, (button.Width - 24) * ready / prep.Members.Count, 1), accent * .75f);
+        Fill(new Rectangle(button.X + 14, button.Y + 13, 6, 6), accent * (local.IsReady ? 1f : .25f));
+        Utils.DrawBorderString(batch, "READY", new(button.X + 30, button.Y + 8), accent, .7f);
+        Utils.DrawBorderString(batch, $"{ready}/{prep.Members.Count}", new(button.Right - 13, button.Y + 8), Color.Silver, .7f, 1f);
         if (hover)
         {
             Main.LocalPlayer.mouseInterface = true;
@@ -88,5 +92,4 @@ internal sealed class FirstSeverancePreparationVisuals
         void Fill(Rectangle rect, Color color) => batch.Draw(TextureAssets.MagicPixel.Value, rect, color);
     }
 
-    private static string Text(string key) => Language.GetTextValue("Mods.Convergence.UI.PreparationDeployment." + key);
 }
