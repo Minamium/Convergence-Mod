@@ -1,0 +1,77 @@
+name: Retry orchestral BGM 0.2.42
+
+on:
+  push:
+    branches:
+      - audio/orchestral-abc-0.2.42
+
+permissions:
+  contents: write
+
+jobs:
+  render-verify-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audio/orchestral-abc-0.2.42
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libsndfile1
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.5 scipy==1.16.1 soundfile==0.14.0 pyloudnorm==0.1.1 PyYAML==6.0.3
+
+      - name: Reuse renderer and documentation updater from original temporary workflow
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess, yaml
+          data = yaml.safe_load(Path('.github/workflows/tmp-orchestral-bgm-0242.yml').read_text(encoding='utf-8'))
+          steps = data['jobs']['render-and-commit']['steps']
+          wanted = {
+              'Render four orchestral A-B-C masters',
+              'Update version, audio docs and exact attribution',
+          }
+          for step in steps:
+              if step.get('name') in wanted:
+                  subprocess.run(['bash', '-euo', 'pipefail', '-c', step['run']], check=True)
+          evidence = Path('docs/evidence/2026-09-10-orchestral-bgm-abc.json')
+          text = evidence.read_text(encoding='utf-8')
+          if not text.endswith('\n'):
+              evidence.write_text(text + '\n', encoding='utf-8')
+          PY
+
+      - name: Static repository verification and catalog refresh
+        run: |
+          python -m pip install -r tools/requirements-ci.txt
+          python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog
+          git diff --check
+
+      - name: Remove temporary workflows and commit BGM implementation
+        shell: bash
+        run: |
+          rm .github/workflows/tmp-orchestral-bgm-0242.yml
+          rm .github/workflows/tmp-orchestral-bgm-0242-retry.yml
+          git config user.name 'OpenAI Codex'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Implement continuous orchestral A/B/C phase music (0.2.42)'
+          git push origin HEAD:audio/orchestral-abc-0.2.42
+
+      - name: Upload audition evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: convergence-bgm-0242-audition
+          path: |
+            /tmp/convergence-bgm-0242/A_to_B_audition.mp3
+            /tmp/convergence-bgm-0242/audio_report.json
+          if-no-files-found: error
