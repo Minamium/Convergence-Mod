@@ -47,6 +47,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('Assets/ATTRIBUTION.md')
+          path.write_text(path.read_text(encoding='utf-8').rstrip() + '\n', encoding='utf-8')
+          PY
           python3 -m unittest discover -s tools/tests
           python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py --write-catalog .
           git diff --check
