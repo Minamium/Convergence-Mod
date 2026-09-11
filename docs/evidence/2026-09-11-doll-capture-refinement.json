@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-11",
+  "version": "0.2.49",
+  "protocol": 28,
+  "scope": "Smaller restrained face with retained porcelain arms; limited sealed protrusion; NPC fragmentation into an already complete stationary coffin. Presentation only.",
+  "native_build": {
+    "record_id": "20260911T122531040596Z",
+    "source_base_commit": "ff64fd9d3faca6123dcc60097bcdc94d35a907f9",
+    "source_sha256": "f2c4fe679c6e88eb88a4edeb4193fffa32596f5fff364920c21289e757eba4a1",
+    "dirty_build": true,
+    "source_changed_during_build": false,
+    "exit_code": 0,
+    "errors": 0,
+    "existing_warnings": 4,
+    "artifact": {
+      "file": "Convergence.tmod",
+      "bytes": 46036710,
+      "sha256": "c918acd8984d6d2e7858634e5c11803e34a13d3bd52baa6c475eb4412764c1fb"
+    },
+    "previous_package": "retained in ignored local build archive",
+    "resolved_build_failure": "Initial attempt referenced private Boss glow helpers; final source uses an owned AttackAccents halo with Unload cleanup."
+  },
+  "checks": {
+    "focused_domain": "PASS: 2 Doll presentation tests; connected upper-arm/forearm/hand pivots, finite continuous pose, exact 32x52 partition, bounded capture paths ending at fixed center in normal/reduced effects",
+    "visual": "PASS: shared game pose/UV offline P1/P2 preview and five capture samples inspected; retained textures pass existing cutout/palette checks",
+    "static": "PASS: docs catalog, repository checks, YAML and git diff --check",
+    "runtime": "not_run; no game session or playable server started",
+    "performance": "not_measured"
+  },
+  "preserved": {
+    "dirty_user_files": [
+      "Localization/DollTheater/en-US.hjson",
+      "Localization/Preparation/en-US.hjson",
+      "Localization/RitualArmaments/en-US.hjson",
+      "Localization/en-US.hjson"
+    ],
+    "assets": "No bitmap replacement/generation; original doll and old rig textures plus external originals retained",
+    "gameplay": "No authority, roster, timing, HP, collision, attacks, revival, audio or NPC lifecycle changes"
+  },
+  "preview": {
+    "command": "pwsh -NoProfile -File tools/preview_doll_theater.ps1 -OutputPath <external-output>/preview.png",
+    "outputs": ["preview.png", "capture.png"],
+    "limitation": "Offline shared-math/material study, not captured gameplay or measured performance"
+  },
+  "remaining": [
+    "User-owned reload and actual fragment capture -> Ready -> shell opening continuity",
+    "Limited Phase I exposure, small restrained face and retained arms readable in combat",
+    "Multiplayer, zoom/UI107 and ReducedEffects runtime behavior remain unverified"
+  ],
+  "notes": [
+    "Final package includes pre-existing local English edits, left outside this change's commit.",
+    "Only documentation/catalog/evidence bookkeeping changed after the successful native build."
+  ]
+}

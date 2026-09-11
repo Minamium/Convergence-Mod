@@ -179,9 +179,8 @@ internal sealed class FirstSeveranceBossVisuals
         if (remote) DrawRemoteArms(batch, combat, center, renderTick, reveal, retreat, reduced);
         float encased = combat.BossPhase == FirstSeveranceBossPhase.Sealed ? 1
             : hatching ? 1 - Window(hatchAge, .12, .28) : 0;
-        if (encased > .001f) doll.DrawEncased(batch, center, renderTick, reveal * encased, castPose, false, reduced);
+        if (encased > .001f) doll.DrawEncased(batch, center, renderTick, reveal * encased, castPose, reduced);
         stages.DrawShell(batch, combat, center, renderTick, reveal, castPose, Accents, reduced);
-        if (encased > .001f) doll.DrawEncased(batch, center, renderTick, reveal * encased, castPose, true, reduced);
         if (hatching && unseal > 0)
             DrawRig(batch, center, reveal * unseal, breath, 0, 0,
                 EclosionUnfurl(hatchAge), EclosionEmerge(hatchAge), EclosionPry(hatchAge), handsOnly: true);

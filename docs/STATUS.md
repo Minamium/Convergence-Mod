@@ -23,19 +23,19 @@ related_docs:
 
 ## Current build
 
-Development **0.2.48 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
+Development **0.2.49 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
 
 - Server-wide roster → field deployment → manual Ready → separate combat introduction is implemented. [Arena infrastructure](ARENA_INFRASTRUCTURE.md) owns admission, movement and cancellation.
 - Phase I / II / III / Final survival, frozen-roster HP scaling, fixed-position Stack, Spread, Raid-owned Down/instant revival and terminal effects/rewards are implemented. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) and [recovery spec](encounters/first-severance/REVIVE_SPEC.md) own current behavior.
-- Latest presentation: [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) replaces the abstract Boss with a white-haired Gothic ball-jointed girl, conversation NPC, enclosing porcelain coffin and crooked connected rig. Hinged eclosion, remote attack geometry, accepted beams/verdicts, weapons and rift Victory are preserved. NPC is not a Raid companion.
+- Latest presentation: [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) restores the old crown/body restraint silhouette around a smaller, partly veiled face while retaining the accepted porcelain arms. Phase I exposes only a little at the rim; preparation disassembles the NPC into the already complete coffin. Gameplay, remote arms and accepted attacks/audio are unchanged. NPC is not a Raid companion.
 - Audio remains the prior EigHt section-loop/mix revision. [Audio sheet](AUDIO_CUE_SHEET.md) owns its current files, phase handoff and preparation silence; this visual revision does not change music/SFX/gameplay timing.
 - One-member admission defaults on only as a build-gated development aid. It adds no companion, invulnerability or solo-specific fight. Normal testing is multiplayer unless the user explicitly chooses solo.
 
 ## Verification state
 
-The **0.2.48** native package is built and installed: **0 errors, 4 existing CS8632 warnings**; source unchanged during compilation/packaging. Shared-pose continuity, cutout/palette checks, offline preview and static checks pass. [Doll Theater evidence](evidence/2026-09-11-doll-theater.json) records exact source/package hashes and local build identity. New NPC lifecycle, transformations, actual combat readability and multiplayer/zoom remain `not_run` / user-owned. No game session/playable server was launched. [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) retains the preceding audio measurements.
+The **0.2.49** native package is built and installed: **0 errors, 4 existing CS8632 warnings**; source unchanged during compilation/packaging. Two focused joint/fragment-curve checks, shared-pose offline previews and static checks pass. [Capture/refinement evidence](evidence/2026-09-11-doll-capture-refinement.json) records the source/package identity. Actual capture/reveal readability, multiplayer and zoom remain `not_run` / user-owned. No game session/playable server was launched. [0.2.48 evidence](evidence/2026-09-11-doll-theater.json) retains the initial NPC/art build; [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) retains the audio measurements.
 
-The working tree includes pre-existing English edits in `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved and kept outside this change's commits. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
+The working tree includes pre-existing English edits in `Localization/DollTheater/en-US.hjson`, `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved and kept outside this change's commits. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
 
 Recent observed gameplay: the [0.2.43 solo run](evidence/2026-09-10-grounded-posts-audio-tails.json) ended in all-Down Defeat after a failed Stack; earlier successful solo and multiplayer runs and detailed diagnostics remain in the [frozen checkpoint history](history/2026-09-11-status-through-0246.md#verification-state). Those results are version/topology-specific, not certification of the current package.
 
@@ -56,7 +56,7 @@ Development loot is implemented, but balance, public solo/companions and final p
 
 ## Next change
 
-The new package is installed; restart/reload tModLoader (no unchanged rebuild needed). Inspect only its changed surfaces in the user-owned game: the conversational girl on the plinth, capture into the coffin before Ready, giant parts in Phase I, crooked suspended reveal and the same porcelain hands in Phase III. Keep the previous audio settings and attack balance.
+The new package is installed; restart/reload tModLoader (no unchanged rebuild needed). Inspect only the revised surfaces: complete coffin present before NPC fragmentation, accelerating capture without residual pieces, limited Phase I protrusion, and a restrained smaller face with the accepted arms after eclosion. Keep the previous audio settings and attack balance.
 
 Keep current behavior and accepted art unless explicitly revising them. Choose checks from the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md); do not replay historical checklists.
 

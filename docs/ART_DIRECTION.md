@@ -25,7 +25,7 @@ related_docs:
 
 ## Current First Severance presentation
 
-First Severance now centers on a tragic white-haired, black Gothic ball-jointed **girl doll**, not an abstract ritual machine. [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) owns that identity, pre-Raid conversation NPC, pixel-density rules and crooked suspension. Reuse the accepted hinged eclosion, connected arms, field and terminal effects; the machinery restrains her rather than being her body. [Presentation](encounters/first-severance/VISUAL_SPEC.md) still owns attack readability and kinetic contrast. One life pool/marked chest aperture remains one logical damage target; the giant decorative anatomy is not multipart collision.
+First Severance retains the tragic white-haired Gothic **girl doll** inside an inhuman restraint structure. Do not simply enlarge the NPC face/costume: the user's refinement restores the old crown/body silhouette around a smaller, partly veiled face, keeps the accepted porcelain arms and limits pre-eclosion exposure. [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) owns those details, the conversation NPC and fragment capture into an already present coffin. Reuse the accepted hinged eclosion, field and terminal effects. [Presentation](encounters/first-severance/VISUAL_SPEC.md) still owns attack readability and kinetic contrast. One life pool/marked chest aperture remains one logical damage target; the giant decorative anatomy is not multipart collision.
 
 ## Shape language
 

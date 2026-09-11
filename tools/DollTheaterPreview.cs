@@ -13,6 +13,7 @@ public static class DollTheaterPreview
     {
         Validate(assets);
         using var atlas=new Bitmap(Path.Combine(assets,"DollRigAtlas.png"));
+        using var harness=new Bitmap(Path.Combine(assets,"..","NullCantorRigAtlas.png"));
         using var shell=new Bitmap(Path.Combine(assets,"DollCoffin.png"));
         using var npc=new Bitmap(Path.Combine(assets,"DollAttendant.png"));
         using var result=new Bitmap(1536,1024);
@@ -39,14 +40,14 @@ public static class DollTheaterPreview
         g.DrawString("1x           2x",small,quiet,37,floor+13);
         g.DrawString("Above: 7x inspection\nActual sprite: 32 x 52\nBlink: 2 aligned frames",small,quiet,26,890);
         var pose=new FirstSeveranceDollPose();
-        pose.Encased(3,0,false); DrawPose(g,atlas,pose,603,500,.89f);
+        pose.Encased(3,0,false); DrawPose(g,atlas,harness,pose,603,500,.89f);
         g.DrawImage(shell,new RectangleF(603-256*.89f*2.25f/2,500-256*.89f*2.25f/2,256*.89f*2.25f,256*.89f*2.25f));
-        pose.EncasedFace(); DrawPose(g,atlas,pose,603,500,.89f);
-        pose.Body(3,0,0,1,1,false); DrawPose(g,atlas,pose,1160,465,.68f);
-        g.DrawString("Porcelain petals retain the old hinged eclosion.\nA real arm, white hair and a sorrowful face emerge first.",small,quiet,335,905);
-        g.DrawString("Unequal cable tension / shared shoulder-elbow-wrist pivots.\nThe chest remains the only damage target; art is not collision.",small,quiet,916,905);
+        pose.Body(3,0,0,1,1,false); DrawPose(g,atlas,harness,pose,1160,465,.68f);
+        g.DrawString("Mostly enclosed: only a short lock and fingertips.\nNo face or complete arm pasted in front of the casing.",small,quiet,335,905);
+        g.DrawString("Accepted porcelain arms / old restrained body silhouette.\nSmaller captive face inside the crown, not a giant NPC head.",small,quiet,916,905);
         Directory.CreateDirectory(Path.GetDirectoryName(output));
         result.Save(output,ImageFormat.Png);
+        Capture(npc,shell,Path.Combine(Path.GetDirectoryName(output),"capture.png"));
     }
 
     public static void Validate(string assets)
@@ -70,7 +71,7 @@ public static class DollTheaterPreview
         }
     }
 
-    static void DrawPose(Graphics g,Bitmap atlas,FirstSeveranceDollPose pose,float x,float y,float scale)
+    static void DrawPose(Graphics g,Bitmap atlas,Bitmap harness,FirstSeveranceDollPose pose,float x,float y,float scale)
     {
         using var cord=new Pen(Color.FromArgb(140,124,107),1.2f);
         foreach(var cable in pose.Cords) g.DrawLine(cord,x+cable.AnchorX*scale,y+cable.AnchorY*scale,
@@ -81,9 +82,45 @@ public static class DollTheaterPreview
             g.TranslateTransform(x+part.Position.X*scale,y+part.Position.Y*scale);
             g.RotateTransform(part.Rotation*180/MathF.PI);
             g.ScaleTransform(part.Scale.X*scale,part.Scale.Y*scale);
-            g.DrawImage(atlas,new RectangleF(-part.Pivot.X,-part.Pivot.Y,128,part.CropHeight),
-                new RectangleF(part.Cell%3*128,part.Cell/3*128,128,part.CropHeight),GraphicsUnit.Pixel);
+            var region=FirstSeveranceDollPose.Region(part);
+            g.DrawImage(part.Harness?harness:atlas,new RectangleF(-part.Pivot.X,-part.Pivot.Y,region.Width,region.Height),
+                new RectangleF(region.X,region.Y,region.Width,region.Height),GraphicsUnit.Pixel);
             g.Restore(state);
         }
+    }
+
+    static void Capture(Bitmap npc,Bitmap shell,string output)
+    {
+        using var result=new Bitmap(1500,720);
+        using var g=Graphics.FromImage(result);
+        using var font=new Font("Segoe UI",13);
+        using var pale=new SolidBrush(Color.FromArgb(210,201,189));
+        g.Clear(Color.FromArgb(21,20,27));
+        g.InterpolationMode=InterpolationMode.NearestNeighbor; g.PixelOffsetMode=PixelOffsetMode.Half;
+        float[] times={0,.35f,.57f,.76f,.90f};
+        string[] labels={"Already present","Disassembly / hold","Accelerating pull","Into the center","Captured"};
+        for(int frame=0;frame<times.Length;frame++)
+        {
+            float x=150+frame*300,y=275,scale=.65f;
+            g.DrawString(labels[frame]+"\n"+(times[frame]*3).ToString("0.00")+"s",font,pale,frame*300+14,20);
+            float size=576*scale;
+            g.DrawImage(shell,new RectangleF(x-size/2,y-size/2,size,size));
+            for(int i=0;i<FirstSeveranceDollCapture.Count;i++)
+            {
+                var part=FirstSeveranceDollCapture.Sample(i,times[frame],new(0,506),new(0,0),false);
+                if(part.Opacity<.001f) continue;
+                var state=g.Save();
+                g.TranslateTransform(x+part.Position.X*scale,y+part.Position.Y*scale);
+                g.RotateTransform(part.Rotation*180/MathF.PI);
+                g.ScaleTransform(part.Scale*scale,part.Scale*scale);
+                using var attrs=new ImageAttributes();
+                var matrix=new ColorMatrix(); matrix.Matrix33=part.Opacity; attrs.SetColorMatrix(matrix);
+                g.DrawImage(npc,new Rectangle(-part.Width/2,-part.Height/2,part.Width,part.Height),
+                    part.X,part.Y,part.Width,part.Height,GraphicsUnit.Pixel,attrs);
+                g.Restore(state);
+            }
+        }
+        g.DrawString("Offline samples of the shared fragment curve; no actual game rendering captured.",font,pale,16,683);
+        result.Save(output,ImageFormat.Png);
     }
 }

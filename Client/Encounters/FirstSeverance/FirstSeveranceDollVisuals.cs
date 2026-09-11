@@ -19,8 +19,9 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 internal sealed class FirstSeveranceDollVisuals
 {
     internal const string ArtRoot = "Convergence/Assets/Textures/NPCs/DollTheater/";
-    private Asset<Texture2D>? atlas, coffin, attendant;
+    private Asset<Texture2D>? atlas, harness, coffin, attendant;
     private readonly FirstSeveranceDollPose pose = new();
+    private readonly FirstSeveranceAttackAccents captureAccents = new();
     private static Vector2 V(System.Numerics.Vector2 p) => new(p.X,p.Y);
 
     // Caller is the owned world-space AlphaBlend/LinearClamp presentation pass.
@@ -71,13 +72,13 @@ internal sealed class FirstSeveranceDollVisuals
         }
     }
 
-    internal void DrawEncased(SpriteBatch batch,Vector2 center,double tick,float opacity,float pressure,bool front,bool reduced)
+    internal void DrawEncased(SpriteBatch batch,Vector2 center,double tick,float opacity,float pressure,bool reduced)
     {
         Ensure();
         float seconds=(float)(tick%216000)/60f;
-        if (front) pose.EncasedFace(); else pose.Encased(seconds,pressure,reduced);
+        pose.Encased(seconds,pressure,reduced);
         using var pixels=new PixelPass(batch);
-        if (!front) DrawCords(batch,center,1,opacity,seconds,reduced);
+        DrawCords(batch,center,1,opacity,seconds,reduced);
         foreach(var part in pose.Sprites) DrawPart(batch,part,center,1,Color.White*opacity,0,0,center,seconds*60,reduced);
     }
 
@@ -107,38 +108,41 @@ internal sealed class FirstSeveranceDollVisuals
         Vector2 foot=ground-new Vector2(0,54);
         if (TileEntity.ByPosition.TryGetValue(new Point16(prep.CoreTopLeft.X,prep.CoreTopLeft.Y),out var entity)
             && entity is FoundationCoreTileEntity foundation) foot=FirstSeveranceDollAttendant.StandingFoot(foundation);
-        // Upward pull -> held breath -> abrupt final capture. Same 180 server ticks.
-        float pull=.72f*Window(age,.13,.43)+.28f*Window(age,.56,.67);
-        float closure=Window(age,.58,.78);
-        float grown=Window(age,.77,1);
-        Vector2 captive=Vector2.Lerp(foot-new Vector2(0,24),core,pull);
+        float grown=Window(age,.86,1);
         float seconds=(float)(tick%216000)/60f;
+        if(grown>.001f) DrawEncased(batch,core,tick,grown,0,reduced);
         using (new PixelPass(batch))
         {
-            if (age<.80f)
-            {
-                for(int side=-1;side<=1;side+=2)
-                    Cord(batch,FoundationCoreVisuals.HoistAnchor(ground,side,true,age),captive+new Vector2(side*9,-12),
-                        Window(age,.05,.16)*(1-grown),seconds,side,2,reduced);
-                var texture=attendant!.Value;
-                batch.Draw(texture,captive-Main.screenPosition,new Rectangle(0,0,32,52),Color.White*(1-closure),
-                    .35f*pull,new Vector2(16,26),1+.14f*pull,SpriteEffects.None,0);
-            }
-            // Two halves close *around* the visible captive; not a cross-faded enlargement.
+            // The destination is already complete and stationary, including on
+            // late snapshots. Never close new shell halves around an intact NPC.
+            batch.Draw(coffin!.Value,core-Main.screenPosition,null,Color.White,0,new Vector2(128),2.25f,SpriteEffects.None,0);
             for(int side=-1;side<=1;side+=2)
+                Cord(batch,FoundationCoreVisuals.HoistAnchor(ground,side,true,age),core+new Vector2(side*66,-215),
+                    Window(age,.08,.36),seconds,side,side<0?13:2,reduced);
+            if(age<.87f)
             {
-                var source=new Rectangle(side<0?0:128,0,128,256);
-                Vector2 offset=new(side*(1-closure)*175,0);
-                batch.Draw(coffin!.Value,core+offset-Main.screenPosition,source,
-                    Color.White*Window(age,.30,.53),0,new Vector2(side<0?128:0,128),2.25f,SpriteEffects.None,0);
+                for(int i=0;i<FirstSeveranceDollCapture.Count;i++)
+                {
+                    var part=FirstSeveranceDollCapture.Sample(i,age,new(foot.X,foot.Y),new(core.X,core.Y),reduced);
+                    if(part.Opacity<=.001f) continue;
+                    var source=new Rectangle(part.X,part.Y,part.Width,part.Height);
+                    // A short afterimage is sampled from the very same path;
+                    // no second clock or lingering particle after capture.
+                    if(!reduced && age>.43f)
+                    {
+                        var prior=FirstSeveranceDollCapture.Sample(i,Math.Max(0,age-.009f),new(foot.X,foot.Y),new(core.X,core.Y),false);
+                        batch.Draw(attendant!.Value,V(prior.Position)-Main.screenPosition,source,
+                            new Color(185,176,161)*(.22f*part.Opacity),prior.Rotation,
+                            new Vector2(part.Width,part.Height)*.5f,prior.Scale,SpriteEffects.None,0);
+                    }
+                    batch.Draw(attendant!.Value,V(part.Position)-Main.screenPosition,source,Color.White*part.Opacity,
+                        part.Rotation,new Vector2(part.Width,part.Height)*.5f,part.Scale,SpriteEffects.None,0);
+                }
             }
         }
-        if (grown>.001f)
-        {
-            DrawEncased(batch,core,tick,grown,0,false,reduced);
-            using (new PixelPass(batch)) batch.Draw(coffin!.Value,core-Main.screenPosition,null,Color.White*grown,0,new Vector2(128),2.25f,SpriteEffects.None,0);
-            DrawEncased(batch,core,tick,grown,0,true,reduced);
-        }
+        float capture=Window(age,.56,.75)*(1-Window(age,.85,.99));
+        if(capture>.001f)
+            captureAccents.Halo(batch,core,new Vector2(54+capture*42),new Color(226,212,189),capture*(reduced?.25f:.50f));
     }
 
     private void DrawCords(SpriteBatch batch,Vector2 center,float scale,float opacity,float seconds,bool reduced)
@@ -164,21 +168,24 @@ internal sealed class FirstSeveranceDollVisuals
 
     private void DrawPart(SpriteBatch batch,DollSprite part,Vector2 root,float scale,Color tint,float breakup,float consume,Vector2 sink,float time,bool reduced)
     {
-        var rect=new Rectangle(part.Cell%3*128,part.Cell/3*128,128,part.CropHeight);
+        var region=FirstSeveranceDollPose.Region(part);
+        var rect=new Rectangle(region.X,region.Y,region.Width,region.Height);
+        var texture=part.Harness?harness!.Value:atlas!.Value;
         Vector2 position=root+V(part.Position)*scale;
         // Keep her face coherent during Final; the dress/limbs fragment first.
-        float amount=part.Cell==0?breakup*.27f:breakup;
+        float amount=part.Cell==0&&!part.Harness?breakup*.27f:breakup;
         if(amount>.001f || consume>0)
-            FirstSeveranceDissolutionVisuals.Bone(batch,atlas!.Value,rect,position,V(part.Pivot),V(part.Scale)*scale,
+            FirstSeveranceDissolutionVisuals.Bone(batch,texture,rect,position,V(part.Pivot),V(part.Scale)*scale,
                 part.Rotation,tint,amount,consume,sink,time,reduced);
-        else batch.Draw(atlas!.Value,position-Main.screenPosition,rect,tint,part.Rotation,V(part.Pivot),V(part.Scale)*scale,SpriteEffects.None,0);
+        else batch.Draw(texture,position-Main.screenPosition,rect,tint,part.Rotation,V(part.Pivot),V(part.Scale)*scale,SpriteEffects.None,0);
     }
 
     private void Ensure()
     {
         atlas??=ModContent.Request<Texture2D>(ArtRoot+"DollRigAtlas",AssetRequestMode.ImmediateLoad);
+        harness??=ModContent.Request<Texture2D>("Convergence/Assets/Textures/NPCs/NullCantorRigAtlas",AssetRequestMode.ImmediateLoad);
         coffin??=ModContent.Request<Texture2D>(ArtRoot+"DollCoffin",AssetRequestMode.ImmediateLoad);
         attendant??=ModContent.Request<Texture2D>(ArtRoot+"DollAttendant",AssetRequestMode.ImmediateLoad);
     }
-    internal void Unload() { atlas=null;coffin=null;attendant=null; }
+    internal void Unload() { atlas=null;harness=null;coffin=null;attendant=null;captureAccents.Unload(); }
 }

@@ -46,10 +46,10 @@ Preparation first deploys the full field/black exterior with a brief HUD-free ci
 
 | Accepted state | Presentation |
 |---|---|
-| Before / Preparation | Conversational doll on the plinth → lifted on strings → enclosed between coffin petals before Ready. No change to the admission flow. |
-| Phase I / Sealed | Vertical porcelain doll coffin with a giant jointed arm, white hair and sorrowful face protruding. The body stays concealed. Shielded/exposed remain distinguishable; Pylon winch cables visibly sustain the shield. |
+| Before / Preparation | Completed coffin already at center; the plinth NPC disassembles, briefly hangs in pieces, then accelerates into that center before Ready. No change to admission or deployment duration. |
+| Phase I / Sealed | Porcelain coffin hides almost all of the body; only a few fingertips/hair escape the rim, no face overlaid in front. Shielded/exposed remain distinguishable; Pylon winch cables sustain the shield. |
 | I → II | Eclosion: hands pierce/pry seams, casing catches then peels on connected hinges, head/torso slides out, folded limbs unfurl. Preserve depth passes and attached joints; no radial tile explosion or instantaneous sprite swap. |
-| Phase II / Unbound | White-haired, black-dressed giant girl doll; visible ball joints, slanted body, one arm held high and the other dragged down. Every field-origin attack still gets a corresponding Boss load/recoil. |
+| Phase II / Unbound | Retained porcelain ball-jointed arms and slant; old crown/body restraint silhouette around a small, partly veiled face. Not an enlarged NPC portrait/costume. Every field-origin attack still gets a corresponding Boss load/recoil. |
 | II → III / Distant | Body retreats in depth; two remote arms manifest at the field sides. The real foreground Core aperture remains the single NPC target. Background body/arms are not extra hitboxes. |
 | Final | Keep the same doll identity in Distant's form; dress/limbs fragment first and her face remains coherent longer. Progress follows accepted score, not local elapsed time or invented HP. |
 | Victory | After accepted terminal: an oblique narrow dimensional slit appears; fragments arrest, then accelerate inward as the form disintegrates, the slit contracts, and a strong bounded flash/shake/sound extinguishes it. |
