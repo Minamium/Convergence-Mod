@@ -18,7 +18,8 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 public sealed class FoundationCoreVisuals : GlobalTile
 {
     private Asset<Texture2D>? atlas;
-    public override void Unload() => atlas = null;
+    private readonly FirstSeveranceDollVisuals doll = new();
+    public override void Unload() { atlas = null; doll.Unload(); }
     public override bool PreDraw(int i, int j, int type, SpriteBatch spriteBatch)
         => !FoundationCoreTileEntity.IsCoreType(type);
 
@@ -58,6 +59,8 @@ public sealed class FoundationCoreVisuals : GlobalTile
             double tick = state.EstimatedAuthorityTick;
             float deployment = Math.Clamp((float)((tick - preparation.EnteredTick) / FirstSeverancePreparationTimeline.DeploymentTicks), 0, 1);
             DrawField(batch, new(preparation.GroundX, preparation.GroundY), deployment, tick);
+            doll.DrawPreparation(batch, preparation, tick,
+                ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects);
         }
         else if (Main.LocalPlayer.HeldItem.type == ModContent.ItemType<FoundationCoreItem>())
         {
@@ -82,9 +85,8 @@ public sealed class FoundationCoreVisuals : GlobalTile
     {
         // Latches arrive, the lift catches its weight, then the upper stage
         // engages. Cosmetic only: the complete containment outline exists at t0.
-        float rise = .14f * Arrive(intro - .04, .035) + .68f * Window(intro, .16, .38)
-            + .18f * Window(intro, .47, .58);
-        float ignition = .78f * Arrive(intro - .42, .11) + .22f * Window(intro, .64, .74);
+        float rise = DeploymentRise(intro);
+        float ignition = DeploymentIgnition(intro);
         float age = (float)(tick % 36000) / 60f;
         var field = FirstSeveranceContainmentBounds.FromGround(ground.X, ground.Y);
         Vector2 center = new(field.CenterX, field.CenterY);
@@ -112,21 +114,16 @@ public sealed class FoundationCoreVisuals : GlobalTile
                 Vector2 top = foot - new Vector2(0, height);
                 // Textured horizontal gantry, then thin hanging cables. No diagonal
                 // solid braces: both shoulders really hang from the raised capitals.
-                float shoulderX = outer ? 136 : 112;
+                float shoulderX = outer ? 460 : 248;
                 Vector2 hanger = new(MathHelper.Lerp(top.X, lifted.X + side * shoulderX, ignition), top.Y + 16);
                 if (ignition > .001f)
                 {
                     Sprite(batch, new(1002, 90, 90, 570), (top + new Vector2(0, 16) + hanger) * .5f,
                         new(outer ? 28 : 22, Math.Abs(top.X - hanger.X) + 24), MathHelper.PiOver2,
                         new Color(169, 171, 184) * ignition, new(.5f));
-                    Vector2 shoulder = lifted + new Vector2(side * shoulderX, outer ? -78 : -106);
-                    for (int cable = 0; cable < 3; cable++)
-                    {
-                        Vector2 offset = new(side * cable * 7, 0);
-                        DrawSuspension(batch, hanger + offset, shoulder + offset,
-                            ignition, age, side, cable);
-                    }
-                    Sprite(batch, new(836, 762, 402, 475), shoulder, new(28, 38), 0,
+                    // Rig-owned cords attach to these hoists and to the *moving*
+                    // shoulders/wrists. No second set ending in empty mid-air.
+                    Sprite(batch, new(836, 762, 402, 475), hanger, new(28, 38), 0,
                         Color.White * ignition, new(.5f));
                 }
             }
@@ -139,17 +136,23 @@ public sealed class FoundationCoreVisuals : GlobalTile
                 Line(batch, new(wallX - 10, y + 15), new(wallX + 10, y - 15), Gold * brightness * ignition, 2);
             }
         }
-        Sprite(batch, new(40, 469, 780, 780), lifted, new(265 + ignition * 55), 0,
-            Color.White * (.35f + rise * .65f), new(.5f));
-        if (ignition > 0)
-        {
-            Ring(batch, center, 152 + MathF.Sin(age) * 2, Gold * ignition * .6f, 2, -age * .03f, 12);
-            float travel = (age * .17f) % 1;
-            for (int side = -1; side <= 1; side += 2)
-                Line(batch, center + new Vector2(side * (175 + travel * 150), 0), center + new Vector2(side * (180 + travel * 150), 0), Ice * ignition * (1 - travel), 3);
-        }
+        // The human-scale attendant and then the coffin replace the old floating
+        // concentric machine emblem. Their lives are drawn by the owning state.
         foreach (Vector2 corner in new[] { new Vector2(field.Left, field.Top), new Vector2(field.Right, field.Top), new Vector2(field.Left, field.Bottom), new Vector2(field.Right, field.Bottom) })
             Sprite(batch, new(836, 762, 402, 475), corner, new(88, 105), 0, Color.White * ignition, new(.5f));
+    }
+
+    private static float DeploymentRise(float intro) => .14f * Arrive(intro - .04, .035)
+        + .68f * Window(intro, .16, .38) + .18f * Window(intro, .47, .58);
+    private static float DeploymentIgnition(float intro) => .78f * Arrive(intro - .42, .11)
+        + .22f * Window(intro, .64, .74);
+
+    internal static Vector2 HoistAnchor(Vector2 ground, int side, bool outer, float intro)
+    {
+        float rise=DeploymentRise(intro), ignition=DeploymentIgnition(intro);
+        float start=outer?230+rise*340:140+rise*190;
+        float height=70+rise*(FirstSeveranceLanceTuning.BossHeightAboveCore+(outer?320:190));
+        return ground+new Vector2(side*MathHelper.Lerp(start,outer?460:248,ignition),-height+16);
     }
 
     private static void DrawSuspension(SpriteBatch batch, Vector2 from, Vector2 to,

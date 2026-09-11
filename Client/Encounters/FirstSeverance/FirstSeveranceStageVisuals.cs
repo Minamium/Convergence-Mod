@@ -32,9 +32,13 @@ internal sealed class FirstSeveranceStageVisuals
         float fade = reveal * (1 - Window(age, .73, .99));
         float charge = breaking ? EclosionPry(age) : cast;
         float breath = MathF.Sin((float)(tick % 36000) * .021f);
-        float radius = 246 + breath * 2 + charge * 5;
-        Color ion = Color.Lerp(new Color(91, 213, 223), new Color(255, 172, 112), charge * .65f);
+        float radius = 288 + breath * 1.3f + charge * 3;
+        Color ion = Color.Lerp(new Color(179, 165, 158), new Color(229, 197, 147), charge * .65f);
         accents.Halo(batch, center, new Vector2(510 + charge * 65), ion, .20f * fade);
+        using var pixels = new FirstSeveranceDollVisuals.PixelPass(batch);
+        for (int side=-1;side<=1;side+=2)
+            FirstSeveranceDollVisuals.Cord(batch,center+new Vector2(side*460,-374),
+                center+new Vector2(side*66,-215),fade,(float)tick/60,side,side<0?13:2,reduced);
         for (int index = 0; index < 8; index++)
         {
             float angle = (index + .5f) * MathF.Tau / 8 - MathF.PI;
@@ -50,13 +54,11 @@ internal sealed class FirstSeveranceStageVisuals
             Vector2 Map(Vector2 p) => center + hinge + offset + ((p - hinge) * squash).RotatedBy(roll);
             batch.Draw(plates![index], center + hinge + offset - Main.screenPosition, null,
                 Color.Lerp(Color.White, new Color(227, 240, 255), charge * .25f) * fade, roll,
-                new Vector2(512) + direction * (512 * .82f),
-                squash * ((radius * 2) / 1024f), SpriteEffects.None, 0);
+                new Vector2(128) + direction * (128 * .82f),
+                squash * ((radius * 2) / 256f), SpriteEffects.None, 0);
             float ringAngle = index * MathF.Tau / 8 + .03f * breath;
             Vector2 rim = Map(new Vector2(MathF.Cos(ringAngle), MathF.Sin(ringAngle)) * (radius + 12));
-            if (!breaking)
-                FirstSeveranceAttackAccents.Arc(batch, center, radius + 12, ringAngle, .57f, Gold * fade * .72f, 5);
-            else if (!reduced)
+            if (breaking && !reduced)
             {
                 // Stretched membranes remain attached to the retreating casing.
                 float tether = Window(age, .20, .36) * (1 - Window(age, .58, .76));
@@ -190,8 +192,8 @@ internal sealed class FirstSeveranceStageVisuals
     private void EnsureShell()
     {
         if (plates is not null || Main.dedServ) return;
-        const int size = 1024;
-        var original = ModContent.Request<Texture2D>("Convergence/Assets/Textures/NPCs/NullCantorShell",
+        const int size = 256;
+        var original = ModContent.Request<Texture2D>(FirstSeveranceDollVisuals.ArtRoot + "DollCoffin",
             ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
         var pixels = new Color[original.Width * original.Height];
         original.GetData(pixels);
@@ -200,7 +202,7 @@ internal sealed class FirstSeveranceStageVisuals
         for (int y = 0; y < size; y++)
             for (int x = 0; x < size; x++)
             {
-                float nx = (x - 511.5f) / 511f, ny = (y - 511.5f) / 511f;
+                float nx = (x - 127.5f) / 127f, ny = (y - 127.5f) / 127f;
                 float radius = MathF.Sqrt(nx * nx + ny * ny);
                 float angle = MathF.Atan2(ny, nx) + MathF.PI;
                 float warped = angle + .045f * MathF.Sin(radius * 17 + angle * 5);

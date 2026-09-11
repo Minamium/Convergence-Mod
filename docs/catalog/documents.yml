@@ -491,10 +491,34 @@ documents:
   related_docs:
   - encounter.first-severance.spec
   - encounter.first-severance.visual
+- doc_id: encounter.first-severance.doll-theater
+  path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
+  title: 不幸な人形劇 — 少女人形の提示仕様
+  content_sha256: 5696e59a1f683a8743f4d724f7cb6b6411d093186ee463884b4dcae1030c3926
+  document_type: spec
+  status: provisional
+  owners:
+  - art
+  - gameplay
+  last_reviewed: '2026-09-11'
+  source_of_truth_for:
+  - first_severance.doll_identity
+  aliases:
+  - 不幸な人形劇
+  - suspended doll
+  related_code:
+  - Client/Encounters/FirstSeverance/FirstSeveranceDollPose.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceDollVisuals.cs
+  - Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs
+  - Assets/Textures/NPCs/DollTheater
+  related_docs:
+  - encounter.first-severance.visual
+  - project.art-direction
+  - project.asset-pipeline
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: 7a9a73848f7b900fecf3d0277df00a1c3d278a7fb92163fa879f823f5751c0c1
+  content_sha256: e8473bb25fdc27bbecdfa34836b8d4e71994ed4702b701f16095734264768677
   document_type: overview
   status: accepted
   owners:
@@ -588,7 +612,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 24fb51d9c2cca35a4c68ec44b64fedef33685cf23b0d2a5aa55125a42ca023a7
+  content_sha256: 7f265e2fbe778343e84454dd5fc57b88a4d976552534868026fb1205e7d8fd7c
   document_type: spec
   status: provisional
   owners:
@@ -826,7 +850,7 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: d3d6daeee1e586e24e5fae9481e10aa3f76a211bfe0e30c38f4f976a6b8ff191
+  content_sha256: 054dac233df532aa32604bfeef5da01ca914b69ef845b8e7fbccc3ca03da580f
   document_type: spec
   status: accepted
   owners:
@@ -1047,7 +1071,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: c677d5d1efd1eaebd859765b8b78ea61aeda28a019d8595fee0c1ad837684a34
+  content_sha256: 0112b50975ccb47c940b97f0d5877925a7d467083a1f8a8cc1cb49791441133c
   document_type: status
   status: accepted
   owners:

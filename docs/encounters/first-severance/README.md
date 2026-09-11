@@ -46,6 +46,7 @@ Raid独自の致死ダメージはDownへ変換。味方のResuscitation Kitで�
 - [Encounter Specification](ENCOUNTER_SPEC.md): player-visible loop, authority outcomes, timing defaults, 2/3/4-player behavior.
 - [Implementation Plan](IMPLEMENTATION_PLAN.md): current work boundary, extension seams and completed consolidation; not another rename queue.
 - [Visual Specification](VISUAL_SPEC.md): accepted materials, extreme motion contrast, phase forms, UI/field coordinate contract and endings.
+- [Doll Theater](DOLL_THEATER_VISUAL_SPEC.md): current white-haired Gothic doll identity, conversation NPC, coffin/reveal, suspension, pixel assets and offline preview.
 - [Weapons](WEAPONS.md): claws, long-form Magic/Ranged/Summon/Rogue rituals and exchange recipes.
 - [Audio](../../AUDIO_CUE_SHEET.md): active BGM, selectively restored SFX, silence and voice lifetimes.
 - [Revive Specification](REVIVE_SPEC.md): Downed, reusable instant recovery, recipient lockout, and the ordinary-lethal-hook compatibility blocker.

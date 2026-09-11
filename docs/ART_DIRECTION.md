@@ -25,13 +25,13 @@ related_docs:
 
 ## Current First Severance presentation
 
-The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). Preserve the accepted high-resolution shell, articulated body/arms and ritual machinery. One NPC/life pool means one logical damage target, not a small silhouette. Phase forms, kinetic contrast, beam/verdict readability and the current four-column suspension belong to that spec; the original small placeholder/pixel-first sequence is complete history, not today's work order. Separately damageable multipart mechanics remain deferred.
+First Severance now centers on a tragic white-haired, black Gothic ball-jointed **girl doll**, not an abstract ritual machine. [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) owns that identity, pre-Raid conversation NPC, pixel-density rules and crooked suspension. Reuse the accepted hinged eclosion, connected arms, field and terminal effects; the machinery restrains her rather than being her body. [Presentation](encounters/first-severance/VISUAL_SPEC.md) still owns attack readability and kinetic contrast. One life pool/marked chest aperture remains one logical damage target; the giant decorative anatomy is not multipart collision.
 
 ## Shape language
 
 - Arena: horizontal/vertical industrial structure, columns, grids, repeated measurements.
-- Boss: central dark aperture, vertical fractured keel, four restraint calipers, broken orbital seals and strong negative space.
-- Seal: concentric circles, radial anchors, broken continuity.
+- Boss: white hair, restrained sorrowful face, layered black dress, porcelain ball joints, tilted neck/waist and unequal cable tension. No upright mechanical keel or orbital god silhouette.
+- Seal: vertically enclosed porcelain doll coffin, damaged petals, dark iron bindings and legible asymmetrical openings.
 - Danger: triangles, segmented lines, converging motion.
 - Stack: circle plus inward motion.
 - Spread: diamond/radial marker plus outward motion.

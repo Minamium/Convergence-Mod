@@ -23,19 +23,19 @@ related_docs:
 
 ## Current build
 
-Development **0.2.47 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
+Development **0.2.48 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
 
 - Server-wide roster → field deployment → manual Ready → separate combat introduction is implemented. [Arena infrastructure](ARENA_INFRASTRUCTURE.md) owns admission, movement and cancellation.
 - Phase I / II / III / Final survival, frozen-roster HP scaling, fixed-position Stack, Spread, Raid-owned Down/instant revival and terminal effects/rewards are implemented. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) and [recovery spec](encounters/first-severance/REVIVE_SPEC.md) own current behavior.
-- Current presentation includes articulated shell/eclosion/remote arms, flowing beams, fragment verdicts, staged weapon rituals and oblique-rift Victory. [Visual spec](encounters/first-severance/VISUAL_SPEC.md) and [five weapons](encounters/first-severance/WEAPONS.md) own the accepted direction.
-- Latest change: phase transitions keep the previous BGM through the full transformation, then start P2/P3/Final at section-only high-energy loops; P1/P2 mastering is raised so BGM stays audible against raid SFX. [Audio sheet](AUDIO_CUE_SHEET.md) owns the active cuts/mix; gameplay timing, SFX selection and silent preparation are unchanged.
+- Latest presentation: [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) replaces the abstract Boss with a white-haired Gothic ball-jointed girl, conversation NPC, enclosing porcelain coffin and crooked connected rig. Hinged eclosion, remote attack geometry, accepted beams/verdicts, weapons and rift Victory are preserved. NPC is not a Raid companion.
+- Audio remains the prior EigHt section-loop/mix revision. [Audio sheet](AUDIO_CUE_SHEET.md) owns its current files, phase handoff and preparation silence; this visual revision does not change music/SFX/gameplay timing.
 - One-member admission defaults on only as a build-gated development aid. It adds no companion, invulnerability or solo-specific fight. Normal testing is multiplayer unless the user explicitly chooses solo.
 
 ## Verification state
 
-Latest native package: **0.2.47**, source commit **0687412** on `main`, **0 errors and 4 existing CS8632 warnings**. Source remained unchanged during compilation/packaging; the package is installed in the configured Mods profile and the predecessor is retained in the local build record. The integration's audio/static checks passed; in-game phase handoff/loop/mix audition remains `not_run` / user-owned. [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) owns exact source/package hashes, build record ID and audio measurements. No game session or server was launched for this build.
+The **0.2.48** native package is built and installed: **0 errors, 4 existing CS8632 warnings**; source unchanged during compilation/packaging. Shared-pose continuity, cutout/palette checks, offline preview and static checks pass. [Doll Theater evidence](evidence/2026-09-11-doll-theater.json) records exact source/package hashes and local build identity. New NPC lifecycle, transformations, actual combat readability and multiplayer/zoom remain `not_run` / user-owned. No game session/playable server was launched. [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) retains the preceding audio measurements.
 
-The package also included existing, uncommitted English edits in `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved, not included in this documentation commit. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
+The working tree includes pre-existing English edits in `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved and kept outside this change's commits. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
 
 Recent observed gameplay: the [0.2.43 solo run](evidence/2026-09-10-grounded-posts-audio-tails.json) ended in all-Down Defeat after a failed Stack; earlier successful solo and multiplayer runs and detailed diagnostics remain in the [frozen checkpoint history](history/2026-09-11-status-through-0246.md#verification-state). Those results are version/topology-specific, not certification of the current package.
 
@@ -43,7 +43,7 @@ Concrete unverified surfaces to select **when relevant**, not a mandatory retest
 
 - Latest audio: silent preparation → P1, old BGM held through each transformation, new high-energy section starting with the first attack, section-loop seam, and BGM/SFX balance audition.
 - Preparation/UI: a distant three-player roster, last Ready/unready/cancel, and a peer at 107% UI scale seeing aligned black exterior/letterboxes.
-- Latest four-column/plinth art: ground contact and suspension continuity in the actual world.
+- Doll Theater: the short [acceptance list](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md#検証と残課題) covers NPC/Core lifecycle, capture/reveal, suspension and actual combat-scale readability.
 - Production compatibility: ordinary lethal hits, reconnect/observer identity, outsider rules and release matrix remain separate gates.
 
 ## Constraints and deferred work
@@ -56,7 +56,7 @@ Development loot is implemented, but balance, public solo/companions and final p
 
 ## Next change
 
-The matching 0.2.47 package is built. Reload/restart without another unchanged Build + Reload and audition only the affected audio surfaces: confirm each transformation retains the old track until completion, the next phase enters directly on its selected high-energy section, loops never reintroduce the removed opening, and BGM remains continuously perceptible beneath attack SFX at the unchanged user sliders.
+The new package is installed; restart/reload tModLoader (no unchanged rebuild needed). Inspect only its changed surfaces in the user-owned game: the conversational girl on the plinth, capture into the coffin before Ready, giant parts in Phase I, crooked suspended reveal and the same porcelain hands in Phase III. Keep the previous audio settings and attack balance.
 
 Keep current behavior and accepted art unless explicitly revising them. Choose checks from the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md); do not replay historical checklists.
 

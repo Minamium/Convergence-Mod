@@ -20,11 +20,11 @@ related_docs:
 
 # First Severance — Current Presentation Direction
 
-The accepted **development** art is the baseline, not a claim of final production/Wrath of the Gods quality. Preserve good existing surfaces and improve how they arrive, connect and release. Prior passes, rejected designs and pinned API research are preserved in [visual evolution](../../history/2026-09-11-visual-evolution.md); do not apply those passages as additive requirements.
+Attack/field **development** art remains the baseline, not a claim of final production/Wrath of the Gods quality. The 2026-09-11 user direction replaces the abstract Boss identity with [Doll Theater](DOLL_THEATER_VISUAL_SPEC.md): a white-haired Gothic ball-jointed girl swallowed by a coffin and forced to fight while crookedly suspended. That document owns the new body/NPC/asset details. Prior passes, rejected designs and pinned API research are preserved in [visual evolution](../../history/2026-09-11-visual-evolution.md); do not apply them as additive requirements.
 
 ## Creative intent and motion
 
-Aim for an ominous, solemn, irregular high-resolution containment ritual: obsidian/charcoal metal, frost-white ceramic/glass, restrained aged gold and cold energy. Brief fluorescent pearl/ruby/violet attacks must read clearly against quiet material. Large scale and spectacle are deliberate; the tiny early placeholder and compulsory pixel/chiptune brief are retired.
+Aim for an ominous, solemn doll theater: ivory hair/porcelain, charcoal Gothic cloth, restrained aged brass and dark cathedral scenery. The new NPC/Boss uses deliberately simplified pixel clusters and hard sampling; it does not paste a high-resolution illustration into Terraria. Brief fluorescent pearl/ruby/violet attacks retain their accepted flowing material and readable footprint. Pixel density for the doll does not imply chiptune music or redoing every weapon/beam.
 
 Wrath of the Gods' Avatar of Emptiness/Nameless Deity and the user's Evangelion references guide ambition, scale and tension, **not** copied characters, signatures, code or assets. [The benchmark](../../research/WOTG_RAID_BENCHMARK.md) distinguishes verified source observations from inaccessible/unverified video details.
 
@@ -36,7 +36,7 @@ For visual-only work, preserve server forecast/live/end ticks and damage volumes
 
 New plinth and legacy Core tiles share a ground-aligned crop/pivot. The foundation uses its solid bottom course with a tiny sampling overlap, not the transparent canvas bottom. Placement preview and deployed art must agree without changing saved tiles, footprint or collision.
 
-**Four suspension columns: two per side.** Outer columns are taller/thicker; inner columns shorter/slimmer. Each is one tight-cropped post seated in its base, not repeated capped segments with transparent seams. Horizontal gantries and fine shoulder cables suspend an upright central iris. Solid diagonal struts and the superseded two-column-only arrangement are rejected. Shared lift curves keep feet, gantries and cable endpoints attached throughout deployment; only interior cable vibration is decorative.
+**Four suspension columns: two per side.** Outer columns are taller/thicker; inner columns shorter/slimmer. Each is one tight-cropped post seated in its base, not repeated capped segments with transparent seams. Horizontal gantries now carry hoists; fine cables suspend the doll coffin and then her unevenly loaded shoulder/wrists. The floating central iris is removed. Solid diagonal struts and the superseded two-column-only arrangement are rejected. Shared lift coordinates keep cable origins on the moving gantries; only interior cable vibration is decorative.
 
 Preparation first deploys the full field/black exterior with a brief HUD-free cinematic and minimal progress hairline. It then shows one compact READY/unready control with a state indicator and ready/total count, plus a small world-anchored `Ready!` per accepted player. The all-Ready hold leads to the separate Boss/Raid introduction while the field remains deployed. [Arena infrastructure](../../ARENA_INFRASTRUCTURE.md#deployment-and-presentation--0241) owns timing and behavior; [audio](../../AUDIO_CUE_SHEET.md) owns preparation silence.
 
@@ -46,17 +46,18 @@ Preparation first deploys the full field/black exterior with a brief HUD-free ci
 
 | Accepted state | Presentation |
 |---|---|
-| Phase I / Sealed | Almost spherical, slightly restrained-size authored shell; irregular detailed faults and partially exposed attacks, not a grid of drawn cracks. Shielded/exposed must differ structurally, not only by tint. Pylon conduits visibly feed the shield. |
+| Before / Preparation | Conversational doll on the plinth → lifted on strings → enclosed between coffin petals before Ready. No change to the admission flow. |
+| Phase I / Sealed | Vertical porcelain doll coffin with a giant jointed arm, white hair and sorrowful face protruding. The body stays concealed. Shielded/exposed remain distinguishable; Pylon winch cables visibly sustain the shield. |
 | I → II | Eclosion: hands pierce/pry seams, casing catches then peels on connected hinges, head/torso slides out, folded limbs unfurl. Preserve depth passes and attached joints; no radial tile explosion or instantaneous sprite swap. |
-| Phase II / Unbound | Existing large articulated Null Cantor body. Every field-origin attack still gets a corresponding Boss load/recoil. |
+| Phase II / Unbound | White-haired, black-dressed giant girl doll; visible ball joints, slanted body, one arm held high and the other dragged down. Every field-origin attack still gets a corresponding Boss load/recoil. |
 | II → III / Distant | Body retreats in depth; two remote arms manifest at the field sides. The real foreground Core aperture remains the single NPC target. Background body/arms are not extra hitboxes. |
-| Final | Keep Distant's form for now; progressively separate/displace its material as accepted score progress advances. Do not use local elapsed time or invented HP for progression. |
+| Final | Keep the same doll identity in Distant's form; dress/limbs fragment first and her face remains coherent longer. Progress follows accepted score, not local elapsed time or invented HP. |
 | Victory | After accepted terminal: an oblique narrow dimensional slit appears; fragments arrest, then accelerate inward as the form disintegrates, the slit contracts, and a strong bounded flash/shake/sound extinguishes it. |
 | Defeat | Distinct HUD-free failure designation/pressure collapse; no false victory on cancel/invalidation. |
 
 Intro, phase changes and both results temporarily replace the local participant's HUD. Conditional camera focus returns smoothly; no persistent input lock, global `hideUI`, zoom/time/weather mutation or retained gameplay actor. Gameplay death, reward and cleanup happen immediately on the accepted terminal; the client keeps only disposable ending art. A new Fight/world unload cancels stale tails.
 
-Native selected boss-bar style is retained, including vanilla. The Boss registers its existing Core emblem as a Boss head rather than drawing a competing custom bar.
+Native selected boss-bar style is retained, including vanilla. The Boss registers a compact new doll portrait rather than drawing a competing custom bar.
 
 ## Beams, swords and forecast readability
 
@@ -89,7 +90,7 @@ Intro, phase-transition letterboxes, Victory/Defeat and the Ready button also co
 
 ## Scene, accessibility and ownership
 
-The existing cathedral is a depth anchor, not a static full-screen replacement: independent parallax/breathing, moving mist layers, distant orbits and phase tension sit behind terrain/players/forecasts. Scenery must not overpower actionable cues or mutate the world's biome/weather/time.
+The existing cathedral is a depth anchor, not a static full-screen replacement: independent parallax/breathing, moving mist layers, uneven abandoned puppet strings and phase tension sit behind terrain/players/forecasts. Scenery must not overpower actionable cues or mutate the world's biome/weather/time.
 
 Reduced Effects lowers decorative density, displacement, exposure and sound layering where appropriate **without hiding danger**; shake-off is independent. Use isolated impact peaks, not repetitive full-screen strobing. Preserve the player's silhouette and readable negative space.
 

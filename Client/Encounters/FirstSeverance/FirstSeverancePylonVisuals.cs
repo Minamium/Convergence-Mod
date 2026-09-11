@@ -35,8 +35,8 @@ internal sealed class FirstSeverancePylonVisuals : GlobalNPC
         if (combat is not null && combat.Substate == FirstSeveranceSubstate.PylonCheck)
         {
             Vector2 core = FirstSeveranceBossVisuals.CoreCenter(combat);
-            // Shield conduits travel into the Core, visibly explaining what this
-            // satellite is sustaining. All curves are decorative, not beams.
+            // Shield-bearing winch cables: readable solid metal, not a second
+            // set of hostile laser forecasts. The old cage becomes a stage hoist.
             Vector2 last = center;
             for (int n = 1; n <= (reduced ? 12 : 24); n++)
             {
@@ -44,8 +44,9 @@ internal sealed class FirstSeverancePylonVisuals : GlobalNPC
                 Vector2 next = Vector2.Lerp(center, core, t) + new Vector2(0,
                     MathF.Sin(t * MathF.PI) * (42 + 8 * MathF.Sin((float)tick * .018f)));
                 float flow = .5f + .5f * MathF.Sin(t * 17 - (float)tick * .14f);
-                FirstSeveranceBossVisuals.Line(spriteBatch, last, next,
-                    FirstSeveranceAttackAccents.Neon(ice, (.12f + .32f * flow) * assemble), 1 + flow * 1.7f);
+                FirstSeveranceBossVisuals.Line(spriteBatch, last, next,new Color(27,23,29)*assemble,4);
+                FirstSeveranceBossVisuals.Line(spriteBatch, last+new Vector2(0,-1), next+new Vector2(0,-1),
+                    new Color(168,145,112) * (.40f + .20f * flow) * assemble, 1.5f);
                 last = next;
             }
             // Final timeout warning belongs to the actual remaining pylons, not
@@ -74,12 +75,13 @@ internal sealed class FirstSeverancePylonVisuals : GlobalNPC
                     new Vector2(23f / strut.Width, 78f / strut.Height), SpriteEffects.None, 0);
         }
         accents.Halo(spriteBatch, center, new Vector2(48, 108), ice, assemble * (reduced ? .15f : .38f));
-        // A small matching reliquary shard replaces the rotating item icon.
-        // This is still one 56x88 target; the surrounding cage is decorative.
-        Texture2D texture = ModContent.Request<Texture2D>("Convergence/Assets/Textures/NPCs/NullCantorBody").Value;
-        var shard = new Rectangle((int)(texture.Width * .3f), 0, (int)(texture.Width * .4f), texture.Height);
-        spriteBatch.Draw(texture, center - screenPos, shard, npc.dontTakeDamage ? Color.Gray : Color.White, 0f,
-            new Vector2(shard.Width * .5f, texture.Height * .36f), 115f / texture.Height, SpriteEffects.None, 0f);
+        // Wound spool occupies the original 56x88 target. No new multipart actor.
+        for (int coil=0;coil<7;coil++)
+        {
+            Vector2 at=center+new Vector2(0,(coil-3)*8);
+            FirstSeveranceBossVisuals.Line(spriteBatch,at-new Vector2(20,0),at+new Vector2(20,0),new Color(32,27,34)*assemble,7);
+            FirstSeveranceBossVisuals.Line(spriteBatch,at-new Vector2(18,2),at+new Vector2(18,-2),new Color(180,160,126)*assemble,2);
+        }
         for (int i = 0; i < 3; i++)
             FirstSeveranceAttackAccents.Arc(spriteBatch, center, 44 - pressure * 6,
                 i * MathF.Tau / 3 + (float)(tick % 36000) * .009f, .64f,

@@ -40,9 +40,8 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
     public override string Texture =>
         "Convergence/Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem";
 
-    // The common vanilla bar requires a registered boss head, not just NPC.boss.
-    // Reuse the existing compact 32x34 Core emblem; no full-size body atlas in UI.
-    public override string BossHeadTexture => Texture;
+    // Keep the native bar contract; only its compact portrait changes.
+    public override string BossHeadTexture => "Convergence/Assets/Textures/NPCs/DollTheater/DollHead";
 
     public override void SetStaticDefaults()
     {

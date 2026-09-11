@@ -78,25 +78,24 @@ internal sealed class FirstSeveranceSky : CustomSky
                 MathF.Sin(time * .07f + layer) * .06f, fog.Size() * .5f,
                 new Vector2(Main.screenWidth * (1.2f + depth * .5f) / fog.Width, (130 + depth * 110) / fog.Height), SpriteEffects.None, 0);
         }
-        // Quiet distorted orbits in the distant nave; darker than all forecasts.
-        Vector2 vanishing = new(Main.screenWidth * .5f, Main.screenHeight * .40f);
-        for (int ring = 0; ring < 3; ring++)
+        // Uneven abandoned puppet strings in the cathedral's upper fly loft.
+        // Deliberately dim and behind terrain: never resemble attack forecasts.
+        for (int cord = 0; cord < 11; cord++)
         {
-            Vector2 prior = Vector2.Zero;
-            for (int n = 0; n <= 72; n++)
+            float x = (cord + .3f) * Main.screenWidth / 11;
+            float length = Main.screenHeight * (.13f + (cord * 7 % 5) * .052f);
+            Vector2 prior = new(x, 0);
+            for (int n = 1; n <= 18; n++)
             {
-                float a = n * MathHelper.TwoPi / 72;
-                Vector2 p = vanishing + new Vector2(MathF.Cos(a) * (190 + ring * 80), MathF.Sin(a) * (48 + ring * 23))
-                    .RotatedBy(-.42f + ring * .30f + MathF.Sin(time * .08f + ring) * .09f);
-                if (n > 0)
-                {
-                    Vector2 delta = p - prior;
-                    float light = (.5f + .5f * MathF.Sin(a * 3 + time * .25f + ring)) * fade * (.07f + unrest * .05f);
-                    batch.Draw(TextureAssets.MagicPixel.Value, prior, new Rectangle(0, 0, 1, 1), new Color(166, 142, 190) * light,
-                        delta.ToRotation(), new Vector2(0, .5f), new Vector2(delta.Length(), 1.2f), SpriteEffects.None, 0);
-                }
+                float t=n/18f;
+                Vector2 p=new(x + MathF.Sin(time*.28f+cord)*t*t*9 + drift.X*.4f*t, length*t);
+                Vector2 delta=p-prior;
+                batch.Draw(TextureAssets.MagicPixel.Value,prior,new Rectangle(0,0,1,1),new Color(138,123,112)*(fade*.17f),
+                    delta.ToRotation(),new Vector2(0,.5f),new Vector2(delta.Length(),1.3f),SpriteEffects.None,0);
                 prior = p;
             }
+            batch.Draw(TextureAssets.MagicPixel.Value,new Rectangle((int)prior.X-2,(int)prior.Y,4,8),
+                new Rectangle(0,0,1,1),new Color(135,116,91)*(fade*.16f));
         }
         // Sparse falling ash behind terrain, player sprites and danger markers.
         for (int i = 0; i < 22; i++)

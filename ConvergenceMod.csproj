@@ -21,5 +21,7 @@
   <ItemGroup>
     <!-- The standalone harness links selected production files explicitly. -->
     <Compile Remove="Tests/**/*.cs" />
+    <!-- Windows-only offline art preview is tooling, never a Mod dependency. -->
+    <Compile Remove="tools/**/*.cs" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-11",
+  "version": "0.2.48",
+  "protocol": 28,
+  "scope": "First Severance Doll Theater visual identity and a noncombat conversational Core attendant; Raid gameplay/audio unchanged.",
+  "native_build": {
+    "record_id": "20260911T112858814599Z",
+    "source_base_commit": "de99f8e62b53cc23585847d9dbb2bd46b8b4b45e",
+    "source_sha256": "36e9832d1885605954fa1b2914c475bc1f8932f774cc1617b06f34cf577c9e07",
+    "dirty_build": true,
+    "source_changed_during_build": false,
+    "exit_code": 0,
+    "errors": 0,
+    "existing_warnings": 4,
+    "artifact": {
+      "file": "Convergence.tmod",
+      "bytes": 46034720,
+      "sha256": "99820bc1662888d3db321334aeae3a38ed5b0fe745a86db2ee25348d1adf3495"
+    },
+    "previous_package": "retained in ignored local build archive"
+  },
+  "checks": {
+    "pose": "PASS: Doll presentation keeps joint endpoints continuous and scale finite (one deterministic test, 240 steps each normal/reduced)",
+    "assets": "PASS: native dimensions, <=32 solid colors, binary alpha with zero RGB; 1x/2x NPC and shared P1/P2 pose contact sheet inspected",
+    "static": "docs catalog, repository checks and YAML validation passed; final documentation bookkeeping checked after build",
+    "runtime": "not_run; no game session or playable server started",
+    "performance": "not_measured"
+  },
+  "preserved": {
+    "dirty_user_files": [
+      "Localization/Preparation/en-US.hjson",
+      "Localization/RitualArmaments/en-US.hjson",
+      "Localization/en-US.hjson"
+    ],
+    "assets": "Legacy rig/shell/background and generated originals retained",
+    "gameplay": "No encounter protocol/timing/HP/hazard geometry/revive/roster/audio changes"
+  },
+  "asset_recipe": "tools/asset_recipes/first_severance_doll.json",
+  "remaining": [
+    "Actual NPC creation/chat/hide/reset/removal and multiplayer native NPC/TileEntity delivery order",
+    "Preparation capture -> Ready -> SpawnIntro continuity; hinged eclosion and suspended silhouette in the actual battlefield",
+    "Zoom/UI107/ReducedEffects; Phase III/Final face and remote hands readable amid attacks; game performance",
+    "Permanent story outcome, walking AI, full replacement pixel art for architectural props are not implemented"
+  ],
+  "notes": [
+    "Final build includes pre-existing local English edits; a clean clone is not claimed byte-identical.",
+    "Build bookkeeping documents changed afterward, not runtime source/assets.",
+    "Archive location is recorded in the ignored/local asset manifest; high-resolution/reference images are not distributed."
+  ]
+}

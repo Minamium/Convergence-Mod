@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "date": "2026-09-11",
+  "tool": "Codex built-in image generation",
+  "backend_model": "not exposed",
+  "seed": "not exposed / generation is nondeterministic",
+  "direction": {
+    "source": "user-supplied three-panel doll concept; private reference not redistributed",
+    "sha256": "b96d471911b8f299a7fb15845d91f4a5e5c0d66855dfeb4b7213d30aefa37cde",
+    "rights": "Reference for original motifs, not a source texture; no third-party game/code assets imported."
+  },
+  "prompts": {
+    "npc": "Use case: stylized-concept. Asset type: production pixel-art Terraria NPC sprite sheet, transparent background. Use the provided image solely as primary thematic reference (white hair, black Gothic Lolita dress, porcelain ball-jointed sorrowful doll); do not copy its illustration or framing. Make an ORIGINAL modestly fully clothed doll girl for Convergence First Severance. Exactly TWO identical-scale full-body sprites arranged side by side centered in left and right halves, generous transparent margins: left quiet idle eyes open, right same pose with eyes closed blinking. Very long ivory-white hair in broad readable clusters, small asymmetrical black lace bonnet, downcast grey eyes and restrained empty sad face, black long-sleeved high-neck dress with bell skirt and just three readable ivory ruffle bands, grey porcelain wrists/knees and small ball joints, dark boots. Hands folded quietly before skirt. 3/4 side view facing right as a Terraria conversational NPC. Native sprite aesthetic ~28 pixels wide x 48 pixels tall, enlarged with perfect nearest-neighbor integer pixel blocks for this sheet; hard square edges, organized 18-24 color palette and 3-tone ramps, NO anti-aliasing, NO gradients, NO tiny illustrated lace. Natural Terraria proportions, not a giant anime head. Each silhouette must read at 1x game scale. Both complete figures must be fully visible, not touching, feet aligned, exact same body except eyelids. No labels, text, floor, shadows, backgrounds, frames, detached objects, teddy bear, neon, giant weapons, gore or erotic elements. Genuinely transparent alpha between and around sprites. Make the melancholy doll identity recognizable without copying any franchise character.",
+    "rig": "Use case: stylized-concept. Asset type: transparent 2D pixel-art segmented Boss rig atlas for a Terraria mod, a brand-new design informed by the attached primary theme reference, NOT a copy of that illustration. ORIGINAL sorrowful WHITE-HAIRED BLACK GOTHIC LOLITA PORCELAIN BALL-JOINTED DOLL GIRL, giant and malformed in proportions but always recognizably a girl doll, fully modest clothing, hollow sad grey eyes, not angry, no gore or sexuality. Produce exactly a 3 by 3 grid of NINE SEPARATE non-overlapping cutout parts, each entirely within its own equal square cell with transparent padding; no text or cell borders. LEFT TO RIGHT, TOP TO BOTTOM: 1) full head and long hanging ivory hair with small asymmetric black lace bonnet, head tipped slightly with downcast vacant face; hair runs down sides with empty transparent central lower space; 2) headless armless black dress BODICE with high ivory collar, puff sleeves and a small antique brass clasp at heart, ending at waist; 3) separate black bell SKIRT with three broad torn ivory frill tiers, slanted ragged hem; 4) one slender ivory upper ARM pointing downward with a clearly large spherical shoulder joint at TOP and bare porcelain elbow at bottom, small torn black sleeve; 5) one longer porcelain FOREARM pointing downward, spherical elbow at TOP, narrow wrist bottom; 6) one large elegant PORCELAIN HAND fingers hanging straight downward, wrist at TOP, five clearly readable fingers and ball joints, no claws or monster talons; 7) one ivory THIGH with spherical hip at TOP and knee at bottom, fully artificial smooth porcelain and dark doll seam; 8) one lower LEG with ball knee at TOP and black lace boot at bottom; 9) separate flowing white HAIR LOCK with black ribbon at top, hanging downward, broad clusters. Every part uses compatible front/three-quarter orthographic view and SAME pixel density. All parts large enough to rig independently, not a complete character portrait. Genuine PIXEL ART: disciplined square clusters at about 128 logical pixels per cell, hard edges, 24-32 restrained tones, no photographic tiny cracks, no antialiased painting, no glossy 3D. Ivory hair/porcelain against black charcoal/slate dress and dull tarnished brass, strong negative space. Avoid neon/cyan energy, spiky monster bones, machinery, stretched anime woman. Genuinely transparent background throughout, no white matte, no checkerboard baked into art. Square 1536x1536 atlas preferred. Upper joints must be fully visible circles that will join seamlessly when rotated. The reference's tragedy, emptiness, gothic doll theater identity is essential; final tilted suspended pose and wires will be animated by code, do not bake ropes across these parts.",
+    "shell": "Use case: stylized-concept. Asset type: one transparent pixel-art cocoon/coffin shell texture for Terraria First Severance Boss. The attached illustration is the primary mood reference only. Independently design a massive antique PORCELAIN DOLL COFFIN, an egg-shaped upright storage chrysalis captured by four dark tarnished wrought-iron ribs and broken gothic brass clasps. A narrow theatre burial capsule, NOT a smooth abstract magic orb, NOT futuristic machine or cosmic god. Ivory-grey thick ceramic petals chipped along large legible asymmetrical cracks, dark empty interior. Upper right side has a large torn opening to reveal a girl's face/hair when a separate sprite is drawn behind it; upper left another open crack for a shoulder; central chest has a smaller broken opening. Make openings genuinely transparent. Asymmetric jagged lower edge with three substantial shell plates still held by dull iron straps. No doll or human anatomy inside THIS shell asset: human parts will be separately rigged so keep the dark-window interiors transparent. Whole object isolated, no pedestal, no floor, no hanging wires beyond the silhouette; code supplies suspension lines. Strong approximately 160x192-native-pixel silhouette, coherent hard-edged pixel clusters and limited 24-32 color ramps, not high-resolution painterly cracks. Front/3/4 view, all shell fully visible with padding, no extreme perspective. Genuinely transparent background. Ominous cathedral doll-theatre mood. No neon, runes, energy rings, text, labels, logos, checkerboard matte, gore or flesh. The shell is slightly tilted in its material asymmetry but leave overall image upright enough to split into hinged petals by code. One object only.",
+    "npc_alpha_attempt": "EDIT THIS IMAGE: retain the exact original two NPC doll sprites, faces, clothing, poses, proportions, positions and sprite size without redesign. REMOVE ONLY ALL the fake checkerboard, white/grey background and matte. Output a genuinely transparent PNG cutout with alpha=0 everywhere outside the sprite silhouettes, INCLUDING the spaces between hair strands/fingers and ALL spaces between parts. No new content, no lighting changes, no shadows, no backdrop. Preserve hard pixel art silhouettes and white/ivory hair inside their dark outlines. Do not draw checkerboard: transparency must be real alpha, not a checkerboard picture. This is production game texture background removal.",
+    "rig_alpha_attempt": "EDIT THIS IMAGE: retain the exact original nine isolated porcelain doll rig parts, their exact shapes, face, dress, arrangement, proportions, position and size without redesign. REMOVE ONLY ALL the fake checkerboard, white/grey background and matte. Output a genuinely transparent PNG cutout with alpha=0 everywhere outside the sprite silhouettes, INCLUDING the spaces between hair strands/fingers and ALL spaces between parts. No new content, no lighting changes, no shadows, no backdrop. Preserve hard pixel art silhouettes and white/ivory hair inside their dark outlines. Do not draw checkerboard: transparency must be real alpha, not a checkerboard picture. This is production game texture background removal.",
+    "npc_chroma_matte": "Change ONLY the checkerboard background of this game-sprite image to ONE COMPLETELY FLAT UNIFORM BRIGHT CHROMA GREEN #00FF00. Green everywhere outside the two complete doll NPC sprites including spaces between hair and fingers. Do not alter, recolor, move, crop or redesign the doll artwork at all. Preserve the exact canvas, part coordinates, scale, dark outlines, original skin/white hair colors and shapes. No green tint or spill on any part. No transparency, no checkerboard, no pattern, no gradient or shadow in the background: just uniformly RGB(0,255,0). This is a technical matte for mechanical chroma keying, preserve the entire artwork unchanged.",
+    "rig_chroma_matte": "Change ONLY the checkerboard background of this game-sprite image to ONE COMPLETELY FLAT UNIFORM BRIGHT CHROMA GREEN #00FF00. Green everywhere outside the nine separate rig parts in their exact 3x3 grid including spaces between hair and fingers. Do not alter, recolor, move, crop or redesign the doll artwork at all. Preserve the exact canvas, part coordinates, scale, dark outlines, original skin/white hair colors and shapes. No green tint or spill on any part. No transparency, no checkerboard, no pattern, no gradient or shadow in the background: just uniformly RGB(0,255,0). This is a technical matte for mechanical chroma keying, preserve the entire artwork unchanged."
+  },
+  "source_exports": [
+    {
+      "file": "npc-source.png",
+      "sha256": "64655870e401c95c2d078ae4b997cefc6e190ff920be563ff5324259edfb7e7b",
+      "bytes": 1604074
+    },
+    {
+      "file": "rig-source.png",
+      "sha256": "97a0cfabce3a35b942ad04d217fdb5d79777c2c750c79f375c6806adda33a4bb",
+      "bytes": 1952304
+    },
+    {
+      "file": "shell-source.png",
+      "sha256": "66aa273c0005622adc526f7dd11dd41f9b0e2524294a41239c6588c3cbb28492",
+      "bytes": 1328718
+    }
+  ],
+  "export": {
+    "script": "tools/prepare_doll_assets.ps1",
+    "method": "Source NPC/rig green mattes chroma-keyed; nearest-centre sampled to native cells and mapped to 32 fixed colours with binary alpha/zero RGB for empty pixels. No Python image editing. Shell original alpha retained above threshold; dark inner material not treated as transparent windows.",
+    "source_storage": "External asset archive; local build/consolidation record identifies archive root. Preserve originals; do not put reference or full-resolution source in the package."
+  },
+  "outputs": [
+    {
+      "file": "Assets/Textures/NPCs/DollTheater/DollAttendant.png",
+      "width": 32,
+      "height": 104,
+      "frames": 2,
+      "bytes": 1937,
+      "sha256": "82629e1ef9fcb921d030ae14839d4e274cbb25b197cea9146e70c0f8738d36fe"
+    },
+    {
+      "file": "Assets/Textures/NPCs/DollTheater/DollRigAtlas.png",
+      "width": 384,
+      "height": 384,
+      "cells": 9,
+      "bytes": 51876,
+      "sha256": "92510d3977e38d4c964a0758db115c117aaae0aa8fc2c2ea222b73b36dd64ae4"
+    },
+    {
+      "file": "Assets/Textures/NPCs/DollTheater/DollCoffin.png",
+      "width": 256,
+      "height": 256,
+      "bytes": 17015,
+      "sha256": "8ee2ec8e8efead390c1f6c58b5c0d6370e43375ab5fa4381c73a3d62d7c41901"
+    },
+    {
+      "file": "Assets/Textures/NPCs/DollTheater/DollHead.png",
+      "width": 34,
+      "height": 34,
+      "bytes": 1258,
+      "sha256": "5eafc55f85b6b06b488db04597e725e674c54bb2dd1a7529e9b617b3013988b0"
+    }
+  ],
+  "review": {
+    "offline": "Native NPC 1x/2x/7x and shared P1/P2 rig contact sheet",
+    "in_game": "not_run; user-owned"
+  }
+}

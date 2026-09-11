@@ -2,6 +2,77 @@
 
 ## Records
 
+### First Severance Doll Theater — 0.2.48
+
+- Assets:
+  - `Assets/Textures/NPCs/DollTheater/DollAttendant.png`
+  - `Assets/Textures/NPCs/DollTheater/DollRigAtlas.png`
+  - `Assets/Textures/NPCs/DollTheater/DollCoffin.png`
+  - `Assets/Textures/NPCs/DollTheater/DollHead.png`
+- New AI-generated designs produced with Codex's built-in image-generation tool. Backend model/seed are not exposed; do not label them as a particular GPT Image version. User-supplied three-panel concept is a private thematic reference, not a redistributed source texture. No Orchis/Avatar or other game's asset/code is imported.
+- Prompt direction: sorrowful fully clothed white-haired Gothic ball-jointed girl doll, uneven suspension, porcelain coffin; native NPC silhouettes and separate Boss rig parts. Exact prompts, rejected-alpha handling, input/output hashes and export recipe: [first_severance_doll.json](../tools/asset_recipes/first_severance_doll.json).
+- Generated opaque checkerboards were rejected. Final NPC/rig source images use a generated green matte for mechanical keying. The shell source has true exterior alpha and dark interior material. `tools/prepare_doll_assets.ps1` performs key/nearest/32-colour export and portrait crop; it preserves all originals outside the package.
+- Runtime output: NPC 32×104 (2 frames), rig 384×384 (9 cells), coffin 256×256, portrait 34×34. Shared-pose offline preview is reproducible through `tools/preview_doll_theater.ps1`; it is not a game screenshot or performance proof.
+- Rights/provenance status: original generated production proposals; the project's overall license selection/publication gate is unchanged. User concept and high-resolution originals stay outside the public package. No new third-party license is asserted or inferred.
+- Legacy shell/rig/background/weapon originals are retained. This batch does not change the EigHt music attribution, audio files, third-party terms or existing accepted attack textures.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/DollAttendant.png`
+- Asset ID: first-severance-doll-attendant-20260911
+- Asset type: conversation NPC texture
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-11
+- Source type: generated
+- Source work and URL: user-directed original; exact prompts/source hashes in tools/asset_recipes/first_severance_doll.json
+- Tool/model/version: built-in image_gen; backend model/seed unavailable; PowerShell/System.Drawing mechanical export
+- Human modifications: reference direction, rig pivots, palette/alpha export and native crop; see Doll Theater batch note
+- License and redistribution terms: project license remains undecided; existing public-release gate retained
+- Required attribution: retain this provenance; no third-party game asset imported
+- Reviewer and review date: Codex 2026-09-11; offline cutout/palette/dimensions/shared pose inspected; game acceptance pending
+- Notes: runtime SHA256 `82629e1ef9fcb921d030ae14839d4e274cbb25b197cea9146e70c0f8738d36fe`; original retained externally.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/DollRigAtlas.png`
+- Asset ID: first-severance-doll-rig-20260911
+- Asset type: segmented Boss rig atlas
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-11
+- Source type: generated
+- Source work and URL: user-directed original; exact prompts/source hashes in tools/asset_recipes/first_severance_doll.json
+- Tool/model/version: built-in image_gen; backend model/seed unavailable; PowerShell/System.Drawing mechanical export
+- Human modifications: reference direction, rig pivots, palette/alpha export and native crop; see Doll Theater batch note
+- License and redistribution terms: project license remains undecided; existing public-release gate retained
+- Required attribution: retain this provenance; no third-party game asset imported
+- Reviewer and review date: Codex 2026-09-11; offline cutout/palette/dimensions/shared pose inspected; game acceptance pending
+- Notes: runtime SHA256 `92510d3977e38d4c964a0758db115c117aaae0aa8fc2c2ea222b73b36dd64ae4`; original retained externally.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/DollCoffin.png`
+- Asset ID: first-severance-doll-coffin-20260911
+- Asset type: hinged Boss coffin texture
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-11
+- Source type: generated
+- Source work and URL: user-directed original; exact prompts/source hashes in tools/asset_recipes/first_severance_doll.json
+- Tool/model/version: built-in image_gen; backend model/seed unavailable; PowerShell/System.Drawing mechanical export
+- Human modifications: reference direction, rig pivots, palette/alpha export and native crop; see Doll Theater batch note
+- License and redistribution terms: project license remains undecided; existing public-release gate retained
+- Required attribution: retain this provenance; no third-party game asset imported
+- Reviewer and review date: Codex 2026-09-11; offline cutout/palette/dimensions/shared pose inspected; game acceptance pending
+- Notes: runtime SHA256 `8ee2ec8e8efead390c1f6c58b5c0d6370e43375ab5fa4381c73a3d62d7c41901`; original retained externally.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/DollHead.png`
+- Asset ID: first-severance-doll-portrait-20260911
+- Asset type: native Boss-bar portrait
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-11
+- Source type: generated
+- Source work and URL: user-directed original; exact prompts/source hashes in tools/asset_recipes/first_severance_doll.json
+- Tool/model/version: built-in image_gen; backend model/seed unavailable; PowerShell/System.Drawing mechanical export
+- Human modifications: reference direction, rig pivots, palette/alpha export and native crop; see Doll Theater batch note
+- License and redistribution terms: project license remains undecided; existing public-release gate retained
+- Required attribution: retain this provenance; no third-party game asset imported
+- Reviewer and review date: Codex 2026-09-11; offline cutout/palette/dimensions/shared pose inspected; game acceptance pending
+- Notes: runtime SHA256 `5eafc55f85b6b06b488db04597e725e674c54bb2dd1a7529e9b617b3013988b0`; original retained externally.
+
+
 ### Ritual grand apparatus v3 — 2026-09-09
 
 Four separate built-in image generations, text only. No input/reference images; model identifier unavailable and the owner explicitly accepted that limitation. Original PNGs remain in the local generated-image archive. Mechanical export via `tools/export_ritual_icons.py` preserves alpha and fits128px icons/512px apparatus to116px/464px envelopes; no image-to-image step or reuse of older art. Older assets remain untouched. The following is the exact shared prompt, with `{SUBJECT}` replaced by the per-item brief below:

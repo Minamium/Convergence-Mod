@@ -21,16 +21,13 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 // facts come from the read-only snapshot; animation is disposable client state.
 internal sealed class FirstSeveranceBossVisuals
 {
-    private const string BodyPath = "Convergence/Assets/Textures/NPCs/NullCantorRigAtlas";
+    private readonly FirstSeveranceDollVisuals doll = new();
     private readonly FirstSeveranceEmissionVisuals emissions = new();
     private readonly FirstSeveranceStageVisuals stages = new();
     private readonly FirstSeveranceScoreVisuals scoreVisuals = new();
-    private Vector2 rigOrigin;
-    private float rigScale = .66f;
     internal static readonly Color Ice = new(195, 213, 215);
     internal static readonly Color Gold = new(173, 151, 110);
     internal static readonly Color Danger = new(181, 85, 79);
-    private Asset<Texture2D>? body;
     private Texture2D? glow;
     private FightId fight;
     private FirstSeveranceSubstate previousPhase;
@@ -139,10 +136,9 @@ internal sealed class FirstSeveranceBossVisuals
             (float)Math.Clamp((renderTick - combat.ActionStartedTick) /
                 Math.Max(1, (double)combat.ResolveTick - combat.ActionStartedTick), 0, 1)) / FirstSeveranceChoreography.Final.Count;
         breakup = combat.BossPhase == FirstSeveranceBossPhase.Final ? .78f * Window(scoreAge, .02, 1) : 0;
-        float intro = combat.Substate == FirstSeveranceSubstate.SpawnIntro
-            ? 1f - Math.Clamp((float)((double)combat.ResolveTick - tick)
-                / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0f, 1f) : 1f;
-        float reveal = MathHelper.SmoothStep(0f, 1f, Math.Min(1f, intro * 1.25f));
+        // Preparation has already closed this coffin around the girl. The second
+        // cinematic must not erase/re-fade her when the snapshot enters SpawnIntro.
+        float reveal = 1f;
         float breath = MathF.Sin(time * .72f);
         float recoil = emissions.Kick;
         float castPose = Math.Max(emissions.Pose, mechanicPose);
@@ -161,10 +157,7 @@ internal sealed class FirstSeveranceBossVisuals
             Glow(batch, center, 980f, new Color(16, 16, 20) * (0.4f * reveal));
             DrawAurora(batch, center, time, reveal);
         }
-        float shellScale = combat.BossPhase == FirstSeveranceBossPhase.Sealed ? .80f
-            : combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Unbound
-                ? MathHelper.Lerp(.80f, 1, EclosionUnfurl(FirstSeveranceStageVisuals.RuptureAge(combat, renderTick))) : 1;
-        DrawSeal(batch, center, time, reveal, reduced, shellScale);
+        // The suspension and coffin supply the silhouette now, not orbital machinery.
         if (!reduced && phaseImpactTicks > 0)
         {
             float impact = 1f - phaseImpactTicks / 24f;
@@ -184,7 +177,11 @@ internal sealed class FirstSeveranceBossVisuals
             EclosionUnfurl(hatchAge), EclosionEmerge(hatchAge), EclosionPry(hatchAge), hideHands: hatching,
             depth: 1 - retreat * .76f);
         if (remote) DrawRemoteArms(batch, combat, center, renderTick, reveal, retreat, reduced);
+        float encased = combat.BossPhase == FirstSeveranceBossPhase.Sealed ? 1
+            : hatching ? 1 - Window(hatchAge, .12, .28) : 0;
+        if (encased > .001f) doll.DrawEncased(batch, center, renderTick, reveal * encased, castPose, false, reduced);
         stages.DrawShell(batch, combat, center, renderTick, reveal, castPose, Accents, reduced);
+        if (encased > .001f) doll.DrawEncased(batch, center, renderTick, reveal * encased, castPose, true, reduced);
         if (hatching && unseal > 0)
             DrawRig(batch, center, reveal * unseal, breath, 0, 0,
                 EclosionUnfurl(hatchAge), EclosionEmerge(hatchAge), EclosionPry(hatchAge), handsOnly: true);
@@ -204,20 +201,12 @@ internal sealed class FirstSeveranceBossVisuals
         {
             Ring(batch, center, 185f - castPose * 92f + recoil * 170f,
                 castColor * Math.Max(cast, recoil), 2.4f, -castPose * 0.7f, 8);
-            // Tall, slow-closing calipers make the cast silhouette readable even
-            // when the actual attack originates at a player across the arena.
-            for (int side = -1; side <= 1; side += 2)
-            {
-                Vector2 arm = center + new Vector2(side * (180 + 120 * castPose), -150 * castPose);
-                Line(batch, arm + new Vector2(0, -100), arm + new Vector2(0, 95), castColor * cast, 3f);
-                Line(batch, arm, arm + new Vector2(-side * 44, 0), Color.White * cast, 2.5f);
-            }
             Glow(batch, center, 240f + recoil * 320f,
                 Additive(Ice, (cast * 0.18f + recoil * 0.45f) * (reduced ? 0.4f : 1f)));
         }
 
         // A dark aperture makes the single damage target readable over any biome.
-        Glow(batch, center, 183f, Color.Black * reveal);
+        Glow(batch, center, 142f, Color.Black * (.48f * reveal));
         Color coreColor = Color.Lerp(Gold, Ice, exposure);
         if (exposure > 0.02f)
         {
@@ -250,42 +239,8 @@ internal sealed class FirstSeveranceBossVisuals
     private void DrawRig(SpriteBatch batch, Vector2 center, float reveal, float breath, float cast, float kick,
         float unfurl = 1, float emergence = 1, float pry = 1, bool handsOnly = false, bool hideHands = false, float collapse = 0, float depth = 1)
     {
-        center += new Vector2(0, 85 * (1 - emergence));
-        rigOrigin = center;
-        rigScale = .66f * (.78f + .22f * emergence) * (1 - collapse * .995f) * depth;
-        Color tint = Color.Lerp(new Color(188, 190, 201), Color.White, exposure * .6f) * reveal;
-        float scale = 1.25f * (.92f + .08f * reveal);
-        // Separate authored bones, with shared joint coordinates. Forearms and
-        // hands inherit parent rotation, so wrists cannot detach during casting.
-        for (int side = -1; side <= 1; side += 2)
-        {
-            Vector2 shoulder = center + new Vector2(side * MathHelper.Lerp(150, 210, unfurl), 12);
-            Vector2 folded = new(side * MathHelper.Lerp(150, 455, pry), MathHelper.Lerp(-75, -235, pry));
-            Vector2 expanded = new(side * (620 + cast * 38 - kick * 55), 110 - cast * 220 + kick * 70 + breath * 9);
-            Vector2 wrist = center + Vector2.Lerp(folded, expanded, unfurl);
-            var joint = Elbow(new(shoulder.X, shoulder.Y), new(wrist.X, wrist.Y), side);
-            Vector2 elbowPoint = new(joint.X, joint.Y);
-            float upper = MathF.Atan2(elbowPoint.Y - shoulder.Y, elbowPoint.X - shoulder.X) - MathHelper.PiOver2;
-            float elbow = MathF.Atan2(wrist.Y - elbowPoint.Y, wrist.X - elbowPoint.X) - MathHelper.PiOver2;
-            if (!handsOnly)
-            {
-                Bone(batch, new(470, 0, 236, 651), shoulder, new(85, 53), new Vector2(140, 370), upper, tint);
-                Bone(batch, new(740, 0, 205, 651), elbowPoint, new(104, 52), new Vector2(115, 320), elbow, tint);
-                Bone(batch, new(957, 787, 297, 318), shoulder, new(148, 155), new Vector2(76), upper, tint);
-                Bone(batch, new(465, 655, 241, 599), center + new Vector2(side * 165, 40), new(120, 40),
-                    new Vector2(130, MathHelper.Lerp(220, 580, emergence)),
-                    -side * (.08f + unfurl * .12f + cast * .13f), tint);
-            }
-            if (!hideHands)
-                Bone(batch, new(953, 0, 301, 655), wrist, new(186, 40), new Vector2(150, 300),
-                    elbow + side * (cast * .42f + (1 - unfurl) * .38f), tint);
-        }
-        if (handsOnly) return;
-        Bone(batch, new(745, 660, 189, 585), center + new Vector2(0, MathHelper.Lerp(90, 330, emergence)),
-            new(95, 15), new Vector2(110, MathHelper.Lerp(160, 420, emergence)), breath * .009f, tint);
-        Bone(batch, new(0, 0, 448, 657), center, new(220, 260), new Vector2(448, 657) * scale * (.84f + .16f * emergence), breath * .005f, tint);
-        Bone(batch, new(0, 675, 445, 495), center + new Vector2(0, MathHelper.Lerp(-65, -355, emergence) - cast * 42 + kick * 18), new(222, 248),
-            new Vector2(540, 400) * (.48f + emergence * .52f), breath * -.012f + (1 - emergence) * .22f, tint);
+        doll.DrawBody(batch, center, reveal, fractureTime / 60f, cast, kick, unfurl, emergence, pry,
+            handsOnly, hideHands, depth * (1 - collapse * .995f), breakup, consumption, lastCenter, fractureReduced);
     }
 
     private void DrawRemoteArms(SpriteBatch batch, FirstSeveranceCombatProjection combat, Vector2 center,
@@ -312,20 +267,15 @@ internal sealed class FirstSeveranceBossVisuals
             * (1 - Window(age, 190, 270)) : 0;
         if (crushing) grasp = brace * .7f + closure * .3f;
         Color color = combat.BossPhase == FirstSeveranceBossPhase.Final ? new(231, 117, 184) : new(156, 212, 226);
-        rigOrigin = center; rigScale = 1;
         for (int side = -1; side <= 1; side += 2)
         {
             Vector2 wrist = Wrist(side);
             Vector2 elbow = wrist + new Vector2(side * (160 + grasp * 50), -250 - grasp * 70);
             Vector2 shoulder = elbow + new Vector2(side * 100, 290);
-            float upper = (elbow - shoulder).ToRotation() - MathHelper.PiOver2;
-            float fore = (wrist - elbow).ToRotation() - MathHelper.PiOver2;
             Color tint = Color.White * (appear * reveal);
-            Bone(batch, new(470, 0, 236, 651), shoulder, new(85, 53), new(185, 350), upper, tint);
-            Bone(batch, new(740, 0, 205, 651), elbow, new(104, 52), new(150, 340), fore, tint);
-            Bone(batch, new(953, 0, 301, 655), wrist, new(186, 40),
-                new(200 + brace * 400, 380 + brace * 80),
-                (crushing ? side : -side) * MathHelper.PiOver2 - side * grasp * (crushing ? .07f : .22f), tint);
+            doll.DrawRemoteArm(batch, shoulder, elbow, wrist,
+                (crushing ? side : -side) * MathHelper.PiOver2 - side * grasp * (crushing ? .07f : .22f),
+                2.5f + brace * .55f, tint, breakup, consumption, lastCenter, fractureTime, reduced);
             if (crushing)
             {
                 Accents.CastSeal(batch, wrist, age, 0, FirstSeveranceScoreGeometry.CrushRushTick, new Color(255, 91, 145), reduced, 1.2f);
@@ -375,25 +325,6 @@ internal sealed class FirstSeveranceBossVisuals
         }
     }
 
-    private void Bone(SpriteBatch batch, Rectangle source, Vector2 position, Vector2 pivot, Vector2 size, float rotation, Color tint)
-    {
-        Texture2D texture = body!.Value;
-        // Keep the existing long-limbed form inside the more intimate field.
-        position = rigOrigin + (position - rigOrigin) * rigScale;
-        size *= rigScale;
-        float factor = texture.Width / 1254f;
-        Vector2 originalSize = new(source.Width, source.Height);
-        source = new((int)(source.X * factor), (int)(source.Y * factor), (int)(source.Width * factor), (int)(source.Height * factor));
-        if (breakup > .001f || consumption > 0)
-        {
-            FirstSeveranceDissolutionVisuals.Bone(batch, texture, source, position, pivot * factor,
-                size / originalSize / factor, rotation, tint, breakup, consumption, lastCenter,
-                fractureTime, fractureReduced);
-            return;
-        }
-        batch.Draw(texture, position - Main.screenPosition, source, tint, rotation, pivot * factor,
-            size / originalSize / factor, SpriteEffects.None, 0);
-    }
 
     private void DrawSeal(SpriteBatch batch, Vector2 center, float time, float reveal, bool reduced, float size = 1)
     {
@@ -586,7 +517,6 @@ internal sealed class FirstSeveranceBossVisuals
 
     private void EnsureAssets()
     {
-        body ??= ModContent.Request<Texture2D>(BodyPath, AssetRequestMode.ImmediateLoad);
         if (glow is not null)
             return;
         // Render-thread-only procedural falloff. Not a borrowed texture or effect.
@@ -622,7 +552,7 @@ internal sealed class FirstSeveranceBossVisuals
         {
             Texture2D? oldGlow = glow;
             glow = null;
-            body = null; // ReLogic owns the requested body texture.
+            doll.Unload(); // ReLogic owns the authored textures.
             if (oldGlow is not null)
                 Main.QueueMainThreadAction(oldGlow.Dispose);
         }
