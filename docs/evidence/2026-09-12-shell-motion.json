@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.50",
+  "protocol": 28,
+  "scope": "Restore the retained high-detail shell and add continuous, asymmetric joint/surface motion. Presentation only.",
+  "findings": [
+    "The retained NullCantorShell image had not been deleted; 0.2.48 replaced the active material and masks with the separate 256px DollCoffin. Restored the original material and 1024px petal masks.",
+    "The reviewed client.log selected and loaded local 0.2.49. No shell/resource rendering error appeared in the reviewed log; an unrelated localhost connection-refused warning was present. This is not direct visual proof of the user's symptom.",
+    "Boss anatomy is procedural, not a low-frame sprite cycle. Prior motion was mostly tiny whole-rig sway, rigid hair/material and nearest-neighbor rotated parts; mechanic pose was cached at update frequency.",
+    "Closed shell now draws the original once instead of alpha-filtered adjacent petals; opening keeps the established hinges. Preparation/combat share material, footprint and breathing size."
+  ],
+  "native_build": {
+    "record_id": "20260911T151840071062Z",
+    "source_base_commit": "2d60da59a3f4c93723423cba03dabe841dac1e6f",
+    "source_sha256": "400088ef0170adf9d8d85930c8fc0b30c1dc92ad404acbd4bc57cd655a02cd3d",
+    "dirty_build": true,
+    "source_changed_during_build": false,
+    "exit_code": 0,
+    "errors": 0,
+    "existing_warnings": 4,
+    "artifact": {
+      "file": "Convergence.tmod",
+      "bytes": 46040106,
+      "sha256": "d1756a338401e436205ee333e0b5f54b1659b41aeb613959a8ff56fd8ddfd9f9"
+    },
+    "previous_package": "retained in ignored local build archive"
+  },
+  "checks": {
+    "focused_domain": "PASS: 3 Doll presentation tests covering fractional joint/surface continuity and anchored roots, unchanged fragment capture, and complete nonempty shell mask partition",
+    "preview": "Shared pose/UV/flex equations rendered offline; restored shell and representative poses inspected; 240 frames at 60 samples/sec exported externally, not an actual game recording",
+    "static": "PASS: documentation catalog, repository checks, YAML and git diff --check",
+    "runtime": "not_run; no game session/playable server started",
+    "gpu_performance": "not_measured"
+  },
+  "ownership": {
+    "body_motion": "Fractional local simulation clock reset on accepted new Fight; attack loading/recoil remain authority-timed",
+    "mesh": "DollSurface-owned reusable vertices/BasicEffect; restores world render state and releases effect on Unload; does not share/reset weapon surface buffers",
+    "remote_arms": "Only decorative shoulder/elbow offsets added; wrist and attack hand orientation preserved",
+    "server": "No new server graphics, NPC, packet, save or gameplay path"
+  },
+  "preserved": {
+    "dirty_user_files": [
+      "Localization/DollTheater/en-US.hjson",
+      "Localization/Preparation/en-US.hjson",
+      "Localization/RitualArmaments/en-US.hjson",
+      "Localization/en-US.hjson"
+    ],
+    "assets": "No image/audio files generated or overwritten; existing source assets and external originals retained",
+    "gameplay": "Attack timings, geometry, damage, HP, admission, revival and audio unchanged"
+  },
+  "remaining": [
+    "User-owned reload: restored shell in preparation, Sealed combat and hinged opening",
+    "Actual connected mesh rendering with zoom/UI107 and ReducedEffects; confirm attack wrist alignment and terminal transition",
+    "Measure frame time in the user's real Mod/environment mix if perceived stutter persists"
+  ],
+  "notes": [
+    "Pre-existing English working-tree edits are included in the local build but excluded from this commit.",
+    "Only documentation/catalog/evidence bookkeeping changed after the final successful native build."
+  ]
+}

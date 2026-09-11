@@ -39,6 +39,9 @@ internal sealed class FirstSeveranceBossVisuals
     private float lastCast, lastKick, lastBreath;
     private int phaseImpactTicks;
     private float mechanicPose;
+    private double mechanicPoseTick;
+    private ulong motionStartTick;
+    private float MotionSeconds => (float)((Math.Max(0,(double)Main.GameUpdateCount-motionStartTick)+RitualRenderClock.Fraction)/60d);
     private float breakup, consumption, fractureTime;
     private bool fractureReduced;
     private FirstSeveranceCombatProjection? lastCombat;
@@ -88,6 +91,8 @@ internal sealed class FirstSeveranceBossVisuals
         if (fight != combat.FightId)
         {
             fight = combat.FightId;
+            motionStartTick = Main.GameUpdateCount;
+            mechanicPose = 0;
             emissions.Clear();
             stages.Reset();
             previousPhase = FirstSeveranceSubstate.None;
@@ -110,6 +115,7 @@ internal sealed class FirstSeveranceBossVisuals
         }
         emissions.Update(combat.LanceVolley, state.EstimatedAuthorityTick, combat.SpreadLances);
         double renderTick = emissions.RenderTick;
+        mechanicPoseTick = renderTick;
         double lead = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread ? 120 : 90;
         float requestedPose = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread
             || (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0)
@@ -141,7 +147,14 @@ internal sealed class FirstSeveranceBossVisuals
         float reveal = 1f;
         float breath = MathF.Sin(time * .72f);
         float recoil = emissions.Kick;
-        float castPose = Math.Max(emissions.Pose, mechanicPose);
+        // Evaluate the continuous warning curve on draw as emitters already do;
+        // a cached integer-update pose should not step between rendered frames.
+        float displayedMechanic = mechanicPose*MathF.Pow(.80f,(float)Math.Clamp(renderTick-mechanicPoseTick,0,1));
+        double mechanicLead = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread ? 120 : 90;
+        if(combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread
+            || combat.Substate==FirstSeveranceSubstate.PylonCheck&&combat.RemainingPylons>0)
+            displayedMechanic=Math.Max(displayedMechanic,CastTension(renderTick,combat.ResolveTick-mechanicLead,combat.ResolveTick));
+        float castPose = Math.Max(emissions.Pose, displayedMechanic);
         if (combat.GridVolley is { } grid)
         {
             castPose = Math.Max(castPose, FirstSeveranceVisualCurves.CastPose(renderTick, grid.StartTick, grid.FireTick, grid.EndTick));
@@ -238,7 +251,9 @@ internal sealed class FirstSeveranceBossVisuals
     private void DrawRig(SpriteBatch batch, Vector2 center, float reveal, float breath, float cast, float kick,
         float unfurl = 1, float emergence = 1, float pry = 1, bool handsOnly = false, bool hideHands = false, float collapse = 0, float depth = 1)
     {
-        doll.DrawBody(batch, center, reveal, fractureTime / 60f, cast, kick, unfurl, emergence, pry,
+        // Ambient articulation uses the fractional local simulation clock, not
+        // packet timestamp corrections. Attack loading/recoil stays authoritative.
+        doll.DrawBody(batch, center, reveal, MotionSeconds, cast, kick, unfurl, emergence, pry,
             handsOnly, hideHands, depth * (1 - collapse * .995f), breakup, consumption, lastCenter, fractureReduced);
     }
 
@@ -274,7 +289,7 @@ internal sealed class FirstSeveranceBossVisuals
             Color tint = Color.White * (appear * reveal);
             doll.DrawRemoteArm(batch, shoulder, elbow, wrist,
                 (crushing ? side : -side) * MathHelper.PiOver2 - side * grasp * (crushing ? .07f : .22f),
-                2.5f + brace * .55f, tint, breakup, consumption, lastCenter, fractureTime, reduced);
+                2.5f + brace * .55f, tint, breakup, consumption, lastCenter, MotionSeconds*60, reduced);
             if (crushing)
             {
                 Accents.CastSeal(batch, wrist, age, 0, FirstSeveranceScoreGeometry.CrushRushTick, new Color(255, 91, 145), reduced, 1.2f);

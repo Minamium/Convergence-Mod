@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - first_severance.visual_mvp
 aliases:
@@ -47,7 +47,7 @@ Preparation first deploys the full field/black exterior with a brief HUD-free ci
 | Accepted state | Presentation |
 |---|---|
 | Before / Preparation | Completed coffin already at center; the plinth NPC disassembles, briefly hangs in pieces, then accelerates into that center before Ready. No change to admission or deployment duration. |
-| Phase I / Sealed | Porcelain coffin hides almost all of the body; only a few fingertips/hair escape the rim, no face overlaid in front. Shielded/exposed remain distinguishable; Pylon winch cables sustain the shield. |
+| Phase I / Sealed | Restored microfractured metal shell hides almost all of the body; only a few fingertips/hair escape the rim, no face overlaid in front. Preparation/combat share the original material. Shielded/exposed remain distinguishable; Pylon winch cables sustain the shield. |
 | I → II | Eclosion: hands pierce/pry seams, casing catches then peels on connected hinges, head/torso slides out, folded limbs unfurl. Preserve depth passes and attached joints; no radial tile explosion or instantaneous sprite swap. |
 | Phase II / Unbound | Retained porcelain ball-jointed arms and slant; old crown/body restraint silhouette around a small, partly veiled face. Not an enlarged NPC portrait/costume. Every field-origin attack still gets a corresponding Boss load/recoil. |
 | II → III / Distant | Body retreats in depth; two remote arms manifest at the field sides. The real foreground Core aperture remains the single NPC target. Background body/arms are not extra hitboxes. |

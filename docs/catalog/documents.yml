@@ -494,13 +494,13 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: 不幸な人形劇 — 少女人形の提示仕様
-  content_sha256: 5a52ebaf3ebd75d838b1918d09bb39fa27471ce53b32620ae8c2c2c06256c666
+  content_sha256: 9586c5f3995d0a40d581bc67514e985a505fa56b2ef5b2c83f6d00077fc87cbc
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - first_severance.doll_identity
   aliases:
@@ -510,6 +510,8 @@ documents:
   - Client/Encounters/FirstSeverance/FirstSeveranceDollPose.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollVisuals.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollCapture.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceDollSurface.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceShellSurface.cs
   - Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs
   - Assets/Textures/NPCs/DollTheater
   related_docs:
@@ -613,13 +615,13 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 33efb609d4302dff20b860f4619d1d3bc8954cba9da50a54c446b401ffeb89a3
+  content_sha256: 979aacc0ccf0b77335f7d2e3c4760a1b8d121db7e095b5269f7460ccdcd09bcb
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -1072,12 +1074,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 59c7f9339e32f4b4dd12a6133f3bc2115839055e84ce91e96501d0c8c7cd54f5
+  content_sha256: 8d3d8f980322af920a238bd976937ef6ad090542ff327ec1c5efcef0c461925d
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - project.implementation_status
   aliases:

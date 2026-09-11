@@ -20,16 +20,27 @@ internal sealed class FirstSeveranceDollPose
     internal void Body(float seconds, float cast, float recoil, float unfurl, float emergence, bool reduced, float pry = -1)
     {
         Sprites.Clear(); Cords.Clear();
-        float sway = reduced ? 0 : MathF.Sin(seconds * .69f) * .013f + MathF.Sin(seconds * 1.17f) * .004f;
+        float motion=unfurl*(reduced?.18f:1);
+        float sway = (Wave(seconds,0)*.043f+MathF.Sin(seconds*2.73f)*.009f)*motion;
         Tilt = .08f + .295f * unfurl + sway; // Already crooked inside the coffin; no upright reveal.
-        float drag = reduced ? 0 : MathF.Sin(seconds * .83f - .9f) * 3;
+        float drag = Wave(seconds,.9f)*12*motion;
         if (pry < 0) pry = emergence;
         Vector2 neck = Vector2.Lerp(V(69,-80), V(22,-183), emergence), waist = V(-5, 51);
-        Vector2 leftShoulder = Vector2.Lerp(V(-50,-28), V(-77,-35), unfurl), rightShoulder = V(83,-49);
-        Vector2 leftElbow = Vector2.Lerp(V(-94-pry*117,54+pry*14), V(-160,105 - cast*80 + recoil*23),unfurl);
+        Vector2 leftShoulder = Vector2.Lerp(V(-104,-28), V(-77,-35), unfurl), rightShoulder = V(83,-49);
+        Vector2 leftElbow = Vector2.Lerp(V(-160-pry*51,54+pry*14), V(-160,105 - cast*80 + recoil*23),unfurl);
         Vector2 rightElbow = Vector2.Lerp(V(169+pry*15,-98), V(191,-132 - cast*49 + recoil*19),unfurl);
-        Vector2 leftWrist = Vector2.Lerp(V(-95-pry*103,125-pry*18), V(-218,225 - cast*167 + recoil*41 + drag),unfurl);
+        Vector2 leftWrist = Vector2.Lerp(V(-191-pry*7,125-pry*18), V(-218,225 - cast*167 + recoil*41 + drag),unfurl);
         Vector2 rightWrist = Vector2.Lerp(V(221+pry*40,-110-pry*65), V(249,-264 - cast*49 + recoil*32),unfurl);
+        // Successive joints carry delayed, unequal tension, not a rigid sprite
+        // rotating around one point. These are decorative, never attack origins.
+        leftShoulder += V(3*Wave(seconds,.25f),7*Wave(seconds,.4f))*motion;
+        rightShoulder += V(-4*Wave(seconds,.9f),-8*Wave(seconds,1.1f))*motion;
+        leftElbow += V(16*Wave(seconds,.6f),23*Wave(seconds,1.0f))*motion;
+        rightElbow += V(-19*Wave(seconds,1.2f),20*Wave(seconds,1.6f))*motion;
+        leftWrist += V(27*Wave(seconds,1.25f),34*Wave(seconds,1.8f))*motion;
+        rightWrist += V(-24*Wave(seconds,1.9f),29*Wave(seconds,2.2f))*motion;
+        neck += V(9*Wave(seconds,2.1f),6*Wave(seconds,2.5f))*motion;
+        waist += V(6*Wave(seconds,1.6f),3*Wave(seconds,2.0f))*motion;
         // Restore the old elongated, pointed restraint silhouette. The person
         // is caught inside it, not a scaled copy of the complete NPC costume.
         Part(7,waist+V(0,65),V(95,15),V(.60f,.58f+.16f*unfurl),-.04f,true);
@@ -65,14 +76,33 @@ internal sealed class FirstSeveranceDollPose
         Sprites.Clear(); Cords.Clear();
         Tilt = .08f;
         float shiver = reduced ? 0 : MathF.Sin(seconds*1.17f)*1.8f;
-        Vector2 shoulder=V(-50,-28), elbow=V(-94,54+shiver*.35f), wrist=V(-95,125-pressure*3);
+        Vector2 shoulder=V(-104,-28), elbow=V(-160,54+shiver*.35f), wrist=V(-191,125-pressure*3);
         // Mostly behind the existing opaque coffin. Only fingertips and a short
         // hair lock cross its rim; no face portrait is layered over the casing.
-        Part(8,V(133,-88),V(63,18),V(.28f,.70f),-.12f+shiver*.002f);
+        Part(8,V(224,-70),V(63,18),V(.28f,.70f),-.12f+shiver*.002f);
         Limb(3,shoulder,elbow,false); Limb(4,elbow,wrist,false);
         Hand(wrist,elbow,.65f,-.12f);
         // The outer shell owns its suspension; hidden wrist cables need not
         // cross the casing or disclose the whole arm before it opens.
+    }
+
+    internal static float Wave(float seconds,float lag)
+        => MathF.Sin(seconds*1.18f-lag+.42f*MathF.Sin(seconds*.39f))
+            +.24f*MathF.Sin(seconds*2.09f-lag*1.7f);
+
+    internal static bool Flexible(DollSprite part) => !part.Harness&&part.Cell==8
+        || part.Harness&&(part.Cell==2||part.Cell==7);
+
+    // Continuous surface bend, with a fixed root. Neighboring mesh rows sample
+    // the same boundary; no tiled-strip seams or detached locks of hair.
+    internal static float FlexOffset(DollSprite part,float y,float seconds,bool reduced)
+    {
+        if(!Flexible(part)) return 0;
+        var region=Region(part);
+        float q=Math.Clamp((y-part.Pivot.Y)/Math.Max(1,region.Height-part.Pivot.Y),0,1);
+        float amplitude=part.Harness?(part.Cell==7?24:17):14;
+        float delay=part.Position.X*.006f+part.Cell*.57f;
+        return q*q*amplitude*Wave(seconds,delay+q*2.8f)*(reduced?.18f:1);
     }
 
     private void Part(int cell,Vector2 at,Vector2 pivot,Vector2 scale,float rotation,bool harness=false)

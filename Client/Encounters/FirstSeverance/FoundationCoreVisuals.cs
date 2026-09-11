@@ -56,7 +56,7 @@ public sealed class FoundationCoreVisuals : GlobalTile
         }
         else if (state.Preparation is { } preparation && preparation.TryGetMemberByServerSlot(Main.myPlayer, out _))
         {
-            double tick = state.EstimatedAuthorityTick;
+            double tick = state.EstimatedAuthorityTick + RitualRenderClock.Fraction;
             float deployment = Math.Clamp((float)((tick - preparation.EnteredTick) / FirstSeverancePreparationTimeline.DeploymentTicks), 0, 1);
             DrawField(batch, new(preparation.GroundX, preparation.GroundY), deployment, tick);
             doll.DrawPreparation(batch, preparation, tick,

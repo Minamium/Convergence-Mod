@@ -12,19 +12,30 @@ internal static partial class Program
         var before=new FirstSeveranceDollPose();
         var after=new FirstSeveranceDollPose();
         foreach(bool reduced in new[]{false,true})
-            for(int frame=0;frame<240;frame++)
+            for(int frame=0;frame<720;frame++)
             {
-                float a=frame/240f,b=(frame+1)/240f;
+                float a=frame/720f,b=(frame+1)/720f;
                 before.Body(a*6,a,0,a,a,reduced); after.Body(b*6,b,0,b,b,reduced);
                 AssertEqual(17,before.Sprites.Count,"bounded doll and retained restraint rig");
                 AssertEqual(5,before.Cords.Count,"bounded real attachment points");
-                AssertEqual(true,before.Tilt>.06f && before.Tilt<.40f,"crooked even during reveal");
+                AssertEqual(true,before.Tilt>.04f && before.Tilt<.45f,"bounded crooked sway, never upright");
                 for(int i=0;i<before.Sprites.Count;i++)
                 {
                     var part=before.Sprites[i];
                     AssertEqual(true,float.IsFinite(part.Scale.X) && part.Scale.X>.1f && part.Scale.X<4,"positive finite authored part scale");
-                    AssertEqual(true,Vector2.Distance(part.Position,after.Sprites[i].Position)<7,"no discontinuous joint jump");
-                    AssertEqual(true,MathF.Abs(part.Rotation-after.Sprites[i].Rotation)<.06f,"no sudden part rotation");
+                    AssertEqual(true,Vector2.Distance(part.Position,after.Sprites[i].Position)<4,"continuous joints at fractional 120Hz samples");
+                    AssertEqual(true,MathF.Abs(part.Rotation-after.Sprites[i].Rotation)<.025f,"no sudden part rotation");
+                    if(FirstSeveranceDollPose.Flexible(part))
+                    {
+                        AssertEqual(0f,FirstSeveranceDollPose.FlexOffset(part,part.Pivot.Y,a*6,reduced),"flexible root is anchored");
+                        int height=FirstSeveranceDollPose.Region(part).Height;
+                        for(int row=0;row<=12;row++)
+                        {
+                            float y=height*row/12f;
+                            float delta=FirstSeveranceDollPose.FlexOffset(part,y,b*6,reduced)-FirstSeveranceDollPose.FlexOffset(part,y,a*6,reduced);
+                            AssertEqual(true,MathF.Abs(delta)<1,"continuous flexible surface at shared row boundary");
+                        }
+                    }
                 }
                 // Upper-arm bottom must exactly meet the forearm's authored top,
                 // and forearm bottom the corresponding hand's wrist pivot.
@@ -44,6 +55,26 @@ internal static partial class Program
                     AssertEqual(true,Vector2.Distance(end,before.Sprites[l].Position)<.001f,"adjacent limbs meet at shared joint center");
                 }
             }
+    }
+
+    [DomainTest("Doll presentation retained shell masks preserve a closed full surface")]
+    private static void RetainedShellSurface()
+    {
+        int size=FirstSeveranceShellSurface.MaskSize;
+        AssertEqual(true,size>=1024,"microfractures are not downsampled to 256px");
+        var counts=new int[8];
+        for(int y=0;y<size;y++) for(int x=0;x<size;x++)
+        {
+            int sector=FirstSeveranceShellSurface.Sector(x,y,size);
+            AssertEqual(true,sector>=0&&sector<8,"exactly one petal for every source pixel");
+            counts[sector]++;
+        }
+        foreach(int count in counts) AssertEqual(true,count>size*size/12,"no empty/missing petal");
+        for(int tick=0;tick<360;tick++)
+        {
+            var closed=FirstSeveranceShellSurface.Size(tick);
+            AssertEqual(true,closed.X>480&&closed.Y>570,"stable visible preparation/combat footprint");
+        }
     }
 
     [DomainTest("Doll presentation capture reconstructs NPC then converges into the existing shell")]

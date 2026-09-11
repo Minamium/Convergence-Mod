@@ -16,6 +16,7 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 internal sealed class FirstSeveranceStageVisuals
 {
     private Texture2D[]? plates;
+    private Texture2D? shellTexture;
     private FirstSeveranceGridVolley? fadingGrid;
     internal static float RuptureAge(FirstSeveranceCombatProjection combat, double tick)
         => Math.Clamp((float)((tick - combat.BossPhaseStartedTick) / FirstSeveranceBossPhasePlan.Instance.Get(combat.BossPhase).TransitionTicks), 0, 1);
@@ -32,21 +33,27 @@ internal sealed class FirstSeveranceStageVisuals
         float fade = reveal * (1 - Window(age, .73, .99));
         float charge = breaking ? EclosionPry(age) : cast;
         float breath = MathF.Sin((float)(tick % 36000) * .021f);
-        float radius = 288 + breath * 1.3f + charge * 3;
+        float radius = FirstSeveranceShellSurface.Radius(tick,charge);
+        Vector2 footprint = new(FirstSeveranceShellSurface.Aspect,1);
         Color ion = Color.Lerp(new Color(179, 165, 158), new Color(229, 197, 147), charge * .65f);
         accents.Halo(batch, center, new Vector2(510 + charge * 65), ion, .20f * fade);
-        using var pixels = new FirstSeveranceDollVisuals.PixelPass(batch);
         for (int side=-1;side<=1;side+=2)
             FirstSeveranceDollVisuals.Cord(batch,center+new Vector2(side*460,-374),
                 center+new Vector2(side*66,-215),fade,(float)tick/60,side,side<0?13:2,reduced);
-        for (int index = 0; index < 8; index++)
+        // Adjacent alpha-filtered petals darken each other's edge at rest. Draw
+        // the original intact surface until they actually begin to separate.
+        if(split<=.001f)
+            batch.Draw(shellTexture!,center-Main.screenPosition,null,Color.White*fade,0,
+                new Vector2(shellTexture!.Width,shellTexture.Height)*.5f,
+                footprint*(radius*2)/new Vector2(shellTexture.Width,shellTexture.Height),SpriteEffects.None,0);
+        else for (int index = 0; index < 8; index++)
         {
             float angle = (index + .5f) * MathF.Tau / 8 - MathF.PI;
             Vector2 direction = new(MathF.Cos(angle), MathF.Sin(angle));
             float side = direction.X < 0 ? -1 : 1;
             // Hinged petals peel around their outer rims under the hands. They
             // compress in perspective, rather than exploding radially as tiles.
-            Vector2 hinge = direction * (radius * .82f);
+            Vector2 hinge = direction * footprint * (radius * .82f);
             Vector2 offset = new(side * split * (75 + MathF.Abs(direction.Y) * 35),
                 split * (30 + Math.Max(0, direction.Y) * 85));
             float roll = side * split * (.15f + MathF.Abs(direction.Y) * .36f);
@@ -54,10 +61,10 @@ internal sealed class FirstSeveranceStageVisuals
             Vector2 Map(Vector2 p) => center + hinge + offset + ((p - hinge) * squash).RotatedBy(roll);
             batch.Draw(plates![index], center + hinge + offset - Main.screenPosition, null,
                 Color.Lerp(Color.White, new Color(227, 240, 255), charge * .25f) * fade, roll,
-                new Vector2(128) + direction * (128 * .82f),
-                squash * ((radius * 2) / 256f), SpriteEffects.None, 0);
+                new Vector2(FirstSeveranceShellSurface.MaskSize*.5f) * (Vector2.One+direction*.82f),
+                squash * footprint * ((radius * 2) / FirstSeveranceShellSurface.MaskSize), SpriteEffects.None, 0);
             float ringAngle = index * MathF.Tau / 8 + .03f * breath;
-            Vector2 rim = Map(new Vector2(MathF.Cos(ringAngle), MathF.Sin(ringAngle)) * (radius + 12));
+            Vector2 rim = Map(new Vector2(MathF.Cos(ringAngle), MathF.Sin(ringAngle)) * footprint * (radius + 12));
             if (breaking && !reduced)
             {
                 // Stretched membranes remain attached to the retreating casing.
@@ -192,9 +199,10 @@ internal sealed class FirstSeveranceStageVisuals
     private void EnsureShell()
     {
         if (plates is not null || Main.dedServ) return;
-        const int size = 256;
-        var original = ModContent.Request<Texture2D>(FirstSeveranceDollVisuals.ArtRoot + "DollCoffin",
+        const int size = FirstSeveranceShellSurface.MaskSize;
+        var original = ModContent.Request<Texture2D>(FirstSeveranceShellSurface.TexturePath,
             ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+        shellTexture=original;
         var pixels = new Color[original.Width * original.Height];
         original.GetData(pixels);
         var data = new Color[8][];
@@ -202,12 +210,7 @@ internal sealed class FirstSeveranceStageVisuals
         for (int y = 0; y < size; y++)
             for (int x = 0; x < size; x++)
             {
-                float nx = (x - 127.5f) / 127f, ny = (y - 127.5f) / 127f;
-                float radius = MathF.Sqrt(nx * nx + ny * ny);
-                float angle = MathF.Atan2(ny, nx) + MathF.PI;
-                float warped = angle + .045f * MathF.Sin(radius * 17 + angle * 5);
-                float sector = (warped + MathF.Tau) % MathF.Tau / MathF.Tau * 8;
-                int index = (int)sector;
+                int index = FirstSeveranceShellSurface.Sector(x,y,size);
                 // Preserve authored irregular microfractures and alpha. Sector
                 // masks have no gaps until the shell is physically peeled apart.
                 data[index][y * size + x] = pixels[(y * original.Height / size) * original.Width + x * original.Width / size];
@@ -224,7 +227,7 @@ internal sealed class FirstSeveranceStageVisuals
     {
         fadingGrid = null;
         if (!unload || plates is null) return;
-        var old = plates; plates = null;
+        var old = plates; plates = null; shellTexture = null; // Content manager owns the original.
         Main.QueueMainThreadAction(() => { foreach (var plate in old) plate.Dispose(); });
     }
 }

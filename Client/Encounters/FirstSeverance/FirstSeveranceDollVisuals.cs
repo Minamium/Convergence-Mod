@@ -19,9 +19,10 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 internal sealed class FirstSeveranceDollVisuals
 {
     internal const string ArtRoot = "Convergence/Assets/Textures/NPCs/DollTheater/";
-    private Asset<Texture2D>? atlas, harness, coffin, attendant;
+    private Asset<Texture2D>? atlas, harness, coffin, attendant, shell;
     private readonly FirstSeveranceDollPose pose = new();
     private readonly FirstSeveranceAttackAccents captureAccents = new();
+    private readonly FirstSeveranceDollSurface surface = new();
     private static Vector2 V(System.Numerics.Vector2 p) => new(p.X,p.Y);
 
     // Caller is the owned world-space AlphaBlend/LinearClamp presentation pass.
@@ -51,7 +52,8 @@ internal sealed class FirstSeveranceDollVisuals
         Ensure();
         pose.Body(seconds,cast,kick,unfurl,emergence,reduced,pry);
         float scale=depth; // Visible P1 arm keeps the same size and joint endpoints while the casing peels.
-        using var pixels=new PixelPass(batch);
+        // Continuous subpixel rotation for Boss parts. Only the small NPC uses
+        // nearest-neighbor sampling; it must not quantize the entire giant rig.
         if (!handsOnly)
             DrawCords(batch,center,scale,opacity*(1-consumption),seconds,reduced);
         foreach (var part in pose.Sprites)
@@ -77,7 +79,6 @@ internal sealed class FirstSeveranceDollVisuals
         Ensure();
         float seconds=(float)(tick%216000)/60f;
         pose.Encased(seconds,pressure,reduced);
-        using var pixels=new PixelPass(batch);
         DrawCords(batch,center,1,opacity,seconds,reduced);
         foreach(var part in pose.Sprites) DrawPart(batch,part,center,1,Color.White*opacity,0,0,center,seconds*60,reduced);
     }
@@ -86,7 +87,12 @@ internal sealed class FirstSeveranceDollVisuals
         float handRotation,float handScale,Color tint,float breakup,float consume,Vector2 sink,float time,bool reduced)
     {
         Ensure();
-        using var pixels=new PixelPass(batch);
+        // Move the upper rig around the exact wrist. The hazard/emitter point
+        // stays authoritative, including the instant-kill closing hands.
+        float strength=reduced?.18f:1;
+        float seconds=time/60;
+        shoulder+=new Vector2(8*FirstSeveranceDollPose.Wave(seconds,.2f),12*FirstSeveranceDollPose.Wave(seconds,.7f))*strength;
+        elbow+=new Vector2(15*FirstSeveranceDollPose.Wave(seconds,1.0f),19*FirstSeveranceDollPose.Wave(seconds,1.5f))*strength;
         Arm(3,shoulder,elbow); Arm(4,elbow,wrist);
         var hand=new DollSprite(5,new(0,0),new(69,10),new(handScale),handRotation);
         DrawPart(batch,hand,wrist,1,tint,breakup,consume,sink,time,reduced);
@@ -111,11 +117,14 @@ internal sealed class FirstSeveranceDollVisuals
         float grown=Window(age,.86,1);
         float seconds=(float)(tick%216000)/60f;
         if(grown>.001f) DrawEncased(batch,core,tick,grown,0,reduced);
+        Vector2 shellSize=V(FirstSeveranceShellSurface.Size(tick));
+        batch.Draw(shell!.Value,core-Main.screenPosition,null,Color.White,0,
+            new Vector2(shell.Value.Width,shell.Value.Height)*.5f,
+            shellSize/new Vector2(shell.Value.Width,shell.Value.Height),SpriteEffects.None,0);
         using (new PixelPass(batch))
         {
             // The destination is already complete and stationary, including on
             // late snapshots. Never close new shell halves around an intact NPC.
-            batch.Draw(coffin!.Value,core-Main.screenPosition,null,Color.White,0,new Vector2(128),2.25f,SpriteEffects.None,0);
             for(int side=-1;side<=1;side+=2)
                 Cord(batch,FoundationCoreVisuals.HoistAnchor(ground,side,true,age),core+new Vector2(side*66,-215),
                     Window(age,.08,.36),seconds,side,side<0?13:2,reduced);
@@ -174,6 +183,16 @@ internal sealed class FirstSeveranceDollVisuals
         Vector2 position=root+V(part.Position)*scale;
         // Keep her face coherent during Final; the dress/limbs fragment first.
         float amount=part.Cell==0&&!part.Harness?breakup*.27f:breakup;
+        if(FirstSeveranceDollPose.Flexible(part))
+        {
+            if(amount<.12f&&consume<=0)
+            {
+                surface.Draw(batch,texture,rect,part,position,V(part.Scale)*scale,tint,time/60,reduced,1-Window(amount,0,.12));
+                return;
+            }
+            // Settle the bend before breaking it, so Final has no mesh/sprite pop.
+            amount=Window(amount,.12,1);
+        }
         if(amount>.001f || consume>0)
             FirstSeveranceDissolutionVisuals.Bone(batch,texture,rect,position,V(part.Pivot),V(part.Scale)*scale,
                 part.Rotation,tint,amount,consume,sink,time,reduced);
@@ -185,7 +204,8 @@ internal sealed class FirstSeveranceDollVisuals
         atlas??=ModContent.Request<Texture2D>(ArtRoot+"DollRigAtlas",AssetRequestMode.ImmediateLoad);
         harness??=ModContent.Request<Texture2D>("Convergence/Assets/Textures/NPCs/NullCantorRigAtlas",AssetRequestMode.ImmediateLoad);
         coffin??=ModContent.Request<Texture2D>(ArtRoot+"DollCoffin",AssetRequestMode.ImmediateLoad);
+        shell??=ModContent.Request<Texture2D>(FirstSeveranceShellSurface.TexturePath,AssetRequestMode.ImmediateLoad);
         attendant??=ModContent.Request<Texture2D>(ArtRoot+"DollAttendant",AssetRequestMode.ImmediateLoad);
     }
-    internal void Unload() { atlas=null;harness=null;coffin=null;attendant=null;captureAccents.Unload(); }
+    internal void Unload() { atlas=null;harness=null;coffin=null;attendant=null;shell=null;captureAccents.Unload();surface.Unload(); }
 }
