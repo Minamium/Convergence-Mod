@@ -63,7 +63,13 @@
     "audio": "passed: all four OGGs decode as 48 kHz stereo, bounded true peak, monotonic integrated loudness from P1 through Final",
     "repository_static": "passed: unit tests + verify_repo.py --write-catalog .",
     "git_diff_check": "passed",
-    "native_mod_build": "not_run: latest native package remains 0.2.46; 0.2.47 changes presentation C# and audio assets",
+    "native_mod_build": "passed: native tModLoader compilation/package, 0 errors and 4 existing CS8632 warnings; source unchanged during build",
+    "source_commit": "0687412d23e7e1c755f325ca2e6321ac4f2edc29",
+    "source_sha256": "fd5b825969b3a815e96bdb8922ae3c876ae98fc9537f17534fd96e5e40b23ca8",
+    "source_local_changes": "Preserved existing English edits in Localization/Preparation/en-US.hjson, Localization/RitualArmaments/en-US.hjson and Localization/en-US.hjson; included in package but not committed",
+    "build_record": ".local/builds/20260911T102158299617Z/record.json",
+    "artifact_bytes": 45960549,
+    "artifact_sha256": "887e9622f951b3e58b611e3740f080fe0212c0d88076a3adb5839497fcfe155d",
     "runtime": "not_run: user-owned transition/loop/mix listening"
   }
 }

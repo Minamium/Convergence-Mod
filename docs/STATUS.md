@@ -33,7 +33,7 @@ Development **0.2.47 / protocol 28**. Version comes from [build.txt](../build.tx
 
 ## Verification state
 
-Latest native package remains the 0.2.46 package from source commit **9232caa** (0 errors, 4 existing CS8632 warnings). For **0.2.47**, the one-shot integration verifies all four new OGGs as finite 48 kHz stereo with bounded true peak and the intended rising LUFS-I curve, then runs repository tests, catalog refresh and `git diff --check` before push. The 0.2.47 native tModLoader package and in-game phase handoff/loop/mix audition remain `not_run` / user-owned. [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) owns exact hashes and measurements.
+Latest native package: **0.2.47**, source commit **0687412** on `main`, **0 errors and 4 existing CS8632 warnings**. Source remained unchanged during compilation/packaging; the package is installed in the configured Mods profile and the predecessor is retained in the local build record. The integration's audio/static checks passed; in-game phase handoff/loop/mix audition remains `not_run` / user-owned. [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) owns exact source/package hashes, build record ID and audio measurements. No game session or server was launched for this build.
 
 The package also included existing, uncommitted English edits in `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved, not included in this documentation commit. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
 
@@ -56,7 +56,7 @@ Development loot is implemented, but balance, public solo/companions and final p
 
 ## Next change
 
-After obtaining a matching 0.2.47 client build, reload/restart and audition only the affected audio surfaces: confirm each transformation retains the old track until completion, the next phase enters directly on its selected high-energy section, loops never reintroduce the removed opening, and BGM remains continuously perceptible beneath attack SFX at the unchanged user sliders.
+The matching 0.2.47 package is built. Reload/restart without another unchanged Build + Reload and audition only the affected audio surfaces: confirm each transformation retains the old track until completion, the next phase enters directly on its selected high-energy section, loops never reintroduce the removed opening, and BGM remains continuously perceptible beneath attack SFX at the unchanged user sliders.
 
 Keep current behavior and accepted art unless explicitly revising them. Choose checks from the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md); do not replay historical checklists.
 
