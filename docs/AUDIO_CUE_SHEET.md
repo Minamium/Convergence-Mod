@@ -21,10 +21,18 @@ related_docs:
 
 Weapon-only0.2.25: the five ritual armaments reuse existing SFX masters with a separate `Convergence:RitualWeapon:` sound Identifier group, bounded positional volume, two-voice limits and unload cleanup. Weapon playback does not evict Boss cue voices. All Boss/music masters and cues remain unchanged; [weapon specification](encounters/first-severance/WEAPONS.md) owns the new timing.
 
-The accepted direction is ominous, solemn original orchestral-textural music, not the discarded Ninth/chiptune arrangement. The current mix and cue overrides are below. Human listening/mix approval remains user-owned. Implementation/build/load evidence belongs to [Status](STATUS.md).
+The current accepted phase BGM is EigHt's free BGM `不幸な人形劇`, used as one recognizable musical identity with owner-approved phase edits; the prior project-authored orchestral masters are retained below as history. Music playback remains client presentation and never drives gameplay timing. Human listening/mix approval remains user-owned. Implementation/build/load evidence belongs to [Status](STATUS.md).
 
 
 Current implementation is governed by the first section's overrides and the shared encounter/recovery specs. Versioned preceding sections preserve design history, not additional tuning or work orders. Exact timings, widths, gains and durations live in the relevant code/assets; do not restore an older value from a historical paragraph.
+## EigHt phase-progression BGM — 0.2.46
+
+All four existing First Severance phase-music filenames now derive from EigHt's `不幸な人形劇` rather than switching between independently composed tracks. The composition and section order remain recognizable; phase identity is created by a deliberately wide lower-to-upper curve in tempo, component density, pitch and stereo scale. The existing scene-effect mapping is unchanged, so music remains independent of the authority clock and phase transitions do not alter gameplay.
+
+Phase I is approximately **168 BPM / -2 semitones** and intentionally exposes a reduced harmonic body: most percussive material, low-band mass, high-band attack and side image are withheld. Phase II rises to approximately **194 BPM / -1 semitone** and restores roughly half the percussive/residual layer plus much of the low/high band and stereo image. Phase III reaches the source's published **218 BPM / original pitch / full source identity**. Final rises only slightly beyond that ceiling to approximately **222 BPM / +1 semitone**, with a restrained low-mid/presence/stereo lift and a bounded limiter for decode headroom. This produces the accepted P1 -> P2 -> P3 -> Final acceleration without rewriting the melody, harmony or formal order.
+
+The official BOOTH item identifies the MP3 as free BGM and links EigHt's governing terms; the exact runtime provenance and hashes are recorded in [Attribution](../Assets/ATTRIBUTION.md) and [0.2.46 evidence](evidence/2026-09-11-fukou-phase-progression.json). The source master itself is not committed. The 0.2.45 preparation-silence scene and all SFX are unchanged. Human in-game loop, transition and mix acceptance remains user-owned `not_run`.
+
 ## Accepted Stack, restored other SFX, silent preparation — 0.2.45
 
 Keep the accepted0.2.43/44 StackSummon and ShellMassLatch/Arc/Shed/Collapse masters and all four BGM byte-for-byte. All other SFX now match the pre-rebuild0.2.41 masters; nine remaining changed files are restored, including the three weapon sustain voices. The0.2.44 attack-window end/fade correction remains, so this rollback restores timbres without restoring unbounded Raid beam tails.

@@ -48,7 +48,7 @@ Current feature naming is `FirstSeverance` / `first_severance`. The isolated sou
 
 ## Assets and external material
 
-- Do not vendor Calamity binaries, source mirrors, extracted assets, or third-party recordings.
+- Do not vendor Calamity binaries, source mirrors, or extracted assets. Third-party recordings may be vendored only when the repository owner explicitly approves the exact work for this project, the source terms permit game use of the committed form, and `Assets/ATTRIBUTION.md` records the creator, source, terms, and exact modifications. Never treat game-use permission as permission for standalone redistribution; recheck the governing source terms before public release.
 - Do not commit concept/raw asset directories or generated build output.
 - Add an exact `Assets/ATTRIBUTION.md` record for every distributable image, audio, music, or font asset.
 - No release or external contribution acceptance occurs until source and asset licenses are selected.

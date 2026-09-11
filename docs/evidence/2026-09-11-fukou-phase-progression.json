@@ -1,0 +1,100 @@
+{
+  "date": "2026-09-11",
+  "version": "0.2.46",
+  "protocol": 28,
+  "base_commit": "3a378ab1e14f4d6af1a661c8732c0bcccc4b7922",
+  "branch": "audio/fukou-p1-fp-0.2.46",
+  "scope": "First Severance four BGM assets plus owning audio/status/rights docs and build version; SFX/C#/gameplay/network unchanged",
+  "accepted_direction": "Owner approved a dramatic lower-phase curve using EigHt's 不幸な人形劇: P1/P2 slower, stripped and lower-pitched; P3 reaches the full 218-BPM identity; Final rises slightly further.",
+  "source": {
+    "acquisition": "official BOOTH public full-preview MP3 for item 5206457; the same item exposes the work as a free MP3 download and links the governing terms",
+    "youtube": "https://www.youtube.com/watch?v=vTFL5_d_p7o",
+    "booth": "https://booth.pm/ja/items/5206457",
+    "booth_full_preview": "https://s6.booth.pm/f5e98993-8522-4ea2-85ce-57a8fc696e5c/s/5206457/full/a45fc2f1-3e47-4212-bbd9-f40bceac72c3.mp3",
+    "terms": "https://eight-novel.fanbox.cc/posts/7647818",
+    "sha256": "b4b9a44f2460f89b628673d4725d24e29d09ea76cc29113e005ba2dde7fbd5e8",
+    "bytes": 3605056,
+    "decoded_wav_sha256": "5ffe4334f74248df6eaf3658630c5c68eb54db353645b0012bbdcbf3931d53ef",
+    "owner_provided_booth_mp3_sha256": "b4b9a44f2460f89b628673d4725d24e29d09ea76cc29113e005ba2dde7fbd5e8"
+  },
+  "phases": {
+    "P1": {
+      "bytes": 5369386,
+      "sha256": "39b6d164f46e514078cae9dcefa887ae6359dd7d4c6380129f64404517c191c2",
+      "sample_rate": 48000,
+      "channels": 2,
+      "frames": 11213410,
+      "duration_seconds": 233.61270833333333,
+      "decoded_peak": 0.4500097632408142,
+      "decoded_rms": 0.07761412113904953,
+      "phase": "P1",
+      "target_bpm": 168.0,
+      "pitch_semitones": -2,
+      "stereo_width_factor": 0.68,
+      "component_weights": {
+        "low": 0.38,
+        "mid": 0.78,
+        "high": 0.28,
+        "perc": 0.14,
+        "resid": 0.15
+      }
+    },
+    "P2": {
+      "bytes": 5280479,
+      "sha256": "fac5a5b6b580ddff0615c3c302377b96ba19759904ce5ec561d8e417c9e964f8",
+      "sample_rate": 48000,
+      "channels": 2,
+      "frames": 9711221,
+      "duration_seconds": 202.31710416666667,
+      "decoded_peak": 0.8210119605064392,
+      "decoded_rms": 0.1625426858663559,
+      "phase": "P2",
+      "target_bpm": 194.0,
+      "pitch_semitones": -1,
+      "stereo_width_factor": 0.86,
+      "component_weights": {
+        "low": 0.72,
+        "mid": 0.94,
+        "high": 0.65,
+        "perc": 0.52,
+        "resid": 0.52
+      }
+    },
+    "P3": {
+      "bytes": 5048451,
+      "sha256": "a19fe1f848a777e825b2bc7701aa78858e3e585183dae89656e767826db162ec",
+      "sample_rate": 48000,
+      "channels": 2,
+      "frames": 8641786,
+      "duration_seconds": 180.03720833333333,
+      "decoded_peak": 0.9634669423103333,
+      "decoded_rms": 0.2286175936460495,
+      "phase": "P3",
+      "target_bpm": 218.0,
+      "pitch_semitones": 0,
+      "stereo_width_factor": 1.0
+    },
+    "FP": {
+      "bytes": 5215320,
+      "sha256": "f18b080345073b765b614ac9310f18a78fd255ff683223de7d318d6bfacbc94d",
+      "sample_rate": 48000,
+      "channels": 2,
+      "frames": 8486183,
+      "duration_seconds": 176.79547916666667,
+      "decoded_peak": 0.9477013945579529,
+      "decoded_rms": 0.22046992182731628,
+      "phase": "FP",
+      "target_bpm": 222.0,
+      "pitch_semitones": 1,
+      "stereo_width_factor": 1.08
+    }
+  },
+  "verification": {
+    "audio": "passed in generator: all four runtime OGGs decode finite stereo 48kHz, peak below 1.0 and P1/P2/P3 decoded RMS rises monotonically",
+    "repository_static": "passed: verify_repo.py . --write-catalog",
+    "git_diff_check": "passed: git diff --check",
+    "native_mod_build": "not_run: no C# or dependency/runtime contract changed",
+    "runtime": "not_run: user-owned in-game phase transition, loop seam and mix review"
+  },
+  "preserved": "0.2.45 SFX/restoration, preparation silence, cue filenames/scene selection, gameplay authority/timing, protocol28 and all C# behavior"
+}

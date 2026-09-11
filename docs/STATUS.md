@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.45**, protocol **28**. [Selective audio rollback](AUDIO_CUE_SHEET.md#accepted-stack-restored-other-sfx-silent-preparation--0245) preserves accepted Stack SFX and all current BGM, restoring other SFX to0.2.41. Preparation selects silence until combat starts or preparation ends. The0.2.44 four grounded columns and attack-tail deadlines remain; gameplay, visual geometry and protocol are unchanged.
+Development **0.2.46**, protocol **28**. [First Severance phase BGM](AUDIO_CUE_SHEET.md#eight-phase-progression-bgm--0246) now uses the owner-approved EigHt `不幸な人形劇` free-BGM source as one musical identity: P1/P2 start slower, lower-pitched and stripped, P3 reaches the published 218-BPM/full arrangement, and Final rises slightly further. Existing cue filenames/scene selection and gameplay timing are unchanged. The 0.2.45 SFX rollback and preparation silence remain.
 
 Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wave two shifts the sparse lanes so standing in the first gap is no longer safe. The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#random-final-triples) owns tuning. The owner reported submitting the preceding build to Workshop; approval/visibility is unverified. This build has not been uploaded by this task; [publication policy](RELEASE_PROCESS.md#development-publication-preparation) remains separate.
 
@@ -36,6 +36,8 @@ Retained Boss baseline: Final random triples have wider gaps; Phase-III sword wa
 The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery spec](encounters/first-severance/REVIVE_SPEC.md), [visual spec](encounters/first-severance/VISUAL_SPEC.md) and [audio cues](AUDIO_CUE_SHEET.md) own behavior. The [version matrix](VERSION_MATRIX.md) owns the runtime baseline.
 
 ## Verification state
+
+[0.2.46 BGM checks](evidence/2026-09-11-fukou-phase-progression.json) own official-source metadata, acquired-source hash, four-master decode/finite/stereo/48kHz/duration/peak/hash checks and repository static verification. No C#, protocol or runtime dependency contract changed; native Mod build is `not_run`. In-game phase-transition, loop and mix acceptance remains user-owned `not_run`.
 
 [0.2.45 checks](evidence/2026-09-11-selective-sfx-rollback.json) own exact audio restoration/preservation hashes, scene selection checks and build evidence. Preparation silence/start/cancel music handoff and in-game listening remain user-owned `not_run`.
 
@@ -97,6 +99,8 @@ The following is retained Boss-build evidence, not a weapon-build claim:
 - One-member start must be compiled off before public release. Full release/compatibility gates are separate from normal development checks.
 
 ## Next change
+
+User-owned0.2.46: reload matching client(s), check P1's slower/sparser/lower-pitch opening, P2's clearly faster/denser lift, P3 arriving at the original full 218-BPM identity, and Final's slight additional pitch/tempo pressure. Listen through ordinary loop seams and phase switches at unchanged music slider. Preparation should still be silent until combat starts, and SFX should remain 0.2.45 behavior.
 
 User-owned0.2.45: reload, confirm preparation is silent, current BGM starts with combat, and cancelling preparation returns ordinary music. Check retained Stack timbres and restored other SFX. No additional build or GUI/server launch is required here.
 

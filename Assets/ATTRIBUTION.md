@@ -1814,3 +1814,25 @@ User-directed restoration of these exact project-owned runtime masters from comm
 | `Assets/Sounds/FirstSeverance/LanceFire.wav` | `9ac2dd7a976b4afbe9687162bfc0468ffd0be63b494a6d7975e07d7ddf1d71bb` |
 | `Assets/Sounds/FirstSeverance/MeridianSustain.wav` | `6753c47585bb7d5447b3b55de7e832803a35c13c91670c21ad6655a9dbcc0274` |
 | `Assets/Sounds/FirstSeverance/PhaseRupture.wav` | `b3f0280827ea4c8377c89c1f3b0b3866cb35a9ea41484d3b104fcc3b04576a79` |
+
+
+## EigHt `不幸な人形劇` phase masters — 0.2.46
+
+- Creator/composer: **EigHt**.
+- Source work: **`不幸な人形劇` (Misfortune Puppet Show)**, published BPM 218.
+- Official free-BGM item: <https://booth.pm/ja/items/5206457>. The item page states that the MP3 may be used free of charge and directs users to the governing terms.
+- Governing terms link supplied by the creator: <https://eight-novel.fanbox.cc/posts/7647818>.
+- Reproducible render source: the official BOOTH-hosted public full-preview stream exposed by item 5206457 JSON. The workflow records that exact stream URL/hash below; the owner separately auditioned/provided the free BOOTH MP3 before approving this phase treatment. Official creator video reference: <https://www.youtube.com/watch?v=vTFL5_d_p7o>.
+- Owner-provided BOOTH MP3 audition SHA-256: `b4b9a44f2460f89b628673d4725d24e29d09ea76cc29113e005ba2dde7fbd5e8` (not vendored).
+- Repository-render input SHA-256: `b4b9a44f2460f89b628673d4725d24e29d09ea76cc29113e005ba2dde7fbd5e8` (`3605056` bytes; official BOOTH public full-preview MP3, decoded to 48kHz stereo before editing).
+- Human modifications: one composition is preserved across all phases. P1/P2 progressively restore harmonic bands, percussive/residual content and stereo width while raising tempo and pitch; P3 is the full 218-BPM/original-pitch identity; Final receives only a small tempo/pitch/low-mid/presence/width lift and bounded peak limiting. No new melody, harmony or section reordering is introduced.
+- Redistribution note: the raw source master is not committed. Only the game-facing derived OGG phase masters are distributed. Do not extract or redistribute these as a standalone BGM pack; recheck the creator's current governing terms before any public release or external redistribution of the Mod package.
+- Required project credit: credit **Music: EigHt — 不幸な人形劇** and retain the official source/terms links above, even where a downstream use might not otherwise require a credit.
+- Reviewer/date: owner selected the work and accepted the phase-treatment direction; repository provenance/decode checks 2026-09-11. In-game transition/mix/loop listening remains user-owned.
+
+| Runtime asset | Exact phase treatment / export |
+|---|---|
+| `Assets/Music/ObsidianLiturgy.ogg` | P1; 168 BPM; -2 semitone; 233.613s; SHA-256 `39b6d164f46e514078cae9dcefa887ae6359dd7d4c6380129f64404517c191c2` |
+| `Assets/Music/UnboundLiturgy.ogg` | P2; 194 BPM; -1 semitone; 202.317s; SHA-256 `fac5a5b6b580ddff0615c3c302377b96ba19759904ce5ec561d8e417c9e964f8` |
+| `Assets/Music/DistantLiturgy.ogg` | P3; 218 BPM; +0 semitone; 180.037s; SHA-256 `a19fe1f848a777e825b2bc7701aa78858e3e585183dae89656e767826db162ec` |
+| `Assets/Music/TerminalLiturgy.ogg` | FP; 222 BPM; +1 semitone; 176.795s; SHA-256 `f18b080345073b765b614ac9310f18a78fd255ff683223de7d318d6bfacbc94d` |
