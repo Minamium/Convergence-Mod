@@ -23,17 +23,17 @@ related_docs:
 
 ## Current build
 
-Development **0.2.46 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
+Development **0.2.47 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
 
 - Server-wide roster → field deployment → manual Ready → separate combat introduction is implemented. [Arena infrastructure](ARENA_INFRASTRUCTURE.md) owns admission, movement and cancellation.
 - Phase I / II / III / Final survival, frozen-roster HP scaling, fixed-position Stack, Spread, Raid-owned Down/instant revival and terminal effects/rewards are implemented. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) and [recovery spec](encounters/first-severance/REVIVE_SPEC.md) own current behavior.
 - Current presentation includes articulated shell/eclosion/remote arms, flowing beams, fragment verdicts, staged weapon rituals and oblique-rift Victory. [Visual spec](encounters/first-severance/VISUAL_SPEC.md) and [five weapons](encounters/first-severance/WEAPONS.md) own the accepted direction.
-- Latest change: four phase edits of EigHt's **不幸な人形劇**. Keep the accepted Stack effects, restored pre-rebuild non-Stack SFX and silent preparation. [Audio sheet](AUDIO_CUE_SHEET.md) owns the exact active selection; older Ninth/chiptune/orchestral masters are history.
+- Latest change: phase transitions keep the previous BGM through the full transformation, then start P2/P3/Final at section-only high-energy loops; P1/P2 mastering is raised so BGM stays audible against raid SFX. [Audio sheet](AUDIO_CUE_SHEET.md) owns the active cuts/mix; gameplay timing, SFX selection and silent preparation are unchanged.
 - One-member admission defaults on only as a build-gated development aid. It adds no companion, invulnerability or solo-specific fight. Normal testing is multiplayer unless the user explicitly chooses solo.
 
 ## Verification state
 
-Latest native package: source commit **9232caa**, integrated on `main`; **0 errors, 4 existing CS8632 warnings**, unchanged source during packaging. [Build/audio evidence](evidence/2026-09-11-fukou-phase-progression.json) owns hashes and the local record ID. Audio decode/static checks passed. **The latest BGM's in-game phase changes, loop seams and mix remain not_run / user-owned.** This documentation checkpoint does not rebuild or establish runtime acceptance.
+Latest native package remains the 0.2.46 package from source commit **9232caa** (0 errors, 4 existing CS8632 warnings). For **0.2.47**, the one-shot integration verifies all four new OGGs as finite 48 kHz stereo with bounded true peak and the intended rising LUFS-I curve, then runs repository tests, catalog refresh and `git diff --check` before push. The 0.2.47 native tModLoader package and in-game phase handoff/loop/mix audition remain `not_run` / user-owned. [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) owns exact hashes and measurements.
 
 The package also included existing, uncommitted English edits in `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved, not included in this documentation commit. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
 
@@ -41,7 +41,7 @@ Recent observed gameplay: the [0.2.43 solo run](evidence/2026-09-10-grounded-pos
 
 Concrete unverified surfaces to select **when relevant**, not a mandatory retest queue:
 
-- Latest audio: silent preparation → phase music, cancellation restoring ordinary music, phase/loop/mix audition.
+- Latest audio: silent preparation → P1, old BGM held through each transformation, new high-energy section starting with the first attack, section-loop seam, and BGM/SFX balance audition.
 - Preparation/UI: a distant three-player roster, last Ready/unready/cancel, and a peer at 107% UI scale seeing aligned black exterior/letterboxes.
 - Latest four-column/plinth art: ground contact and suspension continuity in the actual world.
 - Production compatibility: ordinary lethal hits, reconnect/observer identity, outsider rules and release matrix remain separate gates.
@@ -56,7 +56,7 @@ Development loot is implemented, but balance, public solo/companions and final p
 
 ## Next change
 
-Resume from [Windows handoff](handoff/WINDOWS.md), then read only the owning spec for the requested work. Next live check after the already-packaged BGM update is user-owned Reload/restart and the affected audio observations above; another unchanged Build + Reload is unnecessary. No server/GUI operation is implied.
+After obtaining a matching 0.2.47 client build, reload/restart and audition only the affected audio surfaces: confirm each transformation retains the old track until completion, the next phase enters directly on its selected high-energy section, loops never reintroduce the removed opening, and BGM remains continuously perceptible beneath attack SFX at the unchanged user sliders.
 
 Keep current behavior and accepted art unless explicitly revising them. Choose checks from the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md); do not replay historical checklists.
 

@@ -1836,3 +1836,17 @@ User-directed restoration of these exact project-owned runtime masters from comm
 | `Assets/Music/UnboundLiturgy.ogg` | P2; 194 BPM; -1 semitone; 202.317s; SHA-256 `fac5a5b6b580ddff0615c3c302377b96ba19759904ce5ec561d8e417c9e964f8` |
 | `Assets/Music/DistantLiturgy.ogg` | P3; 218 BPM; +0 semitone; 180.037s; SHA-256 `a19fe1f848a777e825b2bc7701aa78858e3e585183dae89656e767826db162ec` |
 | `Assets/Music/TerminalLiturgy.ogg` | FP; 222 BPM; +1 semitone; 176.795s; SHA-256 `f18b080345073b765b614ac9310f18a78fd255ff683223de7d318d6bfacbc94d` |
+
+## EigHt `不幸な人形劇` section-loop / mix revision — 0.2.47
+
+- Creator/composer, work, source, governing terms and redistribution conditions remain exactly the **0.2.46 EigHt `不幸な人形劇`** record; this revision introduces no new third-party recording or composition.
+- Edit basis: the four already-approved 0.2.46 runtime phase masters. P1 remains full-form and receives +6.25dB static gain. P2 is cropped to processed-master 40.873–94.068s and receives +0.75dB. P3 is cropped to 92.523–138.485s. Final is cropped to 145.721–170.849s and reduced 0.60dB for encode headroom. P2/P3/Final receive 20ms entry/exit anti-click fades.
+- Playback change: during the 6.0s/5.0s/4.0s `PhaseTransition` windows the previous phase music slot is retained; the next file starts only after transformation resolves. This changes no composition, SFX source, user slider, gameplay clock or network state.
+- Loop rule: P2/P3/Final contain only their selected section, therefore an ordinary whole-file loop cannot reintroduce the discarded opening material.
+
+| Runtime asset | Duration | Loudness | True peak | SHA-256 |
+|---|---:|---:|---:|---|
+| `Assets/Music/ObsidianLiturgy.ogg` | 233.613s | -13.5 LUFS-I | -0.6 dBTP | `586c8a0999b3b03badf5a34cded304bb7018c2f6adc9a58053095958c2d41930` |
+| `Assets/Music/UnboundLiturgy.ogg` | 53.195s | -12.2 LUFS-I | -1.4 dBTP | `f649dbe264f7e2167aae0805511f9a312bbd24873321dc4b49e8202eab42073c` |
+| `Assets/Music/DistantLiturgy.ogg` | 45.962s | -10.5 LUFS-I | -0.5 dBTP | `e9b75cfc8069fb0ae462a39a49fa651d0f8082e6b1f3668bb3ec2b11f264c7b7` |
+| `Assets/Music/TerminalLiturgy.ogg` | 25.128s | -10.4 LUFS-I | -1.0 dBTP | `db5ebaa555b95e29c575e10038f952e13c08a267cf07801a7d173bbbab36539f` |

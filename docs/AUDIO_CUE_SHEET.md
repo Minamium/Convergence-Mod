@@ -23,20 +23,22 @@ This page owns **current playback/design choices**. [Attribution](../Assets/ATTR
 
 ## Current BGM
 
-All four phase slots now use owner-approved edits of **EigHt — 不幸な人形劇**. Maintain one recognizable musical identity, moving from sparse/lower/slower early phases to the full source and slightly beyond in Final. This replaces both the Ninth/chiptune brief and the later project-authored orchestral A/B/C masters; do not regenerate those older tracks over the active ones.
+All four phase slots use owner-approved edits of **EigHt — 不幸な人形劇** as one recognizable identity. Phase I keeps the full reduced/lower/slower form; Phase II / III / Final now contain only selected high-energy sections, so an ordinary whole-file loop cannot return to the removed slow opening.
 
 | Runtime slot | Active treatment |
 |---|---|
-| `Assets/Music/ObsidianLiturgy.ogg` | Phase I: reduced harmonic/percussive/low/high/stereo body, lower and slower |
-| `Assets/Music/UnboundLiturgy.ogg` | Phase II: denser, faster, progressively restored bands and stereo |
-| `Assets/Music/DistantLiturgy.ogg` | Phase III: full original-pitch/source identity |
-| `Assets/Music/TerminalLiturgy.ogg` | Final: small further tempo/pitch/presence lift with controlled peak headroom |
+| `Assets/Music/ObsidianLiturgy.ogg` | Phase I: full 168-BPM/-2-semitone reduced arrangement; +6.25 dB master lift; about -14.0 LUFS-I |
+| `Assets/Music/UnboundLiturgy.ogg` | Phase II: 194-BPM/-1-semitone processed-master section 40.873–94.068s; +0.75 dB; 20 ms anti-click edges; about -12.9 LUFS-I |
+| `Assets/Music/DistantLiturgy.ogg` | Phase III: full-identity 218-BPM section 92.523–138.485s; 20 ms anti-click edges; about -10.5 LUFS-I |
+| `Assets/Music/TerminalLiturgy.ogg` | Final: 222-BPM/+1-semitone section 145.721–170.849s; -0.60 dB encode headroom; 20 ms anti-click edges; about -9.8 LUFS-I |
 
-Exact BPM, pitch, duration and hashes have one owner: [EigHt attribution/export table](../Assets/ATTRIBUTION.md#eight-不幸な人形劇-phase-masters--0246). [PrototypePresentation](../Client/Encounters/FirstSeverance/FirstSeverancePrototypePresentation.cs) maps accepted phase to MusicLoader slots. The legacy filenames are runtime IDs, not titles/ownership of the current composition.
+During `PhaseTransition`, music selection intentionally stays on the **previous phase slot** for the complete transformation (P1→P2 6.0s, P2→P3 5.0s, P3→Final 4.0s). The new phase file starts only when the transition resolves into the first attack. BossPhase itself still advances at transition start, so transformation visuals/SFX, HP gates, authority timing and network state are unchanged.
+
+The master balance is raised on the music side rather than reducing warning SFX or changing user sliders. The resulting integrated-loudness ramp is approximately **-14.0 / -12.9 / -10.5 / -9.8 LUFS-I**, preserving phase escalation while keeping early-phase BGM materially present against raid cues. Exact hashes, durations, loudness and true peaks are in [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json); creator/source/terms remain owned by [Attribution](../Assets/ATTRIBUTION.md).
 
 **Preparation is silent.** [PreparationSilence](../Client/Encounters/FirstSeverance/FirstSeverancePreparationSilence.cs) selects silence only while the local member has accepted preparation without combat. Combat start selects phase music; cancel/lost preparation releases the scene to ordinary music. No user music/SFX slider, world state or input flag changes.
 
-Music never drives authority timers. Tracks are not sample-accurate seek-synchronized for joining peers. Numeric decode/peak/RMS checks do not prove loop/transition/mix acceptance.
+Music never drives authority timers. Tracks are not sample-accurate seek-synchronized for joining peers. Numeric decode/peak/LUFS checks do not prove in-game loop/transition/mix acceptance.
 
 ## Accepted SFX selection
 

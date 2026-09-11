@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-11",
+  "version": "0.2.47",
+  "protocol": 28,
+  "scope": "First Severance phase-music handoff, V8 section loops and BGM loudness; gameplay/network/SFX unchanged",
+  "source": {
+    "basis": "0.2.46 approved EigHt 不幸な人形劇 runtime phase masters already committed to the repository",
+    "prior_hashes": {
+      "P1": "39b6d164f46e514078cae9dcefa887ae6359dd7d4c6380129f64404517c191c2",
+      "P2": "fac5a5b6b580ddff0615c3c302377b96ba19759904ce5ec561d8e417c9e964f8",
+      "P3": "a19fe1f848a777e825b2bc7701aa78858e3e585183dae89656e767826db162ec",
+      "Final": "f18b080345073b765b614ac9310f18a78fd255ff683223de7d318d6bfacbc94d"
+    },
+    "third_party_rights": "unchanged from Assets/ATTRIBUTION.md 0.2.46 EigHt record; no new source recording introduced"
+  },
+  "edit": {
+    "transition_music": "During PhaseTransition, music selection resolves to the previous BossPhase; the new phase track begins when the transition substate ends.",
+    "P1": "full 0.2.46 phase master, +6.25 dB static gain",
+    "P2": "processed-master 40.873s..94.068s, +0.75 dB, 20 ms entry/exit fades",
+    "P3": "processed-master 92.523s..138.485s, 20 ms entry/exit fades",
+    "Final": "processed-master 145.721s..170.849s, -0.60 dB for encode headroom, 20 ms entry/exit fades",
+    "loop_policy": "P2/P3/Final files contain only the selected high-energy section; deleted earlier material cannot reappear on an ordinary whole-file loop."
+  },
+  "runtime_assets": {
+    "P1": {
+      "bytes": 5084181,
+      "sha256": "586c8a0999b3b03badf5a34cded304bb7018c2f6adc9a58053095958c2d41930",
+      "sample_rate": 48000,
+      "channels": 2,
+      "duration_seconds": 233.612708,
+      "lufs_i": -13.5,
+      "true_peak_dbfs": -0.6
+    },
+    "P2": {
+      "bytes": 1373698,
+      "sha256": "f649dbe264f7e2167aae0805511f9a312bbd24873321dc4b49e8202eab42073c",
+      "sample_rate": 48000,
+      "channels": 2,
+      "duration_seconds": 53.195,
+      "lufs_i": -12.2,
+      "true_peak_dbfs": -1.4
+    },
+    "P3": {
+      "bytes": 1286852,
+      "sha256": "e9b75cfc8069fb0ae462a39a49fa651d0f8082e6b1f3668bb3ec2b11f264c7b7",
+      "sample_rate": 48000,
+      "channels": 2,
+      "duration_seconds": 45.962,
+      "lufs_i": -10.5,
+      "true_peak_dbfs": -0.5
+    },
+    "Final": {
+      "bytes": 773507,
+      "sha256": "db5ebaa555b95e29c575e10038f952e13c08a267cf07801a7d173bbbab36539f",
+      "sample_rate": 48000,
+      "channels": 2,
+      "duration_seconds": 25.128,
+      "lufs_i": -10.4,
+      "true_peak_dbfs": -1.0
+    }
+  },
+  "verification": {
+    "audio": "passed: all four OGGs decode as 48 kHz stereo, bounded true peak, monotonic integrated loudness from P1 through Final",
+    "repository_static": "passed: unit tests + verify_repo.py --write-catalog .",
+    "git_diff_check": "passed",
+    "native_mod_build": "not_run: latest native package remains 0.2.46; 0.2.47 changes presentation C# and audio assets",
+    "runtime": "not_run: user-owned transition/loop/mix listening"
+  }
+}

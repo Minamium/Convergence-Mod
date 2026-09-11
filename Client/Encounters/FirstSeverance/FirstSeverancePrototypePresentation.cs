@@ -20,8 +20,19 @@ internal sealed class FirstSeverancePrototypeMusic : ModSceneEffect
 {
     public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
 
+    private static FirstSeveranceBossPhase MusicPhase(FirstSeveranceCombatProjection? combat)
+        => combat is { Substate: FirstSeveranceSubstate.PhaseTransition }
+            ? combat.BossPhase switch
+            {
+                FirstSeveranceBossPhase.Final => FirstSeveranceBossPhase.Distant,
+                FirstSeveranceBossPhase.Distant => FirstSeveranceBossPhase.Unbound,
+                FirstSeveranceBossPhase.Unbound => FirstSeveranceBossPhase.Sealed,
+                _ => combat.BossPhase,
+            }
+            : combat?.BossPhase ?? FirstSeveranceBossPhase.Sealed;
+
     public override int Music => Main.dedServ ? -1 : MusicLoader.GetMusicSlot(Mod,
-        ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat?.BossPhase switch
+        MusicPhase(ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat) switch
         {
             FirstSeveranceBossPhase.Final => "Assets/Music/TerminalLiturgy",
             FirstSeveranceBossPhase.Distant => "Assets/Music/DistantLiturgy",
