@@ -93,7 +93,10 @@
     "audio": "passed in generator: all four runtime OGGs decode finite stereo 48kHz, peak below 1.0 and P1/P2/P3 decoded RMS rises monotonically",
     "repository_static": "passed: verify_repo.py . --write-catalog",
     "git_diff_check": "passed: git diff --check",
-    "native_mod_build": "not_run: no C# or dependency/runtime contract changed",
+    "native_mod_build": "passed on main integration:0errors,4existing CS8632 warnings; all four asset hashes match; source unchanged during packaging",
+    "build_record": ".local/builds/20260911T083718761799Z/record.json",
+    "source_sha256": "null",
+    "artifact_sha256": "baf256e82c5a7518915972165b343ad10d316f7223b32fb50f35d3faa3bbbd94",
     "runtime": "not_run: user-owned in-game phase transition, loop seam and mix review"
   },
   "preserved": "0.2.45 SFX/restoration, preparation silence, cue filenames/scene selection, gameplay authority/timing, protocol28 and all C# behavior"

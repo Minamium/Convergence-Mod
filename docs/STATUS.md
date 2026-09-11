@@ -37,7 +37,7 @@ The [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md), [recovery sp
 
 ## Verification state
 
-[0.2.46 BGM checks](evidence/2026-09-11-fukou-phase-progression.json) own official-source metadata, acquired-source hash, four-master decode/finite/stereo/48kHz/duration/peak/hash checks and repository static verification. No C#, protocol or runtime dependency contract changed; native Mod build is `not_run`. In-game phase-transition, loop and mix acceptance remains user-owned `not_run`.
+[0.2.46 BGM checks](evidence/2026-09-11-fukou-phase-progression.json) own official-source metadata, acquired-source hash, four-master decode/finite/stereo/48kHz/duration/peak/hash checks and repository static verification. Main integration verified all four asset hashes and native packaging passed with0errors/4existing warnings; the stale generated catalog was refreshed. No C#, protocol or runtime dependency contract changed. In-game phase-transition, loop and mix acceptance remains user-owned `not_run`.
 
 [0.2.45 checks](evidence/2026-09-11-selective-sfx-rollback.json) own exact audio restoration/preservation hashes, scene selection checks and build evidence. Preparation silence/start/cancel music handoff and in-game listening remain user-owned `not_run`.
 
