@@ -46,11 +46,12 @@ Preparation first deploys the full field/black exterior with a brief HUD-free ci
 
 | Accepted state | Presentation |
 |---|---|
-| Before / Preparation | Completed coffin already at center; the plinth NPC disassembles, briefly hangs in pieces, then accelerates into that center before Ready. No change to admission or deployment duration. |
+| Before / Preparation | Empty completed coffin already at center; NPC remains intact on the plinth throughout deployment and Ready. Admission/deployment duration unchanged. |
+| All-Ready / SpawnIntro | Capture only after Ready: suspension tension, disassembly/hold, accelerating intake, arrival light and late name reveal. Shared accepted start/end clock; camera follows the NPC to the shell. See [Doll Theater](DOLL_THEATER_VISUAL_SPEC.md) for the expanded intro. |
 | Phase I / Sealed | Restored microfractured metal shell hides almost all of the body; only a few fingertips/hair escape the rim, no face overlaid in front. Preparation/combat share the original material. Shielded/exposed remain distinguishable; Pylon winch cables sustain the shield. |
 | I → II | Eclosion: hands pierce/pry seams, casing catches then peels on connected hinges, head/torso slides out, folded limbs unfurl. Preserve depth passes and attached joints; no radial tile explosion or instantaneous sprite swap. |
 | Phase II / Unbound | Retained porcelain ball-jointed arms and slant; old crown/body restraint silhouette around a small, partly veiled face. Not an enlarged NPC portrait/costume. Every field-origin attack still gets a corresponding Boss load/recoil. |
-| II → III / Distant | Body retreats in depth; two remote arms manifest at the field sides. The real foreground Core aperture remains the single NPC target. Background body/arms are not extra hitboxes. |
+| II → III / Distant | Current doll retreats in depth and remotely controls the old ivory/tendon/clawed arms at the field sides. Authored claw/torso frames supplement rig motion; body porcelain arms remain. The real foreground Core aperture remains the single NPC target. Background body/arms are not extra hitboxes. |
 | Final | Keep the same doll identity in Distant's form; dress/limbs fragment first and her face remains coherent longer. Progress follows accepted score, not local elapsed time or invented HP. |
 | Victory | After accepted terminal: an oblique narrow dimensional slit appears; fragments arrest, then accelerate inward as the form disintegrates, the slit contracts, and a strong bounded flash/shake/sound extinguishes it. |
 | Defeat | Distinct HUD-free failure designation/pressure collapse; no false victory on cancel/invalidation. |

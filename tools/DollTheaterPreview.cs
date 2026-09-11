@@ -9,11 +9,13 @@ using Convergence.Client.Encounters.FirstSeverance;
 // not a replacement for lighting/zoom/multiplayer acceptance in tModLoader.
 public static class DollTheaterPreview
 {
-    public static void Create(string assets, string output)
+    public static void Create(string assets, string output,bool includeMotion=true)
     {
         Validate(assets);
         using var atlas=new Bitmap(Path.Combine(assets,"DollRigAtlas.png"));
         using var harness=new Bitmap(Path.Combine(assets,"..","NullCantorRigAtlas.png"));
+        using var bodyFrames=new Bitmap(Path.Combine(assets,"RestraintFrames.png"));
+        using var handFrames=new Bitmap(Path.Combine(assets,"RemoteClawFrames.png"));
         using var shell=new Bitmap(Path.Combine(assets,"..","NullCantorShell.png"));
         using var npc=new Bitmap(Path.Combine(assets,"DollAttendant.png"));
         using var result=new Bitmap(1536,1024);
@@ -44,13 +46,14 @@ public static class DollTheaterPreview
         pose.Encased(3,0,false); DrawPose(g,atlas,harness,pose,603,500,.89f);
         var shellSize=FirstSeveranceShellSurface.Size(180)*.89f;
         g.DrawImage(shell,new RectangleF(603-shellSize.X/2,500-shellSize.Y/2,shellSize.X,shellSize.Y));
-        pose.Body(3,0,0,1,1,false); DrawPose(g,atlas,harness,pose,1160,465,.68f);
+        pose.Body(3,0,0,1,1,false); DrawPose(g,atlas,harness,pose,1160,465,.68f,bodyFrames:bodyFrames);
         g.DrawString("Mostly enclosed: only a short lock and fingertips.\nNo face or complete arm pasted in front of the casing.",small,quiet,335,905);
         g.DrawString("Accepted porcelain arms / old restrained body silhouette.\nSmaller captive face inside the crown, not a giant NPC head.",small,quiet,916,905);
         Directory.CreateDirectory(Path.GetDirectoryName(output));
         result.Save(output,ImageFormat.Png);
         Capture(npc,shell,Path.Combine(Path.GetDirectoryName(output),"capture.png"));
-        Motion(atlas,harness,Path.Combine(Path.GetDirectoryName(output),"motion"));
+        Frames(handFrames,bodyFrames,Path.Combine(Path.GetDirectoryName(output),"authored-frames.png"));
+        if(includeMotion) Motion(atlas,harness,bodyFrames,Path.Combine(Path.GetDirectoryName(output),"motion"));
     }
 
     public static void Validate(string assets)
@@ -74,7 +77,7 @@ public static class DollTheaterPreview
         }
     }
 
-    static void DrawPose(Graphics g,Bitmap atlas,Bitmap harness,FirstSeveranceDollPose pose,float x,float y,float scale,float seconds=3,bool reduced=false)
+    static void DrawPose(Graphics g,Bitmap atlas,Bitmap harness,FirstSeveranceDollPose pose,float x,float y,float scale,float seconds=3,bool reduced=false,Bitmap bodyFrames=null)
     {
         using var cord=new Pen(Color.FromArgb(140,124,107),1.2f);
         foreach(var cable in pose.Cords) g.DrawLine(cord,x+cable.AnchorX*scale,y+cable.AnchorY*scale,
@@ -87,7 +90,14 @@ public static class DollTheaterPreview
             g.ScaleTransform(part.Scale.X*scale,part.Scale.Y*scale);
             var region=FirstSeveranceDollPose.Region(part);
             var texture=part.Harness?harness:atlas;
-            if(FirstSeveranceDollPose.Flexible(part))
+            if(part.Harness&&part.Cell==0&&bodyFrames!=null)
+            {
+                var uv=FirstSeveranceDollFrames.Region(false,FirstSeveranceDollFrames.Body(seconds,0,reduced));
+                var pivot=FirstSeveranceDollFrames.Pivot(false);
+                g.DrawImage(bodyFrames,new RectangleF(-pivot.X*2,-pivot.Y*2,uv.Width*2,uv.Height*2),
+                    new RectangleF(uv.X,uv.Y,uv.Width,uv.Height),GraphicsUnit.Pixel);
+            }
+            else if(FirstSeveranceDollPose.Flexible(part))
             {
                 int rows=reduced?6:12;
                 for(int row=0;row<rows;row++)
@@ -118,7 +128,7 @@ public static class DollTheaterPreview
         for(int frame=0;frame<times.Length;frame++)
         {
             float x=150+frame*300,y=275,scale=.65f;
-            g.DrawString(labels[frame]+"\n"+(times[frame]*3).ToString("0.00")+"s",font,pale,frame*300+14,20);
+            g.DrawString(labels[frame]+"\n"+(times[frame]*100).ToString("0")+"% of accepted Raid intro",font,pale,frame*300+14,20);
             var size=FirstSeveranceShellSurface.Size(times[frame]*180)*scale;
             g.InterpolationMode=InterpolationMode.Bilinear;
             g.DrawImage(shell,new RectangleF(x-size.X/2,y-size.Y/2,size.X,size.Y));
@@ -138,11 +148,28 @@ public static class DollTheaterPreview
                 g.Restore(state);
             }
         }
-        g.DrawString("Offline samples of the shared fragment curve; no actual game rendering captured.",font,pale,16,683);
+        g.DrawString("AFTER ALL READY / offline shared capture curve, not preparation or an actual game recording.",font,pale,16,683);
         result.Save(output,ImageFormat.Png);
     }
 
-    static void Motion(Bitmap atlas,Bitmap harness,string folder)
+    static void Frames(Bitmap hand,Bitmap body,string output)
+    {
+        using var image=new Bitmap(1600,890); using var g=Graphics.FromImage(image);
+        using var font=new Font("Segoe UI",13); using var ink=new SolidBrush(Color.LightGray);
+        g.Clear(Color.FromArgb(21,20,27)); g.InterpolationMode=InterpolationMode.Bilinear;
+        g.DrawString("8 AUTHORED CLAW POSES + 8 RESTRAINT POSES / actual runtime atlas frames, not rig screenshots",font,ink,20,15);
+        for(int row=0;row<2;row++) for(int i=0;i<8;i++)
+        {
+            var uv=FirstSeveranceDollFrames.Region(row==0,i);
+            var tex=row==0?hand:body;
+            if(tex.Width!=uv.Width*4||tex.Height!=uv.Height*2) throw new InvalidDataException("Invalid frame atlas size");
+            g.DrawString((row==0?"Claw ":"Restraint ")+i,font,ink,i*200+12,55+row*410);
+            g.DrawImage(tex,new RectangleF(i*200+5,82+row*410,190,352),new RectangleF(uv.X,uv.Y,uv.Width,uv.Height),GraphicsUnit.Pixel);
+        }
+        image.Save(output,ImageFormat.Png);
+    }
+
+    static void Motion(Bitmap atlas,Bitmap harness,Bitmap bodyFrames,string folder)
     {
         Directory.CreateDirectory(folder);
         using var frame=new Bitmap(900,800);
@@ -157,7 +184,7 @@ public static class DollTheaterPreview
             g.Clear(Color.FromArgb(21,20,27));
             g.DrawString("Offline rig + surface motion / 60 samples per second / not game FPS",font,pale,16,16);
             pose.Body(seconds,0,0,1,1,false);
-            DrawPose(g,atlas,harness,pose,450,360,.78f,seconds);
+            DrawPose(g,atlas,harness,pose,450,360,.78f,seconds,bodyFrames:bodyFrames);
             frame.Save(Path.Combine(folder,i.ToString("D4")+".png"),ImageFormat.Png);
         }
     }

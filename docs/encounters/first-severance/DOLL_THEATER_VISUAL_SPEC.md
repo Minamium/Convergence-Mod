@@ -16,6 +16,7 @@ related_code:
   - Client/Encounters/FirstSeverance/FirstSeveranceDollVisuals.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollCapture.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollSurface.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceShellSurface.cs
   - Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs
   - Assets/Textures/NPCs/DollTheater
@@ -35,28 +36,29 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 
 **同日の追加指示が優先：NPCの顔と全身をそのまま巨大化させない。腕の人形造形は維持する。** 旧Bossの冠・尖った胴の拘束フレーム・長い裾状の装甲を再利用して異形の外形を戻す。顔は小さくして冠の奥に置き、非対称の装甲で一部を遮る。白髪・黒衣は拘束された内側の少女を示す断片。完全なベル形スカートと両脚を揃えた巨大NPCの輪郭は避ける。Phase Iは特に露出を抑え、殻の前へ巨大な顔や腕全体を重ねない。
 
-今回の変更は提示と会話NPC。RaidのID・HP・フェーズ条件・攻撃座標／予告時間・Ready手順・蘇生・音楽／SFXは変更しない。NPCは仲間でも追加の参加者でもなく、ソロ調整や戦闘補助をしない。
+今回の変更は提示と会話NPC。RaidのID・HP・フェーズ条件・攻撃座標／予告時間・Ready集計・蘇生・音楽は変更しない。追加指示で、Ready後のSpawnIntroだけを延長し、既存SFXを吸入の三つの節目へ接続する。NPCは仲間でも追加の参加者でもなく、ソロ調整や戦闘補助をしない。
 
-2026-09-12の修正：殻本体には元の高精細な `NullCantorShell` を戻す。256pxの陶器素材への置換で失われていた微細な亀裂と金属の質感を維持し、準備／戦闘とも同じ縦長の収容殻を描く。身体は固定フレーム切替ではなく、関節の遅れとうねり＋連続した表面変形で動かす。
+2026-09-12の修正：殻本体は元の高精細な `NullCantorShell` を維持。Phase IIIの遠隔腕だけ旧型の黒い腱・象牙装甲・長い鉤爪へ戻す。本体の人形腕は維持し、それが別の手を操る構図とする。鉤爪8枚／胸の拘束殻8枚の実際に形が異なる描き分けを追加し、既存の関節の遅れ・うねり・表面屈曲を二次動作として併用する。
 
 ## 各状態
 
 | 状態 | 画面で伝える内容 | 実装 |
 |---|---|---|
 | 戦闘前 | 台に静かに立つ等身大の白髪少女。黒い多段フリル、袖、ボンネット、人工的な膝、伏し目。短い会話ができる | `FirstSeveranceDollAttendant`。32×52の2フレーム、微小な揺れと不等間隔のまばたき。歩行・町の住居AIは付けない |
-| 最初の準備演出 | 完成した殻が先に中央にある。台の少女がばらばらになる → 短くばらけて留まる → 破片が加速して殻の中央へ吸い込まれる | `DrawPreparation`／`DollCapture`。既存Deployment期間の中で完結。殻の中心・サイズは固定。無傷のNPCを持ち上げたり、新しい殻を左右から閉じない |
-| Ready待機 | 殻への取り込みが終わり、縁からごく少量の指先・髪が見える | 大きな説明文は足さない。既存READY集計と無音準備を維持 |
+| 最初の準備演出 | フィールド・柱・空の既存殻が展開する。台の少女は無傷で残る | `DrawPreparation`は少女を分解せず、人形の指／髪も殻から出さない。既存Deployment期間とUI／境界を維持 |
+| Ready待機 | 少女は台で静止・まばたき。まだ殻へ取り込まれない | 既存READY集計と無音準備を維持。NPCは参加者ではなく、準備中は会話不可 |
+| 全員Ready後のRaid開始 | 糸の張り → NPC分解 → 短い滞留 → 加速吸入 → 殻中央の発光／名前表示 → 戦闘 | SpawnIntroの正本は `EncounterPlan.Timing.SpawnIntroTicks`。現在10秒。`DollCapture`はaccepted ActionStartedTick～ResolveTickで進め、台から殻へカメラ追従。HUD非表示、文字は吸入後だけ。終了直前に殻内の指／髪が現れる |
 | Phase I | ほぼ全身が殻の中にある。少しだけ覗く指・髪で内部の存在を示す | 腕と髪を殻の後ろへ描く。手前に顔を描かず、肩・上腕・前腕の大部分は殻で隠す |
 | I → II | 内部の腕が拘束をこじ開け、殻が引っかかってから開く。冠・胴の拘束フレームが抜け、腕と長い残骸が崩れた姿勢へ展開 | 既存eclosionの8分割ヒンジ／時間曲線を流用。コンパクトな封入姿勢から連続的に接続し、髪と首は遅れて追従 |
 | Phase II | 旧Bossの異形の冠・胴を外形の主体にし、白髪と小さい顔が内部に残る。受け入れ済みの球体関節の腕は維持 | 傾斜を保ちつつ、肩→肘→手首、首→髪へ異なる遅れで張力が伝わる。吊り糸は可動関節に接続。顔の巨大なNPC立ち絵化をしない |
-| Phase III以降 | 遠景へ下がった同じ少女と、空間内の左右の巨大な人形腕 | 遠隔腕の既存攻撃軌道／発射口は維持し、肩・前腕・手だけ人形素材へ変更。遠景の姿は追加の当たり判定ではない |
+| Phase III以降 | 遠景の人形本体が、左右に展開された旧型の異形腕を糸で遠隔操作する | 上腕・前腕は旧atlas／旧寸法。鉤爪は旧材質を基にした開閉8枚。手首・発射口・中央挟撃の軌道は維持。遠景本体の人形腕と取り違えない |
 | Final／勝利 | ドレス・四肢が先に形象を失い、最後まで少女の顔が残る。斜め裂け目へ引き込まれて消える | 既存dissolution/riftを新規パーツに適用。顔の事前分裂を弱める。敗北・cancelで勝利を偽装しない |
 
 完全直立、堂々とした威圧ポーズ、怒り顔、肉塊、少女の痕跡を全て消したメカへの置換、過度な性的／萌え的強調は避ける。「飛翔」より**保持されている重量**を見せる。
 
 ## 素材とコードの分担
 
-少女素材は `Assets/Textures/NPCs/DollTheater/`。旧 `Assets/Textures/NPCs/NullCantorRigAtlas.png` の既存UVも合成する。今回PNGそのものは変更せず、パーツ選択・配置・遮蔽で再構成。生成高解像度原本は外部に保持する。
+少女素材は `Assets/Textures/NPCs/DollTheater/`。旧 `Assets/Textures/NPCs/NullCantorRigAtlas.png` の既存UVも合成する。共用PNGは上書きせず、新規連続フレームを隣接atlasへ追加。生成高解像度原本は外部に保持する。
 
 | 素材 | 構成／意図 |
 |---|---|
@@ -64,12 +66,14 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 | `DollRigAtlas.png` | 384×384、128角の3×3。頭／胴／裾／上腕／前腕／手／腿／下腿／髪束。球体関節の中心をpivotとしてコードで接続 |
 | `DollCoffin.png` | 256×256。初期人形棺案として保持。本体の殻としては不採用に戻し、裾の小さな残骸のみに使用。原本・PNGは削除しない |
 | `DollHead.png` | 34×34。新規頭素材からの切り出し。バニラを含む選択中のBossバー用 |
+| `RemoteClawFrames.png` | 896×704、224×352の4×2。旧鉤爪が弛緩→開く→指節を曲げる→握る8つの描き分け。共通手首pivotで接続。握る絵の高さを自動で伸ばして開いた絵へ揃えない |
+| `RestraintFrames.png` | 960×704、240×352の4×2。胸の拘束殻の開口・左右の装甲・垂れ布が変形する8枚。小さい顔／本体の人形腕／外側の収容殻を置換しない |
 | 旧 `NullCantorRigAtlas.png` | 冠・胴・裾状装甲・下方の拘束材を再利用。人形の顔より大きな異形の外形を作る。共用素材は上書きしない |
 | `NullCantorShell.png` | 元の高精細な黒い金属・微細亀裂の殻。準備と戦闘の正本。閉じている間は元画像一枚、開く際のみ1024角の8枚へmask分割。比率・呼吸サイズ・分割所属は `ShellSurface` が所有 |
 
-顔・衣装・球の材質・髪の塊・ひびはtexture。傾斜、親子関節、片側の張力、服／髪の遅れ、微振動、殻のヒンジと残骸、取り込み、Finalの分裂はcode。全身の大量のフレームや汎用アニメーションDSLは増やさない。
+顔・衣装・球の材質・髪の塊・ひび・鉤爪開閉・胸の装甲の描き分けはtexture。傾斜、親子関節、片側の張力、服／髪の遅れ、微振動、殻のヒンジと残骸、取り込み、Finalの分裂はcode。今回は2部位各8枚であり、全身60枚の手描きアニメやフレーム間の形状補間を実装したとは言わない。使わない汎用アニメーションDSLは追加しない。
 
-`FirstSeveranceDollPose`はTerrariaに依存しない**このBoss専用の提示座標とUV**で、プレビューとゲームが共有する。`DollCapture`も同様に共有し、32×52のNPCを28区画へ隙間なく分割。各片の分離→短い減速→加速吸入をaccepted deployment ageから計算し、中央で縮小・消失する。描画用actor／ゲーム乱数／保持particleを増やさず、ReducedEffectsでは横への変位と回転を抑え、残像を省く。
+`FirstSeveranceDollPose`はTerrariaに依存しない**このBoss専用の提示座標とUV**で、プレビューとゲームが共有する。`DollFrames`が追加atlasのフレーム／固定pivotを所有。`DollCapture`も同様に共有し、32×52のNPCを28区画へ隙間なく分割。各片の分離→短い減速→加速吸入をaccepted SpawnIntro ageから計算し、中央で縮小・消失する。描画用actor／ゲーム乱数／保持particleを増やさず、ReducedEffectsでは横への変位と回転を抑え、残像・全面flashを省く。
 
 `DollVisuals`は読み取り専用の状態から描画し、殻・攻撃・終了処理は既存所有者が制御する。巨大な身体はdamage actorではなく、胸元の既存Core四隅が唯一の被ダメージ領域を示す。ゲーム中に触れられる位置を見た目に合わせて移さない。
 
@@ -80,6 +84,7 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 - 髪・長い裾状の拘束材は根元固定のconnected texture meshで屈曲。通常12行／Reduced6行の共有境界を持つ三角形で、別々の短冊をずらして隙間を作る方式にはしない。素材原本を増やさず、分裂へ入る前に屈曲を収めて既存Final表現へ接続。
 - `DollSurface`が小さな再利用vertex配列とeffectを所有。描画順を守ってworld passを一時的にflushし、同じGameViewMatrix／viewportへ描き、blend／sampler／raster／depthを復帰。Unloadでeffectを解放。武器用mesh bufferには触れない。
 - ReducedEffectsではうねり／屈曲を18%に抑える。攻撃予告・ダメージ領域・HP・行動時間は動かさない。滑らかさやGPU負荷は実機確認と分けて扱う。
+- 実フレームは鉤爪の溜め／衝撃に合わせた開閉と、胴の弛緩→素早い開き→滞留→回復。独立した攻撃用時計は作らない。ReducedEffectsでも攻撃姿勢は保ち、胴の常時ループを止める。
 
 ## 舞台・Pylonの再解釈
 
@@ -97,13 +102,13 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 4. 白髪と肌は背景から分離するが、常時発光しない。黒衣の断片・球の明暗と外側の金属フレームを読み分ける。危険色はこれまでの攻撃予告が優先。
 5. 等倍／2倍／画面距離の比較と、胴・肩・肘・手首が繋がる検査を行う。静止プレビューだけで実機視認性やFPSを断言しない。
 
-素材export入口は `tools/prepare_doll_assets.ps1`、実際のposeからの比較画像は `tools/preview_doll_theater.ps1 -OutputPath <外部PNG>`。同じ出力先にcapture見本と `motion/` の60Hz・4秒の連続画像も生成する。これは共有座標／屈曲式のoffline表示であり、実GPU描画の録画やFPS測定ではない。原本と最終prompt／hashは [素材recipe](../../../tools/asset_recipes/first_severance_doll.json)、利用記録は [Attribution](../../../Assets/ATTRIBUTION.md) を参照。
+素材export入口は `tools/prepare_doll_assets.ps1`、追加フレームは `tools/prepare_doll_frames.ps1`。比較画像は `tools/preview_doll_theater.ps1 -OutputPath <外部PNG>`。同じ出力先にcapture見本、実際の描き分け一覧 `authored-frames.png`、`motion/` の60Hz・4秒の連続表示見本を生成する。表示見本の240枚を新規の描き分け数と数えない。実GPU録画やFPS測定ではない。[初期recipe](../../../tools/asset_recipes/first_severance_doll.json)、[連続フレームrecipe](../../../tools/asset_recipes/first_severance_doll_frames.json)、[Attribution](../../../Assets/ATTRIBUTION.md) を参照。
 
 ## NPCの寿命と安全条件
 
-- Server／Single Playerのみが、Idleの有効なCore付近にプレイヤーがいれば生成する。Coreごとに1体、全体最大4体、1秒周期の生成判定。
+- Server／Single Playerのみが、Idle／Preparingの有効なCore付近にプレイヤーがいれば生成する。Coreごとに1体、全体最大4体、1秒周期の生成判定。
 - Coreのtile座標をnative NPC AIで共有。町NPCや恒久保存対象にせず、敵に殴られない・攻撃しない・lootを出さない。Core削除／離れたIdle状態ではauthorityが除去する。ワールドに永続フラグは追加しない。
-- Preparing／Activeでは実NPCは不可視・会話不可。参加者の準備描画が少女の取り込みを担当する。TileEntityより先にNPCを受信したclientは非表示で待ち、勝手に消さない。
+- Preparingでは実NPCを可視のまま保持し、必要なら同じCore所有者が生成する。会話はIdleだけ。Activeで実NPCを隠し、参加者のSpawnIntro描画が取り込みを担当する。TileEntityより先にNPCを受信したclientは非表示で待ち、勝手に消さない。
 - 再挑戦／終了後は台の少女へ戻す開発用演出。永続的な救済・死亡・物語進行は**未設計**。会話からRaid開始／Readyの別ルートは追加しない。
 - [対象tModLoader commitのModNPC](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNPC.cs)で、`CanChat`／`GetChat`、`NeedSaving`、`CheckActive`の呼び出し先と意味を確認。新規独自packetは不要。
 
@@ -121,8 +126,8 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 自動検査は素材のalpha／寸法、共有関節の連続性・有限scale、native compile。実機の受入れは以下だけを今回の確認対象としてユーザーへ渡す。
 
 - 台にNPCが立ち、会話できる。新規・既存Core、再入場、Core撤去、再挑戦で複製／残留しない。
-- 2～4人で同じ既存棺→NPC分解・吸入→Ready→羽化を見る。途中snapshotでも殻の位置や完成状態が戻らず、破片が残らない。
-- Phase Iは少量の露出のみ。Phase IIではNPC顔の単純拡大に見えず、旧拘束フレームと維持した腕が読める。Phase IIIの腕も維持。球体関節に隙間がない。
+- 2～4人で空の既存棺＋台のNPC→Ready→NPC分解・吸入→戦闘→羽化を見る。Ready中には分解しない。途中snapshotでも演出が最初へ戻らず、破片が残らない。cancel時も台のNPCが戻る／残る。
+- Phase Iは少量の露出のみ。Phase IIではNPC顔の単純拡大に見えず、旧拘束フレームと維持した腕が読める。Phase IIIは別の旧異形腕と開閉する鉤爪。本体の人形腕は維持。球体関節に隙間がない。
 - 元の殻の微細な亀裂が準備／戦闘とも見える。閉じた殻にmask境界の黒い継ぎ目が出ない。関節と髪の連続動作、実機のフレーム時間／mesh描画を確認する。
 - 1x／2x距離、異なるzoomと107% UI、ReducedEffects、結果演出後のHUD復帰を確認。
 

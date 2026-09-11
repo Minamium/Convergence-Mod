@@ -494,7 +494,7 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: 不幸な人形劇 — 少女人形の提示仕様
-  content_sha256: 9586c5f3995d0a40d581bc67514e985a505fa56b2ef5b2c83f6d00077fc87cbc
+  content_sha256: 4db59f10ed143a78bdb53b905dff30eeab0aedaa16b5fbed71cdfb16192313ba
   document_type: spec
   status: provisional
   owners:
@@ -511,6 +511,7 @@ documents:
   - Client/Encounters/FirstSeverance/FirstSeveranceDollVisuals.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollCapture.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollSurface.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceShellSurface.cs
   - Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs
   - Assets/Textures/NPCs/DollTheater
@@ -615,7 +616,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 979aacc0ccf0b77335f7d2e3c4760a1b8d121db7e095b5269f7460ccdcd09bcb
+  content_sha256: 9419810bef5c962e831a8b92b4877819829cee40c85ff73fa37ef4e5a65ecdd5
   document_type: spec
   status: provisional
   owners:
@@ -1074,7 +1075,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8d3d8f980322af920a238bd976937ef6ad090542ff327ec1c5efcef0c461925d
+  content_sha256: d2aeebb43339be832f251d7bdab3b9d1ac16710a1917674a7871fd82fd55f5ea
   document_type: status
   status: accepted
   owners:

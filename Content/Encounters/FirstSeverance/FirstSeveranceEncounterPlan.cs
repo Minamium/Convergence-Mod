@@ -117,7 +117,7 @@ internal sealed class FirstSeveranceEncounterPlan
     private static FirstSeveranceEncounterPlan CreateDefault()
     {
         var timing = new FirstSeveranceTimingPlan(
-            spawnIntroTicks: 360,
+            spawnIntroTicks: 600,
             pylonTelegraphTicks: 90,
             pylonActiveTicks: 840,
             stackTelegraphTicks: 240,

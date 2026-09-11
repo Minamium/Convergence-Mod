@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "sha256": {
+    "hand_source": "db7458778898d137fd041d330a35365819b0429ac9453d3614fc224b86c24667",
+    "body_source": "dd2e5c90159dec65747aa2aa494c4bdd32b7019df06074a3fc337386e2174406",
+    "RemoteClawFrames.png": "abcefb2e79455152e0b4bdad80c2cf208b7c8a619ddfbe300ced4ade8d8283e5",
+    "RestraintFrames.png": "f481a2b626842e4a1f56775db46c2ca97cb60202a59e9987920b2abefcb5217e"
+  },
+  "date": "2026-09-12",
+  "mode": "built-in image_gen",
+  "model": "not exposed",
+  "source_reference": "Assets/Textures/NPCs/NullCantorRigAtlas.png",
+  "intent": "Restore pre-doll remote-arm identity; add eight authored claw and eight restraint drawings, preserve current doll body arms/face.",
+  "prompts": {
+    "hand": "Use case: precise-object-edit. Asset type: production sprite animation sheet for a Terraria raid Boss. Image 1 is the existing project-owned rig atlas and is the identity reference. Extract ONLY the long three-taloned alien hand in the UPPER RIGHT corner, and draw EIGHT genuine successive animation poses of that SAME hand opening, flexing, then curling its fingers into a threatening grip. Keep cracked ivory armor, dark burgundy tendon cables and antique bronze wrist mechanism, original three very long pointed talons, not a human porcelain doll hand. Each finger must bend at its joints with changing overlap and foreshortening, not rotate the entire illustration. Eight frames ordered left-to-right, top row then bottom row. Exactly FOUR columns and TWO rows in a square 2048x2048 transparent PNG, each cell 512 wide x1024 high. The wrist socket at the top is EXACTLY at cell x256,y72, same scale and camera in every frame, no wrist rotation. Frame0 fingers long loosely separated downward; frame1 slightly tensed; frame2 splayed; frame3 maximally splayed; frame4 hooked tips; frame5 half curled; frame6 strongly curled; frame7 grip closed with visible long claws. Keep original palm scale and limb identity; leave at least 24px transparent padding each cell, no clipping, no dividers, no labels, no shadows or background. Pixel-readable material clusters rather than noisy microtexture. Genuine transparent alpha, no matte or checkerboard. Do not draw any other part of the input atlas.",
+    "body": "Use case: precise-object-edit. Asset type: production sprite animation sheet for the existing Terraria Boss torso restraint. Image 1 is the original project-owned rig atlas, identity reference. Use ONLY the pointed Gothic ivory torso in the TOP LEFT, with cathedral spires, two shoulder sockets, the black empty almond-shaped central cavity, asymmetric cracked ivory armor, bronze fittings and dark wine hanging tissue. Draw EIGHT successive animation drawings of this exact torso subtly forcing itself wider under tension: the paired plates articulate slightly, the central opening and folds genuinely change contour, the left and right material bends at slightly different times. Not eight rotated or scaled copies. Keep the original elongated pointed silhouette, silhouette scale, shoulder socket positions and topmost crown fixed; do not add a face or human body. Frame0 relaxed; frames1,2,3,4 increasingly tense with the opening widening up to 12 percent; frames5,6,7 recover toward frame0 with delayed folds. Exactly FOUR columns TWO rows on a square 2048x2048 transparent PNG. Each cell 512x1024, same orthographic front camera. Each torso occupies x40..472,y48..928 and shoulder sockets remain at consistent positions. No overall rotation or translation. Full asset not cropped, small transparent margin, no grid lines, numbers, captions, glows, effects, background, cast shadow or checkerboard. Match existing ivory/black/bronze/wine colors; high-quality restrained material readable at Terraria Boss distance. Genuine transparent alpha. No other atlas parts.",
+    "matteCorrection": "Use case: precise-object-edit. Change ONLY the baked white/gray checkerboard surrounding and between the eight sprites into a single perfectly flat chroma green background RGB(0,255,0), including all gaps between fingers or fabric. Do not change sprite designs, colors, dimensions, camera, frame poses, positions, spacing or number. Preserve the black central cavity as solid black material. No checkerboard, no gradients, no ground shadow, no labels. This is a production chroma-key export: protect ivory highlights and fine bronze edges, all background is flat #00FF00."
+  },
+  "export": {
+    "entry": "tools/prepare_doll_frames.ps1",
+    "details": "Reject baked checkerboard alpha. Key the generated green matte, register top socket/spire using first 10 solid rows, common scale from frame 0 (never fit each curled hand to its box), nearest sample to 4x2 atlases, strip chroma spill. Eight connected pose islands and unclipped borders required."
+  },
+  "runtime": [
+    {
+      "path": "Assets/Textures/NPCs/DollTheater/RemoteClawFrames.png",
+      "frames": 8,
+      "cell": [
+        224,
+        352
+      ],
+      "pivot": [
+        120,
+        28
+      ]
+    },
+    {
+      "path": "Assets/Textures/NPCs/DollTheater/RestraintFrames.png",
+      "frames": 8,
+      "cell": [
+        240,
+        352
+      ],
+      "pivot": [
+        120,
+        138
+      ]
+    }
+  ],
+  "originals": "External output/doll-theater-0251/originals; preserve sources, rejected-alpha variants and prior art. No private absolute paths required to reproduce; supply explicit source arguments.",
+  "limitations": "Eight distinct authored drawings each, not a full-body 60-frame redraw, optical-flow morph, or a guarantee of in-game frame rate. Original shared rig atlas is not overwritten."
+}

@@ -142,8 +142,8 @@ internal sealed class FirstSeveranceBossVisuals
             (float)Math.Clamp((renderTick - combat.ActionStartedTick) /
                 Math.Max(1, (double)combat.ResolveTick - combat.ActionStartedTick), 0, 1)) / FirstSeveranceChoreography.Final.Count;
         breakup = combat.BossPhase == FirstSeveranceBossPhase.Final ? .78f * Window(scoreAge, .02, 1) : 0;
-        // Preparation has already closed this coffin around the girl. The second
-        // cinematic must not erase/re-fade her when the snapshot enters SpawnIntro.
+        // The empty coffin already exists in preparation. Only the girl inside
+        // it fades in after her accepted combat-intro capture has completed.
         float reveal = 1f;
         float breath = MathF.Sin(time * .72f);
         float recoil = emissions.Kick;
@@ -192,8 +192,11 @@ internal sealed class FirstSeveranceBossVisuals
         if (remote) DrawRemoteArms(batch, combat, center, renderTick, reveal, retreat, reduced);
         float encased = combat.BossPhase == FirstSeveranceBossPhase.Sealed ? 1
             : hatching ? 1 - Window(hatchAge, .12, .28) : 0;
+        if(combat.Substate==FirstSeveranceSubstate.SpawnIntro)
+            encased*=Window(FirstSeveranceDollCapture.IntroAge(renderTick,combat.ActionStartedTick,combat.ResolveTick),.86,.97);
         if (encased > .001f) doll.DrawEncased(batch, center, renderTick, reveal * encased, castPose, reduced);
         stages.DrawShell(batch, combat, center, renderTick, reveal, castPose, Accents, reduced);
+        if(combat.Substate==FirstSeveranceSubstate.SpawnIntro) doll.DrawCapture(batch,combat,renderTick,reduced);
         if (hatching && unseal > 0)
             DrawRig(batch, center, reveal * unseal, breath, 0, 0,
                 EclosionUnfurl(hatchAge), EclosionEmerge(hatchAge), EclosionPry(hatchAge), handsOnly: true);
@@ -289,7 +292,7 @@ internal sealed class FirstSeveranceBossVisuals
             Color tint = Color.White * (appear * reveal);
             doll.DrawRemoteArm(batch, shoulder, elbow, wrist,
                 (crushing ? side : -side) * MathHelper.PiOver2 - side * grasp * (crushing ? .07f : .22f),
-                2.5f + brace * .55f, tint, breakup, consumption, lastCenter, MotionSeconds*60, reduced);
+                brace, grasp, crushing ? closure : Math.Max(recoil,stabKick), tint, breakup, consumption, lastCenter, MotionSeconds*60, reduced);
             if (crushing)
             {
                 Accents.CastSeal(batch, wrist, age, 0, FirstSeveranceScoreGeometry.CrushRushTick, new Color(255, 91, 145), reduced, 1.2f);

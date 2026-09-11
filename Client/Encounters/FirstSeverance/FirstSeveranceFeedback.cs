@@ -37,6 +37,7 @@ internal sealed class FirstSeveranceFeedback
     private bool shellBroken;
     private int countdown = -1, resultTicks;
     private int scoreImpactTicks;
+    private int captureCueMask;
     private readonly HashSet<int> scoreSounds = new();
     private readonly HashSet<uint> spreadCharges = new(), spreadFires = new();
     private bool failed, stack;
@@ -122,6 +123,7 @@ internal sealed class FirstSeveranceFeedback
             || previous.ZeroBasedLoopIndex != combat.ZeroBasedLoopIndex || previous.ActionStartedTick != combat.ActionStartedTick;
         if (phaseChanged)
         {
+            captureCueMask=0;
             // An HP-gated transition may interrupt an action before its planned
             // end. Retire only that action's sounds, not accepted verdict tails.
             for (int i = 0; i < timedVoices.Count; i++)
@@ -151,6 +153,20 @@ internal sealed class FirstSeveranceFeedback
             };
             if (cue is not null && state.EstimatedAuthorityTick < combat.ActionStartedTick + 30)
                 PlayTimed(cue, .98f, state.EstimatedAuthorityTick, combat.ResolveTick);
+        }
+        if(combat.Substate==FirstSeveranceSubstate.SpawnIntro)
+        {
+            float captureAge=FirstSeveranceDollCapture.IntroAge(state.EstimatedAuthorityTick,combat.ActionStartedTick,combat.ResolveTick);
+            CaptureCue(1,.22f,"ShellMassLatch",.62f);
+            CaptureCue(2,.52f,"RemoteDeparture",.55f);
+            CaptureCue(4,.858f,"CoreExposure",.76f);
+            void CaptureCue(int bit,float at,string name,float gain)
+            {
+                if(captureAge<at||(captureCueMask&bit)!=0) return;
+                captureCueMask|=bit;
+                // Do not replay missed cinematic sounds on a late snapshot.
+                if(captureAge-at<.025f) PlayTimed(name,gain,state.EstimatedAuthorityTick,combat.ResolveTick);
+            }
         }
         // Do not announce an old result or revive when joining/catching up.
         if (!fresh && previous is { } before)

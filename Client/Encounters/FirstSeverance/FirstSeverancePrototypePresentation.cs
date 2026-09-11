@@ -159,6 +159,14 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         if (state.Combat is not { } combat
             || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out _))
             return;
+        if(IsIntro(state,out _))
+        {
+            float age=IntroAge(combat,state.EstimatedAuthorityTick);
+            float lift=FirstSeveranceVisualCurves.Ease(Math.Clamp((age-.28f)/.57f,0,1));
+            Vector2 target=FirstSeveranceBossVisuals.CoreCenter(combat)+new Vector2(0,350*(1-lift))
+                -new Vector2(Main.screenWidth,Main.screenHeight)*.5f;
+            Main.screenPosition=Vector2.Lerp(Main.screenPosition,target,FirstSeveranceStageVisuals.CameraWeight(age));
+        }
         if (combat.Substate == FirstSeveranceSubstate.PhaseTransition && state.EstimatedAuthorityTick < combat.ResolveTick)
         {
             float age = FirstSeveranceStageVisuals.RuptureAge(combat, visuals.RenderTick);
@@ -176,7 +184,9 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         if (IsIntro(state, out _))
         {
             float age = IntroAge(combat, state.EstimatedAuthorityTick);
-            amount = Math.Max(amount, 18f * MathF.Pow(1f - age, 2f));
+            float pull=FirstSeveranceVisualCurves.Ease(Math.Clamp((age-.48f)/.36f,0,1))
+                *(1-Math.Clamp((age-.85f)/.04f,0,1));
+            amount = Math.Max(amount, 3*pull+16*FirstSeveranceDollCapture.Arrival(age));
         }
         if (combat.LanceVolley is { } volley && volley.IsFiring(state.EstimatedAuthorityTick))
         {
@@ -477,8 +487,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
     }
 
     private static float IntroAge(FirstSeveranceCombatProjection combat, ulong tick)
-        => 1f - Math.Clamp((float)((double)combat.ResolveTick - tick)
-            / FirstSeveranceEncounterPlan.Instance.Timing.SpawnIntroTicks, 0f, 1f);
+        => FirstSeveranceDollCapture.IntroAge(tick,combat.ActionStartedTick,combat.ResolveTick);
 
     private static void DrawIntro(SpriteBatch batch, FirstSeveranceCombatProjection intro, ulong tick)
     {
@@ -488,11 +497,18 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         float width = viewport.Width, height = viewport.Height;
         var pixel = new Rectangle(0, 0, 1, 1);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)width, (int)height), pixel,
-            new Color(4, 3, 9) * (fade * 0.36f));
+            new Color(4, 3, 9) * (fade * 0.16f));
         int bar = (int)(height * 0.14f);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, (int)width, bar), pixel, Color.Black * fade);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, (int)height - bar, (int)width, bar), pixel, Color.Black * fade);
-        Vector2 center = new(width * 0.5f, height * 0.46f);
+        bool reduced=ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+        if(!reduced)
+            batch.Draw(TextureAssets.MagicPixel.Value,new Rectangle(0,0,(int)width,(int)height),pixel,
+                new Color(230,221,213)*(FirstSeveranceDollCapture.Arrival(age)*.30f));
+        // Leave the capture itself unobstructed. Names appear only after intake,
+        // in the bottom title region, never across the NPC or central aperture.
+        fade*=FirstSeveranceVisualCurves.Ease(Math.Clamp((age-.83f)/.08f,0,1));
+        Vector2 center = new(width * 0.5f, height * 0.78f);
         float lineWidth = Math.Min(660f, width * 0.78f) * FirstSeveranceVisualCurves.Ease(Math.Min(1, age * 4));
         batch.Draw(TextureAssets.MagicPixel.Value,
             new Rectangle((int)(center.X - lineWidth / 2), (int)center.Y - 52, (int)lineWidth, 1),
@@ -500,14 +516,10 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         batch.Draw(TextureAssets.MagicPixel.Value,
             new Rectangle((int)(center.X - lineWidth / 2), (int)center.Y + 91, (int)lineWidth, 1),
             pixel, Color.LightSlateGray * fade);
-        Utils.DrawBorderString(batch, age < .43f ? "[ FIELD GEOMETRY // LOCKING ]" : "R A I D  / /  0 0 1", center + new Vector2(0, -87),
-            Color.Silver * fade, 0.8f, 0.5f);
         Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.IntroRaidName"),
             center + new Vector2(0, -28), Color.White * fade * FirstSeveranceVisualCurves.Ease((age - .15f) * 5), Math.Min(1.65f, width / 640f), 0.5f);
         Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.NPCs.FirstSeverancePrototypeBoss.DisplayName").ToUpperInvariant(),
             center + new Vector2(0, 27), Color.LightGray * fade * FirstSeveranceVisualCurves.Ease((age - .38f) * 5), 1.2f, 0.5f);
-        Utils.DrawBorderString(batch, age < .70f ? "[ APERTURE RISING // FLIGHT LINK ACTIVE ]" : "[ CONTAINMENT SEALED // NO RESPONSE ]", center + new Vector2(0, 113),
-            Color.Gray * fade, 0.7f, 0.5f);
     }
 
     private static void DrawRing(SpriteBatch batch, Vector2 center, float radius, Color color, float width = 2f)

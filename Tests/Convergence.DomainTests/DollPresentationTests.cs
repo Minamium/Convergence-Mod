@@ -6,6 +6,35 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Doll presentation authored frames preserve atlas and attachment contracts")]
+    private static void DollFrameContracts()
+    {
+        foreach(bool hand in new[]{false,true})
+        {
+            var pivot=FirstSeveranceDollFrames.Pivot(hand);
+            for(int i=0;i<8;i++)
+            {
+                var uv=FirstSeveranceDollFrames.Region(hand,i);
+                AssertEqual(true,uv.X>=0&&uv.Y>=0&&uv.X+uv.Width<=uv.Width*4&&uv.Y+uv.Height<=uv.Height*2,"in atlas");
+                AssertEqual(true,pivot.X>0&&pivot.X<uv.Width&&pivot.Y>0&&pivot.Y<uv.Height,"fixed registered pivot");
+            }
+        }
+        var seen=new bool[8];
+        for(int i=0;i<240;i++)
+        {
+            float seconds=i/60f;
+            int frame=FirstSeveranceDollFrames.Body(seconds,0,false); seen[frame]=true;
+            foreach(bool reduced in new[]{false,true})
+            {
+                int claw=FirstSeveranceDollFrames.Hand(seconds,MathF.Sin(seconds),MathF.Cos(seconds),reduced);
+                AssertEqual(true,claw>=0&&claw<8,"bounded claw sample");
+            }
+        }
+        foreach(bool used in seen) AssertEqual(true,used,"every authored torso frame is played");
+        AssertEqual(7,FirstSeveranceDollFrames.Hand(0,1,1,false),"full strike closes grip");
+        AssertEqual(0,FirstSeveranceDollFrames.Body(99,0,true),"reduced ambient animation stays quiet");
+    }
+
     [DomainTest("Doll presentation keeps joint endpoints continuous and scale finite")]
     private static void DollJointContinuity()
     {
@@ -80,6 +109,11 @@ internal static partial class Program
     [DomainTest("Doll presentation capture reconstructs NPC then converges into the existing shell")]
     private static void DollCaptureContinuity()
     {
+        AssertEqual(0f,FirstSeveranceDollCapture.IntroAge(110,200,800),"before accepted intro clamps at intact NPC");
+        AssertEqual(.5f,FirstSeveranceDollCapture.IntroAge(500,200,800),"accepted ten-second intro halfway");
+        AssertEqual(1f,FirstSeveranceDollCapture.IntroAge(999,200,800),"late snapshot never restarts capture");
+        AssertEqual(0f,FirstSeveranceDollCapture.Arrival(0),"no intake flash during initial hold");
+        AssertEqual(0f,FirstSeveranceDollCapture.Arrival(1),"no lingering flash after intro");
         Vector2 foot=new(321,654), core=foot-new Vector2(0,506);
         var coverage=new int[32*52];
         for(int i=0;i<FirstSeveranceDollCapture.Count;i++)

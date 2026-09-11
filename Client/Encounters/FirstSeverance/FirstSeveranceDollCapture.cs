@@ -5,12 +5,17 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 
 internal readonly record struct DollCaptureShard(int X,int Y,int Width,int Height,Vector2 Position,float Rotation,float Scale,float Opacity);
 
-// Stateless client choreography, keyed only by the accepted deployment age.
+// Stateless client choreography, keyed only by accepted SpawnIntro age.
 // All cuts reconstruct the original 32x52 NPC at age zero and end at the
 // existing coffin center. No debris actors, gameplay RNG or retained particles.
 internal static class FirstSeveranceDollCapture
 {
     internal const int Count=28;
+
+    internal static float IntroAge(double tick,ulong start,ulong end)
+        => Math.Clamp((float)((tick-start)/Math.Max(1d,(double)end-start)),0,1);
+    internal static float Arrival(float age)
+        => Window(age,.855f,.872f)*(1-Window(age,.872f,.97f));
 
     internal static DollCaptureShard Sample(int index,float age,Vector2 foot,Vector2 core,bool reduced)
     {

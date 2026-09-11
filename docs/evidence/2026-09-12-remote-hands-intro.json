@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.51",
+  "protocol": 28,
+  "scope": "Legacy remote-arm identity plus authored claw/restraint frames; intact preparation NPC and expanded all-Ready capture intro.",
+  "build": {
+    "record_id": "20260911T173549727135Z",
+    "source_commit": "57ce6cd346cccf4d7501754301d80a9b18c14a43",
+    "source_sha256": "d1d7225a79ebcaa753ddf1f0b42d1580c6430e43e9a0bacff28ebefa70bd9f58",
+    "dirty_build": true,
+    "source_changed_during_build": false,
+    "exit_code": 0,
+    "errors": 0,
+    "existing_warnings": 4,
+    "artifact": {
+      "file": "Convergence.tmod",
+      "bytes": 47375264,
+      "sha256": "be47484e5856b0530ba819084d2dbc60c93e6fc5f73ce4777a0f32d0861b83c3"
+    },
+    "previous_package": "retained in ignored local build archive"
+  },
+  "checks": {
+    "focused_domain": "PASS: 4 Doll presentation tests, 2 plan validation tests, combo cadence and full-loop continuity (8 distinct tests).",
+    "preview": "Inspected generated eight-pose sheets, keyed/registered runtime atlases and current assembled rig. Existing extra offline samples are not new artwork counts.",
+    "static": "PASS: catalog/repository/YAML/diff checks",
+    "runtime": "not_run; user-owned in-game reload/playtest",
+    "gpu_performance": "not_measured"
+  },
+  "notes": [
+    "First native attempt exposed two inaccessible presentation helpers and one local-name collision; corrected before the successful package.",
+    "No new network payload or save state. SpawnIntro length updated on its authority plan; client capture/camera use accepted start/end snapshots.",
+    "Preparing keeps the ordinary friendly NPC visible; it is never a Ready roster member. Active presentation uses a disposable cutout, not a second actor.",
+    "Main doll arms/face, shared original rig/shell, damage corridors/attack deadlines, music and existing audio files retained.",
+    "Post-build documentation/provenance and offline-preview labels do not alter packaged runtime inputs."
+  ],
+  "preserved_dirty_files": [
+    "Localization/DollTheater/en-US.hjson",
+    "Localization/Preparation/en-US.hjson",
+    "Localization/RitualArmaments/en-US.hjson",
+    "Localization/en-US.hjson"
+  ]
+}

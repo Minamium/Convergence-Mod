@@ -2,6 +2,39 @@
 
 ## Records
 
+### First Severance remote claw / restraint animation — 0.2.51
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/RemoteClawFrames.png`
+- Asset ID: first-severance-remote-claw-frames-20260912
+- Asset type: remote hand animation atlas
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-12
+- Source type: generated
+- Source work and URL: project-owned NullCantorRigAtlas identity reference; tools/asset_recipes/first_severance_doll_frames.json
+- Tool/model/version: built-in image_gen; backend model/seed unavailable; PowerShell/System.Drawing mechanical export
+- Human modifications: eight-pose selection, matte/alpha cleanup, fixed-pivot registration and common-scale atlas packing
+- License and redistribution terms: project license remains undecided; existing public-release gate retained
+- Required attribution: retain this provenance; no third-party game asset imported
+- Reviewer and review date: Codex 2026-09-12; frame silhouettes/alpha and registration inspected; in-game acceptance pending
+- Notes: eight distinct drawings, not eight rotations of one image; source originals archived externally; shared original atlas retained.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/RestraintFrames.png`
+- Asset ID: first-severance-restraint-frames-20260912
+- Asset type: Boss torso animation atlas
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-12
+- Source type: generated
+- Source work and URL: project-owned NullCantorRigAtlas identity reference; tools/asset_recipes/first_severance_doll_frames.json
+- Tool/model/version: built-in image_gen; backend model/seed unavailable; PowerShell/System.Drawing mechanical export
+- Human modifications: eight-pose selection, matte/alpha cleanup, fixed-pivot registration and common-scale atlas packing
+- License and redistribution terms: project license remains undecided; existing public-release gate retained
+- Required attribution: retain this provenance; no third-party game asset imported
+- Reviewer and review date: Codex 2026-09-12; frame silhouettes/alpha and registration inspected; in-game acceptance pending
+- Notes: eight distinct drawings, not eight rotations of one image; source originals archived externally; shared original atlas retained.
+
+Exact generation and matte-correction prompts, export entry and dimensions: [frame recipe](../tools/asset_recipes/first_severance_doll_frames.json). Generated opaque checkerboards were rejected; the selected green-matte originals were keyed mechanically. No animation frame is synthesized by rotating the original art. Rig movement remains a separate client presentation layer.
+
+
 ### First Severance Doll Theater — 0.2.48
 
 - Assets:

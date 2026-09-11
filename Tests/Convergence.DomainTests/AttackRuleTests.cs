@@ -293,7 +293,7 @@ internal static partial class Program
         AssertEqual(142ul, charge.FireTick, "42-tick charge windup");
         AssertEqual(118ul, charge.LockTick, "18-tick tracking followed by the retained 24-tick harmless hold");
         var timing = FirstSeveranceEncounterPlan.Instance.Timing;
-        AssertEqual(360, timing.SpawnIntroTicks, "six-second containment intro");
+        AssertEqual(600, timing.SpawnIntroTicks, "ten-second doll capture intro after Ready");
         AssertEqual(90, timing.PylonTelegraphTicks, "pylon opening unchanged");
         AssertEqual(840, timing.PylonActiveTicks, "DPS window unchanged");
         AssertEqual(240, timing.StackTelegraphTicks, "Stack assignment window unchanged");

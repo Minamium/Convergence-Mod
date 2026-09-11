@@ -73,7 +73,8 @@ public sealed class FirstSeveranceDollAttendant : ModNPC
         NPC.Bottom = StandingFoot(core);
         NPC.direction = NPC.spriteDirection = 1;
         bool idle = core.ProtectionState == FirstSeveranceCoreProtectionState.Idle;
-        NPC.alpha = idle ? Math.Max(0, NPC.alpha - 12) : 255;
+        bool onStage = idle || core.ProtectionState == FirstSeveranceCoreProtectionState.Preparing;
+        NPC.alpha = onStage ? Math.Max(0, NPC.alpha - 12) : 255;
         // Hide/return only this actor; never alter player input, music or the roster.
         if (!idle && !Main.dedServ && Main.LocalPlayer.talkNPC == NPC.whoAmI) Main.LocalPlayer.SetTalkNPC(-1);
         if (Main.netMode != NetmodeID.MultiplayerClient && Main.GameUpdateCount % 60 == 0
@@ -126,7 +127,7 @@ public sealed class FirstSeveranceDollAttendantSystem : ModSystem
         {
             if (entity is not FoundationCoreTileEntity core
                 || !core.IsTileValidForEntity(core.Position.X, core.Position.Y)
-                || core.ProtectionState != FirstSeveranceCoreProtectionState.Idle
+                || core.ProtectionState is not (FirstSeveranceCoreProtectionState.Idle or FirstSeveranceCoreProtectionState.Preparing)
                 || !HasViewer(core.GroundCenter, 1800)) continue;
             bool exists = false;
             foreach (NPC npc in Main.ActiveNPCs)

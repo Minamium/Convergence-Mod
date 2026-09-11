@@ -43,7 +43,7 @@ internal static partial class Program
                 $"{participantCount}-player Stack shares");
         }
 
-        AssertEqual(360, plan.Timing.SpawnIntroTicks, "SpawnIntro duration");
+        AssertEqual(600, plan.Timing.SpawnIntroTicks, "SpawnIntro duration");
         AssertEqual(930, plan.Timing.PylonCheckTicks, "Pylon duration");
         AssertEqual(240, plan.Timing.StackTelegraphTicks, "Stack duration");
         AssertEqual(240, plan.Timing.SpreadTelegraphTicks, "Spread duration");

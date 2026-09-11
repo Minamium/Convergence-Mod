@@ -23,17 +23,17 @@ related_docs:
 
 ## Current build
 
-Development **0.2.50 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
+Development **0.2.51 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). First Severance is a playable development Raid, not a production-completeness claim.
 
 - Server-wide roster → field deployment → manual Ready → separate combat introduction is implemented. [Arena infrastructure](ARENA_INFRASTRUCTURE.md) owns admission, movement and cancellation.
 - Phase I / II / III / Final survival, frozen-roster HP scaling, fixed-position Stack, Spread, Raid-owned Down/instant revival and terminal effects/rewards are implemented. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) and [recovery spec](encounters/first-severance/REVIVE_SPEC.md) own current behavior.
-- Latest presentation: [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) restores the original high-detail shell in preparation/combat and adds fractional, lagged joint motion plus continuous hair/restraint meshes. Small veiled face, accepted porcelain arms, limited sealed exposure and fragment capture are retained. Attack wrists, collision, gameplay and audio are unchanged.
-- Audio remains the prior EigHt section-loop/mix revision. [Audio sheet](AUDIO_CUE_SHEET.md) owns its current files, phase handoff and preparation silence; this visual revision does not change music/SFX/gameplay timing.
+- Latest presentation: [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) restores the old Phase-III remote arms, adding eight authored claw poses and eight torso-restraint poses alongside continuous rig motion. Main-body porcelain arms/small face and the restored shell remain. NPC stays intact during preparation/Ready; capture now happens in the extended all-Ready combat intro with camera/sound/light beats. Attack wrists, collision, battle cadence and music are unchanged.
+- Audio files remain the prior EigHt section-loop/mix revision. [Audio sheet](AUDIO_CUE_SHEET.md) owns those files, phase handoff and preparation silence. Only the new intro adds scheduling of existing cues; battle-action timing and music/SFX assets are unchanged.
 - One-member admission defaults on only as a build-gated development aid. It adds no companion, invulnerability or solo-specific fight. Normal testing is multiplayer unless the user explicitly chooses solo.
 
 ## Verification state
 
-The **0.2.50** native package is built and installed: **0 errors, 4 existing CS8632 warnings**; source unchanged during compilation/packaging. Three focused presentation tests, shared-pose/surface offline previews and static checks pass. [Shell/motion evidence](evidence/2026-09-12-shell-motion.json) records the source/package identity. Actual mesh rendering, smoothness/frame time, multiplayer and zoom remain `not_run` / user-owned. No game session/playable server was launched. [0.2.49 evidence](evidence/2026-09-11-doll-capture-refinement.json) retains capture/refinement; [0.2.48 evidence](evidence/2026-09-11-doll-theater.json) retains the initial NPC/art build; [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) retains audio measurements.
+The **0.2.51** native package is built and installed: **0 errors, 4 existing CS8632 warnings**; source unchanged during compilation/packaging. Eight selected domain tests (four doll presentation, two plan validation, combo cadence, full-loop continuity), authored-frame/shared-pose previews and static checks pass. [Frame/intro evidence](evidence/2026-09-12-remote-hands-intro.json) records package identity. In-game frame animation, capture/camera, multiplayer/zoom and frame time remain `not_run` / user-owned. No game session/playable server was launched. [0.2.50 evidence](evidence/2026-09-12-shell-motion.json) retains shell/mesh checks; [0.2.49 evidence](evidence/2026-09-11-doll-capture-refinement.json) retains capture/refinement; [0.2.48 evidence](evidence/2026-09-11-doll-theater.json) retains initial NPC/art; [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json) retains audio measurements.
 
 The working tree includes pre-existing English edits in `Localization/DollTheater/en-US.hjson`, `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved and kept outside this change's commits. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
 
@@ -56,7 +56,7 @@ Development loot is implemented, but balance, public solo/companions and final p
 
 ## Next change
 
-The new package is installed; restart/reload tModLoader (no unchanged rebuild needed). Inspect only the revised surfaces: original shell material across preparation/combat/eclosion, continuous shoulder/elbow/wrist and hair/restraint movement, no mesh seams or world/UI coordinate shift, ReducedEffects and unchanged attack wrist alignment. Keep the previous audio settings and attack balance. Measure actual frame time if stutter persists; offline 60Hz samples are not game FPS evidence.
+The new package is installed; restart/reload tModLoader (no unchanged rebuild needed). Inspect NPC remaining intact through Ready, then capture only after all-Ready with the expanded intro, unobstructed camera/title and no duplicate NPC. Check the old remote arms with actual claw-frame changes, torso material animation, unchanged attack wrist alignment and ReducedEffects. Keep the accepted music and attack balance. Eight drawings per part are not a full-body 60-frame redraw; offline 60Hz samples are not game FPS evidence.
 
 Keep current behavior and accepted art unless explicitly revising them. Choose checks from the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md); do not replay historical checklists.
 
