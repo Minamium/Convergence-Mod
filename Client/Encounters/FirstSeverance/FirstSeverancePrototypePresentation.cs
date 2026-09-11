@@ -21,24 +21,37 @@ internal sealed class FirstSeverancePrototypeMusic : ModSceneEffect
     public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
 
     private static FirstSeveranceBossPhase MusicPhase(FirstSeveranceCombatProjection? combat)
-        => combat is { Substate: FirstSeveranceSubstate.PhaseTransition }
-            ? combat.BossPhase switch
-            {
-                FirstSeveranceBossPhase.Final => FirstSeveranceBossPhase.Distant,
-                FirstSeveranceBossPhase.Distant => FirstSeveranceBossPhase.Unbound,
-                FirstSeveranceBossPhase.Unbound => FirstSeveranceBossPhase.Sealed,
-                _ => combat.BossPhase,
-            }
-            : combat?.BossPhase ?? FirstSeveranceBossPhase.Sealed;
+        => combat is null ? FirstSeveranceBossPhase.Sealed
+            : FirstSeveranceMusicTimeline.Select(combat.BossPhase,
+                combat.Substate == FirstSeveranceSubstate.PhaseTransition,
+                combat.BossPhaseStartedTick, combat.ResolveTick,
+                ModContent.GetInstance<FirstSeveranceClientStateSystem>().EstimatedAuthorityTick);
 
     public override int Music => Main.dedServ ? -1 : MusicLoader.GetMusicSlot(Mod,
-        MusicPhase(ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat) switch
+        MusicPath(MusicPhase(ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat)));
+
+    private static string MusicPath(FirstSeveranceBossPhase phase) => phase switch
         {
             FirstSeveranceBossPhase.Final => "Assets/Music/TerminalLiturgy",
             FirstSeveranceBossPhase.Distant => "Assets/Music/DistantLiturgy",
             FirstSeveranceBossPhase.Unbound => "Assets/Music/UnboundLiturgy",
             _ => "Assets/Music/ObsidianLiturgy",
-        });
+        };
+
+    internal void UpdateTransition(FirstSeveranceClientStateSystem state)
+    {
+        if (Main.dedServ || Main.gameMenu || state.Combat is not
+            { Substate: FirstSeveranceSubstate.PhaseTransition } combat
+            || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out var participant)
+            || !participant.IsConnected) return;
+        int outgoing = MusicLoader.GetMusicSlot(Mod, MusicPath(FirstSeveranceMusicTimeline.Previous(combat.BossPhase)));
+        // Only our outgoing track; native music owns incoming fade and playback.
+        // Hard ceiling prevents a low native crossfade rate bleeding into combat.
+        if (outgoing > 0 && outgoing < Main.musicFade.Length)
+            Main.musicFade[outgoing] = Math.Min(Main.musicFade[outgoing],
+                FirstSeveranceMusicTimeline.OutgoingCeiling(combat.BossPhaseStartedTick,
+                    combat.ResolveTick, state.EstimatedAuthorityTick));
+    }
 
     public override void SpecialVisuals(Player player, bool isActive)
     {
@@ -87,6 +100,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         if (!Main.dedServ && !Main.gameMenu)
         {
             var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
+            ModContent.GetInstance<FirstSeverancePrototypeMusic>().UpdateTransition(state);
             if (state.Preparation is not null && visuals.IsEnding) visuals.Reset();
             visuals.Update(state);
             feedback.Update(state);

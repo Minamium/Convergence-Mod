@@ -12,7 +12,7 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 // current authority pulse can still hurt. Fractional time animates its material.
 internal static class FirstSeveranceFinalBeamVisuals
 {
-    internal static void Draw(SpriteBatch batch, FirstSeveranceAttackAccents accents,
+    internal static void Draw(SpriteBatch batch, FirstSeveranceEmissionVisuals emissions,
         FirstSeveranceCombatProjection combat, double renderTick, ulong authorityTick, bool reduced)
     {
         if (Main.dedServ || authorityTick < combat.ActionStartedTick) return;
@@ -27,16 +27,9 @@ internal static class FirstSeveranceFinalBeamVisuals
             int reveal = FirstSeveranceScoreGeometry.SlicerReveal(item.Pulse);
             int fire = FirstSeveranceScoreGeometry.SlicerFire(combat.ActionIndex)
                 + item.Pulse * FirstSeveranceScoreGeometry.SlicerCadence(combat.ActionIndex);
-            Color color = item.Pulse switch { 0 => new(65, 232, 255), 1 => new(190, 143, 255), _ => new(255, 120, 176) };
-            bool warning = age < fire;
-            float charge = Window(clock, reveal, fire);
-            float fade = 1 - Window(clock, fire + 6, fire + 18);
-            float arrival = 1 - Window(clock, reveal + 3, reveal + 12);
-            float power = warning ? .52f + .22f * arrival + .26f * Window(clock, fire - 12, fire)
-                : item.Live ? 1 : .10f * fade;
-            // Exact lattice tooth material and width; no extra wide plasma overlay.
-            FirstSeveranceBeamMaterial.DrawTooth(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                clock, charge, item.Live ? 1 : 0, power, color, reduced);
+            emissions.DrawPrismRay(batch, ray, clock, (ulong)reveal, (ulong)fire,
+                (ulong)(fire + FirstSeveranceLanceTuning.PatternActiveTicks), item.Live,
+                FirstSeveranceEmissionVisuals.PrismColor(item.Pulse), reduced);
         }
     }
 }

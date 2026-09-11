@@ -94,14 +94,14 @@ internal static partial class Program
                 if (action < 2 || station >= 2)
                     AssertEqual(true, score[station * 3 + action].Ticks < score[(station - (action == 2 ? 2 : 1)) * 3 + action].Ticks,
                         "each category accelerates with terminal progress (compare slicers to slicers)");
-        AssertEqual(24, FirstSeveranceScoreGeometry.SlicerCadence(2), "initial release cadence after read-ahead");
-        AssertEqual(18, FirstSeveranceScoreGeometry.SlicerCadence(23), "terminal release cadence after read-ahead");
+        AssertEqual(60, FirstSeveranceScoreGeometry.SlicerCadence(2), "initial release cadence after read-ahead");
+        AssertEqual(48, FirstSeveranceScoreGeometry.SlicerCadence(23), "terminal release cadence after read-ahead");
         AssertEqual(true, FirstSeveranceScoreGeometry.BulletSpeed(20) > FirstSeveranceScoreGeometry.BulletSpeed(2), "bullet motion accelerates too");
         foreach (int step in new[] { 5, 11, 17, 23 })
         {
-            AssertEqual(FirstSeveranceScoreGeometry.SlicerFire(step) + 2 * FirstSeveranceScoreGeometry.SlicerCadence(step) + 18,
+            AssertEqual(FirstSeveranceScoreGeometry.SlicerEnd(step) + 3 * FirstSeveranceScoreGeometry.SlicerCadence(step) + 24,
                 score[step].Ticks, "last release and fade fit the action exactly");
-            for (int pulse = 0; pulse < 3; pulse++)
+            for (int pulse = 0; pulse < 4; pulse++)
                 foreach (var item in FirstSeveranceRandomComb.Rays(75123, step, pulse, 4000, 3440))
                     AssertEqual(true, item.IsValid, "finite normalized clipped rays");
         }

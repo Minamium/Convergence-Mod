@@ -12,14 +12,14 @@ internal static partial class Program
         foreach(bool hand in new[]{false,true})
         {
             var pivot=FirstSeveranceDollFrames.Pivot(hand);
-            for(int i=0;i<8;i++)
+            for(int i=0;i<16;i++)
             {
                 var uv=FirstSeveranceDollFrames.Region(hand,i);
-                AssertEqual(true,uv.X>=0&&uv.Y>=0&&uv.X+uv.Width<=uv.Width*4&&uv.Y+uv.Height<=uv.Height*2,"in atlas");
+                AssertEqual(true,uv.X>=0&&uv.Y>=0&&uv.X+uv.Width<=uv.Width*4&&uv.Y+uv.Height<=uv.Height*4,"in atlas");
                 AssertEqual(true,pivot.X>0&&pivot.X<uv.Width&&pivot.Y>0&&pivot.Y<uv.Height,"fixed registered pivot");
             }
         }
-        var seen=new bool[8];
+        var seen=new bool[16];
         for(int i=0;i<240;i++)
         {
             float seconds=i/60f;
@@ -27,11 +27,11 @@ internal static partial class Program
             foreach(bool reduced in new[]{false,true})
             {
                 int claw=FirstSeveranceDollFrames.Hand(seconds,MathF.Sin(seconds),MathF.Cos(seconds),reduced);
-                AssertEqual(true,claw>=0&&claw<8,"bounded claw sample");
+                AssertEqual(true,claw>=0&&claw<16,"bounded claw sample");
             }
         }
         foreach(bool used in seen) AssertEqual(true,used,"every authored torso frame is played");
-        AssertEqual(7,FirstSeveranceDollFrames.Hand(0,1,1,false),"full strike closes grip");
+        AssertEqual(15,FirstSeveranceDollFrames.Hand(0,1,1,false),"full strike closes grip");
         AssertEqual(0,FirstSeveranceDollFrames.Body(99,0,true),"reduced ambient animation stays quiet");
     }
 

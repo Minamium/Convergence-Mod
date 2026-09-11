@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-12",
+  "build": "0.2.52",
+  "protocol": 28,
+  "source": {
+    "branch": "main",
+    "base_commit": "cdc368f58729e6a1a95d9ac8299103be10d29b02",
+    "dirty_at_build": true,
+    "source_sha256": "307470c8c20a0e3e3cb3bf973769b8aa27f28aa621554c223d5539b1366f7f53",
+    "manifest": ".local/builds/20260911T194422364668Z/record.json",
+    "source_changed_during_build": false,
+    "user_owned_changes_preserved": [
+      "Localization/DollTheater/en-US.hjson",
+      "Localization/Preparation/en-US.hjson",
+      "Localization/RitualArmaments/en-US.hjson",
+      "Localization/en-US.hjson"
+    ]
+  },
+  "native_build": {
+    "result": "passed",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "artifact": "Convergence.tmod",
+    "bytes": 48245931,
+    "sha256": "cf21eafe29d857487310b03959c60eb9fcc2403732fddc482f41b670508f0e0c",
+    "installed": true
+  },
+  "verification": {
+    "domain": "passed: Final filter (6), Doll filter (5), Music transition filter (1); finite shared SAT geometry, stable read-ahead, four-color coverage and single-color safe bands, frame/gesture bounds and capture continuity, early outgoing music fade",
+    "assets": "passed: 16 distinct source islands each, atlas 4x4/frame registration and unclipped alpha; NPC 12 vertical cels/32-colour palette; shared-pose preview inspected. Not in-game footage.",
+    "static": "passed: catalog, repository checks (532 files), YAML (10 files), diff whitespace check",
+    "runtime": "not_run; user-owned. Reload 0.2.52 on all peers, observe four-color memory score and prism emission/hit alignment, NPC idle/dialogue/Ready/capture, two remote hands, transition mix including P1->P2/P2->P3/P3->Final, ReducedEffects and frame time."
+  },
+  "prior_playtest": "2026-09-12-playtest-0251.json",
+  "scope": "Final attack assignment/timing changed within existing exact-Fight authority controller and snapshots. No new actor, packet, save state or player authority. Shared PursuitPrism rendering extracted; approved music samples/volume settings and other attack balance unchanged.",
+  "asset_recipe": "../../tools/asset_recipes/first_severance_doll_frames_0252.json"
+}

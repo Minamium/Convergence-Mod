@@ -6,30 +6,30 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Final slicers complete three fast warned pulses")]
+    [DomainTest("Final slicers complete four read-ahead pursuit pulses")]
     private static void SlicerWarningExtension()
     {
         foreach (int step in new[] { 5, 11, 17, 23 })
         {
-            AssertEqual(6, FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "six live ticks");
-            AssertEqual(true, FirstSeveranceScoreGeometry.SlicerFire(step) - FirstSeveranceScoreGeometry.SlicerReveal(2) >= 42,
-                "full reading grace after third reveal");
+            AssertEqual(12, FirstSeveranceScoreGeometry.SlicerEnd(step) - FirstSeveranceScoreGeometry.SlicerFire(step), "pursuit live duration");
+            AssertEqual(true, FirstSeveranceScoreGeometry.SlicerFire(step) - FirstSeveranceScoreGeometry.SlicerReveal(3) >= 84,
+                "full reading grace after fourth reveal");
             for (int age = 0; age < FirstSeveranceScoreGeometry.SlicerFire(step); age++)
             {
                 var seen = new System.Collections.Generic.HashSet<int>();
                 foreach (var ray in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer, step, age, 4000, 4000))
                 {
-                    AssertEqual(false, ray.Live, "all three previews harmless");
+                    AssertEqual(false, ray.Live, "all four previews harmless");
                     seen.Add(ray.Pulse);
                 }
-                AssertEqual(Math.Min(3, age / 12 + 1), seen.Count, "one then two then three retained previews");
+                AssertEqual(Math.Min(4, age / 30 + 1), seen.Count, "four cumulative forecasts");
             }
-            for (int pulse = 0; pulse < 3; pulse++)
+            for (int pulse = 0; pulse < 4; pulse++)
             {
                 int fire = pulse * FirstSeveranceScoreGeometry.SlicerCadence(step) + FirstSeveranceScoreGeometry.SlicerFire(step);
                 foreach (var ray in FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer, step, fire - 1, 4000, 4000))
                     AssertEqual(false, ray.Live, "last warning frame harmless");
-                AssertEqual(true, fire < FirstSeveranceChoreography.Final[step].Ticks, "third shot not truncated");
+                AssertEqual(true, fire < FirstSeveranceChoreography.Final[step].Ticks, "fourth shot not truncated");
             }
         }
     }

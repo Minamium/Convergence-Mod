@@ -4,7 +4,7 @@ document_type: spec
 status: provisional
 owners:
   - audio
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - first_severance.audio_cues
 aliases:
@@ -32,7 +32,7 @@ All four phase slots use owner-approved edits of **EigHt — 不幸な人形劇*
 | `Assets/Music/DistantLiturgy.ogg` | Phase III: full-identity 218-BPM section 92.523–138.485s; 20 ms anti-click edges; about -10.5 LUFS-I |
 | `Assets/Music/TerminalLiturgy.ogg` | Final: 222-BPM/+1-semitone section 145.721–170.849s; -0.60 dB encode headroom; 20 ms anti-click edges; about -9.8 LUFS-I |
 
-During `PhaseTransition`, music selection intentionally stays on the **previous phase slot** for the complete transformation (P1→P2 6.0s, P2→P3 5.0s, P3→Final 4.0s). The new phase file starts only when the transition resolves into the first attack. BossPhase itself still advances at transition start, so transformation visuals/SFX, HP gates, authority timing and network state are unchanged.
+During `PhaseTransition`, selection changes to the next phase **180 ticks before its resolve** (clamped to transition start). The previous phase slot's fade is capped to zero over the following 90 ticks, leaving it silent before the next attack. [MusicTimeline](../Client/Encounters/FirstSeverance/FirstSeveranceMusicTimeline.cs) owns this authority-clock presentation envelope; the native music system owns incoming playback/fade. Only Convergence's outgoing slot is capped; user volume, other Mods' tracks and the approved OGG files are untouched. This replaces the old full-transformation hold. Phase timing, HP gates and packets are unchanged.
 
 The master balance is raised on the music side rather than reducing warning SFX or changing user sliders. The resulting integrated-loudness ramp is approximately **-14.0 / -12.9 / -10.5 / -9.8 LUFS-I**, preserving phase escalation while keeping early-phase BGM materially present against raid cues. Exact hashes, durations, loudness and true peaks are in [0.2.47 evidence](evidence/2026-09-11-fukou-section-loops-mix.json); creator/source/terms remain owned by [Attribution](../Assets/ATTRIBUTION.md).
 

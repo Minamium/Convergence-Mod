@@ -11,6 +11,8 @@
   <ItemGroup>
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollPose.cs" Link="Presentation/FirstSeveranceDollPose.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs" Link="Presentation/FirstSeveranceDollFrames.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceMusicTimeline.cs" Link="Presentation/FirstSeveranceMusicTimeline.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceDollMannerisms.cs" Link="Domain/FirstSeveranceDollMannerisms.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollCapture.cs" Link="Presentation/FirstSeveranceDollCapture.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceShellSurface.cs" Link="Presentation/FirstSeveranceShellSurface.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceAudioCueClock.cs" Link="Presentation/FirstSeveranceAudioCueClock.cs" />

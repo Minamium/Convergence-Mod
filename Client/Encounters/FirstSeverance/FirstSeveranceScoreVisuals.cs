@@ -18,13 +18,14 @@ internal sealed class FirstSeveranceScoreVisuals
     internal void Unload() => blade = null; // Content manager owns the borrowed PNG.
 
     internal void Draw(SpriteBatch batch, FirstSeveranceCombatProjection combat, double tick,
-        ulong authorityTick, FirstSeveranceAttackAccents accents, bool reduced)
+        ulong authorityTick, FirstSeveranceEmissionVisuals emissions, bool reduced)
     {
+        var accents = emissions.Accents;
         if (Main.dedServ || tick < combat.ActionStartedTick || authorityTick >= combat.ResolveTick) return;
         double age = tick - combat.ActionStartedTick;
         if (combat.Substate == FirstSeveranceSubstate.FinalSlicer)
         {
-            FirstSeveranceFinalBeamVisuals.Draw(batch, accents, combat, tick, authorityTick, reduced);
+            FirstSeveranceFinalBeamVisuals.Draw(batch, emissions, combat, tick, authorityTick, reduced);
             return;
         }
         if (combat.Substate == FirstSeveranceSubstate.RemoteClaws)

@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$HandSource,
     [Parameter(Mandatory=$true)][string]$BodySource,
+    [Parameter(Mandatory=$true)][string]$NpcSource,
     [Parameter(Mandatory=$true)][string]$ArchiveDirectory
 )
 $ErrorActionPreference='Stop'
@@ -17,3 +18,8 @@ foreach($entry in @(@('hand',$HandSource),@('body',$BodySource))) {
     $name=if($entry[0] -eq 'hand') {'RemoteClawFrames.png'} else {'RestraintFrames.png'}
     [DollFrameExport]::Export($entry[1],(Join-Path $frameRepo ('Assets/Textures/NPCs/DollTheater/'+$name)),$entry[0] -eq 'hand')
 }
+$npcArchive=Join-Path $ArchiveDirectory 'npc-matte.png'
+if(Test-Path -LiteralPath $npcArchive) {
+    if((Get-FileHash $npcArchive).Hash -ne (Get-FileHash $NpcSource).Hash) {throw 'Different NPC original already archived.'}
+} else {Copy-Item -LiteralPath $NpcSource -Destination $npcArchive}
+[DollFrameExport]::ExportNpc($npcArchive,(Join-Path $frameRepo 'Assets/Textures/NPCs/DollTheater/DollAttendant.png'))

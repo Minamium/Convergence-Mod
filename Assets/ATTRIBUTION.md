@@ -2,9 +2,55 @@
 
 ## Records
 
-### First Severance remote claw / restraint animation — 0.2.51
+### First Severance expanded authored frames — 0.2.52
 
 - Runtime file: `Assets/Textures/NPCs/DollTheater/RemoteClawFrames.png`
+- Asset ID: first-severance-remote-claw-0252
+- Asset type: Boss animation atlas
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-12
+- Source type: generated
+- Source work and URL: previous project-owned originals; tools/asset_recipes/first_severance_doll_frames_0252.json
+- Tool/model/version: built-in image_gen; backend model/seed not exposed; PowerShell/System.Drawing mechanical export
+- Human modifications: 16 authored poses selected; chroma-key extraction, common-scale fixed-pivot/foot registration, nearest sampling
+- License and redistribution terms: project license undecided; existing public-release gate retained
+- Required attribution: preserve provenance; no third-party game texture imported
+- Reviewer and review date: Codex 2026-09-12; source and packed pose/contact-sheet inspection; in-game acceptance pending
+- Notes: runtime SHA256 `d1c8390fce0bcf4e9c772a50bac6dc4a801b56305fc30bb72555fb5698b45ba1`; preceding originals are preserved externally and preceding records remain historical.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/RestraintFrames.png`
+- Asset ID: first-severance-restraint-0252
+- Asset type: Boss animation atlas
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-12
+- Source type: generated
+- Source work and URL: previous project-owned originals; tools/asset_recipes/first_severance_doll_frames_0252.json
+- Tool/model/version: built-in image_gen; backend model/seed not exposed; PowerShell/System.Drawing mechanical export
+- Human modifications: 16 authored poses selected; chroma-key extraction, common-scale fixed-pivot/foot registration, nearest sampling
+- License and redistribution terms: project license undecided; existing public-release gate retained
+- Required attribution: preserve provenance; no third-party game texture imported
+- Reviewer and review date: Codex 2026-09-12; source and packed pose/contact-sheet inspection; in-game acceptance pending
+- Notes: runtime SHA256 `04c5416a88974c6cf89ebcba2b0dc032c0d9377e53d36d36b3a0954c350fede0`; preceding originals are preserved externally and preceding records remain historical.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/DollAttendant.png`
+- Asset ID: first-severance-npc-mannerisms-0252
+- Asset type: native NPC expression/gesture strip
+- Creator: project-directed OpenAI image generation
+- Creation/acquisition date: 2026-09-12
+- Source type: generated
+- Source work and URL: previous project-owned originals; tools/asset_recipes/first_severance_doll_frames_0252.json
+- Tool/model/version: built-in image_gen; backend model/seed not exposed; PowerShell/System.Drawing mechanical export
+- Human modifications: 12 authored poses selected; chroma-key extraction, common-scale fixed-pivot/foot registration, nearest sampling, 32-colour quantization
+- License and redistribution terms: project license undecided; existing public-release gate retained
+- Required attribution: preserve provenance; no third-party game texture imported
+- Reviewer and review date: Codex 2026-09-12; source and packed pose/contact-sheet inspection; in-game acceptance pending
+- Notes: runtime SHA256 `2a5cca62c2f8376533a4f42bfc4ce799d4a304e81c5873e516414063d8ddb839`; preceding originals are preserved externally and preceding records remain historical.
+
+Exact built-in prompts, original hashes, dimensions and re-export arguments: [0.2.52 recipe](../tools/asset_recipes/first_severance_doll_frames_0252.json). The following 0.2.51/0.2.48 entries describe the preceding runtime revisions, not the expanded atlases.
+
+### First Severance remote claw / restraint animation — 0.2.51
+
+- Historical runtime file: `Assets/Textures/NPCs/DollTheater/RemoteClawFrames.png`
 - Asset ID: first-severance-remote-claw-frames-20260912
 - Asset type: remote hand animation atlas
 - Creator: project-directed OpenAI image generation
@@ -18,7 +64,7 @@
 - Reviewer and review date: Codex 2026-09-12; frame silhouettes/alpha and registration inspected; in-game acceptance pending
 - Notes: eight distinct drawings, not eight rotations of one image; source originals archived externally; shared original atlas retained.
 
-- Runtime file: `Assets/Textures/NPCs/DollTheater/RestraintFrames.png`
+- Historical runtime file: `Assets/Textures/NPCs/DollTheater/RestraintFrames.png`
 - Asset ID: first-severance-restraint-frames-20260912
 - Asset type: Boss torso animation atlas
 - Creator: project-directed OpenAI image generation
@@ -49,7 +95,7 @@ Exact generation and matte-correction prompts, export entry and dimensions: [fra
 - Rights/provenance status: original generated production proposals; the project's overall license selection/publication gate is unchanged. User concept and high-resolution originals stay outside the public package. No new third-party license is asserted or inferred.
 - Legacy shell/rig/background/weapon originals are retained. This batch does not change the EigHt music attribution, audio files, third-party terms or existing accepted attack textures.
 
-- Runtime file: `Assets/Textures/NPCs/DollTheater/DollAttendant.png`
+- Historical runtime file: `Assets/Textures/NPCs/DollTheater/DollAttendant.png`
 - Asset ID: first-severance-doll-attendant-20260911
 - Asset type: conversation NPC texture
 - Creator: project-directed OpenAI image generation

@@ -19,7 +19,7 @@ public sealed class FirstSeveranceDollAttendant : ModNPC
     public override string Texture => "Convergence/Assets/Textures/NPCs/DollTheater/DollAttendant";
     public override void SetStaticDefaults()
     {
-        Main.npcFrameCount[Type] = 2;
+        Main.npcFrameCount[Type] = FirstSeveranceDollMannerisms.Frames;
         NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
         NPCID.Sets.NPCBestiaryDrawOffset.Add(Type, new NPCID.Sets.NPCBestiaryDrawModifiers { Hide = true });
     }
@@ -83,9 +83,9 @@ public sealed class FirstSeveranceDollAttendant : ModNPC
 
     public override void FindFrame(int frameHeight)
     {
-        double tick = Main.GameUpdateCount + NPC.whoAmI * 31;
-        int blink = tick % 277 < 7 || tick % 463 < 5 ? 1 : 0;
-        NPC.frame.Y = blink * frameHeight;
+        ulong tick = Main.GameUpdateCount + (ulong)(NPC.whoAmI * 31);
+        NPC.frame.Y = FirstSeveranceDollMannerisms.Frame(tick,
+            !Main.dedServ && Main.LocalPlayer.talkNPC == NPC.whoAmI) * frameHeight;
     }
 
     public override bool PreDraw(SpriteBatch batch, Vector2 screenPos, Color drawColor)

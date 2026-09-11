@@ -16,7 +16,7 @@ internal static class FirstSeveranceScoreGeometry
     internal const int BladeCount = 2;
     internal const int CrushRushTick = 150, CrushImpactTick = 162, CrushReleaseTick = 180;
     internal const float CrushHalfWidth = 360, CrushHalfHeight = 300;
-    internal const int SlicerPulses = 3;
+    internal const int SlicerPulses = 4;
     internal const int FloodInterval = 200, FloodFireTick = 48, FloodDeployTicks = 12,
         FloodGrowTicks = 42, FloodEndTick = 182, FloodFadeTick = 196;
     internal const float FloodSafeHalfHeight = 96;
@@ -34,13 +34,13 @@ internal static class FirstSeveranceScoreGeometry
     internal static int BladeTurn(double age) => Math.Min(FirstSeveranceChoreography.BladeTurns - 1, (int)BladeTravel(age));
     internal static float BladeExtension(double age) => Smooth((float)((age - 144) / 12))
         * (1 - Smooth((float)((age - FirstSeveranceChoreography.BladeEnd - 12) / 45)));
-    // Reveal all three locked combs before the first can hurt. The last reveal
-    // always gets a full 0.7–0.9 second reading window, even late in Final.
-    internal static int SlicerReveal(int pulse) => pulse * 12;
-    internal static int SlicerFire(int step) => SlicerReveal(2) + 54 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
-    internal static int SlicerEnd(int step) => SlicerFire(step) + 6;
-    internal static int SlicerCadence(int step) => 24 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 6);
-    internal const int SlicerPitch = 112;
+    // Four fixed-color groups are fully revealed before release. No late-Final
+    // compression of the final reading window; release cadence alone accelerates.
+    internal static int SlicerReveal(int pulse) => pulse * 30;
+    internal static int SlicerFire(int step) => SlicerReveal(SlicerPulses - 1) + 84;
+    internal static int SlicerEnd(int step) => SlicerFire(step) + FirstSeveranceLanceTuning.PatternActiveTicks;
+    internal static int SlicerCadence(int step) => 60 - (int)MathF.Round(FirstSeveranceChoreography.FinalProgress(step) * 12);
+    internal const int SlicerPitch = (int)(FirstSeveranceLanceTuning.HalfWidth * 8);
     internal static int BulletStartTick(int step, int wave) => 36 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 8)
         + wave * (32 - (int)(FirstSeveranceChoreography.FinalProgress(step) * 10));
     internal static float BulletSpeed(int step) => 10 + FirstSeveranceChoreography.FinalProgress(step) * 3.5f;
@@ -127,9 +127,9 @@ internal static class FirstSeveranceScoreGeometry
             for (int pulse = 0; pulse < SlicerPulses; pulse++)
             {
                 int reveal = SlicerReveal(pulse), fire = SlicerFire(step) + pulse * SlicerCadence(step);
-                if (age < reveal || age >= fire + 18) continue;
+                if (age < reveal || age >= fire + FirstSeveranceLanceTuning.PatternActiveTicks + 24) continue;
                 foreach (var ray in FirstSeveranceRandomComb.Rays(actionSeed, step, pulse, groundX, cy))
-                    rays.Add(new(ray, age >= fire && age < fire + 6, pulse,
+                    rays.Add(new(ray, age >= fire && age < fire + FirstSeveranceLanceTuning.PatternActiveTicks, pulse,
                         Smooth((float)(age - reveal) / (fire - reveal))));
             }
         }

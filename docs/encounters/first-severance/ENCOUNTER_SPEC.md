@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -48,7 +48,7 @@ Temporary infinite flight and containment are Fight-owned through preparation/co
 | I — Sealed | Pylons → opening Stack/Spread → first Core exposure → four clockwise fixed Stack sites, each followed by Spread | Unbound at 80% remaining HP |
 | II — Unbound | Lattice → Spread → accelerating twin-blade double rotation → Spread → Lattice → Spread | Distant at 40% remaining HP |
 | III — Distant | Remote floods → Iron Interdict → Stack/Spread → opposite-side Iron Interdict → remote floods → Stack/Spread → central crush | Final at zero logical HP |
-| Final | Eight clockwise Stack/Spread stops, alternating dense bullets and three-group slicing attacks between stops | Victory after the whole score, not on entering zero HP |
+| Final | Eight clockwise Stack/Spread stops, alternating dense bullets and four-color prism scores between stops | Victory after the whole score, not on entering zero HP |
 
 [BossPhases](../../../Content/Encounters/FirstSeverance/FirstSeveranceBossPhases.cs) owns thresholds, transition lengths and hittable substates. [Choreography](../../../Content/Encounters/FirstSeverance/FirstSeveranceChoreography.cs) owns ordered actions, moving-site geometry and durations. [LoopStateMachine](../../../Content/Encounters/FirstSeverance/FirstSeveranceLoopStateMachine.cs) owns cycle completion and pending gates.
 
@@ -90,15 +90,17 @@ Success/failure is authority sampled; ruby verdict rays are instantaneous result
 - **Remote floods:** short smooth loading → horizontal deployment → accelerating widening leaving a moving safe strip. Stack → Spread → Stack resolves during the corresponding safe holds.
 - **Iron Interdict:** the legacy `HalfField` state is now two staggered waves of irregular top/bottom swords, not half-field laser stripes. One half has no safe gaps when fully inserted; the other has narrow whole-body gaps. Wave two shifts those gaps to require movement. The later action seals the opposite half. Warning covers the full future corridor, while active damage reaches only the visible inserted tip; retraction is harmless.
 - **Central crush:** remote hands brace, then rapidly close toward the center with a readable pressure forecast. Contact is a lethal Raid hit subject to the normal Down/recovery rules, not bypassed protection.
-- **Final bullets:** increasingly dense lancets with forecasted birth and bounded trails, alternating with the slicing triples below.
+- **Final bullets:** increasingly dense lancets with forecasted birth and bounded trails, alternating with the four-color prism score below.
 
 Exact motion and hit caps live in [AttackPatterns](../../../Content/Encounters/FirstSeverance/FirstSeveranceAttackPatterns.cs), [Lance](../../../Content/Encounters/FirstSeverance/FirstSeveranceLance.cs), [GridVolley](../../../Content/Encounters/FirstSeverance/FirstSeveranceGridVolley.cs), [SafeWindows](../../../Content/Encounters/FirstSeverance/FirstSeveranceSafeWindows.cs), [ImpalingSwords](../../../Content/Encounters/FirstSeverance/FirstSeveranceImpalingSwords.cs) and [ScoreGeometry](../../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs). Ordinary beams use fixed damage, separately from percentage Stack/Spread penalties; never infer collision from bloom.
 
-## Random Final triples
+## Four-color Final prism score
 
-Three complete comb forecasts appear one after another, **all before any fires**. They keep their locked coordinates through a reading window, then fire in reveal order. Later forecasts remain visible during earlier shots; harmless residue is dim. Cyan/violet/rose distinguish the groups without numeric labels or arrows.
+Four complete forecasts appear in **red → blue → green → gold** order, all before any fires. They keep their locked coordinates through a reading window, then fire in the same order. Later forecasts remain visible during earlier shots; harmless residue is dim. No numeric labels or arrows. This uses the initial eight-shot PursuitPrism's actual corridor width, live duration, finite-rectangle collision, emission material, aperture and launch sound—not the retired thin lattice-tooth effect.
 
-Each group chooses vertical, horizontal or either diagonal from the server action seed; repeats are allowed. No new randomness or retargeting happens on release. [ScoreGeometry](../../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs) owns reveal, reading window, cadence, width and pitch; authority and drawing share them. Tempo accelerates with Final progress, but the last revealed group always receives its authored reading time. Do not restore the older six-pulse or last-moment reveal designs.
+Two adjacent pursuit rays form each occupied band. Red/blue are complementary bands on one axis; green/gold complement one another on a different axis. Axes are selected from vertical, horizontal and the two diagonals using the existing server action seed. All four forecasts together cover the field, but each individual firing group leaves broad safe bands; there is no permanent hiding point through all colors. It is a movement/sequence-reading attack, not simultaneous field-wide damage. No randomness or retargeting occurs on release.
+
+[ScoreGeometry](../../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs) owns the 30-tick reveal cadence, 84-tick reading window after the last reveal, and release cadence accelerating from 60 to 48 ticks. Width and 12-tick live duration reference `LanceTuning`; fixed damage remains 120 with at most one accepted hit per participant/color. [RandomComb](../../../Content/Encounters/FirstSeverance/FirstSeveranceRandomComb.cs) owns deterministic complementary geometry; its retained internal name does not imply the old random triples. [EmissionVisuals](../../../Client/Encounters/FirstSeverance/FirstSeveranceEmissionVisuals.cs) supplies the shared renderer. Late snapshots derive the same locked positions and current reveal/live intervals, never replay earlier shots.
 
 ## Raid damage and Adrenaline
 

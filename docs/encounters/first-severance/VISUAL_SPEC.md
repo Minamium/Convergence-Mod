@@ -62,7 +62,7 @@ Native selected boss-bar style is retained, including vanilla. The Boss register
 
 ## Beams, swords and forecast readability
 
-- Preserve accepted narrow Prism/lattice plasma: full real corridor, pearl-hot spine, saturated flowing filaments and dim harmless residue. All-three Final previews use that same lattice material; [encounter timing](ENCOUNTER_SPEC.md#random-final-triples) is authoritative.
+- Preserve accepted narrow Prism/lattice plasma: full real corridor, pearl-hot spine, saturated flowing filaments and dim harmless residue. The four-color Final score shares the initial PursuitPrism aperture, material and launch envelope, not the thin lattice tooth; [encounter timing](ENCOUNTER_SPEC.md#four-color-final-prism-score) is authoritative.
 - Broad floods/salvos use tightly layered laminar light and wavering filaments **inside a readable continuous footprint**. No flat opaque slabs, fake decorative safe gaps or glow spilling into the surviving strip. Future width is readable before the actual live interval.
 - Boss-origin Core salvos have an inward-loading chest lens, graduated filament neck and connected throat; no square-cut root or detached muzzle. Use a persistent flow phase plus bounded release offset, not elapsed time multiplied by a changing speed that jumps on firing.
 - Phase-I Stillness builds/fires dense narrow teeth from each side footprint's center outward. Each tooth gets its complete forecast; only live teeth brighten as dangerous. Never illuminate the whole slab early.

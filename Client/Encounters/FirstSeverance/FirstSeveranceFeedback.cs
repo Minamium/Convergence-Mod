@@ -327,7 +327,7 @@ internal sealed class FirstSeveranceFeedback
                     PlayTimed(combat.Substate switch
                     {
                         FirstSeveranceSubstate.RemoteClaws => "HandClasp",
-                        _ => "FinalSlicerFire",
+                        _ => "LanceFire",
                     }, .98f, tick, Math.Min(combat.ResolveTick + 6, soundEnd));
                 }
             }

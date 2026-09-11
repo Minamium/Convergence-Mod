@@ -40,7 +40,7 @@ public static class DollTheaterPreview
         g.DrawImage(npc,new RectangleF(94,floor-104,64,104),new RectangleF(0,0,32,52),GraphicsUnit.Pixel);
         g.DrawImage(npc,new RectangleF(30,240,224,364),new RectangleF(0,0,32,52),GraphicsUnit.Pixel);
         g.DrawString("1x           2x",small,quiet,37,floor+13);
-        g.DrawString("Above: 7x inspection\nActual sprite: 32 x 52\nBlink: 2 aligned frames",small,quiet,26,890);
+        g.DrawString("Above: 7x inspection\nActual sprite: 32 x 52\n12 expression / gesture cels",small,quiet,26,890);
         var pose=new FirstSeveranceDollPose();
         g.InterpolationMode=InterpolationMode.Bilinear;
         pose.Encased(3,0,false); DrawPose(g,atlas,harness,pose,603,500,.89f);
@@ -59,7 +59,7 @@ public static class DollTheaterPreview
     public static void Validate(string assets)
     {
         string[] names={"DollAttendant.png","DollRigAtlas.png","DollCoffin.png","DollHead.png"};
-        int[] widths={32,384,256,34},heights={104,384,256,34};
+        int[] widths={32,384,256,34},heights={624,384,256,34};
         for(int i=0;i<names.Length;i++)
         {
             using var texture=new Bitmap(Path.Combine(assets,names[i]));
@@ -154,16 +154,17 @@ public static class DollTheaterPreview
 
     static void Frames(Bitmap hand,Bitmap body,string output)
     {
-        using var image=new Bitmap(1600,890); using var g=Graphics.FromImage(image);
+        using var image=new Bitmap(1600,1710); using var g=Graphics.FromImage(image);
         using var font=new Font("Segoe UI",13); using var ink=new SolidBrush(Color.LightGray);
         g.Clear(Color.FromArgb(21,20,27)); g.InterpolationMode=InterpolationMode.Bilinear;
-        g.DrawString("8 AUTHORED CLAW POSES + 8 RESTRAINT POSES / actual runtime atlas frames, not rig screenshots",font,ink,20,15);
-        for(int row=0;row<2;row++) for(int i=0;i<8;i++)
+        g.DrawString("16 AUTHORED CLAW POSES + 16 RESTRAINT POSES / actual runtime atlas frames, not rig screenshots",font,ink,20,15);
+        for(int row=0;row<4;row++) for(int i=0;i<8;i++)
         {
-            var uv=FirstSeveranceDollFrames.Region(row==0,i);
-            var tex=row==0?hand:body;
-            if(tex.Width!=uv.Width*4||tex.Height!=uv.Height*2) throw new InvalidDataException("Invalid frame atlas size");
-            g.DrawString((row==0?"Claw ":"Restraint ")+i,font,ink,i*200+12,55+row*410);
+            int frame=row%2*8+i;
+            var uv=FirstSeveranceDollFrames.Region(row<2,frame);
+            var tex=row<2?hand:body;
+            if(tex.Width!=uv.Width*4||tex.Height!=uv.Height*4) throw new InvalidDataException("Invalid frame atlas size");
+            g.DrawString((row<2?"Claw ":"Restraint ")+frame,font,ink,i*200+12,55+row*410);
             g.DrawImage(tex,new RectangleF(i*200+5,82+row*410,190,352),new RectangleF(uv.X,uv.Y,uv.Width,uv.Height),GraphicsUnit.Pixel);
         }
         image.Save(output,ImageFormat.Png);

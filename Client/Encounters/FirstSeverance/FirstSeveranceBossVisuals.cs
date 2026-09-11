@@ -248,7 +248,7 @@ internal sealed class FirstSeveranceBossVisuals
         }
         emissions.Draw(batch, tick, reduced);
         stages.DrawGrid(batch, combat, renderTick, tick, Accents, reduced);
-        scoreVisuals.Draw(batch, combat, renderTick, tick, Accents, reduced);
+        scoreVisuals.Draw(batch, combat, renderTick, tick, emissions, reduced);
     }
 
     private void DrawRig(SpriteBatch batch, Vector2 center, float reveal, float breath, float cast, float kick,

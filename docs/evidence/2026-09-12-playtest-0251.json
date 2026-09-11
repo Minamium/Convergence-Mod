@@ -1,0 +1,214 @@
+{
+  "date": "2026-09-12",
+  "build": "0.2.51",
+  "topology": "Host & Play; one solo development run followed by six three-player attempts",
+  "server_sha256": "0c28854bcdf41006caadb9ea30b3554b274b02fc8a3e8c022bab3204ef2cae5a",
+  "sources": [
+    "server.log",
+    "client.log",
+    "server2.log"
+  ],
+  "raw_logs": "External output/playtest-20260912-0251; not distributed",
+  "attempts": [
+    {
+      "sequence": 1,
+      "players": 1,
+      "seconds": 224.75,
+      "result": "Victory",
+      "boss_remaining_pct": 0,
+      "core_window_dps": 122850.1,
+      "pylon_window_dps": 87167.1,
+      "downed": 0,
+      "revived": 0,
+      "stack_success": 19,
+      "stack_failure": 0,
+      "final_reached": true,
+      "final_slicer": {
+        "source": "FinalSlicer",
+        "lethal": 0,
+        "hits": 8,
+        "damage": 960
+      }
+    },
+    {
+      "sequence": 2,
+      "players": 3,
+      "seconds": 60.02,
+      "result": "Defeat",
+      "boss_remaining_pct": 80,
+      "core_window_dps": 200371.1,
+      "pylon_window_dps": 222772.3,
+      "downed": 4,
+      "revived": 1,
+      "stack_success": 2,
+      "stack_failure": 2,
+      "final_reached": false,
+      "final_slicer": {
+        "hits": 0,
+        "lethal": 0
+      }
+    },
+    {
+      "sequence": 3,
+      "players": 3,
+      "seconds": 58.4,
+      "result": "Defeat",
+      "boss_remaining_pct": 80,
+      "core_window_dps": 210116.7,
+      "pylon_window_dps": 217391.3,
+      "downed": 4,
+      "revived": 1,
+      "stack_success": 1,
+      "stack_failure": 3,
+      "final_reached": false,
+      "final_slicer": {
+        "hits": 0,
+        "lethal": 0
+      }
+    },
+    {
+      "sequence": 4,
+      "players": 3,
+      "seconds": 188.93,
+      "result": "Defeat",
+      "boss_remaining_pct": 6.16,
+      "core_window_dps": 99206.4,
+      "pylon_window_dps": 159574.5,
+      "downed": 7,
+      "revived": 4,
+      "stack_success": 2,
+      "stack_failure": 10,
+      "final_reached": false,
+      "final_slicer": {
+        "hits": 0,
+        "lethal": 0
+      }
+    },
+    {
+      "sequence": 5,
+      "players": 3,
+      "seconds": 57.9,
+      "result": "Defeat",
+      "boss_remaining_pct": 80,
+      "core_window_dps": 113445.4,
+      "pylon_window_dps": 234375,
+      "downed": 4,
+      "revived": 1,
+      "stack_success": 1,
+      "stack_failure": 3,
+      "final_reached": false,
+      "final_slicer": {
+        "hits": 0,
+        "lethal": 0
+      }
+    },
+    {
+      "sequence": 6,
+      "players": 3,
+      "seconds": 35.35,
+      "result": "Defeat",
+      "boss_remaining_pct": 89.26,
+      "core_window_dps": 96949.7,
+      "pylon_window_dps": 254957.5,
+      "downed": 3,
+      "revived": 0,
+      "stack_success": 0,
+      "stack_failure": 1,
+      "final_reached": false,
+      "final_slicer": {
+        "hits": 0,
+        "lethal": 0
+      }
+    },
+    {
+      "sequence": 7,
+      "players": 3,
+      "seconds": 195.93,
+      "result": "Defeat",
+      "boss_remaining_pct": 0,
+      "core_window_dps": 119548.4,
+      "pylon_window_dps": 226130.7,
+      "downed": 6,
+      "revived": 3,
+      "stack_success": 6,
+      "stack_failure": 9,
+      "final_reached": true,
+      "final_slicer": {
+        "source": "FinalSlicer",
+        "lethal": 0,
+        "hits": 2,
+        "damage": 240
+      }
+    }
+  ],
+  "three_player_damage_by_source": {
+    "PursuitPrism": {
+      "hits": 36,
+      "lethal": 3,
+      "damage": 4320
+    },
+    "SpreadPrism": {
+      "hits": 74,
+      "lethal": 9,
+      "damage": 8880
+    },
+    "Stack": {
+      "hits": 57,
+      "lethal": 8,
+      "damage": 13889
+    },
+    "Stillness": {
+      "hits": 23,
+      "lethal": 1,
+      "damage": 2760
+    },
+    "SweepLeft": {
+      "hits": 4,
+      "lethal": 2,
+      "damage": 1302
+    },
+    "SweepRight": {
+      "hits": 5,
+      "lethal": 1,
+      "damage": 1749
+    },
+    "HalfField": {
+      "hits": 8,
+      "lethal": 2,
+      "damage": 960
+    },
+    "Lattice": {
+      "hits": 9,
+      "lethal": 1,
+      "damage": 1080
+    },
+    "RemoteClaws": {
+      "hits": 2,
+      "lethal": 0,
+      "damage": 240
+    },
+    "FinalBullets": {
+      "hits": 4,
+      "lethal": 1,
+      "damage": 480
+    },
+    "FinalSlicer": {
+      "hits": 2,
+      "lethal": 0,
+      "damage": 240
+    },
+    "RotatingBlade": {
+      "hits": 2,
+      "lethal": 0,
+      "damage": 240
+    }
+  },
+  "interpretation": [
+    "All six multiplayer defeats ended in AllParticipantsDowned. The final attempt reached zero core HP and Final survival.",
+    "Final attempt: 2 FinalSlicer hits (240 total), neither lethal; two other players were already Downed at the last Stack. The remaining player was inside the marker (37.7px), but only 1/3 standing members attended; damage 497 against life 134 caused the final Down. CombatEnded.phase=Spread is the successor substate, not the killing source.",
+    "All 10 InstantReviveAccepted records have corresponding ParticipantRevived; no revive rejection observed in these archived server records. This does not certify remote UI or every attempted input.",
+    "Three-player core-window effective DPS 96,949.7–210,116.7 is authority net HP loss divided by open-window time, not uninterrupted weapon DPS. No HP balance change made.",
+    "server2.log has a caught EndOfStreamException in SubworldLibrary.LoadIntoSubworld/TagIO at 04:07:45, after host shutdown. No Convergence frame in that stack; not evidence of a Raid combat crash. No fix to third-party mods made.",
+    "Music overlap is inferred from inspected selection code (prior slot retained until transition end), not measured audio recordings. Latest code remedy has separate build evidence."
+  ]
+}

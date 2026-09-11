@@ -18,26 +18,34 @@ internal static class FirstSeveranceRandomComb
     }
     internal static int Axis(ulong seed, int step, int pulse)
     {
-        uint sample = Sample(seed, step, pulse);
-        int category = (int)(sample % 3);
-        return category < 2 ? category : 2 + (int)((sample >> 8) & 1);
+        uint sample = Sample(seed, step, 0);
+        int first = (int)(sample & 3);
+        // Complementary color pairs cover the entire field along two different
+        // axes. Every four-color score requires movement, with broad safe bands.
+        return pulse < 2 ? first : (first + 1 + (int)((sample >> 8) % 3)) % 4;
     }
     internal static IReadOnlyList<FirstSeveranceLanceRay> Rays(ulong seed, int step, int pulse, float cx, float cy)
     {
-        var rays = new List<FirstSeveranceLanceRay>(32);
+        var rays = new List<FirstSeveranceLanceRay>(40);
         int axis = Axis(seed, step, pulse);
         float diagonal = MathF.Sqrt(.5f);
         float dx = axis == 0 ? 0 : axis == 1 ? 1 : diagonal;
         float dy = axis == 0 ? 1 : axis == 1 ? 0 : axis == 2 ? diagonal : -diagonal;
         float nx = -dy, ny = dx;
-        float offset = (Sample(seed, step, pulse) >> 10) % FirstSeveranceScoreGeometry.SlicerPitch - FirstSeveranceScoreGeometry.SlicerPitch * .5f;
-        for (int i = -20; i <= 20; i++)
+        float width = FirstSeveranceLanceTuning.HalfWidth * 2;
+        float offset = (Sample(seed, step, pulse / 2) >> 10) % FirstSeveranceScoreGeometry.SlicerPitch
+            + (pulse % 2) * width * 2;
+        for (int i = -8; i <= 8; i++)
+        for (int tooth = 0; tooth < 2; tooth++)
         {
-            float x = nx * (i * FirstSeveranceScoreGeometry.SlicerPitch + offset);
-            float y = ny * (i * FirstSeveranceScoreGeometry.SlicerPitch + offset);
+            float distance = i * FirstSeveranceScoreGeometry.SlicerPitch + offset + tooth * width;
+            float x = nx * distance;
+            float y = ny * distance;
             float lo = -4000, hi = 4000;
-            if (!Clip(x, dx, 1280, ref lo, ref hi) || !Clip(y, dy, 560, ref lo, ref hi) || hi - lo < 32) continue;
-            rays.Add(new(cx + x + dx * lo, cy + y + dy * lo, dx, dy, hi - lo, FirstSeveranceGridVolley.HalfWidth));
+            // Pad endpoints for finite player boxes and diagonal corners. The
+            // containment mask clips decoration outside; SAT uses these same rays.
+            if (!Clip(x, dx, 1324, ref lo, ref hi) || !Clip(y, dy, 604, ref lo, ref hi) || hi - lo < 32) continue;
+            rays.Add(new(cx + x + dx * lo, cy + y + dy * lo, dx, dy, hi - lo));
         }
         return rays;
     }
