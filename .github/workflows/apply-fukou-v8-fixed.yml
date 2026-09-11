@@ -1,0 +1,61 @@
+name: Apply Fukou V8 section loops fixed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-fukou-v8-fixed.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare audio and Python tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v ffmpeg >/dev/null || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+          python3 -m pip install --disable-pip-version-check -r tools/requirements-ci.txt
+          python3 -m py_compile .github/scripts/apply-fukou-v8.py
+
+      - name: Apply section loops, handoff and mix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/apply-fukou-v8.py
+
+      - name: Verify repository and audio revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools/tests
+          python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py --write-catalog .
+          git diff --check
+          python3 - <<'PY'
+          import json, pathlib
+          path = pathlib.Path('docs/evidence/2026-09-11-fukou-section-loops-mix.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          data['verification']['repository_static'] = 'passed: verify_repo.py --write-catalog .'
+          data['verification']['git_diff_check'] = 'passed'
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+          python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py --write-catalog .
+          git diff --check
+
+      - name: Commit and push 0.2.47
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Assets/Music Client/Encounters/FirstSeverance/FirstSeverancePrototypePresentation.cs Assets/ATTRIBUTION.md docs build.txt
+          git status --short
+          git commit -m 'Align phase music handoff and strengthen BGM mix (0.2.47)'
+          git push origin HEAD:main
