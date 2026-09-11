@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - art
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - first_severance.reward_weapons
 aliases:
@@ -22,13 +22,15 @@ related_docs:
 
 # First Severance — Five Ritual Armaments
 
+Current mechanics are below; [Audio](../../AUDIO_CUE_SHEET.md) owns the active sound masters and removal of the claw's overlapping swipe after-sound. Versioned labels identify when a design arrived, not the current package/protocol: those belong to [Status](../../STATUS.md).
+
 ## Claw swipe cleanup — 0.2.38
 
 Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. Normal swipes no longer emit radial line/shard sprays, including their normal-hit aftermath; their ribbon omits its dark opaque underlay. The palm's existing aperture and the entire right-click crush remain unchanged. The shared ribbon helper defaults to its old behavior for other weapons. Motion, hitboxes, damage, resources and audio are untouched.
 
 ## Null Cantor's Claws — accepted melee redesign, 0.2.29
 
-This section replaces the original sword/echo prototype. Internal item identity `NullRefrain`, the accepted Victory drop and all one-for-one exchanges are unchanged. Boss attacks, Raid timing, recovery, music and protocol23 are untouched. The other four forms follow the v2 specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it.
+This section replaces the original sword/echo prototype. Internal item identity `NullRefrain`, the accepted Victory drop and all one-for-one exchanges are unchanged. The other four forms follow the long-form ritual specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it. Weapon-only changes do not authorize Raid tuning.
 
 **Left click:** alternate independently articulated left/right five-finger claws using the actual P3 rig material. The hand expands from0.68x to2.30x during the stroke, then retracts; the whole attack stays inside560 world pixels of the player. Base duration28ticks, bounded10–90 after native true-melee speed. Only the palm and swept finger capsules damage, once per logical NPC root per swipe. No homing echo projectiles: this is the user's replacement true-melee design. Calamity's registered `TrueMeleeDamageClass` is resolved through the compatibility adapter, without using its internal singleton.
 
@@ -36,7 +38,7 @@ This section replaces the original sword/echo prototype. Internal item identity 
 
 The new presentation uses native-resolution P3 palm/bone/talon regions, independently moving finger joints, broad layered violet/white crescents with negative-space interiors, connected fingertip wakes, dislodged dark shards and expanding broken pressure rings. The remote strike closes on a dark center before a vertical flare and ring release. Bright remnants never increase hit range. Both hands and major crescents remain under Reduced Effects; secondary shards and shake are reduced/disabled. Weapon sounds use a separate identifier and tracked, bounded voices; P3 masters are reused unchanged. No global pause, forced zoom or white-screen fill.
 
-Initial base damage7700 gives16500 nominal unmodified swipe damage/sec at28ticks; execution damage32340, before native armor/crit/gear/hooks. Including its72-tick occupation and360-tick refill gives about18.2k nominal raw output/sec under continuous perfect contact. This is a budgeting calculation, not measured Calamity DPS or a claim of superiority over every final weapon. Tune `NullCantorClawMotion` from the user/Codex comparison, without changing Boss HP.
+`NullCantorClawMotion` owns the current melee budget and timing; the previous72-tick execution calculation predates the faster right-click score and is not current DPS. Measure actual contact with native armor/crit/gear/hooks before comparing endgame output. Do not change Boss HP to disguise a weapon balance problem.
 
 The native128x128 RGBA inventory icon is composed from the existing original P3 hand and palm atlas, not cropped from the concept board and not32-color quantized. The original atlas remains unchanged; runtime limbs keep the native source detail. Its exact derivative record is in `Assets/ATTRIBUTION.md`.
 
@@ -88,7 +90,7 @@ Magic has persistent flowing plasma with a full-width luminous throat, rotating 
 
 Render clocks and short-angle interpolation connect game ticks. Transparent, filamentary layers remain inside a readable continuous beam body, not independent decorative gaps. Reduced Effects reduces density/intensity and disables local shake; no fullscreen white pulses, forced zoom, time manipulation or UI/input ownership is introduced. The accepted melee geometry, controls, art and charge are unchanged.
 
-Owner clients alone sample mouse/channel input, spend mana/ammo and create child projectiles, using Terraria's existing cooperative weapon replication. Other peers render/read native projectile state. Raid outcomes remain server-authoritative; this is not a new anti-cheat guarantee. Held controllers cancel on item change/death/Down/CC; launched ordinary projectiles retain normal flight lifetimes and terminate for unusable owners. World unload clears voices; Mod unload disposes material/mesh resources. No new Encounter packet or ID: protocol23 remains, but **all peers need the same0.2.34 content build**.
+Owner clients alone sample mouse/channel input, spend mana/ammo and create child projectiles, using Terraria's existing cooperative weapon replication. Other peers render/read native projectile state. Raid outcomes remain server-authoritative; this is not a new anti-cheat guarantee. Held controllers cancel on item change/death/Down/CC; launched ordinary projectiles retain normal flight lifetimes and terminate for unusable owners. World unload clears voices; Mod unload disposes material/mesh resources. No weapon-specific Encounter packet is introduced; all peers still need matching current content/protocol as recorded in [Status](../../STATUS.md).
 
 ## Initial power budget — not measured DPS
 

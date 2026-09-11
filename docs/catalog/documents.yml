@@ -416,12 +416,12 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 0fd4df98d3c2cef5691b7f50e00967cb667f6a5b8b7fb18866eddd8366fdfec7
+  content_sha256: 0d8e8a1a2bdd7bcd434da4a90d7bacbe7882c2275bf4eea3e6a521995f16272b
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - documentation.read_order
   aliases:
@@ -435,12 +435,12 @@ documents:
 - doc_id: docs.search-index
   path: docs/INDEX.md
   title: Documentation Search Index
-  content_sha256: 64f834da52d1729c18a3a9a5db434eb7590403a246c3dcb0b4f1173f3cfd1005
+  content_sha256: dd3eb3dd4a02abc023faad3cc091286eb81cd06526ec8fbbbe8c2a40eeb9145d
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - documentation.search_index
   aliases:
@@ -494,12 +494,12 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: First Severance
-  content_sha256: 8d77bd07da3fddf59fbe496d1e256ad9be6ec6429e6f7ccb631ac3ab14b609fb
+  content_sha256: 7a9a73848f7b900fecf3d0277df00a1c3d278a7fb92163fa879f823f5751c0c1
   document_type: overview
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - first_severance.document_map
   aliases:
@@ -515,13 +515,13 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 342547e5ff58bc42ef1b544b9fda89ac7f0009f4b96aff1161c440df75e99ada
+  content_sha256: 588162953e1564908c9eced9e9514967125a1074379d0e351f83fa44927d22aa
   document_type: plan
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - first_severance.implementation_sequence
   aliases:
@@ -563,13 +563,13 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: First Severance Encounter Specification
-  content_sha256: 3837ce90884f8d9b9e2dce38bb61cc6a7d8c0afb6c5d307ddadeebb68366a2a6
+  content_sha256: 6f1a3a8073f8f7b774e205a2b8e5c4369e09caeee5d180c7975433e9c7f3e511
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-09'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -587,14 +587,14 @@ documents:
   - encounter.first-severance.revive
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
-  title: First Severance — Null Cantor Visual Pass
-  content_sha256: 3374ab58b4e0b569924330db9ba409aae92032629e7c124cce13b4b93b00ad98
+  title: First Severance — Current Presentation Direction
+  content_sha256: 24fb51d9c2cca35a4c68ec44b64fedef33685cf23b0d2a5aa55125a42ca023a7
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-10'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -608,13 +608,13 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: First Severance — Five Ritual Armaments
-  content_sha256: ce3e2806c094fec05b2d9ce37e29d45339561602ddfb2a413924c03fdb47d456
+  content_sha256: e70198e88cd3f88c81e72392e7697b0145ddc9ee49b95774574c44f251bd4e1e
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - art
-  last_reviewed: '2026-09-09'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - first_severance.reward_weapons
   aliases:
@@ -629,15 +629,15 @@ documents:
   - encounter.first-severance.spec
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
-  title: Windows Development Handoff
-  content_sha256: 25e65d9db1dbd5ac63387bdc5a710c23d7f18cdbb713a2d444fd48353394e631
+  title: Windows Development Handoff — チャット不要の再開入口
+  content_sha256: 093a29785cef302ad82b87ca0a8f810a814dda125e8374fe0f9269e04890b6eb
   document_type: handoff
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
-  - handoff.windows.2026-09-04
+  - handoff.windows.resume
   aliases:
   - Windows handoff
   - desktop migration
@@ -649,6 +649,38 @@ documents:
   - project.status
   - development.windows
   - encounter.first-severance.plan
+- doc_id: history.audio-evolution-0246
+  path: docs/history/2026-09-11-audio-evolution.md
+  title: Audio evolution through 0.2.46
+  content_sha256: ab5affd46421121c1e4f6803e7de0c2f071df4a317c421361532b6c38aff4ee7
+  document_type: evidence
+  status: historical
+  owners:
+  - project
+  last_reviewed: '2026-09-11'
+  source_of_truth_for: []
+  aliases:
+  - Audio evolution through 0.2.46
+  related_code: []
+  related_docs:
+  - project.status
+  - handoff.windows
+- doc_id: history.encounter-evolution-0246
+  path: docs/history/2026-09-11-encounter-evolution.md
+  title: Encounter evolution through 0.2.46
+  content_sha256: 5950d5d56a762801d9b15c54eff4e7ed8caba97d89b347e13497885e8cb45861
+  document_type: evidence
+  status: historical
+  owners:
+  - project
+  last_reviewed: '2026-09-11'
+  source_of_truth_for: []
+  aliases:
+  - Encounter evolution through 0.2.46
+  related_code: []
+  related_docs:
+  - project.status
+  - handoff.windows
 - doc_id: history.pre-consolidation
   path: docs/history/2026-09-07-pre-consolidation.md
   title: Pre-consolidation development record
@@ -665,16 +697,48 @@ documents:
   related_docs:
   - project.status
   - encounter.first-severance.plan
+- doc_id: history.status-through-0246
+  path: docs/history/2026-09-11-status-through-0246.md
+  title: Status and verification through 0.2.46
+  content_sha256: 5befc173896c9c92bb4a4e0ea9bbc3339d5fda7ff6154784e8069f5c931c0b92
+  document_type: evidence
+  status: historical
+  owners:
+  - project
+  last_reviewed: '2026-09-11'
+  source_of_truth_for: []
+  aliases:
+  - Status and verification through 0.2.46
+  related_code: []
+  related_docs:
+  - project.status
+  - handoff.windows
+- doc_id: history.visual-evolution-0246
+  path: docs/history/2026-09-11-visual-evolution.md
+  title: Presentation evolution through 0.2.46
+  content_sha256: 010c0c4382076bdb25cfb2f8b6ce45b78283165ec72b02dd84dbb6504cd6e3ef
+  document_type: evidence
+  status: historical
+  owners:
+  - project
+  last_reviewed: '2026-09-11'
+  source_of_truth_for: []
+  aliases:
+  - Presentation evolution through 0.2.46
+  related_code: []
+  related_docs:
+  - project.status
+  - handoff.windows
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: e3b166c5d274f289d55771fe86a31b245a79c0980299d50a118b25d127ae21ed
+  content_sha256: 0cdb07ec7837a3f6537477c96de2fff1659e9ab105e456a3ad76d793f5f1bcc3
   document_type: policy
   status: accepted
   owners:
   - project
   - art
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - policy.ip_provenance
   aliases:
@@ -688,13 +752,13 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: 917898aa5bdcc3d777c360169511fb4b468e982cbc3bcf770e1ee91af08cd296
+  content_sha256: 37a5afdda7eecd9a45af151bd77dc24aebeadbee4c82490244342f6af06aa5b3
   document_type: policy
   status: accepted
   owners:
   - project
   - quality
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - policy.release_process
   aliases:
@@ -710,7 +774,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: d919241cb1e080813f4d9c2f945f51f9b7d8319a9f8a0de45de9f34449855a94
+  content_sha256: 16a0d2e75755d0727f3978ca5206d1bf904cf068b4b9c755226bdeb456414c66
   document_type: governance
   status: accepted
   owners:
@@ -734,7 +798,7 @@ documents:
 - doc_id: project.arena-infrastructure
   path: docs/ARENA_INFRASTRUCTURE.md
   title: Arena Infrastructure
-  content_sha256: efb1daa897ee56777190cd399c83e2cec6011390db05be7828ec351afcda813b
+  content_sha256: e7721eb0cf8488f993ed1bc3c8329d08d29ff115c003f0e33aecba93b0305d6d
   document_type: spec
   status: accepted
   owners:
@@ -762,12 +826,12 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: 3b278bdf204be098e85df1d88cf6c4e2db3123b6adf313cd43e0a923de9ac1d4
+  content_sha256: d3d6daeee1e586e24e5fae9481e10aa3f76a211bfe0e30c38f4f976a6b8ff191
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - project.art_direction
   aliases:
@@ -781,13 +845,13 @@ documents:
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
-  content_sha256: 61676c1f90708690f15977ecb8f1f425ae1ea1c318612286fa13b19f5e8a14d3
+  content_sha256: baa473a9f984d723e613ed4d2630acff18e1bd8cd04ad757843622d4b06aae98
   document_type: governance
   status: accepted
   owners:
   - art
   - audio
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-11'
   source_of_truth_for:
   - assets.production_pipeline
   aliases:
@@ -801,7 +865,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: First Severance Audio Cue Sheet
-  content_sha256: 187917e6aaab24a2786792f30366efd5c49f7dc45160f35694af18c880b762f0
+  content_sha256: c3e1951d7cbd91677e765e1f310ab2eefdfa58c9590bd34d64568c48dbc5d250
   document_type: spec
   status: provisional
   owners:
@@ -938,7 +1002,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 68f8861b4a3c5f47560e0e9864dec4863f55bdee76ad7584cfd509a1eb8d56ad
+  content_sha256: dd0cc382518cc64294b659db2318e5c9f0f30398810f009b219889f71c33cc5e
   document_type: governance
   status: accepted
   owners:
@@ -983,7 +1047,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 1728def8e0e066206d7588a8f7f8fa834edb3e1c85f96a02839c5c299ebb870f
+  content_sha256: 9a4819b711cb46a283e4369728b41bd69184aa632d1a7496dad8aec0911bd505
   document_type: status
   status: accepted
   owners:

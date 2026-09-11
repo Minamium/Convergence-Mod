@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - documentation.search_index
 aliases:
@@ -41,16 +41,18 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 | Document ID | Type / status | Owns | Useful search terms |
 |---|---|---|---|
 | `project.status` | status / accepted | implementation inventory | implemented, missing, inert, verification, playable |
-| `handoff.windows` | handoff / accepted | historical 2026-09-04 Windows transfer checkpoint | transfer history, ModSources, Mac audit |
+| `handoff.windows` | handoff / accepted | thread-independent resume and local-work checkpoint | source, ModSources junction, GUI owner, logs, dirty translations |
 | `encounter.first-severance.overview` | overview / accepted | feature reading map | First Severance, 第一断絶, legacy ThirdSeverance |
 | `encounter.first-severance.spec` | spec / accepted | active encounter loop and outcomes | Pylon, DPS check, Stack, 頭割り, Spread, 散開, Core exposure |
-| `encounter.first-severance.plan` | plan / accepted | implementation order and gates | slice, rename, adapter, executor, Definition of Done |
-| `encounter.first-severance.visual` | spec / provisional | prototype boss appearance within the accepted one-body/readability boundary | central Core, broken ring, side arms, Shielded, Exposed |
+| `encounter.first-severance.plan` | plan / accepted | current scope and completed consolidation | bounded work, phase extension, adapters, deferred production |
+| `encounter.first-severance.visual` | spec / provisional | accepted development materials, motion and coordinate contract | eclosion, four columns, 107% UI, connected emission, oblique rift |
+| `encounter.first-severance.weapons` | spec / provisional | five reward forms and long-form rituals | NullRefrain, claws, mana, ammo, concert, stealth |
+| `project.audio-cues` | spec / provisional | current BGM, selective SFX and cue lifecycle | EigHt, 不幸な人形劇, silent preparation, Stack, deadline, AudioVoice |
 | `encounter.first-severance.revive` | spec / accepted | Downed/Revive player rules | Resuscitation Kit, 蘇生キット, instant revival, recipient lockout, PreKill |
 | `encounter.first-severance.backlog` | backlog / accepted | deferred ideas | Part Break, Effigy, Last Stand, Split Reality |
 | `development.windows` | runbook / accepted | repeatable workstation setup | tModLoader, Calamity, .NET 8, Build + Reload, Dedicated Server |
 | `research.wotg-raid-benchmark` | research / provisional | reference evidence, not gameplay authority | [WotG](research/WOTG_RAID_BENCHMARK.md), Avatar, Nameless, composite, telegraph, audio, video chapters |
-| `development.single-operator-testing` | runbook / provisional | proposed local testing method, not runtime evidence | [一人二窓](runbooks/SINGLE_OPERATOR_TESTING.md), localhost, debug Down, God Mode, NPC limitations |
+| `development.single-operator-testing` | runbook / provisional | opt-in build-gated solo / separately authorized auxiliary client | [一人二窓](runbooks/SINGLE_OPERATOR_TESTING.md), localhost, debug Down, console lease, no NPC companion |
 | `verification.evidence` | evidence / accepted | build/test record format | commit SHA, versions, checksums, logs |
 | `docs.system` | governance / accepted | documentation data model | front matter, catalog, rg, doc_id |
 
@@ -76,4 +78,4 @@ Start with this curated map, then use [`catalog/documents.yml`](catalog/document
 - Working revive item: `Resuscitation Kit`, `蘇生キット`; it is provisional.
 - Removed-from-MVP concepts: `Part Break`, `Targeted Line`, `Personal Effigy`, `Split Reality`, `Last Stand`, `Crown`, `Wings`, `Heart Casing`.
 
-Do not globally replace legacy strings in historical ADRs, research, changelog entries, or completed-rename instructions. Current code and tests use the `FirstSeverance` identity; follow the remaining sequence in the implementation plan.
+Do not globally replace legacy strings in historical ADRs, research or changelog entries. The rename is complete. Current code and tests use `FirstSeverance`; current work is scoped by the implementation plan and new user request.

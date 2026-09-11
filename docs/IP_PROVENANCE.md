@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -61,6 +61,10 @@ The0.2.34 weapon score design uses behavior-only study of Yharim's Crystal, Drat
 - 公開sourceはAPI調査と挙動理解のreferenceとして使う。
 - codeを持ち込む必要が生じた場合は、Calamity licenseのcredit/link条件を満たすか確認し、可能なら独立実装を選ぶ。
 - userは公式Steam Workshop版を別途導入する。
+
+## Licensed recordings
+
+現在のEigHt BGMはユーザーが曲とフェーズ編集方針を選択したもの。出所・変更・credit・配布制限は [Attribution](../Assets/ATTRIBUTION.md#eight-不幸な人形劇-phase-masters--0246)、制作上の扱いは [Asset Pipeline](ASSET_PIPELINE.md#music-rights-policy) を正本とする。ゲーム同梱と音源単体再配布を混同しない。過去の「全曲project-original」という記述から現在の権利を判断しない。
 
 ## Classical music
 

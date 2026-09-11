@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - documentation.read_order
 aliases:
@@ -20,6 +20,8 @@ related_docs:
 # Documentation Home
 
 This page is the starting point for humans and coding agents. The repository includes an experimental Raid playtest build; do not infer production completeness from a design document. Verify current implementation and evidence in [Status](STATUS.md).
+
+**Resuming without chat history? Start with the [Windows handoff](handoff/WINDOWS.md).** It records source/build identity, local-only work, collaboration defaults and log-reading workflow. [First Severance overview](encounters/first-severance/README.md) is the short player-facing map; current specs below own details. Historical snapshots are optional evidence, not a reading queue.
 
 ## Read by task
 
@@ -49,6 +51,9 @@ Select checks from the shared [Verification Matrix](../.agents/skills/develop-co
 | What is the current first Raid? | [First Severance encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) |
 | What gets implemented, and in what order? | [First Severance implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) |
 | How does Downed/Revive feel to players? | [Revive specification](encounters/first-severance/REVIVE_SPEC.md) |
+| Which weapon forms, inputs and macro timelines are current? | [Weapons](encounters/first-severance/WEAPONS.md) |
+| Which art/motion decisions must not regress? | [Visual specification](encounters/first-severance/VISUAL_SPEC.md) |
+| Which music/effect masters and playback rules are current? | [Audio cue sheet](AUDIO_CUE_SHEET.md); exact asset provenance in [Attribution](../Assets/ATTRIBUTION.md) |
 | What authority invariants are mandatory? | [ADR-0002](adr/0002-server-authoritative-encounters.md), [ADR-0005 foundation](adr/0005-server-authoritative-downed-revive.md), and [ADR-0011 recovery policy](adr/0011-instant-revival-and-recipient-lockout.md) |
 | What is deliberately postponed? | [First Severance backlog](encounters/first-severance/BACKLOG.md) |
 | How should Windows be prepared? | [Windows development runbook](runbooks/WINDOWS_DEVELOPMENT.md) |

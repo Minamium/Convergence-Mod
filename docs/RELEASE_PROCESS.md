@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - quality
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - policy.release_process
 aliases:
@@ -22,15 +22,17 @@ related_docs:
 
 # Release Process
 
-There is no release artifact yet. This policy prevents a green repository check from being mistaken for a playable build.
+Playable development packages and Workshop materials exist. This policy separates a build from approval of a particular public/production artifact. [Status](STATUS.md) owns the latest built package and outstanding evidence.
 
 ## Development-publication preparation
 
 The user requested materials for sharing the current playable development build, not completion of production content. `description.txt`, `description_workshop.txt`, `icon.png` and `icon_workshop.png` are the publication assets. This preparation is not a Publish action or a declaration that the gate below passed. Current version comes from `build.txt`, not the outdated0.2.26 planning excerpt. Keep `Convergence (Development Build)` as the public-facing name.
 
-Before the owner publishes: choose source/asset distribution terms, approve the solo-debug exception for the intended public test channel (the production rule below is still in force), confirm the exact package's load/setup/reward smoke, inspect package exclusions, and capture current gameplay screenshots. Do not invent license permissions or mark a compiled package release-approved. The repository is private as checked2026-09-08; descriptions therefore use future Workshop comments rather than inaccessible GitHub Issues. No private repository visibility, Steam agreement or publishing setting was changed.
+Before publishing a candidate: choose source/asset distribution terms, explicitly approve/document any solo-debug exception for the intended development-test channel (the production rule below remains in force), confirm the exact package's load/setup/reward smoke, inspect package exclusions, and capture current gameplay screenshots. Do not invent license permissions or mark a compiled package release-approved.
 
-The [official Workshop guide](https://github.com/tModLoader/tModLoader/wiki/Workshop#update-mod-icon), checked2026-09-08, specifies80×80 `icon.png`, up to512×512 `icon_workshop.png`, and Workshop BBCode in `description_workshop.txt`. The generated emblem is promotional artwork, not a gameplay screenshot. Suggested actual screenshots: preparation/arena, one readable Stack/Spread, Phase-II lattice and Phase-III swords. Hide names/chat where practical; captions should describe the pictured current build, not promise future features. The owner supplies/approves those screenshots and performs Publish manually.
+The owner previously reported completing the publication interaction and possibly waiting for approval. The current Workshop URL/visibility/approval and latest uploaded version are **not verified by this documentation checkpoint**; check them only when publication is in scope. The2026-09-08 private-repository observation and comments-based report wording are historical, not proof of current GitHub/Workshop visibility. This documentation work changes no visibility, Steam agreement or upload setting.
+
+The [official Workshop guide](https://github.com/tModLoader/tModLoader/wiki/Workshop#update-mod-icon), checked2026-09-08, specifies80×80 `icon.png`, up to512×512 `icon_workshop.png`, and Workshop BBCode in `description_workshop.txt`. The generated emblem is promotional artwork, not a gameplay screenshot. Suggested actual screenshots: preparation/arena, one readable Stack/Spread, Phase-II lattice and Phase-III swords. Hide names/chat where practical; captions describe pictured current content, not future features. The owner approves screenshots/publication; GUI assistance requires explicit scope for that run, not general build permission.
 
 ## Version sources
 

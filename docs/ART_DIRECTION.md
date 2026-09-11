@@ -4,7 +4,7 @@ document_type: spec
 status: accepted
 owners:
   - art
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - project.art_direction
 aliases:
@@ -23,9 +23,9 @@ related_docs:
 
 極地の巨大研究・収容施設が、封印対象の起動により工業設備から儀式装置へ読み替わる瞬間を描く。既存作品やCalamity assetの形・構図を借りず、低密度でも読める独自の幾何学表現から始める。
 
-## First Severance MVP
+## Current First Severance presentation
 
-The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). The user requested a giant original art/VFX pass after the recovery experiment. One NPC/life pool means one logical damage target, not a small silhouette: `0.2.0` uses a colossal black-ice/ceramic containment body, four caliper-like restraints and orbiting industrial seals. Shield/exposure readability remains mandatory; separately damageable multipart mechanics remain deferred.
+The active source of truth is [First Severance Visual Spec](encounters/first-severance/VISUAL_SPEC.md). Preserve the accepted high-resolution shell, articulated body/arms and ritual machinery. One NPC/life pool means one logical damage target, not a small silhouette. Phase forms, kinetic contrast, beam/verdict readability and the current four-column suspension belong to that spec; the original small placeholder/pixel-first sequence is complete history, not today's work order. Separately damageable multipart mechanics remain deferred.
 
 ## Shape language
 
@@ -75,14 +75,8 @@ Boss scale may be visually large, but hitbox and damage gate must be obvious. De
 - extraction, repainting, tracing, or remixing Calamity sprites/textures/particles;
 - prompts requesting a living artist's exact style.
 
-## Production order
+## Bounded presentation changes
 
-1. placeholder body/ring/Core/Pylon and mechanic primitives;
-2. in-game silhouette/hitbox/telegraph test;
-3. 3–5 original concept options after mechanics are stable;
-4. selected key poses and component separation;
-5. pixel cleanup and animation;
-6. grayscale/color-vision/reduced-VFX/multiplayer QA;
-7. provenance entry before merge.
+For timing/continuity work, reuse accepted art and follow the development Skill's [presentation direction](../.agents/skills/develop-convergence-raids/references/presentation-direction.md). Name the arrival/brake/release/recovery beats, retain authoritative warning/hit geometry and inspect only the affected scene/poses. For genuinely new art, select a silhouette, separate only required components, preserve native material detail and record provenance before merge. Broader multiplayer/accessibility acceptance is selected by risk, not automatically rerun on every visual edit.
 
 Do not produce elaborate multipart art for deferred backlog mechanics.

@@ -95,7 +95,7 @@
     "git_diff_check": "passed: git diff --check",
     "native_mod_build": "passed on main integration:0errors,4existing CS8632 warnings; all four asset hashes match; source unchanged during packaging",
     "build_record": ".local/builds/20260911T083718761799Z/record.json",
-    "source_sha256": "null",
+    "source_sha256": "1576c239ed6a936876713816414ceba08f93933989693c15c2b8604f163eb647",
     "artifact_sha256": "baf256e82c5a7518915972165b343ad10d316f7223b32fb50f35d3faa3bbbd94",
     "runtime": "not_run: user-owned in-game phase transition, loop seam and mix review"
   },

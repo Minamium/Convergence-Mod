@@ -89,16 +89,16 @@ Required checks:
 - no chest, another Core, important TE, protected structure, or forbidden conflict;
 - no active Boss/invasion/Boss Rush conflict under the compatibility policy;
 - requester is within allowed server-measured range;
-- 2–4 eligible selected participants.
+- the complete eligible active-world roster, within the compiled admission limits; see Participant/Ready policy.
 
-Interior solidity, liquids, wire/actuator, platforms/rope, World spawn, and NPC housing are explicit non-blocking warnings in Slice 3A. Containers, another Core, a foreign Tile Entity, dungeon/Lihzahrd protected tiles, foundation gaps, World conflicts, incomplete scans, Core mismatch, distance failure, and invalid/ambiguous roster size are fatal errors. This is prototype policy and must be retested before activation.
+The old Slice 3A warning-only interior is historical: current development containment requires clear solid-block airspace and supporting plinth ground. Non-solid fixtures/liquids and housing/spawn diagnostics follow the current typed validator, not an instruction to excavate or clear the world. Containers, another Core, a foreign Tile Entity, protected tiles, unsupported foundation, world conflicts, incomplete scans, Core mismatch, requester-distance failure and invalid roster remain rejection conditions. Read the validator for a reported issue; do not treat the old warning policy as current authority.
 
 ## Participant/Ready policy
 
 - Candidate: every active current-world server player, independent of distance. Dead/ghost players or unresolved connection epochs block the whole start, rather than being silently omitted. Transport connections still loading their player into the world are not counted as active players.
-- One player cannot start the release feature; development override, if any, must be explicit/non-release.
+- Development has the explicit build-gated one-member admission documented in the [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#identity-and-scope) and [solo runbook](runbooks/SINGLE_OPERATOR_TESTING.md). This does not create a production solo mode.
 - Five or more active players reject the whole start with an explicit capacity message; selection UI/partial-group launch is not implemented.
-- Freeze 2–4 stable Participant IDs and current binding epochs before combat.
+- Freeze the accepted roster's stable Participant IDs and current binding epochs before combat; do not shrink the denominator on invalidity.
 - Ready belongs to Raid `Preparing`, supports unready, timeout, allowed initiator cancel, Foundation Core break/removal, and participant-loss cleanup. Any join/leave, epoch replacement or death during preparation cancels it with an explanation; reactivate the Core for a new complete roster. The denominator never shrinks behind the user's Ready consent.
 - Ready/cancel commands bind the exact server slot plus connection epoch and a monotonic per-participant nonce. Rejected identity/nonce commands do not advance authority time.
 - After `Active`, join-in-progress remains outside the frozen fight/next-pull; this change does not implement combat rejoin.

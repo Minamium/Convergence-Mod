@@ -4,7 +4,7 @@ document_type: overview
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - first_severance.document_map
 aliases:
@@ -21,28 +21,33 @@ related_docs:
 
 # First Severance
 
-`First Severance`（第一断絶）は、Convergenceで最初に完成させる2～4人向けRaidです。現在はReadyから戦闘ループ・BGM・実験Down／蘇生までを確認する開発ビルドです。実装済み範囲と未検証事項は[Status](../../STATUS.md)を参照してください。
+`First Severance`（第一断絶）は、2～4人推奨の開発版Raidです。全員Ready、3つの通常フェーズ、Final生存、Down／蘇生、勝敗演出、5クラスの武器まで実装しています。ソロ起動は開発確認用で、NPC仲間やソロ専用バランスはありません。実装・未検証事項は [Status](../../STATUS.md)、チャット不要の再開手順は [Windows handoff](../../handoff/WINDOWS.md) を参照してください。
 
-## Current slice
+## Current flow
 
 ```text
-Activation
-  -> Boss spawn
-  -> Pylon DPS check
-  -> Stack
-  -> Spread
-  -> Core exposure
-       -> HP remains: return to Pylon
-       -> HP reaches zero: Victory
+Core activation / all current-world participants
+  -> field deployment and black exterior
+  -> manual Ready from everyone
+  -> separate Boss/Raid introduction
+  -> Phase I: sealed / Pylons / Core / clockwise Stack + Spread
+  -> Phase II: lattice / twin rotating blades / Spread
+  -> Phase III: remote arms / floods / swords / Stack + Spread / crush
+  -> Final: eight clockwise stops + bullets / previewed slicing triples
+  -> survived full Final: Victory + shared reward drops
 ```
 
-Stackはserver-owned damage poolを分ける実際の頭割りです。Raid独自ダメージの致死はDownedへ変換し、別の参加者が専用アイテムで蘇生します。`0.2.0`では巨大な黒氷のBoss・拘束装置の初稿と、予測線の後に繰り返し発射する観測の槍を追加します。単一NPC/bodyとはHP・判定の所有単位であり、外見を小さく制限する意味ではありません。実装・確認状態は[Status](../../STATUS.md)に集約します。
+頭割りは固定座標へ全員集合すればゼロダメージ、不足人数分の割合ダメージ。散開も重ならなければゼロです。各フェーズは初回の行動一周を保証し、その後はHP閾値へ達したら即移行します。HPゼロだけでは勝利せずFinalを生き残る必要があります。詳細・閾値・定数の正本は [Encounter spec](ENCOUNTER_SPEC.md)。
+
+Raid独自の致死ダメージはDownへ変換。味方のResuscitation Kitで即時蘇生、消費/共有トークンなし、蘇生を受けた側だけ60秒再蘇生不可。Eliminated/Down期限はなく、全員Downなら即敗北です。通常のTerraria致死との統合は別課題です。
 
 ## Read by purpose
 
 - [Encounter Specification](ENCOUNTER_SPEC.md): player-visible loop, authority outcomes, timing defaults, 2/3/4-player behavior.
-- [Implementation Plan](IMPLEMENTATION_PLAN.md): safe rename, adapters, slices, gates, and Definition of Done.
-- [Visual Specification](VISUAL_SPEC.md): minimum Boss silhouette and three visual states.
+- [Implementation Plan](IMPLEMENTATION_PLAN.md): current work boundary, extension seams and completed consolidation; not another rename queue.
+- [Visual Specification](VISUAL_SPEC.md): accepted materials, extreme motion contrast, phase forms, UI/field coordinate contract and endings.
+- [Weapons](WEAPONS.md): claws, long-form Magic/Ranged/Summon/Rogue rituals and exchange recipes.
+- [Audio](../../AUDIO_CUE_SHEET.md): active BGM, selectively restored SFX, silence and voice lifetimes.
 - [Revive Specification](REVIVE_SPEC.md): Downed, reusable instant recovery, recipient lockout, and the ordinary-lethal-hook compatibility blocker.
 - [Backlog](BACKLOG.md): preserved old ideas explicitly excluded from the first slice.
 
@@ -50,7 +55,7 @@ Project-wide authority, networking, arena, compatibility, and test constraints r
 
 ## Decision labels
 
-- **Accepted**: minamiが方向として確定したもの。変更時は仕様・計画・必要なADRを同時更新する。
+- **Accepted**: ユーザーが方向として確定したもの。変更した事実の正本だけ更新し、構造判断が変わる場合のみADRを追加する。
 - **Provisional**: 最初の実機prototypeに入れる初期値。測定結果で変更可能。
 - **TBD**: 実装または検証前に選択が必要。コードへ暗黙に固定しない。
 - **Deferred**: アイデアは保持するが現在のDefinition of Doneへ含めない。

@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - first_severance.implementation_sequence
 aliases:
@@ -25,6 +25,14 @@ related_docs:
 # First Severance Implementation Plan
 
 Current implementation/evidence is in [Status](../../STATUS.md). This is the forward queue, not a requirement to replay completed slices.
+
+## Current work boundary
+
+The user accepted the playable Raid combat body as the current development baseline. Start/Ready, suspension/grounding and the latest BGM/SFX changes are implemented; current unverified observations belong to [Status](../../STATUS.md), not another full implementation queue. The thread-independent handoff/spec checkpoint changes documentation only.
+
+The next task is whatever bounded polish, defect or extension the user selects. Preserve accepted art, current combat/recovery and the [presentation direction](VISUAL_SPEC.md#creative-intent-and-motion). No Phase IV/V, solo companion, new Raid, further audio rewrite or whole-fight redesign is scheduled merely because it appeared as a future idea.
+
+For an eventual phase extension, use the feature-local phase plan/score and attack adapters, retaining first-cycle gates and explicit Final survival. For an ordinary bug or VFX edit, use only the affected owners. No new framework, assembly split or generic mechanics DSL is planned.
 
 ## Completed consolidation
 
@@ -47,7 +55,7 @@ These stages were committed/pushed independently. Evidence and remaining user-ow
 - Terminal snapshot/outcome is committed before the active runtime and player projections are released.
 - Existing numeric packet IDs are never renumbered during the feature rename.
 
-The first slice assumes cooperative multiplayer with unmodified clients. Terraria/tModLoader supplies ordinary movement and combat facts observed by the server; custom-message authority is not a claim of anti-cheat against a modified client. The exact normal-hit and lethal-hook seams must be measured on the pinned runtime before their respective adapters are enabled.
+The development fight assumes cooperative multiplayer with unmodified clients. Terraria/tModLoader supplies ordinary movement and combat facts observed by the server; custom-message authority is not a claim of anti-cheat against a modified client. Raid-owned damage already has the narrow Calamity Adrenaline side effect; general native hit/death interception remains separately gated. Do not confuse those two seams.
 
 ## Follow-on work, not current gates
 

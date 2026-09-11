@@ -57,7 +57,7 @@ Wire layout remains unchanged. Random Final geometry uses the already replicated
 
 ## Preceding development protocol v21
 
-The wire layout, operation IDs, ownership and terminal contract remain v20. Version21 requires matching peers because Iron Interdict sword geometry, denser/earlier Final slicers and wider Spread/lattice pockets derive locally from the accepted action epoch. A peer with older geometry must not render a different warning from authority collision. No per-sword packet or actor is added. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#iron-interdict-and-current-spacing-override) owns the changed behavior.
+The wire layout, operation IDs, ownership and terminal contract remained v20. Version21 required matching peers because Iron Interdict sword geometry, denser/earlier Final slicers and wider Spread/lattice pockets derived locally from the accepted action epoch. A peer with older geometry must not render a different warning from authority collision. No per-sword packet or actor was added. [Encounter evolution](history/2026-09-11-encounter-evolution.md#iron-interdict-and-current-spacing-override) preserves this historical change; [current attack modules](encounters/first-severance/ENCOUNTER_SPEC.md#attack-modules) own present behavior.
 
 ## Preceding development protocol v20
 
@@ -67,7 +67,7 @@ The feature keeps at most one immutable same-tick Defeat presentation snapshot a
 
 ## Preceding development protocol v19
 
-Packet IDs, field layouts and Fight ownership are unchanged. Stillness retains two locked footprint descriptors; [CurtainComb](../Content/Encounters/FirstSeverance/FirstSeveranceCurtainComb.cs) derives bounded center-out teeth and individual reveal/fire/end clocks. Authority hits and client presentation use the same helper; the volley/phase deadline includes the last tooth. No per-tooth actors or packets are added. Grid pattern bit2 is retired with Phase-II Stack: only0–3 and8–11 are accepted; Spread-pocket descriptors cannot carry Core salvos. All peers must update together because the derived geometry/timing and validation changed. [The encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#center-out-curtains-and-phase-ii-spread-only-override) owns behavior; [Status](STATUS.md) owns evidence.
+Packet IDs, field layouts and Fight ownership are unchanged. Stillness retains two locked footprint descriptors; [CurtainComb](../Content/Encounters/FirstSeverance/FirstSeveranceCurtainComb.cs) derives bounded center-out teeth and individual reveal/fire/end clocks. Authority hits and client presentation use the same helper; the volley/phase deadline includes the last tooth. No per-tooth actors or packets are added. Grid pattern bit2 is retired with Phase-II Stack: only0–3 and8–11 are accepted; Spread-pocket descriptors cannot carry Core salvos. All peers must update together because the derived geometry/timing and validation changed. [The encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#attack-modules) owns behavior; [Status](STATUS.md) owns evidence.
 
 ## Preceding development protocol v18
 

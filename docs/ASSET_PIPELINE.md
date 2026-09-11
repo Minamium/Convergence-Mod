@@ -5,7 +5,7 @@ status: accepted
 owners:
   - art
   - audio
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-11
 source_of_truth_for:
   - assets.production_pipeline
 aliases:
@@ -42,17 +42,17 @@ Local consolidation found the previous audio recipes/masters and image working o
 - editable MIDI/MusicXML rough composition data;
 - OGG conversion/loop metadata and technical audio QA.
 
-Production pixel art still requires frame consistency, palette/edge cleanup, hitbox/readability playtests, and human review. Release orchestral/choral audio requires properly licensed instruments/samples and competent mix/master.
+Both high-resolution and pixel assets require frame/material consistency, edge cleanup, hitbox/readability playtests and human review. Do not downsample accepted high-resolution art to satisfy the historical pixel-first plan. Original or licensed music still needs appropriate source permissions and competent mix/master.
 
 ## Visual workflow
 
 1. Lock current visual/gameplay constraints in [Art Direction](ART_DIRECTION.md) and feature visual spec.
-2. Generate/sketch several original silhouette options without artist/作品 imitation prompts.
+2. Preserve accepted art for timing/continuity-only work. For a requested new design, generate/sketch original silhouettes without artist/作品 imitation prompts.
 3. Select by 2D hitbox, readability, and distinction at 100% scale.
 4. Define only required states/poses.
-5. Clean pixel art manually in an appropriate editor.
-6. Export transparent PNG at fixed frame dimensions with nearest-neighbor assumptions.
-7. Test in-game over real telegraphs for 2/3/4 players and accessibility settings.
+5. Clean edges/materials in the chosen native-resolution art workflow; pixel cleanup applies when the asset actually is pixel art.
+6. Export transparent PNG with explicit canvas, opaque bounds, pivots/atlas regions and runtime scale/filter assumptions; inspect icons at actual inventory size.
+7. Select affected in-game telegraph/accessibility checks; the complete2/3/4-player acceptance matrix belongs to release/compatibility, not every small export.
 8. Record provenance before committing distributable files.
 
 ## Repository separation
@@ -87,6 +87,8 @@ Never commit Calamity `.tmod` files, extracted assets, source mirrors, or repain
 
 ## Music rights policy
 
+The current owner-approved licensed recording is EigHt's `不幸な人形劇`; [Attribution](../Assets/ATTRIBUTION.md#eight-不幸な人形劇-phase-masters--0246) owns its source, modifications, credit and distribution boundaries. A third-party recording is permitted only when the owner approved the exact work and verified terms cover the committed game-facing derivative. Game use is not standalone BGM-pack redistribution permission. Keep raw masters external and recheck current terms before public distribution; do not infer a blanket right from “free BGM.” This follows the existing repository asset rule, not a new license grant.
+
 Public-domain composition and a modern score/arrangement/performance/recording are different rights. A Beethoven Ninth-derived idea, if used, must start from a verified public-domain score and use a new project-owned arrangement, MIDI/orchestration, performance/render, and recording. Do not extract or imitate a film/CD/stream recording, reuse an unlicensed modern MIDI/arrangement, or use a license-unknown SoundFont/sample library.
 
 This is a production policy, not legal advice; release materials require jurisdiction/source/license review.
@@ -99,10 +101,10 @@ At 120 BPM, one beat is 30 game ticks and a 4/4 bar is 120 ticks, useful for pro
 
 ## Audio workflow
 
-1. Produce 60–90 second motif/instrumentation sketches only after the loop is stable.
+1. Identify whether the task changes an original score, a permitted licensed phase edit, or playback only; retain accepted unrelated masters.
 2. Map accents/transitions to server ticks and feature cues.
-3. Create project-owned MIDI/MusicXML and import into the DAW.
-4. Orchestrate with commercially usable licensed instruments/samples.
+3. For an original score, retain project-owned MIDI/MusicXML/recipe; for a licensed edit, retain the exact approved input hash, terms and transformation recipe externally.
+4. Use only permitted instruments/samples/recordings and changes covered by the selected workflow.
 5. Export phase mixes/transitions; preserve 48 kHz/24-bit masters externally.
 6. Encode reviewed game assets as OGG when appropriate and add loop tags.
 7. Test seam, clipping, loudness, focus/pause/resume, join-in-progress, and transitions.
