@@ -48,9 +48,9 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 
 | 状態 | 画面で伝える内容 | 実装 |
 |---|---|---|
-| 戦闘前 | 台に静かに立つ等身大の白髪少女。黒い多段フリル、袖、ボンネット、人工的な膝、伏し目。短い会話ができる | `FirstSeveranceDollAttendant`。32×52の12フレーム。微小な呼吸、不等間隔のまばたき、伏し目、胸へ手を添える、両手を合わせる、小さなお辞儀。歩行・町の住居AIは付けない |
-| 最初の準備演出 | フィールド・柱・空の既存殻が展開する。台の少女は無傷で残る | `DrawPreparation`は少女を分解せず、人形の指／髪も殻から出さない。既存Deployment期間とUI／境界を維持 |
-| Ready待機 | 少女は台でまばたき・控えめな仕草。まだ殻へ取り込まれない | 既存READY集計と無音準備を維持。NPCは参加者ではなく、準備中は会話不可 |
+| 戦闘前 | 台だけ。人形は開始用の所持アイテム | [Activation flow](../../ARENA_INFRASTRUCTURE.md#activation-flow) の「開演の人形」で台をクリックすると準備へ。10枠ミニオン用の人形とは別物 |
+| 最初の準備演出 | フィールド・柱・空の既存殻が展開し、台に等身大の少女が現れる。ここでは取り込まない | `DrawPreparation`は少女を分解せず、人形の指／髪も殻から出さない。既存Deployment期間とUI／境界を維持 |
+| Ready待機 | 少女は台でまばたき・控えめな仕草。まだ殻へ取り込まれない | `FirstSeveranceDollAttendant`の32×52・12枚の既存フレームと微小な呼吸を維持。既存READY集計と無音準備。NPCは参加者ではなく会話不可 |
 | 全員Ready後のRaid開始 | 糸の張り → NPC分解 → 短い滞留 → 加速吸入 → 殻中央の発光／名前表示 → 戦闘 | SpawnIntroの正本は `EncounterPlan.Timing.SpawnIntroTicks`。現在10秒。`DollCapture`はaccepted ActionStartedTick～ResolveTickで進め、台から殻へカメラ追従。HUD非表示、文字は吸入後だけ。終了直前に殻内の指／髪が現れる |
 | Phase I | ほぼ全身が殻の中にある。少しだけ覗く指・髪で内部の存在を示す | 腕と髪を殻の後ろへ描く。手前に顔を描かず、肩・上腕・前腕の大部分は殻で隠す |
 | I → II | 内部の腕が拘束をこじ開け、殻が引っかかってから開く。冠・胴の拘束フレームが抜け、腕と長い残骸が崩れた姿勢へ展開 | 既存eclosionの8分割ヒンジ／時間曲線を流用。コンパクトな封入姿勢から連続的に接続し、髪と首は遅れて追従 |
@@ -112,10 +112,10 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 
 ## NPCの寿命と安全条件
 
-- Server／Single Playerのみが、Idle／Preparingの有効なCore付近にプレイヤーがいれば生成する。Coreごとに1体、全体最大4体、1秒周期の生成判定。
-- Coreのtile座標をnative NPC AIで共有。町NPCや恒久保存対象にせず、敵に殴られない・攻撃しない・lootを出さない。Core削除／離れたIdle状態ではauthorityが除去する。ワールドに永続フラグは追加しない。
-- Preparingでは実NPCを可視のまま保持し、必要なら同じCore所有者が生成する。会話はIdleだけ。Activeで実NPCを隠し、参加者のSpawnIntro描画が取り込みを担当する。TileEntityより先にNPCを受信したclientは非表示で待ち、勝手に消さない。
-- 再挑戦／終了後は台の少女へ戻す開発用演出。永続的な救済・死亡・物語進行は**未設計**。会話からRaid開始／Readyの別ルートは追加しない。
+- Server／Single Playerのみが、Preparingの有効なCore付近にプレイヤーがいれば生成する。Idleでは生成しない。Coreごとに1体、全体最大4体、1秒周期の生成判定。
+- Coreのtile座標をnative NPC AIで共有。町NPCや恒久保存対象にせず、敵に殴られない・攻撃しない・lootを出さない。Core削除／Idleへ戻った時点でauthorityが除去する。ワールドに永続フラグは追加しない。
+- Preparingでは実NPCを可視のまま保持し、必要なら同じCore所有者が生成する。準備中は会話しない。Activeで実NPCを隠し、参加者のSpawnIntro描画が取り込みを担当する。TileEntityより先にNPCを受信したclientは非表示で待ち、勝手に消さない。
+- 再挑戦／終了後は台だけへ戻る。消費しない開始用人形から再度準備できる。永続的な救済・死亡・物語進行は**未設計**。会話からRaid開始／Readyの別ルートは追加しない。
 - [対象tModLoader commitのModNPC](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNPC.cs)で、`CanChat`／`GetChat`、`NeedSaving`、`CheckActive`の呼び出し先と意味を確認。新規独自packetは不要。
 
 ## 検証と残課題

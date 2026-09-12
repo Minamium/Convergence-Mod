@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.63",
+  "protocol": 30,
+  "source_commit": "14c5a616f85e834e06e1f3333e5e196c54bbfe4a",
+  "source_branch": "main",
+  "source_sha256": "83addf6cf44b9983ccfa4a0f6a5cb9437adc9a9231ed138944d88c040ed1872f",
+  "preserved_local_changes": [
+    "Localization/DollBeam/en-US.hjson",
+    "Localization/DollTheater/en-US.hjson",
+    "Localization/GhostSamurai/en-US.hjson",
+    "Localization/Preparation/en-US.hjson",
+    "Localization/en-US.hjson"
+  ],
+  "local_build_record": ".local/builds/20260912T163601550623Z/record.json",
+  "native_package": {
+    "result": "passed",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "source_changed_during_build": false,
+    "installed_hjson_parser_files_passed": 18,
+    "package_bytes": 54706510,
+    "package_sha256": "96f1016926bdd0670c3632476a219753fd6db102fb3a034fcf584a14c8c63e50",
+    "previous_package": "preserved by native build entry point"
+  },
+  "checks": {
+    "domain_Doll_filter": "12 passed; selected-item/alive gate, empty-stage lifecycle, cavity continuity/normals, retained companion and pose contracts",
+    "domain_Core_filter": "9 passed; cavity clock, core salvos/width/timing, exact-Fight lease and Final score contracts",
+    "presentation_integration_guards": "13 passed; updated nonmetal cues and existing timing/voice cleanup guards",
+    "codec": "324 round-trips and 50 malformed/truncated rejections passed against the current linked-source assembly; protocol 30",
+    "gameplay_geometry": "Attack directions, widths, timing, insertion, two-turn speed, bullet paths/radius and damage sources were not changed",
+    "static_catalog_yaml": "passed: 66 indexed documents, 629 repository files, 10 YAML files"
+  },
+  "runtime_not_run": [
+    "Owner loads 0.2.63 in Host & Play; empty pedestal cannot activate without Theater Doll; held left/right click deploys preparation without consuming the item",
+    "All players see the preparation field and intact NPC; manual Ready needs no Doll; all-Ready capture remains; cancel/end/retry leaves only the plinth",
+    "P2 Core has a single full-width forecast and a visible opening crater; eight-shot and Final Prism retain their color order with the new flowing jet",
+    "P2 rotation and P3 top/bottom live attacks use purple beams with the accepted warnings/gaps; no old sword sprites/metal sounds; sustain stops on interruption/end",
+    "Final purple bullet nuclei and tails are readable at actual zoom/UI scale and with Reduced Effects; listen to the Raid alongside player magic weapons",
+    "Rendering frame time, actual multiplayer motion and collision readability are not established by compilation"
+  ],
+  "preservation": "Ghost Samurai, existing weapon/minion behavior, BGM, saves, enabled-Mod list and old asset originals were not changed; shared inventory art and magic sound masters are reused without binary edits."
+}

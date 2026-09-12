@@ -59,15 +59,17 @@ Perform geometry in tile coordinates and convert at the rendering/position adapt
 
 The definition-scoped resolver/preparation/combat adapters own this flow. The active development override, not historical slice gating, determines availability; see the owning feature spec.
 
-1. Client Core interaction sends bounded `RequestActivate` intent with candidate coordinate/nonce.
+1. Idle is **the pedestal only**. Select **Theater Doll / 開演の人形** and left-click it (or right-click the Core while holding the Doll). This reusable stage key is a separate item from the ten-slot Doll Covenant companion, crafted at a Work Bench from 10 Silk and one Fallen Star. Client sends the selected equipment/control state before bounded `RequestActivate` coordinate/nonce intent.
 2. Server derives sender, validates side/rate/basic coordinate, and creates only the validation path.
 3. Feature resolves the actual server Core Tile Entity; request coordinates never become trusted anchors.
-4. Authority checks Calamity progression, conflicting World activity, participant candidates, and pure prospective Arena validation.
+4. The definition's Core resolver checks the sender's actual selected Theater Doll and active/alive/non-ghost state, then Calamity progression, conflicting World activity, participant candidates, and pure prospective Arena validation. Missing Doll rejects with `first_severance.activation_requires_doll`; no item is consumed and no client claim bypasses this gate.
 5. Failure returns structured issue codes and cleanup without World mutation.
-6. Success enters generic `Preparing`, gathers the entire server roster into the validated field, and deploys the field/black exterior with a short HUD-suppressed cinematic.
+6. Success enters generic `Preparing`, gathers the entire server roster into the validated field, and deploys the field/black exterior with a short HUD-suppressed cinematic. The Core-owned Doll actor appears on the plinth; the intact NPC remains there until the all-Ready introduction captures her.
 7. After deployment, show the Ready panel; all members must manually accept. The server holds the all-Ready state briefly, then enters Active and the separate existing Boss-introduction cinematic.
 
 The Core anchors/requests an encounter; it does not own lifecycle, actors, roster, or cleanup.
+
+Ready needs no item once preparing. Failure/cancel/terminal/world reload returns the stage to its empty plinth; there is no persistent installed-Doll flag, resource cost or save migration. Native NPC AI sync owns the transient actor; existing preparation snapshots own deployment/roster and native selected-slot state owns the activation check. The wire DTOs and protocol are unchanged.
 
 ## Validator contract
 

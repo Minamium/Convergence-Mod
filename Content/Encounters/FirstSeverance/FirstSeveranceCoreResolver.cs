@@ -102,6 +102,13 @@ internal sealed class FirstSeveranceCoreResolver
         }
 
         IReadOnlyList<FirstSeveranceRosterCandidate> candidates = BuildCandidates();
+        Player requester = Main.player[start.RequesterWhoAmI];
+        if (!FirstSeveranceDollActivation.CanActivate(requester.active, requester.dead, requester.ghost,
+                requester.HeldItem.type == ModContent.ItemType<TheaterDoll>()))
+        {
+            failureCode = FirstSeveranceDollActivation.RequiresDoll;
+            return false;
+        }
         int selectableCandidateCount = candidates.Count;
         bool requesterInRange = IsPlayerWithinTiles(
             Main.player[start.RequesterWhoAmI],

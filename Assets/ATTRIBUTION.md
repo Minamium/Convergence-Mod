@@ -100,6 +100,7 @@ The new companion uses the existing project-authored NPC as a character referenc
 
 - Runtime file: `Assets/Textures/Items/RitualArmaments/DollCovenant.png`
 - Asset ID: doll-theater-0253-dollcovenant
+- Additional unchanged runtime use (2026-09-13): the reusable `TheaterDoll` stage key shares this original inventory texture; gameplay identity and recipe are separate from the companion. No new raster export or third-party source.
 - Asset type: image
 - Creator: project-directed built-in image generation and Codex mechanical export
 - Creation/acquisition date: 2026-09-12

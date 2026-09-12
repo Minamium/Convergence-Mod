@@ -11,6 +11,42 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 // radiance INSIDE the authoritative corridor, never the gameplay footprint.
 internal static class FirstSeveranceBeamMaterial
 {
+    // One axis, one continuous footprint. No parallel lane subdivision in a
+    // single-target forecast; the spine is guidance, not the damage width.
+    internal static void SingleForecast(SpriteBatch batch, FirstSeveranceAttackAccents accents,
+        Vector2 origin, Vector2 direction, float length, float halfWidth,
+        float charge, float opacity, Color color)
+    {
+        if (Main.dedServ || opacity <= .001f || length <= 0) return;
+        Line(batch, origin, origin + direction * length, new Color(18, 8, 31) * opacity * .35f, halfWidth * 2);
+        accents.Ribbon(batch, origin, direction, length, halfWidth * 2, color, opacity * (.32f + charge * .15f));
+        Line(batch, origin, origin + direction * length,
+            FirstSeveranceAttackAccents.Neon(Color.Lerp(color, Color.White, .3f), opacity * (.48f + charge * .25f)),
+            2.5f + charge * 1.5f);
+    }
+
+    // World batch boundary shared by Raid users of the accepted weapon material.
+    // No weapon seals, gameplay state, new textures or moving hitboxes here.
+    internal static void Flow(SpriteBatch batch, Vector2 origin, Vector2 direction,
+        float length, float halfWidth, double age, Color color, float power, bool reduced,
+        float throatLength = 0, float throatWidth = 0)
+    {
+        if (Main.dedServ || power <= .001f || length <= .1f || halfWidth <= 0) return;
+        batch.End();
+        try
+        {
+            RitualSurfacePass.Begin();
+            RitualGrandArt.QueueBeam(origin, direction, length, halfWidth * 2,
+                (float)(age % 36000), color, power * (reduced ? .72f : 1), throatLength, throatWidth);
+            RitualSurfacePass.Flush();
+        }
+        finally
+        {
+            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+    }
+
     // Bright, compact optics for dense comb teeth and the fine lattice. The
     // entire footprint stays visible; the thin hot filament is not the hitbox.
     internal static void DrawTooth(SpriteBatch batch, FirstSeveranceAttackAccents accents,

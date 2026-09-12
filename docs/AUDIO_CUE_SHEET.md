@@ -57,8 +57,8 @@ The owner accepted **Stack** but rejected the other 0.2.42/43 remaster timbres. 
 | Stack verdict | `ShellMassShed` for loose success debris; `ShellMassCollapse` for inward failure impact, once from accepted result |
 | Spread | Same `SpreadExecution` high metallic launch ping/white cross on success and failure; `SpreadDissolve` accompanies successful endpoint dispersion |
 | Prism / curtains / grid / Core salvo | Distinct charge, lock and release; bounded shared accents, not one sound per ray/tooth/player |
-| P3 Iron Interdict / central crush | Weight/presence from `IronPressure/Descent` and `CrushPressure/Cataclysm`, following shared wave/collision clocks |
-| P2 twin rotation | `BladeOrbitFirst/Second` follow the actual two-turn curve; second replaces first, exit stops owned rotation |
+| P3 vertical jets / central crush | Jets reuse weapon `MagicCharge/Fire` via Raid-owned `PrismBeamCharge/Fire` cues: two bounded releases per wave, clipped to that wave's live end. No Iron/sword contacts. Central crush retains `CrushPressure/Cataclysm` unchanged |
+| P2 twin rotation | `PrismBeamSustain` reuses weapon `LacunaSustain` through both turns; `MagicFire` accents actual fire and turn two. Action/end/Fight cleanup stops the owned loop. No BladeGather/Unsheathe/Orbit cues on this Raid action |
 | NPC hits | `ShellHit`: unsettling hard metal; `CoreHit`: glass microfracture; `PylonHit`: metal-plate knock. Native hit cues, no damage-request packet |
 | Recovery / terminal | Accepted Down/revive/defeat/victory only, no channel sound, no HP-zero-before-Final victory cue |
 | Non-melee weapons | Assembly/lock/launch accents plus continuous Magic/Ranged/Summon sustain; [Weapons](encounters/first-severance/WEAPONS.md) owns macro scores |

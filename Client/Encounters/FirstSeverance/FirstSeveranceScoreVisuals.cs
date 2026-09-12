@@ -3,9 +3,7 @@ using System;
 using Convergence.Content.Encounters.FirstSeverance;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
-using Terraria.ModLoader;
 using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceBossVisuals;
 using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualCurves;
 
@@ -13,9 +11,8 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 
 internal sealed class FirstSeveranceScoreVisuals
 {
-    private Asset<Texture2D>? blade;
     private static Vector2 Unit(float angle) => new(MathF.Cos(angle), MathF.Sin(angle));
-    internal void Unload() => blade = null; // Content manager owns the borrowed PNG.
+    internal void Unload() { } // Shared material resources have their existing owner.
 
     internal void Draw(SpriteBatch batch, FirstSeveranceCombatProjection combat, double tick,
         ulong authorityTick, FirstSeveranceEmissionVisuals emissions, bool reduced)
@@ -35,8 +32,7 @@ internal sealed class FirstSeveranceScoreVisuals
         }
         if (combat.Substate == FirstSeveranceSubstate.HalfField)
         {
-            blade ??= ModContent.Request<Texture2D>("Convergence/Assets/Textures/VFX/SeveranceBlade");
-            FirstSeveranceImpalingSwordVisuals.Draw(batch, accents, blade.Value, combat, age,
+            FirstSeveranceImpalingSwordVisuals.Draw(batch, accents, combat, age,
                 Math.Max(0, (double)authorityTick - combat.ActionStartedTick), reduced);
             return;
         }
@@ -79,13 +75,10 @@ internal sealed class FirstSeveranceScoreVisuals
     private void DrawBlade(SpriteBatch batch, FirstSeveranceAttackAccents accents, Vector2 origin,
         FirstSeveranceScoreRay item, double age, bool live, bool reduced)
     {
-        blade ??= ModContent.Request<Texture2D>("Convergence/Assets/Textures/VFX/SeveranceBlade");
-        Texture2D texture = blade.Value;
         int bladeIndex = item.Pulse % FirstSeveranceScoreGeometry.BladeCount;
         float angle = FirstSeveranceScoreGeometry.BladeAngle(age) + bladeIndex * MathHelper.Pi;
         Vector2 direction = Unit(angle), normal = new(-direction.Y, direction.X);
-        Color color = bladeIndex == 0 ? new(162, 213, 255) : new(217, 166, 255);
-        float extension = FirstSeveranceScoreGeometry.BladeExtension(age);
+        Color color = RitualArmamentArt.ColorFor(Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
         float retract = 1 - Window(age, FirstSeveranceChoreography.BladeEnd, FirstSeveranceChoreography.BladeEnd + 58);
         float born = Window(age, 0, 12) * retract;
         // Full footprint is visible throughout the held windup, independent of the short draw animation.
@@ -104,32 +97,17 @@ internal sealed class FirstSeveranceScoreVisuals
                 prior = next;
             }
         }
-        if (extension > .001f)
+        if (live)
         {
-            // Detailed material never changes topology. Trailing samples follow the same
-            // integrated authority angle; the full-opacity leading blade is always current.
-            if (live && !reduced)
-                for (int echo = 4; echo >= 1; echo--)
-                    Sprite(FirstSeveranceScoreGeometry.BladeAngle(Math.Max(180, age - echo * 1.2)) + bladeIndex * MathHelper.Pi,
-                        color * (.055f * (5 - echo)), 1);
-            Sprite(angle, Color.White * retract, extension);
-            float drawFlash = Window(age, 143, 148) * (1 - Window(age, 156, 174));
-            accents.Ribbon(batch, origin, direction, item.Ray.Length * extension, 125, color, drawFlash * .70f);
-            accents.Halo(batch, origin + direction * item.Ray.Length * extension,
-                new Vector2(190, 120), color, drawFlash * .8f, angle);
+            // Forecast remains an aura until the authority opens damage, then
+            // both opposed jets follow the integrated two-turn angle exactly.
+            FirstSeveranceBeamMaterial.Flow(batch, origin, direction, item.Ray.Length,
+                item.Ray.HalfWidth, age, color, 1, reduced, throatLength: 90, throatWidth: 24);
         }
-        accents.ChargeFracture(batch, origin, age, 0, 180, color, reduced, 1.1f);
-        void Sprite(float rotation, Color tint, float lengthScale)
-        {
-            Vector2 dir = Unit(rotation);
-            float visible = FirstSeveranceScoreGeometry.ToEdge(dir.X, dir.Y);
-            // A rigid 1400 px blade, clipped at the field plane instead of stretching
-            // its material to the rectangle's changing radius as it turns.
-            float scaleX = 1400 * lengthScale / 2131;
-            int width = Math.Clamp((int)(25 + visible / scaleX), 26, texture.Width);
-            batch.Draw(texture, origin - Main.screenPosition, new Rectangle(0, 0, width, texture.Height), tint, rotation,
-                new Vector2(25, 362), new Vector2(scaleX, .24f), SpriteEffects.None, 0);
-        }
+        else if (age >= FirstSeveranceChoreography.BladeEnd)
+            FirstSeveranceBeamMaterial.Flow(batch, origin, direction, item.Ray.Length,
+                item.Ray.HalfWidth, age, color, retract * .08f, reduced);
+        accents.ChargeFracture(batch, origin, age, 0, FirstSeveranceChoreography.BladeWindup, color, reduced, 1.1f);
     }
 
     private static void DrawBullets(SpriteBatch batch, FirstSeveranceAttackAccents accents,
@@ -141,7 +119,7 @@ internal sealed class FirstSeveranceScoreVisuals
             Vector2 velocity = point - previous;
             Vector2 direction = velocity.LengthSquared() > .01f ? Vector2.Normalize(velocity) : Vector2.UnitY;
             Vector2 normal = new(-direction.Y, direction.X);
-            Color color = b.Wave % 2 == 0 ? new(100, 238, 255) : new(236, 132, 255);
+            Color color = new(182, 83, 255);
             if (b.Live)
             {
                 if (!reduced)
@@ -161,13 +139,30 @@ internal sealed class FirstSeveranceScoreVisuals
                     }
                 }
                 accents.Halo(batch, point, new Vector2(68, 50), color, reduced ? .35f : .72f, direction.ToRotation());
-                // Solid pointed projectile material, not a circular HUD outline.
-                Line(batch, point - direction * 12, point + direction * 12, new Color(19, 11, 30), 24);
-                Line(batch, point - direction * 10, point + direction * 10, color, 18);
-                // An ivory lancet within the exact dark-outlined collision core.
-                Line(batch, point - direction * 8, point + direction * 10, Color.White, 5);
-                Line(batch, point - normal * 5, point + direction * 10, Color.White * .9f, 2);
-                Line(batch, point + normal * 5, point + direction * 10, Color.White * .9f, 2);
+                // Layered lens/embers, not rectangles or circular HUD outlines.
+                // The saturated 24px nucleus identifies the unchanged r12 hit body;
+                // its longer wavering wake is translucent and harmless.
+                float pulse = .5f + .5f * MathF.Sin((float)age * .24f + b.X * .017f + b.Wave);
+                accents.Halo(batch, point, new Vector2(32, 29), new Color(51, 9, 92), .95f, direction.ToRotation());
+                accents.Ribbon(batch, point - direction * 13, direction, 26, 25, color, .92f);
+                accents.Ribbon(batch, point - direction * (9 + pulse * 3), direction, 22, 13,
+                    new Color(230, 193, 255), .95f);
+                accents.Halo(batch, point + direction * 3, new Vector2(14, 13), Color.White, .7f + pulse * .15f);
+                for (int filament = 0; filament < (reduced ? 1 : 3); filament++)
+                {
+                    Vector2 prior = point + direction * 10;
+                    for (int n = 1; n <= 12; n++)
+                    {
+                        float t = n / 12f;
+                        Vector2 next = point + direction * (10 - 75 * t)
+                            + normal * (MathF.Sin(t * 9 - (float)age * .32f + filament * 2.1f)
+                                * MathF.Sin(MathF.PI * t) * (6 + filament * 3));
+                        Line(batch, prior, next, FirstSeveranceAttackAccents.Neon(
+                            filament == 0 ? new Color(239, 214, 255) : color, (1 - t) * .8f),
+                            (1 - t) * 2.4f + .4f);
+                        prior = next;
+                    }
+                }
             }
             else
             {

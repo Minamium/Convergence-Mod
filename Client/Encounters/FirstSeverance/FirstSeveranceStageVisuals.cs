@@ -119,8 +119,8 @@ internal sealed class FirstSeveranceStageVisuals
             // The complete authority corridor is visible during the full warning.
             // No circular seal or floating aperture geometry.
             float footprint = warning ? born : active ? .8f : emission * .08f;
-            FirstSeveranceBeamMaterial.DrawVolume(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                tick - grid.StartTick, gather, 0, footprint * (warning ? 1 : .35f), violet, reduced);
+            FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                gather, footprint * (warning ? 1 : .35f), violet);
             if (warning) continue;
 
             // Reuse the sustained magic beam's connected flowing material, with
@@ -128,20 +128,8 @@ internal sealed class FirstSeveranceStageVisuals
             // full-width footprint above still covers the exact root hit area.
             float power = active ? Math.Max(.85f, emission) : emission * .08f;
             if (power <= .001f) continue;
-            batch.End();
-            try
-            {
-                RitualSurfacePass.Begin();
-                RitualGrandArt.QueueBeam(origin, direction, ray.Length, ray.HalfWidth * 2,
-                    (float)(tick - grid.StartTick), violet, power * (reduced ? .72f : 1),
-                    throatLength: 150, throatWidth: 28);
-                RitualSurfacePass.Flush();
-            }
-            finally
-            {
-                batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
-                    DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-            }
+            FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
+                tick - grid.StartTick, violet, power, reduced, throatLength: 150, throatWidth: 28);
             float kick = ReleaseImpulse(tick, grid.FireTick);
             accents.Halo(batch, origin, new Vector2(125 + kick * 110, 25 + kick * 35), violet,
                 power * (reduced ? .22f : .55f), direction.ToRotation());

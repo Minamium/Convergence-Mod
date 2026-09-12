@@ -56,6 +56,11 @@ internal static class FirstSeveranceClientActions
             return;
         }
 
+        if (Main.LocalPlayer.HeldItem.type != ModContent.ItemType<FoundationCore.TheaterDoll>())
+        {
+            ShowRejected(FirstSeveranceDollActivation.RequiresDoll);
+            return;
+        }
         RequestActivate(new TilePoint(tileX, tileY));
     }
 
@@ -204,6 +209,11 @@ internal static class FirstSeveranceClientActions
                 Revision: 0),
             requestedAnchor,
             nonce);
+        // Publish the selected slot before the request, as for the revive kit.
+        // The definition resolver still validates the server's own inventory.
+        NetMessage.SendData(MessageID.SyncEquipment, number: Main.myPlayer,
+            number2: Main.LocalPlayer.selectedItem);
+        NetMessage.SendData(MessageID.PlayerControls, number: Main.myPlayer);
         packet.Send();
     }
 
@@ -296,6 +306,11 @@ internal static class FirstSeveranceClientActions
 
     internal static void ShowRejected(string failureCode)
     {
+        if (failureCode == FirstSeveranceDollActivation.RequiresDoll)
+        {
+            Main.NewText(Language.GetTextValue("Mods.Convergence.UI.DollActivation.RequiresDoll"), 235, 170, 110);
+            return;
+        }
         string? preparationReason = failureCode switch
         {
             "first_severance.roster_player_not_alive" => "PlayerUnavailable",
