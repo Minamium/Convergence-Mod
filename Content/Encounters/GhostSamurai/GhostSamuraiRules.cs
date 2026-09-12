@@ -14,19 +14,25 @@ internal static class GhostSamuraiRules
     internal const int Life = 2_400_000, Defense = 160;
     internal const float Phase2Threshold = .66f, Phase3Threshold = .33f;
     internal const int TransitionTime = 90, AttackIntervalPhase1 = 36, AttackIntervalPhase2 = 24, RecoveryTime = 18;
-    internal const int SlashWarning = 54, SlashLive = 10, DirectionalSlashInterval = 36, DirectionalSlashCount = 4;
-    internal const int DirectionalDuration = (DirectionalSlashCount - 1) * DirectionalSlashInterval + SlashWarning + SlashLive + RecoveryTime;
+    internal const int SlashWarning = 54, SlashLive = 10, DirectionalSlashInterval = 12, DirectionalPairInterval = 48;
+    internal const int DirectionalPairCount = 4, DirectionalSlashCount = DirectionalPairCount * 2;
+    internal const int DirectionalDuration = (DirectionalPairCount - 1) * DirectionalPairInterval + DirectionalSlashInterval + SlashWarning + SlashLive + RecoveryTime;
     internal const int ChargeAimTime = 48, ChargeWarning = 72, ChargeLive = 12;
+    internal const int AimLockLead = 16, AimSyncInterval = 3, ChargeComboGap = 6;
+    internal const int ChargeSecondWarning = 30, ChargeThirdWarning = 48;
     internal const int GridPrelude = 36, GridWarning = 84, GridLive = 12;
-    internal const int DashApproach = 36, DashWarning = 54, DashLive = 24, DashRecovery = RecoveryTime;
+    internal const int GridEnd = GridPrelude + GridWarning + GridLive;
+    internal const int GridFollowWarning = 48, GridFollowGap = 24, GridFollowStart = GridEnd + GridFollowGap - GridFollowWarning;
+    internal const int DashApproach = 48, DashWarning = 54, DashLive = 18, DashRecovery = RecoveryTime;
     internal const int DashCadence = DashApproach + DashWarning + DashLive + DashRecovery;
     internal const float SlashLength = 1400, SlashHalfWidth = 32, ChargeHalfWidth = 150;
-    internal const float GridWidth = 2520, GridHeight = 2520, GridSpacing = 180, GridHalfWidth = 20;
+    internal const float GridWidth = 2520, GridHeight = 2520, GridSpacing = 180, GridHalfWidth = 34;
     internal const int GridVerticalLineCount = (int)(GridWidth / GridSpacing) + 1;
     internal const int GridHorizontalLineCount = (int)(GridHeight / GridSpacing) + 1;
-    internal const float DashDistance = 1300, DashHalfWidth = 50;
-    internal const int WispDelay = 18, SpreadDuration = 30, WispLife = 180, MaximumWisps = 12;
-    internal const int MaximumHazards = GridVerticalLineCount + GridHorizontalLineCount + MaximumWisps;
+    internal const float DashDistance = 1800, DashHalfWidth = 50, DashStandOff = 900, DashRetreatSpeed = 38;
+    internal const int WispDelay = 18, WispBurstInterval = 18, SpreadDuration = 30, WispLife = 180, MaximumWisps = 18;
+    // The follow-up charge forecast overlaps the end of the grid warning/live window.
+    internal const int MaximumHazards = GridVerticalLineCount + GridHorizontalLineCount + 1 + MaximumWisps;
     internal const int WispSyncInterval = 6;
     internal const float SpreadSpeed = 3.5f, HomingSpeed = 4.5f, HomingStrength = .035f, WispRadius = 15;
     internal const int SlashDamage = 260, ChargeDamage = 380, GridDamage = 280, WispDamage = 200;
@@ -35,15 +41,27 @@ internal static class GhostSamuraiRules
 
     internal static int AttackInterval(SamuraiPhase phase) => phase == SamuraiPhase.Phase1 ? AttackIntervalPhase1 : AttackIntervalPhase2;
 
-    internal static int DirectionalSpawnStep(int tick) => tick >= 0 && tick % DirectionalSlashInterval == 0
-        && tick / DirectionalSlashInterval < DirectionalSlashCount ? tick / DirectionalSlashInterval : -1;
+    internal static int DirectionalSpawnTime(int step) => step / 2 * DirectionalPairInterval + step % 2 * DirectionalSlashInterval;
+    internal static int DirectionalSpawnStep(int tick)
+    {
+        if (tick < 0 || tick / DirectionalPairInterval >= DirectionalPairCount) return -1;
+        int local = tick % DirectionalPairInterval;
+        return local == 0 ? tick / DirectionalPairInterval * 2
+            : local == DirectionalSlashInterval ? tick / DirectionalPairInterval * 2 + 1 : -1;
+    }
+
+    private static int DirectionalStrike(float tick)
+    {
+        for (int i = DirectionalSlashCount - 1; i >= 0; i--)
+            if (tick >= DirectionalSpawnTime(i) + SlashWarning) return i;
+        return -1;
+    }
 
     internal static SamuraiBeat DirectionalBeat(float tick)
     {
-        int last = Math.Clamp((int)MathF.Floor((tick - SlashWarning) / DirectionalSlashInterval), 0, DirectionalSlashCount - 1);
-        float sinceFire = tick - SlashWarning - last * DirectionalSlashInterval;
-        if (sinceFire >= 0 && sinceFire < SlashLive) return SamuraiBeat.Strike;
-        return tick < (DirectionalSlashCount - 1) * DirectionalSlashInterval + SlashWarning ? SamuraiBeat.Telegraph : SamuraiBeat.Recovery;
+        int last = DirectionalStrike(tick);
+        if (last >= 0 && tick < DirectionalSpawnTime(last) + SlashWarning + SlashLive) return SamuraiBeat.Strike;
+        return tick < DirectionalSpawnTime(DirectionalSlashCount - 1) + SlashWarning ? SamuraiBeat.Telegraph : SamuraiBeat.Recovery;
     }
 
     // Later warnings overlap earlier strikes. The blades follow the strike clock,
@@ -51,14 +69,52 @@ internal static class GhostSamuraiRules
     internal static float DirectionalPose(float tick)
     {
         if (tick < SlashWarning) return -MathF.Sin(Math.Clamp(tick / 16, 0, 1) * MathF.PI / 2);
-        int strike = Math.Clamp((int)((tick - SlashWarning) / DirectionalSlashInterval), 0, DirectionalSlashCount - 1);
-        float local = tick - SlashWarning - strike * DirectionalSlashInterval;
+        int strike = DirectionalStrike(tick);
+        float local = tick - SlashWarning - DirectionalSpawnTime(strike);
         if (local < 5) return -1 + 2 * (local / 5) * (local / 5);
         if (local < SlashLive) return 1;
         bool last = strike == DirectionalSlashCount - 1;
-        float recoil = Math.Clamp((local - SlashLive) / (last ? RecoveryTime : DirectionalSlashInterval - SlashLive), 0, 1);
+        float recoil = Math.Clamp((local - SlashLive) / (last ? RecoveryTime : DirectionalSpawnTime(strike + 1) - DirectionalSpawnTime(strike) - SlashLive), 0, 1);
         return 1 - (last ? 1 : 2) * recoil * recoil * (3 - 2 * recoil);
     }
+
+    internal static int ChargeCount(SamuraiPhase phase) => phase == SamuraiPhase.Phase1 ? 1 : 3;
+    internal static int ChargeWindup(int pass, bool afterGrid) => pass == 0 ? (afterGrid ? GridFollowWarning : ChargeWarning)
+        : pass == 1 ? ChargeSecondWarning : ChargeThirdWarning;
+    internal static int ChargeStart(int pass, bool afterGrid)
+    {
+        int start = 0;
+        for (int i = 0; i < pass; i++) start += ChargeWindup(i, afterGrid) + ChargeLive + ChargeComboGap;
+        return start;
+    }
+    internal static int ChargePass(float tick, SamuraiPhase phase, bool afterGrid)
+    {
+        for (int pass = ChargeCount(phase) - 1; pass > 0; pass--)
+            if (tick >= ChargeStart(pass, afterGrid)) return pass;
+        return 0;
+    }
+    internal static int ChargeDuration(SamuraiPhase phase, bool afterGrid)
+    {
+        int last = ChargeCount(phase) - 1;
+        return ChargeStart(last, afterGrid) + ChargeWindup(last, afterGrid) + ChargeLive + RecoveryTime;
+    }
+    internal static float ChargePose(float tick, SamuraiPhase phase, bool afterGrid)
+    {
+        if (tick < 0) return 0;
+        int pass = ChargePass(tick, phase, afterGrid);
+        float local = tick - ChargeStart(pass, afterGrid);
+        int warning = ChargeWindup(pass, afterGrid);
+        if (local < warning) return afterGrid && pass == 0 ? -1 : -MathF.Sin(Math.Clamp(local / 16, 0, 1) * MathF.PI / 2);
+        if (local < warning + 5) { float release = (local - warning) / 5; return -1 + 2 * release * release; }
+        if (local < warning + ChargeLive) return 1;
+        int recovery = pass == ChargeCount(phase) - 1 ? RecoveryTime : ChargeComboGap;
+        float recoil = Math.Clamp((local - warning - ChargeLive) / recovery, 0, 1);
+        return 1 - recoil * recoil * (3 - 2 * recoil);
+    }
+
+    // Preserve one base opportunity per old slash/pattern; two opportunities yield
+    // three separated bursts, instead of doubling wisps with the new paired strikes.
+    internal static int WispBursts(int opportunity) => 1 + (opportunity & 1);
 
     internal static SamuraiHazard GridLine(bool vertical, int index, float x, float y, int born)
     {

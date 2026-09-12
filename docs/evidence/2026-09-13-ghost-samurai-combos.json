@@ -1,0 +1,198 @@
+{
+  "date": "2026-09-13",
+  "feature": "Ghost Samurai paired strikes, grid follow-up, late aim locks and Phase2 pressure",
+  "branch": "feat/ghost-samurai-combo-pressure",
+  "initial_main": "9ddff6b051593d0f7f82693169f7820e8af1266e",
+  "integrated_main": "c5a6348",
+  "built_commit": "510651185159f7cebed4ed26a2949133eab7f568",
+  "version": "0.2.66",
+  "protocol": 31,
+  "scope": "Ghost Samurai rules/runtime/forecast geometry and focused tests; protocol increment for the added full slash-aim state. Preserve the phase enum/state machine, native damage values, summon identity, exact-Fight cleanup and original artwork. Current main's Doll/Luminance changes were retained via a normal merge into the feature branch; main itself was not modified.",
+  "environment": {
+    "os": "Windows x64",
+    "terraria": "1.4.4.9",
+    "tmodloader": "2026.07.3.0",
+    "dotnet_sdk": "8.0.424",
+    "calamity": {
+      "version": "2.2.4",
+      "sha256": "d50fea9025f88ee2073c00e3482976ca1e6ea54d0b8770eb7810bb7b280397d6"
+    },
+    "music": {
+      "version": "2.1",
+      "sha256": "ca202bc18ae690d5ea7267b42c9ec8162241a19aafc9efdf40eff0a59eada9e5"
+    },
+    "luminance": {
+      "version": "1.0.14",
+      "sha256": "47a1ce462a4b407efcb1f043419d58bb750cc60addffcb4e3e442612c0495cad"
+    },
+    "dependency_note": "Versions read from installed package headers; copies exist only in ignored compiler profile. Luminance is inherited from integrated main, not introduced by this mechanic."
+  },
+  "changes": {
+    "directional": {
+      "previous": "4 strikes, 36 ticks apart",
+      "current": "4 pairs / 8 strikes; 12 ticks within each pair and 36 ticks from a pair's second hit to the next pair",
+      "warning_ticks": 54,
+      "live_ticks": 10,
+      "fire_ticks_from_attack_start": [
+        54,
+        66,
+        102,
+        114,
+        150,
+        162,
+        198,
+        210
+      ],
+      "duration_ticks": 238,
+      "maximum_concurrent_directional_forecasts": 4
+    },
+    "grid": {
+      "size": [
+        2520,
+        2520
+      ],
+      "spacing": 180,
+      "line_count": [
+        15,
+        15
+      ],
+      "line_width_before_after": [
+        40,
+        68
+      ],
+      "clear_cell_before_after": [
+        140,
+        112
+      ],
+      "grid_end_and_first_followup_lock_tick": 132,
+      "followup_fire_ticks_phase1": [
+        156
+      ],
+      "followup_fire_ticks_phase2": [
+        156,
+        204,
+        270
+      ],
+      "movement_window_after_grid_ticks": 24
+    },
+    "charge": {
+      "aim_lock_lead_ticks": 16,
+      "phase1_count": 1,
+      "phase2_and_provisional_phase3_count": 3,
+      "warning_ticks": [
+        72,
+        30,
+        48
+      ],
+      "between_live_end_and_next_warning_ticks": 6,
+      "live_ticks": 12,
+      "phase2_fire_ticks_from_attack_start": [
+        120,
+        168,
+        234
+      ],
+      "phase2_duration_ticks": 264,
+      "final_recovery_ticks": 18
+    },
+    "dash": {
+      "stand_off_before_after": [
+        650,
+        900
+      ],
+      "distance_before_after": [
+        1300,
+        1800
+      ],
+      "live_ticks_before_after": [
+        24,
+        18
+      ],
+      "approach_ticks_before_after": [
+        36,
+        48
+      ],
+      "warning_ticks": 54,
+      "aim_lock_lead_ticks": 16,
+      "passes": 3,
+      "geometry": "Retreat tracks the target until lock; direction may be diagonal. At lock the actor stops and the final start/end govern both forecast/collision and subsequent movement."
+    },
+    "wisps": {
+      "burst_opportunities": "Alternate 1 then 2 bursts across base opportunities. One directional pair replaces one former slash opportunity, giving 6 bursts per four-pair sequence; charge/grid patterns retain one base opportunity each rather than multiplying again per added charge strike.",
+      "extra_burst_delay_ticks": 18,
+      "per_burst_projectiles": "3 for directional; 5 for charge/grid, unchanged",
+      "live_and_reserved_cap_before_after": [
+        12,
+        18
+      ],
+      "total_hazard_cap_before_after": [
+        42,
+        49
+      ],
+      "limit": "The cap overrides requested count when prior live/reserved wisps remain, so actual crowded-field spawning can be below the theoretical 1.5 multiplier.",
+      "unchanged_motion": "30 ticks outward at 3.5px/tick, then 180 ticks homing toward 4.5px/tick with strength 0.035; harmless during spread."
+    }
+  },
+  "authority_and_replication": {
+    "owner": "GhostSamuraiRuntime server/SP only",
+    "identity": "Immutable hazard shape/times, Fight GUID and exact boss slot retained",
+    "aim": "24-byte full SamuraiSlashAim containing tick, lock tick, position and unit direction; populated in OnSpawn before initial native synchronization",
+    "updates": "Every 3 ticks while tracking plus final lock; clients display accepted geometry verbatim and do not aim or determine damage",
+    "rejection": "Parse/validate completely before applying; reject stale ticks, same-tick conflicting geometry, changed lock schedules or hazard identity, malformed values and wrong owner/Fight; no client authority",
+    "late_join": "A final full locked snapshot repairs missing intermediate updates. Until final lock arrives, clients do not draw an obsolete line as a live strike.",
+    "cleanup": "Existing exact-Fight scan and slot/instance ownership retained; aimed-projectile reference cleared on finish/phase cleanup/abandon/terminal path",
+    "clock": "Display snapshot reports the evaluated attack tick rather than the incremented next-tick cursor"
+  },
+  "checks": {
+    "focused_domain": {
+      "result": "passed",
+      "cases": 15,
+      "scope": "Eight-hit schedule, pose continuity, charge triple timing, grid/player clearance for 1-4 players, lock and dodge boundaries, wisp burst multiplier/caps, phase/selection and malformed/stale/full-state codecs"
+    },
+    "compiled_codec": {
+      "result": "passed",
+      "protocol": 31,
+      "round_trips": 324,
+      "rejected_cases": 50,
+      "assembly_sha256": "0ef68ee92bda823c918493bfb7a214ee6d947de03aa37fa84a4ad9959fc4db04"
+    },
+    "reuse": "No linked domain/codec inputs or Ghost Samurai registration types changed during the later main merges. Passing tests and 0.2.65 type validation were reused; native packaging repeated to retain current main Luminance materials and advance the feature version.",
+    "native_build": {
+      "result": "passed",
+      "mode": "tools/dev.py build --native with explicit isolated compiler-output profile",
+      "record_id": "20260912T184012183742Z",
+      "dirty_at_start": false,
+      "source_sha256": "d9ec8d2ca74a27d8cd1f5a2d844a6dc15b0d4f24bf56b55cdf0e1dfc2d315a8a",
+      "source_changed_during_build": false,
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "locales_parsed": 18,
+      "inherited_shader_exports": "passed",
+      "artifact_bytes": 54715075,
+      "artifact_sha256": "1c96d698046617349c9f6ef22f1581fcccc923f7ff3deb49445755357ccb10df",
+      "subsequent_changes": "Owning specification, status, evidence and generated catalog only; no runtime or asset edits after this build"
+    },
+    "packaged_type_validation": {
+      "result": "passed",
+      "version": "0.2.65",
+      "global_types": 2,
+      "summon_identity": "Convergence/GhostSamuraiSummon",
+      "limitation": "Installed loader ValidateType only; no full Mod autoload or graphics initialization"
+    },
+    "static": {
+      "result": "passed",
+      "catalog_documents": 66,
+      "repository_files": 639,
+      "yaml_files": 10
+    },
+    "workspace": "New worktree from current main at task start; previous worktrees and their dirty files untouched. Shared package SHA256 remained 37b49b57131e6837c77006da714061207bed3688892875d081f8906c7ac5d8d5; its old version is not the final artifact. ModSources junction, personal enabled-Mod list and saves were not changed."
+  },
+  "runtime": {
+    "Single_Player": "not_run; user-owned",
+    "Host_and_Play": "not_run; user-owned",
+    "Dedicated_Server": "not_run; user-owned",
+    "Build_and_Reload": "not_run; isolated native package built",
+    "real_equipment_and_latency": "not_run: geometric tests assume immediate perpendicular motion at 8px/tick or a 14px/tick dash. They do not establish a particular Calamity accessory's acceleration/cooldown, a latency guarantee or in-game FPS.",
+    "game_gui_or_server_started": false
+  },
+  "handoff": "Review/merge into main when requested, then build/install the integrated protocol31 package for every peer. Reload Mods/restart without a duplicate Build + Reload. Verify paired rhythm, immediate post-grid dodge, late-lock charge/dash evasion, the held third Phase2 charge, wisp pressure and phase/terminal cleanup."
+}
