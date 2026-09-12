@@ -105,7 +105,7 @@ internal static class FirstSeveranceClientActions
     {
         if (!TryGetActiveCombatSnapshot(out EncounterSnapshot snapshot))
         {
-            Main.NewText("[Convergence] First Severance combat is not active.", 235, 180, 90);
+            Main.NewText("[Convergence] " + Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.CombatNotActive"), 235, 180, 90);
             return;
         }
 
@@ -137,7 +137,7 @@ internal static class FirstSeveranceClientActions
     {
         if (!TryGetActiveCombatSnapshot(out EncounterSnapshot snapshot))
         {
-            Main.NewText("[Convergence] First Severance combat is not active.", 235, 180, 90);
+            Main.NewText("[Convergence] " + Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.CombatNotActive"), 235, 180, 90);
             return;
         }
 

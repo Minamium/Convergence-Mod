@@ -23,15 +23,15 @@ related_docs:
   - encounter.first-severance.revive
 ---
 
-# First Severance Encounter Specification
+# 不幸な人形劇 — Encounter Specification
 
 This is the current player-visible contract, reconciled with the implementation at the [Status](../../STATUS.md) checkpoint. Prior tuning/override paragraphs are preserved in [encounter evolution](../../history/2026-09-11-encounter-evolution.md), not instructions to restore old behavior.
 
 ## Identity and scope
 
-`First Severance / 第一断絶` (`first_severance`) faces `The Null Cantor / 無響の唱導者` in a polar containment/ritual setting. The cooperative development target is 2–4 players with post-Exo-Mechs/Supreme-Calamitas, Shadowspec-level equipment. Boss identity/art remain original; the large body is **one logical HP pool**, not multiple damageable limbs.
+**不幸な人形劇 / The Unfortunate Doll Play** faces **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**, a tragic suspended Doll in a cathedral theater. These are the current public names. The former First Severance / Null Cantor names survive only as historical names and stable internal `FirstSeverance` / `first_severance` / `NullCantor` content, packet, asset and document IDs; no save migration is performed. The cooperative development target is 2–4 players with post-Exo-Mechs/Supreme-Calamitas, Shadowspec-level equipment. The large body is **one logical HP pool**, not multiple damageable limbs.
 
-Solo is a compiled development exception, not balanced solo content. Current implementation/test state belongs only to [Status](../../STATUS.md). Future phases, companions and production progression are not silently promoted from [Backlog](BACKLOG.md).
+Solo is a compiled development exception, not balanced solo content. The additional [Doll summon weapon](WEAPONS.md#doll-companion--the-unbroken-promise) is not a roster member and does not fill Ready/Stack/revival roles. Current implementation/test state belongs only to [Status](../../STATUS.md). Future phases, NPC party substitutes and production progression are not silently promoted from [Backlog](BACKLOG.md).
 
 ## Admission and arena
 

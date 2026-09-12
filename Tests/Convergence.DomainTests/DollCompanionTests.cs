@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Convergence.Content.Encounters.FirstSeverance.Rewards;
 
 namespace Convergence.DomainTests;
@@ -17,10 +18,12 @@ internal static partial class Program
     private static void DollMotionScore()
     {
         int shots=0;
+        var seen=new HashSet<int>();
         for(int tick=0;tick<DollCompanionRules.Cycle;tick++)
         {
             if(DollCompanionRules.NeedleAt(tick)) {shots++;AssertEqual(true,tick<DollCompanionRules.Verdict,"notes precede verdict");}
             int frame=DollCompanionRules.Frame(tick,false,-1,tick);
+            seen.Add(frame);
             AssertEqual(true,frame>=0&&frame<DollCompanionRules.FrameCount,"attack cel bounds");
         }
         AssertEqual(3,shots,"three shots, not a shot every rendered frame");
@@ -32,7 +35,9 @@ internal static partial class Program
             int flight=DollCompanionRules.Frame(0,true,-1,tick);
             AssertEqual(true,flight>=20&&flight<24,"four authored floating cels");
             int walk=DollCompanionRules.Frame(0,false,tick%40,tick);
+            seen.Add(idle);seen.Add(flight);seen.Add(walk);
             AssertEqual(true,walk>=12&&walk<20,"eight authored walk cels");
         }
+        AssertEqual(DollCompanionRules.FrameCount,seen.Count,"all authored cels are reachable");
     }
 }

@@ -19,7 +19,11 @@ internal static class DollCompanionRules
         {
             if (attack < 12) return 24;
             if (attack < 22) return 25;
-            if (attack < 52) return 26 + ((int)(attack - 22) % 12 < 5 ? 0 : 2);
+            if (attack < 52)
+            {
+                int castBeat = (int)(attack - 22) % 12;
+                return 26 + (castBeat < 3 ? 0 : castBeat < 7 ? 1 : 2);
+            }
             if (attack < 68) return 29;
             if (attack < 82) return 30;
             if (attack < Verdict) return 31;
@@ -31,6 +35,7 @@ internal static class DollCompanionRules
         if (flying) return 20 + idle / 9 % 4;
         if (walk >= 0) return 12 + (int)(walk / 5) % 8;
         int beat = idle % 420;
+        if (beat is >= 60 and < 108) return 3 + (beat - 60) / 16;
         if (beat is >= 180 and < 198) return beat < 186 ? 1 : beat < 192 ? 2 : 1;
         if (beat is >= 260 and < 340) return 6 + Math.Min(5, (beat - 260) / 14);
         return 0;

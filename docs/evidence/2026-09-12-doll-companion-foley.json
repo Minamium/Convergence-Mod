@@ -1,0 +1,74 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.53",
+  "protocol": 28,
+  "scope": [
+    "participant-only Stack/Spread circles",
+    "weapon-only foley",
+    "10-slot Doll companion",
+    "public Raid/Boss rename; internal IDs unchanged"
+  ],
+  "build": {
+    "base": "472d0c3d7c7951241a48587e505fb017ec6f2eb0",
+    "source_sha256": "16f6874439b4ef4972350b9e1454071f5a2ba6448f4399235c98759a8ed8cc15",
+    "source_changed": false,
+    "exit_code": 0,
+    "bytes": 51061654,
+    "artifact_sha256": "5da99c96143b4840887dbf54e2b33a7ae34900533fa300a1e4303195dbc15e5e",
+    "record": ".local/builds/20260912T043040788368Z/record.json",
+    "native": true,
+    "installed": "tModLoader/Mods/Convergence.tmod",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "dirty_at_build": true
+  },
+  "checks": {
+    "doll_domain_tests": {
+      "passed": 2,
+      "notes": "Retested only the changed frame selector; all 36 cels reachable. Intermediate local variable shadowing compile error fixed before final pass."
+    },
+    "sprite_atlas": {
+      "size": "48x2304",
+      "frames": 36,
+      "unique_frames": 36,
+      "clipped_frames": 0,
+      "inspected": "4x exported pose board"
+    },
+    "item_icon": {
+      "size": "44x44",
+      "opaque_pixels": 525,
+      "corner_alpha": 0
+    },
+    "audio": {
+      "files": 27,
+      "passed": [
+        "PCM16/44100 decode",
+        "finite samples",
+        "headroom",
+        "shot/charge duration bounds",
+        "periodic seam step within local slope"
+      ],
+      "subjective_listening": "not_run"
+    },
+    "static_wrapper": "passed: catalog 65 documents, repository 573 files, YAML 10 files; new attribution block moved under Records after initial policy-check failure; only failed/pending checks rerun"
+  },
+  "preserved": [
+    "approved BGM and Raid sound masters unchanged",
+    "pre-existing English locale formatting/additions excluded from task commits"
+  ],
+  "not_run": [
+    "game load/reload",
+    "Doll native 9/10-slot gating, sacrifice, ground/flight/platform/teleport and owner/peer replication",
+    "retarget, Down, buff dismissal, child/charge cleanup in game",
+    "Boss/player ring readability and localized title widths in game",
+    "physical audio audition and simultaneous weapon/BGM mix",
+    "performance benchmark"
+  ],
+  "references": [
+    "../encounters/first-severance/WEAPONS.md",
+    "../AUDIO_CUE_SHEET.md",
+    "../../tools/doll_companion_recipe.json",
+    "../../Assets/ATTRIBUTION.md"
+  ],
+  "build_notes": "Native builds repeated only after source corrections (idle netUpdate suppression, exact one-texel thread draw, complete frame selection/localized wording). Final source unchanged during packaging."
+}

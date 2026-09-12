@@ -494,7 +494,7 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: 不幸な人形劇 — 少女人形の提示仕様
-  content_sha256: 1a99742c9d32924f188e3d6a85b97d0a9cfcd6b19c0843022f8e93f2c49e6e31
+  content_sha256: fccd1c3d940b4fe60107cfe94281d856a56b11a490f7739d78ccafc125a07a2e
   document_type: spec
   status: provisional
   owners:
@@ -521,13 +521,13 @@ documents:
   - project.asset-pipeline
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
-  title: First Severance
-  content_sha256: e8473bb25fdc27bbecdfa34836b8d4e71994ed4702b701f16095734264768677
+  title: 不幸な人形劇 / The Unfortunate Doll Play
+  content_sha256: 341a07b2b0124c6089ac77d48b77a49c38b2552e48cb244848ad7c14ade08aec
   document_type: overview
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - first_severance.document_map
   aliases:
@@ -590,8 +590,8 @@ documents:
   - decision.untimed-recovery-simultaneous-prism
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
-  title: First Severance Encounter Specification
-  content_sha256: 5e49acb002b57f1329ef56f23f77be0b4c752ce48025e47c6787399d9766e04e
+  title: 不幸な人形劇 — Encounter Specification
+  content_sha256: bf0eaf64913d6a157728c866c23a0af3d3419b6f51dd89f5a295174cce466237
   document_type: spec
   status: accepted
   owners:
@@ -635,14 +635,14 @@ documents:
   - encounter.first-severance.backlog
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
-  title: First Severance — Five Ritual Armaments
-  content_sha256: e70198e88cd3f88c81e72392e7697b0145ddc9ee49b95774574c44f251bd4e1e
+  title: 不幸な人形劇 — Ritual Armaments
+  content_sha256: 7931642c2acb2d3037a7bd226204f1e4c3ee512c0732aecaeba1278df13af26e
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - art
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - first_severance.reward_weapons
   aliases:
@@ -760,7 +760,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 0cdb07ec7837a3f6537477c96de2fff1659e9ab105e456a3ad76d793f5f1bcc3
+  content_sha256: f2a28a0ed7967841007574e560fe3d7a68aaa91e1bc18e52582ecff6f8821c2c
   document_type: policy
   status: accepted
   owners:
@@ -892,8 +892,8 @@ documents:
   - project.audio-cues
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
-  title: First Severance Audio Cue Sheet
-  content_sha256: 1b5cced439db98715cb2aaf9ca071ccd89c0707c9129406ee8a76fbdb2025f9a
+  title: 不幸な人形劇 Audio Cue Sheet
+  content_sha256: a5d035749b9a08385762b05451c8e10bbd74056ee9197069eef5eb23a889e26c
   document_type: spec
   status: provisional
   owners:
@@ -1075,7 +1075,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 21551d023e8f03e4ca2c16e83d2ff86bf77dbd08396def5a24c70f7d2fe21139
+  content_sha256: 3a0f9667e948a7be604c440dd60f005069a8bc30d4f5f11c3c9fe96ad9f3b549
   document_type: status
   status: accepted
   owners:
@@ -1272,7 +1272,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 0555c0d9a2fd491d5c6b25ddb346d1d35e5c2ad4250872e104ba57895fd1995a
+  content_sha256: 06be4c7b8f2f25ef60a54d60c1589e9943cda7285e504f6ed5f66e97e50efe73
   document_type: research
   status: historical
   owners:

@@ -1,6 +1,6 @@
 # Convergence Mod
 
-A multiplayer-first Calamity addon for Terraria, with a staged long-term path toward a standalone Calamity-scale Content Mod. The first target is a 2–4-player post-Exo Mechs/Supreme Calamitas Raid named **First Severance**.
+A multiplayer-first Calamity addon for Terraria, with a staged long-term path toward a standalone Calamity-scale Content Mod. The current 2–4-player post-Exo Mechs/Supreme Calamitas Raid is **The Unfortunate Doll Play / 不幸な人形劇**, starring **Lacrimosa — The Bound Heart**. `FirstSeverance` remains the stable internal feature/document ID.
 
 `Convergence` is the provisional internal Mod/assembly/root-namespace identity; `ConvergenceMod` is the entry class/project filename. Public branding and most story proper nouns remain provisional.
 
@@ -11,7 +11,7 @@ A multiplayer-first Calamity addon for Terraria, with a staged long-term path to
 - New developer or coding agent: [Documentation Home](docs/README.md)
 - Preparing the Windows desktop: [Windows Development](docs/runbooks/WINDOWS_DEVELOPMENT.md)
 - Exact implementation inventory: [Project Status](docs/STATUS.md)
-- Current Raid loop: [First Severance Specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md)
+- Current Raid loop and public names: [Doll Play Specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md)
 - Safe work sequence: [First Severance Implementation Plan](docs/encounters/first-severance/IMPLEMENTATION_PLAN.md)
 - Topic/alias/source search: [Documentation Search Index](docs/INDEX.md)
 

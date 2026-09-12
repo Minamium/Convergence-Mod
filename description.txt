@@ -1,7 +1,7 @@
 Convergence (Development Build)
 An experimental multiplayer-first raid for Calamity endgame equipment.
 
-First Severance pits your party against Null Cantor: gathering and spreading mechanics, resurrection, multiple boss phases, dense beam patterns and a final survival sequence. Victory awards a weapon convertible into five class forms at a Work Bench.
+The Unfortunate Doll Play pits your party against Lacrimosa — The Bound Heart: a tragic suspended Doll, gathering and spreading mechanics, resurrection, multiple phases and a final survival sequence. Victory awards a weapon convertible into five class forms at a Work Bench. The summon form also exchanges for The Unbroken Promise, a ten-slot Doll companion; she is not a Raid participant.
 
 Requires Calamity Mod 2.2.4 on the tested tModLoader 2026.07 / Terraria 1.4.4.9 baseline. Use Calamity's required dependencies, including its official music mod where required. Other installed addons are not Convergence dependencies.
 Recommended: 2-4 players with endgame gear, in a world with Exo Mechs and Supreme Calamitas defeated. Current balance is provisional; all peers must use the same Convergence version.

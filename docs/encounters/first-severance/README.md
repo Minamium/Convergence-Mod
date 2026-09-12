@@ -4,7 +4,7 @@ document_type: overview
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - first_severance.document_map
 aliases:
@@ -19,9 +19,9 @@ related_docs:
   - project.status
 ---
 
-# First Severance
+# 不幸な人形劇 / The Unfortunate Doll Play
 
-`First Severance`（第一断絶）は、2～4人推奨の開発版Raidです。全員Ready、3つの通常フェーズ、Final生存、Down／蘇生、勝敗演出、5クラスの武器まで実装しています。ソロ起動は開発確認用で、NPC仲間やソロ専用バランスはありません。実装・未検証事項は [Status](../../STATUS.md)、チャット不要の再開手順は [Windows handoff](../../handoff/WINDOWS.md) を参照してください。
+「不幸な人形劇」は、ラクリモーサ — 縛られた心に挑む2～4人推奨の開発版Raidです。旧称First Severanceの内部IDと文書パスは維持しています。[現行仕様](ENCOUNTER_SPEC.md)が名称・戦闘の正本、[武器仕様](WEAPONS.md)が追加の10枠Dollミニオンの正本です。ミニオンは参加者の代役ではなく、ソロ起動は引き続き開発確認用です。実装・未検証事項は [Status](../../STATUS.md)、チャット不要の再開手順は [Windows handoff](../../handoff/WINDOWS.md) を参照してください。
 
 ## Current flow
 

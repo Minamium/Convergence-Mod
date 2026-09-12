@@ -204,18 +204,23 @@ internal sealed class FirstSeveranceBossVisuals
             ? FirstSeveranceEmissionVisuals.AttackColor(attack)
             : combat.Substate == FirstSeveranceSubstate.Stack ? FirstSeveranceAttackAccents.Cyan
             : FirstSeveranceAttackAccents.Magenta;
-        if (combat.LanceVolley is { } current)
+        bool participantMechanic = combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread
+            || FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex, combat.ActionStartedTick,
+                (ulong)Math.Max(0, renderTick), combat.CoreX, combat.CoreY) is { };
+        if (!participantMechanic && combat.LanceVolley is { } current)
             Accents.CastSeal(batch, center, renderTick, current.StartTick, current.FireTick, castColor, reduced, 1.6f);
-        if (combat.Substate is FirstSeveranceSubstate.Stack or FirstSeveranceSubstate.Spread
-            || (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0))
+        if (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0)
         {
-            double lead = combat.Substate == FirstSeveranceSubstate.PylonCheck ? 90 : 120;
+            double lead = 90;
             Accents.CastSeal(batch, center, renderTick, combat.ResolveTick - lead, combat.ResolveTick, castColor, reduced, 1.7f);
         }
         if (cast > 0f || recoil > 0f)
         {
-            Ring(batch, center, 185f - castPose * 92f + recoil * 170f,
-                castColor * Math.Max(cast, recoil), 2.4f, -castPose * 0.7f, 8);
+            // Stack/spread read on the participants, not as a second floating
+            // targeting UI over the suspended body. Keep its physical light.
+            if (!participantMechanic)
+                Ring(batch, center, 185f - castPose * 92f + recoil * 170f,
+                    castColor * Math.Max(cast, recoil), 2.4f, -castPose * 0.7f, 8);
             Glow(batch, center, 240f + recoil * 320f,
                 Additive(Ice, (cast * 0.18f + recoil * 0.45f) * (reduced ? 0.4f : 1f)));
         }

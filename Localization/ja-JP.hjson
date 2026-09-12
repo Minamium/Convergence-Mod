@@ -3,11 +3,11 @@ Mods: {
     Items: {
       NullRefrain: {
         DisplayName: 断唱 — Null Refrain
-        Tooltip: "沈黙を断つ、黒曜の刃\n左右の斬撃から、三撃目で大きく断ち切る\n第一断絶を最後まで生き延びた者への報酬"
+        Tooltip: "沈黙を断つ、黒曜の刃\n左右の斬撃から、三撃目で大きく断ち切る\n不幸な人形劇を最後まで生き延びた者への報酬"
       }
       FoundationCoreItem: {
         DisplayName: ファウンデーション・コア
-        Tooltip: "第一断絶の候補アリーナを固定する大型封印装置\n足元の発光コンソールを右クリック\n開発ビルド：全員Readyで実験用Raidを開始"
+        Tooltip: "不幸な人形劇の候補アリーナを固定する大型封印装置\n足元の発光コンソールを右クリック\n開発ビルド：全員Readyで実験用Raidを開始"
       }
       ResuscitationKitItem: {
         DisplayName: 蘇生キット
@@ -16,8 +16,8 @@ Mods: {
     }
     Projectiles.NullRefrainSlash.DisplayName: 断唱
     NPCs: {
-      FirstSeverancePrototypeBoss.DisplayName: 無響の唱導者
-      FirstSeverancePrototypePylon.DisplayName: 断絶のパイロン
+      FirstSeverancePrototypeBoss.DisplayName: ラクリモーサ — 縛られた心
+      FirstSeverancePrototypePylon.DisplayName: 懸架の楔
     }
     Buffs.RecoveryLockoutDebuff: {
       DisplayName: 再構成不応期
@@ -30,11 +30,11 @@ Mods: {
     }
     UI: {
       FirstSeverance: {
-        VictorySeal: "NULL CANTOR // 信号途絶"
+        VictorySeal: "LACRIMOSA // 終幕"
         SoloDebugNotice: "SOLO DEBUG — HPと攻撃は2人用、参加者は自分1人です。Readyは手動。ダウンで敗北終了します。マルチ同期の確認にはなりません。"
         ResultVictory: RAID COMPLETE // 制圧完了
         ResultDefeat: RAID FAILED // 接続断絶
-        ResultVictoryDetail: "[ NULL CANTOR // 信号途絶 ]"
+        ResultVictoryDetail: "[ LACRIMOSA // 終幕 ]"
         ResultDefeatDetail: "[ 生命反応消失 // 封鎖解除 ]"
         ActivationRejected: "ファウンデーション・コアの起動条件を満たしていません: {0}"
         RequestRejected: "操作できません: {0}"
@@ -43,8 +43,8 @@ Mods: {
         ReviveNoTarget: 8タイル以内にダウン中の味方がいません。
         ReviveLocked: この味方はまだ再蘇生を受けられません。頭上の残り時間を確認してください。
         ReviveTargetUnavailable: この味方はすでに復帰中、または蘇生できない状態です。
-        PreparationStatus: "第一断絶の準備中 — Ready: {0}/{1}。コアを右クリックするとReadyを切り替えます。"
-        AllReady: "第一断絶 Ready完了 — {0}/{1}。実験用Raidを開始します。"
+        PreparationStatus: "不幸な人形劇の準備中 — Ready: {0}/{1}。コアを右クリックするとReadyを切り替えます。"
+        AllReady: "不幸な人形劇 Ready完了 — {0}/{1}。実験用Raidを開始します。"
         PhaseSpawnIntro: "Raid開始。足元の蘇生キットを拾ってください。/convergence-down でDownを実験できます。起動者の /convergence-cancel で終了。"
         PhasePylonCheck: "パイロン — {0}基すべてを破壊！ Bossはまだ無敵です。"
         PhaseStack: "頭割り — {1} の7タイル以内に集合！ 必要人数: {3}。あと{2}秒。"
@@ -56,8 +56,8 @@ Mods: {
         DashRightInstruction: "連撃 {0}/4 — エネルギー突進！ 進路固定に合わせ右へダッシュ →"
         DashLeftInstruction: "連撃 {0}/4 — ← エネルギー突進！ 進路固定に合わせ左へダッシュ"
         StillnessInstruction: "連撃 {0}/4 — 空いた柱の中で静止"
-        IntroRaidName: 第一断絶
-        DefeatDeathReason: "{0} は第一断絶により抹消された。"
+        IntroRaidName: 不幸な人形劇
+        DefeatDeathReason: "{0} は不幸な人形劇により抹消された。"
         PhaseReset: "1周完了。Bossの盾が戻り、次のパイロンへ。実験を終える場合は /convergence-cancel。"
         ResultStackPassed: 頭割り成功 — 全員集合。ダメージなし。
         ResultStackFailed: 頭割り人数不足 — 不足人数の割合分、生存参加者全員に最大HP割合ダメージ。
@@ -89,7 +89,7 @@ Mods: {
         BodyRevivable: キット使用で即時蘇生
         BodyLocked: "再蘇生不可：あと{0}秒"
         ReviveHud: "蘇生中 — 静止して長押し: 残り{0}秒"
-        NameSpawnIntro: 第一断絶
+        NameSpawnIntro: 不幸な人形劇
         NamePylonCheck: パイロン破壊
         NameStack: 頭割り
         FixedStackTarget: 光っている固定集合地点
@@ -99,7 +99,7 @@ Mods: {
         PhasePhaseTransition: "封印崩壊 — 攻撃停止。真の姿が現れる。"
         PhaseLattice: "PHASE II — 予告された格子を避け、光線の間のマスへ。コアを攻撃！"
         GridInstruction: "格子光線 — 光る線を避けてマスの中へ"
-        UnboundTitle: "NULL CANTOR // 封印解除"
+        UnboundTitle: "LACRIMOSA // 壊れた人形棺"
         NameSpread: 散開
         NameCoreExposure: コア露出
         NameReset: リセット
@@ -115,8 +115,8 @@ Mods: {
         FloodSafeGuide: 安全地帯
         HalfGuide: 密集した半面から離れ、上下から刺さる剣の隙間へ。
         FinalGuide: HPはゼロ。最後の行動リストを避けきろう。蘇生は引き続き使用可能。
-        DistantTitle: 無響の唱導者 // 遠隔顕現
-        FinalTitle: 無響の唱導者 // 終端楽譜
+        DistantTitle: LACRIMOSA // 舞台の向こう側
+        FinalTitle: LACRIMOSA // 最後の幕
         PhaseRotatingBlade: 公理の剣 — 伸展後は内側に寄って時計回りに旋回！
         PhaseRemoteClaws: 遠隔挟撃 — 左右の腕が閉じる。予測線を避けよう。
         PhaseHalfField: 鉄の禁域 — 密集した半面を離れ、剣の隙間を抜けろ！
@@ -127,7 +127,7 @@ Mods: {
       }
     }
     Configs.FirstSeveranceVisualConfig: {
-      DisplayName: 第一断絶の視覚効果
+      DisplayName: 不幸な人形劇の視覚効果
       ReducedEffects: {
         Label: 装飾演出を軽減
         Tooltip: オーロラ・発光・破片・暗転を軽減し、画面揺れを無効化します。危険範囲・予測線・ビームは消えません。
