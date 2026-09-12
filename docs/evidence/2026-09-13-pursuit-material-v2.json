@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.65",
+  "protocol": 30,
+  "source_commit": "093f0376384dffa4bdf8319333af83d8e15047df",
+  "source_branch": "main",
+  "source_sha256": "eadb6fc1294460743936988a7686888c6ff909348f6859c4a627b124c3db36cd",
+  "local_build_record": ".local/builds/20260912T182831191419Z/record.json",
+  "preserved_local_changes": [
+    "Localization/DollActivation/en-US.hjson",
+    "Localization/DollBeam/en-US.hjson",
+    "Localization/DollTheater/en-US.hjson",
+    "Localization/GhostSamurai/en-US.hjson",
+    "Localization/Preparation/en-US.hjson",
+    "Localization/en-US.hjson"
+  ],
+  "reason": "Owner rejected the flat rectangular fill and sinusoidal wires of 0.2.64; prior build success did not establish visual acceptance.",
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "installed_hjson_parser_files_passed": 18,
+    "source_changed_during_build": false,
+    "bytes": 54668467,
+    "sha256": "2b665b187091e0ff49719f04f848ac659469d6f5a8a6744925a639786195d947",
+    "previous_package": "preserved by dev.py",
+    "shader_bytes": 13256,
+    "shader_sha256": "34c3114a88fb2a48d1cf0f5ab82790ba39496611315517c9e77d5dc3a90b0b5a",
+    "installed_export_matches": true,
+    "forbidden_source_local_or_dependency_asset_entries": 0
+  },
+  "checks": {
+    "static_wrapper": "passed once after indexed-document edits: 66 documents / 637 files / 10 YAML; catalog regenerated",
+    "focused_shader_contracts": "4 passed; scoped opt-in, client guard, exact body quad/world transform, authority-live selection, restored texture/sampler slots, export integrity and stale rejection",
+    "native_shader": "FXC compilation passed (expected deprecated-effects warning). Installed FNA/D3D11 rendered with the two installed Luminance noise textures; no dependency assets extracted to disk or vendored.",
+    "offline_preview": ".local/shader-preview/pursuit-v2-comparison.png; old left, new right; ruby/blue/mint/gold rows at physical 88px full width, no aspect shrink",
+    "motion_frames": "104 frames of old/new warning/live/retirement; reduced-detail gold on the new side. PNG sequence preserves tick samples; optional GIF is 50Hz playback, not exact 60Hz game pacing.",
+    "preview_conclusion": "New live material removes rectangular radiance floor and sine-wire loops; flowing mantle/detail, hot core, source plume and diffuse bloom remain visually distinct. This is an offline material comparison, not game acceptance or a frame-time benchmark.",
+    "gameplay": "No Content/Common, sound, geometry, timing or network sources changed. Spread pursuit, Final score, weapons and Ghost Samurai remain untouched."
+  },
+  "runtime_not_run": [
+    "Actual tModLoader shader autoload/reload with this package",
+    "Eight-cast warning/live full-width readability and subjective motion approval in combat",
+    "Peer UI107% / zoom / camera and Reduced Effects",
+    "Performance or compatibility beyond offline local D3D11 rendering"
+  ]
+}

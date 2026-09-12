@@ -622,7 +622,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: a6c748d019bec97408a257ef43efebf60f7f48d574715228133ca608334036ff
+  content_sha256: 3ef0d61d16625a64592aeb54a899cb5babae3f52706c5967e90ca12319225ba9
   document_type: spec
   status: provisional
   owners:
@@ -788,7 +788,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 696aca3e8f0d7da8635cd2e1e6d886a2582d02e48662ff8f07bb423927661ce4
+  content_sha256: 9177a57c80eac4304a43a249153c231301905f54b7eea66836da89a46556895d
   document_type: policy
   status: accepted
   owners:
@@ -1103,7 +1103,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: ca0bc4a245fff6d871c5e4395f8e6e9667d7bc5c172f3099de8b2803e8531025
+  content_sha256: f82c3d1b0fc5d37b0909113d4f00de4db2d15bcd71390c6dc92f82d9d0ac5b43
   document_type: status
   status: accepted
   owners:
