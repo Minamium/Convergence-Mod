@@ -664,13 +664,13 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 4f3501d9d99d6650e2896d8413d61680143b003a337f71c59fdfd766b66682b0
+  content_sha256: d9c27ebe02d813c59f119cba0d4f9156d2451342458da9479551bd13a3957a21
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - ghost_samurai.behavior
   aliases:
@@ -1103,7 +1103,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: c6ab5c00d3ebd83c3db3c7b2104da625070d67baa941b449eef82edaecb59954
+  content_sha256: ca0bc4a245fff6d871c5e4395f8e6e9667d7bc5c172f3099de8b2803e8531025
   document_type: status
   status: accepted
   owners:
