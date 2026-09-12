@@ -73,6 +73,8 @@ Installed `tMLMod.targets` was inspected during consolidation: it sets .NET 8/C#
 
 ## Routine checks and user handoff
 
+Original GPU materials ship precompiled `.fxc`, not a player-side compiler requirement. After changing `.fx`, run `python tools/compile_shaders.py --fxc "<existing tModLoader user-data>/FXC/fxc.exe"` with an explicit installed compiler (Luminance's development setup supplies it), then use the normal build entry. Source/compiler/export hashes are recorded in `Assets/AutoloadedEffects/Shaders/compiled.json`; `dev.py build` rejects stale exports before touching the installed package. `.fx` and that manifest stay in Git but are excluded from `.tmod`. Do not commit the compiler or dependency DLLs. A clean checkout with matching exports needs no shader recompile.
+
 Install `tools/requirements-ci.txt` once per Python environment. Select the affected static/domain/codec checks using the [Verification Matrix](../../.agents/skills/develop-convergence-raids/references/verification-matrix.md); generate the catalog once after the documentation batch.
 
 A successful recorded build has already packaged the Mod in the selected profile. Stop/restart or Reload Mods to load it; **another Build + Reload compilation is not required for unchanged source**. The user owns the actual load and affected Host & Play observation unless GUI control is explicitly requested. Record those as not_run until observed; packaging is not a runtime success claim.

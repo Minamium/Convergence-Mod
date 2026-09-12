@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-13
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.63 / protocol 30**, built and installed from `14c5a61` on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Doll changes: one Core forecast and a continuously recessed mechanical crater; Core/Lacuna flowing material on the color-preserving Prisms, purple twin rotation/top-bottom jets and purple Final energy bodies. Attack geometry/timing/damage are unchanged. [Activation](ARENA_INFRASTRUCTURE.md#activation-flow) now starts from an empty pedestal using the reusable **Theater Doll / 開演の人形**, distinct from the ten-slot companion. Existing all-Ready capture, mounted broom motion, equal rewards and companion recipe remain. Ghost Samurai integration through `75e95ab` and its fixes are retained unchanged.
+Development **0.2.64 / protocol 30**, native Release build installed from `4b452f7` on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Only the main eight-cast PursuitPrism now uses an original Luminance-managed GPU material; [visual spec](encounters/first-severance/VISUAL_SPEC.md#luminance-prototype-boundary) owns the opt-in and shader boundary. Original colors, geometry, warning/live/end ticks and sounds are unchanged. Final, Spread's extra pursuit, weapons, other attacks, Doll activation/companion/rewards and integrated Ghost Samurai behavior are retained.
 
 - Independent [Ghost Samurai / 幽鬼武者](encounters/ghost-samurai/ENCOUNTER_SPEC.md): Phase1/2 now have shorter recovery/intervals, overlapping warnings for sequential four-slash strikes, a larger denser grid, and bounded radial-spread-then-homing Phase2 wisps. Attack windup/live times, phase state machine, summon, native damage and exact-Fight cleanup remain intact. Phase3 temporarily continues Phase2; no Raid Ready/Down/revival or new loot/progression is added to this boss.
 - Ghost Samurai presentation replaces the procedural skeleton with original generated body/sword-arm artwork, fixes the whole-MagicPixel source rectangle that enlarged stroke thickness by 1000, and adds warm high-contrast forecasts with pale-blue strikes. This display-only pass changes no combat or wire rules; the feature spec owns exact art/keying/border behavior.
@@ -37,6 +37,8 @@ Development **0.2.63 / protocol 30**, built and installed from `14c5a61` on main
 - One-member admission defaults on only as a build-gated development aid. It adds no companion, invulnerability or solo-specific fight. Normal testing is multiplayer unless the user explicitly chooses solo.
 
 ## Verification state
+
+**0.2.64** [evidence](evidence/2026-09-13-pursuit-luminance.json): native Release build/install **0 errors / 4 existing warnings**, 18 locales parsed, source stable during packaging. Shader compiler/export validation, native FNA/D3D11 effect load and 24 offline draws passed; installed package contains the exact checked shader and excludes `.fx`/compiler metadata. Four focused shader tests and two build-preflight tests passed. No gameplay/network sources changed. Six pre-existing English locale edits were preserved. Actual Mod reload/autoload, eight-shot readability, peer 107% UI/zoom and Reduced Effects are **user-owned / not_run**; offline rendering is not game/FPS acceptance.
 
 **0.2.63** [evidence](evidence/2026-09-13-doll-beams-and-stage-key.json): native build/install **0 errors / 4 existing warnings**, all **18** localization files parsed by installed tML Hjson. Selected domain filters **12 + 9 passed**, presentation guards **13 passed**, codec **324 round-trips / 50 invalid cases passed**. Static/catalog/YAML passed (66 docs / 629 files / 10 YAML). Five pre-existing English locale edits were preserved and included in the local package, not folded into the implementation commit. Runtime readability, audio, held-item activation and cancel/retry are **user-owned / not_run**.
 
@@ -79,7 +81,7 @@ Development loot includes a companion summon weapon, but balance, public solo/NP
 
 ## Next change
 
-The **0.2.63 / protocol30** package is installed from main. Reload Mods/restart tModLoader; no second Build + Reload compilation is needed. For Doll testing, obtain **Theater Doll / 開演の人形** (Work Bench: 10 Silk + 1 Fallen Star, or Cheat Sheet), hold it and click the pedestal. Confirm single-player and peer-visible preparation, manual Ready, all-Ready capture, cancel/retry and the changed beam/bullet visuals. The key is not consumed. The ten-slot crafted companion is not the key. See the concrete runtime list in the [current evidence](evidence/2026-09-13-doll-beams-and-stage-key.json).
+The **0.2.64 / protocol30** native Release package is installed from main. Reload Mods/restart tModLoader; another Build + Reload compilation is unnecessary. Confirm the main eight-cast sequence's colored forecasts → connected pressure release → dim residue, especially full-width readability, Reduced Effects and peer UI107%/zoom. Luminance is now a declared dependency (already installed locally). Other attacks are deliberately unchanged; expand the material only after user acceptance. Retained activation/companion smoke items are in the [previous evidence](evidence/2026-09-13-doll-beams-and-stage-key.json), not a new mandatory replay queue.
 
 Then continue the focused Ghost Samurai smoke: end a fight and summon again, read all four slash warnings and grid gaps, inspect the body's transparency/sword motion, and compare homing-wisp positions with a peer. Native load, multiplayer alignment and dodgeability remain user-owned. Retained Doll flight/beam/reward checks live in their evidence; an unrelated full Raid replay is not required.
 
