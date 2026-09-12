@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - engineering.content_authoring
 aliases:
@@ -22,47 +22,36 @@ related_docs:
 
 ## Feature-first placement
 
-```text
-Content/Encounters/<Name>/
-  <Name>Definition.cs
-  <Name>RegistrationSystem.cs
-  Activation/ Arena/ Actors/ Phases/ Mechanics/ Rewards/ Cues/
-```
+Keep each encounter under `Content/Encounters/<Feature>` with its presentation under `Client/Encounters/<Feature>` and its spec under `docs/encounters/<feature>`. Add subdirectories only when they own real files. `FirstSeverance` is the stable internal identity of 不幸な人形劇; `GhostSamurai` is an independent Boss.
 
-Create a directory only when it owns a real file. The first feature is `FirstSeverance`; its source identity and immutable six-state loop plan are implemented, while live adapters remain isolated behind activation denial.
+The [feature specifications](README.md#sources-of-truth) own active behavior. [Status](STATUS.md) owns implementation and activation state; an old slice plan does not disable an accepted development path.
 
 ## Encounter definition and runtime
 
-Each definition supplies a stable key, kind, participant range, optional arena profile, feature policies, and runtime factory. Registration remains local to the module. The common registry/coordinator/router never gains feature switches.
+Each definition supplies a stable key, kind, participant range, optional arena profile, feature policies and runtime factory. Registration stays local to the module. The common registry/coordinator/router never gains feature switches.
 
-`EncounterStartCommand.RequestedAnchor` is untrusted. Authority resolves an actual Core Tile Entity and validates the prospective arena before any world mutation. The feature runtime registers every transient resource and exposes only bounded snapshot/cue state.
+The definition and active spec choose the activation policy and arena requirements. Validate untrusted activation inputs before spawning owned world resources. Core/Tile Entity arena validation applies to encounters that use that activation path; it is not a prerequisite for an independent summon-item Boss. Register every transient resource with its exact-Fight owner and expose bounded snapshots/events.
 
-## First mechanics
+## Mechanics and presentation
 
-Implement Pylon, Stack, Spread, and Core exposure inside First Severance. Do not create a generic mechanic DSL or move them into `Common` until a second real encounter demonstrates a common contract.
+Keep a new mechanic in its feature until a second encounter demonstrates a useful shared contract. A mechanic owns assignments, start/resolve ticks, results, failure policy and cue data; it does not draw UI, play audio, trust client-reported outcomes or bypass cleanup.
 
-A mechanic owns authoritative assignments, start/resolve ticks, results, soft failures, and cue data. It does not draw UI, play audio, trust client DPS/positions, or bypass exact-Fight cleanup.
-
-The first Boss is one NPC and one life pool. If the provisional ring/arms placeholder is retained, those pieces are draw/presentation components; Pylons are separate authority-owned NPCs. Deferred Part Break/Effigy/Last Stand concepts must not shape the first runtime API.
+Each feature chooses its own phases, life-pool model, recovery and presentation. Do not give Ghost Samurai the Raid's Ready/Down/revive rules or copy the Doll's silhouette and marker policy into another Boss. Read the affected feature spec and relevant [Art Direction](ART_DIRECTION.md) section.
 
 ## Tuning
 
-Feature-owned typed code holds initial timing/HP/damage/radius values. Mark them provisional in the spec and tune from 2/3/4-player evidence. Runtime JSON/config is added only for a demonstrated server-operator need and must have a schema. Never make identity, protocol, authority, or cleanup data-driven casually.
+Feature-owned typed code holds timing, HP, damage and geometry. The spec names the tuning owner and the intended experience; avoid a second numeric table that can drift. Verify the player counts and boundaries affected by the change. Runtime JSON/config requires a demonstrated operator need and a schema; stable identity, protocol, authority and cleanup remain explicit contracts.
 
 ## Calamity integration
 
-Ask the compatibility gateway for progression, difficulty, class category, Rage/Adrenaline/Rogue information. Do not reference Calamity internals from NPC/item/phase/reward code or copy its source/assets.
+Keep compatibility policy behind the project gateway and the accepted dependency boundaries. Do not copy Calamity internals, binaries or assets. The [Windows build procedure](runbooks/WINDOWS_DEVELOPMENT.md#diagnose-or-build) covers installed Mod references; source inspection alone does not establish runtime compatibility.
 
 ## Assets
 
-Follow [Asset Pipeline](ASSET_PIPELINE.md) and [IP Provenance](IP_PROVENANCE.md). Runtime exports alone enter `Assets`; editable/raw sources remain external. Every distributable asset requires an attribution record before merge.
+Follow [Asset Pipeline](ASSET_PIPELINE.md) and [IP Provenance](IP_PROVENANCE.md). Runtime exports enter `Assets`; final documentation illustrations may live under `docs/media` and are excluded from the Mod package. Keep editable/raw originals external and record every distributable export in [Attribution](../Assets/ATTRIBUTION.md).
 
 ## Definition of done
 
-- Authority/client split and bounded packet intent are explicit.
-- Start, cancel, failure, disconnect/rejoin, unload, and repeated cleanup are handled.
-- 2/3/4-player behavior and Downed interaction are specified.
-- Telegraphs remain readable without optional effects/music.
-- Dedicated Server avoids presentation initialization.
-- Performance/traffic budgets are measured.
-- Docs/status/tests/changelog and asset provenance are current.
+Use the [AGENTS completion contract](../AGENTS.md#verification) and [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). Complete the applicable automated work and distinguish remaining manual acceptance from a passing build.
+
+For a new encounter or a changed contract, specify the authority/client split, activation and terminal behavior, supported participant counts, recovery interaction if any, and exact-Fight cleanup. Check the affected lifecycle paths and readability without optional effects. Measure performance/traffic when the change affects those budgets; a wording fix does not require a new benchmark or full multiplayer matrix.

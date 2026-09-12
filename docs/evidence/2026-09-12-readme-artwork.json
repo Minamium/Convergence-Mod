@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-12",
+  "scope": "README illustration and repository documentation; no runtime asset replacement",
+  "creator": "OpenAI built-in image_gen, directed by Codex for Minamium",
+  "model": "not exposed by tool",
+  "reference": "icon_workshop.png; existing project-directed generated emblem, see Assets/ATTRIBUTION.md",
+  "prompt": "Create one polished, very wide landscape promotional illustration for the GitHub README of an original Terraria content mod named CONVERGENCE MOD. Aim for a 3:1 banner composition, 1800x600 if available. The supplied image is a reference for the project's existing emblem, NOT a gameplay screenshot or sprite to replace. Preserve its recognizable four black curved blade-like segments around a small pale blue luminous core. Put the large emblem as an ancient floating relic slightly right of center in a vast shadowed ruined cathedral, with faint distant pillars, restrained mist, fractured obsidian, aged silver edges and tiny warm ivory highlights. Rich detailed dark-fantasy painted key art, atmospheric and elegant, not flat shapes, not a game UI. Left third should have quiet negative space with exceptionally crisp refined ivory serif title text exactly 'CONVERGENCE', and a much smaller widely spaced line exactly 'MOD' below it. Strong readable silhouette, near-black navy background, muted cyan glow only around the core, avoid overexposed neon. No additional words, no badges, no watermarks, no screenshots, no borrowed franchise logos, no identifiable Terraria or Calamity characters. Keep important title and emblem comfortably inside all edges. This is a README illustration only; do not invent specific playable scenes or character designs.",
+  "output": {
+    "path": "docs/media/convergence-banner.png",
+    "width": 2172,
+    "height": 724,
+    "bytes": 2239776,
+    "sha256": "84e4ffd1fb9ddab1d581542a62a7a0fcf9646f960e926402342c4f72a5e888e3"
+  },
+  "processing": "Selected PNG copied byte-for-byte; no raster edits or resampling. Original generated output retained outside source.",
+  "review": "Inspected title spelling, emblem silhouette, composition and margins. This is illustrative key art, not a gameplay screenshot.",
+  "packaging": "docs directory is already excluded by buildIgnore; artwork does not enter Convergence.tmod",
+  "terms": "Project asset distribution terms remain unresolved. The user requested illustration for this repository's README; no third-party license or public game-release approval is asserted."
+}

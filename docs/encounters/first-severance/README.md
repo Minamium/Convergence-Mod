@@ -10,6 +10,9 @@ source_of_truth_for:
 aliases:
   - First Severance
   - 第一断絶
+  - 不幸な人形劇
+  - The Unfortunate Doll Play
+  - Lacrimosa
   - first_severance
 related_code:
   - Content/Encounters/FirstSeverance
@@ -33,7 +36,7 @@ Core activation / all current-world participants
   -> Phase I: sealed / Pylons / Core / clockwise Stack + Spread
   -> Phase II: lattice / twin rotating blades / Spread
   -> Phase III: remote arms / floods / swords / Stack + Spread / crush
-  -> Final: eight clockwise stops + bullets / previewed slicing triples
+  -> Final: survival score and current beam/attack patterns
   -> survived full Final: Victory + shared reward drops
 ```
 
@@ -47,7 +50,7 @@ Raid独自の致死ダメージはDownへ変換。味方のResuscitation Kitで�
 - [Implementation Plan](IMPLEMENTATION_PLAN.md): current work boundary, extension seams and completed consolidation; not another rename queue.
 - [Visual Specification](VISUAL_SPEC.md): accepted materials, extreme motion contrast, phase forms, UI/field coordinate contract and endings.
 - [Doll Theater](DOLL_THEATER_VISUAL_SPEC.md): current white-haired Gothic doll identity, conversation NPC, coffin/reveal, suspension, pixel assets and offline preview.
-- [Weapons](WEAPONS.md): claws, long-form Magic/Ranged/Summon/Rogue rituals and exchange recipes.
+- [Weapons](WEAPONS.md): current weapon rewards, ritual timelines and the Doll companion recipe.
 - [Audio](../../AUDIO_CUE_SHEET.md): active BGM, selectively restored SFX, silence and voice lifetimes.
 - [Revive Specification](REVIVE_SPEC.md): Downed, reusable instant recovery, recipient lockout, and the ordinary-lethal-hook compatibility blocker.
 - [Backlog](BACKLOG.md): preserved old ideas explicitly excluded from the first slice.

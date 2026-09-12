@@ -1,87 +1,65 @@
 # Convergence Mod
 
-A multiplayer-first Calamity addon for Terraria, with a staged long-term path toward a standalone Calamity-scale Content Mod. The current 2–4-player post-Exo Mechs/Supreme Calamitas Raid is **The Unfortunate Doll Play / 不幸な人形劇**, starring **Lacrimosa — The Bound Heart**. `FirstSeverance` remains the stable internal feature/document ID.
+![Convergenceの四つの黒い刃と青白い光を描いた大聖堂のイラスト](docs/media/convergence-banner.png)
 
-`Convergence` is the provisional internal Mod/assembly/root-namespace identity; `ConvergenceMod` is the entry class/project filename. Public branding and most story proper nouns remain provisional.
+**仲間と挑むRaid。読み切って避けるBoss。Terrariaに、新しい決戦を。**
 
-> Development includes an experimental Raid playtest build. See [Project Status](docs/STATUS.md#current-build) for the current implementation, observed verification, and remaining playtest; this overview does not track version-by-version state.
+Convergenceは、Calamity終盤を舞台にした協力Raidと独立Bossを開発するtModLoader Modです。頭割り・散開・蘇生による連携と、予兆を読んで切り抜けるアクションを組み合わせます。
 
-## Start here
+*A Terraria / tModLoader content mod featuring cooperative raids and independent bosses, built around Calamity's endgame.*
 
-- New developer or coding agent: [Documentation Home](docs/README.md)
-- Preparing the Windows desktop: [Windows Development](docs/runbooks/WINDOWS_DEVELOPMENT.md)
-- Exact implementation inventory: [Project Status](docs/STATUS.md)
-- Current Raid loop and public names: [Doll Play Specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md)
-- Safe work sequence: [First Severance Implementation Plan](docs/encounters/first-severance/IMPLEMENTATION_PLAN.md)
-- Topic/alias/source search: [Documentation Search Index](docs/INDEX.md)
+[現在の開発状況](docs/STATUS.md) · [開発に参加する](CONTRIBUTING.md) · [環境構築](docs/DEVELOPMENT.md) · [ドキュメント](docs/README.md)
 
-## First Raid direction
+<sub>上の画像はREADME用のイメージイラストです。ゲーム画面ではありません。[制作記録](docs/evidence/2026-09-12-readme-artwork.json)</sub>
+
+## Encounters
+
+| コンテンツ | 体験 | 詳細 |
+|---|---|---|
+| **不幸な人形劇 / The Unfortunate Doll Play** | ラクリモーサ — 縛られた心に挑む、2～4人推奨の協力Raid。頭割り、散開、DPS区間、味方の蘇生を通じて最終局面へ | [Raid概要](docs/encounters/first-severance/README.md) · [戦闘仕様](docs/encounters/first-severance/ENCOUNTER_SPEC.md) |
+| **幽鬼武者 / Ghost Samurai** | 青白い鬼火をまとった二刀流の独立Boss。召喚アイテムから始まり、斬撃の予兆と間合いを読んで戦う | [Boss仕様](docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
+
+本リポジトリは**プレイ可能な開発版**です。実装済みの範囲、最新ビルド、確認済みの挙動と残る試遊項目は [Status](docs/STATUS.md) にまとめています。各Bossの仕様はその機能の文書が持ちます。
+
+Raidの旧称 `First Severance` は、`FirstSeverance` / `first_severance` という内部IDと文書パスに残っています。公開名の変更に伴うコード・セーブ・通信IDの一括改名は行いません。
+
+## Development
+
+| やりたいこと | 最初に読むもの |
+|---|---|
+| 新しい変更・修正を担当する | [Contributing](CONTRIBUTING.md) と対象機能の仕様 |
+| 開発環境を用意する | [Development](docs/DEVELOPMENT.md) → 必要な [Windows手順](docs/runbooks/WINDOWS_DEVELOPMENT.md) |
+| 適切な検証を選ぶ | [Verification Matrix](.agents/skills/develop-convergence-raids/references/verification-matrix.md) |
+| 設計・API・過去の判断を探す | [作業別の文書案内](docs/README.md#read-by-task) |
+
+新しいcloneでも、ローカルのソースディレクトリ名は `Convergence` を使います。
+
+```sh
+git clone https://github.com/Minamium/Convergence-Mod.git Convergence
+cd Convergence
+python -m pip install -r tools/requirements-ci.txt
+python .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
+```
+
+これは文書・構成の静的検証です。Modのコンパイルには、[Version Matrix](docs/VERSION_MATRIX.md) のtModLoader・Calamity・.NET環境とローカル設定が必要です。実際のpackage buildは [Windows runbook](docs/runbooks/WINDOWS_DEVELOPMENT.md#diagnose-or-build) の記録付き入口を使います。
+
+## Built for shared development
+
+機能ごとに実装と責任を分け、ゲーム結果はServer / Single Player側で決定します。クライアントは同期された状態から描画・音・UIを組み立てます。
 
 ```text
-Activation -> Boss spawn -> Pylon DPS -> Stack -> Spread -> Core exposure
-                                                   ^               |
-                                                   |--- HP > 0 -----|
+Common/              共有基盤、通信、権限、Raid domain、互換性
+Content/Encounters/  各Boss・Raidの実装
+Client/              描画、音、UI、アクセシビリティ
+Tests/               ゲームに依存しないdomain・codec検証
+docs/                現行仕様、開発手順、状態、検証証拠
+.agents/skills/      必要な作業で読む開発・調査ガイド
 ```
 
-The Boss has one logical NPC/body and life pool; presentation can extend beyond its hitbox. Damage is accepted only during Core exposure. The [encounter](docs/encounters/first-severance/ENCOUNTER_SPEC.md), [visual](docs/encounters/first-severance/VISUAL_SPEC.md), and [recovery](docs/encounters/first-severance/REVIVE_SPEC.md) specifications own the active gameplay and presentation rules.
+共同作業は最新の統合mainから目的別のbranch / worktreeで進めます。共有プレイ用packageの扱いとPRの検証記録は [Contributing](CONTRIBUTING.md#shared-development) を参照してください。
 
-Part Break, Targeted Line, Personal Effigies, Split Reality, Last Stand, multipart production art, rewards, and final tuning are deferred.
+プロジェクトは [Minamium](https://github.com/Minamium) が管理し、[mac10101010](https://github.com/mac10101010) による幽鬼武者の実装など、コントリビューターの協力で開発しています。全履歴は [Contributors](https://github.com/Minamium/Convergence-Mod/graphs/contributors) で確認できます。
 
-## Target environment
+## License and credits
 
-- Terraria `1.4.4.9` — confirmed
-- tModLoader stable `v2026.07.3.0` — confirmed
-- Calamity Mod `2.2.4` plus official Music Mod `2.1` — confirmed
-- .NET SDK `8.0.424` / tModLoader-owned .NET 8 and C# 12 baseline
-
-This Windows baseline passed command build, Build + Reload, Single Player, Dedicated Server, and two-client smoke at commit `b34adbc`. See the [Version Matrix](docs/VERSION_MATRIX.md) and [sanitized evidence](docs/evidence/2026-09-05-windows-baseline.json).
-
-Windows is the primary implementation and runtime-verification workstation. macOS is supported as a secondary Git/docs/review environment and can perform Mod work only when the same pinned runtime is actually installed and tested.
-
-## Architecture at a glance
-
-- One tModLoader assembly with enforced modular-monolith boundaries.
-- `Common` owns stable foundations, authority runtime, networking, Raid domains, and compatibility boundaries.
-- `Content/Encounters/<Feature>` owns each Boss/Raid vertically.
-- `Client` consumes read-only state for UI, VFX, audio, and accessibility.
-- Server/Single Player authority decides every gameplay result; clients submit bounded intent.
-- Active fights are ephemeral, exact-Fight owned, and cleanup is idempotent.
-- Calamity is isolated behind an adapter and is not the permanent owner of the Raid architecture.
-
-Read [Architecture](docs/ARCHITECTURE.md), [Network Architecture](docs/NETWORK_ARCHITECTURE.md), and [ADRs](docs/adr/README.md) before changing authority code.
-
-## Repository map
-
-```text
-Common/                         shared foundation, authority, networking, compatibility
-Content/Encounters/             feature-first Boss/Raid modules
-Client/                         client-only presentation
-Assets/                         reviewed runtime exports only
-docs/                           specs, status, handoff, runbooks, ADRs, evidence, research
-.agents/skills/                 repository-local Raid and source-research workflows
-Tests/Convergence.DomainTests/  tModLoader-free authoritative domain harness
-tools/                          repository, documentation-catalog, and YAML checks
-```
-
-`Content/Encounters/FirstSeverance` owns the Raid implementation. Read only the relevant code/specification sections using [Read by task](docs/README.md#read-by-task); completed bootstrap and rename instructions are historical context.
-
-## Local verification
-
-```bash
-python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
-```
-
-Install `tools/requirements-ci.txt` once per Python environment. The [Verification Matrix](.agents/skills/develop-convergence-raids/references/verification-matrix.md) selects catalog, domain, build, and runtime checks by change; combine its flags in one invocation. A domain run does not compile/load tModLoader. Use [Windows Development](docs/runbooks/WINDOWS_DEVELOPMENT.md) when actual runtime verification applies.
-
-## Repository Skills
-
-Two project-local Skills already exist:
-
-- `.agents/skills/develop-convergence-raids`: authority, cleanup, replication, and multiplayer workflow for Raid changes.
-- `.agents/skills/research-tmodloader-sources`: exact-version, source- and license-aware tModLoader/public-Mod research.
-
-They are development tooling and excluded from `.tmod` packaging. Extend them when repeated workflows emerge; do not create a new Skill for a one-off step.
-
-## Contribution and licensing status
-
-The source and asset licenses have not been selected. Repository visibility grants no reuse permission, and unsolicited code/assets are not accepted yet. See [Contributing](CONTRIBUTING.md), [Security Policy](SECURITY.md), and [IP Provenance](docs/IP_PROVENANCE.md).
+ソース・素材の配布ライセンスは未選定です。依頼・合意済みの共同開発、一般からの投稿、公開配布の条件は [Contributing](CONTRIBUTING.md#contribution-scope-and-licensing) と [Release Process](docs/RELEASE_PROCESS.md) に従います。素材・音楽・生成イラストの出典は [Attribution](Assets/ATTRIBUTION.md) に記録しています。

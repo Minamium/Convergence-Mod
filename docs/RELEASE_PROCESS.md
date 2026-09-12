@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - quality
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - policy.release_process
 aliases:
@@ -74,4 +74,4 @@ Never run untrusted fork code on a self-hosted runner containing Steam credentia
 
 ## Branch policy
 
-Use short-lived branches and squash merges. Keep compatibility updates, pure refactors, encounter tuning, and bulk assets separate. After the first successful Actions run, protect `main` with the stable repository-check job, linear history, no force push, and no deletion. Additional review requirements begin when more maintainers join.
+Use short-lived branches and squash merges under [shared development](../CONTRIBUTING.md#shared-development). Keep compatibility updates, pure refactors, encounter tuning, and bulk assets separate. After the first successful Actions run, protect `main` with the stable repository-check job, linear history, no force push, and no deletion. Additional review requirements begin when more maintainers join.

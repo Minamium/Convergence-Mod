@@ -1,18 +1,18 @@
 ---
 name: research-tmodloader-sources
-description: Research current Terraria/tModLoader APIs and prior implementations in official documentation and public Mod source repositories. Use when investigating multiplayer authority, packets, player hooks, death/respawn, bosses, arenas, barriers, UI, rendering, compatibility, performance, or another Mod's implementation before designing or changing Convergence. Produces source-linked evidence and license-aware design findings; it does not authorize copying third-party code or assets.
+description: Investigate unresolved Terraria/tModLoader API behavior or a named public Mod implementation for Convergence. Use for source-backed compatibility and design research; skip changes already supported by existing code, specifications, and version-matched evidence.
 ---
 
 # Research tModLoader Sources
 
-Produce reproducible, license-aware prior-art research before changing Convergence.
+Resolve the API or prior-art question with reproducible evidence and a clear consequence for Convergence.
 
 ## Establish the question
 
 Start with existing scoped research and source/version evidence. Reuse findings when the target version and relevant source still match; check freshness for mutable or compatibility-critical claims. Search only unresolved mechanisms rather than repeating a broad prior-art survey.
 
 1. Convert the request into a small set of mechanisms, such as lethal-damage interception, revive channel authority, arena ejection, part ownership, or DPS-window timing.
-2. Record the target Terraria, tModLoader, Calamity, .NET, and C# versions from the repository's `docs/VERSION_MATRIX.md`, `build.txt`, project/props files, and dependency manifests. Record conflicts or missing declarations instead of guessing.
+2. Record the runtime/dependency versions relevant to the question, reusing `docs/VERSION_MATRIX.md` and matching evidence. Inspect project/manifest declarations when version resolution is uncertain; a narrow API lookup does not require an unrelated full toolchain inventory.
 3. Define what evidence would change the design. Avoid browsing unrelated showcase content.
 4. Choose implementation or audit-only mode. In audit-only mode, do not edit durable documents or create build/bytecode output; return proposed evidence entries and clearly say which files were not updated.
 
@@ -31,6 +31,8 @@ Record the exact repositories, paths, symbols, and search terms examined for a n
 Determine each surveyed commit's target versions from its `build.txt`, project files, dependency manifests, release notes, or tags. If none declare the target, record `unknown`; do not infer compatibility from recency or branch name.
 
 ## Inspect behavior, not just names
+
+Select the paths below that can affect the question. A drawing API lookup does not require an unrelated death/rejoin audit.
 
 - Trace authority from hook or packet entry to state mutation and replication.
 - Identify whether code executes on client, server, or both.
@@ -62,7 +64,7 @@ For design-changing research, distinguish these categories where applicable; omi
 6. Version or license uncertainties.
 7. Concrete tests and architecture consequences.
 
-Do not declare multiplayer correctness from source inspection alone. Recommend a minimal Dedicated Server prototype for hooks, packet timing, death suppression, movement correction, and inter-Mod conflicts.
+Do not declare multiplayer correctness from source inspection alone. Recommend a minimal Dedicated Server prototype when the unresolved claim depends on hooks, packet timing, death suppression, movement correction, or inter-Mod conflicts.
 
 ## Update durable knowledge
 

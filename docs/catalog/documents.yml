@@ -346,12 +346,12 @@ documents:
 - doc_id: development.general
   path: docs/DEVELOPMENT.md
   title: Development Setup
-  content_sha256: 140f3167d97ee63c36621ca652609e08df3ffaf0406ec1c909254d4d84694b8f
+  content_sha256: 1f37c49221b94e66e885c5b34da613483c3fcd8f5ae5c81a196f9fb7884c0765
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - development.general_policy
   aliases:
@@ -394,12 +394,12 @@ documents:
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: ce6b485bd622a81760adadb5b6d9e6b9df049b67377e356c5e861589dae10690
+  content_sha256: e236baa476e8cd1f64d7f67d8e818442430f424ffecc467f339cef91accd4c51
   document_type: runbook
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - development.windows_setup
   aliases:
@@ -416,12 +416,12 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 0d8e8a1a2bdd7bcd434da4a90d7bacbe7882c2275bf4eea3e6a521995f16272b
+  content_sha256: a38728b3093dab1d4776d061e0c316fa2d77d0ea32f244e025abdc48f0e83a60
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - documentation.read_order
   aliases:
@@ -454,12 +454,12 @@ documents:
 - doc_id: docs.system
   path: docs/DOCUMENTATION_SYSTEM.md
   title: Documentation and Knowledge-Base Design
-  content_sha256: 177175ca8393de9525faac2d32762efc98d4040dbb459508108d292e516976c9
+  content_sha256: e276ef9f099a4248646af5014544914b28e24fa906505d5ed143d894edf08f3d
   document_type: governance
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - documentation.data_model
   aliases:
@@ -522,7 +522,7 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: 不幸な人形劇 / The Unfortunate Doll Play
-  content_sha256: 341a07b2b0124c6089ac77d48b77a49c38b2552e48cb244848ad7c14ade08aec
+  content_sha256: dc6bda50cfaad4a9a5f21c61c33fdcd69f160fe93a54b3e0cbd5173e34d47894
   document_type: overview
   status: accepted
   owners:
@@ -533,6 +533,9 @@ documents:
   aliases:
   - First Severance
   - 第一断絶
+  - 不幸な人形劇
+  - The Unfortunate Doll Play
+  - Lacrimosa
   - first_severance
   related_code:
   - Content/Encounters/FirstSeverance
@@ -591,7 +594,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: 不幸な人形劇 — Encounter Specification
-  content_sha256: 37ad1a552a715d8c206504fd96badfb22bb6e81884d9f7b334f51921641e7c6a
+  content_sha256: 99af7905cad072c9386847be17f72c4884c32b48bcf6710d2b4abb82c0c09f7b
   document_type: spec
   status: accepted
   owners:
@@ -604,6 +607,9 @@ documents:
   - first_severance.terminal_outcomes
   aliases:
   - First Severance
+  - 不幸な人形劇
+  - The Unfortunate Doll Play
+  - Lacrimosa
   - 第一断絶
   - Pylon Stack Spread Core
   related_code:
@@ -680,12 +686,12 @@ documents:
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Development Handoff — チャット不要の再開入口
-  content_sha256: 093a29785cef302ad82b87ca0a8f810a814dda125e8374fe0f9269e04890b6eb
+  content_sha256: a86145e1fe2706157d3879a2d0f7f0495419740b108530fc053932af293f2484
   document_type: handoff
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - handoff.windows.resume
   aliases:
@@ -802,13 +808,13 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: 37a5afdda7eecd9a45af151bd77dc24aebeadbee4c82490244342f6af06aa5b3
+  content_sha256: 289780aff716094376dd65f0343e7b67a28394fea2530a0d090d37d23c8950b0
   document_type: policy
   status: accepted
   owners:
   - project
   - quality
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - policy.release_process
   aliases:
@@ -876,12 +882,12 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: d5788ae59a0cf2a513c832d1e554271336ce32db79bd3bebdc6647dd4699350e
+  content_sha256: 2e0645127086bca52efbf4aa4c3635d1bb131a614e9a37b5d21ca6551d48a49e
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - project.art_direction
   aliases:
@@ -934,12 +940,12 @@ documents:
 - doc_id: project.brief
   path: docs/PROJECT_BRIEF.md
   title: Project Brief
-  content_sha256: 588cb052d95364e9cb5e02f2b7d5f0b23e2e4c5e5af0e3c0a5d09f872f40a3f5
+  content_sha256: 1f77437f521c6cb56fa274a9f62e109ffa68a957b0af10d33768207d540429ca
   document_type: overview
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - project.product_scope
   aliases:
@@ -974,12 +980,12 @@ documents:
 - doc_id: project.content-authoring
   path: docs/CONTENT_AUTHORING.md
   title: Content Authoring
-  content_sha256: 6c96fa761044b8323751254eafef6c06b0640db70a46b53bee47b8dbca5aebe4
+  content_sha256: 0c6b6a9eb81a66e27997a8ab224c4332c665f994478f7ac861c68ab3405c679e
   document_type: governance
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-12'
   source_of_truth_for:
   - engineering.content_authoring
   aliases:

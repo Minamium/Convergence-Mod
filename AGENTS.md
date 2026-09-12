@@ -10,7 +10,7 @@ This file applies to the entire repository.
 4. Briefly state the change and applicable verification. Identify authority, replication, and cleanup owners when those responsibilities change; omit unrelated checklist fields.
 5. Follow the current user-requested scope and active specification. Historical slices and backlog do not add work or reinstate superseded gates.
 
-Current feature naming is `FirstSeverance` / `first_severance`. The isolated source/key/failure-prefix rename is complete; `ThirdSeverance` forms may remain only in deliberately historical records or completed-rename instructions, and no compatibility alias is required for the unpublished identifier.
+Player-facing names and behavior come from the active encounter specification selected through `docs/README.md`. Preserve stable internal code, packet, asset, and document IDs unless an explicit migration is in scope; a display-name or GitHub repository rename does not rename them.
 
 ## Repository Skills
 
@@ -43,7 +43,8 @@ Current feature naming is `FirstSeverance` / `first_severance`. The isolated sou
 ## Verification
 
 - The command entry point and change-based requirements live in [.agents/skills/develop-convergence-raids/references/verification-matrix.md](.agents/skills/develop-convergence-raids/references/verification-matrix.md). Run its static wrapper once at completion, adding domain/build/runtime checks for the affected behavior.
-- Do not repeat passing checks for unchanged inputs/environment without a failure or unresolved concern. Full release and compatibility matrices belong to their declared gates, not every edit.
+- For implementation requests, finish the requested behavior and applicable automated checks. Investigate failures, fix those caused by the change, and rerun affected checks within the authorized local scope. An unresolved failure or unavailable prerequisite is a concrete blocker, not completion.
+- Reuse passing checks for unchanged inputs/environment. Full release and compatibility matrices belong to their declared gates, not every edit.
 - Record relevant runtime checks as passed, failed, or `not_run` with the remaining action. A build is not a playtest; missing evidence cannot satisfy an activation, compatibility, or release gate that depends on it.
 
 ## Assets and external material
@@ -51,7 +52,7 @@ Current feature naming is `FirstSeverance` / `first_severance`. The isolated sou
 - Do not vendor Calamity binaries, source mirrors, or extracted assets. Third-party recordings may be vendored only when the repository owner explicitly approves the exact work for this project, the source terms permit game use of the committed form, and `Assets/ATTRIBUTION.md` records the creator, source, terms, and exact modifications. Never treat game-use permission as permission for standalone redistribution; recheck the governing source terms before public release.
 - Do not commit concept/raw asset directories or generated build output.
 - Add an exact `Assets/ATTRIBUTION.md` record for every distributable image, audio, music, or font asset.
-- No release or external contribution acceptance occurs until source and asset licenses are selected.
+- Follow [CONTRIBUTING.md](CONTRIBUTING.md#contribution-scope-and-licensing) for agreed collaboration and unsolicited submissions. Public distribution requires the terms and gates in `docs/RELEASE_PROCESS.md`; repository access does not grant reuse rights.
 
 ## Change discipline
 
@@ -59,10 +60,7 @@ Current feature naming is `FirstSeverance` / `first_severance`. The isolated sou
 - Update docs or an ADR with changes to authority, protocol, persistence, dependencies, module direction, or rights policy.
 - Preserve terminal snapshots, stable packet IDs, machine-readable failure codes, and cleanup invariants.
 
-## Parallel development and Ghost Samurai handoff
+## Shared development
 
-- 次のGhost Samurai作業は、`git fetch origin`後の最新`origin/main`を基点とする。`feature/ghost-samurai-phases-1-2`（実装最終`d4ad7d2`）は統合用の旧ブランチとして残し、ここから次の実装を継続しない。mainに`d4ad7d2`と再召喚修正`9464e9c`の両方が含まれることを確認する。未統合なら旧版で作業を進めず、統合待ちであることを報告する。
-- 未コミット・未プッシュの作業を保全してから、最新mainから目的別の新しいfeatureブランチ／worktreeで再開する。既存worktreeの強制切替、hard reset、force push、旧ファイル一式での上書きはしない。
-- Ghost SamuraiとDollは各機能のContent／Client／テスト／仕様内で並行開発する。Commonの通信・終了・cleanupを変更した場合は、統合済みmainを通じて共有し、他機能の修正を取り落とさない。
-- 統合担当は既存の高いModバージョンを巻き戻さず、通信変更に必要なprotocol更新を保持する。STATUSは最新mainの他機能情報を残して統合し、カタログは最後に生成する。
-- 共有プレイ用の`Convergence.tmod`へのインストールは統合mainから行う。feature側の検証は明示した別出力／プロファイルで行い、正本ModSourcesのjunctionや共有ビルドを勝手に差し替えない。コンパイル成功と実機確認は区別する。
+- Follow [Contributing](CONTRIBUTING.md#shared-development) for branches, integration and build destinations. Preserve other contributors' changes and the current version/protocol when integrating.
+- Keep task-specific branch/commit checkpoints in the relevant handoff, not in always-on rules. The completed Ghost Samurai integration is recorded in [Windows handoff](docs/handoff/WINDOWS.md#completed-ghost-samurai-integration).

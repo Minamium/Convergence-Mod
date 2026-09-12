@@ -4,7 +4,7 @@ document_type: handoff
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - handoff.windows.resume
 aliases:
@@ -24,7 +24,7 @@ related_docs:
 
 ## 最初の数分
 
-1. リポジトリの `AGENTS.md` と [Status](../STATUS.md) を読む。過去のチャット・全仕様・履歴の全文読書は不要。
+1. リポジトリの `AGENTS.md` を読み、コード/挙動作業なら [Current build](../STATUS.md#current-build)・[Verification state](../STATUS.md#verification-state)・[Next change](../STATUS.md#next-change) の必要箇所を確認する。文言修正は対象箇所から始める。
 2. `git status --short --branch`、`git remote -v`、`git log -5 --oneline` で現在地と既存差分を確認する。古い引き継ぎのHEADをcheckoutしない。
 3. 今回の依頼に対応する正本を [作業別参照表](../README.md#read-by-task) から選ぶ。仕様理解には [Raid概要](../encounters/first-severance/README.md) → 必要な節だけでよい。
 4. ビルドが必要なら [Windows runbook](../runbooks/WINDOWS_DEVELOPMENT.md#diagnose-or-build) の記録付き入口を使う。同じ入力で通過した検証は繰り返さない。
@@ -33,11 +33,11 @@ related_docs:
 
 ## 正本・ローカル環境・未保存作業
 
-正本はこの `Convergence` checkout、通常ブランチは `main`、origin は `https://github.com/Minamium/tmod.git`。既存Windowsでは tModLoader の `ModSources/Convergence` がこの正本へのjunctionであり、別ソースではない。絶対パス・保存先・旧コピー一覧は ignored `.local/consolidation.json`、ビルドパスは `Convergence.local.props` が持つ。新しいマシンでは [runbook](../runbooks/WINDOWS_DEVELOPMENT.md#one-canonical-source-and-local-setup) に従って一度だけclone/configureする。
+正本はこの `Convergence` checkout、通常ブランチは `main`、origin は `https://github.com/Minamium/Convergence-Mod.git`。既存Windowsでは tModLoader の `ModSources/Convergence` がこの正本へのjunctionであり、別ソースではない。絶対パス・保存先・旧コピー一覧は ignored `.local/consolidation.json`、ビルドパスは `Convergence.local.props` が持つ。新しいマシンでは [runbook](../runbooks/WINDOWS_DEVELOPMENT.md#one-canonical-source-and-local-setup) に従って一度だけclone/configureする。
 
-2026-09-11の文書整理開始時、英語翻訳3ファイルに既存の未コミット変更がある。対象とビルドへの含有は [Status](../STATUS.md#verification-state) に記録した。今回の文書整理では編集・stage・revertしない。将来の作業では現物のdiffを確認してから統合する。Gitにない内容は新しいcloneへ自動で引き継がれない。
+未コミット変更はその時点の `git status` / `git diff` で特定し、今回の担当範囲と分ける。ビルドに含む差分は各manifestが識別する。過去の引き継ぎにあるファイル数を現在の状態とみなさない。Gitにない内容は新しいcloneへ自動で引き継がれない。
 
-旧 `ConvergenceEdit*` / `ConvergenceBase*`、退避リポジトリ、外部素材原本は保持済み。日常作業で走査・削除・上書き統合しない。並行実装は明示したbranch/worktreeで行い、統合先・ビルド対象を確認する。通常のコミット・pushは許可済みだが、force push/hard resetや第三者作業の破棄はしない。
+旧 `ConvergenceEdit*` / `ConvergenceBase*`、退避リポジトリ、外部素材原本は保持済み。日常作業で走査・削除・上書き統合しない。並行実装の共通手順は [Contributing](../../CONTRIBUTING.md#shared-development) に従い、統合先・ビルド対象を確認する。通常のコミット・pushは許可済みだが、force push/hard resetや第三者作業の破棄はしない。
 
 ## 変更先の地図
 
@@ -49,13 +49,14 @@ related_docs:
 | 描画・緩急・黒領域・演出 | [Visual spec](../encounters/first-severance/VISUAL_SPEC.md)、`Client/Encounters/FirstSeverance`。特に107% UI倍率の座標契約を維持 |
 | BGM/SFX、音が聞こえない | [Audio sheet](../AUDIO_CUE_SHEET.md)、`FirstSeveranceFeedback` / `AudioCueClock` / `PreparationSilence` |
 | ドロップ武器 | [Weapons](../encounters/first-severance/WEAPONS.md)、feature `Rewards/`。爪の内部IDは `NullRefrain` |
+| 幽鬼武者の攻撃・描画・召喚 | [Ghost Samurai spec](../encounters/ghost-samurai/ENCOUNTER_SPEC.md)、`Content/Encounters/GhostSamurai` / `Client/Encounters/GhostSamurai` |
 | 通信/権限/cleanup/新機能 | [Architecture](../ARCHITECTURE.md)、[Network](../NETWORK_ARCHITECTURE.md)。共通routerへRaid専用switchを増やさない |
 
 数値はリンク先コードの定数が正本。HPやバージョンをこの表へ再掲しない。設計判断の理由・変更履歴は各現行仕様の履歴リンクから追える。
 
-## ユーザーとの作業分担
+## このWindows環境での作業分担
 
-- 通常は **GUI操作＝ユーザー、マルチ検証＝友人と実施**。一人検証は明示された回だけ [solo手順](../runbooks/SINGLE_OPERATOR_TESTING.md) を使う。二窓・補助無敵は通常プレイへ持ち込まない。
+- この環境では通常 **GUI操作＝依頼者、マルチ検証＝友人と実施**。別の貢献者はそのタスクで確認担当を決める。一人検証は明示された回だけ [solo手順](../runbooks/SINGLE_OPERATOR_TESTING.md) を使う。二窓・補助無敵は通常プレイへ持ち込まない。
 - ゲーム/サーバ起動や停止、GUI自走はその回の依頼範囲だけ。ビルド依頼からHost & Play参加や公開を推測しない。
 - 記録付きnative buildは実際のMods保存先へpackageする。成功後はReload/restartでよく、変更のないBuild + Reloadは不要。ゲームが旧版をロード中なら再読込が必要。
 - ユーザーのワールド・キャラクター・有効Modリスト・音量設定は保持する。昔依頼されたMod一覧を現在のセットへ上書きしない。依存最低構成と普段のテスト用Mod packを混同しない。
@@ -78,6 +79,10 @@ related_docs:
 Server/SP authority、Terraria非依存domain、単一Mod assembly、Common/Content/Client分離、Calamity隔離、Fight単位の所有と冪等cleanupを維持する。普通のTerraria致死のDown化・堅牢なrejoin・一般外部者制御・独立Mod化は未完成であり、現在のRaid独自ダメージ実験と区別する。
 
 読む資料と検証は [verification matrix](../../.agents/skills/develop-convergence-raids/references/verification-matrix.md) で変更種別ごとに選ぶ。既読/通過済みの再実行は入力変更・具体的な疑問・失敗がある時だけ。全文読書、新ADR/Skill、全体release gateを軽微な修正へ自動追加しない。
+
+## Completed Ghost Samurai integration
+
+2026-09-12、`67e36c1` で旧featureの `d4ad7d2` とmain側の再召喚修正 `9464e9c` を統合済み。`feature/ghost-samurai-phases-1-2` はこの統合の履歴であり、次の作業は最新 `origin/main` から新しい目的別branch/worktreeを作る。以後の通常作業でこの完了済みcheckpointを毎回確認し直す必要はない。現在の実装・packageは [Status](../STATUS.md) が持つ。
 
 ## 履歴
 
