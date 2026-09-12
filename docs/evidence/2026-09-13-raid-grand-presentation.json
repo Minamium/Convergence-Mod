@@ -1,12 +1,19 @@
 {
   "date": "2026-09-13",
-  "version": "0.2.66",
-  "protocol": 30,
-  "source_commit": "a2fc28149ac428237f19210e7dd9fd16e0abc8ac",
+  "version": "0.2.67",
+  "protocol": 31,
+  "source_commit": "2a94736ee6a06ffe1a7ddd9225e612363c745332",
   "source_branch": "main",
-  "source_sha256": "4e699083f15cf360819bde6eff57a333e56d89805b65a9d2ca2716f47e06c0c5",
-  "local_build_record": ".local/builds/20260912T191424632674Z/record.json",
+  "source_sha256": "0c3acce008c8b06cd1c4928a168a7d8e25710d461b8660140a8b0bc7615f4658",
+  "local_build_record": ".local/builds/20260912T192638845465Z/record.json",
   "baseline": "c5a6348d4dc50a7d853b752e3dcf15a98c9d7ea0",
+  "concurrent_main_integration": {
+    "retained_main": "3d7305465089b5925d537214b8ab2da7efbc9a6d",
+    "reason": "Ghost Samurai combo update and protocol31 landed during the Doll implementation. Merged without changing those sources; resolved only STATUS and its generated catalog. Shared package rebuilt as 0.2.67 to distinguish both previous 0.2.66 builds.",
+    "unchanged_remote_subtrees": "Client/Encounters/GhostSamurai, Content, Common and Tests match integrated origin/main exactly.",
+    "prior_doll_build": ".local/builds/20260912T191424632674Z/record.json preserves the successful pre-integration 0.2.66/protocol30 package identity.",
+    "source_entry": "Existing ModSources/Convergence junction still resolves to this canonical checkout; it was not repointed."
+  },
   "preserved_local_changes": [
     "Localization/DollActivation/en-US.hjson",
     "Localization/DollBeam/en-US.hjson",
@@ -22,8 +29,8 @@
     "existing_nullable_warnings": 4,
     "installed_hjson_parser_files_passed": 18,
     "source_changed_during_build": false,
-    "bytes": 54674054,
-    "sha256": "cd9d0310fbf0ff4885fd36fc3b78e027a703bd0afede299c2fe656c6f9d0212a",
+    "bytes": 54677147,
+    "sha256": "3498addf93c2fa273fe6c06f1a6700ea2a9fb152a94593cfbdb73d6d0d919026",
     "previous_package": "preserved by dev.py",
     "shader_bytes": 28040,
     "shader_sha256": "fbc78b6e7af3d03cfdf317c81893f9b5b7c03fedc4589ff74092d0ceb6475c14",
@@ -31,13 +38,13 @@
     "forbidden_source_local_or_dependency_asset_entries": 0
   },
   "checks": {
-    "static_wrapper": "Passed once after documentation edits: 66 indexed documents / 642 repository files / 10 YAML files; catalog regenerated.",
+    "static_wrapper": "First edit batch passed: 66 documents / 642 repository files / 10 YAML. Concurrent main integration required a catalog merge and a second affected static check; see integration commit and CI.",
     "focused_shader_contracts": "5 passed: accepted timing adapters, client/world/width/state restoration, all named passes and bounded frame retirement, current export integrity and stale-input rejection",
     "native_shader": "FXC compilation passed (expected deprecated-effects warning). Installed FNA/D3D11 exercised all nine named passes with the installed Luminance textures, read only in memory.",
     "offline_preview": ".local/shader-preview/raid-materials.png: top old/new narrow red/blue, middle broad forecast/live, bottom pressure/orbs/wakes and rift. Compiled material only, no simulated game acceptance.",
     "motion_frames": ".local/shader-preview/raid-frames contains 80 unresized GPU samples of beam warning/live/retirement, orb/wake and rift. raid-materials.gif is a 50Hz encoding, not exact 60Hz game pacing. PressurePass was additionally checked in the final still.",
     "build_correction": "Bare MSBuild lacks configured direct dependency DLLs; the documented native compiler was used instead. Its first attempt caught a missing Terraria extension import in GrandStage, corrected before the successful package. No game/server was launched.",
-    "gameplay_scope": "No Content/Common or Assets/Music/Assets/Sounds changes against the baseline. Existing six locale edits are included in the local package but not committed by this task."
+    "gameplay_scope": "The Doll commits change no Content/Common or music/sounds. The concurrent Ghost Samurai implementation/protocol31 is retained unchanged. Existing six locale edits are included in the local package but not committed by this task."
   },
   "runtime_not_run": [
     "Actual tModLoader reload and Luminance shader autoload with the new package",
