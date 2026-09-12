@@ -10,10 +10,14 @@ using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.GhostSamurai;
 
-// Original procedural placeholder derived from the user's skull/oni/skeleton sketch.
-// Replace these drawing methods with an atlas later; no gameplay depends on them.
+// Client-only articulated sprite rig. Authority clocks still own every attack beat.
 internal sealed class GhostSamuraiVisuals : GlobalNPC
 {
+    // MagicPixel is a texture, not a promise of a 1x1 source image. Scaling its
+    // whole surface multiplies every line/rectangle by the asset dimensions.
+    internal static readonly Rectangle StrokePixel = new(0, 0, 1, 1);
+    private readonly GhostSamuraiArt art = new();
+    public override void Unload() => art.Unload();
     public override bool AppliesToEntity(NPC entity, bool lateInstantiation) => entity.ModNPC is GhostSamuraiBoss;
     public override bool PreDraw(NPC npc, SpriteBatch batch, Vector2 screenPos, Color drawColor)
     {
@@ -22,71 +26,34 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
         return false;
     }
 
-    private static void DrawBoss(SpriteBatch batch, GhostSamuraiBoss boss, Vector2 screen)
+    private void DrawBoss(SpriteBatch batch, GhostSamuraiBoss boss, Vector2 screen)
     {
+        Texture2D texture = art.Texture;
         float clock = boss.VisualAge;
-        Vector2 root = boss.NPC.Center - screen + new Vector2(0, MathF.Sin(clock * .035f) * 5);
-        Color bone = boss.Phase == SamuraiPhase.Phase1 ? new(174, 229, 244) : new(193, 225, 255);
-        Color aura = boss.Phase == SamuraiPhase.Phase1 ? new(27, 135, 205) : new(65, 95, 224);
-        // The torso/rib cage is also the damageable hitbox, with a visible rim.
-        for (int i = 0; i < 7; i++)
-        {
-            float y = 8 + i * 16;
-            float width = 49 - i * 3;
-            Vector2 a = root + new Vector2(-width, y), b = root + new Vector2(width, y);
-            Stroke(batch, a, root + new Vector2(-width - 6, y + 7), 5, bone * .75f);
-            Stroke(batch, root + new Vector2(-width - 6, y + 7), root + new Vector2(-8, y + 12), 5, bone * .75f);
-            Stroke(batch, b, root + new Vector2(width + 6, y + 7), 5, bone * .75f);
-            Stroke(batch, root + new Vector2(width + 6, y + 7), root + new Vector2(8, y + 12), 5, bone * .75f);
-        }
-        Stroke(batch, root + new Vector2(0, -2), root + new Vector2(0, 105), 6, bone);
-        Vector2 skull = root + new Vector2(0, -53);
-        Vector2[] outline = { new(-40,-25), new(-26,-43), new(26,-43), new(40,-25), new(38,9), new(20,31), new(-20,31), new(-38,9) };
-        for (int i = 0; i < outline.Length; i++) Stroke(batch, skull + outline[i], skull + outline[(i + 1) % outline.Length], 7, bone);
-        for (int side = -1; side <= 1; side += 2)
-        {
-            // Swept horns, slanted eye sockets and fang-like teeth.
-            Stroke(batch, skull + new Vector2(side * 30, -32), skull + new Vector2(side * 62, -62), 9, bone);
-            Stroke(batch, skull + new Vector2(side * 62, -62), skull + new Vector2(side * 55, -34), 4, bone);
-            Stroke(batch, skull + new Vector2(side * 9, -7), skull + new Vector2(side * 29, -14), 11, new Color(10, 29, 52));
-            Stroke(batch, skull + new Vector2(side * 12, -8), skull + new Vector2(side * 27, -12), 4, new Color(117, 238, 255));
-            Stroke(batch, skull + new Vector2(side * 26, 20), skull + new Vector2(side * 20, 33), 4, bone);
-        }
-        Stroke(batch, skull + new Vector2(-25, 15), skull + new Vector2(25, 15), 5, bone);
-        for (int i = -2; i <= 2; i++) Stroke(batch, skull + new Vector2(i * 9, 15), skull + new Vector2(i * 9, 23), 3, bone);
-
-        float motion = MathF.Sin(clock * .028f) * .10f;
+        Vector2 root = boss.NPC.Center - screen + new Vector2(0, MathF.Sin(clock * .035f) * 3);
+        Color tint = boss.Phase == SamuraiPhase.Phase1 ? Color.White : new Color(211, 236, 255);
         float pose = AttackPose(boss);
-        float strike = Math.Max(0, pose), tension = Math.Max(0, -pose) * .65f;
-        for (int side = -1; side <= 1; side += 2)
-        {
-            Vector2 shoulder = root + new Vector2(side * 58, 2);
-            float angle = side * (1.2f + motion - tension - strike * 1.7f);
-            // Arm and sword share the same hand anchor, including attack/recoil.
-            Vector2 hand = root + new Vector2(side * (95 - tension * 30), 62 - tension * 105 - strike * 50);
-            Vector2 elbow = Vector2.Lerp(shoulder, hand, .5f) + new Vector2(side * 35, 5);
-            Stroke(batch, shoulder, elbow, 8, bone); Stroke(batch, elbow, hand, 6, bone);
-            Vector2 direction = new(MathF.Sin(angle), -MathF.Cos(angle));
-            Vector2 normal = new(-direction.Y, direction.X);
-            Stroke(batch, hand - direction * 23, hand + direction * 12, 10, new Color(46, 89, 117));
-            Stroke(batch, hand + direction * 9 - normal * 20, hand + direction * 9 + normal * 20, 6, bone);
-            Vector2 blade = hand + direction * 14;
-            for (int j = 0; j < 8; j++)
-            {
-                Vector2 start = blade + direction * (j * 20) + normal * (j * j * .36f);
-                Vector2 end = blade + direction * ((j + 1) * 20) + normal * ((j + 1) * (j + 1) * .36f);
-                Stroke(batch, start, end, 10 - j, bone);
-            }
-            for (int j = 0; j < 9; j++)
-            {
-                Vector2 a = root + new Vector2(side * (35 + j * 3 + MathF.Sin(clock * .04f + j) * 7), 100 + j * 11);
-                Stroke(batch, a, a + new Vector2(side * 3, 18), 6 - j * .5f, aura * (1 - j / 9f) * .5f);
-            }
-        }
+        float motion = MathF.Sin(clock * .028f) * .04f;
+        // Both arms are articulated from their shoulder bone, never from the
+        // texture corner; mirroring also mirrors the pivot within the source rect.
+        DrawArm(-1);
+        batch.Draw(texture, root, GhostSamuraiArt.Body, tint, 0, GhostSamuraiArt.BodyPivot,
+            GhostSamuraiArt.Scale, SpriteEffects.None, 0);
+        DrawArm(1);
         if (boss.TransitionRemaining > 0)
         {
             float t = 1 - boss.TransitionRemaining / (float)GhostSamuraiRules.TransitionTime;
-            Ring(batch, root, 75 + t * 145, 3, aura * (1 - t));
+            Ring(batch, root, 75 + t * 145, 3, new Color(65, 135, 224) * (1 - t));
+        }
+
+        void DrawArm(int side)
+        {
+            Vector2 shoulder = root + new Vector2(side * 56, -35);
+            float angle = side * (.1f + motion + pose * (pose < 0 ? .65f : 1.2f));
+            Vector2 pivot = GhostSamuraiArt.ShoulderPivot;
+            if (side < 0) pivot.X = GhostSamuraiArt.SwordArm.Width - pivot.X;
+            batch.Draw(texture, shoulder, GhostSamuraiArt.SwordArm, tint, angle, pivot,
+                GhostSamuraiArt.Scale, side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
         }
     }
 
@@ -126,8 +93,8 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
     internal static void Stroke(SpriteBatch batch, Vector2 a, Vector2 b, float width, Color color)
     {
         Vector2 d = b - a;
-        if (d.LengthSquared() < .001f) return;
-        batch.Draw(TextureAssets.MagicPixel.Value, a, null, color, d.ToRotation(), new Vector2(0, .5f), new Vector2(d.Length(), width), SpriteEffects.None, 0);
+        if (!float.IsFinite(d.X) || !float.IsFinite(d.Y) || !float.IsFinite(width) || width <= 0 || d.LengthSquared() < .001f) return;
+        batch.Draw(TextureAssets.MagicPixel.Value, a, StrokePixel, color, d.ToRotation(), new Vector2(0, .5f), new Vector2(d.Length(), width), SpriteEffects.None, 0);
     }
     internal static void Ring(SpriteBatch batch, Vector2 center, float radius, float width, Color color)
     {
@@ -178,6 +145,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         if (h.Shape == SamuraiShape.Wisp)
         {
             // Core radius matches collision. Tail is translucent decoration.
+            GhostSamuraiVisuals.Ring(batch, position, h.Radius, 6, new Color(5, 14, 32) * .9f);
             GhostSamuraiVisuals.Ring(batch, position, h.Radius, 3, color);
             Vector2 heading = new Vector2(p.WispMotion.VX, p.WispMotion.VY).SafeNormalize(new Vector2(h.DX, h.DY));
             GhostSamuraiVisuals.Stroke(batch, position - heading * 30, position, live ? 10 : 5, color * .6f);
@@ -186,13 +154,25 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         else
         {
             Vector2 direction = new(h.DX, h.DY), normal = new(-h.DY, h.DX), end = position + direction * h.Length;
-            // Continuous full-width fill + two exact edges, including the broad cut.
-            GhostSamuraiVisuals.Stroke(batch, position, end, h.Radius * 2, color * (live ? .75f : .16f));
-            GhostSamuraiVisuals.Stroke(batch, position, end, live ? 7 : 2, color * (live ? 1 : .65f));
+            float progress = Math.Clamp((age - h.Born) / (h.Fire - h.Born), 0, 1);
+            // Warm warnings remain distinct from the blue boss/wisps and bright sky.
+            // Dark backing provides contrast without flooding the safe cells.
+            Color ink = new(6, 13, 30);
+            Color edge = live ? new Color(218, 253, 255)
+                : Color.Lerp(new Color(255, 180, 58), new Color(255, 235, 160), progress);
+            GhostSamuraiVisuals.Stroke(batch, position, end, h.Radius * 2, ink * (live ? .35f : .42f));
+            GhostSamuraiVisuals.Stroke(batch, position, end, h.Radius * 2 - 4, (live ? color : edge) * (live ? .38f : .14f + .08f * progress));
+            GhostSamuraiVisuals.Stroke(batch, position, end, live ? 7 : 4, ink * .85f);
+            GhostSamuraiVisuals.Stroke(batch, position, end, live ? 3 : 2, edge * (live ? 1 : .7f + .3f * progress));
             for (int side = -1; side <= 1; side += 2)
-                GhostSamuraiVisuals.Stroke(batch, position + normal * h.Radius * side, end + normal * h.Radius * side, 2, color * .8f);
-            GhostSamuraiVisuals.Stroke(batch, position - normal * h.Radius, position + normal * h.Radius, 2, color);
-            GhostSamuraiVisuals.Stroke(batch, end - normal * h.Radius, end + normal * h.Radius, 2, color);
+            {
+                // Borders are inset: their outer edge is the authoritative half-width.
+                Vector2 offset = normal * (h.Radius - 2) * side;
+                GhostSamuraiVisuals.Stroke(batch, position + offset, end + offset, 4, ink * .95f);
+                GhostSamuraiVisuals.Stroke(batch, position + offset, end + offset, 2, edge);
+            }
+            GhostSamuraiVisuals.Stroke(batch, position - normal * h.Radius, position + normal * h.Radius, 2, edge);
+            GhostSamuraiVisuals.Stroke(batch, end - normal * h.Radius, end + normal * h.Radius, 2, edge);
         }
         return false;
     }

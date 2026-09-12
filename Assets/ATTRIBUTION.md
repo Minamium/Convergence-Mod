@@ -2,6 +2,20 @@
 
 ## Records
 
+- Runtime file: `Assets/Textures/GhostSamurai/GhostSamuraiAtlas.png`
+- Asset ID: ghost-samurai-boss-rig-20260912
+- Asset type: segmented Boss body and sword-arm atlas
+- Creator: project-directed OpenAI image generation from the owner's concept sketch
+- Creation/acquisition date: 2026-09-12
+- Source type: generated
+- Source work and URL: owner-supplied original skull/oni/two-katana sketch; no third-party source; prompts in docs/evidence/2026-09-12-ghost-samurai-visuals.json
+- Tool/model/version: built-in image_gen; backend model/seed unavailable; selected PNG copied byte-for-byte
+- Human modifications: user requested visual regeneration; agent directed body/arm separation and keyed-background export, then implemented shoulder pivots and client-only runtime transparency
+- License and redistribution terms: project license remains undecided; existing public-release gate retained
+- Required attribution: retain this provenance; no third-party game asset imported
+- Reviewer and review date: Codex 2026-09-12; key/gutter/regions and offline multi-background poses inspected; in-game approval pending
+- Notes: 1254x1254 RGB PNG; SHA256 `9e32d45d56d239df31a401cbefbdcc239ebfb81f6dd9cdb28e503adaf961ad48`; detailed production note below
+
 ### Doll companion and weapon-only foley — 0.2.53
 
 The new companion uses the existing project-authored NPC as a character reference, not third-party sprite material. Exact briefs and export contract: `tools/doll_companion_recipe.json`. Raw originals and rejected background variants are retained in the external workspace archive. Weapon sounds are independent NumPy synthesis; prior-art event/voice design is recorded in `docs/encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references`. No foreign audio or implementation is copied. Existing stage-NPC, Boss, Raid SFX and BGM masters remain unchanged.
@@ -2411,3 +2425,14 @@ User-directed restoration of these exact project-owned runtime masters from comm
 | `Assets/Music/UnboundLiturgy.ogg` | 53.195s | -12.2 LUFS-I | -1.4 dBTP | `f649dbe264f7e2167aae0805511f9a312bbd24873321dc4b49e8202eab42073c` |
 | `Assets/Music/DistantLiturgy.ogg` | 45.962s | -10.5 LUFS-I | -0.5 dBTP | `e9b75cfc8069fb0ae462a39a49fa651d0f8082e6b1f3668bb3ec2b11f264c7b7` |
 | `Assets/Music/TerminalLiturgy.ogg` | 25.128s | -10.4 LUFS-I | -1.0 dBTP | `db5ebaa555b95e29c575e10038f952e13c08a267cf07801a7d173bbbab36539f` |
+
+## Ghost Samurai generated boss rig — 0.2.56 / 2026-09-12
+
+- Runtime asset: `Assets/Textures/GhostSamurai/GhostSamuraiAtlas.png`.
+- Source type / creator: AI-generated original artwork using the built-in OpenAI image_gen tool, directed by Codex from the repository owner's supplied skull/oni/two-katana sketch. The tool did not expose a specific model version. No third-party character art, game extraction or external source image is imported.
+- Concept owner / requested use: the user supplied the original sketch and explicitly requested regeneration of this boss's visual for Convergence. Artistic in-game acceptance is pending.
+- Production treatment: generated horned blue-white skeletal oni body and one detached sword-arm assembly; the arm is mirrored and articulated in code. A transparency edit still returned opaque checkerboard pixels, so a final image_gen edit replaced the backdrop with magenta for runtime color-keying. The selected generated PNG is copied byte-for-byte; no external material is composited into it.
+- Runtime processing: `GhostSamuraiArt` converts magenta-dominant pixels to transparent once on the client, keeps the existing alpha of remaining pixels, caches the private texture, and disposes it on unload. The source asset is not mutated and the server never loads graphics.
+- Exact source/export identity: 1254×1254 RGB PNG; SHA256 `9e32d45d56d239df31a401cbefbdcc239ebfb81f6dd9cdb28e503adaf961ad48`.
+- License / redistribution: original project-directed generated asset; project asset licensing and public-release review remain governed by the existing repository policy. Retain this provenance; no third-party license is asserted.
+- Prompt set and verification: `docs/evidence/2026-09-12-ghost-samurai-visuals.json`. Runtime integration was compiled; atlas/key/gutter and an offline multi-background articulated preview were inspected. No claim of in-game approval or measured FPS.
