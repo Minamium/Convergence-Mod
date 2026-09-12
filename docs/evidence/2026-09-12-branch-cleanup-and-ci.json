@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-12",
+  "scope": "Owner-requested Ghost Samurai load-fix integration, failing Actions repair and retired-branch cleanup",
+  "repository": "Minamium/Convergence-Mod",
+  "integration": {
+    "pull_request": "https://github.com/Minamium/Convergence-Mod/pull/4",
+    "contributor_fix": "c61c5b46806fb3314c7fa119708265087d154aaa",
+    "tested_head": "7d3fc89",
+    "merged_main": "75e95abbee8abcdeb71b6c90292185ee769159ed",
+    "method": "Updated the existing PR with current main and scoped CI repairs; squash-merged after its validate check passed. The canonical checkout fast-forwarded without changing its five pre-existing English locale deltas."
+  },
+  "ci": {
+    "cause": "Four presentation source-contract tests still required superseded BladeUnsheathe playback, FoundationCore-owned suspension, a void Sound helper and the old Core-item Boss portrait.",
+    "repair": "Use the accepted dedicated ClawSwipe asset, rig-owned shell/body attachment paths, sound playback regardless of visual reduction, and the resolved native Boss portrait with its specified 34x34 dimensions. No production gameplay/presentation source or asset was changed to satisfy these checks.",
+    "python_tests": {"passed": 23, "failed": 0},
+    "domain_tests": {"passed": 172, "failed": 0},
+    "codec": {"protocol": 30, "round_trips": 324, "malformed_rejections": 50, "result": "passed"},
+    "static": {"result": "passed", "catalog_documents": 66, "repository_files": 621, "yaml_files": 10},
+    "pr_run": "https://github.com/Minamium/Convergence-Mod/actions/runs/34699405835",
+    "merged_main_run": "https://github.com/Minamium/Convergence-Mod/actions/runs/34699548832",
+    "github_result": "success on both PR and merged main; optional self-hosted Mod-build job correctly skipped",
+    "notification_settings": "Unchanged; repaired the recurring failure rather than disabling validation."
+  },
+  "installed_package": {
+    "version": "0.2.62",
+    "protocol": 30,
+    "build_main": "75e95abbee8abcdeb71b6c90292185ee769159ed",
+    "local_record": ".local/builds/20260912T143202748618Z/record.json",
+    "command": "python tools/dev.py build --native",
+    "environment_reference": "2026-09-12-ghost-samurai-main-handoff.json",
+    "output": "Configured existing shared-play Mods/Convergence.tmod; previous package backed up by the build entry point",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "localization_files_parsed": 16,
+    "source_sha256": "6269e96a5f99070ccc0f01362f281a400183ae281a2361bb56abf7d90e852af4",
+    "source_changed_during_build": false,
+    "bytes": 54703961,
+    "sha256": "6933728a2284d7f58809dc9319aabf04e0e28a47baa8f26f79760167c0458d45",
+    "dirty_inputs": "Five pre-existing English localization deltas remained unchanged and are included in this local package; see the ignored build manifest for exact input hashes.",
+    "type_validation": "tools/check-ghost-samurai-load.ps1 passed the installed tModLoader ValidateType for GhostSamuraiVisuals and GhostSamuraiHazardVisuals, and found Convergence/GhostSamuraiSummon in this installed package.",
+    "later_changes": "This evidence, Status and generated catalog only; no second compilation required for unchanged runtime inputs."
+  },
+  "branch_cleanup": {
+    "deleted_after_net_tree_and_head_checks": [
+      "tmp/catalyst-audio-analysis-20260911",
+      "feature/ghost-samurai-phases-1-2",
+      "audio/fukou-p1-fp-0.2.46",
+      "audio/orchestral-abc-0.2.42",
+      "feat/null-cantor-claws",
+      "feat/ritual-armaments-20260908",
+      "feat/ritual-armaments-v2",
+      "tmp/audio-workbench-export-20260910"
+    ],
+    "proof": "Seven branch heads were ancestors of the pre-merge main. Catalyst had 14 unique commits but the same final tree as its merge base. All heads were retained under local refs/archive/branch-cleanup-20260912, then the eight remote refs were deleted atomically with exact-head leases.",
+    "merged_fix_branch": "fix/ghost-samurai-unloaded-item was archived locally and deleted after PR #4 merged.",
+    "remaining_remote_branches": ["main", "setup/windows-development-20260909"],
+    "setup_reason": "Retains its one unmerged historical workstation-evidence file; neither deleted nor represented as current setup.",
+    "local_worktrees": "Other worktrees, their source files, old copies and external originals were preserved."
+  },
+  "manual_checks": {
+    "full_mod_load": "not_run; user-owned Reload Mods",
+    "saved_item_restoration": "not_run; retain the Unloaded Item, enable Convergence if disabled, reload and re-enter the same character/world",
+    "summon_resummon_and_multiplayer": "not_run; continue the focused Ghost Samurai smoke",
+    "game_or_server_session_started": false,
+    "saves_and_enabled_mod_list": "unchanged"
+  }
+}
