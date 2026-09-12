@@ -23,37 +23,39 @@ float3 Pearl() { return lerp(beamColor,float3(1,.97,.94),.87); }
 float4 Beam(FI i):COLOR0 {
     float x=i.uv.x*shape.x,y=i.uv.y*2-1;
     float3 n=Field(x,y);
-    float warp=(n.x-.5)*.15*shape.w;
+    float warp=(n.x-.5)*.24*shape.w;
     float r=abs(y-warp*(1-abs(y)));
-    float mantle=pow(saturate(1-r*r),.43);
-    float broad=smoothstep(45,210,shape.y);
-    float core=exp2(-pow(r,1.65)*(17-broad*7))*(.65+n.z*.7);
-    float shear=pow(saturate(n.y*1.5),3);
-    float facets=pow(saturate(n.z*1.75-n.x*.65),3.5);
-    float body=mantle*(.16+n.x*.52+shear*.56);
-    float3 light=beamColor*body + Pearl()*(core*.95+facets*mantle*.52);
-    light+=Pearl()*signal.w*.42*exp2(-r*r*4);
-    // Strong transverse contrast and local turbulent maxima, not a uniform slab.
+    // Long drawn-out currents, separated by dark violet depths. Transverse
+    // noise alone made a coloured cloudy rectangle; stretch the flow axially.
+    float stream=tex2D(flowNoise,float2(x*.00075-clock*1.4+shape.z,y*3.8+n.x*.22)).r;
+    float filaments=pow(saturate(stream*1.65-n.y*.32),4);
+    float depth=pow(saturate(1-r*r),.55);
+    float core=exp2(-r*r*34)*(.8+n.z*.35);
+    float strandA=exp2(-pow(y-(n.x-.5)*.62,2)*210);
+    float strandB=exp2(-pow(y+.43+(n.y-.5)*.22,2)*280);
+    float strandC=exp2(-pow(y-.48+(n.z-.5)*.20,2)*320);
+    float3 shadow=lerp(beamColor,float3(.36,.13,.67),.32);
+    float3 light=shadow*depth*(.16+filaments*.62)
+        +beamColor*depth*(strandB+strandC)*.38
+        +Pearl()*(core*.95+strandA*.48+filaments*depth*.17);
+    light+=Pearl()*signal.w*.36*exp2(-r*r*14);
+    // The shared growing quad is the hitbox. A low continuous coloured mantle
+    // marks its full live width; the brilliant filaments are not separate lanes.
     return float4(light*Edge(y)*signal.z,0);
 }
 float4 Forecast(FI i):COLOR0 {
     float x=i.uv.x*shape.x,y=i.uv.y*2-1;
-    float3 n=Field(x*.55,y);
-    float area=pow(saturate(1-y*y),.36);
-    float spine=exp2(-y*y*shape.y*shape.y*.13);
-    // Finely distributed in-flow motes; no chevrons, dashes or side rails.
-    float2 cells=float2(x/29-clock*(2+signal.x*4),y*shape.y/15+shape.z);
-    float2 id=floor(cells),p=frac(cells)-.5;
-    float star=pow(saturate(1-length(p*float2(2.8,3.8))),6)*step(.78,Hash(id));
-    float tension=pow(signal.x,3);
-    float veins=pow(saturate(n.z*1.85-n.y*.45),5)*area;
-    float3 forecastHighlight=lerp(beamColor,float3(1,1,1),.27);
-    float3 light=beamColor*area*(.075+n.x*.09+tension*.045)
-        +forecastHighlight*(spine*.38+star*.85*shape.w+veins*(.14+tension*.25));
-    // Only the material's source rim eases in; the continuous centre signal
-    // and the whole locked danger width remain present, including at tick zero.
-    float birthRim=.45+.55*smoothstep(0,18,x);
-    return float4(light*Edge(y)*birthRim*signal.z,area*.025*signal.z);
+    float py=y*shape.y;
+    float spine=exp2(-py*py*2.1);
+    float halo=exp2(-py*py*.32);
+    float flow=.5+.5*sin(x*.012-clock*9+shape.z);
+    float glint=exp2(-pow((frac(x/710+clock*.8+shape.z)-.5)*22,2));
+    float3 highlight=lerp(beamColor,float3(.94,.88,1),.38);
+    float3 light=highlight*spine*(.66+signal.x*.32+flow*.13+glint*.46)
+        +beamColor*halo*(.085+signal.x*.055);
+    // Pixel-thin axis, never the future area: no full-width colour, rails,
+    // hash cells or warning rectangles. Bloom is bounded to a six-pixel strip.
+    return float4(light*Edge(y)*signal.z,halo*.07*signal.z);
 }
 float4 Corona(FI i):COLOR0 {
     float x=i.uv.x*shape.x,y=i.uv.y*2-1;

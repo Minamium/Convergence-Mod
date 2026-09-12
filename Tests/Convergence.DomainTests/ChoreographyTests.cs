@@ -93,7 +93,7 @@ internal static partial class Program
                 var rays=FirstSeveranceScoreGeometry.Rays(state,0,tick,4000,4000);
                 AssertEqual(true,rays.Count <= (state == FirstSeveranceSubstate.FinalSlicer ? 3 * 32 : 28),
                     "bounded geometry including three retained previews");
-                foreach(var r in rays) AssertEqual(true,float.IsFinite(r.Ray.X)&&float.IsFinite(r.Ray.Y)&&r.Ray.Length>0,"finite rays");
+                foreach(var r in rays) AssertEqual(true,float.IsFinite(r.Ray.X)&&float.IsFinite(r.Ray.Y)&&r.Ray.Length>=0,"finite rays including a zero-length ignition front");
             }
         }
         AssertEqual(false,FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.RotatingBlade,2,179,4000,4000)[0].Live,"last warning tick");

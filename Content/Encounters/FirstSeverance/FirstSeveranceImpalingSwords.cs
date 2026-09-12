@@ -11,10 +11,16 @@ internal readonly record struct FirstSeveranceImpalingSword(FirstSeveranceLanceR
 internal static class FirstSeveranceImpalingSwords
 {
     internal const int Duration = 300, DenseCount = 20, SparseCount = 8, Count = DenseCount + SparseCount;
-    internal const int InsertionTicks = 6;
+    internal const int InsertionTicks = FirstSeveranceBeamIgnition.TravelTicks;
     private static readonly int[] Stagger = { 0, 7, 3, 12, 5, 16 };
     internal static int FireBase(int wave) => wave == 0 ? 108 : 214;
     internal static int WarningStart(int wave) => wave == 0 ? 0 : 174;
+
+    internal static FirstSeveranceLanceRay BeamAt(in FirstSeveranceImpalingSword sword, double age)
+    {
+        var ray = FirstSeveranceBeamIgnition.At(sword.FullRay, age - sword.Fire);
+        return ray with { Length = sword.FullRay.Length * sword.Extension };
+    }
 
     internal static IReadOnlyList<FirstSeveranceImpalingSword> At(int step, double age, float groundX, float groundY)
     {
@@ -38,7 +44,7 @@ internal static class FirstSeveranceImpalingSwords
             bool fromTop = (lane * 3 + wave + step) % 4 < 2;
             var ray = new FirstSeveranceLanceRay(groundX + x, fromTop ? groundY - 1120 : groundY,
                 0, fromTop ? 1 : -1, 1120, dense ? 34 : 52);
-            float extension = FirstSeveranceScoreGeometry.Smooth((float)((age - fire) / InsertionTicks))
+            float extension = FirstSeveranceBeamIgnition.LengthFactor(age - fire)
                 * (1 - FirstSeveranceScoreGeometry.Smooth((float)((age - retract) / 20)));
             float fade = 1 - FirstSeveranceScoreGeometry.Smooth((float)((age - retract - 20) / 8));
             float charge = FirstSeveranceScoreGeometry.Smooth((float)((age - WarningStart(wave)) / (fire - WarningStart(wave))));

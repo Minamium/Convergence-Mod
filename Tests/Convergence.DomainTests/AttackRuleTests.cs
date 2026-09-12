@@ -104,7 +104,7 @@ internal static partial class Program
             AssertEqual(true, ray.IsValid, "valid bounded ray");
             AssertEqual(true, Math.Abs(ray.X + ray.DirectionX * 800 - 1220) < 0.01f, "capped X prediction");
             AssertEqual(true, Math.Abs(ray.Y + ray.DirectionY * 800 - 1840) < 0.01f, "capped Y prediction");
-            AssertEqual(ray, volley.RayAt(0, volley.FireTick), "no live retargeting");
+            AssertEqual(ray, volley.RayAt(0, volley.FireTick + FirstSeveranceBeamIgnition.FullWidthTicks), "no live retargeting after ignition");
         }
     }
 
@@ -282,7 +282,7 @@ internal static partial class Program
         AssertEqual(42, FirstSeveranceAttackPatterns.StepCadence(FirstSeveranceSubstate.PylonCheck), "prism starts every 0.7s");
         AssertEqual(72, FirstSeveranceAttackPatterns.StepCadence(FirstSeveranceSubstate.CoreExposure), "dash-stop combo starts every 1.2s");
         AssertEqual(334, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.PylonCheck), "eight-shot sequence budget");
-        AssertEqual(280, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.CoreExposure), "four-action sequence includes last staggered curtain tooth");
+        AssertEqual(287, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.CoreExposure), "four-action sequence includes last tooth's ignition and full hold");
         AssertEqual(60, FirstSeveranceAttackPatterns.SequenceRestTicks, "unchanged extra rest between full combos");
         AssertEqual(60, FirstSeveranceAttackPatterns.ExposureOpeningRestTicks, "unchanged exposure opening rest");
         var prism = FirstSeveranceAttackPatterns.Create(1, 100, FirstSeveranceSubstate.PylonCheck, 0, 0, 1000, 2000, 0, 0);

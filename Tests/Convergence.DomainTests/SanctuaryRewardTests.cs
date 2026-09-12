@@ -55,7 +55,8 @@ internal static partial class Program
                     AssertEqual(true, MathF.Sqrt(MathF.Pow(pockets[a].X - pockets[b].X, 2)
                         + MathF.Pow(pockets[a].Y - pockets[b].Y, 2)) >= FirstSeveranceLanceTuning.SpreadSeparation + 72,
                         "four spread destinations retain separation throughout both 36px acceptance discs");
-            AssertEqual(true, grid.Intersects(grid.FireTick, grid.Rays[0].X, grid.Rays[0].Y, 10, 21), "hazards remain outside sanctuaries");
+            AssertEqual(true, grid.Intersects(grid.LineFireTick(0) + FirstSeveranceBeamIgnition.FullWidthTicks,
+                grid.Rays[0].X, grid.Rays[0].Y, 10, 21), "amplified hazards remain outside sanctuaries");
             AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(3, 100, pattern, 4000, 4000,
                 new[] { FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 4200, 3200) }), "no aimed core salvo through a sanctuary");
         }

@@ -105,9 +105,10 @@ internal static partial class Program
             float x = field.Left + 40 + pattern * 40;
             float y = field.Top + 40 + ((pattern * 3) % 4) * 40;
             AssertEqual(false, grid.Intersects(159, x, y, 10, 21), "warning is harmless");
-            AssertEqual(true, grid.Intersects(160, x, y, 10, 21), "crossing gives one boolean hit");
+            AssertEqual(false, grid.Intersects(160, x, y, 10, 21), "launch has no extended invisible area");
+            AssertEqual(true, grid.Intersects(175, x, y, 10, 21), "all staggered lines reach full width");
             AssertEqual(true, grid.Intersects(179, x, y, 10, 21), "last active tick");
-            AssertEqual(false, grid.Intersects(180, x, y, 10, 21), "end tick harmless");
+            AssertEqual(false, grid.Intersects(grid.EndTick, x, y, 10, 21), "last staggered end harmless");
             AssertEqual(false, grid.Intersects(160, x + 80, y + 80, 10, 21), "whole body fits clear cell");
         }
         AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(1, 100, 12, 4000, 4000), "unknown pattern");

@@ -36,6 +36,9 @@ internal static class FirstSeveranceRaidVfx
         if (Main.dedServ || opacity <= .001f || length <= 0 || halfWidth <= 0) return;
         using var scope=new LocalBatch(batch);
         float live = energy > .001f ? 1 : 0;
+        // A forecast describes the axis, not a translucent copy of the eventual
+        // hazard. The caller supplies shared growing geometry only AFTER fire.
+        if (live == 0) halfWidth = Math.Min(halfWidth, 3f);
         Vector4 signal = new(Math.Clamp(charge,0,1), live, Math.Clamp(opacity,0,1), Math.Clamp(release,0,1));
         // Small gaps cannot be washed out by glow. Dense teeth/flood bands use no
         // outside corona. Other beams retain a low-intensity decorative skirt.
@@ -46,7 +49,7 @@ internal static class FirstSeveranceRaidVfx
             color, signal, age, reduced);
         if (mouth)
         {
-            float radius = Math.Min(170,36+halfWidth*.75f+release*38);
+            float radius = live > 0 ? Math.Min(170,12+halfWidth*.85f+release*18) : 16;
             Add(batch, "MouthPass", origin-direction*150, direction, 300, radius,
                 color, signal, age, reduced);
         }

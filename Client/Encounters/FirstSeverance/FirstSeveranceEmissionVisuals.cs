@@ -123,7 +123,7 @@ internal sealed class FirstSeveranceEmissionVisuals
             : FirstSeveranceAttackAccents.Cyan;
 
     internal static Color PrismColor(int index) => index switch
-        { 0 => new(255, 58, 108), 1 => new(100, 125, 255), 2 => new(50, 255, 196), _ => new(255, 205, 88) };
+        { 0 => new(246, 81, 145), 1 => new(139, 125, 255), 2 => new(100, 236, 204), _ => new(244, 197, 125) };
 
     internal void Draw(SpriteBatch batch, ulong authorityTick, bool reduced)
     {
@@ -169,7 +169,8 @@ internal sealed class FirstSeveranceEmissionVisuals
                         color, reduced);
                     continue;
                 }
-                DrawLockedRay(batch, ray, now, v.StartTick, v.FireTick, v.EndTick,
+                DrawLockedRay(batch, ray, e.CancelledAt is { } stopped ? Math.Min(now, stopped) : now,
+                    v.StartTick, v.FireTick, v.EndTick,
                     e.CancelledAt is null && v.IsFiring(authorityTick), e.CancelledAt is not null,
                     open, emission, warning, cooling, color, reduced);
             }
@@ -198,20 +199,22 @@ internal sealed class FirstSeveranceEmissionVisuals
         float angle = MathF.Atan2(direction.Y, direction.X);
         DrawAperture(batch, origin, direction, now, start, fire, open, emission, color, reduced);
 
-        // The locked corridor is always readable, including a late
-        // snapshot's first frame. Retired light is dim and has no rails.
+        // Forecast only the locked axis. The body then uses the SAME advancing
+        // pilot and widening envelope as authority; never a full invisible hitbox.
         if (!active && !cancelled && now < fire)
             DrawWarning(batch, origin, direction, ray.Length, ray.HalfWidth,
                 now, start, fire, color, Math.Max(.6f, warning), reduced);
-        if (now >= fire && ray.HalfWidth >= 120)
+        bool broad = ray.HalfWidth >= 120;
+        if (now >= fire) ray = FirstSeveranceBeamIgnition.At(ray, now - fire);
+        if (now >= fire && broad)
             FirstSeveranceHazardSurface.Draw(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
-                now - start, 1, active ? emission : emission * .15f, cooling, color, reduced);
+                now - start, 1, 1, active ? 1 : emission * .04f, color, reduced);
         float light = active ? .85f + emission * .15f : emission * .12f;
         if (now < fire) light = 0;
-        if (ray.HalfWidth < 120)
+        if (!broad)
         {
             // Same continuously flowing surface as the Core/Lacuna jet, retaining
-            // each Prism cast's color and the original locked full-width corridor.
+            // each Prism cast's colour and authority's developing corridor.
             FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
                 now - start, color, light, reduced, throatLength: 95, throatWidth: 18);
             float kick = ReleaseImpulse(now, fire);
@@ -234,6 +237,8 @@ internal sealed class FirstSeveranceEmissionVisuals
                 ulong end = FirstSeveranceCurtainComb.EndTick(v, lane);
                 if (clock < start) continue;
                 var ray = FirstSeveranceCurtainComb.Ray(curtain, lane);
+                bool warning = clock < fire;
+                if (!warning) ray = FirstSeveranceBeamIgnition.At(ray, clock - fire);
                 Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
                 bool live = e.CancelledAt is null && FirstSeveranceCurtainComb.IsLive(v, lane, authorityTick);
                 float charge = Window(clock, start, fire);
@@ -242,16 +247,7 @@ internal sealed class FirstSeveranceEmissionVisuals
                 float power = (clock < fire ? born : live ? 1 : release * .10f) * cancelledFade;
                 Color tint = Color.Lerp(color, new Color(174, 152, 255), MathF.Abs(lane - FirstSeveranceCurtainComb.CenterLane) / 36f);
                 FirstSeveranceBeamMaterial.DrawTooth(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
-                    clock - start, charge, live ? release : 0, power, tint, reduced);
-                // Each tooth launches its own bounded luminous knot along the
-                // axis. Its narrow mask never blooms across the central safe gap.
-                float shock = Window(clock, fire, fire + 2d) * (1 - Window(clock, fire + 5d, end));
-                if (shock > 0 && e.CancelledAt is null)
-                {
-                    float travel = Math.Clamp((float)(clock - fire) * 180, 0, ray.Length - 100);
-                    Accents.Ribbon(batch, origin + direction * travel, direction, 100,
-                        ray.HalfWidth * 1.5f, Color.White, shock * .85f);
-                }
+                    clock - start, charge, warning ? 0 : 1, power, tint, reduced);
             }
     }
 

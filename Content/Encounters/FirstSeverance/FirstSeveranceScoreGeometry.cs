@@ -3,7 +3,11 @@ using System.Collections.Generic;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal readonly record struct FirstSeveranceScoreRay(FirstSeveranceLanceRay Ray, bool Live, int Pulse, float Charge);
+internal readonly record struct FirstSeveranceScoreRay(FirstSeveranceLanceRay Ray, bool Live, int Pulse, float Charge,
+    double BeamAge = -1)
+{
+    internal FirstSeveranceLanceRay BeamRay => BeamAge < 0 ? Ray : FirstSeveranceBeamIgnition.At(Ray, BeamAge);
+}
 internal readonly record struct FirstSeveranceScoreBullet(float X, float Y, float PreviousX, float PreviousY, bool Live, int Wave);
 
 // Deterministic geometry shared by authority and fractional client drawing.
@@ -17,8 +21,10 @@ internal static class FirstSeveranceScoreGeometry
     internal const int CrushRushTick = 150, CrushImpactTick = 162, CrushReleaseTick = 180;
     internal const float CrushHalfWidth = 360, CrushHalfHeight = 300;
     internal const int SlicerPulses = 4;
-    internal const int FloodInterval = 200, FloodFireTick = 48, FloodDeployTicks = 12,
-        FloodGrowTicks = 42, FloodEndTick = 182, FloodFadeTick = 196;
+    internal const int FloodInterval = 200, FloodFireTick = 48,
+        FloodDeployTicks = FirstSeveranceBeamIgnition.TravelTicks,
+        FloodGrowTicks = FirstSeveranceBeamIgnition.FullWidthTicks - FloodDeployTicks,
+        FloodEndTick = 182, FloodFadeTick = 196;
     internal const float FloodSafeHalfHeight = 96;
     internal const int BulletWaves = 5, BulletsPerWave = 24;
     internal static bool HasHazards(FirstSeveranceSubstate state) => state is FirstSeveranceSubstate.RotatingBlade
@@ -62,12 +68,7 @@ internal static class FirstSeveranceScoreGeometry
     }
 
     internal static float FloodGrowth(double local)
-    {
-        float t = Math.Clamp((float)((local - FloodFireTick - FloodDeployTicks) / FloodGrowTicks), 0, 1);
-        // Accelerates from a needle to a full volume, then eases into its hold.
-        // This curve, not a decorative scale, also defines authoritative width.
-        return t * t * t * (4 - 3 * t);
-    }
+        => FirstSeveranceBeamIgnition.WidthFactor(local - FloodFireTick);
     internal static float CrushClosure(double age) => Smooth((float)((age - CrushRushTick) / (CrushImpactTick - CrushRushTick)))
         * (1 - Smooth((float)((age - CrushReleaseTick) / 70)));
     internal static float ToEdge(float dx, float dy) => Math.Min(
@@ -90,7 +91,8 @@ internal static class FirstSeveranceScoreGeometry
                 rays.Add(new(new(groundX, cy, dx, dy, ToEdge(dx, dy), BladeHalfWidth),
                     age >= FirstSeveranceChoreography.BladeWindup
                         && age < FirstSeveranceChoreography.BladeWindup + FirstSeveranceChoreography.BladeSpin,
-                    BladeTurn(age) * BladeCount + blade, Smooth((float)age / FirstSeveranceChoreography.BladeWindup)));
+                    BladeTurn(age) * BladeCount + blade, Smooth((float)age / FirstSeveranceChoreography.BladeWindup),
+                    age - FirstSeveranceChoreography.BladeWindup));
             }
         }
         else if (state == FirstSeveranceSubstate.RemoteClaws && age < 600)
@@ -98,14 +100,12 @@ internal static class FirstSeveranceScoreGeometry
             int pulse = (int)age / FloodInterval;
             double local = age - pulse * FloodInterval;
             if (local >= FloodFadeTick) return rays;
-            float deployment = Smooth((float)((local - FloodFireTick) / FloodDeployTicks));
-            float growth = FloodGrowth(local);
             float cooling = 1 - Smooth((float)((local - FloodEndTick) / (FloodFadeTick - FloodEndTick)));
             for (int band = 0; band < 2; band++)
             {
                 var full = FloodBand(step, pulse, band, groundX, groundY);
-                var ray = full with { HalfWidth = (10 + (full.HalfWidth - 10) * growth) * cooling,
-                    Length = local < FloodFireTick ? full.Length : Math.Max(1, full.Length * deployment) };
+                var pilot = local < FloodFireTick ? full : FirstSeveranceBeamIgnition.At(full, local - FloodFireTick);
+                var ray = pilot with { HalfWidth = pilot.HalfWidth * cooling };
                 rays.Add(new(ray, local >= FloodFireTick && local < FloodEndTick,
                     pulse, Smooth((float)local / FloodFireTick)));
             }
@@ -113,7 +113,7 @@ internal static class FirstSeveranceScoreGeometry
         else if (state == FirstSeveranceSubstate.HalfField && age < 300)
         {
             foreach (var sword in FirstSeveranceImpalingSwords.At(step, age, groundX, groundY))
-                rays.Add(new(sword.FullRay with { Length = Math.Max(1, sword.FullRay.Length * sword.Extension) },
+                rays.Add(new(FirstSeveranceImpalingSwords.BeamAt(sword, age),
                     sword.Live, sword.Wave, sword.Charge));
         }
         else if (state == FirstSeveranceSubstate.RemoteCrush && age < 300)
@@ -130,7 +130,7 @@ internal static class FirstSeveranceScoreGeometry
                 if (age < reveal || age >= fire + FirstSeveranceLanceTuning.PatternActiveTicks + 24) continue;
                 foreach (var ray in FirstSeveranceRandomComb.Rays(actionSeed, step, pulse, groundX, cy))
                     rays.Add(new(ray, age >= fire && age < fire + FirstSeveranceLanceTuning.PatternActiveTicks, pulse,
-                        Smooth((float)(age - reveal) / (fire - reveal))));
+                        Smooth((float)(age - reveal) / (fire - reveal)), age - fire));
             }
         }
         return rays;
@@ -168,7 +168,7 @@ internal static class FirstSeveranceScoreGeometry
         double age, float x, float y, float halfWidth, float halfHeight)
     {
         if (!item.Live) return false;
-        if (item.Ray.Intersects(x, y, halfWidth, halfHeight)) return true;
+        if (item.BeamRay.Intersects(x, y, halfWidth, halfHeight)) return true;
         if (state != FirstSeveranceSubstate.RotatingBlade) return false;
         // Accelerated tips can travel farther than a player width per tick.
         double from = Math.Max(FirstSeveranceChoreography.BladeWindup, age - 1);
@@ -177,7 +177,8 @@ internal static class FirstSeveranceScoreGeometry
             float a = BladeAngle(from + (age - from) * sample / 4) + item.Pulse * MathF.PI;
             float dx = MathF.Cos(a), dy = MathF.Sin(a);
             var ray = new FirstSeveranceLanceRay(item.Ray.X, item.Ray.Y, dx, dy, ToEdge(dx, dy), BladeHalfWidth);
-            if (ray.Intersects(x, y, halfWidth, halfHeight)) return true;
+            if (FirstSeveranceBeamIgnition.At(ray, from + (age - from) * sample / 4
+                - FirstSeveranceChoreography.BladeWindup).Intersects(x, y, halfWidth, halfHeight)) return true;
         }
         return false;
     }

@@ -56,7 +56,7 @@ internal static partial class Program
         AssertEqual(0, FirstSeveranceImpalingSwords.At(1, 300, 4000, 4000).Count, "action cleanup");
     }
 
-    [DomainTest("Impaling warnings and six-tick insertion never damage beyond visible tip")]
+    [DomainTest("Impaling warnings and shared ignition never damage beyond visible tip")]
     private static void ImpalingInsertionBoundaries()
     {
         foreach (int step in new[] {1, 4})
@@ -65,10 +65,10 @@ internal static partial class Program
                 {
                     AssertEqual(true, float.IsFinite(sword.Extension) && sword.Extension is >= 0 and <= 1, "finite insertion");
                     if (age <= sword.Fire || age >= sword.Retract) AssertEqual(false, sword.Live, "forecast/retraction harmless");
-                    if (age == sword.Fire + 6) AssertEqual(1f, sword.Extension, "six-tick insertion complete");
+                    if (age == sword.Fire + FirstSeveranceBeamIgnition.TravelTicks) AssertEqual(1f, sword.Extension, "shared insertion complete");
                     if (sword.Live && sword.Extension < .8f)
                     {
-                        var actual = sword.FullRay with { Length = sword.FullRay.Length * sword.Extension };
+                        var actual = FirstSeveranceImpalingSwords.BeamAt(sword, age);
                         float y = sword.FullRay.Y + sword.FullRay.DirectionY * (actual.Length + 70);
                         AssertEqual(false, actual.Intersects(actual.X, y, 10, 21), "unreached far tip not damaging");
                     }

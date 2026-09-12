@@ -9,7 +9,8 @@ internal static class FirstSeveranceCurtainComb
     internal const int LaneCount = 25;
     internal const int CenterLane = LaneCount / 2;
     internal const int StaggerTicks = CenterLane;
-    internal const int LaneActiveTicks = 16;
+    // Keep the original gapless full-width hold after the new ignition ramp.
+    internal const int LaneActiveTicks = 16 + FirstSeveranceBeamIgnition.FullWidthTicks;
     internal const int ActiveTicks = StaggerTicks + LaneActiveTicks;
 
     internal static int Offset(int lane)
@@ -42,7 +43,8 @@ internal static class FirstSeveranceCurtainComb
         if (volley.Kind != FirstSeveranceAttackKind.Stillness || !volley.IsFiring(tick)) return false;
         foreach (var curtain in volley.Rays)
             for (int lane = 0; lane < LaneCount; lane++)
-                if (IsLive(volley, lane, tick) && Ray(curtain, lane).Intersects(x, y, halfWidth, halfHeight))
+                if (IsLive(volley, lane, tick) && FirstSeveranceBeamIgnition.At(Ray(curtain, lane),
+                    (double)tick - FireTick(volley, lane)).Intersects(x, y, halfWidth, halfHeight))
                     return true;
         return false;
     }

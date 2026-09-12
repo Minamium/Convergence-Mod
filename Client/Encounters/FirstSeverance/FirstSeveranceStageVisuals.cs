@@ -100,33 +100,35 @@ internal sealed class FirstSeveranceStageVisuals
         if (fadingGrid is not { } grid || tick >= grid.EndTick + 20d) return;
         float born = .75f + .25f * Window(tick, grid.StartTick, grid.StartTick + 6d);
         float gather = Window(tick, grid.StartTick, grid.FireTick);
-        float emission = Emission(tick, grid.FireTick, grid.EndTick);
-        bool active = combat.GridVolley is not null && grid.IsFiring(authorityTick);
         bool warning = tick < grid.FireTick;
-        Color color = grid.Pattern % 2 == 0 ? new(64, 229, 255) : new(193, 123, 255);
-        foreach (var ray in grid.Rays)
+        Color color = grid.Pattern % 2 == 0 ? new(128, 183, 255) : new(193, 123, 255);
+        for (int line = 0; line < grid.Rays.Count; line++)
         {
+            ulong start = grid.RevealTick(line), fire = grid.LineFireTick(line), end = grid.LineEndTick(line);
+            if (tick < start) continue;
+            bool forecast = tick < fire;
+            bool live = combat.GridVolley is not null && grid.LineIsLive(line, authorityTick);
+            var ray = forecast ? grid.Rays[line] : grid.RayAt(line, tick);
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-            float power = warning ? born : active ? 1 : emission * .10f;
+            float power = forecast ? Arrive(tick - start, 2) : live ? 1 : (1 - Window(tick, end, end + 12)) * .04f;
             FirstSeveranceBeamMaterial.DrawTooth(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                tick - grid.StartTick, gather, active ? emission : 0, power, color, reduced);
+                tick - start, CastTension(tick, start, fire), forecast ? 0 : 1, power, color, reduced);
         }
-        foreach (var ray in grid.CoreBeams)
+        foreach (var full in grid.CoreBeams)
         {
+            var ray = warning ? full : FirstSeveranceBeamIgnition.At(full, tick - grid.FireTick);
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
             Color violet = RitualArmamentArt.ColorFor(
                 Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
-            // The complete authority corridor is visible during the full warning.
-            // No circular seal or floating aperture geometry.
-            float footprint = warning ? born : active ? .8f : emission * .08f;
-            FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                gather, footprint * (warning ? 1 : .35f), violet);
-            if (warning) continue;
+            if (warning)
+            {
+                FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                    gather, born, violet);
+                continue;
+            }
 
-            // Reuse the sustained magic beam's connected flowing material, with
-            // its bright throat expanding from the recessed sphere. The dim
-            // full-width footprint above still covers the exact root hit area.
-            float power = active ? Math.Max(.85f, emission) : emission * .08f;
+            bool active = combat.GridVolley is not null && authorityTick >= grid.FireTick && authorityTick < grid.CoreEndTick;
+            float power = active ? 1 : (1 - Window(tick, grid.CoreEndTick, grid.CoreEndTick + 12)) * .04f;
             if (power <= .001f) continue;
             FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
                 tick - grid.StartTick, violet, power, reduced, throatLength: 150, throatWidth: 28);
