@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-12",
+  "feature": "Integrate Ghost Samurai tuning and art with current Doll main; retire contributor branch for follow-up work",
+  "version": "0.2.61",
+  "protocol": 30,
+  "main_parent": "6b103e22708045a34b48b5df23c3002e9249e2e2",
+  "contributor_implementation_head": "d4ad7d2ba003bdbd074ba42ba5c36c6c48ad3696",
+  "contributor_handoff_commit": "0f7ac17",
+  "environment_reference": "2026-09-12-doll-owner-flight.json",
+  "integration": {
+    "method": "Normal two-parent merge; contributor authorship/history preserved; no reset or forced push",
+    "preserved": "Doll code/art/audio/rewards through main parent, coordinator terminal-before-Idle publication, exact-Fight hazard slot/expiry cleanup, Ghost Samurai summon/phase/end diagnostics, and all five pre-existing dirty English locale files",
+    "resolution": "Use contributor StrokePixel 1x1 rectangle plus finite/positive-width guard; retain both asset provenance sets and both features' current status. Raise package above main rather than accepting the older contributor version; keep protocol30 for added wisp state.",
+    "handoff": "AGENTS.md on both branches requires the next Ghost Samurai task to start from integrated origin/main in a new scoped branch/worktree. Existing feature branch is retained as integration history; no shared-package or ModSources-junction switching from feature worktrees.",
+    "source_layout": "Canonical main and its existing ModSources junction unchanged. Handoff-only worktree not used to build."
+  },
+  "checks": {
+    "ghost_samurai_domain": "passed: 10 focused cases, including cadence, grid geometry, homing motion and bounded/stale wire state",
+    "re_summon_domain": "passed: 3 cases for terminal/Idle ordering, next-fight coalescing and pending cleanup exclusion",
+    "compiled_codec": "passed: protocol30; 324 round-trips and 50 malformed/truncated rejections; same linked-source Release harness, not a stale Mod DLL",
+    "domain_assembly_sha256": "5c7e8dfca2a1e75bf9573a71ead7e0e44e354a1bfda531860a1390cf94f22242",
+    "localization": "passed: all 16 Hjson files parsed with installed tModLoader parser during native build preflight",
+    "art": "Source atlas inspected and hash matched contributor evidence; 1x1 stroke semantics and client-only cached color key retained. Existing offline pose evidence reused; no native graphics approval claimed."
+  },
+  "build": {
+    "mode": "tools/dev.py build --native from canonical main with reviewed merge staged",
+    "record_id": "20260912T135154559700Z",
+    "result": "passed_and_installed",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "source_sha256": "1667cc4d66e59435c6f91db616a348e91472e48803129b3a4e1acfd630ef2cbc",
+    "source_changed_during_build": false,
+    "package_sha256": "72dbe0de0dec4081f77608b64ffe2e33b9d76da84afdc5e380ecba646d45f2eb",
+    "package_bytes": 54703975,
+    "source_identity": "Build record retains the full staged merge and five pre-existing dirty English locale hashes; locales are included in the local package but excluded from this merge commit. Only STATUS, this evidence and generated catalog change after the build; runtime sources/assets stay identical.",
+    "previous_package": "Preserved in the ignored build record directory"
+  },
+  "runtime": {
+    "mod_load_and_repeat_summon": "not_run; user-owned",
+    "boss_transparency_and_sword_motion": "not_run; user-owned",
+    "four_slashes_grid_gaps_and_homing_wisp_peer_alignment": "not_run; user-owned",
+    "native_performance_and_dodgeability": "not_run; user-owned",
+    "game_gui_or_play_server_started": false
+  }
+}

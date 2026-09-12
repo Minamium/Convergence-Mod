@@ -1,0 +1,115 @@
+{
+  "date": "2026-09-12",
+  "feature": "Ghost Samurai giant-stroke repair, generated articulated boss art and contrasting telegraphs",
+  "base_commit": "3ef3777e0daef87ec6becd82d83bb9b63aed4c36",
+  "branch": "feature/ghost-samurai-phases-1-2",
+  "version": "0.2.56",
+  "protocol": 30,
+  "scope": "Client presentation and one original runtime atlas only; attack timing, collision, damage, state machine, server creation and networking unchanged. Existing uncommitted five English localization files and old workstation evidence preserved and excluded from this commit.",
+  "environment_reference": "2026-09-12-ghost-samurai.json",
+  "diagnosis": {
+    "report": "User supplied screenshot of giant blue-white bands obscuring most of the view; screenshot itself does not certify an exact package hash.",
+    "cause": "Stroke drew the entire MagicPixel texture with per-pixel scaling and no source rectangle.",
+    "local_texture_metadata": {
+      "asset": "Terraria/Content/Images/MagicPixel.xnb",
+      "method": "Read-only XNB header/Texture2D payload using the installed FNA LzxDecoder; no game, graphics device or server initialized.",
+      "width": 1,
+      "height": 1000,
+      "surface_format": 0,
+      "mip_count": 1,
+      "rgba_bytes": 4000
+    },
+    "fix": "Use the explicit (0,0,1,1) source rectangle for all shared strokes. Requested length/width now map to world pixels rather than texture dimensions."
+  },
+  "art": {
+    "asset": "Assets/Textures/GhostSamurai/GhostSamuraiAtlas.png",
+    "sha256": "9e32d45d56d239df31a401cbefbdcc239ebfb81f6dd9cdb28e503adaf961ad48",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "generator": "Built-in image_gen; exact model not exposed",
+    "source": "Owner-provided original horned skull/spectral samurai/two-katana sketch; no imported third-party artwork.",
+    "alpha_handling": "Two requests for actual alpha returned opaque RGB checkerboard. Final image_gen edit produced magenta-background RGB; runtime performs tolerant magenta color-keying once on the drawing thread, caches the private texture and disposes on Unload. Original generated PNG is copied byte-for-byte.",
+    "keyed_pixels": 1158780,
+    "total_pixels": 1572516,
+    "unkeyed_pixels_in_gutter_x679_through700": 0,
+    "body_region": [
+      0,
+      0,
+      690,
+      1254
+    ],
+    "arm_region": [
+      690,
+      0,
+      564,
+      1254
+    ],
+    "body_pivot": [
+      366,
+      550
+    ],
+    "arm_pivot": [
+      65,
+      756
+    ],
+    "scale": 0.3,
+    "rig": "Two mirrored sword-arm assemblies anchored at shoulders; existing attack pose/time drives continuous rotation. Server graphics paths remain gated.",
+    "prompts": [
+      {
+        "step": "Initial art from user sketch",
+        "prompt": "Transform the supplied user's rough sketch into an ORIGINAL production-ready transparent game sprite atlas for a Terraria-style 2D raid boss called Ghost Samurai. Reference image role: user concept drawing only; retain horned oni skull, exposed skeletal ribs, ghostly blue-white coloring, two curved katanas (the arm asset will be mirrored in-game). Ignore all writing in reference.\nUse case: stylized-concept. Output ONE 1024x1024 PNG with genuine transparent alpha background, no checkerboard painted into pixels, no text, no labels, no borders.\nEXACT ATLAS LAYOUT: two non-overlapping rectangular columns, each 512x1024 pixels.\nLEFT COLUMN x0..511: ONE front-facing floating boss BODY ONLY, without arms, without hands and without any weapons. Center it at x256. Horned menacing skeletal oni face with long swept upward horns, luminous cyan eyes in very dark sockets, sharp teeth and fangs, large angular jaw; clearly exposed ribcage and spine, modest dark navy battered samurai shoulder plates and waist armor, no helmet covering horns or face; torn spectral ribbons and a tapering wispy blue ghost tail instead of legs. Top horn tips near y50, skull around y220, shoulders around y390, ribs around y510, waist y710, tail ends near y980. Keep entire silhouette at least 20px away from column boundaries. Clean navy/near-black outline, cold ivory bones with blue shaded planes, restrained cyan flame rim, readable solid shaded masses, NOT line art. Spine and ribcage must remain visible.\nRIGHT COLUMN x512..1023: ONE detached RIGHT skeletal ARM with HAND HOLDING ONE long curved KATANA, isolated as a single cutout assembly; NO additional body or head. Coordinates relative to this right column: small shoulder bone joint centered at (85,650), upper arm extends down-right to an elbow at about (170,790), forearm rises toward hand centered at (295,645). Fingers visibly wrap a dark blue hilt; round/small square iron guard above fist, long icy silver-blue curved katana blade rises toward tip at (410,100). Blade curves elegantly, not straight laser. Shoulder pivot and bent arm are complete. Do not connect to left column. Keep at least 20px transparent gutter at every column edge.\nStyle: richly shaded crisp pixel-art game sprite with intentional stepped edges and clusters, ominous majestic undead samurai, limited palette ~navy, muted steel blue, cold ivory, electric pale cyan accents. High readability at in-game scale around 170px torso with extended horns/tail and 200px swords. No huge bloom, no external aura cloud, no attack trails or beams, no scenery. Transparent holes between ribs and around all components. No third-party franchise characters. This is actual runtime art, not a concept sheet mockup."
+      },
+      {
+        "step": "Unsuccessful alpha-only edit; output not committed",
+        "prompt": "Precise background-extraction edit of this exact generated sprite atlas. Preserve EVERY detail, color, outline, position, and size of the skeletal oni body and detached sword arm. Do not redraw or redesign them. Remove the gray checkerboard pattern everywhere: outside the two sprites AND in the holes between ribs, arm bones, sword/arm, hanging cloth, and ghost tail. Return an actual RGBA PNG with an alpha channel: background pixels must have alpha=0, sprite pixels alpha=255 with appropriate edge alpha. NOT an RGB image with a transparency checkerboard painted on it. No checkerboard, no backdrop, no text. Keep canvas 1254x1254 and exact original art placement. This is runtime game artwork and opaque checkerboard pixels make it unusable. True transparent background is the only edit."
+      },
+      {
+        "step": "Selected color-keyed runtime export",
+        "prompt": "Precise background replacement for this exact sprite atlas. The gray checkerboard is unfortunately baked into the image, so the game engine needs a COLOR-KEYED sprite sheet instead. Preserve the exact oni skeleton body, right sword arm, all positions, scale, silhouette, pixel art details, bone colors and blue hues. Replace EVERY checkerboard/background pixel with one perfectly flat pure RGB(255,0,255) / hexadecimal #FF00FF magenta. Include the holes between the ribs and bones and fabric strips. Solid uniform magenta ONLY outside the sprites, with absolutely no checkerboard, gradient, noise, pattern, shadow, backdrop texture or letters. Use hard crisp edges against magenta to make color-key transparency clean in the game. Do not add magenta inside the sprite details. Keep the same 1254x1254 canvas and exact image placement; body occupies x~50..675, sword arm x~700..1195. No redesign. This is a game sprite sheet whose magenta will be treated as transparent at runtime."
+      }
+    ]
+  },
+  "telegraphs": {
+    "warning": "Dark backing, warm gold inset borders and center line; continuous brightness rise toward authoritative fire tick.",
+    "live": "Pale-blue strike, reduced opaque coverage.",
+    "grid": "Safe cells remain unpainted; no separate warning/damage spawn; 140px clear cells unchanged.",
+    "wisp": "Dark core outline for contrast; existing trajectory and hit radius unchanged."
+  },
+  "checks": {
+    "native_build": {
+      "result": "passed",
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "source_sha256": "85faa505740df21d29dfc6b542abda6bd3034766e4bbec4fd8b2348ffbe13992",
+      "source_changed_during_build": false,
+      "package_sha256": "b62b82dac78d679ea25a377b4b485424e2473f2c0d71641c9db250ca2bdd725b",
+      "subsequent_changes": "Documentation, provenance, evidence and generated catalog only; no runtime source or asset edits after this build."
+    },
+    "package": {
+      "result": "passed",
+      "entries": 153,
+      "atlas_entry": "Assets/Textures/GhostSamurai/GhostSamuraiAtlas.rawimg",
+      "unexpected_source_or_local_entries": []
+    },
+    "visual_preview": {
+      "result": "inspected",
+      "method": "Offline System.Drawing rendering of atlas source regions, matching runtime color-key rule, mirrored shoulder pivots, idle/wind-up/strike and forecast/grid geometry against three background colors.",
+      "sha256": "aea4f977152fe301a5be124e2f728d431f7bb67d3b4300a77546e60bb12573f9",
+      "limitation": "Software preview, not a native game capture or performance test."
+    },
+    "static": "passed: catalog 66 documents; repository policy 594 files after correcting the exact asset attribution record; YAML 10 files. The final two checks resumed successfully after the earlier approval-service usage limit.",
+    "domain_and_codec": "not_repeated: gameplay/network sources unchanged from passing 0.2.55 checks",
+    "preserved_local_files": "six pre-existing paths hash-checked; no localization or older workstation record included"
+  },
+  "runtime": {
+    "mod_load": "not_run; user-owned",
+    "giant_stroke_absence": "not_run in game; source cause/fix and offline scale verified",
+    "sprite_transparency_and_motion": "not_run in game; offline preview inspected",
+    "warning_readability_and_grid_performance": "not_run; user-owned",
+    "multiplayer_alignment": "not_run; user-owned",
+    "game_or_server_started": false
+  },
+  "handoff": "Reload or restart peers with 0.2.56/protocol30; no unchanged Build + Reload. Verify no giant lines or magenta/box background, dual-sword motion, gold forecasts on bright/dark scenery and pale-blue live strikes. Existing tuning remains unchanged."
+}

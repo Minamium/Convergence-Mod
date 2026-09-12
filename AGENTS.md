@@ -58,3 +58,11 @@ Current feature naming is `FirstSeverance` / `first_severance`. The isolated sou
 - Prefer small, concern-focused commits.
 - Update docs or an ADR with changes to authority, protocol, persistence, dependencies, module direction, or rights policy.
 - Preserve terminal snapshots, stable packet IDs, machine-readable failure codes, and cleanup invariants.
+
+## Parallel development and Ghost Samurai handoff
+
+- 次のGhost Samurai作業は、`git fetch origin`後の最新`origin/main`を基点とする。`feature/ghost-samurai-phases-1-2`（実装最終`d4ad7d2`）は統合用の旧ブランチとして残し、ここから次の実装を継続しない。mainに`d4ad7d2`と再召喚修正`9464e9c`の両方が含まれることを確認する。未統合なら旧版で作業を進めず、統合待ちであることを報告する。
+- 未コミット・未プッシュの作業を保全してから、最新mainから目的別の新しいfeatureブランチ／worktreeで再開する。既存worktreeの強制切替、hard reset、force push、旧ファイル一式での上書きはしない。
+- Ghost SamuraiとDollは各機能のContent／Client／テスト／仕様内で並行開発する。Commonの通信・終了・cleanupを変更した場合は、統合済みmainを通じて共有し、他機能の修正を取り落とさない。
+- 統合担当は既存の高いModバージョンを巻き戻さず、通信変更に必要なprotocol更新を保持する。STATUSは最新mainの他機能情報を残して統合し、カタログは最後に生成する。
+- 共有プレイ用の`Convergence.tmod`へのインストールは統合mainから行う。feature側の検証は明示した別出力／プロファイルで行い、正本ModSourcesのjunctionや共有ビルドを勝手に差し替えない。コンパイル成功と実機確認は区別する。

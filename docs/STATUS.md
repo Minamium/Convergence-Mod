@@ -23,9 +23,10 @@ related_docs:
 
 ## Current build
 
-Development **0.2.60 / protocol 29** on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns wire compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Latest follow-up fixes Doll locomotion: any mount or unsupported/airborne owner keeps its broom pose, including stationary hover; only a stable dismounted landing permits walking. Existing 16 broom/casting frames are retained. Previous Doll-only changes remain: one rotating-target Phase-II Core beam from the sphere, no Raid circular HUD ornaments except Stack/Spread, five equal weapon rewards and the all-five Doll recipe. Ghost Samurai, audio/BGM, damage/timing and the previous re-summon fix are unchanged.
+Development **0.2.61 / protocol 30** on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns wire compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Ghost Samurai tuning and generated rig through `d4ad7d2` are integrated with the main-side re-summon, exact-Fight cleanup and line-geometry repairs. All Doll changes through `6b103e2` remain: mounted/airborne broom locomotion, one rotating-target Phase-II Core beam, five equal weapon rewards and the all-five Doll recipe. Accepted Doll/Raid presentation, audio/BGM and damage/timing are unchanged by this integration.
 
-- New independent [Ghost Samurai / 幽鬼武者](encounters/ghost-samurai/ENCOUNTER_SPEC.md): reusable summon item, three Phase1 attacks, delayed wisps and three-pass lateral slash in Phase2; Phase3 temporarily continues Phase2. Uses the existing encounter coordinator and exact-Fight cleanup, native player damage outcomes and procedural placeholder visuals. No Raid Ready/Down/revival or new loot/progression is added to this boss.
+- Independent [Ghost Samurai / 幽鬼武者](encounters/ghost-samurai/ENCOUNTER_SPEC.md): Phase1/2 now have shorter recovery/intervals, overlapping warnings for sequential four-slash strikes, a larger denser grid, and bounded radial-spread-then-homing Phase2 wisps. Attack windup/live times, phase state machine, summon, native damage and exact-Fight cleanup remain intact. Phase3 temporarily continues Phase2; no Raid Ready/Down/revival or new loot/progression is added to this boss.
+- Ghost Samurai presentation replaces the procedural skeleton with original generated body/sword-arm artwork, fixes the whole-MagicPixel source rectangle that enlarged stroke thickness by 1000, and adds warm high-contrast forecasts with pale-blue strikes. This display-only pass changes no combat or wire rules; the feature spec owns exact art/keying/border behavior.
 
 - Server-wide roster → field deployment → manual Ready → separate combat introduction is implemented. [Arena infrastructure](ARENA_INFRASTRUCTURE.md) owns admission, movement and cancellation.
 - Phase I / II / III / Final survival, frozen-roster HP scaling, fixed-position Stack, Spread, Raid-owned Down/instant revival and terminal effects/rewards are implemented. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) and [recovery spec](encounters/first-severance/REVIVE_SPEC.md) own current behavior.
@@ -35,6 +36,8 @@ Development **0.2.60 / protocol 29** on main. [build.txt](../build.txt) owns ver
 - One-member admission defaults on only as a build-gated development aid. It adds no companion, invulnerability or solo-specific fight. Normal testing is multiplayer unless the user explicitly chooses solo.
 
 ## Verification state
+
+**0.2.61** integrated native package installed: **0 errors / 4 existing warnings**, 16 locales parsed, 10 Ghost Samurai and 3 re-summon tests passed, compiled protocol30 checks passed (324 round-trips / 50 malformed cases). [Integration evidence](evidence/2026-09-12-ghost-samurai-main-handoff.json) records both source lines and the combined artifact. Contributor-only [tuning](evidence/2026-09-12-ghost-samurai-tuning.json) and [visual evidence](evidence/2026-09-12-ghost-samurai-visuals.json) retain their original branch versions. Native load, transparency, re-summon and peer wisp alignment remain user-owned and unverified for this package.
 
 **0.2.60** native package installed: **0 errors / 4 existing warnings**, 16 locales parsed, all four focused Doll companion tests passed. [Flight-fix evidence](evidence/2026-09-12-doll-owner-flight.json) records the former zero-vertical-speed grounding mistake, native-owner mode replication and runtime scope. Actual mount/hover/landing animation and peer playback remain user-owned and unverified.
 
@@ -71,7 +74,9 @@ Development loot includes a companion summon weapon, but balance, public solo/NP
 
 ## Next change
 
-Reload/restart peers onto **0.2.60 / protocol29**; **no unchanged Build + Reload is needed**. Latest user-owned smoke: mount while stationary, horizontal flight/hover, dismount in air, then land; the Doll stays on its broom until a supported dismounted landing. Check one remote peer if available. Previous beam/reward changes retain their specific unverified checks in their evidence; do not require a full Raid replay for this locomotion fix. Oni belongs to the separate task.
+Reload/restart all peers on **0.2.61 / protocol30**; no second unchanged Build + Reload is needed. Focused Ghost Samurai smoke: end a fight and summon again, read all four slash warnings and grid gaps, inspect the new body's transparency/sword motion, and compare homing-wisp positions with a peer. Native load, multiplayer alignment and dodgeability remain user-owned. Retained Doll flight/beam/reward checks live in their evidence; an unrelated full Raid replay is not required.
+
+Next feature work starts from the integrated `origin/main`, in a new scoped branch/worktree. [AGENTS](../AGENTS.md#parallel-development-and-ghost-samurai-handoff) owns the contributor handoff; do not resume implementation from the retired Ghost Samurai branch or overwrite the shared package from a feature worktree.
 
 Retain the player-only Stack/Spread rings, renamed intro/bar and The Unbroken Promise companion. The stage NPC remains intact until all-Ready intro; minions do not replace missing Raid participants. Native rendering, listening and performance checks remain user-owned.
 

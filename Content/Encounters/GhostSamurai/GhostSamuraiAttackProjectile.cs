@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -16,6 +15,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     internal Guid Fight;
     internal int BossSlot = -1;
     internal SamuraiHazard Hazard;
+    internal SamuraiWispMotion WispMotion;
     public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.DeathLaser;
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 3000;
     public override void SetDefaults()
@@ -34,6 +34,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
         if (source is GhostSamuraiAttackSource owned)
         {
             Fight = owned.Fight; BossSlot = owned.BossSlot; Hazard = owned.Hazard;
+            if (Hazard.Shape == SamuraiShape.Wisp) WispMotion = SamuraiWispMotion.Spawn(Hazard);
         }
     }
     public override bool? CanDamage() => false;
@@ -52,20 +53,44 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
             if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
             return; // Late NPC synchronization may still arrive on the client.
         }
-        Projectile.Center = new Vector2(Hazard.CenterX(age), Hazard.CenterY(age));
+        Projectile.Center = VisualCenter(age);
         if (Main.netMode != NetmodeID.MultiplayerClient && age >= Hazard.End) Projectile.Kill();
     }
+    internal Vector2 VisualCenter(float age) => Hazard.Shape != SamuraiShape.Wisp ? new(Hazard.X, Hazard.Y)
+        : Main.netMode == NetmodeID.MultiplayerClient ? new(WispMotion.VisualX(age), WispMotion.VisualY(age)) : new(WispMotion.X, WispMotion.Y);
+
+    internal void AdvanceWisp(int age, Vector2 target)
+    {
+        if (Main.netMode == NetmodeID.MultiplayerClient || !Projectile.active || Hazard.Shape != SamuraiShape.Wisp
+            || age < Hazard.Born || age >= Hazard.End) return;
+        WispMotion = WispMotion.Advance(Hazard, age, target.X, target.Y);
+        Projectile.Center = new(WispMotion.X, WispMotion.Y);
+        // Stagger full snapshots; no target/steering is inferred from a client player.
+        if (age == Hazard.Born || age == Hazard.Fire || (age + Projectile.identity) % GhostSamuraiRules.WispSyncInterval == 0)
+            Projectile.netUpdate = true;
+    }
+
+    internal bool Hits(int age, Player p) => Hazard.Shape == SamuraiShape.Wisp
+        ? WispMotion.Hits(Hazard, age, p.Center.X, p.Center.Y, p.width * .5f, p.height * .5f)
+        : Hazard.Hits(age, p.Center.X, p.Center.Y, p.width * .5f, p.height * .5f);
+
     public override bool PreDraw(ref Color lightColor) => false;
     public override void SendExtraAI(BinaryWriter writer)
     {
         writer.Write(Fight.ToByteArray()); writer.Write((short)BossSlot); Hazard.Write(writer);
+        if (Hazard.Shape == SamuraiShape.Wisp) WispMotion.Write(writer);
     }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         byte[] bytes = reader.ReadBytes(16); int slot = reader.ReadInt16(); SamuraiHazard hazard = SamuraiHazard.Read(reader);
-        if (bytes.Length != 16 || slot < 0 || slot >= Main.maxNPCs) throw new InvalidDataException("ghost_samurai.projectile_owner_invalid");
+        SamuraiWispMotion motion = hazard.Shape == SamuraiShape.Wisp ? SamuraiWispMotion.Read(reader, hazard) : default;
+        if (bytes.Length != 16 || new Guid(bytes) == Guid.Empty || slot < 0 || slot >= Main.maxNPCs)
+            throw new InvalidDataException("ghost_samurai.projectile_owner_invalid");
         // Client-created SyncProjectile packets never gain authority over a fight.
         if (Main.netMode == NetmodeID.Server) return;
+        if (Fight != Guid.Empty && (Fight != new Guid(bytes) || BossSlot != slot || Hazard != hazard
+            || (hazard.Shape == SamuraiShape.Wisp && !motion.CanReplace(WispMotion)))) return;
         Fight = new Guid(bytes); BossSlot = slot; Hazard = hazard;
+        WispMotion = motion;
     }
 }
