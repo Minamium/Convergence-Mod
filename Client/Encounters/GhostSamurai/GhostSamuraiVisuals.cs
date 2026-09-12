@@ -97,8 +97,7 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
         switch (boss.Attack)
         {
             case SamuraiAttack.DirectionalSlash:
-                t %= GhostSamuraiRules.SlashCadence;
-                warning = GhostSamuraiRules.SlashWarning; live = GhostSamuraiRules.SlashLive; break;
+                return GhostSamuraiRules.DirectionalPose(t);
             case SamuraiAttack.ChargedSlash:
                 t -= GhostSamuraiRules.ChargeAimTime;
                 warning = GhostSamuraiRules.ChargeWarning; live = GhostSamuraiRules.ChargeLive; break;
@@ -120,7 +119,7 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             return -1 + 2 * release * release;
         }
         if (t < warning + live) return 1;
-        float recoil = Math.Clamp((t - warning - live) / 24, 0, 1);
+        float recoil = Math.Clamp((t - warning - live) / GhostSamuraiRules.RecoveryTime, 0, 1);
         return 1 - recoil * recoil * (3 - 2 * recoil);
     }
 
@@ -173,15 +172,16 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         var h = p.Hazard;
         if (age < h.Born || age >= h.End) return false;
         SpriteBatch batch = Main.spriteBatch;
-        Vector2 position = new Vector2(h.CenterX(age), h.CenterY(age)) - Main.screenPosition;
+        Vector2 position = p.VisualCenter(age) - Main.screenPosition;
         bool live = h.Live(age);
         Color color = live ? new Color(186, 247, 255) : new Color(69, 182, 240);
         if (h.Shape == SamuraiShape.Wisp)
         {
             // Core radius matches collision. Tail is translucent decoration.
             GhostSamuraiVisuals.Ring(batch, position, h.Radius, 3, color);
-            GhostSamuraiVisuals.Stroke(batch, position - new Vector2(h.DX, h.DY) * 30, position, live ? 10 : 5, color * .6f);
-            if (!live) GhostSamuraiVisuals.Stroke(batch, position, position + new Vector2(h.DX, h.DY) * 75, 2, color * .5f);
+            Vector2 heading = new Vector2(p.WispMotion.VX, p.WispMotion.VY).SafeNormalize(new Vector2(h.DX, h.DY));
+            GhostSamuraiVisuals.Stroke(batch, position - heading * 30, position, live ? 10 : 5, color * .6f);
+            if (!live) GhostSamuraiVisuals.Stroke(batch, position, position + heading * 75, 2, color * .5f);
         }
         else
         {

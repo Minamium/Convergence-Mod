@@ -658,7 +658,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 39ec267d57e55f0a16e216d658addac52ec85ee11526adae22b19654b174e2d2
+  content_sha256: c0c293848ae8110167f31e38cf8fdef7022806c5fb3d6dbae4ade67dccf329b8
   document_type: spec
   status: provisional
   owners:
@@ -1097,7 +1097,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: e085516a6e1d31974fab5e5aaa0642037747b6f4d2d3f328cd4ee1786fd6f1e6
+  content_sha256: 765eba4b327f815b968e47430063b816aff9fbb9ed7871d22b44830350679cd9
   document_type: status
   status: accepted
   owners:

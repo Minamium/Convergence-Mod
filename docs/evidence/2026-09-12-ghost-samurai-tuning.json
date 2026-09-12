@@ -1,0 +1,98 @@
+{
+  "date": "2026-09-12",
+  "feature": "Ghost Samurai Phase1/2 tempo, expanded grid, sequential four-slash cadence and spread-then-homing wisps",
+  "base_commit": "c2a969463f73bbd69bce60f2660adcd74c919f63",
+  "branch": "feature/ghost-samurai-phases-1-2",
+  "version": "0.2.55",
+  "protocol": 30,
+  "environment_reference": "2026-09-12-ghost-samurai.json",
+  "build": {
+    "result": "passed",
+    "mode": "native",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "source_sha256": "434d698fd12a422df9753acdc297de057f5c561d3810685f21160915c9a6db84",
+    "source_changed_during_build": false,
+    "package_sha256": "02e639b3867cd88dd103264a43562def09d850316e818d2b64e5738342fb0683",
+    "dirty_manifest": "Tuning source plus five pre-existing English localization edits and one old untracked workstation record. All six pre-existing files verified byte-for-byte unchanged and excluded from this commit. Full local source manifest is retained in ignored build records. Only evidence/catalog changed after the final native build."
+  },
+  "checks": {
+    "ghost_samurai_domain": "passed: 10 deterministic cases; includes overlap timing, continuous blade poses, enlarged grid, harmless non-targeting spread, bounded smooth homing, stale and malformed motion snapshots",
+    "existing_protocol_codec": "passed: protocol30, 324 round-trips and 50 malformed/truncated cases; reused linked-source harness",
+    "static": "passed: regenerated catalog 66 documents, repository policy 591 files, YAML 10 files",
+    "package_manifest": {
+      "result": "passed",
+      "entries": 152,
+      "unexpected_source_or_local_entries": [],
+      "package_sha256_matches_build": true
+    }
+  },
+  "authority_review": {
+    "owner": "Existing coordinator-owned GhostSamuraiRuntime; unchanged phase/attack selection and exact-Fight cleanup",
+    "spawn": "Server/SP only; original IEntitySource assigns Fight and immutable geometry before initial sync; initial wisp motion is also populated before sync",
+    "motion_and_hits": "Runtime advances each wisp once per tick toward the server target and tests its resulting circular core; no native projectile contact damage or client homing/hit decisions",
+    "replication": "20-byte full motion snapshot on existing ExtraAI; six-tick staggered updates plus born/fire edges; finite bounds and stale tick/Fight/owner/geometry rejection; bounded display-only extrapolation",
+    "limits": "Maximum 12 wisps including future births; extra wisp requests clipped. Maximum 30 grid lines plus 12 wisps, 42 total; main attacks complete before next selection. No duplicate telegraph and damage entities.",
+    "grid_followup_origin": "Boss position at warning start, preventing the enlarged outer grid boundary from moving wisps beyond their travel lifetime"
+  },
+  "tuning": {
+    "ticks_per_second": 60,
+    "idle_interval_ticks": {
+      "before": 60,
+      "phase1": 36,
+      "phase2": 24
+    },
+    "recovery_ticks": {
+      "directional_before": 24,
+      "charge_grid_before": 48,
+      "dash_before": 30,
+      "after": 18
+    },
+    "directional_cadence_ticks": {
+      "before": 88,
+      "after": 36,
+      "warning_unchanged": 54,
+      "live_unchanged": 10,
+      "fire_ticks": [
+        54,
+        90,
+        126,
+        162
+      ],
+      "finish_tick": 190
+    },
+    "grid": {
+      "size_before_px": 1440,
+      "width_px": 2520,
+      "height_px": 2520,
+      "spacing_before_px": 240,
+      "spacing_px": 180,
+      "vertical_before": 5,
+      "horizontal_before": 5,
+      "vertical_lines": 15,
+      "horizontal_lines": 15,
+      "line_width_px": 40,
+      "clear_cell_px": 140,
+      "warning_ticks_unchanged": 84
+    },
+    "wisp": {
+      "before": "30-tick stationary warning then straight 4 px/tick flight",
+      "spread_duration_ticks": 30,
+      "spread_speed_px_per_tick": 3.5,
+      "homing_speed_px_per_tick": 4.5,
+      "homing_velocity_lerp_per_tick": 0.035,
+      "live_ticks": 180,
+      "maximum_count": 12
+    }
+  },
+  "runtime": {
+    "mod_load": "not_run; user-owned",
+    "tempo_and_grid_dodgeability": "not_run; user-owned",
+    "wisp_second_dodge_and_density": "not_run; user-owned",
+    "multiplayer_latency_late_join_and_collision_alignment": "not_run; user-owned",
+    "phase_transition_and_retreat_cleanup": "not_run; user-owned",
+    "native_grid_performance": "not_run; user-owned",
+    "game_or_server_started": false
+  },
+  "handoff": "Reload or restart all peers with 0.2.55/protocol30; package is already built and installed, so no unchanged Build + Reload. Check all four warned strikes, grid gaps, spread-then-homing wisps and their remaining density. Main merge and Workshop publication are not performed."
+}

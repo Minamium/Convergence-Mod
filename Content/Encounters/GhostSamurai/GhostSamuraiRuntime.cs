@@ -88,6 +88,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         else
         {
             UpdateAttack(npc, target);
+            foreach (var hazard in hazards) hazard.AdvanceWisp(age, target.Center);
             ApplyDamage(npc);
         }
         Project(npc);
@@ -109,7 +110,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         {
             beat = SamuraiBeat.Recovery;
             Hover(npc, target.Center + new Vector2(npc.Center.X < target.Center.X ? -300 : 300, -200));
-            if (++timer < GhostSamuraiRules.Interval) return;
+            if (++timer < GhostSamuraiRules.AttackInterval(phase)) return;
             int count = phase == SamuraiPhase.Phase1 ? 3 : 4;
             attack = GhostSamuraiRules.SelectNextAttack(phase, previous, Main.rand.Next(count - (previous == SamuraiAttack.Idle ? 0 : 1)));
             timer = 0;
@@ -124,23 +125,23 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             case SamuraiAttack.GridSlash: DoGridSlash(npc, target); break;
             case SamuraiAttack.Phase2DashSlash: DoPhase2DashSlash(npc, target); break;
         }
-        timer++;
+        if (attack != SamuraiAttack.Idle) timer++;
     }
 
     private void DoDirectionalSlash(NPC npc, Player target)
     {
-        int step = timer / GhostSamuraiRules.SlashCadence, local = timer % GhostSamuraiRules.SlashCadence;
-        if (step >= 4) { FinishAttack(); return; }
+        if (timer >= GhostSamuraiRules.DirectionalDuration) { FinishAttack(); return; }
+        int step = Math.Min(timer / GhostSamuraiRules.DirectionalSlashInterval, GhostSamuraiRules.DirectionalSlashCount - 1);
         Hover(npc, target.Center + new Vector2(step % 2 == 0 ? -260 : 260, -180));
-        beat = local < GhostSamuraiRules.SlashWarning ? SamuraiBeat.Telegraph
-            : local < GhostSamuraiRules.SlashWarning + GhostSamuraiRules.SlashLive ? SamuraiBeat.Strike : SamuraiBeat.Recovery;
-        if (local != 0) return;
+        beat = GhostSamuraiRules.DirectionalBeat(timer);
+        step = GhostSamuraiRules.DirectionalSpawnStep(timer);
+        if (step < 0) return;
         float angle = baseAngle + step * MathHelper.PiOver4 + Main.rand.NextFloat(-.12f, .12f);
         Vector2 direction = angle.ToRotationVector2();
         Vector2 center = target.Center;
         AddSlash(center - direction * GhostSamuraiRules.SlashLength / 2, direction,
             GhostSamuraiRules.SlashLength, GhostSamuraiRules.SlashHalfWidth, GhostSamuraiRules.SlashWarning, GhostSamuraiRules.SlashLive);
-        if (phase != SamuraiPhase.Phase1) AddWisps(npc.Center, center, age + GhostSamuraiRules.SlashWarning + GhostSamuraiRules.WispDelay, 3);
+        if (phase != SamuraiPhase.Phase1) AddWisps(npc.Center, age + GhostSamuraiRules.SlashWarning + GhostSamuraiRules.WispDelay, 3);
     }
 
     private void DoChargedSlash(NPC npc, Player target)
@@ -160,9 +161,9 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             Vector2 direction = (target.Center - npc.Center).SafeNormalize(Vector2.UnitX);
             AddSlash(target.Center - direction * 900, direction, 1800, GhostSamuraiRules.ChargeHalfWidth,
                 GhostSamuraiRules.ChargeWarning, GhostSamuraiRules.ChargeLive);
-            if (phase != SamuraiPhase.Phase1) AddWisps(npc.Center, target.Center, age + GhostSamuraiRules.ChargeWarning + GhostSamuraiRules.WispDelay, 5);
+            if (phase != SamuraiPhase.Phase1) AddWisps(npc.Center, age + GhostSamuraiRules.ChargeWarning + GhostSamuraiRules.WispDelay, 5);
         }
-        if (local >= GhostSamuraiRules.ChargeWarning + GhostSamuraiRules.ChargeLive + 48) FinishAttack();
+        if (local >= GhostSamuraiRules.ChargeWarning + GhostSamuraiRules.ChargeLive + GhostSamuraiRules.RecoveryTime) FinishAttack();
     }
 
     private void DoGridSlash(NPC npc, Player target)
@@ -174,22 +175,19 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             : local < GhostSamuraiRules.GridWarning + GhostSamuraiRules.GridLive ? SamuraiBeat.Strike : SamuraiBeat.Recovery;
         if (local == 0)
         {
-            float extent = GhostSamuraiRules.GridExtent;
+            float halfWidth = GhostSamuraiRules.GridWidth / 2, halfHeight = GhostSamuraiRules.GridHeight / 2;
             // Keep full cells available near world borders. This never changes tiles.
-            Vector2 center = new(Math.Clamp(target.Center.X, extent + 160, Main.maxTilesX * 16 - extent - 160),
-                Math.Clamp(target.Center.Y, extent + 160, Main.maxTilesY * 16 - extent - 160));
-            for (int i = -2; i <= 2; i++)
-            {
-                float offset = i * GhostSamuraiRules.GridSpacing;
-                AddSlash(center + new Vector2(offset, -extent), Vector2.UnitY, extent * 2, GhostSamuraiRules.GridHalfWidth,
-                    GhostSamuraiRules.GridWarning, GhostSamuraiRules.GridLive);
-                AddSlash(center + new Vector2(-extent, offset), Vector2.UnitX, extent * 2, GhostSamuraiRules.GridHalfWidth,
-                    GhostSamuraiRules.GridWarning, GhostSamuraiRules.GridLive);
-            }
-            if (phase != SamuraiPhase.Phase1) AddWisps(center + new Vector2(0, -extent), center,
+            Vector2 center = new(Math.Clamp(target.Center.X, halfWidth + 160, Main.maxTilesX * 16 - halfWidth - 160),
+                Math.Clamp(target.Center.Y, halfHeight + 160, Main.maxTilesY * 16 - halfHeight - 160));
+            for (int i = 0; i < GhostSamuraiRules.GridVerticalLineCount; i++)
+                Spawn(GhostSamuraiRules.GridLine(true, i, center.X, center.Y, age));
+            for (int i = 0; i < GhostSamuraiRules.GridHorizontalLineCount; i++)
+                Spawn(GhostSamuraiRules.GridLine(false, i, center.X, center.Y, age));
+            // Expanding the grid must not move its follow-up wisps out of reach.
+            if (phase != SamuraiPhase.Phase1) AddWisps(npc.Center,
                 age + GhostSamuraiRules.GridWarning + GhostSamuraiRules.WispDelay, 5);
         }
-        if (local >= GhostSamuraiRules.GridWarning + GhostSamuraiRules.GridLive + 48) FinishAttack();
+        if (local >= GhostSamuraiRules.GridWarning + GhostSamuraiRules.GridLive + GhostSamuraiRules.RecoveryTime) FinishAttack();
     }
 
     private void DoPhase2DashSlash(NPC npc, Player target)
@@ -237,14 +235,18 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         => Spawn(new(SamuraiShape.Slash, start.X, start.Y, direction.X, direction.Y, length, halfWidth,
             age, age + warning, age + warning + live, GhostSamuraiRules.Damage(attack)));
 
-    private void AddWisps(Vector2 origin, Vector2 target, int born, int count)
+    private void AddWisps(Vector2 origin, int born, int count)
     {
-        Vector2 direction = (target - origin).SafeNormalize(Vector2.UnitY);
+        int existing = 0;
+        foreach (var p in hazards)
+            if (p.Projectile.active && p.Hazard.Shape == SamuraiShape.Wisp) existing++;
+        count = Math.Min(count, GhostSamuraiRules.MaximumWisps - existing);
+        float rotation = Main.rand.NextFloat(MathHelper.TwoPi);
         for (int i = 0; i < count; i++)
         {
-            Vector2 d = direction.RotatedBy((i - (count - 1) * .5f) * .22f);
+            Vector2 d = (rotation + i * MathHelper.TwoPi / count + Main.rand.NextFloat(-.18f, .18f)).ToRotationVector2();
             Spawn(new(SamuraiShape.Wisp, origin.X, origin.Y, d.X, d.Y, 0, GhostSamuraiRules.WispRadius,
-                born, born + GhostSamuraiRules.WispWarning, born + GhostSamuraiRules.WispWarning + GhostSamuraiRules.WispLife,
+                born, born + GhostSamuraiRules.SpreadDuration, born + GhostSamuraiRules.SpreadDuration + GhostSamuraiRules.WispLife,
                 GhostSamuraiRules.WispDamage));
         }
     }
@@ -269,7 +271,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             if (p.dead || p.ghost || p.immune || p.creativeGodMode || age < nextHit[p.whoAmI]) continue;
             foreach (var hazard in hazards)
             {
-                if (!hazard.Projectile.active || !hazard.Hazard.Hits(age, p.Center.X, p.Center.Y, p.width * .5f, p.height * .5f)) continue;
+                if (!hazard.Projectile.active || !hazard.Hits(age, p)) continue;
                 // Resolve native defense/endurance/hooks once on the authority. Clients
                 // receive the resulting HurtInfo; projectile collision is disabled there.
                 double dealt = p.Hurt(PlayerDeathReason.ByNPC(npc.whoAmI), hazard.Hazard.Damage,

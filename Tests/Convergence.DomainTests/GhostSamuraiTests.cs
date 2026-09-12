@@ -92,27 +92,114 @@ internal static partial class Program
         {
             float x = (slot % 2 == 0 ? -1 : 1) * GhostSamuraiRules.GridSpacing / 2;
             float y = (slot / 2 == 0 ? -1 : 1) * GhostSamuraiRules.GridSpacing / 2;
-            for (int line = -2; line <= 2; line++)
+            foreach (bool vertical in new[] { true, false })
+            for (int line = 0; line < (vertical ? GhostSamuraiRules.GridVerticalLineCount : GhostSamuraiRules.GridHorizontalLineCount); line++)
             {
-                float offset = line * GhostSamuraiRules.GridSpacing;
-                var vertical = new SamuraiHazard(SamuraiShape.Slash, offset, -720, 0, 1, 1440, 20, 0, 84, 96, 280);
-                var horizontal = new SamuraiHazard(SamuraiShape.Slash, -720, offset, 1, 0, 1440, 20, 0, 84, 96, 280);
-                AssertEqual(false, vertical.Hits(84, x, y, 10, 21) || horizontal.Hits(84, x, y, 10, 21), "safe full hitbox");
-                AssertEqual(true, vertical.Hits(84, offset, 0, 10, 21), "vertical line actually damages");
+                var h = GhostSamuraiRules.GridLine(vertical, line, 0, 0, 0);
+                AssertEqual(true, h.IsValid, "expanded line fits bounded wire geometry");
+                AssertEqual(false, h.Hits(h.Fire, x, y, 10, 21), "safe full hitbox");
+                AssertEqual(true, h.Hits(h.Fire, h.X + h.DX * h.Length / 2, h.Y + h.DY * h.Length / 2, 10, 21), "every line damages");
+                AssertEqual(false, h.Hits(h.Fire - 1, h.X, h.Y, 10, 21), "expanded warning harmless");
             }
         }
+        var left = GhostSamuraiRules.GridLine(true, 0, 0, 0, 0);
+        var right = GhostSamuraiRules.GridLine(true, GhostSamuraiRules.GridVerticalLineCount - 1, 0, 0, 0);
+        var top = GhostSamuraiRules.GridLine(false, 0, 0, 0, 0);
+        var bottom = GhostSamuraiRules.GridLine(false, GhostSamuraiRules.GridHorizontalLineCount - 1, 0, 0, 0);
+        AssertEqual(GhostSamuraiRules.GridWidth, right.X - left.X, "outer columns span whole width");
+        AssertEqual(GhostSamuraiRules.GridHeight, bottom.Y - top.Y, "outer rows span whole height");
+        AssertEqual(true, GhostSamuraiRules.GridSpacing - GhostSamuraiRules.GridHalfWidth * 2 > 42, "full-height player clearance");
+        AssertEqual(true, GhostSamuraiRules.MaximumHazards >= GhostSamuraiRules.GridVerticalLineCount
+            + GhostSamuraiRules.GridHorizontalLineCount + GhostSamuraiRules.MaximumWisps, "full grid reserved even with maximum lingering wisps");
     }
 
-    [DomainTest("Ghost Samurai wisps wait then travel steadily without retargeting")]
+    [DomainTest("Ghost Samurai wisps spread without targeting then home smoothly within speed and lifetime bounds")]
     private static void SamuraiWisps()
     {
+        var h = new SamuraiHazard(SamuraiShape.Wisp, 400, 500, 1, 0, 0, 15, 72,
+            72 + GhostSamuraiRules.SpreadDuration, 72 + GhostSamuraiRules.SpreadDuration + GhostSamuraiRules.WispLife, 200);
+        var motion = SamuraiWispMotion.Spawn(h);
+        AssertEqual(motion, motion.Advance(h, h.Born - 1, 0, 0), "future birth does not move");
+        for (int age = h.Born; age < h.End; age++)
+        {
+            var previous = motion;
+            motion = motion.Advance(h, age, 400, 2000);
+            AssertEqual(true, motion.IsValid(h), "all ticks finite and speed bounded");
+            AssertEqual(motion, motion.Advance(h, age, -1000, -1000), "one movement per authority tick");
+            if (age < h.Fire)
+            {
+                AssertEqual(500f, motion.Y, "target below does not bend the outward spread");
+                AssertEqual(400 + (age - h.Born) * GhostSamuraiRules.SpreadSpeed, motion.X, "outward speed");
+                AssertEqual(false, motion.Hits(h, age, motion.X, motion.Y, 10, 21), "spread is harmless");
+            }
+            else
+            {
+                float dx = motion.VX - previous.VX, dy = motion.VY - previous.VY;
+                AssertEqual(true, dx * dx + dy * dy < .101f, "bounded steering acceleration");
+                AssertEqual(true, motion.Hits(h, age, motion.X, motion.Y, 10, 21), "authoritative moving core hits");
+                AssertEqual(false, motion.Hits(h, age, motion.X, motion.Y + 50, 10, 21), "outside core safe");
+                if (age == h.Fire) AssertEqual(true, motion.VX > 3 && motion.VY > 0 && motion.VY < .2f, "initial turn is gentle");
+            }
+        }
+        AssertEqual(true, motion.Y > 900, "later homing closes toward target");
+        AssertEqual(false, motion.Hits(h, h.End, motion.X, motion.Y, 10, 21), "expired core harmless");
+        AssertEqual(motion, motion.Advance(h, h.End, 0, 0), "expired motion stops");
+        AssertEqual(motion.VisualX(motion.Tick + GhostSamuraiRules.WispSyncInterval), motion.VisualX(motion.Tick + 1000), "client stops extrapolation if snapshots stall");
+    }
+
+    [DomainTest("Ghost Samurai directional cadence overlaps warnings without overlapping strikes or cutting off the fourth hit")]
+    private static void SamuraiDirectionalTiming()
+    {
+        int spawns = 0, peak = 0;
+        var hazards = new System.Collections.Generic.List<SamuraiHazard>();
+        for (int tick = 0; tick <= GhostSamuraiRules.DirectionalDuration; tick++)
+        {
+            int step = GhostSamuraiRules.DirectionalSpawnStep(tick);
+            if (step >= 0)
+            {
+                spawns++;
+                hazards.Add(new(SamuraiShape.Slash, 0, 0, 1, 0, 1400, 32, tick,
+                    tick + GhostSamuraiRules.SlashWarning, tick + GhostSamuraiRules.SlashWarning + GhostSamuraiRules.SlashLive, 260));
+                if (step > 0) AssertEqual(true, tick < hazards[step - 1].Fire, "next warning precedes previous strike");
+            }
+            int live = 0, alive = 0;
+            foreach (var h in hazards) { if (h.Live(tick)) live++; if (tick < h.End) alive++; }
+            peak = Math.Max(peak, alive);
+            AssertEqual(true, live <= 1, "four hits remain sequential");
+            AssertEqual(live == 1, GhostSamuraiRules.DirectionalBeat(tick) == SamuraiBeat.Strike, "pose beat follows active slash rather than newest warning");
+            float pose = GhostSamuraiRules.DirectionalPose(tick);
+            AssertEqual(true, Math.Abs(pose - GhostSamuraiRules.DirectionalPose(tick - .001f)) < .002f, "blade pose continuous at every beat");
+        }
+        AssertEqual(4, spawns, "exactly four warning entities");
+        AssertEqual(true, peak <= 2, "at most two slash entities coexist");
+        AssertEqual(GhostSamuraiRules.RecoveryTime, GhostSamuraiRules.DirectionalDuration - hazards[3].End, "fourth live window finishes before recovery");
+        AssertEqual(0f, GhostSamuraiRules.DirectionalPose(GhostSamuraiRules.DirectionalDuration), "last recoil reaches idle");
+        AssertEqual(true, GhostSamuraiRules.AttackInterval(SamuraiPhase.Phase2) < GhostSamuraiRules.AttackInterval(SamuraiPhase.Phase1), "phase two has shorter interval");
+    }
+
+    [DomainTest("Ghost Samurai wisp snapshots round-trip and reject stale truncated or unbounded motion")]
+    private static void SamuraiWispWire()
+    {
         var h = new SamuraiHazard(SamuraiShape.Wisp, 400, 500, 1, 0, 0, 15, 72, 102, 282, 200);
-        AssertEqual(400f, h.CenterX(101), "stationary warning");
-        AssertEqual(false, h.Hits(101, 400, 500, 10, 21), "warning harmless");
-        AssertEqual(440f, h.CenterX(112), "ten ticks of bounded motion");
-        AssertEqual(true, h.Hits(112, 440, 500, 10, 21), "core hits");
-        AssertEqual(false, h.Hits(112, 440, 550, 10, 21), "outside circle safe");
-        AssertEqual(false, h.Hits(282, h.CenterX(282), 500, 10, 21), "expired wisp harmless");
+        var motion = SamuraiWispMotion.Spawn(h).Advance(h, 73, 0, 0);
+        AssertEqual(false, SamuraiWispMotion.Spawn(h).CanReplace(motion), "older full snapshot rejected");
+        AssertEqual(true, motion.CanReplace(SamuraiWispMotion.Spawn(h)), "newer full snapshot accepted");
+        using var stream = new MemoryStream(); motion.Write(new BinaryWriter(stream)); byte[] data = stream.ToArray(); stream.Position = 0;
+        AssertEqual(motion, SamuraiWispMotion.Read(new BinaryReader(stream), h), "full trajectory roundtrip");
+        for (int n = 0; n < data.Length; n++)
+        {
+            bool rejected = false;
+            try { SamuraiWispMotion.Read(new BinaryReader(new MemoryStream(data, 0, n)), h); } catch (IOException) { rejected = true; }
+            AssertEqual(true, rejected, "truncated motion snapshot rejected");
+        }
+        foreach (var invalid in new[] { motion with { Tick = h.Born - 1 }, motion with { Tick = h.End },
+            motion with { X = float.NaN }, motion with { Y = float.PositiveInfinity }, motion with { VX = 5 }, motion with { VY = float.NaN } })
+        {
+            using var packet = new MemoryStream(); invalid.Write(new BinaryWriter(packet)); packet.Position = 0;
+            bool rejected = false;
+            try { SamuraiWispMotion.Read(new BinaryReader(packet), h); } catch (InvalidDataException) { rejected = true; }
+            AssertEqual(true, rejected, "invalid motion rejected before mutation");
+        }
     }
 
     [DomainTest("Ghost Samurai dash is continuous and reaches its warned endpoint")]
