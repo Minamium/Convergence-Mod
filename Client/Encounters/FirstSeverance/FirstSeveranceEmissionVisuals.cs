@@ -159,8 +159,8 @@ internal sealed class FirstSeveranceEmissionVisuals
             }
             foreach (var ray in v.Rays)
             {
-                // Deliberately opt in only the pursuit family. Final's four-color
-                // score and every other Boss/weapon retain their accepted material.
+                // Keep the eight-cast cancellation/timing adapter. The other
+                // Raid adapters now reach the same material without sharing state.
                 if (e.MainSequence && v.Kind == FirstSeveranceAttackKind.PursuitPrism)
                 {
                     pursuit.Draw(batch, ray, Math.Min(now, authorityTick + .999),

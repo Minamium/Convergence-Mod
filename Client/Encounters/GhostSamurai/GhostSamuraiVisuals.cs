@@ -68,9 +68,10 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             case SamuraiAttack.DirectionalSlash:
                 return GhostSamuraiRules.DirectionalPose(t);
             case SamuraiAttack.ChargedSlash:
-                t -= GhostSamuraiRules.ChargeAimTime;
-                warning = GhostSamuraiRules.ChargeWarning; live = GhostSamuraiRules.ChargeLive; break;
+                return GhostSamuraiRules.ChargePose(t - GhostSamuraiRules.ChargeAimTime, boss.Phase, false);
             case SamuraiAttack.GridSlash:
+                if (t >= GhostSamuraiRules.GridFollowStart)
+                    return GhostSamuraiRules.ChargePose(t - GhostSamuraiRules.GridFollowStart, boss.Phase, true);
                 // Quick double unsheathing in the prelude, then a held pose.
                 if (t < GhostSamuraiRules.GridPrelude) return MathF.Sin(t / GhostSamuraiRules.GridPrelude * MathHelper.TwoPi * 2) * .7f;
                 t -= GhostSamuraiRules.GridPrelude;
@@ -123,7 +124,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
             if (h.Shape == SamuraiShape.Slash && h.Radius == GhostSamuraiRules.ChargeHalfWidth)
                 for (int warning = 0; warning < 3; warning++)
                 {
-                    int at = h.Born + warning * 24;
+                    int at = h.Born + warning * (h.Fire - h.Born) / 3;
                     if (lastAge < at && tick >= at) SoundEngine.PlaySound(SoundID.Item4 with { Volume = .7f, Pitch = warning * .15f }, projectile.Center);
                 }
             if (lastAge < h.Fire && tick >= h.Fire && h.Shape == SamuraiShape.Slash)
@@ -138,8 +139,10 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
     public override bool PreDraw(Projectile projectile, ref Color lightColor)
     {
         if (Main.dedServ || projectile.ModProjectile is not GhostSamuraiAttackProjectile p || !p.TryGetAge(out float age)) return true;
-        var h = p.Hazard;
+        var h = p.DisplayHazard;
         if (age < h.Born || age >= h.End) return false;
+        // A delayed client must not render a stale aimed line as the live strike.
+        if (h.Shape == SamuraiShape.Slash && age >= h.Fire && !p.SlashAim.Locked) return false;
         SpriteBatch batch = Main.spriteBatch;
         Vector2 position = p.VisualCenter(age) - Main.screenPosition;
         bool live = h.Live(age);
@@ -162,6 +165,9 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
             Color ink = new(6, 13, 30);
             Color edge = live ? new Color(218, 253, 255)
                 : Color.Lerp(new Color(255, 180, 58), new Color(255, 235, 160), progress);
+            // The stable pale-gold edge identifies the final dodge window without
+            // adding a flash or changing the authoritative width.
+            if (!live && p.SlashAim.LockTick > h.Born && p.SlashAim.Locked) edge = new Color(255, 245, 198);
             GhostSamuraiVisuals.Stroke(batch, position, end, h.Radius * 2, ink * (live ? .35f : .42f));
             GhostSamuraiVisuals.Stroke(batch, position, end, h.Radius * 2 - 4, (live ? color : edge) * (live ? .38f : .14f + .08f * progress));
             GhostSamuraiVisuals.Stroke(batch, position, end, live ? 7 : 4, ink * .85f);
