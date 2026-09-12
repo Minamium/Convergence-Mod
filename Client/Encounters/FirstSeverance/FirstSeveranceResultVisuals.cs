@@ -40,21 +40,15 @@ internal static class FirstSeveranceResultVisuals
 
         float inscription = FirstSeveranceVisualCurves.Window(age, victory ? .58 : .15, victory ? .85 : .33) * leave;
         float axisY = victory ? height * .80f : height * .48f;
-        float span = Math.Min(720, width * .8f) * FirstSeveranceVisualCurves.Window(age, .05, .35);
-        for (int side = -1; side <= 1; side += 2)
-        {
-            int y = (int)(axisY + side * 43);
-            batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)((width - span) * .5f), y, (int)span, 1), pixel, accent * fade * .65f);
-            int x = (int)(width * .5f + side * span * .5f);
-            batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(x, y - 7, 2, 15), pixel, accent * fade);
-        }
+        // Let the actual scene close before the result settles. No targeting
+        // brackets or machine-status readout competing with the final rift.
+        float settle = 1 - FirstSeveranceVisualCurves.Window(age, victory ? .79 : .17, victory ? .88 : .36);
+        float offset = (reduced ? 0 : 13) * settle * settle;
         string key = "Mods.Convergence.UI.FirstSeverance.";
         Utils.DrawBorderString(batch, Language.GetTextValue(key + "IntroRaidName").ToUpperInvariant(),
             new Vector2(width * .5f, height * .064f), Color.Silver * fade, .85f, .5f);
-        Utils.DrawBorderString(batch, victory ? "[ RAID SIGNAL // TERMINATED ]" : "[ PARTICIPANT SIGNAL // LOST ]",
-            new Vector2(width * .5f, axisY - 72), accent * inscription, .75f, .5f);
         Utils.DrawBorderString(batch, Language.GetTextValue(key + (victory ? "ResultVictory" : "ResultDefeat")),
-            new Vector2(width * .5f, axisY - 19), Color.White * inscription, Math.Min(1.55f, width / 660f), .5f);
+            new Vector2(width * .5f, axisY - 19 + offset), Color.White * inscription, Math.Min(1.55f, width / 660f), .5f);
         Utils.DrawBorderString(batch, Language.GetTextValue(key + (victory ? "ResultVictoryDetail" : "ResultDefeatDetail")),
             new Vector2(width * .5f, height * .91f), accent * inscription, .8f, .5f);
     }

@@ -54,31 +54,10 @@ internal static class FirstSeveranceDissolutionVisuals
     internal static void Rift(SpriteBatch batch, FirstSeveranceAttackAccents accents, Vector2 center,
         float age, bool reduced)
     {
-        Vector2 axis = RiftAxis, normal = new(-axis.Y, axis.X);
-        float opening = Window(age, .025, .075);
-        float drawIn = Window(age, .28, .78);
-        float shut = 1 - Window(age, .785, .81);
-        float life = opening * shut;
-        float length = (880 + drawIn * 480) * life;
-        Color ion = new(202, 154, 255);
-        accents.Halo(batch, center, new Vector2(length * .68f, 35 + drawIn * 90), ion,
-            life * (reduced ? .16f : .7f), axis.ToRotation());
-        const int segments = 32;
-        for (int i = 0; i < segments; i++)
-        {
-            float u = i / (float)segments, v = (i + 1f) / segments;
-            float taper = MathF.Pow(MathF.Sin((u + v) * .5f * MathF.PI), 1.7f);
-            float bend = MathF.Sin(u * 19 + age * 24) * 6 * taper * life;
-            Vector2 a = center + axis * ((u - .5f) * length) + normal * bend;
-            Vector2 b = center + axis * ((v - .5f) * length) + normal * (MathF.Sin(v * 19 + age * 24) * 6 * taper * life);
-            float width = taper * (12 + drawIn * 52) * life;
-            Line(batch, a, b, new Color(1, 0, 5) * life, width + 2);
-            for (int side = -1; side <= 1; side += 2)
-                Line(batch, a + normal * side * width * .5f, b + normal * side * width * .5f,
-                    FirstSeveranceAttackAccents.Neon(side < 0 ? ion : Color.White, life * (reduced ? .2f : .85f)), 1.2f + drawIn * 2);
-        }
-        float flash = Window(age, .785, .797) * (1 - Window(age, .797, .88));
-        accents.Halo(batch, center, new Vector2(1300, 130), Color.White, flash * (reduced ? .10f : 1), axis.ToRotation());
-        accents.Halo(batch, center, new Vector2(820), ion, flash * (reduced ? .06f : .9f));
+        float open = Window(age, .025, .075), pull = Window(age, .29, .78);
+        float life = open * (1 - Window(age, .785, .81));
+        FirstSeveranceRaidVfx.Rift(batch, center, RiftAxis, (1080 + pull * 480) * open,
+            160 + pull * 120, age * 210, .25f + pull * .75f, life,
+            new Color(202, 154, 255), reduced);
     }
 }

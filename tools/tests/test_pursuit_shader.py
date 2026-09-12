@@ -1,4 +1,4 @@
-"""Narrow opt-in and exported-shader contracts; not a claim of game rendering."""
+"""Doll Raid render integration/export guards; GPU/game checks are separate."""
 import importlib.util
 import json
 from pathlib import Path
@@ -13,7 +13,7 @@ spec.loader.exec_module(exports)
 
 
 class PursuitShader(unittest.TestCase):
-    def test_only_main_pursuit_opts_in(self):
+    def test_pursuit_and_final_keep_their_existing_timing_adapters(self):
         text = (ROOT / "Client/Encounters/FirstSeverance/FirstSeveranceEmissionVisuals.cs").read_text()
         self.assertIn("e.MainSequence && v.Kind == FirstSeveranceAttackKind.PursuitPrism", text)
         self.assertIn("Accept(volley, tick, true)", text)
@@ -23,19 +23,36 @@ class PursuitShader(unittest.TestCase):
         self.assertNotIn("pursuit.Draw", final)
 
     def test_native_pass_is_client_only_and_preserves_world_width(self):
-        text = (ROOT / "Client/Encounters/FirstSeverance/FirstSeverancePursuitBeamVisuals.cs").read_text()
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        text = (root / "FirstSeveranceRaidVfx.cs").read_text()
         self.assertLess(text.index("Main.dedServ"), text.index("ShaderManager.GetShader"))
-        self.assertIn("float live = active ? 1 : 0", text)
-        self.assertIn("Quad(origin, direction, ray.Length, ray.HalfWidth)", text)
+        adapter = (root / "FirstSeverancePursuitBeamVisuals.cs").read_text()
+        self.assertIn("ray.Length,ray.HalfWidth", adapter)
+        self.assertIn("Quad(c.Origin,c.Direction,c.Length,c.HalfWidth)", text)
         self.assertIn("Main.GameViewMatrix.TransformationMatrix", text)
         self.assertNotIn("UIScale", text)
         self.assertIn("finally", text)
-        self.assertNotIn("Main.rand", text)
-        for slot in (1, 2):
-            self.assertIn(f"device.Textures[{slot}] = texture{slot}", text)
-            self.assertIn(f"device.SamplerStates[{slot}] = sampler{slot}", text)
-        self.assertIn('shader.Apply(warning ? "ForecastPass" : "AutoloadPass")', text)
-        self.assertIn('shader.Apply("BloomPass")', text)
+        self.assertNotIn("Main.rand.", text)
+        for slot in (1, 2, 3):
+            self.assertIn(f"device.Textures[{slot}]=t{slot}", text)
+            self.assertIn(f"device.SamplerStates[{slot}]=s{slot}", text)
+        self.assertIn('live > 0 ? "AutoloadPass" : "ForecastPass"', text)
+        self.assertIn("!confined && live > 0", text)
+        self.assertIn("if(count==commands.Length) Flush(batch)", text)
+        self.assertNotIn("new Texture2D", text)
+
+    def test_all_named_passes_exist_and_frame_is_retired(self):
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        renderer = (root / "FirstSeveranceRaidVfx.cs").read_text()
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
+        for name in ("AutoloadPass", "ForecastPass", "CoronaPass", "MouthPass",
+                     "OrbPass", "WakePass", "PressurePass", "RiftPass", "FlarePass"):
+            self.assertIn(f'"{name}"', renderer)
+            self.assertIn(f"pass {name} {{", shader)
+        owner = (root / "FirstSeverancePrototypePresentation.cs").read_text()
+        self.assertIn("FirstSeveranceRaidVfx.BeginFrame()", owner)
+        self.assertIn("FirstSeveranceRaidVfx.EndFrame(batch)", owner)
+        self.assertIn("FirstSeveranceRaidVfx.Reset()", owner)
 
     def test_current_exports_match(self):
         exports.verify()

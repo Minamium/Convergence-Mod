@@ -111,6 +111,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
 
     public override void OnWorldUnload()
     {
+        FirstSeveranceRaidVfx.Reset();
         fieldMask = null;
         visuals.Reset();
         preparationVisuals.Reset();
@@ -120,6 +121,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
 
     public override void Unload()
     {
+        FirstSeveranceRaidVfx.Reset();
         fieldMask = null;
         visuals.Reset(unload: true);
         preparationVisuals.Reset();
@@ -238,6 +240,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                 transform, viewport.Width, viewport.Height);
         }
         SpriteBatch batch = Main.spriteBatch;
+        FirstSeveranceRaidVfx.BeginFrame();
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         try
@@ -253,6 +256,8 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             visuals.Draw(batch, combat, state.EstimatedAuthorityTick);
             bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
             feedback.Draw(batch, reduced);
+            // Flush energetic bodies before player/gather boundaries and labels.
+            FirstSeveranceRaidVfx.Flush(batch);
             var safeWindow = FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex,
                 combat.ActionStartedTick, state.EstimatedAuthorityTick, combat.CoreX, combat.CoreY);
             if (safeWindow is { } expired && state.EstimatedAuthorityTick >= expired.ResolveTick) safeWindow = null;
@@ -295,6 +300,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         }
         finally
         {
+            FirstSeveranceRaidVfx.EndFrame(batch);
             batch.End();
         }
     }
