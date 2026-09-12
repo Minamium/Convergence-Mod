@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-13",
+  "feature": "Install integrated Ghost Samurai combo update for the requesting user's normal playtest profile",
+  "version": "0.2.66",
+  "protocol": 31,
+  "source_branch": "main",
+  "source_commit": "04051a1489a8d577ef64f26161ad0a85ef590842",
+  "feature_head": "379a0e67c5cb33bf18e4ef568c56c1f4d64791cd",
+  "pr": "https://github.com/Minamium/Convergence-Mod/pull/8",
+  "authorization": "User explicitly asked to reflect the changes so they can playtest. Main integration and normal-profile installation were performed under that request; no game/GUI/server launch was requested or performed.",
+  "integration": {
+    "method": "Repository permits squash merges only. PR #8 merged using its expected head; feature branch/history retained and no force/reset/deletion used.",
+    "tree_matches_verified_feature": true,
+    "ci": {"result": "passed", "workflow": "Repository checks", "run_id": 34711960262, "run_number": 73},
+    "source_layout": "Dedicated main worktree, advanced by fast-forward only. Local ModSources/Convergence was a verified junction to this task's retired worktree. Replaced only that link with a junction to integrated main; old source files and dirty worktrees retained. Personal paths/configuration remain in ignored local files."
+  },
+  "environment_reference": "2026-09-13-ghost-samurai-combos.json",
+  "build": {
+    "result": "passed",
+    "mode": "tools/dev.py build --native from integrated main into existing normal tModLoader profile",
+    "record_id": "20260912T191410800458Z",
+    "dirty_at_start": false,
+    "source_sha256": "0cbb224ba263af443b9814b22c9ffa373568b368a1d6031e87f0b764a0b89c6b",
+    "source_changed_during_build": false,
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "shader_exports": "passed",
+    "artifact_bytes": 54715056,
+    "artifact_sha256": "2e26e9953e906dec982fb8a725198e5bb0099d5783efe678403f0b2439b1e822",
+    "previous_package": "Preserved automatically in the ignored build-record directory",
+    "after_build": "Only installation evidence/status/catalog documentation; no runtime or asset edits"
+  },
+  "checks": {
+    "installed_package_matches_record": "passed",
+    "installed_package_version": "0.2.66",
+    "installed_Global_type_validation": "passed: GhostSamuraiVisuals and GhostSamuraiHazardVisuals against installed tModLoader ValidateType",
+    "summon_identity": "passed: Convergence/GhostSamuraiSummon present",
+    "mod_list": "Convergence and Luminance already enabled; personal enabled.json hash unchanged",
+    "source_alignment": "passed: ModSources/Convergence points to the actual integrated main build source",
+    "reused_checks": "Fifteen focused Ghost Samurai domain tests and protocol31's 324 round-trips / 50 malformed rejections; exact source tree unchanged by merge",
+    "static": {"result": "passed", "catalog_documents": 66, "repository_files": 640, "yaml_files": 10}
+  },
+  "runtime": {
+    "full_Mod_load": "not_run; user-owned",
+    "Single_Player": "not_run; user-owned",
+    "Host_and_Play": "not_run; user-owned",
+    "Dedicated_Server": "not_run; user-owned",
+    "Build_and_Reload": "not_run; normal-profile native package already installed",
+    "game_gui_or_server_started": false,
+    "saves_modified": false
+  },
+  "handoff": "Start tModLoader or Reload Mods from its menu, verify Convergence0.2.66, then use the existing bell. All multiplayer peers require protocol31. No extra Build + Reload needed. Verify paired rhythm, grid-to-charge dodge, late-lock dash/charge, the longer third Phase2 hold, wisps and end/phase cleanup."
+}
