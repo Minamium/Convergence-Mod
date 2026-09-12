@@ -9,7 +9,7 @@ internal sealed record GhostSamuraiActorSource(GhostSamuraiRuntime Runtime, Guid
 {
     public string Context => "GhostSamuraiSummon";
 }
-internal sealed record GhostSamuraiAttackSource(Guid Fight, int BossSlot, SamuraiHazard Hazard) : IEntitySource
+internal sealed record GhostSamuraiAttackSource(Guid Fight, int BossSlot, SamuraiHazard Hazard, int AimLockTick) : IEntitySource
 {
     public string Context => "GhostSamuraiAttack";
 }
