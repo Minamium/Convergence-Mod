@@ -31,6 +31,11 @@ class PursuitShader(unittest.TestCase):
         self.assertNotIn("UIScale", text)
         self.assertIn("finally", text)
         self.assertNotIn("Main.rand", text)
+        for slot in (1, 2):
+            self.assertIn(f"device.Textures[{slot}] = texture{slot}", text)
+            self.assertIn(f"device.SamplerStates[{slot}] = sampler{slot}", text)
+        self.assertIn('shader.Apply(warning ? "ForecastPass" : "AutoloadPass")', text)
+        self.assertIn('shader.Apply("BloomPass")', text)
 
     def test_current_exports_match(self):
         exports.verify()

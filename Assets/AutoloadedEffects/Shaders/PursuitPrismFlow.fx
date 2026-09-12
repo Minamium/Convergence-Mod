@@ -1,21 +1,16 @@
-// Original Convergence material. No external shader/textures copied.
-// XY are the locked corridor coordinates; animation affects radiance only.
+// Original Convergence material. Luminance supplies the two noise maps at runtime.
+// Warning/live geometry is immutable. Flow, corona and sparks are radiance only.
 float4x4 uWorldViewProjection;
 float3 beamColor;
 float4 envelope; // tension, authority-live, opacity, release impulse
-float2 dimensions; // physical length, half width
+float2 dimensions; // physical length, half width of this pass
 float flowTime;
 float detail;
+sampler cloudNoise : register(s1);
+sampler fractureNoise : register(s2);
 
-struct VertexInput {
-    float4 position : POSITION0;
-    float4 color : COLOR0;
-    float2 uv : TEXCOORD0;
-};
-struct FragmentInput {
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD0;
-};
+struct VertexInput { float4 position : POSITION0; float4 color : COLOR0; float2 uv : TEXCOORD0; };
+struct FragmentInput { float4 position : SV_POSITION; float2 uv : TEXCOORD0; };
 FragmentInput VertexMain(VertexInput input) {
     FragmentInput output;
     output.position = mul(input.position, uWorldViewProjection);
@@ -23,79 +18,80 @@ FragmentInput VertexMain(VertexInput input) {
     return output;
 }
 
-float Hash(float2 p) {
-    return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
+// Two differently advected scales: flowing volume under a torn, faster skin.
+// Coordinates use world lengths, not the stretched quad's aspect ratio.
+float3 Flow(float x, float y) {
+    float cloud = tex2D(cloudNoise, float2(x * .0027 - flowTime * .13, y * .48 + flowTime * .023)).r;
+    float fine = tex2D(fractureNoise, float2(x * .009 - flowTime * .36 + cloud * .17,
+        y * 1.6 + cloud * .38 - flowTime * .038)).r;
+    float folds = tex2D(cloudNoise, float2(x * .0048 - flowTime * .23, y * 1.1 - cloud * .3)).r;
+    return float3(cloud, fine, folds);
 }
-float Noise(float2 p) {
-    float2 cell = floor(p), f = frac(p);
-    f = f * f * (3 - 2 * f);
-    return lerp(lerp(Hash(cell), Hash(cell + float2(1, 0)), f.x),
-        lerp(Hash(cell + float2(0, 1)), Hash(cell + 1), f.x), f.y);
+
+float4 PixelBody(FragmentInput input) : COLOR0 {
+    float x = input.uv.x * dimensions.x, y = input.uv.y * 2 - 1;
+    float3 n = Flow(x, y);
+    float warp = (n.x - .5) * .15 * detail;
+    float radial = abs(y - warp * (1 - abs(y)));
+    // The occupied body reaches the locked boundary; only the last 2px feather.
+    // No moving gaps, growing damage front, constant rectangular fill or rails.
+    float boundary = 1 - smoothstep(1 - 2 / max(dimensions.y, 2), 1, abs(y));
+    float mantle = pow(saturate(1 - radial * radial), .8);
+    float convection = exp2(-radial * radial * 4.5) * (.22 + n.x * .58);
+    float strata = pow(saturate(n.y * 1.35), 3) * (.14 + n.z * .6) * detail;
+    float core = exp2(-pow(radial, 1.6) * 25) * (.58 + n.z * .48);
+    float lace = pow(saturate(n.z * 1.65 - n.y * .45), 4) * exp2(-radial * radial * 3.5);
+    float3 pearl = lerp(beamColor, float3(1, .98, .94), .88);
+    float3 light = beamColor * mantle * (.12 + convection + strata * .5)
+        + pearl * (core * .86 + lace * .24 + envelope.w * .23 * exp2(-radial * radial * 5));
+    return float4(light * boundary * envelope.z, 0);
 }
-float Band(float value, float width) {
-    float q = saturate(1 - abs(value) / width);
-    return q * q;
+
+float4 PixelForecast(FragmentInput input) : COLOR0 {
+    float x = input.uv.x * dimensions.x, y = input.uv.y * 2 - 1;
+    float3 n = Flow(x, y);
+    float area = pow(saturate(1 - y * y), .6);
+    float boundary = 1 - smoothstep(.95, 1, abs(y));
+    float spine = exp2(-y * y * dimensions.y * dimensions.y * .45);
+    float charge = pow(saturate(n.y * 1.65 - .3), 3) * exp2(-y * y * 5) * detail;
+    float3 pearl = lerp(beamColor, float3(1, .98, .94), .65);
+    float3 light = beamColor * (area * (.065 + .04 * envelope.x) + charge * .075)
+        + pearl * spine * (.34 + .18 * envelope.x);
+    return float4(light * boundary * envelope.z, 0);
+}
+
+float4 PixelBloom(FragmentInput input) : COLOR0 {
+    float x = input.uv.x * dimensions.x, y = input.uv.y * 2 - 1;
+    float3 n = Flow(x, y * 2.7);
+    // This pass is 2.7x wider than danger; keep it diffuse and much dimmer.
+    float halo = exp2(-y * y * 11) * pow(saturate(1 - y * y), 2);
+    float veil = halo * (.10 + .035 * n.x) * (.3 + envelope.y * .7);
+    // Flecks shear away from the hot body. These cannot create false safe holes.
+    float flecks = pow(saturate(n.y * 1.8 - .4), 7) * pow(saturate(n.z * 1.8), 3)
+        * exp2(-pow(abs(y) - .36, 2) * 50) * .11 * envelope.y * detail;
+    return float4(beamColor * (veil + flecks) * envelope.z * lerp(.45, 1, detail), 0);
 }
 
 float4 PixelMouth(FragmentInput input) : COLOR0 {
-    float2 uv = input.uv;
-    float x = uv.x * dimensions.x, y = uv.y * 2 - 1;
-    float tension = envelope.x, live = envelope.y, opacity = envelope.z, kick = envelope.w;
-    float3 pearl = lerp(beamColor, float3(1, .97, .94), .8);
-        // A crooked longitudinal pressure fold gathers into a slit at x=150.
-        // Fibers brake at the mouth, then visibly turn downstream on release.
-        float mouth = (x - 150) / 70;
-        float rear = saturate(-mouth);
-        float side = 1 - smoothstep(.65, 1, abs(y));
-        float falloff = 1 - smoothstep(.65, 1, abs(mouth) * .43);
-        float warp = sin(mouth * 8 + flowTime * 2) * .08 * rear;
-        float fibers = Band(y - warp - sin(mouth * 4 - flowTime) * rear * .38, .065)
-            + Band(y + warp + sin(mouth * 5 + flowTime * 1.3) * rear * .5, .045);
-        float slit = Band(mouth, .14 + kick * .16) * pow(saturate(1 - abs(y)), .65);
-        float throat = Band(y, .20 + live * .15) * exp(-abs(mouth) * 2.7);
-        float haze = exp(-mouth * mouth * 4 - y * y * 6) * (.1 + tension * .1);
-        float3 light = beamColor * (haze + fibers * rear * .34 * detail + slit * .4)
-            + pearl * (slit * (.45 + kick * .7) + throat * (.3 + live * .8));
-        return float4(light * side * falloff * opacity * lerp(.66, 1, detail), 0);
-}
-
-float4 PixelMain(FragmentInput input) : COLOR0 {
-    float2 uv = input.uv;
-    float x = uv.x * dimensions.x, y = uv.y * 2 - 1;
-    float tension = envelope.x, live = envelope.y, opacity = envelope.z, kick = envelope.w;
-    float3 pearl = lerp(beamColor, float3(1, .97, .94), .8);
-    float edge = 1 - smoothstep(.94, 1, abs(y));
-    float noise = Noise(float2(x * .012 - flowTime, y * 2.4 + flowTime * .12));
-    float fine = Noise(float2(x * .038 - flowTime * 2, y * 5 - flowTime * .17));
-    float turn = sin(x * .018 - flowTime * 2.2 + noise * 3) * .075 * detail;
-    float throat = lerp(.17, .62, smoothstep(0, 155, x));
-    float skin = Band(y - turn, throat + (noise - .5) * .22 * detail);
-    float hot = Band(y - turn * .4, .10 + kick * .05);
-    float filaments = Band(y - turn - sin(x * .027 - flowTime * 2.1) * .34, .07)
-        + Band(y + turn + sin(x * .019 - flowTime * 1.7 + 2) * .45, .045);
-    float wake = .55 + .45 * fine;
-    // No dark slots within the live width, no thick edge rails. The narrower
-    // bright core is material detail; the continuous colored body is danger.
-    float occupied = .27 + .18 * noise;
-    float3 plasma = beamColor * (occupied + skin * .66 + filaments * .28 * detail)
-        + pearl * (hot * .72 + skin * wake * .31 + kick * .10);
-    float spine = Band(y, min(.11, 2.2 / max(dimensions.y, 1)));
-    float3 forecast = beamColor * (.075 + noise * .075 + tension * .055)
-        + pearl * spine * (.23 + tension * .13);
-    // Movement is within the warning footprint, not dashed future "safe" lanes.
-    forecast += beamColor * filaments * .035 * detail;
-    float3 light = lerp(forecast, plasma, live);
-    float alpha = edge * opacity * lerp(.12, .08, live);
-    return float4(light * edge * opacity * lerp(.78, 1, detail), alpha);
+    // A pressure plume through a slit, not a circle/crosshair or looping wire.
+    float x = input.uv.x * dimensions.x - 120, y = input.uv.y * 2 - 1;
+    float3 n = Flow(x * 1.7, y * 1.8);
+    float crossFalloff = pow(saturate(1 - y * y), 2);
+    float rear = exp2(-abs(x) * .019);
+    float plume = exp2(-y * y * (8 + saturate(-x / 120) * 24)) * rear;
+    float slit = exp2(-x * x * .018) * crossFalloff;
+    float splinters = pow(saturate(n.y * 1.7 - .25), 5) * plume * detail;
+    float3 pearl = lerp(beamColor, float3(1, .98, .94), .87);
+    float3 light = beamColor * plume * (.1 + n.x * .24 + splinters * .3)
+        + pearl * (slit * (.12 + envelope.w * .48)
+        + plume * (.10 + envelope.y * .33 + envelope.w * .36));
+    float ends = smoothstep(-120, -85, x) * (1 - smoothstep(140, 180, x));
+    return float4(light * ends * envelope.z * lerp(.55, 1, detail), 0);
 }
 
 technique PursuitPrism {
-    pass AutoloadPass {
-        VertexShader = compile vs_3_0 VertexMain();
-        PixelShader = compile ps_3_0 PixelMain();
-    }
-    pass MouthPass {
-        VertexShader = compile vs_3_0 VertexMain();
-        PixelShader = compile ps_3_0 PixelMouth();
-    }
+    pass AutoloadPass { VertexShader = compile vs_3_0 VertexMain(); PixelShader = compile ps_3_0 PixelBody(); }
+    pass ForecastPass { VertexShader = compile vs_3_0 VertexMain(); PixelShader = compile ps_3_0 PixelForecast(); }
+    pass BloomPass { VertexShader = compile vs_3_0 VertexMain(); PixelShader = compile ps_3_0 PixelBloom(); }
+    pass MouthPass { VertexShader = compile vs_3_0 VertexMain(); PixelShader = compile ps_3_0 PixelMouth(); }
 }
