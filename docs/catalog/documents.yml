@@ -45,7 +45,7 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: c367881905dfced5df9835267d8235e327fa96cfd109aaac810f8dab8800f71b
+  content_sha256: 718611ba584ef429e64f904f767c3428c261d2edb5f74b6dc52941570af445ac
   document_type: policy
   status: accepted
   owners:
@@ -394,7 +394,7 @@ documents:
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: e236baa476e8cd1f64d7f67d8e818442430f424ffecc467f339cef91accd4c51
+  content_sha256: ac31eea2e5ac5be00e4f7ec7839179519db0c23af68b98c8a73afbc425cd5698
   document_type: runbook
   status: accepted
   owners:
@@ -622,13 +622,13 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 22bcc5b081ce2a7d402b2c23940d5e1c3b518c77832772b68e5703b94839fa4c
+  content_sha256: a6c748d019bec97408a257ef43efebf60f7f48d574715228133ca608334036ff
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -788,7 +788,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: f2a28a0ed7967841007574e560fe3d7a68aaa91e1bc18e52582ecff6f8821c2c
+  content_sha256: 696aca3e8f0d7da8635cd2e1e6d886a2582d02e48662ff8f07bb423927661ce4
   document_type: policy
   status: accepted
   owners:
@@ -1103,12 +1103,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 88afdd1bf9f40e0733f005a35986cd96084c832b50fea5535b2fbdb5f827c2dc
+  content_sha256: c6ab5c00d3ebd83c3db3c7b2104da625070d67baa941b449eef82edaecb59954
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1300,7 +1300,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 06be4c7b8f2f25ef60a54d60c1589e9943cda7285e504f6ed5f66e97e50efe73
+  content_sha256: 7a1d915d7319f2a64851d54c62671c4e823cfe6d4e10f29eb4ae5d39e7d09f7f
   document_type: research
   status: historical
   owners:

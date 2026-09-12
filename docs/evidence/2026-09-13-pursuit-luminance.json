@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.64",
+  "protocol": 30,
+  "source_commit": "4b452f7e34e31457b0e0030d5e123666aa3aaafd",
+  "source_branch": "main",
+  "source_sha256": "4e4d7bb49513920ef11b2bfca6a6ddeca5fa354d05f03a4f8c3be634c266b3ea",
+  "local_build_record": ".local/builds/20260912T175358022697Z/record.json",
+  "preserved_local_changes": [
+    "Localization/DollActivation/en-US.hjson",
+    "Localization/DollBeam/en-US.hjson",
+    "Localization/DollTheater/en-US.hjson",
+    "Localization/GhostSamurai/en-US.hjson",
+    "Localization/Preparation/en-US.hjson",
+    "Localization/en-US.hjson"
+  ],
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "installed_hjson_parser_files_passed": 18,
+    "source_changed_during_build": false,
+    "bytes": 54667971,
+    "sha256": "5d29c0d8d35a3a34d596ab63c71faca4c761ef257d5e06a4c5e3262a42b26fd3",
+    "previous_package": "preserved by dev.py",
+    "shader_bytes": 10104,
+    "shader_sha256": "ab7345ed96f2b694edb7163765d838e309541824d599d979b00b892145c0b2ca",
+    "export_matches_installed_package": true,
+    "forbidden_fx_source_manifest_local_or_dependency_dll_entries": 0
+  },
+  "dependency": {
+    "name": "Luminance",
+    "minimum": "1.0.14",
+    "installed": "1.0.14",
+    "source_reference": "b2468dfd2f299597602dc6826af781d436c29a57",
+    "source_binary_identity": "unproven; same declared version",
+    "scope": "public ManagedShader loading/parameters/named-pass API only; original HLSL"
+  },
+  "checks": {
+    "focused_shader_tests": "4 passed: opt-in, client/world contract, source/export match, stale rejection",
+    "localization_preflight_tests": "2 passed",
+    "native_shader": "FXC compilation passed (expected Effects-deprecated compiler warning); installed FNA/D3D11 loaded the actual .fxc and rendered 24 offline passes",
+    "offline_preview": ".local/shader-preview/pursuit-material.png; rows ruby/blue/mint/gold, columns forecast/live/residue",
+    "preview_setup_failure": "Initial standalone preview missed FNA3D_PrepareWindowAttributes and raised NoSuitableGraphicsDeviceException. Setup corrected; subsequent hidden-window runs passed. No game was running or modified by the preview.",
+    "visual_iteration": "Separated beam/mouth shader passes after native preview revealed incorrect combined conditional output; final preview has connected luminous slit without rectangular muzzle fill.",
+    "gameplay": "No Content/Common or network changes. Spread pursuit, Final score, all weapons and other boss render paths unchanged."
+  },
+  "runtime_not_run": [
+    "Full tModLoader reload/autoload with the new declared dependency",
+    "Eight-cast forecast/live footprint readability and subjective motion approval",
+    "Peer 107% UI scale / zoom / camera and Reduced Effects",
+    "FPS/compatibility beyond the local offline D3D11 effect check"
+  ]
+}

@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-13
 source_of_truth_for:
   - first_severance.visual_mvp
 aliases:
@@ -62,7 +62,7 @@ Native selected boss-bar style is retained, including vanilla. The Boss register
 
 ## Beams, swords and forecast readability
 
-- Eight-cast PursuitPrism and the four-color Final score share the accepted Core/Lacuna flowing ribbon jet, with a connected narrow throat and the **original per-cast colors**, not an all-purple recolor. The fine lattice still uses its accepted tooth material. Full real corridor and dim harmless residue remain; [encounter timing](ENCOUNTER_SPEC.md#four-color-final-prism-score) is authoritative.
+- The main eight-cast PursuitPrism uses the original Luminance-managed `PursuitPrismFlow` shader: rapid pressure-slit appearance, braked tension, an immediate full-width live volume with a flowing pearl core and turbulent colored skin, then dim residue. **Original per-cast colors, authority geometry and warning/live/end ticks remain unchanged.** The separate Spread pursuit and Final four-color score still use the accepted Core/Lacuna ribbon jet; the fine lattice and weapons are unchanged. No circular casting seal, arrows or thick edge rails are introduced. [Encounter timing](ENCOUNTER_SPEC.md#four-color-final-prism-score) remains authoritative.
 - Broad floods/salvos use tightly layered laminar light and wavering filaments **inside a readable continuous footprint**. No flat opaque slabs, fake decorative safe gaps or glow spilling into the surviving strip. Future width is readable before the actual live interval.
 - The single Phase-II Core beam has **one continuous forecast footprint and one center spine**, not parallel lane subdivisions. Its accepted violet Lacuna jet remains. A crater-like hole opens **within the rotating metal sphere**: physical inward displacement, raised metal lip, concave wall normals and dark depth all share one continuous profile, followed by tension hold, pressure widening and resealing. The bright throat graduates into the beam; the full collision corridor remains forecast and faintly covered at the root. No floating muzzle, seal, square-cut bright root or changed damage window. Use a persistent flow phase plus bounded release offset, not elapsed time multiplied by a changing speed that jumps on firing.
 - Phase-I Stillness builds/fires dense narrow teeth from each side footprint's center outward. Each tooth gets its complete forecast; only live teeth brighten as dangerous. Never illuminate the whole slab early.
@@ -73,6 +73,12 @@ Native selected boss-bar style is retained, including vanilla. The Boss register
 - **No prediction chevrons, SAFE/Gather words, Stack ordinal/count stamps or heavy forecast-edge rails.** Stack's inward gathering guidance is intentional, not permission to restore arrow patterns on beams.
 
 Shared geometry and accepted epochs drive both authority collision and live footprint; fractional time animates the surface only. [BeamMaterial](../../../Client/Encounters/FirstSeverance/FirstSeveranceBeamMaterial.cs), [EmissionVisuals](../../../Client/Encounters/FirstSeverance/FirstSeveranceEmissionVisuals.cs), [ScoreVisuals](../../../Client/Encounters/FirstSeverance/FirstSeveranceScoreVisuals.cs) and [ImpalingSwordVisuals](../../../Client/Encounters/FirstSeverance/FirstSeveranceImpalingSwordVisuals.cs) own those paths.
+
+## Luminance prototype boundary
+
+Only `FirstSeverancePursuitBeamVisuals` uses the dependency: two straight world-space quads and `ManagedShader`, without a new generic rendering framework, full-screen filter or RenderTarget. Luminance owns shader autoload/reload/disposal; existing per-Fight emitters own timing and cancellation. No network/authority or sound changes. Fractional time stops below the next authority tick; the complete corridor lights on the accepted live tick, not after an ornamental traveling front. The mouth and corridor use separate named passes; the native FNA preview caught an unsuitable combined conditional pass before packaging.
+
+API evidence, accessed 2026-09-13: official [Luminance](https://github.com/LucilleKarma/Luminance) at `b2468dfd2f299597602dc6826af781d436c29a57`, declared version 1.0.14; installed Workshop binary is also 1.0.14, but exact source/binary identity is unproven (GitHub `release` is still 1.0.12). [ShaderManager](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/Core/Graphics/Shaders/ShaderManager.cs) loads `.fxc` from `AutoloadedEffects/Shaders` under `ModName.FileName`; [ManagedShader](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/Core/Graphics/Shaders/ManagedShader.cs) exposes `TrySetParameter` and named-pass `Apply`, with server guards. Library license: [MIT](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/LICENSE). API usage only; no external shaders, assets or implementation copied. Drawing uses Convergence's existing world matrix/full half-width convention instead of Luminance's trail-specific projection/UV convention. Runtime screen scaling, peer rendering and performance are still user-owned acceptance, not inferred from compilation.
 
 ## Stack and Spread verdicts
 
