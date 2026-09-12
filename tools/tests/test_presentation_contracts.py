@@ -1,5 +1,7 @@
 """Small integration guards for the formerly double-scaled cinematic callbacks."""
 from pathlib import Path
+import re
+import struct
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -63,10 +65,19 @@ class CinematicCoordinates(unittest.TestCase):
         self.assertIn("FirstSeveranceClientActions.InteractWithCore", overlay)
         field = (CLIENT / "FoundationCoreVisuals.cs").read_text(encoding="utf-8")
         self.assertNotIn("Line(batch, top, latch", field)
-        self.assertIn("DrawSuspension(batch, hanger + offset, shoulder + offset", field)
-        cable = body(field, "private static void DrawSuspension")
-        self.assertIn("segment <= 12", cable)
-        self.assertIn("MathF.Sin(t * MathF.PI)", cable)
+        # The Doll rig now owns both the sealed shell and exposed-body cords.
+        doll = (CLIENT / "FirstSeveranceDollVisuals.cs").read_text(encoding="utf-8")
+        shell = body(doll, "internal static void DrawShellCords")
+        self.assertIn("FoundationCoreVisuals.HoistAnchor(", shell)
+        self.assertIn("FirstSeveranceShellSurface.Attachment(", shell)
+        self.assertIn("FirstSeveranceShellSurface.Suspension(", shell)
+        exposed = body(doll, "private void DrawCords")
+        self.assertIn("pose.Cords", exposed)
+        self.assertIn("cord.Attachment", exposed)
+        cable = body(doll, "internal static void Cord(")
+        self.assertIn("i<=count", cable)
+        self.assertIn("Vector2.Lerp(from,to,t)", cable)
+        self.assertIn("MathF.Sin(t*MathF.PI)", cable)
 
     def test_preparation_field_ready_and_cinematic_share_unscaled_geometry(self):
         source = (CLIENT / "FirstSeverancePreparationVisuals.cs").read_text(encoding="utf-8")
@@ -102,22 +113,32 @@ class CinematicCoordinates(unittest.TestCase):
         self.assertIn("tick >= result.MechanicTick", source)
         self.assertIn("orbit.Stop()", source)
 
-    def test_claw_swipe_keeps_unsheathe_without_long_sweep_layer(self):
+    def test_claw_swipe_uses_weapon_foley_without_long_sweep_layer(self):
         source = (CLIENT / "NullCantorClawPresentation.cs").read_text(encoding="utf-8")
-        self.assertIn('system.Play("BladeUnsheathe"', source)
+        self.assertIn('system.Play("ClawSwipe"', source)
         self.assertNotIn('system.Play("BladeSweep"', source)
+        self.assertIn("RitualWeaponFeedback.SoundRoot + name", body(source, "internal void Play("))
+        self.assertTrue((ROOT / "Assets/Sounds/Weapons/DollTheater/ClawSwipe.wav").is_file())
 
     def test_weapon_audio_is_not_muted_by_reduced_visual_effects(self):
         source = (CLIENT / "NullRefrainVisuals.cs").read_text(encoding="utf-8")
         self.assertNotIn("RitualArmamentArt.Reduced", body(source, "private void UpdateSustain"))
-        self.assertNotIn("RitualArmamentArt.Reduced", body(source, "internal static void Sound"))
+        # Sound returns a voice handle; its return type does not govern audibility.
+        sound = body(source, " Sound(")
+        self.assertIn("SoundEngine.PlaySound", sound)
+        for callback in (sound, body(source, "private void UpdateSustain")):
+            self.assertNotIn("RitualArmamentArt.Reduced", callback)
+            self.assertNotIn(".ReducedEffects", callback)
 
     def test_boss_registers_a_compact_existing_head_for_vanilla_bar(self):
         source = (ROOT / "Content/Encounters/FirstSeverance/Actors/FirstSeverancePrototypeBoss.cs").read_text(encoding="utf-8")
         self.assertIn("[AutoloadBossHead]", source)
-        self.assertIn("public override string BossHeadTexture => Texture;", source)
         self.assertIn("NPC.boss = true;", source)
-        self.assertTrue((ROOT / "Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem.png").is_file())
+        portrait = re.search(r'BossHeadTexture\s*=>\s*"Convergence/([^"]+)"', source)
+        self.assertIsNotNone(portrait, "The native Boss bar must resolve a project portrait")
+        png = (ROOT / (portrait.group(1) + ".png")).read_bytes()
+        self.assertEqual(b"\x89PNG\r\n\x1a\n", png[:8])
+        self.assertEqual((34, 34), struct.unpack(">II", png[16:24]), "Doll portrait dimensions from the visual spec")
 
     def test_claw_keeps_light_without_dark_trail_or_swipe_debris(self):
         source = (CLIENT / "NullCantorClawArt.cs").read_text(encoding="utf-8")

@@ -81,7 +81,7 @@ First integrate the scoped **0.2.62 / protocol30** load fix into main when the o
 
 Then continue the focused Ghost Samurai smoke: end a fight and summon again, read all four slash warnings and grid gaps, inspect the body's transparency/sword motion, and compare homing-wisp positions with a peer. Native load, multiplayer alignment and dodgeability remain user-owned. Retained Doll flight/beam/reward checks live in their evidence; an unrelated full Raid replay is not required.
 
-Next feature work starts from the integrated `origin/main`, in a new scoped branch/worktree. [AGENTS](../AGENTS.md#parallel-development-and-ghost-samurai-handoff) owns the contributor handoff; do not resume implementation from the retired Ghost Samurai branch or overwrite the shared package from a feature worktree.
+Next feature work starts from the integrated `origin/main`, in a new scoped branch/worktree. [Contributing](../CONTRIBUTING.md#shared-development) owns shared development; do not resume implementation from the retired Ghost Samurai branch or overwrite the shared package from a feature worktree.
 
 Retain the player-only Stack/Spread rings, renamed intro/bar and The Unbroken Promise companion. The stage NPC remains intact until all-Ready intro; minions do not replace missing Raid participants. Native rendering, listening and performance checks remain user-owned.
 
