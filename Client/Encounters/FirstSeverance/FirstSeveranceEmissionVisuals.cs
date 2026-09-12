@@ -180,10 +180,8 @@ internal sealed class FirstSeveranceEmissionVisuals
         float open, float emission, float warning, float cooling, Color color, bool reduced)
     {
         Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-        Vector2 normal = new(-direction.Y, direction.X);
         float angle = MathF.Atan2(direction.Y, direction.X);
         DrawAperture(batch, origin, direction, now, start, fire, open, emission, color, reduced);
-        Vector2 end = origin + direction * ray.Length;
 
         // The locked corridor is always readable, including a late
         // snapshot's first frame. Retired light is dim and has no rails.
@@ -195,48 +193,16 @@ internal sealed class FirstSeveranceEmissionVisuals
                 now - start, 1, active ? emission : emission * .15f, cooling, color, reduced);
         float light = active ? .85f + emission * .15f : emission * .12f;
         if (now < fire) light = 0;
-        float width = ray.HalfWidth * (0.08f + .92f * emission);
-        // Saturated plasma skin, white-hot inner spine, soft gradient
-        // strictly INSIDE the authority corridor, even on broad curtains.
         if (ray.HalfWidth < 120)
-            FirstSeveranceBeamMaterial.Draw(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
-                now - start, 1, emission, light, color, reduced);
-        // Flowing, tapered strands; the same converging fibers survive
-        // the launch and accelerate down the barrel. No static stretch.
-        int strands = reduced ? 3 : 7;
-        for (int fiber = 0; fiber < strands; fiber++)
         {
-            Vector2 previous = origin;
-            const int segments = 48;
-            for (int s = 1; s <= segments; s++)
-            {
-                float t = s / (float)segments;
-                float phase = t * 23 - FlowPhase(now - start, .42f, emission) + fiber * 2.4f;
-                float taper = MathF.Sin(MathF.PI * t) * .55f + .15f;
-                float offset = (MathF.Sin(phase) * .28f + (fiber / (float)strands - .5f)) * width * taper;
-                Vector2 next = origin + direction * (ray.Length * t) + normal * offset;
-                Line(batch, previous, next, FirstSeveranceAttackAccents.Neon(
-                    fiber == 0 ? Color.White : color, (.06f * warning + light * .65f) / (fiber * .17f + 1)),
-                    1.1f + emission * (fiber == 0 ? 3.5f : 1.2f));
-                previous = next;
-            }
+            // Same continuously flowing surface as the Core/Lacuna jet, retaining
+            // each Prism cast's color and the original locked full-width corridor.
+            FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
+                now - start, color, light, reduced, throatLength: 95, throatWidth: 18);
+            float kick = ReleaseImpulse(now, fire);
+            Accents.Halo(batch, origin, new Vector2(95 + kick * 110, 20 + kick * 28),
+                color, light * (reduced ? .22f : .52f), angle);
         }
-        // Textured turbulent knots move along the filament and dissolve
-        // at the endpoints. No bloom is placed in the stillness safe lane.
-        for (int knot = 0; knot < (reduced ? 2 : 5); knot++)
-        {
-            float t = Frac((float)(now - start) * .023f + knot * .217f);
-            float alpha = MathF.Sin(t * MathF.PI) * light * .55f;
-            Sprite(batch, new Rectangle(5, 12, 980, 455), origin + direction * (t * ray.Length),
-                new Vector2(700, width * 1.55f), angle, FirstSeveranceAttackAccents.Neon(color, alpha), new Vector2(.96f, .55f));
-        }
-        // Opening ring is born at the mouth then travels down the jet.
-        float age = (float)(now - fire);
-        float shock = Window(now, fire - 2d, fire + 3d) * (1 - Window(now, fire + 3d, endTick + 12d));
-        if (shock > 0)
-            Sprite(batch, new Rectangle(1010, 8, 235, 527), origin + direction * (Math.Max(0, age) * 42),
-                new Vector2(36 + Math.Max(age, 0) * 2, Math.Min(ray.HalfWidth * 1.8f, 120 + age * 3)), angle,
-                FirstSeveranceAttackAccents.Neon(color, shock * .85f), new(.5f));
     }
 
     private void DrawCurtainComb(SpriteBatch batch, Emitter e, double now, ulong authorityTick,

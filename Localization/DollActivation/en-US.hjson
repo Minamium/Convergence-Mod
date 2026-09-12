@@ -1,0 +1,19 @@
+Mods: {
+  Convergence: {
+    Items: {
+      TheaterDoll: {
+        DisplayName: Theater Doll
+        Tooltip: '''
+          Hold and click a Foundation Core pedestal to unfold the Doll Play's preparation
+          Not consumed; everyone readies after the field is deployed
+          A stage key, not the ten-slot Doll Covenant companion
+          '''
+      }
+    }
+    UI: {
+      DollActivation: {
+        RequiresDoll: Hold a Theater Doll and click the pedestal to prepare the Raid.
+      }
+    }
+  }
+}

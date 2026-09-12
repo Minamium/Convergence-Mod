@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceCoreCrater.cs" Link="Presentation/FirstSeveranceCoreCrater.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceDollActivation.cs" Link="Domain/FirstSeveranceDollActivation.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/GhostSamuraiRules.cs" Link="Domain/GhostSamuraiRules.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiWispMotion.cs" Link="Domain/SamuraiWispMotion.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiActorSnapshot.cs" Link="Domain/SamuraiActorSnapshot.cs" />

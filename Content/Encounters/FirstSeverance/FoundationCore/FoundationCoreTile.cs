@@ -113,7 +113,7 @@ public class FoundationCoreTile : ModTile
         Player player = Main.LocalPlayer;
         player.noThrow = 2;
         player.cursorItemIconEnabled = true;
-        player.cursorItemIconID = ModContent.ItemType<FoundationCoreItem>();
+        player.cursorItemIconID = ModContent.ItemType<TheaterDoll>();
     }
 }
 

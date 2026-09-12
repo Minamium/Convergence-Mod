@@ -10,7 +10,7 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 
 internal static class FirstSeveranceImpalingSwordVisuals
 {
-    internal static void Draw(SpriteBatch batch, FirstSeveranceAttackAccents accents, Texture2D texture,
+    internal static void Draw(SpriteBatch batch, FirstSeveranceAttackAccents accents,
         FirstSeveranceCombatProjection combat, double age, double authorityAge, bool reduced)
     {
         if (Main.dedServ) return;
@@ -21,13 +21,13 @@ internal static class FirstSeveranceImpalingSwordVisuals
             bool live = sword.Live && authorityAge > sword.Fire && authorityAge < sword.Retract;
             float angle = direction.ToRotation(), born = Window(age, FirstSeveranceImpalingSwords.WarningStart(sword.Wave),
                 FirstSeveranceImpalingSwords.WarningStart(sword.Wave) + 9) * sword.Fade;
-            Color color = sword.Slot < FirstSeveranceImpalingSwords.DenseCount ? new(205, 142, 244) : new(134, 220, 255);
+            Color color = RitualArmamentArt.ColorFor(Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
             bool warning = age < sword.Fire;
             float arrival = Arrive(age - FirstSeveranceImpalingSwords.WarningStart(sword.Wave), 5);
             float brake = Window(age, sword.Fire - 16, sword.Fire - 7);
             float commit = Window(age, sword.Fire - 5, sword.Fire);
-            // Held aura forecasts the whole blade volume. A rigid textured sword
-            // then translates through the field plane; it never scales in length.
+            // Preserve the accepted aura forecast. Live light advances through the
+            // same field plane; both halves now share one violet material.
             float length = warning ? ray.Length : ray.Length * sword.Extension;
             accents.Ribbon(batch, origin, direction, length, ray.HalfWidth * 2, color,
                 born * (live ? .85f : warning ? .48f : .18f));
@@ -45,27 +45,21 @@ internal static class FirstSeveranceImpalingSwordVisuals
             }
             if (sword.Extension > .001f)
             {
-                float scaleX = ray.Length / 2131;
-                int skip = Math.Clamp((int)(25 + (ray.Length - length) / scaleX), 25, texture.Width - 1);
-                int count = Math.Min(texture.Width - skip, Math.Max(1, (int)(length / scaleX)));
-                batch.Draw(texture, origin - Main.screenPosition, new Rectangle(skip, 0, count, texture.Height),
-                    Color.White * sword.Fade, angle, new Vector2(0, 362),
-                    new Vector2(scaleX, ray.HalfWidth * 2 / 300), SpriteEffects.None, 0);
+                // The beam front advances with the exact shared six-tick
+                // collision insertion. Cooling light is visibly harmless.
+                FirstSeveranceBeamMaterial.Flow(batch, origin, direction, length, ray.HalfWidth,
+                    age, color, sword.Fade * (live ? 1 : .10f), reduced);
                 float stab = Window(age, sword.Fire, sword.Fire + 2) * (1 - Window(age, sword.Fire + 6, sword.Fire + 18));
-                Vector2 tip = origin + direction * length;
-                accents.Halo(batch, tip, new Vector2(90, 10), Color.White, stab * (reduced ? .2f : .75f), angle + MathF.PI * .5f);
+                accents.Halo(batch, origin + direction * length, new Vector2(75, 12),
+                    Color.White, stab * (reduced ? .18f : .65f), angle + MathF.PI * .5f);
             }
             else if (warning)
             {
-                // Harmless tip OUTSIDE the arena: snap from the slit, settle into
-                // tension, then the existing shared six-tick insertion takes over.
-                float scaleX = ray.Length / 2131;
+                // Pressure draws back into the entry slit without introducing a
+                // metal tip. The accepted full corridor warning above stays put.
                 Vector2 point = origin - direction * ((2 + (1 - arrival) * 140 + brake * 14) * (1 - commit));
-                int tipWidth = Math.Min(420, texture.Width);
-                batch.Draw(texture, point - Main.screenPosition,
-                    new Rectangle(texture.Width - tipWidth, 0, tipWidth, texture.Height),
-                    Color.White * (born * (.45f + commit * .55f)), angle, new Vector2(tipWidth, 362),
-                    new Vector2(scaleX, ray.HalfWidth * 2 / 300), SpriteEffects.None, 0);
+                accents.Halo(batch, point, new Vector2(18 + commit * 12, ray.HalfWidth * 1.4f),
+                    color, born * (.28f + commit * .42f), angle);
             }
             // Edge rifts gather/close continuously; no hard forecast rails.
             accents.ChargeFracture(batch, origin + direction * 12, age,

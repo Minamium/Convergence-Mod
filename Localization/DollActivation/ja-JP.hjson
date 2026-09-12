@@ -1,0 +1,19 @@
+Mods: {
+  Convergence: {
+    Items: {
+      TheaterDoll: {
+        DisplayName: 開演の人形
+        Tooltip: '''
+          手に持って基壇をクリックすると、不幸な人形劇の準備が展開する
+          消費しない。フィールド展開後、全員のReadyで開演
+          10枠ミニオン「人形の契約」とは別の開始用アイテム
+          '''
+      }
+    }
+    UI: {
+      DollActivation: {
+        RequiresDoll: 「開演の人形」を手に持って基壇をクリックしてください。
+      }
+    }
+  }
+}

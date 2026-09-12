@@ -144,8 +144,8 @@ internal sealed class FirstSeveranceFeedback
                 FirstSeveranceSubstate.PhaseTransition => combat.BossPhase == FirstSeveranceBossPhase.Distant ? "RemoteDeparture"
                     : combat.BossPhase == FirstSeveranceBossPhase.Final ? "TerminalEntry" : "PhaseRupture",
                 FirstSeveranceSubstate.Lattice => "CoreExposure",
-                FirstSeveranceSubstate.RotatingBlade => "BladeGather",
-                FirstSeveranceSubstate.HalfField => "ShellMassLatch",
+                FirstSeveranceSubstate.RotatingBlade => "PrismBeamCharge",
+                FirstSeveranceSubstate.HalfField => "PrismBeamCharge",
                 FirstSeveranceSubstate.RemoteCrush => null, // owned by the critical cue clock
                 FirstSeveranceSubstate.FinalBullets => "FinalGather",
                 FirstSeveranceSubstate.FinalSlicer => null,
@@ -332,7 +332,7 @@ internal sealed class FirstSeveranceFeedback
                 }
             }
             if (combat.Substate == FirstSeveranceSubstate.RotatingBlade && age >= 144 && age < 162 && scoreSounds.Add(-500))
-                PlayTimed("BladeUnsheathe", .98f, tick, combat.ActionStartedTick + FirstSeveranceChoreography.BladeWindup);
+                PlayTimed("PrismBeamCharge", .90f, tick, combat.ActionStartedTick + FirstSeveranceChoreography.BladeWindup);
             if (combat.Substate == FirstSeveranceSubstate.FinalBullets)
                 foreach (var bullet in FirstSeveranceScoreGeometry.Bullets(combat.ActionIndex, age, combat.CoreX, combat.CoreY))
                     if (bullet.Live && scoreSounds.Add(bullet.Wave)) PlayTimed("FinalBulletRelease", .94f, tick, combat.ResolveTick + 6, bullet.Wave * .025f);
@@ -349,25 +349,27 @@ internal sealed class FirstSeveranceFeedback
 
     private void PlayCriticalAction(FirstSeveranceCombatProjection combat, ulong tick)
     {
-        void Cue(int key, int offset, string name, float gain = 1.25f, bool impact = true)
+        void Cue(int key, int offset, string name, float gain = 1.25f, bool impact = true, int endOffset = 0)
         {
             ulong due = combat.ActionStartedTick + (ulong)offset;
             if (!criticalClock.Take(key, tick, due)) return;
             var voice = PlayCritical(name, combat, tick, due, gain, impact);
-            if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
+            if (name == "PrismBeamSustain")
             {
                 if (SoundEngine.TryGetActiveSound(orbitVoice, out var old)) old.Stop();
                 orbitVoice = voice;
             }
+            if (endOffset > 0)
+                timedVoices.Add((voice, combat.ActionStartedTick + (ulong)endOffset));
         }
         if (combat.Substate == FirstSeveranceSubstate.HalfField)
             for (int wave = 0; wave < 2; wave++)
             {
                 int strike = FirstSeveranceImpalingSwords.FireBase(wave);
-                Cue(wave * 3, strike - 39, "IronPressure", 1f, false);
-                // Two substantial contacts per field wave, not 28 competing voices.
-                Cue(wave * 3 + 1, strike, "IronDescent");
-                Cue(wave * 3 + 2, strike + 12, "IronDescent", 1.05f);
+                Cue(wave * 3, strike - 39, "PrismBeamCharge", .95f, false, strike);
+                // Two emission accents per field wave, not 28 competing voices.
+                Cue(wave * 3 + 1, strike, "PrismBeamFire", 1.1f, false, strike + 50);
+                Cue(wave * 3 + 2, strike + 12, "PrismBeamFire", .90f, false, strike + 50);
             }
         else if (combat.Substate == FirstSeveranceSubstate.RemoteCrush)
         {
@@ -381,8 +383,10 @@ internal sealed class FirstSeveranceFeedback
         }
         else if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
         {
-            Cue(0, FirstSeveranceChoreography.BladeWindup, "BladeOrbitFirst", .85f, false);
-            Cue(1, SecondTurnTick, "BladeOrbitSecond", .95f, false);
+            Cue(0, FirstSeveranceChoreography.BladeWindup, "PrismBeamSustain", .95f, false);
+            Cue(1, FirstSeveranceChoreography.BladeWindup, "PrismBeamFire", 1.1f, false,
+                FirstSeveranceChoreography.BladeWindup + 30);
+            Cue(2, SecondTurnTick, "PrismBeamFire", 1.1f, false, SecondTurnTick + 30);
             if (tick >= combat.ActionStartedTick + FirstSeveranceChoreography.BladeEnd
                 && SoundEngine.TryGetActiveSound(orbitVoice, out var orbit)) orbit.Stop();
         }
@@ -418,9 +422,18 @@ internal sealed class FirstSeveranceFeedback
     {
         // No position: raid-critical cues remain audible in a very large arena.
         // Main.soundVolume still applies; music uses Main.musicVolume separately.
-        var style = new SoundStyle(Root + name)
+        const string weaponRoot = "Convergence/Assets/Sounds/Weapons/DollTheater/";
+        string path = name switch
+        {
+            "PrismBeamCharge" => weaponRoot + "MagicCharge",
+            "PrismBeamFire" => weaponRoot + "MagicFire",
+            "PrismBeamSustain" => weaponRoot + "LacunaSustain",
+            _ => Root + name,
+        };
+        var style = new SoundStyle(path)
         {
             Volume = volume * .80f, Pitch = pitch, MaxInstances = 2,
+            IsLooped = name == "PrismBeamSustain",
             SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
         };
