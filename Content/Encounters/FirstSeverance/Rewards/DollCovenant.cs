@@ -42,8 +42,9 @@ public sealed class DollCovenant : ModItem
     }
     public override void AddRecipes()
     {
-        CreateRecipe().AddIngredient<ChoirOfTheUnmade>().AddTile(TileID.WorkBenches).Register();
-        Recipe.Create(ModContent.ItemType<ChoirOfTheUnmade>()).AddIngredient(Type).AddTile(TileID.WorkBenches).Register();
+        var recipe = CreateRecipe();
+        foreach (int weapon in RitualArmamentItems.RewardTypes()) recipe.AddIngredient(weapon);
+        recipe.AddTile(TileID.WorkBenches).Register();
     }
 }
 

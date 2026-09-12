@@ -111,93 +111,41 @@ internal sealed class FirstSeveranceStageVisuals
             FirstSeveranceBeamMaterial.DrawTooth(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
                 tick - grid.StartTick, gather, active ? emission : 0, power, color, reduced);
         }
-        Vector2 core = CoreCenter(combat);
-        accents.CastSeal(batch, core, tick, grid.StartTick, grid.FireTick, color, reduced, 1.6f);
         foreach (var ray in grid.CoreBeams)
         {
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-            Vector2 normal = new(-direction.Y, direction.X);
-            Color hot = new(255, 87, 190), inner = new(225, 206, 255);
-            float release = active ? Math.Max(.7f, emission) : warning ? 0 : emission * .10f;
-            // Entire 144px corridor is foretold; the outer bloom is not a hitbox.
-            // The body keeps its accepted material. A graduated neck replaces
-            // the square cut at the Boss, without changing the collision ray.
-            float neck = Math.Min(180, ray.Length);
-            FirstSeveranceBeamMaterial.DrawVolume(batch, accents, origin + direction * neck, direction, ray.Length - neck, ray.HalfWidth,
-                tick - grid.StartTick, gather, active ? emission : 0, warning ? born : release, hot, reduced);
-            DrawCoreMouth(batch, accents, origin, direction, ray.HalfWidth, neck, tick, grid,
-                warning ? born : release, active ? emission : 0, hot, reduced);
-            if (!warning)
-            {
+            Color violet = RitualArmamentArt.ColorFor(
+                Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
+            // The complete authority corridor is visible during the full warning.
+            // No circular seal or floating aperture geometry.
+            float footprint = warning ? born : active ? .8f : emission * .08f;
+            FirstSeveranceBeamMaterial.DrawVolume(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
+                tick - grid.StartTick, gather, 0, footprint * (warning ? 1 : .35f), violet, reduced);
+            if (warning) continue;
 
-                for (int strand = -1; strand <= 1; strand += 2)
-                {
-                    Vector2 last = origin;
-                    for (int n = 1; n <= 48; n++)
-                    {
-                        float distance = ray.Length * n / 48;
-                        float opening = Window(distance, 0, 180);
-                        Vector2 next = origin + direction * distance + normal * opening *
-                            (strand * 39 + MathF.Sin(distance * .032f - (float)(tick % 3600) * .5f + strand) * 10);
-                        Line(batch, last, next, FirstSeveranceAttackAccents.Neon(inner, release * .75f), 4);
-                        last = next;
-                    }
-                }
-            }
-            accents.Halo(batch, origin, new Vector2(180 + gather * 150), inner,
-                (warning ? born * gather * .34f : release * .75f) * (reduced ? .4f : 1));
-        }
-    }
-
-    private static void DrawCoreMouth(SpriteBatch batch, FirstSeveranceAttackAccents accents,
-        Vector2 origin, Vector2 direction, float halfWidth, float neck, double tick, FirstSeveranceGridVolley grid,
-        float opacity, float emission, Color color, bool reduced)
-    {
-        Vector2 normal = new(-direction.Y, direction.X);
-        float charge = CastTension(tick, grid.StartTick, grid.FireTick);
-        float open = Aperture(tick, grid.StartTick, grid.FireTick, grid.EndTick);
-        float time = (float)(tick - grid.StartTick);
-        // The dim full-width substrate still declares the exact danger volume;
-        // its live filaments emerge from a lens buried within the chest.
-        accents.Ribbon(batch, origin, direction, neck, halfWidth * 2, color, opacity * .30f);
-        for (int lane = 0; lane < (reduced ? 7 : 13); lane++)
-        {
-            float across = (lane / (float)(reduced ? 6 : 12) * 2 - 1) * halfWidth * .83f;
-            Vector2 last = origin - direction * 20 + normal * (across * .08f);
-            for (int n = 1; n <= 24; n++)
+            // Reuse the sustained magic beam's connected flowing material, with
+            // its bright throat expanding from the recessed sphere. The dim
+            // full-width footprint above still covers the exact root hit area.
+            float power = active ? Math.Max(.85f, emission) : emission * .08f;
+            if (power <= .001f) continue;
+            batch.End();
+            try
             {
-                float t = n / 24f;
-                float opening = Window(t, 0, 1);
-                float wave = MathF.Sin(t * 14 - FlowPhase(time, .25f, emission) + lane * 1.73f)
-                    * MathF.Sin(t * MathF.PI) * 7;
-                Vector2 next = origin + direction * (-20 + (neck + 20) * t)
-                    + normal * (across * (.08f + .92f * opening) + wave);
-                float flow = .7f + .3f * MathF.Sin(t * 16 - time * .22f + lane);
-                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(color, opacity * flow * .55f), 4 + emission * 2);
-                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(Color.Lerp(color, Color.White, .6f),
-                    opacity * flow * (.34f + emission * .56f)), 1 + emission * 1.5f);
-                last = next;
+                RitualSurfacePass.Begin();
+                RitualGrandArt.QueueBeam(origin, direction, ray.Length, ray.HalfWidth * 2,
+                    (float)(tick - grid.StartTick), violet, power * (reduced ? .72f : 1),
+                    throatLength: 150, throatWidth: 28);
+                RitualSurfacePass.Flush();
             }
-        }
-        for (int i = 0; i < (reduced ? 3 : 7); i++)
-        {
-            float a = i * MathF.Tau / 7 + time * .022f;
-            Vector2 mouth = origin + direction * (MathF.Cos(a) * (8 + open * 12))
-                + normal * (MathF.Sin(a) * (15 + open * 40));
-            Vector2 tail = origin - direction * (70 + charge * 45) + normal * (MathF.Sin(a - .7f) * 80);
-            Vector2 last = tail;
-            for (int n = 1; n <= 12; n++)
+            finally
             {
-                float t = n / 12f;
-                Vector2 next = Vector2.Lerp(tail, mouth, t) + normal * MathF.Sin(t * MathF.PI) * MathF.Cos(a) * 18;
-                Line(batch, last, next, FirstSeveranceAttackAccents.Neon(color, open * (1 - emission * .4f) * t * .7f), 1.4f);
-                last = next;
+                batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                    DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
             }
+            float kick = ReleaseImpulse(tick, grid.FireTick);
+            accents.Halo(batch, origin, new Vector2(125 + kick * 110, 25 + kick * 35), violet,
+                power * (reduced ? .22f : .55f), direction.ToRotation());
         }
-        accents.Halo(batch, origin, new Vector2(80 + open * 90, 35 + open * 60), color,
-            open * .70f, direction.ToRotation());
-        accents.Halo(batch, origin + direction * 12, new Vector2(32, 60 + open * 40), Color.White,
-            opacity * (.20f + emission * .55f), direction.ToRotation());
     }
 
     private void EnsureShell()

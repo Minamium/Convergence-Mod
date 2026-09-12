@@ -124,8 +124,8 @@ internal static partial class Program
         AssertEqual(false,FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.RemoteCrush,8,180,4000,4000)[0].Live,"crush recovery harmless");
         AssertEqual(true,FirstSeveranceChoreography.IsValidStep(FirstSeveranceBossPhase.Distant,FirstSeveranceSubstate.RemoteCrush,8),"crush is phase-local score step");
         var comb=FirstSeveranceScoreGeometry.Rays(FirstSeveranceSubstate.FinalSlicer,2,28,4000,4000);
-        AssertEqual(true,comb.Count > 0 && comb.Count <= 3 * 32,"bounded read-ahead combs");
-        foreach(var tooth in comb) AssertEqual(FirstSeveranceGridVolley.HalfWidth,tooth.Ray.HalfWidth,"lattice hit width");
+        AssertEqual(true,comb.Count > 0 && comb.Count <= FirstSeveranceScoreGeometry.SlicerPulses * 32,"bounded four-color read-ahead combs");
+        foreach(var tooth in comb) AssertEqual(FirstSeveranceLanceTuning.HalfWidth,tooth.Ray.HalfWidth,"current four-color prism width, not retired lattice width");
         AssertEqual(96,FirstSeveranceScoreGeometry.Bullets(2,132,4000,4000).Count,"four overlapping 24-bullet waves");
     }
 }

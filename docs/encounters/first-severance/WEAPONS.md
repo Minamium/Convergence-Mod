@@ -30,13 +30,13 @@ Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. 
 
 ## Curtainfall Treasure Box
 
-**閉幕の宝箱 / Curtainfall Treasure Box** (`DollTreasureBox`) replaces the direct weapon drop in every difficulty. Accepted Victory creates the same frozen-party-count number of shared world drops at the Core. Right-click one box to consume it and obtain one `NullRefrain` (Lacrimosa's Claws), guaranteed. Existing Work Bench exchanges provide the other weapon forms and the 10-slot Doll. No additional random loot, NPC death reward, private inventory grant or production drop table is introduced.
+**閉幕の宝箱 / Curtainfall Treasure Box** (`DollTreasureBox`) replaces the direct weapon drop in every difficulty. Accepted Victory creates the same frozen-party-count number of shared world drops at the Core. Right-click consumes one box and draws **one weapon**, uniformly from `NullRefrain`, `PaleMeridian`, `LacunaTestament`, `ChoirOfTheUnmade`, `LastWitness`: **20% each**, independent of Luck. Duplicate draws are possible; there is no guaranteed collection cycle. No weapon-to-weapon exchange recipes remain. The Doll is excluded from the box. There is no additional NPC death reward or private inventory grant.
 
-The native `CanRightClick`/`ModifyItemLoot` container path owns consumption and contents; do not also spawn a weapon in `RightClick`. No `ItemID.Sets.BossBag` flag, since this is an all-difficulty treasure box without injected vanilla developer-armour drops. API checked 2026-09-12 against pinned tML [ModItem](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModItem.cs) and [ExampleMod bag](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod/Content/Items/Consumables/MinionBossBag.cs); independently implemented, no copied art/code.
+Uniform selection uses `ItemDropRule.OneFromOptionsNotScalingWithLuck(1, options)` ([v2026.07 API](https://docs.tmodloader.net/docs/stable/class_item_drop_rule.html), checked 2026-09-12; package compilation checks the installed signature). The native `CanRightClick`/`ModifyItemLoot` container path owns consumption and contents; do not also spawn a weapon in `RightClick`. No `ItemID.Sets.BossBag` flag, since this is an all-difficulty treasure box without injected vanilla developer-armour drops. API checked 2026-09-12 against pinned tML [ModItem](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModItem.cs) and [ExampleMod bag](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod/Content/Items/Consumables/MinionBossBag.cs); independently implemented, no copied art/code.
 
 ## Lacrimosa's Claws — accepted melee redesign, 0.2.29
 
-This section replaces the original sword/echo prototype. Internal item identity `NullRefrain`, the accepted Victory drop and all one-for-one exchanges are unchanged. The other four forms follow the long-form ritual specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it. Weapon-only changes do not authorize Raid tuning.
+This section replaces the original sword/echo prototype. Internal item identity `NullRefrain` is unchanged; current acquisition is owned by [Curtainfall Treasure Box](#curtainfall-treasure-box). The other four forms follow the long-form ritual specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it. Weapon-only changes do not authorize Raid tuning.
 
 **Left click:** alternate independently articulated left/right five-finger claws using the actual P3 rig material. The hand expands from0.68x to2.30x during the stroke, then retracts; the whole attack stays inside560 world pixels of the player. Base duration28ticks, bounded10–90 after native true-melee speed. Only the palm and swept finger capsules damage, once per logical NPC root per swipe. No homing echo projectiles: this is the user's replacement true-melee design. Calamity's registered `TrueMeleeDamageClass` is resolved through the compatibility adapter, without using its internal singleton.
 
@@ -56,7 +56,7 @@ Native projectile ownership is unchanged. Shared pure geometry covers both fract
 
 User-approved concept: obsidian/ivory/aged-gold ritual machinery, hollow apertures and physical material opening before a bright release. This development change touches weapons only. Boss behavior, loot execution, mechanics, recovery and music are unchanged.
 
-Accepted Victory still drops one Null Refrain for each frozen-roster participant as ordinary shared world items. At a Work Bench, any one armament converts into any other, consuming exactly one input and producing one output. The20 directed recipes neither multiply rewards nor allow pre-Raid crafting. No recipes use vanilla materials alone. The prior statement that the reward has no recipe is superseded only for these exchanges.
+The [treasure box](#curtainfall-treasure-box) owns acquisition. The former 20 directed class exchanges and Choir ↔ Doll exchange are removed. Existing owned weapons remain usable; no inventory migration or deletion occurs.
 
 ## Long-form non-melee rituals — 0.2.34
 
@@ -106,7 +106,7 @@ These are arithmetic bounds before defense, crits, armor/accessories, misses, mo
 
 ## Doll companion — The Unbroken Promise
 
-**ほどけない約束 / The Unbroken Promise** (`DollCovenant`) is an additional summon item, not a replacement for Choir of the Unmade. Exchange Choir ↔ Promise one-for-one at a Work Bench. Existing five-form recipes remain; the [treasure box](#curtainfall-treasure-box) packages the same Victory weapon reward, without an additional free Doll drop.
+**ほどけない約束 / The Unbroken Promise** (`DollCovenant`) is an additional summon item, not a replacement for Choir of the Unmade. **Craft at a Work Bench using one of each of all five box weapons**, consuming all five and producing one Promise. No reverse recipe and no free Doll drop. The box options and recipe ingredients use the same `RitualArmamentItems.RewardTypes()` list so they cannot drift.
 
 - Native `minionSlots = 10`, matching staff metadata and a capacity check. At least 10 maximum slots are required; only one Doll per owner. Native sacrifice replaces other sacrificial minions if needed. No slots, invulnerability or Raid participation are granted.
 - Grounded follow uses gravity, collision/platform handling and a jump over small obstacles. Airborne owners, large vertical gaps and stuck paths switch to **broom-riding** follow; distant owners trigger an owner-synchronized catch-up teleport. Ground collision resumes only outside solid tiles. A brief pose blend mounts/dismounts the broom; hair/boots/recoil use authored poses, with small secondary sway.

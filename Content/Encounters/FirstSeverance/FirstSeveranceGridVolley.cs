@@ -9,6 +9,7 @@ internal sealed class FirstSeveranceGridVolley
     internal const int TelegraphTicks = 60, ActiveTicks = 20, CadenceTicks = 102;
     internal const float Spacing = 160f, HalfWidth = 12f;
     internal const int MaximumLines = 96;
+    // Keep protocol29's decoder capacity; current authority emits only one.
     internal const int MaximumCoreBeams = 4, CoreSalvoFirstSerial = 3;
     internal const float CoreBeamLength = 3000f, CoreBeamHalfWidth = 72f;
     internal uint Serial { get; }
@@ -58,6 +59,13 @@ internal sealed class FirstSeveranceGridVolley
         float length = MathF.Sqrt(dx * dx + dy * dy);
         return new(coreX, y, length > .001f ? dx / length : 0, length > .001f ? dy / length : 1,
             CoreBeamLength, CoreBeamHalfWidth);
+    }
+
+    internal static int CoreTargetIndex(uint salvoOrdinal, int eligibleCount)
+    {
+        if (eligibleCount < 1 || eligibleCount > FirstSeveranceRoster.MaximumCount)
+            throw new ArgumentOutOfRangeException(nameof(eligibleCount));
+        return (int)(salvoOrdinal % (uint)eligibleCount);
     }
 
     internal bool CoreIntersects(ulong tick, float x, float y, float halfWidth, float halfHeight)

@@ -118,15 +118,7 @@ internal sealed class FirstSeveranceScoreVisuals
             accents.Halo(batch, origin + direction * item.Ray.Length * extension,
                 new Vector2(190, 120), color, drawFlash * .8f, angle);
         }
-        accents.CastSeal(batch, origin, age, 0, 180, color, reduced, 1.1f);
-        if (age < 180)
-            for (int i = 0; i < 4; i++)
-            {
-                float a = angle + .5f + i * MathHelper.TwoPi / 4 + Window(age, 0, 180) * .45f;
-                FirstSeveranceAttackAccents.Arc(batch, origin, 235, a, .55f, color * born * .65f, 3);
-                Vector2 tip = origin + Unit(a + .55f) * 235;
-                Line(batch, tip - Unit(a) * 16, tip, color * born, 3);
-            }
+        accents.ChargeFracture(batch, origin, age, 0, 180, color, reduced, 1.1f);
         void Sprite(float rotation, Color tint, float lengthScale)
         {
             Vector2 dir = Unit(rotation);
@@ -169,8 +161,9 @@ internal sealed class FirstSeveranceScoreVisuals
                     }
                 }
                 accents.Halo(batch, point, new Vector2(68, 50), color, reduced ? .35f : .72f, direction.ToRotation());
-                Ring(batch, point, FirstSeveranceScoreGeometry.BulletRadius, Color.Black, 6);
-                Ring(batch, point, FirstSeveranceScoreGeometry.BulletRadius, color, 3);
+                // Solid pointed projectile material, not a circular HUD outline.
+                Line(batch, point - direction * 12, point + direction * 12, new Color(19, 11, 30), 24);
+                Line(batch, point - direction * 10, point + direction * 10, color, 18);
                 // An ivory lancet within the exact dark-outlined collision core.
                 Line(batch, point - direction * 8, point + direction * 10, Color.White, 5);
                 Line(batch, point - normal * 5, point + direction * 10, Color.White * .9f, 2);
@@ -180,7 +173,6 @@ internal sealed class FirstSeveranceScoreVisuals
             {
                 double local = age - FirstSeveranceScoreGeometry.BulletStartTick(combat.ActionIndex, b.Wave);
                 float charge = CastTension(local, -24, 0);
-                Ring(batch, point, 28 - charge * 14, color * .90f, 2.5f);
                 accents.Halo(batch, point, new Vector2(65), color, charge * .55f);
                 // Two halves of the live lancet assemble around its actual spawn
                 // position, brake, then meet before release; no extra fake bullets.
@@ -232,7 +224,7 @@ internal sealed class FirstSeveranceScoreVisuals
                 accents.Ribbon(batch, origin + direction * (ray.Length - front), direction,
                     front, ray.HalfWidth * 2, Color.White, emission * .65f);
             }
-            accents.CastSeal(batch, origin + direction * 24, local, 0, FirstSeveranceScoreGeometry.FloodFireTick,
+            accents.ChargeFracture(batch, origin + direction * 24, local, 0, FirstSeveranceScoreGeometry.FloodFireTick,
                 color, reduced, .75f + charge * .28f);
         }
         // The negative space itself denotes safety; no floating arrow labels.

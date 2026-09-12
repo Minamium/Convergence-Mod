@@ -1,10 +1,16 @@
-Mods.Convergence.Items.DollTreasureBox: {
-  DisplayName: Curtainfall Treasure Box
-  Tooltip:
-    '''
-    Right click to open
-    Contains {$Mods.Convergence.RitualArmaments.NullRefrain.Name}
-    Exchange the weapon for another class at a Work Bench
-    A small casket left behind when the strings fall silent
-    '''
+Mods: {
+	Convergence: {
+		Items: {
+			DollTreasureBox: {
+				DisplayName: Curtainfall Treasure Box
+				Tooltip:
+					'''
+					Right click to open
+					Contains one of the five Raid weapons, each with an equal 20% chance
+					Collect all five weapons to craft The Unbroken Promise at a Work Bench
+					A small casket left behind when the strings fall silent
+					'''
+			}
+		}
+	}
 }

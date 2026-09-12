@@ -49,16 +49,10 @@ internal sealed class FirstSeverancePylonVisuals : GlobalNPC
                     new Color(168,145,112) * (.40f + .20f * flow) * assemble, 1.5f);
                 last = next;
             }
-            // Final timeout warning belongs to the actual remaining pylons, not
-            // an inferred local damage result. These arches are purely cosmetic.
-            float gathering = FirstSeveranceVisualCurves.CastTension(tick, combat.ResolveTick - 90d, combat.ResolveTick);
-            pressure = gathering;
-            float close = FirstSeveranceVisualCurves.PreRelease(tick, combat.ResolveTick, 30);
-            Color cue = FirstSeveranceAttackAccents.Magenta;
-            for (int i = 0; i < 4; i++)
-                FirstSeveranceAttackAccents.Arc(spriteBatch, center, 95 - gathering * 35,
-                    i * MathF.Tau / 4 + gathering, .85f, cue * gathering, 3);
-            FirstSeveranceBossVisuals.Ring(spriteBatch, center, 42 + close * 9, Color.White * close, 3);
+            // Pressure travels along the physical spool, never orbiting UI arcs.
+            pressure = FirstSeveranceVisualCurves.CastTension(tick, combat.ResolveTick - 90d, combat.ResolveTick);
+            accents.ChargeFracture(spriteBatch, center, tick, combat.ResolveTick - 90d,
+                combat.ResolveTick, FirstSeveranceAttackAccents.Magenta, reduced, .48f);
         }
 
         cage ??= ModContent.Request<Texture2D>("Convergence/Assets/Textures/NPCs/NullCantorRigAtlas");
@@ -82,10 +76,6 @@ internal sealed class FirstSeverancePylonVisuals : GlobalNPC
             FirstSeveranceBossVisuals.Line(spriteBatch,at-new Vector2(20,0),at+new Vector2(20,0),new Color(32,27,34)*assemble,7);
             FirstSeveranceBossVisuals.Line(spriteBatch,at-new Vector2(18,2),at+new Vector2(18,-2),new Color(180,160,126)*assemble,2);
         }
-        for (int i = 0; i < 3; i++)
-            FirstSeveranceAttackAccents.Arc(spriteBatch, center, 44 - pressure * 6,
-                i * MathF.Tau / 3 + (float)(tick % 36000) * .009f, .64f,
-                FirstSeveranceAttackAccents.Neon(ice, assemble * .65f), 1.6f);
         return false;
     }
 }

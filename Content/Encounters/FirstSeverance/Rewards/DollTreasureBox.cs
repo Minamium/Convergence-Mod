@@ -30,9 +30,8 @@ public sealed class DollTreasureBox : ModItem
 
     public override void ModifyItemLoot(ItemLoot itemLoot)
     {
-        // Keep the accepted one-weapon reward and all existing one-for-one
-        // Work Bench exchanges. The native bag path consumes exactly one box;
-        // do not also spawn a weapon in RightClick or the authority cleanup.
-        itemLoot.Add(ItemDropRule.NotScalingWithLuck(ModContent.ItemType<NullRefrain>(), 1, 1, 1));
+        // One guaranteed draw, uniform among five distinct forms (20% each).
+        // Native opening consumes one box; no duplicate RightClick grant.
+        itemLoot.Add(ItemDropRule.OneFromOptionsNotScalingWithLuck(1, RitualArmamentItems.RewardTypes()));
     }
 }

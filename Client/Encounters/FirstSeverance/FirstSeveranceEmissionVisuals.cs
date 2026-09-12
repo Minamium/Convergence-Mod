@@ -330,7 +330,7 @@ internal sealed class FirstSeveranceEmissionVisuals
         Vector2 normal = new(-direction.Y, direction.X);
         float radius = 15 + open * 58;
         float imminent = PreRelease(tick, fire, Math.Min(16, fire - start));
-        Accents.CastSeal(batch, mouth, tick, start, fire, color, reduced, .75f);
+        Accents.ChargeFracture(batch, mouth, tick, start, fire, color, reduced, .75f);
         Accents.Halo(batch, mouth, new Vector2(160 + open * 170, 120 + open * 160), color,
             open * (reduced ? .24f : .6f), angle);
         Sprite(batch, new Rectangle(1010, 8, 235, 527), mouth, new Vector2(8 + open * 38, radius * 2),

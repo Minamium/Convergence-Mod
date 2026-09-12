@@ -1,34 +1,71 @@
-{
-  "Mods": {
-    "Convergence": {
-      "RitualArmaments": {
-        "NullRefrain": {
-          "Name": "Null Refrain — Lacrimosa's Claws",
-          "Tooltip": "Manifest the distant arms of Lacrimosa\nLeft click: alternate enormous expanding true-melee claws\nHold this weapon for 6 seconds to charge one execution\nRight click: both hands crush the clicked location after a short windup\nThe charge pauses while unequipped or incapacitated; death clears it\nTrade this raid weapon for another class form at a Work Bench"
-        },
-        "PaleMeridian": {
-          "Name": "Pale Meridian",
-          "Tooltip": "Hold to unfold five siege cannons over several seconds, firing as each joins.\nThe battery locks and charges, then maintains a rapid armor-piercing crossfire.\nRelease or switch items to stop. Uses bullets; 75% ammo conservation.\nExchange one-for-one with other ritual armaments at a Work Bench."
-        },
-        "LacunaTestament": {
-          "Name": "Lacuna Testament",
-          "Tooltip": "Hold to attack from one sigil, then unfold six more at accelerating intervals.\nThe array merges and charges for 0.8 seconds, then sustains one powerful beam.\nAim while channeling. Release, switch items, or run out of mana to stop.\nBuilds over 6.8 seconds. Continuous mana drain; no forced automatic mana potions.\nExchange one-for-one with other ritual armaments at a Work Bench."
-        },
-        "ChoirOfTheUnmade": {
-          "Name": "Choir of the Unmade",
-          "Tooltip": "Summon a one-slot chorister that attacks independently while the ritual grows.\nAn eleven-second concert: skirmish, assemble, charge, then a three-second chorus beam.\nAll voices power one shared organ; supports normal minion target commands.\nExchange one-for-one with other ritual armaments at a Work Bench."
-        },
-        "LastWitness": {
-          "Name": "Last Witness",
-          "Tooltip": "Hold to accumulate six witnesses, each casting a seeking shard.\nThey fold into one heavy relic and release a devastating returning blade.\nStealth empowers the final blade and its converging execution seal.\nRelease early to cancel; the full ritual lasts about 4.7 seconds.\nExchange one-for-one with other ritual armaments at a Work Bench."
-        }
-      },
-      "Buffs": {
-        "ChoirOfTheUnmadeBuff": {
-          "DisplayName": "Choir of the Unmade",
-          "Description": "The sentinels sing for you"
-        }
-      }
-    }
-  }
+Mods: {
+	Convergence: {
+		RitualArmaments: {
+			NullRefrain: {
+				Name: Null Refrain — Lacrimosa's Claws
+				Tooltip:
+					'''
+					Manifest the distant arms of Lacrimosa
+					Left click: alternate enormous expanding true-melee claws
+					Hold this weapon for 6 seconds to charge one execution
+					Right click: both hands crush the clicked location after a short windup
+					The charge pauses while unequipped or incapacitated; death clears it
+					One of five equally likely rewards from the Curtainfall Treasure Box
+					'''
+			}
+
+			PaleMeridian: {
+				Name: Pale Meridian
+				Tooltip:
+					'''
+					Hold to unfold five siege cannons over several seconds, firing as each joins.
+					The battery locks and charges, then maintains a rapid armor-piercing crossfire.
+					Release or switch items to stop. Uses bullets; 75% ammo conservation.
+					One of five equally likely rewards from the Curtainfall Treasure Box.
+					'''
+			}
+
+			LacunaTestament: {
+				Name: Lacuna Testament
+				Tooltip:
+					'''
+					Hold to attack from one sigil, then unfold six more at accelerating intervals.
+					The array merges and charges for 0.8 seconds, then sustains one powerful beam.
+					Aim while channeling. Release, switch items, or run out of mana to stop.
+					Builds over 6.8 seconds. Continuous mana drain; no forced automatic mana potions.
+					One of five equally likely rewards from the Curtainfall Treasure Box.
+					'''
+			}
+
+			ChoirOfTheUnmade: {
+				Name: Choir of the Unmade
+				Tooltip:
+					'''
+					Summon a one-slot chorister that attacks independently while the ritual grows.
+					An eleven-second concert: skirmish, assemble, charge, then a three-second chorus beam.
+					All voices power one shared organ; supports normal minion target commands.
+					One of five equally likely rewards from the Curtainfall Treasure Box.
+					'''
+			}
+
+			LastWitness: {
+				Name: Last Witness
+				Tooltip:
+					'''
+					Hold to accumulate six witnesses, each casting a seeking shard.
+					They fold into one heavy relic and release a devastating returning blade.
+					Stealth empowers the final blade and its converging execution seal.
+					Release early to cancel; the full ritual lasts about 4.7 seconds.
+					One of five equally likely rewards from the Curtainfall Treasure Box.
+					'''
+			}
+		}
+
+		Buffs: {
+			ChoirOfTheUnmadeBuff: {
+				DisplayName: Choir of the Unmade
+				Description: The sentinels sing for you
+			}
+		}
+	}
 }

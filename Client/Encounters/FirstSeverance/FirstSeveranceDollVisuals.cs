@@ -22,11 +22,25 @@ internal sealed class FirstSeveranceDollVisuals
     private Asset<Texture2D>? atlas, harness, coffin, attendant, shell;
     private Asset<Texture2D>? handFrames, bodyFrames;
     private float bodyCast;
+    private float coreBore;
+    private FirstSeveranceGridVolley? coreVolley;
+    private Vector2 coreAxis = Vector2.UnitY;
     private readonly FirstSeveranceDollPose pose = new();
     private readonly FirstSeveranceAttackAccents captureAccents = new();
     private readonly FirstSeveranceDollSurface surface = new();
     private readonly FirstSeveranceMechanicalCore mechanicalCore = new();
     private static Vector2 V(System.Numerics.Vector2 p) => new(p.X,p.Y);
+
+    internal void SetCoreAttack(FirstSeveranceCombatProjection combat, double tick)
+    {
+        coreBore = 0;
+        if (combat.Substate != FirstSeveranceSubstate.Lattice) { coreVolley = null; return; }
+        if (combat.GridVolley is { } received) coreVolley = received;
+        if (coreVolley is not { CoreBeams.Count: > 0 } grid || tick >= grid.EndTick + 20d) return;
+        coreBore = CoreBore(tick, grid.StartTick, grid.FireTick, grid.EndTick);
+        var ray = grid.CoreBeams[0];
+        coreAxis = new(ray.DirectionX, ray.DirectionY);
+    }
 
     // Caller is the owned world-space AlphaBlend/LinearClamp presentation pass.
     // Isolate pixel sampling; do not change any engine-global UI or zoom setting.
@@ -202,7 +216,6 @@ internal sealed class FirstSeveranceDollVisuals
         if(arrival>.001f)
         {
             captureAccents.Halo(batch,core,new Vector2(180+arrival*120),new Color(235,224,210),arrival*(reduced?.1f:.46f));
-            Ring(batch,core,24+Window(age,.87,.97)*180,new Color(207,196,183)*arrival*(reduced?.2f:.7f),1.8f);
         }
     }
 
@@ -273,7 +286,7 @@ internal sealed class FirstSeveranceDollVisuals
             // Cover the baked reference globe at every authored jaw opening;
             // a constant radius prevents the sphere itself pulsing by cel.
             mechanicalCore.Draw(batch,at,33*scale.X,time/60,rotation,tint,
-                (1-Window(breakup,.05,.55))*(1-consume),reduced);
+                (1-Window(breakup,.05,.55))*(1-consume),reduced,coreBore,coreAxis);
     }
 
     // The Distant body is scenery; this physical relay stays over the real

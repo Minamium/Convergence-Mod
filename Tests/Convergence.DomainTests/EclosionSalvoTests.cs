@@ -7,6 +7,37 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Single core beam rotates through eligible players without retargeting")]
+    private static void SingleCoreBeamTargets()
+    {
+        for (int count = 1; count <= 4; count++)
+            for (uint ordinal = 0; ordinal < count * 3; ordinal++)
+                AssertEqual((int)(ordinal % count), FirstSeveranceGridVolley.CoreTargetIndex(ordinal, count), "fair live-roster rotation");
+        AssertThrows<ArgumentOutOfRangeException>(() => FirstSeveranceGridVolley.CoreTargetIndex(0, 0), "no empty selection");
+        AssertThrows<ArgumentOutOfRangeException>(() => FirstSeveranceGridVolley.CoreTargetIndex(0, 5), "bounded roster");
+        var aim = FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 4500, 3800);
+        var grid = new FirstSeveranceGridVolley(3, 100, 0, 4000, 4000, new[] { aim });
+        AssertEqual(1, grid.CoreBeams.Count, "one selected aim in snapshot");
+        AssertEqual(aim, grid.CoreBeams[0], "server-locked direction");
+    }
+
+    [DomainTest("Core bore opens holds and reseals continuously without new timing")]
+    private static void CoreBoreContinuity()
+    {
+        AssertEqual(0f, CoreBore(100, 100, 160, 180), "intact metal");
+        AssertEqual(1f, CoreBore(160, 100, 160, 180), "open before damage");
+        AssertEqual(1f, CoreBore(180, 100, 160, 180), "held through live window");
+        AssertEqual(0f, CoreBore(200, 100, 160, 180), "resealed before next cast");
+        float last = 0;
+        for (int n = 0; n <= 420; n++)
+        {
+            float value = CoreBore(100 + n * .25, 100, 160, 180);
+            AssertEqual(true, float.IsFinite(value) && value >= 0 && value <= 1, "bounded material");
+            AssertEqual(true, Math.Abs(value-last) < .075f, "continuous fractional clock");
+            last=value;
+        }
+    }
+
     [DomainTest("Development HP scales from the frozen two/three/four-player roster")]
     private static void DevelopmentPartyHp()
     {

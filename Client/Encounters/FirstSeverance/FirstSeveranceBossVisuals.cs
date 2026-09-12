@@ -174,12 +174,10 @@ internal sealed class FirstSeveranceBossVisuals
         if (!reduced && phaseImpactTicks > 0)
         {
             float impact = 1f - phaseImpactTicks / 24f;
-            float spread = 1f - MathF.Pow(1f - impact, 3f);
-            Ring(batch, center, 100 + spread * 780, Ice * (1f - impact) * 0.85f, 5f);
-            Ring(batch, center, 85 + spread * 590, Gold * (1f - impact), 3f, time, 12);
             Glow(batch, center, 600 * (1f - impact), Additive(Ice, (1f - impact) * 0.8f));
         }
 
+        doll.SetCoreAttack(combat, renderTick);
         bool hatching = combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Unbound;
         float hatchAge = hatching ? FirstSeveranceStageVisuals.RuptureAge(combat, renderTick) : 1;
         float unseal = hatching ? Window(hatchAge, .06, .19) : combat.BossPhase != FirstSeveranceBossPhase.Sealed ? 1 : 0;
@@ -212,19 +210,16 @@ internal sealed class FirstSeveranceBossVisuals
             || FirstSeveranceSafeWindows.At(combat.Substate, combat.ActionIndex, combat.ActionStartedTick,
                 (ulong)Math.Max(0, renderTick), combat.CoreX, combat.CoreY) is { };
         if (!participantMechanic && combat.LanceVolley is { } current)
-            Accents.CastSeal(batch, center, renderTick, current.StartTick, current.FireTick, castColor, reduced, 1.6f);
+            Accents.ChargeFracture(batch, center, renderTick, current.StartTick, current.FireTick, castColor, reduced, 1.6f);
         if (combat.Substate == FirstSeveranceSubstate.PylonCheck && combat.RemainingPylons > 0)
         {
             double lead = 90;
-            Accents.CastSeal(batch, center, renderTick, combat.ResolveTick - lead, combat.ResolveTick, castColor, reduced, 1.7f);
+            Accents.ChargeFracture(batch, center, renderTick, combat.ResolveTick - lead, combat.ResolveTick, castColor, reduced, 1.7f);
         }
         if (cast > 0f || recoil > 0f)
         {
             // Stack/spread read on the participants, not as a second floating
             // targeting UI over the suspended body. Keep its physical light.
-            if (!participantMechanic)
-                Ring(batch, center, 185f - castPose * 92f + recoil * 170f,
-                    castColor * Math.Max(cast, recoil), 2.4f, -castPose * 0.7f, 8);
             Glow(batch, center, 240f + recoil * 320f,
                 Additive(Ice, (cast * 0.18f + recoil * 0.45f) * (reduced ? 0.4f : 1f)));
         }
@@ -292,7 +287,7 @@ internal sealed class FirstSeveranceBossVisuals
                 brace, grasp, crushing ? closure : Math.Max(recoil,stabKick), tint, breakup, consumption, lastCenter, MotionSeconds*60, reduced);
             if (crushing)
             {
-                Accents.CastSeal(batch, wrist, age, 0, FirstSeveranceScoreGeometry.CrushRushTick, new Color(255, 91, 145), reduced, 1.2f);
+                Accents.ChargeFracture(batch, wrist, age, 0, FirstSeveranceScoreGeometry.CrushRushTick, new Color(255, 91, 145), reduced, 1.2f);
                 // Smooth stretched wake during the 0.2 s inward strike, not held animation frames.
                 float rush = Window(age, 150, 154) * (1 - Window(age, 162, 176));
                 Accents.Ribbon(batch, wrist, new Vector2(side, 0), 320 + closure * 220, 170,
@@ -339,43 +334,6 @@ internal sealed class FirstSeveranceBossVisuals
         }
     }
 
-
-    private void DrawSeal(SpriteBatch batch, Vector2 center, float time, float reveal, bool reduced, float size = 1)
-    {
-        float radius = (460f + exposure * 38f) * (0.7f + 0.3f * reveal) * size;
-        float spin = time * 0.035f;
-        Ring(batch, center, radius, new Color(25, 24, 27) * reveal, 6f, spin, 12);
-        Ring(batch, center, radius - 9f, Ice * (0.18f * reveal), 1.2f, spin, 12);
-        Ring(batch, center, radius + 7f, Gold * (0.24f * reveal), 1.2f, spin, 12);
-        if (!reduced)
-        {
-            Ellipse(batch, center, new Vector2(radius + 80f, radius * 0.38f), -0.55f + spin,
-                Ice * (0.2f * reveal), 1.7f);
-            Ellipse(batch, center, new Vector2(radius + 60f, radius * 0.38f), 0.55f - spin,
-                Gold * (0.18f * reveal), 1.7f);
-        }
-        for (int index = 0; index < 48; index++)
-        {
-            float angle = index * MathHelper.TwoPi / 48f + spin;
-            Vector2 direction = Unit(angle);
-            float tickLength = index % 4 == 0 ? 22f : 7f;
-            Line(batch, center + direction * (radius - tickLength), center + direction * radius,
-                Ice * (0.34f * reveal), index % 4 == 0 ? 3f : 1.5f);
-        }
-        for (int index = 0; index < 6; index++)
-        {
-            float angle = index * MathHelper.TwoPi / 6f - MathHelper.PiOver2 + spin;
-            Vector2 direction = Unit(angle);
-            Vector2 tangent = new(-direction.Y, direction.X);
-            Vector2 anchor = center + direction * (radius + 18f);
-            Line(batch, anchor - direction * 30, anchor + direction * 34, new Color(30, 44, 51) * reveal, 30f);
-            Line(batch, anchor - direction * 24, anchor + direction * 26, Gold * (0.65f * reveal), 6f);
-            Line(batch, anchor - tangent * 22, anchor + tangent * 22, Ice * (0.5f * reveal), 3f);
-            if (exposure < 0.9f)
-                Line(batch, center + direction * 104, anchor - direction * 34,
-                    Ice * (0.15f * reveal * (1f - exposure)), 1.7f);
-        }
-    }
 
     private static void DrawAurora(SpriteBatch batch, Vector2 center, float time, float opacity)
     {
@@ -484,17 +442,6 @@ internal sealed class FirstSeveranceBossVisuals
             float a = rotation + index * MathHelper.TwoPi / count;
             float b = rotation + (index + 1) * MathHelper.TwoPi / count;
             Line(batch, center + Unit(a) * radius, center + Unit(b) * radius, color, width);
-        }
-    }
-
-    private static void Ellipse(SpriteBatch batch, Vector2 center, Vector2 radius, float rotation, Color color, float width)
-    {
-        Vector2 previous = center + Rotate(new Vector2(radius.X, 0), rotation);
-        for (int index = 1; index <= 96; index++)
-        {
-            Vector2 point = center + Rotate(Unit(index * MathHelper.TwoPi / 96f) * radius, rotation);
-            Line(batch, previous, point, color, width);
-            previous = point;
         }
     }
 

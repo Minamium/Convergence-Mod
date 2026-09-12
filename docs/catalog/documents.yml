@@ -494,7 +494,7 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: 不幸な人形劇 — 少女人形の提示仕様
-  content_sha256: ab8406025f3c4e733e2b4e77ee5bc2fb5b6210befb3cb7efbbfcfbb6b37b2c1d
+  content_sha256: 0ebce6181d554ee440d20be4f906b4fba49044b0b1bacc1e4971b00cfb8ae38d
   document_type: spec
   status: provisional
   owners:
@@ -591,7 +591,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: 不幸な人形劇 — Encounter Specification
-  content_sha256: 106cf8532d28d498ff63235b9094bc0a3b4171a587d67b97045bff48d77914f7
+  content_sha256: 37ad1a552a715d8c206504fd96badfb22bb6e81884d9f7b334f51921641e7c6a
   document_type: spec
   status: accepted
   owners:
@@ -616,7 +616,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: f00252385cba8728e97ffe992b3f892b44e270e903583eb9ada23d018fc7e5cd
+  content_sha256: 5c53044b3d2e02c329e3470e63cbabf43247f825b9cd4d75d046602e11f0fdd2
   document_type: spec
   status: provisional
   owners:
@@ -636,7 +636,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: 不幸な人形劇 — Ritual Armaments
-  content_sha256: 34015539195d25e102e81e3ceba946dadb9e929707ed72cb96753da708722807
+  content_sha256: 1db7316443d58cca970b09bfcb14d35b43812d096a16681decb791aa542a8b40
   document_type: spec
   status: provisional
   owners:
@@ -1097,7 +1097,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 345e0df3f7b34ee081b07352ba44a15f9c5176a3633c26b0fe074018be0f4f9c
+  content_sha256: 705fed94dacbb809977636aad33b78405471c18a87edad3522492ef1d9a96740
   document_type: status
   status: accepted
   owners:

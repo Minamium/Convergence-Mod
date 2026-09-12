@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-12",
+  "build": "0.2.58",
+  "protocol": 29,
+  "environment_reference": "../VERSION_MATRIX.md",
+  "topology": "Host & Play, one real participant, development solo enabled",
+  "sources": [
+    {"file": "client.log", "bytes": 199917, "sha256": "57c91c2cab2e05229910a5537a2c21e2e7bff199207328ba3dc2755acff48555"},
+    {"file": "server.log", "bytes": 320678, "sha256": "a56c9046a453be330007327513c3af89f43010c854c31c3c7e25eeb1e12d4f4a"},
+    {"file": "server2.log", "bytes": 73123, "sha256": "7bdac8c9bb1481fb63c8043e78232f1f8d620f6498c27b4c14611e3e982f0c86"}
+  ],
+  "runs": [
+    {
+      "sequence": 1,
+      "fight": "dda29f30-acc9-42f8-8bfb-54de11b071db",
+      "jst": "17:08:27-17:12:50",
+      "result": "Defeat",
+      "cause": "AllParticipantsDowned",
+      "last_action": "FinalSlicer",
+      "elapsed_seconds": 263.48,
+      "core_effective_damage": 5000000,
+      "core_open_seconds": 57.80,
+      "core_window_dps": 86505.2,
+      "pylon_effective_damage": 1200000,
+      "pylon_open_seconds": 18.17,
+      "pylon_window_dps": 66055.0,
+      "stack": {"success": 20, "failure": 0},
+      "spread": {"success": 23, "failure": 0},
+      "raid_hits": 25,
+      "hits_by_source": {"FinalBullets": 7, "FinalSlicer": 7, "HalfField": 2, "PursuitPrism": 1, "SpreadPrism": 6, "Stillness": 1, "SweepLeft": 1},
+      "downed": 1,
+      "lethal_hit": {"source": "FinalSlicer", "life_before": 32, "damage": 120},
+      "reward_boxes": 0
+    },
+    {
+      "sequence": 2,
+      "fight": "16bcbd87-3011-4702-966f-21f44fd3b390",
+      "jst": "17:14:20-17:18:19",
+      "result": "Victory",
+      "cause": "BossLifeZero",
+      "last_action": "FinalSlicer",
+      "elapsed_seconds": 239.33,
+      "core_effective_damage": 5000000,
+      "core_open_seconds": 35.67,
+      "core_window_dps": 140186.9,
+      "pylon_effective_damage": 600000,
+      "pylon_open_seconds": 5.53,
+      "pylon_window_dps": 108433.7,
+      "stack": {"success": 19, "failure": 0},
+      "spread": {"success": 22, "failure": 0},
+      "raid_hits": 10,
+      "hits_by_source": {"FinalBullets": 2, "FinalSlicer": 4, "Lattice": 1, "SpreadPrism": 3},
+      "downed": 0,
+      "reward_boxes": 1
+    }
+  ],
+  "interpretation": [
+    "0.2.58 client/server loading and two combat sessions confirm the previous Hjson load fix. No Convergence exception occurs in the sampled session.",
+    "Core DPS is effective authority HP loss divided by damage-open time, not whole-fight DPS or weapon tooltip DPS. The HP floor and Final survival remain intentional.",
+    "Both runs are solo. Successful Stack/Spread samples do not establish multiplayer synchronization or overlap behavior. No revive attempts are present.",
+    "VictoryRewardDropped confirms one treasure box spawned; opening, random content and new 0.2.59 recipes are not covered by these logs.",
+    "Client has a localhost connection-refused warning before server startup. The separate server2 has no combat events and ends with a SubworldLibrary.LoadIntoSubworld TagIO EndOfStream warning at 17:19:03. No causal link to Doll combat is established; no other-Mod/save mutation was attempted.",
+    "Accepted Stack success audio reports a 0.079 client SFX slider. This is not an acoustic listening test and no volumes were changed in this task."
+  ]
+}

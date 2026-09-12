@@ -68,7 +68,7 @@ internal static class FirstSeveranceImpalingSwordVisuals
                     new Vector2(scaleX, ray.HalfWidth * 2 / 300), SpriteEffects.None, 0);
             }
             // Edge rifts gather/close continuously; no hard forecast rails.
-            accents.CastSeal(batch, origin + direction * 12, age,
+            accents.ChargeFracture(batch, origin + direction * 12, age,
                 FirstSeveranceImpalingSwords.WarningStart(sword.Wave), sword.Fire, color, reduced, .35f);
             float rift = born * (1 - Window(age, sword.Retract, sword.Retract + 24));
             accents.Halo(batch, origin, new Vector2(32 - brake * 21, ray.HalfWidth * (2.5f + brake)), color,

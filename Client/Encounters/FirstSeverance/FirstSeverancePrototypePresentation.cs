@@ -273,8 +273,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                     continue;
                 if (participant.CombatState != RaidParticipantCombatState.Alive)
                 {
-                    DrawRing(batch, player.Center, 30f, Color.IndianRed);
-                    DrawRing(batch, player.Center, 8 * 16f, Color.IndianRed * 0.35f);
+                    visuals.Accents.Halo(batch, player.Center, new Vector2(44, 76), Color.IndianRed, .35f);
                     string recovery = participant.ReviveLockoutUntilTick > state.EstimatedAuthorityTick
                             ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.BodyLocked",
                                 Math.Ceiling(SecondsLeft(participant.ReviveLockoutUntilTick,
@@ -292,8 +291,6 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                     visuals.Accents.Marker(batch, player.Center, radius, stack, visuals.RenderTick,
                         mechanicResolve, telegraph, reduced);
                 }
-                if (participant.IsReviving)
-                    DrawRing(batch, player.Center, 35f, Color.LightGreen);
             }
         }
         finally
@@ -536,6 +533,4 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
             center + new Vector2(0, 27), Color.LightGray * fade * FirstSeveranceVisualCurves.Ease((age - .38f) * 5), 1.2f, 0.5f);
     }
 
-    private static void DrawRing(SpriteBatch batch, Vector2 center, float radius, Color color, float width = 2f)
-        => FirstSeveranceBossVisuals.Ring(batch, center, radius, color, width);
 }

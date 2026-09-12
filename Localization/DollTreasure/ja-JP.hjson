@@ -3,8 +3,8 @@ Mods.Convergence.Items.DollTreasureBox: {
   Tooltip:
     '''
     右クリックで開封
-    「{$Mods.Convergence.RitualArmaments.NullRefrain.Name}」が入っている
-    中身の武器は作業台で別のクラスの武器へ交換できる
+    5種類のレイド武器から1種類が出る（各20％）
+    全5種類を集め、作業台で「ほどけない約束」を作れる
     糸が沈黙したあとに残された、小さな棺
     '''
 }

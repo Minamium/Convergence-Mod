@@ -13,24 +13,27 @@ internal static class RitualGrandArt
 {
     private static Vector2 Center(Projectile p) => p.GetGlobalProjectile<RitualArmamentProjectileVisuals>().Center(p);
     private static Vector2 Axis(Projectile p) => p.GetGlobalProjectile<RitualArmamentProjectileVisuals>().Angle(p).ToRotationVector2();
-    internal static void QueueBeam(Vector2 root, Vector2 axis, float length, float width, float age, Color color, float fade)
+    internal static void QueueBeam(Vector2 root, Vector2 axis, float length, float width, float age, Color color, float fade,
+        float throatLength = 0, float throatWidth = 0)
     {
         if (length <= 0 || width <= 0 || fade <= 0) return;
         Span<Vector2> line = stackalloc Vector2[65];
         Vector2 normal = axis.RotatedBy(MathHelper.PiOver2);
+        float opening = throatLength / length;
         for (int i = 0; i < line.Length; i++) line[i] = root + axis * (length * i / (line.Length - 1));
         // Full-width core at the emitter and tip: unlike a projectile trail, the
         // beam must never taper to invisible points inside a damaging rectangle.
         RitualSurfacePass.Ribbon(line, width * 1.5f, Light(color, fade * .25f), false);
-        RitualSurfacePass.Ribbon(line, width * 1.04f, Light(color, fade * .8f), false);
-        RitualSurfacePass.Ribbon(line, width * .42f, Light(Ivory, fade * .88f), false);
+        RitualSurfacePass.Ribbon(line, width * 1.04f, Light(color, fade * .8f), false, throatWidth, opening);
+        RitualSurfacePass.Ribbon(line, width * .42f, Light(Ivory, fade * .88f), false, throatWidth * .42f, opening);
         int layers = Reduced ? 3 : 7;
         for (int layer = 0; layer < layers; layer++)
         {
             for (int i = 0; i < line.Length; i++)
             {
                 float t = i / (float)(line.Length - 1);
-                float amplitude = width * (.12f + layer * .026f) * RitualKineticMotion.Arrive(t * 8);
+                float throat = opening > 0 ? FirstSeveranceVisualCurves.Window(t, 0, opening) : 1;
+                float amplitude = width * (.12f + layer * .026f) * RitualKineticMotion.Arrive(t * 8) * throat;
                 float wave = MathF.Sin(t * (25 + layer * 1.5f) - age * (.34f + layer * .035f) + layer * 2.39f);
                 line[i] = root + axis * (length * t) + normal * (wave * amplitude);
             }

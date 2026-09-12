@@ -10,7 +10,7 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 // synthesis, private animation state, gameplay clock or per-frame allocation.
 internal sealed class FirstSeveranceMechanicalCore
 {
-    private const int Rings=16, Sectors=72;
+    private const int Rings=24, Sectors=96;
     private readonly Vector3[] normals=new Vector3[(Rings+1)*(Sectors+1)];
     private readonly VertexPositionColor[] vertices=new VertexPositionColor[(Rings+1)*(Sectors+1)];
     private readonly short[] indices=new short[Rings*Sectors*6];
@@ -34,7 +34,8 @@ internal sealed class FirstSeveranceMechanicalCore
         }
     }
 
-    internal void Draw(SpriteBatch batch,Vector2 center,float radius,float seconds,float roll,Color tint,float opacity,bool reduced)
+    internal void Draw(SpriteBatch batch,Vector2 center,float radius,float seconds,float roll,Color tint,float opacity,bool reduced,
+        float bore = 0, Vector2 boreAxis = default)
     {
         if(Main.dedServ||opacity<=.001f||radius<1) return;
         // The sphere's surface rotates; the highlight remains in the world
@@ -45,6 +46,8 @@ internal sealed class FirstSeveranceMechanicalCore
         Vector3 halfLight=Vector3.Normalize(light+Vector3.UnitZ);
         Vector2 origin=center-Main.screenPosition;
         Vector4 modulation=tint.ToVector4()*opacity;
+        bore = Math.Clamp(bore, 0, 1);
+        Vector2 axis = boreAxis.SafeNormalize(Vector2.UnitY), across = new(-axis.Y, axis.X);
         for(int i=0;i<normals.Length;i++)
         {
             Vector3 n=normals[i],local=Vector3.TransformNormal(n,turn);
@@ -62,6 +65,23 @@ internal sealed class FirstSeveranceMechanicalCore
             // Fine brass lip catches the same light without becoming neon.
             float edge=(1-Math.Clamp(Math.Abs(Math.Abs(local.Y)-.037f)/.016f,0,1))*.14f*diffuse;
             material+=new Vector3(edge,edge*.84f,edge*.59f);
+            if (bore > .001f)
+            {
+                // A surface-bound recessed socket. The asymmetric beveled cut
+                // grows out of the metal; no floating ring, reticle or decal.
+                Vector2 p = new(n.X, n.Y);
+                float along = Vector2.Dot(p, axis), cross = Vector2.Dot(p, across);
+                float cut = MathF.Pow(Math.Abs(along / (.15f + .48f * bore)), 4)
+                    + MathF.Pow(Math.Abs(cross / (.035f + .32f * bore)), 4);
+                float inside = 1 - Math.Clamp((cut - .58f) / .55f, 0, 1);
+                float bevel = Math.Max(0, 1 - Math.Abs(cut - 1.16f) / .48f);
+                float recess = inside * bore;
+                material = Vector3.Lerp(material, new Vector3(.003f, .002f, .009f), recess);
+                // Opposed dark/light lips suggest inward thickness, with a dim
+                // violet floor carrying the same light as the outgoing stream.
+                material += new Vector3(.13f, .12f, .17f) * bevel * bore * Math.Max(0, -cross + .15f);
+                material += new Vector3(.075f, .013f, .12f) * inside * bore * MathF.Pow(Math.Max(0, along + .35f), 3);
+            }
             vertices[i]=new(new Vector3(origin+new Vector2(n.X,n.Y)*radius,0),
                 new Color(new Vector4(Vector3.Clamp(material,Vector3.Zero,Vector3.One),1)*modulation));
         }

@@ -35,6 +35,13 @@ internal static class RitualArmamentItems
         RitualArmamentKind.Summon => ModContent.ItemType<ChoirOfTheUnmade>(),
         _ => ModContent.ItemType<LastWitness>(),
     };
+    // One authoritative pool for the box and the collection-completion recipe.
+    internal static int[] RewardTypes() => new[]
+    {
+        TypeFor(RitualArmamentKind.Melee), TypeFor(RitualArmamentKind.Ranged),
+        TypeFor(RitualArmamentKind.Magic), TypeFor(RitualArmamentKind.Summon),
+        TypeFor(RitualArmamentKind.Rogue),
+    };
     internal static void Defaults(Item item, RitualArmamentKind kind)
     {
         item.width = 58; item.height = 28;
@@ -192,20 +199,5 @@ public sealed class RitualArmamentPlayer : ModPlayer
         if (previousItem != Player.HeldItem.type || !RitualArmamentItems.Usable(Player) || ++idle > 90)
         { Array.Clear(sequence); idle = 91; }
         previousItem = Player.HeldItem.type;
-    }
-}
-
-// Every form costs exactly one existing raid weapon. No new progression bypass,
-// world flag or reward hook; existing one-item-per-participant Victory stays intact.
-public sealed class RitualArmamentRecipes : ModSystem
-{
-    public override void AddRecipes()
-    {
-        for (int to = 0; to < 5; to++)
-            for (int from = 0; from < 5; from++)
-                if (to != from)
-                    Recipe.Create(RitualArmamentItems.TypeFor((RitualArmamentKind)to))
-                        .AddIngredient(RitualArmamentItems.TypeFor((RitualArmamentKind)from))
-                        .AddTile(TileID.WorkBenches).Register();
     }
 }

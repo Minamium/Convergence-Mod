@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.59",
+  "protocol": 29,
+  "source_base_commit": "51a68b5ffb4b1159f754595d727828c5500fb828",
+  "source_dirty": true,
+  "source_manifest_sha256": "20babc00939ba801ff962d661ca59c592faa763887c27bd6be3dd32871e2312b",
+  "local_build_record": ".local/builds/20260912T091143892975Z/record.json",
+  "artifact": {"name": "Convergence.tmod", "bytes": 52376526, "sha256": "0990fc3d652a0d766b9e8a1b6d676ab865d50c6b24c1a550678953e7245ca6c3"},
+  "environment_reference": "../VERSION_MATRIX.md",
+  "changes": [
+    "Authority emits one ordinary-grid Core beam, rotates among eligible standing roster members and snapshots one immutable aim. Existing four-ray wire capacity remains; no new protocol fields.",
+    "Reused sustained Lacuna ribbon material with a graduated throat; the sphere's beveled recess opens, holds and reseals on the same fractional forecast clock. Damage width and deadlines unchanged.",
+    "Raid circular UI ornaments removed except player Spread and Stack gathering marks. Physical sphere/joint surfaces and weapon/minion magic circles retained. Recovery retains status text and a soft light.",
+    "One native guaranteed equal five-option treasure draw, 20% per weapon. No class conversions. Doll requires one of each weapon at a Work Bench, consumes all five; same pool supplies loot and recipe.",
+    "Corrected stale Doll attack/acquisition tooltips in both languages and the former 12px-lattice assertion left after the earlier 44px four-color Final redesign. No Final gameplay changes."
+  ],
+  "checks": {
+    "native_build": "passed; 0 errors / 4 existing CS8632 warnings; installed with previous package backup",
+    "localization": "passed; 16 files using the installed tModLoader Hjson parser before packaging",
+    "domain": "168/169 initially passed including both new cases; stale Choreography width assertion repaired and the failed case rerun successfully. Passing unchanged cases not repeated.",
+    "compiled_codec": "passed; protocol29, 324 round-trips and 50 malformed/truncated rejections using current linked-source Release assembly",
+    "review": "same native bag consumption, shared reward count, damage clocks/width, exact-Fight ownership and Dedicated Server guards retained; unrelated locale dirt preserved",
+    "static": "passed; catalog 66 documents, repository policy 610 files, 10 YAML files"
+  },
+  "runtime_not_run": [
+    "Reload 0.2.59; inspect medium beam throat, black sphere recess and removal of cast HUD circles at actual game distance and Reduced Effects",
+    "Open boxes and inspect native craft list: five equally eligible weapons, all-five consumed for one Doll, no reverse or class conversion",
+    "Two-to-four-player Core target rotation including a Downed member; rendering/audio balance/FPS are not certified by compilation"
+  ],
+  "previous_runtime_evidence": "2026-09-12-playtest-0258.json",
+  "preserved": "No Ghost Samurai implementation, Raid audio/BGM, source bitmaps, player/world saves, enabled-Mod lists or GUI state changed. Three edited English locales retain tML's existing rewrite; five unrelated locales remain outside the task commit.",
+  "build_notes": "Initial native compile found a local variable-name collision in new sphere shading; renamed and rebuilt successfully. STATUS, evidence and catalog are finalized after packaging; they are not gameplay binaries."
+}

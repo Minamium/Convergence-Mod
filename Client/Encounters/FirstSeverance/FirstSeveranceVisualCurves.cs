@@ -20,6 +20,15 @@ internal static class FirstSeveranceVisualCurves
     internal static float Aperture(double tick, ulong start, ulong fire, ulong end)
         => CastTension(tick, start, fire) * (1f - Window(tick, end, end + 24d));
 
+    // Shared by the sphere depression and its connected beam throat. Fast
+    // opening -> tension hold -> pressure expansion -> smooth resealing.
+    internal static float CoreBore(double tick, ulong start, ulong fire, ulong end)
+    {
+        float opening = .72f * Arrive(tick - start, 10)
+            + .28f * Window(tick, fire - 12d, fire);
+        return opening * (1 - Window(tick, end, end + 20d));
+    }
+
     internal static float Emission(double tick, ulong fire, ulong end)
         => Window(tick, fire - 2d, fire + 2d) * (1f - Window(tick, end - 2d, end + 18d));
 

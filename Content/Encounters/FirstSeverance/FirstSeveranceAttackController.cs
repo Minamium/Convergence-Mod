@@ -27,6 +27,7 @@ internal sealed class FirstSeveranceAttackController
     private readonly FirstSeveranceEncounterPlan plan;
     private FirstSeveranceGridVolley? gridVolley;
     private uint gridSerial;
+    private uint coreSalvoOrdinal;
     private ulong nextGridTick;
     private readonly HashSet<ParticipantId> gridHitParticipants = new();
     private readonly HashSet<(int Pulse, ParticipantId Participant)> scoreHits = new();
@@ -111,16 +112,26 @@ internal sealed class FirstSeveranceAttackController
         {
             uint serial = ++gridSerial;
             byte pattern = FirstSeveranceSafeWindows.GridPattern(serial, tick - state.SubstateEnteredTick);
-            var beams = new List<FirstSeveranceLanceRay>(roster.Count);
+            var beams = new List<FirstSeveranceLanceRay>(1);
+            int coreTargetSlot = -1;
             if (pattern < 4 && serial >= FirstSeveranceGridVolley.CoreSalvoFirstSerial)
+            {
+                var targets = new List<Player>(roster.Count);
                 foreach (var member in roster.Members)
                     if (recovery.IsAlive(member.ParticipantId) && recovery.TryGetPlayer(member, out Player target))
-                        beams.Add(FirstSeveranceGridVolley.AimCoreBeam(groundCenter.X, groundCenter.Y,
-                            target.Center.X, target.Center.Y));
+                        targets.Add(target);
+                if (targets.Count > 0)
+                {
+                    Player target = targets[FirstSeveranceGridVolley.CoreTargetIndex(coreSalvoOrdinal++, targets.Count)];
+                    coreTargetSlot = target.whoAmI;
+                    beams.Add(FirstSeveranceGridVolley.AimCoreBeam(groundCenter.X, groundCenter.Y,
+                        target.Center.X, target.Center.Y));
+                }
+            }
             gridVolley = new(serial, tick, pattern, groundCenter.X, groundCenter.Y, beams);
             nextGridTick = tick + FirstSeveranceGridVolley.CadenceTicks;
             changed = true;
-            Log(tick, $"event=GridTelegraph cast={serial} pattern={gridVolley.Pattern} lines={gridVolley.Rays.Count} core_beams={gridVolley.CoreBeams.Count} fire_tick={gridVolley.FireTick} end_tick={gridVolley.EndTick}");
+            Log(tick, $"event=GridTelegraph cast={serial} pattern={gridVolley.Pattern} lines={gridVolley.Rays.Count} core_beams={gridVolley.CoreBeams.Count} core_target_slot={coreTargetSlot} fire_tick={gridVolley.FireTick} end_tick={gridVolley.EndTick}");
         }
         if (gridVolley is null || !gridVolley.IsFiring(tick)) return changed;
         if (tick == gridVolley.FireTick)

@@ -18,7 +18,8 @@ internal static class RitualSurfacePass
     private static BasicEffect? effect;
     private static Asset<Texture2D>? feather;
     internal static void Begin() { used = 0; }
-    internal static void Ribbon(ReadOnlySpan<Vector2> points, float width, Color color, bool taper = true)
+    internal static void Ribbon(ReadOnlySpan<Vector2> points, float width, Color color, bool taper = true,
+        float startWidth = -1, float openingFraction = 0)
     {
         if (Main.dedServ || width <= 0 || points.Length < 2 || points.Length > 256) return;
         int required = (points.Length - 1) * 6;
@@ -31,7 +32,9 @@ internal static class RitualSurfacePass
             if (!float.IsFinite(points[i].X) || !float.IsFinite(points[i].Y)) return;
             Vector2 normal = new Vector2(-tangent.Y, tangent.X).SafeNormalize(Vector2.UnitY);
             float t = i / (float)(points.Length - 1);
-            float radius = width * .5f * (taper ? MathF.Pow(Math.Max(0, MathF.Sin(t * MathF.PI)), .65f) : 1);
+            float materialWidth = startWidth >= 0 && openingFraction > 0
+                ? MathHelper.Lerp(startWidth, width, FirstSeveranceVisualCurves.Window(t, 0, openingFraction)) : width;
+            float radius = materialWidth * .5f * (taper ? MathF.Pow(Math.Max(0, MathF.Sin(t * MathF.PI)), .65f) : 1);
             Vector2 left = points[i] - Main.screenPosition + normal * radius;
             Vector2 right = points[i] - Main.screenPosition - normal * radius;
             if (i > 0)
