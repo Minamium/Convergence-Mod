@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using Convergence.Content.Encounters.FirstSeverance;
+using Luminance.Assets;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,8 +10,8 @@ using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualCu
 
 namespace Convergence.Client.Encounters.FirstSeverance;
 
-// One original shader, two bounded quads: the exact locked corridor and a small
-// directional pressure mouth. No render targets, particles, actors or timers to
+// Separate low-intensity bloom, textured live body/forecast and pressure mouth.
+// Reuse six vertices for three bounded passes; no render targets, actors or timers to
 // leak into the next Fight. Luminance owns the shader's load/reload/disposal.
 internal sealed class FirstSeverancePursuitBeamVisuals
 {
@@ -31,7 +32,7 @@ internal sealed class FirstSeverancePursuitBeamVisuals
         // Authority decides danger. Fractional material time can never turn a
         // warning live or leave a bright damaging-looking tail after retirement.
         float live = active ? 1 : 0;
-        float tail = !active && !warning ? after * .085f : 0;
+        float tail = !active && !warning ? after * .045f : 0;
         float kick = active ? 1 - Window(clock, fire, fire + 7d) : 0;
         float opacity = fade * (warning ? born : active ? 1 : tail);
         if (opacity < .001f) return;
@@ -44,6 +45,10 @@ internal sealed class FirstSeverancePursuitBeamVisuals
         var depth = device.DepthStencilState;
         var raster = device.RasterizerState;
         var sampler = device.SamplerStates[0];
+        var sampler1 = device.SamplerStates[1];
+        var sampler2 = device.SamplerStates[2];
+        var texture1 = device.Textures[1];
+        var texture2 = device.Textures[2];
         try
         {
             device.BlendState = BlendState.AlphaBlend;
@@ -60,16 +65,25 @@ internal sealed class FirstSeverancePursuitBeamVisuals
             shader.TrySetParameter("flowTime", (float)((clock - start) * .055
                 + Math.Clamp(clock - fire, 0, (double)end - fire) * .27));
             shader.TrySetParameter("detail", reduced ? .35f : 1f);
+            // Read dependency-owned textures only on a client. No copied assets
+            // or lazy per-frame texture allocations; Luminance owns their lifetime.
+            shader.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
+            shader.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value, 2, SamplerState.LinearWrap);
+
+            shader.TrySetParameter("dimensions", new Vector2(ray.Length, ray.HalfWidth * 2.7f));
+            Quad(origin, direction, ray.Length, ray.HalfWidth * 2.7f);
+            shader.Apply("BloomPass");
+            device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 2);
 
             shader.TrySetParameter("dimensions", new Vector2(ray.Length, ray.HalfWidth));
             Quad(origin, direction, ray.Length, ray.HalfWidth);
-            shader.Apply();
+            shader.Apply(warning ? "ForecastPass" : "AutoloadPass");
             device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 2);
 
-            // Elongated slit and inward fibers, never an iris/circular HUD seal.
-            float radius = 24 + tension * 40 + kick * 18;
-            shader.TrySetParameter("dimensions", new Vector2(220, radius));
-            Quad(origin - direction * 150, direction, 220, radius);
+            // Rapid release flare, then a flowing plume; no looping wire glyph.
+            float radius = ray.HalfWidth * (1.3f + tension * .4f + kick * .45f);
+            shader.TrySetParameter("dimensions", new Vector2(300, radius));
+            Quad(origin - direction * 120, direction, 300, radius);
             shader.Apply("MouthPass");
             device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 2);
         }
@@ -77,6 +91,8 @@ internal sealed class FirstSeverancePursuitBeamVisuals
         {
             device.BlendState = blend; device.DepthStencilState = depth;
             device.RasterizerState = raster; device.SamplerStates[0] = sampler;
+            device.Textures[1] = texture1; device.Textures[2] = texture2;
+            device.SamplerStates[1] = sampler1; device.SamplerStates[2] = sampler2;
             batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
                 DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
