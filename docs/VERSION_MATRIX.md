@@ -40,6 +40,7 @@ related_docs:
 | Calamity source reference | `1a8cebd27ec5615316b78f71973446b5528d2b78` (`2.2.2`) | Reference only | 公開mirrorに2.2.4相当sourceが無いため、binaryとの同一性は主張しない |
 | Calamity internal name | `CalamityMod` | Confirmed | `build.txt`とnamespace |
 | Addon dependency | `CalamityMod@2.2.4` | Confirmed | `build.txt`の下限とruntime gateを実機確認 |
+| Luminance graphics dependency | `Luminance@1.0.14` | Local prototype target; full compatibility pending | Installed Workshop 1.0.14 already loaded in client/server logs; eight-cast shader only. See [visual API boundary](encounters/first-severance/VISUAL_SPEC.md#luminance-prototype-boundary). |
 
 This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calamity-independence.md); it is not a permanent commitment to a hard Calamity dependency.
 

@@ -1,0 +1,14 @@
+{
+  "compiler_sha256": "f1ad11316512f6c5cc8b36f20220cfd4e12c0ac5eb9c86b9b4d2399a4e8e5909",
+  "flags": [
+    "/T",
+    "fx_2_0",
+    "/O3"
+  ],
+  "files": {
+    "PursuitPrismFlow.fx": {
+      "source_sha256": "7d5fa50641ed3c7b580a4255b79264c4f54bb143e2f3872f0223856366c9c892",
+      "output_sha256": "ab7345ed96f2b694edb7163765d838e309541824d599d979b00b892145c0b2ca"
+    }
+  }
+}

@@ -24,9 +24,11 @@ internal sealed class FirstSeveranceEmissionVisuals
         internal float FromAngle, TargetAngle;
         internal double SampleTick;
         internal ulong? CancelledAt;
-        internal Emitter(FirstSeveranceLanceVolley volley, double tick)
+        internal readonly bool MainSequence;
+        internal Emitter(FirstSeveranceLanceVolley volley, double tick, bool mainSequence)
         {
             Volley = volley;
+            MainSequence = mainSequence;
             From = Target = new(volley.Rays[0].X, volley.Rays[0].Y);
             FromAngle = TargetAngle = MathF.Atan2(volley.Rays[0].DirectionY, volley.Rays[0].DirectionX);
             SampleTick = tick;
@@ -65,6 +67,7 @@ internal sealed class FirstSeveranceEmissionVisuals
     }
 
     private readonly List<Emitter> emitters = new(12);
+    private readonly FirstSeverancePursuitBeamVisuals pursuit = new();
     internal readonly FirstSeveranceAttackAccents Accents = new();
     private Asset<Texture2D>? atlas;
     private double clockTick;
@@ -90,18 +93,18 @@ internal sealed class FirstSeveranceEmissionVisuals
             if (!currentSpread && emitter.Volley.Serial != volley?.Serial && tick < emitter.Volley.EndTick)
                 emitter.CancelledAt ??= tick;
         }
-        if (volley is not null) Accept(volley, tick);
+        if (volley is not null) Accept(volley, tick, true);
         foreach (var cast in spread)
-            if (tick <= cast.EndTick + 28) Accept(cast, tick);
+            if (tick <= cast.EndTick + 28) Accept(cast, tick, false);
     }
-    private void Accept(FirstSeveranceLanceVolley volley, ulong tick)
+    private void Accept(FirstSeveranceLanceVolley volley, ulong tick, bool mainSequence)
     {
         var existing = emitters.Find(e => e.Volley.Serial == volley.Serial);
         if (existing is not null) existing.Accept(volley, tick);
         else
         {
             if (emitters.Count == 12) emitters.RemoveAt(0);
-            emitters.Add(new Emitter(volley, tick));
+            emitters.Add(new Emitter(volley, tick, mainSequence));
         }
     }
     internal void Clear(bool unload = false)
@@ -155,9 +158,21 @@ internal sealed class FirstSeveranceEmissionVisuals
                 continue;
             }
             foreach (var ray in v.Rays)
+            {
+                // Deliberately opt in only the pursuit family. Final's four-color
+                // score and every other Boss/weapon retain their accepted material.
+                if (e.MainSequence && v.Kind == FirstSeveranceAttackKind.PursuitPrism)
+                {
+                    pursuit.Draw(batch, ray, Math.Min(now, authorityTick + .999),
+                        v.StartTick, v.FireTick, v.EndTick,
+                        e.CancelledAt is null && v.IsFiring(authorityTick), e.CancelledAt,
+                        color, reduced);
+                    continue;
+                }
                 DrawLockedRay(batch, ray, now, v.StartTick, v.FireTick, v.EndTick,
                     e.CancelledAt is null && v.IsFiring(authorityTick), e.CancelledAt is not null,
                     open, emission, warning, cooling, color, reduced);
+            }
         }
     }
 

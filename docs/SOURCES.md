@@ -101,6 +101,8 @@ The2026-09-09 [long-form weapon findings](encounters/first-severance/WEAPONS.md#
 
 ## Revalidation rule
 
+Luminance eight-cast prototype, 2026-09-13: [visual API boundary](encounters/first-severance/VISUAL_SPEC.md#luminance-prototype-boundary) records the pinned 1.0.14 source, installed binary distinction, shader ownership, server guards and original implementation boundary. No other rendering paths are migrated.
+
 Drawing/Defeat/intro pass, 2026-09-06: the same pinned official `Player.KillMe`, `ModSystem.ModifyInterfaceLayers` and `Main` layer-draw path were inspected. [Focused API evidence](research/INSTANT_REVIVAL_CORE_APIS.md#022-narrow-lookup-normal-defeat-death-and-temporary-hud-suppression) records the normal death-hook cancellation boundary, frame-local UI decision, and remaining multiplayer observations.
 
 Instant revival/Core pass, 2026-09-06: pinned tModLoader `ModBuff`, `GlobalTile`, `ModTile`, `ModBlockType` and `MessageID` contracts were inspected. Exact links, confirmed behavior, item-selection ordering inference and focused checks are recorded in [instant revival/Core evidence](research/INSTANT_REVIVAL_CORE_APIS.md). No engine implementation was copied or decompiled.

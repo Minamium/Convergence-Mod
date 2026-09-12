@@ -1,10 +1,10 @@
 displayName = Convergence (Development Build)
 author = Minamium
-version = 0.2.63
-modReferences = CalamityMod@2.2.4
+version = 0.2.64
+modReferences = CalamityMod@2.2.4, Luminance@1.0.14
 side = Both
 playableOnPreview = false
 hideCode = false
 hideResources = false
 includeSource = false
-buildIgnore = Convergence.local.props, .local\*, *.csproj, *.user, *.userprefs, *.suo, *.tmod, *.tmod.sha256, *.pdb, *.dll, *.exe, *.zip, *.nupkg, *.rar, *.7z, *.log, *.trace, *.dmp, *.plr, *.tplr, *.wld, *.twld, *.bak, *.deps.json, *.runtimeconfig.json, *.binlog, *.pyc, *.pyo, *.sqlite, *.sqlite3, *.db, *.pem, *.key, *.pfx, *.p12, *.env*, *credentials*.json, *secrets*.json, *.als, *.ase, *.aseprite, *.aup3, *.blend, *.flp, *.kra, *.logicx, *.mid, *.midi, *.musicxml, *.mxl, *.psd, *.ptx, *.rpp, *.DS_Store, *Thumbs.db, *desktop.ini, bin\*, obj\*, .vs\*, .vscode\*, .idea\*, .git\*, .github\*, .agents\*, .tmodloader\*, *\__pycache__\*, docs\*, tools\*, Tests\*, Mods\*, Logs\*, ci-dependencies\*, tml-save\*, compile_temp\*, ModAssemblies\*, TestResults\*, coverage\*, Assets\Concept\*, Assets\Source\*, Assets\Textures\Concept\*, Assets\Music\Source\*, Assets\Sounds\Source\*, Assets\README.md, Assets\ATTRIBUTION.md, Client\README.md, Content\README.md, README.md, AGENTS.md, CONTRIBUTING.md, SECURITY.md, CHANGELOG.md, Directory.Build.props, global.json, .editorconfig, .gitattributes, .gitignore, build-record.local.json
+buildIgnore = Convergence.local.props, .local\*, *.csproj, *.user, *.userprefs, *.suo, *.tmod, *.tmod.sha256, *.pdb, *.dll, *.exe, *.zip, *.nupkg, *.rar, *.7z, *.log, *.trace, *.dmp, *.plr, *.tplr, *.wld, *.twld, *.bak, *.deps.json, *.runtimeconfig.json, *.binlog, *.pyc, *.pyo, *.sqlite, *.sqlite3, *.db, *.pem, *.key, *.pfx, *.p12, *.env*, *credentials*.json, *secrets*.json, *.als, *.ase, *.aseprite, *.aup3, *.blend, *.flp, *.kra, *.logicx, *.mid, *.midi, *.musicxml, *.mxl, *.psd, *.ptx, *.rpp, *.DS_Store, *Thumbs.db, *desktop.ini, bin\*, obj\*, .vs\*, .vscode\*, .idea\*, .git\*, .github\*, .agents\*, .tmodloader\*, *\__pycache__\*, docs\*, tools\*, Tests\*, Mods\*, Logs\*, ci-dependencies\*, tml-save\*, compile_temp\*, ModAssemblies\*, TestResults\*, coverage\*, Assets\Concept\*, Assets\Source\*, Assets\Textures\Concept\*, Assets\Music\Source\*, Assets\Sounds\Source\*, Assets\README.md, Assets\ATTRIBUTION.md, Client\README.md, Content\README.md, README.md, AGENTS.md, CONTRIBUTING.md, SECURITY.md, CHANGELOG.md, Directory.Build.props, global.json, .editorconfig, .gitattributes, .gitignore, build-record.local.json, *.fx, Assets\AutoloadedEffects\Shaders\compiled.json

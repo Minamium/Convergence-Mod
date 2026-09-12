@@ -155,6 +155,7 @@ TEXT_SUFFIXES = {
 }
 
 DISTRIBUTABLE_ASSET_SUFFIXES = {
+    ".fxc",
     ".gif",
     ".jpeg",
     ".jpg",
