@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.60",
+  "protocol": 29,
+  "base_commit": "052801cecf88db37f9df3a08b53fe64a29d3b9d4",
+  "source_dirty": true,
+  "source_sha256": "80f8a7ce6db1dde2feaecb852e731c2599c3cac1cb87ad64633826b77d42c0e9",
+  "local_build_record": ".local/builds/20260912T093129857055Z/record.json",
+  "artifact": {"name": "Convergence.tmod", "bytes": 52376508, "sha256": "19e7dc439cfb569f0ca25b5a31a455c861926b39f3b317fd9d70b70fadce4098"},
+  "cause": "Owner grounding previously depended only on abs(vertical velocity) < 0.2; horizontal flight and hovering could revert to walking. Mount.Active was not considered.",
+  "fix": "Any actual mount, missing foot support, vertical motion or inverted gravity requires broom flight. Three native solid-point probes check support. Dismounted stable ground is confirmed for six ticks before safe nearby landing. Existing ai[2] owner-mode synchronization and 16 seated/casting cels are reused; no new packet, asset or attack change.",
+  "verification": {
+    "domain": "passed; four focused Doll companion cases including mount, hover/apex, takeoff, airborne dismount, supported landing, inverted gravity, landing hysteresis, catchup and blocked landing",
+    "localization": "passed; all 16 files with the installed Hjson parser",
+    "native_build": "passed; 0 errors / 4 existing CS8632 warnings; installed with package backup",
+    "static": "passed; 66-document catalog, repository policy (611 files), 10 YAML files"
+  },
+  "runtime": "not_run; user-owned mount/hover/dismount/landing and platform/slope checks, plus remote peer pose if available. Compilation is not visual or multiplayer acceptance.",
+  "preserved": "Five unrelated English locale edits remain uncommitted; prior Raid, loot, audio and authored animation assets unchanged."
+}

@@ -636,7 +636,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: 不幸な人形劇 — Ritual Armaments
-  content_sha256: 1db7316443d58cca970b09bfcb14d35b43812d096a16681decb791aa542a8b40
+  content_sha256: 27b2b65a5ced122376d90c1d7a2191ff43811cb4b7f728ac57463f46fc9fee9d
   document_type: spec
   status: provisional
   owners:
@@ -1097,7 +1097,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 705fed94dacbb809977636aad33b78405471c18a87edad3522492ef1d9a96740
+  content_sha256: 321ee5090d9931cee8db2dba74cc2d5918f800cd86b5c6849a0554eed66a3acd
   document_type: status
   status: accepted
   owners:

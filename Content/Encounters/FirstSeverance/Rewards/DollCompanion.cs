@@ -11,7 +11,7 @@ namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
 public sealed class DollCompanion : ModProjectile
 {
     private float walk;
-    private int idle, stuck;
+    private int idle, stuck, ownerGroundedTicks;
     public override string Texture => "Convergence/Assets/Textures/NPCs/DollTheater/DollCompanion";
     public override void SetStaticDefaults()
     {
@@ -47,25 +47,30 @@ public sealed class DollCompanion : ModProjectile
         if (authority && (before > 0 && Projectile.ai[0] == 0 || Projectile.ai[0] > 0 && (int)Projectile.ai[0] % 45 == 0)) Projectile.netUpdate = true;
 
         Vector2 footHome = owner.Bottom - new Vector2(owner.direction * 70, 0);
-        bool ownerGrounded = Math.Abs(owner.velocity.Y) < .2f;
+        // Zero vertical speed also occurs while hovering or riding horizontally.
+        // The owner selects locomotion; peers render its existing replicated ai[2].
+        bool ownerRequiresBroom = DollCompanionRules.OwnerRequiresBroom(owner.mount.Active,
+            HasFootSupport(owner), owner.velocity.Y, owner.gravDir);
         bool landed = Math.Abs(Projectile.velocity.Y) < .1f;
         if (authority)
         {
-            bool fly = Projectile.ai[2] == 1;
-            if (!ownerGrounded || Vector2.DistanceSquared(Projectile.Bottom, footHome) > 360 * 360
-                || Math.Abs(Projectile.Bottom.Y - owner.Bottom.Y) > 140 || stuck > 36) fly = true;
-            // Settle only near the ground; do not switch collision on inside blocks.
-            else if (fly && Math.Abs(Projectile.Bottom.X - footHome.X) < 80
+            ownerGroundedTicks = DollCompanionRules.GroundedTicks(ownerRequiresBroom, ownerGroundedTicks);
+            bool catchup = Vector2.DistanceSquared(Projectile.Bottom, footHome) > 360 * 360
+                || Math.Abs(Projectile.Bottom.Y - owner.Bottom.Y) > 140 || stuck > 36;
+            // Settle only after a stable dismounted landing and a clear body.
+            bool canLand = Math.Abs(Projectile.Bottom.X - footHome.X) < 80
                 && Projectile.Bottom.Y >= owner.Bottom.Y - 18 && Projectile.Bottom.Y <= owner.Bottom.Y + 12
-                && !Collision.SolidCollision(Projectile.position, Projectile.width, Projectile.height)) fly = false;
+                && !Collision.SolidCollision(Projectile.position, Projectile.width, Projectile.height);
+            bool fly = DollCompanionRules.UseBroom(Projectile.ai[2] == 1, ownerRequiresBroom,
+                ownerGroundedTicks, catchup, canLand);
             if (Projectile.ai[2] != (fly ? 1 : 0)) { Projectile.ai[2] = fly ? 1 : 0; Projectile.netUpdate = true; }
         }
         bool floating = Projectile.ai[2] == 1;
         Projectile.tileCollide = !floating;
         if (floating)
         {
-            Vector2 destination = ownerGrounded ? footHome - new Vector2(0, Projectile.height * .5f + 4)
-                : owner.Center + new Vector2(-owner.direction * 92, -52);
+            Vector2 destination = ownerRequiresBroom ? owner.Center + new Vector2(-owner.direction * 92, -52 * owner.gravDir)
+                : footHome - new Vector2(0, Projectile.height * .5f + 4);
             Vector2 desired = (destination - Projectile.Center) * .11f;
             float limit = Math.Max(15, owner.velocity.Length() + 5);
             if (desired.LengthSquared() > limit * limit) desired = Vector2.Normalize(desired) * limit;
@@ -113,6 +118,20 @@ public sealed class DollCompanion : ModProjectile
                 Projectile.knockBack, Projectile.owner, 0, target.whoAmI, Projectile.identity);
     }
     public override bool OnTileCollide(Vector2 oldVelocity) => false;
+
+    private static bool HasFootSupport(Player owner)
+    {
+        if (owner.mount.Active || owner.gravDir < 0) return false;
+        // Native shape-aware point tests include platforms, slopes and half
+        // blocks. Unlike running player collision, this does not move anything.
+        for (int sample = 0; sample < 3; sample++)
+        {
+            Vector2 point = new(owner.position.X + 2 + sample * (owner.width - 4) * .5f, owner.Bottom.Y + 2);
+            if (WorldGen.InWorld((int)(point.X / 16), (int)(point.Y / 16), 1)
+                && Collision.IsWorldPointSolid(point, treatPlatformsAsNonSolid: false)) return true;
+        }
+        return false;
+    }
     public override bool TileCollideStyle(ref int width, ref int height, ref bool fallThrough, ref Vector2 hitboxCenterFrac)
     { fallThrough = Main.player[Projectile.owner].Bottom.Y > Projectile.Bottom.Y + 48; return true; }
 

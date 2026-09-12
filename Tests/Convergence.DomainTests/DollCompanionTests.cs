@@ -6,6 +6,30 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Doll companion follows mounted and hovering owners in broom mode")]
+    private static void DollOwnerLocomotion()
+    {
+        AssertEqual(true, DollCompanionRules.OwnerRequiresBroom(true, true, 0, 1), "stationary ground mount also rides");
+        AssertEqual(true, DollCompanionRules.OwnerRequiresBroom(true, false, 0, 1), "horizontal flying mount");
+        AssertEqual(true, DollCompanionRules.OwnerRequiresBroom(false, false, 0, 1), "hovering and jump apex are not ground");
+        AssertEqual(true, DollCompanionRules.OwnerRequiresBroom(false, true, -7, 1), "takeoff before feet clear ground");
+        AssertEqual(true, DollCompanionRules.OwnerRequiresBroom(false, false, 8, 1), "dismount while falling");
+        AssertEqual(true, DollCompanionRules.OwnerRequiresBroom(false, true, 0, -1), "inverted gravity stays airborne");
+        AssertEqual(false, DollCompanionRules.OwnerRequiresBroom(false, true, 0, 1), "actual supported unmounted landing");
+        int grounded = 0;
+        for (int tick = 1; tick <= DollCompanionRules.LandingConfirmTicks; tick++)
+        {
+            grounded = DollCompanionRules.GroundedTicks(false, grounded);
+            AssertEqual(tick < DollCompanionRules.LandingConfirmTicks,
+                DollCompanionRules.UseBroom(true, false, grounded, false, true), "stable landing hysteresis");
+        }
+        AssertEqual(true, DollCompanionRules.UseBroom(false, true, grounded, false, true), "mount takes priority immediately");
+        AssertEqual(true, DollCompanionRules.UseBroom(true, false, grounded, false, false), "never enable collision inside tiles");
+        AssertEqual(true, DollCompanionRules.UseBroom(false, false, grounded, true, true), "ground-owner catchup retained");
+        AssertEqual(false, DollCompanionRules.UseBroom(false, false, grounded, false, true), "ordinary ground walking retained");
+        AssertEqual(0, DollCompanionRules.GroundedTicks(true, grounded), "new flight resets landing confirmation");
+    }
+
     [DomainTest("Doll companion reserves ten slots and cannot duplicate itself")]
     private static void DollSummonBudget()
     {

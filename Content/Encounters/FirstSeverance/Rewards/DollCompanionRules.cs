@@ -16,6 +16,13 @@ internal static class DollCompanionRules
     internal const int FrameCount = 36;
     internal const int BroomFrames = 16;
     internal const int BroomRecoveryEnd = Verdict + BeamTicks + 18;
+    internal const int LandingConfirmTicks = 6;
+    internal static bool OwnerRequiresBroom(bool mounted, bool footSupported, float verticalSpeed, float gravityDirection)
+        => mounted || !footSupported || Math.Abs(verticalSpeed) >= .2f || gravityDirection < 0;
+    internal static int GroundedTicks(bool ownerRequiresBroom, int previous)
+        => ownerRequiresBroom ? 0 : Math.Min(LandingConfirmTicks, previous + 1);
+    internal static bool UseBroom(bool wasFlying, bool ownerRequiresBroom, int groundedTicks, bool needsCatchup, bool canLand)
+        => ownerRequiresBroom || needsCatchup || wasFlying && (groundedTicks < LandingConfirmTicks || !canLand);
     internal static bool CanSummon(int capacity, int owned) => capacity >= Slots && owned == 0;
     internal static bool NeedleAt(int tick) => tick is 24 or 44 or 58;
     internal static int SigilBirth(int index) => index switch { 0 => 12, 1 => 38, _ => 54 };

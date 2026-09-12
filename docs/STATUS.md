@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.59 / protocol 29** on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns wire compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Current changes are Doll-only: one rotating-target Phase-II Core beam using the sustained violet weapon material, a recessed opening within the metal sphere, and removal of Raid circular HUD ornaments except Stack/Spread. The treasure box selects five weapon forms equally; the 10-slot Doll requires all five. Broom companion, Raid-derived weapon audio and shell suspension are retained. Ghost Samurai, BGM, damage/timing and the previous re-summon fix are unchanged.
+Development **0.2.60 / protocol 29** on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns wire compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Latest follow-up fixes Doll locomotion: any mount or unsupported/airborne owner keeps its broom pose, including stationary hover; only a stable dismounted landing permits walking. Existing 16 broom/casting frames are retained. Previous Doll-only changes remain: one rotating-target Phase-II Core beam from the sphere, no Raid circular HUD ornaments except Stack/Spread, five equal weapon rewards and the all-five Doll recipe. Ghost Samurai, audio/BGM, damage/timing and the previous re-summon fix are unchanged.
 
 - New independent [Ghost Samurai / 幽鬼武者](encounters/ghost-samurai/ENCOUNTER_SPEC.md): reusable summon item, three Phase1 attacks, delayed wisps and three-pass lateral slash in Phase2; Phase3 temporarily continues Phase2. Uses the existing encounter coordinator and exact-Fight cleanup, native player damage outcomes and procedural placeholder visuals. No Raid Ready/Down/revival or new loot/progression is added to this boss.
 
@@ -35,6 +35,8 @@ Development **0.2.59 / protocol 29** on main. [build.txt](../build.txt) owns ver
 - One-member admission defaults on only as a build-gated development aid. It adds no companion, invulnerability or solo-specific fight. Normal testing is multiplayer unless the user explicitly chooses solo.
 
 ## Verification state
+
+**0.2.60** native package installed: **0 errors / 4 existing warnings**, 16 locales parsed, all four focused Doll companion tests passed. [Flight-fix evidence](evidence/2026-09-12-doll-owner-flight.json) records the former zero-vertical-speed grounding mistake, native-owner mode replication and runtime scope. Actual mount/hover/landing animation and peer playback remain user-owned and unverified.
 
 **0.2.59** native package installed: **0 errors / 4 existing warnings**, all 16 localization files parsed by the installed Hjson parser. New target-rotation/bore tests passed; one stale pre-four-color Final test was corrected (168/169 initially, repaired case passed separately). Compiled protocol29 checks passed: 324 round-trips / 50 malformed cases. [Build evidence](evidence/2026-09-12-doll-core-rewards-0259.json) identifies the package and remaining runtime checks.
 
@@ -69,7 +71,7 @@ Development loot includes a companion summon weapon, but balance, public solo/NP
 
 ## Next change
 
-Reload/restart peers onto **0.2.59 / protocol29**; **no unchanged Build + Reload is needed**. User-owned smoke: Phase-II's single locked violet beam from the smoothly opening sphere, absence of non-Stack/Spread Raid reticles, box contents and all-five-weapon Doll craft (no reverse/class exchanges). Also listen/watch the retained broom/weapon work if not yet checked. Oni belongs to the separate task; do not expand this into its playtest matrix.
+Reload/restart peers onto **0.2.60 / protocol29**; **no unchanged Build + Reload is needed**. Latest user-owned smoke: mount while stationary, horizontal flight/hover, dismount in air, then land; the Doll stays on its broom until a supported dismounted landing. Check one remote peer if available. Previous beam/reward changes retain their specific unverified checks in their evidence; do not require a full Raid replay for this locomotion fix. Oni belongs to the separate task.
 
 Retain the player-only Stack/Spread rings, renamed intro/bar and The Unbroken Promise companion. The stage NPC remains intact until all-Ready intro; minions do not replace missing Raid participants. Native rendering, listening and performance checks remain user-owned.
 
