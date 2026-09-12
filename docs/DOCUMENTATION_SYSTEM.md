@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - documentation.data_model
 aliases:
@@ -133,6 +133,14 @@ python3 tools/docs_catalog.py --check
 ## Search tooling
 
 Use rg and the generated catalog. No SQLite, embeddings or additional search service is implemented or required. The former optional database sketch is [archived](history/2026-09-07-pre-consolidation.md#optional-search-design-sketch-not-implemented), outside normal development reading. Any future index must be disposable, ignored cache justified by actual search cost.
+
+## Agent guidance maintenance
+
+When editing AGENTS.md or a Skill, keep durable project boundaries in the agreement and route task-specific procedures through narrow Skill descriptions and references. Shared guidance supports contributors using different models; model preferences belong in personal configuration. Task prompts should identify a concrete result and its applicable verification, with [AGENTS.md](../AGENTS.md#verification) owning the common completion contract.
+
+Check realistic boundary cases after changing a trigger: a wording fix should not load gameplay research, known tuning should not repeat API investigation, and Ghost Samurai presentation should not inherit Doll-specific rules. Structural validation checks syntax and links; it does not prove actual model selection or behavior.
+
+This maintenance approach was reviewed on 2026-09-12 against OpenAI's [skills and prompts article](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra), [Build skills](https://learn.chatgpt.com/docs/build-skills), and [Codex best practices](https://learn.chatgpt.com/guides/best-practices). The local agreement and verification matrix define the project's actual requirements.
 
 ## Game-state data is separate
 

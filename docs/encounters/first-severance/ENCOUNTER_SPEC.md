@@ -12,6 +12,9 @@ source_of_truth_for:
   - first_severance.terminal_outcomes
 aliases:
   - First Severance
+  - 不幸な人形劇
+  - The Unfortunate Doll Play
+  - Lacrimosa
   - 第一断絶
   - Pylon Stack Spread Core
 related_code:

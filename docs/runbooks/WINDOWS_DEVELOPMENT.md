@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - development.windows_setup
 aliases:
@@ -45,14 +45,14 @@ Do not silently update tModLoader or Calamity mid-feature. If Steam updates a de
 
 ## One canonical source and local setup
 
-Choose one Git checkout named `Convergence` inside an authorized writable workspace. The usual `<user-data>/ModSources/Convergence` may be that checkout or an NTFS junction to it; both editing and tModLoader must resolve to the same files. Do not make another ConvergenceEdit copy for each change. Preserve/commit local work before pulling; use branches or purpose-named worktrees only for genuinely parallel work, with a final source directory named Convergence and an explicit build target.
+For each workstation, choose a primary Git checkout named `Convergence` inside an authorized writable workspace. The usual `<user-data>/ModSources/Convergence` may be that checkout or an NTFS junction to it; both editing and tModLoader must resolve to the same files. Do not make another ConvergenceEdit copy for each change. Preserve/commit local work before pulling; use branches or purpose-named worktrees only for genuinely parallel work, with a final source directory named Convergence and an explicit build target.
 
 Copy [tools/local.example.props](../../tools/local.example.props) to the ignored repository-root `Convergence.local.props`, and set:
 
 - `TModLoaderPath`: installed pinned tModLoader directory containing `tMLMod.targets`.
-- `TModLoaderSavePath`: existing user-data directory containing `Mods`; never silently create an empty alternate profile.
+- `TModLoaderSavePath`: existing user-data directory containing `Mods`; never silently create an empty alternate profile. Feature builds use the explicit separate output/profile chosen under [shared development](../../CONTRIBUTING.md#shared-development), while integrated main owns the shared playtest package.
 
-The project prefers explicit local/MSBuild paths, then `TML_PATH`, with the traditional parent `../tModLoader.targets` as fallback. It fails clearly if no targets exist. Do not commit local props, dependency binaries or personal paths, or broaden global permissions to make a checkout writable. A new machine clones GitHub once (`gh repo clone Minamium/tmod Convergence`); authenticate through Git/gh, never tracked credentials.
+The project prefers explicit local/MSBuild paths, then `TML_PATH`, with the traditional parent `../tModLoader.targets` as fallback. It fails clearly if no targets exist. Do not commit local props, dependency binaries or personal paths, or broaden global permissions to make a checkout writable. A new machine clones GitHub once (`gh repo clone Minamium/Convergence-Mod Convergence`); authenticate through Git/gh, never tracked credentials. Existing clones need only the [remote update](../../CONTRIBUTING.md#repository-name-and-existing-clones). The local directory, namespace, ModSources junction and `Convergence.tmod` identity stay unchanged by the GitHub rename.
 
 ## Diagnose or build
 
@@ -65,9 +65,9 @@ Use the available Python 3 interpreter. Doctor is read-only and identifies the r
 
 Build also requires PowerShell 7 (`pwsh`) and runs `tools/check-localization.ps1` with the selected installation's own `Hjson.dll`. All `Localization/**/*.hjson` are parsed before package backup/compilation; a syntax error stops the build instead of packaging an unloadable Mod. Hjson unquoted values extend to the newline: put a following object-closing brace on its own line, or quote the inline string. This check is automatic; do not rerun it manually after an unchanged successful build. Its build-abort contract is covered by `python -B tools/tests/test_localization_preflight.py`.
 
-Use `--native` for the current direct Calamity weapon references: the installed tModLoader compiler resolves `modReferences` from installed Mods/Workshop and removes its temporary reference DLLs. This is a non-GUI build, not a running game server. It does not refresh `bin/Debug` DLLs; do not use an older MSBuild DLL as this package's codec evidence. Bare `dotnet build`/the wrapper's `--with-dotnet` require separately configured local Calamity assembly references; the previous project-only setup is insufficient for0.2.25. Do not vendor those DLLs or run both compilers on unchanged inputs.
+Use `--native` for the current direct Calamity weapon references: the installed tModLoader compiler resolves `modReferences` from installed Mods/Workshop and removes its temporary reference DLLs. This is a non-GUI build, not a running game server. It does not refresh `bin/Debug` DLLs; do not use an older MSBuild DLL as this package's codec evidence. Bare `dotnet build`/the wrapper's `--with-dotnet` require separately configured local Calamity assembly references; the previous project-only setup is insufficient for the current direct-reference build. Do not vendor those DLLs or run both compilers on unchanged inputs.
 
-Verified2026-09-08 against pinned [ModCompile.cs](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/Core/ModCompile.cs): `CompileMod` resolves installed dependencies whereas `-eac` packages a precompiled assembly. Native compilation uses tML's parser settings rather than the project nullable context (currently four annotation warnings).
+Verified 2026-09-08 against pinned [ModCompile.cs](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/Core/ModCompile.cs): `CompileMod` resolves installed dependencies whereas `-eac` packages a precompiled assembly. Native compilation uses tML's parser settings rather than the project nullable context (currently four annotation warnings).
 
 Installed `tMLMod.targets` was inspected during consolidation: it sets .NET 8/C#12 and calls the bundled server build command with ProjectDir, TargetPath and ExtraBuildModFlags. No copied third-party build targets or hard-coded Steam directory is committed.
 
@@ -129,7 +129,7 @@ For each bounded change:
 
 1. select only the context needed using [Read by task](../README.md#read-by-task); reuse context already read;
 2. implement the current scope and update only affected tests/document owners;
-3. run the wrapper once with the applicable flags and perform the runtime checks selected by the Verification Matrix;
+3. complete the [AGENTS verification contract](../../AGENTS.md#verification) using the wrapper's applicable flags, the selected package build and assigned runtime checks;
 4. inspect the final diff and report results plus any concrete remaining user playtest; use a narrow commit when committing.
 
 Use [Test Plan](../TEST_PLAN.md) for the affected multiplayer/authority cases. Repeat passing checks only if their inputs/environment change or a failure/uncertainty warrants it. Full compatibility and release gates retain their complete evidence requirements.

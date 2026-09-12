@@ -4,7 +4,7 @@ document_type: overview
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - project.product_scope
 aliases:
@@ -22,20 +22,20 @@ related_docs:
 
 ## One-line concept
 
-Shadowspec級装備の2～4人パーティーが、極地の終末研究・収容施設に展開された固定Raidフィールドで、DPSと位置取りを協力して処理する最終決戦。
+Calamity終盤に、位置取り・火力・蘇生を協力して処理するRaidと、予兆を読み切って挑む独立Bossを追加するContent Mod。
 
 ## Product position
 
 Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、MMORPG Raid型の協力ギミックをTerrariaの2D移動とserver authorityへ翻訳する。弾幕密度とHPだけを増やしたSuperbossにはしない。
 
-想定party:
+協力Raidの想定party:
 
 - Exo MechsおよびSupreme Calamitas撃破済み;
 - Shadowspec級装備を利用可能;
 - 2～4人の固定または準固定party;
 - 5～12分程度の反復攻略を受け入れられる。
 
-5～12分は将来拡張したRaid全体のproduct goalであり、最初のvertical sliceは2～4分を暫定目標とする。Soloは初期release対象外。将来対応するなら協力ギミックの数値を縮めるだけでなく、独立した個人Superbossとして設計する。
+5～12分は将来のRaid全体のproduct goalであり、現行の戦闘時間を示す数値ではない。協力Raidの一人起動は開発支援として区別する。独立Bossは各featureの参加人数・戦闘設計に従う。
 
 最初のRaidは基盤の実証対象であってAddon全体の上限ではない。長期的には独立Boss、追加Raid、World content、進行、Item、Utility、演出まで広げ、Calamity級の独自Content Modを目指す。
 
@@ -56,18 +56,15 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 5. **Recovery** — 軽微な失敗とDownedを立て直せるが、立て直しには機会費用がある。
 6. **Extensibility** — feature ownershipとserver/client境界が追加Boss/Raidを妨げない。
 
-## First Raid
+## Current encounters
 
-最初のRaidは`First Severance` / `第一断絶`。current code name/keyは`FirstSeverance` / `first_severance`。現行の開発版は起動・戦闘可能。実装状況は[STATUS](STATUS.md)、行動とフェーズは[現行仕様](encounters/first-severance/ENCOUNTER_SPEC.md)を参照する。
+最初のRaidは **不幸な人形劇 / The Unfortunate Doll Play**。Bossは **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**。`FirstSeverance` / `first_severance` は安定内部IDとして残る。[Raid概要](encounters/first-severance/README.md)と[現行仕様](encounters/first-severance/ENCOUNTER_SPEC.md)が公開名と戦闘体験を持つ。
 
-最初のplayable loop:
+Raidは集合・Readyから複数フェーズとFinal生存へ進む。現行の蘇生方式は[Revive Spec](encounters/first-severance/REVIVE_SPEC.md)に従う。古いchannel/token方式や初期の単純ループを現行仕様として実装し直さない。
 
-```text
-起動 -> Boss出現 -> Pylon DPS -> 頭割り -> 散開 -> Core露出
-                                           -> HPが残ればPylonへ戻る
-```
+**幽鬼武者 / Ghost Samurai** は同じ基盤を使う独立Boss。[専用仕様](encounters/ghost-samurai/ENCOUNTER_SPEC.md)が召喚、攻撃、通常死亡、終了と再召喚を定義する。Raid専用のReady/Down/蘇生を全Bossの要件にしない。
 
-頭割りはserver-owned damage poolを必要人数で分配する。Raid中のeligible lethalはDownedへ変換し、他playerが専用itemを使ってchannelして蘇生する。BossのAccepted境界は単純な単一NPC/bodyであることまでで、中央Core、破損円環1本、左右アーム2本は最初のprovisional placeholderとする。
+実装・検証の現在地は [Status](STATUS.md)。この文書は製品の方向性を持ち、ビルド別の状態表は持たない。
 
 ## Player experience goals
 
@@ -80,31 +77,14 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 
 ## Setting and presentation
 
-舞台は極地の巨大工業研究・収容施設。氷、暗い金属、白、赤、黒、円環、封印柱、観測装置、無機質な警告を視覚語彙とする。
+各Encounterが固有の背景・造形・音・動きを持つ。不幸な人形劇の懸架された人形と拘束機構は [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md)、幽鬼武者の骸骨・鬼火・二刀流は[専用仕様](encounters/ghost-samurai/ENCOUNTER_SPEC.md)を参照する。既存作品の顔・logo・構図やCalamity assetを再現・抽出しない。
 
-`The Null Cantor`、`The Choir Beneath the Ice`、`Erebus Polar Citadel`、`Pale Meridian Containment Complex`などはすべてprovisional。既存作品の機体、logo、顔、固有語、構図やCalamity assetを再現・抽出しない。
+[Art Direction](ART_DIRECTION.md)は共通の読みやすさとfeature別の参照先を示す。過去の極地/観測施設の案や旧固有名は、新しいBossを同じ見た目へ固定する条件ではない。
 
-## Initial implementation scope
+## Scope and acceptance
 
-- completed: Windowsでのversion build/load/Dedicated Server確定;
-- completed: atomic `ThirdSeverance` → `FirstSeverance` rename;
-- completed: obsolete multipart planからbounded six-state loop・feature terminal mappingへの置換;
-- Core/Arena/roster/Ready/logical Barrier/cleanup;
-- bounded transport、feature snapshot、client replica;
-- simple Boss/Pylons and repeated loop;
-- server-resolved Stack/Spread/Core damage window;
-- instrumented and tested Downed/Revive adapter/item;
-- 2/3/4-player multiplayer acceptance evidence。
+現在の依頼と各featureのspec/planが実装範囲を決める。[Raid backlog](encounters/first-severance/BACKLOG.md)は未採用の案であり、今回の依頼を自動拡張しない。初期sliceの計画・完了済みrename・bootstrapは[履歴](history/2026-09-07-pre-consolidation.md)に残る。
 
-## Non-goals for the first playable slice
+独立Mod化、同時に複数のEncounterを動かす設計、一般的なnative lethal/rejoin互換性はそれぞれ別の設計・検証対象。完成済みの報酬や音楽を旧い「初期slice対象外」の一覧から取り消さない。
 
-- Part Break、Targeted Line/Bait、Personal Effigies、Split Reality、Last Stand;
-- multipart Crown/Wings/Heart Casing;
-- complete Boss attack catalog、final balance、reward、music、shader、production sprite;
-- Subworld/dimension、Solo、multiple simultaneous arenas;
-- Calamity内部実装/assetのcopyまたはredistribution;
-- Stage C standalone content。
-
-## Viable first-Raid definition
-
-The slice is viable only when 2–4 players can activate, Ready, clear/fail, Down/revive, disconnect, cancel, and unload on Dedicated Server with identical server-owned outcomes and zero stale exact-Fight state. “The domain class exists” or “one client loads” is not completion.
+実装依頼の完了は [AGENTS](../AGENTS.md#verification) と[検証表](../.agents/skills/develop-convergence-raids/references/verification-matrix.md)に従う。公開/本番受入には [Release Process](RELEASE_PROCESS.md) の対応する人数・環境・cleanup・互換性の証拠が必要であり、単体のコンパイルや一人の画面表示だけでは満たさない。

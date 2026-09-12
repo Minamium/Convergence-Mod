@@ -4,7 +4,7 @@ document_type: spec
 status: accepted
 owners:
   - art
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - project.art_direction
 aliases:
@@ -19,13 +19,20 @@ related_docs:
 
 # Art Direction
 
-## Core statement
+## Feature scope
 
-極地の巨大研究・収容施設が、封印対象の起動により工業設備から儀式装置へ読み替わる瞬間を描く。既存作品やCalamity assetの形・構図を借りず、低密度でも読める独自の幾何学表現から始める。
+Each encounter has its own silhouette, materials, motion and cue vocabulary. Shared guidance below concerns readability and presentation cost. The Doll's palette and Raid markers do not define an independent Boss.
 
-## Current First Severance presentation
+| Feature | Appearance and motion owner |
+|---|---|
+| 不幸な人形劇 / `FirstSeverance` | [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) for the bound Gothic doll, restraint structure and reveal; [Visual Spec](encounters/first-severance/VISUAL_SPEC.md) for readability and scene rules |
+| Ghost Samurai | [Boss spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) for the horned skeleton, blue-white ghost fire, dual swords, rig and attack presentation |
 
-First Severance retains the tragic white-haired Gothic **girl doll** inside an inhuman restraint structure. Do not simply enlarge the NPC face/costume: the user's refinement restores the old crown/body silhouette around a smaller, partly veiled face, keeps the accepted porcelain arms and limits pre-eclosion exposure. [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) owns those details, the conversation NPC and fragment capture into an already present coffin. Reuse the accepted hinged eclosion, field and terminal effects. [Presentation](encounters/first-severance/VISUAL_SPEC.md) still owns attack readability and kinetic contrast. One life pool/marked chest aperture remains one logical damage target; the giant decorative anatomy is not multipart collision.
+## Current Doll Play presentation
+
+The bound white-haired girl doll remains inside an inhuman restraint structure. The accepted face, crown, arms, shell and Core composition are owned by Doll Theater; reuse those details rather than deriving a replacement from an older general style paragraph. One logical damage target does not imply multipart collision.
+
+The following shape/palette notes apply to the Doll Play field. Follow its current visual spec when a local instruction refines these broad terms.
 
 ## Shape language
 
@@ -65,7 +72,7 @@ Boss scale may be visually large, but hitbox and damage gate must be obvious. De
 - no color-only assignment;
 - warnings do not cover players, markers, or safe areas;
 - screen shake, flash, chromatic effects, and dense particles are reducible;
-- test 2/3/4-player overlap at 1080p, 1440p, ultrawide, and supported UI scales.
+- select relevant player-count overlap, resolution and UI-scale checks from the verification matrix; record untested configurations honestly.
 
 ## Forbidden references
 

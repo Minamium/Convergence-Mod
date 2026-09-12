@@ -2,6 +2,22 @@
 
 ## Records
 
+### Convergence Mod README illustration — 2026-09-12
+
+- Runtime file: `docs/media/convergence-banner.png`
+- Asset ID: convergence-readme-banner-2026-09-12
+- Asset type: documentation illustration
+- Creator: OpenAI built-in image_gen, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-12
+- Source type: generated
+- Source work and URL: the project's existing `icon_workshop.png` emblem, whose original generated-art record is retained below; no external character art or game extraction supplied
+- Tool/model/version: OpenAI built-in image_gen; backend model version not exposed
+- Human modifications: owner requested an illustrated README; selected 2172×724 PNG copied byte-for-byte, without raster edits, cropping or resampling
+- License and redistribution terms: project asset distribution license remains unselected; this task authorizes repository documentation use, not a new third-party license or public game release
+- Required attribution: retain this provenance; no external credit requirement specified
+- Reviewer and review date: Codex inspected title, emblem, composition and margins on 2026-09-12; README labels it as an illustration, not a screenshot
+- Notes: documentation-only export, excluded from the runtime package by the existing `docs` buildIgnore; generated original retained outside source; 2239776 bytes; SHA256 `84e4ffd1fb9ddab1d581542a62a7a0fcf9646f960e926402342c4f72a5e888e3`; [prompt and output evidence](../docs/evidence/2026-09-12-readme-artwork.json)
+
 ### Broom companion, treasure box and mechanical cradle — 0.2.57
 
 Built-in prompts: `tools/asset_recipes/doll_presentation_0257.json`; export: `tools/prepare_doll_presentation.ps1`. Project Doll NPC and restraint atlas supplied identity/layout references. Rejected checkerboard background, corrected originals and old runtime atlases are retained; no third-party art imported. Code-native sphere lighting is described in the Doll Theater visual spec.

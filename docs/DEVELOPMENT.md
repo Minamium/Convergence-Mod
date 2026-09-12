@@ -4,7 +4,7 @@ document_type: runbook
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - development.general_policy
 aliases:
@@ -22,44 +22,44 @@ related_docs:
 
 # Development Setup
 
-## Primary workstation
+## Workstation and baseline
 
-Use the Windows desktop as the primary tModLoader/Calamity build, Host & Play, and Dedicated Server environment. Read the relevant [Windows Development Runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure when preparing or using that environment. The [Windows Handoff](handoff/WINDOWS.md) is a short resume entry, not an edit prerequisite.
+The [Version Matrix](VERSION_MATRIX.md) owns the confirmed runtime/dependency baseline. Windows is the primary runtime-verification environment. Other platforms can perform Git/docs/review and platform-independent checks; Mod build/load claims require the pinned runtime to be installed and observed on that platform. A past workstation inventory is not a restriction on another contributor's machine.
 
-macOS can support tModLoader development when its runtime is installed, but the audited MacBook did not contain Terraria, tModLoader, .NET SDK, Calamity, or a valid `ModSources` checkout. It remains useful for documentation, Git, review, and platform-independent work. Never transfer an unverified Mac result into the version matrix as a successful Mod build.
-
-## Confirmed environment
-
-The [Version Matrix](VERSION_MATRIX.md) is the only compatibility baseline. A source-path change is not a dependency upgrade.
+Use the relevant [Windows runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure for setup, compilation and load checks. The [Windows handoff](handoff/WINDOWS.md) describes the maintainer workstation and completed checkpoints; it is not a prerequisite for every edit.
 
 ## Checkout and local configuration
 
-Use one canonical Git checkout named Convergence; the ModSources entry may be an NTFS junction to it. The [Windows runbook](runbooks/WINDOWS_DEVELOPMENT.md#one-canonical-source-and-local-setup) owns local configuration and build procedures. Branches/worktrees replace per-edit copies, and each build must identify its actual source. Never overwrite a newer checkout with a historical snapshot.
+Clone `Minamium/Convergence-Mod` into a directory named `Convergence`. The GitHub name and Mod source identity are independent. Existing clones use the [remote update procedure](../CONTRIBUTING.md#repository-name-and-existing-clones); no source, assembly or ModSources rename is needed.
 
-`python tools/dev.py doctor` resolves the environment read-only; `python tools/dev.py build` packages and records source/dirty delta/output identity. Personal paths live in ignored local props, not committed targets.
+Each developer identifies their checkout and build destination through ignored local props. Follow [shared development](../CONTRIBUTING.md#shared-development) for branches/worktrees, integration and separate feature-build profiles. The [Windows source setup](runbooks/WINDOWS_DEVELOPMENT.md#one-canonical-source-and-local-setup) owns actual path resolution. Preserve historical copies; do not use them to overwrite current work.
+
+`python tools/dev.py doctor` resolves the local environment read-only. Package builds record source, dirty delta and output identity; another contributor's manifest cannot identify your local package.
 
 ## Repository checks
 
-Install `tools/requirements-ci.txt` once per Python environment. Routine verification uses the [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md):
+Install `tools/requirements-ci.txt` once per Python environment. Select checks using the [Verification Matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md):
 
-```bash
-python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
+```sh
+python .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
 ```
 
-Add `--write-catalog` after indexed-doc edits, `--with-domain` for affected pure/linked domain code, and `--with-dotnet` for C# compiled into the Mod. Combine applicable flags in one invocation. The standalone domain harness is not a Mod build.
+Add `--write-catalog` after an indexed-document edit batch, `--with-domain` for affected linked domain code, and `--with-codec` for packet contracts. Combine the applicable flags. The standalone harness does not compile or load the Mod.
 
-## Real build/load gates
+## Package build and load
 
-```bash
-dotnet build ConvergenceMod.csproj
+Use the [recorded native build](runbooks/WINDOWS_DEVELOPMENT.md#diagnose-or-build) for the current installed Calamity references:
+
+```sh
+python tools/dev.py build --native
 ```
 
-The command build can instead run through the wrapper's `--with-dotnet`; do not run both command paths for unchanged inputs. Use the Verification Matrix to select matching Build + Reload, affected-behavior smoke, and multiplayer cases. Full build/load/server/two-client baseline confirmation is required for runtime/dependency changes; it is not the default loop for every edit. User-owned GUI checks remain explicitly `not_run` until observed.
+Run it against the output/profile selected for the task. Bare `dotnet build` and the wrapper's `--with-dotnet` are alternatives only when the required local assembly references are configured; they are not an extra mandatory compilation after a successful native build.
 
-## Evidence
+Reload or restart peers with the resulting package. Manual load/playtesting belongs to the named task owner unless GUI assistance is requested. Record unobserved applicable checks as `not_run`. Full load/server/two-client compatibility confirmation applies to dependency/runtime changes and declared acceptance gates, not every edit.
 
-For runtime/baseline evidence, use [the build-record template](evidence/build-record.example.json) as ignored `build-record.local.json`. Record exact commit, OS/architecture, runtime versions, Calamity binary checksum without the binary, each applicable gate result, participant count, and network conditions. Link unchanged environment evidence instead of copying it into each document. Text-only work needs the static-check result, not a runtime record. Sanitized records follow [Evidence](evidence/README.md).
+## Evidence and completion
 
-## Feature activation gates
+[AGENTS.md](../AGENTS.md#verification) owns the completion contract. [Evidence](evidence/README.md) defines sanitized runtime records, including exact source/dirty identity, versions, artifact and topology. Link unchanged environment evidence rather than copying it into every document. Text-only work needs its static-check result, not a runtime record.
 
-Use [Status](STATUS.md) and the active feature specification/ADRs for enabled development paths and remaining adapter gates. Historical bootstrap instructions do not disable an accepted experiment. Enabling a new path still requires that path's authority, ownership, replication, and cleanup contract plus its declared verification.
+Use [Status](STATUS.md) and active feature specs/ADRs for enabled development paths and remaining adapter gates. New activation paths retain their required authority, ownership, replication, cleanup and verification contracts.
