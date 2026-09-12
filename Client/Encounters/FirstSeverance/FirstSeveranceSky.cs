@@ -54,6 +54,22 @@ internal sealed class FirstSeveranceSky : CustomSky
         var combat = ModContent.GetInstance<FirstSeveranceClientStateSystem>().Combat;
         float unrest = combat?.BossPhase == FirstSeveranceBossPhase.Final
             ? .5f + .5f * FirstSeveranceChoreography.FinalProgress(combat.ActionIndex) : .18f;
+        var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
+        double tick = state.EstimatedAuthorityTick;
+        float discharge = 0;
+        if (combat?.LanceVolley is { } lance)
+            discharge = FirstSeveranceVisualCurves.ReleaseImpulse(tick, lance.FireTick);
+        if (combat?.GridVolley is { } grid)
+            discharge = Math.Max(discharge, FirstSeveranceVisualCurves.ReleaseImpulse(tick, grid.FireTick));
+        if (combat?.Substate == FirstSeveranceSubstate.PhaseTransition)
+        {
+            float transition = FirstSeveranceStageVisuals.RuptureAge(combat, tick);
+            discharge = FirstSeveranceVisualCurves.Window(transition, .36, .39)
+                * (1 - FirstSeveranceVisualCurves.Window(transition, .39, .6));
+        }
+        // Illumination responds behind the terrain. It never changes the world
+        // weather or covers players/forecasts with a full-screen flash.
+        float exposure = reduced ? .65f : .78f - unrest * .10f - discharge * .16f;
         float scale = Math.Max(Main.screenWidth / (float)painting.Width, Main.screenHeight / (float)painting.Height) * 1.08f;
         if (!reduced) scale *= 1 + .012f * MathF.Sin(time * .19f);
         // Overscan covers all aspect ratios; bounded parallax never exposes an edge.
@@ -61,11 +77,23 @@ internal sealed class FirstSeveranceSky : CustomSky
             MathF.Sin(Main.screenPosition.X * .0005f + time * .065f) * 12,
             MathF.Sin(Main.screenPosition.Y * .0006f + time * .082f) * 8);
         batch.Draw(painting, new Vector2(Main.screenWidth, Main.screenHeight) * .5f + drift,
-            null, Color.White * (fade * (reduced ? .65f : 1f)), 0f,
+            null, Color.White * (fade * exposure), 0f,
             new Vector2(painting.Width, painting.Height) * .5f, scale, SpriteEffects.None, 0f);
         if (reduced) return;
         EnsureMist();
         Texture2D fog = mist!;
+        // Broad moving cathedral light with stratified occlusion; these are
+        // textured depth planes, not hazard-like straight luminous lines.
+        for (int layer = 0; layer < 5; layer++)
+        {
+            float seed = FirstSeveranceRaidVfx.Seed(layer + 31);
+            Vector2 point = new(Main.screenWidth * (.1f + seed * .8f) + drift.X * .5f,
+                Main.screenHeight * (.27f + MathF.Sin(time * .06f + layer) * .035f));
+            Color light = new(118, 89, 154, 0);
+            batch.Draw(fog, point, null, light * (fade * (.12f + discharge * .24f)),
+                -.9f + seed * .7f, fog.Size() * .5f,
+                new Vector2(Main.screenHeight * 1.3f / fog.Width, (100 + seed * 160) / fog.Height), SpriteEffects.None, 0);
+        }
         // Separate depth layers move even when the camera/player is stationary.
         // The painting remains the architectural anchor, not an animated hazard.
         for (int layer = 0; layer < 7; layer++)
@@ -73,7 +101,7 @@ internal sealed class FirstSeveranceSky : CustomSky
             float depth = layer / 6f;
             Vector2 point = new(Main.screenWidth * (.5f + MathF.Sin(time * (.045f + depth * .04f) + layer * 2) * .28f),
                 Main.screenHeight * (.20f + depth * .70f) + MathF.Sin(time * .12f + layer) * 24);
-            Color veil = layer % 2 == 0 ? new(68, 61, 77) : new(25, 30, 39);
+            Color veil = layer % 2 == 0 ? new(74, 58, 91) : new(16, 16, 25);
             batch.Draw(fog, point + drift * depth * 2, null, veil * (fade * (.32f + unrest * .15f)),
                 MathF.Sin(time * .07f + layer) * .06f, fog.Size() * .5f,
                 new Vector2(Main.screenWidth * (1.2f + depth * .5f) / fog.Width, (130 + depth * 110) / fog.Height), SpriteEffects.None, 0);

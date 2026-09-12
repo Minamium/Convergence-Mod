@@ -159,8 +159,8 @@ internal sealed class FirstSeveranceEmissionVisuals
             }
             foreach (var ray in v.Rays)
             {
-                // Deliberately opt in only the pursuit family. Final's four-color
-                // score and every other Boss/weapon retain their accepted material.
+                // Keep the eight-cast cancellation/timing adapter. The other
+                // Raid adapters now reach the same material without sharing state.
                 if (e.MainSequence && v.Kind == FirstSeveranceAttackKind.PursuitPrism)
                 {
                     pursuit.Draw(batch, ray, Math.Min(now, authorityTick + .999),
@@ -258,87 +258,31 @@ internal sealed class FirstSeveranceEmissionVisuals
     private void DrawCharge(SpriteBatch batch, Emitter e, double now, ulong authorityTick,
         float open, float emission, float warning, float cooling, Color color, bool reduced)
     {
-        var v = e.Volley;
-        Vector2 head = e.Position(now);
-        float angle = e.Angle(now);
-        Vector2 direction = new(MathF.Cos(angle), MathF.Sin(angle));
-        Vector2 normal = new(-direction.Y, direction.X);
-        // Reconstruct the locked launch aperture even from a later motion sample.
-        var sample = v.Rays[0];
-        float launchedTicks = v.MotionTick >= v.FireTick ? v.MotionTick - v.FireTick + 1 : 0;
-        Vector2 mouth = now < v.FireTick ? head : new Vector2(sample.X, sample.Y) - direction * (104 * launchedTicks);
-        DrawAperture(batch, mouth, direction, now, v.StartTick, v.FireTick, open, emission, color, reduced);
-        if (now < v.FireTick && e.CancelledAt is null)
-            DrawWarning(batch, head, direction, 1600, 50, now, v.StartTick, v.FireTick, color, Math.Max(.6f, warning), reduced);
-        float charge = CastTension(now, v.StartTick, v.FireTick);
-        // The gathered body deforms continuously into a long needle at launch.
-        float stretch = 1 + emission * 1.35f;
-        float opacity = Window(now, v.StartTick, v.StartTick + 5d) * cooling;
-        Sprite(batch, new Rectangle(5, 12, 980, 455), head, new Vector2((220 + charge * 100) * stretch, 120 - emission * 24),
-            angle, color * opacity, new(.97f, .55f));
-        Accents.Halo(batch, head - direction * 35, new Vector2(210 + emission * 160, 104), color,
-            opacity * .75f, angle);
-        Accents.Ribbon(batch, head - direction * (140 + emission * 140), direction,
-            140 + emission * 140, 45, Color.White, opacity * (.35f + emission * .6f));
-        if (!reduced)
-            Sprite(batch, new Rectangle(5, 12, 980, 455), head - direction * 80, new Vector2(540 * stretch, 90),
-                angle, FirstSeveranceAttackAccents.Neon(color, opacity * emission * .4f), new(.97f, .55f));
-        // Filaments stream out of the gathered body, not a disconnected trail.
-        for (int f = 0; f < (reduced ? 2 : 5); f++)
-        {
-            Vector2 previous = head;
-            for (int s = 1; s <= 32; s++)
-            {
-                float t = s / 32f;
-                float wave = MathF.Sin(t * 16 + (float)now * .27f + f * 1.7f);
-                Vector2 p = head - direction * (t * (240 + emission * 540)) + normal * (wave * 32 * t + (f - 2) * 7 * t);
-                Line(batch, previous, p, FirstSeveranceAttackAccents.Neon(color, opacity * (1 - t) * .8f), (1 - t) * 3 + .5f);
-                previous = p;
-            }
+        var v=e.Volley;
+        Vector2 head=e.Position(now),direction=new(MathF.Cos(e.Angle(now)),MathF.Sin(e.Angle(now)));
+        bool live=e.CancelledAt is null && v.IsFiring(authorityTick);
+        float charge=CastTension(now,v.StartTick,v.FireTick);
+        float opacity=Arrive(now-v.StartTick,5)*cooling;
+        if(now<v.FireTick && e.CancelledAt is null)
+            DrawWarning(batch,head,direction,1600,50,now,v.StartTick,v.FireTick,color,Math.Max(.6f,warning),reduced);
+        if(live) {
+            var hit=v.RayAt(0,authorityTick);
+            FirstSeveranceRaidVfx.Beam(batch,new(hit.X,hit.Y),new(hit.DirectionX,hit.DirectionY),
+                hit.Length,hit.HalfWidth,now-v.StartTick,1,1,opacity,color,reduced,confined:true,mouth:false);
         }
-        if (e.CancelledAt is null && v.IsFiring(authorityTick))
-        {
-            var hit = v.RayAt(0, authorityTick);
-            Accents.Ribbon(batch, new(hit.X, hit.Y), new(hit.DirectionX, hit.DirectionY),
-                hit.Length, hit.HalfWidth * 2, Ice, .7f);
-        }
+        FirstSeveranceRaidVfx.Orb(batch,head,direction*(live?24:0),48,now-v.StartTick,
+            color,opacity,live,reduced);
+        if(!live && now<v.FireTick) FirstSeveranceRaidVfx.Charge(batch,head,direction,now-v.StartTick,
+            charge,0,opacity,color,reduced,1.2f);
+        if(live) FirstSeveranceRaidVfx.Flare(batch,head,now-v.StartTick,
+            ReleaseImpulse(now,v.FireTick)*opacity,color,reduced,1.35f);
     }
 
     private void DrawAperture(SpriteBatch batch, Vector2 mouth, Vector2 direction, double tick,
         double start, double fire, float open, float emission, Color color, bool reduced)
     {
-        float angle = MathF.Atan2(direction.Y, direction.X);
-        Vector2 normal = new(-direction.Y, direction.X);
-        float radius = 15 + open * 58;
-        float imminent = PreRelease(tick, fire, Math.Min(16, fire - start));
-        Accents.ChargeFracture(batch, mouth, tick, start, fire, color, reduced, .75f);
-        Accents.Halo(batch, mouth, new Vector2(160 + open * 170, 120 + open * 160), color,
-            open * (reduced ? .24f : .6f), angle);
-        Sprite(batch, new Rectangle(1010, 8, 235, 527), mouth, new Vector2(8 + open * 38, radius * 2),
-            angle, FirstSeveranceAttackAccents.Neon(color, open), new(.5f));
-        float gathering = open * (1 - Window(tick, fire, fire + 10d));
-        for (int f = 0; f < (reduced ? 3 : 8); f++)
-        {
-            Vector2 previous = mouth;
-            for (int s = 1; s <= 24; s++)
-            {
-                float t = s / 24f;
-                float phase = f * MathHelper.TwoPi / 8 + (float)(tick - start) * (.04f + open * .10f) + t * 3;
-                float reach = 60 + 190 * open;
-                Vector2 p = mouth - direction * (t * reach) + normal * (MathF.Sin(phase) * t * radius * 1.5f);
-                Line(batch, previous, p, FirstSeveranceAttackAccents.Neon(color, gathering * (1 - t)), 1 + open * 2.2f);
-                previous = p;
-            }
-        }
-        // Iris blades contract while the aperture itself remains open through
-        // the jet's decay. All transforms use the same smooth phase envelopes.
-        for (int blade = 0; blade < 6; blade++)
-        {
-            float a = blade * MathHelper.TwoPi / 6 + open * .85f;
-            Vector2 edge = mouth + new Vector2(MathF.Cos(a) * .32f, MathF.Sin(a)) .RotatedBy(angle) * (radius + 10);
-            Vector2 tip = mouth + (edge - mouth) * (.68f - emission * .18f);
-            Line(batch, edge, tip, Color.Lerp(color, Color.White, imminent) * open, 3);
-        }
+        FirstSeveranceRaidVfx.Charge(batch,mouth,direction,tick-start,CastTension(tick,start,fire),
+            ReleaseImpulse(tick,fire),open,color,reduced,.85f);
     }
 
     private void DrawWarning(SpriteBatch batch, Vector2 origin, Vector2 direction, float length,

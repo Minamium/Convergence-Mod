@@ -45,12 +45,12 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: 718611ba584ef429e64f904f767c3428c261d2edb5f74b6dc52941570af445ac
+  content_sha256: 531ebc48caa943648ab3e7badc07209cba235cb387fd14cc2dbca766b2d1c765
   document_type: policy
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - compatibility.version_matrix
   aliases:
@@ -622,7 +622,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 3ef0d61d16625a64592aeb54a899cb5babae3f52706c5967e90ca12319225ba9
+  content_sha256: 093f7503f5f4b7bbce2de9d391e2cb141aed388298d9bc4c43e1eb80d7f86363
   document_type: spec
   status: provisional
   owners:
@@ -788,13 +788,13 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 9177a57c80eac4304a43a249153c231301905f54b7eea66836da89a46556895d
+  content_sha256: 93b3945aaaf55aaec9183f89bc78dc8f04cd70bf395ad60059cd4c47047c2127
   document_type: policy
   status: accepted
   owners:
   - project
   - art
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - policy.ip_provenance
   aliases:
@@ -1103,7 +1103,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 678cedaea007f3c78e4c9541c922ebc1e400d49e74988f5090594b1f894295f0
+  content_sha256: 0dcc1bc6247d5383412c535bd176f49526de276982d86ca10a6e3cc4ba8bd493
   document_type: status
   status: accepted
   owners:
@@ -1300,12 +1300,12 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 7a1d915d7319f2a64851d54c62671c4e823cfe6d4e10f29eb4ae5d39e7d09f7f
+  content_sha256: 8cf2e6b49ddbf622fea5ddbbc63756a1784df844203cc2e4fe987889d4c2c37f
   document_type: research
   status: historical
   owners:
   - research
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-13'
   source_of_truth_for: []
   aliases:
   - research sources
@@ -1322,14 +1322,14 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: 794bd23a28682d072a9ee3dbaba5f396b457d0328c1f65044d5fee64b47dfed0
+  content_sha256: c57a4127f313efb3309cbd2acfd096959148a23d53c1ecb61eb287acdc4aa5c3
   document_type: research
   status: provisional
   owners:
   - research
   - art
   - gameplay
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-13'
   source_of_truth_for: []
   aliases:
   - Wrath of the Gods benchmark

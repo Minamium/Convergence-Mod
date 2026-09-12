@@ -59,8 +59,19 @@ public sealed class FoundationCoreVisuals : GlobalTile
             double tick = state.EstimatedAuthorityTick + RitualRenderClock.Fraction;
             float deployment = Math.Clamp((float)((tick - preparation.EnteredTick) / FirstSeverancePreparationTimeline.DeploymentTicks), 0, 1);
             DrawField(batch, new(preparation.GroundX, preparation.GroundY), deployment, tick);
+            bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+            Vector2 seat = new(preparation.GroundX,
+                preparation.GroundY - FirstSeveranceLanceTuning.BossHeightAboveCore);
+            float engaged = Window(deployment, .42, .58) * (1 - Window(deployment, .7, .9));
+            // The lifting apparatus catches its load before Ready. The girl
+            // remains intact here; capture belongs exclusively to SpawnIntro.
+            FirstSeveranceRaidVfx.Pressure(batch, seat, Vector2.UnitY, 580, 320,
+                tick - preparation.EnteredTick, deployment, engaged * .65f, Ice, reduced);
+            FirstSeveranceRaidVfx.Flare(batch, seat, tick - preparation.EnteredTick,
+                engaged * .6f, Ice, reduced, 2);
+            FirstSeveranceRaidVfx.Flush(batch);
             doll.DrawPreparation(batch, preparation, tick,
-                ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects);
+                reduced);
         }
         else if (Main.LocalPlayer.HeldItem.type == ModContent.ItemType<FoundationCoreItem>())
         {

@@ -99,6 +99,7 @@ internal sealed class FirstSeveranceMechanicVisuals
         // Same launch on success/failure, once per verdict rather than per player.
         if (age >= 6) return;
         float flash = (1 - Window(age, 1, 6)) * (reduced ? .22f : 1);
+        FirstSeveranceRaidVfx.Flare(batch, mouth, age, flash, Color.White, reduced, 2.9f);
         float reach = 175 + 165 * Window(age, 0, 2);
         for (int axis = 0; axis < 2; axis++)
         {
@@ -128,10 +129,8 @@ internal sealed class FirstSeveranceMechanicVisuals
         float release = 1 - Window(age, 4, 17);
         Color red = new(255, 22, 62);
         // Instant full-length hairline, not a travelling projectile or hit test.
-        accents.Ribbon(batch, origin, direction, stop, 18, red, release * .95f);
-        Line(batch, origin, origin + direction * stop, FirstSeveranceAttackAccents.Neon(red, release), 3.2f);
-        Line(batch, origin, origin + direction * stop, FirstSeveranceAttackAccents.Neon(Color.White, release * .9f), 1.1f);
-        accents.Halo(batch, origin, new Vector2(125), red, release * .7f);
+        FirstSeveranceRaidVfx.Beam(batch, origin, direction, stop, 2.1f, age,
+            1, 1, release, red, reduced, confined: true, mouth: false);
         if (!failed)
         {
             DrawDissipation(batch, origin + direction * stop, direction, age, reduced);
@@ -139,6 +138,9 @@ internal sealed class FirstSeveranceMechanicVisuals
         }
         float decay = 1 - Window(age, 12, failed ? 38 : 32);
         Vector2 impact = origin + direction * stop;
+        FirstSeveranceRaidVfx.Flare(batch, impact, age, release, red, reduced, 1.8f);
+        if (!reduced) FirstSeveranceRaidVfx.Sparks(batch, impact, direction, age,
+            1, decay, red, false, 1.2f);
         for (int i = 0; i < (reduced ? 5 : 13); i++)
         {
             float seed = i * 2.39996f;
@@ -156,6 +158,10 @@ internal sealed class FirstSeveranceMechanicVisuals
         Vector2 normal = new(-direction.Y, direction.X);
         float opening = 1 - MathF.Exp(-age * .14f), fade = 1 - Window(age, 18, 60);
         Color rose = new(255, 92, 147);
+        FirstSeveranceRaidVfx.Pressure(batch, center, normal, 160 + opening * 230,
+            65, age, 1 - opening, fade * .7f, rose, reduced);
+        if (!reduced) FirstSeveranceRaidVfx.Sparks(batch, center, normal, age,
+            opening, fade, rose, false, 1.1f);
         // A split, transverse plume catches the ray before the body. Fine
         // curling trails and glass sparks retain negative space, not a filled ball.
         for (int i = 0; i < (reduced ? 10 : 28); i++)
@@ -229,6 +235,9 @@ internal sealed class FirstSeveranceMechanicVisuals
                 new Vector2(64, 80), scale, SpriteEffects.None, 0);
             float glint = releaseAge < 0 ? 1 - Window(age, birth + 2, birth + 10) : failed ? 1 - Window(releaseAge, 6, 15) : 0;
             accents.Halo(batch, position, new Vector2(55, 6), Color.White, fade * glint * .75f, rotation);
+            if (!reduced && glint > .01f)
+                FirstSeveranceRaidVfx.Flare(batch, position, clock, fade * glint * .48f,
+                    new Color(165, 186, 248), false, .6f);
         }
         if (agitation > 0)
             for (int i = 0; i < 8; i++)
@@ -249,8 +258,13 @@ internal sealed class FirstSeveranceMechanicVisuals
                         clock + 7, seed + 13, strength * .8f);
             }
         if (failed && releaseAge >= 4)
-            accents.Halo(batch, center, new Vector2(100, 145), new Color(255, 85, 113),
-                Window(releaseAge, 4, 7) * (1 - Window(releaseAge, 8, 23)) * .9f);
+        {
+            float crush = Window(releaseAge, 4, 7) * (1 - Window(releaseAge, 8, 23));
+            FirstSeveranceRaidVfx.Flare(batch, center, releaseAge, crush,
+                new Color(255, 85, 113), reduced, 1.9f);
+            if (!reduced) FirstSeveranceRaidVfx.Sparks(batch, center, Vector2.UnitY,
+                releaseAge, 1, crush, new Color(255, 149, 173), false, .8f);
+        }
     }
 
     private void DrawFrictionArc(SpriteBatch batch, Vector2 start, Vector2 end, float clock, float seed, float strength)

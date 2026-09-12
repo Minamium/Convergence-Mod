@@ -29,20 +29,9 @@ internal static class FirstSeveranceImpalingSwordVisuals
             // Preserve the accepted aura forecast. Live light advances through the
             // same field plane; both halves now share one violet material.
             float length = warning ? ray.Length : ray.Length * sword.Extension;
-            accents.Ribbon(batch, origin, direction, length, ray.HalfWidth * 2, color,
-                born * (live ? .85f : warning ? .48f : .18f));
-            for (int strand = 0; strand < (reduced ? 2 : 4); strand++)
-            {
-                Vector2 last = origin;
-                for (int n = 1; n <= 18; n++)
-                {
-                    float t = n / 18f;
-                    Vector2 next = origin + direction * (t * length) + normal *
-                        (MathF.Sin(t * 16 - (float)age * .15f + strand * 1.9f + sword.Slot) * ray.HalfWidth * .58f * MathF.Sin(t * MathF.PI));
-                    Line(batch, last, next, FirstSeveranceAttackAccents.Neon(color, born * (live ? .65f : .35f)), live ? 2.5f : 1.5f);
-                    last = next;
-                }
-            }
+            if(warning) FirstSeveranceRaidVfx.Beam(batch,origin,direction,ray.Length,ray.HalfWidth,
+                age,CastTension(age,FirstSeveranceImpalingSwords.WarningStart(sword.Wave),sword.Fire),
+                0,born,color,reduced,confined:true,mouth:false);
             if (sword.Extension > .001f)
             {
                 // The beam front advances with the exact shared six-tick

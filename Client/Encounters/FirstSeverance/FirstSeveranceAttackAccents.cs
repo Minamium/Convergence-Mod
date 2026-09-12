@@ -141,24 +141,9 @@ internal sealed class FirstSeveranceAttackAccents
     internal void ChargeFracture(SpriteBatch batch, Vector2 center, double tick, double start, double fire,
         Color color, bool reduced, float scale = 1)
     {
-        float tension = CastTension(tick, start, fire);
-        float release = ReleaseImpulse(tick, fire);
-        float born = Arrive(tick - start, Math.Min(7, (fire - start) * .2))
-            * (1 - Window(tick, fire + 2, fire + 20));
-        Halo(batch, center, new Vector2(160 + tension * 90, 60 + tension * 40) * scale,
-            color, born * (reduced ? .18f : .34f), -.32f);
-        int count = reduced ? 3 : 7;
-        for (int i = 0; i < count; i++)
-        {
-            float side = i % 2 == 0 ? -1 : 1;
-            float arrival = Arrive(tick - start - i * .6, 6);
-            float extent = (26 + i * 14) * (1 - tension * .65f) + release * (45 + i * 10);
-            Vector2 tip = center + new Vector2(side * extent, (i - count * .5f) * 8 * (1 - tension * .5f)) * scale;
-            Vector2 tail = tip + new Vector2(side * (10 + tension * 17), -6 - i * 2) * scale;
-            Line(batch, tail, tip, Neon(color, born * arrival * .7f), (1.2f + tension) * scale);
-        }
-        Halo(batch, center, new Vector2(240, 27) * scale, Color.White,
-            release * (reduced ? .12f : .52f), -.32f);
+        float born=Arrive(tick-start,6)*(1-Window(tick,fire+2,fire+20));
+        FirstSeveranceRaidVfx.Charge(batch,center,new Vector2(1,-.18f).SafeNormalize(Vector2.UnitX),
+            tick-start,CastTension(tick,start,fire),ReleaseImpulse(tick,fire),born,color,reduced,scale);
     }
 
     private static Vector2 Unit(float angle) => new(MathF.Cos(angle), MathF.Sin(angle));

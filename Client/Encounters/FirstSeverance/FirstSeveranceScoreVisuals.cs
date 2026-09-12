@@ -75,110 +75,25 @@ internal sealed class FirstSeveranceScoreVisuals
     private void DrawBlade(SpriteBatch batch, FirstSeveranceAttackAccents accents, Vector2 origin,
         FirstSeveranceScoreRay item, double age, bool live, bool reduced)
     {
-        int bladeIndex = item.Pulse % FirstSeveranceScoreGeometry.BladeCount;
-        float angle = FirstSeveranceScoreGeometry.BladeAngle(age) + bladeIndex * MathHelper.Pi;
-        Vector2 direction = Unit(angle), normal = new(-direction.Y, direction.X);
-        Color color = RitualArmamentArt.ColorFor(Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
-        float retract = 1 - Window(age, FirstSeveranceChoreography.BladeEnd, FirstSeveranceChoreography.BladeEnd + 58);
-        float born = Window(age, 0, 12) * retract;
-        // Full footprint is visible throughout the held windup, independent of the short draw animation.
-        accents.Ribbon(batch, origin, direction, item.Ray.Length, 88, color, born * (live ? .90f : .44f));
-        accents.Ribbon(batch, origin, direction, item.Ray.Length, 54, Color.White, born * (live ? .40f : .14f));
-        // Flowing surface filaments stay inside the damage aura, not rigid side rails.
-        for (int strand = 0; strand < (reduced ? 2 : 5); strand++)
-        {
-            Vector2 prior = origin;
-            for (int segment = 1; segment <= 24; segment++)
-            {
-                float p = segment / 24f;
-                Vector2 next = origin + direction * (p * item.Ray.Length) + normal
-                    * MathF.Sin(p * 13 - (float)age * .09f + strand * 1.4f) * (10 + strand * 5) * MathF.Sin(p * MathF.PI);
-                Line(batch, prior, next, FirstSeveranceAttackAccents.Neon(color, born * (live ? .60f : .28f)), live ? 2.4f : 1.3f);
-                prior = next;
-            }
-        }
-        if (live)
-        {
-            // Forecast remains an aura until the authority opens damage, then
-            // both opposed jets follow the integrated two-turn angle exactly.
-            FirstSeveranceBeamMaterial.Flow(batch, origin, direction, item.Ray.Length,
-                item.Ray.HalfWidth, age, color, 1, reduced, throatLength: 90, throatWidth: 24);
-        }
-        else if (age >= FirstSeveranceChoreography.BladeEnd)
-            FirstSeveranceBeamMaterial.Flow(batch, origin, direction, item.Ray.Length,
-                item.Ray.HalfWidth, age, color, retract * .08f, reduced);
-        accents.ChargeFracture(batch, origin, age, 0, FirstSeveranceChoreography.BladeWindup, color, reduced, 1.1f);
+        Vector2 direction=new(item.Ray.DirectionX,item.Ray.DirectionY);
+        Color color=RitualArmamentArt.ColorFor(Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
+        float retract=1-Window(age,FirstSeveranceChoreography.BladeEnd,FirstSeveranceChoreography.BladeEnd+58);
+        bool warning=age<FirstSeveranceChoreography.BladeWindup;
+        float opacity=warning?Arrive(age,4):live?1:retract*.055f;
+        FirstSeveranceRaidVfx.Beam(batch,origin,direction,item.Ray.Length,item.Ray.HalfWidth,age,
+            item.Charge,warning?0:1,opacity,color,reduced,release:ReleaseImpulse(age,FirstSeveranceChoreography.BladeWindup));
+        accents.ChargeFracture(batch,origin,age,0,FirstSeveranceChoreography.BladeWindup,color,reduced,1.2f);
     }
 
-    private static void DrawBullets(SpriteBatch batch, FirstSeveranceAttackAccents accents,
-        FirstSeveranceCombatProjection combat, double age, bool reduced)
+    private static void DrawBullets(SpriteBatch batch,FirstSeveranceAttackAccents accents,
+        FirstSeveranceCombatProjection combat,double age,bool reduced)
     {
-        foreach (var b in FirstSeveranceScoreGeometry.Bullets(combat.ActionIndex, age, combat.CoreX, combat.CoreY))
-        {
-            Vector2 point = new(b.X, b.Y), previous = new(b.PreviousX, b.PreviousY);
-            Vector2 velocity = point - previous;
-            Vector2 direction = velocity.LengthSquared() > .01f ? Vector2.Normalize(velocity) : Vector2.UnitY;
-            Vector2 normal = new(-direction.Y, direction.X);
-            Color color = new(182, 83, 255);
-            if (b.Live)
-            {
-                if (!reduced)
-                {
-                    accents.Ribbon(batch, point - velocity * 8, direction, velocity.Length() * 8, 30, color, .28f);
-                    for (int side = -1; side <= 1; side += 2)
-                    {
-                        Vector2 prior = point;
-                        for (int segment = 1; segment <= 7; segment++)
-                        {
-                            float t = segment / 7f;
-                            Vector2 next = point - velocity * (t * 7)
-                                + normal * side * MathF.Sin(t * MathF.PI) * (9 + 3 * MathF.Sin((float)age * .18f + b.Wave));
-                            Line(batch, prior, next, FirstSeveranceAttackAccents.Neon(color, (1 - t) * .8f), 2.3f);
-                            prior = next;
-                        }
-                    }
-                }
-                accents.Halo(batch, point, new Vector2(68, 50), color, reduced ? .35f : .72f, direction.ToRotation());
-                // Layered lens/embers, not rectangles or circular HUD outlines.
-                // The saturated 24px nucleus identifies the unchanged r12 hit body;
-                // its longer wavering wake is translucent and harmless.
-                float pulse = .5f + .5f * MathF.Sin((float)age * .24f + b.X * .017f + b.Wave);
-                accents.Halo(batch, point, new Vector2(32, 29), new Color(51, 9, 92), .95f, direction.ToRotation());
-                accents.Ribbon(batch, point - direction * 13, direction, 26, 25, color, .92f);
-                accents.Ribbon(batch, point - direction * (9 + pulse * 3), direction, 22, 13,
-                    new Color(230, 193, 255), .95f);
-                accents.Halo(batch, point + direction * 3, new Vector2(14, 13), Color.White, .7f + pulse * .15f);
-                for (int filament = 0; filament < (reduced ? 1 : 3); filament++)
-                {
-                    Vector2 prior = point + direction * 10;
-                    for (int n = 1; n <= 12; n++)
-                    {
-                        float t = n / 12f;
-                        Vector2 next = point + direction * (10 - 75 * t)
-                            + normal * (MathF.Sin(t * 9 - (float)age * .32f + filament * 2.1f)
-                                * MathF.Sin(MathF.PI * t) * (6 + filament * 3));
-                        Line(batch, prior, next, FirstSeveranceAttackAccents.Neon(
-                            filament == 0 ? new Color(239, 214, 255) : color, (1 - t) * .8f),
-                            (1 - t) * 2.4f + .4f);
-                        prior = next;
-                    }
-                }
-            }
-            else
-            {
-                double local = age - FirstSeveranceScoreGeometry.BulletStartTick(combat.ActionIndex, b.Wave);
-                float charge = CastTension(local, -24, 0);
-                accents.Halo(batch, point, new Vector2(65), color, charge * .55f);
-                // Two halves of the live lancet assemble around its actual spawn
-                // position, brake, then meet before release; no extra fake bullets.
-                float join = Window(local, -5, 0);
-                for (int side = -1; side <= 1; side += 2)
-                {
-                    Vector2 tip = point + normal * (side * (1 - join) * (34 - charge * 16));
-                    Line(batch, tip - direction * 13, tip + direction * 8,
-                        FirstSeveranceAttackAccents.Neon(color, .45f + charge * .5f), 2);
-                }
-            }
+        foreach(var b in FirstSeveranceScoreGeometry.Bullets(combat.ActionIndex,age,combat.CoreX,combat.CoreY)) {
+            Vector2 point=new(b.X,b.Y),velocity=point-new Vector2(b.PreviousX,b.PreviousY);
+            double local=age-FirstSeveranceScoreGeometry.BulletStartTick(combat.ActionIndex,b.Wave);
+            float opacity=b.Live?1:Arrive(local+24,5);
+            FirstSeveranceRaidVfx.Orb(batch,point,velocity,FirstSeveranceScoreGeometry.BulletRadius,
+                age+b.Wave*7,new Color(188,76,255),opacity,b.Live,reduced);
         }
     }
 

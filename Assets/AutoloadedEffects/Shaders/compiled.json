@@ -9,6 +9,10 @@
     "PursuitPrismFlow.fx": {
       "source_sha256": "29cd1396f9ca0443aceaa440e02cc058a48aad6d172b00b9dd8197d08180853b",
       "output_sha256": "34c3114a88fb2a48d1cf0f5ab82790ba39496611315517c9e77d5dc3a90b0b5a"
+    },
+    "RaidEnergy.fx": {
+      "source_sha256": "c2ec2422cb0b7644f73addda141aac1517d4a1d9e0dd57ddbdc828da9e0c55b9",
+      "output_sha256": "fbc78b6e7af3d03cfdf317c81893f9b5b7c03fedc4589ff74092d0ceb6475c14"
     }
   }
 }

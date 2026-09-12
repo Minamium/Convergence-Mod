@@ -6,7 +6,7 @@ owners:
   - research
   - art
   - gameplay
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-13
 source_of_truth_for: []
 aliases:
   - Wrath of the Gods benchmark
@@ -211,6 +211,32 @@ Calamityの `ArenaWallSystem.Box` は矩形・描画・更新・除去条件を�
 **独立設計・推論:** 共通tickから連続envelopeを計算し、開口、収束する繊維、流動texture、伸びる飛翔体、冷える残光を重ねる。追尾中だけHermite補間し、確定後の命中geometryを補間しない。射出直後に予告objectを別のbeam objectへ取り替えること、末尾を突然消すこと、見えない全長hit、safe gapを塞ぐbloom、第三者shader/assetの移植を採用しない。構造物には独立生成atlasの関節を使う。フィールドはexact-Fight roster/接続epoch、期限付き飛行権限、地面中心から派生する矩形を使用する。これらが目標の滑らかさ・読みやすさを達成するかは実機評価が必要。
 
 **権利・確認:** コード・画像・shader・音源の複製なし。モデルによる独自atlas生成と独立C#実装。境界/時間関数、二人のdash/recall/Down/終了解除、旧2x2と新12x4配置、二重client負荷を該当確認とする。実行済みかどうかは[Status](../STATUS.md)だけに記録する。今回YouTubeフレーム/音声を新たに観測したとは主張しない。
+
+### F12 — 極太赤ビーム・エネルギー弾・終幕の連動（2026-09-13追補）
+
+**対象と版:** WoTMはWrath of the **Machines**。公式公開snapshot `5556a3adcbabffc6fc95685e34f1ee22cee31d9a` / 1.0.4。WotGは既読調査と同じ `7cb5b86c770e73d6853749b2b688d478ba3326a7` / 1.2.24。後者の公開snapshotは現在のWorkshop版と同一とは確認できない。参照snapshotのtML/Terraria厳密版は不明。WotG側のprojectはLuminance 1.0.9、Calamity 2.0.4.1等を参照するが、Convergenceの実環境はtML 2026.07.3.0 / Terraria 1.4.4.9、Calamity 2.2.4、Luminance 1.0.14。依存更新ではなく設計観察として扱う。今回YouTubeの動画フレームや音声を新規観測したとは主張しない。
+
+**観測・極太赤ビーム:** [HadesSuperLaserbeam](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/HadesSuperLaserbeam.cs) は過熱時に赤へ変わり、幅の立ち上がり、独立した広いbloom、二重の発射口光、稲妻、背景露出低下を組み合わせる。ユーザーの言う太い赤ビームに対応する有力例であり、全Mod中で最大と計測したわけではない。[ExoEnergyBlast状態](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Hades/States/SoloAttacks/HadesBodyEternity.ExoEnergyBlast.cs) は顎の開閉、最後の震え、粒子の吸引、発射音・反動まで同じ工程にまとめる。[材質shader](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Assets/AutoloadedEffects/Shaders/Primitives/HadesExoEnergyBlastShader.fx) は移流noiseと横断方向の明暗を使う。**推論:** 「太い線」そのものより、暗い場・圧縮した発射源・不均一な高輝度・反動の対比が力感に寄与している。
+
+**観測・エネルギー弾:** [HadesExoEnergyOrb](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/HadesExoEnergyOrb.cs) は背景の柔らかい光と本体を別描画し、[orb shader](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Assets/AutoloadedEffects/Shaders/Objects/HadesExoEnergyOrbShader.fx) は極座標noise、脈動、中心光、縁の色を組み合わせる。**採用:** 小さいFinal弾にも明るい核・乱れた皮膜・進行方向に残る薄い尾を分ける。既存当たり半径を縮めて光だけ巨大化させる案や、参考側の補助Projectile生成は採用しない。
+
+**観測・WotGの予兆／発射:** [TelegraphedPortalLaserbeam](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/NamelessDeity/Projectiles/TelegraphedPortalLaserbeam.cs) は予告と本体のshaderを分け、縦長の発射口光・近傍粒子・一度の画面／音イベントを持つ。[予告shader](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Assets/AutoloadedEffects/Shaders/Primitives/NamelessDeityFlowerLaserTelegraphShader.fx) は横断勾配と疎な微光、[本体shader](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Assets/AutoloadedEffects/Shaders/Primitives/NamelessDeityPortalLaserShader.fx) は異なる速度の明暗noiseを用いる。**採用:** 色付きの危険体積→流れる微光の圧縮→即時に全判定幅の高輝度材質→暗い余韻。円形発射印、別の予兆レール、参考側の長さ／幅の成長による命中時刻変更は移植しない。
+
+**観測・終幕:** [DeathAnimations](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/NamelessDeity/Behaviors/AnimationStates/NamelessDeityBoss.BehaviorStates.DeathAnimations.cs) は奥行きへの退避、照明変化、溜め、画面方向への急加速、単発の強い破壊を時間で分ける。[ScreenShatterSystem](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Core/Graphics/ScreenShatter/ScreenShatterSystem.cs) は実画面のcapture/三角形分割、再作成・後始末、光過敏設定を扱う。**採用:** 大きな静止対比と一度の終端burst。Convergenceでは既存の斜め裂け目・自前のshell/rig片・GPU吸引材質で独立に構成し、画面capture基盤を追加しない。入力封鎖、world退出、全Projectile削除、save操作、NPCの延命による報酬遅延は明確に不採用。
+
+**実装への写像:**
+
+| 観察した責務 | Convergenceの独立実装 | 守る境界 |
+|---|---|---|
+| 予告・内部流・外周光の分離 | `RaidEnergy` のForecast/Beam/Coronaと既存ray adapter | 同じhalf-width/tick。格子・密集領域では外周光なし |
+| 発射源の圧縮・吸引・反動 | Mouth/Pressure/Flare、固定個数の流線、既存Coreの凹み | 発射口を物理的に接続。Boss上にHUD円を復活させない |
+| 球状の流動材質 | Orb/WakeをFinal弾と突進体へ | 新しいhitbox/Projectileなし |
+| 背景露出と幕の奥行き | cathedralの照明／mist、GrandStageの後景圧力 | terrain・プレイヤー・円の前に不透明な装飾を出さない |
+| 溜め→吸引→消滅 | 既存terminal時計のRift/fragment/Flare | reward/cleanupは遅らせず、新Fightで破棄 |
+
+**権利・ライセンス:** [WoTM MIT](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/LICENSE) は確認したが、今回そのコード・shader・素材の複製はしていない。WotGの調査対象には明示ライセンスを確認できず、公開閲覧を転載許可と扱わない。LuminanceのMIT依存と公開texture registryだけを利用し、依存画像のコピーをリポジトリ／配布物に入れない。新規shaderは独立作成で、[素材台帳](../../Assets/ATTRIBUTION.md)に記録する。
+
+**確認と限界:** shaderの実GPU previewでは予告／本体の差、流動、球体、裂け目、退色を確認する。実Raidの多人数重なり、107% UI/zoom、Reduced Effects、低フレーム時、ロード／アンロード後の状態復帰は別の実機受け入れ項目。静的レビューやプレビューだけでWoTM/WotGと同等品質・FPSを断言しない。実行記録は[Status](../STATUS.md)、現行の規則は[Visual spec](../encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation)を正本とする。
 
 ## 5. First Severanceに変換するときに崩さないもの
 

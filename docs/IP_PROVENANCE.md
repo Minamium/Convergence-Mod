@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-13
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -114,6 +114,6 @@ The 0.2.8 continuous-emission/ground-containment pass is materially informed by 
 
 ## Doll companion and weapon-only sounds — 0.2.53
 
-The 2026-09-13 eight-cast shader uses Luminance's public loading/parameter/texture APIs with an independently authored HLSL material. No Wrath of the Machines/Gods shader or art is copied. The revised continuous-beam material references two dependency-owned noise maps at runtime; it does not vendor those assets. [API boundary](encounters/first-severance/VISUAL_SPEC.md#luminance-prototype-boundary) records source/license/version evidence and the independent design adaptation; [Attribution](../Assets/ATTRIBUTION.md#pursuit-prism-shader--2026-09-13) records the runtime export and regeneration recipe. Luminance remains a separately distributed dependency.
+The 2026-09-13 Doll Raid material suite uses Luminance's public loading/parameter/texture APIs with independently authored HLSL. No Wrath of the Machines/Gods shader or art is copied. Three dependency-owned noise maps are referenced at runtime, not vendored. [API boundary](encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation) links pinned observations, adoption/rejection and the source/binary distinction; [Attribution](../Assets/ATTRIBUTION.md#raid-energy-material-suite--2026-09-13) owns export provenance and regeneration. Luminance remains a separately distributed dependency.
 
 [Weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references) record native summon-slot/lifetime and endgame sound event/voice design influences, with pinned versions and existing license caveats. New weapon recordings are independent NumPy synthesis without samples; the Doll motion sheets are generated from the existing project-authored NPC reference. [Attribution](../Assets/ATTRIBUTION.md#doll-companion-and-weapon-only-foley--0253) owns exact assets, prompts/export recipe, hashes and release limits. No Calamity/Terraria source, extracted sound or external sprite enters the package. The Raid naming is a Convergence character decision, not an assertion that EigHt authored or endorsed the character.

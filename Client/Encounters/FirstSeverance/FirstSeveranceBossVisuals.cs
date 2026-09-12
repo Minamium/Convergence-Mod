@@ -17,7 +17,7 @@ using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualCu
 
 namespace Convergence.Client.Encounters.FirstSeverance;
 
-// No world actors, gameplay callbacks, shaders, or network traffic. All spatial
+// No world actors, gameplay callbacks, or network traffic. All spatial
 // facts come from the read-only snapshot; animation is disposable client state.
 internal sealed class FirstSeveranceBossVisuals
 {
@@ -177,6 +177,7 @@ internal sealed class FirstSeveranceBossVisuals
             Glow(batch, center, 600 * (1f - impact), Additive(Ice, (1f - impact) * 0.8f));
         }
 
+        FirstSeveranceGrandStage.BehindBody(batch, combat, center, renderTick, reduced);
         doll.SetCoreAttack(combat, renderTick);
         bool hatching = combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Unbound;
         float hatchAge = hatching ? FirstSeveranceStageVisuals.RuptureAge(combat, renderTick) : 1;
@@ -354,68 +355,38 @@ internal sealed class FirstSeveranceBossVisuals
 
     internal void DrawEnding(SpriteBatch batch)
     {
-        if (!IsEnding || glow is null)
-            return;
+        if (!IsEnding || glow is null) return;
+        float age = EndingAge;
+        bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+        fractureReduced = reduced;
+        fractureTime = (float)(Main.GameUpdateCount % 216000);
+        bool remote = lastCombat?.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
         if (EndingVictory)
         {
-            float age = EndingAge;
-            bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
-            fractureReduced = reduced;
-            fractureTime = (float)(Main.GameUpdateCount % 216000);
             breakup = Math.Max(breakup, .78f + .22f * Window(age, .03, .35));
-            consumption = Window(age, .16, .79);
+            // Separation is visible throughout the braked hold, not immediately
+            // hidden by a white disc. All pieces then accelerate to one sink.
+            consumption = Window(age, .29, .79);
             FirstSeveranceDissolutionVisuals.Rift(batch, Accents, lastCenter, age, reduced);
-            float fold = Window(age, .03, .40), pinch = Window(age, .15, .79);
+            FirstSeveranceRaidVfx.Flush(batch);
+            float fold = Window(age, .03, .40), pinch = Window(age, .29, .79);
             float dissolve = 1 - Window(age, .76, .80);
-            bool remote = lastCombat?.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
-            DrawRig(batch, lastCenter - new Vector2(0, remote ? 190 * (1 - pinch) : 0), dissolve, lastBreath * (1 - fold), lastCast * (1 - fold),
+            DrawRig(batch, lastCenter - new Vector2(0, remote ? 190 * (1 - pinch) : 0),
+                dissolve, lastBreath * (1 - fold), lastCast * (1 - fold),
                 lastKick * (1 - fold), 1 - fold * .35f, depth: remote ? .24f : 1);
             if (remote && lastCombat is { } remnant && age < .8f)
                 DrawRemoteArms(batch, remnant, lastCenter, remnant.ResolveTick, dissolve, 1, reduced);
-            Color ion = new(210, 164, 255);
-            float tension = Window(age, .06, .45) * (1 - Window(age, .79, .805));
-            Accents.Halo(batch, lastCenter, new Vector2(600, 32 + pinch * 55), ion,
-                tension * (reduced ? .12f : .5f), FirstSeveranceDissolutionVisuals.RiftAxis.ToRotation());
-            // Filaments accelerate inward; one optical snap erases the point.
-            for (int n = 0; n < (reduced ? 16 : 72); n++)
-            {
-                float angle = n * 2.399963f + pinch * 1.1f;
-                Vector2 direction = Unit(angle);
-                float radius = (240 + n % 11 * 87) * (1 - pinch);
-                float tail = (25 + n % 7 * 18) * (1 - pinch);
-                Vector2 point = lastCenter + direction * radius;
-                Line(batch, point, lastCenter + direction * (radius + tail), Additive(ion, tension * .65f), 1.5f + n % 3);
-                if (!reduced && n % 3 == 0) Accents.Halo(batch, point, new Vector2(11), Ice, tension * .75f);
-            }
-            float sever = Window(age, .79, .802) * (1 - Window(age, .802, .87));
-            Vector2 riftAxis = FirstSeveranceDissolutionVisuals.RiftAxis;
-            Accents.Ribbon(batch, lastCenter - riftAxis * 1100, riftAxis, 2200,
-                3 + sever * 17, ion, sever * (reduced ? .30f : 1));
-            Accents.Halo(batch, lastCenter, new Vector2(320 * sever), Color.White, sever * (reduced ? .25f : .95f));
-            Line(batch, lastCenter - riftAxis * (740 * sever), lastCenter + riftAxis * (740 * sever), Color.White * sever, 3);
-            float inscription = Window(age, .85, .90) * (1 - Window(age, .96, 1));
-            Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.VictorySeal"),
-                lastCenter - Main.screenPosition + new Vector2(0, 105), Ice * inscription, .82f, .5f);
-            return;
         }
-        float progress = EndingAge;
-        consumption = 0;
-        float closure = Window(progress, .04, .55);
-        float opacity = 1 - Window(progress, .18, .60);
-        bool distant = lastCombat?.BossPhase is FirstSeveranceBossPhase.Distant or FirstSeveranceBossPhase.Final;
-        DrawRig(batch, lastCenter - new Vector2(0, distant ? 190 : 0), opacity,
-            lastBreath * (1 - closure), lastCast * (1 - closure), lastKick * (1 - closure),
-            1 - closure * .4f, depth: distant ? .24f : 1);
-        // The surviving entity recedes behind two closing geometric shutters.
-        // All of this is a cached image pose, never an active or damageable actor.
-        Color extinguish = new(168, 67, 94);
-        for (int side = -1; side <= 1; side += 2)
+        else
         {
-            Vector2 point = lastCenter + new Vector2(side * (620 * (1 - closure) + 10), 0);
-            Line(batch, point - new Vector2(0, 620), point + new Vector2(0, 620),
-                extinguish * opacity * .75f, 3 + closure * 22);
-            Glow(batch, point, 130 * (1 - closure), Additive(extinguish, opacity * .4f));
+            consumption = 0;
+            float closure = Window(age, .04, .55);
+            float opacity = 1 - Window(age, .18, .60);
+            DrawRig(batch, lastCenter - new Vector2(0, remote ? 190 : 0), opacity,
+                lastBreath * (1 - closure), lastCast * (1 - closure), lastKick * (1 - closure),
+                1 - closure * .4f, depth: remote ? .24f : 1);
         }
+        FirstSeveranceGrandStage.EndingFront(batch, lastCenter, age, EndingVictory, reduced);
     }
 
     private static void DrawSlice(SpriteBatch batch, Texture2D texture, Rectangle source, Vector2 center,
