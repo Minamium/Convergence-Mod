@@ -2,6 +2,22 @@
 
 ## Records
 
+### Raid Energy material suite — 2026-09-13
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/RaidEnergy.fxc`
+- Asset ID: doll-raid-energy-0266
+- Asset type: compiled original nine-pass GPU material suite
+- Creator: Codex, project-directed for Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: adjacent `RaidEnergy.fx`, independent implementation; [pinned research](../docs/research/WOTG_RAID_BENCHMARK.md#f12--極太赤ビームエネルギー弾終幕の連動2026-09-13追補) records observations rather than copied source/assets
+- Tool/model/version: Microsoft FXC 10.1 / D3DCompiler_47; input/output hashes in adjacent `compiled.json`
+- Human modifications: separate forecast/live/corona/source/orb/wake/pressure/rift/flare passes; exact authority geometry; scene and hit-result adapters, bounded frame-local rendering
+- License and redistribution terms: existing project publication/license gate remains; Luminance MIT dependency is separately installed, not vendored
+- Required attribution: retain this record; runtime maps use the public Luminance registry (`WavyBlotchNoise`, `TurbulentNoise`, `DendriticNoiseZoomedOut`), whose license is linked below
+- Reviewer and review date: Codex, 2026-09-13; compiled FNA/D3D11 material preview, native package; actual game acceptance pending
+- Notes: reproduce with `tools/compile_shaders.py --fxc <local compiler>`; no player-side compiler. `.fx` and manifest excluded from `.tmod`. Original shell/rig and previous shader source retained. No WoTM/WotG code/art/shader is distributed. [Luminance MIT](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/LICENSE).
+
 ### Pursuit Prism shader — 2026-09-13
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/PursuitPrismFlow.fxc`
@@ -10,7 +26,7 @@
 - Creator: Codex, project-directed for Minamium
 - Creation/acquisition date: 2026-09-13
 - Source type: original
-- Source work and URL: adjacent `PursuitPrismFlow.fx`, independently authored. Continuous-beam layering research is pinned in [visual specification](../docs/encounters/first-severance/VISUAL_SPEC.md#luminance-prototype-boundary); no WoTM shader/code is copied. Runtime texture references use Luminance's `MiscTexturesRegistry.WavyBlotchNoise` and `TurbulentNoise`; no dependency textures are redistributed in Convergence.
+- Source work and URL: adjacent `PursuitPrismFlow.fx`, independently authored; retained historical eight-cast material. Current [visual specification](../docs/encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation) supersedes its narrow scope; no WoTM shader/code was copied. Runtime texture references use Luminance's `MiscTexturesRegistry.WavyBlotchNoise` and `TurbulentNoise`; no dependency textures are redistributed in Convergence.
 - Tool/model/version: Microsoft FXC 10.1 / D3DCompiler_47; exact compiler and input/output hashes in adjacent `compiled.json`
 - Human modifications: replaced the rejected uniform rectangular fill/sine wires with independently advected textured convection, a hot core, diffuse separate bloom and pressure plume; retained the eight-cast-only scope and palette
 - License and redistribution terms: project source/asset terms remain subject to the existing development publication gate; Luminance stays a separate MIT-licensed dependency, not bundled code

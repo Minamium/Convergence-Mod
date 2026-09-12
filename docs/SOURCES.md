@@ -4,7 +4,7 @@ document_type: research
 status: historical
 owners:
   - research
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-13
 source_of_truth_for: []
 aliases:
   - research sources
@@ -101,7 +101,7 @@ The2026-09-09 [long-form weapon findings](encounters/first-severance/WEAPONS.md#
 
 ## Revalidation rule
 
-Luminance eight-cast prototype, 2026-09-13: [visual API boundary](encounters/first-severance/VISUAL_SPEC.md#luminance-prototype-boundary) records the pinned 1.0.14 source, installed binary distinction, shader ownership, server guards and original implementation boundary. No other rendering paths are migrated.
+Luminance Doll Raid material refresh, 2026-09-13: [visual API boundary](encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation) owns the pinned 1.0.14 API/source versus installed-binary distinction and original implementation scope. [WoTM/WotG F12](research/WOTG_RAID_BENCHMARK.md#f12--極太赤ビームエネルギー弾終幕の連動2026-09-13追補) records the extreme red beam, energy orb and staged-ending observations with adopt/reject decisions. Weapons/Oni are not migrated.
 
 Drawing/Defeat/intro pass, 2026-09-06: the same pinned official `Player.KillMe`, `ModSystem.ModifyInterfaceLayers` and `Main` layer-draw path were inspected. [Focused API evidence](research/INSTANT_REVIVAL_CORE_APIS.md#022-narrow-lookup-normal-defeat-death-and-temporary-hud-suppression) records the normal death-hook cancellation boundary, frame-local UI decision, and remaining multiplayer observations.
 
