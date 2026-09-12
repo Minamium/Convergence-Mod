@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-12",
+  "feature": "Restore Convergence loading after the Ghost Samurai shared GlobalNPC cache registration failure",
+  "base_commit": "67e36c1795dba76da3fb6445e40105943006bb86",
+  "branch": "fix/ghost-samurai-unloaded-item",
+  "version": "0.2.62",
+  "protocol": 30,
+  "environment_reference": "2026-09-12-ghost-samurai.json",
+  "scope": "Make the shared art cache static; retain texture disposal on Unload. No gameplay, networking, asset bytes, summon identifier, saves or personal enabled-Mod settings changed. The old worktree and its six pre-existing local files remain preserved; the final branch starts clean from integrated main.",
+  "handoff_during_task": {
+    "initial_base": "d4ad7d2ba003bdbd074ba42ba5c36c6c48ad3696",
+    "preserved_local_commit": "78f0ace0d86a849d924b7c1424982e5595d80d5a",
+    "event": "The initial fetch showed no pending contributor updates. The first push was rejected because the owner had meanwhile added the main-based handoff. A fresh fetch revealed integrated main 67e36c1 and contributor handoff 0f7ac17. Both d4ad7d2 and re-summon fix 9464e9c were confirmed ancestors of main.",
+    "action": "Preserved the old commit and dirty worktree, created a new branch/worktree from origin/main, and applied only this task's shared-cache fix, focused check and owning documentation. Retained main's Doll work, summon/cleanup fixes and protocol30; raised version from 0.2.61 to 0.2.62.",
+    "initial_build": "Before the new handoff was discovered, old-branch 0.2.57 was built and installed, with 0 errors and 4 existing warnings; old failure reproduction and corrected registration passed. Its local build record and previous-package backup remain intact. This artifact predates integrated main and is not the final shared-play handoff.",
+    "initial_package_sha256": "37b49b57131e6837c77006da714061207bed3688892875d081f8906c7ac5d8d5",
+    "final_output": "Explicit isolated compiler-only profile under ignored .local, containing copies of the two installed Calamity dependency packages. No player/world saves or personal Mod list copied. No shared-package or ModSources junction changes after discovering the handoff."
+  },
+  "diagnosis": {
+    "report": "The user could not use the summon because it appeared as Unloaded Item.",
+    "observed_failure": "The 2026-09-12 22:48 client log identifies Convergence 0.2.56 and a GhostSamuraiVisuals instance-fields/InstancePerEntity=false rejection in GlobalType.ValidateType. The Mod was disabled; the personal enabled-Mod list no longer contains Convergence.",
+    "cause": "GhostSamuraiVisuals is a shared GlobalNPC, but the preceding art update introduced an instance field for its texture cache. tModLoader rejects the entire Mod during type registration.",
+    "fix": "Use a static shared GhostSamuraiArt reference. GhostSamuraiHazardVisuals retains its existing InstancePerEntity=true behavior.",
+    "saved_item_identity": "Convergence/GhostSamuraiSummon",
+    "restoration": "Official ItemIO and UnloadedItem loading resolve the original stored Mod and item names once that Mod loads. Re-enable Convergence, Reload Mods and re-enter the same character/world. No replacement item or save migration is needed for the unchanged identifier. Actual restoration remains user-owned verification."
+  },
+  "source_research": {
+    "installed_tmodloader": "2026.07.3.0",
+    "commit": "666f69962d3bdffde54fc14025f02634965b4e7c",
+    "method": "Read the pinned official source and invoke the installed loader's actual protected ValidateType on the packaged Convergence types; no third-party code or binaries copied into the repository.",
+    "sources": [
+      "https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/GlobalType.cs",
+      "https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/GlobalNPC.cs",
+      "https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/IO/ItemIO.cs",
+      "https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/Default/UnloadedItem.cs"
+    ]
+  },
+  "checks": {
+    "regression_reproduction": {
+      "result": "passed",
+      "script": "tools/check-ghost-samurai-load.ps1",
+      "mode": "ExpectOldFailure",
+      "package_version": "0.2.56",
+      "package_sha256": "b62b82dac78d679ea25a377b4b485424e2473f2c0d71641c9db250ca2bdd725b",
+      "outcome": "Reproduced the exact GhostSamuraiVisuals rejection. GhostSamuraiHazardVisuals passed; the summon type was present."
+    },
+    "native_build": {
+      "result": "passed",
+      "command": "python tools/dev.py build --native --tml <installed-loader> --save <isolated-compiler-output-profile>",
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "source_sha256": "9a30ef14ef6c49a204448f3ce8a24dee5db0060825f9135c261146fbe2d788b1",
+      "source_changed_during_build": false,
+      "package_sha256": "f5409e6700cb32612688cf563811c6ef01beccdd3c7fd2ea9be41c17f231d201",
+      "package_bytes": 54703796,
+      "output": "isolated compiler-only profile, not the shared play package",
+      "localization": "passed: all 16 files parsed with the installed tModLoader Hjson parser",
+      "subsequent_changes": "Documentation, evidence and generated catalog only. No runtime source or asset changes after the build."
+    },
+    "packaged_type_validation": {
+      "result": "passed",
+      "script": "tools/check-ghost-samurai-load.ps1",
+      "package_version": "0.2.62",
+      "types": ["GhostSamuraiVisuals", "GhostSamuraiHazardVisuals"],
+      "saved_summon_type_present": true,
+      "limitation": "Only the loader's Global type validation and summon type lookup. Does not initialize graphics, perform full Mod autoload or open character/world saves."
+    },
+    "static": {"result": "passed", "catalog_documents": 66, "repository_files_inspected": 619, "yaml_files_inspected": 10},
+    "preserved_local_files": "passed: all six pre-existing paths retain their baseline SHA-256; five English localization files and the old workstation evidence remain outside this change",
+    "unchanged_checks": "No repetition of integrated main's passing 10 Ghost Samurai domain, 3 re-summon and protocol30 codec cases or prior offline art checks. This patch changes none of their gameplay, networking or asset inputs."
+  },
+  "runtime": {
+    "full_mod_load": "not_run; user-owned",
+    "existing_item_restoration": "not_run; user-owned",
+    "summon_and_combat": "not_run; user-owned",
+    "Build_and_Reload": "not_run; final native package only in isolated compiler output",
+    "Single_Player": "not_run",
+    "Host_and_Play": "not_run",
+    "Dedicated_Server": "not_run",
+    "game_or_server_started": false
+  },
+  "handoff": "Owner-requested main integration and build/install from integrated main remain pending under the updated AGENTS agreement. Do not deploy uncorrected 0.2.61, which retains the same invalid instance field. After corrected installation, keep the Unloaded Item, enable Convergence again, Reload Mods and re-enter with the same character/world. Confirm the bell restores and summons Ghost Samurai. No duplicate Build + Reload is required after installation."
+}

@@ -16,7 +16,9 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
     // MagicPixel is a texture, not a promise of a 1x1 source image. Scaling its
     // whole surface multiplies every line/rectangle by the asset dimensions.
     internal static readonly Rectangle StrokePixel = new(0, 0, 1, 1);
-    private readonly GhostSamuraiArt art = new();
+    // This GlobalNPC is shared (InstancePerEntity=false). Its shared texture
+    // cache must be static or tML rejects the entire Mod during ValidateType.
+    private static readonly GhostSamuraiArt art = new();
     public override void Unload() => art.Unload();
     public override bool AppliesToEntity(NPC entity, bool lateInstantiation) => entity.ModNPC is GhostSamuraiBoss;
     public override bool PreDraw(NPC npc, SpriteBatch batch, Vector2 screenPos, Color drawColor)
