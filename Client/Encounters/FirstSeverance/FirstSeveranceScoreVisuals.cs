@@ -41,7 +41,7 @@ internal sealed class FirstSeveranceScoreVisuals
             Math.Max(0, (double)authorityTick - combat.ActionStartedTick), combat.CoreX, combat.CoreY);
         for (int index = 0; index < rays.Count; index++)
         {
-            var item = rays[index]; var ray = item.Ray;
+            var item = rays[index]; var ray = item.BeamRay;
             bool live = index < authority.Count && authority[index].Live && authority[index].Pulse == item.Pulse;
             Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY), normal = new(-direction.Y, direction.X);
             Vector2 end = origin + direction * ray.Length;
@@ -76,11 +76,12 @@ internal sealed class FirstSeveranceScoreVisuals
         FirstSeveranceScoreRay item, double age, bool live, bool reduced)
     {
         Vector2 direction=new(item.Ray.DirectionX,item.Ray.DirectionY);
+        var ray=item.BeamRay;
         Color color=RitualArmamentArt.ColorFor(Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
         float retract=1-Window(age,FirstSeveranceChoreography.BladeEnd,FirstSeveranceChoreography.BladeEnd+58);
         bool warning=age<FirstSeveranceChoreography.BladeWindup;
         float opacity=warning?Arrive(age,4):live?1:retract*.055f;
-        FirstSeveranceRaidVfx.Beam(batch,origin,direction,item.Ray.Length,item.Ray.HalfWidth,age,
+        FirstSeveranceRaidVfx.Beam(batch,origin,direction,ray.Length,ray.HalfWidth,age,
             item.Charge,warning?0:1,opacity,color,reduced,release:ReleaseImpulse(age,FirstSeveranceChoreography.BladeWindup));
         accents.ChargeFracture(batch,origin,age,0,FirstSeveranceChoreography.BladeWindup,color,reduced,1.2f);
     }
@@ -104,7 +105,6 @@ internal sealed class FirstSeveranceScoreVisuals
         double local = age - pulse * FirstSeveranceScoreGeometry.FloodInterval;
         if (pulse >= 3 || local >= FirstSeveranceScoreGeometry.FloodFadeTick) return;
         float born = .75f + .25f * Window(local, 0, 6), charge = Window(local, 0, FirstSeveranceScoreGeometry.FloodFireTick);
-        float growth = FirstSeveranceScoreGeometry.FloodGrowth(local);
         float emission = Window(local, FirstSeveranceScoreGeometry.FloodFireTick, FirstSeveranceScoreGeometry.FloodFireTick + 8)
             * (1 - Window(local, FirstSeveranceScoreGeometry.FloodEndTick, FirstSeveranceScoreGeometry.FloodFadeTick));
         Color color = pulse % 2 == 0 ? new(99, 235, 255) : new(206, 155, 255);
@@ -114,25 +114,15 @@ internal sealed class FirstSeveranceScoreVisuals
             var full = FirstSeveranceScoreGeometry.FloodBand(combat.ActionIndex, pulse, band, combat.CoreX, combat.CoreY);
             var ray = rays[band].Ray;
             Vector2 origin = new(full.X, full.Y), direction = new(full.DirectionX, full.DirectionY);
-            // Foretell the final occupied volume and the genuine surviving pocket.
-            // The bright layer then advances and widens using the exact authority curve.
-            FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, full.Length, full.HalfWidth,
-                local, charge, 0, born * (1 - growth) * .90f, color, reduced);
             if (local < FirstSeveranceScoreGeometry.FloodFireTick)
             {
-                accents.Ribbon(batch, origin, direction, full.Length, 24, color, born * (.40f + charge * .30f));
-                Line(batch, origin, origin + direction * full.Length, Color.White * born * (.25f + charge * .4f), 2.5f);
+                FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, full.Length, full.HalfWidth,
+                    local, charge, 0, born, color, reduced);
             }
             else
             {
                 FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    local, 1, emission, rays[band].Live ? 1 : emission * .12f, color, reduced);
-
-                // Keep the bright moving front inside the same volume; a round
-                // end-halo used to wash over the safe strip and obscure its edge.
-                float front = Math.Min(36, ray.Length);
-                accents.Ribbon(batch, origin + direction * (ray.Length - front), direction,
-                    front, ray.HalfWidth * 2, Color.White, emission * .65f);
+                    local, 1, 1, rays[band].Live ? 1 : emission * .04f, color, reduced);
             }
             accents.ChargeFracture(batch, origin + direction * 24, local, 0, FirstSeveranceScoreGeometry.FloodFireTick,
                 color, reduced, .75f + charge * .28f);

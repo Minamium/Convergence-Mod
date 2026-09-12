@@ -80,8 +80,8 @@ internal static partial class Program
                 AssertEqual(true, Math.Abs(FirstSeveranceScoreGeometry.FloodSafeY(step, pulse)
                     - FirstSeveranceScoreGeometry.FloodSafeY(step, (pulse + 1) % 3)) >= 220, "safe strip moves substantially");
             }
-        float early = FirstSeveranceScoreGeometry.FloodGrowth(69) - FirstSeveranceScoreGeometry.FloodGrowth(68);
-        float middle = FirstSeveranceScoreGeometry.FloodGrowth(83) - FirstSeveranceScoreGeometry.FloodGrowth(82);
+        float early = FirstSeveranceScoreGeometry.FloodGrowth(50) - FirstSeveranceScoreGeometry.FloodGrowth(49);
+        float middle = FirstSeveranceScoreGeometry.FloodGrowth(52) - FirstSeveranceScoreGeometry.FloodGrowth(51);
         AssertEqual(true, middle > early * 2, "width grows with acceleration before easing into full hold");
     }
 

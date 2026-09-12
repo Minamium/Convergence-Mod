@@ -238,6 +238,18 @@ Calamityの `ArenaWallSystem.Box` は矩形・描画・更新・除去条件を�
 
 **確認と限界:** shaderの実GPU previewでは予告／本体の差、流動、球体、裂け目、退色を確認する。実Raidの多人数重なり、107% UI/zoom、Reduced Effects、低フレーム時、ロード／アンロード後の状態復帰は別の実機受け入れ項目。静的レビューやプレビューだけでWoTM/WotGと同等品質・FPSを断言しない。実行記録は[Status](../STATUS.md)、現行の規則は[Visual spec](../encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation)を正本とする。
 
+### F13 — 細い予告から射出・増幅へ（2026-09-13追補）
+
+**問い・範囲:** 色付きの予告体積を廃止し、細い軸→素早い射出→短い細身の保持→滑らかな急増幅を全Raidビームへ適用できるか。検索・追跡対象は Nameless `TelegraphedPortalLaserbeam` → `BaseTelegraphedPrimitiveLaserbeam` → `BasePrimitiveLaserbeam`、WoTM `HadesSuperLaserbeam` / `CannonLaserbeam` の draw/width/length/collision。アクセス日2026-09-13、全対象の公開sourceを確認。公式repository、固定commit、宣言版、対象環境とライセンスの証拠は直上F12と共通。Workshop最新版の実装と同一とは主張しない。
+
+**Namelessの観測:** [TelegraphedPortalLaserbeam](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/NamelessDeity/Projectiles/TelegraphedPortalLaserbeam.cs) は予告／本体を別shaderで描き、発射口bloomとreleaseイベントを持つ。このクラス自体の幅関数は `Opacity * Projectile.width` であり、「幅を段階的に増幅する」とは言えない。[BaseTelegraphedPrimitiveLaserbeam](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Core/BaseEntities/BaseTelegraphedPrimitiveLaserbeam.cs) は予告を全長で描き、発射後は `LaserLengthFactor` を1へ近づける。[BasePrimitiveLaserbeam](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Core/BaseEntities/BasePrimitiveLaserbeam.cs) の描画点列と、予告baseの命中終点は同じ係数で延びる。予告中／末尾の判定拒否も別にある。
+
+**WoTMの観測:** [HadesSuperLaserbeam](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/HadesSuperLaserbeam.cs) は約4tickの拡張待ちと約12tickの拡張区間を分け、細い初期幅から大きな幅へ二乗補間する。長さも進行し、軸上距離で評価した同じ `LaserWidthFunction` が描画と衝突の両方に使われる。[CannonLaserbeam](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/CannonLaserbeam.cs) は長さの伸展に応じた幅、発射源への接続、別bloom、末尾減衰を組み合わせる。全長・最終幅を最初から当てるだけの処理ではない。
+
+**独立設計・採否:** ユーザーの新指示により、F12の「面で予告／即時全幅／成長による判定変更は不採用」は**上書き済み**。Namelessの予告と伸展の分離、WoTMの細身保持と幅増幅を別々の観察として採用する。数式・tick値・shaderは移植せず、短いConvergenceのcast内で完結する独自の共有envelopeを作る。格子のばらつきは既存descriptorをseedとした独立整数shuffleであり、参考元からの移植ではない。四色の役割を保持し、流れを長軸方向へ引き延ばして紫の深部／真珠色の核と調和させる。警告の全面color、太い両端rail、装飾による安全地帯の偽装は不採用。
+
+**権利・互換・検証:** behaviorのみを独立再実装し、WoTM/WotGのコード・画像・shaderは複製しない。利用するLuminance API/環境はF12の実環境を継続。更新箇所は既存feature内の純粋geometryとclient材質であり、ローカル乱数・追加packet・演出起因のauthority mutationを導入しない。共有geometryの意味が変わるためprotocolを更新して旧peerを拒否する。必要確認はpilotの非先行判定・連続な成長・全幅到達・格子の再構成/猶予/各線の終了・Stillnessのgapless区間、compiled shader比較、同版の実機reload/重なり/peer同期。実施結果は[Status](../STATUS.md)、現行仕様は[Beam ignition](../encounters/first-severance/ENCOUNTER_SPEC.md#beam-ignition-and-lattice-order)を参照。
+
 ## 5. First Severanceに変換するときに崩さないもの
 
 | 残すRaid契約 | 巨大・派手な表現への変換案 | 避ける破綻 |

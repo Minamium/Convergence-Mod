@@ -28,6 +28,8 @@ class PursuitShader(unittest.TestCase):
         self.assertLess(text.index("Main.dedServ"), text.index("ShaderManager.GetShader"))
         adapter = (root / "FirstSeverancePursuitBeamVisuals.cs").read_text()
         self.assertIn("ray.Length,ray.HalfWidth", adapter)
+        self.assertIn("FirstSeveranceBeamIgnition.At(ray,clock-fire)", adapter)
+        self.assertIn("if (live == 0) halfWidth = Math.Min(halfWidth, 3f)", text)
         self.assertIn("Quad(c.Origin,c.Direction,c.Length,c.HalfWidth)", text)
         self.assertIn("Main.GameViewMatrix.TransformationMatrix", text)
         self.assertNotIn("UIScale", text)

@@ -56,8 +56,8 @@ internal sealed class FirstSeveranceSpreadBarrageRuntime
             {
                 if (hits.Contains((cast.Serial, member.ParticipantId)) || !recovery.IsAlive(member.ParticipantId)
                     || !recovery.TryGetPlayer(member, out Player p)) continue;
-                foreach (var ray in cast.Rays)
-                    if (ray.Intersects(p.Center.X, p.Center.Y, p.width * .5f, p.height * .5f))
+                for (int line = 0; line < cast.Rays.Count; line++)
+                    if (cast.RayAt(line, tick).Intersects(p.Center.X, p.Center.Y, p.width * .5f, p.height * .5f))
                     {
                         hits.Add((cast.Serial, member.ParticipantId));
                         recovery.ApplyRaidDamage(member, FirstSeveranceCombatRules.BeamDamage, tick, "SpreadPrism");

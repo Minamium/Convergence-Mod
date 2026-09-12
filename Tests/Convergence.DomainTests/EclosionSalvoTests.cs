@@ -90,8 +90,9 @@ internal static partial class Program
         var ray = FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 5000, 3440);
         var grid = new FirstSeveranceGridVolley(3, 100, 0, 4000, 4000, new[] { ray });
         AssertEqual(false, grid.CoreIntersects(159, 4500, 3440, 10, 21), "whole warning harmless");
-        AssertEqual(true, grid.CoreIntersects(160, 4500, 3533, 10, 21), "144px beam inclusive edge");
-        AssertEqual(false, grid.CoreIntersects(160, 4500, 3534, 10, 21), "outside thick corridor");
+        AssertEqual(false, grid.CoreIntersects(160, 4500, 3533, 10, 21), "pilot cannot use the final width early");
+        AssertEqual(true, grid.CoreIntersects(167, 4500, 3533, 10, 21), "144px beam inclusive edge after amplification");
+        AssertEqual(false, grid.CoreIntersects(167, 4500, 3534, 10, 21), "outside thick corridor");
         AssertEqual(true, grid.Intersects(179, 4500, 3440, 10, 21), "union includes core beam");
         AssertEqual(false, grid.CoreIntersects(180, 4500, 3440, 10, 21), "cooling light harmless");
         AssertEqual(false, grid.CoreIntersects(160, 3989, 3440, 10, 21), "no attack behind source");

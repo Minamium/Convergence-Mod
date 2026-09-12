@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-09
+last_reviewed: 2026-09-13
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v28
+## Current development protocol v32
+
+Packet IDs, layouts and request bounds are unchanged from v31. The version advances because both peers now derive beam length/width during ignition and each lattice line's reveal/fire/end offset from the same descriptor. Older peers would draw full-width instant hazards against the new narrow growing authority geometry, so they must be rejected rather than silently mixed. [Beam ignition](encounters/first-severance/ENCOUNTER_SPEC.md#beam-ignition-and-lattice-order) owns the timing/geometry rules. No client RNG, target requests or per-line actors/packets are added; Fight ownership, hit ledgers and cleanup remain unchanged. The existing Ghost Samurai payload/behavior is preserved; its [feature spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns the preceding v31 addition.
+
+## Preceding development protocol v28
 
 Packet IDs and layouts are unchanged. Preparation uses the full active server roster rather than radius-filtered candidates. Its shared180-tick deployment clock delays Ready acceptance and starts the Ready timeout afterward. Existing EnteredTick/ArenaBounds determine deployment and field geometry; no client submits a roster/teleport target. The server cancels on membership change before processing Ready/start, publishes30-tick preparation repairs, and retains all-Ready for45ticks before Active. All Ready flags are exact-slot/epoch/nonce authoritative. Both cinematic/field presentation and the new head labels consume those snapshots; matching peers are required. [Arena infrastructure](ARENA_INFRASTRUCTURE.md#deployment-and-presentation--0241) owns the behavior and cleanup.
 

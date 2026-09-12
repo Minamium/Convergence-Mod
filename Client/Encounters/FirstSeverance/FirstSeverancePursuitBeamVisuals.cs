@@ -19,6 +19,7 @@ internal sealed class FirstSeverancePursuitBeamVisuals
         float opacity=fade*(warning?Arrive(clock-start,4):active?1:(1-Window(clock,end,end+16d))*.04f);
         float charge=CastTension(clock,start,fire);
         float kick=active?ReleaseImpulse(clock,fire):0;
+        if(!warning) ray=FirstSeveranceBeamIgnition.At(ray,clock-fire);
         Vector2 origin=new(ray.X,ray.Y),direction=new(ray.DirectionX,ray.DirectionY);
         FirstSeveranceRaidVfx.Beam(batch,origin,direction,ray.Length,ray.HalfWidth,clock-start,
             charge,warning?0:1,opacity,color,reduced,release:kick);

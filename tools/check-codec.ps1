@@ -206,6 +206,9 @@ foreach ($rosterCount in 1, 2, 3, 4) {
             if ($rays.Count -ne $actualRays.Count) { throw 'Grid count changed' }
             for ($i = 0; $i -lt $rays.Count; $i++) {
                 if (-not $rays[$i].Equals($actualRays[$i])) { throw 'Grid geometry drift' }
+                $fireMethod = $grid.GetType().GetMethod('LineFireTick', $instanceFlags)
+                $before = $fireMethod.Invoke($grid, @([int]$i))
+                if ($before -ne $fireMethod.Invoke($actual, @([int]$i))) { throw 'Grid ignition order drift after decode' }
             }
             $actualBeams = Get-Field $actual 'CoreBeams'
             if ($actualBeams.Count -ne $coreCount) { throw 'Core salvo count drift' }

@@ -30,11 +30,12 @@ internal static partial class Program
                         AssertEqual(true, FirstSeveranceCurtainComb.IsLive(volley, lane, fire), "first live tick");
                         AssertEqual(false, FirstSeveranceCurtainComb.IsLive(volley, lane, FirstSeveranceCurtainComb.EndTick(volley, lane)), "cooling harmless");
                         AssertEqual(false, FirstSeveranceCurtainComb.Intersects(volley, fire - 1, ray.X, 2000, 0, 0), "not the old full curtain firing early");
-                        AssertEqual(true, FirstSeveranceCurtainComb.Intersects(volley, fire, ray.X, 2000, 0, 0), "rendered tooth actually damages at launch");
+                        AssertEqual(true, FirstSeveranceCurtainComb.Intersects(volley,
+                            fire + FirstSeveranceBeamIgnition.FullWidthTicks, ray.X, 2000, 0, 0), "tooth reaches warned corridor after ignition");
                         AssertEqual(FirstSeveranceCurtainComb.Offset(lane), FirstSeveranceCurtainComb.Offset(24 - lane), "mirror pairs reveal together");
                     }
                     // Full-size player sampling includes joints and both curtain edges.
-                    ulong full = volley.FireTick + FirstSeveranceCurtainComb.StaggerTicks;
+                    ulong full = volley.FireTick + FirstSeveranceCurtainComb.StaggerTicks + FirstSeveranceBeamIgnition.FullWidthTicks;
                     for (float dx = -footprint.HalfWidth; dx <= footprint.HalfWidth; dx += 2)
                         AssertEqual(true, FirstSeveranceCurtainComb.Intersects(volley, full, footprint.X + dx, 2000, 10, 21), "no survivable lane between teeth");
                 }

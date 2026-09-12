@@ -26,17 +26,15 @@ internal static class FirstSeveranceImpalingSwordVisuals
             float arrival = Arrive(age - FirstSeveranceImpalingSwords.WarningStart(sword.Wave), 5);
             float brake = Window(age, sword.Fire - 16, sword.Fire - 7);
             float commit = Window(age, sword.Fire - 5, sword.Fire);
-            // Preserve the accepted aura forecast. Live light advances through the
-            // same field plane; both halves now share one violet material.
-            float length = warning ? ray.Length : ray.Length * sword.Extension;
+            var body = FirstSeveranceImpalingSwords.BeamAt(sword, age);
+            float length = body.Length;
             if(warning) FirstSeveranceRaidVfx.Beam(batch,origin,direction,ray.Length,ray.HalfWidth,
                 age,CastTension(age,FirstSeveranceImpalingSwords.WarningStart(sword.Wave),sword.Fire),
                 0,born,color,reduced,confined:true,mouth:false);
             if (sword.Extension > .001f)
             {
-                // The beam front advances with the exact shared six-tick
-                // collision insertion. Cooling light is visibly harmless.
-                FirstSeveranceBeamMaterial.Flow(batch, origin, direction, length, ray.HalfWidth,
+                // Both length and width follow the shared ignition geometry.
+                FirstSeveranceBeamMaterial.Flow(batch, origin, direction, length, body.HalfWidth,
                     age, color, sword.Fade * (live ? 1 : .10f), reduced);
                 float stab = Window(age, sword.Fire, sword.Fire + 2) * (1 - Window(age, sword.Fire + 6, sword.Fire + 18));
                 accents.Halo(batch, origin + direction * length, new Vector2(75, 12),
@@ -45,7 +43,7 @@ internal static class FirstSeveranceImpalingSwordVisuals
             else if (warning)
             {
                 // Pressure draws back into the entry slit without introducing a
-                // metal tip. The accepted full corridor warning above stays put.
+                // metal tip. The thin locked axis above stays put.
                 Vector2 point = origin - direction * ((2 + (1 - arrival) * 140 + brake * 14) * (1 - commit));
                 accents.Halo(batch, point, new Vector2(18 + commit * 12, ray.HalfWidth * 1.4f),
                     color, born * (.28f + commit * .42f), angle);

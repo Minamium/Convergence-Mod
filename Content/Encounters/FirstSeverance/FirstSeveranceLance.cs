@@ -52,6 +52,7 @@ internal readonly record struct FirstSeveranceLanceRay(float X, float Y, float D
     // The visible danger material uses this same half-width; soft bloom is decorative.
     internal bool Intersects(float centerX, float centerY, float halfWidth, float halfHeight)
     {
+        if (Length <= 0 || HalfWidth <= 0) return false;
         float beamHalfLength = Length * 0.5f;
         float beamHalfWidth = HalfWidth;
         float dx = centerX - X - DirectionX * beamHalfLength;
@@ -133,7 +134,7 @@ internal sealed class FirstSeveranceLanceVolley
     {
         FirstSeveranceLanceRay ray = Rays[index];
         if (!IsCharge)
-            return ray;
+            return FirstSeveranceBeamIgnition.At(ray, (double)tick - FireTick);
         var head = ChargeHeadAt(tick);
         float speed = IsFiring(tick) ? 104f : 0f;
         // Include the previous-to-current head sweep: 104px/tick cannot tunnel

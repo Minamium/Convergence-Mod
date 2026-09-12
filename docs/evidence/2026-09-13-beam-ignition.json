@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.68",
+  "protocol": 32,
+  "baseline": "0d3f7045ad22d88941d3d20dd161c97aee3581e1",
+  "source_commit": "559afaf81b916ad07f2b6f21f0a505590562aa7b",
+  "source_branch": "main",
+  "source_sha256": "dc76bff0006f4231004972c0b9444145eabe21c94a706f90e02614040a9914ef",
+  "local_build_record": ".local/builds/20260912T201125398714Z/record.json",
+  "scope": "Thin forecasts across all avoidable Doll Raid beams; shared length/pilot/width ignition; descriptor-seeded lattice reveal/fire offsets; longitudinal material and four-color tone. All server damage adapters share the new geometry, including standalone Spread pursuit. No extra wire fields/actors. Protocol32 rejects older derived-timing semantics.",
+  "preserved": "HP, fixed damage, targets, Final color roles/order, hit caps, recovery, player circles, music/sounds, shell/rig/capture/stage/endings, weapons/companion/rewards and Ghost Samurai implementation.",
+  "preserved_local_changes": [
+    "Localization/DollActivation/en-US.hjson",
+    "Localization/DollBeam/en-US.hjson",
+    "Localization/DollTheater/en-US.hjson",
+    "Localization/GhostSamurai/en-US.hjson",
+    "Localization/Preparation/en-US.hjson",
+    "Localization/en-US.hjson"
+  ],
+  "localization_preservation": "All six file SHA256s equal the preceding 0.2.67 native build. Included in the local package, not committed by this task.",
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "hjson_files_parsed": 18,
+    "source_changed_during_build": false,
+    "bytes": 54677369,
+    "sha256": "2043de44109e9f378991bfcbfc207e38b602609416bc87415f4681a17fabe00d",
+    "previous_package": "Preserved by dev.py in the ignored local build archive; no game/server was launched."
+  },
+  "verification": {
+    "domain": "182 passed; updated prior instantaneous-width expectations and added continuous ignition, deterministic line order and score-hit boundaries",
+    "codec": "Compiled protocol32: 324 round-trips and 50 malformed/truncated rejections; lattice line fire offsets are equal after decode. Domain assembly SHA256 28596e82e1a2879d507cce0e37275254fe4043c6eb442d854b6d0bfa6280483c.",
+    "static": "Selected wrapper passed; catalog generated once after indexed edits (66 documents), repository checks (648 files) and YAML checks (10 files). No unrelated full playtest matrix.",
+    "shader_guards": "5 passed, including thin forecast cap, shared pursuit geometry, coordinate/state restoration and export integrity",
+    "native_shader": "FXC compilation passed with the expected deprecated-effects warning; installed FNA/D3D11 rendered the compiled export with three Luminance maps read only in memory.",
+    "preview": ".local/shader-preview/beam-ignition.png and ignition-frames/frame-020.png compare 0.2.67 (left) with thin-axis/longitudinal material (right). 80 GPU samples use the compiled domain's ignition functions and GridVolley offsets via reflection. beam-ignition.gif is an unresized 50Hz encoding, not exact gameplay pacing or a performance measurement.",
+    "observed_preview": "Forecast band fill is absent on the new side; actual beam begins narrow and grows, retaining longitudinal streak contrast. Lattice lines appear/fire at descriptor-derived stagger offsets. This does not establish readability against live terrain, player effects or overlapping attack categories."
+  },
+  "runtime_not_run": [
+    "Actual tModLoader reload and shader autoload",
+    "Initial/Spread/Final forecast, pilot and live-mantle readability under multiplayer overlap",
+    "Same-version peers observe identical lattice ordering, including delayed snapshots",
+    "Stillness gapless interval, rotation and Core/top-bottom/flood safe-space acceptance",
+    "Reduced Effects, peer UI107%/zoom/gravity changes and measured frame-time"
+  ]
+}
