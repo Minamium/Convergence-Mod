@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-12",
+  "scope": "Requested contributor integration and local native build; not Workshop publication or gameplay acceptance.",
+  "contributor_commit": "c2a969463f73bbd69bce60f2660adcd74c919f63",
+  "base_main": "c4fa7b161376923fc17b22d73360ae5d3ab9fccf",
+  "merge": "Fast-forward into the existing main checkout; no conflicts, history replacement or source-junction changes.",
+  "version": "0.2.55",
+  "protocol": 29,
+  "integration_fixes": [
+    "GhostSamuraiVisuals.Stroke samples a 1x1 source texel so pixel-length scaling matches hazard endpoints and full width, instead of scaling the full MagicPixel texture.",
+    "GhostSamuraiRuntime removes expired hazards and checks that the native projectile still owns the exact ModProjectile instance before retaining it in the 32-hazard budget."
+  ],
+  "preserved": "All contributor implementation and prior First Severance behavior/assets. Five pre-existing English localization edits remain uncommitted and are included only in this local package.",
+  "build": {
+    "result": "passed",
+    "mode": "native",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "source_base_commit": "c2a969463f73bbd69bce60f2660adcd74c919f63",
+    "source_dirty": "Two integration C# fixes, build.txt, STATUS and the five pre-existing English localization files; full file manifest in ignored local record.",
+    "source_sha256": "7426cf8a6f493f9e7f27e130fec7eccf3b6459665d4526c08e28acb0f5604920",
+    "source_changed_during_build": false,
+    "local_record": ".local/builds/20260912T053519049793Z/record.json",
+    "package_sha256": "e05c3848be5fcce40c1430e4a620e2bc0e5e07000e32042d9cd849d6560d9e57",
+    "package_bytes": 51085711,
+    "deployment": "Existing configured tModLoader Mods/Convergence.tmod; previous package preserved by tools/dev.py.",
+    "retry": "First compilation passed but packaging lacked write access. Retried with scoped deployment permission; the second native build and packaging succeeded.",
+    "post_build_changes": "Documentation/evidence/catalog only; no subsequent runtime source or asset changes."
+  },
+  "review": {
+    "github": "No open PR or workflow/check runs for the contributor branch at review time; push CI is configured for main and PRs.",
+    "domain_codec": "Reused contributor-recorded results for unchanged domain/codec sources; no new claim of multiplayer correctness.",
+    "geometry": "Source review: a 1x1 texel scaled by (line length, full width), with origin (0,0.5), has the same rectangle endpoints and half-width as SamuraiHazard.Hits.",
+    "lifecycle": "Source review: inactive, replaced-instance, wrong-Fight and expired references are pruned before capacity checks; cleanup remains exact-Fight and idempotent. Native slot-churn playtest is not_run."
+  },
+  "runtime": {
+    "mod_load_and_summon": "not_run; user-owned",
+    "multiplayer_warnings_damage_death_cleanup": "not_run; user-owned",
+    "native_dodge_accessory_hooks": "not_run; existing documented local-player-hook limitations retained",
+    "game_or_server_started": false
+  }
+}

@@ -128,7 +128,9 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
     {
         Vector2 d = b - a;
         if (d.LengthSquared() < .001f) return;
-        batch.Draw(TextureAssets.MagicPixel.Value, a, null, color, d.ToRotation(), new Vector2(0, .5f), new Vector2(d.Length(), width), SpriteEffects.None, 0);
+        // Scale one texel, not the full texture: rendered endpoints/width must
+        // match SamuraiHazard geometry for both forecasts and live slashes.
+        batch.Draw(TextureAssets.MagicPixel.Value, a, new Rectangle(0, 0, 1, 1), color, d.ToRotation(), new Vector2(0, .5f), new Vector2(d.Length(), width), SpriteEffects.None, 0);
     }
     internal static void Ring(SpriteBatch batch, Vector2 center, float radius, float width, Color color)
     {

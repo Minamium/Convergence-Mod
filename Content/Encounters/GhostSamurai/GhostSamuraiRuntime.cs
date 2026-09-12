@@ -54,7 +54,10 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
 
         NPC npc = actor.NPC;
         age++;
-        hazards.RemoveAll(p => !p.Projectile.active || p.Fight != fight.Value);
+        // Native projectile slots can be reused before this authority tick. An
+        // active replacement must not keep an old ModProjectile in our budget.
+        hazards.RemoveAll(p => !p.Projectile.active || p.Projectile.ModProjectile != p
+            || p.Fight != fight.Value || age >= p.Hazard.End);
         if (npc.target < 0 || npc.target >= Main.maxPlayers || !Main.player[npc.target].active || Main.player[npc.target].dead
             || Vector2.DistanceSquared(npc.Center, Main.player[npc.target].Center) > GhostSamuraiRules.AbandonDistance * GhostSamuraiRules.AbandonDistance)
             npc.TargetClosest(false);
