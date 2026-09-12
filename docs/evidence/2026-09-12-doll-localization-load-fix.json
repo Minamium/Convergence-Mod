@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.58",
+  "protocol": 29,
+  "source": {
+    "commit": "949c927333ea85efa2017025c8043aaad8874598",
+    "branch": "main",
+    "source_sha256": "4d1272c86dc3f65bde87b75889d4666900cee8499437a5dfa196b09229a0073e"
+  },
+  "artifact": {
+    "bytes": 52378820,
+    "sha256": "d0733cc342ab05e37cd37d6c5c760ce41a44176d68ffc74c106676dda8cee3eb"
+  },
+  "source_unchanged_during_build": true,
+  "local_build_record": ".local/builds/20260912T080351586149Z/record.json",
+  "observed_failure": {
+    "version": "0.2.57",
+    "client_times_jst": [
+      "16:59",
+      "17:00:09"
+    ],
+    "file": "Localization/DollBeam/en-US.hjson",
+    "exception": "Hjson.ArgumentException: Name is not closed. At line 7, column 2",
+    "cause": "Unquoted Hjson value consumed same-line closing brace; equivalent Japanese file also invalid",
+    "automatic_action": "tModLoader disabled Convergence during failed autoload"
+  },
+  "changes": [
+    "Separate DisplayName and closing brace in both DollBeam locales",
+    "tools/dev.py checks all locale Hjson using the selected tML installation's Hjson.dll before backup/compiler/package write",
+    "No gameplay, assets, protocol, enabled-mod list or GUI changes"
+  ],
+  "verification": {
+    "regression": "Both previous committed DollBeam files rejected by installed Hjson 3.0.0; both fixed files parse and contain the expected names",
+    "localization": "16 files passed using installed Hjson parser",
+    "preflight_tests": "2 passed; selected installation argument and abort before compiler/backup",
+    "native_build": "passed; 0 errors, 4 existing CS8632 warnings",
+    "runtime_reload": "not_run; user-owned"
+  },
+  "preserved": "Six pre-existing English locale changes remain uncommitted and are included in local build"
+}

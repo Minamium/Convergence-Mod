@@ -47,6 +47,13 @@ def environment(properties: list[str]) -> dict:
     return result
 
 
+def validate_localization(env: dict) -> None:
+    # tML's build compiler packages Hjson without parsing it. Fail before
+    # touching the installed package when the runtime's parser rejects a file.
+    subprocess.run(["pwsh", "-NoProfile", "-File", str(ROOT / "tools" / "check-localization.ps1"),
+                    "-TModLoaderPath", env["tMLSteamPath"]], cwd=ROOT, check=True)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("doctor", "build"))
@@ -71,6 +78,7 @@ def main() -> int:
         save = Path(env["TModLoaderSavePath"])
         if not env["TModLoaderSavePath"] or not (save / "Mods").is_dir():
             raise ValueError("Set an existing user-data directory with Mods via TModLoaderSavePath or --save; no empty profile is created.")
+        validate_localization(env)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
         record_dir = ROOT / ".local" / "builds" / stamp
         record_dir.mkdir(parents=True)
@@ -86,6 +94,7 @@ def main() -> int:
             command = ["dotnet", str(build_cwd / "tModLoader.dll"), "-server", "-build", str(ROOT),
                        "-define", ";".join(filter(None, env["DefineConstants"].split(";"))), "-tmlsavedirectory", str(save)]
         record = {"started_utc": stamp, "source": source, "environment": env, "command": command,
+                  "localization_validation": "passed; installed tModLoader Hjson parser",
                   "runtime_checks": "not_run; user-owned"}
         with (record_dir / "build.log").open("w", encoding="utf-8") as log:
             process = subprocess.Popen(command, cwd=build_cwd, text=True, encoding="utf-8", errors="replace",

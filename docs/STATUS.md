@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development **0.2.57 / protocol 29** on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns wire compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Current changes are Doll-only: treasure box, broom companion with purple continuous beam, Raid-derived weapon sounds, connected unstable shell suspension and polished mechanical sphere. Raid rules, Ghost Samurai and the previous re-summon fix are unchanged.
+Development **0.2.58 / protocol 29** on main. [build.txt](../build.txt) owns version; [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs) owns wire compatibility. First Severance remains **不幸な人形劇 / The Unfortunate Doll Play**, Boss **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**. Current changes are Doll-only: treasure box, broom companion with purple continuous beam, Raid-derived weapon sounds, connected unstable shell suspension and polished mechanical sphere. Raid rules, Ghost Samurai and the previous re-summon fix are unchanged.
 
 - New independent [Ghost Samurai / 幽鬼武者](encounters/ghost-samurai/ENCOUNTER_SPEC.md): reusable summon item, three Phase1 attacks, delayed wisps and three-pass lateral slash in Phase2; Phase3 temporarily continues Phase2. Uses the existing encounter coordinator and exact-Fight cleanup, native player damage outcomes and procedural placeholder visuals. No Raid Ready/Down/revival or new loot/progression is added to this boss.
 
@@ -36,7 +36,9 @@ Development **0.2.57 / protocol 29** on main. [build.txt](../build.txt) owns ver
 
 ## Verification state
 
-Current **0.2.57** [evidence](evidence/2026-09-12-doll-treasure-broom-core.json): native build/install **0 errors / 4 existing warnings**; 3 companion and 5 presentation tests passed. PNG alpha/pivot/clipping and offline previews checked; 27 SFX measured, input preservation and deterministic reproduction checked. Box opening, broom/beam playback, weapon listening and suspension/Core readability remain **user-owned, not playtested**. Static/catalog/YAML checks passed (66 docs / 605 files / 10 YAML).
+**0.2.58** fixes the reported **0.2.57 load failure**: an inline unquoted Hjson value swallowed its closing brace in both DollBeam locales. The [load-fix evidence](evidence/2026-09-12-doll-localization-load-fix.json) records the actual client exception, reproduction with the installed parser, all 16 locale files passing, two build-preflight tests and native packaging (0 errors / 4 existing warnings). Build now rejects malformed translations before touching the installed package. A real client reload remains user-owned and unverified.
+
+Previous **0.2.57** [evidence](evidence/2026-09-12-doll-treasure-broom-core.json): native build/install **0 errors / 4 existing warnings**; 3 companion and 5 presentation tests passed. PNG alpha/pivot/clipping and offline previews checked; 27 SFX measured, input preservation and deterministic reproduction checked. Box opening, broom/beam playback, weapon listening and suspension/Core readability remain **user-owned, not playtested**. Static/catalog/YAML checks passed (66 docs / 605 files / 10 YAML).
 
 The **0.2.56** [re-summon fix](evidence/2026-09-12-ghost-samurai-resummon.json) is built and installed with **0 errors / 4 existing warnings**. The missing-Idle regression was reproduced before the fix; three focused re-summon tests and four affected existing terminal/replica tests now pass. Current wire bodies are unchanged. The [0.2.55 integration evidence](evidence/2026-09-12-ghost-samurai-integration.json) and contributor's [0.2.54 evidence](evidence/2026-09-12-ghost-samurai.json) preserve earlier build/codec checks. New Boss load succeeded on both peers in the latest 0.2.55 logs, but summon/end telemetry was absent; the reported second-summon failure matched the code defect. Native re-summon, placeholder readability, accessory compatibility and dodgeability remain user-owned and unverified for the fix.
 
@@ -63,7 +65,7 @@ Development loot includes a companion summon weapon, but balance, public solo/NP
 
 ## Next change
 
-Reload/restart peers onto **0.2.57 / protocol29**; no unchanged Build + Reload is needed. This task continues Doll; Oni belongs to the user's separate task. Select only the changed surfaces: one treasure-box opening, broom flight/landing and purple beam, weapon sound listening, preparation/P1 exposure/P2–3 Core readability. Ghost Samurai's prior re-summon smoke remains pending, not a mandatory repeat for this Doll change.
+Reload/restart peers onto **0.2.58 / protocol29**; no unchanged Build + Reload is needed. If the load error disabled Convergence, enable it again before reloading. First confirm the reported translation error is gone; retain the following unchanged playtest scope. This task continues Doll; Oni belongs to the user's separate task. Select only the changed surfaces: one treasure-box opening, broom flight/landing and purple beam, weapon sound listening, preparation/P1 exposure/P2–3 Core readability. Ghost Samurai's prior re-summon smoke remains pending, not a mandatory repeat for this Doll change.
 
 Retain the player-only Stack/Spread rings, renamed intro/bar and The Unbroken Promise companion. The stage NPC remains intact until all-Ready intro; minions do not replace missing Raid participants. Native rendering, listening and performance checks remain user-owned.
 

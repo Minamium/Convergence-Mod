@@ -1,7 +1,9 @@
 Mods: {
 	Convergence: {
 		Projectiles: {
-			DollLacunaBeam: { DisplayName: 薄紫の誓約 }
+			DollLacunaBeam: {
+				DisplayName: 薄紫の誓約
+			}
 		}
 	}
 }
