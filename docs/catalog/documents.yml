@@ -655,6 +655,28 @@ documents:
   related_docs:
   - project.status
   - encounter.first-severance.spec
+- doc_id: encounter.ghost-samurai.spec
+  path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
+  title: 幽鬼武者 / Ghost Samurai
+  content_sha256: 39ec267d57e55f0a16e216d658addac52ec85ee11526adae22b19654b174e2d2
+  document_type: spec
+  status: provisional
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-12'
+  source_of_truth_for:
+  - ghost_samurai.behavior
+  aliases:
+  - Ghost Samurai
+  - 幽鬼武者
+  related_code:
+  - Content/Encounters/GhostSamurai
+  - Client/Encounters/GhostSamurai
+  - Tests/Convergence.DomainTests/GhostSamuraiTests.cs
+  related_docs:
+  - project.status
+  - development.windows
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Development Handoff — チャット不要の再開入口
@@ -1075,7 +1097,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 3a0f9667e948a7be604c440dd60f005069a8bc30d4f5f11c3c9fe96ad9f3b549
+  content_sha256: e085516a6e1d31974fab5e5aaa0642037747b6f4d2d3f328cd4ee1786fd6f1e6
   document_type: status
   status: accepted
   owners:

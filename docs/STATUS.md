@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Development **0.2.53 / protocol 28**. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). Public names are now **不幸な人形劇 / The Unfortunate Doll Play** and **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**; internal FirstSeverance/NullCantor identifiers remain stable. This is a playable development Raid, not a production-completeness claim.
+Development **0.2.54 / protocol 29** on the Ghost Samurai development branch. Version comes from [build.txt](../build.txt); wire compatibility from [EncounterProtocol](../Common/Networking/Protocol/EncounterProtocol.cs). Public First Severance names remain **不幸な人形劇 / The Unfortunate Doll Play** and **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**; internal identifiers and its accepted behavior remain stable.
+
+- New independent [Ghost Samurai / 幽鬼武者](encounters/ghost-samurai/ENCOUNTER_SPEC.md): reusable summon item, three Phase1 attacks, delayed wisps and three-pass lateral slash in Phase2; Phase3 temporarily continues Phase2. Uses the existing encounter coordinator and exact-Fight cleanup, native player damage outcomes and procedural placeholder visuals. No Raid Ready/Down/revival or new loot/progression is added to this boss.
 
 - Server-wide roster → field deployment → manual Ready → separate combat introduction is implemented. [Arena infrastructure](ARENA_INFRASTRUCTURE.md) owns admission, movement and cancellation.
 - Phase I / II / III / Final survival, frozen-roster HP scaling, fixed-position Stack, Spread, Raid-owned Down/instant revival and terminal effects/rewards are implemented. [Encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md) and [recovery spec](encounters/first-severance/REVIVE_SPEC.md) own current behavior.
@@ -34,9 +36,11 @@ Development **0.2.53 / protocol 28**. Version comes from [build.txt](../build.tx
 
 ## Verification state
 
+0.2.54 native packaging passed with **0 errors / 4 existing CS8632 warnings**, with unchanged source during the build. Eight scoped Ghost Samurai domain tests passed (phase boundaries, selection, collision/forecast timing, 1–4-player grid cells, wisps, dash motion bounded hazard codec and stale/malformed actor snapshots). [Ghost Samurai evidence](evidence/2026-09-12-ghost-samurai.json) records the exact build and pending native load/multiplayer checks. No GUI, game or server session was started; placeholder geometry and test results do not establish in-game readability, accessory compatibility or dodgeability.
+
 The **0.2.53** native package is built and installed with **0 errors / 4 existing CS8632 warnings**. Two focused companion contract tests, 36-cel/alpha/pixel previews, 27 PCM checks and selected static checks pass; [build evidence](evidence/2026-09-12-doll-companion-foley.json) records identity and scope. Game load, physical listening, movement on real terrain and peer replication remain **not_run**, user-owned. [Previous build evidence](evidence/2026-09-12-four-color-prism-frames.json) preserves the prior Final beam/music/frame checks; no unrelated domain suite is repeated.
 
-The working tree includes pre-existing English edits in `Localization/DollTheater/en-US.hjson`, `Localization/Preparation/en-US.hjson`, `Localization/RitualArmaments/en-US.hjson` and `Localization/en-US.hjson`. They are preserved and kept outside this change's commits. A fresh clone does not contain those local edits; consult the build manifest before claiming byte-identical reproduction.
+The previous workstation's 0.2.53 record includes uncommitted English localization edits. This Ghost Samurai branch starts at current main `c4fa7b1` in an isolated worktree; the original workstation checkout's two uncommitted English files remain there untouched. They are not silently merged into this build. Consult each build manifest before claiming byte-identical reproduction.
 
 Recent observed gameplay: [0.2.51 archived logs](evidence/2026-09-12-playtest-0251.json) contain one solo victory and six three-player all-Down defeats. Ten revives succeeded. The final multiplayer attempt reached Final and ended on a one-of-three Stack with two Downed members; its Final slicer had two nonlethal hits. Logs do not certify the new package or every peer's visuals/audio. Earlier runs remain in the [checkpoint history](history/2026-09-11-status-through-0246.md#verification-state).
 
@@ -56,6 +60,8 @@ Calamity is still a hard dependency, including progression and Rogue/true-melee 
 Development loot includes a companion summon weapon, but balance, public solo/NPC-party substitutes and final production acceptance are not settled. Source/asset license selection, exact-package release approval and current Workshop visibility must not be inferred from a build or an earlier “approval pending” report. [Release process](RELEASE_PROCESS.md) owns the gate and explicit development-publication exception process.
 
 ## Next change
+
+Ghost Samurai: reload/restart all peers on **0.2.54 / protocol29**. Craft **鬼武者の弔い鈴 / Oni's Mourning Bell** at a Work Bench (10 Bone + 5 Fallen Star) and use it in an open area. Confirm menu load, each warned attack, three charge sounds, phase pauses, wisps, three lateral passes, ordinary damage/death, remote-peer alignment and cleanup/re-summon. No unchanged Build + Reload is needed. The new feature's [spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#検証と試遊) owns its focused checks; the retained First Severance handoff below is not a mandatory repeat.
 
 Reload/restart the installed 0.2.53 package; no unchanged rebuild needed. Check the player-only Stack/Spread rings and renamed intro/bar; summon The Unbroken Promise with 10 slots and try ground/flight/retarget/Down/dismissal with a peer. Audition weapon families at unchanged sliders and confirm charge/sustain cancellation. The stage NPC remains intact until all-Ready intro; minions do not replace missing Raid participants. Native rendering, listening and performance checks are user-owned; authored frames/CPU previews are not proof of game FPS.
 

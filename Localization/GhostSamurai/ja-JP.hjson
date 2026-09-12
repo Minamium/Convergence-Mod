@@ -1,0 +1,19 @@
+Mods: {
+  Convergence: {
+    NPCs: {
+      GhostSamuraiBoss: { DisplayName: "幽鬼武者" }
+    }
+    Items: {
+      GhostSamuraiSummon: {
+        DisplayName: "鬼武者の弔い鈴"
+        Tooltip: "幽鬼武者を呼び出す\n消費しない開発用アイテム。広い場所で使用する\n第3フェーズは現在、第2フェーズの動きを継続する"
+      }
+    }
+    Projectiles: {
+      GhostSamuraiAttackProjectile: { DisplayName: "幽鬼武者の斬撃" }
+    }
+    GhostSamurai: {
+      SummonRejected: "幽鬼武者を呼び出せませんでした。戦闘を終え、弔い鈴を手に持って使用してください。"
+    }
+  }
+}

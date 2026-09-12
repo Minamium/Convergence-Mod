@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-12",
+  "feature": "Ghost Samurai phases 1 and 2; Phase3 provisionally continues Phase2",
+  "base_commit": "c4fa7b161376923fc17b22d73360ae5d3ab9fccf",
+  "branch": "feature/ghost-samurai-phases-1-2",
+  "version": "0.2.54",
+  "protocol": 29,
+  "scope": "Independent summoned boss; original First Severance source/assets unchanged; original dirty checkout preserved in place.",
+  "build": {
+    "result": "passed",
+    "mode": "native",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "source_sha256": "8a01722cd80a5a851105eb425e79d314f2a9732b5c812286f4d549e2155c63f4",
+    "source_changed_during_build": false,
+    "package_sha256": "5e0b1557d15c8d077b42e03439a65ac6031a9c80ff06481a19a832fc79307e94",
+    "dirty_manifest": "New feature files and tracked changes; full source manifest is in ignored local build record. Subsequent edits are documentation/evidence/catalog only."
+  },
+  "checks": {
+    "ghost_samurai_domain_cases": 8,
+    "result": "passed: seven attack/geometry/codec cases plus one actor-snapshot case after its addition",
+    "existing_protocol_codec": "passed: 324 round-trips and 50 malformed/truncated packets; linked-source harness, protocol29",
+    "static": "passed: catalog (66 documents), repository policy (588 files), YAML (10 files)",
+    "package_manifest": {
+      "result": "passed",
+      "version": "0.2.54",
+      "entries": 152,
+      "unexpected_source_or_local_entries": [],
+      "package_sha256_matches_build": true
+    }
+  },
+  "environment": {
+    "tmodloader": "2026.07.3.0",
+    "terraria": "1.4.4.9",
+    "sdk": "8.0.424",
+    "calamity": "2.2.4",
+    "music": "2.1"
+  },
+  "authority_review": {
+    "owner": "GhostSamuraiRuntime registered by EncounterCoordinator before world resources spawn",
+    "initial_spawn_sync": "IEntitySource populates Fight and hazard state in OnSpawn before initial SyncNPC/SyncProjectile",
+    "damage": "Server/SP tests shared timed geometry; native HurtInfo sent to peers, client projectiles cannot decide hits",
+    "cleanup": "Idempotent exact-Fight projectile scan and exact NPC instance check; phase transition also clears hazards",
+    "source_review": "No client attack selection/spawn/hit path; no Common-to-Content or Content-to-Client dependency; graphics/audio remain guarded/client-only"
+  },
+  "runtime": {
+    "mod_load": "not_run; user-owned",
+    "multiplayer_spawn_forecast_damage": "not_run; user-owned",
+    "disconnect_death_rejoin_cleanup": "not_run; user-owned",
+    "native_accessory_defense_dodge_hooks": "not_run; local-player-only hooks require specific acceptance",
+    "visual_audio_acceptance": "not_run; procedural placeholders",
+    "game_or_server_started": false
+  },
+  "handoff": "Reload or restart every peer with 0.2.54/protocol29. At a Work Bench craft the reusable bell from 10 Bone and 5 Fallen Star. Check warnings, 3 charge sounds, HP66%/33% pauses, wisps, 3 lateral passes, damage/death and re-summon cleanup. No unchanged Build + Reload needed.",
+  "source_layout": "Explicit new worktree named Convergence; ModSources junction now resolves to that worktree. Original dirty checkout and its personal tools remain untouched. No merge of old local translations."
+}
