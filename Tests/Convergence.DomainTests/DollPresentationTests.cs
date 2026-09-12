@@ -6,6 +6,31 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Doll presentation suspension keeps shell and cuffs on one continuous pose")]
+    private static void DollSuspensionContinuity()
+    {
+        foreach(bool reduced in new[]{false,true})
+            for(int frame=0;frame<2400;frame++)
+            {
+                double tick=frame*.5;
+                var a=FirstSeveranceShellSurface.Suspension(tick,reduced);
+                var b=FirstSeveranceShellSurface.Suspension(tick+.5,reduced);
+                AssertEqual(true,a.Offset.Length()<25&&MathF.Abs(a.Roll)<.12f,"bounded visual sway");
+                AssertEqual(true,Vector2.Distance(a.Offset,b.Offset)<.4f&&MathF.Abs(a.Roll-b.Roll)<.002f,
+                    "continuous fractional catch/release, no pose jumps");
+                foreach(int side in new[]{-1,1}) foreach(bool outer in new[]{false,true})
+                {
+                    Vector2 point=FirstSeveranceShellSurface.Attachment(side,outer,tick,a.Roll);
+                    Vector2 untilted=Vector2.Transform(point,Matrix3x2.CreateRotation(-a.Roll));
+                    Vector2 expected=new Vector2(side*(outer?66:188),outer?-215:-65)*
+                        (FirstSeveranceShellSurface.Radius(tick)/288);
+                    AssertEqual(true,Vector2.Distance(untilted,expected)<.001f,"cuff belongs to same rotated shell surface");
+                    Vector2 next=b.Offset+FirstSeveranceShellSurface.Attachment(side,outer,tick+.5,b.Roll);
+                    AssertEqual(true,Vector2.Distance(a.Offset+point,next)<.8f,"cables follow exact moving cuffs");
+                }
+            }
+    }
+
     [DomainTest("Doll presentation authored frames preserve atlas and attachment contracts")]
     private static void DollFrameContracts()
     {

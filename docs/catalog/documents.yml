@@ -494,7 +494,7 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: 不幸な人形劇 — 少女人形の提示仕様
-  content_sha256: fccd1c3d940b4fe60107cfe94281d856a56b11a490f7739d78ccafc125a07a2e
+  content_sha256: ab8406025f3c4e733e2b4e77ee5bc2fb5b6210befb3cb7efbbfcfbb6b37b2c1d
   document_type: spec
   status: provisional
   owners:
@@ -591,7 +591,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: 不幸な人形劇 — Encounter Specification
-  content_sha256: bf0eaf64913d6a157728c866c23a0af3d3419b6f51dd89f5a295174cce466237
+  content_sha256: 106cf8532d28d498ff63235b9094bc0a3b4171a587d67b97045bff48d77914f7
   document_type: spec
   status: accepted
   owners:
@@ -616,7 +616,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: c19c90ad76ded2337d2af13b57e614690767f080c1158ce6db7ed6fc0b4eff3a
+  content_sha256: f00252385cba8728e97ffe992b3f892b44e270e903583eb9ada23d018fc7e5cd
   document_type: spec
   status: provisional
   owners:
@@ -636,7 +636,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: 不幸な人形劇 — Ritual Armaments
-  content_sha256: 7931642c2acb2d3037a7bd226204f1e4c3ee512c0732aecaeba1278df13af26e
+  content_sha256: 34015539195d25e102e81e3ceba946dadb9e929707ed72cb96753da708722807
   document_type: spec
   status: provisional
   owners:
@@ -915,7 +915,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: a5d035749b9a08385762b05451c8e10bbd74056ee9197069eef5eb23a889e26c
+  content_sha256: 71eec39bef8090b4be3b1eb4704c577eee0ae0645decafc17df4fe0f3abce044
   document_type: spec
   status: provisional
   owners:
@@ -1097,7 +1097,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 1a9245ff5a555ae05e9638b2f51b139c09c7caf4c13273419ba70d0ed7bed742
+  content_sha256: c0a3e45291b50b2ff4dc4e631d58d3c651f573bbe15ad8c90b50b0063b13a627
   document_type: status
   status: accepted
   owners:

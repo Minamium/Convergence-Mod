@@ -71,10 +71,10 @@ internal sealed class FirstSeveranceDollPose
         // deliberately not treated as a new bone or a gameplay attachment.
     }
 
-    internal void Encased(float seconds, float pressure, bool reduced)
+    internal void Encased(float seconds, float pressure, bool reduced,float roll=0)
     {
         Sprites.Clear(); Cords.Clear();
-        Tilt = .08f;
+        Tilt = .08f+roll;
         float shiver = reduced ? 0 : MathF.Sin(seconds*1.17f)*1.8f;
         Vector2 shoulder=V(-104,-28), elbow=V(-160,54+shiver*.35f), wrist=V(-191,125-pressure*3);
         // Mostly behind the existing opaque coffin. Only fingertips and a short

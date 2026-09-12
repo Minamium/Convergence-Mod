@@ -14,7 +14,7 @@ internal static partial class Program
         AssertEqual(false,DollCompanionRules.CanSummon(30,1),"one companion");
         AssertEqual(RitualArmamentRules.Damage(RitualArmamentKind.Summon)*10,DollCompanionRules.Damage,"ten-slot item budget");
     }
-    [DomainTest("Doll companion has bounded cels and one three-shot charge verdict score")]
+    [DomainTest("Doll companion has bounded ground and broom cels and one charge beam score")]
     private static void DollMotionScore()
     {
         int shots=0;
@@ -39,5 +39,49 @@ internal static partial class Program
             AssertEqual(true,walk>=12&&walk<20,"eight authored walk cels");
         }
         AssertEqual(DollCompanionRules.FrameCount,seen.Count,"all authored cels are reachable");
+        var broomSeen = new HashSet<int>();
+        for (int tick = 0; tick < 2520; tick++)
+        {
+            int flight = DollCompanionRules.BroomFrame(0, tick);
+            AssertEqual(true, flight >= 0 && flight < 8, "eight authored seated flight cels");
+            broomSeen.Add(flight);
+        }
+        for (int tick = 1; tick < DollCompanionRules.BroomRecoveryEnd; tick++)
+        {
+            int cast = DollCompanionRules.BroomFrame(tick, tick);
+            AssertEqual(true, cast >= 8 && cast < DollCompanionRules.BroomFrames, "eight authored broom casting cels");
+            broomSeen.Add(cast);
+        }
+        AssertEqual(DollCompanionRules.BroomFrames, broomSeen.Count, "all sixteen broom cels reachable");
+        AssertEqual(11, DollCompanionRules.BroomFrame(DollCompanionRules.Verdict, 0), "beam is cast by the pointing hand, not seated-idle cel");
+        for (int tick = DollCompanionRules.Verdict; tick < DollCompanionRules.Verdict + DollCompanionRules.BeamTicks; tick++)
+            AssertEqual(true, DollCompanionRules.BroomFrame(tick, tick) is 10 or 11, "hand stays extended for sustained beam");
+    }
+
+    [DomainTest("Doll companion beam uses one bounded collision and material envelope")]
+    private static void DollBeamEnvelope()
+    {
+        AssertEqual(false, DollCompanionRules.BeamLive(-.01f), "no prefire damage");
+        AssertEqual(0f, DollCompanionRules.BeamScale(-.01f), "no prefire attack surface");
+        AssertEqual(true, DollCompanionRules.BeamLive(0), "beam first active tick");
+        AssertEqual(true, DollCompanionRules.BeamScale(0) > .5f, "explosive opening, not a slow fade-in");
+        AssertEqual(1f, DollCompanionRules.BeamScale(4), "full damage geometry matches beam within five ticks");
+        AssertEqual(false, DollCompanionRules.BeamLive(DollCompanionRules.BeamTicks), "afterglow cannot damage");
+        AssertEqual(0f, DollCompanionRules.BeamScale(DollCompanionRules.BeamTicks), "beam fully shut off at boundary");
+        float last = 1;
+        for (float age = DollCompanionRules.BeamTicks - 8; age <= DollCompanionRules.BeamTicks + 1; age += .25f)
+        {
+            float scale = DollCompanionRules.BeamScale(age);
+            AssertEqual(true, scale >= 0 && scale <= last, "pressure/collision retreat monotonically together");
+            last = scale;
+        }
+        for (int index = 0; index < 3; index++)
+            AssertEqual(true, DollCompanionRules.SigilBirth(index) < DollCompanionRules.NeedleTick(index), "circle exists before its shot");
+        AssertEqual(0f, DollCompanionRules.MergeAmount(DollCompanionRules.Merge), "merge starts continuously");
+        AssertEqual(1f, DollCompanionRules.MergeAmount(DollCompanionRules.Tension), "merge completes before short held beat");
+        AssertEqual(true, DollCompanionRules.ChargeAmount(DollCompanionRules.Verdict - 9)
+            < DollCompanionRules.ChargeAmount(DollCompanionRules.Verdict - 2), "final eight ticks sharply accelerate");
+        AssertEqual(true, DollCompanionRules.Verdict + DollCompanionRules.BeamTicks + DollCompanionRules.BeamAfterglow
+            < DollCompanionRules.Cycle, "beam lifecycle ends before the next attack score");
     }
 }

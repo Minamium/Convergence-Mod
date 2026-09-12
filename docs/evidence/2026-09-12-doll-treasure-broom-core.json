@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.57",
+  "protocol": 29,
+  "scope": "Doll treasure box, broom companion purple beam, Raid-derived weapon audio, suspended shell and mechanical core",
+  "base_commit": "9464e9c262e5e970db85ef464b59cfb4f4f22fee",
+  "branch": "main",
+  "source_sha256": "8212b1ca15d16171680e4124b5d9eeee56b9bd47ba79ddcfdb34f3ac30bbf415",
+  "local_build_record": ".local/builds/20260912T075527489081Z/record.json",
+  "artifact": {
+    "bytes": 52378802,
+    "sha256": "8a75973beeed65c3e318eea4ddbc2a73a490875fdfebbb9e2dcf34718565a037"
+  },
+  "source_changed_during_build": false,
+  "verification": {
+    "native_build": "passed; 0 errors, 4 pre-existing CS8632 warnings",
+    "doll_companion_tests": "3 passed; capacity, frame mapping and beam/cadence contracts",
+    "doll_presentation_tests": "5 passed; frames, capture, joints, shell coverage and fractional suspension",
+    "assets": "3 PNG exports; alpha, dimensions, pivot, clipping checks and offline inspection",
+    "audio": "27 masters; 20 inputs preserved; PCM/finite/endpoints/4xpeak/loop/determinism passed",
+    "static": "passed; catalog 66 docs, repository 605 files, YAML 10 files",
+    "gameplay": "not_run; user-owned"
+  },
+  "not_run": [
+    "Victory boxes: frozen roster count; opening => box -1 / weapon +1",
+    "Broom flight/landing, purple circle/beam, retarget and Down/death/dismiss on 2 peers",
+    "Weapon listening, Core readability, connected suspension and Reduced Effects"
+  ],
+  "preserved": [
+    "Six pre-existing English locale edits remain outside task commit; packaged as current working content",
+    "Oni, Common, Raid combat, Raid source SFX and BGM unchanged",
+    "Old sprites and external originals retained"
+  ],
+  "assets_recipe": "tools/asset_recipes/doll_presentation_0257.json",
+  "audio_recipe": "tools/remix_weapon_foley.py"
+}

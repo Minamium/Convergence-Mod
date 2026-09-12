@@ -190,12 +190,16 @@ internal sealed class FirstSeveranceBossVisuals
             EclosionUnfurl(hatchAge), EclosionEmerge(hatchAge), EclosionPry(hatchAge), hideHands: hatching,
             depth: 1 - retreat * .76f);
         if (remote) DrawRemoteArms(batch, combat, center, renderTick, reveal, retreat, reduced);
+        if (remote)
+            doll.DrawRemoteCore(batch,center,MotionSeconds,reveal*retreat*(1-breakup),reduced);
         float encased = combat.BossPhase == FirstSeveranceBossPhase.Sealed ? 1
             : hatching ? 1 - Window(hatchAge, .12, .28) : 0;
         if(combat.Substate==FirstSeveranceSubstate.SpawnIntro)
             encased*=Window(FirstSeveranceDollCapture.IntroAge(renderTick,combat.ActionStartedTick,combat.ResolveTick),.86,.97);
         if (encased > .001f) doll.DrawEncased(batch, center, renderTick, reveal * encased, castPose, reduced);
         stages.DrawShell(batch, combat, center, renderTick, reveal, castPose, Accents, reduced);
+        if(combat.BossPhase==FirstSeveranceBossPhase.Sealed && exposure>.02f)
+            doll.DrawRemoteCore(batch,center,MotionSeconds,reveal*exposure,reduced);
         if(combat.Substate==FirstSeveranceSubstate.SpawnIntro) doll.DrawCapture(batch,combat,renderTick,reduced);
         if (hatching && unseal > 0)
             DrawRig(batch, center, reveal * unseal, breath, 0, 0,
@@ -225,22 +229,10 @@ internal sealed class FirstSeveranceBossVisuals
                 Additive(Ice, (cast * 0.18f + recoil * 0.45f) * (reduced ? 0.4f : 1f)));
         }
 
-        // A dark aperture makes the single damage target readable over any biome.
-        Glow(batch, center, 142f, Color.Black * (.48f * reveal));
-        Color coreColor = Color.Lerp(Gold, Ice, exposure);
-        if (exposure > 0.02f)
-        {
-            Glow(batch, center, 270f, Additive(Ice, exposure * 0.42f * reveal));
-            Ring(batch, center, 76f + 4f * breath, coreColor * reveal, 2.5f, time * 0.18f, 8);
-        }
-        else
-        {
-            Ring(batch, center, 81f, Gold * (0.6f * reveal), 3f, -time * 0.08f, 8);
-            // Closed diagonal braces versus four separated hitbox corners.
-            Line(batch, center + new Vector2(-43, -43), center + new Vector2(43, 43), Gold * reveal, 4f);
-            Line(batch, center + new Vector2(43, -43), center + new Vector2(-43, 43), Gold * reveal, 4f);
-        }
-        DrawCoreCorners(batch, center, coreColor * reveal, exposure);
+        // Retire the old debug-like core corners, octagon and crossed braces.
+        // Exposure reads through material light, never a HUD stamp over the doll.
+        if (exposure > .02f)
+            Glow(batch, center, 210f, Additive(Ice, exposure * .22f * reveal));
 
         int shards = reduced ? 4 : 16;
         for (int index = 0; index < shards; index++)
@@ -466,18 +458,6 @@ internal sealed class FirstSeveranceBossVisuals
                 extinguish * opacity * .75f, 3 + closure * 22);
             Glow(batch, point, 130 * (1 - closure), Additive(extinguish, opacity * .4f));
         }
-    }
-
-    internal static void DrawCoreCorners(SpriteBatch batch, Vector2 center, Color color, float open)
-    {
-        float radius = 72f; // Exact 144x144 NPC hitbox, not the 820px casing.
-        for (int x = -1; x <= 1; x += 2)
-            for (int y = -1; y <= 1; y += 2)
-            {
-                Vector2 corner = center + new Vector2(x, y) * radius;
-                Line(batch, corner, corner - new Vector2(x * (18 + open * 8), 0), color, 3f);
-                Line(batch, corner, corner - new Vector2(0, y * (18 + open * 8)), color, 3f);
-            }
     }
 
     private static void DrawSlice(SpriteBatch batch, Texture2D texture, Rectangle source, Vector2 center,

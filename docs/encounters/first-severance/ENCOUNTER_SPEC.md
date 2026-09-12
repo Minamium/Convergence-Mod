@@ -116,7 +116,7 @@ Scoped API research: Calamity public source **2.2.2**, commit `1a8cebd27ec561531
 
 Accepted Defeat clears Raid protection and requests ordinary Terraria death for connected participants only. Other Mods' death cancellation is respected/logged; ordinary difficulty penalties, including Hardcore loss, apply. Victory/cancel/invalidation/unload never force this death.
 
-Only accepted Victory after Final creates one shared world drop per frozen participant at the Core. Internal item `NullRefrain` now displays **Null Cantor's Claws**; [Weapons](WEAPONS.md) owns all five forms and one-for-one Work Bench exchanges. This is neither instanced inventory loot nor a final production reward table. Grant-attempt tracking prevents duplicate drops on cleanup retry.
+Only accepted Victory after Final creates one shared world **Curtainfall Treasure Box** (`DollTreasureBox`) per frozen participant at the Core. [Weapons](WEAPONS.md#curtainfall-treasure-box) owns opening contents and one-for-one Work Bench exchanges. This is neither instanced inventory loot nor a final production reward table. Grant-attempt tracking prevents duplicate drops on cleanup retry.
 
 ## Authority tick and terminal precedence
 

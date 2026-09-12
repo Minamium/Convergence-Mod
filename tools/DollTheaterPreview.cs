@@ -14,7 +14,7 @@ public static class DollTheaterPreview
         Validate(assets);
         using var atlas=new Bitmap(Path.Combine(assets,"DollRigAtlas.png"));
         using var harness=new Bitmap(Path.Combine(assets,"..","NullCantorRigAtlas.png"));
-        using var bodyFrames=new Bitmap(Path.Combine(assets,"RestraintFrames.png"));
+        using var bodyFrames=new Bitmap(Path.Combine(assets,"MechanicalRestraintFrames.png"));
         using var handFrames=new Bitmap(Path.Combine(assets,"RemoteClawFrames.png"));
         using var shell=new Bitmap(Path.Combine(assets,"..","NullCantorShell.png"));
         using var npc=new Bitmap(Path.Combine(assets,"DollAttendant.png"));
@@ -43,12 +43,15 @@ public static class DollTheaterPreview
         g.DrawString("Above: 7x inspection\nActual sprite: 32 x 52\n12 expression / gesture cels",small,quiet,26,890);
         var pose=new FirstSeveranceDollPose();
         g.InterpolationMode=InterpolationMode.Bilinear;
-        pose.Encased(3,0,false); DrawPose(g,atlas,harness,pose,603,500,.89f);
+        var hang=FirstSeveranceShellSurface.Suspension(180,false);
+        float shellX=603+hang.Offset.X*.89f,shellY=500+hang.Offset.Y*.89f;
+        pose.Encased(3,0,false,hang.Roll); DrawPose(g,atlas,harness,pose,shellX,shellY,.89f);
         var shellSize=FirstSeveranceShellSurface.Size(180)*.89f;
-        g.DrawImage(shell,new RectangleF(603-shellSize.X/2,500-shellSize.Y/2,shellSize.X,shellSize.Y));
+        var shellState=g.Save();g.TranslateTransform(shellX,shellY);g.RotateTransform(hang.Roll*180/MathF.PI);
+        g.DrawImage(shell,new RectangleF(-shellSize.X/2,-shellSize.Y/2,shellSize.X,shellSize.Y));g.Restore(shellState);
         pose.Body(3,0,0,1,1,false); DrawPose(g,atlas,harness,pose,1160,465,.68f,bodyFrames:bodyFrames);
         g.DrawString("Mostly enclosed: only a short lock and fingertips.\nNo face or complete arm pasted in front of the casing.",small,quiet,335,905);
-        g.DrawString("Accepted porcelain arms / old restrained body silhouette.\nSmaller captive face inside the crown, not a giant NPC head.",small,quiet,916,905);
+        g.DrawString("Porcelain arms / mechanical socket and polished orb.\nOffline atlas only; continuous GPU lighting is not captured.",small,quiet,916,905);
         Directory.CreateDirectory(Path.GetDirectoryName(output));
         result.Save(output,ImageFormat.Png);
         Capture(npc,shell,Path.Combine(Path.GetDirectoryName(output),"capture.png"));

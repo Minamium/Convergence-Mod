@@ -25,6 +25,7 @@ internal sealed class FirstSeveranceDollVisuals
     private readonly FirstSeveranceDollPose pose = new();
     private readonly FirstSeveranceAttackAccents captureAccents = new();
     private readonly FirstSeveranceDollSurface surface = new();
+    private readonly FirstSeveranceMechanicalCore mechanicalCore = new();
     private static Vector2 V(System.Numerics.Vector2 p) => new(p.X,p.Y);
 
     // Caller is the owned world-space AlphaBlend/LinearClamp presentation pass.
@@ -81,7 +82,9 @@ internal sealed class FirstSeveranceDollVisuals
     {
         Ensure();
         float seconds=(float)(tick%216000)/60f;
-        pose.Encased(seconds,pressure,reduced);
+        var suspension=FirstSeveranceShellSurface.Suspension(tick,reduced);
+        center+=V(suspension.Offset);
+        pose.Encased(seconds,pressure,reduced,suspension.Roll);
         DrawCords(batch,center,1,opacity,seconds,reduced);
         foreach(var part in pose.Sprites) DrawPart(batch,part,center,1,Color.White*opacity,0,0,center,seconds*60,reduced);
     }
@@ -121,13 +124,32 @@ internal sealed class FirstSeveranceDollVisuals
         float seconds=(float)(tick%216000)/60f;
         // Preparation builds the empty theatre. The real NPC stays on the
         // plinth through Ready; her capture belongs exclusively to SpawnIntro.
+        var suspension=FirstSeveranceShellSurface.Suspension(tick,reduced);
+        Vector2 suspended=core+V(suspension.Offset);
         Vector2 shellSize=V(FirstSeveranceShellSurface.Size(tick));
-        batch.Draw(shell!.Value,core-Main.screenPosition,null,Color.White,0,
+        DrawShellCords(batch,ground,core,tick,age,1,suspension.Roll,1,reduced);
+        batch.Draw(shell!.Value,suspended-Main.screenPosition,null,Color.White,suspension.Roll,
             new Vector2(shell.Value.Width,shell.Value.Height)*.5f,
             shellSize/new Vector2(shell.Value.Width,shell.Value.Height),SpriteEffects.None,0);
+    }
+
+    internal static void DrawShellCords(SpriteBatch batch,Vector2 ground,Vector2 core,double tick,float deployment,
+        float opacity,float roll,float poseWeight,bool reduced)
+    {
+        float seconds=(float)(tick%216000)/60;
+        Vector2 offset=V(FirstSeveranceShellSurface.Suspension(tick,reduced).Offset)*poseWeight;
         for(int side=-1;side<=1;side+=2)
-            Cord(batch,FoundationCoreVisuals.HoistAnchor(ground,side,true,age),core+new Vector2(side*66,-215),
-                Window(age,.08,.36),seconds,side,side<0?13:2,reduced);
+            for(int tier=0;tier<2;tier++)
+            {
+                bool outer=tier==0;
+                Vector2 cuff=core+offset+V(FirstSeveranceShellSurface.Attachment(side,outer,tick,roll));
+                float load=.5f+.5f*MathF.Sin(seconds*1.31f+side*.9f+tier);
+                // The long left hoist bears weight; the right safety line
+                // repeatedly slackens/catches. All four endpoints share pose.
+                float slack=outer?(side<0?2+load*3:12+load*13):18+load*16;
+                Cord(batch,FoundationCoreVisuals.HoistAnchor(ground,side,outer,deployment),cuff,
+                    opacity*Window(deployment,.08,.36),seconds,side+tier*2,slack,reduced);
+            }
     }
 
     internal void DrawCapture(SpriteBatch batch,FirstSeveranceCombatProjection combat,double tick,bool reduced)
@@ -198,7 +220,9 @@ internal sealed class FirstSeveranceDollVisuals
         for(int i=1;i<=count;i++)
         {
             float t=i/(float)count;
-            Vector2 next=Vector2.Lerp(from,to,t)+new Vector2(MathF.Sin(t*MathF.PI)*(slack+(reduced?0:MathF.Sin(seconds*1.2f+phase)*1.2f)),0);
+            float bow=MathF.Sin(t*MathF.PI);
+            Vector2 next=Vector2.Lerp(from,to,t)+new Vector2(
+                bow*(reduced?0:MathF.Sin(seconds*1.2f+phase-t*1.8f)*2.1f),bow*slack);
             Line(batch,prior,next,new Color(23,19,24)*opacity,3.5f);
             Line(batch,prior+new Vector2(-.7f,0),next+new Vector2(-.7f,0),new Color(166,149,126)*(.75f*opacity),1.25f);
             prior=next;
@@ -245,7 +269,17 @@ internal sealed class FirstSeveranceDollVisuals
         if(breakup>.001f||consume>0)
             FirstSeveranceDissolutionVisuals.Bone(batch,texture,rect,at,pivot,scale,rotation,tint,breakup,consume,sink,time,reduced);
         else batch.Draw(texture,at-Main.screenPosition,rect,tint,rotation,pivot,scale,SpriteEffects.None,0);
+        if(!hand)
+            // Cover the baked reference globe at every authored jaw opening;
+            // a constant radius prevents the sphere itself pulsing by cel.
+            mechanicalCore.Draw(batch,at,33*scale.X,time/60,rotation,tint,
+                (1-Window(breakup,.05,.55))*(1-consume),reduced);
     }
+
+    // The Distant body is scenery; this physical relay stays over the real
+    // foreground hit target. It replaces the old floating square/X stamp.
+    internal void DrawRemoteCore(SpriteBatch batch,Vector2 center,float seconds,float opacity,bool reduced)
+        => mechanicalCore.Draw(batch,center,66,seconds,.3f,Color.White,opacity,reduced);
 
     private void Ensure()
     {
@@ -255,7 +289,7 @@ internal sealed class FirstSeveranceDollVisuals
         shell??=ModContent.Request<Texture2D>(FirstSeveranceShellSurface.TexturePath,AssetRequestMode.ImmediateLoad);
         attendant??=ModContent.Request<Texture2D>(ArtRoot+"DollAttendant",AssetRequestMode.ImmediateLoad);
         handFrames??=ModContent.Request<Texture2D>(ArtRoot+"RemoteClawFrames",AssetRequestMode.ImmediateLoad);
-        bodyFrames??=ModContent.Request<Texture2D>(ArtRoot+"RestraintFrames",AssetRequestMode.ImmediateLoad);
+        bodyFrames??=ModContent.Request<Texture2D>(ArtRoot+"MechanicalRestraintFrames",AssetRequestMode.ImmediateLoad);
     }
-    internal void Unload() { atlas=null;harness=null;coffin=null;attendant=null;shell=null;handFrames=null;bodyFrames=null;captureAccents.Unload();surface.Unload(); }
+    internal void Unload() { atlas=null;harness=null;coffin=null;attendant=null;shell=null;handFrames=null;bodyFrames=null;captureAccents.Unload();surface.Unload();mechanicalCore.Unload(); }
 }

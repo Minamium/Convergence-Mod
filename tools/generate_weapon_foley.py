@@ -1,4 +1,8 @@
-"""Original weapon-only synthesis. No sampled/extracted Terraria or Calamity audio.
+"""Historical 0.2.53 weapon-only synthesis (not the current runtime recipe).
+
+Use remix_weapon_foley.py for the accepted-Raid-derived 0.2.57 weapon set.
+This predecessor is retained for reproducibility of archived original masters.
+No sampled/extracted Terraria or Calamity audio.
 
 Transient / material resonance / air are separate layers. Short shots fit their
 cadence; charge is explicitly timed; four-second beds use periodic synthesis.

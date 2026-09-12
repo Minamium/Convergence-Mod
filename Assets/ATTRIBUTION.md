@@ -2,6 +2,52 @@
 
 ## Records
 
+### Broom companion, treasure box and mechanical cradle — 0.2.57
+
+Built-in prompts: `tools/asset_recipes/doll_presentation_0257.json`; export: `tools/prepare_doll_presentation.ps1`. Project Doll NPC and restraint atlas supplied identity/layout references. Rejected checkerboard background, corrected originals and old runtime atlases are retained; no third-party art imported. Code-native sphere lighting is described in the Doll Theater visual spec.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/DollBroom.png`
+- Asset ID: doll-theater-0257-dollbroom
+- Asset type: image
+- Creator: project-directed built-in image generation and Codex mechanical export
+- Creation/acquisition date: 2026-09-12
+- Source type: original
+- Source work and URL: existing original Convergence NPC/restraint references; no third-party source
+- Tool/model/version: built-in ImageGen (backend model unavailable); System.Drawing via tools/prepare_doll_presentation.ps1
+- Human modifications: owner requested broom animation, treasure container and smooth mechanical sphere; fixed-pivot registration, crop, keying, palette and nearest resize only
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex alpha/dimensions/pivot and offline pixel inspection, 2026-09-12; actual game readability pending
+- Notes: 22801 bytes; SHA256 `2b91a22d51ad936677e3cbad1ef0bf69df18fb8db7e89d1ac8591485db84fb97`.
+
+- Runtime file: `Assets/Textures/Items/RitualArmaments/DollTreasureBox.png`
+- Asset ID: doll-theater-0257-dolltreasurebox
+- Asset type: image
+- Creator: project-directed built-in image generation and Codex mechanical export
+- Creation/acquisition date: 2026-09-12
+- Source type: original
+- Source work and URL: existing original Convergence NPC/restraint references; no third-party source
+- Tool/model/version: built-in ImageGen (backend model unavailable); System.Drawing via tools/prepare_doll_presentation.ps1
+- Human modifications: owner requested broom animation, treasure container and smooth mechanical sphere; fixed-pivot registration, crop, keying, palette and nearest resize only
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex alpha/dimensions/pivot and offline pixel inspection, 2026-09-12; actual game readability pending
+- Notes: 3485 bytes; SHA256 `ff0d271851e07e9d647ec31c5be73c1428edd368bdb6bc8ca64ddec2207f1c32`.
+
+- Runtime file: `Assets/Textures/NPCs/DollTheater/MechanicalRestraintFrames.png`
+- Asset ID: doll-theater-0257-mechanicalrestraintframes
+- Asset type: image
+- Creator: project-directed built-in image generation and Codex mechanical export
+- Creation/acquisition date: 2026-09-12
+- Source type: original
+- Source work and URL: existing original Convergence NPC/restraint references; no third-party source
+- Tool/model/version: built-in ImageGen (backend model unavailable); System.Drawing via tools/prepare_doll_presentation.ps1
+- Human modifications: owner requested broom animation, treasure container and smooth mechanical sphere; fixed-pivot registration, crop, keying, palette and nearest resize only
+- License and redistribution terms: project asset terms remain under the existing development publication gate
+- Required attribution: retain this provenance
+- Reviewer and review date: Codex alpha/dimensions/pivot and offline pixel inspection, 2026-09-12; actual game readability pending
+- Notes: 1238481 bytes; SHA256 `aaf7480206de13e30824d86e4918f43b860dd529812fbb12887b44eb42264ee2`.
+
 ### Doll companion and weapon-only foley — 0.2.53
 
 The new companion uses the existing project-authored NPC as a character reference, not third-party sprite material. Exact briefs and export contract: `tools/doll_companion_recipe.json`. Raw originals and rejected background variants are retained in the external workspace archive. Weapon sounds are independent NumPy synthesis; prior-art event/voice design is recorded in `docs/encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references`. No foreign audio or implementation is copied. Existing stage-NPC, Boss, Raid SFX and BGM masters remain unchanged.
@@ -37,380 +83,380 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ChoirCharge.wav`
 - Asset ID: doll-theater-0253-choircharge
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; EnergyCharge, EnergyLock, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 70604 bytes; SHA256 `e09a2dc86681a8acbb6a4a266065a17c075b7ba084edbfca0335c046a24cbdb6`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.8 seconds; SHA256 `4624492fd66e1f29f25cf0be297b56388f2abc52cccd860c27e1a1ab182099c6`; RMS -14.354 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ChoirFire.wav`
 - Asset ID: doll-theater-0253-choirfire
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; GridFire, ShellMassCollapse, SpreadExecution; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 35324 bytes; SHA256 `85519d50ae2f89b3b6f66afe7cfe30562013fe2e1ccea6f33c258e16d2e5e7c3`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.42 seconds; SHA256 `22677a0a3908ae5390b0895e2aa55da79fba2e24f82d024bdd6529c92c54e8f4`; RMS -14.587 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ChoirNote.wav`
 - Asset ID: doll-theater-0253-choirnote
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; CoreHit, SpreadDissolve, LanceFire; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 16802 bytes; SHA256 `3d52557aff6a128f1362491eb443b316a161a639bdede358844af91e0303ebba`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.23 seconds; SHA256 `05adb0319ed9a25883677eea08d3ffcbba89cb0c593053de106d0e5c9baf074a`; RMS -14.213 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ChoirSustain.wav`
 - Asset ID: doll-theater-0253-choirsustain
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; ChoirSustain, GridFire; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 705644 bytes; SHA256 `76bc96314a6bcaca63771948930c7cdb37cb8e53d65b5fb38965949b05d30579`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 4 seconds; SHA256 `55fa92f7a20278af8c1ec225692910cff2c47392dea3ead302e613433e31fb00`; RMS -11.775 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ClawCrush.wav`
 - Asset ID: doll-theater-0253-clawcrush
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; HandCrushImpact, ShellMassCollapse, SwordImpale; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 26504 bytes; SHA256 `ffaaf4e77af1608cc297d23e4c819fa1e76c22d8942452548fd03579967d3b96`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.32 seconds; SHA256 `78d5be4b64aaf82e4d4f66dd37f7df40ab36c121fb8c309fc97d5ab325321ecb`; RMS -14.154 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ClawGrip.wav`
 - Asset ID: doll-theater-0253-clawgrip
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; ShellMassLatch, PylonHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 17684 bytes; SHA256 `3ab3c240da43cbd3eefba0b0a36ad408d5c72f160a2441e94761a4de430bddcf`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.18 seconds; SHA256 `336a6157baa4f8ce8d4c703e234e41441951cc14485fae67f5f4d9fb846571a9`; RMS -14.28 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ClawHit.wav`
 - Asset ID: doll-theater-0253-clawhit
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; SwordImpale, PylonHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 9746 bytes; SHA256 `e833c0a49cf4c9c6d92f8bedb41501faf74f6052b34e24fabd87eae75eaa46ab`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.12 seconds; SHA256 `0ac563e97e552952e0a17c2abfc47fa351f9bc6f8056e73a868efb1972897824`; RMS -13.1 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ClawSwipe.wav`
 - Asset ID: doll-theater-0253-clawswipe
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; BladeUnsheathe, SwordImpale; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 12392 bytes; SHA256 `0319fe16afc13da781f805bda0c3b27ea84cb1e74d2fc6aa0bc4bd227d81015f`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.2 seconds; SHA256 `e01cafbdace0568a9148ede78b8e435260e3d15a11658b29908fe3a01587eff2`; RMS -12.418 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`
 - Asset ID: doll-theater-0253-dollcharge
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; EnergyCharge, ShellArc; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 52964 bytes; SHA256 `deb633b11c43d3e59436a77bfe8a906d7660433680ad977441489f835cea0366`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.6 seconds; SHA256 `abf8633dc6569c4bfa7fb179a6bd0596bdb5972b9ca54cb419e6d292532140ce`; RMS -12.336 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/DollSummon.wav`
 - Asset ID: doll-theater-0253-dollsummon
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; ShellMassShed, CoreHit, SpreadDissolve; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 44144 bytes; SHA256 `27ffdbe5e771e00e36f6d162e0b3cec455afac1a7392bd258daa2dde47d751a9`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.55 seconds; SHA256 `da405f686bf09a1bf66981e96af7d7daa98ce5c1bb4dd595cdbe434bec6f6f35`; RMS -15.285 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/DollThread.wav`
 - Asset ID: doll-theater-0253-dollthread
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; LanceFire, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 14156 bytes; SHA256 `0c42e1df804d00e3da199ac49786b7b17cc735de0cbb1d48dea7bd09dba62d34`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.16 seconds; SHA256 `376910330a91f9ef36ed2e685ac58f5081b0742906a19520503beca7c04e8d41`; RMS -14.02 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/DollVerdict.wav`
 - Asset ID: doll-theater-0253-dollverdict
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; LanceFire, CoreSalvoFire, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 28268 bytes; SHA256 `d1bab2ef806460dde10f4aa51d61fc8ea1945d0a6e7cf629a1efca93d50fb730`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.34 seconds; SHA256 `f868f2238a4fac44dcb74cb9281d2074b843745fcabc79a8c79086c58712e149`; RMS -13.679 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/LacunaSustain.wav`
 - Asset ID: doll-theater-0253-lacunasustain
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; LacunaSustain, LanceFire; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 705644 bytes; SHA256 `f3a86de2f999b661c6e78a25b75fb8b89705d5f4a86df4aecd7e92d9d182c325`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 4 seconds; SHA256 `70b09d192892750dba63c3eb56b7a45ff73a17746c3209c18558c3d76089df2f`; RMS -11.329 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/MagicBolt.wav`
 - Asset ID: doll-theater-0253-magicbolt
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; LanceFire, CoreSalvoFire, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 10628 bytes; SHA256 `7310665e33da0d792c36c2b2e90985c6ba53d9974bbda9b8c696046509554d13`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.15 seconds; SHA256 `f9cf3728ee5fb35f3a7e96136c5a8462e41fa32f4064338c42423344799330f0`; RMS -14.242 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/MagicCharge.wav`
 - Asset ID: doll-theater-0253-magiccharge
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; EnergyCharge, ShellArc; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 70604 bytes; SHA256 `b6e42ac9588e4376147b48d61ad01977e175155f7c1eebb918418dbbd20e0f01`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.8 seconds; SHA256 `b15bdb4e67ef5d692a862d1eb4d379f4dc653340682d3dd6c1be4a6aa720f187`; RMS -13.256 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/MagicFire.wav`
 - Asset ID: doll-theater-0253-magicfire
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; LanceFire, CoreSalvoFire, SpreadExecution; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 37088 bytes; SHA256 `0ce6e41bd9fe1853016d7215980fe1b36e22952dd3cc62169719fcc1fceed42c`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.34 seconds; SHA256 `a8e358a0b818f7984e215ca52599c2b1947e33666989a6e29fd3b6e31146f95e`; RMS -13.022 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/MagicMerge.wav`
 - Asset ID: doll-theater-0253-magicmerge
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; ShellMassShed, EnergyGather, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 30032 bytes; SHA256 `19419ecd8f6e015504edde3e0427142ff0ddfe08a7520903a5b83e87f0bc5d85`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.366667 seconds; SHA256 `1daeccc847b020f3564b33d3be3b5ec37cfe38b215f580e0d63461412da3bc00`; RMS -11.867 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/MagicSigil.wav`
 - Asset ID: doll-theater-0253-magicsigil
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; ShellMassLatch, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 12392 bytes; SHA256 `3257470d6e902f11ec7bcf3540a10f61e9ace0be461d85f1641bb0306426b4a2`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.22 seconds; SHA256 `22fe263ac2366eb9f7e04cbf2d22b056bcdbf5d4135ae54346b5a9a8fcca283c`; RMS -14.224 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/MeridianSustain.wav`
 - Asset ID: doll-theater-0253-meridiansustain
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; MeridianSustain, CoreSalvoFire; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 705644 bytes; SHA256 `108c5fc5e0b21bd51bcb2fbec0b6474f4284fa444b04c5dd6b135084544e7e62`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 4 seconds; SHA256 `9ed5f54752cb8312594d6ba9b564e89c9afad191f13e2f8d96a1dcdd358fb0a9`; RMS -12.516 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/RangedCharge.wav`
 - Asset ID: doll-theater-0253-rangedcharge
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; EnergyGather, EnergyLock; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 70604 bytes; SHA256 `f0d8bda3def8fff6d9cee76a23c4437a270741fad1d3bf97bde66bc8ec5382cd`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.8 seconds; SHA256 `84fda5c3573f2d4090680101eb19f3402123a6488baf8f5c31a88de47f6f72ef`; RMS -12.569 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/RangedFire.wav`
 - Asset ID: doll-theater-0253-rangedfire
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; GridFire, HandCrushImpact, SwordImpale; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 30032 bytes; SHA256 `1a5f49abc3fb6e44041cd4a133889ef682e682f961fcf0b7cd4f175e4f055c92`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.29 seconds; SHA256 `be10c88f0f598d766b605d615eac66505a65216ce5bfcb496c7f2777e8b54094`; RMS -14.122 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/RangedLatch.wav`
 - Asset ID: doll-theater-0253-rangedlatch
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; PylonHit, ShellMassLatch; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 9746 bytes; SHA256 `e33d64785ae21c0f2ae64ee1d711bc5f12226f431015461bfb264ea12f56edd4`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.14 seconds; SHA256 `334e24aa155f5666d966269de03caae303963ce23470a8afe7094bb1748b3303`; RMS -13.125 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/RangedShot.wav`
 - Asset ID: doll-theater-0253-rangedshot
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; CoreSalvoFire, SwordImpale, PylonHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 9304 bytes; SHA256 `8357069202570f1b6d07d0e3f37f261bf9da8a95b96a7d05d3f1071794bffb13`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.13 seconds; SHA256 `e52c861541c3efbb1a2a911b12dafe600df6f36ab4a467035051ddd6a3735cab`; RMS -13.724 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WeaponHit.wav`
 - Asset ID: doll-theater-0253-weaponhit
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; PylonHit, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 8864 bytes; SHA256 `fbb4db8e6376a2faa3bdb3a2efe88915ba530f33b2d27296a8d2c236c4e37123`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.1 seconds; SHA256 `efba51906a222a8977aa98b65fe34cf748768be4f43011cd162129e78366a2fe`; RMS -13.408 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WitnessDraw.wav`
 - Asset ID: doll-theater-0253-witnessdraw
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; BladeUnsheathe, CoreHit; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 14156 bytes; SHA256 `16ca8028f9e8324b901e2ea28cdb279364edc1679d3cee4a4b540e1c3a8210ae`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.2 seconds; SHA256 `0e90ddca26d055d227a819c72fce0bae7938061440987cfc1f7fad25a8bb8bc9`; RMS -12.548 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WitnessFire.wav`
 - Asset ID: doll-theater-0253-witnessfire
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; SwordImpale, HandCrushImpact, LanceFire; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 33560 bytes; SHA256 `93a0239565a7d80a9d5d1b35b4e11a6b40e36bca2977b843715bc9a2299cf53c`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.34 seconds; SHA256 `f6b5ac3774ec01b52ed6a0edafefe36e3a3203a84f54096f2c2e4a67d6ee41d7`; RMS -13.673 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WitnessLock.wav`
 - Asset ID: doll-theater-0253-witnesslock
 - Asset type: audio
-- Creator: project-directed original deterministic DSP synthesis by Codex
+- Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: none; no third-party recording or sample imported
-- Tool/model/version: Python/NumPy; tools/generate_weapon_foley.py; 44.1kHz PCM16
-- Human modifications: owner requested endgame weapon sound redesign; agent authored transient/body/charge/loop recipes
+- Source work and URL: project-owned FirstSeverance SFX and retained weapon loop beds; EnergyLock, SwordImpale; no external recording
+- Tool/model/version: Python/NumPy; tools/remix_weapon_foley.py; 44.1kHz PCM16
+- Human modifications: source-window cropping, rate/EQ/layer mixing, attack/release envelopes and bounded level normalization for weapon use
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
-- Reviewer and review date: Codex decode/finite/level/cadence checks, 2026-09-12; actual game listening pending
-- Notes: 31796 bytes; SHA256 `2c5bba9a19786ac6d93350451170c8e6cc08d48b3b99188691347587fa7cafa9`.
+- Reviewer and review date: Codex decode/endpoint/level/determinism checks, 2026-09-12; in-game listening pending
+- Notes: 0.366667 seconds; SHA256 `7d5181ab905cc660f164b598aaa1399c697de7da6329bcd1de81a1fb420d5dce`; RMS -13.17 dBFS. Superseded masters/inputs retained in external weapon-raid-remix-0257 archive.
 
 
 ### First Severance expanded authored frames — 0.2.52

@@ -386,12 +386,12 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                 {
                     int item = Item.NewItem(new EntitySource_Misc("Convergence:FirstSeveranceVictory"),
                         new Rectangle((int)groundCenter.X + index * 36 - roster.Count * 18,
-                            (int)groundCenter.Y - 180, 32, 32), ModContent.ItemType<Rewards.NullRefrain>());
-                    Log(lastAuthorityTick, $"event={(item >= 0 && item < Main.maxItems ? "VictoryRewardDropped" : "VictoryRewardFailed")} reward=NullRefrain index={index + 1} total={roster.Count}");
+                            (int)groundCenter.Y - 180, 32, 32), ModContent.ItemType<Rewards.DollTreasureBox>());
+                    Log(lastAuthorityTick, $"event={(item >= 0 && item < Main.maxItems ? "VictoryRewardDropped" : "VictoryRewardFailed")} reward=DollTreasureBox index={index + 1} total={roster.Count}");
                 }
                 catch (Exception error)
                 {
-                    Log(lastAuthorityTick, $"event=VictoryRewardFailed reward=NullRefrain index={index + 1} error={error.GetType().Name}");
+                    Log(lastAuthorityTick, $"event=VictoryRewardFailed reward=DollTreasureBox index={index + 1} error={error.GetType().Name}");
                 }
             }
         }

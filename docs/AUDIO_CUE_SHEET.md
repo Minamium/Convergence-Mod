@@ -71,21 +71,21 @@ Accepted impact tails may complete across same-Fight terminal cleanup, including
 
 ## Weapon-only foley
 
-The current 27 original masters live under `Assets/Sounds/Weapons/DollTheater`. `tools/generate_weapon_foley.py` owns deterministic transient/material/air synthesis and external audition mixes. No Terraria/Calamity recording is extracted or bundled. Existing Raid and music masters are untouched.
+The current 27 masters live under `Assets/Sounds/Weapons/DollTheater`. `tools/remix_weapon_foley.py` edits the **accepted project-authored Raid SFX** into weapon-length performances: explicit source windows, pitch/rate, material bands, reversal, and separate arrival/held-tension/release envelopes. The former generic synth set and its generator are retained as history, not the current recipe. No Terraria/Calamity recording or BGM is sampled; the Raid and music source files are read-only and hash-checked after export.
 
 | Family | Audible role |
 |---|---|
-| ClawSwipe / Grip / Crush / Hit | Short cutting air; compressed grip; heavy close; brief material hit. No second singing after-tone |
-| MagicSigil / Bolt / Merge / Charge / Fire / LacunaSustain | Distinct apparatus arrival and thin shot; converging body; 0.8s charge; attack onset into continuous voiced energy |
-| RangedLatch / Shot / Charge / Fire / MeridianSustain | Mechanical click; short hard transient; timed chamber acceleration; pressure discharge and rhythmic continuous bed |
-| ChoirNote / Charge / Fire / ChoirSustain | Discrete notes; one conductor charge; one combined launch and sustained body, not a new launch for every damage tick |
-| WitnessDraw / Lock / Fire | Draw, brief tension, heavy release; no Raid impact file reuse |
-| DollSummon / Thread / Charge / Verdict | Arrival, three short threads, held tension, crossing release; tied to authored casting cels |
+| ClawSwipe / Grip / Crush / Hit | Accepted `BladeUnsheathe` cutting air, Stack metal grip, crush body and short blade contact. No `BladeSweep` or second singing after-tone |
+| MagicSigil / Bolt / Merge / Charge / Fire / LacunaSustain | Stack latch/glass sigil, focused `LanceFire`, reverse shell fragments into 22-tick merge, 0.8s held pressure, `CoreSalvoFire`-bodied release into continuous energy |
+| RangedLatch / Shot / Charge / Fire / MeridianSustain | `PylonHit` chamber knock, short metal/beam discharge, pressure acceleration, dense grid/crush launch and rhythmic continuous bed |
+| ChoirNote / Charge / Fire / ChoirSustain | Glass/dispersion chimes, one 0.8s conductor tension, low grid/Stack launch and sustained body; no launch on every damage tick |
+| WitnessDraw / Lock / Fire | Slower metallic unsheathing, a 22-tick pressure lock, blade insertion/crush release |
+| DollSummon / Thread / Charge / Verdict | Shell/glass arrival, three purple beam threads, 0.6s charge, `LanceFire`/Core salvo release; the 72-tick beam borrows the Magic bed and owns its own voice |
 | WeaponHit | Short low-priority contact, below the release accents |
 
-One-shots are 0.10–0.80s PCM mono; persistent beds are phase-periodic 4s stereo. Weapon voices are separate from the Raid ledger: cue IDs have bounded voices, sustain has a per-owner/projectile identity and stops with the projectile; charge voices also stop on cancellation/Down/dismissal. Charge pitch is fixed to preserve duration. No global slider changes. The generator reports sample peak/RMS and endpoint values; waveform checks do not certify perceived loudness, sample-to-sample loop steps are not themselves discontinuities, and the final multi-player mix needs listening at unchanged sliders.
+One-shots are 0.10–0.80s PCM mono, with exact silent endpoints and bounded attack tails; none plays a full multi-second Raid aftermath. Persistent beds are 4s stereo, combining the accepted bed with a periodic/crossfaded stable beam-body window. Weapon voices remain separate from the Raid ledger: cue IDs have bounded voices; sustain has per-owner/projectile identity, a four-tick entry ramp, and immediate cancellation on unusable owner/Down/dismissal/end. Charge stops at fire and on cancellation; charge pitch is fixed to preserve timing. No global slider or gameplay-clock changes. Export reports decoded sample/4× peaks, RMS and loop steps; these measurements do not certify perceived quality or multi-player mix. Listening at unchanged sliders remains user-owned.
 
-Design sources and license/version caveats are in [weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references). External audition WAVs are grouped by weapon family and use runtime event gains; these are project-original SFX, not exports of the approved third-party BGM.
+Design sources and license/version caveats are in [weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references). External `Claws/Magic/Ranged/Summon/Rogue/Doll.wav` auditions retain runtime event gains and representative macro timelines (not every concurrent projectile/peer); only a reported safety attenuation prevents preview clipping. The same external manifest preserves input/export hashes, exact recipe hash and previous masters. These are project-original derived SFX, not standalone exports of the approved third-party BGM.
 
 ## Mix, diagnostics and exports
 

@@ -46,6 +46,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
     private uint serial;
     private SlotId sustain = SlotId.Invalid;
     private SlotId chargeVoice = SlotId.Invalid;
+    private float sustainEnvelope;
     private int impactCooldown;
     public override bool InstancePerEntity => true;
     internal static bool Matches(Projectile p) => p.ModProjectile is RitualBolt or WitnessBlade or ChoirSentinel or RitualArmamentPose or WitnessVerdict or LacunaConvergence or MeridianBastion or ChoirRequiem or WitnessLitany;
@@ -124,6 +125,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                 chargeVoice = RitualWeaponFeedback.Sound("MagicCharge", beam.Muzzle, .4f);
             if (Crossed(RitualGrandScore.MagicFire, beam.Age))
             {
+                RitualWeaponFeedback.Stop(ref chargeVoice);
                 RitualWeaponFeedback.Sound("MagicFire", beam.Muzzle, .55f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 5);
             }
@@ -139,6 +141,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                 chargeVoice = RitualWeaponFeedback.Sound("RangedCharge", p.Center, .42f);
             if (Crossed(RitualGrandScore.BatteryFire, gun.Age))
             {
+                RitualWeaponFeedback.Stop(ref chargeVoice);
                 RitualWeaponFeedback.Sound("RangedFire", p.Center, .57f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 4);
             }
@@ -156,6 +159,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                 chargeVoice = RitualWeaponFeedback.Sound("WitnessLock", litany.Crown, .43f);
             if (Crossed(RitualGrandScore.WitnessFire, litany.Age))
             {
+                RitualWeaponFeedback.Stop(ref chargeVoice);
                 RitualWeaponFeedback.Sound("WitnessFire", litany.Crown, .5f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 4.5f);
             }
@@ -179,6 +183,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                 RitualWeaponFeedback.Sound("WitnessDraw", p.Center, .34f);
             if (lastAge < 28 && verdict.Age >= 28 && verdict.Age < 32)
             {
+                RitualWeaponFeedback.Stop(ref chargeVoice);
                 RitualWeaponFeedback.Sound("WitnessFire", p.Center, .62f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 5.5f);
             }
@@ -191,6 +196,8 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
                 RitualWeaponFeedback.Sound("MagicMerge", s.ConcertCenter, .30f);
             if (s.IsLeader && Crossed(RitualGrandScore.ChoirCharge, s.Age))
                 chargeVoice = RitualWeaponFeedback.Sound("ChoirCharge", s.ConcertCenter, .38f);
+            if (s.IsLeader && Crossed(RitualGrandScore.ChoirFire, s.Age))
+                RitualWeaponFeedback.Stop(ref chargeVoice);
             lastAge = s.Age;
         }
         else if (!sounded && p.ModProjectile is ChoirNote)
@@ -199,16 +206,20 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
     private bool Crossed(float beat, float now) => lastAge < beat && now >= beat && now < beat + 3;
     private void UpdateSustain(Projectile p, bool active, string name, float volume)
     {
-        if (!active)
+        if (!active || !SustainOwnerUsable(p))
         {
-            if (SoundEngine.TryGetActiveSound(sustain, out var old)) old.Stop();
+            RitualWeaponFeedback.Stop(ref sustain);
+            sustainEnvelope = 0;
             return;
         }
+        // Join the source-derived pressure bed behind the launch, not a second
+        // sudden launch transient. Cancellation has no copied Raid aftermath.
+        sustainEnvelope = Math.Min(1, sustainEnvelope + .25f);
         if (SoundEngine.TryGetActiveSound(sustain, out var sound) && sound.IsPlaying)
         {
             sound.Position = p.Center;
             // ActiveSound.Volume multiplies Style.Volume; do not square the gain.
-            sound.Volume = volume / Math.Max(.0001f, sound.Style.Volume);
+            sound.Volume = volume * sustainEnvelope / Math.Max(.0001f, sound.Style.Volume);
             return;
         }
         // A persistent looping voice, not a repeated launch sample or per-hit cue.
@@ -218,9 +229,12 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
             Identifier = $"Convergence:Sustain:{owner}:{identity}:{type}", IsLooped = true, MaxInstances = 1,
             Volume = volume,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
-        }, p.Center, _ => p.active && p.identity == identity && p.type == type && p.owner == owner);
+        }, p.Center, _ => p.active && p.identity == identity && p.type == type && p.owner == owner && SustainOwnerUsable(p));
+        if (SoundEngine.TryGetActiveSound(sustain, out var begun)) begun.Volume = sustainEnvelope;
         ModContent.GetInstance<RitualWeaponFeedback>().Track(sustain);
     }
+    private static bool SustainOwnerUsable(Projectile p) => p.owner >= 0 && p.owner < Main.maxPlayers
+        && RitualArmamentItems.Usable(Main.player[p.owner]) && !Main.player[p.owner].noItems && !Main.player[p.owner].CCed;
     public override void OnHitNPC(Projectile p, NPC target, NPC.HitInfo hit, int damageDone)
     {
         bool continuous = p.ModProjectile is LacunaConvergence or ChoirRequiem;
@@ -277,7 +291,8 @@ public sealed class RitualWeaponFeedback : ModSystem
             // Preserve the existing quiet-assembly / sharp-lock / loud-release
             // hierarchy. Reduced visual effects must not mute these audible beats.
             Identifier = "Convergence:RitualWeapon:" + name, Volume = Math.Min(.95f, volume * 2f),
-            PitchVariance = name.EndsWith("Charge", StringComparison.Ordinal) || name.EndsWith("Lock", StringComparison.Ordinal) ? 0 : .055f,
+            PitchVariance = name == "MagicMerge" || name.EndsWith("Charge", StringComparison.Ordinal)
+                || name.EndsWith("Lock", StringComparison.Ordinal) ? 0 : .055f,
             MaxInstances = 3, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
         }, at);

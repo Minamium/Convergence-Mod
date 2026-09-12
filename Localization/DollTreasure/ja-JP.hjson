@@ -1,0 +1,10 @@
+Mods.Convergence.Items.DollTreasureBox: {
+  DisplayName: 閉幕の宝箱
+  Tooltip:
+    '''
+    右クリックで開封
+    「{$Mods.Convergence.RitualArmaments.NullRefrain.Name}」が入っている
+    中身の武器は作業台で別のクラスの武器へ交換できる
+    糸が沈黙したあとに残された、小さな棺
+    '''
+}

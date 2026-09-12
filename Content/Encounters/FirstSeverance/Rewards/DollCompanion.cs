@@ -94,31 +94,52 @@ public sealed class DollCompanion : ModProjectile
         Projectile.frame = DollCompanionRules.Frame(Projectile.ai[0], floating, Math.Abs(Projectile.velocity.X) > .4f ? walk : -1, idle);
         if (!authority || target is null || !usable) return;
         int age = (int)Projectile.ai[0];
-        Vector2 muzzle = Projectile.Center + new Vector2(Projectile.spriteDirection * 17, -8);
+        Vector2 hand = Hand(Projectile);
+        Vector2 axis = RitualArmamentItems.Aim(target.Center - hand, Projectile.spriteDirection);
+        Vector2 muzzle = hand + axis * 35;
         if (DollCompanionRules.NeedleAt(age))
         {
-            Vector2 aim = RitualArmamentItems.Aim(target.Center - muzzle, Projectile.spriteDirection);
-            Projectile.NewProjectile(Projectile.GetSource_FromThis(), muzzle, aim * 28,
-                ModContent.ProjectileType<DollNeedle>(), Projectile.damage, Projectile.knockBack, Projectile.owner,
+            int lane = age == DollCompanionRules.NeedleTick(0) ? 0 : age == DollCompanionRules.NeedleTick(1) ? 1 : 2;
+            Vector2 at = Sigil(hand, axis, lane, age);
+            Vector2 aim = RitualArmamentItems.Aim(target.Center - at, Projectile.spriteDirection);
+            Projectile.NewProjectile(Projectile.GetSource_FromThis(), at, aim * 28,
+                ModContent.ProjectileType<DollNeedle>(), RitualArmamentRules.ScaledDamage(Projectile.damage, DollCompanionRules.NeedleDamageScale),
+                Projectile.knockBack, Projectile.owner,
                 0, target.whoAmI, Projectile.identity);
         }
         if (age == DollCompanionRules.Verdict)
-            for (int side = -1; side <= 1; side += 2)
-                Projectile.NewProjectile(Projectile.GetSource_FromThis(), target.Center, new Vector2(1, side).SafeNormalize(Vector2.UnitX),
-                    ModContent.ProjectileType<DollSeam>(), RitualArmamentRules.ScaledDamage(Projectile.damage, 1.5f),
-                    Projectile.knockBack, Projectile.owner, 0, -1, Projectile.identity);
+            Projectile.NewProjectile(Projectile.GetSource_FromThis(), muzzle, axis,
+                ModContent.ProjectileType<DollLacunaBeam>(), RitualArmamentRules.ScaledDamage(Projectile.damage, DollCompanionRules.BeamDamageScale),
+                Projectile.knockBack, Projectile.owner, 0, target.whoAmI, Projectile.identity);
     }
     public override bool OnTileCollide(Vector2 oldVelocity) => false;
     public override bool TileCollideStyle(ref int width, ref int height, ref bool fallThrough, ref Vector2 hitboxCenterFrac)
     { fallThrough = Main.player[Projectile.owner].Bottom.Y > Projectile.Bottom.Y + 48; return true; }
 
-    internal static bool ParentAlive(Projectile child)
+    internal static Vector2 Hand(Projectile parent) => parent.Center
+        + new Vector2(parent.spriteDirection * 17, -8).RotatedBy(parent.rotation);
+
+    internal static Vector2 Sigil(Vector2 hand, Vector2 axis, int index, float age)
     {
-        if (!RitualTargeting.ValidState(child)) return false;
+        Vector2 normal = axis.RotatedBy(MathHelper.PiOver2);
+        Vector2 muzzle = hand + axis * 35;
+        Vector2 offset = index == 0 ? axis * 8 : -axis * 7 + normal * (index == 1 ? -34 : 34);
+        float birth = 1 - MathF.Pow(1 - Math.Clamp((age - DollCompanionRules.SigilBirth(index)) / 6, 0, 1), 4);
+        Vector2 at = muzzle + offset + normal * (index == 2 ? 1 : -1) * (1 - birth) * 28;
+        return Vector2.Lerp(at, muzzle, DollCompanionRules.MergeAmount(age));
+    }
+
+    internal static bool ParentAlive(Projectile child) => TryGetParent(child, out _);
+
+    internal static bool TryGetParent(Projectile child, out Projectile parent)
+    {
+        parent = null!;
+        if (!RitualTargeting.ValidState(child) || child.ai[2] < 0 || child.ai[2] != (int)child.ai[2]) return false;
         Player owner = Main.player[child.owner];
         if (!RitualArmamentItems.Usable(owner) || owner.noItems || owner.CCed || !owner.HasBuff(ModContent.BuffType<DollCovenantBuff>())) return false;
-        foreach (Projectile parent in Main.ActiveProjectiles)
-            if (parent.owner == child.owner && parent.identity == (int)child.ai[2] && parent.ModProjectile is DollCompanion) return true;
+        foreach (Projectile candidate in Main.ActiveProjectiles)
+            if (candidate.owner == child.owner && candidate.identity == (int)child.ai[2] && candidate.ModProjectile is DollCompanion)
+            { parent = candidate; return true; }
         return false;
     }
 }
@@ -141,30 +162,66 @@ public sealed class DollNeedle : ModProjectile
             RitualTargeting.Home(Projectile, target.Center, target.velocity, 48);
         Projectile.rotation = Projectile.velocity.ToRotation();
     }
+    public override bool CanHitPvp(Player target) => false;
 }
 
-public sealed class DollSeam : ModProjectile
+// Ordinary native minion shot, exact owner + parent identity. A sustained
+// connected beam is one projectile, never dozens of per-tick laser spawns.
+public sealed class DollLacunaBeam : ModProjectile
 {
+    private readonly ulong[] nextRootHit = new ulong[Main.maxNPCs];
+    internal float Age => Projectile.ai[0];
+    internal Vector2 Axis => RitualArmamentItems.Aim(Projectile.velocity, 1);
+    internal float Opening => DollCompanionRules.BeamScale(Age);
+    internal float Reach => DollCompanionRules.BeamLength * Opening;
+    internal float Width => DollCompanionRules.BeamWidth * Opening;
     public override string Texture => "Terraria/Images/Projectile_1";
-    public override void SetStaticDefaults() => ProjectileID.Sets.MinionShot[Type] = true;
+    public override void SetStaticDefaults()
+    {
+        ProjectileID.Sets.MinionShot[Type] = true;
+        ProjectileID.Sets.DrawScreenCheckFluff[Type] = 2200;
+    }
     public override void SetDefaults()
     {
         Projectile.width = Projectile.height = 8; Projectile.friendly = true;
         Projectile.DamageType = DamageClass.Summon; Projectile.tileCollide = false; Projectile.ignoreWater = true;
-        Projectile.timeLeft = 24; Projectile.penetrate = -1;
-        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = -1;
+        Projectile.timeLeft = DollCompanionRules.BeamTicks + DollCompanionRules.BeamAfterglow; Projectile.penetrate = -1;
+        Projectile.netImportant = true;
+        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = DollCompanionRules.BeamHitCadence;
     }
     public override bool ShouldUpdatePosition() => false;
     public override void AI()
     {
-        if (!DollCompanion.ParentAlive(Projectile)) { Projectile.Kill(); return; }
-        Projectile.ai[0]++; Projectile.rotation = Projectile.velocity.ToRotation();
+        if (!DollCompanion.TryGetParent(Projectile, out Projectile parent)
+            || parent.ai[0] < DollCompanionRules.Verdict || parent.ai[0] >= DollCompanionRules.Cycle
+            || Age < 0 || Age >= DollCompanionRules.BeamTicks + DollCompanionRules.BeamAfterglow)
+        { Projectile.Kill(); return; }
+        Projectile.ai[0]++;
+        Vector2 hand = DollCompanion.Hand(parent);
+        if (Projectile.owner == Main.myPlayer)
+        {
+            NPC? target = RitualTargeting.Current(Projectile);
+            if (target is not null)
+            {
+                float desired = (target.Center - hand).ToRotation();
+                Projectile.velocity = Axis.ToRotation().AngleTowards(desired, .052f).ToRotationVector2();
+            }
+            if ((int)Age % 6 == 0) Projectile.netUpdate = true;
+        }
+        Projectile.Center = hand + Axis * 35;
+        Projectile.rotation = Axis.ToRotation();
+        Projectile.damage = RitualArmamentRules.ScaledDamage(parent.damage, DollCompanionRules.BeamDamageScale);
     }
-    public override bool? CanDamage() => Projectile.ai[0] is >= 5 and <= 9 ? null : false;
+    public override bool? CanCutTiles() => false;
+    public override bool CanHitPvp(Player target) => false;
+    public override bool? CanDamage() => DollCompanionRules.BeamLive(Age) && Opening > 0 ? null : false;
+    public override bool? CanHitNPC(NPC target) => Main.GameUpdateCount < nextRootHit[RitualTargeting.Root(target)] ? false : null;
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
         float point = 0;
-        Vector2 axis = RitualArmamentItems.Aim(Projectile.velocity, 1) * 132;
-        return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center - axis, Projectile.Center + axis, 22, ref point);
+        if (!DollCompanionRules.BeamLive(Age) || Opening <= 0) return false;
+        return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center, Projectile.Center + Axis * Reach, Width, ref point);
     }
+    public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        => nextRootHit[RitualTargeting.Root(target)] = Main.GameUpdateCount + DollCompanionRules.BeamHitCadence;
 }

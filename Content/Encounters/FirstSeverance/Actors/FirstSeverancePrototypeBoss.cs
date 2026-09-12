@@ -78,7 +78,8 @@ public sealed class FirstSeverancePrototypeBoss : ModNPC
     public override bool CheckDead() => !FirstSeveranceCombatAuthority.ProtectBossPhaseBoundary(NPC);
 
     // The client presentation system draws the enormous silhouette independently
-    // of NPC culling. This NPC is only its clearly marked central damageable core.
+    // of NPC culling. This NPC is only the fixed central damageable core; the
+    // world material replaces its old HUD-like corner/X overlay.
     public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
 
     public override bool? CanBeHitByItem(Player player, Item item)

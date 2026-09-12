@@ -1,0 +1,7 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			DollLacunaBeam: { DisplayName: Violet Covenant }
+		}
+	}
+}

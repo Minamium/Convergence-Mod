@@ -35,15 +35,19 @@ internal sealed class FirstSeveranceStageVisuals
         float breath = MathF.Sin((float)(tick % 36000) * .021f);
         float radius = FirstSeveranceShellSurface.Radius(tick,charge);
         Vector2 footprint = new(FirstSeveranceShellSurface.Aspect,1);
+        var suspension=FirstSeveranceShellSurface.Suspension(tick,reduced);
+        float poseWeight=1-Window(age,.1,.4);
+        float shellRoll=suspension.Roll*poseWeight;
+        Vector2 fixedCenter=center;
+        FirstSeveranceDollVisuals.DrawShellCords(batch,new(combat.CoreX,combat.CoreY),fixedCenter,tick,1,
+            fade*(1-Window(age,.24,.58)),shellRoll,poseWeight,reduced);
+        center+=new Vector2(suspension.Offset.X,suspension.Offset.Y)*poseWeight;
         Color ion = Color.Lerp(new Color(179, 165, 158), new Color(229, 197, 147), charge * .65f);
         accents.Halo(batch, center, new Vector2(510 + charge * 65), ion, .20f * fade);
-        for (int side=-1;side<=1;side+=2)
-            FirstSeveranceDollVisuals.Cord(batch,center+new Vector2(side*460,-374),
-                center+new Vector2(side*66,-215),fade,(float)tick/60,side,side<0?13:2,reduced);
         // Adjacent alpha-filtered petals darken each other's edge at rest. Draw
         // the original intact surface until they actually begin to separate.
         if(split<=.001f)
-            batch.Draw(shellTexture!,center-Main.screenPosition,null,Color.White*fade,0,
+            batch.Draw(shellTexture!,center-Main.screenPosition,null,Color.White*fade,shellRoll,
                 new Vector2(shellTexture!.Width,shellTexture.Height)*.5f,
                 footprint*(radius*2)/new Vector2(shellTexture.Width,shellTexture.Height),SpriteEffects.None,0);
         else for (int index = 0; index < 8; index++)
@@ -58,9 +62,9 @@ internal sealed class FirstSeveranceStageVisuals
                 split * (30 + Math.Max(0, direction.Y) * 85));
             float roll = side * split * (.15f + MathF.Abs(direction.Y) * .36f);
             Vector2 squash = new(1 - split * .58f, 1 - split * .22f);
-            Vector2 Map(Vector2 p) => center + hinge + offset + ((p - hinge) * squash).RotatedBy(roll);
-            batch.Draw(plates![index], center + hinge + offset - Main.screenPosition, null,
-                Color.Lerp(Color.White, new Color(227, 240, 255), charge * .25f) * fade, roll,
+            Vector2 Map(Vector2 p) => center + (hinge + offset + ((p - hinge) * squash).RotatedBy(roll)).RotatedBy(shellRoll);
+            batch.Draw(plates![index], center + (hinge + offset).RotatedBy(shellRoll) - Main.screenPosition, null,
+                Color.Lerp(Color.White, new Color(227, 240, 255), charge * .25f) * fade, roll+shellRoll,
                 new Vector2(FirstSeveranceShellSurface.MaskSize*.5f) * (Vector2.One+direction*.82f),
                 squash * footprint * ((radius * 2) / FirstSeveranceShellSurface.MaskSize), SpriteEffects.None, 0);
             float ringAngle = index * MathF.Tau / 8 + .03f * breath;
