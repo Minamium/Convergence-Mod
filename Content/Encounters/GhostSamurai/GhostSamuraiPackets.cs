@@ -16,14 +16,27 @@ namespace Convergence.Content.Encounters.GhostSamurai;
 internal sealed class GhostSamuraiPackets : ModSystem, IEncounterPacketHandler
 {
     private static uint nonce;
+    private static ulong nextBlockedLog;
+    private ulong observedSequence;
+
+    internal static void Log(string details)
+        => global::Convergence.ConvergenceMod.Instance.Logger.Info($"GhostSamurai {details}");
+
+    internal static void LogBlocked(Player player, in EncounterSnapshot state, string reason)
+    {
+        if (player.whoAmI != Main.myPlayer || Main.GameUpdateCount < nextBlockedLog) return;
+        nextBlockedLog = Main.GameUpdateCount + 120;
+        Log($"event=SummonBlocked side={Main.netMode} slot={player.whoAmI} reason={reason} seq={state.EncounterSequence} fight={state.FightId.Value} lifecycle={state.Lifecycle} revision={state.Revision}");
+    }
 
     internal static void RequestSummon(Player player)
     {
         uint request = ++nonce;
         if (request == 0) request = ++nonce;
+        Log($"event=SummonRequested side={Main.netMode} slot={player.whoAmI} nonce={request}");
         if (Main.netMode == NetmodeID.SinglePlayer)
         {
-            Start(player.whoAmI, request);
+            if (!Start(player.whoAmI, request)) ShowRejected();
             return;
         }
         var packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
@@ -36,10 +49,18 @@ internal sealed class GhostSamuraiPackets : ModSystem, IEncounterPacketHandler
     private static bool Start(int sender, uint request)
     {
         Player p = Main.player[sender];
-        return ModContent.GetInstance<EncounterCoordinatorSystem>().CommandSink?.TryStart(
+        var coordinator = ModContent.GetInstance<EncounterCoordinatorSystem>();
+        var snapshot = coordinator.Snapshot;
+        string failure = "encounter.coordinator_not_ready";
+        bool accepted = coordinator.CommandSink is { } sink && sink.TryStart(
             new(sender, GhostSamuraiDefinition.EncounterKey, new TilePoint((int)p.Center.X / 16, (int)p.Center.Y / 16), request),
-            out _, out _) == true;
+            out snapshot, out failure);
+        Log($"event={(accepted ? "SummonAccepted" : "SummonRejected")} slot={sender} nonce={request} reason={(accepted ? "none" : failure)} seq={snapshot.EncounterSequence} fight={snapshot.FightId.Value} lifecycle={snapshot.Lifecycle}");
+        return accepted;
     }
+
+    private static void ShowRejected()
+        => Main.NewText(Terraria.Localization.Language.GetTextValue("Mods.Convergence.GhostSamurai.SummonRejected"));
 
     public bool TryHandle(BinaryReader reader, int sender, in EncounterPacketHeader header, out string failureCode)
     {
@@ -51,7 +72,10 @@ internal sealed class GhostSamuraiPackets : ModSystem, IEncounterPacketHandler
                 || !Main.player[sender].active || Main.player[sender].dead
                 || !header.FightId.IsNone || header.EncounterSequence != 0 || header.Revision != 0) return false;
             var connection = Main.player[sender].GetModPlayer<GhostSamuraiSummonPlayer>();
-            if (Main.GameUpdateCount < connection.NextRequest || request <= connection.LastNonce) return false;
+            if (Main.GameUpdateCount < connection.NextRequest)
+            { failureCode = "ghost_samurai.summon_rate_limited"; return false; }
+            if (request <= connection.LastNonce)
+            { failureCode = "ghost_samurai.summon_stale_nonce"; return false; }
             connection.NextRequest = Main.GameUpdateCount + 60;
             connection.LastNonce = request;
             bool accepted = Start(sender, request);
@@ -65,7 +89,8 @@ internal sealed class GhostSamuraiPackets : ModSystem, IEncounterPacketHandler
         {
             bool accepted = reader.ReadBoolean();
             if (Main.netMode != NetmodeID.MultiplayerClient) return false;
-            if (!accepted) Main.NewText(Terraria.Localization.Language.GetTextValue("Mods.Convergence.GhostSamurai.SummonRejected"));
+            Log($"event=SummonResponse accepted={accepted}");
+            if (!accepted) ShowRejected();
         }
         else if (header.PacketType == EncounterPacketType.Snapshot)
         {
@@ -76,8 +101,16 @@ internal sealed class GhostSamuraiPackets : ModSystem, IEncounterPacketHandler
                 || !Enum.IsDefined((EncounterLifecycle)lifecycle) || !Enum.IsDefined((EncounterEndReason)reason)
                 || entered > tick || ((EncounterLifecycle)lifecycle == EncounterLifecycle.Cleanup) != (reason != 0)) return false;
             var termination = reason == 0 ? EncounterTerminationDescriptor.None : GhostSamuraiTermination.End((EncounterEndReason)reason);
-            ModContent.GetInstance<EncounterReplicaSystem>().ApplyFullSnapshot(new(header.EncounterSequence, header.FightId,
+            var replica = ModContent.GetInstance<EncounterReplicaSystem>();
+            var previous = replica.Snapshot;
+            bool applied = replica.ApplyFullSnapshot(new(header.EncounterSequence, header.FightId,
                 GhostSamuraiDefinition.EncounterKey, (EncounterLifecycle)lifecycle, header.Revision, tick, entered, active, termination));
+            if (applied)
+            {
+                observedSequence = header.EncounterSequence;
+                if (previous.EncounterSequence != header.EncounterSequence || previous.Lifecycle != (EncounterLifecycle)lifecycle)
+                    Log($"event=ClientLifecycle seq={header.EncounterSequence} fight={header.FightId.Value} lifecycle={(EncounterLifecycle)lifecycle} revision={header.Revision} reason={(EncounterEndReason)reason}");
+            }
         }
         else return false;
         failureCode = string.Empty;
@@ -94,8 +127,13 @@ internal sealed class GhostSamuraiPackets : ModSystem, IEncounterPacketHandler
         packet.Write(snapshot.LifecycleEnteredTick); packet.Write(snapshot.ActiveFightTick); packet.Write((byte)snapshot.EndReason);
         packet.Send(toClient);
     }
-    public void ApplyIdleSnapshot(in EncounterSnapshot snapshot) { }
-    public override void ClearWorld() { nonce = 0; }
+    public void ApplyIdleSnapshot(in EncounterSnapshot snapshot)
+    {
+        if (observedSequence == 0 || observedSequence != snapshot.EncounterSequence) return;
+        Log($"event=ClientIdle seq={snapshot.EncounterSequence} revision={snapshot.Revision}");
+        observedSequence = 0;
+    }
+    public override void ClearWorld() { nonce = 0; nextBlockedLog = 0; observedSequence = 0; }
     public override void OnWorldUnload() => ClearWorld();
 }
 

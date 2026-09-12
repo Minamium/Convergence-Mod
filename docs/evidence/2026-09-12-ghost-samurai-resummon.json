@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-12",
+  "version": "0.2.56",
+  "protocol": 29,
+  "scope": "Ghost Samurai second-summon failure and bounded summon/lifecycle diagnostics; no attack, balance, Raid outcome or save changes.",
+  "cause": "Coordinator released the authority session to Idle but only published Cleanup. GhostSamuraiSummon requires the client replica to be Idle, so it blocked subsequent requests before transmission.",
+  "fix": "Publish a newer Idle after the retained terminal; outbox priority keeps the terminal first. The authority still rejects starts while cleanup is pending. Ghost Samurai logs requests, admission/rejection, local use blocks, combat start/phase/end and accepted client lifecycle/Idle.",
+  "tests": {
+    "before_fix": "Focused test failed: Idle must be published without a repair request; expected True, got False.",
+    "after_fix": "7 focused tests passed: 3 re-summon cases, 2 existing Runtime End cases, 1 replica terminal-retention case, 1 external termination-priority case.",
+    "contracts": "Victory/defeat followed by a second fight; ordered Cleanup/Idle; duplicate/stale rejection; terminal retention; next-fight coalescing; cleanup retry cannot be bypassed.",
+    "codec": "No packet layout, ID, parser schema or protocol version changes; existing codec results reused."
+  },
+  "build": {
+    "result": "passed",
+    "mode": "native",
+    "base_commit": "e67a67bc817d302db867fd354a0927ed28aae20c",
+    "dirty": "Scoped re-summon source/tests/docs/version changes plus six pre-existing English localization edits. Full manifest is in the ignored local record.",
+    "source_sha256": "19b3eb51e92d169d1a5c782396494fd1faf400f04e0d32fbc89496c93aa9ff37",
+    "source_changed_during_build": false,
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "record": ".local/builds/20260912T055559285525Z/record.json",
+    "package_sha256": "3463e226f3b98c7d0db5b2f96f863490564fca2565acffe534438817f3f88bfd",
+    "package_bytes": 51086710,
+    "deployed": "Existing configured tModLoader Mods/Convergence.tmod; hash matches build record; previous package backed up by tools/dev.py.",
+    "post_build_changes": "Documentation/evidence/catalog only."
+  },
+  "runtime": {
+    "host_and_play_second_summon": "not_run; user-owned",
+    "new_diagnostic_log_capture": "not_run; emitted by the next playtest",
+    "game_or_server_started": false
+  },
+  "remaining_check": "All peers reload 0.2.56. In the same world summon, defeat or let the Boss retreat, and summon again. Match CombatEnded -> ClientIdle -> new SummonAccepted, or inspect the specific block/rejection reason."
+}

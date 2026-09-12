@@ -25,7 +25,11 @@ public sealed class GhostSamuraiSummon : ModItem
         var state = Main.netMode == NetmodeID.MultiplayerClient
             ? ModContent.GetInstance<EncounterReplicaSystem>().Snapshot
             : ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot;
-        return !player.dead && state.Lifecycle == EncounterLifecycle.Idle && !NPC.AnyNPCs(ModContent.NPCType<GhostSamuraiBoss>());
+        string reason = player.dead ? "player_dead"
+            : state.Lifecycle != EncounterLifecycle.Idle ? "encounter_not_idle"
+            : NPC.AnyNPCs(ModContent.NPCType<GhostSamuraiBoss>()) ? "boss_still_present" : string.Empty;
+        if (reason.Length > 0) GhostSamuraiPackets.LogBlocked(player, state, reason);
+        return reason.Length == 0;
     }
     public override bool? UseItem(Player player)
     {

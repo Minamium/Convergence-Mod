@@ -49,7 +49,11 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         }
         if (killed) return End(EncounterEndReason.Victory);
         if (actor is null || !actor.NPC.active || actor.NPC.ModNPC != actor) return End(EncounterEndReason.EncounterActorMissing);
-        if (context.Lifecycle == EncounterLifecycle.Preparing) return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Active);
+        if (context.Lifecycle == EncounterLifecycle.Preparing)
+        {
+            GhostSamuraiPackets.Log($"event=CombatStarted seq={context.EncounterSequence} fight={fight.Value} boss_slot={actor.NPC.whoAmI} target_slot={actor.NPC.target} max_life={actor.NPC.lifeMax}");
+            return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Active);
+        }
         if (context.Lifecycle != EncounterLifecycle.Active) return EncounterRuntimeUpdate.None;
 
         NPC npc = actor.NPC;
@@ -80,6 +84,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             timer = 0;
             ClearHazards();
             npc.netUpdate = true;
+            GhostSamuraiPackets.Log($"event=PhaseChanged fight={fight.Value} age={age} phase={phase} life={npc.life} max_life={npc.lifeMax}");
         }
         npc.dontTakeDamage = transition > 0;
         if (transition > 0)
@@ -310,5 +315,6 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         }
         if (actor is not null) actor.Runtime = null;
         cleaned = true;
+        GhostSamuraiPackets.Log($"event=CombatEnded seq={context.EncounterSequence} fight={fight.Value} age={age} reason={context.EndReason} phase={phase} life={actor?.NPC.life ?? 0} max_life={actor?.NPC.lifeMax ?? 0} cleanup=complete");
     }
 }

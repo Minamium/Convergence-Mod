@@ -327,6 +327,10 @@ internal sealed class EncounterCoordinator : IEncounterCommandSink
             idleRevision = terminalSnapshot.Revision == uint.MaxValue
                 ? uint.MaxValue
                 : terminalSnapshot.Revision + 1;
+            // The outbox sends the retained terminal first, then this newer Idle.
+            // Without it, peers remain in Cleanup and Idle-gated summons never send.
+            // TryStart still rejects while any cleanup work remains pending.
+            snapshotOutbox.Publish(Snapshot);
         }
 
         return true;
