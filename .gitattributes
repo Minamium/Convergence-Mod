@@ -22,3 +22,5 @@ global.json text
 *.mp3 binary
 *.ttf binary
 *.otf binary
+*.fx text
+*.fxc binary

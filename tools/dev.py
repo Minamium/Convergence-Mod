@@ -79,6 +79,9 @@ def main() -> int:
         if not env["TModLoaderSavePath"] or not (save / "Mods").is_dir():
             raise ValueError("Set an existing user-data directory with Mods via TModLoaderSavePath or --save; no empty profile is created.")
         validate_localization(env)
+        # A stale shader can package successfully yet fail or show old visuals
+        # on load. Validate exports before backing up/touching the installed Mod.
+        subprocess.run([sys.executable, str(ROOT / "tools" / "compile_shaders.py")], cwd=ROOT, check=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
         record_dir = ROOT / ".local" / "builds" / stamp
         record_dir.mkdir(parents=True)

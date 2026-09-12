@@ -2,6 +2,22 @@
 
 ## Records
 
+### Pursuit Prism shader — 2026-09-13
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/PursuitPrismFlow.fxc`
+- Asset ID: pursuit-prism-luminance-0264
+- Asset type: compiled original beam/mouth shader
+- Creator: Codex, project-directed for Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: adjacent `PursuitPrismFlow.fx`, independently authored; Luminance public API only, no external shader or texture copied
+- Tool/model/version: Microsoft FXC 10.1 / D3DCompiler_47; exact compiler and input/output hashes in adjacent `compiled.json`
+- Human modifications: owner requested an eight-cast-only Luminance visual prototype; original procedural pressure slit, flowing plasma and bounded forecast
+- License and redistribution terms: project source/asset terms remain subject to the existing development publication gate; Luminance stays a separate MIT-licensed dependency, not bundled code
+- Required attribution: retain this record and the API references in the visual specification
+- Reviewer and review date: Codex, 2026-09-13; native FNA effect load and offscreen material draws; game acceptance pending
+- Notes: `tools/compile_shaders.py --fxc <local compiler>` reproduces the runtime export. Sources/manifest excluded from `.tmod`; no player-side compiler required.
+
 ### Convergence Mod README illustration — 2026-09-12
 
 - Runtime file: `docs/media/convergence-banner.png`
