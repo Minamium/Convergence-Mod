@@ -594,13 +594,13 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: 不幸な人形劇 — Encounter Specification
-  content_sha256: c1c7cdcb156b81c68b8b8200b8286cabe9ad6c670ab095353cf8de66af1bffaa
+  content_sha256: d837004c61234d90a3673e2d9222292ace5f3db73fd2653720ba179ad3e9aa0b
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -622,7 +622,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 093f7503f5f4b7bbce2de9d391e2cb141aed388298d9bc4c43e1eb80d7f86363
+  content_sha256: 53fa28fb38b26cb3fdefc0cfdf7cc81f96f43e49d6a32621a39a13876790f105
   document_type: spec
   status: provisional
   owners:
@@ -1058,12 +1058,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: dd0cc382518cc64294b659db2318e5c9f0f30398810f009b219889f71c33cc5e
+  content_sha256: 32d3215d01aed0ef9576c9b33a4e50506c567e88498978247bcf800764c263ea
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-09'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -1103,7 +1103,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 0dcc1bc6247d5383412c535bd176f49526de276982d86ca10a6e3cc4ba8bd493
+  content_sha256: 3bb8f2770f89d9d4fe750080a4f9c7b1bdd02189eca952ad9479a45493384bd2
   document_type: status
   status: accepted
   owners:
@@ -1322,7 +1322,7 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: c57a4127f313efb3309cbd2acfd096959148a23d53c1ecb61eb287acdc4aa5c3
+  content_sha256: 2bc8da214dc5f849cb7edc9d17cd35728a5b26fc20a4c23f96a297114c673dff
   document_type: research
   status: provisional
   owners:
