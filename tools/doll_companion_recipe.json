@@ -1,0 +1,35 @@
+{
+  "version": "0.2.53",
+  "mode": "built-in image generation; backend model not exposed",
+  "date": "2026-09-12",
+  "archive": "workspace-container/output/doll-companion-0253/originals (external; see local manifest)",
+  "reference": "previous project-authored NPC 12-cel source, output/doll-theater-0252/originals/npc-matte.png",
+  "prompts": [
+    {
+      "key": "dollwalk",
+      "prompt": "Use case: stylized-concept. Asset type: production Terraria companion sprite animation sheet. The input is a CHARACTER IDENTITY REFERENCE, not an edit target. Generate a NEW sheet featuring exactly this white-haired pale porcelain gothic girl doll, black bonnet, black layered dress with ivory lace, visible knee joints, boots. Preserve her proportions, outfit, silhouette and melancholy expression. Authored pixel-art cels with clean discrete pixel clusters, NOT concept illustration. Transparent background with real alpha preferred; if not possible use uniform bright key-green #00ff00. No text, frames, guides, scenery, glows or shadows. Grid exactly FOUR columns by THREE rows, 12 isolated full-body sprites, centered in equal cells with generous padding. Same character size and baseline in every cell; each is a distinct drawn animation pose, not a rotated copy. All face RIGHT in three-quarter side view. Frames in reading order: 1-8 a continuous walking cycle, alternating clearly visible forward/back legs and arms with subtly swinging skirt and hair. Frames 9-12 a floating-follow loop: knees bent softly with feet off the ground, skirt hanging, hair lifting in a gentle upward draft, hands held close to chest, small changes in head and arms. Fully clothed, tranquil but subtly unnatural. Readable body and face at 48 pixels tall."
+    },
+    {
+      "key": "dollcast",
+      "prompt": "Use case: stylized-concept. Asset type: production Terraria companion sprite animation sheet. The input is a CHARACTER IDENTITY REFERENCE, not an edit target. Generate a NEW sheet featuring exactly this white-haired pale porcelain gothic girl doll, black bonnet, black layered dress with ivory lace, visible knee joints, boots. Preserve her proportions, outfit, silhouette and melancholy expression. Authored pixel-art cels with clean discrete pixel clusters, NOT concept illustration. Transparent background with real alpha preferred; if not possible use uniform bright key-green #00ff00. No text, frames, guides, scenery, glows or shadows. Grid exactly FOUR columns by THREE rows, 12 isolated full-body sprites, centered in equal cells with generous padding. Same character size and baseline in every cell; each is a distinct drawn animation pose, not a rotated copy. All face RIGHT in three-quarter side view. Frames in reading order: 1 hand abruptly lifting from chest; 2 elbow extends; 3 palm sharply extended aiming right; 4 slight wrist pause; 5 recoil fingers curl; 6 second hand lifts; 7 both palms open chest level; 8 arms sweep outward; 9 arms held spread with skirt and hair swept backwards, strongest casting pose; 10 wrists relax and arms fall; 11 hands returning to chest; 12 quietly clasped hands. Continuous anticipation, sharp release, recovery through actual pose changes. No separate projectiles or visual effects; draw only character. Readable at 48 pixels tall."
+    },
+    {
+      "key": "dollitem",
+      "prompt": "Use case: stylized-concept. Asset type: Terraria endgame summon item pixel icon. Create one original ornate hand-held winding KEY for a tragic white-haired gothic porcelain doll, a small blackened silver key with an ivory heart-shaped porcelain chamber and dark crimson tied ribbon. Elegant eerie doll-theater, no neon. Bold readable silhouette tilted diagonally, crisp deliberately clustered pixels and limited charcoal/ivory/silver/blood-red palette, approximates 40x40 native pixels enlarged cleanly. Single isolated full object centered filling 80% square. Transparent background with real alpha preferred; otherwise uniform key-green #00ff00. No ground shadow, scenery, text, frame, oversize diffuse glow. Item must be distinct and readable alongside Terraria weapons."
+    }
+  ],
+  "walk_matte_fix": "Use case: background-extraction. Edit this twelve-cel sprite sheet: replace ONLY the brown gradient background and every surrounding halo/glow with a perfectly uniform solid bright chroma green #00ff00 matte, including spaces between hair strands and legs. Preserve all twelve girl sprite poses, exact coordinates, sizes, clothing, pixel style, proportions and the FOUR columns THREE rows layout unchanged. No anti-aliased dark halo. No new shadow, scenery, text or border. Pure key green everywhere except the characters.",
+  "export": "tools/prepare_doll_companion.ps1; mechanical chroma/alpha extraction, foot registration, 32-colour palette and frame packing; preserves all original files",
+  "assets": [
+    {
+      "path": "Assets/Textures/NPCs/DollTheater/DollCompanion.png",
+      "sha256": "585630ae57d530657bd9639ff6b8654b70cb81e2cde07a1ae4ebb5953e257d8c",
+      "bytes": 33416
+    },
+    {
+      "path": "Assets/Textures/Items/RitualArmaments/DollCovenant.png",
+      "sha256": "53da713ff5f4810648e09e54edc16b57572b2bf9b37d275fde98105d1c710323",
+      "bytes": 2132
+    }
+  ]
+}

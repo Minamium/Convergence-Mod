@@ -1,0 +1,24 @@
+Mods.Convergence: {
+  UI.FirstSeverance.CombatNotActive: The Unfortunate Doll Play is not active.
+  Items.DollCovenant: {
+    DisplayName: The Unbroken Promise
+    Tooltip:
+      '''
+      Summons a porcelain Doll to walk, fly and fight beside you
+      Requires 10 minion slots; only one Doll at a time
+      She weaves three piercing threads, then tears a cross into her target
+      Right-click an enemy to direct her attacks; dismiss her buff to release her
+      Exchange with Choir of the Unmade at a Work Bench
+      She is a minion, not a Raid participant
+      '''
+  }
+  Buffs.DollCovenantBuff: {
+    DisplayName: The Unbroken Promise
+    Description: The Doll remains beside you. Uses 10 minion slots.
+  }
+  Projectiles: {
+    DollCompanion.DisplayName: Doll Companion
+    DollNeedle.DisplayName: Porcelain Thread
+    DollSeam.DisplayName: Severed Seam
+  }
+}

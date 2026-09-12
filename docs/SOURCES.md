@@ -114,3 +114,5 @@ Development combat references accessed 2026-09-05: [ModNPC](https://docs.tmodloa
 実装開始日、Workshop公開前、tModLoader/Calamity更新時に再確認する。リンク切れやbranch移動があっても、当時の判断とversionはcommit historyへ残す。
 
 Continuous-emission/containment recheck, 2026-09-06: the pinned WotG Avatar rendering utilities, Nameless portal state/laser, Calamity ArenaWallSystem/SupremeCalamitas and tML ModPlayer/ModBlockType/GlobalTile contracts are linked and evaluated in [benchmark finding F11](research/WOTG_RAID_BENCHMARK.md). Reuse that fixed-source table rather than interpreting current branches as the tested runtime.
+
+Weapon audio/ten-slot companion survey, 2026-09-12: the pinned official Terraria/tML styles and ExampleMod minion, Calamity Photoviscerator/SubsumingVortex/CosmicImmaterializer paths and exact applicability are in [weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references). This verifies source behavior, not subjective sound playback.

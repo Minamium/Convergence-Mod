@@ -1,0 +1,24 @@
+Mods.Convergence: {
+  UI.FirstSeverance.CombatNotActive: 不幸な人形劇は開演していません。
+  Items.DollCovenant: {
+    DisplayName: ほどけない約束
+    Tooltip:
+      '''
+      少女人形を呼び出し、一緒に歩き、飛び、戦う
+      ミニオン枠を10使用する。同時に呼べる人形は1体
+      三本の糸を撃ち、溜めた力で標的を十字に断ち切る
+      敵を右クリックで攻撃対象に指定。バフ解除で帰還
+      作業台で「未成の聖歌隊」と相互交換できる
+      ミニオンのため、Raidの参加人数には数えない
+      '''
+  }
+  Buffs.DollCovenantBuff: {
+    DisplayName: ほどけない約束
+    Description: 少女人形がそばにいる。ミニオン枠を10使用。
+  }
+  Projectiles: {
+    DollCompanion.DisplayName: 共に歩む人形
+    DollNeedle.DisplayName: 磁器の糸
+    DollSeam.DisplayName: 断たれた縫い目
+  }
+}

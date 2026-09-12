@@ -17,7 +17,7 @@ related_docs:
   - encounter.first-severance.spec
 ---
 
-# First Severance Audio Cue Sheet
+# 不幸な人形劇 Audio Cue Sheet
 
 This page owns **current playback/design choices**. [Attribution](../Assets/ATTRIBUTION.md) owns exact masters, source hashes, recipes and rights; [Status](STATUS.md) owns verification. [Audio evolution](history/2026-09-11-audio-evolution.md) preserves rejected/superseded mixes and API evidence. Historical “keep unchanged” statements apply to their old batch, not today's source.
 
@@ -45,7 +45,7 @@ Music never drives authority timers. Tracks are not sample-accurate seek-synchro
 The owner accepted **Stack** but rejected the other 0.2.42/43 remaster timbres. Current selection is therefore deliberate:
 
 - Keep `StackSummon`, `ShellMassLatch`, `ShellMassArc`, `ShellMassShed` and `ShellMassCollapse` from the accepted Stack pass.
-- All other First Severance SFX match project commit **5fba4d7** (pre-rebuild 0.2.41), including restored weapon sustain voices. [Restoration evidence](evidence/2026-09-11-selective-sfx-rollback.json) and [prior salvo restoration](evidence/2026-09-10-grounded-posts-audio-tails.json) own exact identities.
+- Other Raid SFX match project commit **5fba4d7** (pre-rebuild 0.2.41). Weapon playback is now separate; see [weapon-only foley](#weapon-only-foley). [Restoration evidence](evidence/2026-09-11-selective-sfx-rollback.json) and [prior salvo restoration](evidence/2026-09-10-grounded-posts-audio-tails.json) own historical identities.
 - Keep the later attack-bounded playback fixes. Restoring an old master must **not** restore its formerly overlong sustained-beam tail.
 - Claw swipe uses the accepted unsheathing/swing accent, without its rejected overlapping `BladeSweep` after-sound. Existing contact/right-click cues remain.
 
@@ -68,6 +68,24 @@ The owner accepted **Stack** but rejected the other 0.2.42/43 remaster timbres. 
 Charge ends at fire; sustained beams fade at their accepted live end, using per-pulse deadlines for Final and the flood's own fade boundary. Stack/Spread anticipation retires at verdict, preparation assembly at Ready opening. Early action transitions shorten old timed voices to a brief fade; exact-Fight cleanup clears their bounded ledger.
 
 Accepted impact tails may complete across same-Fight terminal cleanup, including a same-tick lethal verdict. They never retain gameplay or play across a new Fight/world unload. Victory/revive stingers and projectile-owned sustain are not treated as long beam tails. These distinctions prevent both missing impacts and attack sound hanging after the action.
+
+## Weapon-only foley
+
+The current 27 original masters live under `Assets/Sounds/Weapons/DollTheater`. `tools/generate_weapon_foley.py` owns deterministic transient/material/air synthesis and external audition mixes. No Terraria/Calamity recording is extracted or bundled. Existing Raid and music masters are untouched.
+
+| Family | Audible role |
+|---|---|
+| ClawSwipe / Grip / Crush / Hit | Short cutting air; compressed grip; heavy close; brief material hit. No second singing after-tone |
+| MagicSigil / Bolt / Merge / Charge / Fire / LacunaSustain | Distinct apparatus arrival and thin shot; converging body; 0.8s charge; attack onset into continuous voiced energy |
+| RangedLatch / Shot / Charge / Fire / MeridianSustain | Mechanical click; short hard transient; timed chamber acceleration; pressure discharge and rhythmic continuous bed |
+| ChoirNote / Charge / Fire / ChoirSustain | Discrete notes; one conductor charge; one combined launch and sustained body, not a new launch for every damage tick |
+| WitnessDraw / Lock / Fire | Draw, brief tension, heavy release; no Raid impact file reuse |
+| DollSummon / Thread / Charge / Verdict | Arrival, three short threads, held tension, crossing release; tied to authored casting cels |
+| WeaponHit | Short low-priority contact, below the release accents |
+
+One-shots are 0.10–0.80s PCM mono; persistent beds are phase-periodic 4s stereo. Weapon voices are separate from the Raid ledger: cue IDs have bounded voices, sustain has a per-owner/projectile identity and stops with the projectile; charge voices also stop on cancellation/Down/dismissal. Charge pitch is fixed to preserve duration. No global slider changes. The generator reports sample peak/RMS and endpoint values; waveform checks do not certify perceived loudness, sample-to-sample loop steps are not themselves discontinuities, and the final multi-player mix needs listening at unchanged sliders.
+
+Design sources and license/version caveats are in [weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references). External audition WAVs are grouped by weapon family and use runtime event gains; these are project-original SFX, not exports of the approved third-party BGM.
 
 ## Mix, diagnostics and exports
 

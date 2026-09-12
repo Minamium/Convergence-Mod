@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - art
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 source_of_truth_for:
   - first_severance.reward_weapons
 aliases:
@@ -20,7 +20,7 @@ related_docs:
   - encounter.first-severance.spec
 ---
 
-# First Severance — Five Ritual Armaments
+# 不幸な人形劇 — Ritual Armaments
 
 Current mechanics are below; [Audio](../../AUDIO_CUE_SHEET.md) owns the active sound masters and removal of the claw's overlapping swipe after-sound. Versioned labels identify when a design arrived, not the current package/protocol: those belong to [Status](../../STATUS.md).
 
@@ -28,7 +28,7 @@ Current mechanics are below; [Audio](../../AUDIO_CUE_SHEET.md) owns the active s
 
 Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. Normal swipes no longer emit radial line/shard sprays, including their normal-hit aftermath; their ribbon omits its dark opaque underlay. The palm's existing aperture and the entire right-click crush remain unchanged. The shared ribbon helper defaults to its old behavior for other weapons. Motion, hitboxes, damage, resources and audio are untouched.
 
-## Null Cantor's Claws — accepted melee redesign, 0.2.29
+## Lacrimosa's Claws — accepted melee redesign, 0.2.29
 
 This section replaces the original sword/echo prototype. Internal item identity `NullRefrain`, the accepted Victory drop and all one-for-one exchanges are unchanged. The other four forms follow the long-form ritual specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it. Weapon-only changes do not authorize Raid tuning.
 
@@ -36,7 +36,7 @@ This section replaces the original sword/echo prototype. Internal item identity 
 
 **Right click (0.2.31):** one charge after360 real game ticks while holding a usable claw. Holding an attack also recharges; unequipping/incapacitation pauses it, execution pauses it, death/world entry clears it. The charge belongs to the player, so extra item copies cannot duplicate it. A click spends it once and fixes a world coordinate within1120px. A fresh right click while left-clicking prioritizes execution and cancels only the owner's current swipe. Gameplay-only input ignores UI/fullscreen map/unfocused/Downed use; the ordinary alternate-use path shares the same one-charge spend. Both hands emerge diagonally in5 ticks, decelerate/brace until11, then accelerate to impact at16; one4.2x ordinary-melee strike is active during16–20 and recovery ends at42. The166x132px axis-aligned damage ellipse is unchanged and forecast; the oblique hands are its presentation, not an enlarged rotated hitbox. No forced NPC/player movement, literal instant kill, invulnerability bypass, homing after target lock, or attack-speed reduction of the six-second charge. Native NPC defenses and damage hooks remain in effect.
 
-The new presentation uses native-resolution P3 palm/bone/talon regions, independently moving finger joints, broad layered violet/white crescents with negative-space interiors, connected fingertip wakes, dislodged dark shards and expanding broken pressure rings. The remote strike closes on a dark center before a vertical flare and ring release. Bright remnants never increase hit range. Both hands and major crescents remain under Reduced Effects; secondary shards and shake are reduced/disabled. Weapon sounds use a separate identifier and tracked, bounded voices; P3 masters are reused unchanged. No global pause, forced zoom or white-screen fill.
+The presentation uses native-resolution P3 palm/bone/talon regions, independently moving finger joints and layered violet/white crescents with negative-space interiors. The remote strike closes on a dark center before a vertical flare and ring release. Bright remnants never increase hit range. Both hands and major crescents remain under Reduced Effects; secondary shards and shake are reduced/disabled. Weapon sounds now use independent weapon masters and bounded voices; [Audio](../../AUDIO_CUE_SHEET.md#weapon-only-foley) owns current choices. No global pause, forced zoom or white-screen fill.
 
 `NullCantorClawMotion` owns the current melee budget and timing; the previous72-tick execution calculation predates the faster right-click score and is not current DPS. Measure actual contact with native armor/crit/gear/hooks before comparing endgame output. Do not change Boss HP to disguise a weapon balance problem.
 
@@ -97,6 +97,31 @@ Owner clients alone sample mouse/channel input, spend mana/ammo and create child
 The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Ranged warmup needles carry0.95x; overdrive carries0.62x, replacing one in12 with1.15x (about26593 raw/sec at2002 base, excluding ammo). Choir ordinary notes carry0.85x; shared chorus hits carry1.05x the sum of living voices every12 ticks (5082 raw/sec per968-damage voice **during the chorus**, not averaged over rest). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; that blade splits0.70/0.30 outbound/return.
 
 These are arithmetic bounds before defense, crits, armor/accessories, misses, movement and class hooks—not claims of endgame balance or measured DPS. The goal of a modest improvement over selected same-class final equipment needs matched in-game measurements. Do not change Boss HP to hide weapon imbalance.
+
+## Doll companion — The Unbroken Promise
+
+**ほどけない約束 / The Unbroken Promise** (`DollCovenant`) is an additional summon item, not a replacement for Choir of the Unmade. Exchange Choir ↔ Promise one-for-one at a Work Bench. Existing five-form recipes and Victory rewards remain unchanged; there is no additional free drop or duplicate reward.
+
+- Native `minionSlots = 10`, matching staff metadata and a capacity check. At least 10 maximum slots are required; only one Doll per owner. Native sacrifice replaces other sacrificial minions if needed. No slots, invulnerability or Raid participation are granted.
+- Grounded follow uses gravity, collision/platform handling and a jump over small obstacles. Airborne owners, large vertical gaps and stuck paths switch to floating follow; distant owners trigger an owner-synchronized catch-up teleport. Ground collision resumes only outside solid tiles.
+- Right-click enemy targeting is the ordinary minion targeting contract. Three piercing-thread projectiles precede a held palm charge and two crossing cuts. Timing, item base damage and frame bounds have one code owner: `DollCompanionRules`; nominal pre-defense output is a development seed, not measured DPS.
+- Owner-client selects targets/mode and creates child projectiles through native Terraria projectile replication, as the other weapons do. Remote peers/server consume these native objects, not encounter packets. This is not server-side anti-cheat validation. The parent is owner/identity-bound, and children expire when the exact parent/buff disappears or the owner is Downed/dead/disabled. Down suspends attacks while retaining the companion; normal death, dismissal and native sacrifice remove it. No effect on Raid roster, Stack counts, Ready, revive or all-Down defeat.
+- Actual pixel cels: 12 existing NPC idle/expressions, 8 walk, 4 float, 12 casting/recovery, packed as 36 × 48×64 frames. Foot anchoring/palette reduction are mechanical exports of generated drawings. Code adds limited breath/tilt, target-facing, frame selection and thread VFX; it does not substitute a moving still for the new motions. Original stage NPC and its capture remain separate.
+- User-owned smoke: summon at 9 vs 10 slots, sacrifice and coexistence with spare slots, stairs/platforms/flight/teleport, right-click retarget, attack/dismiss/Down cleanup, and a second peer observing one Doll with matching shots. No claim of actual in-game readability, DPS or network smoothness from build/CPU preview alone.
+
+## Weapon sound and ten-slot companion references
+
+Accessed 2026-09-12. Same pinned Calamity source/version/license caveat as the survey below (public 2.2.2 source, installed 2.2.4); tML commit `666f69962d3bdffde54fc14025f02634965b4e7c` targets the installed 2026.07 family/.NET8/C#12. This was a source/API survey, not a listening comparison or a claim to reproduce another weapon's timbre.
+
+| Verified primary source | Observation and independent decision |
+|---|---|
+| [Photoviscerator](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/Items/Weapons/Ranged/Photoviscerator.cs) / [holdout](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/Projectiles/Ranged/PhotovisceratorHoldout.cs) | Separate use/hit sounds; the holdout tracks position and pitch, renews the sustained firing sound on its own cadence, stops it on mode change. Adopt separate event/body ownership; use our own true periodic bed, not a sound per projectile hit or a copied renewal interval |
+| [SubsumingVortex](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/Items/Weapons/Magic/SubsumingVortex.cs) | Native Item84 casting plus a separate custom explosion. Adopt distinct casting/release roles; do not reuse Boss explosion files for all weapons |
+| [CosmicImmaterializer](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/Items/Weapons/Summon/CosmicImmaterializer.cs) | Staff metadata/capacity 10, one owned minion, originalDamage, Item60 summon sound. Independently pair 10-slot item/actor contracts; our Doll moves and attacks with its own cels and score |
+| [Official ExampleSimpleMinion](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod/Content/Projectiles/Minions/ExampleSimpleMinion.cs) | Buff/death lifetime, minion slots/sacrifice flags, owner-only teleport with netUpdate. Adopt these native API contracts, not its contact-damage movement algorithm |
+| [Native SoundID styles](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ID/SoundID.TML.cs) / [current SoundStyle guidance](https://docs.tmodloader.net/docs/stable/struct_sound_style.html) | Per-style volume, pitch, loop/voice limits. Keep original materials and bounded managed voices. Source inspected does not by itself identify every Last Prism/Terraprisma sound path; no such exact mapping is claimed |
+
+No external implementation, recording or sprite is copied. The native ownership pattern is conventional weapon replication, not proof of adversarial server authority. Needed runtime evidence is the focused minion/cancel/audio smoke above, not an unrelated full Raid replay.
 
 ## Prior-art findings and engine seams
 

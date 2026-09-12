@@ -8,13 +8,13 @@ using System.IO;
 // The distinct poses come from the preserved image-generation originals.
 public static class DollFrameExport
 {
-    static bool Empty(Color c) => c.A<100 || c.G>75&&c.G>c.R*1.22+18&&c.G>c.B*1.22+18;
+    internal static bool Empty(Color c) => c.A<100 || c.G>75&&c.G>c.R*1.22+18&&c.G>c.B*1.22+18;
     static readonly int[] NpcPalette = {
         0x121017,0x1d1a22,0x29252f,0x38323d,0x49404a,0x5b505a,0x6b626b,0x817881,
         0x99929a,0xb1aab0,0xc9c4c9,0xe1dce0,0xf4edef,0x302a29,0x493a36,0x635048,
         0x80675b,0x9c8070,0xb69a85,0xd0b69e,0xe5cfb7,0xf4e3ce,0x756b6a,0x938481,
         0xb0a19b,0xc8b9af,0xdbcec2,0xede2d4,0xfcf4e6,0x444855,0x747b89,0xa9aeb6 };
-    static Color Quantize(Color c)
+    internal static Color Quantize(Color c)
     {
         int best=int.MaxValue,winner=0;
         foreach(int rgb in NpcPalette) {

@@ -30,16 +30,15 @@ public sealed class NullCantorClawVisualState : GlobalProjectile
         bool Crossed(float tick) => previousAge < tick && claw.Age >= tick && claw.Age - tick < 5;
         if (claw is NullCantorClawSwipe swipe && Crossed(swipe.Duration * NullCantorClawMotion.SweepStart))
         {
-            system.Play("BladeUnsheathe", p.Center, .64f, -.16f + swipe.Hand * .10f);
+            system.Play("ClawSwipe", p.Center, .64f, -.06f + swipe.Hand * .06f);
         }
         if (claw is NullCantorClawCrush)
         {
-            if (Crossed(0)) { system.Play("ExecutionLock", p.Center, .50f, -.18f); system.Play("HandGather", p.Center, .52f, .2f); }
-            if (Crossed(NullCantorClawMotion.CrushCloseTick)) system.Play("BladeUnsheathe", p.Center, .68f, .32f);
+            if (Crossed(0)) system.Play("ClawGrip", p.Center, .65f, -.06f);
+            if (Crossed(NullCantorClawMotion.CrushCloseTick)) system.Play("ClawSwipe", p.Center, .68f, .08f);
             if (Crossed(NullCantorClawMotion.CrushImpactTick))
             {
-                system.Play("HandCrushImpact", p.Center, .85f, -.20f);
-                system.Play("CoreHit", p.Center, .55f, .20f);
+                system.Play("ClawCrush", p.Center, .85f, -.04f);
                 system.Kick(p.owner, 9);
             }
         }
@@ -47,7 +46,7 @@ public sealed class NullCantorClawVisualState : GlobalProjectile
         {
             hitPlayed = true;
             if (claw.Age - claw.ImpactAge < 8 && claw is NullCantorClawSwipe)
-            { system.Play("ShellHit", claw.Impact, .68f, -.10f); system.Kick(p.owner, 3.8f); }
+            { system.Play("ClawHit", claw.Impact, .58f, -.04f); system.Kick(p.owner, 3.8f); }
         }
         previousAge = claw.Age;
     }
@@ -65,7 +64,7 @@ public sealed class NullCantorClawPresentation : ModSystem
         voices.RemoveAll(id => !SoundEngine.TryGetActiveSound(id, out var s) || !s.IsPlaying);
         if (voices.Count >= 32)
         { if (SoundEngine.TryGetActiveSound(voices[0], out var old)) old.Stop(); voices.RemoveAt(0); }
-        voices.Add(SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + name)
+        voices.Add(SoundEngine.PlaySound(new SoundStyle(RitualWeaponFeedback.SoundRoot + name)
         {
             Identifier = "Convergence:NullCantorClaws:" + name,
             Volume = volume, Pitch = pitch, PitchVariance = .04f, MaxInstances = 2,

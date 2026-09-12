@@ -111,3 +111,7 @@ Release candidateごとに次を確認する。
 - license選択とcontributor agreement方針が確定済み
 
 The 0.2.8 continuous-emission/ground-containment pass is materially informed by WotG's timed portal-laser layers and articulated rendering, and Calamity's logical arena-wall pattern. [The pinned F11 evidence](research/WOTG_RAID_BENCHMARK.md) records versions, authorship/license limits, observed behavior and independent decisions. No external implementation, shader, atlas, recording or source mirror is copied. Three original generated atlases are used unedited through measured C# source rectangles; exact assets and briefs are in [Attribution](../Assets/ATTRIBUTION.md). Development use does not resolve the project's release-license gate.
+
+## Doll companion and weapon-only sounds — 0.2.53
+
+[Weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references) record native summon-slot/lifetime and endgame sound event/voice design influences, with pinned versions and existing license caveats. New weapon recordings are independent NumPy synthesis without samples; the Doll motion sheets are generated from the existing project-authored NPC reference. [Attribution](../Assets/ATTRIBUTION.md#doll-companion-and-weapon-only-foley--0253) owns exact assets, prompts/export recipe, hashes and release limits. No Calamity/Terraria source, extracted sound or external sprite enters the package. The Raid naming is a Convergence character decision, not an assertion that EigHt authored or endorsed the character.
