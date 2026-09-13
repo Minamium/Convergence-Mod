@@ -14,7 +14,7 @@ internal static class FirstSeveranceImpalingSwordVisuals
         FirstSeveranceCombatProjection combat, double age, double authorityAge, bool reduced)
     {
         if (Main.dedServ) return;
-        foreach (var sword in FirstSeveranceImpalingSwords.At(combat.ActionIndex, age, combat.CoreX, combat.CoreY))
+        foreach (var sword in FirstSeveranceImpalingSwords.At(combat.ActionIndex, age, combat.CoreX, combat.CoreY, combat.ActionStartedTick))
         {
             var ray = sword.FullRay;
             Vector2 origin = new(ray.X, ray.Y), direction = new(0, ray.DirectionY), normal = new(-direction.Y, 0);
@@ -36,7 +36,7 @@ internal static class FirstSeveranceImpalingSwordVisuals
                 // Both length and width follow the shared ignition geometry.
                 FirstSeveranceBeamMaterial.Flow(batch, origin, direction, length, body.HalfWidth,
                     age, color, sword.Fade * (live || age >= sword.Retract ? 1 : .10f), reduced,
-                    fireAge:sword.Fire,endAge:sword.Retract);
+                    fireAge:sword.Fire,endAge:sword.Retract,confined:true);
                 float stab = Window(age, sword.Fire, sword.Fire + 2) * (1 - Window(age, sword.Fire + 6, sword.Fire + 18));
                 accents.Halo(batch, origin + direction * length, new Vector2(75, 12),
                     Color.White, stab * (reduced ? .18f : .65f), angle + MathF.PI * .5f);

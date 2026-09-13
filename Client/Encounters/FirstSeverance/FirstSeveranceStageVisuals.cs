@@ -119,34 +119,19 @@ internal sealed class FirstSeveranceStageVisuals
                 FirstSeveranceRaidVfx.GridRibbon(batch, grid.PulseAt(line, tick), tick - fire, color, reduced);
         }
         foreach (var full in grid.CoreBeams)
-        {
-            var ray = warning ? full : FirstSeveranceBeamIgnition.At(full, tick - grid.FireTick);
-            Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-            Color violet = RitualArmamentArt.ColorFor(
-                Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
-            if (warning)
-            {
-                float pulse = FirstSeveranceEnergyPulse.Charge(tick, grid.StartTick, grid.FireTick);
-                Vector2 mouth = origin + direction * 44;
-                FirstSeveranceRaidVfx.Charge(batch, mouth, direction, tick - grid.StartTick,
-                    pulse, 0, born, violet, reduced, .35f + pulse * .85f);
-                FirstSeveranceRaidVfx.Orb(batch, mouth, Vector2.Zero, 8 + pulse * 36,
-                    tick - grid.StartTick, violet, pulse, true, reduced);
-                FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    tick - grid.StartTick, gather, born, violet, grid.FireTick-grid.StartTick);
-                continue;
-            }
+            FirstSeveranceCoreCannonVisuals.Draw(batch, accents, full, tick, grid.StartTick, grid.FireTick, grid.CoreEndTick,
+                combat.GridVolley is not null && authorityTick >= grid.FireTick && authorityTick < grid.CoreEndTick, reduced);
+    }
 
-            bool active = combat.GridVolley is not null && authorityTick >= grid.FireTick && authorityTick < grid.CoreEndTick;
-            float power = active ? 1 : 1 - Window(tick, grid.CoreEndTick, grid.CoreEndTick + 12);
-            if (power <= .001f) continue;
-            FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
-                tick - grid.StartTick, violet, power, reduced, throatLength: 260, throatWidth: 20,
-                fireAge:grid.FireTick-grid.StartTick,endAge:grid.CoreEndTick-grid.StartTick);
-            float kick = ReleaseImpulse(tick, grid.FireTick);
-            accents.Halo(batch, origin, new Vector2(125 + kick * 110, 25 + kick * 35), violet,
-                power * (active ? 1 : .06f) * (reduced ? .22f : .55f), direction.ToRotation());
-        }
+    private FirstSeveranceCoreCannonVolley? fadingCannon;
+    internal void DrawFinalCannon(SpriteBatch batch, FirstSeveranceCombatProjection combat, double tick,
+        ulong authorityTick, FirstSeveranceAttackAccents accents, bool reduced)
+    {
+        if (combat.Substate != FirstSeveranceSubstate.FinalBullets) { fadingCannon = null; return; }
+        if (combat.CoreCannon is { } received) fadingCannon = received;
+        if (fadingCannon is not { } cannon || tick >= cannon.EndTick + 12d) return;
+        FirstSeveranceCoreCannonVisuals.Draw(batch, accents, cannon.Ray, tick, cannon.StartTick, cannon.FireTick, cannon.EndTick,
+            combat.CoreCannon is not null && authorityTick >= cannon.FireTick && authorityTick < cannon.EndTick, reduced);
     }
 
     private void EnsureShell()
@@ -178,6 +163,7 @@ internal sealed class FirstSeveranceStageVisuals
 
     internal void Reset(bool unload = false)
     {
+        fadingCannon = null;
         fadingGrid = null;
         if (!unload || plates is null) return;
         var old = plates; plates = null; shellTexture = null; // Content manager owns the original.

@@ -63,7 +63,8 @@ internal sealed class FirstSeveranceCombatProjection
         ulong actionStartedTick = 0, int actionIndex = -1, int completedPhaseCycles = 0,
         ulong mechanicTick = 0, IReadOnlyList<FirstSeveranceMechanicImpact>? mechanicImpacts = null,
         IReadOnlyList<FirstSeveranceLanceVolley>? spreadLances = null,
-        FirstSeveranceLanceVolley? carriedLance = null)
+        FirstSeveranceLanceVolley? carriedLance = null,
+        FirstSeveranceCoreCannonVolley? coreCannon = null)
     {
         if (encounterSequence == 0
             || fightId.IsNone
@@ -151,6 +152,12 @@ internal sealed class FirstSeveranceCombatProjection
             || gridVolley.EndTick > resolveTick || lanceVolley is not null || gridVolley.CoreBeams.Count > Participants.Count))
             throw new ArgumentException("A grid cannot outlive its owning stage/window.");
         GridVolley = gridVolley;
+        if (coreCannon is { } cannon && (substate != FirstSeveranceSubstate.FinalBullets
+            || cannon.StartTick < actionStartedTick || cannon.StartTick - actionStartedTick < FirstSeveranceCoreCannonVolley.OpeningTicks
+            || cannon.EndTick > resolveTick || !TryGetParticipantByServerSlot(cannon.TargetSlot, out _)
+            || cannon.Ray.X != coreX || cannon.Ray.Y != coreY - FirstSeveranceLanceTuning.BossHeightAboveCore))
+            throw new ArgumentException("Core cannon must belong to the accepted Final bullet window and roster.");
+        CoreCannon = coreCannon;
         if (spreadLances is { Count: > FirstSeveranceSpreadBarrage.Count })
             throw new ArgumentException("Too many Spread pursuit casts.");
         SpreadLances = FirstSeverancePlanCollections.Copy(spreadLances ?? Array.Empty<FirstSeveranceLanceVolley>(), nameof(spreadLances));
@@ -206,6 +213,7 @@ internal sealed class FirstSeveranceCombatProjection
             && BossLife <= FirstSeveranceBossPhasePlan.LifeThreshold(BossMaximumLife, next));
     public bool IsCoreOpen => !IsHpGated && FirstSeveranceBossPhasePlan.IsDamageState(Substate);
     public FirstSeveranceGridVolley? GridVolley { get; }
+    public FirstSeveranceCoreCannonVolley? CoreCannon { get; }
 
     public float CoreX { get; }
 

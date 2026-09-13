@@ -33,6 +33,7 @@ internal sealed class FirstSeveranceFeedback
     private readonly List<(ReLogic.Utilities.SlotId Id, string Name, ulong CheckAt)> audioChecks = new(16);
     private uint chargeSerial, lockSerial, fireSerial;
     private uint gridChargeSerial, gridFireSerial;
+    private uint cannonChargeSerial, cannonFireSerial;
     private bool shellBroken;
     private int countdown = -1, resultTicks;
     private int scoreImpactTicks;
@@ -105,7 +106,7 @@ internal sealed class FirstSeveranceFeedback
         {
             StopVoices();
             chargeSerial = lockSerial = fireSerial = 0;
-            gridChargeSerial = gridFireSerial = 0;
+            gridChargeSerial = gridFireSerial = cannonChargeSerial = cannonFireSerial = 0;
             shellBroken = false;
             countdown = -1;
             safeCueResolve = 0;
@@ -224,7 +225,8 @@ internal sealed class FirstSeveranceFeedback
         {
             int beat = (int)((deadline - tick + 29) / 30);
             if (beat <= 3 && beat != countdown)
-                PlayTimed("MechanicTick", .95f, tick, deadline);
+                PlayTimed("MechanicTick", safe?.Kind == FirstSeveranceSafeMechanic.Stack
+                    || combat.Substate == FirstSeveranceSubstate.Stack ? .64f : .95f, tick, deadline);
             countdown = beat;
         }
         foreach (var cast in combat.SpreadLances)
@@ -279,6 +281,19 @@ internal sealed class FirstSeveranceFeedback
                     // pressure-rich voice instead of summing two clipped peaks.
                     PlayTimed(grid.CoreBeams.Count > 0 ? "CoreSalvoFire" : "GridFire", 1f, tick, grid.EndTick + 6);
                 }
+            }
+        }
+        if (combat.CoreCannon is { } cannon)
+        {
+            if (cannonChargeSerial != cannon.Serial)
+            {
+                cannonChargeSerial = cannon.Serial;
+                if (tick >= cannon.StartTick && tick < cannon.FireTick) PlayTimed("GridCharge", .98f, tick, cannon.FireTick);
+            }
+            if (cannonFireSerial != cannon.Serial && tick >= cannon.FireTick)
+            {
+                cannonFireSerial = cannon.Serial;
+                if (tick < cannon.EndTick) PlayTimed("CoreSalvoFire", 1f, tick, cannon.EndTick + 6);
             }
         }
         double age = (double)tick - combat.ActionStartedTick;
@@ -527,7 +542,7 @@ internal sealed class FirstSeveranceFeedback
         resultTicks = 0;
         scoreImpactTicks = 0;
         chargeSerial = lockSerial = fireSerial = 0;
-        gridChargeSerial = gridFireSerial = 0;
+        gridChargeSerial = gridFireSerial = cannonChargeSerial = cannonFireSerial = 0;
         shellBroken = false;
         countdown = -1;
         scoreSounds.Clear();

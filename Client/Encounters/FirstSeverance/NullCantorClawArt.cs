@@ -126,7 +126,7 @@ internal static class NullCantorClawArt
         Span<Vector2> points = stackalloc Vector2[96];
         // No clamped run of coincident points: resample only the actual swept arc.
         float end = Math.Min(progress, NullCantorClawMotion.SweepEnd);
-        float begin = Math.Max(NullCantorClawMotion.SweepStart, end - .32f);
+        float begin = Math.Max(NullCantorClawMotion.SweepStart, end - .17f);
         if (end <= begin) return;
         for (int finger = 0; finger < 5; finger++)
         {
@@ -136,7 +136,10 @@ internal static class NullCantorClawArt
                 var pose = NullCantorClawMotion.SwingPose(sample, p.Hand);
                 points[i] = Transform(NullCantorClawMotion.Joint(pose, finger, 3), root, p.Aim, p.Facing);
             }
-            RitualSurfacePass.Flame(points[..count], (Reduced ? 74 : 108) * NullCantorClawMotion.Smooth((end - begin) / .14f), Violet, fade, darkUnderlay: false);
+            // Five broad additive sheets used to fuse into one white crescent.
+            // Separate fingertip filaments leave the moving metal silhouette clear.
+            RitualSurfacePass.Flame(points[..count], (Reduced ? 13 : 19)
+                * NullCantorClawMotion.Smooth((end - begin) / .10f), Violet, fade * .54f, darkUnderlay: false);
         }
     }
     internal static void DrawSwipe(SpriteBatch b, NullCantorClawSwipe p, float age)

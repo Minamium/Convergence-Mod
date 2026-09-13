@@ -63,7 +63,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
     };
     public override void PostAI(Projectile p)
     {
-        if (p.numUpdates != 0) return;
+        if (!RitualPresentationStep.IsFinal(p.numUpdates)) return;
         if (p.ai[0] < lastAge || p.owner < 0 || p.owner >= Main.maxPlayers
             || !RitualArmamentItems.Usable(Main.player[p.owner]) || Main.player[p.owner].noItems || Main.player[p.owner].CCed
             || p.ModProjectile is LacunaConvergence or MeridianBastion or WitnessLitany && p.ai[2] < 0)
@@ -232,6 +232,7 @@ public sealed class RitualArmamentProjectileVisuals : GlobalProjectile
         }, p.Center, _ => p.active && p.identity == identity && p.type == type && p.owner == owner && SustainOwnerUsable(p));
         if (SoundEngine.TryGetActiveSound(sustain, out var begun)) begun.Volume = sustainEnvelope;
         ModContent.GetInstance<RitualWeaponFeedback>().Track(sustain);
+        RitualAudioDiagnostics.Track(name, sustain, volume);
     }
     private static bool SustainOwnerUsable(Projectile p) => p.owner >= 0 && p.owner < Main.maxPlayers
         && RitualArmamentItems.Usable(Main.player[p.owner]) && !Main.player[p.owner].noItems && !Main.player[p.owner].CCed;
@@ -297,6 +298,7 @@ public sealed class RitualWeaponFeedback : ModSystem
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
         }, at);
         system.voices.Add(voice);
+        RitualAudioDiagnostics.Track(name, voice, Math.Min(.95f, volume * 2f));
         return voice;
     }
     internal void Kick(int owner, float force) { if (owner == Main.myPlayer) shake = Math.Max(shake, force); }

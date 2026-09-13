@@ -50,7 +50,7 @@ public sealed class DollCompanionVisuals : GlobalProjectile
     }
     public override void PostAI(Projectile p)
     {
-        if (p.numUpdates != 0) return;
+        if (!RitualPresentationStep.IsFinal(p.numUpdates)) return;
         float angle = p.velocity.ToRotation();
         if (p.ModProjectile is DollCompanion)
         {

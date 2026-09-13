@@ -17,7 +17,9 @@ internal static partial class Program
     [DomainTest("Presentation polish: mechanic cues step down and beam/other cues step up")]
     private static void RaidCueGroups()
     {
-        foreach(string cue in new[]{"StackSummon","ShellMassShed","SpreadExecution","SpreadDissolve","MechanicTick"})
+        foreach(string cue in new[]{"StackSummon","ShellMassLatch","ShellMassArc","ShellMassShed","ShellMassCollapse"})
+            AssertEqual(.44f,FirstSeverancePresentationTiming.CueGain(cue,1),cue);
+        foreach(string cue in new[]{"SpreadExecution","SpreadDissolve","MechanicTick"})
             AssertEqual(.65f,FirstSeverancePresentationTiming.CueGain(cue,1),cue);
         AssertEqual(.88f,FirstSeverancePresentationTiming.CueGain("LanceFire",1),"beam");
         AssertEqual(.92f,FirstSeverancePresentationTiming.CueGain("CoreExposure",1),"other");

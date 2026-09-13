@@ -109,34 +109,36 @@ internal static class RitualGrandArt
     internal static void Battery(SpriteBatch batch, MeridianBastion gun, float age)
     {
         Color color = ColorFor(RitualArmamentKind.Ranged);
-        Vector2 root = Center(gun.Projectile), axis = Axis(gun.Projectile);
-        float lockIn = RitualKineticMotion.Arrive((age - RitualGrandScore.BatteryLock) / 18);
+        Vector2 root = Center(gun.Projectile), axis = Axis(gun.Projectile), normal = new(-axis.Y, axis.X);
+        float born = RitualGrandScore.Arrival(age, 0), fade = gun.Fade;
         float charge = RitualKineticMotion.Strike((age - RitualGrandScore.BatteryLock - 18) / 48);
-        int count = RitualGrandScore.Count(age, false);
-        float flash = RitualKineticMotion.Recoil(age - RitualGrandScore.BatteryFire);
-        for (int i = 0; i < count; i++)
+        float kick = 0;
+        for (int back = 0; back <= 11; back++)
+            if (RitualGrandScore.BatteryLane((int)age - back) >= 0)
+                kick = Math.Max(kick, RitualKineticMotion.Recoil(back + age % 1));
+        Vector2 muzzle = gun.Muzzle(0, age, root, axis);
+        Vector2 body = root + axis * (25 - kick * 17 - (1 - born) * 90);
+        // One receiver, one barrel. Later births dock small breech components,
+        // never another complete gun or a large circle behind the player.
+        Relic(batch, RitualArmamentKind.Ranged, body, axis.ToRotation() + MathHelper.PiOver4,
+            226 * born, Color.White * born * fade);
+        for (int i = 1; i < RitualGrandScore.Count(age, false); i++)
         {
-            float born = RitualGrandScore.Arrival(age, RitualGrandScore.BatteryBirth(i));
-            Vector2 at = gun.Muzzle(i, age, root, axis), normal = axis.RotatedBy(MathHelper.PiOver2);
-            float kick = 0;
-            for (int back = 0; back <= 11; back++)
-                if (RitualGrandScore.BatteryLane((int)age - back) == i)
-                    kick = Math.Max(kick, RitualKineticMotion.Recoil(back + age % 1));
-            Vector2 body = at - axis * (150 + kick * (gun.Overdrive ? 26 : 18));
-            Relic(batch, RitualArmamentKind.Ranged, body, axis.ToRotation() + MathHelper.PiOver4,
-                260 * born, Color.White * born * gun.Fade);
-            for (int side = -1; side <= 1; side += 2)
-                Part(batch, 1, body + normal * side * (20 + charge * 25), axis.ToRotation() + side * (.14f + charge * .65f),
-                    110 * born, Color.White * born * gun.Fade, side < 0, new(256, 400));
-            Line(batch, body + axis * 75, at, Light(color, born * gun.Fade * (.3f + charge * .4f)), 3 + charge * 5);
-            Aperture(batch, at, axis, (31 + charge * 15 + kick * 24) * born, age + i * 17, color, born * gun.Fade);
-            Glow(batch, at, new(32 + kick * 95), Light(Ivory, kick * gun.Fade * .7f));
-            if (kick > 0) Line(batch, at, at + axis * kick * 160, Light(color, kick * gun.Fade), 8 * kick);
-            Conduit(batch, root - axis * 100, body, body - normal * i * 15, color, age + i * 11, born * gun.Fade * .45f);
+            float latch = RitualGrandScore.Arrival(age, RitualGrandScore.BatteryBirth(i));
+            int side = i % 2 == 0 ? 1 : -1;
+            Vector2 socket = body - axis * (18 + (i / 2) * 27) + normal * side * (18 + charge * 11);
+            Vector2 part = socket - axis * (1 - latch) * 85 + normal * side * (1 - latch) * 64;
+            Part(batch, 1, part, axis.ToRotation() + MathHelper.PiOver2 + side * charge * .16f,
+                66 * latch, Color.White * latch * fade, side < 0);
+            Line(batch, socket - axis * 23, socket + axis * 15, Light(color, latch * fade * (.18f + charge * .45f)), 2);
         }
-        Ring(batch, root - axis * 110, new(60 + lockIn * 30, 90 + count * 40), axis.ToRotation(),
-            Light(color, .35f * gun.Fade), 3, true);
-        if (flash > 0) RitualKineticArt.Vent(batch, root, axis, age - RitualGrandScore.BatteryFire, color, true);
+        FirstSeveranceRaidVfx.Charge(batch, muzzle, axis, age, charge,
+            kick, born * fade * (charge + kick) * .6f, color, Reduced, .35f);
+        Glow(batch, muzzle, new Vector2(24 + kick * 57), Light(color, kick * fade * .72f));
+        // A narrow moving packet reads as a gunshot, not a full-size Raid flash.
+        if (kick > .01f)
+            FirstSeveranceRaidVfx.Beam(batch, muzzle, axis, 60 + kick * 170, 3 + kick * 5,
+                age, 1, 1, kick * fade, color, Reduced, mouth: false, fireAge: 0);
     }
 
     internal static void Choir(SpriteBatch batch, ChoirSentinel choir, Vector2 center, float age)
@@ -181,29 +183,36 @@ internal static class RitualGrandArt
     internal static void Witness(SpriteBatch batch, WitnessLitany litany, float age)
     {
         Color color = ColorFor(RitualArmamentKind.Rogue);
-        Vector2 center = litany.Crown;
+        Vector2 axis = Axis(litany.Projectile), normal = new(-axis.Y, axis.X);
+        Vector2 center = Center(litany.Projectile) + axis * 128;
+        float arrive = RitualGrandScore.Arrival(age, 0);
+        float held = 1 - RitualKineticMotion.Arrive((age - RitualGrandScore.WitnessFire) / 4);
         float fold = RitualGrandScore.WitnessFold(age);
-        float fired = RitualKineticMotion.Arrive((age - RitualGrandScore.WitnessFire) / 5);
+        float charge = RitualKineticMotion.Strike((age - RitualGrandScore.WitnessFire + 22) / 22);
+        float recoil = RitualKineticMotion.Recoil(age - RitualGrandScore.WitnessFire);
+        // A single suspended execution blade. Six irregular pressure cuts load
+        // its edge; a short compressed hold precedes the actual thrown relic.
+        Vector2 blade = center - axis * (28 * charge + (1 - arrive) * 90);
+        float roll = axis.ToRotation() + MathHelper.PiOver4 + .20f * (1 - fold) * MathF.Sin(age * .035f);
+        Relic(batch, RitualArmamentKind.Rogue, blade, roll, (148 + fold * 40) * arrive, Color.White * arrive * held);
         for (int i = 0; i < RitualGrandScore.WitnessCount(age); i++)
         {
-            float born = RitualGrandScore.Arrival(age, i * 29), angle = i * MathF.Tau / 6 + age * .012f;
-            Vector2 at = center + angle.ToRotationVector2() * (190 + (1 - born) * 145) * (1 - fold);
-            float fade = born * (1 - fold) * (1 - fired);
-            Relic(batch, RitualArmamentKind.Rogue, at, angle + age * .02f, 105 * born, Color.White * fade);
-            RitualKineticArt.Seal(batch, at, 48 * born, angle, color, fade * .8f);
-            Conduit(batch, at, center, at + litany.Axis * 80, color, age + i * 12, fade * .5f);
+            float beat = age - i * 29;
+            float pulse = RitualKineticMotion.Recoil(beat - 2);
+            int side = i % 2 == 0 ? -1 : 1;
+            Vector2 inlet = blade - axis * (i * 12 - 28) + normal * side * (21 + (1 - fold) * 12);
+            Glow(batch, inlet, new Vector2(14 + pulse * 38), Light(color, (.16f + pulse * .42f) * held));
+            FirstSeveranceRaidVfx.Sparks(batch, inlet, axis, beat, 1, pulse * held * .3f, color, true, .18f);
         }
-        float charge = RitualKineticMotion.Strike((age - RitualGrandScore.WitnessMerge - 20) / 24);
-        Relic(batch, RitualArmamentKind.Rogue, center, -age * .014f, (230 - charge * 45) * fold,
-            Color.White * fold * (1 - fired));
-        Aperture(batch, center, litany.Axis, 115 * fold * (1 - fired), age, color, fold * (1 - fired));
-        Glow(batch, center, new(45 + charge * 115), Light(color, fold * (1 - fired) * .8f));
-        if (age >= RitualGrandScore.WitnessFire)
+        FirstSeveranceRaidVfx.Charge(batch, blade + axis * 35, axis, age, charge,
+            recoil, (charge * held + recoil) * .55f, color, Reduced, .45f);
+        if (recoil > .01f)
         {
-            float after = age - RitualGrandScore.WitnessFire, flash = RitualKineticMotion.Recoil(after);
-            RitualKineticArt.Vent(batch, center, litany.Axis, after, color, true);
-            Ring(batch, center + litany.Axis * after * 9, new(40 + after * 8), 0,
-                Light(Ivory, flash), 9 * flash, true);
+            FirstSeveranceRaidVfx.Flare(batch, center, age - RitualGrandScore.WitnessFire,
+                recoil * .65f, color, Reduced, .62f);
+            FirstSeveranceRaidVfx.Sparks(batch, center, axis, age - RitualGrandScore.WitnessFire,
+                1, recoil * .7f, color, false, .65f);
         }
     }
+
 }

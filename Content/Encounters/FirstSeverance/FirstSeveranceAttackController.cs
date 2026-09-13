@@ -26,6 +26,9 @@ internal sealed class FirstSeveranceAttackController
     private readonly Vector2 groundCenter;
     private readonly FirstSeveranceEncounterPlan plan;
     private FirstSeveranceGridVolley? gridVolley;
+    private FirstSeveranceCoreCannonVolley? coreCannon;
+    private bool coreCannonIssued;
+    private readonly HashSet<ParticipantId> coreCannonHits = new();
     private uint gridSerial;
     private uint coreSalvoOrdinal;
     private ulong nextGridTick;
@@ -56,12 +59,16 @@ internal sealed class FirstSeveranceAttackController
     internal FirstSeveranceLanceVolley? Lance => lanceVolley;
     internal FirstSeveranceLanceVolley? CarriedLance => lances.Carried;
     internal FirstSeveranceGridVolley? Grid => gridVolley;
+    internal FirstSeveranceCoreCannonVolley? CoreCannon => coreCannon;
     internal IReadOnlyList<FirstSeveranceLanceVolley> SpreadLances => spread.Casts;
     internal bool UpdateSpread(in FirstSeveranceLoopState state, ulong tick)
         => spread.Update(state, tick, roster, recovery, ref lanceSerial, Log);
 
     internal void EnterSubstate(FirstSeveranceSubstate after, ulong authorityTick)
     {
+        coreCannon = null;
+        coreCannonIssued = false;
+        coreCannonHits.Clear();
         spread.Clear();
         lances.Clear();
         scoreHits.Clear();
@@ -78,6 +85,9 @@ internal sealed class FirstSeveranceAttackController
 
     internal void Cleanup()
     {
+        coreCannon = null;
+        coreCannonIssued = false;
+        coreCannonHits.Clear();
         spread.Clear();
         lances.Clear();
         gridVolley = null;
@@ -148,6 +158,50 @@ internal sealed class FirstSeveranceAttackController
             string source = gridVolley.CoreIntersects(tick, player.Center.X, player.Center.Y,
                 player.width * .5f, player.height * .5f) ? "CoreSalvo" : "Lattice";
             recovery.ApplyRaidDamage(member, FirstSeveranceCombatRules.BeamDamage, tick, source);
+            changed = true;
+        }
+        return changed;
+    }
+
+    internal bool UpdateCoreCannon(in FirstSeveranceLoopState state, ulong tick)
+    {
+        if (state.Substate != FirstSeveranceSubstate.FinalBullets || tick >= state.ResolveTick)
+        {
+            bool had = coreCannon is not null;
+            coreCannon = null; coreCannonHits.Clear();
+            return had;
+        }
+        bool changed = false;
+        if (!coreCannonIssued && tick >= state.SubstateEnteredTick + FirstSeveranceCoreCannonVolley.OpeningTicks
+            && state.ResolveTick - tick >= FirstSeveranceCoreCannonVolley.DurationTicks)
+        {
+            coreCannonIssued = true; // No delayed retarget/catch-up burst after death or reconnect.
+            var targets = new List<Player>(roster.Count);
+            foreach (var member in roster.Members)
+                if (recovery.IsAlive(member.ParticipantId) && recovery.TryGetPlayer(member, out var player)) targets.Add(player);
+            if (targets.Count > 0)
+            {
+                var target = targets[FirstSeveranceGridVolley.CoreTargetIndex(coreSalvoOrdinal++, targets.Count)];
+                coreCannon = new(++gridSerial, tick, target.whoAmI,
+                    FirstSeveranceGridVolley.AimCoreBeam(groundCenter.X, groundCenter.Y, target.Center.X, target.Center.Y));
+                changed = true;
+                Log(tick, $"event=CoreCannonTelegraph cast={coreCannon.Serial} target_slot={target.whoAmI} fire_tick={coreCannon.FireTick} end_tick={coreCannon.EndTick} action=FinalBullets");
+            }
+        }
+        if (coreCannon is not { } cast) return changed;
+        if (tick >= cast.EndTick) { coreCannon = null; coreCannonHits.Clear(); return true; }
+        if (tick == cast.FireTick)
+        {
+            changed = true;
+            Log(tick, $"event=CoreCannonFired cast={cast.Serial} fixed_damage={FirstSeveranceCombatRules.BeamDamage}");
+        }
+        foreach (var member in roster.Members)
+        {
+            if (coreCannonHits.Contains(member.ParticipantId) || !recovery.IsAlive(member.ParticipantId)
+                || !recovery.TryGetPlayer(member, out var player)
+                || !cast.Intersects(tick, player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f)) continue;
+            coreCannonHits.Add(member.ParticipantId);
+            recovery.ApplyRaidDamage(member, FirstSeveranceCombatRules.BeamDamage, tick, "FinalCoreSalvo");
             changed = true;
         }
         return changed;

@@ -12,7 +12,7 @@ public sealed class WitnessLitany : ModProjectile
     internal float Age => Projectile.ai[0];
     internal bool Stealth => Projectile.ai[2] == 1;
     internal Vector2 Axis => RitualArmamentItems.Aim(Projectile.velocity, 1);
-    internal Vector2 Crown => Projectile.Center + Axis * 220;
+    internal Vector2 Crown => Projectile.Center + Axis * 128;
     public override string Texture => RitualArmamentItems.TexturePath;
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 1800;
     public override void SetDefaults()
@@ -40,7 +40,7 @@ public sealed class WitnessLitany : ModProjectile
         if (tick < RitualGrandScore.WitnessMerge && tick % 29 == 16)
         {
             int index = tick / 29;
-            Vector2 at = Crown + (index * MathHelper.TwoPi / 6).ToRotationVector2() * 190;
+            Vector2 at = Crown + new Vector2(-Axis.Y, Axis.X) * (index % 2 == 0 ? -12 : 12);
             Projectile.NewProjectile(Projectile.GetSource_FromThis(), at, Axis * 22,
                 ModContent.ProjectileType<WitnessEcho>(), RitualArmamentRules.ScaledDamage(Projectile.damage, .28f),
                 Projectile.knockBack, Projectile.owner, 0, -1, 0);

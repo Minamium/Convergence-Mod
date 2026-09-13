@@ -35,7 +35,7 @@ internal sealed class FirstSeveranceMechanicalCore
     }
 
     internal void Draw(SpriteBatch batch,Vector2 center,float radius,float seconds,float roll,Color tint,float opacity,bool reduced,
-        float bore = 0, Vector2 boreAxis = default)
+        float bore = 0, Vector2 boreAxis = default, bool twinBore = false)
     {
         if(Main.dedServ||opacity<=.001f||radius<1) return;
         // The sphere's surface rotates; the highlight remains in the world
@@ -53,8 +53,9 @@ internal sealed class FirstSeveranceMechanicalCore
             Vector3 n=normals[i],local=Vector3.TransformNormal(n,turn);
             Vector2 p = new(n.X, n.Y);
             float along = Vector2.Dot(p, axis), cross = Vector2.Dot(p, across);
-            var crater = FirstSeveranceCoreCrater.SampleSide(along, cross, bore);
-            Vector2 slope = axis * crater.AlongSlope + across * crater.AcrossSlope;
+            float side = twinBore && along < 0 ? -1 : 1;
+            var crater = FirstSeveranceCoreCrater.SampleSide(along * side, cross, bore);
+            Vector2 slope = axis * (crater.AlongSlope * side) + across * crater.AcrossSlope;
             // Inward wall normals catch a different highlight to the polished
             // outside. Oblique projection exposes depth and a heavy raised lip.
             Vector3 surfaceNormal = Vector3.Normalize(n - new Vector3(slope * Math.Max(n.Z, .001f), 0));
@@ -77,7 +78,7 @@ internal sealed class FirstSeveranceMechanicalCore
             material += new Vector3(.022f, .006f, .039f) * occlusion;
             // Cold reflected wall light remains subordinate to the actual jet.
             material += new Vector3(.06f, .018f, .095f) * Math.Max(0, surfaceNormal.Z) * occlusion * bore;
-            Vector2 displaced = p + axis * (crater.Depth * .20f);
+            Vector2 displaced = p + axis * (crater.Depth * .20f * side);
             vertices[i]=new(new Vector3(origin+displaced*radius,0),
                 new Color(new Vector4(Vector3.Clamp(material,Vector3.Zero,Vector3.One),1)*modulation));
         }

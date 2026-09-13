@@ -60,7 +60,7 @@ internal sealed class FirstSeveranceScoreVisuals
             }
             if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
             {
-                DrawBlade(batch, accents, origin, item, age, live, reduced);
+                DrawBlade(batch, accents, item, age, live, reduced);
                 continue;
             }
             float power = live ? .92f : (.20f + item.Charge * .30f) * born * fade;
@@ -72,19 +72,11 @@ internal sealed class FirstSeveranceScoreVisuals
             DrawBullets(batch, accents, combat, age, reduced);
     }
 
-    private void DrawBlade(SpriteBatch batch, FirstSeveranceAttackAccents accents, Vector2 origin,
+    private static void DrawBlade(SpriteBatch batch, FirstSeveranceAttackAccents accents,
         FirstSeveranceScoreRay item, double age, bool live, bool reduced)
     {
-        Vector2 direction=new(item.Ray.DirectionX,item.Ray.DirectionY);
-        var ray=item.BeamRay;
-        Color color=RitualArmamentArt.ColorFor(Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
-        float retract=1-Window(age,FirstSeveranceChoreography.BladeEnd,FirstSeveranceChoreography.BladeEnd+58);
-        bool warning=age<FirstSeveranceChoreography.BladeWindup;
-        float opacity=warning?Arrive(age,4):live?1:retract;
-        FirstSeveranceRaidVfx.Beam(batch,origin,direction,ray.Length,ray.HalfWidth,age,
-            item.Charge,warning?0:1,opacity,color,reduced,release:ReleaseImpulse(age,FirstSeveranceChoreography.BladeWindup),
-            fireAge:FirstSeveranceChoreography.BladeWindup,endAge:FirstSeveranceChoreography.BladeEnd);
-        accents.ChargeFracture(batch,origin,age,0,FirstSeveranceChoreography.BladeWindup,color,reduced,1.2f);
+        FirstSeveranceCoreCannonVisuals.Draw(batch, accents, item.Ray, age, 0,
+            FirstSeveranceChoreography.BladeWindup, FirstSeveranceChoreography.BladeEnd, live, reduced);
     }
 
     private static void DrawBullets(SpriteBatch batch,FirstSeveranceAttackAccents accents,

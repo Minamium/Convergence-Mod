@@ -23,7 +23,9 @@ internal sealed class FirstSeveranceDollVisuals
     private Asset<Texture2D>? handFrames, bodyFrames;
     private float bodyCast;
     private float coreBore;
+    private bool twinBore;
     private FirstSeveranceGridVolley? coreVolley;
+    private FirstSeveranceCoreCannonVolley? lastCannon;
     private Vector2 coreAxis = Vector2.UnitY;
     private readonly FirstSeveranceDollPose pose = new();
     private readonly FirstSeveranceAttackAccents captureAccents = new();
@@ -31,9 +33,34 @@ internal sealed class FirstSeveranceDollVisuals
     private readonly FirstSeveranceMechanicalCore mechanicalCore = new();
     private static Vector2 V(System.Numerics.Vector2 p) => new(p.X,p.Y);
 
+    internal void ResetAttack()
+    {
+        coreBore = 0; twinBore = false; coreVolley = null; lastCannon = null;
+        coreAxis = Vector2.UnitY;
+    }
+
     internal void SetCoreAttack(FirstSeveranceCombatProjection combat, double tick)
     {
         coreBore = 0;
+        twinBore = false;
+        if (combat.Substate != FirstSeveranceSubstate.FinalBullets) lastCannon = null;
+        if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
+        {
+            double age = tick - combat.ActionStartedTick;
+            coreBore = CoreBore(age, 0, FirstSeveranceChoreography.BladeWindup, FirstSeveranceChoreography.BladeEnd);
+            coreAxis = FirstSeveranceScoreGeometry.BladeAngle(age).ToRotationVector2();
+            twinBore = true;
+            coreVolley = null;
+            return;
+        }
+        if (combat.CoreCannon is { } receivedCannon) lastCannon = receivedCannon;
+        if (lastCannon is { } cannon && tick < cannon.EndTick + 20d)
+        {
+            coreBore = CoreBore(tick, cannon.StartTick, cannon.FireTick, cannon.EndTick);
+            coreAxis = new(cannon.Ray.DirectionX, cannon.Ray.DirectionY);
+            coreVolley = null;
+            return;
+        }
         if (combat.Substate != FirstSeveranceSubstate.Lattice) { coreVolley = null; return; }
         if (combat.GridVolley is { } received) coreVolley = received;
         if (coreVolley is not { CoreBeams.Count: > 0 } grid || tick >= grid.EndTick + 20d) return;
@@ -286,13 +313,13 @@ internal sealed class FirstSeveranceDollVisuals
             // Cover the baked reference globe at every authored jaw opening;
             // a constant radius prevents the sphere itself pulsing by cel.
             mechanicalCore.Draw(batch,at,33*scale.X,time/60,rotation,tint,
-                (1-Window(breakup,.05,.55))*(1-consume),reduced,coreBore,coreAxis);
+                (1-Window(breakup,.05,.55))*(1-consume),reduced,coreBore,coreAxis,twinBore);
     }
 
     // The Distant body is scenery; this physical relay stays over the real
     // foreground hit target. It replaces the old floating square/X stamp.
     internal void DrawRemoteCore(SpriteBatch batch,Vector2 center,float seconds,float opacity,bool reduced)
-        => mechanicalCore.Draw(batch,center,66,seconds,.3f,Color.White,opacity,reduced);
+        => mechanicalCore.Draw(batch,center,66,seconds,.3f,Color.White,opacity,reduced,coreBore,coreAxis,twinBore);
 
     private void Ensure()
     {

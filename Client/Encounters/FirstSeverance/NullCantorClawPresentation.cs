@@ -25,12 +25,12 @@ public sealed class NullCantorClawVisualState : GlobalProjectile
     public override void PostAI(Projectile p)
     {
         var claw = (NullCantorClawProjectile)p.ModProjectile;
-        if (p.numUpdates == 0) Stamp = Stopwatch.GetTimestamp();
+        if (RitualPresentationStep.IsFinal(p.numUpdates)) Stamp = Stopwatch.GetTimestamp();
         var system = ModContent.GetInstance<NullCantorClawPresentation>();
         bool Crossed(float tick) => previousAge < tick && claw.Age >= tick && claw.Age - tick < 5;
         if (claw is NullCantorClawSwipe swipe && Crossed(swipe.Duration * NullCantorClawMotion.SweepStart))
         {
-            system.Play("ClawSwipe", p.Center, .64f, -.06f + swipe.Hand * .06f);
+            system.Play("ClawSwipe", p.Center, .80f, -.06f + swipe.Hand * .06f);
         }
         if (claw is NullCantorClawCrush)
         {
@@ -64,13 +64,15 @@ public sealed class NullCantorClawPresentation : ModSystem
         voices.RemoveAll(id => !SoundEngine.TryGetActiveSound(id, out var s) || !s.IsPlaying);
         if (voices.Count >= 32)
         { if (SoundEngine.TryGetActiveSound(voices[0], out var old)) old.Stop(); voices.RemoveAt(0); }
-        voices.Add(SoundEngine.PlaySound(new SoundStyle(RitualWeaponFeedback.SoundRoot + name)
+        var voice = SoundEngine.PlaySound(new SoundStyle(RitualWeaponFeedback.SoundRoot + name)
         {
             Identifier = "Convergence:NullCantorClaws:" + name,
             Volume = volume, Pitch = pitch, PitchVariance = .04f, MaxInstances = 2,
             SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
-        }, at));
+        }, at);
+        voices.Add(voice);
+        RitualAudioDiagnostics.Track(name, voice, volume);
     }
     internal void Kick(int owner, float strength) { if (owner == Main.myPlayer) shake = Math.Max(shake, strength); }
     public override void PostUpdateEverything() => shake *= .76f;

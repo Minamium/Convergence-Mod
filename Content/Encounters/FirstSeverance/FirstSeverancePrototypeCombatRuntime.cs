@@ -243,6 +243,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             lanceChanged = attacks.UpdateLances(before, context.AuthorityTick,
                 before.Substate == FirstSeveranceSubstate.PylonCheck && destroyedPylons >= before.RemainingPylons);
             lanceChanged |= attacks.UpdateGrid(before, context.AuthorityTick, false);
+            lanceChanged |= attacks.UpdateCoreCannon(before, context.AuthorityTick);
             lanceChanged |= attacks.UpdateSpread(before, context.AuthorityTick);
             attacks.UpdateScoreHazards(before, context.AuthorityTick);
         }
@@ -350,7 +351,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             mechanicRevision,
             Array.AsReadOnly(participants),
             attacks.Lance, state.BossPhase, state.BossPhaseStartedTick, attacks.Grid,
-            state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles, mechanicTick, mechanicImpacts, attacks.SpreadLances, attacks.CarriedLance);
+            state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles, mechanicTick, mechanicImpacts, attacks.SpreadLances, attacks.CarriedLance, attacks.CoreCannon);
         return true;
     }
 
