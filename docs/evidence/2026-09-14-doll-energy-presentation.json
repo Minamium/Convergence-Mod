@@ -32,7 +32,7 @@
     "offline_gpu": "FNA/D3D11, installed Luminance noise; 16 countdown frames + 16 frames of seal/weapon ribbon/side bell. Selected earlier/later frames visually inspected. Not a gameplay/FPS result.",
     "audio": "27 PCM masters; bounded sample/4x peaks; six actual-event-gain auditions with safety attenuation reported. Sources unchanged and old masters archived. No subjective listening claim.",
     "static": "Catalog passed (67 docs), repository passed (709 files), YAML passed (10 files). Fixed the new assets' exact provenance records; reran only the failed repository check.",
-    "github_ci": "pending PR"
+    "github_ci": "Passed at 9e036ba: https://github.com/Minamium/Convergence-Mod/actions/runs/34777766496 ; final PR checks: https://github.com/Minamium/Convergence-Mod/pull/22/checks . The separately provisioned manual Mod-build job is skipped; native build evidence is above."
   },
   "not_run": [
     "User Reload Mods / startup loading",
