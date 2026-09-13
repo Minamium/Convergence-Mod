@@ -16,7 +16,7 @@ internal static class FirstSeveranceRaidVfx
 {
     private readonly record struct DrawCommand(string Pass, Vector2 Origin, Vector2 Direction,
         float Length, float HalfWidth, Color Color, Vector4 Signal, float Time, float Seed, bool Reduced,
-        Vector4 Pulse, float FlowOffset);
+        Vector4 Pulse, float FlowOffset, bool Portal, Vector4 Ceremony);
     private static readonly DrawCommand[] commands = new DrawCommand[1024];
     private static readonly VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[6];
     private static int count;
@@ -33,12 +33,42 @@ internal static class FirstSeveranceRaidVfx
 
     internal static void Beam(SpriteBatch batch, Vector2 origin, Vector2 direction, float length, float halfWidth,
         double age, float charge, float energy, float opacity, Color color, bool reduced,
-        bool confined = false, bool mouth = true, float release = 0)
+        bool confined = false, bool mouth = true, float release = 0,
+        double fireAge = double.NaN, double endAge = double.NaN)
     {
         if (Main.dedServ || opacity <= .001f || length <= 0 || halfWidth <= 0) return;
         using var scope=new LocalBatch(batch);
         float live = energy > .001f ? 1 : 0;
         Vector4 signal = new(Math.Clamp(charge,0,1), live, Math.Clamp(opacity,0,1), Math.Clamp(release,0,1));
+        if (double.IsFinite(fireAge))
+        {
+            Vector4 ceremony = new((float)Math.Clamp(age-fireAge,-600,600),
+                double.IsFinite(endAge)?(float)Math.Clamp(age-endAge,0,60):0,0,0);
+            if (live == 0)
+            {
+                float t=Math.Clamp((ceremony.X+8)/7,0,1);
+                float dip=1-.84f*t*t*(3-2*t);
+                Add(batch,"ForecastDustPass",origin,direction,length,halfWidth,color,
+                    signal with { Z=signal.Z*dip },age,reduced);
+                Add(batch,"PortalForecastPass",origin,direction,length,halfWidth,color,
+                    signal,age,reduced,portal:true,ceremony:ceremony);
+            }
+            else
+            {
+                if (!confined)
+                    Add(batch,"PortalCoronaPass",origin,direction,length,halfWidth+Math.Min(24,halfWidth*.3f),
+                        color,signal with { Z=signal.Z*(reduced?.3f:1) },age,reduced,portal:true,ceremony:ceremony);
+                Add(batch,"AutoloadPass",origin,direction,length,halfWidth,color,
+                    signal,age,reduced,portal:true,ceremony:ceremony);
+            }
+            if (mouth)
+                Add(batch,"PortalMouthPass",origin-direction*110,direction,220,
+                    live>0?Math.Min(150,22+halfWidth*.85f):24,color,signal,age,reduced,
+                    portal:true,ceremony:ceremony);
+            return;
+        }
+        // Untimed verdict rays and lattice forecasts retain the accepted 0.2.71
+        // material. In particular, lattice never enters the portal-jet branch.
         if (live == 0)
         {
             // Sparse glints describe the accepted FUTURE footprint. Keep its
@@ -146,14 +176,15 @@ internal static class FirstSeveranceRaidVfx
 
     private static void Add(SpriteBatch batch,string pass,Vector2 origin,Vector2 direction,float length,
         float halfWidth,Color color,Vector4 signal,double age,bool reduced,
-        Vector4 pulse = default, float flowOffset = 0, Vector2? seedOrigin = null)
+        Vector4 pulse = default, float flowOffset = 0, Vector2? seedOrigin = null,
+        bool portal = false, Vector4 ceremony = default)
     {
         if(Main.dedServ || signal.Z<=.001f || length<=0 || halfWidth<=0) return;
         bool immediate=!collecting;
         if(count==commands.Length) Flush(batch); // Never silently drop a danger footprint.
         var stableOrigin=seedOrigin ?? origin;
         float seed=(stableOrigin.X*.00017f+stableOrigin.Y*.00031f)%11;
-        commands[count++]=new(pass,origin,direction,length,halfWidth,color,signal,(float)(age%216000)/60,seed,reduced,pulse,flowOffset);
+        commands[count++]=new(pass,origin,direction,length,halfWidth,color,signal,(float)(age%216000)/60,seed,reduced,pulse,flowOffset,portal,ceremony);
         if(immediate) Flush(batch);
     }
 
@@ -164,7 +195,8 @@ internal static class FirstSeveranceRaidVfx
     internal static void Flush(SpriteBatch batch)
     {
         if(Main.dedServ || count==0) { count=0; return; }
-        ManagedShader shader=ShaderManager.GetShader("Convergence.RaidEnergy");
+        ManagedShader legacy=ShaderManager.GetShader("Convergence.RaidEnergy");
+        ManagedShader portal=ShaderManager.GetShader("Convergence.PortalBeam");
         var device=Main.instance.GraphicsDevice;
         batch.End();
         var blend=device.BlendState; var depth=device.DepthStencilState; var raster=device.RasterizerState;
@@ -173,19 +205,23 @@ internal static class FirstSeveranceRaidVfx
         try {
             device.BlendState=BlendState.AlphaBlend;device.DepthStencilState=DepthStencilState.None;
             device.RasterizerState=RasterizerState.CullNone;
-            shader.TrySetParameter("uWorldViewProjection",Main.GameViewMatrix.TransformationMatrix*
-                Matrix.CreateOrthographicOffCenter(0,device.Viewport.Width,device.Viewport.Height,0,-1,1));
-            shader.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value,1,SamplerState.LinearWrap);
-            shader.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value,2,SamplerState.LinearWrap);
-            shader.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,3,SamplerState.LinearWrap);
+            var transform=Main.GameViewMatrix.TransformationMatrix*
+                Matrix.CreateOrthographicOffCenter(0,device.Viewport.Width,device.Viewport.Height,0,-1,1);
+            legacy.TrySetParameter("uWorldViewProjection",transform);
+            portal.TrySetParameter("uWorldViewProjection",transform);
+            legacy.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value,1,SamplerState.LinearWrap);
+            legacy.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value,2,SamplerState.LinearWrap);
+            legacy.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,3,SamplerState.LinearWrap);
             for(int i=0;i<count;i++) {
                 ref readonly var c=ref commands[i];
+                ManagedShader shader=c.Portal?portal:legacy;
                 shader.TrySetParameter("beamColor",c.Color.ToVector3());
                 shader.TrySetParameter("signal",c.Signal);
                 shader.TrySetParameter("shape",new Vector4(c.Length,c.HalfWidth,c.Seed,c.Reduced?.25f:1));
                 shader.TrySetParameter("clock",c.Time);
                 shader.TrySetParameter("pulse",c.Pulse);
                 shader.TrySetParameter("flowOffset",c.FlowOffset);
+                shader.TrySetParameter("ceremony",c.Ceremony);
                 Quad(c.Origin,c.Direction,c.Length,c.HalfWidth);
                 shader.Apply(c.Pass);
                 device.DrawUserPrimitives(PrimitiveType.TriangleList,vertices,0,2);
