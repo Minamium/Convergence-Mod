@@ -29,7 +29,7 @@ related_docs:
 
 調査日: 2026-09-06。目的は「WotG級の巨大感・不穏さ・荘厳さ・攻撃演出」を分解し、First Severanceへ独自に取り込む判断材料を残すこと。**WotGの再現Modにする、ソロ戦へ寄せる、素材や実装を移植する、という意味ではない。**
 
-本書は参考研究と提案。現在の実装は[Status](../STATUS.md)、確定したRaidルールは[Encounter Spec](../encounters/first-severance/ENCOUNTER_SPEC.md)、現在の造形は[Visual Spec](../encounters/first-severance/VISUAL_SPEC.md)が所有する。初回2026-09-06は文書調査のみ。以後の追補は独立実装の判断も記録する。**2026-09-13の実録画フレーム解析はF14**。初回YouTube調査の未視聴記録を、後から視聴済みだったことに書き換えない。
+本書は参考研究と提案。現在の実装は[Status](../STATUS.md)、確定したRaidルールは[Encounter Spec](../encounters/first-severance/ENCOUNTER_SPEC.md)、現在の造形は[Visual Spec](../encounters/first-severance/VISUAL_SPEC.md)が所有する。初回2026-09-06は文書調査のみ。以後の追補は独立実装の判断も記録する。**2026-09-13の実録画解析はF14、指定されたNameless三連の詳細はF15**。初回YouTube調査の未視聴記録を、後から視聴済みだったことに書き換えない。
 
 ## 1. 結論
 
@@ -307,6 +307,52 @@ F12の `HadesSuperLaserbeam` / `HadesExoEnergyBlastShader` は太い口砲の**s
 [f14-blazing-shader]: https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Assets/AutoloadedEffects/Shaders/Primitives/BlazingExoLaserbeamShader.fx
 [f14-portal-forecast]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Assets/AutoloadedEffects/Shaders/Primitives/NamelessDeityFlowerLaserTelegraphShader.fx
 [f14-portal-live]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Assets/AutoloadedEffects/Shaders/Primitives/NamelessDeityPortalLaserShader.fx
+
+### F15 — Nameless portal triplet (2026-09-13)
+
+**問い:** ユーザー指定の録画B・30秒付近からの3回の予告→中幅ビームを、格子以外の理想形にする。F14の有限packet風currentを無条件に引き継がず、指定場面の明暗と緩急を優先する。格子はユーザーが受け入れた現状を保持。実装モードの追加調査で、音声変更・攻撃タイミング変更は範囲外。
+
+#### 実映像の観察
+
+録画Bは台帳の `Terraria_ Not to be confused with Catastrophe 2026-09-13 20-00-10.mp4`。原本133.85秒、1920×1012、平均約29.83fpsの可変frame-rate。29秒以降の3fps俯瞰3枚を見た後、**補間もfps再標本化もしない連続16frame×9枚＝144frame**を直接確認した。対象範囲は30.416–31.993、32.063–33.629、33.429–34.999秒。PTSを各frameに表示し、以下は約1frame（33ms）精度の視覚観測。音声聴取や全編の連続再生をしたという記録ではない。
+
+| 順番 | 予告の育ち／発射直前 | 最初の発光frame／本体 | 絞り込み／消失 |
+|---|---|---|---|
+| 1・縦 | 30.688以降、赤紫の柔らかい帯が育つ。31.227–31.360で急に暗くなる | **31.393**。31.427以降、白い芯と裂けた赤い層が連続噴出 | 31.760–31.860で細線化、31.893で本体消失 |
+| 2・横 | 32.063付近から帯。32.729–32.863で減光 | **32.929**、32.963以降に太い白芯 | 33.296–33.396で細線化、33.429で消失 |
+| 3・縦 | 33.696付近から予兆、33.963–34.196で強くなる。34.329–34.429で沈む | **34.463**、34.496以降に白芯／色付きの流れ | 34.799–34.932で収縮、34.965で消失 |
+
+最初の発光同士は約1.535秒間隔、本体から消失までは約0.50秒。**この秒数をConvergenceの攻撃設定へ移すのではなく、明暗・幅・前後の対比を採用する。** 予告は「細線しか存在しない」ものではない。薄い色の体積、中心の微光、疎な粒子、柔らかい縁が見える。本体は分断された彗星ではなく、明瞭な白芯に暗い裂け目と色の流れが重なる持続噴流。終わりも全面alphaだけを落とさず、細い光へ潰れてから消える。
+
+別物の区別: 巨大な星／ループ状の攻撃にはプレイヤー武器由来のものがある。32.8秒付近の大きな白い球はBoss移動と重なるため、各ビームの発射光として複製しない。録画版Modの厳密version、危険判定の開始／終了、観測画素と判定幅の一致は映像だけでは確定できない。
+
+#### 公開描画実装との対応
+
+公式性・version・ライセンスはF12を共用。WotG公開snapshot **`7cb5b86c770e73d6853749b2b688d478ba3326a7` / 1.2.24** に固定し、以下の本文を取得して読解した（アクセス2026-09-13、verified）。録画のV/H/V構成と整合するが、録画バイナリがこのsnapshotと同一とは主張しない。WotG側のtML/Terraria厳密版はunknown、参照依存はF12、Convergenceは現行[Version Matrix](../VERSION_MATRIX.md)のまま。
+
+| 正確な対象・member | 確認できた構造 | 独立実装への意味 |
+|---|---|---|
+| [NamelessDeityBoss.BehaviorStates.PerpendicularPortalLaserbeams.cs][f15-state] の射出処理 | Bossが水平／垂直を交互に移動し、経路にportalを置く。残り移動時間からfire delayを計算するので、順次予告されても同じ組の発射が揃う | 3回の方角変化の有力な対応。Boss移動、flower、瞬間移動、全screen shakeは移植しない |
+| [TelegraphedPortalLaserbeam.cs][f15-portal] の `TelegraphColorFunction` / `LaserWidthFunction` / `PrepareLaserShader` / `PreDraw` | 時間曲線で予告を発射直前に減光。終端でOpacityに従い幅を収縮。明暗別scrollとnon-additive設定、局所的なsource bloom | 予告dip・白芯／暗部・細線への退出を組み合わせる。色、係数、実装式や依存内部はコピーしない |
+| [NamelessDeityFlowerLaserTelegraphShader.fx][f14-portal-forecast] | 柔らかい横断面gradient、少数の星状点滅、source側の光、長軸端fade | 平坦な塗り領域ではない淡いveil。過去の「予告に面の色は禁止」を非格子のみ上書き |
+| [NamelessDeityPortalLaserShader.fx][f14-portal-live] | 独立したdark/bright scroll、noiseの減算・contrast、明瞭な芯、非ゼロalpha、縁／終端のfade | 加算光だけでは作れない暗い溝を持つ噴流。独立shaderで同じ見え方の要因を再構成 |
+| [BaseTelegraphedPrimitiveLaserbeam.cs][f15-base] | 予告とliveの描画を分離し、発射後に長さを伸ばす。終端には独自のcollision停止条件もある | 幅収縮だけ真似して見えない危険を作らない。Convergenceは既存hit窓の**終了後**から収縮させる |
+
+#### Convergenceの採否・境界
+
+- 新しい独立 `PortalBeam.fx` のforecast / jet / corona / mouthに分ける。淡いveilと疎なglintを発射直前だけ沈め、既存needle/増幅geometryで白芯を出す。明暗を別速度で流して、色付きの裂けとほぼ黒い溝を作る。終端後に急収縮して消す。巨大なteleport球や花のspriteは追加しない。
+- 初期八連、単独散開の追従、Final四色、格子中の**別のCore砲**、Stillness、旋回、上下／横方向のjetsへ同一materialを適用。確定ray・target・fire/end・damage・protocolは維持する。長い旋回／floodを参考動画の0.5秒に短縮しない。
+- **格子線そのものは例外**。予告・有限packet・stagger・速度・shader exportを変更せず、別のlegacy経路へ固定。Stack/Spreadの判定演出、弾幕、Boss／背景／終幕、音、武器、Oniは今回は触らない。
+- 予告の外周rail、矢印、照準円は戻さない。素材内部の暗部も危険域なので、live中は薄い外層を残す。完全に細くなるのは終了後だけ。Reduced Effectsでfuture extentや判定を変えない。
+- Luminanceの既読APIを継続。追加確認として固定1.0.14 [`ManagedShader.SetTexture` / `Apply`](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/Core/Graphics/Shaders/ManagedShader.cs) はdevice slotへ直接bindし、指定passを適用することを確認した。二つのeffectで同じ3枚の公開noiseを参照し、frame終了時にgraphics stateを復元する。
+
+**権利:** WotGの再利用許諾は未確立。録画とsourceは挙動の観察に限り、数式・コード・shader・画像・音声を複製しない。新shaderは独立作成、runtime noiseは別途導入済みのLuminance公開registryのみ。[Attribution](../../Assets/ATTRIBUTION.md#portal-triplet-beam-material--2026-09-13)に記録し、原録画／解析frame／第三者source mirrorはpackageにもGitにも入れない。
+
+**確認:** 実際のcompiled FNA/D3D11で4幅のold/new比較と予告→release→収縮を確認する。格子の既存shader byte hashとnative pixel比較、descriptor fire/end経路、server guard、texture/sampler復元を検証。Convergenceのゲーム内重なり・UI107%/zoom・Reduced Effects・frame-time・視覚的な好みの受入れは別項目で、GPU材質previewを実機プレイやWotG同等品質と呼ばない。[Status](../STATUS.md)が結果を所有する。
+
+[f15-state]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/NamelessDeity/Behaviors/Phase1Attacks/NamelessDeityBoss.BehaviorStates.PerpendicularPortalLaserbeams.cs
+[f15-portal]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/NamelessDeity/Projectiles/TelegraphedPortalLaserbeam.cs
+[f15-base]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Core/BaseEntities/BaseTelegraphedPrimitiveLaserbeam.cs
 
 ## 5. First Severanceに変換するときに崩さないもの
 

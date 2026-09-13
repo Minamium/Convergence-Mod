@@ -2,6 +2,22 @@
 
 ## Records
 
+### Portal triplet beam material — 2026-09-13
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/PortalBeam.fxc`
+- Asset ID: doll-portal-jet-0272
+- Asset type: compiled original four-pass GPU material
+- Creator: Codex, project-directed for Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: adjacent `PortalBeam.fx`; [F15 recorded triplet analysis](../docs/research/WOTG_RAID_BENCHMARK.md#f15--nameless-portal-triplet-2026-09-13) records visual/source influence, not copied equations or textures
+- Tool/model/version: Microsoft FXC 10.1 / D3DCompiler_47; exact input/output hashes in adjacent `compiled.json`
+- Human modifications: soft forecast veil, pre-shot dim, independent scrolling dark/colored folds and white core, post-damage width contraction, connected source slit. Lattice and prior shader exports preserved unchanged.
+- License and redistribution terms: existing project publication/license gate; WotG reuse permission is unestablished and no source/shader/art from it is distributed
+- Required attribution: retain this record and F15; Luminance MIT maps are referenced through its public runtime registry, not copied into the package
+- Reviewer and review date: Codex, 2026-09-13; native compiled FNA/D3D11 previews, gameplay acceptance pending
+- Notes: regenerate with `tools/compile_shaders.py --fxc <local compiler>`. Source/manifest and local user-recording frame analysis are excluded from `.tmod`; no image generation or third-party media conversion into runtime textures.
+
 ### Raid Energy material suite — 2026-09-13
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/RaidEnergy.fxc`
