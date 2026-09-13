@@ -30,10 +30,10 @@ public sealed class GhostSamuraiBoss : ModNPC
     }
     public override void SetDefaults()
     {
-        NPC.width = 116; NPC.height = 170;
+        NPC.width = GhostSamuraiRules.BodyWidth; NPC.height = GhostSamuraiRules.BodyHeight;
         NPC.lifeMax = GhostSamuraiRules.Life;
         NPC.defense = GhostSamuraiRules.Defense;
-        NPC.damage = 0; // No invisible body/contact hits during approach or wind-up.
+        NPC.damage = 0; // Runtime owns swept body contact; native client hits stay off.
         NPC.knockBackResist = 0;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.boss = NPC.netAlways = true;
         NPC.aiStyle = -1;
@@ -54,6 +54,19 @@ public sealed class GhostSamuraiBoss : ModNPC
     public override void AI()
     {
         NPC.timeLeft = NPC.activeTime;
+        if (Main.netMode == NetmodeID.MultiplayerClient && TransitionRemaining == 0)
+        {
+            // Evaluate the same locked trajectory, instead of extrapolating a
+            // single high velocity past its end. This path never decides hits.
+            foreach (Projectile p in Main.ActiveProjectiles)
+                if (p.ModProjectile is GhostSamuraiAttackProjectile rush && rush.Fight == Fight && rush.BossSlot == NPC.whoAmI
+                    && rush.Hazard.Shape == SamuraiShape.RushVisual && rush.SlashAim.Locked && rush.Hazard.Live(VisualAge))
+                {
+                    NPC.Center = GhostSamuraiAttackProjectile.RushCenter(rush.DisplayHazard, VisualAge);
+                    NPC.velocity = Vector2.Zero;
+                    break;
+                }
+        }
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {
             // Unregistered/debug-spawned actors cannot run an unmanaged second fight.

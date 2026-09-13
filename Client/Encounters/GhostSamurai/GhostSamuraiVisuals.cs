@@ -79,6 +79,12 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             case SamuraiAttack.Phase2DashSlash:
                 t = t % GhostSamuraiRules.DashCadence - GhostSamuraiRules.DashApproach;
                 warning = GhostSamuraiRules.DashWarning; live = GhostSamuraiRules.DashLive; break;
+            case SamuraiAttack.Phase3CircleAttack:
+                int step = Math.Min((int)t / GhostSamuraiRules.Phase3CircleStepInterval, 3);
+                t -= step * GhostSamuraiRules.Phase3CircleStepInterval;
+                warning = GhostSamuraiRules.Phase3CircleTelegraphTime;
+                live = step < 2 ? GhostSamuraiRules.Phase3CircleSlashLive : GhostSamuraiRules.Phase3KamaitachiDuration;
+                break;
             default: return 0;
         }
         if (t < 0) return 0;
@@ -121,17 +127,17 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         // Do not replay missed historical cues after joining/snapshot catch-up.
         if (lastAge >= 0 && tick - lastAge <= 4)
         {
-            if (h.Shape == SamuraiShape.Slash && h.Radius == GhostSamuraiRules.ChargeHalfWidth)
+            if (h.Shape == SamuraiShape.RushVisual && h.Radius == GhostSamuraiRules.ChargeHalfWidth)
                 for (int warning = 0; warning < 3; warning++)
                 {
                     int at = h.Born + warning * (h.Fire - h.Born) / 3;
                     if (lastAge < at && tick >= at) SoundEngine.PlaySound(SoundID.Item4 with { Volume = .7f, Pitch = warning * .15f }, projectile.Center);
                 }
-            if (lastAge < h.Fire && tick >= h.Fire && h.Shape == SamuraiShape.Slash)
-                SoundEngine.PlaySound(SoundID.Item71 with { Volume = .6f, MaxInstances = 2 }, projectile.Center);
+            if (lastAge < h.Fire && tick >= h.Fire && h.Shape != SamuraiShape.Wisp)
+                SoundEngine.PlaySound((h.IsWind ? SoundID.Item60 : SoundID.Item71) with { Volume = .6f, MaxInstances = 2 }, projectile.Center);
         }
         // First warning is the current event, not history, on a fresh charge spawn.
-        if (lastAge < 0 && tick >= h.Born && tick <= h.Born + 3 && h.Radius == GhostSamuraiRules.ChargeHalfWidth)
+        if (lastAge < 0 && tick >= h.Born && tick <= h.Born + 3 && h.Shape == SamuraiShape.RushVisual && h.Radius == GhostSamuraiRules.ChargeHalfWidth)
             SoundEngine.PlaySound(SoundID.Item4 with { Volume = .7f }, projectile.Center);
         lastAge = tick;
     }
@@ -142,12 +148,15 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         var h = p.DisplayHazard;
         if (age < h.Born || age >= h.End) return false;
         // A delayed client must not render a stale aimed line as the live strike.
-        if (h.Shape == SamuraiShape.Slash && age >= h.Fire && !p.SlashAim.Locked) return false;
+        if (h.HasAim && age >= h.Fire && !p.SlashAim.Locked) return false;
         SpriteBatch batch = Main.spriteBatch;
         Vector2 position = p.VisualCenter(age) - Main.screenPosition;
         bool live = h.Live(age);
         Color color = live ? new Color(186, 247, 255) : new Color(69, 182, 240);
-        if (h.Shape == SamuraiShape.Wisp)
+        if (h.IsCircle) GhostSamuraiCircleVisuals.Draw(batch, h, position, age,
+            ModContent.GetInstance<Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig>().ReducedEffects);
+        else if (h.Shape == SamuraiShape.RushVisual) DrawRush(batch, p, position, age);
+        else if (h.Shape == SamuraiShape.Wisp)
         {
             // Core radius matches collision. Tail is translucent decoration.
             GhostSamuraiVisuals.Ring(batch, position, h.Radius, 6, new Color(5, 14, 32) * .9f);
@@ -183,5 +192,39 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
             GhostSamuraiVisuals.Stroke(batch, end - normal * h.Radius, end + normal * h.Radius, 2, edge);
         }
         return false;
+    }
+
+    private static void DrawRush(SpriteBatch batch, GhostSamuraiAttackProjectile p, Vector2 start, float age)
+    {
+        var h = p.DisplayHazard;
+        Vector2 d = new(h.DX, h.DY), n = new(-h.DY, h.DX), end = start + d * h.Length;
+        bool live = h.Live(age);
+        Color ink = new(6, 13, 30), edge = p.SlashAim.Locked ? new(255, 245, 198) : new(255, 180, 58);
+        if (!live)
+        {
+            // Only the route is forecast. No filled slash-shaped damage field.
+            float width = Math.Abs(n.X) * GhostSamuraiRules.BodyWidth / 2 + Math.Abs(n.Y) * GhostSamuraiRules.BodyHeight / 2;
+            GhostSamuraiVisuals.Stroke(batch, start, end, 6, ink);
+            GhostSamuraiVisuals.Stroke(batch, start, end, 2, edge);
+            for (int side = -1; side <= 1; side += 2)
+            for (float along = 0; along < h.Length; along += 60)
+            {
+                Vector2 a = start + d * along + n * width * side;
+                Vector2 b = a + d * Math.Min(30, h.Length - along);
+                GhostSamuraiVisuals.Stroke(batch, a, b, 5, ink * .8f);
+                GhostSamuraiVisuals.Stroke(batch, a, b, 2, edge * .8f);
+            }
+        }
+        else
+        {
+            float t = (age - h.Fire) / (h.End - h.Fire);
+            Color flash = new Color(186, 247, 255) * (1 - t);
+            // Large single blade flash stays translucent and unbordered: unlike
+            // the solid outlined grid, this art is entirely harmless.
+            GhostSamuraiVisuals.Stroke(batch, start, end, h.Radius * .6f, flash * .15f);
+            GhostSamuraiVisuals.Stroke(batch, start, end, 7, flash * .65f);
+            Vector2 body = GhostSamuraiAttackProjectile.RushCenter(h, age) - Main.screenPosition;
+            GhostSamuraiVisuals.Stroke(batch, body - d * 180, body, 18, flash * .3f);
+        }
     }
 }

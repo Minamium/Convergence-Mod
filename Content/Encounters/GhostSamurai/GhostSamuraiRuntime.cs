@@ -26,7 +26,8 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
     private SamuraiAttack attack, previous;
     private SamuraiBeat beat;
     private float baseAngle;
-    private Vector2 dashStart, dashEnd;
+    private Vector2 contactFrom;
+    private int contactDamage;
     private int dashSide;
     private int wispOpportunity;
     private GhostSamuraiAttackProjectile? aimedSlash;
@@ -60,6 +61,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
 
         NPC npc = actor.NPC;
         age++;
+        contactDamage = 0; // No body damage survives a tick, interruption or recovery.
         // Native projectile slots can be reused before this authority tick. An
         // active replacement must not keep an old ModProjectile in our budget.
         hazards.RemoveAll(p => !p.Projectile.active || p.Projectile.ModProjectile != p
@@ -124,7 +126,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             beat = SamuraiBeat.Recovery;
             Hover(npc, target.Center + new Vector2(npc.Center.X < target.Center.X ? -300 : 300, -200));
             if (++timer < GhostSamuraiRules.AttackInterval(phase)) return;
-            int count = phase == SamuraiPhase.Phase1 ? 3 : 4;
+            int count = GhostSamuraiRules.AttackCount(phase);
             attack = GhostSamuraiRules.SelectNextAttack(phase, previous, Main.rand.Next(count - (previous == SamuraiAttack.Idle ? 0 : 1)));
             timer = 0;
             baseAngle = Main.rand.NextFloat(-.35f, .35f);
@@ -137,6 +139,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             case SamuraiAttack.ChargedSlash: DoChargedSlash(npc, target); break;
             case SamuraiAttack.GridSlash: DoGridSlash(npc, target); break;
             case SamuraiAttack.Phase2DashSlash: DoPhase2DashSlash(npc, target); break;
+            case SamuraiAttack.Phase3CircleAttack: DoPhase3CircleAttack(npc, target); break;
         }
         if (attack != SamuraiAttack.Idle) timer++;
     }
@@ -163,7 +166,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         if (timer < GhostSamuraiRules.ChargeAimTime)
         {
             beat = SamuraiBeat.Approach;
-            Hover(npc, target.Center + new Vector2(dashSide * 360, -100));
+            Hover(npc, target.Center + new Vector2(dashSide * GhostSamuraiRules.ChargeStandOff, 0), GhostSamuraiRules.DashRetreatSpeed);
             return;
         }
         DoChargeSequence(npc, target, timer - GhostSamuraiRules.ChargeAimTime, false);
@@ -178,20 +181,25 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         int warning = GhostSamuraiRules.ChargeWindup(pass, afterGrid);
         beat = local < warning ? SamuraiBeat.Telegraph
             : local < warning + GhostSamuraiRules.ChargeLive ? SamuraiBeat.Strike : SamuraiBeat.Recovery;
-        Vector2 direction = (target.Center - npc.Center).SafeNormalize(Vector2.UnitX);
-        Vector2 start = target.Center - direction * 900;
+        int side = pass % 2 == 0 ? dashSide : -dashSide;
         if (local == 0)
         {
-            // Grid follow-up locks precisely when the grid stops hurting, so an
-            // immediate dodge is never chased into another cell by the warning.
-            int lead = afterGrid && pass == 0 ? GhostSamuraiRules.GridFollowGap : GhostSamuraiRules.AimLockLead;
-            aimedSlash = AddSlash(start, direction, 1800, GhostSamuraiRules.ChargeHalfWidth,
-                warning, GhostSamuraiRules.ChargeLive, age + warning - lead, GhostSamuraiRules.ChargeDamage);
+            aimedSlash = AddRush(npc, target, GhostSamuraiRules.ChargeDistance, GhostSamuraiRules.ChargeHalfWidth,
+                warning, GhostSamuraiRules.ChargeLive);
             if (phase != SamuraiPhase.Phase1 && pass == 0 && !afterGrid)
                 AddWispBursts(npc.Center, age + warning + GhostSamuraiRules.WispDelay, 5);
             npc.netUpdate = true;
         }
-        if (local < warning && aimedSlash is not null) aimedSlash.Aim(age, start, direction);
+        if (local < warning) TrackRush(npc, target, side, GhostSamuraiRules.ChargeStandOff);
+        else if (local < warning + GhostSamuraiRules.ChargeLive) MoveRush(npc, GhostSamuraiRules.ChargeDamage);
+        else
+        {
+            // Reposition in the harmless gap so the short later warnings can aim
+            // from the opposite side without teleporting the physical body.
+            int nextSide = -side;
+            if (pass < GhostSamuraiRules.ChargeCount(phase) - 1)
+                Hover(npc, target.Center + new Vector2(nextSide * GhostSamuraiRules.ChargeStandOff, 0), GhostSamuraiRules.DashRetreatSpeed);
+        }
     }
 
     private void DoGridSlash(NPC npc, Player target)
@@ -236,32 +244,82 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         int windup = local - GhostSamuraiRules.DashApproach;
         if (windup == 0)
         {
-            Vector2 direction = (target.Center - npc.Center).SafeNormalize(new Vector2(-side, 0));
-            aimedSlash = AddSlash(npc.Center, direction, GhostSamuraiRules.DashDistance,
-                GhostSamuraiRules.DashHalfWidth, GhostSamuraiRules.DashWarning, GhostSamuraiRules.DashLive,
-                age + GhostSamuraiRules.DashWarning - GhostSamuraiRules.AimLockLead);
+            aimedSlash = AddRush(npc, target, GhostSamuraiRules.DashDistance,
+                GhostSamuraiRules.DashHalfWidth, GhostSamuraiRules.DashWarning, GhostSamuraiRules.DashLive);
             npc.netUpdate = true;
         }
         if (windup < GhostSamuraiRules.DashWarning)
         {
             beat = SamuraiBeat.Telegraph;
-            if (aimedSlash is not null && age <= aimedSlash.SlashAim.LockTick)
-            {
-                Hover(npc, target.Center + new Vector2(side * GhostSamuraiRules.DashStandOff, 0), GhostSamuraiRules.DashRetreatSpeed);
-                aimedSlash.Aim(age, npc.Center, (target.Center - npc.Center).SafeNormalize(new Vector2(-side, 0)));
-                var geometry = aimedSlash.DisplayHazard;
-                dashStart = new(geometry.X, geometry.Y);
-                dashEnd = dashStart + new Vector2(geometry.DX, geometry.DY) * geometry.Length;
-            }
-            if (aimedSlash is null || aimedSlash.SlashAim.Locked) npc.velocity = Vector2.Zero;
+            TrackRush(npc, target, side, GhostSamuraiRules.DashStandOff);
         }
         else if (windup < GhostSamuraiRules.DashWarning + GhostSamuraiRules.DashLive)
         {
             beat = SamuraiBeat.Strike;
-            float progress = GhostSamuraiRules.DashProgress(windup - GhostSamuraiRules.DashWarning + 1);
-            npc.velocity = Vector2.Lerp(dashStart, dashEnd, progress) - npc.Center;
+            MoveRush(npc, GhostSamuraiRules.SlashDamage);
         }
         else { beat = SamuraiBeat.Recovery; npc.velocity *= .7f; }
+    }
+
+    private GhostSamuraiAttackProjectile AddRush(NPC npc, Player target, float distance, float visualWidth, int warning, int live)
+    {
+        Vector2 d = RushDirection(npc, target, distance, live);
+        return Spawn(new(SamuraiShape.RushVisual, npc.Center.X, npc.Center.Y, d.X, d.Y, distance, visualWidth,
+            age, age + warning, age + warning + live, 0), age + warning - GhostSamuraiRules.AimLockLead);
+    }
+
+    private void TrackRush(NPC npc, Player target, int side, float standOff)
+    {
+        if (aimedSlash is null) { npc.velocity = Vector2.Zero; return; }
+        if (age <= aimedSlash.SlashAim.LockTick)
+        {
+            Hover(npc, target.Center + new Vector2(side * standOff, 0), GhostSamuraiRules.DashRetreatSpeed);
+            aimedSlash.Aim(age, npc.Center, RushDirection(npc, target, aimedSlash.Hazard.Length, aimedSlash.Hazard.End - aimedSlash.Hazard.Fire));
+        }
+        if (aimedSlash.SlashAim.Locked)
+        {
+            npc.velocity = Vector2.Zero;
+            if (age == aimedSlash.SlashAim.LockTick) npc.netUpdate = true;
+        }
+    }
+
+    private static Vector2 RushDirection(NPC npc, Player target, float distance, int duration)
+    {
+        var d = GhostSamuraiRules.RushDirection(npc.Center.X, npc.Center.Y, target.Center.X, target.Center.Y,
+            target.velocity.X, target.velocity.Y, distance, duration);
+        return new(d.DX, d.DY);
+    }
+
+    private void MoveRush(NPC npc, int damage)
+    {
+        npc.velocity = Vector2.Zero;
+        if (aimedSlash is null || !aimedSlash.Projectile.active || !aimedSlash.SlashAim.Locked) return;
+        var h = aimedSlash.DisplayHazard;
+        if (!GhostSamuraiRules.RushCanContact(h, age, aimedSlash.SlashAim.Locked)) return;
+        contactFrom = npc.Center;
+        // Runtime runs after native entity movement. Commit the body position now,
+        // then sweep only the segment actually travelled in this authority tick.
+        npc.Center = GhostSamuraiAttackProjectile.RushCenter(h, age);
+        contactDamage = damage;
+        if (age == h.Fire || age == h.End - 1 || age % 3 == 0) npc.netUpdate = true;
+    }
+
+    private void DoPhase3CircleAttack(NPC npc, Player target)
+    {
+        npc.velocity *= .85f;
+        if (timer >= GhostSamuraiRules.Phase3CircleDuration) { FinishAttack(); return; }
+        if (timer == 0)
+        {
+            // Four bounded immutable entities carry the same captured center and
+            // complete schedule, including on late join. No client targeting.
+            Vector2 center = target.Center;
+            for (int step = 0; step < GhostSamuraiRules.Phase3CircleSteps; step++)
+                Spawn(GhostSamuraiRules.CircleStep(step, center.X, center.Y, age));
+            npc.netUpdate = true;
+        }
+        int current = Math.Min(timer / GhostSamuraiRules.Phase3CircleStepInterval, 3);
+        var stepHazard = GhostSamuraiRules.CircleStep(current, 0, 0, 0);
+        beat = timer < stepHazard.Fire ? SamuraiBeat.Telegraph : stepHazard.Live(timer) ? SamuraiBeat.Strike : SamuraiBeat.Recovery;
     }
 
     private static void Hover(NPC npc, Vector2 destination, float speed = 18)
@@ -304,7 +362,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         if (actor is null || !hazard.IsValid || hazards.Count >= GhostSamuraiRules.MaximumHazards)
             throw new InvalidOperationException("ghost_samurai.hazard_capacity_or_shape");
         int lockAt = lockTick ?? hazard.Born;
-        if (hazard.Shape == SamuraiShape.Slash && !SamuraiSlashAim.Spawn(hazard, lockAt).IsValid(hazard))
+        if (hazard.HasAim && !SamuraiSlashAim.Spawn(hazard, lockAt).IsValid(hazard))
             throw new InvalidOperationException("ghost_samurai.aim_invalid");
         int slot = Projectile.NewProjectile(new GhostSamuraiAttackSource(fight.Value, actor.NPC.whoAmI, hazard, lockAt), new Vector2(hazard.X, hazard.Y), Vector2.Zero,
             ModContent.ProjectileType<GhostSamuraiAttackProjectile>(), 0, 0, Main.myPlayer);
@@ -321,17 +379,20 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         foreach (Player p in Main.ActivePlayers)
         {
             if (p.dead || p.ghost || p.immune || p.creativeGodMode || age < nextHit[p.whoAmI]) continue;
+            int damage = contactDamage > 0 && GhostSamuraiRules.BodyContact(contactFrom.X, contactFrom.Y, npc.Center.X, npc.Center.Y,
+                p.Center.X, p.Center.Y, p.width * .5f, p.height * .5f) ? contactDamage : 0;
             foreach (var hazard in hazards)
             {
+                if (damage > 0) break;
                 if (!hazard.Projectile.active || !hazard.Hits(age, p)) continue;
-                // Resolve native defense/endurance/hooks once on the authority. Clients
-                // receive the resulting HurtInfo; projectile collision is disabled there.
-                double dealt = p.Hurt(PlayerDeathReason.ByNPC(npc.whoAmI), hazard.Hazard.Damage,
-                    p.Center.X >= npc.Center.X ? 1 : -1, out Player.HurtInfo info, quiet: true);
-                nextHit[p.whoAmI] = age + GhostSamuraiRules.HitCooldown;
-                if (dealt > 0 && Main.netMode == NetmodeID.Server) NetMessage.SendPlayerHurt(p.whoAmI, info);
-                break;
+                damage = hazard.Hazard.Damage;
             }
+            if (damage == 0) continue;
+            // One shared native hurt/cooldown path for body, grid, circles and wisps.
+            double dealt = p.Hurt(PlayerDeathReason.ByNPC(npc.whoAmI), damage,
+                p.Center.X >= npc.Center.X ? 1 : -1, out Player.HurtInfo info, quiet: true);
+            nextHit[p.whoAmI] = age + GhostSamuraiRules.HitCooldown;
+            if (dealt > 0 && Main.netMode == NetmodeID.Server) NetMessage.SendPlayerHurt(p.whoAmI, info);
         }
     }
 
@@ -340,6 +401,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         if (attack != SamuraiAttack.Idle) previous = attack;
         attack = SamuraiAttack.Idle; timer = 0; beat = SamuraiBeat.Recovery;
         aimedSlash = null;
+        contactDamage = 0;
         if (actor is not null) actor.NPC.netUpdate = true;
     }
     private static EncounterRuntimeUpdate End(EncounterEndReason reason) => EncounterRuntimeUpdate.End(GhostSamuraiTermination.End(reason));
@@ -351,6 +413,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             if (p.ModProjectile is GhostSamuraiAttackProjectile owned && owned.Fight == fight.Value) p.Kill();
         hazards.Clear();
         aimedSlash = null;
+        contactDamage = 0;
     }
     public void Cleanup(in EncounterCleanupContext context)
     {

@@ -10,7 +10,7 @@ internal readonly record struct SamuraiSlashAim(int Tick, int LockTick, float X,
     internal static SamuraiSlashAim Spawn(SamuraiHazard h, int lockTick)
         => new(h.Born, lockTick, h.X, h.Y, h.DX, h.DY);
     internal SamuraiHazard Geometry(SamuraiHazard h) => h with { X = X, Y = Y, DX = DX, DY = DY };
-    internal bool IsValid(SamuraiHazard h) => h.Shape == SamuraiShape.Slash && Geometry(h).IsValid
+    internal bool IsValid(SamuraiHazard h) => h.HasAim && Geometry(h).IsValid
         && LockTick >= h.Born && LockTick <= h.Fire - (LockTick == h.Born ? 0 : GhostSamuraiRules.AimLockLead)
         && Tick >= h.Born && Tick <= LockTick;
     internal bool Locked => Tick == LockTick;
