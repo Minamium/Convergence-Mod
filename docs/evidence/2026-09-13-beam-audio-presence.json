@@ -3,6 +3,7 @@
   "version": "0.2.75",
   "protocol": 36,
   "baseline": "9b4d0b4",
+  "parallel_integration": "Merged origin/main 79a6e9e after it added canonical Ghost Samurai installation records. Conflicts were documentation/catalog only; both evidence records retained and catalog regenerated for changed input. No packaged runtime input changed, so the existing native build remains applicable.",
   "source_commit": "efdfdc6de6066c3a501e2f06b23077688506f977",
   "source_branch": "main",
   "source_sha256": "c6e4915b63bcdea555b012fca5a3e08c22e802fc914ef28935e93a2137ffc507",

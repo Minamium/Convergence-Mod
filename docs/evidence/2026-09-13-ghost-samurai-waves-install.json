@@ -1,0 +1,57 @@
+{
+  "feature": "Ghost Samurai waves and summon-centered field: canonical playtest installation",
+  "version": "0.2.74",
+  "protocol": 36,
+  "merged_pr": 18,
+  "commit": "9b4d0b4453d0b29ccd9a924ab9523c9296f2fe0f",
+  "feature_commit": "94bf0a959cc1ae83ccb13b67c1f51e58843a7a38",
+  "source_sha256": "8285577134f739da2f646bbd776cc858c3d213fcfd8b86a897e71181420a01a4",
+  "artifact": {
+    "bytes": 56837759,
+    "sha256": "a5c03349b8f6cbe298fc7875eddfa95efd7c1e14b9e8fd3efecfe4d41a4fd50b"
+  },
+  "build": {
+    "mode": "native, canonical main and existing normal profile",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "shader_exports": "passed",
+    "source_changed": false
+  },
+  "verification": {
+    "installed_hash": "matches build record",
+    "merged_tree": "identical to verified feature commit",
+    "global_type_registration": "2 passed with installed loader and installed package",
+    "summon_type": "Convergence/GhostSamuraiSummon retained",
+    "prior_checks": "199 domain cases; protocol36 324 codec round-trips and 50 malformed rejections; final 27 focused cases passed. Unchanged code checks reused.",
+    "feature_ci": "PR18 workflow run 34759363809 passed"
+  },
+  "preservation": {
+    "preexisting_modified_locales": "5 files byte-identical and uncommitted",
+    "preexisting_untracked_setup_record": "hash unchanged and uncommitted",
+    "enabled_mod_list": "hash unchanged",
+    "modsources_junction": "unchanged canonical main",
+    "previous_package": "this profile's 0.2.69 backed up; hash matches pre-install baseline",
+    "saves": "not modified"
+  },
+  "runtime": {
+    "status": "not_run; user-owned",
+    "next_action": "Reload Mods or restart tModLoader; no Build + Reload needed for unchanged source",
+    "checks": [
+      "Mod load and summon item restoration",
+      "fixed summoner-centered field, four edges and teleport correction",
+      "death, disconnect/rejoin and fight cleanup",
+      "native wave accessory immunity and multiplayer alignment",
+      "grid follow-up movement and slash/shout timing",
+      "Phase3 out/in/out/in inside the field",
+      "frame time and Reduced Effects"
+    ]
+  },
+  "notes": [
+    "Administrator explicitly authorized main integration and normal-profile installation.",
+    "No GUI, game or gameplay server session was started.",
+    "Local translations remain in the installed package, excluded from Git commits.",
+    "Every peer needs matching version0.2.74/protocol36.",
+    "The later installation-record commit changes documentation only; no rebuild is required."
+  ]
+}

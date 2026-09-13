@@ -41,7 +41,7 @@
       "frame time and Reduced Effects"
     ]
   },
-  "shared_install": "pending authorized main integration and canonical native build",
+  "shared_install": "completed after authorized PR18 integration; see 2026-09-13-ghost-samurai-waves-install.json",
   "notes": [
     "No GUI, game or server play session started.",
     "Server owns field admission, geometry, attack schedule and cleanup; native wave local-player hit resolution is the explicit ADR-0023 exception.",
