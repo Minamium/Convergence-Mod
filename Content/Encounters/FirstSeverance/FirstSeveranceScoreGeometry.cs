@@ -112,7 +112,7 @@ internal static class FirstSeveranceScoreGeometry
         }
         else if (state == FirstSeveranceSubstate.HalfField && age < 300)
         {
-            foreach (var sword in FirstSeveranceImpalingSwords.At(step, age, groundX, groundY))
+            foreach (var sword in FirstSeveranceImpalingSwords.At(step, age, groundX, groundY, actionSeed))
                 rays.Add(new(FirstSeveranceImpalingSwords.BeamAt(sword, age),
                     sword.Live, sword.Wave, sword.Charge));
         }

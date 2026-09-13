@@ -1,5 +1,5 @@
 Mods.Convergence: {
-  UI.FirstSeverance.CombatNotActive: 不幸な人形劇は開演していません。
+  UI.FirstSeverance.CombatNotActive: Requiem of the Hollow Dollは開演していません。
   Items.DollCovenant: {
     DisplayName: ほどけない約束
     Tooltip:

@@ -22,6 +22,7 @@ function New-Record([string]$name, [object[]]$values) {
     if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 24) { $values = $values + @([ulong]0, $null) }
     if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 26) { $values = $values + @($null) }
     if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 27) { $values = $values + @($null) }
+    if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 28) { $values = $values + @($null) }
     $ctor = $assembly.GetType($name, $true).GetConstructors($instanceFlags) | Where-Object { $_.GetParameters().Count -eq $values.Count } | Select-Object -First 1
     if ($null -eq $ctor) { throw "Constructor missing: $name" }
     return $ctor.Invoke($values)

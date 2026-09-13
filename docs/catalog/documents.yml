@@ -513,8 +513,8 @@ documents:
   - encounter.first-severance.visual
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
-  title: 不幸な人形劇 — 少女人形の提示仕様
-  content_sha256: 001e8f9045d9e06fbdc4936b6c5ffee935c4f4473888d1aa09934b32153b17e6
+  title: Requiem of the Hollow Doll — 少女人形の提示仕様
+  content_sha256: a9e85ce2fa254ab7cfd9f98a419624901cad3a664d4104326f3c96c81808121a
   document_type: spec
   status: provisional
   owners:
@@ -541,8 +541,8 @@ documents:
   - project.asset-pipeline
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
-  title: 不幸な人形劇 / The Unfortunate Doll Play
-  content_sha256: dc6bda50cfaad4a9a5f21c61c33fdcd69f160fe93a54b3e0cbd5173e34d47894
+  title: Requiem of the Hollow Doll
+  content_sha256: ff5e5336b27fff1a03e7cc81a57d900adaa65158bba5e6a3f44dbdcf9b9e3355
   document_type: overview
   status: accepted
   owners:
@@ -613,19 +613,20 @@ documents:
   - decision.untimed-recovery-simultaneous-prism
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
-  title: 不幸な人形劇 — Encounter Specification
-  content_sha256: 4ea1894b12a804ba96380e1ec3de7ded310617c2823df462c8d5ccc2e32ac9e1
+  title: Requiem of the Hollow Doll — Encounter Specification
+  content_sha256: d9820222781c187764967504027941572fa4dd1e9fb8a8a457634827e3d56798
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
   - first_severance.terminal_outcomes
   aliases:
+  - Requiem of the Hollow Doll
   - First Severance
   - 不幸な人形劇
   - The Unfortunate Doll Play
@@ -642,7 +643,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 40efaeae58077ab4f379b0bf5f6ff932ee5db419429cccc74e761c186c95403e
+  content_sha256: e258030c9e1a342a3a427eef53b65a7d5635c9c3617bf20141905ede7ed0779f
   document_type: spec
   status: provisional
   owners:
@@ -661,14 +662,14 @@ documents:
   - encounter.first-severance.backlog
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
-  title: 不幸な人形劇 — Ritual Armaments
-  content_sha256: 6040873cad068d5757bf6131b0be09c898f2c5ac9baa5ba2534b9f20c0271dc5
+  title: Requiem of the Hollow Doll — Ritual Armaments
+  content_sha256: 9dffebfaf6e4ae0499b9643253e99ecf521c88e9f9713d168b323f13159f96b6
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - art
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.reward_weapons
   aliases:
@@ -941,7 +942,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 0c000b7568f8c2d089f485eb868ca7190ae81e840bc5799a7a19059abc24f87b
+  content_sha256: 0ddf4fe4e4020fca1d8ad5fbfee6ce3d8d5c4138b90a213449a09de3b936a04e
   document_type: spec
   status: provisional
   owners:
@@ -1078,7 +1079,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 2aba60b463c83d2e02f437917250daf6f22c25fc5d57d3f6bbe5a90408673ce9
+  content_sha256: c7fba50637c4a05539e1242ae6dbca2adf4330671462502e1cf466a9649dc775
   document_type: governance
   status: accepted
   owners:
@@ -1123,7 +1124,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: cf958fab297977fd361264bb5415550c329397c2ce0b36243f0d9f662d540fd2
+  content_sha256: 59e066f8b7e91519ba844f0ecda6e61663c63542e6f2fc8f5053e598b2e706ef
   document_type: status
   status: accepted
   owners:
@@ -1192,6 +1193,30 @@ documents:
   related_docs:
   - docs.system
   - research.sources
+- doc_id: research.doll-video-20260914
+  path: docs/research/2026-09-14-doll-playtest-video.md
+  title: 'Doll playtest: video, audio scheduling and revised presentation'
+  content_sha256: 59795e1f70968bcb4cd4c8774302028bdf88f7c22c376629558fa4b97d7fac0f
+  document_type: research
+  status: provisional
+  owners:
+  - art
+  - gameplay
+  last_reviewed: '2026-09-14'
+  source_of_truth_for: []
+  aliases:
+  - Doll weapon audio missing
+  - Now with more ducks recording
+  related_code:
+  - Client/Encounters/FirstSeverance
+  - Content/Encounters/FirstSeverance/FirstSeveranceCoreCannonVolley.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceImpalingSwords.cs
+  - tools/remix_weapon_impact.py
+  related_docs:
+  - project.status
+  - encounter.first-severance.visual
+  - encounter.first-severance.weapons
+  - research.wotg-raid-benchmark
 - doc_id: research.energy-audio-sky-apis
   path: docs/research/ENERGY_AUDIO_SKY_APIS.md
   title: Energy, audio and sky API evidence

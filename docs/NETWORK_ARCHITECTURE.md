@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v36
+## Current development protocol v37
+
+Doll snapshots append one strict Boolean after the carried-pursuit section. When present, the single Final core cannon adds serial (`uint`), start tick (`ulong`), target slot (`short`) and unit direction (`float` X/Y): **23 bytes including the flag**. Its origin/dimensions and warning/fire/end are reconstructed from accepted Core coordinates and the P2 cannon constants. Reject nonfinite/nonunit directions, absent roster targets, invalid/overflow clocks, casts outside FinalBullets or its complete action window. No target/hit request is added. The feature attack controller owns scheduling, one-hit-per-member ledger and action/Fight cleanup; a late snapshot contains the entire locked cast. P3 spacing also changes: accepted action-start ticks seed shared deterministic gap positions. Old peers must not draw a different hazard from the same action descriptor. Existing Ghost Samurai payloads and stable packet IDs are retained.
+
+## Preceding development protocol v36
 
 Ghost Samurai appends SlashWave to its bounded native ExtraAI shape enum, bounds finite circle radii to3000px, and validates the dash lock against an18-tick shout gap. Existing shape/packet IDs are not renumbered and the native boss snapshot appends16 bytes for the fixed summon-centered field (X/Y center, half-width/height). It rejects invalid or changed same-Fight bounds. Other payload layouts are unchanged. Matching peers are required. The wave uses the explicitly requested native local-player damage/dodge path in [ADR-0023](adr/0023-ghost-samurai-native-wave-damage.md); this is a narrow exception to encounter-owned player-hit resolution, while server spawning, locked geometry, schedule and exact-Fight cleanup are retained. No new client hit request or global feature switch is introduced. [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns tuning and [Status](STATUS.md) owns evidence.
 

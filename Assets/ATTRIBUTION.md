@@ -524,13 +524,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/WideFire, HandCrushImpact, CoreHit; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; HandCrushImpact, PylonHit, SwordImpale; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.4s; SHA256 `80bfeebe6aacfce8b6ee02ed7faf7a4755198e5e1278ce9935fcea851c9737b8`; RMS -13.379 dBFS; 4x peak -1.31 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.38s; SHA256 `0e827cccbe1ff4c872d3db799011ca5c086ba6f5eb68e077c21e4f120d64d7e1`; RMS -14.135 dBFS; 4x peak -1.308 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ClawGrip.wav`
 - Asset ID: doll-theater-0253-clawgrip
@@ -538,13 +538,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; PylonHit, Beams/ChargeLock; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; PylonHit, ShellMassLatch; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.19s; SHA256 `0de24a4f343b77521d787ffd5e9159da32e17ac34fbc6a6a9af17f23a3b3b10c`; RMS -13.762 dBFS; 4x peak -1.309 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.18s; SHA256 `74c93a05b8aabdc7152acbcac68c32d0f2f76f3c3a2aba5a82c03072c70c1545`; RMS -13.055 dBFS; 4x peak -1.31 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ClawHit.wav`
 - Asset ID: doll-theater-0253-clawhit
@@ -552,13 +552,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/CoreSalvoFire, PylonHit; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; PylonHit, CoreHit; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.15s; SHA256 `0229e7e4ad7050775ab662f6137be2416b1b5b1c2ad46c7b17b72dd4c40494b4`; RMS -12.9 dBFS; 4x peak -1.309 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.16s; SHA256 `0bc04192ec4a5c245d4a12338e4a9520e4bf3f95b74f9a4d38b914677dadc081`; RMS -13.452 dBFS; 4x peak -1.309 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/ClawSwipe.wav`
 - Asset ID: doll-theater-0253-clawswipe
@@ -566,13 +566,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/PortalFire, Beams/WideFire, PylonHit; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; BladeUnsheathe, Beams/WideFire, SwordImpale; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.244989s; SHA256 `35326a945fcca80f02b363d4c2c80ca762fd1f9216b6bbd0f77d96bd0fe34484`; RMS -12.153 dBFS; 4x peak -1.309 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.29s; SHA256 `68b896d29f61ce5f2dd12a18380981e3aa29f93efdbd8a13dbfed1b2964ea721`; RMS -13.434 dBFS; 4x peak -1.308 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`
 - Asset ID: doll-theater-0253-dollcharge
@@ -734,13 +734,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/ChargeGather, Beams/ChargeLock; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; Beams/ChargeGather, Beams/ChargeRush, PylonHit; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.8s; SHA256 `0828a97080debcfd00045c5327de25211418f41ee93ab62f4bf12f5c1c147b77`; RMS -12.765 dBFS; 4x peak -1.31 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.8s; SHA256 `f499e542f585fa08697346fcfa60a8768677ab9104d592cb39c1308e815dbb64`; RMS -14.021 dBFS; 4x peak -1.309 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/RangedFire.wav`
 - Asset ID: doll-theater-0253-rangedfire
@@ -748,13 +748,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/WideFire, HandCrushImpact, SwordImpale; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; HandCrushImpact, Beams/WideFire, PylonHit; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.355011s; SHA256 `cc5eb48e06f58a2d50a7420ad96fc4860748d39e26e2f3da2e9e13fc51e1fbda`; RMS -13.735 dBFS; 4x peak -1.31 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.35s; SHA256 `8d1df5469899a388a6ce51e4945845b5f71b366cf6a1ff0b265aa9ff3e68598c`; RMS -13.812 dBFS; 4x peak -1.309 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/RangedLatch.wav`
 - Asset ID: doll-theater-0253-rangedlatch
@@ -762,13 +762,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; PylonHit, ShellMassLatch; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; PylonHit, ShellMassLatch; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.204989s; SHA256 `17523de15e4d785b283e8b3bff21d8d0e88459c3e04afe07a2ffc63126ed8a80`; RMS -13.558 dBFS; 4x peak -1.307 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.17s; SHA256 `c84192e1b289f66aa356c0a48e87b9191bcc7988c430992d2905a806325dd2d3`; RMS -13.367 dBFS; 4x peak -1.308 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/RangedShot.wav`
 - Asset ID: doll-theater-0253-rangedshot
@@ -776,13 +776,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/CoreSalvoFire, SwordImpale, PylonHit; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; HandCrushImpact, PylonHit, SwordImpale; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.13s; SHA256 `cf3ec736fa3beaf860d9a1d3d3596daea35c7c8b1b186fbb3a311ede4f662af1`; RMS -14.272 dBFS; 4x peak -1.269 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.16s; SHA256 `30231cfd1fe46d6fa47f98dcd20f90ef1eeb8ceadd1e4bf58679c1d5b003fd3e`; RMS -13.577 dBFS; 4x peak -1.3 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WeaponHit.wav`
 - Asset ID: doll-theater-0253-weaponhit
@@ -790,13 +790,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/CoreSalvoFire, CoreHit; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; PylonHit, CoreHit; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.13s; SHA256 `45c521f0f48c1741672ef6169354175f4ee65c943f18d704f1c3162b060b1be9`; RMS -14.355 dBFS; 4x peak -1.303 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.135011s; SHA256 `0b91af8b76f4abb16037873f6a8cf154d5c207c499ae2248d89877374d21a4f6`; RMS -13.642 dBFS; 4x peak -1.309 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WitnessDraw.wav`
 - Asset ID: doll-theater-0253-witnessdraw
@@ -804,13 +804,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/PortalFire, CoreHit; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; BladeUnsheathe, Beams/WideFire, CoreHit; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.2s; SHA256 `af038a92a15df4307b9ecb8583a7e657a9804001c2d96ad3a0f188a9f274651c`; RMS -12.122 dBFS; 4x peak -1.31 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.26s; SHA256 `7e7e5b8826fc7c2a0193bf8ddb283899ea11342cadea3575bae87d3ab490f14c`; RMS -13.333 dBFS; 4x peak -1.31 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WitnessFire.wav`
 - Asset ID: doll-theater-0253-witnessfire
@@ -818,13 +818,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; SwordImpale, HandCrushImpact, Beams/PortalFire; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; BladeUnsheathe, HandCrushImpact, PylonHit; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.404989s; SHA256 `b6df86d1f2caaf568eeef8d20f2e1e58654be1ad0656d78abfc3120230c42556`; RMS -13.938 dBFS; 4x peak -1.31 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.36s; SHA256 `a71243b0a21a11bac35c8b786c77a3259672ef1c6f3c4403339ae5b963b257f7`; RMS -14.091 dBFS; 4x peak -1.31 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 - Runtime file: `Assets/Sounds/Weapons/DollTheater/WitnessLock.wav`
 - Asset ID: doll-theater-0253-witnesslock
@@ -832,13 +832,13 @@ The new companion uses the existing project-authored NPC as a character referenc
 - Creator: project-authored Raid DSP sounds, weapon-duration derivative editing by Codex
 - Creation/acquisition date: 2026-09-12
 - Source type: original
-- Source work and URL: project-owned Raid masters and retained loop beds; Beams/ChargeLock, SwordImpale; no external recording
-- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_energy.py plus remix_weapon_foley.py helpers; 44.1kHz PCM16
-- Human modifications: accepted portal-pressure layers, weapon-sized rates/EQ, micro-held intake, transient/body/short attached release; gameplay cue clocks unchanged
+- Source work and URL: project-owned Raid masters; Beams/ChargeLock, PylonHit; no reference recording samples
+- Tool/model/version: Python/NumPy 2.3.5; tools/remix_weapon_impact.py with remix_weapon_foley.py helpers; 44.1kHz PCM16
+- Human modifications: one fast physical cut/strike, low/mid pressure, bounded attached air and silence at endpoints; no second singing note
 - License and redistribution terms: project asset terms remain under the existing development publication gate
 - Required attribution: retain this provenance
 - Reviewer and review date: Codex numerical decode/peak/endpoint checks, 2026-09-14; user listening pending
-- Notes: 0.366667s; SHA256 `19e4f2e08e4955c0dbbff98be681e7924df87d7a1a8fb8c2b8f9174db7dbd5ee`; RMS -14.398 dBFS; 4x peak -1.31 dBFS. Exact inputs and output metrics: docs/evidence/2026-09-14-weapon-energy-assets.json. Prior masters retained externally.
+- Notes: 0.366667s; SHA256 `fe0b45b04058c54eb66055ca191460fdef3da1879cf7769a22bf3aab34235b04`; RMS -14.125 dBFS; 4x peak -1.304 dBFS. Exact inputs/metrics: docs/evidence/2026-09-14-weapon-impact-assets.json. Previous masters archived externally.
 
 
 ### First Severance expanded authored frames — 0.2.52

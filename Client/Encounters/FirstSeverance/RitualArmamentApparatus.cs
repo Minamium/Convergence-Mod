@@ -64,7 +64,7 @@ internal static class RitualArmamentArt
         path[n++] = head;
         var kind = p.ModProjectile is RitualBolt bolt ? bolt.Kind : RitualArmamentKind.Rogue;
         bool strong = p.ModProjectile is RitualBolt { Empowered: true } or WitnessBlade { Stealth: true };
-        float width = p.ModProjectile is WitnessBlade ? (strong ? 136 : 90) : strong ? 65 : kind == RitualArmamentKind.Magic ? 42 : 28;
+        float width = p.ModProjectile is WitnessBlade ? (strong ? 40 : 26) : strong ? 65 : kind == RitualArmamentKind.Magic ? 42 : 28;
         float fade = Math.Min(1, p.timeLeft / (12f * p.MaxUpdates));
         RitualSurfacePass.Flame(path[..n], width, ColorFor(kind), fade * (Reduced ? .68f : .94f));
     }
@@ -95,10 +95,12 @@ internal static class RitualArmamentArt
         if (p.ModProjectile is WitnessBlade witness)
         {
             float size = (witness.Stealth ? 225 : 158) * (.64f + .36f * Q(age / 9));
-            float angle = p.rotation + RitualRenderClock.Fraction * .22f;
+            float angle = p.velocity.ToRotation() + MathHelper.PiOver4
+                + MathF.Sin(age * .13f) * (witness.Returning ? .18f : .05f);
             Relic(b, RitualArmamentKind.Rogue, center, angle, size, Color.White);
-            Ring(b, center, new(size * .43f), -angle, Light(light, .6f), 4, true);
-            Glow(b, center, new(size * .33f), Light(light, .5f));
+            Glow(b, center, new(size * .22f), Light(light, .35f));
+            FirstSeveranceRaidVfx.Sparks(b, center, p.velocity.SafeNormalize(Vector2.UnitX), age,
+                1, witness.Returning ? .18f : .35f, light, false, .24f);
             return;
         }
         if (p.ModProjectile is RitualBolt { Age: < 0 })

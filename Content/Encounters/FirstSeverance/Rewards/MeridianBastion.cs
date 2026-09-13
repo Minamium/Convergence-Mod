@@ -14,12 +14,10 @@ public sealed class MeridianBastion : ModProjectile
     internal Vector2 Muzzle(int lane, float? renderAge = null, Vector2? renderRoot = null, Vector2? renderAxis = null)
     {
         float age = renderAge ?? Age;
-        var v = RitualGrandScore.BatteryOffset(lane);
-        float born = RitualGrandScore.Arrival(age, RitualGrandScore.BatteryBirth(lane));
-        float lockIn = RitualKineticMotion.Arrive((age - RitualGrandScore.BatteryLock) / 18);
-        Vector2 spread = new(v.X - (1 - born) * 170, v.Y);
-        Vector2 locked = new(135 - lane * 7, (lane - 2) * 66);
-        return (renderRoot ?? Projectile.Center) + Vector2.Lerp(spread, locked, lockIn).RotatedBy((renderAxis ?? Axis).ToRotation());
+        float arrival = RitualGrandScore.Arrival(age, 0);
+        // All rounds leave one barrel. Lane still selects the unchanged shot
+        // cadence/ammo budget, not a separate floating gun position.
+        return (renderRoot ?? Projectile.Center) + (renderAxis ?? Axis) * (122 - (1 - arrival) * 60);
     }
     public override string Texture => RitualArmamentItems.TexturePath;
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 1600;

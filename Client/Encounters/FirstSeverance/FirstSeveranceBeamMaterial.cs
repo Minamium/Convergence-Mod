@@ -16,9 +16,9 @@ internal static class FirstSeveranceBeamMaterial
 
     internal static void Flow(SpriteBatch batch,Vector2 origin,Vector2 direction,
         float length,float halfWidth,double age,Color color,float power,bool reduced,
-        float throatLength=0,float throatWidth=0,double fireAge=double.NaN,double endAge=double.NaN)
+        float throatLength=0,float throatWidth=0,double fireAge=double.NaN,double endAge=double.NaN,bool confined=false)
         => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,age,
-            1,1,power,color,reduced,confined:halfWidth>=120,mouth:throatLength>0,fireAge:fireAge,endAge:endAge,
+            1,1,power,color,reduced,confined:confined||halfWidth>=120,mouth:throatLength>0,fireAge:fireAge,endAge:endAge,
             bellLength:throatLength,bellWidth:throatWidth);
 
     internal static void DrawTooth(SpriteBatch batch,FirstSeveranceAttackAccents accents,

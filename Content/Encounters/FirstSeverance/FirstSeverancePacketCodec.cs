@@ -416,6 +416,12 @@ internal static class FirstSeverancePacketCodec
                 writer.Write(ray.Length); writer.Write(ray.HalfWidth);
             }
         }
+        WriteBoolean(writer, combat.CoreCannon is not null);
+        if (combat.CoreCannon is { } cannon)
+        {
+            writer.Write(cannon.Serial); writer.Write(cannon.StartTick); writer.Write((short)cannon.TargetSlot);
+            writer.Write(cannon.Ray.DirectionX); writer.Write(cannon.Ray.DirectionY);
+        }
     }
 
     private static bool TryReadCombat(
@@ -603,6 +609,10 @@ internal static class FirstSeverancePacketCodec
                 carriedLance = new(serial, start, rays, FirstSeveranceAttackKind.PursuitPrism,
                     step, target, sustainedPrism: true);
             }
+            if (!TryReadBoolean(reader, out bool hasCannon)) return false;
+            FirstSeveranceCoreCannonVolley? cannon = hasCannon ? new(reader.ReadUInt32(), reader.ReadUInt64(), reader.ReadInt16(),
+                new(coreX, coreY - FirstSeveranceLanceTuning.BossHeightAboveCore, reader.ReadSingle(), reader.ReadSingle(),
+                    FirstSeveranceGridVolley.CoreBeamLength, FirstSeveranceGridVolley.CoreBeamHalfWidth)) : null;
             combat = new FirstSeveranceCombatProjection(
                 encounterSequence,
                 fightId,
@@ -621,7 +631,7 @@ internal static class FirstSeverancePacketCodec
                 mechanicResult,
                 mechanicRevision,
                 Array.AsReadOnly(participants),
-                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles, mechanicTick, impacts, spread, carriedLance);
+                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles, mechanicTick, impacts, spread, carriedLance, cannon);
             return true;
         }
         catch (ArgumentException)

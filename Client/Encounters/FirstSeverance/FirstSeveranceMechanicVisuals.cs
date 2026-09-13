@@ -78,10 +78,10 @@ internal sealed class FirstSeveranceMechanicVisuals
                     float charge = FirstSeveranceEnergyPulse.Charge(tick, Math.Max(start, end - 100), end);
                     Vector2 mouth = Source(combat);
                     Color ruby = new(255, 24, 66);
-                    accents.Halo(batch, mouth, new Vector2(80 + charge * 240), ruby, .95f * charge);
+                    accents.Halo(batch, mouth, new Vector2(130 + charge * 420), ruby, .95f * charge);
                     FirstSeveranceRaidVfx.Charge(batch, mouth, Vector2.UnitX, tick - start,
-                        charge, 0, charge, ruby, reduced, .45f + charge * .85f);
-                    FirstSeveranceRaidVfx.Orb(batch, mouth, Vector2.Zero, 10 + charge * 34,
+                        charge, 0, charge, ruby, reduced, .65f + charge * 1.45f);
+                    FirstSeveranceRaidVfx.Orb(batch, mouth, Vector2.Zero, 14 + charge * 62,
                         tick - start, ruby, charge, true, reduced);
                 }
             }

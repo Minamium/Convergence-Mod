@@ -105,7 +105,7 @@ internal static partial class Program
                 AssertEqual(prior.Rays[i],decoded.CarriedLance.Rays[i],"older locked aim unmodified");
                 AssertEqual(current.Rays[i],decoded.LanceVolley.Rays[i],"current locked aim unmodified");
             }
-            int tail = end-(2+16+24*count);
+            int tail = end-(3+16+24*count); // v37 adds a trailing cannon-present flag.
             foreach(int flag in new[]{tail,tail+1})
             {
                 var bad=(byte[])bytes.Clone(); bad[flag]=2;

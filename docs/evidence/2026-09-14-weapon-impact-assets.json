@@ -1,0 +1,259 @@
+{
+  "date": "2026-09-14",
+  "recipe": "tools/remix_weapon_impact.py",
+  "recipe_sha256": "d8ffc889912c9e95dab45de27de7c75afd41cc87f95cb2fe6cea170822d8dad1",
+  "helper_sha256": "5673802aab0a622e682b369427543bbe6ab5fd8bf38e7a7f24f67d077bf243a0",
+  "numpy": "2.3.5",
+  "source_sha256": {
+    "Beams/ChargeGather": "e48071a2eb6316e521420850ad570ebf3505da9bc83e6a86f0e4cfbfbc4b1c30",
+    "Beams/ChargeLock": "52a0b6e14c8dfb7233b30bce87cd9225d826b7225a19b6a4ac5acacd0011fb7d",
+    "Beams/ChargeRush": "57adc7042b6ba34074f5c02f455e78471e37bcc13a5b7d404bec08b398378c31",
+    "Beams/WideFire": "8cff57a17c01748492e568a12dfccd52b9d19d8355710e50e78e30c99149cb48",
+    "BladeUnsheathe": "c85d18f30eb1797223ad3fb3e32de8582421e018ae963c413ededf9d2492f828",
+    "CoreHit": "dfabf4f2473db8e9246a2142c48433c989323abc8dfc628280e3f9c0c7303caf",
+    "HandCrushImpact": "54c0dde42c658da36b69db73fa0b9f801e26aeb6519f3e55290e4a4b767e528c",
+    "PylonHit": "4b2366b9c6e281d471bd0a1c2cecabeb70a14207c84801a2ac24305813fa486a",
+    "ShellMassLatch": "f2f952c2c9c4a733199e720fee7991e3b5cba0a5d13b78091d21bce661de2f7e",
+    "SwordImpale": "ba6e2c21571a01ccd5fa5d9393a69e10cb18c98f3582e44c3e143bd731740f77"
+  },
+  "assets": {
+    "ClawSwipe": {
+      "seconds": 0.29,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.308,
+      "rms_dbfs": -13.434,
+      "seam": 0,
+      "max_step": 0.3702698,
+      "sha256": "68b896d29f61ce5f2dd12a18380981e3aa29f93efdbd8a13dbfed1b2964ea721",
+      "sources": [
+        "BladeUnsheathe",
+        "Beams/WideFire",
+        "SwordImpale"
+      ],
+      "below_700hz_power_fraction": 0.72671
+    },
+    "ClawGrip": {
+      "seconds": 0.18,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.31,
+      "rms_dbfs": -13.055,
+      "seam": 0,
+      "max_step": 0.0748596,
+      "sha256": "74c93a05b8aabdc7152acbcac68c32d0f2f76f3c3a2aba5a82c03072c70c1545",
+      "sources": [
+        "PylonHit",
+        "ShellMassLatch"
+      ],
+      "below_700hz_power_fraction": 0.97537
+    },
+    "ClawCrush": {
+      "seconds": 0.38,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.308,
+      "rms_dbfs": -14.135,
+      "seam": 0,
+      "max_step": 0.3947449,
+      "sha256": "0e827cccbe1ff4c872d3db799011ca5c086ba6f5eb68e077c21e4f120d64d7e1",
+      "sources": [
+        "HandCrushImpact",
+        "PylonHit",
+        "SwordImpale"
+      ],
+      "below_700hz_power_fraction": 0.93892
+    },
+    "ClawHit": {
+      "seconds": 0.16,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.309,
+      "rms_dbfs": -13.452,
+      "seam": 0,
+      "max_step": 0.1581421,
+      "sha256": "0bc04192ec4a5c245d4a12338e4a9520e4bf3f95b74f9a4d38b914677dadc081",
+      "sources": [
+        "PylonHit",
+        "CoreHit"
+      ],
+      "below_700hz_power_fraction": 0.91699
+    },
+    "RangedLatch": {
+      "seconds": 0.17,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.308,
+      "rms_dbfs": -13.367,
+      "seam": 0,
+      "max_step": 0.1339111,
+      "sha256": "c84192e1b289f66aa356c0a48e87b9191bcc7988c430992d2905a806325dd2d3",
+      "sources": [
+        "PylonHit",
+        "ShellMassLatch"
+      ],
+      "below_700hz_power_fraction": 0.92798
+    },
+    "RangedShot": {
+      "seconds": 0.16,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.3,
+      "rms_dbfs": -13.577,
+      "seam": 0,
+      "max_step": 0.2698364,
+      "sha256": "30231cfd1fe46d6fa47f98dcd20f90ef1eeb8ceadd1e4bf58679c1d5b003fd3e",
+      "sources": [
+        "HandCrushImpact",
+        "PylonHit",
+        "SwordImpale"
+      ],
+      "below_700hz_power_fraction": 0.86559
+    },
+    "RangedCharge": {
+      "seconds": 0.8,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.309,
+      "rms_dbfs": -14.021,
+      "seam": 0,
+      "max_step": 0.0834045,
+      "sha256": "f499e542f585fa08697346fcfa60a8768677ab9104d592cb39c1308e815dbb64",
+      "sources": [
+        "Beams/ChargeGather",
+        "Beams/ChargeRush",
+        "PylonHit"
+      ],
+      "below_700hz_power_fraction": 0.94404
+    },
+    "RangedFire": {
+      "seconds": 0.35,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.309,
+      "rms_dbfs": -13.812,
+      "seam": 0,
+      "max_step": 0.4739685,
+      "sha256": "8d1df5469899a388a6ce51e4945845b5f71b366cf6a1ff0b265aa9ff3e68598c",
+      "sources": [
+        "HandCrushImpact",
+        "Beams/WideFire",
+        "PylonHit"
+      ],
+      "below_700hz_power_fraction": 0.86763
+    },
+    "WitnessDraw": {
+      "seconds": 0.26,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.31,
+      "rms_dbfs": -13.333,
+      "seam": 0,
+      "max_step": 0.1571655,
+      "sha256": "7e7e5b8826fc7c2a0193bf8ddb283899ea11342cadea3575bae87d3ab490f14c",
+      "sources": [
+        "BladeUnsheathe",
+        "Beams/WideFire",
+        "CoreHit"
+      ],
+      "below_700hz_power_fraction": 0.72072
+    },
+    "WitnessLock": {
+      "seconds": 0.366667,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.304,
+      "rms_dbfs": -14.125,
+      "seam": 0,
+      "max_step": 0.2626648,
+      "sha256": "fe0b45b04058c54eb66055ca191460fdef3da1879cf7769a22bf3aab34235b04",
+      "sources": [
+        "Beams/ChargeLock",
+        "PylonHit"
+      ],
+      "below_700hz_power_fraction": 0.86738
+    },
+    "WitnessFire": {
+      "seconds": 0.36,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.31,
+      "rms_dbfs": -14.091,
+      "seam": 0,
+      "max_step": 0.305603,
+      "sha256": "a71243b0a21a11bac35c8b786c77a3259672ef1c6f3c4403339ae5b963b257f7",
+      "sources": [
+        "BladeUnsheathe",
+        "HandCrushImpact",
+        "PylonHit"
+      ],
+      "below_700hz_power_fraction": 0.62057
+    },
+    "WeaponHit": {
+      "seconds": 0.135011,
+      "peak_dbfs": -1.31,
+      "peak_4x_dbfs": -1.309,
+      "rms_dbfs": -13.642,
+      "seam": 0,
+      "max_step": 0.2617188,
+      "sha256": "0b91af8b76f4abb16037873f6a8cf154d5c207c499ae2248d89877374d21a4f6",
+      "sources": [
+        "PylonHit",
+        "CoreHit"
+      ],
+      "below_700hz_power_fraction": 0.87091
+    }
+  },
+  "auditions": {
+    "Claws": {
+      "seconds": 1.78,
+      "peak_dbfs": -0.377,
+      "peak_4x_dbfs": -0.355,
+      "rms_dbfs": -17.174,
+      "seam": 0,
+      "max_step": 0.2994385,
+      "sha256": "652bbf4aafa0b10ad482971537b9d8d171d2d7f80ec356fe7f45dc7df7948432",
+      "preview_only_safety_attenuation_db": -0.46
+    },
+    "Magic": {
+      "seconds": 11.013333,
+      "peak_dbfs": -0.355,
+      "peak_4x_dbfs": -0.355,
+      "rms_dbfs": -19.306,
+      "seam": 0,
+      "max_step": 0.1571655,
+      "sha256": "f93e2a28e69ba6e11c48866bb97779425bc0ce72da284333ec50f420a7a7d58e",
+      "preview_only_safety_attenuation_db": -1.944
+    },
+    "Ranged": {
+      "seconds": 9.98,
+      "peak_dbfs": -0.355,
+      "peak_4x_dbfs": -0.355,
+      "rms_dbfs": -19.57,
+      "seam": 0,
+      "max_step": 0.423645,
+      "sha256": "be6ca758236dafe332646fb71ea4dda5f5f069e9e8574eb7053c7217298e4da8",
+      "preview_only_safety_attenuation_db": -0.532
+    },
+    "Summon": {
+      "seconds": 7.18,
+      "peak_dbfs": -0.359,
+      "peak_4x_dbfs": -0.355,
+      "rms_dbfs": -17.92,
+      "seam": 0,
+      "max_step": 0.2010803,
+      "sha256": "3a53272e4b1faa725a30a7f2843853a67d9b4b36a1907f9f07550541e50f5e06",
+      "preview_only_safety_attenuation_db": -0.867
+    },
+    "Rogue": {
+      "seconds": 4.006667,
+      "peak_dbfs": -1.756,
+      "peak_4x_dbfs": -1.756,
+      "rms_dbfs": -19.413,
+      "seam": 0,
+      "max_step": 0.2903137,
+      "sha256": "a66eae11ba8b24e9b61cfacc3dc3b67c1fec91ee2e2fe434b6472df16a01ee63",
+      "preview_only_safety_attenuation_db": 0
+    },
+    "Doll": {
+      "seconds": 3.98,
+      "peak_dbfs": -1.352,
+      "peak_4x_dbfs": -1.352,
+      "rms_dbfs": -17.43,
+      "seam": 0,
+      "max_step": 0.3067627,
+      "sha256": "7dfb4b811eb7105b1c14a431206236c69f4a2c682d569d1896ce5e90fb7f535d",
+      "preview_only_safety_attenuation_db": 0
+    }
+  },
+  "listening": "not_run; numerical analysis only; user audition required"
+}

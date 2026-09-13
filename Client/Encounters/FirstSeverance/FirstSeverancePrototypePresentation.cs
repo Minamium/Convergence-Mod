@@ -298,97 +298,8 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         }
     }
 
-    public override void PostDrawInterface(SpriteBatch spriteBatch)
-    {
-        if (Main.dedServ || Main.gameMenu)
-            return;
-        FirstSeveranceClientStateSystem state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
-        if (IsIntro(state, out _) || IsRupture(state, out _) || visuals.IsEnding)
-            return; // The isolated cinematic layer owns this frame, without HUD overlap.
-        FirstSeveranceCombatProjection? combat = state.Combat;
-        if (combat is null)
-        {
-            if (state.CombatEndMessage is { } ended)
-                Utils.DrawBorderString(spriteBatch, ended,
-                    new Vector2(Main.screenWidth / 2f, 108f), Color.LightGoldenrodYellow, 0.9f, 0.5f);
-            return;
-        }
-        if (!combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local))
-            return;
-        if (combat.GridVolley is { } grid)
-            Utils.DrawBorderString(spriteBatch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.GridInstruction"),
-                new Vector2(Main.screenWidth / Main.UIScale / 2, 135), grid.IsFiring(state.EstimatedAuthorityTick) ? Color.White : Color.LightCyan, .85f, .5f);
-
-        // A brief edge accent gives the shot impact without a full-screen white flash.
-        if (!ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects
-            && combat.LanceVolley is { } impact && impact.IsFiring(state.EstimatedAuthorityTick))
-        {
-            float power = 1f - (state.EstimatedAuthorityTick - impact.FireTick)
-                / (float)impact.ActiveTicks;
-            Color edge = FirstSeveranceBossVisuals.Gold * (power * 0.32f);
-            spriteBatch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, 5),
-                new Rectangle(0, 0, 1, 1), edge);
-            spriteBatch.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(0, Main.screenHeight - 5, Main.screenWidth, 5),
-                new Rectangle(0, 0, 1, 1), edge);
-        }
-
-        string phase = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.Name" + combat.Substate);
-        phase = $"{combat.BossPhase.ToString().ToUpperInvariant()} // {phase}";
-        float remaining = SecondsLeft(combat.ResolveTick, state.EstimatedAuthorityTick);
-        string text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.CombatHud",
-            phase, remaining.ToString("0.0"));
-        if (combat.IsHpGated && combat.BossPhase != FirstSeveranceBossPhase.Final)
-            text += "  |  HP LOCK";
-        Utils.DrawBorderString(spriteBatch, text,
-            new Vector2(Main.screenWidth / 2f, 82f), Color.LightCyan, 0.9f, 0.5f);
-        string? scoreGuide = combat.Substate switch
-        {
-            FirstSeveranceSubstate.RotatingBlade => "BladeGuide",
-            FirstSeveranceSubstate.RemoteClaws => "ClawsGuide",
-            FirstSeveranceSubstate.HalfField => "HalfGuide",
-            FirstSeveranceSubstate.RemoteCrush => "CrushGuide",
-            FirstSeveranceSubstate.FinalBullets or FirstSeveranceSubstate.FinalSlicer => "FinalGuide",
-            _ => null,
-        };
-        if (scoreGuide is not null)
-            Utils.DrawBorderString(spriteBatch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance." + scoreGuide),
-                new Vector2(Main.screenWidth / 2f, 108f), Color.Silver, .72f, .5f);
-
-        if (combat.LanceVolley is { } volley && state.EstimatedAuthorityTick < volley.EndTick)
-        {
-            string instruction = volley.Kind switch
-            {
-                FirstSeveranceAttackKind.PursuitPrism => "PrismInstruction",
-                FirstSeveranceAttackKind.SweepRight => "DashRightInstruction",
-                FirstSeveranceAttackKind.SweepLeft => "DashLeftInstruction",
-                FirstSeveranceAttackKind.Stillness => "StillnessInstruction",
-                _ => "LanceWarning",
-            };
-            string lance = volley.Kind != FirstSeveranceAttackKind.ObservationLance
-                ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance." + instruction, volley.Step + 1)
-                : state.EstimatedAuthorityTick >= volley.FireTick
-                ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.LanceFire")
-                : Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.LanceWarning",
-                    SecondsLeft(volley.FireTick, state.EstimatedAuthorityTick).ToString("0.0"));
-            Utils.DrawBorderString(spriteBatch, lance,
-                new Vector2(Main.screenWidth / 2f, 143f), Color.LightSalmon, 0.85f, 0.5f);
-        }
-
-        if (local.CombatState == RaidParticipantCombatState.Downed)
-            text = local.ReviveLockoutUntilTick > state.EstimatedAuthorityTick
-                ? Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.DownedLockedHud",
-                    SecondsLeft(local.ReviveLockoutUntilTick, state.EstimatedAuthorityTick).ToString("0"))
-                : Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.DownedHud");
-        else if (local.ReviveLockoutUntilTick > state.EstimatedAuthorityTick)
-            text = Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.RecoveryLockoutHud",
-                SecondsLeft(local.ReviveLockoutUntilTick, state.EstimatedAuthorityTick).ToString("0"));
-        else
-            return;
-
-        Utils.DrawBorderString(spriteBatch, text,
-            new Vector2(Main.screenWidth / 2f, 112f), Color.Orange, 1.1f, 0.5f);
-    }
+    // Preparation Ready is the only persistent top-center raid label.
+    // Combat is read from hazards; Down/lockout remain above each participant.
 
     private static float SecondsLeft(ulong deadline, ulong tick)
         => deadline > tick ? (deadline - tick) / 60f : 0f;
@@ -483,13 +394,6 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         var pixel = new Rectangle(0, 0, 1, 1);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, 0, w, h / 9), pixel, Color.Black * fade);
         batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle(0, h * 8 / 9, w, h / 9 + 1), pixel, Color.Black * fade);
-        string line = combat.BossPhase switch
-        {
-            FirstSeveranceBossPhase.Distant => age < .48f ? "[ LOCAL PRESENCE // RECEDING ]" : "[ PHASE III // REMOTE MANIFESTATION ]",
-            FirstSeveranceBossPhase.Final => age < .48f ? "[ VITAL SIGNAL // ZERO ]" : "[ FINAL // TERMINATION DENIED ]",
-            _ => age < .48f ? "[ SEAL INTEGRITY // CRITICAL ]" : "[ PHASE II // UNBOUND ]",
-        };
-        Utils.DrawBorderString(batch, line, new Vector2(w * .5f, h * .06f), Color.Silver * fade, 1, .5f);
         string titleKey = combat.BossPhase == FirstSeveranceBossPhase.Distant ? "DistantTitle"
             : combat.BossPhase == FirstSeveranceBossPhase.Final ? "FinalTitle" : "UnboundTitle";
         Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance." + titleKey),

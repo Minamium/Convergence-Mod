@@ -5,12 +5,13 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
   - first_severance.terminal_outcomes
 aliases:
+  - Requiem of the Hollow Doll
   - First Severance
   - 不幸な人形劇
   - The Unfortunate Doll Play
@@ -26,13 +27,13 @@ related_docs:
   - encounter.first-severance.revive
 ---
 
-# 不幸な人形劇 — Encounter Specification
+# Requiem of the Hollow Doll — Encounter Specification
 
 This is the current player-visible contract, reconciled with the implementation at the [Status](../../STATUS.md) checkpoint. Prior tuning/override paragraphs are preserved in [encounter evolution](../../history/2026-09-11-encounter-evolution.md), not instructions to restore old behavior.
 
 ## Identity and scope
 
-**不幸な人形劇 / The Unfortunate Doll Play** faces **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**, a tragic suspended Doll in a cathedral theater. These are the current public names. The former First Severance / Null Cantor names survive only as historical names and stable internal `FirstSeverance` / `first_severance` / `NullCantor` content, packet, asset and document IDs; no save migration is performed. The cooperative development target is 2–4 players with post-Exo-Mechs/Supreme-Calamitas, Shadowspec-level equipment. The large body is **one logical HP pool**, not multiple damageable limbs.
+**Requiem of the Hollow Doll** faces **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**, a tragic suspended Doll in a cathedral theater. These are the current public names. The Raid title is separate from the approved BGM **EigHt — 不幸な人形劇**; do not rename the credited work or imply creator endorsement. The former First Severance / Null Cantor names survive only as historical names and stable internal `FirstSeverance` / `first_severance` / `NullCantor` content, packet, asset and document IDs; no save migration is performed. The cooperative development target is 2–4 players with post-Exo-Mechs/Supreme-Calamitas, Shadowspec-level equipment. The large body is **one logical HP pool**, not multiple damageable limbs.
 
 Solo is a compiled development exception, not balanced solo content. The additional [Doll summon weapon](WEAPONS.md#doll-companion--the-unbroken-promise) is not a roster member and does not fill Ready/Stack/revival roles. Current implementation/test state belongs only to [Status](../../STATUS.md). Future phases, NPC party substitutes and production progression are not silently promoted from [Backlog](BACKLOG.md).
 
@@ -91,9 +92,9 @@ Success/failure is authority sampled; ruby verdict rays are instantaneous result
 - **Phase-II lattice:** fine intersecting corridors use shared clipped grid geometry. Serial-three-and-later ordinary volleys add **one** Boss-origin Core beam. Authority cycles through the eligible standing frozen-roster members, locks the selected position at telegraph start and snapshots that one direction; it does not chase during charge/live. Final widths and the union's one-hit-per-player limit stay unchanged; per-line launch order follows the shared ignition contract below. Protocol29's historical four-ray decoder capacity remains for compatibility, not as the current emission count. The third-volley Spread pockets omit those salvos and resolve Spread during the live grid. **There is no Phase-II Stack.**
 - **Twin rotation:** thin-axis forecast/brace followed by two purple magic jets making two accelerating revolutions. Final widths, angles and turn count remain; ignition grows the live geometry below; sword artwork and metallic release audio are retired. Stable internal `RotatingBlade` IDs remain.
 - **Remote floods:** short smooth loading → horizontal deployment → accelerating widening leaving a moving safe strip. Stack → Spread → Stack resolves during the corresponding safe holds.
-- **Vertical interdict:** the legacy `HalfField` state uses two staggered waves of irregular top/bottom purple magic jets in place of swords. One half has no safe gaps when fully extended; the other has narrow whole-body gaps. Wave two shifts those gaps to require movement. The later action seals the opposite half. A thin full-length axis warns each jet; damage grows only with its live length/width, and withdrawal is harmless. Wave assignments and internal `ImpalingSwords` IDs remain.
+- **Vertical interdict:** the legacy `HalfField` state uses two staggered top/bottom purple-jet waves. Both halves share the former wider jet width. The dense side now has barely whole-body-safe gaps; the easier side has a larger minimum gap. Weighted spacing is deterministic from the accepted action-start tick, with different minimums per side, never local RNG. Wave two centers its jets in the first wave's gaps so remaining still fails. The later action swaps difficult/easier halves. Wrapped edge fragments prevent a free wall sanctuary; every warning and live hit uses the same shared geometry. Outside corona is suppressed so the narrow gaps remain visible. Exact widths/minimums/count bounds belong to `FirstSeveranceImpalingSwords`, not a second tuning table here.
 - **Central crush:** remote hands brace, then rapidly close toward the center with a readable pressure forecast. Contact is a lethal Raid hit subject to the normal Down/recovery rules, not bypassed protection.
-- **Final bullets:** increasingly dense purple energy nuclei with forecasted birth and bounded trails, alternating with the four-color prism score below. Their motion, density and hit radius are unchanged by the material revision.
+- **Final bullets:** increasingly dense purple energy nuclei with forecasted birth and bounded trails, alternating with the four-color prism score below. Each bullet action also issues one P2-style Core cannon after its opening beat: authority selects a standing participant in round-robin order and freezes aim at warning. It retains the full P2 warning, dimensions, ignition and fixed beam damage, with one hit per participant per cast; bullet motion/density/radius are unchanged. The cast must fit wholly inside its action and is cleared on action/Fight cleanup. [CoreCannonVolley](../../../Content/Encounters/FirstSeverance/FirstSeveranceCoreCannonVolley.cs) owns constants; [Network architecture](../../NETWORK_ARCHITECTURE.md#current-development-protocol-v37) owns replication.
 
 Exact motion and hit caps live in [AttackPatterns](../../../Content/Encounters/FirstSeverance/FirstSeveranceAttackPatterns.cs), [Lance](../../../Content/Encounters/FirstSeverance/FirstSeveranceLance.cs), [GridVolley](../../../Content/Encounters/FirstSeverance/FirstSeveranceGridVolley.cs), [SafeWindows](../../../Content/Encounters/FirstSeverance/FirstSeveranceSafeWindows.cs), [ImpalingSwords](../../../Content/Encounters/FirstSeverance/FirstSeveranceImpalingSwords.cs) and [ScoreGeometry](../../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs). Ordinary beams use fixed damage, separately from percentage Stack/Spread penalties; never infer collision from bloom.
 

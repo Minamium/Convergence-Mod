@@ -1,0 +1,123 @@
+{
+  "date": "2026-09-14",
+  "build": "0.2.77",
+  "protocol": 36,
+  "kind": "user-owned pre-change solo playtest",
+  "files": {
+    "client.log": {
+      "sha256": "e92cb9f72561ef8c253315ddd524eecb68be5820287ffbcd5f1b997ba99fb69f",
+      "bytes": 156761
+    },
+    "server.log": {
+      "sha256": "4fc4fec00a5c7385043410173ceb92b631b17108f7860089abc2011d04247c43",
+      "bytes": 190044
+    },
+    "server2.log": {
+      "sha256": "53e7fc3e895b42cc41460f4a841d608ceccda8d630ea394da83727a25e076a30",
+      "bytes": 73880
+    }
+  },
+  "aggregation": "Deduplicated authority events across server.log/server2.log; client audio is not a second fight.",
+  "fights": {
+    "1": {
+      "events": {
+        "CombatStarted": 1,
+        "PhaseChanged": 54,
+        "DamageWindowStarted": 6,
+        "LanceTelegraph": 22,
+        "LanceFired": 22,
+        "RaidDamage": 19,
+        "DamageProgress": 17,
+        "PylonDestroyed": 2,
+        "DamageWindowEnded": 6,
+        "StackResolved": 19,
+        "StackAttendance": 19,
+        "SpreadPrismTelegraph": 65,
+        "SpreadPrismFired": 65,
+        "SpreadResolved": 22,
+        "EnergyChargeLocked": 6,
+        "HpGateReached": 3,
+        "GridTelegraph": 6,
+        "GridFired": 6,
+        "SafeWindowResolved": 8,
+        "ScoreAttackFired": 31,
+        "CombatEnded": 1,
+        "CombatDpsSummary": 1,
+        "VictoryRewardDropped": 1
+      },
+      "damage": {
+        "PursuitPrism": 3,
+        "SpreadPrism": 5,
+        "RotatingBlade": 1,
+        "HalfField": 1,
+        "FinalBullets": 7,
+        "FinalSlicer": 2
+      },
+      "damage_total": 2280,
+      "stack": [
+        19,
+        0
+      ],
+      "spread": [
+        22,
+        0
+      ],
+      "dps": [
+        {
+          "seq": "1",
+          "tick": "16553",
+          "cause": "BossLifeZero",
+          "participants": "1",
+          "elapsed_seconds": "241.60",
+          "completed_exposures": "1",
+          "overload": "0",
+          "core_effective_damage": "5000000",
+          "core_open_seconds": "35.67",
+          "core_window_dps": "140186.9",
+          "pylon_effective_damage": "600000",
+          "pylon_open_seconds": "7.80",
+          "pylon_window_dps": "76923.1",
+          "boss_life": "0",
+          "boss_max_life": "5000000",
+          "boss_remaining_pct": "0.00",
+          "dps_basis": "AuthorityNetHpLoss"
+        }
+      ],
+      "phase_ticks": {
+        "Sealed": 2657,
+        "Unbound": 6125,
+        "Distant": 8465,
+        "Final": 11555
+      }
+    }
+  },
+  "audio": {
+    "critical_accepted": 36,
+    "weapon_voice_diagnostics_available": false
+  },
+  "exceptions": [
+    {
+      "phase": "initial connection",
+      "kind": "connection refused",
+      "recovered": true
+    },
+    {
+      "phase": "world unload",
+      "owner": "GhostSamuraiContainmentSystem.OnWorldUnload",
+      "kind": "IndexOutOfRangeException",
+      "status": "unchanged; separate feature"
+    },
+    {
+      "phase": "shutdown",
+      "owner": "SubworldLibrary",
+      "kind": "EndOfStreamException",
+      "status": "after world unload"
+    }
+  ],
+  "limits": [
+    "One solo run, not multiplayer evidence",
+    "RaidDamage total is requested damage, not post-defense life lost",
+    "Window DPS uses authority net HP loss and actual damageable time",
+    "No revive exercised; no audio listening acceptance"
+  ]
+}

@@ -38,18 +38,21 @@ internal static class FirstSeveranceEnergyPulse
         }
         Cast(c.LanceVolley); Cast(c.CarriedLance);
         foreach (var cast in c.SpreadLances) Cast(cast);
+        if (c.CoreCannon is { } cannon)
+            value = Math.Max(value, Math.Max(8 * Charge(tick, cannon.StartTick, cannon.FireTick), Kick(tick, cannon.FireTick, cannon.EndTick)));
         if (c.GridVolley is { } grid && grid.CoreBeams.Count > 0)
-            value = Math.Max(value, Math.Max(5 * Charge(tick, grid.StartTick, grid.FireTick), Kick(tick, grid.FireTick, grid.CoreEndTick)));
+            value = Math.Max(value, Math.Max(8 * Charge(tick, grid.StartTick, grid.FireTick), Kick(tick, grid.FireTick, grid.CoreEndTick)));
         var window = FirstSeveranceSafeWindows.At(c.Substate, c.ActionIndex, c.ActionStartedTick,
             (ulong)Math.Max(0, tick), c.CoreX, c.CoreY);
         if (window?.Kind == FirstSeveranceSafeMechanic.Spread || c.Substate == FirstSeveranceSubstate.Spread)
         {
             double start = window?.StartTick ?? c.ActionStartedTick, fire = window?.ResolveTick ?? c.ResolveTick;
-            value = Math.Max(value, 7 * Charge(tick, Math.Max(start, fire - 100), fire));
+            value = Math.Max(value, 10 * Charge(tick, Math.Max(start, fire - 100), fire));
         }
         double age = tick - c.ActionStartedTick;
         if (c.Substate == FirstSeveranceSubstate.RotatingBlade)
         {
+            value = Math.Max(value, 8 * Charge(age, 0, FirstSeveranceChoreography.BladeWindup));
             value = Math.Max(value, Kick(age, FirstSeveranceChoreography.BladeWindup, FirstSeveranceChoreography.BladeEnd));
             // The second revolution uses the same non-linear travel as the rays.
             value = Math.Max(value, Kick(age, SecondTurn, FirstSeveranceChoreography.BladeEnd));

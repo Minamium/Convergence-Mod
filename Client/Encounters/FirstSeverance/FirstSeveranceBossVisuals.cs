@@ -90,6 +90,7 @@ internal sealed class FirstSeveranceBossVisuals
 
         if (fight != combat.FightId)
         {
+            doll.ResetAttack();
             fight = combat.FightId;
             motionStartTick = Main.GameUpdateCount;
             mechanicPose = 0;
@@ -230,17 +231,11 @@ internal sealed class FirstSeveranceBossVisuals
         if (exposure > .02f)
             Glow(batch, center, 210f, Additive(Ice, exposure * .22f * reveal));
 
-        int shards = reduced ? 4 : 16;
-        for (int index = 0; index < shards; index++)
-        {
-            float angle = index * 2.399963f + time * (index % 2 == 0 ? 0.04f : -0.03f);
-            float radius = 300f + index % 5 * 39f + exposure * 38f;
-            Vector2 point = center + Unit(angle) * radius + new Vector2(0, MathF.Sin(time + index) * 14f);
-            Line(batch, point - Unit(angle + 0.4f) * 9f, point + Unit(angle + 0.4f) * 9f,
-                Ice * (0.3f * reveal), index % 3 + 2f);
-        }
+        // The old orbiting 18px line "shards" read as floating debug bars.
+        // Keep authored shell fragments and real suspension cords only.
         emissions.Draw(batch, tick, reduced);
         stages.DrawGrid(batch, combat, renderTick, tick, Accents, reduced);
+        stages.DrawFinalCannon(batch, combat, renderTick, tick, Accents, reduced);
         scoreVisuals.Draw(batch, combat, renderTick, tick, emissions, reduced);
     }
 
@@ -459,6 +454,7 @@ internal sealed class FirstSeveranceBossVisuals
         fight = FightId.None;
         emissions.Clear(unload);
         stages.Reset(unload);
+        doll.ResetAttack();
         if (unload) scoreVisuals.Unload();
         previousPhase = FirstSeveranceSubstate.None;
         ending.Clear();

@@ -19,6 +19,8 @@ internal static class FirstSeverancePresentationTiming
 
     internal static float CueGain(string name, float volume)
     {
+        if (name is "StackSummon" or "ShellMassLatch" or "ShellMassArc" or "ShellMassShed" or "ShellMassCollapse")
+            return Math.Min(1, volume * .44f);
         bool mechanic = name is "StackSummon" or "SpreadSummon" or "ShellMassLatch"
             or "ShellMassArc" or "ShellMassShed" or "ShellMassCollapse"
             or "MechanicTick" or "SpreadExecution" or "SpreadDissolve";
