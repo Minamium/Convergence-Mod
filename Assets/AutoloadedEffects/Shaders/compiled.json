@@ -6,13 +6,17 @@
     "/O3"
   ],
   "files": {
+    "ArmamentEnergy.fx": {
+      "source_sha256": "7767d55adb4a41719950ffb480e916d09a450990f5bbadb2045513d651fe7dfb",
+      "output_sha256": "9830c065065c36562ec30b5c2ee453e0c5e3ded65fdf4f67fd2388d4a16d82c8"
+    },
     "MechanicRing.fx": {
-      "source_sha256": "4fc0aa25de43ee2751d443389dac4d94f248232e456672b65b969f7e0ad537e6",
-      "output_sha256": "d20c9532cf4df1e3f4d31c93dbeb125d980308f5970d62fdd8a29cf9c1d9dd47"
+      "source_sha256": "b685e8922f20aa34fad6f86d6da927d5033885dc2b7229be9fc956e6aec80aa3",
+      "output_sha256": "7556fe157bf8afe6c8d394d87b45f4170660de127044620f358b94487881a20e"
     },
     "PortalBeam.fx": {
-      "source_sha256": "e44dc75f4482a9bd4248170b239468f61aad0f42f2934d55ca4e06f03b75426d",
-      "output_sha256": "ccea10cd46a0e8672865f71cd2b3e315cc6f14623603be1ee3ac4955e4b78026"
+      "source_sha256": "645ffd856e4ee9cdfc7d663eca01f626aab8e3b883a726876559f7d73eaec1d8",
+      "output_sha256": "cf2ffeb0e7441e6b0c0597f2f9cfd87c77a58af87bc51e4f59b333e73a28d699"
     },
     "PursuitPrismFlow.fx": {
       "source_sha256": "29cd1396f9ca0443aceaa440e02cc058a48aad6d172b00b9dd8197d08180853b",

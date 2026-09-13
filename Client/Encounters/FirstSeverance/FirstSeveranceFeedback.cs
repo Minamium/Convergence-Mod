@@ -55,7 +55,7 @@ internal sealed class FirstSeveranceFeedback
         previousEndingAge = age;
     }
 
-    internal float Shake => Math.Max(resultTicks > 0 ? (failed ? 17f : 9f) * MathF.Pow(resultTicks / 32f, 2f) : 0f,
+    internal float Shake => Math.Max(resultTicks > 0 ? (stack ? (failed ? 17f : 9f) : 19f) * MathF.Pow(resultTicks / 32f, 2f) : 0f,
         22f * MathF.Pow(scoreImpactTicks / 24f, 2f));
 
     internal void Update(FirstSeveranceClientStateSystem state)

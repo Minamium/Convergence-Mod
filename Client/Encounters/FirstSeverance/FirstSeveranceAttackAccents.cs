@@ -57,17 +57,16 @@ internal sealed class FirstSeveranceAttackAccents
         float born = Arrive(tick - start, 12);
         float remaining = Math.Clamp((float)((resolve - tick) / Math.Max(1, duration)), 0, 1);
         FirstSeveranceRaidVfx.MechanicRing(batch, center, radius, tick, remaining, born, stack, reduced);
-        if (!stack) return;
-        // Inward guidance is outside the ONE true acceptance circle; no heavy
-        // brackets, black disks, center diamonds or second timer circumference.
-        Color color = new(137, 196, 211);
+        // Directional guidance stays outside the fixed acceptance boundary.
+        Color color = stack ? new(160, 225, 238) : new(242, 148, 197);
         for (int side = 0; side < 4; side++)
         {
             Vector2 unit = Unit(side * MathHelper.PiOver2), tangent = new(-unit.Y, unit.X);
-            float travel = Cycle(tick - start, 64, side * .08);
-            float alpha = MathF.Sin(MathF.PI * travel) * born * .8f;
-            Vector2 tip = center + unit * (radius + 8 + (1 - Ease(travel)) * (reduced ? 34 : 60));
-            Vector2 back = tip + unit * 14;
+            float travel = Cycle(tick - start, 46, side * .08);
+            float alpha = (.35f + .65f * MathF.Sin(MathF.PI * travel)) * born;
+            float motion = stack ? 1 - Ease(travel) : Ease(travel);
+            Vector2 tip = center + unit * (radius + 18 + motion * (reduced ? 34 : 60));
+            Vector2 back = tip + unit * (stack ? 18 : -18);
             Line(batch, back + tangent * 9, tip, Color.Black * alpha, 3.8f);
             Line(batch, back - tangent * 9, tip, Color.Black * alpha, 3.8f);
             Line(batch, back + tangent * 9, tip, color * alpha, 1.8f);

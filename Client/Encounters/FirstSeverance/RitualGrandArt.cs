@@ -18,28 +18,9 @@ internal static class RitualGrandArt
     {
         if (length <= 0 || width <= 0 || fade <= 0) return;
         Span<Vector2> line = stackalloc Vector2[65];
-        Vector2 normal = axis.RotatedBy(MathHelper.PiOver2);
-        float opening = throatLength / length;
         for (int i = 0; i < line.Length; i++) line[i] = root + axis * (length * i / (line.Length - 1));
-        // Full-width core at the emitter and tip: unlike a projectile trail, the
-        // beam must never taper to invisible points inside a damaging rectangle.
-        RitualSurfacePass.Ribbon(line, width * 1.5f, Light(color, fade * .25f), false);
-        RitualSurfacePass.Ribbon(line, width * 1.04f, Light(color, fade * .8f), false, throatWidth, opening);
-        RitualSurfacePass.Ribbon(line, width * .42f, Light(Ivory, fade * .88f), false, throatWidth * .42f, opening);
-        int layers = Reduced ? 3 : 7;
-        for (int layer = 0; layer < layers; layer++)
-        {
-            for (int i = 0; i < line.Length; i++)
-            {
-                float t = i / (float)(line.Length - 1);
-                float throat = opening > 0 ? FirstSeveranceVisualCurves.Window(t, 0, opening) : 1;
-                float amplitude = width * (.12f + layer * .026f) * RitualKineticMotion.Arrive(t * 8) * throat;
-                float wave = MathF.Sin(t * (25 + layer * 1.5f) - age * (.34f + layer * .035f) + layer * 2.39f);
-                line[i] = root + axis * (length * t) + normal * (wave * amplitude);
-            }
-            RitualSurfacePass.Ribbon(line, width * (layer % 2 == 0 ? .075f : .035f),
-                Light(layer % 2 == 0 ? Ivory : color, fade * (Reduced ? .55f : .78f)), false);
-        }
+        // One connected turbulent jet, not layered flat ribbons and loose lines.
+        RitualSurfacePass.Ribbon(line, width, Light(color, fade), false, throatWidth, throatLength / length);
     }
 
     private static void Conduit(SpriteBatch batch, Vector2 from, Vector2 to, Vector2 bend, Color light, float clock, float opacity)
@@ -110,14 +91,8 @@ internal static class RitualGrandArt
         Aperture(batch, muzzle, axis, radiusMain, age, color, combined * fade);
         Glow(batch, muzzle, new Vector2(55 + charge * 56 + opening * 120, 60 + opening * 120),
             Light(color, (.35f + charge * .4f + opening * .45f) * combined * fade * (Reduced ? .55f : 1)));
-        // Stored rings travel into the mouth during the final acceleration.
-        for (int i = 0; i < (Reduced ? 3 : 6); i++)
-        {
-            float travel = (age * .022f + i / 6f) % 1;
-            Vector2 at = muzzle - axis * (35 + (1 - travel) * 155);
-            Ring(batch, at, new(12, radiusMain * (.4f + (1 - travel) * .6f)), axis.ToRotation(),
-                Light(color, travel * combined * fade * .35f), 2.5f, true);
-        }
+        FirstSeveranceRaidVfx.Charge(batch, muzzle, axis, age, charge,
+            recoil, combined * fade * .7f, color, Reduced, .45f + opening * .25f);
         if (fireAge < 0) return;
         Vector2 normal = axis.RotatedBy(MathHelper.PiOver2);
         Line(batch, muzzle - normal * recoil * 250, muzzle + normal * recoil * 250, Light(Ivory, recoil * fade), 8 * recoil);

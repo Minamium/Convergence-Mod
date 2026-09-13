@@ -327,7 +327,7 @@ def main():
             archive(target,args.audition/'previous-masters')
         metrics[name] = save(target, x)
         metrics[name]['sources'] = [part['source'] for part in SCORE[name][2]] if name in SCORE else list(LOOPS[name][:2])
-    report = dict(recipe='tools/remix_weapon_foley.py', recipe_sha256=sha(Path(__file__)),
+    report = dict(recipe='tools/'+Path(__file__).name, recipe_sha256=sha(Path(__file__)),
                   numpy=np.__version__, source_sha256=source_hashes, assets=metrics,
                   auditions=auditions(samples,args.audition))
     for name in names:

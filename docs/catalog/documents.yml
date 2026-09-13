@@ -642,7 +642,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 0522e56cd03bfc19a4481d4d07367a9ff103c692763bb25e46ca48014030886e
+  content_sha256: 40efaeae58077ab4f379b0bf5f6ff932ee5db419429cccc74e761c186c95403e
   document_type: spec
   status: provisional
   owners:
@@ -662,7 +662,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: 不幸な人形劇 — Ritual Armaments
-  content_sha256: 27b2b65a5ced122376d90c1d7a2191ff43811cb4b7f728ac57463f46fc9fee9d
+  content_sha256: 6040873cad068d5757bf6131b0be09c898f2c5ac9baa5ba2534b9f20c0271dc5
   document_type: spec
   status: provisional
   owners:
@@ -941,7 +941,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 06107636c607cbd126a824784b38ec8814b1e307cd3904d12764382e347c5d2c
+  content_sha256: 0c000b7568f8c2d089f485eb868ca7190ae81e840bc5799a7a19059abc24f87b
   document_type: spec
   status: provisional
   owners:
@@ -1123,7 +1123,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 552f890d2f64e6b202629319b62929a838ed9a41e18d3395bbee0ea509c5f3f0
+  content_sha256: cf958fab297977fd361264bb5415550c329397c2ce0b36243f0d9f662d540fd2
   document_type: status
   status: accepted
   owners:

@@ -8,6 +8,13 @@ internal static class FirstSeveranceCoreCrater
 {
     internal readonly record struct Surface(float Depth, float AlongSlope, float AcrossSlope, float Interior);
 
+    // Off-axis, foreshortened mouth at the firing-side limb of the sphere.
+    internal static Surface SampleSide(float along, float across, float opening)
+    {
+        Surface s = Sample((along - .69f) / .48f, across, opening);
+        return new(s.Depth * .65f, s.AlongSlope * .65f / .48f, s.AcrossSlope * .65f, s.Interior);
+    }
+
     internal static Surface Sample(float along, float across, float opening)
     {
         opening = Math.Clamp(opening, 0, 1);

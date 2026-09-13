@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBeamIgnition.cs" Link="Domain/FirstSeveranceBeamIgnition.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceCoreCrater.cs" Link="Presentation/FirstSeveranceCoreCrater.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEnergyPulse.cs" Link="Presentation/FirstSeveranceEnergyPulse.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceDollActivation.cs" Link="Domain/FirstSeveranceDollActivation.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/GhostSamuraiRules.cs" Link="Domain/GhostSamuraiRules.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiWispMotion.cs" Link="Domain/SamuraiWispMotion.cs" />

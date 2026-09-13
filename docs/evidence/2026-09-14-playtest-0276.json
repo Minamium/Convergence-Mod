@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-14",
+  "build": "0.2.76/protocol36",
+  "files": {
+    "client.log": {
+      "sha256": "dab5157c95513b09850dcdfd48f20b282f7519c8958c0d94ba9f7fff5ee1e71a",
+      "bytes": 157846
+    },
+    "server.log": {
+      "sha256": "c914b8b75c56475c16018674b7118433716d48916a20c6c883992c1ea7dcea7f",
+      "bytes": 199360
+    },
+    "server2.log": {
+      "sha256": "cd2dcb98e7436d155ced92f42af932c24cddfbbe9d7331511a2ae87a0ecd6c88",
+      "bytes": 73871
+    }
+  },
+  "method": "Full authority messages deduplicated across server/server2; one Fight sequence, not double-counted client copies.",
+  "result": "one solo victory, 243.97 seconds; no Down or revive events",
+  "events": {
+    "CombatStarted": 1,
+    "PhaseChanged": 54,
+    "DamageWindowStarted": 9,
+    "LanceTelegraph": 26,
+    "LanceFired": 25,
+    "RaidDamage": 19,
+    "DamageProgress": 27,
+    "PylonDestroyed": 2,
+    "DamageWindowEnded": 9,
+    "StackResolved": 19,
+    "StackAttendance": 19,
+    "SpreadPrismTelegraph": 65,
+    "SpreadPrismFired": 65,
+    "SpreadResolved": 22,
+    "EnergyChargeLocked": 6,
+    "HpGateReached": 3,
+    "GridTelegraph": 6,
+    "GridFired": 6,
+    "SafeWindowResolved": 8,
+    "ScoreAttackFired": 31,
+    "CombatEnded": 1,
+    "CombatDpsSummary": 1,
+    "VictoryRewardDropped": 1
+  },
+  "damage_by_kind": {
+    "PursuitPrism": 5,
+    "SweepLeft": 1,
+    "SpreadPrism": 2,
+    "HalfField": 1,
+    "FinalBullets": 8,
+    "FinalSlicer": 2
+  },
+  "damage_note": "19 RaidDamage events, 2607 requested damage; not measured post-defense HP loss.",
+  "mechanics": {
+    "stack_pass": 19,
+    "stack_fail": 0,
+    "spread_pass": 22,
+    "spread_fail": 0
+  },
+  "damage_windows": {
+    "core_effective": 5000000,
+    "core_seconds": 54.47,
+    "core_dps": 91799.3,
+    "pylon_effective": 600000,
+    "pylon_seconds": 10.17,
+    "pylon_dps": 59016.4
+  },
+  "critical_audio_accepted": 36,
+  "caveats": [
+    "Solo does not verify peer alignment, multi-player overlap or revive.",
+    "Audio acceptance is not audibility.",
+    "Same Ghost Samurai OnWorldUnload GetModPlayer IndexOutOfRange remains; no Ghost fight this session. Other task owns fix.",
+    "Initial local connection refusal recovers; SubworldLibrary EndOfStream occurs at shutdown."
+  ]
+}

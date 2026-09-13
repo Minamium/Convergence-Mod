@@ -19,6 +19,8 @@ public sealed class DollCompanionVisuals : GlobalProjectile
     private float previousAge = -1, beforeAngle, nowAngle, beforeMount, mount;
     private Vector2 before, now;
     private bool initialized;
+    private Vector2[]? glitter;
+    private int glitterHead, glitterCount;
     private int beamSlot = -1, hitDelay;
     private SlotId charge = SlotId.Invalid, sustain = SlotId.Invalid;
     internal static Asset<Texture2D>? BroomTexture;
@@ -58,13 +60,21 @@ public sealed class DollCompanionVisuals : GlobalProjectile
                 : (p.spriteDirection < 0 ? MathHelper.Pi : 0);
         }
         if (!initialized || Vector2.DistanceSquared(now, p.Center) > 600 * 600)
-        { before = now = p.Center; beforeAngle = nowAngle = angle; }
+        { before = now = p.Center; beforeAngle = nowAngle = angle; glitterCount = 0; }
         else { before = now; now = p.Center; beforeAngle = nowAngle; nowAngle = angle; }
         bool first = !initialized; initialized = true;
         hitDelay = Math.Max(0, hitDelay - 1);
         if (p.ModProjectile is not DollCompanion) return;
         beforeMount = mount;
         mount = MathHelper.Lerp(mount, p.ai[2] == 1 ? 1 : 0, .22f);
+        if (mount > .1f)
+        {
+            glitter ??= new Vector2[36];
+            glitter[glitterHead] = p.Center + new Vector2(-p.spriteDirection * 35, 12);
+            glitterHead = (glitterHead + 1) % glitter.Length;
+            glitterCount = Math.Min(glitter.Length, glitterCount + 1);
+        }
+        else glitterCount = 0;
         float age = p.ai[0];
         if (age < previousAge) { previousAge = -1; RitualWeaponFeedback.Stop(ref charge); }
         bool Crossed(int beat) => previousAge < beat && age >= beat && age < beat + 3;
@@ -123,6 +133,20 @@ public sealed class DollCompanionVisuals : GlobalProjectile
             float time = RitualRenderClock.Time;
             float breath = MathF.Sin(time * .038f + p.identity) * .006f;
             float riding = MathHelper.Lerp(beforeMount, mount, RitualRenderClock.Fraction);
+            if (glitter is not null)
+                for (int i = 1; i < glitterCount; i += Reduced ? 6 : 3)
+                {
+                    float left = 1 - (i + RitualRenderClock.Fraction) / glitter.Length;
+                    float seed = FirstSeveranceRaidVfx.Seed(p.identity + (glitterHead - i + 72) % 36);
+                    Vector2 at = glitter[(glitterHead - i + glitter.Length) % glitter.Length]
+                        + new Vector2(MathF.Sin(seed * 19) * 12, -i * .20f + MathF.Cos(seed * 17) * 8);
+                    float twinkle = MathF.Pow(.5f + .5f * MathF.Sin(time * .28f + seed * 31), 4);
+                    float power = left * riding * (.25f + .75f * twinkle);
+                    Glow(batch, at, new Vector2(9 + twinkle * 8), Light(ColorFor(RitualArmamentKind.Magic), power * .65f));
+                    float r = (2 + twinkle * 3) * left;
+                    Line(batch, at - Vector2.UnitX * r, at + Vector2.UnitX * r, Light(Ivory, power), 1);
+                    Line(batch, at - Vector2.UnitY * r, at + Vector2.UnitY * r, Light(Ivory, power), 1);
+                }
             float age = p.ai[0] > 0 ? RitualRenderClock.Sample(p.ai[0]) : 0;
             Color tint = Color.Lerp(lightColor, Color.White, .40f);
             SpriteEffects flip = p.spriteDirection < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;

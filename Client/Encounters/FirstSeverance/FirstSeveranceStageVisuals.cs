@@ -126,6 +126,12 @@ internal sealed class FirstSeveranceStageVisuals
                 Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
             if (warning)
             {
+                float pulse = FirstSeveranceEnergyPulse.Charge(tick, grid.StartTick, grid.FireTick);
+                Vector2 mouth = origin + direction * 44;
+                FirstSeveranceRaidVfx.Charge(batch, mouth, direction, tick - grid.StartTick,
+                    pulse, 0, born, violet, reduced, .35f + pulse * .85f);
+                FirstSeveranceRaidVfx.Orb(batch, mouth, Vector2.Zero, 8 + pulse * 36,
+                    tick - grid.StartTick, violet, pulse, true, reduced);
                 FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
                     tick - grid.StartTick, gather, born, violet, grid.FireTick-grid.StartTick);
                 continue;
@@ -135,7 +141,7 @@ internal sealed class FirstSeveranceStageVisuals
             float power = active ? 1 : 1 - Window(tick, grid.CoreEndTick, grid.CoreEndTick + 12);
             if (power <= .001f) continue;
             FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
-                tick - grid.StartTick, violet, power, reduced, throatLength: 150, throatWidth: 28,
+                tick - grid.StartTick, violet, power, reduced, throatLength: 260, throatWidth: 20,
                 fireAge:grid.FireTick-grid.StartTick,endAge:grid.CoreEndTick-grid.StartTick);
             float kick = ReleaseImpulse(tick, grid.FireTick);
             accents.Halo(batch, origin, new Vector2(125 + kick * 110, 25 + kick * 35), violet,

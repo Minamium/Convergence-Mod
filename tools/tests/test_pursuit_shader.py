@@ -157,13 +157,16 @@ class PursuitShader(unittest.TestCase):
         marker = (root / "FirstSeveranceAttackAccents.cs").read_text().split("internal void Marker(")[1].split("internal void ChargeFracture(")[0]
         shader = (ROOT / "Assets/AutoloadedEffects/Shaders/MechanicRing.fx").read_text()
         self.assertIn("MechanicRing(batch, center, radius", marker)
-        self.assertIn("if (!stack) return", marker)
+        self.assertNotIn("if (!stack) return", marker)
+        self.assertIn("stack ? 18 : -18", marker)
         self.assertNotIn("Arc(", marker)
         self.assertIn("radius / extent", renderer)
         self.assertIn('if (c.Pass == "MechanicRingPass") shader=marker', renderer)
         self.assertIn("(length(p)-signal.w)*shape.y", shader)
         self.assertIn("pass MechanicRingPass", shader)
         self.assertIn("signal.x-.006", shader)
+        self.assertIn(".12+.80*signal.x", shader)
+        self.assertIn("frac(cycle*24)", shader)
 
 
 if __name__ == "__main__":

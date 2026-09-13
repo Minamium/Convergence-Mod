@@ -53,7 +53,7 @@ internal sealed class FirstSeveranceMechanicalCore
             Vector3 n=normals[i],local=Vector3.TransformNormal(n,turn);
             Vector2 p = new(n.X, n.Y);
             float along = Vector2.Dot(p, axis), cross = Vector2.Dot(p, across);
-            var crater = FirstSeveranceCoreCrater.Sample(along, cross, bore);
+            var crater = FirstSeveranceCoreCrater.SampleSide(along, cross, bore);
             Vector2 slope = axis * crater.AlongSlope + across * crater.AcrossSlope;
             // Inward wall normals catch a different highlight to the polished
             // outside. Oblique projection exposes depth and a heavy raised lip.

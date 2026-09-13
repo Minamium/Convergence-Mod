@@ -4,7 +4,7 @@ using Terraria;
 namespace Convergence.Client.Encounters.FirstSeverance;
 
 // Feature-local adapters preserve every caller's accepted ray/time/opacity.
-// The Raid GPU suite is deliberately not the weapon surface pass.
+// Raid and weapon geometry stay separate; both use flowing energy materials.
 internal static class FirstSeveranceBeamMaterial
 {
     internal static void SingleForecast(SpriteBatch batch, FirstSeveranceAttackAccents accents,
@@ -18,7 +18,8 @@ internal static class FirstSeveranceBeamMaterial
         float length,float halfWidth,double age,Color color,float power,bool reduced,
         float throatLength=0,float throatWidth=0,double fireAge=double.NaN,double endAge=double.NaN)
         => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,age,
-            1,1,power,color,reduced,confined:halfWidth>=120,mouth:throatLength>0,fireAge:fireAge,endAge:endAge);
+            1,1,power,color,reduced,confined:halfWidth>=120,mouth:throatLength>0,fireAge:fireAge,endAge:endAge,
+            bellLength:throatLength,bellWidth:throatWidth);
 
     internal static void DrawTooth(SpriteBatch batch,FirstSeveranceAttackAccents accents,
         Vector2 origin,Vector2 direction,float length,float halfWidth,double clock,
