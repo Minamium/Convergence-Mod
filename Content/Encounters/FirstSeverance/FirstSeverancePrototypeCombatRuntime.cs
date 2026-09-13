@@ -350,7 +350,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             mechanicRevision,
             Array.AsReadOnly(participants),
             attacks.Lance, state.BossPhase, state.BossPhaseStartedTick, attacks.Grid,
-            state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles, mechanicTick, mechanicImpacts, attacks.SpreadLances);
+            state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles, mechanicTick, mechanicImpacts, attacks.SpreadLances, attacks.CarriedLance);
         return true;
     }
 

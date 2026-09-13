@@ -32,7 +32,6 @@ internal sealed class FirstSeveranceFeedback
     private static readonly int SecondTurnTick = FindSecondTurnTick();
     private readonly List<(ReLogic.Utilities.SlotId Id, string Name, ulong CheckAt)> audioChecks = new(16);
     private uint chargeSerial, lockSerial, fireSerial;
-    private int curtainBeat = -1;
     private uint gridChargeSerial, gridFireSerial;
     private bool shellBroken;
     private int countdown = -1, resultTicks;
@@ -106,7 +105,6 @@ internal sealed class FirstSeveranceFeedback
         {
             StopVoices();
             chargeSerial = lockSerial = fireSerial = 0;
-            curtainBeat = -1;
             gridChargeSerial = gridFireSerial = 0;
             shellBroken = false;
             countdown = -1;
@@ -239,33 +237,22 @@ internal sealed class FirstSeveranceFeedback
             if (chargeSerial != volley.Serial)
             {
                 chargeSerial = volley.Serial;
-                curtainBeat = -1;
                 if (tick >= volley.StartTick && tick < volley.FireTick)
-                    PlayTimed(volley.IsCharge ? "EnergyGather" : "LanceCharge", .98f, tick, volley.FireTick);
+                    PlayTimed(volley.IsCharge ? "BeamGather" : volley.Kind == FirstSeveranceAttackKind.Stillness
+                        ? "PrismBeamCharge" : "LanceCharge", .98f, tick, volley.FireTick);
             }
             if (fireSerial != volley.Serial && tick >= volley.FireTick)
             {
                 fireSerial = volley.Serial;
-                if (volley.IsFiring(tick) && volley.Kind != FirstSeveranceAttackKind.Stillness)
-                    PlayTimed(volley.IsCharge ? "EnergyCharge" : "LanceFire", .96f, tick, volley.EndTick + 6);
-            }
-            if (volley.Kind == FirstSeveranceAttackKind.Stillness && tick >= volley.FireTick)
-            {
-                int beat = (int)Math.Min((tick - volley.FireTick) / 4, 3ul);
-                if (beat > curtainBeat)
-                {
-                    curtainBeat = beat;
-                    // Four restrained transients for both curtains together, not
-                    // fifty competing voices. Late snapshots never catch up a burst.
-                    ulong cueTick = volley.FireTick + (ulong)(beat * 4);
-                    if (tick < cueTick + 3 && volley.IsFiring(tick))
-                        PlayTimed("LanceFire", .64f, tick, volley.EndTick + 6, -.08f + beat * .045f);
-                }
+                if (volley.IsFiring(tick))
+                    // One pressure envelope for the pair of continuous bands.
+                    PlayTimed(volley.IsCharge ? "EnergyCharge" : volley.Kind == FirstSeveranceAttackKind.Stillness
+                        ? "CurtainFire" : "LanceFire", .96f, tick, volley.EndTick + 6);
             }
             if (volley.IsCharge && lockSerial != volley.Serial && tick >= volley.LockTick)
             {
                 lockSerial = volley.Serial;
-                if (tick < volley.FireTick) PlayTimed("EnergyLock", .98f, tick, volley.FireTick);
+                if (tick < volley.FireTick) PlayTimed("BeamLock", .72f, tick, volley.FireTick);
             }
         }
         if (combat.Substate == FirstSeveranceSubstate.PhaseTransition && combat.BossPhase == FirstSeveranceBossPhase.Unbound && !shellBroken
@@ -307,7 +294,7 @@ internal sealed class FirstSeveranceFeedback
             {
                 int pulse = (int)age / FirstSeveranceScoreGeometry.FloodInterval;
                 if (age % FirstSeveranceScoreGeometry.FloodInterval < 12 && scoreSounds.Add(pulse - 800))
-                    PlayTimed("HandGather", .98f, tick,
+                    PlayTimed("PrismBeamCharge", .98f, tick,
                         combat.ActionStartedTick + (ulong)(pulse * FirstSeveranceScoreGeometry.FloodInterval + FirstSeveranceScoreGeometry.FloodFireTick));
             }
             foreach (var ray in FirstSeveranceScoreGeometry.Rays(combat.Substate, combat.ActionIndex, age, combat.CoreX, combat.CoreY, combat.ActionStartedTick))
@@ -316,7 +303,7 @@ internal sealed class FirstSeveranceFeedback
                     ? ray.Pulse / FirstSeveranceScoreGeometry.BladeCount : ray.Pulse;
                 if (combat.Substate is not (FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RemoteCrush or FirstSeveranceSubstate.FinalSlicer)
                     && !ray.Live && ray.Charge >= .65f && ray.Charge < 1 && scoreSounds.Add(soundPulse - 128))
-                    PlayTimed("ExecutionLock", .98f, tick, Math.Min(combat.ResolveTick, tick + 18));
+                    PlayTimed("BeamLock", .78f, tick, Math.Min(combat.ResolveTick, tick + 18));
                 if (combat.Substate is not (FirstSeveranceSubstate.HalfField or FirstSeveranceSubstate.RotatingBlade or FirstSeveranceSubstate.RemoteCrush)
                     && ray.Live && scoreSounds.Add(soundPulse))
                 {
@@ -326,7 +313,7 @@ internal sealed class FirstSeveranceFeedback
                             + ray.Pulse * FirstSeveranceScoreGeometry.SlicerCadence(combat.ActionIndex) + 6);
                     PlayTimed(combat.Substate switch
                     {
-                        FirstSeveranceSubstate.RemoteClaws => "HandClasp",
+                        FirstSeveranceSubstate.RemoteClaws => "FloodFire",
                         _ => "LanceFire",
                     }, .98f, tick, Math.Min(combat.ResolveTick + 6, soundEnd));
                 }
@@ -368,8 +355,8 @@ internal sealed class FirstSeveranceFeedback
                 int strike = FirstSeveranceImpalingSwords.FireBase(wave);
                 Cue(wave * 3, strike - 39, "PrismBeamCharge", .95f, false, strike);
                 // Two emission accents per field wave, not 28 competing voices.
-                Cue(wave * 3 + 1, strike, "PrismBeamFire", 1.1f, false, strike + 50);
-                Cue(wave * 3 + 2, strike + 12, "PrismBeamFire", .90f, false, strike + 50);
+                Cue(wave * 3 + 1, strike, "PrismBeamFire", .95f, false, strike + 50);
+                Cue(wave * 3 + 2, strike + 12, "PrismBeamFire", .70f, false, strike + 50);
             }
         else if (combat.Substate == FirstSeveranceSubstate.RemoteCrush)
         {
@@ -383,7 +370,8 @@ internal sealed class FirstSeveranceFeedback
         }
         else if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
         {
-            Cue(0, FirstSeveranceChoreography.BladeWindup, "PrismBeamSustain", .95f, false);
+            Cue(0, FirstSeveranceChoreography.BladeWindup, "PrismBeamSustain", .95f, false,
+                FirstSeveranceChoreography.BladeEnd);
             Cue(1, FirstSeveranceChoreography.BladeWindup, "PrismBeamFire", 1.1f, false,
                 FirstSeveranceChoreography.BladeWindup + 30);
             Cue(2, SecondTurnTick, "PrismBeamFire", 1.1f, false, SecondTurnTick + 30);
@@ -422,12 +410,24 @@ internal sealed class FirstSeveranceFeedback
     {
         // No position: raid-critical cues remain audible in a very large arena.
         // Main.soundVolume still applies; music uses Main.musicVolume separately.
-        const string weaponRoot = "Convergence/Assets/Sounds/Weapons/DollTheater/";
+        const string beamRoot = Root + "Beams/";
         string path = name switch
         {
-            "PrismBeamCharge" => weaponRoot + "MagicCharge",
-            "PrismBeamFire" => weaponRoot + "MagicFire",
-            "PrismBeamSustain" => weaponRoot + "LacunaSustain",
+            "LanceCharge" => beamRoot + "PortalCharge",
+            "LanceFire" => beamRoot + "PortalFire",
+            "CurtainFire" => beamRoot + "CurtainFire",
+            "BeamGather" => beamRoot + "ChargeGather",
+            "BeamLock" => beamRoot + "ChargeLock",
+            "EnergyCharge" => beamRoot + "ChargeRush",
+            "GridCharge" => beamRoot + "GridCharge",
+            "GridFire" => beamRoot + "GridFire",
+            "CoreSalvoFire" => beamRoot + "CoreSalvoFire",
+            "PrismBeamCharge" => beamRoot + "WideCharge",
+            "PrismBeamFire" => beamRoot + "WideFire",
+            "PrismBeamSustain" => beamRoot + "BeamSustain",
+            "FloodFire" => beamRoot + "FloodFire",
+            "SpreadExecution" => beamRoot + "SpreadRay",
+            "SpreadDissolve" => beamRoot + "SpreadScatter",
             _ => Root + name,
         };
         var style = new SoundStyle(path)
@@ -519,7 +519,6 @@ internal sealed class FirstSeveranceFeedback
         resultTicks = 0;
         scoreImpactTicks = 0;
         chargeSerial = lockSerial = fireSerial = 0;
-        curtainBeat = -1;
         gridChargeSerial = gridFireSerial = 0;
         shellBroken = false;
         countdown = -1;

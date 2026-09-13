@@ -32,13 +32,13 @@ internal sealed class FirstSeveranceAttackController
     private readonly HashSet<ParticipantId> gridHitParticipants = new();
     private readonly HashSet<(int Pulse, ParticipantId Participant)> scoreHits = new();
     private readonly HashSet<int> scoreFires = new();
-    private FirstSeveranceLanceVolley? lanceVolley;
+    private readonly FirstSeveranceLanceLedger lances = new();
+    private FirstSeveranceLanceVolley? lanceVolley => lances.Current;
     private uint lanceSerial;
     private ulong nextLanceTick;
     private byte attackStep;
     private int attackTargetSlot = -1;
     private uint attackSequence;
-    private readonly HashSet<ParticipantId> lanceHitParticipants = new();
     private readonly FirstSeveranceRecoveryController recovery;
     private readonly FirstSeveranceSpreadBarrageRuntime spread = new();
     private readonly Action<ulong, string> Log;
@@ -54,6 +54,7 @@ internal sealed class FirstSeveranceAttackController
     }
 
     internal FirstSeveranceLanceVolley? Lance => lanceVolley;
+    internal FirstSeveranceLanceVolley? CarriedLance => lances.Carried;
     internal FirstSeveranceGridVolley? Grid => gridVolley;
     internal IReadOnlyList<FirstSeveranceLanceVolley> SpreadLances => spread.Casts;
     internal bool UpdateSpread(in FirstSeveranceLoopState state, ulong tick)
@@ -62,8 +63,7 @@ internal sealed class FirstSeveranceAttackController
     internal void EnterSubstate(FirstSeveranceSubstate after, ulong authorityTick)
     {
         spread.Clear();
-        lanceVolley = null;
-        lanceHitParticipants.Clear();
+        lances.Clear();
         scoreHits.Clear();
         scoreFires.Clear();
         nextLanceTick = authorityTick + (after == FirstSeveranceSubstate.PylonCheck
@@ -79,9 +79,8 @@ internal sealed class FirstSeveranceAttackController
     internal void Cleanup()
     {
         spread.Clear();
-        lanceVolley = null;
+        lances.Clear();
         gridVolley = null;
-        lanceHitParticipants.Clear();
         gridHitParticipants.Clear();
         scoreHits.Clear();
         scoreFires.Clear();
@@ -159,25 +158,18 @@ internal sealed class FirstSeveranceAttackController
         if (phaseComplete || !FirstSeveranceLanceTuning.IsAttackPhase(state.Substate)
             || tick >= state.ResolveTick)
         {
-            bool hadVolley = lanceVolley is not null;
-            lanceVolley = null;
-            lanceHitParticipants.Clear();
+            bool hadVolley = lanceVolley is not null || lances.Carried is not null;
+            lances.Clear();
             return hadVolley;
         }
 
-        bool changed = false;
-        if (lanceVolley is not null && tick >= lanceVolley.EndTick)
-        {
-            lanceVolley = null;
-            lanceHitParticipants.Clear();
-            changed = true;
-        }
+        bool changed = lances.Retire(tick);
 
         // Never truncate a new telegraph at the phase boundary. Do not catch up
         // missed casts in a burst; scheduling is relative to the actual start.
         int neededTicks = attackStep == 0 ? FirstSeveranceAttackPatterns.SequenceTicks(state.Substate)
             : FirstSeveranceAttackPatterns.StepTicks(state.Substate, attackStep);
-        if (lanceVolley is null && tick >= nextLanceTick && state.ResolveTick - tick >= (ulong)neededTicks)
+        if (lances.CanStart && tick >= nextLanceTick && state.ResolveTick - tick >= (ulong)neededTicks)
         {
             var targets = new List<Player>(roster.Count);
             int first = (int)(attackSequence % (uint)roster.Count);
@@ -194,6 +186,7 @@ internal sealed class FirstSeveranceAttackController
                 if (attackStep == 0)
                     attackSequence++;
                 attackTargetSlot = target.whoAmI;
+                FirstSeveranceLanceVolley created;
                 if (state.Substate == FirstSeveranceSubstate.PylonCheck)
                 {
                     var aims = new List<FirstSeverancePrismTarget>(targets.Count);
@@ -202,12 +195,13 @@ internal sealed class FirstSeveranceAttackController
                             participant.velocity.X, participant.velocity.Y));
                     // One simultaneous, locked ray per standing participant. A crossed
                     // group of rays is still capped to one hit per player per step.
-                    lanceVolley = FirstSeveranceAttackPatterns.CreatePrism(++lanceSerial, tick, attackStep, aims);
+                    created = FirstSeveranceAttackPatterns.CreatePrism(++lanceSerial, tick, attackStep, aims, sustainedPrism:true);
                 }
                 else
-                    lanceVolley = FirstSeveranceAttackPatterns.Create(++lanceSerial, tick,
+                    created = FirstSeveranceAttackPatterns.Create(++lanceSerial, tick,
                         state.Substate, attackStep, target.whoAmI, target.Center.X, target.Center.Y,
                         target.velocity.X, target.velocity.Y);
+                lances.Start(created, tick);
                 nextLanceTick = tick + (ulong)FirstSeveranceAttackPatterns.StepCadence(state.Substate);
                 attackStep++;
                 if (attackStep >= FirstSeveranceAttackPatterns.StepCount(state.Substate))
@@ -215,14 +209,13 @@ internal sealed class FirstSeveranceAttackController
                     attackStep = 0;
                     nextLanceTick += (ulong)FirstSeveranceAttackPatterns.SequenceRestTicks;
                 }
-                lanceHitParticipants.Clear();
                 changed = true; // Publish the locked aim immediately, not on the 30-tick heartbeat.
-                string assignedSlots = lanceVolley.Kind == FirstSeveranceAttackKind.PursuitPrism
+                string assignedSlots = created.Kind == FirstSeveranceAttackKind.PursuitPrism
                     ? string.Join(",", targets.ConvertAll(player => player.whoAmI)) : target.whoAmI.ToString();
-                string curtain = lanceVolley.Kind == FirstSeveranceAttackKind.Stillness
-                    ? $" pattern=CenterOut teeth={lanceVolley.Rays.Count * FirstSeveranceCurtainComb.LaneCount} last_fire_tick={lanceVolley.FireTick + FirstSeveranceCurtainComb.StaggerTicks} end_tick={lanceVolley.EndTick}"
+                string curtain = created.Kind == FirstSeveranceAttackKind.Stillness
+                    ? $" pattern=ContinuousBands half_width={FirstSeveranceAttackPatterns.StillnessBeamHalfWidth}"
                     : string.Empty;
-                Log(tick, $"event=LanceTelegraph cast={lanceSerial} kind={lanceVolley.Kind} step={lanceVolley.Step + 1} target_slot={target.whoAmI} target_slots={assignedSlots} rays={lanceVolley.Rays.Count} fire_tick={lanceVolley.FireTick}{curtain}");
+                Log(tick, $"event=LanceTelegraph cast={lanceSerial} kind={created.Kind} step={created.Step + 1} target_slot={target.whoAmI} target_slots={assignedSlots} rays={created.Rays.Count} fire_tick={created.FireTick} end_tick={created.EndTick} carried_cast={lances.Carried?.Serial ?? 0}{curtain}");
             }
         }
 
@@ -231,44 +224,53 @@ internal sealed class FirstSeveranceAttackController
             Player focus = Main.player[body.TargetSlot];
             // No target replacement mid-charge. If the focus is Down, pursue its
             // last anchor and finish the same bounded trajectory, never an outsider.
-            lanceVolley = body.AdvanceCharge(tick, focus.Center.X, focus.Center.Y,
-                focus.velocity.X, focus.velocity.Y);
+            lances.UpdateMotion(body.AdvanceCharge(tick, focus.Center.X, focus.Center.Y,
+                focus.velocity.X, focus.velocity.Y));
             changed |= (tick < body.LockTick && tick % 4ul == 0)
                 || tick == body.LockTick;
             if (tick == body.LockTick)
                 Log(tick, $"event=EnergyChargeLocked cast={body.Serial} speed=104 target_slot={body.TargetSlot}");
         }
-        if (lanceVolley is null || !lanceVolley.IsFiring(tick))
-            return changed;
-        if (tick == lanceVolley.FireTick)
+        // Older cast first, each with its own hit set. A new forecast cannot
+        // erase or rearm its still-firing predecessor.
+        changed |= ApplyLance(lances.Carried, tick);
+        changed |= ApplyLance(lanceVolley, tick);
+        return changed;
+    }
+
+    private bool ApplyLance(FirstSeveranceLanceVolley? volley, ulong tick)
+    {
+        if (volley is null || !volley.IsFiring(tick)) return false;
+        bool changed = false;
+        if (tick == volley.FireTick)
         {
             changed = true;
-            Log(tick, $"event=LanceFired cast={lanceVolley.Serial} rays={lanceVolley.Rays.Count}");
+            Log(tick, $"event=LanceFired cast={volley.Serial} rays={volley.Rays.Count} end_tick={volley.EndTick}");
         }
         foreach (FirstSeveranceRosterMember member in roster.Members)
         {
-            if (lanceHitParticipants.Contains(member.ParticipantId) || !recovery.IsAlive(member.ParticipantId)
+            if (lances.HasHit(volley.Serial, member.ParticipantId) || !recovery.IsAlive(member.ParticipantId)
                 || !recovery.TryGetPlayer(member, out Player player))
                 continue;
             // Contact-style energy charges respect legitimate engine/dash i-frames.
             // Stack/Spread remain authority percentage mechanics, not dodgeable hits.
-            if (lanceVolley.IsCharge && player.immune && player.immuneTime > 0)
+            if (volley.IsCharge && player.immune && player.immuneTime > 0)
                 continue;
-            bool hit = lanceVolley.Kind == FirstSeveranceAttackKind.Stillness
-                && FirstSeveranceCurtainComb.Intersects(lanceVolley, tick,
+            bool hit = volley.Kind == FirstSeveranceAttackKind.Stillness
+                && FirstSeveranceCurtainComb.Intersects(volley, tick,
                     player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f);
-            for (int index = 0; !hit && lanceVolley.Kind != FirstSeveranceAttackKind.Stillness
-                && index < lanceVolley.Rays.Count; index++)
+            for (int index = 0; !hit && volley.Kind != FirstSeveranceAttackKind.Stillness
+                && index < volley.Rays.Count; index++)
             {
-                FirstSeveranceLanceRay ray = lanceVolley.RayAt(index, tick);
+                FirstSeveranceLanceRay ray = volley.RayAt(index, tick);
                 hit = ray.Intersects(player.Center.X, player.Center.Y, player.width * .5f, player.height * .5f);
             }
             if (hit)
             {
                 // One hit per step, including overlapping curtains or moving blades.
-                lanceHitParticipants.Add(member.ParticipantId);
+                lances.MarkHit(volley.Serial, member.ParticipantId);
                 recovery.ApplyRaidDamage(member, FirstSeveranceCombatRules.AttackDamage(
-                    lanceVolley.Kind, player.statLifeMax2), tick, lanceVolley.Kind.ToString());
+                    volley.Kind, player.statLifeMax2), tick, volley.Kind.ToString());
                 changed = true;
             }
         }

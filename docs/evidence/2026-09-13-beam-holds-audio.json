@@ -1,0 +1,222 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.73",
+  "protocol": 35,
+  "baseline": "15100dfb54fdcc086331375f0b0831d4343ec579",
+  "source_commit": "e3eae50d90853fe7dfde75b3c1673a75efb21e66",
+  "source_branch": "main",
+  "source_sha256": "a3f7fd4c731c6154c90daf44edb49790afc1544843adc2fd7f11774058e4fa5f",
+  "local_build_record": ".local/builds/20260913T125933683435Z/record.json",
+  "scope": "Main eight-cast sustained overlap without cadence change; half-width continuous Stillness bands and folded charge body; original Raid-only beam audio.",
+  "preserved": "PortalBeam/RaidEnergy shaders and exports unchanged. Lattice geometry/material/cadence, other attack timing and fixed damage, BGM, Stack sounds, weapon audio, player markers and Ghost Samurai unchanged. Six pre-existing locale edits match the preceding build manifest byte-for-byte, not included in these commits.",
+  "authority": "Exact-Fight AttackController owns LanceLedger; at most current+carried, separate per-cast hit caps, end-exclusive retirement and idempotent phase/Fight cleanup. Protocol35 appends main duration policy and bounded carried descriptor; clients cannot select durations/hits.",
+  "reference_analysis": {
+    "report": "docs/research/WOTG_RAID_BENCHMARK.md#f16--beam-audio-envelope-analysis-2026-09-13",
+    "consent": "User explicitly approved numeric mixed-recording analysis, original synthesis and audition delivery after audio-input capability proved unavailable. No subjective listening claim.",
+    "method": "Four local recording regions decoded mono24kHz. 10ms RMS and 2048-Hann FFT/256-hop, waveform/spectrogram inspected with F15's actual native fire frames. Mixed BGM/weapon/teleport audio, not isolated beam samples.",
+    "rights": "Independent seeded NumPy synthesis. No recording samples, WotG/WoTM audio, source code or dependency media vendored.",
+    "local_outputs": ".local/beam-audio-20260913: numeric analysis, waveform/spectrogram; audition/ contains five labeled WAV examples and Beam-audition.mp3."
+  },
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "hjson_files_parsed": 18,
+    "source_changed_during_build": false,
+    "bytes": 56784518,
+    "sha256": "90a679615985ee579f9fdab8b1a7dcd061974c80eda85a77e1ef058c5ed7612f",
+    "installed_hash_verified": true,
+    "previous_package": "Archived by dev.py; no game/GUI/server session started, no save or Mod-list change."
+  },
+  "verification": {
+    "domain": "192 deterministic cases passed; subsequent stricter carried-step adjacency reran the 3 affected pursuit cases successfully. Includes 1–4-member real packet carry round-trips and malformed count/order/policy/truncation rejection, one-hit carry ledger, cadence, half-width/sanctuary and unaffected Spread/Final windows.",
+    "codec": "Protocol35: 324 compiled round-trips and 50 malformed/truncated rejections passed. Additional carry cases are in the domain harness, not counted twice here.",
+    "shader_audio_guards": "12 passed: existing 10 shader/export integration guards plus 2 PCM/routing guards. All 15 new assets have bounded peaks/RMS/DC, one-shot zero edges, bounded loop wrap and exact routing.",
+    "static": "Catalog generated once and checked (66 documents); repository policy passed (678 files) after adding the required per-file attribution fields; YAML passed (10 files). Initial wrapper needed the existing ignored python-deps/PyYAML path, not a new installation. Only failed/unreached checks were resumed.",
+    "gpu": "Accepted0.2.72 shader/material evidence reused because GPU sources/exports are unchanged; this pass does not claim new runtime/GPU/FPS verification."
+  },
+  "audio_exports_and_offline_mix": {
+    "PortalCharge": {
+      "seconds": 0.47,
+      "peak_dbfs": -4.15,
+      "rms_dbfs": -19.06,
+      "dc": 1.449155918876868e-7,
+      "boundary_step": 5.802354827074619e-10,
+      "clipped_samples": 0,
+      "sha256": "9119c2bbe02df3277c5314b9cba619874d77510b2bf2467995eca509bd7f9b50"
+    },
+    "WideCharge": {
+      "seconds": 0.65,
+      "peak_dbfs": -2.85,
+      "rms_dbfs": -16.81,
+      "dc": 0.0000019405908921828398,
+      "boundary_step": 4.827208020493039e-10,
+      "clipped_samples": 0,
+      "sha256": "96bc82fba8812702fccebfd719cf505212e987433b970a961c320d000e5490cb"
+    },
+    "GridCharge": {
+      "seconds": 1,
+      "peak_dbfs": -3.35,
+      "rms_dbfs": -19.03,
+      "dc": 0.000007747295068476541,
+      "boundary_step": 2.4775222553902944e-10,
+      "clipped_samples": 0,
+      "sha256": "4a1ca02afc9f556d8f4edbf1fc6445ee3cfdf0ff2d67983005a2c526cef30ab0"
+    },
+    "ChargeGather": {
+      "seconds": 0.7,
+      "peak_dbfs": -2.16,
+      "rms_dbfs": -16.79,
+      "dc": 5.878774304754058e-7,
+      "boundary_step": 2.5942943009710247e-10,
+      "clipped_samples": 0,
+      "sha256": "a144b84556d9911be706a30fb4ed945016db5e0862faea954e5ec1a5335cff5d"
+    },
+    "ChargeLock": {
+      "seconds": 0.4,
+      "peak_dbfs": -4.44,
+      "rms_dbfs": -22.32,
+      "dc": 0.000016711057103068313,
+      "boundary_step": 1.0853039794122666e-9,
+      "clipped_samples": 0,
+      "sha256": "7b9f79ae4c063e8586968c3960def708c8abfc8ba030a6bcf00b8c69244ff6da"
+    },
+    "PortalFire": {
+      "seconds": 1,
+      "peak_dbfs": -2.62,
+      "rms_dbfs": -16.26,
+      "dc": 0.0000026416661278539025,
+      "boundary_step": 2.2630902201296694e-10,
+      "clipped_samples": 0,
+      "sha256": "4db5546e9bc7399c6d65f3f6ee7a2e37c3e6c8c3fb45e0fcc630dc623fd42d68"
+    },
+    "CurtainFire": {
+      "seconds": 0.69,
+      "peak_dbfs": -2.62,
+      "rms_dbfs": -15.81,
+      "dc": 0.0000022216825957928558,
+      "boundary_step": 2.1726322669086827e-10,
+      "clipped_samples": 0,
+      "sha256": "5404c052dfd6b3bf370d81344c614557a48dfc200e4ea969831896c61ae80bf2"
+    },
+    "CoreSalvoFire": {
+      "seconds": 0.94,
+      "peak_dbfs": -2.58,
+      "rms_dbfs": -15.14,
+      "dc": 0.000001052363435025979,
+      "boundary_step": 5.406727377936687e-10,
+      "clipped_samples": 0,
+      "sha256": "6748cdc6af0423c0304a70e9a20db5cdd1fdedcf01dd78109c518e5662df771d"
+    },
+    "GridFire": {
+      "seconds": 0.94,
+      "peak_dbfs": -2.85,
+      "rms_dbfs": -16.55,
+      "dc": 3.7024246081250756e-8,
+      "boundary_step": 7.737653174639431e-10,
+      "clipped_samples": 0,
+      "sha256": "8ab8fe0d4b4d86678f379bba2d6a36d3891371670e393fbb6a6cd02e5d79be3d"
+    },
+    "ChargeRush": {
+      "seconds": 0.47,
+      "peak_dbfs": -2.38,
+      "rms_dbfs": -15.17,
+      "dc": 0.0000027932868876631755,
+      "boundary_step": 3.934440521927528e-10,
+      "clipped_samples": 0,
+      "sha256": "dc2748b4e742dc6e3acc8207309a4ee3bf14908e1713582477050294e5f25912"
+    },
+    "WideFire": {
+      "seconds": 0.88,
+      "peak_dbfs": -2.62,
+      "rms_dbfs": -15.22,
+      "dc": 0.000002043040190519849,
+      "boundary_step": 1.0968799853133204e-9,
+      "clipped_samples": 0,
+      "sha256": "a57c6644f21cb064868890f084eec9bb6afe27330bd85b19d9bf38426752f61e"
+    },
+    "BeamSustain": {
+      "seconds": 2.4,
+      "peak_dbfs": -4.88,
+      "rms_dbfs": -16.42,
+      "dc": 4.572825489394645e-18,
+      "boundary_step": 0.01787721320346096,
+      "clipped_samples": 0,
+      "sha256": "c45cada7d4d8cb5d22f07b8a2ece5e272d39504fe73a60c7f20034f0febf1e4f"
+    },
+    "FloodFire": {
+      "seconds": 0.64,
+      "peak_dbfs": -2.85,
+      "rms_dbfs": -15.52,
+      "dc": 0.000003353561124056179,
+      "boundary_step": 6.249616194393744e-11,
+      "clipped_samples": 0,
+      "sha256": "24982627e1037e76262b98e8aa81c099f63cf94bdfd2967452cad02c64b9467f"
+    },
+    "SpreadRay": {
+      "seconds": 0.34,
+      "peak_dbfs": -3.1,
+      "rms_dbfs": -18.62,
+      "dc": 0.00001930612877818566,
+      "boundary_step": 4.292639458189062e-9,
+      "clipped_samples": 0,
+      "sha256": "235d2b26298c3df1681115e0d0efe9724406859c7a4ae0e90cc26eba68d26398"
+    },
+    "SpreadScatter": {
+      "seconds": 0.46,
+      "peak_dbfs": -4.44,
+      "rms_dbfs": -22.16,
+      "dc": 0.000004410282510393951,
+      "boundary_step": 3.7476626193092046e-10,
+      "clipped_samples": 0,
+      "sha256": "8ad8fe63b3730b1546bdbf3e5e27ecba8fed1ba0a053c4baecef2a5c1004084d"
+    },
+    "01-eight-cast": {
+      "seconds": 7,
+      "peak_dbfs": -4.08,
+      "rms_dbfs": -17.33,
+      "dc": 0.000013710220480074369,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "02-side-bands-and-charge": {
+      "seconds": 4.1,
+      "peak_dbfs": -4.39,
+      "rms_dbfs": -20.79,
+      "dc": 9.019583821920138e-7,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "03-grid-and-core": {
+      "seconds": 3,
+      "peak_dbfs": -4.52,
+      "rms_dbfs": -20.84,
+      "dc": 0.000004041103141605905,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "04-rotation-and-field": {
+      "seconds": 6.5,
+      "peak_dbfs": -1.96,
+      "rms_dbfs": -18.52,
+      "dc": 0.00009080830653561212,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "05-spread-ray-and-dissolve": {
+      "seconds": 1.5,
+      "peak_dbfs": -4.32,
+      "rms_dbfs": -26.7,
+      "dc": 0.000020006853879714695,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    }
+  },
+  "runtime_not_run": [
+    "Actual tModLoader reload and multiplayer matching-version combat",
+    "Eight-cast continued firing while next forecast/fire begins; late snapshot and one-hit cap under real networking",
+    "Narrower Stillness footprint, full central sanctuary and charge-body launch/harmless closure readability",
+    "User audio audition and full-game mix with BGM/other Mods, no late beam tails on phase/end",
+    "Reduced Effects, UI107%/zoom and measured frame time"
+  ]
+}

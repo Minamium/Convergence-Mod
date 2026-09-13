@@ -594,7 +594,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: 不幸な人形劇 — Encounter Specification
-  content_sha256: fcaff9339d092754f31532f1ec8ad35837653ed0a055a2233608677e793570fb
+  content_sha256: 4ea1894b12a804ba96380e1ec3de7ded310617c2823df462c8d5ccc2e32ac9e1
   document_type: spec
   status: accepted
   owners:
@@ -622,7 +622,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 4450b5424e8d3ca131cdc04554d2fceb3e27f533b0e4420f826ef48c0f1b51cd
+  content_sha256: 90433dfae9dd74061f1286e1fc74232e7de2b184515dafd81d3a8dd5e9c24d1e
   document_type: spec
   status: provisional
   owners:
@@ -921,12 +921,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 6e63069a624f3f5d62fe5097eaf37debd6d1889766a676673965bef9035a97db
+  content_sha256: eb0920061df28702195bb6ef4d42f29a6a21b8a8932e766d9f8988204f653495
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -1103,7 +1103,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 5d8cf5885efea48b271820d9e2dc0b0d4204c8d0e577b50e8c8fbbdb30c3135d
+  content_sha256: e74a867f0952e5bf45358168d8b29ee1feba7ea886172045e212bf9f61abfcac
   document_type: status
   status: accepted
   owners:
@@ -1322,7 +1322,7 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: 12f999df5a5cc4fdf6f9621b49976ff798927b8e66c81a1a4f442a44241918f5
+  content_sha256: e02fa50ec9e25ea63d49e94ea629745a01d22b6bd9457ac23646b16759abc38d
   document_type: research
   status: provisional
   owners:

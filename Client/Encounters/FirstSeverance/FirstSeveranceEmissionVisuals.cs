@@ -81,7 +81,8 @@ internal sealed class FirstSeveranceEmissionVisuals
         foreach (var emitter in emitters) result = Math.Max(result, value(emitter));
         return result;
     }
-    internal void Update(FirstSeveranceLanceVolley? volley, ulong tick, IReadOnlyList<FirstSeveranceLanceVolley> spread)
+    internal void Update(FirstSeveranceLanceVolley? volley, ulong tick, IReadOnlyList<FirstSeveranceLanceVolley> spread,
+        FirstSeveranceLanceVolley? carried)
     {
         clockTick = tick;
         clockStamp = Stopwatch.GetTimestamp();
@@ -90,9 +91,11 @@ internal sealed class FirstSeveranceEmissionVisuals
         {
             bool currentSpread = false;
             foreach (var cast in spread) currentSpread |= emitter.Volley.Serial == cast.Serial;
-            if (!currentSpread && emitter.Volley.Serial != volley?.Serial && tick < emitter.Volley.EndTick)
+            if (!currentSpread && emitter.Volley.Serial != volley?.Serial
+                && emitter.Volley.Serial != carried?.Serial && tick < emitter.Volley.EndTick)
                 emitter.CancelledAt ??= tick;
         }
+        if (carried is not null) Accept(carried, tick, true);
         if (volley is not null) Accept(volley, tick, true);
         foreach (var cast in spread)
             if (tick <= cast.EndTick + 28) Accept(cast, tick, false);
@@ -154,7 +157,7 @@ internal sealed class FirstSeveranceEmissionVisuals
             }
             if (v.Kind == FirstSeveranceAttackKind.Stillness)
             {
-                DrawCurtainComb(batch, e, now, authorityTick, color, reduced);
+                DrawCurtainBands(batch, e, now, authorityTick, color, reduced);
                 continue;
             }
             foreach (var ray in v.Rays)
@@ -225,7 +228,7 @@ internal sealed class FirstSeveranceEmissionVisuals
         }
     }
 
-    private void DrawCurtainComb(SpriteBatch batch, Emitter e, double now, ulong authorityTick,
+    private void DrawCurtainBands(SpriteBatch batch, Emitter e, double now, ulong authorityTick,
         Color color, bool reduced)
     {
         var v = e.Volley;
@@ -247,9 +250,8 @@ internal sealed class FirstSeveranceEmissionVisuals
                 float release = Emission(clock, fire, end);
                 float born = .65f + .35f * Window(clock, start, start + 2d);
                 float power = (clock < fire ? born : live ? 1 : release * (e.CancelledAt.HasValue?.10f:1)) * cancelledFade;
-                Color tint = Color.Lerp(color, new Color(174, 152, 255), MathF.Abs(lane - FirstSeveranceCurtainComb.CenterLane) / 36f);
-                FirstSeveranceBeamMaterial.DrawTooth(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
-                    clock - start, charge, warning ? 0 : 1, power, tint, reduced,fire-start,end-start);
+                FirstSeveranceHazardSurface.Draw(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
+                    clock - start, charge, warning ? 0 : 1, power, color, reduced,fire-start,end-start);
             }
     }
 
@@ -263,14 +265,14 @@ internal sealed class FirstSeveranceEmissionVisuals
         float opacity=Arrive(now-v.StartTick,5)*cooling;
         if(now<v.FireTick && e.CancelledAt is null)
             DrawWarning(batch,head,direction,1600,50,now,v.StartTick,v.FireTick,color,Math.Max(.6f,warning),reduced);
-        if(live) {
-            var hit=v.RayAt(0,authorityTick);
-            FirstSeveranceRaidVfx.Beam(batch,new(hit.X,hit.Y),new(hit.DirectionX,hit.DirectionY),
+        if(now>=v.FireTick && now<v.EndTick+13d) {
+            var hit=v.RayAt(0,Math.Min(authorityTick,v.EndTick-1));
+            Vector2 origin=head-direction*(hit.Length-hit.HalfWidth);
+            FirstSeveranceRaidVfx.Beam(batch,origin,direction,
                 hit.Length,hit.HalfWidth,now-v.StartTick,1,1,opacity,color,reduced,confined:true,mouth:false,
                 fireAge:v.FireTick-v.StartTick,endAge:v.EndTick-v.StartTick);
         }
-        FirstSeveranceRaidVfx.Orb(batch,head,direction*(live?24:0),48,now-v.StartTick,
-            color,opacity,live,reduced);
+        // Folded energy, not a solid orb over the beam's nose. The swept hit capsule is unchanged.
         if(!live && now<v.FireTick) FirstSeveranceRaidVfx.Charge(batch,head,direction,now-v.StartTick,
             charge,0,opacity,color,reduced,1.2f);
         if(live) FirstSeveranceRaidVfx.Flare(batch,head,now-v.StartTick,
