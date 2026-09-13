@@ -4,7 +4,7 @@ document_type: policy
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - compatibility.version_matrix
 aliases:
@@ -46,9 +46,9 @@ This compatibility freeze describes Stage A of [ADR-0006](adr/0006-staged-calami
 
 現在のパッケージ宣言は[build.txt](../build.txt)、実装・検証状態は[Status](STATUS.md)を正本とする。この互換性表に開発版番号を重複記載しない。
 
-Source/asset licenseが未決定のため、accidental `.tmod` source distributionを避ける目的で`includeSource = false`に固定する。ライセンス決定後に配布方針と合わせて再審査する。
+汎用的なsource/asset再利用ライセンスは付与していないため、accidental `.tmod` source distributionを避ける目的で`includeSource = false`を維持する。開発版Modの配布範囲は[Release Process](RELEASE_PROCESS.md)、素材ごとの条件はAttributionを参照し、オープンソース化を選ぶ場合は別途再審査する。
 
-内部Mod/assembly名とroot namespaceは開発コードネーム`Convergence`とした。entry class/project filenameは`ConvergenceMod`である。公開名は未決定であり、`displayName`はdevelopment用である。tModLoaderは`ModReference`の`Name@Version`形式を、指定版以上かつ同じmajor versionとして判定する。したがって`CalamityMod@2.2.4`はloaderの依存解決では後続2.xを許可し、3.0.0を拒否する。
+内部Mod/assembly名とroot namespaceは`Convergence`、entry class/project filenameは`ConvergenceMod`を維持する。公開Mod名は`build.txt`の`displayName`、Raid/Boss名は[現行仕様](encounters/first-severance/ENCOUNTER_SPEC.md#public-naming)を正本とする。tModLoaderは`ModReference`の`Name@Version`形式を、指定版以上かつ同じmajor versionとして判定する。したがって`CalamityMod@2.2.4`はloaderの依存解決では後続2.xを許可し、3.0.0を拒否する。
 
 企画上の対応範囲を2.2.xへ限定するため、Compatibility層で実行時に`2.2.4 <= version < 2.3.0`を検査する。範囲外ではMod全体をcrashさせず、Raid起動を無効化して必要versionを表示する。この数値下限だけは[ADR-0008](adr/0008-confirmed-2026-07-runtime-baseline.md)が[ADR-0004](adr/0004-calamity-compatibility-boundary.md)の旧下限を更新し、adapter境界そのものは維持する。
 

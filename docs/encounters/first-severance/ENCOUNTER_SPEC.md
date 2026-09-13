@@ -10,6 +10,7 @@ source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
   - first_severance.terminal_outcomes
+  - first_severance.public_identity
 aliases:
   - Requiem of the Hollow Doll
   - First Severance
@@ -36,6 +37,23 @@ This is the current player-visible contract, reconciled with the implementation 
 **Requiem of the Hollow Doll** faces **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**, a tragic suspended Doll in a cathedral theater. These are the current public names. The Raid title is separate from the approved BGM **EigHt — 不幸な人形劇**; do not rename the credited work or imply creator endorsement. The former First Severance / Null Cantor names survive only as historical names and stable internal `FirstSeverance` / `first_severance` / `NullCantor` content, packet, asset and document IDs; no save migration is performed. The cooperative development target is 2–4 players with post-Exo-Mechs/Supreme-Calamitas, Shadowspec-level equipment. The large body is **one logical HP pool**, not multiple damageable limbs.
 
 Solo is a compiled development exception, not balanced solo content. The additional [Doll summon weapon](WEAPONS.md#doll-companion--the-unbroken-promise) is not a roster member and does not fill Ready/Stack/revival roles. Current implementation/test state belongs only to [Status](../../STATUS.md). Future phases, NPC party substitutes and production progression are not silently promoted from [Backlog](BACKLOG.md).
+
+### Public naming
+
+Use these names in localization, tooltips, README, Workshop and release notes. Uppercase cinematic typography is not a different name. Historical research/ADRs and stable identifiers retain their original spelling.
+
+| Surface | English | Japanese |
+|---|---|---|
+| Raid | Requiem of the Hollow Doll | Requiem of the Hollow Doll |
+| Boss | Lacrimosa — The Bound Heart | ラクリモーサ — 縛られた心 |
+| Pre-Raid NPC | Unnamed Doll | 名もなき人形 |
+| Pedestal / preparation key | Foundation Core / Theater Doll | ファウンデーション・コア / 開演の人形 |
+| Damageable Pylon | Suspension Anchor | 懸架の楔 |
+| Revival item | Resuscitation Kit | 蘇生キット |
+| Reward box | Curtainfall Treasure Box | 閉幕の宝箱 |
+| Ten-slot companion weapon | The Unbroken Promise | ほどけない約束 |
+
+[Weapons](WEAPONS.md) owns the five reward names. `DollCovenant` and `NullCantor` are internal identifiers, not alternate public companion/Boss names. `Null Refrain` remains the legitimate melee weapon name; do not rename saved item/projectile types to match display text. The BGM keeps its original title and composer credit in [Attribution](../../../Assets/ATTRIBUTION.md#eight-不幸な人形劇-phase-masters--0246).
 
 ## Admission and arena
 

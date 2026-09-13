@@ -65,12 +65,12 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: 531ebc48caa943648ab3e7badc07209cba235cb387fd14cc2dbca766b2d1c765
+  content_sha256: 8ee8ba75f0f7edbe9a3c3efb91246fb64a8c488e1f6640862a899199f0a4c345
   document_type: policy
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - compatibility.version_matrix
   aliases:
@@ -436,12 +436,12 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: a38728b3093dab1d4776d061e0c316fa2d77d0ea32f244e025abdc48f0e83a60
+  content_sha256: b27c33602921860500c8cec47b8ba05805d23b72b578e8522b3927810fd999ae
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - documentation.read_order
   aliases:
@@ -542,12 +542,12 @@ documents:
 - doc_id: encounter.first-severance.overview
   path: docs/encounters/first-severance/README.md
   title: Requiem of the Hollow Doll
-  content_sha256: ff5e5336b27fff1a03e7cc81a57d900adaa65158bba5e6a3f44dbdcf9b9e3355
+  content_sha256: 16e39d9742335bcfcb7ef5af0a1bccc26b8e195b2f2cf308927e4b0fff37ef47
   document_type: overview
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.document_map
   aliases:
@@ -614,7 +614,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: Requiem of the Hollow Doll — Encounter Specification
-  content_sha256: d9820222781c187764967504027941572fa4dd1e9fb8a8a457634827e3d56798
+  content_sha256: c0857e28d55d8554606839b9339a0a5262aeb72d7a005a48669f5a819b08c3e8
   document_type: spec
   status: accepted
   owners:
@@ -625,6 +625,7 @@ documents:
   - first_severance.encounter_loop
   - first_severance.mechanics
   - first_severance.terminal_outcomes
+  - first_severance.public_identity
   aliases:
   - Requiem of the Hollow Doll
   - First Severance
@@ -685,7 +686,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 6736c2bf364dcbe773a02ee04503631c0236ced96f8ae40a41e67a98f45996e6
+  content_sha256: e481e058fce1b9488f50c04a1ae3455223a359e12b0f22176740bb73c1bf7813
   document_type: spec
   status: provisional
   owners:
@@ -758,6 +759,23 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.playtest-feedback
+  path: docs/history/PLAYTEST_FEEDBACK.md
+  title: Playtest feedback ledger
+  content_sha256: df1becb44861f58b38b9c70e8cc83317a43759400cf74bd53dfb8da9baa270a4
+  document_type: evidence
+  status: historical
+  owners:
+  - project
+  last_reviewed: '2026-09-14'
+  source_of_truth_for: []
+  aliases:
+  - playtest feedback
+  - user acceptance history
+  related_code: []
+  related_docs:
+  - project.status
+  - encounter.first-severance.spec
 - doc_id: history.pre-consolidation
   path: docs/history/2026-09-07-pre-consolidation.md
   title: Pre-consolidation development record
@@ -790,6 +808,21 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.status-through-0278
+  path: docs/history/2026-09-14-status-through-0278.md
+  title: Verification checkpoint through 0.2.78
+  content_sha256: 1a354f1c3c09a81abbbd0107e43062d5f92790d662d8cdbfccb500300ab0429f
+  document_type: evidence
+  status: historical
+  owners:
+  - project
+  last_reviewed: '2026-09-14'
+  source_of_truth_for: []
+  aliases:
+  - verification through 0.2.78
+  related_code: []
+  related_docs:
+  - project.status
 - doc_id: history.visual-evolution-0246
   path: docs/history/2026-09-11-visual-evolution.md
   title: Presentation evolution through 0.2.46
@@ -829,7 +862,7 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: a6fa07ed4b89f500672f78b26b60a42cb0d383cc5671e88fa764c70727ceb220
+  content_sha256: e23b4feab14a9a7b4199a5760b9d495d4538641401e0f3b261864b3862c84af6
   document_type: policy
   status: accepted
   owners:
@@ -961,7 +994,7 @@ documents:
 - doc_id: project.brief
   path: docs/PROJECT_BRIEF.md
   title: Project Brief
-  content_sha256: 1f77437f521c6cb56fa274a9f62e109ffa68a957b0af10d33768207d540429ca
+  content_sha256: 6c12b6e4c852530a6ba0f829b688df9322c9c8925ec7da127b84355395c295dc
   document_type: overview
   status: accepted
   owners:
@@ -1124,7 +1157,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 59e066f8b7e91519ba844f0ecda6e61663c63542e6f2fc8f5053e598b2e706ef
+  content_sha256: 0335d495b3af5631baac46ba6412b490a8970d58b82f0d54bc325558a9cfe710
   document_type: status
   status: accepted
   owners:
@@ -1175,6 +1208,24 @@ documents:
   related_code: []
   related_docs:
   - encounter.first-severance.plan
+- doc_id: release.0-3-1
+  path: docs/releases/0.3.1.md
+  title: Convergence 0.3.1 — Public Playtest
+  content_sha256: 116b0ac9d4c53f8ec7b7cb992f9e3a76b59abaef2759a0f8f7b0271a6ce10425
+  document_type: evidence
+  status: accepted
+  owners:
+  - project
+  last_reviewed: '2026-09-14'
+  source_of_truth_for:
+  - release.0_3_1_scope
+  aliases:
+  - 0.3.1 public playtest
+  related_code:
+  - build.txt
+  related_docs:
+  - project.status
+  - policy.release-process
 - doc_id: research.codex-skills-survey
   path: docs/research/CODEX_SKILLS_SURVEY.md
   title: Codex Skills Survey

@@ -15,6 +15,8 @@ Mods: {
       }
     }
     Projectiles.NullRefrainSlash.DisplayName: 断唱
+    Projectiles.NullCantorClawCrush.DisplayName: ラクリモーサの掌握
+    Projectiles.NullCantorClawSwipe.DisplayName: ラクリモーサの爪
     NPCs: {
       FirstSeverancePrototypeBoss.DisplayName: ラクリモーサ — 縛られた心
       FirstSeverancePrototypePylon.DisplayName: 懸架の楔

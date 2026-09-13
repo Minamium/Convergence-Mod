@@ -1,19 +1,20 @@
 Mods: {
-  Convergence: {
-    NPCs: {
-      GhostSamuraiBoss: { DisplayName: "Ghost Samurai" }
-    }
-    Items: {
-      GhostSamuraiSummon: {
-        DisplayName: "Oni's Mourning Bell"
-        Tooltip: "Summons the Ghost Samurai\nReusable development summon; use in a large open area\nPhase 3 currently continues Phase 2"
-      }
-    }
-    Projectiles: {
-      GhostSamuraiAttackProjectile: { DisplayName: "Ghost Samurai's Blade" }
-    }
-    GhostSamurai: {
-      SummonRejected: "The Ghost Samurai could not be summoned. Hold the bell and finish the current encounter first."
-    }
-  }
+	Convergence: {
+		NPCs.GhostSamuraiBoss.DisplayName: Ghost Samurai
+
+		Items: {
+			GhostSamuraiSummon: {
+				DisplayName: Oni's Mourning Bell
+				Tooltip:
+					'''
+					Summons the Ghost Samurai
+					Reusable development summon; use in a large open area
+					Work in progress: attacks, rewards and balance are unfinished
+					'''
+			}
+		}
+
+		Projectiles.GhostSamuraiAttackProjectile.DisplayName: Ghost Samurai's Blade
+		GhostSamurai.SummonRejected: The Ghost Samurai could not be summoned. Hold the bell and finish the current encounter first.
+	}
 }

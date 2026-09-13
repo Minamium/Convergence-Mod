@@ -1,0 +1,141 @@
+{
+  "date": "2026-09-14",
+  "build": "0.2.78",
+  "protocol": 37,
+  "kind": "owner-run solo Host & Play, pre-0.3.1 release baseline",
+  "files": {
+    "client.log": {
+      "sha256": "fa8b521b8e495d5f702e60dc8b8dc675b9a82611d1b87a447dbe2cb53bb78fac",
+      "bytes": 166411
+    },
+    "server.log": {
+      "sha256": "6b9206bb8eba4bff97519da057d030d5ba40d29a1665c5702ff5117025bc97ee",
+      "bytes": 201103
+    },
+    "server2.log": {
+      "sha256": "37e60de2e2102a201084109ca53900ba9526e995f188e124e9a8d493cc925dcb",
+      "bytes": 73880
+    }
+  },
+  "aggregation": "Unique authority event lines across server.log/server2.log; client audio is separate, not another fight.",
+  "fights": {
+    "1": {
+      "events": {
+        "CombatStarted": 1,
+        "PhaseChanged": 54,
+        "DamageWindowStarted": 7,
+        "LanceTelegraph": 21,
+        "LanceFired": 20,
+        "RaidDamage": 28,
+        "DamageProgress": 20,
+        "PylonDestroyed": 2,
+        "DamageWindowEnded": 7,
+        "StackResolved": 19,
+        "StackAttendance": 19,
+        "SpreadPrismTelegraph": 65,
+        "SpreadPrismFired": 65,
+        "SpreadResolved": 22,
+        "EnergyChargeLocked": 6,
+        "HpGateReached": 3,
+        "GridTelegraph": 6,
+        "GridFired": 6,
+        "SafeWindowResolved": 8,
+        "ScoreAttackFired": 31,
+        "CoreCannonTelegraph": 4,
+        "CoreCannonFired": 4,
+        "CombatEnded": 1,
+        "CombatDpsSummary": 1,
+        "VictoryRewardDropped": 1
+      },
+      "damage": {
+        "PursuitPrism": 5,
+        "Lattice": 2,
+        "SpreadPrism": 4,
+        "RemoteClaws": 1,
+        "HalfField": 2,
+        "FinalBullets": 11,
+        "FinalSlicer": 2,
+        "FinalCoreSalvo": 1
+      },
+      "damage_total": 3360,
+      "stack": [
+        19,
+        0
+      ],
+      "spread": [
+        22,
+        0
+      ],
+      "dps": [
+        {
+          "seq": "1",
+          "tick": "24685",
+          "cause": "BossLifeZero",
+          "participants": "1",
+          "elapsed_seconds": "240.65",
+          "completed_exposures": "1",
+          "overload": "0",
+          "core_effective_damage": "5000000",
+          "core_open_seconds": "40.38",
+          "core_window_dps": "123813.5",
+          "pylon_effective_damage": "600000",
+          "pylon_open_seconds": "6.85",
+          "pylon_window_dps": "87591.2",
+          "boss_life": "0",
+          "boss_max_life": "5000000",
+          "boss_remaining_pct": "0.00",
+          "dps_basis": "AuthorityNetHpLoss"
+        }
+      ],
+      "phase_ticks": {
+        "Sealed": 10846,
+        "Unbound": 14257,
+        "Distant": 16597,
+        "Final": 19687
+      }
+    }
+  },
+  "audio": {
+    "critical_cues_accepted": 36,
+    "weapon_voice_cues": 24,
+    "weapon_voice_samples": 48,
+    "playing_true": 48,
+    "playing_false": 0,
+    "sound_slider": 0.161,
+    "focus": true,
+    "scope": "Bounded first-three-per-cue diagnostics, not a complete sound-event count or perceived-loudness measurement."
+  },
+  "exceptions": [
+    {
+      "phase": "initial connection",
+      "kind": "connection refused",
+      "recovered": true
+    },
+    {
+      "phase": "shutdown tile replication",
+      "kind": "ObjectDisposedException",
+      "count": 2,
+      "owner": "Terraria.NetMessage / Ionic.Zlib",
+      "relation": "After Raid completion; causal relationship to the subsequent unload failure is not established."
+    },
+    {
+      "phase": "world unload",
+      "kind": "IndexOutOfRangeException",
+      "owner": "GhostSamuraiContainmentSystem.OnWorldUnload",
+      "status": "Known, still present; no Ghost Samurai fight was invoked."
+    },
+    {
+      "phase": "subworld shutdown",
+      "kind": "EndOfStreamException",
+      "owner": "SubworldLibrary",
+      "status": "After world unload"
+    }
+  ],
+  "limits": [
+    "One solo victory is not evidence of multiplayer alignment, roster scaling or revival.",
+    "RaidDamage totals are requested authority damage, not observed net player HP loss.",
+    "Window DPS excludes shielding and overkill; it is not whole-fight or individual DPS.",
+    "21 lance forecasts and 20 fires were logged; forecasts may retire on phase changes. This count alone does not establish a missing attack.",
+    "No new artistic or listening approval inferred from attachment; raw logs/video remain external."
+  ]
+}

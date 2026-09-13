@@ -32,7 +32,24 @@ Mods: {
 			}
 		}
 
-		Projectiles.NullRefrainSlash.DisplayName: Null Refrain
+		Projectiles: {
+			NullRefrainSlash.DisplayName: Null Refrain
+			ChoirNote.DisplayName: Choir Note
+			ChoirSentinel.DisplayName: Choir Sentinel
+			LacunaRay.DisplayName: Lacuna Ray
+			MeridianNeedle.DisplayName: Meridian Needle
+			RefrainEcho.DisplayName: Refrain Echo
+			RitualArmamentPose.DisplayName: Ritual Armament
+			WitnessBlade.DisplayName: Witness Blade
+			WitnessEcho.DisplayName: Witness Echo
+			NullCantorClawCrush.DisplayName: Lacrimosa's Grasp
+			NullCantorClawSwipe.DisplayName: Lacrimosa's Claw
+			WitnessVerdict.DisplayName: Witness Verdict
+			LacunaConvergence.DisplayName: Lacuna Convergence
+			ChoirRequiem.DisplayName: Choir Requiem
+			MeridianBastion.DisplayName: Meridian Bastion
+			WitnessLitany.DisplayName: Witness Litany
+		}
 
 		Buffs: {
 			RecoveryLockoutDebuff: {
@@ -76,7 +93,7 @@ Mods: {
 				PhasePylonCheck: PYLONS — destroy all {0}. The Boss remains shielded.
 				PhaseStack: STACK — gather within 7 tiles of {1}. Required shares: {3}. {2} seconds!
 				PhaseSpread: SPREAD — large circles! Separate by at least 44 tiles. {2} seconds!
-				PhaseCoreExposure: CORE EXPOSED — attack the framed central aperture; dodge the predicted beams! {2} seconds.
+				PhaseCoreExposure: CORE EXPOSED — attack the central sphere; dodge the predicted beams! {2} seconds.
 				LanceWarning: OBSERVATION LANCE — aim locked. Clear the dashed corridor! {0}s
 				LanceFire: OBSERVATION LANCE — FIRING
 				PrismInstruction: PRISM {0}/8 — EVERYONE targeted. Keep dodging!

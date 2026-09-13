@@ -6,6 +6,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-09-14
+
+- First public GitHub playtest milestone: **Requiem of the Hollow Doll**, starring **Lacrimosa — The Bound Heart**, is initially complete as a prototype. Ghost Samurai remains in development.
+- Includes connected-party preparation/Ready, four-stage Raid survival, roster-scaled health, instant teammate revival, five equal-odds treasure rewards and the craftable ten-slot Doll companion.
+- Carries the latest flowing beam materials, suspended Doll/mechanical core, staged weapon animations, corrected weapon sound playback and approved EigHt phase music from 0.2.78.
+- Unifies public names and corrects obsolete ranged/rogue/summon descriptions without changing stable content IDs. Combat, assets, HP, loot and protocol37 remain unchanged from 0.2.78.
+- Keeps solo activation available for this development playtest; multiplayer is preferred, solo balance is not promised. See [release notes](docs/releases/0.3.1.md) for compatibility, credits and unresolved shutdown/verification limits.
+- Adds a lightweight player-feedback ledger and moves historical verification out of the current STATUS view. Existing history and assets are preserved.
+
+## Development history before 0.3.1
+
+These entries describe their original versions, not current tuning or release instructions.
+
 ### Development 0.2.19 — flowing beams, sanctuaries and Null Refrain
 
 - Final comb forecasts gain0.25s without truncating the six-shot sequence; existing Final BGM retimed to fit.

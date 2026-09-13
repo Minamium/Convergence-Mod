@@ -4,7 +4,7 @@ document_type: overview
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.document_map
 aliases:
@@ -34,8 +34,8 @@ Core activation / all current-world participants
   -> manual Ready from everyone
   -> separate Boss/Raid introduction
   -> Phase I: sealed / Pylons / Core / clockwise Stack + Spread
-  -> Phase II: lattice / twin rotating blades / Spread
-  -> Phase III: remote arms / floods / swords / Stack + Spread / crush
+  -> Phase II: lattice / twin rotating beams / Spread
+  -> Phase III: remote arms / tight and easier beam lanes / Stack + Spread / crush
   -> Final: survival score and current beam/attack patterns
   -> survived full Final: Victory + shared reward drops
 ```
