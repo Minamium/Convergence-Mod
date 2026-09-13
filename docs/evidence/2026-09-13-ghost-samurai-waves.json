@@ -4,10 +4,10 @@
   "protocol": 36,
   "base_commit": "0a038302cf1afe621859cc3237b25391a676acd4",
   "branch": "feat/ghost-samurai-wave-audio",
-  "source_sha256": "fad4a6c73f91b0d93fa220cbdaae368b58daf1c6e56d53acb4122860dca4960a",
+  "source_sha256": "fea078918b83756da644eaee26700c16fc44522531e069906c8650561fcebe1a",
   "artifact": {
-    "bytes": 56837888,
-    "sha256": "5aa7b8eeaa7bb03c87be9238bb9bd2d10bf0e44009b3e47f512b3363a3384c21"
+    "bytes": 56837891,
+    "sha256": "177ba7bb13fd63b903c65f2ef809d17e4b5c1f7bd143c591c4f6de1ecf52b901"
   },
   "build": {
     "mode": "native isolated profile",
@@ -25,7 +25,7 @@
     "global_type_registration": "2 passed using installed tML ValidateType",
     "summon_type": "Convergence/GhostSamuraiSummon retained",
     "offline_preview": "12 panels; compiled production circle/wave renderers with GDI stroke adapter, final field clipping inspected; not FNA/game rendering",
-    "static_domain_codec": "passed: latest-main integrated static/docs/YAML checks; 199 domain tests; protocol36 324 round-trips and 50 malformed rejections"
+    "static_domain_codec": "passed: latest-main integrated static/docs/YAML checks; 199 domain tests; protocol36 324 round-trips and 50 malformed rejections; final minimum-field guard rechecked in all27 focused Ghost Samurai cases"
   },
   "runtime": {
     "status": "not_run; user-owned",

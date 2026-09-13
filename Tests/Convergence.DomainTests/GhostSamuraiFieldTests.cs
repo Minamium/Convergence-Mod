@@ -30,16 +30,17 @@ internal static partial class Program
     [DomainTest("Ghost Samurai field shrinks symmetrically at world edges and rejects impossible centers")]
     private static void SamuraiFieldWorldEdges()
     {
-        var edge = SamuraiArenaBounds.Create(400, 300, 60000, 20000);
+        var edge = SamuraiArenaBounds.Create(400, 400, 60000, 20000);
         AssertEqual(true, edge.IsValid, "small but playable border field");
         AssertEqual(400f, edge.CenterX, "border handling never moves summon center");
-        AssertEqual(300f, edge.CenterY, "border handling never grounds the field");
+        AssertEqual(400f, edge.CenterY, "border handling never grounds the field");
         AssertEqual(32f, edge.Left, "world margin preserved");
         AssertEqual(32f, edge.Top, "upper world margin preserved");
-        var bottom = SamuraiArenaBounds.Create(59600, 19700, 60000, 20000);
+        var bottom = SamuraiArenaBounds.Create(59600, 19600, 60000, 20000);
         AssertEqual(59968f, bottom.Right, "right world margin");
         AssertEqual(19968f, bottom.Bottom, "bottom world margin");
         AssertEqual(false, SamuraiArenaBounds.Create(10, 10, 60000, 20000).IsValid, "unplayable world-edge summon rejected before spawn");
+        AssertEqual(false, SamuraiArenaBounds.Create(300, 300, 60000, 20000).IsValid, "field cannot shrink until the inner circle is unavoidable");
     }
 
     [DomainTest("Ghost Samurai arena wire preserves exact frozen geometry and rejects malformed or truncated bounds")]
@@ -66,4 +67,3 @@ internal static partial class Program
         }
     }
 }
-

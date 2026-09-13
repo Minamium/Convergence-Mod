@@ -14,8 +14,10 @@ internal readonly record struct SamuraiArenaBounds(float CenterX, float CenterY,
     internal float Bottom => CenterY + HalfHeight;
     internal bool IsValid => float.IsFinite(CenterX) && float.IsFinite(CenterY)
         && CenterX is >= WorldMargin and <= 500000 && CenterY is >= WorldMargin and <= 500000
-        && float.IsFinite(HalfWidth) && HalfWidth is >= 64 and <= Width / 2
-        && float.IsFinite(HalfHeight) && HalfHeight is >= 64 and <= Height / 2
+        // A border-shrunk field must still leave whole-body escape room outside
+        // the 240px inner circle in both axes; reject unusable edge summons.
+        && float.IsFinite(HalfWidth) && HalfWidth is >= 320 and <= Width / 2
+        && float.IsFinite(HalfHeight) && HalfHeight is >= 320 and <= Height / 2
         && Left >= WorldMargin && Top >= WorldMargin && Right <= 500000 && Bottom <= 500000;
     internal static SamuraiArenaBounds Create(float x, float y, float worldWidth, float worldHeight)
         => new(x, y, Math.Min(Width / 2, Math.Min(x - WorldMargin, worldWidth - WorldMargin - x)),
@@ -36,4 +38,3 @@ internal readonly record struct SamuraiArenaBounds(float CenterX, float CenterY,
         return result;
     }
 }
-
