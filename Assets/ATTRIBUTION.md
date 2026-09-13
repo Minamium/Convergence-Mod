@@ -2,6 +2,36 @@
 
 ## Records
 
+### Weapon energy and README NPC export — 2026-09-14
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ArmamentEnergy.fxc`
+- Asset ID: doll-armament-energy-0277
+- Asset type: compiled original weapon trail/beam/seal material
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-14
+- Source type: original
+- Source work and URL: adjacent `ArmamentEnergy.fx`; project-authored HLSL, runtime Luminance noise dependency; no third-party code/art copied
+- Tool/model/version: pinned FXC 10.1/D3DCompiler_47; exact hashes in adjacent `compiled.json`
+- Human modifications: flowing dark/light channels, connected hot core, engraved interlaced weapon seals; original geometry and clocks preserved
+- License and redistribution terms: project publication/asset-license gate; Luminance textures remain supplied by the separate dependency, not vendored
+- Required attribution: retain this provenance and the existing Luminance dependency credit
+- Reviewer and review date: Codex, 2026-09-14; compiled FNA/D3D11 frames inspected; gameplay acceptance pending
+- Notes: source/export SHA256 and reproduction flags in `Assets/AutoloadedEffects/Shaders/compiled.json`; no client compiler is required
+
+- Runtime file: `docs/media/doll-npc.png`
+- Asset ID: readme-doll-native-cel-0277
+- Asset type: documentation PNG, excluded from Mod package
+- Creator: existing project Doll NPC artwork; mechanical export by Codex
+- Creation/acquisition date: 2026-09-14
+- Source type: generated
+- Source work and URL: `Assets/Textures/NPCs/DollTheater/DollAttendant.png`, first 32x52 cel; inherits the exact existing Doll NPC record's source and terms
+- Tool/model/version: Python/Pillow, `tools/export_readme_doll.py`; no image-generation model used for this export
+- Human modifications: crop exact native cel and nearest-neighbor 3x enlargement to 96x156; no repainting, compositing or new art
+- License and redistribution terms: same project asset/publication gate as the source Doll NPC texture
+- Required attribution: retain the source NPC provenance and this derivative record
+- Reviewer and review date: Codex, 2026-09-14; native atlas and README export visually inspected
+- Notes: original atlas and former generated README banner remain preserved; this export is not promotional artwork or a game screenshot
+
 ### Theater Doll activation reliquary — 2026-09-14
 
 - Runtime file: `Assets/Textures/Items/TheaterDoll.png`
@@ -28,11 +58,11 @@
 - Source type: original
 - Source work and URL: adjacent `MechanicRing.fx`; independent code, using the [Luminance API](../docs/encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation) already referenced by the Raid renderer
 - Tool/model/version: Microsoft FXC 10.1 / D3DCompiler_47, pinned compiler/source/output hashes in adjacent `compiled.json`
-- Human modifications: exact world-radius pearl boundary, inward advected currents, soft shadow and same-boundary countdown; muted teal/plum palette; reduced-detail path without moving the true boundary
+- Human modifications: exact world-radius pearl boundary, inward advected currents, soft shadow and distinct contracting dashed inner countdown; muted teal/plum palette; reduced-detail path without moving the true boundary
 - License and redistribution terms: project publication/asset-license gate; separately installed Luminance maps are runtime references, not copied third-party textures
 - Required attribution: retain this record; Luminance is [MIT licensed](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/LICENSE)
 - Reviewer and review date: Codex, 2026-09-14; compiled FNA/D3D11 frames on dark/light backgrounds; in-game overlap, peer scale and accessibility acceptance pending
-- Notes: reproduce with `tools/compile_shaders.py --fxc <local compiler>`. Source/manifest are excluded from the package. Prior three shader exports are byte-identical to their tracked originals.
+- Notes: reproduce with `tools/compile_shaders.py --fxc <local compiler>`. Source/manifest are excluded from the package. The accepted lattice source/export remain byte-identical; current hashes are recorded in the compiled manifest.
 
 ### Raid beam pressure audio — 2026-09-13
 

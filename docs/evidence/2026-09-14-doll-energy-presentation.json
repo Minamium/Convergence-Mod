@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-14",
+  "version": "0.2.77",
+  "protocol": 36,
+  "source_commit": "51b8f91d0a6d12ce4fb825df9f1e22931b9106b6",
+  "build": {
+    "route": "tools/dev.py build --native --configuration Release; integrated main",
+    "source_sha256": "0d5f72b363ea7cd63fdd43f96dbddd5ae8054064ebee15e7b60d8708b2214a80",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "source_changed_during_build": false,
+    "artifact": "Convergence.tmod",
+    "bytes": 57010491,
+    "sha256": "495ff52ffc29c7a5a59879c312d2f63d496daff77ff99568f87f040b532b82c7",
+    "installed_hash_matches": true
+  },
+  "preserved": {
+    "preexisting_locale_edits": 6,
+    "all_locales_unchanged": 18,
+    "music_masters": 4,
+    "raid_sfx_masters": 76,
+    "gameplay_and_common_files": 182,
+    "lattice_shader_source_and_export": "byte-identical to 0.2.76",
+    "old_banner_and_asset_originals": "retained"
+  },
+  "checks": {
+    "focused_domain": "2 passed: charge/kick time boundaries and continuous side crater",
+    "shader_guards": "11 passed",
+    "presentation_guards": "13 passed",
+    "package": "27 weapon WAVs + 5 compiled effects match source; no docs/tools/local content packaged",
+    "offline_gpu": "FNA/D3D11, installed Luminance noise; 16 countdown frames + 16 frames of seal/weapon ribbon/side bell. Selected earlier/later frames visually inspected. Not a gameplay/FPS result.",
+    "audio": "27 PCM masters; bounded sample/4x peaks; six actual-event-gain auditions with safety attenuation reported. Sources unchanged and old masters archived. No subjective listening claim.",
+    "static": "Catalog passed (67 docs), repository passed (709 files), YAML passed (10 files). Fixed the new assets' exact provenance records; reran only the failed repository check.",
+    "github_ci": "pending PR"
+  },
+  "not_run": [
+    "User Reload Mods / startup loading",
+    "Countdown and outward-arrow visibility under overlapping combat; UI107%, zoom and Reduced Effects",
+    "Ruby/purple source pulse, sphere/muzzle alignment and non-lattice shake acceptance",
+    "All weapon live effects, mix and cancellation; Doll airborne trail",
+    "Multiplayer mix, peer alignment, revival; solo logs cannot establish these"
+  ],
+  "references": {
+    "playtest": "2026-09-14-playtest-0276.json",
+    "audio": "2026-09-14-weapon-energy-assets.json"
+  }
+}
