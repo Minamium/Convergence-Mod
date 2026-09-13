@@ -941,7 +941,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: eb0920061df28702195bb6ef4d42f29a6a21b8a8932e766d9f8988204f653495
+  content_sha256: 3266dffc552cb24d44a9a239d96315ee4027db723e2e78e588e2352c75543da9
   document_type: spec
   status: provisional
   owners:
@@ -1123,7 +1123,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: ba5515e1f59e12dcc200653cc9a9832f377cd68185f11aa150f9f1f78b40b7bf
+  content_sha256: 58bbe4b58fa1098169988894e63075452433b03a893b63571ed930ee37f7342c
   document_type: status
   status: accepted
   owners:

@@ -1,9 +1,11 @@
-"""Original Raid beam pressure/ion-foil cues. NumPy only; no recorded samples.
+"""Original Raid beam pressure/ion-foil cues. NumPy only; no third-party samples.
 
 The reference recordings informed envelope/event grouping, not timbre claims or
 sample extraction. --output is explicit: shared weapon/BGM masters are untouched.
 PCM16 stereo, 44.1 kHz, bounded peaks and DC, short end releases. BeamSustain is
 periodic (integer-frequency partials + periodic FFT noise), not a faded one-shot.
+The accepted project-authored SpreadExecution needle is read-only input to the
+restored Spread accent; its exact source identity is checked before generation.
 """
 import argparse
 import hashlib
@@ -15,6 +17,8 @@ from pathlib import Path
 import numpy as np
 
 RATE = 44100
+PING_SOURCE = Path(__file__).resolve().parents[1] / 'Assets/Sounds/FirstSeverance/SpreadExecution.wav'
+PING_SHA256 = '44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220'
 SPECS = {
     'PortalCharge': (.47, 'gather', .62),
     'WideCharge': (.65, 'gather', .72),
@@ -29,7 +33,7 @@ SPECS = {
     'WideFire': (.88, 'wide', .74),
     'BeamSustain': (2.40, 'loop', .57),
     'FloodFire': (.64, 'wide', .72),
-    'SpreadRay': (.34, 'ray', .70),
+    'SpreadRay': (.50, 'ray', .70),
     'SpreadScatter': (.46, 'scatter', .60),
 }
 
@@ -67,6 +71,72 @@ def impulse(t, rng, mass=1):
     crack = noise(len(t),rng,650,7600)*np.exp(-t/.024)
     grain = noise(len(t),rng,65,1750)*np.exp(-t/.078)
     return (low*.56*mass + crack*.24 + grain*.32)*ease(t,0,.002)
+
+
+def resonant_fan(t, kind):
+    """Brief mid-register 'fwan', not a sustained high sine or siren.
+
+    Rise/short brake/fall follows the beam's first seven ignition ticks. The
+    inharmonic partials sit mainly at 500-1700 Hz and die before the firing bed.
+    """
+    center = 530 if kind in ('wide','salvo') else 625
+    frequency = center*(.84+.25*(1-np.exp(-t/.014))-.18*(1-np.exp(-t/.13)))
+    phase = 2*np.pi*np.cumsum(frequency)/RATE
+    x = np.zeros_like(t)
+    for ratio,gain,decay,offset in ((1,.78,.11,0),(1.503,.43,.083,.7),(2.071,.22,.057,1.3)):
+        x += gain*np.sin(phase*ratio+.06*np.sin(2*np.pi*23*t)+offset)*np.exp(-t/decay)
+    return x*ease(t,0,.006)*(1-ease(t,.18,.26))
+
+
+def read_pcm(path):
+    with wave.open(str(path),'rb') as src:
+        if src.getsampwidth()!=2: raise ValueError('Expected PCM16 source')
+        channels,rate = src.getnchannels(),src.getframerate()
+        x=np.frombuffer(src.readframes(src.getnframes()),'<i2').reshape(-1,channels)/32768
+    if rate!=RATE:
+        times=np.arange(round(len(x)*RATE/rate))/RATE
+        x=np.column_stack([np.interp(times,np.arange(len(x))/rate,x[:,i]) for i in range(channels)])
+    if channels==1: x=np.repeat(x,2,axis=1)
+    if x.shape[1]!=2: raise ValueError('Expected mono/stereo source')
+    return x
+
+
+def legacy_ping(length):
+    if hashlib.sha256(PING_SOURCE.read_bytes()).hexdigest()!=PING_SHA256:
+        raise ValueError('SpreadExecution source changed; review before remixing')
+    src=read_pcm(PING_SOURCE).mean(axis=1)
+    f=np.fft.rfftfreq(len(src),1/RATE)
+    # Preserve the actual old needle's pitch/timing, excluding low pressure that
+    # the new body already supplies. No pitch shift or time compression.
+    shape=(1-np.exp(-(f/650)**4))*np.exp(-(f/6500)**4)
+    src=np.fft.irfft(np.fft.rfft(src)*shape,n=len(src))
+    result=np.zeros(length); n=min(length,len(src)); result[:n]=src[:n]
+    t=np.arange(length)/RATE
+    return result*ease(t,0,.001)*(1-ease(t,length/RATE-.055,length/RATE))
+
+
+def presence_master(stereo,kind):
+    t=np.arange(len(stereo))/RATE
+    # Lift the accepted body, not the user's slider or unrelated cues. Release
+    # masters also gain a brief, comparable-midband accent rather than more hiss.
+    gain_db = 1.5 if kind in ('loop','scatter') else 4.0
+    x=stereo*10**(gain_db/20)
+    if kind in ('beam','wide','salvo','grid','rush'):
+        x += resonant_fan(t,kind)[:,None]*.33
+    elif kind=='ray':
+        x += legacy_ping(len(x))[:,None]*.87
+    # Transparent below the knee; progressively contain rare summed crests.
+    # This preserves pressure and transients without hard-clipped peaks.
+    # The sustained bed shares a voice with both turn accents. Bound its crests
+    # separately so the launch stays forward without their sum overloading.
+    ceiling,knee=(.35,.22) if kind=='loop' else (.81,.48)
+    magnitude=abs(x)
+    x=np.sign(x)*np.where(magnitude<=knee,magnitude,
+        knee+(ceiling-knee)*np.tanh((magnitude-knee)/(ceiling-knee)))
+    x-=x.mean(axis=0)
+    if kind!='loop':
+        x*=(ease(t,0,.001)*(1-ease(t,t[-1]-.018,t[-1])))[:,None]
+    return x
 
 
 def synth(name, seconds, kind):
@@ -142,7 +212,7 @@ def synth(name, seconds, kind):
     peak = SPECS[name][2]
     # Keep crest factor, do not hard-limit or force every cue to maximum RMS.
     stereo *= min(peak/max(abs(stereo).max(),1e-9), .175/max(np.sqrt(np.mean(stereo**2)),1e-9))
-    return stereo
+    return presence_master(stereo,kind)
 
 
 def write_wav(path, x):
@@ -163,6 +233,7 @@ def main():
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--preview',type=Path)
     p.add_argument('--ffmpeg',type=Path)
+    p.add_argument('--compare-with',type=Path,help='Optional prior owned masters; audition only')
     args=p.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
     assets={name:synth(name,*spec[:2]) for name,spec in SPECS.items()}
@@ -184,7 +255,8 @@ def main():
                 clip*=np.minimum(1,np.maximum(remain,0)/.1)[:,None]
                 bus[start:start+n]+=clip*gain*.8
             # Leave playback equivalent; fail on clipping instead of hiding a bad mix.
-            if abs(bus).max()>=1: raise ValueError('Preview bus clips')
+            if abs(bus).max()>=1:
+                raise ValueError(f'Preview bus clips: peak={abs(bus).max():.4f}, events={events}')
             return bus
         scenarios={
             '01-eight-cast':(7.0,[(n,.25+i*.7+off,gain,dur) for i in range(8)
@@ -195,7 +267,7 @@ def main():
             '04-rotation-and-field':(6.5,[('WideCharge',.1,.90,.65),('BeamSustain',.75,.95,2.4),
                 ('WideFire',.75,1.1,.5),('WideFire',2.0,1.1,.5),('WideCharge',4.,.95,.65),
                 ('WideFire',4.65,.95,50/60),('WideFire',4.85,.70,38/60)]),
-            '05-spread-ray-and-dissolve':(1.5,[('SpreadRay',.2,.90,.34),('SpreadScatter',.24,.68,.46)]),
+            '05-spread-ray-and-dissolve':(1.5,[('SpreadRay',.2,.90,.50),('SpreadScatter',.2,.68,.46)]),
         }
         all_parts=[]
         for name,(seconds,events) in scenarios.items():
@@ -206,6 +278,16 @@ def main():
         if args.ffmpeg:
             subprocess.run([str(args.ffmpeg),'-v','error','-y','-i',str(wav),'-codec:a','libmp3lame','-b:a','192k',
                 str(args.preview/'Beam-audition.mp3')],check=True)
+        if args.compare_with:
+            pairs=[]
+            for name in ('PortalFire','CurtainFire','GridFire','WideFire','SpreadRay'):
+                for old in (True,False):
+                    clip=read_pcm(args.compare_with/(name+'.wav')) if old else assets[name]
+                    pairs.extend([clip*.768,np.zeros((round(RATE*.65),2))])
+            ab=args.preview/'Beam-AB.wav'; write_wav(ab,np.concatenate(pairs))
+            if args.ffmpeg:
+                subprocess.run([str(args.ffmpeg),'-v','error','-y','-i',str(ab),'-codec:a','libmp3lame','-b:a','192k',
+                    str(args.preview/'Beam-AB.mp3')],check=True)
         (args.preview/'audio-audit.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     print(json.dumps(report,indent=2))
 
