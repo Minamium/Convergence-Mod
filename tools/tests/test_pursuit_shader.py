@@ -69,12 +69,20 @@ class PursuitShader(unittest.TestCase):
     def test_all_beam_families_route_to_shared_material(self):
         root = ROOT / "Client/Encounters/FirstSeverance"
         for name in ("FirstSeverancePursuitBeamVisuals.cs", "FirstSeveranceBeamMaterial.cs",
-                     "FirstSeveranceImpalingSwordVisuals.cs", "FirstSeveranceScoreVisuals.cs"):
+                     "FirstSeveranceImpalingSwordVisuals.cs"):
             self.assertIn("FirstSeveranceRaidVfx.Beam", (root / name).read_text())
         emission = (root / "FirstSeveranceEmissionVisuals.cs").read_text()
         self.assertIn("FirstSeveranceBeamMaterial.Flow", emission)
         stage = (root / "FirstSeveranceStageVisuals.cs").read_text()
-        self.assertIn("FirstSeveranceBeamMaterial.SingleForecast", stage)
+        score = (root / "FirstSeveranceScoreVisuals.cs").read_text()
+        cannon = (root / "FirstSeveranceCoreCannonVisuals.cs").read_text()
+        # P2/Final/rotation intentionally share a real adapter, rather than
+        # requiring each caller to duplicate its forecast and live rendering.
+        self.assertEqual(2, stage.count("FirstSeveranceCoreCannonVisuals.Draw"))
+        self.assertIn("FirstSeveranceCoreCannonVisuals.Draw", score)
+        self.assertIn("FirstSeveranceBeamMaterial.SingleForecast", cannon)
+        self.assertIn("FirstSeveranceBeamMaterial.Flow", cannon)
+        self.assertIn("FirstSeveranceBeamIgnition.At(full, tick - fire)", cannon)
         shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
         self.assertIn("Current(x,span,3100,shape.z)", shader)
         self.assertIn("Current(x,span*1.41,2160,shape.z+.43)", shader)
@@ -128,9 +136,10 @@ class PursuitShader(unittest.TestCase):
         for file, descriptor in {
             "FirstSeverancePursuitBeamVisuals.cs": "endAge:end-start",
             "FirstSeveranceEmissionVisuals.cs": "endAge:endTick-start",
-            "FirstSeveranceStageVisuals.cs": "endAge:grid.CoreEndTick-grid.StartTick",
+            "FirstSeveranceStageVisuals.cs": "grid.StartTick, grid.FireTick, grid.CoreEndTick",
+            "FirstSeveranceCoreCannonVisuals.cs": "endAge: end - start",
             "FirstSeveranceImpalingSwordVisuals.cs": "endAge:sword.Retract",
-            "FirstSeveranceScoreVisuals.cs": "endAge:FirstSeveranceChoreography.BladeEnd",
+            "FirstSeveranceScoreVisuals.cs": "FirstSeveranceChoreography.BladeWindup, FirstSeveranceChoreography.BladeEnd",
         }.items():
             self.assertIn(descriptor, (root / file).read_text())
 
