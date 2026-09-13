@@ -6,7 +6,7 @@
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/RaidEnergy.fxc`
 - Asset ID: doll-raid-energy-0266
-- Asset type: compiled original ten-pass GPU material suite
+- Asset type: compiled original eleven-pass GPU material suite
 - Creator: Codex, project-directed for Minamium
 - Creation/acquisition date: 2026-09-13
 - Source type: original
@@ -14,6 +14,7 @@
 - Tool/model/version: Microsoft FXC 10.1 / D3DCompiler_47; input/output hashes in adjacent `compiled.json`
 - Human modifications: separate forecast/live/corona/source/orb/wake/pressure/rift/flare passes; exact authority geometry; scene and hit-result adapters, bounded frame-local rendering. The subsequent [thin-axis/ignition revision](../docs/research/WOTG_RAID_BENCHMARK.md#f13--細い予告から射出増幅へ2026-09-13追補) removes area forecasts, stretches live currents longitudinally and couples launch/amplification to shared geometry. The lattice follow-up adds an original finite-ribbon pass with a luminous moving head, long tapered tail and clipping-stable flow coordinates; no third-party material was copied.
 - License and redistribution terms: existing project publication/license gate remains; Luminance MIT dependency is separately installed, not vendored
+- Recorded-reference revision: [F14](../docs/research/WOTG_RAID_BENCHMARK.md#f14--recorded-beam-motion-2026-09-13) adds an original sparse forecast-glint pass and asymmetric travelling current envelopes to all Raid beam materials. User-supplied gameplay recordings were inspected locally, not packaged or used as textures. Shader code remains independently authored; no WoTM/WotG shader, sprite or recording was copied.
 - Required attribution: retain this record; runtime maps use the public Luminance registry (`WavyBlotchNoise`, `TurbulentNoise`, `DendriticNoiseZoomedOut`), whose license is linked below
 - Reviewer and review date: Codex, 2026-09-13; compiled FNA/D3D11 material preview, native package; actual game acceptance pending
 - Notes: reproduce with `tools/compile_shaders.py --fxc <local compiler>`; no player-side compiler. `.fx` and manifest excluded from `.tmod`. Original shell/rig and previous shader source retained. No WoTM/WotG code/art/shader is distributed. [Luminance MIT](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/LICENSE).

@@ -29,7 +29,7 @@ related_docs:
 
 調査日: 2026-09-06。目的は「WotG級の巨大感・不穏さ・荘厳さ・攻撃演出」を分解し、First Severanceへ独自に取り込む判断材料を残すこと。**WotGの再現Modにする、ソロ戦へ寄せる、素材や実装を移植する、という意味ではない。**
 
-本書は参考研究と提案。現在の実装は[Status](../STATUS.md)、確定したRaidルールは[Encounter Spec](../encounters/first-severance/ENCOUNTER_SPEC.md)、現在の造形は[Visual Spec](../encounters/first-severance/VISUAL_SPEC.md)が所有する。本書だけでそれらを変更しない。ゲームコード・依存関係・素材は今回変更していない。
+本書は参考研究と提案。現在の実装は[Status](../STATUS.md)、確定したRaidルールは[Encounter Spec](../encounters/first-severance/ENCOUNTER_SPEC.md)、現在の造形は[Visual Spec](../encounters/first-severance/VISUAL_SPEC.md)が所有する。初回2026-09-06は文書調査のみ。以後の追補は独立実装の判断も記録する。**2026-09-13の実録画フレーム解析はF14**。初回YouTube調査の未視聴記録を、後から視聴済みだったことに書き換えない。
 
 ## 1. 結論
 
@@ -41,7 +41,7 @@ related_docs:
 4. 攻撃・フェーズが背景、音、身体のポーズまで変える構造。
 5. 描画用の大きさと実際の危険判定を分離する構造。
 
-これは設計上の解釈であり、共有動画を実視聴して品質を採点した結論ではない。動画の公開メタデータは取得できたが、映像・音声の直接観察は未完了。公開ソースも最新Workshop版と同一とは確認できない。
+この初回結論は設計上の解釈であり、当時共有されたYouTube動画を実視聴して採点したものではない。初回は公開メタデータのみ取得。別途共有されたローカル録画の直接観察は[F14](#f14--recorded-beam-motion-2026-09-13)へ。公開ソースと録画版／最新Workshop版の同一性は依然未確認。
 
 特に重要なのは、調査版の`description.txt`がマルチ非対応を宣言し、`FrostScreenSmash`にはSingle Player以外でその攻撃を抜ける条件があること。**演出の参考と、マルチの正しさの参考は別に扱う。** [版の宣言][w-description]・[攻撃の分岐][a-frost]
 
@@ -249,6 +249,64 @@ Calamityの `ArenaWallSystem.Box` は矩形・描画・更新・除去条件を�
 **独立設計・採否:** ユーザーの新指示により、F12の「面で予告／即時全幅／成長による判定変更は不採用」は**上書き済み**。Namelessの予告と伸展の分離、WoTMの細身保持と幅増幅を別々の観察として採用する。数式・tick値・shaderは移植せず、短いConvergenceのcast内で完結する独自の共有envelopeを作る。格子のばらつきは既存descriptorをseedとした独立整数shuffleであり、参考元からの移植ではない。四色の役割を保持し、流れを長軸方向へ引き延ばして紫の深部／真珠色の核と調和させる。警告の全面color、太い両端rail、装飾による安全地帯の偽装は不採用。
 
 **権利・互換・検証:** behaviorのみを独立再実装し、WoTM/WotGのコード・画像・shaderは複製しない。利用するLuminance API/環境はF12の実環境を継続。更新箇所は既存feature内の純粋geometryとclient材質であり、ローカル乱数・追加packet・演出起因のauthority mutationを導入しない。共有geometryの意味が変わるためprotocolを更新して旧peerを拒否する。必要確認はpilotの非先行判定・連続な成長・全幅到達・格子の再構成/猶予/各線の終了・Stillnessのgapless区間、compiled shader比較、同版の実機reload/重なり/peer同期。実施結果は[Status](../STATUS.md)、現行仕様は[Beam ignition](../encounters/first-severance/ENCOUNTER_SPEC.md#beam-ignition-and-lattice-order)を参照。
+
+### F14 — Recorded beam motion (2026-09-13)
+
+**問い:** 「高速で帯が流れる」を格子だけに限定せず、全Raidビームへ適用する。細い予測軸の周囲に、将来のダメージ幅が読める程度の疎な光点を出す。矩形の点灯／消灯や単なるnoiseのスクロールでは何が不足するか、実フレームと描画実装の両方から確認する。
+
+**調査範囲・手順:** ユーザー共有MP4をローカルdecode。両編を4秒間隔の俯瞰で確認した後、A70–74秒／142–146秒、B22–26秒／29–33秒を4fpsで分解。重要な発射をさらに**補間なしの連続24フレーム**で確認した。全フレームを通し再生して採点したものではなく、音声も聴取していない。公開repositoryのtreeから `HadesLaserBurst`, `PerpendicularBodyLaserBlasts`, `BlazingExoLaserbeam`, `TelegraphedPortalLaserbeam` と関連shaderを追跡し、本文を取得・読解した。F12/F13のsource-only調査とは別の観測である。
+
+| ローカル録画 | decodeで確認した条件 | 直接確認した出力 |
+|---|---|---|
+| A: `Terraria_ Not to be confused with Catastrophe 2026-09-13 19-57-13.mp4` | 157.31秒、1920×1012、H.264、平均約29.81fps（可変時刻） | 俯瞰3枚、詳細2系列、73.411–74.178秒の連続24コマ |
+| B: `Terraria_ Not to be confused with Catastrophe 2026-09-13 20-00-10.mp4` | 133.85秒、1920×1012、H.264、平均約29.83fps | 俯瞰3枚、詳細2系列、31.127–31.893秒の連続24コマ |
+
+時刻はclip先頭からの表示時刻。俯瞰／4fps系列はresamplingの丸めを含むため、正確な発射の判断にはnative連続フレームのPTSを使った。FFmpegはignored `.local/media-tools` 内のimageio-ffmpeg 0.6.0付属exeを使用。原本は移動・変更していない。確認用出力は `.local/video-reference-20260913/` の `a-overview-*`, `b-overview-*`, `a-70-sequence.png`, `a-142-sequence.png`, `b-22-sequence.png`, `b-29-sequence.png`, `a-73-native.png`, `b-31-native.png`。映像／切り出し画像をGitやModへ配布しない。
+
+#### フレームで見えたことと推論を分ける
+
+| 時刻 | 実際に見えた変化 | 実装との照合・限界 |
+|---|---|---|
+| A73.411–73.778 | 赤い扇状予告と発射源近くの煙。線全体が赤く点く場面とは異なる | Hadesの胴体砲塔予告が候補。扇の塗りは今回の細線方針には採用しない |
+| A73.811–74.178 | 明るい先端が左へ進み、中央の白い筋と赤い尾が続く。先端が画面外へ出た後も尾が移動している | **有限な射出体＋軌跡**。下記 `HadesLaserBurst` 系が有力。F12の巨大口砲 `HadesSuperLaserbeam` と同じ攻撃だとは扱わない |
+| A142–146付近 | 赤い射出に加え、右寄りに緑の下向きの持続光。白い芯と緑の輪郭が流動する | 下記 `BlazingExoLaserbeam` が候補。録画の内部type／収録Mod版は未確認 |
+| B22–26付近 | 細い白線、短い広幅の水平白光、吊られた刃のような線が連続する | 全てをPortalビームとして解釈しない。このカットの個別typeの同定は保留 |
+| B31.127–31.360 | 縦の赤紫予告と疎な微光があり、減光した後にBossが現れる | 周囲の星には背景由来もある。全てを予告粒子と断定しない |
+| B31.393–31.893 | 白い芯が到着し、赤白の広い噴流が裂けた輪郭を変え続ける。最後は速く減衰する | **持続する噴流**。明暗の流れと輪郭変化が重要。有限弾へ全面置換する根拠ではない |
+
+両動画に見える大きな星／細長い輪の一部はプレイヤー側に追従し、武器エフェクトの可能性が高い。未同定の武器演出をBossの描画能力として引用しない。録画と公開commitの完全一致、全攻撃の実命中幅、音の良し悪し、FPS耐性はこの観察から断定できない。
+
+#### 公開コードで確認した描画経路
+
+共有のauthority/version/license情報はF12を再利用する。公式ownerのrepositoryでsource取得は **verified**、アクセス2026-09-13。WoTM `5556a3adcbabffc6fc95685e34f1ee22cee31d9a`、WotG `7cb5b86c770e73d6853749b2b688d478ba3326a7` に固定。宣言版・参照依存とこのPCの組合せは同一ではなく、移植の互換保証ではない。
+
+| 経路・確認したmember | sourceで確認した仕組み | 採用／不採用 |
+|---|---|---|
+| [Hades胴体状態][f14-hades-state] `CreateBlastTelegraphs` / `FireLaser` → [HadesLaserBurst][f14-hades-burst] `LaserWidthFunction` / `RenderPixelatedPrimitives` → [HadesLaserShader][f14-hades-shader] | 砲塔の開閉・予告・発射、old-position trailに沿う幅、本体と広いbloomの別pass、軸に流すnoise | 発射源→進行する先端→尾の因果を採用。trail用Projectile、扇予告、外部textureは移植しない |
+| [BlazingExoLaserbeam][f14-blazing] `AI` / `RenderPixelatedPrimitives` → [shader][f14-blazing-shader] | Owner位置から伸展する光、長軸で変わる幅、独立bloom／終端減衰、進行方向へ流すnoise | 持続噴流の内部速度差と根元接続を採用。大量の粒子数、音、長さ／命中計算はコピーしない |
+| [TelegraphedPortalLaserbeam][n-laser] `PrepareLaserShader` → [BaseTelegraphedPrimitiveLaserbeam][laser-base] `DrawTelegraphOrLaser` → [予告shader][f14-portal-forecast] / [本体shader][f14-portal-live] | 疎なhash配置の星とtwinkle、予告／本体passの分離、異なる速度の明暗noise、非対称な始点／noiseで揺れる終点のfade | 星の粒度、流れの速度差と平坦な端を避ける考えを採用。予告全体の色塗り・輪・shader実装そのものは不採用 |
+
+F12の `HadesSuperLaserbeam` / `HadesExoEnergyBlastShader` は太い口砲の**source-only補助例**として残す。今回Aの赤い射出をそのままこのクラスだと呼ばない。Namelessも予告と本体のshaderは実際には切り替えており、「切替自体が存在しないから滑らか」と説明しない。流れ・明暗・発射源・fadeの連携が観察できる部分である。
+
+#### Convergenceへの独立適用
+
+- **全avoidable Raidビームに共通:** `RaidVfx.Beam` はfuture half-widthを保持して `ForecastDustPass` を描き、その後だけ軸を細くする。点以外は透明。安定したray内配置、疎なtwinkle、Reduced Effects用の密度低下。新しいparticle actorやpacketは作らない。
+- **単なる領域点灯から流れへ:** 独自の非対称envelopeで速い明部の先頭と長い尾を移動させ、速度の違う流れ／暗い筋を重ねる。境界の硬い切替を避ける内向きの柔らかいmantleを残す。巨大な白い塊に潰れる試作は、白成分の量と細い筋を調整して改めた。
+- **二種類を区別:** 持続攻撃は既存の危険域内に流れる噴流、格子は従来のauthority共有の有限packet。持続域の内部に一時的に暗い部分があっても安全ではない。既存timing/判定を変えず、bright currentだけを新たなhitboxにしない。
+- **連続性:** Core予告にもreleaseと同じaccepted cast-ageを渡す。発射直前だけ別のglobal clockへ飛ばさない。発射源、細身保持／増幅、暗い終了残光は既存adapterと共有する。
+- **維持:** 四色の役割、確定ray、warning/live/end、damage、格子の前回修正した速度／順序、Stack/Spread円、Raid状態・音、武器／Oni。ゲーム判定とprotocolは変更しない。
+
+**権利:** WoTMのMITはF12参照。WotGの再利用許諾は未確立。両者のコード・shader・画像を複製せず、挙動／描画上の考えを独立実装。Luminance noiseは既存の公開registryを実行時参照するだけ。録画・切り出し画像・元Modアセットは同梱しない。
+
+**必要確認と限界:** shader/exportの整合、全beam adapterの共通経路、future幅を失わないこと、client-only/world座標/state復帰、compiled GPUの連続フレーム比較。実戦では細幅／広幅／重なった予告、Reduced Effects、UI107%/zoom、見えている危険域と被弾の違和感をユーザーに確認してもらう。単色背景の一枚だけで合格にしない。今回のGPU比較も構造物を置いた自作背景上の材質診断であり、実機プレイ／FPS／参考作品との品質同等を証明しない。実行記録は[Status](../STATUS.md)へ。
+
+[f14-hades-state]: https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Hades/States/SoloAttacks/HadesBodyEternity.PerpendicularBodyLaserBlasts.cs
+[f14-hades-burst]: https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/HadesLaserBurst.cs
+[f14-hades-shader]: https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Assets/AutoloadedEffects/Shaders/Primitives/HadesLaserShader.fx
+[f14-blazing]: https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/BlazingExoLaserbeam.cs
+[f14-blazing-shader]: https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Assets/AutoloadedEffects/Shaders/Primitives/BlazingExoLaserbeamShader.fx
+[f14-portal-forecast]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Assets/AutoloadedEffects/Shaders/Primitives/NamelessDeityFlowerLaserTelegraphShader.fx
+[f14-portal-live]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Assets/AutoloadedEffects/Shaders/Primitives/NamelessDeityPortalLaserShader.fx
 
 ## 5. First Severanceに変換するときに崩さないもの
 

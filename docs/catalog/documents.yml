@@ -622,7 +622,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 6100e5b69ba0cb689f4eb849c4db7456ee54a1d5ec16a7bf60aabc5db2614458
+  content_sha256: 256a1f879a89e07162f49eac7bdac2ceb6fee1dc551802f64a438babc1c6c482
   document_type: spec
   status: provisional
   owners:
@@ -788,7 +788,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 93b3945aaaf55aaec9183f89bc78dc8f04cd70bf395ad60059cd4c47047c2127
+  content_sha256: 58898ab22f9bbdca956f8d2e81bbc9ad9b8d3590f43a7a897ef0727e706d45d5
   document_type: policy
   status: accepted
   owners:
@@ -1103,7 +1103,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: dabf9663ece4f5fcadb879cbde51bb027361d710e42c93598064cc8e83605848
+  content_sha256: d66abc3f77211a8cc5fbfff6eaefa34f94dcf785bf656e42c327942c2fe73d35
   document_type: status
   status: accepted
   owners:
@@ -1300,7 +1300,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 8cf2e6b49ddbf622fea5ddbbc63756a1784df844203cc2e4fe987889d4c2c37f
+  content_sha256: ecf57143a3f728c371df20b1ac5762d6c13960d30fa30ce8c9c1871aa3a4ef16
   document_type: research
   status: historical
   owners:
@@ -1322,7 +1322,7 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: 2bc8da214dc5f849cb7edc9d17cd35728a5b26fc20a4c23f96a297114c673dff
+  content_sha256: 530b5f44304cba6d498a9ca941344adfeecbc60db70c726e1fc78eb693af5c7b
   document_type: research
   status: provisional
   owners:
