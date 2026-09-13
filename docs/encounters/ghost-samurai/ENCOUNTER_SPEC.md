@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - ghost_samurai.behavior
 aliases:
@@ -122,6 +122,21 @@ HP33%以下のPhase3では既存4攻撃に円形攻撃を追加し、直前の�
 ### 再召喚の診断ログ
 
 `GhostSamurai event=...`で`SummonRequested`、`SummonAccepted`／`SummonRejected`、`CombatStarted`、`PhaseChanged`、`CombatEnded`、受信側の`ClientLifecycle`／`ClientIdle`を記録する。サーバー拒否は失敗コードを残し、nonce・Fight・Sequenceで対応を追える。要求送信前に鈴が使用不可なら`SummonBlocked`が生存・待機状態・本体残存の理由を記録する（ローカルで最大2秒に1回）。これは開始・終了の診断であり、攻撃別DPS集計の実装ではない。
+
+### Lifecycle handoff — 2026-09-14
+
+The latest [0.2.75 playtest summary](../../evidence/2026-09-14-playtest-0275.json) contains **no Ghost Samurai fight events**. It therefore does not establish another end-flag/re-summon failure. It does establish `IndexOutOfRangeException` in `GhostSamuraiContainmentSystem.OnWorldUnload` → `Player.GetModPlayer`, followed by tML's unload-error warning. The Doll task records the evidence here; Ghost Samurai's owning task must implement and verify the fix.
+
+The current unload loop visits every `Main.player` slot with `player?.GetModPlayer<GhostSamuraiContainmentPlayer>().Clear()`. A non-null Player can still have an empty/uninitialized ModPlayer array. A null guard or checking only whether a boss exists is not sufficient. Pinned tModLoader [Player.TML.cs](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Player.TML.cs#L95-L125), checked 2026-09-14, shows that `GetModPlayer` directly indexes that array; the `TryGetModPlayer(baseInstance, out result)` overload bounds-checks it. Use a known registered base instance and a safe lookup when clearing existing players, or track only initialized owned instances. Do not instantiate missing players during teardown. If types themselves have unloaded, avoid querying ModContent for an instance at that stage; ordinary per-instance reset and world-system teardown must each be safe and idempotent. This is a mitigation design, not a claim of an applied fix.
+
+Keep these contracts when repairing or extending the encounter:
+
+- Authority ends the exact Fight, publishes its terminal projection, completes owned cleanup, then publishes the newer `Idle`. Client summon gating must consume that Idle; clearing only a local `bossActive` flag does not release the server session. Preserve the existing [runtime/cleanup ownership](../../ARCHITECTURE.md), not a second independent end flag.
+- Failed cleanup remains diagnosable and blocks a new encounter until resolved. Never swallow the exception and declare the session ready while owned resources remain.
+- Match Fight GUID, sequence/revision and exact NPC instance, not just a reused array slot. A late terminal/Idle or an old projectile must not clear or resurrect the next Fight. Terminal handling, death and disconnect paths must be safe when repeated.
+- Clear containment, replicas and audio/visual caches on the relevant disconnect/world boundary. Unused player slots and a world with no Samurai summon must unload without exceptions. Do not retain movement leases into a new connection or world.
+
+Focused evidence for the owning task: unload without a summon (including unused server slots); victory and retreat/defeat followed by a second summon; disconnect/rejoin and reused player/NPC slots; delayed old terminal/Idle after a new Fight; cleanup failure followed by a successful retry. Correlate `SummonRequested/Accepted/Rejected`, `CombatEnded`, `ClientLifecycle/ClientIdle` and `SummonBlocked` by Fight/sequence, rather than diagnosing from the button alone. Do not rerun unrelated Doll combat for this fix. The separate SubworldLibrary shutdown stream error in the same capture is not evidence that this exception caused save corruption.
 
 ## 表示と素材
 

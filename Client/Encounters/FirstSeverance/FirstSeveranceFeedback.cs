@@ -25,7 +25,7 @@ internal sealed class FirstSeveranceFeedback
     private int shardBeat = -1;
     private readonly List<ReLogic.Utilities.SlotId> voices = new(24);
     private readonly HashSet<ReLogic.Utilities.SlotId> impactTails = new();
-    private readonly List<(ReLogic.Utilities.SlotId Id, ulong End)> timedVoices = new(24);
+    private readonly List<(ReLogic.Utilities.SlotId Id, ulong End, int Release)> timedVoices = new(24);
     private readonly FirstSeveranceAudioCueClock criticalClock = new();
     private FirstSeveranceCombatProjection? pendingResult;
     private ReLogic.Utilities.SlotId orbitVoice;
@@ -125,7 +125,9 @@ internal sealed class FirstSeveranceFeedback
             // An HP-gated transition may interrupt an action before its planned
             // end. Retire only that action's sounds, not accepted verdict tails.
             for (int i = 0; i < timedVoices.Count; i++)
-                timedVoices[i] = (timedVoices[i].Id, Math.Min(timedVoices[i].End, state.EstimatedAuthorityTick + 6));
+                timedVoices[i] = (timedVoices[i].Id,
+                    Math.Min(timedVoices[i].End, state.EstimatedAuthorityTick + (ulong)(6 + timedVoices[i].Release)),
+                    timedVoices[i].Release);
             countdown = -1;
             scoreSounds.Clear();
             criticalClock.Reset();
@@ -347,7 +349,7 @@ internal sealed class FirstSeveranceFeedback
                 orbitVoice = voice;
             }
             if (endOffset > 0)
-                timedVoices.Add((voice, combat.ActionStartedTick + (ulong)endOffset));
+                TrackTimed(voice, name, combat.ActionStartedTick + (ulong)endOffset);
         }
         if (combat.Substate == FirstSeveranceSubstate.HalfField)
             for (int wave = 0; wave < 2; wave++)
@@ -387,7 +389,7 @@ internal sealed class FirstSeveranceFeedback
         bool accepted = SoundEngine.TryGetActiveSound(id, out var sound) && sound.IsPlaying;
         if (accepted && finishOnTerminal) impactTails.Add(id);
         ModContent.GetInstance<FirstSeveranceClientStateSystem>().Mod.Logger.Info(FormattableString.Invariant(
-            $"FirstSeverance event=AudioCue seq={combat.EncounterSequence} fight={combat.FightId} cue={name} action={combat.Substate} tick={tick} due={due} late_ticks={tick - due} accepted={accepted} gain={Math.Min(1, gain * .8f):F3} slider={Main.soundVolume:F3} focused={Main.instance.IsActive}"));
+            $"FirstSeverance event=AudioCue seq={combat.EncounterSequence} fight={combat.FightId} cue={name} action={combat.Substate} tick={tick} due={due} late_ticks={tick - due} accepted={accepted} gain={FirstSeverancePresentationTiming.CueGain(name, gain):F3} slider={Main.soundVolume:F3} focused={Main.instance.IsActive}"));
         if (accepted && audioChecks.Count < 32) audioChecks.Add((id, name, Main.GameUpdateCount + 2));
         return id;
     }
@@ -432,7 +434,7 @@ internal sealed class FirstSeveranceFeedback
         };
         var style = new SoundStyle(path)
         {
-            Volume = volume * .80f, Pitch = pitch, MaxInstances = 2,
+            Volume = FirstSeverancePresentationTiming.CueGain(name, volume), Pitch = pitch, MaxInstances = 2,
             IsLooped = name == "PrismBeamSustain",
             SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
@@ -446,12 +448,18 @@ internal sealed class FirstSeveranceFeedback
     {
         if (tick >= endTick) return;
         var id = Play(name, volume, pitch);
+        TrackTimed(id, name, endTick);
+    }
+
+    private void TrackTimed(ReLogic.Utilities.SlotId id, string name, ulong endTick)
+    {
         if (timedVoices.Count >= 64)
         {
             if (SoundEngine.TryGetActiveSound(timedVoices[0].Id, out var oldest)) oldest.Stop();
             timedVoices.RemoveAt(0);
         }
-        timedVoices.Add((id, endTick));
+        int release = FirstSeverancePresentationTiming.BeamReleaseTicks(name);
+        timedVoices.Add((id, endTick + (ulong)release, release));
     }
 
     private void UpdateTimedVoices(ulong tick)
@@ -464,7 +472,7 @@ internal sealed class FirstSeveranceFeedback
             if (tick >= voice.End)
             { sound.Stop(); timedVoices.RemoveAt(i); continue; }
             // ActiveSound.Volume is a multiplier, not the SoundStyle gain.
-            sound.Volume = Math.Min(sound.Volume, Math.Clamp((voice.End - tick) / 6f, 0, 1));
+            sound.Volume = Math.Min(sound.Volume, FirstSeverancePresentationTiming.VoiceFade(tick, voice.End, voice.Release));
         }
     }
 

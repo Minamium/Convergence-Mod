@@ -40,7 +40,7 @@ class BeamAudioTests(unittest.TestCase):
         self.assertEqual('44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220',
                          hashlib.sha256(needle.read_bytes()).hexdigest())
         rate = 44100
-        # Export-only overlap checks at the existing .8 feedback gain. No bus
+        # Export-only overlap checks at the current per-group feedback gain. No bus
         # normalization/limiting: a future master must fit the actual voices.
         scenarios = [
             [('PortalCharge', i*.7, .98, 28/60) for i in range(8)] +
@@ -54,12 +54,15 @@ class BeamAudioTests(unittest.TestCase):
             with self.subTest(events=events):
                 bus = array.array('f', [0.]) * (rate*7*2)
                 for name, start, gain, duration in events:
+                    release = .3 if name in ('PortalFire','WideFire') else 0
+                    duration += release
+                    level = .65 if name in ('SpreadRay','SpreadScatter') else .8 if name=='BeamSustain' else .88
                     with wave.open(str(ASSETS/(name+'.wav')), 'rb') as wav:
                         samples = array.array('h', wav.readframes(round(duration*rate)))
                     offset = round(start*rate)*2
                     for i, sample in enumerate(samples):
-                        fade = min(1., max(0., (duration-(i//2)/rate)/.1))
-                        bus[offset+i] += sample/32768*gain*.8*fade
+                        fade = min(1., max(0., (duration-(i//2)/rate)/(.1+release)))
+                        bus[offset+i] += sample/32768*min(1,gain*level)*fade
                 self.assertLess(max(abs(n) for n in bus), .99)
 
     def test_feedback_routes_every_new_asset_without_changing_shared_masters(self):
@@ -70,7 +73,7 @@ class BeamAudioTests(unittest.TestCase):
         self.assertIn('MaxInstances = 2',text)
         self.assertIn('PrismBeamSustain',text)
         self.assertIn('FirstSeveranceChoreography.BladeEnd);',text)
-        self.assertIn('voice.End - tick',text)
+        self.assertIn('FirstSeverancePresentationTiming.VoiceFade(tick, voice.End, voice.Release)',text)
         self.assertNotIn('curtainBeat',text)
 
 

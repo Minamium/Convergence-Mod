@@ -4,7 +4,7 @@ document_type: spec
 status: provisional
 owners:
   - audio
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.audio_cues
 aliases:
@@ -55,7 +55,11 @@ The owner accepted **Stack** but rejected the other 0.2.42/43 remaster timbres. 
 
 Pursuit uses `PortalCharge/Fire`; both Stillness bands share one `CurtainFire` instead of four tooth accents. The orbiting charge has separate `ChargeGather/Lock/Rush`. Lattice and its core jet use one `GridFire` or combined `CoreSalvoFire` ensemble, avoiding per-line/player voice multiplication. Final uses the same portal family under its own shorter deadlines. Wide jets, rotation and Spread routes are listed below. No BGM, Stack, terminal or weapon master is overwritten.
 
-All exports are PCM16 stereo / 44.1 kHz. A soft knee bounds one-shot peaks near 0.81; the periodic rotation bed has its own 0.35 ceiling to leave room for both turn accents while retaining pressure. Export guards bound peak/RMS/DC and check the actual overlapping voices without normalizing their sum. Runtime retains the existing 0.8 cue gain and user sound slider, separate from music. Main pursuit allows at most two overlapping voices of each cue. Rotation owns one periodic sustain, faded during its final six live ticks; other timed voices stop by their existing attack deadlines. Offline audition mixes have headroom, but this does not prove full-game output cannot clip or mask music under other Mods. Stack, non-beam SFX and BGM levels are not lowered to make the beams seem louder.
+All exports are PCM16 stereo / 44.1 kHz. The current mix keeps the accepted fan and Spread needle. `FirstSeverancePresentationTiming.CueGain` owns the category balance: Stack/Spread use 0.65, beam accents 0.88, other Feedback-owned Raid cues 0.92, and the periodic beam bed remains 0.8, each multiplied by its existing per-cue level and capped at 1. Relative to the previous common 0.8 gain, this mildly reduces Stack/Spread and raises the other accents; existing level caps make the exact change cue-dependent. This does not change the user slider, BGM, weapon voices, native NPC hit cues or other Mods.
+
+Fired beam masters add a short, dark diffuse reflection tail (0.24 s), with lower soft-knee ceilings to preserve overlap headroom. The timed-voice owner permits at most 18 ticks after the live deadline and smoothly releases across the final 24 ticks; warnings still finish at their launch deadlines and the continuous rotation bed ends with the live attack. Early action transitions shorten old voices to the same bounded release; new Fight/world unload stops them completely. There is no repeated echo attack or long reverberation over the next mechanic. Main pursuit still allows at most two simultaneous voices per cue, and the timed ledger is bounded for both ordinary and critical playback.
+
+Export guards bound peak/RMS/DC and check actual-gain overlapping voices without normalizing their sum. Five offline mixes have no sample clipping; this is not a claim about full-game peak level, other Mods or subjective listening. [0.2.76 evidence](evidence/2026-09-14-doll-presentation-polish.json) records the category/overlap measurements and user-owned audition.
 
 Recreate runtime assets with `python tools/generate_beam_sfx.py --output Assets/Sounds/FirstSeverance/Beams`. Add `--preview <ignored folder> --ffmpeg <local executable>` for five labeled WAV examples and a combined MP3; `--compare-with <prior masters folder>` adds an old→new A/B at identical playback gain. Preserve original recordings and generated audition exports outside Git/package; the tracked recipe, per-name seed and unchanged project-owned Spread source reproduce the masters.
 
@@ -67,7 +71,7 @@ Recreate runtime assets with `python tools/generate_beam_sfx.py --output Assets/
 | Stack verdict | `ShellMassShed` for loose success debris; `ShellMassCollapse` for inward failure impact, once from accepted result |
 | Spread | `SpreadExecution` routes to new `Beams/SpreadRay`: short high edge over pressure on both verdicts; `SpreadDissolve` routes to `Beams/SpreadScatter` for successful endpoint dispersion |
 | Prism / curtains / grid / Core salvo | Distinct charge, lock and release; bounded shared accents, not one sound per ray/tooth/player |
-| P3 vertical jets / central crush | `PrismBeamCharge/Fire` routes to Raid-owned `Beams/WideCharge/WideFire`: two bounded releases per wave at reduced ensemble gain, clipped to the wave. Horizontal floods use `FloodFire`. Central crush retains `CrushPressure/Cataclysm` unchanged |
+| P3 vertical jets / central crush | `PrismBeamCharge/Fire` routes to Raid-owned `Beams/WideCharge/WideFire`: two bounded releases per wave with the short beam residue above. Horizontal floods use `FloodFire`. Central crush retains `CrushPressure/Cataclysm` masters |
 | P2 twin rotation | `PrismBeamSustain` routes to periodic `Beams/BeamSustain` through both turns; `WideFire` accents actual fire and turn two. The loop fades at the live end, and action/Fight cleanup stops it. No weapon-sustain or metallic sword asset dependency |
 | NPC hits | `ShellHit`: unsettling hard metal; `CoreHit`: glass microfracture; `PylonHit`: metal-plate knock. Native hit cues, no damage-request packet |
 | Recovery / terminal | Accepted Down/revive/defeat/victory only, no channel sound, no HP-zero-before-Final victory cue |
@@ -75,7 +79,7 @@ Recreate runtime assets with `python tools/generate_beam_sfx.py --output Assets/
 
 [Feedback](../Client/Encounters/FirstSeverance/FirstSeveranceFeedback.cs) is the Raid cue/voice owner; [AudioCueClock](../Client/Encounters/FirstSeverance/FirstSeveranceAudioCueClock.cs) bounds once-only scheduled accents. A result received ahead of estimated time waits for its accepted tick instead of being dropped. Critical late arrivals have bounded catch-up/expiry, not a burst of old sounds. Native hit cues and weapon voices have their own bounded identities so rapid attacks do not multiply or evict unrelated Boss accents.
 
-Charge ends at fire; sustained beams fade at their accepted live end, using per-pulse deadlines for Final and the flood's own fade boundary. Stack/Spread anticipation retires at verdict, preparation assembly at Ready opening. Early action transitions shorten old timed voices to a brief fade; exact-Fight cleanup clears their bounded ledger.
+Charge ends at fire; the periodic sustain ends at the accepted live end. Fired one-shots use the short bounded release above, based on per-pulse deadlines for Final and the flood's own fade boundary. Stack/Spread anticipation retires at verdict, preparation assembly at Ready opening; exact-Fight cleanup clears the bounded ledger.
 
 Accepted impact tails may complete across same-Fight terminal cleanup, including a same-tick lethal verdict. They never retain gameplay or play across a new Fight/world unload. Victory/revive stingers and projectile-owned sustain are not treated as long beam tails. These distinctions prevent both missing impacts and attack sound hanging after the action.
 
