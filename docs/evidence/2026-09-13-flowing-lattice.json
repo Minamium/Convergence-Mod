@@ -1,0 +1,38 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.70",
+  "protocol": 34,
+  "baseline": "6f4a3a69cbd37e093e9ff7e9b11590273188030f",
+  "source_commit": "3bdc58b760206d26dc11e4eec3f53f48037a25b6",
+  "source_branch": "main",
+  "source_sha256": "4ca80f3955490247a3b5ae331c54869ba46060169c370dd44aed19452b579d1a",
+  "local_build_record": ".local/builds/20260913T081039533976Z/record.json",
+  "scope": "Doll lattice only: slower track staggering; finite travelling energy ribbons with tapered head/tail collision; cut segments share parent track clock and material coordinates; cadence/admission/embedded Spread derive from complete staggered volley. Protocol34 rejects incompatible old derived geometry; no new wire fields, actors, ownership or cleanup path.",
+  "preserved": "Non-lattice attack timing/material, HP, fixed damage, targets, hit caps, player circles, recovery, audio, stage/rig/endings, weapons/rewards and integrated Ghost Samurai Phase3/contact-rush changes.",
+  "local_changes": "Six pre-existing English locale edits remain outside these commits. The pre-edit modified compiled shader was backed up under ignored .local/flowing-lattice-backup before recompilation. No originals, old checkouts, saves or personal Mod configuration were deleted or edited.",
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "hjson_files_parsed": 18,
+    "source_changed_during_build": false,
+    "bytes": 54685788,
+    "sha256": "7fbeddc4518d611cd048d3bb4fce198a22d254c7adb5b004e22d56fb204b8a12",
+    "installed_hash_verified": true,
+    "previous_package": "Preserved by dev.py in the ignored local build archive. No game/server play session was launched."
+  },
+  "verification": {
+    "domain": "189 passed, including finite head/tail and tapered collision, fractional continuity, sanctuary track continuity, complete volley admission and revised third-volley Spread; existing non-lattice and Oni contracts remain passing.",
+    "codec": "Protocol34: 324 round-trips and 50 malformed/truncated rejections. Domain assembly SHA256 81cd0a0ba11ed4744ff52b0d095f9fecd5d86b183df8593203311906978c8f39.",
+    "shader_guards": "6 passed: named passes, shared profile uniforms, stable seed/flow, coordinate/state restoration, client-only dispatch and export integrity.",
+    "native_shader": "FXC compilation passed (expected deprecated-effects warning). Installed FNA/D3D11 rendered the actual export using Luminance maps read in memory; no third-party textures copied into the repository.",
+    "preview": ".local/shader-preview/flowing-lattice.gif and flowing-lattice-frames contain 120 native GPU samples, 1.2 simulation ticks per 20ms frame. Lower panel uses reflected production GridVolley/PulseAt at 0.52x; upper isolated horizontal packet exaggerates transverse width for material inspection. Frames 055/060/075 were inspected. This is offline rendering, not a game/FPS claim.",
+    "static": "Selected wrapper passed: catalog regenerated once and checked (66 documents), repository policy (654 files), YAML (10 files). Passing domain/codec inputs were unchanged, so those checks were not repeated by the final static wrapper."
+  },
+  "runtime_not_run": [
+    "Actual tModLoader reload/autoload and live combat readability",
+    "Slower stagger and head/body/tail acceptance, including damage ahead/behind the packet",
+    "Matching-version peers / delayed snapshots and third-volley Spread sanctuaries",
+    "Reduced Effects, UI107%/zoom and measured frame time"
+  ]
+}
