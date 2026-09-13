@@ -522,9 +522,10 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
         if(!reduced)
             batch.Draw(TextureAssets.MagicPixel.Value,new Rectangle(0,0,(int)width,(int)height),pixel,
                 new Color(230,221,213)*(FirstSeveranceDollCapture.Arrival(age)*.30f));
-        // Leave the capture itself unobstructed. Names appear only after intake,
-        // in the bottom title region, never across the NPC or central aperture.
-        fade*=FirstSeveranceVisualCurves.Ease(Math.Clamp((age-.83f)/.08f,0,1));
+        // Separate the readable name hold from letterbox/capture fade. The old
+        // late reveal multiplied an already falling fade and never held opaque.
+        // Bottom title region leaves the moving NPC and central aperture clear.
+        fade = FirstSeverancePresentationTiming.TitleOpacity(tick, intro.ActionStartedTick, intro.ResolveTick);
         Vector2 center = new(width * 0.5f, height * 0.78f);
         float lineWidth = Math.Min(660f, width * 0.78f) * FirstSeveranceVisualCurves.Ease(Math.Min(1, age * 4));
         batch.Draw(TextureAssets.MagicPixel.Value,

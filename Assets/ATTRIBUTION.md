@@ -2,6 +2,38 @@
 
 ## Records
 
+### Theater Doll activation reliquary — 2026-09-14
+
+- Runtime file: `Assets/Textures/Items/TheaterDoll.png`
+- Asset ID: theater-doll-reliquary-0276
+- Asset type: inventory item sprite; transparent 44x48 PNG
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-14
+- Source type: generated
+- Source work and URL: original generation, no reference image or third-party asset; local source identifier `theater-key-20260914/source.png`, preserved outside Git/package
+- Tool/model/version: built-in image generation; actual model name not reported; Pillow mechanical alpha crop/resize through [export_theater_key.py](../tools/export_theater_key.py)
+- Human modifications: selected a black-iron miniature coffin containing a cracked ivory doll mask, winding key and muted violet ribbon; alpha crop, 40x44 maximum painted envelope centered in 44x48, no redraw or fake transparency
+- License and redistribution terms: original generated project asset, subject to the existing project publication/asset-license gate; no third-party character or artwork copied
+- Required attribution: retain this record, design brief and export recipe; do not identify an unreported generation model
+- Reviewer and review date: Codex, 2026-09-14; full-size source and native export inspected, real inventory acceptance pending
+- Notes: source SHA256 `7e621be4164757bc525b61629b07695bea47abc4bddddb8274ca95dc7851e333`; runtime SHA256 `7028322cf5c97e88d097f325c84baa9ee7a59d4a0f678db10651154f1d8453bc`. Abridged generation brief: one readable Terraria-style inventory relic, chunky limited-color clusters, black coffin/ivory half-mask/winding key/purple ribbon, genuine transparent background, no text or girl/minion portrait. Source is retained, never required by the runtime.
+
+### Stack and Spread world-space ring — 2026-09-14
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/MechanicRing.fxc`
+- Asset ID: doll-mechanic-ring-0276
+- Asset type: compiled original GPU area marker
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-14
+- Source type: original
+- Source work and URL: adjacent `MechanicRing.fx`; independent code, using the [Luminance API](../docs/encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation) already referenced by the Raid renderer
+- Tool/model/version: Microsoft FXC 10.1 / D3DCompiler_47, pinned compiler/source/output hashes in adjacent `compiled.json`
+- Human modifications: exact world-radius pearl boundary, inward advected currents, soft shadow and same-boundary countdown; muted teal/plum palette; reduced-detail path without moving the true boundary
+- License and redistribution terms: project publication/asset-license gate; separately installed Luminance maps are runtime references, not copied third-party textures
+- Required attribution: retain this record; Luminance is [MIT licensed](https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/LICENSE)
+- Reviewer and review date: Codex, 2026-09-14; compiled FNA/D3D11 frames on dark/light backgrounds; in-game overlap, peer scale and accessibility acceptance pending
+- Notes: reproduce with `tools/compile_shaders.py --fxc <local compiler>`. Source/manifest are excluded from the package. Prior three shader exports are byte-identical to their tracked originals.
+
 ### Raid beam pressure audio — 2026-09-13
 
 - Asset ID: doll-beam-pressure-0273; type: original synthesized SFX.
@@ -25,6 +57,7 @@
 - Source type: original project synthesis/remix; reproducible master/seed/envelope: [tools/generate_beam_sfx.py](../tools/generate_beam_sfx.py), NumPy FFT synthesis, 44.1-kHz stereo PCM16 export. No third-party samples, reference-recording excerpts, AI audio service or extracted third-party game asset used. SpreadRay additionally layers the project's own unchanged `Assets/Sounds/FirstSeverance/SpreadExecution.wav` (SHA256 `44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220`; [original provenance](#execution-ping-revision--0222--2026-09-07)).
 - Reference influence: [F16](../docs/research/WOTG_RAID_BENCHMARK.md#f16--beam-audio-envelope-analysis-2026-09-13), numeric mixed-recording/event analysis and pinned WotG/WoTM cue grouping. This environment cannot hear audio; user approved analysis-based creation with audition delivery. Reference originals/analysis and MP3 previews remain ignored local artifacts.
 - Design/editing: aperiodic pressure, inharmonic cavities, short bright rupture, pre-shot dip and bounded release; one periodic rotation sustain. Revision 0.2.75 raises warning/launch presence about 4 dB, adds a brief mid-register resonant fan, restores the owned Spread needle over its heavy body, and separately contains sustain crests for overlap headroom. Separate Raid routes leave existing music, shared weapon and accepted Stack masters untouched.
+- Revision 0.2.76 (2026-09-14): preserve the accepted fan/needle, add a 0.24-second dark diffuse release to fired beam masters, and remaster peaks for the revised runtime category gains and bounded overlap. Eleven masters change; the Spread pair, rotation bed and lock master retain their 0.2.75 bytes. The updated exact per-file hashes below and [mix policy](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set) supersede the earlier gain/deadline details. Numeric export/overlap checks pass; no claim of subjective audition.
 - License/redistribution: original project asset under the existing project publication/asset-license gate. No WotG/WoTM audio reuse rights are asserted or needed for these independently generated sounds. Retain this record and recipe; preview encoding does not change runtime master identity.
 - Review: PCM/header, peak/RMS/DC, one-shot edges, loop wrap and mapping guards; artistic listening and actual game mix remain user-owned. Exact export hashes are recorded in the matching build's source manifest and audio evidence.
 
@@ -40,7 +73,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `f77180aba26913e8c57a3efdf0308dc168865e9da26ecc905fe770f697cb54d4`
+- Notes: SHA256 `016c41987ae0a730cac443482f38a96ad4174e4d7e36f8ea3ba855870de7c985`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/WideCharge.wav`
 - Asset ID: doll-beam-0273-widecharge
@@ -54,7 +87,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `1d93ca48d007de069e684c834500727c1aea829af5b2baa649d36e54ab9bd4a6`
+- Notes: SHA256 `a14d908e5a5858033f49043ee3ea12ee6f98dc414d878edb87ff621862dacab3`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/GridCharge.wav`
 - Asset ID: doll-beam-0273-gridcharge
@@ -68,7 +101,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `693783b980ef403b278fc7448b93e5c0cb84acaac55d68e241f0b42f2c9d5d7c`
+- Notes: SHA256 `f05950bba0982bb1a646f1a94d6b7cfcb7ef553217104f5ac1a579a026783b8e`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeGather.wav`
 - Asset ID: doll-beam-0273-chargegather
@@ -82,7 +115,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `ce900222755d0c2bfcb32565e144bd72c1c9c3e28777801cc880eef64ebc4e0f`
+- Notes: SHA256 `e48071a2eb6316e521420850ad570ebf3505da9bc83e6a86f0e4cfbfbc4b1c30`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeLock.wav`
 - Asset ID: doll-beam-0273-chargelock
@@ -110,7 +143,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `4b23303768c9f768dbfb075e629c7fb266dedd2d4f20c49793dd2e879958892e`
+- Notes: SHA256 `d7c50341bca300d854a61708e3063549ac47e95c06ea8a651a6ec4bb3ee9b2f9`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/CurtainFire.wav`
 - Asset ID: doll-beam-0273-curtainfire
@@ -124,7 +157,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `8e959b8bf50b6e723582ec694533a8c3246fd9d50923c1b585a9db4990d4a474`
+- Notes: SHA256 `2c7074d02f1c0041eef4a723c0e461ee999629fcde643f75acb001b7551f6b33`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/CoreSalvoFire.wav`
 - Asset ID: doll-beam-0273-coresalvofire
@@ -138,7 +171,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `63682b2c6c35a0c7ce6f548ea671258ee5a581150567e4073e0602cac1d606fb`
+- Notes: SHA256 `44e87ca0743bcf093d4be9eaed1571a8e9678a496fdeb2ac78e7c8d376982aaf`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/GridFire.wav`
 - Asset ID: doll-beam-0273-gridfire
@@ -152,7 +185,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `50bb8e9f96f5101bd286638641d1b666af27e9af29609cef420a91c8b7300183`
+- Notes: SHA256 `d0f53f3ffffdf4f6227ce7d0954e51267ad36356e37ac4c4276ec925b28dc636`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeRush.wav`
 - Asset ID: doll-beam-0273-chargerush
@@ -166,7 +199,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `0566ebce2baf9b29f4967a9b5eb8d1cf7b713543a56028157540724c9aa2bbf9`
+- Notes: SHA256 `57adc7042b6ba34074f5c02f455e78471e37bcc13a5b7d404bec08b398378c31`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/WideFire.wav`
 - Asset ID: doll-beam-0273-widefire
@@ -180,7 +213,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `95227a0095123893f59879a48f373e8b05a67053103c30869b3d0ad9fb2025ac`
+- Notes: SHA256 `8cff57a17c01748492e568a12dfccd52b9d19d8355710e50e78e30c99149cb48`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/BeamSustain.wav`
 - Asset ID: doll-beam-0273-beamsustain
@@ -208,7 +241,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `8df6bf9c7b20d09a772d2a835b25ddb84ccb081b4a42dab13dcc3e9f6efc5cc9`
+- Notes: SHA256 `9da55f70db57abbd4fa5579bc159baabad8e432e685ba4cf67ef1b4cd89f8514`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/SpreadRay.wav`
 - Asset ID: doll-beam-0273-spreadray
@@ -386,7 +419,7 @@ The new companion uses the existing project-authored NPC as a character referenc
 
 - Runtime file: `Assets/Textures/Items/RitualArmaments/DollCovenant.png`
 - Asset ID: doll-theater-0253-dollcovenant
-- Additional unchanged runtime use (2026-09-13): the reusable `TheaterDoll` stage key shares this original inventory texture; gameplay identity and recipe are separate from the companion. No new raster export or third-party source.
+- Historical runtime use (2026-09-13): the stage key initially shared this companion inventory texture. It now uses the separate [activation reliquary](#theater-doll-activation-reliquary--2026-09-14); the companion retains this original texture.
 - Asset type: image
 - Creator: project-directed built-in image generation and Codex mechanical export
 - Creation/acquisition date: 2026-09-12

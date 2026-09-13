@@ -151,5 +151,20 @@ class PursuitShader(unittest.TestCase):
                 with self.assertRaises(ValueError): exports.verify()
 
 
+    def test_player_markers_keep_one_exact_world_boundary(self):
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        renderer = (root / "FirstSeveranceRaidVfx.cs").read_text()
+        marker = (root / "FirstSeveranceAttackAccents.cs").read_text().split("internal void Marker(")[1].split("internal void ChargeFracture(")[0]
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/MechanicRing.fx").read_text()
+        self.assertIn("MechanicRing(batch, center, radius", marker)
+        self.assertIn("if (!stack) return", marker)
+        self.assertNotIn("Arc(", marker)
+        self.assertIn("radius / extent", renderer)
+        self.assertIn('if (c.Pass == "MechanicRingPass") shader=marker', renderer)
+        self.assertIn("(length(p)-signal.w)*shape.y", shader)
+        self.assertIn("pass MechanicRingPass", shader)
+        self.assertIn("signal.x-.006", shader)
+
+
 if __name__ == "__main__":
     unittest.main()

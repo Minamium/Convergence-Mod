@@ -125,11 +125,24 @@ def presence_master(stereo,kind):
         x += resonant_fan(t,kind)[:,None]*.33
     elif kind=='ray':
         x += legacy_ping(len(x))[:,None]*.87
+    firing = kind in ('beam','wide','salvo','grid','rush')
+    if firing:
+        # Small dark early-room reflections, not an extra shot or long drone.
+        # Preserve a real release after the body instead of zeroing its last grain.
+        padded=np.pad(x,((0,round(.24*RATE)),(0,0)))
+        f=np.fft.rfftfreq(len(x),1/RATE)
+        diffuse=np.fft.irfft(np.fft.rfft(x,axis=0)*np.exp(-(f/2300)**2)[:,None],n=len(x),axis=0)
+        for i,(delay,gain) in enumerate(((.037,.10),(.073,.075),(.109,.050),(.151,.032),(.207,.018))):
+            at=round(delay*RATE)
+            padded[at:at+len(x)] += diffuse[:,::(-1 if i%2 else 1)]*gain
+        x=padded
+        t=np.arange(len(x))/RATE
     # Transparent below the knee; progressively contain rare summed crests.
     # This preserves pressure and transients without hard-clipped peaks.
     # The sustained bed shares a voice with both turn accents. Bound its crests
     # separately so the launch stays forward without their sum overloading.
-    ceiling,knee=(.35,.22) if kind=='loop' else (.81,.48)
+    ceiling,knee=(.35,.22) if kind=='loop' else ((.66,.39) if firing
+        else (.70,.42) if kind in ('gather','grid_charge') else (.81,.48))
     magnitude=abs(x)
     x=np.sign(x)*np.where(magnitude<=knee,magnitude,
         knee+(ceiling-knee)*np.tanh((magnitude-knee)/(ceiling-knee)))
@@ -244,16 +257,21 @@ def main():
         report[name]['sha256']=hashlib.sha256(path.read_bytes()).hexdigest()
     if args.preview:
         args.preview.mkdir(parents=True,exist_ok=True)
-        # The preview uses the current feedback .8 gain, with exact deadline fade.
+        # Match the client cue groups and bounded post-beam release. Do not
+        # normalize the bus: overlap clipping must remain a visible failure.
         def mix(seconds,events):
             bus=np.zeros((round(seconds*RATE),2))
             for name,at,gain,limit in events:
+                kind=SPECS[name][1]
+                release=.3 if kind in ('beam','wide','salvo','grid','rush') else 0
+                limit+=release
                 start=round(at*RATE); clip=assets[name][:round(limit*RATE)].copy()
                 n=min(len(clip),len(bus)-start)
                 if n<1: continue
                 clip=clip[:n]; remain=limit-np.arange(n)/RATE
-                clip*=np.minimum(1,np.maximum(remain,0)/.1)[:,None]
-                bus[start:start+n]+=clip*gain*.8
+                clip*=np.minimum(1,np.maximum(remain,0)/(.1+release))[:,None]
+                level=.65 if name in ('SpreadRay','SpreadScatter') else .8 if kind=='loop' else .88
+                bus[start:start+n]+=clip*min(1,gain*level)
             # Leave playback equivalent; fail on clipping instead of hiding a bad mix.
             if abs(bus).max()>=1:
                 raise ValueError(f'Preview bus clips: peak={abs(bus).max():.4f}, events={events}')

@@ -153,6 +153,15 @@ internal static class FirstSeveranceRaidVfx
         => Add(batch,"PressurePass",center-axis*length*.5f,axis,length,halfWidth,color,
             new(tension,0,opacity,0),age,reduced);
 
+    internal static void MechanicRing(SpriteBatch batch, Vector2 center, float radius,
+        double tick, float remaining, float opacity, bool stack, bool reduced)
+    {
+        float extent = radius + 16;
+        Color color = stack ? new Color(137, 196, 211) : new Color(206, 118, 182);
+        Add(batch, "MechanicRingPass", center - Vector2.UnitX * extent, Vector2.UnitX,
+            extent * 2, extent, color, new(remaining, stack ? 1 : 0, opacity, radius / extent), tick, reduced);
+    }
+
     internal static void Sparks(SpriteBatch batch, Vector2 center, Vector2 axis, double age,
         float strength,float opacity,Color color,bool inward,float scale=1)
     {
@@ -197,6 +206,7 @@ internal static class FirstSeveranceRaidVfx
         if(Main.dedServ || count==0) { count=0; return; }
         ManagedShader legacy=ShaderManager.GetShader("Convergence.RaidEnergy");
         ManagedShader portal=ShaderManager.GetShader("Convergence.PortalBeam");
+        ManagedShader marker=ShaderManager.GetShader("Convergence.MechanicRing");
         var device=Main.instance.GraphicsDevice;
         batch.End();
         var blend=device.BlendState; var depth=device.DepthStencilState; var raster=device.RasterizerState;
@@ -209,12 +219,14 @@ internal static class FirstSeveranceRaidVfx
                 Matrix.CreateOrthographicOffCenter(0,device.Viewport.Width,device.Viewport.Height,0,-1,1);
             legacy.TrySetParameter("uWorldViewProjection",transform);
             portal.TrySetParameter("uWorldViewProjection",transform);
+            marker.TrySetParameter("uWorldViewProjection",transform);
             legacy.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value,1,SamplerState.LinearWrap);
             legacy.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value,2,SamplerState.LinearWrap);
             legacy.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,3,SamplerState.LinearWrap);
             for(int i=0;i<count;i++) {
                 ref readonly var c=ref commands[i];
                 ManagedShader shader=c.Portal?portal:legacy;
+                if (c.Pass == "MechanicRingPass") shader=marker;
                 shader.TrySetParameter("beamColor",c.Color.ToVector3());
                 shader.TrySetParameter("signal",c.Signal);
                 shader.TrySetParameter("shape",new Vector4(c.Length,c.HalfWidth,c.Seed,c.Reduced?.25f:1));

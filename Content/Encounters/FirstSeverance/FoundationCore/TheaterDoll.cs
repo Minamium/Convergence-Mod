@@ -9,7 +9,7 @@ namespace Convergence.Content.Encounters.FirstSeverance.FoundationCore;
 // requiring a Boss reward to start the first fight would create a progression loop.
 public sealed class TheaterDoll : ModItem
 {
-    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/DollCovenant";
+    public override string Texture => "Convergence/Assets/Textures/Items/TheaterDoll";
     public override void SetDefaults()
     {
         Item.width = Item.height = 40;

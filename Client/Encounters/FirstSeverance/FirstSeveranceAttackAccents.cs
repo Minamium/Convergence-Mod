@@ -53,87 +53,26 @@ internal sealed class FirstSeveranceAttackAccents
     internal void Marker(SpriteBatch batch, Vector2 center, float radius, bool stack,
         double tick, ulong resolve, int duration, bool reduced)
     {
-        if (stack)
-        {
-            StackMarker(batch, center, radius, tick, resolve, duration, reduced);
-            return;
-        }
         double start = (double)resolve - duration;
-        float born = Window(tick, start, start + 18);
-        float progress = Math.Clamp((float)((resolve - tick) / duration), 0, 1);
-        float imminent = PreRelease(tick, resolve, 36);
-        Color color = stack ? Cyan : Magenta;
-        // Fixed danger boundary + a clearly separate smooth countdown inside.
-        Ring(batch, center, radius, Color.Black * .9f, 7);
-        Ring(batch, center, radius, color * (.8f + imminent * .2f), 2.4f);
-        Ring(batch, center, radius - 4, Neon(color, .26f + imminent * .35f), reduced ? 2 : 5);
-        float contracting = radius * (.16f + .84f * progress);
-        Ring(batch, center, contracting, Neon(color, born * (.5f + imminent * .4f)), 2.2f);
-        Arc(batch, center, radius - 12, -MathHelper.PiOver2, MathHelper.TwoPi * progress,
-            Color.White * born * .9f, 3);
-        // Do not flood the body with bloom. Luminous arcs are distributed along
-        // the perimeter; their approaching teeth stop exactly on that perimeter.
-        for (int i = 0; i < (reduced ? 4 : 8); i++)
-        {
-            float angle = i * MathHelper.TwoPi / (reduced ? 4 : 8);
-            Vector2 unit = Unit(angle), tangent = new(-unit.Y, unit.X);
-            float travel = Cycle(tick - start, 64, i * .125);
-            float fade = MathF.Sin(MathF.PI * travel) * born;
-            float position = stack ? 1f - travel * .38f : .62f + travel * .38f;
-            Vector2 tip = center + unit * (radius * position);
-            Vector2 back = tip + unit * (stack ? 15 : -15);
-            Line(batch, back - tangent * 8, tip, Neon(color, fade), 3);
-            Line(batch, back + tangent * 8, tip, Neon(color, fade), 3);
-            float rotation = angle + (float)(tick % 18000) * (stack ? -.009f : .007f);
-            Arc(batch, center, radius - 22 - imminent * 6, rotation, .34f,
-                Neon(color, born * .8f), 3.5f);
-            if (!reduced)
-                Halo(batch, center + unit * (radius - 5), new Vector2(75 + imminent * 65), color, born * (.24f + imminent * .34f));
-            Vector2 latch = center + unit * (radius + (1 - imminent) * 25);
-            Line(batch, latch - tangent * 9, latch + tangent * 9, Color.White * imminent, 3);
-        }
-        if (stack) Ring(batch, center, 24, color * born, 3);
-        else
-            for (int i = 0; i < 4; i++)
-                Line(batch, center + Unit(i * MathHelper.PiOver2) * 27,
-                    center + Unit((i + 1) * MathHelper.PiOver2) * 27, color * born, 3);
-    }
-
-    private static void StackMarker(SpriteBatch batch, Vector2 center, float radius,
-        double tick, ulong resolve, int duration, bool reduced)
-    {
-        double start = (double)resolve - duration;
-        float born = Window(tick, start, start + 15);
-        float imminent = PreRelease(tick, resolve, 36);
-        // Exactly one spatial circle: the authority's fixed acceptance radius.
-        // No contracting timer circle, rotating outer arcs or circular bloom.
-        Ring(batch, center, radius, Color.Black * .95f, 11);
-        Ring(batch, center, radius, Cyan * (.86f + .14f * imminent), 5);
+        float born = Arrive(tick - start, 12);
+        float remaining = Math.Clamp((float)((resolve - tick) / Math.Max(1, duration)), 0, 1);
+        FirstSeveranceRaidVfx.MechanicRing(batch, center, radius, tick, remaining, born, stack, reduced);
+        if (!stack) return;
+        // Inward guidance is outside the ONE true acceptance circle; no heavy
+        // brackets, black disks, center diamonds or second timer circumference.
+        Color color = new(137, 196, 211);
         for (int side = 0; side < 4; side++)
         {
             Vector2 unit = Unit(side * MathHelper.PiOver2), tangent = new(-unit.Y, unit.X);
-            for (int tooth = 0; tooth < (reduced ? 1 : 2); tooth++)
-            {
-                float travel = Cycle(tick - start, 64, tooth * .5);
-                float alpha = MathF.Sin(MathF.PI * travel) * born;
-                Vector2 tip = center + unit * (radius + 12 + (1 - Ease(travel)) * 105);
-                Vector2 back = tip + unit * 29;
-                Line(batch, back + tangent * 21, tip, Color.Black * alpha, 11);
-                Line(batch, back - tangent * 21, tip, Color.Black * alpha, 11);
-                Line(batch, back + tangent * 21, tip, Cyan * alpha, 6);
-                Line(batch, back - tangent * 21, tip, Cyan * alpha, 6);
-                Line(batch, back + tangent * 21, tip, Color.White * alpha * .65f, 1.5f);
-                Line(batch, back - tangent * 21, tip, Color.White * alpha * .65f, 1.5f);
-            }
+            float travel = Cycle(tick - start, 64, side * .08);
+            float alpha = MathF.Sin(MathF.PI * travel) * born * .8f;
+            Vector2 tip = center + unit * (radius + 8 + (1 - Ease(travel)) * (reduced ? 34 : 60));
+            Vector2 back = tip + unit * 14;
+            Line(batch, back + tangent * 9, tip, Color.Black * alpha, 3.8f);
+            Line(batch, back - tangent * 9, tip, Color.Black * alpha, 3.8f);
+            Line(batch, back + tangent * 9, tip, color * alpha, 1.8f);
+            Line(batch, back - tangent * 9, tip, color * alpha, 1.8f);
         }
-        // Countdown becomes a straight readout, never a second spatial boundary.
-        float remaining = Math.Clamp((float)((resolve - tick) / duration), 0, 1);
-        Vector2 bar = center + new Vector2(-40, 39);
-        Line(batch, bar, bar + new Vector2(80, 0), Color.Black * born, 8);
-        Line(batch, bar, bar + new Vector2(80 * remaining, 0), Color.White * born, 3);
-        for (int i = 0; i < 4; i++)
-            Line(batch, center + Unit(i * MathHelper.PiOver2) * 17,
-                center + Unit((i + 1) * MathHelper.PiOver2) * 17, Cyan * born, 3);
     }
 
     // Material fracture/pressure, never a circular cast reticle. Player markers
