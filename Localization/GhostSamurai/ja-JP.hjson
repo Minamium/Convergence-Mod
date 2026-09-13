@@ -6,7 +6,7 @@ Mods: {
     Items: {
       GhostSamuraiSummon: {
         DisplayName: "鬼武者の弔い鈴"
-        Tooltip: "幽鬼武者を呼び出す\n消費しない開発用アイテム。広い場所で使用する\n第3フェーズは現在、第2フェーズの動きを継続する"
+        Tooltip: "幽鬼武者を呼び出す\n消費しない開発用アイテム。広い場所で使用する\n開発中：攻撃・報酬・バランスは未完成"
       }
     }
     Projectiles: {

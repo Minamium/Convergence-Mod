@@ -58,7 +58,7 @@ Convergenceは、Calamity終盤の個人回避・火力最適化を土台に、M
 
 ## Current encounters
 
-最初のRaidは **不幸な人形劇 / The Unfortunate Doll Play**。Bossは **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**。`FirstSeverance` / `first_severance` は安定内部IDとして残る。[Raid概要](encounters/first-severance/README.md)と[現行仕様](encounters/first-severance/ENCOUNTER_SPEC.md)が公開名と戦闘体験を持つ。
+最初のRaidは **Requiem of the Hollow Doll**。Bossは **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**。`FirstSeverance` / `first_severance` は安定内部IDとして残る。[Raid概要](encounters/first-severance/README.md)と[現行仕様](encounters/first-severance/ENCOUNTER_SPEC.md)が公開名と戦闘体験を持つ。BGMの原題「不幸な人形劇」は改名しない。
 
 Raidは集合・Readyから複数フェーズとFinal生存へ進む。現行の蘇生方式は[Revive Spec](encounters/first-severance/REVIVE_SPEC.md)に従う。古いchannel/token方式や初期の単純ループを現行仕様として実装し直さない。
 
@@ -77,7 +77,7 @@ Raidは集合・Readyから複数フェーズとFinal生存へ進む。現行の
 
 ## Setting and presentation
 
-各Encounterが固有の背景・造形・音・動きを持つ。不幸な人形劇の懸架された人形と拘束機構は [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md)、幽鬼武者の骸骨・鬼火・二刀流は[専用仕様](encounters/ghost-samurai/ENCOUNTER_SPEC.md)を参照する。既存作品の顔・logo・構図やCalamity assetを再現・抽出しない。
+各Encounterが固有の背景・造形・音・動きを持つ。Doll Raidの懸架された人形と拘束機構は [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md)、幽鬼武者の骸骨・鬼火・二刀流は[専用仕様](encounters/ghost-samurai/ENCOUNTER_SPEC.md)を参照する。既存作品の顔・logo・構図やCalamity assetを再現・抽出しない。
 
 [Art Direction](ART_DIRECTION.md)は共通の読みやすさとfeature別の参照先を示す。過去の極地/観測施設の案や旧固有名は、新しいBossを同じ見た目へ固定する条件ではない。
 

@@ -1,0 +1,19 @@
+Japanese (attach the gameplay video)
+
+Convergence v0.3.1、テストプレイヤー募集！
+Dollレイドの初期プロトタイプが完成。開発中につき感想・不具合報告歓迎です。ソロ可、マルチ推奨。Calamity最終装備向け。
+BGM：EigHt「不幸な人形劇」
+https://www.youtube.com/watch?v=vTFL5_d_p7o
+https://steamcommunity.com/sharedfiles/filedetails/?id=3798073077
+
+English (attach the gameplay video)
+
+Convergence v0.3.1 needs playtesters! An in-development Terraria/tModLoader raid for Calamity endgame. Solo works; multiplayer preferred. Feedback welcome!
+Music: EigHt — 不幸な人形劇
+https://www.youtube.com/watch?v=vTFL5_d_p7o
+https://steamcommunity.com/sharedfiles/filedetails/?id=3798073077
+
+Optional longer title for Reddit/Discord
+Convergence v0.3.1 — Requiem of the Hollow Doll: multiplayer playtesters wanted
+
+Post after updating the existing Workshop item to 0.3.1. These are drafts for the owner to post; no social or Steam publication was performed by preparing them. Retain the music credit and link. BGM use terms: https://eight-novel.fanbox.cc/posts/7647818

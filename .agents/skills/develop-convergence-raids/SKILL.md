@@ -1,6 +1,6 @@
 ---
 name: develop-convergence-raids
-description: Implement or review Convergence Boss/Raid behavior and its specifications. Use for mechanics, authority, replication, cleanup, or client presentation; skip wording-only edits, general build setup, and repository housekeeping.
+description: Implement or review Convergence Boss/Raid behavior, presentation, and playtest feedback. Use for mechanics, authority, replication, cleanup, or user playtest/log reviews; skip unrelated wording, build setup, and repository housekeeping.
 ---
 
 # Develop Convergence Raids
@@ -37,3 +37,9 @@ For new mechanics, define assignment, telegraph/resolve ticks, authority result,
 Update the document that owns each changed fact. Do not copy the same implementation report into the spec, plan, README, and skill. Review the final diff for affected invariants and finish under the [AGENTS completion contract](../../../AGENTS.md#verification), selecting checks from the verification matrix.
 
 Report concrete defects and missing applicable evidence. Distinguish an implementation defect from a future release gate or a user-owned playtest that has not run.
+
+## Keep playtest feedback lightweight
+
+When the user supplies gameplay feedback, logs or a recording, append one compact dated/build-labelled entry to [playtest feedback](../../../docs/history/PLAYTEST_FEEDBACK.md): user observation → decision/change → result or remaining check. Separate reported experience from measured evidence; link existing evidence instead of duplicating logs, transcripts or tuning tables. Combine the same session's follow-ups and omit entries with no new finding.
+
+The ledger is optional history, never a startup reading requirement. Search only the relevant feature/version when needed; current rules remain in their owning specs. Do not turn each remark into an ADR, research report or additional test gate.

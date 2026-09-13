@@ -1,7 +1,9 @@
 Convergence (Development Build)
-An experimental multiplayer-first raid for Calamity endgame equipment.
+A public-test mod for Calamity endgame equipment.
 
 Requiem of the Hollow Doll pits your party against Lacrimosa — The Bound Heart: a tragic suspended Doll, gathering and spreading mechanics, resurrection, multiple phases and a final survival sequence. Victory awards a Curtainfall Treasure Box with one of five class weapons at equal odds. Collect all five to craft The Unbroken Promise, a ten-slot Doll companion; she is not a Raid participant.
+
+Doll Raid: initial prototype complete, with balance and compatibility still provisional. Ghost Samurai: a separate summoned boss still in development, including unfinished rewards and a known world-unload exception. This exception can occur even without summoning Ghost Samurai.
 
 Requires Calamity Mod 2.2.4 and Luminance 1.0.14 on the tested tModLoader 2026.07 / Terraria 1.4.4.9 baseline. Use Calamity's required dependencies, including its official music mod where required. Other installed addons are not Convergence dependencies.
 Recommended: 2-4 players with endgame gear, in a world with Exo Mechs and Supreme Calamitas defeated. Current balance is provisional; all peers must use the same Convergence version.
@@ -9,3 +11,10 @@ Recommended: 2-4 players with endgame gear, in a world with Exo Mechs and Suprem
 This build has no normal crafting recipe for Foundation Core, Theater Doll or Resuscitation Kit. Obtain them using an item browser/spawner such as Cheat Sheet (setup aid, not a hard dependency). On a backed-up test world, place Foundation Core on solid ground with ample open space around/above it. Hold Theater Doll and click the pedestal to deploy preparation for the connected party, then each participant marks Ready. Follow the on-screen validation messages. Use Resuscitation Kit near a downed ally; the item is reusable and the revived player has a 60-second revival lockout. All participants down means defeat.
 
 Solo activation is enabled only as a development convenience, not balanced solo content. Rapid flashes, screen shake and loud effects: reduced-effects settings are available. Balance, artwork, performance and multiplayer edge cases remain in development. Back up worlds/characters; avoid valuable main saves. Report bugs in the Workshop comments after publication with version, player count, enabled Mods and reproduction steps; redact personal information from any logs.
+
+Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3798073077
+Reports: https://github.com/Minamium/Convergence-Mod/issues
+Music: EigHt — 不幸な人形劇
+Original: https://booth.pm/ja/items/5206457
+Creator: https://www.youtube.com/watch?v=vTFL5_d_p7o
+Music use terms: https://eight-novel.fanbox.cc/posts/7647818

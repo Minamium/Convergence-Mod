@@ -18,8 +18,8 @@ Mods: {
 				Name: Pale Meridian
 				Tooltip:
 					'''
-					Hold to unfold five siege cannons over several seconds, firing as each joins.
-					The battery locks and charges, then maintains a rapid armor-piercing crossfire.
+					Hold to assemble one siege weapon in stages, firing throughout assembly.
+					Its mechanism locks and charges, then maintains rapid armor-piercing fire.
 					Release or switch items to stop. Uses bullets; 75% ammo conservation.
 					One of five equally likely rewards from the Curtainfall Treasure Box.
 					'''
@@ -52,8 +52,8 @@ Mods: {
 				Name: Last Witness
 				Tooltip:
 					'''
-					Hold to accumulate six witnesses, each casting a seeking shard.
-					They fold into one heavy relic and release a devastating returning blade.
+					Hold to load one execution relic, releasing seeking shards as pressure builds.
+					The relic locks and releases a devastating returning blade.
 					Stealth empowers the final blade and its converging execution seal.
 					Release early to cancel; the full ritual lasts about 4.7 seconds.
 					One of five equally likely rewards from the Curtainfall Treasure Box.

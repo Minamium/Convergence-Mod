@@ -4,18 +4,20 @@
 
 Convergence is a playable development mod for Terraria / tModLoader. It adds a cooperative raid and an independent boss, with combat tuned around Calamity's endgame equipment. The raid combines bullet dodging with group mechanics, a shared arena, and teammate revival.
 
-[Current status](docs/STATUS.md) · [Contributing](CONTRIBUTING.md) · [Development setup](docs/DEVELOPMENT.md) · [Documentation](docs/README.md)
+[Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3798073077) · [GitHub Releases](https://github.com/Minamium/Convergence-Mod/releases) · [Current status](docs/STATUS.md) · [Contributing](CONTRIBUTING.md) · [Documentation](docs/README.md)
 
 ## Content
 
-- **Requiem of the Hollow Doll** — a raid against **Lacrimosa — The Bound Heart**, recommended for 2–4 players. Fight through multiple phases using coordinated Stack and Spread mechanics, damage windows, and instant teammate revival. Survive the final sequence to earn weapon reward boxes. [Raid guide](docs/encounters/first-severance/README.md) · [Combat specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md).
-- **Ghost Samurai** — an independent dual-wielding boss with travelling slash waves, dash attacks, lattice patterns, and wisps. It uses its own summon and normal player death, not the raid's Ready or revival system. [Boss specification](docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md).
+- **Requiem of the Hollow Doll — initial prototype complete.** A raid against **Lacrimosa — The Bound Heart**, recommended for 2–4 players. Fight through multiple phases using coordinated Stack and Spread mechanics, damage windows, and instant teammate revival. Survive the final sequence to earn weapon reward boxes. Balance and compatibility remain provisional. [Raid guide](docs/encounters/first-severance/README.md) · [Combat specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md).
+- **Ghost Samurai — in development.** An independent dual-wielding boss with travelling slash waves, dash attacks, lattice patterns, and wisps. It uses its own summon and normal player death, not the raid's Ready or revival system. Rewards, balance and lifecycle work remain unfinished. [Boss specification](docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
-Content, balance, visuals, and compatibility are still being revised. The [status page](docs/STATUS.md) identifies the latest installed development build, verification evidence, and outstanding issues. Development-only solo raid admission is a testing aid, not a balanced solo mode; companions do not replace raid participants.
+This is a public playtest, not a finished or stability-certified release. **Solo activation is available**, but multiplayer testing is preferred; the fight is not rebalanced for solo and companions do not replace raid participants. Back up worlds and characters, and expect intense flashes, screen shake and sound. Reduced-effects settings are available. The [status page](docs/STATUS.md) owns verification and known issues, including the Ghost Samurai shutdown exception that can occur without summoning that boss.
 
 ## Requirements and starting a raid
 
 Use the supported tModLoader version and dependency versions in the [version matrix](docs/VERSION_MATRIX.md). **Calamity Mod and Luminance are required**, together with the dependencies requested by tModLoader. Recommended equipment is Calamity endgame gear. Client and server must run matching Convergence builds and protocols.
+
+The three setup items currently have no normal recipes. Obtain **Foundation Core**, **Theater Doll** and **Resuscitation Kit** through an item browser/spawner such as Cheat Sheet (a setup aid, not a dependency).
 
 1. Place a **Foundation Core** pedestal with enough unobstructed arena space.
 2. Hold the **Theater Doll** activation item and click the pedestal to deploy preparation. This item is separate from the summon weapon and is not consumed.
@@ -49,14 +51,16 @@ docs/                Specifications, workflow, status, evidence
 
 Work from integrated main in a scoped branch or worktree. Shared play packages follow the [integration workflow](CONTRIBUTING.md#shared-development). Game outcomes remain server/Single Player authoritative, with only the explicitly documented [Ghost Samurai native-wave exception](docs/adr/0023-ghost-samurai-native-wave-damage.md).
 
-## Reports and release planning
+## Reports and releases
 
 Report reproducible issues through [GitHub Issues](https://github.com/Minamium/Convergence-Mod/issues). Include the Mod/tModLoader versions, single-player or multiplayer mode, relevant enabled Mods, reproduction steps, and a short relevant log excerpt. Remove personal paths, names, chat, and credentials; do not upload saves or full raw logs by default.
 
-The proposed 0.3.x release track is in [Release Process](docs/RELEASE_PROCESS.md#03x-github-prerelease-plan). Planning is not a published release or a claim that all compatibility checks passed.
+The 0.3.1 public-test candidate and its limits are described in [release notes](docs/releases/0.3.1.md). GitHub packages and Workshop uploads are separate; check the installed version and keep every multiplayer peer on the same build. Historical player feedback is [optional, searchable history](docs/history/PLAYTEST_FEEDBACK.md), not a development reading requirement.
 
 ## License and credits
 
 Maintained by [Minamium](https://github.com/Minamium), with contributions including Ghost Samurai by [mac10101010](https://github.com/mac10101010). See [contributors](https://github.com/Minamium/Convergence-Mod/graphs/contributors) for the project history.
 
-Source and asset distribution licenses have not yet been selected. Repository access does not grant reuse or redistribution rights. Agreed collaboration and public distribution follow [Contributing](CONTRIBUTING.md#contribution-scope-and-licensing) and [Release Process](docs/RELEASE_PROCESS.md). Asset, music, and generated-art sources and permissions are recorded in [Attribution](Assets/ATTRIBUTION.md).
+**Music: EigHt — 不幸な人形劇.** [Original work](https://booth.pm/ja/items/5206457) · [Creator's video](https://www.youtube.com/watch?v=vTFL5_d_p7o) · [Use terms](https://eight-novel.fanbox.cc/posts/7647818). The in-game phase edits use this music as background for the Mod; it is not a project-original composition or a separately redistributable soundtrack. No endorsement by the composer or Calamity team is implied.
+
+The owner distributes the compiled development Mod for playtesting. No general open-source or standalone asset-reuse license is granted; existing rights are retained by the respective creators. Public repository access is not permission to reuse or redistribute individual assets. Agreed collaboration and distribution follow [Contributing](CONTRIBUTING.md#contribution-scope-and-licensing) and [Release Process](docs/RELEASE_PROCESS.md). Music and other asset sources/conditions are recorded in [Attribution](Assets/ATTRIBUTION.md).

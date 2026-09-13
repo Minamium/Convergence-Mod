@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - documentation.read_order
 aliases:
@@ -21,7 +21,7 @@ related_docs:
 
 This page is the starting point for humans and coding agents. The repository includes a playable development Raid and independent Boss work; do not infer production completeness from a design document. Verify current implementation and evidence in [Status](STATUS.md).
 
-[Contributing](../CONTRIBUTING.md) owns shared development and existing-clone migration; [Development](DEVELOPMENT.md) routes workstation setup. The [Windows handoff](handoff/WINDOWS.md) helps resume the maintainer's local environment. [不幸な人形劇 overview](encounters/first-severance/README.md) and [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md) identify the current features. Historical snapshots are optional evidence, not a reading queue.
+[Contributing](../CONTRIBUTING.md) owns shared development and existing-clone migration; [Development](DEVELOPMENT.md) routes workstation setup. The [Windows handoff](handoff/WINDOWS.md) helps resume the maintainer's local environment. [Requiem of the Hollow Doll](encounters/first-severance/README.md) and [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md) identify the current features. Historical snapshots are optional evidence, not a reading queue.
 
 ## Read by task
 
@@ -31,7 +31,7 @@ For code/behavior work, start with [Current build](STATUS.md#current-build), [Ve
 |---|---|
 | Markdown, wording, repository housekeeping | Target file; [documentation schema](DOCUMENTATION_SYSTEM.md#front-matter-record) only if metadata/structure changes |
 | VFX, UI, assets | Target feature's spec via [Art Direction](ART_DIRECTION.md#feature-scope); [asset pipeline](ASSET_PIPELINE.md) and attribution for distributable exports. Doll Theater rules do not define another Boss's appearance |
-| HP, timing, radius, damage tuning | Target constants/callers and the affected feature: [不幸な人形劇](encounters/first-severance/ENCOUNTER_SPEC.md) or [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
+| HP, timing, radius, damage tuning | Target constants/callers and the affected feature: [Doll Raid](encounters/first-severance/ENCOUNTER_SPEC.md) or [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
 | Combat, recovery, arena | Affected feature spec and code; [revive spec](encounters/first-severance/REVIVE_SPEC.md) or [arena rules](ARENA_INFRASTRUCTURE.md) for that subsystem; follow linked active ADRs only where a decision matters |
 | Authority, protocol, lifecycle, module boundaries | Relevant [architecture](ARCHITECTURE.md) / [network](NETWORK_ARCHITECTURE.md) sections and the ADRs governing the changed contract |
 | Work order or new feature scope | The named feature's active task/spec/plan; [Raid implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) for that Raid. Backlog only when promoting an idea |
@@ -39,6 +39,7 @@ For code/behavior work, start with [Current build](STATUS.md#current-build), [Ve
 | API research, real build, new workstation | [Version matrix](VERSION_MATRIX.md), existing scoped research, and relevant [Windows runbook](runbooks/WINDOWS_DEVELOPMENT.md) procedure |
 | WotG-level presentation without losing multiplayer Raid mechanics | [WotG benchmark](research/WOTG_RAID_BENCHMARK.md): video metadata/access limits, pinned public source, independent design proposals |
 | Playtesting when only one person is available | [Single-operator testing](runbooks/SINGLE_OPERATOR_TESTING.md): build-gated one-member start or separately authorized two-client assistance |
+| Recording player feedback / finding a past acceptance | Add a few lines to [Playtest feedback](history/PLAYTEST_FEEDBACK.md), linking existing evidence; search only the relevant feature/build, never read the whole history by default |
 
 Use `rg` for headings, symbols, and topic names before opening a long document. Reuse sections already read until relevant files or scope change. [Search Index](INDEX.md) and [Glossary](GLOSSARY.md) help only when locating an unfamiliar topic/name. The [Windows handoff](handoff/WINDOWS.md) is a brief resume entry; completed slices are [historical context](history/2026-09-07-pre-consolidation.md), not prerequisites.
 
@@ -49,9 +50,9 @@ Select checks from the shared [Verification Matrix](../.agents/skills/develop-co
 | Question | Authoritative document |
 |---|---|
 | What is implemented now? | [Status](STATUS.md) |
-| What is the current cooperative Raid? | [不幸な人形劇 encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) |
+| What is the current cooperative Raid and its public name? | [Doll Raid encounter specification](encounters/first-severance/ENCOUNTER_SPEC.md) |
 | What governs the independent summoned Boss? | [Ghost Samurai specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
-| What gets implemented in the Raid, and in what order? | [不幸な人形劇 implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) |
+| What gets implemented in the Raid, and in what order? | [Doll Raid implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) |
 | How does Downed/Revive feel to players? | [Revive specification](encounters/first-severance/REVIVE_SPEC.md) |
 | Which weapon forms, inputs and macro timelines are current? | [Weapons](encounters/first-severance/WEAPONS.md) |
 | Which art/motion decisions must not regress? | [Visual specification](encounters/first-severance/VISUAL_SPEC.md) |
