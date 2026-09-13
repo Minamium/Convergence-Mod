@@ -73,7 +73,7 @@ internal sealed class FirstSeveranceAttackController
         if (after == FirstSeveranceSubstate.PylonCheck) return;
         gridVolley = null;
         gridHitParticipants.Clear();
-        nextGridTick = authorityTick + 60;
+        nextGridTick = authorityTick + FirstSeveranceGridVolley.OpeningTicks;
     }
 
     internal void Cleanup()
@@ -108,7 +108,7 @@ internal sealed class FirstSeveranceAttackController
             changed = true;
         }
         if (gridVolley is null && tick >= nextGridTick
-            && state.ResolveTick - tick >= FirstSeveranceGridVolley.TelegraphTicks + FirstSeveranceGridVolley.ActiveTicks)
+            && state.ResolveTick - tick >= FirstSeveranceGridVolley.DurationTicks)
         {
             uint serial = ++gridSerial;
             byte pattern = FirstSeveranceSafeWindows.GridPattern(serial, tick - state.SubstateEnteredTick);

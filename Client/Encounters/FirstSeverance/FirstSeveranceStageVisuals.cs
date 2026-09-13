@@ -104,15 +104,19 @@ internal sealed class FirstSeveranceStageVisuals
         Color color = grid.Pattern % 2 == 0 ? new(128, 183, 255) : new(193, 123, 255);
         for (int line = 0; line < grid.Rays.Count; line++)
         {
-            ulong start = grid.RevealTick(line), fire = grid.LineFireTick(line), end = grid.LineEndTick(line);
+            ulong start = grid.RevealTick(line), fire = grid.LineFireTick(line);
             if (tick < start) continue;
             bool forecast = tick < fire;
             bool live = combat.GridVolley is not null && grid.LineIsLive(line, authorityTick);
-            var ray = forecast ? grid.Rays[line] : grid.RayAt(line, tick);
-            Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-            float power = forecast ? Arrive(tick - start, 2) : live ? 1 : (1 - Window(tick, end, end + 12)) * .04f;
-            FirstSeveranceBeamMaterial.DrawTooth(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                tick - start, CastTension(tick, start, fire), forecast ? 0 : 1, power, color, reduced);
+            if (forecast)
+            {
+                var ray = grid.Rays[line];
+                FirstSeveranceBeamMaterial.DrawTooth(batch, accents, new(ray.X, ray.Y), new(ray.DirectionX, ray.DirectionY),
+                    ray.Length, ray.HalfWidth, tick - start, CastTension(tick, start, fire), 0,
+                    Arrive(tick - start, 2), color, reduced);
+            }
+            else if (live)
+                FirstSeveranceRaidVfx.GridRibbon(batch, grid.PulseAt(line, tick), tick - fire, color, reduced);
         }
         foreach (var full in grid.CoreBeams)
         {

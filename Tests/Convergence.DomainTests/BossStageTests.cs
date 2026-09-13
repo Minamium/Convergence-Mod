@@ -106,8 +106,11 @@ internal static partial class Program
             float y = field.Top + 40 + ((pattern * 3) % 4) * 40;
             AssertEqual(false, grid.Intersects(159, x, y, 10, 21), "warning is harmless");
             AssertEqual(false, grid.Intersects(160, x, y, 10, 21), "launch has no extended invisible area");
-            AssertEqual(true, grid.Intersects(175, x, y, 10, 21), "all staggered lines reach full width");
-            AssertEqual(true, grid.Intersects(179, x, y, 10, 21), "last active tick");
+            ulong liveTick = grid.LineFireTick(0) + 10;
+            var pulse = grid.PulseAt(0, liveTick);
+            var body = pulse.Bounds;
+            AssertEqual(true, grid.Intersects(liveTick, body.X + body.DirectionX * body.Length * .6f,
+                body.Y + body.DirectionY * body.Length * .6f, 10, 21), "finite moving body reaches a player");
             AssertEqual(false, grid.Intersects(grid.EndTick, x, y, 10, 21), "last staggered end harmless");
             AssertEqual(false, grid.Intersects(160, x + 80, y + 80, 10, 21), "whole body fits clear cell");
         }

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using Convergence.Content.Encounters.FirstSeverance;
 using Luminance.Assets;
 using Luminance.Core.Graphics;
 using Microsoft.Xna.Framework;
@@ -14,7 +15,8 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 internal static class FirstSeveranceRaidVfx
 {
     private readonly record struct DrawCommand(string Pass, Vector2 Origin, Vector2 Direction,
-        float Length, float HalfWidth, Color Color, Vector4 Signal, float Time, float Seed, bool Reduced);
+        float Length, float HalfWidth, Color Color, Vector4 Signal, float Time, float Seed, bool Reduced,
+        Vector4 Pulse, float FlowOffset);
     private static readonly DrawCommand[] commands = new DrawCommand[1024];
     private static readonly VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[6];
     private static int count;
@@ -53,6 +55,18 @@ internal static class FirstSeveranceRaidVfx
             Add(batch, "MouthPass", origin-direction*150, direction, 300, radius,
                 color, signal, age, reduced);
         }
+    }
+
+    internal static void GridRibbon(SpriteBatch batch, FirstSeveranceGridPulse pulse,
+        double age, Color color, bool reduced)
+    {
+        var ray = pulse.Bounds;
+        // Clipping never remaps the packet or changes its noise seed. Head and
+        // taper are material-space geometry, shared with the authority collision.
+        Add(batch, "RibbonPass", new(ray.X, ray.Y), new(ray.DirectionX, ray.DirectionY),
+            ray.Length, ray.HalfWidth, color, new(1, 1, 1, 0), age, reduced,
+            new(pulse.StartU, pulse.EndU, FirstSeveranceGridPulse.TailFraction, FirstSeveranceGridPulse.HeadFraction),
+            pulse.FlowOffset, new(pulse.Track.X, pulse.Track.Y));
     }
 
     internal static void Orb(SpriteBatch batch, Vector2 center, Vector2 velocity, float radius,
@@ -126,13 +140,15 @@ internal static class FirstSeveranceRaidVfx
     internal static float Seed(int n) { float f=MathF.Sin(n*71.37f+13.1f)*951.135f; return f-MathF.Floor(f); }
 
     private static void Add(SpriteBatch batch,string pass,Vector2 origin,Vector2 direction,float length,
-        float halfWidth,Color color,Vector4 signal,double age,bool reduced)
+        float halfWidth,Color color,Vector4 signal,double age,bool reduced,
+        Vector4 pulse = default, float flowOffset = 0, Vector2? seedOrigin = null)
     {
         if(Main.dedServ || signal.Z<=.001f || length<=0 || halfWidth<=0) return;
         bool immediate=!collecting;
         if(count==commands.Length) Flush(batch); // Never silently drop a danger footprint.
-        float seed=(origin.X*.00017f+origin.Y*.00031f)%11;
-        commands[count++]=new(pass,origin,direction,length,halfWidth,color,signal,(float)(age%216000)/60,seed,reduced);
+        var stableOrigin=seedOrigin ?? origin;
+        float seed=(stableOrigin.X*.00017f+stableOrigin.Y*.00031f)%11;
+        commands[count++]=new(pass,origin,direction,length,halfWidth,color,signal,(float)(age%216000)/60,seed,reduced,pulse,flowOffset);
         if(immediate) Flush(batch);
     }
 
@@ -163,6 +179,8 @@ internal static class FirstSeveranceRaidVfx
                 shader.TrySetParameter("signal",c.Signal);
                 shader.TrySetParameter("shape",new Vector4(c.Length,c.HalfWidth,c.Seed,c.Reduced?.25f:1));
                 shader.TrySetParameter("clock",c.Time);
+                shader.TrySetParameter("pulse",c.Pulse);
+                shader.TrySetParameter("flowOffset",c.FlowOffset);
                 Quad(c.Origin,c.Direction,c.Length,c.HalfWidth);
                 shader.Apply(c.Pass);
                 device.DrawUserPrimitives(PrimitiveType.TriangleList,vertices,0,2);

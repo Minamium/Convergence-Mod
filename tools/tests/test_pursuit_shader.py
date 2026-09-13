@@ -48,13 +48,27 @@ class PursuitShader(unittest.TestCase):
         renderer = (root / "FirstSeveranceRaidVfx.cs").read_text()
         shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
         for name in ("AutoloadPass", "ForecastPass", "CoronaPass", "MouthPass",
-                     "OrbPass", "WakePass", "PressurePass", "RiftPass", "FlarePass"):
+                     "OrbPass", "WakePass", "PressurePass", "RiftPass", "FlarePass", "RibbonPass"):
             self.assertIn(f'"{name}"', renderer)
             self.assertIn(f"pass {name} {{", shader)
         owner = (root / "FirstSeverancePrototypePresentation.cs").read_text()
         self.assertIn("FirstSeveranceRaidVfx.BeginFrame()", owner)
         self.assertIn("FirstSeveranceRaidVfx.EndFrame(batch)", owner)
         self.assertIn("FirstSeveranceRaidVfx.Reset()", owner)
+
+    def test_grid_ribbon_uses_shared_profile_and_stable_packet_coordinates(self):
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        renderer = (root / "FirstSeveranceRaidVfx.cs").read_text()
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
+        stage = (root / "FirstSeveranceStageVisuals.cs").read_text()
+        self.assertIn("grid.PulseAt(line, tick)", stage)
+        self.assertIn("FirstSeveranceGridPulse.TailFraction", renderer)
+        self.assertIn("FirstSeveranceGridPulse.HeadFraction", renderer)
+        self.assertIn("seedOrigin ?? origin", renderer)
+        self.assertIn('TrySetParameter("pulse",c.Pulse)', renderer)
+        self.assertIn('TrySetParameter("flowOffset",c.FlowOffset)', renderer)
+        self.assertIn("i.uv.x*shape.x+flowOffset", shader)
+        self.assertIn("Smoother(u/pulse.z)*Smoother((1-u)/pulse.w)", shader)
 
     def test_current_exports_match(self):
         exports.verify()

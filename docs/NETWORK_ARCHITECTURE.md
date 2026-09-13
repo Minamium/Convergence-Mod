@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v32
+## Current development protocol v34
+
+Wire IDs/layouts remain unchanged from v33. Lattice descriptors now derive slower track staggering and finite travelling head/body/tail geometry instead of a whole-line rectangle; sanctuary cuts share one parent track clock. Authority collision and client fractional rendering use that same tapered profile. Embedded Spread follows the third volley's derived schedule. Older peers must be rejected because the unchanged bytes mean different timing/geometry, not because of a new packet. No new target requests, client RNG, actors, hit-ledger or cleanup ownership is added. [Beam ignition and lattice order](encounters/first-severance/ENCOUNTER_SPEC.md#beam-ignition-and-lattice-order) owns the rules. Ghost Samurai's [v33 feature](encounters/ghost-samurai/ENCOUNTER_SPEC.md) is retained unchanged.
+
+## Preceding development protocol v32
 
 Packet IDs, layouts and request bounds are unchanged from v31. The version advances because both peers now derive beam length/width during ignition and each lattice line's reveal/fire/end offset from the same descriptor. Older peers would draw full-width instant hazards against the new narrow growing authority geometry, so they must be rejected rather than silently mixed. [Beam ignition](encounters/first-severance/ENCOUNTER_SPEC.md#beam-ignition-and-lattice-order) owns the timing/geometry rules. No client RNG, target requests or per-line actors/packets are added; Fight ownership, hit ledgers and cleanup remain unchanged. The existing Ghost Samurai payload/behavior is preserved; its [feature spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns the preceding v31 addition.
 
