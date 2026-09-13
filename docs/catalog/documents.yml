@@ -594,7 +594,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: 不幸な人形劇 — Encounter Specification
-  content_sha256: d837004c61234d90a3673e2d9222292ace5f3db73fd2653720ba179ad3e9aa0b
+  content_sha256: fcaff9339d092754f31532f1ec8ad35837653ed0a055a2233608677e793570fb
   document_type: spec
   status: accepted
   owners:
@@ -622,7 +622,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 53fa28fb38b26cb3fdefc0cfdf7cc81f96f43e49d6a32621a39a13876790f105
+  content_sha256: 6100e5b69ba0cb689f4eb849c4db7456ee54a1d5ec16a7bf60aabc5db2614458
   document_type: spec
   status: provisional
   owners:
@@ -1058,7 +1058,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 32d3215d01aed0ef9576c9b33a4e50506c567e88498978247bcf800764c263ea
+  content_sha256: 4e1b6f8ea24e9fd28b1a7d1b36c05996fb2dfbed17b01b535e8ab8f10c50355b
   document_type: governance
   status: accepted
   owners:
@@ -1103,7 +1103,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 324168140632fec265a520a53fed6fb047eeeabd23a059db71a58b77ef6e0624
+  content_sha256: dabf9663ece4f5fcadb879cbde51bb027361d710e42c93598064cc8e83605848
   document_type: status
   status: accepted
   owners:

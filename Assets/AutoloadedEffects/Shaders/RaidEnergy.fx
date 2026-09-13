@@ -5,6 +5,8 @@ float3 beamColor;
 float4 signal; // charge, live energy, opacity, release
 float4 shape; // length, half-width, stable seed, detail
 float clock;
+float4 pulse; // unclipped packet U at quad ends, tail fraction, head fraction
+float flowOffset; // world distance from the moving head to the clipped quad start
 sampler cloudNoise : register(s1);
 sampler flowNoise : register(s2);
 sampler branchNoise : register(s3);
@@ -20,8 +22,7 @@ float3 Field(float x,float y) {
 }
 float Edge(float y) { return 1-smoothstep(1-1.5/max(shape.y,2),1,abs(y)); }
 float3 Pearl() { return lerp(beamColor,float3(1,.97,.94),.87); }
-float4 Beam(FI i):COLOR0 {
-    float x=i.uv.x*shape.x,y=i.uv.y*2-1;
+float3 BeamLight(float x,float y) {
     float3 n=Field(x,y);
     float warp=(n.x-.5)*.24*shape.w;
     float r=abs(y-warp*(1-abs(y)));
@@ -41,7 +42,27 @@ float4 Beam(FI i):COLOR0 {
     light+=Pearl()*signal.w*.36*exp2(-r*r*14);
     // The shared growing quad is the hitbox. A low continuous coloured mantle
     // marks its full live width; the brilliant filaments are not separate lanes.
-    return float4(light*Edge(y)*signal.z,0);
+    return light;
+}
+float4 Beam(FI i):COLOR0 {
+    float y=i.uv.y*2-1;
+    return float4(BeamLight(i.uv.x*shape.x,y)*Edge(y)*signal.z,0);
+}
+float Smoother(float t) { t=saturate(t); return t*t*t*(t*(t*6-15)+10); }
+float4 Ribbon(FI i):COLOR0 {
+    float u=lerp(pulse.x,pulse.y,i.uv.x);
+    // Same finite, rounded head / long tail profile as GridPulse.Intersects.
+    // The packet crosses the field instead of flipping an entire corridor on/off.
+    float cap=Smoother(u/pulse.z)*Smoother((1-u)/pulse.w);
+    float y=(i.uv.y*2-1)/max(cap,.00001);
+    float x=i.uv.x*shape.x+flowOffset;
+    float head=exp2(-pow((u-.9)*19,2));
+    float tail=Smoother(u/pulse.z);
+    float3 light=BeamLight(x,y)*(.5+.5*tail)
+        +Pearl()*head*exp2(-y*y*8)*1.05;
+    // Only antialias the visible contour. No corona filling nominal grid gaps,
+    // no longitudinal remapping, no seed change when the tail enters the arena.
+    return float4(light*Edge(y)*Smoother(cap*shape.y)*signal.z,0);
 }
 float4 Forecast(FI i):COLOR0 {
     float x=i.uv.x*shape.x,y=i.uv.y*2-1;
@@ -130,6 +151,7 @@ float4 Flare(FI i):COLOR0 {
 }
 technique RaidEnergy {
     pass AutoloadPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Beam(); }
+    pass RibbonPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Ribbon(); }
     pass ForecastPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Forecast(); }
     pass CoronaPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Corona(); }
     pass MouthPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Mouth(); }

@@ -6,8 +6,11 @@ namespace Convergence.Content.Encounters.FirstSeverance;
 // One small descriptor, shared deterministic geometry; no projectile/NPC grid.
 internal sealed class FirstSeveranceGridVolley
 {
-    internal const int TelegraphTicks = 60, ActiveTicks = 20, CadenceTicks = 102;
-    internal const int StaggerTicks = 8;
+    internal const int OpeningTicks = 60, TelegraphTicks = 60;
+    internal const int ActiveTicks = FirstSeveranceGridPulse.TransitTicks + FirstSeveranceGridPulse.EmissionTicks;
+    internal const int StaggerTicks = 30;
+    internal const int DurationTicks = TelegraphTicks + ActiveTicks + StaggerTicks;
+    internal const int CadenceTicks = DurationTicks + 14;
     internal const float Spacing = 160f, HalfWidth = 12f;
     internal const int MaximumLines = 96;
     // Keep protocol29's decoder capacity; current authority emits only one.
@@ -20,6 +23,7 @@ internal sealed class FirstSeveranceGridVolley
     internal ulong CoreEndTick => FireTick + ActiveTicks;
     internal ulong EndTick => CoreEndTick + StaggerTicks;
     private readonly int[] offsets;
+    private readonly FirstSeveranceLanceRay[] tracks;
     internal IReadOnlyList<FirstSeveranceLanceRay> Rays { get; }
     internal IReadOnlyList<FirstSeveranceLanceRay> CoreBeams { get; }
 
@@ -40,12 +44,13 @@ internal sealed class FirstSeveranceGridVolley
             rays.Add(new(x, field.Top, 0, 1, field.Bottom - field.Top, HalfWidth));
         for (float y = field.Top + offsetY; y < field.Bottom; y += Spacing)
             rays.Add(new(field.Left, y, 1, 0, field.Right - field.Left, HalfWidth));
+        var fullTracks = rays.ToArray();
         rays = FirstSeveranceSafeWindows.CutGrid(rays, pattern, coreX, groundY);
         if (rays.Count > MaximumLines) throw new ArgumentException("Lattice exceeds bounded geometry.");
         Rays = Array.AsReadOnly(rays.ToArray());
         // Fisher-Yates on the accepted descriptor, independent of runtime/library
-        // Random implementations. Each peer gets the same rapid scattered reveal.
-        int[] order = new int[rays.Count];
+        // Random implementations. Cut segments share their parent track's clock.
+        int[] order = new int[fullTracks.Length];
         for (int i = 0; i < order.Length; i++) order[i] = i;
         uint seed = unchecked(serial * 747796405u ^ (uint)startTick ^ (uint)(startTick >> 32) ^ (uint)pattern * 2891336453u) | 1u;
         for (int i = order.Length - 1; i > 0; i--)
@@ -54,9 +59,20 @@ internal sealed class FirstSeveranceGridVolley
             int j = (int)(seed % (uint)(i + 1));
             (order[i], order[j]) = (order[j], order[i]);
         }
-        offsets = new int[order.Length];
+        int[] trackOffsets = new int[order.Length];
         for (int rank = 0; rank < order.Length; rank++)
-            offsets[order[rank]] = rank * StaggerTicks / Math.Max(1, order.Length - 1);
+            trackOffsets[order[rank]] = rank * StaggerTicks / Math.Max(1, order.Length - 1);
+        offsets = new int[rays.Count];
+        tracks = new FirstSeveranceLanceRay[rays.Count];
+        for (int line = 0; line < rays.Count; line++)
+        {
+            var segment = rays[line];
+            int track = Array.FindIndex(fullTracks, candidate => candidate.DirectionX == segment.DirectionX
+                && candidate.DirectionY == segment.DirectionY
+                && (segment.DirectionX == 0 ? candidate.X == segment.X : candidate.Y == segment.Y));
+            tracks[line] = fullTracks[track];
+            offsets[line] = trackOffsets[track];
+        }
         coreBeams ??= Array.Empty<FirstSeveranceLanceRay>();
         if ((pattern >= 4 && coreBeams.Count != 0) || coreBeams.Count > MaximumCoreBeams || (serial < CoreSalvoFirstSerial && coreBeams.Count != 0))
             throw new ArgumentException("Invalid core salvo count or sequence.");
@@ -98,13 +114,13 @@ internal sealed class FirstSeveranceGridVolley
     internal ulong LineFireTick(int line) => FireTick + (ulong)offsets[line];
     internal ulong LineEndTick(int line) => LineFireTick(line) + ActiveTicks;
     internal bool LineIsLive(int line, ulong tick) => tick >= LineFireTick(line) && tick < LineEndTick(line);
-    internal FirstSeveranceLanceRay RayAt(int line, double tick)
-        => FirstSeveranceBeamIgnition.At(Rays[line], tick - LineFireTick(line));
+    internal FirstSeveranceGridPulse PulseAt(int line, double tick)
+        => new(tracks[line], Rays[line], tick - LineFireTick(line));
     internal bool Intersects(ulong tick, float x, float y, float halfWidth, float halfHeight)
     {
         if (!IsFiring(tick)) return false;
         for (int line = 0; line < Rays.Count; line++)
-            if (LineIsLive(line, tick) && RayAt(line, tick).Intersects(x, y, halfWidth, halfHeight)) return true;
+            if (LineIsLive(line, tick) && PulseAt(line, tick).Intersects(x, y, halfWidth, halfHeight)) return true;
         return CoreIntersects(tick, x, y, halfWidth, halfHeight);
     }
 }
