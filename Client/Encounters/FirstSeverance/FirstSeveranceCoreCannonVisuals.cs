@@ -2,6 +2,7 @@ using Convergence.Content.Encounters.FirstSeverance;
 using Convergence.Content.Encounters.FirstSeverance.Rewards;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using static Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualCurves;
 
 namespace Convergence.Client.Encounters.FirstSeverance;
