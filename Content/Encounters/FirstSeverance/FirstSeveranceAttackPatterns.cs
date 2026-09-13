@@ -11,6 +11,7 @@ internal readonly record struct FirstSeverancePrismTarget(int Slot, float X, flo
 internal static class FirstSeveranceAttackPatterns
 {
     internal const float StillnessSafeHalfWidth = 64f;
+    internal const float StillnessBeamHalfWidth = 160f;
     // Category opening and complete-combo pauses stay deliberate; only the
     // steps inside each combo return to the earlier fast cadence.
     internal const int ExposureOpeningRestTicks = 60;
@@ -23,14 +24,14 @@ internal static class FirstSeveranceAttackPatterns
         => (StepCount(phase) - 1) * StepCadence(phase) + StepTicks(phase, StepCount(phase) - 1);
     internal static int StepTicks(FirstSeveranceSubstate phase, int step)
         => phase == FirstSeveranceSubstate.PylonCheck
-            ? FirstSeveranceLanceTuning.PrismTelegraphTicks + FirstSeveranceLanceTuning.PatternActiveTicks
+            ? FirstSeveranceLanceTuning.PrismTelegraphTicks + FirstSeveranceLanceTuning.SustainedPrismTicks
             : step % 2 == 1
                 ? FirstSeveranceLanceTuning.StillnessTelegraphTicks + FirstSeveranceCurtainComb.ActiveTicks
                 : FirstSeveranceLanceTuning.TelegraphTicks + FirstSeveranceLanceTuning.ChargeActiveTicks;
     internal static int PrismColorIndex(int step) => step < 4 ? step : 7 - step;
 
     internal static FirstSeveranceLanceVolley CreatePrism(uint serial, ulong tick, byte step,
-        IReadOnlyList<FirstSeverancePrismTarget> targets)
+        IReadOnlyList<FirstSeverancePrismTarget> targets, bool sustainedPrism = false)
     {
         if (targets is null || targets.Count is < 1 or > FirstSeveranceLanceTuning.MaximumRays)
             throw new ArgumentException("Prism targets must be a bounded standing roster.");
@@ -44,7 +45,8 @@ internal static class FirstSeveranceAttackPatterns
         }
         // TargetSlot is only the representative pose focus. All bounded world rays
         // are immutable assignments; neither client nor audio retargets a ray.
-        return new(serial, tick, rays, FirstSeveranceAttackKind.PursuitPrism, step, targets[0].Slot);
+        return new(serial, tick, rays, FirstSeveranceAttackKind.PursuitPrism, step, targets[0].Slot,
+            sustainedPrism:sustainedPrism);
     }
 
     internal static FirstSeveranceLanceVolley Create(uint serial, ulong tick,
@@ -63,13 +65,14 @@ internal static class FirstSeveranceAttackPatterns
             float leadX = targetX + Math.Clamp(velocityX * 18f, -220f, 220f);
             float leadY = targetY + Math.Clamp(velocityY * 18f, -160f, 160f);
             var ray = new FirstSeveranceLanceRay(leadX - dx * 800f, leadY - dy * 800f, dx, dy);
-            return new(serial, tick, new[] { ray }, FirstSeveranceAttackKind.PursuitPrism, step, targetSlot);
+            return new(serial, tick, new[] { ray }, FirstSeveranceAttackKind.PursuitPrism, step, targetSlot,
+                sustainedPrism:true);
         }
         if (step is 1 or 3)
         {
             // A locked empty column: stationary is safe, continued horizontal
             // movement enters one of the two overhead curtains. No velocity test.
-            const float width = 320f;
+            const float width = StillnessBeamHalfWidth;
             return new(serial, tick, new[]
             {
                 new FirstSeveranceLanceRay(targetX - StillnessSafeHalfWidth - width, targetY - 1200f, 0, 1, 2600f, width),

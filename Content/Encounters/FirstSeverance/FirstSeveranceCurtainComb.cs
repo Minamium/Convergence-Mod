@@ -2,15 +2,14 @@ using System;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-// Two wire footprints become gapless, center-out teeth. Authority and client
-// derive the same per-tooth clock without publishing fifty projectile actors.
+// The former comb now has one continuous band per side, like the Phase-III
+// jets. Retain the internal helper/descriptor IDs and original total live time.
 internal static class FirstSeveranceCurtainComb
 {
-    internal const int LaneCount = 25;
+    internal const int LaneCount = 1;
     internal const int CenterLane = LaneCount / 2;
     internal const int StaggerTicks = CenterLane;
-    // Keep the original gapless full-width hold after the new ignition ramp.
-    internal const int LaneActiveTicks = 16 + FirstSeveranceBeamIgnition.FullWidthTicks;
+    internal const int LaneActiveTicks = 35;
     internal const int ActiveTicks = StaggerTicks + LaneActiveTicks;
 
     internal static int Offset(int lane)

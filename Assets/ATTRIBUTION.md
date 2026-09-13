@@ -2,6 +2,17 @@
 
 ## Records
 
+### Raid beam pressure audio — 2026-09-13
+
+- Asset ID: doll-beam-pressure-0273; type: original synthesized SFX.
+- Runtime files, all under `Assets/Sounds/FirstSeverance/Beams/`: `PortalCharge.wav`, `WideCharge.wav`, `GridCharge.wav`, `ChargeGather.wav`, `ChargeLock.wav`, `PortalFire.wav`, `CurtainFire.wav`, `CoreSalvoFire.wav`, `GridFire.wav`, `ChargeRush.wav`, `WideFire.wav`, `BeamSustain.wav`, `FloodFire.wav`, `SpreadRay.wav`, `SpreadScatter.wav`.
+- Creator: Codex, directed by Minamium. Creation/review date: 2026-09-13.
+- Source type: original; reproducible master/seed/envelope: [tools/generate_beam_sfx.py](../tools/generate_beam_sfx.py), NumPy FFT synthesis, 44.1-kHz stereo PCM16 export. No third-party samples, recording excerpts, AI audio service or extracted game asset used.
+- Reference influence: [F16](../docs/research/WOTG_RAID_BENCHMARK.md#f16--beam-audio-envelope-analysis-2026-09-13), numeric mixed-recording/event analysis and pinned WotG/WoTM cue grouping. This environment cannot hear audio; user approved analysis-based creation with audition delivery. Reference originals/analysis and MP3 previews remain ignored local artifacts.
+- Design/editing: aperiodic pressure, inharmonic cavities, short bright rupture, pre-shot dip and bounded release; one periodic rotation sustain. Separate Raid routes leave existing music, shared weapon and accepted Stack masters untouched.
+- License/redistribution: original project asset under the existing project publication/asset-license gate. No WotG/WoTM audio reuse rights are asserted or needed for these independently generated sounds. Retain this record and recipe; preview encoding does not change runtime master identity.
+- Review: PCM/header, peak/RMS/DC, one-shot edges, loop wrap and mapping guards; artistic listening and actual game mix remain user-owned. Exact export hashes are recorded in the matching build's source manifest and audio evidence.
+
 ### Portal triplet beam material — 2026-09-13
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/PortalBeam.fxc`

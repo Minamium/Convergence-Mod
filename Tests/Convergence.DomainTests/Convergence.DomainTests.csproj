@@ -61,6 +61,8 @@
              Link="Domain/FirstSeveranceAttackPatterns.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceLance.cs"
              Link="Domain/FirstSeveranceLance.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceLanceLedger.cs"
+             Link="Domain/FirstSeveranceLanceLedger.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCombatProjection.cs"
              Link="Domain/FirstSeveranceCombatProjection.cs" />
     <Compile Include="../../Common/Encounters/Abstractions/AcceptedEncounterStart.cs"

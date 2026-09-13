@@ -354,6 +354,21 @@ F12の `HadesSuperLaserbeam` / `HadesExoEnergyBlastShader` は太い口砲の**s
 [f15-portal]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/NamelessDeity/Projectiles/TelegraphedPortalLaserbeam.cs
 [f15-base]: https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Core/BaseEntities/BaseTelegraphedPrimitiveLaserbeam.cs
 
+### F16 — Beam audio envelope analysis (2026-09-13)
+
+**Scope/limits:** the owner accepted the F15 visual and requested all Raid beam sounds to follow both supplied videos. Audio-input capability is unavailable here; the owner explicitly approved **numeric analysis → original synthesis → user audition**. No claim of hearing or isolating a beam sample. Raw recordings and derived excerpts are ignored local reference only.
+
+Reused source identity/license observations from F12/F15; no dependency upgrade: WotG `7cb5b86c770e73d6853749b2b688d478ba3326a7` (declared1.2.24; exact recorded version unproven; reuse permission unestablished), WoTM `5556a3adcbabffc6fc95685e34f1ee22cee31d9a` (declared1.0.4, MIT code; no inference that audio assets share code licensing). Accessed 2026-09-13.
+
+- [WotG TelegraphedPortalLaserbeam.OnLaserFire](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/NamelessDeity/Projectiles/TelegraphedPortalLaserbeam.cs#L63): selected projectiles trigger the launch at the fire transition; one-instance replacement groups the audible event despite many rendered beams. Local-player positioning avoids arena-distance attenuation. This is evidence of scheduling/grouping, not a measured loudness target or permission to copy `PortalLaserShoot`.
+- [WoTM PerpendicularBodyLaserBlasts](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Hades/States/SoloAttacks/HadesBodyEternity.PerpendicularBodyLaserBlasts.cs#L169): a shared charge cue precedes the shot; one head-owned burst cue fires before eligible body segments launch their individual lasers. [HadesLaserBurst](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/HadesLaserBurst.cs) does not play a separate sound for every travelling body. Adopt bounded ensemble sound, not its samples/volume values.
+
+**Measured recording regions:** A70–76s and142–147s, B22–27s and30.1–35.3s. FFmpeg mono24-kHz decode, 10-ms RMS windows, 2048-sample Hann FFT/256-hop; waveform/spectrogram inspected. These are **mixed** captures with BGM, weapons and teleport effects. Mean RMS is about -48.7/-50.3/-53.6/-53.1dBFS respectively. Very low capture level is not a desired in-game cue gain. Whole-region power below180Hz is approximately53–67%; music contamination prevents attributing that ratio specifically to beam SFX.
+
+F15's first-visible-fire frames at31.393/32.929/34.463s align with respective before/after150-ms mixed RMS of -54.87→-51.63, -52.72→-52.24 and -52.94→-50.87dBFS. Timing is recording-frame precision, **not proof of audio/physics latency**. Peaks near31.51/32.91/34.55s support inspecting a compact release event rather than assuming a long post-action ring; individual source identity cannot be established from the mix. Local evidence: `.local/beam-audio-20260913/reference-audio-analysis.json` and its waveform/spectrogram, plus unchanged F15 native frame sheets.
+
+**Independent decision:** synthesize a short broadband rupture above low pressure, with a moving noisy/inharmonic body lasting through firing, a short intake/dip before release and a clean deadline release. Keep the current sound slider/mix gain, preserve BGM/Stack/weapons, and provide audition examples rather than claiming timbral parity. No source function/equation, sound recording or dependency media is vendored. [Audio sheet](../AUDIO_CUE_SHEET.md#beam-pressure-set) owns runtime choices; [Attribution](../../Assets/ATTRIBUTION.md#raid-beam-pressure-audio--2026-09-13) owns exact files/recipe/rights.
+
 ## 5. First Severanceに変換するときに崩さないもの
 
 | 残すRaid契約 | 巨大・派手な表現への変換案 | 避ける破綻 |

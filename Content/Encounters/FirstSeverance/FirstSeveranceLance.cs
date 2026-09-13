@@ -22,6 +22,9 @@ internal static class FirstSeveranceLanceTuning
     internal const int PrismTelegraphTicks = 28;
     internal const int StillnessTelegraphTicks = 36;
     internal const int PatternActiveTicks = 12;
+    // Main eight-cast only: 0.9 s firing at the unchanged 0.7 s cadence.
+    // Standalone Spread and Final keep their existing short live windows.
+    internal const int SustainedPrismTicks = 54;
     internal const int ChargeActiveTicks = 22;
     internal const int ChargeLockLeadTicks = 24;
     internal const int ActiveTicks = 14;
@@ -73,11 +76,12 @@ internal sealed class FirstSeveranceLanceVolley
     internal FirstSeveranceLanceVolley(uint serial, ulong startTick,
         IReadOnlyList<FirstSeveranceLanceRay> rays,
         FirstSeveranceAttackKind kind = FirstSeveranceAttackKind.ObservationLance, byte step = 0,
-        int targetSlot = -1, ulong motionTick = 0)
+        int targetSlot = -1, ulong motionTick = 0, bool sustainedPrism = false)
     {
         if (serial == 0 || startTick == 0 || startTick > ulong.MaxValue - 128
             || rays is null || rays.Count is < 1 or > FirstSeveranceLanceTuning.MaximumRays
-            || !Enum.IsDefined(kind) || step > 7 || targetSlot is < -1 or >= 255)
+            || !Enum.IsDefined(kind) || step > 7 || targetSlot is < -1 or >= 255
+            || (sustainedPrism && kind != FirstSeveranceAttackKind.PursuitPrism))
             throw new ArgumentException("Invalid observation-lance volley.");
         foreach (FirstSeveranceLanceRay ray in rays)
             if (!ray.IsValid)
@@ -104,6 +108,7 @@ internal sealed class FirstSeveranceLanceVolley
         Serial = serial;
         StartTick = startTick;
         Kind = kind;
+        SustainedPrism = sustainedPrism;
         Step = step;
         TargetSlot = targetSlot;
         Rays = FirstSeverancePlanCollections.Copy(rays, nameof(rays));
@@ -115,6 +120,7 @@ internal sealed class FirstSeveranceLanceVolley
     internal uint Serial { get; }
     internal ulong StartTick { get; }
     internal FirstSeveranceAttackKind Kind { get; }
+    internal bool SustainedPrism { get; }
     internal byte Step { get; }
     internal int TargetSlot { get; }
     internal ulong MotionTick { get; }
@@ -122,7 +128,8 @@ internal sealed class FirstSeveranceLanceVolley
     internal ulong LockTick => FireTick - FirstSeveranceLanceTuning.ChargeLockLeadTicks;
     internal int TelegraphTicks => Kind == FirstSeveranceAttackKind.PursuitPrism ? FirstSeveranceLanceTuning.PrismTelegraphTicks
         : Kind == FirstSeveranceAttackKind.Stillness ? FirstSeveranceLanceTuning.StillnessTelegraphTicks : FirstSeveranceLanceTuning.TelegraphTicks;
-    internal int ActiveTicks => Kind == FirstSeveranceAttackKind.Stillness ? FirstSeveranceCurtainComb.ActiveTicks
+    internal int ActiveTicks => SustainedPrism ? FirstSeveranceLanceTuning.SustainedPrismTicks
+        : Kind == FirstSeveranceAttackKind.Stillness ? FirstSeveranceCurtainComb.ActiveTicks
         : Kind == FirstSeveranceAttackKind.ObservationLance
         ? FirstSeveranceLanceTuning.ActiveTicks : IsCharge ? FirstSeveranceLanceTuning.ChargeActiveTicks : FirstSeveranceLanceTuning.PatternActiveTicks;
     internal ulong FireTick => StartTick + (ulong)TelegraphTicks;

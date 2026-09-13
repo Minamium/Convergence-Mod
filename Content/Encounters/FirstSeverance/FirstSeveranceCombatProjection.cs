@@ -62,7 +62,8 @@ internal sealed class FirstSeveranceCombatProjection
         FirstSeveranceGridVolley? gridVolley = null,
         ulong actionStartedTick = 0, int actionIndex = -1, int completedPhaseCycles = 0,
         ulong mechanicTick = 0, IReadOnlyList<FirstSeveranceMechanicImpact>? mechanicImpacts = null,
-        IReadOnlyList<FirstSeveranceLanceVolley>? spreadLances = null)
+        IReadOnlyList<FirstSeveranceLanceVolley>? spreadLances = null,
+        FirstSeveranceLanceVolley? carriedLance = null)
     {
         if (encounterSequence == 0
             || fightId.IsNone
@@ -131,9 +132,21 @@ internal sealed class FirstSeveranceCombatProjection
                 throw new ArgumentException("First Severance has no eliminated participant state.");
         if (lanceVolley is not null
             && (!FirstSeveranceLanceTuning.IsAttackPhase(substate) || lanceVolley.EndTick > resolveTick
-                || (lanceVolley.Kind == FirstSeveranceAttackKind.PursuitPrism && lanceVolley.Rays.Count > Participants.Count)))
+                || (lanceVolley.Kind == FirstSeveranceAttackKind.PursuitPrism && lanceVolley.Rays.Count > Participants.Count)
+                || (lanceVolley.SustainedPrism && substate != FirstSeveranceSubstate.PylonCheck)))
             throw new ArgumentException("A lance cannot outlive its attack phase.");
         LanceVolley = lanceVolley;
+        if (carriedLance is { } carried
+            && (lanceVolley is not { SustainedPrism: true } current || !carried.SustainedPrism
+                || substate != FirstSeveranceSubstate.PylonCheck || carried.Serial == current.Serial
+                || carried.Step + 1 != current.Step
+                || carried.StartTick >= current.StartTick
+                || current.StartTick - carried.StartTick < (ulong)FirstSeveranceAttackPatterns.StepCadence(substate)
+                || carried.EndTick <= current.StartTick || carried.EndTick > resolveTick
+                || carried.Rays.Count > Participants.Count
+                || !TryGetParticipantByServerSlot(carried.TargetSlot, out _)))
+            throw new ArgumentException("Invalid overlapping main pursuit cast.");
+        CarriedLance = carriedLance;
         if (gridVolley is not null && (substate != FirstSeveranceSubstate.Lattice
             || gridVolley.EndTick > resolveTick || lanceVolley is not null || gridVolley.CoreBeams.Count > Participants.Count))
             throw new ArgumentException("A grid cannot outlive its owning stage/window.");
@@ -149,7 +162,7 @@ internal sealed class FirstSeveranceCombatProjection
             var window = FirstSeveranceSpreadBarrage.Window(substate, actionIndex, actionStartedTick, resolveTick, cast.StartTick);
             bool targetMember = false;
             foreach (var p in Participants) targetMember |= p.ServerWhoAmI == cast.TargetSlot;
-            if (window is not { } w || cast.Kind != FirstSeveranceAttackKind.PursuitPrism
+            if (window is not { } w || cast.Kind != FirstSeveranceAttackKind.PursuitPrism || cast.SustainedPrism
                 || cast.Step >= FirstSeveranceSpreadBarrage.Count || cast.Step <= previousStep
                 || cast.StartTick <= previousStart || cast.StartTick < FirstSeveranceSpreadBarrage.Start(w, cast.Step)
                 || cast.EndTick > w.ResolveTick - FirstSeveranceSpreadBarrage.Settle
@@ -211,6 +224,7 @@ internal sealed class FirstSeveranceCombatProjection
     public IReadOnlyList<FirstSeveranceCombatParticipantProjection> Participants { get; }
 
     public FirstSeveranceLanceVolley? LanceVolley { get; }
+    public FirstSeveranceLanceVolley? CarriedLance { get; }
     public IReadOnlyList<FirstSeveranceLanceVolley> SpreadLances { get; }
 
     public bool TryGetParticipantByServerSlot(

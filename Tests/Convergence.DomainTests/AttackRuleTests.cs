@@ -198,7 +198,10 @@ internal static partial class Program
                 var volley = FirstSeveranceAttackPatterns.Create(1, start, phase, step, 0, 1000, 2000, 0, 0);
                 AssertEqual((ulong)FirstSeveranceAttackPatterns.StepTicks(phase, step), volley.EndTick - start,
                     "scheduler reserves the actual warning and live duration");
-                AssertEqual(true, lastEnd <= start, "no overlapping step collision windows");
+                if (phase == FirstSeveranceSubstate.CoreExposure)
+                    AssertEqual(true, lastEnd <= start, "charge/stillness keep separate collision windows");
+                else if (step > 0)
+                    AssertEqual(12ul, lastEnd - volley.FireTick, "main pursuit keeps twelve ticks of live overlap");
                 AssertEqual(true, volley.IsFiring(volley.EndTick - 1), "last active tick");
                 AssertEqual(false, volley.IsFiring(volley.EndTick), "end exclusive");
                 lastEnd = volley.EndTick;
@@ -281,7 +284,7 @@ internal static partial class Program
     {
         AssertEqual(42, FirstSeveranceAttackPatterns.StepCadence(FirstSeveranceSubstate.PylonCheck), "prism starts every 0.7s");
         AssertEqual(72, FirstSeveranceAttackPatterns.StepCadence(FirstSeveranceSubstate.CoreExposure), "dash-stop combo starts every 1.2s");
-        AssertEqual(334, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.PylonCheck), "eight-shot sequence budget");
+        AssertEqual(376, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.PylonCheck), "last sustained beam gets its complete sequence budget");
         AssertEqual(287, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.CoreExposure), "four-action sequence includes last tooth's ignition and full hold");
         AssertEqual(60, FirstSeveranceAttackPatterns.SequenceRestTicks, "unchanged extra rest between full combos");
         AssertEqual(60, FirstSeveranceAttackPatterns.ExposureOpeningRestTicks, "unchanged exposure opening rest");
