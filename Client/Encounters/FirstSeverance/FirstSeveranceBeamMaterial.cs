@@ -9,8 +9,8 @@ internal static class FirstSeveranceBeamMaterial
 {
     internal static void SingleForecast(SpriteBatch batch, FirstSeveranceAttackAccents accents,
         Vector2 origin, Vector2 direction, float length, float halfWidth,
-        float charge, float opacity, Color color)
-        => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,RitualRenderClock.Time,
+        double age, float charge, float opacity, Color color)
+        => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,age,
             charge,0,opacity,color,Terraria.ModLoader.ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects,
             mouth:false);
 

@@ -38,10 +38,15 @@ internal static class FirstSeveranceRaidVfx
         if (Main.dedServ || opacity <= .001f || length <= 0 || halfWidth <= 0) return;
         using var scope=new LocalBatch(batch);
         float live = energy > .001f ? 1 : 0;
-        // A forecast describes the axis, not a translucent copy of the eventual
-        // hazard. The caller supplies shared growing geometry only AFTER fire.
-        if (live == 0) halfWidth = Math.Min(halfWidth, 3f);
         Vector4 signal = new(Math.Clamp(charge,0,1), live, Math.Clamp(opacity,0,1), Math.Clamp(release,0,1));
+        if (live == 0)
+        {
+            // Sparse glints describe the accepted FUTURE footprint. Keep its
+            // width before clamping the axis; never fill the warning rectangle.
+            Add(batch, "ForecastDustPass", origin, direction, length, halfWidth,
+                color, signal, age, reduced);
+            halfWidth = Math.Min(halfWidth, 3f);
+        }
         // Small gaps cannot be washed out by glow. Dense teeth/flood bands use no
         // outside corona. Other beams retain a low-intensity decorative skirt.
         if (!confined && live > 0)
