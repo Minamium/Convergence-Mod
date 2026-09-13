@@ -1,0 +1,114 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.75",
+  "protocol": 36,
+  "baseline": "9b4d0b4",
+  "source_commit": "efdfdc6de6066c3a501e2f06b23077688506f977",
+  "source_branch": "main",
+  "source_sha256": "c6e4915b63bcdea555b012fca5a3e08c22e802fc914ef28935e93a2137ffc507",
+  "local_build_record": ".local/builds/20260913T133727645889Z/record.json",
+  "scope": "Beam-only audio mastering: approximately 4 dB launch/warning lift, brief inharmonic mid-register fan and actual original owned Spread needle over the pressure body. No runtime C#/shader/gameplay/protocol or BGM/Stack/weapon audio changes.",
+  "user_feedback": "User accepted 0.2.73's visual/audio direction but reported quiet beam cues and a missing Spread ping. Requested a moderately higher fan, not an excessively shrill layer.",
+  "audio_design": {
+    "fan": "500–1700 Hz inharmonic partials, rapid rise/brief brake/fall and release within 0.26 s; pressure bed preserved.",
+    "spread": "Project-owned SpreadExecution.wav is read-only/hash-checked; retain pitch and timing, band shape/resample into a 0.50 s SpreadRay. Both success and failure share launch, success also dissolves.",
+    "mix": "Existing feedback .8 gain and user slider untouched. Soft one-shot crest bound near .81; periodic bed near .35 leaves room for turn accents. No normalization of overlap previews.",
+    "source_ping_sha256": "44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220"
+  },
+  "measurement_method": "PCM RMS/FFT power bands and FFmpeg ebur128 with identical 600 ms silence padding for comparative short-cue LUFS. Not perceptual equivalence, isolated listening, or full-game mix certification. Original recordings were not sampled.",
+  "comparison": {
+    "PortalCharge": {
+      "before_rms_dbfs": -19.07,
+      "after_rms_dbfs": -15.13,
+      "before_padded_lufs": -16.7,
+      "after_padded_lufs": -12.8,
+      "after_true_peak_dbfs": -2.1
+    },
+    "PortalFire": {
+      "before_rms_dbfs": -16.26,
+      "after_rms_dbfs": -12.24,
+      "before_padded_lufs": -15.7,
+      "after_padded_lufs": -11.7,
+      "after_true_peak_dbfs": -1.9
+    },
+    "CurtainFire": {
+      "before_rms_dbfs": -15.81,
+      "after_rms_dbfs": -11.79,
+      "before_padded_lufs": -15.5,
+      "after_padded_lufs": -11.6,
+      "after_true_peak_dbfs": -1.8
+    },
+    "GridFire": {
+      "before_rms_dbfs": -16.55,
+      "after_rms_dbfs": -12.51,
+      "before_padded_lufs": -16.3,
+      "after_padded_lufs": -12.3,
+      "after_true_peak_dbfs": -1.9
+    },
+    "WideFire": {
+      "before_rms_dbfs": -15.22,
+      "after_rms_dbfs": -11.25,
+      "before_padded_lufs": -14.9,
+      "after_padded_lufs": -10.9,
+      "after_true_peak_dbfs": -1.9
+    },
+    "SpreadRay": {
+      "before_rms_dbfs": -18.62,
+      "after_rms_dbfs": -15.98,
+      "before_padded_lufs": -20.7,
+      "after_padded_lufs": -13.9,
+      "after_true_peak_dbfs": -1.8
+    },
+    "BeamSustain": {
+      "before_rms_dbfs": -16.42,
+      "after_rms_dbfs": -15.5,
+      "before_padded_lufs": -15,
+      "after_padded_lufs": -14,
+      "after_true_peak_dbfs": -9.1
+    }
+  },
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "hjson_files_parsed": 18,
+    "source_changed_during_build": false,
+    "bytes": 56828958,
+    "sha256": "0d7ec48ae8900d067ea3ed416d6f6874d0194370584195bab6bfae1ff2e9c056",
+    "installed_hash_verified": true,
+    "previous_package": "Archived by dev.py. No GUI/game/server, save or Mod-list mutation."
+  },
+  "preservation": {
+    "comparison_record": ".local/builds/20260913T125933683435Z/record.json",
+    "unchanged_file_groups": {
+      "Localization/": 18,
+      "Assets/AutoloadedEffects/": 7,
+      "Assets/Sounds/FirstSeverance/": 61,
+      "Assets/Sounds/Weapons/": 27,
+      "Assets/Music/": 4
+    },
+    "six_existing_locale_edits": "Byte-identical and uncommitted; included in local build manifest.",
+    "contributor_work": "Latest 0.2.74 Ghost Samurai/protocol36 integrated before branching; preserved unchanged."
+  },
+  "verification": {
+    "focused_audio": "3 passed: 15 exports PCM/RMS/peak/DC, zero one-shot ends, bounded periodic wrap; all existing routes; original Spread source identity and 4 actual-gain overlapping scenarios.",
+    "offline_mix": "5 generated examples passed; worst sample peak -0.29 dBFS (rotation/field), independently measured true peak -0.3 dBFS. Initial louder sustain caused clipping; revised per-bed crest containment fixed it without a preview bus limiter.",
+    "static": "Catalog generated once and checked (67 documents); repository checks passed (690 files); YAML passed (10 files). Existing ignored PyYAML dependency path reused; no dependency installation.",
+    "reused": "Unchanged Doll authority/codec and GPU inputs reuse 0.2.73 evidence; integrated Ghost Samurai reuses 0.2.74 feature evidence. No extra local domain/codec/GPU rerun for this audio-only revision."
+  },
+  "audition": {
+    "directory": ".local/beam-audio-presence-20260913/audition",
+    "files": [
+      "Beam-audition.mp3",
+      "Beam-AB.mp3"
+    ],
+    "ab_order": "PortalFire, CurtainFire, GridFire, WideFire, SpreadRay; each old then new at identical .768 gain, no loudness matching.",
+    "limitations": "Model cannot hear the audio. User authorized numeric analysis/synthesis and auditions; new timbre and runtime mix remain unverified by a listener."
+  },
+  "not_run": [
+    "Actual Mod Reload/load",
+    "User audition: fan level/pitch and Spread restored needle",
+    "Full-game balance with BGM, Stack/Spread and other Mods",
+    "Runtime success/failure playback and deadline tail clearance"
+  ]
+}
