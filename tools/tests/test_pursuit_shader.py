@@ -29,7 +29,7 @@ class PursuitShader(unittest.TestCase):
         adapter = (root / "FirstSeverancePursuitBeamVisuals.cs").read_text()
         self.assertIn("ray.Length,ray.HalfWidth", adapter)
         self.assertIn("FirstSeveranceBeamIgnition.At(ray,clock-fire)", adapter)
-        self.assertIn("if (live == 0) halfWidth = Math.Min(halfWidth, 3f)", text)
+        self.assertIn("halfWidth = Math.Min(halfWidth, 3f)", text)
         self.assertIn("Quad(c.Origin,c.Direction,c.Length,c.HalfWidth)", text)
         self.assertIn("Main.GameViewMatrix.TransformationMatrix", text)
         self.assertNotIn("UIScale", text)
@@ -48,13 +48,35 @@ class PursuitShader(unittest.TestCase):
         renderer = (root / "FirstSeveranceRaidVfx.cs").read_text()
         shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
         for name in ("AutoloadPass", "ForecastPass", "CoronaPass", "MouthPass",
-                     "OrbPass", "WakePass", "PressurePass", "RiftPass", "FlarePass", "RibbonPass"):
+                     "OrbPass", "WakePass", "PressurePass", "RiftPass", "FlarePass", "RibbonPass", "ForecastDustPass"):
             self.assertIn(f'"{name}"', renderer)
             self.assertIn(f"pass {name} {{", shader)
         owner = (root / "FirstSeverancePrototypePresentation.cs").read_text()
         self.assertIn("FirstSeveranceRaidVfx.BeginFrame()", owner)
         self.assertIn("FirstSeveranceRaidVfx.EndFrame(batch)", owner)
         self.assertIn("FirstSeveranceRaidVfx.Reset()", owner)
+
+    def test_sparse_forecast_keeps_future_width_before_axis_clamp(self):
+        text = (ROOT / "Client/Encounters/FirstSeverance/FirstSeveranceRaidVfx.cs").read_text()
+        self.assertLess(text.index('"ForecastDustPass"'), text.index("halfWidth = Math.Min"))
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
+        dust = shader.split("float4 ForecastDust(")[1].split("float4 Corona(")[0]
+        self.assertIn("i.uv.x*shape.x,(i.uv.y*2-1)*shape.y", dust)
+        self.assertIn("light*occupancy*twinkle*fade*signal.z,0", dust)
+        self.assertIn("lerp(.22,.4,shape.w)", dust)
+
+    def test_all_beam_families_route_to_shared_material(self):
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        for name in ("FirstSeverancePursuitBeamVisuals.cs", "FirstSeveranceBeamMaterial.cs",
+                     "FirstSeveranceImpalingSwordVisuals.cs", "FirstSeveranceScoreVisuals.cs"):
+            self.assertIn("FirstSeveranceRaidVfx.Beam", (root / name).read_text())
+        emission = (root / "FirstSeveranceEmissionVisuals.cs").read_text()
+        self.assertIn("FirstSeveranceBeamMaterial.Flow", emission)
+        stage = (root / "FirstSeveranceStageVisuals.cs").read_text()
+        self.assertIn("FirstSeveranceBeamMaterial.SingleForecast", stage)
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
+        self.assertIn("Current(x,span,3100,shape.z)", shader)
+        self.assertIn("Current(x,span*1.41,2160,shape.z+.43)", shader)
 
     def test_grid_ribbon_uses_shared_profile_and_stable_packet_coordinates(self):
         root = ROOT / "Client/Encounters/FirstSeverance"

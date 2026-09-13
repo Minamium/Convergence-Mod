@@ -127,7 +127,7 @@ internal sealed class FirstSeveranceStageVisuals
             if (warning)
             {
                 FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    gather, born, violet);
+                    tick - grid.StartTick, gather, born, violet);
                 continue;
             }
 
