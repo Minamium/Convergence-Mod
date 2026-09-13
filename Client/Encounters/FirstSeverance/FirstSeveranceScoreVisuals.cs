@@ -80,9 +80,10 @@ internal sealed class FirstSeveranceScoreVisuals
         Color color=RitualArmamentArt.ColorFor(Convergence.Content.Encounters.FirstSeverance.Rewards.RitualArmamentKind.Magic);
         float retract=1-Window(age,FirstSeveranceChoreography.BladeEnd,FirstSeveranceChoreography.BladeEnd+58);
         bool warning=age<FirstSeveranceChoreography.BladeWindup;
-        float opacity=warning?Arrive(age,4):live?1:retract*.055f;
+        float opacity=warning?Arrive(age,4):live?1:retract;
         FirstSeveranceRaidVfx.Beam(batch,origin,direction,ray.Length,ray.HalfWidth,age,
-            item.Charge,warning?0:1,opacity,color,reduced,release:ReleaseImpulse(age,FirstSeveranceChoreography.BladeWindup));
+            item.Charge,warning?0:1,opacity,color,reduced,release:ReleaseImpulse(age,FirstSeveranceChoreography.BladeWindup),
+            fireAge:FirstSeveranceChoreography.BladeWindup,endAge:FirstSeveranceChoreography.BladeEnd);
         accents.ChargeFracture(batch,origin,age,0,FirstSeveranceChoreography.BladeWindup,color,reduced,1.2f);
     }
 
@@ -117,12 +118,13 @@ internal sealed class FirstSeveranceScoreVisuals
             if (local < FirstSeveranceScoreGeometry.FloodFireTick)
             {
                 FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, full.Length, full.HalfWidth,
-                    local, charge, 0, born, color, reduced);
+                    local, charge, 0, born, color, reduced,FirstSeveranceScoreGeometry.FloodFireTick);
             }
             else
             {
                 FirstSeveranceHazardSurface.Draw(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    local, 1, 1, rays[band].Live ? 1 : emission * .04f, color, reduced);
+                    local, 1, 1, rays[band].Live ? 1 : emission, color, reduced,
+                    FirstSeveranceScoreGeometry.FloodFireTick,FirstSeveranceScoreGeometry.FloodEndTick);
             }
             accents.ChargeFracture(batch, origin + direction * 24, local, 0, FirstSeveranceScoreGeometry.FloodFireTick,
                 color, reduced, .75f + charge * .28f);

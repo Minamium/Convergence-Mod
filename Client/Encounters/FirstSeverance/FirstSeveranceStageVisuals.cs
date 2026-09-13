@@ -127,18 +127,19 @@ internal sealed class FirstSeveranceStageVisuals
             if (warning)
             {
                 FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    tick - grid.StartTick, gather, born, violet);
+                    tick - grid.StartTick, gather, born, violet, grid.FireTick-grid.StartTick);
                 continue;
             }
 
             bool active = combat.GridVolley is not null && authorityTick >= grid.FireTick && authorityTick < grid.CoreEndTick;
-            float power = active ? 1 : (1 - Window(tick, grid.CoreEndTick, grid.CoreEndTick + 12)) * .04f;
+            float power = active ? 1 : 1 - Window(tick, grid.CoreEndTick, grid.CoreEndTick + 12);
             if (power <= .001f) continue;
             FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
-                tick - grid.StartTick, violet, power, reduced, throatLength: 150, throatWidth: 28);
+                tick - grid.StartTick, violet, power, reduced, throatLength: 150, throatWidth: 28,
+                fireAge:grid.FireTick-grid.StartTick,endAge:grid.CoreEndTick-grid.StartTick);
             float kick = ReleaseImpulse(tick, grid.FireTick);
             accents.Halo(batch, origin, new Vector2(125 + kick * 110, 25 + kick * 35), violet,
-                power * (reduced ? .22f : .55f), direction.ToRotation());
+                power * (active ? 1 : .06f) * (reduced ? .22f : .55f), direction.ToRotation());
         }
     }
 

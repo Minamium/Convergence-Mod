@@ -12,9 +12,10 @@ internal static class FirstSeveranceHazardSurface
 {
     internal static void Draw(SpriteBatch batch, FirstSeveranceAttackAccents accents,
         Vector2 origin, Vector2 direction, float length, float halfWidth, double age,
-        float charge, float emission, float opacity, Color color, bool reduced)
+        float charge, float emission, float opacity, Color color, bool reduced,
+        double fireAge=double.NaN,double endAge=double.NaN)
     {
         FirstSeveranceBeamMaterial.DrawVolume(batch, accents, origin, direction, length, halfWidth,
-            age, charge, emission, opacity, color, reduced);
+            age, charge, emission, opacity, color, reduced,fireAge,endAge);
     }
 }

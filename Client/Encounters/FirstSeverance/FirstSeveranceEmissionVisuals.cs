@@ -199,7 +199,7 @@ internal sealed class FirstSeveranceEmissionVisuals
         float angle = MathF.Atan2(direction.Y, direction.X);
         DrawAperture(batch, origin, direction, now, start, fire, open, emission, color, reduced);
 
-        // Forecast only the locked axis. The body then uses the SAME advancing
+        // Forecast the locked corridor. The body then uses the SAME advancing
         // pilot and widening envelope as authority; never a full invisible hitbox.
         if (!active && !cancelled && now < fire)
             DrawWarning(batch, origin, direction, ray.Length, ray.HalfWidth,
@@ -208,18 +208,20 @@ internal sealed class FirstSeveranceEmissionVisuals
         if (now >= fire) ray = FirstSeveranceBeamIgnition.At(ray, now - fire);
         if (now >= fire && broad)
             FirstSeveranceHazardSurface.Draw(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
-                now - start, 1, 1, active ? 1 : emission * .04f, color, reduced);
-        float light = active ? .85f + emission * .15f : emission * .12f;
+                now - start, 1, 1, active ? 1 : emission * (cancelled?.12f:1), color, reduced,
+                fire-start,endTick-start);
+        float light = active ? .85f + emission * .15f : emission * (cancelled?.12f:1);
         if (now < fire) light = 0;
         if (!broad)
         {
             // Same continuously flowing surface as the Core/Lacuna jet, retaining
             // each Prism cast's colour and authority's developing corridor.
             FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
-                now - start, color, light, reduced, throatLength: 95, throatWidth: 18);
+                now - start, color, light, reduced, throatLength: 95, throatWidth: 18,
+                fireAge:fire-start,endAge:endTick-start);
             float kick = ReleaseImpulse(now, fire);
             Accents.Halo(batch, origin, new Vector2(95 + kick * 110, 20 + kick * 28),
-                color, light * (reduced ? .22f : .52f), angle);
+                color, light * (active?1:.06f) * (reduced ? .22f : .52f), angle);
         }
     }
 
@@ -244,10 +246,10 @@ internal sealed class FirstSeveranceEmissionVisuals
                 float charge = Window(clock, start, fire);
                 float release = Emission(clock, fire, end);
                 float born = .65f + .35f * Window(clock, start, start + 2d);
-                float power = (clock < fire ? born : live ? 1 : release * .10f) * cancelledFade;
+                float power = (clock < fire ? born : live ? 1 : release * (e.CancelledAt.HasValue?.10f:1)) * cancelledFade;
                 Color tint = Color.Lerp(color, new Color(174, 152, 255), MathF.Abs(lane - FirstSeveranceCurtainComb.CenterLane) / 36f);
                 FirstSeveranceBeamMaterial.DrawTooth(batch, Accents, origin, direction, ray.Length, ray.HalfWidth,
-                    clock - start, charge, warning ? 0 : 1, power, tint, reduced);
+                    clock - start, charge, warning ? 0 : 1, power, tint, reduced,fire-start,end-start);
             }
     }
 
@@ -264,7 +266,8 @@ internal sealed class FirstSeveranceEmissionVisuals
         if(live) {
             var hit=v.RayAt(0,authorityTick);
             FirstSeveranceRaidVfx.Beam(batch,new(hit.X,hit.Y),new(hit.DirectionX,hit.DirectionY),
-                hit.Length,hit.HalfWidth,now-v.StartTick,1,1,opacity,color,reduced,confined:true,mouth:false);
+                hit.Length,hit.HalfWidth,now-v.StartTick,1,1,opacity,color,reduced,confined:true,mouth:false,
+                fireAge:v.FireTick-v.StartTick,endAge:v.EndTick-v.StartTick);
         }
         FirstSeveranceRaidVfx.Orb(batch,head,direction*(live?24:0),48,now-v.StartTick,
             color,opacity,live,reduced);
@@ -288,11 +291,11 @@ internal sealed class FirstSeveranceEmissionVisuals
         if (halfWidth >= 120)
         {
             FirstSeveranceHazardSurface.Draw(batch, Accents, origin, direction, length, halfWidth,
-                tick - start, gather, 0, warning, color, reduced);
+                tick - start, gather, 0, warning, color, reduced,fire-start);
             return;
         }
         FirstSeveranceBeamMaterial.Draw(batch, Accents, origin, direction, length, halfWidth,
-            tick - start, gather, 0, warning, color, reduced);
+            tick - start, gather, 0, warning, color, reduced,fire-start);
     }
 
     private void Sprite(SpriteBatch batch, Rectangle source, Vector2 position, Vector2 size, float angle, Color color, Vector2 pivot)
