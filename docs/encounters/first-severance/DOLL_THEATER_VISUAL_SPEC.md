@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.doll_identity
 aliases:
@@ -51,7 +51,7 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 | 戦闘前 | 台だけ。人形は開始用の所持アイテム | [Activation flow](../../ARENA_INFRASTRUCTURE.md#activation-flow) の「開演の人形」で台をクリックすると準備へ。10枠ミニオン用の人形とは別物 |
 | 最初の準備演出 | フィールド・柱・空の既存殻が展開し、台に等身大の少女が現れる。ここでは取り込まない | `DrawPreparation`は少女を分解せず、人形の指／髪も殻から出さない。既存Deployment期間とUI／境界を維持 |
 | Ready待機 | 少女は台でまばたき・控えめな仕草。まだ殻へ取り込まれない | `FirstSeveranceDollAttendant`の32×52・12枚の既存フレームと微小な呼吸を維持。既存READY集計と無音準備。NPCは参加者ではなく会話不可 |
-| 全員Ready後のRaid開始 | 糸の張り → NPC分解 → 短い滞留 → 加速吸入 → 殻中央の発光／名前表示 → 戦闘 | SpawnIntroの正本は `EncounterPlan.Timing.SpawnIntroTicks`。現在10秒。`DollCapture`はaccepted ActionStartedTick～ResolveTickで進め、台から殻へカメラ追従。HUD非表示、文字は吸入後だけ。終了直前に殻内の指／髪が現れる |
+| 全員Ready後のRaid開始 | 糸の張り → NPC分解 → 短い滞留 → 加速吸入 → 殻中央の発光／名前表示 → 戦闘 | SpawnIntroの正本は `EncounterPlan.Timing.SpawnIntroTicks`。`DollCapture`はaccepted ActionStartedTick～ResolveTickで進め、台から殻へカメラ追従。HUD非表示、名前は吸入終盤から明確に保持する（[表示時間の正本](VISUAL_SPEC.md#scene-accessibility-and-ownership)）。終了直前に殻内の指／髪が現れる |
 | Phase I | ほぼ全身が殻の中にある。少しだけ覗く指・髪で内部の存在を示す | 腕と髪を殻の後ろへ描く。手前に顔を描かず、肩・上腕・前腕の大部分は殻で隠す |
 | I → II | 内部の腕が拘束をこじ開け、殻が引っかかってから開く。冠・胴の拘束フレームが抜け、腕と長い残骸が崩れた姿勢へ展開 | 既存eclosionの8分割ヒンジ／時間曲線を流用。コンパクトな封入姿勢から連続的に接続し、髪と首は遅れて追従 |
 | Phase II | 旧Bossの異形の冠・胴を外形の主体にし、白髪と小さい顔が内部に残る。受け入れ済みの球体関節の腕は維持 | 傾斜を保ちつつ、肩→肘→手首、首→髪へ異なる遅れで張力が伝わる。吊り糸は可動関節に接続。顔の巨大なNPC立ち絵化をしない |
@@ -59,6 +59,8 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 | Final／勝利 | ドレス・四肢が先に形象を失い、最後まで少女の顔が残る。斜め裂け目へ引き込まれて消える | 既存dissolution/riftを新規パーツに適用。顔の事前分裂を弱める。敗北・cancelで勝利を偽装しない |
 
 完全直立、堂々とした威圧ポーズ、怒り顔、肉塊、少女の痕跡を全て消したメカへの置換、過度な性的／萌え的強調は避ける。「飛翔」より**保持されている重量**を見せる。
+
+開始用 `TheaterDoll` アイコンは、白い割れた人形面を収めた黒鉄の小棺に巻き鍵と紫のリボンを付ける。44×48pxの独立した透明PNGで、少女姿のミニオン武器とはシルエットから区別する。アイテムID・名前・非消費・台への使用方法は変更しない。[素材台帳](../../../Assets/ATTRIBUTION.md#theater-doll-activation-reliquary--2026-09-14)が生成原本と書き出し手順を持つ。
 
 ## 素材とコードの分担
 

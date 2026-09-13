@@ -514,13 +514,13 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: 不幸な人形劇 — 少女人形の提示仕様
-  content_sha256: a8334835785d2417312452ac71e2e8873530b09912572f19f9521d3872d8833b
+  content_sha256: 001e8f9045d9e06fbdc4936b6c5ffee935c4f4473888d1aa09934b32153b17e6
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.doll_identity
   aliases:
@@ -642,13 +642,13 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 90433dfae9dd74061f1286e1fc74232e7de2b184515dafd81d3a8dd5e9c24d1e
+  content_sha256: 0522e56cd03bfc19a4481d4d07367a9ff103c692763bb25e46ca48014030886e
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -684,13 +684,13 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: c800b44acdfbf8e57f07ddba107a2a9ba05842ab7c7fcd1ac5cd638d47295206
+  content_sha256: 6736c2bf364dcbe773a02ee04503631c0236ced96f8ae40a41e67a98f45996e6
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - ghost_samurai.behavior
   aliases:
@@ -828,13 +828,13 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: 289780aff716094376dd65f0343e7b67a28394fea2530a0d090d37d23c8950b0
+  content_sha256: a6fa07ed4b89f500672f78b26b60a42cb0d383cc5671e88fa764c70727ceb220
   document_type: policy
   status: accepted
   owners:
   - project
   - quality
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - policy.release_process
   aliases:
@@ -941,12 +941,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 3266dffc552cb24d44a9a239d96315ee4027db723e2e78e588e2352c75543da9
+  content_sha256: 06107636c607cbd126a824784b38ec8814b1e307cd3904d12764382e347c5d2c
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -1123,12 +1123,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 58bbe4b58fa1098169988894e63075452433b03a893b63571ed930ee37f7342c
+  content_sha256: 552f890d2f64e6b202629319b62929a838ed9a41e18d3395bbee0ea509c5f3f0
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - project.implementation_status
   aliases:

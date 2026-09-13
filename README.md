@@ -1,38 +1,35 @@
 # Convergence Mod
 
-![Convergenceの四つの黒い刃と青白い光を描いた大聖堂のイラスト](docs/media/convergence-banner.png)
+![Convergence promotional artwork: dark blades and pale light in a cathedral](docs/media/convergence-banner.png)
 
-**仲間と挑むRaid。読み切って避けるBoss。Terrariaに、新しい決戦を。**
+Convergence is a playable development mod for Terraria / tModLoader. It adds a cooperative raid and an independent boss, with combat tuned around Calamity's endgame equipment. The raid combines bullet dodging with group mechanics, a shared arena, and teammate revival.
 
-Convergenceは、Calamity終盤を舞台にした協力Raidと独立Bossを開発するtModLoader Modです。頭割り・散開・蘇生による連携と、予兆を読んで切り抜けるアクションを組み合わせます。
+[Current status](docs/STATUS.md) · [Contributing](CONTRIBUTING.md) · [Development setup](docs/DEVELOPMENT.md) · [Documentation](docs/README.md)
 
-*A Terraria / tModLoader content mod featuring cooperative raids and independent bosses, built around Calamity's endgame.*
+The banner is promotional artwork, not a gameplay screenshot. [Artwork provenance](docs/evidence/2026-09-12-readme-artwork.json).
 
-[現在の開発状況](docs/STATUS.md) · [開発に参加する](CONTRIBUTING.md) · [環境構築](docs/DEVELOPMENT.md) · [ドキュメント](docs/README.md)
+## Content
 
-<sub>上の画像はREADME用のイメージイラストです。ゲーム画面ではありません。[制作記録](docs/evidence/2026-09-12-readme-artwork.json)</sub>
+- **The Unfortunate Doll Play** — a raid against **Lacrimosa — The Bound Heart**, recommended for 2–4 players. Fight through multiple phases using coordinated Stack and Spread mechanics, damage windows, and instant teammate revival. Survive the final sequence to earn weapon reward boxes. [Raid guide](docs/encounters/first-severance/README.md) · [Combat specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md).
+- **Ghost Samurai** — an independent dual-wielding boss with travelling slash waves, dash attacks, lattice patterns, and wisps. It uses its own summon and normal player death, not the raid's Ready or revival system. [Boss specification](docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
-## Encounters
+Content, balance, visuals, and compatibility are still being revised. The [status page](docs/STATUS.md) identifies the latest installed development build, verification evidence, and outstanding issues. Development-only solo raid admission is a testing aid, not a balanced solo mode; companions do not replace raid participants.
 
-| コンテンツ | 体験 | 詳細 |
-|---|---|---|
-| **不幸な人形劇 / The Unfortunate Doll Play** | ラクリモーサ — 縛られた心に挑む、2～4人推奨の協力Raid。頭割り、散開、DPS区間、味方の蘇生を通じて最終局面へ | [Raid概要](docs/encounters/first-severance/README.md) · [戦闘仕様](docs/encounters/first-severance/ENCOUNTER_SPEC.md) |
-| **幽鬼武者 / Ghost Samurai** | 青白い鬼火をまとった二刀流の独立Boss。召喚アイテムから始まり、斬撃の予兆と間合いを読んで戦う | [Boss仕様](docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
+## Requirements and starting a raid
 
-本リポジトリは**プレイ可能な開発版**です。実装済みの範囲、最新ビルド、確認済みの挙動と残る試遊項目は [Status](docs/STATUS.md) にまとめています。各Bossの仕様はその機能の文書が持ちます。
+Use the supported tModLoader version and dependency versions in the [version matrix](docs/VERSION_MATRIX.md). **Calamity Mod and Luminance are required**, together with the dependencies requested by tModLoader. Recommended equipment is Calamity endgame gear. Client and server must run matching Convergence builds and protocols.
 
-Raidの旧称 `First Severance` は、`FirstSeverance` / `first_severance` という内部IDと文書パスに残っています。公開名の変更に伴うコード・セーブ・通信IDの一括改名は行いません。
+1. Place a **Foundation Core** pedestal with enough unobstructed arena space.
+2. Hold the **Theater Doll** activation item and click the pedestal to deploy preparation. This item is separate from the summon weapon and is not consumed.
+3. Every admitted player must mark **Ready**. The raid starts after everyone is ready.
+
+See [arena setup](docs/ARENA_INFRASTRUCTURE.md) for placement/admission rules and [recovery](docs/encounters/first-severance/REVIVE_SPEC.md) for Down and revival behavior. Ordinary gameplay and Reload checks are distinct from successful compilation.
+
+The raid's former name, `First Severance`, remains in stable code, asset, packet, and document identifiers. Its public rename does not migrate saved items or network IDs.
 
 ## Development
 
-| やりたいこと | 最初に読むもの |
-|---|---|
-| 新しい変更・修正を担当する | [Contributing](CONTRIBUTING.md) と対象機能の仕様 |
-| 開発環境を用意する | [Development](docs/DEVELOPMENT.md) → 必要な [Windows手順](docs/runbooks/WINDOWS_DEVELOPMENT.md) |
-| 適切な検証を選ぶ | [Verification Matrix](.agents/skills/develop-convergence-raids/references/verification-matrix.md) |
-| 設計・API・過去の判断を探す | [作業別の文書案内](docs/README.md#read-by-task) |
-
-新しいcloneでも、ローカルのソースディレクトリ名は `Convergence` を使います。
+Clone into a source directory named `Convergence`:
 
 ```sh
 git clone https://github.com/Minamium/Convergence-Mod.git Convergence
@@ -41,25 +38,27 @@ python -m pip install -r tools/requirements-ci.txt
 python .agents/skills/develop-convergence-raids/scripts/verify_repo.py .
 ```
 
-これは文書・構成の静的検証です。Modのコンパイルには、[Version Matrix](docs/VERSION_MATRIX.md) のtModLoader・Calamity・.NET環境とローカル設定が必要です。実際のpackage buildは [Windows runbook](docs/runbooks/WINDOWS_DEVELOPMENT.md#diagnose-or-build) の記録付き入口を使います。
-
-## Built for shared development
-
-機能ごとに実装と責任を分け、ゲーム結果はServer / Single Player側で決定します。クライアントは同期された状態から描画・音・UIを組み立てます。
+This runs repository checks, not a Mod build. Follow [Development](docs/DEVELOPMENT.md) and the [Windows runbook](docs/runbooks/WINDOWS_DEVELOPMENT.md#diagnose-or-build) to configure local dependencies and produce a recorded package. Choose checks by change type using the [verification matrix](.agents/skills/develop-convergence-raids/references/verification-matrix.md).
 
 ```text
-Common/              共有基盤、通信、権限、Raid domain、互換性
-Content/Encounters/  各Boss・Raidの実装
-Client/              描画、音、UI、アクセシビリティ
-Tests/               ゲームに依存しないdomain・codec検証
-docs/                現行仕様、開発手順、状態、検証証拠
-.agents/skills/      必要な作業で読む開発・調査ガイド
+Common/              Shared infrastructure, networking, authority, domain, compatibility
+Content/Encounters/  Encounter-specific gameplay
+Client/              Rendering, audio, UI, accessibility
+Tests/               Terraria-independent domain and codec checks
+docs/                Specifications, workflow, status, evidence
+.agents/skills/      Task-specific development and research guidance
 ```
 
-共同作業は最新の統合mainから目的別のbranch / worktreeで進めます。共有プレイ用packageの扱いとPRの検証記録は [Contributing](CONTRIBUTING.md#shared-development) を参照してください。
+Work from integrated main in a scoped branch or worktree. Shared play packages follow the [integration workflow](CONTRIBUTING.md#shared-development). Game outcomes remain server/Single Player authoritative, with only the explicitly documented [Ghost Samurai native-wave exception](docs/adr/0023-ghost-samurai-native-wave-damage.md).
 
-プロジェクトは [Minamium](https://github.com/Minamium) が管理し、[mac10101010](https://github.com/mac10101010) による幽鬼武者の実装など、コントリビューターの協力で開発しています。全履歴は [Contributors](https://github.com/Minamium/Convergence-Mod/graphs/contributors) で確認できます。
+## Reports and release planning
+
+Report reproducible issues through [GitHub Issues](https://github.com/Minamium/Convergence-Mod/issues). Include the Mod/tModLoader versions, single-player or multiplayer mode, relevant enabled Mods, reproduction steps, and a short relevant log excerpt. Remove personal paths, names, chat, and credentials; do not upload saves or full raw logs by default.
+
+The proposed 0.3.x release track is in [Release Process](docs/RELEASE_PROCESS.md#03x-github-prerelease-plan). Planning is not a published release or a claim that all compatibility checks passed.
 
 ## License and credits
 
-ソース・素材の配布ライセンスは未選定です。依頼・合意済みの共同開発、一般からの投稿、公開配布の条件は [Contributing](CONTRIBUTING.md#contribution-scope-and-licensing) と [Release Process](docs/RELEASE_PROCESS.md) に従います。素材・音楽・生成イラストの出典は [Attribution](Assets/ATTRIBUTION.md) に記録しています。
+Maintained by [Minamium](https://github.com/Minamium), with contributions including Ghost Samurai by [mac10101010](https://github.com/mac10101010). See [contributors](https://github.com/Minamium/Convergence-Mod/graphs/contributors) for the project history.
+
+Source and asset distribution licenses have not yet been selected. Repository access does not grant reuse or redistribution rights. Agreed collaboration and public distribution follow [Contributing](CONTRIBUTING.md#contribution-scope-and-licensing) and [Release Process](docs/RELEASE_PROCESS.md). Asset, music, and generated-art sources and permissions are recorded in [Attribution](Assets/ATTRIBUTION.md).

@@ -1,0 +1,225 @@
+{
+  "date": "2026-09-14",
+  "target_build": "0.2.76",
+  "protocol": 36,
+  "base_commit": "2e20fbfe5bdea6bf2549b637d7c06088282d5be7",
+  "scope": "Doll-only presentation/audio/item export; English README, 0.3.x planning and Ghost Samurai lifecycle handoff. No gameplay/protocol/loot/authority changes; no release publication.",
+  "changes": {
+    "audio": "Slightly lower Stack/Spread, raise beam/other Feedback accents. Preserve fan/needle. Add dark 0.24s firing residue with bounded 18-tick runtime tail; warnings and loop retain live deadlines.",
+    "title": "Independent final 210-tick name window, 24-tick fades, 162-tick full-opacity hold. Same accepted 600-tick intro; names now begin during late intake rather than after all capture has completed.",
+    "markers": "Original Luminance MechanicRing managed material; accepted radius unchanged, material moves inward/on fixed perimeter; no false contracting circle, heavy brackets, diamond or disk. Stack arrows retained.",
+    "item": "Original transparent TheaterDoll reliquary sprite 44x48, painted bounds (7,2)-(38,46). Stable item/name/use/recipe; separate from minion portrait."
+  },
+  "audio_exports": {
+    "PortalCharge": {
+      "seconds": 0.47,
+      "peak_dbfs": -3.22,
+      "rms_dbfs": -15.21,
+      "dc": 0.000011691280174185883,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "016c41987ae0a730cac443482f38a96ad4174e4d7e36f8ea3ba855870de7c985"
+    },
+    "WideCharge": {
+      "seconds": 0.65,
+      "peak_dbfs": -3.13,
+      "rms_dbfs": -13.22,
+      "dc": 0.0000034369258174576566,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "a14d908e5a5858033f49043ee3ea12ee6f98dc414d878edb87ff621862dacab3"
+    },
+    "GridCharge": {
+      "seconds": 1,
+      "peak_dbfs": -3.16,
+      "rms_dbfs": -15.17,
+      "dc": 0.000006952595635116335,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "f05950bba0982bb1a646f1a94d6b7cfcb7ef553217104f5ac1a579a026783b8e"
+    },
+    "ChargeGather": {
+      "seconds": 0.7,
+      "peak_dbfs": -3.12,
+      "rms_dbfs": -13.19,
+      "dc": 0.000010938571410776085,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "e48071a2eb6316e521420850ad570ebf3505da9bc83e6a86f0e4cfbfbc4b1c30"
+    },
+    "ChargeLock": {
+      "seconds": 0.4,
+      "peak_dbfs": -2.22,
+      "rms_dbfs": -18.34,
+      "dc": 0.000009608059907336977,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "52a0b6e14c8dfb7233b30bce87cd9225d826b7225a19b6a4ac5acacd0011fb7d"
+    },
+    "PortalFire": {
+      "seconds": 1.24,
+      "peak_dbfs": -3.62,
+      "rms_dbfs": -13.41,
+      "dc": 0.000005503297225967212,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "d7c50341bca300d854a61708e3063549ac47e95c06ea8a651a6ec4bb3ee9b2f9"
+    },
+    "CurtainFire": {
+      "seconds": 0.93,
+      "peak_dbfs": -3.6,
+      "rms_dbfs": -13.42,
+      "dc": 0.000014110414554725973,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "2c7074d02f1c0041eef4a723c0e461ee999629fcde643f75acb001b7551f6b33"
+    },
+    "CoreSalvoFire": {
+      "seconds": 1.18,
+      "peak_dbfs": -3.63,
+      "rms_dbfs": -12.4,
+      "dc": 0.0000014667535174698495,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "44e87ca0743bcf093d4be9eaed1571a8e9678a496fdeb2ac78e7c8d376982aaf"
+    },
+    "GridFire": {
+      "seconds": 1.18,
+      "peak_dbfs": -3.62,
+      "rms_dbfs": -13.68,
+      "dc": 5.987699729556601e-7,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "d0f53f3ffffdf4f6227ce7d0954e51267ad36356e37ac4c4276ec925b28dc636"
+    },
+    "ChargeRush": {
+      "seconds": 0.71,
+      "peak_dbfs": -3.62,
+      "rms_dbfs": -13.25,
+      "dc": 0.000004518230659048532,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "57adc7042b6ba34074f5c02f455e78471e37bcc13a5b7d404bec08b398378c31"
+    },
+    "WideFire": {
+      "seconds": 1.12,
+      "peak_dbfs": -3.61,
+      "rms_dbfs": -12.52,
+      "dc": 0.0000013708279910585874,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "8cff57a17c01748492e568a12dfccd52b9d19d8355710e50e78e30c99149cb48"
+    },
+    "BeamSustain": {
+      "seconds": 2.4,
+      "peak_dbfs": -9.11,
+      "rms_dbfs": -15.5,
+      "dc": 5.672401533955605e-18,
+      "boundary_step": 0.021247107712679833,
+      "clipped_samples": 0,
+      "sha256": "965a74c56213bb37c2a498068ffae567f7e2ca30a9e17d23a9cc470c871bc7b6"
+    },
+    "FloodFire": {
+      "seconds": 0.88,
+      "peak_dbfs": -3.63,
+      "rms_dbfs": -13.16,
+      "dc": 0.00001543624451931007,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "9da55f70db57abbd4fa5579bc159baabad8e432e685ba4cf67ef1b4cd89f8514"
+    },
+    "SpreadRay": {
+      "seconds": 0.5,
+      "peak_dbfs": -1.84,
+      "rms_dbfs": -15.98,
+      "dc": 0.000005509232482545699,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "24683bc4df5f00874cb60065265612cec2bcb95941349ff06569a7aac6082414"
+    },
+    "SpreadScatter": {
+      "seconds": 0.46,
+      "peak_dbfs": -3.34,
+      "rms_dbfs": -20.66,
+      "dc": 0.0000011305020935737243,
+      "boundary_step": 0,
+      "clipped_samples": 0,
+      "sha256": "deea7949fb10cebca5bcb4e7e46964d8ec9c048415c24cc757518d48b1ac3975"
+    },
+    "01-eight-cast": {
+      "seconds": 7,
+      "peak_dbfs": -0.19,
+      "rms_dbfs": -12.68,
+      "dc": 0.00004081691284446553,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "02-side-bands-and-charge": {
+      "seconds": 4.1,
+      "peak_dbfs": -2.63,
+      "rms_dbfs": -16.29,
+      "dc": 0.0000036011990073083787,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "03-grid-and-core": {
+      "seconds": 3,
+      "peak_dbfs": -4.74,
+      "rms_dbfs": -16.25,
+      "dc": 0.000009531580077809372,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "04-rotation-and-field": {
+      "seconds": 6.5,
+      "peak_dbfs": -0.9,
+      "rms_dbfs": -14.57,
+      "dc": 0.00019225992104627464,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    },
+    "05-spread-ray-and-dissolve": {
+      "seconds": 1.5,
+      "peak_dbfs": -4.4,
+      "rms_dbfs": -24.71,
+      "dc": 0.00000925959788658961,
+      "boundary_step": 0,
+      "clipped_samples": 0
+    }
+  },
+  "independent_audio_measurement": {
+    "file": "01-eight-cast.wav",
+    "method": "FFmpeg ebur128=peak=true",
+    "integrated_lufs": -10.6,
+    "true_peak_dbfs": -0.2,
+    "interpretation": "Selected dense audition mix only; not full game output."
+  },
+  "verification": {
+    "focused_audio_shader_guards": "16 distinct Python checks pass: 3 audio/overlap, 11 shader/export/marker guards, 2 physical-viewport/cinematic-layer guards. After timed-ledger consolidation, reran only the 6 affected/new audio, marker and viewport checks; all passed.",
+    "presentation_envelopes": "3 filtered domain cases passed",
+    "gpu": "Installed FNA/D3D11, compiled MechanicRing.fxc and separately installed Luminance noise. 16 offline frames on dark/light backgrounds, normal/reduced detail, Stack112/Spread352 px. Selected frames visually inspected.",
+    "native_build": "passed: 0 errors / 4 pre-existing CS8632 warnings; 18 locales parsed, shader source/export hashes verified, no source change during packaging. Installed artifact hash matches.",
+    "static": "passed: one final write-catalog/static wrapper; 67 indexed documents, 699 repository files and 10 YAML files. No domain/codec rerun for unchanged gameplay contracts.",
+    "runtime": "not_run: Reload/autoload, new circle overlap/zoom/UI107% on peers, title readability, relative SFX/residue in game"
+  },
+  "preservation": {
+    "locales": "All 18 files match the preceding canonical build; six pre-existing English locale edits remain unstaged and are not owned by this task.",
+    "shader_exports": "Three initially dirty compiled exports backed up under ignored .local/shader-flags-backup-20260914; original pinned compiler/O3 reproduces tracked bytes exactly. Source materials unchanged; no originals discarded.",
+    "audio": "All 4 music, 27 weapon and 61 non-beam Raid masters match the preceding canonical build, including original SpreadExecution.",
+    "art_source": "Generated original preserved outside Git/package; exact provenance in Assets/ATTRIBUTION.md."
+  },
+  "build": {
+    "record": ".local/builds/20260913T170253071830Z/record.json",
+    "source_commit": "ce35bceeeb946651e43b2fb30863a7491175ef33",
+    "branch": "main",
+    "source_sha256": "c46e132269e77020d3e7c5d1cabc2942e3126cc0a17736dea12d59cacaf976d9",
+    "source_changed_during_build": false,
+    "dirty_scope": "Six preserved local translations plus pending README/spec/evidence edits; full manifest in local build record. Subsequent documentation-only commits do not change packaged runtime inputs.",
+    "artifact": "Convergence.tmod (normal tModLoader profile)",
+    "bytes": 56949661,
+    "sha256": "f5e1fc14a77e0f50c9cb2b24d81757a249172ea7e02e3e6a5028e472e655fda8",
+    "development_solo": true,
+    "gui_game_or_server_started": false
+  },
+  "publication": "0.3.0 proposed as future GitHub prerelease, not current version. No tag/release/Steam publication performed."
+}

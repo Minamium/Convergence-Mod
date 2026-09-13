@@ -1,0 +1,240 @@
+{
+  "date": "2026-09-14",
+  "build": "0.2.75",
+  "protocol": 36,
+  "source_head": "2e20fbfe5bdea6bf2549b637d7c06088282d5be7",
+  "scope": "Client and two server logs ending 2026-09-14 01:12 JST. No new game session started for this analysis.",
+  "files": {
+    "client.log": {
+      "sha256": "ab91e5cb0b1e09590694f9541042bb0bb6d0b26951f73c0d56757abdf1ca27ce",
+      "bytes": 179345
+    },
+    "server.log": {
+      "sha256": "79518309449f4834ef87d8e0fbd516184fef16b4f46649616f98a60b644236c4",
+      "bytes": 228750
+    },
+    "server2.log": {
+      "sha256": "45d146c404328a0ec9826daa08fe0a4c2b001b90a4cd33ac6a942b9cf8c3750c",
+      "bytes": 73865
+    }
+  },
+  "aggregation": "FirstSeverance authority messages deduplicated by complete message across server/server2. Client AudioCue records counted separately. No raw logs, player names or personal paths distributed.",
+  "fights": {
+    "1": {
+      "events": {
+        "CombatStarted": 1,
+        "PhaseChanged": 11,
+        "DamageWindowStarted": 2,
+        "LanceTelegraph": 19,
+        "LanceFired": 18,
+        "RaidDamage": 15,
+        "DamageProgress": 5,
+        "PylonDestroyed": 2,
+        "DamageWindowEnded": 2,
+        "StackResolved": 5,
+        "StackAttendance": 10,
+        "SpreadPrismTelegraph": 16,
+        "SpreadPrismFired": 16,
+        "SpreadResolved": 4,
+        "EnergyChargeLocked": 6,
+        "HpGateReached": 1,
+        "ParticipantDowned": 2,
+        "RaidFailed": 1,
+        "CombatEnded": 1,
+        "CombatDpsSummary": 1,
+        "DefeatDeathOrdered": 2
+      },
+      "damage": {
+        "PursuitPrism": 7,
+        "SweepRight": 1,
+        "Stillness": 2,
+        "SpreadPrism": 2,
+        "Spread": 2,
+        "Stack": 1
+      },
+      "damage_total": 3038,
+      "stack": [
+        4,
+        1
+      ],
+      "spread": [
+        3,
+        1
+      ],
+      "dps": [
+        {
+          "seq": "1",
+          "tick": "5981",
+          "cause": "AllParticipantsDowned",
+          "participants": "2",
+          "elapsed_seconds": "61.53",
+          "completed_exposures": "1",
+          "overload": "0",
+          "core_effective_damage": "1000000",
+          "core_open_seconds": "7.35",
+          "core_window_dps": "136054.4",
+          "pylon_effective_damage": "600000",
+          "pylon_open_seconds": "4.53",
+          "pylon_window_dps": "132352.9",
+          "boss_life": "4000000",
+          "boss_max_life": "5000000",
+          "boss_remaining_pct": "80.00",
+          "dps_basis": "AuthorityNetHpLoss"
+        }
+      ],
+      "phase_ticks": {
+        "Sealed": 2889
+      }
+    },
+    "2": {
+      "events": {
+        "CombatStarted": 1,
+        "PhaseChanged": 54,
+        "DamageWindowStarted": 7,
+        "LanceTelegraph": 21,
+        "LanceFired": 20,
+        "RaidDamage": 10,
+        "DamageProgress": 18,
+        "PylonDestroyed": 2,
+        "DamageWindowEnded": 7,
+        "StackResolved": 19,
+        "StackAttendance": 19,
+        "SpreadPrismTelegraph": 65,
+        "SpreadPrismFired": 65,
+        "SpreadResolved": 22,
+        "EnergyChargeLocked": 6,
+        "HpGateReached": 3,
+        "GridTelegraph": 6,
+        "GridFired": 6,
+        "SafeWindowResolved": 8,
+        "ScoreAttackFired": 31,
+        "CombatEnded": 1,
+        "CombatDpsSummary": 1,
+        "VictoryRewardDropped": 1
+      },
+      "damage": {
+        "PursuitPrism": 2,
+        "FinalBullets": 5,
+        "FinalSlicer": 3
+      },
+      "damage_total": 1200,
+      "stack": [
+        19,
+        0
+      ],
+      "spread": [
+        22,
+        0
+      ],
+      "dps": [
+        {
+          "seq": "2",
+          "tick": "22459",
+          "cause": "BossLifeZero",
+          "participants": "1",
+          "elapsed_seconds": "240.63",
+          "completed_exposures": "1",
+          "overload": "0",
+          "core_effective_damage": "5000000",
+          "core_open_seconds": "36.03",
+          "core_window_dps": "138760.4",
+          "pylon_effective_damage": "600000",
+          "pylon_open_seconds": "6.83",
+          "pylon_window_dps": "87804.9",
+          "boss_life": "0",
+          "boss_max_life": "5000000",
+          "boss_remaining_pct": "0.00",
+          "dps_basis": "AuthorityNetHpLoss"
+        }
+      ],
+      "phase_ticks": {
+        "Sealed": 8621,
+        "Unbound": 12031,
+        "Distant": 14371,
+        "Final": 17461
+      }
+    }
+  },
+  "audio": {
+    "accepted": 41,
+    "rejected": 0,
+    "cue_gains_and_user_slider": {
+      "ShellMassShed": [
+        [
+          "1.000",
+          "0.161"
+        ]
+      ],
+      "ShellMassCollapse": [
+        [
+          "1.000",
+          "0.161"
+        ]
+      ],
+      "PrismBeamSustain": [
+        [
+          "0.760",
+          "0.161"
+        ]
+      ],
+      "PrismBeamFire": [
+        [
+          "0.560",
+          "0.161"
+        ],
+        [
+          "0.760",
+          "0.161"
+        ],
+        [
+          "0.880",
+          "0.161"
+        ]
+      ],
+      "PrismBeamCharge": [
+        [
+          "0.760",
+          "0.161"
+        ]
+      ],
+      "CrushPressure": [
+        [
+          "0.880",
+          "0.161"
+        ]
+      ],
+      "CrushCataclysm": [
+        [
+          "1.000",
+          "0.161"
+        ]
+      ]
+    }
+  },
+  "ghost_samurai": {
+    "fight_events": 0,
+    "observed_exception": "IndexOutOfRangeException at Player.GetModPlayer<T>(T), called by GhostSamuraiContainmentSystem.OnWorldUnload (GhostSamuraiContainmentPlayer.cs:108). Followed by tML unload-error warning.",
+    "log": "server.log",
+    "time": "01:12:35.943",
+    "unload_exception_line": 1162,
+    "tml_error_line": 1174,
+    "interpretation": "The unconditional GetModPlayer lookup across unused/uninitialized slots is unsafe. This capture does not demonstrate a Ghost Samurai end-flag or re-summon failure. Owning task must fix/verify; this task documents only."
+  },
+  "other_errors": [
+    {
+      "log": "client.log",
+      "event": "Local server startup connection refused; later gameplay recorded."
+    },
+    {
+      "log": "server2.log",
+      "event": "EndOfStreamException in SubworldLibrary.SubworldSystem.LoadIntoSubworld/TagIO during shutdown; not attributed to Convergence or proven save corruption."
+    }
+  ],
+  "limits": [
+    "DPS is authority net HP loss per vulnerable window, not theoretical equipment DPS or whole-fight DPS.",
+    "RaidDamage totals are logged damage requests, not reconstructed player HP lost after every shield/heal.",
+    "No revival attempts appear; cannot establish recovery regression coverage.",
+    "AudioCue acceptance confirms instrumented cue submission, not all game sounds, audible loudness or subjective quality.",
+    "Two runs with different rosters and phase coverage do not justify HP rebalance in this presentation-only task."
+  ]
+}

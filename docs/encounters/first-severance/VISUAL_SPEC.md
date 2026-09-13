@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.visual_mvp
 aliases:
@@ -88,6 +88,8 @@ API evidence, accessed 2026-09-13: official [Luminance](https://github.com/Lucil
 
 ## Stack and Spread verdicts
 
+**World-space area material:** `FirstSeveranceAttackAccents.Marker` submits Stack and Spread to the original `MechanicRing` material through Luminance's managed renderer. Use a thin pearl boundary, muted teal (Stack) / plum-rose (Spread), subtle inward energy currents, and a soft dark underlay that remains readable over bright terrain. No flat disk, heavy brackets, center diamonds or second contracting ring. The exact accepted radius stays stationary; the countdown travels in brightness along that same boundary. Stack alone retains four restrained inward arrows outside it. Reduced Effects lowers glints/current detail, not the true perimeter. The accepted verdict shards/rays remain separate and unchanged.
+
 **Raid circle policy:** only player Spread-area circles and the Stack acceptance circle may use circular UI/reticles. Boss casting (including pursuit volleys), Pylon pressure, transformation/capture, bullet charging and recovery cues use material fractures, directional light or existing status text; no circular HUD ornaments. Physical sphere/joint surfaces are not HUD circles. This does not remove the deliberately authored weapon/minion magic circles or alter Oni presentation.
 
 **Stack:** one true acceptance circle with inward guidance; no outer false circle. Around each standing player, large faceted shell splinters appear in irregular hard beats. Their independent stick/slip vibration and branching cold-white arcs build friction without flat lightning sheets hiding the texture or player. On failure they rapidly contract toward the authority-sampled recipients, fracture and scatter; on success they lose tension without contracting and tumble away. Use accepted high-resolution shell art and bounded disposable masks.
@@ -105,6 +107,8 @@ Intro, phase-transition letterboxes, Victory/Defeat and the Ready button also co
 [FieldMaskLayout](../../../Client/Encounters/FirstSeverance/FirstSeveranceFieldMaskLayout.cs) owns pure projection/partition math; [PrototypePresentation](../../../Client/Encounters/FirstSeverance/FirstSeverancePrototypePresentation.cs) owns the world capture/interface composition. Tests cannot replace a peer's actual 107% UI/zoom observation.
 
 ## Scene, accessibility and ownership
+
+**Combat-start title:** show names during the late intake/arrival, with a readable full-opacity hold instead of multiplying a late fade-in by the whole intro's fade-out. `FirstSeverancePresentationTiming` owns the final 210-tick title window with 24-tick arrival/release (162 ticks fully visible in the current intro). This is a client-only envelope; deployment/Ready, capture choreography, combat start ticks and the physical-viewport coordinate contract do not change. Do not add a second title timer or alter user UI flags.
 
 The existing cathedral is a depth anchor, not a static full-screen replacement: independent parallax/breathing, moving mist layers, uneven abandoned puppet strings and phase tension sit behind terrain/players/forecasts. Scenery must not overpower actionable cues or mutate the world's biome/weather/time.
 
