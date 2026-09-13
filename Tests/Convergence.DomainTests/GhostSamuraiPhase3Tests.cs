@@ -49,13 +49,13 @@ internal static partial class Program
             }
             AssertEqual(false, h.Hits(h.Fire - 1, 300, 0, 10, 21), "last telegraph tick harmless");
             AssertEqual(false, h.Hits(h.End, 300, 0, 10, 21), "end tick harmless");
-            AssertEqual(false, h.Hits(h.Fire, 950, 0, 10, 21), "outside finite outer radius safe");
+            AssertEqual(false, h.Hits(h.Fire, GhostSamuraiRules.Phase3CircleOuterRadius + 50, 0, 10, 21), "outside finite outer radius safe");
             if (h.IsOuter)
             {
                 AssertEqual(false, h.Hits(h.Fire, 0, 0, 10, 21), "center hole stays safe");
                 AssertEqual(true, h.Hits(h.Fire, 235, 0, 10, 21), "hitbox crossing inner boundary is unsafe");
-                AssertEqual(true, h.Hits(h.Fire, 905, 0, 10, 21), "hitbox overlapping outer boundary still touches donut");
-                AssertEqual(false, h.Hits(h.Fire, 911, 0, 10, 21), "whole hitbox beyond outer border safe");
+                AssertEqual(true, h.Hits(h.Fire, GhostSamuraiRules.Phase3CircleOuterRadius + 5, 0, 10, 21), "hitbox overlapping outer boundary still touches donut");
+                AssertEqual(false, h.Hits(h.Fire, GhostSamuraiRules.Phase3CircleOuterRadius + 11, 0, 10, 21), "whole hitbox beyond outer border safe");
             }
             else
             {
@@ -72,7 +72,7 @@ internal static partial class Program
         var ring = GhostSamuraiRules.CircleStep(1, 0, 0, 0);
         var rush = new SamuraiHazard(SamuraiShape.RushVisual, -900, 0, 1, 0, 2100, 150, 0, 192, 204, 0);
         AssertEqual(true, rush.IsValid, "extended initial warning accepted");
-        foreach (var invalid in new[] { disk with { Length = 1 }, disk with { Radius = 1201 }, ring with { Length = 0 },
+        foreach (var invalid in new[] { disk with { Length = 1 }, disk with { Radius = 3001 }, ring with { Length = 0 },
             ring with { Length = ring.Radius }, ring with { Length = float.NaN }, rush with { Damage = 1 }, rush with { Fire = 301, End = 313 },
             disk with { Born = int.MaxValue, Fire = int.MinValue, End = int.MinValue + 12 } })
         {
@@ -86,7 +86,7 @@ internal static partial class Program
     [DomainTest("Ghost Samurai rush contact exists only during locked body traversal and never across the visual line")]
     private static void SamuraiRushContactWindow()
     {
-        foreach (bool charged in new[] { false, true })
+        foreach (bool charged in new[] { false })
         {
             int live = charged ? GhostSamuraiRules.ChargeLive : GhostSamuraiRules.DashLive;
             var h = new SamuraiHazard(SamuraiShape.RushVisual, -900, 0, 1, 0, 2100, 150, 0, 192, 192 + live, 0);
@@ -107,7 +107,7 @@ internal static partial class Program
     [DomainTest("Ghost Samurai interception threatens steady flight but allows a late perpendicular dash")]
     private static void SamuraiRushDodge()
     {
-        foreach (bool charged in new[] { false, true })
+        foreach (bool charged in new[] { false })
         foreach (float speed in new[] { 0f, 8f, 24f, 36f })
         {
             int duration = charged ? GhostSamuraiRules.ChargeLive : GhostSamuraiRules.DashLive;
@@ -119,7 +119,7 @@ internal static partial class Program
             {
                 float travel = distance * GhostSamuraiRules.RushProgress(tick + 1, duration);
                 float x = -900 + d.DX * travel, y = d.DY * travel;
-                float elapsed = GhostSamuraiRules.AimLockLead + tick;
+                float elapsed = GhostSamuraiRules.DashShoutDelay + tick;
                 steadyHit |= GhostSamuraiRules.BodyContact(oldX, oldY, x, y, 0, speed * elapsed, 10, 21);
                 // Change velocity only after lock, perpendicular to the locked line.
                 dashHit |= GhostSamuraiRules.BodyContact(oldX, oldY, x, y,

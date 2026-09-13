@@ -1,0 +1,53 @@
+{
+  "feature": "Ghost Samurai slash waves, slash/shout cues and summon-centered field",
+  "version": "0.2.70",
+  "protocol": 34,
+  "base_commit": "6f4a3a69cbd37e093e9ff7e9b11590273188030f",
+  "branch": "feat/ghost-samurai-wave-audio",
+  "source_sha256": "0147d017befb8b200b697c2bdd45857f50d08e43f82484eb76a12f2009607a34",
+  "artifact": {
+    "bytes": 54736290,
+    "sha256": "d4691d1a04e04523a1b418bd88632bacc29e30edeba69527747ab1de28bcab3a"
+  },
+  "build": {
+    "mode": "native isolated profile",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "shader_exports": "passed",
+    "source_changed": false
+  },
+  "verification": {
+    "focused_domain": {
+      "passed": 27,
+      "failed": 0
+    },
+    "global_type_registration": "2 passed using installed tML ValidateType",
+    "summon_type": "Convergence/GhostSamuraiSummon retained",
+    "offline_preview": "12 panels; compiled production circle/wave renderers with GDI stroke adapter, final field clipping inspected; not FNA/game rendering",
+    "static_domain_codec": "passed: 663 files, 67 docs, 10 YAML; 194 domain tests; protocol34 324 round-trips and 50 malformed rejections"
+  },
+  "runtime": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "Mod load and summon item",
+      "fixed summoner-centered field, all four edges and teleport correction",
+      "death, disconnect/rejoin, slot reuse and end-of-fight release",
+      "native accessory immunity against travelling waves",
+      "slash deduplication and shout to dash reaction time",
+      "grid to captured-reference arrival, 60 ticks",
+      "Phase3 out/in/out/in and clipping at field border",
+      "multiplayer late snapshots and native wave hit synchronization",
+      "frame time and Reduced Effects"
+    ]
+  },
+  "shared_install": "pending authorized main integration and canonical native build",
+  "notes": [
+    "No GUI, game or server play session started.",
+    "Server owns field admission, geometry, attack schedule and cleanup; native wave local-player hit resolution is the explicit ADR-0023 exception.",
+    "Normal field2560x1120px, outer circle2800px, inner240px.",
+    "Wave24px/tick with64x480px OBB; shout delay18 ticks.",
+    "No personal translations, saves, Mod lists, build products or dependency binaries committed.",
+    "Build source hash precedes documentation-only evidence/catalog updates."
+  ]
+}

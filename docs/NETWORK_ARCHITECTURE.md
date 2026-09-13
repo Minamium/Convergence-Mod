@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v32
+## Current development protocol v34
+
+Ghost Samurai appends SlashWave to its bounded native ExtraAI shape enum, bounds finite circle radii to3000px, and validates the dash lock against an18-tick shout gap. Existing shape/packet IDs are not renumbered and the native boss snapshot appends16 bytes for the fixed summon-centered field (X/Y center, half-width/height). It rejects invalid or changed same-Fight bounds. Other payload layouts are unchanged. Matching peers are required. The wave uses the explicitly requested native local-player damage/dodge path in [ADR-0023](adr/0023-ghost-samurai-native-wave-damage.md); this is a narrow exception to encounter-owned player-hit resolution, while server spawning, locked geometry, schedule and exact-Fight cleanup are retained. No new client hit request or global feature switch is introduced. [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns tuning and [Status](STATUS.md) owns evidence.
+
+## Preceding development protocol v32
 
 Packet IDs, layouts and request bounds are unchanged from v31. The version advances because both peers now derive beam length/width during ignition and each lattice line's reveal/fire/end offset from the same descriptor. Older peers would draw full-width instant hazards against the new narrow growing authority geometry, so they must be rejected rather than silently mixed. [Beam ignition](encounters/first-severance/ENCOUNTER_SPEC.md#beam-ignition-and-lattice-order) owns the timing/geometry rules. No client RNG, target requests or per-line actors/packets are added; Fight ownership, hit ledgers and cleanup remain unchanged. The existing Ghost Samurai payload/behavior is preserved; its [feature spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns the preceding v31 addition.
 

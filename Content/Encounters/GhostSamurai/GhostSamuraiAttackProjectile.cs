@@ -8,8 +8,9 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.GhostSamurai;
 
-// Network entity only. Harmless forecast and damaging interval are distinct rules;
-// all collisions are resolved by GhostSamuraiRuntime on the authority, exactly once.
+// Server-spawned network entity. Only SlashWave uses native Projectile damage,
+// including the local player's standard immunity/dodge hooks. Other shapes retain
+// the runtime's authority-owned hit path; no shape takes both paths.
 public sealed class GhostSamuraiAttackProjectile : ModProjectile
 {
     internal Guid Fight;
@@ -19,7 +20,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     internal SamuraiSlashAim SlashAim;
     internal SamuraiHazard DisplayHazard => Hazard.HasAim ? SlashAim.Geometry(Hazard) : Hazard;
     public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.DeathLaser;
-    public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 3000;
+    public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = (int)GhostSamuraiRules.Phase3CircleOuterRadius + 1000;
     public override void SetDefaults()
     {
         Projectile.width = Projectile.height = 30;
@@ -40,7 +41,22 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
             else if (Hazard.HasAim) SlashAim = SamuraiSlashAim.Spawn(Hazard, owned.AimLockTick);
         }
     }
-    public override bool? CanDamage() => false;
+    // The default -1 cooldown slot preserves ordinary player immunity and all
+    // vanilla / ModPlayer dodge hooks. No forced Hurt or dodge suppression here.
+    public override bool? CanDamage() => Hazard.Shape == SamuraiShape.SlashWave && SlashAim.Locked
+        && TryGetAge(out float age) && Hazard.Live(NativeAge(age)) ? null : false;
+    public override bool? CanHitNPC(NPC target) => false;
+    public override bool CanHitPlayer(Player target) => TryGetAge(out _)
+        && Main.npc[BossSlot].ModNPC is GhostSamuraiBoss owner
+        && target.GetModPlayer<GhostSamuraiContainmentPlayer>().BoundTo(owner);
+    public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
+        => Hazard.Shape == SamuraiShape.SlashWave && SlashAim.Locked && TryGetAge(out float age)
+            && SamuraiWaveRules.Geometry(DisplayHazard, NativeAge(age)).Hits(NativeAge(age),
+                targetHitbox.Center.X, targetHitbox.Center.Y, targetHitbox.Width * .5f, targetHitbox.Height * .5f);
+
+    // Native projectiles update before PostUpdateWorld advances the SP/server
+    // fight clock. MP snapshots already extrapolate into this update's age.
+    private static float NativeAge(float age) => age + (Main.netMode == NetmodeID.MultiplayerClient ? 0 : 1);
     internal bool TryGetAge(out float age)
     {
         age = 0;
@@ -53,14 +69,26 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     {
         if (!TryGetAge(out float age))
         {
+            Projectile.hostile = false;
             if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
             return; // Late NPC synchronization may still arrive on the client.
         }
-        Projectile.Center = VisualCenter(age);
+        Projectile.hostile = Hazard.Shape == SamuraiShape.SlashWave && SlashAim.Locked && Hazard.Live(NativeAge(age));
+        Projectile.damage = Hazard.Shape == SamuraiShape.SlashWave ? Hazard.Damage : 0;
+        Projectile.Center = VisualCenter(Hazard.Shape == SamuraiShape.SlashWave ? NativeAge(age) : age);
+        if (Projectile.hostile) Projectile.velocity = new Vector2(DisplayHazard.DX, DisplayHazard.DY) * SamuraiWaveRules.ChargedSlashWaveSpeed;
         if (Main.netMode != NetmodeID.MultiplayerClient && age >= Hazard.End) Projectile.Kill();
     }
-    internal Vector2 VisualCenter(float age) => Hazard.Shape != SamuraiShape.Wisp ? new(DisplayHazard.X, DisplayHazard.Y)
-        : Main.netMode == NetmodeID.MultiplayerClient ? new(WispMotion.VisualX(age), WispMotion.VisualY(age)) : new(WispMotion.X, WispMotion.Y);
+    internal Vector2 VisualCenter(float age)
+    {
+        if (Hazard.Shape == SamuraiShape.SlashWave)
+        {
+            var h = DisplayHazard;
+            return new Vector2(h.X, h.Y) + new Vector2(h.DX, h.DY) * Math.Max(0, age - h.Fire) * SamuraiWaveRules.ChargedSlashWaveSpeed;
+        }
+        return Hazard.Shape != SamuraiShape.Wisp ? new(DisplayHazard.X, DisplayHazard.Y)
+            : Main.netMode == NetmodeID.MultiplayerClient ? new(WispMotion.VisualX(age), WispMotion.VisualY(age)) : new(WispMotion.X, WispMotion.Y);
+    }
 
     internal static Vector2 RushCenter(SamuraiHazard h, float age)
         => new Vector2(h.X, h.Y) + new Vector2(h.DX, h.DY) * h.Length

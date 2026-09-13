@@ -14,11 +14,13 @@ public sealed class GhostSamuraiBoss : ModNPC
 {
     internal GhostSamuraiRuntime? Runtime;
     internal Guid Fight;
+    internal SamuraiArenaBounds Arena;
     internal int Age, AttackTimer, TransitionRemaining;
     internal SamuraiPhase Phase = SamuraiPhase.Phase1;
     internal SamuraiAttack Attack;
     internal SamuraiBeat Beat;
     private ulong receivedAt;
+    internal bool ProjectionFresh => Main.netMode != NetmodeID.MultiplayerClient || Main.GameUpdateCount - receivedAt <= 45;
     internal float VisualAge => Main.netMode == NetmodeID.MultiplayerClient
         ? Age + (float)Math.Min(30UL, Main.GameUpdateCount - receivedAt) : Age;
     internal float VisualAttackTimer => AttackTimer + (VisualAge - Age);
@@ -47,7 +49,7 @@ public sealed class GhostSamuraiBoss : ModNPC
     {
         if (source is GhostSamuraiActorSource owned)
         {
-            Runtime = owned.Runtime; Fight = owned.Fight; NPC.target = owned.Target;
+            Runtime = owned.Runtime; Fight = owned.Fight; NPC.target = owned.Target; Arena = owned.Arena;
         }
     }
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
@@ -87,14 +89,16 @@ public sealed class GhostSamuraiBoss : ModNPC
     public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
     public override void SendExtraAI(BinaryWriter writer)
     {
-        new SamuraiActorSnapshot(Fight, Age, Phase, Attack, Beat, AttackTimer, TransitionRemaining, NPC.lifeMax).Write(writer);
+        new SamuraiActorSnapshot(Fight, Age, Phase, Attack, Beat, AttackTimer, TransitionRemaining, NPC.lifeMax, Arena).Write(writer);
     }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         SamuraiActorSnapshot state = SamuraiActorSnapshot.Read(reader);
+        if (Main.netMode == NetmodeID.Server || Fight != Guid.Empty && Arena != state.Arena) return;
         if (!state.CanReplace(Fight, Age)) return;
         Fight = state.Fight; Age = state.Age; Phase = state.Phase; Attack = state.Attack; Beat = state.Beat;
         AttackTimer = state.AttackTimer; TransitionRemaining = state.TransitionRemaining; NPC.lifeMax = state.MaximumLife;
+        Arena = state.Arena;
         receivedAt = Main.GameUpdateCount;
     }
 }

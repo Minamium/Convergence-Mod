@@ -17,6 +17,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
 {
     private readonly FightId fight;
     private readonly int summoner;
+    private readonly SamuraiArenaBounds arena;
     private readonly List<GhostSamuraiAttackProjectile> hazards = new();
     private readonly int[] nextHit = new int[256];
     private GhostSamuraiBoss? actor;
@@ -29,10 +30,11 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
     private Vector2 contactFrom;
     private int contactDamage;
     private int dashSide;
-    private int wispOpportunity;
+    private int wispOpportunity, lastWaveEnd;
     private GhostSamuraiAttackProjectile? aimedSlash;
 
-    internal GhostSamuraiRuntime(FightId fight, int summoner) { this.fight = fight; this.summoner = summoner; }
+    internal GhostSamuraiRuntime(FightId fight, int summoner, SamuraiArenaBounds arena)
+    { this.fight = fight; this.summoner = summoner; this.arena = arena; }
     internal bool Matches(GhostSamuraiBoss npc) => !cleaned && ReferenceEquals(actor, npc) && npc.Fight == fight.Value;
     internal void RecordDeath(GhostSamuraiBoss npc) { if (Matches(npc)) killed = true; }
 
@@ -43,10 +45,11 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         {
             Player p = Main.player[summoner];
             if (!p.active || p.dead) return End(EncounterEndReason.Defeat);
-            int slot = NPC.NewNPC(new GhostSamuraiActorSource(this, fight.Value, summoner), (int)p.Center.X, (int)p.Center.Y - 280,
+            int slot = NPC.NewNPC(new GhostSamuraiActorSource(this, fight.Value, summoner, arena), (int)p.Center.X, (int)p.Center.Y - 280,
                 ModContent.NPCType<GhostSamuraiBoss>());
             if (slot < 0 || slot >= Main.maxNPCs) return End(EncounterEndReason.EncounterActorMissing);
             actor = (GhostSamuraiBoss)Main.npc[slot].ModNPC;
+            RefreshField();
             actor.NPC.netUpdate = true;
             return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Preparing);
         }
@@ -61,16 +64,28 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
 
         NPC npc = actor.NPC;
         age++;
+        RefreshField();
         contactDamage = 0; // No body damage survives a tick, interruption or recovery.
         // Native projectile slots can be reused before this authority tick. An
         // active replacement must not keep an old ModProjectile in our budget.
         hazards.RemoveAll(p => !p.Projectile.active || p.Projectile.ModProjectile != p
             || p.Fight != fight.Value || age >= p.Hazard.End);
         if (npc.target < 0 || npc.target >= Main.maxPlayers || !Main.player[npc.target].active || Main.player[npc.target].dead
-            || Vector2.DistanceSquared(npc.Center, Main.player[npc.target].Center) > GhostSamuraiRules.AbandonDistance * GhostSamuraiRules.AbandonDistance)
-            npc.TargetClosest(false);
+            || !Main.player[npc.target].GetModPlayer<GhostSamuraiContainmentPlayer>().BoundTo(actor))
+        {
+            float nearest = float.MaxValue;
+            int previousTarget = npc.target;
+            npc.target = Main.maxPlayers;
+            foreach (Player candidate in Main.ActivePlayers)
+                if (candidate.GetModPlayer<GhostSamuraiContainmentPlayer>().BoundTo(actor))
+                {
+                    float distance = Vector2.DistanceSquared(npc.Center, candidate.Center);
+                    if (distance < nearest) { nearest = distance; npc.target = candidate.whoAmI; }
+                }
+            if (npc.target != previousTarget) npc.netUpdate = true;
+        }
         Player target = Main.player[Math.Clamp(npc.target, 0, Main.maxPlayers - 1)];
-        if (!target.active || target.dead || Vector2.Distance(npc.Center, target.Center) > GhostSamuraiRules.AbandonDistance)
+        if (!target.active || target.dead || !target.GetModPlayer<GhostSamuraiContainmentPlayer>().BoundTo(actor))
         {
             if (absent++ == 0) ClearHazards();
             npc.velocity = Vector2.Lerp(npc.velocity, new Vector2(0, -6), .04f);
@@ -117,6 +132,18 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         actor.TransitionRemaining = transition;
         // Snapshots also re-anchor client-only clocks during long attacks / late join.
         if (age % 15 == 0) npc.netUpdate = true;
+    }
+
+    private void RefreshField()
+    {
+        if (actor is null) return;
+        foreach (Player p in Main.ActivePlayers)
+        {
+            var containment = p.GetModPlayer<GhostSamuraiContainmentPlayer>();
+            if (!p.dead && !p.ghost && (containment.BoundTo(actor) || arena.Contains(p.Center.X, p.Center.Y)))
+                containment.Refresh(actor);
+            else containment.Clear(fight.Value);
+        }
     }
 
     private void UpdateAttack(NPC npc, Player target)
@@ -174,7 +201,8 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
 
     private void DoChargeSequence(NPC npc, Player target, int sequenceTick, bool afterGrid)
     {
-        if (sequenceTick >= GhostSamuraiRules.ChargeDuration(phase, afterGrid)) { FinishAttack(); return; }
+        if (sequenceTick >= GhostSamuraiRules.ChargeDuration(phase, afterGrid)
+            && age >= lastWaveEnd + GhostSamuraiRules.RecoveryTime) { FinishAttack(); return; }
         npc.velocity *= .86f;
         int pass = GhostSamuraiRules.ChargePass(sequenceTick, phase, afterGrid);
         int local = sequenceTick - GhostSamuraiRules.ChargeStart(pass, afterGrid);
@@ -182,16 +210,15 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         beat = local < warning ? SamuraiBeat.Telegraph
             : local < warning + GhostSamuraiRules.ChargeLive ? SamuraiBeat.Strike : SamuraiBeat.Recovery;
         int side = pass % 2 == 0 ? dashSide : -dashSide;
-        if (local == 0)
+        if (local == 0 && !(afterGrid && pass == 0))
         {
-            aimedSlash = AddRush(npc, target, GhostSamuraiRules.ChargeDistance, GhostSamuraiRules.ChargeHalfWidth,
-                warning, GhostSamuraiRules.ChargeLive);
+            aimedSlash = AddWave(npc, target, warning, false);
             if (phase != SamuraiPhase.Phase1 && pass == 0 && !afterGrid)
                 AddWispBursts(npc.Center, age + warning + GhostSamuraiRules.WispDelay, 5);
             npc.netUpdate = true;
         }
-        if (local < warning) TrackRush(npc, target, side, GhostSamuraiRules.ChargeStandOff);
-        else if (local < warning + GhostSamuraiRules.ChargeLive) MoveRush(npc, GhostSamuraiRules.ChargeDamage);
+        if (local < warning) TrackWave(npc, target, side);
+        else if (local < warning + GhostSamuraiRules.ChargeLive) npc.velocity = Vector2.Zero;
         else
         {
             // Reposition in the harmless gap so the short later warnings can aim
@@ -204,30 +231,52 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
 
     private void DoGridSlash(NPC npc, Player target)
     {
-        if (timer >= GhostSamuraiRules.GridFollowStart)
+        if (timer == 0)
         {
-            DoChargeSequence(npc, target, timer - GhostSamuraiRules.GridFollowStart, true);
-            return;
-        }
-        npc.velocity *= .9f;
-        if (timer < GhostSamuraiRules.GridPrelude) { beat = SamuraiBeat.Approach; return; }
-        int local = timer - GhostSamuraiRules.GridPrelude;
-        beat = local < GhostSamuraiRules.GridWarning ? SamuraiBeat.Telegraph
-            : local < GhostSamuraiRules.GridWarning + GhostSamuraiRules.GridLive ? SamuraiBeat.Strike : SamuraiBeat.Recovery;
-        if (local == 0)
-        {
+            // Capture one immutable reference, including the player's full hitbox.
+            // Both warnings may overlap. Grid fire is calculated from the wave's
+            // first discrete contact, not from its release or center crossing.
+            npc.velocity = Vector2.Zero;
+            aimedSlash = AddWave(npc, target, GhostSamuraiRules.GridFollowWarning, true);
+            int flight = SamuraiWaveRules.FlightTicks(aimedSlash.Hazard, target.Center.X, target.Center.Y, target.width * .5f, target.height * .5f);
+            int gridFire = SamuraiWaveRules.GridFire(aimedSlash.Hazard, flight);
+            int gridBorn = gridFire - GhostSamuraiRules.GridWarning;
             float halfWidth = GhostSamuraiRules.GridWidth / 2, halfHeight = GhostSamuraiRules.GridHeight / 2;
             // Keep full cells available near world borders. This never changes tiles.
             Vector2 center = new(Math.Clamp(target.Center.X, halfWidth + 160, Main.maxTilesX * 16 - halfWidth - 160),
                 Math.Clamp(target.Center.Y, halfHeight + 160, Main.maxTilesY * 16 - halfHeight - 160));
             for (int i = 0; i < GhostSamuraiRules.GridVerticalLineCount; i++)
-                Spawn(GhostSamuraiRules.GridLine(true, i, center.X, center.Y, age));
+                Spawn(GhostSamuraiRules.GridLine(true, i, center.X, center.Y, gridBorn));
             for (int i = 0; i < GhostSamuraiRules.GridHorizontalLineCount; i++)
-                Spawn(GhostSamuraiRules.GridLine(false, i, center.X, center.Y, age));
+                Spawn(GhostSamuraiRules.GridLine(false, i, center.X, center.Y, gridBorn));
             // Expanding the grid must not move its follow-up wisps out of reach.
             if (phase != SamuraiPhase.Phase1) AddWispBursts(npc.Center,
-                age + GhostSamuraiRules.GridWarning + GhostSamuraiRules.WispDelay, 5);
+                gridFire + GhostSamuraiRules.WispDelay, 5);
         }
+        DoChargeSequence(npc, target, timer, true);
+    }
+
+    private GhostSamuraiAttackProjectile AddWave(NPC npc, Player target, int warning, bool fixedReference)
+    {
+        Vector2 d = (target.Center - npc.Center).SafeNormalize(Vector2.UnitX);
+        var h = new SamuraiHazard(SamuraiShape.SlashWave, npc.Center.X, npc.Center.Y, d.X, d.Y,
+            SamuraiWaveRules.ChargedSlashWaveWidth, SamuraiWaveRules.ChargedSlashWaveHeight / 2,
+            age, age + warning, age + warning + SamuraiWaveRules.WaveLife, GhostSamuraiRules.ChargeDamage);
+        if (fixedReference)
+        {
+            int flight = SamuraiWaveRules.FlightTicks(h, target.Center.X, target.Center.Y, target.width * .5f, target.height * .5f);
+            h = h with { End = h.Fire + Math.Max(SamuraiWaveRules.WaveLife, flight + 24) };
+        }
+        lastWaveEnd = Math.Max(lastWaveEnd, h.End);
+        return Spawn(h, fixedReference ? h.Born : h.Fire - GhostSamuraiRules.AimLockLead);
+    }
+
+    private void TrackWave(NPC npc, Player target, int side)
+    {
+        if (aimedSlash is null || aimedSlash.SlashAim.Locked) { npc.velocity = Vector2.Zero; return; }
+        Hover(npc, target.Center + new Vector2(side * GhostSamuraiRules.ChargeStandOff, 0), GhostSamuraiRules.DashRetreatSpeed);
+        aimedSlash.Aim(age, npc.Center, (target.Center - npc.Center).SafeNormalize(Vector2.UnitX));
+        if (aimedSlash.SlashAim.Locked) { npc.velocity = Vector2.Zero; npc.netUpdate = true; }
     }
 
     private void DoPhase2DashSlash(NPC npc, Player target)
@@ -265,7 +314,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
     {
         Vector2 d = RushDirection(npc, target, distance, live);
         return Spawn(new(SamuraiShape.RushVisual, npc.Center.X, npc.Center.Y, d.X, d.Y, distance, visualWidth,
-            age, age + warning, age + warning + live, 0), age + warning - GhostSamuraiRules.AimLockLead);
+            age, age + warning, age + warning + live, 0), age + warning - GhostSamuraiRules.DashShoutDelay);
     }
 
     private void TrackRush(NPC npc, Player target, int side, float standOff)
@@ -365,7 +414,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         if (hazard.HasAim && !SamuraiSlashAim.Spawn(hazard, lockAt).IsValid(hazard))
             throw new InvalidOperationException("ghost_samurai.aim_invalid");
         int slot = Projectile.NewProjectile(new GhostSamuraiAttackSource(fight.Value, actor.NPC.whoAmI, hazard, lockAt), new Vector2(hazard.X, hazard.Y), Vector2.Zero,
-            ModContent.ProjectileType<GhostSamuraiAttackProjectile>(), 0, 0, Main.myPlayer);
+            ModContent.ProjectileType<GhostSamuraiAttackProjectile>(), hazard.Shape == SamuraiShape.SlashWave ? hazard.Damage : 0, 0, Main.myPlayer);
         if (slot < 0 || slot >= Main.maxProjectiles) throw new InvalidOperationException("ghost_samurai.projectile_capacity");
         var p = (GhostSamuraiAttackProjectile)Main.projectile[slot].ModProjectile;
         hazards.Add(p); // Register before any further mutation/synchronization.
@@ -378,13 +427,16 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
     {
         foreach (Player p in Main.ActivePlayers)
         {
+            if (actor is null || !p.GetModPlayer<GhostSamuraiContainmentPlayer>().BoundTo(actor)) continue;
             if (p.dead || p.ghost || p.immune || p.creativeGodMode || age < nextHit[p.whoAmI]) continue;
             int damage = contactDamage > 0 && GhostSamuraiRules.BodyContact(contactFrom.X, contactFrom.Y, npc.Center.X, npc.Center.Y,
                 p.Center.X, p.Center.Y, p.width * .5f, p.height * .5f) ? contactDamage : 0;
             foreach (var hazard in hazards)
             {
                 if (damage > 0) break;
-                if (!hazard.Projectile.active || !hazard.Hits(age, p)) continue;
+                // Waves exclusively use native Projectile.Damage / player dodge
+                // hooks. Never apply the authority's manual Hurt path a second time.
+                if (hazard.Hazard.Shape == SamuraiShape.SlashWave || !hazard.Projectile.active || !hazard.Hits(age, p)) continue;
                 damage = hazard.Hazard.Damage;
             }
             if (damage == 0) continue;
@@ -402,6 +454,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         attack = SamuraiAttack.Idle; timer = 0; beat = SamuraiBeat.Recovery;
         aimedSlash = null;
         contactDamage = 0;
+        lastWaveEnd = 0;
         if (actor is not null) actor.NPC.netUpdate = true;
     }
     private static EncounterRuntimeUpdate End(EncounterEndReason reason) => EncounterRuntimeUpdate.End(GhostSamuraiTermination.End(reason));
@@ -414,11 +467,13 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         hazards.Clear();
         aimedSlash = null;
         contactDamage = 0;
+        lastWaveEnd = 0;
     }
     public void Cleanup(in EncounterCleanupContext context)
     {
         if (cleaned || context.FightId != fight) return;
         ClearHazards();
+        foreach (Player p in Main.player) p?.GetModPlayer<GhostSamuraiContainmentPlayer>().Clear(fight.Value);
         if (actor is not null && actor.NPC.active && actor.NPC.ModNPC == actor && actor.Fight == fight.Value)
         {
             actor.NPC.active = false;

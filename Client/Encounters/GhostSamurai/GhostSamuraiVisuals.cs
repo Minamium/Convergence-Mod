@@ -3,9 +3,7 @@ using Convergence.Content.Encounters.GhostSamurai;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.GhostSamurai;
@@ -70,12 +68,7 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             case SamuraiAttack.ChargedSlash:
                 return GhostSamuraiRules.ChargePose(t - GhostSamuraiRules.ChargeAimTime, boss.Phase, false);
             case SamuraiAttack.GridSlash:
-                if (t >= GhostSamuraiRules.GridFollowStart)
-                    return GhostSamuraiRules.ChargePose(t - GhostSamuraiRules.GridFollowStart, boss.Phase, true);
-                // Quick double unsheathing in the prelude, then a held pose.
-                if (t < GhostSamuraiRules.GridPrelude) return MathF.Sin(t / GhostSamuraiRules.GridPrelude * MathHelper.TwoPi * 2) * .7f;
-                t -= GhostSamuraiRules.GridPrelude;
-                warning = GhostSamuraiRules.GridWarning; live = GhostSamuraiRules.GridLive; break;
+                return GhostSamuraiRules.ChargePose(t, boss.Phase, true);
             case SamuraiAttack.Phase2DashSlash:
                 t = t % GhostSamuraiRules.DashCadence - GhostSamuraiRules.DashApproach;
                 warning = GhostSamuraiRules.DashWarning; live = GhostSamuraiRules.DashLive; break;
@@ -115,32 +108,7 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
 
 internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
 {
-    public override bool InstancePerEntity => true;
-    private int lastAge = -1;
     public override bool AppliesToEntity(Projectile entity, bool lateInstantiation) => entity.ModProjectile is GhostSamuraiAttackProjectile;
-
-    public override void PostAI(Projectile projectile)
-    {
-        if (Main.dedServ || projectile.ModProjectile is not GhostSamuraiAttackProjectile p || !p.TryGetAge(out float age)) return;
-        int tick = (int)age;
-        var h = p.Hazard;
-        // Do not replay missed historical cues after joining/snapshot catch-up.
-        if (lastAge >= 0 && tick - lastAge <= 4)
-        {
-            if (h.Shape == SamuraiShape.RushVisual && h.Radius == GhostSamuraiRules.ChargeHalfWidth)
-                for (int warning = 0; warning < 3; warning++)
-                {
-                    int at = h.Born + warning * (h.Fire - h.Born) / 3;
-                    if (lastAge < at && tick >= at) SoundEngine.PlaySound(SoundID.Item4 with { Volume = .7f, Pitch = warning * .15f }, projectile.Center);
-                }
-            if (lastAge < h.Fire && tick >= h.Fire && h.Shape != SamuraiShape.Wisp)
-                SoundEngine.PlaySound((h.IsWind ? SoundID.Item60 : SoundID.Item71) with { Volume = .6f, MaxInstances = 2 }, projectile.Center);
-        }
-        // First warning is the current event, not history, on a fresh charge spawn.
-        if (lastAge < 0 && tick >= h.Born && tick <= h.Born + 3 && h.Shape == SamuraiShape.RushVisual && h.Radius == GhostSamuraiRules.ChargeHalfWidth)
-            SoundEngine.PlaySound(SoundID.Item4 with { Volume = .7f }, projectile.Center);
-        lastAge = tick;
-    }
 
     public override bool PreDraw(Projectile projectile, ref Color lightColor)
     {
@@ -153,8 +121,19 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         Vector2 position = p.VisualCenter(age) - Main.screenPosition;
         bool live = h.Live(age);
         Color color = live ? new Color(186, 247, 255) : new Color(69, 182, 240);
-        if (h.IsCircle) GhostSamuraiCircleVisuals.Draw(batch, h, position, age,
+        Vector2 zoom = Main.GameViewMatrix.Zoom;
+        int viewWidth = (int)MathF.Ceiling(Main.screenWidth / Math.Max(.1f, zoom.X)) + 64;
+        int viewHeight = (int)MathF.Ceiling(Main.screenHeight / Math.Max(.1f, zoom.Y)) + 64;
+        Rectangle viewport = new((Main.screenWidth - viewWidth) / 2, (Main.screenHeight - viewHeight) / 2, viewWidth, viewHeight);
+        if (h.IsCircle && Main.npc[p.BossSlot].ModNPC is GhostSamuraiBoss owner)
+        {
+            var field = owner.Arena;
+            viewport = Rectangle.Intersect(viewport, new Rectangle((int)(field.Left - Main.screenPosition.X),
+                (int)(field.Top - Main.screenPosition.Y), (int)(field.HalfWidth * 2), (int)(field.HalfHeight * 2)));
+        }
+        if (h.IsCircle) GhostSamuraiCircleVisuals.Draw(batch, h, position, age, viewport,
             ModContent.GetInstance<Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig>().ReducedEffects);
+        else if (h.Shape == SamuraiShape.SlashWave) GhostSamuraiWaveVisuals.Draw(batch, h, position, age, p.SlashAim.Locked);
         else if (h.Shape == SamuraiShape.RushVisual) DrawRush(batch, p, position, age);
         else if (h.Shape == SamuraiShape.Wisp)
         {

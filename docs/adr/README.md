@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-13
 source_of_truth_for:
   - architecture.adr_index
 aliases:
@@ -48,3 +48,5 @@ ADRs record decisions that are expensive to reverse: authority, dependency direc
 | [0022](0022-definition-routed-encounter-transport.md) | Accepted; replaces feature-global packet registration/outbox consumption | Definition-routed common transport, shared operation IDs and generic snapshot repair; protocol v17 |
 
 Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark the old record superseded. Current implementation status remains in [`../STATUS.md`](../STATUS.md), not in this index.
+
+| [0023](0023-ghost-samurai-native-wave-damage.md) | Accepted; narrowly supersedes0002 for Ghost Samurai SlashWave player hits | Native local-player immunity/dodge hooks; server-owned spawning, geometry, schedule and cleanup; protocol34 |
