@@ -3,6 +3,8 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using Luminance.Assets;
+using Luminance.Core.Graphics;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -15,8 +17,6 @@ internal static class RitualSurfacePass
     private const int Capacity = 196608;
     private static VertexPositionColorTexture[]? vertices;
     private static int used;
-    private static BasicEffect? effect;
-    private static Asset<Texture2D>? feather;
     internal static void Begin() { used = 0; }
     internal static void Ribbon(ReadOnlySpan<Vector2> points, float width, Color color, bool taper = true,
         float startWidth = -1, float openingFraction = 0)
@@ -49,31 +49,36 @@ internal static class RitualSurfacePass
     private static void Add(Vector2 p, Vector2 uv, Color c) => vertices![used++] = new(new Vector3(p, 0), c, uv);
     internal static void Flame(ReadOnlySpan<Vector2> points, float width, Color tint, float opacity, bool darkUnderlay = true)
     {
-        if (darkUnderlay) Ribbon(points, width * 1.16f, new Color(10, 3, 23, 215) * opacity);
+        // One flowing material, without the old black slab and stacked flat cores.
         Ribbon(points, width, new Color(tint.R, tint.G, tint.B, 0) * (opacity * .9f));
-        Ribbon(points, width * .36f, new Color(228, 217, 255, 0) * opacity);
-        Ribbon(points, width * .10f, new Color(255, 252, 246, 0) * opacity);
     }
     internal static void Flush()
     {
         if (Main.dedServ || used == 0) return;
         var device = Main.graphics.GraphicsDevice;
         var blend = device.BlendState; var depth = device.DepthStencilState;
-        var raster = device.RasterizerState; var sampler = device.SamplerStates[0];
+        var raster = device.RasterizerState;
+        var t1 = device.Textures[1]; var t2 = device.Textures[2];
+        var s1 = device.SamplerStates[1]; var s2 = device.SamplerStates[2];
         try
         {
-            effect ??= new BasicEffect(device) { TextureEnabled = true, VertexColorEnabled = true, LightingEnabled = false };
-            feather ??= ModContent.Request<Texture2D>("Convergence/Assets/Textures/Items/RitualArmaments/V2/RibbonFeather");
-            effect.Texture = feather.Value;
-            effect.World = Matrix.Identity; effect.View = Main.GameViewMatrix.TransformationMatrix;
-            effect.Projection = Matrix.CreateOrthographicOffCenter(0, device.Viewport.Width, device.Viewport.Height, 0, -1, 1);
+            var effect = ShaderManager.GetShader("Convergence.ArmamentEnergy");
+            effect.TrySetParameter("uWorldViewProjection", Main.GameViewMatrix.TransformationMatrix *
+                Matrix.CreateOrthographicOffCenter(0, device.Viewport.Width, device.Viewport.Height, 0, -1, 1));
+            effect.TrySetParameter("clock", RitualRenderClock.Time / 60);
+            effect.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
+            effect.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value, 2, SamplerState.LinearWrap);
             device.BlendState = BlendState.AlphaBlend; device.DepthStencilState = DepthStencilState.None;
-            device.RasterizerState = RasterizerState.CullNone; device.SamplerStates[0] = SamplerState.LinearClamp;
-            foreach (var pass in effect.CurrentTechnique.Passes)
-            { pass.Apply(); device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices!, 0, used / 3); }
+            device.RasterizerState = RasterizerState.CullNone;
+            effect.Apply("AutoloadPass");
+            device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices!, 0, used / 3);
         }
         finally
-        { device.BlendState = blend; device.DepthStencilState = depth; device.RasterizerState = raster; device.SamplerStates[0] = sampler; used = 0; }
+        {
+            device.BlendState = blend; device.DepthStencilState = depth; device.RasterizerState = raster;
+            device.Textures[1] = t1; device.Textures[2] = t2;
+            device.SamplerStates[1] = s1; device.SamplerStates[2] = s2; used = 0;
+        }
     }
-    internal static void Dispose() { effect?.Dispose(); effect = null; feather = null; vertices = null; used = 0; }
+    internal static void Dispose() { vertices = null; used = 0; }
 }

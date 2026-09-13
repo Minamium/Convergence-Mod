@@ -106,13 +106,11 @@ internal static class RitualArmamentArt
         Vector2 axis = RitualArmamentItems.Aim(p.velocity, 1), normal = axis.RotatedBy(MathHelper.PiOver2);
         float length = kind == RitualArmamentKind.Ranged ? (strong ? 156 : 90) : (strong ? 116 : 75);
         float life = Math.Min(1, p.timeLeft / (12f * p.MaxUpdates));
-        Glow(b, center, new(strong ? 52 : 30), Light(light, life * .9f));
-        Line(b, center - axis * length, center, new Color(10, 3, 20, 230) * life, strong ? 24 : 13);
-        Line(b, center - axis * length, center + axis * 12, Light(light, life), strong ? 15 : 8);
-        Line(b, center - axis * length * .83f, center + axis * 7, Light(Ivory, life), strong ? 5 : 3);
-        if (strong)
-            for (int side = -1; side <= 1; side += 2)
-                Line(b, center - axis * 54 + normal * side * 19, center - axis * 8, Light(light, life), 4);
+        FirstSeveranceRaidVfx.Orb(b, center, axis * (length / 9), strong ? 17 : 9,
+            age, light, life, true, Reduced);
+        if (kind == RitualArmamentKind.Ranged)
+            FirstSeveranceRaidVfx.Beam(b, center - axis * length, axis, length, strong ? 7 : 4,
+                age, 1, 1, life, light, Reduced, mouth:false, fireAge:0);
     }
     internal static void QueueVerdict(WitnessVerdict v, float age)
     {
@@ -162,6 +160,9 @@ internal static class RitualArmamentArt
         Color color = ColorFor(kind);
         float fade = MathF.Pow(1 - age / 32, 2), flash = 1 - Q(age / 8), expand = Q(age / 23);
         float reach = strong ? 235 : 91;
+        FirstSeveranceRaidVfx.Flare(b, center, age, flash, color, Reduced, strong ? 1.1f : .42f);
+        FirstSeveranceRaidVfx.Orb(b, center, Vector2.Zero, (strong ? 50 : 20) * (1 + expand),
+            age, color, fade * .65f, false, Reduced);
         Glow(b, center, new(reach * .66f * flash), Light(color, flash));
         Ring(b, center, new Vector2(18 + reach * expand, 12 + reach * expand * .55f), -.25f,
             Light(color, fade), (strong ? 16 : 7) * fade, true);

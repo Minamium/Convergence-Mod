@@ -17,8 +17,7 @@ float4 Ring(FI i):COLOR0 {
     float cycle=frac((angle+1.5707963)/6.2831853+1);
     float n=tex2D(cloudNoise,p*1.7+float2(clock*.043,-clock*.031)+shape.z).r;
     float flow=tex2D(flowNoise,float2(cos(angle-clock*.22),sin(angle-clock*.22))*1.9+n*.21).r;
-    // The geometric boundary never wobbles. Material currents stay just inside
-    // it; there is no displaced/contracting circle implying a second hit radius.
+    // Fixed continuous boundary = range. Broken contracting inner ring = time.
     float edge=exp2(-distance*distance*.65);
     float inner=exp2(-pow((distance+3.8+n*2.3)/3.7,2));
     float shade=exp2(-distance*distance*.035)*.48;
@@ -31,7 +30,13 @@ float4 Ring(FI i):COLOR0 {
     float3 light=beamColor*(inner*(.15+.38*flow)+fog)*(.75+.25*shape.w)
         +pearl*edge*(.48+.34*progress+.1*near)
         +pearl*inner*glint*.7;
+    float timerDistance=(length(p)-signal.w*(.12+.80*signal.x))*shape.y;
+    float timer=exp2(-timerDistance*timerDistance*.15);
+    float dash=smoothstep(.18,.28,frac(cycle*24));
+    float timerFade=smoothstep(0,.035,signal.x);
+    light+=pearl*timer*dash*timerFade*(.80+.16*sin(clock*5));
     float alpha=saturate(shade+edge*.18)*signal.z;
+    alpha=max(alpha,timer*.36*dash*timerFade*signal.z);
     return float4(light*signal.z,alpha);
 }
 technique Material {

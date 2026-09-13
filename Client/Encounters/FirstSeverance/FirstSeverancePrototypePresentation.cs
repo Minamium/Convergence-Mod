@@ -204,14 +204,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
                 *(1-Math.Clamp((age-.85f)/.04f,0,1));
             amount = Math.Max(amount, 3*pull+16*FirstSeveranceDollCapture.Arrival(age));
         }
-        if (combat.LanceVolley is { } volley && volley.IsFiring(state.EstimatedAuthorityTick))
-        {
-            float age = (state.EstimatedAuthorityTick - volley.FireTick) / (float)volley.ActiveTicks;
-            amount = Math.Max(amount, 12f * MathF.Pow(1f - age, 2f));
-        }
-        if (combat.GridVolley is { } grid && grid.IsFiring(state.EstimatedAuthorityTick))
-            amount = Math.Max(amount, (grid.CoreBeams.Count > 0 ? 14 : 7)
-                * FirstSeveranceVisualCurves.Recoil(visuals.RenderTick, grid.FireTick, grid.EndTick));
+        amount = Math.Max(amount, FirstSeveranceEnergyPulse.Shake(combat, visuals.RenderTick));
         if (amount <= 0)
             return;
         float t = Main.GameUpdateCount % 3600;

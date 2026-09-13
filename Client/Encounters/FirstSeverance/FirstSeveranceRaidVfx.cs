@@ -34,7 +34,7 @@ internal static class FirstSeveranceRaidVfx
     internal static void Beam(SpriteBatch batch, Vector2 origin, Vector2 direction, float length, float halfWidth,
         double age, float charge, float energy, float opacity, Color color, bool reduced,
         bool confined = false, bool mouth = true, float release = 0,
-        double fireAge = double.NaN, double endAge = double.NaN)
+        double fireAge = double.NaN, double endAge = double.NaN, float bellLength = 0, float bellWidth = 0)
     {
         if (Main.dedServ || opacity <= .001f || length <= 0 || halfWidth <= 0) return;
         using var scope=new LocalBatch(batch);
@@ -43,7 +43,7 @@ internal static class FirstSeveranceRaidVfx
         if (double.IsFinite(fireAge))
         {
             Vector4 ceremony = new((float)Math.Clamp(age-fireAge,-600,600),
-                double.IsFinite(endAge)?(float)Math.Clamp(age-endAge,0,60):0,0,0);
+                double.IsFinite(endAge)?(float)Math.Clamp(age-endAge,0,60):0,bellLength,bellWidth);
             if (live == 0)
             {
                 float t=Math.Clamp((ceremony.X+8)/7,0,1);
@@ -110,7 +110,7 @@ internal static class FirstSeveranceRaidVfx
         Vector2 dir=velocity.LengthSquared()>.001f ? Vector2.Normalize(velocity) : Vector2.UnitX;
         using var scope=new LocalBatch(batch);
         Vector4 signal=new(.8f,live?1:0,opacity,0);
-        if(live && !reduced) {
+        if(live && !reduced && velocity.LengthSquared() > .001f) {
             float length=Math.Clamp(velocity.Length()*9+radius*3,35,180);
             Add(batch,"WakePass",center-dir*length,dir,length,radius*1.8f,color,
                 signal with { Z=opacity*.52f },age,false);
@@ -162,6 +162,14 @@ internal static class FirstSeveranceRaidVfx
             extent * 2, extent, color, new(remaining, stack ? 1 : 0, opacity, radius / extent), tick, reduced);
     }
 
+    internal static void WeaponSigil(SpriteBatch batch, Vector2 center, float radius, float angle,
+        Color color, float opacity, bool reduced)
+    {
+        Vector2 axis = new(MathF.Cos(angle), MathF.Sin(angle));
+        Add(batch, "WeaponSigilPass", center - axis * radius, axis, radius * 2, radius * .72f,
+            color, new(1, 0, opacity, 0), RitualRenderClock.Time, reduced);
+    }
+
     internal static void Sparks(SpriteBatch batch, Vector2 center, Vector2 axis, double age,
         float strength,float opacity,Color color,bool inward,float scale=1)
     {
@@ -207,6 +215,7 @@ internal static class FirstSeveranceRaidVfx
         ManagedShader legacy=ShaderManager.GetShader("Convergence.RaidEnergy");
         ManagedShader portal=ShaderManager.GetShader("Convergence.PortalBeam");
         ManagedShader marker=ShaderManager.GetShader("Convergence.MechanicRing");
+        ManagedShader weapon=ShaderManager.GetShader("Convergence.ArmamentEnergy");
         var device=Main.instance.GraphicsDevice;
         batch.End();
         var blend=device.BlendState; var depth=device.DepthStencilState; var raster=device.RasterizerState;
@@ -220,6 +229,7 @@ internal static class FirstSeveranceRaidVfx
             legacy.TrySetParameter("uWorldViewProjection",transform);
             portal.TrySetParameter("uWorldViewProjection",transform);
             marker.TrySetParameter("uWorldViewProjection",transform);
+            weapon.TrySetParameter("uWorldViewProjection",transform);
             legacy.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value,1,SamplerState.LinearWrap);
             legacy.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value,2,SamplerState.LinearWrap);
             legacy.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,3,SamplerState.LinearWrap);
@@ -227,6 +237,7 @@ internal static class FirstSeveranceRaidVfx
                 ref readonly var c=ref commands[i];
                 ManagedShader shader=c.Portal?portal:legacy;
                 if (c.Pass == "MechanicRingPass") shader=marker;
+                if (c.Pass == "WeaponSigilPass") shader=weapon;
                 shader.TrySetParameter("beamColor",c.Color.ToVector3());
                 shader.TrySetParameter("signal",c.Signal);
                 shader.TrySetParameter("shape",new Vector4(c.Length,c.HalfWidth,c.Seed,c.Reduced?.25f:1));

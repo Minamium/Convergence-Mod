@@ -122,16 +122,6 @@ internal sealed class FirstSeveranceSky : CustomSky
                     delta.ToRotation(),new Vector2(0,.5f),new Vector2(delta.Length(),1.3f),SpriteEffects.None,0);
                 prior = p;
             }
-            batch.Draw(TextureAssets.MagicPixel.Value,new Rectangle((int)prior.X-2,(int)prior.Y,4,8),
-                new Rectangle(0,0,1,1),new Color(135,116,91)*(fade*.16f));
-        }
-        // Sparse falling ash behind terrain, player sprites and danger markers.
-        for (int i = 0; i < 22; i++)
-        {
-            float x = ((i * 157.71f + MathF.Sin(time * .10f + i) * 18) % Main.screenWidth + Main.screenWidth) % Main.screenWidth;
-            float y = (i * 113.9f + time * (3 + i % 4)) % Main.screenHeight;
-            batch.Draw(TextureAssets.MagicPixel.Value, new Rectangle((int)x, (int)y, 1, 2),
-                new Rectangle(0, 0, 1, 1), new Color(180, 169, 152) * (fade * .20f));
         }
     }
     private void EnsureMist()

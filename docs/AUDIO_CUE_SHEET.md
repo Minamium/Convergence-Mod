@@ -85,7 +85,7 @@ Accepted impact tails may complete across same-Fight terminal cleanup, including
 
 ## Weapon-only foley
 
-The current 27 masters live under `Assets/Sounds/Weapons/DollTheater`. `tools/remix_weapon_foley.py` edits the **accepted project-authored Raid SFX** into weapon-length performances: explicit source windows, pitch/rate, material bands, reversal, and separate arrival/held-tension/release envelopes. The former generic synth set and its generator are retained as history, not the current recipe. No Terraria/Calamity recording or BGM is sampled; the Raid and music source files are read-only and hash-checked after export.
+The current 27 masters live under `Assets/Sounds/Weapons/DollTheater`. `tools/remix_weapon_energy.py`, using the PCM/export helpers in `remix_weapon_foley.py`, edits the **accepted project-authored portal-beam Raid SFX** into weapon-length performances: explicit source windows, pitch/rate, material bands, reversal, and separate arrival/held-tension/release envelopes. The prior synth and foley recipes are retained as history/helpers, not the current master set. Claws emphasize pressure/body/contact without a second ringing note; Magic/Doll use rising intake and a connected release, Ranged emphasizes short mechanical pressure, Choir a layered body, and Rogue a drawn cut/impact. Impact releases have a short attached tail rather than a full Raid aftermath. [Exact exports](evidence/2026-09-14-weapon-energy-assets.json) record inputs, rates/EQ/envelopes, peaks and auditions. No Terraria/Calamity recording or BGM is sampled; the Raid and music source files are read-only and hash-checked after export.
 
 | Family | Audible role |
 |---|---|

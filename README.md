@@ -1,12 +1,10 @@
 # Convergence Mod
 
-![Convergence promotional artwork: dark blades and pale light in a cathedral](docs/media/convergence-banner.png)
+![Doll attendant — the actual in-game NPC sprite, enlarged with nearest-neighbor sampling](docs/media/doll-npc.png)
 
 Convergence is a playable development mod for Terraria / tModLoader. It adds a cooperative raid and an independent boss, with combat tuned around Calamity's endgame equipment. The raid combines bullet dodging with group mechanics, a shared arena, and teammate revival.
 
 [Current status](docs/STATUS.md) · [Contributing](CONTRIBUTING.md) · [Development setup](docs/DEVELOPMENT.md) · [Documentation](docs/README.md)
-
-The banner is promotional artwork, not a gameplay screenshot. [Artwork provenance](docs/evidence/2026-09-12-readme-artwork.json).
 
 ## Content
 

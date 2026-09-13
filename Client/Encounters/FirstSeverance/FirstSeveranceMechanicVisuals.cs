@@ -75,9 +75,14 @@ internal sealed class FirstSeveranceMechanicVisuals
                 // pretending the unavoidable result ray is a dodgeable telegraph.
                 if (spread)
                 {
-                    float charge = CastTension(tick, end - 55, end);
+                    float charge = FirstSeveranceEnergyPulse.Charge(tick, Math.Max(start, end - 100), end);
                     Vector2 mouth = Source(combat);
-                    accents.Halo(batch, mouth, new Vector2(150 - charge * 88), new Color(255, 24, 66), .8f * charge);
+                    Color ruby = new(255, 24, 66);
+                    accents.Halo(batch, mouth, new Vector2(80 + charge * 240), ruby, .95f * charge);
+                    FirstSeveranceRaidVfx.Charge(batch, mouth, Vector2.UnitX, tick - start,
+                        charge, 0, charge, ruby, reduced, .45f + charge * .85f);
+                    FirstSeveranceRaidVfx.Orb(batch, mouth, Vector2.Zero, 10 + charge * 34,
+                        tick - start, ruby, charge, true, reduced);
                 }
             }
         }

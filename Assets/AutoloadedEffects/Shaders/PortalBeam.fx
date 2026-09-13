@@ -4,7 +4,7 @@ float4x4 uWorldViewProjection;
 float3 beamColor;
 float4 signal; // charge, live, opacity, release
 float4 shape; // current length, current half-width, stable seed, detail
-float4 ceremony; // ticks since fire, ticks since damaging end, reserved
+float4 ceremony; // ticks since fire/end, optional bell throat length/full width
 float clock;
 sampler cloudNoise : register(s1);
 sampler flowNoise : register(s2);
@@ -45,7 +45,10 @@ float4 Jet(FI i):COLOR0 {
     // Width contracts only AFTER the authoritative damage window. During live
     // frames the current geometry supplied by the adapter remains authoritative.
     float taper=lerp(1,.012,closure);
-    float y=(i.uv.y*2-1)/max(taper,.012);
+    float footprintY=(i.uv.y*2-1)/max(taper,.012);
+    float bell=ceremony.z>0 ? lerp(clamp(ceremony.w/max(shape.y*2,1),.16,1),1,
+        pow(saturate(x/max(ceremony.z,1)),1.65)) : 1;
+    float y=footprintY/bell;
     float3 n=Turbulence(x,y);
     float bend=(n.x-.5)*.21*(1-saturate(abs(y)))*shape.w;
     float r=abs(y-bend);
@@ -55,7 +58,7 @@ float4 Jet(FI i):COLOR0 {
     float seam=pow(saturate(1-abs(fold)*1.9),3);
     float wound=smoothstep(.42,.78,n.y+.19*seam);
     float colored=(1-smoothstep(.45+n.x*.13,.93,r));
-    float rim=1-smoothstep(.84,.995,abs(y));
+    float rim=1-smoothstep(.84,.995,abs(footprintY));
     float fringe=pow(saturate(n.z*1.6-n.y*.27),3)*pow(saturate(1-r*r),.8);
     // Opaque-dark violet channels and a hot white spine: unlike additive-only
     // fog, this keeps its contrast over lit terrain and other effects.
@@ -69,7 +72,9 @@ float4 Jet(FI i):COLOR0 {
     light+=Hue()*.065*rim;
     float source=Ease(x/4), end=Ease((shape.x-x)/(5+n.x*7));
     float mask=rim*source*end*TailFade()*signal.z;
-    float alpha=(.68+.14*colored)*mask;
+    // The bell's unused corners retain only a faint luminous hazard carrier,
+    // never an opaque rectangular socket around the narrow throat.
+    float alpha=(ceremony.z>0 ? .82*colored : .68+.14*colored)*mask;
     return float4(light*mask,alpha);
 }
 float4 Corona(FI i):COLOR0 {

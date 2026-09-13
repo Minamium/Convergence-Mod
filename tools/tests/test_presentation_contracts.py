@@ -154,8 +154,12 @@ class CinematicCoordinates(unittest.TestCase):
         self.assertNotIn("Shards(b,", swipe)
         self.assertIn("if (crush) Shards", body(source, "internal static void Impact"))
         surface = (CLIENT / "RitualSurfacePass.cs").read_text(encoding="utf-8")
-        self.assertIn("bool darkUnderlay = true", surface)  # Other weapons unchanged.
-        self.assertIn("if (darkUnderlay) Ribbon", body(surface, "internal static void Flame"))
+        self.assertIn("bool darkUnderlay = true", surface)  # Existing call sites remain valid.
+        self.assertNotIn("if (darkUnderlay) Ribbon", body(surface, "internal static void Flame"))
+        self.assertIn('ShaderManager.GetShader("Convergence.ArmamentEnergy")', surface)
+        for slot in (1, 2):
+            self.assertIn(f"device.Textures[{slot}] = t{slot}", surface)
+            self.assertIn(f"device.SamplerStates[{slot}] = s{slot}", surface)
 
     def test_shared_pylon_renderer_has_no_instance_caches(self):
         source = (CLIENT / "FirstSeverancePylonVisuals.cs").read_text(encoding="utf-8")
