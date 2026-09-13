@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - art
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.reward_weapons
 aliases:
@@ -20,7 +20,7 @@ related_docs:
   - encounter.first-severance.spec
 ---
 
-# 不幸な人形劇 — Ritual Armaments
+# Requiem of the Hollow Doll — Ritual Armaments
 
 Current mechanics are below; [Audio](../../AUDIO_CUE_SHEET.md) owns the active sound masters and removal of the claw's overlapping swipe after-sound. Versioned labels identify when a design arrived, not the current package/protocol: those belong to [Status](../../STATUS.md).
 
@@ -72,9 +72,9 @@ Native item use pays8 base mana once. Construction pays35% of the modified item 
 
 ### Ranged — Pale Meridian
 
-Hold to maintain a siege battery. Five separate cannon bodies arrive at0/90/162/213/246 ticks. The first shoots during construction; cadence accelerates as bodies join. Each actual shot selects one muzzle, not five copies of a full damage budget. At282–300 the deployed rails snap into a compact overlapping battery; a48-tick pressure/charge beat precedes overdrive at348 (5.8s). The body, telescoping throat, muzzle and recoil stay connected.
+Hold to assemble **one siege gun**, not an array of complete guns. One physical receiver arrives first; four small breech/rail components dock at90/162/213/246 ticks with rapid approach and a braked seating beat. The initial gun shoots during construction; cadence accelerates as components lock. At282–300 the mechanism compresses, then a48-tick pressure charge precedes overdrive at348 (5.8s). One barrel/muzzle remains attached through recoil; no full-gun duplication or large player-centered crown.
 
-Overdrive maintains physical homing needles at one every3 real ticks, alternating among five muzzles; every36 ticks a heavier penetrating needle replaces an ordinary shot. This is a kinetic crossfire, not the Magic beam recolored. Release/item change/incapacitation/out-of-ammo ends it. One native `PickAmmo` call per actual shot retains ammunition damage, knockback and conservation hooks. The initial harmless holdout consumes no bullet.75% conservation remains. Aim cap0.055rad/tick in overdrive.
+Overdrive maintains physical homing needles at one every3 real ticks, using the single assembled muzzle; every36 ticks a heavier penetrating needle replaces an ordinary shot. This is physical needle fire, not the Magic beam recolored. Release/item change/incapacitation/out-of-ammo ends it. One native `PickAmmo` call per actual shot retains ammunition damage, knockback and conservation hooks. The initial harmless holdout consumes no bullet.75% conservation remains. Aim cap0.055rad/tick in overdrive.
 
 ### Summon — Choir of the Unmade
 
@@ -86,17 +86,21 @@ The beam turns toward the native selected target at0.045rad/tick, reaches2000px,
 
 ### Rogue — Last Witness
 
-Hold to enroll six witnesses at29-tick intervals. Each casts one small seeking shard during construction. At174–194 they rapidly fold into one heavy relic;24 ticks of braking/compression precede a single amplified returning blade at218. Recovery completes at282 (4.7s total). Releasing before commitment cancels; holding can begin another full score after recovery. Native Calamity RogueWeapon hooks determine initial damage/stealth once; the final blade inherits the stored stealth flag. A stealth final blade retains the target-locking triangular verdict. The early fragments do not each receive another stealth execution.
+Hold to load one suspended execution relic with six small pressure/cut beats at29-tick intervals. Each still emits one small seeking shard from the real central apparatus, rather than another full weapon on an orbit. At174–194 its edge loads inward;24 ticks of braking/compression precede a single amplified returning blade at218. Flight keeps the physical blade legible with a narrow textured wake instead of a broad spinning light sheet. Recovery completes at282 (4.7s total). Releasing before commitment cancels; holding can begin another full score after recovery. Native Calamity RogueWeapon hooks determine initial damage/stealth once; the final blade inherits the stored stealth flag. A stealth final blade retains the target-locking triangular verdict. The early fragments do not each receive another stealth execution.
 
 ## Presentation and native ownership
 
 Four new **text-only image generations** replace the non-melee icons and supply512px runtime apparatus artwork; no previous image was passed as input. The owner approved the built-in generator despite its unexposed backend model: do not label the results GPT Image2.5.128px inventory exports fit a116px maximum opaque envelope, inspected at40px as well. Original generated PNGs and all predecessor assets are preserved. Exact prompts, export procedure and provenance are in [Attribution](../../../Assets/ATTRIBUTION.md#ritual-grand-apparatus-v3--2026-09-09).
 
-The original Luminance-managed `ArmamentEnergy` material replaces flat weapon strips with connected white energy, violet dark folds and flowing noise. Claw swipe/rogue trails and Magic/Choir/Doll beams share it, retaining their accepted geometry and attack clocks. Engraved, interlaced magic seals replace plain rings/ticks; physical apparatus artwork remains. Bolts receive luminous nuclei/wakes, and source vents/impacts receive the accepted Raid pressure/flare treatment. Magic has persistent flowing plasma with a full-width luminous throat, inward energy flow and one launch accent. Ranged has expanding machinery, connected recoil and continuous induction/motor sound. Choir layers voices/towers before one sustained organ release. The three original four-second sound beds loop continuously; damage ticks do not restart launch sounds. Their voices follow projectile lifetime and stop on cancel/unload. `ActiveSound.Volume` is a multiplier of `Style.Volume`; dynamic fading must not square the intended gain.
+The original Luminance-managed `ArmamentEnergy` material replaces flat weapon strips with connected white energy, violet dark folds and flowing noise. Claw swipe/rogue trails and Magic/Choir/Doll beams share it, retaining their accepted geometry and attack clocks. Engraved, interlaced magic seals replace plain rings/ticks; physical apparatus artwork remains. Bolts receive luminous nuclei/wakes, and source vents/impacts receive the accepted Raid pressure/flare treatment. Magic has persistent flowing plasma with a full-width luminous throat, inward energy flow and one launch accent. Ranged has one progressively assembled receiver, connected recoil and continuous induction/motor sound. Choir layers voices/towers before one sustained organ release. The three original four-second sound beds loop continuously; damage ticks do not restart launch sounds. Their voices follow projectile lifetime and stop on cancel/unload. `ActiveSound.Volume` is a multiplier of `Style.Volume`; dynamic fading must not square the intended gain.
 
-Render clocks and short-angle interpolation connect game ticks. Transparent, filamentary layers remain inside a readable continuous beam body, not independent decorative gaps. Reduced Effects reduces density/intensity and disables local shake; no fullscreen white pulses, forced zoom, time manipulation or UI/input ownership is introduced. The accepted melee geometry, controls, art and charge are unchanged; its ribbon material and weapon-sized pressure/impact audio are refreshed. Do not restore radial trail lines, black impact masses or a separate lingering swipe note.
+Render clocks and short-angle interpolation connect game ticks. Transparent, filamentary layers remain inside a readable continuous beam body, not independent decorative gaps. Reduced Effects reduces density/intensity and disables local shake; no fullscreen white pulses, forced zoom, time manipulation or UI/input ownership is introduced. The accepted melee geometry, controls, articulated art and charge are unchanged. Its five wide additive sheets are replaced with short separated fingertip filaments, so they do not fuse into a white crescent. The new physical cut/impact audio emphasizes low/mid weight and a brief attached air tail. Do not restore radial trail lines, black impact masses or a separate lingering swipe note.
 
 Owner clients alone sample mouse/channel input, spend mana/ammo and create child projectiles, using Terraria's existing cooperative weapon replication. Other peers render/read native projectile state. Raid outcomes remain server-authoritative; this is not a new anti-cheat guarantee. Held controllers cancel on item change/death/Down/CC; launched ordinary projectiles retain normal flight lifetimes and terminate for unusable owners. World unload clears voices; Mod unload disposes material/mesh resources. No weapon-specific Encounter packet is introduced; all peers still need matching current content/protocol as recorded in [Status](../../STATUS.md).
+
+## Video-driven playback correction
+
+The [2026-09-14 recording/source analysis](../../research/2026-09-14-doll-playtest-video.md) distinguishes inspected reference frames from numeric audio evidence. Default-extraUpdates weapon and Doll PostAI hooks now run at native `numUpdates == -1` exactly once per real tick; the old zero-only guard skipped normal audio/interpolation updates. Bounded `RitualWeapon event=AudioVoice` diagnostics check actual voice acceptance, not only an asset path. The [audio sheet](../../AUDIO_CUE_SHEET.md#weapon-only-foley) owns the 12 remixed Claw/Ranged/Rogue/contact masters and unchanged other sounds. No reference-game audio, sprite or shader is imported.
 
 ## Initial power budget — not measured DPS
 

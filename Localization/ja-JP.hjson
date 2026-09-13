@@ -3,11 +3,11 @@ Mods: {
     Items: {
       NullRefrain: {
         DisplayName: 断唱 — Null Refrain
-        Tooltip: "沈黙を断つ、黒曜の刃\n左右の斬撃から、三撃目で大きく断ち切る\n不幸な人形劇を最後まで生き延びた者への報酬"
+        Tooltip: "沈黙を断つ、黒曜の刃\n左右の斬撃から、三撃目で大きく断ち切る\nRequiem of the Hollow Dollを最後まで生き延びた者への報酬"
       }
       FoundationCoreItem: {
         DisplayName: ファウンデーション・コア
-        Tooltip: "不幸な人形劇の候補アリーナを固定する大型封印装置\n足元の発光コンソールを右クリック\n開発ビルド：全員Readyで実験用Raidを開始"
+        Tooltip: "Requiem of the Hollow Dollの候補アリーナを固定する大型封印装置\n足元の発光コンソールを右クリック\n開発ビルド：全員Readyで実験用Raidを開始"
       }
       ResuscitationKitItem: {
         DisplayName: 蘇生キット
@@ -43,8 +43,8 @@ Mods: {
         ReviveNoTarget: 8タイル以内にダウン中の味方がいません。
         ReviveLocked: この味方はまだ再蘇生を受けられません。頭上の残り時間を確認してください。
         ReviveTargetUnavailable: この味方はすでに復帰中、または蘇生できない状態です。
-        PreparationStatus: "不幸な人形劇の準備中 — Ready: {0}/{1}。コアを右クリックするとReadyを切り替えます。"
-        AllReady: "不幸な人形劇 Ready完了 — {0}/{1}。実験用Raidを開始します。"
+        PreparationStatus: "Requiem of the Hollow Dollの準備中 — Ready: {0}/{1}。コアを右クリックするとReadyを切り替えます。"
+        AllReady: "Requiem of the Hollow Doll Ready完了 — {0}/{1}。実験用Raidを開始します。"
         PhaseSpawnIntro: "Raid開始。足元の蘇生キットを拾ってください。/convergence-down でDownを実験できます。起動者の /convergence-cancel で終了。"
         PhasePylonCheck: "パイロン — {0}基すべてを破壊！ Bossはまだ無敵です。"
         PhaseStack: "頭割り — {1} の7タイル以内に集合！ 必要人数: {3}。あと{2}秒。"
@@ -56,8 +56,8 @@ Mods: {
         DashRightInstruction: "連撃 {0}/4 — エネルギー突進！ 進路固定に合わせ右へダッシュ →"
         DashLeftInstruction: "連撃 {0}/4 — ← エネルギー突進！ 進路固定に合わせ左へダッシュ"
         StillnessInstruction: "連撃 {0}/4 — 空いた柱の中で静止"
-        IntroRaidName: 不幸な人形劇
-        DefeatDeathReason: "{0} は不幸な人形劇により抹消された。"
+        IntroRaidName: Requiem of the Hollow Doll
+        DefeatDeathReason: "{0} はRequiem of the Hollow Dollにより抹消された。"
         PhaseReset: "1周完了。Bossの盾が戻り、次のパイロンへ。実験を終える場合は /convergence-cancel。"
         ResultStackPassed: 頭割り成功 — 全員集合。ダメージなし。
         ResultStackFailed: 頭割り人数不足 — 不足人数の割合分、生存参加者全員に最大HP割合ダメージ。
@@ -89,7 +89,7 @@ Mods: {
         BodyRevivable: キット使用で即時蘇生
         BodyLocked: "再蘇生不可：あと{0}秒"
         ReviveHud: "蘇生中 — 静止して長押し: 残り{0}秒"
-        NameSpawnIntro: 不幸な人形劇
+        NameSpawnIntro: Requiem of the Hollow Doll
         NamePylonCheck: パイロン破壊
         NameStack: 頭割り
         FixedStackTarget: 光っている固定集合地点
@@ -127,7 +127,7 @@ Mods: {
       }
     }
     Configs.FirstSeveranceVisualConfig: {
-      DisplayName: 不幸な人形劇の視覚効果
+      DisplayName: Requiem of the Hollow Dollの視覚効果
       ReducedEffects: {
         Label: 装飾演出を軽減
         Tooltip: オーロラ・発光・破片・暗転を軽減し、画面揺れを無効化します。危険範囲・予測線・ビームは消えません。

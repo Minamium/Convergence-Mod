@@ -7,7 +7,7 @@ Mods: {
 					'''
 					An obsidian edge that cuts the silence
 					Alternating slashes culminate in an empowered third stroke
-					Awarded to the survivors of The Unfortunate Doll Play
+					Awarded to the survivors of Requiem of the Hollow Doll
 					'''
 			}
 
@@ -15,7 +15,7 @@ Mods: {
 				DisplayName: Foundation Core
 				Tooltip:
 					'''
-					Anchors the stage of The Unfortunate Doll Play
+					Anchors the stage of Requiem of the Hollow Doll
 					Development build: all Ready starts the experimental Raid loop
 					Large containment monument; right-click the glowing console at its base
 					'''
@@ -70,8 +70,8 @@ Mods: {
 				RecoveryLockoutHud: Cannot receive another revival: {0}s
 				BodyRevivable: KIT → INSTANT REVIVE
 				BodyLocked: REVIVAL LOCKED: {0}s
-				PreparationStatus: The Unfortunate Doll Play preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready.
-				AllReady: The Unfortunate Doll Play Ready: {0}/{1}. Starting the experimental Raid.
+				PreparationStatus: Requiem of the Hollow Doll preparation active — Ready: {0}/{1}. Right-click the Core to toggle Ready.
+				AllReady: Requiem of the Hollow Doll Ready: {0}/{1}. Starting the experimental Raid.
 				PhaseSpawnIntro: Raid started. Pick up your Resuscitation Kit. /convergence-down tests Downed; the initiator can end with /convergence-cancel.
 				PhasePylonCheck: PYLONS — destroy all {0}. The Boss remains shielded.
 				PhaseStack: STACK — gather within 7 tiles of {1}. Required shares: {3}. {2} seconds!
@@ -83,7 +83,7 @@ Mods: {
 				DashRightInstruction: SEQUENCE {0}/4 — ENERGY CHARGE → Dash right as it commits!
 				DashLeftInstruction: SEQUENCE {0}/4 — ← ENERGY CHARGE! Dash left as it commits!
 				StillnessInstruction: SEQUENCE {0}/4 — STOP inside the empty column
-				IntroRaidName: THE UNFORTUNATE DOLL PLAY
+				IntroRaidName: REQUIEM OF THE HOLLOW DOLL
 				DefeatDeathReason: "{0} was erased by Lacrimosa's final act."
 				PhaseReset: Loop complete. Boss shields restore; the next Pylons follow. /convergence-cancel ends the experiment.
 				ResultStackPassed: Stack successful — everyone gathered. Zero damage.
@@ -112,7 +112,7 @@ Mods: {
 				CombatHud: "{0}  |  {1}s"
 				DownedHud: DOWNED — no timeout. Ally: use the kit within 8 tiles to revive instantly!
 				ReviveHud: REVIVING — hold use, stay still: {0}s
-				NameSpawnIntro: THE UNFORTUNATE DOLL PLAY
+				NameSpawnIntro: REQUIEM OF THE HOLLOW DOLL
 				NamePylonCheck: PYLONS
 				NameStack: STACK
 				FixedStackTarget: the fixed illuminated assembly beacon
@@ -152,7 +152,7 @@ Mods: {
 
 		Configs: {
 			FirstSeveranceVisualConfig: {
-				DisplayName: The Unfortunate Doll Play visuals
+				DisplayName: Requiem of the Hollow Doll visuals
 
 				ReducedEffects: {
 					Label: Reduce decorative effects

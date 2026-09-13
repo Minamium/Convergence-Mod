@@ -8,7 +8,7 @@ Convergence is a playable development mod for Terraria / tModLoader. It adds a c
 
 ## Content
 
-- **The Unfortunate Doll Play** — a raid against **Lacrimosa — The Bound Heart**, recommended for 2–4 players. Fight through multiple phases using coordinated Stack and Spread mechanics, damage windows, and instant teammate revival. Survive the final sequence to earn weapon reward boxes. [Raid guide](docs/encounters/first-severance/README.md) · [Combat specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md).
+- **Requiem of the Hollow Doll** — a raid against **Lacrimosa — The Bound Heart**, recommended for 2–4 players. Fight through multiple phases using coordinated Stack and Spread mechanics, damage windows, and instant teammate revival. Survive the final sequence to earn weapon reward boxes. [Raid guide](docs/encounters/first-severance/README.md) · [Combat specification](docs/encounters/first-severance/ENCOUNTER_SPEC.md).
 - **Ghost Samurai** — an independent dual-wielding boss with travelling slash waves, dash attacks, lattice patterns, and wisps. It uses its own summon and normal player death, not the raid's Ready or revival system. [Boss specification](docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 Content, balance, visuals, and compatibility are still being revised. The [status page](docs/STATUS.md) identifies the latest installed development build, verification evidence, and outstanding issues. Development-only solo raid admission is a testing aid, not a balanced solo mode; companions do not replace raid participants.

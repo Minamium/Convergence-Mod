@@ -257,7 +257,7 @@ def archive(path, folder):
         shutil.copy2(path, target)
 
 
-def auditions(samples, folder):
+def auditions(samples, folder, overrides=None):
     cues = {
         'Claws': [(0,'ClawSwipe',.64),(.40,'ClawSwipe',.64),(.95,'ClawGrip',.65),
                   (1.15,'ClawSwipe',.68),(1.22,'ClawCrush',.85)],
@@ -278,6 +278,7 @@ def auditions(samples, folder):
                  (1+44/60,'DollThread',.65),(1+58/60,'DollThread',.65),
                  (2.,'DollCharge',.65),(2.6,'DollVerdict',.85),(2.6,'LacunaSustain',.48)],
     }
+    cues.update(overrides or {})
     report = {}
     for name, events in cues.items():
         end = max(at+(1.2 if name == 'Doll' and 'Sustain' in cue else len(samples[cue])/RATE)

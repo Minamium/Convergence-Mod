@@ -26,11 +26,11 @@ related_docs:
   - project.asset-pipeline
 ---
 
-# 不幸な人形劇 — 少女人形の提示仕様
+# Requiem of the Hollow Doll — 少女人形の提示仕様
 
 ## 方針と範囲
 
-公開表示名は [Encounter spec](ENCOUNTER_SPEC.md#identity-and-scope) に従う。「不幸な人形劇」とラクリモーサの名前はConvergence内の演出上の設定であり、BGM作者EigHtによるキャラクター設定・提携を意味しない。戦闘前の個体は「名もなき人形」のままとする。
+公開表示名は [Encounter spec](ENCOUNTER_SPEC.md#identity-and-scope) に従う。「Requiem of the Hollow Doll」とラクリモーサの名前はConvergence内の演出上の設定であり、BGM作者EigHtによるキャラクター設定・提携を意味しない。戦闘前の個体は「名もなき人形」のままとする。
 
 頭割り・散開の円はプレイヤー／集合地点にだけ置く。Boss中央の同形照準・幾何学の詠唱円は表示しない（他行動内の頭割り／散開、散開中の補助射撃も含む）。身体の詠唱姿勢、赤い蓄光、瞬間の発射光と直撃／霧散は残す。ゲーム判定とプレイヤー側の殻片・円は変更しない。
 

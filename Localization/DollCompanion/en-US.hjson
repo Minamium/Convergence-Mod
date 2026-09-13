@@ -1,6 +1,6 @@
 Mods: {
 	Convergence: {
-		UI.FirstSeverance.CombatNotActive: The Unfortunate Doll Play is not active.
+		UI.FirstSeverance.CombatNotActive: Requiem of the Hollow Doll is not active.
 
 		Items: {
 			DollCovenant: {

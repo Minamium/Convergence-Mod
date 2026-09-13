@@ -1,14 +1,14 @@
 [h1]Convergence — Development Build[/h1]
 [b]集まり、散開し、倒れた仲間を起こす。Calamity最終装備向けのマルチ推奨レイド。[/b]
 
-レイド「不幸な人形劇」で、ラクリモーサ — 縛られた心に挑みます。雑に吊られた悲劇的な人形、外殻からの羽化、遠隔の腕、頭割りと散開、最後の生存フェーズまで進行する実験的なボス戦です。勝利報酬は作業台で5クラスの武器へ等価交換できます。「未成の聖歌隊」は、人形が歩き・飛び・共闘する10枠ミニオン「ほどけない約束」とも相互交換可能です。ミニオンはRaidの参加人数には数えません。
+レイド「Requiem of the Hollow Doll」で、ラクリモーサ — 縛られた心に挑みます。雑に吊られた悲劇的な人形、外殻からの羽化、遠隔の腕、頭割りと散開、最後の生存フェーズまで進行する実験的なボス戦です。勝利報酬のトレジャーボックスから5種類の武器のいずれかが等確率で出ます。5種類をすべて集めて作業台で合成すると、人形が歩き・飛び・共闘する10枠ミニオン「ほどけない約束」を入手できます。ミニオンはRaidの参加人数には数えません。
 
 [h2]開発中のプレイ可能なテスト版です[/h2]
 完成版ではありません。難易度・数値・演出・武器性能は大きく変わる可能性があります。安定動作、全Modとの互換性、セーブ互換性は保証していません。ワールドとキャラクターをバックアップし、まずテスト用ワールドで遊んでください。
 
 [h2]必要な環境[/h2]
 [list]
-[*]Calamity Mod 2.2.4。検証基準はtModLoader 2026.07系 / Terraria 1.4.4.9です。
+[*]Calamity Mod 2.2.4 と Luminance 1.0.14。検証基準はtModLoader 2026.07系 / Terraria 1.4.4.9です。
 [*]Calamity側で必要な依存Modも導入してください。検証環境では公式Calamity Mod Musicも使用しています。
 [*]2～4人推奨。Exo MechsとSupreme Calamitas撃破済みワールド、Calamity最終装備を想定しています。人数別バランスは調整中です。
 [*]参加者全員でConvergenceのバージョンをそろえてください。
@@ -16,9 +16,9 @@
 
 [h2]レイドの始め方[/h2]
 [list]
-[*]現時点では開始用「Foundation Core」と蘇生用「Resuscitation Kit」に通常レシピがありません。Cheat Sheetなどのアイテム取得補助Modで入手してください。これは開発版のセットアップ手段で、Convergenceの必須依存ではありません。
+[*]現時点では開始用「Foundation Core」「Theater Doll」と蘇生用「Resuscitation Kit」に通常レシピがありません。Cheat Sheetなどのアイテム取得補助Modで入手してください。これは開発版のセットアップ手段で、Convergenceの必須依存ではありません。
 [*]Host & Playなどで同じワールドに参加し、周囲・上方に十分な空間のある地面へFoundation Coreを設置します。設置や起動が拒否されたら画面の検証メッセージを確認してください。
-[*]参加者がCoreの近くに集まり、右クリックで準備開始。その後、各参加者が右クリックしてReadyを設定します。
+[*]Theater Dollを手に持って台をクリックすると、接続中のパーティーに準備が展開します。その後、各参加者がReadyを設定します。
 [*]頭割りは示された有効円へ集合、散開は各自の円を重ねず離れます。全員で成功すればそのギミックのダメージはありません。
 [*]倒れた仲間の近くでResuscitation Kitを使用すると即時蘇生します。アイテム消費・共有トークンはありません。蘇生された人は60秒間、再度の蘇生を受けられません。全員ダウンすると敗北します。
 [/list]
@@ -31,6 +31,6 @@
 公開後はこのWorkshopページのコメント欄へ、ConvergenceとtModLoaderのバージョン、人数、導入Mod、再現手順を添えて報告してください。スクリーンショットやログを共有する場合は、個人情報・接続情報を伏せてください。現在、公開GitHub Issuesや専用のサポート窓口は案内していません。
 
 [h2]English summary[/h2]
-An experimental multiplayer-first Calamity endgame raid. Recommended for 2-4 players after Exo Mechs and Supreme Calamitas. Requires Calamity Mod 2.2.4 and its required dependencies; tested on tModLoader 2026.07 / Terraria 1.4.4.9. Everyone must use the same Convergence version.
-Spawn Foundation Core and Resuscitation Kit with an item tool such as Cheat Sheet: normal recipes are not implemented yet. Place the Core on open solid ground, gather nearby, right-click to prepare, then each player right-clicks to ready up. Gather for Stack, separate for Spread, and use the reusable kit near downed allies. Revival gives a 60-second recipient lockout; all down means defeat. Solo admission is a debugging convenience, not balanced solo content.
+An experimental multiplayer-first Calamity endgame raid. Recommended for 2-4 players after Exo Mechs and Supreme Calamitas. Requires Calamity Mod 2.2.4, Luminance 1.0.14 and their required dependencies; tested on tModLoader 2026.07 / Terraria 1.4.4.9. Everyone must use the same Convergence version.
+Spawn Foundation Core, Theater Doll and Resuscitation Kit with an item tool such as Cheat Sheet: normal recipes are not implemented yet. Place the Core on open solid ground, hold Theater Doll and click the pedestal to deploy preparation for the connected party, then each player marks Ready. Gather for Stack, separate for Spread, and use the reusable kit near downed allies. Revival gives a 60-second recipient lockout; all down means defeat. Solo admission is a debugging convenience, not balanced solo content.
 Development build: back up saves, expect changing balance and unfinished compatibility. Contains intense visual/audio effects; reduced effects are available. Please report reproduction steps, versions, party size and enabled Mods in Workshop comments after publication. This is an independent addon, not an official Calamity release.
