@@ -22,9 +22,9 @@
   - `Assets/Sounds/FirstSeverance/Beams/SpreadRay.wav`
   - `Assets/Sounds/FirstSeverance/Beams/SpreadScatter.wav`
 - Creator: Codex, directed by Minamium. Creation/review date: 2026-09-13.
-- Source type: original; reproducible master/seed/envelope: [tools/generate_beam_sfx.py](../tools/generate_beam_sfx.py), NumPy FFT synthesis, 44.1-kHz stereo PCM16 export. No third-party samples, recording excerpts, AI audio service or extracted game asset used.
+- Source type: original project synthesis/remix; reproducible master/seed/envelope: [tools/generate_beam_sfx.py](../tools/generate_beam_sfx.py), NumPy FFT synthesis, 44.1-kHz stereo PCM16 export. No third-party samples, reference-recording excerpts, AI audio service or extracted third-party game asset used. SpreadRay additionally layers the project's own unchanged `Assets/Sounds/FirstSeverance/SpreadExecution.wav` (SHA256 `44484f4970caaa194524c6363aa5aeb96ce2b518058f67dd96769ae26efb4220`; [original provenance](#execution-ping-revision--0222--2026-09-07)).
 - Reference influence: [F16](../docs/research/WOTG_RAID_BENCHMARK.md#f16--beam-audio-envelope-analysis-2026-09-13), numeric mixed-recording/event analysis and pinned WotG/WoTM cue grouping. This environment cannot hear audio; user approved analysis-based creation with audition delivery. Reference originals/analysis and MP3 previews remain ignored local artifacts.
-- Design/editing: aperiodic pressure, inharmonic cavities, short bright rupture, pre-shot dip and bounded release; one periodic rotation sustain. Separate Raid routes leave existing music, shared weapon and accepted Stack masters untouched.
+- Design/editing: aperiodic pressure, inharmonic cavities, short bright rupture, pre-shot dip and bounded release; one periodic rotation sustain. Revision 0.2.75 raises warning/launch presence about 4 dB, adds a brief mid-register resonant fan, restores the owned Spread needle over its heavy body, and separately contains sustain crests for overlap headroom. Separate Raid routes leave existing music, shared weapon and accepted Stack masters untouched.
 - License/redistribution: original project asset under the existing project publication/asset-license gate. No WotG/WoTM audio reuse rights are asserted or needed for these independently generated sounds. Retain this record and recipe; preview encoding does not change runtime master identity.
 - Review: PCM/header, peak/RMS/DC, one-shot edges, loop wrap and mapping guards; artistic listening and actual game mix remain user-owned. Exact export hashes are recorded in the matching build's source manifest and audio evidence.
 
@@ -40,7 +40,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `9119c2bbe02df3277c5314b9cba619874d77510b2bf2467995eca509bd7f9b50`
+- Notes: SHA256 `f77180aba26913e8c57a3efdf0308dc168865e9da26ecc905fe770f697cb54d4`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/WideCharge.wav`
 - Asset ID: doll-beam-0273-widecharge
@@ -54,7 +54,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `96bc82fba8812702fccebfd719cf505212e987433b970a961c320d000e5490cb`
+- Notes: SHA256 `1d93ca48d007de069e684c834500727c1aea829af5b2baa649d36e54ab9bd4a6`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/GridCharge.wav`
 - Asset ID: doll-beam-0273-gridcharge
@@ -68,7 +68,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `4a1ca02afc9f556d8f4edbf1fc6445ee3cfdf0ff2d67983005a2c526cef30ab0`
+- Notes: SHA256 `693783b980ef403b278fc7448b93e5c0cb84acaac55d68e241f0b42f2c9d5d7c`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeGather.wav`
 - Asset ID: doll-beam-0273-chargegather
@@ -82,7 +82,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `a144b84556d9911be706a30fb4ed945016db5e0862faea954e5ec1a5335cff5d`
+- Notes: SHA256 `ce900222755d0c2bfcb32565e144bd72c1c9c3e28777801cc880eef64ebc4e0f`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeLock.wav`
 - Asset ID: doll-beam-0273-chargelock
@@ -96,7 +96,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `7b9f79ae4c063e8586968c3960def708c8abfc8ba030a6bcf00b8c69244ff6da`
+- Notes: SHA256 `52a0b6e14c8dfb7233b30bce87cd9225d826b7225a19b6a4ac5acacd0011fb7d`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/PortalFire.wav`
 - Asset ID: doll-beam-0273-portalfire
@@ -110,7 +110,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `4db5546e9bc7399c6d65f3f6ee7a2e37c3e6c8c3fb45e0fcc630dc623fd42d68`
+- Notes: SHA256 `4b23303768c9f768dbfb075e629c7fb266dedd2d4f20c49793dd2e879958892e`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/CurtainFire.wav`
 - Asset ID: doll-beam-0273-curtainfire
@@ -124,7 +124,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `5404c052dfd6b3bf370d81344c614557a48dfc200e4ea969831896c61ae80bf2`
+- Notes: SHA256 `8e959b8bf50b6e723582ec694533a8c3246fd9d50923c1b585a9db4990d4a474`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/CoreSalvoFire.wav`
 - Asset ID: doll-beam-0273-coresalvofire
@@ -138,7 +138,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `6748cdc6af0423c0304a70e9a20db5cdd1fdedcf01dd78109c518e5662df771d`
+- Notes: SHA256 `63682b2c6c35a0c7ce6f548ea671258ee5a581150567e4073e0602cac1d606fb`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/GridFire.wav`
 - Asset ID: doll-beam-0273-gridfire
@@ -152,7 +152,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `8ab8fe0d4b4d86678f379bba2d6a36d3891371670e393fbb6a6cd02e5d79be3d`
+- Notes: SHA256 `50bb8e9f96f5101bd286638641d1b666af27e9af29609cef420a91c8b7300183`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeRush.wav`
 - Asset ID: doll-beam-0273-chargerush
@@ -166,7 +166,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `dc2748b4e742dc6e3acc8207309a4ee3bf14908e1713582477050294e5f25912`
+- Notes: SHA256 `0566ebce2baf9b29f4967a9b5eb8d1cf7b713543a56028157540724c9aa2bbf9`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/WideFire.wav`
 - Asset ID: doll-beam-0273-widefire
@@ -180,7 +180,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `a57c6644f21cb064868890f084eec9bb6afe27330bd85b19d9bf38426752f61e`
+- Notes: SHA256 `95227a0095123893f59879a48f373e8b05a67053103c30869b3d0ad9fb2025ac`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/BeamSustain.wav`
 - Asset ID: doll-beam-0273-beamsustain
@@ -194,7 +194,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `c45cada7d4d8cb5d22f07b8a2ece5e272d39504fe73a60c7f20034f0febf1e4f`
+- Notes: SHA256 `965a74c56213bb37c2a498068ffae567f7e2ca30a9e17d23a9cc470c871bc7b6`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/FloodFire.wav`
 - Asset ID: doll-beam-0273-floodfire
@@ -208,7 +208,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `24982627e1037e76262b98e8aa81c099f63cf94bdfd2967452cad02c64b9467f`
+- Notes: SHA256 `8df6bf9c7b20d09a772d2a835b25ddb84ccb081b4a42dab13dcc3e9f6efc5cc9`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/SpreadRay.wav`
 - Asset ID: doll-beam-0273-spreadray
@@ -216,13 +216,13 @@
 - Creator: Codex, directed by Minamium
 - Creation/acquisition date: 2026-09-13
 - Source type: original
-- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py) and project-owned [SpreadExecution.wav](Sounds/FirstSeverance/SpreadExecution.wav); original source identity recorded in set provenance above
 - Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
-- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- Human modifications: Preserve the new pressure body; restore the actual original needle at unchanged pitch/timing with band shaping, resampling and a bounded 0.50-second release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `235d2b26298c3df1681115e0d0efe9724406859c7a4ae0e90cc26eba68d26398`
+- Notes: SHA256 `24683bc4df5f00874cb60065265612cec2bcb95941349ff06569a7aac6082414`
 
 - Runtime file: `Assets/Sounds/FirstSeverance/Beams/SpreadScatter.wav`
 - Asset ID: doll-beam-0273-spreadscatter
@@ -236,7 +236,7 @@
 - License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
 - Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
 - Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
-- Notes: SHA256 `8ad8fe63b3730b1546bdbf3e5e27ecba8fed1ba0a053c4baecef2a5c1004084d`
+- Notes: SHA256 `deea7949fb10cebca5bcb4e7e46964d8ec9c048415c24cc757518d48b1ac3975`
 
 
 ### Portal triplet beam material — 2026-09-13
