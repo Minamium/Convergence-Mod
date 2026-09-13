@@ -94,7 +94,7 @@ internal static partial class Program
                 AssertEqual(casts[i].FireTick, decoded.SpreadLances[i].FireTick, "same release clock");
                 for (int j = 0; j < count; j++) AssertEqual(casts[i].Rays[j], decoded.SpreadLances[i].Rays[j], "locked peer geometry");
             }
-            int section = end - (1 + 4 * (16 + 24 * count));
+            int section = end - (1 + 4 * (16 + 24 * count)) - 2; // v35 main/carry flags follow Spread
             var corrupt = (byte[])bytes.Clone(); corrupt[section] = 5;
             AssertEqual(false, Read(corrupt, out _), "reject count before allocation");
             corrupt = (byte[])bytes.Clone(); corrupt[section + 16] = (byte)(count + 1);

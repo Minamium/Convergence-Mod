@@ -11,6 +11,10 @@ internal readonly record struct FirstSeveranceSafeWindow(FirstSeveranceSafeMecha
 // The same sanctuaries cut the actual grid and its rendered segments.
 internal static class FirstSeveranceSafeWindows
 {
+    internal const int SpreadVolleyAge = FirstSeveranceGridVolley.OpeningTicks + 2 * FirstSeveranceGridVolley.CadenceTicks;
+    internal const int GridSpreadStart = SpreadVolleyAge - 84;
+    internal const int GridSpreadResolve = SpreadVolleyAge + FirstSeveranceGridVolley.TelegraphTicks
+        + FirstSeveranceGridVolley.StaggerTicks + 10;
     internal static FirstSeveranceSafeWindow? At(FirstSeveranceSubstate state, int step,
         ulong started, ulong tick, float x, float groundY)
     {
@@ -18,7 +22,8 @@ internal static class FirstSeveranceSafeWindows
         ulong age = tick - started;
         if (state == FirstSeveranceSubstate.Lattice)
         {
-            if (age >= 180 && age < 344) return new(FirstSeveranceSafeMechanic.Spread, started + 180, started + 336, x, groundY - 560);
+            if (age >= GridSpreadStart && age < GridSpreadResolve + 8)
+                return new(FirstSeveranceSafeMechanic.Spread, started + GridSpreadStart, started + GridSpreadResolve, x, groundY - 560);
         }
         if (state == FirstSeveranceSubstate.RemoteClaws && age < 600)
         {
@@ -32,7 +37,8 @@ internal static class FirstSeveranceSafeWindows
 
     internal static byte GridPattern(uint serial, ulong actionAge)
     {
-        int index = actionAge < 60 ? -1 : (int)((actionAge - 60) / FirstSeveranceGridVolley.CadenceTicks);
+        int index = actionAge < FirstSeveranceGridVolley.OpeningTicks ? -1
+            : (int)((actionAge - FirstSeveranceGridVolley.OpeningTicks) / FirstSeveranceGridVolley.CadenceTicks);
         return (byte)(((serial - 1) % 4) | (index == 2 ? 8u : 0u));
     }
 

@@ -1,5 +1,6 @@
 """Doll Raid render integration/export guards; GPU/game checks are separate."""
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -29,7 +30,7 @@ class PursuitShader(unittest.TestCase):
         adapter = (root / "FirstSeverancePursuitBeamVisuals.cs").read_text()
         self.assertIn("ray.Length,ray.HalfWidth", adapter)
         self.assertIn("FirstSeveranceBeamIgnition.At(ray,clock-fire)", adapter)
-        self.assertIn("if (live == 0) halfWidth = Math.Min(halfWidth, 3f)", text)
+        self.assertIn("halfWidth = Math.Min(halfWidth, 3f)", text)
         self.assertIn("Quad(c.Origin,c.Direction,c.Length,c.HalfWidth)", text)
         self.assertIn("Main.GameViewMatrix.TransformationMatrix", text)
         self.assertNotIn("UIScale", text)
@@ -48,7 +49,7 @@ class PursuitShader(unittest.TestCase):
         renderer = (root / "FirstSeveranceRaidVfx.cs").read_text()
         shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
         for name in ("AutoloadPass", "ForecastPass", "CoronaPass", "MouthPass",
-                     "OrbPass", "WakePass", "PressurePass", "RiftPass", "FlarePass"):
+                     "OrbPass", "WakePass", "PressurePass", "RiftPass", "FlarePass", "RibbonPass", "ForecastDustPass"):
             self.assertIn(f'"{name}"', renderer)
             self.assertIn(f"pass {name} {{", shader)
         owner = (root / "FirstSeverancePrototypePresentation.cs").read_text()
@@ -56,8 +57,82 @@ class PursuitShader(unittest.TestCase):
         self.assertIn("FirstSeveranceRaidVfx.EndFrame(batch)", owner)
         self.assertIn("FirstSeveranceRaidVfx.Reset()", owner)
 
+    def test_sparse_forecast_keeps_future_width_before_axis_clamp(self):
+        text = (ROOT / "Client/Encounters/FirstSeverance/FirstSeveranceRaidVfx.cs").read_text()
+        self.assertLess(text.index('"ForecastDustPass"'), text.index("halfWidth = Math.Min"))
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
+        dust = shader.split("float4 ForecastDust(")[1].split("float4 Corona(")[0]
+        self.assertIn("i.uv.x*shape.x,(i.uv.y*2-1)*shape.y", dust)
+        self.assertIn("light*occupancy*twinkle*fade*signal.z,0", dust)
+        self.assertIn("lerp(.22,.4,shape.w)", dust)
+
+    def test_all_beam_families_route_to_shared_material(self):
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        for name in ("FirstSeverancePursuitBeamVisuals.cs", "FirstSeveranceBeamMaterial.cs",
+                     "FirstSeveranceImpalingSwordVisuals.cs", "FirstSeveranceScoreVisuals.cs"):
+            self.assertIn("FirstSeveranceRaidVfx.Beam", (root / name).read_text())
+        emission = (root / "FirstSeveranceEmissionVisuals.cs").read_text()
+        self.assertIn("FirstSeveranceBeamMaterial.Flow", emission)
+        stage = (root / "FirstSeveranceStageVisuals.cs").read_text()
+        self.assertIn("FirstSeveranceBeamMaterial.SingleForecast", stage)
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
+        self.assertIn("Current(x,span,3100,shape.z)", shader)
+        self.assertIn("Current(x,span*1.41,2160,shape.z+.43)", shader)
+
+    def test_grid_ribbon_uses_shared_profile_and_stable_packet_coordinates(self):
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        renderer = (root / "FirstSeveranceRaidVfx.cs").read_text()
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/RaidEnergy.fx").read_text()
+        stage = (root / "FirstSeveranceStageVisuals.cs").read_text()
+        self.assertIn("grid.PulseAt(line, tick)", stage)
+        self.assertIn("FirstSeveranceGridPulse.TailFraction", renderer)
+        self.assertIn("FirstSeveranceGridPulse.HeadFraction", renderer)
+        self.assertIn("seedOrigin ?? origin", renderer)
+        self.assertIn('TrySetParameter("pulse",c.Pulse)', renderer)
+        self.assertIn('TrySetParameter("flowOffset",c.FlowOffset)', renderer)
+        self.assertIn("i.uv.x*shape.x+flowOffset", shader)
+        self.assertIn("Smoother(u/pulse.z)*Smoother((1-u)/pulse.w)", shader)
+
     def test_current_exports_match(self):
         exports.verify()
+
+    def test_portal_passes_are_opt_in_and_keep_lattice_material(self):
+        renderer = (ROOT / "Client/Encounters/FirstSeverance/FirstSeveranceRaidVfx.cs").read_text()
+        portal = (ROOT / "Assets/AutoloadedEffects/Shaders/PortalBeam.fx").read_text()
+        self.assertIn("if (double.IsFinite(fireAge))", renderer)
+        self.assertIn("ManagedShader shader=c.Portal?portal:legacy", renderer)
+        for name in ("AutoloadPass", "PortalForecastPass", "PortalCoronaPass", "PortalMouthPass"):
+            self.assertIn(f'"{name}"', renderer)
+            self.assertIn(f"pass {name} {{", portal)
+        # Accepted 0.2.71 lattice/untimed-verdict suite remains byte-identical;
+        # a future deliberate lattice change must explicitly update this guard.
+        for name, digest in {
+            "RaidEnergy.fx": "924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8",
+            "RaidEnergy.fxc": "299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7",
+        }.items():
+            self.assertEqual(hashlib.sha256((ROOT / "Assets/AutoloadedEffects/Shaders" / name).read_bytes()).hexdigest(), digest)
+        stage = (ROOT / "Client/Encounters/FirstSeverance/FirstSeveranceStageVisuals.cs").read_text()
+        lattice = stage.split("for (int line = 0; line < grid.Rays.Count; line++)")[1].split("foreach (var full in grid.CoreBeams)")[0]
+        self.assertIn("Arrive(tick - start, 2), color, reduced);", lattice)
+        self.assertNotIn("fireAge", lattice)
+        self.assertIn("grid.PulseAt(line, tick)", lattice)
+
+    def test_portal_closure_uses_damage_end_not_fire_or_charge(self):
+        renderer = (ROOT / "Client/Encounters/FirstSeverance/FirstSeveranceRaidVfx.cs").read_text()
+        shader = (ROOT / "Assets/AutoloadedEffects/Shaders/PortalBeam.fx").read_text()
+        self.assertIn("Math.Clamp(age-endAge,0,60)", renderer)
+        self.assertIn("float Closure() { return Ease(ceremony.y/9); }", shader)
+        self.assertIn("float TailFade() { return 1-Ease(ceremony.y/13); }", shader)
+        self.assertIn("float WarningDip() { return 1-.84*Ease((ceremony.x+8)/7); }", shader)
+        root = ROOT / "Client/Encounters/FirstSeverance"
+        for file, descriptor in {
+            "FirstSeverancePursuitBeamVisuals.cs": "endAge:end-start",
+            "FirstSeveranceEmissionVisuals.cs": "endAge:endTick-start",
+            "FirstSeveranceStageVisuals.cs": "endAge:grid.CoreEndTick-grid.StartTick",
+            "FirstSeveranceImpalingSwordVisuals.cs": "endAge:sword.Retract",
+            "FirstSeveranceScoreVisuals.cs": "endAge:FirstSeveranceChoreography.BladeEnd",
+        }.items():
+            self.assertIn(descriptor, (root / file).read_text())
 
     def test_stale_source_or_export_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

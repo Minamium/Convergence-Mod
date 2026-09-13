@@ -106,7 +106,7 @@ HP33%以下のPhase3では既存4攻撃に円形攻撃を追加し、直前の�
 
 ## 判定、同期、後始末
 
-- 既存のFactory／Runtime登録・共通セッション排他・終端スナップショットを利用する。終端schemaは2/version1。共通packet IDは変更せず、SlashWaveのshape追加・16byteのフィールド境界追加・円形上限3000px・叫び固定時刻を含む通信版34を全員で使う。
+- 既存のFactory／Runtime登録・共通セッション排他・終端スナップショットを利用する。終端schemaは2/version1。共通packet IDは変更せず、SlashWaveのshape追加・16byteのフィールド境界追加・円形上限3000px・叫び固定時刻を含む通信版36を全員で使う。
 - サーバー／SPが乱数、ロック位置、フェーズ、攻撃生成・時刻・後始末を所有する。斬撃波のみはユーザーの標準Projectile指定に従う [ADR-0023](../../adr/0023-ghost-samurai-native-wave-damage.md) の狭い例外：ネイティブProjectile.Damageで各ローカル参加者の無敵／FreeDodge／ConsumableDodgeを処理する。Runtimeの手動Hurt対象から波を明示的に除外し、二重被弾を防ぐ。その他は従来どおりサーバーが長方形／鬼火／内外円／本体掃引を判定してHurtInfoを送り、受信側は命中を再判定しない。
 - ボスは `SendExtraAI` / `ReceiveExtraAI` でFight GUID、時計、状態、最大HPとフィールド中心X/Y・半幅・半高さ（計16byte）を同期。不正な数値・サイズ、同じFightの境界変更、サーバーへの逆方向更新を拒否する。15tickごとと状態変更時に `netUpdate`。クライアントの時計は表示と標準斬撃波の現在位置に使い、受信が止まると30tickで停止する。ネイティブProjectile更新がRuntimeのPostUpdateWorldより先に来るSP/server側だけ、波の処理時刻を前回Age＋1として同じtickに合わせる。
 - 各Projectileに同じFight GUID、所有NPCスロット、固定予告開始／発射／終了時刻と幾何を付ける。ExtraAIは有限数値・方向・時刻・幅・所有者の上限を検証する。クライアント由来のProjectile情報はサーバーの戦闘に採用しない。

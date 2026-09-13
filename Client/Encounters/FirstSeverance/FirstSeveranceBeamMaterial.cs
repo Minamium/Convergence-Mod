@@ -9,34 +9,37 @@ internal static class FirstSeveranceBeamMaterial
 {
     internal static void SingleForecast(SpriteBatch batch, FirstSeveranceAttackAccents accents,
         Vector2 origin, Vector2 direction, float length, float halfWidth,
-        float charge, float opacity, Color color)
-        => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,RitualRenderClock.Time,
+        double age, float charge, float opacity, Color color, double fireAge)
+        => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,age,
             charge,0,opacity,color,Terraria.ModLoader.ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects,
-            mouth:false);
+            mouth:false,fireAge:fireAge);
 
     internal static void Flow(SpriteBatch batch,Vector2 origin,Vector2 direction,
         float length,float halfWidth,double age,Color color,float power,bool reduced,
-        float throatLength=0,float throatWidth=0)
+        float throatLength=0,float throatWidth=0,double fireAge=double.NaN,double endAge=double.NaN)
         => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,age,
-            1,1,power,color,reduced,confined:halfWidth>=120,mouth:throatLength>0);
+            1,1,power,color,reduced,confined:halfWidth>=120,mouth:throatLength>0,fireAge:fireAge,endAge:endAge);
 
     internal static void DrawTooth(SpriteBatch batch,FirstSeveranceAttackAccents accents,
         Vector2 origin,Vector2 direction,float length,float halfWidth,double clock,
-        float charge,float emission,float opacity,Color color,bool reduced)
+        float charge,float emission,float opacity,Color color,bool reduced,
+        double fireAge=double.NaN,double endAge=double.NaN)
         => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,clock,
-            charge,emission,opacity,color,reduced,confined:true,mouth:false);
+            charge,emission,opacity,color,reduced,confined:true,mouth:false,fireAge:fireAge,endAge:endAge);
 
     internal static void DrawVolume(SpriteBatch batch,FirstSeveranceAttackAccents accents,
         Vector2 origin,Vector2 direction,float length,float halfWidth,double clock,
-        float charge,float emission,float opacity,Color color,bool reduced)
+        float charge,float emission,float opacity,Color color,bool reduced,
+        double fireAge=double.NaN,double endAge=double.NaN)
         => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,clock,
-            charge,emission,opacity,color,reduced,confined:true,mouth:false);
+            charge,emission,opacity,color,reduced,confined:true,mouth:false,fireAge:fireAge,endAge:endAge);
 
     internal static void Draw(SpriteBatch batch,FirstSeveranceAttackAccents accents,
         Vector2 origin,Vector2 direction,float length,float halfWidth,double clock,
-        float charge,float emission,float opacity,Color color,bool reduced)
+        float charge,float emission,float opacity,Color color,bool reduced,
+        double fireAge=double.NaN,double endAge=double.NaN)
         => FirstSeveranceRaidVfx.Beam(batch,origin,direction,length,halfWidth,clock,
-            charge,emission,opacity,color,reduced,confined:halfWidth>=120,mouth:false);
+            charge,emission,opacity,color,reduced,confined:halfWidth>=120,mouth:false,fireAge:fireAge,endAge:endAge);
 
     internal static void CrushMembrane(SpriteBatch batch,FirstSeveranceAttackAccents accents,
         Vector2 center,float halfWidth,float halfHeight,double age,float charge,

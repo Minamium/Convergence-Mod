@@ -5,6 +5,8 @@ float3 beamColor;
 float4 signal; // charge, live energy, opacity, release
 float4 shape; // length, half-width, stable seed, detail
 float clock;
+float4 pulse; // unclipped packet U at quad ends, tail fraction, head fraction
+float flowOffset; // world distance from the moving head to the clipped quad start
 sampler cloudNoise : register(s1);
 sampler flowNoise : register(s2);
 sampler branchNoise : register(s3);
@@ -20,28 +22,66 @@ float3 Field(float x,float y) {
 }
 float Edge(float y) { return 1-smoothstep(1-1.5/max(shape.y,2),1,abs(y)); }
 float3 Pearl() { return lerp(beamColor,float3(1,.97,.94),.87); }
+float Smoother(float t) { t=saturate(t); return t*t*t*(t*(t*6-15)+10); }
+// A sustained jet is not a stationary rectangle full of scrolling transverse
+// noise. Each current has a moving bright head and a stretched, tapering tail.
+// The envelope is zero at BOTH wrap ends so a new current never pops into view.
+float2 Current(float x,float span,float speed,float phase) {
+    float u=frac((x-clock*speed)/span+phase);
+    float tail=Smoother((u-.025)/.79);
+    float front=1-Smoother((u-.81)/.18);
+    return float2(tail*front,exp2(-pow((u-.825)*24,2))*front);
+}
+float3 BeamLight(float x,float y) {
+    float travel=x-clock*(2450+min(shape.y*3,550));
+    float a=tex2D(cloudNoise,float2(travel*.0011+shape.z,y*.49+clock*.09)).r;
+    float b=tex2D(flowNoise,float2(x*.00165-clock*4.8+shape.z,y*2.7+a*.32)).r;
+    float c=tex2D(branchNoise,float2(x*.0023-clock*5.1,y*.9-a*.21+shape.z)).r;
+    float r=abs(y-(a-.5)*.36*(1-abs(y))*shape.w);
+    float span=520+min(shape.y*5,680);
+    float2 fast=Current(x,span,3100,shape.z);
+    float2 slow=Current(x,span*1.41,2160,shape.z+.43);
+    float width=.13+fast.x*.66;
+    float strand=exp2(-r*r/(width*width)*3.3);
+    float sideAxis=(a-.5)*.92;
+    float second=exp2(-pow((y-sideAxis)/(.08+slow.x*.38),2)*3);
+    float filaments=pow(saturate(b*1.55-c*.38),3);
+    float grain=.30+.60*saturate(b*1.4-c*.37);
+    // Feather inward continuously instead of a 1.5 px hard wall. A dim but
+    // unbroken mantle still marks the FULL authority width: currents are not
+    // safe holes. Confined beams never bloom across their neighbouring lanes.
+    float mantle=1-smoothstep(.58+a*.17,1,abs(y));
+    float depth=pow(saturate(1-r*r),.65);
+    float3 shadow=lerp(beamColor,float3(.35,.12,.65),.26);
+    float3 light=shadow*mantle*(.13+filaments*.4)
+        +beamColor*depth*(strand*fast.x*.48+second*slow.x*.3)
+        +Pearl()*(strand*(.10+fast.x*.38+fast.y*.24)*grain
+            +second*(slow.x*.20+slow.y*.20)*grain+filaments*mantle*.13
+            +exp2(-r*r*230)*(.35+c*.45)*(.3+fast.x*.7));
+    light+=Pearl()*signal.w*.28*exp2(-r*r*18);
+    return light;
+}
 float4 Beam(FI i):COLOR0 {
     float x=i.uv.x*shape.x,y=i.uv.y*2-1;
-    float3 n=Field(x,y);
-    float warp=(n.x-.5)*.24*shape.w;
-    float r=abs(y-warp*(1-abs(y)));
-    // Long drawn-out currents, separated by dark violet depths. Transverse
-    // noise alone made a coloured cloudy rectangle; stretch the flow axially.
-    float stream=tex2D(flowNoise,float2(x*.00075-clock*1.4+shape.z,y*3.8+n.x*.22)).r;
-    float filaments=pow(saturate(stream*1.65-n.y*.32),4);
-    float depth=pow(saturate(1-r*r),.55);
-    float core=exp2(-r*r*34)*(.8+n.z*.35);
-    float strandA=exp2(-pow(y-(n.x-.5)*.62,2)*210);
-    float strandB=exp2(-pow(y+.43+(n.y-.5)*.22,2)*280);
-    float strandC=exp2(-pow(y-.48+(n.z-.5)*.20,2)*320);
-    float3 shadow=lerp(beamColor,float3(.36,.13,.67),.32);
-    float3 light=shadow*depth*(.16+filaments*.62)
-        +beamColor*depth*(strandB+strandC)*.38
-        +Pearl()*(core*.95+strandA*.48+filaments*depth*.17);
-    light+=Pearl()*signal.w*.36*exp2(-r*r*14);
-    // The shared growing quad is the hitbox. A low continuous coloured mantle
-    // marks its full live width; the brilliant filaments are not separate lanes.
-    return float4(light*Edge(y)*signal.z,0);
+    // Only a few world pixels of end antialiasing; do not shorten a live
+    // collision corridor just to draw a decorative moving head inside it.
+    float cap=Smoother(x/3)*Smoother((shape.x-x)/4);
+    return float4(BeamLight(x,y)*Edge(y)*cap*signal.z,0);
+}
+float4 Ribbon(FI i):COLOR0 {
+    float u=lerp(pulse.x,pulse.y,i.uv.x);
+    // Same finite, rounded head / long tail profile as GridPulse.Intersects.
+    // The packet crosses the field instead of flipping an entire corridor on/off.
+    float cap=Smoother(u/pulse.z)*Smoother((1-u)/pulse.w);
+    float y=(i.uv.y*2-1)/max(cap,.00001);
+    float x=i.uv.x*shape.x+flowOffset;
+    float head=exp2(-pow((u-.9)*19,2));
+    float tail=Smoother(u/pulse.z);
+    float3 light=BeamLight(x,y)*(.5+.5*tail)
+        +Pearl()*head*exp2(-y*y*8)*1.05;
+    // Only antialias the visible contour. No corona filling nominal grid gaps,
+    // no longitudinal remapping, no seed change when the tail enters the arena.
+    return float4(light*Edge(y)*Smoother(cap*shape.y)*signal.z,0);
 }
 float4 Forecast(FI i):COLOR0 {
     float x=i.uv.x*shape.x,y=i.uv.y*2-1;
@@ -57,12 +97,35 @@ float4 Forecast(FI i):COLOR0 {
     // hash cells or warning rectangles. Bloom is bounded to a six-pixel strip.
     return float4(light*Edge(y)*signal.z,halo*.07*signal.z);
 }
+float4 ForecastDust(FI i):COLOR0 {
+    // Ray-local WORLD units, not UI or normalized-width cells. Only the points
+    // emit light; the rest of this full-footprint quad is exactly transparent.
+    float2 p=float2(i.uv.x*shape.x,(i.uv.y*2-1)*shape.y);
+    float2 cellSize=float2(118,min(46,max(12,shape.y)));
+    float2 cell=floor(p/cellSize);
+    float seed=Hash(cell+shape.z*17);
+    float occupancy=step(seed,lerp(.22,.4,shape.w));
+    float2 jitter=float2(Hash(cell+13.17+shape.z),Hash(cell-29.71-shape.z));
+    float2 center=(cell+.23+jitter*.54)*cellSize;
+    center+=float2(sin(clock*1.7+seed*31),cos(clock*1.3+seed*47))*2;
+    float2 q=p-center;
+    float twinkle=.24+.76*pow(.5+.5*sin(clock*(3+seed*3)+seed*53),3);
+    float size=1.1+signal.x*.65;
+    float core=exp2(-dot(q,q)/(size*size)*2.1);
+    float cross=exp2(-q.x*q.x*2.8-q.y*q.y*.11)
+        +exp2(-q.y*q.y*2.8-q.x*q.x*.11);
+    float fade=Smoother((shape.y-abs(center.y))/5)
+        *Smoother(center.x/5)*Smoother((shape.x-center.x)/5);
+    float3 light=Pearl()*core*.9+beamColor*cross*.28;
+    return float4(light*occupancy*twinkle*fade*signal.z,0);
+}
 float4 Corona(FI i):COLOR0 {
     float x=i.uv.x*shape.x,y=i.uv.y*2-1;
     float3 n=Field(x,y*2);
     float veil=exp2(-y*y*8)*pow(saturate(1-y*y),2);
     float jets=pow(saturate(n.z*1.85-n.y*.55),5)*veil;
-    return float4(beamColor*(veil*.16+jets*.18*shape.w)*signal.z,0);
+    float2 current=Current(x,760,2700,shape.z);
+    return float4(beamColor*(veil*.07+jets*(.08+current.x*.22)*shape.w)*signal.z,0);
 }
 float4 Mouth(FI i):COLOR0 {
     float2 p=(i.uv-.5)*2;
@@ -130,7 +193,9 @@ float4 Flare(FI i):COLOR0 {
 }
 technique RaidEnergy {
     pass AutoloadPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Beam(); }
+    pass RibbonPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Ribbon(); }
     pass ForecastPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Forecast(); }
+    pass ForecastDustPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 ForecastDust(); }
     pass CoronaPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Corona(); }
     pass MouthPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Mouth(); }
     pass OrbPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Orb(); }

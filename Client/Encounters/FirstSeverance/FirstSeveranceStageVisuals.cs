@@ -104,15 +104,19 @@ internal sealed class FirstSeveranceStageVisuals
         Color color = grid.Pattern % 2 == 0 ? new(128, 183, 255) : new(193, 123, 255);
         for (int line = 0; line < grid.Rays.Count; line++)
         {
-            ulong start = grid.RevealTick(line), fire = grid.LineFireTick(line), end = grid.LineEndTick(line);
+            ulong start = grid.RevealTick(line), fire = grid.LineFireTick(line);
             if (tick < start) continue;
             bool forecast = tick < fire;
             bool live = combat.GridVolley is not null && grid.LineIsLive(line, authorityTick);
-            var ray = forecast ? grid.Rays[line] : grid.RayAt(line, tick);
-            Vector2 origin = new(ray.X, ray.Y), direction = new(ray.DirectionX, ray.DirectionY);
-            float power = forecast ? Arrive(tick - start, 2) : live ? 1 : (1 - Window(tick, end, end + 12)) * .04f;
-            FirstSeveranceBeamMaterial.DrawTooth(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                tick - start, CastTension(tick, start, fire), forecast ? 0 : 1, power, color, reduced);
+            if (forecast)
+            {
+                var ray = grid.Rays[line];
+                FirstSeveranceBeamMaterial.DrawTooth(batch, accents, new(ray.X, ray.Y), new(ray.DirectionX, ray.DirectionY),
+                    ray.Length, ray.HalfWidth, tick - start, CastTension(tick, start, fire), 0,
+                    Arrive(tick - start, 2), color, reduced);
+            }
+            else if (live)
+                FirstSeveranceRaidVfx.GridRibbon(batch, grid.PulseAt(line, tick), tick - fire, color, reduced);
         }
         foreach (var full in grid.CoreBeams)
         {
@@ -123,18 +127,19 @@ internal sealed class FirstSeveranceStageVisuals
             if (warning)
             {
                 FirstSeveranceBeamMaterial.SingleForecast(batch, accents, origin, direction, ray.Length, ray.HalfWidth,
-                    gather, born, violet);
+                    tick - grid.StartTick, gather, born, violet, grid.FireTick-grid.StartTick);
                 continue;
             }
 
             bool active = combat.GridVolley is not null && authorityTick >= grid.FireTick && authorityTick < grid.CoreEndTick;
-            float power = active ? 1 : (1 - Window(tick, grid.CoreEndTick, grid.CoreEndTick + 12)) * .04f;
+            float power = active ? 1 : 1 - Window(tick, grid.CoreEndTick, grid.CoreEndTick + 12);
             if (power <= .001f) continue;
             FirstSeveranceBeamMaterial.Flow(batch, origin, direction, ray.Length, ray.HalfWidth,
-                tick - grid.StartTick, violet, power, reduced, throatLength: 150, throatWidth: 28);
+                tick - grid.StartTick, violet, power, reduced, throatLength: 150, throatWidth: 28,
+                fireAge:grid.FireTick-grid.StartTick,endAge:grid.CoreEndTick-grid.StartTick);
             float kick = ReleaseImpulse(tick, grid.FireTick);
             accents.Halo(batch, origin, new Vector2(125 + kick * 110, 25 + kick * 35), violet,
-                power * (reduced ? .22f : .55f), direction.ToRotation());
+                power * (active ? 1 : .06f) * (reduced ? .22f : .55f), direction.ToRotation());
         }
     }
 

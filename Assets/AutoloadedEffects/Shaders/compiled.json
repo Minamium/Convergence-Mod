@@ -6,13 +6,17 @@
     "/O3"
   ],
   "files": {
+    "PortalBeam.fx": {
+      "source_sha256": "e44dc75f4482a9bd4248170b239468f61aad0f42f2934d55ca4e06f03b75426d",
+      "output_sha256": "ccea10cd46a0e8672865f71cd2b3e315cc6f14623603be1ee3ac4955e4b78026"
+    },
     "PursuitPrismFlow.fx": {
       "source_sha256": "29cd1396f9ca0443aceaa440e02cc058a48aad6d172b00b9dd8197d08180853b",
       "output_sha256": "34c3114a88fb2a48d1cf0f5ab82790ba39496611315517c9e77d5dc3a90b0b5a"
     },
     "RaidEnergy.fx": {
-      "source_sha256": "0394320dca8af74c3371bb0bb362c195a0261c61cd36efdf51001b6f4dc1c2ca",
-      "output_sha256": "18bf58841d23059d053cf21465bcf8c9eac92b9f4e8c4e9a83d9e158221057f1"
+      "source_sha256": "924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8",
+      "output_sha256": "299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7"
     }
   }
 }

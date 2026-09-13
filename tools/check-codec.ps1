@@ -21,6 +21,7 @@ function New-Record([string]$name, [object[]]$values) {
     }
     if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 24) { $values = $values + @([ulong]0, $null) }
     if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 26) { $values = $values + @($null) }
+    if ($name.EndsWith('FirstSeveranceCombatProjection') -and $values.Count -eq 27) { $values = $values + @($null) }
     $ctor = $assembly.GetType($name, $true).GetConstructors($instanceFlags) | Where-Object { $_.GetParameters().Count -eq $values.Count } | Select-Object -First 1
     if ($null -eq $ctor) { throw "Constructor missing: $name" }
     return $ctor.Invoke($values)
@@ -70,7 +71,7 @@ foreach ($rosterCount in 1, 2, 3, 4) {
                     for ($i=0; $i -lt $rosterCount; $i++) {
                         $targets.SetValue((New-Record ($feature + 'FirstSeverancePrismTarget') @([int]$i,[float](1000+$i*350),[float](2000+$i*100),[float]12,[float]-5)), $i)
                     }
-                    $volley = $createPrism.Invoke($null, @([uint]17,[ulong]100,[byte]$step,$targets))
+                    $volley = $createPrism.Invoke($null, @([uint]17,[ulong]100,[byte]$step,$targets,$true))
                 }
                 if ((Get-Field $volley 'IsCharge')) {
                     $advance = $volley.GetType().GetMethod('AdvanceCharge', $instanceFlags)

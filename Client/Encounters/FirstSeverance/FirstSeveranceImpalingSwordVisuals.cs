@@ -30,12 +30,13 @@ internal static class FirstSeveranceImpalingSwordVisuals
             float length = body.Length;
             if(warning) FirstSeveranceRaidVfx.Beam(batch,origin,direction,ray.Length,ray.HalfWidth,
                 age,CastTension(age,FirstSeveranceImpalingSwords.WarningStart(sword.Wave),sword.Fire),
-                0,born,color,reduced,confined:true,mouth:false);
+                0,born,color,reduced,confined:true,mouth:false,fireAge:sword.Fire,endAge:sword.Retract);
             if (sword.Extension > .001f)
             {
                 // Both length and width follow the shared ignition geometry.
                 FirstSeveranceBeamMaterial.Flow(batch, origin, direction, length, body.HalfWidth,
-                    age, color, sword.Fade * (live ? 1 : .10f), reduced);
+                    age, color, sword.Fade * (live || age >= sword.Retract ? 1 : .10f), reduced,
+                    fireAge:sword.Fire,endAge:sword.Retract);
                 float stab = Window(age, sword.Fire, sword.Fire + 2) * (1 - Window(age, sword.Fire + 6, sword.Fire + 18));
                 accents.Halo(batch, origin + direction * length, new Vector2(75, 12),
                     Color.White, stab * (reduced ? .18f : .65f), angle + MathF.PI * .5f);

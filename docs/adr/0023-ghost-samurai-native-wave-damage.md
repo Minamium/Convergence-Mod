@@ -28,7 +28,7 @@ The runtime creates and registers each wave once on the server/SP. Its immutable
 
 In multiplayer, native hostile Projectile damage evaluates the owning local player and its normal immunity, FreeDodge and ConsumableDodge hooks. This is an intentional local-player hit resolution exception, not a claim of server-only wave hits. We add no custom client hit requests, forced-hit packet, dash cancellation, universal dash invulnerability, or independent client targeting. The accepted bounded server schedule/aim is the only geometry input. Clients awaiting the final aim cannot hit or draw a stale live wave. Native Terraria health/dodge synchronization and its trust boundary apply.
 
-Cleanup/phase transition removes all exact-Fight wave entities through the existing idempotent runtime scan. No saved state, identities or dependency versions change. Protocol34 appends the SlashWave shape without renumbering existing shapes/packet IDs; field-sized circle bounds,16-byte immutable summon-centered field geometry and shout-lock timing also require matching peers. The feature runtime owns field admission and expiring exact-Fight player containment; it does not attach First Severance Raid recovery or Ready rules.
+Cleanup/phase transition removes all exact-Fight wave entities through the existing idempotent runtime scan. No saved state, identities or dependency versions change. Protocol36 appends the SlashWave shape without renumbering existing shapes/packet IDs; field-sized circle bounds,16-byte immutable summon-centered field geometry and shout-lock timing also require matching peers. The feature runtime owns field admission and expiring exact-Fight player containment; it does not attach First Severance Raid recovery or Ready rules.
 
 ## Evidence and limits
 

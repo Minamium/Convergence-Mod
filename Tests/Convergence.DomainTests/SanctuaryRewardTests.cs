@@ -46,8 +46,9 @@ internal static partial class Program
             foreach (var pocket in pockets)
             {
                 const float acceptance = 36;
+                for (ulong tick = grid.FireTick; tick <= grid.EndTick; tick++)
                 for (float angle = 0; angle < MathF.Tau; angle += .1f)
-                    AssertEqual(false, grid.Intersects(grid.FireTick, pocket.X + MathF.Cos(angle) * acceptance,
+                    AssertEqual(false, grid.Intersects(tick, pocket.X + MathF.Cos(angle) * acceptance,
                         pocket.Y + MathF.Sin(angle) * acceptance, 10, 21), "the entire visible acceptance circle is safe for a body");
             }
             for (int a = 0; a < pockets.Count; a++)
@@ -55,8 +56,10 @@ internal static partial class Program
                     AssertEqual(true, MathF.Sqrt(MathF.Pow(pockets[a].X - pockets[b].X, 2)
                         + MathF.Pow(pockets[a].Y - pockets[b].Y, 2)) >= FirstSeveranceLanceTuning.SpreadSeparation + 72,
                         "four spread destinations retain separation throughout both 36px acceptance discs");
-            AssertEqual(true, grid.Intersects(grid.LineFireTick(0) + FirstSeveranceBeamIgnition.FullWidthTicks,
-                grid.Rays[0].X, grid.Rays[0].Y, 10, 21), "amplified hazards remain outside sanctuaries");
+            var liveTick = grid.LineFireTick(0) + 10;
+            var live = grid.PulseAt(0, liveTick).Bounds;
+            AssertEqual(true, grid.Intersects(liveTick, live.X + live.DirectionX * live.Length * .6f,
+                live.Y + live.DirectionY * live.Length * .6f, 10, 21), "travelling hazards remain outside sanctuaries");
             AssertThrows<ArgumentException>(() => new FirstSeveranceGridVolley(3, 100, pattern, 4000, 4000,
                 new[] { FirstSeveranceGridVolley.AimCoreBeam(4000, 4000, 4200, 3200) }), "no aimed core salvo through a sanctuary");
         }
@@ -66,8 +69,10 @@ internal static partial class Program
         for (uint serial = 1; serial < 13; serial++)
         {
             AssertEqual((byte)((serial - 1) % 4), FirstSeveranceSafeWindows.GridPattern(serial, 60), "first volley now ordinary");
-            AssertEqual((byte)((serial - 1) % 4), FirstSeveranceSafeWindows.GridPattern(serial, 162), "second volley ordinary");
-            AssertEqual((byte)(8 | ((serial - 1) % 4)), FirstSeveranceSafeWindows.GridPattern(serial, 264), "third volley Spread");
+            AssertEqual((byte)((serial - 1) % 4), FirstSeveranceSafeWindows.GridPattern(serial,
+                FirstSeveranceGridVolley.OpeningTicks + FirstSeveranceGridVolley.CadenceTicks), "second volley ordinary");
+            AssertEqual((byte)(8 | ((serial - 1) % 4)), FirstSeveranceSafeWindows.GridPattern(serial,
+                FirstSeveranceSafeWindows.SpreadVolleyAge), "third volley Spread");
         }
     }
 
@@ -84,10 +89,10 @@ internal static partial class Program
         }
         foreach (var action in FirstSeveranceChoreography.Unbound)
             AssertEqual(false, action.State == FirstSeveranceSubstate.Stack, "no standalone Phase II Stack");
-        foreach (int local in new[] { 336 })
+        foreach (int local in new[] { FirstSeveranceSafeWindows.GridSpreadResolve })
         {
             var window = FirstSeveranceSafeWindows.At(FirstSeveranceSubstate.Lattice, 0, start, start + (ulong)local, 4000, 4000)!.Value;
-            const ulong volleyAge = 264;
+            const ulong volleyAge = FirstSeveranceSafeWindows.SpreadVolleyAge;
             var grid = new FirstSeveranceGridVolley(3, start + volleyAge,
                 FirstSeveranceSafeWindows.GridPattern(3, volleyAge), 4000, 4000);
             AssertEqual(window.ResolveTick, start + (ulong)local, "deadline derived from authority action epoch");

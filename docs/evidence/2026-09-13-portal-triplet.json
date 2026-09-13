@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.72",
+  "protocol": 34,
+  "baseline": "b45ad9792ffe586b0c3c7e17500a74ff455663c7",
+  "source_commit": "52d431a43047b34428230f3d3e683d91da115751",
+  "source_branch": "main",
+  "source_sha256": "db4d3abe34a3c32b1699c827def3ca39aee16fe32fae2c611316dd993f9f0c9d",
+  "local_build_record": ".local/builds/20260913T120939110729Z/record.json",
+  "scope": "Client-only non-lattice beam choreography: soft veil/sparse glints, brief pre-fire dim, non-additive dark folds plus colored jet and white core, contraction only after accepted damaging end. Four original PortalBeam passes use existing Luminance loading and maps.",
+  "preserved": "Accepted lattice forecast and finite-ribbon shader/source bytes, pulse geometry and cadence. All authority targets, ignition, collision, damage, protocol, player circles/verdicts, bullets, Boss/stage/endings, audio, weapons/rewards and Ghost Samurai remain unchanged. Six pre-existing locale files match the 0.2.71 build record byte-for-byte and remain outside these commits.",
+  "reference_analysis": {
+    "report": "docs/research/WOTG_RAID_BENCHMARK.md#f15--nameless-portal-triplet-2026-09-13",
+    "recording": "User-supplied B (2026-09-13 20-00-10.mp4), 133.85s, 1920x1012, VFR average29.83fps. Original untouched; no audio assessment.",
+    "method": "Three 3fps overview sheets and nine 16-frame native consecutive sheets (144 frames), no interpolation or fps resampling in the native sheets. Ranges30.416-31.993,32.063-33.629,33.429-34.999 seconds. All nine sheets inspected.",
+    "visible_first_fire_seconds": [31.393, 32.929, 34.463],
+    "finding": "Vertical/horizontal/vertical: soft forecast builds then dims, continuous white-core colored/dark jet emerges, body contracts to thin light before clearing. Approximate one-native-frame precision; visual appearance does not prove hit timing. Teleport bloom and weapon stars are distinguished from beam effects.",
+    "sources": "Official pinned WotG7cb5b86c770e73d6853749b2b688d478ba3326a7: PerpendicularPortalLaserbeams behavior, TelegraphedPortalLaserbeam, forecast/live shaders and base telegraphed laser. Exact paths and source/recorded-version uncertainty are in F15. Luminance1.0.14 ManagedShader direct binding/Apply rechecked.",
+    "rights": "Independently authored shader; no WotG code/equations/art/audio copied. Recording and native frame sheets remain ignored locally; no third-party source mirror or media enters Git/package.",
+    "local_outputs": ".local/portal-triplet-20260913: overview/native sheets, compiled GPU diagnostic and rapid motion sheets, portal-beam-comparison.mp4. These are material inspections, not game captures."
+  },
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "hjson_files_parsed": 18,
+    "source_changed_during_build": false,
+    "bytes": 54693162,
+    "sha256": "0f5c748ebddeb01c4b6b13191a9d18f1dfa542752068ad25aa689478314144eb",
+    "installed_hash_verified": true,
+    "previous_package": "Preserved by dev.py in ignored local archive. No GUI/game-server launch, save or Mod-list change. Build was from locally fast-forward-integrated main with pending attribution/research edits and preserved locales recorded in the local dirty manifest."
+  },
+  "verification": {
+    "shader_guards": "10 passed: four portal passes and explicit timed opt-in, lattice legacy route/hash, descriptor-end contraction, existing all-beam adapters, world/server/state boundaries, sparse forecast extent, export integrity and stale-source rejection.",
+    "gpu": "Actual compiled FNA/D3D11 previews through installed dependency textures: left0.2.71/right0.2.72 over an original structured background, half-widths12/36/76/120px. 108 frames with diagnostic forecast60/live30 and58 frames with current Prism forecast28/live12; both at60Hz. Shared production ignition and grid-pulse methods loaded from unchanged passing domain assembly. All four new passes drawn. 16 diagnostic and12 rapid selected frames plus full-width still inspected.",
+    "lattice": "All166 lower-row legacy lattice comparisons are pixel-identical. RaidEnergy.fx SHA256924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8; export299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7 remain unchanged. This is offline isolation evidence, not gameplay acceptance.",
+    "domain_codec": "Inputs/dependencies unchanged; reused0.2.70's189 domain cases and324 protocol34 round-trips /50 malformed rejections. No redundant local rerun.",
+    "static": "Passed final single wrapper: catalog regenerated once and checked (66 documents), repository policy (658 files), YAML (10 files)."
+  },
+  "runtime_not_run": [
+    "Actual tModLoader reload/autoload",
+    "Non-lattice forecast dip, colored jet and closure readability during multiplayer overlap",
+    "Dark folds must not be mistaken for safe gaps; post-damage thin residue must read as harmless",
+    "Reduced Effects, UI107%/zoom and measured frame time",
+    "User aesthetic acceptance against the selected recorded triplet"
+  ]
+}

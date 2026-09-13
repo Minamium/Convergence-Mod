@@ -399,6 +399,23 @@ internal static class FirstSeverancePacketCodec
                 writer.Write(ray.Length); writer.Write(ray.HalfWidth);
             }
         }
+        // v35 appends the bounded overlap; older field offsets stay stable.
+        WriteBoolean(writer, combat.LanceVolley?.SustainedPrism ?? false);
+        WriteBoolean(writer, combat.CarriedLance is not null);
+        if (combat.CarriedLance is { } carried)
+        {
+            writer.Write(carried.Serial);
+            writer.Write(carried.StartTick);
+            writer.Write(carried.Step);
+            writer.Write((short)carried.TargetSlot);
+            writer.Write(checked((byte)carried.Rays.Count));
+            foreach (var ray in carried.Rays)
+            {
+                writer.Write(ray.X); writer.Write(ray.Y);
+                writer.Write(ray.DirectionX); writer.Write(ray.DirectionY);
+                writer.Write(ray.Length); writer.Write(ray.HalfWidth);
+            }
+        }
     }
 
     private static bool TryReadCombat(
@@ -562,8 +579,30 @@ internal static class FirstSeverancePacketCodec
             try { spread[i] = new(serial, start, rays, FirstSeveranceAttackKind.PursuitPrism, step, target); }
             catch (ArgumentException) { return false; }
         }
+        if (!TryReadBoolean(reader, out bool sustained) || !TryReadBoolean(reader, out bool hasCarried)) return false;
+        FirstSeveranceLanceVolley? carriedLance = null;
         try
         {
+            if (sustained)
+            {
+                if (lance is not { Kind: FirstSeveranceAttackKind.PursuitPrism }) return false;
+                lance = new(lance.Serial, lance.StartTick, lance.Rays, lance.Kind, lance.Step,
+                    lance.TargetSlot, sustainedPrism: true);
+            }
+            if (hasCarried)
+            {
+                uint serial = reader.ReadUInt32();
+                ulong start = reader.ReadUInt64();
+                byte step = reader.ReadByte();
+                int target = reader.ReadInt16(), rayCount = reader.ReadByte();
+                if (rayCount < 1 || rayCount > participantCount) return false;
+                var rays = new FirstSeveranceLanceRay[rayCount];
+                for (int j = 0; j < rayCount; j++)
+                    rays[j] = new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+                        reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                carriedLance = new(serial, start, rays, FirstSeveranceAttackKind.PursuitPrism,
+                    step, target, sustainedPrism: true);
+            }
             combat = new FirstSeveranceCombatProjection(
                 encounterSequence,
                 fightId,
@@ -582,7 +621,7 @@ internal static class FirstSeverancePacketCodec
                 mechanicResult,
                 mechanicRevision,
                 Array.AsReadOnly(participants),
-                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles, mechanicTick, impacts, spread);
+                lance, bossPhase, bossPhaseStartedTick, grid, actionStartedTick, actionIndex, completedPhaseCycles, mechanicTick, impacts, spread, carriedLance);
             return true;
         }
         catch (ArgumentException)

@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.71",
+  "protocol": 34,
+  "baseline": "a38495698d2c4fb15c31cc40a0d85861f7d5c884",
+  "source_commit": "9b6ffe1db5cdaa10bf7be793faa29a1de43af00d",
+  "source_branch": "main",
+  "source_sha256": "a81c88e0ee7750ccc6f7e27aac30896bc770350bf75fe331e6907db0cba95da1",
+  "local_build_record": ".local/builds/20260913T112838661336Z/record.json",
+  "scope": "Client-only all-beam material revision: sparse ray-local forecast glints retain the accepted future width before axis clamping; asymmetric travelling bright heads and long tails, independent dark/bright currents, inward-feathered mantle. Core forecast and release share accepted cast-age. No domain, collision, timing or protocol changes.",
+  "preserved": "Prior finite lattice packet and stagger, all accepted targets and hit rules, player circles, HP/damage, recovery, audio, stage/endings, weapons/rewards and integrated Ghost Samurai work. Six pre-existing English locale files match the prior build record byte-for-byte and remain outside these commits.",
+  "reference_analysis": {
+    "report": "docs/research/WOTG_RAID_BENCHMARK.md#f14--recorded-beam-motion-2026-09-13",
+    "recordings": "Two user-provided local MP4s: A 157.31s / 29.81 average fps, B 133.85s / 29.83 average fps; both 1920x1012. No source audio was listened to.",
+    "method": "Inspected six whole-duration overview pages, four 4fps detailed sequences, and two native consecutive 24-frame sequences (A73.411-74.178s, B31.127-31.893s). Not a claim of uninterrupted full-frame playback.",
+    "findings": "A's moving red shots have an advancing head and trailing path; HadesLaserBurst is a candidate, not the HadesSuperLaserbeam mouth cannon. Nameless shows sustained flowing jets with evolving contours. Player-weapon effects and background stars were not uncritically attributed to the Boss. Exact recorded Mod builds remain unknown.",
+    "public_sources": "Official pinned WoTM 5556a3adcbabffc6fc95685e34f1ee22cee31d9a and WotG 7cb5b86c770e73d6853749b2b688d478ba3326a7; exact class/shader paths and adoption/rejection are in F14.",
+    "local_outputs": ".local/video-reference-20260913 contains overview/detail/native sheets. Originals unchanged. No recording, extracted art, public source mirror or third-party shader is committed. Isolated imageio-ffmpeg tools remain ignored."
+  },
+  "native_package": {
+    "configuration": "Release",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "hjson_files_parsed": 18,
+    "source_changed_during_build": false,
+    "bytes": 54687536,
+    "sha256": "0dcb498b1f00185221ae04730e49d5f1047439ffc67205ea42c1c0fc31b893c9",
+    "installed_hash_verified": true,
+    "previous_package": "Preserved by dev.py in the local ignored archive. No GUI, game/server play session, save or Mod-list mutation."
+  },
+  "verification": {
+    "shader_guards": "8 passed: named passes, future width before axis clamp, stable grid profile/flow, all beam adapter routing, client-only/world coordinates/state restoration and export integrity.",
+    "native_shader": "FXC compilation passed with expected deprecated-effects warning; actual compiled exports rendered through installed FNA/D3D11 with separately installed Luminance maps read in memory.",
+    "preview": ".local/video-reference-20260913/beam-material-comparison.mp4: left 0.2.70 / right 0.2.71, four diagnostic half-widths (12/36/76/120px), slight diagonal and actual finite grid packet over an original structured backdrop. 160 frames at 40Hz / 1.5 simulation ticks each. The extended 48-tick forecast/hold is diagnostic, not production attack cadence. Final still plus warning frame024 and sequence frames050/052/054/056/058/060/062/064 inspected. No game/FPS claim.",
+    "domain_codec": "Unchanged source/dependencies; reused 0.2.70's 189 domain cases and 324 codec round-trips / 50 malformed rejections. No redundant local rerun.",
+    "static": "Selected wrapper passed: catalog regenerated once and checked (66 documents), repository policy (655 files), YAML (10 files). No repeated domain/codec run."
+  },
+  "runtime_not_run": [
+    "Actual tModLoader reload/autoload",
+    "All beam families: sparse forecast footprint and live-current readability during overlapping multiplayer combat",
+    "Dark internal current gaps must not be mistaken for safe lanes; existing hit geometry unchanged",
+    "Reduced Effects, UI107%/zoom and measured frame time"
+  ]
+}

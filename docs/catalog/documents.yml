@@ -45,7 +45,7 @@ documents:
 - doc_id: adr.0023
   path: docs/adr/0023-ghost-samurai-native-wave-damage.md
   title: 'ADR-0023: Native player damage for Ghost Samurai slash waves'
-  content_sha256: 192365d0e46de97755c8f5631f18c0275cd61291b235d242a2be99ce6f5dfba4
+  content_sha256: 4fd527238d8de4bcfd63cfb55096af24cd470875ced200d34cbd888e99c6fa9a
   document_type: adr
   status: accepted
   owners:
@@ -348,7 +348,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: e829b24332012833eb3fb5409c49321e290acc3fc866de89a4475673ca4eea70
+  content_sha256: 436ebd5d202a1adbe2d44e8925b0013c3b54502be8946dfd155f4635fa998a72
   document_type: index
   status: accepted
   owners:
@@ -614,7 +614,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: 不幸な人形劇 — Encounter Specification
-  content_sha256: d837004c61234d90a3673e2d9222292ace5f3db73fd2653720ba179ad3e9aa0b
+  content_sha256: 4ea1894b12a804ba96380e1ec3de7ded310617c2823df462c8d5ccc2e32ac9e1
   document_type: spec
   status: accepted
   owners:
@@ -642,7 +642,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 53fa28fb38b26cb3fdefc0cfdf7cc81f96f43e49d6a32621a39a13876790f105
+  content_sha256: 90433dfae9dd74061f1286e1fc74232e7de2b184515dafd81d3a8dd5e9c24d1e
   document_type: spec
   status: provisional
   owners:
@@ -684,7 +684,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 88e06081311123343b06d0599559928c07c8f02ec4926a9678277e01d120a2aa
+  content_sha256: c800b44acdfbf8e57f07ddba107a2a9ba05842ab7c7fcd1ac5cd638d47295206
   document_type: spec
   status: provisional
   owners:
@@ -808,7 +808,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 93b3945aaaf55aaec9183f89bc78dc8f04cd70bf395ad60059cd4c47047c2127
+  content_sha256: acd83ffe11f74cf5ebd71a24557deff7b61589b367efb8daaf4df1172e2833cc
   document_type: policy
   status: accepted
   owners:
@@ -941,12 +941,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 6e63069a624f3f5d62fe5097eaf37debd6d1889766a676673965bef9035a97db
+  content_sha256: eb0920061df28702195bb6ef4d42f29a6a21b8a8932e766d9f8988204f653495
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -1078,7 +1078,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 0b862d3ec657734ca491fc2147d07d33c02ea090d25e6fb6edd3b90d2ca25732
+  content_sha256: 2aba60b463c83d2e02f437917250daf6f22c25fc5d57d3f6bbe5a90408673ce9
   document_type: governance
   status: accepted
   owners:
@@ -1123,7 +1123,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: c54af7a80231750c606cd13aa587daf052b950adc4ccd4e9f8ddf35915ab3e38
+  content_sha256: 734c6ff4fc551a56f817c552ac269eaf1286e885cd8294c8a47372f5bb112038
   document_type: status
   status: accepted
   owners:
@@ -1320,7 +1320,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 8cf2e6b49ddbf622fea5ddbbc63756a1784df844203cc2e4fe987889d4c2c37f
+  content_sha256: 47dc209d5e2ccd674a5507667bd6643504e522e4e1fb288dcaa468974b6bedef
   document_type: research
   status: historical
   owners:
@@ -1342,7 +1342,7 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: 2bc8da214dc5f849cb7edc9d17cd35728a5b26fc20a4c23f96a297114c673dff
+  content_sha256: e02fa50ec9e25ea63d49e94ea629745a01d22b6bd9457ac23646b16759abc38d
   document_type: research
   status: provisional
   owners:

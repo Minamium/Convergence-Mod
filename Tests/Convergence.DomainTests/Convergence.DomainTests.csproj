@@ -54,6 +54,7 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeverancePartyScaling.cs" Link="Domain/FirstSeverancePartyScaling.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBossPhases.cs" Link="Domain/FirstSeveranceBossPhases.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceGridVolley.cs" Link="Domain/FirstSeveranceGridVolley.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceGridPulse.cs" Link="Domain/FirstSeveranceGridPulse.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceDamageWindow.cs" Link="Domain/FirstSeveranceDamageWindow.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceVisualCurves.cs" Link="Domain/FirstSeveranceVisualCurves.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceContainmentBounds.cs" Link="Domain/FirstSeveranceContainmentBounds.cs" />
@@ -63,6 +64,8 @@
              Link="Domain/FirstSeveranceAttackPatterns.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceLance.cs"
              Link="Domain/FirstSeveranceLance.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceLanceLedger.cs"
+             Link="Domain/FirstSeveranceLanceLedger.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCombatProjection.cs"
              Link="Domain/FirstSeveranceCombatProjection.cs" />
     <Compile Include="../../Common/Encounters/Abstractions/AcceptedEncounterStart.cs"

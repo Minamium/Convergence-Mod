@@ -1,13 +1,13 @@
 {
   "feature": "Ghost Samurai slash waves, slash/shout cues and summon-centered field",
-  "version": "0.2.70",
-  "protocol": 34,
-  "base_commit": "6f4a3a69cbd37e093e9ff7e9b11590273188030f",
+  "version": "0.2.74",
+  "protocol": 36,
+  "base_commit": "0a038302cf1afe621859cc3237b25391a676acd4",
   "branch": "feat/ghost-samurai-wave-audio",
-  "source_sha256": "0147d017befb8b200b697c2bdd45857f50d08e43f82484eb76a12f2009607a34",
+  "source_sha256": "fad4a6c73f91b0d93fa220cbdaae368b58daf1c6e56d53acb4122860dca4960a",
   "artifact": {
-    "bytes": 54736290,
-    "sha256": "d4691d1a04e04523a1b418bd88632bacc29e30edeba69527747ab1de28bcab3a"
+    "bytes": 56837888,
+    "sha256": "5aa7b8eeaa7bb03c87be9238bb9bd2d10bf0e44009b3e47f512b3363a3384c21"
   },
   "build": {
     "mode": "native isolated profile",
@@ -25,7 +25,7 @@
     "global_type_registration": "2 passed using installed tML ValidateType",
     "summon_type": "Convergence/GhostSamuraiSummon retained",
     "offline_preview": "12 panels; compiled production circle/wave renderers with GDI stroke adapter, final field clipping inspected; not FNA/game rendering",
-    "static_domain_codec": "passed: 663 files, 67 docs, 10 YAML; 194 domain tests; protocol34 324 round-trips and 50 malformed rejections"
+    "static_domain_codec": "passed: latest-main integrated static/docs/YAML checks; 199 domain tests; protocol36 324 round-trips and 50 malformed rejections"
   },
   "runtime": {
     "status": "not_run; user-owned",
@@ -49,5 +49,6 @@
     "Wave24px/tick with64x480px OBB; shout delay18 ticks.",
     "No personal translations, saves, Mod lists, build products or dependency binaries committed.",
     "Build source hash precedes documentation-only evidence/catalog updates."
-  ]
+  ],
+  "integration": "Preserves current Doll0.2.73/protocol35 behavior; only shared version advances for Ghost Samurai fields and waves."
 }

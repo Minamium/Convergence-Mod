@@ -238,7 +238,8 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             // first discrete contact, not from its release or center crossing.
             npc.velocity = Vector2.Zero;
             aimedSlash = AddWave(npc, target, GhostSamuraiRules.GridFollowWarning, true);
-            int flight = SamuraiWaveRules.FlightTicks(aimedSlash.Hazard, target.Center.X, target.Center.Y, target.width * .5f, target.height * .5f);
+            Rectangle reference = target.Hitbox;
+            int flight = SamuraiWaveRules.FlightTicks(aimedSlash.Hazard, reference.Center.X, reference.Center.Y, reference.Width * .5f, reference.Height * .5f);
             int gridFire = SamuraiWaveRules.GridFire(aimedSlash.Hazard, flight);
             int gridBorn = gridFire - GhostSamuraiRules.GridWarning;
             float halfWidth = GhostSamuraiRules.GridWidth / 2, halfHeight = GhostSamuraiRules.GridHeight / 2;
@@ -258,13 +259,15 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
 
     private GhostSamuraiAttackProjectile AddWave(NPC npc, Player target, int warning, bool fixedReference)
     {
-        Vector2 d = (target.Center - npc.Center).SafeNormalize(Vector2.UnitX);
+        Rectangle reference = target.Hitbox;
+        Vector2 aimPoint = fixedReference ? reference.Center.ToVector2() : target.Center;
+        Vector2 d = (aimPoint - npc.Center).SafeNormalize(Vector2.UnitX);
         var h = new SamuraiHazard(SamuraiShape.SlashWave, npc.Center.X, npc.Center.Y, d.X, d.Y,
             SamuraiWaveRules.ChargedSlashWaveWidth, SamuraiWaveRules.ChargedSlashWaveHeight / 2,
             age, age + warning, age + warning + SamuraiWaveRules.WaveLife, GhostSamuraiRules.ChargeDamage);
         if (fixedReference)
         {
-            int flight = SamuraiWaveRules.FlightTicks(h, target.Center.X, target.Center.Y, target.width * .5f, target.height * .5f);
+            int flight = SamuraiWaveRules.FlightTicks(h, reference.Center.X, reference.Center.Y, reference.Width * .5f, reference.Height * .5f);
             h = h with { End = h.Fire + Math.Max(SamuraiWaveRules.WaveLife, flight + 24) };
         }
         lastWaveEnd = Math.Max(lastWaveEnd, h.End);

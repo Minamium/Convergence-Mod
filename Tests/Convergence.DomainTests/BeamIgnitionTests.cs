@@ -50,16 +50,73 @@ internal static partial class Program
                 AssertEqual(20ul, end - fire, "each line retains full active duration");
                 AssertEqual(false, grid.LineIsLive(line, fire - 1), "no early line harm");
                 AssertEqual(false, grid.LineIsLive(line, end), "no damaging residue");
-                AssertEqual(grid.Rays[line], grid.RayAt(line, fire + 7), "restored full locked shape");
-                AssertEqual(0f, grid.RayAt(line, fire).Length, "first instant starts at origin");
-                for (double age = 0; age <= 7; age += .25)
-                    AssertEqual(peer.RayAt(line, fire + age), grid.RayAt(line, fire + age), "fractional shared geometry");
+                AssertEqual(true, grid.PulseAt(line, fire + 10).Length < grid.Rays[line].Length, "finite packet, not a lit corridor");
+                AssertEqual(0f, grid.PulseAt(line, fire).Length, "first instant starts at origin");
+                for (double age = 0; age <= 20; age += .25)
+                    AssertEqual(peer.PulseAt(line, fire + age), grid.PulseAt(line, fire + age), "fractional shared geometry");
             }
             AssertEqual(grid.FireTick, first, "no global delay added");
-            AssertEqual(8ul, last - first, "rapid complete scattered burst");
+            AssertEqual(30ul, last - first, "readable half-second scattered deployment");
             AssertEqual(true, grid.EndTick < grid.StartTick + FirstSeveranceGridVolley.CadenceTicks, "no next volley truncation");
         }
         AssertEqual(true, changedOrder, "new volley changes scatter order");
+    }
+
+    [DomainTest("Lattice ribbon head and tail bound visible collision continuously")]
+    private static void LatticeRibbonBounds()
+    {
+        foreach (bool vertical in new[] { false, true })
+        {
+            var ray = new FirstSeveranceLanceRay(4000, 3000, vertical ? 0 : 1, vertical ? 1 : 0, vertical ? 1120 : 2560, 12);
+            float priorHead = 0, priorTail = -ray.Length;
+            for (int sample = 0; sample <= 2000; sample++)
+            {
+                var pulse = new FirstSeveranceGridPulse(ray, ray, sample / 100d);
+                AssertEqual(true, pulse.HeadDistance >= priorHead && pulse.TailDistance >= priorTail, "packet moves only forward");
+                if (sample > 0) AssertEqual(true, pulse.HeadDistance - priorHead < 1.84f, "continuous fractional front");
+                priorHead = pulse.HeadDistance; priorTail = pulse.TailDistance;
+                float ahead = pulse.EndDistance + 1, behind = pulse.StartDistance - 1;
+                AssertEqual(false, pulse.Intersects(ray.X + ray.DirectionX * ahead, ray.Y + ray.DirectionY * ahead, 0, 0), "no invisible damage ahead");
+                AssertEqual(false, pulse.Intersects(ray.X + ray.DirectionX * behind, ray.Y + ray.DirectionY * behind, 0, 0), "no invisible damage behind tail");
+                if (pulse.Length <= 0) continue;
+                foreach (float u in new[] { .05f, .2f, .6f, .93f })
+                {
+                    float distance = pulse.TailDistance + pulse.PacketLength * u;
+                    if (distance < pulse.StartDistance || distance > pulse.EndDistance) continue;
+                    float width = pulse.HalfWidth * FirstSeveranceGridPulse.Envelope(u);
+                    float x = ray.X + ray.DirectionX * distance, y = ray.Y + ray.DirectionY * distance;
+                    AssertEqual(true, pulse.Intersects(x, y, 0, 0), "visible live spine damages");
+                    AssertEqual(false, pulse.Intersects(x - ray.DirectionY * (width + .02f), y + ray.DirectionX * (width + .02f), 0, 0), "taper is geometry not alpha-only rectangle");
+                    AssertEqual(true, pulse.Intersects(x - ray.DirectionY * width * .7f, y + ray.DirectionX * width * .7f, 0, 0), "inside luminous tapered body");
+                }
+            }
+            AssertEqual(0f, new FirstSeveranceGridPulse(ray, ray, 20).Length, "last tail exits without a full-width switch-off");
+            var late = new FirstSeveranceGridPulse(ray, ray, 10);
+            AssertEqual(false, late.Intersects(ray.X, ray.Y, 10, 21), "source clear once tail passes");
+        }
+    }
+
+    [DomainTest("Lattice sanctuary cuts preserve one travelling packet and complete volley budget")]
+    private static void LatticeRibbonCuts()
+    {
+        var grid = new FirstSeveranceGridVolley(3, 100, 8, 4000, 4000);
+        bool sawCut = false;
+        for (int a = 0; a < grid.Rays.Count; a++)
+            for (int b = a + 1; b < grid.Rays.Count; b++)
+            {
+                var first = grid.PulseAt(a, 180);
+                var second = grid.PulseAt(b, 180);
+                if (first.Track != second.Track) continue;
+                sawCut = true;
+                AssertEqual(grid.LineFireTick(a), grid.LineFireTick(b), "same track does not re-fire at a sanctuary");
+                AssertEqual(first.HeadDistance, second.HeadDistance, "same moving head across cuts");
+                AssertEqual(first.TailDistance, second.TailDistance, "same moving tail across cuts");
+                AssertEqual(first.FlowOffset - first.StartDistance, second.FlowOffset - second.StartDistance, "material anchored to head not cut origin");
+            }
+        AssertEqual(true, sawCut, "test exercises split tracks");
+        AssertEqual(true, FirstSeveranceSafeWindows.SpreadVolleyAge + FirstSeveranceGridVolley.DurationTicks <= 450, "third volley completes before action deadline");
+        AssertEqual(true, FirstSeveranceGridVolley.OpeningTicks + 3 * FirstSeveranceGridVolley.CadenceTicks
+            + FirstSeveranceGridVolley.DurationTicks > 450, "no truncated fourth volley");
     }
 
     [DomainTest("Beam ignition Final score and rotating sweep use animated not full-size hits")]
