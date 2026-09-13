@@ -1,0 +1,51 @@
+{
+  "feature": "Ghost Samurai Phase3 integration and shared playtest installation",
+  "version": "0.2.69",
+  "protocol": 33,
+  "merged_pr": 12,
+  "commit": "2f086e4814fb10051b2d18f3b53c1eff67880770",
+  "source_sha256": "1d04af95430402bffdc50cbc7f7dadd62d35954ddd587649fd94977973e8da87",
+  "artifact": {
+    "bytes": 54726262,
+    "sha256": "5d14d83b9fd2760f0e8a5eb4e1fc1a59a25ad5fded6a1153ea118eda72c38ae8"
+  },
+  "build": {
+    "mode": "native, canonical main and existing shared profile",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "shader_exports": "passed",
+    "source_changed": false
+  },
+  "verification": {
+    "installed_hash": "matches build record",
+    "merged_tree": "matches verified feature 3d16b712d87929a25e9ca3d4634e8f56d2b81ac1",
+    "global_type_registration": "2 passed with installed loader and installed package",
+    "summon_type": "Convergence/GhostSamuraiSummon retained",
+    "prior_checks": "187 domain cases, 324 codec round-trips and 50 malformed rejections reused for identical code; PR12 CI run 34734967288 passed"
+  },
+  "preservation": {
+    "preexisting_modified_locales": 5,
+    "preexisting_untracked_setup_record": "hash unchanged",
+    "enabled_mod_list": "hash unchanged; Convergence and Luminance already enabled",
+    "modsources_junction": "unchanged canonical main",
+    "previous_package": "0.2.66 backed up by native build record",
+    "saves": "not modified"
+  },
+  "runtime": {
+    "status": "not_run; user-owned",
+    "next_action": "Reload Mods or restart tModLoader; no Build + Reload needed for unchanged source",
+    "checks": [
+      "late dash and contact-only rush",
+      "charged release rhythm",
+      "fixed-center circle out/in/out/in",
+      "late-peer alignment",
+      "phase/terminal cleanup and re-summon"
+    ]
+  },
+  "notes": [
+    "No GUI, game or gameplay server session was started.",
+    "Existing personal translations are retained in the local package, excluded from implementation commits.",
+    "Every peer needs the matching protocol33 package."
+  ]
+}
