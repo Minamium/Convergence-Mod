@@ -4,9 +4,9 @@ using System.IO;
 namespace Convergence.Content.Encounters.GhostSamurai;
 
 internal enum SamuraiPhase : byte { Phase1 = 1, Phase2 = 2, Phase3 = 3 }
-internal enum SamuraiAttack : byte { Idle, DirectionalSlash, ChargedSlash, GridSlash, Phase2DashSlash }
+internal enum SamuraiAttack : byte { Idle, DirectionalSlash, ChargedSlash, GridSlash, Phase2DashSlash, Phase3CircleAttack }
 internal enum SamuraiBeat : byte { Recovery, Approach, Telegraph, Strike, Transition }
-internal enum SamuraiShape : byte { Slash, Wisp }
+internal enum SamuraiShape : byte { Slash, Wisp, RushVisual, InnerSlash, OuterSlash, InnerKamaitachi, OuterKamaitachi }
 
 // Shared by the authority, read-only presentation and dependency-free tests.
 internal static class GhostSamuraiRules
@@ -17,12 +17,12 @@ internal static class GhostSamuraiRules
     internal const int SlashWarning = 54, SlashLive = 10, DirectionalSlashInterval = 12, DirectionalPairInterval = 48;
     internal const int DirectionalPairCount = 4, DirectionalSlashCount = DirectionalPairCount * 2;
     internal const int DirectionalDuration = (DirectionalPairCount - 1) * DirectionalPairInterval + DirectionalSlashInterval + SlashWarning + SlashLive + RecoveryTime;
-    internal const int ChargeAimTime = 48, ChargeWarning = 72, ChargeLive = 12;
-    internal const int AimLockLead = 16, AimSyncInterval = 3, ChargeComboGap = 6;
+    internal const int ChargeAimTime = 48, FirstChargeWarningExtension = 120, ChargeWarning = 72 + FirstChargeWarningExtension, ChargeLive = 12;
+    internal const int AimLockLead = 4, AimSyncInterval = 3, ChargedSlashInterval = 90;
     internal const int ChargeSecondWarning = 30, ChargeThirdWarning = 48;
     internal const int GridPrelude = 36, GridWarning = 84, GridLive = 12;
     internal const int GridEnd = GridPrelude + GridWarning + GridLive;
-    internal const int GridFollowWarning = 48, GridFollowGap = 24, GridFollowStart = GridEnd + GridFollowGap - GridFollowWarning;
+    internal const int GridFollowWarning = 48 + FirstChargeWarningExtension, GridFollowStart = GridEnd + 24 - 48;
     internal const int DashApproach = 48, DashWarning = 54, DashLive = 18, DashRecovery = RecoveryTime;
     internal const int DashCadence = DashApproach + DashWarning + DashLive + DashRecovery;
     internal const float SlashLength = 1400, SlashHalfWidth = 32, ChargeHalfWidth = 150;
@@ -30,6 +30,13 @@ internal static class GhostSamuraiRules
     internal const int GridVerticalLineCount = (int)(GridWidth / GridSpacing) + 1;
     internal const int GridHorizontalLineCount = (int)(GridHeight / GridSpacing) + 1;
     internal const float DashDistance = 1800, DashHalfWidth = 50, DashStandOff = 900, DashRetreatSpeed = 38;
+    internal const float ChargeDistance = 2100, ChargeStandOff = 900;
+    internal const float RushPredictionSpeedLimit = 48;
+    internal const int BodyWidth = 116, BodyHeight = 170;
+    internal const float Phase3CircleInnerRadius = 240, Phase3CircleOuterRadius = 900;
+    internal const int Phase3CircleStepInterval = 60, Phase3CircleTelegraphTime = 36, Phase3KamaitachiDuration = 24;
+    internal const int Phase3CircleSteps = 4, Phase3CircleSlashLive = 12;
+    internal const int Phase3CircleDuration = 3 * Phase3CircleStepInterval + Phase3CircleTelegraphTime + Phase3KamaitachiDuration + RecoveryTime;
     internal const int WispDelay = 18, WispBurstInterval = 18, SpreadDuration = 30, WispLife = 180, MaximumWisps = 18;
     // The follow-up charge forecast overlaps the end of the grid warning/live window.
     internal const int MaximumHazards = GridVerticalLineCount + GridHorizontalLineCount + 1 + MaximumWisps;
@@ -83,9 +90,7 @@ internal static class GhostSamuraiRules
         : pass == 1 ? ChargeSecondWarning : ChargeThirdWarning;
     internal static int ChargeStart(int pass, bool afterGrid)
     {
-        int start = 0;
-        for (int i = 0; i < pass; i++) start += ChargeWindup(i, afterGrid) + ChargeLive + ChargeComboGap;
-        return start;
+        return ChargeWindup(0, afterGrid) + pass * ChargedSlashInterval - ChargeWindup(pass, afterGrid);
     }
     internal static int ChargePass(float tick, SamuraiPhase phase, bool afterGrid)
     {
@@ -107,7 +112,8 @@ internal static class GhostSamuraiRules
         if (local < warning) return afterGrid && pass == 0 ? -1 : -MathF.Sin(Math.Clamp(local / 16, 0, 1) * MathF.PI / 2);
         if (local < warning + 5) { float release = (local - warning) / 5; return -1 + 2 * release * release; }
         if (local < warning + ChargeLive) return 1;
-        int recovery = pass == ChargeCount(phase) - 1 ? RecoveryTime : ChargeComboGap;
+        int recovery = pass == ChargeCount(phase) - 1 ? RecoveryTime
+            : ChargeStart(pass + 1, afterGrid) - ChargeStart(pass, afterGrid) - warning - ChargeLive;
         float recoil = Math.Clamp((local - warning - ChargeLive) / recovery, 0, 1);
         return 1 - recoil * recoil * (3 - 2 * recoil);
     }
@@ -135,10 +141,10 @@ internal static class GhostSamuraiRules
     }
 
     // One bounded draw selects uniformly among attacks other than the previous one.
-    // Phase3 deliberately shares Phase2's pool until its own score is commissioned.
+    internal static int AttackCount(SamuraiPhase phase) => phase == SamuraiPhase.Phase1 ? 3 : phase == SamuraiPhase.Phase2 ? 4 : 5;
     internal static SamuraiAttack SelectNextAttack(SamuraiPhase phase, SamuraiAttack previous, int choice)
     {
-        int count = phase == SamuraiPhase.Phase1 ? 3 : 4;
+        int count = AttackCount(phase);
         int choices = count - ((int)previous is >= 1 && (int)previous <= count ? 1 : 0);
         if (choice < 0 || choice >= choices) throw new ArgumentOutOfRangeException(nameof(choice));
         for (int candidate = 1; candidate <= count; candidate++)
@@ -147,10 +153,71 @@ internal static class GhostSamuraiRules
     }
 
     internal static float DashProgress(float tick)
+        => RushProgress(tick, DashLive);
+
+    internal static float RushProgress(float tick, float duration)
     {
-        float t = Math.Clamp(tick / DashLive, 0, 1);
+        float t = Math.Clamp(tick / duration, 0, 1);
         // Fast acceleration, continuous endpoints; no position teleport.
         return t * t * (3 - 2 * t);
+    }
+
+    // One immutable descriptor per step; the caller captures x/y once for all four.
+    internal static SamuraiHazard CircleStep(int step, float x, float y, int started)
+    {
+        if (step is < 0 or >= Phase3CircleSteps) throw new ArgumentOutOfRangeException(nameof(step));
+        int born = started + step * Phase3CircleStepInterval, fire = born + Phase3CircleTelegraphTime;
+        bool outer = step % 2 == 1;
+        return new((SamuraiShape)((int)SamuraiShape.InnerSlash + step), x, y, 1, 0,
+            outer ? Phase3CircleInnerRadius : 0, outer ? Phase3CircleOuterRadius : Phase3CircleInnerRadius,
+            born, fire, fire + (step < 2 ? Phase3CircleSlashLive : Phase3KamaitachiDuration), SlashDamage);
+    }
+
+    // Sweep only this tick's physical body displacement. A distant point on the
+    // decorative slash cannot hit before the boss actually reaches it.
+    internal static bool RushCanContact(SamuraiHazard h, float age, bool locked)
+        => h.Shape == SamuraiShape.RushVisual && locked && h.Live(age);
+
+    // Bounded interception from current authority position/velocity. Constant
+    // wing flight remains threatened; a velocity change after lock is not chased.
+    internal static (float DX, float DY) RushDirection(float x, float y, float targetX, float targetY,
+        float velocityX, float velocityY, float distance, int duration)
+    {
+        float speed = MathF.Sqrt(velocityX * velocityX + velocityY * velocityY);
+        if (speed > RushPredictionSpeedLimit) { velocityX *= RushPredictionSpeedLimit / speed; velocityY *= RushPredictionSpeedLimit / speed; }
+        float dx = targetX - x, dy = targetY - y;
+        for (int iteration = 0; iteration < 3; iteration++)
+        {
+            float fraction = Math.Clamp(MathF.Sqrt(dx * dx + dy * dy) / distance, 0, 1);
+            float low = 0, high = duration;
+            for (int i = 0; i < 12; i++)
+            {
+                float middle = (low + high) * .5f;
+                if (RushProgress(middle, duration) < fraction) low = middle; else high = middle;
+            }
+            float lead = AimLockLead + Math.Max(0, (low + high) * .5f - 1);
+            dx = targetX + velocityX * lead - x;
+            dy = targetY + velocityY * lead - y;
+        }
+        float length = MathF.Sqrt(dx * dx + dy * dy);
+        return length < .001f ? (1, 0) : (dx / length, dy / length);
+    }
+
+    internal static bool BodyContact(float fromX, float fromY, float toX, float toY,
+        float playerX, float playerY, float halfX, float halfY)
+    {
+        float enter = 0, exit = 1;
+        return Axis(fromX - playerX, toX - fromX, BodyWidth * .5f + halfX, ref enter, ref exit)
+            && Axis(fromY - playerY, toY - fromY, BodyHeight * .5f + halfY, ref enter, ref exit);
+    }
+
+    private static bool Axis(float origin, float delta, float extent, ref float enter, ref float exit)
+    {
+        if (Math.Abs(delta) < .00001f) return Math.Abs(origin) <= extent;
+        float first = (-extent - origin) / delta, last = (extent - origin) / delta;
+        if (first > last) (first, last) = (last, first);
+        enter = Math.Max(enter, first); exit = Math.Min(exit, last);
+        return enter <= exit;
     }
 
     internal static int Damage(SamuraiAttack attack) => attack switch
@@ -167,18 +234,32 @@ internal static class GhostSamuraiRules
 internal readonly record struct SamuraiHazard(SamuraiShape Shape, float X, float Y, float DX, float DY,
     float Length, float Radius, int Born, int Fire, int End, int Damage)
 {
+    internal bool HasAim => Shape is SamuraiShape.Slash or SamuraiShape.RushVisual;
+    internal bool IsCircle => Shape is SamuraiShape.InnerSlash or SamuraiShape.OuterSlash or SamuraiShape.InnerKamaitachi or SamuraiShape.OuterKamaitachi;
+    internal bool IsWind => Shape is SamuraiShape.InnerKamaitachi or SamuraiShape.OuterKamaitachi;
+    internal bool IsOuter => Shape is SamuraiShape.OuterSlash or SamuraiShape.OuterKamaitachi;
     internal bool IsValid => Enum.IsDefined(Shape) && float.IsFinite(X) && float.IsFinite(Y)
         && Math.Abs(X) <= 500000 && Math.Abs(Y) <= 500000
         && float.IsFinite(DX) && float.IsFinite(DY) && Math.Abs(DX * DX + DY * DY - 1) < .01f
         && float.IsFinite(Length) && Length is >= 0 and <= 3000
-        && float.IsFinite(Radius) && Radius is >= 1 and <= 200
-        && Born >= 0 && Fire - Born is >= 24 and <= 180 && End > Fire && End - Fire <= 240
-        && Damage is > 0 and <= 2000;
+        && float.IsFinite(Radius) && (IsCircle ? Radius is >= 1 and <= 1200 && (IsOuter ? Length > 0 && Length < Radius : Length == 0) : Radius is >= 1 and <= 200)
+        && Born >= 0 && (long)Fire - Born is >= 24 and <= 300 && End > Fire && (long)End - Fire <= 240
+        && (Shape == SamuraiShape.RushVisual ? Damage == 0 : Damage is > 0 and <= 2000);
 
     internal bool Live(float age) => age >= Fire && age < End;
     internal bool Hits(float age, float x, float y, float halfX, float halfY)
     {
-        if (Shape != SamuraiShape.Slash || !Live(age)) return false;
+        if (!Live(age)) return false;
+        if (IsCircle)
+        {
+            // Circle/annulus vs the entire player AABB, not just its center.
+            float ax = Math.Abs(x - X), ay = Math.Abs(y - Y);
+            float nearX = Math.Max(0, ax - halfX), nearY = Math.Max(0, ay - halfY);
+            if (nearX * nearX + nearY * nearY > Radius * Radius) return false;
+            float farX = ax + halfX, farY = ay + halfY;
+            return !IsOuter || farX * farX + farY * farY > Length * Length;
+        }
+        if (Shape != SamuraiShape.Slash) return false; // Rush art never owns damage.
         // Exact separating-axis test: the two AABB axes and the two slash axes.
         float rx = x - (X + DX * Length * .5f), ry = y - (Y + DY * Length * .5f);
         return Math.Abs(rx) <= halfX + Math.Abs(DX) * Length * .5f + Math.Abs(DY) * Radius

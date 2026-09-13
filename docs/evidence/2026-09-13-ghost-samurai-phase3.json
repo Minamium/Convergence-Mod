@@ -1,0 +1,49 @@
+{
+  "feature": "Ghost Samurai contact rushes and Phase3 circles",
+  "version": "0.2.69",
+  "protocol": 33,
+  "base_commit": "46595a6ec31f30d61230d75dd4f2e8903f3b5220",
+  "branch": "feat/ghost-samurai-phase3-contact",
+  "source_sha256": "8d615705dd9b4b94851d569430898cd3fc2373ecb6e5991408b64501524c8b80",
+  "artifact": {
+    "bytes": 54726400,
+    "sha256": "629eb01a2ae9c904fdcd192eb5aefd83321d176a7edf504f237ef8c45f6dce5e"
+  },
+  "build": {
+    "mode": "native, isolated feature profile",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "shader_exports": "passed",
+    "source_changed": false
+  },
+  "verification": {
+    "focused_domain": {
+      "passed": 20,
+      "failed": 0
+    },
+    "global_type_registration": "2 passed using installed tML ValidateType",
+    "summon_type": "Convergence/GhostSamuraiSummon retained",
+    "offline_preview": "8 panels; compiled production circle renderer with GDI stroke adapter; not FNA/game rendering",
+    "static_domain_codec": "passed: 651 files, 66 docs, 10 YAML; 187 domain tests; protocol33 324 round-trips and 50 malformed rejections"
+  },
+  "runtime": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "Mod load",
+      "dash accessory timing and steady flight",
+      "late-peer aim/body timing",
+      "circle center, borders and 4-step order",
+      "cleanup and re-summon",
+      "frame-time and Reduced Effects"
+    ]
+  },
+  "shared_install": "pending integration",
+  "notes": [
+    "No game, server or GUI session started.",
+    "No saves, personal translations, enabled Mod lists, artwork or dependency binaries committed.",
+    "Grid follow-up receives the same +120 tick first forecast extension.",
+    "Clock/contact/center ownership stays in the exact-Fight server/SP runtime.",
+    "Build source hash records the implementation snapshot before documentation-only updates."
+  ]
+}

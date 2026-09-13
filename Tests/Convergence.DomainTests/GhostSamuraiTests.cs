@@ -33,7 +33,7 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Ghost Samurai phase thresholds advance once and Phase3 keeps the enhanced pool")]
+    [DomainTest("Ghost Samurai phase thresholds advance once and Phase3 adds the circle pool")]
     private static void SamuraiPhases()
     {
         AssertEqual(SamuraiPhase.Phase1, GhostSamuraiRules.NextPhase(SamuraiPhase.Phase1, 661, 1000), "above P2 boundary");
@@ -44,7 +44,8 @@ internal static partial class Program
         AssertEqual(SamuraiPhase.Phase3, GhostSamuraiRules.NextPhase(SamuraiPhase.Phase3, 1, 1000), "no phase four");
         for (int choice = 0; choice < 4; choice++)
             AssertEqual(GhostSamuraiRules.SelectNextAttack(SamuraiPhase.Phase2, SamuraiAttack.Idle, choice),
-                GhostSamuraiRules.SelectNextAttack(SamuraiPhase.Phase3, SamuraiAttack.Idle, choice), "P3 provisional continuation");
+                GhostSamuraiRules.SelectNextAttack(SamuraiPhase.Phase3, SamuraiAttack.Idle, choice), "P3 retains earlier attacks");
+        AssertEqual(SamuraiAttack.Phase3CircleAttack, GhostSamuraiRules.SelectNextAttack(SamuraiPhase.Phase3, SamuraiAttack.Idle, 4), "P3 circle added");
     }
 
     [DomainTest("Ghost Samurai selection never repeats and covers every permitted attack")]
@@ -52,10 +53,10 @@ internal static partial class Program
     {
         foreach (SamuraiPhase phase in Enum.GetValues<SamuraiPhase>())
         {
-            int count = phase == SamuraiPhase.Phase1 ? 3 : 4;
+            int count = GhostSamuraiRules.AttackCount(phase);
             for (int prior = 0; prior <= count; prior++)
             {
-                var seen = new bool[5];
+                var seen = new bool[6];
                 for (int choice = 0; choice < count - (prior > 0 ? 1 : 0); choice++)
                 {
                     int selected = (int)GhostSamuraiRules.SelectNextAttack(phase, (SamuraiAttack)prior, choice);
@@ -237,7 +238,11 @@ internal static partial class Program
                 int fire = start + GhostSamuraiRules.ChargeWindup(pass, grid);
                 AssertEqual(true, fire - start >= 30, "every strike retains a readable warning");
                 AssertEqual(pass, GhostSamuraiRules.ChargePass(start, phase, grid), "new pass starts at exact boundary");
-                if (pass > 0) AssertEqual(GhostSamuraiRules.ChargeComboGap, start - lastEnd, "prior attack ended before next warning");
+                if (pass > 0)
+                {
+                    AssertEqual(90, fire - (lastEnd - GhostSamuraiRules.ChargeLive), "fire-to-fire interval is 1.5 seconds");
+                    AssertEqual(true, start > lastEnd, "prior body contact finishes before next warning");
+                }
                 lastEnd = fire + GhostSamuraiRules.ChargeLive;
             }
             AssertEqual(GhostSamuraiRules.RecoveryTime, GhostSamuraiRules.ChargeDuration(phase, grid) - lastEnd, "complete final recoil");
@@ -247,24 +252,26 @@ internal static partial class Program
         }
         AssertEqual(true, GhostSamuraiRules.ChargeThirdWarning > GhostSamuraiRules.ChargeSecondWarning, "third attack has longer tension");
         AssertEqual(-1f, GhostSamuraiRules.ChargePose(0, SamuraiPhase.Phase2, true), "grid's held pose joins follow-up without a snap");
+        AssertEqual(192, GhostSamuraiRules.ChargeWindup(0, false), "first warning gains 120 ticks");
+        AssertEqual(168, GhostSamuraiRules.ChargeWindup(0, true), "grid follow-up also gains 120 ticks");
+        AssertEqual(30, GhostSamuraiRules.ChargeWindup(1, false), "second warning retained");
+        AssertEqual(48, GhostSamuraiRules.ChargeWindup(2, false), "third warning retained");
     }
 
-    [DomainTest("Ghost Samurai grid ends before the follow-up and immediate movement can escape the locked band")]
+    [DomainTest("Ghost Samurai grid ends before the extended contact-only follow-up")]
     private static void SamuraiGridFollowDodge()
     {
         AssertEqual(112f, GhostSamuraiRules.GridSpacing - GhostSamuraiRules.GridHalfWidth * 2, "narrower but player-sized safe cells");
         int born = GhostSamuraiRules.GridFollowStart;
-        var h = new SamuraiHazard(SamuraiShape.Slash, -900, 0, 1, 0, 1800, GhostSamuraiRules.ChargeHalfWidth,
-            born, born + GhostSamuraiRules.GridFollowWarning, born + GhostSamuraiRules.GridFollowWarning + GhostSamuraiRules.ChargeLive, GhostSamuraiRules.ChargeDamage);
-        var aim = SamuraiSlashAim.Spawn(h, GhostSamuraiRules.GridEnd);
-        aim = aim.Advance(h, GhostSamuraiRules.GridEnd, -900, 0, 1, 0);
-        AssertEqual(true, aim.Locked && aim.IsValid(h), "lock coincides with grid release");
-        AssertEqual(24, h.Fire - aim.LockTick, "0.4 seconds to leave the grid cell");
+        var h = new SamuraiHazard(SamuraiShape.RushVisual, -900, 0, 1, 0, 2100, GhostSamuraiRules.ChargeHalfWidth,
+            born, born + GhostSamuraiRules.GridFollowWarning, born + GhostSamuraiRules.GridFollowWarning + GhostSamuraiRules.ChargeLive, 0);
+        var aim = SamuraiSlashAim.Spawn(h, h.Fire - GhostSamuraiRules.AimLockLead);
+        aim = aim.Advance(h, aim.LockTick, -900, 0, 1, 0);
+        AssertEqual(true, aim.Locked && aim.IsValid(h), "follow-up locks just before the rush");
+        AssertEqual(144, h.Fire - GhostSamuraiRules.GridEnd, "first extension also applies to the grid follow-up");
         var line = GhostSamuraiRules.GridLine(true, 7, 0, 0, GhostSamuraiRules.GridPrelude);
         AssertEqual(false, line.Live(aim.LockTick), "grid no longer hits when movement begins");
-        AssertEqual(true, h.Hits(h.Fire, 0, 0, 10, 21), "standing still is punished");
-        AssertEqual(false, h.Hits(h.Fire, 0, 8 * (h.Fire - aim.LockTick), 10, 21), "immediate 8px/tick perpendicular movement clears full body");
-        AssertEqual(true, h.Hits(h.Fire, 0, 8 * (h.Fire - aim.LockTick - 6), 10, 21), "hesitation consumes the dodge window");
+        AssertEqual(false, h.Hits(h.Fire, 0, 0, 10, 21), "slash visual never hits even on its centerline");
         AssertEqual(true, GhostSamuraiRules.MaximumHazards >= GhostSamuraiRules.GridVerticalLineCount
             + GhostSamuraiRules.GridHorizontalLineCount + 1 + GhostSamuraiRules.MaximumWisps, "reserve the overlapping charge even at wisp cap");
     }
@@ -274,7 +281,7 @@ internal static partial class Program
     {
         foreach (float width in new[] { GhostSamuraiRules.ChargeHalfWidth, GhostSamuraiRules.DashHalfWidth })
         {
-            var h = new SamuraiHazard(SamuraiShape.Slash, -900, 0, 1, 0, 1800, width, 10, 82, 94, 380);
+            var h = new SamuraiHazard(SamuraiShape.RushVisual, -900, 0, 1, 0, 1800, width, 10, 82, 94, 0);
             var aim = SamuraiSlashAim.Spawn(h, h.Fire - GhostSamuraiRules.AimLockLead);
             for (int tick = h.Born + 1; tick <= aim.LockTick; tick++)
                 aim = aim.Advance(h, tick, -900, tick * 2, 1, 0);
@@ -283,10 +290,8 @@ internal static partial class Program
             var final = aim.Geometry(h);
             AssertEqual(aim, aim.Advance(h, aim.LockTick + 1, 4000, 4000, 0, 1), "no late chase after lock");
             AssertEqual(false, final.Hits(h.Fire - 1, 0, aim.Y, 10, 21), "last warning tick stays harmless");
-            AssertEqual(true, final.Hits(h.Fire, 0, aim.Y, 10, 21), "held target is hit at declared fire");
-            AssertEqual(false, final.Hits(h.Fire, 0, aim.Y + 14 * GhostSamuraiRules.AimLockLead, 10, 21), "14px/tick perpendicular dash clears both attack widths");
-            if (width == GhostSamuraiRules.ChargeHalfWidth)
-                AssertEqual(true, final.Hits(h.Fire, 0, aim.Y + 8 * GhostSamuraiRules.AimLockLead, 10, 21), "wide cut favors a dash over ordinary running");
+            AssertEqual(false, final.Hits(h.Fire, 0, aim.Y, 10, 21), "locked rush art is harmless");
+            AssertEqual(4, h.Fire - aim.LockTick, "tracks until four ticks before fire");
         }
     }
 
@@ -351,7 +356,8 @@ internal static partial class Program
     {
         foreach (SamuraiShape shape in Enum.GetValues<SamuraiShape>())
         {
-            var h = new SamuraiHazard(shape, 1000, 1200, 1, 0, 1400, 32, 100, 154, 164, 260);
+            var h = new SamuraiHazard(shape, 1000, 1200, 1, 0, 1400, 32, 100, 154, 164, shape == SamuraiShape.RushVisual ? 0 : 260);
+            if (h.IsCircle) h = GhostSamuraiRules.CircleStep((int)shape - (int)SamuraiShape.InnerSlash, 1000, 1200, 100);
             using var stream = new MemoryStream(); using var writer = new BinaryWriter(stream);
             h.Write(writer); byte[] payload = stream.ToArray(); stream.Position = 0;
             AssertEqual(h, SamuraiHazard.Read(new BinaryReader(stream)), "shape roundtrip");
