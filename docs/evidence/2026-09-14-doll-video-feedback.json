@@ -1,0 +1,48 @@
+{
+  "date": "2026-09-14",
+  "version": "0.2.78",
+  "protocol": 37,
+  "source_commit": "4673739bfee2352136f057d8cfbc9d6d54623a3f",
+  "build": {
+    "route": "tools/dev.py build --native --configuration Release; fast-forward integrated main",
+    "source_sha256": "f9d33c69b23777f79e63cc6faa2380c2cd7485f0be6dbbc9f5599d84c6d25a39",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "source_changed_during_build": false,
+    "artifact": "Convergence.tmod",
+    "bytes": 57001860,
+    "sha256": "fac7c0c7da855857d36bc5c471fcbe764a289eb024fc74a1963169e5cd6b1132",
+    "installed_hash_matches": true,
+    "packaged_assembly_sha256": "a56143654f04ee73925e6128ce7b4bfb7b66c830a8187af40cad795d7d82f83c"
+  },
+  "preserved": {
+    "preexisting_uncommitted_locales": 6,
+    "locale_scope": "Only public name edits are committed in the two overlapping English files; other user text remains in working tree and installed package.",
+    "bgm_masters": 4,
+    "raid_sfx_masters": 76,
+    "ghost_source_files": 21,
+    "lattice_shader": "source/export unchanged",
+    "source_assets_and_prior_weapon_masters": "retained"
+  },
+  "checks": {
+    "domain": "206 cases: full run plus only changed Stack-gain fixture rerun; failures resolved",
+    "codec": "324 round-trips and 50 malformed rejections on both linked domain and actual packaged assembly; dedicated Final cannon domain bounds/round-trip test",
+    "p3": "Six accepted action seeds; same widths, safe gaps in both halves, bounded wrapped fragments, second wave occupies previous safe places, growing visible tip",
+    "audio": "12 original project-derived PCM16 remixes; finite samples, silent endpoints, 4x peaks below -1.29 dBFS; six actual-gain auditions with reported safety attenuation; no subjective listening",
+    "package": "27 weapon WAVs and all five shader exports match source; no docs/tools/local files in package",
+    "static": "Passed final wrapper: catalog 68 documents, repository 719 files, YAML 10 files; domain/codec results reused for unchanged inputs"
+  },
+  "not_run": [
+    "User reload/runtime startup",
+    "Multiplayer shared random gaps, second-wave movement and Final cannon snapshot timing",
+    "Rotating crater/bell attachment and charge readability in actual combat",
+    "Weapon startup/sustain/cancel, physical voice audibility, remote peer observing weapons",
+    "Subjective audio mix, full-game compositing and performance"
+  ],
+  "references": {
+    "recording_analysis": "../research/2026-09-14-doll-playtest-video.md",
+    "prechange_logs": "2026-09-14-playtest-0277.json",
+    "audio_exports": "2026-09-14-weapon-impact-assets.json"
+  }
+}
