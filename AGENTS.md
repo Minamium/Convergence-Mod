@@ -20,7 +20,7 @@ Player-facing names and behavior come from the active encounter specification se
 
 ## Non-negotiable boundaries
 
-- Gameplay state and outcomes are server/Single Player authoritative.
+- Gameplay state and outcomes are server/Single Player authoritative. The explicit wave-only native player-damage exception is owned by [ADR-0023](docs/adr/0023-ghost-samurai-native-wave-damage.md); do not generalize it to other hazards or Raid outcomes.
 - Clients send bounded requests and consume read-only snapshots/events.
 - `Common` never depends on `Content` or presentation-only `Client` code.
 - Encounter-specific behavior enters through definition-scoped policies and runtime factories; do not add feature switches to global policy, coordinator, or packet-router code.

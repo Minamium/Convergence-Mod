@@ -46,7 +46,9 @@ internal sealed class GhostSamuraiFactory : IEncounterRuntimeFactory
             throw new EncounterStartRejectedException("ghost_samurai.summon_not_held");
         // The factory creates no world entities: its runtime is registered for cleanup
         // by the coordinator before the first Tick can spawn anything.
-        return new GhostSamuraiRuntime(context.FightId, context.Start.RequesterWhoAmI);
+        var arena = SamuraiArenaBounds.Create(p.Center.X, p.Center.Y, Main.maxTilesX * 16, Main.maxTilesY * 16);
+        if (!arena.IsValid) throw new EncounterStartRejectedException("ghost_samurai.arena_world_edge");
+        return new GhostSamuraiRuntime(context.FightId, context.Start.RequesterWhoAmI, arena);
     }
 }
 

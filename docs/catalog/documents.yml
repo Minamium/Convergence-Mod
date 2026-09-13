@@ -42,6 +42,26 @@ documents:
   related_docs:
   - project.network-architecture
   - project.architecture
+- doc_id: adr.0023
+  path: docs/adr/0023-ghost-samurai-native-wave-damage.md
+  title: 'ADR-0023: Native player damage for Ghost Samurai slash waves'
+  content_sha256: 4fd527238d8de4bcfd63cfb55096af24cd470875ced200d34cbd888e99c6fa9a
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-13'
+  source_of_truth_for:
+  - architecture.ghost_samurai_native_wave_damage
+  aliases:
+  - native slash wave immunity
+  related_code:
+  - Content/Encounters/GhostSamurai/GhostSamuraiAttackProjectile.cs
+  - Content/Encounters/GhostSamurai/GhostSamuraiRuntime.cs
+  related_docs:
+  - encounter.ghost-samurai.spec
+  - project.network-architecture
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -328,12 +348,12 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: a0dbec65784bcdbfd59ce6f6825ebf281e52e0028b862e362658a4481c492729
+  content_sha256: 436ebd5d202a1adbe2d44e8925b0013c3b54502be8946dfd155f4635fa998a72
   document_type: index
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-13'
   source_of_truth_for:
   - architecture.adr_index
   aliases:
@@ -664,7 +684,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 14775fb00a64ae940f62c8a5b710d4db7a1ac7180578fb4c2e8a25e32e39e378
+  content_sha256: c800b44acdfbf8e57f07ddba107a2a9ba05842ab7c7fcd1ac5cd638d47295206
   document_type: spec
   status: provisional
   owners:
@@ -1058,7 +1078,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 4e1b6f8ea24e9fd28b1a7d1b36c05996fb2dfbed17b01b535e8ab8f10c50355b
+  content_sha256: 2aba60b463c83d2e02f437917250daf6f22c25fc5d57d3f6bbe5a90408673ce9
   document_type: governance
   status: accepted
   owners:
@@ -1103,7 +1123,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: e74a867f0952e5bf45358168d8b29ee1feba7ea886172045e212bf9f61abfcac
+  content_sha256: 734c6ff4fc551a56f817c552ac269eaf1286e885cd8294c8a47372f5bb112038
   document_type: status
   status: accepted
   owners:

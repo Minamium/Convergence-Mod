@@ -23,7 +23,13 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v34
+## Current development protocol v36
+
+Ghost Samurai appends SlashWave to its bounded native ExtraAI shape enum, bounds finite circle radii to3000px, and validates the dash lock against an18-tick shout gap. Existing shape/packet IDs are not renumbered and the native boss snapshot appends16 bytes for the fixed summon-centered field (X/Y center, half-width/height). It rejects invalid or changed same-Fight bounds. Other payload layouts are unchanged. Matching peers are required. The wave uses the explicitly requested native local-player damage/dodge path in [ADR-0023](adr/0023-ghost-samurai-native-wave-damage.md); this is a narrow exception to encounter-owned player-hit resolution, while server spawning, locked geometry, schedule and exact-Fight cleanup are retained. No new client hit request or global feature switch is introduced. [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns tuning and [Status](STATUS.md) owns evidence.
+
+The integrated protocol35 predecessor-beam snapshot and per-cast hit caps remain unchanged. Version36 includes both the current Doll behavior and this Ghost Samurai field/wave update.
+
+## Preceding development protocol v34
 
 Wire IDs/layouts remain unchanged from v33. Lattice descriptors now derive slower track staggering and finite travelling head/body/tail geometry instead of a whole-line rectangle; sanctuary cuts share one parent track clock. Authority collision and client fractional rendering use that same tapered profile. Embedded Spread follows the third volley's derived schedule. Older peers must be rejected because the unchanged bytes mean different timing/geometry, not because of a new packet. No new target requests, client RNG, actors, hit-ledger or cleanup ownership is added. [Beam ignition and lattice order](encounters/first-severance/ENCOUNTER_SPEC.md#beam-ignition-and-lattice-order) owns the rules. Ghost Samurai's [v33 feature](encounters/ghost-samurai/ENCOUNTER_SPEC.md) is retained unchanged.
 
