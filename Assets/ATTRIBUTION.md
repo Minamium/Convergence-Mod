@@ -5,13 +5,239 @@
 ### Raid beam pressure audio — 2026-09-13
 
 - Asset ID: doll-beam-pressure-0273; type: original synthesized SFX.
-- Runtime files, all under `Assets/Sounds/FirstSeverance/Beams/`: `PortalCharge.wav`, `WideCharge.wav`, `GridCharge.wav`, `ChargeGather.wav`, `ChargeLock.wav`, `PortalFire.wav`, `CurtainFire.wav`, `CoreSalvoFire.wav`, `GridFire.wav`, `ChargeRush.wav`, `WideFire.wav`, `BeamSustain.wav`, `FloodFire.wav`, `SpreadRay.wav`, `SpreadScatter.wav`.
+- Runtime files:
+  - `Assets/Sounds/FirstSeverance/Beams/PortalCharge.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/WideCharge.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/GridCharge.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/ChargeGather.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/ChargeLock.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/PortalFire.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/CurtainFire.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/CoreSalvoFire.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/GridFire.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/ChargeRush.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/WideFire.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/BeamSustain.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/FloodFire.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/SpreadRay.wav`
+  - `Assets/Sounds/FirstSeverance/Beams/SpreadScatter.wav`
 - Creator: Codex, directed by Minamium. Creation/review date: 2026-09-13.
 - Source type: original; reproducible master/seed/envelope: [tools/generate_beam_sfx.py](../tools/generate_beam_sfx.py), NumPy FFT synthesis, 44.1-kHz stereo PCM16 export. No third-party samples, recording excerpts, AI audio service or extracted game asset used.
 - Reference influence: [F16](../docs/research/WOTG_RAID_BENCHMARK.md#f16--beam-audio-envelope-analysis-2026-09-13), numeric mixed-recording/event analysis and pinned WotG/WoTM cue grouping. This environment cannot hear audio; user approved analysis-based creation with audition delivery. Reference originals/analysis and MP3 previews remain ignored local artifacts.
 - Design/editing: aperiodic pressure, inharmonic cavities, short bright rupture, pre-shot dip and bounded release; one periodic rotation sustain. Separate Raid routes leave existing music, shared weapon and accepted Stack masters untouched.
 - License/redistribution: original project asset under the existing project publication/asset-license gate. No WotG/WoTM audio reuse rights are asserted or needed for these independently generated sounds. Retain this record and recipe; preview encoding does not change runtime master identity.
 - Review: PCM/header, peak/RMS/DC, one-shot edges, loop wrap and mapping guards; artistic listening and actual game mix remain user-owned. Exact export hashes are recorded in the matching build's source manifest and audio evidence.
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/PortalCharge.wav`
+- Asset ID: doll-beam-0273-portalcharge
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `9119c2bbe02df3277c5314b9cba619874d77510b2bf2467995eca509bd7f9b50`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/WideCharge.wav`
+- Asset ID: doll-beam-0273-widecharge
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `96bc82fba8812702fccebfd719cf505212e987433b970a961c320d000e5490cb`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/GridCharge.wav`
+- Asset ID: doll-beam-0273-gridcharge
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `4a1ca02afc9f556d8f4edbf1fc6445ee3cfdf0ff2d67983005a2c526cef30ab0`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeGather.wav`
+- Asset ID: doll-beam-0273-chargegather
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `a144b84556d9911be706a30fb4ed945016db5e0862faea954e5ec1a5335cff5d`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeLock.wav`
+- Asset ID: doll-beam-0273-chargelock
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `7b9f79ae4c063e8586968c3960def708c8abfc8ba030a6bcf00b8c69244ff6da`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/PortalFire.wav`
+- Asset ID: doll-beam-0273-portalfire
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `4db5546e9bc7399c6d65f3f6ee7a2e37c3e6c8c3fb45e0fcc630dc623fd42d68`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/CurtainFire.wav`
+- Asset ID: doll-beam-0273-curtainfire
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `5404c052dfd6b3bf370d81344c614557a48dfc200e4ea969831896c61ae80bf2`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/CoreSalvoFire.wav`
+- Asset ID: doll-beam-0273-coresalvofire
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `6748cdc6af0423c0304a70e9a20db5cdd1fdedcf01dd78109c518e5662df771d`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/GridFire.wav`
+- Asset ID: doll-beam-0273-gridfire
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `8ab8fe0d4b4d86678f379bba2d6a36d3891371670e393fbb6a6cd02e5d79be3d`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/ChargeRush.wav`
+- Asset ID: doll-beam-0273-chargerush
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `dc2748b4e742dc6e3acc8207309a4ee3bf14908e1713582477050294e5f25912`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/WideFire.wav`
+- Asset ID: doll-beam-0273-widefire
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `a57c6644f21cb064868890f084eec9bb6afe27330bd85b19d9bf38426752f61e`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/BeamSustain.wav`
+- Asset ID: doll-beam-0273-beamsustain
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Periodic noise/inharmonic rotation bed, owned by the two-turn action; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `c45cada7d4d8cb5d22f07b8a2ece5e272d39504fe73a60c7f20034f0febf1e4f`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/FloodFire.wav`
+- Asset ID: doll-beam-0273-floodfire
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `24982627e1037e76262b98e8aa81c099f63cf94bdfd2967452cad02c64b9467f`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/SpreadRay.wav`
+- Asset ID: doll-beam-0273-spreadray
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `235d2b26298c3df1681115e0d0efe9724406859c7a4ae0e90cc26eba68d26398`
+
+- Runtime file: `Assets/Sounds/FirstSeverance/Beams/SpreadScatter.wav`
+- Asset ID: doll-beam-0273-spreadscatter
+- Asset type: original beam sound effect
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-13
+- Source type: original
+- Source work and URL: [beam synthesis recipe](../tools/generate_beam_sfx.py)
+- Tool/model/version: NumPy FFT synthesis; PCM16 stereo44.1kHz
+- Human modifications: Layered pressure/foil envelope, short early reflections and clean one-shot release; see [set design](../docs/AUDIO_CUE_SHEET.md#beam-pressure-set)
+- License and redistribution terms: Original project asset; existing project publication/asset-license gate. No sampled third-party work.
+- Required attribution: Retain recipe and [set provenance](#raid-beam-pressure-audio--2026-09-13).
+- Reviewer and review date: Codex, 2026-09-13; numeric PCM/routing checks, subjective audition pending
+- Notes: SHA256 `8ad8fe63b3730b1546bdbf3e5e27ecba8fed1ba0a053c4baecef2a5c1004084d`
+
 
 ### Portal triplet beam material — 2026-09-13
 
