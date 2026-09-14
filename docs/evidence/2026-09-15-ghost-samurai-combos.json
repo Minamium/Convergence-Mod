@@ -1,0 +1,57 @@
+{
+  "feature": "Ghost Samurai independent triple-vertical and frontal-cleave/ground-shockwave states",
+  "date": "2026-09-15",
+  "version": "0.3.5",
+  "protocol": 40,
+  "branch": "feature/ghost-samurai-vertical-rear-combos",
+  "base_commit": "12cfa78b53b3fc611a94a6ba877dd1039c510e25",
+  "source_sha256": "3f52088aa1c2ab0c1f121794e5acbf8654a53e2508d1f56f910ed45a93cfd994",
+  "source_note": "Feature build before final documentation and an additional field-boundary domain test. Production C# hashes match the build manifest.",
+  "artifact": {
+    "bytes": 57068283,
+    "sha256": "5c9c560d31e1853184db2e37fcf63e4b311c3dd72dc11a64202e5956acae478e"
+  },
+  "assembly_sha256": "30b413da171f4aef4caa96eb5d0fa2990914052dbac4f90af8300c3d6fca2fc1",
+  "build": {
+    "mode": "native isolated profile",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "shader_exports": "passed",
+    "source_changed": false,
+    "packaged_admission": "1-4 players, solo enabled"
+  },
+  "verification": {
+    "domain_cases": 225,
+    "ghost_samurai_cases": 41,
+    "compiled_protocol_roundtrips": 330,
+    "compiled_malformed_rejections": 54,
+    "global_and_summon_registration": "passed",
+    "both_encounters_teardown": "packaged exact-Fight and repeated teardown passed without Player/ModContent initialization",
+    "native_Hurt_API_boundary": "passed against exact package"
+  },
+  "scope": {
+    "phase1": "TripleVerticalSlash plus existing pool",
+    "phase2_and_3": "both new states plus existing pools",
+    "terrain": "bounded read-only ground/platform lookup; fixed horizontal shock plane; arena bottom fallback when no floor",
+    "authority": "existing server/SP target selection, timing, collision and cleanup; no new native damage exception",
+    "assets": "existing articulated atlas and built-in sounds reused; no new asset files"
+  },
+  "runtime": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "SP summon and all phases; exactly three vertical swings",
+      "MP 2-4 matching peers: facing lock, same column/front/ground height, actual warning latency",
+      "current target death/exit during tracking and after lock; remaining participant continues",
+      "rear dodge then jump on a flat platform; no repeated shock spawn",
+      "boss victory, wipe, phase interruption and world exit remove all new hazards",
+      "in-game animation, cue audibility, Reduced Effects and FPS"
+    ]
+  },
+  "shared_install": "not performed; normal-profile 0.3.4 retained pending approval to integrate this new feature",
+  "notes": [
+    "No GUI, game or gameplay server launched.",
+    "Domain/codec checks and packaging do not establish SP or MP playtest success.",
+    "Flying above the fixed shock plane remains a valid dodge; no terrain following or flight restrictions were introduced."
+  ]
+}

@@ -32,11 +32,22 @@ internal sealed class GhostSamuraiAudio : ModSystem
                 for (int warning = 0; warning < 3; warning++)
                     if (cues.Try(2, p.Hazard.Born + warning * (p.Hazard.Fire - p.Hazard.Born) / 3))
                         SoundEngine.PlaySound(SoundID.Item4 with { Volume = .7f, Pitch = warning * .15f }, boss.NPC.Center);
+            if (h.Shape == SamuraiShape.FrontalCleave)
+            {
+                if (cues.Try(4, h.Born)) SoundEngine.PlaySound(SoundID.Item4 with { Volume = .65f, Pitch = -.25f }, boss.NPC.Center);
+                if (p.SlashAim.Locked && cues.Try(5, p.SlashAim.LockTick))
+                    SoundEngine.PlaySound(SoundID.Item4 with { Volume = .8f, Pitch = .3f }, boss.NPC.Center);
+            }
+            if (h.Shape == SamuraiShape.GroundShockwave)
+            {
+                if (cues.Try(6, h.Fire)) SoundEngine.PlaySound(SoundID.Item14 with { Volume = .55f, Pitch = .25f, MaxInstances = 2 }, boss.NPC.Center);
+                continue; // Two fronts share one sound; never a second sword swing.
+            }
             if (h.Shape == SamuraiShape.RushVisual
                 && cues.Try(1, h.Fire - GhostSamuraiRules.DashShoutDelay))
                 SoundEngine.PlaySound(DashShoutSound, boss.NPC.Center);
-            if ((!h.HasAim || p.SlashAim.Locked) && cues.Try(h.Shape == SamuraiShape.SlashWave ? 3 : 0, h.Fire))
-                SoundEngine.PlaySound(h.Shape == SamuraiShape.SlashWave ? ChargedSwingSound : SlashSound, boss.NPC.Center);
+            if ((!h.HasAim || p.SlashAim.Locked) && cues.Try(h.Shape is SamuraiShape.SlashWave or SamuraiShape.FrontalCleave ? 3 : 0, h.Fire))
+                SoundEngine.PlaySound(h.Shape is SamuraiShape.SlashWave or SamuraiShape.FrontalCleave ? ChargedSwingSound : SlashSound, boss.NPC.Center);
         }
     }
 

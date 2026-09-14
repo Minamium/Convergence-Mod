@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-15
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development source: **0.3.4 / protocol39**, ordinary solo admission in every build ([ADR-0025](adr/0025-public-solo-admission.md)), retaining native receiving-player Hurt with authoritative Doll Down/revival ([ADR-0024](adr/0024-native-raid-hurt-and-downed.md)) and integrated Ghost Samurai0.3.2 fixes. Defensive-equipment behavior changed and matching peers are required. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md), with a confirmed Workshop solo-admission regression; no new release is implied by a local build.
+Development source: **0.3.5 / protocol40**, Ghost Samurai adds independent triple-vertical and frontal-cleave/ground-shockwave attacks. Ordinary solo admission in every build ([ADR-0025](adr/0025-public-solo-admission.md)) and native receiving-player Hurt are retained with authoritative Doll Down/revival ([ADR-0024](adr/0024-native-raid-hurt-and-downed.md)) and integrated Ghost Samurai0.3.2 fixes. Defensive-equipment behavior changed and matching peers are required. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md), with a confirmed Workshop solo-admission regression; no new release is implied by a local build.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Cleanup and target ownership repaired with automated checks; rewards/balance and actual multiplayer/re-entry validation remain incomplete.
@@ -32,6 +32,8 @@ Development source: **0.3.4 / protocol39**, ordinary solo admission in every bui
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.5 Ghost Samurai:** [new-state evidence](evidence/2026-09-15-ghost-samurai-combos.json): 225 domain cases (41 Ghost Samurai), protocol40 330 compiled round-trips /54 malformed rejections; isolated native build0 errors /4 existing warnings,18 locales and shader exports pass. Exact-package summon/Global registration, native API and both encounters' teardown pass. Normal-profile0.3.4 is retained until integration approval. SP/MP playtesting of the new attacks is not_run.
 
 - Latest [0.2.78 owner playtest](evidence/2026-09-14-playtest-0278.json): solo Host & Play, one victory in 240.65s, Stack19/19 and Spread22/22, no Down/revive. Twenty-four weapon cues / 48 samples report actual playback. This is neither multiplayer recovery evidence nor measured listening quality.
 - Unchanged gameplay baseline: [0.2.78 build/implementation evidence](evidence/2026-09-14-doll-video-feedback.json), 206 domain cases, 324 codec round-trips / 50 malformed rejections, 37 tooling guards; native build with 0 errors / 4 existing CS8632 warnings. The release changes version, presentation text and documentation, not combat, assets or wire layout.
@@ -43,7 +45,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-Load the corrected normal-profile package after integration/install, verify one-player Ready/start and the focused matching-peer recovery checks above. Do not mix protocol39 with37/38. Compare source damage against native damage in logs before retuning HP/damage budgets. Workshop and GitHub releases remain separate owner-authorized publication steps. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations; the [review disposition](research/2026-09-14-implementation-review.md) records deferred latency/rejoin/reward/performance work.
+Ghost Samurai0.3.5 is built in the separate feature profile; review/integrate it before replacing the shared package. Then Reload Mods and verify the triple dash dodge, rear dodge then jump, retarget/cleanup and matching-peer behavior. Also verify one-player Ready/start and the focused matching-peer recovery checks above. Do not mix protocol40 with earlier peers. Compare source damage against native damage in logs before retuning HP/damage budgets. Workshop and GitHub releases remain separate owner-authorized publication steps. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations; the [review disposition](research/2026-09-14-implementation-review.md) records deferred latency/rejoin/reward/performance work.
 
 Preserve accepted mechanics and art unless explicitly revised. Log meaningful owner feedback in the optional [ledger](history/PLAYTEST_FEEDBACK.md), update only the affected fact owner, and select checks using the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). Do not replay historical checklists.
 

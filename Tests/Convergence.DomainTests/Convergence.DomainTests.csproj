@@ -17,6 +17,7 @@
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEnergyPulse.cs" Link="Presentation/FirstSeveranceEnergyPulse.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceDollActivation.cs" Link="Domain/FirstSeveranceDollActivation.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiTargetRules.cs" Link="Domain/SamuraiTargetRules.cs" />
+    <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiComboRules.cs" Link="Domain/SamuraiComboRules.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/GhostSamuraiRules.cs" Link="Domain/GhostSamuraiRules.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiWispMotion.cs" Link="Domain/SamuraiWispMotion.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiSlashAim.cs" Link="Domain/SamuraiSlashAim.cs" />

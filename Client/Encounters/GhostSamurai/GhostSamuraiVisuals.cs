@@ -40,6 +40,16 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
         batch.Draw(texture, root, GhostSamuraiArt.Body, tint, 0, GhostSamuraiArt.BodyPivot,
             GhostSamuraiArt.Scale, SpriteEffects.None, 0);
         DrawArm(1);
+        if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave && boss.Combo.IsValid(boss.Attack))
+        {
+            int facing = boss.Combo.Facing;
+            Color gaze = boss.Combo.Locked ? new(255, 242, 192) : new(83, 192, 255);
+            Vector2 tip = root + new Vector2(facing * 100, -64);
+            Stroke(batch, tip - new Vector2(facing * 27, 0), tip, 6, new Color(6, 13, 30));
+            Stroke(batch, tip - new Vector2(facing * 27, 0), tip, 2, gaze);
+            Stroke(batch, tip - new Vector2(facing * 10, 6), tip, 3, gaze);
+            Stroke(batch, tip - new Vector2(facing * 10, -6), tip, 3, gaze);
+        }
         if (boss.Attack == SamuraiAttack.Phase2DashSlash && boss.TransitionRemaining == 0)
         {
             float remaining = GhostSamuraiRules.DashApproach + GhostSamuraiRules.DashWarning
@@ -67,9 +77,15 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
         {
             Vector2 shoulder = root + new Vector2(side * 56, -35);
             float angle = side * (.1f + motion + pose * (pose < 0 ? .65f : 1.2f));
+            if (boss.Attack == SamuraiAttack.TripleVerticalSlash)
+                angle = side * (.1f + motion + pose * (pose < 0 ? 1.05f : 1.55f));
+            else if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave)
+                angle = side * (.1f + motion) + pose * (pose < 0 ? .85f : 1.85f) * boss.Combo.Facing - side * pose * .2f;
+            Color bladeTint = SamuraiComboRules.IsCombo(boss.Attack) && pose < 0
+                ? Color.Lerp(tint, new Color(255, 237, 183), -pose * .35f) : tint;
             Vector2 pivot = GhostSamuraiArt.ShoulderPivot;
             if (side < 0) pivot.X = GhostSamuraiArt.SwordArm.Width - pivot.X;
-            batch.Draw(texture, shoulder, GhostSamuraiArt.SwordArm, tint, angle, pivot,
+            batch.Draw(texture, shoulder, GhostSamuraiArt.SwordArm, bladeTint, angle, pivot,
                 GhostSamuraiArt.Scale, side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
         }
     }
@@ -80,6 +96,10 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
         float warning, live;
         switch (boss.Attack)
         {
+            case SamuraiAttack.TripleVerticalSlash:
+                return SamuraiComboRules.VerticalPose(t);
+            case SamuraiAttack.FrontalCleaveShockwave:
+                return SamuraiComboRules.SwingPose(t - SamuraiComboRules.CleaveApproach, SamuraiComboRules.CleaveWindup, SamuraiComboRules.CleaveLive, SamuraiComboRules.ShockDelay);
             case SamuraiAttack.DirectionalSlash:
                 return GhostSamuraiRules.DirectionalPose(t);
             case SamuraiAttack.ChargedSlash:
@@ -132,6 +152,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         if (Main.dedServ || projectile.ModProjectile is not GhostSamuraiAttackProjectile p || !p.TryGetAge(out float age)) return true;
         var h = p.DisplayHazard;
         if (age < h.Born || age >= h.End) return false;
+        if (h.Shape == SamuraiShape.VerticalSlash && age < h.Fire - SamuraiComboRules.VerticalForecast) return false;
         // A delayed client must not render a stale aimed line as the live strike.
         if (h.HasAim && age >= h.Fire && !p.SlashAim.Locked) return false;
         SpriteBatch batch = Main.spriteBatch;
@@ -142,13 +163,16 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         int viewWidth = (int)MathF.Ceiling(Main.screenWidth / Math.Max(.1f, zoom.X)) + 64;
         int viewHeight = (int)MathF.Ceiling(Main.screenHeight / Math.Max(.1f, zoom.Y)) + 64;
         Rectangle viewport = new((Main.screenWidth - viewWidth) / 2, (Main.screenHeight - viewHeight) / 2, viewWidth, viewHeight);
-        if (h.IsCircle && Main.npc[p.BossSlot].ModNPC is GhostSamuraiBoss owner)
+        if ((h.IsCircle || h.Shape == SamuraiShape.FrontalCleave) && Main.npc[p.BossSlot].ModNPC is GhostSamuraiBoss owner)
         {
             var field = owner.Arena;
             viewport = Rectangle.Intersect(viewport, new Rectangle((int)(field.Left - Main.screenPosition.X),
                 (int)(field.Top - Main.screenPosition.Y), (int)(field.HalfWidth * 2), (int)(field.HalfHeight * 2)));
         }
-        if (h.IsCircle) GhostSamuraiCircleVisuals.Draw(batch, h, position, age, viewport,
+        if (h.Shape == SamuraiShape.FrontalCleave) GhostSamuraiComboVisuals.DrawCleave(batch, h, position, age, p.SlashAim.Locked, viewport,
+            ModContent.GetInstance<Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig>().ReducedEffects);
+        else if (h.Shape == SamuraiShape.GroundShockwave) GhostSamuraiComboVisuals.DrawShock(batch, h, position, age);
+        else if (h.IsCircle) GhostSamuraiCircleVisuals.Draw(batch, h, position, age, viewport,
             ModContent.GetInstance<Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig>().ReducedEffects);
         else if (h.Shape == SamuraiShape.SlashWave) GhostSamuraiWaveVisuals.Draw(batch, h, position, age, p.SlashAim.Locked);
         else if (h.Shape == SamuraiShape.RushVisual) DrawRush(batch, p, position, age);
