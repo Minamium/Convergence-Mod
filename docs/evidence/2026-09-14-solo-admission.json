@@ -11,8 +11,33 @@
     "Package policies inspected directly in memory; GitHub asset digest independently matches the enabled artifact."
   ],
   "correction": "0.3.4/protocol39: remove compile opt-in/release opt-out; validate actual TMOD admission",
-  "verification": "pending final build/checks",
-  "shared_install": "pending",
+  "build": {
+    "source_commit": "6cbbe62df98d68108635304e1e072bc20382afa2",
+    "source_sha256": "8b21f7d4441209c3b32849bcd93c5eba73652de4203489cab80e2db4a3e274b9",
+    "branch": "main",
+    "dirty": false,
+    "record_id": "20260914T135934442622Z",
+    "command_entry": "tools/dev.py build --native --release-candidate --save <isolated profile>",
+    "solo_opt_in_symbol_present": false,
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "source_changed_during_build": false,
+    "artifact_bytes": 57014272,
+    "artifact_sha256": "2549faac8199438ca1ca901539f876ba0e9bb72ff2b36dda582412bbd0cf7028",
+    "assembly_sha256": "cbf1d6a71d19e355f5d8f74490544b36b9c48c43c1dd12ae419cb136001d213b"
+  },
+  "verification": {
+    "static": "passed",
+    "domain": 216,
+    "development_tool_tests": 10,
+    "compiled_codec_roundtrips": 330,
+    "compiled_codec_malformed_rejections": 54,
+    "installed_native_API_and_Doll_teardown": "passed",
+    "packaged_admission": "passed: solo enabled, minimum1, maximum4",
+    "regression_control": "GitHub0.3.1 accepted; known disabled Workshop0.3.1 rejected with nonzero exit"
+  },
+  "shared_install": "completed: game processes absent; preserved normal0.3.1 in the build record directory, copied this exact main-built package into normal Mods, verified installed hash and1-4 admission; no saves or enabled Mods changed",
   "runtime": "not_run after correction; user owns one-player Ready/start and matching-peer multiplayer/recovery",
-  "publication": "Workshop/GitHub0.3.1 unchanged; corrected package is not automatically published"
+  "publication": "Workshop/GitHub0.3.1 unchanged; corrected package is not automatically published",
+  "notes": "Evidence/handoff documents finalized after packaging; production inputs unchanged. A background VBCSCompiler was distinguished from tModLoader before install."
 }

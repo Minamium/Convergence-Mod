@@ -4,7 +4,7 @@ document_type: handoff
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - handoff.windows.resume
 aliases:
@@ -76,13 +76,17 @@ related_docs:
 
 ## 再発させない境界
 
-Server/SP authority、Terraria非依存domain、単一Mod assembly、Common/Content/Client分離、Calamity隔離、Fight単位の所有と冪等cleanupを維持する。普通のTerraria致死のDown化・堅牢なrejoin・一般外部者制御・独立Mod化は未完成であり、現在のRaid独自ダメージ実験と区別する。
+Server/SP authority、Terraria非依存domain、単一Mod assembly、Common/Content/Client分離、Calamity隔離、Fight単位の所有と冪等cleanupを維持する。Dollの通常Hurt→Downは[ADR-0024](../adr/0024-native-raid-hurt-and-downed.md)で実装したが、DoT/直接死亡/他Mod全般の互換性や堅牢なrejoinを保証しない。ソロは[ADR-0025](../adr/0025-public-solo-admission.md)による通常仕様であり、公開時やGUIビルドで無効にしない。
 
 読む資料と検証は [verification matrix](../../.agents/skills/develop-convergence-raids/references/verification-matrix.md) で変更種別ごとに選ぶ。既読/通過済みの再実行は入力変更・具体的な疑問・失敗がある時だけ。全文読書、新ADR/Skill、全体release gateを軽微な修正へ自動追加しない。
 
 ## Completed Ghost Samurai integration
 
 2026-09-12、`67e36c1` で旧featureの `d4ad7d2` とmain側の再召喚修正 `9464e9c` を統合済み。`feature/ghost-samurai-phases-1-2` はこの統合の履歴であり、次の作業は最新 `origin/main` から新しい目的別branch/worktreeを作る。以後の通常作業でこの完了済みcheckpointを毎回確認し直す必要はない。現在の実装・packageは [Status](../STATUS.md) が持つ。
+
+## Completed native damage and solo correction
+
+2026-09-14、Ghost Samurai PR25を保持したmainへ、native Hurtの`2ed584b`とソロ通常化の`6cbbe62`を統合。実際に使われる通常Modsへmain由来パッケージを反映済み。`fix/native-raid-hurt`の古い分岐や専用profileを次の正本にしない。正確な成果物・旧版バックアップ・公開物との差は[証拠](../evidence/2026-09-14-solo-admission.json)、次のユーザー確認は[Status](../STATUS.md)を参照。
 
 ## 履歴
 

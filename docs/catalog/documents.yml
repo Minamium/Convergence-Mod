@@ -607,7 +607,7 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 57c648bf6c1c5c7d2804d7f395b85b318aece778a10dd863ef573111cb1d646c
+  content_sha256: 676b0435b445b555e8f1a87a35b53ad880fe6782b4f39e3397cc2150fe2baea2
   document_type: plan
   status: accepted
   owners:
@@ -749,12 +749,12 @@ documents:
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Development Handoff — チャット不要の再開入口
-  content_sha256: a86145e1fe2706157d3879a2d0f7f0495419740b108530fc053932af293f2484
+  content_sha256: 1a7fcda1c82fd4d52a6dd5746ee33aae046d2a5c55b4aa13f7654b749b3c344a
   document_type: handoff
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - handoff.windows.resume
   aliases:
@@ -1198,7 +1198,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 38724a958ac1114f7bcb6fc62fe1c71365fa6841be403cadec3955036cb7ad49
+  content_sha256: 7c1761262d50062c762f46f49fb5674eb51b09d9ae78690ed635f1043c304f66
   document_type: status
   status: accepted
   owners:
