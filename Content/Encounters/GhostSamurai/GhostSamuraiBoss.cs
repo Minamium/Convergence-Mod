@@ -16,6 +16,7 @@ public sealed class GhostSamuraiBoss : ModNPC
     internal Guid Fight;
     internal SamuraiArenaBounds Arena;
     internal int Age, AttackTimer, TransitionRemaining;
+    internal int LockedTarget = -1;
     internal SamuraiPhase Phase = SamuraiPhase.Phase1;
     internal SamuraiAttack Attack;
     internal SamuraiBeat Beat;
@@ -45,11 +46,20 @@ public sealed class GhostSamuraiBoss : ModNPC
     public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)
         => NPC.lifeMax = (int)(GhostSamuraiRules.Life * (1 + .55f * Math.Max(0, numPlayers - 1)));
     public override bool CheckActive() => false;
+    // Native player strikes are resolved on the attacking client (or projectile
+    // owner). Consume only the server's target snapshot; never select a target here.
+    private float IncomingMultiplier(int owner) => SamuraiTargetRules.DamageMultiplier(
+        Main.netMode != NetmodeID.SinglePlayer, LockedTarget, owner,
+        owner >= 0 && owner < Main.maxPlayers && Main.player[owner].active);
+    public override void ModifyHitByItem(Player player, Item item, ref NPC.HitModifiers modifiers)
+        => modifiers.FinalDamage *= IncomingMultiplier(player.whoAmI);
+    public override void ModifyHitByProjectile(Projectile projectile, ref NPC.HitModifiers modifiers)
+        => modifiers.FinalDamage *= IncomingMultiplier(projectile.owner);
     public override void OnSpawn(IEntitySource source)
     {
         if (source is GhostSamuraiActorSource owned)
         {
-            Runtime = owned.Runtime; Fight = owned.Fight; NPC.target = owned.Target; Arena = owned.Arena;
+            Runtime = owned.Runtime; Fight = owned.Fight; NPC.target = LockedTarget = owned.Target; Arena = owned.Arena;
         }
     }
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
@@ -89,16 +99,17 @@ public sealed class GhostSamuraiBoss : ModNPC
     public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
     public override void SendExtraAI(BinaryWriter writer)
     {
-        new SamuraiActorSnapshot(Fight, Age, Phase, Attack, Beat, AttackTimer, TransitionRemaining, NPC.lifeMax, Arena).Write(writer);
+        new SamuraiActorSnapshot(Fight, Age, Phase, Attack, Beat, AttackTimer, TransitionRemaining, NPC.lifeMax, Arena, LockedTarget).Write(writer);
     }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         SamuraiActorSnapshot state = SamuraiActorSnapshot.Read(reader);
         if (Main.netMode == NetmodeID.Server || Fight != Guid.Empty && Arena != state.Arena) return;
+        if (Fight != Guid.Empty && Age == state.Age && LockedTarget != state.LockedTarget) return;
         if (!state.CanReplace(Fight, Age)) return;
         Fight = state.Fight; Age = state.Age; Phase = state.Phase; Attack = state.Attack; Beat = state.Beat;
         AttackTimer = state.AttackTimer; TransitionRemaining = state.TransitionRemaining; NPC.lifeMax = state.MaximumLife;
-        Arena = state.Arena;
+        Arena = state.Arena; LockedTarget = state.LockedTarget;
         receivedAt = Main.GameUpdateCount;
     }
 }

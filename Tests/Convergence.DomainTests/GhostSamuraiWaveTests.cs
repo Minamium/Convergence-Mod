@@ -11,32 +11,53 @@ internal static partial class Program
             SamuraiWaveRules.ChargedSlashWaveHeight / 2, born, born + GhostSamuraiRules.GridFollowWarning,
             born + GhostSamuraiRules.GridFollowWarning + SamuraiWaveRules.WaveLife, GhostSamuraiRules.ChargeDamage);
 
-    [DomainTest("Ghost Samurai grid hit precedes first wave contact by exactly sixty ticks at all captured ranges")]
+    [DomainTest("Ghost Samurai grid wave tracks a moving target and reverse-schedules sixty-tick arrival")]
     private static void SamuraiGridWaveArrival()
     {
         foreach (float distance in new[] { 0f, 50f, 300f, 900f, 2100f, 3950f })
         for (int angle = 0; angle < 32; angle++)
         {
             float dx = MathF.Cos(angle * MathF.Tau / 32), dy = MathF.Sin(angle * MathF.Tau / 32);
-            var h = TestWave(dx, dy);
+            var h = TestWave(dx, dy, 0);
             float x = dx * distance, y = dy * distance;
             int flight = SamuraiWaveRules.FlightTicks(h, x, y, 10, 21);
-            h = h with { End = h.Fire + Math.Max(SamuraiWaveRules.WaveLife, flight + 24) };
-            int gridFire = SamuraiWaveRules.GridFire(h, flight);
-            var grid = GhostSamuraiRules.GridLine(true, 7, x, y, gridFire - GhostSamuraiRules.GridWarning);
-            AssertEqual(true, h.IsValid && grid.IsValid, "full fixed schedules remain wire-valid");
-            AssertEqual(true, grid.Born >= h.Born, "both complete warnings fit without negative-time spawns");
-            AssertEqual(168, h.Fire - h.Born, "long first warning preserved");
-            AssertEqual(84, grid.Fire - grid.Born, "full grid warning preserved");
-            AssertEqual(60, h.Fire + flight - grid.Fire, "actual leading-edge/AABB contact, not projectile spawn");
-            AssertEqual(true, SamuraiWaveRules.Geometry(h, h.Fire + flight).Hits(h.Fire + flight, x, y, 10, 21), "reference is reached");
-            for (int tick = 0; tick < flight; tick++)
-                AssertEqual(false, SamuraiWaveRules.Geometry(h, h.Fire + tick).Hits(h.Fire + tick, x, y, 10, 21), "no earlier contact");
-            AssertEqual(true, h.Fire + flight >= grid.End + 48, "grid releases movement well before wave arrival");
-            var fixedAim = SamuraiSlashAim.Spawn(h, h.Born);
-            AssertEqual(true, fixedAim.Locked && fixedAim.IsValid(h), "late join gets captured reference immediately");
-            AssertEqual(fixedAim, fixedAim.Advance(h, h.Born + 1, 999, 999, 0, 1), "moving target does not invalidate arrival schedule");
+            h = h with { ArrivalTick = Math.Max(h.Fire + flight, h.Born + 144) };
+            var grid = GhostSamuraiRules.GridLine(true, 7, x, y, h.ArrivalTick - 144);
+            AssertEqual(true, h.IsValid && grid.IsValid, "both full warnings have nonnegative births");
+            AssertEqual(108, h.Fire - h.Born, "grid wave minimum warning");
+            AssertEqual(84, grid.Fire - grid.Born, "grid warning intact");
+            var aim = SamuraiSlashAim.Spawn(h, h.Fire - 4);
+            for (int tick = 1; tick <= 300 && !aim.Locked; tick++)
+            {
+                // Target and boss moving together must not break the arrival
+                // clock or pin the first grid wave to the original target point.
+                aim = aim.TrackArrival(h, tick, 0, tick * 3, dx, dy, x, y + tick * 3, 10, 21);
+                AssertEqual(true, aim.IsValid(h), "moving release is bounded and transferable");
+            }
+            AssertEqual(true, aim.Locked, "bounded late lock");
+            var final = aim.Geometry(h);
+            AssertEqual(60, final.Fire + flight - grid.Fire, "first full-hitbox contact is one second after grid");
+            AssertEqual(true, SamuraiWaveRules.Geometry(final, final.Fire + flight).Hits(final.Fire + flight, x, y + aim.Tick * 3, 10, 21), "full wave reaches final reference");
+            AssertEqual(aim, aim.TrackArrival(h, aim.Tick + 1, 5000, 5000, 0, 1, 0, 0, 10, 21), "late dash cannot bend a locked wave");
         }
+    }
+
+    [DomainTest("Ghost Samurai moving arrival snapshots reject rollback and preserve warning under late teleports")]
+    private static void SamuraiArrivalWire()
+    {
+        var h = TestWave(born: 0) with { ArrivalTick = 144 };
+        var first = SamuraiSlashAim.Spawn(h, h.Fire - 4);
+        var moving = first.TrackArrival(h, 40, 0, 0, 1, 0, 600, 0, 10, 21);
+        var locked = moving.TrackArrival(h, 120, 0, 0, 1, 0, 3000, 0, 10, 21);
+        AssertEqual(true, locked.Locked && locked.IsValid(h), "teleport locks with a future release, never rewinds damage");
+        AssertEqual(124, locked.ReleaseTick, "four real ticks remain for late lock");
+        AssertEqual(true, locked.CanReplace(first), "final snapshot repairs missed mutable timing");
+        AssertEqual(false, moving.CanReplace(locked), "old moving packet cannot restore a locked attack");
+        using var bytes = new System.IO.MemoryStream();
+        locked.Write(new System.IO.BinaryWriter(bytes)); bytes.Position = 0;
+        AssertEqual(locked, SamuraiSlashAim.Read(new System.IO.BinaryReader(bytes), h), "late peer receives final geometry and time together");
+        AssertEqual(false, (locked with { ReleaseTick = 500 }).IsValid(h), "unbounded warning rejected");
+        AssertEqual(false, (h with { Shape = SamuraiShape.RushVisual, Damage = 0 }).IsValid, "arrival schedule is wave-only");
     }
 
     [DomainTest("Ghost Samurai slash wave is a finite travelling hitbox and never a runtime line or body hit")]
@@ -72,7 +93,7 @@ internal static partial class Program
     private static void SamuraiCircleFieldCoverage()
     {
         var field = SamuraiArenaBounds.Create(4000, 4000, 60000, 20000);
-        AssertEqual(2800f, GhostSamuraiRules.Phase3CircleOuterRadius, "field-sized finite radius");
+        AssertEqual(5600f, GhostSamuraiRules.Phase3CircleOuterRadius, "field-sized finite radius");
         foreach (float x in new[] { field.Left, field.CenterX, field.Right })
         foreach (float y in new[] { field.Top, field.CenterY, field.Bottom })
         foreach (float px in new[] { field.Left, field.Right })
@@ -96,6 +117,8 @@ internal static partial class Program
         cues.Advance(fight, 84);
         for (int line = 0; line < 30; line++) if (cues.Try(0, 84)) sounds++;
         AssertEqual(1, sounds, "thirty grid entities yield one slash");
+        AssertEqual(true, cues.Try(3, 84), "a genuinely simultaneous wave retains its heavy swing cue");
+        AssertEqual(false, cues.Try(3, 84), "duplicate wave cue suppressed");
         cues.Clear(); cues.Advance(fight, 0); sounds = 0;
         for (int strike = 0; strike < 8; strike++)
         {
@@ -115,10 +138,10 @@ internal static partial class Program
         cues.Clear(); cues.Advance(fight, 0);
         const int fire = 102; int shout = fire - GhostSamuraiRules.DashShoutDelay;
         cues.Advance(fight, shout - 1); AssertEqual(false, cues.Try(1, shout), "no early shout");
-        cues.Advance(fight, shout); AssertEqual(true, cues.Try(1, shout), "shout at final lock");
+        cues.Advance(fight, shout); AssertEqual(true, cues.Try(1, shout), "shout before final lock");
         AssertEqual(false, cues.Try(0, fire), "no dash release before reaction gap");
         cues.Advance(fight, fire); AssertEqual(true, cues.Try(0, fire), "slash at dash start");
-        AssertEqual(18, fire - shout, "0.3 second reaction cue");
+        AssertEqual(78, fire - shout, "preparation shout moved sixty ticks earlier");
     }
 
     [DomainTest("Ghost Samurai audio clock bounds catch-up memory and never replays pre-join or previous-fight cues")]

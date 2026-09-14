@@ -17,25 +17,26 @@ internal static class GhostSamuraiRules
     internal const int SlashWarning = 54, SlashLive = 10, DirectionalSlashInterval = 12, DirectionalPairInterval = 48;
     internal const int DirectionalPairCount = 4, DirectionalSlashCount = DirectionalPairCount * 2;
     internal const int DirectionalDuration = (DirectionalPairCount - 1) * DirectionalPairInterval + DirectionalSlashInterval + SlashWarning + SlashLive + RecoveryTime;
-    internal const int ChargeAimTime = 48, FirstChargeWarningExtension = 120, ChargeWarning = 72 + FirstChargeWarningExtension, ChargeLive = 12;
+    internal const int ChargeAimTime = 48, FirstChargeWarningExtension = 60, ChargeWarning = 72 + FirstChargeWarningExtension, ChargeLive = 12;
     internal const int AimLockLead = 4, AimSyncInterval = 3, ChargedSlashInterval = 90;
     internal const int ChargeSecondWarning = 30, ChargeThirdWarning = 48;
     internal const int GridPrelude = 36, GridWarning = 84, GridLive = 12;
     internal const int GridEnd = GridPrelude + GridWarning + GridLive;
     internal const int GridFollowWarning = 48 + FirstChargeWarningExtension, GridFollowStart = 0;
-    internal const int GridToChargedSlashHitInterval = 60, DashShoutDelay = 18;
-    internal const int DashApproach = 48, DashWarning = 54, DashLive = 18, DashRecovery = RecoveryTime;
+    internal const int GridToChargedSlashHitInterval = 60, DashShoutDelay = 78, DashAimLockTime = 4, DashVisualCueTime = 12;
+    internal const int DashApproach = 24, DashWarning = 78, DashLive = 21, DashRecovery = RecoveryTime;
     internal const int DashCadence = DashApproach + DashWarning + DashLive + DashRecovery;
     internal const float SlashLength = 1400, SlashHalfWidth = 32, ChargeHalfWidth = 150;
     internal const float GridWidth = 2520, GridHeight = 2520, GridSpacing = 180, GridHalfWidth = 34;
     internal const int GridVerticalLineCount = (int)(GridWidth / GridSpacing) + 1;
     internal const int GridHorizontalLineCount = (int)(GridHeight / GridSpacing) + 1;
-    internal const float DashDistance = 1800, DashHalfWidth = 50, DashStandOff = 900, DashRetreatSpeed = 38;
+    internal const float DashAttackSpeed = 1800f / DashLive; // Mean speed; smoothstep peak is 1.5x.
+    internal const float DashDistance = DashAttackSpeed * DashLive, DashHalfWidth = 50, DashStandOff = 900, DashRetreatSpeed = 38;
     internal const float ChargeDistance = 2100, ChargeStandOff = 900;
     internal const float RushPredictionSpeedLimit = 48;
     internal const int BodyWidth = 116, BodyHeight = 170;
     // A circle centered anywhere inside the 2560x1120 field covers every corner.
-    internal const float Phase3CircleInnerRadius = 240, Phase3CircleOuterRadius = 2800;
+    internal const float Phase3CircleInnerRadius = 240, Phase3CircleOuterRadius = 5600;
     internal const int Phase3CircleStepInterval = 60, Phase3CircleTelegraphTime = 36, Phase3KamaitachiDuration = 24;
     internal const int Phase3CircleSteps = 4, Phase3CircleSlashLive = 12;
     internal const int Phase3CircleDuration = 3 * Phase3CircleStepInterval + Phase3CircleTelegraphTime + Phase3KamaitachiDuration + RecoveryTime;
@@ -44,8 +45,8 @@ internal static class GhostSamuraiRules
     internal const int MaximumHazards = GridVerticalLineCount + GridHorizontalLineCount + 3 + MaximumWisps;
     internal const int WispSyncInterval = 6;
     internal const float SpreadSpeed = 3.5f, HomingSpeed = 4.5f, HomingStrength = .035f, WispRadius = 15;
-    internal const int SlashDamage = 260, ChargeDamage = 380, GridDamage = 280, WispDamage = 200;
-    internal const int HitCooldown = 50, AbandonTime = 180;
+    internal const int SlashDamage = 260, ChargedSlashDamage = 60, ChargeDamage = ChargedSlashDamage, GridDamage = 280, WispDamage = 200;
+    internal const int HitCooldown = 50;
     internal const float AbandonDistance = 4000;
 
     internal static int AttackInterval(SamuraiPhase phase) => phase == SamuraiPhase.Phase1 ? AttackIntervalPhase1 : AttackIntervalPhase2;
@@ -197,7 +198,7 @@ internal static class GhostSamuraiRules
                 float middle = (low + high) * .5f;
                 if (RushProgress(middle, duration) < fraction) low = middle; else high = middle;
             }
-            float lead = DashShoutDelay + Math.Max(0, (low + high) * .5f - 1);
+            float lead = DashAimLockTime + Math.Max(0, (low + high) * .5f - 1);
             dx = targetX + velocityX * lead - x;
             dy = targetY + velocityY * lead - y;
         }
@@ -234,7 +235,7 @@ internal static class GhostSamuraiRules
 // A wisp's immutable geometry carries its initial outward direction and live window;
 // its moving center is supplied by the authority's SamuraiWispMotion.
 internal readonly record struct SamuraiHazard(SamuraiShape Shape, float X, float Y, float DX, float DY,
-    float Length, float Radius, int Born, int Fire, int End, int Damage)
+    float Length, float Radius, int Born, int Fire, int End, int Damage, int ArrivalTick = 0)
 {
     internal bool HasAim => Shape is SamuraiShape.Slash or SamuraiShape.RushVisual or SamuraiShape.SlashWave;
     internal bool IsCircle => Shape is SamuraiShape.InnerSlash or SamuraiShape.OuterSlash or SamuraiShape.InnerKamaitachi or SamuraiShape.OuterKamaitachi;
@@ -244,8 +245,9 @@ internal readonly record struct SamuraiHazard(SamuraiShape Shape, float X, float
         && Math.Abs(X) <= 500000 && Math.Abs(Y) <= 500000
         && float.IsFinite(DX) && float.IsFinite(DY) && Math.Abs(DX * DX + DY * DY - 1) < .01f
         && float.IsFinite(Length) && Length is >= 0 and <= 3000
-        && float.IsFinite(Radius) && (IsCircle ? Radius is >= 1 and <= 3000 && (IsOuter ? Length > 0 && Length < Radius : Length == 0)
+        && float.IsFinite(Radius) && (IsCircle ? Radius is >= 1 and <= 6000 && (IsOuter ? Length > 0 && Length < Radius : Length == 0)
             : Shape == SamuraiShape.SlashWave ? Length == SamuraiWaveRules.ChargedSlashWaveWidth && Radius == SamuraiWaveRules.ChargedSlashWaveHeight / 2 : Radius is >= 1 and <= 200)
+        && (ArrivalTick == 0 || Shape == SamuraiShape.SlashWave && (long)ArrivalTick - Born is >= 144 and <= 540)
         && Born >= 0 && (long)Fire - Born is >= 24 and <= 300 && End > Fire && (long)End - Fire <= 240
         && (Shape == SamuraiShape.RushVisual ? Damage == 0 : Damage is > 0 and <= 2000);
 
@@ -274,13 +276,13 @@ internal readonly record struct SamuraiHazard(SamuraiShape Shape, float X, float
     internal void Write(BinaryWriter w)
     {
         w.Write((byte)Shape); w.Write(X); w.Write(Y); w.Write(DX); w.Write(DY); w.Write(Length);
-        w.Write(Radius); w.Write(Born); w.Write(Fire); w.Write(End); w.Write(Damage);
+        w.Write(Radius); w.Write(Born); w.Write(Fire); w.Write(End); w.Write(Damage); w.Write(ArrivalTick);
     }
 
     internal static SamuraiHazard Read(BinaryReader r)
     {
         var result = new SamuraiHazard((SamuraiShape)r.ReadByte(), r.ReadSingle(), r.ReadSingle(),
-            r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
+            r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
         if (!result.IsValid) throw new InvalidDataException("ghost_samurai.hazard_invalid");
         return result;
     }

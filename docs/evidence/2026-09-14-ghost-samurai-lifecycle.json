@@ -1,0 +1,46 @@
+{
+  "feature": "Ghost Samurai lifecycle, late tracking, foot-anchored arena and target damage",
+  "version": "0.3.2",
+  "protocol": 38,
+  "branch": "fix/ghost-samurai-fight-lifecycle",
+  "base_commit": "1fba399214c4ba17379958ac7aa56121f245dd1d",
+  "source_sha256": "a10b1b40358e80398a9968e6b633836acbea4ff0da043d128f23c62f20d116d9",
+  "artifact": {
+    "bytes": 57053639,
+    "sha256": "5e5afb8786d0da1f62f83c81e97a76b106690e47cf9ab5a744f361fee5ff0a77"
+  },
+  "build": {
+    "mode": "native isolated profile",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales_parsed": 18,
+    "shader_exports": "passed",
+    "source_changed": false
+  },
+  "verification": {
+    "domain": 211,
+    "focused": 32,
+    "codec_roundtrips": 324,
+    "malformed_rejections": 50,
+    "global_registration": "2 passed",
+    "summon": "stable type retained",
+    "teardown": "packaged methods: exact-Fight removal preserves other Fight; repeated WorldUnload/Unload; Player/ModContent uninitialized"
+  },
+  "runtime": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "solo death, one MP survivor, wipe, boss death, re-summon",
+      "world entry/exit without summon",
+      "target disconnect, slot reuse and late snapshots",
+      "Item/projectile/minion/sentry owner damage ratio",
+      "field placement, P3 out/in/out/in, dash/wave/audio timing and FPS"
+    ]
+  },
+  "arrival_contract": "60ticks at static or equally translating relative reference. Late large movement/teleport/retarget may delay: minimum108tick warning and4tick lock take precedence over retroactive release or faster waves.",
+  "shared_install": "not performed; canonical main and normal package untouched",
+  "notes": [
+    "No GUI/game/gameplay-server started. No public release updated.",
+    "Documentation follows the build; production source unchanged.",
+    "Native incoming-NPC-hit hooks consume server target; unknown owners/direct unattributed strikes are not guessed."
+  ]
+}

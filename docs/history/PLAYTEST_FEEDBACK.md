@@ -45,3 +45,7 @@ This is a retrospective summary of the owner's playtests and repeated correction
 - **Audio:** 24 distinct weapon cues / 48 bounded voice samples report `playing=True`, including Magic/Ranged sustain and Doll beam cues. This confirms the repaired playback path, not subjective loudness or every event.
 - **Remaining:** Ghost Samurai `OnWorldUnload` still throws after the Raid; native tile-stream shutdown warnings and a SubworldLibrary EOF also appear. No Ghost Samurai fight was run. The latest solo session does not validate multiplayer recovery/alignment.
 - **Evidence:** [sanitized log summary](../evidence/2026-09-14-playtest-0278.json). The owner supplied a 4m31s gameplay clip for a social invitation; original video and logs remain external. No new artistic approval is inferred merely from its attachment.
+
+## Ghost Samurai — 2026-09-14 / development0.3.2
+
+The user reported a fight surviving death and fields extending underground; requested later tracking, low wave test damage, early shout/late visual cue and target damage ownership. Replace unsafe all-slot teardown with exact-Fight leases, end on last living participant, anchor the unchanged field above summoner feet, retain living targets and halve known non-target owner damage. The user clarified that only first-wave warnings shorten60ticks; later30/48tick warnings remain. [Evidence](../evidence/2026-09-14-ghost-samurai-lifecycle.json) records automated results; actual death/re-summon, multiplayer ratios, network timing and arena/dash playability await testing.
