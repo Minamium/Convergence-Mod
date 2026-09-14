@@ -37,10 +37,75 @@
     ]
   },
   "arrival_contract": "60ticks at static or equally translating relative reference. Late large movement/teleport/retarget may delay: minimum108tick warning and4tick lock take precedence over retroactive release or faster waves.",
-  "shared_install": "not performed; canonical main and normal package untouched",
+  "shared_install": {
+    "status": "historical 0.3.2 installation; administrator approved PR25 integration and normal-profile deployment; superseded below by current main 0.3.4",
+    "pull_request": "https://github.com/Minamium/Convergence-Mod/pull/25",
+    "source_commit": "0a53d398bb68bb1924516aa8c3391cae72374650",
+    "source_branch": "main",
+    "started_utc": "20260914T094911325014Z",
+    "source_sha256": "3dc4fff40cf955f7898faad26cfda9018fcaddff2ebd9487eb152396c1d25b0c",
+    "source_changed_during_build": false,
+    "source_note": "Tracked files match merged PR25 exactly. One pre-existing untracked workstation setup record remains local and is excluded from packaging.",
+    "artifact": {
+      "bytes": 57053623,
+      "sha256": "c28c9554463a2a750822ad64ed7b667e2981c144c9570116047260d78f15c747"
+    },
+    "build": {
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "locales_parsed": 18,
+      "shader_exports": "passed"
+    },
+    "installed_package_checks": [
+      "version 0.3.2",
+      "both Global types accepted by installed tModLoader ValidateType",
+      "saved summon type retained",
+      "exact-Fight lease removal and repeated teardown with uninitialized Player/ModContent"
+    ],
+    "preservation": {
+      "previous_package_backup": "hash matches pre-install package",
+      "original_local_files": "all seven pre-install file copies hash-verified; exact tracked-file stash retained",
+      "translation_reconciliation": "Old automatic formatting is already in main. Latest tooltips retained; duplicate generated projectile defaults are now owned by main localization and must not override newer names. Original copies retained locally.",
+      "enabled_mods": "unchanged, Convergence enabled",
+      "local_props_and_setup_record": "unchanged",
+      "source_junction": "unchanged; normal ModSources resolves to canonical main"
+    },
+    "next_action": "User: Reload Mods; no repeat compilation required. Actual gameplay remains not_run."
+  },
   "notes": [
     "No GUI/game/gameplay-server started. No public release updated.",
     "Documentation follows the build; production source unchanged.",
     "Native incoming-NPC-hit hooks consume server target; unknown owners/direct unattributed strikes are not guessed."
-  ]
+  ],
+  "followup_install": {
+    "status": "installed from current main on task resume; preserves integrated Ghost Samurai fixes and subsequent main changes",
+    "version": "0.3.4",
+    "protocol": 39,
+    "source_commit": "7c07e0654e3cd8248138660dc4434533646cc42c",
+    "branch": "main",
+    "started_utc": "20260914T150329211486Z",
+    "source_sha256": "5a83fa45eea72b96e036f5066dbfe0fe95146a6e0ca0fa9a518369772937715c",
+    "source_changed_during_build": false,
+    "artifact": {
+      "bytes": 57061886,
+      "sha256": "b423aaa4cf35968e56faf5d2626deed306bb7ba6edfa6893f6d2bc6446bfca5e"
+    },
+    "assembly_sha256": "c96aa57f34ad291463cbf1115a50c0dccc8065a96e8e67f7490ad52b8a93932a",
+    "build": {
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "locales_parsed": 18,
+      "shader_exports": "passed"
+    },
+    "verification": {
+      "packaged_admission": "1-4 players; solo enabled",
+      "ghost_samurai_registration_and_teardown": "passed against installed package",
+      "native_Hurt_API_and_Doll_teardown": "passed against installed package",
+      "compiled_codec_roundtrips": 330,
+      "malformed_rejections": 54
+    },
+    "preservation": "Previous 0.3.2 package backup hash matches baseline; enabled Mods, local props, source junction and local setup record unchanged. Original translation backup/stash retained.",
+    "new_main_behavior_evidence": "docs/evidence/2026-09-14-solo-admission.json",
+    "handoff": "Reload Mods, not another build. Matching 0.3.4/protocol39 peers required. Actual gameplay not_run; no Workshop or release update."
+  }
 }
