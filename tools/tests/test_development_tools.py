@@ -78,6 +78,22 @@ class VerifierTests(unittest.TestCase):
 
 
 class SourceIdentityTests(unittest.TestCase):
+    def test_release_configuration_never_disables_solo(self):
+        for flags, expected in (([], "Debug"), (["--release-candidate"], "Release"),
+                                (["--configuration", "Release"], "Release")):
+            with self.subTest(flags=flags), patch.object(sys, "argv", ["dev", "doctor", *flags]), \
+                    patch.object(dev, "environment", return_value={}) as environment, \
+                    patch.object(dev, "source_record", return_value={"files": {}}), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(0, dev.main())
+                self.assertEqual([f"-p:Configuration={expected}"], environment.call_args.args[0])
+
+    def test_conflicting_release_configuration_is_rejected(self):
+        with patch.object(sys, "argv", ["dev", "doctor", "--release-candidate", "--configuration", "Debug"]), \
+                contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+            dev.main()
+        self.assertEqual(2, error.exception.code)
+
     def test_manifest_covers_content_changes_and_tracked_deletion(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

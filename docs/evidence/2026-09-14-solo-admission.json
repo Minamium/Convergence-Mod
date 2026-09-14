@@ -1,0 +1,18 @@
+{
+  "issue": "GUI rebuild disabled solo before Workshop0.3.1 publication",
+  "observed_date": "2026-09-14",
+  "artifacts": {
+    "github_0_3_1": {"solo_enabled": true, "minimum_participants": 1, "sha256": "ef3ffc9d6e8e3bc10c335e59d1a868e0656626e12bd6dbbeb4cf180054317801"},
+    "normal_and_subscribed_workshop_0_3_1": {"solo_enabled": false, "minimum_participants": 2, "sha256": "8ac1426448913c682c55d4d8f0c7de7cabed11f9edd4dae9fe112fc06aa2c98f"}
+  },
+  "observations": [
+    "Archived client: GUI build09:44:19, package09:44:22, publish/update09:44:54.",
+    "Host server selected local0.3.1 at21:32:06; one player joined21:32:32; roster_too_small21:33:32.",
+    "Package policies inspected directly in memory; GitHub asset digest independently matches the enabled artifact."
+  ],
+  "correction": "0.3.4/protocol39: remove compile opt-in/release opt-out; validate actual TMOD admission",
+  "verification": "pending final build/checks",
+  "shared_install": "pending",
+  "runtime": "not_run after correction; user owns one-player Ready/start and matching-peer multiplayer/recovery",
+  "publication": "Workshop/GitHub0.3.1 unchanged; corrected package is not automatically published"
+}

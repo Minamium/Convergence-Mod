@@ -1,7 +1,6 @@
 # Requires PowerShell 7+; tests the supplied compiled assembly, never starts Terraria.
 param(
-    [Parameter(Mandatory=$true)][string]$AssemblyPath,
-    [ValidateSet('enabled','disabled','any')][string]$ExpectedSoloDebug = 'enabled'
+    [Parameter(Mandatory=$true)][string]$AssemblyPath
 )
 $ErrorActionPreference = 'Stop'
 $assemblyFile = (Resolve-Path -LiteralPath $AssemblyPath).Path
@@ -39,9 +38,9 @@ $version = $assembly.GetType('Convergence.Common.Networking.Protocol.EncounterPr
 if ($version -ne $expectedProtocol) { throw "Compiled protocol $version does not match source $expectedProtocol" }
 $createPrism = $assembly.GetType($feature + 'FirstSeveranceAttackPatterns').GetMethod('CreatePrism', $staticFlags)
 $downed = Enum-Value 'Convergence.Common.Raids.Revive.RaidParticipantCombatState' 'Downed'
-$soloFlag = $assembly.GetType($feature + 'Development.FirstSeveranceDevelopmentPolicy').GetField('AllowSoloDebugStart', $staticFlags).GetRawConstantValue()
-if (($ExpectedSoloDebug -eq 'enabled' -and -not $soloFlag) -or ($ExpectedSoloDebug -eq 'disabled' -and $soloFlag)) {
-    throw "Unexpected compiled solo flag: $soloFlag"
+$soloFlag = $assembly.GetType($feature + 'Development.FirstSeveranceDevelopmentPolicy').GetField('AllowSoloStart', $staticFlags).GetRawConstantValue()
+if (-not $soloFlag) {
+    throw 'Compiled package disables solo admission; all development/public candidates must allow it.'
 }
 $aimCore = $assembly.GetType($feature + 'FirstSeveranceGridVolley').GetMethod('AimCoreBeam', $staticFlags)
 $partyScaling = $assembly.GetType($feature + 'FirstSeverancePartyScaling').GetMethod('ForCount', $staticFlags)

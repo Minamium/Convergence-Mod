@@ -132,7 +132,7 @@ documents:
 - doc_id: decision.development-solo-admission
   path: docs/adr/0020-development-solo-admission-and-terminal-hud.md
   title: 'ADR-0020: Build-gated solo debug admission and disposable terminal HUD'
-  content_sha256: 93715aadafc93d5cbb3ef646fcc1a4b033b295a77811f70fd0962b38885f60d1
+  content_sha256: 5e52bc312e25a1be30fd75c590e26204895125ad22443c6c3756ff0464e1e045
   document_type: adr
   status: accepted
   owners:
@@ -302,6 +302,25 @@ documents:
   - decision.roster-health-core-salvos
   - encounter.first-severance.spec
   - project.status
+- doc_id: decision.public-solo-admission
+  path: docs/adr/0025-public-solo-admission.md
+  title: 'ADR-0025: Solo admission is a public gameplay contract'
+  content_sha256: edb26128abf0b191b56af435dfafd606059710b8fa328713e05d78129bbca1e3
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  last_reviewed: '2026-09-14'
+  source_of_truth_for:
+  - architecture.doll_public_admission
+  aliases:
+  - multiplayer recommended not required
+  related_code:
+  - Content/Encounters/FirstSeverance/Development/FirstSeveranceDevelopmentPolicy.cs
+  - tools/check-package-admission.ps1
+  related_docs:
+  - encounter.first-severance.spec
+  - policy.release-process
 - doc_id: decision.roster-health-core-salvos
   path: docs/adr/0018-roster-health-and-core-salvos.md
   title: 'ADR-0018: Frozen-roster health and bounded Core salvos'
@@ -370,7 +389,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: 129890cc6a0d21abb54ea88c554652c844b48652dea552cfc2c9ffefba62527c
+  content_sha256: b3e5edf470e8549f073871bc47ab5f6a8753a257b13297456b7c36e488654974
   document_type: index
   status: accepted
   owners:
@@ -410,13 +429,13 @@ documents:
 - doc_id: development.single-operator-testing
   path: docs/runbooks/SINGLE_OPERATOR_TESTING.md
   title: 一人でマルチRaidを検証する方法
-  content_sha256: b711b906ca754aada0d4b9c4a11944446f92682ec88594864cb276a3a930b331
+  content_sha256: 2215dc17a2981408d908921107cc2043aaf28397c8c8f15cd6719a6a525c7ea6
   document_type: runbook
   status: provisional
   owners:
   - engineering
   - gameplay
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-14'
   source_of_truth_for: []
   aliases:
   - 一人マルチ検証
@@ -436,7 +455,7 @@ documents:
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: ac31eea2e5ac5be00e4f7ec7839179519db0c23af68b98c8a73afbc425cd5698
+  content_sha256: 158d02a8d741ad69ed330b7c97bda8094f28c39cfbb4e15b2ede2a885819bcce
   document_type: runbook
   status: accepted
   owners:
@@ -517,12 +536,12 @@ documents:
 - doc_id: encounter.first-severance.backlog
   path: docs/encounters/first-severance/BACKLOG.md
   title: First Severance Deferred Backlog
-  content_sha256: e76e52a834b45302c3f94b56f90e66c8d77cfe9b71e0961d8b27f2a21a6fbee4
+  content_sha256: 33b68795d4a92b391ec3ea1addbcff28a64837e5554e65c05ec276bb1923cc3f
   document_type: backlog
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.deferred_scope
   aliases:
@@ -636,7 +655,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: Requiem of the Hollow Doll — Encounter Specification
-  content_sha256: 07af26315c1d518639ee7b67b8def4ada4fcb60a5ba3a264e3071a58fa30d759
+  content_sha256: deb25680bea392a03403d7335e12762ba88688628f213665a78b09ca10d5379a
   document_type: spec
   status: accepted
   owners:
@@ -784,7 +803,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: fbd13df9db860dc5980e85a5d4864c75a13b26f6e8799e18c16c86ae11671b02
+  content_sha256: 8cab3a6caf3d1ecb5a4758836c4c384b75f4f52a56bd7711f9706374b3af64af
   document_type: evidence
   status: historical
   owners:
@@ -884,7 +903,7 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: e23b4feab14a9a7b4199a5760b9d495d4538641401e0f3b261864b3862c84af6
+  content_sha256: fc7ea51fc31a7a989edcee22a8812b06f04a44de00e40670271329fefd4d2b80
   document_type: policy
   status: accepted
   owners:
@@ -1179,7 +1198,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: f8de874c71828ee2082a16af20013fc93fa00120e69f8214905f3cb50808e2c0
+  content_sha256: 38724a958ac1114f7bcb6fc62fe1c71365fa6841be403cadec3955036cb7ad49
   document_type: status
   status: accepted
   owners:
@@ -1233,7 +1252,7 @@ documents:
 - doc_id: release.0-3-1
   path: docs/releases/0.3.1.md
   title: Convergence 0.3.1 — Public Playtest
-  content_sha256: 116b0ac9d4c53f8ec7b7cb992f9e3a76b59abaef2759a0f8f7b0271a6ce10425
+  content_sha256: fde623c59b3fb939b85ac1950183890c9def0c46eed7db99c689d0b2bbf29718
   document_type: evidence
   status: accepted
   owners:
@@ -1504,7 +1523,7 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: 735e7dc05970f36c439dfaa78bd63acc1da96e3b54d867d6d59795ec2fcf85b4
+  content_sha256: 011b91c15e31723c15e2dbe39ffb81e44f2870deaff393a87cec5e126e726997
   document_type: plan
   status: accepted
   owners:

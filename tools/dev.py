@@ -32,7 +32,7 @@ def source_record() -> dict:
 
 def environment(properties: list[str]) -> dict:
     raw = output("dotnet", "msbuild", "ConvergenceMod.csproj", "-nologo",
-                 "-getProperty:TModLoaderTargets,tMLSteamPath,TModLoaderSavePath,TargetPath,ConvergenceDevelopmentSolo,DefineConstants,ExtraBuildModFlags,TargetFramework,LangVersion",
+                 "-getProperty:TModLoaderTargets,tMLSteamPath,TModLoaderSavePath,TargetPath,DefineConstants,ExtraBuildModFlags,TargetFramework,LangVersion",
                  *properties)
     result = json.loads(raw)["Properties"]
     targets = (ROOT / result["TModLoaderTargets"]).resolve()
@@ -59,16 +59,17 @@ def main() -> int:
     parser.add_argument("action", choices=("doctor", "build"))
     parser.add_argument("--tml", help="explicit installed tModLoader directory; overrides local config")
     parser.add_argument("--save", help="explicit existing tModLoader user-data directory")
-    parser.add_argument("--configuration", choices=("Debug", "Release"), default="Debug")
-    parser.add_argument("--release-candidate", action="store_true", help="compile out solo debug admission; not a release approval")
+    parser.add_argument("--configuration", choices=("Debug", "Release"))
+    parser.add_argument("--release-candidate", action="store_true", help="use Release configuration without changing solo/multiplayer admission; not a release approval")
     parser.add_argument("--native", action="store_true", help="use tModLoader's compiler to resolve installed modReferences without extracting permanent DLL references")
     args = parser.parse_args()
-    properties = [f"-p:Configuration={args.configuration}"]
+    if args.release_candidate and args.configuration == "Debug":
+        parser.error("--release-candidate cannot be combined with --configuration Debug")
+    configuration = args.configuration or ("Release" if args.release_candidate else "Debug")
+    properties = [f"-p:Configuration={configuration}"]
     for name, value in (("TModLoaderPath", args.tml), ("TModLoaderSavePath", args.save)):
         if value:
             properties.append(f"-p:{name}={Path(value).resolve()}")
-    if args.release_candidate:
-        properties.append("-p:ConvergenceDevelopmentSolo=false")
     try:
         env = environment(properties)
         source = source_record()
@@ -113,6 +114,18 @@ def main() -> int:
         if code == 0 and package.is_file():
             record["artifact"] = {"path": str(package), "bytes": package.stat().st_size,
                                   "sha256": hashlib.sha256(package.read_bytes()).hexdigest()}
+            # Inspect the actual output, not just an MSBuild symbol that GUI or
+            # another compiler path may silently omit. No game/Mod load is needed.
+            admission = subprocess.run(["pwsh", "-NoProfile", "-File",
+                str(ROOT / "tools" / "check-package-admission.ps1"), "-PackagePath", str(package)],
+                cwd=ROOT, text=True, encoding="utf-8", errors="replace", capture_output=True)
+            print(admission.stdout, end="", flush=True)
+            record["admission_check"] = {"exit_code": admission.returncode,
+                "output": admission.stdout.strip(), "error": admission.stderr.strip()}
+            if admission.returncode:
+                code = admission.returncode
+                record["error"] = "Packaged solo admission failed; do not distribute this artifact."
+                print(admission.stderr, file=sys.stderr, end="")
         elif code == 0:
             code = 1
             record["error"] = "Build returned success without the expected package."
