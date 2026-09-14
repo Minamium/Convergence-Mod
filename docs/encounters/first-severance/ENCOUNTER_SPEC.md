@@ -36,7 +36,7 @@ This is the current player-visible contract, reconciled with the implementation 
 
 **Requiem of the Hollow Doll** faces **ラクリモーサ — 縛られた心 / Lacrimosa — The Bound Heart**, a tragic suspended Doll in a cathedral theater. These are the current public names. The Raid title is separate from the approved BGM **EigHt — 不幸な人形劇**; do not rename the credited work or imply creator endorsement. The former First Severance / Null Cantor names survive only as historical names and stable internal `FirstSeverance` / `first_severance` / `NullCantor` content, packet, asset and document IDs; no save migration is performed. The cooperative development target is 2–4 players with post-Exo-Mechs/Supreme-Calamitas, Shadowspec-level equipment. The large body is **one logical HP pool**, not multiple damageable limbs.
 
-Solo is a compiled development exception, not balanced solo content. The additional [Doll summon weapon](WEAPONS.md#doll-companion--the-unbroken-promise) is not a roster member and does not fill Ready/Stack/revival roles. Current implementation/test state belongs only to [Status](../../STATUS.md). Future phases, NPC party substitutes and production progression are not silently promoted from [Backlog](BACKLOG.md).
+Solo activation is ordinary supported behavior, not a debug-only or release-disabled exception; multiplayer remains recommended. Solo is not separately rebalanced. The additional [Doll summon weapon](WEAPONS.md#doll-companion--the-unbroken-promise) is currently not a roster member and does not fill Ready/Stack/revival roles. Companion substitution is an owner-selected future direction recorded in [Backlog](BACKLOG.md#companion-party-substitution--planned), not implemented behavior. Current implementation/test state belongs only to [Status](../../STATUS.md).
 
 ### Public naming
 
@@ -56,6 +56,8 @@ Use these names in localization, tooltips, README, Workshop and release notes. U
 [Weapons](WEAPONS.md) owns the five reward names. `DollCovenant` and `NullCantor` are internal identifiers, not alternate public companion/Boss names. `Null Refrain` remains the legitimate melee weapon name; do not rename saved item/projectile types to match display text. The BGM keeps its original title and composer credit in [Attribution](../../../Assets/ATTRIBUTION.md#eight-不幸な人形劇-phase-masters--0246).
 
 ## Admission and arena
+
+Accept **1–4 real connected players** in Single Player, Host & Play and Dedicated Server builds, including public releases. One player still marks Ready manually; one solo Down ends the Raid. Never require a compile symbol, private flag or second client merely to start. [ADR-0025](../../adr/0025-public-solo-admission.md) supersedes the old build-gated exception without changing attack patterns, HP scaling or network authority.
 
 [Arena infrastructure](../../ARENA_INFRASTRUCTURE.md#activation-flow) owns the complete start procedure. Every active in-world server member is considered, regardless of distance; invalid/dead/ghost/over-capacity rosters reject the whole start instead of omitting someone. The requester still needs to be near the Core. The selected roster/binding epochs remain frozen; joining/leaving during preparation requires a fresh preparation.
 

@@ -5,7 +5,7 @@ status: provisional
 owners:
   - engineering
   - gameplay
-last_reviewed: 2026-09-06
+last_reviewed: 2026-09-14
 source_of_truth_for: []
 aliases:
   - 一人マルチ検証
@@ -28,14 +28,14 @@ related_docs:
 
 **通常はユーザーのGUI操作とフレンドとの検証を続ける。一人と明示された場合、簡単な挙動・演出確認には一窓のHost & Playを使える。** 二窓・専用server・Computer Useはその回に必要とされた場合だけ準備する。過去のComputer Use依頼を今後のGUI自動化への包括的な許可としない。NPCを先に実装する必要はない。
 
-「一人で挙動を見る」と「本番用のソロRaidを設計する」は別物。開発用の単独起動は[ADR-0020](../adr/0020-development-solo-admission-and-terminal-hud.md)、二窓の保護権限は[ADR-0015](../adr/0015-console-only-single-pull-assist.md)、実装・実機での到達点は[Status](../STATUS.md)を正本とする。
+ソロ起動は通常仕様で、マルチ推奨はソロ禁止を意味しない。人数条件の正本は[Encounter Spec](../encounters/first-severance/ENCOUNTER_SPEC.md#admission-and-arena)、旧ビルド制限の撤廃は[ADR-0025](../adr/0025-public-solo-admission.md)、二窓の無敵保護は別の[ADR-0015](../adr/0015-console-only-single-pull-assist.md)を参照。ソロのプレイ可能性とマルチ同期・個別バランスの検証は区別する。
 
 ## 0. 最短の一窓デバッグ
 
-開発用ビルドでは `ConvergenceDevelopmentSolo` が既定で有効。ゲーム内コマンドや起動オプション、二人目のキャラクターは不要。
+公開版・開発版とも単独起動を許可する。ゲーム内コマンド、ビルドフラグ、起動オプション、二人目のキャラクターは不要。
 
 1. 最新パッケージを読み込むようtModLoaderを再起動し、自分でHost & Playからワールドに入る。
-2. 通常のFoundation Coreを右クリックして準備へ進む。SOLO DEBUG表示を確認する。
+2. Theater Dollを手に持って設置済みFoundation Coreをクリックし、フィールド展開後のReady受付へ進む。SOLO DEBUG等の文字表示は要求しない。
 3. もう一度Coreを右クリックして自分のReadyを入れる。1/1で通常の開始演出に進む。
 4. 見たい攻撃を確認する。敗北演出だけを見るなら、既存の `/convergence-down` で自分をDownにできる。単独Downは即座に敗北へ進み、3秒の結果演出後に通常の死亡UIへ戻る。意図的な死亡検証にはHardcoreを使わない。
 
@@ -43,7 +43,7 @@ HP/パイロンは2人用のままで、攻撃やフェーズをスキップし�
 
 単独では二人目の画面、蘇生、頭割り同期、遠隔回線の遅延やマルチ難易度は検証できない。それらを見る回は従来のフレンドまたは§3の実client二窓へ戻す。
 
-公開前は `dotnet build ConvergenceMod.csproj -p:ConvergenceDevelopmentSolo=false` としてフラグを無効にし、実際の公開候補で1人起動が拒否されることを確認する。設定の正本は[Release Process](../RELEASE_PROCESS.md)。これは保存データや通常のMod設定画面の項目ではない。
+公開前もソロを無効化しない。[Release Process](../RELEASE_PROCESS.md#pre-release-gate)の実パッケージ検査で1–4人許可を確認する。将来の同行ミニオンによる参加者代替は別実装で、現時点では人数に含めない。
 
 ## 1. 方式の比較
 
@@ -52,7 +52,7 @@ HP/パイロンは2人用のままで、攻撃やフェーズをスキップし�
 | 一窓Host & Play・開発用単独起動 | 攻撃・移動・VFX・音・開始/終了の短い反復 | 連携、蘇生、二画面同期、マルチバランス | **単純な確認はこれ**。§0の手順 |
 | 実client A/Bを一人で操作 | 実packet、双方のUI、target割当、item操作、Down／蘇生の流れ | 同時の高度な回避・連携、遠隔回線の遅延 | 実際の二人分の入力/投影が必要な回 |
 | 実client A/B＋Bへの開発用支援 | Aの回避練習、Bを救助係として待機 | 無敵Bが生存条件を変えるため、本番のwipe／難易度判定には使えない | §5の専用server consoleで一戦だけ許可。場面再実行は別の未実装機能 |
-| Single Playerの開発用単独起動 | 構え、BGM／SFX、負荷の反復 | remote client／server間の問題を検出できない | 同じ開発フラグの対象。通常の確認はHost & Playを優先 |
+| Single Playerの単独起動 | 構え、BGM／SFX、負荷の反復 | remote client／server間の問題を検出できない | フラグ不要。通常の確認はHost & Playを優先 |
 | 通常の同行NPC | Solo練習、役割の説明、物語演出 | player接続、inventory request、Down投影、二人目の画面 | 今は後回し。自動でRaid人数にはならない |
 | domain／codec試験 | tick境界、重複request、人数計算、boundsを短時間で確認 | 実際の描画・音・input・他Modの干渉 | 変更したルールの補助に限定。手動試遊の代わりではない |
 

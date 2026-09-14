@@ -4,7 +4,7 @@ document_type: backlog
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-05
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.deferred_scope
 aliases:
@@ -23,7 +23,13 @@ These ideas are preserved, but none belongs to the first playable Definition of 
 
 Simplifying the vertical slice is a sequencing decision, not a ceiling on the eventual Raid or Mod. A later Calamity-scale encounter may promote, replace, or reject these ideas after the multiplayer foundation is proven; until then they remain future ideation rather than hidden active scope.
 
-## Deferred mechanics
+## Companion party substitution — planned
+
+Owner-selected direction,2026-09-14: allow the Doll companion minion to stand in for another Raid party member. Ordinary solo activation must work independently of this future feature. Existing minions currently deal weapon damage only; this change does not add them to Ready/Stack/Spread/revival counts.
+
+Before implementation, define stable server-owned companion membership, spawning/despawning and owner disconnect, Ready/targeting, positioning and shares, Down/revival/wipe participation, snapshot replication and exact-Fight cleanup. Do not fake a connected Terraria player or broadly count all minions. Keep this future scope separate from the current [admission contract](ENCOUNTER_SPEC.md#admission-and-arena).
+
+## Deferred mechanics (historical seeds)
 
 - Part Break and route selection.
 - Targeted Line and positional Bait.
@@ -49,7 +55,7 @@ Simplifying the vertical slice is a sequencing decision, not a ceiling on the ev
 - finished sprites, shaders, dense VFX, camera work, and cinematic transitions;
 - phase-specific final score, dynamic stems, and Last Stand music;
 - rewards, recipes, lore items, trophy/relic/vanity;
-- Solo redesign;
+- Solo-specific balancing (not a prerequisite for solo admission);
 - optional Calamity coexistence after the Standalone stage.
 
 ## Archived setting and presentation seeds

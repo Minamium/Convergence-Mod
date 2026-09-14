@@ -10,12 +10,13 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Solo debug admission is authority-opted-in with unchanged invalid roster rejection")]
+    [DomainTest("Solo admission is enabled without build symbols and preserves invalid roster rejection")]
     private static void SoloDebugAdmission()
     {
         AssertEqual(1, FirstSeveranceDevelopmentPolicy.MinimumFor(true), "enabled admission");
-        AssertEqual(2, FirstSeveranceDevelopmentPolicy.MinimumFor(false), "release admission");
-        AssertEqual(FirstSeveranceDevelopmentPolicy.AllowSoloDebugStart ? 1 : 2,
+        AssertEqual(2, FirstSeveranceDevelopmentPolicy.MinimumFor(false), "explicit multi-only validator fixture");
+        AssertEqual(true, FirstSeveranceDevelopmentPolicy.AllowSoloStart, "product policy, not a compile opt-in");
+        AssertEqual(1,
             FirstSeveranceDevelopmentPolicy.MinimumParticipants, "compiled policy agrees");
         foreach (bool enabled in new[] { false, true })
         {
@@ -36,7 +37,7 @@ internal static partial class Program
             0, 0, 0, 0, 0, 0, 0, 0, 0, layout.ArenaBounds.Width, 1);
         var survey = new FirstSeveranceArenaSurvey(layout, true, true, false, 1, metrics, default);
         AssertEqual(FirstSeveranceArenaIssueCodes.TooFewParticipants,
-            FirstSeveranceArenaValidator.Instance.Validate(survey).FirstErrorCode, "release arena still needs two");
+            FirstSeveranceArenaValidator.Instance.Validate(survey).FirstErrorCode, "generic validator default remains strict");
         AssertEqual(true, FirstSeveranceArenaValidator.Instance.Validate(survey, allowSoloDebug: true).IsValid, "solo arena only with opt-in");
         var invalid = new FirstSeveranceArenaSurvey(layout, false, true, false, 1, metrics, default);
         AssertEqual(FirstSeveranceArenaIssueCodes.CoreMismatch,

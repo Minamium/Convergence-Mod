@@ -53,3 +53,7 @@ The user reported a fight surviving death and fields extending underground; requ
 ## Doll damage review — 2026-09-14 / development0.3.3
 
 Owner objected to Raid-only HP subtraction bypassing equipment and proposed a bound-debuff/native-damage Down model; explicitly confirmed combat text was intentionally removed. Adopt native Hurt with bounded receipts and authoritative recovery, remove the Adrenaline-only bridge, preserve minimal presentation. [Review disposition](../research/2026-09-14-implementation-review.md) separates confirmed defects from proposed tests; [Status](../STATUS.md) owns verification. No new gameplay observation or broad compatibility approval is inferred from the external analysis.
+
+## Solo admission regression — 2026-09-14 / Workshop0.3.1 → source0.3.4
+
+Owner's one-player Host & Play (`al`) was rejected at21:33:32 with `roster_too_small`, then repeated clicks hit rate limiting. Actual package inspection finds the GitHub0.3.1 artifact solo-enabled but the09:44 GUI rebuild/local/Workshop artifact solo-disabled. Owner reiterates **multiplayer recommended, never solo prohibited**, with companion party substitution planned. Remove symbol/release opt-out and check packaged admission, without changing combat, adding fake players or claiming companion support. [Evidence](../evidence/2026-09-14-solo-admission.json) owns hashes/results; a new owner solo start remains unobserved.

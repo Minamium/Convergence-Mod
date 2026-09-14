@@ -26,6 +26,7 @@ Player-facing names and behavior come from the active encounter specification se
 - Encounter-specific behavior enters through definition-scoped policies and runtime factories; do not add feature switches to global policy, coordinator, or packet-router code.
 - Calamity access stays in `Common/Compatibility/Calamity`.
 - Every transient world resource has one exact-Fight owning runtime and an idempotent cleanup path.
+- Doll is multiplayer-recommended, not multiplayer-required. Preserve [ordinary solo admission](docs/encounters/first-severance/ENCOUNTER_SPEC.md#admission-and-arena) in GUI and public builds; never compile it out as a release precaution.
 - Active encounters are ephemeral and at most one may exist per World initially.
 - Dedicated Server paths must not initialize graphics or audio.
 - Explicit packet IDs are never renumbered; parse bounded DTOs completely before authority validation/mutation.

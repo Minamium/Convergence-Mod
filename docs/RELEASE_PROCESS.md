@@ -40,7 +40,7 @@ The [official Workshop guide](https://github.com/tModLoader/tModLoader/wiki/Work
 
 On 2026-09-14 the owner explicitly selected **0.3.1**, authorized its GitHub release and retained the tModLoader Publish step. The earlier unselected 0.3.0 proposal is superseded. Publish this as a **GitHub prerelease / public playtest**, not a production-certified build. [0.3.1 notes](releases/0.3.1.md) record its checks, known issues and owner-approved channel exceptions.
 
-Prepare the candidate from integrated main after the relevant fixes from both encounter branches are included. Release notes should cover Doll raid entry/Ready/recovery/rewards, Ghost Samurai, exact dependencies/protocol, known limitations, and the development-solo policy. README is an English content/setup overview, not a substitute for those notes or a marketing slogan.
+Prepare the candidate from integrated main after the relevant fixes from both encounter branches are included. Release notes should cover Doll raid entry/Ready/recovery/rewards, Ghost Samurai, exact dependencies/protocol, known limitations, and the solo-allowed/multiplayer-recommended policy. README is an English content/setup overview, not a substitute for those notes or a marketing slogan.
 
 Before creation, close or explicitly record the [pre-release gate](#pre-release-gate), particularly source/asset terms, exact music permissions, solo admission and load/re-summon evidence. For this explicitly requested development channel, one-player admission remains enabled and the full production compatibility matrix is deferred and labelled `not_run`, not passed. The owner accepts the existing playable prototype for broader testing, not final balance. The [Ghost Samurai unload failure](encounters/ghost-samurai/ENCOUNTER_SPEC.md#lifecycle-handoff--2026-09-14) remains a disclosed known issue requiring work in its owning feature; documentation does not fix it. Never silently use these exceptions for a later production release.
 
@@ -73,7 +73,7 @@ This is the full production/compatibility gate. A specifically authorized public
 12. Changelog and release notes describe compatibility and known limitations.
 13. Artifact checksum is recorded.
 14. Workshop upload remains manual until credential and rollback policy are reviewed.
-15. Disable development solo admission with `-p:ConvergenceDevelopmentSolo=false` on the public-candidate build. Verify the compiled flag is false and one-player Core activation returns `first_severance.roster_too_small`, while normal two-player preparation still works. Do not publish the default development package. [ADR-0020](adr/0020-development-solo-admission-and-terminal-hud.md) owns this temporary development exception; a balanced public solo mode requires a separate decision.
+15. Preserve solo admission: **multiplayer recommended is not multiplayer required**, including public releases. Run `pwsh -NoProfile -File tools/check-package-admission.ps1 -PackagePath <exact Convergence.tmod to publish>` and verify1–4-player admission. Recheck if GUI Build + Reload replaces the package before Publish. Observe one-player Ready/start and matching-peer multiplayer; do not claim these runtime checks from a compiler pass. [ADR-0025](adr/0025-public-solo-admission.md) retires the old release opt-out. A new solo/companion balance design is not a prerequisite for admission.
 
 ## CI tiers
 

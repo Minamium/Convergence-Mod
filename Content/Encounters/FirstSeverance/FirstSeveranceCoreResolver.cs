@@ -143,7 +143,7 @@ internal sealed class FirstSeveranceCoreResolver
                 requesterEpoch,
                 out FirstSeveranceRoster? roster,
                 out failureCode,
-                allowSoloDebug: FirstSeveranceDevelopmentPolicy.AllowSoloDebugStart,
+                allowSoloDebug: FirstSeveranceDevelopmentPolicy.AllowSoloStart,
                 requireAllConnected: true)
             || roster is null)
         {
