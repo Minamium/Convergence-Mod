@@ -28,6 +28,8 @@ Last reviewed: **2026-09-06**
 
 ## tModLoader
 
+- [Native Hurt and implementation-review evidence](research/2026-09-14-implementation-review.md#pinned-api-evidence) — current pinned HurtModifiers, native HurtInfo transport, death-hook aggregation and safe player-instance teardown; verified2026-09-14.
+
 - [tModLoader v2026.07.3.0](https://github.com/tModLoader/tModLoader/releases/tag/v2026.07.3.0) — Windows実機で確認した現行固定対象の1.4.4 stable release。
 - [Confirmed tModLoader source commit](https://github.com/tModLoader/tModLoader/commit/666f69962d3bdffde54fc14025f02634965b4e7c) — runtimeが報告した現行source基準点。
 - [Pinned ExampleMod BasicTileEntity](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod/Content/TileEntities/BasicTileEntity.cs) — multitile TE配置・削除・同期patternの現行根拠。

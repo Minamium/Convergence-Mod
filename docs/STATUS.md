@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development source: **0.3.2 / protocol38**, Ghost Samurai cleanup, target ownership, late wave/dash tracking and foot-anchored fields. [Evidence](evidence/2026-09-14-ghost-samurai-lifecycle.json) identifies the isolated build; normal-profile installation is not performed. The separately published/test-channel baseline remains [0.3.1 / protocol37](releases/0.3.1.md). Latest actual gameplay evidence remains0.2.78.
+Development source: **0.3.3 / protocol39**, native receiving-player Hurt with authoritative Doll Down/revival ([ADR-0024](adr/0024-native-raid-hurt-and-downed.md)). This changes defensive-equipment behavior and requires matching peers. The isolated package is for recovery/compatibility testing, not a public release or a normal-profile installation. Integrated Ghost Samurai0.3.2 fixes are retained. The separately published/test-channel baseline remains [0.3.1 / protocol37](releases/0.3.1.md). Latest actual gameplay evidence remains0.2.78.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Cleanup and target ownership repaired with automated checks; rewards/balance and actual multiplayer/re-entry validation remain incomplete.
@@ -37,10 +37,11 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 - Unchanged gameplay baseline: [0.2.78 build/implementation evidence](evidence/2026-09-14-doll-video-feedback.json), 206 domain cases, 324 codec round-trips / 50 malformed rejections, 37 tooling guards; native build with 0 errors / 4 existing CS8632 warnings. The release changes version, presentation text and documentation, not combat, assets or wire layout.
 - **0.3.2 automated verification:** 211 domain cases (32 focused), protocol38 324 codec round-trips / 50 malformed rejections, native build0 errors /4 existing warnings,18 locales and shader exports pass. Packaged Global/summon registration and exact-Fight/repeated teardown with uninitialized Player/ModContent pass. The separate native tile-stream/SubworldLibrary shutdown errors are not claimed fixed. Actual wipe/victory/re-summon, ratios, field placement and timing remain user-owned / not_run.
 - **User-owned / not_run for 0.3.1:** reload/load and repeated entry/exit, 2–4-player matching-peer Ready/Stack/revive, latency/rejoin and latest scene/audio/accessibility/performance checks. Build success does not satisfy these checks. Use backed-up test saves.
+- **0.3.3:** automated results are recorded in [native-Hurt evidence](evidence/2026-09-14-native-raid-hurt.json). Actual equipped damage, Calamity shields/dodge/Adrenaline, lethal→Down→rescue and last-hit all-Down remain user-owned / not_run. Native Hurt is covered; DoT/direct KillMe/foreign HP writes and reconnect remain limited. No combat text is restored.
 
 ## Next change
 
-For Ghost Samurai0.3.2, review/integrate the feature, build from canonical main into the normal profile, then Reload Mods. The separate0.3.1 public-test distribution is not updated by this isolated build. [Contributing](../CONTRIBUTING.md#shared-development) owns integration and build destinations.
+Review/integrate the native-Hurt feature, then build canonical main into the normal profile for the focused matching-peer checks above. Do not mix protocol39 with37/38. Compare source damage against native damage in logs before retuning HP/damage budgets. The separate0.3.1 public-test distribution is not updated by an isolated build. [Contributing](../CONTRIBUTING.md#shared-development) owns integration and build destinations; the [review disposition](research/2026-09-14-implementation-review.md) records deferred latency/rejoin/reward/performance work.
 
 Preserve accepted mechanics and art unless explicitly revised. Log meaningful owner feedback in the optional [ledger](history/PLAYTEST_FEEDBACK.md), update only the affected fact owner, and select checks using the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). Do not replay historical checklists.
 

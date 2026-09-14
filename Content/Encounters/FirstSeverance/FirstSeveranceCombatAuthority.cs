@@ -121,6 +121,14 @@ internal static class FirstSeveranceCombatAuthority
             out failureCode);
     }
 
+    internal static bool TryAcceptHurtResult(ulong sequence, FightId fight, int sender, ulong epoch,
+        in FirstSeveranceHurtResult result, out string failure)
+    {
+        failure = "first_severance.hurt_fight_not_current";
+        return Main.netMode != NetmodeID.MultiplayerClient && current is not null && current.Matches(sequence, fight)
+            && current.TryAcceptHurtResult(sender, epoch, result, out failure);
+    }
+
     internal static bool TryCreateProjection(
         ulong encounterSequence,
         FightId fightId,

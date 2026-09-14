@@ -79,7 +79,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         fieldLayout = arena;
         plan = FirstSeveranceEncounterPlan.Instance;
         recovery = new(fightId, roster, groundCenter, debugAssist, Log,
-            () => isStarted && !isCleaned && isAttached && loop?.State.IsTerminal == false);
+            () => isStarted && !isCleaned && isAttached && loop is not null
+                && (!loop.State.IsTerminal || loop.State.Termination.EndReason == EncounterEndReason.Victory));
         actors = new(fightId, partyScaling, groundCenter, plan);
         attacks = new(roster, groundCenter, plan, recovery, Log);
         telemetry = new(actors, partyScaling, roster.Count, plan, Log);
@@ -170,6 +171,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         => recovery.TryQueuePrototypeDown(sender, epoch, nonce, out failure);
     internal bool TryQueueReviveNearest(int sender, ulong epoch, uint nonce, out string failure)
         => recovery.TryQueueReviveNearest(sender, epoch, nonce, out failure);
+    internal bool TryAcceptHurtResult(int sender, ulong epoch, in FirstSeveranceHurtResult result, out string failure)
+        => recovery.TryAcceptHurtResult(sender, epoch, result, out failure);
 
     internal bool CanHitActor(NPC npc, int playerSlot)
     {
@@ -201,14 +204,24 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         recovery.ApplyConnectionChanges(context.AuthorityTick);
         foreach (FirstSeveranceRosterMember member in roster.Members)
         {
-            // The experimental adapter does not reinterpret ordinary Terraria death
-            // or assign a rejoined slot the original participant's identity.
+            // Native Hurt is converted before death, but direct KillMe/DoT/foreign
+            // HP writers are not a guaranteed interception or a rejoin lease.
             if (!recovery.TryGetPlayer(member, out Player player) || player.dead)
                 return End(FirstSeveranceTerminalCause.AdministrativeAbort);
         }
         recovery.ApplyPendingIntents(context.AuthorityTick);
         if (recovery.CancelRequested)
             return End(FirstSeveranceTerminalCause.UserCancelled);
+
+        if (loop.State.IsTerminal)
+        {
+            // Freeze the completed score while reliable native-hit receipts drain.
+            // Do not award a victory ahead of an in-flight lethal last attack.
+            recovery.ApplyPendingRevives(context.AuthorityTick);
+            var pendingRecovery = recovery.Commit(context);
+            recovery.SynchronizeRevivePlayers(context.AuthorityTick);
+            return SettleTerminal(loop.State, pendingRecovery, context.AuthorityTick);
+        }
 
         FirstSeveranceLoopState before = loop.State;
         uint oldMechanicRevision = mechanicRevision;
@@ -277,17 +290,7 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
         EncounterRuntimeUpdate reviveUpdate = recovery.Commit(context);
         recovery.SynchronizeRevivePlayers(context.AuthorityTick);
         if (after.IsTerminal)
-        {
-            if (!reviveUpdate.RequestedTermination.IsNone)
-            {
-                FirstSeveranceTerminalCause selected =
-                    FirstSeveranceTerminationContract.Instance.SelectHigherPriority(
-                        FirstSeveranceTerminationContract.Instance.GetCause(after.Termination),
-                        FirstSeveranceTerminationContract.Instance.GetCause(reviveUpdate.RequestedTermination));
-                return End(selected);
-            }
-            return EncounterRuntimeUpdate.End(after.Termination);
-        }
+            return SettleTerminal(after, reviveUpdate, context.AuthorityTick);
         if (!reviveUpdate.RequestedTermination.IsNone)
             return reviveUpdate;
 
@@ -353,6 +356,28 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
             attacks.Lance, state.BossPhase, state.BossPhaseStartedTick, attacks.Grid,
             state.SubstateEnteredTick, state.ActionIndex, state.CompletedPhaseCycles, mechanicTick, mechanicImpacts, attacks.SpreadLances, attacks.CarriedLance, attacks.CoreCannon);
         return true;
+    }
+
+    private EncounterRuntimeUpdate SettleTerminal(in FirstSeveranceLoopState state,
+        in EncounterRuntimeUpdate recoveryUpdate, ulong tick)
+    {
+        var termination = state.Termination;
+        if (!recoveryUpdate.RequestedTermination.IsNone)
+            termination = FirstSeveranceTerminationContract.Instance.Create(
+                FirstSeveranceTerminationContract.Instance.SelectHigherPriority(
+                    FirstSeveranceTerminationContract.Instance.GetCause(termination),
+                    FirstSeveranceTerminationContract.Instance.GetCause(recoveryUpdate.RequestedTermination)));
+        if (termination.EndReason == EncounterEndReason.Victory && recovery.AwaitingHurtResults(tick, out bool timedOut))
+        {
+            if (timedOut)
+            {
+                Log(tick, "event=NativeHurtSettlementFailed reason=receipt_timeout");
+                return End(FirstSeveranceTerminalCause.AdministrativeAbort);
+            }
+            return tick % 30 == 0 || recoveryUpdate.HasObservableChange
+                ? EncounterRuntimeUpdate.ObservableChange() : EncounterRuntimeUpdate.None;
+        }
+        return EncounterRuntimeUpdate.End(termination);
     }
 
     internal void Cleanup(in EncounterCleanupContext context)
