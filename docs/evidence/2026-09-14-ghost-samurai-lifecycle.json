@@ -37,7 +37,41 @@
     ]
   },
   "arrival_contract": "60ticks at static or equally translating relative reference. Late large movement/teleport/retarget may delay: minimum108tick warning and4tick lock take precedence over retroactive release or faster waves.",
-  "shared_install": "not performed; canonical main and normal package untouched",
+  "shared_install": {
+    "status": "installed; administrator approved PR25 integration and normal-profile deployment",
+    "pull_request": "https://github.com/Minamium/Convergence-Mod/pull/25",
+    "source_commit": "0a53d398bb68bb1924516aa8c3391cae72374650",
+    "source_branch": "main",
+    "started_utc": "20260914T094911325014Z",
+    "source_sha256": "3dc4fff40cf955f7898faad26cfda9018fcaddff2ebd9487eb152396c1d25b0c",
+    "source_changed_during_build": false,
+    "source_note": "Tracked files match merged PR25 exactly. One pre-existing untracked workstation setup record remains local and is excluded from packaging.",
+    "artifact": {
+      "bytes": 57053623,
+      "sha256": "c28c9554463a2a750822ad64ed7b667e2981c144c9570116047260d78f15c747"
+    },
+    "build": {
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "locales_parsed": 18,
+      "shader_exports": "passed"
+    },
+    "installed_package_checks": [
+      "version 0.3.2",
+      "both Global types accepted by installed tModLoader ValidateType",
+      "saved summon type retained",
+      "exact-Fight lease removal and repeated teardown with uninitialized Player/ModContent"
+    ],
+    "preservation": {
+      "previous_package_backup": "hash matches pre-install package",
+      "original_local_files": "all seven pre-install file copies hash-verified; exact tracked-file stash retained",
+      "translation_reconciliation": "Old automatic formatting is already in main. Latest tooltips retained; duplicate generated projectile defaults are now owned by main localization and must not override newer names. Original copies retained locally.",
+      "enabled_mods": "unchanged, Convergence enabled",
+      "local_props_and_setup_record": "unchanged",
+      "source_junction": "unchanged; normal ModSources resolves to canonical main"
+    },
+    "next_action": "User: Reload Mods; no repeat compilation required. Actual gameplay remains not_run."
+  },
   "notes": [
     "No GUI/game/gameplay-server started. No public release updated.",
     "Documentation follows the build; production source unchanged.",

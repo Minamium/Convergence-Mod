@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development source: **0.3.2 / protocol38**, Ghost Samurai cleanup, target ownership, late wave/dash tracking and foot-anchored fields. [Evidence](evidence/2026-09-14-ghost-samurai-lifecycle.json) identifies the isolated build; normal-profile installation is not performed. The separately published/test-channel baseline remains [0.3.1 / protocol37](releases/0.3.1.md). Latest actual gameplay evidence remains0.2.78.
+Development source: **0.3.2 / protocol38**, Ghost Samurai cleanup, target ownership, late wave/dash tracking and foot-anchored fields. [Evidence](evidence/2026-09-14-ghost-samurai-lifecycle.json) identifies the isolated build and the administrator-approved PR #25 integration at `0a53d39`. Canonical main was built into the normal playtest profile; installed-package registration and teardown checks pass. Reload Mods to load0.3.2; actual gameplay remains user-owned / not_run. The separately published/test-channel baseline remains [0.3.1 / protocol37](releases/0.3.1.md). Latest actual gameplay evidence remains0.2.78.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Cleanup and target ownership repaired with automated checks; rewards/balance and actual multiplayer/re-entry validation remain incomplete.
@@ -40,7 +40,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-For Ghost Samurai0.3.2, review/integrate the feature, build from canonical main into the normal profile, then Reload Mods. The separate0.3.1 public-test distribution is not updated by this isolated build. [Contributing](../CONTRIBUTING.md#shared-development) owns integration and build destinations.
+For the installed Ghost Samurai0.3.2, Reload Mods and check death/wipe, re-summon, target retention and damage ratios, foot-anchored field placement, late wave/dash cues and P3 circle avoidance. No repeat Build + Reload is required. The separate0.3.1 public-test distribution is unchanged. [Contributing](../CONTRIBUTING.md#shared-development) owns integration and build destinations.
 
 Preserve accepted mechanics and art unless explicitly revised. Log meaningful owner feedback in the optional [ledger](history/PLAYTEST_FEEDBACK.md), update only the affected fact owner, and select checks using the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). Do not replay historical checklists.
 
