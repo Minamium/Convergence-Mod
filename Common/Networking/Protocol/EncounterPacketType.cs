@@ -8,6 +8,7 @@ internal enum EncounterPacketType : byte
     RequestSnapshot = 4,
     RequestPrototypeDown = 5,
     RequestReviveNearest = 6,
+    RequestRaidHurtResult = 7,
 
     Snapshot = 64,
     StateChanged = 65,

@@ -23,7 +23,15 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v38
+## Current development protocol v39
+
+[ADR-0024](adr/0024-native-raid-hurt-and-downed.md) replaces Doll's gauge-only RaidHit69 with a native Hurt intent: health generation (`uint`), source damage (`int`,1..1,000,000) and policy (`byte`,0..2),9 body bytes. Header revision is the per-owner hit ID. Receiving owner validates active exact Fight/sequence and current recovery generation before once-only Hurt; Terraria transports the native HurtInfo/HP.
+
+New request7 is an owner result,24 body bytes: nonce/hit ID/health generation (`uint` each), before/after life and native damage (`int` each, bounded). Hit0 is reserved for ordinary native damage reaching1 HP. Server validates the transport sender's frozen binding/epoch, Alive state, recovery generation, nonce and the issued-hit ledger; Down also requires observed native HP1. One ledger per participant holds at most16 hits for at most600ticks. Results are diagnostics and Down requests, never a client mechanic-success/geometry verdict or a second HP subtraction. The final victory drains issued hits; expired results abort rather than silently award. Recovery correction retires old-generation messages.
+
+All peers must update together. Existing IDs, bounded combat snapshots, Ghost Samurai38 payloads and server-owned Raid outcomes remain. Native owner HP trust is inherited; this is not a hostile-client defense or latency-compensation claim.
+
+## Preceding development protocol v38
 
 Ghost Samurai native actor ExtraAI adds2 bytes for a bounded signed LockedTarget (-1 or0..254). Server selects using connection generation and the living field roster; clients consume that selection in native incoming-NPC-hit hooks. No new target/hit request.
 

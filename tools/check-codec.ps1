@@ -1,7 +1,6 @@
 # Requires PowerShell 7+; tests the supplied compiled assembly, never starts Terraria.
 param(
-    [Parameter(Mandatory=$true)][string]$AssemblyPath,
-    [ValidateSet('enabled','disabled','any')][string]$ExpectedSoloDebug = 'enabled'
+    [Parameter(Mandatory=$true)][string]$AssemblyPath
 )
 $ErrorActionPreference = 'Stop'
 $assemblyFile = (Resolve-Path -LiteralPath $AssemblyPath).Path
@@ -39,9 +38,9 @@ $version = $assembly.GetType('Convergence.Common.Networking.Protocol.EncounterPr
 if ($version -ne $expectedProtocol) { throw "Compiled protocol $version does not match source $expectedProtocol" }
 $createPrism = $assembly.GetType($feature + 'FirstSeveranceAttackPatterns').GetMethod('CreatePrism', $staticFlags)
 $downed = Enum-Value 'Convergence.Common.Raids.Revive.RaidParticipantCombatState' 'Downed'
-$soloFlag = $assembly.GetType($feature + 'Development.FirstSeveranceDevelopmentPolicy').GetField('AllowSoloDebugStart', $staticFlags).GetRawConstantValue()
-if (($ExpectedSoloDebug -eq 'enabled' -and -not $soloFlag) -or ($ExpectedSoloDebug -eq 'disabled' -and $soloFlag)) {
-    throw "Unexpected compiled solo flag: $soloFlag"
+$soloFlag = $assembly.GetType($feature + 'Development.FirstSeveranceDevelopmentPolicy').GetField('AllowSoloStart', $staticFlags).GetRawConstantValue()
+if (-not $soloFlag) {
+    throw 'Compiled package disables solo admission; all development/public candidates must allow it.'
 }
 $aimCore = $assembly.GetType($feature + 'FirstSeveranceGridVolley').GetMethod('AimCoreBeam', $staticFlags)
 $partyScaling = $assembly.GetType($feature + 'FirstSeverancePartyScaling').GetMethod('ForCount', $staticFlags)
@@ -359,6 +358,51 @@ foreach ($count in 1,2,3,4) {
                 }
                 if (-not $rejected -or $null -ne $badArgs[3]) {throw "Preparation accepted $case"}
                 $invalidChecks++; $badReader.Dispose(); $badStream.Dispose()
+            }
+        }
+        $reader.Dispose(); $writer.Dispose(); $stream.Dispose()
+    }
+}
+# Native Hurt uses separate, bounded bodies; exercise the actual packaged codec,
+# including a following packet in the same buffer (not only the linked test copy).
+foreach ($message in 'RaidHit','HurtResult') {
+    $packetType = Enum-Value 'Convergence.Common.Networking.Protocol.EncounterPacketType' $(if ($message -eq 'RaidHit') { 'RaidHit' } else { 'RequestRaidHurtResult' })
+    $header = New-Record 'Convergence.Common.Networking.Protocol.EncounterPacketHeader' @([ushort]$version,$packetType,[ulong]1,$fight,[uint]$(if ($message -eq 'RaidHit') { 1 } else { 0 }))
+    $writeNative = $codec.GetMethod(('Write' + $message), $staticFlags)
+    $readNative = $codec.GetMethod(('TryRead' + $message), $staticFlags)
+    $bodyLength = if ($message -eq 'RaidHit') { 9 } else { 24 }
+    for ($variant = 0; $variant -lt 3; $variant++) {
+        $value = if ($message -eq 'RaidHit') {
+            $kind = Enum-Value ($feature+'FirstSeveranceHurtKind') @('Hazard','Mechanic','Crush')[$variant]
+            New-Record ($feature+'FirstSeveranceHurtIntent') @([uint]2,[int]120,$kind)
+        } else {
+            # Applied damage, native dodge, external lethal floor.
+            New-Record ($feature+'FirstSeveranceHurtResult') @([uint]3,[uint]$(if ($variant -eq 2) {0} else {1}),[uint]2,[int]500,[int]@(400,500,1)[$variant],[int]@(100,0,499)[$variant])
+        }
+        $stream = [IO.MemoryStream]::new(); $writer = [IO.BinaryWriter]::new($stream)
+        $null = $writeNative.Invoke($null,@($writer,$header,$value)); $end = $stream.Position
+        $writer.Write([byte]234); $stream.Position = $end - $bodyLength
+        $reader = [IO.BinaryReader]::new($stream); $readArgs = [object[]]@($reader,$null,$null)
+        if (-not $readNative.Invoke($null,$readArgs) -or -not $value.Equals($readArgs[1]) -or $stream.Position -ne $end -or $reader.ReadByte() -ne 234) {
+            throw "Native $message shared-buffer round-trip failed"
+        }
+        $passed++
+        if ($variant -eq 0) {
+            $body = $stream.ToArray()[($end-$bodyLength)..($end-1)]
+            foreach ($case in 'invalid','truncated') {
+                $bad = [byte[]]$body.Clone()
+                if ($case -eq 'truncated') { $bad = $bad[0..($bodyLength-2)] }
+                elseif ($message -eq 'RaidHit') { $bad[8] = 255 }
+                else { [BitConverter]::GetBytes([uint]0).CopyTo($bad,0) }
+                $badReader = [IO.BinaryReader]::new([IO.MemoryStream]::new($bad))
+                $badArgs = [object[]]@($badReader,$null,$null); $rejected = $false
+                try { $rejected = -not $readNative.Invoke($null,$badArgs) }
+                catch {
+                    if ($case -ne 'truncated' -or $_.Exception.InnerException -isnot [IO.EndOfStreamException]) { throw }
+                    $rejected = $true
+                }
+                if (-not $rejected) { throw "Native $message accepted $case body" }
+                $invalidChecks++; $badReader.Dispose()
             }
         }
         $reader.Dispose(); $writer.Dispose(); $stream.Dispose()

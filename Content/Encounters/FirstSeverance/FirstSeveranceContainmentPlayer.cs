@@ -47,6 +47,13 @@ public sealed class FirstSeveranceContainmentPlayer : ModPlayer
         if (owner == fight) Clear();
     }
 
+    internal static void ClearExisting(Player? player, FightId fight)
+    {
+        if (player is null) return;
+        foreach (ModPlayer instance in player.ModPlayers)
+            if (instance is FirstSeveranceContainmentPlayer containment) containment.Clear(fight);
+    }
+
     public override void PreUpdateMovement()
     {
         if (!Active || !OwnsMovement) return;
@@ -56,7 +63,7 @@ public sealed class FirstSeveranceContainmentPlayer : ModPlayer
         var raid = Player.GetModPlayer<FirstSeveranceRaidPlayer>();
         // A participant without equipped wings still gets field-supported lift.
         // Equipped wings retain their own acceleration/hover behavior.
-        if (!raid.IsRaidDowned && !raid.IsRaidEliminated && Player.wingsLogic == 0 && Player.controlJump)
+        if (!raid.IsIncapacitated && Player.wingsLogic == 0 && Player.controlJump)
             Player.velocity.Y = MathHelper.Lerp(Player.velocity.Y, -12f, .18f);
     }
 
@@ -74,7 +81,7 @@ public sealed class FirstSeveranceContainmentPlayer : ModPlayer
         var raid = Player.GetModPlayer<FirstSeveranceRaidPlayer>();
         bool eligible = Main.netMode == NetmodeID.MultiplayerClient
             && Player.whoAmI == Main.myPlayer && Active
-            && !raid.IsRaidDowned && !raid.IsRaidEliminated;
+            && !raid.IsIncapacitated;
         if (movementSync.TryAdvance(Main.GameUpdateCount, eligible))
             NetMessage.SendData(MessageID.PlayerControls, number: Player.whoAmI);
     }
@@ -82,7 +89,7 @@ public sealed class FirstSeveranceContainmentPlayer : ModPlayer
     {
         if (!Active) return;
         var raid = Player.GetModPlayer<FirstSeveranceRaidPlayer>();
-        if (raid.IsRaidDowned || raid.IsRaidEliminated) return;
+        if (raid.IsIncapacitated) return;
         Player.wingTime = Player.wingTimeMax;
         Player.rocketTime = Player.rocketTimeMax;
         Player.noFallDmg = true;

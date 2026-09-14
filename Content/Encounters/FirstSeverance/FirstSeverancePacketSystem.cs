@@ -63,6 +63,7 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
                 reader,
                 out failureCode),
             EncounterPacketType.RaidHit => HandleRaidHit(reader, header, out failureCode),
+            EncounterPacketType.RequestRaidHurtResult => HandleHurtResult(reader, whoAmI, header, out failureCode),
             _ => Reject("first_severance.packet_type_unhandled", out failureCode),
         };
     }
@@ -274,24 +275,49 @@ internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHa
 
     private static bool HandleRaidHit(BinaryReader reader, in EncounterPacketHeader header, out string failureCode)
     {
-        if (!FirstSeverancePacketCodec.TryReadRaidHit(reader, out int damage, out failureCode)) return false;
+        if (!FirstSeverancePacketCodec.TryReadRaidHit(reader, out var intent, out failureCode)) return false;
         var state = ModContent.GetInstance<FirstSeveranceClientStateSystem>();
         var combat = state.Combat;
         if (combat is null || !combat.TryGetParticipantByServerSlot(Main.myPlayer, out var member)
             || !member.IsConnected) return true;
         Main.LocalPlayer.GetModPlayer<FirstSeveranceRaidPlayer>().ApplyRaidHit(header,
-            combat.FightId, combat.EncounterSequence, damage);
+            combat.FightId, combat.EncounterSequence, intent);
         return true;
     }
 
-    internal static void SendRaidHit(int toClient, FightId fight, uint revision, int damage)
+    internal static void SendRaidHit(int toClient, FightId fight, uint revision, FirstSeveranceHurtIntent intent)
     {
         var snapshot = ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot;
         if (Main.netMode != NetmodeID.Server || snapshot.FightId != fight) return;
         ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
         FirstSeverancePacketCodec.WriteRaidHit(packet, new(EncounterProtocol.CurrentVersion,
-            EncounterPacketType.RaidHit, snapshot.EncounterSequence, fight, revision), damage);
+            EncounterPacketType.RaidHit, snapshot.EncounterSequence, fight, revision), intent);
         packet.Send(toClient);
+    }
+
+    private static bool HandleHurtResult(BinaryReader reader, int sender, in EncounterPacketHeader header, out string failureCode)
+    {
+        if (!FirstSeverancePacketCodec.TryReadHurtResult(reader, out var result, out failureCode)) return false;
+        if (!IsLiveHeader(header) || header.Revision != 0 || !IsCurrentPlayer(sender)
+            || !FirstSeveranceConnectionEpochSystem.TryGetCurrentEpoch(sender, out ulong epoch))
+            return Reject("first_severance.hurt_sender_invalid", out failureCode);
+        if (!TryConsumeRate(sender, header.PacketType, FastRequestWindowTicks, 30))
+            return Reject("first_severance.hurt_result_rate_limited", out failureCode);
+        return FirstSeveranceCombatAuthority.TryAcceptHurtResult(header.EncounterSequence, header.FightId,
+            sender, epoch, result, out failureCode);
+    }
+
+    internal static void SendHurtResult(ulong sequence, FightId fight, in FirstSeveranceHurtResult result)
+    {
+        if (Main.netMode != NetmodeID.MultiplayerClient) return;
+        // Standard HP transport precedes the report on the same ordered connection.
+        // In particular the authority must observe 1 HP before accepting a Down.
+        if (result.ReachedFloor) NetMessage.SendData(MessageID.PlayerControls, number: Main.myPlayer);
+        NetMessage.SendData(MessageID.PlayerLifeMana, number: Main.myPlayer);
+        ModPacket packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
+        FirstSeverancePacketCodec.WriteHurtResult(packet, new(EncounterProtocol.CurrentVersion,
+            EncounterPacketType.RequestRaidHurtResult, sequence, fight, 0), result);
+        packet.Send();
     }
 
     private static bool HandleValidation(BinaryReader reader, out string failureCode)

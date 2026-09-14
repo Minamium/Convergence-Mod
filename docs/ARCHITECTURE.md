@@ -32,7 +32,7 @@ The architecture is a modular monolith: one tModLoader assembly with enforced so
 
 ## Current implementation note
 
-The source contains a First Severance development experiment composing loop/revive domains, server-wide preparation and active participant containment. [Status](STATUS.md) is authoritative; [ADR-0009](adr/0009-development-combat-experiment.md) records the temporary NPC/HP adapter foundation, subsequently extended by the active ADRs. General native lethal-hit/rejoin/outsider integration remains separate; the development Barrier is not still inert. The current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
+The source contains a First Severance development experiment composing loop/revive domains, server-wide preparation and active participant containment. [Status](STATUS.md) is authoritative; [ADR-0009](adr/0009-development-combat-experiment.md) records its temporary foundation and [ADR-0024](adr/0024-native-raid-hurt-and-downed.md) replaces its direct HP path with receiving-owner native Hurt plus authoritative Down/revival. Universal death-source interception/rejoin/outsider integration remains separate. The current product loop is in the [First Severance spec](encounters/first-severance/ENCOUNTER_SPEC.md).
 
 ## Dependency direction
 

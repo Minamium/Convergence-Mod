@@ -25,6 +25,8 @@ related_docs:
 
 # ADR-0020: Build-gated solo debug admission and disposable terminal HUD
 
+**Partial supersession,2026-09-14:** [ADR-0025](0025-public-solo-admission.md) replaces the build/release gate with ordinary1–4-player admission. The historical opt-out instructions below are not current commands. Terminal presentation and normal all-Down cleanup remain applicable.
+
 The user requests a single ordinary Host & Play client for quick development checks, without a companion NPC, invulnerability or a redesigned solo Boss. This supersedes the earlier blanket two-real-player minimum for this development build, not the separate console-only protection permission in [ADR-0015](0015-console-only-single-pull-assist.md). A balanced public solo/NPC mode remains undecided. The user also requests success and failure cinematics that temporarily replace HUD, extending the disposable terminal presentation in [ADR-0018](0018-roster-health-and-core-salvos.md).
 
 ## Authority and release boundary

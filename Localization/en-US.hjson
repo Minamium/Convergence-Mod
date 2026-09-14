@@ -52,6 +52,10 @@ Mods: {
 		}
 
 		Buffs: {
+			RaidBoundDebuff: {
+				DisplayName: Bound to the Requiem
+				Description: Native hits retain defense, damage reduction and on-hit effects. At 1 HP you become Downed instead of dying; death-triggered revival does not activate. Only an ally can revive you.
+			}
 			RecoveryLockoutDebuff: {
 				DisplayName: Reconstitution Lockout
 				Description: Cannot receive another revival for 60 seconds after recovery. You can still revive allies.
@@ -102,6 +106,7 @@ Mods: {
 				StillnessInstruction: SEQUENCE {0}/4 — STOP inside the empty column
 				IntroRaidName: REQUIEM OF THE HOLLOW DOLL
 				DefeatDeathReason: "{0} was erased by Lacrimosa's final act."
+				NativeHitDeathReason: "{0} was struck by the Requiem."
 				PhaseReset: Loop complete. Boss shields restore; the next Pylons follow. /convergence-cancel ends the experiment.
 				ResultStackPassed: Stack successful — everyone gathered. Zero damage.
 				ResultStackFailed: Stack incomplete — standing participants lose max-life percentage equal to the missing roster fraction.

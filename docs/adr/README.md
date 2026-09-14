@@ -41,7 +41,7 @@ ADRs record decisions that are expensive to reverse: authority, dependency direc
 | [0017](0017-boss-stages-fixed-stack-and-lattice.md) | Accepted; wire extended by 0018; immediate exits/grid-only score superseded by 0019 | Feature-local phase plan, protected half-HP rupture, fixed Stack, reduced field and bounded grid |
 | [0018](0018-roster-health-and-core-salvos.md) | Accepted; HP-zero victory superseded by 0019; result HUD extended by 0020 | Frozen-roster actor health, bounded Core salvos sharing the grid hit ledger, disposable Victory presentation; protocol v12 |
 | [0019](0019-phase-scores-and-terminal-survival.md) | Accepted; supersedes immediate transitions/death and grid-only cycling in 0017/0018 | Ordered action scores, stage HP floors, remote third phase and HP-zero Final survival; protocol v13 |
-| [0020](0020-development-solo-admission-and-terminal-hud.md) | Accepted for development; supersedes blanket minimum-two admission and the old terminal HUD policy | Build-gated one-member debugging, normal all-Down defeat, bounded success/failure HUD cinematics; protocol v14 |
+| [0020](0020-development-solo-admission-and-terminal-hud.md) | Admission gate superseded by0025; terminal presentation retained | Historical build-gated solo, normal all-Down defeat, bounded success/failure HUD cinematics; protocol v14 |
 
 | [0021](0021-untimed-recovery-and-simultaneous-prism.md) | Accepted for development; supersedes active timed Down and single-focus Prism | Untimed recoverable Down and bounded simultaneous Prism; protocol v16 |
 
@@ -50,3 +50,5 @@ ADRs record decisions that are expensive to reverse: authority, dependency direc
 Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark the old record superseded. Current implementation status remains in [`../STATUS.md`](../STATUS.md), not in this index.
 
 | [0023](0023-ghost-samurai-native-wave-damage.md) | Accepted; narrowly supersedes0002 for Ghost Samurai SlashWave player hits | Native local-player immunity/dodge hooks; server-owned spawning, geometry, schedule and cleanup; protocol36 |
+| [0024](0024-native-raid-hurt-and-downed.md) | Accepted for development; partially supersedes0002/0005/0009 for Doll HP calculation/reporting | Native receiving-owner Hurt with health floor; authority-owned hit intents, Down/revival and terminal settlement; protocol39 |
+| [0025](0025-public-solo-admission.md) | Accepted; replaces0020's build/release admission gate | Multiplayer recommended, solo always admitted; actual package checks for GUI/native/public parity |

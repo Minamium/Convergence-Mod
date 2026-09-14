@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using Convergence.Common.Compatibility.Calamity;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Foundation.Geometry;
 using Convergence.Common.Foundation.Identifiers;
@@ -46,7 +45,8 @@ internal sealed class FirstSeveranceRecoveryController
     private readonly bool[] observedConnected;
     private readonly RaidParticipantCombatState[] projectedCombatStates;
     private readonly uint[] healthRevisions;
-    private readonly uint[] hitRevisions;
+    private readonly FirstSeveranceHurtLedger[] hurts;
+    private readonly bool[] pendingNativeDown;
     private readonly int[] correctedLife;
     private readonly Vector2[] downedPositions;
     private readonly ulong[] projectedReviveLockouts;
@@ -70,7 +70,9 @@ internal sealed class FirstSeveranceRecoveryController
         observedConnected = new bool[roster.Count];
         projectedCombatStates = new RaidParticipantCombatState[roster.Count];
         healthRevisions = new uint[roster.Count];
-        hitRevisions = new uint[roster.Count];
+        hurts = new FirstSeveranceHurtLedger[roster.Count];
+        pendingNativeDown = new bool[roster.Count];
+        for (int i = 0; i < hurts.Length; i++) hurts[i] = new();
         correctedLife = new int[roster.Count];
         downedPositions = new Vector2[roster.Count];
         projectedReviveLockouts = new ulong[roster.Count];
@@ -82,6 +84,17 @@ internal sealed class FirstSeveranceRecoveryController
     internal bool CancelRequested => cancelRequested;
     internal RaidReviveSnapshot? CreateSnapshot() => revive.CreateSnapshot();
     internal EncounterRuntimeUpdate Commit(in EncounterRuntimeContext context) => revive.Tick(context);
+    internal bool AwaitingHurtResults(ulong tick, out bool timedOut)
+    {
+        bool waiting = false;
+        timedOut = false;
+        for (int i = 0; i < hurts.Length; i++)
+        {
+            waiting |= hurts[i].Awaiting(healthRevisions[i], tick, out bool expired);
+            timedOut |= expired;
+        }
+        return waiting;
+    }
 
     internal bool TryInitialize(out string failure)
     {
@@ -92,6 +105,7 @@ internal sealed class FirstSeveranceRecoveryController
 
     internal bool CanHitActor(FirstSeveranceRosterMember member)
         => projectedCombatStates[member.ParticipantId.Value] == RaidParticipantCombatState.Alive
+            && !pendingNativeDown[member.ParticipantId.Value]
             && !Main.player[member.ServerWhoAmI].GetModPlayer<FirstSeveranceRaidPlayer>().IsReviving;
 
     internal FirstSeveranceCombatParticipantProjection[] CreateParticipants(in RaidReviveSnapshot snapshot)
@@ -120,6 +134,7 @@ internal sealed class FirstSeveranceRecoveryController
         revive.Cleanup(context);
         Array.Clear(projectedReviveLockouts);
         pendingIntents.Clear();
+        Array.Clear(pendingNativeDown);
         Array.Clear(lastQueuedNonces);
     }
 
@@ -245,6 +260,7 @@ internal sealed class FirstSeveranceRecoveryController
 
     internal void ApplyPendingIntents(ulong authorityTick)
     {
+        ApplyNativeDowns(authorityTick);
         if (pendingIntents.Count == 0)
         {
             return;
@@ -298,6 +314,9 @@ internal sealed class FirstSeveranceRecoveryController
 
     internal void ApplyPendingRevives(ulong authorityTick)
     {
+        // SP native hits may happen inside the attack update. Commit those before
+        // rescue selection; MP reports enter here on the next authority tick.
+        ApplyNativeDowns(authorityTick);
         var starts = new List<RaidReviveStartCommand>(roster.Count);
         foreach (FirstSeveranceQueuedCombatIntent intent in pendingIntents)
         {
@@ -364,6 +383,8 @@ internal sealed class FirstSeveranceRecoveryController
                 SetCorrectedLife(index, player, restoredLife);
                 lifeChanged = true;
             }
+            else if (participant.CombatState == RaidParticipantCombatState.Downed)
+                player.statLife = 1; // Neither native healing nor stale HP transport is a revival.
 
             FirstSeveranceCombatParticipantProjection projection =
                 CreateParticipantProjection(snapshot.Value, participant, index);
@@ -409,7 +430,8 @@ internal sealed class FirstSeveranceRecoveryController
 
     internal void ApplyRaidDamage(FirstSeveranceRosterMember member, int damage, ulong authorityTick, string source)
     {
-        if (damage <= 0 || !TryGetPlayer(member, out Player player) || player.dead
+        if (damage <= 0 || pendingNativeDown[member.ParticipantId.Value]
+            || !TryGetPlayer(member, out Player player) || player.dead
             || !TryGetReviveParticipant(member.ParticipantId, out RaidParticipantReviveSnapshot state)
             || state.CombatState != RaidParticipantCombatState.Alive
             || authorityTick < state.InvulnerabilityUntilTick)
@@ -421,22 +443,57 @@ internal sealed class FirstSeveranceRecoveryController
             return;
         }
 
-        Log(authorityTick, $"event=RaidDamage source={source} participant={member.ParticipantId.Value} slot={member.ServerWhoAmI} damage={damage} life_before={player.statLife} max_life={player.statLifeMax2} lethal={damage >= player.statLife}");
-
-        // Accepted hits only, including lethal-to-Down. Send before any terminal
-        // cleanup; a periodic HP snapshot alone can lose the final hit or a heal.
-        CalamityRaidHit.Apply(player);
+        var kind = source == "RemoteCrush" ? FirstSeveranceHurtKind.Crush
+            : source is "Stack" or "Spread" or "PylonPulse" ? FirstSeveranceHurtKind.Mechanic : FirstSeveranceHurtKind.Hazard;
+        // Ordinary hazards keep their source-damage budgets. Mechanics ignore
+        // armor, NOT endurance/shields/hooks. Crush is an extreme native hit.
+        if (kind == FirstSeveranceHurtKind.Crush) damage = Math.Max(damage, 100_000);
+        var intent = new FirstSeveranceHurtIntent(healthRevisions[member.ParticipantId.Value], damage, kind);
+        if (!hurts[member.ParticipantId.Value].TryIssue(intent, authorityTick, source, out var hit))
+        {
+            Log(authorityTick, $"event=RaidHurtRejected source={source} reason=bounded_intent_capacity participant={member.ParticipantId.Value}");
+            return;
+        }
+        Log(authorityTick, $"event=RaidDamage source={source} participant={member.ParticipantId.Value} slot={member.ServerWhoAmI} damage={damage} life_before={player.statLife} max_life={player.statLifeMax2} resolution=NativePending hit={hit.Revision} health_revision={intent.HealthRevision}");
         if (Main.netMode == NetmodeID.Server)
-            FirstSeverancePacketSystem.SendRaidHit(member.ServerWhoAmI, fightId,
-                ++hitRevisions[member.ParticipantId.Value], damage);
-
-        // Experimental encounter-owned damage, not an interception of another Mod's hit.
-        // This path never sends a lethal HP value or invokes Terraria's death hooks.
-        if (damage >= player.statLife)
-            revive.Apply(new AuthoritativeParticipantDownedCommand(
-                fightId, ToReviveBinding(member), authorityTick));
+            FirstSeverancePacketSystem.SendRaidHit(member.ServerWhoAmI, fightId, hit.Revision, intent);
         else
-            SetCorrectedLife(member.ParticipantId.Value, player, player.statLife - damage);
+            TryAcceptHurtResult(member.ServerWhoAmI, member.ConnectionEpoch,
+                player.GetModPlayer<FirstSeveranceRaidPlayer>().ApplyNativeHurt(hit.Revision, intent), out _);
+    }
+
+    internal bool TryAcceptHurtResult(int sender, ulong epoch, in FirstSeveranceHurtResult result, out string failure)
+    {
+        failure = "first_severance.hurt_result_not_current";
+        if (!canAcceptIntent() || !roster.TryResolveCurrentBinding(sender, epoch, out var member)
+            || !TryGetPlayer(member, out Player player) || player.dead
+            || !TryGetReviveParticipant(member.ParticipantId, out var state)
+            || state.CombatState != RaidParticipantCombatState.Alive) return false;
+        // Terraria owns HP transport. Never accept a client-only success verdict,
+        // or turn a stale result into a new Down after authority health correction.
+        if (result.ReachedFloor && (player.statLife != 1 || debugAssist?.Protects(fightId, member) == true))
+        {
+            failure = "first_severance.hurt_floor_not_observed";
+            return false;
+        }
+        int index = member.ParticipantId.Value;
+        if (!hurts[index].TryAccept(result, healthRevisions[index], Main.GameUpdateCount, out var hit)) return false;
+        if (result.ReachedFloor) pendingNativeDown[index] = true;
+        Log(Main.GameUpdateCount, $"event=RaidDamageResolved source={(result.HitRevision == 0 ? "NativeExternal" : hit.Source)} participant={index} slot={sender} hit={result.HitRevision} health_revision={result.HealthRevision} requested={hit.Intent.Damage} native_damage={result.Damage} life_before={result.LifeBefore} life_after={result.LifeAfter} net_hp_loss={result.LifeBefore - result.LifeAfter} floor={result.ReachedFloor} basis=OwnerNativeReport round_trip_ticks={(result.HitRevision == 0 ? 0 : Main.GameUpdateCount - hit.IssuedTick)}");
+        failure = string.Empty;
+        return true;
+    }
+
+    private void ApplyNativeDowns(ulong tick)
+    {
+        for (int i = 0; i < pendingNativeDown.Length; i++)
+        {
+            if (!pendingNativeDown[i]) continue;
+            pendingNativeDown[i] = false;
+            var member = roster.Members[i];
+            if (TryGetPlayer(member, out var player) && !player.dead)
+                revive.Apply(new AuthoritativeParticipantDownedCommand(fightId, ToReviveBinding(member), tick));
+        }
     }
 
     internal void GrantPrototypeReviveKits()
@@ -543,7 +600,8 @@ internal sealed class FirstSeveranceRecoveryController
 
     internal bool IsAlive(ParticipantId participantId)
     {
-        return TryGetReviveParticipant(participantId, out RaidParticipantReviveSnapshot participant)
+        return !pendingNativeDown[participantId.Value]
+            && TryGetReviveParticipant(participantId, out RaidParticipantReviveSnapshot participant)
             && participant.CombatState == RaidParticipantCombatState.Alive;
     }
 

@@ -132,7 +132,7 @@ documents:
 - doc_id: decision.development-solo-admission
   path: docs/adr/0020-development-solo-admission-and-terminal-hud.md
   title: 'ADR-0020: Build-gated solo debug admission and disposable terminal HUD'
-  content_sha256: 93715aadafc93d5cbb3ef646fcc1a4b033b295a77811f70fd0962b38885f60d1
+  content_sha256: 5e52bc312e25a1be30fd75c590e26204895125ad22443c6c3756ff0464e1e045
   document_type: adr
   status: accepted
   owners:
@@ -237,6 +237,28 @@ documents:
   - encounter.first-severance.revive
   - project.network-architecture
   - project.status
+- doc_id: decision.native-raid-hurt
+  path: docs/adr/0024-native-raid-hurt-and-downed.md
+  title: 'ADR-0024: Native Hurt, authoritative Down'
+  content_sha256: d3f362496acbf1e20c6f4f74984b69ad06f8316c8e0f11569e9bbf49c1def6db
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-14'
+  source_of_truth_for:
+  - architecture.doll_native_hurt_boundary
+  aliases:
+  - native damage and Raid Down
+  related_code:
+  - Content/Encounters/FirstSeverance/FirstSeveranceNativeHurt.cs
+  - Content/Encounters/FirstSeverance/FirstSeveranceRecoveryController.cs
+  - Content/Encounters/FirstSeverance/Revive/FirstSeveranceRaidPlayer.cs
+  related_docs:
+  - encounter.first-severance.revive
+  - project.network-architecture
+  - research.implementation-review-20260914
 - doc_id: decision.pattern-sequences-defeat-death
   path: docs/adr/0012-pattern-sequences-and-defeat-death.md
   title: 'ADR-0012: Bounded spatial sequences and ordinary death on Raid Defeat'
@@ -280,6 +302,25 @@ documents:
   - decision.roster-health-core-salvos
   - encounter.first-severance.spec
   - project.status
+- doc_id: decision.public-solo-admission
+  path: docs/adr/0025-public-solo-admission.md
+  title: 'ADR-0025: Solo admission is a public gameplay contract'
+  content_sha256: edb26128abf0b191b56af435dfafd606059710b8fa328713e05d78129bbca1e3
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  last_reviewed: '2026-09-14'
+  source_of_truth_for:
+  - architecture.doll_public_admission
+  aliases:
+  - multiplayer recommended not required
+  related_code:
+  - Content/Encounters/FirstSeverance/Development/FirstSeveranceDevelopmentPolicy.cs
+  - tools/check-package-admission.ps1
+  related_docs:
+  - encounter.first-severance.spec
+  - policy.release-process
 - doc_id: decision.roster-health-core-salvos
   path: docs/adr/0018-roster-health-and-core-salvos.md
   title: 'ADR-0018: Frozen-roster health and bounded Core salvos'
@@ -348,7 +389,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: 436ebd5d202a1adbe2d44e8925b0013c3b54502be8946dfd155f4635fa998a72
+  content_sha256: b3e5edf470e8549f073871bc47ab5f6a8753a257b13297456b7c36e488654974
   document_type: index
   status: accepted
   owners:
@@ -388,13 +429,13 @@ documents:
 - doc_id: development.single-operator-testing
   path: docs/runbooks/SINGLE_OPERATOR_TESTING.md
   title: 一人でマルチRaidを検証する方法
-  content_sha256: b711b906ca754aada0d4b9c4a11944446f92682ec88594864cb276a3a930b331
+  content_sha256: 2215dc17a2981408d908921107cc2043aaf28397c8c8f15cd6719a6a525c7ea6
   document_type: runbook
   status: provisional
   owners:
   - engineering
   - gameplay
-  last_reviewed: '2026-09-06'
+  last_reviewed: '2026-09-14'
   source_of_truth_for: []
   aliases:
   - 一人マルチ検証
@@ -414,7 +455,7 @@ documents:
 - doc_id: development.windows
   path: docs/runbooks/WINDOWS_DEVELOPMENT.md
   title: Windows Development Runbook
-  content_sha256: ac31eea2e5ac5be00e4f7ec7839179519db0c23af68b98c8a73afbc425cd5698
+  content_sha256: 158d02a8d741ad69ed330b7c97bda8094f28c39cfbb4e15b2ede2a885819bcce
   document_type: runbook
   status: accepted
   owners:
@@ -495,12 +536,12 @@ documents:
 - doc_id: encounter.first-severance.backlog
   path: docs/encounters/first-severance/BACKLOG.md
   title: First Severance Deferred Backlog
-  content_sha256: e76e52a834b45302c3f94b56f90e66c8d77cfe9b71e0961d8b27f2a21a6fbee4
+  content_sha256: 33b68795d4a92b391ec3ea1addbcff28a64837e5554e65c05ec276bb1923cc3f
   document_type: backlog
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-05'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.deferred_scope
   aliases:
@@ -566,13 +607,13 @@ documents:
 - doc_id: encounter.first-severance.plan
   path: docs/encounters/first-severance/IMPLEMENTATION_PLAN.md
   title: First Severance Implementation Plan
-  content_sha256: 588162953e1564908c9eced9e9514967125a1074379d0e351f83fa44927d22aa
+  content_sha256: 676b0435b445b555e8f1a87a35b53ad880fe6782b4f39e3397cc2150fe2baea2
   document_type: plan
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-11'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.implementation_sequence
   aliases:
@@ -590,13 +631,13 @@ documents:
 - doc_id: encounter.first-severance.revive
   path: docs/encounters/first-severance/REVIVE_SPEC.md
   title: First Severance Downed and Revive Specification
-  content_sha256: f1d3ce746d9994ef03e52dfad694372c6904f19b2f4d200e30b3b3e114875b64
+  content_sha256: e97e0b6282121a24d95cc2d8d7fe48236e034aaf54403c5d5890ef83f58cadb4
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - first_severance.player_recovery
   aliases:
@@ -614,7 +655,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: Requiem of the Hollow Doll — Encounter Specification
-  content_sha256: c0857e28d55d8554606839b9339a0a5262aeb72d7a005a48669f5a819b08c3e8
+  content_sha256: deb25680bea392a03403d7335e12762ba88688628f213665a78b09ca10d5379a
   document_type: spec
   status: accepted
   owners:
@@ -708,12 +749,12 @@ documents:
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Development Handoff — チャット不要の再開入口
-  content_sha256: a86145e1fe2706157d3879a2d0f7f0495419740b108530fc053932af293f2484
+  content_sha256: 1a7fcda1c82fd4d52a6dd5746ee33aae046d2a5c55b4aa13f7654b749b3c344a
   document_type: handoff
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-14'
   source_of_truth_for:
   - handoff.windows.resume
   aliases:
@@ -746,7 +787,7 @@ documents:
 - doc_id: history.encounter-evolution-0246
   path: docs/history/2026-09-11-encounter-evolution.md
   title: Encounter evolution through 0.2.46
-  content_sha256: 5950d5d56a762801d9b15c54eff4e7ed8caba97d89b347e13497885e8cb45861
+  content_sha256: 908c70a233f68eebb1f0ced22cf939cf64efa10407057164ac1f7200ddec1441
   document_type: evidence
   status: historical
   owners:
@@ -762,7 +803,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 61667cdc506ae36a358ceeefeda9c84a1d64b0f67dc04a486c0bf42a0f5a60d0
+  content_sha256: 8cab3a6caf3d1ecb5a4758836c4c384b75f4f52a56bd7711f9706374b3af64af
   document_type: evidence
   status: historical
   owners:
@@ -862,7 +903,7 @@ documents:
 - doc_id: policy.release-process
   path: docs/RELEASE_PROCESS.md
   title: Release Process
-  content_sha256: e23b4feab14a9a7b4199a5760b9d495d4538641401e0f3b261864b3862c84af6
+  content_sha256: fc7ea51fc31a7a989edcee22a8812b06f04a44de00e40670271329fefd4d2b80
   document_type: policy
   status: accepted
   owners:
@@ -884,7 +925,7 @@ documents:
 - doc_id: project.architecture
   path: docs/ARCHITECTURE.md
   title: Architecture
-  content_sha256: 16a0d2e75755d0727f3978ca5206d1bf904cf068b4b9c755226bdeb456414c66
+  content_sha256: cf957768f276aac9b207059e8d5bbd98c3491b13780dcaea1bbed2acce2799ff
   document_type: governance
   status: accepted
   owners:
@@ -1112,7 +1153,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 2165d19251180b72d4b59e78259ca12461b7d9a78200bd634d9c7721e45c6d74
+  content_sha256: 389f410cf6e1dd48ba4e7528b236b5d21c70a0291d1ce8e8a6bf3026332677b5
   document_type: governance
   status: accepted
   owners:
@@ -1157,7 +1198,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: e2092cfd20d153b0ea0bc691714aff588f3f269dc68e9ab7347dfb43812054fb
+  content_sha256: b14c8d5f2c10254e9048113a4c490300f1a5126dd1aae962086c0010a1343f2e
   document_type: status
   status: accepted
   owners:
@@ -1211,7 +1252,7 @@ documents:
 - doc_id: release.0-3-1
   path: docs/releases/0.3.1.md
   title: Convergence 0.3.1 — Public Playtest
-  content_sha256: 116b0ac9d4c53f8ec7b7cb992f9e3a76b59abaef2759a0f8f7b0271a6ce10425
+  content_sha256: fde623c59b3fb939b85ac1950183890c9def0c46eed7db99c689d0b2bbf29718
   document_type: evidence
   status: accepted
   owners:
@@ -1330,6 +1371,23 @@ documents:
   - compatibility.version-matrix
   - project.arena-infrastructure
   - encounter.first-severance.plan
+- doc_id: research.implementation-review-20260914
+  path: docs/research/2026-09-14-implementation-review.md
+  title: 'Owner-supplied implementation review: disposition'
+  content_sha256: b594de314a593b97af9038744f76d2afdbdd873d1beffb603e8353ac0cd2e68b
+  document_type: research
+  status: accepted
+  owners:
+  - engineering
+  last_reviewed: '2026-09-14'
+  source_of_truth_for: []
+  aliases:
+  - owner supplied implementation review
+  related_code:
+  - Content/Encounters/FirstSeverance/Revive/FirstSeveranceRaidPlayer.cs
+  related_docs:
+  - decision.native-raid-hurt
+  - project.status
 - doc_id: research.instant-revival-core-apis
   path: docs/research/INSTANT_REVIVAL_CORE_APIS.md
   title: Instant revival / Foundation Core API evidence
@@ -1396,7 +1454,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 47dc209d5e2ccd674a5507667bd6643504e522e4e1fb288dcaa468974b6bedef
+  content_sha256: db2604b0d8f30567209c3850781fbc9bf15def3444c6b3f471919f58be92a4d3
   document_type: research
   status: historical
   owners:
@@ -1465,7 +1523,7 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: a10d4402297c3761f8e037473e20b2fa1932da2c3785e8b2d6ce0214546e6a1e
+  content_sha256: 011b91c15e31723c15e2dbe39ffb81e44f2870deaff393a87cec5e126e726997
   document_type: plan
   status: accepted
   owners:

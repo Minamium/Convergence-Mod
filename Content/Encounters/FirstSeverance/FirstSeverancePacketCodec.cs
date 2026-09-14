@@ -21,17 +21,38 @@ internal static class FirstSeverancePacketCodec
 {
     private const int MaximumFailureCodeBytes = 120;
 
-    internal static void WriteRaidHit(BinaryWriter writer, in EncounterPacketHeader header, int damage)
+    internal static void WriteRaidHit(BinaryWriter writer, in EncounterPacketHeader header, FirstSeveranceHurtIntent intent)
     {
         EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
-        writer.Write(damage);
+        writer.Write(intent.HealthRevision);
+        writer.Write(intent.Damage);
+        writer.Write((byte)intent.Kind);
     }
 
-    internal static bool TryReadRaidHit(BinaryReader reader, out int damage, out string failureCode)
+    internal static bool TryReadRaidHit(BinaryReader reader, out FirstSeveranceHurtIntent intent, out string failureCode)
     {
-        damage = reader.ReadInt32();
-        failureCode = damage > 0 ? string.Empty : "first_severance.hit_damage_invalid";
-        return damage > 0;
+        intent = new(reader.ReadUInt32(), reader.ReadInt32(), (FirstSeveranceHurtKind)reader.ReadByte());
+        failureCode = intent.IsValid ? string.Empty : "first_severance.hit_intent_invalid";
+        return intent.IsValid;
+    }
+
+    internal static void WriteHurtResult(BinaryWriter writer, in EncounterPacketHeader header, in FirstSeveranceHurtResult result)
+    {
+        EncounterRouteCodec.WriteHeader(writer, header, FirstSeveranceIdentity.EncounterKey);
+        writer.Write(result.Nonce);
+        writer.Write(result.HitRevision);
+        writer.Write(result.HealthRevision);
+        writer.Write(result.LifeBefore);
+        writer.Write(result.LifeAfter);
+        writer.Write(result.Damage);
+    }
+
+    internal static bool TryReadHurtResult(BinaryReader reader, out FirstSeveranceHurtResult result, out string failureCode)
+    {
+        result = new(reader.ReadUInt32(), reader.ReadUInt32(), reader.ReadUInt32(),
+            reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+        failureCode = result.IsValid ? string.Empty : "first_severance.hurt_result_invalid";
+        return result.IsValid;
     }
 
     internal static void WriteActivateRequest(

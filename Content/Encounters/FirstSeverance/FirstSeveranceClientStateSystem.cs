@@ -63,7 +63,7 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
                 : null;
         if (preparation is { } oldPreparation && nextPreparation is null && combat is null)
             foreach (var member in oldPreparation.Members)
-                Main.player[member.ServerWhoAmI].GetModPlayer<FirstSeveranceContainmentPlayer>().Clear(oldPreparation.FightId);
+                FirstSeveranceContainmentPlayer.ClearExisting(Main.player[member.ServerWhoAmI], oldPreparation.FightId);
         preparation = nextPreparation;
         if (nextPreparation is { } fieldPreparation && Main.netMode == NetmodeID.MultiplayerClient)
             foreach (var member in fieldPreparation.Members)
@@ -230,8 +230,7 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     {
         if (previous is null)
             return;
-        foreach (FirstSeveranceCombatParticipantProjection participant in previous.Participants)
-            Main.player[participant.ServerWhoAmI].GetModPlayer<FirstSeveranceRaidPlayer>().ClearRaidState();
+        FirstSeveranceRaidPlayer.ClearFight(previous.FightId);
     }
 
     internal void ApplyValidation(in FirstSeveranceValidationMessage validation)
@@ -316,7 +315,7 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
     {
         if (preparation is { } oldPreparation)
             foreach (var member in oldPreparation.Members)
-                Main.player[member.ServerWhoAmI].GetModPlayer<FirstSeveranceContainmentPlayer>().Clear(oldPreparation.FightId);
+                FirstSeveranceContainmentPlayer.ClearExisting(Main.player[member.ServerWhoAmI], oldPreparation.FightId);
         ClearCombatPlayers(combat);
         TerminalMechanic = null;
         TerminalCombat = null;

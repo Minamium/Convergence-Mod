@@ -49,3 +49,11 @@ This is a retrospective summary of the owner's playtests and repeated correction
 ## Ghost Samurai — 2026-09-14 / development0.3.2
 
 The user reported a fight surviving death and fields extending underground; requested later tracking, low wave test damage, early shout/late visual cue and target damage ownership. Replace unsafe all-slot teardown with exact-Fight leases, end on last living participant, anchor the unchanged field above summoner feet, retain living targets and halve known non-target owner damage. The user clarified that only first-wave warnings shorten60ticks; later30/48tick warnings remain. [Evidence](../evidence/2026-09-14-ghost-samurai-lifecycle.json) records automated results; actual death/re-summon, multiplayer ratios, network timing and arena/dash playability await testing.
+
+## Doll damage review — 2026-09-14 / development0.3.3
+
+Owner objected to Raid-only HP subtraction bypassing equipment and proposed a bound-debuff/native-damage Down model; explicitly confirmed combat text was intentionally removed. Adopt native Hurt with bounded receipts and authoritative recovery, remove the Adrenaline-only bridge, preserve minimal presentation. [Review disposition](../research/2026-09-14-implementation-review.md) separates confirmed defects from proposed tests; [Status](../STATUS.md) owns verification. No new gameplay observation or broad compatibility approval is inferred from the external analysis.
+
+## Solo admission regression — 2026-09-14 / Workshop0.3.1 → source0.3.4
+
+Owner's one-player Host & Play (`al`) was rejected at21:33:32 with `roster_too_small`, then repeated clicks hit rate limiting. Actual package inspection finds the GitHub0.3.1 artifact solo-enabled but the09:44 GUI rebuild/local/Workshop artifact solo-disabled. Owner reiterates **multiplayer recommended, never solo prohibited**, with companion party substitution planned. Remove symbol/release opt-out and check packaged admission, without changing combat, adding fake players or claiming companion support. [Evidence](../evidence/2026-09-14-solo-admission.json) owns hashes/results; a new owner solo start remains unobserved.

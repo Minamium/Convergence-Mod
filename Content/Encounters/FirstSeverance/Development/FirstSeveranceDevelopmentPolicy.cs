@@ -1,24 +1,23 @@
 namespace Convergence.Content.Encounters.FirstSeverance.Development;
 
-// Build-time admission only. Never a client request, public cheat, saved option,
-// placeholder participant or change to the server's combat/recovery decisions.
+// Historical internal type name retained. Solo admission is ordinary product
+// behavior in GUI/native/MSBuild and public builds, not a development cheat.
+// Membership and every Core/Ready check remain server-owned; no fake participant.
 internal static class FirstSeveranceDevelopmentPolicy
 {
-#if CONVERGENCE_DEVELOPMENT_SOLO
-    internal const bool AllowSoloDebugStart = true;
-#else
-    internal const bool AllowSoloDebugStart = false;
-#endif
+    internal const bool AllowSoloStart = true;
+    // Legacy diagnostic name, retained for existing offline package inspectors.
+    internal const bool AllowSoloDebugStart = AllowSoloStart;
 
-    internal static int MinimumParticipants => MinimumFor(AllowSoloDebugStart);
+    internal static int MinimumParticipants => MinimumFor(AllowSoloStart);
 
     internal static int MinimumFor(bool allowSoloDebug)
         => allowSoloDebug ? FirstSeveranceRoster.MinimumCount : FirstSeveranceRoster.ProductionMinimumCount;
 
     // Both admission and the fresh Ready -> combat scan must use this policy.
-    // Keep the general validator production-safe; don't silently default it to solo.
+    // General validation fixtures may still request a two-member minimum explicitly.
     internal static FirstSeveranceArenaValidationResult ValidateStartArena(FirstSeveranceArenaSurvey survey)
         => FirstSeveranceArenaValidator.Instance.Validate(survey,
             FirstSeveranceArenaValidationMode.DevelopmentContainment,
-            allowSoloDebug: AllowSoloDebugStart);
+            allowSoloDebug: AllowSoloStart);
 }

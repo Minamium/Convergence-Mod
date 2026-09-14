@@ -54,6 +54,8 @@ jobs:
         working-directory: Convergence
         run: |
           if (-not $env:TML_PATH -or -not $env:TML_SAVE_PATH) { throw 'Set pinned TML_PATH and disposable TML_SAVE_PATH on this runner' }
-          python tools/dev.py build --tml "$env:TML_PATH" --save "$env:TML_SAVE_PATH" --release-candidate
+          python tools/dev.py build --native --tml "$env:TML_PATH" --save "$env:TML_SAVE_PATH" --release-candidate
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          ./tools/check-codec.ps1 -AssemblyPath bin/Debug/net8.0/Convergence.dll -ExpectedSoloDebug disabled
+          ./tools/check-native-hurt.ps1 -PackagePath "$env:TML_SAVE_PATH/Mods/Convergence.tmod" -TModLoaderPath "$env:TML_PATH" -AssemblyOutput .local/candidate.dll
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./tools/check-codec.ps1 -AssemblyPath .local/candidate.dll

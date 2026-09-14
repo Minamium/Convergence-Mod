@@ -21,6 +21,10 @@ Mods: {
       FirstSeverancePrototypeBoss.DisplayName: ラクリモーサ — 縛られた心
       FirstSeverancePrototypePylon.DisplayName: 懸架の楔
     }
+    Buffs.RaidBoundDebuff: {
+      DisplayName: 鎮魂劇の拘束
+      Description: 通常被弾では防御・軽減・被弾時効果が有効。HP1で死亡せずDownするため、死亡時復活は発動しない。蘇生には味方の助けが必要。
+    }
     Buffs.RecoveryLockoutDebuff: {
       DisplayName: 再構成不応期
       Description: 蘇生後60秒間、再び蘇生を受けることができない。味方を蘇生することはできる。
@@ -60,6 +64,7 @@ Mods: {
         StillnessInstruction: "連撃 {0}/4 — 空いた柱の中で静止"
         IntroRaidName: Requiem of the Hollow Doll
         DefeatDeathReason: "{0} はRequiem of the Hollow Dollにより抹消された。"
+        NativeHitDeathReason: "{0} は鎮魂劇の一撃に倒れた。"
         PhaseReset: "1周完了。Bossの盾が戻り、次のパイロンへ。実験を終える場合は /convergence-cancel。"
         ResultStackPassed: 頭割り成功 — 全員集合。ダメージなし。
         ResultStackFailed: 頭割り人数不足 — 不足人数の割合分、生存参加者全員に最大HP割合ダメージ。
