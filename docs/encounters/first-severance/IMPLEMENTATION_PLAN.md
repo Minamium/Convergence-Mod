@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.implementation_sequence
 aliases:
@@ -30,7 +30,7 @@ Current implementation/evidence is in [Status](../../STATUS.md). This is the for
 
 The user accepted the playable Raid combat body as the current development baseline. Start/Ready, suspension/grounding and the latest BGM/SFX changes are implemented; current unverified observations belong to [Status](../../STATUS.md), not another full implementation queue. The thread-independent handoff/spec checkpoint changes documentation only.
 
-The next task is whatever bounded polish, defect or extension the user selects. Preserve accepted art, current combat/recovery and the [presentation direction](VISUAL_SPEC.md#creative-intent-and-motion). No Phase IV/V, solo companion, new Raid, further audio rewrite or whole-fight redesign is scheduled merely because it appeared as a future idea.
+The selected task is [native Hurt / authoritative Down](../../adr/0024-native-raid-hurt-and-downed.md); the [review disposition](../../research/2026-09-14-implementation-review.md) separates adopted fixes from follow-on clock/DoT/rejoin/reward work. Preserve accepted art and the [presentation direction](VISUAL_SPEC.md#creative-intent-and-motion), including intentionally absent combat text. No Phase IV/V, new Raid, audio rewrite or whole-fight redesign is implied.
 
 For an eventual phase extension, use the feature-local phase plan/score and attack adapters, retaining first-cycle gates and explicit Final survival. For an ordinary bug or VFX edit, use only the affected owners. No new framework, assembly split or generic mechanics DSL is planned.
 
@@ -48,14 +48,14 @@ These stages were committed/pushed independently. Evidence and remaining user-ow
 ## Invariants
 
 - Server or Single Player local authority owns lifecycle, roster, ticks, assignments, entity spawn, feature damage gates, committed actor life, Downed/Revive, victory, and cleanup.
-- Clients send bounded intent and render read-only snapshots/events. No custom packet reports DPS, position-check success, revive completion, life, or player identity as truth.
+- Clients send bounded intent and consume read-only Raid snapshots. ADR-0024 permits native Hurt telemetry/floor requests with frozen sender identity and recovery generations; no client reports mechanic success, revive completion, restored HP or terminal as truth.
 - `Common` does not depend on `Content` or `Client`; feature behavior stays in `Content/Encounters/FirstSeverance`.
 - Calamity access stays in `Common/Compatibility/Calamity` behind project-owned contracts.
 - Every transient actor is registered to exact `FightId` ownership immediately and cleanup is idempotent.
 - Terminal snapshot/outcome is committed before the active runtime and player projections are released.
 - Existing numeric packet IDs are never renumbered during the feature rename.
 
-The development fight assumes cooperative multiplayer with unmodified clients. Terraria/tModLoader supplies ordinary movement and combat facts observed by the server; custom-message authority is not a claim of anti-cheat against a modified client. Raid-owned damage already has the narrow Calamity Adrenaline side effect; general native hit/death interception remains separately gated. Do not confuse those two seams.
+The development fight assumes cooperative multiplayer with unmodified clients. Terraria/tModLoader supplies ordinary movement, HP and native Hurt observed by the server; custom-message authority is not an anti-cheat claim. ADR-0024 removes the manual Adrenaline bridge but does not promise arbitrary death-source or inter-Mod compatibility.
 
 ## Follow-on work, not current gates
 

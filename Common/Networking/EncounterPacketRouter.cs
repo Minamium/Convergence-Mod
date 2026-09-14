@@ -111,7 +111,8 @@ internal static class EncounterPacketRouter
             or EncounterPacketType.RequestCancel
             or EncounterPacketType.RequestSnapshot
             or EncounterPacketType.RequestPrototypeDown
-            or EncounterPacketType.RequestReviveNearest;
+            or EncounterPacketType.RequestReviveNearest
+            or EncounterPacketType.RequestRaidHurtResult;
         bool isServerEvent = packetType is EncounterPacketType.Snapshot
             or EncounterPacketType.StateChanged
             or EncounterPacketType.ParticipantChanged

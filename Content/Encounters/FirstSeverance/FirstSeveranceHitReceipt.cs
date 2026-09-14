@@ -3,8 +3,8 @@ using Convergence.Common.Networking.Protocol;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-// Per-owner, per-Fight receipt, separate from HP corrections (heals can coalesce
-// with hits). Reliable ordered delivery precedes a terminal snapshot as well.
+// Per-owner, per-Fight at-most-once native Hurt intent. Recovery generation is
+// checked before advancing this cursor; HP is no longer subtracted by snapshots.
 internal struct FirstSeveranceHitReceipt
 {
     private uint revision;

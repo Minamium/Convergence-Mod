@@ -364,5 +364,50 @@ foreach ($count in 1,2,3,4) {
         $reader.Dispose(); $writer.Dispose(); $stream.Dispose()
     }
 }
+# Native Hurt uses separate, bounded bodies; exercise the actual packaged codec,
+# including a following packet in the same buffer (not only the linked test copy).
+foreach ($message in 'RaidHit','HurtResult') {
+    $packetType = Enum-Value 'Convergence.Common.Networking.Protocol.EncounterPacketType' $(if ($message -eq 'RaidHit') { 'RaidHit' } else { 'RequestRaidHurtResult' })
+    $header = New-Record 'Convergence.Common.Networking.Protocol.EncounterPacketHeader' @([ushort]$version,$packetType,[ulong]1,$fight,[uint]$(if ($message -eq 'RaidHit') { 1 } else { 0 }))
+    $writeNative = $codec.GetMethod(('Write' + $message), $staticFlags)
+    $readNative = $codec.GetMethod(('TryRead' + $message), $staticFlags)
+    $bodyLength = if ($message -eq 'RaidHit') { 9 } else { 24 }
+    for ($variant = 0; $variant -lt 3; $variant++) {
+        $value = if ($message -eq 'RaidHit') {
+            $kind = Enum-Value ($feature+'FirstSeveranceHurtKind') @('Hazard','Mechanic','Crush')[$variant]
+            New-Record ($feature+'FirstSeveranceHurtIntent') @([uint]2,[int]120,$kind)
+        } else {
+            # Applied damage, native dodge, external lethal floor.
+            New-Record ($feature+'FirstSeveranceHurtResult') @([uint]3,[uint]$(if ($variant -eq 2) {0} else {1}),[uint]2,[int]500,[int]@(400,500,1)[$variant],[int]@(100,0,499)[$variant])
+        }
+        $stream = [IO.MemoryStream]::new(); $writer = [IO.BinaryWriter]::new($stream)
+        $null = $writeNative.Invoke($null,@($writer,$header,$value)); $end = $stream.Position
+        $writer.Write([byte]234); $stream.Position = $end - $bodyLength
+        $reader = [IO.BinaryReader]::new($stream); $readArgs = [object[]]@($reader,$null,$null)
+        if (-not $readNative.Invoke($null,$readArgs) -or -not $value.Equals($readArgs[1]) -or $stream.Position -ne $end -or $reader.ReadByte() -ne 234) {
+            throw "Native $message shared-buffer round-trip failed"
+        }
+        $passed++
+        if ($variant -eq 0) {
+            $body = $stream.ToArray()[($end-$bodyLength)..($end-1)]
+            foreach ($case in 'invalid','truncated') {
+                $bad = [byte[]]$body.Clone()
+                if ($case -eq 'truncated') { $bad = $bad[0..($bodyLength-2)] }
+                elseif ($message -eq 'RaidHit') { $bad[8] = 255 }
+                else { [BitConverter]::GetBytes([uint]0).CopyTo($bad,0) }
+                $badReader = [IO.BinaryReader]::new([IO.MemoryStream]::new($bad))
+                $badArgs = [object[]]@($badReader,$null,$null); $rejected = $false
+                try { $rejected = -not $readNative.Invoke($null,$badArgs) }
+                catch {
+                    if ($case -ne 'truncated' -or $_.Exception.InnerException -isnot [IO.EndOfStreamException]) { throw }
+                    $rejected = $true
+                }
+                if (-not $rejected) { throw "Native $message accepted $case body" }
+                $invalidChecks++; $badReader.Dispose()
+            }
+        }
+        $reader.Dispose(); $writer.Dispose(); $stream.Dispose()
+    }
+}
 Write-Output "Assembly: $assemblyFile; SHA256=$((Get-FileHash -LiteralPath $assemblyFile -Algorithm SHA256).Hash)"
 Write-Output "PASS compiled protocol ${version}: $passed round-trips; $invalidChecks malformed/truncated cases rejected. Simultaneous 1-4-ray Prisms, untimed Down, eliminated/oversized roster rejection, every phase/action, HP-zero Final and shared-buffer boundaries. Compiled solo flag=$soloFlag."

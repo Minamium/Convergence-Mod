@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - first_severance.player_recovery
 aliases:
@@ -66,8 +66,7 @@ There is no countdown to removal: if a player is revived and Downed again 12 sec
 ## Feedback
 
 - Kit tooltip describes click-to-revive, eight-tile range, no resource cost, and the recipient lockout.
-- The recipient sees a timed debuff and HUD countdown.
-- A Downed body shows either instant-revive availability or remaining lockout seconds. HUD explicitly says Down has no timeout; no Eliminated label exists in this feature.
+- The recipient sees the timed recovery debuff. Keep the owner's deliberately minimal combat presentation; no new phase/survival/countdown text HUD is required.
 - Rejections distinguish sender not Alive, wrong selected item, no nearby Downed ally, locked recipient and unavailable target. They are not mislabeled as Foundation Core activation failures.
 - Successful recovery announces HP35% and the 60-second restriction.
 - Server diagnostics record accepted instant requests, actual revival, lockout deadline, Down and terminal cause. No Down-timeout event is emitted by this feature. They do not log personal positions every tick.
@@ -80,4 +79,12 @@ Exact-Fight cleanup clears service reservations, deadlines, projections and the 
 
 From `0.2.2`, committed **Defeat** additionally orders ordinary Terraria death for every connected Raid participant after clearing the Raid Down/protection state. Owner clients execute one `Player.KillMe` from their accepted exact-Fight terminal; outsiders and non-Defeat cleanup never receive this action. Normal character-difficulty penalties apply, including Hardcore character loss. External death-cancelling hooks are respected and logged if they prevent death; no private hook bypass is introduced. See [ADR-0012](../../adr/0012-pattern-sequences-and-defeat-death.md).
 
-The development adapter uses Raid-owned HP damage and the debug Down command, not a general Terraria PreKill interception. Ordinary Terraria death/disconnect still aborts the experiment. The pinned tModLoader/Calamity lethal-hook and production rejoin integration remain separately gated; this change does not claim to implement or verify them.
+## Native damage boundary
+
+[ADR-0024](../../adr/0024-native-raid-hurt-and-downed.md) replaces direct Raid HP subtraction with native receiving-player Hurt. Server still decides all Raid hits/Stack/Spread outcomes; the owning player runs engine damage calculation, modifiers, immunity/dodge and hit reactions. Hazard budgets are source damage, so defense/DR may make actual loss lower. Stack/Spread/Pylon penalties ignore armor only, not shields, DR or dodge; crush is an extreme armor-ignoring non-dodgeable native hit. Success still sends no damage.
+
+An active bound participant above1 HP receives a final Hurt ceiling of current HP minus1. Reaching1 latches pending Down and blocks further Hurt, movement and attacks until authoritative Down/recovery. A stale Alive snapshot cannot clear this latch. The authority validates the exact bound sender, health generation and observed native HP before committing Down. Only Down/revival creates HP correction revisions; ordinary damage/healing stays native. Final victory waits for in-flight damage results, with bounded failure rather than a premature reward.
+
+Bound to the Requiem / 鎮魂劇の拘束 is an unsaved, reasserted debuff icon describing this boundary. Removing it cannot alter membership/protection. Death-triggered self-revival is not requested or consumed by the normal capped-Hurt path. Do not manually replay Calamity OnHurt/Adrenaline logic.
+
+This is **not universal death interception**: DoT, direct KillMe/HP writers or foreign final-Hurt overrides may bypass the cap. Actual unexpected death/disconnect still aborts. No PreKill hook bypass, automatic rejoin or universal accessory compatibility is claimed; [review disposition](../../research/2026-09-14-implementation-review.md) records follow-on investigation.

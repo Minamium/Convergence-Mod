@@ -307,7 +307,7 @@ internal sealed class FirstSeveranceAttackController
                 || !recovery.TryGetPlayer(member, out Player player))
                 continue;
             // Contact-style energy charges respect legitimate engine/dash i-frames.
-            // Stack/Spread remain authority percentage mechanics, not dodgeable hits.
+            // Final immunity/dodge decisions run on the native receiving owner.
             if (volley.IsCharge && player.immune && player.immuneTime > 0)
                 continue;
             bool hit = volley.Kind == FirstSeveranceAttackKind.Stillness

@@ -50,3 +50,4 @@ ADRs record decisions that are expensive to reverse: authority, dependency direc
 Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark the old record superseded. Current implementation status remains in [`../STATUS.md`](../STATUS.md), not in this index.
 
 | [0023](0023-ghost-samurai-native-wave-damage.md) | Accepted; narrowly supersedes0002 for Ghost Samurai SlashWave player hits | Native local-player immunity/dodge hooks; server-owned spawning, geometry, schedule and cleanup; protocol36 |
+| [0024](0024-native-raid-hurt-and-downed.md) | Accepted for development; partially supersedes0002/0005/0009 for Doll HP calculation/reporting | Native receiving-owner Hurt with health floor; authority-owned hit intents, Down/revival and terminal settlement; protocol39 |

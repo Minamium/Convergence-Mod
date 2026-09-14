@@ -37,7 +37,8 @@ internal static partial class Program
             7, CreateContext(2).FightId, 3);
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream, Encoding.UTF8, true);
-        FirstSeverancePacketCodec.WriteRaidHit(writer, header, 120);
+        var intent = new FirstSeveranceHurtIntent(4, 120, FirstSeveranceHurtKind.Hazard);
+        FirstSeverancePacketCodec.WriteRaidHit(writer, header, intent);
         long end = stream.Position;
         writer.Write(0x12345678);
         stream.Position = 0;
@@ -46,18 +47,21 @@ internal static partial class Program
         AssertEqual(header, actual, "Fight and hit serial");
         AssertEqual(true, EncounterRouteCodec.TryRead(reader, out string route), "route");
         AssertEqual(FirstSeveranceIdentity.EncounterKey, route, "definition route");
-        AssertEqual(true, FirstSeverancePacketCodec.TryReadRaidHit(reader, out int damage, out _), "hit");
-        AssertEqual(120, damage, "no duplicate HP loss encoded");
+        AssertEqual(true, FirstSeverancePacketCodec.TryReadRaidHit(reader, out var actualIntent, out _), "hit");
+        AssertEqual(intent, actualIntent, "source damage and recovery generation");
         AssertEqual(end, stream.Position, "shared stream remains intact");
-        for (int length = 0; length < 4; length++)
+        for (int length = 0; length < 9; length++)
         {
             using var shortStream = new MemoryStream(new byte[length]);
             using var shortReader = new BinaryReader(shortStream);
             AssertThrows<EndOfStreamException>(() => FirstSeverancePacketCodec.TryReadRaidHit(shortReader, out _, out _), "truncated hit");
         }
-        foreach (int invalid in new[] { 0, -1, int.MinValue })
+        foreach (int invalid in new[] { 0, -1, int.MinValue, FirstSeveranceHurtIntent.MaximumDamage + 1 })
         {
-            using var invalidStream = new MemoryStream(BitConverter.GetBytes(invalid));
+            using var invalidStream = new MemoryStream();
+            using var invalidWriter = new BinaryWriter(invalidStream, Encoding.UTF8, true);
+            invalidWriter.Write(0u); invalidWriter.Write(invalid); invalidWriter.Write((byte)0);
+            invalidStream.Position = 0;
             using var invalidReader = new BinaryReader(invalidStream);
             AssertEqual(false, FirstSeverancePacketCodec.TryReadRaidHit(invalidReader, out _, out _), "non-hit");
         }
