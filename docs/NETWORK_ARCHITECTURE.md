@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-14
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,15 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v37
+## Current development protocol v38
+
+Ghost Samurai native actor ExtraAI adds2 bytes for a bounded signed LockedTarget (-1 or0..254). Server selects using connection generation and the living field roster; clients consume that selection in native incoming-NPC-hit hooks. No new target/hit request.
+
+SamuraiHazard appends a4-byte arrival tick (zero except the first grid follow-up wave), making45 immutable bytes. SamuraiSlashAim adds authoritative release time, making28 bytes. Only an arrival-bearing wave can revise release/lock while tracking. The final locked full snapshot repairs missing updates and rejects later moving updates; other aimed attacks retain immutable release/lock. Validate the complete payload, finite geometry, deadlines, warning/lifetime and ordering before replacement. Circle radius is bounded to6000px; arena dimensions stay2560x1120px with foot-anchored position.
+
+Matching peers are required. Stable packet/shape IDs and Doll v37 payloads are unchanged. Teardown clears registered exact-Fight leases without touching uninitialized Player slots. Terminal replicas gate attack display/damage/audio before late actor deletion. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns tuning; [ADR-0023](adr/0023-ghost-samurai-native-wave-damage.md) remains the wave-only native player-damage exception.
+
+## Preceding development protocol v37
 
 Doll snapshots append one strict Boolean after the carried-pursuit section. When present, the single Final core cannon adds serial (`uint`), start tick (`ulong`), target slot (`short`) and unit direction (`float` X/Y): **23 bytes including the flag**. Its origin/dimensions and warning/fire/end are reconstructed from accepted Core coordinates and the P2 cannon constants. Reject nonfinite/nonunit directions, absent roster targets, invalid/overflow clocks, casts outside FinalBullets or its complete action window. No target/hit request is added. The feature attack controller owns scheduling, one-hit-per-member ledger and action/Fight cleanup; a late snapshot contains the entire locked cast. P3 spacing also changes: accepted action-start ticks seed shared deterministic gap positions. Old peers must not draw a different hazard from the same action descriptor. Existing Ghost Samurai payloads and stable packet IDs are retained.
 

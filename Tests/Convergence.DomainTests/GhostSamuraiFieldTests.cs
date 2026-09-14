@@ -5,13 +5,14 @@ using Convergence.Content.Encounters.GhostSamurai;
 namespace Convergence.DomainTests;
 internal static partial class Program
 {
-    [DomainTest("Ghost Samurai field stays centered on the summoner and constrains every complete player body")]
+    [DomainTest("Ghost Samurai field stays anchored above the summoner feet and constrains every complete player body")]
     private static void SamuraiFieldBounds()
     {
         var field = SamuraiArenaBounds.Create(4000, 3000, 60000, 20000);
         AssertEqual(true, field.IsValid, "valid summon field");
         AssertEqual(4000f, field.CenterX, "summoner X captured");
-        AssertEqual(3000f, field.CenterY, "summoner Y captured, not a ground anchor");
+        AssertEqual(2440f, field.CenterY, "center raised by half the unchanged height");
+        AssertEqual(3000f, field.Bottom, "summoner feet become the bottom");
         AssertEqual(2560f, field.HalfWidth * 2, "same width as Doll field");
         AssertEqual(1120f, field.HalfHeight * 2, "same height as Doll field");
         for (int player = 0; player < 4; player++)
@@ -23,24 +24,21 @@ internal static partial class Program
             AssertEqual(true, field.Contains(point.X, point.Y) && field.Contains(point.X + width, point.Y + height), "whole body remains inside");
             AssertEqual(point, field.ClampBody(point.X, point.Y, width, height, 2), "correction is idempotent");
         }
-        AssertEqual((3990f, 2979f), field.ClampBody(3990, 2979, 20, 42), "ordinary inside movement unchanged");
+        AssertEqual((3990f, 2900f), field.ClampBody(3990, 2900, 20, 42), "ordinary inside movement unchanged");
         AssertEqual(false, field.Contains(1000, 3000), "distant outsider not admitted by field entry");
     }
 
-    [DomainTest("Ghost Samurai field shrinks symmetrically at world edges and rejects impossible centers")]
+    [DomainTest("Ghost Samurai world-edge summon rejection never changes arena size")]
     private static void SamuraiFieldWorldEdges()
     {
-        var edge = SamuraiArenaBounds.Create(400, 400, 60000, 20000);
-        AssertEqual(true, edge.IsValid, "small but playable border field");
-        AssertEqual(400f, edge.CenterX, "border handling never moves summon center");
-        AssertEqual(400f, edge.CenterY, "border handling never grounds the field");
-        AssertEqual(32f, edge.Left, "world margin preserved");
-        AssertEqual(32f, edge.Top, "upper world margin preserved");
-        var bottom = SamuraiArenaBounds.Create(59600, 19600, 60000, 20000);
-        AssertEqual(59968f, bottom.Right, "right world margin");
-        AssertEqual(19968f, bottom.Bottom, "bottom world margin");
-        AssertEqual(false, SamuraiArenaBounds.Create(10, 10, 60000, 20000).IsValid, "unplayable world-edge summon rejected before spawn");
-        AssertEqual(false, SamuraiArenaBounds.Create(300, 300, 60000, 20000).IsValid, "field cannot shrink until the inner circle is unavoidable");
+        foreach (var point in new[] { (400f, 3000f), (4000f, 400f), (59600f, 19600f), (10f, 10f), (3000f, 19990f) })
+            AssertEqual(false, SamuraiArenaBounds.Create(point.Item1, point.Item2, 60000, 20000).IsValid, "reject before spawning; no shrinking or buried downward shift");
+        var top = SamuraiArenaBounds.Create(1312, 1152, 60000, 20000);
+        AssertEqual(true, top.IsValid, "full field fits at margins");
+        AssertEqual(32f, top.Left, "left margin");
+        AssertEqual(32f, top.Top, "top margin");
+        AssertEqual(2560f, top.Right - top.Left, "width unchanged");
+        AssertEqual(1120f, top.Bottom - top.Top, "height unchanged");
     }
 
     [DomainTest("Ghost Samurai arena wire preserves exact frozen geometry and rejects malformed or truncated bounds")]

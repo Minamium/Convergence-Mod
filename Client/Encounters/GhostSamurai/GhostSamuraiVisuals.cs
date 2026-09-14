@@ -40,6 +40,23 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
         batch.Draw(texture, root, GhostSamuraiArt.Body, tint, 0, GhostSamuraiArt.BodyPivot,
             GhostSamuraiArt.Scale, SpriteEffects.None, 0);
         DrawArm(1);
+        if (boss.Attack == SamuraiAttack.Phase2DashSlash && boss.TransitionRemaining == 0)
+        {
+            float remaining = GhostSamuraiRules.DashApproach + GhostSamuraiRules.DashWarning
+                - boss.VisualAttackTimer % GhostSamuraiRules.DashCadence;
+            if (remaining > 0 && remaining <= GhostSamuraiRules.DashVisualCueTime)
+            {
+                // A local-to-body closing ring is the actual dodge cue. The
+                // earlier shout only announces preparation; no full-screen flash.
+                float progress = 1 - remaining / GhostSamuraiRules.DashVisualCueTime;
+                Color cue = remaining <= GhostSamuraiRules.DashAimLockTime
+                    ? new Color(255, 248, 201) : new Color(255, 178, 55);
+                Ring(batch, root, 128 - progress * 48, 7, new Color(5, 12, 28));
+                Ring(batch, root, 128 - progress * 48, 3, cue);
+                Stroke(batch, root + new Vector2(-30, -75), root + new Vector2(-10, -75), 4, cue);
+                Stroke(batch, root + new Vector2(10, -75), root + new Vector2(30, -75), 4, cue);
+            }
+        }
         if (boss.TransitionRemaining > 0)
         {
             float t = 1 - boss.TransitionRemaining / (float)GhostSamuraiRules.TransitionTime;

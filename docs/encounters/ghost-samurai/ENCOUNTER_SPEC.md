@@ -26,15 +26,15 @@ related_docs:
 
 ## 呼び出しと戦闘範囲
 
-作業台で **骨10個＋星5個 → 鬼武者の弔い鈴**。消費せず繰り返し使用できる。広い空間で呼び出す。今回はユーザーが選んだ召喚アイテム方式であり、集合・Ready・Raid Down/蘇生は付けない。フィールドは下記の召喚者中心方式で自動展開する。通常のHP・死亡を使う。戦利品・進行条件・最終バランスは今回の範囲外。
+作業台で **骨10個＋星5個 → 鬼武者の弔い鈴**。消費せず繰り返し使用できる。広い空間で呼び出す。今回はユーザーが選んだ召喚アイテム方式であり、集合・Ready・Raid Down/蘇生は付けない。フィールドは下記の召喚者足元基準で自動展開する。通常のHP・死亡を使う。戦利品・進行条件・最終バランスは今回の範囲外。
 
 保存上の識別子は `Convergence/GhostSamuraiSummon` を維持する。Modの無効化・読み込み失敗でUnloaded Itemになった場合、tModLoader標準の保存情報には元のMod名・アイテム名が残る。原因を修正してModを有効化し、同じキャラクター／ワールドを読み込み直すことで復元する経路を使い、独自の置換アイテムやセーブ編集は行わない。
 
-召喚受付時の使用者中心に **2560×1120px（横160×縦70タイル）** のフィールドを固定して展開する。First Severanceと同じ基準サイズ・全身の内側補正方式を使うが、地面やCoreではなく使用者のX/Yを中心にする。世界端では中心を動かさず左右／上下を対称に縮める。極端な端で有効な空間を作れない場合は召喚を拒否する。タイルの設置・削除・地形整備はしない。
+サーバーが召喚した本人の player.Bottom を記録し、足元を下端中央として2560×1120px（160×70タイル）を左右と上へ展開する。中心Yは足元より560px上。サイズは変更せず、全サイズが世界境界内に収まらない場所では召喚を拒否する。地面探索・自動縮小・タイル変更はしない。
 
 フィールド内の生存プレイヤーと後から入った人を対象とする。外にいる人を強制集合させず、ターゲットと被弾対象はフィールド参加者だけにする。移動・ダッシュ・フック・マウント・ノックバック・テレポート後の全身を内側へ無傷で補正する。補正先が地形に埋まる場合は、記録済みの直近の安全な内側位置を優先する。サーバーが補正し、ローカル参加者だけが同じ境界で予測補正する。無限飛行や地形変更は追加しない。
 
-青白い外枠と内向きの短い目盛りが移動可能範囲。フィールド座標は戦闘中に動かず、全フェーズで共有する。死亡・切断で本人の制限を解除し、再入場は通常のフィールド進入で扱う。戦闘終了・世界終了は同じFightの制限を全解除する。生存参加者がいない状態が3秒続くと退場する。その猶予中は攻撃を消して停止し、参加者が戻る場合はインターバルから再開する。
+青白い外枠は全フェーズ固定。死亡・切断で本人の制限を解除する。生存参加者がゼロになったサーバー更新で即時敗北を確定し、旧3秒猶予を廃止する。対象者だけの死亡・退出なら他の生存参加者へ狙い直す。戦闘外の観戦者だけでは継続しない。
 
 召喚要求は既存の EncounterCoordinator を使う。`EncounterKind.Boss` の独立した `ghost_samurai` 定義なので、既存Raidとの同時起動を同じ共通機構で拒否する。依存ライブラリは現行版を維持する。
 
@@ -47,9 +47,9 @@ related_docs:
 | 攻撃 | 予告と処理 |
 |---|---|
 | 二連斬撃×4セット | 元の `DirectionalSlash` を維持し、各セットの2発目は刀の向きを90度変える。8発それぞれ現在のターゲット位置をロックして54tick予告→10tick判定。予告開始は0/12/48/60/96/108/144/156tick、発射は54/66/102/114/150/162/198/210tick。セット内12tick（0.2秒）、2発目から次セットまで36tick（0.6秒）。判定は重ならず、最大4本の予告が共存する。最後の判定が220tickで終わり、18tickの余韻後238tickでIdleへ戻る。刀の動作も8発の発射時刻から連続的に求める。 |
-| 溜め大斬撃 | 48tickの位置調整後、初回予告192tick。ボスは振り抜くが突進せず、斬撃波を前方へ発射する。第1フェーズは1発、第2・第3は3発。発射間隔90tick、2発目予告30tick・3発目48tick、通常攻撃の発射240/330/420tickを維持。予告中は現在のターゲット方向を追い、4tick前に固定。波は24px/tick、進行方向64px×直交方向480px、通常90tick存続。最後の波が消えてから余韻18tickを置き、次の主攻撃へ進む。 |
-| 格子→大斬撃 | 開始0tickにターゲット中心・全身の当たり判定を一度記録し、ボス位置と初弾の方向を固定する。同時に長い168tickの波予告を開始。飛翔に要する整数tickをFとし、波発射168、基準地点への最初の接触168＋F、格子発動108＋F、格子予告開始24＋Fと逆算する。格子は84tick予告・12tick判定、2520px四方・間隔180px・縦横15本・線幅68px・隙間112pxを維持。第2・第3の後続波は258/348tick発射で、通常どおり直前追尾する。 |
-| 第2フェーズ横断斬撃 | 左右900pxの構え位置へ48tick移動→54tick予告→18tickで1800px突進→余韻18tick、左右交互に3回。現在位置・速度の追跡後、発動18tick前に方向を固定して叫び声を鳴らす。0.3秒の反応時間を経て突進する。平均100px/tick、ピーク150px/tick。ダメージは116×170px本体が実際に通過した部分だけ。斬撃帯・残像・予告線は無害。 |
+| 溜め大斬撃 | 48tick位置調整後、初撃予告192→132tick。P1は1発、P2/P3は3発。ユーザー確認により後半予告30/48tickを維持し、発射180/270/360tick、間隔90tick。発射4tick前まで追い、以後直進。本体は突進せず波のみ標準Projectileダメージ60。速度24px/tick、64×480px、通常寿命90tick。最終波終了後18tick余韻。 |
+| 格子→大斬撃 | 格子30本、84tick予告・12tick判定、2520px四方・間隔180px・線幅68px・隙間112pxを維持。初弾最低予告168→108tick。格子と波の予告を重ね、格子発動＋60tickを到達目標として現在の全身矩形から発射時刻を逆算する。初弾も直前4tickまで追う。後続波は実際の初弾発射から90/180tick後。急移動時の制約は下記。 |
+| 第2フェーズ横断斬撃 | 左右900pxの構え位置へ追従。開始24tickに予告・叫び、90tickに収束リング、98tickに狙い固定、102tickに突進。予告78tick／移動21tick／余韻18tick、左右交互に3回。位置＋上限48px/tickの速度から短時間予測し、突進後は旋回しない。1800pxの平均100→85.714px/tick、ピーク150→128.571（約14.29%減）。116×170px本体の実移動区間だけが接触判定、斬撃帯は無害。 |
 
 第2フェーズの元の3攻撃には、主斬撃開始の18tick後から鬼火が現れる。元の発生機会2回に対して3群出すため、Fight内で1群／2群を交互に予約し、追加群は18tick遅らせる。二連斬撃は1セットを元の1機会と数えるため、4セットで計6群（旧4群）。大斬撃3発全体／格子と追撃全体はそれぞれ元の1機会とし、連撃の追加と鬼火倍率を二重に掛けない。横断には従来どおり鬼火を足さない。鬼火は発生地点から30tick（0.5秒）、3.5px/tickで放射状に拡散する。この間は無害で、プレイヤー方向への補正はしない。群ごとにランダムな回転、各方向に±0.18radの揺らぎを加える。その後は命中可能となり、現在のボスのターゲットへ、目標速度4.5px/tick・毎tickの速度補間率0.035で緩やかに追尾する。追尾区間は180tick。発生から最大3.5秒で消える。
 
@@ -67,17 +67,17 @@ related_docs:
 | 移行休止 | `TransitionTime = 90` tick。攻撃を全消去し、無敵の青い輪を表示 |
 | 攻撃間隔・余韻 | `AttackIntervalPhase1 = 36`、`AttackIntervalPhase2 = 24`、`RecoveryTime = 18` tick |
 | 二連斬撃 | `SlashWarning = 54`、`DirectionalSlashInterval = 12`、`DirectionalPairInterval = 48`、`DirectionalPairCount = 4` |
-| 溜め斬撃 | ChargeAimTime = 48、ChargeWarning = 192、ChargeSecondWarning = 30、ChargeThirdWarning = 48、ChargedSlashInterval = 90、AimLockLead = 4。SamuraiWaveRules の ChargedSlashWaveSpeed = 24、ChargedSlashWaveWidth = 64、ChargedSlashWaveHeight = 480、WaveLife = 90 |
-| 格子 | GridWarning = 84、GridWidth = GridHeight = 2520、GridSpacing = 180、GridHalfWidth = 34、GridFollowStart = 0、GridFollowWarning = 168、GridToChargedSlashHitInterval = 60。縦横15本 |
-| 横断 | `DashDistance = 1800`、`DashStandOff = 900`、`DashApproach = 48`、`DashRetreatSpeed = 38`、`DashWarning = 54`、`DashLive = 18`、`DashShoutDelay = 18` |
+| 溜め斬撃 | ChargeAimTime48、ChargeWarning132、ChargeSecondWarning30、ChargeThirdWarning48、ChargedSlashInterval90、AimLockLead4、ChargedSlashDamage60。波速度24、幅64、高さ480、WaveLife90 |
+| 格子 | GridWarning84、GridWidth/Height2520、GridSpacing180、GridHalfWidth34、GridFollowWarning108（最低）、GridToChargedSlashHitInterval60、縦横15本 |
+| 横断 | DashDistance1800、DashAttackSpeed1800/21、DashStandOff900、DashApproach24、DashRetreatSpeed38、DashWarning78、DashLive21、DashShoutDelay78、DashVisualCueTime12、DashAimLockTime4 |
 | 鬼火 | `WispBursts`、`WispBurstInterval = 18`、`WispDelay = 18`、`SpreadDuration = 30`、`SpreadSpeed = 3.5`、`HomingSpeed = 4.5`、`HomingStrength = .035`、`WispLife = 180`、`MaximumWisps = 18` |
-| 生ダメージ | 斬撃260／溜め380／格子280／鬼火200。通常の防御・軽減処理に入力する |
+| 生ダメージ | 斬撃260／溜め60（テスト用、旧380）／格子280／鬼火200。通常の防御・軽減処理に入力 |
 
 HP33%以下のPhase3では既存4攻撃に円形攻撃を追加し、直前の攻撃を除いて選ぶ。致死攻撃でも移行前はHP1で保持し、各フェーズ境界を順に通す。
 
 ## 第3フェーズ：内外円形攻撃
 
-ユーザーの円形イラストに沿い、攻撃開始時のターゲット位置を一度だけ記録する。全4段で中心は動かない。赤い内側円の半径は **240px**、青い外側は **240〜2800px** の有限ドーナツ。今回の広域案24000pxから縮小した。フィールドの対角線は約2795pxなので、円の中心がフィールド端にある場合も全域を覆い、外周へ逃げ切る場所を作らない。表示はフィールド境界でクリップし、外側の人を攻撃対象にしない。有限の円の判定を維持し、正規の回避は内側へ戻ることとする。境界に体が重なる場合は命中するため、体全体を安全側へ移す。
+円形は開始時のターゲット位置を4段とも固定する。内側半径240px、外側半径2800→5600px。有限ドーナツの外では判定せず、フィールド全域を覆う。表示はフィールド境界へクリップし、非参加者は被弾させない。正規回避は外→内→外→内で、体全体を安全域へ移す。
 
 | STEP | 危険区域 | 予告開始／発動／判定終了（攻撃開始からのtick） | 表現 |
 |---|---|---|---|
@@ -92,17 +92,17 @@ HP33%以下のPhase3では既存4攻撃に円形攻撃を追加し、直前の�
 
 通常の斬撃波は発動4tick前まで現在のターゲット方向を追い、発射後は旋回しない。ボス本体に大斬撃の接触ダメージを付けず、飛ぶ64×480pxの長方形だけが標準Projectileダメージを持つ。予告の破線は飛翔経路、実体の縁は現在の判定範囲。既存の無敵時間・回避フックを使って接触時に抜ける狙いであり、無敵時間を持たないダッシュへ新たな無敵を与える処理はない。
 
-格子後の初弾だけは前倒し予告と正確な到達時刻を両立するため、開始時のターゲット位置と全身の矩形を固定基準にする。24px/tickの離散移動と波の先端を含む矩形衝突から、最初に基準の全身矩形へ触れるFを求める。格子発動からその到達までは**厳密に60tick**。移動したプレイヤーへ必ず命中させる意味ではなく、移動後の実際の接触時刻は変わる。遠距離の基準では初弾の寿命をF＋24tickまで延長し、到達前に消さない（通常90tick以上、対象距離4000px以内で上限210tick内）。
+格子後初弾は不変の到達目標ArrivalTickを持つ。開始時に最低108tickの波予告と84tickの格子予告が両立する時刻を決め、格子発動60tick後を目標とする。現在のボス位置→対象全身矩形へ24px/tickで初接触する整数時間Fから、発射をArrivalTick−Fへ更新する。発射4tick前に位置・方向・発射時刻をまとめて固定する。通常波と追跡対象・照準・固定猶予は共通で、初弾だけ発射時刻も更新する。
 
-例：ボスから水平方向900px、通常20×42pxのターゲットではF＝36。攻撃開始0に168tickの波予告、60に84tickの格子予告、144に格子判定開始、156に格子判定終了、168に刀の振り抜きと波発射、180に振り抜きの余韻へ、204に波の先端が基準の当たり判定へ到達する。**204−144＝60tick**。全員への到達を同時に強制せず、選ばれた1人の基準を使う。
+例：水平距離900pxを維持する20×42pxの対象はF＝36。両予告0、格子発動84、格子終了96、狙い固定104、波発射108、基準矩形接触144で、144−84＝60tick。静止／同相対距離での移動は距離0〜3950px・32方向で検証。直前の遠距離テレポート・急移動・対象交代では、過去の発射や弾速増加を行わず、最低予告・4tick固定を優先するため到達が遅れる場合がある。発射後に相手が動けば実接触も変わる。GridWaveLockedログに格子発動・実発射・固定時の基準到達を記録する。
 
-横断突進だけは現在位置・速度から短い到達予測を毎tick更新する（速度上限48px/tick）。発動18tick前に完全固定して叫ぶ。以後は追尾せず、聞いてから横へ抜ける0.3秒を設ける。Runtimeが18tickの本体移動を116×170pxで掃引し、サーバーの既存Player.Hurt経路で一度だけ適用する。接近・予告・余韻・中断時や、遠くの斬撃帯は無害。実装備と通信遅延での避けやすさは試遊で確認する。
+横断は位置・速度（上限48px/tick）から短時間予測を更新する。発射78tick前の叫びは準備合図。12tick前から本体へ収束する暗縁付き金色リングと目の強調を出し、4tick前に淡い金色へ変えて固定する。以後は旋回せず21tick横断。本体移動を掃引し、既存サーバーPlayer.Hurt経路で一度だけ判定。接近・叫び・予告・余韻と斬撃帯は無害。ボス側へダッシュしてすれ違う操作、装備固有回避・通信下の反応余裕は試遊で確認する。
 
 ### 効果音
 
-斬撃は全8連撃・格子・斬撃波各発・横断各発・円形4段（かまいたちを含む）の**発動時刻**に共通 SoundID.Item1（Volume .9、Pitch .25）を鳴らす。横断固定時の叫びは SoundID.ScaryScream（Roar_2、Volume .9、Pitch .2）。差し替え先は GhostSamuraiAudio の SlashSound / DashShoutSound。既存の3回の溜めチャイム Item4 は波予告に残す。
+全8連撃・格子・横断・円形4段（風を含む）は発動時にSlashSound＝SoundID.Item1（Volume .9、Pitch .25、MaxInstances6）。波はChargedSwingSound＝Item1（Volume1、Pitch−.3、MaxInstances3）を実発射時に鳴らす。叫びはScaryScream（Roar_2、Volume .9、Pitch .2、MaxInstances3）で、同じ突進の発射を基準に旧18→78tick前へ60tick早める。Item4の3チャイムは初期予告内の固定時刻で鳴らし、発射予定変更で再演しない。
 
-音の所有者はクライアント/SPの GhostSamuraiAudio.PostUpdateEverything だけ。Fight・音種・発動tickでまとめ、格子30本でも1回。最大4tickの小さな遅れのみ救済し、途中参加前や古いスナップショットの攻撃は再生しない。最終照準未受信なら叫び／発動音を待ち、古い照準を音で確定したように扱わない。専用サーバーはPlaySoundを呼ばず、終了・世界終了・Unloadで履歴を消す。
+音の所有者はGhostSamuraiAudio.PostUpdateEverythingのみ。Fight・音種・時刻で重複を抑え、格子30本は1音。同時の格子と波は別種として保持。4tick以内の遅着のみ救済し、参加前の履歴を再演しない。発動音は最終照準受信後、準備の叫びはロック前にも鳴る。終端Replicaで遅れたNPC削除を待たず攻撃表示と音を停止する。Dedicated Serverでは無音、終了／世界終了／Unloadで履歴解除。
 
 ## 判定、同期、後始末
 
@@ -110,8 +110,8 @@ HP33%以下のPhase3では既存4攻撃に円形攻撃を追加し、直前の�
 - サーバー／SPが乱数、ロック位置、フェーズ、攻撃生成・時刻・後始末を所有する。斬撃波のみはユーザーの標準Projectile指定に従う [ADR-0023](../../adr/0023-ghost-samurai-native-wave-damage.md) の狭い例外：ネイティブProjectile.Damageで各ローカル参加者の無敵／FreeDodge／ConsumableDodgeを処理する。Runtimeの手動Hurt対象から波を明示的に除外し、二重被弾を防ぐ。その他は従来どおりサーバーが長方形／鬼火／内外円／本体掃引を判定してHurtInfoを送り、受信側は命中を再判定しない。
 - ボスは `SendExtraAI` / `ReceiveExtraAI` でFight GUID、時計、状態、最大HPとフィールド中心X/Y・半幅・半高さ（計16byte）を同期。不正な数値・サイズ、同じFightの境界変更、サーバーへの逆方向更新を拒否する。15tickごとと状態変更時に `netUpdate`。クライアントの時計は表示と標準斬撃波の現在位置に使い、受信が止まると30tickで停止する。ネイティブProjectile更新がRuntimeのPostUpdateWorldより先に来るSP/server側だけ、波の処理時刻を前回Age＋1として同じtickに合わせる。
 - 各Projectileに同じFight GUID、所有NPCスロット、固定予告開始／発射／終了時刻と幾何を付ける。ExtraAIは有限数値・方向・時刻・幅・所有者の上限を検証する。クライアント由来のProjectile情報はサーバーの戦闘に採用しない。
-- 斬撃の初期幾何と時刻は不変の識別情報として維持し、現在の位置・方向・更新tick・ロックtickは `SamuraiSlashAim` の24byte完全状態で同期する。OnSpawnの段階で初期状態を設定し、初回SyncProjectileより後にロック時刻を差し替えない。動く予告は3tickごととロック時に送信。クライアントはローカルなターゲットから狙わず、受信した同じ幾何を描画する。別Fight／所有者／初期幾何／ロック時刻、古いtick、同tickの矛盾、範囲外データを拒否する。ロックの最終更新だけでも途中参加・中間更新欠落から復元できる。最終更新が届かないまま発射時刻を過ぎたクライアントは、古い位置に実斬撃を描かない。実通信下の猶予は別途確認する。
-- 円形の中心・内外半径・全時刻は4個の不変Projectileへ同時に記録し、途中参加でも復元する。円形には可変照準を送らない。突進表示には24byte照準状態を使い、クライアント本体も受信した確定軌道と同じ時計から表示位置を求める。
+- 斬撃の初期幾何と時刻は不変の識別情報として維持し、現在の位置・方向・更新tick・ロックtickは `SamuraiSlashAim` の28byte完全状態（発射tickを含む）で同期する。OnSpawnの段階で初期状態を設定し、初回SyncProjectileより後にロック時刻を差し替えない。動く予告は3tickごととロック時に送信。クライアントはローカルなターゲットから狙わず、受信した同じ幾何を描画する。別Fight／所有者／初期幾何、通常攻撃のロック時刻、古いtick、同tickの矛盾、範囲外データを拒否する。ロックの最終更新だけでも途中参加・中間更新欠落から復元できる。最終更新が届かないまま発射時刻を過ぎたクライアントは、古い位置に実斬撃を描かない。実通信下の猶予は別途確認する。
+- 円形の中心・内外半径・全時刻は4個の不変Projectileへ同時に記録し、途中参加でも復元する。円形には可変照準を送らない。突進表示には28byte照準状態を使い、クライアント本体も受信した確定軌道と同じ時計から表示位置を求める。
 - 鬼火の位置・速度・更新tickは `SamuraiWispMotion` の20byteの完全状態として同じExtraAIに付ける。Runtimeが1tickに1度、サーバーのターゲットから速度と位置を更新して命中判定する。6tickごとの送信を個体ごとにずらし、発生・追尾開始時にも送る。クライアントは受信した速度を最大6tickだけ表示用に外挿し、古いtick、異なるFight・所有者・幾何の更新を拒否する。ローカルなターゲット追尾や命中判定はしない。
 - 移動制限は本人のModPlayerにだけ置く45tickの期限付き状態で、Fight GUID＋所有NPCインスタンスを照合する。サーバーが毎tick再認定し、クライアントは共通Replicaの同じ生存Fightと45tick以内のNPCスナップショットがある場合だけ予測補正する。切断・再初期化・死亡・終端で消し、別接続や再利用NPCに引き継がない。補助の標準移動送信は6tick、サーバー補正送信は最短12tick間隔。壁へ出ようとし続けても毎tick通信しない。
 - 召喚要求は保持アイテム・生存・共通セッション・接続単位nonce・頻度を検証する。既存の順序付きスナップショットで古いセッションと終端後の再適用を拒否する。
@@ -123,20 +123,20 @@ HP33%以下のPhase3では既存4攻撃に円形攻撃を追加し、直前の�
 
 `GhostSamurai event=...`で`SummonRequested`、`SummonAccepted`／`SummonRejected`、`CombatStarted`、`PhaseChanged`、`CombatEnded`、受信側の`ClientLifecycle`／`ClientIdle`を記録する。サーバー拒否は失敗コードを残し、nonce・Fight・Sequenceで対応を追える。要求送信前に鈴が使用不可なら`SummonBlocked`が生存・待機状態・本体残存の理由を記録する（ローカルで最大2秒に1回）。これは開始・終了の診断であり、攻撃別DPS集計の実装ではない。
 
-### Lifecycle handoff — 2026-09-14
+### 終了処理と2026-09-14の不具合
 
-The latest [0.2.75 playtest summary](../../evidence/2026-09-14-playtest-0275.json) contains **no Ghost Samurai fight events**. It therefore does not establish another end-flag/re-summon failure. It does establish `IndexOutOfRangeException` in `GhostSamuraiContainmentSystem.OnWorldUnload` → `Player.GetModPlayer`, followed by tML's unload-error warning. The Doll task records the evidence here; Ghost Samurai's owning task must implement and verify the fix.
+[0.2.75記録](../../evidence/2026-09-14-playtest-0275.json)にはこのボスの戦闘ログはないが、未初期化PlayerへのGetModPlayerによる世界終了例外がある。Runtime.Cleanupにも同じ全スロット参照があり、敗北・勝利の掃除を中断し得た。移動制限を受け取ったModPlayerだけを台帳へ登録し、同じFightだけ解除する方式へ変更する。空Player配列／未登録ModContent／未召喚でも不足情報を参照・生成しない。Clear・Disconnect・Initializeで台帳から除去し、世界／Mod終了は全解除する。
 
-The current unload loop visits every `Main.player` slot with `player?.GetModPlayer<GhostSamuraiContainmentPlayer>().Clear()`. A non-null Player can still have an empty/uninitialized ModPlayer array. A null guard or checking only whether a boss exists is not sufficient. Pinned tModLoader [Player.TML.cs](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Player.TML.cs#L95-L125), checked 2026-09-14, shows that `GetModPlayer` directly indexes that array; the `TryGetModPlayer(baseInstance, out result)` overload bounds-checks it. Use a known registered base instance and a safe lookup when clearing existing players, or track only initialized owned instances. Do not instantiate missing players during teardown. If types themselves have unloaded, avoid querying ModContent for an instance at that stage; ordinary per-instance reset and world-system teardown must each be safe and idempotent. This is a mitigation design, not a claim of an applied fix.
+勝利・全滅とも既存Coordinatorの共通Cleanupへ到達する。斬撃、格子予告、波、鬼火、円形4段、横断演出は同じProjectile型をFight GUIDで走査して削除する。本体はFight＋NPCインスタンス一致時だけ削除し、移動制限とRuntime参照を解除。終端通知→Cleanup成功→新しいIdleを維持し、例外を握り潰して再召喚可能にしない。独立したbossActiveフラグは追加しない。
 
-Keep these contracts when repairing or extending the encounter:
+### ターゲット固定と被ダメージ
 
-- Authority ends the exact Fight, publishes its terminal projection, completes owned cleanup, then publishes the newer `Idle`. Client summon gating must consume that Idle; clearing only a local `bossActive` flag does not release the server session. Preserve the existing [runtime/cleanup ownership](../../ARCHITECTURE.md), not a second independent end flag.
-- Failed cleanup remains diagnosable and blocks a new encounter until resolved. Never swallow the exception and declare the session ready while owned resources remain.
-- Match Fight GUID, sequence/revision and exact NPC instance, not just a reused array slot. A late terminal/Idle or an old projectile must not clear or resurrect the next Fight. Terminal handling, death and disconnect paths must be safe when repeated.
-- Clear containment, replicas and audio/visual caches on the relevant disconnect/world boundary. Unused player slots and a world with no Samurai summon must unload without exceptions. Do not retain movement leases into a new connection or world.
+初期対象は召喚者。サーバーは参加者のactive/dead/ghostと接続世代を確認し、生存対象を距離で切り替えない。死亡・退出・接続世代変化時だけ生存参加者から最寄りを選ぶ。同slotへの再接続は旧ロックを継承しない。NPC.targetと2byte追加のLockedTargetをExtraAIで同期し、クライアントでは対象を選ばない。追跡中の波・横断・鬼火は新対象へ向け、既に固定／発射済みの攻撃や円形中心は曲げない。
 
-Focused evidence for the owning task: unload without a summon (including unused server slots); victory and retreat/defeat followed by a second summon; disconnect/rejoin and reused player/NPC slots; delayed old terminal/Idle after a new Fight; cleanup failure followed by a successful retry. Correlate `SummonRequested/Accepted/Rejected`, `CombatEnded`, `ClientLifecycle/ClientIdle` and `SummonBlocked` by Fight/sequence, rather than diagnosing from the button alone. Do not rerun unrelated Doll combat for this fix. The separate SubworldLibrary shutdown stream error in the same capture is not evidence that this exception caused save corruption.
+Itemのplayer.whoAmI、Projectileのowner（Minion/Sentry含む）を使う。標準ModifyHitByItem／ModifyHitByProjectileで受信したLockedTargetと比較し、対象外のみHitModifiers.FinalDamageへ0.5倍を追加する。本人／Single Playerは1.0倍。所有者不明・無効／非activeなowner・ロック未確定は半減しない。防御・会心・貫通経路を維持する。NPCへの通常攻撃は攻撃者側の標準tMLフックで計算され、未受信の対象変更や第三者Modが直接StrikeNPCする攻撃まで再計算するものではない。
+
+API確認（2026-09-14、固定source666f69962d3bdffde54fc14025f02634965b4e7c）：
+[ModNPCフック](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModNPC.cs) と [FinalDamage](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/NPC.TML.Hit.cs) が倍率の根拠。[Player.TML.cs](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Player.TML.cs) の直接配列参照を踏まえ、後片付けでは既知インスタンスのみ使う。第三者実装の取り込みなし。
 
 ## 表示と素材
 
@@ -152,9 +152,9 @@ Focused evidence for the owning task: unload without a summon (including unused 
 
 ## 検証と試遊
 
-自動チェックはフェーズ境界・非連続選択・予告と判定・1〜4人分の112px格子隙間・鬼火・同期値の往復と不正入力を維持。変更部分は、距離0〜3950px・32方向で格子発動→基準矩形到達60tick、波の有限移動矩形・予告／終了時の無害、手動Hurtと本体接触の対象外、18tick固定猶予、音の重複／途中参加／履歴上限、召喚者中心の固定フィールド・1〜4人の全身補正・世界端・16byte境界スナップショットと円の全フィールド被覆を確認する。
+自動検証は既存攻撃境界に加え、全滅／一人生存／接続世代、対象別倍率、足元基準同サイズ境界、可変発射と最終ロック、同期値の往復・不正入力を対象とする。実パッケージのGlobal登録・召喚型・exact-Fight解除・未初期化Player/ModContentでの繰り返し世界／Mod終了をヘッドレス確認する。実ゲームでの終了成功や描画品質とは区別する。
 
-ユーザーの試遊：P1/P2大斬撃で本体が突進しない、波に無敵時間を持つ装備で触れて抜けられる、P2横断は叫び→0.3秒→突進、格子後の二段階回避、P3の外→内→外→内。通常のダッシュ全てに無敵があるとは扱わない。マルチプレイは最終照準・音・波の位置を比較し、途中参加／移行／全滅後の再召喚で残留がないことを見る。GUI・試遊はユーザー担当。召喚地点からフィールドが動かないこと、四辺での移動／ダッシュ／テレポート補正、死亡／終了時解除、途中参加・再接続・同スロット再利用、円形の描画が外枠を越えないことも確認する。
+試遊：ソロ死亡／2〜4人の一人死亡と全滅／討伐→再召喚、未召喚での世界出入り、途中退出・再接続。非対象が接近しても狙いが変わらず、本人／他人のItem・弾・Minion・Sentryの倍率が1.0／0.5になること。足元から上へ同サイズの枠、円形の外→内→外→内、波の直前追跡・低ダメージ・ダッシュ、格子後約1秒、早い叫びと直前リングを確認する。全員同じversion／protocol38を使う。GUI・ゲーム／サーバー起動はユーザー担当。
 
 API確認の根拠
 

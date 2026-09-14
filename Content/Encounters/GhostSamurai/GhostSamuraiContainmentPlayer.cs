@@ -1,5 +1,7 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Networking.Replication;
 using Microsoft.Xna.Framework;
@@ -13,6 +15,10 @@ namespace Convergence.Content.Encounters.GhostSamurai;
 // players on entering the field; only that local owner predicts its edge clamp.
 public sealed class GhostSamuraiContainmentPlayer : ModPlayer
 {
+    // Track only instances that actually received a lease. Teardown must never
+    // index ModPlayer arrays belonging to unused/uninitialized Main.player slots.
+    private static readonly HashSet<GhostSamuraiContainmentPlayer> leased = new();
+    internal Guid Connection { get; private set; } = Guid.NewGuid();
     private GhostSamuraiBoss? boss;
     private Guid fight;
     private ulong expires, lastCorrection, lastSent;
@@ -24,7 +30,7 @@ public sealed class GhostSamuraiContainmentPlayer : ModPlayer
         && Main.GameUpdateCount < expires && Player.active && !Player.dead && !Player.ghost && FightActive(boss);
     private bool OwnsMovement => Main.netMode == NetmodeID.SinglePlayer
         || Main.netMode == NetmodeID.MultiplayerClient && Player.whoAmI == Main.myPlayer;
-    private static bool FightActive(GhostSamuraiBoss owner)
+    internal static bool FightActive(GhostSamuraiBoss owner)
     {
         if (Main.netMode != NetmodeID.MultiplayerClient) return owner.Runtime is not null && owner.Runtime.Matches(owner);
         var state = ModContent.GetInstance<EncounterReplicaSystem>().Snapshot;
@@ -35,6 +41,7 @@ public sealed class GhostSamuraiContainmentPlayer : ModPlayer
     {
         if (!FightActive(owner) || !owner.Arena.IsValid) return;
         if (!ReferenceEquals(boss, owner) || fight != owner.Fight) { Clear(); boss = owner; fight = owner.Fight; }
+        leased.Add(this);
         expires = Main.GameUpdateCount + 45;
         if (Main.netMode != NetmodeID.MultiplayerClient) Constrain();
     }
@@ -48,10 +55,16 @@ public sealed class GhostSamuraiContainmentPlayer : ModPlayer
         Clear();
     }
     internal void Clear(Guid owner) { if (fight == owner) Clear(); }
-    internal void Clear() { boss = null; fight = Guid.Empty; expires = lastCorrection = lastSent = 0; hasSafe = false; }
-    public override void Initialize() => Clear();
-    public override void OnEnterWorld() => Clear();
-    public override void PlayerDisconnect() => Clear();
+    internal void Clear() { leased.Remove(this); boss = null; fight = Guid.Empty; expires = lastCorrection = lastSent = 0; hasSafe = false; }
+    internal static void ClearAll(Guid? owner = null)
+    {
+        foreach (var instance in leased.ToArray())
+            if (!owner.HasValue || instance.fight == owner.Value) instance.Clear();
+    }
+    private void ResetConnection() { Clear(); Connection = Guid.NewGuid(); }
+    public override void Initialize() => ResetConnection();
+    public override void OnEnterWorld() => ResetConnection();
+    public override void PlayerDisconnect() => ResetConnection();
     public override void UpdateDead() => Clear();
     public override void PreUpdateMovement()
     {
@@ -103,8 +116,6 @@ internal sealed class GhostSamuraiContainmentSystem : ModSystem
         if (Main.netMode == NetmodeID.MultiplayerClient && !Main.gameMenu && Main.LocalPlayer.active)
             Main.LocalPlayer.GetModPlayer<GhostSamuraiContainmentPlayer>().PredictEntry();
     }
-    public override void OnWorldUnload()
-    {
-        foreach (Player p in Main.player) p?.GetModPlayer<GhostSamuraiContainmentPlayer>().Clear();
-    }
+    public override void OnWorldUnload() => GhostSamuraiContainmentPlayer.ClearAll();
+    public override void Unload() => GhostSamuraiContainmentPlayer.ClearAll();
 }

@@ -72,7 +72,7 @@ internal static partial class Program
         var ring = GhostSamuraiRules.CircleStep(1, 0, 0, 0);
         var rush = new SamuraiHazard(SamuraiShape.RushVisual, -900, 0, 1, 0, 2100, 150, 0, 192, 204, 0);
         AssertEqual(true, rush.IsValid, "extended initial warning accepted");
-        foreach (var invalid in new[] { disk with { Length = 1 }, disk with { Radius = 3001 }, ring with { Length = 0 },
+        foreach (var invalid in new[] { disk with { Length = 1 }, disk with { Radius = 6001 }, ring with { Length = 0 },
             ring with { Length = ring.Radius }, ring with { Length = float.NaN }, rush with { Damage = 1 }, rush with { Fire = 301, End = 313 },
             disk with { Born = int.MaxValue, Fire = int.MinValue, End = int.MinValue + 12 } })
         {
@@ -119,7 +119,7 @@ internal static partial class Program
             {
                 float travel = distance * GhostSamuraiRules.RushProgress(tick + 1, duration);
                 float x = -900 + d.DX * travel, y = d.DY * travel;
-                float elapsed = GhostSamuraiRules.DashShoutDelay + tick;
+                float elapsed = GhostSamuraiRules.DashAimLockTime + tick;
                 steadyHit |= GhostSamuraiRules.BodyContact(oldX, oldY, x, y, 0, speed * elapsed, 10, 21);
                 // Change velocity only after lock, perpendicular to the locked line.
                 dashHit |= GhostSamuraiRules.BodyContact(oldX, oldY, x, y,

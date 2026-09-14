@@ -44,7 +44,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     // The default -1 cooldown slot preserves ordinary player immunity and all
     // vanilla / ModPlayer dodge hooks. No forced Hurt or dodge suppression here.
     public override bool? CanDamage() => Hazard.Shape == SamuraiShape.SlashWave && SlashAim.Locked
-        && TryGetAge(out float age) && Hazard.Live(NativeAge(age)) ? null : false;
+        && TryGetAge(out float age) && DisplayHazard.Live(NativeAge(age)) ? null : false;
     public override bool? CanHitNPC(NPC target) => false;
     public override bool CanHitPlayer(Player target) => TryGetAge(out _)
         && Main.npc[BossSlot].ModNPC is GhostSamuraiBoss owner
@@ -61,7 +61,8 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     {
         age = 0;
         if (BossSlot < 0 || BossSlot >= Main.maxNPCs || !Main.npc[BossSlot].active
-            || Main.npc[BossSlot].ModNPC is not GhostSamuraiBoss boss || boss.Fight != Fight || Fight == Guid.Empty) return false;
+            || Main.npc[BossSlot].ModNPC is not GhostSamuraiBoss boss || boss.Fight != Fight || Fight == Guid.Empty
+            || !GhostSamuraiContainmentPlayer.FightActive(boss)) return false;
         age = boss.VisualAge;
         return true;
     }
@@ -73,11 +74,15 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
             if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
             return; // Late NPC synchronization may still arrive on the client.
         }
-        Projectile.hostile = Hazard.Shape == SamuraiShape.SlashWave && SlashAim.Locked && Hazard.Live(NativeAge(age));
+        Projectile.hostile = Hazard.Shape == SamuraiShape.SlashWave && SlashAim.Locked && DisplayHazard.Live(NativeAge(age));
         Projectile.damage = Hazard.Shape == SamuraiShape.SlashWave ? Hazard.Damage : 0;
         Projectile.Center = VisualCenter(Hazard.Shape == SamuraiShape.SlashWave ? NativeAge(age) : age);
         if (Projectile.hostile) Projectile.velocity = new Vector2(DisplayHazard.DX, DisplayHazard.DY) * SamuraiWaveRules.ChargedSlashWaveSpeed;
-        if (Main.netMode != NetmodeID.MultiplayerClient && age >= Hazard.End) Projectile.Kill();
+        if (Main.netMode != NetmodeID.MultiplayerClient)
+        {
+            Projectile.timeLeft = Math.Max(Projectile.timeLeft, DisplayHazard.End - (int)age + 30);
+            if (age >= DisplayHazard.End) Projectile.Kill();
+        }
     }
     internal Vector2 VisualCenter(float age)
     {
@@ -98,6 +103,15 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     {
         if (Main.netMode == NetmodeID.MultiplayerClient || !Hazard.HasAim || SlashAim.Locked) return;
         SlashAim = SlashAim.Advance(Hazard, age, start.X, start.Y, direction.X, direction.Y);
+        Projectile.Center = new(SlashAim.X, SlashAim.Y);
+        if (SlashAim.Locked || age % GhostSamuraiRules.AimSyncInterval == 0) Projectile.netUpdate = true;
+    }
+
+    internal void AimArrival(int age, Vector2 start, Vector2 direction, Rectangle target)
+    {
+        if (Main.netMode == NetmodeID.MultiplayerClient || Hazard.ArrivalTick == 0 || SlashAim.Locked) return;
+        SlashAim = SlashAim.TrackArrival(Hazard, age, start.X, start.Y, direction.X, direction.Y,
+            target.Center.X, target.Center.Y, target.Width * .5f, target.Height * .5f);
         Projectile.Center = new(SlashAim.X, SlashAim.Y);
         if (SlashAim.Locked || age % GhostSamuraiRules.AimSyncInterval == 0) Projectile.netUpdate = true;
     }
@@ -135,7 +149,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
         if (Main.netMode == NetmodeID.Server) return;
         if (Fight != Guid.Empty && (Fight != new Guid(bytes) || BossSlot != slot || Hazard != hazard
             || (hazard.Shape == SamuraiShape.Wisp && !motion.CanReplace(WispMotion))
-            || (hazard.HasAim && !aim.CanReplace(SlashAim)))) return;
+            || (hazard.HasAim && (!aim.CanReplace(SlashAim) || hazard.ArrivalTick == 0 && aim.LockTick != SlashAim.LockTick)))) return;
         Fight = new Guid(bytes); BossSlot = slot; Hazard = hazard;
         WispMotion = motion;
         SlashAim = aim;

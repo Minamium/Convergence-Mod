@@ -11,7 +11,7 @@ internal static partial class Program
     {
         var id = Guid.NewGuid();
         var state = new SamuraiActorSnapshot(id, 100, SamuraiPhase.Phase2, SamuraiAttack.GridSlash, SamuraiBeat.Telegraph, 70, 0, 2_400_000,
-            SamuraiArenaBounds.Create(4000, 4000, 60000, 20000));
+            SamuraiArenaBounds.Create(4000, 4000, 60000, 20000), 3);
         AssertEqual(true, state.CanReplace(Guid.Empty, 0), "initial full state");
         AssertEqual(true, state.CanReplace(id, 99), "new authority time");
         AssertEqual(false, state.CanReplace(id, 101), "old authority time");
@@ -25,7 +25,8 @@ internal static partial class Program
             AssertEqual(true, rejected, "truncated actor packet");
         }
         foreach (var malformed in new[] { state with { Fight = Guid.Empty }, state with { Phase = (SamuraiPhase)255 },
-            state with { AttackTimer = -1 }, state with { TransitionRemaining = 91 }, state with { MaximumLife = int.MaxValue } })
+            state with { AttackTimer = -1 }, state with { TransitionRemaining = 91 }, state with { MaximumLife = int.MaxValue },
+            state with { LockedTarget = 255 }, state with { LockedTarget = -2 } })
         {
             using var packet = new MemoryStream(); malformed.Write(new BinaryWriter(packet)); packet.Position = 0;
             bool rejected = false;
@@ -253,8 +254,8 @@ internal static partial class Program
         }
         AssertEqual(true, GhostSamuraiRules.ChargeThirdWarning > GhostSamuraiRules.ChargeSecondWarning, "third attack has longer tension");
         AssertEqual(-1f, GhostSamuraiRules.ChargePose(0, SamuraiPhase.Phase2, true), "grid's held pose joins follow-up without a snap");
-        AssertEqual(192, GhostSamuraiRules.ChargeWindup(0, false), "first warning gains 120 ticks");
-        AssertEqual(168, GhostSamuraiRules.ChargeWindup(0, true), "grid follow-up also gains 120 ticks");
+        AssertEqual(132, GhostSamuraiRules.ChargeWindup(0, false), "first warning shortened by 60 ticks");
+        AssertEqual(108, GhostSamuraiRules.ChargeWindup(0, true), "grid minimum warning shortened by 60 ticks");
         AssertEqual(30, GhostSamuraiRules.ChargeWindup(1, false), "second warning retained");
         AssertEqual(48, GhostSamuraiRules.ChargeWindup(2, false), "third warning retained");
     }
@@ -265,7 +266,7 @@ internal static partial class Program
         foreach (float width in new[] { GhostSamuraiRules.DashHalfWidth })
         {
             var h = new SamuraiHazard(SamuraiShape.RushVisual, -900, 0, 1, 0, 1800, width, 10, 82, 94, 0);
-            var aim = SamuraiSlashAim.Spawn(h, h.Fire - GhostSamuraiRules.DashShoutDelay);
+            var aim = SamuraiSlashAim.Spawn(h, h.Fire - GhostSamuraiRules.DashAimLockTime);
             for (int tick = h.Born + 1; tick <= aim.LockTick; tick++)
                 aim = aim.Advance(h, tick, -900, tick * 2, 1, 0);
             AssertEqual(true, aim.Locked, "final authority update locks");
@@ -274,7 +275,7 @@ internal static partial class Program
             AssertEqual(aim, aim.Advance(h, aim.LockTick + 1, 4000, 4000, 0, 1), "no late chase after lock");
             AssertEqual(false, final.Hits(h.Fire - 1, 0, aim.Y, 10, 21), "last warning tick stays harmless");
             AssertEqual(false, final.Hits(h.Fire, 0, aim.Y, 10, 21), "locked rush art is harmless");
-            AssertEqual(18, h.Fire - aim.LockTick, "fixed direction allows the shout reaction gap");
+            AssertEqual(4, h.Fire - aim.LockTick, "late visual lock is distinct from early shout");
         }
     }
 
@@ -293,7 +294,7 @@ internal static partial class Program
         foreach (var snapshot in new[] { initial, moving, locked, SamuraiSlashAim.Spawn(h, h.Born) })
         {
             using var stream = new MemoryStream(); snapshot.Write(new BinaryWriter(stream)); byte[] bytes = stream.ToArray(); stream.Position = 0;
-            AssertEqual(24, bytes.Length, "bounded full aim state");
+            AssertEqual(28, bytes.Length, "bounded aim including authoritative release");
             AssertEqual(snapshot, SamuraiSlashAim.Read(new BinaryReader(stream), h), "aim snapshot roundtrip");
             for (int n = 0; n < bytes.Length; n++)
             {

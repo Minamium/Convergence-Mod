@@ -3,7 +3,8 @@
 param(
     [Parameter(Mandatory=$true)][string]$PackagePath,
     [Parameter(Mandatory=$true)][string]$TModLoaderPath,
-    [switch]$ExpectOldFailure
+    [switch]$ExpectOldFailure,
+    [switch]$CheckLifecycle
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -TypeDefinition @'
@@ -50,7 +51,7 @@ public static class GhostSamuraiLoadCheck
         return output.ToArray();
     }
 
-    public static void Run(string package, string loader, bool expectOldFailure)
+    public static void Run(string package, string loader, bool expectOldFailure, bool checkLifecycle)
     {
         var resolver = new AssemblyDependencyResolver(loader);
         var context = new AssemblyLoadContext("GhostSamuraiValidation", isCollectible: true);
@@ -88,6 +89,32 @@ public static class GhostSamuraiLoadCheck
             }
             Type summon = assembly.GetType("Convergence.Content.Encounters.GhostSamurai.GhostSamuraiSummon", throwOnError: true);
             Console.WriteLine("PASS saved item type retained: Convergence/" + summon.Name);
+            if (checkLifecycle) {
+                const string contentPrefix = "Convergence.Content.Encounters.GhostSamurai.";
+                Type leaseType = assembly.GetType(contentPrefix + "GhostSamuraiContainmentPlayer", true);
+                object registry = leaseType.GetField("leased", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+                MethodInfo add = registry.GetType().GetMethod("Add");
+                PropertyInfo count = registry.GetType().GetProperty("Count");
+                FieldInfo fight = leaseType.GetField("fight", BindingFlags.Instance | BindingFlags.NonPublic);
+                MethodInfo clear = leaseType.GetMethod("ClearAll", BindingFlags.Static | BindingFlags.NonPublic);
+                Guid current = Guid.NewGuid(), nextFight = Guid.NewGuid();
+                foreach (Guid id in new[] { current, current, nextFight }) {
+                    object lease = Activator.CreateInstance(leaseType);
+                    fight.SetValue(lease, id); add.Invoke(registry, new[] { lease });
+                }
+                clear.Invoke(null, new object[] { current });
+                clear.Invoke(null, new object[] { current });
+                if ((int)count.GetValue(registry) != 1) throw new Exception("Exact-fight cleanup damaged the next fight");
+                Type systemType = assembly.GetType(contentPrefix + "GhostSamuraiContainmentSystem", true);
+                object system = Activator.CreateInstance(systemType, true);
+                // Main.player and ModContent are deliberately not initialized.
+                // The production teardown must neither index them nor initialize
+                // missing players/types, including a world with no summon.
+                foreach (string hook in new[] { "OnWorldUnload", "OnWorldUnload", "Unload" })
+                    systemType.GetMethod(hook).Invoke(system, null);
+                if ((int)count.GetValue(registry) != 0) throw new Exception("World cleanup left leases");
+                Console.WriteLine("PASS exact-fight leases, repeated world/Mod teardown and uninitialized player/type state");
+            }
             Console.WriteLine("Only type validation executed; full Mod load and item restoration remain user-owned.");
         }
         finally { context.Unload(); }
@@ -96,4 +123,4 @@ public static class GhostSamuraiLoadCheck
 '@
 $package = (Resolve-Path -LiteralPath $PackagePath).Path
 $loader = Join-Path (Resolve-Path -LiteralPath $TModLoaderPath).Path 'tModLoader.dll'
-[GhostSamuraiLoadCheck]::Run($package, $loader, $ExpectOldFailure.IsPresent)
+[GhostSamuraiLoadCheck]::Run($package, $loader, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent)
