@@ -50,22 +50,27 @@ internal sealed partial class GhostSamuraiRuntime
         if (timer >= SamuraiComboRules.MaximumComboTime) { ClearHazards(); FinishAttack(); return; }
         if (timer == 0)
         {
-            float ground = FindComboGround(target);
-            float x = Math.Clamp(target.Center.X + dashSide * SamuraiComboRules.CleaveStandOff,
-                arena.Left + SamuraiComboRules.CleaveStandOff, arena.Right - SamuraiComboRules.CleaveStandOff);
-            combo = new(0, -dashSide, false, npc.Center.X, npc.Center.Y, x, ground - GhostSamuraiRules.BodyHeight / 2f, ground);
+            if (!SamuraiComboRules.TryHorizontalAnchorY(arena, HorizontalBodyClear, out float y))
+            {
+                npc.velocity = Vector2.Zero;
+                FinishAttack();
+                return;
+            }
+            float ground = FindHorizontalGround(y + SamuraiComboRules.HorizontalBodyBelow);
+            combo = new(0, -dashSide, false, npc.Center.X, npc.Center.Y, arena.CenterX, y, ground);
             npc.netUpdate = true;
         }
         npc.velocity = Vector2.Zero;
-        if (timer < SamuraiComboRules.CleaveApproach)
+        int approach = SamuraiComboRules.ApproachDuration(combo);
+        if (timer < approach)
         {
             beat = SamuraiBeat.Approach;
-            npc.Center = Vector2.Lerp(new(combo.FromX, combo.FromY), new(combo.AnchorX, combo.AnchorY), SamuraiComboRules.ApproachProgress(timer));
+            npc.Center = Vector2.Lerp(new(combo.FromX, combo.FromY), new(combo.AnchorX, combo.AnchorY), SamuraiComboRules.ApproachProgress(timer, combo));
             FaceTarget(npc, target);
             return;
         }
         npc.Center = new(combo.AnchorX, combo.AnchorY);
-        int local = timer - SamuraiComboRules.CleaveApproach;
+        int local = timer - approach;
         if (local == 0 && combo.TryAdvance(1, out var next))
         {
             combo = next;
@@ -86,7 +91,8 @@ internal sealed partial class GhostSamuraiRuntime
             combo = shock with { Locked = true }; // Keep the cleave-facing pose through the follow-up.
             for (int side = -1; side <= 1; side += 2)
             {
-                float distance = (side > 0 ? arena.Right - combo.AnchorX : combo.AnchorX - arena.Left) + SamuraiComboRules.ShockWidth / 2;
+                float distance = (side > 0 ? arena.Right - combo.AnchorX : combo.AnchorX - arena.Left)
+                    + SamuraiComboRules.ShockWidth * SamuraiComboRules.HorizontalSlashWaveMaxScale / 2;
                 var h = SamuraiComboRules.Shock(combo.AnchorX, combo.GroundY, side, distance, age);
                 Spawn(h);
                 comboEndAge = Math.Max(comboEndAge, h.End);
@@ -99,19 +105,37 @@ internal sealed partial class GhostSamuraiRuntime
                 ? SamuraiBeat.Strike : SamuraiBeat.Recovery;
     }
 
-    private float FindComboGround(Player target)
+    private bool HorizontalBodyClear(float centerY)
     {
-        // Read at most one field-height column. Tiles/platforms are never edited;
-        // an aerial summon with no floor uses its visible field bottom as the plane.
-        int x = Math.Clamp((int)(target.Center.X / 16), 1, Main.maxTilesX - 2);
-        int first = Math.Clamp((int)MathF.Ceiling((target.Bottom.Y - 2) / 16), 1, Main.maxTilesY - 2);
+        const int padding = 4;
+        int left = (int)((arena.CenterX - SamuraiComboRules.HorizontalBodyHalfWidth - padding) / 16);
+        int right = (int)((arena.CenterX + SamuraiComboRules.HorizontalBodyHalfWidth + padding) / 16);
+        int top = (int)((centerY - SamuraiComboRules.HorizontalBodyAbove - padding) / 16);
+        int bottom = (int)((centerY + SamuraiComboRules.HorizontalBodyBelow + padding) / 16);
+        for (int x = left; x <= right; x++)
+        for (int y = top; y <= bottom; y++)
+            if (HorizontalSolid(x, y)) return false;
+        return true;
+    }
+
+    private static bool HorizontalSolid(int x, int y)
+    {
+        if (x <= 0 || y <= 0 || x >= Main.maxTilesX - 1 || y >= Main.maxTilesY - 1) return true;
+        var tile = Main.tile[x, y];
+        return tile.HasTile && !tile.IsActuated && (Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType]);
+    }
+
+    private float FindHorizontalGround(float bodyBottom)
+    {
+        // One bounded server lookup across the body footprint. No player-local
+        // terrain, arena relocation or tile edits participate in the attack.
+        int left = (int)((arena.CenterX - SamuraiComboRules.HorizontalBodyHalfWidth) / 16);
+        int right = (int)((arena.CenterX + SamuraiComboRules.HorizontalBodyHalfWidth) / 16);
+        int first = Math.Clamp((int)MathF.Ceiling(bodyBottom / 16), 1, Main.maxTilesY - 2);
         int last = Math.Clamp((int)(arena.Bottom / 16), 1, Main.maxTilesY - 2);
         for (int y = first; y <= last; y++)
-        {
-            var tile = Main.tile[x, y];
-            if (tile.HasTile && !tile.IsActuated && (Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType]))
-                return Math.Clamp(y * 16, arena.Top + GhostSamuraiRules.BodyHeight, arena.Bottom);
-        }
+        for (int x = left; x <= right; x++)
+            if (HorizontalSolid(x, y)) return Math.Min(y * 16, arena.Bottom);
         return arena.Bottom;
     }
 }

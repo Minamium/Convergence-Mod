@@ -80,13 +80,38 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             if (boss.Attack == SamuraiAttack.TripleVerticalSlash)
                 angle = side * (.1f + motion + pose * (pose < 0 ? 1.05f : 1.55f));
             else if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave)
-                angle = side * (.1f + motion) + pose * (pose < 0 ? .85f : 1.85f) * boss.Combo.Facing - side * pose * .2f;
+                angle = SamuraiComboRules.HorizontalArmAngle(boss.VisualAttackTimer - SamuraiComboRules.ApproachDuration(boss.Combo),
+                    side, boss.Combo.Facing, side * (.1f + motion));
             Color bladeTint = SamuraiComboRules.IsCombo(boss.Attack) && pose < 0
                 ? Color.Lerp(tint, new Color(255, 237, 183), -pose * .35f) : tint;
             Vector2 pivot = GhostSamuraiArt.ShoulderPivot;
             if (side < 0) pivot.X = GhostSamuraiArt.SwordArm.Width - pivot.X;
+            if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave && side == boss.Combo.Facing)
+            {
+                float local = boss.VisualAttackTimer - SamuraiComboRules.ApproachDuration(boss.Combo);
+                float scale = SamuraiComboRules.HorizontalSwordScale(local);
+                DrawArmPart(GhostSamuraiArt.ArmUpper);
+                DrawArmPart(GhostSamuraiArt.ArmLower);
+                Vector2 joint = GhostSamuraiArt.BladeBase;
+                if (side < 0) joint.X = GhostSamuraiArt.SwordArm.Width - joint.X;
+                Vector2 bladePivot = GhostSamuraiArt.BladeBase - new Vector2(GhostSamuraiArt.Blade.X - GhostSamuraiArt.SwordArm.X, GhostSamuraiArt.Blade.Y);
+                if (side < 0) bladePivot.X = GhostSamuraiArt.Blade.Width - bladePivot.X;
+                batch.Draw(texture, shoulder + ((joint - pivot) * GhostSamuraiArt.Scale).RotatedBy(angle), GhostSamuraiArt.Blade,
+                    bladeTint, angle, bladePivot, GhostSamuraiArt.Scale * scale,
+                    side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
+                return;
+            }
             batch.Draw(texture, shoulder, GhostSamuraiArt.SwordArm, bladeTint, angle, pivot,
                 GhostSamuraiArt.Scale, side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
+
+            void DrawArmPart(Rectangle part)
+            {
+                float x = part.X - GhostSamuraiArt.SwordArm.X;
+                if (side < 0) x = GhostSamuraiArt.SwordArm.Width - x - part.Width;
+                Vector2 offset = new(x, part.Y - GhostSamuraiArt.SwordArm.Y);
+                batch.Draw(texture, shoulder, part, bladeTint, angle, pivot - offset,
+                    GhostSamuraiArt.Scale, side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
+            }
         }
     }
 
@@ -99,7 +124,7 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             case SamuraiAttack.TripleVerticalSlash:
                 return SamuraiComboRules.VerticalPose(t);
             case SamuraiAttack.FrontalCleaveShockwave:
-                return SamuraiComboRules.SwingPose(t - SamuraiComboRules.CleaveApproach, SamuraiComboRules.CleaveWindup, SamuraiComboRules.CleaveLive, SamuraiComboRules.ShockDelay);
+                return SamuraiComboRules.SwingPose(t - SamuraiComboRules.ApproachDuration(boss.Combo), SamuraiComboRules.CleaveWindup, SamuraiComboRules.CleaveLive, SamuraiComboRules.ShockDelay);
             case SamuraiAttack.DirectionalSlash:
                 return GhostSamuraiRules.DirectionalPose(t);
             case SamuraiAttack.ChargedSlash:

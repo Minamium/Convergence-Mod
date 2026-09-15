@@ -770,7 +770,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: af81d22b32380cce33caa6831901ae86c3d93fb158e7ceb363c11c6eaefb96ab
+  content_sha256: 6b2ccf9c08f0a79eb69faf35de2252c3c12528b3fef561526d2fa15a4b23dc47
   document_type: spec
   status: provisional
   owners:
@@ -1196,7 +1196,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 9855f38262c04bfffade0b0bd6477815776ecec6ef85e5c6945ec578af8dd909
+  content_sha256: fbe3cf3fdf980eb8febe877d818106dafd6a90e7d7776efa8625f56b3fa2c768
   document_type: governance
   status: accepted
   owners:
@@ -1241,7 +1241,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: fd560fadefc0bee6c4f8f4c1737e97428f6bf02f070ff398a4f41876f3bb2d04
+  content_sha256: 602d53b356ff14bf4b6c3ad2825b4e3fbfe9b3ba50d67babbbd194588b734cb7
   document_type: status
   status: accepted
   owners:

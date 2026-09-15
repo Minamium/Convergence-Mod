@@ -1,0 +1,69 @@
+{
+  "feature": "Ghost Samurai frontal cleave bottom-center staging, overhead growing blade and expanding ground fronts",
+  "date": "2026-09-15",
+  "version": "0.3.7",
+  "protocol": 41,
+  "base_commit": "c8c2b180fd5926b1dfb8f1ad140b30dda7890fbd",
+  "source_sha256": "d589c6f9c05ef1549a1b7770136e975f8a9448e4c18fc96e21c9f2f247a2e2c6",
+  "source_state": "uncommitted final feature C# with body-tail clearance; final evidence fields written after build; production C# matches manifest",
+  "artifact_sha256": "b5ad3c8e59b7a7bb500083bac610329b6d5b7f112038fca6085e55e71be2a7ad",
+  "assembly_sha256": "e71518574b333bf547a9026889635a12a53966cb6ab107a6e41edcd8e0ce3b51",
+  "build": {
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales": 18,
+    "shader_exports": "passed",
+    "source_changed": false,
+    "packaged_admission": "solo enabled;1-4 players"
+  },
+  "checks": {
+    "domain_cases": 229,
+    "ghost_samurai_cases": 45,
+    "compiled_protocol_roundtrips": 330,
+    "malformed_rejections": 54,
+    "summon_and_Global_registration": "passed",
+    "both_encounters_exact_Fight_teardown": "passed",
+    "native_Doll_Hurt_calibration": "passed",
+    "focused_rerun_after_body_clearance": 45
+  },
+  "authority": "existing server/SP pose anchors, target, event counter, ground lookup, hazard generation, collision and cleanup; no new packet fields or native damage exception",
+  "runtime": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "clear bottom-center arrival on flat and obstructed terrain without arena changes",
+      "overhead grip stays attached and only blade scales",
+      "six-tick swing contact matches sound and damage",
+      "rear dodge then jump over growing fronts; Reduced Effects readability",
+      "matching-peer phase interruption, target death/exit, wipe/victory cleanup"
+    ]
+  },
+  "notes": [
+    "Only FrontalCleaveShockwave and its ground fronts changed; other attack rules retained.",
+    "No GUI, game or gameplay server launched.",
+    "No new asset files; original atlas regions reused.",
+    "Fully blocked center skips this attack safely; ground fronts keep a fixed horizontal plane."
+  ],
+  "integration": {
+    "version": "0.3.10",
+    "protocol": 44,
+    "upstream_commit": "ae071bc924c4f834b56557ae62435ea24cfc8b7f",
+    "resolution": "Retained latest main Crimson/Doll code and assets; only version/protocol/STATUS/network prose/catalog conflicted. Horizontal gameplay C# is unchanged from feature commit780ae00.",
+    "authorization": "Administrator explicitly approved PR #30 main integration and normal-profile installation.",
+    "source_commit": "d75c8415ebf681b2d765b23a116f38b9a1f6b295",
+    "source_dirty": "",
+    "source_sha256": "3e9b546fec5dd919a34480d1bd43e74ff42156e7ee6d82681652c56d1bda00ca",
+    "isolated_package_sha256": "f36484eea5dd0eeb0b6bc8504a0e715d0548435b6edb800852dcf2ac4439ede6",
+    "assembly_sha256": "464366951b7985d14ebaa475528782532ab39a5a564bca17044ea261267d171b",
+    "verification": {
+      "domain_cases": 238,
+      "native_build": "0 errors /4 existing CS8632 warnings;locales, shaders and solo admission passed",
+      "compiled_roundtrips": 334,
+      "malformed_rejections": 54,
+      "Ghost_summon_and_Global_registration": "passed",
+      "Doll_and_Crimson_type_validation": "passed",
+      "Ghost_and_Doll_exact_Fight_teardown": "passed",
+      "Doll_Hurt_calibration": "passed"
+    },
+    "gameplay": "not_run; user-owned"
+  }
+}
