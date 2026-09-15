@@ -18,6 +18,28 @@ def body(source, signature):
     raise AssertionError("Unclosed callback")
 
 
+class CrimsonGraphicsLifetime(unittest.TestCase):
+    def test_worker_load_does_not_allocate_effect(self):
+        source = (ROOT / "Client/Encounters/CrimsonFoundry/CrimsonRig.cs").read_text(encoding="utf-8")
+        load = body(source, "internal static void Load()")
+        self.assertIn("if (Main.dedServ) return", load)
+        self.assertNotIn("new BasicEffect", load)
+        self.assertNotIn("GraphicsDevice", load)
+        draw = body(source, "private static void Mesh(")
+        self.assertIn("material ??= new BasicEffect", draw)
+        self.assertLess(draw.index("Main.dedServ"), draw.index("new BasicEffect"))
+        self.assertEqual(source.count("new BasicEffect"), 1)
+
+    def test_unload_queues_only_captured_effect_not_asset_textures(self):
+        source = (ROOT / "Client/Encounters/CrimsonFoundry/CrimsonRig.cs").read_text(encoding="utf-8")
+        unload = body(source, "internal static void Unload()")
+        self.assertLess(unload.index("var oldMaterial = material"), unload.index("material = null"))
+        self.assertLess(unload.index("material = null"), unload.index("Main.QueueMainThreadAction"))
+        self.assertIn("Main.QueueMainThreadAction(oldMaterial.Dispose)", unload)
+        self.assertNotIn("performer.Dispose", unload)
+        self.assertNotIn("material.Dispose", unload)
+
+
 class CinematicCoordinates(unittest.TestCase):
     def test_preparation_silence_does_not_change_volume_or_combat_music(self):
         source = (CLIENT / "FirstSeverancePreparationSilence.cs").read_text(encoding="utf-8")
