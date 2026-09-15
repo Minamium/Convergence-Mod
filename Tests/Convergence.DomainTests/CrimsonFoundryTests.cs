@@ -75,19 +75,76 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Crimson clients derive vulnerability from accepted stage and purge, not defaults")]
+    [DomainTest("Crimson clients expose individual summons and final performer only at accepted epochs")]
     private static void CrimsonDamageProjection()
     {
         var state = new CrimsonState(Guid.NewGuid(), 400, 100, -1, CrimsonStage.Ready,
             new[] { new CrimsonMember(0, Guid.NewGuid(), true, false) }, 8000, 6000);
         AssertEqual(false, state.Vulnerable(400), "preparation remains protected");
         state = state with { Stage = CrimsonStage.Performance };
-        AssertEqual(true, state.Vulnerable(400), "client and server both expose native hurt");
-        state = state with { PurgeTick = 500 };
-        AssertEqual(false, state.Vulnerable(589.99f), "purge cannot be damaged early");
-        AssertEqual(true, state.Vulnerable(590), "purge expiry unlocks every replica");
-        AssertEqual(false, (state with { Stage = CrimsonStage.Victory }).Vulnerable(600), "ending protected");
+        AssertEqual(false, state.Vulnerable(400), "performer protected while summons remain");
+        for (int i = 0; i < 3; i++)
+        {
+            AssertEqual(true, state.SummonVulnerable(i), "independent live target");
+            byte mask = CrimsonInvocation.Defeat(state.DefeatedMask, i);
+            AssertEqual(mask, CrimsonInvocation.Defeat(mask, i), "duplicate death is idempotent");
+            state = state with { DefeatedMask = mask };
+            AssertEqual(false, state.SummonVulnerable(i), "dead target cannot keep attacking");
+            AssertEqual(false, state.Vulnerable(400), "kill mask alone does not skip manifestation");
+        }
+        AssertEqual(3, CrimsonInvocation.SelectAlive(8, state.DefeatedMask), "only all dead selects performer");
+        state = state with { FinalStart = 500 };
+        AssertEqual(false, state.Vulnerable(649.99f), "manifestation protected");
+        AssertEqual(true, state.Vulnerable(650), "every peer exposes same final target");
+        AssertEqual(false, (state with { Stage = CrimsonStage.Victory }).Vulnerable(700), "ending protected");
         AssertEqual(false, default(CrimsonState).Vulnerable(600), "uninitialized actor is protected");
+    }
+
+    [DomainTest("Crimson apparition identity and footprint codecs reject malformed state")]
+    private static void CrimsonEffigyCodec()
+    {
+        var value = new CrimsonEffigyState(Guid.NewGuid(), 5, 2, 410);
+        using var stream = new MemoryStream(); value.Write(new BinaryWriter(stream)); byte[] bytes = stream.ToArray(); stream.Position = 0;
+        AssertEqual(value, CrimsonEffigyState.Read(new BinaryReader(stream)), "child exact owner roundtrip");
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            bool rejected = false;
+            try { CrimsonEffigyState.Read(new BinaryReader(new MemoryStream(bytes, 0, i))); } catch (IOException) { rejected = true; }
+            AssertEqual(true, rejected, "truncated child identity rejected");
+        }
+        foreach (var invalid in new[] { value with { Index = 3 }, value with { Boss = 200 }, value with { Fight = Guid.Empty } })
+        {
+            using var bad = new MemoryStream(); invalid.Write(new BinaryWriter(bad)); bad.Position = 0;
+            bool rejected = false;
+            try { CrimsonEffigyState.Read(new BinaryReader(bad)); } catch (InvalidDataException) { rejected = true; }
+            AssertEqual(true, rejected, "invalid child owner rejected");
+        }
+    }
+
+    [DomainTest("Crimson barrages keep a full shared corridor and fill only announced bands")]
+    private static void CrimsonCorridors()
+    {
+        var field = Convergence.Common.Raids.Arena.RaidFieldGeometry.FromGround(8000, 6000);
+        for (int cue = 0; cue < 100; cue++) for (int source = 0; source < 4; source++)
+        {
+            var b = CrimsonBarrageGeometry.Build(field, cue, source, source == 3);
+            AssertEqual(true, b.Lanes.Count is > 2 and < 50, "bounded pattern");
+            foreach (var lane in b.Lanes)
+            {
+                float center = (lane.X - field.CenterX) * b.NormalX + (lane.Y - field.CenterY) * b.NormalY;
+                AssertEqual(true, Math.Abs(center - b.SafeOffset) - lane.HalfWidth >= b.SafeWidth * .5f - 1, "every lane respects safe corridor");
+                var h = new CrimsonHazard(Guid.NewGuid(), 0, 10, 70, 112, CrimsonShape.Slash,
+                    lane.X, lane.Y, lane.DX, lane.DY, lane.Length, lane.HalfWidth, 450, (byte)source);
+                using var s = new MemoryStream(); h.Write(new BinaryWriter(s)); s.Position = 0;
+                AssertEqual(h, CrimsonHazard.Read(new BinaryReader(s)), "each actual pattern fits bounded wire contract");
+            }
+        }
+        AssertEqual(3000000, CrimsonInvocation.TargetLife(1), "solo target budget");
+        AssertEqual(7000000, CrimsonInvocation.TargetLife(3), "three-player target budget");
+        AssertEqual(0f, CrimsonInvocation.MusicGain(0), "music begins silent");
+        AssertEqual(.39f, CrimsonInvocation.MusicGain(150), "fade reaches same calibrated ceiling");
+        AssertEqual(1f, CrimsonInvocation.OpeningBars(CrimsonStage.Countdown, 299, 300, 480), "lead has no HUD gap");
+        AssertEqual(1f, CrimsonInvocation.OpeningBars(CrimsonStage.Countdown, 300, 300, 480), "music boundary continuous");
     }
 
     [DomainTest("Crimson shared pedestal footprint clips rays and contains players without drift")]
@@ -107,7 +164,7 @@ internal static partial class Program
         }
         AssertEqual(false, field.ClipAxis(field.Right + 10, field.CenterY, 0, 1, out _, out _), "outside parallel lanes are not spawned");
         AssertEqual(0f, Convergence.Client.Encounters.CrimsonFoundry.CrimsonRigMotion.Recoil(-1), "no recoil before fire");
-        AssertEqual(0f, Convergence.Client.Encounters.CrimsonFoundry.CrimsonRigMotion.ArmorTravel(-1), "no armor jump before cue");
-        AssertEqual(1f, Convergence.Client.Encounters.CrimsonFoundry.CrimsonRigMotion.Assemble(70), "deployment settles continuously");
+        AssertEqual(0f, CrimsonInvocation.Manifest(70, -1), "no final manifestation before authority cue");
+        AssertEqual(1f, CrimsonInvocation.Manifest(650, 500), "final manifestation settles continuously");
     }
 }

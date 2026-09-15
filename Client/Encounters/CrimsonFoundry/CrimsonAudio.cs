@@ -84,7 +84,7 @@ internal sealed class CrimsonAudio : ModSystem
         }
         // The source is ~2.1dB hotter than Doll P1; this direct PCM path lacks
         // Terraria's music-track mixing headroom. -7.0dB from the prior .88.
-        gain = Math.Min(.39f, gain + .035f);
+        gain = CrimsonInvocation.MusicGain(age) * Math.Clamp((float)playback.Elapsed.TotalSeconds / .3f, 0, 1);
         if (voice is not null) voice.Volume = gain * Main.musicVolume;
     }
     private void Start(double age)

@@ -14,12 +14,13 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 
 internal sealed record CrimsonActorSource(CrimsonRuntime Runtime, CrimsonState State) : IEntitySource
 { public string Context => "CrimsonFoundry"; }
+internal sealed record CrimsonEffigySource(CrimsonRuntime Runtime, CrimsonEffigyState State, int Life) : IEntitySource
+{ public string Context => "CrimsonInvocation"; }
 internal sealed record CrimsonAttackSource(CrimsonHazard Hazard) : IEntitySource
 { public string Context => "CrimsonFoundryScore"; }
 
-// One session owns roster, score cursor, actor and every attack. Nothing extends
-// Doll's recovery service or native-Hurt receipt exception. Only the shared
-// pedestal lease/field footprint is reused; this feature owns containment.
+// Authority update/terminal order stays here. The three independently damageable
+// summons, their projections and hazards are resources of this exact session.
 internal sealed class CrimsonRuntime : IEncounterRuntime
 {
     private readonly FightId fight;
@@ -27,18 +28,30 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
     private readonly IRaidPedestal pedestal;
     private readonly ulong sequence;
     private readonly Vector2 ground;
+    private readonly CrimsonEffigy?[] summons = new CrimsonEffigy?[CrimsonInvocation.SummonCount];
     private bool claimed;
-    private int lastLife, lastLifeAge, hurtTotal;
     private CrimsonBoss? actor;
     private CrimsonMember[] members = Array.Empty<CrimsonMember>();
-    private int age, musicStart = -1, purge = -1, ending = -1;
+    private int age, musicStart = -1, finalStart = -1, ending = -1, nextVolley, volleyIndex;
+    private int targetLife, previousDamage, previousLogAge;
+    private byte defeated;
     private CrimsonStage stage;
     private bool cleaned, killed, cancelled;
     internal CrimsonRuntime(FightId fight, int summoner, IRaidPedestal pedestal, ulong sequence)
     { this.fight = fight; this.summoner = summoner; this.pedestal = pedestal; this.sequence = sequence; ground = pedestal.Ground; }
-    private CrimsonState State => new(fight.Value, age, musicStart, purge, stage, members, (int)ground.X, (int)ground.Y);
+    private CrimsonState State => new(fight.Value, age, musicStart, finalStart, stage, members, (int)ground.X, (int)ground.Y, defeated);
     internal bool Matches(CrimsonBoss value) => !cleaned && ReferenceEquals(value, actor) && value.State.Fight == fight.Value;
-    internal void Killed(CrimsonBoss value) { if (Matches(value)) killed = true; }
+    internal bool Matches(CrimsonEffigy value) => !cleaned && value.State.Fight == fight.Value
+        && value.State.Index < summons.Length && ReferenceEquals(summons[value.State.Index], value);
+    internal void Killed(CrimsonBoss value) { if (Matches(value) && State.Vulnerable(age)) killed = true; }
+    internal void SummonKilled(CrimsonEffigy value)
+    {
+        if (!Matches(value) || !State.SummonVulnerable(value.State.Index)) return;
+        defeated = CrimsonInvocation.Defeat(defeated, value.State.Index);
+        ClearHazards(value.State.Index);
+        CrimsonPackets.Log($"event=SummonDefeated fight={fight.Value} index={value.State.Index} mask={defeated} age={age}");
+        Project(true);
+    }
     internal bool Request(int sender, Guid connection, bool ready, bool cancel)
     {
         if (cleaned || stage != CrimsonStage.Ready || sender < 0 || sender >= Main.maxPlayers) return false;
@@ -47,24 +60,21 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
         if (index < 0) return false;
         if (cancel) { if (sender != summoner) return false; cancelled = true; }
         else members[index] = members[index] with { Ready = ready };
-        Project(true);
-        return true;
+        Project(true); return true;
     }
     public EncounterRuntimeUpdate Tick(in EncounterRuntimeContext context)
     {
         if (cleaned || Main.netMode == NetmodeID.MultiplayerClient) return EncounterRuntimeUpdate.None;
         if (context.Lifecycle == EncounterLifecycle.Validating)
         {
-            if (!RefreshRoster()) return End(EncounterEndReason.Invalidated);
-            if (!pedestal.Claim(sequence, fight)) return End(EncounterEndReason.Invalidated);
-            claimed = true;
-            int slot = NPC.NewNPC(new CrimsonActorSource(this, State), (int)ground.X, (int)ground.Y - 420, ModContent.NPCType<CrimsonBoss>());
+            if (!RefreshRoster() || !pedestal.Claim(sequence, fight)) return End(EncounterEndReason.Invalidated);
+            claimed = true; targetLife = CrimsonInvocation.TargetLife(members.Length);
+            int slot = NPC.NewNPC(new CrimsonActorSource(this, State), (int)ground.X, (int)ground.Y - 100, ModContent.NPCType<CrimsonBoss>());
             if (slot >= Main.maxNPCs) return End(EncounterEndReason.EncounterActorMissing);
             actor = (CrimsonBoss)Main.npc[slot].ModNPC;
-            actor.NPC.life = actor.NPC.lifeMax = 12000000 + 8000000 * (members.Length - 1);
-            lastLife = actor.NPC.life;
+            actor.NPC.life = actor.NPC.lifeMax = targetLife;
             Project(true);
-            CrimsonPackets.Log($"event=Preparing fight={fight.Value} members={members.Length} life={actor.NPC.lifeMax}");
+            CrimsonPackets.Log($"event=Preparing fight={fight.Value} members={members.Length} target_life={targetLife} targets=4");
             return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Preparing);
         }
         if (actor is null || !actor.NPC.active || actor.NPC.ModNPC != actor) return End(EncounterEndReason.EncounterActorMissing);
@@ -74,12 +84,13 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
         if (context.Lifecycle == EncounterLifecycle.Preparing)
         {
             if (!RefreshRoster()) return End(EncounterEndReason.Invalidated);
-            if (age >= 150) stage = CrimsonStage.Ready;
+            if (age >= CrimsonInvocation.DeploymentTicks) stage = CrimsonStage.Ready;
             if (stage == CrimsonStage.Ready && Array.TrueForAll(members, m => m.Ready && !Main.player[m.Slot].dead))
             {
-                // Two seconds ahead: every client can preload/arm the same
-                // music epoch; the 8s score introduction starts after this lead.
-                musicStart = age + 120; stage = CrimsonStage.Countdown;
+                // Cinematic starts immediately; music lead never brings the HUD back.
+                musicStart = age + CrimsonInvocation.MusicLeadTicks; stage = CrimsonStage.Countdown;
+                targetLife = CrimsonInvocation.TargetLife(members.Length);
+                actor.NPC.life = actor.NPC.lifeMax = targetLife;
                 if (!pedestal.Activate(fight)) return End(EncounterEndReason.Invalidated);
                 Project(true);
                 CrimsonPackets.Log($"event=AllReady fight={fight.Value} music_start={musicStart}");
@@ -99,44 +110,64 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
             {
                 ending = age; stage = killed ? CrimsonStage.Victory : CrimsonStage.Defeat;
                 actor.NPC.dontTakeDamage = true; ClearHazards();
-                CrimsonPackets.Log($"event={stage} fight={fight.Value} age={age} life={actor.NPC.life} max={actor.NPC.lifeMax} damage={hurtTotal + Math.Max(0, lastLife - actor.NPC.life)}");
+                CrimsonPackets.Log($"event={stage} fight={fight.Value} age={age} remaining={RemainingLife()} total={targetLife * 4} mask={defeated}");
                 Project(true);
             }
             if (ending >= 0)
             {
                 if (age >= ending + 150) return End(killed ? EncounterEndReason.Victory : EncounterEndReason.Defeat);
-                Project(age % 15 == 0);
-                return EncounterRuntimeUpdate.None;
+                Project(age % 10 == 0); return EncounterRuntimeUpdate.None;
             }
-            var score = CrimsonRegistration.Score;
             int songAge = age - musicStart;
-            if (songAge >= score.IntroTicks) stage = CrimsonStage.Performance;
-            actor.NPC.dontTakeDamage = !State.Vulnerable(age);
-            if (stage == CrimsonStage.Performance && purge < 0 && actor.NPC.life <= actor.NPC.lifeMax / 2)
+            var score = CrimsonRegistration.Score;
+            for (byte i = 0; i < summons.Length; i++)
             {
-                // Pick the next measured accent within 0.8s; no soundtrack restart.
-                purge = age + 30;
-                double pos = score.Position(songAge);
-                for (int i = 0; i < score.BeatTicks.Length; i++)
-                    if (score.BeatTicks[i] > pos && score.BeatTicks[i] - pos < 48 && score.Energy[i] >= .55f)
-                    { purge = age + (int)Math.Round(score.BeatTicks[i] - pos); break; }
-                actor.NPC.life = actor.NPC.lifeMax / 2;
-                actor.NPC.dontTakeDamage = true; ClearHazards();
-                CrimsonPackets.Log($"event=ArmorPurge fight={fight.Value} accent={purge} music_age={songAge}");
+                if ((defeated & 1 << i) != 0) continue;
+                if (summons[i] is null && songAge >= SummonBeat(i)) SpawnSummon(i);
+                else if (summons[i] is { } child && (!child.NPC.active || child.NPC.ModNPC != child))
+                    return End(EncounterEndReason.EncounterActorMissing); // Missing is not defeated.
+            }
+            if (songAge >= score.IntroTicks) stage = CrimsonStage.Performance;
+            if (stage == CrimsonStage.Performance && defeated == CrimsonInvocation.AllDefeated && finalStart < 0)
+            {
+                finalStart = age; ClearHazards();
+                CrimsonPackets.Log($"event=FinalManifest fight={fight.Value} age={age} life={actor.NPC.life}");
                 Project(true);
             }
-            if (stage == CrimsonStage.Performance && (purge < 0 || age >= purge + 90))
-                score.Events(songAge, Schedule);
+            actor.NPC.dontTakeDamage = !State.Vulnerable(age);
+            actor.NPC.boss = State.Vulnerable(age);
+            if (stage == CrimsonStage.Performance && (finalStart < 0 || State.Vulnerable(age))) score.Events(songAge, Schedule);
         }
         if (age % 300 == 0)
         {
-            int delta = Math.Max(0, lastLife - actor.NPC.life); hurtTotal += delta;
-            CrimsonPackets.Log(FormattableString.Invariant($"event=Progress fight={fight.Value} age={age} stage={stage} life={actor.NPC.life} max={actor.NPC.lifeMax} interval_damage={delta} interval_dps={delta * 60d / Math.Max(1, age - lastLifeAge):F0} vulnerable={!actor.NPC.dontTakeDamage} members={members.Length}"));
-            lastLife = actor.NPC.life; lastLifeAge = age;
+            int damage = targetLife * 4 - RemainingLife();
+            CrimsonPackets.Log(FormattableString.Invariant($"event=Progress fight={fight.Value} age={age} stage={stage} remaining={RemainingLife()} total={targetLife * 4} interval_damage={damage - previousDamage} interval_dps={(damage - previousDamage) * 60d / Math.Max(1, age - previousLogAge):F0} final={finalStart >= 0} mask={defeated} members={members.Length}"));
+            previousDamage = damage; previousLogAge = age;
         }
-        Move();
-        Project(age % 10 == 0);
-        return EncounterRuntimeUpdate.None;
+        Move(); Project(age % 10 == 0); return EncounterRuntimeUpdate.None;
+    }
+    private int SummonBeat(int index)
+    {
+        int desired = 110 + index * 105;
+        foreach (int tick in CrimsonRegistration.Score.BeatTicks) if (tick >= desired) return tick;
+        return desired;
+    }
+    private void SpawnSummon(byte index)
+    {
+        if (actor is null) return;
+        Vector2 position = SummonPosition(index);
+        var state = new CrimsonEffigyState(fight.Value, (short)actor.NPC.whoAmI, index, age);
+        int slot = NPC.NewNPC(new CrimsonEffigySource(this, state, targetLife), (int)position.X, (int)position.Y, ModContent.NPCType<CrimsonEffigy>());
+        if (slot >= Main.maxNPCs) throw new InvalidOperationException("crimson.summon_capacity");
+        summons[index] = (CrimsonEffigy)Main.npc[slot].ModNPC; Main.npc[slot].netUpdate = true;
+        CrimsonPackets.Log($"event=SummonAppeared fight={fight.Value} index={index} life={targetLife} age={age}");
+    }
+    private int RemainingLife()
+    {
+        int remaining = actor is null ? targetLife : Math.Clamp(actor.NPC.life, 0, targetLife);
+        for (int i = 0; i < summons.Length; i++) if ((defeated & 1 << i) == 0)
+            remaining += summons[i] is { } summon ? Math.Clamp(summon.NPC.life, 0, targetLife) : targetLife;
+        return remaining;
     }
     private bool RefreshRoster()
     {
@@ -152,75 +183,54 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
         bool changed = next.Count != members.Length;
         for (int i = 0; i < next.Count && !changed; i++) changed |= next[i].Slot != members[i].Slot || next[i].Connection != members[i].Connection;
         if (changed) for (int i = 0; i < next.Count; i++) next[i] = next[i] with { Ready = false };
-        members = next.ToArray();
-        if (changed) Project(true);
-        return true;
+        members = next.ToArray(); if (changed) Project(true); return true;
+    }
+    private Vector2 SummonPosition(int i)
+    {
+        var f = State.Field;
+        return new(f.CenterX + (i - 1) * 650 + MathF.Sin(age * .013f + i * 2) * 46,
+            f.CenterY + (i == 1 ? -180 : 40) + MathF.Sin(age * .018f + i) * 32);
     }
     private void Move()
     {
         if (actor is null) return;
-        bool fast = purge >= 0 && age >= purge + 90;
-        float orbit = age * (fast ? .033f : .006f);
-        var field = State.Field;
-        Vector2 goal = stage is CrimsonStage.Deployment or CrimsonStage.Ready
-            ? ground + new Vector2(MathF.Sin(orbit) * 35, -410)
-            : new Vector2(field.CenterX + MathF.Sin(orbit) * (fast ? 690 : 340),
-                field.CenterY - 60 + MathF.Cos(orbit * 1.3f) * (fast ? 175 : 80));
-        Vector2 delta = goal - actor.NPC.Center;
-        Vector2 desired = delta.SafeNormalize(Vector2.Zero) * Math.Min(delta.Length() * .08f, fast ? 40 : 8);
-        actor.NPC.velocity = Vector2.Lerp(actor.NPC.velocity, desired, fast ? .17f : .07f);
+        var f = State.Field;
+        Vector2 preparing = ground + new Vector2(0, -95);
+        float depart = musicStart < 0 ? 0 : CrimsonInvocation.Ease((age - (musicStart - 90)) / 150f);
+        Vector2 background = new(f.CenterX, f.Top + 170);
+        Vector2 front = new(f.CenterX + MathF.Sin(age * .017f) * 260, f.CenterY - 60 + MathF.Sin(age * .025f) * 70);
+        Vector2 goal = Vector2.Lerp(Vector2.Lerp(preparing, background, depart), front, CrimsonInvocation.Manifest(age, finalStart));
+        actor.NPC.velocity = (goal - actor.NPC.Center) * .075f;
+        for (int i = 0; i < summons.Length; i++) if (summons[i] is { } child && child.NPC.active && child.NPC.ModNPC == child)
+        { child.NPC.velocity = (SummonPosition(i) - child.NPC.Center) * .05f; if (age % 15 == 0) child.NPC.netUpdate = true; }
     }
     private void Schedule(int id, int fire, float intensity, bool offbeat)
     {
-        if (actor is null) return;
-        int eventIndex = (id % 4096) / 2;
-        bool fast = purge >= 0 && age >= purge + 90;
-        // First form articulates; unarmored form uses more offbeat energy bolts.
-        if (!fast && offbeat && eventIndex % 4 != 1) return;
-        foreach (var m in members)
+        if (actor is null || age < nextVolley) return;
+        bool final = State.Vulnerable(age);
+        int source = final ? 3 : CrimsonInvocation.SelectAlive(volleyIndex, defeated);
+        if (!final && (source >= 3 || summons[source] is not { } child || !child.NPC.active)) return;
+        nextVolley = age + (final ? 72 : intensity > .76f ? 90 : 110); volleyIndex++;
+        var barrage = CrimsonBarrageGeometry.Build(State.Field, id, source, final);
+        var shape = source == 1 && !final ? CrimsonShape.Bolt : CrimsonShape.Slash;
+        foreach (var lane in barrage.Lanes)
         {
-            if (m.Out) continue;
-            Player p = Main.player[m.Slot];
-            if (!p.active || p.dead) continue;
-            Vector2 anchor = p.Center; // Frozen at warning start, never aims again.
-            float angle = ((eventIndex * 5 + m.Slot * 3) % 8) * MathHelper.PiOver4 + (offbeat ? .22f : 0);
-            int lanes = intensity > .72f ? (fast ? 3 : 2) : 1;
-            Vector2 direction = angle.ToRotationVector2();
-            Vector2 normal = direction.RotatedBy(MathHelper.PiOver2);
-            for (int lane = 0; lane < lanes; lane++)
-            {
-                // Parallel geometry cannot trap the player at a crossed intersection.
-                // Always threaten the frozen anchor. Symmetric TWO lanes would
-                // leave the targeted player's current position permanently safe.
-                float offset = lane == 0 ? 0 : (lane % 2 == 1 ? 155 : -155);
-                // The whole field diagonal is forecast, not a tiny local beam.
-                // World coordinates freeze here, including when the robot moves.
-                Vector2 center = anchor + normal * offset;
-                if (!State.Field.ClipAxis(center.X, center.Y, direction.X, direction.Y, out float near, out float far)) continue;
-                Vector2 origin = center + direction * near;
-                var shape = offbeat || eventIndex % 4 == 3 ? CrimsonShape.Bolt : CrimsonShape.Slash;
-                var hazard = new CrimsonHazard(fight.Value, (short)actor.NPC.whoAmI, age,
-                    musicStart + fire, musicStart + fire + (shape == CrimsonShape.Bolt ? 30 : 42), shape,
-                    origin.X, origin.Y, direction.X, direction.Y, far - near, shape == CrimsonShape.Bolt ? 21 : 28, fast ? 510 : 450);
-                int slot = Projectile.NewProjectile(new CrimsonAttackSource(hazard), origin, Vector2.Zero,
-                    ModContent.ProjectileType<CrimsonAttack>(), hazard.Damage, 0, Main.myPlayer);
-                if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.projectile_capacity");
-                Main.projectile[slot].netUpdate = true;
-            }
+            var hazard = new CrimsonHazard(fight.Value, (short)actor.NPC.whoAmI, age, musicStart + fire,
+                musicStart + fire + (shape == CrimsonShape.Bolt ? 30 : 42), shape,
+                lane.X, lane.Y, lane.DX, lane.DY, lane.Length, lane.HalfWidth, final ? 510 : 450, (byte)source);
+            int slot = Projectile.NewProjectile(new CrimsonAttackSource(hazard), new Vector2(lane.X, lane.Y), Vector2.Zero,
+                ModContent.ProjectileType<CrimsonAttack>(), hazard.Damage, 0, Main.myPlayer);
+            if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.projectile_capacity");
+            Main.projectile[slot].netUpdate = true;
         }
-        if (eventIndex % 8 == 0) CrimsonPackets.Log($"event=ScoreAccent fight={fight.Value} cue={id} fire={musicStart + fire} energy={intensity:F2} form={(fast ? 2 : 1)}");
+        CrimsonPackets.Log(FormattableString.Invariant($"event=ScoreBarrage fight={fight.Value} cue={id} source={source} fire={musicStart + fire} lanes={barrage.Lanes.Count} safe={barrage.SafeOffset:F0} gap={barrage.SafeWidth:F0} energy={intensity:F2} final={final}"));
     }
-    private void Project(bool sync)
-    {
-        if (actor is null) return;
-        actor.State = State;
-        if (sync) actor.NPC.netUpdate = true;
-    }
+    private void Project(bool sync) { if (actor is null) return; actor.State = State; if (sync) actor.NPC.netUpdate = true; }
     private EncounterRuntimeUpdate End(EncounterEndReason reason) => EncounterRuntimeUpdate.End(CrimsonTermination.End(reason));
-    private void ClearHazards()
+    private void ClearHazards(int source = -1)
     {
         foreach (Projectile p in Main.ActiveProjectiles)
-            if (p.ModProjectile is CrimsonAttack a && a.Hazard.Fight == fight.Value) p.Kill();
+            if (p.ModProjectile is CrimsonAttack a && a.Hazard.Fight == fight.Value && (source < 0 || a.Hazard.Source == source)) p.Kill();
     }
     public void Cleanup(in EncounterCleanupContext context)
     {
@@ -231,10 +241,14 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
         {
             try
             {
-                if (actor is not null && actor.NPC.active && actor.NPC.ModNPC == actor && actor.State.Fight == fight.Value)
+                // Exact-Fight scan covers partially constructed actors too.
+                foreach (NPC n in Main.ActiveNPCs)
                 {
-                    actor.NPC.active = false; actor.Runtime = null;
-                    if (Main.netMode == NetmodeID.Server) NetMessage.SendData(MessageID.SyncNPC, number: actor.NPC.whoAmI);
+                    bool owned = n.ModNPC is CrimsonBoss b && b.State.Fight == fight.Value
+                        || n.ModNPC is CrimsonEffigy e && e.State.Fight == fight.Value;
+                    if (!owned) continue;
+                    n.active = false;
+                    if (Main.netMode == NetmodeID.Server) NetMessage.SendData(MessageID.SyncNPC, number: n.whoAmI);
                 }
             }
             finally
