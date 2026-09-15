@@ -405,6 +405,20 @@ F15's first-visible-fire frames at31.393/32.929/34.463s align with respective be
 
 初回の評価は「映像として一場面を見たいと思えるか」「被弾理由が分かるか」「もう一人を助ける余地があるか」。同期に触れた時だけ実client2つで同一castを確認し、文書だけの変更でgame buildや全test matrixを要求しない。ソロ作業時の具体策は[一人検証](../runbooks/SINGLE_OPERATOR_TESTING.md)へ。
 
+### F17 — Crimson articulated machine and energy release (2026-09-15)
+
+**Question:** replace Crimson's whole-image hover with an articulated mechanical threat and stronger legible red releases. Reuse F12/F16 source identity/license facts: WoTM `5556a3adcbabffc6fc95685e34f1ee22cee31d9a`, declared1.0.4, MIT code. This PC's later installed1.0.5 is not claimed identical. Current tML2026.07.3.0 / Terraria1.4.4.9 / Calamity2.2.4 / Luminance1.0.14 stay unchanged.
+
+Selected official code retrieved/inspected on2026-09-15:
+
+- [AresBodyEternity.cs](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Ares/AresBodyEternity.cs): core position is a rotated body-local anchor; velocity-dependent banking and separate body/glow/bloom passes bind energy to the machine. Inspection covered relevant rendering/core/rotation passages, not a claimed complete Ares IK audit.
+- [CannonLaserbeam.cs](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/CannonLaserbeam.cs): moving length, bulging/pulsating width, source/end taper, separate wide bloom and travelling particles create energy depth.
+- [HadesSuperLaserbeam.cs](https://github.com/LucilleKarma/WrathOfTheMachines/blob/5556a3adcbabffc6fc95685e34f1ee22cee31d9a/Content/NPCs/ExoMechs/Projectiles/HadesSuperLaserbeam.cs): thin onset expands rapidly, an axial leading shape and source glow connect the release; background contrast supports the bright body.
+
+**Direct video observation:** owner recordingA (`Terraria_ Not to be confused with Catastrophe 2026-09-13 19-57-13.mp4`,157.31s,1920×1012, about29.81fps) was sampled into a whole-recording overview, then73–76s at4fps for release inspection. Observed red energy with white cores, long travelling tails, connected glow and residual curling smoke. Some visible energy belongs to player weapons; do not attribute every ray to a particular Boss. This is sampled visual inspection, not continuous playback/audio listening. Raw video/frames remain ignored and external.
+
+**Independent implementation:** use a new original twelve-part machine atlas; procedural joints, attached plates, recoil and fractional clocks rather than moving one finished illustration. Preserve one-second frozen forecasts, extend full-field release and visible tails; reuse Convergence PortalBeam/RaidEnergy and a newly authored red reactor shader. Keep emitter/core effects on rotated local anchors and keep thin forecast axes separate from sparse damage-footprint particles. No external code, formulas, audio or textures copied; Luminance supplies its existing runtime noise. [Crimson spec](../encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns behavior; [revision evidence](../evidence/2026-09-15-crimson-stage.json) owns verification, not claims of visual parity or measured FPS.
+
 ## 8. 未確認・次に埋める項目
 
 - V1 00:40／V2 14:02前後の実フレーム・音・回避経路。素材を再共有してもらうか、ユーザーの再視聴メモがあれば章マップへ追加する。
