@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development source: **0.3.11 / protocol45**. Crimson Invocation replaces the machine with a normal NPC-sized scarlet conjurer, three independently damageable large apparitions and an all-three-defeated Final. Adds shared-corridor musical attacks, continuous intro/music fade, original item art and a ten-slot companion. Integrated main0.3.10 Ghost Samurai horizontal-cleave changes and Doll0.3.7 are preserved. Use matching0.3.11/protocol45 peers. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md); no new release is implied.
+Development source: **0.3.12 / protocol45**. Hotfixes Crimson's worker-thread GPU effect creation that prevented0.3.11 from loading; effect creation now belongs to first draw and disposal is queued with a captured old instance. Crimson Invocation's small conjurer, three independent apparitions, companion, music and gameplay are unchanged. Integrated main0.3.10 Ghost Samurai horizontal-cleave changes and Doll0.3.7 are preserved. Use matching0.3.12/protocol45 peers. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md); no new release is implied.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Cleanup and target ownership repaired with automated checks; rewards/balance and actual multiplayer/re-entry validation remain incomplete.
@@ -36,7 +36,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 - **Ghost Samurai horizontal cleave:** [evidence](evidence/2026-09-15-ghost-samurai-horizontal.json) distinguishes the isolated0.3.7/protocol41 feature checks from subsequent integration with main0.3.9 as0.3.10/protocol44. The original feature passed229 domain cases (45 focused), native compilation, loader/teardown and330/54 codec cases. The administrator approved PR #30 integration and normal-profile installation. Actual arrival/pose/terrain/readability and matching-peer playtesting remain user-owned / not_run.
 
-- **Crimson Invocation:** [0.3.11 evidence](evidence/2026-09-16-crimson-invocation.json) records the integrated build, independent-target/corridor contracts, loader/codec checks and representative offline NPC/creature rendering. Actual four-target progression, corridor fairness, remote companion, mount/landing, field/Ready/re-summon, UI107%/zoom, mix/listening and performance remain user-owned / not_run. [0.3.9 machine evidence](evidence/2026-09-15-crimson-stage.json) and [initial0.3.8](evidence/2026-09-15-crimson-foundry.json) remain historical, not approval of this redesign.
+- **Crimson Invocation:** [evidence and0.3.12 hotfix](evidence/2026-09-16-crimson-invocation.json) distinguish0.3.11's passing type/codec checks from the owner's actual failed content load. The correction passes native compilation and a linked-production FNA worker-load/render/queued-reload lifetime check; actual tModLoader reload remains user-owned / not_run. Four-target progression, corridor fairness, remote companion, mount/landing, field/Ready/re-summon, UI107%/zoom, mix/listening and performance remain unverified. [0.3.9 machine evidence](evidence/2026-09-15-crimson-stage.json) and [initial0.3.8](evidence/2026-09-15-crimson-foundry.json) remain historical, not approval of this redesign.
 
 - **Ghost Samurai new attacks:** [new-state evidence](evidence/2026-09-15-ghost-samurai-combos.json) records the original isolated0.3.5/protocol40 feature build and the subsequent0.3.6 integration with current main. The feature passed225 domain cases (41 Ghost Samurai),330 compiled round-trips /54 malformed rejections, package registration and both encounters' teardown. The administrator approved PR #28 integration and normal-profile installation. Actual SP/MP playtesting remains user-owned / not_run.
 
@@ -51,7 +51,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-After installing0.3.11, Reload Mods. Ghost Samurai's inherited bottom-center arrival, overhead blade/downstroke, growing fronts, target loss and cleanup still need its separate owner check; this task does not claim those playtests passed.
+After installing0.3.12, re-enable Convergence (the failed0.3.11 load disabled it) and Reload Mods; do not rebuild unchanged source. First confirm content loading succeeds. Ghost Samurai's inherited bottom-center arrival, overhead blade/downstroke, growing fronts, target loss and cleanup still need its separate owner check; this task does not claim those playtests passed.
 
 For Crimson, use Crimson Grimoire on Foundation Core → Ready → defeat three independent apparitions → confirm the performer becomes damageable without growing → victory/wipe/re-summon. Try Scarlet Covenant with ten minion slots, including remote visibility and flying/landing. Earlier Doll companion/final-check/audio checks remain outstanding. Workshop/GitHub releases remain separate from ordinary main integration. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations.
 
