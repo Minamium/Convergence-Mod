@@ -37,6 +37,8 @@ internal sealed class GhostSamuraiAudio : ModSystem
                 if (cues.Try(4, h.Born)) SoundEngine.PlaySound(SoundID.Item4 with { Volume = .65f, Pitch = -.25f }, boss.NPC.Center);
                 if (p.SlashAim.Locked && cues.Try(5, p.SlashAim.LockTick))
                     SoundEngine.PlaySound(SoundID.Item4 with { Volume = .8f, Pitch = .3f }, boss.NPC.Center);
+                if (cues.Try(7, h.Born + SamuraiComboRules.HorizontalSlashChargeTime - SamuraiComboRules.HorizontalSlashHoldTime))
+                    SoundEngine.PlaySound(SoundID.Item4 with { Volume = .65f, Pitch = .5f }, boss.NPC.Center);
             }
             if (h.Shape == SamuraiShape.GroundShockwave)
             {

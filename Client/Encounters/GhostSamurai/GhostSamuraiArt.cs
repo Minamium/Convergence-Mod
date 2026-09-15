@@ -16,6 +16,12 @@ internal sealed class GhostSamuraiArt
     internal const float Scale = .30f;
     internal static readonly Rectangle Body = new(0, 0, 690, 1254);
     internal static readonly Rectangle SwordArm = new(690, 0, 564, 1254);
+    // Partition the existing rig at the blade root: the hand/guard keep their
+    // original size while only the blade grows from its attached base.
+    internal static readonly Rectangle ArmUpper = new(690, 0, 315, 765);
+    internal static readonly Rectangle ArmLower = new(690, 765, 564, 489);
+    internal static readonly Rectangle Blade = new(1005, 0, 249, 765);
+    internal static readonly Vector2 BladeBase = new(1044 - 690, 765);
     internal static readonly Vector2 BodyPivot = new(366, 550);
     internal static readonly Vector2 ShoulderPivot = new(65, 756);
     private Asset<Texture2D>? source;

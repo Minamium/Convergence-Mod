@@ -87,7 +87,10 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     internal Vector2 VisualCenter(float age)
     {
         if (Hazard.Shape == SamuraiShape.GroundShockwave)
-            return new(Hazard.X + Hazard.DX * SamuraiComboRules.ShockDistance(Hazard, age), Hazard.Y);
+        {
+            var ground = SamuraiComboRules.ShockGeometry(Hazard, age);
+            return new(ground.X + ground.DX * ground.Length / 2, ground.Y);
+        }
         if (Hazard.Shape == SamuraiShape.SlashWave)
         {
             var h = DisplayHazard;

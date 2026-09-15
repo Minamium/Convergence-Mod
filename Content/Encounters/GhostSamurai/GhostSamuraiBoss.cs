@@ -72,7 +72,7 @@ public sealed class GhostSamuraiBoss : ModNPC
             if (Attack == SamuraiAttack.FrontalCleaveShockwave && Combo.IsValid(Attack))
             {
                 NPC.Center = Vector2.Lerp(new(Combo.FromX, Combo.FromY), new(Combo.AnchorX, Combo.AnchorY),
-                    SamuraiComboRules.ApproachProgress(VisualAttackTimer));
+                    SamuraiComboRules.ApproachProgress(VisualAttackTimer, Combo));
                 NPC.velocity = Vector2.Zero;
             }
             // Evaluate the same locked trajectory, instead of extrapolating a

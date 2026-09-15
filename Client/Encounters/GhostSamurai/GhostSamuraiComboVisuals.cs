@@ -34,9 +34,9 @@ internal static class GhostSamuraiComboVisuals
         }
         // One enormous accelerating sword fan, entirely in front of the boss.
         // It does not define a second damage sector or advertise the safe side.
-        if (!live) return;
+        if (age < h.Fire - SamuraiComboRules.HorizontalSlashSwingTime) return;
         float t = Math.Clamp((age - h.Fire) / (h.End - h.Fire), 0, 1);
-        float head = -MathHelper.PiOver2 + MathHelper.Pi * Math.Min(1, t * t * 4);
+        float head = -MathHelper.PiOver2 + MathHelper.Pi * SamuraiComboRules.HorizontalSwingProgress(age - h.Born);
         int arcs = reduced ? 1 : 3;
         for (int arc = 0; arc < arcs; arc++)
         {
@@ -47,8 +47,8 @@ internal static class GhostSamuraiComboVisuals
                 float b = Math.Max(-MathHelper.PiOver2, head - 1.2f) + (segment + 1) / 24f * Math.Min(1.2f, head + MathHelper.PiOver2);
                 Vector2 p = center + new Vector2(h.DX * MathF.Cos(a), MathF.Sin(a)) * radius;
                 Vector2 q = center + new Vector2(h.DX * MathF.Cos(b), MathF.Sin(b)) * radius;
-                GhostSamuraiVisuals.Stroke(batch, p, q, 12, edge * (.65f * (1 - t)));
-                GhostSamuraiVisuals.Stroke(batch, p, q, 3, Color.White * (1 - t));
+                GhostSamuraiVisuals.Stroke(batch, p, q, 12, edge * ((live ? .65f : .2f) * (1 - t)));
+                GhostSamuraiVisuals.Stroke(batch, p, q, 3, (live ? Color.White : edge) * ((live ? 1 : .45f) * (1 - t)));
             }
         }
     }
@@ -58,11 +58,15 @@ internal static class GhostSamuraiComboVisuals
         Color ink = new(6, 13, 30), edge = h.Live(age) ? new(204, 252, 255) : new(255, 210, 110);
         if (!h.Live(age))
         {
+            // Forecast the maximum swept height, anchored to the same floor as
+            // the growing fronts. The bright live rectangle is the current size.
+            float radius = h.Radius * SamuraiComboRules.HorizontalSlashWaveMaxScale;
+            center.Y += h.Radius * SamuraiComboRules.HorizontalSlashWaveStartScale - radius;
             Vector2 end = center + new Vector2(h.DX * h.Length, 0);
-            GhostSamuraiVisuals.Stroke(batch, center, end, h.Radius * 2, ink * .22f);
+            GhostSamuraiVisuals.Stroke(batch, center, end, radius * 2, ink * .22f);
             for (int side = -1; side <= 1; side += 2)
             {
-                Vector2 offset = new(0, side * (h.Radius - 2));
+                Vector2 offset = new(0, side * (radius - 2));
                 GhostSamuraiVisuals.Stroke(batch, center + offset, end + offset, 4, ink * .9f);
                 GhostSamuraiVisuals.Stroke(batch, center + offset, end + offset, 2, edge * .8f);
             }
@@ -74,14 +78,17 @@ internal static class GhostSamuraiComboVisuals
             }
             return;
         }
-        Vector2 a = center - new Vector2(SamuraiComboRules.ShockWidth / 2, 0), b = center + new Vector2(SamuraiComboRules.ShockWidth / 2, 0);
-        GhostSamuraiVisuals.Stroke(batch, a, b, h.Radius * 2, ink * .7f);
-        GhostSamuraiVisuals.Stroke(batch, a, b, h.Radius * 2 - 4, edge * .5f);
+        var geometry = SamuraiComboRules.ShockGeometry(h, age);
+        float halfWidth = geometry.Length / 2;
+        Vector2 a = center - new Vector2(halfWidth, 0), b = center + new Vector2(halfWidth, 0);
+        GhostSamuraiVisuals.Stroke(batch, a, b, geometry.Radius * 2, ink * .7f);
+        GhostSamuraiVisuals.Stroke(batch, a, b, geometry.Radius * 2 - 4, edge * .5f);
         // A crest rises only within the actual jump-clearance height.
         for (int i = 0; i < 5; i++)
         {
-            float x = -SamuraiComboRules.ShockWidth / 2 + 8 + i * 16;
-            GhostSamuraiVisuals.Stroke(batch, center + new Vector2(x, h.Radius - 2), center + new Vector2(x + h.DX * 7, -h.Radius + 2), 3, edge);
+            float x = -halfWidth + (i + .5f) * geometry.Length / 5;
+            GhostSamuraiVisuals.Stroke(batch, center + new Vector2(x, geometry.Radius - 2),
+                center + new Vector2(x + h.DX * Math.Min(7, geometry.Length / 12), -geometry.Radius + 2), 3, edge);
         }
     }
 }

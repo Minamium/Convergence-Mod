@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v40
+## Current development protocol v41
+
+Ghost Samurai's FrontalCleaveShockwave retains the v40 actor/aim/hazard layouts, stable IDs and authority ownership. The server now selects a clear staging point above the arena's bottom center; the existing origin/anchor/ground floats determine a speed-capped arrival duration. Charge, blade growth, downswing/contact and ground-front growth derive from the same accepted attack/hazard clocks. Clients never choose terrain or add damage. ShockGeometry keeps the floor fixed while widening/raising the current rectangle for both rendering and the server hit path. Protocol41 prevents old peers from deriving the former path, fire time or constant-size front from unchanged payloads. Target invalidation, event counters, sound deduplication and exact-Fight cleanup are retained; no per-frame scale packets or new native damage exceptions are added. The [attack specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md#正面大斬撃衝撃波--frontalcleaveshockwave) owns tuning.
+
+## Preceding development protocol v40
 
 Ghost Samurai appends attack IDs6/7 (TripleVerticalSlash/FrontalCleaveShockwave) and shape IDs8/9/10 (VerticalSlash/FrontalCleave/GroundShockwave), preserving existing values. The native actor ExtraAI appends23 bytes: step and signed facing (one byte each), a canonical boolean lock byte, and five finite floats for approach origin, anchor and ground plane. Its complete actor body is76 bytes. Idle and old attacks require an empty combo pose; new attacks bound the counter and require facing -1/+1. Reject malformed/truncated state before mutation and conflicting same-age combo updates.
 

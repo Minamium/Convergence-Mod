@@ -1,0 +1,46 @@
+{
+  "feature": "Ghost Samurai frontal cleave bottom-center staging, overhead growing blade and expanding ground fronts",
+  "date": "2026-09-15",
+  "version": "0.3.7",
+  "protocol": 41,
+  "base_commit": "c8c2b180fd5926b1dfb8f1ad140b30dda7890fbd",
+  "source_sha256": "d589c6f9c05ef1549a1b7770136e975f8a9448e4c18fc96e21c9f2f247a2e2c6",
+  "source_state": "uncommitted final feature C# with body-tail clearance; final evidence fields written after build; production C# matches manifest",
+  "artifact_sha256": "b5ad3c8e59b7a7bb500083bac610329b6d5b7f112038fca6085e55e71be2a7ad",
+  "assembly_sha256": "e71518574b333bf547a9026889635a12a53966cb6ab107a6e41edcd8e0ce3b51",
+  "build": {
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales": 18,
+    "shader_exports": "passed",
+    "source_changed": false,
+    "packaged_admission": "solo enabled;1-4 players"
+  },
+  "checks": {
+    "domain_cases": 229,
+    "ghost_samurai_cases": 45,
+    "compiled_protocol_roundtrips": 330,
+    "malformed_rejections": 54,
+    "summon_and_Global_registration": "passed",
+    "both_encounters_exact_Fight_teardown": "passed",
+    "native_Doll_Hurt_calibration": "passed",
+    "focused_rerun_after_body_clearance": 45
+  },
+  "authority": "existing server/SP pose anchors, target, event counter, ground lookup, hazard generation, collision and cleanup; no new packet fields or native damage exception",
+  "runtime": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "clear bottom-center arrival on flat and obstructed terrain without arena changes",
+      "overhead grip stays attached and only blade scales",
+      "six-tick swing contact matches sound and damage",
+      "rear dodge then jump over growing fronts; Reduced Effects readability",
+      "matching-peer phase interruption, target death/exit, wipe/victory cleanup"
+    ]
+  },
+  "notes": [
+    "Only FrontalCleaveShockwave and its ground fronts changed; other attack rules retained.",
+    "No GUI, game or gameplay server launched.",
+    "No new asset files; original atlas regions reused.",
+    "Fully blocked center skips this attack safely; ground fronts keep a fixed horizontal plane."
+  ]
+}
