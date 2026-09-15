@@ -35,7 +35,7 @@ internal sealed class FirstSeveranceMechanicalCore
     }
 
     internal void Draw(SpriteBatch batch,Vector2 center,float radius,float seconds,float roll,Color tint,float opacity,bool reduced,
-        float bore = 0, Vector2 boreAxis = default, bool twinBore = false)
+        float bore = 0, Vector2 boreAxis = default, bool twinBore = false, float damage = 0)
     {
         if(Main.dedServ||opacity<=.001f||radius<1) return;
         // The sphere's surface rotates; the highlight remains in the world
@@ -78,7 +78,15 @@ internal sealed class FirstSeveranceMechanicalCore
             material += new Vector3(.022f, .006f, .039f) * occlusion;
             // Cold reflected wall light remains subordinate to the actual jet.
             material += new Vector3(.06f, .018f, .095f) * Math.Max(0, surfaceNormal.Z) * occlusion * bore;
+            // Failing metal, not another UI reticle: torn, asymmetric joins
+            // rotate with the material and leak white-violet pressure from inside.
+            float scar = MathF.Abs(local.Y + .065f * MathF.Sin(local.X * 21 + local.Z * 8));
+            float crack = MathF.Pow(1 - Math.Clamp(scar / (.004f + damage * .026f), 0, 1), 2);
+            float flicker = .6f + .4f * MathF.Sin(seconds * 19 + local.X * 6) * MathF.Sin(seconds * 31);
+            material *= 1 - damage * .38f;
+            material += new Vector3(.7f, .34f, 1f) * crack * damage * flicker * (1 - occlusion);
             Vector2 displaced = p + axis * (crater.Depth * .20f * side);
+            displaced *= 1 + damage * .022f * MathF.Sin(seconds * 13 + local.X * 9) * n.Z;
             vertices[i]=new(new Vector3(origin+displaced*radius,0),
                 new Color(new Vector4(Vector3.Clamp(material,Vector3.Zero,Vector3.One),1)*modulation));
         }

@@ -150,6 +150,7 @@ internal sealed class FirstSeveranceFeedback
                 FirstSeveranceSubstate.RemoteCrush => null, // owned by the critical cue clock
                 FirstSeveranceSubstate.FinalBullets => "FinalGather",
                 FirstSeveranceSubstate.FinalSlicer => null,
+                FirstSeveranceSubstate.FinalCoreCheck => "CoreExposure",
                 _ => null,
             };
             if (cue is not null && state.EstimatedAuthorityTick < combat.ActionStartedTick + 30)

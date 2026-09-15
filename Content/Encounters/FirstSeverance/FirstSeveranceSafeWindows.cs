@@ -8,7 +8,7 @@ internal readonly record struct FirstSeveranceSafeWindow(FirstSeveranceSafeMecha
     ulong StartTick, ulong ResolveTick, float X, float Y);
 
 // Derived from the accepted action clock; no client assignment or extra packet.
-// The same sanctuaries cut the actual grid and its rendered segments.
+// Spread sanctuaries omit whole lanes, never holes inside a visible beam.
 internal static class FirstSeveranceSafeWindows
 {
     internal const int SpreadVolleyAge = FirstSeveranceGridVolley.OpeningTicks + 2 * FirstSeveranceGridVolley.CadenceTicks;
@@ -52,28 +52,20 @@ internal static class FirstSeveranceSafeWindows
         return Array.Empty<(float, float, float)>();
     }
 
-    internal static List<FirstSeveranceLanceRay> CutGrid(List<FirstSeveranceLanceRay> rays,
+    internal static List<FirstSeveranceLanceRay> OmitSanctuaryLanes(List<FirstSeveranceLanceRay> rays,
         byte pattern, float x, float groundY)
     {
         foreach (var p in Pockets(pattern, x, groundY))
         {
-            var clipped = new List<FirstSeveranceLanceRay>(rays.Count + 12);
+            var continuous = new List<FirstSeveranceLanceRay>(rays.Count);
             foreach (var ray in rays)
             {
                 bool vertical = ray.DirectionY == 1;
                 float across = vertical ? ray.X : ray.Y;
                 float center = vertical ? p.X : p.Y;
-                if (Math.Abs(across - center) > p.Half + ray.HalfWidth) { clipped.Add(ray); continue; }
-                float along = vertical ? ray.Y : ray.X;
-                float target = vertical ? p.Y : p.X;
-                float low = Math.Clamp(target - p.Half - ray.HalfWidth - along, 0, ray.Length);
-                float high = Math.Clamp(target + p.Half + ray.HalfWidth - along, 0, ray.Length);
-                if (low > .01f) clipped.Add(ray with { Length = low });
-                if (high < ray.Length - .01f)
-                    clipped.Add(ray with { X = ray.X + ray.DirectionX * high,
-                        Y = ray.Y + ray.DirectionY * high, Length = ray.Length - high });
+                if (Math.Abs(across - center) > p.Half + ray.HalfWidth) continuous.Add(ray);
             }
-            rays = clipped;
+            rays = continuous;
         }
         return rays;
     }

@@ -68,6 +68,7 @@ internal static partial class Program
             FirstSeveranceSubstate.FinalBullets,
             FirstSeveranceSubstate.FinalSlicer,
             FirstSeveranceSubstate.RemoteCrush,
+            FirstSeveranceSubstate.FinalCoreCheck,
         };
         FirstSeveranceMechanicKind[] expectedMechanics =
         {

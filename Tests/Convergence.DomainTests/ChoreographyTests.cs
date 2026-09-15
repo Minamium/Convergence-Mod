@@ -19,7 +19,7 @@ internal static partial class Program
                 var before = loop.State;
                 if (before.ActionIndex >= 0) visited.Add((before.BossPhase, before.ActionIndex));
                 if (before.BossPhase == FirstSeveranceBossPhase.Final && before.Substate == FirstSeveranceSubstate.Stack) finalStacks++;
-                if (before.BossPhase == FirstSeveranceBossPhase.Final)
+                if (before.BossPhase == FirstSeveranceBossPhase.Final && before.Substate != FirstSeveranceSubstate.FinalCoreCheck)
                     AssertEqual(0, before.BossLife, "terminal survival is truly logical HP zero");
                 var result = loop.Advance(new(before.ResolveTick, 0, int.MaxValue));
                 AssertEqual(false, result.Disposition == FirstSeveranceLoopUpdateDisposition.Rejected, "valid action deadline");

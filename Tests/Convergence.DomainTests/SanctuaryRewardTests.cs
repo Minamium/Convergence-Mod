@@ -42,6 +42,14 @@ internal static partial class Program
             var grid = new FirstSeveranceGridVolley(3, 100, pattern, 4000, 4000);
             var pockets = FirstSeveranceSafeWindows.Pockets(pattern, 4000, 4000);
             AssertEqual(4, pockets.Count, "explicit bounded sanctuary layout");
+            var bounds = FirstSeveranceContainmentBounds.FromGround(4000, 4000);
+            foreach (var ray in grid.Rays)
+            {
+                AssertEqual(ray.DirectionY == 1 ? bounds.Top : bounds.Left,
+                    ray.DirectionY == 1 ? ray.Y : ray.X, "continuous beam begins at field edge");
+                AssertEqual(ray.DirectionY == 1 ? bounds.Bottom : bounds.Right,
+                    (ray.DirectionY == 1 ? ray.Y : ray.X) + ray.Length, "no internal hole or truncated segment");
+            }
             AssertEqual(true, grid.Rays.Count <= FirstSeveranceGridVolley.MaximumLines, "bounded post-cut segments");
             foreach (var pocket in pockets)
             {

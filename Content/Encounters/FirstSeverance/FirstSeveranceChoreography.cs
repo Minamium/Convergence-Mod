@@ -7,7 +7,7 @@ internal readonly record struct FirstSeveranceAction(FirstSeveranceSubstate Stat
 
 // Feature-local score. Sealed's score follows its FIRST full Core exposure.
 // Adding an intermediate phase only changes the phase plan and its score here;
-// Final remains an explicit HP-zero survival stage, never a normal death hook.
+// Final is survival followed by a bounded core check, never a normal death hook.
 internal static class FirstSeveranceChoreography
 {
     internal const float ClockRadiusX = 560, ClockRadiusY = 300;
@@ -58,6 +58,7 @@ internal static class FirstSeveranceChoreography
             if (final) actions.Add(new(i % 2 == 0 ? FirstSeveranceSubstate.FinalBullets : FirstSeveranceSubstate.FinalSlicer,
                 FinalHazardTicks(i * 3 + 2)));
         }
+        if (final) actions.Add(new(FirstSeveranceSubstate.FinalCoreCheck, FirstSeveranceFinalCheck.DurationTicks));
         return actions.AsReadOnly();
     }
 
@@ -84,4 +85,11 @@ internal static class FirstSeveranceChoreography
         => step == -1 ? (phase == FirstSeveranceBossPhase.Sealed && state is >= FirstSeveranceSubstate.SpawnIntro and <= FirstSeveranceSubstate.Reset)
             || (phase != FirstSeveranceBossPhase.Sealed && state == FirstSeveranceSubstate.PhaseTransition)
             : step >= 0 && step < For(phase).Count && For(phase)[step].State == state;
+}
+
+internal static class FirstSeveranceFinalCheck
+{
+    internal const int DurationTicks = 600;
+    internal const int CannonCadenceTicks = 132;
+    internal static int Life(int maximum) => checked((int)(((long)maximum + 19) / 20));
 }

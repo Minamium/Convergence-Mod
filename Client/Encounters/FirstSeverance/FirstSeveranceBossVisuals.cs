@@ -191,7 +191,24 @@ internal sealed class FirstSeveranceBossVisuals
             depth: 1 - retreat * .76f);
         if (remote) DrawRemoteArms(batch, combat, center, renderTick, reveal, retreat, reduced);
         if (remote)
-            doll.DrawRemoteCore(batch,center,MotionSeconds,reveal*retreat*(1-breakup),reduced);
+        {
+            bool finalCheck = combat.Substate == FirstSeveranceSubstate.FinalCoreCheck;
+            float failing = finalCheck ? .35f + .65f * (1 - combat.BossLife /
+                (float)Math.Max(1, FirstSeveranceFinalCheck.Life(combat.BossMaximumLife))) : 0;
+            float entry = finalCheck ? Window(renderTick - combat.ActionStartedTick, 0, 14) : 0;
+            doll.DrawRemoteCore(batch,center,MotionSeconds,reveal*retreat*MathHelper.Lerp(1-breakup,1,entry),reduced,failing);
+            if (finalCheck)
+            {
+                float age = (float)(renderTick - combat.ActionStartedTick);
+                float pulse = .5f + .5f * MathF.Sin(age * .24f);
+                Glow(batch, center, 180 + pulse * 60, Additive(new Color(164, 103, 255),
+                    entry * (.12f + failing * .14f) * (reduced ? .4f : 1)));
+                // Brief recoil on exposure, then intermittent leaking pressure;
+                // no blackout, title, target ring or geometry displacement.
+                Accents.ChargeFracture(batch, center, renderTick, combat.ActionStartedTick,
+                    combat.ActionStartedTick + 18d, new Color(197, 163, 255), reduced, 2.2f);
+            }
+        }
         float encased = combat.BossPhase == FirstSeveranceBossPhase.Sealed ? 1
             : hatching ? 1 - Window(hatchAge, .12, .28) : 0;
         if(combat.Substate==FirstSeveranceSubstate.SpawnIntro)
