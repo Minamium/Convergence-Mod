@@ -102,6 +102,20 @@ public static class NativeHurtCheck
             }
             Console.WriteLine("PASS packaged Raid player/buff loader type validation");
 
+            foreach (string name in new[] {
+                "Convergence.Client.Encounters.CrimsonFoundry.CrimsonBossVisuals",
+                "Convergence.Client.Encounters.CrimsonFoundry.CrimsonAttackVisuals",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonBoss",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonAttack",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonConductor",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonConnection" }) {
+                Type type = mod.GetType(name, false);
+                if (type == null) continue; // Earlier packages remain inspectable.
+                object instance = Activator.CreateInstance(type, true);
+                type.GetMethod("ValidateType", Instance).Invoke(instance, null);
+                Console.WriteLine("PASS packaged loader type: " + type.Name);
+            }
+
             var playerType = engine.GetType("Terraria.Player", true);
             var modPlayer = engine.GetType("Terraria.ModLoader.ModPlayer", true);
             var fightType = mod.GetType("Convergence.Common.Foundation.Identifiers.FightId", true);
