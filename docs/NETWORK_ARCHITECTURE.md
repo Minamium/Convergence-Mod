@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v41
+## Current development protocol v42
+
+Crimson Foundry adds definition route `crimson_foundry` and termination schema3/version1. Reuses Activate/Ready/Cancel/Snapshot operation IDs; prior feature layouts remain unchanged. Bounded native actor ExtraAI includes Fight, age/music-start/purge ticks, stage and up to8 ordered slot/connection-GUID/Ready/out records. Hazard ExtraAI owns immutable Fight/boss slot, born/fire/end, shape, finite locked world ray and native source damage. Server-only mutations, complete decode before replacement, stale-Fight/age rejection and exact-Fight cleanup follow [ADR-0026](adr/0026-crimson-score-and-native-projectiles.md). No global feature switch or client beat/hit-report packet. Matching42 peers are required; [feature spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns music timing and admission.
+
+## Preceding development protocol v41
 
 Doll appends `FinalCoreCheck = 15` and feature cause `FinalDpsFailed = 14` without renumbering existing IDs. No DTO fields change. Final snapshots may carry up to5% of maximum HP only during the final check; other Final actions still require zero HP. The existing bounded CoreCannon descriptor is admitted in FinalBullets and FinalCoreCheck, deriving the new60-tick live interval on all peers. Third-volley lattice sanctuaries now omit whole lanes rather than clipping holes; geometry is still deterministically reconstructed. Use matching protocol41 clients/server. Server owns the one-time refill, deadline, cast targets/hits, victory/defeat and exact-Fight cleanup; no client DPS report or replica minion controls the Raid.
 

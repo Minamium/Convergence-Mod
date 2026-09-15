@@ -62,6 +62,27 @@ documents:
   related_docs:
   - encounter.ghost-samurai.spec
   - project.network-architecture
+- doc_id: adr.0026
+  path: docs/adr/0026-crimson-score-and-native-projectiles.md
+  title: 'ADR-0026: Crimson Foundry score clock and native projectiles'
+  content_sha256: a4d51cfbc682167e56ff5c75bad88c83a4a28e7be7e0e1014f4da111a81993a5
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-15'
+  source_of_truth_for:
+  - architecture.crimson_score_authority
+  aliases:
+  - Crimson score authority
+  related_code:
+  - Content/Encounters/CrimsonFoundry
+  - Client/Encounters/CrimsonFoundry/CrimsonAudio.cs
+  related_docs:
+  - encounter.crimson-foundry.spec
+  - adr.0022
+  - adr.0023
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -389,7 +410,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: b3e5edf470e8549f073871bc47ab5f6a8753a257b13297456b7c36e488654974
+  content_sha256: bc23700f1997f3afee2b01866e74d3608134f99cbfc69fb636638342b39fa63f
   document_type: index
   status: accepted
   owners:
@@ -477,7 +498,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: b27c33602921860500c8cec47b8ba05805d23b72b578e8522b3927810fd999ae
+  content_sha256: 1681c25631d2e0b6daa9d210f0acf7a586b149d171c800fe234028c24e640c36
   document_type: index
   status: accepted
   owners:
@@ -533,6 +554,28 @@ documents:
   related_docs:
   - docs.entrypoint
   - docs.search-index
+- doc_id: encounter.crimson-foundry.spec
+  path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
+  title: Crimson Foundry
+  content_sha256: fa657dc005db22fe16fd0c9daadac1d3277cd293407213200fb9dcc26f22c767
+  document_type: spec
+  status: accepted
+  owners:
+  - gameplay
+  - art
+  - audio
+  last_reviewed: '2026-09-15'
+  source_of_truth_for:
+  - encounter.crimson_foundry.experience
+  - encounter.crimson_foundry.music
+  aliases:
+  - red mechanic raid
+  related_code:
+  - Content/Encounters/CrimsonFoundry
+  - Client/Encounters/CrimsonFoundry
+  related_docs:
+  - project.status
+  - adr.0026
 - doc_id: encounter.first-severance.backlog
   path: docs/encounters/first-severance/BACKLOG.md
   title: First Severance Deferred Backlog
@@ -996,7 +1039,7 @@ documents:
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
-  content_sha256: baa473a9f984d723e613ed4d2630acff18e1bd8cd04ad757843622d4b06aae98
+  content_sha256: ffcedc3795775151773697efab2bd08615353bded90296fc9543c802565570f4
   document_type: governance
   status: accepted
   owners:
@@ -1153,7 +1196,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 013ffbc8ccc793147ea54d0cd58c99be158a48de5e66eaa6bc2985b9124054e6
+  content_sha256: 9855f38262c04bfffade0b0bd6477815776ecec6ef85e5c6945ec578af8dd909
   document_type: governance
   status: accepted
   owners:
@@ -1198,7 +1241,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 6e358b7b278b53d0b2062c48902bd6e400fe3f152dc489b974ad17b8acdb7b5d
+  content_sha256: 471341c4aa7be98c33b9696dbddae4fcbec717d994b1fc9be9399eae95242f99
   document_type: status
   status: accepted
   owners:
@@ -1454,7 +1497,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 528f12375d29fea1a89983e175fe5a0da12ed18e0682d1bf03ac252ff002a4e2
+  content_sha256: fc5cb306cf675b5f0ea3284c512e1844408b6f1c742c62a3b819a0d2b31d31a0
   document_type: research
   status: historical
   owners:

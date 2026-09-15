@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-15",
+  "scope": "Crimson Foundry initial local prototype, owner-added 50-percent armor purge",
+  "base_commit": "a66a9f7809477cb76d7126de436d7ec06062edd6",
+  "version": "0.3.8",
+  "protocol": 42,
+  "automated": {
+    "domain": "232 passed; 3 new cases exercise loop precision, warning/offbeat schedule and actor/hazard full/truncated/malformed inputs",
+    "existing_compiled_codecs": "334 round-trips and 54 malformed/truncated rejections, protocol42",
+    "native_build": "final native Release package passed, zero errors and four pre-existing CS8632 warnings; twenty localization files and shader source/export hashes passed",
+    "loader": "six new Crimson types pass installed ValidateType; prior native-Hurt/Doll cleanup checks pass",
+    "static": "76-document catalog, 767-file repository policy and 10 YAML files passed; final catalog reflects initial HP tuning",
+    "package_assets": "exact local OGG/score/credits SHA256 match; compiled 1536x1024 and 1689x931 textures present"
+  },
+  "build": {
+    "local_record_id": "20260915T125455495076Z",
+    "package_sha256": "4623e6ac6adfcc46c4d3dcf1b7d845ac6042ca1923707469f31d4d55306b9955",
+    "source": "feature/crimson-foundry on the recorded base with the full dirty-file manifest in the local build record",
+    "ignored_local_audio_sha256": "f8f0a566a18dfa7d9ba2fd6203d877160bc6e0ae04123a694a2c9307bbaaffa9",
+    "normal_profile_install": "separate ignored installation receipt; never inferred from isolated build"
+  },
+  "audio": {
+    "method": "Numerical onset/energy/chroma analysis, not subjective listening",
+    "source_duration_seconds": 142.5,
+    "loop_start_sample": 821888,
+    "loop_end_sample": 6456608,
+    "sample_rate": 48000,
+    "crossfade_seconds": 0.3,
+    "peak_dbfs": -0.2,
+    "beat_count": 294,
+    "distribution": "Local owner-approved game edit only; raw/standalone audio not pushed"
+  },
+  "not_run": [
+    "Actual Mod load, rendering, Ready controls at 107-percent UI scale and zoom",
+    "Solo and three/eight-player distant roster/slot reuse/late-join behavior",
+    "Native equipment hits and dodge; victory/wipe then re-summon",
+    "Audio seam listening, device latency, MP drift and focus/pause recovery",
+    "50-percent armor purge, musical accent alignment and fight balance",
+    "Graphics/audio performance under actual multiplayer load"
+  ]
+}
