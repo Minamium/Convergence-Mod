@@ -848,7 +848,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 0a9cf45e733d34352f8a2af9bbd889e8327dc7f4c90eb33e4765ad336aef32c7
+  content_sha256: ee4ae054c4310c95d1260bd18792399c675b5e088d36113f9595ed4ecf73cd76
   document_type: evidence
   status: historical
   owners:
@@ -1243,7 +1243,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8717981a487393eb65e66dfb38452fd4a0781731907b0366a55c407c065cbdc4
+  content_sha256: 5e267fec3a22a4229fd2c68e67bb0468d46c47f588a09cde8f4f783fe2c9c17c
   document_type: status
   status: accepted
   owners:
