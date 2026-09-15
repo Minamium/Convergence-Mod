@@ -64,14 +64,14 @@ documents:
   - project.network-architecture
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
-  title: 'ADR-0026: Crimson Foundry score clock and native projectiles'
-  content_sha256: 9f7336c0a182f24f405abbc2b26e87cb6a10fa2c47c29045fe5a0e82b56c427f
+  title: 'ADR-0026: Crimson score clock and native projectiles'
+  content_sha256: f203043669aa953cbab42abbf778828a9a01a66e60d3cedcb959f894036b7bb5
   document_type: adr
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-16'
   source_of_truth_for:
   - architecture.crimson_score_authority
   aliases:
@@ -498,7 +498,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: e657c36dc7383df0a295a59e4158e8782fad5807383140e07e603a83b5a7eeb0
+  content_sha256: b274efae996a874ebff7a4323fb4e7e02888637e56d02cdf6a7a919546b7b5b8
   document_type: index
   status: accepted
   owners:
@@ -556,20 +556,22 @@ documents:
   - docs.search-index
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
-  title: Crimson Foundry
-  content_sha256: 0bdc237c45c85282044b07b23f7bb951aa5f200c9b9ea951ffce0f4e1454e3b9
+  title: Crimson Invocation
+  content_sha256: 0e84a5c6f5413d441232a5b95114fe93c42152109babdabc50b17cac9b1593f8
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-16'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
   aliases:
   - red mechanic raid
+  - Crimson Invocation
+  - scarlet conjurer
   related_code:
   - Content/Encounters/CrimsonFoundry
   - Client/Encounters/CrimsonFoundry
@@ -846,7 +848,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 1d40050998bc13d171c53d7469cde9ca168d173147b9a454c30f414e08fd0b9f
+  content_sha256: 0a9cf45e733d34352f8a2af9bbd889e8327dc7f4c90eb33e4765ad336aef32c7
   document_type: evidence
   status: historical
   owners:
@@ -1241,12 +1243,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 602d53b356ff14bf4b6c3ad2825b4e3fbfe9b3ba50d67babbbd194588b734cb7
+  content_sha256: 8717981a487393eb65e66dfb38452fd4a0781731907b0366a55c407c065cbdc4
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-16'
   source_of_truth_for:
   - project.implementation_status
   aliases:
