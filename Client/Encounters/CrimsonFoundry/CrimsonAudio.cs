@@ -82,7 +82,9 @@ internal sealed class CrimsonAudio : ModSystem
             lastResync = (int)age; Start(age);
             Mod.Logger.Info($"CrimsonFoundry event=AudioReanchor score_tick={(int)age}");
         }
-        gain = Math.Min(.88f, gain + .06f);
+        // The source is ~2.1dB hotter than Doll P1; this direct PCM path lacks
+        // Terraria's music-track mixing headroom. -7.0dB from the prior .88.
+        gain = Math.Min(.39f, gain + .035f);
         if (voice is not null) voice.Volume = gain * Main.musicVolume;
     }
     private void Start(double age)

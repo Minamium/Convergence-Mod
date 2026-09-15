@@ -108,7 +108,9 @@ public static class NativeHurtCheck
                 "Convergence.Content.Encounters.CrimsonFoundry.CrimsonBoss",
                 "Convergence.Content.Encounters.CrimsonFoundry.CrimsonAttack",
                 "Convergence.Content.Encounters.CrimsonFoundry.CrimsonConductor",
-                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonConnection" }) {
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonConnection",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonFieldPlayer",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonFieldSpawns" }) {
                 Type type = mod.GetType(name, false);
                 if (type == null) continue; // Earlier packages remain inspectable.
                 object instance = Activator.CreateInstance(type, true);

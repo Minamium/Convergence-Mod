@@ -11,6 +11,8 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
+using System.Diagnostics;
+using Luminance.Assets;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry;
 
@@ -27,6 +29,18 @@ internal sealed class CrimsonVisuals : ModSystem
     private Guid fight;
     private int previousAge = -1, lastFire = -100, endingAt = -1;
     private float shake;
+    private readonly List<(ReLogic.Utilities.SlotId Id, int Stop)> voices = new();
+    private int lastCharge = -100;
+    private static int lastClock;
+    private static long clockReceived;
+    internal static float RenderAge(CrimsonBoss boss)
+    {
+        int tick = (int)boss.VisualAge;
+        if (tick != lastClock) { lastClock = tick; clockReceived = Stopwatch.GetTimestamp(); }
+        return tick + (Main.gamePaused ? 0f : (float)Math.Clamp((Stopwatch.GetTimestamp() - clockReceived) / (double)Stopwatch.Frequency * 60, 0, 1));
+    }
+    public override void PostSetupContent() => CrimsonRig.Load();
+    public override void Unload() { Reset(); CrimsonRig.Unload(); }
     private static readonly Rectangle Pixel = new(0, 0, 1, 1);
     internal static bool Reduced => ModContent.GetInstance<CrimsonVisualConfig>().ReducedEffects;
     internal static bool Local(CrimsonBoss b) => Array.Exists(b.State.Members, m => m.Slot == Main.myPlayer);
@@ -40,25 +54,44 @@ internal sealed class CrimsonVisuals : ModSystem
         if (fight != boss.State.Fight) { Reset(); fight = boss.State.Fight; previousAge = age - 1; }
         shake *= .80f;
         if (boss.State.PurgeTick >= 0 && previousAge < boss.State.PurgeTick && age >= boss.State.PurgeTick && age - boss.State.PurgeTick < 8)
-        { Cue("ShellBreak", .65f); shake = 11; }
+        { Cue("ShellBreak", .42f, age + 90); shake = 11; }
         if (boss.State.MusicStart >= 0 && previousAge < boss.State.MusicStart && age >= boss.State.MusicStart && age - boss.State.MusicStart < 8)
-        { Cue("RaidDesignation", .36f); shake = 5; }
+        { Cue("RaidDesignation", .24f, age + 120); shake = 5; }
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && endingAt < 0)
         {
             endingAt = age;
-            Cue(boss.State.Stage == CrimsonStage.Victory ? "RaidVictory" : "RaidDefeat", .60f); shake = 8;
+            Cue(boss.State.Stage == CrimsonStage.Victory ? "RaidVictory" : "RaidDefeat", .40f, age + 150); shake = 8;
         }
         foreach (Projectile p in Main.ActiveProjectiles)
         {
             if (p.ModProjectile is not CrimsonAttack a || a.Hazard.Fight != fight) continue;
+            int chargeTick = a.Hazard.Fire - 26;
+            if (previousAge < chargeTick && age >= chargeTick && age - chargeTick < 5 && age - lastCharge > 14)
+            { lastCharge = age; Cue("Beams/PortalCharge", .24f, a.Hazard.Fire + 6); }
             if (previousAge < a.Hazard.Fire && age >= a.Hazard.Fire && age - a.Hazard.Fire < 5 && age - lastFire > 5)
-            { lastFire = age; Cue(a.Hazard.Shape == CrimsonShape.Bolt ? "LanceFire" : "FinalSlicerFire", .48f); shake = Math.Max(shake, 3.5f); }
+            { lastFire = age; Cue("Beams/PortalFire", .35f, a.Hazard.End + 14); shake = Math.Max(shake, 5.5f); }
+        }
+        for (int i = voices.Count - 1; i >= 0; i--)
+        {
+            var voice = voices[i];
+            if (!SoundEngine.TryGetActiveSound(voice.Id, out var sound)) { voices.RemoveAt(i); continue; }
+            if (age >= voice.Stop) { sound.Stop(); voices.RemoveAt(i); }
+            else sound.Volume = Math.Min(sound.Volume, Math.Clamp((voice.Stop - age) / 14f, 0, 1));
         }
         previousAge = age;
     }
-    private static void Cue(string asset, float gain) => SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
-    { Volume = gain, MaxInstances = 2, PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused });
-    private void Reset() { fight = Guid.Empty; previousAge = -1; lastFire = -100; endingAt = -1; shake = 0; }
+    private void Cue(string asset, float gain, int stop)
+    {
+        if (voices.Count >= 32) return;
+        voices.Add((SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
+        { Volume = gain, MaxInstances = 1, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
+            PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused }), stop));
+    }
+    private void Reset()
+    {
+        foreach (var voice in voices) if (SoundEngine.TryGetActiveSound(voice.Id, out var sound)) sound.Stop();
+        voices.Clear(); fight = Guid.Empty; previousAge = -1; lastFire = lastCharge = -100; endingAt = -1; shake = 0;
+    }
     public override void OnWorldUnload() => Reset();
     public override void ClearWorld() => Reset();
     public override void ModifyScreenPosition()
@@ -76,12 +109,12 @@ internal sealed class CrimsonVisuals : ModSystem
         CrimsonEnergy.Begin();
         try
         {
-            float age = boss.VisualAge;
+            float age = RenderAge(boss);
             foreach (Projectile p in Main.ActiveProjectiles)
             {
                 if (p.ModProjectile is not CrimsonAttack attack || attack.Hazard.Fight != boss.State.Fight) continue;
                 var h = attack.Hazard;
-                if (age >= h.End + 8 || age < h.Born) continue;
+                if (age >= h.End + 14 || age < h.Born) continue;
                 bool live = age >= h.Fire;
                 Vector2 origin = new(h.X, h.Y), direction = new(h.DX, h.DY);
                 float length = h.Length, width = h.Width, opacity = 1;
@@ -89,10 +122,25 @@ internal sealed class CrimsonVisuals : ModSystem
                 {
                     width = h.HitWidth(age);
                     length = h.Reach(age);
-                    if (h.Shape == CrimsonShape.Bolt) origin += direction * Math.Max(0, h.Travel(age) - 110);
-                    if (age >= h.End) opacity = 1 - Ease((age - h.End) / 8);
+                    if (h.Shape == CrimsonShape.Bolt) origin += direction * Math.Max(0, h.Travel(age) - CrimsonHazard.BoltTail);
+                    if (age >= h.End) opacity = 1 - Ease((age - h.End) / 14);
                 }
                 CrimsonEnergy.Add(origin, direction, length, width, age, h.Fire, h.End, opacity, Reduced);
+                if (!Reduced)
+                {
+                    var glow = MiscTexturesRegistry.BloomCircleSmall.Value;
+                    int sparks = live ? 12 : 8;
+                    for (int i = 0; i < sparks; i++)
+                    {
+                        float u = ((i * .173f + age * (live ? .024f : .001f) + h.Born * .001f) % 1 + 1) % 1;
+                        Vector2 n = new(-direction.Y, direction.X);
+                        Vector2 at = origin + direction * length * u + n * MathF.Sin(i * 4.1f + age * .12f) * width * .72f;
+                        float intensity = live ? .45f : .20f * Ease((age - h.Born) / 20);
+                        Vector2 size = live ? new(12, 2.5f) : new(3, 3);
+                        batch.Draw(glow, at - Main.screenPosition, null, new Color(255, 166, 155, 0) * intensity * opacity,
+                            direction.ToRotation(), glow.Size() * .5f, size * 2 / glow.Size(), SpriteEffects.None, 0);
+                    }
+                }
                 if (!Reduced && live)
                 {
                     // Source flash is brief, directed and never a HUD reticle.
@@ -121,6 +169,25 @@ internal sealed class CrimsonVisuals : ModSystem
     {
         var batch = Main.spriteBatch; var state = boss.State; float age = boss.VisualAge;
         var view = Main.instance.GraphicsDevice.Viewport;
+        // Physical pixels, transformed ONCE; UI scale never enters world masks.
+        var field = state.Field;
+        Vector2 tl = Vector2.Transform(new Vector2(field.Left, field.Top) - Main.screenPosition, Main.GameViewMatrix.TransformationMatrix);
+        Vector2 br = Vector2.Transform(new Vector2(field.Right, field.Bottom) - Main.screenPosition, Main.GameViewMatrix.TransformationMatrix);
+        int left = Math.Clamp((int)MathF.Floor(tl.X), 0, view.Width), right = Math.Clamp((int)MathF.Ceiling(br.X), 0, view.Width);
+        int top = Math.Clamp((int)MathF.Floor(tl.Y), 0, view.Height), bottom = Math.Clamp((int)MathF.Ceiling(br.Y), 0, view.Height);
+        // Eliminated/respawned spectators can be outside the stage. Never cover
+        // their entire unrelated world view with the participant-only mask.
+        if (state.Contains(Main.myPlayer) && !Main.LocalPlayer.dead && !Main.LocalPlayer.ghost)
+        {
+            Fill(new(0, 0, view.Width, top), Color.Black); Fill(new(0, bottom, view.Width, view.Height - bottom), Color.Black);
+            Fill(new(0, top, left, Math.Max(0, bottom - top)), Color.Black);
+            Fill(new(right, top, view.Width - right, Math.Max(0, bottom - top)), Color.Black);
+            Color edge = new(213, 53, 67);
+            if (tl.X >= 0 && tl.X < view.Width) Fill(new(left, top, 2, Math.Max(0, bottom - top)), edge);
+            if (br.X > 0 && br.X <= view.Width) Fill(new(Math.Max(0, right - 2), top, 2, Math.Max(0, bottom - top)), edge);
+            if (tl.Y >= 0 && tl.Y < view.Height) Fill(new(left, top, Math.Max(0, right - left), 2), edge);
+            if (br.Y > 0 && br.Y <= view.Height) Fill(new(left, Math.Max(0, bottom - 2), Math.Max(0, right - left), 2), edge);
+        }
         bool intro = state.MusicStart >= 0 && age >= state.MusicStart && age < state.MusicStart + CrimsonRegistration.Score.IntroTicks;
         bool cinematic = state.Stage == CrimsonStage.Deployment || intro || endingAt >= 0;
         if (cinematic)
@@ -172,49 +239,7 @@ internal sealed class CrimsonBossVisuals : GlobalNPC
     public override bool PreDraw(NPC npc, SpriteBatch batch, Vector2 screenPos, Color drawColor)
     {
         if (npc.ModNPC is not CrimsonBoss boss) return true;
-        var state = boss.State; float age = boss.VisualAge;
-        Texture2D heavy = ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/FoundryEngine").Value;
-        Texture2D light = ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/FoundryUnbound").Value;
-        float purge = state.PurgeTick < 0 ? -1 : age - state.PurgeTick;
-        float deployment = Math.Clamp(age / 110, 0, 1);
-        deployment = 1 - MathF.Pow(1 - deployment, 4);
-        Vector2 root = npc.Center - screenPos + new Vector2(0, (1 - deployment) * -160);
-        float pulse = state.MusicStart < 0 ? 0 : CrimsonRegistration.Score.Pulse(age - state.MusicStart);
-        float rotation = Math.Clamp(npc.velocity.X * .006f, -.28f, .28f) + MathF.Sin(age * .016f) * .018f;
-        float ending = state.Stage is CrimsonStage.Victory or CrimsonStage.Defeat ? .5f + .5f * MathF.Sin(age * .12f) : 1;
-        float alpha = deployment * ending;
-        if (purge < 0)
-            batch.Draw(heavy, root, null, Color.White * alpha, rotation, heavy.Size() * .5f, .34f, SpriteEffects.None, 0);
-        else
-        {
-            float emergence = Math.Clamp(purge / 36, 0, 1);
-            float scale = .235f * (.76f + .24f * (1 - MathF.Pow(1 - emergence, 3)));
-            if (!CrimsonVisuals.Reduced)
-                for (int i = 4; i > 0; i--) batch.Draw(light, root - npc.velocity * i * .7f, null,
-                    new Color(155, 25, 42, 0) * (alpha * .09f), rotation, light.Size() * .5f, scale, SpriteEffects.None, 0);
-            batch.Draw(light, root, null, Color.White * alpha * emergence, rotation, light.Size() * .5f, scale, SpriteEffects.None, 0);
-            if (purge < 80)
-            {
-                float travel = MathF.Pow(Math.Clamp(purge / 60, 0, 1), 1.7f);
-                for (int y = 0; y < 3; y++) for (int x = 0; x < 4; x++)
-                {
-                    var rect = new Rectangle(x * heavy.Width / 4, y * heavy.Height / 3, heavy.Width / 4, heavy.Height / 3);
-                    Vector2 local = new Vector2(rect.Center.X - heavy.Width * .5f, rect.Center.Y - heavy.Height * .5f) * .34f;
-                    Vector2 outward = local.SafeNormalize(new Vector2(x % 2 == 0 ? -1 : 1, -1));
-                    Vector2 position = root + local + outward * travel * (260 + x * 28) + new Vector2(0, travel * travel * 150);
-                    batch.Draw(heavy, position, rect, Color.White * (1 - Math.Clamp(purge / 80, 0, 1)), rotation + travel * (x - 1.5f),
-                        rect.Size() * .5f, .34f, SpriteEffects.None, 0);
-                }
-            }
-        }
-        // Red exhaust filaments are code-native and aligned with the moving hull.
-        if (pulse > .05f && !CrimsonVisuals.Reduced)
-        {
-            Vector2 flame = npc.Center + new Vector2(16, 65);
-            for (int i = -2; i <= 2; i++)
-                CrimsonVisuals.Stroke(batch, flame + new Vector2(i * 11, 0), flame + new Vector2(i * 17, 30 + 55 * pulse), new Color(245, 27, 54, 0) * pulse * .4f, 3);
-        }
-        return false;
+        return CrimsonRig.Draw(boss, batch, screenPos);
     }
 }
 
