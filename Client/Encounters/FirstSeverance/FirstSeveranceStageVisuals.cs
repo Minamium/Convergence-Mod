@@ -127,7 +127,8 @@ internal sealed class FirstSeveranceStageVisuals
     internal void DrawFinalCannon(SpriteBatch batch, FirstSeveranceCombatProjection combat, double tick,
         ulong authorityTick, FirstSeveranceAttackAccents accents, bool reduced)
     {
-        if (combat.Substate != FirstSeveranceSubstate.FinalBullets) { fadingCannon = null; return; }
+        if (combat.Substate is not (FirstSeveranceSubstate.FinalBullets or FirstSeveranceSubstate.FinalCoreCheck))
+        { fadingCannon = null; return; }
         if (combat.CoreCannon is { } received) fadingCannon = received;
         if (fadingCannon is not { } cannon || tick >= cannon.EndTick + 12d) return;
         FirstSeveranceCoreCannonVisuals.Draw(batch, accents, cannon.Ray, tick, cannon.StartTick, cannon.FireTick, cannon.EndTick,

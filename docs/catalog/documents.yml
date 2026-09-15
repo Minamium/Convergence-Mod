@@ -62,6 +62,27 @@ documents:
   related_docs:
   - encounter.ghost-samurai.spec
   - project.network-architecture
+- doc_id: adr.0026
+  path: docs/adr/0026-crimson-score-and-native-projectiles.md
+  title: 'ADR-0026: Crimson Foundry score clock and native projectiles'
+  content_sha256: 9f7336c0a182f24f405abbc2b26e87cb6a10fa2c47c29045fe5a0e82b56c427f
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-15'
+  source_of_truth_for:
+  - architecture.crimson_score_authority
+  aliases:
+  - Crimson score authority
+  related_code:
+  - Content/Encounters/CrimsonFoundry
+  - Client/Encounters/CrimsonFoundry/CrimsonAudio.cs
+  related_docs:
+  - encounter.crimson-foundry.spec
+  - adr.0022
+  - adr.0023
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -389,7 +410,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: b3e5edf470e8549f073871bc47ab5f6a8753a257b13297456b7c36e488654974
+  content_sha256: bc23700f1997f3afee2b01866e74d3608134f99cbfc69fb636638342b39fa63f
   document_type: index
   status: accepted
   owners:
@@ -477,7 +498,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: b27c33602921860500c8cec47b8ba05805d23b72b578e8522b3927810fd999ae
+  content_sha256: e657c36dc7383df0a295a59e4158e8782fad5807383140e07e603a83b5a7eeb0
   document_type: index
   status: accepted
   owners:
@@ -533,6 +554,28 @@ documents:
   related_docs:
   - docs.entrypoint
   - docs.search-index
+- doc_id: encounter.crimson-foundry.spec
+  path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
+  title: Crimson Foundry
+  content_sha256: 0bdc237c45c85282044b07b23f7bb951aa5f200c9b9ea951ffce0f4e1454e3b9
+  document_type: spec
+  status: accepted
+  owners:
+  - gameplay
+  - art
+  - audio
+  last_reviewed: '2026-09-15'
+  source_of_truth_for:
+  - encounter.crimson_foundry.experience
+  - encounter.crimson_foundry.music
+  aliases:
+  - red mechanic raid
+  related_code:
+  - Content/Encounters/CrimsonFoundry
+  - Client/Encounters/CrimsonFoundry
+  related_docs:
+  - project.status
+  - adr.0026
 - doc_id: encounter.first-severance.backlog
   path: docs/encounters/first-severance/BACKLOG.md
   title: First Severance Deferred Backlog
@@ -655,7 +698,7 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: Requiem of the Hollow Doll — Encounter Specification
-  content_sha256: 5d695249f718a88f767490e7d1600cce62489962a476f129764b486b40a3ac6d
+  content_sha256: 33a65ae4da4c162e17b51cdec9402baa9c1491c31a3bc7f30a65a978c95b75ea
   document_type: spec
   status: accepted
   owners:
@@ -705,7 +748,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 9dffebfaf6e4ae0499b9643253e99ecf521c88e9f9713d168b323f13159f96b6
+  content_sha256: f8be1b509eed78217a533d35c8f0d9064bb9edf8e8fa717163379448fd86ad0d
   document_type: spec
   status: provisional
   owners:
@@ -803,7 +846,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: c003d13d21cd6cc90b1b9fe2797e0e67af8c6934d7d4fb0bd5eb73e312f20a83
+  content_sha256: 1d40050998bc13d171c53d7469cde9ca168d173147b9a454c30f414e08fd0b9f
   document_type: evidence
   status: historical
   owners:
@@ -996,7 +1039,7 @@ documents:
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
-  content_sha256: baa473a9f984d723e613ed4d2630acff18e1bd8cd04ad757843622d4b06aae98
+  content_sha256: ba8f17488aae86783ed8e183677dc7162797d3b721441fa744818018b66d1466
   document_type: governance
   status: accepted
   owners:
@@ -1016,7 +1059,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 0ddf4fe4e4020fca1d8ad5fbfee6ce3d8d5c4138b90a213449a09de3b936a04e
+  content_sha256: 99be7ba627ce70ce7040dbf9ae7c06b882fa7a1024714a7c10aa752743cfcbb8
   document_type: spec
   status: provisional
   owners:
@@ -1153,7 +1196,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 1c0fdea924ab06d2e2d4b0942c3100efaec39333959ca545c247e4af61deb510
+  content_sha256: fbe3cf3fdf980eb8febe877d818106dafd6a90e7d7776efa8625f56b3fa2c768
   document_type: governance
   status: accepted
   owners:
@@ -1198,7 +1241,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: a59628d1624cbc77f33cd2ddca0adede7699e687e5df500874e9d10b61ee64c0
+  content_sha256: dca1ad18fd4520f9e02407b90b28a958b201080cdf1259b19ed777117f7c65f1
   document_type: status
   status: accepted
   owners:
@@ -1454,7 +1497,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 528f12375d29fea1a89983e175fe5a0da12ed18e0682d1bf03ac252ff002a4e2
+  content_sha256: a37e4c6623ef36f3e58e2550fec73e6ebad919d78ae8ae8c98ee559af104d9e6
   document_type: research
   status: historical
   owners:
@@ -1476,7 +1519,7 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: e02fa50ec9e25ea63d49e94ea629745a01d22b6bd9457ac23646b16759abc38d
+  content_sha256: 4cb83db2b17a908a28bc3062a636594b71614eb6c7f61984d4ac840d17f0ba39
   document_type: research
   status: provisional
   owners:

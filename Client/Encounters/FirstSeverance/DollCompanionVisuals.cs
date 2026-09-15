@@ -111,7 +111,8 @@ public sealed class DollCompanionVisuals : GlobalProjectile
         }, p.Center, _ => p.active && p.owner == owner && p.identity == identity && p.type == type
             && p.ai[0] >= DollCompanionRules.Verdict && p.ai[0] < DollCompanionRules.Verdict + DollCompanionRules.BeamTicks
             && RitualArmamentItems.Usable(Main.player[owner]) && !Main.player[owner].noItems && !Main.player[owner].CCed
-            && Main.player[owner].HasBuff(ModContent.BuffType<DollCovenantBuff>()));
+            && !DollCompanionRules.DismissForMissingBuff(owner == Main.myPlayer,
+                Main.player[owner].HasBuff(ModContent.BuffType<DollCovenantBuff>())));
         if (SoundEngine.TryGetActiveSound(sustain, out var started)) started.Volume = volume / .43f;
         ModContent.GetInstance<RitualWeaponFeedback>().Track(sustain);
     }

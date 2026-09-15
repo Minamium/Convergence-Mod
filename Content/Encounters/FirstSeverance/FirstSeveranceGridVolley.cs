@@ -45,11 +45,12 @@ internal sealed class FirstSeveranceGridVolley
         for (float y = field.Top + offsetY; y < field.Bottom; y += Spacing)
             rays.Add(new(field.Left, y, 1, 0, field.Right - field.Left, HalfWidth));
         var fullTracks = rays.ToArray();
-        rays = FirstSeveranceSafeWindows.CutGrid(rays, pattern, coreX, groundY);
+        rays = FirstSeveranceSafeWindows.OmitSanctuaryLanes(rays, pattern, coreX, groundY);
         if (rays.Count > MaximumLines) throw new ArgumentException("Lattice exceeds bounded geometry.");
         Rays = Array.AsReadOnly(rays.ToArray());
         // Fisher-Yates on the accepted descriptor, independent of runtime/library
-        // Random implementations. Cut segments share their parent track's clock.
+        // Random implementations. Omitted sanctuary lanes do not reorder the
+        // remaining lanes or introduce a fresh ignition in the middle of a track.
         int[] order = new int[fullTracks.Length];
         for (int i = 0; i < order.Length; i++) order[i] = i;
         uint seed = unchecked(serial * 747796405u ^ (uint)startTick ^ (uint)(startTick >> 32) ^ (uint)pattern * 2891336453u) | 1u;

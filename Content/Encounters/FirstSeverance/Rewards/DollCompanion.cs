@@ -12,6 +12,7 @@ public sealed class DollCompanion : ModProjectile
 {
     private float walk;
     private int idle, stuck, ownerGroundedTicks;
+    private bool observed;
     public override string Texture => "Convergence/Assets/Textures/NPCs/DollTheater/DollCompanion";
     public override void SetStaticDefaults()
     {
@@ -36,8 +37,14 @@ public sealed class DollCompanion : ModProjectile
             || Projectile.ai[2] is not (0 or 1)) { Projectile.Kill(); return; }
         Player owner = Main.player[Projectile.owner];
         int buff = ModContent.BuffType<DollCovenantBuff>();
+        if (!observed)
+        {
+            observed = true;
+            Mod.Logger.Info($"DollCompanion event=ReplicaActive owner={Projectile.owner} identity={Projectile.identity} local={Main.myPlayer} net_mode={Main.netMode} owner_buff={owner.HasBuff(buff)}");
+        }
         if (!owner.active || owner.dead) { owner.ClearBuff(buff); Projectile.Kill(); return; }
-        if (!owner.HasBuff(buff)) { Projectile.Kill(); return; }
+        if (DollCompanionRules.DismissForMissingBuff(Projectile.owner == Main.myPlayer, owner.HasBuff(buff)))
+        { Projectile.Kill(); return; }
         Projectile.timeLeft = 2;
         bool usable = RitualArmamentItems.Usable(owner) && !owner.noItems && !owner.CCed;
         NPC? target = usable ? RitualTargeting.Acquire(Projectile, owner, manual: true) : null;
@@ -155,7 +162,9 @@ public sealed class DollCompanion : ModProjectile
         parent = null!;
         if (!RitualTargeting.ValidState(child) || child.ai[2] < 0 || child.ai[2] != (int)child.ai[2]) return false;
         Player owner = Main.player[child.owner];
-        if (!RitualArmamentItems.Usable(owner) || owner.noItems || owner.CCed || !owner.HasBuff(ModContent.BuffType<DollCovenantBuff>())) return false;
+        if (!RitualArmamentItems.Usable(owner) || owner.noItems || owner.CCed
+            || DollCompanionRules.DismissForMissingBuff(child.owner == Main.myPlayer,
+                owner.HasBuff(ModContent.BuffType<DollCovenantBuff>()))) return false;
         foreach (Projectile candidate in Main.ActiveProjectiles)
             if (candidate.owner == child.owner && candidate.identity == (int)child.ai[2] && candidate.ModProjectile is DollCompanion)
             { parent = candidate; return true; }

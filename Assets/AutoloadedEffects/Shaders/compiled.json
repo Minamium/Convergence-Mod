@@ -10,6 +10,10 @@
       "source_sha256": "7767d55adb4a41719950ffb480e916d09a450990f5bbadb2045513d651fe7dfb",
       "output_sha256": "9830c065065c36562ec30b5c2ee453e0c5e3ded65fdf4f67fd2388d4a16d82c8"
     },
+    "CrimsonReactor.fx": {
+      "source_sha256": "e016c33b62286a5781a530d027a7a6b8ae99999bceccd52bbb7cd54933b90607",
+      "output_sha256": "8df1ac1bdb9dcb1b46eed0490ed4c5ce25272dc7f6a7ef19563880508005180f"
+    },
     "MechanicRing.fx": {
       "source_sha256": "b685e8922f20aa34fad6f86d6da927d5033885dc2b7229be9fc956e6aec80aa3",
       "output_sha256": "7556fe157bf8afe6c8d394d87b45f4170660de127044620f358b94487881a20e"

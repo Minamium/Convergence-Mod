@@ -154,7 +154,8 @@ internal sealed class FirstSeveranceLoopStateMachine
             EnterSubstate(FirstSeveranceSubstate.PhaseTransition, input.AuthorityTick);
             return FirstSeveranceLoopUpdate.Applied;
         }
-        if (bossPhases is null && FirstSeveranceBossPhasePlan.IsDamageState(State.Substate) && State.BossLife == 0)
+        if ((bossPhases is null || State.Substate == FirstSeveranceSubstate.FinalCoreCheck)
+            && FirstSeveranceBossPhasePlan.IsDamageState(State.Substate) && State.BossLife == 0)
         {
             return End(FirstSeveranceTerminalCause.BossLifeZero);
         }
@@ -196,7 +197,8 @@ internal sealed class FirstSeveranceLoopStateMachine
         }
 
         if (input.AcceptedBossDamage > 0
-            && FirstSeveranceBossPhasePlan.IsDamageState(State.Substate))
+            && FirstSeveranceBossPhasePlan.IsDamageState(State.Substate)
+            && (State.Substate != FirstSeveranceSubstate.FinalCoreCheck || input.AuthorityTick <= State.ResolveTick))
         {
             int floor = bossPhases is not null && bossPhases.TryGetNext(State.BossPhase, out var next)
                 ? FirstSeveranceBossPhasePlan.LifeThreshold(State.BossMaximumLife, next) : 0;
@@ -319,7 +321,7 @@ internal sealed class FirstSeveranceLoopStateMachine
         }
         State = State with { CompletedPhaseCycles = Math.Min(255, State.CompletedPhaseCycles + 1) };
         if (State.BossPhase == FirstSeveranceBossPhase.Final)
-            return End(FirstSeveranceTerminalCause.BossLifeZero);
+            return End(State.BossLife == 0 ? FirstSeveranceTerminalCause.BossLifeZero : FirstSeveranceTerminalCause.FinalDpsFailed);
         if (bossPhases!.TryGetNext(State.BossPhase, out var next) && State.BossLife <= DamageFloor)
         {
             State = State with { BossPhase = next.Id, BossPhaseStartedTick = tick, ActionIndex = -1, CompletedPhaseCycles = 0 };
@@ -338,7 +340,9 @@ internal sealed class FirstSeveranceLoopStateMachine
     {
         var action = FirstSeveranceChoreography.For(State.BossPhase)[index];
         State = State with { ActionIndex = index, Substate = action.State, SubstateEnteredTick = tick,
-            ResolveTick = AddDuration(tick, action.Ticks), RemainingPylons = 0, IsPenalizedExposure = false };
+            ResolveTick = AddDuration(tick, action.Ticks), RemainingPylons = 0, IsPenalizedExposure = false,
+            BossLife = action.State == FirstSeveranceSubstate.FinalCoreCheck
+                ? FirstSeveranceFinalCheck.Life(State.BossMaximumLife) : State.BossLife };
     }
 
     private FirstSeveranceLoopUpdate End(FirstSeveranceTerminalCause cause)

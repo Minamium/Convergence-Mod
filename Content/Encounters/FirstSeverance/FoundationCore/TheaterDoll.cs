@@ -7,8 +7,10 @@ namespace Convergence.Content.Encounters.FirstSeverance.FoundationCore;
 
 // The reusable stage key is deliberately separate from the ten-slot companion:
 // requiring a Boss reward to start the first fight would create a progression loop.
-public sealed class TheaterDoll : ModItem
+public sealed class TheaterDoll : ModItem, Convergence.Content.Shared.IRaidPedestalKey
 {
+    void Convergence.Content.Shared.IRaidPedestalKey.Interact(int tileX, int tileY)
+        => FirstSeveranceClientActions.InteractWithCore(tileX, tileY);
     public override string Texture => "Convergence/Assets/Textures/Items/TheaterDoll";
     public override void SetDefaults()
     {

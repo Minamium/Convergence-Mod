@@ -87,6 +87,8 @@ Never commit Calamity `.tmod` files, extracted assets, source mirrors, or repain
 
 ## Music rights policy
 
+[Crimson Foundry's recording](../Assets/ATTRIBUTION.md#crimson-foundry--2026-09-15) is an owner-approved game-facing loop edit included in the Mod and public source tree with kuku's credit and a project-license exclusion. Its attribution record owns the checked terms and scoped inclusion decision; raw masters remain external. This does not grant standalone music-pack rights or blanket permission for other recordings.
+
 The current owner-approved licensed recording is EigHt's `不幸な人形劇`; [Attribution](../Assets/ATTRIBUTION.md#eight-不幸な人形劇-phase-masters--0246) owns its source, modifications, credit and distribution boundaries. A third-party recording is permitted only when the owner approved the exact work and verified terms cover the committed game-facing derivative. Game use is not standalone BGM-pack redistribution permission. Keep raw masters external and recheck current terms before public distribution; do not infer a blanket right from “free BGM.” This follows the existing repository asset rule, not a new license grant.
 
 Public-domain composition and a modern score/arrangement/performance/recording are different rights. A Beethoven Ninth-derived idea, if used, must start from a verified public-domain score and use a new project-owned arrangement, MIDI/orchestration, performance/render, and recording. Do not extract or imitate a film/CD/stream recording, reuse an unlicensed modern MIDI/arrangement, or use a license-unknown SoundFont/sample library.

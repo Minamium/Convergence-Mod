@@ -194,8 +194,8 @@ internal sealed class FirstSeveranceArenaLayout
 
 internal sealed class FirstSeveranceArenaBlueprint
 {
-    public const int WidthInTiles = 160;
-    public const int HeightInTiles = 70;
+    public const int WidthInTiles = Convergence.Common.Raids.Arena.RaidFieldGeometry.WidthInTiles;
+    public const int HeightInTiles = Convergence.Common.Raids.Arena.RaidFieldGeometry.HeightInTiles;
     public const int BarrierInsetInTiles = 2;
     public const int PylonInsetInTiles = 14;
     public const int WorldEdgeSafetyMarginInTiles = 20;

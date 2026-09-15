@@ -23,9 +23,19 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v41
+## Current development protocol v44
 
-Ghost Samurai's FrontalCleaveShockwave retains the v40 actor/aim/hazard layouts, stable IDs and authority ownership. The server now selects a clear staging point above the arena's bottom center; the existing origin/anchor/ground floats determine a speed-capped arrival duration. Charge, blade growth, downswing/contact and ground-front growth derive from the same accepted attack/hazard clocks. Clients never choose terrain or add damage. ShockGeometry keeps the floor fixed while widening/raising the current rectangle for both rendering and the server hit path. Protocol41 prevents old peers from deriving the former path, fire time or constant-size front from unchanged payloads. Target invalidation, event counters, sound deduplication and exact-Fight cleanup are retained; no per-frame scale packets or new native damage exceptions are added. The [attack specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md#正面大斬撃衝撃波--frontalcleaveshockwave) owns tuning.
+Ghost Samurai's FrontalCleaveShockwave retains the v40 actor/aim/hazard layouts, stable IDs and authority ownership. The server now selects a clear staging point above the arena's bottom center; the existing origin/anchor/ground floats determine a speed-capped arrival duration. Charge, blade growth, downswing/contact and ground-front growth derive from the same accepted attack/hazard clocks. Clients never choose terrain or add damage. ShockGeometry keeps the floor fixed while widening/raising the current rectangle for both rendering and the server hit path. Protocol44 prevents old peers from deriving the former path, fire time or constant-size front from unchanged payloads. Target invalidation, event counters, sound deduplication and exact-Fight cleanup are retained; no per-frame scale packets or new native damage exceptions are added. The [attack specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md#正面大斬撃衝撃波--frontalcleaveshockwave) owns tuning.
+
+Main0.3.9/protocol43's shared pedestal/field derivation and Crimson native-hit repair are retained. Its documentation still labelled42 as current while code and STATUS declared43; integration follows the code/STATUS. Protocol44 advances from that integrated43 baseline, not the isolated Ghost Samurai41 build. Existing Crimson/Doll packet definitions and runtime behavior remain intact.
+
+## Preceding development protocol v42
+
+Crimson Foundry adds definition route `crimson_foundry` and termination schema3/version1. Reuses Activate/Ready/Cancel/Snapshot operation IDs; prior feature layouts remain unchanged. Bounded native actor ExtraAI includes Fight, age/music-start/purge ticks, stage and up to8 ordered slot/connection-GUID/Ready/out records. Hazard ExtraAI owns immutable Fight/boss slot, born/fire/end, shape, finite locked world ray and native source damage. Server-only mutations, complete decode before replacement, stale-Fight/age rejection and exact-Fight cleanup follow [ADR-0026](adr/0026-crimson-score-and-native-projectiles.md). No global feature switch or client beat/hit-report packet. Matching42 peers are required; [feature spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns music timing and admission.
+
+## Preceding development protocol v41
+
+Doll appends `FinalCoreCheck = 15` and feature cause `FinalDpsFailed = 14` without renumbering existing IDs. No DTO fields change. Final snapshots may carry up to5% of maximum HP only during the final check; other Final actions still require zero HP. The existing bounded CoreCannon descriptor is admitted in FinalBullets and FinalCoreCheck, deriving the new60-tick live interval on all peers. Third-volley lattice sanctuaries now omit whole lanes rather than clipping holes; geometry is still deterministically reconstructed. Use matching protocol41 clients/server. Server owns the one-time refill, deadline, cast targets/hits, victory/defeat and exact-Fight cleanup; no client DPS report or replica minion controls the Raid.
 
 ## Preceding development protocol v40
 

@@ -21,6 +21,7 @@ internal enum FirstSeveranceSubstate : byte
     FinalBullets = 12,
     FinalSlicer = 13,
     RemoteCrush = 14,
+    FinalCoreCheck = 15,
 }
 
 internal enum FirstSeveranceMechanicKind : byte

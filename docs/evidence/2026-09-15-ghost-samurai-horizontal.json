@@ -42,5 +42,12 @@
     "No GUI, game or gameplay server launched.",
     "No new asset files; original atlas regions reused.",
     "Fully blocked center skips this attack safely; ground fronts keep a fixed horizontal plane."
-  ]
+  ],
+  "integration": {
+    "version": "0.3.10",
+    "protocol": 44,
+    "upstream_commit": "ae071bc924c4f834b56557ae62435ea24cfc8b7f",
+    "resolution": "Retained latest main Crimson/Doll code and assets; only version/protocol/STATUS/network prose/catalog conflicted. Horizontal gameplay C# is unchanged from feature commit780ae00.",
+    "authorization": "Administrator explicitly approved PR #30 main integration and normal-profile installation."
+  }
 }

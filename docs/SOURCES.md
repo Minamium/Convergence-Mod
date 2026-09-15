@@ -22,6 +22,9 @@ related_docs:
 
 # Research Sources
 
+- [Crimson Foundry authority/audio API evidence](adr/0026-crimson-score-and-native-projectiles.md) — pinned tML OGG tags/update hooks and FNA PCM-loop signature, checked2026-09-15. [Music provenance](../Assets/ATTRIBUTION.md#crimson-foundry--2026-09-15) owns kuku's supplied work, author description, local edit and distribution limits.
+- [Crimson mechanical/reactor visual reference](research/WOTG_RAID_BENCHMARK.md#f17--crimson-articulated-machine-and-energy-release-2026-09-15) — selected pinned WoTM body/laser rendering and directly inspected owner-recording frames; independent art/code, no third-party media copied.
+
 Last reviewed: **2026-09-06**
 
 一次資料を優先する。sourceの存在はAPI安定性や再利用許可を意味しない。

@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-15",
+  "scope": "Crimson Foundry shared stage, native vulnerability, articulated machine and mix revision",
+  "base_commit": "02a0f6d309737278697bad0ca1ef90ffcd2ac68e",
+  "version": "0.3.9",
+  "protocol": 43,
+  "build": {
+    "local_record_id": "20260915T141423120028Z",
+    "package_sha256": "114671c3a4fc3ed82c6d2f034a08ae9fddca77474a6d25ae9fc0ec5244d381b1",
+    "source": "feature/crimson-reactor-stage on the recorded base; exact file hashes and dirty manifest in the ignored local build record",
+    "admission": "Packaged Doll remains solo-enabled 1-4; Crimson separately accepts 1-8",
+    "normal_profile_install": "Separate ignored receipt after main integration; not inferred from this isolated build"
+  },
+  "observed_playtest": {
+    "version": "0.3.8",
+    "sources": ["Old/2026-09-15-10.zip/server.log", "Old/2026-09-15-9.zip/client.log"],
+    "sessions": [
+      { "participants": 1, "spawn_hp": 12000000, "result": "Defeat", "combat_seconds": 15.65, "cleanup": true },
+      { "participants": 2, "spawn_hp": 20000000, "result": "Defeat", "combat_seconds": 47.4667, "cleanup": true }
+    ],
+    "armor_purges": 0,
+    "damage_dps": "unavailable: previous logs did not record incoming hits or remaining HP",
+    "cause": "Code-confirmed: SetDefaults made the actor invulnerable and only the server cleared that flag; client NPCs never admitted ordinary weapon hits. The fix projects the same vulnerability/purge rule on every peer.",
+    "later_logs": "The newer Exo Mechs/WoTM session has Calamity packet/ExtraAI errors but no Crimson fight. Those separate errors are not claimed fixed here."
+  },
+  "audio": {
+    "method": "FFmpeg 7.1 volumedetect plus playback-path inspection; not subjective listening",
+    "graceful_ordeal": { "mean_dbfs": -13.8, "peak_dbfs": 0.0 },
+    "doll_phase1": { "mean_dbfs": -15.9, "peak_dbfs": -0.6 },
+    "music_gain_before": 0.88,
+    "music_gain_after": 0.39,
+    "relative_music_reduction_db": 7.07,
+    "portal_fire_mean_dbfs": -13.4,
+    "portal_fire_peak_dbfs": -3.6,
+    "change": "Use existing current Portal charge/fire masters instead of obsolete un-routed cues, lower scoped gains and limit ensemble voices. Preserve the recorded BGM, loop, score and Doll mix."
+  },
+  "visual": {
+    "reference": "WOTG_RAID_BENCHMARK F17; selected pinned official WoTM code plus owner-recording overview and 73-76s samples",
+    "atlas": "1448x1086 RGBA; twelve connected silhouettes with explicit UV gutters; no per-frame texture creation",
+    "atlas_sha256": "f9a14914699d1dfbc6c85e13e9871c311ccb0e51c01660f00cd6d38e1dc7245e",
+    "shader_sha256": "8df1ac1bdb9dcb1b46eed0490ed4c5ce25272dc7f6a7ef19563880508005180f",
+    "preview": "Twelve hidden FNA/D3D11 frames using the actual linked rig/material renderer, exact FXC exports and installed dependency noise. Dark/light composition inspected; not gameplay/FPS evidence."
+  },
+  "automated": {
+    "domain": "234 passed: score/codecs, client/server vulnerability and purge, shared field/clipping/containment and motion envelopes",
+    "shader": "FXC compilation and source/export hashes passed",
+    "native_build": "0 errors, 4 pre-existing CS8632 warnings; 20 localization files; final build receipt maintained locally",
+    "compiled_codecs": "334 exact-package round-trips, 54 malformed/truncated rejections, protocol43",
+    "loader": "8 Crimson types pass installed ValidateType; prior HurtModifiers and exact-Fight repeated Doll teardown checks pass",
+    "static": "76-document catalog, 777-file repository policy and 10 YAML files passed"
+  },
+  "not_run": [
+    "Owner's actual native weapon hits and 50-percent armor purge on matching 0.3.9 peers",
+    "Doll versus Crimson key selection on the same pedestal; distant party, slot reuse and death/wipe/re-summon",
+    "Black exterior/physics agreement at 107-percent UI scale and changed zoom",
+    "Real music/SFX listening, loop seam, device latency, focus recovery and multiplayer music alignment",
+    "In-game rig/forecast/release readability, balance and rendering performance"
+  ]
+}

@@ -5,6 +5,8 @@ Requiem of the Hollow Doll pits your party against Lacrimosa — The Bound Heart
 
 Doll Raid: initial prototype complete, with balance and compatibility still provisional. Ghost Samurai: a separate summoned boss still in development, including unfinished rewards and a known world-unload exception. This exception can occur even without summoning Ghost Samurai.
 
+Crimson Foundry: a separate music-led Raid prototype featuring a red-haired mechanic, an articulated steel machine and a midfight armor purge. Hold Crimson Conductor and click the same Foundation Core pedestal to prepare this Raid instead of Doll. All connected participants confirm Ready inside its bounded field. This prototype uses ordinary deaths, not Doll's revival system; music, artwork and balance remain under playtest.
+
 Requires Calamity Mod 2.2.4 and Luminance 1.0.14 on the tested tModLoader 2026.07 / Terraria 1.4.4.9 baseline. Use Calamity's required dependencies, including its official music mod where required. Other installed addons are not Convergence dependencies.
 Recommended: 2-4 players with endgame gear, in a world with Exo Mechs and Supreme Calamitas defeated. Current balance is provisional; all peers must use the same Convergence version.
 
@@ -18,3 +20,7 @@ Music: EigHt — 不幸な人形劇
 Original: https://booth.pm/ja/items/5206457
 Creator: https://www.youtube.com/watch?v=vTFL5_d_p7o
 Music use terms: https://eight-novel.fanbox.cc/posts/7647818
+
+Crimson Foundry prototype music: "Graceful Ordeal" / 「実はとてもお強いお嬢様からの試練BGM」 by kuku
+Original and use terms: https://www.youtube.com/watch?v=HnBESyUqx_g
+Loop edit for this encounter; original copyright belongs to kuku. This recording is not covered by Convergence's source-code or original-asset license.

@@ -303,6 +303,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
 
         if (windowChanged)
         {
+            if (after.Substate == FirstSeveranceSubstate.FinalCoreCheck)
+                Log(context.AuthorityTick, $"event=FinalDpsCheckStarted required_damage={after.BossLife} duration_ticks={FirstSeveranceFinalCheck.DurationTicks} required_dps={after.BossLife * 60d / FirstSeveranceFinalCheck.DurationTicks:F1} deadline_tick={after.ResolveTick}");
             Log(context.AuthorityTick, $"event=PhaseChanged phase={after.Substate} boss_phase={after.BossPhase} phase_start_tick={after.BossPhaseStartedTick} action={after.ActionIndex} completed_cycles={after.CompletedPhaseCycles} resolve_tick={after.ResolveTick} loop={after.ZeroBasedLoopIndex + 1} overload={after.Overload} boss_life={after.BossLife}");
             telemetry.BeginDamageProgress(after, loop.DamageFloor);
         }

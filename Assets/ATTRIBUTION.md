@@ -2,6 +2,88 @@
 
 ## Records
 
+### Crimson articulated rig and reactor — 2026-09-15 / 0.3.9
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/FoundryRig.png`
+- Asset ID: crimson-articulated-rig-039
+- Asset type: twelve-part transparent machine/operator atlas
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: original selected output copied unchanged; explicit runtime UV rectangles measured around alpha silhouettes, independently posed in code
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork or license asserted
+- Required attribution: retain this provenance and brief
+- Reviewer and review date: Codex, 2026-09-15; original/alpha/part boundaries inspected; in-game readability awaits owner acceptance
+- Brief: original angular ivory/gunmetal/crimson steel machine, long limbs, nonhuman narrow head, central reactor housing, separate chest/shoulder/thigh armor, engine and small red-haired mechanic in a command chair. Twelve separated parts; no text, HUD, neon panels or third-party designs. Owner's Garde/operator references inform proportions only, not copied costumes or mecha silhouettes.
+- Export:1448×1086 RGBA, true alpha0–255; SHA256 `f9a14914699d1dfbc6c85e13e9871c311ccb0e51c01660f00cd6d38e1dc7245e`. Two subsequent background/repacking candidates had opaque painted checkerboards and were rejected; the original is preserved and selected. External originals/generation records remain local, not an off-device backup claim.
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/CrimsonReactor.fxc`
+- Asset ID: crimson-reactor-material-039
+- Asset type: compiled original procedural reactor material
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: original
+- Source work and URL: `Assets/AutoloadedEffects/Shaders/CrimsonReactor.fx`, independently written Convergence HLSL
+- Tool/model/version: Microsoft FXC, pinned identity/options in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: authored contained plasma/filament/white-core and charge/release envelopes; runtime noise comes from the installed Luminance registry
+- License and redistribution terms: original project asset under existing project terms; no copied WoTM/WotG shader, formula, texture or audio
+- Required attribution: retain this record; dependency assets are not redistributed here
+- Reviewer and review date: Codex, 2026-09-15; source/export compilation checked; actual game composition remains owner-tested
+- SHA256: source `e016c33b62286a5781a530d027a7a6b8ae99999bceccd52bbb7cd54933b90607`; export `8df1ac1bdb9dcb1b46eed0490ed4c5ce25272dc7f6a7ef19563880508005180f`.
+
+Older FoundryEngine/FoundryUnbound provenance and originals below remain retained; they no longer drive the active composite. Existing project-authored Portal charge/fire masters and BGM file are unchanged; this revision changes scoped playback gain/envelopes, not their recording licenses.
+
+### Crimson Foundry — 2026-09-15
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/FoundryEngine.png`
+- Asset ID: crimson-heavy-engine-038
+- Asset type: transparent Boss PNG
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: generated
+- Source work and URL: original generated heavy steel-engine image, no third-party image source
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original red-haired mechanic/furnace design, background extraction by the built-in tool; runtime export unchanged
+- License and redistribution terms: original project asset, subject to existing publication/asset-license gate
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-15; silhouette/alpha inspected, gameplay readability not_run
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/FoundryUnbound.png`
+- Asset ID: crimson-exposed-engine-038
+- Asset type: transparent Boss PNG
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: generated
+- Source work and URL: original slim exposed-engine image, no third-party image source
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original exposed-scythe craft and red-haired pilot; runtime export unchanged
+- License and redistribution terms: original project asset, subject to existing publication/asset-license gate
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-15; silhouette/alpha inspected, gameplay readability not_run
+- Creator/source: OpenAI built-in image generation, directed by Codex for Minamium; original designs, no supplied third-party visual reference. Actual generation model name was not reported.
+- Brief: red-haired mechanic in an open cockpit; asymmetric heavy gunmetal/crimson furnace weapon engine, then an exposed slim swept-scythe craft after armor purge; crisp textured2D silhouettes, true transparent alpha, no text/UI rings. The heavy image received a background-extraction edit; no other artwork was copied. Full generation records remain external.
+- Export: selected PNGs unchanged from the built-in outputs,1536×1024 and1689×931. Runtime code supplies scale, banking, armor fragments and exhaust. External originals remain preserved; not an off-device backup claim.
+- SHA256: heavy `7c8703f2d0969bbd1444bb89c57a5d747605cb932e2cf09b298fd0033198078a`; exposed `65912b7856832a0210028eb62e0de7ebee81e26b8d81e9afd667b017c9bbd594`.
+- Terms: original generated project assets under the existing publication/asset-license gate. Retain this provenance. Codex inspected the generated silhouettes/alpha on2026-09-15; actual game-distance readability remains owner-tested.
+- Effects: existing project-authored `PortalBeam.fxc` / `RaidEnergy.fxc` and existing original Raid cues are referenced unchanged; Luminance supplies its own noise textures at runtime. No external Mod assets or recordings are extracted.
+
+- Runtime file: `Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg`
+- Asset ID: crimson-graceful-ordeal-loop-038
+- Asset type: third-party game-facing OGG loop edit; not a standalone music release
+- Creator: **kuku**, composer/recording owner; Minamium supplied the WAV for this encounter
+- Creation/acquisition date: 2026-09-15
+- Source type: licensed
+- Source work and URL: **Graceful Ordeal** / 「実はとてもお強いお嬢様からの試練BGM」; [author's video and terms](https://www.youtube.com/watch?v=HnBESyUqx_g), with [official WAV](https://drive.google.com/file/d/1bX8QLlttGdZ5ssGm6qtbd-XQAXs09MdA/view) linked from its description
+- License and redistribution terms: BGM/personal use permitted, including monetized video use; credit required for secondary creative publication; copyright retained by kuku; uncreative BGM-only/endurance content prohibited. Minamium explicitly approved inclusion of this exact game-facing derivative in the Mod and public source repository on2026-09-15 after reviewing the terms and source-distribution ambiguity. This is project-integrated use, not a claim of a separate standalone-audio redistribution license.
+- License exclusion: **Copyright belongs to kuku. This recording and its loop edit are NOT covered by any Convergence source-code or original-asset license.** The author's linked terms continue to govern; no Content ID registration, music-only collection or endurance upload by this project. The raw WAV and audition exports remain external.
+- Required attribution: **Music: “Graceful Ordeal” / 「実はとてもお強いお嬢様からの試練BGM」 by kuku — https://www.youtube.com/watch?v=HnBESyUqx_g . Loop edit for Crimson Foundry; original copyright belongs to kuku.**
+- Exact input SHA256: `42a10539bdc12468d279f9956085ce1c99aae1fa0092fc05912e0225c26076d3`; owner-provided WAV preserved unchanged. Runtime OGG SHA256: `f8f0a566a18dfa7d9ba2fd6203d877160bc6e0ae04123a694a2c9307bbaaffa9`.
+- Tool/model/version: `tools/prepare_crimson_score.py`, NumPy2.3.5 and FFmpeg7.1/libvorbis quality6
+- Human modifications: No tempo/pitch change or normalization. A300ms tail bridge and sample loop points omit terminal fade/silence; immutable measured beat/intensity data are exported beside it. See [owning music spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-and-musical-presentation), not duplicated tuning here.
+- Reviewer and review date: Codex,2026-09-15; numerical timing, peak and loop analysis completed; musical seam/device/MP listening remains owner-owned. Author video terms rechecked; retain the bundled `Credits.txt` and this provenance when building/distributing the Mod. The score analysis JSON is project-generated numeric game data, not a new license for the recording.
+
 ### Weapon energy and README NPC export — 2026-09-14
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ArmamentEnergy.fxc`
@@ -2869,3 +2951,29 @@ Original Convergence HLSL; no external shader code or texture is vendored. Runti
 - Original source: `Assets/AutoloadedEffects/Shaders/PortalBeam.fx`; SHA256 `645ffd856e4ee9cdfc7d663eca01f626aab8e3b883a726876559f7d73eaec1d8`.
 
 README `docs/media/doll-npc.png` is the exact first 32×52 cel of `DollAttendant.png`, enlarged 3× with nearest-neighbor by `tools/export_readme_doll.py`; no repainting or image generation. It inherits the recorded Doll NPC asset's provenance/terms. The former banner and its original provenance remain in history/storage, unused by README.
+
+
+## Weapon articulation revision — 2026-09-15 / 0.3.7
+
+Creator: Codex under the repository owner's direction; original Convergence DSP plus edits of the already-attributed project-authored Raid beam sounds. No third-party audio, reference recording or music sample. Project asset terms remain unchanged. `tools/remix_weapon_articulation.py` defines explicit windows/rate/EQ, deterministic resonant/noise layers, envelopes and attached reflections; `remix_weapon_foley.py` supplies PCM export and safety metering. [Exact per-file hashes, source hashes and metrics](../docs/evidence/2026-09-15-doll-final-check.json) identify these replacements. Prior masters/source copies remain in ignored external audition archives; previous records are historical for the following destinations. Seven long-beam launches/beds are unchanged. Numerical decode/headroom checks are not human listening approval.
+
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawSwipe.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawGrip.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawCrush.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawHit.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicSigil.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicBolt.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicMerge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicCharge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/RangedLatch.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/RangedShot.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/RangedCharge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ChoirNote.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ChoirCharge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WitnessDraw.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WitnessLock.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WitnessFire.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WeaponHit.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollSummon.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollThread.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`.

@@ -82,7 +82,8 @@ internal sealed class FirstSeveranceCombatProjection
             || !FirstSeveranceChoreography.IsValidStep(bossPhase, substate, actionIndex)
             || actionStartedTick >= resolveTick || completedPhaseCycles is < 0 or > 255
             || (bossPhase != FirstSeveranceBossPhase.Sealed && (bossPhaseStartedTick == 0 || bossPhaseStartedTick >= resolveTick))
-            || (bossPhase == FirstSeveranceBossPhase.Final && bossLife != 0)
+            || (bossPhase == FirstSeveranceBossPhase.Final && bossLife >
+                (substate == FirstSeveranceSubstate.FinalCoreCheck ? FirstSeveranceFinalCheck.Life(bossMaximumLife) : 0))
             || !float.IsFinite(coreX) || !float.IsFinite(coreY)
             || Math.Abs(coreX) > 1_000_000 || Math.Abs(coreY) > 1_000_000
             || !Enum.IsDefined(lastMechanicResult))
@@ -152,7 +153,7 @@ internal sealed class FirstSeveranceCombatProjection
             || gridVolley.EndTick > resolveTick || lanceVolley is not null || gridVolley.CoreBeams.Count > Participants.Count))
             throw new ArgumentException("A grid cannot outlive its owning stage/window.");
         GridVolley = gridVolley;
-        if (coreCannon is { } cannon && (substate != FirstSeveranceSubstate.FinalBullets
+        if (coreCannon is { } cannon && (substate is not (FirstSeveranceSubstate.FinalBullets or FirstSeveranceSubstate.FinalCoreCheck)
             || cannon.StartTick < actionStartedTick || cannon.StartTick - actionStartedTick < FirstSeveranceCoreCannonVolley.OpeningTicks
             || cannon.EndTick > resolveTick || !TryGetParticipantByServerSlot(cannon.TargetSlot, out _)
             || cannon.Ray.X != coreX || cannon.Ray.Y != coreY - FirstSeveranceLanceTuning.BossHeightAboveCore))
@@ -208,7 +209,8 @@ internal sealed class FirstSeveranceCombatProjection
     public ulong ActionStartedTick { get; }
     public int ActionIndex { get; }
     public int CompletedPhaseCycles { get; }
-    public bool IsHpGated => BossPhase == FirstSeveranceBossPhase.Final
+    public bool IsHpGated => (BossPhase == FirstSeveranceBossPhase.Final
+            && (Substate != FirstSeveranceSubstate.FinalCoreCheck || BossLife == 0))
         || (FirstSeveranceBossPhasePlan.Instance.TryGetNext(BossPhase, out var next)
             && BossLife <= FirstSeveranceBossPhasePlan.LifeThreshold(BossMaximumLife, next));
     public bool IsCoreOpen => !IsHpGated && FirstSeveranceBossPhasePlan.IsDamageState(Substate);

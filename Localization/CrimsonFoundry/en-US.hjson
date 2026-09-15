@@ -1,0 +1,36 @@
+Mods: {
+	Convergence: {
+		Items: {
+			CrimsonConductor: {
+				DisplayName: Crimson Conductor
+				Tooltip:
+					'''
+					Use on a Foundation Core pedestal to deploy Crimson Foundry; everyone confirms Ready
+					A contained field grants unlimited flight. Dodge rhythm-marked beams and energy bolts
+					Right-click to cancel your preparation. Reusable
+					Prototype: 1–8 players; late arrivals spectate until the next summon
+					'''
+			}
+		}
+
+		NPCs.CrimsonBoss.DisplayName: Ferrum — The Scarlet Machinist
+		Projectiles.CrimsonAttack.DisplayName: Crimson Ordnance
+		CrimsonFoundry.Rejected: Preparation rejected. Hold the conductor near a Foundation Core pedestal, finish other encounters, and use a party of at most eight.
+
+		Configs: {
+			CrimsonVisualConfig: {
+				DisplayName: Crimson Foundry presentation
+
+				ReducedEffects: {
+					Label: Reduce decorative effects
+					Tooltip: Preserves warnings and damage footprints. Reduces exhaust, afterimages and camera shake.
+				}
+
+				ScreenShake: {
+					Label: Camera shake
+					Tooltip: Brief directed shake on attacks and armor purge.
+				}
+			}
+		}
+	}
+}

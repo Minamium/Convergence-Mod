@@ -8,8 +8,17 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.FirstSeverance.FoundationCore;
 
-public sealed class FoundationCoreTileEntity : ModTileEntity
+public sealed class FoundationCoreTileEntity : ModTileEntity, Convergence.Content.Shared.IRaidPedestal
 {
+    Microsoft.Xna.Framework.Vector2 Convergence.Content.Shared.IRaidPedestal.Ground => GroundCenter;
+    bool Convergence.Content.Shared.IRaidPedestal.Claim(ulong sequence, Convergence.Common.Foundation.Identifiers.FightId fight)
+        => FoundationCoreProtectionSystem.TryClaim(this, sequence, fight);
+    bool Convergence.Content.Shared.IRaidPedestal.IsOwned(Convergence.Common.Foundation.Identifiers.FightId fight)
+        => FoundationCoreProtectionSystem.TryResolveOwnedCore(ID, fight, out var core) && ReferenceEquals(core, this);
+    bool Convergence.Content.Shared.IRaidPedestal.Activate(Convergence.Common.Foundation.Identifiers.FightId fight)
+        => FoundationCoreProtectionSystem.TryEnterActive(ID, fight);
+    void Convergence.Content.Shared.IRaidPedestal.Release(Convergence.Common.Foundation.Identifiers.FightId fight)
+        => FoundationCoreProtectionSystem.TryRelease(ID, fight);
     internal static bool IsCoreType(int type) => type == ModContent.TileType<FoundationCoreTile>()
         || type == ModContent.TileType<FoundationPlinthTile>();
     internal int FootprintWidth => Main.tile[Position.X, Position.Y].TileType == ModContent.TileType<FoundationPlinthTile>() ? 12 : 2;

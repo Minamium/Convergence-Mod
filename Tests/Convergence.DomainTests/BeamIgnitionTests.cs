@@ -96,24 +96,17 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Lattice sanctuary cuts preserve one travelling packet and complete volley budget")]
+    [DomainTest("Lattice sanctuary lanes remain unbroken and preserve the complete volley budget")]
     private static void LatticeRibbonCuts()
     {
         var grid = new FirstSeveranceGridVolley(3, 100, 8, 4000, 4000);
-        bool sawCut = false;
         for (int a = 0; a < grid.Rays.Count; a++)
             for (int b = a + 1; b < grid.Rays.Count; b++)
             {
                 var first = grid.PulseAt(a, 180);
                 var second = grid.PulseAt(b, 180);
-                if (first.Track != second.Track) continue;
-                sawCut = true;
-                AssertEqual(grid.LineFireTick(a), grid.LineFireTick(b), "same track does not re-fire at a sanctuary");
-                AssertEqual(first.HeadDistance, second.HeadDistance, "same moving head across cuts");
-                AssertEqual(first.TailDistance, second.TailDistance, "same moving tail across cuts");
-                AssertEqual(first.FlowOffset - first.StartDistance, second.FlowOffset - second.StartDistance, "material anchored to head not cut origin");
+                AssertEqual(false, first.Track == second.Track, "each retained lane has one continuous moving body");
             }
-        AssertEqual(true, sawCut, "test exercises split tracks");
         AssertEqual(true, FirstSeveranceSafeWindows.SpreadVolleyAge + FirstSeveranceGridVolley.DurationTicks <= 450, "third volley completes before action deadline");
         AssertEqual(true, FirstSeveranceGridVolley.OpeningTicks + 3 * FirstSeveranceGridVolley.CadenceTicks
             + FirstSeveranceGridVolley.DurationTicks > 450, "no truncated fourth volley");
