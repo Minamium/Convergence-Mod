@@ -48,6 +48,22 @@
     "protocol": 44,
     "upstream_commit": "ae071bc924c4f834b56557ae62435ea24cfc8b7f",
     "resolution": "Retained latest main Crimson/Doll code and assets; only version/protocol/STATUS/network prose/catalog conflicted. Horizontal gameplay C# is unchanged from feature commit780ae00.",
-    "authorization": "Administrator explicitly approved PR #30 main integration and normal-profile installation."
+    "authorization": "Administrator explicitly approved PR #30 main integration and normal-profile installation.",
+    "source_commit": "d75c8415ebf681b2d765b23a116f38b9a1f6b295",
+    "source_dirty": "",
+    "source_sha256": "3e9b546fec5dd919a34480d1bd43e74ff42156e7ee6d82681652c56d1bda00ca",
+    "isolated_package_sha256": "f36484eea5dd0eeb0b6bc8504a0e715d0548435b6edb800852dcf2ac4439ede6",
+    "assembly_sha256": "464366951b7985d14ebaa475528782532ab39a5a564bca17044ea261267d171b",
+    "verification": {
+      "domain_cases": 238,
+      "native_build": "0 errors /4 existing CS8632 warnings;locales, shaders and solo admission passed",
+      "compiled_roundtrips": 334,
+      "malformed_rejections": 54,
+      "Ghost_summon_and_Global_registration": "passed",
+      "Doll_and_Crimson_type_validation": "passed",
+      "Ghost_and_Doll_exact_Fight_teardown": "passed",
+      "Doll_Hurt_calibration": "passed"
+    },
+    "gameplay": "not_run; user-owned"
   }
 }
