@@ -23,14 +23,24 @@ internal static class CrimsonRig
     private static readonly Vector2[] pivots = { new(190, 278), new(223, 278), new(276, 270), new(207, 278) };
     internal static void Load()
     {
+        if (Main.dedServ) return;
         performer = LoadTexture("ScarletConjurer");
         string[] names = { "EmberCrown", "SableMantle", "ThornChoir" };
         for (int i = 0; i < 3; i++) effigies[i] = LoadTexture(names[i]);
-        material = new BasicEffect(Main.instance.GraphicsDevice) { TextureEnabled = true, VertexColorEnabled = true };
+        // PostSetupContent runs on the loader worker. Asset requests marshal
+        // their uploads, but direct FNA effect construction must wait for draw.
     }
     private static Texture2D LoadTexture(string name) => ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/" + name, AssetRequestMode.ImmediateLoad).Value;
     internal static void Unload()
-    { performer = null; Array.Clear(effigies); material?.Dispose(); material = null; }
+    {
+        performer = null;
+        Array.Clear(effigies);
+        var oldMaterial = material;
+        material = null;
+        // Capture this load's instance: a delayed disposal must not touch the
+        // replacement created after Reload Mods. Asset textures are not ours.
+        if (oldMaterial is not null) Main.QueueMainThreadAction(oldMaterial.Dispose);
+    }
     internal static (float Charge, float Recoil) Signal(CrimsonBoss boss, int source, float age)
     {
         float until = 60, since = 100;
@@ -102,7 +112,8 @@ internal static class CrimsonRig
     private static void Mesh(SpriteBatch batch, Texture2D texture, Rectangle source, Vector2 center, Vector2 pivot,
         float scale, float time, float motion, float charge, float recoil, Color tint, bool flip, float rotation, bool apparition)
     {
-        if (material is null || tint.A == 0) return;
+        if (Main.dedServ || tint.A == 0) return;
+        material ??= new BasicEffect(Main.instance.GraphicsDevice) { TextureEnabled = true, VertexColorEnabled = true };
         int offset = 0;
         for (int y = 0; y < Rows; y++) for (int x = 0; x < Columns; x++)
         {
