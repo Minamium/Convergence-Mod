@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Convergence.Common.Encounters.Abstractions;
 using Convergence.Common.Encounters.Runtime;
 using Convergence.Common.Networking;
+using Convergence.Common.Raids.Arena;
+using Convergence.Content.Shared;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -46,7 +49,14 @@ internal sealed class CrimsonFactory : IEncounterRuntimeFactory
         int count = 0;
         foreach (Player player in Main.ActivePlayers) if (!player.ghost) count++;
         if (count > CrimsonState.MaxMembers) throw new EncounterStartRejectedException("crimson.party_above_eight");
-        return new CrimsonRuntime(context.FightId, p.whoAmI);
+        var anchor = context.Start.RequestedAnchor;
+        if (!RaidPedestal.TryResolve(anchor.X, anchor.Y, out var core))
+            throw new EncounterStartRejectedException("crimson.pedestal_missing");
+        if (Vector2.DistanceSquared(p.Center, core.Ground) > 260 * 260)
+            throw new EncounterStartRejectedException("crimson.pedestal_out_of_range");
+        if (!RaidFieldGeometry.FromGround(core.Ground.X, core.Ground.Y).FitsWorld(Main.maxTilesX, Main.maxTilesY))
+            throw new EncounterStartRejectedException("crimson.field_outside_world");
+        return new CrimsonRuntime(context.FightId, p.whoAmI, core, context.EncounterSequence);
     }
 }
 

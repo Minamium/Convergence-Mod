@@ -1,12 +1,14 @@
 using Convergence.Common.Encounters.Abstractions;
+using Convergence.Content.Shared;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
-public sealed class CrimsonConductor : ModItem
+public sealed class CrimsonConductor : ModItem, IRaidPedestalKey
 {
+    void IRaidPedestalKey.Interact(int tileX, int tileY) => CrimsonPackets.Summon(tileX, tileY);
     public override string Texture => "Terraria/Images/Item_" + ItemID.MechanicalBatteryPiece;
     public override void SetDefaults()
     {
@@ -16,13 +18,14 @@ public sealed class CrimsonConductor : ModItem
     }
     public override bool AltFunctionUse(Player player) => true;
     public override bool CanUseItem(Player player) => !player.dead && (CrimsonPackets.Snapshot.Lifecycle == EncounterLifecycle.Idle
+        && RaidPedestal.TryResolve(Player.tileTargetX, Player.tileTargetY, out _)
         || player.altFunctionUse == 2 && CrimsonPackets.Snapshot.DefinitionKey == CrimsonDefinition.EncounterKey);
     public override bool? UseItem(Player player)
     {
         if (player.whoAmI == Main.myPlayer)
         {
             if (player.altFunctionUse == 2) CrimsonPackets.Ready(false, true);
-            else CrimsonPackets.Summon();
+            else CrimsonPackets.Summon(Player.tileTargetX, Player.tileTargetY);
         }
         return true;
     }
