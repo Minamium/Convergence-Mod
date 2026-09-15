@@ -655,13 +655,13 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: Requiem of the Hollow Doll — Encounter Specification
-  content_sha256: deb25680bea392a03403d7335e12762ba88688628f213665a78b09ca10d5379a
+  content_sha256: 5d695249f718a88f767490e7d1600cce62489962a476f129764b486b40a3ac6d
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-15'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -803,12 +803,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 8cab3a6caf3d1ecb5a4758836c4c384b75f4f52a56bd7711f9706374b3af64af
+  content_sha256: c003d13d21cd6cc90b1b9fe2797e0e67af8c6934d7d4fb0bd5eb73e312f20a83
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-15'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1198,12 +1198,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b14c8d5f2c10254e9048113a4c490300f1a5126dd1aae962086c0010a1343f2e
+  content_sha256: 621bd2a23ddc6bef0e5563c6c622d24d4722bb046640ee155697065b578fd77b
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-15'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1374,12 +1374,12 @@ documents:
 - doc_id: research.implementation-review-20260914
   path: docs/research/2026-09-14-implementation-review.md
   title: 'Owner-supplied implementation review: disposition'
-  content_sha256: b594de314a593b97af9038744f76d2afdbdd873d1beffb603e8353ac0cd2e68b
+  content_sha256: 624dfb01d53192d79570d8587c78587a97765683a8df6f74bf84afffb9d7ebd2
   document_type: research
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-15'
   source_of_truth_for: []
   aliases:
   - owner supplied implementation review
@@ -1454,7 +1454,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: db2604b0d8f30567209c3850781fbc9bf15def3444c6b3f471919f58be92a4d3
+  content_sha256: 528f12375d29fea1a89983e175fe5a0da12ed18e0682d1bf03ac252ff002a4e2
   document_type: research
   status: historical
   owners:

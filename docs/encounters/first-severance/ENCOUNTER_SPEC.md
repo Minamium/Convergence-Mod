@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-15
 source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -107,7 +107,7 @@ Success/failure is authority sampled; ruby verdict rays are instantaneous result
 
 ## Attack modules
 
-- **Phase-I Prism:** eight rapid aimed casts for every standing participant simultaneously. Lock forecasts with movement lead before release; the colored forward/reverse order is shared. Main-sequence warnings remain 28 ticks and start-to-start cadence 42 ticks; firing now lasts **54 ticks / 0.9 seconds**. Consecutive beams overlap live for 12 ticks, without moving the next warning/fire or increasing damage per cast. The full sequence reserves 376 ticks. Standalone Spread and Final retain their shorter existing windows.
+- **Phase-I Prism:** eight rapid aimed casts for every standing participant simultaneously. Lock forecasts with movement lead before release; the colored forward/reverse order is shared. Main-sequence warnings remain 28 ticks and start-to-start cadence 42 ticks; firing lasts **45 ticks / 0.75 seconds**. Consecutive beams overlap live for 3 ticks, without moving the next warning/fire or increasing hits per cast. The full sequence reserves 367 ticks. Standalone Spread and Final retain their shorter existing windows; post-live contraction remains harmless.
 - **Energy pursuit / Stillness:** right/left semi-homing energy charges alternate with two **continuous broad bands**, each 320 pixels wide (half the earlier footprint). Charge approach tracks then locks; dash-through is the intended motion. Stillness retains the 128-pixel safe column, 36-tick warning and 35-tick total live window, with shared thin-pilot amplification; there is no hidden “velocity must be zero” damage test. Category rest, charge steering/speed and damage are unchanged.
 - **Phase-II lattice:** fine intersecting corridors use shared clipped grid geometry. Serial-three-and-later ordinary volleys add **one** Boss-origin Core beam. Authority cycles through the eligible standing frozen-roster members, locks the selected position at telegraph start and snapshots that one direction; it does not chase during charge/live. Final widths and the union's one-hit-per-player limit stay unchanged; per-line launch order follows the shared ignition contract below. Protocol29's historical four-ray decoder capacity remains for compatibility, not as the current emission count. The third-volley Spread pockets omit those salvos and resolve Spread during the live grid. **There is no Phase-II Stack.**
 - **Twin rotation:** thin-axis forecast/brace followed by two purple magic jets making two accelerating revolutions. Final widths, angles and turn count remain; ignition grows the live geometry below; sword artwork and metallic release audio are retired. Stable internal `RotatingBlade` IDs remain.
@@ -136,13 +136,17 @@ Four complete forecasts appear in **red → blue → green → gold** order, all
 
 Two adjacent pursuit rays form each occupied band. Red/blue are complementary bands on one axis; green/gold complement one another on a different axis. Axes are selected from vertical, horizontal and the two diagonals using the existing server action seed. The eventual occupied bands of all four forecasts together cover the field, but each individual firing group leaves broad safe bands; there is no permanent hiding point through all colors. It is a movement/sequence-reading attack, not simultaneous field-wide damage. No randomness or retargeting occurs on release.
 
-[ScoreGeometry](../../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs) owns the 30-tick reveal cadence, 84-tick reading window after the last reveal, and release cadence accelerating from 60 to 48 ticks. Width and 12-tick live duration reference `LanceTuning`; fixed damage remains 120 with at most one accepted hit per participant/color. [RandomComb](../../../Content/Encounters/FirstSeverance/FirstSeveranceRandomComb.cs) owns deterministic complementary geometry; its retained internal name does not imply the old random triples. [EmissionVisuals](../../../Client/Encounters/FirstSeverance/FirstSeveranceEmissionVisuals.cs) supplies the shared renderer. Late snapshots derive the same locked positions and current reveal/live intervals, never replay earlier shots.
+[ScoreGeometry](../../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs) owns the 30-tick reveal cadence, 84-tick reading window after the last reveal, and release cadence accelerating from 60 to 48 ticks. Width and 12-tick live duration reference `LanceTuning`; damage uses the shared native source budget below with at most one accepted hit per participant/color. [RandomComb](../../../Content/Encounters/FirstSeverance/FirstSeveranceRandomComb.cs) owns deterministic complementary geometry; its retained internal name does not imply the old random triples. [EmissionVisuals](../../../Client/Encounters/FirstSeverance/FirstSeveranceEmissionVisuals.cs) supplies the shared renderer. Late snapshots derive the same locked positions and current reveal/live intervals, never replay earlier shots.
 
 ## Raid damage and Adrenaline
 
 [ADR-0024](../../adr/0024-native-raid-hurt-and-downed.md) now routes Raid damage through the receiving player's native Hurt. Geometry and mechanic results remain authoritative. Fixed beam budgets mean source damage, not final HP loss: native defense/DR/shields/dodge may reduce or cancel a hit. Percentage mechanic penalties bypass armor only. The [revive specification](REVIVE_SPEC.md#native-damage-boundary) owns the1-HP floor, pending Down and compatibility limits.
 
 Calamity handles its own Adrenaline/shield/hit reactions through the normal hooks; the old gauge-only bridge is removed. Do not manually reset Adrenaline on a dodge, shield cancellation, successful mechanic or mere HP snapshot. The native policy may differ from the former unconditional full-gauge reset, particularly for tiny hits. Installed-Mod behavior still requires a playtest.
+
+The shared avoidable beam/bullet source budget is **500** (`CombatRules.BeamDamage`; `ScoreGeometry` references it), retuned from the former direct-HP120 budget after the0.3.4 owner test repeatedly resolved to1. It does not scale with player HP or guarantee500 HP loss. Contact charges, Stack/Spread percentages, crush, hit caps and Boss/Pylon HP are unchanged. With300 defense at full effectiveness and50% DR, the basic native calculation is100 before shields/accessories; this is a calibration example, not measured owner gear.
+
+Chalice's deferred bleed is an equipment effect, not a Raid-applied bleeding debuff. Keep it native. Owner-only `NativeHurtDiagnostics` records source/direct damage, defense/DR and the Chalice buffer before/after each Raid intent. `NativeDotSample` samples an active bleed/negative-regen indicator at most once/second, including vanilla bleeding and debuff IDs. Do not sum buffer reductions as HP loss: potions can clear the buffer. See the [scoped compatibility finding](../../research/2026-09-14-implementation-review.md#chalice-follow-up--2026-09-15); lethal non-Hurt damage remains a known boundary, not a solved compatibility claim.
 
 ## Recovery, rewards and terminal outcomes
 

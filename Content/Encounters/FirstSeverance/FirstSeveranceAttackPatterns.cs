@@ -89,9 +89,10 @@ internal static class FirstSeveranceAttackPatterns
 
 internal static class FirstSeveranceCombatRules
 {
-    // Beams are direct, fixed Raid damage; maximum life is used only by the
-    // separate contact-style energy charge. Armor/recovery policy is unchanged.
-    internal const int BeamDamage = 120;
+    // Native Hurt SOURCE damage, before defense/DR/shields/Chalice. The former
+    // direct-HP budget of 120 was reduced to 1 by endgame armor in the owner test.
+    // Do not compensate by bypassing equipment or assigning guaranteed HP loss.
+    internal const int BeamDamage = 500;
     internal static int AttackDamage(FirstSeveranceAttackKind kind, int maximumLife)
     {
         if (maximumLife <= 0 || !Enum.IsDefined(kind))

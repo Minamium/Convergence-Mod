@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Convergence.Common.Compatibility.Calamity;
 using Convergence.Common.Encounters.Runtime;
 using Convergence.Common.Networking.Protocol;
 using Convergence.Common.Foundation.Identifiers;
@@ -24,6 +25,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
     private uint resultNonce;
     private int hurtLifeBefore;
     private bool applyingIntent;
+    private ulong nextDamageSampleTick;
     private int boundBuffType, lockoutBuffType;
     private Vector2 downedPosition;
     private ulong immunityUntilLocalTick;
@@ -121,6 +123,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
     {
         int before = Math.Max(1, Player.statLife);
         double applied = 0;
+        var chaliceBefore = OwnsHurt ? CalamityDamageDiagnostics.ReadChalice(Player) : default;
         applyingIntent = true;
         try
         {
@@ -130,6 +133,11 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
                     intent.Damage, 0, dodgeable: intent.Dodgeable, scalingArmorPenetration: intent.ArmorPenetration);
         }
         finally { applyingIntent = false; }
+        if (OwnsHurt && IsBound)
+        {
+            var chaliceAfter = CalamityDamageDiagnostics.ReadChalice(Player);
+            Mod.Logger.Info(FormattableString.Invariant($"FirstSeverance event=NativeHurtDiagnostics fight={fightId} slot={Player.whoAmI} hit={hitRevision} kind={intent.Kind} requested={intent.Damage} native_damage={applied:F0} defense={Player.statDefense} endurance={Player.endurance:F3} chalice_equipped={chaliceAfter.Equipped} chalice_buffer_before={chaliceBefore.Buffer:F2} chalice_buffer_after={chaliceAfter.Buffer:F2} chalice_deferred_added={Math.Max(0, chaliceAfter.Buffer - chaliceBefore.Buffer):F2}"));
+        }
         if (Player.statLife == 1 && !Player.dead && !IsDebugAssistProtected) LatchDown();
         return new(++resultNonce, hitRevision, healthRevision, before, Math.Max(1, Player.statLife),
             (int)Math.Clamp(applied, 0, FirstSeveranceHurtIntent.MaximumDamage));
@@ -203,6 +211,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
         downLatch = default;
         resultNonce = 0;
         applyingIntent = false;
+        nextDamageSampleTick = 0;
         immunityUntilLocalTick = 0;
         weaknessUntilLocalTick = 0;
         reviveLockoutUntilLocalTick = 0;
@@ -320,6 +329,7 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
 
     public override void PostUpdate()
     {
+        SampleDamageOverTime();
         RefreshRecoveryLockoutBuff();
         if (IsBound && boundBuffType > 0)
         {
@@ -358,6 +368,18 @@ public sealed class FirstSeveranceRaidPlayer : ModPlayer
                 0.8f);
             Main.dust[dust].noGravity = true;
         }
+    }
+
+    private void SampleDamageOverTime()
+    {
+        if (!OwnsHurt || !IsBound || Main.GameUpdateCount < nextDamageSampleTick) return;
+        nextDamageSampleTick = Main.GameUpdateCount + 60;
+        var chalice = CalamityDamageDiagnostics.ReadChalice(Player);
+        if (chalice.Buffer <= 0 && Player.lifeRegen >= 0 && !Player.bleed) return;
+        // At most one owner sample/second, only while a DoT indicator is present.
+        // A buffer drop is not an HP-loss measurement (potions can clear it).
+        string debuffs = string.Join(",", Player.buffType.Where(type => type > 0 && Main.debuff[type]));
+        Mod.Logger.Info(FormattableString.Invariant($"FirstSeverance event=NativeDotSample fight={fightId} slot={Player.whoAmI} life={Player.statLife} max_life={Player.statLifeMax2} life_regen={Player.lifeRegen} vanilla_bleeding={Player.bleed} chalice_equipped={chalice.Equipped} chalice_buffer={chalice.Buffer:F2} debuff_ids={debuffs} incapacitated={IsIncapacitated}"));
     }
 
     private static ulong Remaining(ulong deadline, ulong tick, ulong maximum)

@@ -21,8 +21,12 @@ internal static partial class Program
         var member = new ParticipantId(0);
         var first = HeldPrism(1, 100);
         var second = HeldPrism(2, 142, 1);
-        AssertEqual(54, first.ActiveTicks, "main beam holds for 0.9 seconds");
+        AssertEqual(45, first.ActiveTicks, "main beam holds for 0.75 seconds");
         AssertEqual(28, first.TelegraphTicks, "forecast unchanged");
+        AssertEqual(42, (int)(second.FireTick - first.FireTick), "fire cadence unchanged");
+        AssertEqual(true, first.IsFiring(second.FireTick), "three ticks of live overlap remain");
+        AssertEqual(true, first.IsFiring(first.EndTick - 1), "last live tick still damages");
+        AssertEqual(false, first.IsFiring(first.EndTick), "closure is harmless");
         ledger.Start(first, 100);
         ledger.MarkHit(1, member);
         ledger.Start(second, 142);
@@ -31,8 +35,8 @@ internal static partial class Program
         AssertEqual(false, ledger.HasHit(2, member), "new cast owns a separate hit cap");
         ledger.MarkHit(2, member);
         AssertEqual(false, ledger.CanStart, "only two simultaneous casts");
-        AssertEqual(false, ledger.Retire(181), "old cast kept through last live tick");
-        AssertEqual(true, ledger.Retire(182), "old cast retired exactly at end");
+        AssertEqual(false, ledger.Retire(172), "old cast kept through last live tick");
+        AssertEqual(true, ledger.Retire(173), "old cast retired exactly at end");
         AssertEqual(true, ledger.HasHit(2, member), "retirement does not clear current cap");
         AssertThrows<InvalidOperationException>(() => ledger.HasHit(1, member), "expired hit identity rejected");
         ledger.Start(HeldPrism(3, 184, 2), 184);
@@ -98,8 +102,8 @@ internal static partial class Program
                 return ok;
             }
             AssertEqual(true,Read(bytes,out var decoded),"both casts recovered without local history");
-            AssertEqual(224ul,decoded.LanceVolley!.EndTick,"latest full firing window");
-            AssertEqual(182ul,decoded.CarriedLance!.EndTick,"predecessor keeps independent end");
+            AssertEqual(215ul,decoded.LanceVolley!.EndTick,"latest full firing window");
+            AssertEqual(173ul,decoded.CarriedLance!.EndTick,"predecessor keeps independent end");
             for(int i=0;i<count;i++)
             {
                 AssertEqual(prior.Rays[i],decoded.CarriedLance.Rays[i],"older locked aim unmodified");
