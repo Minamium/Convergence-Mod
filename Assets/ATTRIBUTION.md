@@ -2,6 +2,106 @@
 
 ## Records
 
+### Crimson Invocation and companion — 2026-09-16 / 0.3.11
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/ScarletConjurer.png`
+- Asset ID: crimson-invocation-scarletconjurer-0311
+- Asset type: four-pose pixel NPC sprite sheet
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original copied unchanged; runtime UV/size/pose and mesh deformation are code, not baked image edits
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork license asserted
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-16; alpha/silhouette and representative hidden-FNA frames inspected; gameplay approval remains owner-tested
+- Prompt or brief location: the following final generation brief
+- Brief: Original red-haired young-adult summoner with very long twin-tails, black/wine-red modest dress, high collar and ivory clasps. Four full-body idle/cast/float/walk poses on true transparency, coarse readable Terraria-like pixel clusters for56px gameplay. No props, UI, text, mechanical costume or reference-image copy. The first high-resolution parts-sheet candidate was rejected.
+- SHA256: `65735cb1785e3d6a21f0e76bd28c250edb6eb0d007aa8b5314d8f342d6ca058c`
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/EmberCrown.png`
+- Asset ID: crimson-invocation-embercrown-0311
+- Asset type: transparent apparition sprite
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original copied unchanged; runtime UV/size/pose and mesh deformation are code, not baked image edits
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork license asserted
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-16; alpha/silhouette and representative hidden-FNA frames inspected; gameplay approval remains owner-tested
+- Prompt or brief location: the following final generation brief
+- Brief: Original asymmetrical obsidian/ivory crown, hollow red heart, blood-red veil and three thorn legs. Readable large silhouette, transparent cutout, no machinery, gore, text or HUD.
+- SHA256: `daff90ee77fe46adf402a0b696c61823291ac770267433f34e48c5100deade1e`
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/SableMantle.png`
+- Asset ID: crimson-invocation-sablemantle-0311
+- Asset type: transparent apparition sprite
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original copied unchanged; runtime UV/size/pose and mesh deformation are code, not baked image edits
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork license asserted
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-16; alpha/silhouette and representative hidden-FNA frames inspected; gameplay approval remains owner-tested
+- Prompt or brief location: the following final generation brief
+- Brief: Original broad black/blood-red silk apparition, four asymmetric flowing ribbons and ivory spines, tiny hollow mask/red energy knot. True transparent square, no machinery, gore, text or HUD.
+- SHA256: `5ffb9323b31a4f1c4c5a0b3dd07b5b6eb134b0c105728dfde048820d485f2086`
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/ThornChoir.png`
+- Asset ID: crimson-invocation-thornchoir-0311
+- Asset type: transparent apparition sprite
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original copied unchanged; runtime UV/size/pose and mesh deformation are code, not baked image edits
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork license asserted
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-16; alpha/silhouette and representative hidden-FNA frames inspected; gameplay approval remains owner-tested
+- Prompt or brief location: the following final generation brief
+- Brief: Original tall faceless black/crimson shroud with uneven branch horns, four ivory claws, hollow torso/red heart and long tendrils. True transparency, no machinery, gore, text or HUD.
+- SHA256: `2d417b7c36b9ecc12ec3e6c64a9e8f4dfb3821fef43ae3f959c72bcbb652d282`
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/CrimsonConductor.png`
+- Asset ID: crimson-invocation-crimsonconductor-0311
+- Asset type: summoning item icon
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original copied unchanged; runtime UV/size/pose and mesh deformation are code, not baked image edits
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork license asserted
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-16; alpha/silhouette and representative hidden-FNA frames inspected; gameplay approval remains owner-tested
+- Prompt or brief location: the following final generation brief
+- Brief: Compact original black/crimson grimoire with red orb, ivory clasp and two ribbon tails. Terraria-style chunky pixel silhouette, actual transparent background, no labels or reference-image editing.
+- SHA256: `18b91f13f30ffef3609d9e85dba2025d8380c828099c9c88f0a6fd1a6384e78c`
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/CrimsonPact.png`
+- Asset ID: crimson-invocation-crimsonpact-0311
+- Asset type: companion item icon
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original copied unchanged; runtime UV/size/pose and mesh deformation are code, not baked image edits
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork license asserted
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-16; alpha/silhouette and representative hidden-FNA frames inspected; gameplay approval remains owner-tested
+- Prompt or brief location: the following final generation brief
+- Brief: Original scarlet twin-tail tassel ornament, ivory clasp and red star gem, distinct from the raid book. Terraria-style chunky pixel silhouette, actual transparent background, no labels.
+- SHA256: `a4cb1fb577b21397d29435e5076b56f8a9c4e1f7ca6169e75c7a9d8e8d037bdc`
+
+The six PNGs above are new generations, not image-to-image copies. External originals are preserved; unused high-resolution drafts remain outside the package. Runtime uses the existing original CrimsonReactor/PortalBeam/RaidEnergy shader exports and project Portal charge/fire recordings unchanged. No new third-party recording, shader or texture is vendored.
+
 ### Crimson articulated rig and reactor — 2026-09-15 / 0.3.9
 
 - Runtime file: `Assets/Textures/CrimsonFoundry/FoundryRig.png`

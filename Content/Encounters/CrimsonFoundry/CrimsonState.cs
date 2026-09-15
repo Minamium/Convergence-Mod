@@ -6,27 +6,31 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 
 internal enum CrimsonStage : byte { Deployment, Ready, Countdown, Performance, Victory, Defeat }
 internal readonly record struct CrimsonMember(byte Slot, Guid Connection, bool Ready, bool Out);
-internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart, int PurgeTick, CrimsonStage Stage, CrimsonMember[] Members,
-    int GroundX, int GroundY)
+internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart, int FinalStart, CrimsonStage Stage, CrimsonMember[] Members,
+    int GroundX, int GroundY, byte DefeatedMask = 0)
 {
     internal const int MaxMembers = 8;
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
     internal bool Vulnerable(float now) => Fight != Guid.Empty && Stage == CrimsonStage.Performance
-        && (PurgeTick < 0 || now >= PurgeTick + 90);
+        && DefeatedMask == CrimsonInvocation.AllDefeated && FinalStart >= 0 && now >= FinalStart + CrimsonInvocation.ManifestTicks;
+    internal bool SummonVulnerable(int index) => Fight != Guid.Empty && Stage == CrimsonStage.Performance && FinalStart < 0
+        && index is >= 0 and < CrimsonInvocation.SummonCount && (DefeatedMask & 1 << index) == 0;
     internal bool Contains(int slot) => Array.Exists(Members ?? Array.Empty<CrimsonMember>(), m => m.Slot == slot && !m.Out);
     internal void Write(BinaryWriter w)
     {
-        w.Write(Fight.ToByteArray()); w.Write(Age); w.Write(MusicStart); w.Write(PurgeTick); w.Write((byte)Stage);
+        w.Write(Fight.ToByteArray()); w.Write(Age); w.Write(MusicStart); w.Write(FinalStart); w.Write((byte)Stage);
         w.Write(GroundX); w.Write(GroundY);
+        w.Write(DefeatedMask);
         w.Write((byte)Members.Length);
         foreach (var m in Members) { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); }
     }
     internal static CrimsonState Read(BinaryReader r)
     {
-        byte[] f = r.ReadBytes(16); int age = r.ReadInt32(), start = r.ReadInt32(), purge = r.ReadInt32();
-        var stage = (CrimsonStage)r.ReadByte(); int groundX = r.ReadInt32(), groundY = r.ReadInt32(); int count = r.ReadByte();
+        byte[] f = r.ReadBytes(16); int age = r.ReadInt32(), start = r.ReadInt32(), final = r.ReadInt32();
+        var stage = (CrimsonStage)r.ReadByte(); int groundX = r.ReadInt32(), groundY = r.ReadInt32(); byte defeated = r.ReadByte(); int count = r.ReadByte();
         if (f.Length != 16 || new Guid(f) == Guid.Empty || age is < 0 or > 72000 || start is < -1 or > 72000
-            || purge is < -1 or > 72000 || !Enum.IsDefined(stage) || count is < 1 or > MaxMembers
+            || final is < -1 or > 72000 || !Enum.IsDefined(stage) || count is < 1 or > MaxMembers
+            || defeated > CrimsonInvocation.AllDefeated || final >= 0 && defeated != CrimsonInvocation.AllDefeated
             || groundX is < 1600 or > 400000 || groundY is < 1440 or > 150000)
             throw new InvalidDataException("crimson.actor_invalid");
         var members = new CrimsonMember[count];
@@ -38,13 +42,26 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
             members[i] = new(slot, new Guid(bytes), ready, eliminated);
         }
         if (stage is CrimsonStage.Countdown or CrimsonStage.Performance && start < 0) throw new InvalidDataException("crimson.clock_missing");
-        return new(new Guid(f), age, start, purge, stage, members, groundX, groundY);
+        return new(new Guid(f), age, start, final, stage, members, groundX, groundY, defeated);
     }
 }
 
 internal enum CrimsonShape : byte { Slash, Bolt }
+internal readonly record struct CrimsonEffigyState(Guid Fight, short Boss, byte Index, int Born)
+{
+    internal void Write(BinaryWriter w)
+    { w.Write(Fight.ToByteArray()); w.Write(Boss); w.Write(Index); w.Write(Born); }
+    internal static CrimsonEffigyState Read(BinaryReader r)
+    {
+        byte[] fight = r.ReadBytes(16); short boss = r.ReadInt16(); byte index = r.ReadByte(); int born = r.ReadInt32();
+        if (fight.Length != 16 || new Guid(fight) == Guid.Empty || boss is < 0 or >= 200 || index >= 3 || born is < 0 or > 72000)
+            throw new InvalidDataException("crimson.effigy_invalid");
+        return new(new Guid(fight), boss, index, born);
+    }
+}
+
 internal readonly record struct CrimsonHazard(Guid Fight, short Boss, int Born, int Fire, int End,
-    CrimsonShape Shape, float X, float Y, float DX, float DY, float Length, float Width, int Damage)
+    CrimsonShape Shape, float X, float Y, float DX, float DY, float Length, float Width, int Damage, byte Source = 3)
 {
     internal bool Live(float age) => age >= Fire && age < End;
     internal const float BoltTail = 210;
@@ -54,20 +71,20 @@ internal readonly record struct CrimsonHazard(Guid Fight, short Boss, int Born, 
     internal void Write(BinaryWriter w)
     {
         w.Write(Fight.ToByteArray()); w.Write(Boss); w.Write(Born); w.Write(Fire); w.Write(End); w.Write((byte)Shape);
-        w.Write(X); w.Write(Y); w.Write(DX); w.Write(DY); w.Write(Length); w.Write(Width); w.Write(Damage);
+        w.Write(X); w.Write(Y); w.Write(DX); w.Write(DY); w.Write(Length); w.Write(Width); w.Write(Damage); w.Write(Source);
     }
     internal static CrimsonHazard Read(BinaryReader r)
     {
         byte[] f = r.ReadBytes(16); short boss = r.ReadInt16(); int born = r.ReadInt32(), fire = r.ReadInt32(), end = r.ReadInt32();
         var shape = (CrimsonShape)r.ReadByte();
         float x = r.ReadSingle(), y = r.ReadSingle(), dx = r.ReadSingle(), dy = r.ReadSingle(), length = r.ReadSingle(), width = r.ReadSingle();
-        int damage = r.ReadInt32();
+        int damage = r.ReadInt32(); byte source = r.ReadByte();
         if (f.Length != 16 || new Guid(f) == Guid.Empty || boss is < 0 or >= 200 || born < 0 || fire - born != CrimsonScore.WarningTicks
             || end <= fire || end - fire > 90 || !Enum.IsDefined(shape) || !float.IsFinite(x) || !float.IsFinite(y)
             || Math.Abs(x) > 400000 || Math.Abs(y) > 150000 || !float.IsFinite(dx) || !float.IsFinite(dy)
             || Math.Abs(dx * dx + dy * dy - 1) > .02 || !float.IsFinite(length) || length is < 1 or > 4000
-            || !float.IsFinite(width) || width is < 1 or > 120 || damage is < 1 or > 2000)
+            || !float.IsFinite(width) || width is < 1 or > 120 || damage is < 1 or > 2000 || source > 3)
             throw new InvalidDataException("crimson.hazard_invalid");
-        return new(new Guid(f), boss, born, fire, end, shape, x, y, dx, dy, length, width, damage);
+        return new(new Guid(f), boss, born, fire, end, shape, x, y, dx, dy, length, width, damage, source);
     }
 }
