@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-15
+last_reviewed: 2026-09-16
 source_of_truth_for:
   - architecture.crimson_score_authority
 aliases:
@@ -19,7 +19,9 @@ related_docs:
   - adr.0023
 ---
 
-# ADR-0026: Crimson Foundry score clock and native projectiles
+# ADR-0026: Crimson score clock and native projectiles
+
+Current amendment: [independent summons](#independent-summons-amendment--2026-09-16). The original steel-machine/50% purge rationale below is historical, not the current visual/phase instruction.
 
 The owner requests a separate music-led Raid without a fixed arena, then a50% armored→fast-machine transformation. Reuse the definition-routed coordinator/transport, not either prior encounter's runtime. `crimson_foundry` owns a runtime, preparation roster, native NPC projection, immutable hazard projectiles and terminal cleanup; no global encounter switch, extra assembly or persisted session is added. Feature termination schema3/version1 and protocol42 distinguish matching peers without renumbering prior packet IDs.
 
@@ -38,3 +40,13 @@ The first implementation withheld the recording from Git pending a distribution 
 The owner replaces the boundary-free requirement with a Doll-sized field selected by a different item on the same pedestal. `Content/Shared/RaidPedestal` exposes a narrow held-key/lease adapter implemented by the existing saved tile entity; existing tile/type IDs and Doll's interaction remain stable. Pure `Common/Raids/Arena/RaidFieldGeometry` owns the common footprint and bounded geometry. No new feature switch is added to the coordinator/router, and Common does not import Content.
 
 Crimson's runtime owns claiming, validating, activating and finally releasing its exact Fight lease. Its actor snapshot now includes the immutable ground anchor, requiring protocol43 on every peer. Native incoming NPC damage remains the intended path: a client must project `dontTakeDamage` from the same Performance/purge rule as authority, or it never submits legitimate weapon hits. Field containment/flight are feature-scoped capabilities derived from that fresh actor/retained roster, not saved player flags. Only authority and the owning client adjust position; remote clients do not inject input. Physics and physical-pixel exterior rendering consume the same rectangle, with one world-transform application and no UI-scale multiplication. Clear/wipe/cancel/world exit release the field with the actor. This adds no Doll recovery integration or terrain mutation.
+
+## Independent summons amendment — 2026-09-16
+
+The owner replaces the machine with an NPC-sized summoner and three large independently damageable apparitions. `CrimsonRuntime` retains authority tick order and exact-Fight cleanup, owns four native NPCs and source-tagged hazards, freezes their equal HP budgets at Ready acceptance, and advances an idempotent three-bit defeated mask only from matched child deaths. A missing child invalidates the encounter instead of counting as a kill. All three deaths open a protected Final manifestation, then expose the performer; no remaining50% purge logic. Native player/NPC damage remains unchanged.
+
+The main projection replaces the old purge epoch with a Final epoch and adds the defeated mask. Each child completely bounds Fight, parent NPC slot, index0–2 and birth tick; each hazard adds source0–3. Every peer derives target vulnerability from the same fresh accepted state. The merged Ghost Samurai update already uses protocol44; this combined revision therefore uses **protocol45**, with no packet-ID renumbering. Cleanup scans exact-Fight actors, including partial construction, before releasing the shared lease. Child death cancels its existing hazards; Final cancels all prior hazards.
+
+`CrimsonBarrageGeometry` takes field/cue/source, never player coordinates. All lanes in a volley share one corridor; authority issues fixed world-space geometry. Music fade and continuous introductory bars consume the accepted epoch but never alter score timing or gameplay.
+
+The new companion is a normal owner-replicated minion, outside encounter authority/roster/Ready. Owner chooses locomotion and creates child beams; missing remote owner buffs cannot dismiss a replica. Child lifetime checks exact owner plus projectile identity. The client-only rig is shared as artwork, not via a gameplay dependency on Client or on Doll's runtime.
