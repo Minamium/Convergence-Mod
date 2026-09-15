@@ -65,7 +65,7 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson Foundry score clock and native projectiles'
-  content_sha256: a4d51cfbc682167e56ff5c75bad88c83a4a28e7be7e0e1014f4da111a81993a5
+  content_sha256: 51e980b187afac0a84aeb808496d976b5728fd094497b6047e9f13ddf7805d0e
   document_type: adr
   status: accepted
   owners:
@@ -557,7 +557,7 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Crimson Foundry
-  content_sha256: fa657dc005db22fe16fd0c9daadac1d3277cd293407213200fb9dcc26f22c767
+  content_sha256: 13fd5050be5bd2c0deb982a0ba33206c3068d2411f444d070c8b2a410707e3e0
   document_type: spec
   status: accepted
   owners:
@@ -1039,7 +1039,7 @@ documents:
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
-  content_sha256: ffcedc3795775151773697efab2bd08615353bded90296fc9543c802565570f4
+  content_sha256: ba8f17488aae86783ed8e183677dc7162797d3b721441fa744818018b66d1466
   document_type: governance
   status: accepted
   owners:
@@ -1241,7 +1241,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 471341c4aa7be98c33b9696dbddae4fcbec717d994b1fc9be9399eae95242f99
+  content_sha256: b1f7f51b5edfd7b584d3620eb1c8acd39c312934f0df0762e9611ba227c62698
   document_type: status
   status: accepted
   owners:

@@ -74,9 +74,6 @@ Assets/Textures/Concept/
 Assets/Music/Source/
 Assets/Sounds/Source/
 
-# User-approved local game edit; standalone source redistribution not verified.
-Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg
-
 # Editable art/audio project formats use the approved external source store.
 *.als
 *.ase
