@@ -2869,3 +2869,29 @@ Original Convergence HLSL; no external shader code or texture is vendored. Runti
 - Original source: `Assets/AutoloadedEffects/Shaders/PortalBeam.fx`; SHA256 `645ffd856e4ee9cdfc7d663eca01f626aab8e3b883a726876559f7d73eaec1d8`.
 
 README `docs/media/doll-npc.png` is the exact first 32×52 cel of `DollAttendant.png`, enlarged 3× with nearest-neighbor by `tools/export_readme_doll.py`; no repainting or image generation. It inherits the recorded Doll NPC asset's provenance/terms. The former banner and its original provenance remain in history/storage, unused by README.
+
+
+## Weapon articulation revision — 2026-09-15 / 0.3.7
+
+Creator: Codex under the repository owner's direction; original Convergence DSP plus edits of the already-attributed project-authored Raid beam sounds. No third-party audio, reference recording or music sample. Project asset terms remain unchanged. `tools/remix_weapon_articulation.py` defines explicit windows/rate/EQ, deterministic resonant/noise layers, envelopes and attached reflections; `remix_weapon_foley.py` supplies PCM export and safety metering. [Exact per-file hashes, source hashes and metrics](../docs/evidence/2026-09-15-doll-final-check.json) identify these replacements. Prior masters/source copies remain in ignored external audition archives; previous records are historical for the following destinations. Seven long-beam launches/beds are unchanged. Numerical decode/headroom checks are not human listening approval.
+
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawSwipe.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawGrip.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawCrush.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ClawHit.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicSigil.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicBolt.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicMerge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/MagicCharge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/RangedLatch.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/RangedShot.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/RangedCharge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ChoirNote.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/ChoirCharge.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WitnessDraw.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WitnessLock.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WitnessFire.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/WeaponHit.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollSummon.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollThread.wav`.
+- Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`.
