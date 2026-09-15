@@ -100,7 +100,8 @@ public class FoundationCoreTile : ModTile
         if (Main.netMode != NetmodeID.Server)
         {
             Point16 topLeft = TileObjectData.TopLeft(i, j);
-            FirstSeveranceClientActions.InteractWithCore(topLeft.X, topLeft.Y);
+            if (!Convergence.Content.Shared.RaidPedestal.UseHeldKey(topLeft.X, topLeft.Y))
+                FirstSeveranceClientActions.InteractWithCore(topLeft.X, topLeft.Y);
         }
 
         return true;
@@ -113,7 +114,8 @@ public class FoundationCoreTile : ModTile
         Player player = Main.LocalPlayer;
         player.noThrow = 2;
         player.cursorItemIconEnabled = true;
-        player.cursorItemIconID = ModContent.ItemType<TheaterDoll>();
+        player.cursorItemIconID = player.HeldItem.ModItem is Convergence.Content.Shared.IRaidPedestalKey
+            ? player.HeldItem.type : ModContent.ItemType<TheaterDoll>();
     }
 }
 

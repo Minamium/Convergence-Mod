@@ -4,8 +4,8 @@ Mods: {
       CrimsonConductor: {
         DisplayName: 紅蓮の指揮装置
         Tooltip: '''
-          Crimson Foundryを展開する。接続中の全員がReadyすると開始
-          フィールド境界なし。音楽に合わせた斬撃とエネルギー弾を回避せよ
+          Foundation Coreの台に使用してCrimson Foundryを展開。接続中の全員がReadyすると開始
+          領域内は無限飛行。音楽に合わせたビームとエネルギー弾を回避せよ
           右クリックで自分が始めた準備を中止。消耗しない
           試作版：1～8人。開始後の参加者は次回起動まで観戦
           '''
@@ -13,7 +13,7 @@ Mods: {
     }
     NPCs: { CrimsonBoss: { DisplayName: "Ferrum — 紅の機工士" } }
     Projectiles: { CrimsonAttack: { DisplayName: "紅蓮の兵装" } }
-    CrimsonFoundry: { Rejected: "起動できません。指揮装置を持ち、他の戦闘を終了して、8人以下で使用してください。" }
+    CrimsonFoundry: { Rejected: "起動できません。指揮装置を持ってFoundation Coreの台の近くで使用し、他の戦闘を終了して8人以下で開始してください。" }
     Configs: {
       CrimsonVisualConfig: {
         DisplayName: Crimson Foundryの演出

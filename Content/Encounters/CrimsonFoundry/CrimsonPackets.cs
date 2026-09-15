@@ -30,13 +30,13 @@ internal sealed class CrimsonPackets : ModSystem, IEncounterPacketHandler
         }
     }
     internal static void Log(string text) => global::Convergence.ConvergenceMod.Instance.Logger.Info("CrimsonFoundry " + text);
-    internal static void Summon()
+    internal static void Summon(int tileX, int tileY)
     {
         uint id = ++nonce; if (id == 0) id = ++nonce;
-        if (Main.netMode == NetmodeID.SinglePlayer) { Start(Main.myPlayer, id); return; }
+        if (Main.netMode == NetmodeID.SinglePlayer) { Start(Main.myPlayer, id, new(tileX, tileY)); return; }
         var packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
         EncounterRouteCodec.WriteHeader(packet, new(EncounterProtocol.CurrentVersion, EncounterPacketType.RequestActivate, 0, FightId.None, 0), CrimsonDefinition.EncounterKey);
-        packet.Write(id); packet.Send();
+        packet.Write(id); packet.Write(tileX); packet.Write(tileY); packet.Send();
     }
     internal static void Ready(bool ready, bool cancel = false)
     {
@@ -51,13 +51,13 @@ internal sealed class CrimsonPackets : ModSystem, IEncounterPacketHandler
             state.EncounterSequence, state.FightId, state.Revision), CrimsonDefinition.EncounterKey);
         packet.Write(member.Connection.ToByteArray()); packet.Write(++nonce); packet.Write(ready); packet.Send();
     }
-    private static bool Start(int sender, uint request)
+    private static bool Start(int sender, uint request, TilePoint anchor)
     {
         Player p = Main.player[sender];
         var sink = ModContent.GetInstance<EncounterCoordinatorSystem>().CommandSink;
         string failure = "crimson.coordinator_unavailable";
         bool success = sink is not null && sink.TryStart(new(sender, CrimsonDefinition.EncounterKey,
-            new TilePoint((int)p.Center.X / 16, (int)p.Center.Y / 16), request), out _, out failure);
+            anchor, request), out _, out failure);
         Log($"event=Summon accepted={success} sender={sender} reason={failure}");
         if (!success && Main.netMode == NetmodeID.SinglePlayer)
             Main.NewText(Terraria.Localization.Language.GetTextValue("Mods.Convergence.CrimsonFoundry.Rejected") + " " + failure);
@@ -68,13 +68,13 @@ internal sealed class CrimsonPackets : ModSystem, IEncounterPacketHandler
         failureCode = "crimson.packet_invalid";
         if (header.PacketType == EncounterPacketType.RequestActivate)
         {
-            uint id = reader.ReadUInt32();
+            uint id = reader.ReadUInt32(); int x = reader.ReadInt32(), y = reader.ReadInt32();
             if (Main.netMode != NetmodeID.Server || sender < 0 || sender >= Main.maxPlayers || !Main.player[sender].active
                 || Main.player[sender].dead || id == 0 || !header.FightId.IsNone || header.EncounterSequence != 0 || header.Revision != 0) return false;
             var connection = Main.player[sender].GetModPlayer<CrimsonConnection>();
             if (Main.GameUpdateCount < connection.NextRequest || id <= connection.LastNonce) return false;
             connection.NextRequest = Main.GameUpdateCount + 45; connection.LastNonce = id;
-            bool accepted = Start(sender, id);
+            bool accepted = Start(sender, id, new TilePoint(x, y));
             var response = global::Convergence.ConvergenceMod.Instance.GetPacket();
             EncounterRouteCodec.WriteHeader(response, new(EncounterProtocol.CurrentVersion, EncounterPacketType.ValidationResult, 0, FightId.None, 0), CrimsonDefinition.EncounterKey);
             response.Write(accepted); response.Send(sender);
@@ -84,6 +84,8 @@ internal sealed class CrimsonPackets : ModSystem, IEncounterPacketHandler
             byte[] token = reader.ReadBytes(16); uint id = reader.ReadUInt32(); bool ready = reader.ReadBoolean();
             if (Main.netMode != NetmodeID.Server || sender < 0 || sender >= Main.maxPlayers || !Main.player[sender].active || token.Length != 16) return false;
             var connection = Main.player[sender].GetModPlayer<CrimsonConnection>();
+            if (header.FightId != Snapshot.FightId || header.EncounterSequence != Snapshot.EncounterSequence
+                || header.Revision > Snapshot.Revision || id == 0) return false;
             if (id <= connection.LastNonce || Main.GameUpdateCount < connection.NextRequest) return false;
             connection.LastNonce = id; connection.NextRequest = Main.GameUpdateCount + 6;
             if (Boss?.Runtime?.Request(sender, new Guid(token), ready, header.PacketType == EncounterPacketType.RequestCancel) != true) return false;

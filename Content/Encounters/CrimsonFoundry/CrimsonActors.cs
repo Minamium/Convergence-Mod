@@ -20,7 +20,7 @@ public sealed class CrimsonBoss : ModNPC
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
     {
-        NPC.width = 220; NPC.height = 170; NPC.lifeMax = 12000000; NPC.defense = 65;
+        NPC.width = 200; NPC.height = 330; NPC.lifeMax = 12000000; NPC.defense = 65;
         NPC.damage = 0; NPC.knockBackResist = 0; NPC.aiStyle = -1;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.boss = NPC.netAlways = true;
         NPC.dontTakeDamage = true;
@@ -37,6 +37,10 @@ public sealed class CrimsonBoss : ModNPC
     public override void AI()
     {
         NPC.timeLeft = NPC.activeTime;
+        // dontTakeDamage is not supplied by this feature's native snapshot.
+        // Project it on EVERY peer: clients otherwise retain SetDefaults(true)
+        // forever and never submit their legitimate native item/projectile hits.
+        NPC.dontTakeDamage = !Fresh || !State.Vulnerable(VisualAge);
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {
             NPC.active = false;
@@ -89,7 +93,7 @@ public sealed class CrimsonAttack : ModProjectile
     {
         if (!TryBoss(out var boss) || !Hazard.Live(Age(boss!))) return false;
         float age = Age(boss!); Vector2 direction = new(Hazard.DX, Hazard.DY), origin = new(Hazard.X, Hazard.Y);
-        if (Hazard.Shape == CrimsonShape.Bolt) origin += direction * Math.Max(0, Hazard.Travel(age) - 110);
+        if (Hazard.Shape == CrimsonShape.Bolt) origin += direction * Math.Max(0, Hazard.Travel(age) - CrimsonHazard.BoltTail);
         float point = 0;
         return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), origin,
             origin + direction * Hazard.Reach(age), Hazard.HitWidth(age) * 2, ref point);
@@ -103,7 +107,7 @@ public sealed class CrimsonAttack : ModProjectile
             float age = Age(boss);
             Projectile.Center = new Vector2(Hazard.X, Hazard.Y) + new Vector2(Hazard.DX, Hazard.DY)
                 * (Hazard.Shape == CrimsonShape.Bolt ? Hazard.Travel(age) : Hazard.Length * .5f);
-            if (Main.netMode != NetmodeID.MultiplayerClient && age >= Hazard.End) Projectile.Kill();
+            if (Main.netMode != NetmodeID.MultiplayerClient && age >= Hazard.End + 14) Projectile.Kill();
         }
         else if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
     }
