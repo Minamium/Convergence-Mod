@@ -36,13 +36,20 @@
 - Terms: original generated project assets under the existing publication/asset-license gate. Retain this provenance. Codex inspected the generated silhouettes/alpha on2026-09-15; actual game-distance readability remains owner-tested.
 - Effects: existing project-authored `PortalBeam.fxc` / `RaidEnergy.fxc` and existing original Raid cues are referenced unchanged; Luminance supplies its own noise textures at runtime. No external Mod assets or recordings are extracted.
 
-- Local game-facing music file: `Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg` (**gitignored; not a source/music release**).
-- Composer/recording owner: **kuku**. Work supplied as **Graceful Ordeal.wav** by Minamium for this encounter. [Author's video and current terms](https://www.youtube.com/watch?v=HnBESyUqx_g), titled 「実はとてもお強いお嬢様からの試練BGM」; description links [the official WAV](https://drive.google.com/file/d/1bX8QLlttGdZ5ssGm6qtbd-XQAXs09MdA/view). Description retrieved2026-09-15; playback was not subjectively auditioned by Codex.
-- Terms summary: BGM/personal use permitted; credit required for a secondary creative publication; copyright retained by kuku; uncreative BGM-only/endurance content prohibited. No standalone source-asset redistribution grant was found in that description. Public game distribution of this edit remains a rights-review item, not a permission inferred from “free.”
-- Required credit used: **Music: “Graceful Ordeal” by kuku — https://www.youtube.com/watch?v=HnBESyUqx_g . Loop edit for Crimson Foundry; original copyright belongs to kuku.**
-- Exact input SHA256: `42a10539bdc12468d279f9956085ce1c99aae1fa0092fc05912e0225c26076d3`; owner-approved local WAV preserved unchanged. Local OGG SHA256: `f8f0a566a18dfa7d9ba2fd6203d877160bc6e0ae04123a694a2c9307bbaaffa9`.
-- Modifications/tool: `tools/prepare_crimson_score.py`, NumPy2.3.5 and FFmpeg7.1/libvorbis quality6. No tempo/pitch change or normalization. A300ms tail bridge and sample loop points omit terminal fade/silence; immutable measured beat/intensity data are exported beside it. See [owning music spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-and-musical-presentation), not duplicated tuning here.
-- Review: numerical timing, peak and loop analysis completed; musical seam/device/MP listening remains owner-owned. Do not upload the WAV, standalone OGG, seam audition or an endurance video. The score analysis JSON is project-generated numeric game data, not a new license for the recording.
+- Runtime file: `Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg`
+- Asset ID: crimson-graceful-ordeal-loop-038
+- Asset type: third-party game-facing OGG loop edit; not a standalone music release
+- Creator: **kuku**, composer/recording owner; Minamium supplied the WAV for this encounter
+- Creation/acquisition date: 2026-09-15
+- Source type: licensed
+- Source work and URL: **Graceful Ordeal** / 「実はとてもお強いお嬢様からの試練BGM」; [author's video and terms](https://www.youtube.com/watch?v=HnBESyUqx_g), with [official WAV](https://drive.google.com/file/d/1bX8QLlttGdZ5ssGm6qtbd-XQAXs09MdA/view) linked from its description
+- License and redistribution terms: BGM/personal use permitted, including monetized video use; credit required for secondary creative publication; copyright retained by kuku; uncreative BGM-only/endurance content prohibited. Minamium explicitly approved inclusion of this exact game-facing derivative in the Mod and public source repository on2026-09-15 after reviewing the terms and source-distribution ambiguity. This is project-integrated use, not a claim of a separate standalone-audio redistribution license.
+- License exclusion: **Copyright belongs to kuku. This recording and its loop edit are NOT covered by any Convergence source-code or original-asset license.** The author's linked terms continue to govern; no Content ID registration, music-only collection or endurance upload by this project. The raw WAV and audition exports remain external.
+- Required attribution: **Music: “Graceful Ordeal” / 「実はとてもお強いお嬢様からの試練BGM」 by kuku — https://www.youtube.com/watch?v=HnBESyUqx_g . Loop edit for Crimson Foundry; original copyright belongs to kuku.**
+- Exact input SHA256: `42a10539bdc12468d279f9956085ce1c99aae1fa0092fc05912e0225c26076d3`; owner-provided WAV preserved unchanged. Runtime OGG SHA256: `f8f0a566a18dfa7d9ba2fd6203d877160bc6e0ae04123a694a2c9307bbaaffa9`.
+- Tool/model/version: `tools/prepare_crimson_score.py`, NumPy2.3.5 and FFmpeg7.1/libvorbis quality6
+- Human modifications: No tempo/pitch change or normalization. A300ms tail bridge and sample loop points omit terminal fade/silence; immutable measured beat/intensity data are exported beside it. See [owning music spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-and-musical-presentation), not duplicated tuning here.
+- Reviewer and review date: Codex,2026-09-15; numerical timing, peak and loop analysis completed; musical seam/device/MP listening remains owner-owned. Author video terms rechecked; retain the bundled `Credits.txt` and this provenance when building/distributing the Mod. The score analysis JSON is project-generated numeric game data, not a new license for the recording.
 
 ### Weapon energy and README NPC export — 2026-09-14
 

@@ -28,7 +28,7 @@
     "crossfade_seconds": 0.3,
     "peak_dbfs": -0.2,
     "beat_count": 294,
-    "distribution": "Local owner-approved game edit only; raw/standalone audio not pushed"
+    "distribution": "Initial build used an ignored local edit. Later on2026-09-15 the owner approved committing the same game-facing OGG with creator credit and project-license exclusion; raw masters and auditions remain external. See Assets/ATTRIBUTION.md."
   },
   "not_run": [
     "Actual Mod load, rendering, Ready controls at 107-percent UI scale and zoom",
