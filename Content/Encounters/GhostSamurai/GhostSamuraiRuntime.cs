@@ -13,7 +13,7 @@ namespace Convergence.Content.Encounters.GhostSamurai;
 
 // One coordinator-owned fight. The NPC is a damageable actor and read-only network
 // projection; it does not own a second AI or a client-side random attack selector.
-internal sealed class GhostSamuraiRuntime : IEncounterRuntime
+internal sealed partial class GhostSamuraiRuntime : IEncounterRuntime
 {
     private readonly FightId fight;
     private readonly int summoner;
@@ -114,7 +114,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         // UpdateAttack has already advanced the next-tick cursor; display the tick
         // that actually produced this age's hazard/pose, rather than one tick ahead.
         actor.AttackTimer = attack == SamuraiAttack.Idle ? timer : Math.Max(0, timer - 1 - (attack == SamuraiAttack.GridSlash ? gridSequenceOffset : 0));
-        actor.TransitionRemaining = transition;
+        actor.TransitionRemaining = transition; actor.Combo = combo;
         // Snapshots also re-anchor client-only clocks during long attacks / late join.
         if (age % 15 == 0) npc.netUpdate = true;
     }
@@ -162,7 +162,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             Hover(npc, target.Center + new Vector2(npc.Center.X < target.Center.X ? -300 : 300, -200));
             if (++timer < GhostSamuraiRules.AttackInterval(phase)) return;
             int count = GhostSamuraiRules.AttackCount(phase);
-            attack = GhostSamuraiRules.SelectNextAttack(phase, previous, Main.rand.Next(count - (previous == SamuraiAttack.Idle ? 0 : 1)));
+            attack = GhostSamuraiRules.SelectNextAttack(phase, previous, Main.rand.Next(count - (GhostSamuraiRules.AttackAllowed(phase, previous) ? 1 : 0)));
             timer = 0;
             baseAngle = Main.rand.NextFloat(-.35f, .35f);
             dashSide = npc.Center.X < target.Center.X ? -1 : 1;
@@ -175,6 +175,8 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
             case SamuraiAttack.GridSlash: DoGridSlash(npc, target); break;
             case SamuraiAttack.Phase2DashSlash: DoPhase2DashSlash(npc, target); break;
             case SamuraiAttack.Phase3CircleAttack: DoPhase3CircleAttack(npc, target); break;
+            case SamuraiAttack.TripleVerticalSlash: DoTripleVerticalSlash(npc, target); break;
+            case SamuraiAttack.FrontalCleaveShockwave: DoFrontalCleaveShockwave(npc, target); break;
         }
         if (attack != SamuraiAttack.Idle) timer++;
     }
@@ -489,6 +491,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         lastWaveEnd = 0;
         firstGridWave = null;
         gridSequenceOffset = 0;
+        ResetCombo();
         if (actor is not null) actor.NPC.netUpdate = true;
     }
     private EncounterRuntimeUpdate End(EncounterEndReason reason)
@@ -509,6 +512,7 @@ internal sealed class GhostSamuraiRuntime : IEncounterRuntime
         lastWaveEnd = 0;
         firstGridWave = null;
         gridSequenceOffset = 0;
+        ResetCombo();
     }
     public void Cleanup(in EncounterCleanupContext context)
     {

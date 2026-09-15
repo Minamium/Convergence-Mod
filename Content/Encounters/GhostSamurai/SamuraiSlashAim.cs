@@ -16,6 +16,8 @@ internal readonly record struct SamuraiSlashAim(int Tick, int LockTick, float X,
         && (h.ArrivalTick == 0 || LockTick == ReleaseTick - GhostSamuraiRules.AimLockLead)
         && LockTick >= h.Born && LockTick <= ReleaseTick - (LockTick == h.Born ? 0
             : h.Shape == SamuraiShape.RushVisual ? GhostSamuraiRules.DashAimLockTime : GhostSamuraiRules.AimLockLead)
+        && (h.Shape != SamuraiShape.VerticalSlash || LockTick == ReleaseTick - SamuraiComboRules.VerticalLockLead)
+        && (h.Shape != SamuraiShape.FrontalCleave || LockTick == h.Born + SamuraiComboRules.CleaveTrackTime)
         && Tick >= h.Born && Tick <= LockTick;
     internal bool Locked => Tick == LockTick;
     internal SamuraiSlashAim Advance(SamuraiHazard h, int tick, float x, float y, float dx, float dy)

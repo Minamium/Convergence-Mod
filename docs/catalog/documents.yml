@@ -727,13 +727,13 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: f026525d3f2a5f56e9f151b095990ea7028ec19f7b7090d53332c3e43deb56d9
+  content_sha256: af81d22b32380cce33caa6831901ae86c3d93fb158e7ceb363c11c6eaefb96ab
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-15'
   source_of_truth_for:
   - ghost_samurai.behavior
   aliases:
@@ -1153,12 +1153,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 389f410cf6e1dd48ba4e7528b236b5d21c70a0291d1ce8e8a6bf3026332677b5
+  content_sha256: c45ee530c642ab02b659603b440b00c2f020e03ad851b21d7c72480259f081f6
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-15'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -1198,7 +1198,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 621bd2a23ddc6bef0e5563c6c622d24d4722bb046640ee155697065b578fd77b
+  content_sha256: ab38acada86423c23ac19e73e6947cd4efe94120cb66b4fe24a843bc2de08fa4
   document_type: status
   status: accepted
   owners:

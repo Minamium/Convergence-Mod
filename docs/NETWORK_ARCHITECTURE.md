@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-15
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,13 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v39
+## Current development protocol v40
+
+Ghost Samurai appends attack IDs6/7 (TripleVerticalSlash/FrontalCleaveShockwave) and shape IDs8/9/10 (VerticalSlash/FrontalCleave/GroundShockwave), preserving existing values. The native actor ExtraAI appends23 bytes: step and signed facing (one byte each), a canonical boolean lock byte, and five finite floats for approach origin, anchor and ground plane. Its complete actor body is76 bytes. Idle and old attacks require an empty combo pose; new attacks bound the counter and require facing -1/+1. Reject malformed/truncated state before mutation and conflicting same-age combo updates.
+
+Vertical/cleave aim uses the existing28-byte full snapshot with immutable release time and an exact per-shape lock tick. The final lock repairs missing intermediate updates and cannot be reopened by late target movement. Ground fronts reuse the45-byte immutable descriptor and the fight clock, with no per-frame position packets or client terrain lookup. Server owns target selection, bounded tile reads, all new damage and exact-Fight cleanup; clients only render received geometry. Existing Doll v39 packets, wave-only damage exception, target identity and terminal contracts remain unchanged. Matching protocol40 peers are required. [The attack specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns timing and geometry.
+
+## Preceding development protocol v39
 
 [ADR-0024](adr/0024-native-raid-hurt-and-downed.md) replaces Doll's gauge-only RaidHit69 with a native Hurt intent: health generation (`uint`), source damage (`int`,1..1,000,000) and policy (`byte`,0..2),9 body bytes. Header revision is the per-owner hit ID. Receiving owner validates active exact Fight/sequence and current recovery generation before once-only Hurt; Terraria transports the native HurtInfo/HP.
 

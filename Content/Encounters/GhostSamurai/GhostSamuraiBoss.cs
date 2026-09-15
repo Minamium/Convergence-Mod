@@ -20,6 +20,7 @@ public sealed class GhostSamuraiBoss : ModNPC
     internal SamuraiPhase Phase = SamuraiPhase.Phase1;
     internal SamuraiAttack Attack;
     internal SamuraiBeat Beat;
+    internal SamuraiComboSnapshot Combo;
     private ulong receivedAt;
     internal bool ProjectionFresh => Main.netMode != NetmodeID.MultiplayerClient || Main.GameUpdateCount - receivedAt <= 45;
     internal float VisualAge => Main.netMode == NetmodeID.MultiplayerClient
@@ -68,6 +69,12 @@ public sealed class GhostSamuraiBoss : ModNPC
         NPC.timeLeft = NPC.activeTime;
         if (Main.netMode == NetmodeID.MultiplayerClient && TransitionRemaining == 0)
         {
+            if (Attack == SamuraiAttack.FrontalCleaveShockwave && Combo.IsValid(Attack))
+            {
+                NPC.Center = Vector2.Lerp(new(Combo.FromX, Combo.FromY), new(Combo.AnchorX, Combo.AnchorY),
+                    SamuraiComboRules.ApproachProgress(VisualAttackTimer));
+                NPC.velocity = Vector2.Zero;
+            }
             // Evaluate the same locked trajectory, instead of extrapolating a
             // single high velocity past its end. This path never decides hits.
             foreach (Projectile p in Main.ActiveProjectiles)
@@ -99,17 +106,18 @@ public sealed class GhostSamuraiBoss : ModNPC
     public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
     public override void SendExtraAI(BinaryWriter writer)
     {
-        new SamuraiActorSnapshot(Fight, Age, Phase, Attack, Beat, AttackTimer, TransitionRemaining, NPC.lifeMax, Arena, LockedTarget).Write(writer);
+        new SamuraiActorSnapshot(Fight, Age, Phase, Attack, Beat, AttackTimer, TransitionRemaining, NPC.lifeMax, Arena, LockedTarget, Combo).Write(writer);
     }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         SamuraiActorSnapshot state = SamuraiActorSnapshot.Read(reader);
         if (Main.netMode == NetmodeID.Server || Fight != Guid.Empty && Arena != state.Arena) return;
-        if (Fight != Guid.Empty && Age == state.Age && LockedTarget != state.LockedTarget) return;
+        if (Fight != Guid.Empty && Age == state.Age && (LockedTarget != state.LockedTarget || Combo != state.Combo)) return;
         if (!state.CanReplace(Fight, Age)) return;
         Fight = state.Fight; Age = state.Age; Phase = state.Phase; Attack = state.Attack; Beat = state.Beat;
         AttackTimer = state.AttackTimer; TransitionRemaining = state.TransitionRemaining; NPC.lifeMax = state.MaximumLife;
-        Arena = state.Arena; LockedTarget = state.LockedTarget;
+        Arena = state.Arena; LockedTarget = state.LockedTarget; Combo = state.Combo;
+        if (SamuraiComboRules.IsCombo(Attack)) NPC.direction = NPC.spriteDirection = Combo.Facing;
         receivedAt = Main.GameUpdateCount;
     }
 }

@@ -4,9 +4,9 @@ using System.IO;
 namespace Convergence.Content.Encounters.GhostSamurai;
 
 internal enum SamuraiPhase : byte { Phase1 = 1, Phase2 = 2, Phase3 = 3 }
-internal enum SamuraiAttack : byte { Idle, DirectionalSlash, ChargedSlash, GridSlash, Phase2DashSlash, Phase3CircleAttack }
+internal enum SamuraiAttack : byte { Idle, DirectionalSlash, ChargedSlash, GridSlash, Phase2DashSlash, Phase3CircleAttack, TripleVerticalSlash, FrontalCleaveShockwave }
 internal enum SamuraiBeat : byte { Recovery, Approach, Telegraph, Strike, Transition }
-internal enum SamuraiShape : byte { Slash, Wisp, RushVisual, InnerSlash, OuterSlash, InnerKamaitachi, OuterKamaitachi, SlashWave }
+internal enum SamuraiShape : byte { Slash, Wisp, RushVisual, InnerSlash, OuterSlash, InnerKamaitachi, OuterKamaitachi, SlashWave, VerticalSlash, FrontalCleave, GroundShockwave }
 
 // Shared by the authority, read-only presentation and dependency-free tests.
 internal static class GhostSamuraiRules
@@ -144,14 +144,21 @@ internal static class GhostSamuraiRules
     }
 
     // One bounded draw selects uniformly among attacks other than the previous one.
-    internal static int AttackCount(SamuraiPhase phase) => phase == SamuraiPhase.Phase1 ? 3 : phase == SamuraiPhase.Phase2 ? 4 : 5;
+    internal static bool AttackAllowed(SamuraiPhase phase, SamuraiAttack attack) => attack switch
+    {
+        SamuraiAttack.DirectionalSlash or SamuraiAttack.ChargedSlash or SamuraiAttack.GridSlash or SamuraiAttack.TripleVerticalSlash => true,
+        SamuraiAttack.Phase2DashSlash or SamuraiAttack.FrontalCleaveShockwave => phase != SamuraiPhase.Phase1,
+        SamuraiAttack.Phase3CircleAttack => phase == SamuraiPhase.Phase3,
+        _ => false,
+    };
+    internal static int AttackCount(SamuraiPhase phase) => phase == SamuraiPhase.Phase1 ? 4 : phase == SamuraiPhase.Phase2 ? 6 : 7;
     internal static SamuraiAttack SelectNextAttack(SamuraiPhase phase, SamuraiAttack previous, int choice)
     {
         int count = AttackCount(phase);
-        int choices = count - ((int)previous is >= 1 && (int)previous <= count ? 1 : 0);
+        int choices = count - (AttackAllowed(phase, previous) ? 1 : 0);
         if (choice < 0 || choice >= choices) throw new ArgumentOutOfRangeException(nameof(choice));
-        for (int candidate = 1; candidate <= count; candidate++)
-            if ((SamuraiAttack)candidate != previous && choice-- == 0) return (SamuraiAttack)candidate;
+        for (int candidate = 1; candidate <= (int)SamuraiAttack.FrontalCleaveShockwave; candidate++)
+            if (AttackAllowed(phase, (SamuraiAttack)candidate) && (SamuraiAttack)candidate != previous && choice-- == 0) return (SamuraiAttack)candidate;
         throw new InvalidOperationException();
     }
 
@@ -237,7 +244,7 @@ internal static class GhostSamuraiRules
 internal readonly record struct SamuraiHazard(SamuraiShape Shape, float X, float Y, float DX, float DY,
     float Length, float Radius, int Born, int Fire, int End, int Damage, int ArrivalTick = 0)
 {
-    internal bool HasAim => Shape is SamuraiShape.Slash or SamuraiShape.RushVisual or SamuraiShape.SlashWave;
+    internal bool HasAim => Shape is SamuraiShape.Slash or SamuraiShape.RushVisual or SamuraiShape.SlashWave or SamuraiShape.VerticalSlash or SamuraiShape.FrontalCleave;
     internal bool IsCircle => Shape is SamuraiShape.InnerSlash or SamuraiShape.OuterSlash or SamuraiShape.InnerKamaitachi or SamuraiShape.OuterKamaitachi;
     internal bool IsWind => Shape is SamuraiShape.InnerKamaitachi or SamuraiShape.OuterKamaitachi;
     internal bool IsOuter => Shape is SamuraiShape.OuterSlash or SamuraiShape.OuterKamaitachi;
@@ -246,7 +253,11 @@ internal readonly record struct SamuraiHazard(SamuraiShape Shape, float X, float
         && float.IsFinite(DX) && float.IsFinite(DY) && Math.Abs(DX * DX + DY * DY - 1) < .01f
         && float.IsFinite(Length) && Length is >= 0 and <= 3000
         && float.IsFinite(Radius) && (IsCircle ? Radius is >= 1 and <= 6000 && (IsOuter ? Length > 0 && Length < Radius : Length == 0)
+            : Shape == SamuraiShape.FrontalCleave ? Length == 0 && Radius == SamuraiComboRules.CleaveRadius
             : Shape == SamuraiShape.SlashWave ? Length == SamuraiWaveRules.ChargedSlashWaveWidth && Radius == SamuraiWaveRules.ChargedSlashWaveHeight / 2 : Radius is >= 1 and <= 200)
+        && (Shape != SamuraiShape.VerticalSlash || DX == 0 && DY == 1 && Radius == SamuraiComboRules.VerticalHalfWidth)
+        && (Shape is not (SamuraiShape.FrontalCleave or SamuraiShape.GroundShockwave) || Math.Abs(DX) == 1 && DY == 0)
+        && (Shape != SamuraiShape.GroundShockwave || Radius == SamuraiComboRules.ShockHalfHeight && Length > 0)
         && (ArrivalTick == 0 || Shape == SamuraiShape.SlashWave && (long)ArrivalTick - Born is >= 144 and <= 540)
         && Born >= 0 && (long)Fire - Born is >= 24 and <= 300 && End > Fire && (long)End - Fire <= 240
         && (Shape == SamuraiShape.RushVisual ? Damage == 0 : Damage is > 0 and <= 2000);
@@ -264,7 +275,9 @@ internal readonly record struct SamuraiHazard(SamuraiShape Shape, float X, float
             float farX = ax + halfX, farY = ay + halfY;
             return !IsOuter || farX * farX + farY * farY > Length * Length;
         }
-        if (Shape != SamuraiShape.Slash) return false; // Rush art never owns damage.
+        if (Shape == SamuraiShape.FrontalCleave) return SamuraiComboRules.CleaveHits(this, x, y, halfX, halfY);
+        if (Shape == SamuraiShape.GroundShockwave) return SamuraiComboRules.ShockGeometry(this, age).Hits(age, x, y, halfX, halfY);
+        if (Shape is not (SamuraiShape.Slash or SamuraiShape.VerticalSlash)) return false; // Rush art never owns damage.
         // Exact separating-axis test: the two AABB axes and the two slash axes.
         float rx = x - (X + DX * Length * .5f), ry = y - (Y + DY * Length * .5f);
         return Math.Abs(rx) <= halfX + Math.Abs(DX) * Length * .5f + Math.Abs(DY) * Radius

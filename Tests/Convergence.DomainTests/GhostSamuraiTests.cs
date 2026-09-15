@@ -56,16 +56,16 @@ internal static partial class Program
         foreach (SamuraiPhase phase in Enum.GetValues<SamuraiPhase>())
         {
             int count = GhostSamuraiRules.AttackCount(phase);
-            for (int prior = 0; prior <= count; prior++)
+            for (int prior = 0; prior <= (int)SamuraiAttack.FrontalCleaveShockwave; prior++)
             {
-                var seen = new bool[6];
-                for (int choice = 0; choice < count - (prior > 0 ? 1 : 0); choice++)
+                var seen = new bool[8];
+                for (int choice = 0; choice < count - (GhostSamuraiRules.AttackAllowed(phase, (SamuraiAttack)prior) ? 1 : 0); choice++)
                 {
                     int selected = (int)GhostSamuraiRules.SelectNextAttack(phase, (SamuraiAttack)prior, choice);
-                    AssertEqual(true, selected > 0 && selected <= count && selected != prior, "permitted non-repeat");
+                    AssertEqual(true, GhostSamuraiRules.AttackAllowed(phase, (SamuraiAttack)selected) && selected != prior, "permitted non-repeat");
                     AssertEqual(false, seen[selected], "one choice per alternative"); seen[selected] = true;
                 }
-                for (int i = 1; i <= count; i++) AssertEqual(i != prior, seen[i], "pool coverage");
+                for (int i = 1; i < seen.Length; i++) AssertEqual(i != prior && GhostSamuraiRules.AttackAllowed(phase, (SamuraiAttack)i), seen[i], "pool coverage");
             }
         }
     }
@@ -342,6 +342,9 @@ internal static partial class Program
         {
             var h = new SamuraiHazard(shape, 1000, 1200, 1, 0, 1400, 32, 100, 154, 164, shape == SamuraiShape.RushVisual ? 0 : 260);
             if (shape == SamuraiShape.SlashWave) h = h with { Length = SamuraiWaveRules.ChargedSlashWaveWidth, Radius = SamuraiWaveRules.ChargedSlashWaveHeight / 2 };
+            if (shape == SamuraiShape.VerticalSlash) h = SamuraiComboRules.Vertical(4000, SamuraiArenaBounds.Create(4000, 4000, 60000, 20000), 100);
+            if (shape == SamuraiShape.FrontalCleave) h = SamuraiComboRules.Cleave(1000, 1200, 1, 100);
+            if (shape == SamuraiShape.GroundShockwave) h = SamuraiComboRules.Shock(1000, 1200, 1, 1400, 100);
             if (h.IsCircle) h = GhostSamuraiRules.CircleStep((int)shape - (int)SamuraiShape.InnerSlash, 1000, 1200, 100);
             using var stream = new MemoryStream(); using var writer = new BinaryWriter(stream);
             h.Write(writer); byte[] payload = stream.ToArray(); stream.Position = 0;
