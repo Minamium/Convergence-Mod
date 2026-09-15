@@ -56,6 +56,8 @@ Last reviewed: **2026-09-06**
 
 The2026-09-09 [long-form weapon findings](encounters/first-severance/WEAPONS.md#prior-art-findings-and-engine-seams) pin Yharim's Crystal, Drataliornus and Midnight Sun UFO observations and the native mana/ammo/audio seams. Use that scoped evidence rather than another broad endgame survey.
 
+The2026-09-15 [Chalice follow-up](research/2026-09-14-implementation-review.md#chalice-follow-up--2026-09-15) pins the accessory's native Hurt/bleed-buffer path and read-only diagnostics. The public mirror still declares2.2.2; distinguish it from installed2.2.4 behavior.
+
 - [Calamity public mirror](https://github.com/CalamityTeam/CalamityModPublic) — latest public release mirror。
 - [Calamity 2.2.2 source commit](https://github.com/CalamityTeam/CalamityModPublic/commit/1a8cebd27ec5615316b78f71973446b5528d2b78) — 公開source基準点。
 - [Calamity build.txt at 2.2.2](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/build.txt) — versionとMusic dependency。

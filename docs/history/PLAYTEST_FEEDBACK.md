@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-15
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -57,3 +57,7 @@ Owner objected to Raid-only HP subtraction bypassing equipment and proposed a bo
 ## Solo admission regression — 2026-09-14 / Workshop0.3.1 → source0.3.4
 
 Owner's one-player Host & Play (`al`) was rejected at21:33:32 with `roster_too_small`, then repeated clicks hit rate limiting. Actual package inspection finds the GitHub0.3.1 artifact solo-enabled but the09:44 GUI rebuild/local/Workshop artifact solo-disabled. Owner reiterates **multiplayer recommended, never solo prohibited**, with companion party substitution planned. Remove symbol/release opt-out and check packaged admission, without changing combat, adding fake players or claiming companion support. [Evidence](../evidence/2026-09-14-solo-admission.json) owns hashes/results; a new owner solo start remains unobserved.
+
+## Doll native-damage tuning — 2026-09-15 / 0.3.4 → 0.3.5
+
+Owner reports damage too low, apparent heavy bleed, and main eight-cast beams lingering too long. Latest solo Host & Play wins in267.27s: Stack19/20, Spread23/23, no Down/rescue;41 native receipts total only43 immediate damage, excluding DoT. Chalice is probably equipped; its delayed-damage pattern fits but was not logged. Raise the fixed native hazard source budget, shorten only the main eight-cast hold without changing forecast/cadence, and add read-only buffer/regen diagnostics. Preserve ordinary solo, native equipment, successful mechanics and accepted artwork. [Evidence](../evidence/2026-09-15-doll-damage-tuning.json) owns aggregates; post-change balance/readability and actual bleed attribution await owner testing.

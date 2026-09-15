@@ -10,7 +10,8 @@ internal static partial class Program
         foreach (int life in new[] { 1, 100, 500, 625, 1000, int.MaxValue })
             foreach (var kind in new[] { FirstSeveranceAttackKind.ObservationLance,
                 FirstSeveranceAttackKind.PursuitPrism, FirstSeveranceAttackKind.Stillness })
-                AssertEqual(120, FirstSeveranceCombatRules.AttackDamage(kind, life), "HP-independent beam damage");
+                AssertEqual(500, FirstSeveranceCombatRules.AttackDamage(kind, life), "HP-independent native beam source damage");
+        AssertEqual(FirstSeveranceCombatRules.BeamDamage, FirstSeveranceScoreGeometry.FixedDamage, "later beams and bullets share the native source budget");
         AssertEqual(300, FirstSeveranceCombatRules.AttackDamage(FirstSeveranceAttackKind.SweepRight, 500), "right charge unchanged");
         AssertEqual(375, FirstSeveranceCombatRules.AttackDamage(FirstSeveranceAttackKind.SweepLeft, 625), "left charge unchanged");
         AssertEqual(0, FirstSeveranceCombatRules.StackDamage(625, 2, 2), "full attendance unchanged");

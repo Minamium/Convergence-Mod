@@ -22,9 +22,9 @@ internal static class FirstSeveranceLanceTuning
     internal const int PrismTelegraphTicks = 28;
     internal const int StillnessTelegraphTicks = 36;
     internal const int PatternActiveTicks = 12;
-    // Main eight-cast only: 0.9 s firing at the unchanged 0.7 s cadence.
+    // Main eight-cast only: 0.75 s firing at the unchanged 0.7 s cadence.
     // Standalone Spread and Final keep their existing short live windows.
-    internal const int SustainedPrismTicks = 54;
+    internal const int SustainedPrismTicks = 45;
     internal const int ChargeActiveTicks = 22;
     internal const int ChargeLockLeadTicks = 24;
     internal const int ActiveTicks = 14;

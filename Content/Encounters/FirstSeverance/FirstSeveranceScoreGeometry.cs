@@ -14,7 +14,7 @@ internal readonly record struct FirstSeveranceScoreBullet(float X, float Y, floa
 // No random/client targets, projectile slots or persistent world actors.
 internal static class FirstSeveranceScoreGeometry
 {
-    internal const int FixedDamage = 120;
+    internal const int FixedDamage = FirstSeveranceCombatRules.BeamDamage;
     internal const float FieldHalfWidth = 1280, FieldHalfHeight = 560;
     internal const float BladeHalfWidth = 44, BulletRadius = 12;
     internal const int BladeCount = 2;

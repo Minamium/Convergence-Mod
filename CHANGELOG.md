@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Retune Doll's native beam/bullet source damage for endgame armor, shorten the main eight-cast live hold without changing its warning/fire cadence, and log Chalice deferred damage separately from immediate damage. Equipment effects remain native; this is not a public release.
+
 ## [0.3.1] — 2026-09-14
 
 - First public GitHub playtest milestone: **Requiem of the Hollow Doll**, starring **Lacrimosa — The Bound Heart**, is initially complete as a prototype. Ghost Samurai remains in development.

@@ -4,7 +4,7 @@ document_type: research
 status: accepted
 owners:
   - engineering
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-15
 source_of_truth_for: []
 aliases:
   - owner supplied implementation review
@@ -48,3 +48,10 @@ The owner supplied a GPT-6 Pro0.3.1 review and Sol's proposed native-Hurt respon
 ### Inference and prototype limits
 
 The split should restore native defensive behavior without forcing death-hook side effects. A packet contract/native API check cannot establish installed Calamity shield/Chalice interactions, WAN fairness or same-frame foreign HP effects. Use the focused owner smoke in ADR-0024; record results, not speculative compatibility claims. HP budgets may need later retuning because source damage is now mitigated. Do not infer audio-mixer defects from the external review's very quiet encoded recording.
+
+## Chalice follow-up — 2026-09-15
+
+- **Question/evidence:** the0.3.4 owner sees little direct damage but heavy apparent bleeding. Native120 hits resolve to1; accepted387 contact hits and100000 crush resolve to5, followed by HP reduction between Hurt events. Owner says Chalice is *probably* equipped, not a confirmed inventory observation. [Playtest summary](../evidence/2026-09-15-doll-damage-tuning.json) separates these facts.
+- **Primary source:** official CalamityTeam mirror's current default `1.4.4` remains commit `1a8cebd27ec5615316b78f71973446b5528d2b78`. [build.txt](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/build.txt) declares2.2.2, **not installed2.2.4**. Source URLs and public fields rechecked2026-09-15; no matching2.2.4 public tag found in this scoped API lookup. Authority/license boundary remains the [existing Calamity survey](MULTIPLAYER_RAID_PRIOR_ART.md): proprietary reference-only, no source/assets copied.
+- **Observed implementation:** [CalamityPlayerHitHurt](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/CalPlayer/CalamityPlayerHitHurt.cs) moves eligible post-mitigation damage above5 into the accessory buffer and applies it in OnHurt; shields/dodges can prevent it. [ChaliceOfTheBloodGod](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/Items/Accessories/ChaliceOfTheBloodGod.cs), `HandleBleedout`, subtracts buffered damage directly from HP and can call KillMe; it is not the vanilla Bleeding debuff. Healing potions can clear part of the buffer. [CalamityPlayer](https://raw.githubusercontent.com/CalamityTeam/CalamityModPublic/1a8cebd27ec5615316b78f71973446b5528d2b78/CalPlayer/CalamityPlayer.cs) exposes the equipped flag and buffer as public fields.
+- **Decision:** Chalice is the strong explanation, not yet proven by2.2.4 runtime equipment telemetry. Add a read-only compatibility adapter and bounded owner logs; keep ordinary accessory behavior. Do not disable bleed, replay hooks, or infer total damage from the direct5. The native1-HP ceiling precedes dirty modifiers, so the crush's requested100000 was not100000 measured HP loss. Lethal bleed/direct KillMe bypass remains deferred under ADR-0024. Build verifies the installed public-field surface; owner test must confirm actual buffer flow and current balance.

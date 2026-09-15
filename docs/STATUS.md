@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-15
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development source: **0.3.4 / protocol39**, ordinary solo admission in every build ([ADR-0025](adr/0025-public-solo-admission.md)), retaining native receiving-player Hurt with authoritative Doll Down/revival ([ADR-0024](adr/0024-native-raid-hurt-and-downed.md)) and integrated Ghost Samurai0.3.2 fixes. Defensive-equipment behavior changed and matching peers are required. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md), with a confirmed Workshop solo-admission regression; no new release is implied by a local build.
+Development source: **0.3.5 / protocol39**, Doll native damage retuning and shorter main pursuit hold; [encounter spec](encounters/first-severance/ENCOUNTER_SPEC.md#raid-damage-and-adrenaline) owns values. Ordinary solo admission in every build ([ADR-0025](adr/0025-public-solo-admission.md)), native receiving-player Hurt with authoritative Down/revival ([ADR-0024](adr/0024-native-raid-hurt-and-downed.md)) and integrated Ghost Samurai0.3.2 fixes are retained. Use matching0.3.5 peers despite the unchanged packet layout. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md); no new release is implied by a local build.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Cleanup and target ownership repaired with automated checks; rewards/balance and actual multiplayer/re-entry validation remain incomplete.
@@ -33,17 +33,18 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Verification state
 
-- Latest [0.2.78 owner playtest](evidence/2026-09-14-playtest-0278.json): solo Host & Play, one victory in 240.65s, Stack19/19 and Spread22/22, no Down/revive. Twenty-four weapon cues / 48 samples report actual playback. This is neither multiplayer recovery evidence nor measured listening quality.
+- Latest [0.3.4 owner playtest](evidence/2026-09-15-doll-damage-tuning.json): solo Host & Play starts and wins in267.27s, Stack19/20 and Spread23/23, no Down/revive. Forty-one receipts total43 immediate damage, excluding suspected Chalice bleed. Solo admission is now observed, not just compiled. The earlier [0.2.78 session](evidence/2026-09-14-playtest-0278.json) retains weapon-playback evidence.
 - Unchanged gameplay baseline: [0.2.78 build/implementation evidence](evidence/2026-09-14-doll-video-feedback.json), 206 domain cases, 324 codec round-trips / 50 malformed rejections, 37 tooling guards; native build with 0 errors / 4 existing CS8632 warnings. The release changes version, presentation text and documentation, not combat, assets or wire layout.
 - **Ghost Samurai installation:** [PR #25 integration and normal-profile evidence](evidence/2026-09-14-ghost-samurai-lifecycle.json) records the initial0.3.2 install and a follow-up build from current main0.3.4/protocol39. Installed summon/Global registration, both encounters' teardown and compiled codec checks pass. Reload Mods; no repeat Build + Reload is required. Actual gameplay remains user-owned / not_run.
 - **0.3.2 automated verification:** 211 domain cases (32 focused), protocol38 324 codec round-trips / 50 malformed rejections, native build0 errors /4 existing warnings,18 locales and shader exports pass. Packaged Global/summon registration and exact-Fight/repeated teardown with uninitialized Player/ModContent pass. The separate native tile-stream/SubworldLibrary shutdown errors are not claimed fixed. Actual wipe/victory/re-summon, ratios, field placement and timing remain user-owned / not_run.
 - **User-owned / not_run for 0.3.1:** reload/load and repeated entry/exit, 2–4-player matching-peer Ready/Stack/revive, latency/rejoin and latest scene/audio/accessibility/performance checks. Build success does not satisfy these checks. Use backed-up test saves.
 - **0.3.3:** automated results are recorded in [native-Hurt evidence](evidence/2026-09-14-native-raid-hurt.json). Actual equipped damage, Calamity shields/dodge/Adrenaline, lethal→Down→rescue and last-hit all-Down remain user-owned / not_run. Native Hurt is covered; DoT/direct KillMe/foreign HP writes and reconnect remain limited. No combat text is restored.
-- **0.3.4 admission:** [regression/build evidence](evidence/2026-09-14-solo-admission.json) distinguishes the GitHub and Workshop0.3.1 packages. Integrated main was built without a solo opt-in symbol, verified and installed into normal Mods with the old package backed up. The installed package permits1–4 players; the owner has not yet confirmed a new successful solo start.
+- **0.3.4 admission:** [regression/build evidence](evidence/2026-09-14-solo-admission.json) distinguishes the GitHub and Workshop0.3.1 packages. Integrated main was built without a solo opt-in symbol; the successful solo session above closes the start-only owner check, not multiplayer/recovery compatibility.
+- **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
 
-Load the corrected normal-profile package after integration/install, verify one-player Ready/start and the focused matching-peer recovery checks above. Do not mix protocol39 with37/38. Compare source damage against native damage in logs before retuning HP/damage budgets. Workshop and GitHub releases remain separate owner-authorized publication steps. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations; the [review disposition](research/2026-09-14-implementation-review.md) records deferred latency/rejoin/reward/performance work.
+After installing0.3.5, compare damage with/without Chalice using the new owner diagnostics and check the shorter main pursuit hold. Do not mix builds or protocol39 with37/38. Matching-peer recovery and non-Hurt lethal compatibility remain separate checks above. Boss/Pylon HP is unchanged in this adjustment. Workshop and GitHub releases remain separate owner-authorized publication steps. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations; the [review disposition](research/2026-09-14-implementation-review.md) records deferred latency/rejoin/reward/performance work.
 
 Preserve accepted mechanics and art unless explicitly revised. Log meaningful owner feedback in the optional [ledger](history/PLAYTEST_FEEDBACK.md), update only the affected fact owner, and select checks using the [verification matrix](../.agents/skills/develop-convergence-raids/references/verification-matrix.md). Do not replay historical checklists.
 
