@@ -59,6 +59,19 @@
     "protocol": 40,
     "upstream_commit": "3199b05ed7800e7397fc02afe0bc57c1369c98c0",
     "preserved": "Doll damage retuning, native diagnostics, pursuit timing and their tests from main0.3.5; no Ghost Samurai C# conflict",
-    "resolution": "Reconcile STATUS, regenerate catalog and assign0.3.6 because main now owns0.3.5."
+    "resolution": "Reconcile STATUS, regenerate catalog and assign0.3.6 because main now owns0.3.5.",
+    "source_commit": "dc945ddff7ba5eebce86e21ec196a18c67016059",
+    "source_dirty": "",
+    "source_sha256": "03e1878177441c2aa38668007db3e942512f91bc63302616244b13143c08e750",
+    "isolated_package_sha256": "511dd71ef66d07eab832b66d903ce18741c0e52a12bcbec845f24ec84d9d20a4",
+    "assembly_sha256": "d95be325ed92bba175a03624342d90d0b232eadc88e3c36aaced0716ed9d3706",
+    "verification": {
+      "domain_cases": 225,
+      "native_build": "0 errors /4 existing CS8632 warnings;18 locales, shader exports and1-4 solo admission passed",
+      "compiled_protocol_roundtrips": 330,
+      "compiled_malformed_rejections": 54,
+      "type_registration_and_both_encounters_teardown": "passed",
+      "Doll_native_Hurt_calibration": "passed with current main source500/defense300/DR50% sample"
+    }
   }
 }
