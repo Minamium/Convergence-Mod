@@ -2,6 +2,48 @@
 
 ## Records
 
+### Crimson Foundry — 2026-09-15
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/FoundryEngine.png`
+- Asset ID: crimson-heavy-engine-038
+- Asset type: transparent Boss PNG
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: generated
+- Source work and URL: original generated heavy steel-engine image, no third-party image source
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original red-haired mechanic/furnace design, background extraction by the built-in tool; runtime export unchanged
+- License and redistribution terms: original project asset, subject to existing publication/asset-license gate
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-15; silhouette/alpha inspected, gameplay readability not_run
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/FoundryUnbound.png`
+- Asset ID: crimson-exposed-engine-038
+- Asset type: transparent Boss PNG
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: generated
+- Source work and URL: original slim exposed-engine image, no third-party image source
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: selected original exposed-scythe craft and red-haired pilot; runtime export unchanged
+- License and redistribution terms: original project asset, subject to existing publication/asset-license gate
+- Required attribution: retain this provenance and generation brief
+- Reviewer and review date: Codex, 2026-09-15; silhouette/alpha inspected, gameplay readability not_run
+- Creator/source: OpenAI built-in image generation, directed by Codex for Minamium; original designs, no supplied third-party visual reference. Actual generation model name was not reported.
+- Brief: red-haired mechanic in an open cockpit; asymmetric heavy gunmetal/crimson furnace weapon engine, then an exposed slim swept-scythe craft after armor purge; crisp textured2D silhouettes, true transparent alpha, no text/UI rings. The heavy image received a background-extraction edit; no other artwork was copied. Full generation records remain external.
+- Export: selected PNGs unchanged from the built-in outputs,1536×1024 and1689×931. Runtime code supplies scale, banking, armor fragments and exhaust. External originals remain preserved; not an off-device backup claim.
+- SHA256: heavy `7c8703f2d0969bbd1444bb89c57a5d747605cb932e2cf09b298fd0033198078a`; exposed `65912b7856832a0210028eb62e0de7ebee81e26b8d81e9afd667b017c9bbd594`.
+- Terms: original generated project assets under the existing publication/asset-license gate. Retain this provenance. Codex inspected the generated silhouettes/alpha on2026-09-15; actual game-distance readability remains owner-tested.
+- Effects: existing project-authored `PortalBeam.fxc` / `RaidEnergy.fxc` and existing original Raid cues are referenced unchanged; Luminance supplies its own noise textures at runtime. No external Mod assets or recordings are extracted.
+
+- Local game-facing music file: `Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg` (**gitignored; not a source/music release**).
+- Composer/recording owner: **kuku**. Work supplied as **Graceful Ordeal.wav** by Minamium for this encounter. [Author's video and current terms](https://www.youtube.com/watch?v=HnBESyUqx_g), titled 「実はとてもお強いお嬢様からの試練BGM」; description links [the official WAV](https://drive.google.com/file/d/1bX8QLlttGdZ5ssGm6qtbd-XQAXs09MdA/view). Description retrieved2026-09-15; playback was not subjectively auditioned by Codex.
+- Terms summary: BGM/personal use permitted; credit required for a secondary creative publication; copyright retained by kuku; uncreative BGM-only/endurance content prohibited. No standalone source-asset redistribution grant was found in that description. Public game distribution of this edit remains a rights-review item, not a permission inferred from “free.”
+- Required credit used: **Music: “Graceful Ordeal” by kuku — https://www.youtube.com/watch?v=HnBESyUqx_g . Loop edit for Crimson Foundry; original copyright belongs to kuku.**
+- Exact input SHA256: `42a10539bdc12468d279f9956085ce1c99aae1fa0092fc05912e0225c26076d3`; owner-approved local WAV preserved unchanged. Local OGG SHA256: `f8f0a566a18dfa7d9ba2fd6203d877160bc6e0ae04123a694a2c9307bbaaffa9`.
+- Modifications/tool: `tools/prepare_crimson_score.py`, NumPy2.3.5 and FFmpeg7.1/libvorbis quality6. No tempo/pitch change or normalization. A300ms tail bridge and sample loop points omit terminal fade/silence; immutable measured beat/intensity data are exported beside it. See [owning music spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-and-musical-presentation), not duplicated tuning here.
+- Review: numerical timing, peak and loop analysis completed; musical seam/device/MP listening remains owner-owned. Do not upload the WAV, standalone OGG, seam audition or an endurance video. The score analysis JSON is project-generated numeric game data, not a new license for the recording.
+
 ### Weapon energy and README NPC export — 2026-09-14
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ArmamentEnergy.fxc`
