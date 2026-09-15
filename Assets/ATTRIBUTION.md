@@ -2,6 +2,39 @@
 
 ## Records
 
+### Crimson articulated rig and reactor — 2026-09-15 / 0.3.9
+
+- Runtime file: `Assets/Textures/CrimsonFoundry/FoundryRig.png`
+- Asset ID: crimson-articulated-rig-039
+- Asset type: twelve-part transparent machine/operator atlas
+- Creator: OpenAI built-in image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: generated
+- Source work and URL: original project-directed generation; no third-party source image
+- Tool/model/version: built-in image generation; actual model not reported
+- Human modifications: original selected output copied unchanged; explicit runtime UV rectangles measured around alpha silhouettes, independently posed in code
+- License and redistribution terms: original project asset under the existing project publication/asset terms; no external artwork or license asserted
+- Required attribution: retain this provenance and brief
+- Reviewer and review date: Codex, 2026-09-15; original/alpha/part boundaries inspected; in-game readability awaits owner acceptance
+- Brief: original angular ivory/gunmetal/crimson steel machine, long limbs, nonhuman narrow head, central reactor housing, separate chest/shoulder/thigh armor, engine and small red-haired mechanic in a command chair. Twelve separated parts; no text, HUD, neon panels or third-party designs. Owner's Garde/operator references inform proportions only, not copied costumes or mecha silhouettes.
+- Export:1448×1086 RGBA, true alpha0–255; SHA256 `f9a14914699d1dfbc6c85e13e9871c311ccb0e51c01660f00cd6d38e1dc7245e`. Two subsequent background/repacking candidates had opaque painted checkerboards and were rejected; the original is preserved and selected. External originals/generation records remain local, not an off-device backup claim.
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/CrimsonReactor.fxc`
+- Asset ID: crimson-reactor-material-039
+- Asset type: compiled original procedural reactor material
+- Creator: Codex, directed by Minamium
+- Creation/acquisition date: 2026-09-15
+- Source type: original
+- Source work and URL: `Assets/AutoloadedEffects/Shaders/CrimsonReactor.fx`, independently written Convergence HLSL
+- Tool/model/version: Microsoft FXC, pinned identity/options in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: authored contained plasma/filament/white-core and charge/release envelopes; runtime noise comes from the installed Luminance registry
+- License and redistribution terms: original project asset under existing project terms; no copied WoTM/WotG shader, formula, texture or audio
+- Required attribution: retain this record; dependency assets are not redistributed here
+- Reviewer and review date: Codex, 2026-09-15; source/export compilation checked; actual game composition remains owner-tested
+- SHA256: source `e016c33b62286a5781a530d027a7a6b8ae99999bceccd52bbb7cd54933b90607`; export `8df1ac1bdb9dcb1b46eed0490ed4c5ce25272dc7f6a7ef19563880508005180f`.
+
+Older FoundryEngine/FoundryUnbound provenance and originals below remain retained; they no longer drive the active composite. Existing project-authored Portal charge/fire masters and BGM file are unchanged; this revision changes scoped playback gain/envelopes, not their recording licenses.
+
 ### Crimson Foundry — 2026-09-15
 
 - Runtime file: `Assets/Textures/CrimsonFoundry/FoundryEngine.png`
