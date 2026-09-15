@@ -82,6 +82,17 @@ public static class NativeHurtCheck
             Require((float)getDamage.Invoke(h, new object[] {1000f, 0f, .5f}) == 1, "Zero cap is NOT immunity");
             Console.WriteLine("PASS installed HurtModifiers: defense/DR, lethal floor, minimum1 and competing ceilings");
 
+            // Calibration example, not a simulation of the owner's equipment.
+            int beamSource = (int)mod.GetType("Convergence.Content.Encounters.FirstSeverance.FirstSeveranceCombatRules", true)
+                .GetField("BeamDamage", Static).GetRawConstantValue();
+            h = Activator.CreateInstance(modifiers);
+            dr = final.GetValue(h);
+            final.SetValue(h, multiply.Invoke(null, new object[] {dr, .5f}));
+            Require((float)getDamage.Invoke(h, new object[] {120f, 300f, 1f}) == 1, "Old budget floors against endgame armor");
+            Require(beamSource == 500 && (float)getDamage.Invoke(h, new object[] {(float)beamSource, 300f, 1f}) == 100,
+                "New source budget retains armor and DR");
+            Console.WriteLine("PASS calibration: source500, defense300, effectiveness1, DR50% => 100 before accessory hooks");
+
             string prefix = "Convergence.Content.Encounters.FirstSeverance.";
             var raid = mod.GetType(prefix + "Revive.FirstSeveranceRaidPlayer", true);
             foreach (string name in new[] {"Revive.FirstSeveranceRaidPlayer", "Revive.RaidBoundDebuff"}) {

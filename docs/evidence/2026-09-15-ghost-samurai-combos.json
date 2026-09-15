@@ -48,10 +48,17 @@
       "in-game animation, cue audibility, Reduced Effects and FPS"
     ]
   },
-  "shared_install": "not performed; normal-profile 0.3.4 retained pending approval to integrate this new feature",
+  "shared_install": "Administrator approved PR #28 integration and normal-profile installation; the original feature artifact above remains isolated build evidence.",
   "notes": [
     "No GUI, game or gameplay server launched.",
     "Domain/codec checks and packaging do not establish SP or MP playtest success.",
     "Flying above the fixed shock plane remains a valid dodge; no terrain following or flight restrictions were introduced."
-  ]
+  ],
+  "integration": {
+    "version": "0.3.6",
+    "protocol": 40,
+    "upstream_commit": "3199b05ed7800e7397fc02afe0bc57c1369c98c0",
+    "preserved": "Doll damage retuning, native diagnostics, pursuit timing and their tests from main0.3.5; no Ghost Samurai C# conflict",
+    "resolution": "Reconcile STATUS, regenerate catalog and assign0.3.6 because main now owns0.3.5."
+  }
 }

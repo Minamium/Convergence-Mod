@@ -201,7 +201,7 @@ internal static partial class Program
                 if (phase == FirstSeveranceSubstate.CoreExposure)
                     AssertEqual(true, lastEnd <= start, "charge/stillness keep separate collision windows");
                 else if (step > 0)
-                    AssertEqual(12ul, lastEnd - volley.FireTick, "main pursuit keeps twelve ticks of live overlap");
+                    AssertEqual(3ul, lastEnd - volley.FireTick, "main pursuit keeps three ticks of live overlap");
                 AssertEqual(true, volley.IsFiring(volley.EndTick - 1), "last active tick");
                 AssertEqual(false, volley.IsFiring(volley.EndTick), "end exclusive");
                 lastEnd = volley.EndTick;
@@ -284,7 +284,7 @@ internal static partial class Program
     {
         AssertEqual(42, FirstSeveranceAttackPatterns.StepCadence(FirstSeveranceSubstate.PylonCheck), "prism starts every 0.7s");
         AssertEqual(72, FirstSeveranceAttackPatterns.StepCadence(FirstSeveranceSubstate.CoreExposure), "dash-stop combo starts every 1.2s");
-        AssertEqual(376, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.PylonCheck), "last sustained beam gets its complete sequence budget");
+        AssertEqual(367, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.PylonCheck), "last sustained beam gets its complete sequence budget");
         AssertEqual(287, FirstSeveranceAttackPatterns.SequenceTicks(FirstSeveranceSubstate.CoreExposure), "four-action sequence includes last tooth's ignition and full hold");
         AssertEqual(60, FirstSeveranceAttackPatterns.SequenceRestTicks, "unchanged extra rest between full combos");
         AssertEqual(60, FirstSeveranceAttackPatterns.ExposureOpeningRestTicks, "unchanged exposure opening rest");

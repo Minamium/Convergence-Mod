@@ -1,0 +1,72 @@
+{
+  "feature": "Doll native damage retuning, Chalice diagnostics and shorter main pursuit hold",
+  "observed": {
+    "date": "2026-09-15",
+    "version": "0.3.4",
+    "protocol": 39,
+    "tmodloader": "2026.07.3.0",
+    "calamity": "2.2.4",
+    "luminance": "1.0.14",
+    "topology": "solo Host & Play; one frozen participant",
+    "server_log_sha256": "c44e5a8f8786570a69cf1cf90db7f004fddf2683d1dd9c339db37d8a33d33ffc",
+    "client_log_sha256": "cfcbe562fb8d7b1469aa4c995fcaf5dec9c661f30a3ceefcb7eb78fdde1788a1",
+    "window_local": "15:05:38.387–15:10:05.651",
+    "result": "Victory / BossLifeZero",
+    "elapsed_seconds": 267.27,
+    "stack": { "resolved": 20, "success": 19, "failure": 1 },
+    "spread": { "resolved": 23, "success": 23, "failure": 0 },
+    "native_receipts": { "total": 41, "positive": 31, "zero": 10, "immediate_damage_sum": 43, "floor_reports": 0 },
+    "damage_by_source": [
+      { "source": "PursuitPrism", "attempts": 8, "positive": 6, "requested": 120, "immediate_sum": 6 },
+      { "source": "Stillness", "attempts": 2, "positive": 1, "requested": 120, "immediate_sum": 1 },
+      { "source": "SweepLeft", "attempts": 2, "positive": 1, "requested": 387, "immediate_sum": 5 },
+      { "source": "SweepRight", "attempts": 1, "positive": 1, "requested": 387, "immediate_sum": 5 },
+      { "source": "SpreadPrism", "attempts": 9, "positive": 8, "requested": 120, "immediate_sum": 8 },
+      { "source": "Stack", "attempts": 1, "positive": 0, "requested": 645, "immediate_sum": 0 },
+      { "source": "HalfField", "attempts": 2, "positive": 2, "requested": 120, "immediate_sum": 2 },
+      { "source": "RemoteCrush", "attempts": 1, "positive": 1, "requested": 100000, "immediate_sum": 5 },
+      { "source": "FinalSlicer", "attempts": 6, "positive": 6, "requested": 120, "immediate_sum": 6 },
+      { "source": "FinalBullets", "attempts": 8, "positive": 5, "requested": 120, "immediate_sum": 5 },
+      { "source": "FinalCoreSalvo", "attempts": 1, "positive": 0, "requested": 120, "immediate_sum": 0 }
+    ],
+    "dps": {
+      "basis": "authority net target HP loss during vulnerable windows, not personal or whole-fight DPS",
+      "core_damage": 5000000, "core_open_seconds": 53.12, "core_window_dps": 94132.4,
+      "pylon_damage": 1200000, "pylon_open_seconds": 19.47, "pylon_window_dps": 61643.8,
+      "pylon_clears_seconds": [8.45, 11.02], "pylon_overloads": 0
+    },
+    "damage_limitations": "Immediate43 excludes DoT and regeneration. Native1/5 values cannot measure Chalice total damage. No Down/revival observed; no multiplayer claim.",
+    "bleed": "Owner says Chalice probably equipped. Five-point direct hits followed by inter-hit HP loss match the public accessory implementation, but equipment/buffer were not recorded in this build. No new Raid bleeding debuff exists.",
+    "other_log_findings": "Workshop already-installed warning and localhost socket retries precede the fight. server2 records a shutdown EndOfStreamException after the victory. No encounter-time Convergence exception found; these unrelated warnings are not claimed fixed."
+  },
+  "change": {
+    "version": "0.3.5",
+    "protocol": 39,
+    "base_commit": "12cfa78b53b3fc611a94a6ba877dd1039c510e25",
+    "beam_and_bullet_source_damage": { "before": 120, "after": 500 },
+    "main_pursuit_live_ticks": { "before": 54, "after": 45 },
+    "unchanged": "28-tick main forecast,42-tick cadence,short Spread/Final holds,hit caps,native defense/DR/shields/dodge/Chalice,mechanic percentages,contact/crush,Boss/Pylon HP,solo admission,artwork,packet layout",
+    "diagnostics": "Read-only owner hit buffer delta plus at-most1Hz active DoT samples; no network DTO or authority change.",
+    "existing_change_preserved": "Pre-existing en-US localization blank-line edit is not part of this task."
+  },
+  "verification": {
+    "domain": "216 cases:215 passed in the full run, remaining old12-tick overlap expectation changed to3 and its focused case passed; no production changes after that run",
+    "native_build": { "record_id": "20260915T062752801742Z", "configuration": "Release", "errors": 0, "existing_warnings": 4, "locales": 18, "shaders": "passed" },
+    "source_sha256": "241999c5847a615291d201cd830e2af921e7ca6fc9b35858dba7b57b941ef662",
+    "package_sha256": "70a9eeb2a39c9099bca11f1b662b3342a481338044f2a2bf41f82a0dea0991f5",
+    "assembly_sha256": "a45d5ee47bf70fddb7ad5cb4f76ff35688f50f7fc576ba8f0e242b22106a0da9",
+    "build_source_note": "Base commit plus logged dirty source manifest; original localization whitespace preserved. Documentation/evidence completion after packaging does not change compiled inputs.",
+    "installed_native_math": "Passed existing floor/competing ceilings/defense/DR checks and source500/defense300/full effectiveness/50%DR =>100 calibration before accessory hooks",
+    "installed_api": "Calamity public diagnostic fields compile against installed2.2.4; no behavior emulation",
+    "packaged_loader_and_teardown": "Raid player/buff ValidateType, exact-Fight/repeated cleanup and empty registry passed",
+    "compiled_codec": { "protocol": 39, "round_trips": 330, "malformed_rejections": 54 },
+    "packaged_solo": { "enabled": true, "minimum": 1, "maximum": 4 },
+    "static": "Catalog74 documents, repository738 files and YAML10 files passed; final evidence JSON parsed separately",
+    "normal_install": "Only after normal Git integration and no active game process; final local receipt is kept outside tracked source"
+  },
+  "remaining": [
+    "Owner reload/playtest0.3.5: damage with and without Chalice, buffer attribution and beam readability.",
+    "Actual multiplayer lethal-Hurt Down/rescue and non-Hurt lethal compatibility remain unverified; this tuning does not solve direct KillMe/DoT death.",
+    "No new Workshop or GitHub release authorized by this task."
+  ]
+}
