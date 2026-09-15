@@ -85,17 +85,17 @@ Accepted impact tails may complete across same-Fight terminal cleanup, including
 
 ## Weapon-only foley
 
-The 27 weapon masters live under `Assets/Sounds/Weapons/DollTheater`. `tools/remix_weapon_energy.py`, using the PCM/export helpers in `remix_weapon_foley.py`, edits the **accepted project-authored portal-beam Raid SFX** into weapon-length performances: explicit source windows, pitch/rate, material bands, reversal, and separate arrival/held-tension/release envelopes. Twelve Claw/Ranged/Rogue/contact destinations are subsequently replaced by `tools/remix_weapon_impact.py`: a fast physical cut or strike, low/mid weight, short attached air and silent endpoints. The other 15 masters and all Raid/music sources are unchanged. [Current impact exports](evidence/2026-09-14-weapon-impact-assets.json) own their exact hashes; the prior energy set remains historical evidence for replaced files. Claws emphasize pressure/body/contact without a second ringing note; Magic/Doll use rising intake and a connected release, Ranged emphasizes short mechanical pressure, Choir a layered body, and Rogue a drawn cut/impact. Impact releases have a short attached tail rather than a full Raid aftermath. [Exact exports](evidence/2026-09-14-weapon-energy-assets.json) record inputs, rates/EQ/envelopes, peaks and auditions. No Terraria/Calamity recording or BGM is sampled; the Raid and music source files are read-only and hash-checked after export.
+The 27 weapon masters live under `Assets/Sounds/Weapons/DollTheater`. Current recipe: `tools/remix_weapon_articulation.py` with the PCM/export helpers in `remix_weapon_foley.py`. It replaces20 short/charge cues with sharp cutting air, resonant energy edges, bright discharges and fast pressure ramps, using the project's accepted Raid-beam sources plus deterministic original DSP. The preceding impact-heavy recipe is historical. Seven approved long-beam launches/beds remain byte-identical: MagicFire, RangedFire, ChoirFire, DollVerdict, LacunaSustain, MeridianSustain and ChoirSustain. [Exact exports and sources](evidence/2026-09-15-doll-final-check.json) own the current hashes/metrics. Sources and superseded masters are archived outside the runtime tree. No recording or BGM is sampled; no user slider changes.
 
 | Family | Audible role |
 |---|---|
-| ClawSwipe / Grip / Crush / Hit | Low/mid-weight unsheathing air, Pylon material grip/contact and short crush body; no `BladeSweep`, laser note or delayed second accent |
-| MagicSigil / Bolt / Merge / Charge / Fire / LacunaSustain | Stack latch/glass sigil, focused `LanceFire`, reverse shell fragments into 22-tick merge, 0.8s held pressure, `CoreSalvoFire`-bodied release into continuous energy |
-| RangedLatch / Shot / Charge / Fire / MeridianSustain | `PylonHit` chamber knock, short metal/beam discharge, pressure acceleration, dense grid/crush launch and rhythmic continuous bed |
-| ChoirNote / Charge / Fire / ChoirSustain | Glass/dispersion chimes, one 0.8s conductor tension, low grid/Stack launch and sustained body; no launch on every damage tick |
-| WitnessDraw / Lock / Fire | Slower metallic unsheathing, a 22-tick pressure lock, blade insertion/crush release |
-| DollSummon / Thread / Charge / Verdict | Shell/glass arrival, three purple beam threads, 0.6s charge, `LanceFire`/Core salvo release; the 72-tick beam borrows the Magic bed and owns its own voice |
-| WeaponHit | Short low-priority contact, below the release accents |
+| ClawSwipe / Grip / Crush / Hit | Fast cutting-air edge, taut lock, violent severing release and sharp contact; no delayed second note |
+| MagicSigil / Bolt / Merge / Charge / Fire / LacunaSustain | Resonant seal arrival, piercing arc shots, gathering pressure and connected charge; approved launch/bed retained |
+| RangedLatch / Shot / Charge / Fire / MeridianSustain | Precise chamber snap, bright compressed discharge and rising pressure; approved launch/bed retained |
+| ChoirNote / Charge / Fire / ChoirSustain | Layered resonant energy notes and rising intake; approved launch/bed retained |
+| WitnessDraw / Lock / Fire | Cutting air, strained energy lock and bright high-pressure execution |
+| DollSummon / Thread / Charge / Verdict | Diffuse spectral arrival, incisive purple threads, held charge; approved verdict/bed retained |
+| WeaponHit | Short sharp contact below release accents, not a low thud |
 
 One-shots are 0.13–0.80s PCM mono, with exact silent endpoints and bounded attack tails; none plays a full multi-second Raid aftermath. Persistent beds are 4s stereo, combining the accepted bed with a periodic/crossfaded stable beam-body window. Weapon voices remain separate from the Raid ledger: cue IDs have bounded voices; sustain has per-owner/projectile identity, a four-tick entry ramp, and immediate cancellation on unusable owner/Down/dismissal/end. Charge stops at fire and on cancellation; charge pitch is fixed to preserve timing. No global slider or gameplay-clock changes. Export reports decoded sample/4× peaks, RMS and loop steps; these measurements do not certify perceived quality or multi-player mix. Listening at unchanged sliders remains user-owned.
 

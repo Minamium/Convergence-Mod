@@ -1,0 +1,907 @@
+{
+  "date": "2026-09-15",
+  "scope": "Doll multiplayer visibility, final DPS check and weapon articulation",
+  "base_commit": "c8c2b180fd5926b1dfb8f1ad140b30dda7890fbd",
+  "source_version": "0.3.7",
+  "protocol": 41,
+  "playtest": {
+    "version": "0.3.5",
+    "topology": "Host & Play, two real players",
+    "local_time": "18:46:55-18:50:52 JST",
+    "duration_seconds": 236.48,
+    "outcome": "Victory",
+    "stack": {
+      "passed": 19,
+      "total": 19
+    },
+    "spread": {
+      "passed": 19,
+      "total": 22
+    },
+    "downs": 2,
+    "revives": 2,
+    "boss_effective_damage": 5000000,
+    "boss_open_seconds": 26.97,
+    "boss_window_dps": 185414.1,
+    "pylon_damage": 600000,
+    "pylon_open_seconds": 2.68,
+    "pylon_window_dps": 223602.5,
+    "native_receipts": [
+      {
+        "slot": 0,
+        "count": 22,
+        "immediate_damage": 3384,
+        "zero_damage": 9,
+        "chalice_equipped": false
+      },
+      {
+        "slot": 1,
+        "count": 21,
+        "immediate_damage": 65,
+        "zero_damage": 8,
+        "chalice_equipped": "unobserved on local client; five-point pattern consistent with deferred equipment damage"
+      }
+    ],
+    "damage_caveat": "Immediate native receipts exclude deferred damage, healing and other sources; not a whole-fight HP-loss sum.",
+    "weapon_playback": "Claw/Witness/Magic device voice probes playing=True at sound slider0.161. This verifies playback, not audio quality.",
+    "warnings": [
+      "Startup localhost connection refused",
+      "SubworldLibrary shutdown EndOfStreamException"
+    ],
+    "convergence_combat_exceptions": 0,
+    "minion_visibility": "Owner-reported invisible on observer; old logs do not contain replica lifetime. Source reveals unconditional observer HasBuff kill."
+  },
+  "design": {
+    "final_check_percent": 5,
+    "deadline_ticks": 600,
+    "boss_hp_multiplier": 2,
+    "pylon_hp_changed": false,
+    "check_budgets": {
+      "3": 900000,
+      "4": 1300000,
+      "1-2": 500000
+    },
+    "required_dps": {
+      "3": 90000,
+      "4": 130000,
+      "1-2": 50000
+    },
+    "cannon_live_ticks": 60,
+    "cannon_cadence_ticks": 132,
+    "grid": "Whole sanctuary lanes omitted, never internal cutouts",
+    "minion": "Only owner can dismiss for missing buff; children/audio track exact parent; owner/replica diagnostic once"
+  },
+  "audio": {
+    "date": "2026-09-15",
+    "recipe": "tools/remix_weapon_articulation.py",
+    "recipe_sha256": "ec2140f65c6cd971b30a2851f43b8f76372be95d9310059793d0bc568dbf80b2",
+    "helper_sha256": "5673802aab0a622e682b369427543bbe6ab5fd8bf38e7a7f24f67d077bf243a0",
+    "numpy": "2.3.5",
+    "source_sha256": {
+      "Beams/ChargeGather": "e48071a2eb6316e521420850ad570ebf3505da9bc83e6a86f0e4cfbfbc4b1c30",
+      "Beams/ChargeLock": "52a0b6e14c8dfb7233b30bce87cd9225d826b7225a19b6a4ac5acacd0011fb7d",
+      "Beams/ChargeRush": "57adc7042b6ba34074f5c02f455e78471e37bcc13a5b7d404bec08b398378c31",
+      "Beams/CoreSalvoFire": "44e87ca0743bcf093d4be9eaed1571a8e9678a496fdeb2ac78e7c8d376982aaf",
+      "Beams/PortalCharge": "016c41987ae0a730cac443482f38a96ad4174e4d7e36f8ea3ba855870de7c985",
+      "Beams/PortalFire": "d7c50341bca300d854a61708e3063549ac47e95c06ea8a651a6ec4bb3ee9b2f9",
+      "Beams/SpreadRay": "24683bc4df5f00874cb60065265612cec2bcb95941349ff06569a7aac6082414",
+      "Beams/SpreadScatter": "deea7949fb10cebca5bcb4e7e46964d8ec9c048415c24cc757518d48b1ac3975",
+      "BladeUnsheathe": "c85d18f30eb1797223ad3fb3e32de8582421e018ae963c413ededf9d2492f828",
+      "SwordImpale": "ba6e2c21571a01ccd5fa5d9393a69e10cb18c98f3582e44c3e143bd731740f77"
+    },
+    "protected_sha256": {
+      "MagicFire": "ab85c2fbd76dbcfd6675d6f84026cbe6fcb43f73513fb0b32cff51a2d809de25",
+      "RangedFire": "8d1df5469899a388a6ce51e4945845b5f71b366cf6a1ff0b265aa9ff3e68598c",
+      "ChoirFire": "896921cfdc784c5797fa192da79d7421b3297b57911a135ff31dfbe56e19dad7",
+      "DollVerdict": "eb726ca2ef03d04cf7bcc2ce28efe62ce2290f9513ae0c96c1db5a37c873ea7b",
+      "LacunaSustain": "43a305a9985bf82b43cde3909ba4583c85945d4a52addc8ac876007a22434735",
+      "MeridianSustain": "b3fd1d5f1c2396c777623fc267220776ba54e4cb2f9bc8a03ed7c8bd3be58696",
+      "ChoirSustain": "2ef521ede3a62a701c89c2fe750a8179d34495dd09805f573e166b38b8918352"
+    },
+    "assets": {
+      "ClawSwipe": {
+        "seconds": 0.25,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.515,
+        "rms_dbfs": -11.685,
+        "seam": 0,
+        "max_step": 0.9068298,
+        "sha256": "95d78ba07229d518e71ff1a87b23e440728a5b0e9556d14dd2229dbc57c83d6f",
+        "presence_700_6000_fraction": 0.7753,
+        "peak_time_ms": 48.78,
+        "layers": [
+          {
+            "source": "BladeUnsheathe",
+            "gain": 1,
+            "speed": 1.25,
+            "start": 0,
+            "low": 500,
+            "high": 9000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/PortalFire",
+            "gain": 0.6,
+            "speed": 1.7,
+            "start": 0,
+            "low": 1300,
+            "high": 7500,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "ClawGrip": {
+        "seconds": 0.16,
+        "peak_dbfs": -2.215,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -13.656,
+        "seam": 0,
+        "max_step": 1.2857971,
+        "sha256": "75a8c611f03bbcc28644fbc22529cdd7a3ae9ae5ac0404f119f732f54ab66d67",
+        "presence_700_6000_fraction": 0.8821,
+        "peak_time_ms": 5.26,
+        "layers": [
+          {
+            "source": "Beams/ChargeLock",
+            "gain": 0.7,
+            "speed": 1.65,
+            "start": 0,
+            "low": 700,
+            "high": 7000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "SwordImpale",
+            "gain": 0.6,
+            "speed": 1.8,
+            "start": 0,
+            "low": 1600,
+            "high": 8000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "ClawCrush": {
+        "seconds": 0.31,
+        "peak_dbfs": -1.608,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -13.189,
+        "seam": 0,
+        "max_step": 1.1500854,
+        "sha256": "94962d40b863b60fa5b4416236f0288513feb245447961bb696b81f8fcf9a538",
+        "presence_700_6000_fraction": 0.6163,
+        "peak_time_ms": 9.02,
+        "layers": [
+          {
+            "source": "Beams/PortalFire",
+            "gain": 1,
+            "speed": 0.92,
+            "start": 0,
+            "low": 170,
+            "high": 7800,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "SwordImpale",
+            "gain": 0.8,
+            "speed": 1.3,
+            "start": 0,
+            "low": 800,
+            "high": 9500,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "ClawHit": {
+        "seconds": 0.13,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -0.985,
+        "rms_dbfs": -12.851,
+        "seam": 0,
+        "max_step": 1.1379089,
+        "sha256": "c8491a85d74749f0489e39e253cc53b44d1998eda48ebd319c68f7a3df6ae0ae",
+        "presence_700_6000_fraction": 0.8371,
+        "peak_time_ms": 6.26,
+        "layers": [
+          {
+            "source": "SwordImpale",
+            "gain": 1,
+            "speed": 1.6,
+            "start": 0,
+            "low": 700,
+            "high": 9200,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/SpreadRay",
+            "gain": 0.35,
+            "speed": 1.9,
+            "start": 0,
+            "low": 1400,
+            "high": 7000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "MagicSigil": {
+        "seconds": 0.26,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.382,
+        "rms_dbfs": -13.105,
+        "seam": 0,
+        "max_step": 0.8985596,
+        "sha256": "8f157542f42b22bea14159c30c2a53dc087c11764aaf86ae6f03312f1242f638",
+        "presence_700_6000_fraction": 0.7243,
+        "peak_time_ms": 15.51,
+        "layers": [
+          {
+            "source": "Beams/ChargeLock",
+            "gain": 0.65,
+            "speed": 1.2,
+            "start": 0,
+            "low": 350,
+            "high": 7000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/SpreadScatter",
+            "gain": 0.4,
+            "speed": 1.45,
+            "start": 0,
+            "low": 1400,
+            "high": 8500,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "MagicBolt": {
+        "seconds": 0.22,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -0.975,
+        "rms_dbfs": -12.832,
+        "seam": 0,
+        "max_step": 1.2894287,
+        "sha256": "7135106f00621512445afb63ab1d82f6566a93cd122d4af6e2438db598ca03c4",
+        "presence_700_6000_fraction": 0.921,
+        "peak_time_ms": 4.83,
+        "layers": [
+          {
+            "source": "Beams/PortalFire",
+            "gain": 1,
+            "speed": 1.6,
+            "start": 0,
+            "low": 380,
+            "high": 8800,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/SpreadRay",
+            "gain": 0.4,
+            "speed": 1.6,
+            "start": 0,
+            "low": 1000,
+            "high": 6500,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "MagicMerge": {
+        "seconds": 0.366667,
+        "peak_dbfs": -1.632,
+        "peak_4x_dbfs": -1.632,
+        "rms_dbfs": -11.482,
+        "seam": 0,
+        "max_step": 0.4336548,
+        "sha256": "f5cee5b18972094350f022533e1a38024812451b682d81cd78206d6292be9bdb",
+        "presence_700_6000_fraction": 0.7473,
+        "peak_time_ms": 225.44,
+        "layers": [
+          {
+            "source": "Beams/PortalFire",
+            "gain": 0.6,
+            "speed": 0.9,
+            "start": 0,
+            "low": 300,
+            "high": 7500,
+            "reverse": true,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/ChargeRush",
+            "gain": 1,
+            "speed": 1.25,
+            "start": 0,
+            "low": 420,
+            "high": 8000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "MagicCharge": {
+        "seconds": 0.8,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.504,
+        "rms_dbfs": -11.627,
+        "seam": 0,
+        "max_step": 0.4406738,
+        "sha256": "6b123ed5f7c4b77437b05c769c426fb535598f8a0162688e4e2349d589a9fe11",
+        "presence_700_6000_fraction": 0.8363,
+        "peak_time_ms": 647.98,
+        "layers": [
+          {
+            "source": "Beams/PortalCharge",
+            "gain": 1,
+            "speed": 1,
+            "start": 0,
+            "low": 350,
+            "high": 7000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/ChargeRush",
+            "gain": 0.6,
+            "speed": 0.8,
+            "start": 0,
+            "low": 700,
+            "high": 8200,
+            "reverse": false,
+            "window": null,
+            "at": 0.32
+          }
+        ]
+      },
+      "RangedLatch": {
+        "seconds": 0.15,
+        "peak_dbfs": -1.769,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -12.707,
+        "seam": 0,
+        "max_step": 1.3512878,
+        "sha256": "b64e4968ed4ee49e52c94e064103be5957c5ce4e6f82f342293d4ba1efe2f573",
+        "presence_700_6000_fraction": 0.8493,
+        "peak_time_ms": 7.44,
+        "layers": [
+          {
+            "source": "Beams/ChargeLock",
+            "gain": 0.7,
+            "speed": 1.7,
+            "start": 0,
+            "low": 650,
+            "high": 8600,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "SwordImpale",
+            "gain": 0.45,
+            "speed": 1.75,
+            "start": 0,
+            "low": 1800,
+            "high": 10000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "RangedShot": {
+        "seconds": 0.2,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.479,
+        "rms_dbfs": -12.593,
+        "seam": 0,
+        "max_step": 0.9033813,
+        "sha256": "26b42776f9bbc3e927190dfaf6b97e03b2dc3e72a8f16cb739c3ee61725bd087",
+        "presence_700_6000_fraction": 0.6921,
+        "peak_time_ms": 4.06,
+        "layers": [
+          {
+            "source": "Beams/PortalFire",
+            "gain": 1.1,
+            "speed": 1.9,
+            "start": 0,
+            "low": 140,
+            "high": 9800,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/CoreSalvoFire",
+            "gain": 0.45,
+            "speed": 1.5,
+            "start": 0,
+            "low": 350,
+            "high": 6500,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "RangedCharge": {
+        "seconds": 0.8,
+        "peak_dbfs": -1.766,
+        "peak_4x_dbfs": -1.763,
+        "rms_dbfs": -12.031,
+        "seam": 0,
+        "max_step": 0.3067322,
+        "sha256": "6b28e93d8fa4cfd7e92c078aeaee93ff3cc872d75123ffc3357df21e713ad2ab",
+        "presence_700_6000_fraction": 0.679,
+        "peak_time_ms": 763.97,
+        "layers": [
+          {
+            "source": "Beams/ChargeGather",
+            "gain": 0.6,
+            "speed": 0.8,
+            "start": 0,
+            "low": 250,
+            "high": 4800,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/ChargeRush",
+            "gain": 1,
+            "speed": 0.8,
+            "start": 0,
+            "low": 750,
+            "high": 9000,
+            "reverse": false,
+            "window": null,
+            "at": 0.12
+          }
+        ]
+      },
+      "ChoirNote": {
+        "seconds": 0.3,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.379,
+        "rms_dbfs": -13.074,
+        "seam": 0,
+        "max_step": 1.0416565,
+        "sha256": "8384e3bb832926663db9f6285ad0360f5169df1d6a0f75621853c22b5d489001",
+        "presence_700_6000_fraction": 0.8723,
+        "peak_time_ms": 4.69,
+        "layers": [
+          {
+            "source": "Beams/SpreadScatter",
+            "gain": 0.6,
+            "speed": 1.25,
+            "start": 0,
+            "low": 900,
+            "high": 7000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/PortalFire",
+            "gain": 0.45,
+            "speed": 1.3,
+            "start": 0,
+            "low": 500,
+            "high": 7000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "ChoirCharge": {
+        "seconds": 0.8,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.506,
+        "rms_dbfs": -11.82,
+        "seam": 0,
+        "max_step": 0.4708862,
+        "sha256": "7fbb0bdfd297ad999f39eab08648ce1041d89f95549c9e28698f475a7e27262a",
+        "presence_700_6000_fraction": 0.847,
+        "peak_time_ms": 612.22,
+        "layers": [
+          {
+            "source": "Beams/PortalCharge",
+            "gain": 0.7,
+            "speed": 0.8,
+            "start": 0,
+            "low": 350,
+            "high": 6000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/ChargeRush",
+            "gain": 0.8,
+            "speed": 0.85,
+            "start": 0,
+            "low": 850,
+            "high": 8500,
+            "reverse": false,
+            "window": null,
+            "at": 0.25
+          }
+        ]
+      },
+      "WitnessDraw": {
+        "seconds": 0.24,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.459,
+        "rms_dbfs": -11.836,
+        "seam": 0,
+        "max_step": 1.0424194,
+        "sha256": "0b9e279131898ca1f7576ccb1f4c84adf54a9ae193335ec6e121d445a53702f3",
+        "presence_700_6000_fraction": 0.8412,
+        "peak_time_ms": 37.55,
+        "layers": [
+          {
+            "source": "BladeUnsheathe",
+            "gain": 1,
+            "speed": 1.5,
+            "start": 0,
+            "low": 650,
+            "high": 9200,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/PortalFire",
+            "gain": 0.5,
+            "speed": 1.8,
+            "start": 0,
+            "low": 1400,
+            "high": 7600,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "WitnessLock": {
+        "seconds": 0.366667,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.493,
+        "rms_dbfs": -12.7,
+        "seam": 0,
+        "max_step": 0.8086853,
+        "sha256": "fdcd748932c169c8339b906cec3a04b22ee3d9464ac21b7ebfcb5d8743f67a08",
+        "presence_700_6000_fraction": 0.8369,
+        "peak_time_ms": 4.08,
+        "layers": [
+          {
+            "source": "Beams/ChargeLock",
+            "gain": 0.75,
+            "speed": 1.2,
+            "start": 0,
+            "low": 380,
+            "high": 8000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/ChargeRush",
+            "gain": 0.6,
+            "speed": 1.4,
+            "start": 0,
+            "low": 1200,
+            "high": 9300,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "WitnessFire": {
+        "seconds": 0.32,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.253,
+        "rms_dbfs": -13.264,
+        "seam": 0,
+        "max_step": 1.1577148,
+        "sha256": "b47cb3ed66ad87546c99eac739d6ac07df71e12ef3ab8b82ba51013096b66e0b",
+        "presence_700_6000_fraction": 0.7879,
+        "peak_time_ms": 24.13,
+        "layers": [
+          {
+            "source": "Beams/PortalFire",
+            "gain": 0.9,
+            "speed": 1.18,
+            "start": 0,
+            "low": 240,
+            "high": 9200,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "SwordImpale",
+            "gain": 0.8,
+            "speed": 1.4,
+            "start": 0,
+            "low": 800,
+            "high": 9000,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "WeaponHit": {
+        "seconds": 0.13,
+        "peak_dbfs": -2.271,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -13.704,
+        "seam": 0,
+        "max_step": 1.4267578,
+        "sha256": "e1995794add936271ed71fb568b341665aea2a18484b41016ad885677981a249",
+        "presence_700_6000_fraction": 0.7822,
+        "peak_time_ms": 3.9,
+        "layers": [
+          {
+            "source": "Beams/SpreadRay",
+            "gain": 0.5,
+            "speed": 1.8,
+            "start": 0,
+            "low": 1000,
+            "high": 7200,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "SwordImpale",
+            "gain": 0.9,
+            "speed": 1.9,
+            "start": 0,
+            "low": 1800,
+            "high": 9300,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "DollSummon": {
+        "seconds": 0.55,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.503,
+        "rms_dbfs": -13.358,
+        "seam": 0,
+        "max_step": 0.7772217,
+        "sha256": "f4be1a0733e06ad0262d6703a44fc00a0a01dd9a17a3fb1a3381831d634e8534",
+        "presence_700_6000_fraction": 0.6404,
+        "peak_time_ms": 18.21,
+        "layers": [
+          {
+            "source": "Beams/SpreadScatter",
+            "gain": 0.7,
+            "speed": 0.82,
+            "start": 0,
+            "low": 550,
+            "high": 7600,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/ChargeLock",
+            "gain": 0.7,
+            "speed": 0.75,
+            "start": 0,
+            "low": 260,
+            "high": 6400,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "DollThread": {
+        "seconds": 0.23,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.328,
+        "rms_dbfs": -12.91,
+        "seam": 0,
+        "max_step": 1.1332092,
+        "sha256": "c2f268bcccfa5f46ba0fb8440fd577adc9f3e35cec5396326bd0c1d3477f866a",
+        "presence_700_6000_fraction": 0.8993,
+        "peak_time_ms": 6.35,
+        "layers": [
+          {
+            "source": "Beams/PortalFire",
+            "gain": 0.9,
+            "speed": 1.5,
+            "start": 0,
+            "low": 350,
+            "high": 8400,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/SpreadRay",
+            "gain": 0.3,
+            "speed": 1.6,
+            "start": 0,
+            "low": 1300,
+            "high": 7500,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          }
+        ]
+      },
+      "DollCharge": {
+        "seconds": 0.6,
+        "peak_dbfs": -1.515,
+        "peak_4x_dbfs": -1.515,
+        "rms_dbfs": -11.899,
+        "seam": 0,
+        "max_step": 0.4881592,
+        "sha256": "47a266f92dbc1a05bd14e654a0205650982561fcbb2f8c20ccad7e841eede373",
+        "presence_700_6000_fraction": 0.8771,
+        "peak_time_ms": 442.36,
+        "layers": [
+          {
+            "source": "Beams/PortalCharge",
+            "gain": 0.9,
+            "speed": 1.2,
+            "start": 0,
+            "low": 300,
+            "high": 7500,
+            "reverse": false,
+            "window": null,
+            "at": 0
+          },
+          {
+            "source": "Beams/ChargeRush",
+            "gain": 0.6,
+            "speed": 1,
+            "start": 0,
+            "low": 950,
+            "high": 8500,
+            "reverse": false,
+            "window": null,
+            "at": 0.18
+          }
+        ]
+      }
+    },
+    "auditions": {
+      "Claws": {
+        "seconds": 1.71,
+        "peak_dbfs": -0.898,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -17.66,
+        "seam": 0,
+        "max_step": 0.8594666,
+        "sha256": "d903d59cf34cb9ae71dbcd15dfca11de1f5e2606bb9560c630b861645081bade",
+        "preview_only_safety_attenuation_db": -1.165
+      },
+      "Magic": {
+        "seconds": 11.013333,
+        "peak_dbfs": -0.355,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -18.869,
+        "seam": 0,
+        "max_step": 0.45401,
+        "sha256": "ba39e3022d63b11a936b8d07f8ed917f019b3783d675ecf6c208e7179b8be33e",
+        "preview_only_safety_attenuation_db": -1.944
+      },
+      "Ranged": {
+        "seconds": 9.98,
+        "peak_dbfs": -0.355,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -19.037,
+        "seam": 0,
+        "max_step": 0.7625732,
+        "sha256": "2da0f529cd1652c3d1954f2e15b6db05c636e0d6c2cf9e034e3c3628e84b222f",
+        "preview_only_safety_attenuation_db": -0.532
+      },
+      "Summon": {
+        "seconds": 7.18,
+        "peak_dbfs": -0.359,
+        "peak_4x_dbfs": -0.355,
+        "rms_dbfs": -17.198,
+        "seam": 0,
+        "max_step": 0.4334106,
+        "sha256": "c6fd724089c6e2d90495e910a9a778b441e812b34bfca01c3825acc2cf29afea",
+        "preview_only_safety_attenuation_db": -0.867
+      },
+      "Rogue": {
+        "seconds": 3.966667,
+        "peak_dbfs": -1.961,
+        "peak_4x_dbfs": -1.698,
+        "rms_dbfs": -18.367,
+        "seam": 0,
+        "max_step": 1.0997925,
+        "sha256": "fe007b7e5d81d622da501b7d21fc023f974454229e028d8bf23d0f2d45b21b0f",
+        "preview_only_safety_attenuation_db": 0
+      },
+      "Doll": {
+        "seconds": 3.98,
+        "peak_dbfs": -1.352,
+        "peak_4x_dbfs": -1.352,
+        "rms_dbfs": -16.87,
+        "seam": 0,
+        "max_step": 0.7365723,
+        "sha256": "4b7e2190f54606d260e859576eafd7e04c90242116f7d2ec62400016eb3ac289",
+        "preview_only_safety_attenuation_db": 0
+      }
+    },
+    "listening": "not_run; numerical checks only; user audition required"
+  },
+  "verification": {
+    "domain_cases": 229,
+    "domain_failures": 0,
+    "build": {
+      "result": "passed",
+      "configuration": "Release native tModLoader package",
+      "errors": 0,
+      "warnings": 4,
+      "warning_kind": "existing CS8632",
+      "artifact_bytes": 57024571,
+      "artifact_sha256": "d9385ee0ac578818f89c9f62a094db72551befc8e195fa5487a1ede737590c19",
+      "assembly_sha256": "869c792d3f4ea62ac838c1bbeb06184e7402a62f4dd41a8ebe0cf4d10e578efb",
+      "source_changed_during_build": false,
+      "source_manifest_sha256": "a1c16d91baf7aacafb19b8ee20dc18863954651f2f5116498708fd81238201b3",
+      "attribution": "Base commit plus recorded working diff; pre-existing en-US trailing blank line retained. Post-build edits limited to documentation/evidence/catalog."
+    },
+    "codec": {
+      "protocol": 41,
+      "round_trips": 334,
+      "malformed_rejections": 54,
+      "assembly": "exact DLL extracted from package"
+    },
+    "native_hurt": {
+      "result": "passed",
+      "scope": "installed HurtModifiers calibration, lethal floor, loader registration, exact-Fight/repeated Doll teardown without game simulation"
+    },
+    "static": "passed: catalog74, repository746, YAML10; git diff whitespace check",
+    "gameplay": [
+      "not_run: owner and observer summon/flight/shots/dismiss/rejoin",
+      "not_run: complete final check, fail timeout, simultaneous all-Down/hit settlement",
+      "not_run: weakened sphere and extended cannon readability in multiplayer"
+    ],
+    "listening": "not_run",
+    "admission": {
+      "minimum": 1,
+      "maximum": 4,
+      "solo_enabled": true,
+      "verified_in": "exact packaged Release assembly"
+    }
+  }
+}
