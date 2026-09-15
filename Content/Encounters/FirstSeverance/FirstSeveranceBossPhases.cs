@@ -44,7 +44,7 @@ internal sealed class FirstSeveranceBossPhasePlan
     internal static bool IsDamageState(FirstSeveranceSubstate state)
         => state is FirstSeveranceSubstate.CoreExposure or FirstSeveranceSubstate.Lattice
             or FirstSeveranceSubstate.RotatingBlade or FirstSeveranceSubstate.RemoteClaws or FirstSeveranceSubstate.HalfField
-            or FirstSeveranceSubstate.RemoteCrush;
+            or FirstSeveranceSubstate.RemoteCrush or FirstSeveranceSubstate.FinalCoreCheck;
 }
 
 internal static class FirstSeveranceStackAnchor

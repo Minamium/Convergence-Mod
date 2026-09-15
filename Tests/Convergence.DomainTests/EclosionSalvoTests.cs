@@ -41,7 +41,7 @@ internal static partial class Program
     [DomainTest("Development HP scales from the frozen two/three/four-player roster")]
     private static void DevelopmentPartyHp()
     {
-        var boss = new[] { 5_000_000, 9_000_000, 13_000_000 };
+        var boss = new[] { 10_000_000, 18_000_000, 26_000_000 };
         var pylon = new[] { 300_000, 500_000, 600_000 };
         for (int count = 2; count <= 4; count++)
         {

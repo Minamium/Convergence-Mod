@@ -6,6 +6,9 @@ namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
 // Native summon rules, independent of the encounter roster and its authority tick.
 internal static class DollCompanionRules
 {
+    // Player buffs can arrive after their projectile, or be absent on observers.
+    // Only the owner may interpret a missing buff as an explicit dismissal.
+    internal static bool DismissForMissingBuff(bool isOwner, bool hasBuff) => isOwner && !hasBuff;
     internal const int Slots = 10;
     internal const int Cycle = 210;
     internal const int Verdict = 96;

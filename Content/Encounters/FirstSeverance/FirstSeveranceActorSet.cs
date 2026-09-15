@@ -162,8 +162,7 @@ internal sealed class FirstSeveranceActorSet
     {
         if (TryResolveOwnedNpc<FirstSeverancePrototypeBoss>(bossNpcIndex, out NPC boss))
         {
-            bool shielded = !plan.Boss.CanTakeDamage(state.Substate) || state.BossLife <= damageFloor
-                || state.BossPhase == FirstSeveranceBossPhase.Final;
+            bool shielded = !plan.Boss.CanTakeDamage(state.Substate) || state.BossLife <= damageFloor;
             if (boss.dontTakeDamage != shielded || boss.chaseable == shielded)
             {
                 boss.dontTakeDamage = shielded;

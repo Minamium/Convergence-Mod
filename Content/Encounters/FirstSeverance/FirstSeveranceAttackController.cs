@@ -28,6 +28,7 @@ internal sealed class FirstSeveranceAttackController
     private FirstSeveranceGridVolley? gridVolley;
     private FirstSeveranceCoreCannonVolley? coreCannon;
     private bool coreCannonIssued;
+    private ulong nextCoreCannonTick;
     private readonly HashSet<ParticipantId> coreCannonHits = new();
     private uint gridSerial;
     private uint coreSalvoOrdinal;
@@ -68,6 +69,7 @@ internal sealed class FirstSeveranceAttackController
     {
         coreCannon = null;
         coreCannonIssued = false;
+        nextCoreCannonTick = authorityTick + FirstSeveranceCoreCannonVolley.OpeningTicks;
         coreCannonHits.Clear();
         spread.Clear();
         lances.Clear();
@@ -165,17 +167,20 @@ internal sealed class FirstSeveranceAttackController
 
     internal bool UpdateCoreCannon(in FirstSeveranceLoopState state, ulong tick)
     {
-        if (state.Substate != FirstSeveranceSubstate.FinalBullets || tick >= state.ResolveTick)
+        if (state.Substate is not (FirstSeveranceSubstate.FinalBullets or FirstSeveranceSubstate.FinalCoreCheck)
+            || tick >= state.ResolveTick)
         {
             bool had = coreCannon is not null;
             coreCannon = null; coreCannonHits.Clear();
             return had;
         }
         bool changed = false;
-        if (!coreCannonIssued && tick >= state.SubstateEnteredTick + FirstSeveranceCoreCannonVolley.OpeningTicks
+        if (coreCannon is null && (!coreCannonIssued || state.Substate == FirstSeveranceSubstate.FinalCoreCheck)
+            && tick >= nextCoreCannonTick
             && state.ResolveTick - tick >= FirstSeveranceCoreCannonVolley.DurationTicks)
         {
             coreCannonIssued = true; // No delayed retarget/catch-up burst after death or reconnect.
+            nextCoreCannonTick = tick + FirstSeveranceFinalCheck.CannonCadenceTicks;
             var targets = new List<Player>(roster.Count);
             foreach (var member in roster.Members)
                 if (recovery.IsAlive(member.ParticipantId) && recovery.TryGetPlayer(member, out var player)) targets.Add(player);
@@ -185,7 +190,7 @@ internal sealed class FirstSeveranceAttackController
                 coreCannon = new(++gridSerial, tick, target.whoAmI,
                     FirstSeveranceGridVolley.AimCoreBeam(groundCenter.X, groundCenter.Y, target.Center.X, target.Center.Y));
                 changed = true;
-                Log(tick, $"event=CoreCannonTelegraph cast={coreCannon.Serial} target_slot={target.whoAmI} fire_tick={coreCannon.FireTick} end_tick={coreCannon.EndTick} action=FinalBullets");
+                Log(tick, $"event=CoreCannonTelegraph cast={coreCannon.Serial} target_slot={target.whoAmI} fire_tick={coreCannon.FireTick} end_tick={coreCannon.EndTick} action={state.Substate}");
             }
         }
         if (coreCannon is not { } cast) return changed;

@@ -43,7 +43,7 @@ internal sealed class FirstSeveranceDollVisuals
     {
         coreBore = 0;
         twinBore = false;
-        if (combat.Substate != FirstSeveranceSubstate.FinalBullets) lastCannon = null;
+        if (combat.Substate is not (FirstSeveranceSubstate.FinalBullets or FirstSeveranceSubstate.FinalCoreCheck)) lastCannon = null;
         if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
         {
             double age = tick - combat.ActionStartedTick;
@@ -318,8 +318,8 @@ internal sealed class FirstSeveranceDollVisuals
 
     // The Distant body is scenery; this physical relay stays over the real
     // foreground hit target. It replaces the old floating square/X stamp.
-    internal void DrawRemoteCore(SpriteBatch batch,Vector2 center,float seconds,float opacity,bool reduced)
-        => mechanicalCore.Draw(batch,center,66,seconds,.3f,Color.White,opacity,reduced,coreBore,coreAxis,twinBore);
+    internal void DrawRemoteCore(SpriteBatch batch,Vector2 center,float seconds,float opacity,bool reduced,float damage = 0)
+        => mechanicalCore.Draw(batch,center,66,seconds,.3f,Color.White,opacity,reduced,coreBore,coreAxis,twinBore,damage);
 
     private void Ensure()
     {

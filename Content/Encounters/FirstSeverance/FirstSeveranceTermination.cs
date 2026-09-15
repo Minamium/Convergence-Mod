@@ -22,6 +22,7 @@ internal enum FirstSeveranceTerminalCause : byte
     WorldUnload = 11,
     ProtocolFailure = 12,
     InternalFailure = 13,
+    FinalDpsFailed = 14,
 }
 
 internal sealed class FirstSeveranceTerminationContract : IEncounterTerminationContract
@@ -102,7 +103,8 @@ internal sealed class FirstSeveranceTerminationContract : IEncounterTerminationC
             FirstSeveranceTerminalCause.OverloadLimit
                 or FirstSeveranceTerminalCause.AllParticipantsDowned
                 or FirstSeveranceTerminalCause.RecoveryImpossible
-                or FirstSeveranceTerminalCause.LoopCapExceeded => EncounterEndReason.Defeat,
+                or FirstSeveranceTerminalCause.LoopCapExceeded
+                or FirstSeveranceTerminalCause.FinalDpsFailed => EncounterEndReason.Defeat,
             FirstSeveranceTerminalCause.UserCancelled => EncounterEndReason.Cancelled,
             FirstSeveranceTerminalCause.FoundationCoreLost =>
                 EncounterEndReason.AnchorDestroyed,
@@ -121,7 +123,7 @@ internal sealed class FirstSeveranceTerminationContract : IEncounterTerminationC
     public static bool IsFeatureOwned(FirstSeveranceTerminalCause cause)
     {
         return cause is >= FirstSeveranceTerminalCause.BossLifeZero
-            and <= FirstSeveranceTerminalCause.AdministrativeAbort;
+            and <= FirstSeveranceTerminalCause.AdministrativeAbort or FirstSeveranceTerminalCause.FinalDpsFailed;
     }
 
     private static EncounterTerminationDescriptor CreateDescriptor(
@@ -144,6 +146,7 @@ internal sealed class FirstSeveranceTerminationContract : IEncounterTerminationC
             FirstSeveranceTerminalCause.AdministrativeAbort => 7,
             FirstSeveranceTerminalCause.BossLifeZero => 6,
             FirstSeveranceTerminalCause.OverloadLimit => 5,
+            FirstSeveranceTerminalCause.FinalDpsFailed => 5,
             FirstSeveranceTerminalCause.AllParticipantsDowned => 4,
             FirstSeveranceTerminalCause.RecoveryImpossible => 3,
             FirstSeveranceTerminalCause.LoopCapExceeded => 2,

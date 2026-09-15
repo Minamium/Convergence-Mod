@@ -8,7 +8,7 @@ internal sealed class FirstSeveranceCoreCannonVolley
 {
     internal const int OpeningTicks = 24;
     internal const int TelegraphTicks = FirstSeveranceGridVolley.TelegraphTicks;
-    internal const int ActiveTicks = FirstSeveranceGridVolley.ActiveTicks;
+    internal const int ActiveTicks = 60;
     internal const int DurationTicks = TelegraphTicks + ActiveTicks;
     internal uint Serial { get; }
     internal ulong StartTick { get; }

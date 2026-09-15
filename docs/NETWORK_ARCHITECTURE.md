@@ -23,7 +23,11 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v40
+## Current development protocol v41
+
+Doll appends `FinalCoreCheck = 15` and feature cause `FinalDpsFailed = 14` without renumbering existing IDs. No DTO fields change. Final snapshots may carry up to5% of maximum HP only during the final check; other Final actions still require zero HP. The existing bounded CoreCannon descriptor is admitted in FinalBullets and FinalCoreCheck, deriving the new60-tick live interval on all peers. Third-volley lattice sanctuaries now omit whole lanes rather than clipping holes; geometry is still deterministically reconstructed. Use matching protocol41 clients/server. Server owns the one-time refill, deadline, cast targets/hits, victory/defeat and exact-Fight cleanup; no client DPS report or replica minion controls the Raid.
+
+## Preceding development protocol v40
 
 Ghost Samurai appends attack IDs6/7 (TripleVerticalSlash/FrontalCleaveShockwave) and shape IDs8/9/10 (VerticalSlash/FrontalCleave/GroundShockwave), preserving existing values. The native actor ExtraAI appends23 bytes: step and signed facing (one byte each), a canonical boolean lock byte, and five finite floats for approach origin, anchor and ground plane. Its complete actor body is76 bytes. Idle and old attacks require an empty combo pose; new attacks bound the counter and require facing -1/+1. Reject malformed/truncated state before mutation and conflicting same-age combo updates.
 
