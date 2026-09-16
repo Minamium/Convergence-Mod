@@ -1,0 +1,35 @@
+name: Scarlet branch checks
+on:
+  push:
+    branches: [feat/scarlet-rhythm-phases]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Archive exact branch sources for review
+        run: git archive --format=zip --output=scarlet-source.zip HEAD
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: scarlet-source
+          path: scarlet-source.zip
+          retention-days: 3
+      - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d
+        with:
+          dotnet-version: 8.0.424
+      - run: python3 -m pip install --disable-pip-version-check --requirement tools/requirements-ci.txt
+      - run: python3 -m unittest discover -s tools/tests
+      - run: python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog --with-domain --with-codec
+      - name: Preserve generated catalog for exact-source review
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: scarlet-catalog
+          path: docs/catalog/documents.yml
+          retention-days: 3
