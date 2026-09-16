@@ -9,8 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="../../Assets/Music/CrimsonFoundry/Score.json" Link="CrimsonScore.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../Common/Raids/Arena/RaidFieldGeometry.cs" Link="Domain/RaidFieldGeometry.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/CrimsonRigMotion.cs" Link="Presentation/CrimsonRigMotion.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonPhaseRules.cs" Link="Domain/CrimsonPhaseRules.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonRhythm.cs" Link="Domain/CrimsonRhythm.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonScore.cs" Link="Domain/CrimsonScore.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonState.cs" Link="Domain/CrimsonState.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonInvocation.cs" Link="Domain/CrimsonInvocation.cs" />

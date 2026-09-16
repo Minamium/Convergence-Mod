@@ -1,0 +1,74 @@
+name: Finish Scarlet physical repertoire
+on:
+  push:
+    branches: [feat/scarlet-rhythm-phases]
+    paths:
+      - .github/scarlet-complete.py
+      - .github/workflows/scarlet-complete.yml
+permissions:
+  contents: write
+concurrency:
+  group: scarlet-completion-write
+  cancel-in-progress: false
+jobs:
+  integrate:
+    if: github.ref == 'refs/heads/feat/scarlet-rhythm-phases'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: true
+      - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d
+        with:
+          dotnet-version: 8.0.424
+      - run: python3 -m pip install --disable-pip-version-check --requirement tools/requirements-ci.txt
+      - name: Integrate reviewed changes and remove one-shot tooling
+        run: |
+          python3 .github/scarlet-complete.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('Content/Encounters/CrimsonFoundry/CrimsonChorus.cs')
+          text = p.read_text().replace('// No manual Hurt, statLife subtraction, immunity clearing or accessory emulation.', '// Normal defensive hooks remain enabled; no custom HP or immunity writes.')
+          p.write_text(text)
+          PY
+          git rm .github/scarlet-complete.py .github/workflows/scarlet-complete.yml
+      - name: Verify tooling contracts
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 -m unittest discover -s tools/tests 2>&1 | tee "$RUNNER_TEMP/scarlet-tools.txt"
+      - name: Verify catalog policy domain and compiled codecs
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog --with-domain --with-codec 2>&1 | tee "$RUNNER_TEMP/scarlet-checks.txt"
+      - name: Record actual results and commit only the requested feature branch
+        run: |
+          python3 - <<'PY'
+          import os, json, re, hashlib
+          from pathlib import Path
+          p = Path('docs/evidence/2026-09-16-scarlet-techniques.json')
+          record = json.loads(p.read_text())
+          checks = (Path(os.environ['RUNNER_TEMP']) / 'scarlet-checks.txt').read_text()
+          tools = (Path(os.environ['RUNNER_TEMP']) / 'scarlet-tools.txt').read_text()
+          match = re.search(r'Executed (\d+) deterministic domain tests; failures: 0', checks)
+          assert match, 'No successful domain summary'
+          count = re.search(r'Ran (\d+) tests', tools)
+          assert count and '\nOK' in tools, 'No successful tooling summary'
+          assert '334 round-trips' in checks and '54 malformed/truncated' in checks
+          record['verification']['linked_domain'] = f"pass: {match.group(1)} deterministic cases; exact changed linked sources"
+          record['verification']['tooling_static_codec'] = f"pass: {count.group(1)} tooling tests, catalog/repository/YAML, protocol48 inherited334/54 codecs; Scarlet codecs in domain suite"
+          record['verification']['github_run'] = os.environ['GITHUB_SERVER_URL'] + '/' + os.environ['GITHUB_REPOSITORY'] + '/actions/runs/' + os.environ['GITHUB_RUN_ID']
+          record['verification']['checked_checkout'] = os.environ['GITHUB_SHA']
+          record['verification']['note'] = 'Workflow applied reviewed source edits before validation; resulting implementation is committed only after these checks. This is not a native Mod build.'
+          for source in record['source_sha256']:
+              record['source_sha256'][source] = hashlib.sha256(Path(source).read_bytes()).hexdigest()
+          p.write_text(json.dumps(record, indent=2) + '\n')
+          PY
+          git diff --check
+          git add --all
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat: finish Scarlet physical repertoire, native chorus mechanics and owning docs'
+          git push origin HEAD:refs/heads/feat/scarlet-rhythm-phases

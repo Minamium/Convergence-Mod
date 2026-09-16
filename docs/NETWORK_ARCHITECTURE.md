@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-15
+last_reviewed: 2026-09-16
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,15 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v44
+## Current development protocol v46
+
+Scarlet Invocation keeps the `crimson_foundry` route and existing operation IDs. `CrimsonState` adds phase0–3, transition/unlock epochs, retained target slot, phrase start/end/kind, frozen target maximum and four current HP values plus performer-defeated. The final death mask now records final kills only. Bounds enforce nonnegative/limited clocks and HP, legal phase/final combinations, ordered unique1–8-player membership and a retained target. Replacement rejects another Fight, older age/phase/epoch, death-mask rollback or a reopened terminal. Every peer derives vulnerability and standard bar state from the same projection.
+
+`CrimsonHazard` appends phase epoch, phrase serial and accent0–2. The warning interval is bounded40–180ticks rather than fixed60; live intervals and finite ray geometry remain bounded. The authority preannounces complete rhythm phrases, preflights capacity and invalidates old-generation hazards on phase changes. A source death cancels that source. There is no high-frequency client input/beat report or new damage authority. `CrimsonEffigyState` identity layout is unchanged. The current [feature spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns the choreography; [ADR-0026](adr/0026-crimson-score-and-native-projectiles.md#sequential-acts-and-rhythm-phrases--2026-09-16) owns the boundary. Use matching protocol46 peers; this is not latency compensation.
+
+Predecessor45 replaced Crimson's purge epoch with Final epoch and added the independent summon mask/source. Its schema is superseded here, not compatible with46. Doll and Ghost Samurai payloads and gameplay remain unchanged.
+
+## Preceding development protocol v44
 
 Ghost Samurai's FrontalCleaveShockwave retains the v40 actor/aim/hazard layouts, stable IDs and authority ownership. The server now selects a clear staging point above the arena's bottom center; the existing origin/anchor/ground floats determine a speed-capped arrival duration. Charge, blade growth, downswing/contact and ground-front growth derive from the same accepted attack/hazard clocks. Clients never choose terrain or add damage. ShockGeometry keeps the floor fixed while widening/raising the current rectangle for both rendering and the server hit path. Protocol44 prevents old peers from deriving the former path, fire time or constant-size front from unchanged payloads. Target invalidation, event counters, sound deduplication and exact-Fight cleanup are retained; no per-frame scale packets or new native damage exceptions are added. The [attack specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md#正面大斬撃衝撃波--frontalcleaveshockwave) owns tuning.
 
