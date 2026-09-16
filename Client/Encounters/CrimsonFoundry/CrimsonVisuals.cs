@@ -53,8 +53,12 @@ internal sealed class CrimsonVisuals : ModSystem
         int age = (int)boss.VisualAge;
         if (fight != boss.State.Fight) { Reset(); fight = boss.State.Fight; previousAge = age - 1; }
         shake *= .80f;
-        if (boss.State.PurgeTick >= 0 && previousAge < boss.State.PurgeTick && age >= boss.State.PurgeTick && age - boss.State.PurgeTick < 8)
-        { Cue("ShellBreak", .42f, age + 90); shake = 11; }
+        if (boss.State.FinalStart >= 0 && previousAge < boss.State.FinalStart && age >= boss.State.FinalStart && age - boss.State.FinalStart < 8)
+        { Cue("RaidDesignation", .28f, age + 90); shake = 8; }
+        foreach (NPC n in Main.ActiveNPCs)
+            if (n.ModNPC is CrimsonEffigy e && e.State.Fight == fight && previousAge < e.State.Born + 12
+                && age >= e.State.Born + 12 && age - e.State.Born < 18)
+            { Cue("Beams/PortalFire", .30f, age + 55); shake = 6; }
         if (boss.State.MusicStart >= 0 && previousAge < boss.State.MusicStart && age >= boss.State.MusicStart && age - boss.State.MusicStart < 8)
         { Cue("RaidDesignation", .24f, age + 120); shake = 5; }
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && endingAt < 0)
@@ -126,6 +130,13 @@ internal sealed class CrimsonVisuals : ModSystem
                     if (age >= h.End) opacity = 1 - Ease((age - h.End) / 14);
                 }
                 CrimsonEnergy.Add(origin, direction, length, width, age, h.Fire, h.End, opacity, Reduced);
+                if (!live)
+                {
+                    Vector2 normal = new(-direction.Y, direction.X);
+                    Color edge = new Color(255, 108, 115, 0) * (.24f + .32f * Ease((age - h.Born) / 25));
+                    for (int side = -1; side <= 1; side += 2)
+                        Stroke(batch, origin + normal * width * side, origin + direction * length + normal * width * side, edge, 1.25f);
+                }
                 if (!Reduced)
                 {
                     var glow = MiscTexturesRegistry.BloomCircleSmall.Value;
@@ -188,19 +199,20 @@ internal sealed class CrimsonVisuals : ModSystem
             if (tl.Y >= 0 && tl.Y < view.Height) Fill(new(left, top, Math.Max(0, right - left), 2), edge);
             if (br.Y > 0 && br.Y <= view.Height) Fill(new(left, Math.Max(0, bottom - 2), Math.Max(0, right - left), 2), edge);
         }
-        bool intro = state.MusicStart >= 0 && age >= state.MusicStart && age < state.MusicStart + CrimsonRegistration.Score.IntroTicks;
-        bool cinematic = state.Stage == CrimsonStage.Deployment || intro || endingAt >= 0;
+        bool intro = state.MusicStart >= 0 && age < state.MusicStart + CrimsonRegistration.Score.IntroTicks;
+        bool manifest = state.FinalStart >= 0 && age < state.FinalStart + CrimsonInvocation.ManifestTicks;
+        bool cinematic = state.Stage == CrimsonStage.Deployment || intro || manifest || endingAt >= 0;
         if (cinematic)
         {
-            float clock = endingAt >= 0 ? age - endingAt : intro ? age - state.MusicStart : age;
-            float duration = intro ? CrimsonRegistration.Score.IntroTicks : 150;
-            float alpha = Math.Min(Ease(clock / 22), Ease((duration - clock) / 32));
+            float clock = endingAt >= 0 ? age - endingAt : manifest ? age - state.FinalStart : intro ? age - state.MusicStart : age;
+            float alpha = endingAt >= 0 || manifest ? Math.Min(Ease(clock / 22), Ease((150 - clock) / 32))
+                : CrimsonInvocation.OpeningBars(state.Stage, age, state.MusicStart, CrimsonRegistration.Score.IntroTicks);
             Fill(new(0, 0, view.Width, (int)(view.Height * .11f)), Color.Black * alpha);
             Fill(new(0, (int)(view.Height * .89f), view.Width, (int)(view.Height * .12f)), Color.Black * alpha);
             if (intro)
             {
                 float title = Ease((clock - 80) / 30) * (1 - Ease((clock - 365) / 45));
-                Utils.DrawBorderString(batch, "CRIMSON FOUNDRY", new(view.Width * .5f, view.Height * .83f), new Color(248, 206, 194) * title, 1.12f, .5f);
+                Utils.DrawBorderString(batch, "CRIMSON INVOCATION", new(view.Width * .5f, view.Height * .83f), new Color(248, 206, 194) * title, 1.12f, .5f);
             }
             return false; // Frame-local HUD suppression only, no input/settings flags.
         }
@@ -235,11 +247,11 @@ internal sealed class CrimsonVisuals : ModSystem
 [Autoload(Side = ModSide.Client)]
 internal sealed class CrimsonBossVisuals : GlobalNPC
 {
-    public override bool AppliesToEntity(NPC entity, bool lateInstantiation) => entity.ModNPC is CrimsonBoss;
+    public override bool AppliesToEntity(NPC entity, bool lateInstantiation) => entity.ModNPC is CrimsonBoss or CrimsonEffigy;
     public override bool PreDraw(NPC npc, SpriteBatch batch, Vector2 screenPos, Color drawColor)
     {
-        if (npc.ModNPC is not CrimsonBoss boss) return true;
-        return CrimsonRig.Draw(boss, batch, screenPos);
+        return npc.ModNPC switch { CrimsonBoss boss => CrimsonRig.Draw(boss, batch, screenPos),
+            CrimsonEffigy effigy => CrimsonRig.DrawEffigy(effigy, batch, screenPos), _ => true };
     }
 }
 

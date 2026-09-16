@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-16",
+  "feature": "crimson_foundry",
+  "display_name": "Crimson Invocation",
+  "version": "0.3.11",
+  "protocol": 45,
+  "integrated_base": "da4e1eb690e35ba79c036370abfc02a69bad2ffe",
+  "implementation_commit": "f78aa14",
+  "inputs": {
+    "user_feedback": "Replace machine with normal NPC-sized red-haired summoner; only independent apparitions are large; safe corridors, intro fade, summon art and companion.",
+    "new_gameplay_logs": false,
+    "unchanged_environment": "2026-09-15-crimson-stage.json",
+    "music_export_changed": false
+  },
+  "verification": {
+    "native_build": "pass: 0 errors; 4 pre-existing nullable warnings outside Crimson",
+    "domain": "pass: 240 deterministic cases; Crimson includes individual-target epochs/mask, bounded child/state/hazard codecs, 400 field patterns and music/cinematic continuity",
+    "compiled_codec": "pass: 334 inherited Doll round-trips and 54 malformed/truncated cases from the exact integrated protocol45 package; solo enabled",
+    "loader": "pass: all15 selected Crimson native/client type registrations, installed native-Hurt calibration and existing teardown fixture; does NOT execute worker-thread PostSetupContent",
+    "static": "pass: catalog76, repository789 and YAML10; final source diff checked",
+    "offline_visual": "pass: 12 hidden FNA/D3D11 frames using linked production rig/energy code, actual PNGs and existing shader exports; representative frames inspected",
+    "visual_scale": "performer and companion 56px reference; large apparitions 330/370px; no Final scale-up",
+    "assets": "six new original RGBA images with exact attribution; original files preserved; no new copied third-party assets"
+  },
+  "package": {
+    "bytes": 72741077,
+    "sha256": "ff942cee1e0d78bf815a648fc25f4417215776a15f046efbe361056f08ed5675",
+    "assembly_sha256": "ab63fd76b1e8a61e2aeb95ab13d22e3edeea43d8634dff52ca6004799b8dcdb8",
+    "local_build_record": "20260915T151410119034Z",
+    "provenance": "Built during resolved local integration on da4e1eb with recorded dirty inputs; resulting implementation committed as f78aa14. No source changed during packaging. Local record retains per-file hashes; subsequent docs/commit metadata do not imply a different gameplay build."
+  },
+  "owner_checks_not_run": [
+    "Solo and distant multiplayer Ready/start; continuous bars and audible fade",
+    "All three independently damageable targets, exact source cancellation and all-three-only Final",
+    "Corridor travel fairness under normal network latency and late snapshots",
+    "Native damage with installed loadouts; death/victory/re-summon",
+    "Remote companion visibility, owner buff dismissal, mount/flight/landing and sustained beam",
+    "UI107%, zoom, actual sound/loop perception and frame-time profiling"
+  ],
+  "scope": "No GUI launch or playtest claimed; no Workshop publication or GitHub release. Doll mechanics and inherited Ghost Samurai changes preserved.",
+  "hotfix_0312": {
+    "implementation_commit": "a4a9639",
+    "observed": "2026-09-16 00:54:28 JST client.log: actual0.3.11 PostSetupContent on .NET TP Worker fails at CrimsonRig.Load line29, BasicEffect construction/FNA3D_CreateEffect, ThreadStateException; tModLoader disables Convergence.",
+    "cause": "Direct GPU creation in the loader hook; the earlier type checks did not run content setup and the earlier offline rendering loaded on the main thread.",
+    "change": "Asset-managed textures remain in Load; BasicEffect is lazy-created in main-thread Mesh only, guarded against dedicated execution. Unload nulls static state and queues disposal of the captured old effect, never asset-owned textures or a replacement effect.",
+    "protocol": 45,
+    "build": "pass: 0 errors / 4 unchanged nullable warnings;20 locale checks and shader export validation pass; unchanged solo admission enabled",
+    "focused_guards": "pass:2 repository-runnable CrimsonGraphicsLifetime tests for worker-load/draw and captured queued disposal",
+    "offline_fna_lifecycle": "pass: linked production CrimsonRig with prewarmed asset facade, real FNA/D3D11 and GPU device access guarded to main thread; Task.Run Load, first draw, Task.Run Unload, reload/draw before draining disposal, verify old disposed/new alive, repeated unload and dedicated guard. Not a full tModLoader content-loading test.",
+    "gameplay_checks": "not repeated: no geometry, timing, authority, assets or wire layout changed",
+    "local_build_record": "20260915T160140940939Z",
+    "source_changed_during_build": false,
+    "package_bytes": 72741131,
+    "package_sha256": "aeebb852364ec20ba71be0471fc0404ce3fa12b5fb1c3977cd729b1198671f64",
+    "owner_reload": "not_run: re-enable automatically disabled Convergence, load0.3.12, confirm content loading and then companion/apparition rendering"
+  }
+}

@@ -2,23 +2,36 @@ Mods: {
   Convergence: {
     Items: {
       CrimsonConductor: {
-        DisplayName: 紅蓮の指揮装置
+        DisplayName: 紅蓮の魔導書
         Tooltip: '''
-          Foundation Coreの台に使用してCrimson Foundryを展開。接続中の全員がReadyすると開始
-          領域内は無限飛行。音楽に合わせたビームとエネルギー弾を回避せよ
+          Foundation Coreの台に使用してCrimson Invocationを準備。接続中の全員がReadyすると開始
+          3体の異形を倒し、紅の召喚師と対峙せよ。領域内は無限飛行
           右クリックで自分が始めた準備を中止。消耗しない
           試作版：1～8人。開始後の参加者は次回起動まで観戦
           '''
       }
+      CrimsonPact: {
+        DisplayName: 紅の盟約
+        Tooltip: '''
+          等身大の紅の召喚師が同行する
+          地上では歩き、飛行時は浮遊して追従。赤い球体から持続ビームで戦う
+          ミニオン枠を10使用。Raidの参加人数には含まれない
+          '''
+      }
     }
-    NPCs: { CrimsonBoss: { DisplayName: "Ferrum — 紅の機工士" } }
-    Projectiles: { CrimsonAttack: { DisplayName: "紅蓮の兵装" } }
+    NPCs: { CrimsonBoss: { DisplayName: "Vespera — 紅の召喚師" } CrimsonEffigy: { DisplayName: "紅の異形" } }
+    Projectiles: {
+      CrimsonAttack: { DisplayName: "紅の召喚" }
+      CrimsonCompanion: { DisplayName: "紅の同行者" }
+      CrimsonCompanionRay: { DisplayName: "紅の盟約" }
+    }
+    Buffs.CrimsonPactBuff: { DisplayName: "紅の盟約" Description: "紅の召喚師が同行している" }
     CrimsonFoundry: { Rejected: "起動できません。指揮装置を持ってFoundation Coreの台の近くで使用し、他の戦闘を終了して8人以下で開始してください。" }
     Configs: {
       CrimsonVisualConfig: {
-        DisplayName: Crimson Foundryの演出
-        ReducedEffects: { Label: "装飾エフェクトを減らす" Tooltip: "予兆と攻撃範囲は維持し、噴射・残像・画面の揺れを抑えます。" }
-        ScreenShake: { Label: "画面の揺れ" Tooltip: "発射と装甲パージ時の短い揺れ。" }
+        DisplayName: Crimson Invocationの演出
+        ReducedEffects: { Label: "装飾エフェクトを減らす" Tooltip: "予兆と攻撃範囲は維持し、粒子と画面の揺れを抑えます。" }
+        ScreenShake: { Label: "画面の揺れ" Tooltip: "発射と召喚時の短い揺れ。" }
       }
     }
   }

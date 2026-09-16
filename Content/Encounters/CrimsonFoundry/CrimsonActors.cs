@@ -16,13 +16,13 @@ public sealed class CrimsonBoss : ModNPC
     private ulong receivedAt;
     internal float VisualAge => State.Age + (Main.netMode == NetmodeID.MultiplayerClient ? (float)Math.Min(30UL, Main.GameUpdateCount - receivedAt) : 0);
     internal bool Fresh => Main.netMode != NetmodeID.MultiplayerClient || Main.GameUpdateCount - receivedAt <= 60;
-    public override string Texture => "Convergence/Assets/Textures/CrimsonFoundry/FoundryEngine";
+    public override string Texture => "Convergence/Assets/Textures/CrimsonFoundry/ScarletConjurer";
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
     {
-        NPC.width = 200; NPC.height = 330; NPC.lifeMax = 12000000; NPC.defense = 65;
+        NPC.width = 28; NPC.height = 56; NPC.lifeMax = 3000000; NPC.defense = 65;
         NPC.damage = 0; NPC.knockBackResist = 0; NPC.aiStyle = -1;
-        NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.boss = NPC.netAlways = true;
+        NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.netAlways = true;
         NPC.dontTakeDamage = true;
         if (!Main.dedServ) { NPC.HitSound = SoundID.NPCHit4; Music = 0; }
     }
@@ -41,6 +41,7 @@ public sealed class CrimsonBoss : ModNPC
         // Project it on EVERY peer: clients otherwise retain SetDefaults(true)
         // forever and never submit their legitimate native item/projectile hits.
         NPC.dontTakeDamage = !Fresh || !State.Vulnerable(VisualAge);
+        NPC.boss = !NPC.dontTakeDamage;
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {
             NPC.active = false;
@@ -49,8 +50,8 @@ public sealed class CrimsonBoss : ModNPC
     }
     public override bool CheckDead()
     {
-        if (State.PurgeTick < 0) NPC.life = NPC.lifeMax / 2;
-        else { NPC.life = 1; Runtime?.Killed(this); }
+        NPC.life = 1;
+        if (State.Vulnerable(VisualAge)) Runtime?.Killed(this);
         NPC.dontTakeDamage = true;
         NPC.netUpdate = Main.netMode != NetmodeID.MultiplayerClient;
         return false; // The accepted ending owns the actor until its short exit.
@@ -83,7 +84,8 @@ public sealed class CrimsonAttack : ModProjectile
         boss = Hazard.Boss >= 0 && Hazard.Boss < Main.maxNPCs && Main.npc[Hazard.Boss].active
             ? Main.npc[Hazard.Boss].ModNPC as CrimsonBoss : null;
         return boss is not null && Hazard.Fight != Guid.Empty && boss.State.Fight == Hazard.Fight
-            && boss.State.Stage == CrimsonStage.Performance && boss.Fresh;
+            && boss.State.Stage == CrimsonStage.Performance && boss.Fresh
+            && (Hazard.Source == 3 ? boss.State.Vulnerable(boss.VisualAge) : boss.State.SummonVulnerable(Hazard.Source));
     }
     internal float Age(CrimsonBoss boss) => boss.VisualAge + (Main.netMode == NetmodeID.MultiplayerClient ? 0 : 1);
     public override bool? CanDamage() => TryBoss(out var boss) && Hazard.Live(Age(boss!)) ? null : false;
