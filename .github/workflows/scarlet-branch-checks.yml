@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: scarlet-branch-verification
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -16,13 +19,17 @@ jobs:
       - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d
         with:
           dotnet-version: 8.0.424
-      - name: Offline SDK for isolated source verification
-        run: tar -czf "$RUNNER_TEMP/scarlet-dotnet.tar.gz" -C "$DOTNET_ROOT" .
+      - name: Offline pinned SDK only
+        shell: bash
+        run: |
+          cd "$DOTNET_ROOT"
+          tar -I 'gzip -1' -cf "$RUNNER_TEMP/scarlet-dotnet.tar.gz" dotnet sdk/8.0.424 host/fxr/8.* packs/Microsoft.NETCore.App.Ref/8.* shared/Microsoft.NETCore.App/8.*
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: scarlet-dotnet
           path: ${{ runner.temp }}/scarlet-dotnet.tar.gz
           retention-days: 1
+          compression-level: 0
       - run: python3 -m pip install --disable-pip-version-check --requirement tools/requirements-ci.txt
       - run: python3 -m unittest discover -s tools/tests
       - run: python3 .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --with-domain --with-codec
