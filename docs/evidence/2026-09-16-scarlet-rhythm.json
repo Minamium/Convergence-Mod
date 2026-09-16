@@ -4,6 +4,7 @@
   "display_name": "Scarlet Invocation",
   "branch": "feat/scarlet-rhythm-phases",
   "base_commit": "9f46892cf4d4fb131faca625cc2697fa20937d52",
+  "implementation_commit": "9296811393f7027b28b79cc5d387ec12c0069841",
   "source_version": "0.3.13",
   "protocol": 46,
   "changes": [
@@ -15,13 +16,20 @@
     "Scarlet display names with stable IDs"
   ],
   "verification": {
-    "domain": "246 cases passed in isolated .NET8.0.424; build0 errors/0 warnings",
-    "tooling": "45 tests passed, including four Scarlet source-wiring guards; source guards are not an engine execution test",
-    "static": "catalog/repository/YAML wrapper passed; checked again after final documentation edit",
+    "domain": "246 cases passed locally and on GitHub Actions with .NET8.0.424; local linked-domain build0 errors/0 warnings",
+    "tooling": "45 tests passed locally and on GitHub Actions, including four Scarlet source-wiring guards; source guards are not an engine execution test",
+    "static": "GitHub Actions passed catalog76, repository796 and YAML11; catalog regenerated and committed with the implementation",
+    "compiled_codec": "protocol46 linked-source harness:334 inherited Doll round-trips and54 malformed/truncated rejections; new Scarlet actor/hazard and phase boundaries are exercised by domain tests, not claimed as a full Mod package test",
     "native_build": "not_run: pinned tModLoader/dependency installation not present in this environment",
     "runtime": "not_run: no GUI, multiplayer or listening session performed",
-    "syntax": "Roslyn C#12 parsing of all repository C# sources passed; does not bind native APIs",
-    "github_ci": "pending feature-branch commit; the baseline-only workflow result is not implementation evidence"
+    "syntax": "Roslyn C#12 parsing of all322 repository C# sources passed; does not bind native APIs",
+    "github_ci": {
+      "status": "passed",
+      "run_url": "https://github.com/Minamium/Convergence-Mod/actions/runs/35049063077",
+      "job_id": 104645263320,
+      "tested_inputs": "29 hash-verified implementation/document/test edits plus generated catalog; tested worktree committed as9296811393f7027b28b79cc5d387ec12c0069841 after all checks passed",
+      "transport_cleanup": "Temporary transfer payloads and write-enabled application workflow removed before verification and commit; final branch workflow is read-only"
+    }
   },
   "limits": [
     "Beat-map timing is not certified drum transcription or perceived synchronization.",
