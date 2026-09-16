@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -15,7 +16,9 @@ internal sealed class SpectralSpriteCutouts : ModSystem
     internal static Texture2D Get(string path)
     {
         if (textures.TryGetValue(path, out var result)) return result;
-        var input = ModContent.Request<Texture2D>(path).Value;
+        // Value of a pending AsyncLoad is the transparent default texture. Never
+        // process/cache that placeholder: this first-use path runs on draw.
+        var input = ModContent.Request<Texture2D>(path, AssetRequestMode.ImmediateLoad).Value;
         var pixels = new Color[input.Width * input.Height]; input.GetData(pixels);
         for (int i = 0; i < pixels.Length; i++)
         {

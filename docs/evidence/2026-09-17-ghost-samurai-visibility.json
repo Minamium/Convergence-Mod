@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-17",
+  "version": "0.3.14",
+  "protocol": 46,
+  "base_main": "9188226110fcd11e26f731662856f90fdabaa936",
+  "observation": "Owner reports invisible Ghost Samurai body after0.3.13 violet-art integration; no new screenshot was supplied for this report.",
+  "cause": "SpectralSpriteCutouts copied ModContent.Request<Texture2D>(path).Value using default AsyncLoad, then permanently cached its pixels. Installed ReLogic Asset<T>.Value returns DefaultValue while pending. The unrequested violet atlas can therefore become a cached transparent placeholder even after the actual asset loads. PreDraw correctly invokes the custom body renderer before suppressing native drawing; it was drawing the cached empty texture.",
+  "fix": "Use ImmediateLoad on the first drawing-thread cache miss before dimensions/pixel readback. Keep existing key removal, owned cache and queued captured-instance disposal. BodyOpacity retains55% before synchronization and reaches100% at24ticks. No new graphics initialization in worker loading or on a server.",
+  "audit": {
+    "texture": "Actual custom path Convergence/Assets/Textures/GhostSamurai/VioletActions exists; unchanged1254x1254 PNG has visible pixels in each of12 cells. ModNPC.Texture is the intentional native DungeonGuardian fallback; custom GlobalNPC.PreDraw draws the atlas.",
+    "hooks": "GlobalNPC.PreDraw invokes DrawBoss/Draw before returning false. Installed-version pinned NPCLoader calls every GlobalNPC hook before ModNPC.PreDraw. No Boss PostDraw/DrawEffects override hides or clears the body.",
+    "npc_flags": "No Ghost Samurai attack writes NPC.alpha, Opacity, hide or scale. Custom body color/scale come from presentation; no alpha reset or gameplay flag changes needed.",
+    "frames": "Explicit4x3 source cells, bounded index0..11; source-cell origin and positive390/cellHeight draw scale; NPC.frame does not select this atlas.",
+    "states": "All attack and beat combinations select a valid cell; transition uses11. Body is never gated by target ownership, ProjectionFresh, attack damage eligibility or actor Runtime presence.",
+    "multiplayer": "Shared draw path uses received Age/AttackTimer/phase/beat/facing plus bounded visual extrapolation; no owner-only body branch. Opacity is visible atAge0 before first/late snapshot. Cache fix applies independently to each client's cold load. Real network sessions were not launched."
+  },
+  "api_evidence": {
+    "installed_versions": "Unchanged tModLoader2026.07.3.0/Terraria1.4.4.9; installed ReLogic get_Value IL inspected read-only, raw output kept local",
+    "accessed": "2026-09-17",
+    "request_contract": "https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModContent.cs#L103",
+    "draw_dispatch": "https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/NPCLoader.cs#L876",
+    "reuse": "API observations only; no external implementation or asset copied"
+  },
+  "checks": {
+    "regression": "pass: tools/check-spectral-cache.ps1 with original0.3.13 cache fails on cached pending placeholder; revised production source passes",
+    "cache_fixture": "pass:3 independent cold loads,12 pose cores,key removal,source ownership,one-time processing,repeated unload and new cache before old queued disposal. CPU shim mirrors pending Asset.Value behavior; not FNA/tModLoader rendering.",
+    "actual_atlas": "pass:12 retained-pixel counts54983,58068,59378,54251,56673,56793,60994,62835,60561,76586,47021,58801 after existing key rule; no texture edited",
+    "domain": "pass:252 deterministic cases including every attack/beat pose,nonempty frames,finite positive scale and55%-100% opacity across initial/late ages",
+    "build": "pass:native0.3.14 compilation,0 errors /4 unchanged CS8632 warnings;22 locale files,shader exports and packaged solo admission passed",
+    "package_check": "pass:exact0.3.14 package contains VioletActions.rawimg and VioletDissolve.rawimg; installed tModLoader ValidateType accepts both Ghost Samurai globals and saved summon identity is retained",
+    "static": "pass:catalog78,repository816,YAML10 and final diff whitespace checks"
+  },
+  "package": {
+    "local_record": "20260916T151947479989Z",
+    "source_sha256": "622796a74af1b25def967a039c2ff4274ef9fc8306ed23ef061242f167c2ba2c",
+    "source_changed_during_build": false,
+    "bytes": 80756817,
+    "sha256": "60a63cac108352cc84676fce37295cf20344c6e61ce95e1920dea561bb45c974",
+    "provenance": "Built from the feature's recorded dirty changes on base_main; no source changed during compilation. The subsequent evidence-only completion does not require a repeat build."
+  },
+  "not_run": ["Actual Reload Mods and cold first summon", "Idle/movement/all attacks/two phase transitions and re-summon visual acceptance", "Second matching client and late join with real network timing", "In-game frame-time/readability and interactions with other render hooks"],
+  "scope": "Presentation and verification only. No Boss AI,attack logic,damage geometry,wire layout,weapon performance or asset changes. No game/server launch,main merge,normal-profile install or publication."
+}

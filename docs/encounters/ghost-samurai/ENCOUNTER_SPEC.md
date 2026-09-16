@@ -168,9 +168,9 @@ API確認（2026-09-14、固定source666f69962d3bdffde54fc14025f02634965b4e7c）
 
 ## 表示と素材
 
-`Client/Encounters/GhostSamurai/GhostSamuraiVisuals.cs` が本体・二刀・斬撃帯・鬼火を描画し、音は専用 GhostSamuraiAudio がまとめる。本体はユーザーの最初の図を基に生成した、青白い骸骨の鬼面、角、露出した肋骨、紺の武者鎧と霊体の尾を持つ `Assets/Textures/GhostSamurai/GhostSamuraiAtlas.png`。本体と刀を握る腕を分離し、左右の腕を肩から回す。刀と手は同じ画像内にあり、構え・振り抜き・余韻は従来の攻撃時計に従う。図の文字、第三者素材、新しい音声は取り込まない。Textureのフォールバックと召喚アイコン・効果音はゲーム内の既存アセット参照を維持する。
+`Client/Encounters/GhostSamurai/GhostSamuraiVisuals.cs` が本体・二刀・斬撃帯・鬼火を描画し、音は専用 GhostSamuraiAudio がまとめる。9月16日の参考画像に従い、本体は紫の霊炎、髑髏兜、鎧、札付きの輪を持つ `Assets/Textures/GhostSamurai/VioletActions.png` の12ポーズを使用する。`GhostSamuraiSpriteArt` と `SamuraiSpriteFrames` が構え・振り抜き・余韻を既存の攻撃時計へ合わせる。初期同期前を含め、生存中の本体は55%以上の不透明度を保ち、24tickで通常の明度へ移行する。Idle・移動・攻撃・Phase移行で本体を隠す分岐は設けない。撃破後のみ別の `VioletDissolve.png` で消滅を描く。旧青白い分割Atlasは保持するが、現行本体描画では使わない。図の文字、第三者素材、新しい音声は取り込まない。
 
-素材管理はクライアント専用の `GhostSamuraiArt`。画像生成ツールが要求した透過PNGを返さなかったため、最終素材はマゼンタ背景で生成し、初回描画時だけ背景色を透過する。画像全体や元の共有アセットを変更せず、専用Textureを作成してキャッシュし、Unload時に破棄する。Dedicated Serverは画像要求・加工・描画を行わない。元画像の出自とSHA256は [素材台帳](../../../Assets/ATTRIBUTION.md) に記録する。
+素材管理はクライアント専用の `SpectralSpriteCutouts`。紫Atlasの緑背景は初回描画時だけ透過する。`ImmediateLoad` で実画像の読み込みを完了してから画素を読む。非同期読み込み中の仮画像を加工・キャッシュしない。共有アセットを変更せず専用Textureを作成し、Unload時は旧インスタンスを捕捉して描画スレッドで破棄する。Dedicated Serverは画像要求・加工・描画を行わない。元画像の出自とSHA256は [素材台帳](../../../Assets/ATTRIBUTION.md) に記録する。
 
 `GhostSamuraiVisuals` は全NPCで共有するGlobalNPCなので、画像キャッシュの参照はstaticとする。NPCごとの状態をこのクラスへ追加しない。`InstancePerEntity = false` のまま非staticフィールドを追加すると、tModLoaderの `ValidateType` がMod全体の読み込みを拒否する。GhostSamuraiHazardVisuals は個別の音時計を持たず、Projectileのスナップショットを参照する共有GlobalProjectileとする。
 

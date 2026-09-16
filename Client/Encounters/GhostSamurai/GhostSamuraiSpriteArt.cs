@@ -27,8 +27,7 @@ internal static class GhostSamuraiSpriteArt
         float scale = 390f / c.Height;
         bool flip = boss.NPC.direction < 0;
         if (flip) pivot.X = c.Width - pivot.X;
-        float appear = MathHelper.SmoothStep(0, 1, Math.Clamp(boss.VisualAge / 24, 0, 1));
-        Color tint = Color.White * appear;
+        Color tint = Color.White * SamuraiSpriteFrames.BodyOpacity(boss.VisualAge);
         if (boss.NPC.justHit) tint = Color.Lerp(tint, new Color(241, 222, 255), .35f);
         // Modest follow-through keeps fixed key poses connected without changing
         // the telegraph clocks or moving the center used by the damage rules.
