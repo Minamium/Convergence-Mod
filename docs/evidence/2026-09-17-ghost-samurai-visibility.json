@@ -38,6 +38,28 @@
     "sha256": "60a63cac108352cc84676fce37295cf20344c6e61ce95e1920dea561bb45c974",
     "provenance": "Built from the feature's recorded dirty changes on base_main; no source changed during compilation. The subsequent evidence-only completion does not require a repeat build."
   },
-  "not_run": ["Actual Reload Mods and cold first summon", "Idle/movement/all attacks/two phase transitions and re-summon visual acceptance", "Second matching client and late join with real network timing", "In-game frame-time/readability and interactions with other render hooks"],
-  "scope": "Presentation and verification only. No Boss AI,attack logic,damage geometry,wire layout,weapon performance or asset changes. No game/server launch,main merge,normal-profile install or publication."
+  "not_run": [
+    "Actual Reload Mods and cold first summon",
+    "Idle/movement/all attacks/two phase transitions and re-summon visual acceptance",
+    "Second matching client and late join with real network timing",
+    "In-game frame-time/readability and interactions with other render hooks"
+  ],
+  "scope": "Presentation and verification only. No Boss AI,attack logic,damage geometry,wire layout,weapon performance or asset changes. Initial feature scope excluded installation; authorized integration is recorded below. No game/server launch or publication.",
+  "approved_integration": {
+    "date": "2026-09-17",
+    "authorization": "Administrator explicitly approved PR #39 main integration and normal playtest installation in the task.",
+    "pr": 39,
+    "main_commit": "39e50377c4ad545aaae8e20208ea71eac6fde844",
+    "version": "0.3.14",
+    "protocol": 46,
+    "build": "pass:native integrated main build,0 errors /4 unchanged warnings,22 locales,shader exports and packaged solo admission",
+    "local_record": "20260916T152539128306Z",
+    "source_changed_during_build": false,
+    "source_sha256": "1da9210d6dec723a59fbf3d2a5472e90b91eb2df52db792d3961b4ed5bf37458",
+    "package_bytes": 80756824,
+    "package_sha256": "f7adf1c3f3d10221933dee4dcb25078750a138f166e545c4186b8ae31eeda3e5",
+    "installed_check": "pass:actual0.3.14 package GhostSamuraiVisuals/GhostSamuraiHazardVisuals native type validation and stable summon identity",
+    "local_preservation": "Three existing English localization formatting edits and untracked workstation evidence retained byte-for-byte; enabled Mods and ModSources junction unchanged; previous package backed up.",
+    "remaining": "User Reload Mods, cold initial summon/all states/re-summon and real second-client/late-join visibility checks. No gameplay or GUI was launched."
+  }
 }
