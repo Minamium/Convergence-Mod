@@ -38,5 +38,22 @@
     "Death, weapon switch, world exit, reconnect, delayed packets and multiple wielders on matching peers",
     "Boss pose/blade/telegraph alignment, defeat dissolve, fire readability, sound, zoom/UI scale and frame-time profiling"
   ],
-  "scope": "No game or gameplay server launched; no normal-profile installation, main merge, Workshop publication or GitHub release."
+  "scope": "Initial feature checks did not merge/install. The separately authorized integration is recorded below. No game or gameplay server launched; no Workshop publication or GitHub release.",
+  "approved_integration": {
+    "date": "2026-09-16",
+    "authorization": "Administrator explicitly approved PR #37 main integration and normal playtest installation in the task.",
+    "pr": 37,
+    "main_commit": "b38fec3801e57e3d17948298821aaee2fcf29290",
+    "version": "0.3.13",
+    "protocol": 46,
+    "build": "pass: native main build, zero errors / four unchanged warnings,22 locales, shader exports and packaged solo admission",
+    "local_record": "20260916T143451630274Z",
+    "source_sha256": "00caccf9d5f148fcb0656dff271d7ea69a68cf83bfd43217ccba40643bdd829b",
+    "source_changed_during_build": false,
+    "package_bytes": 80756786,
+    "package_sha256": "6f46980cc71a667f13c56a538afb855228153d412f77bc5dfabb21a9b4502566",
+    "installed_checks": "pass: exact installed package Oboro types, empty cleanup, root regen fixture, three body codecs and all75 truncations; Ghost Samurai summon identity and exact-fight repeated teardown; inherited native type validation",
+    "preserved_local_state": "Existing en-US whitespace-only edit and untracked workstation evidence retained byte-for-byte. ModSources junction unchanged. Previous package backed up; enabled Mods list unchanged and Convergence remains enabled.",
+    "remaining": "User Reload Mods and affected SP/MP playtests; compiling and inspecting the package did not launch the game."
+  }
 }
