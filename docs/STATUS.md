@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-17
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Development source: **0.3.13 / protocol46**. Adds Ghost Samurai's guaranteed Oboro weapon drop and the owner's violet boss/weapon art direction. Oboro follows the original three-cut True Melee, Zanshin, wound detonation and Wraith Fire brief; the September16 boards change appearance only. Ghost Samurai's existing attack timings and damage geometry are preserved. Integrated main0.3.12 retains Crimson's worker-thread GPU hotfix, small conjurer, three independent apparitions, companion and music, along with Doll0.3.7. Use matching0.3.13/protocol46 peers. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md); no new release is implied.
+Development source: **0.3.14 / protocol46**. Repairs the violet Ghost Samurai body's cold texture load: the cutout cache waits for real pixels instead of storing a transparent pending-asset placeholder, and body materialization retains a visible minimum opacity before initial synchronization. Boss AI, hit geometry, attack clocks, wire layout, Oboro performance and accepted assets are unchanged from0.3.13. Crimson's GPU hotfix and integrated Doll/Crimson work remain intact. Use matching0.3.14/protocol46 peers when checking visibility. The separately published baseline remains [0.3.1 / protocol37](releases/0.3.1.md); no new release is implied.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Oboro is a guaranteed single ground drop; further rewards and balance remain provisional. Cleanup and target ownership have automated coverage; actual multiplayer/re-entry and the new weapon/art need owner playtesting.
@@ -33,6 +33,8 @@ Development source: **0.3.13 / protocol46**. Adds Ghost Samurai's guaranteed Obo
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **Ghost Samurai invisible body:** [visibility evidence](evidence/2026-09-17-ghost-samurai-visibility.json) distinguishes the owner's0.3.13 observation from the pending-asset reproduction and0.3.14 fix. A linked-production CPU cache fixture reproduces the old failure and passes after the fix; all twelve unchanged atlas cells retain visible pixels. The body uses valid frames/scales and nonzero opacity for idle, movement, attacks, phase transitions and first/late snapshots. Actual tModLoader drawing and multiple-client playtesting remain user-owned / not_run; the fixture is not a network session.0.3.14 is a feature build awaiting integration.
 
 - **Oboro and violet Ghost Samurai:** [evidence](evidence/2026-09-16-oboro-violet.json) records the isolated0.3.13/protocol46 native build, exact-package loader/codec/regen checks, domain verification and offline light/dark visual inspection. The administrator approved PR #37; integrated main was built into the normal playtest profile and its installed weapon/summon registration, codec, regen and cleanup checks passed. Server/SP owns hits, marks, buff benefits and detonation; client state and visual events are bounded. Runtime-generated cutout textures are created on draw and disposed through the main-thread queue. Equipped Earth comparison, actual drop/save/reload, combat, latency/rejoin and in-game visual checks remain user-owned / not_run.
 
@@ -53,7 +55,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-0.3.13 is installed and Convergence remains enabled. Reload Mods; no repeat Build + Reload is required. Confirm Ghost Samurai's violet poses, halo, clear telegraphs and dissolve, then defeat it for Oboro. Check the down/up/heavy three-cut loop, five-second right-click Zanshin, five-wound limit per enemy, manual/expiry detonation and ten-second Wraith Fire. Compare equipped output/range against Earth, and repeat weapon hit/death/disconnect checks with matching peers. Ghost Samurai's inherited bottom-center arrival, overhead blade/downstroke, growing fronts, target loss and cleanup still need its separate owner check; this task does not claim those playtests passed.
+The normal profile currently has0.3.13; after approved0.3.14 integration/installation, Reload Mods without another Build + Reload. First summon with a cold texture cache and check the body during idle/movement, every attack, both phase transitions and after re-summon; repeat on a second matching client and a late join. Verify the violet body remains visible while ghost transparency and danger markers remain readable. Oboro drop/three-cut/Zanshin/Wraith Fire, equipped Earth comparison and inherited horizontal-cleave arrival/terrain checks remain separate owner checks, not certified by this visual fix.
 
 For Crimson, use Crimson Grimoire on Foundation Core → Ready → defeat three independent apparitions → confirm the performer becomes damageable without growing → victory/wipe/re-summon. Try Scarlet Covenant with ten minion slots, including remote visibility and flying/landing. Earlier Doll companion/final-check/audio checks remain outstanding. Workshop/GitHub releases remain separate from ordinary main integration. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations.
 

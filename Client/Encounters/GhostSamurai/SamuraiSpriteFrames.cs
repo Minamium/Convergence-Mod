@@ -7,6 +7,13 @@ namespace Convergence.Client.Encounters.GhostSamurai;
 internal static class SamuraiSpriteFrames
 {
     internal const int Columns = 4, Rows = 3, Count = 12;
+    internal static float BodyOpacity(float age)
+    {
+        // Fresh/late clients can draw before their first actor snapshot. Keep a
+        // visible ghost silhouette even then; attack/phase never gates the body.
+        float t = float.IsFinite(age) ? Math.Clamp(age / 24f, 0, 1) : 0;
+        return .55f + .45f * t * t * (3 - 2 * t);
+    }
     internal static int Idle(float age) => (int)(age / 10) % 3;
     internal static int Select(SamuraiAttack attack, SamuraiBeat beat, float timer, float age, float pose)
     {

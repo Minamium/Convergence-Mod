@@ -792,7 +792,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 0fc75574b41eae0ec8989a7ede62fdb60669e43c1b43f69fc6d8ff8ef1faee7c
+  content_sha256: fe4bf57e0e18680d9488a16459347a00377cc12d73cc6c858d40fbdbb43130be
   document_type: spec
   status: provisional
   owners:
@@ -868,7 +868,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: ee4ae054c4310c95d1260bd18792399c675b5e088d36113f9595ed4ecf73cd76
+  content_sha256: 0bcb2a18d9d86eb0a0f4b512caa963b6a1378b28c356eeba1ce36a18d313ac07
   document_type: evidence
   status: historical
   owners:
@@ -1263,12 +1263,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 4371e1cec558c0e05912fe4bae3f372aa763aadcb750a1d82d18e66deea0f248
+  content_sha256: c79a017cfad23a0d709fd38f28e0f1cc837dbdeb469e8a208b39f83a87692b02
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-16'
+  last_reviewed: '2026-09-17'
   source_of_truth_for:
   - project.implementation_status
   aliases:
