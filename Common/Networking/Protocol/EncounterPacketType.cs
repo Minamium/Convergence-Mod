@@ -9,6 +9,7 @@ internal enum EncounterPacketType : byte
     RequestPrototypeDown = 5,
     RequestReviveNearest = 6,
     RequestRaidHurtResult = 7,
+    RequestWeaponUse = 8,
 
     Snapshot = 64,
     StateChanged = 65,
@@ -16,4 +17,6 @@ internal enum EncounterPacketType : byte
     ValidationResult = 67,
     EncounterEnded = 68,
     RaidHit = 69,
+    WeaponState = 70,
+    WeaponBurst = 71,
 }

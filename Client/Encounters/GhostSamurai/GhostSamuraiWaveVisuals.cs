@@ -36,7 +36,7 @@ internal static class GhostSamuraiWaveVisuals
         }
         // The rectangular outer outline is the real OBB, not a misleading curved
         // hitbox. Swept blade strands inside it make the forward direction clear.
-        Color blade = new(179, 242, 255);
+        Color blade = new(215, 175, 255);
         Vector2 rear = center - d * h.Length / 2, front = center + d * h.Length / 2;
         GhostSamuraiVisuals.Stroke(batch, rear, front, h.Radius * 2, ink * .65f);
         GhostSamuraiVisuals.Stroke(batch, rear, front, h.Radius * 2 - 4, blade * .18f);

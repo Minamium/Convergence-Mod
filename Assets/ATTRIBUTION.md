@@ -2977,3 +2977,63 @@ Creator: Codex under the repository owner's direction; original Convergence DSP 
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollSummon.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollThread.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`.
+
+### Oboro and violet Ghost Samurai — 2026-09-16
+
+The September16 boards replace the earlier cyan appearance only. The old Boss atlas and earlier local candidates are retained. Full local generation requests and references remain in the ignored generation record; these are project-directed images, not extracted Calamity/Terraria artwork.
+
+- Runtime file: `Assets/Textures/Items/Oboro/Blade.png`
+- Asset ID: oboro-violet-blade
+- Asset type: single weapon sprite
+- Creator: OpenAI built-in image generation directed for Minamium; dissolve sheet supplied by the owner
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: Generated from the owner September16 Oboro board: indigo curved blade, gold guard, paper talismans, violet fire.
+- Tool/model/version: built-in image generation; underlying model and seed not reported; source-sheet generator version not provided
+- Human modifications: RGBA transparent original; runtime grip (254,1059), tip-axis angle -0.78 rad, reference length1230; icon/world/held uses explicit scale.
+- License and redistribution terms: owner-requested project use and project-directed generated derivative under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin
+- Reviewer and review date: Codex,2026-09-16; alpha/key removal and dark/light preview checked; game acceptance remains user-owned
+- SHA256: `21d61523f86a996c9e413fc4cd90431243df694ce7fc7318a717a398be96bf5a`
+
+- Runtime file: `Assets/Textures/Items/Oboro/Spirit.png`
+- Asset ID: oboro-violet-spirit
+- Asset type: ghost-fire VFX sprite
+- Creator: OpenAI built-in image generation directed for Minamium; dissolve sheet supplied by the owner
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: Generated from the floating orb/flame examples in the owner September16 Oboro board.
+- Tool/model/version: built-in image generation; underlying model and seed not reported; source-sheet generator version not provided
+- Human modifications: Opaque green-key original; SpectralSpriteCutouts removes green once on the render thread. White/lavender core retained.
+- License and redistribution terms: owner-requested project use and project-directed generated derivative under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin
+- Reviewer and review date: Codex,2026-09-16; alpha/key removal and dark/light preview checked; game acceptance remains user-owned
+- SHA256: `9a499a0d179ac0e6a6a9c2f4d3b92d4b4b3b473bcd641386af5643920707ac2a`
+
+- Runtime file: `Assets/Textures/GhostSamurai/VioletActions.png`
+- Asset ID: ghost-samurai-violet-actions
+- Asset type: twelve-pose Boss atlas
+- Creator: OpenAI built-in image generation directed for Minamium; dissolve sheet supplied by the owner
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: Generated from the owner September16 idle, dash, paired cuts, heavy cut and floating-blade boards.
+- Tool/model/version: built-in image generation; underlying model and seed not reported; source-sheet generator version not provided
+- Human modifications: Opaque green-key original,4 columns x3 rows; runtime key extraction and explicit bounded cells. No per-frame pixel readback.
+- License and redistribution terms: owner-requested project use and project-directed generated derivative under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin
+- Reviewer and review date: Codex,2026-09-16; alpha/key removal and dark/light preview checked; game acceptance remains user-owned
+- SHA256: `4f07828fc7ec374aab3fbed64f34e44a9071a56cdd0b1e0e87a6a42fbcacf75d`
+
+- Runtime file: `Assets/Textures/GhostSamurai/VioletDissolve.png`
+- Asset ID: ghost-samurai-violet-dissolve
+- Asset type: ten-frame Boss dissolve atlas
+- Creator: OpenAI built-in image generation directed for Minamium; dissolve sheet supplied by the owner
+- Creation/acquisition date: 2026-09-16
+- Source type: generated
+- Source work and URL: Owner-supplied September16 18_08_03 generated reference image, supplied for this implementation.
+- Tool/model/version: built-in image generation; underlying model and seed not reported; source-sheet generator version not provided
+- Human modifications: Copied unchanged;5 columns x2 rows; runtime clips cells and suppresses alpha below8; no gameplay death delay.
+- License and redistribution terms: owner-requested project use and project-directed generated derivative under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin
+- Reviewer and review date: Codex,2026-09-16; alpha/key removal and dark/light preview checked; game acceptance remains user-owned
+- SHA256: `f90af5b4ad893127ea5926f7604d66c681a53b5c57220ea60a92bd29a47aee72`

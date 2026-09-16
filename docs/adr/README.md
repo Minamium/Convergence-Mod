@@ -53,3 +53,5 @@ Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark th
 | [0024](0024-native-raid-hurt-and-downed.md) | Accepted for development; partially supersedes0002/0005/0009 for Doll HP calculation/reporting | Native receiving-owner Hurt with health floor; authority-owned hit intents, Down/revival and terminal settlement; protocol39 |
 | [0025](0025-public-solo-admission.md) | Accepted; replaces0020's build/release admission gate | Multiplayer recommended, solo always admitted; actual package checks for GUI/native/public parity |
 | [0026](0026-crimson-score-and-native-projectiles.md) | Accepted for the Crimson prototype only | Server-owned score/Ready, scoped native hostile Projectile hits, sample-loop client audio and local recording boundary; protocol42 |
+
+| [0027](0027-oboro-authoritative-weapon.md) | Accepted for Oboro | Session-independent server-owned weapon swings, per-wielder wounds and bounded presentation transport |
