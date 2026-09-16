@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-16",
+  "feature": "Oboro and violet Ghost Samurai presentation",
+  "version": "0.3.13",
+  "protocol": 46,
+  "source_commit": "52a26a824ef960dc75cc2ea087f7065d01e2fd82",
+  "integrated_main": "9f46892cf4d4fb131faca625cc2697fa20937d52",
+  "inputs": "Original weapon sketch governs performance; eight September16 owner boards govern appearance. No alternate board damage/combo-acceleration rules were adopted.",
+  "environment": {
+    "tmodloader": "2026.07.3.0 / Terraria1.4.4.9",
+    "calamity": "2.2.4",
+    "luminance": "1.0.14",
+    "dotnet": "8.0.424 / C#12",
+    "loader_sha256": "d530e508b2841e66d880ce279a609624b5ab66ce8093eedfa04f47c3d12d485c"
+  },
+  "verification": {
+    "native_build": "pass: 0 errors / 4 existing CS8632 warnings, 22 locale files and shader exports validated; isolated profile only",
+    "package_types": "pass: six Oboro installed-loader validations including saved item identity, Ghost Samurai summon identity, existing Ghost/Doll teardown and fifteen inherited Crimson types",
+    "weapon_cleanup": "pass: repeated empty cleanup before native Player/content setup",
+    "npc_regen_fixture": "pass: exact compiled UpdateLifeRegen using isolated uninitialized native NPCs; 2.4M maxHP plus existing negative regen gives -96460, wet does not cancel; client and segment paths do not duplicate DoT. This is not a simulated NPC update or gameplay test.",
+    "oboro_codec": "pass: three exact compiled body round-trips, shared-buffer boundaries and all75 truncated payloads rejected",
+    "existing_codec": "pass: exact protocol46 package, 334 round-trips /54 malformed or truncated rejections; solo admission enabled",
+    "domain": "pass: 251 deterministic cases, including ten Oboro cases and bounded violet atlas cells",
+    "static": "pass: documentation catalog78, repository813 and YAML10; new attribution records corrected into the Records section and affected check rerun",
+    "offline_visual": "pass: generated assets and representative boss idle/windup/cleave/dash, blade, ghost-fire and icon sizes inspected on dark and light backgrounds; not game rendering"
+  },
+  "package": {
+    "sha256": "2de7a72a98696afef89dc09b54061c85046f247c63dbe7ec7a502a321b8468fb",
+    "assembly_sha256": "927e4187df5863dbd58d13f59bdec5842fc9befe2a873a1a52be9ad00fbfe892a",
+    "source_sha256": "ecbdc3df7ce6f1c04a977a3bd12e36eb6dfc4c03e1c9709c71fb8356e62a302c",
+    "local_record": "20260916T093724950055Z",
+    "provenance": "Clean build at source_commit; subsequent verification scripts and documentation do not change packaged gameplay. Normal profile untouched by this feature."
+  },
+  "owner_checks_not_run": [
+    "Actual content loading, saved item restoration, guaranteed boss drop and repeated Reload Mods",
+    "Three-cut continuous input, wall collision, accessory/True Melee interactions and equipped Earth comparison",
+    "Five-second Zanshin stats, five marks per enemy per wielder, manual/expiry once-only burst and third-cut Wraith Fire",
+    "Death, weapon switch, world exit, reconnect, delayed packets and multiple wielders on matching peers",
+    "Boss pose/blade/telegraph alignment, defeat dissolve, fire readability, sound, zoom/UI scale and frame-time profiling"
+  ],
+  "scope": "No game or gameplay server launched; no normal-profile installation, main merge, Workshop publication or GitHub release."
+}

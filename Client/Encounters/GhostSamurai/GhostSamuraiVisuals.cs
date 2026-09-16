@@ -14,10 +14,10 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
     // MagicPixel is a texture, not a promise of a 1x1 source image. Scaling its
     // whole surface multiplies every line/rectangle by the asset dimensions.
     internal static readonly Rectangle StrokePixel = new(0, 0, 1, 1);
-    // This GlobalNPC is shared (InstancePerEntity=false). Its shared texture
-    // cache must be static or tML rejects the entire Mod during ValidateType.
-    private static readonly GhostSamuraiArt art = new();
-    public override void Unload() => art.Unload();
+    public override void HitEffect(NPC npc, NPC.HitInfo hit)
+    {
+        if (!Main.dedServ && npc.life <= 0 && npc.ModNPC is GhostSamuraiBoss boss) GhostSamuraiDissolve.Add(boss);
+    }
     public override bool AppliesToEntity(NPC entity, bool lateInstantiation) => entity.ModNPC is GhostSamuraiBoss;
     public override bool PreDraw(NPC npc, SpriteBatch batch, Vector2 screenPos, Color drawColor)
     {
@@ -28,18 +28,9 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
 
     private void DrawBoss(SpriteBatch batch, GhostSamuraiBoss boss, Vector2 screen)
     {
-        Texture2D texture = art.Texture;
         float clock = boss.VisualAge;
         Vector2 root = boss.NPC.Center - screen + new Vector2(0, MathF.Sin(clock * .035f) * 3);
-        Color tint = boss.Phase == SamuraiPhase.Phase1 ? Color.White : new Color(211, 236, 255);
-        float pose = AttackPose(boss);
-        float motion = MathF.Sin(clock * .028f) * .04f;
-        // Both arms are articulated from their shoulder bone, never from the
-        // texture corner; mirroring also mirrors the pivot within the source rect.
-        DrawArm(-1);
-        batch.Draw(texture, root, GhostSamuraiArt.Body, tint, 0, GhostSamuraiArt.BodyPivot,
-            GhostSamuraiArt.Scale, SpriteEffects.None, 0);
-        DrawArm(1);
+        GhostSamuraiSpriteArt.Draw(batch, boss, root, AttackPose(boss));
         if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave && boss.Combo.IsValid(boss.Attack))
         {
             int facing = boss.Combo.Facing;
@@ -73,46 +64,6 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             Ring(batch, root, 75 + t * 145, 3, new Color(65, 135, 224) * (1 - t));
         }
 
-        void DrawArm(int side)
-        {
-            Vector2 shoulder = root + new Vector2(side * 56, -35);
-            float angle = side * (.1f + motion + pose * (pose < 0 ? .65f : 1.2f));
-            if (boss.Attack == SamuraiAttack.TripleVerticalSlash)
-                angle = side * (.1f + motion + pose * (pose < 0 ? 1.05f : 1.55f));
-            else if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave)
-                angle = SamuraiComboRules.HorizontalArmAngle(boss.VisualAttackTimer - SamuraiComboRules.ApproachDuration(boss.Combo),
-                    side, boss.Combo.Facing, side * (.1f + motion));
-            Color bladeTint = SamuraiComboRules.IsCombo(boss.Attack) && pose < 0
-                ? Color.Lerp(tint, new Color(255, 237, 183), -pose * .35f) : tint;
-            Vector2 pivot = GhostSamuraiArt.ShoulderPivot;
-            if (side < 0) pivot.X = GhostSamuraiArt.SwordArm.Width - pivot.X;
-            if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave && side == boss.Combo.Facing)
-            {
-                float local = boss.VisualAttackTimer - SamuraiComboRules.ApproachDuration(boss.Combo);
-                float scale = SamuraiComboRules.HorizontalSwordScale(local);
-                DrawArmPart(GhostSamuraiArt.ArmUpper);
-                DrawArmPart(GhostSamuraiArt.ArmLower);
-                Vector2 joint = GhostSamuraiArt.BladeBase;
-                if (side < 0) joint.X = GhostSamuraiArt.SwordArm.Width - joint.X;
-                Vector2 bladePivot = GhostSamuraiArt.BladeBase - new Vector2(GhostSamuraiArt.Blade.X - GhostSamuraiArt.SwordArm.X, GhostSamuraiArt.Blade.Y);
-                if (side < 0) bladePivot.X = GhostSamuraiArt.Blade.Width - bladePivot.X;
-                batch.Draw(texture, shoulder + ((joint - pivot) * GhostSamuraiArt.Scale).RotatedBy(angle), GhostSamuraiArt.Blade,
-                    bladeTint, angle, bladePivot, GhostSamuraiArt.Scale * scale,
-                    side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
-                return;
-            }
-            batch.Draw(texture, shoulder, GhostSamuraiArt.SwordArm, bladeTint, angle, pivot,
-                GhostSamuraiArt.Scale, side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
-
-            void DrawArmPart(Rectangle part)
-            {
-                float x = part.X - GhostSamuraiArt.SwordArm.X;
-                if (side < 0) x = GhostSamuraiArt.SwordArm.Width - x - part.Width;
-                Vector2 offset = new(x, part.Y - GhostSamuraiArt.SwordArm.Y);
-                batch.Draw(texture, shoulder, part, bladeTint, angle, pivot - offset,
-                    GhostSamuraiArt.Scale, side < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
-            }
-        }
     }
 
     private static float AttackPose(GhostSamuraiBoss boss)
@@ -183,7 +134,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         SpriteBatch batch = Main.spriteBatch;
         Vector2 position = p.VisualCenter(age) - Main.screenPosition;
         bool live = h.Live(age);
-        Color color = live ? new Color(186, 247, 255) : new Color(69, 182, 240);
+        Color color = live ? new Color(230, 207, 255) : new Color(171, 108, 240);
         Vector2 zoom = Main.GameViewMatrix.Zoom;
         int viewWidth = (int)MathF.Ceiling(Main.screenWidth / Math.Max(.1f, zoom.X)) + 64;
         int viewHeight = (int)MathF.Ceiling(Main.screenHeight / Math.Max(.1f, zoom.Y)) + 64;
@@ -203,7 +154,8 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         else if (h.Shape == SamuraiShape.RushVisual) DrawRush(batch, p, position, age);
         else if (h.Shape == SamuraiShape.Wisp)
         {
-            // Core radius matches collision. Tail is translucent decoration.
+            // The outlined core retains the collision radius; the violet flame is decoration.
+            GhostSamuraiSpriteArt.DrawSpirit(batch, position, h.Radius);
             GhostSamuraiVisuals.Ring(batch, position, h.Radius, 6, new Color(5, 14, 32) * .9f);
             GhostSamuraiVisuals.Ring(batch, position, h.Radius, 3, color);
             Vector2 heading = new Vector2(p.WispMotion.VX, p.WispMotion.VY).SafeNormalize(new Vector2(h.DX, h.DY));
@@ -214,7 +166,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         {
             Vector2 direction = new(h.DX, h.DY), normal = new(-h.DY, h.DX), end = position + direction * h.Length;
             float progress = Math.Clamp((age - h.Born) / (h.Fire - h.Born), 0, 1);
-            // Warm warnings remain distinct from the blue boss/wisps and bright sky.
+            // Warm warnings remain distinct from the violet boss/wisps and bright sky.
             // Dark backing provides contrast without flooding the safe cells.
             Color ink = new(6, 13, 30);
             Color edge = live ? new Color(218, 253, 255)
@@ -263,7 +215,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         else
         {
             float t = (age - h.Fire) / (h.End - h.Fire);
-            Color flash = new Color(186, 247, 255) * (1 - t);
+            Color flash = new Color(230, 207, 255) * (1 - t);
             // Large single blade flash stays translucent and unbordered: unlike
             // the solid outlined grid, this art is entirely harmless.
             GhostSamuraiVisuals.Stroke(batch, start, end, h.Radius * .6f, flash * .15f);

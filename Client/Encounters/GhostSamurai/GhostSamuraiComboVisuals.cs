@@ -11,7 +11,7 @@ internal static class GhostSamuraiComboVisuals
     internal static void DrawCleave(SpriteBatch batch, SamuraiHazard h, Vector2 center, float age, bool locked, Rectangle view, bool reduced)
     {
         bool live = h.Live(age);
-        Color ink = new(6, 13, 30), edge = live ? new(213, 252, 255) : locked ? new(255, 241, 185) : new(255, 180, 58);
+        Color ink = new(6, 13, 30), edge = live ? new(237, 214, 255) : locked ? new(255, 241, 185) : new(255, 180, 58);
         float start = Math.Max(view.Top, center.Y - h.Radius), end = Math.Min(view.Bottom, center.Y + h.Radius);
         int stride = Math.Max(reduced ? 10 : 6, view.Height / 128);
         // The entire dangerous half-disc has restrained continuous coverage.
@@ -55,7 +55,7 @@ internal static class GhostSamuraiComboVisuals
 
     internal static void DrawShock(SpriteBatch batch, SamuraiHazard h, Vector2 center, float age)
     {
-        Color ink = new(6, 13, 30), edge = h.Live(age) ? new(204, 252, 255) : new(255, 210, 110);
+        Color ink = new(6, 13, 30), edge = h.Live(age) ? new(231, 202, 255) : new(255, 210, 110);
         if (!h.Live(age))
         {
             // Forecast the maximum swept height, anchored to the same floor as

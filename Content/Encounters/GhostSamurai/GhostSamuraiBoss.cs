@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -103,6 +104,8 @@ public sealed class GhostSamuraiBoss : ModNPC
         return false;
     }
     public override void OnKill() => Runtime?.RecordDeath(this);
+    public override void ModifyNPCLoot(NPCLoot npcLoot)
+        => npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<Content.Items.Oboro.Oboro>()));
     public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
     public override void SendExtraAI(BinaryWriter writer)
     {

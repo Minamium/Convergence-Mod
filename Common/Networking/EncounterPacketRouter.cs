@@ -70,6 +70,7 @@ internal static class EncounterPacketRouter
                 return;
             }
             if (Main.netMode == NetmodeID.Server && header.PacketType != EncounterPacketType.RequestActivate
+                && header.PacketType != EncounterPacketType.RequestWeaponUse
                 && !EncounterPacketRoutes.MatchesSession(key, header, ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot))
             {
                 WarnRejected(whoAmI, "packet.route_session_mismatch");
@@ -112,13 +113,16 @@ internal static class EncounterPacketRouter
             or EncounterPacketType.RequestSnapshot
             or EncounterPacketType.RequestPrototypeDown
             or EncounterPacketType.RequestReviveNearest
-            or EncounterPacketType.RequestRaidHurtResult;
+            or EncounterPacketType.RequestRaidHurtResult
+            or EncounterPacketType.RequestWeaponUse;
         bool isServerEvent = packetType is EncounterPacketType.Snapshot
             or EncounterPacketType.StateChanged
             or EncounterPacketType.ParticipantChanged
             or EncounterPacketType.ValidationResult
             or EncounterPacketType.EncounterEnded
-            or EncounterPacketType.RaidHit;
+            or EncounterPacketType.RaidHit
+            or EncounterPacketType.WeaponState
+            or EncounterPacketType.WeaponBurst;
 
         return Main.netMode switch
         {
