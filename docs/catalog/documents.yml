@@ -83,6 +83,26 @@ documents:
   - encounter.crimson-foundry.spec
   - adr.0022
   - adr.0023
+- doc_id: adr.0027
+  path: docs/adr/0027-oboro-authoritative-weapon.md
+  title: 'ADR-0027: Server-owned Oboro swings and wounds'
+  content_sha256: 1c3c6f5c5872a11128060ce069e7141a5e0731a673f20fc56c08a01c3ef170fb
+  document_type: adr
+  status: accepted
+  owners:
+  - gameplay
+  - networking
+  last_reviewed: '2026-09-16'
+  source_of_truth_for:
+  - architecture.oboro_weapon_authority
+  aliases:
+  - Oboro weapon authority
+  related_code:
+  - Content/Items/Oboro
+  - Client/Weapons
+  related_docs:
+  - adr.0022
+  - encounter.ghost-samurai.spec
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -410,7 +430,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: bc23700f1997f3afee2b01866e74d3608134f99cbfc69fb636638342b39fa63f
+  content_sha256: 4bb24331937dac8450d90fb0543153ef1771f2a6fcd24c5ec0226e78c4e0027a
   document_type: index
   status: accepted
   owners:
@@ -772,13 +792,13 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 6b2ccf9c08f0a79eb69faf35de2252c3c12528b3fef561526d2fa15a4b23dc47
+  content_sha256: 0fc75574b41eae0ec8989a7ede62fdb60669e43c1b43f69fc6d8ff8ef1faee7c
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-16'
   source_of_truth_for:
   - ghost_samurai.behavior
   aliases:
@@ -928,7 +948,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: acd83ffe11f74cf5ebd71a24557deff7b61589b367efb8daaf4df1172e2833cc
+  content_sha256: 8bf297101591ab9263c16753a1316acfd7955407e8b440799191f6d95f46aafa
   document_type: policy
   status: accepted
   owners:
@@ -1243,7 +1263,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 5e267fec3a22a4229fd2c68e67bb0468d46c47f588a09cde8f4f783fe2c9c17c
+  content_sha256: 303c821f5e01ce42188180a598d3b6dee2c92dbacd0d31b3466bea2e44760bec
   document_type: status
   status: accepted
   owners:
@@ -1475,6 +1495,24 @@ documents:
   - project.network-architecture
   - encounter.first-severance.spec
   - research.sources
+- doc_id: research.oboro-20260916
+  path: docs/research/2026-09-16-oboro.md
+  title: 'Oboro: API and comparison boundary'
+  content_sha256: c44550f139609d1658e3a32d1231a86e4c6c9a9b3ae7036be2055c1c2fadedb8
+  document_type: research
+  status: provisional
+  owners:
+  - gameplay
+  last_reviewed: '2026-09-16'
+  source_of_truth_for:
+  - research.oboro_api_evidence
+  aliases:
+  - Oboro Earth comparison
+  related_code:
+  - Content/Items/Oboro
+  related_docs:
+  - adr.0027
+  - research.sources
 - doc_id: research.raid-movement-sync-apis
   path: docs/research/RAID_MOVEMENT_SYNC_APIS.md
   title: Raid movement synchronization investigation
@@ -1499,7 +1537,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: a37e4c6623ef36f3e58e2550fec73e6ebad919d78ae8ae8c98ee559af104d9e6
+  content_sha256: 0818e150458d43b2c2de76e5cb8c5b74e78a0151e495f1ec94c716a4334c53db
   document_type: research
   status: historical
   owners:
