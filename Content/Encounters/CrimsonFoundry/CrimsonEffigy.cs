@@ -8,8 +8,7 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
-// Native independently damageable NPC. The owning encounter alone advances
-// the defeated mask; a lost/despawned child never counts as a successful kill.
+// Independently damageable native NPC. Only its owner advances the death mask.
 public sealed class CrimsonEffigy : ModNPC
 {
     internal CrimsonRuntime? Runtime;
@@ -44,7 +43,11 @@ public sealed class CrimsonEffigy : ModNPC
         NPC.GivenName = State.Index switch { 0 => "Ember Crown", 1 => "Sable Mantle", _ => "Thorn Choir" };
         NPC.dontTakeDamage = !TryBoss(out var boss) || !boss!.State.SummonVulnerable(State.Index);
         NPC.boss = !NPC.dontTakeDamage;
-        if (boss is not null) NPC.lifeMax = boss.State.TargetLife;
+        if (boss is not null)
+        {
+            NPC.lifeMax = boss.State.TargetLife;
+            CrimsonGesture.ProjectMotion(NPC, boss, State.Index);
+        }
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {
             NPC.active = false;
@@ -66,7 +69,6 @@ public sealed class CrimsonEffigy : ModNPC
     {
         if (!TryBoss(out var boss) || boss!.State.Phase < 3)
         {
-            // Last-resort protection from overkill before the authority tick.
             NPC.life = CrimsonPhaseRules.RetreatLife(boss?.State.TargetLife ?? NPC.lifeMax);
             NPC.dontTakeDamage = true;
             return false;

@@ -38,12 +38,11 @@ public sealed class CrimsonBoss : ModNPC
     public override void AI()
     {
         NPC.timeLeft = NPC.activeTime;
-        // dontTakeDamage is not supplied by this feature's native snapshot.
-        // Project it on EVERY peer: clients otherwise retain SetDefaults(true)
-        // forever and never submit their legitimate native item/projectile hits.
+        // Project vulnerability on EVERY peer, otherwise clients never submit hits.
         NPC.dontTakeDamage = !Fresh || !State.Vulnerable(VisualAge);
         NPC.boss = State.Stage is CrimsonStage.Countdown or CrimsonStage.Performance;
         if (State.TargetLife > 0) NPC.lifeMax = State.TargetLife;
+        CrimsonGesture.ProjectMotion(NPC, this, 3);
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {
             NPC.active = false;
@@ -56,7 +55,7 @@ public sealed class CrimsonBoss : ModNPC
         if (State.Vulnerable(VisualAge)) Runtime?.Killed(this);
         NPC.dontTakeDamage = true;
         NPC.netUpdate = Main.netMode != NetmodeID.MultiplayerClient;
-        return false; // The accepted ending owns the actor until its short exit.
+        return false;
     }
     public override void SendExtraAI(BinaryWriter writer) => State.Write(writer);
     public override void ReceiveExtraAI(BinaryReader reader)
@@ -67,6 +66,7 @@ public sealed class CrimsonBoss : ModNPC
     }
 }
 
+// Retained type/codec for stable content identity; new phrases spawn gestures.
 public sealed class CrimsonAttack : ModProjectile
 {
     internal CrimsonHazard Hazard;

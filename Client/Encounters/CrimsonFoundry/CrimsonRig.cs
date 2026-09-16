@@ -10,8 +10,7 @@ using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry;
 
-// A human-sized performer and large deforming apparitions, not one scaled
-// machine portrait. All motion samples one fractional render clock.
+// Original artwork with species-specific articulation and accepted gesture paths.
 internal static class CrimsonRig
 {
     private static Texture2D? performer;
@@ -27,28 +26,23 @@ internal static class CrimsonRig
         performer = LoadTexture("ScarletConjurer");
         string[] names = { "EmberCrown", "SableMantle", "ThornChoir" };
         for (int i = 0; i < 3; i++) effigies[i] = LoadTexture(names[i]);
-        // PostSetupContent runs on the loader worker. Asset requests marshal
-        // their uploads, but direct FNA effect construction must wait for draw.
+        // Direct FNA effect construction belongs to drawing, not this loader hook.
     }
     private static Texture2D LoadTexture(string name) => ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/" + name, AssetRequestMode.ImmediateLoad).Value;
     internal static void Unload()
     {
-        performer = null;
-        Array.Clear(effigies);
-        var oldMaterial = material;
-        material = null;
-        // Capture this load's instance: a delayed disposal must not touch the
-        // replacement created after Reload Mods. Asset textures are not ours.
+        performer = null; Array.Clear(effigies);
+        var oldMaterial = material; material = null;
         if (oldMaterial is not null) Main.QueueMainThreadAction(oldMaterial.Dispose);
     }
     internal static (float Charge, float Recoil) Signal(CrimsonBoss boss, int source, float age)
     {
         float until = 60, since = 100;
         foreach (Projectile p in Main.ActiveProjectiles)
-            if (p.ModProjectile is CrimsonAttack a && a.Hazard.Fight == boss.State.Fight && a.Hazard.Epoch == boss.State.PhaseStart && age >= a.Hazard.Born
-                && (source < 0 || a.Hazard.Source == source))
+            if (p.ModProjectile is CrimsonGesture g && g.TryBoss(out var owner) && owner == boss
+                && age >= g.Plan.Born && (source < 0 || g.Plan.Source == source))
             {
-                float delta = a.Hazard.Fire - age;
+                float delta = g.Plan.Fire - age;
                 if (delta >= 0) until = Math.Min(until, delta); else since = Math.Min(since, -delta);
             }
         return (CrimsonRigMotion.Charge(until), CrimsonRigMotion.Recoil(since));
@@ -59,8 +53,9 @@ internal static class CrimsonRig
         var signal = Signal(boss, -1, age);
         float ending = boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat ? .65f : 1;
         if (boss.State.PerformerDefeated) ending *= .18f;
-        // Final changes location/exposure, NEVER the performer's 56px stature.
-        DrawPerformer(batch, screen, boss.NPC.Center, age, boss.NPC.velocity, 1,
+        Vector2 at = boss.NPC.Center;
+        if (CrimsonGesture.TryPose(boss, 3, age, out var pose)) at = CrimsonGestureVisuals.V(pose.Body(age));
+        DrawPerformer(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection,
             boss.State.MusicStart >= 0, signal.Charge, signal.Recoil, ending);
         return false;
     }
@@ -70,8 +65,7 @@ internal static class CrimsonRig
         if (performer is not { } sprite) return;
         int idle = floating ? 2 : Math.Abs(velocity.X) > .7f && MathF.Sin(age * .22f) > 0 ? 3 : 0;
         float cast = CrimsonInvocation.Ease(charge * 2);
-        DrawPose(idle, 1 - cast);
-        DrawPose(1, cast); // The floating conductor still visibly calls/releases.
+        DrawPose(idle, 1 - cast); DrawPose(1, cast);
         Vector2 orb = center + new Vector2(facing * 28, -13).RotatedBy(velocity.X * .009f);
         CrimsonEnergy.Begin();
         CrimsonEnergy.AddCore(orb, 13 + charge * 10 + recoil * 7, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
@@ -104,17 +98,28 @@ internal static class CrimsonRig
         float alpha = boss!.State.Presence(effigy.State.Index, age);
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat) alpha *= .35f;
         if (alpha <= .001f) return false;
-        Mesh(batch, texture, texture.Bounds, effigy.NPC.Center - screen, texture.Size() * .5f,
+        Vector2 at = effigy.NPC.Center;
+        if (CrimsonGesture.TryPose(boss, effigy.State.Index, age, out var pose))
+        {
+            at = CrimsonGestureVisuals.V(pose.Body(age));
+            if (pose.Technique == CrimsonTechnique.MantleRush && pose.Live(age) && !CrimsonVisuals.Reduced)
+                for (int k = 3; k >= 1; k--)
+                    Mesh(batch, texture, texture.Bounds, CrimsonGestureVisuals.V(pose.Body(age - k * .35f)) - screen,
+                        texture.Size() * .5f, size / texture.Height, age, 14, signal.Charge, signal.Recoil,
+                        new Color(142, 98, 159) * (alpha * .09f), effigy.NPC.spriteDirection < 0, effigy.NPC.rotation, true, effigy.State.Index);
+        }
+        Mesh(batch, texture, texture.Bounds, at - screen, texture.Size() * .5f,
             size / texture.Height * (.90f + appear * .1f), age + effigy.State.Index * 100,
-            14, signal.Charge, signal.Recoil, Color.White * (appear * alpha), effigy.NPC.velocity.X < -1, effigy.NPC.rotation + signal.Recoil * .045f, true);
+            14, signal.Charge, signal.Recoil, Color.White * (appear * alpha), effigy.NPC.spriteDirection < 0,
+            effigy.NPC.rotation + signal.Recoil * .045f, true, effigy.State.Index);
         CrimsonEnergy.Begin();
-        CrimsonEnergy.AddCore(effigy.NPC.Center, 23 + signal.Charge * 20 + snap * 55, age,
+        CrimsonEnergy.AddCore(at, 23 + signal.Charge * 20 + snap * 55, age,
             signal.Charge, Math.Max(signal.Recoil, snap), appear * alpha, CrimsonVisuals.Reduced);
         CrimsonEnergy.Draw(batch);
         return false;
     }
     private static void Mesh(SpriteBatch batch, Texture2D texture, Rectangle source, Vector2 center, Vector2 pivot,
-        float scale, float time, float motion, float charge, float recoil, Color tint, bool flip, float rotation, bool apparition)
+        float scale, float time, float motion, float charge, float recoil, Color tint, bool flip, float rotation, bool apparition, int species = -1)
     {
         if (Main.dedServ || tint.A == 0) return;
         material ??= new BasicEffect(Main.instance.GraphicsDevice) { TextureEnabled = true, VertexColorEnabled = true };
@@ -149,6 +154,22 @@ internal static class CrimsonRig
             float loose = apparition ? .25f + MathF.Abs(u - .5f) + v * v : .12f + MathF.Abs(u - .5f) * v;
             local.X += MathF.Sin(time * .037f - v * 7 + u * 2) * motion * loose;
             local.Y += MathF.Sin(time * .028f + u * 8 - v * 3) * motion * loose * .65f;
+            float edge = MathF.Abs(u - .5f) * 2;
+            if (species == 0)
+            {
+                local.X += (u < .5f ? -1 : 1) * edge * charge * (v < .55f ? 24 : 12);
+                local.Y += MathF.Sin(time * .09f + u * 15) * Math.Max(0, v - .55f) * (8 + recoil * 24);
+            }
+            else if (species == 1)
+            {
+                local.X *= 1 + edge * charge * .28f;
+                local.Y += edge * edge * (-charge * 48 + recoil * 68);
+            }
+            else if (species == 2)
+            {
+                local.X += MathF.Sin(time * .08f - v * 16 + u * 8) * v * v * (5 + charge * 19);
+                local.Y += MathF.Cos(time * .06f + u * 12) * edge * charge * 15;
+            }
             local *= new Vector2(1 - charge * .055f + recoil * .12f, 1 + charge * .022f - recoil * .04f);
             if (flip) local.X = -local.X;
             Vector2 pos = center + local.RotatedBy(rotation);
