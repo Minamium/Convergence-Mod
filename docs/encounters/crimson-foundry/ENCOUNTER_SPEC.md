@@ -12,7 +12,8 @@ source_of_truth_for:
   - encounter.crimson_foundry.music
 aliases:
   - red mechanic raid
-  - Crimson Invocation
+  - Scarlet Invocation
+  - Crimson Invocation (historical name)
   - scarlet conjurer
 related_code:
   - Content/Encounters/CrimsonFoundry
@@ -22,45 +23,74 @@ related_docs:
   - adr.0026
 ---
 
-# Crimson Invocation
+# Scarlet Invocation
 
-Provisional Raid name: **Crimson Invocation**. Boss display name: **Vespera — The Scarlet Conjurer**. A red-haired, long-twin-tailed summoner controls a red energy sphere and three large apparitions. **The woman herself always stays ordinary NPC size, including the Final and companion; only her apparitions are large.** This replaces the steel-machine/armor-purge concept, not Doll's encounter. Stable `CrimsonFoundry` code, document and network IDs remain unchanged. [Status](../../STATUS.md) owns implementation and verification state.
+Player-facing Raid name: **Scarlet Invocation**. Boss: **Vespera — The Scarlet Conjurer**. The former Crimson name is retired to avoid suggesting a connection to Terraria's evil biome. Stable `CrimsonFoundry`, `crimson_foundry`, item, asset, packet and document IDs do not change. Vespera and her companion stay at the existing56px body reference; only her apparitions are large. [Status](../../STATUS.md) owns verification and integration state.
 
 ## Summoning and party
 
-Place the existing **Foundation Core** on clear ground, then hold **Crimson Grimoire / 紅蓮の魔導書** (internal item `CrimsonConductor`) and click the pedestal. Theater Doll selects the other Raid on that same pedestal. The server validates the actual pedestal, range, field/world bounds and exclusive Fight lease. Temporary recipe: one Book, ten Silk and three Souls of Night at a Bookcase. The new icon is a compact black/red grimoire clasped around a crimson orb. Reusable; alternate item use cancels the summoner's Ready-stage preparation.
+Use **Scarlet Grimoire / 紅蓮の魔導書** (`CrimsonConductor`) on the existing **Foundation Core** pedestal. Theater Doll still selects Doll on that same pedestal. Retain the reusable Book/Silk/Souls of Night prototype recipe, server-held-item/range/world/lease checks, server-wide1–8-player preparation, manual Ready and no synthetic participants. Roster changes before Ready acceptance reset confirmations. The frozen roster uses connection tokens; disconnect/world entry reset connection-local tokens and request cursors. Dead/disconnected participants remain out until the next Raid; late joiners spectate. **This feature still uses normal death, not Doll Down/revival.**
 
-The server collects all connected non-ghost players, irrespective of distance (1–8; more than eight rejects the whole summon, never silently omits someone). A 150-tick deployment precedes clickable Ready controls above the local player's head. Other ready players show a small Ready! label. Dead players must respawn before confirming. Roster changes before acceptance clear everyone's confirmations. Once all confirm, the server freezes the connection-bound roster and schedules a music epoch 120 ticks ahead. Later arrivals and dead participants observe until the next summon. Everyone dead/disconnected ends in Defeat; **no Doll Downed/revival integration in this prototype**.
+Preparation uses the same160×70-tile grounded logical field, bounded owner/server movement, replenished wings/rockets, no-wing lift and natural-spawn suppression. No terrain mutation, automatic rejoin, or unrelated encounter changes are added. Preparation expires after three minutes; the session retains its fifteen-minute fail-safe.
 
-Preparation immediately establishes the same ground-anchored160×70-tile footprint as Doll, a visible red boundary and black exterior. Participants, including distant connected members, are contained on authority and the local owning client. Wings/rockets are replenished and no-wing jump lift is provided; native equipment/damage otherwise remains intact. Natural NPC spawning is suppressed without deleting existing creatures or modifying terrain. Preparation expires after three minutes; the session has a fifteen-minute fail-safe. Cleanup releases the exact pedestal lease and all owned actors/hazards; field/audio/flight expires with the main actor. One encounter per World remains the limit. See [shared-stage amendment](../../adr/0026-crimson-score-and-native-projectiles.md#shared-pedestal-and-bounded-stage-amendment--2026-09-15).
+## Sequential acts and the four-target finale
 
-## Score, warnings and targets
+| Act | Present combat target | Transition |
+|---|---|---|
+| I | **Ember Crown**: hollow crown, veil and thorn legs | At20% of its frozen maximum HP, retreat without dying |
+| II | **Sable Mantle**: broad dark mantle, ivory mask and heart | At20%, retreat without dying |
+| III | **Thorn Choir**: faceless shroud, horns/claws and tendrils | At20%, retreat without dying |
+| Final | All three retained apparitions **and Vespera** | Defeat all four; an observed all-player wipe takes priority over a simultaneous clear |
 
-`Assets/Music/CrimsonFoundry/Score.json` owns the measured beat/dynamics map, not a perfectly constant BPM claim. The server schedules immutable hazards; no player position enters a barrage layout. Each volley fills the field outside **one shared, reachable corridor**, with cardinal/diagonal orientation and deterministic cue-based offsets. A60-tick warning includes the thin axis, sparse footprint glints and clearer paired edges; collision grows with the visible opening. Normal/Final minimum volley spacing is90–110/72ticks, still quantized to accepted musical cues. Different orientations do not resolve simultaneously into incompatible safe zones.
+Only Ember Crown appears in the introduction. Each threshold changes exactly one act. Native incoming damage is capped at the threshold in solo acts, with a CheckDead guard for overkill. A withdrawn NPC keeps its identity and exact20% HP, becomes invulnerable and fades out; it is not killed, looted, respawned or healed. The next apparition arrives during150protected ticks. Final recalls all retained bodies at their remaining HP and exposes Vespera after the same protected transition. The music never restarts at an act change.
 
-- **Introduction:** Ready acceptance starts the cinematic immediately. Bars remain continuous across the120-tick music lead. The performer floats from the pedestal toward the upper background; the three apparitions manifest on measured intro beats. Combat waits for the eight-second musical intro. No sudden replacement of a giant PNG.
-- **Ember Crown:** hollow ivory/obsidian crown, crimson veil and three thorn legs; vertical energy lanes.
-- **Sable Mantle:** broad asymmetric silk apparition with an ivory mask and red heart; horizontal travelling energy bands.
-- **Thorn Choir:** tall faceless shroud, crooked horns/claws and tendrils; diagonal lanes.
-- **Independent defeats:** each apparition has its own ordinary native NPC HP and accepts participant weapon damage on every peer. Defeating one removes its hazards and future actions. Despawning/lost identity is an error, never a substitute for killing it.
-- **Final:** only all three confirmed defeats trigger150ticks of protected manifestation. The same56px performer moves forward, never grows; she becomes damageable and mixes the corridor orientations. The BGM/score does not restart. The former50% armor purge no longer exists.
-- **Ending:** the accepted result clears hazards immediately; a short bars/audio exit precedes exact-Fight cleanup and re-summoning. There is no contact damage, bespoke treasure table or finished defeat animation in this prototype.
+The authority owns the phase, transition/unlock epochs, current target, final death mask and performer-defeated flag. Killing only the performer or only the three apparitions cannot win Final. A missing live or withdrawn actor invalidates the encounter, rather than being counted as a successful defeat. Phase changes clear all old hazards; source death in Final cancels that source's hazards. Cleanup covers all retained bodies, partly created actors and exact-pedestal ownership.
 
-Source damage starts at450/510 (apparitions/Final) through ordinary hostile Projectile armor/accessory/dodge hooks, never percent-HP or direct `statLife` subtraction. Total HP budget remains `12,000,000 + 8,000,000 × (participants − 1)`, now split equally between the three apparitions and performer, frozen at Ready acceptance. Solo:3million each; three players:7million each. These are provisional, not calibrated difficulty claims.
+The existing total HP budget `12,000,000 + 8,000,000 × (participants − 1)` is still split into four equal targets at Ready acceptance. Solo phases spend80% of each apparition; Final spends the retained20% of each plus the full performer budget. There is no extra refill. Damage450/510 remains **native source damage**, not guaranteed HP loss; defensive equipment, dodge and native immunity remain enabled. Actual balance is uncalibrated.
 
-Slash release lasts42ticks, with a seven-tick opening and fourteen-tick harmless dissipation. Bolts travel over24ticks with a210px tail. `CrimsonHazard` owns shared collision/reach curves. `CrimsonInvocation` owns masks, Final protection, musical fade and barrage geometry. Progress logs every five seconds include combined remaining/maxHP, interval received damage/DPS, defeated mask and Final state; summon appearance/death records identify each target. Not theoretical loadout DPS.
+## Movement and attack posture
+
+The server retains a living frozen-roster target until it becomes invalid, then selects a living replacement. Ordinary movement loosely follows that player's position with apparition-specific standoff offsets, smoothed acceleration and a15px/tick desired-speed cap. Vespera stays above the field while directing solo acts and joins the loose pursuit in Final. World-space attack geometry is never dragged by a moving actor or player after its warning is issued.
+
+During transition and accented Fill/Roll phrases, the bodies take authored upper/side/corner positions with a22px/tick desired-speed cap, then return to pursuit. These formations are presentation/movement, not per-player random targeting. Native NPC position/velocity plus the accepted phase/phrase epochs are replicated; observers do not choose targets or drive authority movement. The existing mesh rig adds charge/recoil and velocity lean. The floating performer now blends into the cast pose rather than remaining locked in the float frame. Ordinary NPC size and the0.3.12 draw-thread GPU lifetime fix are preserved.
+
+## Rhythm choreography: call, breath, response
+
+The player's reported problem was that sparse attacks did not feel like the underlying drum rhythm. The scheduler therefore admits **complete musical phrases**, not individual beat candidates discarded by a72–110tick cooldown. `CrimsonRhythm` consumes the existing measured `Score.json` beat times. It subdivides the actual adjacent beat intervals; there is no hardcoded128BPM loop or accumulated seven-/fourteen-tick rounding.
+
+One four-beat phrase uses a16-position subdivision grid. Forecasts are the call; the corresponding attacks answer two beats later:
+
+| Pattern | Forecast subdivision offsets | Impact offsets | Use |
+|---|---|---|---|
+| Groove | 0,2,4 | 8,10,12 | Ordinary eighth-note call/response |
+| Fill | 0,1,3,5,6 | 8,9,11,13,14 | Every fourth phrase: compressed, uneven `ba-bam-bam-ba-bam` variation |
+| Roll | 0,1,2,3 | 8,9,10,11 | Accented Final passages selected from the existing energy map |
+
+For a local28-tick beat interval, Groove warnings occur at0/14/28 and impacts at56/70/84; Fill warnings at0/7/21/35/42 and impacts at56/63/77/91/98. These are illustrations, not a claim that the whole recording has constant tempo. There is a brief breath between the final forecast and the response. Forecasts pulse distinctly at their onsets and leave faint positional evidence; they do not turn into unannounced attacks during a blackout. Short, bounded existing SFX and body charge/recoil articulate each warning/impact once per volley, not once per lane. No explanatory combat-text HUD is restored.
+
+All hits retain40–180ticks of warning under the supported score. Each live pulse lasts at most5ticks and ends before the next pulse; the visual tail is harmless. High visual/event frequency does **not** disable native immunity to force damage on every sixteenth note. Attack density and unavoidable damage are separate decisions.
+
+## Safe corridors and network admission
+
+Each phrase has one shared orientation and a gently drifting common corridor. Ember Crown favors vertical lanes, Sable Mantle horizontal bands, Thorn Choir diagonal lanes; Final mixes orientation **between phrases**. Adjacent offsets shift by28px in solo acts or20px in Final, so even the five-hit fill retains shared space for a whole player body. It does not demand a field-wide move every seven ticks or overlay incompatible live orientations. Final source assignments rotate among surviving apparitions and Vespera, making the ensemble alternate its accents without multiplying the damage fields.
+
+The server publishes the entire bounded phrase at least30ticks ahead of its first forecast. Each immutable hazard records Fight, phase epoch, phrase serial, source, warning/fire/end and accent. A stale phase can never reactivate an old attack. Admission preflights the whole phrase (at most5hits ×40lanes); insufficient native projectile capacity aborts instead of silently losing individual beats. Normal packets do not trigger music restarts, and missed/late warnings are not replayed in a catch-up burst. This is **not** clock-offset or network-latency compensation; matching-peer late delivery and audio/visual/collision alignment still require actual playtests.
+
+The current beat map is an analysis input, not a manually certified drum transcription. Audible downbeat alignment, the chosen fills' fit to the recording and perceived intensity remain owner-listening checks. Do not label them passed from a deterministic timing test.
+
+## HP bar
+
+Main and apparition NPCs explicitly assign `CrimsonBossBar`, which uses tModLoader's ordinary fancy-bar drawing path rather than depending solely on a dynamically set `NPC.boss` flag. During an individual act it shows that target's current/frozen maximum HP. During Final it shows the combined current HP against the remaining Final budget (three20% remnants plus the performer), regardless of which owned NPC vanilla selected to track. It is hidden in preparation/ending and on stale state. No bespoke combat instructions, decorative target rings, or new art are required; the standard fallback icon is used until an authored head icon exists. Other Mods' bar styles and a user-disabled boss bar cannot be overridden by this implementation.
 
 ## Companion
 
-**Scarlet Covenant / 紅の盟約** (`CrimsonPact`) summons the same NPC-sized woman as an ordinary ten-slot minion. She walks on ground; mount/flight/lack of support selects floating follow, with red particle traces and an orbiting energy orb. The orb charges then sustains a red native Summon beam. New companion icon: ivory clasp, red star gem and twin-tail ribbon. Temporary recipe: one Crimson Grimoire, ten Silk and five Souls of Night at a Bookcase. No raid-win prerequisite yet.
-
-Owner alone spawns attacks/chooses locomotion/dismisses for a missing buff; remote peers do not kill the minion merely because private owner buffs are absent. Child beams bind exact owner+projectile identity. Death/buff removal cleans them up. This minion is **not** a Raid participant, Ready vote or revival helper; future companion substitution remains separate work.
+**Scarlet Covenant / 紅の盟約** remains the ordinary owner-replicated ten-slot companion, not a Raid participant, Ready vote or revival helper. Existing owner-only attack spawning/buff dismissal and exact parent identity remain. The floating cast-pose improvement is shared visually; no new companion gameplay, recipe gate or asset is introduced.
 
 ## Music and musical presentation
 
 Music: **Graceful Ordeal — kuku**, provided by the owner with [the author's video](https://www.youtube.com/watch?v=HnBESyUqx_g), titled 「実はとてもお強いお嬢様からの試練BGM」. See [asset terms and exact hashes](../../../Assets/ATTRIBUTION.md#crimson-foundry--2026-09-15).
 
-The original142.5s stereo48kHz PCM16 WAV remains external and untouched. The OGG preserves pitch, tempo and dynamics. Its numeric loop is sample821888→6456608 (17.122667→134.512667s), with a300ms smooth tail-to-pre-loop bridge. The original terminal fade/silence is not replayed. One native looping audio buffer plays the intro once then the loop; no timer-driven restart or accumulated tick rounding. Intro/title and the three manifestations follow the first eight seconds. Measured intensity drives orb/casting tension and attack density.
+The original142.5s stereo48kHz PCM16 WAV remains external and untouched. The OGG preserves pitch, tempo and dynamics. Its numeric loop is sample821888→6456608 (17.122667→134.512667s), with a300ms smooth tail-to-pre-loop bridge. The original terminal fade/silence is not replayed. One native looping audio buffer plays the intro once then the loop; no timer-driven restart or accumulated tick rounding. The introduction/title and Ember Crown's arrival occupy the opening; the other apparitions arrive only at their phase boundaries. Measured intensity drives orb/casting tension and attack density.
 
 `CrimsonAudio` decodes once on clients, uses the Music slider and disposes on World exit/unload. It fades from silence over150score ticks (2.5s) to the previous calibrated ceiling; late join/focus reanchors also have a short recovery envelope. Normal packets and Final do not restart the track. Server timing is independent of the sound card. Actual device latency, perceived fade/loop and multiplayer drift still require listening/playtest checks.
 
@@ -84,4 +114,4 @@ This also creates an external `loop-seam-audition.wav`. Numerical onset/chroma/R
 
 Physical-pixel Ready/bars use the captured world transform once; no UI-scale/world-scale mixing. Reduced Effects and shake-off preserve attack footprints and warning timing. Bounded visual commands never allocate textures per frame. Dedicated Server loads score facts but no graphics/audio device.
 
-Owner smoke: solo/shared-pedestal Ready/start, distant multiplayer admission, each apparition taking independent native damage, dead targets ceasing attacks, all-three-only Final with unchanged NPC size, usable corridor travel, natural loop/fade/focus, wipe/victory/re-summon, UI107%/zoom, remote companion visibility and mount/landing/owner dismissal. Source/codec/build/offline-render checks cannot replace these observations.
+Owner smoke: build/install a separate matching package; load/reload; start solo and with distant peers; confirm exactly one active apparition, all20% threshold/overkill transitions, stored HP and visible withdrawal/arrival; confirm loose pursuit, target loss and accented formations; Final exposes all four and requires every target; verify bar switching/aggregate health, wipe priority and exact-Fight re-summon. Listen to forecast/impact call-response and Fill/Roll accents against the actual recording. Check native immunity, latency, frame time and reduced effects. Domain, adapter and codec checks do not establish those gameplay results.

@@ -65,7 +65,7 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: f203043669aa953cbab42abbf778828a9a01a66e60d3cedcb959f894036b7bb5
+  content_sha256: b18aad6d51b0bd7f25d88c8a1104cfbf1b737ed5d1ad6c9d26a754d606480a7e
   document_type: adr
   status: accepted
   owners:
@@ -498,7 +498,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: b274efae996a874ebff7a4323fb4e7e02888637e56d02cdf6a7a919546b7b5b8
+  content_sha256: 30eab7e800a59fc624dfe4b6845716d48581de18b0d65d7ddc43555f04bd7870
   document_type: index
   status: accepted
   owners:
@@ -556,8 +556,8 @@ documents:
   - docs.search-index
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
-  title: Crimson Invocation
-  content_sha256: 0e84a5c6f5413d441232a5b95114fe93c42152109babdabc50b17cac9b1593f8
+  title: Scarlet Invocation
+  content_sha256: e1174d25542fe1f8909c14ae566f2d532d71156a462f3d373ee802187f64813e
   document_type: spec
   status: accepted
   owners:
@@ -570,7 +570,8 @@ documents:
   - encounter.crimson_foundry.music
   aliases:
   - red mechanic raid
-  - Crimson Invocation
+  - Scarlet Invocation
+  - Crimson Invocation (historical name)
   - scarlet conjurer
   related_code:
   - Content/Encounters/CrimsonFoundry
@@ -848,12 +849,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: ee4ae054c4310c95d1260bd18792399c675b5e088d36113f9595ed4ecf73cd76
+  content_sha256: 3c979923c5f60cd86c10796a31246609ddf0c0812fd0430e5cd92ba8b011a88c
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-16'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1198,12 +1199,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: fbe3cf3fdf980eb8febe877d818106dafd6a90e7d7776efa8625f56b3fa2c768
+  content_sha256: f1eac07164c8e2fb2fa0ebc054995b9c0ba41e7fcf30867f256c61d1fd3c42d3
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-16'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -1243,7 +1244,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 5e267fec3a22a4229fd2c68e67bb0468d46c47f588a09cde8f4f783fe2c9c17c
+  content_sha256: 32337589aa9ecc56113f0477832b0c3f8d101e9fcc29d8dbf8c479058a39910e
   document_type: status
   status: accepted
   owners:

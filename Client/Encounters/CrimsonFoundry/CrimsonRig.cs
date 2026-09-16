@@ -45,7 +45,8 @@ internal static class CrimsonRig
     {
         float until = 60, since = 100;
         foreach (Projectile p in Main.ActiveProjectiles)
-            if (p.ModProjectile is CrimsonAttack a && a.Hazard.Fight == boss.State.Fight && (source < 0 || a.Hazard.Source == source))
+            if (p.ModProjectile is CrimsonAttack a && a.Hazard.Fight == boss.State.Fight && a.Hazard.Epoch == boss.State.PhaseStart && age >= a.Hazard.Born
+                && (source < 0 || a.Hazard.Source == source))
             {
                 float delta = a.Hazard.Fire - age;
                 if (delta >= 0) until = Math.Min(until, delta); else since = Math.Min(since, -delta);
@@ -57,6 +58,7 @@ internal static class CrimsonRig
         float age = CrimsonVisuals.RenderAge(boss);
         var signal = Signal(boss, -1, age);
         float ending = boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat ? .65f : 1;
+        if (boss.State.PerformerDefeated) ending *= .18f;
         // Final changes location/exposure, NEVER the performer's 56px stature.
         DrawPerformer(batch, screen, boss.NPC.Center, age, boss.NPC.velocity, 1,
             boss.State.MusicStart >= 0, signal.Charge, signal.Recoil, ending);
@@ -68,8 +70,8 @@ internal static class CrimsonRig
         if (performer is not { } sprite) return;
         int idle = floating ? 2 : Math.Abs(velocity.X) > .7f && MathF.Sin(age * .22f) > 0 ? 3 : 0;
         float cast = CrimsonInvocation.Ease(charge * 2);
-        if (floating) DrawPose(2, 1);
-        else { DrawPose(idle, 1 - cast); DrawPose(1, cast); }
+        DrawPose(idle, 1 - cast);
+        DrawPose(1, cast); // The floating conductor still visibly calls/releases.
         Vector2 orb = center + new Vector2(facing * 28, -13).RotatedBy(velocity.X * .009f);
         CrimsonEnergy.Begin();
         CrimsonEnergy.AddCore(orb, 13 + charge * 10 + recoil * 7, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
@@ -99,10 +101,12 @@ internal static class CrimsonRig
         float appear = CrimsonInvocation.Ease(born / 62), snap = MathF.Exp(-Math.Max(0, born - 12) / 14);
         var signal = Signal(boss!, effigy.State.Index, age);
         float size = effigy.State.Index == 1 ? 370 : 330;
-        float alpha = boss!.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat ? .35f : 1;
+        float alpha = boss!.State.Presence(effigy.State.Index, age);
+        if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat) alpha *= .35f;
+        if (alpha <= .001f) return false;
         Mesh(batch, texture, texture.Bounds, effigy.NPC.Center - screen, texture.Size() * .5f,
             size / texture.Height * (.90f + appear * .1f), age + effigy.State.Index * 100,
-            14, signal.Charge, signal.Recoil, Color.White * (appear * alpha), false, MathF.Sin(age * .015f + effigy.State.Index) * .06f, true);
+            14, signal.Charge, signal.Recoil, Color.White * (appear * alpha), effigy.NPC.velocity.X < -1, effigy.NPC.rotation + signal.Recoil * .045f, true);
         CrimsonEnergy.Begin();
         CrimsonEnergy.AddCore(effigy.NPC.Center, 23 + signal.Charge * 20 + snap * 55, age,
             signal.Charge, Math.Max(signal.Recoil, snap), appear * alpha, CrimsonVisuals.Reduced);

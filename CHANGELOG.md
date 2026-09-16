@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Scarlet Invocation (stable `crimson_foundry`): replace simultaneous static apparitions with sequential20%-retreat acts and a retained-HP four-target Final; add authority pursuit/formation movement and explicit standard boss-bar projection.
+- Replace sparse volley cooldowns with measured-beat call/response phrases, rapid uneven fills and Final rolls. Preserve native defensive hooks, full warning lead, bounded shared corridors and exact-Fight phase cleanup. Public Crimson display names become Scarlet; recording/assets are unchanged. Branch0.3.13/protocol46 is not a public release.
+
 - Retune Doll's native beam/bullet source damage for endgame armor, shorten the main eight-cast live hold without changing its warning/fire cadence, and log Chalice deferred damage separately from immediate damage. Equipment effects remain native; this is not a public release.
 
 ## [0.3.1] — 2026-09-14

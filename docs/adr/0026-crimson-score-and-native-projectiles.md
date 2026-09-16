@@ -21,7 +21,7 @@ related_docs:
 
 # ADR-0026: Crimson score clock and native projectiles
 
-Current amendment: [independent summons](#independent-summons-amendment--2026-09-16). The original steel-machine/50% purge rationale below is historical, not the current visual/phase instruction.
+Current amendment: [sequential acts and rhythm phrases](#sequential-acts-and-rhythm-phrases--2026-09-16). The original steel-machine/50% purge rationale below is historical, not the current visual/phase instruction.
 
 The owner requests a separate music-led Raid without a fixed arena, then a50% armored→fast-machine transformation. Reuse the definition-routed coordinator/transport, not either prior encounter's runtime. `crimson_foundry` owns a runtime, preparation roster, native NPC projection, immutable hazard projectiles and terminal cleanup; no global encounter switch, extra assembly or persisted session is added. Feature termination schema3/version1 and protocol42 distinguish matching peers without renumbering prior packet IDs.
 
@@ -50,3 +50,15 @@ The main projection replaces the old purge epoch with a Final epoch and adds the
 `CrimsonBarrageGeometry` takes field/cue/source, never player coordinates. All lanes in a volley share one corridor; authority issues fixed world-space geometry. Music fade and continuous introductory bars consume the accepted epoch but never alter score timing or gameplay.
 
 The new companion is a normal owner-replicated minion, outside encounter authority/roster/Ready. Owner chooses locomotion and creates child beams; missing remote owner buffs cannot dismiss a replica. Child lifetime checks exact owner plus projectile identity. The client-only rig is shared as artwork, not via a gameplay dependency on Client or on Doll's runtime.
+
+## Sequential acts and rhythm phrases — 2026-09-16
+
+Supersedes the independent-summons amendment's simultaneous three-target progression and sparse volley scheduling, not native damage or resource ownership. Owner requests A→B→C at20% retained HP, then the three survivors plus performer; moving actors, a standard HP bar and drum-like call/response with rapid fills. Display names become Scarlet Invocation/Scarlet Grimoire; stable identifiers remain unchanged.
+
+Authority caps solo-act native damage at the20% boundary and commits exactly one phase transition. Withdrawn actors are retained, invulnerable and hidden; they are neither killed nor refilled. Final opens all four after the protected epoch. Victory requires the performer flag plus three final kills; all-out takes priority. Phase epochs invalidate all outstanding hazards; final source death invalidates that source. Missing owned actors remain errors. Cleanup is retryable and exact-Fight, including withdrawn/partly spawned resources.
+
+Protocol46 extends the native actor projection with phase/unlock/target, phrase posture and bounded target HP, and extends hazards with phase epoch/phrase/accent. Decode the complete bounded body, reject rollback and inconsistent final state, then replace. The source budget is unchanged. No new packet operation, client outcome claim or saving schema is added.
+
+`CrimsonRhythm` creates measured-beat subdivision phrases with separate warning/impact times, admitted in advance as a bounded batch. Short live pulses and overlapping safe corridors replace the old global volley cooldown. Native projectile immunity remains; high event cadence is not guaranteed repeated HP loss. Movement follows the authority target and authored formations but never retargets forecast geometry. Audio remains a follower of the score epoch, not authority. Subjective fit and network fairness are unverified until playtesting.
+
+Official API check,2026-09-16: pinned tML666f69962d3bdffde54fc14025f02634965b4e7c [`ModBossBar`](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModBossBar.cs) supports `ModifyInfo` with life/lifeMax and standard `DrawFancyBar`; the [`BigProgressBarSystem` patch](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/GameContent/UI/BigProgressBar/BigProgressBarSystem.cs.patch) gives an explicitly assigned NPC.BossBar priority. Use that native UI adapter, not a text-heavy custom combat overlay. API inspection does not prove the owner's bar style will display correctly.

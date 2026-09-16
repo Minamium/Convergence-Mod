@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-16",
+  "feature": "crimson_foundry",
+  "display_name": "Scarlet Invocation",
+  "branch": "feat/scarlet-rhythm-phases",
+  "base_commit": "9f46892cf4d4fb131faca625cc2697fa20937d52",
+  "source_version": "0.3.13",
+  "protocol": 46,
+  "changes": [
+    "sequential20-percent retreat acts",
+    "retained-HP four-target Final",
+    "authority pursuit and formations",
+    "measured-beat call/response, fill and roll phrases",
+    "standard ModBossBar adapter",
+    "Scarlet display names with stable IDs"
+  ],
+  "verification": {
+    "domain": "246 cases passed in isolated .NET8.0.424; build0 errors/0 warnings",
+    "tooling": "45 tests passed, including four Scarlet source-wiring guards; source guards are not an engine execution test",
+    "static": "catalog/repository/YAML wrapper passed; checked again after final documentation edit",
+    "native_build": "not_run: pinned tModLoader/dependency installation not present in this environment",
+    "runtime": "not_run: no GUI, multiplayer or listening session performed",
+    "syntax": "Roslyn C#12 parsing of all repository C# sources passed; does not bind native APIs",
+    "github_ci": "pending feature-branch commit; the baseline-only workflow result is not implementation evidence"
+  },
+  "limits": [
+    "Beat-map timing is not certified drum transcription or perceived synchronization.",
+    "Standard bar may be suppressed by user settings or third-party bar styles.",
+    "Native immunity is retained; sixteenth-note effects do not imply damage on every pulse.",
+    "No latency compensation, Raid Down integration, rewards or companion party substitution added."
+  ],
+  "assets_changed": false,
+  "shared_install": "not performed",
+  "publication": "not performed",
+  "merge": "not performed"
+}

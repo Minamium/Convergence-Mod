@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-15
+last_reviewed: 2026-09-16
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -77,3 +77,7 @@ Owner reports Mod load failure. The00:54:28 client exception identifies `Crimson
 ## Crimson field, vulnerability and articulated machine — 2026-09-15 / 0.3.8 → 0.3.9
 
 Owner rejects the floating illustration, squat silhouette, quiet/short attacks and excessive music/SFX level; reports the Boss could not be hit. Requests shared-pedestal Raid selection, Doll-sized containment, a separate operator/slim post-purge machine and stronger red reactor/Luminance energy. Archived sessions show solo and two-player Defeats after15.65s/47.47s of combat, both followed by cleanup; no purge or per-hit/HP evidence was logged. Code identifies the retained client invulnerability flag, not measured zero DPS. Fix native vulnerability projection; introduce shared field/lease adapter, articulated twelve-part rig, longer release/full-field hazards, lower music/current bounded Portal cues and progress/DPS logging. Supplied video overview and73–76s frames were visually inspected with pinned WoTM source; no third-party assets copied. [Evidence](../evidence/2026-09-15-crimson-stage.json) separates old observations, automated checks and pending owner acceptance.
+
+## Scarlet phase/rhythm redesign — 2026-09-16 / feature0.3.13
+
+Owner reports Crimson naming conflicts with Terraria's biome; sparse attacks do not follow the audible drum groove; three stationary simultaneous apparitions are dull and the vanilla HP bar was absent. Requests rapid rhythmic forecast-call/impact-response, short uneven fills, A→B→C each retreating at20%, then all three plus performer, loose target pursuit and attack formations. Implement Scarlet display names with stable IDs, retained threshold actors, four-target Final, measured-beat subdivision phrases, short native collision pulses, body motion/cast poses and an explicit standard bar adapter. Final victory requires all four with all-out priority; this fills the previously unspecified terminal rule without a save/loot change. [Evidence](../evidence/2026-09-16-scarlet-rhythm.json) separates automated checks from pending native build, listening and playtesting. Earlier128BPM/seven-tick examples were design illustrations, not certification of the whole track or its drum transcription.

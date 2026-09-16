@@ -8,8 +8,8 @@ Fight [b]Lacrimosa — The Bound Heart[/b], a tragic suspended Doll, through mul
 [b]Ghost Samurai — in development.[/b]
 An independent summoned boss with its own attacks and normal player death. Rewards, balance and lifecycle work are unfinished. It is not another completed Raid.
 
-[b]Crimson Invocation — experimental.[/b]
-An NPC-sized scarlet conjurer commands three large apparitions, each with independent HP. Defeat them to face her, dodging music-led field patterns through their safe corridors. Use Crimson Grimoire on the shared Foundation Core and confirm Ready. Scarlet Covenant summons a ten-slot companion, not a Raid participant. Uses normal deaths. Music: Graceful Ordeal by kuku — https://www.youtube.com/watch?v=HnBESyUqx_g . Balance and multiplayer presentation remain under playtest.
+[b]Scarlet Invocation — experimental.[/b]
+Face three apparitions one at a time, each retreating at 20% HP. All three return with their remaining HP alongside the NPC-sized conjurer for a four-target finale. Dodge music-timed call/response phrases and sudden fills through shared safe corridors. Use Scarlet Grimoire on the shared Foundation Core and confirm Ready. Scarlet Covenant summons a ten-slot companion, not a Raid participant. Uses normal deaths. Music: Graceful Ordeal by kuku — https://www.youtube.com/watch?v=HnBESyUqx_g . Balance and multiplayer presentation remain under playtest.
 
 [h2]Requirements[/h2]
 [list]
