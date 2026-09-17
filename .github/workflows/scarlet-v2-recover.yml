@@ -1,0 +1,60 @@
+name: Recover Scarlet v2 prerequisites
+on:
+  push:
+    branches: [feat/scarlet-luminance-presentation-v2]
+    paths: [.github/workflows/scarlet-v2-recover.yml]
+permissions:
+  contents: read
+concurrency:
+  group: scarlet-v2-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.ref == 'refs/heads/feat/scarlet-luminance-presentation-v2'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Import only the previously requested Scarlet code, without reverting current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 6f0d56b5ce638eda66fd9f3651ea9dc01b1edace HEAD
+          git fetch --no-tags origin 4ffa57d508c7b7ab1ff6ea737a735c4846089077
+          git diff --binary 9f46892cf4d4fb131faca625cc2697fa20937d52 4ffa57d508c7b7ab1ff6ea737a735c4846089077 -- \
+            Content/Encounters/CrimsonFoundry Client/Encounters/CrimsonFoundry \
+            Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs \
+            Content/Encounters/FirstSeverance/FirstSeveranceDollActivation.cs \
+            Localization/CrimsonFoundry Tests/Convergence.DomainTests \
+            tools/tests/test_scarlet_contracts.py > "$RUNNER_TEMP/scarlet-prerequisite.patch"
+          git apply --3way "$RUNNER_TEMP/scarlet-prerequisite.patch"
+      - name: Compile checked-in original shaders with the previously inspected compiler
+        shell: pwsh
+        run: |
+          Invoke-WebRequest 'https://codeload.github.com/LucilleKarma/Luminance/zip/b2468dfd2f299597602dc6826af781d436c29a57' -OutFile "$env:RUNNER_TEMP/luminance.zip"
+          Expand-Archive "$env:RUNNER_TEMP/luminance.zip" "$env:RUNNER_TEMP/luminance"
+          $compiler = Get-ChildItem "$env:RUNNER_TEMP/luminance" -Recurse -Filter fxc.exe | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $compiler) { throw 'Pinned compiler unavailable' }
+          python tools/compile_shaders.py --fxc $compiler
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Checkpoint only the authorized feature branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Content/Encounters/CrimsonFoundry Client/Encounters/CrimsonFoundry \
+            Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs \
+            Content/Encounters/FirstSeverance/FirstSeveranceDollActivation.cs \
+            Localization/CrimsonFoundry Tests/Convergence.DomainTests \
+            tools/tests/test_scarlet_contracts.py Assets/AutoloadedEffects/Shaders
+          git diff --cached --check
+          git commit -m 'feat: recover Scarlet physical phases onto current main and check in compiled materials'
+          git push origin HEAD:refs/heads/feat/scarlet-luminance-presentation-v2
