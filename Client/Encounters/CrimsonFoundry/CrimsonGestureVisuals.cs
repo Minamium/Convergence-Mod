@@ -18,7 +18,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
 {
     private Guid fight;
     private int previous = -1;
-    private readonly HashSet<(int Phrase, byte Pulse, bool Fire)> heard = new();
+    private readonly HashSet<(int Phrase, byte Pulse, byte Source, bool Fire)> heard = new();
     private readonly List<(SlotId Id, int Until)> voices = new();
     internal static Vector2 V(CrimsonPoint p) => new(p.X, p.Y);
     internal static Color Palette(int source) => ScarletMaterials.Palette(source);
@@ -35,7 +35,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             Cue(p.Born, false); Cue(p.Fire, true);
             void Cue(int tick, bool impact)
             {
-                if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, impact))) return;
+                if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
                 string asset = impact ? p.Source switch
                 { 0 => "PylonBreak", 1 => "SwordImpale", 2 => "BladeUnsheathe", _ => "Beams/SpreadScatter" }
                     : p.Source switch { 0 => "EnergyLock", 1 => "BladeUnsheathe", 2 => "LanceCharge", _ => "EnergyGather" };
@@ -90,6 +90,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         try
         {
             ScarletAtmosphere.Draw(batch);
+            DrawSources(boss!, batch, age);
             using var scope = new ScarletGraphicsScope(batch);
             Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
             foreach (Projectile projectile in Main.ActiveProjectiles)
@@ -98,18 +99,38 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 var p = gesture.Plan;
                 if (age < p.Born || age >= p.End + 10) continue;
                 bool warning = age < p.Fire;
-                float alpha = warning ? .43f + .42f * MathF.Exp(-(age - p.Born) / 5)
+                float alpha = warning ? .78f + .18f * MathF.Exp(-(age - p.Born) / 5)
                     : age < p.End ? 1 : 1 - CrimsonInvocation.Ease((age - p.End) / 10);
                 float sample = warning ? p.Fire : Math.Min(age, p.End - .001f);
                 if (age >= p.End && p.Technique is CrimsonTechnique.ChoirHook or CrimsonTechnique.ChoirThrust or CrimsonTechnique.MantleScissors)
                     sample = p.Fire + (p.End - p.Fire - 1) * (1 - CrimsonInvocation.Ease((age - p.End) / 10));
                 int count = CrimsonTechniqueGeometry.Write(p, sample, strokes, warning);
                 ScarletMaterials.Strokes(strokes[..count], p.Source, age, alpha, warning,
-                    p.Technique == CrimsonTechnique.ChoirRend, warning ? 0 : p.Accent * MathF.Exp(-(age - p.Fire) / 4));
+                    p.Technique == CrimsonTechnique.ChoirRend, warning ? 0 : (1 + p.Accent * .35f) * MathF.Exp(-(age - p.Fire) / 5),
+                    Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire);
                 if (p.Technique == CrimsonTechnique.CrownCinders && warning) DrawCinders(p, age);
             }
         }
         finally { batch.End(); }
+    }
+    private static void DrawSources(CrimsonBoss boss, SpriteBatch batch, float age)
+    {
+        // At most one anticipation/release per actor, not one giant flash per
+        // ribbon segment. Read-only source positions; no client target selection.
+        for (int source = 0; source < 4; source++)
+        {
+            var signal = CrimsonRig.Signal(boss, source, age);
+            if (signal.Charge < .01f && signal.Recoil < .01f) continue;
+            Vector2 at = boss.NPC.Center;
+            bool present = source == 3;
+            if (source < 3)
+                foreach (NPC n in Main.ActiveNPCs)
+                    if (n.ModNPC is CrimsonEffigy e && e.State.Fight == boss.State.Fight && e.State.Index == source)
+                    { at = n.Center; present = boss.State.Presence(source, age) > .1f; break; }
+            if (!present) continue;
+            if (CrimsonGesture.TryPose(boss, source, age, out var pose)) at = V(pose.Body(age));
+            CrimsonRig.DrawPressure(batch, at, source, age, signal.Charge, signal.Recoil);
+        }
     }
     private static void DrawCinders(in CrimsonGesturePlan p, float age)
     {

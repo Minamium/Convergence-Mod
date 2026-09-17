@@ -8,7 +8,12 @@ import argparse
 import hashlib
 from pathlib import Path
 
-APPROVED_SHA256 = '94b77c968991bf52b14504bb11095c417dbf4dd2abb3bc378da779da39400a2d'
+# Original generated export, then the owner's explicitly supplied clipboard PNG.
+# These are distinct byte identities; neither is silently recompressed/resized.
+APPROVED_SHA256 = {
+    '94b77c968991bf52b14504bb11095c417dbf4dd2abb3bc378da779da39400a2d',
+    '802d1f6393ae6f0919214e3de535c1b38cc8e740161fcb98e5ba7f71c5a7e1ef',
+}
 DESTINATION = Path('Assets/Textures/Backgrounds/ScarletSanctum.png')
 
 def main() -> None:
@@ -19,7 +24,7 @@ def main() -> None:
     if not data.startswith(b'\x89PNG\r\n\x1a\n'):
         parser.error('Expected the original approved PNG file')
     digest = hashlib.sha256(data).hexdigest()
-    if digest != APPROVED_SHA256:
+    if digest not in APPROVED_SHA256:
         parser.error(f'Artwork identity mismatch: {digest}; refusing to substitute another image')
     root = Path(__file__).resolve().parents[1]
     destination = root / DESTINATION

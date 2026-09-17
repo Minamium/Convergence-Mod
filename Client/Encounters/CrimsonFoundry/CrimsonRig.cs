@@ -66,7 +66,16 @@ internal static class CrimsonRig
         if (performer is not { } sprite) return;
         int idle = floating ? 2 : Math.Abs(velocity.X) > .7f && MathF.Sin(age * .22f) > 0 ? 3 : 0;
         float cast = CrimsonInvocation.Ease(charge * 2);
-        DrawPose(idle, 1 - cast); DrawPose(1, cast);
+        // A tiny character does not benefit from a 24x32 apparition mesh.
+        // Keep her authored pixels, a restrained silhouette rim, and no huge orb
+        // over her face. Preserve the caller's batch including UI/sky transforms.
+        using (var scope = new ScarletGraphicsScope(batch))
+        {
+            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+            DrawPose(idle, 1 - cast); DrawPose(1, cast);
+            batch.End();
+        }
         Vector2 orb = center + new Vector2(facing * 28, -13).RotatedBy(velocity.X * .009f);
         CrimsonEnergy.Begin();
         CrimsonEnergy.AddCore(orb, 13 + charge * 10 + recoil * 7, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
@@ -85,8 +94,16 @@ internal static class CrimsonRig
         void DrawPose(int pose, float opacity)
         {
             if (opacity < .001f) return;
-            Mesh(batch, sprite, poses[pose], center - screen, pivots[pose], 56f / 540,
-                age, .8f, charge, recoil, Color.White * (alpha * opacity), facing < 0, velocity.X * .009f, false);
+            Vector2 at = center - screen + new Vector2(0, floating ? MathF.Sin(age * .045f) * 1.4f : 0);
+            float tilt = Math.Clamp(velocity.X * .009f, -.13f, .13f) - recoil * .035f;
+            var flip = facing < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+            var origin = pivots[pose];
+            if (facing < 0) origin.X = poses[pose].Width - origin.X;
+            Color rim = new Color(243, 118, 136, 0) * (alpha * opacity * .26f);
+            for (int k = 0; k < 4; k++)
+                batch.Draw(sprite, at + new Vector2(k == 0 ? -1 : k == 1 ? 1 : 0, k == 2 ? -1 : k == 3 ? 1 : 0),
+                    poses[pose], rim, tilt, origin, 56f / 540, flip, 0);
+            batch.Draw(sprite, at, poses[pose], Color.White * (alpha * opacity), tilt, origin, 56f / 540, flip, 0);
         }
     }
     internal static bool DrawEffigy(CrimsonEffigy effigy, SpriteBatch batch, Vector2 screen)
@@ -122,6 +139,30 @@ internal static class CrimsonRig
             CrimsonEnergy.Draw(batch);
         }
         return false;
+    }
+    internal static void DrawPressure(SpriteBatch batch, Vector2 center, int source, float age, float charge, float recoil)
+    {
+        // Broken converging filaments, not a UI target circle or opaque halo.
+        var bloom = MiscTexturesRegistry.BloomCircleSmall.Value;
+        Color hue = ScarletMaterials.Palette(source); hue.A = 0;
+        float pulse = .78f + .22f * MathF.Pow(Math.Max(0, MathF.Sin(age * .36f)), 3);
+        int count = CrimsonVisuals.Reduced ? 4 : 11;
+        for (int i = 0; i < count; i++)
+        {
+            float drift = (age * .022f + i * .618034f) % 1;
+            float angle = i * 2.399963f + MathF.Sin(i * 2.1f) * .2f;
+            float reach = (source == 3 ? 35 : 135) * (1 - drift * charge) + recoil * 55;
+            Vector2 offset = new Vector2(reach, 0).RotatedBy(angle);
+            float brightness = MathF.Sin(drift * MathF.PI) * charge * .38f;
+            batch.Draw(bloom, center + offset - Main.screenPosition, null, hue * brightness, angle,
+                bloom.Size() * .5f, new Vector2(17 + charge * 22, 2.8f) / bloom.Width, SpriteEffects.None, 0);
+        }
+        float radius = source == 3 ? 22 : 56;
+        batch.Draw(bloom, center - Main.screenPosition, null, hue * (charge * pulse * .36f + recoil * .25f), 0,
+            bloom.Size() * .5f, (radius + charge * 25 + recoil * 42) * 2 / bloom.Width, SpriteEffects.None, 0);
+        if (recoil > .02f)
+            batch.Draw(bloom, center - Main.screenPosition, null, new Color(255, 222, 214, 0) * (recoil * .58f), -.35f,
+                bloom.Size() * .5f, new Vector2(150, 7) * (CrimsonVisuals.Reduced ? .45f : 1) / bloom.Width, SpriteEffects.None, 0);
     }
     private static void Mesh(SpriteBatch batch, Texture2D texture, Rectangle source, Vector2 center, Vector2 pivot,
         float scale, float time, float motion, float charge, float recoil, Color tint, bool flip, float rotation, bool apparition, int species = -1)

@@ -77,7 +77,10 @@ internal sealed class CrimsonSkySystem : ModSystem
     public override void Load()
     {
         if (Main.dedServ) return;
-        bool available = Mod.GetFileNames().Any(path => path == CrimsonSky.PaintingPath);
+        // tML packs PNGs as .rawimg. Accept the compiled asset as well as a
+        // loose PNG, or an imported background still remains invisible.
+        bool available = Mod.GetFileNames().Any(path => path == CrimsonSky.PaintingPath
+            || path == "Assets/Textures/Backgrounds/ScarletSanctum.rawimg");
         SkyManager.Instance[CrimsonSky.Key] = sky = new CrimsonSky { Available = available };
         if (!available) Mod.Logger.Warn("scarlet.background_asset_missing: approved ScarletSanctum.png has not been imported; retain the normal world sky, never substitute another raid's painting.");
     }

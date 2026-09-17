@@ -32,10 +32,7 @@ internal static class CrimsonEnergy
         var portal = ShaderManager.GetShader("Convergence.PortalBeam");
         var dust = ShaderManager.GetShader("Convergence.RaidEnergy");
         var device = Main.instance.GraphicsDevice;
-        batch.End();
-        var blend = device.BlendState; var depth = device.DepthStencilState; var raster = device.RasterizerState;
-        var a = device.Textures[1]; var b = device.Textures[2]; var c = device.Textures[3];
-        var s1 = device.SamplerStates[1]; var s2 = device.SamplerStates[2]; var s3 = device.SamplerStates[3];
+        using var scope = new ScarletGraphicsScope(batch);
         try
         {
             device.BlendState = BlendState.AlphaBlend; device.DepthStencilState = DepthStencilState.None; device.RasterizerState = RasterizerState.CullNone;
@@ -93,11 +90,7 @@ internal static class CrimsonEnergy
         }
         finally
         {
-            count = coreCount = 0; device.Textures[1] = a; device.Textures[2] = b; device.Textures[3] = c;
-            device.SamplerStates[1] = s1; device.SamplerStates[2] = s2; device.SamplerStates[3] = s3;
-            device.BlendState = blend; device.DepthStencilState = depth; device.RasterizerState = raster;
-            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
-                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+            count = coreCount = 0;
         }
     }
     private static void Quad(Vector2 start, Vector2 across, Vector2 along)

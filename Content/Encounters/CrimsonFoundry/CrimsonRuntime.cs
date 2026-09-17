@@ -236,7 +236,11 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         if (actor is null) return;
         var state = State; var f = state.Field;
         Vector2 focus = target >= 0 ? Main.player[target].Center : new(f.CenterX, f.CenterY);
-        Vector2 mainGoal = phase == 3 ? focus + new Vector2(170, -200) : new(f.CenterX, f.Top + 130);
+        // The old top+130 perch was ~990px above a grounded player, outside
+        // normal play view. This shared authority position keeps the 56px
+        // conductor near the action; Final's accepted attack poses are unchanged.
+        Vector2 mainGoal = phase == 3 ? focus + new Vector2(170, -200)
+            : new(Math.Clamp(f.CenterX, focus.X - 280, focus.X + 280), focus.Y - 260);
         if (musicStart < 0) mainGoal = ground + new Vector2(0, -95);
         if (age >= poseUntil[3]) MoveTo(actor.NPC, mainGoal, phase == 3 ? 13 : 9);
         for (int i = 0; i < 3; i++)
