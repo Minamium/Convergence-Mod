@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Add five original spectral slash textures for Ghost Samurai, with distinct normal/heavy/grid/wind/rush presentation and reduced-effects support. Preserve attack clocks, hit geometry, safe gaps, boss AI and Oboro balance.
+
 - Retune Doll's native beam/bullet source damage for endgame armor, shorten the main eight-cast live hold without changing its warning/fire cadence, and log Chalice deferred damage separately from immediate damage. Equipment effects remain native; this is not a public release.
 
 ## [0.3.1] — 2026-09-14

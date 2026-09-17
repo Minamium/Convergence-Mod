@@ -11,7 +11,7 @@ internal static class GhostSamuraiComboVisuals
     internal static void DrawCleave(SpriteBatch batch, SamuraiHazard h, Vector2 center, float age, bool locked, Rectangle view, bool reduced)
     {
         bool live = h.Live(age);
-        Color ink = new(6, 13, 30), edge = live ? new(237, 214, 255) : locked ? new(255, 241, 185) : new(255, 180, 58);
+        Color ink = new(6, 13, 30), edge = live ? new(210, 239, 255) : locked ? new(255, 241, 185) : new(255, 180, 58);
         float start = Math.Max(view.Top, center.Y - h.Radius), end = Math.Min(view.Bottom, center.Y + h.Radius);
         int stride = Math.Max(reduced ? 10 : 6, view.Height / 128);
         // The entire dangerous half-disc has restrained continuous coverage.
@@ -41,6 +41,21 @@ internal static class GhostSamuraiComboVisuals
         for (int arc = 0; arc < arcs; arc++)
         {
             float radius = 260 + arc * 150;
+            if (live)
+            {
+                const float width = 96;
+                // A front-only clip and angular inset keep every sprite corner
+                // off the safe rear half, including the beginning/end of the fan.
+                int split = Math.Clamp((int)(h.DX > 0 ? MathF.Ceiling(center.X) : MathF.Floor(center.X)), view.Left, view.Right);
+                Rectangle front = h.DX > 0 ? new(split, view.Top, view.Right - split, view.Height)
+                    : new(view.Left, view.Top, split - view.Left, view.Height);
+                float margin = MathF.Asin((width * .5f + 3) / radius);
+                float from = Math.Max(-MathHelper.PiOver2 + margin, head - 2.9f);
+                float to = Math.Min(MathHelper.PiOver2 - margin, head);
+                if (to > from) GhostSamuraiSlashArt.Arc(batch, SamuraiSlashArt.Heavy, center, radius,
+                    from, to - from, width, GhostSamuraiSlashArt.Energy(age, h.Fire, h.End) * (reduced ? .58f : .9f), front, (int)h.DX);
+                continue;
+            }
             for (int segment = 0; segment < 24; segment++)
             {
                 float a = Math.Max(-MathHelper.PiOver2, head - 1.2f) + segment / 24f * Math.Min(1.2f, head + MathHelper.PiOver2);
@@ -53,9 +68,9 @@ internal static class GhostSamuraiComboVisuals
         }
     }
 
-    internal static void DrawShock(SpriteBatch batch, SamuraiHazard h, Vector2 center, float age)
+    internal static void DrawShock(SpriteBatch batch, SamuraiHazard h, Vector2 center, float age, bool reduced)
     {
-        Color ink = new(6, 13, 30), edge = h.Live(age) ? new(231, 202, 255) : new(255, 210, 110);
+        Color ink = new(6, 13, 30), edge = h.Live(age) ? new(203, 232, 255) : new(255, 210, 110);
         if (!h.Live(age))
         {
             // Forecast the maximum swept height, anchored to the same floor as
@@ -83,6 +98,8 @@ internal static class GhostSamuraiComboVisuals
         Vector2 a = center - new Vector2(halfWidth, 0), b = center + new Vector2(halfWidth, 0);
         GhostSamuraiVisuals.Stroke(batch, a, b, geometry.Radius * 2, ink * .7f);
         GhostSamuraiVisuals.Stroke(batch, a, b, geometry.Radius * 2 - 4, edge * .5f);
+        GhostSamuraiSlashArt.Strip(batch, SamuraiSlashArt.Wind, h.DX > 0 ? a : b, h.DX > 0 ? b : a,
+            geometry.Radius * 2 - 8, reduced ? .35f : .6f);
         // A crest rises only within the actual jump-clearance height.
         for (int i = 0; i < 5; i++)
         {
