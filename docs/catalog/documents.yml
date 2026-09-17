@@ -577,7 +577,7 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 6349877c09b4c32b724e6d783c0fb45607fb82c7574789f693137bbed4e4d60a
+  content_sha256: f93764ec86c0e343f8bb9007561fe8f715406569ce89099a3e209e65d9fc71c5
   document_type: spec
   status: accepted
   owners:
@@ -868,7 +868,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 38ac3ee536f6a9e6c3ab40d6329f4d405081947acbfb38c6d0480ee57a501be3
+  content_sha256: 8304f7af4e2c12a0259191c144aa5ecf1ae74bbc2aeacfc2dbb994418211b9c2
   document_type: evidence
   status: historical
   owners:
@@ -1263,7 +1263,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 4b5d13eeee503206ee15ecce1affb3975d38216c55e023207cc83b0b86dcf64d
+  content_sha256: bcbca3525fb9cbcc2f314f2dfa63ee4f42e93cc8fc84fcbdc4a9c847be693bfc
   document_type: status
   status: accepted
   owners:

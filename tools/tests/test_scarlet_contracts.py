@@ -76,7 +76,21 @@ class ScarletContracts(unittest.TestCase):
         self.assertNotIn('Main.time =',sky)
         image=ROOT/'Assets/Textures/Backgrounds/ScarletSanctum.png'
         if image.exists():
-            self.assertEqual('94b77c968991bf52b14504bb11095c417dbf4dd2abb3bc378da779da39400a2d',hashlib.sha256(image.read_bytes()).hexdigest())
+            self.assertEqual('802d1f6393ae6f0919214e3de535c1b38cc8e740161fcb98e5ba7f71c5a7e1ef',hashlib.sha256(image.read_bytes()).hexdigest())
+        self.assertIn('ScarletSanctum.rawimg', sky)
+    def test_conductor_stays_near_the_authority_focus_without_changing_final_pose(self):
+        runtime=(CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8')
+        self.assertNotIn('new(f.CenterX, f.Top + 130)', runtime)
+        self.assertIn('focus.Y - 260', runtime)
+        self.assertIn('age >= poseUntil[3]', runtime)
+        self.assertIn('phase == 3 ? focus + new Vector2(170, -200)', runtime)
+    def test_forecast_and_attack_materials_are_separate_and_energy_restores_batch(self):
+        shader=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletRibbon.fx').read_text(encoding='utf-8')
+        self.assertIn('float4 Forecast(VO i)', shader)
+        self.assertIn('if(motion.x>.5 && signal.y>.5) return Forecast(i)', shader)
+        energy=(CLIENT/'CrimsonEnergy.cs').read_text(encoding='utf-8')
+        self.assertIn('using var scope = new ScarletGraphicsScope(batch)', energy)
+        self.assertNotIn('batch.Begin(', energy)
     def test_secondary_motion_is_cosmetic_and_metaballs_are_bounded(self):
         rig=(CLIENT/'ScarletArticulation.cs').read_text()
         self.assertIn('PushdownAutomata',rig)

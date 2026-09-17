@@ -15,7 +15,6 @@ using Terraria.ModLoader;
 namespace Convergence.Client.Encounters.CrimsonFoundry;
 
 internal enum ScarletPose { Follow, Stage, Windup, Strike, Recover, Manifest, Hidden }
-internal readonly record struct ScarletPartPose(Vector2 Offset, float Rotation, Vector2 Scale);
 
 // Disposable, client-only secondary motion. It never supplies collision geometry.
 internal sealed class ScarletArticulatedBody
@@ -105,8 +104,6 @@ internal sealed class ScarletArticulation : ModSystem
     private ScarletPhaseCutscene? cutscene;
     private readonly ScarletArticulatedBody?[] rigs = new ScarletArticulatedBody?[4];
     private readonly List<ScreenShakeSystem.ShakeInfo> shakes = new(8);
-    private static readonly PiecewiseCurve anticipation = new PiecewiseCurve()
-        .Add(EasingCurves.Sine, EasingType.InOut, .28f, .55f).Add(EasingCurves.Cubic, EasingType.Out, 1, 1);
     private static readonly PiecewiseCurve recoil = new PiecewiseCurve()
         .Add(EasingCurves.Exp, EasingType.Out, 1, .12f).Add(EasingCurves.Sine, EasingType.InOut, -.10f, .55f)
         .Add(EasingCurves.Sine, EasingType.Out, 0, 1);
@@ -153,23 +150,7 @@ internal sealed class ScarletArticulation : ModSystem
         shakes.RemoveAll(info => info.ShakeStrength <= .01f);
     }
     internal static ScarletPartPose Part(int species, int part, float age, float charge, float kick)
-    {
-        if (part == 0 || species == 3) return new(Vector2.Zero, 0, Vector2.One);
-        float strength = CrimsonVisuals.Reduced ? .15f : 1;
-        float side = part is 1 or 3 ? -1 : 1, lower = part >= 3 ? 1 : 0;
-        float load = anticipation.Evaluate(charge) * strength;
-        float flutter = CrimsonVisuals.Reduced ? 0 : MathF.Sin(age * .037f - part * 1.7f);
-        kick *= strength;
-        return species switch
-        {
-            0 => new(new(side * load * (9 + lower * 5), lower * (flutter * 3 + kick * 8)),
-                side * (load * .045f - kick * .08f), new(1 + load * .04f, 1 - kick * .035f)),
-            1 => new(new(side * load * (16 + lower * 8), -load * 11 + flutter * (3 + lower * 3)),
-                side * (-load * .11f + kick * .16f + flutter * .018f), new(1 + load * .08f, 1)),
-            _ => new(new(side * (flutter * 4 + load * 7), lower * (load * 10 - kick * 15)),
-                side * (load * .08f + flutter * .025f - kick * .08f), new(1, 1 + load * .06f))
-        };
-    }
+        => ScarletRigMotion.Part(species, part, age, charge, kick, CrimsonVisuals.Reduced);
     internal static float Release(float ticks) => recoil.Evaluate(Math.Clamp(ticks / 20, 0, 1));
     internal static void DrawSecondary(SpriteBatch batch, int source, float age, float alpha)
         => ModContent.GetInstance<ScarletArticulation>().rigs[source]?.DrawSecondary(batch, source, age, alpha);

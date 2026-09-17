@@ -39,8 +39,8 @@ float4 PS(VO i):COLOR0
  float3 light=species<.5?float3(1,.29,.055):species<1.5?float3(.44,.32,.85):species<2.5?float3(.69,.09,.37):float3(1,.19,.30);
  float spec=species<.5?pow(noise,4):species<1.5?pow(saturate(.5+.5*sin(uv.y*66+uv.x*8+noise*4-clock)),10):pow(tissue,5);
  // Authored shadow/detail is retained, not replaced by a constant tint.
- float3 color=base.rgb*(.86+noise*.16+pulse*.11);
- color+=light*base.a*(edge*(.21+pulse*.44)+spec*(.035+pulse*.10));
+ float3 color=base.rgb*(.98+noise*.12+pulse*.14);
+ color+=light*base.a*(edge*(.32+pulse*.72)+spec*(.04+pulse*.18));
  color+=light*base.a*exp(-cavity*9)*pulse*.17;
  return float4(color*mask,base.a*mask)*i.C;
 }

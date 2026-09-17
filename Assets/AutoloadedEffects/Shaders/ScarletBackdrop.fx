@@ -36,6 +36,16 @@ float4 PS(VO i):COLOR0
  float corona=exp(-pow((d-.124)*65,2))*(.52+g*.48);
  rgb=lerp(rgb,rgb*.11,disk*phaseWeights.w*.94);
  rgb+=float3(.24,.052,.12)*corona*phaseWeights.w*.37;
+ // Two sparse ember depths climb in the nave. Analytic lights, no new images,
+ // no floating old rods; reduced effects keeps the approved still painting.
+ for(int layer=0;layer<2;layer++) {
+   float2 q=uv*float2(19+layer*9,11+layer*7)+float2(layer*3.17,clock*(.22+layer*.13));
+   float2 cell=floor(q), local=frac(q)-.5;
+   float seed=frac(sin(dot(cell,float2(127.1,311.7))+layer*81.7)*43758.5453);
+   local.x+=sin(clock*.8+seed*17)*.13;
+   float ember=exp2(-dot(local*float2(39,24),local*float2(39,24)))*step(.88,seed);
+   rgb+=float3(.72,.14,.045)*ember*(.5+layer*.4)*movement*(.7+.3*signal.y);
+ }
  return float4(rgb*signal.x,signal.x)*i.C;
 }
 technique ScarletBackdrop { pass AutoloadPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 PS(); } }
