@@ -18,6 +18,8 @@ namespace Convergence.Client.Encounters.CrimsonFoundry;
 
 public sealed class CrimsonVisualConfig : ModConfig
 {
+    [System.ComponentModel.DefaultValue(true)] public bool CinematicCamera { get; set; } = true;
+
     public override ConfigScope Mode => ConfigScope.ClientSide;
     [DefaultValue(false)] public bool ReducedEffects;
     [DefaultValue(true)] public bool ScreenShake = true;

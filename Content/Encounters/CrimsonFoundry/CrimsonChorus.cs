@@ -75,6 +75,8 @@ public sealed class CrimsonChorusStrike : ModProjectile
     public override bool ShouldUpdatePosition() => false;
     public override bool? CanCutTiles() => false;
     public override bool? CanHitNPC(NPC target) => false;
+    public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
+        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage);
     public override bool PreDraw(ref Color lightColor) => false;
     public override void OnSpawn(IEntitySource source)
     { if (source is CrimsonChorusImpactSource own) { own.Impact.Validate(); Impact = own.Impact; } }
@@ -97,7 +99,7 @@ public sealed class CrimsonChorusStrike : ModProjectile
     public override void OnHitPlayer(Player target, Player.HurtInfo info) { spent = true; Projectile.hostile = false; }
     public override void AI()
     {
-        Projectile.damage = Impact.Damage;
+        Projectile.damage = CrimsonPlaytestTuning.AttackDamage;
         Projectile.hostile = Eligible(out var player);
         if (player is not null) Projectile.Center = player.Center;
         if (CrimsonChorus.TryBoss(Impact.Plan, out var boss))
@@ -172,13 +174,13 @@ internal sealed partial class CrimsonRuntime
         for (int i = 0; i < damage.Length; i++)
         {
             if (damage[i] == 0) continue;
-            var impact = new CrimsonChorusImpact(plan, (byte)i, damage[i]); impact.Validate();
+            var impact = new CrimsonChorusImpact(plan, (byte)i, CrimsonPlaytestTuning.AttackDamage); impact.Validate();
             int slot = Projectile.NewProjectile(new CrimsonChorusImpactSource(impact), Main.player[members[i].Slot].Center,
-                Vector2.Zero, ModContent.ProjectileType<CrimsonChorusStrike>(), damage[i], 0, Main.myPlayer);
+                Vector2.Zero, ModContent.ProjectileType<CrimsonChorusStrike>(), CrimsonPlaytestTuning.AttackDamage, 0, Main.myPlayer);
             if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.chorus_capacity");
             Main.projectile[slot].netUpdate = true;
         }
-        CrimsonPackets.Log($"event=ChorusResolved fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} living={living} native_sources={string.Join(",", damage)}");
+        CrimsonPackets.Log($"event=ChorusResolved fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} living={living} rehearsal_damage=1 budget_sources={string.Join(",", damage)}");
     }
     private void ClearChorus(int source)
     {

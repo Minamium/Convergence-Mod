@@ -10,7 +10,7 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
     int GroundX, int GroundY, byte DefeatedMask = 0, byte Phase = 0, int PhaseStart = 0, int UnlockAt = -1,
     short Target = -1, int PhraseStart = -1, int PhraseEnd = -1, CrimsonRhythmKind PhraseKind = CrimsonRhythmKind.Groove,
     int TargetLife = 3000000, int Life0 = 3000000, int Life1 = 3000000, int Life2 = 3000000, int Life3 = 3000000,
-    bool PerformerDefeated = false)
+    bool PerformerDefeated = false, int CompletedCycles = 0)
 {
     internal const int MaxMembers = 8;
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
@@ -22,6 +22,8 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
     internal bool Contains(int slot) => Array.Exists(Members ?? Array.Empty<CrimsonMember>(), m => m.Slot == slot && !m.Out);
     internal bool SourceActive(int source, float now) => source == 3 ? Vulnerable(now) : SummonVulnerable(source);
     internal int LifeFor(int index) => index switch { 0 => Life0, 1 => Life1, 2 => Life2, _ => Life3 };
+    internal int DamageFloor(int source) => Phase < 3 ? CrimsonPhaseRules.RetreatLife(TargetLife) : CompletedCycles == 0 ? 1 : 0;
+    internal bool HeldAtFloor(int source) => LifeFor(source) <= DamageFloor(source);
     internal int BarLife => Phase == 3 ? Life0 + Life1 + Life2 + Life3 : LifeFor(Phase);
     internal int BarMax => CrimsonPhaseRules.BarMaximum(Phase, TargetLife);
     internal bool FormationAt(float now) => PhraseKind != CrimsonRhythmKind.Groove && PhraseStart >= 0 && now < PhraseEnd + 12;
@@ -36,6 +38,7 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
     {
         if (old.Fight == Guid.Empty) return true;
         if (Fight != old.Fight || Age < old.Age || Phase < old.Phase || PhaseStart < old.PhaseStart) return false;
+        if (Phase == old.Phase && CompletedCycles < old.CompletedCycles) return false;
         if (GroundX != old.GroundX || GroundY != old.GroundY) return false;
         if (old.Stage >= CrimsonStage.Countdown && Stage < old.Stage) return false;
         if (old.MusicStart >= 0 && TargetLife != old.TargetLife) return false;
@@ -50,7 +53,7 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         w.Write(GroundX); w.Write(GroundY); w.Write(DefeatedMask);
         w.Write(Phase); w.Write(PhaseStart); w.Write(UnlockAt); w.Write(Target);
         w.Write(PhraseStart); w.Write(PhraseEnd); w.Write((byte)PhraseKind); w.Write(TargetLife);
-        w.Write(Life0); w.Write(Life1); w.Write(Life2); w.Write(Life3); w.Write(PerformerDefeated);
+        w.Write(Life0); w.Write(Life1); w.Write(Life2); w.Write(Life3); w.Write(PerformerDefeated); w.Write(CompletedCycles);
         w.Write((byte)Members.Length);
         foreach (var m in Members) { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); }
     }
@@ -61,13 +64,14 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         byte phase = r.ReadByte(); int epoch = r.ReadInt32(), unlock = r.ReadInt32(); short target = r.ReadInt16();
         int phrase = r.ReadInt32(), phraseEnd = r.ReadInt32(); var kind = (CrimsonRhythmKind)r.ReadByte();
         int maximum = r.ReadInt32(), a = r.ReadInt32(), b = r.ReadInt32(), c = r.ReadInt32(), d = r.ReadInt32();
-        bool dead = r.ReadBoolean(); int count = r.ReadByte();
+        bool dead = r.ReadBoolean(); int cycles = r.ReadInt32(); int count = r.ReadByte();
         if (f.Length != 16 || new Guid(f) == Guid.Empty || age is < 0 or > 72000 || start is < -1 or > 72000
             || final is < -1 or > 72000 || !Enum.IsDefined(stage) || count is < 1 or > MaxMembers || phase > 3
             || defeated > 7 || phase < 3 && (defeated != 0 || dead || final >= 0) || phase == 3 && final != epoch
             || epoch < 0 || epoch > age || unlock is < -1 or > 72400 || target is < -1 or >= 255
             || !Enum.IsDefined(kind) || phrase is < -1 or > 72400 || phraseEnd is < -1 or > 72800
             || (phrase < 0) != (phraseEnd < 0) || phrase >= 0 && (phraseEnd <= phrase || phraseEnd - phrase > 720)
+            || cycles is < 0 or > 1000
             || maximum is < 1 or > 17000000 || a < 0 || a > maximum || b < 0 || b > maximum
             || c < 0 || c > maximum || d < 0 || d > maximum
             || ((defeated & 1) != 0 && a != 0) || ((defeated & 2) != 0 && b != 0) || ((defeated & 4) != 0 && c != 0) || dead && d != 0
@@ -85,7 +89,7 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
             throw new InvalidDataException("crimson.clock_missing");
         if (target >= 0 && !Array.Exists(members, m => m.Slot == target)) throw new InvalidDataException("crimson.target_invalid");
         return new(new Guid(f), age, start, final, stage, members, x, y, defeated, phase, epoch, unlock,
-            target, phrase, phraseEnd, kind, maximum, a, b, c, d, dead);
+            target, phrase, phraseEnd, kind, maximum, a, b, c, d, dead, cycles);
     }
 }
 

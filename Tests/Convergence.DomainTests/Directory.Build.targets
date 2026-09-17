@@ -6,4 +6,6 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/RitualArmamentRules.cs" Link="Domain/RitualArmamentRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonTechnique.cs" Link="Domain/CrimsonTechnique.cs" />
   </ItemGroup>
+  <ItemGroup><Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonPlaytestTuning.cs" Link="CrimsonPlaytestTuning.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonChorusRules.cs" Link="CrimsonChorusRules.cs" /></ItemGroup>
 </Project>

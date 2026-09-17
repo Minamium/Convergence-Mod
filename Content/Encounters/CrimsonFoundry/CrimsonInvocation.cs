@@ -9,7 +9,7 @@ internal static class CrimsonInvocation
 {
     internal const int SummonCount = 3, AllDefeated = 7, ManifestTicks = 150;
     internal const int DeploymentTicks = 150, MusicLeadTicks = 120, MusicFadeTicks = 150;
-    internal static int TargetLife(int members) => (12000000 + 8000000 * (Math.Clamp(members, 1, 8) - 1)) / 4;
+    internal static int TargetLife(int members) => CrimsonPlaytestTuning.TargetLife(members);
     internal static byte Defeat(byte mask, int index)
     {
         if (index is < 0 or >= SummonCount || mask > AllDefeated) throw new ArgumentOutOfRangeException();

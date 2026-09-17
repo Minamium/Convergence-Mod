@@ -29,6 +29,8 @@ public sealed class CrimsonGesture : ModProjectile
     public override bool PreDraw(ref Color lightColor) => false;
     public override bool ShouldUpdatePosition() => false;
     public override bool? CanHitNPC(NPC target) => false;
+    public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
+        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage);
     public override bool? CanCutTiles() => false;
     internal bool TryBoss(out CrimsonBoss? boss)
     {
@@ -56,7 +58,7 @@ public sealed class CrimsonGesture : ModProjectile
     {
         bool valid = TryBoss(out var boss);
         Projectile.hostile = valid && boss!.State.SourceActive(Plan.Source, Clock(boss)) && Plan.Live(Clock(boss));
-        Projectile.damage = Plan.Damage;
+        Projectile.damage = CrimsonPlaytestTuning.AttackDamage;
         Projectile.Center = new Vector2(Plan.Stage.X, Plan.Stage.Y);
         if (valid)
         {

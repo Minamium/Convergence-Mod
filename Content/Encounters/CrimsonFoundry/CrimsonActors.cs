@@ -20,7 +20,7 @@ public sealed class CrimsonBoss : ModNPC
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
     {
-        NPC.width = 28; NPC.height = 56; NPC.lifeMax = 3000000; NPC.defense = 65;
+        NPC.width = 28; NPC.height = 56; NPC.lifeMax = CrimsonPlaytestTuning.SoloTargetLife; NPC.defense = 65;
         NPC.damage = 0; NPC.knockBackResist = 0; NPC.aiStyle = -1;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.netAlways = true;
         NPC.dontTakeDamage = true; NPC.boss = true;
@@ -29,8 +29,8 @@ public sealed class CrimsonBoss : ModNPC
     }
     public override bool CheckActive() => false;
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
-    public override bool? CanBeHitByItem(Player player, Item item) => State.Contains(player.whoAmI) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile projectile) => State.Contains(projectile.owner) ? null : false;
+    public override bool? CanBeHitByItem(Player player, Item item) => State.Contains(player.whoAmI) && NPC.life > State.DamageFloor(3) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile projectile) => State.Contains(projectile.owner) && NPC.life > State.DamageFloor(3) ? null : false;
     public override void OnSpawn(IEntitySource source)
     {
         if (source is CrimsonActorSource owned) { Runtime = owned.Runtime; State = owned.State; }
@@ -39,7 +39,7 @@ public sealed class CrimsonBoss : ModNPC
     {
         NPC.timeLeft = NPC.activeTime;
         // Project vulnerability on EVERY peer, otherwise clients never submit hits.
-        NPC.dontTakeDamage = !Fresh || !State.Vulnerable(VisualAge);
+        NPC.dontTakeDamage = !Fresh || !State.Vulnerable(VisualAge) || NPC.life <= State.DamageFloor(3);
         NPC.boss = State.Stage is CrimsonStage.Countdown or CrimsonStage.Performance;
         if (State.TargetLife > 0) NPC.lifeMax = State.TargetLife;
         CrimsonGesture.ProjectMotion(NPC, this, 3);
@@ -49,10 +49,14 @@ public sealed class CrimsonBoss : ModNPC
             if (Main.netMode == NetmodeID.Server) NetMessage.SendData(MessageID.SyncNPC, number: NPC.whoAmI);
         }
     }
+    public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
+    {
+        if (State.DamageFloor(3) > 0) modifiers.SetMaxDamage(Math.Max(1, NPC.life - State.DamageFloor(3)));
+    }
     public override bool CheckDead()
     {
         NPC.life = 1;
-        if (State.Vulnerable(VisualAge)) Runtime?.Killed(this);
+        if (State.Vulnerable(VisualAge) && State.DamageFloor(3) == 0) Runtime?.Killed(this);
         NPC.dontTakeDamage = true;
         NPC.netUpdate = Main.netMode != NetmodeID.MultiplayerClient;
         return false;
@@ -95,6 +99,8 @@ public sealed class CrimsonAttack : ModProjectile
         && Hazard.Live(Age(boss)) ? null : false;
     public override bool CanHitPlayer(Player target) => TryBoss(out var boss) && boss!.State.Contains(target.whoAmI);
     public override bool? CanHitNPC(NPC target) => false;
+    public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
+        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage);
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
         if (!TryBoss(out var boss) || !boss!.State.SourceActive(Hazard.Source, Age(boss)) || !Hazard.Live(Age(boss))) return false;
@@ -107,7 +113,7 @@ public sealed class CrimsonAttack : ModProjectile
     public override void AI()
     {
         Projectile.hostile = TryBoss(out var boss) && boss!.State.SourceActive(Hazard.Source, Age(boss)) && Hazard.Live(Age(boss));
-        Projectile.damage = Hazard.Damage;
+        Projectile.damage = CrimsonPlaytestTuning.AttackDamage;
         if (boss is not null)
         {
             float age = Age(boss);

@@ -17,7 +17,7 @@ public sealed class CrimsonEffigy : ModNPC
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
     {
-        NPC.width = 190; NPC.height = 240; NPC.lifeMax = 3000000; NPC.defense = 65;
+        NPC.width = 190; NPC.height = 240; NPC.lifeMax = CrimsonPlaytestTuning.SoloTargetLife; NPC.defense = 65;
         NPC.damage = 0; NPC.knockBackResist = 0; NPC.aiStyle = -1;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.netAlways = true;
         NPC.dontTakeDamage = true;
@@ -41,8 +41,9 @@ public sealed class CrimsonEffigy : ModNPC
     {
         NPC.timeLeft = NPC.activeTime;
         NPC.GivenName = State.Index switch { 0 => "Ember Crown", 1 => "Sable Mantle", _ => "Thorn Choir" };
-        NPC.dontTakeDamage = !TryBoss(out var boss) || !boss!.State.SummonVulnerable(State.Index);
-        NPC.boss = !NPC.dontTakeDamage;
+        bool active = TryBoss(out var boss) && boss!.State.SummonVulnerable(State.Index);
+        NPC.boss = active;
+        NPC.dontTakeDamage = !active || NPC.life <= boss!.State.DamageFloor(State.Index);
         if (boss is not null)
         {
             NPC.lifeMax = boss.State.TargetLife;
@@ -56,20 +57,19 @@ public sealed class CrimsonEffigy : ModNPC
     }
     public override bool CheckActive() => false;
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
-    private bool AboveRetreatFloor(CrimsonBoss boss) => boss.State.Phase == 3
-        || NPC.life > CrimsonPhaseRules.RetreatLife(boss.State.TargetLife);
+    private bool AboveRetreatFloor(CrimsonBoss boss) => NPC.life > boss.State.DamageFloor(State.Index);
     public override bool? CanBeHitByItem(Player player, Item item) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.Contains(player.whoAmI) ? null : false;
     public override bool? CanBeHitByProjectile(Projectile projectile) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.Contains(projectile.owner) ? null : false;
     public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
     {
-        if (TryBoss(out var boss) && boss!.State.Phase < 3)
-            modifiers.SetMaxDamage(Math.Max(1, NPC.life - CrimsonPhaseRules.RetreatLife(boss.State.TargetLife)));
+        if (TryBoss(out var boss) && boss!.State.DamageFloor(State.Index) > 0)
+            modifiers.SetMaxDamage(Math.Max(1, NPC.life - boss.State.DamageFloor(State.Index)));
     }
     public override bool CheckDead()
     {
-        if (!TryBoss(out var boss) || boss!.State.Phase < 3)
+        if (!TryBoss(out var boss) || boss!.State.DamageFloor(State.Index) > 0)
         {
-            NPC.life = CrimsonPhaseRules.RetreatLife(boss?.State.TargetLife ?? NPC.lifeMax);
+            NPC.life = boss is null ? Math.Max(1, NPC.lifeMax / 5) : boss.State.DamageFloor(State.Index);
             NPC.dontTakeDamage = true;
             return false;
         }

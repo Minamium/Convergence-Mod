@@ -21,7 +21,7 @@ internal sealed record CrimsonAttackSource(CrimsonHazard Hazard) : IEntitySource
 
 // Sole owner of progression, targeting, phrase admission and terminal commit.
 // Native actors transport weapon/player damage; replicas never advance phases.
-internal sealed class CrimsonRuntime : IEncounterRuntime
+internal sealed partial class CrimsonRuntime : IEncounterRuntime
 {
     private readonly FightId fight;
     private readonly int summoner;
@@ -29,6 +29,8 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
     private readonly ulong sequence;
     private readonly Vector2 ground;
     private readonly CrimsonEffigy?[] summons = new CrimsonEffigy?[3];
+    private readonly CrimsonActCycle cycle = new();
+    private bool thresholdLatched;
     private readonly int[] techniqueCursor = new int[4];
     private readonly int[] poseUntil = new int[4];
     private readonly CrimsonPoint[] poseExit = new CrimsonPoint[4];
@@ -46,7 +48,7 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
     { this.fight = fight; this.summoner = summoner; this.pedestal = pedestal; this.sequence = sequence; ground = pedestal.Ground; }
     private CrimsonState State => new(fight.Value, age, musicStart, finalStart, stage, members,
         (int)ground.X, (int)ground.Y, defeated, phase, phaseStart, unlockAt, (short)target,
-        phraseStart, phraseEnd, phraseKind, targetLife, Life(0), Life(1), Life(2), Life(3), performerDefeated);
+        phraseStart, phraseEnd, phraseKind, targetLife, Life(0), Life(1), Life(2), Life(3), performerDefeated, cycle.Completed);
     private int Life(int index)
     {
         if (index == 3) return performerDefeated ? 0 : Math.Clamp(actor?.NPC.life ?? targetLife, 0, targetLife);
@@ -57,12 +59,12 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
         && value.State.Index < 3 && ReferenceEquals(summons[value.State.Index], value);
     internal void Killed(CrimsonBoss value)
     {
-        if (!Matches(value) || !State.Vulnerable(age)) return;
+        if (!Matches(value) || cycle.Completed == 0 || !State.Vulnerable(age)) return;
         performerDefeated = true; ClearHazards(3); Project(true);
     }
     internal void SummonKilled(CrimsonEffigy value)
     {
-        if (!Matches(value) || phase != 3 || !State.SummonVulnerable(value.State.Index)) return;
+        if (!Matches(value) || cycle.Completed == 0 || phase != 3 || !State.SummonVulnerable(value.State.Index)) return;
         defeated = CrimsonInvocation.Defeat(defeated, value.State.Index);
         ClearHazards(value.State.Index);
         CrimsonPackets.Log($"event=SummonDefeated fight={fight.Value} index={value.State.Index} mask={defeated} age={age}");
@@ -145,11 +147,27 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
                 if (summons[i] is { } child && (defeated & (1 << i)) == 0
                     && (!child.NPC.active || child.NPC.ModNPC != child)) return End(EncounterEndReason.EncounterActorMissing);
             if (age >= musicStart + CrimsonRegistration.Score.IntroTicks) stage = CrimsonStage.Performance;
+            TickChorus();
+            if (thresholdLatched && phase < 3 && summons[phase] is { } held)
+                held.NPC.life = CrimsonPhaseRules.RetreatLife(targetLife);
             if (stage == CrimsonStage.Performance && phase < 3 && age >= unlockAt
                 && summons[phase] is { } current && CrimsonPhaseRules.ShouldRetreat(phase, phase, current.NPC.life, targetLife))
-                AdvancePhase(current);
-            if (age >= nextPhrase && stage is CrimsonStage.Countdown or CrimsonStage.Performance)
-                SchedulePhrase();
+            {
+                current.NPC.life = CrimsonPhaseRules.RetreatLife(targetLife);
+                if (!thresholdLatched)
+                {
+                    thresholdLatched = true; current.NPC.netUpdate = true;
+                    CrimsonPackets.Log($"event=HpGateHeld fight={fight.Value} phase={phase} age={age} issued={cycle.Issued}");
+                }
+            }
+            if (cycle.TryComplete(age, chorus is not null))
+            {
+                CrimsonPackets.Log($"event=PhaseCycleCompleted fight={fight.Value} phase={phase} age={age} cycles={cycle.Completed}");
+                if (phase < 3 && thresholdLatched && summons[phase] is { } retired) AdvancePhase(retired);
+                else { nextPhrase = age; Project(true); }
+            }
+            if (!cycle.Full && age >= nextPhrase && stage is CrimsonStage.Countdown or CrimsonStage.Performance)
+                if (!TryScheduleChorus()) SchedulePhrase();
         }
         if (age % 300 == 0)
         {
@@ -163,7 +181,8 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
     {
         previous.NPC.life = CrimsonPhaseRules.RetreatLife(targetLife);
         previous.NPC.dontTakeDamage = true; previous.NPC.netUpdate = true;
-        ClearHazards(); Array.Clear(poseUntil);
+        ClearHazards(); Array.Clear(poseUntil); Array.Clear(techniqueCursor);
+        cycle.Reset(); thresholdLatched = false;
         phase++; phaseStart = age; unlockAt = age + CrimsonPhaseRules.TransitionTicks;
         phraseStart = phraseEnd = -1; phraseKind = CrimsonRhythmKind.Groove;
         nextPhrase = unlockAt - CrimsonRhythm.LookAheadTicks;
@@ -246,7 +265,7 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
     }
     private void SchedulePhrase()
     {
-        if (actor is null) return;
+        if (actor is null || cycle.Full) return;
         var score = CrimsonRegistration.Score;
         var rhythm = CrimsonRhythm.Create(score, Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks) - musicStart,
             phraseSerial, phase == 3);
@@ -294,7 +313,7 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
                 techniques[source], (byte)steps[source]++, (byte)counts[source], hit.Accent,
                 begins[source], musicStart + hit.Warning, musicStart + hit.Fire, musicStart + hit.End,
                 first[source], last[source], from[source], staging[source], targets[source],
-                (int)ground.X, (int)ground.Y, phase == 3 ? 510 : 450);
+                (int)ground.X, (int)ground.Y, CrimsonPlaytestTuning.AttackDamage);
             plans[i].Validate();
         }
         foreach (var plan in plans)
@@ -305,7 +324,11 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
             Main.projectile[slot].timeLeft = plan.LastEnd + 14 - age; Main.projectile[slot].netUpdate = true;
         }
         // Reservation lead is not an extra musical rest between every bar.
-        nextPhrase = phraseEnd - CrimsonRhythm.LookAheadTicks; Project(true);
+        int recoveryEnd = phraseEnd;
+        foreach (var plan in plans) recoveryEnd = Math.Max(recoveryEnd, plan.LastEnd + 14);
+        cycle.Admit(phraseEnd, recoveryEnd); phrasesSinceChorus++;
+        nextPhrase = cycle.Full ? cycle.FinishAt : phraseEnd - CrimsonRhythm.LookAheadTicks;
+        Project(true);
         CrimsonPackets.Log($"event=PhysicalPhrase fight={fight.Value} phase={phase} epoch={phaseStart} serial={serial} rhythm={rhythm.Kind} notes={count} start={phraseStart} end={phraseEnd} issued={age} skills={string.Join(",", techniques)}");
     }
     private int SelectFinalSource(int start)
@@ -321,6 +344,7 @@ internal sealed class CrimsonRuntime : IEncounterRuntime
     private EncounterRuntimeUpdate End(EncounterEndReason reason) => EncounterRuntimeUpdate.End(CrimsonTermination.End(reason));
     private void ClearHazards(int source = -1)
     {
+        ClearChorus(source);
         foreach (Projectile p in Main.ActiveProjectiles)
             if (p.ModProjectile is CrimsonAttack a && a.Hazard.Fight == fight.Value && (source < 0 || a.Hazard.Source == source)
                 || p.ModProjectile is CrimsonGesture g && g.Plan.Fight == fight.Value && (source < 0 || g.Plan.Source == source)) p.Kill();

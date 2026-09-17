@@ -201,4 +201,5 @@
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonPhaseRules.cs" Link="Domain/CrimsonPhaseRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonRhythm.cs" Link="Domain/CrimsonRhythm.cs" />
   </ItemGroup>
+  <ItemGroup><None Include="../../Assets/Music/CrimsonFoundry/Score.json" Link="CrimsonScore.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

@@ -94,7 +94,7 @@ internal static partial class Program
         using (var reader = new BinaryReader(new MemoryStream(bytes))) AssertEqual(p, CrimsonChorusPlan.Read(reader), "marker round trip");
         for (int n = 0; n < bytes.Length; n++)
         {
-            bool fail = false; try { using var r = new BinaryReader(new MemoryStream(bytes, 0, n)); CrimsonChorusPlan.Read(r); } catch (IOException) { fail = true; }
+            bool fail = false; try { using var r = new BinaryReader(new MemoryStream(bytes, 0, n)); CrimsonChorusPlan.Read(r); } catch (Exception ex) when (ex is IOException or InvalidDataException) { fail = true; }
             AssertEqual(true, fail, "all marker prefixes reject");
         }
         var impact = new CrimsonChorusImpact(p, 2, 720);
@@ -103,19 +103,19 @@ internal static partial class Program
         using (var r = new BinaryReader(new MemoryStream(bytes))) AssertEqual(impact, CrimsonChorusImpact.Read(r), "verdict round trip");
         for (int n = 0; n < bytes.Length; n++)
         {
-            bool fail = false; try { using var r = new BinaryReader(new MemoryStream(bytes, 0, n)); CrimsonChorusImpact.Read(r); } catch (IOException) { fail = true; }
+            bool fail = false; try { using var r = new BinaryReader(new MemoryStream(bytes, 0, n)); CrimsonChorusImpact.Read(r); } catch (Exception ex) when (ex is IOException or InvalidDataException) { fail = true; }
             AssertEqual(true, fail, "all verdict prefixes reject");
         }
         foreach (var bad in new[] { p with { Kind = (CrimsonChorusKind)255 }, p with { Members = 0 }, p with { Fire = int.MinValue },
             p with { End = int.MaxValue }, p with { Center = new(float.NaN, 0) }, p with { Center = new(100, 100) }, p with { Source = 4 } })
         {
-            bool fail = false; try { bad.Validate(); } catch (IOException) { fail = true; }
+            bool fail = false; try { bad.Validate(); } catch (Exception ex) when (ex is IOException or InvalidDataException) { fail = true; }
             AssertEqual(true, fail, "invalid descriptor rejected");
         }
         AssertEqual(false, p.MatchesRoster(3), "bits cannot address missing native members");
         AssertEqual(true, p.MatchesRoster(4), "bounded roster");
         bool badImpact = false;
-        try { (impact with { Member = 7 }).Validate(); } catch (IOException) { badImpact = true; }
+        try { (impact with { Member = 7 }).Validate(); } catch (Exception ex) when (ex is IOException or InvalidDataException) { badImpact = true; }
         AssertEqual(true, badImpact, "unannounced verdict target rejected");
     }
     [DomainTest("Scarlet chorus rejects nonfinite positions and invalid roster masks before resolution")]

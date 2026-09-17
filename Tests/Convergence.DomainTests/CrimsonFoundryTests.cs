@@ -176,8 +176,8 @@ internal static partial class Program
                 AssertEqual(h, CrimsonHazard.Read(new BinaryReader(s)), "each actual pattern fits bounded wire contract");
             }
         }
-        AssertEqual(3000000, CrimsonInvocation.TargetLife(1), "solo target budget");
-        AssertEqual(7000000, CrimsonInvocation.TargetLife(3), "three-player target budget");
+        AssertEqual(750000, CrimsonInvocation.TargetLife(1), "solo target budget");
+        AssertEqual(1750000, CrimsonInvocation.TargetLife(3), "three-player target budget");
         AssertEqual(0f, CrimsonInvocation.MusicGain(0), "music begins silent");
         AssertEqual(.39f, CrimsonInvocation.MusicGain(150), "fade reaches same calibrated ceiling");
         AssertEqual(1f, CrimsonInvocation.OpeningBars(CrimsonStage.Countdown, 299, 300, 480), "lead has no HUD gap");
