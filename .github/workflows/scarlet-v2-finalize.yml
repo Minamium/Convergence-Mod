@@ -19,6 +19,23 @@ jobs:
           dotnet-version: 8.0.424
       - run: python -m pip install --disable-pip-version-check --requirement tools/requirements-ci.txt
       - run: python tools/_scarlet_v2_finalize.py
+      - name: Complete space-indented Japanese localization and record CPU probe scope
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+          p = Path('Localization/CrimsonFoundry/ja-JP.hjson')
+          text = p.read_text(encoding='utf-8')
+          if 'CinematicCamera:' not in text:
+              assert text.count('        ScreenShake: {') == 1
+              text = text.replace('        ScreenShake: {', '        CinematicCamera: { Label: "フェーズ移行時のカメラ" Tooltip: "無敵の移行時間中だけ緩く視点を動かします。操作は制限しません。" }\n        ScreenShake: {')
+          text = text.replace('異形と一体ずつ戦い、HP20%で次へ。', '異形と一体ずつ戦い、HP20%で行動を一巡してから次へ。')
+          text = text.replace('試作版：1～8人。', '試遊調整：敵の攻撃ダメージ1、HP減量。1～8人。')
+          p.write_text(text, encoding='utf-8', newline='\n')
+          p = Path('docs/evidence/2026-09-17-scarlet-presentation-v2.json')
+          evidence = json.loads(p.read_text())
+          evidence['cpu_lifecycle_probe'] = {'status': 'passed', 'source_commit': 'd091c2d0c73039728dc2ac02f566d470200e4da7', 'run': 'https://github.com/Minamium/Convergence-Mod/actions/runs/35177807736', 'articulation_updates': 3600, 'fna_batch_accessor': 'passed', 'scope': 'linked production FSM/Verlet updates and actual FNA field bindings; not GPU drawing or native game load'}
+          p.write_text(json.dumps(evidence, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
       - name: Remove one-time recovery machinery from the final tree
         shell: bash
         run: |
