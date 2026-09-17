@@ -1,0 +1,59 @@
+name: Scarlet recovery verification
+on:
+  push:
+    branches: [feat/scarlet-luminance-presentation-v2]
+    paths: [.github/workflows/scarlet-recovery-20260917.yml]
+permissions:
+  contents: write
+concurrency:
+  group: scarlet-recovery-20260917
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.repository == 'Minamium/Convergence-Mod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/scarlet-luminance-presentation-v2
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@3447fd6a9f9e575b15f895c5e76e9cd6be604fa4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Apply assertion-guarded recovered integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git branch --show-current)" = feat/scarlet-luminance-presentation-v2
+          if test -f tools/_scarlet_v2_apply.py; then
+            python tools/_scarlet_v2_apply.py
+            git rm tools/_scarlet_v2_apply.py
+            git diff --check
+            git add Content/Encounters/CrimsonFoundry Client/Encounters/CrimsonFoundry Tests/Convergence.DomainTests build.txt Common/Networking/Protocol/EncounterProtocol.cs
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'feat: wire Scarlet materials, one-damage rehearsal and complete-act HP gates'
+            git push origin HEAD:refs/heads/feat/scarlet-luminance-presentation-v2
+          fi
+      - name: Report recovered inputs
+        if: always()
+        shell: bash
+        run: |
+          git log -1 --format='%H %s'
+          git status --short
+          find tools -maxdepth 2 -type f | sort
+          find Tests -maxdepth 3 -type f | sort
+          cat ConvergenceMod.csproj
+      - name: Domain behavior and codec build
+        shell: bash
+        run: dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj -c Release
+      - name: Python regression tests
+        if: always()
+        shell: bash
+        run: |
+          python -m pip install -r tools/requirements-ci.txt
+          python -m unittest discover -s tools/tests -v
