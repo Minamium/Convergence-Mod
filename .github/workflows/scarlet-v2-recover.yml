@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
-      - name: Import only the previously requested Scarlet code, without reverting current main
+      - name: Import feature code without overwriting current main test links
         shell: bash
         run: |
           set -euo pipefail
@@ -33,9 +33,27 @@ jobs:
             Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs \
             Content/Encounters/FirstSeverance/FirstSeveranceDollActivation.cs \
             Localization/CrimsonFoundry Tests/Convergence.DomainTests \
-            tools/tests/test_scarlet_contracts.py > "$RUNNER_TEMP/scarlet-prerequisite.patch"
+            tools/tests/test_scarlet_contracts.py \
+            ':!Tests/Convergence.DomainTests/Convergence.DomainTests.csproj' > "$RUNNER_TEMP/scarlet-prerequisite.patch"
           git apply --3way "$RUNNER_TEMP/scarlet-prerequisite.patch"
-      - name: Compile checked-in original shaders with the previously inspected compiler
+      - name: Merge additional linked sources into the current test project
+        shell: python
+        run: |
+          import pathlib, subprocess, re
+          path = 'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj'
+          previous = subprocess.check_output(['git', 'show', '4ffa57d508c7b7ab1ff6ea737a735c4846089077:' + path]).decode('utf-8-sig')
+          p = pathlib.Path(path)
+          current = p.read_text(encoding='utf-8-sig')
+          entries = re.findall(r'<Compile\b[^>]*?/>', previous)
+          additions = []
+          for entry in entries:
+              include = re.search(r'Include="([^"]+)"', entry)
+              if include and include[1] not in current:
+                  additions.append('    ' + entry)
+          if additions:
+              current = current.replace('</Project>', '  <ItemGroup>\n' + '\n'.join(additions) + '\n  </ItemGroup>\n</Project>')
+              p.write_text(current, encoding='utf-8', newline='\n')
+      - name: Compile original materials
         shell: pwsh
         run: |
           Invoke-WebRequest 'https://codeload.github.com/LucilleKarma/Luminance/zip/b2468dfd2f299597602dc6826af781d436c29a57' -OutFile "$env:RUNNER_TEMP/luminance.zip"
