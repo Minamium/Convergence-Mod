@@ -19,7 +19,7 @@
     "source_changed_during_build": false,
     "bytes": 85099013,
     "sha256": "80788b5fb15bc387a2a7ff63d72efeafccc2a4c29dc7e639ab69014aaf02c323",
-    "provenance": "Isolated native build of recorded feature changes on base_main. Later verification tooling and evidence/catalog edits do not change packaged gameplay code/assets. Normal profile remains0.3.14 pending administrator-approved integration."
+    "provenance": "Initial isolated native build of recorded feature changes on base_main. Later verification tooling and evidence/catalog edits do not change packaged gameplay code/assets. Subsequent approved normal-profile integration is recorded below."
   },
   "not_run": [
     "Actual Reload Mods, cold first summon and resource interaction with other render hooks",
@@ -27,5 +27,24 @@
     "Matching SP/MP peers, late join and latency visual acceptance",
     "Reduced Effects in-game appearance and measured frame time"
   ],
-  "boundaries": "CPU capture validates submitted geometry, not FNA rasterization or in-game multiplayer behavior. No game/server/GUI launch, main merge, normal-profile overwrite or publication was performed."
+  "boundaries": "CPU capture validates submitted geometry, not FNA rasterization or in-game multiplayer behavior. Initial implementation stopped before main integration/installation; approved integration follows. No game/server/GUI launch or publication was performed.",
+  "approved_integration": {
+    "date": "2026-09-17",
+    "authorization": "Administrator explicitly approved PR #42 main integration and normal playtest installation in the task.",
+    "pr": 42,
+    "feature_commit": "30a029b95aa8f8d50fa2098fde3ab84b9a9fa3f5",
+    "main_commit": "eb079c9515f3c789c03040058c6c107875aa6ad0",
+    "version": "0.3.15",
+    "protocol": 46,
+    "build": "pass:native integrated-main build,0 errors /4 unchanged warnings,22 locales,shader exports and packaged solo admission",
+    "local_record": "20260917T091700927062Z",
+    "source_sha256": "f57e10c6fc7ec9faa7be30b586282e6f0102b94ec2ff12203051d8caa4c6f193",
+    "source_changed_during_build": false,
+    "installed_bytes": 85098990,
+    "installed_sha256": "e7236dc253069ce54c4792111f0fb87178cc292156809d85b8302c900a15536c",
+    "installed_checks": "pass: all five rawimg material paths and alpha-bearing sources; installed tModLoader validates GhostSamuraiVisuals,GhostSamuraiHazardVisuals,GhostSamuraiSlashArt and retained summon identity",
+    "preserved": "Canonical ModSources junction unchanged; three pre-existing localization modifications and one local workstation evidence file retained byte-for-byte; enabled-Mod list unchanged and Convergence enabled. Previous0.3.14 package backed up by recorded build; saves untouched.",
+    "playtest": "not_run:user-owned. Reload Mods; no repeat Build + Reload required. Matching0.3.15/protocol46 peers for visual acceptance.",
+    "documentation": "Subsequent installation-record commits change documentation only; the installed package remains attributed to this recorded main build."
+  }
 }
