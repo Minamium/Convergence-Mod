@@ -1,8 +1,10 @@
-name: Scarlet v2 shader verification
+name: Scarlet shader exports
 on:
   push:
     branches: [feat/scarlet-luminance-presentation-v2]
-    paths: [.github/workflows/scarlet-v2-shaders.yml]
+    paths:
+      - Assets/AutoloadedEffects/Shaders/Scarlet*.fx
+      - .github/workflows/scarlet-v2-shaders.yml
 permissions:
   contents: read
 jobs:
@@ -16,17 +18,7 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
-      - name: Verify and expand original shader sources
-        shell: python
-        run: |
-          import base64, hashlib, json, pathlib, zlib
-          payload = base64.b64decode('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')
-          assert hashlib.sha256(payload).hexdigest() == 'd52f4bb7889f1c95a72cbf620c65b84fb4b5d6f643ae8652470b2a97179da7e2'
-          root = pathlib.Path('Assets/AutoloadedEffects/Shaders')
-          for name, text in json.loads(zlib.decompress(payload)).items():
-              assert name.startswith('Scarlet') and name.endswith('.fx') and '/' not in name
-              (root / name).write_text(text, encoding='utf-8', newline='\n')
-      - name: Acquire exact compiler source distribution
+      - name: Compile checked-in original shaders
         shell: pwsh
         run: |
           Invoke-WebRequest 'https://codeload.github.com/LucilleKarma/Luminance/zip/b2468dfd2f299597602dc6826af781d436c29a57' -OutFile lum.zip
