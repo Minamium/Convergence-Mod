@@ -34,5 +34,24 @@
     "Matching multiplayer peers, late join and real latency/rejoin presentation",
     "Reduced Effects acceptance, measured frame time and equipped stationary/moving-target DPS"
   ],
-  "boundaries": "Domain checks validate linked production formulas and history, not FNA drawing or a multiplayer session. No GUI/game/server playtest, main merge, shared-profile install or publication was performed. New administrator approval is needed for this feature's main integration and normal-profile build."
+  "boundaries": "Domain checks validate linked production formulas and history, not FNA drawing or a multiplayer session. No GUI/game/server playtest, main merge, shared-profile install or publication was performed. New administrator approval is needed for this feature's main integration and normal-profile build.",
+  "approved_integration": {
+    "date": "2026-09-17",
+    "authorization": "Owner instructed to proceed through normal-profile installation in response to the PR45 integration approval request.",
+    "pr": 45,
+    "feature_commit": "42379bd55a331ac6956ed35e077f1d23a60a3260",
+    "integrated_base": "fb87ce44faf5e9493bae2a22e736b918f38993a7",
+    "version": "0.3.18",
+    "protocol": 48,
+    "resolution": "Only build version and STATUS/catalog conflicted. Preserve integrated Scarlet0.3.17, all existing code and protocol48; add Oboro motion as0.3.18.",
+    "combined_checks": "pass:288 domain cases; repository/catalog/YAML; isolated native0.3.18 build0 errors/4 existing warnings,22 locales,shader exports and admission.",
+    "combined_build": {
+      "local_record": "20260917T142901462559Z",
+      "source_sha256": "c5a200ba0c110d802184a654612b4d4fd8530064db5177d8d00f1eb506e4d450",
+      "source_changed_during_build": false,
+      "sha256": "27f1e312d0406275e135377cd75fad7a57c6b970858cbdb09b95cbb5701941a9",
+      "bytes": 89175819
+    },
+    "normal_profile": "pending integrated-main build and install"
+  }
 }

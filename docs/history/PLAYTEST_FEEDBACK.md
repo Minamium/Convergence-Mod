@@ -81,3 +81,19 @@ Owner rejects the floating illustration, squat silhouette, quiet/short attacks a
 ## Ghost Samurai invisible body — 2026-09-17 / 0.3.13 → 0.3.14
 
 Owner reports the new violet body is invisible and requests a drawing-only repair across idle/movement/attacks/transitions and peers. The new shared cutout cache copied Asset.Value before asynchronous loading completed, retaining the transparent placeholder permanently. A cold-cache CPU fixture reproduces this; ImmediateLoad before pixel processing fixes it. Keep a55% body opacity floor before initial synchronization, preserve all accepted sprites/AI/attacks, and correct the outdated old-atlas description. [Evidence](../evidence/2026-09-17-ghost-samurai-visibility.json) separates automated reproduction from the user's still-pending actual render and multiplayer checks.
+
+## 2026-09-17 — Scarlet material-quality and rehearsal request
+
+Owner reports strong flat-fill/low-detail appearance compared with Doll and requests meaningful Luminance usage before further playtesting. Owner approves the generated fiery cathedral background and requests a new branch from current main, all Scarlet attack damage temporarily1, lower HP without instant full-fight skips, and completing a phase action cycle while holding threshold HP.
+
+Implemented on `feat/scarlet-luminance-presentation-v2`: independent species materials, masked body regions, continuous physical primitives, decorative Verlet/Metaballs, varied musical calls, full12-phrase gates, reduced target budgets and hostile native damage-one caps. No claim that these changes look better in-game has been accepted. The approved painting's binary import was blocked by the conversation's container timeout; importer/renderer readiness is not artwork inclusion. Main merge/install/release was not requested or performed.
+
+## 2026-09-17 — Reload teardown and approved Scarlet integration
+
+At07:48:02 the owner-reported load failure occurred while unloading old0.3.12, after successful GUI compilation: `NullCantorClawArt.Dispose` released textures from tML's worker. Queue captured owned-texture disposal; the same correction applies to the keyed Ghost Samurai texture. Preserve borrowed asset ownership and the Scarlet partial-declaration correction. Local0.3.14/protocol47 rebuilt successfully; the owner approved backup/replacement of the normal package. Actual cold-load acceptance was not recorded at that time.
+
+The owner subsequently requests latest Scarlet v2 → main → Build/Reload. Integrate `5696fdd` with main `cb42e8a`, retaining Ghost Samurai slash/Oboro fixes and these teardown repairs, as0.3.16/protocol48. Native compilation passes; do not treat it as gameplay/visual approval. The approved background remains absent. No Workshop publication or GitHub release is requested.
+
+## Scarlet visibility and material revision — 2026-09-17 / 0.3.16 → 0.3.17
+
+Owner reports weak presentation and visible apparitions but an invisible performer; supplies the missing cathedral PNG and authorizes graphics rework while preserving the basics. Latest solo Host & Play completes all four action cycles, Victory and cleanup; no ERROR/FATAL entries, but the missing-background warning is present. A ceiling perch placed the56px performer about990px above a grounded player. Bring that shared, invulnerable pre-Final perch near the active focus, preserve small character pixels, add the exact supplied painting and recognize packed `.rawimg`. Rework physical-stroke forecast/live separation, flowing fibre materials, per-source pressure and bounded cloth/limb recoil; retain score/HP/damage-one rehearsal and all collision geometry. [Evidence](../evidence/2026-09-17-scarlet-visual-revision.json) separates the old playtest from the new offline GPU/build checks; visual acceptance, zoom/MP and performance remain owner checks.

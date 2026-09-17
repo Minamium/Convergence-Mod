@@ -29,6 +29,22 @@
     "RaidEnergy.fx": {
       "source_sha256": "924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8",
       "output_sha256": "299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7"
+    },
+    "ScarletBackdrop.fx": {
+      "source_sha256": "ab810c34dda508df2d8f23b3bba37be316937803500811b7778599d87de63f16",
+      "output_sha256": "8c6a64ddf9ad29cd2e2537aa19013587120c7340c6a1577c908726e7f1eb2323"
+    },
+    "ScarletResidue.fx": {
+      "source_sha256": "b0a99ea0bc87086f2e190b678c9a4882e75c68538a6e8d54dc6f686b8a424090",
+      "output_sha256": "feff3ae4fe628f38ee6e6aa90aba61cefb9568fe9de714e07994cb95e1edbe09"
+    },
+    "ScarletRibbon.fx": {
+      "source_sha256": "5041eca16cbec8d7df9ef8db8008c7df83de367faf21b5c60d38124f6eee8941",
+      "output_sha256": "08e523bdd3caa16ebd73d81f9c0d7216359cb3c0d9843b77ed523494f07f0d9e"
+    },
+    "ScarletSurface.fx": {
+      "source_sha256": "46dee4522c642c9adc2e2a4cdbce54319ddcaa32d14d80877571e18d8414a717",
+      "output_sha256": "768340fbe8468a352d87baad0228dc40f44dd3d127612b6fef6e3b22ddd8ed3e"
     }
   }
 }

@@ -1,0 +1,39 @@
+name: Scarlet recovery verification
+on:
+  push:
+    branches: [feat/scarlet-luminance-presentation-v2]
+    paths: [.github/workflows/scarlet-recovery-20260917.yml]
+permissions:
+  contents: read
+concurrency:
+  group: scarlet-recovery-20260917
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'Minamium/Convergence-Mod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d
+        with:
+          dotnet-version: 8.0.424
+      - name: Report recovered inputs
+        shell: bash
+        run: |
+          git log -1 --format='%H %s'
+          find tools -maxdepth 2 -type f | sort
+          find Tests -maxdepth 3 -type f | sort
+          cat ConvergenceMod.csproj
+      - name: Domain behavior
+        run: dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj -c Release
+      - name: Pinned tModLoader and Luminance API compile (not native package)
+        if: always()
+        run: python3 tools/verify_scarlet_api.py
+      - name: Python regression tests
+        if: always()
+        run: |
+          python3 -m pip install -r tools/requirements-ci.txt
+          python3 -m unittest discover -s tools/tests -v

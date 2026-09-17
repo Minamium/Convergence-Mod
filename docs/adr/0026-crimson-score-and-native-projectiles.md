@@ -50,3 +50,15 @@ The main projection replaces the old purge epoch with a Final epoch and adds the
 `CrimsonBarrageGeometry` takes field/cue/source, never player coordinates. All lanes in a volley share one corridor; authority issues fixed world-space geometry. Music fade and continuous introductory bars consume the accepted epoch but never alter score timing or gameplay.
 
 The new companion is a normal owner-replicated minion, outside encounter authority/roster/Ready. Owner chooses locomotion and creates child beams; missing remote owner buffs cannot dismiss a replica. Child lifetime checks exact owner plus projectile identity. The client-only rig is shared as artwork, not via a gameplay dependency on Client or on Doll's runtime.
+
+## Superseding amendment — 2026-09-17, Scarlet presentation v2
+
+For the0.3.15/protocol48 feature branch, the [current owning spec](../encounters/crimson-foundry/ENCOUNTER_SPEC.md) supersedes the original simultaneous-three-target/corridor-only design. Do not infer the new behavior from the historical decision above.
+
+The server still owns Fight/phase/roster/health/cue decisions. It now admits full varied physical phrases and12-phrase action cycles. At20%, an apparition's HP is held and the current action cycle and chorus/tails complete before transition. Final keeps all four bodies at a1HP lethal floor until its first ensemble cycle completes. Completed-cycle count is replicated monotonically within a phase. Attack-source activity is separate from NPC damageability.
+
+Temporary rehearsal source damage and native hit cap are1 for Scarlet hostile attacks only. Target HP is750,000+500,000 per additional player; no player weapon or other Raid is rebalanced. Stack/Spread uses native hostile verdict projectiles with the same temporary cap.
+
+Luminance supplies primitive rendering, managed shader ownership, projected state machines, bounded decorative Verlet chains, manually composited Metaballs, easing and local cutscene/shake. None is a new gameplay authority. Existing artwork is masked into animated regions, not replaced or claimed as new authored frame animation. All transient presentation is exact-Fight/epoch-owned and is cancelled on teardown. Required danger footprints survive Reduced Effects. SpriteBatch parameters and graphics bindings are restored to the actual caller.
+
+The approved background is an unchanged original PNG with a fixed SHA256. Binary import is currently blocked by the conversation compute backend, not replaced by the Doll painting or synthetic artwork. Missing asset leaves the ordinary sky and logs once. Native loading, actual visual quality and MP remain unverified; dependency-source API compilation is not proof of compatibility with the installed DLLs.

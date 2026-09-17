@@ -18,6 +18,8 @@ namespace Convergence.Client.Encounters.CrimsonFoundry;
 
 public sealed class CrimsonVisualConfig : ModConfig
 {
+    [System.ComponentModel.DefaultValue(true)] public bool CinematicCamera { get; set; } = true;
+
     public override ConfigScope Mode => ConfigScope.ClientSide;
     [DefaultValue(false)] public bool ReducedEffects;
     [DefaultValue(true)] public bool ScreenShake = true;
@@ -69,11 +71,11 @@ internal sealed class CrimsonVisuals : ModSystem
         foreach (Projectile p in Main.ActiveProjectiles)
         {
             if (p.ModProjectile is not CrimsonAttack a || a.Hazard.Fight != fight) continue;
-            int chargeTick = a.Hazard.Fire - 26;
-            if (previousAge < chargeTick && age >= chargeTick && age - chargeTick < 5 && age - lastCharge > 14)
-            { lastCharge = age; Cue("Beams/PortalCharge", .24f, a.Hazard.Fire + 6); }
-            if (previousAge < a.Hazard.Fire && age >= a.Hazard.Fire && age - a.Hazard.Fire < 5 && age - lastFire > 5)
-            { lastFire = age; Cue("Beams/PortalFire", .35f, a.Hazard.End + 14); shake = Math.Max(shake, 5.5f); }
+            int chargeTick = a.Hazard.Born;
+            if (previousAge < chargeTick && age >= chargeTick && age - chargeTick < 5 && lastCharge != chargeTick)
+            { lastCharge = chargeTick; Cue("Beams/PortalCharge", .20f + a.Hazard.Accent * .035f, chargeTick + 10); }
+            if (previousAge < a.Hazard.Fire && age >= a.Hazard.Fire && age - a.Hazard.Fire < 5 && lastFire != a.Hazard.Fire)
+            { lastFire = a.Hazard.Fire; Cue("Beams/PortalFire", .28f + a.Hazard.Accent * .05f, a.Hazard.End + 8); shake = Math.Max(shake, 2.5f + a.Hazard.Accent * 1.5f); }
         }
         for (int i = voices.Count - 1; i >= 0; i--)
         {
@@ -88,7 +90,7 @@ internal sealed class CrimsonVisuals : ModSystem
     {
         if (voices.Count >= 32) return;
         voices.Add((SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
-        { Volume = gain, MaxInstances = 1, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
+        { Volume = gain, MaxInstances = 3, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused }), stop));
     }
     private void Reset()
@@ -118,22 +120,23 @@ internal sealed class CrimsonVisuals : ModSystem
             {
                 if (p.ModProjectile is not CrimsonAttack attack || attack.Hazard.Fight != boss.State.Fight) continue;
                 var h = attack.Hazard;
-                if (age >= h.End + 14 || age < h.Born) continue;
+                if (h.Epoch != boss.State.PhaseStart || !boss.Fresh || age >= h.End + 8 || age < h.Born
+                    || !CrimsonPhaseRules.ActiveSource(boss.State.Phase, boss.State.DefeatedMask, boss.State.PerformerDefeated, h.Source)) continue;
                 bool live = age >= h.Fire;
                 Vector2 origin = new(h.X, h.Y), direction = new(h.DX, h.DY);
-                float length = h.Length, width = h.Width, opacity = 1;
+                float length = h.Length, width = h.Width, opacity = live ? 1 : .28f + .72f * MathF.Exp(-(age - h.Born) / 4);
                 if (live)
                 {
                     width = h.HitWidth(age);
                     length = h.Reach(age);
                     if (h.Shape == CrimsonShape.Bolt) origin += direction * Math.Max(0, h.Travel(age) - CrimsonHazard.BoltTail);
-                    if (age >= h.End) opacity = 1 - Ease((age - h.End) / 14);
+                    if (age >= h.End) opacity = 1 - Ease((age - h.End) / 8);
                 }
                 CrimsonEnergy.Add(origin, direction, length, width, age, h.Fire, h.End, opacity, Reduced);
                 if (!live)
                 {
                     Vector2 normal = new(-direction.Y, direction.X);
-                    Color edge = new Color(255, 108, 115, 0) * (.24f + .32f * Ease((age - h.Born) / 25));
+                    Color edge = new Color(255, 108, 115, 0) * (.15f + .55f * MathF.Exp(-(age - h.Born) / 4));
                     for (int side = -1; side <= 1; side += 2)
                         Stroke(batch, origin + normal * width * side, origin + direction * length + normal * width * side, edge, 1.25f);
                 }
@@ -212,7 +215,7 @@ internal sealed class CrimsonVisuals : ModSystem
             if (intro)
             {
                 float title = Ease((clock - 80) / 30) * (1 - Ease((clock - 365) / 45));
-                Utils.DrawBorderString(batch, "CRIMSON INVOCATION", new(view.Width * .5f, view.Height * .83f), new Color(248, 206, 194) * title, 1.12f, .5f);
+                Utils.DrawBorderString(batch, Terraria.Localization.Language.GetTextValue("Mods.Convergence.CrimsonFoundry.RaidTitle"), new(view.Width * .5f, view.Height * .83f), new Color(248, 206, 194) * title, 1.12f, .5f);
             }
             return false; // Frame-local HUD suppression only, no input/settings flags.
         }

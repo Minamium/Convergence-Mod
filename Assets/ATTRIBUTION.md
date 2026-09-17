@@ -2,6 +2,96 @@
 
 ## Records
 
+### Scarlet Sanctum owner-supplied background — 2026-09-17
+
+- Runtime file: `Assets/Textures/Backgrounds/ScarletSanctum.png`
+- Asset ID: scarlet-sanctum-owner-export-20260917
+- Asset type: background texture,1672×941 PNG
+- Creator: project-owner-directed AI-generated artwork, supplied and approved by Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: generated
+- Source work and URL: owner-provided attachment in the Scarlet presentation review; no external artwork download
+- Tool/model/version: earlier built-in image generation; exact model identifier not supplied
+- Human modifications: none to the supplied PNG; copied byte-for-byte. Runtime shaders add only transient scene treatments
+- License and redistribution terms: owner-approved original project artwork under existing project asset terms
+- Required attribution: retain this provenance; do not represent it as another creator's painting
+- Reviewer and review date: owner approval2026-09-17; hash/dimensions and offline FNA composition checked
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, approved background
+- SHA256: `802d1f6393ae6f0919214e3de535c1b38cc8e740161fcb98e5ba7f71c5a7e1ef`
+- Export identity: this is the newly supplied clipboard export, not byte-identical to the previously recorded `94b77c968991bf52b14504bb11095c417dbf4dd2abb3bc378da779da39400a2d` export that could not be transferred
+
+### ScarletBackdrop original shader export — 2026-09-17
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletBackdrop.fxc`
+- Asset ID: scarlet-v2-scarletbackdrop-20260917
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletBackdrop.fx`; no third-party shader copied
+- Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: runtime material parameters, masks and animation are project code; compilation does not modify approved images
+- License and redistribution terms: original project asset under the existing project terms; dependency textures remain external
+- Required attribution: retain this provenance, source and compiler/export identity manifest
+- Reviewer and review date: automated source/export checks, 2026-09-17; native visual approval not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, presentation v2
+- SHA256: `8c6a64ddf9ad29cd2e2537aa19013587120c7340c6a1577c908726e7f1eb2323`
+- Source SHA256: `ab810c34dda508df2d8f23b3bba37be316937803500811b7778599d87de63f16`
+
+### ScarletResidue original shader export — 2026-09-17
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletResidue.fxc`
+- Asset ID: scarlet-v2-scarletresidue-20260917
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletResidue.fx`; no third-party shader copied
+- Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: runtime material parameters, masks and animation are project code; compilation does not modify approved images
+- License and redistribution terms: original project asset under the existing project terms; dependency textures remain external
+- Required attribution: retain this provenance, source and compiler/export identity manifest
+- Reviewer and review date: automated source/export checks, 2026-09-17; native visual approval not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, presentation v2
+- SHA256: `feff3ae4fe628f38ee6e6aa90aba61cefb9568fe9de714e07994cb95e1edbe09`
+- Source SHA256: `b0a99ea0bc87086f2e190b678c9a4882e75c68538a6e8d54dc6f686b8a424090`
+
+### ScarletRibbon original shader export — 2026-09-17
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletRibbon.fxc`
+- Asset ID: scarlet-v2-scarletribbon-20260917
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletRibbon.fx`; no third-party shader copied
+- Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: runtime material parameters, masks and animation are project code; compilation does not modify approved images
+- License and redistribution terms: original project asset under the existing project terms; dependency textures remain external
+- Required attribution: retain this provenance, source and compiler/export identity manifest
+- Reviewer and review date: automated source/export checks, 2026-09-17; native visual approval not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, presentation v2
+- SHA256: `08e523bdd3caa16ebd73d81f9c0d7216359cb3c0d9843b77ed523494f07f0d9e`
+- Source SHA256: `5041eca16cbec8d7df9ef8db8008c7df83de367faf21b5c60d38124f6eee8941`
+
+### ScarletSurface original shader export — 2026-09-17
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSurface.fxc`
+- Asset ID: scarlet-v2-scarletsurface-20260917
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletSurface.fx`; no third-party shader copied
+- Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: runtime material parameters, masks and animation are project code; compilation does not modify approved images
+- License and redistribution terms: original project asset under the existing project terms; dependency textures remain external
+- Required attribution: retain this provenance, source and compiler/export identity manifest
+- Reviewer and review date: automated source/export checks, 2026-09-17; native visual approval not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, presentation v2
+- SHA256: `768340fbe8468a352d87baad0228dc40f44dd3d127612b6fef6e3b22ddd8ed3e`
+- Source SHA256: `46dee4522c642c9adc2e2a4cdbce54319ddcaa32d14d80877571e18d8414a717`
+
 ### Crimson Invocation and companion — 2026-09-16 / 0.3.11
 
 - Runtime file: `Assets/Textures/CrimsonFoundry/ScarletConjurer.png`
@@ -3209,3 +3299,9 @@ Creator: Codex under the repository owner's direction; original Convergence DSP 
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollSummon.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollThread.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`.
+
+### Scarlet presentation v2 — 2026-09-17 / 0.3.15
+
+- Original project-authored shader sources/exports: `ScarletSurface`, `ScarletRibbon`, `ScarletResidue`, `ScarletBackdrop` under `Assets/AutoloadedEffects/Shaders`. Source/export/compiler identities are in `compiled.json`. No external Mod shader or artwork copied. Existing Luminance assets and APIs are referenced through the dependency, not vendored. Surface masks and runtime articulation preserve existing approved apparition PNGs.
+- Historical failed transfer: the first approved1672×941 cathedral export, SHA256 `94b77c968991bf52b14504bb11095c417dbf4dd2abb3bc378da779da39400a2d`, could not be transferred during compute-backend failure. The owner subsequently supplied another explicitly approved PNG export; the current runtime image is identified by the [Scarlet Sanctum record](#scarlet-sanctum-owner-supplied-background--2026-09-17), not this historical hash. No model-version claim or regenerated substitute is made.
+- No new third-party music, sound or texture licenses are asserted. Graceful Ordeal remains separately licensed as recorded above.

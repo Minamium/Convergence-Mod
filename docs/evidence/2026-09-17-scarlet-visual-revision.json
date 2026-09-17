@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-17",
+  "feature": "Scarlet Invocation visibility, approved background and physical materials",
+  "source_version": "0.3.17",
+  "protocol": 48,
+  "source_base": "cd2dfc273654520ec8e29adf08f0ae2bfccaa617",
+  "playtest": {
+    "package": "local 0.3.16, confirmed by client selection/sandbox log",
+    "topology": "one-player Host & Play",
+    "window_local": "2026-09-17 22:26–22:34 JST",
+    "fight": "54de81d0-bbcc-4b5d-8225-5b47c9291143",
+    "result": "Victory, then Cleaned after150 ticks",
+    "total_life": 3000000,
+    "combat_unlock_tick": 913,
+    "victory_tick": 8711,
+    "combat_seconds": 129.967,
+    "completed_first_cycles": [2180, 4262, 6511, 8708],
+    "phase_change_ticks": [2180, 4262, 6511],
+    "threshold_hold_ticks": [1709, 2875, 4769],
+    "peak_five_second_logged_dps_by_act": [45148, 57139, 106441, 129884],
+    "dps_caveat": "HP-delta windows include gate/transition downtime; not uncapped weapon DPS or per-hit native damage",
+    "physical_phrases_admitted": 49,
+    "chorus_called_and_resolved": 6,
+    "spread_verdicts": "all three have budget_sources=0; solo overlap-free",
+    "stack_verdicts": "all three record budget_sources=360, capped to rehearsal source damage1; not proof of final HP loss or Stack occupancy success",
+    "final_floor": "remaining=4 reported from tick7200 through8700, then first-cycle lethal unlock and victory",
+    "errors": "0 ERROR/FATAL entries across client/server/server2 logs",
+    "warnings": "background missing; one caught loopback connection refusal before successful join; unrelated Calamity damage-reduction warnings",
+    "visual_feedback": "owner reports weak graphics and missing human performer; not diagnosed by logs alone"
+  },
+  "repairs": [
+    "Server-owned pre-Final performer perch changes from field ceiling to260px above active focus; Final accepted paths unchanged",
+    "56px performer retains point-sampled original atlas and restrained rim; no giant sprite substitution",
+    "Exact supplied PNG imported unchanged; packed rawimg detected",
+    "Scarlet forecast/live shaders separated; collision geometry and warning/live clocks unchanged",
+    "World-length flowing fibres, bounded pressure/recoil, asymmetric partial-art motion and backdrop embers",
+    "CrimsonEnergy restores caller's actual batch and device bindings via existing scope"
+  ],
+  "automated": {
+    "native_build": "passed,0 errors and4 pre-existing nullable warnings; tML2026.07.3.0, Calamity2.2.4, Luminance1.0.14;22 localization files validated",
+    "offline_gpu": "ten FNA D3D11 frames with linked production rig/motion/material code and pinned shader exports; controlled Terraria/primitive facades, no gameplay claims",
+    "source_checks": "29 affected tooling guards passed; catalog78, repository and YAML12 checks passed; unchanged domain/codec results reused",
+    "package_sha256": "45be69f776669cc779a6cf78a4174696fdcd4178c0c94f34ae62e9a4936802a9",
+    "package_inventory": "Convergence0.3.17; ScarletSanctum.rawimg and current ScarletRibbon/Surface/Backdrop.fxc present",
+    "build_record_local_id": "20260917T141205764179Z",
+    "localization_note": "Four pre-existing tML-generated en-US working files preserved uncommitted and included in this local package; no unrelated edits reverted",
+    "background_sha256": "802d1f6393ae6f0919214e3de535c1b38cc8e740161fcb98e5ba7f71c5a7e1ef"
+  },
+  "installation": {
+    "status": "normal profile replaced after verifying no tModLoader process; previous package retained in the local build record's install-backup directory",
+    "sha256": "45be69f776669cc779a6cf78a4174696fdcd4178c0c94f34ae62e9a4936802a9",
+    "game_started": false
+  },
+  "not_run": [
+    "0.3.17 actual tModLoader reload/playtest",
+    "multiplayer and remote companion visuals",
+    "in-game zoom/UI-scale readability and Reduced Effects acceptance",
+    "frame-time/performance measurements"
+  ]
+}
