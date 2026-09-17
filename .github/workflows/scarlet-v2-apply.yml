@@ -1,0 +1,46 @@
+name: Apply Scarlet v2 recovery
+on:
+  push:
+    branches: [feat/scarlet-luminance-presentation-v2]
+    paths: [.github/workflows/scarlet-v2-apply.yml]
+permissions:
+  contents: read
+jobs:
+  apply:
+    if: github.ref == 'refs/heads/feat/scarlet-luminance-presentation-v2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d
+        with:
+          dotnet-version: 8.0.424
+      - name: Apply checked source transformations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tools/_scarlet_v2_apply.py')
+          text=p.read_text()
+          text=text.replace('const ushort Version', 'const ushort CurrentVersion')
+          p.write_text(text)
+          PY
+          python tools/_scarlet_v2_apply.py
+      - name: Persist completed wiring before validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Content/Encounters/CrimsonFoundry Client/Encounters/CrimsonFoundry Tests/Convergence.DomainTests Common/Networking/Protocol/EncounterProtocol.cs build.txt
+          git diff --cached --check
+          git commit -m 'feat: wire Scarlet materials and native damage-one rehearsal with complete phase cycles'
+          git push origin HEAD:refs/heads/feat/scarlet-luminance-presentation-v2
+      - name: Domain tests
+        run: dotnet run --project Tests/Convergence.DomainTests -c Release
+      - name: Full source API compile (not native package)
+        if: always()
+        run: python tools/verify_scarlet_api.py

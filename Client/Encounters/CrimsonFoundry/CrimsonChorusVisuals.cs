@@ -11,8 +11,6 @@ using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry;
 
-// Dedicated glyph vocabulary: inward chevrons for shared impact, outward
-// chevrons and following circles for separation. No text or screen-wide flash.
 [Autoload(Side = ModSide.Client)]
 internal sealed class CrimsonChorusVisuals : ModSystem
 {
@@ -20,11 +18,13 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     private int previous = -1;
     private readonly HashSet<(int Serial, bool Impact)> heard = new();
     private readonly List<(SlotId Id, int End)> voices = new();
+    private readonly List<Vector2> ring = new(65);
+    private readonly Vector2[] arrow = new Vector2[3];
     public override void PostUpdateEverything()
     {
         var boss = CrimsonPackets.Boss;
-        if (boss is null || !boss.Fresh || !CrimsonVisuals.Local(boss)) { Reset(); return; }
-        int age = (int)boss.VisualAge;
+        if (!ScarletArticulation.Participant(boss)) { Reset(); return; }
+        int age = (int)boss!.VisualAge;
         if (fight != boss.State.Fight) { Reset(); fight = boss.State.Fight; previous = age - 1; }
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
@@ -38,8 +38,7 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                     : impact ? "SpreadRelease" : "SpreadSummon";
                 var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
                 {
-                    Volume = impact ? .30f : .20f, MaxInstances = 1,
-                    SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
+                    Volume = impact ? .30f : .20f, MaxInstances = 1, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
                     PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
                 });
                 voices.Add((id, age + 45));
@@ -57,14 +56,14 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     public override void PostDrawTiles()
     {
         var boss = CrimsonPackets.Boss;
-        if (Main.dedServ || Main.gameMenu || boss is null || !boss.Fresh || !CrimsonVisuals.Local(boss)) return;
-        float age = CrimsonVisuals.RenderAge(boss);
+        if (!ScarletArticulation.Participant(boss)) return;
+        float age = CrimsonVisuals.RenderAge(boss!);
         var batch = Main.spriteBatch;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-        CrimsonEnergy.Begin();
         try
         {
+            using var scope = new ScarletGraphicsScope(batch);
             foreach (Projectile projectile in Main.ActiveProjectiles)
             {
                 if (projectile.ModProjectile is not CrimsonChorus marker || !CrimsonChorus.TryBoss(marker.Plan, out var owner) || owner != boss) continue;
@@ -73,55 +72,41 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                 float progress = Math.Clamp((age - plan.Born) / (plan.Fire - plan.Born), 0, 1);
                 float alpha = age < plan.Fire ? Math.Min(1, (age - plan.Born + 1) / 8)
                     : 1 - CrimsonInvocation.Ease((age - plan.Fire) / 22);
-                float pulse = CrimsonRegistration.Score.Pulse(Math.Max(0, age - boss.State.MusicStart));
-                if (plan.Kind == CrimsonChorusKind.Stack)
-                    DrawMarker(plan.Center, CrimsonChorusRules.StackRadius, new Color(248, 186, 100), true);
-                else
-                    for (int i = 0; i < boss.State.Members.Length; i++)
-                    {
-                        var member = boss.State.Members[i]; var player = Main.player[member.Slot];
-                        if ((plan.Members & (1 << i)) == 0 || member.Out || !player.active || player.dead || player.ghost) continue;
-                        DrawMarker(new(player.Center.X, player.Center.Y), CrimsonChorusRules.SpreadRadius,
-                            new Color(225, 104, 178), false);
-                    }
-                void DrawMarker(CrimsonPoint center, float radius, Color color, bool inward)
+                float pulse = CrimsonRegistration.Score.Pulse(Math.Max(0, age - boss!.State.MusicStart));
+                if (plan.Kind == CrimsonChorusKind.Stack) DrawMarker(plan.Center, CrimsonChorusRules.StackRadius, true);
+                else for (int i = 0; i < boss!.State.Members.Length; i++)
                 {
-                    // The broad field is never filled opaquely. Radius is the
-                    // exact centre-distance rule used by the authority resolver.
-                    Ring(center, radius, 0, MathF.Tau, color * (alpha * .85f), 2.4f);
-                    Ring(center, radius + 12, -MathF.PI / 2, MathF.Tau * (1 - progress), color * alpha, 4);
+                    var member = boss.State.Members[i]; var player = Main.player[member.Slot];
+                    if ((plan.Members & 1 << i) == 0 || member.Out || !player.active || player.dead || player.ghost) continue;
+                    DrawMarker(new(player.Center.X, player.Center.Y), CrimsonChorusRules.SpreadRadius, false);
+                }
+                void DrawMarker(CrimsonPoint center, float radius, bool inward)
+                {
+                    int species = inward ? 0 : 2;
+                    DrawRing(center, radius, 0, MathF.Tau, 2.5f, alpha, species);
+                    DrawRing(center, radius + 12, -MathF.PI / 2, MathF.Tau * (1 - progress), 3.5f, alpha, species);
                     int arrows = inward ? 4 : 6;
                     for (int i = 0; i < arrows; i++)
                     {
-                        float angle = i * MathF.Tau / arrows;
-                        var direction = CrimsonPoint.Polar(angle, 1);
+                        var direction = CrimsonPoint.Polar(i * MathF.Tau / arrows, 1);
                         var normal = new CrimsonPoint(-direction.Y, direction.X);
-                        var point = center + direction * (radius + 23 + pulse * 8);
-                        var tip = point + direction * (inward ? -13 : 13);
-                        CrimsonGestureVisuals.Capsule(batch, new(point + normal * 8, tip, 2), color * alpha);
-                        CrimsonGestureVisuals.Capsule(batch, new(point - normal * 8, tip, 2), color * alpha);
+                        var at = center + direction * (radius + 23 + pulse * 8);
+                        arrow[0] = CrimsonGestureVisuals.V(at + normal * 8);
+                        arrow[1] = CrimsonGestureVisuals.V(at + direction * (inward ? -13 : 13));
+                        arrow[2] = CrimsonGestureVisuals.V(at - normal * 8);
+                        ScarletMaterials.Path(arrow, 2, species, age, alpha);
                     }
                     if (age >= plan.Fire)
-                    {
-                        float impact = MathF.Exp(-(age - plan.Fire) / 5);
-                        Ring(center, radius * (1 + .12f * (1 - impact)), 0, MathF.Tau, color * alpha, 3);
-                        if (!CrimsonVisuals.Reduced)
-                            CrimsonEnergy.AddCore(new(center.X, center.Y), 20 + impact * 70,
-                                age, 0, impact, alpha * .45f, false);
-                    }
+                        DrawRing(center, radius * (1 + .12f * (1 - MathF.Exp(-(age - plan.Fire) / 5))), 0, MathF.Tau, 3, alpha, species);
                 }
-                void Ring(CrimsonPoint center, float radius, float start, float length, Color color, float width)
+                void DrawRing(CrimsonPoint center, float radius, float start, float length, float width, float alpha, int species)
                 {
-                    int count = CrimsonVisuals.Reduced ? 40 : 64;
-                    var old = center + CrimsonPoint.Polar(start, radius);
-                    for (int i = 1; i <= count; i++)
-                    {
-                        var point = center + CrimsonPoint.Polar(start + length * i / count, radius);
-                        CrimsonGestureVisuals.Capsule(batch, new(old, point, width), color); old = point;
-                    }
+                    if (length <= .001f) return;
+                    ring.Clear(); int count = CrimsonVisuals.Reduced ? 40 : 64;
+                    for (int i = 0; i <= count; i++) ring.Add(CrimsonGestureVisuals.V(center + CrimsonPoint.Polar(start + length * i / count, radius)));
+                    ScarletMaterials.Path(ring, width, species, age, alpha);
                 }
             }
-            CrimsonEnergy.Draw(batch);
         }
         finally { batch.End(); }
     }
