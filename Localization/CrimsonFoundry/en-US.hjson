@@ -2,13 +2,13 @@ Mods: {
 	Convergence: {
 		Items: {
 			CrimsonConductor: {
-				DisplayName: Crimson Grimoire
+				DisplayName: Scarlet Grimoire
 				Tooltip:
 					'''
-					Use on a Foundation Core pedestal to prepare Crimson Invocation; everyone confirms Ready
-					Defeat three summoned apparitions, then face the Scarlet Conjurer. Unlimited flight inside the field
+					Use on a Foundation Core pedestal to prepare Scarlet Invocation; everyone confirms Ready
+					Face each apparition alone; at 20% HP it completes its action cycle, then retreats. All three return with Vespera for the finale
 					Right-click to cancel your preparation. Reusable
-					Prototype: 1–8 players; late arrivals spectate until the next summon
+					Rehearsal: hostile damage 1, reduced HP; 1–8 players; late arrivals spectate
 					'''
 			}
 			CrimsonPact: {
@@ -23,20 +23,23 @@ Mods: {
 
 		NPCs.CrimsonBoss.DisplayName: Vespera — The Scarlet Conjurer
 		NPCs.CrimsonEffigy.DisplayName: Scarlet Apparition
-		Projectiles.CrimsonAttack.DisplayName: Crimson Invocation
+		Projectiles.CrimsonAttack.DisplayName: Scarlet Invocation
 		Projectiles.CrimsonCompanion.DisplayName: Scarlet Companion
 		Projectiles.CrimsonCompanionRay.DisplayName: Scarlet Covenant
 		Buffs.CrimsonPactBuff: { DisplayName: "Scarlet Covenant" Description: "The scarlet conjurer accompanies you" }
+		CrimsonFoundry.RaidTitle: SCARLET INVOCATION
 		CrimsonFoundry.Rejected: Preparation rejected. Hold the conductor near a Foundation Core pedestal, finish other encounters, and use a party of at most eight.
 
 		Configs: {
 			CrimsonVisualConfig: {
-				DisplayName: Crimson Invocation presentation
+				DisplayName: Scarlet Invocation presentation
 
 				ReducedEffects: {
 					Label: Reduce decorative effects
 					Tooltip: Preserves warnings and damage footprints. Reduces decorative particles and camera shake.
 				}
+
+				CinematicCamera: { Label: "Phase-transition camera" Tooltip: "Gentle local pan during protected transitions only; never blocks controls." }
 
 				ScreenShake: {
 					Label: Camera shake

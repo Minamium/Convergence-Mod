@@ -16,9 +16,9 @@ internal static partial class Program
             AssertEqual(mask == 9, FirstSeveranceDollActivation.CanActivate(active, dead, ghost, doll),
                 "no forged held-item/alive claims or consumption path");
         }
-        AssertEqual(false, FirstSeveranceDollActivation.ShowAttendant(FirstSeveranceCoreProtectionState.Idle), "empty before and after a fight");
-        AssertEqual(true, FirstSeveranceDollActivation.ShowAttendant(FirstSeveranceCoreProtectionState.Preparing), "Doll on stage while Ready");
-        AssertEqual(false, FirstSeveranceDollActivation.ShowAttendant(FirstSeveranceCoreProtectionState.Active), "intro owns capture art");
+        AssertEqual(false, FirstSeveranceDollActivation.ShowAttendant(FirstSeveranceCoreProtectionState.Idle, true), "empty before and after a fight");
+        AssertEqual(true, FirstSeveranceDollActivation.ShowAttendant(FirstSeveranceCoreProtectionState.Preparing, true), "Doll on stage while Ready");
+        AssertEqual(false, FirstSeveranceDollActivation.ShowAttendant(FirstSeveranceCoreProtectionState.Active, true), "intro owns capture art");
     }
 
     [DomainTest("Doll sphere crater has continuous depth wall normals and an unchanged outside silhouette")]
