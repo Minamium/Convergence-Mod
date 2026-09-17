@@ -4,8 +4,8 @@ Mods: {
       CrimsonConductor: {
         DisplayName: 紅蓮の魔導書
         Tooltip: '''
-          Foundation Coreの台に使用してCrimson Invocationを準備。接続中の全員がReadyすると開始
-          3体の異形を倒し、紅の召喚師と対峙せよ。領域内は無限飛行
+          Foundation Coreの台に使用してScarlet Invocationを準備。接続中の全員がReadyすると開始
+          異形と一体ずつ戦い、HP20%で次へ。最後は三体と本体をすべて倒せ。領域内は無限飛行
           右クリックで自分が始めた準備を中止。消耗しない
           試作版：1～8人。開始後の参加者は次回起動まで観戦
           '''
@@ -26,10 +26,10 @@ Mods: {
       CrimsonCompanionRay: { DisplayName: "紅の盟約" }
     }
     Buffs.CrimsonPactBuff: { DisplayName: "紅の盟約" Description: "紅の召喚師が同行している" }
-    CrimsonFoundry: { Rejected: "起動できません。指揮装置を持ってFoundation Coreの台の近くで使用し、他の戦闘を終了して8人以下で開始してください。" }
+    CrimsonFoundry: { RaidTitle: "SCARLET INVOCATION" Rejected: "起動できません。指揮装置を持ってFoundation Coreの台の近くで使用し、他の戦闘を終了して8人以下で開始してください。" }
     Configs: {
       CrimsonVisualConfig: {
-        DisplayName: Crimson Invocationの演出
+        DisplayName: Scarlet Invocationの演出
         ReducedEffects: { Label: "装飾エフェクトを減らす" Tooltip: "予兆と攻撃範囲は維持し、粒子と画面の揺れを抑えます。" }
         ScreenShake: { Label: "画面の揺れ" Tooltip: "発射と召喚時の短い揺れ。" }
       }

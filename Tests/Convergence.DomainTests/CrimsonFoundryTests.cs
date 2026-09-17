@@ -35,7 +35,7 @@ internal static partial class Program
         {
             var members = new CrimsonMember[count];
             for (int i = 0; i < count; i++) members[i] = new((byte)i, Guid.NewGuid(), true, false);
-            var state = new CrimsonState(Guid.NewGuid(), 300, 360, -1, CrimsonStage.Countdown, members, 8000, 6000);
+            var state = new CrimsonState(Guid.NewGuid(), 300, 360, -1, CrimsonStage.Countdown, members, 8000, 6000, UnlockAt: 840);
             using var stream = new MemoryStream(); state.Write(new BinaryWriter(stream)); byte[] bytes = stream.ToArray(); stream.Position = 0;
             var restored = CrimsonState.Read(new BinaryReader(stream));
             AssertEqual(state.Fight, restored.Fight, "fight roundtrip");
@@ -75,29 +75,66 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Crimson clients expose individual summons and final performer only at accepted epochs")]
+    [DomainTest("Scarlet solo phases retain 20 percent and Final exposes all four targets")]
     private static void CrimsonDamageProjection()
     {
-        var state = new CrimsonState(Guid.NewGuid(), 400, 100, -1, CrimsonStage.Ready,
-            new[] { new CrimsonMember(0, Guid.NewGuid(), true, false) }, 8000, 6000);
-        AssertEqual(false, state.Vulnerable(400), "preparation remains protected");
-        state = state with { Stage = CrimsonStage.Performance };
-        AssertEqual(false, state.Vulnerable(400), "performer protected while summons remain");
-        for (int i = 0; i < 3; i++)
+        var state = new CrimsonState(Guid.NewGuid(), 1000, 100, -1, CrimsonStage.Performance,
+            new[] { new CrimsonMember(0, Guid.NewGuid(), true, false) }, 8000, 6000, UnlockAt: 900);
+        for (byte phase = 0; phase < 3; phase++)
         {
-            AssertEqual(true, state.SummonVulnerable(i), "independent live target");
-            byte mask = CrimsonInvocation.Defeat(state.DefeatedMask, i);
-            AssertEqual(mask, CrimsonInvocation.Defeat(mask, i), "duplicate death is idempotent");
-            state = state with { DefeatedMask = mask };
-            AssertEqual(false, state.SummonVulnerable(i), "dead target cannot keep attacking");
-            AssertEqual(false, state.Vulnerable(400), "kill mask alone does not skip manifestation");
+            state = state with { Phase = phase };
+            for (int i = 0; i < 3; i++) AssertEqual(i == phase, state.SummonVulnerable(i), "one active apparition");
+            AssertEqual(false, state.Vulnerable(1000), "performer cannot be damaged early");
+            int floor = CrimsonPhaseRules.RetreatLife(state.TargetLife);
+            AssertEqual(false, CrimsonPhaseRules.ShouldRetreat(phase, phase, floor + 1, state.TargetLife), "above floor");
+            AssertEqual(true, CrimsonPhaseRules.ShouldRetreat(phase, phase, floor, state.TargetLife), "at floor");
+            AssertEqual(true, CrimsonPhaseRules.ShouldRetreat(phase, phase, -5000, state.TargetLife), "overkill still retreats");
+            AssertEqual(false, CrimsonPhaseRules.ShouldRetreat(phase, (phase + 1) % 3, 0, state.TargetLife), "foreign target cannot advance");
         }
-        AssertEqual(3, CrimsonInvocation.SelectAlive(8, state.DefeatedMask), "only all dead selects performer");
-        state = state with { FinalStart = 500 };
-        AssertEqual(false, state.Vulnerable(649.99f), "manifestation protected");
-        AssertEqual(true, state.Vulnerable(650), "every peer exposes same final target");
-        AssertEqual(false, (state with { Stage = CrimsonStage.Victory }).Vulnerable(700), "ending protected");
-        AssertEqual(false, default(CrimsonState).Vulnerable(600), "uninitialized actor is protected");
+        state = state with { Phase = 3, PhaseStart = 1000, FinalStart = 1000, UnlockAt = 1150,
+            Life0 = 600000, Life1 = 600000, Life2 = 600000 };
+        AssertEqual(4800000, state.BarMax, "Final remaining health denominator");
+        AssertEqual(4800000, state.BarLife, "no full-health respawn");
+        AssertEqual(false, state.Vulnerable(1149.99f), "manifestation protects performer");
+        state = state with { Age = 1150 };
+        for (int i = 0; i < 3; i++) AssertEqual(true, state.SummonVulnerable(i), "all three return");
+        AssertEqual(true, state.Vulnerable(1150), "performer exposed alongside summons");
+        AssertEqual(false, (state with { Stage = CrimsonStage.Victory }).Vulnerable(1200), "terminal protected");
+        AssertEqual(false, default(CrimsonState).Vulnerable(600), "empty actor protected");
+    }
+
+    [DomainTest("Scarlet Final requires four kills and all-out overrides a simultaneous clear")]
+    private static void CrimsonFinalTerminal()
+    {
+        for (byte mask = 0; mask <= 7; mask++)
+        {
+            AssertEqual(mask == 7, CrimsonPhaseRules.Victory(3, mask, true, false), "all targets required");
+            AssertEqual(false, CrimsonPhaseRules.Victory(3, mask, false, false), "main actor required");
+            AssertEqual(false, CrimsonPhaseRules.Victory(3, mask, true, true), "all-out wins tie");
+        }
+        for (int phase = 0; phase < 3; phase++) AssertEqual(false, CrimsonPhaseRules.Victory(phase, 7, true, false), "no early victory");
+        for (int count = 1; count <= 8; count++)
+        {
+            int maximum = CrimsonInvocation.TargetLife(count), floor = CrimsonPhaseRules.RetreatLife(maximum);
+            AssertEqual(maximum, (maximum - floor) + floor, "retreat preserves total damage budget");
+            AssertEqual(maximum * 4, 3 * (maximum - floor) + CrimsonPhaseRules.BarMaximum(3, maximum), "full encounter budget conserved");
+        }
+    }
+
+    [DomainTest("Scarlet phase projections reject rollback and show only current bodies")]
+    private static void CrimsonPhaseReplica()
+    {
+        var old = new CrimsonState(Guid.NewGuid(), 1000, 100, -1, CrimsonStage.Performance,
+            new[] { new CrimsonMember(0, Guid.NewGuid(), true, false) }, 8000, 6000,
+            Phase: 1, PhaseStart: 900, UnlockAt: 1050);
+        AssertEqual(false, (old with { Age = 999 }).CanReplace(old), "old age");
+        AssertEqual(false, (old with { Age = 1100, Phase = 0 }).CanReplace(old), "late prior phase");
+        AssertEqual(false, (old with { Fight = Guid.NewGuid() }).CanReplace(old), "foreign fight");
+        AssertEqual(0f, old.Presence(0, 1000), "previous withdrawn");
+        AssertEqual(1f, old.Presence(1, 1000), "current visible");
+        AssertEqual(0f, old.Presence(2, 1000), "future hidden");
+        var ending = old with { Stage = CrimsonStage.Defeat };
+        AssertEqual(false, old.CanReplace(ending), "terminal never reopened");
     }
 
     [DomainTest("Crimson apparition identity and footprint codecs reject malformed state")]

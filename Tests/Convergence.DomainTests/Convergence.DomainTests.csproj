@@ -197,4 +197,8 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceTermination.cs"
              Link="Domain/FirstSeveranceTermination.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonPhaseRules.cs" Link="Domain/CrimsonPhaseRules.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonRhythm.cs" Link="Domain/CrimsonRhythm.cs" />
+  </ItemGroup>
 </Project>

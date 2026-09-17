@@ -6,8 +6,8 @@ internal static class FirstSeveranceDollActivation
     internal static bool CanActivate(bool active, bool dead, bool ghost, bool heldDoll)
         => active && !dead && !ghost && heldDoll;
 
-    // No persistent 'installed doll' flag: cancel/terminal/world reload returns
-    // to the empty pedestal. The reused native NPC is never a roster member.
-    internal static bool ShowAttendant(FirstSeveranceCoreProtectionState state)
-        => state == FirstSeveranceCoreProtectionState.Preparing;
+    // Shared Preparing protection is not a Doll identity. Callers must prove
+    // the exact Doll encounter/preparation/core, including on remote replicas.
+    internal static bool ShowAttendant(FirstSeveranceCoreProtectionState state, bool ownsDollPreparation = false)
+        => ownsDollPreparation && state == FirstSeveranceCoreProtectionState.Preparing;
 }
