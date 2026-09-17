@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-17",
+  "feature": "Ghost Samurai dedicated spectral slash materials",
+  "version": "0.3.15",
+  "protocol": 46,
+  "base_main": "6f0d56b5ce638eda66fd9f3651ea9dc01b1edace",
+  "branch": "feature/ghost-samurai-slash-vfx",
+  "scope": "Client presentation and five generated assets only; Boss AI, target selection, damage volumes, Born/Fire/End clocks, projectile creation, networking and Oboro performance are unchanged.",
+  "automated": {
+    "source_art": "pass: five original2172x724 RGBA outputs inspected; real zero-alpha background and visible foreground; copied unchanged; attribution records contain SHA256",
+    "visual_geometry": "pass:tools/check-ghost-slash-vfx.ps1 links production renderers and existing rules to a CPU SpriteBatch capture;101 cases /4327 texture quads; disk/annulus interior, field/viewport, rear safety,16 wave orientations, forecast/live separation, Reduced Effects, bounded draws, ImmediateLoad reuse, unload reset and Dedicated Server guard",
+    "native_build": "pass:0 errors,4 pre-existing CS8632 warnings;22 locale files, shader hashes and normal solo admission verified by native build",
+    "package": "pass: all five expected Assets/Textures/GhostSamurai/Slashes/*.rawimg entries are present in the exact package; native type validation accepts both Ghost Samurai Globals and the new client ModSystem; saved summon item type is unchanged",
+    "static": "pass: repository wrapper catalog78,repository825,YAML10 and diff whitespace. No shared rule/domain changes require a new domain suite."
+  },
+  "package": {
+    "local_record": "20260917T090811616459Z",
+    "source_sha256": "089b2eeea72e2a726fed61a266ec02261bd289fcfb028a1d86ffc2ab8d8ec798",
+    "source_changed_during_build": false,
+    "bytes": 85099013,
+    "sha256": "80788b5fb15bc387a2a7ff63d72efeafccc2a4c29dc7e639ab69014aaf02c323",
+    "provenance": "Isolated native build of recorded feature changes on base_main. Later verification tooling and evidence/catalog edits do not change packaged gameplay code/assets. Normal profile remains0.3.14 pending administrator-approved integration."
+  },
+  "not_run": [
+    "Actual Reload Mods, cold first summon and resource interaction with other render hooks",
+    "Bright/dark terrain, grid gaps, safe inner circle and rear cleave readability",
+    "Matching SP/MP peers, late join and latency visual acceptance",
+    "Reduced Effects in-game appearance and measured frame time"
+  ],
+  "boundaries": "CPU capture validates submitted geometry, not FNA rasterization or in-game multiplayer behavior. No game/server/GUI launch, main merge, normal-profile overwrite or publication was performed."
+}

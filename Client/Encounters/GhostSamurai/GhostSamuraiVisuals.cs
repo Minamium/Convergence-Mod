@@ -134,6 +134,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         SpriteBatch batch = Main.spriteBatch;
         Vector2 position = p.VisualCenter(age) - Main.screenPosition;
         bool live = h.Live(age);
+        bool reduced = ModContent.GetInstance<Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig>().ReducedEffects;
         Color color = live ? new Color(230, 207, 255) : new Color(171, 108, 240);
         Vector2 zoom = Main.GameViewMatrix.Zoom;
         int viewWidth = (int)MathF.Ceiling(Main.screenWidth / Math.Max(.1f, zoom.X)) + 64;
@@ -145,13 +146,11 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
             viewport = Rectangle.Intersect(viewport, new Rectangle((int)(field.Left - Main.screenPosition.X),
                 (int)(field.Top - Main.screenPosition.Y), (int)(field.HalfWidth * 2), (int)(field.HalfHeight * 2)));
         }
-        if (h.Shape == SamuraiShape.FrontalCleave) GhostSamuraiComboVisuals.DrawCleave(batch, h, position, age, p.SlashAim.Locked, viewport,
-            ModContent.GetInstance<Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig>().ReducedEffects);
-        else if (h.Shape == SamuraiShape.GroundShockwave) GhostSamuraiComboVisuals.DrawShock(batch, h, position, age);
-        else if (h.IsCircle) GhostSamuraiCircleVisuals.Draw(batch, h, position, age, viewport,
-            ModContent.GetInstance<Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig>().ReducedEffects);
-        else if (h.Shape == SamuraiShape.SlashWave) GhostSamuraiWaveVisuals.Draw(batch, h, position, age, p.SlashAim.Locked);
-        else if (h.Shape == SamuraiShape.RushVisual) DrawRush(batch, p, position, age);
+        if (h.Shape == SamuraiShape.FrontalCleave) GhostSamuraiComboVisuals.DrawCleave(batch, h, position, age, p.SlashAim.Locked, viewport, reduced);
+        else if (h.Shape == SamuraiShape.GroundShockwave) GhostSamuraiComboVisuals.DrawShock(batch, h, position, age, reduced);
+        else if (h.IsCircle) GhostSamuraiCircleVisuals.Draw(batch, h, position, age, viewport, reduced);
+        else if (h.Shape == SamuraiShape.SlashWave) GhostSamuraiWaveVisuals.Draw(batch, h, position, age, p.SlashAim.Locked, reduced);
+        else if (h.Shape == SamuraiShape.RushVisual) DrawRush(batch, p, position, age, reduced);
         else if (h.Shape == SamuraiShape.Wisp)
         {
             // The outlined core retains the collision radius; the violet flame is decoration.
@@ -178,6 +177,17 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
             GhostSamuraiVisuals.Stroke(batch, position, end, h.Radius * 2 - 4, (live ? color : edge) * (live ? .38f : .14f + .08f * progress));
             GhostSamuraiVisuals.Stroke(batch, position, end, live ? 7 : 4, ink * .85f);
             GhostSamuraiVisuals.Stroke(batch, position, end, live ? 3 : 2, edge * (live ? 1 : .7f + .3f * progress));
+            if (live)
+            {
+                // Grid hazards lock at birth; the directional slashes track their
+                // aim. Use the immutable hazard metadata, never the boss's next state.
+                bool grid = h.Shape == SamuraiShape.Slash && p.SlashAim.LockTick == h.Born
+                    && (h.Length == GhostSamuraiRules.GridWidth || h.Length == GhostSamuraiRules.GridHeight)
+                    && h.Radius == GhostSamuraiRules.GridHalfWidth;
+                GhostSamuraiSlashArt.Strip(batch, grid ? SamuraiSlashArt.Grid : SamuraiSlashArt.Normal,
+                    position, end, h.Radius * 2 - 8,
+                    GhostSamuraiSlashArt.Energy(age, h.Fire, h.End) * (reduced ? .55f : grid ? .82f : 1));
+            }
             for (int side = -1; side <= 1; side += 2)
             {
                 // Borders are inset: their outer edge is the authoritative half-width.
@@ -191,7 +201,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         return false;
     }
 
-    private static void DrawRush(SpriteBatch batch, GhostSamuraiAttackProjectile p, Vector2 start, float age)
+    private static void DrawRush(SpriteBatch batch, GhostSamuraiAttackProjectile p, Vector2 start, float age, bool reduced)
     {
         var h = p.DisplayHazard;
         Vector2 d = new(h.DX, h.DY), n = new(-h.DY, h.DX), end = start + d * h.Length;
@@ -215,13 +225,18 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         else
         {
             float t = (age - h.Fire) / (h.End - h.Fire);
-            Color flash = new Color(230, 207, 255) * (1 - t);
+            Color flash = new Color(213, 241, 255) * (1 - t);
             // Large single blade flash stays translucent and unbordered: unlike
             // the solid outlined grid, this art is entirely harmless.
             GhostSamuraiVisuals.Stroke(batch, start, end, h.Radius * .6f, flash * .15f);
             GhostSamuraiVisuals.Stroke(batch, start, end, 7, flash * .65f);
+            GhostSamuraiSlashArt.Strip(batch, SamuraiSlashArt.Dash, start, end, h.Radius,
+                (1 - t) * (reduced ? .25f : .55f));
             Vector2 body = GhostSamuraiAttackProjectile.RushCenter(h, age) - Main.screenPosition;
-            GhostSamuraiVisuals.Stroke(batch, body - d * 180, body, 18, flash * .3f);
+            // The brighter wake follows the authoritative rush center. The full
+            // route remains dim decoration; only the boss body owns rush damage.
+            GhostSamuraiSlashArt.Strip(batch, SamuraiSlashArt.Dash, body - d * 240, body,
+                80, (1 - t) * (reduced ? .45f : .85f));
         }
     }
 }

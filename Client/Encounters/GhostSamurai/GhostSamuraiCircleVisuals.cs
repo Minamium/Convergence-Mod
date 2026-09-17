@@ -5,8 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Convergence.Client.Encounters.GhostSamurai;
 
-// Bounded vector presentation of the authority's disk/annulus. No textures,
-// gameplay RNG, extra projectiles, screen flashes or client-side targeting.
+// Exact-volume vector warnings with bounded sword/wind texture ribbons inside
+// the authority's disk/annulus. No gameplay RNG, extra actors or client targeting.
 internal static class GhostSamuraiCircleVisuals
 {
     internal static void Draw(SpriteBatch batch, SamuraiHazard h, Vector2 center, float age, Rectangle viewport, bool reduced)
@@ -48,8 +48,8 @@ internal static class GhostSamuraiCircleVisuals
             if (h.IsWind) Wind(.25f, age * .007f);
             else Slashes(.3f, 0);
         }
-        else if (h.IsWind) Wind(.85f, (age - h.Fire) * .12f);
-        else Slashes(1 - (age - h.Fire) / (h.End - h.Fire), (age - h.Fire) * .018f);
+        else if (h.IsWind) Wind(GhostSamuraiSlashArt.Energy(age, h.Fire, h.End), (age - h.Fire) * .12f);
+        else Slashes(GhostSamuraiSlashArt.Energy(age, h.Fire, h.End), (age - h.Fire) * .018f);
 
         void Boundary(float radius)
         {
@@ -68,6 +68,7 @@ internal static class GhostSamuraiCircleVisuals
         }
         void Slashes(float opacity, float rotation)
         {
+            float width = live ? 42 : 2, inset = live ? width / 2 + 3 : 8;
             float angle = -.6f + rotation;
             Vector2 d = new(MathF.Cos(angle), MathF.Sin(angle)), n = new(-d.Y, d.X);
             Vector2 viewCenter = new(viewport.Center.X - center.X, viewport.Center.Y - center.Y);
@@ -76,24 +77,44 @@ internal static class GhostSamuraiCircleVisuals
             float lastOffset = Math.Min(h.Radius, projected + extent);
             for (float offset = firstOffset; offset < lastOffset; offset += 120)
             {
-                float outer = Extent(h.Radius - 8, Math.Abs(offset));
-                float hole = inner > 0 ? Extent(inner + 8, Math.Abs(offset)) : 0;
+                // Expand the safe hole / inset the outer disk by the entire
+                // ribbon half-width, including its transparent texture canvas.
+                float outer = Extent(h.Radius - inset, Math.Abs(offset));
+                float hole = inner > 0 ? Extent(inner + inset, Math.Abs(offset)) : 0;
                 if (outer <= hole) continue;
                 Cut(-outer, -hole); Cut(hole, outer);
                 void Cut(float a, float b)
                 {
                     Vector2 first = center + n * offset + d * a, last = center + n * offset + d * b;
-                    if (!Clip(ref first, ref last)) return;
-                    GhostSamuraiVisuals.Stroke(batch, first, last, live ? 8 : 2, edge * opacity * .65f);
-                    if (live) GhostSamuraiVisuals.Stroke(batch, first, last, 2, Color.White * opacity);
+                    if (live)
+                    {
+                        GhostSamuraiSlashArt.Strip(batch, SamuraiSlashArt.Normal, first, last, width,
+                            opacity * (reduced ? .5f : .85f), viewport);
+                        return;
+                    }
+                    if (Clip(ref first, ref last)) GhostSamuraiVisuals.Stroke(batch, first, last, 2, edge * opacity * .65f);
                 }
             }
         }
         void Wind(float opacity, float rotation)
         {
-            // Three concentric blade wakes occupy exactly this step's region.
+            // Wind uses long fluid hooks instead of the sword step's straight
+            // incisions. Ring radii leave room for the full ribbon at both edges.
             for (int ring = 0; ring < (reduced ? 2 : 3); ring++)
             {
+                if (live)
+                {
+                    float band = h.Radius - inner;
+                    float windRadius = inner + band * (.2f + ring * .3f);
+                    float width = Math.Min(96, band * .18f);
+                    for (int blade = 0; blade < (reduced ? 3 : 4); blade++)
+                    {
+                        float angle = rotation * (ring % 2 == 0 ? 1 : -1) + blade * MathF.Tau / (reduced ? 3 : 4) + ring * .4f;
+                        GhostSamuraiSlashArt.Arc(batch, SamuraiSlashArt.Wind, center, windRadius,
+                            angle, 1.05f, width, opacity * (reduced ? .5f : .8f), viewport);
+                    }
+                    continue;
+                }
                 float radius = inner > 0 ? inner + 80 + ring * 180 : h.Radius * (.2f + ring * .3f);
                 for (int blade = 0; blade < 4; blade++)
                 for (int segment = 0; segment < 10; segment++)

@@ -4,7 +4,8 @@ param(
     [Parameter(Mandatory=$true)][string]$PackagePath,
     [Parameter(Mandatory=$true)][string]$TModLoaderPath,
     [switch]$ExpectOldFailure,
-    [switch]$CheckLifecycle
+    [switch]$CheckLifecycle,
+    [switch]$CheckSlashArt
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -TypeDefinition @'
@@ -51,7 +52,7 @@ public static class GhostSamuraiLoadCheck
         return output.ToArray();
     }
 
-    public static void Run(string package, string loader, bool expectOldFailure, bool checkLifecycle)
+    public static void Run(string package, string loader, bool expectOldFailure, bool checkLifecycle, bool checkSlashArt)
     {
         var resolver = new AssemblyDependencyResolver(loader);
         var context = new AssemblyLoadContext("GhostSamuraiValidation", isCollectible: true);
@@ -72,7 +73,9 @@ public static class GhostSamuraiLoadCheck
             using var bytes = new MemoryStream(ReadModAssembly(package));
             Assembly assembly = context.LoadFromStream(bytes);
             const string prefix = "Convergence.Client.Encounters.GhostSamurai.";
-            foreach (string name in new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals" }) {
+            string[] names = checkSlashArt ? new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals", "GhostSamuraiSlashArt" }
+                : new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals" };
+            foreach (string name in names) {
                 Type type = assembly.GetType(prefix + name, throwOnError: true);
                 object instance = Activator.CreateInstance(type, nonPublic: true);
                 MethodInfo validate = type.GetMethod("ValidateType", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -123,4 +126,4 @@ public static class GhostSamuraiLoadCheck
 '@
 $package = (Resolve-Path -LiteralPath $PackagePath).Path
 $loader = Join-Path (Resolve-Path -LiteralPath $TModLoaderPath).Path 'tModLoader.dll'
-[GhostSamuraiLoadCheck]::Run($package, $loader, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent)
+[GhostSamuraiLoadCheck]::Run($package, $loader, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent, $CheckSlashArt.IsPresent)

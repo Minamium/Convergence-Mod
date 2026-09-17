@@ -2725,6 +2725,78 @@ The September16 boards replace the earlier cyan appearance only. The old Boss at
 - Reviewer and review date: Codex,2026-09-16; alpha/key removal and dark/light preview checked; game acceptance remains user-owned
 - SHA256: `f90af5b4ad893127ea5926f7604d66c681a53b5c57220ea60a92bd29a47aee72`
 
+### Ghost Samurai spectral slash materials — 2026-09-17
+
+- Runtime file: `Assets/Textures/GhostSamurai/Slashes/NormalSlash.png`
+- Asset ID: ghost-samurai-slash-normalslash-0315
+- Asset type: original RGBA slash ribbon texture, 2172 x 724
+- Creator: OpenAI image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: generated
+- Source work and URL: original text-to-image output for this request; no third-party art/source imported; exact prompt retained in the local generation manifest
+- Tool/model/version: built-in image_gen; underlying model/version/seed not exposed
+- Human modifications: none to pixels; original alpha preserved. Client-only UV strips fit the texture to existing attack geometry and clocks; no offline resampling.
+- License and redistribution terms: project-directed generated runtime art under the repository's existing asset/publication policy; no third-party license claim; release approval remains separate
+- Required attribution: retain this record
+- Reviewer and review date: Codex, 2026-09-17; source appearance and alpha checked, in-game acceptance pending
+- SHA256: `670858dd4ff4ead472520f4df4d1fcceb217f6af826913a3505ffcc541bc37b2`
+
+- Runtime file: `Assets/Textures/GhostSamurai/Slashes/HeavySlash.png`
+- Asset ID: ghost-samurai-slash-heavyslash-0315
+- Asset type: original RGBA slash ribbon texture, 2172 x 724
+- Creator: OpenAI image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: generated
+- Source work and URL: original text-to-image output for this request; no third-party art/source imported; exact prompt retained in the local generation manifest
+- Tool/model/version: built-in image_gen; underlying model/version/seed not exposed
+- Human modifications: none to pixels; original alpha preserved. Client-only UV strips fit the texture to existing attack geometry and clocks; no offline resampling.
+- License and redistribution terms: project-directed generated runtime art under the repository's existing asset/publication policy; no third-party license claim; release approval remains separate
+- Required attribution: retain this record
+- Reviewer and review date: Codex, 2026-09-17; source appearance and alpha checked, in-game acceptance pending
+- SHA256: `f399d13494587204dbe420551a3fddd5cd80abb47f96a0491f223007e70e313a`
+
+- Runtime file: `Assets/Textures/GhostSamurai/Slashes/GridSlash.png`
+- Asset ID: ghost-samurai-slash-gridslash-0315
+- Asset type: original RGBA slash ribbon texture, 2172 x 724
+- Creator: OpenAI image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: generated
+- Source work and URL: original text-to-image output for this request; no third-party art/source imported; exact prompt retained in the local generation manifest
+- Tool/model/version: built-in image_gen; underlying model/version/seed not exposed
+- Human modifications: none to pixels; original alpha preserved. Client-only UV strips fit the texture to existing attack geometry and clocks; no offline resampling.
+- License and redistribution terms: project-directed generated runtime art under the repository's existing asset/publication policy; no third-party license claim; release approval remains separate
+- Required attribution: retain this record
+- Reviewer and review date: Codex, 2026-09-17; source appearance and alpha checked, in-game acceptance pending
+- SHA256: `6698e80758ecbac325b7886e94e853e30726366ba17105a4f64348d99e0ca253`
+
+- Runtime file: `Assets/Textures/GhostSamurai/Slashes/Kamaitachi.png`
+- Asset ID: ghost-samurai-slash-kamaitachi-0315
+- Asset type: original RGBA slash ribbon texture, 2172 x 724
+- Creator: OpenAI image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: generated
+- Source work and URL: original text-to-image output for this request; no third-party art/source imported; exact prompt retained in the local generation manifest
+- Tool/model/version: built-in image_gen; underlying model/version/seed not exposed
+- Human modifications: none to pixels; original alpha preserved. Client-only UV strips fit the texture to existing attack geometry and clocks; no offline resampling.
+- License and redistribution terms: project-directed generated runtime art under the repository's existing asset/publication policy; no third-party license claim; release approval remains separate
+- Required attribution: retain this record
+- Reviewer and review date: Codex, 2026-09-17; source appearance and alpha checked, in-game acceptance pending
+- SHA256: `e540ba728bc79890477d3bea53538d36007d101075994860d629b72cbc95d7f2`
+
+- Runtime file: `Assets/Textures/GhostSamurai/Slashes/DashFlash.png`
+- Asset ID: ghost-samurai-slash-dashflash-0315
+- Asset type: original RGBA slash ribbon texture, 2172 x 724
+- Creator: OpenAI image generation, directed by Codex for Minamium
+- Creation/acquisition date: 2026-09-17
+- Source type: generated
+- Source work and URL: original text-to-image output for this request; no third-party art/source imported; exact prompt retained in the local generation manifest
+- Tool/model/version: built-in image_gen; underlying model/version/seed not exposed
+- Human modifications: none to pixels; original alpha preserved. Client-only UV strips fit the texture to existing attack geometry and clocks; no offline resampling.
+- License and redistribution terms: project-directed generated runtime art under the repository's existing asset/publication policy; no third-party license claim; release approval remains separate
+- Required attribution: retain this record
+- Reviewer and review date: Codex, 2026-09-17; source appearance and alpha checked, in-game acceptance pending
+- SHA256: `729c27ea3b9f1e5c0261b012a091597fba15f7f06a516838b5f6706f57573cf8`
+
 ## Record template
 
 Copy this section for each asset family. In the Records section above, add one exact Markdown entry in the form `- Runtime file: \`path/from/repository/root\`` for every exported file. The repository check parses only that section and verifies both directions.
