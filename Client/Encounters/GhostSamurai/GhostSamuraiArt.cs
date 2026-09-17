@@ -51,8 +51,11 @@ internal sealed class GhostSamuraiArt
 
     internal void Unload()
     {
-        texture?.Dispose();
+        var oldTexture = texture;
         texture = null;
         source = null;
+        // The keyed copy is ours; the asset repository owns source. Unload may
+        // run on a worker, and a queued release must not touch a new reload.
+        if (oldTexture is not null) Main.QueueMainThreadAction(oldTexture.Dispose);
     }
 }

@@ -8,8 +8,7 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
-// Native independently damageable NPC. The owning encounter alone advances
-// the defeated mask; a lost/despawned child never counts as a successful kill.
+// Independently damageable native NPC. Only its owner advances the death mask.
 public sealed class CrimsonEffigy : ModNPC
 {
     internal CrimsonRuntime? Runtime;
@@ -18,10 +17,11 @@ public sealed class CrimsonEffigy : ModNPC
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
     {
-        NPC.width = 190; NPC.height = 240; NPC.lifeMax = 3000000; NPC.defense = 65;
+        NPC.width = 190; NPC.height = 240; NPC.lifeMax = CrimsonPlaytestTuning.SoloTargetLife; NPC.defense = 65;
         NPC.damage = 0; NPC.knockBackResist = 0; NPC.aiStyle = -1;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.netAlways = true;
         NPC.dontTakeDamage = true;
+        NPC.BossBar = ModContent.GetInstance<CrimsonBossBar>();
         if (!Main.dedServ) NPC.HitSound = SoundID.NPCHit4;
     }
     internal bool TryBoss(out CrimsonBoss? boss)
@@ -41,8 +41,14 @@ public sealed class CrimsonEffigy : ModNPC
     {
         NPC.timeLeft = NPC.activeTime;
         NPC.GivenName = State.Index switch { 0 => "Ember Crown", 1 => "Sable Mantle", _ => "Thorn Choir" };
-        NPC.dontTakeDamage = !TryBoss(out var boss) || !boss!.State.SummonVulnerable(State.Index);
-        NPC.boss = !NPC.dontTakeDamage;
+        bool active = TryBoss(out var boss) && boss!.State.SummonVulnerable(State.Index);
+        NPC.boss = active;
+        NPC.dontTakeDamage = !active || NPC.life <= boss!.State.DamageFloor(State.Index);
+        if (boss is not null)
+        {
+            NPC.lifeMax = boss.State.TargetLife;
+            CrimsonGesture.ProjectMotion(NPC, boss, State.Index);
+        }
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {
             NPC.active = false;
@@ -51,8 +57,24 @@ public sealed class CrimsonEffigy : ModNPC
     }
     public override bool CheckActive() => false;
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
-    public override bool? CanBeHitByItem(Player player, Item item) => TryBoss(out var boss) && boss!.State.Contains(player.whoAmI) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile projectile) => TryBoss(out var boss) && boss!.State.Contains(projectile.owner) ? null : false;
+    private bool AboveRetreatFloor(CrimsonBoss boss) => NPC.life > boss.State.DamageFloor(State.Index);
+    public override bool? CanBeHitByItem(Player player, Item item) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.Contains(player.whoAmI) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile projectile) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.Contains(projectile.owner) ? null : false;
+    public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
+    {
+        if (TryBoss(out var boss) && boss!.State.DamageFloor(State.Index) > 0)
+            modifiers.SetMaxDamage(Math.Max(1, NPC.life - boss.State.DamageFloor(State.Index)));
+    }
+    public override bool CheckDead()
+    {
+        if (!TryBoss(out var boss) || boss!.State.DamageFloor(State.Index) > 0)
+        {
+            NPC.life = boss is null ? Math.Max(1, NPC.lifeMax / 5) : boss.State.DamageFloor(State.Index);
+            NPC.dontTakeDamage = true;
+            return false;
+        }
+        return true;
+    }
     public override void OnKill()
     { if (Main.netMode != NetmodeID.MultiplayerClient) Runtime?.SummonKilled(this); }
     public override void SendExtraAI(BinaryWriter writer) => State.Write(writer);

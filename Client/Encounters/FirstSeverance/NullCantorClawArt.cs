@@ -249,6 +249,13 @@ internal static class NullCantorClawArt
     }
     internal static void Dispose()
     {
-        feather?.Dispose(); glow?.Dispose(); feather = glow = null; rig = icon = null;
+        // Unload runs on tML's worker; detach now, release owned GPU textures on
+        // the main thread. Captures cannot dispose a subsequent reload's cache.
+        var oldFeather = feather;
+        var oldGlow = glow;
+        feather = glow = null;
+        rig = icon = null; // Asset repository owns these, not this renderer.
+        if (oldFeather is not null) Main.QueueMainThreadAction(oldFeather.Dispose);
+        if (oldGlow is not null) Main.QueueMainThreadAction(oldGlow.Dispose);
     }
 }

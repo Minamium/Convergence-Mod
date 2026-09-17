@@ -65,7 +65,7 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: f203043669aa953cbab42abbf778828a9a01a66e60d3cedcb959f894036b7bb5
+  content_sha256: c5649dc0544ad3abe90ef79077fa51443e813dbe30ee6481c0f5c984c5b73a91
   document_type: adr
   status: accepted
   owners:
@@ -576,21 +576,21 @@ documents:
   - docs.search-index
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
-  title: Crimson Invocation
-  content_sha256: 0e84a5c6f5413d441232a5b95114fe93c42152109babdabc50b17cac9b1593f8
+  title: Scarlet Invocation
+  content_sha256: 6349877c09b4c32b724e6d783c0fb45607fb82c7574789f693137bbed4e4d60a
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-16'
+  last_reviewed: '2026-09-17'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
   aliases:
-  - red mechanic raid
-  - Crimson Invocation
+  - Scarlet Invocation
+  - Crimson Invocation (historical name)
   - scarlet conjurer
   related_code:
   - Content/Encounters/CrimsonFoundry
@@ -868,7 +868,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 0bcb2a18d9d86eb0a0f4b512caa963b6a1378b28c356eeba1ce36a18d313ac07
+  content_sha256: 38ac3ee536f6a9e6c3ab40d6329f4d405081947acbfb38c6d0480ee57a501be3
   document_type: evidence
   status: historical
   owners:
@@ -1218,7 +1218,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: fbe3cf3fdf980eb8febe877d818106dafd6a90e7d7776efa8625f56b3fa2c768
+  content_sha256: a9e267ef223821c587bfd227ca991c2f3d127a3d6006f9889c3b2d96c7f1adaa
   document_type: governance
   status: accepted
   owners:
@@ -1263,7 +1263,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: cb9701d5b228f8f53e201cdcdf52bcdc96ec5256aadaeb14c57226bf93f5324d
+  content_sha256: 4b5d13eeee503206ee15ecce1affb3975d38216c55e023207cc83b0b86dcf64d
   document_type: status
   status: accepted
   owners:

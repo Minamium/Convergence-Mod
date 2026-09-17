@@ -26,18 +26,39 @@ class CrimsonGraphicsLifetime(unittest.TestCase):
         self.assertNotIn("new BasicEffect", load)
         self.assertNotIn("GraphicsDevice", load)
         draw = body(source, "private static void Mesh(")
-        self.assertIn("material ??= new BasicEffect", draw)
-        self.assertLess(draw.index("Main.dedServ"), draw.index("new BasicEffect"))
-        self.assertEqual(source.count("new BasicEffect"), 1)
+        self.assertIn('ShaderManager.GetShader("Convergence.ScarletSurface")', draw)
+        self.assertLess(draw.index("Main.dedServ"), draw.index("ShaderManager.GetShader"))
+        self.assertNotIn("new BasicEffect", source)
 
     def test_unload_queues_only_captured_effect_not_asset_textures(self):
         source = (ROOT / "Client/Encounters/CrimsonFoundry/CrimsonRig.cs").read_text(encoding="utf-8")
         unload = body(source, "internal static void Unload()")
-        self.assertLess(unload.index("var oldMaterial = material"), unload.index("material = null"))
-        self.assertLess(unload.index("material = null"), unload.index("Main.QueueMainThreadAction"))
-        self.assertIn("Main.QueueMainThreadAction(oldMaterial.Dispose)", unload)
+        self.assertIn("ScarletMaterials.Reset()", unload)
+        self.assertNotIn("Dispose()", unload)
         self.assertNotIn("performer.Dispose", unload)
         self.assertNotIn("material.Dispose", unload)
+
+
+class OwnedTextureUnload(unittest.TestCase):
+    def test_claw_unload_detaches_and_queues_only_owned_textures(self):
+        source = (CLIENT / "NullCantorClawArt.cs").read_text(encoding="utf-8")
+        unload = body(source, "internal static void Dispose()")
+        for old, field in (("oldFeather", "feather"), ("oldGlow", "glow")):
+            self.assertLess(unload.index(f"var {old} = {field}"), unload.index("feather = glow = null"))
+            self.assertIn(f"if ({old} is not null) Main.QueueMainThreadAction({old}.Dispose)", unload)
+        self.assertLess(unload.index("feather = glow = null"), unload.index("Main.QueueMainThreadAction"))
+        self.assertIn("rig = icon = null", unload)
+        self.assertNotIn(".Dispose()", unload)
+        self.assertEqual(unload.count("Main.QueueMainThreadAction"), 2)
+
+    def test_ghost_unload_captures_owned_copy_not_shared_source(self):
+        source = (ROOT / "Client/Encounters/GhostSamurai/GhostSamuraiArt.cs").read_text(encoding="utf-8")
+        unload = body(source, "internal void Unload()")
+        self.assertLess(unload.index("var oldTexture = texture"), unload.index("texture = null"))
+        self.assertLess(unload.index("texture = null"), unload.index("Main.QueueMainThreadAction"))
+        self.assertIn("if (oldTexture is not null) Main.QueueMainThreadAction(oldTexture.Dispose)", unload)
+        self.assertIn("source = null", unload)
+        self.assertNotIn(".Dispose()", unload)
 
 
 class CinematicCoordinates(unittest.TestCase):

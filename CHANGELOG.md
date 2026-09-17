@@ -139,3 +139,11 @@ These entries describe their original versions, not current tuning or release in
 ## [0.1.0] - Unreleased
 
 Reserved for the first loadable development build. This version has not been released.
+
+## 0.3.15 — Scarlet Luminance rehearsal branch (not released)
+
+- Preserve current main's Ghost Samurai/Oboro fixes while bringing sequential Scarlet acts and11 physical techniques forward.
+- Add Luminance-based species materials, masked body articulation, bounded decorative Verlet/Metaballs, primitive danger silhouettes and local protected-phase camera cues.
+- All Scarlet hostile attacks use native damage1/cap1; quarter the previous HP budgets. Hold20% until the current12-phrase cycle completes; Final lethal unlock follows its first ensemble cycle.
+- Add completed-cycle synchronization at protocol48, chorus Runtime hooks and source/API/lifecycle tests.
+- Approved-background renderer/importer ready; actual image import blocked by compute backend. No normal-profile install, publication or visual-quality approval.
