@@ -345,3 +345,9 @@ Start request carries target stable Participant ID and request nonce only. Serve
 ## Cleanup publication
 
 On terminal outcome, stop new commands/spawns, commit the final feature/revive state, enqueue/broadcast terminal snapshot/`EncounterEnded`, then remove actors/projections and release the session. Cleanup is exact-Fight and idempotent. Delayed packets for the ended Fight hit the replica tombstone or server identity check and cannot mutate a new encounter.
+
+## Scarlet feature protocol48 — 2026-09-17
+
+This branch increments the global handshake to48. All peers must use the same branch package; matching version text alone is insufficient. The stable Scarlet type/Encounter IDs are unchanged. `CrimsonState` appends a bounded `CompletedCycles` integer before its roster count, rejects negative/out-of-range values and same-phase rollback, and projects the first-Final lethal floor. Cycle admission/completion remains server-owned. `CrimsonGesturePlan` retains immutable Fight, phase epoch, source, technique, warning/fire/end, body path and target geometry. Chorus verdicts remain exact-roster server decisions transported through native hostile projectiles. Damage-one tuning is applied both at source creation and native hit cap.
+
+No Verlet positions, particles, material noise, screen shakes or camera state are network authority. They derive from the accepted timeline and reset by Fight/epoch. This revision does not claim to solve existing one-way-delay clock offset or validate late-packet fairness.

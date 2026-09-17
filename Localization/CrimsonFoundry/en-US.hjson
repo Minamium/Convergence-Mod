@@ -6,9 +6,9 @@ Mods: {
 				Tooltip:
 					'''
 					Use on a Foundation Core pedestal to prepare Scarlet Invocation; everyone confirms Ready
-					Face each apparition alone; at 20% HP it retreats. All three return with Vespera for the finale
+					Face each apparition alone; at 20% HP it completes its action cycle, then retreats. All three return with Vespera for the finale
 					Right-click to cancel your preparation. Reusable
-					Prototype: 1–8 players; late arrivals spectate until the next summon
+					Rehearsal: hostile damage 1, reduced HP; 1–8 players; late arrivals spectate
 					'''
 			}
 			CrimsonPact: {
@@ -38,6 +38,8 @@ Mods: {
 					Label: Reduce decorative effects
 					Tooltip: Preserves warnings and damage footprints. Reduces decorative particles and camera shake.
 				}
+
+				CinematicCamera: { Label: "Phase-transition camera" Tooltip: "Gentle local pan during protected transitions only; never blocks controls." }
 
 				ScreenShake: {
 					Label: Camera shake

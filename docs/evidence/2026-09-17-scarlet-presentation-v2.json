@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-17",
+  "feature": "Scarlet Invocation presentation v2 rehearsal",
+  "source_version": "0.3.15",
+  "protocol": 48,
+  "branch": "feat/scarlet-luminance-presentation-v2",
+  "based_on_main": "6f0d56b5ce638eda66fd9f3651ea9dc01b1edace",
+  "verified_source_commit": "1938e6c5082a1eb92dd187f948f070a18cd23205",
+  "verified_run": "https://github.com/Minamium/Convergence-Mod/actions/runs/35177062995",
+  "domain_tests": {
+    "status": "passed",
+    "count": 282
+  },
+  "api_compile": {
+    "status": "passed",
+    "errors": 0,
+    "existing_nullable_warnings": 4,
+    "tml": "v2026.07.3.0",
+    "tml_archive_sha256": "6f51610f4b0f167d1620d0e8c83264ba14e047421e97d9f8053eb40e3d764e1a",
+    "luminance_source": "b2468dfd2f299597602dc6826af781d436c29a57",
+    "calamity": "explicit API-only temporary shim; NOT real Calamity2.2.4 binding"
+  },
+  "shader_exports": {
+    "status": "compiled",
+    "identity_manifest": "Assets/AutoloadedEffects/Shaders/compiled.json"
+  },
+  "background": {
+    "status": "blocked_binary_import",
+    "path": "Assets/Textures/Backgrounds/ScarletSanctum.png",
+    "approved_sha256": "94b77c968991bf52b14504bb11095c417dbf4dd2abb3bc378da779da39400a2d",
+    "reason": "conversation container/Python transport timeouts; no alternate painting substituted"
+  },
+  "final_source_checks": "See feature-branch CI for final catalog, Python, codec and CPU lifecycle results",
+  "not_run": [
+    "native package build with real dependency DLLs",
+    "tModLoader cold load/reload",
+    "current GPU/frame inspection",
+    "in-game graphics acceptance",
+    "music listening",
+    "multiplayer/latency",
+    "performance profiling"
+  ],
+  "not_performed": [
+    "main merge",
+    "normal-profile installation",
+    "Workshop publication",
+    "GitHub release"
+  ],
+  "cpu_lifecycle_probe": {
+    "status": "passed",
+    "source_commit": "d091c2d0c73039728dc2ac02f566d470200e4da7",
+    "run": "https://github.com/Minamium/Convergence-Mod/actions/runs/35177807736",
+    "articulation_updates": 3600,
+    "fna_batch_accessor": "passed",
+    "scope": "linked production FSM/Verlet updates and actual FNA field bindings; not GPU drawing or native game load"
+  }
+}

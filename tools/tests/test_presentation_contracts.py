@@ -26,16 +26,15 @@ class CrimsonGraphicsLifetime(unittest.TestCase):
         self.assertNotIn("new BasicEffect", load)
         self.assertNotIn("GraphicsDevice", load)
         draw = body(source, "private static void Mesh(")
-        self.assertIn("material ??= new BasicEffect", draw)
-        self.assertLess(draw.index("Main.dedServ"), draw.index("new BasicEffect"))
-        self.assertEqual(source.count("new BasicEffect"), 1)
+        self.assertIn('ShaderManager.GetShader("Convergence.ScarletSurface")', draw)
+        self.assertLess(draw.index("Main.dedServ"), draw.index("ShaderManager.GetShader"))
+        self.assertNotIn("new BasicEffect", source)
 
     def test_unload_queues_only_captured_effect_not_asset_textures(self):
         source = (ROOT / "Client/Encounters/CrimsonFoundry/CrimsonRig.cs").read_text(encoding="utf-8")
         unload = body(source, "internal static void Unload()")
-        self.assertLess(unload.index("var oldMaterial = material"), unload.index("material = null"))
-        self.assertLess(unload.index("material = null"), unload.index("Main.QueueMainThreadAction"))
-        self.assertIn("Main.QueueMainThreadAction(oldMaterial.Dispose)", unload)
+        self.assertIn("ScarletMaterials.Reset()", unload)
+        self.assertNotIn("Dispose()", unload)
         self.assertNotIn("performer.Dispose", unload)
         self.assertNotIn("material.Dispose", unload)
 
