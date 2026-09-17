@@ -3,6 +3,7 @@ using Convergence.Client.Encounters.FirstSeverance;
 using Convergence.Content.Items.Oboro;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
@@ -11,7 +12,7 @@ namespace Convergence.Client.Weapons;
 
 internal static class OboroArt
 {
-    internal static Texture2D Blade => ModContent.Request<Texture2D>("Convergence/Assets/Textures/Items/Oboro/Blade").Value;
+    internal static Texture2D Blade => ModContent.Request<Texture2D>("Convergence/Assets/Textures/Items/Oboro/Blade", AssetRequestMode.ImmediateLoad).Value;
     internal static Texture2D Spirit => SpectralSpriteCutouts.Get("Convergence/Assets/Textures/Items/Oboro/Spirit");
     internal static bool Reduced => ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
     private static readonly Vector2 Grip = new(254, 1059);
@@ -28,34 +29,60 @@ internal static class OboroArt
     internal static void Sword(SpriteBatch b, Vector2 at, float angle, float length, Color tint)
         => b.Draw(Blade, at - Main.screenPosition, null, tint, angle - SourceAngle, Grip,
             length / SourceLength, SpriteEffects.None, 0);
-    internal static void Swing(SpriteBatch b, Player player, OboroPlayer state)
+    internal static void Afterimages(SpriteBatch b, OboroSwingPresentation history)
     {
-        float p = state.VisualAge / state.View.Duration;
-        float angle = state.View.Aim + state.View.Facing * OboroRules.Offset(state.View.Step, p);
-        Vector2 center = player.MountedCenter + new Vector2(0, player.gfxOffY);
-        if (OboroRules.Live(state.View.Step, p))
+        bool reduced = Reduced;
+        // Recorded world-space poses persist across recovery and combo handoffs.
+        // Never connect different cuts; echoes do not have any collision or damage.
+        for (int i = 1; i < history.Count; i++)
         {
-            int segments = Reduced ? 9 : 18;
-            float tail = Math.Max(OboroRules.Windup(state.View.Step), p - .16f);
-            for (int i = 1; i <= segments; i++)
+            OboroEcho previous = history.Echo(i - 1), current = history.Echo(i);
+            if (previous.Swing != current.Swing || current.At - previous.At > 2) continue;
+            float fade = OboroSwingPresentation.Opacity(previous.At, Main.GameUpdateCount);
+            float turn = current.Pose.Angle - previous.Pose.Angle;
+            int segments = Math.Clamp((int)MathF.Ceiling(Math.Abs(turn) / (reduced ? .16f : .08f)), 1, 32);
+            for (int j = 0; j < segments; j++)
             {
-                float a = state.View.Aim + state.View.Facing * OboroRules.Offset(state.View.Step, MathHelper.Lerp(tail, p, (i - 1f) / segments));
-                float c = state.View.Aim + state.View.Facing * OboroRules.Offset(state.View.Step, MathHelper.Lerp(tail, p, i / (float)segments));
-                float alpha = i / (float)segments;
-                for (int layer = 0; layer < (Reduced ? 1 : 3); layer++)
-                    Line(b, center + a.ToRotationVector2() * (OboroRules.Reach * (.82f + layer * .07f)),
-                        center + c.ToRotationVector2() * (OboroRules.Reach * (.82f + layer * .07f)),
-                        state.View.Step == 2 ? 17 - layer * 4 : 10 - layer * 2, new Color(144, 74, 245, 0) * (alpha * .55f));
+                float a = j / (float)segments, c = (j + 1f) / segments;
+                Vector2 from = Vector2.Lerp(new(previous.Pose.X, previous.Pose.Y), new(current.Pose.X, current.Pose.Y), a);
+                Vector2 to = Vector2.Lerp(new(previous.Pose.X, previous.Pose.Y), new(current.Pose.X, current.Pose.Y), c);
+                Vector2 axisA = (previous.Pose.Angle + turn * a).ToRotationVector2();
+                Vector2 axisB = (previous.Pose.Angle + turn * c).ToRotationVector2();
+                float strength = current.Pose.Step == 2 ? 1 : .72f;
+                // Thin moonlit edge over a soft violet ribbon; no filled screen-wide fan.
+                for (int layer = 0; layer < (reduced ? 1 : 3); layer++)
+                {
+                    float radius = OboroRules.Reach * (1 - layer * .045f);
+                    Color tint = layer == 0 ? new Color(228, 199, 255, 0) : new Color(135, 57, 238, 0);
+                    Line(b, from + axisA * radius, to + axisB * radius,
+                        (layer == 0 ? 3 : 12 + layer * 3) * strength, tint * (fade * strength * (layer == 0 ? .65f : .28f)));
+                }
             }
         }
-        Sword(b, center, angle, OboroRules.Reach, Color.White);
+        int stride = reduced ? 6 : 3;
+        for (int i = history.Count - 2; i >= 0; i -= stride)
+        {
+            OboroEcho echo = history.Echo(i);
+            float fade = OboroSwingPresentation.Opacity(echo.At, Main.GameUpdateCount);
+            Sword(b, new(echo.Pose.X, echo.Pose.Y), echo.Pose.Angle, echo.Pose.Length,
+                new Color(165, 101, 248) * (fade * .23f));
+            if (!reduced)
+                Flame(b, new Vector2(echo.Pose.X, echo.Pose.Y) + echo.Pose.Angle.ToRotationVector2() * (OboroRules.Reach * .76f),
+                    18 + (1 - fade) * 22, fade * .16f);
+        }
+    }
+    internal static void Swing(SpriteBatch b, OboroBladePose pose, bool swinging)
+    {
+        Vector2 center = new(pose.X, pose.Y);
+        Sword(b, center, pose.Angle, pose.Length, Color.White);
+        if (!swinging) return;
         int flames = Reduced ? 2 : 4;
         for (int i = 0; i < flames; i++)
         {
             float t = .28f + i * .18f, drift = (float)Main.GameUpdateCount * .08f + i * 2;
-            Vector2 at = center + angle.ToRotationVector2() * (OboroRules.Reach * t)
-                + (angle + MathF.PI / 2).ToRotationVector2() * (20 + MathF.Sin(drift) * 12);
-            Flame(b, at, state.View.Step == 2 && p < .48f ? 38 : 24, .85f);
+            Vector2 at = center + pose.Angle.ToRotationVector2() * (pose.Length * t)
+                + (pose.Angle + MathF.PI / 2).ToRotationVector2() * (20 + MathF.Sin(drift) * 12);
+            Flame(b, at, pose.Step == 2 && pose.Progress < .48f ? 38 : 24, .7f);
         }
     }
 }

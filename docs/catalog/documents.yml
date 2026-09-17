@@ -792,7 +792,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 8a7867e51e7ab83006cc63e654f00c2b9b634419304565431cd7f17955badb6a
+  content_sha256: 419498a69a0f68929db0d4e63e1df9c86bed5754f6e2fb5c5d0b05eb21d255b1
   document_type: spec
   status: provisional
   owners:
@@ -948,13 +948,13 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 8bf297101591ab9263c16753a1316acfd7955407e8b440799191f6d95f46aafa
+  content_sha256: 2022694d9d6f092630cdea9b0813a2274d65b80a71c43f5a56d2124901e37282
   document_type: policy
   status: accepted
   owners:
   - project
   - art
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-17'
   source_of_truth_for:
   - policy.ip_provenance
   aliases:
@@ -1263,7 +1263,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: cb9701d5b228f8f53e201cdcdf52bcdc96ec5256aadaeb14c57226bf93f5324d
+  content_sha256: d7636b5b360dffa76a055d2dddaec4be7e0527717e130e4a99251d2fd860c5ef
   document_type: status
   status: accepted
   owners:
@@ -1498,12 +1498,12 @@ documents:
 - doc_id: research.oboro-20260916
   path: docs/research/2026-09-16-oboro.md
   title: 'Oboro: API and comparison boundary'
-  content_sha256: c44550f139609d1658e3a32d1231a86e4c6c9a9b3ae7036be2055c1c2fadedb8
+  content_sha256: 2fec87c264635d2f1ab12d385546ed5424a96e52c3b8b4a785bd5d0e91c03fa7
   document_type: research
   status: provisional
   owners:
   - gameplay
-  last_reviewed: '2026-09-16'
+  last_reviewed: '2026-09-17'
   source_of_truth_for:
   - research.oboro_api_evidence
   aliases:
@@ -1537,12 +1537,12 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 0818e150458d43b2c2de76e5cb8c5b74e78a0151e495f1ec94c716a4334c53db
+  content_sha256: 227c0b2d16879ed98a3c5a9f69a76a59015c738299721cf1de31d88c72b48a31
   document_type: research
   status: historical
   owners:
   - research
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-17'
   source_of_truth_for: []
   aliases:
   - research sources

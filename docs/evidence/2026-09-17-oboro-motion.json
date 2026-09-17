@@ -1,0 +1,38 @@
+{
+  "date": "2026-09-17",
+  "feature": "Oboro connected motion and violet afterimages",
+  "version": "0.3.16",
+  "protocol": 46,
+  "base_main": "cb42e8aa82f541adecc8b588f2ddc2d33e60961c",
+  "branch": "feature/oboro-spectral-motion",
+  "scope": "Shared angular motion and client-only bounded presentation history. Damage,24/24/42-tick durations, live windows,560px reach,34px width, single-hit cap, rarity, drop, buffs and wire layout are unchanged. Instantaneous angular timing changes; equipped DPS remains unmeasured.",
+  "reference": "../research/2026-09-16-oboro.md#murasama-motion-reference--2026-09-17",
+  "automated": {
+    "focused": "pass:16 Oboro domain cases, including6 new linked-production motion/presentation cases. Monotone bounded live arc, connected angular velocities,3-to-1 handoff, actual supported attack-speed sampling budgets, live pose alignment for both facings, fade/cap, changed connections, teleport/ineligibility, late clocks and completed-serial replay prevention.",
+    "native_build": "pass:0 errors,4 pre-existing CS8632 warnings;22 locales, shader exports and packaged solo admission checked by the build wrapper.",
+    "repository": "pass:catalog78,repository828,YAML10 and whitespace checks;258 domain cases, with242 unchanged results reused and all16 Oboro cases rerun after the final harmless return-curve adjustment."
+  },
+  "package": {
+    "local_record": "20260917T141652387472Z",
+    "source_sha256": "a3e6b591f9b03f55539889681e6abed3379f01d1d6b0e415fb665cd566ca24f3",
+    "source_changed_during_build": false,
+    "bytes": 85103103,
+    "sha256": "0605afc16de8695587ea8aa30151ad7331a88fae4e5b01b2261b96e6ca44a583",
+    "provenance": "Isolated native build of recorded dirty feature source on base_main; subsequent status/evidence/catalog changes do not modify packaged code or assets. No shared-profile package was replaced."
+  },
+  "environment": {
+    "tmodloader": "2026.07.3.0",
+    "terraria": "1.4.4.9",
+    "calamity": "2.2.4",
+    "luminance": "1.0.14",
+    "dotnet_sdk": "8.0.424",
+    "tml_assembly_sha256": "d530e508b2841e66d880ce279a609624b5ab66ce8093eedfa04f47c3d12d485c"
+  },
+  "not_run": [
+    "Actual Reload Mods and rendering on bright/dark terrain",
+    "SP continuous1-2-3-1, stop/start, aim reversal, dash, held-item switching and death",
+    "Matching multiplayer peers, late join and real latency/rejoin presentation",
+    "Reduced Effects acceptance, measured frame time and equipped stationary/moving-target DPS"
+  ],
+  "boundaries": "Domain checks validate linked production formulas and history, not FNA drawing or a multiplayer session. No GUI/game/server playtest, main merge, shared-profile install or publication was performed. New administrator approval is needed for this feature's main integration and normal-profile build."
+}
