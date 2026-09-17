@@ -5,6 +5,9 @@ on:
     paths: [.github/workflows/scarlet-v2-finalize.yml]
 permissions:
   contents: read
+concurrency:
+  group: scarlet-v2-finalize
+  cancel-in-progress: false
 jobs:
   finalize:
     if: github.ref == 'refs/heads/feat/scarlet-luminance-presentation-v2'
@@ -36,6 +39,40 @@ jobs:
           evidence = json.loads(p.read_text())
           evidence['cpu_lifecycle_probe'] = {'status': 'passed', 'source_commit': 'd091c2d0c73039728dc2ac02f566d470200e4da7', 'run': 'https://github.com/Minamium/Convergence-Mod/actions/runs/35177807736', 'articulation_updates': 3600, 'fna_batch_accessor': 'passed', 'scope': 'linked production FSM/Verlet updates and actual FNA field bindings; not GPU drawing or native game load'}
           p.write_text(json.dumps(evidence, indent=2, ensure_ascii=False)+'\n', encoding='utf-8')
+      - name: Record exact original shader exports and source hashes
+        shell: python
+        run: |
+          from pathlib import Path
+          import hashlib
+          register = Path('Assets/ATTRIBUTION.md')
+          text = register.read_text(encoding='utf-8')
+          root = Path('Assets/AutoloadedEffects/Shaders')
+          for name in ('ScarletSurface', 'ScarletRibbon', 'ScarletResidue', 'ScarletBackdrop'):
+              source = root / (name + '.fx')
+              export = root / (name + '.fxc')
+              assert source.is_file() and export.is_file(), name
+              record = '\n'.join([
+                  f'### {name} original shader export — 2026-09-17', '',
+                  f'- Runtime file: `{export.as_posix()}`',
+                  f'- Asset ID: scarlet-v2-{name.lower()}-20260917',
+                  '- Asset type: compiled original HLSL effect',
+                  '- Creator: project-directed independent implementation by OpenAI for Minamium',
+                  '- Creation/acquisition date: 2026-09-17',
+                  '- Source type: original',
+                  f'- Source work and URL: repository source `{source.as_posix()}`; no third-party shader copied',
+                  '- Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`',
+                  '- Human modifications: runtime material parameters, masks and animation are project code; compilation does not modify approved images',
+                  '- License and redistribution terms: original project asset under the existing project terms; dependency textures remain external',
+                  '- Required attribution: retain this provenance, source and compiler/export identity manifest',
+                  '- Reviewer and review date: automated source/export checks, 2026-09-17; native visual approval not_run',
+                  '- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, presentation v2',
+                  f'- SHA256: `{hashlib.sha256(export.read_bytes()).hexdigest()}`',
+                  f'- Source SHA256: `{hashlib.sha256(source.read_bytes()).hexdigest()}`',
+              ])
+              marker = f'- Runtime file: `{export.as_posix()}`'
+              if marker not in text:
+                  text = text.rstrip() + '\n\n' + record + '\n'
+          register.write_text(text, encoding='utf-8', newline='\n')
       - name: Remove and stage one-time recovery machinery
         shell: bash
         run: |
