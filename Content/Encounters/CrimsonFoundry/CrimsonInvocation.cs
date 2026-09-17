@@ -9,7 +9,7 @@ internal static class CrimsonInvocation
 {
     internal const int SummonCount = 3, AllDefeated = 7, ManifestTicks = 150;
     internal const int DeploymentTicks = 150, MusicLeadTicks = 120, MusicFadeTicks = 150;
-    internal static int TargetLife(int members) => (12000000 + 8000000 * (Math.Clamp(members, 1, 8) - 1)) / 4;
+    internal static int TargetLife(int members) => CrimsonPlaytestTuning.TargetLife(members);
     internal static byte Defeat(byte mask, int index)
     {
         if (index is < 0 or >= SummonCount || mask > AllDefeated) throw new ArgumentOutOfRangeException();
@@ -42,7 +42,7 @@ internal sealed record CrimsonBarrage(float NormalX, float NormalY, float SafeOf
 
 internal static class CrimsonBarrageGeometry
 {
-    internal static CrimsonBarrage Build(RaidFieldGeometry field, int cue, int source, bool finale)
+    internal static CrimsonBarrage Build(RaidFieldGeometry field, int cue, int source, bool finale, float drift = 0)
     {
         // Each apparition owns a recognizable orientation; the final act mixes
         // them. All lanes of one volley share ONE usable corridor, not separate
@@ -56,7 +56,7 @@ internal static class CrimsonBarrageGeometry
         float gap = finale ? 190 : 250;
         // Nearby offsets, not edge-to-opposite-edge player baiting.
         float safe = ((int)(seed >> 5) % 5 - 2) * (kind == 1 ? 65 : 110);
-        safe = Math.Clamp(safe, -extent + gap, extent - gap);
+        safe = Math.Clamp(safe + Math.Clamp(drift, -60, 60), -extent + gap, extent - gap);
         var lanes = new List<CrimsonLane>(40);
         AddRegion(-extent, safe - gap * .5f);
         AddRegion(safe + gap * .5f, extent);
