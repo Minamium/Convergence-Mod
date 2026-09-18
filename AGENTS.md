@@ -14,9 +14,11 @@ Player-facing names and behavior come from the active encounter specification se
 
 ## Repository Skills
 
-- Use `.agents/skills/develop-convergence-raids` for Boss/Raid code or behavior implementation/review. Documentation wording and repository housekeeping do not need the gameplay workflow.
+- Use `.agents/skills/develop-convergence-raids` for Boss/Raid behavior or any Convergence content presentation implementation/review, including NPCs, weapons and projectiles. Documentation wording and repository housekeeping do not need the gameplay workflow.
 - Use `.agents/skills/research-tmodloader-sources` when API behavior or another public Mod implementation must be investigated. Record exact versions, source paths, licenses, observations, and independent design decisions.
 - Keep always-on rules here and task-specific repeatable procedures in Skills. Repository Skills are excluded from `.tmod` packaging.
+
+For visual work, apply the shared [Luminance presentation policy](docs/ART_DIRECTION.md#luminance-presentation-policy) and the affected feature's spec. This applies to Ghost Samurai and all other content; the policy owns the quality/completion criteria, while the Skill routes implementation details only when needed.
 
 ## Non-negotiable boundaries
 

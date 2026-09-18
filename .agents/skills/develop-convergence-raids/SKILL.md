@@ -1,6 +1,6 @@
 ---
 name: develop-convergence-raids
-description: Implement or review Convergence Boss/Raid behavior, presentation, and playtest feedback. Use for mechanics, authority, replication, cleanup, or user playtest/log reviews; skip unrelated wording, build setup, and repository housekeeping.
+description: Implement or review Convergence combat and client presentation, including Boss/NPC motion, weapon/projectile VFX, scenes, animated UI, and playtest feedback. Use for mechanics, authority, replication or these visual changes; skip unrelated wording, build setup and repository housekeeping.
 ---
 
 # Develop Convergence Raids
@@ -21,7 +21,7 @@ Choose the mode implied by the request; no separate confirmation is needed:
 
 | Change | Reference |
 |---|---|
-| Animation, VFX, texture integration or background scenes | [Presentation direction](references/presentation-direction.md) and the affected feature's visual rules; do not transfer one Boss's appearance to another |
+| Body/weapon animation, VFX, texture integration, animated UI or scenes | [Shared Luminance policy](../../../docs/ART_DIRECTION.md#luminance-presentation-policy), [presentation direction](references/presentation-direction.md) and the affected feature's visual rules; reuse already-read guidance |
 | Choosing a module or changing dependency direction | [Architecture map](references/architecture-map.md); follow the relevant architecture section if the boundary is unclear |
 | Gameplay state, requests, actors, recovery, or cleanup | Relevant sections of [Raid authority checklist](references/raid-authority-checklist.md) |
 | Selecting checks or reporting completion | Applicable rows and commands in [Verification matrix](references/verification-matrix.md) |

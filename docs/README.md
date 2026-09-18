@@ -4,7 +4,7 @@ document_type: index
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-18
 source_of_truth_for:
   - documentation.read_order
 aliases:
@@ -30,7 +30,7 @@ For code/behavior work, start with [Current build](STATUS.md#current-build), [Ve
 | Task | Additional context, only as relevant |
 |---|---|
 | Markdown, wording, repository housekeeping | Target file; [documentation schema](DOCUMENTATION_SYSTEM.md#front-matter-record) only if metadata/structure changes |
-| VFX, UI, assets | Target feature's spec via [Art Direction](ART_DIRECTION.md#feature-scope); [asset pipeline](ASSET_PIPELINE.md) and attribution for distributable exports. Doll Theater rules do not define another Boss's appearance |
+| Body/weapon animation, VFX, animated UI, scenes or assets | Shared [Luminance policy](ART_DIRECTION.md#luminance-presentation-policy), then the target [feature](ART_DIRECTION.md#feature-scope); [asset pipeline](ASSET_PIPELINE.md) and attribution for distributable exports. This includes Ghost Samurai; reuse already-read sections |
 | HP, timing, radius, damage tuning | Target constants/callers and the affected feature: [Doll Raid](encounters/first-severance/ENCOUNTER_SPEC.md) or [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
 | Combat, recovery, arena | Affected feature spec and code; [revive spec](encounters/first-severance/REVIVE_SPEC.md) or [arena rules](ARENA_INFRASTRUCTURE.md) for that subsystem; follow linked active ADRs only where a decision matters |
 | Authority, protocol, lifecycle, module boundaries | Relevant [architecture](ARCHITECTURE.md) / [network](NETWORK_ARCHITECTURE.md) sections and the ADRs governing the changed contract |
@@ -56,7 +56,8 @@ Select checks from the shared [Verification Matrix](../.agents/skills/develop-co
 | What gets implemented in the Raid, and in what order? | [Doll Raid implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) |
 | How does Downed/Revive feel to players? | [Revive specification](encounters/first-severance/REVIVE_SPEC.md) |
 | Which weapon forms, inputs and macro timelines are current? | [Weapons](encounters/first-severance/WEAPONS.md) |
-| Which art/motion decisions must not regress? | [Visual specification](encounters/first-severance/VISUAL_SPEC.md) |
+| Which art/motion decisions must not regress? | The owning spec selected through the [feature map](ART_DIRECTION.md#feature-scope) |
+| What presentation quality applies to every content feature? | [Luminance policy and completion](ART_DIRECTION.md#luminance-presentation-policy); the feature spec owns its artistic identity |
 | Which music/effect masters and playback rules are current? | [Audio cue sheet](AUDIO_CUE_SHEET.md); exact asset provenance in [Attribution](../Assets/ATTRIBUTION.md) |
 | What authority invariants are mandatory? | [ADR-0002](adr/0002-server-authoritative-encounters.md), [ADR-0005 foundation](adr/0005-server-authoritative-downed-revive.md), and [ADR-0011 recovery policy](adr/0011-instant-revival-and-recipient-lockout.md) |
 | What is deliberately postponed? | [不幸な人形劇 backlog](encounters/first-severance/BACKLOG.md) |

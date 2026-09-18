@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-18
 source_of_truth_for:
   - first_severance.visual_mvp
 aliases:
@@ -77,6 +77,8 @@ The regular top-center combat state/countdown/guidance block is removed; only pr
 The separate Phase-II Core beam uses a side-facing foreshortened physical crater. Its actual renderer is shared by rotating twin beams (two opposed crater exits) and the single Final-bullet cannon. Shared forecast/body/deadlines avoid drifting copies of the effect. Its larger purple charge expands/pulses before release; the jet's bright body flares continuously over a 260px bell mouth. A faint full-width carrier still communicates the authoritative rectangle; unused bell corners do not become a black rectangle. Every non-lattice beam family receives bounded source-clock shake (max-combined, never per-ray/player summed), including carried/pursuit, rotation, wide deployments and the Final score. Lattice rays themselves add no shake. ScreenShake=false and Reduced Effects suppress it.
 
 ## Luminance Raid presentation
+
+The [shared Luminance policy](../../ART_DIRECTION.md#luminance-presentation-policy) governs quality and completion across all content. The pass/scene limits here scope this Doll renderer; references to separate Oni/weapon presentation do not exempt those features from the common policy.
 
 The eight-cast-only prototype boundary is superseded by the user's explicit Raid-wide visual refresh. [RaidVfx](../../../Client/Encounters/FirstSeverance/FirstSeveranceRaidVfx.cs) owns a frame-local, bounded command buffer and six reused vertices. Named passes separate forecast, live body, finite ribbon, corona, pressure mouth, orb, wake, compression, dimensional rift and flash. Existing per-Fight emitters/score and accepted result events still own clocks/cancellation; the renderer owns no gameplay actors, targets, hit tests or retained Fight particles. Batch overflow flushes rather than dropping danger geometry. Every frame, world unload and Mod unload discard commands. Restore texture/sampler slots 1–3 and graphics state; resume the existing world-space batch. No new full-screen RenderTarget/filter infrastructure.
 

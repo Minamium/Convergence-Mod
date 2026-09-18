@@ -22,6 +22,8 @@ Use the [PR template](.github/PULL_REQUEST_TEMPLATE.md). The [AGENTS completion 
 
 For changes to gameplay state, requests, replication or cleanup, explain only the affected authority owner, bounded client request, snapshot/rejoin behavior and cleanup path. Gameplay results remain authoritative. UI/VFX-only work needs its read-only input, loading and client-only guards rather than unrelated lifecycle fields.
 
+All visual contributions, including Ghost Samurai, follow the shared [Luminance presentation policy](docs/ART_DIRECTION.md#luminance-presentation-policy) alongside the feature spec. Show the changed motion/material in the evidence described by [presentation completion](docs/ART_DIRECTION.md#presentation-completion), and distinguish observed results from remaining in-game acceptance.
+
 Update only the owner of each changed fact. Structural decisions use the relevant ADR process; every distributable asset needs an exact [Attribution](Assets/ATTRIBUTION.md) record. Small wording/tuning fixes do not require a new ADR, research report, or updates to every document.
 
 ## Repository name and existing clones
