@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-09-18
+last_reviewed: 2026-09-19
 source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -67,20 +67,13 @@ Vespera-only or apparitions-only kills cannot clear Final. An observed all-playe
 
 Each apparition cycles three techniques without adjacent repetition. Final rotates active sources while preserving each source's vocabulary, skipping defeated sources. Targets/staging/paths and all warning/fire/end ticks are frozen when the complete phrase is admitted. NPC motion is projected from the same accepted body trajectory; observers never choose targets. Native hostile projectile geometry, not decorative rope simulation, owns collision. Swept capsules cover fast movement; unused capacity is checked before admitting a full phrase. No generic all-screen beam cooldown is the new attack scheduler.
 
-## Music: varied calls and responses
+## Music: basic pulse rehearsal
 
-The existing licensed Graceful Ordeal audio and onset-derived `Score.json` beat times are unchanged. Actual adjacent beat times are subdivided rather than accumulating a hardcoded7/14-tick interval. Every four-beat phrase uses16 subdivision positions and answers each forecast **one and a half beats later**. Ordinary phrases contain five impacts, fills/rolls six. Broad techniques affect the field; body rush/crash/hook remain targeted contrasts.
+The existing licensed Graceful Ordeal audio and onset-derived `Score.json` beat times are unchanged. Use the **same measured beats as `Score.Pulse`, which drives the four inward arrows on the Stack marker**: forecast on beat1, strike on beat2, forecast on beat3, strike on beat4, then repeat. Each warning therefore lasts one measured beat; do not introduce a separate fixed-BPM clock. Broad techniques still affect the field; body rush/crash/hook remain targeted contrasts.
 
-| Call | Forecast positions | Impact positions |
-|---|---|---|
-| Straight groove | 0,2,4,6,8 | 6,8,10,12,14 |
-| Syncopated groove | 0,2,5,6,8 | 6,8,11,12,14 |
-| Delayed accent | 0,3,4,6,8 | 6,9,10,12,14 |
-| Flam-like opening | 0,1,4,6,8 | 6,7,10,12,14 |
-| Uneven fill | 0,2,3,5,6,8 | 6,8,9,11,12,14 |
-| Final roll | 0,1,2,4,6,8 | 6,7,8,10,12,14 |
+This deliberately plain baseline replaces the syncopated5/6-note patterns after owner feedback. All acts, including Final, use two equal-accent attacks per four-beat phrase. Technique/source choices may vary, but serial numbers and musical energy no longer add fills, rolls or warning-pitch ladders. The existing12-phrase action-cycle gates and separate chorus intervals are unchanged.
 
-Timing bounds live in `CrimsonRhythm`; each live window is capped at10ticks and ends before the next impact, so different Final sources do not create simultaneous incompatible damage fields. Phrase reservations overlap scheduling lead without an extra rest every bar. Rhythm/technique/pose/material cues share the authority timeline. Energy cues influence Final rolls; modulo choices are authored variations, **not verified transcription of the actual drum performance**. `CrimsonAudio` starts from the accepted sample position and can reanchor major drift; absence of reanchor logs is not proof of sample-accurate audible output. PhysicalPhrase logs include score start, first fire, warning ticks and last end. Listening, latency and gameplay fairness require owner playtests.
+Timing bounds live in `CrimsonRhythm`; live damage and its visible residue end before the next forecast. Phrase reservations overlap scheduling lead without an extra rest every bar. Rhythm/technique/pose/material cues share the authority timeline. Event ticks are rounded from absolute score beats; the fractional visual pulse agrees within one rendered tick, including the audio loop seam. This is **not verified transcription of the actual drum performance**. `CrimsonAudio` starts from the accepted sample position and can reanchor major drift; absence of reanchor logs is not proof of sample-accurate audible output. PhysicalPhrase logs include score start, first fire, warning ticks and last end. Listening, latency and gameplay fairness require owner playtests.
 
 ## Stack and Spread chorus
 

@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-18
+last_reviewed: 2026-09-19
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,20 +23,22 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.19 / protocol49**, after pulling the merged Oboro0.3.18 main. Scarlet has denser beat-locked five/six-note phrases, shorter warnings, field-wide physical patterns, dedicated pressure/slash SFX and stronger bounded camera recoil. Approved circles/background, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music are unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Protocol49 requires matching peers because gesture geometry/note bounds changed; packet IDs/layout remain stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.20 / protocol50**, based on current main including Oboro and the shared Luminance policy. Scarlet now repeats forecast/strike/forecast/strike on the same basic beats as the Stack marker, with no offbeat fills or Final-only rolls. Accepted circles/background, enlarged physical attacks, dedicated SFX, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music remain unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Protocol50 requires matching peers for the shorter one-beat warning bound; packet IDs/layout remain stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
-Oboro now has the approved connected three-hit motion, slower return and fading violet blade/edge echoes. Damage, reach, durations/live windows, hit cap, rarity and drop remain unchanged; angular timing changes and equipped DPS remains unmeasured. The same curve drives the server hit test and visible live blade. This integration retains all existing Scarlet/Doll/Boss changes and protocol48.
+Oboro has the approved connected three-hit motion, slower return and fading violet blade/edge echoes. Damage, reach, durations/live windows, hit cap, rarity and drop remain unchanged; equipped DPS remains unmeasured. The same curve drives the server hit test and visible live blade. These changes remain in the current build above.
 
-**Latest owner playtest:** local0.3.17 completed two solo victories (200.60s/129.98s from unlock), both cleaned up; no ERROR/FATAL. The owner approves circles/background but rejects small, sparse attacks, cheap sounds and imperceptible shake. [Onslaught evidence](evidence/2026-09-18-scarlet-onslaught.json) separates those observations from the new implementation and pending playtest. Peak5-second capped-HP DPS was116,291/131,729; not uncapped weapon DPS or multiplayer measurements.
+**Latest owner playtest:** local0.3.19 completed one solo Host & Play victory (130.55s from unlock) and cleanup; no ERROR/FATAL. The owner still cannot feel a clear rhythm and requests the simple pulse used by the Stack arrows. [Basic-pulse evidence](evidence/2026-09-19-scarlet-basic-pulse.json) separates that observation from the new implementation. Peak5-second capped-HP DPS was107,995; not uncapped weapon DPS or multiplayer evidence.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Oboro is a guaranteed single ground drop; further rewards and balance remain provisional. Cleanup and target ownership have automated coverage; actual multiplayer/re-entry and the new weapon/art need owner playtesting.
-- **Scarlet Invocation — feature-branch rehearsal, not visual approval.** [Owning spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) covers1–8-player Ready, shared-pedestal bounded combat, sequential apparitions, a four-target Final, full action cycles, small performer/companion, varied physical phrases and native damage. The owner-approved BGM/loop remains included unchanged; intro playback now fades in. Bespoke rewards, extended character motions and calibrated balance remain incomplete.
+- **Scarlet Invocation — development rehearsal.** [Owning spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) covers1–8-player Ready, shared-pedestal bounded combat, sequential apparitions, a four-target Final, full action cycles, small performer/companion, varied physical techniques on a basic pulse and native damage. Circles/background are owner-approved; the revised rhythm still needs playtesting. The owner-approved BGM/loop remains included unchanged. Bespoke rewards, extended character motions and calibrated balance remain incomplete.
 - Solo admission is normal gameplay in public and development builds, not a compile-time exception. Multiplayer is recommended, not required. Companion party substitution is planned, not implemented; no fake player, invulnerability or solo rebalance is added.
 
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.20 basic pulse:** [evidence](evidence/2026-09-19-scarlet-basic-pulse.json) records the score/chorus alignment, loop continuity, warning codec boundary and package checks. Actual audible timing, one-beat dodge readability and matching-peer synchronization remain owner-owned / not_run.
 
 - **0.3.19 Scarlet onslaught:** [evidence](evidence/2026-09-18-scarlet-onslaught.json) records timing/geometry/codec boundaries, native packaging and linked-source offline render review. The new audio has an unclipped dense-phrase audition; it was not subjectively heard by the agent. Actual feel/fairness, matching-peer synchronization, audible rhythm/mix, camera strength and performance remain owner-owned / not_run.
 
@@ -68,7 +70,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-Use matching0.3.19 and Reload Mods without another build. Play Scarlet's full repertoire: larger dangers/readable refuges, denser accents, collision matching forecasts, dedicated SFX tails and bounded shake. Compare Reduced Effects/shake-off; remote synchronization and audible score alignment still need actual matching-peer play. Package installation identity is recorded in the new evidence rather than inferred from compilation.
+Use matching0.3.20 and Reload Mods without another build after installation is confirmed in the evidence. Check the simple forecast/strike alternation against the Stack arrows' beat, including Final and a music loop. One-beat dodge readability, remote synchronization and audible score alignment need actual playtesting. Package installation identity is recorded in the evidence rather than inferred from compilation.
 
 Scarlet Covenant remote visibility/flying/landing, repeat summon/wipe, Ghost Samurai slash/body/Oboro and earlier Doll companion/final-check/audio checks remain separate owner follow-ups. Do not repeat unchanged whole-fight matrices for this visual edit. Workshop/GitHub releases remain separate from ordinary main integration. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations.
 
