@@ -17,17 +17,37 @@ internal static class OboroRules
     {
         float windup = Windup(step), p = Math.Clamp(progress, 0, 1);
         float arc;
-        if (p < windup) arc = -1.55f - .22f * MathF.Sin(p / windup * MathF.PI * .5f);
+        if (p < windup) arc = -1.55f - .22f * Ease(p / windup);
         else if (p < .8f)
         {
             float t = (p - windup) / (.8f - windup);
-            // Ease into a fast cut, then let the blade settle continuously.
-            t = t * t * (3 - 2 * t);
+            // Connected Hermite segments: gather, burst through the cut, release.
+            // The same curve drives the server's swept hit test and the visible blade.
+            if (t < .18f) t = Hermite(t / .18f, 0, .08f, 0, .9f * .18f);
+            else if (t < .62f) t = Hermite((t - .18f) / .44f, .08f, .9f, .9f * .44f, .6f * .44f);
+            else t = Hermite((t - .62f) / .38f, .9f, 1, .6f * .38f, 0);
             arc = -1.77f + 3.35f * t;
         }
-        else arc = 1.58f + .12f * MathF.Sin((p - .8f) / .2f * MathF.PI * .5f);
+        else
+        {
+            // Light cuts hand off to the reverse cut. The heavy cut follows through
+            // over the shoulder to the first stance (equivalent modulo a full turn).
+            float t = (p - .8f) / .2f;
+            float end = step == 2 ? MathF.Tau - 1.55f : 1.55f;
+            arc = step == 2 ? 1.58f + (end - 1.58f) * Ease(t)
+                : t < .2f ? 1.58f + .1f * Ease(t / .2f)
+                : 1.68f + (end - 1.68f) * Ease((t - .2f) / .8f);
+        }
         return step == 1 ? -arc : arc;
     }
+    internal static float Ease(float t)
+    {
+        t = Math.Clamp(t, 0, 1);
+        return t * t * (3 - 2 * t);
+    }
+    private static float Hermite(float t, float start, float end, float startSpeed, float endSpeed)
+        => (2 * t * t * t - 3 * t * t + 1) * start + (t * t * t - 2 * t * t + t) * startSpeed
+            + (-2 * t * t * t + 3 * t * t) * end + (t * t * t - t * t) * endSpeed;
     internal static int FireDps(int maximumLife) => (int)Math.Min(int.MaxValue / 4L, 200L + Math.Max(0, maximumLife) / 50L);
     internal static float PhantomAngle(float incoming, int index) => incoming + MathF.PI / 2 + (index - 2) * .17f;
 }

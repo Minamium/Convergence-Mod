@@ -17,9 +17,10 @@ public sealed class OboroVisuals : ModSystem
 {
     private readonly List<(OboroBurst Burst, ulong At)> bursts = new();
     private readonly (ulong Generation, uint Swing)[] sounded = new (ulong, uint)[256];
+    private readonly OboroSwingPresentation[] swings = new OboroSwingPresentation[256];
     public override void Load() => OboroPackets.DisplayBurst += ReceiveBurst;
-    public override void Unload() => OboroPackets.DisplayBurst -= ReceiveBurst;
-    public override void ClearWorld() { bursts.Clear(); Array.Clear(sounded); }
+    public override void Unload() { OboroPackets.DisplayBurst -= ReceiveBurst; ClearWorld(); }
+    public override void ClearWorld() { bursts.Clear(); Array.Clear(sounded); Array.Clear(swings); }
     private void ReceiveBurst(OboroBurst burst)
     {
         if (bursts.Count >= 128) bursts.RemoveAt(0);
@@ -29,14 +30,20 @@ public sealed class OboroVisuals : ModSystem
     public override void PostUpdateEverything()
     {
         bursts.RemoveAll(x => Main.GameUpdateCount - x.At > 22);
-        foreach (Player player in Main.ActivePlayers)
+        for (int slot = 0; slot < Main.maxPlayers; slot++)
         {
+            Player player = Main.player[slot];
+            if (!player.active) { swings[slot]?.Clear(); sounded[slot] = default; continue; }
             var state = player.GetModPlayer<OboroPlayer>();
-            if (!state.SwingVisible || !state.Holding || player.dead) continue;
-            float p = state.VisualAge / state.View.Duration;
-            player.ChangeDir(state.View.Facing);
-            float angle = state.View.Aim + state.View.Facing * OboroRules.Offset(state.View.Step, p);
-            player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, angle - MathF.PI / 2);
+            if (!state.Holding || player.dead) { swings[slot]?.Clear(); sounded[slot] = default; continue; }
+            var visual = swings[slot] ??= new OboroSwingPresentation();
+            Vector2 center = player.MountedCenter;
+            visual.Update(state.View, state.VisualAge, state.SwingVisible, true, center.X, center.Y, player.direction, Main.GameUpdateCount);
+            if (visual.Swinging) player.ChangeDir(state.View.Facing);
+            if (visual.Swinging || visual.Settling)
+                player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, visual.Pose.Angle - MathF.PI / 2);
+            if (!visual.Swinging) continue;
+            float p = visual.Pose.Progress;
             if (p < OboroRules.Windup(state.View.Step) || sounded[player.whoAmI] == (state.View.Generation, state.View.Swing)) continue;
             sounded[player.whoAmI] = (state.View.Generation, state.View.Swing);
             SoundEngine.PlaySound(SoundID.Item1 with { Volume = .8f, Pitch = state.View.Step == 2 ? -.6f : .15f, MaxInstances = 4 }, player.Center);
@@ -55,9 +62,21 @@ public sealed class OboroVisuals : ModSystem
             {
                 if (p.dead) continue;
                 var state = p.GetModPlayer<OboroPlayer>();
-                if (state.SwingVisible && state.Holding) OboroArt.Swing(b, p, state);
-                else if (state.Holding)
-                    OboroArt.Sword(b, p.MountedCenter + new Vector2(p.direction * 12, 8), p.direction == 1 ? -1.1f : -2.04f, 145, Color.White);
+                if (state.Holding)
+                {
+                    if (swings[p.whoAmI] is { } visual)
+                    {
+                        // Cull cosmetic work when the owner and its bounded echoes are offscreen.
+                        Vector2 screen = Vector2.Transform(p.Center - Main.screenPosition, Main.GameViewMatrix.TransformationMatrix);
+                        float margin = 900 * Math.Abs(Main.GameViewMatrix.TransformationMatrix.M11);
+                        if (screen.X > -margin && screen.X < Main.screenWidth + margin && screen.Y > -margin && screen.Y < Main.screenHeight + margin)
+                        {
+                            OboroArt.Afterimages(b, visual);
+                            OboroArt.Swing(b, visual.Pose, visual.Swinging);
+                        }
+                    }
+                    else OboroArt.Sword(b, p.MountedCenter + new Vector2(p.direction * 12, 8), p.direction == 1 ? -1.1f : -2.04f, 145, Color.White);
+                }
                 if (state.ZanshinRemaining > 0)
                     for (int i = 0; i < 3; i++)
                     {
