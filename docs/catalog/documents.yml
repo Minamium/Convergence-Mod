@@ -1263,12 +1263,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: f60625f53653f65255b646eb91dc6a31dafa97074aa2b5af9b1abba582bbd72e
+  content_sha256: 1f38b72eccdf26ed24c0f2eb1e52d7664ff6f4b9c7a7194f1233259d90e7d732
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-17'
+  last_reviewed: '2026-09-18'
   source_of_truth_for:
   - project.implementation_status
   aliases:

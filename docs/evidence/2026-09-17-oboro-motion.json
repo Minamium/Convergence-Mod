@@ -52,6 +52,20 @@
       "sha256": "27f1e312d0406275e135377cd75fad7a57c6b970858cbdb09b95cbb5701941a9",
       "bytes": 89175819
     },
-    "normal_profile": "pending integrated-main build and install"
+    "normal_profile": {
+      "date": "2026-09-18",
+      "result": "pass:integrated-main native build and normal-profile installation,0 errors/4 existing warnings;22 locale files,shader exports and packaged solo admission",
+      "local_record": "20260918T090655917588Z",
+      "source_sha256": "5ed62212fa29f1c9d599e00ff1c736a7300466a2b983aab7fb29202813b8705f",
+      "source_changed_during_build": false,
+      "bytes": 89175804,
+      "sha256": "3d02624902b6352447c72d3f4e211be149ea32ee68ad1caea14f18ac5e27ecd4",
+      "installed_checks": "pass:exact installed0.3.18 identity and six Oboro loader type validations including saved item; repeated cleanup, native regen and codec checks. Convergence remains enabled.",
+      "preserved": "ModSources junction still targets the canonical main checkout. Oboro/root localization and local workstation evidence retained byte-for-byte. Crimson localization formatting reapplied with current main strings; exact original backed up and named stash retained. Enabled-Mod list unchanged; prior package backed up by build; saves untouched.",
+      "playtest": "not_run:user-owned. Reload Mods; no repeat Build + Reload. Use matching0.3.18/protocol48 peers.",
+      "documentation": "Subsequent installation-record commits change documentation only; the installed package remains attributed to this main build."
+    },
+    "merged_head": "a3c750a799f8c1bf6463eb2b2ec16161385bc5c6",
+    "main_commit": "1577830e80f0a0caa25ad9364c0ef534df167f6c"
   }
 }
