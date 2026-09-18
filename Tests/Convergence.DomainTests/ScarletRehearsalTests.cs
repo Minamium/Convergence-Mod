@@ -91,26 +91,24 @@ internal static partial class Program
         catch (InvalidDataException) { bad = true; }
         AssertEqual(true, bad, "negative generation rejected");
     }
-    [DomainTest("Scarlet twelve-phrase repertoire includes every apparition technique and varied drum calls")]
+    [DomainTest("Scarlet twelve-phrase repertoire keeps all techniques with a stable basic beat")]
     private static void ScarletCompleteRepertoire()
     {
         var score = ScarletRecordedScore();
         for (int source = 0; source < 3; source++)
         {
-            var techniques = new HashSet<CrimsonTechnique>(); var rhythms = new HashSet<string>();
+            var techniques = new HashSet<CrimsonTechnique>();
             int earliest = score.IntroTicks; var cycle = new CrimsonActCycle();
             for (int serial = 0; serial < CrimsonActCycle.PhrasesPerCycle; serial++)
             {
                 techniques.Add(CrimsonTechniqueGeometry.Select(source, serial));
                 var phrase = CrimsonRhythm.Create(score, earliest, serial, false);
-                var offsets = new List<int>();
-                foreach (var hit in phrase.Hits) offsets.Add(hit.Warning - phrase.Start);
-                rhythms.Add(string.Join(",", offsets));
+                AssertEqual(2, phrase.Hits.Count, "technique changes do not change the basic pulse");
+                AssertEqual(CrimsonRhythmKind.Groove, phrase.Kind, "no irregular fill within the repertoire");
                 cycle.Admit(phrase.End, phrase.End + 6); earliest = phrase.End;
                 AssertEqual(false, cycle.TryComplete(phrase.End, false), "cannot skip the current recovery");
             }
             AssertEqual(3, techniques.Count, "complete species repertoire");
-            AssertEqual(true, rhythms.Count >= 4, "not one equal-spacing pattern");
         }
     }
 }

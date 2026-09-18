@@ -7,46 +7,35 @@ internal enum CrimsonRhythmKind : byte { Groove, Fill, Roll }
 internal readonly record struct CrimsonRhythmHit(int Warning, int Fire, int End, byte Accent);
 internal sealed record CrimsonRhythmPhrase(int Start, int End, CrimsonRhythmKind Kind, IReadOnlyList<CrimsonRhythmHit> Hits);
 
-// Four-beat musical call/response. Absolute score times prevent rounding drift.
+// Basic pulse rehearsal: call / strike / call / strike on the exact same
+// score beats that drive the chorus marker. No subdivisions or Final exception.
 internal static class CrimsonRhythm
 {
     internal const int LookAheadTicks = 30;
-    internal const int MinimumWarningTicks = 28;
+    internal const int MinimumWarningTicks = 20;
     internal const int MaximumWarningTicks = 180;
     internal const int MaximumHits = 6;
     internal const int MaximumLanes = 40;
-    private static readonly int[] groove = { 0, 2, 4, 6, 8 };
-    private static readonly int[] syncopated = { 0, 2, 5, 6, 8 };
-    private static readonly int[] delayed = { 0, 3, 4, 6, 8 };
-    private static readonly int[] flam = { 0, 1, 4, 6, 8 };
-    private static readonly int[] fill = { 0, 2, 3, 5, 6, 8 };
-    private static readonly int[] roll = { 0, 1, 2, 4, 6, 8 };
 
     internal static CrimsonRhythmPhrase Create(CrimsonScore score, int earliest, int serial, bool final)
     {
         if (earliest < 0 || serial < 0) throw new ArgumentOutOfRangeException();
         // A fractional loop beat that rounds to earliest belongs to this bar.
         var beats = NextBeats(score, Math.Max(0, earliest - .499999d), 5);
-        float energy = score.Intensity(beats[0]);
-        var kind = serial % 4 == 3 ? CrimsonRhythmKind.Fill
-            : final && energy >= .76f && serial % 3 == 2 ? CrimsonRhythmKind.Roll : CrimsonRhythmKind.Groove;
-        int[] pattern = kind == CrimsonRhythmKind.Fill ? fill : kind == CrimsonRhythmKind.Roll ? roll
-            : serial % 6 == 1 ? syncopated : serial % 6 == 2 ? delayed : serial % 6 == 4 ? flam : groove;
-        int At(int step) => step == 16 ? (int)Math.Round(beats[4])
-            : (int)Math.Round(beats[step / 4] + (beats[step / 4 + 1] - beats[step / 4]) * (step % 4) / 4d);
-        var hits = new CrimsonRhythmHit[pattern.Length];
-        for (int i = 0; i < pattern.Length; i++)
+        // Keep the reserved kind IDs and descriptor capacity; serial/final no
+        // longer alter cadence, sound accent or the amount of warning.
+        int At(int beat) => (int)Math.Round(beats[beat]);
+        var hits = new CrimsonRhythmHit[2];
+        for (int i = 0; i < hits.Length; i++)
         {
-            int warning = At(pattern[i]), fire = At(pattern[i] + 6);
-            int next = i + 1 == pattern.Length ? At(16) : At(pattern[i + 1] + 6);
+            int warning = At(i * 2), fire = At(i * 2 + 1), next = At(i * 2 + 2);
             if (fire - warning < MinimumWarningTicks || fire - warning > MaximumWarningTicks || next - fire < 4)
                 throw new InvalidOperationException("crimson.rhythm_unreadable_score");
-            // Dense accents remain separate damage windows. Eighth notes have
-            // enough body to read; sixteenth flams never overlap another field.
+            // An attack and its visible residue finish before the next call.
             int live = Math.Min(10, next - fire - 1);
-            hits[i] = new(warning, fire, fire + live, (byte)(i == pattern.Length - 1 ? 2 : i == 0 ? 1 : 0));
+            hits[i] = new(warning, fire, fire + live, 1);
         }
-        return new(At(0), At(16), kind, Array.AsReadOnly(hits));
+        return new(At(0), At(4), CrimsonRhythmKind.Groove, Array.AsReadOnly(hits));
     }
     internal static double[] NextBeats(CrimsonScore score, double earliest, int count)
     {

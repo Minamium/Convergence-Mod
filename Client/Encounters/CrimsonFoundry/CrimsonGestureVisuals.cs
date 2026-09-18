@@ -45,7 +45,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                     var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/CrimsonFoundry/" + asset)
                     {
                         Volume = impact ? .56f + p.Accent * .06f : .25f,
-                        Pitch = impact ? -.035f * p.Accent : .025f * p.Pulse,
+                        Pitch = impact ? -.035f * p.Accent : 0,
                         MaxInstances = 6, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
                         PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
                     });

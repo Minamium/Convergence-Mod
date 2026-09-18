@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-19",
+  "feature": "Scarlet Invocation",
+  "version": "0.3.20",
+  "protocol": 50,
+  "base": "cfe5f41",
+  "integration": "Pulled main before editing (already current); retained shared Luminance policy and four pre-existing generated English locale edits without staging them.",
+  "observed_playtest": {
+    "version": "0.3.19",
+    "local_session": "2026-09-18 22:26–22:29 JST",
+    "topology": "solo Host & Play",
+    "fight": "01b47a88-10a7-4a7d-8dd0-caddadc9930f",
+    "members": 1,
+    "music_start_age": 428,
+    "unlock_age": 908,
+    "victory_age": 8741,
+    "cleanup_age": 8891,
+    "combat_seconds": 130.55,
+    "phrases_admitted": 49,
+    "stack_resolved": 3,
+    "spread_resolved": 3,
+    "phase_cycle_completion_ages": [2180, 4290, 6540, 8730],
+    "peak_five_second_capped_hp_dps": 107995,
+    "errors_fatal": 0,
+    "audio_reanchor_events": 0,
+    "limits": "Admitted phrases may be interrupted by victory. Capped actual-HP DPS is not uncapped weapon DPS. No detailed received-damage trace, multiplayer evidence or measured audio-device latency. No-reanchor is not proof of audible synchronization."
+  },
+  "owner_feedback": "Rhythm still unclear; use the basic pulse of the four Stack arrows for a deliberately simple repeated forecast/attack baseline.",
+  "change": {
+    "cadence": "Forecast on beat1, strike on beat2, forecast on beat3, strike on beat4; repeat without per-bar rests. Two equal-accent notes; no serial/energy variation or Final exception.",
+    "clock": "Absolute Score.json beats, the same map/loop as Score.Pulse on the Stack marker. Rounded gameplay ticks and fractional render clock agree within one tick; not sample-perfect audible timing.",
+    "bounds": "One measured beat warning (minimum20ticks);10tick live pulse on the packaged score; warning pitch no longer rises by note index. Protocol bump protects peers whose old minimum was28ticks. Layout and stable IDs unchanged.",
+    "preserved": ["accepted circles and background", "Luminance physical attack art/geometry and all11techniques", "licensed BGM, loop and fade", "original SFX masters and mix gains", "HP/damage-one rehearsal", "12phrase cycle and chorus gates", "Ready/authority/Fight cleanup", "Doll/Ghost Samurai/Oboro"]
+  },
+  "checks": {
+    "domain": "passed35 focused Scarlet cases;1500 actual-score phrases and800 chorus-pulse/continuous-bar loop cases, plus the minimum-warning descriptor round-trip/rejection",
+    "repository_codec": "passed repository/catalog/YAML; compiled protocol50:334round-trips/54malformed rejections",
+    "native_build": "passed0errors/4existing CS8632 warnings;22locales and shader exports verified; packaged0.3.20 solo admission preserved",
+    "runtime": "not_run: audible pulse, one-beat dodge readability, matching-peer synchronization and in-game reload"
+  },
+  "build": {
+    "record_relative": ".local/builds/20260918T151614132910Z/record.json",
+    "source_commit": "cfe5f414bd4d4ff4d0792d2e5666e2d152cf141e",
+    "source_dirty_sha256": "b17b24f0b63fb52f9ac9c78f1d1126aa5b46ddb149bede5b50aa875ba7e7bbe4",
+    "package_sha256": "d50095ec503ad69fcc8a6a7484731c72bb0a1bad4d301dd5cfe382e89efb456f",
+    "environment": "tModLoader2026.07.3.0 / Calamity2.2.4 / Luminance1.0.14 / .NET8.0.424",
+    "installation": "pending main integration; isolated candidate built with unchanged source throughout compilation"
+  }
+}
