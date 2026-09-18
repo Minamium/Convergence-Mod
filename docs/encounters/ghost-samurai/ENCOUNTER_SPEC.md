@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-18
 source_of_truth_for:
   - ghost_samurai.behavior
 aliases:
@@ -18,6 +18,7 @@ related_code:
 related_docs:
   - project.status
   - development.windows
+  - project.art-direction
 ---
 
 # 幽鬼武者 / Ghost Samurai
@@ -168,6 +169,22 @@ API確認（2026-09-14、固定source666f69962d3bdffde54fc14025f02634965b4e7c）
 
 ## 表示と素材
 
+### Luminance presentation target
+
+**Ghost Samurai本体・鬼火・二刀・斬撃・衝撃波・消散・Oboroにも、共通の[Luminance積極活用方針](../../ART_DIRECTION.md#luminance-presentation-policy)を適用する。** 紫の霊炎、髑髏兜、鎧、札輪、二刀流という採用済みの意匠を保ちながら、次の表現実装ではその場で生きて動く身体と時間変化する材質を目指す。
+
+現在の12姿勢atlas＋画像全体の微小な傾きは、既存実装の出発点である。**そのコマ切替だけを、本体の動作・表現強化の完成形として扱わない。** PNGを廃止したり、採用済み原画を勝手に置き換えたりする方針ではない。必要な部位・マスク・pivot・中間動作を用意して活かす。単独の読み込み不具合修正などへ全身再制作を追加せず、依頼された表現面から適用する。
+
+- **身体と二刀:** 胴・肩・肘・手首・刀の接続を保ち、構え→溜め→加速した振り抜き→反動→復帰を連続化する。Luminanceの補間や表示用stateを必要に応じて使い、可動部位のcurve/pivotはこのBossが持つ。刀光・鬼火の発生点をその動きへ追従させる。全身PNGのクロスフェードやコマ数増加だけで接続・連続性の確認を代用しない。
+- **霊炎・札輪・材質:** ManagedShader等で紫の流れ、濃淡、輪郭の明滅、消散を局所的に動かす。装飾的な札・炎の遅れには、効果のある範囲でbounded Verlet/粒子を選ぶ。身体を見失う過剰な透明化や全画面フラッシュにしない。
+- **刀光・衝撃波:** 採用済みの5枚の斬撃素材を材質入力として活かし、必要な攻撃ではPrimitiveRendererとshaderによる伸長・流動・減衰を組み合わせる。帯・円の穴・フィールド境界、Fire/End、突進本体だけの判定は維持する。背景が明るくても危険の輪郭を残す。
+- **表示時計と後始末:** 現行の権威側attack/beat/snapshotを投影する。Luminanceの表示stateや装飾simulationから攻撃遷移・標的・hit座標を決めない。遅延snapshot、teleport、Phase変更、再召喚で残像・糸・粒子を古い位置へ残さない。撃破表現は報酬とcleanupを遅延させない。
+- **確認:** [共通の完成基準](../../ART_DIRECTION.md#presentation-completion)に従い、変更した待機・予備動作・振り抜き・復帰・消散の短い動画または連続frameを確認する。刀と手の接続、コマ境界の跳び、霊炎の流動、予告と判定、通常/Reduced Effectsを読み取れる証拠にする。オフライン描画と実ゲーム/複数peerの確認は区別する。
+
+この節は表現強化の目標・受入基準であり、既に実装済みという記録ではない。実装・実機確認の状態は [Status](../../STATUS.md) が持つ。
+
+### Current artwork and renderer
+
 `Client/Encounters/GhostSamurai/GhostSamuraiVisuals.cs` が本体・二刀・斬撃帯・鬼火を描画し、音は専用 GhostSamuraiAudio がまとめる。9月16日の参考画像に従い、本体は紫の霊炎、髑髏兜、鎧、札付きの輪を持つ `Assets/Textures/GhostSamurai/VioletActions.png` の12ポーズを使用する。`GhostSamuraiSpriteArt` と `SamuraiSpriteFrames` が構え・振り抜き・余韻を既存の攻撃時計へ合わせる。初期同期前を含め、生存中の本体は55%以上の不透明度を保ち、24tickで通常の明度へ移行する。Idle・移動・攻撃・Phase移行で本体を隠す分岐は設けない。撃破後のみ別の `VioletDissolve.png` で消滅を描く。旧青白い分割Atlasは保持するが、現行本体描画では使わない。図の文字、第三者素材、新しい音声は取り込まない。
 
 素材管理はクライアント専用の `SpectralSpriteCutouts`。紫Atlasの緑背景は初回描画時だけ透過する。`ImmediateLoad` で実画像の読み込みを完了してから画素を読む。非同期読み込み中の仮画像を加工・キャッシュしない。共有アセットを変更せず専用Textureを作成し、Unload時は旧インスタンスを捕捉して描画スレッドで破棄する。Dedicated Serverは画像要求・加工・描画を行わない。元画像の出自とSHA256は [素材台帳](../../../Assets/ATTRIBUTION.md) に記録する。
@@ -192,7 +209,7 @@ API確認（2026-09-14、固定source666f69962d3bdffde54fc14025f02634965b4e7c）
 
 新しい素材は本攻撃のFire以上・End未満だけ表示する。予告は従来の暖色線、円形予告は赤／青の内外識別と直線／曲線の区別を維持。斬撃の発光が弱まっても正確な危険範囲の輪郭・薄い塗りを残す。円形素材は画像の全幅を含めて外周・中央の穴・フィールドへ収め、正面大斬撃は背後へ出さない。斬撃波と地面衝撃波も現在の移動位置・矩形内に収める。
 
-Reduced Effectsは発光濃度、風の刃数・層数、大斬撃の層数を減らす。新しいProjectile・粒子・タイマー・乱数・通信は追加せず、受信した位置と時刻だけから再生する。5素材は初回描画でImmediateLoadし、tModLoader所有のAssetを再利用。画素加工・Texture作成・毎フレームの画素読取りは行わず、Unloadで参照を解放する。Dedicated Serverは読み込まない。
+Reduced Effectsは発光濃度、風の刃数・層数、大斬撃の層数を減らす。この5素材の導入では新しいProjectile・粒子・タイマー・乱数・通信は追加しておらず、受信した位置と時刻だけから再生する。今後のLuminance材質・装飾の追加は上の表現目標と所有権・予算に従い、ゲーム判定や通信を増やさない。5素材は初回描画でImmediateLoadし、tModLoader所有のAssetを再利用。画素加工・Texture作成・毎フレームの画素読取りは行わず、Unloadで参照を解放する。Dedicated Serverは読み込まない。
 
 ## 検証と試遊
 

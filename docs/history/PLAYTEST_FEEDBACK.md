@@ -19,6 +19,10 @@ related_docs:
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
 
+## Shared Luminance direction — 2026-09-18 / source0.3.19
+
+Owner reports a PNG flipbook appearance for Ghost Samurai and requests active Luminance use across all content, including contributor work. Source review confirms the current twelve-pose whole-body atlas renderer and a missing shared requirement despite detailed Doll/Scarlet guidance. Establish the [common policy](../ART_DIRECTION.md#luminance-presentation-policy), route the development Skill and contributor entry points to it, and define the [Ghost Samurai target](../encounters/ghost-samurai/ENCOUNTER_SPEC.md#luminance-presentation-target). This is documentation/Skill work only; connected body motion and evolving materials are targets, not newly implemented or visually approved results. No new game session or renderer acceptance is claimed.
+
 ## Through 0.3.1 — owner feedback consolidated on 2026-09-14
 
 This is a retrospective summary of the owner's playtests and repeated corrections in the development conversation, not a newly replayed acceptance matrix. Earlier versions below identify decision periods, not invented exact test dates. Superseded experiments stay in the linked histories.

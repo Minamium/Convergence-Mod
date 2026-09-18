@@ -11,7 +11,8 @@ Run the static wrapper once after a completed edit batch. Add every applicable r
 | Wording, docs, Skills, repository configuration | Static checks; validate edited Skill structure when affected. No domain run, Mod build or game session for text-only edits |
 | README/documentation artwork | Static checks, rendered layout/image inspection, correct relative links and export provenance. No Mod build for assets excluded under docs |
 | Python verification tooling | Exercise the changed command/failure branches plus static checks |
-| Display/VFX C# or assets | Build changed C#; check affected loading/readability/accessibility and client-only guards. Domain tests only if shared geometry/rules change |
+| Display/VFX C# or assets | Build changed C#; apply [presentation completion](../../../../docs/ART_DIRECTION.md#presentation-completion) to the changed scene, including observed motion/material frames and affected loading/accessibility/client-only guards. Domain tests only if shared geometry/rules change |
+| Shader source or material bindings | Compile changed HLSL and verify exports through the [shader build procedure](../../../../docs/runbooks/WINDOWS_DEVELOPMENT.md#diagnose-or-build); inspect the actual compiled material and relevant draw-state/resource lifecycle. An offline GPU preview does not establish in-game quality or FPS |
 | Tuning values | Build changed C#; focused domain boundaries only if rule/geometry/scaling input changed. Hand off the changed tuning for user playtesting |
 | Combat/recovery rules or linked domain sources/tests | `--with-domain`; matching package build when production code changes, plus relevant task-owner Host & Play smoke |
 | Communication, authority, identity, lifecycle or saving | Bounded codec/round-trip and affected stale/duplicate/cleanup contracts; matching build. Add latency/rejoin/slot-reuse or save migration cases only when affected |
