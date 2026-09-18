@@ -159,8 +159,11 @@ internal sealed class ScarletArticulation : ModSystem
         if (Main.dedServ || CrimsonVisuals.Reduced || !ModContent.GetInstance<CrimsonVisualConfig>().ScreenShake) return;
         var self = ModContent.GetInstance<ScarletArticulation>();
         if (self.shakes.Count >= 6) return;
-        self.shakes.Add(ScreenShakeSystem.StartShakeAtPoint(center, source == 0 ? 1.3f + .55f * accent : .65f + .30f * accent,
-            shakeDirection: source == 0 ? Vector2.UnitY : Vector2.UnitX, angularVariance: .55f, shakeStrengthDissipationIncrement: .35f));
+        // Full-field attacks must still be felt from the far side of the arena.
+        // Existing locality attenuation now starts near the receiving player.
+        Vector2 audibleCenter = Vector2.Lerp(Main.LocalPlayer.Center, center, .2f);
+        self.shakes.Add(ScreenShakeSystem.StartShakeAtPoint(audibleCenter, source == 0 ? 5.0f + 1.1f * accent : 3.8f + .9f * accent,
+            shakeDirection: source == 0 ? Vector2.UnitY : Vector2.UnitX, angularVariance: .85f, shakeStrengthDissipationIncrement: .45f));
     }
     private void Reset()
     {

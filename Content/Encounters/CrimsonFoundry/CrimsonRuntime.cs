@@ -333,7 +333,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         cycle.Admit(phraseEnd, recoveryEnd); phrasesSinceChorus++;
         nextPhrase = cycle.Full ? cycle.FinishAt : phraseEnd - CrimsonRhythm.LookAheadTicks;
         Project(true);
-        CrimsonPackets.Log($"event=PhysicalPhrase fight={fight.Value} phase={phase} epoch={phaseStart} serial={serial} rhythm={rhythm.Kind} notes={count} start={phraseStart} end={phraseEnd} issued={age} skills={string.Join(",", techniques)}");
+        CrimsonPackets.Log($"event=PhysicalPhrase fight={fight.Value} phase={phase} epoch={phaseStart} serial={serial} rhythm={rhythm.Kind} notes={count} start={phraseStart} end={phraseEnd} issued={age} score_start={rhythm.Start} first_fire={plans[0].Fire} warning_ticks={plans[0].Fire - plans[0].Born} last_end={plans[^1].End} skills={string.Join(",", techniques)}");
     }
     private int SelectFinalSource(int start)
     {

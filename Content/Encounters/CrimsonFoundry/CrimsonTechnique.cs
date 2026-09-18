@@ -47,11 +47,11 @@ internal readonly record struct CrimsonGesturePlan(
     }
     internal void Validate()
     {
-        if (Fight == Guid.Empty || Boss is < 0 or >= 200 || Epoch < 0 || Phrase is < 1 or > 100000 || Pulse >= 5
+        if (Fight == Guid.Empty || Boss is < 0 or >= 200 || Epoch < 0 || Phrase is < 1 or > 100000 || Pulse >= CrimsonRhythm.MaximumHits
             || Source > 3 || !Enum.IsDefined(Technique) || CrimsonTechniqueGeometry.Owner(Technique) != Source
-            || Steps is < 1 or > 5 || Step >= Steps || Accent > 2
+            || Steps is < 1 or > CrimsonRhythm.MaximumHits || Step >= Steps || Accent > 2
             || Begin < Epoch || Begin > FirstFire || Born < Epoch || Born > 73000
-            || (long)Fire - Born is < 40 or > 180 || (long)End - Fire is < 2 or > 16 || Fire > 73500
+            || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire is < 2 or > 16 || Fire > 73500
             || FirstFire > Fire || LastEnd < End || LastEnd > 73500 || (long)LastEnd - FirstFire > 600
             || !From.Finite || !Stage.Finite || !Target.Finite || From.X is < 0 or > 400000 || From.Y is < 0 or > 150000
             || GroundX is < 1600 or > 400000 || GroundY is < 1440 or > 150000 || Damage is < 1 or > 2000)
@@ -84,7 +84,7 @@ internal readonly record struct CrimsonGesturePlan(
 
 internal static class CrimsonTechniqueGeometry
 {
-    internal const int MaximumStrokes = 96;
+    internal const int MaximumStrokes = 192;
     internal static int Owner(CrimsonTechnique t) => (int)t < 9 ? (int)t / 3 : 3;
     internal static CrimsonTechnique Select(int source, int serial)
     {
@@ -110,11 +110,11 @@ internal static class CrimsonTechniqueGeometry
             CrimsonTechnique.CrownRain => new(f.CenterX, f.Top + 210),
             CrimsonTechnique.CrownCinders => focus + new CrimsonPoint(-side * 280, -260),
             CrimsonTechnique.CrownCrash => focus + new CrimsonPoint(-side * 160, -330),
-            CrimsonTechnique.MantleFan => focus + new CrimsonPoint(side * 320, -110),
+            CrimsonTechnique.MantleFan => new(side < 0 ? f.Left + 180 : f.Right - 180, f.CenterY),
             CrimsonTechnique.MantleRush => focus + new CrimsonPoint(side * 330, -80),
-            CrimsonTechnique.MantleScissors => focus + new CrimsonPoint(side * 400, -110),
-            CrimsonTechnique.ChoirThrust => focus + new CrimsonPoint(side * 360, -270),
-            CrimsonTechnique.ChoirHook => focus + new CrimsonPoint(side * 320, -100),
+            CrimsonTechnique.MantleScissors => new(side < 0 ? f.Left + 180 : f.Right - 180, f.CenterY),
+            CrimsonTechnique.ChoirThrust => new(f.CenterX, f.Top + 180),
+            CrimsonTechnique.ChoirHook => new(side < 0 ? f.Left + 180 : f.Right - 180, f.CenterY),
             CrimsonTechnique.ChoirRend => new(f.CenterX, f.Top + 220),
             _ => focus + new CrimsonPoint(-side * 230, -240)
         });
@@ -133,108 +133,120 @@ internal static class CrimsonTechniqueGeometry
     internal static CrimsonPoint Bezier(CrimsonPoint a, CrimsonPoint c, CrimsonPoint b, float t)
         => a * ((1 - t) * (1 - t)) + c * (2 * t * (1 - t)) + b * (t * t);
 
+    internal static CrimsonPoint CinderCenter(in CrimsonGesturePlan p, int column, int row)
+        => new(p.Field.Left + 200 + column * (p.Field.Right - p.Field.Left - 400) / 5,
+            p.Field.Top + 230 + row * 560 + (p.Pulse % 2 == 0 ? -35 : 35));
+
     // The same solid capsules are drawn and collided. Forecast is a conservative
     // full swept footprint; only Live(age) can generate damaging geometry.
     internal static int Write(in CrimsonGesturePlan p, float age, Span<CrimsonStroke> destination, bool forecast = false)
     {
         if (!forecast && !p.Live(age)) return 0;
         var w = new Writer(destination); var f = p.Field;
-        float t = p.Progress(age), full = forecast ? 1 : t;
+        float t = p.Progress(age);
+        // Held anticipation belongs to Born..Fire; the accepted strike then
+        // bursts out, briefly brakes and bites. Collision uses this same curve.
+        float full = forecast ? 1 : Strike(t);
         float direction = p.Target.X >= p.Stage.X ? 1 : -1;
         switch (p.Technique)
         {
             case CrimsonTechnique.CrownRain:
-                int gap = (p.Phrase + p.Pulse) % 13 + 2;
-                for (int i = 0; i < 19; i++)
+                int gap = p.Phrase % 18 + 2;
+                for (int i = 0; i < 26; i++)
                 {
                     if (i >= gap && i <= gap + 2) continue;
-                    float x = f.Left + 100 + i * (f.Right - f.Left - 200) / 18;
+                    float x = f.Left + 80 + i * (f.Right - f.Left - 160) / 25;
                     float y = f.Top + 60 + (f.Bottom - f.Top - 100) * t;
                     float before = f.Top + 60 + (f.Bottom - f.Top - 100) * p.Progress(Math.Max(p.Fire, age - 1));
-                    w.Add(new(x, forecast ? f.Top - 4 : before - 62), new(x, forecast ? f.Bottom - 20 : y), 12);
+                    w.Add(new(x, forecast ? f.Top - 20 : before - 80), new(x, forecast ? f.Bottom - 20 : y), 24);
                 }
                 break;
             case CrimsonTechnique.CrownCinders:
-                for (int i = -1; i <= 1; i++)
+                for (int column = 0; column < 6; column++) for (int row = 0; row < 2; row++)
                 {
-                    var c = Clamp(f, p.Target + new CrimsonPoint(i * 260, (p.Pulse % 2 == 0 ? -1 : 1) * 90), 125);
-                    w.Add(c, c, forecast ? 112 : 24 + 88 * MathF.Sin(t * MathF.PI * .5f));
+                    var c = CinderCenter(p, column, row);
+                    w.Add(c, c, forecast ? 164 : 30 + 130 * MathF.Sin(t * MathF.PI * .5f));
                 }
                 break;
             case CrimsonTechnique.CrownCrash:
                 if (forecast)
                     w.Add(CrimsonPoint.Lerp(p.Stage, p.Target, p.Step / (float)p.Steps),
-                        CrimsonPoint.Lerp(p.Stage, p.Target, (p.Step + 1f) / p.Steps), 158);
+                        CrimsonPoint.Lerp(p.Stage, p.Target, (p.Step + 1f) / p.Steps), 196);
                 else
                 {
                     var body = p.Body(age);
-                    w.Add(p.Body(Math.Max(p.Fire, age - 1)), body, 78);
-                    w.Ring(body, 85 + t * 58, 13, 20);
+                    w.Add(p.Body(Math.Max(p.Fire, age - 1)), body, 100);
+                    w.Ring(body, 95 + t * 78, 20, 24);
                 }
                 break;
             case CrimsonTechnique.MantleFan:
-                float aim = MathF.Atan2(p.Target.Y - p.Stage.Y, p.Target.X - p.Stage.X);
-                float start = aim - 1.3f + (forecast ? 0 : t * 1.6f);
-                w.Arc(p.Stage, 340, start, forecast ? 2.55f : .95f, forecast ? 38 : 30, 24);
+                float aim = p.Stage.X < f.CenterX ? 0 : MathF.PI;
+                float start = aim - 1.25f + (forecast ? 0 : full * 1.5f);
+                for (int fan = 0; fan < 4; fan++)
+                    w.Arc(p.Stage, 400 + fan * 470, start, forecast ? 2.55f : 1.0f, forecast ? 50 : 40, 40);
                 break;
             case CrimsonTechnique.MantleRush:
                 w.Add(forecast ? CrimsonPoint.Lerp(p.Stage, p.Target, p.Step / (float)p.Steps) : p.Body(Math.Max(p.Fire, age - 1)),
-                    forecast ? CrimsonPoint.Lerp(p.Stage, p.Target, (p.Step + 1f) / p.Steps) : p.Body(age), 76);
+                    forecast ? CrimsonPoint.Lerp(p.Stage, p.Target, (p.Step + 1f) / p.Steps) : p.Body(age), 110);
                 break;
             case CrimsonTechnique.MantleScissors:
-                for (int side = -1; side <= 1; side += 2)
-                    w.Curve(p.Stage + new CrimsonPoint(0, side * 90),
-                        CrimsonPoint.Lerp(p.Stage, p.Target, .5f) + new CrimsonPoint(0, side * 290),
-                        p.Target + new CrimsonPoint(direction * 110, -side * 45), full, forecast ? 29 : 25, 18);
+                for (int side = -1; side <= 1; side += 2) for (int layer = 0; layer < 2; layer++)
+                    w.Curve(p.Stage + new CrimsonPoint(0, side * (100 + layer * 200)),
+                        new(f.CenterX, f.CenterY + side * (360 + layer * 190)),
+                        new(p.Stage.X < f.CenterX ? f.Right - 140 : f.Left + 140,
+                            f.CenterY + side * (90 + layer * 260)), full, forecast ? 48 : 39, 32);
                 break;
             case CrimsonTechnique.ChoirThrust:
-                for (int limb = -1; limb <= 1; limb++)
+                for (int limb = -3; limb <= 3; limb++)
                     w.Curve(p.Stage + new CrimsonPoint(limb * 35, 10),
-                        CrimsonPoint.Lerp(p.Stage, p.Target, .55f) + new CrimsonPoint(limb * 190, -80),
-                        Clamp(f, p.Target + new CrimsonPoint(limb * 145, 50 + p.Pulse * 20)), full, forecast ? 22 : 18, 18);
+                        new(f.CenterX + limb * 350, f.CenterY - 80),
+                        new(f.CenterX + limb * 365, f.Bottom - 110), full, forecast ? 45 : 35, 24);
                 break;
             case CrimsonTechnique.ChoirHook:
-                var hook = Clamp(f, p.Target + new CrimsonPoint(direction * 130, 100));
-                w.Curve(p.Stage, p.Stage + new CrimsonPoint(direction * 500, -260), hook,
-                    Math.Min(1, full * 1.65f), forecast ? 28 : 24, 24);
+                var hook = Clamp(f, p.Target + new CrimsonPoint(direction * 260, 160));
+                w.Curve(p.Stage, p.Stage + new CrimsonPoint(direction * 1500, -400), hook,
+                    Math.Min(1, full * 1.65f), forecast ? 65 : 52, 48);
                 if (full > .6f)
-                    w.Curve(hook, p.Target + new CrimsonPoint(0, -30), p.Target + new CrimsonPoint(-direction * 150, -40),
-                        (full - .6f) / .4f, forecast ? 24 : 20, 16);
+                    w.Curve(hook, p.Target + new CrimsonPoint(0, -140), p.Target + new CrimsonPoint(-direction * 350, -70),
+                        (full - .6f) / .4f, forecast ? 55 : 44, 32);
                 break;
             case CrimsonTechnique.ChoirRend:
-                for (int cut = 0; cut < 3; cut++)
+                for (int cut = 0; cut < 6; cut++)
                 {
-                    int cell = (p.Phrase * 5 + p.Pulse * 3 + cut * 7) % 15;
-                    var center = new CrimsonPoint(f.Left + 330 + (cell % 5) * (f.Right - f.Left - 660) / 4,
-                        f.Top + 220 + (cell / 5) * (f.Bottom - f.Top - 440) / 2);
-                    float angle = (p.Pulse % 2 == 0 ? .65f : -.8f) + cut * .23f;
-                    var axis = CrimsonPoint.Polar(angle, 245);
-                    w.Rift(center - axis, center + axis, full, forecast ? 26 : 18, 12);
+                    var center = new CrimsonPoint(f.Left + 370 + cut % 3 * (f.Right - f.Left - 740) / 2,
+                        f.Top + 280 + cut / 3 * (f.Bottom - f.Top - 560));
+                    float angle = p.Phrase % 2 == 0 ? .65f : -.65f;
+                    var axis = CrimsonPoint.Polar(angle, 455);
+                    w.Rift(center - axis, center + axis, full, forecast ? 43 : 32, 24);
                 }
                 break;
             case CrimsonTechnique.VesperaOrbit:
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 12; i++)
                 {
-                    float a = i * MathF.PI * .5f + p.Pulse * .29f;
-                    if (forecast) w.Arc(p.Target, 290, a, 1.25f, 24, 10);
-                    else w.Add(p.Target + CrimsonPoint.Polar(a + Math.Max(0, t - .13f) * 1.25f, 290),
-                        p.Target + CrimsonPoint.Polar(a + t * 1.25f, 290), 22);
+                    float a = i * MathF.Tau / 12 + p.Pulse * .12f;
+                    if (forecast) w.Arc(p.Target, 470, a, .42f, 42, 12);
+                    else w.Add(p.Target + CrimsonPoint.Polar(a + Math.Max(0, t - .18f) * .42f, 470),
+                        p.Target + CrimsonPoint.Polar(a + t * .42f, 470), 34);
                 }
                 break;
             case CrimsonTechnique.VesperaPetals:
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 12; i++)
                 {
-                    float a = i * MathF.PI / 3 + p.Pulse * .21f;
-                    var begin = p.Target + CrimsonPoint.Polar(a, 340);
-                    var end = p.Target + CrimsonPoint.Polar(a + .75f, 105);
-                    var control = p.Target + CrimsonPoint.Polar(a + .6f, 420);
-                    if (forecast) w.Curve(begin, control, end, 1, 30, 12);
-                    else w.Add(Bezier(begin, control, end, Math.Max(0, t - .12f)), Bezier(begin, control, end, t), 18);
+                    float a = i * MathF.PI / 6 + p.Pulse * .10f;
+                    var center = new CrimsonPoint(f.CenterX, f.CenterY);
+                    var begin = center + new CrimsonPoint(MathF.Cos(a) * 1170, MathF.Sin(a) * 470);
+                    var end = center + CrimsonPoint.Polar(a + .75f, 170);
+                    var control = center + new CrimsonPoint(MathF.Cos(a + .6f) * 1250, MathF.Sin(a + .6f) * 500);
+                    if (forecast) w.Curve(begin, control, end, 1, 55, 16);
+                    else w.Add(Bezier(begin, control, end, Math.Max(0, t - .12f)), Bezier(begin, control, end, t), 30);
                 }
                 break;
         }
         return w.Count;
     }
+    internal static float Strike(float t) => t < .28f ? .58f * (1 - MathF.Pow(1 - t / .28f, 3))
+        : t < .42f ? .58f + .04f * (t - .28f) / .14f
+        : .62f + .38f * MathF.Pow((t - .42f) / .58f, 2);
     internal static bool Intersects(in CrimsonStroke s, float x, float y, float width, float height)
     {
         var a = new CrimsonPoint(x, y); var b = new CrimsonPoint(x + width, y);

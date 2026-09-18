@@ -11,16 +11,16 @@ internal sealed record CrimsonRhythmPhrase(int Start, int End, CrimsonRhythmKind
 internal static class CrimsonRhythm
 {
     internal const int LookAheadTicks = 30;
-    internal const int MinimumWarningTicks = 40;
+    internal const int MinimumWarningTicks = 28;
     internal const int MaximumWarningTicks = 180;
-    internal const int MaximumHits = 5;
+    internal const int MaximumHits = 6;
     internal const int MaximumLanes = 40;
-    private static readonly int[] groove = { 0, 2, 4 };
-    private static readonly int[] syncopated = { 0, 3, 4 };
-    private static readonly int[] delayed = { 0, 2, 5 };
-    private static readonly int[] flam = { 0, 1, 4 };
-    private static readonly int[] fill = { 0, 1, 3, 5, 6 };
-    private static readonly int[] roll = { 0, 1, 2, 3 };
+    private static readonly int[] groove = { 0, 2, 4, 6, 8 };
+    private static readonly int[] syncopated = { 0, 2, 5, 6, 8 };
+    private static readonly int[] delayed = { 0, 3, 4, 6, 8 };
+    private static readonly int[] flam = { 0, 1, 4, 6, 8 };
+    private static readonly int[] fill = { 0, 2, 3, 5, 6, 8 };
+    private static readonly int[] roll = { 0, 1, 2, 4, 6, 8 };
 
     internal static CrimsonRhythmPhrase Create(CrimsonScore score, int earliest, int serial, bool final)
     {
@@ -37,11 +37,13 @@ internal static class CrimsonRhythm
         var hits = new CrimsonRhythmHit[pattern.Length];
         for (int i = 0; i < pattern.Length; i++)
         {
-            int warning = At(pattern[i]), fire = At(pattern[i] + 8);
-            int next = i + 1 == pattern.Length ? At(16) : At(pattern[i + 1] + 8);
+            int warning = At(pattern[i]), fire = At(pattern[i] + 6);
+            int next = i + 1 == pattern.Length ? At(16) : At(pattern[i + 1] + 6);
             if (fire - warning < MinimumWarningTicks || fire - warning > MaximumWarningTicks || next - fire < 4)
                 throw new InvalidOperationException("crimson.rhythm_unreadable_score");
-            int live = Math.Min(5, next - fire - 2);
+            // Dense accents remain separate damage windows. Eighth notes have
+            // enough body to read; sixteenth flams never overlap another field.
+            int live = Math.Min(10, next - fire - 1);
             hits[i] = new(warning, fire, fire + live, (byte)(i == pattern.Length - 1 ? 2 : i == 0 ? 1 : 0));
         }
         return new(At(0), At(16), kind, Array.AsReadOnly(hits));

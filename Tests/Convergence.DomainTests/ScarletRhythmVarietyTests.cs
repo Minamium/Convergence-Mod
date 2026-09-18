@@ -18,7 +18,7 @@ internal static partial class Program
             var phrase = CrimsonRhythm.Create(score, 600, serial, false);
             AssertEqual(CrimsonRhythmKind.Groove, phrase.Kind, "variety does not erase Fill/Roll identity");
             patterns.Add(string.Join(",", phrase.Hits));
-            foreach (var hit in phrase.Hits) AssertEqual(56, hit.Fire - hit.Warning, "same musical figure answers two beats later");
+            foreach (var hit in phrase.Hits) AssertEqual(42, hit.Fire - hit.Warning, "same figure answers one and a half beats later");
         }
         AssertEqual(4, patterns.Count, "not a single repeated metronome pattern");
     }

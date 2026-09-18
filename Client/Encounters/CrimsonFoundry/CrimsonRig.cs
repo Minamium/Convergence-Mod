@@ -151,13 +151,13 @@ internal static class CrimsonRig
         {
             float drift = (age * .022f + i * .618034f) % 1;
             float angle = i * 2.399963f + MathF.Sin(i * 2.1f) * .2f;
-            float reach = (source == 3 ? 35 : 135) * (1 - drift * charge) + recoil * 55;
+            float reach = (source == 3 ? 65 : 210) * (1 - drift * charge) + recoil * 85;
             Vector2 offset = new Vector2(reach, 0).RotatedBy(angle);
-            float brightness = MathF.Sin(drift * MathF.PI) * charge * .38f;
+            float brightness = MathF.Sin(drift * MathF.PI) * charge * .52f;
             batch.Draw(bloom, center + offset - Main.screenPosition, null, hue * brightness, angle,
                 bloom.Size() * .5f, new Vector2(17 + charge * 22, 2.8f) / bloom.Width, SpriteEffects.None, 0);
         }
-        float radius = source == 3 ? 22 : 56;
+        float radius = source == 3 ? 35 : 82;
         batch.Draw(bloom, center - Main.screenPosition, null, hue * (charge * pulse * .36f + recoil * .25f), 0,
             bloom.Size() * .5f, (radius + charge * 25 + recoil * 42) * 2 / bloom.Width, SpriteEffects.None, 0);
         if (recoil > .02f)
