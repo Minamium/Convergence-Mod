@@ -1,0 +1,46 @@
+{
+  "date": "2026-09-18",
+  "feature": "Scarlet Invocation",
+  "version": "0.3.19",
+  "protocol": 49,
+  "base": "c80123a18d55be9ad12cd32c41348bc13350668b",
+  "integration": "Pulled main fast-forward before editing; latest Oboro branch already merged through PR45/46. Retained four pre-existing generated English locale edits, without staging them.",
+  "observed_playtest": {
+    "version": "0.3.17",
+    "local_session": "2026-09-17 23:41–23:49 JST",
+    "topology": "solo Host & Play",
+    "errors_fatal": 0,
+    "missing_background_warnings": 0,
+    "audio_reanchor_events": 0,
+    "fights": [
+      {"fight": "81622c32-b7cb-48fa-9b3f-c384eace2198", "members": 1, "combat_seconds": 200.60, "phrases_admitted": 73, "stack_resolved": 5, "spread_resolved": 5, "peak_five_second_capped_hp_dps": 116291, "victory_age": 13371, "cleanup_age": 13521},
+      {"fight": "36580486-cccd-43b7-af5d-fec146ee4dfd", "members": 1, "combat_seconds": 129.9833, "phrases_admitted": 49, "stack_resolved": 3, "spread_resolved": 3, "peak_five_second_capped_hp_dps": 131729, "victory_age": 8631, "cleanup_age": 8781}
+    ],
+    "limits": "Initiated phrase counts include the last phrase interrupted by victory. Stack source budget360 is not actual HP loss or proof of failure; rehearsal caps hits at1. No player-by-player damage trace or measured audio-device latency. No claim of multiplayer or full balance acceptance."
+  },
+  "owner_feedback": "Circles and cathedral approved; small/local and sparse attacks, slow anticipation, cheap sounds and negligible shake rejected.",
+  "rhythm": {
+    "source": "Unchanged packaged Score.json onset-derived beat map and original GracefulOrdeal.ogg",
+    "old": "3-note grooves/5-note fills,2-beat call-response, usually5tick live;14tick impact and9tick warning audio cutoff",
+    "new": "5-note grooves/6-note fills and rolls,1.5-beat call-response, up to10tick live, strictly ends before next impact",
+    "score_scan": {"method": "3190 notes from every internal four-beat window using straight/fill patterns; excludes loop seam", "warning_ticks_min": 30, "warning_ticks_max": 48, "warning_ticks_mean": 40.5837, "adjacent_or_end_gap_ticks_min": 5, "adjacent_or_end_gap_ticks_max": 17, "live_ticks_min": 4, "live_ticks_max": 10},
+    "limitations": "Authored variation over detected onsets, not manually verified drum transcription. Absolute loop offsets are domain-tested; audible synchronization remains a playtest item."
+  },
+  "checks": {
+    "focused_domain": "passed33 Scarlet cases, including forecast coverage, six-note bounds, field reach, complete-body refuges, continuity, codecs and loop boundaries",
+    "native_build": "passed,0errors/4existing CS8632 warnings;22locales and shader exports valid",
+    "offline_graphics": "Linked production geometry/material/rig and actual FNA D3D11 exports; forecasts/strike frames for11techniques. Controlled Terraria/primitive-upload facade, not game/MP/FPS evidence.",
+    "audio": "5original WAVs, peak−1.72dBFS,0clipped samples; dense unnormalized phrase audition peak−2.89dBFS; no agent listening claim",
+    "repository_domain_codec": "passed: repository/catalog/YAML,291domain cases, compiled protocol49 334round-trips/54malformed rejections,29presentation wiring checks; packaged loader/Hurt/teardown checks passed",
+    "runtime": "not_run: reload, audible mix/sync, dodge readability, camera options, multiplayer and frame time"
+  },
+  "build": {
+    "record_relative": ".local/builds/20260918T131113119328Z/record.json",
+    "source_commit": "c80123a18d55be9ad12cd32c41348bc13350668b",
+    "source_dirty_sha256": "515c5eefca41727ec36c218cdacc624fbf2cf62d35db87012965711a8a7d5a68",
+    "package_sha256": "e33856ff41fc8f87841e5fbd9e15ec1b1285270d10b5dcb82d9926e299daa230",
+    "environment": "tModLoader2026.07.3.0 / Calamity2.2.4 / Luminance1.0.14 / .NET8.0.424",
+    "installation": "Installed into normal Mods after process guard found no game/server, exact package hash verified. Previous0.3.17 hash45be69f776669cc779a6cf78a4174696fdcd4178c0c94f34ae62e9a4936802a9 retained under this build record's install-backup. No GUI/gameplay launched; no save or enabled-Mod list changed."
+  },
+  "preserved": ["approved chorus circles and cathedral", "licensed music and fade/loop", "source damage1 rehearsal and HP", "12phrase gates", "Ready/identity/authority/exact-Fight cleanup", "Doll, Ghost Samurai and latest Oboro changes"]
+}

@@ -17,13 +17,13 @@ internal static partial class Program
         {
             var phrase = CrimsonRhythm.Create(score, earliest, serial, serial % 2 == 1);
             AssertEqual(true, phrase.Start >= earliest, "never start a late warning");
-            AssertEqual(true, phrase.Hits.Count is >= 3 and <= 5, "bounded phrase");
+            AssertEqual(true, phrase.Hits.Count is >= 5 and <= CrimsonRhythm.MaximumHits, "bounded denser phrase");
             if (phrase.Kind == CrimsonRhythmKind.Fill) fills++;
             for (int i = 0; i < phrase.Hits.Count; i++)
             {
                 var hit = phrase.Hits[i];
                 AssertEqual(true, hit.Fire - hit.Warning >= CrimsonRhythm.MinimumWarningTicks, "fast attacks retain full warning");
-                AssertEqual(true, hit.End - hit.Fire is >= 2 and <= 5, "short native collision pulse");
+                AssertEqual(true, hit.End - hit.Fire is >= 3 and <= 10, "readable but bounded native collision pulse");
                 if (i > 0)
                 {
                     AssertEqual(true, hit.Warning > phrase.Hits[i - 1].Warning, "ordered call");
@@ -45,11 +45,11 @@ internal static partial class Program
             IntroTicks = 120, BeatTicks = new[] { 600, 628, 656, 684, 712, 740, 768, 796 },
             Energy = new[] { .9f, .9f, .9f, .9f, .9f, .9f, .9f, .9f } };
         var phrase = CrimsonRhythm.Create(score, 600, 3, false);
-        int[] offsets = { 0, 7, 21, 35, 42 };
+        int[] offsets = { 0, 14, 21, 35, 42, 56 };
         for (int i = 0; i < offsets.Length; i++)
         {
             AssertEqual(600 + offsets[i], phrase.Hits[i].Warning, "fill forecast rhythm");
-            AssertEqual(656 + offsets[i], phrase.Hits[i].Fire, "same rhythm returned after two beats");
+            AssertEqual(642 + offsets[i], phrase.Hits[i].Fire, "same rhythm returned after one and a half beats");
         }
         AssertEqual(714 - 2, phrase.End, "four-beat phrase");
     }
@@ -76,7 +76,7 @@ internal static partial class Program
         for (int cue = 0; cue < 100; cue++) for (int phase = 0; phase < 4; phase++)
         {
             float low = float.NegativeInfinity, high = float.PositiveInfinity;
-            for (int step = 0; step < CrimsonRhythm.MaximumHits; step++)
+            for (int step = 0; step < 5; step++) // Retained legacy beam descriptors, not the new physical phrase.
             {
                 var b = CrimsonBarrageGeometry.Build(field, cue, phase, phase == 3, (step - 2) * (phase == 3 ? 20 : 28));
                 low = Math.Max(low, b.SafeOffset - b.SafeWidth * .5f);

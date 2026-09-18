@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-15
+last_reviewed: 2026-09-18
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -97,3 +97,7 @@ The owner subsequently requests latest Scarlet v2 → main → Build/Reload. Int
 ## Scarlet visibility and material revision — 2026-09-17 / 0.3.16 → 0.3.17
 
 Owner reports weak presentation and visible apparitions but an invisible performer; supplies the missing cathedral PNG and authorizes graphics rework while preserving the basics. Latest solo Host & Play completes all four action cycles, Victory and cleanup; no ERROR/FATAL entries, but the missing-background warning is present. A ceiling perch placed the56px performer about990px above a grounded player. Bring that shared, invulnerable pre-Final perch near the active focus, preserve small character pixels, add the exact supplied painting and recognize packed `.rawimg`. Rework physical-stroke forecast/live separation, flowing fibre materials, per-source pressure and bounded cloth/limb recoil; retain score/HP/damage-one rehearsal and all collision geometry. [Evidence](../evidence/2026-09-17-scarlet-visual-revision.json) separates the old playtest from the new offline GPU/build checks; visual acceptance, zoom/MP and performance remain owner checks.
+
+## Scarlet rhythmic onslaught — 2026-09-18 / 0.3.17 → 0.3.19
+
+Owner approves chorus circles/background but rejects small sparse attacks, slow melee warnings, cheap sounds and negligible shake. Two solo victories/cleanup are logged without ERROR/FATAL. Pull merged Oboro main first; preserve praised art, HP/damage-one rehearsal and cycle gates. Increase beat-derived phrases to5/6notes, shorten calls to1.5beats, expand physical coverage with refuges, add sharper connected extension, original species SFX with natural tails and stronger bounded recoil. [Evidence](../evidence/2026-09-18-scarlet-onslaught.json) records logs, score limitations, geometry/GPU/audio checks and package identity. Actual mix/fairness/camera/MP acceptance remains not_run; no claim that every drum transient was transcribed.

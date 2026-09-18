@@ -23,11 +23,11 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.18 / protocol48**, built on the0.3.16 Scarlet v2/main integration. Adds the exact owner-supplied cathedral, a visible near-action56px conductor, separate fine forecasts/flowing physical materials and articulated charge/recoil. The sequential acts,12-phrase gates, damage-one rehearsal, reduced HP and original music are unchanged. Main's Ghost Samurai slash/visibility/Oboro changes and worker-thread texture-teardown repairs are retained. Use matching0.3.18 peers; this is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.19 / protocol49**, after pulling the merged Oboro0.3.18 main. Scarlet has denser beat-locked five/six-note phrases, shorter warnings, field-wide physical patterns, dedicated pressure/slash SFX and stronger bounded camera recoil. Approved circles/background, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music are unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Protocol49 requires matching peers because gesture geometry/note bounds changed; packet IDs/layout remain stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
 Oboro now has the approved connected three-hit motion, slower return and fading violet blade/edge echoes. Damage, reach, durations/live windows, hit cap, rarity and drop remain unchanged; angular timing changes and equipped DPS remains unmeasured. The same curve drives the server hit test and visible live blade. This integration retains all existing Scarlet/Doll/Boss changes and protocol48.
 
-**Latest owner playtest:** local0.3.16 completed one-player Ready → all four cycles → Victory → cleanup with no ERROR/FATAL logs, but the owner rejected weak presentation and reported the missing performer. The background was absent in that package. [Revision evidence](evidence/2026-09-17-scarlet-visual-revision.json) distinguishes that playtest from the new graphics and imported image; it is not visual acceptance of0.3.17.
+**Latest owner playtest:** local0.3.17 completed two solo victories (200.60s/129.98s from unlock), both cleaned up; no ERROR/FATAL. The owner approves circles/background but rejects small, sparse attacks, cheap sounds and imperceptible shake. [Onslaught evidence](evidence/2026-09-18-scarlet-onslaught.json) separates those observations from the new implementation and pending playtest. Peak5-second capped-HP DPS was116,291/131,729; not uncapped weapon DPS or multiplayer measurements.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Oboro is a guaranteed single ground drop; further rewards and balance remain provisional. Cleanup and target ownership have automated coverage; actual multiplayer/re-entry and the new weapon/art need owner playtesting.
@@ -37,6 +37,8 @@ Oboro now has the approved connected three-hit motion, slower return and fading 
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.19 Scarlet onslaught:** [evidence](evidence/2026-09-18-scarlet-onslaught.json) records timing/geometry/codec boundaries, native packaging and linked-source offline render review. The new audio has an unclipped dense-phrase audition; it was not subjectively heard by the agent. Actual feel/fairness, matching-peer synchronization, audible rhythm/mix, camera strength and performance remain owner-owned / not_run.
 
 - **Oboro motion and echoes:** [0.3.16 evidence](evidence/2026-09-17-oboro-motion.json) records16 passing focused cases and the isolated native build (0 errors /4 existing warnings), with final repository results in the same record. Linked-production checks cover angular continuity/acceleration, the existing swept-collision budget, exact live blade alignment, bounded fade and late-snapshot/death/teleport/connection cleanup. Actual SP/MP motion, rapid aim changes, stopped/continuous combos, bright/dark backgrounds, Reduced Effects and equipped DPS remain user-owned / not_run. The owner approved PR #45 integration and installation. Combined0.3.18/protocol48 passed288 domain cases and native compilation; integrated main was built into the normal profile on September18. Exact-package Oboro registration, cleanup/regen/codec checks pass; evidence records the installed hash and preserved local edits.
 
@@ -66,9 +68,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-The normal profile has the approved main0.3.18 installed and Convergence enabled. Reload Mods without another Build + Reload. Check repeated1-2-3-1, stop/restart, aim reversal, dash and weapon switching; compare a matching remote player and Reduced Effects.
-
-Load0.3.18 and check Scarlet's small performer from a grounded camera, the supplied cathedral, clear forecast/live separation and connected cloth/limb recoil. Check one contrasting zoom/UI scale and Reduced Effects. A remote matching client remains necessary for multiplayer visibility; compilation/offline frames do not close it.
+Use matching0.3.19 and Reload Mods without another build. Play Scarlet's full repertoire: larger dangers/readable refuges, denser accents, collision matching forecasts, dedicated SFX tails and bounded shake. Compare Reduced Effects/shake-off; remote synchronization and audible score alignment still need actual matching-peer play. Package installation identity is recorded in the new evidence rather than inferred from compilation.
 
 Scarlet Covenant remote visibility/flying/landing, repeat summon/wipe, Ghost Samurai slash/body/Oboro and earlier Doll companion/final-check/audio checks remain separate owner follow-ups. Do not repeat unchanged whole-fight matrices for this visual edit. Workshop/GitHub releases remain separate from ordinary main integration. [Contributing](../CONTRIBUTING.md#shared-development) owns integration/build destinations.
 

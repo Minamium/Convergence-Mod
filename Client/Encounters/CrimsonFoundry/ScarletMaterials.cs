@@ -79,6 +79,8 @@ internal static class ScarletMaterials
     private static readonly List<Vector2> points = new(128);
     private static readonly List<float> radii = new(128);
     private static readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
+    private static readonly VertexPositionColorTexture[] cap = new VertexPositionColorTexture[48];
+    private static bool physicalPass;
     private static PrimitiveSettings? settings;
     private static ManagedShader? ribbon;
     internal static Color Palette(int source) => source switch
@@ -90,6 +92,7 @@ internal static class ScarletMaterials
     private static void Configure(int source, float clock, float alpha, bool warning, bool rift, float accent,
         bool physical = false, float charge = 0, float release = -1)
     {
+        physicalPass = physical;
         ribbon ??= ShaderManager.GetShader("Convergence.ScarletRibbon");
         settings ??= new PrimitiveSettings(Width, _ => Color.White, Smoothen: false, Shader: ribbon);
         ribbon.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
@@ -170,6 +173,24 @@ internal static class ScarletMaterials
         shader.TrySetParameter("capAxis", capAxis);
         shader.TrySetParameter("roundShape", 1f);
         shader.TrySetParameter("uWorldViewProjection", WorldMatrix);
+        if (physicalPass && capAxis.LengthSquared() > .1f)
+        {
+            // Trim real geometry, not a conditional fragment discard: on the
+            // pinned backend an early-return forecast could retain a full disk.
+            float angle = MathF.Atan2(capAxis.Y, capAxis.X) - MathHelper.PiOver2;
+            Vector2 at = center - Main.screenPosition;
+            for (int i = 0; i < 16; i++)
+            {
+                Vector2 a = new Vector2(1, 0).RotatedBy(angle + i * MathHelper.Pi / 16);
+                Vector2 b = new Vector2(1, 0).RotatedBy(angle + (i + 1) * MathHelper.Pi / 16);
+                cap[i * 3] = new(new(at, 0), Color.White, new(.5f));
+                cap[i * 3 + 1] = new(new(at + a * radius, 0), Color.White, a * .5f + new Vector2(.5f));
+                cap[i * 3 + 2] = new(new(at + b * radius, 0), Color.White, b * .5f + new Vector2(.5f));
+            }
+            shader.Apply("CapPass");
+            Main.instance.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, cap, 0, 16);
+            return;
+        }
         Quad(center - Main.screenPosition - new Vector2(radius), new Vector2(radius * 2));
         shader.Apply("CapPass");
         Main.instance.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);

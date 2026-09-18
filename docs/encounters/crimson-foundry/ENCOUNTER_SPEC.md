@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-18
 source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -60,27 +60,27 @@ Vespera-only or apparitions-only kills cannot clear Final. An observed all-playe
 
 | Performer | Techniques and body identity |
 |---|---|
-| Ember Crown | `CrownRain`: falling thorn shards; `CrownCinders`: three arcing cinders/local bursts; `CrownCrash`: accepted body path and impact rings |
-| Sable Mantle | `MantleFan`: unfolding fan sweep; `MantleRush`: body traversal on musical impacts; `MantleScissors`: paired curving cloth blades |
-| Thorn Choir | `ChoirThrust`: three extending tendrils; `ChoirHook`: hooked return curve; `ChoirRend`: successive finite spatial tears, three cuts per pulse |
-| Vespera, Final | `VesperaOrbit`: orbiting solid projectiles; `VesperaPetals`: curving petal convergence |
+| Ember Crown / Act I | `CrownRain`:26-column falling thorns with a fixed three-column refuge per phrase; `CrownCinders`:12 large arcing cinder bursts across two field-wide rows; `CrownCrash`:targeted body traversal, larger contact and expanding impact rings |
+| Sable Mantle / Act II | `MantleFan`:four concentric field-reaching fan sweeps; `MantleRush`:larger targeted body traversal; `MantleScissors`:four long curved cloth blades in upper/lower pairs, with central and inter-blade passages |
+| Thorn Choir / Act III | `ChoirThrust`:seven extending tendrils spreading from overhead across the floor; `ChoirHook`:large targeted hooked return curve; `ChoirRend`:six910px diagonal spatial tears across two rows |
+| Vespera / Final ensemble | `VesperaOrbit`:12 orbiting energy bodies around the accepted target; `VesperaPetals`:12 curved projectiles converging from a field-sized ellipse toward a hollow center. Retained apparitions continue their own decks; defeated sources are skipped |
 
 Each apparition cycles three techniques without adjacent repetition. Final rotates active sources while preserving each source's vocabulary, skipping defeated sources. Targets/staging/paths and all warning/fire/end ticks are frozen when the complete phrase is admitted. NPC motion is projected from the same accepted body trajectory; observers never choose targets. Native hostile projectile geometry, not decorative rope simulation, owns collision. Swept capsules cover fast movement; unused capacity is checked before admitting a full phrase. No generic all-screen beam cooldown is the new attack scheduler.
 
 ## Music: varied calls and responses
 
-The existing licensed Graceful Ordeal audio and measured `Score.json` beat times are unchanged. Actual adjacent beat times are subdivided rather than accumulating a hardcoded7/14-tick interval. Every four-beat phrase uses16 subdivision positions and answers each forecast two beats later.
+The existing licensed Graceful Ordeal audio and onset-derived `Score.json` beat times are unchanged. Actual adjacent beat times are subdivided rather than accumulating a hardcoded7/14-tick interval. Every four-beat phrase uses16 subdivision positions and answers each forecast **one and a half beats later**. Ordinary phrases contain five impacts, fills/rolls six. Broad techniques affect the field; body rush/crash/hook remain targeted contrasts.
 
 | Call | Forecast positions | Impact positions |
 |---|---|---|
-| Straight groove | 0,2,4 | 8,10,12 |
-| Syncopated groove | 0,3,4 | 8,11,12 |
-| Delayed accent | 0,2,5 | 8,10,13 |
-| Flam-like opening | 0,1,4 | 8,9,12 |
-| Uneven fill | 0,1,3,5,6 | 8,9,11,13,14 |
-| Final roll | 0,1,2,3 | 8,9,10,11 |
+| Straight groove | 0,2,4,6,8 | 6,8,10,12,14 |
+| Syncopated groove | 0,2,5,6,8 | 6,8,11,12,14 |
+| Delayed accent | 0,3,4,6,8 | 6,9,10,12,14 |
+| Flam-like opening | 0,1,4,6,8 | 6,7,10,12,14 |
+| Uneven fill | 0,2,3,5,6,8 | 6,8,9,11,12,14 |
+| Final roll | 0,1,2,4,6,8 | 6,7,8,10,12,14 |
 
-High-frequency impacts retain40–180 ticks of individual warning and short bounded live windows. Phrase reservations overlap the previous phrase's scheduling lead without adding an unintended rest every bar. Rhythm/technique/pose/material cue are distinct projections of the same authority timeline. Existing energy cues influence Final rolls; modulo choices are authored variations, **not verified transcription of the actual drum performance**. Listening, latency and gameplay fairness still require owner playtests.
+Timing bounds live in `CrimsonRhythm`; each live window is capped at10ticks and ends before the next impact, so different Final sources do not create simultaneous incompatible damage fields. Phrase reservations overlap scheduling lead without an extra rest every bar. Rhythm/technique/pose/material cues share the authority timeline. Energy cues influence Final rolls; modulo choices are authored variations, **not verified transcription of the actual drum performance**. `CrimsonAudio` starts from the accepted sample position and can reanchor major drift; absence of reanchor logs is not proof of sample-accurate audible output. PhysicalPhrase logs include score start, first fire, warning ticks and last end. Listening, latency and gameplay fairness require owner playtests.
 
 ## Stack and Spread chorus
 
@@ -90,11 +90,15 @@ From Act II, after five physical phrases, alternate a fixed gather marker and pl
 
 The artistic target is materially distinct performers, not more copies of the same beam. The original PNG silhouettes are preserved. `ScarletSurface` uses masked core/upper/lower side regions with per-part pivots; `ScarletRigMotion` provides fractional breathing, asymmetric cloth/limb follow-through, a held loading beat, sharp release and recovery. Crown retains a local heat core, Mantle develops silk sheen, and Choir uses vein/rift treatments. These are masked regions of existing art, not newly hand-painted animation cels or a full skeletal replacement. Vespera remains56px, point-sampled with a restrained silhouette rim. Before Final, her server-owned perch follows the active focus260px above rather than hiding at the field ceiling; Final accepted body paths/vulnerability stay unchanged. No per-client fake hit position is introduced.
 
-Luminance `PrimitiveRenderer` and `ScarletRibbon` render the unchanged accepted physical strokes. Forecasts use a fine spine, delicate footprint edges and sparse moving grains; live strokes have warm scarlet/rose/magenta fibres, a hot core and dark flowing folds. World-length texture coordinates prevent stretching when a limb extends. Rifts retain a dark cavity with hot broken lips, not a generic laser. End caps are outward hemispheres, not bright balls laid over the path. Per-actor converging filaments and local pressure/recoil connect the source to its strike without adding target circles or full-screen strobes. Chorus circles/arrows retain their separate material treatment. Warning/fire/end times, swept collision coverage and musical score are unchanged; visual residue never creates damage.
+Luminance `PrimitiveRenderer` and `ScarletRibbon` render the accepted physical strokes. Forecasts use a fine spine, delicate footprint edges and sparse moving grains; live strokes have warm scarlet/rose/magenta fibres, a hot core and dark flowing folds. World-length coordinates prevent stretching during extension. Rifts retain a dark cavity with hot lips. Physical end caps use actual half-disk geometry rather than an early-return shader discard. Identical future forecasts in a phrase draw only the nearest pending silhouette instead of accumulating opaque copies. Larger converging filaments/pressure connect sources to strikes without target circles or full-screen strobes. Extending blades/tendrils burst out, briefly brake, then bite with one monotone curve for drawing and collision. Chorus circles/arrows and the approved background keep their accepted treatment; residue never causes damage.
 
 Luminance pushdown state machines project Follow/Stage/Windup/Strike/Recover/Manifest/Hidden. Four bounded12-segment Verlet chains per apparition add cosmetic trailing cloth/tendrils; they reset on Fight/phase/teleport and never provide damage coordinates. Luminance manually composed Metaball types provide capped Crown cinders and Choir ink, with exact-Fight/phase ownership, finite lifetime and per-particle-only parallel mutation. Reusable render targets belong to Luminance. Reduced Effects removes optional residue, reduces chains and motion, and preserves attack forecasts/material footprints.
 
 Piecewise easing separates anticipation and recoil. Locally owned Luminance screen shakes are bounded and cancelled on teardown. A Luminance cutscene can gently pan only during the existing protected phase-transition interval; it never extends gameplay or blocks input. `CinematicCamera` and `ScreenShake` are client options. The renderer preserves the caller's actual SpriteBatch parameters, textures/samplers, vertex/index bindings, scissor and graphics state; it does not create or dispose graphics resources on a loader worker. Managed shaders remain library-owned.
+
+### Physical attack audio and recoil
+
+Five original cues under `Assets/Sounds/CrimsonFoundry` separate anticipation, Crown pressure rupture, Mantle air-cut, Choir tearing resonance and Vespera release. `tools/generate_scarlet_sfx.py` reuses project-authored synthesis primitives with transients, low pressure, an inharmonic midrange accent and short stereo reflections; no third-party recording is sampled. Attack masters last0.43–0.48s and finish naturally instead of being cut after14ticks. Bounded voice leases cancel on Fight/phase/world teardown. An unnormalized dense-phrase audition checks overlap without concealing clipping. Chorus and music assets/gains are unchanged. Physical impacts use stronger local-camera impulses, respecting Reduced Effects and shake-off. This is not listening approval.
 
 ### Approved background
 

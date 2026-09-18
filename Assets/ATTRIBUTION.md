@@ -2,6 +2,82 @@
 
 ## Records
 
+### Scarlet Foretell — 2026-09-18
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/Foretell.wav`
+- Asset ID: scarlet-physical-foretell-20260918
+- Asset type: original PCM16 stereo44.1kHz sound
+- Creator: original project-directed synthesis by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: project-authored generator; no external recording or Mod asset sampled
+- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
+- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
+- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
+- Required attribution: retain this provenance and generator
+- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
+
+### Scarlet CrownRupture — 2026-09-18
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/CrownRupture.wav`
+- Asset ID: scarlet-physical-crownrupture-20260918
+- Asset type: original PCM16 stereo44.1kHz sound
+- Creator: original project-directed synthesis by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: project-authored generator; no external recording or Mod asset sampled
+- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
+- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
+- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
+- Required attribution: retain this provenance and generator
+- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
+
+### Scarlet SilkCleave — 2026-09-18
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/SilkCleave.wav`
+- Asset ID: scarlet-physical-silkcleave-20260918
+- Asset type: original PCM16 stereo44.1kHz sound
+- Creator: original project-directed synthesis by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: project-authored generator; no external recording or Mod asset sampled
+- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
+- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
+- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
+- Required attribution: retain this provenance and generator
+- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
+
+### Scarlet ThornRend — 2026-09-18
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ThornRend.wav`
+- Asset ID: scarlet-physical-thornrend-20260918
+- Asset type: original PCM16 stereo44.1kHz sound
+- Creator: original project-directed synthesis by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: project-authored generator; no external recording or Mod asset sampled
+- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
+- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
+- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
+- Required attribution: retain this provenance and generator
+- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
+
+### Scarlet ScarletRelease — 2026-09-18
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletRelease.wav`
+- Asset ID: scarlet-physical-scarletrelease-20260918
+- Asset type: original PCM16 stereo44.1kHz sound
+- Creator: original project-directed synthesis by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: project-authored generator; no external recording or Mod asset sampled
+- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
+- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
+- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
+- Required attribution: retain this provenance and generator
+- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
+
+
 ### Scarlet Sanctum owner-supplied background — 2026-09-17
 
 - Runtime file: `Assets/Textures/Backgrounds/ScarletSanctum.png`
@@ -3299,6 +3375,16 @@ Creator: Codex under the repository owner's direction; original Convergence DSP 
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollSummon.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollThread.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`.
+
+### Scarlet physical-phrase sounds — 2026-09-18
+
+- Original Convergence synthesis, not sampled from a recording or another Mod. Generated by `tools/generate_scarlet_sfx.py`, reusing project-authored `generate_beam_sfx.py` pressure/noise/resonator functions. No new third-party license; these original derivatives follow the project's asset terms. Existing licensed BGM and chorus audio are unchanged.
+- PCM16 stereo44.1kHz. Species-specific transients, air-cut pressure, inharmonic midrange resonance, soft saturation, decorrelated short reflections, DC correction and bounded fades. Reproduce with explicit output/preview paths; masters0.32–0.48s, peak−1.72dBFS. Audition/evidence are local, not standalone music distribution.
+- Runtime asset: `Assets/Sounds/CrimsonFoundry/Foretell.wav`.
+- Runtime asset: `Assets/Sounds/CrimsonFoundry/CrownRupture.wav`.
+- Runtime asset: `Assets/Sounds/CrimsonFoundry/SilkCleave.wav`.
+- Runtime asset: `Assets/Sounds/CrimsonFoundry/ThornRend.wav`.
+- Runtime asset: `Assets/Sounds/CrimsonFoundry/ScarletRelease.wav`.
 
 ### Scarlet presentation v2 — 2026-09-17 / 0.3.15
 
