@@ -113,9 +113,39 @@
     "Assets/AutoloadedEffects/Shaders/SamuraiMist.fxc": "fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065"
   },
   "integration": {
-    "status": "not_merged",
-    "normal_profile": "approved main 0.3.18 retained",
-    "approval": "current PR admin merge/install approval pending"
+    "status": "merged_and_installed",
+    "pull_request": "https://github.com/Minamium/Convergence-Mod/pull/51",
+    "approval": "administrator explicitly requested integration and normal-profile installation",
+    "source_commit": "1c5902a4283a2ecb0060fe5e86fc36571392e0ef",
+    "source_branch": "main",
+    "normal_profile": "0.3.22 / protocol51 built from integrated canonical main",
+    "build_record": ".local/builds/20260919T092506951580Z/record.json",
+    "source_sha256": "24c2b8e0ca2b5d5d644896b5d65db53ee1b76ac4d24de6721bdc66ac711acf57",
+    "source_changed_during_build": false,
+    "artifact": {
+      "bytes": 90864373,
+      "sha256": "1850f03f1b2c1f40c92ab122abff6fbc98f8fcbc0e19dc523397233af3b07ba1"
+    },
+    "build": {
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "locales_parsed": 22,
+      "shader_exports": "passed",
+      "packaged_admission": "1-4 participants; solo enabled"
+    },
+    "installed_package_checks": {
+      "status": "passed",
+      "scope": "type validation, saved summon identity, exact-Fight/repeated teardown, 202 easing samples, 1200 Verlet ticks, bounded mist simulation and actual FNA state accessors",
+      "dependency_resolution": "Initial probe expected adjacent Luminance and could not find the Workshop dependency. Retried using byte-identical local verification copies of the installed package and installed Workshop Luminance1.0.14; hashes verified. The normal Mods directory was not given a duplicate dependency."
+    },
+    "preservation": {
+      "previous_package_sha256": "3d02624902b6352447c72d3f4e211be149ea32ee68ad1caea14f18ac5e27ecd4",
+      "previous_package_backup": "hash verified against pre-install package",
+      "local_edits": "Four pre-existing localization edits and one untracked workstation record retained byte-for-byte; copies kept locally. These local edits were not committed.",
+      "source_note": "Build manifest records the original local edits; source is integrated main plus those preserved localization files.",
+      "source_junction": "unchanged; normal ModSources resolves to canonical main"
+    },
+    "next_action": "User: Reload Mods; no repeat compilation required. Actual game load/rendering and multiplayer remain not_run."
   },
   "initial_isolated_build": {
     "version": "0.3.19",

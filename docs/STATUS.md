@@ -38,7 +38,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Verification state
 
-- **Ghost Samurai articulated rig:** [articulation evidence](evidence/2026-09-18-ghost-samurai-rig.json) records native compilation, motion/history checks, installed Luminance curve/Verlet/mist probes and FNA batch-state accessor validation. Offline FNA D3D11 output includes84 bright/dark rig frames from production transforms and6 compiled-material diagnostic frames, with the direct layouts/continuity inspected. No game/server was launched. In-game GPU composition, SP/MP visibility, transitions, late snapshots, ReducedEffects and high-FPS/frame-time acceptance remain user-owned / not_run. New textures/materials are attributed; Ghost Samurai gameplay and incoming main protocol51 are unchanged.
+- **Ghost Samurai articulated rig:** [articulation evidence](evidence/2026-09-18-ghost-samurai-rig.json) records native compilation, motion/history checks, installed Luminance curve/Verlet/mist probes and FNA batch-state accessor validation. Offline FNA D3D11 output includes84 bright/dark rig frames from production transforms and6 compiled-material diagnostic frames, with the direct layouts/continuity inspected. The administrator approved PR #51; integrated main `1c5902a` was built into the normal playtest profile as0.3.22/protocol51 on September19. The installed package passed type, summon identity, lifecycle and Luminance probes; existing local edits and the prior package were preserved. No game/server was launched. In-game GPU composition, SP/MP visibility, transitions, late snapshots, ReducedEffects and high-FPS/frame-time acceptance remain user-owned / not_run. New textures/materials are attributed; Ghost Samurai gameplay and incoming main protocol51 are unchanged.
 
 - **0.3.21 Scarlet flow:** [evidence](evidence/2026-09-19-scarlet-flow.json) records the installed-library endpoint defect, beat/lifetime and footprint checks, actual shader-export frame sequence and package identity. In-game overlap readability, remote synchronization, audible phase preference and performance remain owner-owned / not_run.
 
@@ -74,7 +74,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-For0.3.22, finish this feature PR review and obtain current-PR administrator authorization before merging/installing. The normal local profile is untouched by this task. After installation, Reload Mods and check Idle, movement, each attack/phase transition, connected blade poses and the Victory-only96-tick ending. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. Offline checks are not a game playtest.
+For the installed0.3.22, Reload Mods and check Idle, movement, each attack/phase transition, connected blade poses and the Victory-only96-tick ending. No repeat Build + Reload is required. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. Offline checks are not a game playtest.
 
 Use matching0.3.21 after installation is confirmed; no repeated compilation is needed. Check reversed beat roles, full-height ActI forecasts and flowing rain, larger energy bodies and overlapping aftermath/next forecast. Actual dodge readability, remote synchronization, audible preference and frame time remain unmeasured. The evidence links the local deployment record rather than inferring installation from compilation.
 
