@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-19",
+  "version": "0.3.24",
+  "protocol": 52,
+  "branch": "feature/oboro-held-projectile-foundation",
+  "foundation_commit": "d8e82ddb0008148a0303baf7831f83412e3870de",
+  "scope": "Requested per-step definitions and continuous server-owned timer progression; detailed motion polish deferred. Base damage, drop, marks and buffs retained; changed durations do not imply unchanged DPS.",
+  "environment_reference": "docs/evidence/2026-09-19-oboro-held.json",
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260919T145341880441Z/record.json",
+    "source_sha256": "02616c5fdaca7d54dba3a0d812c6b6b3cc78f21c745e0e47d7800fe283c9232b",
+    "source_changed_during_build": false,
+    "package_sha256": "8af58ab5ef4205d606b818658cb4ec9bde6fa91ec72a8ca2261e8c30447158c2",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales": 22,
+    "shader_exports": "passed",
+    "output": "isolated feature profile; normal installed0.3.22 unchanged"
+  },
+  "checks": {
+    "focused_domain": {
+      "status": "passed",
+      "cases": 20,
+      "scope": "four exact 60-frame loops, no overlapping start, release on every frame of all steps, new sequence reset, expired input, step-boundary speed changes, requested definitions, shared collision/visual curve, bounded echo lifetime, marks/DoT and input codec"
+    },
+    "exact_package": {
+      "status": "passed",
+      "scope": "eight loader types and saved ID; harmless holdout defaults, draw layer, full generation, server rejection of owner identity, duplicate/slot/connection cleanup; unchanged NPC regen and compiled shared-buffer/truncation codecs"
+    },
+    "repository": {
+      "status": "passed",
+      "domain_cases": 306,
+      "codec_round_trips": 334,
+      "codec_malformed_rejections": 54,
+      "catalog_policy_yaml": "passed",
+      "command": "python .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog --with-domain --with-codec"
+    },
+    "gameplay": {
+      "status": "not_run",
+      "owner": "user",
+      "remaining": [
+        "SP held1-2-3 loop, release during each step and restart at1",
+        "two matching clients: continued input, release, late join and reconnect",
+        "focus/UI blocking, weapon switch, control loss and death cleanup",
+        "live blade/arm/echo alignment with re-aiming and changed attack speed"
+      ]
+    }
+  },
+  "integration": {
+    "status": "not_merged",
+    "pull_request": 53,
+    "normal_profile": "unchanged0.3.22",
+    "next": "review current combo data and progression; detailed motion is the next requested slice"
+  }
+}

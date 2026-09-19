@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-19
 source_of_truth_for:
   - architecture.oboro_weapon_authority
 aliases:
@@ -35,3 +35,9 @@ The generated art, keyed sprite cache and sounds are client-only. GPU allocation
 The accepted left-click request now creates one harmless `OboroHeldProj` per connection, retained across combo steps while the weapon is held. `Shoot` suppresses native owner-client spawning. The existing `OboroTiming`/snapshot remains the sole combo clock and `OboroCombat` remains the sole hit path. The holdout reads combo index, timer and duration each update; its native damage and tile-cut paths are disabled. Packet IDs/layout and server hit hooks do not change.
 
 Projectile ExtraAI carries the full connection generation. A client waits for matching weapon state before drawing; the server consumes but does not trust a client-supplied generation. The player cache checks the exact ModProjectile instance as well as generation/active state, rejecting duplicates and native slot reuse. Weapon switch, loss of control, death and disconnect release it; native world teardown releases projectile-local presentation. The client-only per-entity `OboroHeldVisuals` owns blade/arm/echo updates. It draws in the `overPlayers` projectile layer without locking item timers or also using `player.heldProj`, so autoReuse can still request the next accepted step. The old world renderer only supplies the idle fallback before a holdout is ready.
+
+## Continuous combo progression — 2026-09-19
+
+The requested follow-up moves held-input step transitions into the existing authority clock: `Swing` starts step one only when idle; `Hold` renews the input lease and next-step aim; `Release` ends that lease. A held step ends directly at the next step's age zero, with a new serial, captured item potency, fixed aim/facing and empty hit set. Release completes only the current step. A new sequence always starts at step one, superseding the old idle-gap combo reset. Native autoReuse may request another sequence but cannot advance or overlap a running step.
+
+The client sends `Hold` every six ticks while the eligible left button is down and one `Release` on its falling edge. Authority expires a lease after thirty ticks without refresh; timeout never interrupts the current cut. Focus/UI blocking removes input eligibility, and weapon switch, control loss, death/disconnect clear the same authority state. Hold/release use the existing generation/nonce validation. Action values0/1/2 remain unchanged and new values3/4 use the same bounded request layout; protocol52 requires matching peers. No client supplies combo index, duration or hit results. Attack speed and new aim are sampled only at accepted step boundaries.

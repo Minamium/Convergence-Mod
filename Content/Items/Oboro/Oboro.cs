@@ -14,7 +14,7 @@ public sealed class Oboro : ModItem
     {
         Item.width = Item.height = 56; Item.damage = OboroRules.BaseDamage;
         Item.DamageType = CalamityTrueMelee.Damage; Item.knockBack = 9;
-        Item.useTime = Item.useAnimation = OboroComboSettings.For(0).BaseTicks;
+        Item.useTime = Item.useAnimation = OboroComboSettings.For(0).TotalFrames;
         // Shoot is only the input hook. The vanilla item sprite/rectangle never swings.
         Item.useStyle = ItemUseStyleID.Shoot; Item.autoReuse = true;
         Item.noMelee = Item.noUseGraphic = true;

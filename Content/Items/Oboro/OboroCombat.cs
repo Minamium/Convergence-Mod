@@ -17,7 +17,7 @@ public sealed partial class OboroPlayer
         if (!OboroRules.Live(step, p)) return;
         float current = aim + facing * OboroRules.Offset(step, p);
         float previous = aim + facing * OboroRules.Offset(step, Math.Max(OboroRules.Windup(step), (age - 1f) / duration));
-        Vector2 center = Player.MountedCenter + aim.ToRotationVector2() * OboroComboSettings.For(step).HoldOffset;
+        Vector2 center = Player.MountedCenter + aim.ToRotationVector2() * OboroComboSettings.For(step).ForwardDistance;
         foreach (NPC target in Main.ActiveNPCs)
         {
             if (!Enemy(target)) continue;

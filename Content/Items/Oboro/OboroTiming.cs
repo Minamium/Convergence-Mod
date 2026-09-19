@@ -1,6 +1,7 @@
 namespace Convergence.Content.Items.Oboro;
 
 internal enum OboroToggle { Rejected, Started, Detonate }
+internal enum OboroAdvance { None, NextStep, Finished }
 
 // Server-owned timing, independent of client animation and Terraria globals.
 internal sealed class OboroTiming
@@ -10,20 +11,35 @@ internal sealed class OboroTiming
     internal int Step { get; private set; }
     internal int Zanshin { get; private set; }
     internal uint Serial { get; private set; }
-    private int nextStep;
-    private ulong endAt, toggleAfter;
+    private bool inputHeld;
+    private ulong heldAt, toggleAfter;
+    internal void SetHeld(bool held, ulong now) { inputHeld = held; heldAt = now; }
+    internal bool HeldAt(ulong now) => inputHeld && now >= heldAt && now - heldAt < OboroRules.HoldTimeoutTicks;
     internal bool TryBegin(ulong now, float speed)
     {
         if (Duration > 0) return false;
-        if (now < endAt || now - endAt > OboroRules.ComboResetTicks) nextStep = 0;
-        Step = nextStep; nextStep = (nextStep + 1) % OboroComboSettings.Count;
-        Duration = OboroRules.Duration(Step, speed); Age = 0; Serial++;
+        Step = 0;
+        BeginStep(speed);
         return true;
     }
-    internal bool AdvanceSwing(ulong now)
+    private void BeginStep(float speed)
     {
-        if (Duration == 0 || ++Age < Duration) return false;
-        Age = Duration = 0; endAt = now; return true;
+        Duration = OboroRules.Duration(Step, speed);
+        Age = 0;
+        Serial++;
+    }
+    // 1 tickにつき1回、サーバーだけが呼ぶ。終了tickに次段のtimer=0へ移る。
+    internal OboroAdvance AdvanceSwing(ulong now, float speed)
+    {
+        if (Duration == 0 || ++Age < Duration) return OboroAdvance.None;
+        if (HeldAt(now))
+        {
+            Step = (Step + 1) % OboroComboSettings.Count;
+            BeginStep(speed);
+            return OboroAdvance.NextStep;
+        }
+        CancelSwing();
+        return OboroAdvance.Finished;
     }
     internal OboroToggle Toggle(ulong now)
     {
@@ -34,7 +50,7 @@ internal sealed class OboroTiming
     }
     internal bool TickZanshin() => Zanshin > 0 && --Zanshin == 0;
     internal void EndZanshin() => Zanshin = 0;
-    internal void CancelSwing() { Age = Duration = nextStep = 0; }
-    internal void Clear() { CancelSwing(); Zanshin = 0; toggleAfter = endAt = 0; }
+    internal void CancelSwing() { Age = Duration = Step = 0; inputHeld = false; heldAt = 0; }
+    internal void Clear() { CancelSwing(); Zanshin = 0; toggleAfter = 0; }
     internal void Initialize() { Clear(); Step = 0; Serial = 0; }
 }

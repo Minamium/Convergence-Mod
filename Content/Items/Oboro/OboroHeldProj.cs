@@ -17,8 +17,9 @@ public sealed class OboroHeldProj : ModProjectile
     internal int attackDuration { get; private set; }
     internal bool Ready { get; private set; }
     internal OboroComboStep Settings => OboroComboSettings.For(comboIndex);
+    internal float Progress => attackDuration == 0 ? 0 : timer / attackDuration;
     internal OboroMotionPhase Phase => attackDuration == 0 ? OboroMotionPhase.Idle
-        : Settings.Phase(timer / attackDuration);
+        : Settings.Phase(Progress);
 
     public override string Texture => "Convergence/Assets/Textures/Items/Oboro/Blade";
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 900;
@@ -63,15 +64,17 @@ public sealed class OboroHeldProj : ModProjectile
         timer = state.VisualAge;
         attackDuration = state.View.Duration;
 
-        // 1. Read accepted combo clock. 2. Resolve settings. 3. Place/rotate the blade.
-        // Client PostAI adds the existing harmless entry/return blend and arm pose.
+        // comboIndex: 0/1/2、timer: 現在段の経過F、attackDuration: 速度補正後の総F。
+        // OboroTimingが押下継続中に0→1→2→0へ進める。ここでは独自にtimer++しない。
+        // 入力を離した場合も現在段の終了までは進み、その後Idleへ戻る。
         Vector2 aim = state.View.Aim.ToRotationVector2();
-        Projectile.Center = player.MountedCenter + aim * Settings.HoldOffset;
+        Projectile.Center = player.MountedCenter + aim * Settings.ForwardDistance;
         Projectile.rotation = state.View.Aim + state.View.Facing * OboroRules.Offset(comboIndex,
-            attackDuration == 0 ? 1 : timer / attackDuration);
+            attackDuration == 0 ? 1 : Progress);
         Projectile.direction = Projectile.spriteDirection = state.View.Facing;
         Projectile.velocity = Vector2.Zero;
-        // Do not pin itemTime/itemAnimation: autoReuse must be able to request the next step.
+        // Do not pin itemTime/itemAnimation: native input can start a new sequence after release.
+        // While swinging, OboroTiming owns step transitions independently of autoReuse.
     }
 
     public override void DrawBehind(int index, List<int> behindNPCsAndTiles, List<int> behindNPCs,

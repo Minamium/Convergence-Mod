@@ -21,9 +21,10 @@ public sealed partial class OboroPlayer : ModPlayer
     private int step => timing.Step;
     private int zanshin => timing.Zanshin;
     private int facing = 1;
-    private float aim;
+    private float aim, nextAim;
     private Item swingItem;
-    private bool rightHeld;
+    private bool rightHeld, leftHeld;
+    private ulong lastHoldSent;
     private OboroHeldProj held;
     internal bool HasHeld => held is not null && held.Projectile.active
         && ReferenceEquals(held.Projectile.ModProjectile, held) && held.ConnectionGeneration == View.Generation;
@@ -64,8 +65,8 @@ public sealed partial class OboroPlayer : ModPlayer
     public override void Initialize()
     {
         generation = 0; View = default; revision = RequestNonce = LastNonce = 0;
-        timing.Initialize(); facing = 1; aim = 0;
-        ReceivedAt = 0; rightHeld = false; held = null;
+        timing.Initialize(); facing = 1; aim = nextAim = 0;
+        ReceivedAt = lastHoldSent = 0; rightHeld = leftHeld = false; held = null;
         wounds.Clear(); struck.Clear(); swingItem = null;
     }
     public override void OnEnterWorld()
@@ -82,6 +83,12 @@ public sealed partial class OboroPlayer : ModPlayer
         if (request.Action == OboroAction.Hello) { Publish(Player.whoAmI); return; }
         if (!Usable || !Holding || request.Generation != generation || request.Nonce <= LastNonce) return;
         LastNonce = request.Nonce;
+        if (request.Action is OboroAction.Hold or OboroAction.Release)
+        {
+            timing.SetHeld(request.Action == OboroAction.Hold, Main.GameUpdateCount);
+            if (request.Action == OboroAction.Hold) nextAim = request.Aim;
+            return;
+        }
         if (request.Action == OboroAction.Zanshin)
         {
             var result = timing.Toggle(Main.GameUpdateCount);
@@ -89,17 +96,36 @@ public sealed partial class OboroPlayer : ModPlayer
             else if (result == OboroToggle.Started) Publish();
             return;
         }
-        if (!timing.TryBegin(Main.GameUpdateCount, Player.GetAttackSpeed(Player.HeldItem.DamageType))) return;
-        aim = request.Aim; facing = MathF.Cos(aim) < 0 ? -1 : 1;
-        swingItem = Player.HeldItem.Clone(); struck.Clear();
+        if (request.Action != OboroAction.Swing
+            || !timing.TryBegin(Main.GameUpdateCount, Player.GetAttackSpeed(Player.HeldItem.DamageType))) return;
+        timing.SetHeld(true, Main.GameUpdateCount);
+        nextAim = request.Aim;
+        BeginStep();
         Publish();
         if (!EnsureHeld()) { timing.CancelSwing(); Publish(); }
     }
+    private void BeginStep()
+    {
+        // New serial, aim and item potency are captured only at an accepted step boundary.
+        aim = nextAim; facing = MathF.Cos(aim) < 0 ? -1 : 1;
+        swingItem = Player.HeldItem.Clone(); struck.Clear();
+    }
     public override void ProcessTriggers(TriggersSet triggersSet)
     {
+        bool inputAllowed = Usable && Holding && !Main.gamePaused && Main.hasFocus && !Main.playerInventory
+            && !Main.mapFullscreen && !Player.mouseInterface && !Main.blockInput && !Main.drawingPlayerChat;
+        bool left = Main.mouseLeft && inputAllowed;
+        ulong now = Main.GameUpdateCount;
+        // Renew while held, release once. A lost/stalled input stream expires server-side.
+        if (left && (!leftHeld || now - lastHoldSent >= OboroRules.HoldRefreshTicks))
+        {
+            OboroPackets.Request(Player, OboroAction.Hold, (Main.MouseWorld - Player.MountedCenter).ToRotation());
+            lastHoldSent = now;
+        }
+        else if (!left && leftHeld) OboroPackets.Request(Player, OboroAction.Release, 0);
+        leftHeld = left;
         bool press = Main.mouseRight && !rightHeld; rightHeld = Main.mouseRight;
-        if (press && Usable && Holding && !Main.gamePaused && Main.hasFocus && !Main.playerInventory
-            && !Main.mapFullscreen && !Player.mouseInterface && !Main.blockInput && !Main.drawingPlayerChat)
+        if (press && inputAllowed)
             OboroPackets.Request(Player, OboroAction.Zanshin, 0);
     }
     public override void PostUpdateEquips()
@@ -124,8 +150,9 @@ public sealed partial class OboroPlayer : ModPlayer
                 // If native allocation fails, do not deal invisible sword damage.
                 if (!EnsureHeld()) { timing.CancelSwing(); Publish(); return; }
                 ResolveSwing();
-                if (timing.AdvanceSwing(Main.GameUpdateCount)) Publish();
-                else if (age % 6 == 0) Publish();
+                OboroAdvance result = timing.AdvanceSwing(Main.GameUpdateCount, Player.GetAttackSpeed(Player.HeldItem.DamageType));
+                if (result == OboroAdvance.NextStep) BeginStep();
+                if (result != OboroAdvance.None || age % 6 == 0) Publish();
             }
         }
         else
