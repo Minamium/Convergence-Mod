@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ID;
@@ -23,6 +24,35 @@ public sealed partial class OboroPlayer : ModPlayer
     private float aim;
     private Item swingItem;
     private bool rightHeld;
+    private OboroHeldProj held;
+    internal bool HasHeld => held is not null && held.Projectile.active
+        && ReferenceEquals(held.Projectile.ModProjectile, held) && held.ConnectionGeneration == View.Generation;
+    internal bool HeldReady => HasHeld && held.Ready;
+    internal bool BindHeld(OboroHeldProj candidate)
+    {
+        if (HasHeld && !ReferenceEquals(held, candidate)) return false;
+        held = candidate;
+        return true;
+    }
+    internal void ReleaseHeld(OboroHeldProj candidate) { if (ReferenceEquals(held, candidate)) held = null; }
+    private void RemoveHeld()
+    {
+        var previous = held; held = null;
+        if (previous is not null && previous.Projectile.active
+            && ReferenceEquals(previous.Projectile.ModProjectile, previous)) previous.Projectile.Kill();
+    }
+    private bool EnsureHeld()
+    {
+        if (!Authority) return false;
+        if (HasHeld) return true;
+        int index = Projectile.NewProjectile(Player.GetSource_ItemUse(Player.HeldItem), Player.MountedCenter,
+            Vector2.Zero, ModContent.ProjectileType<OboroHeldProj>(), 0, 0, Player.whoAmI);
+        if (index < 0 || index >= Main.maxProjectiles) return false;
+        held = (OboroHeldProj)Main.projectile[index].ModProjectile;
+        held.ConnectionGeneration = generation;
+        held.Projectile.netUpdate = true;
+        return true;
+    }
     private readonly HashSet<ulong> struck = new();
     private readonly Dictionary<ulong, OboroWounds> wounds = new();
     internal static bool Authority => Main.netMode != NetmodeID.MultiplayerClient;
@@ -35,7 +65,7 @@ public sealed partial class OboroPlayer : ModPlayer
     {
         generation = 0; View = default; revision = RequestNonce = LastNonce = 0;
         timing.Initialize(); facing = 1; aim = 0;
-        ReceivedAt = 0; rightHeld = false;
+        ReceivedAt = 0; rightHeld = false; held = null;
         wounds.Clear(); struck.Clear(); swingItem = null;
     }
     public override void OnEnterWorld()
@@ -63,6 +93,7 @@ public sealed partial class OboroPlayer : ModPlayer
         aim = request.Aim; facing = MathF.Cos(aim) < 0 ? -1 : 1;
         swingItem = Player.HeldItem.Clone(); struck.Clear();
         Publish();
+        if (!EnsureHeld()) { timing.CancelSwing(); Publish(); }
     }
     public override void ProcessTriggers(TriggersSet triggersSet)
     {
@@ -82,6 +113,7 @@ public sealed partial class OboroPlayer : ModPlayer
         if (!Authority) return;
         EnsureGeneration();
         if (!Player.active || Player.dead) { ClearCombat(); return; }
+        if (!Usable || !Holding) RemoveHeld();
         if (timing.TickZanshin()) Detonate();
         PruneWounds();
         if (duration > 0)
@@ -89,6 +121,8 @@ public sealed partial class OboroPlayer : ModPlayer
             if (!Usable || !Holding) { timing.CancelSwing(); Publish(); }
             else
             {
+                // If native allocation fails, do not deal invisible sword damage.
+                if (!EnsureHeld()) { timing.CancelSwing(); Publish(); return; }
                 ResolveSwing();
                 if (timing.AdvanceSwing(Main.GameUpdateCount)) Publish();
                 else if (age % 6 == 0) Publish();
@@ -108,6 +142,7 @@ public sealed partial class OboroPlayer : ModPlayer
     }
     internal void ClearCombat()
     {
+        RemoveHeld();
         bool changed = duration != 0 || zanshin != 0 || wounds.Count != 0;
         ClearWounds(); timing.Clear(); struck.Clear();
         if (changed) Publish();

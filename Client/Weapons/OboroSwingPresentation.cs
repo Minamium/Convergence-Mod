@@ -71,7 +71,9 @@ internal sealed class OboroSwingPresentation
             if (p < OboroRules.Windup(view.Step))
                 angle += entryCorrection * (1 - OboroRules.Ease(p / OboroRules.Windup(view.Step)));
             float drawLength = entryLength + (OboroRules.Reach - entryLength) * OboroRules.Ease(p / OboroRules.Windup(view.Step));
-            Pose = new(x, y, angle, drawLength, p, view.Step);
+            float holdOffset = OboroComboSettings.For(view.Step).HoldOffset;
+            Pose = new(x + MathF.Cos(view.Aim) * holdOffset, y + MathF.Sin(view.Aim) * holdOffset,
+                angle, drawLength, p, view.Step);
             if (age > lastAge && OboroRules.Live(view.Step, p))
             {
                 if (count == Capacity) { head = (head + 1) % Capacity; count--; }

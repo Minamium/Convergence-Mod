@@ -16,7 +16,7 @@ internal sealed class OboroTiming
     {
         if (Duration > 0) return false;
         if (now < endAt || now - endAt > OboroRules.ComboResetTicks) nextStep = 0;
-        Step = nextStep; nextStep = (nextStep + 1) % 3;
+        Step = nextStep; nextStep = (nextStep + 1) % OboroComboSettings.Count;
         Duration = OboroRules.Duration(Step, speed); Age = 0; Serial++;
         return true;
     }
