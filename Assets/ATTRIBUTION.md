@@ -2,6 +2,65 @@
 
 ## Records
 
+### Ghost Samurai articulated parts and materials — 2026-09-18
+
+- Runtime file: `Assets/Textures/GhostSamurai/VioletRig.png`
+- Asset ID: ghost-samurai-rig-violetrig-20260918
+- Asset type: nine-part transparent Boss atlas,1254×1254 RGBA
+- Creator: Convergence / Minamium direction; built-in OpenAI ImageGen assistance
+- Creation/acquisition date: 2026-09-18
+- Source type: generated
+- Source work and URL: project-authored VioletActions.png reference; exact prompts and selected output in docs/evidence/2026-09-18-ghost-samurai-rig.json
+- Tool/model/version: built-in image generation/edit; model and seed not reported
+- Human modifications: no pixel edits; final generated result copied byte-for-byte; independent runtime UV/rotation/scale articulation
+- License and redistribution terms: owner-requested project use under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin; dependency assets remain externally distributed
+- Reviewer and review date: Codex,2026-09-19; native compilation and offline layout checked, in-game GPU acceptance remains user-owned
+- SHA256: `cda2c0fdf4609c98478dd0d75d3d203c78c52add52174f9acd765c77430faab5`
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiSpirit.fxc`
+- Asset ID: ghost-samurai-rig-samuraispirit-20260918
+- Asset type: compiled original HLSL effect
+- Creator: Convergence / Minamium direction; independently authored Convergence HLSL
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: paired .fx source in this directory; Luminance public APIs and runtime-owned noise textures only
+- Tool/model/version: tools/compile_shaders.py, pinned Luminance FXC; compiler/options/source/export hashes in compiled.json
+- Human modifications: original shader authoring and compilation; no external shader imported
+- License and redistribution terms: owner-requested project use under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin; dependency assets remain externally distributed
+- Reviewer and review date: Codex,2026-09-19; native compilation and offline layout checked, in-game GPU acceptance remains user-owned
+- SHA256: `a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70`
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fxc`
+- Asset ID: ghost-samurai-rig-samurairibbon-20260918
+- Asset type: compiled original HLSL effect
+- Creator: Convergence / Minamium direction; independently authored Convergence HLSL
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: paired .fx source in this directory; Luminance public APIs and runtime-owned noise textures only
+- Tool/model/version: tools/compile_shaders.py, pinned Luminance FXC; compiler/options/source/export hashes in compiled.json
+- Human modifications: original shader authoring and compilation; no external shader imported
+- License and redistribution terms: owner-requested project use under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin; dependency assets remain externally distributed
+- Reviewer and review date: Codex,2026-09-19; native compilation and offline layout checked, in-game GPU acceptance remains user-owned
+- SHA256: `cdba683b42c8381e8bb97d88eea69b116d465601fcd0751a3949ff7c2eaee812`
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiMist.fxc`
+- Asset ID: ghost-samurai-rig-samuraimist-20260918
+- Asset type: compiled original HLSL effect
+- Creator: Convergence / Minamium direction; independently authored Convergence HLSL
+- Creation/acquisition date: 2026-09-18
+- Source type: original
+- Source work and URL: paired .fx source in this directory; Luminance public APIs and runtime-owned noise textures only
+- Tool/model/version: tools/compile_shaders.py, pinned Luminance FXC; compiler/options/source/export hashes in compiled.json
+- Human modifications: original shader authoring and compilation; no external shader imported
+- License and redistribution terms: owner-requested project use under existing project asset/publication terms; no third-party asset license asserted
+- Required attribution: retain this provenance and the owner reference origin; dependency assets remain externally distributed
+- Reviewer and review date: Codex,2026-09-19; native compilation and offline layout checked, in-game GPU acceptance remains user-owned
+- SHA256: `fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065`
+
+
 ### Scarlet Sanctum owner-supplied background — 2026-09-17
 
 - Runtime file: `Assets/Textures/Backgrounds/ScarletSanctum.png`
@@ -3305,3 +3364,21 @@ Creator: Codex under the repository owner's direction; original Convergence DSP 
 - Original project-authored shader sources/exports: `ScarletSurface`, `ScarletRibbon`, `ScarletResidue`, `ScarletBackdrop` under `Assets/AutoloadedEffects/Shaders`. Source/export/compiler identities are in `compiled.json`. No external Mod shader or artwork copied. Existing Luminance assets and APIs are referenced through the dependency, not vendored. Surface masks and runtime articulation preserve existing approved apparition PNGs.
 - Historical failed transfer: the first approved1672×941 cathedral export, SHA256 `94b77c968991bf52b14504bb11095c417dbf4dd2abb3bc378da779da39400a2d`, could not be transferred during compute-backend failure. The owner subsequently supplied another explicitly approved PNG export; the current runtime image is identified by the [Scarlet Sanctum record](#scarlet-sanctum-owner-supplied-background--2026-09-17), not this historical hash. No model-version claim or regenerated substitute is made.
 - No new third-party music, sound or texture licenses are asserted. Graceful Ordeal remains separately licensed as recorded above.
+
+## Ghost Samurai articulated rig and Luminance materials — 2026-09-18
+
+Creator: Convergence / Minamium direction, with built-in OpenAI ImageGen assistance for the detached parts and independently authored C#/HLSL. Reference: the project's approved `VioletActions.png`, derived from the owner's September16 violet Boss boards. No third-party sprite, source implementation or audio is imported. Existing project rights/release gates continue to apply; this is not a new public redistribution license.
+
+`Assets/Textures/GhostSamurai/VioletRig.png` is the final generated1254×1254 RGBA output, copied byte-for-byte. Its nine cells are reusable parts, not whole-body animation frames. The first output had a duplicate face on the torso and was rejected; one image-tool edit removed it before import. Runtime UVs, transforms and original shaders perform articulation; no generated source images or third-party binaries enter Git. Exact prompts, selected output identifier and all hashes are in [generation/build evidence](../docs/evidence/2026-09-18-ghost-samurai-rig.json).
+
+Three original `.fx` sources and distributable `.fxc` exports use Luminance's public ManagedShader/PrimitiveRenderer/Metaball APIs. Noise and bloom textures are dependency-owned runtime references, not bundled copies. Exports were compiled with Luminance's pinned FXC tool (`tools/compile_shaders.py --fxc <local-fxc>`); `compiled.json` pairs source and export hashes. [Source/API boundary](../docs/research/2026-09-18-ghost-samurai-luminance.md) records versions and independent choices.
+
+| Runtime/source asset | SHA256 |
+|---|---|
+| `Assets/Textures/GhostSamurai/VioletRig.png` | `cda2c0fdf4609c98478dd0d75d3d203c78c52add52174f9acd765c77430faab5` |
+| `Assets/AutoloadedEffects/Shaders/SamuraiSpirit.fx` | `b569ef5eb648aabfb653e8e828ab771dba293ce55b5177eefb08fe336d801970` |
+| `Assets/AutoloadedEffects/Shaders/SamuraiSpirit.fxc` | `a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70` |
+| `Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fx` | `cb2038dc0930849145bbc9abde860a00db34eecebd9272c43916afccc1adea76` |
+| `Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fxc` | `cdba683b42c8381e8bb97d88eea69b116d465601fcd0751a3949ff7c2eaee812` |
+| `Assets/AutoloadedEffects/Shaders/SamuraiMist.fx` | `aa12892f9724b06b791b7851ba28727b51125f15d28fa0a22866dfc721508bca` |
+| `Assets/AutoloadedEffects/Shaders/SamuraiMist.fxc` | `fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065` |

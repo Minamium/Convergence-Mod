@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-18
+last_reviewed: 2026-09-19
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.18 / protocol48**, built on the0.3.16 Scarlet v2/main integration. Adds the exact owner-supplied cathedral, a visible near-action56px conductor, separate fine forecasts/flowing physical materials and articulated charge/recoil. The sequential acts,12-phrase gates, damage-one rehearsal, reduced HP and original music are unchanged. Main's Ghost Samurai slash/visibility/Oboro changes and worker-thread texture-teardown repairs are retained. Use matching0.3.18 peers; this is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.19 / protocol48**, adding Ghost Samurai's independently articulated parts and Luminance curves, talisman physics, blade ribbons, spirit materials and bounded smoke. Existing attack AI, fire times, hit volumes, rewards, Oboro balance and all Scarlet/Doll changes are retained. This feature is built into an isolated profile; the normal playtest installation remains approved main0.3.18 until this PR is authorized for integration. Use matching versions when testing. This is not a Workshop publication or GitHub release; the public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
 Oboro now has the approved connected three-hit motion, slower return and fading violet blade/edge echoes. Damage, reach, durations/live windows, hit cap, rarity and drop remain unchanged; angular timing changes and equipped DPS remains unmeasured. The same curve drives the server hit test and visible live blade. This integration retains all existing Scarlet/Doll/Boss changes and protocol48.
 
@@ -37,6 +37,8 @@ Oboro now has the approved connected three-hit motion, slower return and fading 
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **Ghost Samurai articulated rig:** [0.3.19 evidence](evidence/2026-09-18-ghost-samurai-rig.json) records the isolated native build (0 errors /4 existing warnings), focused motion/history checks, actual installed Luminance curve/Verlet/mist probes, FNA batch-state accessor validation and offline production-part layout inspection. No game/server was launched. Actual GPU rendering, SP/MP visibility, transitions, late snapshots, ReducedEffects and high-FPS/frame-time acceptance remain user-owned / not_run. New textures/materials are attributed; gameplay/protocol48 is unchanged.
 
 - **Oboro motion and echoes:** [0.3.16 evidence](evidence/2026-09-17-oboro-motion.json) records16 passing focused cases and the isolated native build (0 errors /4 existing warnings), with final repository results in the same record. Linked-production checks cover angular continuity/acceleration, the existing swept-collision budget, exact live blade alignment, bounded fade and late-snapshot/death/teleport/connection cleanup. Actual SP/MP motion, rapid aim changes, stopped/continuous combos, bright/dark backgrounds, Reduced Effects and equipped DPS remain user-owned / not_run. The owner approved PR #45 integration and installation. Combined0.3.18/protocol48 passed288 domain cases and native compilation; integrated main was built into the normal profile on September18. Exact-package Oboro registration, cleanup/regen/codec checks pass; evidence records the installed hash and preserved local edits.
 
@@ -65,6 +67,8 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+For0.3.19, finish feature PR review and obtain current-PR administrator authorization before merging/installing. After installation, Reload Mods and check Idle, movement, each attack/phase transition, consecutive sword poses and the Victory-only96-tick ending. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. The isolated build/CPU preview is not a game playtest.
 
 The normal profile has the approved main0.3.18 installed and Convergence enabled. Reload Mods without another Build + Reload. Check repeated1-2-3-1, stop/restart, aim reversal, dash and weapon switching; compare a matching remote player and Reduced Effects.
 

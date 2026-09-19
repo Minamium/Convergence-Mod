@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-18
 source_of_truth_for:
   - ghost_samurai.behavior
 aliases:
@@ -168,9 +168,15 @@ API確認（2026-09-14、固定source666f69962d3bdffde54fc14025f02634965b4e7c）
 
 ## 表示と素材
 
-`Client/Encounters/GhostSamurai/GhostSamuraiVisuals.cs` が本体・二刀・斬撃帯・鬼火を描画し、音は専用 GhostSamuraiAudio がまとめる。9月16日の参考画像に従い、本体は紫の霊炎、髑髏兜、鎧、札付きの輪を持つ `Assets/Textures/GhostSamurai/VioletActions.png` の12ポーズを使用する。`GhostSamuraiSpriteArt` と `SamuraiSpriteFrames` が構え・振り抜き・余韻を既存の攻撃時計へ合わせる。初期同期前を含め、生存中の本体は55%以上の不透明度を保ち、24tickで通常の明度へ移行する。Idle・移動・攻撃・Phase移行で本体を隠す分岐は設けない。撃破後のみ別の `VioletDissolve.png` で消滅を描く。旧青白い分割Atlasは保持するが、現行本体描画では使わない。図の文字、第三者素材、新しい音声は取り込まない。
+`GhostSamuraiVisuals` からクライアント専用 `GhostSamuraiPresentation` を呼び、本体をパーツごとに描く。紫の霊炎、髑髏兜、鎧、札付きの輪という9月16日の造形を維持した `Assets/Textures/GhostSamurai/VioletRig.png` は、9個の独立素材（胴、頭、上腕、前腕、刀、輪、札、裾、鬼火）のAtlasであり、全身ポーズの切り替えには使わない。両腕・二刀・頭・裾・札・鬼火は独立した位置と角度を持つ。初期同期前にも基本姿勢を描き、生存中の本体は55%以上の不透明度から24tickで通常の明度へ移行する。Idle・移動・攻撃・Phase移行で本体を隠さない。旧 `VioletActions.png` / `VioletDissolve.png` と青白いAtlasは保持するが、現行の本体・撃破描画では使用しない。音は既存 GhostSamuraiAudio が管理する。
 
-素材管理はクライアント専用の `SpectralSpriteCutouts`。紫Atlasの緑背景は初回描画時だけ透過する。`ImmediateLoad` で実画像の読み込みを完了してから画素を読む。非同期読み込み中の仮画像を加工・キャッシュしない。共有アセットを変更せず専用Textureを作成し、Unload時は旧インスタンスを捕捉して描画スレッドで破棄する。Dedicated Serverは画像要求・加工・描画を行わない。元画像の出自とSHA256は [素材台帳](../../../Assets/ATTRIBUTION.md) に記録する。
+新Atlasは透過済みRGBAを `ImmediateLoad` で読み、元画像を変更せずUVでパーツを選ぶ。LuminanceのManagedShaderによる霊気・発光・侵食、PrimitiveRendererによる刀の軌跡、MetaballType/ManagedRenderTargetによる霧、VerletSimulationsによる札の揺れを組み合わせる。既存の緑背景素材を使う鬼火などは引き続き `SpectralSpriteCutouts` が管理し、仮画像のキャッシュを避ける。共有Textureは破棄せず、専用コピーは描画スレッドで破棄する。Dedicated Serverで画像要求・加工・描画を行わない。出自とSHA256は [素材台帳](../../../Assets/ATTRIBUTION.md)、選択した依存機能とAPI上の注意点は [調査記録](../../research/2026-09-18-ghost-samurai-luminance.md) が所有する。
+
+動作は `SamuraiRigMotion` の溜め→4tickの静止→6tickの振り抜き→6tickの余韻→復帰で構成する。既存の発射時刻から構えを逆算し、連撃中は前の終点を保って次へつなぐ。LuminanceのCubic InOut/Out、状態間の短い角度補間を使い、攻撃の判定・発射時計・攻撃間隔は変更しない。待機中は上下4pxと小さい傾き、位相の異なる裾と鬼火を加える。移動時は傾きと遅れ、ダッシュ時は最大6体の薄い縮小残像と最大12pxの表示上の行き過ぎを加える。NPC座標・接触判定を動かさない。
+
+刀の履歴は毎tick最大14件、札は5本×4節、霧は最大64個、局所的な揺れは最大4件。描画回数で履歴や霧を進めない。ReducedEffectsでは広いRibbon・Metaball・本体残像・揺れを抑え、細い刀の線と本体を残す。強い振りの揺れは既存ScreenShake設定と参加者限定を守る。SpriteBatchとGPUの設定は共通 `WorldGraphicsScope` で呼び出し元へ戻す。
+
+被弾は短い白紫の発光・3px以内の表示上の後退・札と鬼火の乱れだけを加え、AIを停止しない。サーバー／Replicaが受理したVictoryのみ、96tickの無害な終幕（刀を下げる→胸の亀裂→札が散る→鎧と裾が霧へ変わる→兜と鬼火が消える）を描く。Phase移行の致死HitEffectでは終幕を始めない。表示状態は正確なFightとNPCインスタンスに結び付け、ワイプ・別Fight・退出・Unload時に履歴・霧・揺れを後始末する。報酬や戦闘終了を演出のために遅らせない。
 
 `GhostSamuraiVisuals` は全NPCで共有するGlobalNPCなので、画像キャッシュの参照はstaticとする。NPCごとの状態をこのクラスへ追加しない。`InstancePerEntity = false` のまま非staticフィールドを追加すると、tModLoaderの `ValidateType` がMod全体の読み込みを拒否する。GhostSamuraiHazardVisuals は個別の音時計を持たず、Projectileのスナップショットを参照する共有GlobalProjectileとする。
 

@@ -106,8 +106,8 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('p.ExtraInfo[0] >= p.ExtraInfo[1]',atmosphere)
         self.assertIn('particles.Epoch != plan.Epoch',atmosphere)
     def test_presentation_restores_actual_batch_and_gpu_bindings(self):
-        text=(CLIENT/'ScarletMaterials.cs').read_text()
-        self.assertIn('ScarletBatchParameters.Capture(batch)',text)
+        text=(ROOT/'Client/Graphics/WorldGraphicsScope.cs').read_text()
+        self.assertIn('WorldBatchParameters.Capture(batch)',text)
         self.assertIn('batchParameters.Restore(batch)',text)
         self.assertIn('device.SetVertexBuffers(bindings)',text)
         self.assertIn('device.Indices = indices',text)

@@ -16,7 +16,7 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
     internal static readonly Rectangle StrokePixel = new(0, 0, 1, 1);
     public override void HitEffect(NPC npc, NPC.HitInfo hit)
     {
-        if (!Main.dedServ && npc.life <= 0 && npc.ModNPC is GhostSamuraiBoss boss) GhostSamuraiDissolve.Add(boss);
+        if (!Main.dedServ && npc.ModNPC is GhostSamuraiBoss boss) GhostSamuraiPresentation.Hit(boss);
     }
     public override bool AppliesToEntity(NPC entity, bool lateInstantiation) => entity.ModNPC is GhostSamuraiBoss;
     public override bool PreDraw(NPC npc, SpriteBatch batch, Vector2 screenPos, Color drawColor)
@@ -30,7 +30,7 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
     {
         float clock = boss.VisualAge;
         Vector2 root = boss.NPC.Center - screen + new Vector2(0, MathF.Sin(clock * .035f) * 3);
-        GhostSamuraiSpriteArt.Draw(batch, boss, root, AttackPose(boss));
+        GhostSamuraiPresentation.Draw(batch, boss, screen);
         if (boss.Attack == SamuraiAttack.FrontalCleaveShockwave && boss.Combo.IsValid(boss.Attack))
         {
             int facing = boss.Combo.Facing;
@@ -64,45 +64,6 @@ internal sealed class GhostSamuraiVisuals : GlobalNPC
             Ring(batch, root, 75 + t * 145, 3, new Color(65, 135, 224) * (1 - t));
         }
 
-    }
-
-    private static float AttackPose(GhostSamuraiBoss boss)
-    {
-        float t = boss.VisualAttackTimer;
-        float warning, live;
-        switch (boss.Attack)
-        {
-            case SamuraiAttack.TripleVerticalSlash:
-                return SamuraiComboRules.VerticalPose(t);
-            case SamuraiAttack.FrontalCleaveShockwave:
-                return SamuraiComboRules.SwingPose(t - SamuraiComboRules.ApproachDuration(boss.Combo), SamuraiComboRules.CleaveWindup, SamuraiComboRules.CleaveLive, SamuraiComboRules.ShockDelay);
-            case SamuraiAttack.DirectionalSlash:
-                return GhostSamuraiRules.DirectionalPose(t);
-            case SamuraiAttack.ChargedSlash:
-                return GhostSamuraiRules.ChargePose(t - GhostSamuraiRules.ChargeAimTime, boss.Phase, false);
-            case SamuraiAttack.GridSlash:
-                return GhostSamuraiRules.ChargePose(t, boss.Phase, true);
-            case SamuraiAttack.Phase2DashSlash:
-                t = t % GhostSamuraiRules.DashCadence - GhostSamuraiRules.DashApproach;
-                warning = GhostSamuraiRules.DashWarning; live = GhostSamuraiRules.DashLive; break;
-            case SamuraiAttack.Phase3CircleAttack:
-                int step = Math.Min((int)t / GhostSamuraiRules.Phase3CircleStepInterval, 3);
-                t -= step * GhostSamuraiRules.Phase3CircleStepInterval;
-                warning = GhostSamuraiRules.Phase3CircleTelegraphTime;
-                live = step < 2 ? GhostSamuraiRules.Phase3CircleSlashLive : GhostSamuraiRules.Phase3KamaitachiDuration;
-                break;
-            default: return 0;
-        }
-        if (t < 0) return 0;
-        if (t < warning) return -MathF.Sin(Math.Clamp(t / 16, 0, 1) * MathHelper.PiOver2);
-        if (t < warning + 5)
-        {
-            float release = (t - warning) / 5;
-            return -1 + 2 * release * release;
-        }
-        if (t < warning + live) return 1;
-        float recoil = Math.Clamp((t - warning - live) / GhostSamuraiRules.RecoveryTime, 0, 1);
-        return 1 - recoil * recoil * (3 - 2 * recoil);
     }
 
     internal static void Stroke(SpriteBatch batch, Vector2 a, Vector2 b, float width, Color color)

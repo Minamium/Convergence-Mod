@@ -1,3 +1,4 @@
+using ScarletGraphicsScope = Convergence.Client.Graphics.WorldGraphicsScope;
 #nullable enable
 using System;
 using System.Collections.Generic;

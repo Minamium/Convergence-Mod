@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-19
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -125,3 +125,7 @@ The 2026-09-13 Doll Raid material suite uses Luminance's public loading/paramete
 The owner supplied the weapon sketch and eight violet Boss/weapon boards and requested their appearance in Convergence. The selected weapon, spirit and twelve-pose atlas were newly generated from those references with the built-in image tool; the supplied dissolve sheet is used as a runtime atlas. No Calamity/Murasama code or extracted artwork was copied. [API/reference boundary](research/2026-09-16-oboro.md) and [exact exports](../Assets/ATTRIBUTION.md) distinguish visual references, gameplay choices and publication provenance.
 
 The September17 [Murasama motion survey](research/2026-09-16-oboro.md#murasama-motion-reference--2026-09-17) informs the three-beat presentation and heavier final-cut emphasis. Oboro's easing, pose history, violet ribbons and sprite echoes are independently written; existing project-authored textures are reused. No new third-party asset or implementation is imported.
+
+## Ghost Samurai articulated presentation — 2026-09-18
+
+The owner requested extensive use of the existing Luminance dependency. [Research](research/2026-09-18-ghost-samurai-luminance.md) separates public API inventory, inspected implementations and installed-binary checks. Calamity Catastrophe/Murasama informs motion emphasis only. The detached purple rig was generated from the existing project-authored atlas; all three materials and articulation code are original. Luminance retains ownership of runtime noise/bloom textures and render targets. No extracted asset, code mirror or dependency binary is imported; [attribution](../Assets/ATTRIBUTION.md#ghost-samurai-articulated-rig-and-luminance-materials--2026-09-18) owns exact exports/prompts/hashes.

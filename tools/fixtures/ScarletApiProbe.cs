@@ -1,3 +1,4 @@
+using ScarletBatchParameters = Convergence.Client.Graphics.WorldBatchParameters;
 using System;
 using System.Collections;
 using System.IO;

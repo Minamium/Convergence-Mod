@@ -1,3 +1,4 @@
+using ScarletGraphicsScope = Convergence.Client.Graphics.WorldGraphicsScope;
 using System;
 using Luminance.Assets;
 using Luminance.Core.Graphics;
