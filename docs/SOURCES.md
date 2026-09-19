@@ -4,7 +4,7 @@ document_type: research
 status: historical
 owners:
   - research
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-19
 source_of_truth_for: []
 aliases:
   - research sources
@@ -127,3 +127,5 @@ Continuous-emission/containment recheck, 2026-09-06: the pinned WotG Avatar rend
 Weapon audio/ten-slot companion survey, 2026-09-12: the pinned official Terraria/tML styles and ExampleMod minion, Calamity Photoviscerator/SubsumingVortex/CosmicImmaterializer paths and exact applicability are in [weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references). This verifies source behavior, not subjective sound playback.
 
 Oboro, 2026-09-16/17: [scoped API, Earth comparison and Murasama motion survey](research/2026-09-16-oboro.md) records pinned tML hooks, public Calamity source/version mismatch, independently authored motion/echoes and the runtime comparison still needed.
+
+Ghost Samurai articulation, 2026-09-18: [Luminance feature survey and selected API behavior](research/2026-09-18-ghost-samurai-luminance.md) records the pinned1.0.14 source, installed native probes, Calamity motion observations and independent presentation design. No library source/assets are vendored.

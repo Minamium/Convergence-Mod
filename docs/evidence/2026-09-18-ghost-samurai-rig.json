@@ -1,0 +1,151 @@
+{
+  "date": "2026-09-18",
+  "completed_local_date": "2026-09-19",
+  "version": "0.3.22",
+  "protocol": 51,
+  "base_commit": "c80123a18d55be9ad12cd32c41348bc13350668b",
+  "branch": "feature/ghost-samurai-articulated-motion",
+  "scope": "Client-only articulated Ghost Samurai presentation; unchanged AI, hit geometry, fire times, packets, rewards and Oboro performance.",
+  "environment": {
+    "tModLoader": "2026.07.3.0",
+    "Terraria": "1.4.4.9",
+    "CalamityMod": "2.2.4",
+    "Luminance": "1.0.14",
+    "dotnet": "8.0.424",
+    "CSharp": "12"
+  },
+  "checks": {
+    "domain_focused": {
+      "status": "passed",
+      "cases": 5,
+      "scope": "continuity/all attacks/phases, fire alignment, connected combos, bounded history/fade/exact-Fight/slot/teleport cleanup"
+    },
+    "repository_and_full_domain": {
+      "status": "passed",
+      "domain_cases": 302,
+      "catalog_documents": 79,
+      "repository_files": 911,
+      "yaml_files": 12
+    },
+    "installed_type_and_lifecycle": {
+      "status": "passed",
+      "command": "pwsh -NoProfile -File tools/check-ghost-samurai-load.ps1 -PackagePath <built-package> -TModLoaderPath <installed-tml> -CheckLifecycle -CheckSlashArt -CheckRig",
+      "version": "0.3.22"
+    },
+    "installed_luminance": {
+      "status": "passed",
+      "curve_samples": 202,
+      "verlet_ticks": 1200,
+      "nodes": 20,
+      "mist_draw_callbacks_per_tick": [
+        1,
+        8
+      ],
+      "scope": "identical tick-owned particle position/size/lifetime; repeated teardown; no graphics initialization"
+    },
+    "installed_fna_batch_accessors": {
+      "status": "passed",
+      "scope": "actual private field binding and caller sort/transform capture; not GPU draw execution"
+    },
+    "offline_part_layout": {
+      "status": "passed",
+      "commands": [
+        "pwsh -NoProfile -File tools/preview-samurai-rig.ps1",
+        "python tools/render_samurai_rig_preview.py"
+      ],
+      "artifact": ".local/samurai-rig-preview.png",
+      "scope": "production transforms/source rectangles, joint layout, original silhouette, dedicated-server guard; no shaders/Verlet rasterized"
+    },
+    "gameplay_gpu_and_multiplayer": {
+      "status": "not_run",
+      "owner": "user",
+      "remaining": [
+        "Reload after approved installation",
+        "Idle/movement/dash and each attack/phase transition",
+        "Heavy-cut windup, connected combos and telegraph readability",
+        "Victory-only dissolve; wipe/re-summon/reload cleanup",
+        "Matching remote peer and late snapshot",
+        "Bright/dark backgrounds, ReducedEffects, ScreenShake off, high FPS and frame-time"
+      ]
+    },
+    "shared_graphics_tooling": {
+      "status": "passed",
+      "cases": 13
+    },
+    "offline_compiled_materials": {
+      "status": "passed",
+      "backend": "installed FNA D3D11",
+      "command": "pwsh -NoProfile -File tools/preview-samurai-materials.ps1 -TModLoaderPath <installed-tml> -LuminanceSource <pinned-source>",
+      "rig_frames": 84,
+      "material_diagnostic_frames": 6,
+      "scope": "bright/dark, start/hold/release/follow-through, staged ending; production-captured transforms and compiled shaders; smoke/ribbon use synthetic diagnostic geometry",
+      "artifacts": [
+        ".local/rig-gpu/motion-contact.png",
+        ".local/rig-gpu/ending-contact.png",
+        ".local/rig-gpu/materials-contact.png"
+      ],
+      "limitations": "No game/server instance, native Luminance target composition, reduced-effects gameplay, peer session or performance measurement"
+    }
+  },
+  "asset_generation": {
+    "tool": "built-in image_gen",
+    "reference": "Assets/Textures/GhostSamurai/VioletActions.png",
+    "initial_output": "exec-7ab2a73c-0c89-416a-953f-ce3df03fdcd7.png (rejected: duplicate face in torso)",
+    "selected_output": "exec-80556e67-db88-41f0-ac73-95b8d21b19a0.png",
+    "prompts": [
+      "Use case: precise-object-edit. Create a production-ready articulated sprite parts atlas for this exact purple ghost samurai boss, using the attached approved sprite sheet as the identity/design reference. Preserve its horned oni skull helmet, dark violet segmented samurai armor, purple cloth/ghost flame hem, violet blade with dark hilt, and arched talisman ornament. This is NOT an animation frame sheet: separate detached reusable body parts on transparent background. 1536 by 1536 canvas, STRICT 3 columns by 3 rows of equal 512x512 cells, each isolated part centered fully INSIDE its cell with generous empty margin, no overlap, no labels, no gridlines. Cell order left-to-right top-to-bottom: (0) front-view armored TORSO ONLY from neck to waist, no head, NO ARMS, no swords, no rear arch, no flames; (1) HEAD ONLY: horned purple oni helmet and skull mask with glowing lavender eyes, no neck/body/arch; (2) ONE separate upper arm pointing vertically DOWN, shoulder pauldron at top and elbow at bottom, NO sword/hand; (3) ONE separate forearm pointing vertically DOWN with gloved closed fist at bottom, no sword; (4) ONE katana: long sharp pale violet curved blade pointing vertically UP, small dark/gold guard and handle at bottom, no arm; (5) REAR ORNAMENT bare arch/halo frame ONLY matching the reference but no hanging paper slips; (6) ONE long paper talisman slip matching reference; (7) LOWER BODY ghost cloth/flame hem ONLY from waist to ragged ethereal tail, no upper armor/head/arms, violet; (8) ONE violet ghost fire wisp with pale white-violet core and vapor tail pointing up. Every isolated part will be assembled in code with rotations, so avoid huge baked glows, slash arcs, motion trails, and other detached particles. Consistent detailed crisp pixel-art edges as the reference, retain rich armor contrast; no blue armor redesign. Truly transparent background, preserve alpha; no scene, no checkerboard.",
+      "Use case: precise-object-edit. Edit ONLY the TOP LEFT cell torso of this exact 3x3 sprite-parts atlas. It currently has an unwanted second mask/face and little horns baked into its neck/chest. REMOVE those glowing eyes, skull face, horns, and head-like ornament FROM THE TOP LEFT CELL ONLY. Replace them with a plain dark violet armored neck opening and layered metal breastplate, preserving the existing armor lower chest, waist/belt. The torso must contain NO head, face, glowing eyes, horns, or arms. Keep its size and position. Preserve ALL OTHER EIGHT CELLS pixel-consistently, especially the separate actual head in the top-middle cell. Preserve exact atlas layout, transparent background and alpha. No text/no gridlines."
+    ],
+    "actual_dimensions": [
+      1254,
+      1254
+    ],
+    "format": "RGBA with true alpha",
+    "copy": "selected output byte-for-byte; source rectangles and rotation only at runtime"
+  },
+  "assets": {
+    "Assets/Textures/GhostSamurai/VioletRig.png": "cda2c0fdf4609c98478dd0d75d3d203c78c52add52174f9acd765c77430faab5",
+    "Assets/AutoloadedEffects/Shaders/SamuraiSpirit.fx": "b569ef5eb648aabfb653e8e828ab771dba293ce55b5177eefb08fe336d801970",
+    "Assets/AutoloadedEffects/Shaders/SamuraiSpirit.fxc": "a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70",
+    "Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fx": "4c6bad4044af61a415d37eaddbca2861839ee52959a2d23cc9aace3b44eff95a",
+    "Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fxc": "474fa47eed26d1ed1ec43d4b851dc6196dfddc9e85cfa76e41d4b06d5f96fc30",
+    "Assets/AutoloadedEffects/Shaders/SamuraiMist.fx": "aa12892f9724b06b791b7851ba28727b51125f15d28fa0a22866dfc721508bca",
+    "Assets/AutoloadedEffects/Shaders/SamuraiMist.fxc": "fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065"
+  },
+  "integration": {
+    "status": "not_merged",
+    "normal_profile": "approved main 0.3.18 retained",
+    "approval": "current PR admin merge/install approval pending"
+  },
+  "initial_isolated_build": {
+    "version": "0.3.19",
+    "protocol": 48,
+    "native_build": {
+      "status": "passed",
+      "record": ".local/builds/20260918T145827926140Z/record.json",
+      "errors": 0,
+      "warnings": 4,
+      "warnings_scope": "pre-existing CS8632 in FirstSeverance",
+      "package_sha256": "75ccd391844caaece19a3ab677118552e416f5e4711a70f9cb84ee47648c4e06",
+      "output": "isolated .local/build-profile; normal profile untouched"
+    },
+    "checks": {
+      "status": "passed",
+      "domain_cases": 293,
+      "catalog_documents": 79
+    }
+  },
+  "integration_base": "4bed78d1bba30f78a14d865ea161459dcb268f83",
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260919T091434422515Z/record.json",
+    "version": "0.3.22",
+    "protocol": 51,
+    "source_sha256": "c5bb6a84ccb736f0d91c458737e412c7572cce56516a36eb7bd13d589bde75ee",
+    "package_sha256": "ea77afe6fb280ee9fbfa7c002b500a0f1f5e1a30217cd0d333a9c2aa3b1ce051",
+    "errors": 0,
+    "warnings": 4,
+    "warnings_scope": "pre-existing CS8632 in FirstSeverance",
+    "output": "isolated .local/build-profile; this task did not install into normal profile"
+  }
+}

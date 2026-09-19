@@ -30,6 +30,18 @@
       "source_sha256": "924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8",
       "output_sha256": "299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7"
     },
+    "SamuraiMist.fx": {
+      "source_sha256": "aa12892f9724b06b791b7851ba28727b51125f15d28fa0a22866dfc721508bca",
+      "output_sha256": "fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065"
+    },
+    "SamuraiRibbon.fx": {
+      "source_sha256": "4c6bad4044af61a415d37eaddbca2861839ee52959a2d23cc9aace3b44eff95a",
+      "output_sha256": "474fa47eed26d1ed1ec43d4b851dc6196dfddc9e85cfa76e41d4b06d5f96fc30"
+    },
+    "SamuraiSpirit.fx": {
+      "source_sha256": "b569ef5eb648aabfb653e8e828ab771dba293ce55b5177eefb08fe336d801970",
+      "output_sha256": "a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70"
+    },
     "ScarletBackdrop.fx": {
       "source_sha256": "ab810c34dda508df2d8f23b3bba37be316937803500811b7778599d87de63f16",
       "output_sha256": "8c6a64ddf9ad29cd2e2537aa19013587120c7340c6a1577c908726e7f1eb2323"

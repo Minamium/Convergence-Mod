@@ -5,10 +5,11 @@ param(
     [Parameter(Mandatory=$true)][string]$TModLoaderPath,
     [switch]$ExpectOldFailure,
     [switch]$CheckLifecycle,
-    [switch]$CheckSlashArt
+    [switch]$CheckSlashArt,
+    [switch]$CheckRig
 )
 $ErrorActionPreference = 'Stop'
-Add-Type -TypeDefinition @'
+$loadSource = @'
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -17,14 +18,14 @@ using System.Runtime.Loader;
 
 public static class GhostSamuraiLoadCheck
 {
-    static byte[] ReadModAssembly(string path)
+    static byte[] ReadModAssembly(string path, string modName = "Convergence")
     {
         using var stream = File.OpenRead(path);
         using var reader = new BinaryReader(stream);
         if (new string(reader.ReadChars(4)) != "TMOD") throw new InvalidDataException("Not a tModLoader package");
         reader.ReadString();
         reader.ReadBytes(280); // hash, signature and package length
-        if (reader.ReadString() != "Convergence") throw new InvalidDataException("Expected the Convergence package");
+        if (reader.ReadString() != modName) throw new InvalidDataException("Unexpected Mod package");
         string version = reader.ReadString();
         int count = reader.ReadInt32();
         if (count < 1 || count > 10000) throw new InvalidDataException("Invalid package entry count");
@@ -34,7 +35,7 @@ public static class GhostSamuraiLoadCheck
             string name = reader.ReadString();
             int size = reader.ReadInt32(), packed = reader.ReadInt32();
             if (size < 0 || packed < 0 || packed > stream.Length) throw new InvalidDataException("Invalid package entry size");
-            if (name == "Convergence.dll") { selectedOffset = offset; selectedSize = size; selectedPacked = packed; }
+            if (name == modName + ".dll") { selectedOffset = offset; selectedSize = size; selectedPacked = packed; }
             offset = checked(offset + packed);
         }
         if (selectedOffset < 0 || selectedSize > 64 * 1024 * 1024 || stream.Position + offset > stream.Length)
@@ -42,7 +43,7 @@ public static class GhostSamuraiLoadCheck
         stream.Position += selectedOffset;
         byte[] bytes = reader.ReadBytes(selectedPacked);
         if (bytes.Length != selectedPacked) throw new EndOfStreamException();
-        Console.WriteLine("Package version: " + version);
+        Console.WriteLine(modName + " package version: " + version);
         if (selectedSize == selectedPacked) return bytes;
         using var input = new MemoryStream(bytes);
         using var deflate = new DeflateStream(input, CompressionMode.Decompress);
@@ -52,11 +53,15 @@ public static class GhostSamuraiLoadCheck
         return output.ToArray();
     }
 
-    public static void Run(string package, string loader, bool expectOldFailure, bool checkLifecycle, bool checkSlashArt)
+    public static void Run(string package, string loader, bool expectOldFailure, bool checkLifecycle, bool checkSlashArt, bool checkRig)
     {
         var resolver = new AssemblyDependencyResolver(loader);
         var context = new AssemblyLoadContext("GhostSamuraiValidation", isCollectible: true);
         context.Resolving += (alc, name) => {
+            if (name.Name == "Luminance") {
+                using var dependency = new MemoryStream(ReadModAssembly(Path.Combine(Path.GetDirectoryName(package), "Luminance.tmod"), "Luminance"));
+                return alc.LoadFromStream(dependency);
+            }
             string resolved = resolver.ResolveAssemblyToPath(name);
             // tML's bundled libraries also use its custom library directory
             // resolver; a normal command-line load context needs that fallback.
@@ -118,12 +123,14 @@ public static class GhostSamuraiLoadCheck
                 if ((int)count.GetValue(registry) != 0) throw new Exception("World cleanup left leases");
                 Console.WriteLine("PASS exact-fight leases, repeated world/Mod teardown and uninitialized player/type state");
             }
-            Console.WriteLine("Only type validation executed; full Mod load and item restoration remain user-owned.");
+            if (checkRig) SamuraiRigNativeProbe.Run(assembly, context);
+            Console.WriteLine("Only headless type/CPU checks executed; full Mod load, graphics and item restoration remain user-owned.");
         }
         finally { context.Unload(); }
     }
 }
 '@
+Add-Type -TypeDefinition ($loadSource + [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'fixtures/SamuraiRigNativeProbe.cs')))
 $package = (Resolve-Path -LiteralPath $PackagePath).Path
 $loader = Join-Path (Resolve-Path -LiteralPath $TModLoaderPath).Path 'tModLoader.dll'
-[GhostSamuraiLoadCheck]::Run($package, $loader, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent, $CheckSlashArt.IsPresent)
+[GhostSamuraiLoadCheck]::Run($package, $loader, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent, $CheckSlashArt.IsPresent, $CheckRig.IsPresent)

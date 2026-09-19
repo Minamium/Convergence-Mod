@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.21 / protocol51**. Scarlet reverses the previous forecast/strike beat roles, extends flight/aftermath without slowing release cadence, repairs half-length Luminance trails and adds continuous falling bands/larger red energy bodies. Accepted circles/background, SFX masters, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music remain unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Matching peers are required for changed geometry/lifetime bounds; packet IDs/layout stay stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.22 / protocol51**. Ghost Samurai now uses independently articulated armor/arms/swords, Luminance easing and talisman physics, violet ribbons, spirit materials and bounded smoke. Ghost Samurai combat, attacks and Oboro balance are unchanged. Latest main0.3.21 changes are preserved: Scarlet reverses the previous forecast/strike beat roles, extends flight/aftermath without slowing release cadence, repairs half-length Luminance trails and adds continuous falling bands/larger red energy bodies. Accepted circles/background, SFX masters, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music remain unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Matching peers are required for changed geometry/lifetime bounds; packet IDs/layout stay stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
 Oboro has the approved connected three-hit motion, slower return and fading violet blade/edge echoes. Damage, reach, durations/live windows, hit cap, rarity and drop remain unchanged; equipped DPS remains unmeasured. The same curve drives the server hit test and visible live blade. These changes remain in the current build above.
 
@@ -37,6 +37,8 @@ Oboro has the approved connected three-hit motion, slower return and fading viol
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **Ghost Samurai articulated rig:** [articulation evidence](evidence/2026-09-18-ghost-samurai-rig.json) records native compilation, motion/history checks, installed Luminance curve/Verlet/mist probes and FNA batch-state accessor validation. Offline FNA D3D11 output includes84 bright/dark rig frames from production transforms and6 compiled-material diagnostic frames, with the direct layouts/continuity inspected. No game/server was launched. In-game GPU composition, SP/MP visibility, transitions, late snapshots, ReducedEffects and high-FPS/frame-time acceptance remain user-owned / not_run. New textures/materials are attributed; Ghost Samurai gameplay and incoming main protocol51 are unchanged.
 
 - **0.3.21 Scarlet flow:** [evidence](evidence/2026-09-19-scarlet-flow.json) records the installed-library endpoint defect, beat/lifetime and footprint checks, actual shader-export frame sequence and package identity. In-game overlap readability, remote synchronization, audible phase preference and performance remain owner-owned / not_run.
 
@@ -71,6 +73,8 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+For0.3.22, finish this feature PR review and obtain current-PR administrator authorization before merging/installing. The normal local profile is untouched by this task. After installation, Reload Mods and check Idle, movement, each attack/phase transition, connected blade poses and the Victory-only96-tick ending. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. Offline checks are not a game playtest.
 
 Use matching0.3.21 after installation is confirmed; no repeated compilation is needed. Check reversed beat roles, full-height ActI forecasts and flowing rain, larger energy bodies and overlapping aftermath/next forecast. Actual dodge readability, remote synchronization, audible preference and frame time remain unmeasured. The evidence links the local deployment record rather than inferring installation from compilation.
 

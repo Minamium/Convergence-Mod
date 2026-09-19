@@ -792,7 +792,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 15d5ceb5155820d340bb065902e7865e398cbf6046a851599bed5329c1406a54
+  content_sha256: 2f8ecc5e263491c1dbd9e4e200c284cd641d2fa01c272027f1ae0db5fbd43375
   document_type: spec
   status: provisional
   owners:
@@ -949,13 +949,13 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 2022694d9d6f092630cdea9b0813a2274d65b80a71c43f5a56d2124901e37282
+  content_sha256: 2f1032235d2daa4f6ffe61a0a56e569b9ce3b90b6bb4bc1c2ab066d2291de77a
   document_type: policy
   status: accepted
   owners:
   - project
   - art
-  last_reviewed: '2026-09-17'
+  last_reviewed: '2026-09-19'
   source_of_truth_for:
   - policy.ip_provenance
   aliases:
@@ -1268,7 +1268,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 291c763f86f87efbf9b55f8f233687b788664173ea6cef543ce75f00c4f205bd
+  content_sha256: e7ff9cd7d8325263d80b7412f45165fd592be931c024eaf1b66bdf0b90ecbcaf
   document_type: status
   status: accepted
   owners:
@@ -1441,6 +1441,27 @@ documents:
   - compatibility.version-matrix
   - project.arena-infrastructure
   - encounter.first-severance.plan
+- doc_id: research.ghost-samurai-luminance-20260918
+  path: docs/research/2026-09-18-ghost-samurai-luminance.md
+  title: 'Ghost Samurai: Luminance capability survey and independent rig'
+  content_sha256: 5dcf5a49afa471268713368591c858a5b1e704d8031b4e31e103e235993a14c8
+  document_type: research
+  status: provisional
+  owners:
+  - gameplay
+  - art
+  last_reviewed: '2026-09-18'
+  source_of_truth_for:
+  - research.ghost_samurai_luminance_api
+  aliases:
+  - Ghost Samurai articulated presentation
+  related_code:
+  - Client/Encounters/GhostSamurai
+  - Client/Graphics/WorldGraphicsScope.cs
+  related_docs:
+  - encounter.ghost-samurai.spec
+  - research.sources
+  - project.status
 - doc_id: research.implementation-review-20260914
   path: docs/research/2026-09-14-implementation-review.md
   title: 'Owner-supplied implementation review: disposition'
@@ -1542,12 +1563,12 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 227c0b2d16879ed98a3c5a9f69a76a59015c738299721cf1de31d88c72b48a31
+  content_sha256: 4c2d0fce9ba44656864db4700c1d820fde42eeb2129b8cd491f444460639fb6e
   document_type: research
   status: historical
   owners:
   - research
-  last_reviewed: '2026-09-17'
+  last_reviewed: '2026-09-19'
   source_of_truth_for: []
   aliases:
   - research sources
