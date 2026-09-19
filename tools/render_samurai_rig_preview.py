@@ -18,7 +18,7 @@ for section in (ROOT / '.local/samurai-rig-draws.txt').read_text(encoding='utf-8
     draw.line((300, 60, 300, 580), fill='#303849')
     draw.line((20, 265, 580, 265), fill='#303849')
     for line in lines[1:]:
-        x,y,sx,sy,w,h,r,g,b,a,rot,ox,oy,kx,ky,flip = map(float, line.split(','))
+        x,y,sx,sy,w,h,r,g,b,a,rot,ox,oy,kx,ky,flip = list(map(float, line.split(',')))[:16]
         if a <= 0:
             continue
         tile = atlas.crop((int(sx), int(sy), int(sx+w), int(sy+h)))

@@ -1,8 +1,8 @@
 {
   "date": "2026-09-18",
   "completed_local_date": "2026-09-19",
-  "version": "0.3.19",
-  "protocol": 48,
+  "version": "0.3.22",
+  "protocol": 51,
   "base_commit": "c80123a18d55be9ad12cd32c41348bc13350668b",
   "branch": "feature/ghost-samurai-articulated-motion",
   "scope": "Client-only articulated Ghost Samurai presentation; unchanged AI, hit geometry, fire times, packets, rewards and Oboro performance.",
@@ -14,15 +14,6 @@
     "dotnet": "8.0.424",
     "CSharp": "12"
   },
-  "native_build": {
-    "status": "passed",
-    "record": ".local/builds/20260918T145827926140Z/record.json",
-    "errors": 0,
-    "warnings": 4,
-    "warnings_scope": "pre-existing CS8632 in FirstSeverance",
-    "package_sha256": "75ccd391844caaece19a3ab677118552e416f5e4711a70f9cb84ee47648c4e06",
-    "output": "isolated .local/build-profile; normal profile untouched"
-  },
   "checks": {
     "domain_focused": {
       "status": "passed",
@@ -31,12 +22,15 @@
     },
     "repository_and_full_domain": {
       "status": "passed",
-      "domain_cases": 293,
-      "catalog_documents": 79
+      "domain_cases": 302,
+      "catalog_documents": 79,
+      "repository_files": 911,
+      "yaml_files": 12
     },
     "installed_type_and_lifecycle": {
       "status": "passed",
-      "command": "pwsh -NoProfile -File tools/check-ghost-samurai-load.ps1 -PackagePath <built-package> -TModLoaderPath <installed-tml> -CheckLifecycle -CheckSlashArt -CheckRig"
+      "command": "pwsh -NoProfile -File tools/check-ghost-samurai-load.ps1 -PackagePath <built-package> -TModLoaderPath <installed-tml> -CheckLifecycle -CheckSlashArt -CheckRig",
+      "version": "0.3.22"
     },
     "installed_luminance": {
       "status": "passed",
@@ -76,7 +70,21 @@
     },
     "shared_graphics_tooling": {
       "status": "passed",
-      "cases": 12
+      "cases": 13
+    },
+    "offline_compiled_materials": {
+      "status": "passed",
+      "backend": "installed FNA D3D11",
+      "command": "pwsh -NoProfile -File tools/preview-samurai-materials.ps1 -TModLoaderPath <installed-tml> -LuminanceSource <pinned-source>",
+      "rig_frames": 84,
+      "material_diagnostic_frames": 6,
+      "scope": "bright/dark, start/hold/release/follow-through, staged ending; production-captured transforms and compiled shaders; smoke/ribbon use synthetic diagnostic geometry",
+      "artifacts": [
+        ".local/rig-gpu/motion-contact.png",
+        ".local/rig-gpu/ending-contact.png",
+        ".local/rig-gpu/materials-contact.png"
+      ],
+      "limitations": "No game/server instance, native Luminance target composition, reduced-effects gameplay, peer session or performance measurement"
     }
   },
   "asset_generation": {
@@ -99,8 +107,8 @@
     "Assets/Textures/GhostSamurai/VioletRig.png": "cda2c0fdf4609c98478dd0d75d3d203c78c52add52174f9acd765c77430faab5",
     "Assets/AutoloadedEffects/Shaders/SamuraiSpirit.fx": "b569ef5eb648aabfb653e8e828ab771dba293ce55b5177eefb08fe336d801970",
     "Assets/AutoloadedEffects/Shaders/SamuraiSpirit.fxc": "a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70",
-    "Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fx": "cb2038dc0930849145bbc9abde860a00db34eecebd9272c43916afccc1adea76",
-    "Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fxc": "cdba683b42c8381e8bb97d88eea69b116d465601fcd0751a3949ff7c2eaee812",
+    "Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fx": "4c6bad4044af61a415d37eaddbca2861839ee52959a2d23cc9aace3b44eff95a",
+    "Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fxc": "474fa47eed26d1ed1ec43d4b851dc6196dfddc9e85cfa76e41d4b06d5f96fc30",
     "Assets/AutoloadedEffects/Shaders/SamuraiMist.fx": "aa12892f9724b06b791b7851ba28727b51125f15d28fa0a22866dfc721508bca",
     "Assets/AutoloadedEffects/Shaders/SamuraiMist.fxc": "fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065"
   },
@@ -108,5 +116,36 @@
     "status": "not_merged",
     "normal_profile": "approved main 0.3.18 retained",
     "approval": "current PR admin merge/install approval pending"
+  },
+  "initial_isolated_build": {
+    "version": "0.3.19",
+    "protocol": 48,
+    "native_build": {
+      "status": "passed",
+      "record": ".local/builds/20260918T145827926140Z/record.json",
+      "errors": 0,
+      "warnings": 4,
+      "warnings_scope": "pre-existing CS8632 in FirstSeverance",
+      "package_sha256": "75ccd391844caaece19a3ab677118552e416f5e4711a70f9cb84ee47648c4e06",
+      "output": "isolated .local/build-profile; normal profile untouched"
+    },
+    "checks": {
+      "status": "passed",
+      "domain_cases": 293,
+      "catalog_documents": 79
+    }
+  },
+  "integration_base": "4bed78d1bba30f78a14d865ea161459dcb268f83",
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260919T091434422515Z/record.json",
+    "version": "0.3.22",
+    "protocol": 51,
+    "source_sha256": "c5bb6a84ccb736f0d91c458737e412c7572cce56516a36eb7bd13d589bde75ee",
+    "package_sha256": "ea77afe6fb280ee9fbfa7c002b500a0f1f5e1a30217cd0d333a9c2aa3b1ce051",
+    "errors": 0,
+    "warnings": 4,
+    "warnings_scope": "pre-existing CS8632 in FirstSeverance",
+    "output": "isolated .local/build-profile; this task did not install into normal profile"
   }
 }

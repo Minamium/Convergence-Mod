@@ -115,6 +115,19 @@ class ScarletContracts(unittest.TestCase):
         for slot in range(4):
             self.assertIn(f'device.Textures[{slot}] = t{slot}',text)
             self.assertIn(f'device.SamplerStates[{slot}] = s{slot}',text)
+    def test_trail_support_point_uv_and_long_tail_are_wired(self):
+        material=(CLIENT/'ScarletMaterials.cs').read_text()
+        self.assertIn('submittedPoints.Add(points[^1] + (points[^1] - points[^2]))',material)
+        self.assertIn('PrimitiveRenderer.RenderTrail(submittedPoints, settings!, submittedPoints.Count)',material)
+        self.assertIn('u * trailCompletionScale',material)
+        shader=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletRibbon.fx').read_text()
+        self.assertIn('o.U.x*=trailCompletionScale',shader)
+        for name in ('CrimsonRuntime.cs','CrimsonGesture.cs'):
+            self.assertIn('CrimsonRhythm.LeaseTicks',(CONTENT/name).read_text())
+        self.assertIn('cycle.FinishAt',(CONTENT/'CrimsonChorus.cs').read_text())
+        visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text()
+        for name in ('WarningOpacity','LiveOpacity','SampleAge'):
+            self.assertIn('ScarletGesturePresentation.'+name,visual)
     def test_public_name_preserves_stable_item_and_encounter_ids(self):
         for locale in ('en-US','ja-JP'):
             text=(ROOT/f'Localization/CrimsonFoundry/{locale}.hjson').read_text(encoding='utf-8')

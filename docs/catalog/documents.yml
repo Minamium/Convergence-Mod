@@ -106,12 +106,12 @@ documents:
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
-  content_sha256: 8ee8ba75f0f7edbe9a3c3efb91246fb64a8c488e1f6640862a899199f0a4c345
+  content_sha256: 2bb7f69caec43ddbff25a7d44fca07821817f2ba29bd98f49251fdb22a42404b
   document_type: policy
   status: accepted
   owners:
   - engineering
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-18'
   source_of_truth_for:
   - compatibility.version_matrix
   aliases:
@@ -518,12 +518,12 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: b274efae996a874ebff7a4323fb4e7e02888637e56d02cdf6a7a919546b7b5b8
+  content_sha256: 7dbdfdb10ce146e55b312399753d9a623b090a637699404e3d2fd3fff6f81a82
   document_type: index
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-18'
   source_of_truth_for:
   - documentation.read_order
   aliases:
@@ -577,14 +577,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: f93764ec86c0e343f8bb9007561fe8f715406569ce89099a3e209e65d9fc71c5
+  content_sha256: f46e129f5d32abe980571708f12368aedc2693915ff0fc2eaed31678ce366df7
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-17'
+  last_reviewed: '2026-09-19'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -750,13 +750,13 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: e258030c9e1a342a3a427eef53b65a7d5635c9c3617bf20141905ede7ed0779f
+  content_sha256: 2d46e1a9625417ac4f7f77ddd45b1909cadd8ad30c2d066ed81f3a7602254602
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-18'
   source_of_truth_for:
   - first_severance.visual_mvp
   aliases:
@@ -792,7 +792,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 52bb2678a5a28293b7b9097804514b8bc1c704cb99cb65be7970a5672b96fdb1
+  content_sha256: 2f8ecc5e263491c1dbd9e4e200c284cd641d2fa01c272027f1ae0db5fbd43375
   document_type: spec
   status: provisional
   owners:
@@ -811,6 +811,7 @@ documents:
   related_docs:
   - project.status
   - development.windows
+  - project.art-direction
 - doc_id: handoff.windows
   path: docs/handoff/WINDOWS.md
   title: Windows Development Handoff — チャット不要の再開入口
@@ -868,12 +869,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 8304f7af4e2c12a0259191c144aa5ecf1ae74bbc2aeacfc2dbb994418211b9c2
+  content_sha256: 483b0c3ba2978be6cbd02da643b549fa1421d0698f08354cf92ab4f9d160164d
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-19'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1042,22 +1043,26 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: 2e0645127086bca52efbf4aa4c3635d1bb131a614e9a37b5d21ca6551d48a49e
+  content_sha256: f4f320400aa580fcc5e8f7e5ccc9bc12608d7a13e4f89ee62b98e83cc477c5cd
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-18'
   source_of_truth_for:
   - project.art_direction
+  - presentation.luminance_policy
   aliases:
   - art direction
   - visual language
+  - Luminance presentation policy
   related_code:
   - Assets
   related_docs:
   - encounter.first-severance.visual
   - encounter.first-severance.backlog
+  - encounter.ghost-samurai.spec
+  - encounter.crimson-foundry.spec
 - doc_id: project.asset-pipeline
   path: docs/ASSET_PIPELINE.md
   title: Asset and Audio Pipeline
@@ -1140,12 +1145,12 @@ documents:
 - doc_id: project.content-authoring
   path: docs/CONTENT_AUTHORING.md
   title: Content Authoring
-  content_sha256: 0c6b6a9eb81a66e27997a8ab224c4332c665f994478f7ac861c68ab3405c679e
+  content_sha256: 6532b6ee3a0e5d308247ed8c5df9be84828d5454a5f13d57f7ab925f987ca889
   document_type: governance
   status: accepted
   owners:
   - gameplay
-  last_reviewed: '2026-09-12'
+  last_reviewed: '2026-09-18'
   source_of_truth_for:
   - engineering.content_authoring
   aliases:
@@ -1263,7 +1268,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: c3df81cc9fb24db777d703b2407be439762b75cf54cc6cbaf2d2bf4298989e98
+  content_sha256: e7ff9cd7d8325263d80b7412f45165fd592be931c024eaf1b66bdf0b90ecbcaf
   document_type: status
   status: accepted
   owners:
@@ -1439,7 +1444,7 @@ documents:
 - doc_id: research.ghost-samurai-luminance-20260918
   path: docs/research/2026-09-18-ghost-samurai-luminance.md
   title: 'Ghost Samurai: Luminance capability survey and independent rig'
-  content_sha256: 26c47fb12637a9ce9e3a251419330e672703705b0c292b6a0afc2812ca8d78ea
+  content_sha256: 5dcf5a49afa471268713368591c858a5b1e704d8031b4e31e103e235993a14c8
   document_type: research
   status: provisional
   owners:

@@ -18,6 +18,7 @@ namespace Convergence.Client.Encounters.CrimsonFoundry;
 internal sealed class CrimsonGestureVisuals : ModSystem
 {
     private Guid fight;
+    private int epoch = -1;
     private int previous = -1;
     private readonly HashSet<(int Phrase, byte Pulse, byte Source, bool Fire)> heard = new();
     private readonly List<(SlotId Id, int Until)> voices = new();
@@ -28,7 +29,8 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         var boss = CrimsonPackets.Boss;
         if (!ScarletArticulation.Participant(boss)) { Reset(); return; }
         int age = (int)boss!.VisualAge;
-        if (fight != boss.State.Fight) { Reset(); fight = boss.State.Fight; previous = age - 1; }
+        if (fight != boss.State.Fight || epoch != boss.State.PhaseStart)
+        { Reset(); fight = boss.State.Fight; epoch = boss.State.PhaseStart; previous = age - 1; }
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
             if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
@@ -38,17 +40,18 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
                 string asset = impact ? p.Source switch
-                { 0 => "PylonBreak", 1 => "SwordImpale", 2 => "BladeUnsheathe", _ => "Beams/SpreadScatter" }
-                    : p.Source switch { 0 => "EnergyLock", 1 => "BladeUnsheathe", 2 => "LanceCharge", _ => "EnergyGather" };
+                { 0 => "CrownRupture", 1 => "SilkCleave", 2 => "ThornRend", _ => "ScarletRelease" } : "Foretell";
                 if (voices.Count < 24)
                 {
-                    var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
+                    var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/CrimsonFoundry/" + asset)
                     {
-                        Volume = (impact ? .24f : .13f) + p.Accent * .025f,
-                        MaxInstances = 3, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
+                        Volume = impact ? .56f + p.Accent * .06f : .25f,
+                        Pitch = impact ? -.035f * p.Accent : 0,
+                        MaxInstances = 6, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
                         PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
                     });
-                    voices.Add((id, tick + (impact ? 14 : 9)));
+                    // Masters end naturally; the lease is only a teardown bound.
+                    voices.Add((id, tick + (impact ? 32 : 22)));
                 }
                 if (impact)
                 {
@@ -75,7 +78,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
     private void Reset()
     {
         foreach (var v in voices) if (SoundEngine.TryGetActiveSound(v.Id, out var sound)) sound.Stop();
-        voices.Clear(); heard.Clear(); fight = Guid.Empty; previous = -1;
+        voices.Clear(); heard.Clear(); fight = Guid.Empty; epoch = -1; previous = -1;
     }
     public override void OnWorldUnload() => Reset();
     public override void ClearWorld() => Reset();
@@ -98,21 +101,46 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
                 var p = gesture.Plan;
-                if (age < p.Born || age >= p.End + 10) continue;
+                if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
-                float alpha = warning ? .78f + .18f * MathF.Exp(-(age - p.Born) / 5)
-                    : age < p.End ? 1 : 1 - CrimsonInvocation.Ease((age - p.End) / 10);
-                float sample = warning ? p.Fire : Math.Min(age, p.End - .001f);
-                if (age >= p.End && p.Technique is CrimsonTechnique.ChoirHook or CrimsonTechnique.ChoirThrust or CrimsonTechnique.MantleScissors)
-                    sample = p.Fire + (p.End - p.Fire - 1) * (1 - CrimsonInvocation.Ease((age - p.End) / 10));
+                if (warning && DuplicateForecast(p, age)) continue;
+                // The guide dissolves into the moving carrier rather than
+                // disappearing on the same tick that a solid strike pops in.
+                float guide = ScarletGesturePresentation.WarningOpacity(p, age);
+                if (guide > .001f)
+                {
+                    int forecastCount = CrimsonTechniqueGeometry.Write(p, p.Fire, strokes, true);
+                    ScarletMaterials.Strokes(strokes[..forecastCount], p.Source, age, guide, true,
+                        p.Technique == CrimsonTechnique.ChoirRend, 0,
+                        Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire);
+                }
+                if (warning)
+                {
+                    if (p.Technique == CrimsonTechnique.CrownCinders) DrawCinders(p, age);
+                    continue;
+                }
+                float alpha = ScarletGesturePresentation.LiveOpacity(p, age);
+                float sample = ScarletGesturePresentation.SampleAge(p, age);
                 int count = CrimsonTechniqueGeometry.Write(p, sample, strokes, warning);
                 ScarletMaterials.Strokes(strokes[..count], p.Source, age, alpha, warning,
                     p.Technique == CrimsonTechnique.ChoirRend, warning ? 0 : (1 + p.Accent * .35f) * MathF.Exp(-(age - p.Fire) / 5),
-                    Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire);
-                if (p.Technique == CrimsonTechnique.CrownCinders && warning) DrawCinders(p, age);
+                    Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire,
+                    p.Technique == CrimsonTechnique.CrownRain);
             }
         }
         finally { batch.End(); }
+    }
+    private static bool DuplicateForecast(in CrimsonGesturePlan plan, float age)
+    {
+        // Repeated full-field cuts have identical silhouettes. Do not stack six
+        // opaque copies; retain the nearest impending note's material pulse.
+        if (plan.Technique is not (CrimsonTechnique.CrownRain or CrimsonTechnique.MantleFan
+            or CrimsonTechnique.MantleScissors or CrimsonTechnique.ChoirThrust or CrimsonTechnique.ChoirRend)) return false;
+        foreach (Projectile projectile in Main.ActiveProjectiles)
+            if (projectile.ModProjectile is CrimsonGesture g && g.Plan.Fight == plan.Fight
+                && g.Plan.Phrase == plan.Phrase && g.Plan.Source == plan.Source
+                && g.Plan.Born <= age && g.Plan.Fire > age && g.Plan.Fire < plan.Fire) return true;
+        return false;
     }
     private static void DrawSources(CrimsonBoss boss, SpriteBatch batch, float age)
     {
@@ -136,14 +164,14 @@ internal sealed class CrimsonGestureVisuals : ModSystem
     private static void DrawCinders(in CrimsonGesturePlan p, float age)
     {
         float t = Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1);
-        Span<CrimsonStroke> particles = stackalloc CrimsonStroke[3];
-        for (int i = -1; i <= 1; i++)
+        Span<CrimsonStroke> particles = stackalloc CrimsonStroke[12];
+        for (int column = 0; column < 6; column++) for (int row = 0; row < 2; row++)
         {
-            var end = CrimsonTechniqueGeometry.Clamp(p.Field, p.Target + new CrimsonPoint(i * 260, (p.Pulse % 2 == 0 ? -1 : 1) * 90), 125);
+            var end = CrimsonTechniqueGeometry.CinderCenter(p, column, row);
             var control = CrimsonPoint.Lerp(p.Stage, end, .5f) + new CrimsonPoint(0, -180);
             var at = CrimsonTechniqueGeometry.Bezier(p.Stage, control, end, t);
             var prior = CrimsonTechniqueGeometry.Bezier(p.Stage, control, end, Math.Max(0, t - .055f));
-            particles[i + 1] = new(prior, at, 9 + t * 7);
+            particles[column * 2 + row] = new(prior, at, 34 + t * 28);
         }
         ScarletMaterials.Strokes(particles, 0, age, .65f, false, false, 0);
     }

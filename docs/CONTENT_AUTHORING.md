@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - gameplay
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-18
 source_of_truth_for:
   - engineering.content_authoring
 aliases:
@@ -36,7 +36,7 @@ The definition and active spec choose the activation policy and arena requiremen
 
 Keep a new mechanic in its feature until a second encounter demonstrates a useful shared contract. A mechanic owns assignments, start/resolve ticks, results, failure policy and cue data; it does not draw UI, play audio, trust client-reported outcomes or bypass cleanup.
 
-Each feature chooses its own phases, life-pool model, recovery and presentation. Do not give Ghost Samurai the Raid's Ready/Down/revive rules or copy the Doll's silhouette and marker policy into another Boss. Read the affected feature spec and relevant [Art Direction](ART_DIRECTION.md) section.
+Each feature chooses its own phases, life-pool model, recovery and artistic identity. Do not give Ghost Samurai the Raid's Ready/Down/revive rules or copy the Doll's silhouette and marker policy into another Boss. All content presentation follows the shared [Luminance policy](ART_DIRECTION.md#luminance-presentation-policy) together with the affected feature spec; feature independence does not waive the common motion/material quality target.
 
 ## Tuning
 

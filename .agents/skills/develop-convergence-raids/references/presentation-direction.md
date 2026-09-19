@@ -1,12 +1,29 @@
 # Convergence presentation direction
 
-Read for animation, VFX, texture integration or scene work. This reference owns shared implementation choices, not appearance or a second tuning table.
+Read for animation, VFX, texture integration, animated UI or scene work across all content. [Art Direction](../../../../docs/ART_DIRECTION.md#luminance-presentation-policy) owns the shared Luminance quality policy and completion criteria. This reference selects implementation paths; feature specs retain appearance and tuning.
 
 | Affected feature | Read only the relevant source of visual decisions |
 |---|---|
-| 不幸な人形劇 / `FirstSeverance` | [Doll Theater](../../../../docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) for body/capture/suspension; [Visual Spec](../../../../docs/encounters/first-severance/VISUAL_SPEC.md) for markers and scenes; [Weapons](../../../../docs/encounters/first-severance/WEAPONS.md) for weapon timelines |
-| Ghost Samurai | [Ghost Samurai spec](../../../../docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md) for skull/oni identity, attacks and rig; do not import Doll materials or Raid Stack/Spread rules |
+| Requiem of the Hollow Doll / `FirstSeverance` | [Doll Theater](../../../../docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md) for body/capture/suspension; [Visual Spec](../../../../docs/encounters/first-severance/VISUAL_SPEC.md) for markers and scenes; [Weapons](../../../../docs/encounters/first-severance/WEAPONS.md) for weapon timelines |
+| Ghost Samurai / Oboro | [Luminance presentation target](../../../../docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md#luminance-presentation-target) for the violet oni, connected dual-sword motion and evolving slash/ghost materials; retain that feature's geometry and identity |
+| Scarlet Invocation | [Luminance presentation v2](../../../../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#luminance-presentation-v2) for masked bodies, physical strokes, flexible appendages and score-linked material states |
 | Another feature | Its owning specification and accepted source art |
+
+## Select the implementation for the visible change
+
+Trace the affected renderer's accepted clock, root/part/emitter anchors, geometry/material pass and resource owner. Choose the useful Luminance mechanism from the policy's [capability table](../../../../docs/ART_DIRECTION.md#choose-capabilities-by-visible-result), then inspect the nearest existing implementation. Reuse proven helpers where suitable; sharing techniques does not require sharing another Boss's colors, silhouettes or attack timing.
+
+| Implementation question | Inspect only as relevant |
+|---|---|
+| Managed materials and existing world-space command buffers | [Doll Raid VFX](../../../../Client/Encounters/FirstSeverance/FirstSeveranceRaidVfx.cs) and its [pinned API evidence](../../../../docs/encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation) |
+| Primitive ribbons and shader state restoration | [Scarlet materials](../../../../Client/Encounters/CrimsonFoundry/ScarletMaterials.cs) |
+| Easing, projected state, decorative Verlet or local cutscene/shake ownership | [Scarlet articulation](../../../../Client/Encounters/CrimsonFoundry/ScarletArticulation.cs) |
+| Managed offscreen residue/Metaball lifecycle | [Scarlet atmosphere](../../../../Client/Encounters/CrimsonFoundry/ScarletAtmosphere.cs) |
+| Ghost Samurai body revision | [Current atlas renderer](../../../../Client/Encounters/GhostSamurai/GhostSamuraiSpriteArt.cs) and [pose selection](../../../../Client/Encounters/GhostSamurai/SamuraiSpriteFrames.cs) are the migration baseline, not a finished articulation/material solution |
+
+For Ghost Samurai motion work, preserve the accepted violet textures and attack clocks while replacing visible full-body pose jumps with connected part motion or authored in-betweens. Keep blade/hand/ghost-flame anchors together. A frame-count increase, crossfade or extra glow alone does not close the identified gap. For a narrow visibility/loading repair, preserve its scope and report that the broader motion target remains separate.
+
+Verify unresolved API/coordinate/thread behavior against the pinned target and installed library. Use existing source evidence for unchanged questions; use the research skill only for an actual uncertainty. Follow the verification matrix's shader-export row when HLSL changes. Judge the rendered result under [presentation completion](../../../../docs/ART_DIRECTION.md#presentation-completion), with observed clips/sequences distinguished from unrun in-game checks.
 
 ## Motion with extreme contrast
 

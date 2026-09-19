@@ -37,12 +37,14 @@ namespace Microsoft.Xna.Framework.Graphics
     {
         public readonly System.Text.StringBuilder Text = new();
         public int Calls;
+        public int ShaderPart = -1;
+        public float Clock, Charge, Hit, Dissolve;
         public void Draw(Texture2D t,Vector2 at,Rectangle r,Color c,float rot,Vector2 origin,Vector2 scale,SpriteEffects effect,float depth)
         {
             if(r.X<0 || r.Y<0 || r.X+r.Width>t.Width || r.Y+r.Height>t.Height || scale.X<=0 || scale.Y<=0) throw new System.Exception("Invalid sprite bounds");
             foreach(float n in new[]{at.X,at.Y,rot,scale.X,scale.Y,c.A}) if(!float.IsFinite(n)) throw new System.Exception("Nonfinite draw");
             Calls++;
-            Text.AppendLine(System.FormattableString.Invariant($"{at.X},{at.Y},{r.X},{r.Y},{r.Width},{r.Height},{c.R},{c.G},{c.B},{c.A},{rot},{origin.X},{origin.Y},{scale.X},{scale.Y},{(int)effect}"));
+            Text.AppendLine(System.FormattableString.Invariant($"{at.X},{at.Y},{r.X},{r.Y},{r.Width},{r.Height},{c.R},{c.G},{c.B},{c.A},{rot},{origin.X},{origin.Y},{scale.X},{scale.Y},{(int)effect},{ShaderPart},{Clock},{Charge},{Hit},{Dissolve}"));
         }
     }
 }
@@ -82,7 +84,7 @@ namespace Convergence.Client.Graphics
     {
         public static Microsoft.Xna.Framework.Graphics.SpriteBatch Batch;
         public WorldGraphicsScope(Microsoft.Xna.Framework.Graphics.SpriteBatch batch) { Batch=batch; }
-        public void Dispose() { }
+        public void Dispose() { Batch.ShaderPart=-1; }
     }
 }
 namespace Convergence.Client.Encounters.GhostSamurai
@@ -93,10 +95,11 @@ namespace Convergence.Client.Encounters.GhostSamurai
     internal static class GhostSamuraiVisuals { internal static void Stroke(SpriteBatch b,Vector2 a,Vector2 end,float w,Color c) { } }
     internal static class GhostSamuraiMaterials
     {
-        internal static void Prepare(float age,float charge,float hit,float death) { }
+        internal static void Prepare(float age,float charge,float hit,float death)
+        { var b=Convergence.Client.Graphics.WorldGraphicsScope.Batch; b.Clock=age; b.Charge=charge; b.Hit=hit; b.Dissolve=death; }
         internal static void Trails(SpriteBatch batch,in SamuraiRigPose p,SamuraiRigHistory h,double tick) { }
         internal static void Part(Texture2D t,int part,Vector2 at,Rectangle r,Color c,float rot,Vector2 origin,Vector2 scale,bool flip)
-            => Convergence.Client.Graphics.WorldGraphicsScope.Batch.Draw(t,at,r,c,rot,origin,scale,flip?SpriteEffects.FlipHorizontally:SpriteEffects.None,0);
+        { var b=Convergence.Client.Graphics.WorldGraphicsScope.Batch; b.ShaderPart=part; b.Draw(t,at,r,c,rot,origin,scale,flip?SpriteEffects.FlipHorizontally:SpriteEffects.None,0); }
     }
 }
 public static class SamuraiRigVisualFixture
@@ -115,10 +118,14 @@ public static class SamuraiRigVisualFixture
             ("Cleave cut left",Convergence.Content.Encounters.GhostSamurai.SamuraiAttack.FrontalCleaveShockwave,135,-1,-1),
             ("Dash",Convergence.Content.Encounters.GhostSamurai.SamuraiAttack.Phase2DashSlash,105,1,-1),
             ("Victory: lower blades",0,0,1,18), ("Victory: scatter",0,0,1,48), ("Victory: last wisp",0,0,1,83) };
-        foreach(var c in cases) {
+        var sequence=new System.Collections.Generic.List<(string Name,Convergence.Content.Encounters.GhostSamurai.SamuraiAttack Attack,float Tick,int Facing,float Death)>(cases);
+        for(int i=0;i<8;i++) sequence.Add(($"Windup {i}",Convergence.Content.Encounters.GhostSamurai.SamuraiAttack.TripleVerticalSlash,14+i*4,1,-1));
+        for(int i=0;i<9;i++) sequence.Add(($"Cut and recovery {i}",Convergence.Content.Encounters.GhostSamurai.SamuraiAttack.TripleVerticalSlash,42+i*2,1,-1));
+        for(int i=0;i<13;i++) sequence.Add(($"Ending {i}",0,0,1,i*8));
+        foreach(var c in sequence) {
             var left=Convergence.Client.Encounters.GhostSamurai.SamuraiRigMotion.Blade(c.Attack,Convergence.Content.Encounters.GhostSamurai.SamuraiPhase.Phase2,c.Tick,200,-1,c.Facing,default,false);
             var right=Convergence.Client.Encounters.GhostSamurai.SamuraiRigMotion.Blade(c.Attack,Convergence.Content.Encounters.GhostSamurai.SamuraiPhase.Phase2,c.Tick,200,1,c.Facing,default,false);
-            var p=new Convergence.Client.Encounters.GhostSamurai.SamuraiRigPose(300,265,200,c.Name=="Moving"?.18f:0,.85f,left,right,0,c.Name=="Dash"?80:0,.08f);
+            var p=new Convergence.Client.Encounters.GhostSamurai.SamuraiRigPose(300,300,200+c.Tick,c.Name=="Moving"?.18f:0,.75f,left,right,0,c.Name=="Dash"?80:0,.08f);
             batch.Text.Clear(); batch.Calls=0;
             if(c.Death<0) Convergence.Client.Encounters.GhostSamurai.GhostSamuraiRigArt.Draw(batch,p,zero,null,200);
             else Convergence.Client.Encounters.GhostSamurai.GhostSamuraiRigArt.DrawDeath(batch,p,zero,c.Death);

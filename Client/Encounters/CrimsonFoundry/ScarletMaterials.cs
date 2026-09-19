@@ -16,18 +16,23 @@ internal static class ScarletMaterials
 {
     private static readonly List<Vector2> points = new(128);
     private static readonly List<float> radii = new(128);
+    private static readonly List<Vector2> submittedPoints = new(128);
+    private static float trailCompletionScale = 1;
     private static readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
+    private static readonly VertexPositionColorTexture[] cap = new VertexPositionColorTexture[48];
+    private static bool physicalPass;
     private static PrimitiveSettings? settings;
     private static ManagedShader? ribbon;
     internal static Color Palette(int source) => source switch
     {
-        0 => new(255, 104, 62), 1 => new(245, 78, 116),
+        0 => new(255, 48, 74), 1 => new(245, 78, 116),
         2 => new(222, 55, 137), _ => new(255, 84, 120)
     };
-    internal static void Reset() { ribbon = null; settings = null; points.Clear(); radii.Clear(); }
+    internal static void Reset() { ribbon = null; settings = null; points.Clear(); radii.Clear(); submittedPoints.Clear(); }
     private static void Configure(int source, float clock, float alpha, bool warning, bool rift, float accent,
-        bool physical = false, float charge = 0, float release = -1)
+        bool physical = false, float charge = 0, float release = -1, bool falling = false)
     {
+        physicalPass = physical;
         ribbon ??= ShaderManager.GetShader("Convergence.ScarletRibbon");
         settings ??= new PrimitiveSettings(Width, _ => Color.White, Smoothen: false, Shader: ribbon);
         ribbon.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
@@ -41,18 +46,20 @@ internal static class ScarletMaterials
         ribbon.TrySetParameter("roundShape", 0f);
         ribbon.TrySetParameter("capAxis", Vector2.Zero);
         ribbon.TrySetParameter("motion", new Vector3(physical ? 1 : 0, charge, release));
+        ribbon.TrySetParameter("falling", falling ? 1f : 0f);
+        ribbon.TrySetParameter("trailCompletionScale", 1f);
     }
     private static float Width(float u)
     {
-        float index = Math.Clamp(u, 0, 1) * (radii.Count - 1); int i = (int)index;
+        float index = Math.Clamp(u * trailCompletionScale, 0, 1) * (radii.Count - 1); int i = (int)index;
         return MathHelper.Lerp(radii[i], radii[Math.Min(i + 1, radii.Count - 1)], index - i);
     }
     // Caller has ended SpriteBatch with ScarletGraphicsScope.
     internal static void Strokes(ReadOnlySpan<CrimsonStroke> strokes, int source, float age, float alpha,
-        bool warning, bool rift, float accent, float charge = 0, float release = -1)
+        bool warning, bool rift, float accent, float charge = 0, float release = -1, bool falling = false)
     {
         if (Main.dedServ || strokes.IsEmpty || alpha <= .001f) return;
-        Configure(source, age, alpha, warning, rift, accent, true, charge, release);
+        Configure(source, age, alpha, warning, rift, accent, true, charge, release, falling);
         points.Clear(); radii.Clear();
         for (int i = 0; i < strokes.Length; i++)
         {
@@ -93,7 +100,13 @@ internal static class ScarletMaterials
             ribbon!.TrySetParameter("footprint", new Vector2(Math.Max(1, length), Math.Max(1, radius / points.Count)));
             ribbon!.TrySetParameter("roundShape", 0f);
             ribbon.TrySetParameter("capAxis", Vector2.Zero);
-            PrimitiveRenderer.RenderTrail(points, settings!, points.Count);
+            // The library omits its last segment. A three-point line previously
+            // drew only its first half, with a detached cap at the far endpoint.
+            submittedPoints.Clear(); submittedPoints.AddRange(points);
+            submittedPoints.Add(points[^1] + (points[^1] - points[^2]));
+            trailCompletionScale = ScarletGesturePresentation.TrailCompletionScale(submittedPoints.Count);
+            ribbon.TrySetParameter("trailCompletionScale", trailCompletionScale);
+            PrimitiveRenderer.RenderTrail(submittedPoints, settings!, submittedPoints.Count);
             Disk(points[0], radii[0], EndDirection(points[0] - points[1]));
             Disk(points[^1], radii[^1], EndDirection(points[^1] - points[^2]));
         }
@@ -107,7 +120,26 @@ internal static class ScarletMaterials
         shader.TrySetParameter("footprint", new Vector2(radius * 2, radius));
         shader.TrySetParameter("capAxis", capAxis);
         shader.TrySetParameter("roundShape", 1f);
+        shader.TrySetParameter("trailCompletionScale", 1f);
         shader.TrySetParameter("uWorldViewProjection", WorldMatrix);
+        if (physicalPass && capAxis.LengthSquared() > .1f)
+        {
+            // Trim real geometry, not a conditional fragment discard: on the
+            // pinned backend an early-return forecast could retain a full disk.
+            float angle = MathF.Atan2(capAxis.Y, capAxis.X) - MathHelper.PiOver2;
+            Vector2 at = center - Main.screenPosition;
+            for (int i = 0; i < 16; i++)
+            {
+                Vector2 a = new Vector2(1, 0).RotatedBy(angle + i * MathHelper.Pi / 16);
+                Vector2 b = new Vector2(1, 0).RotatedBy(angle + (i + 1) * MathHelper.Pi / 16);
+                cap[i * 3] = new(new(at, 0), Color.White, new(.5f));
+                cap[i * 3 + 1] = new(new(at + a * radius, 0), Color.White, a * .5f + new Vector2(.5f));
+                cap[i * 3 + 2] = new(new(at + b * radius, 0), Color.White, b * .5f + new Vector2(.5f));
+            }
+            shader.Apply("CapPass");
+            Main.instance.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, cap, 0, 16);
+            return;
+        }
         Quad(center - Main.screenPosition - new Vector2(radius), new Vector2(radius * 2));
         shader.Apply("CapPass");
         Main.instance.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);

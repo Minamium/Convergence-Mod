@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-15
+last_reviewed: 2026-09-19
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,10 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Shared Luminance direction — 2026-09-18 / source0.3.19
+
+Owner reports a PNG flipbook appearance for Ghost Samurai and requests active Luminance use across all content, including contributor work. Source review confirms the current twelve-pose whole-body atlas renderer and a missing shared requirement despite detailed Doll/Scarlet guidance. Establish the [common policy](../ART_DIRECTION.md#luminance-presentation-policy), route the development Skill and contributor entry points to it, and define the [Ghost Samurai target](../encounters/ghost-samurai/ENCOUNTER_SPEC.md#luminance-presentation-target). This is documentation/Skill work only; connected body motion and evolving materials are targets, not newly implemented or visually approved results. No new game session or renderer acceptance is claimed.
 
 ## Through 0.3.1 — owner feedback consolidated on 2026-09-14
 
@@ -97,3 +101,15 @@ The owner subsequently requests latest Scarlet v2 → main → Build/Reload. Int
 ## Scarlet visibility and material revision — 2026-09-17 / 0.3.16 → 0.3.17
 
 Owner reports weak presentation and visible apparitions but an invisible performer; supplies the missing cathedral PNG and authorizes graphics rework while preserving the basics. Latest solo Host & Play completes all four action cycles, Victory and cleanup; no ERROR/FATAL entries, but the missing-background warning is present. A ceiling perch placed the56px performer about990px above a grounded player. Bring that shared, invulnerable pre-Final perch near the active focus, preserve small character pixels, add the exact supplied painting and recognize packed `.rawimg`. Rework physical-stroke forecast/live separation, flowing fibre materials, per-source pressure and bounded cloth/limb recoil; retain score/HP/damage-one rehearsal and all collision geometry. [Evidence](../evidence/2026-09-17-scarlet-visual-revision.json) separates the old playtest from the new offline GPU/build checks; visual acceptance, zoom/MP and performance remain owner checks.
+
+## Scarlet rhythmic onslaught — 2026-09-18 / 0.3.17 → 0.3.19
+
+Owner approves chorus circles/background but rejects small sparse attacks, slow melee warnings, cheap sounds and negligible shake. Two solo victories/cleanup are logged without ERROR/FATAL. Pull merged Oboro main first; preserve praised art, HP/damage-one rehearsal and cycle gates. Increase beat-derived phrases to5/6notes, shorten calls to1.5beats, expand physical coverage with refuges, add sharper connected extension, original species SFX with natural tails and stronger bounded recoil. [Evidence](../evidence/2026-09-18-scarlet-onslaught.json) records logs, score limitations, geometry/GPU/audio checks and package identity. Actual mix/fairness/camera/MP acceptance remains not_run; no claim that every drum transient was transcribed.
+
+## Scarlet basic pulse — 2026-09-19 / 0.3.19 → 0.3.20
+
+Owner still cannot feel the rhythm and asks for a deliberately simple forecast/strike repetition on the beat of the Stack marker's four inward arrows. Latest solo Host & Play logs show Victory after130.55s, all four action-cycle gates and cleanup, with no ERROR/FATAL; this is not acceptance of the rhythm. Replace5/6-note syncopations with forecast/strike/forecast/strike on four consecutive score beats, uniformly across all acts and Final; remove the warning-pitch ladder. Preserve accepted circles/background, physical techniques, SFX masters, HP/damage-one rehearsal and cycle gates. [Evidence](../evidence/2026-09-19-scarlet-basic-pulse.json) records the old session separately from the new timing/codec/build checks and pending audible/MP acceptance.
+
+## Scarlet flowing pulse — 2026-09-19 / 0.3.20 → 0.3.21
+
+Owner asks to reverse the basic beat roles, reports ActI forecasts only in the upper half and blinking falling attacks, permits flight/aftermath to cross beats and wants larger red energy bodies. The0.3.20 solo fight ends in Victory/cleanup after130.12s without ERROR/FATAL. Confirm Luminance's omitted final segment against pinned source and installed method; the old simplified GPU upload facade masked the half-line error. Add tangent support/UV correction and matching preview contract. Shift warnings/releases one beat, extend flight/residue and their owned leases, add continuous head/tail/ignition envelopes, enlarge energy bodies with honest forecasts. Preserve accepted circles/background, audio and rehearsal balance. [Evidence](../evidence/2026-09-19-scarlet-flow.json) records checks; actual gameplay/readability acceptance remains not_run.

@@ -63,8 +63,8 @@ public sealed class CrimsonGesture : ModProjectile
         if (valid)
         {
             float age = Clock(boss!);
-            Projectile.timeLeft = Math.Max(2, Plan.LastEnd + 14 - (int)age);
-            if (Main.netMode != NetmodeID.MultiplayerClient && age >= Plan.LastEnd + 14) Projectile.Kill();
+            Projectile.timeLeft = Math.Max(2, Plan.LastEnd + CrimsonRhythm.LeaseTicks - (int)age);
+            if (Main.netMode != NetmodeID.MultiplayerClient && age >= Plan.LastEnd + CrimsonRhythm.LeaseTicks) Projectile.Kill();
         }
         else if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
     }
@@ -81,7 +81,7 @@ public sealed class CrimsonGesture : ModProjectile
         {
             if (p.ModProjectile is not CrimsonGesture g || !g.TryBoss(out var parent) || parent != boss) continue;
             var candidate = g.Plan;
-            if (candidate.Source != source || age < candidate.Begin || age >= candidate.LastEnd + 10) continue;
+            if (candidate.Source != source || age < candidate.Begin || age >= candidate.LastEnd + CrimsonRhythm.PoseRecoveryTicks) continue;
             if (!found || candidate.Phrase > plan.Phrase || candidate.Phrase == plan.Phrase
                 && (candidate.Fire <= age && (plan.Fire > age || candidate.Fire > plan.Fire)
                     || candidate.Fire > age && plan.Fire > age && candidate.Fire < plan.Fire))

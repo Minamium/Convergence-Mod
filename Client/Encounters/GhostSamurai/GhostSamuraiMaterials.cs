@@ -16,7 +16,7 @@ internal static class GhostSamuraiMaterials
     private static PrimitiveSettings? trailSettings;
     private static readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private static readonly List<Vector2> points = new(16);
-    private static float trailRadius, trailAlpha;
+    private static float trailRadius, trailAlpha, completionScale = 1;
     internal static void Reset() { surface = ribbon = null; trailSettings = null; points.Clear(); }
     internal static void Prepare(float age, float charge, float hit, float dissolution)
     {
@@ -52,7 +52,7 @@ internal static class GhostSamuraiMaterials
     {
         if (Main.dedServ || history.Count < 2 || GhostSamuraiRigArt.Reduced) return;
         ribbon ??= ShaderManager.GetShader("Convergence.SamuraiRibbon");
-        trailSettings ??= new PrimitiveSettings(u => trailRadius * (.15f + .85f * u), _ => Color.White,
+        trailSettings ??= new PrimitiveSettings(u => trailRadius * (.15f + .85f * Math.Clamp(u * completionScale, 0, 1)), _ => Color.White,
             Smoothen: false, Shader: ribbon);
         using var scope = new WorldGraphicsScope(batch);
         ribbon.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
@@ -87,6 +87,11 @@ internal static class GhostSamuraiMaterials
         if (points.Count == 2) points.Insert(1, (points[0] + points[1]) * .5f);
         if (points.Count >= 3)
         {
+            // Installed Luminance 1.0.14 omits the final segment (tangent
+            // support). Keep the visible endpoint attached to the blade tip.
+            points.Add(points[^1] + (points[^1] - points[^2]));
+            completionScale = (points.Count - 1f) / (points.Count - 2);
+            ribbon!.TrySetParameter("completionScale", completionScale);
             ribbon!.TrySetParameter("opacity", trailAlpha);
             PrimitiveRenderer.RenderTrail(points, trailSettings!, points.Count);
         }

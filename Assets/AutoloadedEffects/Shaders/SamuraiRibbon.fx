@@ -1,11 +1,11 @@
 // Independent violet blade wake; coordinates follow recorded world-space tips.
 matrix uWorldViewProjection;
 sampler turbulence : register(s1);
-float clock, opacity;
+float clock, opacity, completionScale;
 struct VI { float4 P:POSITION0; float4 C:COLOR0; float3 U:TEXCOORD0; };
 struct VO { float4 P:SV_POSITION; float4 C:COLOR0; float2 U:TEXCOORD0; };
 VO VS(VI v) { VO o=(VO)0; o.P=mul(v.P,uWorldViewProjection); o.P.z=0; o.C=v.C;
- o.U=float2(v.U.x,(v.U.y-.5)/max(.001,v.U.z)+.5); return o; }
+ o.U=float2(v.U.x*completionScale,(v.U.y-.5)/max(.001,v.U.z)+.5); return o; }
 float4 PS(VO i):COLOR0
 {
  float d=abs(i.U.y*2-1);

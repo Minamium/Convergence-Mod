@@ -10,28 +10,30 @@ float4 signal; // opacity, forecast, rift, impact accent
 float2 footprint; // world-space length, average capsule radius
 float2 capAxis; // endpoint's outward half-disk; zero for standalone impacts
 float3 motion; // physical attack, warning progress, ticks since fire
+float falling, trailCompletionScale;
 struct PI { float4 P:POSITION0; float4 C:COLOR0; float3 U:TEXCOORD0; };
 struct QI { float4 P:POSITION0; float4 C:COLOR0; float2 U:TEXCOORD0; };
 struct VO { float4 P:SV_POSITION; float4 C:COLOR0; float2 U:TEXCOORD0; };
 VO VS(PI v) { VO o=(VO)0; o.P=mul(v.P,uWorldViewProjection); o.P.z=0; o.C=v.C; o.U=v.U.xy;
+ o.U.x*=trailCompletionScale;
  o.U.y=(o.U.y-.5)/max(.001,v.U.z)+.5; return o; }
 VO VQ(QI v) { VO o=(VO)0; o.P=mul(v.P,uWorldViewProjection); o.P.z=0; o.C=v.C; o.U=v.U; return o; }
 float4 Forecast(VO i)
 {
  float2 uv=i.U;
  float distance=lerp(abs(uv.y*2-1),length(uv*2-1),roundShape);
- float edge=1-smoothstep(.91,1,distance);
+ float edge=1-smoothstep(.76,1,distance);
  float body=pow(saturate(1-distance*distance),.65);
- float boundary=exp2(-pow(((1-distance)*footprint.y-1.4)*.62,2));
+ float boundary=exp2(-pow(((1-distance)*footprint.y-3)*.31,2));
  float spine=exp2(-pow(distance*footprint.y/1.3,2));
  float flow=tex2D(curl,float2(uv.x*footprint.x*.005-clock*.9,uv.y*3)).r;
  float folds=tex2D(veins,float2(uv.x*footprint.x*.008-clock*1.2,uv.y*4+flow*.24)).r;
  float star=pow(saturate(flow*1.17),22)*pow(saturate(folds*1.18),13);
  float3 hot=lerp(tint,float3(1,.94,.89),.90);
- float3 thread=tint*(body*.025+boundary*.25+star*.54)+hot*spine*.72;
+ float3 thread=tint*(body*.035+boundary*.38+star*.54)+hot*spine*.62;
  float3 disk=tint*(body*.018+star*.26)+hot*boundary*.32;
  float3 light=lerp(thread,disk,roundShape);
- float brightness=(.87+.13*sin(clock*4.2))*(.78+.22*motion.y);
+ float brightness=.80+.20*motion.y;
  return float4(light*edge*signal.x*brightness,edge*signal.x*body*.035)*i.C;
 }
 float4 PS(VO i):COLOR0
@@ -45,7 +47,7 @@ float4 PS(VO i):COLOR0
  float f=tex2D(curl,float2(uv.x*11+clock*.07,uv.y*4+n*.18)).r;
  float vein=tex2D(veins,float2(uv.x*7-clock*.12,uv.y*2)).r;
  float distance=lerp(transverse,length(uv*2-1),roundShape);
- float edge=1-smoothstep(.91,1,distance);
+ float edge=1-smoothstep(.78,1,distance);
  float rim=smoothstep(.65,.87,distance)*(1-smoothstep(.89,1,distance));
  float center=pow(saturate(1-distance*distance),.65);
  float3 shade;
@@ -102,6 +104,16 @@ float4 PS(VO i):COLOR0
      shade+=lip*(tint*(.7+flow)+hot*filament*.6)+tint*boundary*.26;
    }
    shade+=hot*body*signal.w*.20*(1-reduced*.8);
+   if(falling>.5) {
+     // A bright travelling head and a feathered, flowing tail. Keep a subtle
+     // carrier at the accepted boundary; no square-ended luminous pill.
+     float tail=smoothstep(0,.30,uv.x);
+     float head=1-smoothstep(.86,1,uv.x);
+     float nose=exp2(-pow((uv.x-.82)*8,2));
+     float envelope=lerp(.08+.92*tail*head,.32,roundShape);
+     shade=shade*(.58+filament*.42)+hot*core*nose*.44;
+     alpha*=envelope;
+   }
    return float4(shade*alpha,alpha*(.66+body*.21))*i.C;
  }
  if(signal.y>.5) {

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Develop Convergence Raids"
-  short_description: "Build and review authoritative multiplayer raids"
-  default_prompt: "Use $develop-convergence-raids to implement or review this Convergence Raid change safely."
+  display_name: "Develop Convergence"
+  short_description: "Implement combat and Luminance presentation"
+  default_prompt: "Use $develop-convergence-raids to implement or review this Convergence combat or presentation change, applying the shared Luminance policy when visual work is in scope."
