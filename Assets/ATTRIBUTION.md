@@ -147,8 +147,9 @@
 - Required attribution: retain this provenance, source and compiler/export identity manifest
 - Reviewer and review date: automated source/export checks, 2026-09-17; native visual approval not_run
 - Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, presentation v2
-- SHA256: `08e523bdd3caa16ebd73d81f9c0d7216359cb3c0d9843b77ed523494f07f0d9e`
-- Source SHA256: `5041eca16cbec8d7df9ef8db8008c7df83de367faf21b5c60d38124f6eee8941`
+- September19 revision: project-authored feathered travelling energy, smoother forecast boundaries and endpoint UV correction; no external shader copied. Installed Luminance is referenced, not modified or vendored.
+- SHA256: `53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b`
+- Source SHA256: `55250e8e4894fb4d12bee34e6d546914606d71cca0e75c1c556d5f45188d83a6`
 
 ### ScarletSurface original shader export — 2026-09-17
 

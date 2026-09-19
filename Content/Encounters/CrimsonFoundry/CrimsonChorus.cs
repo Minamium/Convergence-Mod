@@ -128,7 +128,7 @@ internal sealed partial class CrimsonRuntime
         if (actor is null || phase == 0 || performerDefeated || phrasesSinceChorus < CrimsonChorusRules.PhrasesBetween)
             return false;
         var score = CrimsonRegistration.Score;
-        int earliest = Math.Max(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks), phraseEnd + 14) - musicStart;
+        int earliest = Math.Max(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks), cycle.FinishAt) - musicStart;
         var beats = CrimsonRhythm.NextBeats(score, earliest, 11);
         byte mask = 0;
         for (int i = 0; i < members.Length; i++) if (!members[i].Out) mask |= (byte)(1 << i);

@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-19",
+  "feature": "Scarlet Invocation",
+  "version": "0.3.21",
+  "protocol": 51,
+  "base": "bc325c31781392c95c8f0c7505af642f0dfb4736",
+  "observed_playtest": {
+    "version": "0.3.20",
+    "topology": "solo Host & Play",
+    "fight": "0bd71d06-b826-477c-87fa-0cefc9ba28c4",
+    "members": 1,
+    "unlock_age": 866,
+    "victory_age": 8673,
+    "cleanup_age": 8823,
+    "combat_seconds": 130.1167,
+    "admitted_phrases": 49,
+    "resolved_stack": 3,
+    "resolved_spread": 3,
+    "phase_cycle_completion_ages": [2129, 4209, 6459, 8655],
+    "peak_five_second_capped_hp_dps": 91144,
+    "errors_fatal": 0,
+    "limits": "Capped actual-HP DPS, not weapon potential. Final admitted phrase can be interrupted by victory. No multiplayer/audio-latency evidence."
+  },
+  "owner_feedback": "Reverse forecast/strike beat roles; full-height smooth rain instead of blinking short capsules; flight may cross beats; larger red energy bodies.",
+  "library_finding": {
+    "source": "https://github.com/LucilleKarma/Luminance/blob/b2468dfd2f299597602dc6826af781d436c29a57/Core/Graphics/Primitives/PrimitiveRenderer.cs#L253",
+    "accessed": "2026-09-19",
+    "installed_version": "1.0.14",
+    "installed_package_sha256": "47a1ce462a4b407efcb1f043419d58bb750cc60addffcb4e3e442612c0495cad",
+    "confirmed": "AssignIndicesRectangleTrail uses PositionsIndex minus2 as its exclusive loop bound; installed method IL confirms the same comparison. Three submitted points therefore render only the first segment. Full source/binary equivalence is not claimed.",
+    "repair": "Append a tangent-support point, remap width and longitudinal UV to the visible span. The older independent preview used N-1 segments and concealed the defect; corrected the preview contract. No dependency code/assets vendored."
+  },
+  "changes": "Forecast/strike roles shifted one beat with a priming warning;32tick flight plus24tick harmless residue, continuous rain heads/tails and temporal envelopes; owned leases/chorus recovery follow lifetime. Bigger energy carriers/orbits/petals and offset performer sphere. Native damage/forecast share the larger geometry; rehearsed damage1, HP, all acts, accepted circles/background/music/SFX preserved.",
+  "checks": {
+    "domain_codec": "passed:297 deterministic cases, protocol51 compiled codec334 roundtrips and54 malformed inputs rejected",
+    "repository": "passed:78-document catalog,878-file repository check,12 YAML files,30 presentation/source-wiring tests and git diff --check",
+    "graphics": "135 offline FNA D3D11 frames using linked production geometry/material/envelopes and corrected upload facade. Rain/ignition/arrival/residue and enlarged cinder/performer energy inspected. Petal forecast was subsequently corrected to retain full width; its CPU coverage check passes. Not an in-game, peer, FPS or final acceptance claim.",
+    "native_build": "passed:0 errors,4 existing CS8632 warnings;22 locales parsed by installed tModLoader; shader source/export verified; packaged solo admission1-4 passed",
+    "runtime": "not_run: in-game full-height rain and overlapping forecasts, beat preference, remote peers, Reduced Effects, zoom and frame time"
+  },
+  "build": {
+    "status": "passed; isolated native release candidate",
+    "record_relative": ".local/builds/20260919T072054740967Z/record.json",
+    "base_commit": "bc325c31781392c95c8f0c7505af642f0dfb4736",
+    "source_sha256": "7ecccc34c0fda9c47d19cd71737acd9842bdab59b06c15d0f8c974f96c8674fd",
+    "source_changed_during_build": false,
+    "artifact_sha256": "8ff397b9cbed2dd40a65cf644cc13ed8687e59b56b0bce8847fb776bcaffcad2",
+    "artifact_bytes": 89451983,
+    "environment": "tModLoader2026.07.3.0;Terraria1.4.4.9;Calamity2.2.4;Luminance1.0.14;SDK8.0.424",
+    "installation_at_build": "Isolated candidate. Normal-profile installation follows main integration, unchanged-source verification and stopped game/server checks. This package-excluded evidence file was finalized after building.",
+    "installation_record_relative": ".local/builds/20260919T072054740967Z/installation.json"
+  }
+}

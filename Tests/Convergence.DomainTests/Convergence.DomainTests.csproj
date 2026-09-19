@@ -16,6 +16,7 @@
     <Compile Include="../../Client/Encounters/GhostSamurai/SamuraiSpriteFrames.cs" Link="Presentation/SamuraiSpriteFrames.cs" />
     <Compile Include="../../Common/Raids/Arena/RaidFieldGeometry.cs" Link="Domain/RaidFieldGeometry.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/CrimsonRigMotion.cs" Link="Presentation/CrimsonRigMotion.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/ScarletGesturePresentation.cs" Link="Presentation/ScarletGesturePresentation.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonScore.cs" Link="Domain/CrimsonScore.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonState.cs" Link="Domain/CrimsonState.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonInvocation.cs" Link="Domain/CrimsonInvocation.cs" />

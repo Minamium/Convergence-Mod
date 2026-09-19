@@ -76,9 +76,9 @@ internal static class CrimsonRig
             DrawPose(idle, 1 - cast); DrawPose(1, cast);
             batch.End();
         }
-        Vector2 orb = center + new Vector2(facing * 28, -13).RotatedBy(velocity.X * .009f);
+        Vector2 orb = center + new Vector2(facing * (94 + charge * 12), -25).RotatedBy(velocity.X * .009f);
         CrimsonEnergy.Begin();
-        CrimsonEnergy.AddCore(orb, 13 + charge * 10 + recoil * 7, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
+        CrimsonEnergy.AddCore(orb, 53 + charge * 24 + recoil * 18, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
         CrimsonEnergy.Draw(batch);
         if (floating && !CrimsonVisuals.Reduced)
         {

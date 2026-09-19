@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-18
+last_reviewed: 2026-09-19
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -109,3 +109,7 @@ Owner approves chorus circles/background but rejects small sparse attacks, slow 
 ## Scarlet basic pulse — 2026-09-19 / 0.3.19 → 0.3.20
 
 Owner still cannot feel the rhythm and asks for a deliberately simple forecast/strike repetition on the beat of the Stack marker's four inward arrows. Latest solo Host & Play logs show Victory after130.55s, all four action-cycle gates and cleanup, with no ERROR/FATAL; this is not acceptance of the rhythm. Replace5/6-note syncopations with forecast/strike/forecast/strike on four consecutive score beats, uniformly across all acts and Final; remove the warning-pitch ladder. Preserve accepted circles/background, physical techniques, SFX masters, HP/damage-one rehearsal and cycle gates. [Evidence](../evidence/2026-09-19-scarlet-basic-pulse.json) records the old session separately from the new timing/codec/build checks and pending audible/MP acceptance.
+
+## Scarlet flowing pulse — 2026-09-19 / 0.3.20 → 0.3.21
+
+Owner asks to reverse the basic beat roles, reports ActI forecasts only in the upper half and blinking falling attacks, permits flight/aftermath to cross beats and wants larger red energy bodies. The0.3.20 solo fight ends in Victory/cleanup after130.12s without ERROR/FATAL. Confirm Luminance's omitted final segment against pinned source and installed method; the old simplified GPU upload facade masked the half-line error. Add tangent support/UV correction and matching preview contract. Shift warnings/releases one beat, extend flight/residue and their owned leases, add continuous head/tail/ignition envelopes, enlarge energy bodies with honest forecasts. Preserve accepted circles/background, audio and rehearsal balance. [Evidence](../evidence/2026-09-19-scarlet-flow.json) records checks; actual gameplay/readability acceptance remains not_run.

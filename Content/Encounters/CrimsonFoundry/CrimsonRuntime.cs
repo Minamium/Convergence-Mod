@@ -305,7 +305,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             targets[source] = CrimsonTechniqueGeometry.Target(field, focus, techniques[source], serial);
             bool moves = techniques[source] is CrimsonTechnique.CrownCrash or CrimsonTechnique.MantleRush;
             if (moves) targets[source] = CrimsonTechniqueGeometry.LimitTravel(staging[source], targets[source], counts[source], minimum[source]);
-            poseUntil[source] = last[source] + 10;
+            poseUntil[source] = last[source] + CrimsonRhythm.PoseRecoveryTicks;
             poseExit[source] = moves ? targets[source] : staging[source];
         }
         // Validate the entire phrase before allocating any native resources.
@@ -325,11 +325,11 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             int slot = Projectile.NewProjectile(new CrimsonGestureSource(plan), new Vector2(plan.Stage.X, plan.Stage.Y),
                 Vector2.Zero, ModContent.ProjectileType<CrimsonGesture>(), plan.Damage, 0, Main.myPlayer);
             if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.phrase_capacity");
-            Main.projectile[slot].timeLeft = plan.LastEnd + 14 - age; Main.projectile[slot].netUpdate = true;
+            Main.projectile[slot].timeLeft = plan.LastEnd + CrimsonRhythm.LeaseTicks - age; Main.projectile[slot].netUpdate = true;
         }
         // Reservation lead is not an extra musical rest between every bar.
         int recoveryEnd = phraseEnd;
-        foreach (var plan in plans) recoveryEnd = Math.Max(recoveryEnd, plan.LastEnd + 14);
+        foreach (var plan in plans) recoveryEnd = Math.Max(recoveryEnd, plan.LastEnd + CrimsonRhythm.LeaseTicks);
         cycle.Admit(phraseEnd, recoveryEnd); phrasesSinceChorus++;
         nextPhrase = cycle.Full ? cycle.FinishAt : phraseEnd - CrimsonRhythm.LookAheadTicks;
         Project(true);
