@@ -51,7 +51,7 @@ internal readonly record struct CrimsonGesturePlan(
             || Source > 3 || !Enum.IsDefined(Technique) || CrimsonTechniqueGeometry.Owner(Technique) != Source
             || Steps is < 1 or > CrimsonRhythm.MaximumHits || Step >= Steps || Accent > 2
             || Begin < Epoch || Begin > FirstFire || Born < Epoch || Born > 73000
-            || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire is < 2 or > 16 || Fire > 73500
+            || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire is < 2 or > CrimsonRhythm.LiveTicks || Fire > 73500
             || FirstFire > Fire || LastEnd < End || LastEnd > 73500 || (long)LastEnd - FirstFire > 600
             || !From.Finite || !Stage.Finite || !Target.Finite || From.X is < 0 or > 400000 || From.Y is < 0 or > 150000
             || GroundX is < 1600 or > 400000 || GroundY is < 1440 or > 150000 || Damage is < 1 or > 2000)
@@ -156,16 +156,19 @@ internal static class CrimsonTechniqueGeometry
                 {
                     if (i >= gap && i <= gap + 2) continue;
                     float x = f.Left + 80 + i * (f.Right - f.Left - 160) / 25;
-                    float y = f.Top + 60 + (f.Bottom - f.Top - 100) * t;
-                    float before = f.Top + 60 + (f.Bottom - f.Top - 100) * p.Progress(Math.Max(p.Fire, age - 1));
-                    w.Add(new(x, forecast ? f.Top - 20 : before - 80), new(x, forecast ? f.Bottom - 20 : y), 24);
+                    float top = f.Top + 36, travel = f.Bottom - f.Top - 72;
+                    // A travelling band with separate continuous head/tail, not
+                    // a one-tick swept dash flashed at successive positions.
+                    float head = top + travel * CrimsonInvocation.Ease(t / .76f);
+                    float tail = top + travel * CrimsonInvocation.Ease((t - .24f) / .76f);
+                    w.Add(new(x, forecast ? top : tail), new(x, forecast ? top + travel : head), 32);
                 }
                 break;
             case CrimsonTechnique.CrownCinders:
                 for (int column = 0; column < 6; column++) for (int row = 0; row < 2; row++)
                 {
                     var c = CinderCenter(p, column, row);
-                    w.Add(c, c, forecast ? 164 : 30 + 130 * MathF.Sin(t * MathF.PI * .5f));
+                    w.Add(c, c, forecast ? 196 : 54 + 142 * MathF.Sin(t * MathF.PI * .5f));
                 }
                 break;
             case CrimsonTechnique.CrownCrash:
@@ -224,9 +227,9 @@ internal static class CrimsonTechniqueGeometry
                 for (int i = 0; i < 12; i++)
                 {
                     float a = i * MathF.Tau / 12 + p.Pulse * .12f;
-                    if (forecast) w.Arc(p.Target, 470, a, .42f, 42, 12);
+                    if (forecast) w.Arc(p.Target, 470, a, .42f, 68, 12);
                     else w.Add(p.Target + CrimsonPoint.Polar(a + Math.Max(0, t - .18f) * .42f, 470),
-                        p.Target + CrimsonPoint.Polar(a + t * .42f, 470), 34);
+                        p.Target + CrimsonPoint.Polar(a + t * .42f, 470), 60);
                 }
                 break;
             case CrimsonTechnique.VesperaPetals:
@@ -237,8 +240,14 @@ internal static class CrimsonTechniqueGeometry
                     var begin = center + new CrimsonPoint(MathF.Cos(a) * 1170, MathF.Sin(a) * 470);
                     var end = center + CrimsonPoint.Polar(a + .75f, 170);
                     var control = center + new CrimsonPoint(MathF.Cos(a + .6f) * 1250, MathF.Sin(a + .6f) * 500);
-                    if (forecast) w.Curve(begin, control, end, 1, 55, 16);
-                    else w.Add(Bezier(begin, control, end, Math.Max(0, t - .12f)), Bezier(begin, control, end, t), 30);
+                    if (forecast) w.Curve(begin, control, end, 1, 68, 16, false);
+                    else
+                    {
+                        float tail = Math.Max(0, t - .19f);
+                        for (int k = 0; k < 8; k++)
+                            w.Add(Bezier(begin, control, end, tail + (t - tail) * k / 8),
+                                Bezier(begin, control, end, tail + (t - tail) * (k + 1) / 8), 55);
+                    }
                 }
                 break;
         }
@@ -285,13 +294,13 @@ internal static class CrimsonTechniqueGeometry
             if (Count >= output.Length) throw new InvalidOperationException("crimson.geometry_capacity");
             output[Count++] = new(a, b, radius);
         }
-        internal void Curve(CrimsonPoint a, CrimsonPoint c, CrimsonPoint b, float progress, float radius, int steps)
+        internal void Curve(CrimsonPoint a, CrimsonPoint c, CrimsonPoint b, float progress, float radius, int steps, bool taper = true)
         {
             var previous = a;
             for (int i = 1; i <= steps; i++)
             {
                 float u = i / (float)steps * progress;
-                var point = Bezier(a, c, b, u); Add(previous, point, radius * (1 - u * .35f)); previous = point;
+                var point = Bezier(a, c, b, u); Add(previous, point, radius * (taper ? 1 - u * .35f : 1)); previous = point;
             }
         }
         internal void Arc(CrimsonPoint center, float radius, float start, float length, float thickness, int steps)

@@ -23,19 +23,21 @@ internal static partial class Program
             for (int i = 0; i < phrase.Hits.Count; i++)
             {
                 var hit = phrase.Hits[i];
-                AssertEqual((int)Math.Round(beats[i * 2]), hit.Warning, "forecast on first/third beat");
-                AssertEqual((int)Math.Round(beats[i * 2 + 1]), hit.Fire, "strike on second/fourth beat");
+                AssertEqual((int)Math.Round(beats[i * 2 + 1]), hit.Warning, "forecast moved to second/fourth beat");
+                AssertEqual((int)Math.Round(beats[i * 2 + 2]), hit.Fire, "strike moved to third/fifth beat after priming");
                 AssertEqual((byte)1, hit.Accent, "constant attack accent");
                 AssertEqual(true, hit.Fire - hit.Warning >= CrimsonRhythm.MinimumWarningTicks, "fast attacks retain full warning");
-                AssertEqual(10, hit.End - hit.Fire, "constant native collision pulse on the actual score");
-                AssertEqual(true, hit.End + 10 <= (int)Math.Round(beats[i * 2 + 2]), "visible residue ends before the next forecast");
+                AssertEqual(32, hit.End - hit.Fire, "flight lifetime does not stop at the following forecast beat");
                 if (i > 0)
                 {
                     AssertEqual(true, hit.Warning > phrase.Hits[i - 1].Warning, "ordered call");
                     AssertEqual(true, hit.Fire > phrase.Hits[i - 1].End, "no simultaneous incompatible live fields");
                 }
-                AssertEqual(true, hit.End < phrase.End, "phrase owns its tail");
             }
+            var next = CrimsonRhythm.Create(score, phrase.End, serial + 1, false);
+            var last = phrase.Hits[^1];
+            AssertEqual(true, last.End + CrimsonRhythm.PoseRecoveryTicks <= next.Hits[0].Fire, "old body reaches its exit before the next strike");
+            AssertEqual(true, last.End + CrimsonRhythm.ResidueTicks > next.Hits[0].Warning, "residue may overlap the next forecast");
             AssertEqual((int)Math.Round(beats[4]), phrase.End, "next phrase resumes on fifth beat");
             earliest = phrase.End;
         }
@@ -51,8 +53,8 @@ internal static partial class Program
         int[] offsets = { 0, 56 };
         for (int i = 0; i < offsets.Length; i++)
         {
-            AssertEqual(600 + offsets[i], phrase.Hits[i].Warning, "basic forecast rhythm");
-            AssertEqual(628 + offsets[i], phrase.Hits[i].Fire, "answer exactly one beat later");
+            AssertEqual(628 + offsets[i], phrase.Hits[i].Warning, "forecast shifted by one beat");
+            AssertEqual(656 + offsets[i], phrase.Hits[i].Fire, "answer exactly one beat later, never unannounced");
         }
         AssertEqual(712, phrase.End, "four-beat phrase");
     }

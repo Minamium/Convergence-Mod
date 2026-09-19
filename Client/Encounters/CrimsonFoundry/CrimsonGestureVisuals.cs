@@ -100,19 +100,31 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
                 var p = gesture.Plan;
-                if (age < p.Born || age >= p.End + 10) continue;
+                if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
                 if (warning && DuplicateForecast(p, age)) continue;
-                float alpha = warning ? .78f + .18f * MathF.Exp(-(age - p.Born) / 5)
-                    : age < p.End ? 1 : 1 - CrimsonInvocation.Ease((age - p.End) / 10);
-                float sample = warning ? p.Fire : Math.Min(age, p.End - .001f);
-                if (age >= p.End && p.Technique is CrimsonTechnique.ChoirHook or CrimsonTechnique.ChoirThrust or CrimsonTechnique.MantleScissors)
-                    sample = p.Fire + (p.End - p.Fire - 1) * (1 - CrimsonInvocation.Ease((age - p.End) / 10));
+                // The guide dissolves into the moving carrier rather than
+                // disappearing on the same tick that a solid strike pops in.
+                float guide = ScarletGesturePresentation.WarningOpacity(p, age);
+                if (guide > .001f)
+                {
+                    int forecastCount = CrimsonTechniqueGeometry.Write(p, p.Fire, strokes, true);
+                    ScarletMaterials.Strokes(strokes[..forecastCount], p.Source, age, guide, true,
+                        p.Technique == CrimsonTechnique.ChoirRend, 0,
+                        Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire);
+                }
+                if (warning)
+                {
+                    if (p.Technique == CrimsonTechnique.CrownCinders) DrawCinders(p, age);
+                    continue;
+                }
+                float alpha = ScarletGesturePresentation.LiveOpacity(p, age);
+                float sample = ScarletGesturePresentation.SampleAge(p, age);
                 int count = CrimsonTechniqueGeometry.Write(p, sample, strokes, warning);
                 ScarletMaterials.Strokes(strokes[..count], p.Source, age, alpha, warning,
                     p.Technique == CrimsonTechnique.ChoirRend, warning ? 0 : (1 + p.Accent * .35f) * MathF.Exp(-(age - p.Fire) / 5),
-                    Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire);
-                if (p.Technique == CrimsonTechnique.CrownCinders && warning) DrawCinders(p, age);
+                    Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire,
+                    p.Technique == CrimsonTechnique.CrownRain);
             }
         }
         finally { batch.End(); }
@@ -158,7 +170,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             var control = CrimsonPoint.Lerp(p.Stage, end, .5f) + new CrimsonPoint(0, -180);
             var at = CrimsonTechniqueGeometry.Bezier(p.Stage, control, end, t);
             var prior = CrimsonTechniqueGeometry.Bezier(p.Stage, control, end, Math.Max(0, t - .055f));
-            particles[column * 2 + row] = new(prior, at, 14 + t * 12);
+            particles[column * 2 + row] = new(prior, at, 34 + t * 28);
         }
         ScarletMaterials.Strokes(particles, 0, age, .65f, false, false, 0);
     }

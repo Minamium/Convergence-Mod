@@ -7,8 +7,8 @@ internal enum CrimsonRhythmKind : byte { Groove, Fill, Roll }
 internal readonly record struct CrimsonRhythmHit(int Warning, int Fire, int End, byte Accent);
 internal sealed record CrimsonRhythmPhrase(int Start, int End, CrimsonRhythmKind Kind, IReadOnlyList<CrimsonRhythmHit> Hits);
 
-// Basic pulse rehearsal: call / strike / call / strike on the exact same
-// score beats that drive the chorus marker. No subdivisions or Final exception.
+// Same basic pulse, reversed roles: even beats warn, following odd beats strike.
+// Prime the first warning before firing; nothing can damage before its call.
 internal static class CrimsonRhythm
 {
     internal const int LookAheadTicks = 30;
@@ -16,6 +16,10 @@ internal static class CrimsonRhythm
     internal const int MaximumWarningTicks = 180;
     internal const int MaximumHits = 6;
     internal const int MaximumLanes = 40;
+    internal const int LiveTicks = 32;
+    internal const int ResidueTicks = 24;
+    internal const int PoseRecoveryTicks = 6;
+    internal const int LeaseTicks = ResidueTicks + 4;
 
     internal static CrimsonRhythmPhrase Create(CrimsonScore score, int earliest, int serial, bool final)
     {
@@ -28,12 +32,12 @@ internal static class CrimsonRhythm
         var hits = new CrimsonRhythmHit[2];
         for (int i = 0; i < hits.Length; i++)
         {
-            int warning = At(i * 2), fire = At(i * 2 + 1), next = At(i * 2 + 2);
-            if (fire - warning < MinimumWarningTicks || fire - warning > MaximumWarningTicks || next - fire < 4)
+            int warning = At(i * 2 + 1), fire = At(i * 2 + 2);
+            if (fire - warning < MinimumWarningTicks || fire - warning > MaximumWarningTicks)
                 throw new InvalidOperationException("crimson.rhythm_unreadable_score");
-            // An attack and its visible residue finish before the next call.
-            int live = Math.Min(10, next - fire - 1);
-            hits[i] = new(warning, fire, fire + live, 1);
+            // Cadence schedules new releases, not an expiry deadline. Flight
+            // continues through the following call, and harmless residue longer.
+            hits[i] = new(warning, fire, fire + LiveTicks, 1);
         }
         return new(At(0), At(4), CrimsonRhythmKind.Groove, Array.AsReadOnly(hits));
     }
