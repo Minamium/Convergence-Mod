@@ -25,8 +25,9 @@ public sealed class OboroHeldVisuals : GlobalProjectile
         Player player = Main.player[projectile.owner];
         var state = player.GetModPlayer<OboroPlayer>();
         Vector2 center = player.MountedCenter;
+        var hand = state.View.Step == 0 ? OboroHandAnchor.Capture(player, state.View.Facing) : default;
         visual.Update(state.View, state.VisualAge, state.SwingVisible, true,
-            center.X, center.Y, player.direction, Main.GameUpdateCount);
+            center.X, center.Y, player.direction, Main.GameUpdateCount, hand);
 
         // Every update uses the same pose for blade, root and front arm. The
         // existing windup-only blend reaches the server's angle before damage.
@@ -34,9 +35,15 @@ public sealed class OboroHeldVisuals : GlobalProjectile
         projectile.rotation = visual.Pose.Angle;
         if (visual.Swinging) player.ChangeDir(state.View.Facing);
         if (visual.Swinging || visual.Settling)
-            player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, projectile.rotation - MathF.PI / 2);
+        {
+            var stretch = visual.Pose.Step == 0 ? OboroHandAnchor.Stretch(player, projectile.Center, projectile.rotation)
+                : Player.CompositeArmStretchAmount.Full;
+            player.SetCompositeArmFront(true, stretch, projectile.rotation - MathF.PI / 2);
+        }
 
-        if (!visual.Swinging || visual.Pose.Progress < OboroRules.Windup(state.View.Step)
+        float soundAt = state.View.Step == 0 ? OboroFirstSwingMotion.AccelerationEnd / OboroComboSettings.For(0).TotalFrames
+            : OboroRules.Windup(state.View.Step);
+        if (!visual.Swinging || visual.Pose.Progress < soundAt
             || sounded == (state.View.Generation, state.View.Swing)) return;
         sounded = (state.View.Generation, state.View.Swing);
         SoundEngine.PlaySound(SoundID.Item1 with { Volume = .8f, Pitch = state.View.Step == 2 ? -.6f : .15f, MaxInstances = 4 }, player.Center);

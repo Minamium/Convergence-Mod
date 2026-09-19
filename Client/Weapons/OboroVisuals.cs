@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Convergence.Content.Items.Oboro;
+using Luminance.Common.Easings;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -16,8 +17,12 @@ namespace Convergence.Client.Weapons;
 public sealed class OboroVisuals : ModSystem
 {
     private readonly List<(OboroBurst Burst, ulong At)> bursts = new();
-    public override void Load() => OboroPackets.DisplayBurst += ReceiveBurst;
-    public override void Unload() { OboroPackets.DisplayBurst -= ReceiveBurst; ClearWorld(); }
+    public override void Load()
+    {
+        OboroPackets.DisplayBurst += ReceiveBurst;
+        OboroSwingPresentation.FirstEntryEase = x => EasingCurves.Cubic.Evaluate(EasingType.InOut, x);
+    }
+    public override void Unload() { OboroPackets.DisplayBurst -= ReceiveBurst; OboroSwingPresentation.FirstEntryEase = null; ClearWorld(); }
     public override void ClearWorld() => bursts.Clear();
     private void ReceiveBurst(OboroBurst burst)
     {

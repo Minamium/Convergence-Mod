@@ -16,24 +16,39 @@ public sealed partial class OboroPlayer
         float p = age / (float)duration;
         if (!OboroRules.Live(step, p)) return;
         float current = aim + facing * OboroRules.Offset(step, p);
-        float previous = aim + facing * OboroRules.Offset(step, Math.Max(OboroRules.Windup(step), (age - 1f) / duration));
-        Vector2 center = Player.MountedCenter + aim.ToRotationVector2() * OboroComboSettings.For(step).ForwardDistance;
+        float prior = Math.Max(OboroRules.Windup(step), (age - 1f) / duration);
+        float previous = aim + facing * OboroRules.Offset(step, prior);
+        var hand = step == 0 ? OboroHandAnchor.Capture(Player, facing) : default;
+        Vector2 CenterAt(float progress, float angle)
+        {
+            var offset = OboroRules.RootOffset(step, progress, aim, angle, hand);
+            return Player.MountedCenter + new Vector2(offset.X, offset.Y);
+        }
+        Vector2 center = CenterAt(p, current), priorCenter = CenterAt(prior, previous);
+        float rootTravel = Vector2.Distance(center, priorCenter);
         foreach (NPC target in Main.ActiveNPCs)
         {
             if (!Enemy(target)) continue;
             Vector2 nearest = Vector2.Clamp(center, target.position, target.position + target.Size);
-            if (Vector2.DistanceSquared(center, nearest) > MathF.Pow(OboroRules.Reach + OboroRules.BladeWidth, 2)) continue;
+            if (Vector2.DistanceSquared(center, nearest) > MathF.Pow(OboroRules.Reach + OboroRules.BladeWidth + rootTravel, 2)) continue;
             NPC root = Root(target);
             var identity = root.GetGlobalNPC<OboroNpc>();
             if (identity.Generation == 0 || struck.Contains(identity.Generation)) continue;
             bool contact = false;
             // Sweep between successive blade poses; fast cuts cannot skip thin enemies.
-            int samples = Math.Clamp((int)MathF.Ceiling(Math.Abs(current - previous) / .035f), 1, 64);
+            int samples = Math.Clamp((int)MathF.Ceiling(Math.Max(Math.Abs(current - previous) / .035f, rootTravel / 4)), 1, 64);
             for (int i = 0; i <= samples && !contact; i++)
             {
                 float angle = MathHelper.Lerp(previous, current, i / (float)samples), collision = 0;
-                contact = Collision.CheckAABBvLineCollision(target.position, target.Size, center,
-                    center + angle.ToRotationVector2() * OboroRules.Reach, OboroRules.BladeWidth, ref collision);
+                Vector2 origin = center;
+                if (step == 0)
+                {
+                    float sample = MathHelper.Lerp(prior, p, i / (float)samples);
+                    angle = aim + facing * OboroRules.Offset(step, sample);
+                    origin = CenterAt(sample, angle);
+                }
+                contact = Collision.CheckAABBvLineCollision(target.position, target.Size, origin,
+                    origin + angle.ToRotationVector2() * OboroRules.Reach, OboroRules.BladeWidth, ref collision);
             }
             if (!contact || !Collision.CanHitLine(center, 1, 1, target.position, target.width, target.height)) continue;
             int power = Player.GetWeaponDamage(swingItem);

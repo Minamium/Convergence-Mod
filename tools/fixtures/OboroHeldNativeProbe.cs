@@ -72,5 +72,66 @@ public static class OboroHeldNativeProbe
         playerType.GetMethod("ReleaseHeld", I).Invoke(state, new[] { second });
         playerType.GetMethod("ClearCombat", I).Invoke(state, null);
         System.Console.WriteLine("PASS native held projectile defaults, full identity replication, one-per-player binding, stale cleanup and slot/connection reuse");
+        CheckHand(mod, engine);
+    }
+
+    static void CheckHand(System.Reflection.Assembly mod, System.Reflection.Assembly engine)
+    {
+        var playerType = engine.GetType("Terraria.Player", true);
+        var player = System.Activator.CreateInstance(playerType);
+        var anchor = mod.GetType("Convergence.Content.Items.Oboro.OboroHandAnchor", true);
+        var capture = anchor.GetMethod("Capture", S);
+        var native = playerType.GetMethod("GetFrontHandPosition", I);
+        var stretch = native.GetParameters()[0].ParameterType;
+        object full = System.Enum.Parse(stretch, "Full");
+        var facingField = playerType.GetField("direction", I);
+        var gravity = playerType.GetField("gravDir", I);
+        float X(object v) => (float)v.GetType().GetField("X").GetValue(v);
+        float Y(object v) => (float)v.GetType().GetField("Y").GetValue(v);
+        int count = 0;
+        float largestGap = 0;
+        foreach (int current in new[] { -1, 1 })
+        foreach (int facing in new[] { -1, 1 })
+        foreach (float grav in new[] { -1f, 1f })
+        {
+            facingField.SetValue(player, current); gravity.SetValue(player, grav);
+            object basis = capture.Invoke(null, new object[] { player, facing });
+            Require((int)facingField.GetValue(player) == current, "capture must not mutate facing");
+            object center = playerType.GetProperty("MountedCenter", I).GetValue(player);
+            facingField.SetValue(player, facing);
+            for (int i = 0; i <= 72; i++)
+            {
+                float angle = i * System.MathF.Tau / 72;
+                object actual = native.Invoke(player, new object[] { full, angle - System.MathF.PI / 2 });
+                object sample = basis.GetType().GetMethod("At", I).Invoke(basis, new object[] { angle });
+                float bx = (float)sample.GetType().GetField("Item1").GetValue(sample);
+                float by = (float)sample.GetType().GetField("Item2").GetValue(sample);
+                Require(System.MathF.Abs(X(actual) - X(center) - bx) < .0001f
+                    && System.MathF.Abs(Y(actual) - Y(center) - by) < .0001f, "native hand basis must reconstruct rotation and mirroring");
+                count++;
+            }
+            var motion = mod.GetType("Convergence.Content.Items.Oboro.OboroFirstSwingMotion", true);
+            for (int frame = 0; frame <= 18; frame++)
+            {
+                float progress = frame / 18f;
+                float angle = (float)motion.GetMethod("Angle", S).Invoke(null, new object[] { progress });
+                angle = (facing == 1 ? 0 : System.MathF.PI) + facing * angle;
+                float weight = (float)motion.GetMethod("HandWeight", S).Invoke(null, new object[] { progress });
+                object at = basis.GetType().GetMethod("At", I).Invoke(basis, new object[] { angle });
+                float x = X(center) + (float)at.GetType().GetField("Item1").GetValue(at) * weight;
+                float y = Y(center) + (float)at.GetType().GetField("Item2").GetValue(at) * weight;
+                object grip = System.Activator.CreateInstance(center.GetType(), new object[] { x, y });
+                object selected = anchor.GetMethod("Stretch", S).Invoke(null, new[] { player, grip, (object)angle });
+                object actual = native.Invoke(player, new[] { selected, (object)(angle - System.MathF.PI / 2) });
+                float gap = System.MathF.Sqrt(System.MathF.Pow(X(actual) - x, 2) + System.MathF.Pow(Y(actual) - y, 2));
+                largestGap = System.MathF.Max(largestGap, gap);
+                // Endpoints retain the old centered grip for the untouched next step.
+                // Native arm stretch is discrete; allow <9px at this harmless join.
+                Require(gap < 9, "hand stays within the hilt during root transition: frame=" + frame + " facing=" + facing + " gravity=" + grav + " gap=" + gap + " stretch=" + selected);
+                if (frame >= 4 && frame <= 16) Require(gap < .0001f, "active stroke must be exactly hand anchored");
+            }
+        }
+        System.Console.WriteLine("PASS " + count + " installed hand-anchor samples: facing, counter-facing, gravity and full rotation");
+        System.Console.WriteLine("PASS authored grip attachment: exact 4-16F, transition gap <= " + largestGap + " pixels");
     }
 }

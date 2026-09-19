@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-19
+last_reviewed: 2026-09-20
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,9 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.24 / protocol52**. Oboro has a server-created harmless Held Projectile, explicit three-step frame/angle settings and authority-owned held-input progression. The requested upstroke/return/heavy sequence loops without an idle gap and stops after the current step on release. Detailed choreography remains the next pass. Ghost Samurai uses independently articulated armor/arms/swords, Luminance easing and talisman physics, violet ribbons, spirit materials and bounded smoke; its combat and attacks are unchanged. Latest main0.3.21 changes are preserved: Scarlet reverses the previous forecast/strike beat roles, extends flight/aftermath without slowing release cadence, repairs half-length Luminance trails and adds continuous falling bands/larger red energy bodies. Accepted circles/background, SFX masters, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music remain unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Matching peers are required for new weapon input actions; packet IDs/layout stay stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.25 / protocol53**. Oboro has a server-created harmless Held Projectile, explicit three-step frame/angle settings and authority-owned held-input progression. The requested upstroke/return/heavy sequence loops without an idle gap and stops after the current step on release. The first cut now has five connected beats, a native hand anchor and mirrored blade/echoes. Other cuts retain their existing motion. Ghost Samurai uses independently articulated armor/arms/swords, Luminance easing and talisman physics, violet ribbons, spirit materials and bounded smoke; its combat and attacks are unchanged. Latest main0.3.21 changes are preserved: Scarlet reverses the previous forecast/strike beat roles, extends flight/aftermath without slowing release cadence, repairs half-length Luminance trails and adds continuous falling bands/larger red energy bodies. Accepted circles/background, SFX masters, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music remain unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Matching peers are required for the revised first-cut geometry; packet IDs/layout stay stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
-Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). The same basic interpolation drives the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
+Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
 **Latest owner playtest:** local0.3.20 completed one solo Host & Play victory (130.12s from unlock) and cleanup; no ERROR/FATAL. The owner requests reversed beat roles, rejects half-height forecasts/blinking rain and wants larger energy bodies with motion allowed across beats. [Flow evidence](evidence/2026-09-19-scarlet-flow.json) separates observations from the new implementation. Peak5-second capped-HP DPS was91,144; not uncapped weapon DPS or multiplayer evidence.
 
@@ -37,6 +37,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **Oboro first-cut motion:** [evidence](evidence/2026-09-20-oboro-first-swing.json) records the five-beat curve, mirrored moving-root/live-blade checks, native build, installed hand API probes and linked-production offline FNA frames. Detailed arm/armor/mount rendering, actual SP/MP input/latency and feel remain user-owned / not_run. The normal installed0.3.22 is unchanged.
 
 - **Oboro combo data and progression:** [current evidence](evidence/2026-09-19-oboro-combo.json) records20 focused domain cases, native build (0 errors/4 existing warnings), exact-package type/identity/cleanup and weapon checks. Held loops, release on every base frame, expired input, step-boundary speed changes and shared blade alignment pass. Actual SP/MP input, arm/draw layering, latency/arrival/reconnect and feel remain user-owned / not_run. The normal installed0.3.22 is unchanged. [Foundation evidence](evidence/2026-09-19-oboro-held.json) retains the prior0.3.23 checkpoint.
 
@@ -76,7 +78,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-Review the0.3.24 Oboro definitions and input progression separately from the next detailed motion pass. Use `OboroComboSettings` and the shared curve to refine acceleration, weight and hand/arm anchoring only when that next slice is requested. This branch is not installed into the normal playtest profile.
+Review the0.3.25 first-cut motion and its handoff into the existing second cut. Subsequent choreography for cuts two/three is a separate requested slice. This branch is not installed into the normal playtest profile.
 
 For the installed0.3.22, Reload Mods and check Idle, movement, each attack/phase transition, connected blade poses and the Victory-only96-tick ending. No repeat Build + Reload is required. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. Offline checks are not a game playtest.
 

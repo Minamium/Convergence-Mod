@@ -1,9 +1,10 @@
+#nullable enable
 using System;
 using Convergence.Content.Items.Oboro;
 
 namespace Convergence.Client.Weapons;
 
-internal readonly record struct OboroBladePose(float X, float Y, float Angle, float Length, float Progress, int Step);
+internal readonly record struct OboroBladePose(float X, float Y, float Angle, float Length, float Progress, int Step, int Facing = 1);
 internal readonly record struct OboroEcho(OboroBladePose Pose, uint Swing, ulong At);
 
 // Per-player, client-only presentation history. No hit decisions, projectile spawns
@@ -11,12 +12,16 @@ internal readonly record struct OboroEcho(OboroBladePose Pose, uint Swing, ulong
 internal sealed class OboroSwingPresentation
 {
     internal const int Capacity = 16, FadeTicks = 14, SettleTicks = 10;
+    // Runtime binds Luminance's installed Cubic InOut. It only softens harmless entry.
+    internal static Func<float, float>? FirstEntryEase { get; set; }
+    private static float EntryEase(int step, float t) => step == 0 && FirstEntryEase is not null
+        ? FirstEntryEase(Math.Clamp(t, 0, 1)) : OboroRules.Ease(t);
     private readonly OboroEcho[] echoes = new OboroEcho[Capacity];
     private int head, count;
     private bool initialized, wasSwinging, swingSeen;
     private ulong generation, settleAt;
     private uint swing;
-    private float entryCorrection, entryLength, lastAge;
+    private float entryCorrection, entryLength, lastAge, settleX, settleY;
     private OboroBladePose settleFrom;
     internal OboroBladePose Pose { get; private set; }
     internal bool Settling { get; private set; }
@@ -34,11 +39,11 @@ internal sealed class OboroSwingPresentation
     {
         head = count = 0; initialized = wasSwinging = swingSeen = Settling = false;
         generation = settleAt = 0; swing = 0; entryCorrection = entryLength = lastAge = 0;
-        Pose = settleFrom = default;
+        Pose = settleFrom = default; settleX = settleY = 0;
         Array.Clear(echoes);
     }
     internal void Update(OboroSnapshot view, float age, bool swinging, bool eligible,
-        float x, float y, int facing, ulong now)
+        float x, float y, int facing, ulong now, OboroHandBasis hand = default)
     {
         if (!eligible) { if (initialized) Clear(); return; }
         if (initialized && (generation != view.Generation
@@ -62,6 +67,9 @@ internal sealed class OboroSwingPresentation
                 // Blend a changed aim only while harmless; reach the authoritative
                 // angle exactly before the live window begins.
                 entryCorrection = Wrap(Pose.Angle - (view.Aim + view.Facing * OboroRules.Offset(view.Step, 0)));
+                // First cut from idle begins in the authored low stance; do not spend
+                // its entire anticipation rotating from the unrelated inventory pose.
+                if (view.Step == 0 && !wasSwinging) entryCorrection = 0;
                 entryLength = Pose.Length;
                 swing = view.Swing; swingSeen = true; lastAge = -1;
             }
@@ -69,11 +77,10 @@ internal sealed class OboroSwingPresentation
             float p = Math.Clamp(age / view.Duration, 0, 1);
             float angle = view.Aim + view.Facing * OboroRules.Offset(view.Step, p);
             if (p < OboroRules.Windup(view.Step))
-                angle += entryCorrection * (1 - OboroRules.Ease(p / OboroRules.Windup(view.Step)));
-            float drawLength = entryLength + (OboroRules.Reach - entryLength) * OboroRules.Ease(p / OboroRules.Windup(view.Step));
-            float holdOffset = OboroComboSettings.For(view.Step).ForwardDistance;
-            Pose = new(x + MathF.Cos(view.Aim) * holdOffset, y + MathF.Sin(view.Aim) * holdOffset,
-                angle, drawLength, p, view.Step);
+                angle += entryCorrection * (1 - EntryEase(view.Step, p / OboroRules.Windup(view.Step)));
+            float drawLength = entryLength + (OboroRules.Reach - entryLength) * EntryEase(view.Step, p / OboroRules.Windup(view.Step));
+            var root = OboroRules.RootOffset(view.Step, p, view.Aim, angle, hand);
+            Pose = new(x + root.X, y + root.Y, angle, drawLength, p, view.Step, view.Facing);
             if (age > lastAge && OboroRules.Live(view.Step, p))
             {
                 if (count == Capacity) { head = (head + 1) % Capacity; count--; }
@@ -83,12 +90,12 @@ internal sealed class OboroSwingPresentation
         }
         else
         {
-            if (wasSwinging) { settleAt = now; settleFrom = Pose; Settling = true; }
+            if (wasSwinging) { settleAt = now; settleFrom = Pose; settleX = Pose.X - x; settleY = Pose.Y - y; Settling = true; }
             wasSwinging = false;
             float t = Settling ? OboroRules.Ease(Math.Min(SettleTicks, now - settleAt) / (float)SettleTicks) : 1;
-            Pose = new(x + facing * 12 * t, y + 8 * t,
+            Pose = new(x + (Settling ? settleX * (1 - t) : 0) + facing * 12 * t, y + (Settling ? settleY * (1 - t) : 0) + 8 * t,
                 Settling ? settleFrom.Angle + Wrap(restAngle - settleFrom.Angle) * t : restAngle,
-                Settling ? settleFrom.Length + (145 - settleFrom.Length) * t : 145, 1, Pose.Step);
+                Settling ? settleFrom.Length + (145 - settleFrom.Length) * t : 145, 1, Pose.Step, Settling ? settleFrom.Facing : facing);
             if (t >= 1) Settling = false;
         }
     }

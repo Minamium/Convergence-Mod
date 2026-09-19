@@ -12,7 +12,7 @@ internal static partial class Program
         for (int step = 0; step < 3; step++)
         {
             var settings = OboroComboSettings.For(step);
-            float start = settings.HitStart, finish = settings.HitEnd, largest = 0;
+            float start = settings.HitStart, finish = step == 0 ? OboroFirstSwingMotion.CutEnd / settings.TotalFrames : settings.HitEnd, largest = 0;
             int sign = Math.Sign(settings.CutEndAngle - settings.WindupAngle);
             float previous = sign * settings.WindupAngle;
             for (int i = 0; i <= 1000; i++)

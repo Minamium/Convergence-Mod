@@ -86,7 +86,7 @@ documents:
 - doc_id: adr.0027
   path: docs/adr/0027-oboro-authoritative-weapon.md
   title: 'ADR-0027: Server-owned Oboro swings and wounds'
-  content_sha256: b8688886a8797cd762bcf89b2ebc623c7830e6eec448750b1aebf6eb2e063eb1
+  content_sha256: c3fefac2fe97ca68fab7ce4036bc847ae1500f9f906083fa82edaf6fd41e6e18
   document_type: adr
   status: accepted
   owners:
@@ -792,7 +792,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: d3a1da93ef79b0f4e5ee8c85ffaf98b9cb9e80c66eef08345c367a610d003c8c
+  content_sha256: 41520850678c9b36baee27b9707e058d79177bfc0765f9661deb385b0179203a
   document_type: spec
   status: provisional
   owners:
@@ -1268,12 +1268,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 4f0bccf71da2e458f6331936088d268a36a5aca520c388b051c02a7608cb6001
+  content_sha256: 142099cc6cb502dddfb67995b9458b151c36872ff4b6f6f906c742228f858846
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-19'
+  last_reviewed: '2026-09-20'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1524,12 +1524,12 @@ documents:
 - doc_id: research.oboro-20260916
   path: docs/research/2026-09-16-oboro.md
   title: 'Oboro: API and comparison boundary'
-  content_sha256: 68707abc8d97f83efe91748b4ecca12341874830d31385846f438a23b8ba69d0
+  content_sha256: 78e3209d5c18b5584d65d4c650fc7f49a80597fdbd5808d69d175c466585deb7
   document_type: research
   status: provisional
   owners:
   - gameplay
-  last_reviewed: '2026-09-17'
+  last_reviewed: '2026-09-20'
   source_of_truth_for:
   - research.oboro_api_evidence
   aliases:

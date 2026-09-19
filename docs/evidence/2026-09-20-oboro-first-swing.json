@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-20",
+  "version": "0.3.25",
+  "protocol": 53,
+  "branch": "feature/oboro-held-projectile-foundation",
+  "base_commit": "b6d389e51ab6a76d109d20dbc4d0fa25bc1f0773",
+  "scope": "First-cut five-beat motion and native hand root, with matching authoritative sweep. Second/third curves and all durations, live windows, potency and drop remain unchanged. Sprite mirroring remains consistent at the handoff.",
+  "environment_reference": "docs/evidence/2026-09-19-oboro-held.json",
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260919T231328827009Z/record.json",
+    "source_changed_during_build": false,
+    "package_sha256": "40545bbfe8b9e7a7a2a2f0862dc0f3d8f76bc938a3608ae7d0acef8853009ac7",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales": 22,
+    "shader_exports": "passed",
+    "output": "isolated feature profile"
+  },
+  "checks": {
+    "exact_package": {
+      "status": "passed",
+      "scope": "existing eight-type/identity/cleanup/DoT/codec probes plus584 native hand-basis samples over requested/current facings, gravity and full rotation",
+      "grip": "exact native attachment at4-16F; harmless endpoint transition gap at most8.21988px using discrete native stretch"
+    },
+    "repository": {
+      "status": "passed",
+      "domain_cases": 308,
+      "focused_oboro_cases": 22,
+      "codec_round_trips": 334,
+      "codec_malformed_rejections": 54,
+      "catalog_policy_yaml": "passed"
+    },
+    "presentation": {
+      "status": "offline_frames_inspected",
+      "command": "pwsh -File tools/preview-oboro-motion.ps1 -TModLoaderPath <installed-tml>",
+      "renderer": "linked production OboroArt, SpectralSpriteCutouts and OboroSwingPresentation on hidden FNA D3D11 device",
+      "frames": 232,
+      "scope": "0-28F first-cut and next-step handoff, both facings, bright/dark and full/reduced effects",
+      "observations": "low preparation, rapid rising arc, diminishing follow-through, attached violet echoes and consistent blade reflection; actual sprite/cutout paths load",
+      "limits": "offline arm diagram, not Terraria player/armor rendering; known native basis and equivalent entry easing supplied by fixture; no game, server or FPS claim"
+    },
+    "gameplay": {
+      "status": "not_run",
+      "owner": "user",
+      "remaining": [
+        "first cut with native player/armor/mount animations and both facings",
+        "hold into step2 and step3, release and restart, rapid re-aim",
+        "matching clients, latency/reconnect and visual/collision agreement",
+        "actual motion feel, bright/dark scene readability and frame time"
+      ]
+    }
+  },
+  "integration": {
+    "status": "not_merged",
+    "pull_request": 53,
+    "normal_profile": "unchanged0.3.22"
+  }
+}

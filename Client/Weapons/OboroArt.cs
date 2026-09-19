@@ -26,9 +26,10 @@ internal static class OboroArt
     internal static void Flame(SpriteBatch b, Vector2 at, float size, float opacity = 1)
         => b.Draw(Spirit, at - Main.screenPosition, null, Color.White * opacity, 0,
             Spirit.Size() * .5f, size / Spirit.Height, SpriteEffects.None, 0);
-    internal static void Sword(SpriteBatch b, Vector2 at, float angle, float length, Color tint)
-        => b.Draw(Blade, at - Main.screenPosition, null, tint, angle - SourceAngle, Grip,
-            length / SourceLength, SpriteEffects.None, 0);
+    internal static void Sword(SpriteBatch b, Vector2 at, float angle, float length, Color tint, bool mirror = false)
+        => b.Draw(Blade, at - Main.screenPosition, null, tint, angle + (mirror ? SourceAngle : -SourceAngle),
+            mirror ? new Vector2(Grip.X, Blade.Height - Grip.Y) : Grip,
+            length / SourceLength, mirror ? SpriteEffects.FlipVertically : SpriteEffects.None, 0);
     internal static void Afterimages(SpriteBatch b, OboroSwingPresentation history)
     {
         bool reduced = Reduced;
@@ -65,7 +66,7 @@ internal static class OboroArt
             OboroEcho echo = history.Echo(i);
             float fade = OboroSwingPresentation.Opacity(echo.At, Main.GameUpdateCount);
             Sword(b, new(echo.Pose.X, echo.Pose.Y), echo.Pose.Angle, echo.Pose.Length,
-                new Color(165, 101, 248) * (fade * .23f));
+                new Color(165, 101, 248) * (fade * .23f), echo.Pose.Facing < 0);
             if (!reduced)
                 Flame(b, new Vector2(echo.Pose.X, echo.Pose.Y) + echo.Pose.Angle.ToRotationVector2() * (OboroRules.Reach * .76f),
                     18 + (1 - fade) * 22, fade * .16f);
@@ -74,7 +75,7 @@ internal static class OboroArt
     internal static void Swing(SpriteBatch b, OboroBladePose pose, bool swinging)
     {
         Vector2 center = new(pose.X, pose.Y);
-        Sword(b, center, pose.Angle, pose.Length, Color.White);
+        Sword(b, center, pose.Angle, pose.Length, Color.White, pose.Facing < 0);
         if (!swinging) return;
         int flames = Reduced ? 2 : 4;
         for (int i = 0; i < flames; i++)
