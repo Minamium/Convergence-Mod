@@ -52,8 +52,37 @@
     }
   },
   "integration": {
-    "status": "not_merged",
+    "status": "merged_and_installed",
     "pull_request": 53,
-    "normal_profile": "unchanged0.3.22"
+    "authorization": "Repository owner requested installation of the completed PR53 change in this task.",
+    "source_commit": "f366bf0fbabfce20290620e386e88354ae79db18",
+    "source_branch": "main",
+    "normal_profile": "0.3.25 / protocol53 built from integrated canonical main",
+    "build_record": ".local/builds/20260919T232443200042Z/record.json",
+    "source_sha256": "252d4f853946cca7e14533c0f6ac01a40a27c8ca1c65821b40e70db8010474b8",
+    "source_changed_during_build": false,
+    "artifact": {
+      "bytes": 90871568,
+      "sha256": "fe70ff3a7c42783539467887ef3c7df0c04498fc8a66569491f7670902fde296"
+    },
+    "build": {
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "locales_parsed": 22,
+      "shader_exports": "passed",
+      "packaged_admission": "1-4 participants; solo enabled"
+    },
+    "installed_package_checks": {
+      "status": "passed",
+      "scope": "Eight registered Oboro types and stable saved item identity; one harmless held projectile, identity replication and stale/connection cleanup;584 native hand-anchor samples, exact4-16F grip; root-only additive wet-persistent DoT; compiled weapon codec round-trips/shared-buffer/truncation rejection."
+    },
+    "preservation": {
+      "previous_package_sha256": "1850f03f1b2c1f40c92ab122abff6fbc98f8fcbc0e19dc523397233af3b07ba1",
+      "previous_package_backup": "Hash verified local backup retained.",
+      "local_edits": "Three unrelated localization files and one untracked workstation record retained byte-for-byte. Oboro locale retained its pre-existing generated structure while accepting the new held-combo tooltip. Backups and scoped stash retained; no local edits committed.",
+      "source_note": "Build source is integrated main plus the preserved local localization edits.",
+      "source_junction": "Unchanged; normal ModSources still resolves to canonical main."
+    },
+    "next_action": "User: Reload Mods; no repeat compilation required. Check both facings, held1-2-3 loop, release/restart and matching clients. Actual game load/rendering and multiplayer remain not_run; no game/server launched."
   }
 }
