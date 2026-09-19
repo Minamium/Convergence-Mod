@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-19",
+  "version": "0.3.23",
+  "protocol": 51,
+  "branch": "feature/oboro-held-projectile-foundation",
+  "base_commit": "aeaea829a9143f2f73cdd390a20ebb5aba6f6d26",
+  "scope": "Held Projectile foundation only; existing trajectory, performance and art retained. Requested new upstroke/return/finisher choreography is the next authored-motion pass.",
+  "environment": {
+    "tModLoader": "2026.07.3.0",
+    "CalamityMod": "2.2.4",
+    "Luminance": "1.0.14"
+  },
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260919T095824575988Z/record.json",
+    "source_sha256": "53865dac64fb091e87ccb160350a63d3d86d2c842fd3a4a47051c3fb3ad99e01",
+    "source_changed_during_build": false,
+    "package_sha256": "3cca1f3b866ad0ad5d067dd55c9d54f917ae8fb98e8022ebc6b65571d02662e9",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales": 22,
+    "shader_exports": "passed",
+    "solo_admission": "1-4 participants; enabled",
+    "output": "isolated feature profile; normal installed 0.3.22 unchanged"
+  },
+  "checks": {
+    "focused_domain": {
+      "status": "passed",
+      "cases": 16,
+      "scope": "existing combo, shared curve/live alignment, history/late snapshots, marks/DoT and codec contracts"
+    },
+    "exact_package": {
+      "status": "passed",
+      "command": "pwsh -NoProfile -File tools/check-oboro.ps1 -AssemblyPath <assembly-extracted-from-built-package> -TModLoaderPath <installed-tml>",
+      "scope": "eight registered types, stable item identity, harmless holdout/no tile-cut/velocity path, one draw layer, full ulong identity, server rejection of client identity, duplicate binding, native slot/connection reuse, empty cleanup, NPC regen and weapon codec"
+    },
+    "gameplay": {
+      "status": "not_run",
+      "owner": "user",
+      "remaining": [
+        "left-click autoReuse and exact three-step loop",
+        "release, re-aim, weapon switch, control loss and death",
+        "draw layering/arms/echo visibility at screen edges",
+        "two matching clients, late join and reconnect",
+        "existing Zanshin, hit count and drop/save identity"
+      ]
+    }
+  },
+  "integration": {
+    "status": "not_merged",
+    "normal_profile": "unchanged0.3.22",
+    "next": "review foundation PR; new detailed motion is outside this slice"
+  }
+}

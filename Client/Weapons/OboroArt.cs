@@ -82,7 +82,7 @@ internal static class OboroArt
             float t = .28f + i * .18f, drift = (float)Main.GameUpdateCount * .08f + i * 2;
             Vector2 at = center + pose.Angle.ToRotationVector2() * (pose.Length * t)
                 + (pose.Angle + MathF.PI / 2).ToRotationVector2() * (20 + MathF.Sin(drift) * 12);
-            Flame(b, at, pose.Step == 2 && pose.Progress < .48f ? 38 : 24, .7f);
+            Flame(b, at, pose.Step == 2 && pose.Progress < OboroRules.Windup(pose.Step) ? 38 : 24, .7f);
         }
     }
 }

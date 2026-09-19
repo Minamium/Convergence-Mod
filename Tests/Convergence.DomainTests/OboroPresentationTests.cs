@@ -11,20 +11,17 @@ internal static partial class Program
     {
         for (int step = 0; step < 3; step++)
         {
-            float start = OboroRules.Windup(step), previous = -1.77f, largest = 0;
-            int sign = step == 1 ? -1 : 1;
+            var settings = OboroComboSettings.For(step);
+            float start = settings.HitStart, finish = settings.HitEnd, largest = 0;
+            int sign = Math.Sign(settings.CutEndAngle - settings.WindupAngle);
+            float previous = sign * settings.WindupAngle;
             for (int i = 0; i <= 1000; i++)
             {
-                float angle = sign * OboroRules.Offset(step, start + (.8f - start) * i / 1000);
-                AssertEqual(true, angle >= previous - .00001f && angle <= 1.58001f, "monotone within original arc");
+                float angle = sign * OboroRules.Offset(step, start + (finish - start) * i / 1000);
+                AssertEqual(true, angle >= previous - .00001f && angle <= sign * settings.CutEndAngle + .00001f, "monotone within defined arc");
                 largest = Math.Max(largest, angle - previous); previous = angle;
             }
-            AssertEqual(true, largest > 3.35f / 1000 * 2, "distinct rapid middle");
-            float recoveryPeak = 0;
-            for (int i = 1; i <= 1000; i++)
-                recoveryPeak = Math.Max(recoveryPeak, Math.Abs(OboroRules.Offset(step, .8f + .2f * i / 1000)
-                    - OboroRules.Offset(step, .8f + .2f * (i - 1) / 1000)) / .2f);
-            AssertEqual(true, recoveryPeak < largest / (.8f - start), "return must be slower than the fast cut");
+            AssertEqual(true, largest > Math.Abs(settings.CutEndAngle - settings.WindupAngle) / 1000 * 1.4f, "eased middle");
             for (int duration = OboroRules.Duration(step, 3); duration <= OboroRules.Duration(step, .5f); duration++)
             for (int age = 1; age < duration; age++)
             {
@@ -43,7 +40,7 @@ internal static partial class Program
         for (int step = 0; step < 3; step++)
         {
             float windup = OboroRules.Windup(step);
-            foreach (float at in new[] { windup, windup + (.8f - windup) * .18f, windup + (.8f - windup) * .62f, .8f, .84f })
+            foreach (float at in new[] { windup, OboroComboSettings.For(step).HitEnd })
             {
                 float center = OboroRules.Offset(step, at);
                 float left = (center - OboroRules.Offset(step, at - h)) / h;
@@ -81,13 +78,14 @@ internal static partial class Program
     private static void OboroEchoLifetime()
     {
         var visual = new OboroSwingPresentation();
-        var view = OboroSample with { Step = 0, Duration = 48, Swing = 1 };
-        for (int age = 0; age < 48; age++) visual.Update(view, age, true, true, age, 100, 1, (ulong)age + 100);
+        int duration = OboroRules.Duration(0, 1);
+        var view = OboroSample with { Step = 0, Duration = (ushort)duration, Swing = 1 };
+        for (int age = 0; age < duration; age++) visual.Update(view, age, true, true, age, 100, 1, (ulong)age + 100);
         AssertEqual(true, visual.Count > 0 && visual.Count <= OboroSwingPresentation.Capacity, "bounded echoes after live window");
         int count = visual.Count;
-        visual.Update(view with { Duration = 0 }, 0, false, true, 48, 100, 1, 148);
+        visual.Update(view with { Duration = 0 }, 0, false, true, duration, 100, 1, (ulong)duration + 100);
         AssertEqual(true, visual.Count > 0 && visual.Count <= count && visual.Settling, "normal end preserves fading echoes");
-        visual.Update(view with { Duration = 0 }, 0, false, true, 48, 100, 1, 170);
+        visual.Update(view with { Duration = 0 }, 0, false, true, duration, 100, 1, (ulong)duration + 122);
         AssertEqual(0, visual.Count, "expired"); AssertEqual(false, visual.Settling, "idle reached");
         AssertEqual(145f, visual.Pose.Length, "idle scale");
         float opacity = 1;

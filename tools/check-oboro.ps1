@@ -2,7 +2,7 @@
 param([Parameter(Mandatory=$true)][string]$AssemblyPath,
       [Parameter(Mandatory=$true)][string]$TModLoaderPath)
 $ErrorActionPreference = 'Stop'
-Add-Type -TypeDefinition @'
+$checkSource = @'
 using System;
 using System.IO;
 using System.Reflection;
@@ -24,11 +24,12 @@ public static class OboroPackageCheck {
    var engine=context.LoadFromAssemblyPath(loader);var mod=context.LoadFromAssemblyPath(dll);
    string prefix="Convergence.Content.Items.Oboro.";
    foreach(string name in new[]{prefix+"Oboro",prefix+"OboroPlayer",prefix+"OboroNpc",prefix+"Zanshin",
+    prefix+"OboroHeldProj","Convergence.Client.Weapons.OboroHeldVisuals",
     "Convergence.Client.Weapons.OboroItemVisuals","Convergence.Client.Weapons.OboroBuffVisuals"}){
     var t=mod.GetType(name,true);var value=Activator.CreateInstance(t,true);
     t.GetMethod("ValidateType",I).Invoke(value,null);
    }
-   Console.WriteLine("PASS six Oboro installed-loader type validations, including saved item identity Convergence/Oboro");
+   Console.WriteLine("PASS eight Oboro installed-loader type validations, including saved item identity Convergence/Oboro");
    var player=mod.GetType(prefix+"OboroPlayer",true);var empty=Activator.CreateInstance(player,true);
    player.GetMethod("Initialize",I).Invoke(empty,null);
    player.GetMethod("ClearCombat",I).Invoke(empty,null);player.GetMethod("ClearCombat",I).Invoke(empty,null);
@@ -36,6 +37,7 @@ public static class OboroPackageCheck {
    // Main's static paths normally come from launch setup. Point the fixture at
    // its isolated assembly folder; do not invoke a game or create a save.
    engine.GetType("Terraria.Program",true).GetField("SavePath",S).SetValue(null,Path.GetDirectoryName(dll));
+   OboroHeldNativeProbe.Run(mod, engine);
    var main=engine.GetType("Terraria.Main",true);var npcType=engine.GetType("Terraria.NPC",true);
    var npc=RuntimeHelpers.GetUninitializedObject(npcType);
    void Set(string field,object value)=>npcType.GetField(field,I).SetValue(npc,value);
@@ -74,4 +76,5 @@ public static class OboroPackageCheck {
  }
 }
 '@
+Add-Type -TypeDefinition ($checkSource + [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'fixtures/OboroHeldNativeProbe.cs')))
 [OboroPackageCheck]::Run((Resolve-Path -LiteralPath $AssemblyPath).Path,(Resolve-Path -LiteralPath $TModLoaderPath).Path)
