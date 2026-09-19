@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-19
+last_reviewed: 2026-09-20
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,9 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.22 / protocol51**. Ghost Samurai now uses independently articulated armor/arms/swords, Luminance easing and talisman physics, violet ribbons, spirit materials and bounded smoke. Ghost Samurai combat, attacks and Oboro balance are unchanged. Latest main0.3.21 changes are preserved: Scarlet reverses the previous forecast/strike beat roles, extends flight/aftermath without slowing release cadence, repairs half-length Luminance trails and adds continuous falling bands/larger red energy bodies. Accepted circles/background, SFX masters, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music remain unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Matching peers are required for changed geometry/lifetime bounds; packet IDs/layout stay stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.25 / protocol53**. Oboro has a server-created harmless Held Projectile, explicit three-step frame/angle settings and authority-owned held-input progression. The requested upstroke/return/heavy sequence loops without an idle gap and stops after the current step on release. The first cut now has five connected beats, a native hand anchor and mirrored blade/echoes. Other cuts retain their existing motion. Ghost Samurai uses independently articulated armor/arms/swords, Luminance easing and talisman physics, violet ribbons, spirit materials and bounded smoke; its combat and attacks are unchanged. Latest main0.3.21 changes are preserved: Scarlet reverses the previous forecast/strike beat roles, extends flight/aftermath without slowing release cadence, repairs half-length Luminance trails and adds continuous falling bands/larger red energy bodies. Accepted circles/background, SFX masters, sequential acts,12-phrase gates, damage-one rehearsal, HP and original music remain unchanged. Ghost Samurai/Oboro/Doll and worker-thread teardown fixes are retained. Matching peers are required for the revised first-cut geometry; packet IDs/layout stay stable. This is not a Workshop publication or GitHub release. The public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
-Oboro has the approved connected three-hit motion, slower return and fading violet blade/edge echoes. Damage, reach, durations/live windows, hit cap, rarity and drop remain unchanged; equipped DPS remains unmeasured. The same curve drives the server hit test and visible live blade. These changes remain in the current build above.
+Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
 **Latest owner playtest:** local0.3.20 completed one solo Host & Play victory (130.12s from unlock) and cleanup; no ERROR/FATAL. The owner requests reversed beat roles, rejects half-height forecasts/blinking rain and wants larger energy bodies with motion allowed across beats. [Flow evidence](evidence/2026-09-19-scarlet-flow.json) separates observations from the new implementation. Peak5-second capped-HP DPS was91,144; not uncapped weapon DPS or multiplayer evidence.
 
@@ -37,6 +37,10 @@ Oboro has the approved connected three-hit motion, slower return and fading viol
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **Oboro first-cut motion:** [evidence](evidence/2026-09-20-oboro-first-swing.json) records the five-beat curve, mirrored moving-root/live-blade checks, native build, installed hand API probes and linked-production offline FNA frames. Detailed arm/armor/mount rendering, actual SP/MP input/latency and feel remain user-owned / not_run. The normal installed0.3.22 is unchanged.
+
+- **Oboro combo data and progression:** [current evidence](evidence/2026-09-19-oboro-combo.json) records20 focused domain cases, native build (0 errors/4 existing warnings), exact-package type/identity/cleanup and weapon checks. Held loops, release on every base frame, expired input, step-boundary speed changes and shared blade alignment pass. Actual SP/MP input, arm/draw layering, latency/arrival/reconnect and feel remain user-owned / not_run. The normal installed0.3.22 is unchanged. [Foundation evidence](evidence/2026-09-19-oboro-held.json) retains the prior0.3.23 checkpoint.
 
 - **Ghost Samurai articulated rig:** [articulation evidence](evidence/2026-09-18-ghost-samurai-rig.json) records native compilation, motion/history checks, installed Luminance curve/Verlet/mist probes and FNA batch-state accessor validation. Offline FNA D3D11 output includes84 bright/dark rig frames from production transforms and6 compiled-material diagnostic frames, with the direct layouts/continuity inspected. The administrator approved PR #51; integrated main `1c5902a` was built into the normal playtest profile as0.3.22/protocol51 on September19. The installed package passed type, summon identity, lifecycle and Luminance probes; existing local edits and the prior package were preserved. No game/server was launched. In-game GPU composition, SP/MP visibility, transitions, late snapshots, ReducedEffects and high-FPS/frame-time acceptance remain user-owned / not_run. New textures/materials are attributed; Ghost Samurai gameplay and incoming main protocol51 are unchanged.
 
@@ -73,6 +77,8 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Review the0.3.25 first-cut motion and its handoff into the existing second cut. Subsequent choreography for cuts two/three is a separate requested slice. This branch is not installed into the normal playtest profile.
 
 For the installed0.3.22, Reload Mods and check Idle, movement, each attack/phase transition, connected blade poses and the Victory-only96-tick ending. No repeat Build + Reload is required. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. Offline checks are not a game playtest.
 

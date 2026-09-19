@@ -11,15 +11,24 @@ internal static partial class Program
     private static void OboroCycleSequence()
     {
         var clock = new OboroTiming(); ulong now = 200;
+        clock.SetHeld(true, now);
+        AssertEqual(true, clock.TryBegin(now, 1), "first click starts");
         for (int i = 0; i < 12; i++)
         {
-            AssertEqual(true, clock.TryBegin(now, 1), "start"); AssertEqual(i % 3, clock.Step, "three-step loop");
+            AssertEqual(i % 3, clock.Step, "three-step loop");
+            AssertEqual(0, clock.Age, "next step starts at zero with no idle tick");
+            AssertEqual((uint)(i + 1), clock.Serial, "one serial per step");
             AssertEqual(false, clock.TryBegin(now, 1), "duplicate overlap");
             int total = clock.Duration;
-            for (int tick = 1; tick <= total; tick++) AssertEqual(tick == total, clock.AdvanceSwing(++now), "one finish");
-            AssertEqual(false, clock.AdvanceSwing(++now), "no duplicate finish");
+            AssertEqual(new[] { 18, 16, 26 }[i % 3], total, "requested base ticks");
+            for (int tick = 1; tick <= total; tick++)
+            {
+                if (tick % 6 == 0) clock.SetHeld(true, now);
+                AssertEqual(tick == total ? OboroAdvance.NextStep : OboroAdvance.None,
+                    clock.AdvanceSwing(++now, 1), "one exact boundary");
+            }
         }
-        clock.TryBegin(now + 91, 1); AssertEqual(0, clock.Step, "idle resets combo");
+        AssertEqual(240UL, now - 200, "four loops of exactly 60 frames");
     }
     [DomainTest("Oboro manual and timed Zanshin detonate once then clear on death or exit")]
     private static void OboroZanshinLifecycle()
@@ -54,10 +63,10 @@ internal static partial class Program
     [DomainTest("Oboro return cut reverses direction and poses are continuous at boundaries")]
     private static void OboroMotionContinuity()
     {
-        for (int i = 0; i <= 100; i++)
-            AssertEqual(OboroRules.Offset(0, i / 100f), -OboroRules.Offset(1, i / 100f), "return direction");
+        AssertEqual(true, OboroRules.Offset(0, .5f) < OboroRules.Offset(0, .3f), "upstroke");
+        AssertEqual(true, OboroRules.Offset(1, .5f) > OboroRules.Offset(1, .3f), "return direction");
         for (int step = 0; step < 3; step++)
-        foreach (float at in new[] { OboroRules.Windup(step), .8f })
+        foreach (float at in new[] { OboroRules.Windup(step), OboroComboSettings.For(step).HitEnd })
             AssertEqual(true, Math.Abs(OboroRules.Offset(step, at - .0001f) - OboroRules.Offset(step, at + .0001f)) < .005f, "connected pose");
     }
     [DomainTest("Oboro wounds cap at five without overwriting stored hit angles")]

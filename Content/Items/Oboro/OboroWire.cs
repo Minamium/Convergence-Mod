@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Convergence.Content.Items.Oboro;
 
-internal enum OboroAction : byte { Hello, Swing, Zanshin }
+internal enum OboroAction : byte { Hello = 0, Swing = 1, Zanshin = 2, Hold = 3, Release = 4 }
 internal readonly record struct OboroRequest(OboroAction Action, ulong Generation, uint Nonce, float Aim)
 {
     internal void Write(BinaryWriter w) { w.Write((byte)Action); w.Write(Generation); w.Write(Nonce); w.Write(Aim); }

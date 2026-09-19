@@ -4,7 +4,7 @@ Mods: {
       DisplayName: Oboro
       Tooltip:
         '''
-        True melee: downswing, returning upswing, then a brief windup and heavy downswing
+        Hold left-click: true melee upswing, return cut, then a heavy finisher
         The third cut inflicts Wraith Fire for 10 seconds
         Wraith Fire halves defense and deals 200 + 2% of maximum life per second
         Stacks with other debuffs; water does not extinguish it

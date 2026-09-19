@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-19
 source_of_truth_for:
   - architecture.oboro_weapon_authority
 aliases:
@@ -29,3 +29,17 @@ Authority invokes the installed native NPC incoming-modifier and item CombinedHo
 NPC generations prevent slot reuse inheriting wounds. Segment hits share the live root and Wraith Fire damages only that root. Native negative life regeneration composes with other DoT; water does not clear the custom timer. Death/disconnect clear that wielder's wounds without detonation, invalidate the generation and cancel swings. World entry initializes ephemeral state; no marks, timers or session IDs are saved. NPC transforms/defaults get a new identity. Weapon resources do not belong to an unrelated Fight and cannot be cleared by another player's encounter cleanup. The actual NPC's death/despawn invalidates its wounds.
 
 The generated art, keyed sprite cache and sounds are client-only. GPU allocation occurs on the draw thread; disposal is queued to that thread. Visual frames cannot change damage windows. See the [API notes](../research/2026-09-16-oboro.md) for source versions and remaining runtime evidence.
+
+## Held Projectile adapter — 2026-09-19
+
+The accepted left-click request now creates one harmless `OboroHeldProj` per connection, retained across combo steps while the weapon is held. `Shoot` suppresses native owner-client spawning. The existing `OboroTiming`/snapshot remains the sole combo clock and `OboroCombat` remains the sole hit path. The holdout reads combo index, timer and duration each update; its native damage and tile-cut paths are disabled. Packet IDs/layout and server hit hooks do not change.
+
+Projectile ExtraAI carries the full connection generation. A client waits for matching weapon state before drawing; the server consumes but does not trust a client-supplied generation. The player cache checks the exact ModProjectile instance as well as generation/active state, rejecting duplicates and native slot reuse. Weapon switch, loss of control, death and disconnect release it; native world teardown releases projectile-local presentation. The client-only per-entity `OboroHeldVisuals` owns blade/arm/echo updates. It draws in the `overPlayers` projectile layer without locking item timers or also using `player.heldProj`, so autoReuse can still request the next accepted step. The old world renderer only supplies the idle fallback before a holdout is ready.
+
+## Continuous combo progression — 2026-09-19
+
+The requested follow-up moves held-input step transitions into the existing authority clock: `Swing` starts step one only when idle; `Hold` renews the input lease and next-step aim; `Release` ends that lease. A held step ends directly at the next step's age zero, with a new serial, captured item potency, fixed aim/facing and empty hit set. Release completes only the current step. A new sequence always starts at step one, superseding the old idle-gap combo reset. Native autoReuse may request another sequence but cannot advance or overlap a running step.
+
+The client sends `Hold` every six ticks while the eligible left button is down and one `Release` on its falling edge. Authority expires a lease after thirty ticks without refresh; timeout never interrupts the current cut. Focus/UI blocking removes input eligibility, and weapon switch, control loss, death/disconnect clear the same authority state. Hold/release use the existing generation/nonce validation. Action values0/1/2 remain unchanged and new values3/4 use the same bounded request layout; protocol52 requires matching peers. No client supplies combo index, duration or hit results. Attack speed and new aim are sampled only at accepted step boundaries.
+
+The September20 first-cut motion keeps that clock and input contract. A shared five-beat curve and a native hand basis now drive both blade presentation and the moving root in authority collision. The basis is sampled without mutating player facing; client arm stretch follows the root, never supplies hit positions. Only the first cut's swept geometry changes. Protocol53 requires matching motion implementations; no packet field or ID changes. Other cuts retain their curves and all damage windows/caps remain unchanged.
