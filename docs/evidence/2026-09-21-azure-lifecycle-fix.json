@@ -65,10 +65,11 @@
   ],
   "verification": {
     "old_package_reproduction": "PASS: actual installed engine StrikeNPC retains head but leaves struck child life<=0; native SkyManager.Reset leaves old duplicate active flag stale.",
-    "fixed_package_native_probe": "pending",
+    "fixed_package_native_probe": "PASS against0.3.35 with installed tML2026.07.3.0: native nonlethal body damage reduces one shared head pool50->30; lethal StrikeNPC/CheckDead retains all45 parts; late fromNet strike leaves them intact; another Fight remains unchanged. Actual SkyManager Reset/DeactivateAll recovers on three attempts, does not reactivate every tick, tolerates fade-tail restart and clears with the world.",
     "repository_domain_codec": "PASS: catalog82, repository974 files, YAML12;343 deterministic domain cases; compiled protocol62:334 roundtrips and54 malformed/truncated rejections. Diff whitespace check passed.",
-    "native_build": "pending",
-    "load_smoke": "pending"
+    "native_build": "PASS from0a5b023df9103c72e70aa027d207867ebf7f4879:0 errors,4 pre-existing unrelated nullable warnings. Source unchanged during build;24 locales and shader exports passed. Local build record20260920T163611497864Z. Package includes four preserved pre-existing generated English locale edits, not committed as this fix.",
+    "package_sha256": "71fab7ad12a099d04ca66ef8101a9ac25b66b0bcdaf57a37200a6f121cae7e63",
+    "load_smoke": "PASS: isolated native dedicated content load reaches Choose World with Convergence0.3.35, Calamity2.2.4, Luminance1.0.14, Calamity Music2.1, Simple Whip1.15.12 and SharedMap0.1.5.1. Stopped before entering/creating a world; not a client GPU or gameplay check."
   },
   "not_run": [
     "Consecutive real Host & Play attempts including defeat/retry restore the visible cathedral after the reveal cue.",
