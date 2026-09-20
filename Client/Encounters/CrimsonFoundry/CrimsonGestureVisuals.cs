@@ -34,24 +34,23 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
             if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
-            var p = gesture.Plan;
+            var p = gesture.EffectivePlan(age);
             Cue(p.Born, false); Cue(p.Fire, true);
             void Cue(int tick, bool impact)
             {
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
-                string asset = impact ? p.Source switch
-                { 0 => "CrownRupture", 1 => "SilkCleave", 2 => "ThornRend", _ => "ScarletRelease" } : "Foretell";
+                string asset = impact ? "PortalFire" : "ChargeLock";
                 if (voices.Count < 24)
                 {
-                    var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/CrimsonFoundry/" + asset)
+                    var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/Beams/" + asset)
                     {
-                        Volume = impact ? .56f + p.Accent * .06f : .25f,
-                        Pitch = impact ? -.035f * p.Accent : 0,
+                        Volume = impact ? .72f : .48f,
+                        Pitch = 0,
                         MaxInstances = 6, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
                         PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
                     });
                     // Masters end naturally; the lease is only a teardown bound.
-                    voices.Add((id, tick + (impact ? 32 : 22)));
+                    voices.Add((id, tick + (impact ? 100 : 50)));
                 }
                 if (impact)
                 {
@@ -95,12 +94,14 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         {
             ScarletAtmosphere.Draw(batch);
             DrawSources(boss!, batch, age);
+            DrawTrackingBeams(boss!, batch, age);
             using var scope = new ScarletGraphicsScope(batch);
             Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
             foreach (Projectile projectile in Main.ActiveProjectiles)
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
-                var p = gesture.Plan;
+                var p = gesture.EffectivePlan(age, true);
+                if (p.Technique == CrimsonTechnique.TrackingBeam) continue;
                 if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
                 if (warning && DuplicateForecast(p, age)) continue;
@@ -141,6 +142,24 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 && g.Plan.Phrase == plan.Phrase && g.Plan.Source == plan.Source
                 && g.Plan.Born <= age && g.Plan.Fire > age && g.Plan.Fire < plan.Fire) return true;
         return false;
+    }
+    private static void DrawTrackingBeams(CrimsonBoss boss, SpriteBatch batch, float age)
+    {
+        CrimsonEnergy.Begin();
+        foreach (Projectile projectile in Main.ActiveProjectiles)
+        {
+            if (projectile.ModProjectile is not CrimsonGesture g || !g.TryBoss(out var owner) || owner != boss) continue;
+            var p = g.EffectivePlan(age, true);
+            if (p.Technique != CrimsonTechnique.TrackingBeam || age < p.Born || age >= p.End) continue;
+            bool warning = age < p.Fire;
+            var s = CrimsonTrackingBeam.Stroke(p, age, warning);
+            Vector2 delta = V(s.B - s.A); float length = delta.Length();
+            if (length < .01f || s.Radius < .01f) continue;
+            float opacity = warning ? .95f * CrimsonInvocation.Ease((age - p.Born) / 5) : 1;
+            CrimsonEnergy.Add(V(s.A), delta / length, length, s.Radius, age, p.Fire, p.End,
+                opacity, CrimsonVisuals.Reduced, p.Born, fieldBeam: true);
+        }
+        CrimsonEnergy.Draw(batch);
     }
     private static void DrawSources(CrimsonBoss boss, SpriteBatch batch, float age)
     {

@@ -12,7 +12,7 @@ namespace Convergence.Client.Encounters.CrimsonFoundry;
 // materials. No dependency on either previous encounter's presentation classes.
 internal static class CrimsonEnergy
 {
-    private readonly record struct Ray(Vector2 Origin, Vector2 Direction, float Length, float Width, float Age, float Fire, float End, float Opacity, bool Reduced);
+    private readonly record struct Ray(Vector2 Origin, Vector2 Direction, float Length, float Width, float Age, float Fire, float End, float Opacity, bool Reduced, float Born, bool FieldBeam);
     private static readonly Ray[] rays = new Ray[512];
     private static readonly VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[6];
     private static int count;
@@ -22,10 +22,11 @@ internal static class CrimsonEnergy
     internal static void Begin() { count = coreCount = 0; }
     internal static void AddCore(Vector2 position, float radius, float age, float charge, float impulse, float alpha, bool reduced)
     { if (coreCount < cores.Length) cores[coreCount++] = new(position, radius, age, charge, impulse, alpha, reduced); }
-    internal static void Add(Vector2 origin, Vector2 direction, float length, float width, float age, float fire, float end, float opacity, bool reduced)
+    internal static void Add(Vector2 origin, Vector2 direction, float length, float width, float age, float fire, float end, float opacity, bool reduced,
+        float born = -1, bool fieldBeam = false)
     {
         if (count < rays.Length && length > .01f && width > .01f && opacity > .001f)
-            rays[count++] = new(origin, direction, length, width, age, fire, end, opacity, reduced);
+            rays[count++] = new(origin, direction, length, width, age, fire, end, opacity, reduced, born < 0 ? fire - 60 : born, fieldBeam);
     }
     internal static void Draw(SpriteBatch batch)
     {
@@ -45,10 +46,20 @@ internal static class CrimsonEnergy
             for (int i = 0; i < count; i++)
             {
                 ref var ray = ref rays[i]; bool live = ray.Age >= ray.Fire;
-                var signal = new Vector4(Math.Clamp((ray.Age - ray.Fire + 60) / 60, 0, 1), live ? 1 : 0, ray.Opacity, MathF.Exp(-Math.Max(0, ray.Age - ray.Fire) / 4));
-                DrawPass(portal, live ? "AutoloadPass" : "PortalForecastPass", live ? ray.Width : Math.Min(2, ray.Width));
-                if (live) DrawPass(portal, "PortalCoronaPass", ray.Width * 2.4f);
-                if (!live) DrawPass(dust, "ForecastDustPass", ray.Width);
+                var signal = new Vector4(Math.Clamp((ray.Age - ray.Born) / Math.Max(1, ray.Fire - ray.Born), 0, 1), live ? 1 : 0, ray.Opacity, MathF.Exp(-Math.Max(0, ray.Age - ray.Fire) / 4));
+                // Field beams use the actual Doll timed forecast/jet passes:
+                // soft veil, fine central thread and sparse footprint grains, no rails/caps.
+                DrawPass(portal, live ? "AutoloadPass" : "PortalForecastPass", live || ray.FieldBeam ? ray.Width : Math.Min(2, ray.Width));
+                if (live) DrawPass(portal, "PortalCoronaPass", ray.FieldBeam ? ray.Width + Math.Min(24, ray.Width * .3f) : ray.Width * 2.4f);
+                if (!live) {
+                    var before = signal;
+                    if (ray.FieldBeam) {
+                        float dip = 1 - .84f * Convergence.Content.Encounters.CrimsonFoundry.CrimsonInvocation.Ease((ray.Age - ray.Fire + 8) / 7);
+                        signal.Z *= dip;
+                    }
+                    DrawPass(dust, "ForecastDustPass", ray.Width);
+                    signal = before;
+                }
                 DrawMouth();
                 void DrawMouth()
                 {

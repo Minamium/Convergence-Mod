@@ -21,6 +21,7 @@
     <Compile Include="../../Client/Encounters/CrimsonFoundry/CrimsonRigMotion.cs" Link="Presentation/CrimsonRigMotion.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/ScarletGesturePresentation.cs" Link="Presentation/ScarletGesturePresentation.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonScore.cs" Link="Domain/CrimsonScore.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonTrackingBeam.cs" Link="Domain/CrimsonTrackingBeam.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonState.cs" Link="Domain/CrimsonState.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonInvocation.cs" Link="Domain/CrimsonInvocation.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceNativeHurt.cs" Link="Domain/FirstSeveranceNativeHurt.cs" />

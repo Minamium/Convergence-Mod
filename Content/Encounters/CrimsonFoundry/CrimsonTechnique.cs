@@ -10,7 +10,8 @@ internal enum CrimsonTechnique : byte
     CrownRain, CrownCinders, CrownCrash,
     MantleFan, MantleRush, MantleScissors,
     ChoirThrust, ChoirHook, ChoirRend,
-    VesperaOrbit, VesperaPetals
+    VesperaOrbit, VesperaPetals,
+    TrackingBeam // Append only; the rehearsal replaces decks, not stable IDs.
 }
 
 internal readonly record struct CrimsonPoint(float X, float Y)
@@ -32,7 +33,7 @@ internal readonly record struct CrimsonGesturePlan(
     CrimsonTechnique Technique, byte Step, byte Steps, byte Accent,
     int Begin, int Born, int Fire, int End, int FirstFire, int LastEnd,
     CrimsonPoint From, CrimsonPoint Stage, CrimsonPoint Target,
-    int GroundX, int GroundY, int Damage)
+    int GroundX, int GroundY, int Damage, short TargetSlot = -1, Guid TargetConnection = default)
 {
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
     internal bool Live(float age) => age >= Fire && age < End;
@@ -41,14 +42,14 @@ internal readonly record struct CrimsonGesturePlan(
     internal CrimsonPoint Body(float age)
     {
         if (age < FirstFire)
-            return CrimsonPoint.Lerp(From, Stage, CrimsonInvocation.Ease((age - Begin) / Math.Max(1, FirstFire - Begin)));
+            return CrimsonPoint.Lerp(From, Stage, CrimsonInvocation.Ease((age - Begin) / Math.Max(1, (Technique == CrimsonTechnique.TrackingBeam ? Born : FirstFire) - Begin)));
         if (!MovesBody) return Stage;
         return CrimsonPoint.Lerp(Stage, Target, (Step + CrimsonInvocation.Ease(Progress(age))) / Steps);
     }
     internal void Validate()
     {
         if (Fight == Guid.Empty || Boss is < 0 or >= 200 || Epoch < 0 || Phrase is < 1 or > 100000 || Pulse >= CrimsonRhythm.MaximumHits
-            || Source > 3 || !Enum.IsDefined(Technique) || CrimsonTechniqueGeometry.Owner(Technique) != Source
+            || Source > 3 || !Enum.IsDefined(Technique) || Technique != CrimsonTechnique.TrackingBeam && CrimsonTechniqueGeometry.Owner(Technique) != Source
             || Steps is < 1 or > CrimsonRhythm.MaximumHits || Step >= Steps || Accent > 2
             || Begin < Epoch || Begin > FirstFire || Born < Epoch || Born > 73000
             || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire is < 2 or > CrimsonRhythm.LiveTicks || Fire > 73500
@@ -57,6 +58,10 @@ internal readonly record struct CrimsonGesturePlan(
             || GroundX is < 1600 or > 400000 || GroundY is < 1440 or > 150000 || Damage is < 1 or > 2000)
             throw new InvalidDataException("crimson.gesture_invalid");
         var f = Field;
+        if (Technique == CrimsonTechnique.TrackingBeam
+            ? TargetSlot is < 0 or >= 255 || TargetConnection == Guid.Empty
+            : TargetSlot != -1 || TargetConnection != Guid.Empty)
+            throw new InvalidDataException("crimson.gesture_target_identity");
         if (Stage.X < f.Left + 100 || Stage.X > f.Right - 100 || Stage.Y < f.Top + 100 || Stage.Y > f.Bottom - 100
             || Target.X < f.Left + 100 || Target.X > f.Right - 100 || Target.Y < f.Top + 100 || Target.Y > f.Bottom - 100)
             throw new InvalidDataException("crimson.gesture_outside_field");
@@ -68,6 +73,7 @@ internal readonly record struct CrimsonGesturePlan(
         w.Write(Begin); w.Write(Born); w.Write(Fire); w.Write(End); w.Write(FirstFire); w.Write(LastEnd);
         w.Write(From.X); w.Write(From.Y); w.Write(Stage.X); w.Write(Stage.Y); w.Write(Target.X); w.Write(Target.Y);
         w.Write(GroundX); w.Write(GroundY); w.Write(Damage);
+        w.Write(TargetSlot); w.Write(TargetConnection.ToByteArray());
     }
     internal static CrimsonGesturePlan Read(BinaryReader r)
     {
@@ -77,8 +83,13 @@ internal readonly record struct CrimsonGesturePlan(
             r.ReadByte(), r.ReadByte(), (CrimsonTechnique)r.ReadByte(), r.ReadByte(), r.ReadByte(), r.ReadByte(),
             r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32(),
             new(r.ReadSingle(), r.ReadSingle()), new(r.ReadSingle(), r.ReadSingle()), new(r.ReadSingle(), r.ReadSingle()),
-            r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
+            r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt16(), ReadGuid(r));
         p.Validate(); return p;
+    }
+    private static Guid ReadGuid(BinaryReader r)
+    {
+        byte[] bytes = r.ReadBytes(16);
+        return bytes.Length == 16 ? new Guid(bytes) : throw new EndOfStreamException();
     }
 }
 
@@ -107,6 +118,7 @@ internal static class CrimsonTechniqueGeometry
         float side = serial % 2 == 0 ? -1 : 1;
         return Clamp(f, technique switch
         {
+            CrimsonTechnique.TrackingBeam => new(f.CenterX, f.Top + 210),
             CrimsonTechnique.CrownRain => new(f.CenterX, f.Top + 210),
             CrimsonTechnique.CrownCinders => focus + new CrimsonPoint(-side * 280, -260),
             CrimsonTechnique.CrownCrash => focus + new CrimsonPoint(-side * 160, -330),
@@ -150,6 +162,10 @@ internal static class CrimsonTechniqueGeometry
         float direction = p.Target.X >= p.Stage.X ? 1 : -1;
         switch (p.Technique)
         {
+            case CrimsonTechnique.TrackingBeam:
+                var beam = CrimsonTrackingBeam.Stroke(p, age, forecast);
+                if (beam.Radius > 0) w.Add(beam.A, beam.B, beam.Radius);
+                break;
             case CrimsonTechnique.CrownRain:
                 int gap = p.Phrase % 18 + 2;
                 for (int i = 0; i < 26; i++)

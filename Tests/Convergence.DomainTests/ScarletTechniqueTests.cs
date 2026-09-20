@@ -16,7 +16,9 @@ internal static partial class Program
             (byte)CrimsonTechniqueGeometry.Owner(technique), technique, (byte)step, 3, 1,
             520, 544 + step * 14, 600 + step * 14, 605 + step * 14, 600, 633,
             new(8000, 5230), CrimsonTechniqueGeometry.Stage(f, focus, technique, 8),
-            CrimsonTechniqueGeometry.Target(f, focus, technique, 8), 8000, 6000, 450);
+            CrimsonTechniqueGeometry.Target(f, focus, technique, 8), 8000, 6000, 450,
+            technique == CrimsonTechnique.TrackingBeam ? (short)0 : (short)-1,
+            technique == CrimsonTechnique.TrackingBeam ? Guid.Parse("3c051a1d-dd29-4844-8353-56347645a879") : Guid.Empty);
     }
     [DomainTest("Scarlet each apparition owns three nonrepeating physical techniques")]
     private static void ScarletTechniqueVariety()
@@ -35,7 +37,7 @@ internal static partial class Program
             AssertEqual(source == 3 ? 2 : 3, seen.Count, "full skill deck is reachable");
         }
     }
-    [DomainTest("Scarlet all eleven physical geometries are bounded finite and harmless outside their notes")]
+    [DomainTest("Scarlet retained techniques and tracking beam are bounded finite and harmless outside their notes")]
     private static void ScarletTechniqueGeometryBounds()
     {
         Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
@@ -47,6 +49,7 @@ internal static partial class Program
             for (float age = p.Fire; age < p.End; age += .25f)
             {
                 int count = CrimsonTechniqueGeometry.Write(p, age, strokes);
+                if (technique == CrimsonTechnique.TrackingBeam && age == p.Fire) { AssertEqual(0, count, "zero-width ignition is harmless"); continue; }
                 AssertEqual(true, count is > 0 and <= CrimsonTechniqueGeometry.MaximumStrokes, "bounded strokes");
                 foreach (var stroke in strokes[..count])
                 {
@@ -139,7 +142,8 @@ internal static partial class Program
                 catch (IOException) { rejected = true; }
                 AssertEqual(true, rejected, "all truncated prefixes rejected");
             }
-            CheckRejected(p with { Source = (byte)((p.Source + 1) % 4) });
+            if (technique != CrimsonTechnique.TrackingBeam)
+                CheckRejected(p with { Source = (byte)((p.Source + 1) % 4) });
             CheckRejected(p with { Stage = new(float.NaN, 5000) });
             CheckRejected(p with { Fire = int.MinValue });
             CheckRejected(p with { Steps = 0 });

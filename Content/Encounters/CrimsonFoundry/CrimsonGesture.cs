@@ -16,6 +16,14 @@ internal sealed record CrimsonGestureSource(CrimsonGesturePlan Plan) : IEntitySo
 public sealed class CrimsonGesture : ModProjectile
 {
     internal CrimsonGesturePlan Plan;
+    private int aimTick = -1;
+    private CrimsonPoint aim, oldAim;
+    private float aimReceived;
+    private bool Beam => Plan.Technique == CrimsonTechnique.TrackingBeam;
+    private bool AimLocked => !Beam || aimTick >= CrimsonTrackingBeam.LockAt(Plan);
+    internal CrimsonGesturePlan EffectivePlan(float age, bool visual = false)
+        => !Beam ? Plan : Plan with { Target = visual && age < Plan.Fire
+            ? CrimsonPoint.Lerp(oldAim, aim, CrimsonInvocation.Ease((age - aimReceived) / CrimsonTrackingBeam.SampleInterval)) : aim };
     public override string Texture => "Terraria/Images/Projectile_1";
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 2000;
     public override void SetDefaults()
@@ -25,7 +33,7 @@ public sealed class CrimsonGesture : ModProjectile
         Projectile.penetrate = -1; Projectile.timeLeft = 900; Projectile.netImportant = true;
     }
     public override void OnSpawn(IEntitySource source)
-    { if (source is CrimsonGestureSource owned) { owned.Plan.Validate(); Plan = owned.Plan; } }
+    { if (source is CrimsonGestureSource owned) { owned.Plan.Validate(); Plan = owned.Plan; aim = oldAim = Plan.Target; aimTick = Plan.Born - 1; } }
     public override bool PreDraw(ref Color lightColor) => false;
     public override bool ShouldUpdatePosition() => false;
     public override bool? CanHitNPC(NPC target) => false;
@@ -43,13 +51,13 @@ public sealed class CrimsonGesture : ModProjectile
     }
     internal static float Clock(CrimsonBoss boss) => boss.VisualAge;
     public override bool? CanDamage() => TryBoss(out var boss) && Plan.Live(Clock(boss!))
-        && boss!.State.SourceActive(Plan.Source, Clock(boss)) ? null : false;
+        && AimLocked && boss!.State.SourceActive(Plan.Source, Clock(boss)) ? null : false;
     public override bool CanHitPlayer(Player target) => TryBoss(out var boss) && boss!.State.Contains(target.whoAmI);
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
-        if (!TryBoss(out var boss) || !boss!.State.SourceActive(Plan.Source, Clock(boss)) || !Plan.Live(Clock(boss))) return false;
+        if (!TryBoss(out var boss) || !AimLocked || !boss!.State.SourceActive(Plan.Source, Clock(boss)) || !Plan.Live(Clock(boss))) return false;
         Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
-        int count = CrimsonTechniqueGeometry.Write(Plan, Clock(boss), strokes);
+        int count = CrimsonTechniqueGeometry.Write(EffectivePlan(Clock(boss)), Clock(boss), strokes);
         for (int i = 0; i < count; i++)
             if (CrimsonTechniqueGeometry.Intersects(strokes[i], targetHitbox.X, targetHitbox.Y, targetHitbox.Width, targetHitbox.Height)) return true;
         return false;
@@ -63,16 +71,39 @@ public sealed class CrimsonGesture : ModProjectile
         if (valid)
         {
             float age = Clock(boss!);
+            if (Beam && Main.netMode != NetmodeID.MultiplayerClient && age >= Plan.Born && !AimLocked)
+            {
+                var target = Main.player[Plan.TargetSlot];
+                if (target.active && !target.dead && !target.ghost
+                    && target.GetModPlayer<CrimsonConnection>().Token == Plan.TargetConnection
+                    && Array.Exists(boss!.State.Members, m => m.Slot == Plan.TargetSlot && m.Connection == Plan.TargetConnection && !m.Out))
+                {
+                    var desired = CrimsonTechniqueGeometry.Clamp(Plan.Field, new(target.Center.X, target.Center.Y), 100);
+                    oldAim = aim; aim = CrimsonTrackingBeam.Follow(aim, desired); aimReceived = age;
+                }
+                // A missing/disconnected target freezes its last valid aim; never retarget mid-call.
+                aimTick = Math.Min((int)age, CrimsonTrackingBeam.LockAt(Plan));
+                if (aimTick % CrimsonTrackingBeam.SampleInterval == 0 || AimLocked) Projectile.netUpdate = true;
+            }
             Projectile.timeLeft = Math.Max(2, Plan.LastEnd + CrimsonRhythm.LeaseTicks - (int)age);
             if (Main.netMode != NetmodeID.MultiplayerClient && age >= Plan.LastEnd + CrimsonRhythm.LeaseTicks) Projectile.Kill();
         }
         else if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
     }
-    public override void SendExtraAI(BinaryWriter writer) => Plan.Write(writer);
+    public override void SendExtraAI(BinaryWriter writer)
+    { Plan.Write(writer); CrimsonTrackingBeam.WriteAim(writer, aimTick, aim); }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         var next = CrimsonGesturePlan.Read(reader);
-        if (Main.netMode != NetmodeID.Server && (Plan.Fight == Guid.Empty || next == Plan)) Plan = next;
+        var sample = CrimsonTrackingBeam.ReadAim(reader); // Parse completely before accepting authority.
+        if (Main.netMode == NetmodeID.Server || Plan.Fight != Guid.Empty && next != Plan) return;
+        bool first = Plan.Fight == Guid.Empty;
+        if (next.Technique == CrimsonTechnique.TrackingBeam
+            && !CrimsonTrackingBeam.CanAccept(next, first ? next.Born - 2 : aimTick, sample.Tick, sample.Target)) return;
+        Plan = next;
+        oldAim = first ? sample.Target : aim;
+        aim = sample.Target; aimTick = sample.Tick;
+        aimReceived = TryBoss(out var parent) ? Clock(parent!) : next.Born;
     }
     internal static bool TryPose(CrimsonBoss boss, int source, float age, out CrimsonGesturePlan plan)
     {
