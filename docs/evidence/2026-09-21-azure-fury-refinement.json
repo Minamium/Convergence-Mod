@@ -60,8 +60,9 @@
     "shader_exports": "FXC compiled AzureGlass and palette-parameterized ScarletSorcery; manifest matches exports.",
     "gpu_preview": "120 linked-production FNA/D3D11 frames inspected across retreat/slow jaw/bite silhouette/Fury reveal, bright/dark energy bolts and slash warning/live/residue. Final tail feather refinement rerendered only24 affected frames. Offline staged poses, not native gameplay/network or FPS evidence.",
     "repository": "339 deterministic domain cases passed; protocol61:334 roundtrips and54 malformed/truncated cases rejected. Catalog82, repository policy967 files and YAML12 files passed; scoped diff check passed.",
-    "native_build": "pending",
-    "load_smoke": "pending"
+    "native_build": "Final native release candidate from3390736da8ac3a0471b8ae2d6047ed484bf5d5c4:0 errors,4 existing unrelated nullable warnings; source unchanged during build. Local record20260920T152230567394Z. The earlier candidate's two new nullable warnings were corrected before this final build.",
+    "package_sha256": "d68440a0128048c096531b121e8b56e9d6345a50473fe9582fa618af33f4e2f6",
+    "load_smoke": "Isolated native dedicated content load reached Choose World with Convergence0.3.33, Calamity2.2.4, Luminance1.0.14, Calamity Music2.1, Simple Whip1.15.12 and SharedMap0.1.5.1. Stopped before selecting/creating a world; no client GPU/battle acceptance claim."
   },
   "not_run": [
     "Real equipped full-body Fury damage, piercing immunity/accessory behavior and new HP balance.",
