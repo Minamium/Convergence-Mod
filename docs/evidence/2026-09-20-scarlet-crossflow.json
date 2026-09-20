@@ -43,7 +43,9 @@
     "shader": "FXC compiled; single-pass dynamic warning/live branch misrendered as a rectangle in D3D11 preview. Replaced by separate forecast/live passes, verified narrow blade output. No unverified claim about driver root cause.",
     "gpu": "passed:72 final FNA D3D11 frames using production geometry, shader and CrossflowSeals at fractional age, scaled by the world matrix through controlled facades. Inspected white forecast, subframe ignition, narrow red blade/lattice, end/residue and right-to-left extension with opposing seals. Actual compiled shader/material only; not native gameplay, multiplayer, subjective visual acceptance or FPS evidence.",
     "gpu_relative": ".local/scarlet-crossflow/approved-frames",
-    "native_build": "pending",
+    "native_build": "passed:0.3.29 isolated candidate on735ef3a,0 errors/4 pre-existing nullable warnings; unchanged inputs during build. First compile caught one chorus-renderer call site for the new signature, corrected before this candidate. Packaged solo-admission probe passed (Doll1-4; not Scarlet roster verification). Four pre-existing generated locale edits remain local and are identified in the build record.",
+    "build_record_relative": ".local/builds/20260920T082241718250Z/record.json",
+    "package_sha256": "64615e866899232141aac65e347fb141905385fb1084a0c156257506e445a893",
     "repository": "passed:79-document catalog,930-file repository policy,12 YAML files and git diff --check",
     "environment": "Same pinned local runtime as 2026-09-20-scarlet-choreography.json",
     "runtime_not_run": ["Owner Host & Play crossflow/cadence/slash acceptance", "ActIII four shifted grids with overlapping next warning", "2/4/8-player enlarged Spread and remote forecasts", "Reduced Effects and actual gameplay frame pacing", "Unowned Scarlet NPC sync in native client/server"]
