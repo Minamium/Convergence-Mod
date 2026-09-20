@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-09-19
+last_reviewed: 2026-09-20
 source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -44,7 +44,7 @@ The Doll attendant is only visible when the exact Doll Encounter/Fight/preparati
 | Act III | Thorn Choir | Hold at20% and finish the current full action cycle |
 | Final | All three retained apparitions plus Vespera | Complete the first ensemble cycle, then defeat all four |
 
-An action cycle is **12 complete physical attack phrases**. All three techniques of a solo apparition are included; rhythm variations are retained. Five physical phrases can be followed by a Stack/Spread chorus in Act II onward. A chorus is not counted as one of the12 physical phrases. Completion waits for admitted phrases' last recovery/tail and any outstanding chorus. Issuing the last phrase is not completion. At a safe cycle boundary, a latched20% threshold changes exactly one act; otherwise another full cycle starts. No mid-phrase cancellation is used to accelerate the health transition.
+An action cycle is **12 complete attack phrases**, currently all using the single-beam rehearsal below. Five phrases can be followed by a Stack/Spread chorus in Act II onward. A chorus is not counted as one of the12 phrases. Completion waits for admitted phrases' last recovery/tail and any outstanding chorus. Issuing the last phrase is not completion. At a safe cycle boundary, a latched20% threshold changes exactly one act; otherwise another full cycle starts. No mid-phrase cancellation is used to accelerate the health transition.
 
 Native incoming damage is capped before crossing20% in solo acts. Once reached, HP remains exactly at that floor while the apparition continues its repertoire. The same NPC and HP are retained offstage after retreat, with no loot, replacement or refill. Each next act has150 protected transition ticks. Final recalls those three bodies at20% each and exposes Vespera. All four have a1HP lethal floor until the **first Final action cycle** is finished. The floor then releases; no automatic death is invented. Attack-source activity is deliberately distinct from `dontTakeDamage`, so held targets keep performing and the boss bar stays present.
 
@@ -56,7 +56,15 @@ Vespera-only or apparitions-only kills cannot clear Final. An observed all-playe
 
 **Every Scarlet damaging hostile projectile uses source damage1 and `SetMaxDamage(1)` in its native hit modifier.** Ordinary immunity/dodge/shields/accessory hooks remain; a dodged hit may cause0. This covers physical gestures, retained legacy attack types, and Stack/Spread verdict strikes. Contact damage remains disabled. It does not alter player/companion weapons, environmental damage, or Doll/Ghost Samurai attacks. Chorus rules still calculate the normal sharing/overlap budget for diagnostics, but a nonzero verdict is applied as1 in this rehearsal build. This is explicitly temporary test tuning, not release balance or a universal override of foreign final HP writes.
 
-## Physical attack vocabulary
+## Single-beam baseline — September20
+
+The owner requests rebuilding the attack vocabulary from one basic attack. **All Act I/II/III/Final ordinary attacks now use `TrackingBeam`; the former decks below are not scheduled.** Keep the current two-strike/four-beat rhythm,32-tick live interval, complete-cycle gates, native rehearsal damage and separate Stack/Spread choruses. Final still rotates living sources, but emits only one beam per musical strike, not one per source/player simultaneously.
+
+Each note selects one living roster member in round-robin order. The immutable note binds that player's slot and connection token. During its one-beat warning the server eases the aim toward that member, sending bounded monotonic aim samples every3ticks and at the final lock. Direction freezes10ticks before release; disconnected/dead targets leave their last valid aim, never switch to another person mid-warning. Clients interpolate accepted warning samples only, reject stale/different-Fight/phase/note data and cannot cause damage before receiving the final lock. The beam does not home after release.
+
+One continuous forecast crosses **from one field boundary to the opposite boundary**, through the aimed player; it never begins at the Boss. The direction tracks around the staged source's reference point, but both visible/damaging ends are clipped against the arena. Reuse Doll's actual managed `PortalForecastPass` plus sparse `ForecastDustPass`: one fine spine in a soft veil, no capsule caps or bright edge rails. The red/magenta `PortalBeam` jet ignites at the field edge, reaches full length over5ticks, expands to72px full width over6ticks, then narrows over its final8ticks. Shared geometry owns warning, live width/reach and native collision; zero-width ignition and all residue are harmless. Accepted circles, large decorative energy sphere, cathedral, body articulation and camera options remain unchanged. Protocol54 adds connection-bound target admission and ordered native-projectile aim snapshots, not client targeting requests.
+
+### Retained physical vocabulary (inactive reference)
 
 | Performer | Techniques and body identity |
 |---|---|
@@ -65,11 +73,13 @@ Vespera-only or apparitions-only kills cannot clear Final. An observed all-playe
 | Thorn Choir / Act III | `ChoirThrust`:seven extending tendrils spreading from overhead across the floor; `ChoirHook`:large targeted hooked return curve; `ChoirRend`:six910px diagonal spatial tears across two rows |
 | Vespera / Final ensemble | `VesperaOrbit`:12 orbiting energy bodies around the accepted target; `VesperaPetals`:12 curved projectiles converging from a field-sized ellipse toward a hollow center. Retained apparitions continue their own decks; defeated sources are skipped |
 
-Each apparition cycles three techniques without adjacent repetition. Final rotates active sources while preserving each source's vocabulary, skipping defeated sources. Targets/staging/paths and all warning/fire/end ticks are frozen when the complete phrase is admitted. NPC motion is projected from the same accepted body trajectory; observers never choose targets. Native hostile projectile geometry, not decorative rope simulation, owns collision. Swept capsules cover fast movement; unused capacity is checked before admitting a full phrase. No generic all-screen beam cooldown is the new attack scheduler.
+The retained IDs/geometries and their regression checks are not active decks. Reintroducing any of them requires a new requested design slice. Phrase admission still reserves all native resources before creation, and exact-Fight/epoch cleanup retires pending and live notes.
 
 ## Music: basic pulse rehearsal
 
-The existing licensed Graceful Ordeal audio and onset-derived `Score.json` beat times are unchanged. Use the **same measured beats as `Score.Pulse`, which drives the four inward arrows on the Stack marker**. The owner reverses the previous beat roles: forecast on beat2, strike on beat3, forecast on beat4, strike on the following beat1. Prime that first forecast before any strike; do not damage first simply to reverse the order. Each warning lasts one measured beat; do not introduce a separate fixed-BPM clock. Broad techniques still affect the field; body rush/crash/hook remain targeted contrasts.
+Use the **same measured beats as `Score.Pulse`, which drives the four inward arrows on the Stack marker**. Forecast on beat2, strike on beat3, forecast on beat4, strike on the following beat1. Prime that first forecast before any strike; do not damage first simply to reverse the order. Each warning lasts one measured beat; do not introduce a separate fixed-BPM clock.
+
+The September20 loop revision preserves the introduction but loops the sustained middle section instead of jumping from the outro into the quiet opening:99.8167s →54.8167s,96 measured beats/45s per repeat. A four-beat1.8667s pre-return crossfade joins similar level/harmonic material. No time/pitch stretch; existing beat positions before the new endpoint remain unchanged, later beats are omitted, and both audio/sample clock and scheduler use the same updated endpoints. The game-facing approved OGG is the source for this edit because the external WAV is currently unavailable; no replacement recording is downloaded. Modest1.15dB encode headroom prevents clipping of the prior lossy decode. `tools/reloop_crimson_score.py` records candidate scoring, exact hashes and a local seam audition; numerical matching is not subjective listening approval. Preserve kuku credit and license exclusion.
 
 This deliberately plain baseline replaces the syncopated5/6-note patterns after owner feedback. All acts, including Final, use two equal-accent attacks per four-beat phrase. Technique/source choices may vary, but serial numbers and musical energy no longer add fills, rolls or warning-pitch ladders. The existing12-phrase action-cycle gates and separate chorus intervals are unchanged.
 
@@ -83,7 +93,7 @@ From Act II, after five physical phrases, alternate a fixed gather marker and pl
 
 Apply the [shared Luminance policy](../../ART_DIRECTION.md#luminance-presentation-policy) and its completion criteria. The choices below implement Scarlet's own identity; other features reuse the useful techniques with their own materials, motion and geometry.
 
-The artistic target is materially distinct performers, not more copies of the same beam. The original PNG silhouettes are preserved. `ScarletSurface` uses masked core/upper/lower side regions with per-part pivots; `ScarletRigMotion` provides fractional breathing, asymmetric cloth/limb follow-through, a held loading beat, sharp release and recovery. Crown retains a local heat core, Mantle develops silk sheen, and Choir uses vein/rift treatments. These are masked regions of existing art, not newly hand-painted animation cels or a full skeletal replacement. Vespera remains56px, point-sampled with a restrained silhouette rim. Before Final, her server-owned perch follows the active focus260px above rather than hiding at the field ceiling; Final accepted body paths/vulnerability stay unchanged. No per-client fake hit position is introduced.
+The performers retain distinct body materials while the current rehearsal deliberately shares one ordinary beam attack. The original PNG silhouettes are preserved. `ScarletSurface` uses masked core/upper/lower side regions with per-part pivots; `ScarletRigMotion` provides fractional breathing, asymmetric cloth/limb follow-through, a held loading beat, sharp release and recovery. Crown retains a local heat core, Mantle develops silk sheen, and Choir uses vein/rift treatments. These are masked regions of existing art, not newly hand-painted animation cels or a full skeletal replacement. Vespera remains56px, point-sampled with a restrained silhouette rim. Before Final, her server-owned perch follows the active focus260px above rather than hiding at the field ceiling; Final accepted body paths/vulnerability stay unchanged. No per-client fake hit position is introduced.
 
 Luminance `PrimitiveRenderer` and `ScarletRibbon` render the accepted physical strokes. Forecasts use a fine spine, delicate footprint edges and sparse moving grains; live strokes have warm scarlet/rose/magenta fibres, a hot core and dark flowing folds. World-length coordinates prevent stretching during extension. Rifts retain a dark cavity with hot lips. Physical end caps use actual half-disk geometry rather than an early-return shader discard. Identical future forecasts in a phrase draw only the nearest pending silhouette instead of accumulating opaque copies. Larger converging filaments/pressure connect sources to strikes without target circles or full-screen strobes. Extending blades/tendrils burst out, briefly brake, then bite with one monotone curve for drawing and collision. Chorus circles/arrows and the approved background keep their accepted treatment; residue never causes damage.
 
@@ -95,7 +105,7 @@ Piecewise easing separates anticipation and recoil. Locally owned Luminance scre
 
 ### Physical attack audio and recoil
 
-Five original cues under `Assets/Sounds/CrimsonFoundry` separate anticipation, Crown pressure rupture, Mantle air-cut, Choir tearing resonance and Vespera release. `tools/generate_scarlet_sfx.py` reuses project-authored synthesis primitives with transients, low pressure, an inharmonic midrange accent and short stereo reflections; no third-party recording is sampled. Attack masters last0.43–0.48s and finish naturally instead of being cut after14ticks. Bounded voice leases cancel on Fight/phase/world teardown. An unnormalized dense-phrase audition checks overlap without concealing clipping. Chorus and music assets/gains are unchanged. Physical impacts use stronger local-camera impulses, respecting Reduced Effects and shake-off. This is not listening approval.
+The five bespoke Scarlet cues are no longer used. Ordinary attacks reference the existing project-authored Doll `FirstSeverance/Beams/ChargeLock` and `PortalFire` assets directly, at gains0.48/0.72 without a pitch ladder. Voices retain their natural tails under bounded50/100-tick leases and cancel on Fight/phase/world teardown. No duplicate WAVs or foreign samples are added; old originals remain available for history, not active playback. Chorus and cinematic cues already use Doll sounds. Impacts retain bounded local-camera recoil, respecting Reduced Effects and shake-off. Actual mix acceptance remains user-owned.
 
 ### Approved background
 

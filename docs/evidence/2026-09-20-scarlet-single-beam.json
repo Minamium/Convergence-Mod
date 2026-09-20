@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-20",
+  "feature": "Scarlet Invocation",
+  "version": "0.3.27",
+  "protocol": 55,
+  "base": "ba570de",
+  "observed_playtest": {
+    "build": "0.3.25[81dab6df]",
+    "topology": "solo Host & Play",
+    "fight": "c36d5f23-5e01-4dde-a7e0-5eed01e104f5",
+    "members": 1,
+    "unlock_age": 875,
+    "victory_age": 9215,
+    "cleanup_age": 9365,
+    "combat_seconds": 139,
+    "phase_cycle_completion_ages": [2198,4475,6891,9212],
+    "admitted_phrases": 49,
+    "stack_resolutions": 3,
+    "spread_resolutions": 3,
+    "peak_five_second_capped_hp_dps": 140386,
+    "errors_fatal": 0,
+    "audio_reanchor_events": 0,
+    "limits": "Last admitted phrase interrupted by victory. Absence of audio logs does not prove device/sample sync. No MP or received-damage assessment."
+  },
+  "owner_feedback": "Abrupt BGM loop; reject bespoke SFX and use Doll sounds. Rebuild all ordinary attacks as one following forecast/beam on the current rhythm. Follow-up: beam must span both field boundaries, not originate at the Boss; use the actual Doll forecast treatment.",
+  "music": {
+    "prior_return_seconds": [134.5127,17.1227],
+    "new_return_seconds": [99.8167,54.8167],
+    "loop_beats": 96,
+    "loop_seconds": 45,
+    "bridge_seconds": 1.8667,
+    "pre_seam_bar_level_difference_db": 0.194,
+    "pre_seam_chroma_similarity": 0.955,
+    "encode_headroom_db": -1.1455,
+    "decoded_peak": 0.93047,
+    "decoded_boundary_step": 0.008882,
+    "sha256": "93f2107e8ead427fb3e70e34909640ac19fdb2c873ca0baaf5169db9a824826c",
+    "source": "Approved previous game-facing OGG; former external WAV path unavailable; no download or license change",
+    "audition_relative": ".local/scarlet-single-beam/loop-seam-preview.wav",
+    "listening": "not_run: owner audition required, numerical matching is not subjective approval"
+  },
+  "audio": "Reference existing Doll Beams/ChargeLock (0.4s) and PortalFire (1.24s) at0.48/0.72, leases50/100ticks allow natural tails. Bespoke Scarlet cues no longer referenced; originals preserved. Existing chorus/cinematic cues unchanged.",
+  "checks": {
+    "domain_codec": "pass: initial312 deterministic domain cases; after integrating Oboro PR55,316 domain cases and protocol55 compiled probe334 round-trips/54 malformed or truncated rejections",
+    "repository": "pass: integrated repository925 files, YAML12 files,30 focused Python presentation/contracts checks; catalog regenerated after final indexed edits",
+    "graphics": "45 offline FNA D3D11 frames with linked production edge-to-edge geometry, CrimsonEnergy and the actual compiled Doll PortalForecast/PortalBeam/ForecastDust passes plus shared graphics-state scope. Moving warning, locked extension, sustained jet and thinning inspected. No forecast hard rails or capsule caps. Not native replication, in-game acceptance or performance evidence.",
+    "native_build": "pass: 0.3.27/protocol55 on df98680 including main387da55 (Oboro PR55),0 errors/4 existing nullable warnings; package identity/solo probe passed. tModLoader2026.07.3.0,Calamity2.2.4,Luminance1.0.14,SDK8.0.424. Source unchanged during build. Four pre-existing generated locale edits preserved and recorded, not committed.",
+    "build_record_relative": ".local/builds/20260920T055239453711Z/record.json",
+    "package_sha256": "4257cc8fb1ed156cf92ed6e5bcbee655059befcf7e0db646c8eda7e077ffd828",
+    "runtime": "not_run: owner SP/MP aim lock/collision and rhythm, audio seam/mix, remote delay and Reduced Effects"
+  }
+}

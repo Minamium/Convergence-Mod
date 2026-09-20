@@ -298,7 +298,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         {
             if (counts[source] == 0) continue;
             NPC body = source == 3 ? actor.NPC : summons[source]!.NPC;
-            techniques[source] = CrimsonTechniqueGeometry.Select(source, techniqueCursor[source]++);
+            techniques[source] = CrimsonTechnique.TrackingBeam;
             from[source] = age < poseUntil[source] ? poseExit[source] : new(body.Center.X, body.Center.Y);
             begins[source] = Math.Max(age, poseUntil[source]);
             staging[source] = CrimsonTechniqueGeometry.Stage(field, focus, techniques[source], serial);
@@ -313,11 +313,16 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         for (int i = 0; i < count; i++)
         {
             int source = sources[i]; var hit = rhythm.Hits[i];
+            var eligible = Array.FindAll(members, m => !m.Out && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
+            if (eligible.Length == 0) throw new InvalidOperationException("crimson.no_phrase_target");
+            var aimed = eligible[CrimsonTrackingBeam.TargetIndex(serial, i, eligible.Length)];
+            var playerCenter = Main.player[aimed.Slot].Center;
+            var aim = CrimsonTechniqueGeometry.Clamp(field, new(playerCenter.X, playerCenter.Y), 100);
             plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, (byte)i, (byte)source,
                 techniques[source], (byte)steps[source]++, (byte)counts[source], hit.Accent,
                 begins[source], musicStart + hit.Warning, musicStart + hit.Fire, musicStart + hit.End,
-                first[source], last[source], from[source], staging[source], targets[source],
-                (int)ground.X, (int)ground.Y, CrimsonPlaytestTuning.AttackDamage);
+                first[source], last[source], from[source], staging[source], aim,
+                (int)ground.X, (int)ground.Y, CrimsonPlaytestTuning.AttackDamage, aimed.Slot, aimed.Connection);
             plans[i].Validate();
         }
         foreach (var plan in plans)
