@@ -129,3 +129,5 @@ Weapon audio/ten-slot companion survey, 2026-09-12: the pinned official Terraria
 Oboro, 2026-09-16/17: [scoped API, Earth comparison and Murasama motion survey](research/2026-09-16-oboro.md) records pinned tML hooks, public Calamity source/version mismatch, independently authored motion/echoes and the runtime comparison still needed.
 
 Ghost Samurai articulation, 2026-09-18: [Luminance feature survey and selected API behavior](research/2026-09-18-ghost-samurai-luminance.md) records the pinned1.0.14 source, installed native probes, Calamity motion observations and independent presentation design. No library source/assets are vendored.
+
+Azure Cathedral music,2026-09-20: [feature rights review](encounters/azure-cathedral/ENCOUNTER_SPEC.md#music) records EigHt's official FANBOX7647818 text (public `post.info`, updated2026-07-14), owner-selected recording and unavailable track-page fetches. No guessed track-specific license, standalone redistribution permission or subjective listening is claimed.

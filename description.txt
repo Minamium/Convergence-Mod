@@ -16,6 +16,10 @@ Solo activation is enabled only as a development convenience, not balanced solo 
 
 Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3798073077
 Reports: https://github.com/Minamium/Convergence-Mod/issues
+Azure Cathedral prototype: use Glacial Chime on the Foundation Core, then confirm Ready. Liora and a giant segmented ice-glass leviathan fight together in a bounded cyan cathedral. 1–8 players; native damage and normal deaths. No bespoke rewards yet.
+Azure Cathedral music: EigHt — 白夜に耀うステンドグラス
+Creator: https://www.youtube.com/watch?v=k0-SQQkRxis
+Original: https://bgm-cathedral.booth.pm/items/6112209
 Music: EigHt — 不幸な人形劇
 Original: https://booth.pm/ja/items/5206457
 Creator: https://www.youtube.com/watch?v=vTFL5_d_p7o

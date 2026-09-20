@@ -1,0 +1,42 @@
+Mods: {
+	Convergence: {
+		AzureCathedral.Rejected: Cathedral preparation could not start. Check the pedestal, party size and free world space.
+
+		Items: {
+			AzureConductor: {
+				DisplayName: Glacial Chime
+				Tooltip:
+					'''
+					Use on a Foundation Core to prepare Cathedral of the White Night
+					All connected players confirm Ready; 1–8 players, multiplayer recommended
+					An ice-glass leviathan and its sword-bearing guardian await
+					Right-click while holding it to cancel preparation
+					Not consumed
+					'''
+			}
+		}
+
+		NPCs: {
+			AzureBoss.DisplayName: Liora — Warden of Refraction
+			AzureWorm.DisplayName: Vitrion — The Glass Leviathan
+		}
+
+		Projectiles.AzureAttack.DisplayName: Refracted Ice
+
+		Configs: {
+			AzureVisualConfig: {
+				DisplayName: Azure Cathedral Presentation
+
+				ReducedEffects: {
+					Label: Reduced effects
+					Tooltip: Reduce optional sparks, refraction and movement without hiding attacks
+				}
+
+				ScreenShake: {
+					Label: Screen shake
+					Tooltip: Allow bounded local impact shake
+				}
+			}
+		}
+	}
+}

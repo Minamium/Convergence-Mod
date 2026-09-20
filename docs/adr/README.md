@@ -55,3 +55,5 @@ Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark th
 | [0026](0026-crimson-score-and-native-projectiles.md) | Accepted for the Crimson prototype only | Server-owned score/Ready, scoped native hostile Projectile hits, sample-loop client audio and local recording boundary; protocol42 |
 
 | [0027](0027-oboro-authoritative-weapon.md) | Accepted for Oboro | Session-independent server-owned weapon swings, per-wielder wounds and bounded presentation transport |
+
+| [0028](0028-azure-cathedral-native-actors.md) | Accepted for Azure Cathedral only | Separate shared-pedestal worm/girl runtime, bounded native actor/hazard damage and exact-Fight cleanup; protocol58 |
