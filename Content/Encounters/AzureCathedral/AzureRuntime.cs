@@ -51,6 +51,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
     {
         if (cleaned || !State.Live || isWorm && phase != AzurePhase.Fury || !defeats.Mark(isWorm)) return;
         if (!isWorm) { ClearHazards(AzureAttackKind.MouthBeam); ClearHazards(AzureAttackKind.Icicle); ClearHazards(AzureAttackKind.GlassRain); ClearHazards(AzureAttackKind.GlacialCut); chorus.Clear(fight.Value); }
+        else AzureWorm.RetainChain(fight.Value);
         AzurePackets.Log($"event=ActorDefeated fight={fight.Value} actor={(isWorm ? "worm" : "girl")} age={age}"); Project(true);
     }
     internal bool Request(int sender, Guid connection, bool ready, bool cancel)

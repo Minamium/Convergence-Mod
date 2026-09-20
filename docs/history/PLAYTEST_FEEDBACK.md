@@ -19,6 +19,10 @@ related_docs:
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
 
+## Azure retry background and lethal chain — 2026-09-21 / 0.3.33 → 0.3.35
+
+Owner reports missing background on the second or third attempt and a disappearing worm. Three solo logs show two clean Defeats, then one Fury defeat immediately invalidated by45→40 missing parts; Victory/melting never runs. Actual old-package engine probes reproduce lethal shared-HP child loss and a stale sky flag after native visual reset. Retain all owned native shells at lethal damage and reconcile the actual sky state, preserving gameplay/tuning and incoming Oboro work. [Evidence](../evidence/2026-09-21-azure-lifecycle-fix.json) separates confirmed log events/reproduction from the inferred reset trigger and still-unrun repeated Host & Play / remote visual acceptance.
+
 ## Azure Fury refinement — 2026-09-21 / 0.3.32 → 0.3.33
 
 Owner reports too little worm hit uptime, an overly short diagonal entry, solid-looking missiles and a consumption pose already overlapping Liora; requests1/20 worm HP, full-body Fury hits, cyan Vespera-style cuts and new second-form art. September20 solo logs show two clean Defeats:12.15s and342.27s; in the longer attempt Liora dies after50.95s, the worm reaches its floor247.87s later, refills once, then the party dies35.45s into Fury with88.98% worm HP. Implement shared native Fury damage, six-second moving volley passage, streaming energy bolts, Liora cuts and retreat/rush/slow articulated bite before head-to-tail Fury armor change. Preserve Liora HP and other encounters. [Evidence](../evidence/2026-09-21-azure-fury-refinement.json) owns exact logs/checks; new balance, visuals and multiplayer are not owner-approved yet.

@@ -14,6 +14,7 @@ internal sealed class AzureSky : CustomSky
     internal const string Key = "Convergence:AzureCathedral";
     private float fade, age;
     private bool requested;
+    internal bool IsSceneRequested => requested;
     public override void Activate(Vector2 position, params object[] args) => requested = true;
     public override void Deactivate(params object[] args) => requested = false;
     public override bool IsActive() => requested || fade > 0;
@@ -23,9 +24,10 @@ internal sealed class AzureSky : CustomSky
     {
         if (Main.gameMenu) { Reset(); return; }
         var girl = AzurePackets.Boss;
-        requested = girl is { Fresh: true } && AzureVisuals.Local(girl) && girl.State.MusicStart>=0
+        bool owned = girl is { Fresh: true } && AzureVisuals.Local(girl) && girl.State.MusicStart>=0
             && girl.VisualAge>=girl.State.MusicStart+AzureRules.SkyReveal;
-        float target=requested?AzureRules.Ease((girl!.VisualAge-girl.State.MusicStart-AzureRules.SkyReveal)/220):0;
+        if(!owned)requested=false;
+        float target=requested && owned?AzureRules.Ease((girl!.VisualAge-girl.State.MusicStart-AzureRules.SkyReveal)/220):0;
         if(girl is not null && girl.State.EndAt>=0)target*=1-AzureRules.Ease((girl.VisualAge-girl.State.EndAt-240)/180);
         fade = MathHelper.Clamp(fade + MathHelper.Clamp(target-fade,-.04f,.013f),0,1);
         if (girl is not null) age = AzureVisuals.RenderAge(girl);
@@ -49,17 +51,24 @@ internal sealed class AzureSky : CustomSky
 internal sealed class AzureSkySystem : ModSystem
 {
     private AzureSky? sky;
-    private bool active;
     public override void Load() => SkyManager.Instance[AzureSky.Key] = sky = new AzureSky();
     public override void PostUpdateEverything()
     {
         bool want = !Main.gameMenu && AzurePackets.Boss is { Fresh: true } girl && AzureVisuals.Local(girl)
             && girl.State.MusicStart>=0 && girl.VisualAge>=girl.State.MusicStart+AzureRules.SkyReveal;
-        if (want && !active) SkyManager.Instance.Activate(AzureSky.Key, Vector2.Zero);
-        if (!want && active) SkyManager.Instance.Deactivate(AzureSky.Key);
-        active = want;
+        if(Synchronize(want) && want && AzurePackets.Boss is { } owner)
+            AzurePackets.Log($"event=SkyActivated fight={owner.State.Fight} age={(int)owner.VisualAge}");
     }
-    public override void ClearWorld() { sky?.Reset(); active = false; }
+    internal bool Synchronize(bool want)
+    {
+        // Native Reset/DeactivateAll changes CustomSky, not a ModSystem's cached
+        // flag. Reconcile the actual requested state, including fade-out tails.
+        if(sky is null || sky.IsSceneRequested==want)return false;
+        if(want)SkyManager.Instance.Activate(AzureSky.Key,Vector2.Zero);
+        else SkyManager.Instance.Deactivate(AzureSky.Key);
+        return true;
+    }
+    public override void ClearWorld() { sky?.Reset(); }
     public override void OnWorldUnload() => ClearWorld();
     public override void Unload() { ClearWorld(); sky = null; }
 }

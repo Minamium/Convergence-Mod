@@ -50,6 +50,14 @@ Supersede protocol60's head-only restriction **in Fury only**. Duet retains the 
 
 The native attack envelope adds `GlacialCut` and a bounded emitter NPC slot for segment bolts; the slot must resolve to an active worm of the exact Fight. Frozen target coordinates plus moving emitter origin keep the short warning attached during slow transit. Non-bolt kinds require the absent-emitter sentinel. New phase epochs still reject old hazards; missing emitters fail closed. No common operation ID, client authority, persistence or foreign encounter runtime is added.
 
+### 2026-09-21 native lifecycle correction
+
+Protocol62 (inherited from Oboro) adds no Azure wire change. Installed tML2026.07.3.0 `NPC.StrikeNPC` copies depleted shared HP to the struck child, then calls the head's `checkDead`; native `checkDead` returns early for a `realLife` child. Restoring only the head in `ModNPC.CheckDead` therefore does not retain the struck child's native shell. The exact0.3.33 package reproduces this under the actual engine method, matching the observed45→40 chain loss one tick after Fury defeat. Preserve the lethal child's shell in `HitEffect`, and protect the exact-Fight chain at the one-way defeat latch against late native strikes. No manual shared-pool forwarding/healing, player-Hurt change or relaxation of missing-actor validation.
+
+The official [pinned NPC patch](https://github.com/tModLoader/tModLoader/blob/v2026.07.3.0/patches/tModLoader/Terraria/NPC.cs.patch) and [ModNPC hook definitions](https://github.com/tModLoader/tModLoader/blob/v2026.07.3.0/patches/tModLoader/Terraria/ModLoader/ModNPC.cs), checked2026-09-21, are paired with read-only installed-API inspection and executable reproduction rather than assuming a body `CheckDead` callback. No dependency code/binaries are vendored.
+
+`SkyManager.Reset` / `DeactivateAll` can clear a custom sky without changing a separate ModSystem flag. Reconcile `AzureSky.IsSceneRequested` with current scene ownership; only actual activation changes call the manager. This follows the existing Doll ownership pattern and preserves fade tails/reveal timing. The owner's second/third-attempt report fits the reproduced stale-flag failure; the old logs do not prove which native reset occurred in that session. [Native probe](../../tools/check-azure-lifecycle.ps1) and [evidence](../evidence/2026-09-21-azure-lifecycle-fix.json) keep that distinction explicit.
+
 ### Verification (current scope)
 
 Pure codec/clock tests and an actual Mod package/load check cover deterministic contracts and construction. Linked-production GPU frames cover material composition, not game FPS, native worm hit forwarding under installed accessories, rejoin behavior or remote presentation. Those remain explicit owner playtests in the [feature spec](../encounters/azure-cathedral/ENCOUNTER_SPEC.md).

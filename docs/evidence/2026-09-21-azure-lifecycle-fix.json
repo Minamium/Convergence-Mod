@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-21",
+  "feature": "azure_cathedral",
+  "source_base": "46586ad",
+  "candidate": "0.3.35 / protocol62",
+  "environment_reference": "2026-09-21-azure-fury-refinement.json",
+  "observed_build": "0.3.33 / protocol61",
+  "observed_package_sha256": "d68440a0128048c096531b121e8b56e9d6345a50473fe9582fa618af33f4e2f6",
+  "topology": "solo Host & Play, one participant; three consecutive attempts",
+  "attempts": [
+    {
+      "fight": "f651fa86-e9fe-4db4-a94e-df6cea652ee8",
+      "unlock_tick": 1269,
+      "result_tick": 1644,
+      "combat_seconds": 6.25,
+      "result": "Defeat",
+      "remaining_combined_hp": 2634988,
+      "cleanup_tick": 1824,
+      "peak_five_second_combined_dps": 277
+    },
+    {
+      "fight": "ed89479b-03d6-42b2-806e-a56ee9dd7f60",
+      "unlock_tick": 1164,
+      "result_tick": 1859,
+      "combat_seconds": 11.5833,
+      "result": "Defeat",
+      "remaining_combined_hp": 1971561,
+      "cleanup_tick": 2039,
+      "peak_five_second_combined_dps": 66657
+    },
+    {
+      "fight": "3c5269ce-d953-47e5-9131-d1e33858a8d2",
+      "unlock_tick": 2604,
+      "liora_defeat_tick": 5347,
+      "liora_combat_seconds": 45.7167,
+      "worm_floor_tick": 5617,
+      "worm_floor_hp": 48000,
+      "seconds_from_liora_death_to_floor": 4.5,
+      "devouring_tick": 5617,
+      "fury_tick": 6217,
+      "fury_refill_hp": 240000,
+      "worm_defeat_tick": 6552,
+      "fury_seconds_to_lethal": 5.5833,
+      "result": "EncounterActorMissing; no Victory event",
+      "cleanup_tick": 6553,
+      "expected_parts": 45,
+      "remaining_parts": 40,
+      "linked": false,
+      "peak_five_second_combined_dps": 100545,
+      "stack": { "called": 1, "successful": 0, "failed": 1, "source_damage": 900 },
+      "spread": { "called": 1, "successful": 1, "failed": 0 },
+      "caveat": "Sampled combined damage is not sustained equipped DPS. Solo Spread does not exercise overlap."
+    }
+  ],
+  "findings": {
+    "worm": "Confirmed: lethal Fury event is followed next tick by five lost parts and missing-actor invalidation, cancelling the ending. Native realLife copies lethal shared HP onto the struck child but calls only the head CheckDead; retaining only the head does not preserve that child.",
+    "background": "Owner reports absent on attempt two or three. Exact old-package SkyManager.Reset reproduces stale ModSystem active=true with CustomSky requested=false. This supports the reset/retry defect; old logs do not identify the actual reset/deactivation call or prove rendered frames.",
+    "unrelated": "Loopback connection refusal before joining, Calamity content-startup damage-reduction warnings and server closed-stream exceptions during shutdown are separate; no Cathedral exception was logged."
+  },
+  "changes": [
+    "Preserve only native segment shells during lethal sharing; runtime's one-way defeat latch retains/protects the exact-Fight chain through melting and against late native strikes.",
+    "Do not heal live shared HP, duplicate native subtraction or suppress genuine missing-actor validation.",
+    "Reconcile actual custom-sky requested state after Reset/DeactivateAll; preserve normal-world preparation, timed reveal and fade tails. Log actual SkyActivated transitions.",
+    "Retain incoming Oboro third-cut main changes/version protocol62 and four existing generated locale edits. No HP, attack, art or music rebalance."
+  ],
+  "verification": {
+    "old_package_reproduction": "PASS: actual installed engine StrikeNPC retains head but leaves struck child life<=0; native SkyManager.Reset leaves old duplicate active flag stale.",
+    "fixed_package_native_probe": "pending",
+    "repository_domain_codec": "PASS: catalog82, repository974 files, YAML12;343 deterministic domain cases; compiled protocol62:334 roundtrips and54 malformed/truncated rejections. Diff whitespace check passed.",
+    "native_build": "pending",
+    "load_smoke": "pending"
+  },
+  "not_run": [
+    "Consecutive real Host & Play attempts including defeat/retry restore the visible cathedral after the reveal cue.",
+    "Equipped Fury body/tail lethal damage runs melting, faded music, Victory and fresh invocation.",
+    "Matching remote peers, latency and late native hits under Calamity/piercing equipment.",
+    "Actual UI107 percent/zoom/Reduced Effects rendering, music continuity and performance."
+  ]
+}
