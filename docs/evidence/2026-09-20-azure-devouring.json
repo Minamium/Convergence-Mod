@@ -51,8 +51,9 @@
     "common_codecs": "protocol60:334 roundtrips and54 malformed/truncated cases rejected; Azure native/feature envelopes are covered separately by the linked domain cases.",
     "shader_exports": "FXC succeeded, exact source/export manifest verified.",
     "gpu_preview": "120 linked-production FNA/D3D11 frames; final frost/silhouette/melt adjustment subset rerendered. Staged actor poses, not a native battle or FPS test.",
-    "native_build": "initial candidate:0 errors,4 existing unrelated warnings; final artifact identity pending finalization",
-    "load_smoke": "pending",
+    "native_build": "Final native release candidate from48749171b73d7e209cb63b28c0430bd1cf2f3d6d:0 errors,4 existing unrelated nullable warnings; no inputs changed during build. Local record20260920T130013945698Z; original four locale edits are recorded inputs, not committed changes.",
+    "package_sha256": "8c401eaa4bb0501f2afc155749335dfe47fbf85a5d8271bb99e4aab4944e6e69",
+    "load_smoke": "Isolated native dedicated content load passed through Choose World with Convergence0.3.32, Calamity2.2.4, Luminance1.0.14, Calamity Music2.1, Simple Whip1.15.12 and SharedMap0.1.5.1. Stopped before world creation/selection; no battle or client render claim.",
     "static": "Catalog82, repository policy and YAML checks passed; scoped diff check passed."
   },
   "not_run": [
