@@ -26,6 +26,7 @@ internal sealed class AzureSky : CustomSky
         requested = girl is { Fresh: true } && AzureVisuals.Local(girl) && girl.State.MusicStart>=0
             && girl.VisualAge>=girl.State.MusicStart+AzureRules.SkyReveal;
         float target=requested?AzureRules.Ease((girl!.VisualAge-girl.State.MusicStart-AzureRules.SkyReveal)/220):0;
+        if(girl is not null && girl.State.EndAt>=0)target*=1-AzureRules.Ease((girl.VisualAge-girl.State.EndAt-240)/180);
         fade = MathHelper.Clamp(fade + MathHelper.Clamp(target-fade,-.04f,.013f),0,1);
         if (girl is not null) age = AzureVisuals.RenderAge(girl);
     }
@@ -68,8 +69,13 @@ internal sealed class AzureMusicScene : ModSceneEffect
 {
     public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
     public override int Music => AzurePackets.Boss is { } girl && girl.State.MusicStart >= 0 && girl.VisualAge >= girl.State.MusicStart
-        && girl.State.Stage is AzureStage.Countdown or AzureStage.Performance
         ? MusicLoader.GetMusicSlot(Mod, "Assets/Music/AzureCathedral/WhiteNight") : 0;
+    internal void UpdateFade(AzureBoss girl)
+    {
+        int slot=MusicLoader.GetMusicSlot(Mod,"Assets/Music/AzureCathedral/WhiteNight");
+        if(slot>0 && slot<Main.musicFade.Length)
+            Main.musicFade[slot]=System.Math.Min(Main.musicFade[slot],AzureRules.MusicGain(girl.State.MusicStart,girl.State.EndAt,girl.State.Stage,girl.VisualAge));
+    }
     public override bool IsSceneEffectActive(Player player) => !Main.gameMenu && AzurePackets.Boss is { Fresh: true } girl
         && System.Array.Exists(girl.State.Members, m => m.Slot == player.whoAmI);
 }

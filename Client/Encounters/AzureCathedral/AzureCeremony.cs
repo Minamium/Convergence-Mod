@@ -15,17 +15,20 @@ internal static class AzureCeremony
     internal static void Girl(SpriteBatch batch,AzureBoss g,Vector2 screen)
     {
         float age=AzureVisuals.RenderAge(g),t=g.State.MusicStart<0?-1:age-g.State.MusicStart;
+        if(g.State.Phase>=AzurePhase.Fury)return;
+        float consume=g.State.Phase==AzurePhase.Devouring?age-g.State.PhaseAt:-1;
         bool sealedGirl=t<AzureRules.IceBreak;
-        float alpha=g.State.GirlLife<=0?.25f:1;
+        float alpha=consume>=0?1-AzureRules.Ease((consume-AzureRules.DevourContact+2)/12):g.State.GirlLife<=0?.42f:1;
         if(g.State.EndAt>=0)alpha*=1-AzureRules.Ease((age-g.State.EndAt)/150);
         Vector2 center=g.NPC.Center+new Vector2(0,AzureVisuals.Reduced?0:MathF.Sin(age*.022f)*2.5f);
         float fracture=AzureRules.Ease((t-100)/80),tilt=MathF.Sin(age*.009f)*.045f;
         if(sealedGirl)AzureMaterials.Effect(batch,"IcePass",center,new(98,140),tilt,age,new(.62f,fracture,0,0));
         int frame=sealedGirl?(t<80?0:t<158?4:6):t<280?3:t<380?4:t<670?5:((int)age%230<8?2:1);
+        if(consume>=0)frame=consume<70?4:5;
         float release=0;
         if(g.State.Live)
             foreach(Projectile p in Main.ActiveProjectiles)
-                if(p.ModProjectile is AzureAttack a && a.Plan.Fight==g.State.Fight && a.Plan.Kind!=AzureAttackKind.MouthBeam && age<a.Plan.Fire+22 && age>=a.Plan.Born)
+                if(p.ModProjectile is AzureAttack a && a.Plan.Fight==g.State.Fight && a.Plan.Kind!=AzureAttackKind.FrostBolt && age<a.Plan.Fire+22 && age>=a.Plan.Born)
                 {release=age-a.Plan.Fire;frame=release< -22?4:release<0?5:6;break;}
         var art=ModContent.Request<Texture2D>("Convergence/Assets/Textures/AzureCathedral/Liora").Value;
         var src=new Rectangle(frame%4*48,frame/4*64,48,64);
@@ -52,6 +55,34 @@ internal static class AzureCeremony
     {
         if(state.MusicStart<0)return;
         float t=age-state.MusicStart;var f=state.Field;Vector2 center=new(f.CenterX,f.CenterY);
+        if(state.Phase==AzurePhase.Devouring)
+        {
+            float c=age-state.PhaseAt;
+            float e=AzureRules.Ease(c/100)*(1-AzureRules.Ease((c-AzureRules.DevourContact)/18));
+            Vector2 sword=center+new Vector2(-6,-48);
+            Bloom(batch,sword,80+MathF.Pow(.5f+.5f*MathF.Sin(c*.12f),5)*100,.62f*e);
+            AzureEnergy.Add(sword,-Vector2.UnitY,1000,5*e,age,state.PhaseAt+110,state.PhaseAt+AzureRules.DevourContact,e,AzureVisuals.Reduced,state.PhaseAt,true);
+            float shock=AzureRules.Ease((c-AzureRules.DevourContact)/3)*(1-AzureRules.Ease((c-AzureRules.DevourContact-8)/40));
+            if(shock>0 && !AzureVisuals.Reduced)
+                for(int i=0;i<18;i++)
+                {
+                    Vector2 d=(i*2.399963f).ToRotationVector2();float distance=(c-AzureRules.DevourContact)*12;
+                    AzureMaterials.Shard(batch,center+d*distance,center+d*(distance+35+i%4*16),3,age,shock*.7f);
+                }
+        }
+        if(state.Phase==AzurePhase.Melting)
+        {
+            float c=age-state.EndAt;
+            float e=AzureRules.Ease((c-65)/30)*(1-AzureRules.Ease((c-290)/100));
+            AzureMaterials.Effect(batch,"FrostPass",center+new Vector2(0,190),new(1000,410),0,age,new(e*.65f,0,0,4));
+            if(!AzureVisuals.Reduced)
+                for(int i=0;i<24;i++)
+                {
+                    float u=(c*.008f+i*.071f)%1;
+                    Vector2 from=center+new Vector2(MathF.Sin(i*6.31f)*430,40+u*410);
+                    AzureMaterials.Shard(batch,from,from+new Vector2(0,12+u*22),2+u*3,age,e*(1-u)*.55f);
+                }
+        }
         if(t>=AzureRules.SwordLight && t<760)
         {
             float e=AzureRules.Ease((t-AzureRules.SwordLight)/35)*(1-AzureRules.Ease((t-640)/120));
@@ -73,6 +104,17 @@ internal static class AzureCeremony
                     AzureMaterials.Shard(batch,portal+offset,portal+offset*1.07f,2,age,open*(1-flow)*.65f);
                 }
         }
+    }
+    internal static void Silhouette(SpriteBatch batch,AzureBoss girl,Matrix worldToViewport,float age)
+    {
+        float c=age-girl.State.PhaseAt;
+        if(c>=AzureRules.DevourContact+7)return;
+        var art=ModContent.Request<Texture2D>("Convergence/Assets/Textures/AzureCathedral/Liora").Value;
+        Vector2 center=Vector2.Transform(girl.NPC.Center,worldToViewport);
+        float sx=new Vector2(worldToViewport.M11,worldToViewport.M12).Length();
+        float sy=new Vector2(worldToViewport.M21,worldToViewport.M22).Length();
+        float fade=1-AzureRules.Ease((c-AzureRules.DevourContact)/7);
+        batch.Draw(art,center,new Rectangle(48,64,48,64),new Color(2,6,10)*fade,0,new(24,40),new Vector2(sx,sy),SpriteEffects.None,0);
     }
     internal static void Bloom(SpriteBatch batch,Vector2 center,float diameter,float alpha)
     {

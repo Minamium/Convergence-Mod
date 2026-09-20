@@ -12,16 +12,16 @@ namespace Convergence.Client.Encounters.AzureCathedral;
 // materials. No dependency on either previous encounter's presentation classes.
 internal static class AzureEnergy
 {
-    private readonly record struct Ray(Vector2 Origin, Vector2 Direction, float Length, float Width, float Age, float Fire, float End, float Opacity, bool Reduced, float Born, bool FieldBeam);
+    private readonly record struct Ray(Vector2 Origin, Vector2 Direction, float Length, float Width, float Age, float Fire, float End, float Opacity, bool Reduced, float Born, bool FieldBeam, bool Bell);
     private static readonly Ray[] rays = new Ray[512];
     private static readonly VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[6];
     private static int count;
     internal static void Begin() => count = 0;
     internal static void Add(Vector2 origin, Vector2 direction, float length, float width, float age, float fire, float end, float opacity, bool reduced,
-        float born = -1, bool fieldBeam = false)
+        float born = -1, bool fieldBeam = false, bool bell = false)
     {
         if (count < rays.Length && length > .01f && width > .01f && opacity > .001f)
-            rays[count++] = new(origin, direction, length, width, age, fire, end, opacity, reduced, born < 0 ? fire - 60 : born, fieldBeam);
+            rays[count++] = new(origin, direction, length, width, age, fire, end, opacity, reduced, born < 0 ? fire - 60 : born, fieldBeam,bell);
     }
     internal static void Draw(SpriteBatch batch)
     {
@@ -58,7 +58,8 @@ internal static class AzureEnergy
                 DrawMouth();
                 void DrawMouth()
                 {
-                    var r = rays[i]; float radius = live ? 38 + signal.W * 30 : 12 + signal.X * 24;
+                    var r = rays[i]; float pulse=MathF.Pow(.5f+.5f*MathF.Sin(r.Age*.24f),5);
+                    float radius = live ? 38 + signal.W * 55 : 12 + signal.X * (r.Bell?68:24) + (r.Bell?28:6)*pulse*signal.X;
                     portal.TrySetParameter("shape", new Vector4(radius * 2, radius, i, r.Reduced ? .25f : 1));
                     portal.TrySetParameter("signal", signal);
                     portal.TrySetParameter("clock", r.Age / 60);
@@ -73,7 +74,7 @@ internal static class AzureEnergy
                     shader.TrySetParameter("beamColor", new Vector3(.12f, .68f, 1f)); shader.TrySetParameter("signal", signal);
                     shader.TrySetParameter("shape", new Vector4(r.Length, width, (r.Origin.X + r.Origin.Y) * .001f % 11, r.Reduced ? .25f : 1));
                     shader.TrySetParameter("clock", r.Age / 60); shader.TrySetParameter("pulse", Vector4.Zero); shader.TrySetParameter("flowOffset", 0f);
-                    shader.TrySetParameter("ceremony", new Vector4(r.Age - r.Fire, Math.Max(0, r.Age - r.End), 0, 0));
+                    shader.TrySetParameter("ceremony", new Vector4(r.Age - r.Fire, Math.Max(0, r.Age - r.End), r.Bell?260:0, r.Bell?32:0));
                     Vector2 n = new(-r.Direction.Y * width, r.Direction.X * width), start = r.Origin - Main.screenPosition;
                     Quad(start - n, n * 2, r.Direction * r.Length);
                     shader.Apply(pass); device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 2);

@@ -14,12 +14,12 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Source type: generated
 - Source work and URL: Original owner-directed built-in image generation; no third-party input
 - Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
-- Human modifications: New simplified character sheet, built-in alpha-removal pass, nearest-neighbor1536x1024 to192x128 export. Source SHA256 `f63b05fb7f9b10a320e5384b1ec82d972418794725172b7f640cb959d2b39114`; original and superseded images retained externally.
+- Human modifications: Built-in contrast/dress revision using the prior Liora and our own DollAttendant as references; dark cobalt bodice, shaded ice skirt, retained side ponytail/eight poses. Mechanical nearest-neighbor1536x1024 to192x128 alpha-preserving export. Source SHA256 `715a869c1794879080e8442d1086e6de57716b30c141548229ee30265d875e80`; original and superseded images retained externally.
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `c51846cef067fcc9ac0744d9d74304cc4b8a73fad397fa5ee890c6a4d6980fb2`
+- SHA256: `a940856c1bf12ef5fde5385343740d20d08eee51d3219ed6818fb17a45aa897a`
 
 - Runtime file: `Assets/Textures/AzureCathedral/Vitrion.png`
 - Asset ID: azure-vitrion-20260920
@@ -68,7 +68,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/AzureGlass.fxc`
 - Asset ID: azure-glass-material-20260920
-- Asset type: compiled original ice/glass/background/shard/rift/countdown effect
+- Asset type: compiled original ice/glass/background/shard/rift/countdown/frost/dissolution effect
 - Creator: project-owner-directed original implementation/artwork with OpenAI
 - Creation/acquisition date: 2026-09-20
 - Source type: original
@@ -79,7 +79,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `0249389a198c146efb2fdbb5047387dc7d05ad425ada93238aef2d390627ccc0`
+- SHA256: `12a0f400b6da62d9c6208d55d0286ec87e84df4219c79cda1a656e5d25bbfde7`
 
 - Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
 - Asset ID: azure-eighth-white-night-20260920
