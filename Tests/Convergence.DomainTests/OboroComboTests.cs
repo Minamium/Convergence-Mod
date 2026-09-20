@@ -67,7 +67,8 @@ internal static partial class Program
             for (int timer = 0; timer <= total[step]; timer++)
                 AssertEqual(timer >= begin[step] && timer < end[step],
                     OboroRules.Live(step, timer / (float)total[step]), "base frame window");
-            float cutEnd = step == 0 ? OboroFirstSwingMotion.CutEnd / settings.TotalFrames : settings.HitEnd;
+            float cutEnd = step switch { 0 => OboroFirstSwingMotion.CutEnd / settings.TotalFrames,
+                1 => OboroSecondSwingMotion.CutEnd / settings.TotalFrames, _ => settings.HitEnd };
             AssertEqual(true, Math.Abs(OboroRules.Offset(step, cutEnd) - settings.CutEndAngle) < .00001f, "slash end");
         }
     }

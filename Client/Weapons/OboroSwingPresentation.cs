@@ -12,10 +12,11 @@ internal readonly record struct OboroEcho(OboroBladePose Pose, uint Swing, ulong
 internal sealed class OboroSwingPresentation
 {
     internal const int Capacity = 16, FadeTicks = 14, SettleTicks = 10;
+    internal const int ReturnCutFadeTicks = 9; // 返しは細く短い残光。1段目と重い3段目には余韻を残す。
     // Runtime binds Luminance's installed Cubic InOut. It only softens harmless entry.
-    internal static Func<float, float>? FirstEntryEase { get; set; }
-    private static float EntryEase(int step, float t) => step == 0 && FirstEntryEase is not null
-        ? FirstEntryEase(Math.Clamp(t, 0, 1)) : OboroRules.Ease(t);
+    internal static Func<float, float>? ComboEntryEase { get; set; }
+    private static float EntryEase(int step, float t) => step < 2 && ComboEntryEase is not null
+        ? ComboEntryEase(Math.Clamp(t, 0, 1)) : OboroRules.Ease(t);
     private readonly OboroEcho[] echoes = new OboroEcho[Capacity];
     private int head, count;
     private bool initialized, wasSwinging, swingSeen;
@@ -29,10 +30,11 @@ internal sealed class OboroSwingPresentation
     internal int Count => count;
     internal OboroEcho Echo(int index) => echoes[(head + index) % Capacity];
     internal static float Wrap(float angle) => MathF.IEEERemainder(angle, MathF.Tau);
-    internal static float Opacity(ulong at, ulong now)
+    internal static float Opacity(ulong at, ulong now, int step = 0)
     {
-        if (now < at || now - at >= FadeTicks) return 0;
-        float remaining = 1 - (now - at) / (float)FadeTicks;
+        int duration = step == 1 ? ReturnCutFadeTicks : FadeTicks;
+        if (now < at || now - at >= (ulong)duration) return 0;
+        float remaining = 1 - (now - at) / (float)duration;
         return remaining * remaining;
     }
     internal void Clear()
@@ -54,7 +56,7 @@ internal sealed class OboroSwingPresentation
             initialized = true; generation = view.Generation;
             Pose = new(x + facing * 12, y + 8, restAngle, 145, 1, 0);
         }
-        while (count > 0 && Opacity(Echo(0).At, now) == 0)
+        while (count > 0 && Opacity(Echo(0).At, now, Echo(0).Pose.Step) == 0)
         { head = (head + 1) % Capacity; count--; }
         // Once a replica reached the end, an older-but-newly-arrived clock must
         // not replay that same serial while waiting for the terminal snapshot.

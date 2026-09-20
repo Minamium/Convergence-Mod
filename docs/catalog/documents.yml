@@ -86,7 +86,7 @@ documents:
 - doc_id: adr.0027
   path: docs/adr/0027-oboro-authoritative-weapon.md
   title: 'ADR-0027: Server-owned Oboro swings and wounds'
-  content_sha256: c3fefac2fe97ca68fab7ce4036bc847ae1500f9f906083fa82edaf6fd41e6e18
+  content_sha256: 8f9524aeb8c59ad4fb31400d70047338b498644b7e5be3acb5315dc377f8965d
   document_type: adr
   status: accepted
   owners:
@@ -792,7 +792,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 41520850678c9b36baee27b9707e058d79177bfc0765f9661deb385b0179203a
+  content_sha256: 86a91ae324af7975117ee94d8141beeda154425bda40a2025d729e4d54ecacf0
   document_type: spec
   status: provisional
   owners:
@@ -869,7 +869,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 159295fe31f59ad59432c1dad1608dfbfb5645d54f0519ccc0934794c297b677
+  content_sha256: 9bd9cee959627a50aa59f0ff504dc4fb23bd3ab4a99132ff97c26dd372cb290c
   document_type: evidence
   status: historical
   owners:
@@ -1268,7 +1268,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 769cb3a89abbeaaea62ece3236f7e817b658e200d197471ef942f6b1bf9ce22d
+  content_sha256: af7b87309ef1fd681a166cc4340d7a0bfb487e94bc4eec657dd73c525a5cc161
   document_type: status
   status: accepted
   owners:

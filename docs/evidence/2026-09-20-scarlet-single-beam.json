@@ -1,8 +1,8 @@
 {
   "date": "2026-09-20",
   "feature": "Scarlet Invocation",
-  "version": "0.3.26",
-  "protocol": 54,
+  "version": "0.3.27",
+  "protocol": 55,
   "base": "ba570de",
   "observed_playtest": {
     "build": "0.3.25[81dab6df]",

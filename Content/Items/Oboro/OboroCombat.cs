@@ -18,7 +18,7 @@ public sealed partial class OboroPlayer
         float current = aim + facing * OboroRules.Offset(step, p);
         float prior = Math.Max(OboroRules.Windup(step), (age - 1f) / duration);
         float previous = aim + facing * OboroRules.Offset(step, prior);
-        var hand = step == 0 ? OboroHandAnchor.Capture(Player, facing) : default;
+        var hand = step < 2 ? OboroHandAnchor.Capture(Player, facing) : default;
         Vector2 CenterAt(float progress, float angle)
         {
             var offset = OboroRules.RootOffset(step, progress, aim, angle, hand);
@@ -36,12 +36,13 @@ public sealed partial class OboroPlayer
             if (identity.Generation == 0 || struck.Contains(identity.Generation)) continue;
             bool contact = false;
             // Sweep between successive blade poses; fast cuts cannot skip thin enemies.
-            int samples = Math.Clamp((int)MathF.Ceiling(Math.Max(Math.Abs(current - previous) / .035f, rootTravel / 4)), 1, 64);
+            int samples = step == 1 ? OboroSecondSwingMotion.SweepSamples(prior, p, rootTravel)
+                : Math.Clamp((int)MathF.Ceiling(Math.Max(Math.Abs(current - previous) / .035f, rootTravel / 4)), 1, 64);
             for (int i = 0; i <= samples && !contact; i++)
             {
                 float angle = MathHelper.Lerp(previous, current, i / (float)samples), collision = 0;
                 Vector2 origin = center;
-                if (step == 0)
+                if (step < 2)
                 {
                     float sample = MathHelper.Lerp(prior, p, i / (float)samples);
                     angle = aim + facing * OboroRules.Offset(step, sample);

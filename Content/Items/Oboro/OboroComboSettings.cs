@@ -31,7 +31,7 @@ internal static class OboroComboSettings
 {
     internal const int Count = 3;
 
-    // 段の性質を変える場所。見た目の緩急の作り込みは次の工程。
+    // 基本値の調整場所。1・2段目の緩急は各SwingMotion、3段目は仮の補間。
     internal static OboroComboStep For(int comboIndex) => comboIndex switch
     {
         //            総F   開始    引き    終点   Hit開始 終了 前進px
