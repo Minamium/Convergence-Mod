@@ -1,0 +1,68 @@
+{
+  "date": "2026-09-20",
+  "feature": "azure_cathedral",
+  "source_base": "fa314199391208b0a48a127d742a1bdb3bf5795f",
+  "candidate": "0.3.32 / protocol60",
+  "environment_reference": "2026-09-20-azure-awakening.json",
+  "observed_build": "0.3.31 / protocol59",
+  "topology": "solo Host & Play, one connected participant",
+  "attempts": [
+    {
+      "fight": "f0589ebd-664d-43d9-b677-132fe16c48b4",
+      "unlock_tick": 1322,
+      "result_tick": 2064,
+      "combat_seconds": 12.3667,
+      "result": "Defeat",
+      "remaining_combined_hp": 7153633,
+      "cleanup_tick": 2244
+    },
+    {
+      "fight": "cab9f8a3-aecf-47ef-9a35-fe36c751b9e7",
+      "unlock_tick": 2501,
+      "liora_defeat_tick": 11086,
+      "vitrion_defeat_tick": 14398,
+      "result_tick": 14399,
+      "combat_seconds": 198.3,
+      "result": "Victory",
+      "cleanup_tick": 14579,
+      "peak_five_second_combined_dps": 379416,
+      "stack": { "called": 3, "successful": 1, "failed": 2 },
+      "spread": { "called": 3, "successful": 3, "failed": 0 },
+      "caveat": "Solo Spread cannot exercise overlapping participants; five-second damage samples are not equipped sustained DPS."
+    }
+  ],
+  "old_log_findings": {
+    "cathedral_exceptions": 0,
+    "actor_missing_invalidations": 0,
+    "duplicate_actor_defeats": 0,
+    "separate_startup_event": "Loopback connection refused before the successful Host & Play connection; not a Cathedral combat exception.",
+    "entrance_flicker": "Owner observation, not measured from a recording. Source confirms a 60-tick NPC receipt expiry simultaneously disabled field/UI/music, while runtime feature state was not in periodic common snapshots. Transport gaps/netSpam are a plausible cause, not an observed packet trace."
+  },
+  "changes": [
+    "Definition-routed bounded full projection on six-tick observable updates; native ExtraAI is a repair path. Accepted Idle clears the cache.",
+    "Doll-style fixed viewport Ready pill, separate world labels; continuous scene ownership and native-track gain ceiling through the ending.",
+    "Higher-contrast small Liora atlas;45 linked parts, wider faster courses, head-only weapon hits and authoritative20-percent floor.",
+    "Fixed Liora sword/portal emitter with pulse and shared bell throat collision; diagonal braking/all-segment limited-homing frost volley.",
+    "Protected two-gate devouring epoch, one-time Fury refill, stronger solo-worm attack loop, committed Victory with harmless center rush and ordered melting.",
+    "Luminance frost noise layers, silhouette instant and glass dissolution; unchanged music recording and other encounter gameplay."
+  ],
+  "verification": {
+    "domain_baseline": "332 passed before adding four focused cases;14 Azure cases pass afterward, including the new phase/codec/curve contracts.",
+    "common_codecs": "protocol60:334 roundtrips and54 malformed/truncated cases rejected; Azure native/feature envelopes are covered separately by the linked domain cases.",
+    "shader_exports": "FXC succeeded, exact source/export manifest verified.",
+    "gpu_preview": "120 linked-production FNA/D3D11 frames; final frost/silhouette/melt adjustment subset rerendered. Staged actor poses, not a native battle or FPS test.",
+    "native_build": "Final native release candidate from48749171b73d7e209cb63b28c0430bd1cf2f3d6d:0 errors,4 existing unrelated nullable warnings; no inputs changed during build. Local record20260920T130013945698Z; original four locale edits are recorded inputs, not committed changes.",
+    "package_sha256": "8c401eaa4bb0501f2afc155749335dfe47fbf85a5d8271bb99e4aab4944e6e69",
+    "load_smoke": "Isolated native dedicated content load passed through Choose World with Convergence0.3.32, Calamity2.2.4, Luminance1.0.14, Calamity Music2.1, Simple Whip1.15.12 and SharedMap0.1.5.1. Stopped before world creation/selection; no battle or client render claim.",
+    "static": "Catalog82, repository policy and YAML checks passed; scoped diff check passed."
+  },
+  "not_run": [
+    "Owner game: preparation/Ready/entrance without black exterior or ordinary-BGM gaps.",
+    "Head-only/floor/DoT/accessory behavior and both HP-gate orders under the real equipped character.",
+    "Consumption silhouette, exactly one full refill, Fury kill/melting/fade and a fresh invocation.",
+    "Matching2-8-player projection continuity, segment target allocation and native receiving-player damage; late/lagged snapshot recovery.",
+    "Actual UI107 percent/zoom, Reduced Effects, subjective Liora/mist/beam quality and music fade listening.",
+    "Game frame-time/resource measurements."
+  ],
+  "preserved": "Four pre-existing English locale worktree edits, external originals, music file/credits, other Raids, old branches/copies. No Workshop or GitHub release."
+}

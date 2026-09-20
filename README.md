@@ -2,7 +2,7 @@
 
 ![Doll attendant — the actual in-game NPC sprite, enlarged with nearest-neighbor sampling](docs/media/doll-npc.png)
 
-Convergence is a playable development mod for Terraria / tModLoader. It adds a cooperative raid and an independent boss, with combat tuned around Calamity's endgame equipment. The raid combines bullet dodging with group mechanics, a shared arena, and teammate revival.
+Convergence is a playable development mod for Terraria / tModLoader. It adds cooperative raids and an independent boss, with combat designed around Calamity's endgame equipment. The Doll raid combines bullet dodging with group mechanics, a shared arena, and teammate revival; the other encounters have their own rules.
 
 [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3798073077) · [GitHub Releases](https://github.com/Minamium/Convergence-Mod/releases) · [Current status](docs/STATUS.md) · [Contributing](CONTRIBUTING.md) · [Documentation](docs/README.md)
 
@@ -15,6 +15,8 @@ Convergence is a playable development mod for Terraria / tModLoader. It adds a c
 This is a public playtest, not a finished or stability-certified release. **Solo activation is available**, but multiplayer testing is preferred; the fight is not rebalanced for solo and companions do not replace raid participants. Back up worlds and characters, and expect intense flashes, screen shake and sound. Reduced-effects settings are available. The [status page](docs/STATUS.md) owns verification and known issues, including the Ghost Samurai shutdown exception that can occur without summoning that boss.
 
 ## Requirements and starting a raid
+
+The new **Cathedral of the White Night** prototype pairs an ice-glass leviathan with Liora, an NPC-sized sword-bearing girl. Use **Glacial Chime** on the shared pedestal and confirm Ready (1–8 players). It uses normal deaths and native damage, with provisional balance and no bespoke rewards yet. [Encounter guide](docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md).
 
 Use the supported tModLoader version and dependency versions in the [version matrix](docs/VERSION_MATRIX.md). **Calamity Mod and Luminance are required**, together with the dependencies requested by tModLoader. Recommended equipment is Calamity endgame gear. Client and server must run matching Convergence builds and protocols.
 
@@ -50,7 +52,7 @@ docs/                Specifications, workflow, status, evidence
 .agents/skills/      Task-specific development and research guidance
 ```
 
-Work from integrated main in a scoped branch or worktree. Shared play packages follow the [integration workflow](CONTRIBUTING.md#shared-development). Game outcomes remain server/Single Player authoritative, with only the explicitly documented [Ghost Samurai native-wave exception](docs/adr/0023-ghost-samurai-native-wave-damage.md).
+Work from integrated main in a scoped branch or worktree. Shared play packages follow the [integration workflow](CONTRIBUTING.md#shared-development). Game outcomes remain server/Single Player authoritative; feature-specific native-damage boundaries are documented in the [ADR index](docs/adr/README.md).
 
 ## Reports and releases
 
@@ -59,6 +61,8 @@ Report reproducible issues through [GitHub Issues](https://github.com/Minamium/C
 The 0.3.1 public-test candidate and its limits are described in [release notes](docs/releases/0.3.1.md). GitHub packages and Workshop uploads are separate; check the installed version and keep every multiplayer peer on the same build. Historical player feedback is [optional, searchable history](docs/history/PLAYTEST_FEEDBACK.md), not a development reading requirement.
 
 ## License and credits
+
+**Azure Cathedral music: EigHt — 白夜に耀うステンドグラス.** [Creator video](https://www.youtube.com/watch?v=k0-SQQkRxis) · [Original work](https://bgm-cathedral.booth.pm/items/6112209) · [Use terms](https://eight-novel.fanbox.cc/posts/7647818). Used as game background music; not a standalone soundtrack or a project-original composition.
 
 Maintained by [Minamium](https://github.com/Minamium), with contributions including Ghost Samurai by [mac10101010](https://github.com/mac10101010). See [contributors](https://github.com/Minamium/Convergence-Mod/graphs/contributors) for the project history.
 

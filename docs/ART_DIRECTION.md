@@ -33,6 +33,7 @@ Each encounter has its own silhouette, materials, motion and cue vocabulary. The
 | Ghost Samurai / Oboro | [Boss and weapon spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#luminance-presentation-target) for violet ghost fire, armored oni identity, dual swords, connected motion and attack materials |
 | Scarlet Invocation / `CrimsonFoundry` | [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md#luminance-presentation-v2) for the small performer, distinct apparitions, score and scarlet physical strokes |
 | Other NPCs, weapons, projectiles, companions, fields and UI | Their owning spec plus this shared policy; they are not exempt because they are outside a Raid renderer |
+| Cathedral of the White Night / `AzureCathedral` | [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md#presentation) for the small cyan-haired swordswoman, linked ice-glass leviathan, cathedral and water-refraction materials |
 
 ## Luminance presentation policy
 

@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-21
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,18 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Azure Fury refinement — 2026-09-21 / 0.3.32 → 0.3.33
+
+Owner reports too little worm hit uptime, an overly short diagonal entry, solid-looking missiles and a consumption pose already overlapping Liora; requests1/20 worm HP, full-body Fury hits, cyan Vespera-style cuts and new second-form art. September20 solo logs show two clean Defeats:12.15s and342.27s; in the longer attempt Liora dies after50.95s, the worm reaches its floor247.87s later, refills once, then the party dies35.45s into Fury with88.98% worm HP. Implement shared native Fury damage, six-second moving volley passage, streaming energy bolts, Liora cuts and retreat/rush/slow articulated bite before head-to-tail Fury armor change. Preserve Liora HP and other encounters. [Evidence](../evidence/2026-09-21-azure-fury-refinement.json) owns exact logs/checks; new balance, visuals and multiplayer are not owner-approved yet.
+
+## Azure devouring storm — 2026-09-20 / 0.3.31 → 0.3.32
+
+Owner reports flat Liora, transient entrance mask/music loss, short worm and unfair moving-mouth beams; requests Doll-style preparation, frost, segment missiles and a consumption/Fury/melting progression. Latest solo logs contain one12.37s defeat and one198.30s victory with clean cleanup, three Stacks (one success) and three successful solo Spreads; no Cathedral exception or missing-actor invalidation. Rework the full projection transport, Ready pill, native-density contrast,45-part courses, Liora-origin sweep and head-only20% floor; add the two-gate transformation and one-time Fury refill. Preserve music file, scaling and other Raids. [Evidence](../evidence/2026-09-20-azure-devouring.json) separates measured logs from the source-inferred flicker cause, deterministic/GPU checks and still-unrun multiplayer/audible/visual acceptance.
+
+## Azure awakening and recovery — 2026-09-20 / 0.3.30 → 0.3.31
+
+Owner reports strange endings, overly detailed girl art, timid short worm motion and a fish-like asymmetric silhouette. Three solo attempts contain one normal defeat and two invalidations immediately after Vitrion dies; Liora remains alive, with6/9 duplicate defeat events. Make defeat idempotent and stop requiring an already-defeated chain. Fix Liora centrally at native pixel density, adopt broad off-field worm courses and symmetric segmented armor, and stage sealed ice → sword break → awakening/light → rift arrival before combat. Add Stack ice compression, Spread rift/light-sword verdicts and brighter faceted flying crystals. Preserve BGM, HP and previous Raid implementations. [Evidence](../evidence/2026-09-20-azure-awakening.json) separates the confirmed old bug, offline checks and untested new SP/MP acceptance; no owner approval of the new visuals is inferred.
 
 ## Scarlet crossflow and spatial cuts — 2026-09-20 / 0.3.28 → 0.3.29
 

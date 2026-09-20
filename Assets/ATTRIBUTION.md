@@ -2,6 +2,116 @@
 
 ## Records
 
+### Azure Cathedral — 2026-09-20
+
+New original images use the built-in generator, exact model unknown. Full briefs: [asset brief](../docs/encounters/azure-cathedral/ASSET_BRIEF.md). Existing project-owned Doll sound/beam materials are reused by reference with feature-local gain/pitch/cyan tuning, not replaced. Original image files remain externally archived. Luminance noise textures are referenced at runtime, never vendored.
+
+- Runtime file: `Assets/Textures/AzureCathedral/Liora.png`
+- Asset ID: azure-liora-20260920
+- Asset type: 192x128 eight-pose native-density pixel NPC atlas
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: Built-in contrast/dress revision using the prior Liora and our own DollAttendant as references; dark cobalt bodice, shaded ice skirt, retained side ponytail/eight poses. Mechanical nearest-neighbor1536x1024 to192x128 alpha-preserving export. Source SHA256 `715a869c1794879080e8442d1086e6de57716b30c141548229ee30265d875e80`; original and superseded images retained externally.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `a940856c1bf12ef5fde5385343740d20d08eee51d3219ed6818fb17a45aa897a`
+
+- Runtime file: `Assets/Textures/AzureCathedral/Vitrion.png`
+- Asset ID: azure-vitrion-20260920
+- Asset type: 1024x1024 dorsal-view armored worm parts atlas
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: New dorsal-axis parts, nearest-neighbor1254x1254 to1024x1024 export; shader mirrors paired silhouettes about measured spines. Source SHA256 `16b86c11ed5a9e82422a58f2e8fc4c55455c06694e7f366fc485506b39afcac4`. No third-party sprite input; prior side-view original retained.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `64a45057948b83ccfa4f6fb5dff15a7d7e71fbbd7d7225ea4af1e57221928ece3`
+
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionFury.png`
+- Asset ID: azure-vitrion-fury-20260921
+- Asset type: 1024x1024 dedicated second-form worm parts atlas
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-21
+- Source type: generated
+- Source work and URL: Built-in edit of project-owned Vitrion atlas; no third-party image input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Nearest-neighbor1280x1280 to1024x1024 transparent export; separate material spine alignment, articulated jaws and phase reveal. Source SHA256 `a290fe57c79684b1a570c1a5377618447532660897436d1a08391bd6bdf42ddd`; original retained in external image archive, first form unchanged.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha/material/offline composition inspection2026-09-21; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `20863d0de5d8b183dbbf49c8e9a798fa915f900426bd78c8265e4be103716581`
+
+- Runtime file: `Assets/Textures/AzureCathedral/Cathedral.png`
+- Asset ID: azure-cathedral-20260920
+- Asset type: 1672x941 glacial cathedral background
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: None; runtime-only water/refraction shading
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `ae41d9a8c1f2e66ef1851705f2acfc651b99b1f54cb6dad2dd00c5f8eb57f2a3`
+
+- Runtime file: `Assets/Textures/AzureCathedral/GlacialChime.png`
+- Asset ID: azure-chime-20260920
+- Asset type: 48x60 item icon
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: Nearest-neighbor game export; preserve alpha
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `f1f5ed0a2271dc0d32a6ada3ab51c1f069661a612171e40e00242852b962a240`
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/AzureGlass.fxc`
+- Asset ID: azure-glass-material-20260920
+- Asset type: compiled original ice/glass/background/shard/rift/countdown/frost/dissolution/streaming-energy effect
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: original
+- Source work and URL: Repository-owned AzureGlass.fx; no external shader code
+- Tool/model/version: FXC identity/options pinned in Assets/AutoloadedEffects/Shaders/compiled.json
+- Human modifications: FXC compilation only; identity/options in compiled.json
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `8d43d6aeb9c28d0e9153dba2bd8cec58d7fdef6f3e8f16c2a4c9e45c1c588ebe`
+
+- Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
+- Asset ID: azure-eighth-white-night-20260920
+- Asset type: stereo48000Hz Vorbis background music with native loop tags
+- Creator: EigHt
+- Creation/acquisition date: 2026-09-20
+- Source type: licensed
+- Source work and URL: 白夜に耀うステンドグラス; https://www.youtube.com/watch?v=k0-SQQkRxis and https://bgm-cathedral.booth.pm/items/6112209 ; exact owner-selected local MP3
+- Tool/model/version: ffmpeg7.1 libvorbis quality6
+- Human modifications: trim0.323–263.470s,1.5s triangular crossfade of tail into source0.323–1.823s, gain−2.9dB; LOOPSTART72000/LOOPEND12631056; no deleted climax or new composition
+- License and redistribution terms: copyright retained by EigHt; official https://eight-novel.fanbox.cc/posts/7647818 permits game background use/editing; read unrestricted creator post via public post.info API on2026-09-20 (updated2026-07-14). Not covered by Convergence code/art license; no standalone soundtrack, streaming-service or Content-ID registration permission. Rhythm-game inclusion requires contacting the creator separately. Contextual Mod/source asset only, not a music-pack download; recheck terms before public release
+- Required attribution: Music: EigHt — 白夜に耀うステンドグラス; preserve creator, original and terms links
+- Reviewer and review date: source terms and audio statistics checked2026-09-20; subjective seam/mix listening not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md#music`
+- Source SHA256: `631325533faa6840880e296664029fbc931b39d65304862378a24bbe46174ad6`
+- SHA256: `d73bec8fa67a5b5724b776381b79be6f8f9db17bf6afffbae9b39e2dee04427d`
+
 ### Ghost Samurai articulated parts and materials — 2026-09-18
 
 - Runtime file: `Assets/Textures/GhostSamurai/VioletRig.png`
@@ -219,7 +329,7 @@
 - Source type: original
 - Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fx`; no foreign shader/artwork copied
 - Tool/model/version: FXC compiler/options and source/export identities in `Assets/AutoloadedEffects/Shaders/compiled.json`
-- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; September20 crossflow receiver vapor and continuous microflutter/contracting slash residue. Runtime motion/composition in `ScarletSorcery.cs`; independently adapted behavioral reference recorded in [F18](../docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20), no external code/art/audio copied.
+- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; September20 crossflow receiver vapor and continuous microflutter/contracting slash residue. September21 exposes tear palette parameters for Liora's cyan variant while preserving Scarlet's red defaults. Runtime motion/composition in `ScarletSorcery.cs`; independently adapted behavioral reference recorded in [F18](../docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20), no external code/art/audio copied.
 - License and redistribution terms: original project asset under existing project terms; Luminance supplies its runtime noise, not vendored
 - Required attribution: retain this provenance and source/export manifest
 - Reviewer and review date: Codex,2026-09-20; actual compiled FNA GPU frames inspected, game/MP acceptance not_run

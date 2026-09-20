@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-21
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,13 +23,13 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.30 / protocol58**. Oboro's third cut now uses the requested26F pullback, held charge, explosive release and diminishing follow-through, with shared moving grip/hit geometry and violet charge/edge accents. The charge is harmless; all peers must use matching motion rules. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧の3段目フィニッシュ--2026-09-20) owns tuning.
+Current source: **0.3.34 / protocol62**. Oboro's third cut now uses the requested26F pullback, held charge, explosive release and diminishing follow-through, with shared moving grip/hit geometry and violet charge/edge accents. The charge is harmless; all peers must use matching motion rules. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧の3段目フィニッシュ--2026-09-20) owns tuning.
 
-The0.3.29 Scarlet baseline is retained: Scarlet's paired seals now exchange one right-to-left crossflow; four consecutive beat strikes remove the extra idle beat. ActII cuts gain original Orderbringer-informed sharp cores, continuously varying fine motion and smoke; ActIII adds four offset slash lattices, and Spread is enlarged. Empty-state NPC envelopes guard unowned Scarlet debug-spawn/despawn synchronization. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns details. Approved circles/background, full music, opening, HP/cycle gates, Doll/Ghost Samurai/Oboro and four pre-existing generated English locale edits remain. Matching peers are required for the new gesture ID/actor envelope; common packet IDs are unchanged. This is not a Workshop publication or GitHub release; public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+The integrated0.3.33 Azure baseline is retained: Cathedral reduces worm HP to1/20, enables full-body native shared-HP hits in Fury, lengthens diagonal passage, attaches its volley to moving segments and adds Liora's cyan spatial cuts. Distant retreat/rush/slow jaw consumption reveals new Fury armor; streaming energy replaces solid-looking segment missiles. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns mechanics and owner checks. Liora HP, music, other Raid gameplay and four pre-existing generated English locale edits are preserved; Scarlet's shared slash material keeps its red palette. Matching peers are required; common packet IDs remain unchanged. This is not a Workshop publication or GitHub release; public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
 Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
-**Latest owner playtest:** local0.3.27 completed two solo Host & Play Victories/cleanup in189.25s and140.68s from unlock. Owner reports missing musical climax, repetitive boundary sounds and requests expanded choreography. [Evidence](evidence/2026-09-20-scarlet-choreography.json) separates those observations/code diagnosis from new implementation and pending gameplay/listening checks.
+**Latest owner playtest:** Cathedral0.3.32, two solo Host & Play Defeats (12.15s /342.27s), both cleaned without a Cathedral exception or missing-actor invalidation. Longer run: Liora dies50.95s after combat starts; another247.87s to the worm floor; one Fury refill, then Defeat35.45s later at88.98% worm HP. Peak five-second combined DPS90,385; one successful Stack and Spread (solo). [Evidence](evidence/2026-09-21-azure-fury-refinement.json) separates these measurements from unplayed0.3.33 changes. Older observations remain history.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Oboro is a guaranteed single ground drop; further rewards and balance remain provisional. Cleanup and target ownership have automated coverage; actual multiplayer/re-entry and the new weapon/art need owner playtesting.
@@ -40,9 +40,11 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Verification state
 
+- **0.3.33 Azure Fury:** [evidence](evidence/2026-09-21-azure-fury-refinement.json) owns scoped damage/phase/codec/motion checks, shader/native package verification and linked-production GPU previews. User-owned / not_run: native full-body Fury damage under equipped piercing weapons, slow volley readability, Liora cuts, distant articulated bite/Fury textures, lethal/melting/re-invocation and matching-peer synchronization. Entrance mask/music continuity, UI107%/zoom/Reduced Effects and frame times remain unconfirmed. [Devouring0.3.32 evidence](evidence/2026-09-20-azure-devouring.json) retains earlier verification without implying new game acceptance.
+
 - **0.3.29 Scarlet crossflow/cuts:** [evidence](evidence/2026-09-20-scarlet-crossflow.json) owns current verification and the0.3.28 solo session (ActIII defeat/cleanup, two failed Stacks, one successful Spread; separate post-fight unowned-NPC exceptions). User-owned / not_run: crossflow direction and mobility, consecutive-beat cadence, ActII blade/residue and ActIII four-offset readability, enlarged2/4/8-player Spread, remote synchronization and Reduced Effects. Older [choreography/audio evidence](evidence/2026-09-20-scarlet-choreography.json) remains history; subjective audio/intro acceptance is not inferred from this session. Ghost Samurai's separate invalid-arena sync remains an unaddressed log finding for its task owner.
 
-- **Oboro third-cut finisher:** [evidence](evidence/2026-09-20-oboro-third-swing.json) records focused motion/coverage checks, the isolated native build and712 linked-production offline frames through all three cuts, loop and settle. Native hand probes cover the new thrust and mirrored/inverted-gravity poses; the hilt gap remains bounded within10px. Real player/armor/mount rendering, sound, SP/MP timing and feel remain user-owned / not_run. This feature build does not install into the normal profile.
+- **Oboro third-cut finisher:** [evidence](evidence/2026-09-20-oboro-third-swing.json) records focused motion/coverage checks, the isolated native build and712 linked-production offline frames through all three cuts, loop and settle. Native hand probes cover the new thrust and mirrored/inverted-gravity poses; the hilt gap remains bounded within10px. Real player/armor/mount rendering, sound, SP/MP timing and feel remain user-owned / not_run. The owner approved PR #60 integration and normal-profile installation. The combined0.3.34/protocol62 candidate retains the newer Azure baseline; its build/install results follow in the PR and local build record.
 
 - **Oboro second-cut motion:** [evidence](evidence/2026-09-20-oboro-second-swing.json) records the16F return curve, hand/authority alignment, exact-package checks and360 linked-production offline frames across both facings, bright/dark and Reduced Effects. The native build has0 errors/4 existing warnings. The third-step centered grip leaves a bounded9.333px harmless handoff gap under native discrete arm stretch; the second stroke is exactly hand-anchored at3–14F. Real player/armor/mount drawing, SP/MP input and feel remain user-owned / not_run. That isolated feature build did not change the normal installed0.3.25.
 
@@ -86,7 +88,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-After confirmed0.3.29 deployment, start normally without another Build + Reload. Check right-seal→left-seal flow and upper/lower evasion, four basic on-beat releases without the old extra rest, successive ActIII offset lattices and larger Spread. Confirm remote peers share frozen forecasts and chorus results. Inspect fine slash motion/smoke at actual game zoom and Reduced Effects. The full music/intro are preserved, not re-certified by the new offline checks.
+After confirmed0.3.34 deployment, start normally without another Build + Reload. Use **Glacial Chime / 氷硝子の鐘** on a Foundation Core and the top-center Ready pill. The [Azure follow-up smoke](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) prioritizes worm hit uptime/HP, moving volley, cyan cuts and the distant open-jaw consumption/Fury sequence. Earlier Scarlet/Oboro and music-listening checks remain separate owner follow-ups; do not rerun them merely to accept this change.
 
 The integrated Oboro second-cut changes retain their owner checks: both facings, upper pause, fast downward return, thinner echoes, held loop and release/restart, including the first/third-step handoffs. Use the current matching build for multiplayer. The third-cut follow-up is now implemented; after integration/build, check its still charge, sharp release, heavier violet arc, forward grip and3→1 handoff, both facing directions, high attack speed and release during charge. Real-game checks remain pending.
 

@@ -22,7 +22,7 @@ For visual work, apply the shared [Luminance presentation policy](docs/ART_DIREC
 
 ## Non-negotiable boundaries
 
-- Gameplay state and outcomes are server/Single Player authoritative. Native receiving-player damage boundaries are explicitly scoped in [ADR-0023](docs/adr/0023-ghost-samurai-native-wave-damage.md) (Ghost Samurai wave), [ADR-0024](docs/adr/0024-native-raid-hurt-and-downed.md) (Doll damage calculation, not geometry or outcomes), and [ADR-0026](docs/adr/0026-crimson-score-and-native-projectiles.md) (Crimson Foundry native hostile projectiles). Do not generalize them to other features.
+- Gameplay state and outcomes are server/Single Player authoritative. Native receiving-player damage boundaries are explicitly scoped in [ADR-0023](docs/adr/0023-ghost-samurai-native-wave-damage.md) (Ghost Samurai wave), [ADR-0024](docs/adr/0024-native-raid-hurt-and-downed.md) (Doll damage calculation, not geometry or outcomes), [ADR-0026](docs/adr/0026-crimson-score-and-native-projectiles.md) (Crimson Foundry native hostile projectiles), and [ADR-0028](docs/adr/0028-azure-cathedral-native-actors.md) (Azure Cathedral native actors/projectiles). Do not generalize them to other features.
 - Clients send bounded requests and consume read-only snapshots/events.
 - `Common` never depends on `Content` or presentation-only `Client` code.
 - Encounter-specific behavior enters through definition-scoped policies and runtime factories; do not add feature switches to global policy, coordinator, or packet-router code.

@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-20",
+  "feature": "azure_cathedral",
+  "tested_old_version": "0.3.30",
+  "new_version": "0.3.31",
+  "protocol": 59,
+  "source_baseline": "b5d80ac93ec6cc1bba4ca685028cc0c89e08d6f6",
+  "logs": {
+    "server_sha256": "c86fe49f6a9d5a082fbd1e436b81c3ef1c3080bd03851e7ef2bd383367408d97",
+    "client_sha256": "c2a20b6243eeb61aab99eb2bacfec6fb88e76608001d6d13f28507a5f03c24b0",
+    "mode": "Host and Play, one retained participant in each of three fights; no new multiplayer evidence",
+    "fights": [
+      {"fight": "82e0c400-3d07-4c0e-af19-02d9eb200a72", "outcome": "Defeat", "unlock_age": 1186, "result_age": 1945, "cleanup_age": 2125, "combat_seconds": 12.65, "remaining_hp_at_result": 7194149, "peak_logged_five_second_dps": 576},
+      {"fight": "7ced5360-6bad-4f7a-a9f8-8863ede3df11", "outcome": "EncounterActorMissing", "unlock_age": 846, "worm_defeated_age": 2609, "cleanup_age": 2610, "combat_seconds_to_invalidation": 29.4, "worm_defeat_event_count": 6, "last_sampled_girl_hp": 2343840, "last_sampled_worm_hp_before_kill": 996498, "peak_logged_five_second_dps": 518910},
+      {"fight": "520a6cb3-8c2c-4783-b1ec-d0453275b64d", "outcome": "EncounterActorMissing", "unlock_age": 984, "worm_defeated_age": 8240, "cleanup_age": 8241, "combat_seconds_to_invalidation": 120.95, "worm_defeat_event_count": 9, "last_sampled_girl_hp": 2366073, "last_sampled_worm_hp_before_kill": 4174435, "peak_logged_five_second_dps": 118887}
+    ],
+    "dps_boundary": "Five-second aggregate sampled HP deltas, not per-player equipped DPS, final overkill, or whole-fight DPS. No HP rebalance inferred from interrupted attempts.",
+    "diagnosis": "Both abnormal ends occur one tick after native worm defeat; Runtime required all23 parts even with wormDead=true. Killed had no already-defeated guard. Exact native/inter-mod cause of first disappearing part not reproduced.",
+    "unrelated": "Initial client localhost connection refusal precedes successful join; a later server2 SubworldLibrary.LoadIntoSubworld EndOfStreamException occurs at shutdown, not at either Azure invalidation."
+  },
+  "changes": [
+    "Idempotent actor defeat; living/summoned chain validation; exact-Fight defeated-chain retirement and survivor continuation",
+    "Fixed central native-density Liora; new dorsal bilateral Vitrion atlas, longer chain, broad off-field windups/charges and bounded-angle recovery",
+    "Protected16-second ice/sword/awakening/light/rift intro with delayed background and head-first emergence, temporary camera framing",
+    "Authority Stack/Spread director, immutable bounded plans/verdicts/positions and recipient-only normal native damage",
+    "Luminance ice jaws/prison, dimensional rift/light sword, countdown markers and bright faceted icicles; unchanged BGM and HP"
+  ],
+  "checks": {
+    "domain": "332 deterministic tests passed, including new duplicate defeat/survivor, solo/party chorus, immutable codec/verdict and continuous broad-flight cases",
+    "shader": "Pinned FXC compilation and export manifest passed",
+    "gpu": "72 linked-production FNA D3D11 frames exported and sampled: intro, mirrored chain, stack/spread success and failure, flying shards, reduced/native-density states. Not actual gameplay or a performance measurement.",
+    "initial_native_compile": "0 errors,4 pre-existing nullable-context warnings; source-identified candidate0.3.31. Plain MSBuild without dependency assemblies was inapplicable; native tML compiler resolved installed dependencies.",
+    "final_package": {"record_id": "20260920T114057998483Z", "version": "0.3.31", "sha256": "b38ff9d9c5a9e465e385be605a96423a923578123e03671c138e573438553cd0", "native_errors": 0, "existing_warnings": 4, "source_changed_during_build": false, "note": "Source-identified isolated build. Final camera local-name collision was corrected before this successful build. Package-excluded evidence finalization does not change its compiled inputs."},
+    "dedicated_load": "Convergence0.3.31/Calamity2.2.4/Luminance1.0.14 constructed, configured, finalized and reached dedicated world-selection in the isolated profile. No world opened or game client launched; probe terminated. Subsequent edits change camera framing/world bounds only, not content registration.",
+    "static_and_common_codec": "passed:82 indexed documents,964 repository inputs and12 YAML files; compiled protocol59,334 roundtrips and54 malformed/truncated rejections; diff whitespace clean"
+  },
+  "preserved": "Four pre-existing generated English locale edits remain uncommitted. Existing Raids, BGM recording/export, saves, Mod list, generated originals and historical copies are unchanged.",
+  "not_run": [
+    "New native battle in either kill order through Victory and immediate re-summon",
+    "2-8-client Stack/Spread synchronization and recipient/accessory damage under real latency",
+    "Native worm motion/contact and mouth attachment at map/arena edges",
+    "Introduction visibility, camera/HUD handoff,107% UI/zoom, Reduced Effects, subjective sound mix and frame-time measurement"
+  ],
+  "distribution": "Ordinary development main integration/build only, no Workshop publication or GitHub release."
+}

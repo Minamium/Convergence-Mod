@@ -103,6 +103,24 @@ documents:
   related_docs:
   - adr.0022
   - encounter.ghost-samurai.spec
+- doc_id: adr.0028
+  path: docs/adr/0028-azure-cathedral-native-actors.md
+  title: 'ADR-0028: Azure Cathedral native actors and hazards'
+  content_sha256: 3b9ad88104136d61ab9cb693584cce7cdd24831b7f74c4612ca207cfae19160c
+  document_type: adr
+  status: accepted
+  owners:
+  - architecture
+  - gameplay
+  last_reviewed: '2026-09-21'
+  source_of_truth_for:
+  - authority.azure_cathedral
+  aliases: []
+  related_code:
+  - Content/Encounters/AzureCathedral
+  related_docs:
+  - encounter.azure-cathedral.spec
+  - adr.0026
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -430,7 +448,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: 4bb24331937dac8450d90fb0543153ef1771f2a6fcd24c5ec0226e78c4e0027a
+  content_sha256: f0b5d713397a97f40dff0306b14b2a9fd8394050a504106041c08c4a0540fa4f
   document_type: index
   status: accepted
   owners:
@@ -518,7 +536,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 7dbdfdb10ce146e55b312399753d9a623b090a637699404e3d2fd3fff6f81a82
+  content_sha256: 2da59d85a21a3915ce2944628d5a402e8044329f59faa003d210c94c8b166907
   document_type: index
   status: accepted
   owners:
@@ -574,6 +592,46 @@ documents:
   related_docs:
   - docs.entrypoint
   - docs.search-index
+- doc_id: encounter.azure-cathedral.assets
+  path: docs/encounters/azure-cathedral/ASSET_BRIEF.md
+  title: Azure Cathedral asset brief
+  content_sha256: 3c096629356f762129618d85ed63325a630188edb551970088336a7705596f94
+  document_type: spec
+  status: accepted
+  owners:
+  - art
+  last_reviewed: '2026-09-21'
+  source_of_truth_for:
+  - encounter.azure_cathedral.asset_brief
+  aliases: []
+  related_code:
+  - Assets/Textures/AzureCathedral
+  related_docs:
+  - encounter.azure-cathedral.spec
+- doc_id: encounter.azure-cathedral.spec
+  path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
+  title: Cathedral of the White Night
+  content_sha256: e727b584f6da43a44cf24f8ef420f745b5ed8de67dbbc0d678d61709c90e2e60
+  document_type: spec
+  status: accepted
+  owners:
+  - gameplay
+  - art
+  - audio
+  last_reviewed: '2026-09-21'
+  source_of_truth_for:
+  - encounter.azure_cathedral.experience
+  - encounter.azure_cathedral.presentation
+  aliases:
+  - Cathedral of the White Night
+  - Liora
+  - Vitrion
+  related_code:
+  - Content/Encounters/AzureCathedral
+  - Client/Encounters/AzureCathedral
+  related_docs:
+  - project.status
+  - adr.0028
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
@@ -869,12 +927,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 1ba798beec9c35b5621c55d6e836c413432b6315484161ae0c14cc7a3d59cc99
+  content_sha256: 9207a0640a465fb09badaee36e7cdace728cd4fe87169871f40d5948e30c98ed
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-21'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -949,7 +1007,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 9177330411d53ceb153076ff59bd1ce71021eda5f78bb3d32d1a53563aca4005
+  content_sha256: 42c32858792424b397cd01337e3b9acdd44c0ffb2f1810369d22ab71a7a56135
   document_type: policy
   status: accepted
   owners:
@@ -1043,7 +1101,7 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: f4f320400aa580fcc5e8f7e5ccc9bc12608d7a13e4f89ee62b98e83cc477c5cd
+  content_sha256: 47a3cdc3af5a980956c3b75fb63a3a691671eaa8bc8ffa0c2f99000f689b0453
   document_type: spec
   status: accepted
   owners:
@@ -1268,12 +1326,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: c7733e2a7dfcf7e3fa0372934be497abafa1519990065f99c8fe4d9325b46328
+  content_sha256: 7d26814e05db3e31dacdb24beb6baef0164883dab83b6a9e347ab480b31c869f
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-21'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1563,7 +1621,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 934c781750c1fc93da83508016eb86bac46a356e3cfc5d63138479c9edf5665d
+  content_sha256: 48d3b0074ce62b156bd32a7445f307640459cb65df8d303e4635d44bfbacfd00
   document_type: research
   status: historical
   owners:
@@ -1585,7 +1643,7 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: e61146f752f3253c03f8d139a5e635e5c166cc4d4a38de789144263adee63d10
+  content_sha256: 926d670fc8e324dc7416e2b7b6f80f53d62292b52c327ea3ec8bf1a10af52c97
   document_type: research
   status: provisional
   owners:

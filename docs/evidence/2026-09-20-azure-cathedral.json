@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-20",
+  "feature": "azure_cathedral",
+  "version": "0.3.30",
+  "protocol": 58,
+  "source_baseline": "8b2ab4e44b47498f3f7a2ae1b172692a5ceade30",
+  "verified_source_commit": "4a8c3271bb73e7be8009fab3997e7ccb8661a769",
+  "final_package": {
+    "record_id": "20260920T102927786243Z",
+    "sha256": "47a89bd44db09ea7bd36e7823a7bf63f3ec93c1e8914985ac1f942ebd08571c0",
+    "version": "0.3.30",
+    "note": "Source-identified isolated native package. Pre-existing locale differences are listed in the local record; package-excluded evidence finalization does not require rebuilding."
+  },
+  "preserved_changes": "Four pre-existing generated English locale edits; existing Doll/Scarlet/Ghost Samurai/Oboro implementation and assets unchanged.",
+  "checks": {
+    "native_compile": "passed, 0 errors and 4 pre-existing nullable-context warnings; final source-identified package record is local",
+    "dedicated_mod_load": "passed through world-selection with Convergence0.3.30, Luminance1.0.14, Calamity2.2.4 and three existing profile addons. No world opened and no game client launched. Initial isolated attempts lacked logging permission and then a locally discoverable Luminance package; those environment prerequisites were corrected. Failed probe and completed probe were terminated.",
+    "shader_export": "AzureGlass compiled by pinned FXC; source/export manifest checked",
+    "offline_gpu": "48 linked-production FNA D3D11 frames, RTX3090, include source atlas/segmentation, forecast/ignition/live/tail, bright/dark and Reduced Effects. Tiny actor preview uses actual NPC-sized atlas. Not a game, multiplayer or FPS test.",
+    "domain_and_codec": "passed:328 deterministic domain tests including six Azure contract cases; protocol58,334 compiled roundtrips and54 malformed/truncated rejections",
+    "repository_static": "passed:82 indexed documents, repository policy/asset records and12 YAML files; initial new metadata errors corrected before the passing run"
+  },
+  "audio": {
+    "recording": "EigHt — 白夜に耀うステンドグラス",
+    "terms": "Official unrestricted post7647818, updated2026-07-14, read2026-09-20 via creator public post.info API",
+    "source_mean_db": -13.0,
+    "doll_p1_mean_db": -15.9,
+    "export_gain_db": -2.9,
+    "export_mean_db": -15.9,
+    "export_peak_db": -1.8,
+    "decoded_stereo_sample_frames": 12631056,
+    "duration_seconds": 263.147,
+    "export_sha256": "d73bec8fa67a5b5724b776381b79be6f8f9db17bf6afffbae9b39e2dee04427d",
+    "export_correction": "A shared asplit/short atrim crossfade graph prematurely ended at27ms. Replaced by two independent decoders of the same unchanged input; full decode now confirms263.147s and12631056 stereo frames before packaging.",
+    "loop_start_samples": 72000,
+    "loop_end_samples": 12631056,
+    "loop_sample_rate": 48000,
+    "subjective_listening": "not_run"
+  },
+  "owner_not_run": [
+    "1-player and matching2–8-player Ready, native damage/segment hit forwarding, half-HP escalation and both-actor victory",
+    "Defeat/disconnect/cancel/unload and immediate repeated invocation, remote visibility, late spectator state",
+    "Mouth-anchor attachment during native motion, charge/rain readability,107% UI scale/zoom, Reduced Effects and measured frame times",
+    "Music onset/loop seam and effect-to-BGM subjective balance"
+  ],
+  "distribution": "Ordinary source integration/development build only; no Workshop publication or GitHub release requested."
+}
