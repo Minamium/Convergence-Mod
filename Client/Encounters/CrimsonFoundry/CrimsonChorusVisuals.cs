@@ -39,10 +39,11 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                     : impact ? "SpreadRelease" : "SpreadSummon";
                 var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
                 {
-                    Volume = impact ? .30f : .20f, MaxInstances = 1, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
+                    Volume = impact ? .48f : .25f, MaxInstances = 1, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
                     PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
                 });
-                voices.Add((id, age + 45));
+                voices.Add((id, age + 100));
+                if (impact && marker.Resolved && marker.FailedMask != 0) ScarletArticulation.Impact(3,2,boss.NPC.Center);
             }
             if (heard.Count > 32) heard.RemoveWhere(x => x.Serial < p.Serial - 2);
         }
@@ -64,6 +65,7 @@ internal sealed class CrimsonChorusVisuals : ModSystem
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         try
         {
+            DrawSorcery(boss!,batch,age);
             using var scope = new ScarletGraphicsScope(batch);
             foreach (Projectile projectile in Main.ActiveProjectiles)
             {
@@ -110,6 +112,43 @@ internal sealed class CrimsonChorusVisuals : ModSystem
             }
         }
         finally { batch.End(); }
+    }
+    private static void DrawSorcery(CrimsonBoss boss,SpriteBatch batch,float age)
+    {
+        foreach (Projectile projectile in Main.ActiveProjectiles)
+        {
+            if (projectile.ModProjectile is not CrimsonChorus marker || !CrimsonChorus.TryBoss(marker.Plan,out var owner) || owner!=boss) continue;
+            var p=marker.Plan;if(age<p.Born || age>=p.Fire+32)continue;
+            float progress=Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1);
+            // Three abrupt growth beats with connected ease-out arrivals, not a uniform scale ramp.
+            float size=45+30*CrimsonInvocation.Ease(progress*10)
+                +42*CrimsonInvocation.Ease((progress-.34f)*15)+50*CrimsonInvocation.Ease((progress-.72f)*18);
+            float tail=age<p.Fire?1:1-CrimsonInvocation.Ease((age-p.Fire)/32);
+            for(int i=0;i<boss.State.Members.Length;i++)
+            {
+                var member=boss.State.Members[i];var player=Main.player[member.Slot];
+                if((p.Members & 1<<i)==0 || member.Out || !player.active || player.dead)continue;
+                Vector2 at=player.Center;
+                bool failed=marker.Resolved && (marker.FailedMask & 1<<i)!=0;
+                if(p.Kind==CrimsonChorusKind.Stack)
+                {
+                    ScarletSorcery.Seal(batch,at-new Vector2(0,132),size,.24f,0,age,progress,tail,true,i);
+                    ScarletSorcery.Seal(batch,at+new Vector2(0,132),size,.24f,.08f,age,progress,tail,true,i+2);
+                    if(failed && age>=p.Fire) ScarletSorcery.Flame(batch,at-new Vector2(0,132),at+new Vector2(0,132),
+                        48*CrimsonInvocation.Ease((age-p.Fire)/3),age,tail);
+                }
+                else
+                {
+                    ScarletSorcery.Seal(batch,at,size,.87f,-.16f,age,progress,tail,false,i);
+                    if(failed && age>=p.Fire)
+                    {
+                        Vector2 d=new Vector2(220,0).RotatedBy(-.68f);
+                        float reveal=CrimsonInvocation.Ease((age-p.Fire)/2);
+                        ScarletSorcery.Tear(batch,new(new(at.X-d.X,at.Y-d.Y),new(at.X-d.X+d.X*2*reveal,at.Y-d.Y+d.Y*2*reveal),7),age,true,tail,i);
+                    }
+                }
+            }
+        }
     }
     private void Reset()
     {

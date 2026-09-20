@@ -13,6 +13,7 @@ using Terraria.ModLoader.Config;
 using Terraria.UI;
 using System.Diagnostics;
 using Luminance.Assets;
+using Luminance.Core.Graphics;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry;
 
@@ -63,6 +64,10 @@ internal sealed class CrimsonVisuals : ModSystem
             { Cue("Beams/PortalFire", .30f, age + 55); shake = 6; }
         if (boss.State.MusicStart >= 0 && previousAge < boss.State.MusicStart && age >= boss.State.MusicStart && age - boss.State.MusicStart < 8)
         { Cue("RaidDesignation", .24f, age + 120); shake = 5; }
+        if(boss.State.MusicStart>=0) {
+            int gate=boss.State.MusicStart+CrimsonChoreography.SummonAt;
+            if(previousAge<gate && age>=gate && age-gate<8) { Cue("PhaseRupture",.48f,age+150);shake=11; }
+        }
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && endingAt < 0)
         {
             endingAt = age;
@@ -102,6 +107,13 @@ internal sealed class CrimsonVisuals : ModSystem
     public override void ClearWorld() => Reset();
     public override void ModifyScreenPosition()
     {
+        var boss=CrimsonPackets.Boss;
+        if(boss is not null && boss.Fresh && Local(boss) && boss.State.Stage==CrimsonStage.Countdown
+            && !Reduced && ModContent.GetInstance<CrimsonVisualConfig>().CinematicCamera) {
+            float open=CrimsonChoreography.OpeningAge(boss.VisualAge,boss.State.MusicStart);
+            float pan=Ease(open/100)*(1-Ease((open-780)/180));
+            CameraPanSystem.PanTowards(new(boss.State.Field.CenterX,boss.State.Field.CenterY-80),pan);
+        }
         if (Reduced || !ModContent.GetInstance<CrimsonVisualConfig>().ScreenShake || shake < .05f) return;
         float t = Main.GameUpdateCount % 6000;
         Main.screenPosition += new Vector2(MathF.Sin(t * 2.3f), MathF.Cos(t * 1.9f)) * Math.Min(shake, 11);
@@ -202,19 +214,19 @@ internal sealed class CrimsonVisuals : ModSystem
             if (tl.Y >= 0 && tl.Y < view.Height) Fill(new(left, top, Math.Max(0, right - left), 2), edge);
             if (br.Y > 0 && br.Y <= view.Height) Fill(new(left, Math.Max(0, bottom - 2), Math.Max(0, right - left), 2), edge);
         }
-        bool intro = state.MusicStart >= 0 && age < state.MusicStart + CrimsonRegistration.Score.IntroTicks;
+        bool intro = state.MusicStart >= 0 && age < state.MusicStart + CrimsonChoreography.OpeningTicks;
         bool manifest = state.FinalStart >= 0 && age < state.FinalStart + CrimsonInvocation.ManifestTicks;
         bool cinematic = state.Stage == CrimsonStage.Deployment || intro || manifest || endingAt >= 0;
         if (cinematic)
         {
             float clock = endingAt >= 0 ? age - endingAt : manifest ? age - state.FinalStart : intro ? age - state.MusicStart : age;
             float alpha = endingAt >= 0 || manifest ? Math.Min(Ease(clock / 22), Ease((150 - clock) / 32))
-                : CrimsonInvocation.OpeningBars(state.Stage, age, state.MusicStart, CrimsonRegistration.Score.IntroTicks);
+                : CrimsonInvocation.OpeningBars(state.Stage, age, state.MusicStart, CrimsonChoreography.OpeningTicks);
             Fill(new(0, 0, view.Width, (int)(view.Height * .11f)), Color.Black * alpha);
             Fill(new(0, (int)(view.Height * .89f), view.Width, (int)(view.Height * .12f)), Color.Black * alpha);
             if (intro)
             {
-                float title = Ease((clock - 80) / 30) * (1 - Ease((clock - 365) / 45));
+                float title = Ease((clock - 300) / 45) * (1 - Ease((clock - 650) / 60));
                 Utils.DrawBorderString(batch, Terraria.Localization.Language.GetTextValue("Mods.Convergence.CrimsonFoundry.RaidTitle"), new(view.Width * .5f, view.Height * .83f), new Color(248, 206, 194) * title, 1.12f, .5f);
             }
             return false; // Frame-local HUD suppression only, no input/settings flags.

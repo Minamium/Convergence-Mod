@@ -8,7 +8,7 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 internal static class CrimsonInvocation
 {
     internal const int SummonCount = 3, AllDefeated = 7, ManifestTicks = 150;
-    internal const int DeploymentTicks = 150, MusicLeadTicks = 120, MusicFadeTicks = 150;
+    internal const int DeploymentTicks = 150, MusicLeadTicks = 60, MusicFadeTicks = 150;
     internal static int TargetLife(int members) => CrimsonPlaytestTuning.TargetLife(members);
     internal static byte Defeat(byte mask, int index)
     {

@@ -20,7 +20,7 @@ class ScarletContracts(unittest.TestCase):
         self.assertNotIn('override bool PreDraw',bar)
     def test_runtime_owns_full_cycle_and_resolves_chorus_before_advancement(self):
         text=(CONTENT/'CrimsonRuntime.cs').read_text()
-        self.assertIn('CrimsonRhythm.Create',text)
+        self.assertIn('CrimsonChoreography.Create',text)
         self.assertNotIn('nextVolley',text)
         self.assertNotIn('score.Events(',text)
         self.assertLess(text.index('if (free < count)'),text.index('Projectile.NewProjectile'))
@@ -33,11 +33,14 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('if (phase < 3 && thresholdLatched',text)
         self.assertIn('phraseEnd - CrimsonRhythm.LookAheadTicks',text)
     def test_damage_one_is_hostile_only_and_keeps_native_hooks(self):
-        for name in ('CrimsonGesture.cs','CrimsonActors.cs','CrimsonChorus.cs'):
+        for name in ('CrimsonGesture.cs','CrimsonActors.cs'):
             text=(CONTENT/name).read_text()
             self.assertIn('Projectile.damage = CrimsonPlaytestTuning.AttackDamage',text)
             self.assertIn('public override void ModifyHitPlayer',text)
             self.assertIn('modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage)',text)
+        chorus=(CONTENT/'CrimsonChorus.cs').read_text()
+        self.assertIn('Projectile.damage = Impact.Damage',chorus)
+        self.assertIn('modifiers.SetMaxDamage(Impact.Damage)',chorus)
         for name in ('CrimsonGesture.cs','CrimsonChorus.cs'):
             text=(CONTENT/name).read_text()
             self.assertNotIn('statLife -=',text)
@@ -91,12 +94,18 @@ class ScarletContracts(unittest.TestCase):
         if image.exists():
             self.assertEqual('802d1f6393ae6f0919214e3de535c1b38cc8e740161fcb98e5ba7f71c5a7e1ef',hashlib.sha256(image.read_bytes()).hexdigest())
         self.assertIn('ScarletSanctum.rawimg', sky)
-    def test_conductor_stays_near_the_authority_focus_without_changing_final_pose(self):
+    def test_conductor_is_fixed_and_does_not_follow_aimed_gestures(self):
         runtime=(CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8')
         self.assertNotIn('new(f.CenterX, f.Top + 130)', runtime)
-        self.assertIn('focus.Y - 260', runtime)
-        self.assertIn('age >= poseUntil[3]', runtime)
-        self.assertIn('phase == 3 ? focus + new Vector2(170, -200)', runtime)
+        self.assertIn('CrimsonChoreography.Conductor(f)', runtime)
+        self.assertIn('actor.NPC.Center = new(fixedCenter.X, fixedCenter.Y)', runtime)
+        self.assertNotIn('age >= poseUntil[3]', runtime)
+        self.assertIn('if (source == 3) return false', (CONTENT/'CrimsonGesture.cs').read_text())
+    def test_floor_noise_is_not_repaid_by_small_native_teleports(self):
+        text=(CONTENT/'CrimsonFieldPlayer.cs').read_text()
+        self.assertIn('CrimsonChoreography.ClampParticipant',text)
+        self.assertIn('48 * 48',text)
+        self.assertIn('event=MajorFieldCorrection',text)
     def test_forecast_and_attack_materials_are_separate_and_energy_restores_batch(self):
         shader=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletRibbon.fx').read_text(encoding='utf-8')
         self.assertIn('float4 Forecast(VO i)', shader)

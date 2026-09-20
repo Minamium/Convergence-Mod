@@ -15,7 +15,7 @@ internal static class ScarletRigMotion
         float strength = reduced ? .15f : 1;
         float load = (.28f * CrimsonRigMotion.Ease(charge / .55f)
             + .72f * MathF.Pow(CrimsonRigMotion.Ease((charge - .55f) / .45f), 2)) * strength;
-        float breath = reduced ? 0 : MathF.Sin(age * .034f + species * 1.7f);
+        float breath = reduced ? 0 : MathF.Sin(age * (species == 0 ? .019f : species == 1 ? .041f : .027f) + species * 1.7f);
         kick *= strength;
         if (part == 0)
             return new(new(0, -load * 3 + kick * 4), breath * .009f,
@@ -24,12 +24,12 @@ internal static class ScarletRigMotion
         float flutter = reduced ? 0 : MathF.Sin(age * .043f - part * 1.7f) + .3f * MathF.Sin(age * .079f + part);
         return species switch
         {
-            0 => new(new(side * load * (7 + lower * 5), lower * (flutter * 4 + kick * 9)),
-                side * (load * .052f - kick * .11f + lower * flutter * .022f), new(1 + load * .03f, 1 - kick * .025f)),
-            1 => new(new(side * load * (11 + lower * 7), -load * 8 + flutter * (2 + lower * 3)),
-                side * (-load * .15f + kick * .21f + flutter * .045f), new(1 + load * .07f, 1)),
-            _ => new(new(side * (flutter * 3 + load * 7), lower * (load * 9 - kick * 12)),
-                side * (load * .11f + flutter * .036f - kick * .14f), new(1, 1 + load * .04f))
+            0 => new(new(side * load * (10 + lower * 5), lower * (breath * 6 + kick * 9)),
+                side * (load * .07f - kick * .12f + lower * breath * .025f), new(1 + load * .045f, 1 - kick * .025f)),
+            1 => new(new(side * (load * (15 + lower * 8) + breath * 8), -load * 10 + flutter * (3 + lower * 4)),
+                side * (-load * .22f + kick * .28f + flutter * .082f), new(1 + load * .08f, 1)),
+            _ => new(new(side * (flutter * 6 + load * 10), lower * (load * 13 - kick * 16) + flutter * 3),
+                side * (load * .17f + flutter * .062f - kick * .21f), new(1, 1 + load * .055f))
         };
     }
 }

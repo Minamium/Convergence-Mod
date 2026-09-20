@@ -47,6 +47,12 @@ internal static class CrimsonRig
                 float delta = g.Plan.Fire - age;
                 if (delta >= 0) until = Math.Min(until, delta); else since = Math.Min(since, -delta);
             }
+        if (source is -1 or 3)
+            foreach (Projectile p in Main.ActiveProjectiles)
+                if (p.ModProjectile is CrimsonChorus c && CrimsonChorus.TryBoss(c.Plan,out var owner) && owner==boss && age>=c.Plan.Born && age<c.Plan.End) {
+                    float delta=c.Plan.Fire-age;
+                    if(delta>=0)until=Math.Min(until,delta);else since=Math.Min(since,-delta);
+                }
         return (CrimsonRigMotion.Charge(until), CrimsonRigMotion.Recoil(since));
     }
     internal static bool Draw(CrimsonBoss boss, SpriteBatch batch, Vector2 screen)
@@ -56,13 +62,23 @@ internal static class CrimsonRig
         float ending = boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat ? .65f : 1;
         if (boss.State.PerformerDefeated) ending *= .18f;
         Vector2 at = boss.NPC.Center;
-        if (CrimsonGesture.TryPose(boss, 3, age, out var pose)) at = CrimsonGestureVisuals.V(pose.Body(age));
+        float opening=CrimsonChoreography.OpeningAge(age,boss.State.MusicStart);
+        float reveal=CrimsonChoreography.Reveal(opening);
+        if(reveal<1 || CrimsonChoreography.Seal(opening)>0) DrawInvocation(batch,boss,age,opening,ending);
         DrawPerformer(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection,
-            boss.State.MusicStart >= 0, signal.Charge, signal.Recoil, ending);
+            true, signal.Charge, signal.Recoil, ending*reveal, false, reveal);
+        {
+            Vector2 waiting = new(MathF.Sin(age*.022f)*8,-20+MathF.Sin(age*.031f)*11);
+            Vector2 held = new(boss.NPC.spriteDirection*(94+signal.Charge*12),-25);
+            Vector2 orb=at+Vector2.Lerp(waiting,held,reveal);
+            float radius=MathHelper.Lerp(64+MathF.Sin(age*.038f)*5,53+signal.Charge*24+signal.Recoil*18,reveal);
+            CrimsonEnergy.Begin();CrimsonEnergy.AddCore(orb,radius,age,Math.Max(signal.Charge,reveal*(1-reveal)*3),signal.Recoil,ending,CrimsonVisuals.Reduced);
+            CrimsonEnergy.Draw(batch);
+        }
         return false;
     }
     internal static void DrawPerformer(SpriteBatch batch, Vector2 screen, Vector2 center, float age, Vector2 velocity,
-        int facing, bool floating, float charge, float recoil, float alpha = 1)
+        int facing, bool floating, float charge, float recoil, float alpha = 1, bool showOrb = true, float materialized = 1)
     {
         if (performer is not { } sprite) return;
         int idle = floating ? 2 : Math.Abs(velocity.X) > .7f && MathF.Sin(age * .22f) > 0 ? 3 : 0;
@@ -79,7 +95,7 @@ internal static class CrimsonRig
         }
         Vector2 orb = center + new Vector2(facing * (94 + charge * 12), -25).RotatedBy(velocity.X * .009f);
         CrimsonEnergy.Begin();
-        CrimsonEnergy.AddCore(orb, 53 + charge * 24 + recoil * 18, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
+        if(showOrb) CrimsonEnergy.AddCore(orb, 53 + charge * 24 + recoil * 18, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
         CrimsonEnergy.Draw(batch);
         if (floating && !CrimsonVisuals.Reduced)
         {
@@ -104,7 +120,34 @@ internal static class CrimsonRig
             for (int k = 0; k < 4; k++)
                 batch.Draw(sprite, at + new Vector2(k == 0 ? -1 : k == 1 ? 1 : 0, k == 2 ? -1 : k == 3 ? 1 : 0),
                     poses[pose], rim, tilt, origin, 56f / 540, flip, 0);
-            batch.Draw(sprite, at, poses[pose], Color.White * (alpha * opacity), tilt, origin, 56f / 540, flip, 0);
+            if(materialized>=.999f) batch.Draw(sprite, at, poses[pose], Color.White * (alpha * opacity), tilt, origin, 56f / 540, flip, 0);
+            else for(int strip=0;strip<18;strip++) {
+                var source=poses[pose];int h=source.Height/18;int y=strip*h;source.Y+=y;source.Height=Math.Min(h,poses[pose].Height-y);
+                float settle=CrimsonInvocation.Ease((materialized-strip*.025f)*2.1f);
+                Vector2 drift=new Vector2(MathF.Sin(strip*4.3f)*55*(1-settle),0);
+                batch.Draw(sprite,at+drift,source,Color.Lerp(new Color(255,37,86),Color.White,settle)*(alpha*opacity*settle),
+                    tilt,origin-new Vector2(0,y),56f/540,flip,0);
+            }
+        }
+    }
+    private static void DrawInvocation(SpriteBatch batch,CrimsonBoss boss,float age,float opening,float alpha)
+    {
+        float seal=CrimsonChoreography.Seal(opening);
+        if(seal<=.001f)return;
+        var point=CrimsonChoreography.SummoningGate(boss.State.Field);Vector2 gate=new(point.X,point.Y);
+        float load=CrimsonInvocation.Ease((opening-230)/190);
+        float tension=CrimsonInvocation.Ease((opening-400)/90);
+        float release=MathF.Exp(-Math.Max(0,opening-(CrimsonChoreography.SummonAt+CrimsonInvocation.MusicLeadTicks))/22);
+        float radius=150+load*240+tension*60;
+        ScarletSorcery.Seal(batch,gate,radius,.82f,-.14f,age,load,seal*alpha,false);
+        ScarletSorcery.Seal(batch,gate,radius*.82f,.82f,.24f,age*.65f,load,seal*.58f*alpha,false,3);
+        DrawPressure(batch,gate,0,age,tension,opening>520?release:0);
+        var glow=MiscTexturesRegistry.BloomCircleSmall.Value;
+        int count=CrimsonVisuals.Reduced?8:28;
+        for(int i=0;i<count;i++) {
+            float t=(opening*.007f+i*.618f)%1;
+            Vector2 at=Vector2.Lerp(boss.NPC.Center,gate,t)+new Vector2(MathF.Sin(t*MathF.PI)*MathF.Sin(i*2.4f)*90,0);
+            batch.Draw(glow,at-Main.screenPosition,null,new Color(255,64,98,0)*seal*MathF.Sin(t*MathF.PI)*.7f,0,glow.Size()*.5f,(3+t*4)/glow.Width,SpriteEffects.None,0);
         }
     }
     internal static bool DrawEffigy(CrimsonEffigy effigy, SpriteBatch batch, Vector2 screen)
@@ -113,7 +156,7 @@ internal static class CrimsonRig
         float age = CrimsonVisuals.RenderAge(boss!), born = age - effigy.State.Born;
         float appear = CrimsonInvocation.Ease(born / 62), snap = MathF.Exp(-Math.Max(0, born - 12) / 14);
         var signal = Signal(boss!, effigy.State.Index, age);
-        float size = effigy.State.Index == 1 ? 370 : 330;
+        float size = effigy.State.Index switch { 0 => 350, 1 => 430, _ => 420 };
         float alpha = boss!.State.Presence(effigy.State.Index, age);
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat) alpha *= .35f;
         if (alpha <= .001f) return false;
@@ -135,7 +178,7 @@ internal static class CrimsonRig
         if (effigy.State.Index == 0)
         {
             CrimsonEnergy.Begin();
-            CrimsonEnergy.AddCore(at + new Vector2(0, -18), 18 + signal.Charge * 12 + snap * 22, age,
+            CrimsonEnergy.AddCore(at + new Vector2(0, -18), 34 + signal.Charge * 20 + snap * 22, age,
                 signal.Charge, Math.Max(signal.Recoil, snap), appear * alpha * .66f, CrimsonVisuals.Reduced);
             CrimsonEnergy.Draw(batch);
         }
@@ -204,6 +247,7 @@ internal static class CrimsonRig
                 float side = part is 1 or 3 ? -1 : 1;
                 Vector2 joint = new(side * source.Width * scale * .08f, source.Height * scale * (part >= 3 ? .02f : -.12f));
                 local = ((local - joint) * pose.Scale).RotatedBy(pose.Rotation) + joint + pose.Offset;
+                if(apparition) local *= species switch { 0 => new Vector2(1.18f,.88f), 1 => new Vector2(1.3f,.94f), _ => new Vector2(.86f,1.10f) };
                 if (flip) local.X = -local.X;
                 Vector2 pos = center + local.RotatedBy(rotation);
                 return new(new Vector3(pos, 0), tint, new((source.X + u * source.Width) / texture.Width, (source.Y + v * source.Height) / texture.Height));

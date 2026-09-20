@@ -19,11 +19,11 @@ public sealed class CrimsonGesture : ModProjectile
     private int aimTick = -1;
     private CrimsonPoint aim, oldAim;
     private float aimReceived;
-    private bool Beam => Plan.Technique == CrimsonTechnique.TrackingBeam;
+    private bool Beam => Plan.Aimed;
     private bool AimLocked => !Beam || aimTick >= CrimsonTrackingBeam.LockAt(Plan);
+    internal bool ForecastReady => AimLocked;
     internal CrimsonGesturePlan EffectivePlan(float age, bool visual = false)
-        => !Beam ? Plan : Plan with { Target = visual && age < Plan.Fire
-            ? CrimsonPoint.Lerp(oldAim, aim, CrimsonInvocation.Ease((age - aimReceived) / CrimsonTrackingBeam.SampleInterval)) : aim };
+        => !Beam ? Plan : Plan with { Target = aim }; // A shown warning never drags after its authority lock.
     public override string Texture => "Terraria/Images/Projectile_1";
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 2000;
     public override void SetDefaults()
@@ -78,8 +78,10 @@ public sealed class CrimsonGesture : ModProjectile
                     && target.GetModPlayer<CrimsonConnection>().Token == Plan.TargetConnection
                     && Array.Exists(boss!.State.Members, m => m.Slot == Plan.TargetSlot && m.Connection == Plan.TargetConnection && !m.Out))
                 {
-                    var desired = CrimsonTechniqueGeometry.Clamp(Plan.Field, new(target.Center.X, target.Center.Y), 100);
-                    oldAim = aim; aim = CrimsonTrackingBeam.Follow(aim, desired); aimReceived = age;
+                    var desired = Plan.Technique == CrimsonTechnique.SideBeams
+                        ? CrimsonTechniqueGeometry.Clamp(Plan.Field, new(target.Center.X, target.Center.Y), 100)
+                        : CrimsonChoreography.Predict(Plan.Field, new(target.Center.X, target.Center.Y), new(target.velocity.X, target.velocity.Y));
+                    oldAim = aim = desired; aimReceived = age;
                 }
                 // A missing/disconnected target freezes its last valid aim; never retarget mid-call.
                 aimTick = Math.Min((int)age, CrimsonTrackingBeam.LockAt(Plan));
@@ -98,7 +100,7 @@ public sealed class CrimsonGesture : ModProjectile
         var sample = CrimsonTrackingBeam.ReadAim(reader); // Parse completely before accepting authority.
         if (Main.netMode == NetmodeID.Server || Plan.Fight != Guid.Empty && next != Plan) return;
         bool first = Plan.Fight == Guid.Empty;
-        if (next.Technique == CrimsonTechnique.TrackingBeam
+        if (next.Aimed
             && !CrimsonTrackingBeam.CanAccept(next, first ? next.Born - 2 : aimTick, sample.Tick, sample.Target)) return;
         Plan = next;
         oldAim = first ? sample.Target : aim;
@@ -122,6 +124,7 @@ public sealed class CrimsonGesture : ModProjectile
     }
     internal static bool ProjectMotion(NPC npc, CrimsonBoss boss, int source)
     {
+        if (source == 3) return false; // Conductor stays at the authority-owned center.
         float age = Clock(boss);
         if (!TryPose(boss, source, age, out var plan)) return false;
         var point = plan.Body(age); var previous = plan.Body(age - 1);

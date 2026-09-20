@@ -54,6 +54,10 @@
       "source_sha256": "55250e8e4894fb4d12bee34e6d546914606d71cca0e75c1c556d5f45188d83a6",
       "output_sha256": "53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b"
     },
+    "ScarletSorcery.fx": {
+      "source_sha256": "0cca0071e11644ee136d71f1b940d081bb72630cc1acc62dbb68e1e193bc6d43",
+      "output_sha256": "d542fce53ebbe4dbf5487aafcd9b95b654d8269c781c679e0e21107b352c296d"
+    },
     "ScarletSurface.fx": {
       "source_sha256": "46dee4522c642c9adc2e2a4cdbce54319ddcaa32d14d80877571e18d8414a717",
       "output_sha256": "768340fbe8468a352d87baad0228dc40f44dd3d127612b6fef6e3b22ddd8ed3e"

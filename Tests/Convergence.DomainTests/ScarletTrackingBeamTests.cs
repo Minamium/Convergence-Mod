@@ -11,7 +11,7 @@ internal static partial class Program
     {
         foreach (int size in new[] { 1, 2, 3, 4, 8 })
             for (int note = 0; note < size * 8; note++)
-                AssertEqual(note % size, CrimsonTrackingBeam.TargetIndex(note / 2 + 1, note % 2, size), "one target, fair rotation");
+                AssertEqual(note % size, CrimsonTrackingBeam.TargetIndex(note / 3 + 1, note % 3, size), "one target, fair rotation");
     }
     [DomainTest("Scarlet tracking samples reject stale duplicate outside and post-lock updates")]
     private static void ScarletTrackingSamples()
@@ -23,7 +23,7 @@ internal static partial class Program
             AssertEqual(false, CrimsonTrackingBeam.CanAccept(p, locked - 3, tick, p.Target), "stale/late aim denied");
         AssertEqual(false, CrimsonTrackingBeam.CanAccept(p, 550, 551, new(float.NaN, 5000)), "finite aim");
         AssertEqual(false, CrimsonTrackingBeam.CanAccept(p, 550, 551, new(0, 0)), "field bounded aim");
-        AssertEqual(10, p.Fire - locked, "fixed dodge interval after tracking");
+        AssertEqual(p.Born, locked, "Doll-style warning freezes on its first sample");
         using var bytes = new MemoryStream();
         using (var w = new BinaryWriter(bytes, System.Text.Encoding.UTF8, true)) CrimsonTrackingBeam.WriteAim(w, locked, p.Target);
         using var r = new BinaryReader(new MemoryStream(bytes.ToArray()));

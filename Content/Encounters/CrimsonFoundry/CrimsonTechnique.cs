@@ -11,7 +11,7 @@ internal enum CrimsonTechnique : byte
     MantleFan, MantleRush, MantleScissors,
     ChoirThrust, ChoirHook, ChoirRend,
     VesperaOrbit, VesperaPetals,
-    TrackingBeam // Append only; the rehearsal replaces decks, not stable IDs.
+    TrackingBeam, SideBeams, SpatialRift // Append only; never renumber old IDs.
 }
 
 internal readonly record struct CrimsonPoint(float X, float Y)
@@ -36,29 +36,30 @@ internal readonly record struct CrimsonGesturePlan(
     int GroundX, int GroundY, int Damage, short TargetSlot = -1, Guid TargetConnection = default)
 {
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
+    internal bool Aimed => Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift;
     internal bool Live(float age) => age >= Fire && age < End;
     internal bool MovesBody => Technique is CrimsonTechnique.CrownCrash or CrimsonTechnique.MantleRush;
     internal float Progress(float age) => Math.Clamp((age - Fire) / Math.Max(1, End - Fire - 1f), 0, 1);
     internal CrimsonPoint Body(float age)
     {
         if (age < FirstFire)
-            return CrimsonPoint.Lerp(From, Stage, CrimsonInvocation.Ease((age - Begin) / Math.Max(1, (Technique == CrimsonTechnique.TrackingBeam ? Born : FirstFire) - Begin)));
+            return CrimsonPoint.Lerp(From, Stage, CrimsonInvocation.Ease((age - Begin) / Math.Max(1, (Aimed ? Born : FirstFire) - Begin)));
         if (!MovesBody) return Stage;
         return CrimsonPoint.Lerp(Stage, Target, (Step + CrimsonInvocation.Ease(Progress(age))) / Steps);
     }
     internal void Validate()
     {
         if (Fight == Guid.Empty || Boss is < 0 or >= 200 || Epoch < 0 || Phrase is < 1 or > 100000 || Pulse >= CrimsonRhythm.MaximumHits
-            || Source > 3 || !Enum.IsDefined(Technique) || Technique != CrimsonTechnique.TrackingBeam && CrimsonTechniqueGeometry.Owner(Technique) != Source
+            || Source > 3 || !Enum.IsDefined(Technique) || !Aimed && CrimsonTechniqueGeometry.Owner(Technique) != Source
             || Steps is < 1 or > CrimsonRhythm.MaximumHits || Step >= Steps || Accent > 2
             || Begin < Epoch || Begin > FirstFire || Born < Epoch || Born > 73000
-            || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire is < 2 or > CrimsonRhythm.LiveTicks || Fire > 73500
+            || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire < 2 || (long)End - Fire > (Technique == CrimsonTechnique.SideBeams ? 180 : CrimsonRhythm.LiveTicks) || Fire > 73500
             || FirstFire > Fire || LastEnd < End || LastEnd > 73500 || (long)LastEnd - FirstFire > 600
             || !From.Finite || !Stage.Finite || !Target.Finite || From.X is < 0 or > 400000 || From.Y is < 0 or > 150000
             || GroundX is < 1600 or > 400000 || GroundY is < 1440 or > 150000 || Damage is < 1 or > 2000)
             throw new InvalidDataException("crimson.gesture_invalid");
         var f = Field;
-        if (Technique == CrimsonTechnique.TrackingBeam
+        if (Aimed
             ? TargetSlot is < 0 or >= 255 || TargetConnection == Guid.Empty
             : TargetSlot != -1 || TargetConnection != Guid.Empty)
             throw new InvalidDataException("crimson.gesture_target_identity");
@@ -163,8 +164,15 @@ internal static class CrimsonTechniqueGeometry
         switch (p.Technique)
         {
             case CrimsonTechnique.TrackingBeam:
+            case CrimsonTechnique.SpatialRift:
                 var beam = CrimsonTrackingBeam.Stroke(p, age, forecast);
                 if (beam.Radius > 0) w.Add(beam.A, beam.B, beam.Radius);
+                break;
+            case CrimsonTechnique.SideBeams:
+                for (int side = -1; side <= 1; side += 2) for(int upper=0;upper<2;upper++) {
+                    var band = CrimsonChoreography.Side(p, age, forecast, side, upper==1);
+                    if (band.Radius > 0) w.Add(band.A, band.B, band.Radius);
+                }
                 break;
             case CrimsonTechnique.CrownRain:
                 int gap = p.Phrase % 18 + 2;

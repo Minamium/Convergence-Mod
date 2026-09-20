@@ -9,19 +9,18 @@ internal static partial class Program
     private static CrimsonChorusPlan ChorusExample() => new(Guid.Parse("f67a7558-f844-4266-b326-5cf7977fd508"),
         3, 500, 1, 1, CrimsonChorusKind.Stack, 15, 600, 824, 880, 8000, 6000, new(8000, 5440));
 
-    [DomainTest("Scarlet Stack shares its native source pool for one two four and eight living players")]
+    [DomainTest("Scarlet Stack is harmless on success and charges only the missing fraction")]
     private static void ScarletChorusStackShares()
     {
-        foreach (int count in new[] { 1, 2, 4, 8 })
+        foreach (int count in new[] { 1, 2, 3, 4, 8 })
         {
             var positions = new CrimsonPoint[count]; Array.Fill(positions, new CrimsonPoint(8000, 5440));
             byte mask = (byte)((1 << count) - 1);
             var d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Stack, positions[0], positions, mask, mask);
-            foreach (int damage in d) AssertEqual(CrimsonChorusRules.StackShareSource, damage, "equal correct shares before native mitigation");
+            foreach (int damage in d) AssertEqual(0, damage, "complete gather is harmless");
             positions[0] = new(8000 + CrimsonChorusRules.StackRadius + 1, 5440);
             d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Stack, new(8000, 5440), positions, mask, mask);
-            AssertEqual(360 * count, d[0], "outside participant does not escape assigned impact");
-            if (count > 1) AssertEqual((360 * count + count - 2) / (count - 1), d[1], "fewer gatherers share a larger source budget");
+            foreach (int damage in d) AssertEqual((900 + count - 1) / count, damage, "one missing share, bounded native failure budget");
         }
     }
     [DomainTest("Scarlet Stack boundary is inclusive and an empty gather cannot divide by zero")]
@@ -29,19 +28,19 @@ internal static partial class Program
     {
         CrimsonPoint[] p = { new(220, 0), new(0, 0) };
         var d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Stack, new(0, 0), p, 3, 3);
-        AssertEqual(360, d[0], "exact stack radius accepted");
+        AssertEqual(0, d[0], "exact stack radius accepted");
         p[0] = p[1] = new(1000, 1000);
         d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Stack, new(0, 0), p, 3, 3);
-        AssertEqual(720, d[0], "no one gathered"); AssertEqual(720, d[1], "each assigned member receives a bounded verdict");
+        AssertEqual(900, d[0], "no one gathered"); AssertEqual(900, d[1], "each assigned member receives a bounded verdict");
     }
     [DomainTest("Scarlet chorus removes dead members and never admits late or unannounced slots")]
     private static void ScarletChorusRosterLoss()
     {
         CrimsonPoint[] p = { new(0, 0), new(0, 0), new(0, 0), new(0, 0) };
         var d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Stack, new(0, 0), p, 7, 13);
-        AssertEqual(360, d[0], "two retained living members share two shares");
+        AssertEqual(0, d[0], "both retained living members gathered");
         AssertEqual(0, d[1], "dead slot contributes no budget or damage");
-        AssertEqual(360, d[2], "retained member"); AssertEqual(0, d[3], "late unannounced member excluded");
+        AssertEqual(0, d[2], "retained member"); AssertEqual(0, d[3], "late unannounced member excluded");
         d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Stack, new(0, 0), p, 15, 0);
         foreach (int damage in d) AssertEqual(0, damage, "no damage after wipe");
     }
@@ -53,10 +52,10 @@ internal static partial class Program
         foreach (int damage in d) AssertEqual(0, damage, "tangent circles pass");
         p[1] = new(279, 0);
         d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(0, 0), p, 7, 7);
-        AssertEqual(600, d[0], "first overlap"); AssertEqual(600, d[1], "second overlap"); AssertEqual(0, d[2], "uninvolved third member");
+        AssertEqual(900, d[0], "first overlap"); AssertEqual(900, d[1], "second overlap"); AssertEqual(0, d[2], "uninvolved third member");
         Array.Fill(p, new CrimsonPoint(0, 0));
         d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(0, 0), p, 7, 7);
-        foreach (int damage in d) AssertEqual(600, damage, "multiple overlaps do not multiply the penalty");
+        foreach (int damage in d) AssertEqual(900, damage, "multiple overlaps do not multiply the penalty");
         AssertEqual(0, CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(0, 0), new[] { new CrimsonPoint(0, 0) }, 1, 1)[0], "solo passes");
     }
     [DomainTest("Scarlet eight-player spread can fit complete separated markers in the unchanged field")]
