@@ -143,8 +143,8 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                     if(failed && age>=p.Fire)
                     {
                         Vector2 d=new Vector2(220,0).RotatedBy(-.68f);
-                        float reveal=CrimsonInvocation.Ease((age-p.Fire)/2);
-                        ScarletSorcery.Tear(batch,new(new(at.X-d.X,at.Y-d.Y),new(at.X-d.X+d.X*2*reveal,at.Y-d.Y+d.Y*2*reveal),7),age,true,tail,i);
+                        ScarletSorcery.Tear(batch,new(new(at.X-d.X,at.Y-d.Y),new(at.X+d.X,at.Y+d.Y),7),
+                            age,p.Fire,p.Fire+CrimsonChorusRules.ImpactTicks,1,tail,i);
                     }
                 }
             }
