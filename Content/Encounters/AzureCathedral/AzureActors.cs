@@ -37,6 +37,7 @@ public sealed class AzureBoss : ModNPC
     {
         NPC.timeLeft = NPC.activeTime;
         NPC.dontTakeDamage = !Fresh || !State.Live || State.GirlLife <= 0;
+        NPC.chaseable = State.Live && State.GirlLife > 0;
         NPC.boss = State.Stage is AzureStage.Countdown or AzureStage.Performance;
         if (State.GirlMax > 0) NPC.lifeMax = State.GirlMax;
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
@@ -102,6 +103,7 @@ public sealed class AzureWorm : ModNPC
             return;
         }
         NPC.dontTakeDamage = !g!.State.Live || g.State.WormLife <= 0;
+        NPC.chaseable = g.State.Live && g.State.WormLife > 0;
         NPC.boss = Index == 0 && g.State.Live;
         NPC.lifeMax = g.State.WormMax;
         if (Index == 0)
