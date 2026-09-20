@@ -13,7 +13,7 @@ internal static partial class Program
         {
             var settings = OboroComboSettings.For(step);
             float start = settings.HitStart, finish = step switch { 0 => OboroFirstSwingMotion.CutEnd / settings.TotalFrames,
-                1 => OboroSecondSwingMotion.CutEnd / settings.TotalFrames, _ => settings.HitEnd }, largest = 0;
+                1 => OboroSecondSwingMotion.CutEnd / settings.TotalFrames, _ => OboroThirdSwingMotion.CutEnd / settings.TotalFrames }, largest = 0;
             int sign = Math.Sign(settings.CutEndAngle - settings.WindupAngle);
             float previous = sign * settings.WindupAngle;
             for (int i = 0; i <= 1000; i++)
@@ -30,7 +30,7 @@ internal static partial class Program
                 if (!OboroRules.Live(step, p)) continue;
                 float delta = Math.Abs(OboroRules.Offset(step, p)
                     - OboroRules.Offset(step, Math.Max(start, (age - 1f) / duration)));
-                AssertEqual(true, delta <= 64 * .035f, "within existing collision sampling budget");
+                AssertEqual(true, delta <= 64 * OboroRules.BladeWidth / OboroRules.Reach, "within existing collision sampling budget");
             }
         }
     }
@@ -49,7 +49,8 @@ internal static partial class Program
                 AssertEqual(true, Math.Abs(left - right) < .15f, "no angular-velocity seam");
             }
             float end = OboroRules.Offset(step, 1), next = OboroRules.Offset((step + 1) % 3, 0);
-            AssertEqual(true, Math.Abs(OboroSwingPresentation.Wrap(end - next)) < .00001f, "no combo pose jump");
+            if (step < 2) AssertEqual(true, Math.Abs(OboroSwingPresentation.Wrap(end - next)) < .00001f, "no combo pose jump");
+            // Finisher retains its follow-through; the next harmless entry bridges it (tested separately).
         }
     }
     [DomainTest("Oboro visual blade exactly matches authoritative live aim and reach")]
@@ -70,7 +71,8 @@ internal static partial class Program
                     if (!OboroRules.Live(step, p)) continue;
                     AssertEqual(view.Aim + facing * OboroRules.Offset(step, p), visual.Pose.Angle, "server angle");
                     AssertEqual(OboroRules.Reach, visual.Pose.Length, "server length");
-                    AssertEqual(age * 5f, visual.Pose.X, "authoritative origin");
+                    var root = OboroRules.RootOffset(step, p, view.Aim, visual.Pose.Angle, default);
+                    AssertEqual(age * 5f + root.X, visual.Pose.X, "authoritative origin");
                 }
             }
         }

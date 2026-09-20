@@ -15,6 +15,7 @@
     <Compile Include="../../Content/Items/Oboro/OboroComboSettings.cs" Link="Domain/OboroComboSettings.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroFirstSwingMotion.cs" Link="Domain/OboroFirstSwingMotion.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroSecondSwingMotion.cs" Link="Domain/OboroSecondSwingMotion.cs" />
+    <Compile Include="../../Content/Items/Oboro/OboroThirdSwingMotion.cs" Link="Domain/OboroThirdSwingMotion.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroTiming.cs" Link="Domain/OboroTiming.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroWire.cs" Link="Domain/OboroWire.cs" />
     <Compile Include="../../Client/Encounters/GhostSamurai/SamuraiSpriteFrames.cs" Link="Presentation/SamuraiSpriteFrames.cs" />

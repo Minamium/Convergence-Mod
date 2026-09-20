@@ -19,17 +19,11 @@ internal static class OboroRules
     {
         if (step == 0) return OboroFirstSwingMotion.Angle(progress);
         if (step == 1) return OboroSecondSwingMotion.Angle(progress);
-        OboroComboStep settings = OboroComboSettings.For(step);
-        float windup = settings.HitStart, p = Math.Clamp(progress, 0, 1);
-        // 仮の補間。判定と描画が同じ定義を読む。次工程で各区間の緩急を詰める。
-        if (p < windup) return settings.StartAngle + (settings.WindupAngle - settings.StartAngle) * Ease(p / windup);
-        if (p < settings.HitEnd)
-            return settings.WindupAngle + (settings.CutEndAngle - settings.WindupAngle)
-                * Ease((p - windup) / (settings.HitEnd - windup));
-        float next = OboroComboSettings.For((step + 1) % OboroComboSettings.Count).StartAngle;
-        float delta = MathF.IEEERemainder(next - settings.CutEndAngle, MathF.Tau);
-        return settings.CutEndAngle + delta * Ease((p - settings.HitEnd) / (1 - settings.HitEnd));
+        return OboroThirdSwingMotion.Angle(progress);
     }
+    // 照準の受け渡しは溜めに入る前に完了。命中開始時刻とは分離する。
+    internal static float EntryEnd(int step) => step == 2
+        ? OboroThirdSwingMotion.PullEnd / OboroComboSettings.For(2).TotalFrames : Windup(step);
     internal static float Ease(float t)
     {
         t = Math.Clamp(t, 0, 1);
@@ -37,10 +31,10 @@ internal static class OboroRules
     }
     internal static (float X, float Y) RootOffset(int step, float progress, float aim, float bladeAngle, OboroHandBasis hand)
     {
-        float forward = OboroComboSettings.For(step).ForwardDistance;
-        var at = step < 2 ? hand.At(bladeAngle) : default;
+        float forward = step == 2 ? OboroThirdSwingMotion.Forward(progress) : OboroComboSettings.For(step).ForwardDistance;
+        var at = hand.At(bladeAngle);
         float weight = step switch { 0 => OboroFirstSwingMotion.HandWeight(progress),
-            1 => OboroSecondSwingMotion.HandWeight(progress), _ => 0 };
+            1 => OboroSecondSwingMotion.HandWeight(progress), _ => OboroThirdSwingMotion.HandWeight(progress) };
         return (MathF.Cos(aim) * forward + at.X * weight, MathF.Sin(aim) * forward + at.Y * weight);
     }
     internal static int FireDps(int maximumLife) => (int)Math.Min(int.MaxValue / 4L, 200L + Math.Max(0, maximumLife) / 50L);

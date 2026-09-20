@@ -63,18 +63,19 @@ internal static class OboroMotionPreview
             {
                 Reduced=reduced;var visual=new OboroSwingPresentation();
                 var hand=new OboroHandBasis(-4*facing,-2,10,3*facing,-3*facing,10);
-                for(int frame=0;frame<=44;frame++)
+                for(int frame=0;frame<=88;frame++)
                 {
                     Terraria.Main.GameUpdateCount=(ulong)frame+100;
-                    byte step=(byte)(frame<18?0:frame<34?1:2);
-                    float age=frame-(step==0?0:step==1?18:34);
-                    var view=new OboroSnapshot(0,1,1,(uint)step+1,step,(ushort)age,(ushort)OboroComboSettings.For(step).TotalFrames,
+                    byte step=(byte)(frame<18?0:frame<34?1:frame<60?2:0);
+                    float age=frame-(frame<60?(step==0?0:step==1?18:34):60);
+                    bool swinging=frame<78;
+                    var view=new OboroSnapshot(0,1,1,frame<60?(uint)step+1:4u,step,(ushort)age,(ushort)OboroComboSettings.For(step).TotalFrames,
                         facing==1?0:MathF.PI,(sbyte)facing,0);
-                    visual.Update(view,age,true,true,0,0,facing,Terraria.Main.GameUpdateCount,hand);
+                    visual.Update(view,age,swinging,true,0,0,facing,Terraria.Main.GameUpdateCount,hand);
                     device.SetRenderTarget(target);device.Clear(bright?new Color(176,190,204):new Color(15,18,32));
                     batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,
                         null,Matrix.CreateScale(.46f)*Matrix.CreateTranslation(320,320,0));
-                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.Pose,true);
+                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.Pose,swinging);
                     OboroArt.Line(batch,new(-10,-18),new(10,-18),4,Color.Gray);
                     OboroArt.Line(batch,new(0,-12),new(0,20),10,Color.Gray);
                     var shoulder=new Vector2(-4*facing,-2);var grip=new Vector2(visual.Pose.X,visual.Pose.Y);
@@ -87,7 +88,7 @@ internal static class OboroMotionPreview
             }
             new SpectralSpriteCutouts().Unload();
             foreach(var texture in textures.Values)texture.Dispose();textures.Clear();
-            Console.WriteLine($"PASS {frames} production-renderer frames: first and second cuts, both handoffs, third windup, both facings, bright/dark, reduced/full. Offline only.");
+            Console.WriteLine($"PASS {frames} production-renderer frames: all three cuts, all handoffs including looping first cut and settling, both facings, bright/dark, reduced/full. Offline only.");
         }
         finally{SDL_DestroyWindow(window);SDL_Quit();}
     }
