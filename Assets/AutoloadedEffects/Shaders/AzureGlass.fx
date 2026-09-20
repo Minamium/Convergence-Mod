@@ -6,6 +6,8 @@ float clock;
 float4 signal; // opacity, charge, reduced, index
 float4 region;
 float spine;
+float dissolve;
+float silhouette;
 struct VI { float4 P:POSITION0; float4 C:COLOR0; float2 U:TEXCOORD0; };
 struct VO { float4 P:SV_POSITION; float4 C:COLOR0; float2 U:TEXCOORD0; };
 VO VS(VI v) { VO o=(VO)0; o.P=mul(v.P,uWorldViewProjection); o.C=v.C; o.U=v.U; return o; }
@@ -13,13 +15,31 @@ float4 GlassPS(VO i):COLOR0
 {
  float2 p=(i.U-region.xy)/region.zw;
  float2 sample=p; sample.y=spine-abs(p.y-.5);
+ sample.x+=sin(p.y*19+clock*2)*dissolve*.035;
  float4 a=tex2D(art,region.xy+sample*region.zw); clip(a.a-.005);
  float n=tex2D(noiseMap,p*2+float2(clock*.032,-clock*.075+signal.w*.17)).r;
  float caustic=pow(saturate(1-abs(n-.48)*5),8);
  float light=pow(saturate(.5+.5*sin(p.x*9+p.y*7-clock*1.8-signal.w*.35)),22);
  float crystal=saturate(a.b-a.r*.72);
  float3 color=a.rgb*(.90+n*.18)+float3(.08,.45,.70)*(caustic*.11+light*(.12+signal.y*.25))*a.a*crystal;
- return float4(color,a.a)*i.C*signal.x;
+ float meltNoise=tex2D(noiseMap,p*float2(4,2)+float2(signal.w*.19,-clock*.10)).r;
+ float retain=dissolve>.001 ? 1-smoothstep(meltNoise-.10,meltNoise+.10,dissolve*1.25) : 1;
+ float edge=exp(-abs(meltNoise-dissolve*1.25)*32)*step(.001,dissolve);
+ color+=float3(.22,.70,.95)*edge*a.a;
+ return float4(lerp(color,float3(.003,.008,.014)*a.a,silhouette),a.a)*i.C*signal.x*retain;
+}
+float4 FrostPS(VO i):COLOR0
+{
+ float2 p=i.U;
+ float2 flow=p*float2(3.8,2.2)+float2(-clock*.10+signal.w*.31,-clock*.06);
+ float n=tex2D(noiseMap,flow).r;
+ float detail=tex2D(noiseMap,flow*2.07+float2(clock*.045,n*.42)).r;
+ float curl=tex2D(noiseMap,flow*1.3+float2(n*.5,-clock*.13)).r;
+ float mask=pow(saturate(1-pow((p.x-.5)*2,2)),.65)*pow(saturate(1-pow((p.y-.5)*2,2)),1.6);
+ float wisps=smoothstep(.30,.72,n*.55+detail*.27+curl*.32);
+ float threads=pow(saturate(1-abs(detail-.48)*8),8)*.16;
+ float a=(wisps+threads)*mask*signal.x;
+ return float4(lerp(float3(.28,.48,.58),float3(.78,.94,.99),n)*a,a)*i.C;
 }
 float4 BackdropPS(VO i):COLOR0
 {
@@ -91,4 +111,5 @@ technique AzureGlass
  pass RiftPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 RiftPS(); }
  pass IcePass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 IcePS(); }
  pass CirclePass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 CirclePS(); }
+ pass FrostPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 FrostPS(); }
 }

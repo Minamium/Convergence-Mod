@@ -106,7 +106,7 @@ documents:
 - doc_id: adr.0028
   path: docs/adr/0028-azure-cathedral-native-actors.md
   title: 'ADR-0028: Azure Cathedral native actors and hazards'
-  content_sha256: 89f1d5a6c34a79d44ffd61607b18b8053c9388ca21f0881969f2be25d40d8804
+  content_sha256: d53d81aa59bb0948cea7dfb62d7e4bda4d4c9d4de2f851aa28bae2973e2d75fe
   document_type: adr
   status: accepted
   owners:
@@ -595,7 +595,7 @@ documents:
 - doc_id: encounter.azure-cathedral.assets
   path: docs/encounters/azure-cathedral/ASSET_BRIEF.md
   title: Azure Cathedral asset brief
-  content_sha256: c5295294369b1b4d7aa4da646e04ea1790259ce4fa2922139a2a526d1771cec0
+  content_sha256: 3a374805718e7fe3900164a33833df981e08d461315f057bf5b0111f3c632f7a
   document_type: spec
   status: accepted
   owners:
@@ -611,7 +611,7 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: 98cb8e4b51bf2ef1f1a5fc90e4cb639b71b99ba2b0fcca1ce6da943654b2bd1b
+  content_sha256: c545505c5b097997c7fc10bd501ded04cd75cd0056ca718de04ccee779e45906
   document_type: spec
   status: accepted
   owners:
@@ -927,7 +927,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 3ff0b499dc61aecdf99f046a838fb1d555fbfad7a55aae0e9b051631e81a3ae8
+  content_sha256: c471b44a611ae2a7d57d17f40d89000c329871dbc26fe1ddd92b4600197fdfc9
   document_type: evidence
   status: historical
   owners:
@@ -1326,7 +1326,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: d32331fa7d7e8c53f55cb067d4a5cf536c7383ef41f403d492d891e12652549b
+  content_sha256: f53bf0a853de75e74473309b5f22727c4656e8c5d2f236144290a14ade229a95
   document_type: status
   status: accepted
   owners:

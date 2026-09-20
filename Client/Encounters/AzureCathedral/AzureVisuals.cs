@@ -47,6 +47,7 @@ internal sealed class AzureVisuals : ModSystem
         var girl = AzurePackets.Boss;
         if (girl is null || !girl.Fresh || !Local(girl)) { Reset(); return; }
         int age = (int)girl.VisualAge;
+        ModContent.GetInstance<AzureMusicScene>().UpdateFade(girl);
         if (fight != girl.State.Fight) { Reset(); fight = girl.State.Fight; previous = age - 1; }
         shake *= .85f;
         if(girl.State.MusicStart>=0)
@@ -56,6 +57,13 @@ internal sealed class AzureVisuals : ModSystem
             CueAt(girl.State.MusicStart+AzureRules.WormArrival,"PhaseRupture",.55f,8);
         }
         if (girl.State.EndAt >= 0) CueAt(girl.State.EndAt, girl.State.Stage==AzureStage.Victory?"RaidVictory":"RaidDefeat",.45f,9);
+        if(girl.State.Phase==AzurePhase.Devouring)
+        {
+            CueAt(girl.State.PhaseAt,"StackSummon",.45f,3);
+            CueAt(girl.State.PhaseAt+AzureRules.DevourRush,"Beams/PortalFire",.56f,5);
+            CueAt(girl.State.PhaseAt+AzureRules.DevourContact,"PhaseRupture",.68f,10);
+        }
+        if(girl.State.Phase==AzurePhase.Fury)CueAt(girl.State.PhaseAt,"Beams/PortalFire",.57f,8);
         foreach (Projectile p in Main.ActiveProjectiles)
         {
             if(p.ModProjectile is AzureChorus m && m.Plan.Fight==fight)
@@ -73,10 +81,10 @@ internal sealed class AzureVisuals : ModSystem
             if (a.Plan.Fire != lastFire && Crossed(a.Plan.Fire))
             { lastFire=a.Plan.Fire; Play(a.Plan.Kind==AzureAttackKind.MouthBeam?"Beams/PortalFire":"CoreHit",a.Plan.Kind==AzureAttackKind.MouthBeam?.62f:.50f,.20f); shake=Math.Max(shake,a.Plan.Kind==AzureAttackKind.MouthBeam?7:2.2f); }
         }
-        if (girl.State.Live && girl.State.WormLife>0 && AzureRules.ChargePhrase(AzureRules.Phrase(age,girl.State.UnlockAt)))
+        if (girl.State.Live && girl.State.WormLife>0 && (AzureRules.ChargePhrase(AzureRules.Phrase(age,girl.State.AttackEpoch)) || girl.State.Enraged && AzureRules.ChorusPhrase(AzureRules.Phrase(age,girl.State.AttackEpoch))))
         {
-            int t = AzureRules.Clock(age,girl.State.UnlockAt);
-            int serial = (age-girl.State.UnlockAt)/AzureRules.ChargeTicks;
+            int t = AzureRules.Clock(age,girl.State.AttackEpoch);
+            int serial = (age-girl.State.AttackEpoch)/AzureRules.ChargeTicks;
             if (t%AzureRules.ChargeTicks>=AzureRules.ChargeWarning && t%AzureRules.ChargeTicks<AzureRules.ChargeWarning+5 && serial!=lastDash)
             { lastDash=serial;Play("Beams/PortalFire",.52f,-.14f);shake=6; }
         }
@@ -101,10 +109,11 @@ internal sealed class AzureVisuals : ModSystem
     public override void ModifyScreenPosition()
     {
         var girl=AzurePackets.Boss;
-        if(!Main.gameMenu && girl is {Fresh:true} && Local(girl) && girl.State.Stage==AzureStage.Countdown)
+        if(!Main.gameMenu && girl is {Fresh:true} && Local(girl) && (girl.State.Stage==AzureStage.Countdown || girl.State.Phase==AzurePhase.Devouring || girl.State.Phase==AzurePhase.Melting))
         {
-            float openingAge=RenderAge(girl)-girl.State.MusicStart;
-            float frame=AzureRules.Ease(openingAge/55)*AzureRules.Ease((AzureRules.Intro-openingAge)/80);
+            float openingAge=RenderAge(girl)-(girl.State.Phase==AzurePhase.Duet?girl.State.MusicStart:girl.State.PhaseAt);
+            int duration=girl.State.Phase==AzurePhase.Devouring?AzureRules.Devouring:girl.State.Phase==AzurePhase.Melting?AzureRules.MeltEnding:AzureRules.Intro;
+            float frame=AzureRules.Ease(openingAge/55)*AzureRules.Ease((duration-openingAge)/80);
             var center=new Vector2(girl.State.Field.CenterX,girl.State.Field.CenterY-80);
             Main.screenPosition=Vector2.Lerp(Main.screenPosition,center-new Vector2(Main.screenWidth,Main.screenHeight)*.5f,frame);
         }
@@ -130,9 +139,10 @@ internal sealed class AzureVisuals : ModSystem
         {
             float age=RenderAge(girl);AzureEnergy.Begin();
             AzureCeremony.Stage(batch,girl.State,age);
+            AzureMaterials.Frost(batch,girl,age);
             // Draw the entire chain from the world pass: an off-screen head
             // must not let Terraria's NPC culling hide the visible body.
-            if(girl.State.WormLife>0 && girl.State.WormSlot>=0 && Main.npc[girl.State.WormSlot] is {active:true,ModNPC:AzureWorm head}
+            if((girl.State.WormLife>0 || girl.State.Phase==AzurePhase.Melting) && girl.State.WormSlot>=0 && Main.npc[girl.State.WormSlot] is {active:true,ModNPC:AzureWorm head}
                 && head.Fight==girl.State.Fight)AzureMaterials.Worm(head,girl,batch,Main.screenPosition);
             foreach(Projectile p in Main.ActiveProjectiles)
             {
@@ -143,8 +153,14 @@ internal sealed class AzureVisuals : ModSystem
                 bool forecast=age<h.Fire;
                 if(!attack.Geometry(girl,age,forecast,out var a,out var b,out float radius))continue;
                 var dir=(b-a).SafeNormalize(Vector2.UnitY);float length=Vector2.Distance(a,b);
-                if(h.Kind==AzureAttackKind.MouthBeam || forecast)
-                    AzureEnergy.Add(a,dir,length,radius,age,h.Fire,h.End,1,Reduced,h.Born,true);
+                if(h.Kind==AzureAttackKind.FrostBolt && forecast)
+                {
+                    float glow=AzureRules.Ease((age-h.Born)/5)*(1-AzureRules.Ease((age-h.Fire+4)/4));
+                    Stroke(batch,a,b,new Color(162,228,255,0)*glow,.8f);
+                    AzureCeremony.Bloom(batch,a,35+18*MathF.Sin(age*.18f)*MathF.Sin(age*.18f),.4f*glow);
+                }
+                else if(h.Kind==AzureAttackKind.MouthBeam || forecast)
+                    AzureEnergy.Add(a,dir,length,radius,age,h.Fire,h.End,1,Reduced,h.Born,true,h.Kind==AzureAttackKind.MouthBeam);
                 else
                 {
                     var glow=MiscTexturesRegistry.BloomCircleSmall.Value;
@@ -161,9 +177,9 @@ internal sealed class AzureVisuals : ModSystem
                     }
             }
             if(girl.State.WormSlot>=0 && Main.npc[girl.State.WormSlot].ModNPC is AzureWorm worm && girl.State.Live && girl.State.WormLife>0
-                && worm.Fight==girl.State.Fight && AzureRules.ChargePhrase(AzureRules.Phrase((int)age,girl.State.UnlockAt)))
+                && worm.Fight==girl.State.Fight && (AzureRules.ChargePhrase(AzureRules.Phrase((int)age,girl.State.AttackEpoch)) || girl.State.Enraged && AzureRules.ChorusPhrase(AzureRules.Phrase((int)age,girl.State.AttackEpoch))))
             {
-                int dash=AzureRules.Clock((int)age,girl.State.UnlockAt)%AzureRules.ChargeTicks;
+                int dash=AzureRules.Clock((int)age,girl.State.AttackEpoch)%AzureRules.ChargeTicks;
                 if(dash<AzureRules.ChargeWarning)
                 {
                     Vector2 target=new(worm.NPC.ai[0],worm.NPC.ai[1]);var dir=(target-worm.NPC.Center).SafeNormalize(Vector2.UnitX);
@@ -189,6 +205,13 @@ internal sealed class AzureVisuals : ModSystem
         Vector2 p2=Vector2.Transform(new(f.Left,f.Bottom),worldToViewport),p3=Vector2.Transform(new(f.Right,f.Bottom),worldToViewport);
         Vector2 a=Vector2.Min(Vector2.Min(p0,p1),Vector2.Min(p2,p3)),b=Vector2.Max(Vector2.Max(p0,p1),Vector2.Max(p2,p3));
         int l=Math.Clamp((int)a.X,0,v.Width),r=Math.Clamp((int)b.X,0,v.Width),t=Math.Clamp((int)a.Y,0,v.Height),bottom=Math.Clamp((int)b.Y,0,v.Height);
+        if(s.Phase==AzurePhase.Devouring && AzureRules.Silhouette(age-s.PhaseAt))
+        {
+            Fill(new(0,0,v.Width,v.Height),Reduced?new Color(87,110,119):new Color(194,224,230));
+            if(s.WormSlot>=0 && Main.npc[s.WormSlot] is {active:true,ModNPC:AzureWorm shadow} && shadow.Fight==s.Fight)
+                AzureMaterials.Worm(shadow,girl,batch,Vector2.Zero,worldToViewport,true);
+            AzureCeremony.Silhouette(batch,girl,worldToViewport,age);
+        }
         if(s.Contains(Main.myPlayer) && !Main.LocalPlayer.dead)
         {
             Fill(new(0,0,v.Width,t),Color.Black);Fill(new(0,bottom,v.Width,v.Height-bottom),Color.Black);
@@ -198,11 +221,11 @@ internal sealed class AzureVisuals : ModSystem
             if(b.X<=v.Width)Fill(new(Math.Max(0,r-2),t,2,Math.Max(0,bottom-t)),ice);
             if(a.Y>=0)Fill(new(l,t,Math.Max(0,r-l),2),ice);
         }
-        bool opening=s.Stage==AzureStage.Countdown,ending=s.EndAt>=0,deploy=s.Stage==AzureStage.Deployment;
-        if(opening || ending || deploy)
+        bool opening=s.Stage==AzureStage.Countdown,ending=s.EndAt>=0,deploy=s.Stage==AzureStage.Deployment,devour=s.Phase==AzurePhase.Devouring;
+        if(opening || ending || deploy || devour)
         {
-            float clock=ending?age-s.EndAt:opening?age-s.MusicStart:age;
-            float duration=ending?AzureRules.Ending:opening?AzureRules.Intro:AzureRules.Deploy;
+            float clock=ending?age-s.EndAt:devour?age-s.PhaseAt:opening?age-s.MusicStart:age;
+            float duration=ending?AzureRules.ExitDuration(s.Stage):devour?AzureRules.Devouring:opening?AzureRules.Intro:AzureRules.Deploy;
             float opacity=AzureRules.Ease(clock/30)*AzureRules.Ease((duration-clock)/45);
             Fill(new(0,0,v.Width,(int)(v.Height*.1f)),Color.Black*opacity);
             Fill(new(0,(int)(v.Height*.9f),v.Width,(int)(v.Height*.11f)),Color.Black*opacity);
@@ -217,13 +240,18 @@ internal sealed class AzureVisuals : ModSystem
         foreach(var m in s.Members)
         {
             var player=Main.player[m.Slot];if(!player.active)continue;
-            Vector2 pos=Vector2.Transform(player.Top,worldToViewport)-new Vector2(0,34);
-            if(m.Slot!=Main.myPlayer){if(m.Ready)Utils.DrawBorderString(batch,"Ready!",pos,Color.LightCyan,.68f,.5f);continue;}
-            var button=new Rectangle((int)Math.Clamp(pos.X-78,4,v.Width-160),(int)Math.Clamp(pos.Y,4,v.Height-36),156,30);
+            Vector2 pos=Vector2.Transform(player.Top-new Vector2(0,24),worldToViewport);
+            if(m.Ready)Utils.DrawBorderString(batch,"Ready!",pos,Color.LightCyan,.70f,.5f);
+            if(m.Slot!=Main.myPlayer)continue;
+            // Match Doll's physical-pixel pill. It does not chase a moving player
+            // or inherit UI scale; the world-space label above is separate.
+            var button=new Rectangle(v.Width/2-100,64,200,36);
             bool hover=button.Contains(Main.mouseX,Main.mouseY);
             Fill(button,hover?new Color(30,63,76):new Color(12,25,36));
-            Fill(new(button.X,button.Bottom-2,button.Width*count/s.Members.Length,2),Color.LightCyan);
-            Utils.DrawBorderString(batch,(m.Ready?"Ready!":"READY")+$"  {count}/{s.Members.Length}",new(button.Center.X,button.Y+6),Color.LightCyan,.68f,.5f);
+            Fill(new(button.X+12,button.Bottom-1,(button.Width-24)*count/s.Members.Length,1),Color.LightCyan);
+            Fill(new(button.X+14,button.Y+13,6,6),Color.LightCyan*(m.Ready?1:.25f));
+            Utils.DrawBorderString(batch,"READY",new(button.X+30,button.Y+8),Color.LightCyan,.7f);
+            Utils.DrawBorderString(batch,$"{count}/{s.Members.Length}",new(button.Right-13,button.Y+8),Color.Silver,.7f,1);
             if(hover){Main.LocalPlayer.mouseInterface=true;if(Main.mouseLeft && Main.mouseLeftRelease){Main.mouseLeftRelease=false;AzurePackets.Ready(!m.Ready);}}
         }
         return true;
