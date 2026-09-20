@@ -17,6 +17,9 @@ namespace Convergence.Content.Encounters.AzureCathedral;
 internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
 {
     private static uint nonce;
+    private static AzureState replica;
+    private static short replicaActor=-1;
+    private static ulong replicaAt;
     internal static EncounterSnapshot Snapshot => Main.netMode == NetmodeID.MultiplayerClient
         ? ModContent.GetInstance<EncounterReplicaSystem>().Snapshot : ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot;
     internal static AzureBoss? Boss
@@ -24,8 +27,12 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
         get
         {
             foreach (NPC n in Main.ActiveNPCs)
-                if (n.ModNPC is AzureBoss boss && boss.State.Fight == Snapshot.FightId.Value
-                    && Snapshot.DefinitionKey == AzureDefinition.EncounterKey) return boss;
+                if (n.ModNPC is AzureBoss boss && Snapshot.DefinitionKey == AzureDefinition.EncounterKey)
+                {
+                    if(Main.netMode==NetmodeID.MultiplayerClient && n.whoAmI==replicaActor && replica.Fight==Snapshot.FightId.Value)
+                        boss.ApplyProjection(replica,replicaAt);
+                    if(boss.State.Fight==Snapshot.FightId.Value)return boss;
+                }
             return null;
         }
     }
@@ -100,12 +107,16 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
         {
             var lifecycle = (EncounterLifecycle)reader.ReadByte(); ulong tick = reader.ReadUInt64(), entered = reader.ReadUInt64(), active = reader.ReadUInt64();
             var reason = (EncounterEndReason)reader.ReadByte();
+            short actor=reader.ReadInt16();var projection=AzureState.ReadEnvelope(reader);
             if (Main.netMode != NetmodeID.MultiplayerClient || !Enum.IsDefined(lifecycle) || !Enum.IsDefined(reason)
                 || header.FightId.IsNone || header.EncounterSequence == 0 || entered > tick || active > tick
-                || (lifecycle == EncounterLifecycle.Cleanup) != (reason != EncounterEndReason.None)) return false;
-            ModContent.GetInstance<EncounterReplicaSystem>().ApplyFullSnapshot(new(header.EncounterSequence, header.FightId,
+                || (lifecycle == EncounterLifecycle.Cleanup) != (reason != EncounterEndReason.None)
+                || actor is < -1 or >=200 || (projection is { } p ? p.Fight!=header.FightId.Value || actor<0 : actor!=-1)) return false;
+            bool accepted=ModContent.GetInstance<EncounterReplicaSystem>().ApplyFullSnapshot(new(header.EncounterSequence, header.FightId,
                 AzureDefinition.EncounterKey, lifecycle, header.Revision, tick, entered, active,
                 reason == EncounterEndReason.None ? EncounterTerminationDescriptor.None : AzureTermination.End(reason)));
+            if(accepted && projection is { } next && (replica.Fight!=next.Fight || next.CanReplace(replica)))
+            {replica=next;replicaActor=actor;replicaAt=Main.GameUpdateCount;}
         }
         else return false;
         failureCode = string.Empty; return true;
@@ -117,8 +128,12 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
         EncounterRouteCodec.WriteHeader(packet, new(EncounterProtocol.CurrentVersion, EncounterPacketType.Snapshot,
             snapshot.EncounterSequence, snapshot.FightId, snapshot.Revision), AzureDefinition.EncounterKey);
         packet.Write((byte)snapshot.Lifecycle); packet.Write(snapshot.AuthorityTick); packet.Write(snapshot.LifecycleEnteredTick);
-        packet.Write(snapshot.ActiveFightTick); packet.Write((byte)snapshot.EndReason); packet.Send(toClient);
+        packet.Write(snapshot.ActiveFightTick); packet.Write((byte)snapshot.EndReason);
+        // A queued terminal snapshot must never carry the next Fight's actor.
+        var boss=Boss;if(boss is not null && boss.State.Fight!=snapshot.FightId.Value)boss=null;
+        packet.Write((short)(boss?.NPC.whoAmI??-1));(boss?.State??default).WriteEnvelope(packet);
+        packet.Send(toClient);
     }
-    public void ApplyIdleSnapshot(in EncounterSnapshot snapshot) { }
-    public override void ClearWorld() => nonce = 0;
+    public void ApplyIdleSnapshot(in EncounterSnapshot snapshot) {replica=default;replicaActor=-1;replicaAt=0;}
+    public override void ClearWorld() {nonce=0;replica=default;replicaActor=-1;replicaAt=0;}
 }

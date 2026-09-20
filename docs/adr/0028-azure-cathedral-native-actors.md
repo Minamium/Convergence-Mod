@@ -36,6 +36,14 @@ Retain the original decision; add bounded Stack/Spread plan/verdict/recipient-im
 
 Defeat is an idempotent runtime latch, separate from actor existence. Only a living, already-summoned worm requires the full linked chain. Retire owned defeated segments without invalidating the survivor. The retained girl carries state until the single final result/cleanup. Unexpected disappearance of a living required actor remains invalidation. This addresses the observed duplicate death notifications and next-tick `EncounterActorMissing`; it is not permission to translate arbitrary missing actors into Victory.
 
-### Verification
+### 2026-09-20 devouring revision (protocol60)
+
+The owner's requested phase redesign supersedes the initial both-actors-die ending and protocol59's immediate worm retirement. Keep45 native linked parts until cleanup, with weapon damage restricted to the head. Duet's20% worm floor and Liora0 gate enter one protected phase; its accepted epoch ends in exactly one full refill and Fury. Fury0 commits Victory and retains the harmless chain for the authority-timed melting ending. All-out still precedes victory selection. Only the phase owner refills or changes outcome; no client shader/cutscene makes gameplay decisions. Old-phase hazard plans are rejected after the new attack epoch.
+
+`NPC.HitModifiers.SetMaxDamage` limits ordinary incoming head hits; authority floor clamping and `CheckDead` cover lethal/DoT fallback. The official [tML2026.07 HitModifiers API](https://docs.tmodloader.net/docs/stable/struct_n_p_c_1_1_hit_modifiers.html), checked2026-09-20, specifies an inclusive final-damage ceiling with minimum1; the installed2026.07.3.0 package compiles this hook. This does not bypass the native player damage pathway or other Mods' normal hit effects.
+
+`AzurePackets` now appends the bounded full feature projection to its existing definition-scoped Snapshot route. The runtime publishes at6-tick cadence (and observable changes), with immutable Fight/actor/phase clocks and monotone stages. This avoids tying camera/black exterior/music/field capability exclusively to rate-limited NPC ExtraAI. Parse before accepting the common revision; cache only its accepted projection, clear on accepted Idle/world unload, retain NPC ExtraAI as a secondary repair path. No common packet IDs or global feature switch were added. Client missile steering uses authority-replicated target coordinates and a bounded initial homing interval.
+
+### Verification (current scope)
 
 Pure codec/clock tests and an actual Mod package/load check cover deterministic contracts and construction. Linked-production GPU frames cover material composition, not game FPS, native worm hit forwarding under installed accessories, rejoin behavior or remote presentation. Those remain explicit owner playtests in the [feature spec](../encounters/azure-cathedral/ENCOUNTER_SPEC.md).
