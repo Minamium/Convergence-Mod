@@ -27,7 +27,7 @@ public sealed class AzureVisualConfig : ModConfig
 internal sealed class AzureVisuals : ModSystem
 {
     private Guid fight;
-    private int previous = -1, lastCharge = -1, lastFire = -1, lastDash = -1;
+    private int previous = -1, lastCharge = -1, lastFire = -1, lastDash = -1, lastChorus=-1, lastVerdict=-1;
     private float shake;
     private Matrix worldToViewport;
     private Guid projectedFight;
@@ -49,20 +49,36 @@ internal sealed class AzureVisuals : ModSystem
         int age = (int)girl.VisualAge;
         if (fight != girl.State.Fight) { Reset(); fight = girl.State.Fight; previous = age - 1; }
         shake *= .85f;
-        if(girl.State.MusicStart>=0) CueAt(girl.State.MusicStart + 170, "PhaseRupture", .46f, 8);
+        if(girl.State.MusicStart>=0)
+        {
+            CueAt(girl.State.MusicStart+AzureRules.IceBreak,"PhaseRupture",.52f,9);
+            CueAt(girl.State.MusicStart+AzureRules.SwordLight,"Beams/PortalFire",.50f,5);
+            CueAt(girl.State.MusicStart+AzureRules.WormArrival,"PhaseRupture",.55f,8);
+        }
         if (girl.State.EndAt >= 0) CueAt(girl.State.EndAt, girl.State.Stage==AzureStage.Victory?"RaidVictory":"RaidDefeat",.45f,9);
         foreach (Projectile p in Main.ActiveProjectiles)
         {
+            if(p.ModProjectile is AzureChorus m && m.Plan.Fight==fight)
+            {
+                if(lastChorus!=m.Plan.Born && Crossed(m.Plan.Born))
+                {lastChorus=m.Plan.Born;Play(m.Plan.Kind==AzureChorusKind.Stack?"StackSummon":"SpreadSummon",.44f,.14f);}
+                // Verdict can arrive after its scheduled fire tick on a client.
+                // Play once on receipt inside the visual recovery, not only at a
+                // tick crossing that may have preceded the authoritative packet.
+                if(m.Resolved && lastVerdict!=m.Plan.Fire && age>=m.Plan.Fire && age<m.Plan.Fire+48)
+                {lastVerdict=m.Plan.Fire;Play(m.Plan.Kind==AzureChorusKind.Stack?"StackRelease":"SpreadRelease",.48f,.10f);shake=Math.Max(shake,m.FailedMask==0?3:8);}
+            }
             if (p.ModProjectile is not AzureAttack a || a.Plan.Fight != fight) continue;
             if (a.Plan.Born != lastCharge && Crossed(a.Plan.Born)) { lastCharge=a.Plan.Born; Play("Beams/PortalCharge",.36f,.22f); }
             if (a.Plan.Fire != lastFire && Crossed(a.Plan.Fire))
             { lastFire=a.Plan.Fire; Play(a.Plan.Kind==AzureAttackKind.MouthBeam?"Beams/PortalFire":"CoreHit",a.Plan.Kind==AzureAttackKind.MouthBeam?.62f:.50f,.20f); shake=Math.Max(shake,a.Plan.Kind==AzureAttackKind.MouthBeam?7:2.2f); }
         }
-        if (girl.State.Live && AzureRules.Phrase(age,girl.State.UnlockAt) is 0 or 2)
+        if (girl.State.Live && girl.State.WormLife>0 && AzureRules.ChargePhrase(AzureRules.Phrase(age,girl.State.UnlockAt)))
         {
             int t = AzureRules.Clock(age,girl.State.UnlockAt);
-            int serial = (age-girl.State.UnlockAt)/140;
-            if (t%140>=82 && t%140<87 && serial!=lastDash) { lastDash=serial;Play("Beams/PortalFire",.52f,-.14f);shake=6; }
+            int serial = (age-girl.State.UnlockAt)/AzureRules.ChargeTicks;
+            if (t%AzureRules.ChargeTicks>=AzureRules.ChargeWarning && t%AzureRules.ChargeTicks<AzureRules.ChargeWarning+5 && serial!=lastDash)
+            { lastDash=serial;Play("Beams/PortalFire",.52f,-.14f);shake=6; }
         }
         for (int i=voices.Count-1;i>=0;i--) if (!SoundEngine.TryGetActiveSound(voices[i],out _)) voices.RemoveAt(i);
         previous=age;
@@ -77,13 +93,21 @@ internal sealed class AzureVisuals : ModSystem
     private void Reset()
     {
         foreach(var id in voices) if(SoundEngine.TryGetActiveSound(id,out var voice)) voice.Stop();
-        voices.Clear();fight=projectedFight=Guid.Empty;previous=lastCharge=lastFire=lastDash=-1;shake=0;
+        voices.Clear();fight=projectedFight=Guid.Empty;previous=lastCharge=lastFire=lastDash=lastChorus=lastVerdict=-1;shake=0;
     }
     public override void ClearWorld()=>Reset();
     public override void OnWorldUnload()=>Reset();
     public override void Unload()=>Reset();
     public override void ModifyScreenPosition()
     {
+        var girl=AzurePackets.Boss;
+        if(!Main.gameMenu && girl is {Fresh:true} && Local(girl) && girl.State.Stage==AzureStage.Countdown)
+        {
+            float openingAge=RenderAge(girl)-girl.State.MusicStart;
+            float frame=AzureRules.Ease(openingAge/55)*AzureRules.Ease((AzureRules.Intro-openingAge)/80);
+            var center=new Vector2(girl.State.Field.CenterX,girl.State.Field.CenterY-80);
+            Main.screenPosition=Vector2.Lerp(Main.screenPosition,center-new Vector2(Main.screenWidth,Main.screenHeight)*.5f,frame);
+        }
         if(Reduced || !ModContent.GetInstance<AzureVisualConfig>().ScreenShake || shake<.02f) return;
         float t=Main.GameUpdateCount%6000;
         Main.screenPosition+=new Vector2(MathF.Sin(t*2.11f),MathF.Cos(t*1.87f))*Math.Min(10,shake);
@@ -105,8 +129,15 @@ internal sealed class AzureVisuals : ModSystem
         try
         {
             float age=RenderAge(girl);AzureEnergy.Begin();
+            AzureCeremony.Stage(batch,girl.State,age);
+            // Draw the entire chain from the world pass: an off-screen head
+            // must not let Terraria's NPC culling hide the visible body.
+            if(girl.State.WormLife>0 && girl.State.WormSlot>=0 && Main.npc[girl.State.WormSlot] is {active:true,ModNPC:AzureWorm head}
+                && head.Fight==girl.State.Fight)AzureMaterials.Worm(head,girl,batch,Main.screenPosition);
             foreach(Projectile p in Main.ActiveProjectiles)
             {
+                if(p.ModProjectile is AzureChorus marker && marker.Plan.Fight==girl.State.Fight && AzureChorus.TryGirl(marker.Plan,out _))
+                    AzureChorusVisuals.Draw(batch,girl,marker,age);
                 if(p.ModProjectile is not AzureAttack attack || attack.Plan.Fight!=girl.State.Fight || !attack.TryGirl(out _))continue;
                 var h=attack.Plan;if(age<h.Born || age>=h.End)continue;
                 bool forecast=age<h.Fire;
@@ -130,15 +161,15 @@ internal sealed class AzureVisuals : ModSystem
                     }
             }
             if(girl.State.WormSlot>=0 && Main.npc[girl.State.WormSlot].ModNPC is AzureWorm worm && girl.State.Live && girl.State.WormLife>0
-                && AzureRules.Phrase((int)age,girl.State.UnlockAt) is 0 or 2)
+                && worm.Fight==girl.State.Fight && AzureRules.ChargePhrase(AzureRules.Phrase((int)age,girl.State.UnlockAt)))
             {
-                int dash=AzureRules.Clock((int)age,girl.State.UnlockAt)%140;
-                if(dash<82)
+                int dash=AzureRules.Clock((int)age,girl.State.UnlockAt)%AzureRules.ChargeTicks;
+                if(dash<AzureRules.ChargeWarning)
                 {
                     Vector2 target=new(worm.NPC.ai[0],worm.NPC.ai[1]);var dir=(target-worm.NPC.Center).SafeNormalize(Vector2.UnitX);
                     if(girl.State.Field.ClipAxis(worm.NPC.Center.X,worm.NPC.Center.Y,dir.X,dir.Y,out float first,out float last))
                         AzureEnergy.Add(worm.NPC.Center+dir*Math.Max(0,first),dir,Math.Max(0,last-Math.Max(0,first)),AzureRules.SegmentRadius,
-                            age,age+(82-dash),age+(117-dash),.6f,Reduced,age-dash,true);
+                            age,age+(AzureRules.ChargeWarning-dash),age+(AzureRules.ChargeEnd-dash),.6f,Reduced,age-dash,true);
                 }
             }
             AzureEnergy.Draw(batch);
@@ -206,29 +237,9 @@ internal sealed class AzureActorVisuals : GlobalNPC
     public override bool AppliesToEntity(NPC n,bool lateInstantiation)=>n.ModNPC is AzureBoss or AzureWorm;
     public override bool PreDraw(NPC npc,SpriteBatch batch,Vector2 screen,Color drawColor)
     {
-        if(npc.ModNPC is AzureWorm worm)
-        {if(worm.Index==0 && worm.TryGirl(out var girl))AzureMaterials.Worm(worm,girl!,batch,screen);return false;}
+        if(npc.ModNPC is AzureWorm)return false;
         if(npc.ModNPC is not AzureBoss g || g.State.Fight==Guid.Empty) return false;
-        float age=AzureVisuals.RenderAge(g),alpha=g.State.GirlLife<=0?.25f:1;
-        if(g.State.EndAt>=0)alpha*=1-AzureRules.Ease((age-g.State.EndAt)/150);
-        int frame=g.State.Stage<=AzureStage.Ready?((int)age%260<9?1:0):7;
-        float pose=0;
-        foreach(Projectile p in Main.ActiveProjectiles)
-            if(p.ModProjectile is AzureAttack a && a.Plan.Fight==g.State.Fight && a.Plan.Kind!=AzureAttackKind.MouthBeam && age<a.Plan.Fire+24 && age>=a.Plan.Born)
-            {pose=age-a.Plan.Fire;frame=pose< -22?4:pose<0?5:6;break;}
-        var art=ModContent.Request<Texture2D>("Convergence/Assets/Textures/AzureCathedral/Liora").Value;
-        var src=new Rectangle(frame%4*128,frame/4*128,128,128);
-        float lean=frame==6?MathF.Exp(-Math.Max(0,pose)/9)*-.07f:MathF.Sin(age*.025f)*.018f;
-        batch.Draw(art,npc.Center-screen,src,Color.White*alpha,lean,new(64,68),.56f,npc.spriteDirection==1?SpriteEffects.None:SpriteEffects.FlipHorizontally,0);
-        if(!AzureVisuals.Reduced && g.State.Stage>=AzureStage.Countdown)
-        {
-            var glow=MiscTexturesRegistry.BloomCircleSmall.Value;
-            for(int i=0;i<9;i++)
-            {
-                float y=(age*.65f+i*11)%110;Vector2 pos=npc.Center+new Vector2(MathF.Sin(i*4.1f+age*.02f)*25,20+y);
-                batch.Draw(glow,pos-screen,null,new Color(131,225,255,0)*(.28f*(1-y/110))*alpha,0,glow.Size()*.5f,5f/glow.Width,SpriteEffects.None,0);
-            }
-        }
+        AzureCeremony.Girl(batch,g,screen);
         return false;
     }
 }

@@ -23,8 +23,10 @@ internal sealed class AzureSky : CustomSky
     {
         if (Main.gameMenu) { Reset(); return; }
         var girl = AzurePackets.Boss;
-        requested = girl is { Fresh: true } && AzureVisuals.Local(girl);
-        fade = MathHelper.Clamp(fade + (requested ? .013f : -.04f), 0, 1);
+        requested = girl is { Fresh: true } && AzureVisuals.Local(girl) && girl.State.MusicStart>=0
+            && girl.VisualAge>=girl.State.MusicStart+AzureRules.SkyReveal;
+        float target=requested?AzureRules.Ease((girl!.VisualAge-girl.State.MusicStart-AzureRules.SkyReveal)/220):0;
+        fade = MathHelper.Clamp(fade + MathHelper.Clamp(target-fade,-.04f,.013f),0,1);
         if (girl is not null) age = AzureVisuals.RenderAge(girl);
     }
     public override void Draw(SpriteBatch batch, float minDepth, float maxDepth)
@@ -50,7 +52,8 @@ internal sealed class AzureSkySystem : ModSystem
     public override void Load() => SkyManager.Instance[AzureSky.Key] = sky = new AzureSky();
     public override void PostUpdateEverything()
     {
-        bool want = !Main.gameMenu && AzurePackets.Boss is { Fresh: true } girl && AzureVisuals.Local(girl);
+        bool want = !Main.gameMenu && AzurePackets.Boss is { Fresh: true } girl && AzureVisuals.Local(girl)
+            && girl.State.MusicStart>=0 && girl.VisualAge>=girl.State.MusicStart+AzureRules.SkyReveal;
         if (want && !active) SkyManager.Instance.Activate(AzureSky.Key, Vector2.Zero);
         if (!want && active) SkyManager.Instance.Deactivate(AzureSky.Key);
         active = want;

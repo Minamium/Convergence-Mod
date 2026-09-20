@@ -8,33 +8,33 @@ New original images use the built-in generator, exact model unknown. Full briefs
 
 - Runtime file: `Assets/Textures/AzureCathedral/Liora.png`
 - Asset ID: azure-liora-20260920
-- Asset type: 512x256 eight-pose pixel NPC atlas
+- Asset type: 192x128 eight-pose native-density pixel NPC atlas
 - Creator: project-owner-directed original implementation/artwork with OpenAI
 - Creation/acquisition date: 2026-09-20
 - Source type: generated
 - Source work and URL: Original owner-directed built-in image generation; no third-party input
 - Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
-- Human modifications: Nearest-neighbor game export from1774x887 to512x256
+- Human modifications: New simplified character sheet, built-in alpha-removal pass, nearest-neighbor1536x1024 to192x128 export. Source SHA256 `f63b05fb7f9b10a320e5384b1ec82d972418794725172b7f640cb959d2b39114`; original and superseded images retained externally.
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `147a9af6eb804211c83dcf37e46bba4370fd0ccd37a4096bcac9e57fe59d6284`
+- SHA256: `c51846cef067fcc9ac0744d9d74304cc4b8a73fad397fa5ee890c6a4d6980fb2`
 
 - Runtime file: `Assets/Textures/AzureCathedral/Vitrion.png`
 - Asset ID: azure-vitrion-20260920
-- Asset type: 1254x1254 original worm parts atlas
+- Asset type: 1024x1024 dorsal-view armored worm parts atlas
 - Creator: project-owner-directed original implementation/artwork with OpenAI
 - Creation/acquisition date: 2026-09-20
 - Source type: generated
 - Source work and URL: Original owner-directed built-in image generation; no third-party input
 - Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
-- Human modifications: Generated grid/gutter correction; final art copied byte-for-byte
+- Human modifications: New dorsal-axis parts, nearest-neighbor1254x1254 to1024x1024 export; shader mirrors paired silhouettes about measured spines. Source SHA256 `16b86c11ed5a9e82422a58f2e8fc4c55455c06694e7f366fc485506b39afcac4`. No third-party sprite input; prior side-view original retained.
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `f4fe3007efa7398c79ee3e38a3eead1450a4a19eb566f793016d1ff9c33002cd`
+- SHA256: `64a45057948b83ccfa4f6fb5dff15a7d7e71fbbd7d7225ea4af1e57221928ece3`
 
 - Runtime file: `Assets/Textures/AzureCathedral/Cathedral.png`
 - Asset ID: azure-cathedral-20260920
@@ -68,7 +68,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/AzureGlass.fxc`
 - Asset ID: azure-glass-material-20260920
-- Asset type: compiled original ice/glass/background/shard effect
+- Asset type: compiled original ice/glass/background/shard/rift/countdown effect
 - Creator: project-owner-directed original implementation/artwork with OpenAI
 - Creation/acquisition date: 2026-09-20
 - Source type: original
@@ -79,7 +79,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `026e9e15c613d01a0f2b53d4918106cbedc94183ad75449a85fe910303a78f79`
+- SHA256: `0249389a198c146efb2fdbb5047387dc7d05ad425ada93238aef2d390627ccc0`
 
 - Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
 - Asset ID: azure-eighth-white-night-20260920

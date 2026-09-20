@@ -1,0 +1,82 @@
+using System;
+using Convergence.Content.Encounters.AzureCathedral;
+using Luminance.Assets;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.ModLoader;
+
+namespace Convergence.Client.Encounters.AzureCathedral;
+
+// All presentation follows the accepted encounter clock; no camera/input flags
+// are left behind and none of these decorative primitives have hitboxes.
+internal static class AzureCeremony
+{
+    internal static void Girl(SpriteBatch batch,AzureBoss g,Vector2 screen)
+    {
+        float age=AzureVisuals.RenderAge(g),t=g.State.MusicStart<0?-1:age-g.State.MusicStart;
+        bool sealedGirl=t<AzureRules.IceBreak;
+        float alpha=g.State.GirlLife<=0?.25f:1;
+        if(g.State.EndAt>=0)alpha*=1-AzureRules.Ease((age-g.State.EndAt)/150);
+        Vector2 center=g.NPC.Center+new Vector2(0,AzureVisuals.Reduced?0:MathF.Sin(age*.022f)*2.5f);
+        float fracture=AzureRules.Ease((t-100)/80),tilt=MathF.Sin(age*.009f)*.045f;
+        if(sealedGirl)AzureMaterials.Effect(batch,"IcePass",center,new(98,140),tilt,age,new(.62f,fracture,0,0));
+        int frame=sealedGirl?(t<80?0:t<158?4:6):t<280?3:t<380?4:t<670?5:((int)age%230<8?2:1);
+        float release=0;
+        if(g.State.Live)
+            foreach(Projectile p in Main.ActiveProjectiles)
+                if(p.ModProjectile is AzureAttack a && a.Plan.Fight==g.State.Fight && a.Plan.Kind!=AzureAttackKind.MouthBeam && age<a.Plan.Fire+22 && age>=a.Plan.Born)
+                {release=age-a.Plan.Fire;frame=release< -22?4:release<0?5:6;break;}
+        var art=ModContent.Request<Texture2D>("Convergence/Assets/Textures/AzureCathedral/Liora").Value;
+        var src=new Rectangle(frame%4*48,frame/4*64,48,64);
+        float lean=frame==6?MathF.Exp(-Math.Max(0,release)/9)*-.045f:MathF.Sin(age*.021f)*.008f;
+        // Logical pixel export, drawn at native density rather than shrinking a
+        // 128px illustration. Align the bodies across sword/hover atlas cells.
+        batch.Draw(art,center-screen,src,(sealedGirl?new Color(181,220,239):Color.White)*alpha,lean,
+            new(24,frame>=4?40:35),1f,SpriteEffects.None,0);
+        if(sealedGirl)AzureMaterials.Effect(batch,"IcePass",center,new(98,140),tilt,age,new(.28f,fracture,0,0));
+        float broken=t-AzureRules.IceBreak;
+        if(broken>=0 && broken<125)
+        {
+            float burst=1-MathF.Exp(-broken/13),fade=1-AzureRules.Ease((broken-45)/80);
+            for(int i=0;i<10;i++)
+            {
+                float a=i*2.399963f;Vector2 d=a.ToRotationVector2();
+                Vector2 pos=center+d*(26+burst*(60+i*6))+new Vector2(0,broken*broken*.006f);
+                AzureMaterials.Effect(batch,"IcePass",pos,new(18+i%3*8,34+i%4*7),a+broken*.005f*(i%2==0?1:-1),age,new(fade,.8f,0,0));
+            }
+            if(broken<18)AzureMaterials.Shard(batch,center-new Vector2(62,66),center+new Vector2(72,65),5,age,1-broken/18);
+        }
+    }
+    internal static void Stage(SpriteBatch batch,AzureState state,float age)
+    {
+        if(state.MusicStart<0)return;
+        float t=age-state.MusicStart;var f=state.Field;Vector2 center=new(f.CenterX,f.CenterY);
+        if(t>=AzureRules.SwordLight && t<760)
+        {
+            float e=AzureRules.Ease((t-AzureRules.SwordLight)/35)*(1-AzureRules.Ease((t-640)/120));
+            Vector2 sword=center+new Vector2(-6,-48);
+            AzureEnergy.Add(sword,-Vector2.UnitY,1000,7*e,age,state.MusicStart+AzureRules.SwordLight,
+                state.MusicStart+760,e,AzureVisuals.Reduced,state.MusicStart+AzureRules.SwordLight-100,true);
+            Bloom(batch,sword,85+45*MathF.Sin(t*.09f)*MathF.Sin(t*.09f),.65f*e);
+        }
+        float open=AzureRules.Ease((t-540)/70)*(1-AzureRules.Ease((t-790)/145));
+        if(open>0)
+        {
+            Vector2 portal=center+new Vector2(1050,-280);
+            AzureMaterials.Effect(batch,"RiftPass",portal,new Vector2(500,180)*open,MathHelper.PiOver2+.10f,age,new(open,open,0,0));
+            if(!AzureVisuals.Reduced)
+                for(int i=0;i<12;i++)
+                {
+                    float a=i*2.39996f,flow=(t*.009f+i*.21f)%1;
+                    Vector2 offset=new(MathF.Cos(a)*flow*165,MathF.Sin(a)*flow*260);
+                    AzureMaterials.Shard(batch,portal+offset,portal+offset*1.07f,2,age,open*(1-flow)*.65f);
+                }
+        }
+    }
+    internal static void Bloom(SpriteBatch batch,Vector2 center,float diameter,float alpha)
+    {
+        var art=MiscTexturesRegistry.BloomCircleSmall.Value;
+        batch.Draw(art,center-Main.screenPosition,null,new Color(115,226,255,0)*alpha,0,art.Size()*.5f,diameter/art.Width,SpriteEffects.None,0);
+    }
+}

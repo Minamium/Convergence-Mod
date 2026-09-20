@@ -30,4 +30,12 @@ Client-owned scene/audio/shader resources consume these projections. Missing/sta
 
 ## Evidence boundary
 
+### 2026-09-20 follow-up (protocol59)
+
+Retain the original decision; add bounded Stack/Spread plan/verdict/recipient-impact envelopes. `AzureChorusDirector`, owned by the one authority runtime, resolves the frozen roster at its deadline; `AzureChorus` is a harmless synchronized marker, and `AzureChorusStrike` gates the ordinary native hit to exactly its resolved receiving player. Late/stale verdicts cannot revert a resolved outcome. No new common packet IDs, client decisions, persistence or feature-runtime dependencies.
+
+Defeat is an idempotent runtime latch, separate from actor existence. Only a living, already-summoned worm requires the full linked chain. Retire owned defeated segments without invalidating the survivor. The retained girl carries state until the single final result/cleanup. Unexpected disappearance of a living required actor remains invalidation. This addresses the observed duplicate death notifications and next-tick `EncounterActorMissing`; it is not permission to translate arbitrary missing actors into Victory.
+
+### Verification
+
 Pure codec/clock tests and an actual Mod package/load check cover deterministic contracts and construction. Linked-production GPU frames cover material composition, not game FPS, native worm hit forwarding under installed accessories, rejoin behavior or remote presentation. Those remain explicit owner playtests in the [feature spec](../encounters/azure-cathedral/ENCOUNTER_SPEC.md).

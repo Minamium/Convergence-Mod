@@ -106,7 +106,7 @@ documents:
 - doc_id: adr.0028
   path: docs/adr/0028-azure-cathedral-native-actors.md
   title: 'ADR-0028: Azure Cathedral native actors and hazards'
-  content_sha256: f3c451dcd1ef597d1747fe7045f538df987807d2bb5e18e30853d09d2e3e3c52
+  content_sha256: 89f1d5a6c34a79d44ffd61607b18b8053c9388ca21f0881969f2be25d40d8804
   document_type: adr
   status: accepted
   owners:
@@ -595,7 +595,7 @@ documents:
 - doc_id: encounter.azure-cathedral.assets
   path: docs/encounters/azure-cathedral/ASSET_BRIEF.md
   title: Azure Cathedral asset brief
-  content_sha256: a5f6c0bd2c0ed83eedffa234f277967f7113e9c8fac0b4242c4193287effe659
+  content_sha256: c5295294369b1b4d7aa4da646e04ea1790259ce4fa2922139a2a526d1771cec0
   document_type: spec
   status: accepted
   owners:
@@ -611,7 +611,7 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: 770be8a667662223e7fa11a5839cae96d01e3ba42b4a9bac8824effc51b9f52d
+  content_sha256: 98cb8e4b51bf2ef1f1a5fc90e4cb639b71b99ba2b0fcca1ce6da943654b2bd1b
   document_type: spec
   status: accepted
   owners:
@@ -927,7 +927,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 0874c04f09892ba25add053e5a01f1580ba4e703447e0d55f180762a9f55bdf9
+  content_sha256: 3ff0b499dc61aecdf99f046a838fb1d555fbfad7a55aae0e9b051631e81a3ae8
   document_type: evidence
   status: historical
   owners:
@@ -1326,7 +1326,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 944b98e7c7c00206c53b9e5da3a104fd8de8b00c03090d8612dcd8662fdd2986
+  content_sha256: d32331fa7d7e8c53f55cb067d4a5cf536c7383ef41f403d492d891e12652549b
   document_type: status
   status: accepted
   owners:
@@ -1643,7 +1643,7 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: e61146f752f3253c03f8d139a5e635e5c166cc4d4a38de789144263adee63d10
+  content_sha256: 926d670fc8e324dc7416e2b7b6f80f53d62292b52c327ea3ec8bf1a10af52c97
   document_type: research
   status: provisional
   owners:
