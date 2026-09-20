@@ -104,13 +104,13 @@ public sealed class AzureWorm : ModNPC
     public override void AI()
     {
         NPC.timeLeft = NPC.activeTime;
-        if (!TryGirl(out var g))
+        if (!TryGirl(out var g) || g is null)
         {
             NPC.dontTakeDamage = true;
             if (Main.netMode != NetmodeID.MultiplayerClient) NPC.active = false;
             return;
         }
-        NPC.dontTakeDamage = !Hittable(g!);
+        NPC.dontTakeDamage = !Hittable(g);
         NPC.chaseable = !NPC.dontTakeDamage;
         NPC.boss = Index == 0 && g.State.Live;
         NPC.lifeMax = g.State.WormMax;
