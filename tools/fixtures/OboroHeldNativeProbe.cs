@@ -110,19 +110,20 @@ public static class OboroHeldNativeProbe
                     && System.MathF.Abs(Y(actual) - Y(center) - by) < .0001f, "native hand basis must reconstruct rotation and mirroring");
                 count++;
             }
-            foreach (int step in new[] { 0, 1 })
+            foreach (int step in new[] { 0, 1, 2 })
             {
-              var motion = mod.GetType("Convergence.Content.Items.Oboro." + (step == 0 ? "OboroFirstSwingMotion" : "OboroSecondSwingMotion"), true);
-              int duration = step == 0 ? 18 : 16, ready = step == 0 ? 4 : 3, follow = step == 0 ? 16 : 14;
+              var motion = mod.GetType("Convergence.Content.Items.Oboro." + (step == 0 ? "OboroFirstSwingMotion" : step == 1 ? "OboroSecondSwingMotion" : "OboroThirdSwingMotion"), true);
+              int duration = step == 0 ? 18 : step == 1 ? 16 : 26, ready = step == 0 ? 4 : 3, follow = step == 0 ? 16 : 14;
               for (int frame = 0; frame <= duration; frame++)
               {
                 float progress = frame / (float)duration;
                 float angle = (float)motion.GetMethod("Angle", S).Invoke(null, new object[] { progress });
                 angle = (facing == 1 ? 0 : System.MathF.PI) + facing * angle;
-                float weight = (float)motion.GetMethod("HandWeight", S).Invoke(null, new object[] { progress });
-                object at = basis.GetType().GetMethod("At", I).Invoke(basis, new object[] { angle });
-                float x = X(center) + (float)at.GetType().GetField("Item1").GetValue(at) * weight;
-                float y = Y(center) + (float)at.GetType().GetField("Item2").GetValue(at) * weight;
+                var rules = mod.GetType("Convergence.Content.Items.Oboro.OboroRules", true);
+                object at = rules.GetMethod("RootOffset", S).Invoke(null, new object[] { step, progress,
+                    facing == 1 ? 0f : System.MathF.PI, angle, basis });
+                float x = X(center) + (float)at.GetType().GetField("Item1").GetValue(at);
+                float y = Y(center) + (float)at.GetType().GetField("Item2").GetValue(at);
                 object grip = System.Activator.CreateInstance(center.GetType(), new object[] { x, y });
                 object selected = anchor.GetMethod("Stretch", S).Invoke(null, new[] { player, grip, (object)angle });
                 object actual = native.Invoke(player, new[] { selected, (object)(angle - System.MathF.PI / 2) });
@@ -133,11 +134,11 @@ public static class OboroHeldNativeProbe
                 // has a minimum9.333px gap under inverted gravity (None stretch).
                 // Keep active strokes exact; allow only this harmless hilt join.
                 Require(gap < (step == 0 ? 9 : 10), "hand stays within the hilt during root transition: step=" + step + " frame=" + frame + " facing=" + facing + " gravity=" + grav + " gap=" + gap + " stretch=" + selected);
-                if (frame >= ready && frame <= follow) Require(gap < .0001f, "active stroke must be exactly hand anchored");
+                if (step < 2 && frame >= ready && frame <= follow) Require(gap < .0001f, "active stroke must be exactly hand anchored");
               }
             }
         }
         System.Console.WriteLine("PASS " + count + " installed hand-anchor samples: facing, counter-facing, gravity and full rotation");
-        System.Console.WriteLine("PASS authored grips: first 4-16F and second 3-14F exact, transition gap <= " + largestGap + " pixels");
+        System.Console.WriteLine("PASS authored grips: first 4-16F and second 3-14F exact; third thrust and all handoffs hilt gap <= " + largestGap + " pixels");
     }
 }

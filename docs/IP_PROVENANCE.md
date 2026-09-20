@@ -128,7 +128,7 @@ The 2026-09-13 Doll Raid material suite uses Luminance's public loading/paramete
 
 The owner supplied the weapon sketch and eight violet Boss/weapon boards and requested their appearance in Convergence. The selected weapon, spirit and twelve-pose atlas were newly generated from those references with the built-in image tool; the supplied dissolve sheet is used as a runtime atlas. No Calamity/Murasama code or extracted artwork was copied. [API/reference boundary](research/2026-09-16-oboro.md) and [exact exports](../Assets/ATTRIBUTION.md) distinguish visual references, gameplay choices and publication provenance.
 
-The September17 [Murasama motion survey](research/2026-09-16-oboro.md#murasama-motion-reference--2026-09-17) informs the three-beat presentation and heavier final-cut emphasis. Oboro's easing, pose history, violet ribbons and sprite echoes are independently written; existing project-authored textures are reused. No new third-party asset or implementation is imported.
+The September17 [Murasama motion survey](research/2026-09-16-oboro.md#murasama-motion-reference--2026-09-17) informs the three-beat presentation and heavier final-cut emphasis. Oboro's easing, pose history, violet ribbons and sprite echoes are independently written; existing project-authored textures are reused. No new third-party asset or implementation is imported. The September20 [supplied motion clips](research/2026-09-16-oboro.md#supplied-motion-clips--2026-09-20) add observed Murasama and owner-identified DMC Vergil anticipation/release/residue references. Recordings and decoded frames stay local; independently authored third-cut curves and violet accents retain existing project art.
 
 ## Ghost Samurai articulated presentation — 2026-09-18
 

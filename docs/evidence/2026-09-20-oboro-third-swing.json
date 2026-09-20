@@ -1,0 +1,86 @@
+{
+  "date": "2026-09-20",
+  "version": "0.3.30",
+  "protocol": 58,
+  "branch": "feature/oboro-third-finisher",
+  "base_commit": "8b2ab4e44b47498f3f7a2ae1b172692a5ceade30",
+  "scope": "Third-cut26F choreography and violet accents. Shared blade/root sweep moves with the motion. Live window10-21F becomes14-23F to keep charge harmless. Base power,26F duration,560px blade length,34px width, hit cap, buffs and loot preserved. First/second authored curves unchanged; third-to-first harmless entry accepts follow-through.",
+  "environment_reference": "docs/evidence/2026-09-19-oboro-held.json",
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260920T102040517352Z/record.json",
+    "package_sha256": "9dfc3952e759914cc7c59175a89648baa06813466de92d7ba6f75b67e62090c7",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "output": "isolated feature profile",
+    "locales": 22,
+    "shader_exports": "passed",
+    "source_changed_during_build": false
+  },
+  "checks": {
+    "focused_domain": {
+      "status": "passed",
+      "cases": 30,
+      "failures": 0,
+      "scope": "Six-frame immobile harmless charge; continuous velocities; strongest release; mirror and authority alignment at all9-52tick durations; changed-aim3-to-1 handoff; swept slice overlap at <=64 samples; retained input/cleanup/codec/DoT coverage.",
+      "sweep_refinement": "Initial80degree/F release exceeded the overlapping-slice bound at maximum attack speed. Final72degree/F release passes all supported9-52tick durations with the existing64-sample cap, and remains over1.4 times the other cuts peak speed."
+    },
+    "exact_package": {
+      "status": "passed",
+      "scope": "Eight installed-loader types, saved item identity, one harmless holdout and connection/slot cleanup,584 native hand-basis samples, native arm grip all three strokes, weapon DoT and typed codec round trips/shared buffers/truncations.",
+      "maximum_hilt_gap_px": 9.333013
+    },
+    "repository": {
+      "status": "passed",
+      "static": "catalog, policy and YAML",
+      "domain_cases": 326,
+      "domain_failures": 0,
+      "codec_round_trips": 334,
+      "codec_malformed_rejections": 54,
+      "protocol": 58
+    },
+    "presentation": {
+      "status": "offline_frames_inspected",
+      "frames": 712,
+      "command": "pwsh -File tools/preview-oboro-motion.ps1 -TModLoaderPath <installed-tml> -OutputDirectory .local/oboro-third-motion-preview",
+      "scope": "Linked production OboroArt/FinisherArt/presentation on hidden FNA D3D11. Full three-cut loop,3-to-1 transition and settle; both facings, light/dark, reduced/full.",
+      "observations": "Blade/root stop across8-14F; charge lights draw inward. Release has a brighter broad violet edge, diminishing curve and held final pose that blends into the next stance without an instantaneous180degree reset. Reduced mode retains the blade and thin edge.",
+      "limits": "Calibrated arm diagram and documented Cubic InOut shim, not actual player/armor/mount rendering. No gameplay, listening or FPS claim."
+    },
+    "gameplay": {
+      "status": "not_run",
+      "owner": "user",
+      "remaining": [
+        "Charge/release weight and readability at actual equipped attack speed.",
+        "Player arm/armor/mount layers, both facings and changed aim.",
+        "Hold loop, release during charge, restart and real SP/MP latency/reconnect.",
+        "Hit and Wraith Fire timing, sound accent, bright/dark and Reduced Effects."
+      ]
+    }
+  },
+  "integration": {
+    "status": "approved_candidate",
+    "date": "2026-09-21",
+    "latest_main": "5eedc29",
+    "version": "0.3.34",
+    "protocol": 62,
+    "resolution": "Retain all integrated Azure/Scarlet changes; reconcile only version/protocol/current status and generated catalog. Oboro implementation and preview inputs unchanged.",
+    "normal_profile": "Install from integrated main after combined checks; final package hash and preservation result are recorded in the merged PR and ignored native build record.",
+    "candidate_checks": {
+      "status": "passed",
+      "repository": "catalog, policy and YAML",
+      "domain_cases": 343,
+      "domain_failures": 0,
+      "codec_round_trips": 334,
+      "codec_rejections": 54,
+      "native_build": ".local/builds/20260920T155203189909Z/record.json",
+      "native_errors": 0,
+      "existing_warnings": 4,
+      "package_sha256": "1311eee7f299c8938a694cd09f677f6212eef28d8460e6c64226bfb0a776f6e8",
+      "source_changed_during_build": false,
+      "exact_package": "Oboro loader/identity/held cleanup/584 native hand samples/DoT/typed codecs passed",
+      "visual_evidence": "Reuse712 inspected frames: Oboro code, assets and preview inputs unchanged by main reconciliation."
+    }
+  },
+  "reference": "docs/research/2026-09-16-oboro.md#supplied-motion-clips--2026-09-20"
+}

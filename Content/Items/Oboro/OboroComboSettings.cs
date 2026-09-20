@@ -2,7 +2,7 @@ using System;
 
 namespace Convergence.Content.Items.Oboro;
 
-internal enum OboroMotionPhase { Idle, Windup, Acceleration, Cut, FollowThrough, Transition }
+internal enum OboroMotionPhase { Idle, Windup, Acceleration, Cut, FollowThrough, Transition, Charge }
 
 // 調整用データ。角度は右向き・照準方向を0度とした「度」、Fは攻撃速度補正前。
 // ヒット区間は0始まり [開始F, 終了F)。例: 4,13なら4～12Fが有効。
@@ -31,13 +31,13 @@ internal static class OboroComboSettings
 {
     internal const int Count = 3;
 
-    // 基本値の調整場所。1・2段目の緩急は各SwingMotion、3段目は仮の補間。
+    // 基本値の調整場所。各段の緩急は対応するSwingMotionクラスで調整する。
     internal static OboroComboStep For(int comboIndex) => comboIndex switch
     {
         //            総F   開始    引き    終点   Hit開始 終了 前進px
         0 => new(     18,   110,   135,    -35,       4,  13,     0), // 斬り上げ
         1 => new(     16,   -50,   -80,    120,       3,  12,     0), // 返し斬り
-        2 => new(     26,   150,   170,    -70,      10,  21,     0), // 重い斬撃
+        2 => new(     26,   150,   170,    -70,      14,  23,     8), // 重い斬撃
         _ => throw new ArgumentOutOfRangeException(nameof(comboIndex))
     };
 }

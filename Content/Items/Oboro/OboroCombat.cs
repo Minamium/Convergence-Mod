@@ -18,7 +18,7 @@ public sealed partial class OboroPlayer
         float current = aim + facing * OboroRules.Offset(step, p);
         float prior = Math.Max(OboroRules.Windup(step), (age - 1f) / duration);
         float previous = aim + facing * OboroRules.Offset(step, prior);
-        var hand = step < 2 ? OboroHandAnchor.Capture(Player, facing) : default;
+        var hand = OboroHandAnchor.Capture(Player, facing);
         Vector2 CenterAt(float progress, float angle)
         {
             var offset = OboroRules.RootOffset(step, progress, aim, angle, hand);
@@ -36,18 +36,14 @@ public sealed partial class OboroPlayer
             if (identity.Generation == 0 || struck.Contains(identity.Generation)) continue;
             bool contact = false;
             // Sweep between successive blade poses; fast cuts cannot skip thin enemies.
-            int samples = step == 1 ? OboroSecondSwingMotion.SweepSamples(prior, p, rootTravel)
+            int samples = step == 2 ? OboroThirdSwingMotion.SweepSamples(prior, p, rootTravel)
+                : step == 1 ? OboroSecondSwingMotion.SweepSamples(prior, p, rootTravel)
                 : Math.Clamp((int)MathF.Ceiling(Math.Max(Math.Abs(current - previous) / .035f, rootTravel / 4)), 1, 64);
             for (int i = 0; i <= samples && !contact; i++)
             {
-                float angle = MathHelper.Lerp(previous, current, i / (float)samples), collision = 0;
-                Vector2 origin = center;
-                if (step < 2)
-                {
-                    float sample = MathHelper.Lerp(prior, p, i / (float)samples);
-                    angle = aim + facing * OboroRules.Offset(step, sample);
-                    origin = CenterAt(sample, angle);
-                }
+                float sample = MathHelper.Lerp(prior, p, i / (float)samples), collision = 0;
+                float angle = aim + facing * OboroRules.Offset(step, sample);
+                Vector2 origin = CenterAt(sample, angle);
                 contact = Collision.CheckAABBvLineCollision(target.position, target.Size, origin,
                     origin + angle.ToRotationVector2() * OboroRules.Reach, OboroRules.BladeWidth, ref collision);
             }

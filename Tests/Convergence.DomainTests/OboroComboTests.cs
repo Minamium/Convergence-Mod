@@ -54,7 +54,7 @@ internal static partial class Program
     [DomainTest("Oboro definitions match requested degrees and exact half-open frame windows")]
     private static void OboroFrameDefinitions()
     {
-        int[] total = { 18, 16, 26 }, begin = { 4, 3, 10 }, end = { 13, 12, 21 };
+        int[] total = { 18, 16, 26 }, begin = { 4, 3, 14 }, end = { 13, 12, 23 };
         float[] starts = { 110, -50, 150 }, winds = { 135, -80, 170 }, ends = { -35, 120, -70 };
         for (int step = 0; step < 3; step++)
         {
@@ -63,12 +63,12 @@ internal static partial class Program
             AssertEqual(starts[step], settings.StartDegrees, "start degrees");
             AssertEqual(winds[step], settings.WindupDegrees, "windup degrees");
             AssertEqual(ends[step], settings.EndDegrees, "end degrees");
-            AssertEqual(0f, settings.ForwardDistance, "initial placeholder offset");
+            AssertEqual(step == 2 ? 8f : 0f, settings.ForwardDistance, "finisher thrust distance");
             for (int timer = 0; timer <= total[step]; timer++)
                 AssertEqual(timer >= begin[step] && timer < end[step],
                     OboroRules.Live(step, timer / (float)total[step]), "base frame window");
             float cutEnd = step switch { 0 => OboroFirstSwingMotion.CutEnd / settings.TotalFrames,
-                1 => OboroSecondSwingMotion.CutEnd / settings.TotalFrames, _ => settings.HitEnd };
+                1 => OboroSecondSwingMotion.CutEnd / settings.TotalFrames, _ => OboroThirdSwingMotion.CutEnd / settings.TotalFrames };
             AssertEqual(true, Math.Abs(OboroRules.Offset(step, cutEnd) - settings.CutEndAngle) < .00001f, "slash end");
         }
     }

@@ -15,7 +15,7 @@ internal sealed class OboroSwingPresentation
     internal const int ReturnCutFadeTicks = 9; // 返しは細く短い残光。1段目と重い3段目には余韻を残す。
     // Runtime binds Luminance's installed Cubic InOut. It only softens harmless entry.
     internal static Func<float, float>? ComboEntryEase { get; set; }
-    private static float EntryEase(int step, float t) => step < 2 && ComboEntryEase is not null
+    private static float EntryEase(int step, float t) => ComboEntryEase is not null
         ? ComboEntryEase(Math.Clamp(t, 0, 1)) : OboroRules.Ease(t);
     private readonly OboroEcho[] echoes = new OboroEcho[Capacity];
     private int head, count;
@@ -78,9 +78,9 @@ internal sealed class OboroSwingPresentation
             age = Math.Max(age, lastAge); // a delayed snapshot must not rewind a trail
             float p = Math.Clamp(age / view.Duration, 0, 1);
             float angle = view.Aim + view.Facing * OboroRules.Offset(view.Step, p);
-            if (p < OboroRules.Windup(view.Step))
-                angle += entryCorrection * (1 - EntryEase(view.Step, p / OboroRules.Windup(view.Step)));
-            float drawLength = entryLength + (OboroRules.Reach - entryLength) * EntryEase(view.Step, p / OboroRules.Windup(view.Step));
+            if (p < OboroRules.EntryEnd(view.Step))
+                angle += entryCorrection * (1 - EntryEase(view.Step, p / OboroRules.EntryEnd(view.Step)));
+            float drawLength = entryLength + (OboroRules.Reach - entryLength) * EntryEase(view.Step, p / OboroRules.EntryEnd(view.Step));
             var root = OboroRules.RootOffset(view.Step, p, view.Aim, angle, hand);
             Pose = new(x + root.X, y + root.Y, angle, drawLength, p, view.Step, view.Facing);
             if (age > lastAge && OboroRules.Live(view.Step, p))

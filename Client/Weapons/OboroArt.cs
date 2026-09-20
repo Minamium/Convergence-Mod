@@ -49,7 +49,7 @@ internal static class OboroArt
                 Vector2 to = Vector2.Lerp(new(previous.Pose.X, previous.Pose.Y), new(current.Pose.X, current.Pose.Y), c);
                 Vector2 axisA = (previous.Pose.Angle + turn * a).ToRotationVector2();
                 Vector2 axisB = (previous.Pose.Angle + turn * c).ToRotationVector2();
-                float strength = current.Pose.Step switch { 1 => .52f, 2 => 1, _ => .72f };
+                float strength = current.Pose.Step switch { 1 => .52f, 2 => 1.3f, _ => .72f };
                 // Thin moonlit edge over a soft violet ribbon; no filled screen-wide fan.
                 for (int layer = 0; layer < (reduced ? 1 : 3); layer++)
                 {
@@ -77,13 +77,14 @@ internal static class OboroArt
         Vector2 center = new(pose.X, pose.Y);
         Sword(b, center, pose.Angle, pose.Length, Color.White, pose.Facing < 0);
         if (!swinging) return;
+        if (pose.Step == 2) { OboroFinisherArt.Draw(b, pose, Reduced); return; }
         int flames = Reduced ? 2 : 4;
         for (int i = 0; i < flames; i++)
         {
             float t = .28f + i * .18f, drift = (float)Main.GameUpdateCount * .08f + i * 2;
             Vector2 at = center + pose.Angle.ToRotationVector2() * (pose.Length * t)
                 + (pose.Angle + MathF.PI / 2).ToRotationVector2() * (20 + MathF.Sin(drift) * 12);
-            Flame(b, at, pose.Step == 2 && pose.Progress < OboroRules.Windup(pose.Step) ? 38 : 24, .7f);
+            Flame(b, at, 24, .7f);
         }
     }
 }
