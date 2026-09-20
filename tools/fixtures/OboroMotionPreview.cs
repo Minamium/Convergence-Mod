@@ -55,7 +55,7 @@ internal static class OboroMotionPreview
             Terraria.GameContent.TextureAssets.MagicPixel=new(){Value=pixel};
             // Same documented Cubic InOut formula for harmless entry only.
             // Production binds the installed Luminance implementation instead.
-            OboroSwingPresentation.FirstEntryEase=t=>t<.5f?4*t*t*t:1-MathF.Pow(-2*t+2,3)/2;
+            OboroSwingPresentation.ComboEntryEase=t=>t<.5f?4*t*t*t:1-MathF.Pow(-2*t+2,3)/2;
             int frames=0;
             foreach(int facing in new[]{1,-1})
             foreach(bool bright in new[]{false,true})
@@ -63,11 +63,12 @@ internal static class OboroMotionPreview
             {
                 Reduced=reduced;var visual=new OboroSwingPresentation();
                 var hand=new OboroHandBasis(-4*facing,-2,10,3*facing,-3*facing,10);
-                for(int frame=0;frame<=28;frame++)
+                for(int frame=0;frame<=44;frame++)
                 {
                     Terraria.Main.GameUpdateCount=(ulong)frame+100;
-                    bool second=frame>=18;float age=second?frame-18:frame;
-                    var view=new OboroSnapshot(0,1,1,second?2u:1u,second?(byte)1:(byte)0,(ushort)age,second?(ushort)16:(ushort)18,
+                    byte step=(byte)(frame<18?0:frame<34?1:2);
+                    float age=frame-(step==0?0:step==1?18:34);
+                    var view=new OboroSnapshot(0,1,1,(uint)step+1,step,(ushort)age,(ushort)OboroComboSettings.For(step).TotalFrames,
                         facing==1?0:MathF.PI,(sbyte)facing,0);
                     visual.Update(view,age,true,true,0,0,facing,Terraria.Main.GameUpdateCount,hand);
                     device.SetRenderTarget(target);device.Clear(bright?new Color(176,190,204):new Color(15,18,32));
@@ -86,7 +87,7 @@ internal static class OboroMotionPreview
             }
             new SpectralSpriteCutouts().Unload();
             foreach(var texture in textures.Values)texture.Dispose();textures.Clear();
-            Console.WriteLine($"PASS {frames} production-renderer frames: first cut, second-step handoff, both facings, bright/dark, reduced/full. Offline only.");
+            Console.WriteLine($"PASS {frames} production-renderer frames: first and second cuts, both handoffs, third windup, both facings, bright/dark, reduced/full. Offline only.");
         }
         finally{SDL_DestroyWindow(window);SDL_Quit();}
     }

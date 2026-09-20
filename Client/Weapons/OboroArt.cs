@@ -39,7 +39,7 @@ internal static class OboroArt
         {
             OboroEcho previous = history.Echo(i - 1), current = history.Echo(i);
             if (previous.Swing != current.Swing || current.At - previous.At > 2) continue;
-            float fade = OboroSwingPresentation.Opacity(previous.At, Main.GameUpdateCount);
+            float fade = OboroSwingPresentation.Opacity(previous.At, Main.GameUpdateCount, previous.Pose.Step);
             float turn = current.Pose.Angle - previous.Pose.Angle;
             int segments = Math.Clamp((int)MathF.Ceiling(Math.Abs(turn) / (reduced ? .16f : .08f)), 1, 32);
             for (int j = 0; j < segments; j++)
@@ -49,7 +49,7 @@ internal static class OboroArt
                 Vector2 to = Vector2.Lerp(new(previous.Pose.X, previous.Pose.Y), new(current.Pose.X, current.Pose.Y), c);
                 Vector2 axisA = (previous.Pose.Angle + turn * a).ToRotationVector2();
                 Vector2 axisB = (previous.Pose.Angle + turn * c).ToRotationVector2();
-                float strength = current.Pose.Step == 2 ? 1 : .72f;
+                float strength = current.Pose.Step switch { 1 => .52f, 2 => 1, _ => .72f };
                 // Thin moonlit edge over a soft violet ribbon; no filled screen-wide fan.
                 for (int layer = 0; layer < (reduced ? 1 : 3); layer++)
                 {
@@ -64,7 +64,7 @@ internal static class OboroArt
         for (int i = history.Count - 2; i >= 0; i -= stride)
         {
             OboroEcho echo = history.Echo(i);
-            float fade = OboroSwingPresentation.Opacity(echo.At, Main.GameUpdateCount);
+            float fade = OboroSwingPresentation.Opacity(echo.At, Main.GameUpdateCount, echo.Pose.Step);
             Sword(b, new(echo.Pose.X, echo.Pose.Y), echo.Pose.Angle, echo.Pose.Length,
                 new Color(165, 101, 248) * (fade * .23f), echo.Pose.Facing < 0);
             if (!reduced)

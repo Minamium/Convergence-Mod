@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-20",
+  "version": "0.3.26",
+  "protocol": 54,
+  "branch": "feature/oboro-second-swing",
+  "base_commit": "ba570dec8d679e6f9cc2d711ebde5437e1339533",
+  "scope": "Second-cut16F return choreography, native arm/root alignment, shorter violet traces and release sound beat. First/third curves, durations, live windows, potency, reach and loot retained. Shared second-cut swept geometry changes with the blade; matching protocol54 peers required.",
+  "environment_reference": "docs/evidence/2026-09-19-oboro-held.json",
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260920T052145452104Z/record.json",
+    "source_changed_during_build": false,
+    "source_sha256": "04b8ac3d8cee644b15f25d235e91d11deb0ac6801672f1cadc8f1a1ac9ce4946",
+    "package_sha256": "3d5a22b5e90214097e2fe578ae08f7d68ff25b7539f10076d128df2c21a45036",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales": 22,
+    "shader_exports": "passed",
+    "output": "isolated feature profile"
+  },
+  "checks": {
+    "exact_package": {
+      "status": "passed",
+      "scope": "Eight installed-loader type/identity checks, one harmless held projectile/connection cleanup,584 native hand-basis samples, weapon regen and typed codec round-trips/shared-buffer/truncations.",
+      "grip": "Second cut3-14F exactly follows the native hand. Harmless transition into unchanged third-step centered150-degree grip has at most9.333013px gap due to discrete native arm stretch.",
+      "probe_adjustment": "The prior first-cut-only9px harmless seam bound exposed the unchanged third-step centered-grip limit under inverted gravity. Only the second-cut transition bound is10px; live attachment remains exact. No runtime workaround or third-cut pose change."
+    },
+    "repository": {
+      "status": "passed_after_scoped_fix",
+      "initial_full_domain_cases": 312,
+      "initial_failures": 1,
+      "unaffected_cases_reused": 286,
+      "final_focused_oboro_cases": 26,
+      "final_focused_failures": 0,
+      "codec_round_trips": 334,
+      "codec_malformed_rejections": 54,
+      "protocol": 54,
+      "sweep_regression": "The new coverage test found a38.26px maximum sample-tip gap at a9-tick second stroke, exceeding the34px blade width. Denser second-cut sampling reduces the diagnostic gap to20.29px while retaining the64-sample cap; final linked-source coverage passes across all supported durations.",
+      "static": "catalog/policy/YAML passed before the scoped sweep fix; final catalog/static check accompanies this completed document batch."
+    },
+    "presentation": {
+      "status": "offline_frames_inspected",
+      "command": "pwsh -File tools/preview-oboro-motion.ps1 -TModLoaderPath <installed-tml> -OutputDirectory .local/oboro-second-motion-preview",
+      "renderer": "Linked production OboroArt, SpectralSpriteCutouts and OboroSwingPresentation on hidden FNA D3D11 device.",
+      "frames": 360,
+      "scope": "First/second strokes, first-second and second-third handoffs, third windup; both facings, bright/dark, reduced/full effects.",
+      "observations": "Upper anticipation slows around-80degrees; fast reversed downward sweep then diminishing follow-through into150degree third stance; thinner shorter traces, coherent blade reflection and no pose pop at sampled handoffs.",
+      "limits": "Offline arm diagram rather than native player/armor/mount rendering. Existing documented Cubic InOut entry formula and calibrated hand basis supplied by fixture. No game, server, listening or FPS claim.",
+      "reuse": "Final changes after the360-frame render affect only authority sweep density and verification/docs; motion and renderer inputs remain unchanged."
+    },
+    "gameplay": {
+      "status": "not_run",
+      "owner": "user",
+      "remaining": [
+        "Upper pause and fast return readability at real attack speeds; first/third handoffs and native player/armor/mount arms.",
+        "Held loop, release/restart and rapid changed aim in both facings.",
+        "Matching SP/MP builds, latency/reconnect and visible blade/hit agreement.",
+        "Sound beat/pitch, bright/dark readability and actual frame time."
+      ]
+    }
+  },
+  "integration": {
+    "status": "not_merged",
+    "normal_profile": "unchanged0.3.25"
+  }
+}
