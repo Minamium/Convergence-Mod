@@ -103,6 +103,24 @@ documents:
   related_docs:
   - adr.0022
   - encounter.ghost-samurai.spec
+- doc_id: adr.0028
+  path: docs/adr/0028-azure-cathedral-native-actors.md
+  title: 'ADR-0028: Azure Cathedral native actors and hazards'
+  content_sha256: f3c451dcd1ef597d1747fe7045f538df987807d2bb5e18e30853d09d2e3e3c52
+  document_type: adr
+  status: accepted
+  owners:
+  - architecture
+  - gameplay
+  last_reviewed: '2026-09-20'
+  source_of_truth_for:
+  - authority.azure_cathedral
+  aliases: []
+  related_code:
+  - Content/Encounters/AzureCathedral
+  related_docs:
+  - encounter.azure-cathedral.spec
+  - adr.0026
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -430,7 +448,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: 4bb24331937dac8450d90fb0543153ef1771f2a6fcd24c5ec0226e78c4e0027a
+  content_sha256: f0b5d713397a97f40dff0306b14b2a9fd8394050a504106041c08c4a0540fa4f
   document_type: index
   status: accepted
   owners:
@@ -518,7 +536,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 7dbdfdb10ce146e55b312399753d9a623b090a637699404e3d2fd3fff6f81a82
+  content_sha256: 2da59d85a21a3915ce2944628d5a402e8044329f59faa003d210c94c8b166907
   document_type: index
   status: accepted
   owners:
@@ -574,6 +592,46 @@ documents:
   related_docs:
   - docs.entrypoint
   - docs.search-index
+- doc_id: encounter.azure-cathedral.assets
+  path: docs/encounters/azure-cathedral/ASSET_BRIEF.md
+  title: Azure Cathedral asset brief
+  content_sha256: a5f6c0bd2c0ed83eedffa234f277967f7113e9c8fac0b4242c4193287effe659
+  document_type: spec
+  status: accepted
+  owners:
+  - art
+  last_reviewed: '2026-09-20'
+  source_of_truth_for:
+  - encounter.azure_cathedral.asset_brief
+  aliases: []
+  related_code:
+  - Assets/Textures/AzureCathedral
+  related_docs:
+  - encounter.azure-cathedral.spec
+- doc_id: encounter.azure-cathedral.spec
+  path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
+  title: Cathedral of the White Night
+  content_sha256: 770be8a667662223e7fa11a5839cae96d01e3ba42b4a9bac8824effc51b9f52d
+  document_type: spec
+  status: accepted
+  owners:
+  - gameplay
+  - art
+  - audio
+  last_reviewed: '2026-09-20'
+  source_of_truth_for:
+  - encounter.azure_cathedral.experience
+  - encounter.azure_cathedral.presentation
+  aliases:
+  - Cathedral of the White Night
+  - Liora
+  - Vitrion
+  related_code:
+  - Content/Encounters/AzureCathedral
+  - Client/Encounters/AzureCathedral
+  related_docs:
+  - project.status
+  - adr.0028
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
@@ -949,7 +1007,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 2f1032235d2daa4f6ffe61a0a56e569b9ce3b90b6bb4bc1c2ab066d2291de77a
+  content_sha256: f02f57f04bf66aad6ea93da9109a74b88da156e96d3b59e6e172ddae63d03fde
   document_type: policy
   status: accepted
   owners:
@@ -1043,7 +1101,7 @@ documents:
 - doc_id: project.art-direction
   path: docs/ART_DIRECTION.md
   title: Art Direction
-  content_sha256: f4f320400aa580fcc5e8f7e5ccc9bc12608d7a13e4f89ee62b98e83cc477c5cd
+  content_sha256: 47a3cdc3af5a980956c3b75fb63a3a691671eaa8bc8ffa0c2f99000f689b0453
   document_type: spec
   status: accepted
   owners:
@@ -1268,7 +1326,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 662ccbb4df96f237136e94ce6bc9cb2fbbbab285bd13a484dec30ad871d58a3c
+  content_sha256: 944b98e7c7c00206c53b9e5da3a104fd8de8b00c03090d8612dcd8662fdd2986
   document_type: status
   status: accepted
   owners:
@@ -1563,7 +1621,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 4c2d0fce9ba44656864db4700c1d820fde42eeb2129b8cd491f444460639fb6e
+  content_sha256: 9755f776811825ef8446200a23ba2fa5bbe8ada4aa72f541d87dd71cf80db41d
   document_type: research
   status: historical
   owners:

@@ -38,6 +38,8 @@ Please test and report your experience in the Workshop comments or [url=https://
 [url=https://github.com/Minamium/Convergence-Mod/releases]GitHub Releases[/url]
 
 [h2]Music and credits[/h2]
+[b]Cathedral of the White Night prototype: Music by EigHt — 白夜に耀うステンドグラス[/b]
+[url=https://www.youtube.com/watch?v=k0-SQQkRxis]Creator video[/url] · [url=https://bgm-cathedral.booth.pm/items/6112209]Original work[/url] · [url=https://eight-novel.fanbox.cc/posts/7647818]Use terms[/url]
 [b]Music: EigHt — 不幸な人形劇[/b]
 [url=https://booth.pm/ja/items/5206457]Original music[/url] · [url=https://www.youtube.com/watch?v=vTFL5_d_p7o]Creator's video[/url] · [url=https://eight-novel.fanbox.cc/posts/7647818]Music use terms[/url]
 The phase edits are background music for this Mod, not an original Convergence composition or a separately redistributable soundtrack.

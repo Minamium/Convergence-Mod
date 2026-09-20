@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../../Content/Encounters/AzureCathedral/AzureRules.cs" Link="Domain/AzureRules.cs" />
+    <Compile Include="../../Content/Encounters/AzureCathedral/AzureState.cs" Link="Domain/AzureState.cs" />
     <Compile Include="../../Client/Encounters/GhostSamurai/SamuraiRigMotion.cs" Link="Presentation/SamuraiRigMotion.cs" />
     <Compile Include="../../Client/Weapons/OboroSwingPresentation.cs" Link="Presentation/OboroSwingPresentation.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroRules.cs" Link="Domain/OboroRules.cs" />

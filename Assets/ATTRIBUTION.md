@@ -2,6 +2,101 @@
 
 ## Records
 
+### Azure Cathedral — 2026-09-20
+
+New original images use the built-in generator, exact model unknown. Full briefs: [asset brief](../docs/encounters/azure-cathedral/ASSET_BRIEF.md). Existing project-owned Doll sound/beam materials are reused by reference with feature-local gain/pitch/cyan tuning, not replaced. Original image files remain externally archived. Luminance noise textures are referenced at runtime, never vendored.
+
+- Runtime file: `Assets/Textures/AzureCathedral/Liora.png`
+- Asset ID: azure-liora-20260920
+- Asset type: 512x256 eight-pose pixel NPC atlas
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: Nearest-neighbor game export from1774x887 to512x256
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `147a9af6eb804211c83dcf37e46bba4370fd0ccd37a4096bcac9e57fe59d6284`
+
+- Runtime file: `Assets/Textures/AzureCathedral/Vitrion.png`
+- Asset ID: azure-vitrion-20260920
+- Asset type: 1254x1254 original worm parts atlas
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: Generated grid/gutter correction; final art copied byte-for-byte
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `f4fe3007efa7398c79ee3e38a3eead1450a4a19eb566f793016d1ff9c33002cd`
+
+- Runtime file: `Assets/Textures/AzureCathedral/Cathedral.png`
+- Asset ID: azure-cathedral-20260920
+- Asset type: 1672x941 glacial cathedral background
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: None; runtime-only water/refraction shading
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `ae41d9a8c1f2e66ef1851705f2acfc651b99b1f54cb6dad2dd00c5f8eb57f2a3`
+
+- Runtime file: `Assets/Textures/AzureCathedral/GlacialChime.png`
+- Asset ID: azure-chime-20260920
+- Asset type: 48x60 item icon
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: generated
+- Source work and URL: Original owner-directed built-in image generation; no third-party input
+- Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
+- Human modifications: Nearest-neighbor game export; preserve alpha
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `f1f5ed0a2271dc0d32a6ada3ab51c1f069661a612171e40e00242852b962a240`
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/AzureGlass.fxc`
+- Asset ID: azure-glass-material-20260920
+- Asset type: compiled original ice/glass/background/shard effect
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-20
+- Source type: original
+- Source work and URL: Repository-owned AzureGlass.fx; no external shader code
+- Tool/model/version: FXC identity/options pinned in Assets/AutoloadedEffects/Shaders/compiled.json
+- Human modifications: FXC compilation only; identity/options in compiled.json
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `026e9e15c613d01a0f2b53d4918106cbedc94183ad75449a85fe910303a78f79`
+
+- Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
+- Asset ID: azure-eighth-white-night-20260920
+- Asset type: stereo48000Hz Vorbis background music with native loop tags
+- Creator: EigHt
+- Creation/acquisition date: 2026-09-20
+- Source type: licensed
+- Source work and URL: 白夜に耀うステンドグラス; https://www.youtube.com/watch?v=k0-SQQkRxis and https://bgm-cathedral.booth.pm/items/6112209 ; exact owner-selected local MP3
+- Tool/model/version: ffmpeg7.1 libvorbis quality6
+- Human modifications: trim0.323–263.470s,1.5s triangular crossfade of tail into source0.323–1.823s, gain−2.9dB; LOOPSTART72000/LOOPEND12631056; no deleted climax or new composition
+- License and redistribution terms: copyright retained by EigHt; official https://eight-novel.fanbox.cc/posts/7647818 permits game background use/editing; read unrestricted creator post via public post.info API on2026-09-20 (updated2026-07-14). Not covered by Convergence code/art license; no standalone soundtrack, streaming-service or Content-ID registration permission. Rhythm-game inclusion requires contacting the creator separately. Contextual Mod/source asset only, not a music-pack download; recheck terms before public release
+- Required attribution: Music: EigHt — 白夜に耀うステンドグラス; preserve creator, original and terms links
+- Reviewer and review date: source terms and audio statistics checked2026-09-20; subjective seam/mix listening not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md#music`
+- Source SHA256: `631325533faa6840880e296664029fbc931b39d65304862378a24bbe46174ad6`
+- SHA256: `d73bec8fa67a5b5724b776381b79be6f8f9db17bf6afffbae9b39e2dee04427d`
+
 ### Ghost Samurai articulated parts and materials — 2026-09-18
 
 - Runtime file: `Assets/Textures/GhostSamurai/VioletRig.png`

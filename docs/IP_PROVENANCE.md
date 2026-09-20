@@ -114,6 +114,10 @@ Release candidateごとに次を確認する。
 
 The 0.2.8 continuous-emission/ground-containment pass is materially informed by WotG's timed portal-laser layers and articulated rendering, and Calamity's logical arena-wall pattern. [The pinned F11 evidence](research/WOTG_RAID_BENCHMARK.md) records versions, authorship/license limits, observed behavior and independent decisions. No external implementation, shader, atlas, recording or source mirror is copied. Three original generated atlases are used unedited through measured C# source rectangles; exact assets and briefs are in [Attribution](../Assets/ATTRIBUTION.md). Development use does not resolve the project's release-license gate.
 
+## Azure Cathedral — 2026-09-20
+
+Azure Cathedral uses original generated girl/worm/cathedral/chime art and independently authored segmented motion/materials. DoG is the owner's scale/archetype reference, not copied art or AI code. Existing project-owned Luminance beam techniques are reused; no new third-party shader/texture/source is vendored. The exact EigHt recording and contextual game-use conditions are recorded in [Azure attribution](../Assets/ATTRIBUTION.md#azure-cathedral--2026-09-20) and the [feature music review](encounters/azure-cathedral/ENCOUNTER_SPEC.md#music).
+
 ## Doll companion and weapon-only sounds — 0.2.53
 
 The 2026-09-13 Doll Raid material suite uses Luminance's public loading/parameter/texture APIs with independently authored HLSL. No Wrath of the Machines/Gods shader or art is copied. Three dependency-owned noise maps are referenced at runtime, not vendored. [API boundary](encounters/first-severance/VISUAL_SPEC.md#luminance-raid-presentation) links pinned observations, adoption/rejection and the source/binary distinction; [Attribution](../Assets/ATTRIBUTION.md#raid-energy-material-suite--2026-09-13) owns export provenance and regeneration. Luminance remains a separately distributed dependency.

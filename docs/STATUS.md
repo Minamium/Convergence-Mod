@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.29 / protocol57**. Scarlet's paired seals now exchange one right-to-left crossflow; four consecutive beat strikes remove the extra idle beat. ActII cuts gain original Orderbringer-informed sharp cores, continuously varying fine motion and smoke; ActIII adds four offset slash lattices, and Spread is enlarged. Empty-state NPC envelopes guard unowned Scarlet debug-spawn/despawn synchronization. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns details. Approved circles/background, full music, opening, HP/cycle gates, Doll/Ghost Samurai/Oboro and four pre-existing generated English locale edits remain. Matching peers are required for the new gesture ID/actor envelope; common packet IDs are unchanged. This is not a Workshop publication or GitHub release; public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.30 / protocol58**. Adds **Cathedral of the White Night**, an independent shared-pedestal Raid pairing NPC-sized Liora with a23-part ice-glass leviathan, native damage,1–8-player Ready, cathedral/ice Luminance materials and the owner-selected EigHt recording. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns mechanics, provisional HP and remaining playtests. Doll, Scarlet0.3.29, Ghost Samurai/Oboro and four pre-existing generated English locale edits are preserved. Matching peers are required; common packet IDs remain unchanged. This is not a Workshop publication or GitHub release; public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
 Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
@@ -37,6 +37,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.30 Azure Cathedral:** [evidence](evidence/2026-09-20-azure-cathedral.json) records bounded state/hazard tests, native compilation/load and linked-production GPU material frames. User-owned / not_run: actual Ready/SP/MP battle, two native HP pools and segment hit forwarding, deaths/repeat invocation, normal equipment interactions, music seam/listening,107% UI and zoom, and performance. No claim of visual approval or measured FPS follows from offline frames.
 
 - **0.3.29 Scarlet crossflow/cuts:** [evidence](evidence/2026-09-20-scarlet-crossflow.json) owns current verification and the0.3.28 solo session (ActIII defeat/cleanup, two failed Stacks, one successful Spread; separate post-fight unowned-NPC exceptions). User-owned / not_run: crossflow direction and mobility, consecutive-beat cadence, ActII blade/residue and ActIII four-offset readability, enlarged2/4/8-player Spread, remote synchronization and Reduced Effects. Older [choreography/audio evidence](evidence/2026-09-20-scarlet-choreography.json) remains history; subjective audio/intro acceptance is not inferred from this session. Ghost Samurai's separate invalid-arena sync remains an unaddressed log finding for its task owner.
 
@@ -82,7 +84,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-After confirmed0.3.29 deployment, start normally without another Build + Reload. Check right-seal→left-seal flow and upper/lower evasion, four basic on-beat releases without the old extra rest, successive ActIII offset lattices and larger Spread. Confirm remote peers share frozen forecasts and chorus results. Inspect fine slash motion/smoke at actual game zoom and Reduced Effects. The full music/intro are preserved, not re-certified by the new offline checks.
+After confirmed0.3.30 deployment, start normally without another Build + Reload. Obtain **Glacial Chime / 氷硝子の鐘**, use it on a Foundation Core and confirm Ready. The [Azure first smoke](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) is the new task. Earlier Scarlet crossflow/cuts and full-song subjective checks remain separate, unchanged owner follow-ups; do not rerun them merely to accept the new feature.
 
 The integrated Oboro second-cut changes retain their owner checks: both facings, upper pause, fast downward return, thinner echoes, held loop and release/restart, including the first/third-step handoffs. Use the current matching build for multiplayer. Third-cut choreography is a separate requested slice.
 

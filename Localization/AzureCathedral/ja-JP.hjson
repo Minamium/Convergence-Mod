@@ -1,0 +1,22 @@
+Mods: {
+ Convergence: {
+  AzureCathedral: { Rejected: "大聖堂の準備を開始できません。台座・人数・フィールドの位置を確認してください。" }
+  Items: {
+   AzureConductor: {
+    DisplayName: 氷硝子の鐘
+    Tooltip: '''
+      Foundation Coreに使用して「Cathedral of the White Night」を準備する
+      接続中の全員がReadyで開始。1～8人、マルチプレイ推奨
+      氷硝子の巨竜と剣を携えた少女が待つ
+      手に持って右クリックで準備を中止
+      消費しない
+      '''
+   }
+  }
+  NPCs: {
+   AzureBoss: { DisplayName: "リオラ ― 屈折の守り手" }
+   AzureWorm: { DisplayName: "ヴィトリオン ― 硝子の巨竜" }
+  }
+  Projectiles: { AzureAttack: { DisplayName: "屈折する氷片" } }
+ }
+}
