@@ -21,7 +21,11 @@ Mods: {
 			AzureWorm.DisplayName: Vitrion — The Glass Leviathan
 		}
 
-		Projectiles.AzureAttack.DisplayName: Refracted Ice
+		Projectiles: {
+			AzureAttack.DisplayName: Refracted Ice
+			AzureChorus.DisplayName: Glacial Covenant
+			AzureChorusStrike.DisplayName: Shattered Covenant
+		}
 
 		Configs: {
 			AzureVisualConfig: {

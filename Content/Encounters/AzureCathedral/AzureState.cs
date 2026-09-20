@@ -39,7 +39,7 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
         var stage = (AzureStage)r.ReadByte(); int x = r.ReadInt32(), y = r.ReadInt32();
         int gm = r.ReadInt32(), wm = r.ReadInt32(), gl = r.ReadInt32(), wl = r.ReadInt32();
         short worm = r.ReadInt16(); bool enraged = Presence(r); int count = r.ReadByte();
-        if (age is < 0 or > 72000 || !Enum.IsDefined(stage) || music is < -1 or > 72000 || unlock is < -1 or > 72500
+        if (age is < 0 or > 72000 || !Enum.IsDefined(stage) || music is < -1 or > 72000 || unlock is < -1 or > 73000
             || ending < -1 || ending > age || x is < 1600 or > 400000 || y is < 1440 or > 150000
             || gm is < 1 or > 15000000 || wm is < 1 or > 30000000 || gl < 0 || gl > gm || wl < 0 || wl > wm
             || worm is < -1 or >= 200 || count is < 1 or > AzureRules.Members
