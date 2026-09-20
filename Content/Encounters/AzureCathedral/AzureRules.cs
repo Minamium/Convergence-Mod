@@ -10,10 +10,12 @@ internal static class AzureRules
     internal const int IceBreak = 180, SwordLight = 430, SkyReveal = 460, WormArrival = 610;
     internal const int PhraseTicks = 480, CycleTicks = PhraseTicks * 6;
     internal const int ChargeTicks = 240, ChargeWarning = 100, ChargeEnd = 188;
-    internal const int Devouring = 480, DevourRush = 150, DevourSlow = 222, DevourContact = 306, MeltEnding = 420;
-    internal const int VolleyApproach = 120, VolleyWarning = 24, VolleyFire = 174;
+    internal const int Devouring = 600, DevourRetreat = 120, DevourRush = 180, DevourSlow = 252, DevourContact = 396, MeltEnding = 420;
+    internal const int VolleyApproach = 80, VolleyTransit = 360, VolleyWarning = 24, VolleyFire = 260;
+    internal const int CutWarning = 60, CutLive = 12, CutResidue = 20;
     internal const float SegmentSpacing = 86, SegmentRadius = 43;
-    internal static int Life(int members, bool worm) => checked((worm ? 4800000 : 2400000) + (members - 1) * (worm ? 2600000 : 1300000));
+    internal const float MouthReach = 126, CutRadius = 7;
+    internal static int Life(int members, bool worm) => checked((worm ? 240000 : 2400000) + (members - 1) * (worm ? 130000 : 1300000));
     internal static float Ease(float x) { x = Math.Clamp(x, 0, 1); return x * x * (3 - 2 * x); }
     internal static float Envelope(float elapsed, float duration)
         => elapsed < 0 || elapsed >= duration ? 0 : Ease(elapsed / 9) * Ease((duration - elapsed) / 16);
@@ -34,11 +36,21 @@ internal static class AzureRules
     internal static bool CanRefill(AzurePhase phase, int started, int age)
         => phase == AzurePhase.Devouring && age >= started + Devouring;
     internal static int ExitDuration(AzureStage stage) => stage == AzureStage.Victory ? MeltEnding : Ending;
-    // A fast approach brakes at the mouth, then the last few pixels last over a second.
+    internal static bool WormDamageable(AzurePhase phase, int index, bool live, int life, int maximum)
+        => live && life > 0 && index >= 0 && index <= Segments
+        && (phase == AzurePhase.Fury || phase == AzurePhase.Duet && index == 0 && life > WormFloor(maximum));
+    internal static float VolleyProgress(float t) => Math.Clamp((t-VolleyApproach)/VolleyTransit,0,1);
+    internal static float CutReach(float t) => Ease(t/2);
+    internal static float CutWidth(float t) => CutReach(t)*(1-Ease((t-(CutLive-8))/8));
+    // After a separate retreat, rush most of the distance, then visibly traverse
+    // the final ~290px in 2.4 seconds. This is slow motion, not an overlapping hold.
     internal static float DevourTravel(float t)
-        => t < DevourRush ? 0 : t < DevourSlow ? .965f * Ease((t-DevourRush)/(DevourSlow-DevourRush))
-        : t < DevourContact ? .965f + .035f * Ease((t-DevourSlow)/(DevourContact-DevourSlow))
-        : 1 + .12f * Ease((t-DevourContact)/45);
+        => t < DevourRush ? 0 : t < DevourSlow ? .86f * Ease((t-DevourRush)/(DevourSlow-DevourRush))
+        : t < DevourContact ? .86f + .14f * Ease((t-DevourSlow)/(DevourContact-DevourSlow))
+        : 1 + .08f * Ease((t-DevourContact)/45);
+    internal static float JawOpening(float t)
+        => Ease((t-(DevourRush-20))/80)*(1-Ease((t-(DevourContact-6))/16));
+    internal static float FuryReveal(float t, int part) => Ease((t-DevourContact-14-part*.8f)/90);
     internal static float Melt(float elapsed, int segment)
         => Ease((elapsed - 95 - segment * 2.6f) / 160);
     internal static bool Silhouette(float t) => t >= DevourContact-10 && t < DevourContact+14;

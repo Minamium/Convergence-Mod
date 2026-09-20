@@ -77,9 +77,14 @@ internal sealed class AzureVisuals : ModSystem
                 {lastVerdict=m.Plan.Fire;Play(m.Plan.Kind==AzureChorusKind.Stack?"StackRelease":"SpreadRelease",.48f,.10f);shake=Math.Max(shake,m.FailedMask==0?3:8);}
             }
             if (p.ModProjectile is not AzureAttack a || a.Plan.Fight != fight) continue;
-            if (a.Plan.Born != lastCharge && Crossed(a.Plan.Born)) { lastCharge=a.Plan.Born; Play("Beams/PortalCharge",.36f,.22f); }
+            if (a.Plan.Born != lastCharge && Crossed(a.Plan.Born)) { lastCharge=a.Plan.Born; Play(a.Plan.Kind==AzureAttackKind.GlacialCut?"Beams/ChargeLock":"Beams/PortalCharge",.36f,.22f); }
             if (a.Plan.Fire != lastFire && Crossed(a.Plan.Fire))
-            { lastFire=a.Plan.Fire; Play(a.Plan.Kind==AzureAttackKind.MouthBeam?"Beams/PortalFire":"CoreHit",a.Plan.Kind==AzureAttackKind.MouthBeam?.62f:.50f,.20f); shake=Math.Max(shake,a.Plan.Kind==AzureAttackKind.MouthBeam?7:2.2f); }
+            {
+                lastFire=a.Plan.Fire;
+                bool cut=a.Plan.Kind==AzureAttackKind.GlacialCut,energy=a.Plan.Kind is AzureAttackKind.MouthBeam or AzureAttackKind.FrostBolt;
+                Play(cut?"Beams/ChargeRush":energy?"Beams/PortalFire":"CoreHit",cut?.60f:energy?.62f:.50f,.20f);
+                shake=Math.Max(shake,a.Plan.Kind==AzureAttackKind.MouthBeam?7:cut?4.8f:2.2f);
+            }
         }
         if (girl.State.Live && girl.State.WormLife>0 && (AzureRules.ChargePhrase(AzureRules.Phrase(age,girl.State.AttackEpoch)) || girl.State.Enraged && AzureRules.ChorusPhrase(AzureRules.Phrase(age,girl.State.AttackEpoch))))
         {
@@ -149,16 +154,24 @@ internal sealed class AzureVisuals : ModSystem
                 if(p.ModProjectile is AzureChorus marker && marker.Plan.Fight==girl.State.Fight && AzureChorus.TryGirl(marker.Plan,out _))
                     AzureChorusVisuals.Draw(batch,girl,marker,age);
                 if(p.ModProjectile is not AzureAttack attack || attack.Plan.Fight!=girl.State.Fight || !attack.TryGirl(out _))continue;
-                var h=attack.Plan;if(age<h.Born || age>=h.End)continue;
+                var h=attack.Plan;bool cut=h.Kind==AzureAttackKind.GlacialCut;
+                if(age<h.Born || age>=h.End+(cut?AzureRules.CutResidue:0))continue;
                 bool forecast=age<h.Fire;
-                if(!attack.Geometry(girl,age,forecast,out var a,out var b,out float radius))continue;
+                if(!attack.Geometry(girl,age,forecast || cut,out var a,out var b,out float radius))continue;
                 var dir=(b-a).SafeNormalize(Vector2.UnitY);float length=Vector2.Distance(a,b);
+                if(cut)
+                {
+                    AzureMaterials.Slash(batch,a,b,radius,age,h.Born,h.Fire,h.End);
+                    continue;
+                }
                 if(h.Kind==AzureAttackKind.FrostBolt && forecast)
                 {
                     float glow=AzureRules.Ease((age-h.Born)/5)*(1-AzureRules.Ease((age-h.Fire+4)/4));
                     Stroke(batch,a,b,new Color(162,228,255,0)*glow,.8f);
                     AzureCeremony.Bloom(batch,a,35+18*MathF.Sin(age*.18f)*MathF.Sin(age*.18f),.4f*glow);
                 }
+                else if(h.Kind==AzureAttackKind.FrostBolt)
+                    AzureMaterials.EnergyBolt(batch,a,b,radius,age,h.Born*.13f+h.X*.001f);
                 else if(h.Kind==AzureAttackKind.MouthBeam || forecast)
                     AzureEnergy.Add(a,dir,length,radius,age,h.Fire,h.End,1,Reduced,h.Born,true,h.Kind==AzureAttackKind.MouthBeam);
                 else

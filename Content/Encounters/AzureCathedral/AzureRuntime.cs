@@ -39,7 +39,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private Vector2 chargeGoal, curveA, curveB, curveC, curveD;
     private int previousDamage;
     private bool projectionDirty, floorReached;
-    private Vector2 ceremonyFrom;
+    private Vector2 ceremonyFrom, ceremonyVelocity, volleyExit;
     internal AzureRuntime(FightId id, int sender, IRaidPedestal core, ulong seq)
     { fight = id; summoner = sender; pedestal = core; sequence = seq; gm = AzureRules.Life(1, false); wm = AzureRules.Life(1, true); }
     private AzureState State => new(fight.Value, age, music, unlock, ending, stage, members,
@@ -50,7 +50,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
     internal void Killed(bool isWorm)
     {
         if (cleaned || !State.Live || isWorm && phase != AzurePhase.Fury || !defeats.Mark(isWorm)) return;
-        if (!isWorm) { ClearHazards(AzureAttackKind.MouthBeam); ClearHazards(AzureAttackKind.Icicle); ClearHazards(AzureAttackKind.GlassRain); chorus.Clear(fight.Value); }
+        if (!isWorm) { ClearHazards(AzureAttackKind.MouthBeam); ClearHazards(AzureAttackKind.Icicle); ClearHazards(AzureAttackKind.GlassRain); ClearHazards(AzureAttackKind.GlacialCut); chorus.Clear(fight.Value); }
         AzurePackets.Log($"event=ActorDefeated fight={fight.Value} actor={(isWorm ? "worm" : "girl")} age={age}"); Project(true);
     }
     internal bool Request(int sender, Guid connection, bool ready, bool cancel)
@@ -149,9 +149,9 @@ internal sealed class AzureRuntime : IEncounterRuntime
             }
             if (stage==AzureStage.Performance && AzureRules.CanDevour(phase,State.GirlLife,State.WormLife,wm))
             {
-                phase=AzurePhase.Devouring;phaseAt=age;ceremonyFrom=worm!.NPC.Center;
+                phase=AzurePhase.Devouring;phaseAt=age;ceremonyFrom=worm!.NPC.Center;ceremonyVelocity=worm.NPC.velocity;
                 ClearHazards();worm.NPC.ai[2]=0;Project(true);
-                AzurePackets.Log($"event=Devouring fight={fight.Value} age={age} contact={age+AzureRules.DevourContact}");
+                AzurePackets.Log($"event=Devouring fight={fight.Value} age={age} contact={age+AzureRules.DevourContact} approach_start_distance={Vector2.Distance(V(AzureFlight.DevourStaging(N(ceremonyFrom),N(girl.NPC.Center))),girl.NPC.Center):F0}");
             }
             if(AzureRules.CanRefill(phase,phaseAt,age))
             {
@@ -230,9 +230,12 @@ internal sealed class AzureRuntime : IEncounterRuntime
         if (worm is null || wormDead) return;
         if(phase==AzurePhase.Devouring)
         {
-            Vector2 mouthTarget=girl.NPC.Center-(girl.NPC.Center-ceremonyFrom).SafeNormalize(Vector2.UnitX)*126;
-            Vector2 next=Vector2.Lerp(ceremonyFrom,mouthTarget,AzureRules.DevourTravel(age-phaseAt));
-            worm.NPC.velocity=next-worm.NPC.Center;worm.NPC.ai[2]=0;return;
+            int scene=age-phaseAt;
+            Vector2 next=V(AzureFlight.DevourPosition(N(ceremonyFrom),N(ceremonyVelocity),N(girl.NPC.Center),scene));
+            worm.NPC.velocity=next-worm.NPC.Center;worm.NPC.ai[2]=0;
+            if(scene>=AzureRules.DevourRetreat && scene<AzureRules.DevourRush)
+                worm.NPC.rotation=worm.NPC.rotation.AngleTowards((girl.NPC.Center-worm.NPC.Center).ToRotation(),.045f);
+            return;
         }
         Vector2 goal; float speed;
         if (State.Live && (AzureRules.ChargePhrase(phrase) || enraged && phrase is 2 or 5))
@@ -265,23 +268,28 @@ internal sealed class AzureRuntime : IEncounterRuntime
         }
         else if(State.Live && phrase is 1 or 4)
         {
-            // The diagonal pass has one continuous path and a deliberate braking hold.
+            // Join a six-second straight diagonal crossing with a matched tangent.
+            // The whole chain travels while firing; there is no stop-and-shoot hold.
             if(t==0)
             {
                 float side=phrase==1?-1:1;curveA=worm.NPC.Center;
-                curveB=curveA+worm.NPC.velocity.SafeNormalize(-Vector2.UnitX)*1050;
-                curveD=new(f.CenterX+side*750,f.CenterY-260);
-                curveC=curveD-new Vector2(-side,1)*720;
+                curveB=curveA+worm.NPC.velocity.SafeNormalize(-Vector2.UnitX)*800;
+                curveD=new(f.CenterX+side*1650,f.Top-120);
+                volleyExit=new(f.CenterX-side*1650,f.Bottom+150);
+                curveC=curveD-(volleyExit-curveD)/AzureRules.VolleyTransit*(AzureRules.VolleyApproach/3f);
             }
             if(t<AzureRules.VolleyApproach)
             {
-                // Ease-out at the end while preserving the previous tangent on entry.
-                float u=1-MathF.Pow(1-(t+1)/(float)AzureRules.VolleyApproach,2);
+                float u=(t+1)/(float)AzureRules.VolleyApproach;
                 worm.NPC.velocity=V(AzureFlight.Curve(N(curveA),N(curveB),N(curveC),N(curveD),u))-worm.NPC.Center;
                 worm.NPC.ai[2]=0;return;
             }
-            if(t<AzureRules.VolleyFire+18){worm.NPC.velocity*=.92f;worm.NPC.ai[2]=0;return;}
-            goal=new(f.CenterX+(phrase==1?2100:-2100),f.Top-700);speed=enraged?50:38;
+            if(t<AzureRules.VolleyApproach+AzureRules.VolleyTransit)
+            {
+                worm.NPC.velocity=Vector2.Lerp(curveD,volleyExit,AzureRules.VolleyProgress(t+1))-worm.NPC.Center;
+                worm.NPC.ai[2]=0;return;
+            }
+            goal=new(f.CenterX+(phrase==1?2200:-2200),f.Top-700);speed=enraged?46:38;
         }
         else
         {
@@ -300,6 +308,14 @@ internal sealed class AzureRuntime : IEncounterRuntime
     {
         int phrase = AzureRules.Phrase(age, State.AttackEpoch), t = AzureRules.Clock(age, State.AttackEpoch);
         if (AzureRules.ChorusPhrase(phrase)) return;
+        if(!girlDead && AzureRules.ChargePhrase(phrase) && t%160==60)
+        {
+            // Freeze the cut over the announced target position; it never chases
+            // the player after its one-second white warning has appeared.
+            int note=(age-State.AttackEpoch)/160;
+            float angle=note%3==0?-.62f:note%3==1?.62f:0;
+            Spawn(AzureAttackKind.GlacialCut,Focus(),angle,4000,AzureRules.CutRadius,340,AzureRules.CutWarning,AzureRules.CutLive);
+        }
         if (!girlDead && t % (enraged ? 70 : 105) == 0)
         {
             var f = State.Field; Vector2 source = girl!.NPC.Center + new Vector2(girl.NPC.spriteDirection * 23, -7);
@@ -330,15 +346,15 @@ internal sealed class AzureRuntime : IEncounterRuntime
                     // Rotate segments over living connections; freeze each initial aim on authority.
                     var target=alive[part.Index%alive.Length];
                     Vector2 delta=Main.player[target.Slot].Center-n.Center;
-                    Spawn(AzureAttackKind.FrostBolt,n.Center,delta.ToRotation(),4000,13,300,AzureRules.VolleyWarning,170,target.Slot);
+                    Spawn(AzureAttackKind.FrostBolt,n.Center,delta.ToRotation(),Math.Clamp(delta.Length(),1,10000),13,300,AzureRules.VolleyWarning,170,target.Slot,(short)n.whoAmI);
                 }
             AzurePackets.Log($"event=FrostVolley fight={fight.Value} age={age} parts={AzureRules.Segments+1} targets={alive.Length}");
         }
     }
-    private void Spawn(AzureAttackKind kind, Vector2 source, float direction, float length, float width, int damage, int warning, int live, short target=-1)
+    private void Spawn(AzureAttackKind kind, Vector2 source, float direction, float length, float width, int damage, int warning, int live, short target=-1,short emitter=-1)
     {
         var plan = new AzureAttackPlan(fight.Value, (short)girl!.NPC.whoAmI, kind, age, age + warning, age + warning + live,
-            source.X, source.Y, direction, length, width, damage,target);
+            source.X, source.Y, direction, length, width, damage,target,emitter);
         int slot = Projectile.NewProjectile(new AzureAttackSource(plan), source, Vector2.Zero,
             ModContent.ProjectileType<AzureAttack>(), damage, 0, Main.myPlayer);
         if (slot >= Main.maxProjectiles) throw new InvalidOperationException("azure.attack_capacity");

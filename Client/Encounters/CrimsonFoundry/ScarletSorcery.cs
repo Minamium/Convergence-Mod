@@ -56,6 +56,11 @@ internal static class ScarletSorcery
         shader.TrySetParameter("uWorldViewProjection",ScarletMaterials.WorldMatrix);
         shader.TrySetParameter("clock",age/60); shader.TrySetParameter("signal",signal); shader.TrySetParameter("shape",shape);
         shader.TrySetParameter("hue",new Vector3(.82f,.04f,.11f));
+        shader.TrySetParameter("cutTint",new Vector3(1,.015f,.065f));
+        shader.TrySetParameter("cutCore",new Vector3(1,.82f,.84f));
+        shader.TrySetParameter("cutHot",new Vector3(1,.12f,.19f));
+        shader.TrySetParameter("cutSmoke",new Vector3(.13f,.025f,.04f));
+        shader.TrySetParameter("cutForecast",new Vector3(.9f,.83f,.9f));
         shader.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value,1,SamplerState.LinearWrap);
         shader.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,2,SamplerState.LinearWrap);
         origin-=Main.screenPosition;

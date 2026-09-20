@@ -25,11 +25,11 @@ internal static class AzureCeremony
         if(sealedGirl)AzureMaterials.Effect(batch,"IcePass",center,new(98,140),tilt,age,new(.62f,fracture,0,0));
         int frame=sealedGirl?(t<80?0:t<158?4:6):t<280?3:t<380?4:t<670?5:((int)age%230<8?2:1);
         if(consume>=0)frame=consume<70?4:5;
-        float release=0;
+        float release=0;bool cutting=false;float charge=0;
         if(g.State.Live)
             foreach(Projectile p in Main.ActiveProjectiles)
                 if(p.ModProjectile is AzureAttack a && a.Plan.Fight==g.State.Fight && a.Plan.Kind!=AzureAttackKind.FrostBolt && age<a.Plan.Fire+22 && age>=a.Plan.Born)
-                {release=age-a.Plan.Fire;frame=release< -22?4:release<0?5:6;break;}
+                {release=age-a.Plan.Fire;frame=release< -22?4:release<0?5:6;cutting=a.Plan.Kind==AzureAttackKind.GlacialCut;charge=AzureRules.Ease((age-a.Plan.Born)/Math.Max(1,a.Plan.Fire-a.Plan.Born));break;}
         var art=ModContent.Request<Texture2D>("Convergence/Assets/Textures/AzureCathedral/Liora").Value;
         var src=new Rectangle(frame%4*48,frame/4*64,48,64);
         float lean=frame==6?MathF.Exp(-Math.Max(0,release)/9)*-.045f:MathF.Sin(age*.021f)*.008f;
@@ -37,6 +37,12 @@ internal static class AzureCeremony
         // 128px illustration. Align the bodies across sword/hover atlas cells.
         batch.Draw(art,center-screen,src,(sealedGirl?new Color(181,220,239):Color.White)*alpha,lean,
             new(24,frame>=4?40:35),1f,SpriteEffects.None,0);
+        if(cutting)
+        {
+            var sword=center+new Vector2(-6,release<0?-46:-20);
+            float glow=release<0?charge*.6f:MathF.Exp(-release/6);
+            Bloom(batch,sword,45+charge*35,glow);
+        }
         if(sealedGirl)AzureMaterials.Effect(batch,"IcePass",center,new(98,140),tilt,age,new(.28f,fracture,0,0));
         float broken=t-AzureRules.IceBreak;
         if(broken>=0 && broken<125)

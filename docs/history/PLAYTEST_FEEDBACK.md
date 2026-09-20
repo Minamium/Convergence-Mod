@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-21
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,10 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Azure Fury refinement — 2026-09-21 / 0.3.32 → 0.3.33
+
+Owner reports too little worm hit uptime, an overly short diagonal entry, solid-looking missiles and a consumption pose already overlapping Liora; requests1/20 worm HP, full-body Fury hits, cyan Vespera-style cuts and new second-form art. September20 solo logs show two clean Defeats:12.15s and342.27s; in the longer attempt Liora dies after50.95s, the worm reaches its floor247.87s later, refills once, then the party dies35.45s into Fury with88.98% worm HP. Implement shared native Fury damage, six-second moving volley passage, streaming energy bolts, Liora cuts and retreat/rush/slow articulated bite before head-to-tail Fury armor change. Preserve Liora HP and other encounters. [Evidence](../evidence/2026-09-21-azure-fury-refinement.json) owns exact logs/checks; new balance, visuals and multiplayer are not owner-approved yet.
 
 ## Azure devouring storm — 2026-09-20 / 0.3.31 → 0.3.32
 

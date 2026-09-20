@@ -3,6 +3,7 @@ float4x4 uWorldViewProjection;
 float4 signal; // charge, live/release, opacity, reduced
 float4 shape;  // world length, half-width, stable seed, black-ink mode
 float3 hue;
+float3 cutTint,cutCore,cutHot,cutSmoke,cutForecast;
 float clock;
 sampler cloud : register(s1);
 sampler veins : register(s2);
@@ -34,7 +35,7 @@ float4 TearForecast(VO i):COLOR0 {
  float hair=exp2(-h*h),border=exp2(-b*b)*.13;
  float glint=pow(saturate(sin(x*.028+shape.z)),28)*exp2(-g*g)*.6;
  float edge=saturate(x/10)*saturate((shape.x-x)/10);
- return float4(float3(.9,.83,.9)*(hair+border+glint)*edge*signal.z,0);
+ return float4(cutForecast*(hair+border+glint)*edge*signal.z,0);
 }
 float4 Tear(VO i):COLOR0 {
  float x=i.u.x*shape.x,y=(i.u.y*2-1)*(shape.y+72),t=signal.y;
@@ -58,13 +59,13 @@ float4 Tear(VO i):COLOR0 {
  float cell=floor(x/138),cx=frac(x/138)-.5;
  float star=exp2(-abs(cx)*70-abs(y)/17)+exp2(-abs(cx)*12-abs(y)/1.0);
  star*=pow(saturate(sin(cell*4.19+seed)),4)*flare*.8;
- float3 light=(float3(1,.015,.065)*(blade+glow)+float3(1,.82,.84)*spine)*arrive*collapse;
- light+=(float3(1,.12,.19)*streak+float3(1,.7,.75)*star)*collapse;
+ float3 light=(cutTint*(blade+glow)+cutCore*spine)*arrive*collapse;
+ light+=(cutHot*streak+lerp(cutTint,float3(1,.7,.75),step(.9,cutTint.r))*star)*collapse;
  // Faint smoke blooms after the passing blade; no white core survives End.
  float tail=smoothstep(2,10,t)*(1-smoothstep(shape.w,shape.w+20,t));
  float vy=(y-flutter*5)/(18+t*1.2);
  float veil=pow(saturate(n*.65+fine*.55-.48),2)*exp2(-vy*vy)*tail*.22*(1-signal.w*.65);
- return float4(light*travel*edge*signal.z+float3(.13,.025,.04)*veil,veil*.48)*signal.z;
+ return float4(light*travel*edge*signal.z+cutSmoke*veil,veil*.48)*signal.z;
 }
 float4 Vapor(VO i):COLOR0 {
  float2 p=i.u*2-1;

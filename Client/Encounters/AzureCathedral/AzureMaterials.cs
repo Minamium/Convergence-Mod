@@ -42,8 +42,10 @@ internal static class AzureMaterials
         if (girl.State.WormLife <= 0 && !melting) presence *= .16f;
         if (girl.State.EndAt >= 0 && !melting) presence *= 1 - AzureRules.Ease((age - girl.State.EndAt) / 150);
         var art = ModContent.Request<Texture2D>("Convergence/Assets/Textures/AzureCathedral/Vitrion").Value;
+        var furyArt = ModContent.Request<Texture2D>("Convergence/Assets/Textures/AzureCathedral/VitrionFury").Value;
         using var scope = new WorldGraphicsScope(batch);
         var shader = Begin(); shader.SetTexture(art, 0, SamplerState.PointClamp); shader.TrySetParameter("clock", age / 60);
+        shader.SetTexture(furyArt,2,SamplerState.PointClamp);
         if(projection is { } matrix)shader.TrySetParameter("uWorldViewProjection",matrix*Matrix.CreateOrthographicOffCenter(0,Main.instance.GraphicsDevice.Viewport.Width,Main.instance.GraphicsDevice.Viewport.Height,0,-1,1));
         shader.TrySetParameter("silhouette",silhouette?1f:0f);
         for (int i = AzureRules.Segments; i >= 0; i--)
@@ -61,14 +63,35 @@ internal static class AzureMaterials
             shader.TrySetParameter("region", uv);
             float emerging = AzureRules.Ease((age-girl.State.MusicStart-AzureRules.WormArrival-i*6)/24);
             shader.TrySetParameter("spine",spine);
+            shader.TrySetParameter("furySpine",cell<2?.555f:.455f);
+            float fury=girl.State.Phase==AzurePhase.Devouring?AzureRules.FuryReveal(age-girl.State.PhaseAt,i):girl.State.Enraged?1:0;
+            shader.TrySetParameter("fury",fury);
             float melt=melting?AzureRules.Melt(age-girl.State.EndAt,i):0;
             shader.TrySetParameter("dissolve",melt);
             shader.TrySetParameter("signal", new Vector4(presence*emerging, head.NPC.ai[2]+(girl.State.Enraged?.9f:0), AzureVisuals.Reduced ? 1 : 0, i));
             Vector2 sag=new(0,melt*melt*(60+i*2));
-            Quad(shader, part.NPC.Center + sag - screen, new(scale*(1-melt*.32f), scale * (1 + flex+melt*.45f)), angle, uv, Color.White);
+            var size=new Vector2(scale*(1-melt*.32f),scale*(1+flex+melt*.45f));
+            float jaw=girl.State.Phase==AzurePhase.Devouring?AzureRules.JawOpening(age-girl.State.PhaseAt):fury*(.20f+.08f*MathF.Sin(age*.075f));
+            if(i==0 && jaw>.001f)Head(shader,part.NPC.Center+sag-screen,size,angle,uv,jaw);
+            else Quad(shader, part.NPC.Center + sag - screen,size,angle,uv,Color.White);
         }
         shader.TrySetParameter("silhouette",0f);shader.TrySetParameter("dissolve",0f);
         Array.Clear(parts);
+    }
+    // Three articulated pieces from the authored head. Rear armor stays attached;
+    // the front upper/lower mandibles rotate about their shared throat hinge.
+    private static void Head(ManagedShader shader,Vector2 center,Vector2 size,float rotation,Vector4 uv,float opening)
+    {
+        Vector2 axis=rotation.ToRotationVector2();const float joint=.36f;
+        Quad(shader,center-axis*size.X*(1-joint)*.5f,new(size.X*joint,size.Y),rotation,new(uv.X,uv.Y,uv.Z*joint,uv.W),Color.White);
+        Vector2 pivot=center+axis*size.X*(joint-.5f);
+        for(int half=0;half<2;half++)
+        {
+            float sign=half==0?-1:1,angle=rotation+sign*opening*.36f;
+            var local=new Vector2(size.X*(1-joint)*.5f,sign*size.Y*.25f).RotatedBy(angle);
+            Quad(shader,pivot+local,new(size.X*(1-joint),size.Y*.5f),angle,
+                new(uv.X+uv.Z*joint,uv.Y+uv.W*half*.5f,uv.Z*(1-joint),uv.W*.5f),Color.White);
+        }
     }
     internal static void Frost(SpriteBatch batch, AzureBoss girl, float age)
     {
@@ -100,5 +123,33 @@ internal static class AzureMaterials
         using var scope = new WorldGraphicsScope(batch);
         var shader = Begin(); shader.TrySetParameter("clock", age / 60); shader.TrySetParameter("signal", new Vector4(alpha, 0, 0, 0));
         Quad(shader, (a+b)*.5f-Main.screenPosition, new(Vector2.Distance(a,b),radius*2), (b-a).ToRotation(), new(0,0,1,1), Color.White,"ShardPass");
+    }
+    internal static void EnergyBolt(SpriteBatch batch,Vector2 a,Vector2 b,float radius,float age,float seed)
+    {
+        if(radius<=.01f)return;
+        using var scope=new WorldGraphicsScope(batch);var shader=Begin();
+        float length=Vector2.Distance(a,b)+100,height=radius*6+24;
+        shader.TrySetParameter("clock",age/60);shader.TrySetParameter("signal",new Vector4(1,radius,AzureVisuals.Reduced?1:0,seed));
+        shader.TrySetParameter("orbSize",new Vector2(length,height));
+        Quad(shader,(a+b)*.5f-Main.screenPosition,new(length,height),(b-a).ToRotation(),new(0,0,1,1),Color.White,"EnergyOrbPass");
+    }
+    internal static void Slash(SpriteBatch batch,Vector2 a,Vector2 b,float radius,float age,float born,float fire,float end)
+    {
+        if(Vector2.DistanceSquared(a,b)<1)return;
+        using var scope=new WorldGraphicsScope(batch);
+        var shader=ShaderManager.GetShader("Convergence.ScarletSorcery");
+        shader.TrySetParameter("uWorldViewProjection",Main.GameViewMatrix.TransformationMatrix*Matrix.CreateOrthographicOffCenter(0,Main.instance.GraphicsDevice.Viewport.Width,Main.instance.GraphicsDevice.Viewport.Height,0,-1,1));
+        shader.TrySetParameter("clock",age/60);
+        shader.TrySetParameter("signal",new Vector4(Math.Clamp((age-born)/(fire-born),0,1),age-fire,AzureRules.Ease((age-born)/5),AzureVisuals.Reduced?1:0));
+        shader.TrySetParameter("shape",new Vector4(Vector2.Distance(a,b),radius,born*.17f,end-fire));
+        shader.TrySetParameter("cutTint",new Vector3(.035f,.58f,1));
+        shader.TrySetParameter("cutCore",new Vector3(.84f,.98f,1));
+        shader.TrySetParameter("cutHot",new Vector3(.22f,.80f,1));
+        shader.TrySetParameter("cutSmoke",new Vector3(.035f,.12f,.17f));
+        shader.TrySetParameter("cutForecast",new Vector3(.83f,.95f,1));
+        shader.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value,1,SamplerState.LinearWrap);
+        shader.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,2,SamplerState.LinearWrap);
+        // Same material, wave/recoil and harmless smoke as Vespera; only palette differs.
+        Quad(shader,(a+b)*.5f-Main.screenPosition,new(Vector2.Distance(a,b),(radius+72)*2),(b-a).ToRotation(),new(0,0,1,1),Color.White,age<fire?"TearForecastPass":"TearPass");
     }
 }

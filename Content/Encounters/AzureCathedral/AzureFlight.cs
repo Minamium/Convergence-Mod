@@ -7,6 +7,21 @@ namespace Convergence.Content.Encounters.AzureCathedral;
 // path rather than each orbiting its own small target.
 internal static class AzureFlight
 {
+    internal static Vector2 DevourStaging(Vector2 from, Vector2 girl)
+        => girl + new Vector2(from.X < girl.X ? -2200 : 2200, -400);
+    internal static Vector2 DevourPosition(Vector2 from, Vector2 velocity, Vector2 girl, float t)
+    {
+        Vector2 stage=DevourStaging(from,girl);
+        Vector2 direction=Vector2.Normalize(girl-stage);
+        if(t<AzureRules.DevourRetreat)
+        {
+            Vector2 toStage=stage-from;
+            Vector2 outgoing=velocity.LengthSquared()>1?Vector2.Normalize(velocity):toStage.LengthSquared()>1?Vector2.Normalize(toStage):-direction;
+            return Curve(from,from+outgoing*700,stage+new Vector2(0,-600),stage,t/AzureRules.DevourRetreat);
+        }
+        Vector2 target=girl-direction*AzureRules.MouthReach;
+        return Vector2.Lerp(stage,target,AzureRules.DevourTravel(t));
+    }
     internal static Vector2 Curve(Vector2 a, Vector2 b, Vector2 c, Vector2 d, float t)
     {
         t = Math.Clamp(t, 0, 1); float s = 1 - t;

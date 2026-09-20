@@ -11,8 +11,8 @@
       "output_sha256": "9830c065065c36562ec30b5c2ee453e0c5e3ded65fdf4f67fd2388d4a16d82c8"
     },
     "AzureGlass.fx": {
-      "source_sha256": "55cd42e9da65caee22c4648d1659c6aab8c6eee2f626c41f06b4dbc1550d31cb",
-      "output_sha256": "12a0f400b6da62d9c6208d55d0286ec87e84df4219c79cda1a656e5d25bbfde7"
+      "source_sha256": "7fc6b3668b28e1b282c4e123987b66ed248663045326e64cb4dec305c3bb2ccb",
+      "output_sha256": "8d43d6aeb9c28d0e9153dba2bd8cec58d7fdef6f3e8f16c2a4c9e45c1c588ebe"
     },
     "CrimsonReactor.fx": {
       "source_sha256": "e016c33b62286a5781a530d027a7a6b8ae99999bceccd52bbb7cd54933b90607",
@@ -59,8 +59,8 @@
       "output_sha256": "53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b"
     },
     "ScarletSorcery.fx": {
-      "source_sha256": "712f4b437d402a37fc94b9bc3afa7196ede4cb03c9ed5a6696a6b6ae10400592",
-      "output_sha256": "d7be9c0f083adce8aaf28d8559c1e1d9bc423f7c73876ab2ab43404f25bf5462"
+      "source_sha256": "e9843d23f0b0ca6846b388eb72115a84a6a05fe0ffc8660b2ec8f1a680cc616f",
+      "output_sha256": "963b724a40338569e64cd96f85df00788c2831fa0defcb71915b72e6e8a3ee79"
     },
     "ScarletSurface.fx": {
       "source_sha256": "46dee4522c642c9adc2e2a4cdbce54319ddcaa32d14d80877571e18d8414a717",
