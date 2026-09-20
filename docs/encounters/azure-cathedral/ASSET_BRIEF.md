@@ -4,7 +4,7 @@ document_type: spec
 status: accepted
 owners:
   - art
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-21
 source_of_truth_for:
   - encounter.azure_cathedral.asset_brief
 aliases: []
@@ -16,7 +16,7 @@ related_docs:
 
 # Azure Cathedral asset brief
 
-All four are original built-in image generation, not API/CLI generation; no specific model name is verifiable. No Calamity/WotG artwork was supplied or copied. Generated originals remain in the local external image archive; only game exports are distributed. [Feature spec](ENCOUNTER_SPEC.md) owns the design and [Attribution](../../../Assets/ATTRIBUTION.md#azure-cathedral--2026-09-20) owns rights and export identity. These prompts are optional asset-maintenance references, not normal startup reading.
+All five current images are original built-in image generation, not API/CLI generation; no specific model name is verifiable. No Calamity/WotG artwork was supplied or copied. Generated originals remain in the local external image archive; only game exports are distributed. [Feature spec](ENCOUNTER_SPEC.md) owns the design and [Attribution](../../../Assets/ATTRIBUTION.md#azure-cathedral--2026-09-20) owns rights and export identity. These prompts are optional asset-maintenance references, not normal startup reading.
 
 ## Integration
 
@@ -57,6 +57,12 @@ Background extraction edit: Remove the entire dark blue background and all soft 
 ## Vitrion.png
 
 Use case: stylized-concept. Asset type: transparent production sprite PARTS atlas for an ORIGINAL ice-glass giant worm named Vitrion, for a2D action game. Square image, precise2by2 equal quadrant grid, isolated parts with real transparent alpha. This is a modular top-down DORSAL VIEW leviathan, absolutely NOT a side-view fish or koi, no fabric fins. Every part has strict bilateral symmetry about its horizontal longitudinal axis, paired identical structures above and below, all parts facing RIGHT. Top-left quadrant: massive wedge-like crystalline DRAGON WORM HEAD, viewed straight from above, symmetrical twin sets of swept-back horns and armored mandibles, narrow bright icy water-laser mouth at the right tip, axial cyan core. Top-right: one stout overlapping annular BODY SEGMENT viewed from above, centered spinal ridge along X, two symmetrical sweeping solid glass armor blades on both sides; the front/back ends connect left-right to identical segments. Bottom-left: an alternate same-scale annular BODY SEGMENT with three paired shorter glass blades, same silhouette size and connection axis. Bottom-right: long slender symmetric TAIL with root left, needle point right, paired decreasing spikes; no fish tail. Each silhouette completely contained in its quadrant with ample12% transparent gutter. Render as deliberate clean sharp PIXEL ART, clustered faceted ice and pale cyan stained glass, dark navy silver frames, strong bright sharp cyan edge highlights, quieter deep teal glass interiors; not a photoreal/painted illustration, no airbrush noise. Strong simple shape hierarchy, noble formidable ancient glacial cathedral guardian. Do not reproduce any existing game boss. No background, no text, no labels, no grid lines, no cast ground shadows, no extra motifs. Source orientation and exact2x2 layout are critical for a continuously articulated game worm.
+
+## VitrionFury.png / 0.3.33
+
+Dedicated second-form atlas, not an overwrite of `Vitrion.png`. Built-in image edit of the project-owned original atlas only. Generated1280×1280 →1024×1024 with ffmpeg `scale=1024:1024:flags=neighbor`, preserving real alpha. Four unchanged cell roles; material mirrors each axial spine, morphs from the old atlas after the bite, and code opens the front two mandibles around a retained rear hinge. Authored texture changes armor; motion, pressure waves and transition remain continuous code/shader work. Source/export hashes are in Attribution.
+
+Final brief: original enraged ice/stained-glass leviathan, transparent2×2 parts atlas with head top-left facing right, body top-right, alternate body bottom-left and pointed tail bottom-right. Strict dorsal bilateral symmetry, matched attachment axes and contained cells. Split pale frost-glass plates into sharp swept-back cathedral spires over dark indigo smoked-glass structure; white-blue branching stress seams and a luminous frozen heart. Lean predatory pressure, recognizable compact segments, quieter dark interiors rather than solid white. Upper/lower jaw blades visibly separable for code articulation. Preserve original layout but redesign armor, not merely recolor. Crisp clustered sprite texture, no fuzzy outer glow, flesh, guns, text, scene or copied game design. Original and first-form atlas remain retained.
 
 ## Cathedral.png
 

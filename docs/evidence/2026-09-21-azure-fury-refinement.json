@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-21",
+  "feature": "azure_cathedral",
+  "source_base": "4b572d2fd825556abf8fcc5224fb2ca15ad8ca02",
+  "candidate": "0.3.33 / protocol61",
+  "environment_reference": "2026-09-20-azure-devouring.json",
+  "observed_build": "0.3.32 / protocol60",
+  "observed_session_date": "2026-09-20",
+  "topology": "solo Host & Play, one connected participant",
+  "attempts": [
+    {
+      "fight": "d961c1f2-d337-4097-bd8f-b1881942918f",
+      "unlock_tick": 1954,
+      "result_tick": 2683,
+      "combat_seconds": 12.15,
+      "result": "Defeat",
+      "remaining_combined_hp": 7123536,
+      "cleanup_tick": 2863,
+      "peak_five_second_combined_dps": 7343
+    },
+    {
+      "fight": "779cf343-c815-4481-a695-f7d7f9b81227",
+      "unlock_tick": 1386,
+      "liora_defeat_tick": 4443,
+      "liora_combat_seconds": 50.95,
+      "worm_floor_tick": 19315,
+      "worm_floor_hp": 960000,
+      "seconds_from_liora_death_to_worm_floor": 247.8667,
+      "devouring_tick": 19315,
+      "fury_tick": 19795,
+      "fury_refill_hp": 4800000,
+      "result_tick": 21922,
+      "result": "Defeat",
+      "combat_seconds": 342.2667,
+      "fury_seconds": 35.45,
+      "remaining_worm_hp": 4270996,
+      "cleanup_tick": 22102,
+      "peak_five_second_combined_dps": 90385,
+      "stack": { "called": 1, "successful": 1, "failed": 0 },
+      "spread": { "called": 1, "successful": 1, "failed": 0 },
+      "caveat": "Solo Spread does not test overlap; sampled combined damage is not equipped sustained DPS."
+    }
+  ],
+  "log_findings": {
+    "cathedral_exceptions": 0,
+    "missing_actor_invalidations": 0,
+    "duplicate_terminal_events": 0,
+    "separate_startup_event": "Loopback7777 connection refused before successful connection, outside Cathedral combat.",
+    "interpretation": "The long worm-only interval supports the owner's hit-uptime complaint; damage samples alone do not measure exact aim/contact uptime. Both observed endings are normal Defeat/cleanup, not missing-actor or duplicate-refill failures."
+  },
+  "changes": [
+    "Worm base/scaling HP1/20; Liora unchanged. Duet head-only floor retained; Fury all owned segments share native realLife damage.",
+    "Six-second diagonal transit without stationary hold; thin warnings follow same-Fight native segment emitters toward frozen targets.",
+    "Streaming luminous energy bolts, cyan Vespera-material Liora spatial cuts and preserved Scarlet red palette.",
+    "Off-field retreat, distant rush and long slow approach with articulated jaw bite; silhouette only near contact.",
+    "Dedicated Fury atlas, progressive armor reveal and pressure material; old first-form texture and external originals retained."
+  ],
+  "verification": {
+    "focused_domain": "17 Azure cases passed, including phase vulnerability,1/20 scaling, continuous moving volley, distant approach/jaw contact and new attack/emitter codec boundaries.",
+    "shader_exports": "FXC compiled AzureGlass and palette-parameterized ScarletSorcery; manifest matches exports.",
+    "gpu_preview": "120 linked-production FNA/D3D11 frames inspected across retreat/slow jaw/bite silhouette/Fury reveal, bright/dark energy bolts and slash warning/live/residue. Final tail feather refinement rerendered only24 affected frames. Offline staged poses, not native gameplay/network or FPS evidence.",
+    "repository": "pending final wrapper",
+    "native_build": "pending",
+    "load_smoke": "pending"
+  },
+  "not_run": [
+    "Real equipped full-body Fury damage, piercing immunity/accessory behavior and new HP balance.",
+    "Slow moving segment volley and Liora cut dodgeability/readability in battle.",
+    "Distant rush, jaw/bite silhouette, Fury armor and melting/music-fade/re-invocation acceptance.",
+    "Matching multiplayer clients, lagged native emitters, late snapshots and actual receiving-player hits.",
+    "UI107 percent, camera zoom, Reduced Effects and measured in-game performance.",
+    "Earlier entrance field/music continuity and subjective audio acceptance."
+  ],
+  "preserved": "Four pre-existing English locale edits; Liora HP, music/credits and other Raid gameplay. External originals/copies retained. No Workshop publication or GitHub release."
+}

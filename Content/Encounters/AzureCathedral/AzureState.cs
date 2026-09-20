@@ -64,27 +64,27 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
     }
 }
 
-internal enum AzureAttackKind : byte { Icicle, MouthBeam, GlassRain, FrostBolt }
+internal enum AzureAttackKind : byte { Icicle, MouthBeam, GlassRain, FrostBolt, GlacialCut }
 internal readonly record struct AzureAttackPlan(Guid Fight, short Girl, AzureAttackKind Kind, int Born, int Fire, int End,
-    float X, float Y, float Angle, float Length, float Width, int Damage, short Target = -1)
+    float X, float Y, float Angle, float Length, float Width, int Damage, short Target = -1, short Emitter = -1)
 {
     internal void Write(BinaryWriter w)
     {
         w.Write(Fight != Guid.Empty); if (Fight == Guid.Empty) return;
         w.Write(Fight.ToByteArray()); w.Write(Girl); w.Write((byte)Kind); w.Write(Born); w.Write(Fire); w.Write(End);
-        w.Write(X); w.Write(Y); w.Write(Angle); w.Write(Length); w.Write(Width); w.Write(Damage); w.Write(Target);
+        w.Write(X); w.Write(Y); w.Write(Angle); w.Write(Length); w.Write(Width); w.Write(Damage); w.Write(Target); w.Write(Emitter);
     }
     internal static AzureAttackPlan? Read(BinaryReader r)
     {
         if (!AzureState.Presence(r)) return null;
         var id = AzureState.Id(r); short girl = r.ReadInt16(); var kind = (AzureAttackKind)r.ReadByte();
         int born = r.ReadInt32(), fire = r.ReadInt32(), end = r.ReadInt32();
-        float x = r.ReadSingle(), y = r.ReadSingle(), angle = r.ReadSingle(), length = r.ReadSingle(), width = r.ReadSingle(); int damage = r.ReadInt32(); short target = r.ReadInt16();
+        float x = r.ReadSingle(), y = r.ReadSingle(), angle = r.ReadSingle(), length = r.ReadSingle(), width = r.ReadSingle(); int damage = r.ReadInt32(); short target = r.ReadInt16(),emitter=r.ReadInt16();
         if (girl is < 0 or >= 200 || !Enum.IsDefined(kind) || born is < 0 or > 72000 || fire - (long)born < (kind == AzureAttackKind.FrostBolt ? 24 : 36) || fire - (long)born > 180
             || end - (long)fire is < 1 or > 300 || !float.IsFinite(x) || !float.IsFinite(y) || Math.Abs(x) > 400000 || Math.Abs(y) > 150000
-            || !float.IsFinite(angle) || Math.Abs(angle) > 20 || !float.IsFinite(length) || length is < 1 or > 4000
+            || !float.IsFinite(angle) || Math.Abs(angle) > 20 || !float.IsFinite(length) || length < 1 || length > (kind==AzureAttackKind.FrostBolt?10000:4000)
             || !float.IsFinite(width) || width is < 1 or > 200 || damage is < 1 or > 2000
-            || (kind == AzureAttackKind.FrostBolt ? target is < 0 or >= 255 : target != -1)) throw new InvalidDataException("azure.attack");
-        return new(id, girl, kind, born, fire, end, x, y, angle, length, width, damage, target);
+            || (kind == AzureAttackKind.FrostBolt ? target is < 0 or >= 255 || emitter is < 0 or >= 200 : target != -1 || emitter != -1)) throw new InvalidDataException("azure.attack");
+        return new(id, girl, kind, born, fire, end, x, y, angle, length, width, damage, target,emitter);
     }
 }

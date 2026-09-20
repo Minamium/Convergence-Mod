@@ -2,12 +2,15 @@
 matrix uWorldViewProjection;
 sampler art : register(s0);
 sampler noiseMap : register(s1);
+sampler furyArt : register(s2);
 float clock;
 float4 signal; // opacity, charge, reduced, index
 float4 region;
 float spine;
 float dissolve;
 float silhouette;
+float fury,furySpine;
+float2 orbSize;
 struct VI { float4 P:POSITION0; float4 C:COLOR0; float2 U:TEXCOORD0; };
 struct VO { float4 P:SV_POSITION; float4 C:COLOR0; float2 U:TEXCOORD0; };
 VO VS(VI v) { VO o=(VO)0; o.P=mul(v.P,uWorldViewProjection); o.C=v.C; o.U=v.U; return o; }
@@ -16,17 +19,42 @@ float4 GlassPS(VO i):COLOR0
  float2 p=(i.U-region.xy)/region.zw;
  float2 sample=p; sample.y=spine-abs(p.y-.5);
  sample.x+=sin(p.y*19+clock*2)*dissolve*.035;
- float4 a=tex2D(art,region.xy+sample*region.zw); clip(a.a-.005);
+ float2 alternate=sample;alternate.y=furySpine-abs(p.y-.5);
+ float4 a=lerp(tex2D(art,region.xy+sample*region.zw),tex2D(furyArt,region.xy+alternate*region.zw),fury);clip(a.a-.005);
  float n=tex2D(noiseMap,p*2+float2(clock*.032,-clock*.075+signal.w*.17)).r;
  float caustic=pow(saturate(1-abs(n-.48)*5),8);
  float light=pow(saturate(.5+.5*sin(p.x*9+p.y*7-clock*1.8-signal.w*.35)),22);
  float crystal=saturate(a.b-a.r*.72);
  float3 color=a.rgb*(.90+n*.18)+float3(.08,.45,.70)*(caustic*.11+light*(.12+signal.y*.25))*a.a*crystal;
+ float pressure=pow(saturate(.5+.5*sin(p.x*14-clock*4.4-signal.w*.37)),10);
+ color+=fury*float3(.13,.38,.48)*pressure*crystal*a.a;
  float meltNoise=tex2D(noiseMap,p*float2(4,2)+float2(signal.w*.19,-clock*.10)).r;
  float retain=dissolve>.001 ? 1-smoothstep(meltNoise-.10,meltNoise+.10,dissolve*1.25) : 1;
  float edge=exp(-abs(meltNoise-dissolve*1.25)*32)*step(.001,dissolve);
  color+=float3(.22,.70,.95)*edge*a.a;
  return float4(lerp(color,float3(.003,.008,.014)*a.a,silhouette),a.a)*i.C*signal.x*retain;
+}
+float4 EnergyOrbPS(VO i):COLOR0
+{
+ float2 p=(i.U-.5)*orbSize;float radius=max(signal.y,.1);
+ float n=tex2D(noiseMap,float2(p.x*.027-clock*2.8+signal.w,p.y*.055+clock*.33)).r;
+ float fine=tex2D(noiseMap,float2(p.x*.049-clock*4.1,p.y*.083+n*.44)).r;
+ // A bright leading heart carried by transparent streaming filaments, not a
+ // faceted physical icicle. Dim vapor outside the capsule has no collision.
+ float front=1-smoothstep(12,26,p.x),tail=exp(-max(0,-p.x-8)*.037);
+ float height=radius*(.58+.42*saturate((p.x+65)/72));
+ float flutter=sin(p.x*.10-clock*16+signal.w)*(1-signal.z*.75);
+ float y=(p.y-flutter*.9)/max(.4,height);
+ float body=exp2(-y*y*1.8)*(n*.55+fine*.45)*front*tail;
+ float core=exp2(-pow((p.x-9)/14,2)-pow(p.y/max(1,radius*.5),2));
+ float stream=exp2(-pow((p.y-(n-.5)*height*1.5)/max(.5,radius*.17),2))*tail*front;
+ float halo=exp2(-pow((p.x+8)/48,2)-pow(p.y/(radius*2.3+5),2))*.16;
+ float wisps=pow(saturate(n*.7+fine*.5-.45),2)*exp2(-pow(p.y/(radius*2.1+8),2))*tail*front*.28;
+ // Feather the whole vapor tail, not merely a narrow quad edge: otherwise the
+ // low-frequency halo reads as a rectangular decal against a dark arena.
+ float border=smoothstep(0,.28,i.U.x)*(1-smoothstep(.82,1,i.U.x))*smoothstep(0,.24,i.U.y)*(1-smoothstep(.76,1,i.U.y));
+ float3 c=float3(.07,.53,.97)*(body+halo+wisps)+float3(.74,.96,1)*(core*.85+stream*.65);
+ return float4(c*border*signal.x,0)*i.C;
 }
 float4 FrostPS(VO i):COLOR0
 {
@@ -112,4 +140,5 @@ technique AzureGlass
  pass IcePass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 IcePS(); }
  pass CirclePass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 CirclePS(); }
  pass FrostPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 FrostPS(); }
+ pass EnergyOrbPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 EnergyOrbPS(); }
 }

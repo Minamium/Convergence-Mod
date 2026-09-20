@@ -93,8 +93,9 @@ public sealed class AzureWorm : ModNPC
     public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         => TryGirl(out var girl) && girl!.State.Live && girl.State.WormLife > 0 && girl.State.Contains(target.whoAmI)
         && (Index == 0 ? NPC : Head >= 0 && Head < Main.maxNPCs ? Main.npc[Head] : NPC).ai[2] == 1;
-    public override bool? CanBeHitByItem(Player p, Item item) => Index==0 && TryGirl(out var g) && g!.State.Contains(p.whoAmI) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile p) => Index==0 && TryGirl(out var g) && g!.State.Contains(p.owner) ? null : false;
+    private bool Hittable(AzureBoss g) => AzureRules.WormDamageable(g.State.Phase,Index,g.State.Live,g.State.WormLife,g.State.WormMax);
+    public override bool? CanBeHitByItem(Player p, Item item) => TryGirl(out var g) && Hittable(g!) && g!.State.Contains(p.whoAmI) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile p) => TryGirl(out var g) && Hittable(g!) && g!.State.Contains(p.owner) ? null : false;
     public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
     {
         if(Index==0 && TryGirl(out var g) && g!.State.Phase==AzurePhase.Duet)
@@ -109,8 +110,7 @@ public sealed class AzureWorm : ModNPC
             if (Main.netMode != NetmodeID.MultiplayerClient) NPC.active = false;
             return;
         }
-        bool floor=g!.State.Phase==AzurePhase.Duet && NPC.life<=AzureRules.WormFloor(g.State.WormMax);
-        NPC.dontTakeDamage = Index!=0 || !g.State.Live || g.State.WormLife <= 0 || floor;
+        NPC.dontTakeDamage = !Hittable(g!);
         NPC.chaseable = !NPC.dontTakeDamage;
         NPC.boss = Index == 0 && g.State.Live;
         NPC.lifeMax = g.State.WormMax;
@@ -131,10 +131,17 @@ public sealed class AzureWorm : ModNPC
     public override bool CheckDead()
     {
         NPC.life = 1;
-        if (Index == 0 && TryGirl(out var g))
+        if (TryGirl(out var g))
         {
-            if(g!.State.Phase==AzurePhase.Duet) NPC.life=AzureRules.WormFloor(g.State.WormMax);
-            else if(g.State.Live)g.Runtime?.Killed(true);
+            if(g!.State.Phase==AzurePhase.Duet && Index==0) NPC.life=AzureRules.WormFloor(g.State.WormMax);
+            else if(g.State.Live && g.State.Phase==AzurePhase.Fury)
+            {
+                // Native realLife owns subtraction. Only an actually lethal head
+                // result may finish the encounter; a segment never has its own HP pool.
+                var head=Index==0?NPC:Head>=0 && Head<Main.maxNPCs?Main.npc[Head]:null;
+                if(Index==0 || head is {active:true,ModNPC:AzureWorm a} && a.Fight==Fight && head.life<=0)
+                {g.Runtime?.Killed(true);if(head is not null)head.life=Math.Max(1,head.life);}
+            }
         }
         NPC.dontTakeDamage = true; NPC.netUpdate = Main.netMode != NetmodeID.MultiplayerClient; return false;
     }

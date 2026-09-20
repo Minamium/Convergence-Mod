@@ -5,7 +5,7 @@ status: accepted
 owners:
   - architecture
   - gameplay
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-21
 source_of_truth_for:
   - authority.azure_cathedral
 aliases: []
@@ -43,6 +43,12 @@ The owner's requested phase redesign supersedes the initial both-actors-die endi
 `NPC.HitModifiers.SetMaxDamage` limits ordinary incoming head hits; authority floor clamping and `CheckDead` cover lethal/DoT fallback. The official [tML2026.07 HitModifiers API](https://docs.tmodloader.net/docs/stable/struct_n_p_c_1_1_hit_modifiers.html), checked2026-09-20, specifies an inclusive final-damage ceiling with minimum1; the installed2026.07.3.0 package compiles this hook. This does not bypass the native player damage pathway or other Mods' normal hit effects.
 
 `AzurePackets` now appends the bounded full feature projection to its existing definition-scoped Snapshot route. The runtime publishes at6-tick cadence (and observable changes), with immutable Fight/actor/phase clocks and monotone stages. This avoids tying camera/black exterior/music/field capability exclusively to rate-limited NPC ExtraAI. Parse before accepting the common revision; cache only its accepted projection, clear on accepted Idle/world unload, retain NPC ExtraAI as a secondary repair path. No common packet IDs or global feature switch were added. Client missile steering uses authority-replicated target coordinates and a bounded initial homing interval.
+
+### 2026-09-21 Fury refinement (protocol61)
+
+Supersede protocol60's head-only restriction **in Fury only**. Duet retains the native head ceiling/floor. Fury enables every owned body/tail part while retaining native `NPC.realLife` sharing; no separate segment HP pool or manual second subtraction. `CheckDead` may report only an actually lethal owned head, and the runtime's one-way defeat latch still owns termination. The official [NPC API](https://docs.tmodloader.net/docs/stable/class_n_p_c.html) and [pinned2026.07.3.0 NPC patch](https://github.com/tModLoader/tModLoader/blob/v2026.07.3.0/patches/tModLoader/Terraria/NPC.cs.patch), checked2026-09-21, document `realLife` as the shared-health head index. Actual equipped piercing/accessory effects are not certified by this source check.
+
+The native attack envelope adds `GlacialCut` and a bounded emitter NPC slot for segment bolts; the slot must resolve to an active worm of the exact Fight. Frozen target coordinates plus moving emitter origin keep the short warning attached during slow transit. Non-bolt kinds require the absent-emitter sentinel. New phase epochs still reject old hazards; missing emitters fail closed. No common operation ID, client authority, persistence or foreign encounter runtime is added.
 
 ### Verification (current scope)
 

@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-21
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,11 +23,11 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.32 / protocol60**. Cathedral adds reliable full feature projections/Doll-style Ready, higher-contrast native-density Liora, a45-part long worm with head-only damage, Liora-origin bell/sweeping jets, segment frost volleys and layered frost materials. Liora0 + Vitrion20% now triggers protected consumption → one-time full refill/Fury → center-rush/melting Victory with BGM fade. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns mechanics and remaining playtests. The BGM file/HP scaling, Doll, Scarlet0.3.29, Ghost Samurai/Oboro and four pre-existing generated English locale edits are preserved. Matching peers are required; common packet IDs remain unchanged. This is not a Workshop publication or GitHub release; public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
+Current source: **0.3.33 / protocol61**. Cathedral reduces worm HP to1/20, enables full-body native shared-HP hits in Fury, lengthens diagonal passage, attaches its volley to moving segments and adds Liora's cyan spatial cuts. Distant retreat/rush/slow jaw consumption reveals new Fury armor; streaming energy replaces solid-looking segment missiles. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns mechanics and owner checks. Liora HP, music, other Raid gameplay and four pre-existing generated English locale edits are preserved; Scarlet's shared slash material keeps its red palette. Matching peers are required; common packet IDs remain unchanged. This is not a Workshop publication or GitHub release; public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
 Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
-**Latest owner playtest:** Cathedral0.3.31, two solo Host & Play attempts: one12.37s Defeat and one198.30s Victory, both cleaned; no missing-actor invalidation. Winning run: Liora then Vitrion, peak five-second combined DPS379,416; Stack1/3 success, Spread3/3 success (solo). [Evidence](evidence/2026-09-20-azure-devouring.json) separates logs and the source-inferred entrance flicker path from the unplayed new phase progression. Older observations remain history.
+**Latest owner playtest:** Cathedral0.3.32, two solo Host & Play Defeats (12.15s /342.27s), both cleaned without a Cathedral exception or missing-actor invalidation. Longer run: Liora dies50.95s after combat starts; another247.87s to the worm floor; one Fury refill, then Defeat35.45s later at88.98% worm HP. Peak five-second combined DPS90,385; one successful Stack and Spread (solo). [Evidence](evidence/2026-09-21-azure-fury-refinement.json) separates these measurements from unplayed0.3.33 changes. Older observations remain history.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Oboro is a guaranteed single ground drop; further rewards and balance remain provisional. Cleanup and target ownership have automated coverage; actual multiplayer/re-entry and the new weapon/art need owner playtesting.
@@ -38,7 +38,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Verification state
 
-- **0.3.32 Azure devouring:** [evidence](evidence/2026-09-20-azure-devouring.json) owns phase/floor/refill/codec/curve checks, native package/load and linked-production GPU sequences. User-owned / not_run: entrance mask/music continuity, both HP-gate orders, head-only damage under equipped Mods, consumption/Fury/melt through re-invocation, actual2–8-player projections/volleys,107% UI/zoom/Reduced Effects and frame times. The0.3.31 successful owner run does not certify0.3.32 or multiplayer. [Awakening0.3.31 evidence](evidence/2026-09-20-azure-awakening.json) remains history.
+- **0.3.33 Azure Fury:** [evidence](evidence/2026-09-21-azure-fury-refinement.json) owns scoped damage/phase/codec/motion checks, shader/native package verification and linked-production GPU previews. User-owned / not_run: native full-body Fury damage under equipped piercing weapons, slow volley readability, Liora cuts, distant articulated bite/Fury textures, lethal/melting/re-invocation and matching-peer synchronization. Entrance mask/music continuity, UI107%/zoom/Reduced Effects and frame times remain unconfirmed. [Devouring0.3.32 evidence](evidence/2026-09-20-azure-devouring.json) retains earlier verification without implying new game acceptance.
 
 - **0.3.29 Scarlet crossflow/cuts:** [evidence](evidence/2026-09-20-scarlet-crossflow.json) owns current verification and the0.3.28 solo session (ActIII defeat/cleanup, two failed Stacks, one successful Spread; separate post-fight unowned-NPC exceptions). User-owned / not_run: crossflow direction and mobility, consecutive-beat cadence, ActII blade/residue and ActIII four-offset readability, enlarged2/4/8-player Spread, remote synchronization and Reduced Effects. Older [choreography/audio evidence](evidence/2026-09-20-scarlet-choreography.json) remains history; subjective audio/intro acceptance is not inferred from this session. Ghost Samurai's separate invalid-arena sync remains an unaddressed log finding for its task owner.
 
@@ -84,7 +84,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-After confirmed0.3.32 deployment, start normally without another Build + Reload. Use **Glacial Chime / 氷硝子の鐘** on a Foundation Core and use the top-center Ready pill. The [Azure follow-up smoke](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) prioritizes continuous entrance field/music and the two-gate consumption/Fury/melting sequence. Earlier Scarlet/Oboro and music-listening checks remain separate owner follow-ups; do not rerun them merely to accept this change.
+After confirmed0.3.33 deployment, start normally without another Build + Reload. Use **Glacial Chime / 氷硝子の鐘** on a Foundation Core and the top-center Ready pill. The [Azure follow-up smoke](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) prioritizes worm hit uptime/HP, moving volley, cyan cuts and the distant open-jaw consumption/Fury sequence. Earlier Scarlet/Oboro and music-listening checks remain separate owner follow-ups; do not rerun them merely to accept this change.
 
 The integrated Oboro second-cut changes retain their owner checks: both facings, upper pause, fast downward return, thinner echoes, held loop and release/restart, including the first/third-step handoffs. Use the current matching build for multiplayer. Third-cut choreography is a separate requested slice.
 

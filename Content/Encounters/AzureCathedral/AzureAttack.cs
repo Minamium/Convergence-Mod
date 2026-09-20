@@ -23,6 +23,12 @@ public sealed class AzureAttack : ModProjectile
     }
     public override void OnSpawn(IEntitySource source) { if (source is AzureAttackSource a) Plan = a.Plan; }
     public override bool ShouldUpdatePosition() => Plan.Kind==AzureAttackKind.FrostBolt;
+    private bool TryEmitter(out NPC? emitter)
+    {
+        emitter=Plan.Emitter>=0 && Plan.Emitter<Main.maxNPCs?Main.npc[Plan.Emitter]:null;
+        return emitter is {active:true,ModNPC:AzureWorm w} && w.Fight==Plan.Fight;
+    }
+    private Vector2 FrozenVolleyAim => new Vector2(Plan.X,Plan.Y)+Plan.Angle.ToRotationVector2()*Plan.Length;
     internal bool TryGirl(out AzureBoss? girl)
     {
         girl = Plan.Girl >= 0 && Plan.Girl < Main.maxNPCs && Main.npc[Plan.Girl].active ? Main.npc[Plan.Girl].ModNPC as AzureBoss : null;
@@ -44,8 +50,21 @@ public sealed class AzureAttack : ModProjectile
             { to = from + d * Math.Max(0, last); from += d * Math.Max(0, first); return last > 0; }
             to = from; return false;
         }
-        if(Plan.Kind==AzureAttackKind.FrostBolt && !forecast)
+        if(Plan.Kind==AzureAttackKind.GlacialCut)
         {
+            if(!girl.State.Field.ClipAxis(from.X,from.Y,d.X,d.Y,out float first,out float last))
+            {to=from;return false;}
+            Vector2 end=from+d*last;from+=d*first;
+            to=forecast?end:Vector2.Lerp(from,end,AzureRules.CutReach(age-Plan.Fire));
+            radius*=forecast?1:AzureRules.CutWidth(age-Plan.Fire);return radius>0;
+        }
+        if(Plan.Kind==AzureAttackKind.FrostBolt)
+        {
+            if(forecast)
+            {
+                if(!TryEmitter(out var emitter)){to=from;return false;}
+                from=emitter!.Center;d=(FrozenVolleyAim-from).SafeNormalize(d);to=from+d*4000;return true;
+            }
             d=Projectile.velocity.SafeNormalize(d);to=Projectile.Center+d*18;
             from=Projectile.Center-d*30;radius*=AzureRules.Envelope(age-Plan.Fire,Plan.End-Plan.Fire);return true;
         }
@@ -82,15 +101,29 @@ public sealed class AzureAttack : ModProjectile
         Projectile.hostile = valid && g!.VisualAge >= Plan.Fire && g.VisualAge < Plan.End;
         if (g is not null && valid)
         {
-            Projectile.timeLeft = Math.Max(2, Plan.End + 16 - (int)g.VisualAge);
+            int residue=Plan.Kind==AzureAttackKind.GlacialCut?AzureRules.CutResidue:0;
+            Projectile.timeLeft = Math.Max(2, Plan.End + residue + 16 - (int)g.VisualAge);
             if(Plan.Kind==AzureAttackKind.FrostBolt)
             {
                 float t=g.VisualAge-Plan.Fire;
-                if(t<0){Projectile.Center=new(Plan.X,Plan.Y);Projectile.velocity=Vector2.Zero;}
+                if(t<0)
+                {
+                    if(TryEmitter(out var emitter))Projectile.Center=emitter!.Center;
+                    else if(Main.netMode!=NetmodeID.MultiplayerClient){Projectile.Kill();return;}
+                    Projectile.velocity=Vector2.Zero;
+                }
                 else
                 {
                     if(Projectile.localAI[0]==0)
-                    {Projectile.localAI[0]=1;if(Projectile.velocity.LengthSquared()<1)Projectile.velocity=Plan.Angle.ToRotationVector2()*24;}
+                    {
+                        Projectile.localAI[0]=1;
+                        if(Projectile.velocity.LengthSquared()<1)
+                        {
+                            if(TryEmitter(out var emitter))Projectile.Center=emitter!.Center;
+                            Projectile.velocity=(FrozenVolleyAim-Projectile.Center).SafeNormalize(Plan.Angle.ToRotationVector2())*24;
+                        }
+                        if(Main.netMode!=NetmodeID.MultiplayerClient)Projectile.netUpdate=true;
+                    }
                     if(Main.netMode!=NetmodeID.MultiplayerClient && t<45 && g.State.Contains(Plan.Target))
                     {
                         var p=Main.player[Plan.Target];
@@ -107,7 +140,7 @@ public sealed class AzureAttack : ModProjectile
                 }
             }
             else if (Geometry(g, g.VisualAge, g.VisualAge < Plan.Fire, out var a, out var b, out _)) Projectile.Center = (a + b) * .5f;
-            if (Main.netMode != NetmodeID.MultiplayerClient && g.VisualAge >= Plan.End + 16) Projectile.Kill();
+            if (Main.netMode != NetmodeID.MultiplayerClient && g.VisualAge >= Plan.End + residue + 16) Projectile.Kill();
         }
         else if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
     }

@@ -36,6 +36,21 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
 - SHA256: `64a45057948b83ccfa4f6fb5dff15a7d7e71fbbd7d7225ea4af1e57221928ece3`
 
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionFury.png`
+- Asset ID: azure-vitrion-fury-20260921
+- Asset type: 1024x1024 dedicated second-form worm parts atlas
+- Creator: project-owner-directed original implementation/artwork with OpenAI
+- Creation/acquisition date: 2026-09-21
+- Source type: generated
+- Source work and URL: Built-in edit of project-owned Vitrion atlas; no third-party image input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Nearest-neighbor1280x1280 to1024x1024 transparent export; separate material spine alignment, articulated jaws and phase reveal. Source SHA256 `a290fe57c79684b1a570c1a5377618447532660897436d1a08391bd6bdf42ddd`; original retained in external image archive, first form unchanged.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha/material/offline composition inspection2026-09-21; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `20863d0de5d8b183dbbf49c8e9a798fa915f900426bd78c8265e4be103716581`
+
 - Runtime file: `Assets/Textures/AzureCathedral/Cathedral.png`
 - Asset ID: azure-cathedral-20260920
 - Asset type: 1672x941 glacial cathedral background
@@ -68,7 +83,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/AzureGlass.fxc`
 - Asset ID: azure-glass-material-20260920
-- Asset type: compiled original ice/glass/background/shard/rift/countdown/frost/dissolution effect
+- Asset type: compiled original ice/glass/background/shard/rift/countdown/frost/dissolution/streaming-energy effect
 - Creator: project-owner-directed original implementation/artwork with OpenAI
 - Creation/acquisition date: 2026-09-20
 - Source type: original
@@ -79,7 +94,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `12a0f400b6da62d9c6208d55d0286ec87e84df4219c79cda1a656e5d25bbfde7`
+- SHA256: `8d43d6aeb9c28d0e9153dba2bd8cec58d7fdef6f3e8f16c2a4c9e45c1c588ebe`
 
 - Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
 - Asset ID: azure-eighth-white-night-20260920
@@ -314,7 +329,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Source type: original
 - Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fx`; no foreign shader/artwork copied
 - Tool/model/version: FXC compiler/options and source/export identities in `Assets/AutoloadedEffects/Shaders/compiled.json`
-- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; September20 crossflow receiver vapor and continuous microflutter/contracting slash residue. Runtime motion/composition in `ScarletSorcery.cs`; independently adapted behavioral reference recorded in [F18](../docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20), no external code/art/audio copied.
+- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; September20 crossflow receiver vapor and continuous microflutter/contracting slash residue. September21 exposes tear palette parameters for Liora's cyan variant while preserving Scarlet's red defaults. Runtime motion/composition in `ScarletSorcery.cs`; independently adapted behavioral reference recorded in [F18](../docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20), no external code/art/audio copied.
 - License and redistribution terms: original project asset under existing project terms; Luminance supplies its runtime noise, not vendored
 - Required attribution: retain this provenance and source/export manifest
 - Reviewer and review date: Codex,2026-09-20; actual compiled FNA GPU frames inspected, game/MP acceptance not_run

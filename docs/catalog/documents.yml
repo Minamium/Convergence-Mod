@@ -106,13 +106,13 @@ documents:
 - doc_id: adr.0028
   path: docs/adr/0028-azure-cathedral-native-actors.md
   title: 'ADR-0028: Azure Cathedral native actors and hazards'
-  content_sha256: d53d81aa59bb0948cea7dfb62d7e4bda4d4c9d4de2f851aa28bae2973e2d75fe
+  content_sha256: 3b9ad88104136d61ab9cb693584cce7cdd24831b7f74c4612ca207cfae19160c
   document_type: adr
   status: accepted
   owners:
   - architecture
   - gameplay
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-21'
   source_of_truth_for:
   - authority.azure_cathedral
   aliases: []
@@ -595,12 +595,12 @@ documents:
 - doc_id: encounter.azure-cathedral.assets
   path: docs/encounters/azure-cathedral/ASSET_BRIEF.md
   title: Azure Cathedral asset brief
-  content_sha256: 3a374805718e7fe3900164a33833df981e08d461315f057bf5b0111f3c632f7a
+  content_sha256: 3c096629356f762129618d85ed63325a630188edb551970088336a7705596f94
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-21'
   source_of_truth_for:
   - encounter.azure_cathedral.asset_brief
   aliases: []
@@ -611,14 +611,14 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: 6509c7277f96eed1152e9702a19e7c27cdd7a9d066b8e6e1379e8981f1b6f595
+  content_sha256: e727b584f6da43a44cf24f8ef420f745b5ed8de67dbbc0d678d61709c90e2e60
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-21'
   source_of_truth_for:
   - encounter.azure_cathedral.experience
   - encounter.azure_cathedral.presentation
@@ -927,12 +927,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: c471b44a611ae2a7d57d17f40d89000c329871dbc26fe1ddd92b4600197fdfc9
+  content_sha256: 826f16e3d7cf8de1ad9f6b18c68c9d8ea4e976cc1f4ef69257038fb25b35d135
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-21'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1326,12 +1326,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: f53bf0a853de75e74473309b5f22727c4656e8c5d2f236144290a14ade229a95
+  content_sha256: f3de83ecd5df173d507eb4e8b54128c0f33d802c0a786143d425a123e8a33f31
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-21'
   source_of_truth_for:
   - project.implementation_status
   aliases:
