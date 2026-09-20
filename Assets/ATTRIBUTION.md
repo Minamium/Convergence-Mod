@@ -219,7 +219,7 @@
 - Source type: original
 - Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fx`; no foreign shader/artwork copied
 - Tool/model/version: FXC compiler/options and source/export identities in `Assets/AutoloadedEffects/Shaders/compiled.json`
-- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; runtime motion/composition in `ScarletSorcery.cs`
+- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; September20 crossflow receiver vapor and continuous microflutter/contracting slash residue. Runtime motion/composition in `ScarletSorcery.cs`; independently adapted behavioral reference recorded in [F18](../docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20), no external code/art/audio copied.
 - License and redistribution terms: original project asset under existing project terms; Luminance supplies its runtime noise, not vendored
 - Required attribution: retain this provenance and source/export manifest
 - Reviewer and review date: Codex,2026-09-20; actual compiled FNA GPU frames inspected, game/MP acceptance not_run

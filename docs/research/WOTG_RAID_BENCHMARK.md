@@ -6,7 +6,7 @@ owners:
   - research
   - art
   - gameplay
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-20
 source_of_truth_for: []
 aliases:
   - Wrath of the Gods benchmark
@@ -418,6 +418,16 @@ Selected official code retrieved/inspected on2026-09-15:
 **Direct video observation:** owner recordingA (`Terraria_ Not to be confused with Catastrophe 2026-09-13 19-57-13.mp4`,157.31s,1920×1012, about29.81fps) was sampled into a whole-recording overview, then73–76s at4fps for release inspection. Observed red energy with white cores, long travelling tails, connected glow and residual curling smoke. Some visible energy belongs to player weapons; do not attribute every ray to a particular Boss. This is sampled visual inspection, not continuous playback/audio listening. Raw video/frames remain ignored and external.
 
 **Independent implementation:** use a new original twelve-part machine atlas; procedural joints, attached plates, recoil and fractional clocks rather than moving one finished illustration. Preserve one-second frozen forecasts, extend full-field release and visible tails; reuse Convergence PortalBeam/RaidEnergy and a newly authored red reactor shader. Keep emitter/core effects on rotated local anchors and keep thin forecast axes separate from sparse damage-footprint particles. No external code, formulas, audio or textures copied; Luminance supplies its existing runtime noise. [Crimson spec](../encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns behavior; [revision evidence](../evidence/2026-09-15-crimson-stage.json) owns verification, not claims of visual parity or measured FPS.
+
+### F18 — Orderbringer cursor-hit reference (2026-09-20)
+
+**Question:** remake Scarlet spatial cuts using the owner's blade-hit/cursor effect, not an assumed WotG Boss attack. Reuse F14's two external recording identities and F11's Calamity source/version/license boundary. The official public snapshot still resolves to `1a8cebd27ec5615316b78f71973446b5528d2b78`; it is not claimed identical to installed2.2.4 or the recordings' unidentified versions.
+
+**Observed:** existing whole-video overviews were inspected, then48 native frames across A131.50–132.28s and B23.50–24.28s. The footage mixes the player's curved wave/star train with very fast long luminous falling/slanted strikes and Boss forecasts; B23.9–24.2s especially shows thin long white/pink strokes over the Boss while the player's attack is active. A131.5–132.0s shows short bright emergence, an elongated coloured trail and shrinking afterimage. This is sampled visual inspection, not isolated particle provenance or audio listening. Approximate frame timestamps are navigation aids for variable-frame-rate video.
+
+**Pinned call path:** [`Orderbringer.OnHitNPC`](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/Items/Weapons/Melee/Orderbringer.cs) spawns two `OrderbringerBeam` projectiles above the cursor, selecting a nearby NPC when available. [`OrderbringerBeam`](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/Projectiles/Melee/OrderbringerBeam.cs) uses many sub-updates, a short afterimage cache and stretched shrinking bloom particles; its reference photosensitivity switch suppresses trails. This distinguishes the direct-hit effect from `OrderbringerWaveProj`/`StarofOrder` emitted during swings. Source explains a plausible correspondence, not exact identification of every superimposed video stroke.
+
+**Adapt, independently:** Scarlet retains its red palette, fixed forewarned line and server-owned hit window; it does not copy homing, rainbow colours, source code, textures or audio. Original `ScarletSorcery` draws a narrow hot blade, continuous low-amplitude microflutter, sparse stretched glints, contracting filaments and faint harmless turbulent aftermath. ActIII repeats offset lattices on accepted score beats. The beam's left receiving seal gains localized vapor, not a scene-covering smoke overlay. Actual compiled GPU frames and shared-geometry checks are recorded in [crossflow evidence](../evidence/2026-09-20-scarlet-crossflow.json); in-game appearance/MP/audio acceptance remains separate. External originals and frame sheets remain local, not distributed.
 
 ## 8. 未確認・次に埋める項目
 

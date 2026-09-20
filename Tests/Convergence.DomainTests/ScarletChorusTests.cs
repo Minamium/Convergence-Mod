@@ -47,10 +47,10 @@ internal static partial class Program
     [DomainTest("Scarlet Spread checks all pairs once and tangent or solo markers are harmless")]
     private static void ScarletChorusSpreadPairs()
     {
-        CrimsonPoint[] p = { new(0, 0), new(280, 0), new(560, 0) };
+        CrimsonPoint[] p = { new(0, 0), new(400, 0), new(800, 0) };
         var d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(0, 0), p, 7, 7);
         foreach (int damage in d) AssertEqual(0, damage, "tangent circles pass");
-        p[1] = new(279, 0);
+        p[1] = new(399, 0);
         d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(0, 0), p, 7, 7);
         AssertEqual(900, d[0], "first overlap"); AssertEqual(900, d[1], "second overlap"); AssertEqual(0, d[2], "uninvolved third member");
         Array.Fill(p, new CrimsonPoint(0, 0));
@@ -67,8 +67,9 @@ internal static partial class Program
         for (int i = 0; i < 8; i++)
         {
             AssertEqual(0, d[i], "eight separated centers");
-            AssertEqual(true, positions[i].X - 140 >= field.Left && positions[i].X + 140 <= field.Right
-                && positions[i].Y - 140 >= field.Top && positions[i].Y + 140 <= field.Bottom, "complete markers inside field");
+            float r=CrimsonChorusRules.SpreadRadius;
+            AssertEqual(true, positions[i].X - r >= field.Left && positions[i].X + r <= field.Right
+                && positions[i].Y - r >= field.Top && positions[i].Y + r <= field.Bottom, "complete markers inside field");
         }
     }
     [DomainTest("Scarlet chorus eight-beat calls and recovery stay bounded across the actual score loop")]

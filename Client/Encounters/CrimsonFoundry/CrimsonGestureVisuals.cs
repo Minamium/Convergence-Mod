@@ -40,7 +40,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
                 string asset = p.Technique == CrimsonTechnique.SideBeams ? impact ? "WideFire" : "WideCharge"
-                    : p.Technique == CrimsonTechnique.SpatialRift ? impact ? "ChargeRush" : "ChargeLock"
+                    : p.IsRift ? impact ? "ChargeRush" : "ChargeLock"
                     : impact ? "PortalFire" : "ChargeLock";
                 if (voices.Count < 24)
                 {
@@ -103,7 +103,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
                 var p = gesture.EffectivePlan(age, true);
-                if (p.Aimed) continue;
+                if (p.Aimed || p.IsRift) continue;
                 if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
                 if (warning && DuplicateForecast(p, age)) continue;
@@ -148,26 +148,24 @@ internal sealed class CrimsonGestureVisuals : ModSystem
     private static void DrawTrackingBeams(CrimsonBoss boss, SpriteBatch batch, float age)
     {
         CrimsonEnergy.Begin();
-        Span<CrimsonStroke> strokes=stackalloc CrimsonStroke[4];
+        Span<CrimsonStroke> strokes=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
             if (projectile.ModProjectile is not CrimsonGesture g || !g.TryBoss(out var owner) || owner != boss) continue;
             var p = g.EffectivePlan(age, true);
-            if (!p.Aimed || !g.ForecastReady || age < p.Born || age >= p.End) continue;
+            if ((!p.Aimed && !p.IsRift) || !g.ForecastReady || age < p.Born
+                || age >= p.End + (p.IsRift ? CrimsonSpatialCuts.ResidueTicks : 0)) continue;
             bool warning = age < p.Fire;
-            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning);
+            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift);
+            if (p.Technique == CrimsonTechnique.SideBeams) ScarletSorcery.CrossflowSeals(batch,p,age);
             for(int i=0;i<count;i++) {
             var s = strokes[i];
             Vector2 delta = V(s.B - s.A); float length = delta.Length();
             if (length < .01f || s.Radius < .01f) continue;
             float opacity = warning ? .95f * CrimsonInvocation.Ease((age - p.Born) / 5) : 1;
-            if(p.Technique==CrimsonTechnique.SpatialRift) {
-                ScarletSorcery.Tear(batch,s,age,!warning,opacity,p.Phrase);continue;
-            }
-            if(p.Technique==CrimsonTechnique.SideBeams && i%2==0) {
-                float charge=Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1);
-                float tail=warning?1:1-CrimsonInvocation.Ease((age-(p.End-15))/15);
-                ScarletSorcery.Seal(batch,V(s.A),80+charge*105,.28f,.04f,age,charge,tail,false,i);
+            if(p.IsRift) {
+                ScarletSorcery.Tear(batch,s,age,p.Fire,p.End,Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1),
+                    opacity,p.Phrase*7+p.Pulse*3+i);continue;
             }
             CrimsonEnergy.Add(V(s.A), delta / length, length, s.Radius, age, p.Fire, p.End,
                 opacity, CrimsonVisuals.Reduced, p.Born, fieldBeam: true);

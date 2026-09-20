@@ -20,12 +20,28 @@ internal static class ScarletSorcery
         Draw(batch, center-u*.5f-v*.5f, u, v, age, new(charge,0,alpha,CrimsonVisuals.Reduced?1:0),
             new(radius*2,radius,seed,black?1:0), "AutoloadPass");
     }
-    internal static void Tear(SpriteBatch batch, CrimsonStroke s, float age, bool live, float alpha, float seed)
+    internal static void Tear(SpriteBatch batch, CrimsonStroke s, float age, float fire, float end, float charge, float alpha, float seed)
     {
         Vector2 a = new(s.A.X,s.A.Y), delta = new(s.B.X-s.A.X,s.B.Y-s.A.Y);
         if (delta.LengthSquared() < .01f || s.Radius <= .001f || alpha <= .001f) return;
-        Vector2 n = new Vector2(-delta.Y,delta.X) / delta.Length() * s.Radius;
-        Draw(batch,a-n,delta,n*2,age,new(1,live?1:0,alpha,0),new(delta.Length(),s.Radius,seed,0),"TearPass");
+        // Pad only the material quad. The white/red blade stays inside the
+        // shared capsule; smoke and recoil filaments are harmless decoration.
+        Vector2 n = new Vector2(-delta.Y,delta.X) / delta.Length() * (s.Radius + 72);
+        Draw(batch,a-n,delta,n*2,age,new(charge,age-fire,alpha,CrimsonVisuals.Reduced?1:0),
+            new(delta.Length(),s.Radius,seed,end-fire),age<fire?"TearForecastPass":"TearPass");
+    }
+    internal static void CrossflowSeals(SpriteBatch batch, in CrimsonGesturePlan p, float age)
+    {
+        var span = CrimsonChoreography.Side(p, age, true);
+        float charge = Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1);
+        float alpha = CrimsonInvocation.Ease((age-p.Born)/7) * (1-CrimsonInvocation.Ease((age-(p.End-15))/15));
+        float radius = 80 + charge*105;
+        Seal(batch,new(span.A.X,span.A.Y),radius,.28f,MathF.PI/2,age,charge,alpha,false,p.Phrase);
+        Seal(batch,new(span.B.X,span.B.Y),radius,.28f,MathF.PI/2,age,charge,alpha,false,p.Phrase+.5f);
+        float smoke = CrimsonInvocation.Ease((age-p.Fire-7)/12)*alpha;
+        if (smoke>.001f)
+            Draw(batch,new(span.B.X-170,span.B.Y-200),new(240,0),new(0,400),age,
+                new(charge,1,smoke,CrimsonVisuals.Reduced?1:0),new(240,200,p.Phrase,0),"VaporPass");
     }
     internal static void Flame(SpriteBatch batch, Vector2 from, Vector2 to, float width, float age, float alpha)
     {
