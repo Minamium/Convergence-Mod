@@ -19,7 +19,8 @@ public sealed class OboroHeldProj : ModProjectile
     internal OboroComboStep Settings => OboroComboSettings.For(comboIndex);
     internal float Progress => attackDuration == 0 ? 0 : timer / attackDuration;
     internal OboroMotionPhase Phase => attackDuration == 0 ? OboroMotionPhase.Idle
-        : comboIndex == 0 ? OboroFirstSwingMotion.Phase(Progress) : Settings.Phase(Progress);
+        : comboIndex switch { 0 => OboroFirstSwingMotion.Phase(Progress),
+            1 => OboroSecondSwingMotion.Phase(Progress), _ => Settings.Phase(Progress) };
 
     public override string Texture => "Convergence/Assets/Textures/Items/Oboro/Blade";
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 900;
@@ -69,7 +70,7 @@ public sealed class OboroHeldProj : ModProjectile
         // 入力を離した場合も現在段の終了までは進み、その後Idleへ戻る。
         Projectile.rotation = state.View.Aim + state.View.Facing * OboroRules.Offset(comboIndex,
             attackDuration == 0 ? 1 : Progress);
-        var hand = comboIndex == 0 ? OboroHandAnchor.Capture(player, state.View.Facing) : default;
+        var hand = comboIndex < 2 ? OboroHandAnchor.Capture(player, state.View.Facing) : default;
         var offset = OboroRules.RootOffset(comboIndex, attackDuration == 0 ? 1 : Progress, state.View.Aim, Projectile.rotation, hand);
         Projectile.Center = player.MountedCenter + new Vector2(offset.X, offset.Y);
         Projectile.direction = Projectile.spriteDirection = state.View.Facing;

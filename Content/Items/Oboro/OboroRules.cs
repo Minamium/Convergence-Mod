@@ -18,6 +18,7 @@ internal static class OboroRules
     internal static float Offset(int step, float progress)
     {
         if (step == 0) return OboroFirstSwingMotion.Angle(progress);
+        if (step == 1) return OboroSecondSwingMotion.Angle(progress);
         OboroComboStep settings = OboroComboSettings.For(step);
         float windup = settings.HitStart, p = Math.Clamp(progress, 0, 1);
         // 仮の補間。判定と描画が同じ定義を読む。次工程で各区間の緩急を詰める。
@@ -37,8 +38,9 @@ internal static class OboroRules
     internal static (float X, float Y) RootOffset(int step, float progress, float aim, float bladeAngle, OboroHandBasis hand)
     {
         float forward = OboroComboSettings.For(step).ForwardDistance;
-        var at = step == 0 ? hand.At(bladeAngle) : default;
-        float weight = step == 0 ? OboroFirstSwingMotion.HandWeight(progress) : 0;
+        var at = step < 2 ? hand.At(bladeAngle) : default;
+        float weight = step switch { 0 => OboroFirstSwingMotion.HandWeight(progress),
+            1 => OboroSecondSwingMotion.HandWeight(progress), _ => 0 };
         return (MathF.Cos(aim) * forward + at.X * weight, MathF.Sin(aim) * forward + at.Y * weight);
     }
     internal static int FireDps(int maximumLife) => (int)Math.Min(int.MaxValue / 4L, 200L + Math.Max(0, maximumLife) / 50L);
