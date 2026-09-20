@@ -611,7 +611,7 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: c545505c5b097997c7fc10bd501ded04cd75cd0056ca718de04ccee779e45906
+  content_sha256: 6509c7277f96eed1152e9702a19e7c27cdd7a9d066b8e6e1379e8981f1b6f595
   document_type: spec
   status: accepted
   owners:
