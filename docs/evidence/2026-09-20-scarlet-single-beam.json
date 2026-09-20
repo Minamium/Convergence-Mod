@@ -41,10 +41,12 @@
   },
   "audio": "Reference existing Doll Beams/ChargeLock (0.4s) and PortalFire (1.24s) at0.48/0.72, leases50/100ticks allow natural tails. Bespoke Scarlet cues no longer referenced; originals preserved. Existing chorus/cinematic cues unchanged.",
   "checks": {
-    "domain_codec": "pass: 312 deterministic domain cases; protocol54 compiled probe334 round-trips and54 malformed/truncated rejections",
-    "repository": "pass: repository918 files, YAML12 files,30 focused Python presentation/contracts checks; catalog regenerated after final indexed edits",
+    "domain_codec": "pass: initial312 deterministic domain cases; after integrating Oboro PR55,316 domain cases and protocol55 compiled probe334 round-trips/54 malformed or truncated rejections",
+    "repository": "pass: integrated repository925 files, YAML12 files,30 focused Python presentation/contracts checks; catalog regenerated after final indexed edits",
     "graphics": "45 offline FNA D3D11 frames with linked production edge-to-edge geometry, CrimsonEnergy and the actual compiled Doll PortalForecast/PortalBeam/ForecastDust passes plus shared graphics-state scope. Moving warning, locked extension, sustained jet and thinning inspected. No forecast hard rails or capsule caps. Not native replication, in-game acceptance or performance evidence.",
-    "native_build": "pass: isolated native0.3.26 candidate,0 errors/4 pre-existing nullable warnings; identity/solo probe passed. Main advanced with Oboro PR55 during work; integrated version/build recorded after merge.",
+    "native_build": "pass: 0.3.27/protocol55 on df98680 including main387da55 (Oboro PR55),0 errors/4 existing nullable warnings; package identity/solo probe passed. tModLoader2026.07.3.0,Calamity2.2.4,Luminance1.0.14,SDK8.0.424. Source unchanged during build. Four pre-existing generated locale edits preserved and recorded, not committed.",
+    "build_record_relative": ".local/builds/20260920T055239453711Z/record.json",
+    "package_sha256": "4257cc8fb1ed156cf92ed6e5bcbee655059befcf7e0db646c8eda7e077ffd828",
     "runtime": "not_run: owner SP/MP aim lock/collision and rhythm, audio seam/mix, remote delay and Reduced Effects"
   }
 }
