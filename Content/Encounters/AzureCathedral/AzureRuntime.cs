@@ -28,6 +28,8 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private AzureWorm? worm;
     private AzureMember[] members = Array.Empty<AzureMember>();
     private AzureStage stage;
+    private AzurePhase phase;
+    private int phaseAt = -1;
     private int age, music = -1, unlock = -1, ending = -1, gm, wm;
     private bool claimed, cleaned, cancelled, enraged;
     private readonly AzureDefeats defeats = new();
@@ -36,18 +38,19 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private bool wormDead => defeats.Worm;
     private Vector2 chargeGoal, curveA, curveB, curveC, curveD;
     private int previousDamage;
+    private bool projectionDirty, floorReached;
+    private Vector2 ceremonyFrom;
     internal AzureRuntime(FightId id, int sender, IRaidPedestal core, ulong seq)
     { fight = id; summoner = sender; pedestal = core; sequence = seq; gm = AzureRules.Life(1, false); wm = AzureRules.Life(1, true); }
     private AzureState State => new(fight.Value, age, music, unlock, ending, stage, members,
         (int)pedestal.Ground.X, (int)pedestal.Ground.Y, gm, wm,
         girlDead ? 0 : Math.Clamp(girl?.NPC.life ?? gm, 0, gm), wormDead ? 0 : Math.Clamp(worm?.NPC.life ?? wm, 0, wm),
-        (short)(worm?.NPC.whoAmI ?? -1), enraged);
+        (short)(worm?.NPC.whoAmI ?? -1), enraged, phase, phaseAt);
     internal bool Matches(AzureBoss value) => !cleaned && ReferenceEquals(girl, value) && value.State.Fight == fight.Value;
     internal void Killed(bool isWorm)
     {
-        if (cleaned || stage != AzureStage.Performance || !defeats.Mark(isWorm)) return;
-        ClearHazards(isWorm ? AzureAttackKind.MouthBeam : AzureAttackKind.Icicle);
-        if (!isWorm) { ClearHazards(AzureAttackKind.GlassRain); chorus.Clear(fight.Value); }
+        if (cleaned || !State.Live || isWorm && phase != AzurePhase.Fury || !defeats.Mark(isWorm)) return;
+        if (!isWorm) { ClearHazards(AzureAttackKind.MouthBeam); ClearHazards(AzureAttackKind.Icicle); ClearHazards(AzureAttackKind.GlassRain); chorus.Clear(fight.Value); }
         AzurePackets.Log($"event=ActorDefeated fight={fight.Value} actor={(isWorm ? "worm" : "girl")} age={age}"); Project(true);
     }
     internal bool Request(int sender, Guid connection, bool ready, bool cancel)
@@ -96,8 +99,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
         }
         else if (context.Lifecycle == EncounterLifecycle.Active)
         {
-            if (wormDead) RetireWorm();
-            if (defeats.RequiresChain(worm is not null))
+            if (worm is not null)
             {
                 int parts = 0; bool linked = true;
                 foreach (var part in Main.ActiveNPCs)
@@ -119,19 +121,44 @@ internal sealed class AzureRuntime : IEncounterRuntime
             if (ending < 0 && (allOut || girlDead && wormDead))
             {
                 ending = age; stage = allOut ? AzureStage.Defeat : AzureStage.Victory;
+                if (stage == AzureStage.Victory) { phase=AzurePhase.Melting; phaseAt=age; ceremonyFrom=worm!.NPC.Center; }
                 ClearHazards(); Project(true);
                 AzurePackets.Log($"event={stage} fight={fight.Value} age={age} remaining_hp={State.TotalLife}");
             }
             if (ending >= 0)
             {
                 girl.NPC.velocity = Vector2.Zero;
-                if (worm is not null && !wormDead) worm.NPC.velocity = Vector2.Zero;
-                if (age >= ending + AzureRules.Ending) return End(stage == AzureStage.Victory ? EncounterEndReason.Victory : EncounterEndReason.Defeat);
-                Project(age % 10 == 0); return EncounterRuntimeUpdate.None;
+                if (worm is not null)
+                {
+                    worm.NPC.ai[2]=0;
+                    float t=age-ending;
+                    var center=new Vector2(State.Field.CenterX,State.Field.CenterY);
+                    // Rush to the stage, brake; the linked chain dissolves from head to tail.
+                    Vector2 next=Vector2.Lerp(ceremonyFrom,center,AzureRules.Ease(t/72));
+                    worm.NPC.velocity=stage==AzureStage.Victory?next-worm.NPC.Center:Vector2.Zero;
+                }
+                if (age >= ending + AzureRules.ExitDuration(stage)) return End(stage == AzureStage.Victory ? EncounterEndReason.Victory : EncounterEndReason.Defeat);
+                Project(age % 6 == 0); return Publish();
             }
             if (worm is null && age >= music + AzureRules.WormArrival) { SpawnWorm(); Project(true); }
             if (age >= unlock) stage = AzureStage.Performance;
-            enraged |= State.TotalLife <= State.TotalMax / 2;
+            if (phase==AzurePhase.Duet && worm is not null && worm.NPC.life<=AzureRules.WormFloor(wm))
+            {
+                worm.NPC.life=AzureRules.WormFloor(wm);
+                if(!floorReached){floorReached=true;AzurePackets.Log($"event=WormFloor fight={fight.Value} age={age} hp={worm.NPC.life}");}
+            }
+            if (stage==AzureStage.Performance && AzureRules.CanDevour(phase,State.GirlLife,State.WormLife,wm))
+            {
+                phase=AzurePhase.Devouring;phaseAt=age;ceremonyFrom=worm!.NPC.Center;
+                ClearHazards();worm.NPC.ai[2]=0;Project(true);
+                AzurePackets.Log($"event=Devouring fight={fight.Value} age={age} contact={age+AzureRules.DevourContact}");
+            }
+            if(AzureRules.CanRefill(phase,phaseAt,age))
+            {
+                phase=AzurePhase.Fury;phaseAt=age;enraged=true;worm!.NPC.life=wm;
+                previousDamage=0;Project(true);
+                AzurePackets.Log($"event=Fury fight={fight.Value} age={age} worm_hp={wm}");
+            }
             Move();
             if(worm is not null && !wormDead)
             {
@@ -140,7 +167,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
                 next.X=Math.Clamp(next.X,100,Main.maxTilesX*16-100);next.Y=Math.Clamp(next.Y,100,Main.maxTilesY*16-100);
                 worm.NPC.velocity=next-worm.NPC.Center;
             }
-            if (stage == AzureStage.Performance)
+            if (State.Live)
             {
                 chorus.Tick(State, girl, !girlDead);
                 Schedule();
@@ -148,12 +175,14 @@ internal sealed class AzureRuntime : IEncounterRuntime
             if (age % 300 == 0)
             {
                 int damage = State.TotalMax - State.TotalLife;
-                AzurePackets.Log($"event=Progress fight={fight.Value} age={age} phrase={AzureRules.Phrase(age,unlock)} girl_hp={State.GirlLife} worm_hp={State.WormLife} interval_dps={(damage-previousDamage)/5} enraged={enraged}");
+                AzurePackets.Log($"event=Progress fight={fight.Value} age={age} phrase={AzureRules.Phrase(age,State.AttackEpoch)} phase={phase} girl_hp={State.GirlLife} worm_hp={State.WormLife} interval_dps={Math.Max(0,damage-previousDamage)/5} enraged={enraged}");
                 previousDamage = damage;
             }
         }
-        Project(age % 6 == 0); return EncounterRuntimeUpdate.None;
+        Project(age % 6 == 0); return Publish();
     }
+    private EncounterRuntimeUpdate Publish()
+    { bool dirty=projectionDirty;projectionDirty=false;return dirty?EncounterRuntimeUpdate.ObservableChange():EncounterRuntimeUpdate.None; }
     private bool Roster()
     {
         var next = new List<AzureMember>();
@@ -190,29 +219,35 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private Vector2 Focus()
     {
         var alive = Array.FindAll(members, m => !m.Out);
-        int n = (Math.Max(0, age - unlock) / AzureRules.ChargeTicks) % Math.Max(1, alive.Length);
+        int n = (Math.Max(0, age - State.AttackEpoch) / AzureRules.ChargeTicks) % Math.Max(1, alive.Length);
         return alive.Length == 0 ? girl!.NPC.Center : Main.player[alive[n].Slot].Center;
     }
     private void Move()
     {
-        var f = State.Field; int phrase = AzureRules.Phrase(age, unlock), t = AzureRules.Clock(age, unlock);
+        var f = State.Field; int phrase = AzureRules.Phrase(age, State.AttackEpoch), t = AzureRules.Clock(age, State.AttackEpoch);
         girl!.NPC.Center = new(f.CenterX, f.CenterY); girl.NPC.velocity = Vector2.Zero;
         girl.NPC.spriteDirection = Focus().X < girl.NPC.Center.X ? -1 : 1;
         if (worm is null || wormDead) return;
+        if(phase==AzurePhase.Devouring)
+        {
+            Vector2 mouthTarget=girl.NPC.Center-(girl.NPC.Center-ceremonyFrom).SafeNormalize(Vector2.UnitX)*126;
+            Vector2 next=Vector2.Lerp(ceremonyFrom,mouthTarget,AzureRules.DevourTravel(age-phaseAt));
+            worm.NPC.velocity=next-worm.NPC.Center;worm.NPC.ai[2]=0;return;
+        }
         Vector2 goal; float speed;
-        if (stage == AzureStage.Performance && AzureRules.ChargePhrase(phrase))
+        if (State.Live && (AzureRules.ChargePhrase(phrase) || enraged && phrase is 2 or 5))
         {
             int dash = t % AzureRules.ChargeTicks;
             if (dash == 0)
             {
                 chargeGoal = Focus(); worm!.NPC.ai[0] = chargeGoal.X; worm.NPC.ai[1] = chargeGoal.Y;
-                int serial = (age-unlock)/AzureRules.ChargeTicks;
+                int serial = (age-State.AttackEpoch)/AzureRules.ChargeTicks;
                 float side = serial%2 == 0 ? -1 : 1;
                 curveA = worm.NPC.Center;
-                curveD = new(f.CenterX + side*1660, Math.Clamp(chargeGoal.Y + side*120, f.Top+100, f.Bottom-100));
+                curveD = new(f.CenterX + side*2050, Math.Clamp(chargeGoal.Y + side*240, f.Top+80, f.Bottom-80));
                 var direction = (chargeGoal-curveD).SafeNormalize(Vector2.UnitX);
-                curveB = curveA + worm.NPC.velocity.SafeNormalize(-Vector2.UnitX)*800;
-                curveC = curveD - direction*720;
+                curveB = curveA + worm.NPC.velocity.SafeNormalize(-Vector2.UnitX)*1100;
+                curveC = curveD - direction*980;
                 worm.NPC.netUpdate = true;
             }
             if (dash < AzureRules.ChargeWarning)
@@ -222,17 +257,37 @@ internal sealed class AzureRuntime : IEncounterRuntime
             }
             else if (dash == AzureRules.ChargeWarning)
             {
-                worm!.NPC.velocity = (chargeGoal - worm.NPC.Center).SafeNormalize(Vector2.UnitX) * (enraged ? 56 : 48);
+                worm!.NPC.velocity = (chargeGoal - worm.NPC.Center).SafeNormalize(Vector2.UnitX) * (enraged ? 74 : 62);
                 worm.NPC.ai[2] = 1; worm.NPC.netUpdate = true; return;
             }
             else if (dash < AzureRules.ChargeEnd) return;
-            else { goal = new(f.CenterX, f.Top - 440); speed = 30; }
+            else { goal = new(f.CenterX, f.Top - 680); speed = 42; }
+        }
+        else if(State.Live && phrase is 1 or 4)
+        {
+            // The diagonal pass has one continuous path and a deliberate braking hold.
+            if(t==0)
+            {
+                float side=phrase==1?-1:1;curveA=worm.NPC.Center;
+                curveB=curveA+worm.NPC.velocity.SafeNormalize(-Vector2.UnitX)*1050;
+                curveD=new(f.CenterX+side*750,f.CenterY-260);
+                curveC=curveD-new Vector2(-side,1)*720;
+            }
+            if(t<AzureRules.VolleyApproach)
+            {
+                // Ease-out at the end while preserving the previous tangent on entry.
+                float u=1-MathF.Pow(1-(t+1)/(float)AzureRules.VolleyApproach,2);
+                worm.NPC.velocity=V(AzureFlight.Curve(N(curveA),N(curveB),N(curveC),N(curveD),u))-worm.NPC.Center;
+                worm.NPC.ai[2]=0;return;
+            }
+            if(t<AzureRules.VolleyFire+18){worm.NPC.velocity*=.92f;worm.NPC.ai[2]=0;return;}
+            goal=new(f.CenterX+(phrase==1?2100:-2100),f.Top-700);speed=enraged?50:38;
         }
         else
         {
             float theta = (age - Math.Max(0, music)) * (enraged ? .0065f : .005f);
-            goal = new(f.CenterX + MathF.Cos(theta) * 1720, f.CenterY + MathF.Sin(theta) * 820);
-            speed = stage == AzureStage.Countdown ? 27 : 34;
+            goal = new(f.CenterX + MathF.Cos(theta) * 2200, f.CenterY + MathF.Sin(theta) * 1080);
+            speed = stage == AzureStage.Countdown ? 38 : 42;
         }
         worm!.NPC.ai[2] = 0;
         goal.X=Math.Clamp(goal.X,100,Main.maxTilesX*16-100);goal.Y=Math.Clamp(goal.Y,100,Main.maxTilesY*16-100);
@@ -243,7 +298,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private static Vector2 V(System.Numerics.Vector2 v) => new(v.X,v.Y);
     private void Schedule()
     {
-        int phrase = AzureRules.Phrase(age, unlock), t = AzureRules.Clock(age, unlock);
+        int phrase = AzureRules.Phrase(age, State.AttackEpoch), t = AzureRules.Clock(age, State.AttackEpoch);
         if (AzureRules.ChorusPhrase(phrase)) return;
         if (!girlDead && t % (enraged ? 70 : 105) == 0)
         {
@@ -264,13 +319,26 @@ internal sealed class AzureRuntime : IEncounterRuntime
                 for (int i = 0; i < n; i++) Spawn(AzureAttackKind.Icicle, source, direction + (i - (n - 1) * .5f) * .18f, 3000, 12, 300, 60, 140);
             }
         }
-        if (!wormDead && phrase is 1 or 4 && t == 24)
-            Spawn(AzureAttackKind.MouthBeam, worm!.NPC.Center, 0, 3200, enraged ? 82 : 66, 360, 96, 240);
+        if (!girlDead && phrase is 1 or 4 && t == 200)
+            Spawn(AzureAttackKind.MouthBeam, girl!.NPC.Center, (Focus()-girl.NPC.Center).ToRotation()-.6f, 3200, 66, 360, 96, 180);
+        if (!wormDead && phrase is 1 or 4 && t==AzureRules.VolleyFire-AzureRules.VolleyWarning)
+        {
+            var alive=Array.FindAll(members,m=>!m.Out);
+            foreach(var n in Main.ActiveNPCs)
+                if(n.ModNPC is AzureWorm part && part.Fight==fight.Value && alive.Length>0)
+                {
+                    // Rotate segments over living connections; freeze each initial aim on authority.
+                    var target=alive[part.Index%alive.Length];
+                    Vector2 delta=Main.player[target.Slot].Center-n.Center;
+                    Spawn(AzureAttackKind.FrostBolt,n.Center,delta.ToRotation(),4000,13,300,AzureRules.VolleyWarning,170,target.Slot);
+                }
+            AzurePackets.Log($"event=FrostVolley fight={fight.Value} age={age} parts={AzureRules.Segments+1} targets={alive.Length}");
+        }
     }
-    private void Spawn(AzureAttackKind kind, Vector2 source, float direction, float length, float width, int damage, int warning, int live)
+    private void Spawn(AzureAttackKind kind, Vector2 source, float direction, float length, float width, int damage, int warning, int live, short target=-1)
     {
         var plan = new AzureAttackPlan(fight.Value, (short)girl!.NPC.whoAmI, kind, age, age + warning, age + warning + live,
-            source.X, source.Y, direction, length, width, damage);
+            source.X, source.Y, direction, length, width, damage,target);
         int slot = Projectile.NewProjectile(new AzureAttackSource(plan), source, Vector2.Zero,
             ModContent.ProjectileType<AzureAttack>(), damage, 0, Main.myPlayer);
         if (slot >= Main.maxProjectiles) throw new InvalidOperationException("azure.attack_capacity");
@@ -279,7 +347,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private void Project(bool sync)
     {
         if (girl is null) return;
-        girl.State = State; if (sync) { girl.NPC.netUpdate = true; if (worm is not null && !wormDead && worm.NPC.ModNPC==worm) worm.NPC.netUpdate = true; }
+        girl.State = State; if (sync) { projectionDirty=true; girl.NPC.netUpdate = true; if (worm is not null && worm.NPC.ModNPC==worm) worm.NPC.netUpdate = true; }
     }
     private EncounterRuntimeUpdate End(EncounterEndReason reason) => EncounterRuntimeUpdate.End(AzureTermination.End(reason));
     private void ClearHazards(AzureAttackKind? kind = null)
@@ -287,12 +355,6 @@ internal sealed class AzureRuntime : IEncounterRuntime
         if (kind is null) chorus.Clear(fight.Value);
         foreach (Projectile p in Main.ActiveProjectiles)
             if (p.ModProjectile is AzureAttack a && a.Plan.Fight == fight.Value && (kind is null || a.Plan.Kind == kind)) p.Kill();
-    }
-    private void RetireWorm()
-    {
-        foreach (NPC n in Main.ActiveNPCs)
-            if (n.ModNPC is AzureWorm w && w.Fight == fight.Value)
-            { n.active=false; if (Main.netMode==NetmodeID.Server) NetMessage.SendData(MessageID.SyncNPC,number:n.whoAmI); }
     }
     public void Cleanup(in EncounterCleanupContext context)
     {

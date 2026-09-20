@@ -15,8 +15,10 @@ public sealed class AzureBoss : ModNPC
     internal AzureRuntime? Runtime;
     internal AzureState State;
     private ulong received;
-    internal float VisualAge => State.Age + (Main.netMode == NetmodeID.MultiplayerClient ? (float)Math.Min(24UL, Main.GameUpdateCount - received) : 0);
-    internal bool Fresh => Main.netMode != NetmodeID.MultiplayerClient || Main.GameUpdateCount - received <= 60;
+    internal float VisualAge => State.Age + (Main.netMode == NetmodeID.MultiplayerClient ? (float)Math.Min(60UL, Main.GameUpdateCount - received) : 0);
+    internal bool Fresh => Main.netMode != NetmodeID.MultiplayerClient || Main.GameUpdateCount - received <= 180;
+    internal void ApplyProjection(in AzureState next, ulong at)
+    { if(next.CanReplace(State)){State=next;received=Math.Max(received,at);} }
     public override string Texture => "Convergence/Assets/Textures/AzureCathedral/Liora";
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
@@ -53,7 +55,7 @@ public sealed class AzureBoss : ModNPC
     {
         var parsed = AzureState.ReadEnvelope(r);
         if (parsed is not { } next || Main.netMode == NetmodeID.Server || !next.CanReplace(State)) return;
-        State = next; received = Main.GameUpdateCount;
+        ApplyProjection(next,Main.GameUpdateCount);
     }
 }
 
@@ -91,8 +93,13 @@ public sealed class AzureWorm : ModNPC
     public override bool CanHitPlayer(Player target, ref int cooldownSlot)
         => TryGirl(out var girl) && girl!.State.Live && girl.State.WormLife > 0 && girl.State.Contains(target.whoAmI)
         && (Index == 0 ? NPC : Head >= 0 && Head < Main.maxNPCs ? Main.npc[Head] : NPC).ai[2] == 1;
-    public override bool? CanBeHitByItem(Player p, Item item) => TryGirl(out var g) && g!.State.Contains(p.whoAmI) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile p) => TryGirl(out var g) && g!.State.Contains(p.owner) ? null : false;
+    public override bool? CanBeHitByItem(Player p, Item item) => Index==0 && TryGirl(out var g) && g!.State.Contains(p.whoAmI) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile p) => Index==0 && TryGirl(out var g) && g!.State.Contains(p.owner) ? null : false;
+    public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
+    {
+        if(Index==0 && TryGirl(out var g) && g!.State.Phase==AzurePhase.Duet)
+            modifiers.SetMaxDamage(Math.Max(1,NPC.life-AzureRules.WormFloor(g.State.WormMax)));
+    }
     public override void AI()
     {
         NPC.timeLeft = NPC.activeTime;
@@ -102,12 +109,15 @@ public sealed class AzureWorm : ModNPC
             if (Main.netMode != NetmodeID.MultiplayerClient) NPC.active = false;
             return;
         }
-        NPC.dontTakeDamage = !g!.State.Live || g.State.WormLife <= 0;
-        NPC.chaseable = g.State.Live && g.State.WormLife > 0;
+        bool floor=g!.State.Phase==AzurePhase.Duet && NPC.life<=AzureRules.WormFloor(g.State.WormMax);
+        NPC.dontTakeDamage = Index!=0 || !g.State.Live || g.State.WormLife <= 0 || floor;
+        NPC.chaseable = !NPC.dontTakeDamage;
         NPC.boss = Index == 0 && g.State.Live;
         NPC.lifeMax = g.State.WormMax;
         if (Index == 0)
         {
+            if(Main.netMode!=NetmodeID.MultiplayerClient && g.State.Phase==AzurePhase.Duet)
+                NPC.life=Math.Max(NPC.life,AzureRules.WormFloor(g.State.WormMax));
             if (NPC.velocity.LengthSquared() > .2f) NPC.rotation = NPC.velocity.ToRotation();
             return;
         }
@@ -121,7 +131,11 @@ public sealed class AzureWorm : ModNPC
     public override bool CheckDead()
     {
         NPC.life = 1;
-        if (Index == 0 && TryGirl(out var g) && g!.State.Live) g.Runtime?.Killed(true);
+        if (Index == 0 && TryGirl(out var g))
+        {
+            if(g!.State.Phase==AzurePhase.Duet) NPC.life=AzureRules.WormFloor(g.State.WormMax);
+            else if(g.State.Live)g.Runtime?.Killed(true);
+        }
         NPC.dontTakeDamage = true; NPC.netUpdate = Main.netMode != NetmodeID.MultiplayerClient; return false;
     }
     public override void SendExtraAI(BinaryWriter w)

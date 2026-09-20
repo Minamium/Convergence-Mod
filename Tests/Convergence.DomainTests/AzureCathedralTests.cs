@@ -7,6 +7,69 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Azure devouring requires both HP gates in either order and refills only once")]
+    private static void AzureDevouringGates()
+    {
+        for(int members=1;members<=8;members++)
+        {
+            int maximum=AzureRules.Life(members,true),floor=AzureRules.WormFloor(maximum);
+            AssertEqual(maximum/5,floor,"twenty percent");
+            AssertEqual(false,AzureRules.CanDevour(AzurePhase.Duet,1,floor,maximum),"girl still fighting");
+            AssertEqual(false,AzureRules.CanDevour(AzurePhase.Duet,0,floor+1,maximum),"worm not weakened");
+            AssertEqual(true,AzureRules.CanDevour(AzurePhase.Duet,0,floor,maximum),"both gates");
+            AssertEqual(false,AzureRules.CanDevour(AzurePhase.Fury,0,0,maximum),"cannot replay consumption");
+            AssertEqual(false,AzureRules.CanRefill(AzurePhase.Devouring,2000,2000+AzureRules.Devouring-1),"protected scene complete first");
+            AssertEqual(true,AzureRules.CanRefill(AzurePhase.Devouring,2000,2000+AzureRules.Devouring),"single refill deadline");
+            AssertEqual(false,AzureRules.CanRefill(AzurePhase.Fury,2000,9999),"duplicate update no healing");
+        }
+    }
+    [DomainTest("Azure phase and full projection reject regression malformed epochs and every truncated prefix")]
+    private static void AzurePhaseCodec()
+    {
+        var a=AzureExample() with{Stage=AzureStage.Performance,Age=2100,GirlLife=0,WormLife=960000,Phase=AzurePhase.Devouring,PhaseAt=2000};
+        var b=a with{Age=2480,Phase=AzurePhase.Fury,PhaseAt=2480,WormLife=a.WormMax,Enraged=true};
+        var c=b with{Age=3000,Phase=AzurePhase.Melting,PhaseAt=3000,Stage=AzureStage.Victory,EndAt=3000,WormLife=0};
+        AssertEqual(true,b.CanReplace(a),"refill advances phase not old life");AssertEqual(false,a.CanReplace(b),"no old phase");
+        AssertEqual(false,(b with{Age=2500,PhaseAt=2490}).CanReplace(b),"no clock restart");
+        AssertEqual(false,(b with{Age=2500,GirlLife=1}).CanReplace(b),"no stale resurrection");
+        AssertEqual(false,(b with{Age=2501,WormLife=b.WormMax}).CanReplace(b with{Age=2500,WormLife=b.WormMax-1}),"no duplicate refill");
+        AssertEqual(true,c.CanReplace(b),"committed victory retained through melt");
+        foreach(var state in new[]{a,b,c})
+        {
+            AssertEqual(state.Phase,AzureRead(state)!.Value.Phase,"roundtrip");
+            using var m=new MemoryStream();using(var w=new BinaryWriter(m,System.Text.Encoding.UTF8,true))state.WriteEnvelope(w);
+            byte[] bytes=m.ToArray();for(int count=0;count<bytes.Length;count++)
+            {bool rejected=false;try{using var r=new BinaryReader(new MemoryStream(bytes,0,count));AzureState.ReadEnvelope(r);}catch(Exception e)when(e is EndOfStreamException or InvalidDataException){rejected=true;}AssertEqual(true,rejected,"truncated projection");}
+        }
+        foreach(var invalid in new[]{a with{PhaseAt=2200},a with{GirlLife=1},b with{Enraged=false},c with{Stage=AzureStage.Performance},a with{Phase=(AzurePhase)9}})
+        {bool bad=false;try{AzureRead(invalid);}catch(InvalidDataException){bad=true;}AssertEqual(true,bad,"invalid phase rejected");}
+    }
+    [DomainTest("Azure fast braking slow consumption and melting are continuous and bounded")]
+    private static void AzureCeremonyCurves()
+    {
+        float prior=0;for(float t=0;t<=AzureRules.Devouring;t+=.125f)
+        {float p=AzureRules.DevourTravel(t);AssertEqual(true,p>=prior && p-prior<.004f,"continuous monotone approach");prior=p;}
+        AssertEqual(true,AzureRules.DevourTravel(AzureRules.DevourSlow)>.96f,"at mouth before slow motion");
+        AssertEqual(true,AzureRules.Silhouette(AzureRules.DevourContact),"contact only");
+        AssertEqual(false,AzureRules.Silhouette(AzureRules.DevourContact+14),"no persistent blackout");
+        for(int i=0;i<=AzureRules.Segments;i++)
+        {AssertEqual(0f,AzureRules.Melt(0,i),"whole body on arrival");AssertEqual(1f,AzureRules.Melt(AzureRules.MeltEnding,i),"every segment gone before cleanup");}
+        AssertEqual(0f,AzureRules.MusicGain(-1,-1,AzureStage.Ready,200),"silent ready");
+        AssertEqual(1f,AzureRules.MusicGain(100,-1,AzureStage.Performance,400),"full battle mix");
+        AssertEqual(0f,AzureRules.MusicGain(100,1000,AzureStage.Victory,1420),"fade complete before native handoff");
+        float gain=1;for(int i=1000;i<=1420;i++){float next=AzureRules.MusicGain(100,1000,AzureStage.Victory,i);AssertEqual(true,next<=gain,"no ending swell");gain=next;}
+    }
+    [DomainTest("Azure frost volley has a bounded short warning and recipient while Liora throat stays inside the jet")]
+    private static void AzureVolleyAndBell()
+    {
+        var p=new AzureAttackPlan(Guid.NewGuid(),3,AzureAttackKind.FrostBolt,1000,1024,1194,8000,6000,.5f,4000,13,300,254);
+        using var m=new MemoryStream();using(var w=new BinaryWriter(m,System.Text.Encoding.UTF8,true))p.Write(w);m.Position=0;using var r=new BinaryReader(m);
+        AssertEqual(p,AzureAttackPlan.Read(r)!.Value,"full volley plan");
+        foreach(float radius in new[]{.1f,3f,30f,66f})
+            for(float d=0;d<=320;d+=2)
+            {float width=AzureRules.ThroatRadius(d,radius);AssertEqual(true,width>0 && width<=radius+1e-4,"collision follows visible bell");}
+        AssertEqual(66f,AzureRules.ThroatRadius(260,66),"full jet downstream");
+    }
     private static AzureState AzureExample() => new(Guid.NewGuid(), 500, 180, 180+AzureRules.Intro, -1, AzureStage.Countdown,
         new[] { new AzureMember(0, Guid.NewGuid(), true, false) }, 8000, 6000,
         AzureRules.Life(1,false), AzureRules.Life(1,true), AzureRules.Life(1,false), AzureRules.Life(1,true), 7, false);
