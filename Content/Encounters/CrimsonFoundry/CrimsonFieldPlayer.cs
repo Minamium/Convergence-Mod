@@ -26,7 +26,7 @@ public sealed class CrimsonFieldPlayer : ModPlayer
     public override void PreUpdateMovement()
     {
         if (!OwnsMovement || !TryField(out var boss)) return;
-        var next = boss!.State.Field.ClampBody(Player.position.X + Player.velocity.X, Player.position.Y + Player.velocity.Y, Player.width, Player.height);
+        var next = CrimsonChoreography.ClampParticipant(boss!.State.Field, Player.position.X + Player.velocity.X, Player.position.Y + Player.velocity.Y, Player.width, Player.height);
         if (next.X != Player.position.X + Player.velocity.X) Player.velocity.X = 0;
         if (next.Y != Player.position.Y + Player.velocity.Y) Player.velocity.Y = 0;
         if (Player.wingsLogic == 0 && Player.controlJump) Player.velocity.Y = MathHelper.Lerp(Player.velocity.Y, -12f, .18f);
@@ -39,16 +39,19 @@ public sealed class CrimsonFieldPlayer : ModPlayer
     public override void PostUpdate()
     {
         if (!TryField(out var boss) || !(OwnsMovement || Main.netMode == NetmodeID.Server)) return;
-        var p = boss!.State.Field.ClampBody(Player.position.X, Player.position.Y, Player.width, Player.height);
-        if (Vector2.DistanceSquared(Player.position, new(p.X, p.Y)) > .01f)
+        var p = CrimsonChoreography.ClampParticipant(boss!.State.Field, Player.position.X, Player.position.Y, Player.width, Player.height);
+        float correction = Vector2.DistanceSquared(Player.position, new(p.X, p.Y));
+        // Ordinary gravity/roundoff at the grounded floor is not a teleport.
+        if (correction > (Main.netMode == NetmodeID.Server ? 4 : .01f))
         {
             if (p.X != Player.position.X) Player.velocity.X = 0;
             if (p.Y != Player.position.Y) Player.velocity.Y = 0;
             Player.position = new(p.X, p.Y); Player.fallStart = (int)(p.Y / 16);
-            if (Main.netMode == NetmodeID.Server && Main.GameUpdateCount >= lastCorrection + 12)
+            if (Main.netMode == NetmodeID.Server && correction > 48 * 48 && Main.GameUpdateCount >= lastCorrection + 60)
             {
                 lastCorrection = Main.GameUpdateCount;
                 NetMessage.SendData(MessageID.TeleportEntity, number: 0, number2: Player.whoAmI, number3: p.X, number4: p.Y);
+                CrimsonPackets.Log($"event=MajorFieldCorrection fight={boss.State.Fight} slot={Player.whoAmI} distance={MathF.Sqrt(correction):F1}");
             }
         }
         // Explicit owner cadence also carries custom no-wing lift/edge braking.

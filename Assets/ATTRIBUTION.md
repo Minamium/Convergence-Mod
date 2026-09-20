@@ -209,6 +209,22 @@
 - SHA256: `53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b`
 - Source SHA256: `55250e8e4894fb4d12bee34e6d546914606d71cca0e75c1c556d5f45188d83a6`
 
+### ScarletSorcery original shader export — 2026-09-20
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fxc`
+- Asset ID: scarlet-ritual-sorcery-20260920
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-20
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fx`; no foreign shader/artwork copied
+- Tool/model/version: FXC compiler/options and source/export identities in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; runtime motion/composition in `ScarletSorcery.cs`
+- License and redistribution terms: original project asset under existing project terms; Luminance supplies its runtime noise, not vendored
+- Required attribution: retain this provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-20; actual compiled FNA GPU frames inspected, game/MP acceptance not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, orb-to-invocation and chorus sections
+
 ### ScarletSurface original shader export — 2026-09-17
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSurface.fxc`
@@ -404,9 +420,9 @@ Older FoundryEngine/FoundryUnbound provenance and originals below remain retaine
 - License and redistribution terms: BGM/personal use permitted, including monetized video use; credit required for secondary creative publication; copyright retained by kuku; uncreative BGM-only/endurance content prohibited. Minamium explicitly approved inclusion of this exact game-facing derivative in the Mod and public source repository on2026-09-15 after reviewing the terms and source-distribution ambiguity. This is project-integrated use, not a claim of a separate standalone-audio redistribution license.
 - License exclusion: **Copyright belongs to kuku. This recording and its loop edit are NOT covered by any Convergence source-code or original-asset license.** The author's linked terms continue to govern; no Content ID registration, music-only collection or endurance upload by this project. The raw WAV and audition exports remain external.
 - Required attribution: **Music: “Graceful Ordeal” / 「実はとてもお強いお嬢様からの試練BGM」 by kuku — https://www.youtube.com/watch?v=HnBESyUqx_g . Loop edit for Crimson Foundry; original copyright belongs to kuku.**
-- Original input SHA256: `42a10539bdc12468d279f9956085ce1c99aae1fa0092fc05912e0225c26076d3`; owner-provided WAV was not modified. Its former external path is unavailable on September20. This revision uses the approved game OGG `f8f0a566a18dfa7d9ba2fd6203d877160bc6e0ae04123a694a2c9307bbaaffa9`, retained locally and in Git history, not a new recording. Revised OGG SHA256: `93f2107e8ead427fb3e70e34909640ac19fdb2c873ca0baaf5169db9a824826c`.
-- Tool/model/version: original `tools/prepare_crimson_score.py`; revision `tools/reloop_crimson_score.py`, NumPy2.3.5 and FFmpeg7.1/libvorbis quality7
-- Human modifications: original intro retained; a beat-aligned four-beat crossfade loops a96-beat middle section instead of the quiet opening/outro, with1.15dB encode headroom and no time/pitch stretch. Measured beat positions are preserved until the new endpoint. See [owning music spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-basic-pulse-rehearsal), not duplicated tuning here.
+- Original input SHA256: `42a10539bdc12468d279f9956085ce1c99aae1fa0092fc05912e0225c26076d3`; owner-provided WAV was not modified. Its former external path is unavailable on September20. This revision uses the approved full game OGG `f8f0a566a18dfa7d9ba2fd6203d877160bc6e0ae04123a694a2c9307bbaaffa9`, retained locally and in Git history, not a new recording. Revised OGG SHA256: `1a00366b16c485fd7f921100fe237d19ac59e689471ed6fb966b605d36fa4519`.
+- Tool/model/version: original `tools/prepare_crimson_score.py`; current `tools/restore_crimson_full_score.py`, NumPy2.3.5 and FFmpeg7.1/libvorbis quality7; earlier shortening script retained only as history
+- Human modifications: restore all original134.5127s including the climax; apply1.15dB encode headroom and append a short return bridge, without cutting/time-stretching/pitch-shifting the original portion. Preserve original measured beats and extend the score for the bridge. See [owning music spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-basic-pulse-rehearsal), not duplicated tuning here.
 - Reviewer and review date: Codex,2026-09-20; numerical timing, peak and loop analysis completed; musical seam/device/MP listening remains owner-owned. Author video terms were checked at original adoption, not newly re-certified here; retain the bundled `Credits.txt` and this provenance. The score analysis JSON is project-generated numeric game data, not a new license for the recording. Public release still requires the repository's release terms check.
 
 ### Weapon energy and README NPC export — 2026-09-14

@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-20",
+  "feature": "Scarlet Invocation choreography",
+  "version": "0.3.28",
+  "protocol": 56,
+  "base": "c6903fa",
+  "observed_playtest": {
+    "build": "0.3.27[b5eb7190]",
+    "topology": "solo Host & Play, two fights",
+    "fights": [
+      {"fight": "51b95229-3a95-4af7-ba42-8a512d3b44ae", "unlock": 1251, "victory": 12606, "cleaned": 12756, "combat_seconds": 189.25, "phrases": 73, "cycles": 6, "stack": 3, "spread": 3},
+      {"fight": "461cf659-5bbd-472f-9867-b8f7c76fd839", "unlock": 865, "victory": 9306, "cleaned": 9456, "combat_seconds": 140.6833, "phrases": 49, "cycles": 4, "stack": 3, "spread": 3}
+    ],
+    "server_errors_fatal": 0,
+    "client_errors_fatal": 0,
+    "audio_reanchors": 0,
+    "limits": "No boundary correction events existed in that build. Old victories do not certify new choreography or musical/device synchronization."
+  },
+  "diagnosis": {
+    "music": "Prior99.8167s return omitted the last34.696s of the approved134.5127s source; restore it, not merely hide the early seam.",
+    "boundary": "Code-supported candidate:2px raised ClampBody floor plus native TeleportEntity every12ticks for tiny corrections could repeat the teleport sound. Actual old correction count unavailable. New0-inset owner clamp and server jitter threshold; notify only >48px major corrections at most once per60ticks, log exact Fight."
+  },
+  "changes": "Orb-only preparation, protected16s materialization/gate/cathedral/summon; fixed native conductor center; four-basic/two-seal/two-broad beats; Doll capped-lead frozen cardinal/diagonal warnings; ActII white-to-red rifts; source3-owned black Stack/red Spread verdict effects with bounded replicated result; distinct Crown/Mantle/Choir proportions and articulation. Ordinary damage-one rehearsal retained; chorus succeeds at0 and fails through native900-budget impacts.",
+  "authority": "CrimsonRuntime remains the exact-Fight authority, reserves native projectiles and evaluates each chorus once. Gesture descriptors bind slot+connection; lock data and terminal masks reject stale/changed results. Phase/source/world teardown cleans markers/impacts. No client-owned damage or manual HP subtraction.",
+  "music": {
+    "preserved_seconds": 134.5126667,
+    "appended_bridge_seconds": 1.8706667,
+    "return_seconds": [136.3833333,54.8166667],
+    "original_decoded_samples_preserved_before_encoding": true,
+    "original_beats_preserved": true,
+    "gain_db": -1.14548,
+    "decoded_peak": 0.930469,
+    "decoded_seam_step": 0.007891,
+    "sha256": "1a00366b16c485fd7f921100fe237d19ac59e689471ed6fb966b605d36fa4519",
+    "audition_relative": ".local/scarlet-choreography/full-loop-seam-preview.wav",
+    "listening": "not_run: owner audition, not certified by numerical metrics"
+  },
+  "verification": {
+    "domain": "passed:320 deterministic cases including8-beat timing across loop, paired safe space/lead/axes, floor contact,1/2/3/4/8-member verdicts and malformed/terminal-result contracts",
+    "codec": "passed: compiled protocol56,334 round trips and54 malformed/truncated rejections",
+    "python": "passed:14 focused Scarlet source-wiring checks",
+    "shader": "passed: FXC compilation and source/export manifest validation",
+    "gpu": "123 FNA D3D11 frames linking production CrimsonRig/ScarletSorcery/CrimsonEnergy/geometry with controlled Terraria/Luminance facades. Inspected orb materialization before background, gate/Crown arrival, paired forecast/amplify/shrink and white/red hairline plus black flame/engraving. Uses actual compiled materials, not native game, camera, networking or FPS evidence.",
+    "gpu_relative": ".local/scarlet-choreography/frames",
+    "native_build": "Initial0.3.28 isolated native candidate passed,0 errors/4 pre-existing nullable warnings and package/solo probe. Final candidate identity recorded by tools/dev.py after final source/doc edits.",
+    "environment": "tModLoader2026.07.3.0; Calamity2.2.4; Luminance1.0.14; SDK8.0.424",
+    "preserved": "Four pre-existing generated English locale edits, prior source/assets/audio masters and installed build backup; no other Raid edits.",
+    "runtime_not_run": ["Owner Host & Play opening/camera/material approval", "Ground and side contact sound; severe escape correction", "Matching1/2/4/8-player forecasts and failed/successful chorus including delay", "Native failure damage/accessory balance", "Full climax and loop listening/mix", "Reduced Effects and camera/shake-off in game"]
+  }
+}

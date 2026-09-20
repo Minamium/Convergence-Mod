@@ -29,7 +29,9 @@ internal sealed class CrimsonSky : CustomSky
     {
         if (!Available || !ScarletArticulation.Participant(boss)) { requested = false; return; }
         if (fight != boss!.State.Fight) { Reset(); fight = boss.State.Fight; }
-        requested = true; phase = boss.State.Phase; age = CrimsonVisuals.RenderAge(boss);
+        age = CrimsonVisuals.RenderAge(boss);
+        requested = CrimsonChoreography.Backdrop(CrimsonChoreography.OpeningAge(age,boss.State.MusicStart)) > 0;
+        phase = boss.State.Phase;
         beat = boss.State.MusicStart >= 0 ? CrimsonRegistration.Score.Pulse(Math.Max(0, age - boss.State.MusicStart)) : 0;
     }
     public override void Activate(Vector2 position, params object[] args) => requested = Available;
@@ -89,7 +91,8 @@ internal sealed class CrimsonSkySystem : ModSystem
     {
         if (sky is null) return;
         var boss = Main.gameMenu ? null : CrimsonPackets.Boss;
-        bool want = sky.Available && ScarletArticulation.Participant(boss);
+        bool want = sky.Available && ScarletArticulation.Participant(boss)
+            && CrimsonChoreography.Backdrop(CrimsonChoreography.OpeningAge(boss!.VisualAge,boss.State.MusicStart)) > 0;
         sky.Bind(boss);
         if (want && !activated) SkyManager.Instance.Activate(CrimsonSky.Key, Vector2.Zero);
         else if (!want && activated) SkyManager.Instance.Deactivate(CrimsonSky.Key);

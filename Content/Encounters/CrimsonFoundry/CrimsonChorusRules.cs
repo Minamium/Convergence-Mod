@@ -63,8 +63,18 @@ internal readonly record struct CrimsonChorusImpact(CrimsonChorusPlan Plan, byte
 internal static class CrimsonChorusRules
 {
     internal const float StackRadius = 220, SpreadRadius = 140;
-    internal const int StackShareSource = 360, SpreadFailureSource = 600;
+    internal const int StackShareSource = 900, SpreadFailureSource = 900;
     internal const int ImpactTicks = 12, PhrasesBetween = 5;
+
+    internal static (bool Resolved, byte FailedMask) ReadVerdict(BinaryReader reader, byte members)
+    {
+        byte resolved = reader.ReadByte(), failures = reader.ReadByte();
+        if (resolved > 1 || (failures & ~members) != 0 || resolved == 0 && failures != 0)
+            throw new InvalidDataException("crimson.chorus_verdict_invalid");
+        return (resolved == 1, failures);
+    }
+    internal static bool CanReplaceVerdict(bool resolved, byte failures, bool nextResolved, byte nextFailures)
+        => !resolved || nextResolved && failures == nextFailures;
 
     // Resolution is a single authority observation. Dead/disconnected members
     // are removed from the budget; a slot not in the announced mask cannot join.
@@ -81,18 +91,18 @@ internal static class CrimsonChorusRules
         int[] damage = new int[count]; int mask = announced & living;
         if (kind == CrimsonChorusKind.Stack)
         {
-            int active = 0, gathered = 0, inside = 0;
+            int active = 0, gathered = 0;
             for (int i = 0; i < count; i++)
             {
                 if ((mask & (1 << i)) == 0) continue;
                 active++;
                 if ((positions[i] - center).LengthSquared <= StackRadius * StackRadius)
-                { gathered++; inside |= 1 << i; }
+                    gathered++;
             }
-            int pool = StackShareSource * active;
+            int pool = active == 0 ? 0 : (StackShareSource * (active - gathered) + active - 1) / active;
             for (int i = 0; i < count; i++)
                 if ((mask & (1 << i)) != 0)
-                    damage[i] = (inside & (1 << i)) == 0 ? pool : (pool + gathered - 1) / gathered;
+                    damage[i] = pool;
         }
         else
         {

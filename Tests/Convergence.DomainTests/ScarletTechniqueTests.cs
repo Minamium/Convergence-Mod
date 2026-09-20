@@ -17,8 +17,8 @@ internal static partial class Program
             520, 544 + step * 14, 600 + step * 14, 605 + step * 14, 600, 633,
             new(8000, 5230), CrimsonTechniqueGeometry.Stage(f, focus, technique, 8),
             CrimsonTechniqueGeometry.Target(f, focus, technique, 8), 8000, 6000, 450,
-            technique == CrimsonTechnique.TrackingBeam ? (short)0 : (short)-1,
-            technique == CrimsonTechnique.TrackingBeam ? Guid.Parse("3c051a1d-dd29-4844-8353-56347645a879") : Guid.Empty);
+            technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift ? (short)0 : (short)-1,
+            technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift ? Guid.Parse("3c051a1d-dd29-4844-8353-56347645a879") : Guid.Empty);
     }
     [DomainTest("Scarlet each apparition owns three nonrepeating physical techniques")]
     private static void ScarletTechniqueVariety()
@@ -49,7 +49,7 @@ internal static partial class Program
             for (float age = p.Fire; age < p.End; age += .25f)
             {
                 int count = CrimsonTechniqueGeometry.Write(p, age, strokes);
-                if (technique == CrimsonTechnique.TrackingBeam && age == p.Fire) { AssertEqual(0, count, "zero-width ignition is harmless"); continue; }
+                if (p.Aimed && age == p.Fire) { AssertEqual(0, count, "zero-width ignition is harmless"); continue; }
                 AssertEqual(true, count is > 0 and <= CrimsonTechniqueGeometry.MaximumStrokes, "bounded strokes");
                 foreach (var stroke in strokes[..count])
                 {
@@ -142,7 +142,7 @@ internal static partial class Program
                 catch (IOException) { rejected = true; }
                 AssertEqual(true, rejected, "all truncated prefixes rejected");
             }
-            if (technique != CrimsonTechnique.TrackingBeam)
+            if (!p.Aimed)
                 CheckRejected(p with { Source = (byte)((p.Source + 1) % 4) });
             CheckRejected(p with { Stage = new(float.NaN, 5000) });
             CheckRejected(p with { Fire = int.MinValue });

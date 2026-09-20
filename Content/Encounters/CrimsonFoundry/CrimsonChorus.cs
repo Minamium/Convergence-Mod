@@ -18,6 +18,8 @@ internal sealed record CrimsonChorusImpactSource(CrimsonChorusImpact Impact) : I
 public sealed class CrimsonChorus : ModProjectile
 {
     internal CrimsonChorusPlan Plan;
+    internal bool Resolved;
+    internal byte FailedMask;
     public override string Texture => "Terraria/Images/Projectile_1";
     public override void SetDefaults()
     {
@@ -38,7 +40,7 @@ public sealed class CrimsonChorus : ModProjectile
         return plan.Fight != Guid.Empty && boss is not null && boss.Fresh
             && boss.State.Fight == plan.Fight && boss.State.PhaseStart == plan.Epoch
             && boss.State.Stage == CrimsonStage.Performance && plan.MatchesRoster(boss.State.Members.Length)
-            && CrimsonPhaseRules.ActiveSource(boss.State.Phase, boss.State.DefeatedMask, boss.State.PerformerDefeated, plan.Source);
+            && !boss.State.PerformerDefeated; // Chorus belongs to Vespera in every Act.
     }
     public override void AI()
     {
@@ -50,11 +52,15 @@ public sealed class CrimsonChorus : ModProjectile
         }
         else if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
     }
-    public override void SendExtraAI(BinaryWriter writer) => Plan.Write(writer);
+    public override void SendExtraAI(BinaryWriter writer)
+    { Plan.Write(writer); writer.Write(Resolved); writer.Write(FailedMask); }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         var next = CrimsonChorusPlan.Read(reader);
-        if (Main.netMode != NetmodeID.Server && (Plan.Fight == Guid.Empty || Plan == next)) Plan = next;
+        var (resolved, failures) = CrimsonChorusRules.ReadVerdict(reader, next.Members);
+        if (Main.netMode == NetmodeID.Server || Plan.Fight != Guid.Empty && Plan != next
+            || !CrimsonChorusRules.CanReplaceVerdict(Resolved, FailedMask, resolved, failures)) return;
+        Plan = next; Resolved = resolved; FailedMask = failures;
     }
 }
 
@@ -76,7 +82,7 @@ public sealed class CrimsonChorusStrike : ModProjectile
     public override bool? CanCutTiles() => false;
     public override bool? CanHitNPC(NPC target) => false;
     public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
-        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage);
+        => modifiers.SetMaxDamage(Impact.Damage);
     public override bool PreDraw(ref Color lightColor) => false;
     public override void OnSpawn(IEntitySource source)
     { if (source is CrimsonChorusImpactSource own) { own.Impact.Validate(); Impact = own.Impact; } }
@@ -99,7 +105,7 @@ public sealed class CrimsonChorusStrike : ModProjectile
     public override void OnHitPlayer(Player target, Player.HurtInfo info) { spent = true; Projectile.hostile = false; }
     public override void AI()
     {
-        Projectile.damage = CrimsonPlaytestTuning.AttackDamage;
+        Projectile.damage = Impact.Damage;
         Projectile.hostile = Eligible(out var player);
         if (player is not null) Projectile.Center = player.Center;
         if (CrimsonChorus.TryBoss(Impact.Plan, out var boss))
@@ -134,7 +140,7 @@ internal sealed partial class CrimsonRuntime
         for (int i = 0; i < members.Length; i++) if (!members[i].Out) mask |= (byte)(1 << i);
         var field = State.Field;
         var plan = new CrimsonChorusPlan(fight.Value, (short)actor.NPC.whoAmI, phaseStart, ++chorusOrdinal,
-            phase, chorusOrdinal % 2 == 1 ? CrimsonChorusKind.Stack : CrimsonChorusKind.Spread, mask,
+            3, chorusOrdinal % 2 == 1 ? CrimsonChorusKind.Stack : CrimsonChorusKind.Spread, mask,
             musicStart + (int)Math.Round(beats[0]), musicStart + (int)Math.Round(beats[8]), musicStart + (int)Math.Round(beats[10]),
             (int)ground.X, (int)ground.Y, new(field.CenterX + (chorusOrdinal % 2 == 0 ? -160 : 160), field.CenterY + 80));
         plan.Validate();
@@ -167,6 +173,9 @@ internal sealed partial class CrimsonRuntime
                 && p.GetModPlayer<CrimsonConnection>().Token == members[i].Connection) living |= (byte)(1 << i);
         }
         int[] damage = CrimsonChorusRules.Resolve(plan.Kind, plan.Center, positions, plan.Members, living);
+        marker.Resolved = true; marker.FailedMask = 0;
+        for (int i = 0; i < damage.Length; i++) if (damage[i] > 0) marker.FailedMask |= (byte)(1 << i);
+        marker.Projectile.netUpdate = true;
         int needed = 0, free = 0;
         foreach (int d in damage) if (d > 0) needed++;
         foreach (Projectile p in Main.projectile) if (!p.active) free++;
@@ -174,13 +183,13 @@ internal sealed partial class CrimsonRuntime
         for (int i = 0; i < damage.Length; i++)
         {
             if (damage[i] == 0) continue;
-            var impact = new CrimsonChorusImpact(plan, (byte)i, CrimsonPlaytestTuning.AttackDamage); impact.Validate();
+            var impact = new CrimsonChorusImpact(plan, (byte)i, damage[i]); impact.Validate();
             int slot = Projectile.NewProjectile(new CrimsonChorusImpactSource(impact), Main.player[members[i].Slot].Center,
-                Vector2.Zero, ModContent.ProjectileType<CrimsonChorusStrike>(), CrimsonPlaytestTuning.AttackDamage, 0, Main.myPlayer);
+                Vector2.Zero, ModContent.ProjectileType<CrimsonChorusStrike>(), damage[i], 0, Main.myPlayer);
             if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.chorus_capacity");
             Main.projectile[slot].netUpdate = true;
         }
-        CrimsonPackets.Log($"event=ChorusResolved fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} living={living} rehearsal_damage=1 budget_sources={string.Join(",", damage)}");
+        CrimsonPackets.Log($"event=ChorusResolved fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} living={living} failed_mask={marker.FailedMask} budget_sources={string.Join(",", damage)}");
     }
     private void ClearChorus(int source)
     {
