@@ -4,6 +4,13 @@
   "version": "0.3.30",
   "protocol": 58,
   "source_baseline": "8b2ab4e44b47498f3f7a2ae1b172692a5ceade30",
+  "verified_source_commit": "4a8c3271bb73e7be8009fab3997e7ccb8661a769",
+  "final_package": {
+    "record_id": "20260920T102927786243Z",
+    "sha256": "47a89bd44db09ea7bd36e7823a7bf63f3ec93c1e8914985ac1f942ebd08571c0",
+    "version": "0.3.30",
+    "note": "Source-identified isolated native package. Pre-existing locale differences are listed in the local record; package-excluded evidence finalization does not require rebuilding."
+  },
   "preserved_changes": "Four pre-existing generated English locale edits; existing Doll/Scarlet/Ghost Samurai/Oboro implementation and assets unchanged.",
   "checks": {
     "native_compile": "passed, 0 errors and 4 pre-existing nullable-context warnings; final source-identified package record is local",
