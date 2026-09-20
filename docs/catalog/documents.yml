@@ -577,7 +577,7 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 625aaa57b1483e2d368b32f655b374937ed7f2d17807aeb5c799523f6f6a8ef2
+  content_sha256: d15c8157d5ef8ba7900f5e33a6e1c2db8288b473466360b186f7da8594f3c381
   document_type: spec
   status: accepted
   owners:
@@ -869,12 +869,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 96a246d2d294a21f6476c73f352772d5fdffd65f493175a26ca4d9535c783d09
+  content_sha256: 0874c04f09892ba25add053e5a01f1580ba4e703447e0d55f180762a9f55bdf9
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-19'
+  last_reviewed: '2026-09-20'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1268,7 +1268,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 199d57fb050f9ade2061e4d41749c48c92cfe3ec58bafaa098d8ca7b8297ff06
+  content_sha256: 662ccbb4df96f237136e94ce6bc9cb2fbbbab285bd13a484dec30ad871d58a3c
   document_type: status
   status: accepted
   owners:
@@ -1585,14 +1585,14 @@ documents:
 - doc_id: research.wotg-raid-benchmark
   path: docs/research/WOTG_RAID_BENCHMARK.md
   title: Wrath of the Gods — マルチRaidのための品質ベンチマーク
-  content_sha256: 4cb83db2b17a908a28bc3062a636594b71614eb6c7f61984d4ac840d17f0ba39
+  content_sha256: e61146f752f3253c03f8d139a5e635e5c166cc4d4a38de789144263adee63d10
   document_type: research
   status: provisional
   owners:
   - research
   - art
   - gameplay
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-20'
   source_of_truth_for: []
   aliases:
   - Wrath of the Gods benchmark

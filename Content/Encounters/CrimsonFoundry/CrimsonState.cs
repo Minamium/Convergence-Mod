@@ -57,6 +57,13 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         w.Write((byte)Members.Length);
         foreach (var m in Members) { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); }
     }
+    // Native debug/unowned spawns can be synced before an encounter installs
+    // state, including the despawn packet. Never serialize a default DTO.
+    internal void WriteEnvelope(BinaryWriter w)
+    { w.Write(Fight != Guid.Empty); if (Fight != Guid.Empty) Write(w); }
+    internal static CrimsonState? ReadEnvelope(BinaryReader r) => ReadPresence(r) ? Read(r) : null;
+    internal static bool ReadPresence(BinaryReader r) => r.ReadByte() switch {
+        0 => false, 1 => true, _ => throw new InvalidDataException("crimson.actor_presence_invalid") };
     internal static CrimsonState Read(BinaryReader r)
     {
         byte[] f = r.ReadBytes(16); int age = r.ReadInt32(), start = r.ReadInt32(), final = r.ReadInt32();
@@ -97,6 +104,9 @@ internal enum CrimsonShape : byte { Slash, Bolt }
 internal readonly record struct CrimsonEffigyState(Guid Fight, short Boss, byte Index, int Born)
 {
     internal void Write(BinaryWriter w) { w.Write(Fight.ToByteArray()); w.Write(Boss); w.Write(Index); w.Write(Born); }
+    internal void WriteEnvelope(BinaryWriter w)
+    { w.Write(Fight != Guid.Empty); if (Fight != Guid.Empty) Write(w); }
+    internal static CrimsonEffigyState? ReadEnvelope(BinaryReader r) => CrimsonState.ReadPresence(r) ? Read(r) : null;
     internal static CrimsonEffigyState Read(BinaryReader r)
     {
         byte[] fight = r.ReadBytes(16); short boss = r.ReadInt16(); byte index = r.ReadByte(); int born = r.ReadInt32();

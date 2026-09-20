@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-19
+last_reviewed: 2026-09-20
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,10 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Scarlet crossflow and spatial cuts — 2026-09-20 / 0.3.28 → 0.3.29
+
+Owner approves the seal/beam appearance but clarifies right-to-left crossflow between opposing circles, asks for Orderbringer direct-hit-inspired slashes, larger Spread, beat-shifted ActIII lattices and tighter phrase transitions. Follow-up requests tasteful smoke and continuously changing fine slash amplitude. Latest solo Host & Play reaches ActIII, then fails a Stack and wipes two ticks later; cleanup completes. Ordinary crossflow-to-next-hit gaps were41–63ticks. Replace vertical columns with one seal-to-seal stream, issue four consecutive on-beat strikes, start the next forecast without an extra blank beat, enlarge Spread and add deterministic four-cut lattice sequences. Preserve approved background/rings/audio, HP gates and rehearsal damage. Post-fight unowned Scarlet NPC sync exceptions receive an empty-state envelope; a separate Ghost Samurai invalid-arena packet remains out of scope. [Evidence](../evidence/2026-09-20-scarlet-crossflow.json) separates logs/source/video/GPU/build checks from pending playtest acceptance.
 
 ## Shared Luminance direction — 2026-09-18 / source0.3.19
 

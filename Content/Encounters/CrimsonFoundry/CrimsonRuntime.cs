@@ -322,12 +322,14 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             var playerCenter = Main.player[aimed.Slot].Center;
             var aim = CrimsonTechniqueGeometry.Clamp(field, new(playerCenter.X, playerCenter.Y), 100);
             var technique = CrimsonChoreography.Technique(phase, serial, i);
-            int end = technique == CrimsonTechnique.SpatialRift ? hit.Fire + 12 : hit.End;
+            int end = technique is CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid ? hit.Fire + CrimsonSpatialCuts.LiveTicks : hit.End;
             plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, (byte)i, (byte)source,
                 technique, (byte)steps[source]++, (byte)counts[source], hit.Accent,
                 begins[source], musicStart + hit.Warning, musicStart + hit.Fire, musicStart + end,
                 first[source], last[source], from[source], staging[source], aim,
-                (int)ground.X, (int)ground.Y, CrimsonPlaytestTuning.AttackDamage, aimed.Slot, aimed.Connection);
+                (int)ground.X, (int)ground.Y, CrimsonPlaytestTuning.AttackDamage,
+                technique == CrimsonTechnique.SpatialGrid ? (short)-1 : aimed.Slot,
+                technique == CrimsonTechnique.SpatialGrid ? Guid.Empty : aimed.Connection);
             plans[i].Validate();
         }
         foreach (var plan in plans)

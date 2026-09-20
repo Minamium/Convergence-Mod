@@ -62,7 +62,7 @@ internal readonly record struct CrimsonChorusImpact(CrimsonChorusPlan Plan, byte
 
 internal static class CrimsonChorusRules
 {
-    internal const float StackRadius = 220, SpreadRadius = 140;
+    internal const float StackRadius = 220, SpreadRadius = 200;
     internal const int StackShareSource = 900, SpreadFailureSource = 900;
     internal const int ImpactTicks = 12, PhrasesBetween = 5;
 

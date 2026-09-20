@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-20",
+  "feature": "Scarlet crossflow, spatial cuts and consecutive-beat lattices",
+  "version": "0.3.29",
+  "protocol": 57,
+  "base": "748c79f",
+  "observed_playtest": {
+    "loaded_build": "0.3.28[6b059f65]",
+    "topology": "solo Host & Play; player al",
+    "fight": "a7149193-616e-4326-ad1b-17503b0019f4",
+    "unlock": 2043,
+    "defeat": 9666,
+    "cleaned": 9816,
+    "combat_seconds": 127.05,
+    "phrases": 29,
+    "completed_cycles": 2,
+    "last_act": "III",
+    "stack_results": ["failure, native source budget900", "failure, native source budget900"],
+    "spread_results": ["success, budget0; solo cannot verify pair overlap"],
+    "remaining_hp": 1200000,
+    "starting_total_hp": 3000000,
+    "peak_five_second_interval_dps": 93969,
+    "ordinary_post_crossflow_next_hit_ticks": [41, 63],
+    "notes": "Stack failure precedes Defeat by two ticks; no complete receiving-player damage trace, so do not claim an exact fatal HP amount. HP floor waiting is intentional. No AudioReanchor or MajorFieldCorrection event found; absence is not audible synchronization evidence.",
+    "post_fight_errors": [
+      "16:38:06 CrimsonState.Write null Members while removing an unowned Boss; empty-state sync envelope added.",
+      "16:38:07 crimson.effigy_invalid for empty/unowned Effigy; same envelope added without relaxing owned validation.",
+      "16:38:12 ghost_samurai.arena_invalid in GhostSamuraiBoss.ReceiveExtraAI; separate feature, not changed here."
+    ],
+    "other_log_events": "Local connection refused before server startup; subsequent connection and fight succeeded. The logs do not identify the caller that created the unowned NPCs.",
+    "raw_logs": "External tML logs; ignored compact local aggregate under .local/scarlet-crossflow. No raw logs/player saves committed."
+  },
+  "reference": {
+    "analysis": "docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20",
+    "video_frames": "48 native frames: recordingA131.50-132.28s, recordingB23.50-24.28s, plus reused whole-video overviews. Sampled visual inspection, not audio listening or attribution of every overlaid effect.",
+    "source": "CalamityTeam/CalamityModPublic 1a8cebd27ec5615316b78f71973446b5528d2b78, Orderbringer.OnHitNPC and OrderbringerBeam; behavior only, independently implemented, no source/assets copied."
+  },
+  "changes": "Horizontal right-to-left opposing-seal stream; four consecutive basic strikes with next warning at previous crossflow end; enlarged Spread; ActII slash material and ActIII four beat-offset lattices; subframe decorative microflutter and harmless smoke; bounded unowned native actor envelope.",
+  "authority": "Server/SP still chooses frozen aim/roster and admitted score ticks. Lattice is a pure phrase/note geometry with source2 ownership; clients use no RNG or additional damage decisions. Shared capsules own live width/reach. Smoke/glints have no damage and expire inside existing Fight leases. Ordinary source1 rehearsal and chorus budgets unchanged.",
+  "verification": {
+    "domain": "passed:322 deterministic cases; focused49 Scarlet cases include full-loop timing, new lattice bounds/shared capsules,1/2/3/4/8 roster selection, enlarged Spread and strict unowned/owned actor envelopes",
+    "codec": "passed: compiled protocol57,334 round trips and54 malformed/truncated rejections;14 Scarlet Python wiring guards passed",
+    "shader": "FXC compiled; single-pass dynamic warning/live branch misrendered as a rectangle in D3D11 preview. Replaced by separate forecast/live passes, verified narrow blade output. No unverified claim about driver root cause.",
+    "gpu": "passed:72 final FNA D3D11 frames using production geometry, shader and CrossflowSeals at fractional age, scaled by the world matrix through controlled facades. Inspected white forecast, subframe ignition, narrow red blade/lattice, end/residue and right-to-left extension with opposing seals. Actual compiled shader/material only; not native gameplay, multiplayer, subjective visual acceptance or FPS evidence.",
+    "gpu_relative": ".local/scarlet-crossflow/approved-frames",
+    "native_build": "pending",
+    "repository": "passed:79-document catalog,930-file repository policy,12 YAML files and git diff --check",
+    "environment": "Same pinned local runtime as 2026-09-20-scarlet-choreography.json",
+    "runtime_not_run": ["Owner Host & Play crossflow/cadence/slash acceptance", "ActIII four shifted grids with overlapping next warning", "2/4/8-player enlarged Spread and remote forecasts", "Reduced Effects and actual gameplay frame pacing", "Unowned Scarlet NPC sync in native client/server"]
+  }
+}

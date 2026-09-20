@@ -11,7 +11,7 @@ internal enum CrimsonTechnique : byte
     MantleFan, MantleRush, MantleScissors,
     ChoirThrust, ChoirHook, ChoirRend,
     VesperaOrbit, VesperaPetals,
-    TrackingBeam, SideBeams, SpatialRift // Append only; never renumber old IDs.
+    TrackingBeam, SideBeams, SpatialRift, SpatialGrid // Append only; never renumber old IDs.
 }
 
 internal readonly record struct CrimsonPoint(float X, float Y)
@@ -37,6 +37,7 @@ internal readonly record struct CrimsonGesturePlan(
 {
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
     internal bool Aimed => Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift;
+    internal bool IsRift => Technique is CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid;
     internal bool Live(float age) => age >= Fire && age < End;
     internal bool MovesBody => Technique is CrimsonTechnique.CrownCrash or CrimsonTechnique.MantleRush;
     internal float Progress(float age) => Math.Clamp((age - Fire) / Math.Max(1, End - Fire - 1f), 0, 1);
@@ -97,7 +98,7 @@ internal readonly record struct CrimsonGesturePlan(
 internal static class CrimsonTechniqueGeometry
 {
     internal const int MaximumStrokes = 192;
-    internal static int Owner(CrimsonTechnique t) => (int)t < 9 ? (int)t / 3 : 3;
+    internal static int Owner(CrimsonTechnique t) => t == CrimsonTechnique.SpatialGrid ? 2 : (int)t < 9 ? (int)t / 3 : 3;
     internal static CrimsonTechnique Select(int source, int serial)
     {
         if (source is < 0 or > 3 || serial < 0) throw new ArgumentOutOfRangeException();
@@ -169,11 +170,11 @@ internal static class CrimsonTechniqueGeometry
                 if (beam.Radius > 0) w.Add(beam.A, beam.B, beam.Radius);
                 break;
             case CrimsonTechnique.SideBeams:
-                for (int side = -1; side <= 1; side += 2) for(int upper=0;upper<2;upper++) {
-                    var band = CrimsonChoreography.Side(p, age, forecast, side, upper==1);
-                    if (band.Radius > 0) w.Add(band.A, band.B, band.Radius);
-                }
+                var band = CrimsonChoreography.Side(p, age, forecast);
+                if (band.Radius > 0) w.Add(band.A, band.B, band.Radius);
                 break;
+            case CrimsonTechnique.SpatialGrid:
+                return CrimsonSpatialCuts.WriteGrid(p, age, destination, forecast);
             case CrimsonTechnique.CrownRain:
                 int gap = p.Phrase % 18 + 2;
                 for (int i = 0; i < 26; i++)

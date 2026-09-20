@@ -11,9 +11,9 @@ internal static class CrimsonTrackingBeam
     internal const float Radius = 36;
     internal static int TargetIndex(int phrase, int pulse, int living)
     {
-        if (phrase < 1 || pulse is < 0 or > 2 || living is < 1 or > 8)
+        if (phrase < 1 || pulse is < 0 or > CrimsonChoreography.BasicNotes || living is < 1 or > 8)
             throw new ArgumentOutOfRangeException();
-        return ((phrase - 1) * 3 + pulse) % living;
+        return ((phrase - 1) * (CrimsonChoreography.BasicNotes + 1) + pulse) % living;
     }
     internal static int LockAt(in CrimsonGesturePlan p) => p.Born;
     internal static bool CanAccept(in CrimsonGesturePlan p, int previousTick, int tick, CrimsonPoint point)
@@ -33,7 +33,7 @@ internal static class CrimsonTrackingBeam
         float reach = forecast ? 1 : CrimsonInvocation.Ease(release / (rift ? 2 : 5));
         float width = forecast ? 1 : CrimsonInvocation.Ease(release / (rift ? 2 : 6))
             * (1 - CrimsonInvocation.Ease((age - (p.End - 8)) / 8));
-        return new(edge, edge + direction * ((last - first) * reach), (rift ? 7 : Radius) * width);
+        return new(edge, edge + direction * ((last - first) * reach), (rift ? CrimsonSpatialCuts.Radius : Radius) * width);
     }
     internal static void WriteAim(BinaryWriter w, int tick, CrimsonPoint target)
     { w.Write(tick); w.Write(target.X); w.Write(target.Y); }

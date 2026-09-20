@@ -77,10 +77,11 @@ public sealed class CrimsonEffigy : ModNPC
     }
     public override void OnKill()
     { if (Main.netMode != NetmodeID.MultiplayerClient) Runtime?.SummonKilled(this); }
-    public override void SendExtraAI(BinaryWriter writer) => State.Write(writer);
+    public override void SendExtraAI(BinaryWriter writer) => State.WriteEnvelope(writer);
     public override void ReceiveExtraAI(BinaryReader reader)
     {
-        var next = CrimsonEffigyState.Read(reader);
+        var payload = CrimsonEffigyState.ReadEnvelope(reader);
+        if (payload is not { } next) return;
         if (Main.netMode == NetmodeID.Server || State.Fight != Guid.Empty && State != next) return;
         State = next;
         NPC.width = State.Index == 1 ? 270 : 190; NPC.height = State.Index == 1 ? 180 : 240;

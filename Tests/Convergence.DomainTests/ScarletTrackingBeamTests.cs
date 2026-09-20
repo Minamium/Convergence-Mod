@@ -11,7 +11,7 @@ internal static partial class Program
     {
         foreach (int size in new[] { 1, 2, 3, 4, 8 })
             for (int note = 0; note < size * 8; note++)
-                AssertEqual(note % size, CrimsonTrackingBeam.TargetIndex(note / 3 + 1, note % 3, size), "one target, fair rotation");
+                AssertEqual(note % size, CrimsonTrackingBeam.TargetIndex(note / 5 + 1, note % 5, size), "one target, fair rotation");
     }
     [DomainTest("Scarlet tracking samples reject stale duplicate outside and post-lock updates")]
     private static void ScarletTrackingSamples()

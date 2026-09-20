@@ -61,10 +61,11 @@ public sealed class CrimsonBoss : ModNPC
         NPC.netUpdate = Main.netMode != NetmodeID.MultiplayerClient;
         return false;
     }
-    public override void SendExtraAI(BinaryWriter writer) => State.Write(writer);
+    public override void SendExtraAI(BinaryWriter writer) => State.WriteEnvelope(writer);
     public override void ReceiveExtraAI(BinaryReader reader)
     {
-        var next = CrimsonState.Read(reader);
+        var payload = CrimsonState.ReadEnvelope(reader);
+        if (payload is not { } next) return;
         if (Main.netMode == NetmodeID.Server || !next.CanReplace(State)) return;
         State = next; receivedAt = Main.GameUpdateCount;
     }
