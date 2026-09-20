@@ -60,7 +60,38 @@
     }
   },
   "integration": {
-    "status": "not_merged",
-    "normal_profile": "unchanged0.3.25"
+    "status": "merged_and_installed",
+    "pull_request": 55,
+    "authorization": "Repository owner requested installation of the completed PR55 change in this task.",
+    "source_commit": "387da55a4b69cd313cfe4b54632ff19884e1f31d",
+    "source_branch": "main",
+    "normal_profile": "0.3.26 / protocol54 built from integrated canonical main",
+    "build_record": ".local/builds/20260920T052841405955Z/record.json",
+    "source_sha256": "bdc22bae5b744efa51febac31deac2bcb0f5125e09cc39aa791f8984fd18fcdc",
+    "source_changed_during_build": false,
+    "artifact": {
+      "bytes": 90872515,
+      "sha256": "0a8dfddea2764efc75a5876752f8600dca17faa6dcbc645b013e07e21a9dc0f4"
+    },
+    "build": {
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "locales_parsed": 22,
+      "shader_exports": "passed",
+      "packaged_admission": "1-4 participants; solo enabled"
+    },
+    "installed_package_checks": {
+      "status": "passed",
+      "scope": "Eight registered Oboro types and stable saved item identity; harmless held projectile, replication and stale/connection cleanup;584 native hand-anchor samples, exact second-cut3-14F grip; root-only additive wet-persistent DoT; compiled weapon codec round-trips/shared-buffer/truncation rejection.",
+      "enabled_dependencies": "Convergence, CalamityMod and Luminance remain enabled in the normal profile."
+    },
+    "preservation": {
+      "previous_package_sha256": "fe70ff3a7c42783539467887ef3c7df0c04498fc8a66569491f7670902fde296",
+      "previous_package_backup": "Hash-verified local copy retained.",
+      "local_edits": "Four pre-existing localization edits and one untracked workstation record retained byte-for-byte; backups retained locally and none committed.",
+      "source_note": "Build manifest records integrated main plus the preserved localization edits.",
+      "source_junction": "Unchanged; normal ModSources resolves to canonical main."
+    },
+    "next_action": "User: Reload Mods; no repeat compilation required. Check upper pause, sharp return,1-2-3 handoffs, both facings and matching0.3.26 clients. Actual game load/rendering and multiplayer remain not_run; no game/server launched."
   }
 }

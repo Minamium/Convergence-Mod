@@ -38,7 +38,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Verification state
 
-- **Oboro second-cut motion:** [evidence](evidence/2026-09-20-oboro-second-swing.json) records the16F return curve, hand/authority alignment, exact-package checks and360 linked-production offline frames across both facings, bright/dark and Reduced Effects. The native build has0 errors/4 existing warnings. The third-step centered grip leaves a bounded9.333px harmless handoff gap under native discrete arm stretch; the second stroke is exactly hand-anchored at3–14F. Real player/armor/mount drawing, SP/MP input and feel remain user-owned / not_run. The normal installed0.3.25 is unchanged.
+- **Oboro second-cut motion:** [evidence](evidence/2026-09-20-oboro-second-swing.json) records the16F return curve, hand/authority alignment, exact-package checks and360 linked-production offline frames across both facings, bright/dark and Reduced Effects. The native build has0 errors/4 existing warnings. The third-step centered grip leaves a bounded9.333px harmless handoff gap under native discrete arm stretch; the second stroke is exactly hand-anchored at3–14F. Real player/armor/mount drawing, SP/MP input and feel remain user-owned / not_run. At the owner's installation request, PR #55 was merged and integrated main `387da55` was built into the normal profile as0.3.26/protocol54 on September20. The installed package passed type/identity, held-projectile cleanup, native hand-anchor and weapon codec/DoT probes. Existing local edits and the prior package were preserved; no game/server was launched.
 
 - **Oboro first-cut motion:** [evidence](evidence/2026-09-20-oboro-first-swing.json) records the five-beat curve, mirrored moving-root/live-blade checks, native build, installed hand API probes and linked-production offline FNA frames. At the owner's installation request, PR #53 was merged; integrated main `f366bf0` was built into the normal profile as0.3.25/protocol53 on September20. The installed package passed Oboro type/identity, held-projectile cleanup,584 native hand-anchor and weapon codec/DoT probes. Prior local edits and the previous package were preserved. Detailed arm/armor/mount rendering, actual SP/MP input/latency and feel remain user-owned / not_run; no game/server was launched.
 
@@ -80,7 +80,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-Review the0.3.26 second-cut return and its first/third-step handoffs. This feature is not installed into the normal profile; installed0.3.25 remains available with Reload Mods. After integration/installation, use matching0.3.26/protocol54 peers and check both facings, the upper pause, fast downward return, thinner echoes, held loop and release/restart. Third-cut choreography is a separate requested slice.
+Reload Mods to use installed0.3.26/protocol54; no repeat Build + Reload is required. Check both facings, the upper pause, fast downward return, thinner echoes, first/third-step handoffs, held loop and release/restart. Use matching builds for multiplayer. Third-cut choreography is a separate requested slice.
 
 The earlier0.3.22 Ghost Samurai rig checks remain user-owned: Idle, movement, each attack/phase transition, connected blade poses and the Victory-only96-tick ending. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. Offline checks are not a game playtest.
 
