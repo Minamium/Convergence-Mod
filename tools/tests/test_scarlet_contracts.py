@@ -27,7 +27,7 @@ class ScarletContracts(unittest.TestCase):
         self.assertLess(text.index('plans[i].Validate()'),text.index('Projectile.NewProjectile'))
         self.assertIn('cycle.Admit(phraseEnd, recoveryEnd)',text)
         self.assertIn('cycle.TryComplete(age, chorus is not null)',text)
-        self.assertIn('ClearChorus(source)',text)
+        self.assertIn('ClearChorus(source, preserveVerdict)',text)
         self.assertIn('if (!TryScheduleChorus()) SchedulePhrase()',text)
         self.assertLess(text.index('TickChorus();'),text.index('cycle.TryComplete('))
         self.assertIn('if (phase < 3 && thresholdLatched',text)
@@ -163,3 +163,23 @@ class ScarletContracts(unittest.TestCase):
                      'prep.EncounterSequence == snapshot.EncounterSequence','prep.GroundX - core.GroundCenter.X',
                      '!OwnsDollPreparation(core)','&& !onStage) Retire(NPC)'):
             self.assertIn(rule,text)
+
+    def test_sacrifice_validates_all_native_owners_before_retiring_any(self):
+        text=(CONTENT/'CrimsonRuntime.cs').read_text()
+        body=text[text.index('private bool SacrificeSummons()'):text.index('private void SpawnSummon')]
+        guard='child.NPC.ModNPC != child || !Matches(child)'
+        self.assertLess(body.index(guard),body.index('child.NPC.active = false'))
+        self.assertNotIn('StrikeNPC',body)
+        self.assertNotIn('checkDead',body)
+        self.assertIn('defeated == CrimsonInvocation.AllDefeated',body)
+        self.assertIn('!SacrificeSummons()) return End(EncounterEndReason.EncounterActorMissing)',text)
+
+    def test_companion_uses_owner_target_incarnation_and_resolved_tail_is_harmless(self):
+        companion=(CONTENT/'CrimsonCompanion.cs').read_text()
+        for rule in ('CrimsonCovenantRules.Select','CrimsonCovenantIncarnation','InstancePerEntity => true','Projectile.owner == Main.myPlayer'):
+            self.assertIn(rule,companion)
+        chorus=(CONTENT/'CrimsonChorus.cs').read_text()
+        self.assertIn('CrimsonChorusImpactPositions.Read',chorus)
+        self.assertIn('ImpactPositions.AsSpan().SequenceEqual',chorus)
+        self.assertIn('TryBoss(Plan, out var boss, Resolved)',chorus)
+        self.assertIn('!CrimsonChorus.TryBoss(Impact.Plan, out var boss)',chorus)

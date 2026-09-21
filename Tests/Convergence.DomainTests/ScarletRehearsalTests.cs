@@ -16,7 +16,7 @@ internal static partial class Program
             int life = CrimsonInvocation.TargetLife(members[i]);
             AssertEqual(totals[i], life * 4, "total does not refill at Final");
             AssertEqual(life / 5, CrimsonPhaseRules.RetreatLife(life), "twenty-percent retreat");
-            AssertEqual(life * 8 / 5, CrimsonPhaseRules.BarMaximum(3, life), "Final includes retained apparitions");
+            AssertEqual(life * 8 / 5, CrimsonPhaseRules.BarMaximum(3, life), "Final absorbs retained apparitions into one HP budget");
         }
         AssertEqual(1, CrimsonPlaytestTuning.AttackDamage, "all hostile source tuning");
     }
@@ -56,6 +56,7 @@ internal static partial class Program
     private static void ScarletFinalFirstCycle()
     {
         var state = ScarletRehearsalState() with { Phase = 3, PhaseStart = 500, FinalStart = 500, UnlockAt = 650 };
+        for (int i=0;i<4;i++) AssertEqual(i==3, state.SourceActive(i,state.Age), "only giant attacks after sacrifice");
         for (int source = 0; source < 4; source++) AssertEqual(1, state.DamageFloor(source), "hold every performer at one HP");
         AssertEqual(true, state.Vulnerable(state.Age), "performance source remains active");
         var released = state with { Age = 5000, CompletedCycles = 1 };

@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-22",
+  "feature": "Scarlet Covenant, sacrificial single-target Final and visible chorus aftermath",
+  "version": "0.3.36",
+  "protocol": 63,
+  "base": "7d62b7c37ca59db057867c0260a927dbd0b0c22d",
+  "observed_playtest": {
+    "loaded_build": "0.3.35",
+    "topology": "solo Host & Play",
+    "fight": "8eaa9b6b-fcc0-462a-b00c-28b5a0c70494",
+    "unlock": 1209,
+    "final_unlock": 11061,
+    "defeat": 12461,
+    "cleaned": 12611,
+    "combat_seconds": 187.5333,
+    "final_combat_seconds": 23.3333,
+    "phrases": 41,
+    "completed_cycles": 3,
+    "stack": {"success": 0, "failure": 3, "failed_source_budget": 900},
+    "spread": {"success": 2, "failure": 0, "note": "solo cannot validate pair overlap"},
+    "total_hp": 3000000,
+    "remaining_hp": 4,
+    "peak_five_second_hp_budget_dps": 167260,
+    "notes": "The old four Final targets reached their intentional1HP first-cycle floor; Final admitted only five phrases before Defeat. This is not a native damage failure. No Scarlet runtime exception observed in the fight; initial local connection refusal and another server's shutdown EOF do not establish a Scarlet defect.",
+    "input_sha256": {
+      "server.log": "9566d1cd9df381a0b158dc5d85c5a9d21fe4feb73206388123db7dd24fec5fcb",
+      "server2.log": "1ccfa9c42a2185c5135795f5d5214860247ada4d646385ca59d4e89075330a81",
+      "client.log": "513fbb40f140323fced338f2f5eb3531ed28898ab1fa69843d91dce086283460"
+    },
+    "raw_logs": "External game logs; local ignored aggregate only. No raw logs or saves committed."
+  },
+  "diagnosis": "Code filtered dead/Out members from failed Stack rendering and terminal cleanup removed its resolved marker. These paths explain disappearing lethal aftermath; logs cannot establish the exact frames the owner saw. Persist the server's pre-hit world positions and only the harmless visual marker for48ticks, then clean up normally.",
+  "changes": "Owner-selected top-ten current-HP companion clamps; Act gates; three retained apparitions absorbed into one giant carrying their combined HP; two attack families at once; bounded resolved-position payload and legible black flame. No new image/audio imports, music edit, global authority switch or other Raid rebalance.",
+  "verification": {
+    "domain": "passed:347 deterministic cases, including53 focused Scarlet contracts for HP transfer, sole Final source, geometry, target priority, shared timing and verdict positions",
+    "source_guards": "passed:16 Scarlet wiring guards, including complete native owner validation before sacrifice, incarnation identity and harmless resolved tails",
+    "codec": "passed:compiled protocol63,334 round trips and54 malformed/truncated rejections; additional Scarlet verdict-position/merged-health tests in the domain suite",
+    "repository": "passed:82-document catalog,982-file repository policy,12 YAML files and git diff --check",
+    "shader": "passed: installed FXC export of ScarletSorcery and dependency manifest; actual compiled D3D11 material exercised",
+    "gpu": "80 linked-production FNA D3D11 frames:64 initial gate/clamp/flame samples plus16 updated single-giant sacrifice frames. Inspected binding, absorption, final silhouette and bright/dark flame. Production materials/meshes with controlled world facades; not native gameplay, FPS or multiplayer evidence.",
+    "gpu_relative": ".local/scarlet-ensemble/final-sacrifice",
+    "native_build": "passed:isolated0.3.36 candidate,0 errors/4 existing nullable warnings,26 locales accepted by installed Hjson parser; source inputs unchanged during build. The packaged solo probe verifies Doll admission1-4, not Scarlet1-8 gameplay. Four pre-existing generated locale edits remain local and are captured by the build source manifest.",
+    "native_type_validation": "passed:installed tModLoader ValidateType for CrimsonCovenantIncarnation and CrimsonCompanionVisuals; headless exact-package check, not a full game load",
+    "build_record_relative": ".local/builds/20260921T191002568432Z/record.json",
+    "package_sha256": "fc0747ef92a87837d8ae9bceb0b80d29a6bfbf428689a3386335b79c2ab022a8",
+    "runtime_not_run": [
+      "Real ten-target companion targeting, enemy reuse, native hit cadence and remote visibility",
+      "ActII/III gates, three sacrifices, single giant damage and first-cycle lethal floor",
+      "Paired Final attacks fairness, Victory/Defeat and repeat invocation",
+      "Failed Stack visual aftermath during native death/respawn and remote verdict latency",
+      "Reduced Effects, UI107%, real camera/zoom and game frame pacing"
+    ]
+  }
+}

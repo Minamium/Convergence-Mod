@@ -6,7 +6,7 @@ Mods: {
 				Tooltip:
 					'''
 					Use on a Foundation Core pedestal to prepare Scarlet Invocation; everyone confirms Ready
-					Face each apparition alone; at 20% HP it completes its action cycle, then retreats. All three return with Vespera for the finale
+					Face each apparition alone; at 20% HP it finishes its cycle. The three are sacrificed to one giant final apparition
 					Right-click to cancel your preparation. Reusable
 					Rehearsal: hostile damage 1, reduced HP; 1–8 players; late arrivals spectate
 					'''
@@ -15,7 +15,7 @@ Mods: {
 				DisplayName: Scarlet Covenant
 				Tooltip: '''
 					Summons a human-sized scarlet conjurer to accompany you
-					Follows on foot or floats alongside you; her red orb fires a sustained beam
+					Follows on foot or floats; opposing seals clamp up to 10 enemies with beams, prioritizing highest current HP
 					Requires 10 minion slots. Does not count as a Raid participant
 					'''
 			}

@@ -142,7 +142,7 @@ internal static partial class Program
                 catch (IOException) { rejected = true; }
                 AssertEqual(true, rejected, "all truncated prefixes rejected");
             }
-            if (!p.Aimed)
+            if (!p.Aimed && !p.IsRift)
                 CheckRejected(p with { Source = (byte)((p.Source + 1) % 4) });
             CheckRejected(p with { Stage = new(float.NaN, 5000) });
             CheckRejected(p with { Fire = int.MinValue });

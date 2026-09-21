@@ -120,7 +120,7 @@ internal sealed class ScarletArticulation : ModSystem
             if (epoch > 0 && boss.VisualAge - epoch < 4 && !CrimsonVisuals.Reduced
                 && !CutsceneManager.AnyActive && ModContent.GetInstance<CrimsonVisualConfig>().CinematicCamera)
             {
-                cutscene = ModContent.GetInstance<ScarletPhaseCutscene>(); cutscene.Bind(fight, epoch);
+                cutscene = ModContent.GetInstance<ScarletPhaseCutscene>(); cutscene.Bind(fight, epoch, boss.State.Phase);
                 CutsceneManager.QueueCutscene(cutscene);
             }
         }
@@ -181,8 +181,9 @@ public sealed class ScarletPhaseCutscene : Cutscene
 {
     private Guid fight;
     private int epoch;
-    public override int CutsceneLength => CrimsonPhaseRules.TransitionTicks;
-    internal void Bind(Guid id, int start) { fight = id; epoch = start; EndAbruptly = false; }
+    private int length = CrimsonPhaseRules.TransitionTicks;
+    public override int CutsceneLength => length;
+    internal void Bind(Guid id, int start, int phase) { fight = id; epoch = start; length = CrimsonEnsemble.Transition(phase); EndAbruptly = false; }
     internal void Cancel() { fight = Guid.Empty; EndAbruptly = true; }
     private bool Valid(CrimsonBoss? boss) => ScarletArticulation.Participant(boss) && boss!.State.Fight == fight
         && boss.State.PhaseStart == epoch && boss.VisualAge >= epoch && boss.VisualAge < boss.State.UnlockAt
@@ -193,7 +194,7 @@ public sealed class ScarletPhaseCutscene : Cutscene
     {
         var boss = CrimsonPackets.Boss;
         if (!Valid(boss)) return;
-        float t = Math.Clamp((boss!.VisualAge - epoch) / CrimsonPhaseRules.TransitionTicks, 0, 1);
+        float t = Math.Clamp((boss!.VisualAge - epoch) / length, 0, 1);
         CameraPanSystem.PanTowards(new(boss.State.Field.CenterX, boss.State.Field.CenterY - 70), MathF.Sin(t * MathF.PI) * .10f);
     }
 }
