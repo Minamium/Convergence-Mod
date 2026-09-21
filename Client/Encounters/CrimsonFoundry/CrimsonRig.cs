@@ -19,6 +19,7 @@ internal static class CrimsonRig
     private static readonly Texture2D?[] effigies = new Texture2D?[3];
     private static readonly int[] partOrder = { 3, 4, 0, 1, 2 };
     private static readonly int[] singlePart = { 0 };
+    private static readonly int[] wings = { 1, 2 }, limbs = { 3, 4 };
     private const int Columns = 24, Rows = 32;
     private static readonly VertexPositionColorTexture[] mesh = new VertexPositionColorTexture[Columns * Rows * 6];
     private static readonly Rectangle[] poses = { new(20, 202, 335, 540), new(422, 202, 460, 540), new(890, 190, 487, 530), new(1398, 202, 355, 540) };
@@ -65,6 +66,7 @@ internal static class CrimsonRig
         float opening=CrimsonChoreography.OpeningAge(age,boss.State.MusicStart);
         float reveal=CrimsonChoreography.Reveal(opening);
         if(reveal<1 || CrimsonChoreography.Seal(opening)>0) DrawInvocation(batch,boss,age,opening,ending);
+        ScarletInvocationScene.Draw(batch, boss.State, age, ending);
         DrawPerformer(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection,
             true, signal.Charge, signal.Recoil, ending*reveal, false, reveal);
         {
@@ -154,14 +156,24 @@ internal static class CrimsonRig
     {
         if (effigy.State.Index >= 3 || effigies[effigy.State.Index] is not { } texture || !effigy.TryBoss(out var boss)) return false;
         float age = CrimsonVisuals.RenderAge(boss!), born = age - effigy.State.Born;
-        float appear = CrimsonInvocation.Ease(born / 62), snap = MathF.Exp(-Math.Max(0, born - 12) / 14);
+        float appear = boss!.State.Phase is 1 or 2 && effigy.State.Index == boss.State.Phase
+            ? CrimsonEnsemble.Emergence(age - boss.State.PhaseStart, false) : CrimsonInvocation.Ease(born / 62);
+        float snap = MathF.Exp(-Math.Max(0, born - 12) / 14);
         var signal = Signal(boss!, effigy.State.Index, age);
         float size = effigy.State.Index switch { 0 => 350, 1 => 430, _ => 420 };
+        float absorbed = boss.State.Phase == 3 ? CrimsonEnsemble.Absorption(age - boss.State.PhaseStart) : 0;
+        if (boss.State.Phase == 3) size *= .62f * (1 - absorbed * .93f);
         float alpha = boss!.State.Presence(effigy.State.Index, age);
+        alpha *= 1 - absorbed;
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat) alpha *= .35f;
         if (alpha <= .001f) return false;
         Vector2 at = effigy.NPC.Center;
-        if (CrimsonGesture.TryPose(boss, effigy.State.Index, age, out var pose))
+        if (boss.State.Phase == 3)
+        {
+            var root = CrimsonPoint.Lerp(CrimsonEnsemble.Binding(boss.State.Field, effigy.State.Index), CrimsonChoreography.Conductor(boss.State.Field), absorbed);
+            at = new(root.X, root.Y);
+        }
+        if (boss.State.Phase != 3 && CrimsonGesture.TryPose(boss, effigy.State.Index, age, out var pose))
         {
             at = CrimsonGestureVisuals.V(pose.Body(age));
             if (pose.Technique == CrimsonTechnique.MantleRush && pose.Live(age) && !CrimsonVisuals.Reduced)
@@ -183,6 +195,26 @@ internal static class CrimsonRig
             CrimsonEnergy.Draw(batch);
         }
         return false;
+    }
+    internal static void DrawEnsemble(SpriteBatch batch, Vector2 center, float age, float emergence, float alpha)
+    {
+        // The three retained masks become a fourth silhouette: broad folded
+        // mantle, lagging thorn limbs, furnace crown. Not a resized whole PNG.
+        float release = CrimsonInvocation.Ease((emergence - .30f) / .48f);
+        float size = .48f + .52f * emergence;
+        float charge = .45f + .22f * MathF.Sin(age * .065f), recoil = MathF.Exp(-emergence * 8) * emergence * 3;
+        Part(1, wings, 780 * size, new(0, -48 * release), -.035f, new Color(233, 163, 185));
+        Part(2, limbs, 650 * size, new(0, 8 + 28 * release), .065f, new Color(239, 158, 181));
+        Part(0, singlePart, 475 * size, new(0, -10), -.025f, new Color(255, 194, 175));
+        CrimsonEnergy.Begin();
+        CrimsonEnergy.AddCore(center + new Vector2(0, -20), 51 + charge * 18, age, charge, recoil, emergence * alpha * .8f, CrimsonVisuals.Reduced);
+        CrimsonEnergy.Draw(batch);
+        void Part(int species, int[] parts, float height, Vector2 offset, float angle, Color tint)
+        {
+            if (effigies[species] is not { } texture) return;
+            Mesh(batch, texture, texture.Bounds, center + offset - Main.screenPosition, texture.Size() * .5f,
+                height / texture.Height, age + species * 37, 18, charge, recoil, tint * (emergence * alpha), false, angle, true, species, parts);
+        }
     }
     internal static void DrawPressure(SpriteBatch batch, Vector2 center, int source, float age, float charge, float recoil)
     {
@@ -209,7 +241,7 @@ internal static class CrimsonRig
                 bloom.Size() * .5f, new Vector2(150, 7) * (CrimsonVisuals.Reduced ? .45f : 1) / bloom.Width, SpriteEffects.None, 0);
     }
     private static void Mesh(SpriteBatch batch, Texture2D texture, Rectangle source, Vector2 center, Vector2 pivot,
-        float scale, float time, float motion, float charge, float recoil, Color tint, bool flip, float rotation, bool apparition, int species = -1)
+        float scale, float time, float motion, float charge, float recoil, Color tint, bool flip, float rotation, bool apparition, int species = -1, int[]? selectedParts = null)
     {
         if (Main.dedServ || tint.A == 0) return;
         var material = ShaderManager.GetShader("Convergence.ScarletSurface");
@@ -224,7 +256,7 @@ internal static class CrimsonRig
         material.SetTexture(texture, 0, apparition ? SamplerState.LinearClamp : SamplerState.PointClamp);
         material.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
         material.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value, 2, SamplerState.LinearWrap);
-        foreach (int part in apparition ? partOrder : singlePart)
+        foreach (int part in selectedParts ?? (apparition ? partOrder : singlePart))
         {
             var pose = ScarletArticulation.Part(apparition ? species : 3, part, time, charge, recoil);
             material.TrySetParameter("part", (float)part);

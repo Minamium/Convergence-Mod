@@ -51,7 +51,7 @@ internal readonly record struct CrimsonGesturePlan(
     internal void Validate()
     {
         if (Fight == Guid.Empty || Boss is < 0 or >= 200 || Epoch < 0 || Phrase is < 1 or > 100000 || Pulse >= CrimsonRhythm.MaximumHits
-            || Source > 3 || !Enum.IsDefined(Technique) || !Aimed && CrimsonTechniqueGeometry.Owner(Technique) != Source
+            || Source > 3 || !Enum.IsDefined(Technique) || !Aimed && !IsRift && CrimsonTechniqueGeometry.Owner(Technique) != Source
             || Steps is < 1 or > CrimsonRhythm.MaximumHits || Step >= Steps || Accent > 2
             || Begin < Epoch || Begin > FirstFire || Born < Epoch || Born > 73000
             || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire < 2 || (long)End - Fire > (Technique == CrimsonTechnique.SideBeams ? 180 : CrimsonRhythm.LiveTicks) || Fire > 73500

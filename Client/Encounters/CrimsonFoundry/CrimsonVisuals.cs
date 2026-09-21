@@ -68,6 +68,12 @@ internal sealed class CrimsonVisuals : ModSystem
             int gate=boss.State.MusicStart+CrimsonChoreography.SummonAt;
             if(previousAge<gate && age>=gate && age-gate<8) { Cue("PhaseRupture",.48f,age+150);shake=11; }
         }
+        if (boss.State.Phase > 0)
+        {
+            int release = boss.State.PhaseStart + (boss.State.Phase == 3 ? CrimsonEnsemble.FinalRelease : CrimsonEnsemble.ActRelease);
+            if (previousAge < release && age >= release && age - release < 8)
+            { Cue("PhaseRupture", .48f, age + 150); shake = boss.State.Phase == 3 ? 11 : 7; }
+        }
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && endingAt < 0)
         {
             endingAt = age;
@@ -215,12 +221,12 @@ internal sealed class CrimsonVisuals : ModSystem
             if (br.Y > 0 && br.Y <= view.Height) Fill(new(left, Math.Max(0, bottom - 2), Math.Max(0, right - left), 2), edge);
         }
         bool intro = state.MusicStart >= 0 && age < state.MusicStart + CrimsonChoreography.OpeningTicks;
-        bool manifest = state.FinalStart >= 0 && age < state.FinalStart + CrimsonInvocation.ManifestTicks;
+        bool manifest = state.FinalStart >= 0 && age < state.FinalStart + CrimsonEnsemble.FinalTransition;
         bool cinematic = state.Stage == CrimsonStage.Deployment || intro || manifest || endingAt >= 0;
         if (cinematic)
         {
             float clock = endingAt >= 0 ? age - endingAt : manifest ? age - state.FinalStart : intro ? age - state.MusicStart : age;
-            float alpha = endingAt >= 0 || manifest ? Math.Min(Ease(clock / 22), Ease((150 - clock) / 32))
+            float alpha = endingAt >= 0 || manifest ? Math.Min(Ease(clock / 22), Ease(((manifest ? CrimsonEnsemble.FinalTransition : 150) - clock) / 32))
                 : CrimsonInvocation.OpeningBars(state.Stage, age, state.MusicStart, CrimsonChoreography.OpeningTicks);
             Fill(new(0, 0, view.Width, (int)(view.Height * .11f)), Color.Black * alpha);
             Fill(new(0, (int)(view.Height * .89f), view.Width, (int)(view.Height * .12f)), Color.Black * alpha);

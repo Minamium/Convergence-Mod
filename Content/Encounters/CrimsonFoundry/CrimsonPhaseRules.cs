@@ -13,8 +13,8 @@ internal static class CrimsonPhaseRules
         => phase is >= 0 and < FinalPhase && index == phase && life <= RetreatLife(maximumLife);
     internal static bool ActiveSource(int phase, byte defeated, bool performerDefeated, int source)
         => phase is >= 0 and <= FinalPhase && source is >= 0 and <= FinalPhase
-            && (source == FinalPhase ? phase == FinalPhase && !performerDefeated
-                : (phase == FinalPhase || source == phase) && (defeated & (1 << source)) == 0);
+            && (phase == FinalPhase ? source == FinalPhase && !performerDefeated
+                : source == phase && (defeated & (1 << source)) == 0);
     internal static bool Victory(int phase, byte defeated, bool performerDefeated, bool allPlayersOut)
         => !allPlayersOut && phase == FinalPhase && defeated == CrimsonInvocation.AllDefeated && performerDefeated;
     internal static int BarMaximum(int phase, int targetLife)

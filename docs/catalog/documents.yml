@@ -65,13 +65,13 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: c5649dc0544ad3abe90ef79077fa51443e813dbe30ee6481c0f5c984c5b73a91
+  content_sha256: cec316422c4f5eb0de79e4e952259c500a8bb72275cc4945d55a9d55ec81ef54
   document_type: adr
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-16'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - architecture.crimson_score_authority
   aliases:
@@ -635,14 +635,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: d15c8157d5ef8ba7900f5e33a6e1c2db8288b473466360b186f7da8594f3c381
+  content_sha256: 70b2e1a9baa7099b51060dc61334b2a5a476c76e80f7ce6d64daa9cdb38d6826
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -927,7 +927,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 3a21680650bd2ac8b0b9c4f73f32dadc02e9fe2dced31087810d274c53937581
+  content_sha256: fcd6a0016569605f22ef55cd6f483fc4bf51c819921d0156d5c09b4e97221b97
   document_type: evidence
   status: historical
   owners:
@@ -1326,12 +1326,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 46131ada19b1711eb61d14b946537e64b17cc2ca9c5ce52972e3019ef16aa665
+  content_sha256: b63043c80341e090114a632407bab7ac91c6bf51204c72eaa5a55469fda69812
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - project.implementation_status
   aliases:

@@ -24,13 +24,13 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
     internal int LifeFor(int index) => index switch { 0 => Life0, 1 => Life1, 2 => Life2, _ => Life3 };
     internal int DamageFloor(int source) => Phase < 3 ? CrimsonPhaseRules.RetreatLife(TargetLife) : CompletedCycles == 0 ? 1 : 0;
     internal bool HeldAtFloor(int source) => LifeFor(source) <= DamageFloor(source);
-    internal int BarLife => Phase == 3 ? Life0 + Life1 + Life2 + Life3 : LifeFor(Phase);
+    internal int BarLife => Phase == 3 ? Life3 : LifeFor(Phase);
     internal int BarMax => CrimsonPhaseRules.BarMaximum(Phase, TargetLife);
     internal bool FormationAt(float now) => PhraseKind != CrimsonRhythmKind.Groove && PhraseStart >= 0 && now < PhraseEnd + 12;
     internal float Presence(int index, float now)
     {
         if (index is < 0 or >= 3 || (DefeatedMask & 1 << index) != 0) return 0;
-        if (Phase == 3) return CrimsonInvocation.Ease((now - PhaseStart) / 45);
+        if (Phase == 3) return CrimsonInvocation.Ease((now - PhaseStart - 24 - index * 14) / 48);
         if (index == Phase) return 1;
         return index == Phase - 1 ? 1 - CrimsonInvocation.Ease((now - PhaseStart) / 36) : 0;
     }
@@ -80,7 +80,7 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
             || (phrase < 0) != (phraseEnd < 0) || phrase >= 0 && (phraseEnd <= phrase || phraseEnd - phrase > 720)
             || cycles is < 0 or > 1000
             || maximum is < 1 or > 17000000 || a < 0 || a > maximum || b < 0 || b > maximum
-            || c < 0 || c > maximum || d < 0 || d > maximum
+            || c < 0 || c > maximum || d < 0 || d > (phase == 3 ? CrimsonPhaseRules.BarMaximum(3, maximum) : maximum)
             || ((defeated & 1) != 0 && a != 0) || ((defeated & 2) != 0 && b != 0) || ((defeated & 4) != 0 && c != 0) || dead && d != 0
             || x is < 1600 or > 400000 || y is < 1440 or > 150000)
             throw new InvalidDataException("crimson.actor_invalid");

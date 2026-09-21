@@ -20,6 +20,7 @@ public sealed class CrimsonChorus : ModProjectile
     internal CrimsonChorusPlan Plan;
     internal bool Resolved;
     internal byte FailedMask;
+    internal CrimsonPoint[] ImpactPositions = Array.Empty<CrimsonPoint>();
     public override string Texture => "Terraria/Images/Projectile_1";
     public override void SetDefaults()
     {
@@ -33,19 +34,20 @@ public sealed class CrimsonChorus : ModProjectile
     public override bool PreDraw(ref Color lightColor) => false;
     public override void OnSpawn(IEntitySource source)
     { if (source is CrimsonChorusSource own) { own.Plan.Validate(); Plan = own.Plan; } }
-    internal static bool TryBoss(in CrimsonChorusPlan plan, out CrimsonBoss? boss)
+    internal static bool TryBoss(in CrimsonChorusPlan plan, out CrimsonBoss? boss, bool visualTail = false)
     {
         boss = plan.Boss >= 0 && plan.Boss < Main.maxNPCs && Main.npc[plan.Boss].active
             ? Main.npc[plan.Boss].ModNPC as CrimsonBoss : null;
         return plan.Fight != Guid.Empty && boss is not null && boss.Fresh
             && boss.State.Fight == plan.Fight && boss.State.PhaseStart == plan.Epoch
-            && boss.State.Stage == CrimsonStage.Performance && plan.MatchesRoster(boss.State.Members.Length)
+            && (boss.State.Stage == CrimsonStage.Performance || visualTail && boss.State.Stage == CrimsonStage.Defeat)
+            && plan.MatchesRoster(boss.State.Members.Length)
             && !boss.State.PerformerDefeated; // Chorus belongs to Vespera in every Act.
     }
     public override void AI()
     {
         Projectile.Center = new(Plan.Center.X, Plan.Center.Y);
-        if (TryBoss(Plan, out var boss))
+        if (TryBoss(Plan, out var boss, Resolved))
         {
             Projectile.timeLeft = Math.Max(2, Plan.End + 20 - (int)boss!.VisualAge);
             if (Main.netMode != NetmodeID.MultiplayerClient && boss.VisualAge >= Plan.End + 20) Projectile.Kill();
@@ -53,14 +55,16 @@ public sealed class CrimsonChorus : ModProjectile
         else if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
     }
     public override void SendExtraAI(BinaryWriter writer)
-    { Plan.Write(writer); writer.Write(Resolved); writer.Write(FailedMask); }
+    { Plan.Write(writer); writer.Write(Resolved); writer.Write(FailedMask); CrimsonChorusImpactPositions.Write(writer, ImpactPositions); }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         var next = CrimsonChorusPlan.Read(reader);
         var (resolved, failures) = CrimsonChorusRules.ReadVerdict(reader, next.Members);
+        var positions = CrimsonChorusImpactPositions.Read(reader, resolved, next.Members);
         if (Main.netMode == NetmodeID.Server || Plan.Fight != Guid.Empty && Plan != next
             || !CrimsonChorusRules.CanReplaceVerdict(Resolved, FailedMask, resolved, failures)) return;
-        Plan = next; Resolved = resolved; FailedMask = failures;
+        if (Resolved && !ImpactPositions.AsSpan().SequenceEqual(positions)) return;
+        Plan = next; Resolved = resolved; FailedMask = failures; ImpactPositions = positions;
     }
 }
 
@@ -173,7 +177,7 @@ internal sealed partial class CrimsonRuntime
                 && p.GetModPlayer<CrimsonConnection>().Token == members[i].Connection) living |= (byte)(1 << i);
         }
         int[] damage = CrimsonChorusRules.Resolve(plan.Kind, plan.Center, positions, plan.Members, living);
-        marker.Resolved = true; marker.FailedMask = 0;
+        marker.Resolved = true; marker.FailedMask = 0; marker.ImpactPositions = positions;
         for (int i = 0; i < damage.Length; i++) if (damage[i] > 0) marker.FailedMask |= (byte)(1 << i);
         marker.Projectile.netUpdate = true;
         int needed = 0, free = 0;
@@ -191,13 +195,15 @@ internal sealed partial class CrimsonRuntime
         }
         CrimsonPackets.Log($"event=ChorusResolved fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} living={living} failed_mask={marker.FailedMask} budget_sources={string.Join(",", damage)}");
     }
-    private void ClearChorus(int source)
+    private void ClearChorus(int source, bool preserveVerdict = false)
     {
         if (chorus is { } plan && (source < 0 || source == plan.Source))
         { chorus = null; chorusSlot = -1; chorusResolved = false; }
         if (source < 0) phrasesSinceChorus = 0;
         foreach (Projectile p in Main.ActiveProjectiles)
         {
+            if (preserveVerdict && p.ModProjectile is CrimsonChorus tail && tail.Plan.Fight == fight.Value
+                && tail.Resolved && age < tail.Plan.Fire + CrimsonChorusImpactPositions.TailTicks) continue;
             CrimsonChorusPlan? own = p.ModProjectile is CrimsonChorus marker ? marker.Plan
                 : p.ModProjectile is CrimsonChorusStrike strike ? strike.Impact.Plan : null;
             if (own is { } value && value.Fight == fight.Value && (source < 0 || source == value.Source)) p.Kill();

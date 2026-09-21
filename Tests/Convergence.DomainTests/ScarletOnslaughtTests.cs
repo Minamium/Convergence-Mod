@@ -5,13 +5,13 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Scarlet sixth accent is bounded and seventh accent is rejected")]
+    [DomainTest("Scarlet ensemble notes are bounded and the eleventh accent is rejected")]
     private static void ScarletSixthAccent()
     {
-        var p = TechniqueExample(CrimsonTechnique.CrownRain) with { Pulse = 5, Step = 5, Steps = 6 };
+        var p = TechniqueExample(CrimsonTechnique.CrownRain) with { Pulse = 9, Step = 9, Steps = 10 };
         p.Validate();
         bool failed = false;
-        try { (p with { Pulse = 6 }).Validate(); } catch (System.IO.InvalidDataException) { failed = true; }
+        try { (p with { Pulse = 10 }).Validate(); } catch (System.IO.InvalidDataException) { failed = true; }
         AssertEqual(true, failed, "bounded note count");
     }
 

@@ -75,7 +75,7 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Scarlet solo phases retain 20 percent and Final exposes all four targets")]
+    [DomainTest("Scarlet solo phases retain 20 percent and transfer it into one Final target")]
     private static void CrimsonDamageProjection()
     {
         var state = new CrimsonState(Guid.NewGuid(), 1000, 100, -1, CrimsonStage.Performance,
@@ -92,23 +92,28 @@ internal static partial class Program
             AssertEqual(false, CrimsonPhaseRules.ShouldRetreat(phase, (phase + 1) % 3, 0, state.TargetLife), "foreign target cannot advance");
         }
         state = state with { Phase = 3, PhaseStart = 1000, FinalStart = 1000, UnlockAt = 1150,
-            Life0 = 600000, Life1 = 600000, Life2 = 600000 };
+            Life0 = 600000, Life1 = 600000, Life2 = 600000, Life3 = 4800000 };
         AssertEqual(4800000, state.BarMax, "Final remaining health denominator");
         AssertEqual(4800000, state.BarLife, "no full-health respawn");
         AssertEqual(false, state.Vulnerable(1149.99f), "manifestation protects performer");
         state = state with { Age = 1150 };
-        for (int i = 0; i < 3; i++) AssertEqual(true, state.SummonVulnerable(i), "all three return");
-        AssertEqual(true, state.Vulnerable(1150), "performer exposed alongside summons");
+        for (int i = 0; i < 3; i++) AssertEqual(false, state.SummonVulnerable(i), "sacrifices are not extra targets");
+        AssertEqual(true, state.Vulnerable(1150), "giant is the only target");
+        using (var wire = new MemoryStream())
+        {
+            state.Write(new BinaryWriter(wire)); wire.Position=0;
+            AssertEqual(state.Life3, CrimsonState.Read(new BinaryReader(wire)).Life3, "merged HP exceeds individual cap and round trips");
+        }
         AssertEqual(false, (state with { Stage = CrimsonStage.Victory }).Vulnerable(1200), "terminal protected");
         AssertEqual(false, default(CrimsonState).Vulnerable(600), "empty actor protected");
     }
 
-    [DomainTest("Scarlet Final requires four kills and all-out overrides a simultaneous clear")]
+    [DomainTest("Scarlet Final requires completed sacrifice and one giant kill with all-out precedence")]
     private static void CrimsonFinalTerminal()
     {
         for (byte mask = 0; mask <= 7; mask++)
         {
-            AssertEqual(mask == 7, CrimsonPhaseRules.Victory(3, mask, true, false), "all targets required");
+            AssertEqual(mask == 7, CrimsonPhaseRules.Victory(3, mask, true, false), "sacrifice must complete");
             AssertEqual(false, CrimsonPhaseRules.Victory(3, mask, false, false), "main actor required");
             AssertEqual(false, CrimsonPhaseRules.Victory(3, mask, true, true), "all-out wins tie");
         }

@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-22
 source_of_truth_for:
   - architecture.crimson_score_authority
 aliases:
@@ -21,7 +21,7 @@ related_docs:
 
 # ADR-0026: Crimson score clock and native projectiles
 
-Current amendment: [independent summons](#independent-summons-amendment--2026-09-16). The original steel-machine/50% purge rationale below is historical, not the current visual/phase instruction.
+Current amendment: [single sacrificial Final](#single-sacrificial-final-and-verdict-tail--2026-09-22). Earlier amendments retain historical decisions, not current visual/phase instructions; the owning spec supplies current tuning.
 
 The owner requests a separate music-led Raid without a fixed arena, then a50% armored→fast-machine transformation. Reuse the definition-routed coordinator/transport, not either prior encounter's runtime. `crimson_foundry` owns a runtime, preparation roster, native NPC projection, immutable hazard projectiles and terminal cleanup; no global encounter switch, extra assembly or persisted session is added. Feature termination schema3/version1 and protocol42 distinguish matching peers without renumbering prior packet IDs.
 
@@ -62,3 +62,13 @@ Temporary rehearsal source damage and native hit cap are1 for Scarlet hostile at
 Luminance supplies primitive rendering, managed shader ownership, projected state machines, bounded decorative Verlet chains, manually composited Metaballs, easing and local cutscene/shake. None is a new gameplay authority. Existing artwork is masked into animated regions, not replaced or claimed as new authored frame animation. All transient presentation is exact-Fight/epoch-owned and is cancelled on teardown. Required danger footprints survive Reduced Effects. SpriteBatch parameters and graphics bindings are restored to the actual caller.
 
 The approved background is an unchanged original PNG with a fixed SHA256. Binary import is currently blocked by the conversation compute backend, not replaced by the Doll painting or synthetic artwork. Missing asset leaves the ordinary sky and logs once. Native loading, actual visual quality and MP remain unverified; dependency-source API compilation is not proof of compatibility with the installed DLLs.
+
+## Single sacrificial Final and verdict tail — 2026-09-22
+
+The owner supersedes the four-target Final: three retained apparitions are explicitly sacrificed to one giant. `CrimsonRuntime` validates the complete exact-Fight native child set before retiring any of it, without native death callbacks/loot; missing/reused slots invalidate rather than counting as sacrifices. The existing conductor actor carries the giant's enlarged native hitbox and combined remaining HP. Source3 alone attacks and receives Final damage; Vespera stays an NPC-sized visual conductor. Victory still requires a completed first Final cycle and native lethal damage, plus completed sacrifice. No fifth actor, extra HP budget, new global switch or client-owned outcome is introduced.
+
+The same accepted phase epoch drives protected gate/emergence/absorption animation. Final admits two shared beam/cut families at once within a bounded nine-descriptor phrase, preserving full warnings and all-or-nothing resource admission. Stable IDs and ordinary native Hurt boundaries remain unchanged.
+
+Resolved chorus markers now include bounded, immutable roster-ordered world positions captured **before** native verdict damage. Protocol63 requires matching peers. A resolved marker may survive a wipe for a short harmless visual tail; its damaging child and every unrelated hazard are removed immediately. Decode fully before replacement, reject rollback, and retain exact-Fight/phase/freshness checks. Respawn positions cannot relocate a failed Stack's aftermath. Actual damage still requires the live Performance state.
+
+Scarlet Covenant remains an ordinary owner-replicated companion, not a raid participant. Only its owner selects the bounded current-HP target list, tracks each target through charge and freezes beam geometry at release. A local NPC incarnation guard prevents a reused target slot from being followed; replicas consume native projectile positions and exact parent identity. No target list packet, fake roster member or server-side auto-Ready is added. [Current spec](../encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns all tuning; [evidence](../evidence/2026-09-22-scarlet-ensemble.json) owns verification.

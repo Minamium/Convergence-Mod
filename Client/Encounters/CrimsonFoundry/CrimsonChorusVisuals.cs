@@ -21,20 +21,24 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     private readonly List<(SlotId Id, int End)> voices = new();
     private readonly List<Vector2> ring = new(65);
     private readonly Vector2[] arrow = new Vector2[3];
+    private static bool Audience(CrimsonBoss? boss) => !Main.dedServ && !Main.gameMenu && boss is not null && boss.Fresh
+        && Array.Exists(boss.State.Members, m => m.Slot == Main.myPlayer);
     public override void PostUpdateEverything()
     {
         var boss = CrimsonPackets.Boss;
-        if (!ScarletArticulation.Participant(boss)) { Reset(); return; }
+        if (!Audience(boss)) { Reset(); return; }
         int age = (int)boss!.VisualAge;
         if (fight != boss.State.Fight) { Reset(); fight = boss.State.Fight; previous = age - 1; }
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
-            if (projectile.ModProjectile is not CrimsonChorus marker || !CrimsonChorus.TryBoss(marker.Plan, out var owner) || owner != boss) continue;
+            if (projectile.ModProjectile is not CrimsonChorus marker || !CrimsonChorus.TryBoss(marker.Plan, out var owner, marker.Resolved) || owner != boss) continue;
             var p = marker.Plan;
             Cue(p.Born, false); Cue(p.Fire, true);
             void Cue(int tick, bool impact)
             {
-                if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Serial, impact))) return;
+                if (impact ? !marker.Resolved || age < tick || age - tick > CrimsonChorusImpactPositions.TailTicks
+                    : previous >= tick || age < tick || age - tick > 3) return;
+                if (!heard.Add((p.Serial, impact))) return;
                 string asset = p.Kind == CrimsonChorusKind.Stack ? impact ? "StackRelease" : "StackSummon"
                     : impact ? "SpreadRelease" : "SpreadSummon";
                 var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
@@ -58,7 +62,7 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     public override void PostDrawTiles()
     {
         var boss = CrimsonPackets.Boss;
-        if (!ScarletArticulation.Participant(boss)) return;
+        if (!Audience(boss)) return;
         float age = CrimsonVisuals.RenderAge(boss!);
         var batch = Main.spriteBatch;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
@@ -117,25 +121,26 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     {
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
-            if (projectile.ModProjectile is not CrimsonChorus marker || !CrimsonChorus.TryBoss(marker.Plan,out var owner) || owner!=boss) continue;
-            var p=marker.Plan;if(age<p.Born || age>=p.Fire+32)continue;
+            if (projectile.ModProjectile is not CrimsonChorus marker || !CrimsonChorus.TryBoss(marker.Plan,out var owner,marker.Resolved) || owner!=boss) continue;
+            var p=marker.Plan;if(age<p.Born || age>=p.Fire+CrimsonChorusImpactPositions.TailTicks)continue;
             float progress=Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1);
             // Three abrupt growth beats with connected ease-out arrivals, not a uniform scale ramp.
             float size=45+30*CrimsonInvocation.Ease(progress*10)
                 +42*CrimsonInvocation.Ease((progress-.34f)*15)+50*CrimsonInvocation.Ease((progress-.72f)*18);
-            float tail=age<p.Fire?1:1-CrimsonInvocation.Ease((age-p.Fire)/32);
+            float tail=age<p.Fire?1:1-CrimsonInvocation.Ease((age-p.Fire)/CrimsonChorusImpactPositions.TailTicks);
             for(int i=0;i<boss.State.Members.Length;i++)
             {
                 var member=boss.State.Members[i];var player=Main.player[member.Slot];
-                if((p.Members & 1<<i)==0 || member.Out || !player.active || player.dead)continue;
-                Vector2 at=player.Center;
                 bool failed=marker.Resolved && (marker.FailedMask & 1<<i)!=0;
+                if((p.Members & 1<<i)==0 || !failed && (member.Out || !player.active || player.dead))continue;
+                Vector2 at=marker.Resolved && i<marker.ImpactPositions.Length
+                    ? new(marker.ImpactPositions[i].X,marker.ImpactPositions[i].Y) : player.Center;
                 if(p.Kind==CrimsonChorusKind.Stack)
                 {
                     ScarletSorcery.Seal(batch,at-new Vector2(0,132),size,.24f,0,age,progress,tail,true,i);
                     ScarletSorcery.Seal(batch,at+new Vector2(0,132),size,.24f,.08f,age,progress,tail,true,i+2);
                     if(failed && age>=p.Fire) ScarletSorcery.Flame(batch,at-new Vector2(0,132),at+new Vector2(0,132),
-                        48*CrimsonInvocation.Ease((age-p.Fire)/3),age,tail);
+                        86*CrimsonInvocation.Ease((age-p.Fire)/3),age,tail);
                 }
                 else
                 {
