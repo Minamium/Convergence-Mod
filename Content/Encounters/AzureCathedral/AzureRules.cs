@@ -55,7 +55,7 @@ internal static class AzureRules
         => Ease((t-(DevourRush-20))/80)*(1-Ease((t-(DevourContact-6))/16));
     internal static float FuryReveal(float t, int part) => Ease((t-DevourContact-14-part*.8f)/90);
     internal static float Melt(float elapsed, int segment)
-        => Ease((elapsed - MeltContact - segment * (SegmentSpacing / 20)) / 110);
+        => Ease((elapsed - MeltContact - segment * (SegmentSpacing / 20)) / 60);
     internal static bool Silhouette(float t) => t >= DevourContact-10 && t < DevourContact+14;
     internal static float MusicGain(int music, int ending, AzureStage stage, float age)
         => music < 0 ? 0 : Ease((age-music)/120) * (ending < 0 ? 1 : 1-Ease((age-ending)/ExitDuration(stage)));
