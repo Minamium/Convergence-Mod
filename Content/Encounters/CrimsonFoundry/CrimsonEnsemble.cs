@@ -25,8 +25,14 @@ internal static class CrimsonEnsemble
     internal static CrimsonTechnique Technique(int phase, int phrase, int note, bool second)
     {
         if (phase != 3) return CrimsonChoreography.Technique(phase, phrase, note);
-        if (note == CrimsonChoreography.BasicNotes) return CrimsonTechnique.SideBeams;
+        if (note == CrimsonChoreography.BasicNotes) return CrimsonTechnique.ClusterVolley;
         var pair = Pair(phrase);
         return second ? pair.Second : pair.First;
     }
+    internal static int NoteEnd(CrimsonTechnique technique, CrimsonRhythmHit hit) => technique switch
+    {
+        CrimsonTechnique.ClusterVolley => hit.Fire + CrimsonClusters.FlightTicks,
+        CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid => hit.Fire + CrimsonSpatialCuts.LiveTicks,
+        _ => hit.End
+    };
 }

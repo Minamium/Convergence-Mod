@@ -183,3 +183,23 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('ImpactPositions.AsSpan().SequenceEqual',chorus)
         self.assertIn('TryBoss(Plan, out var boss, Resolved)',chorus)
         self.assertIn('!CrimsonChorus.TryBoss(Impact.Plan, out var boss)',chorus)
+
+    def test_ready_pill_matches_doll_and_does_not_follow_player_or_ui_scale(self):
+        doll=(ROOT/'Client/Encounters/FirstSeverance/FirstSeverancePreparationVisuals.cs').read_text()
+        scarlet=(CLIENT/'CrimsonVisuals.cs').read_text()
+        self.assertIn('new Rectangle(width / 2 - 100, 64, 200, 36)',doll)
+        self.assertIn('new Rectangle(view.Width / 2 - 100, 64, 200, 36)',scarlet)
+        self.assertIn('InterfaceScaleType.None',scarlet)
+        self.assertNotIn('Math.Clamp(pos.X - 78',scarlet)
+        self.assertNotIn('Main.UIScale',scarlet)
+        self.assertIn('if (m.Ready && !p.dead)',scarlet)
+
+    def test_cluster_flight_uses_actual_end_and_fixed_conductor_can_overlap_next_bar(self):
+        text=(CONTENT/'CrimsonRuntime.cs').read_text()
+        self.assertIn('last[source] = Math.Max(last[source], musicStart + CrimsonEnsemble.NoteEnd(technique, note))',text)
+        self.assertIn('begins[source] = phase == 3 ? age : Math.Max(age, poseUntil[source])',text)
+        self.assertIn('plan.LastEnd + CrimsonRhythm.LeaseTicks',text)
+        self.assertIn('cycle.Admit(phraseEnd, recoveryEnd)',text)
+        visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text()
+        self.assertIn('cluster.TryBoss(out var parent) && parent == boss',visual)
+        self.assertIn('ScarletClusters.Draw(batch, cluster.Plan, age)',visual)

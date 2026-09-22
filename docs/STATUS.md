@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.37 / protocol64**. Cathedral stages its entire worm at the20% floor before consumption and again before a flowing melt. The head remains intact with separate beetle-like pincers/throat; Fury has a larger single shared HP pool. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns behavior/tuning. Matching peers are required for the bounded staging projection.
+Current source: **0.3.38 / protocol65**. Scarlet's Ready button now matches Doll/Cathedral's fixed top-center layout. Final's closing slot grows a giant red orb and releases forecast large/medium/small clusters; flight may overlap the next musical bar without losing its owned lifetime. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns behavior. Matching peers are required for the appended technique and its bounded flight.
+
+Retained0.3.37 Cathedral work: the entire worm stages at the20% floor before consumption and again before a flowing melt. The head remains intact with separate beetle-like pincers/throat; Fury has a larger single shared HP pool. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns that unchanged behavior/tuning.
 
 Retained0.3.36 Scarlet work: opposing-seal beams target up to ten current-HP-prioritized actors; Act gates and the single giant Scarlet Eidolon preserve the combined HP budget and paired attacks. Failed chorus visuals retain resolved world positions through death. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns those mechanics; this Cathedral change does not alter them.
 
@@ -43,6 +45,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.38 Scarlet Ready/clusters:** [evidence](evidence/2026-09-22-scarlet-clusters.json) separates the reviewed0.3.37 solo Victory (222.75s after unlock; Stack3/3, Spread3/3, one sacrifice and completed cleanup) from new geometry/codec/source/build and actual-shader GPU checks. User-owned / not_run: native top-center click at UI107%/zoom, matching remote peers, overlapping Final clusters/corridor fairness, audio/shake, Reduced Effects and repeat invocation. Solo Spread does not test overlap and successful Stack does not prove failed aftermath visibility.
 
 - **0.3.37 Azure staging/jaws:** [evidence](evidence/2026-09-22-azure-staged-mandibles.json) records focused phase/codec/geometry checks, packaged45-part native AI and shared-HP/sky regressions, shader/build checks and210linked-production GPU frames. User-owned / not_run: full Host & Play with both HP-gate orders, remote staged bite/melt, Fury duration with equipped piercing weapons, repeat Victory/retry and bright/dark/UI107%/Reduced Effects acceptance. Offline rendering/native isolated probes are not a played encounter.
 
@@ -98,7 +102,9 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-After confirmed0.3.37 deployment, start normally without another Build + Reload. Use **Glacial Chime** on a Foundation Core. Prioritize the20% full-chain retreat, distant articulated bite, longer shared-HP Fury and staged flowing melt→retry. Match peer versions/protocol. The [Azure smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) records remaining native/remote checks; Scarlet, audio and Oboro checks stay separate, not mandatory repeats for this Cathedral change.
+After confirmed0.3.38 deployment, start normally without another Build + Reload. Use **Scarlet Grimoire** on a Foundation Core: verify the fixed Ready button, then Final's growing orb, full warning and three carrier sizes across the next bar. Match peer versions/protocol. Check native avoidance, sound and Reduced Effects; compilation/offline frames do not establish those outcomes.
+
+The separate [Azure smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) remains pending: Glacial Chime,20% full-chain retreat, articulated bite, shared-HP Fury and staged melt→retry. Do not repeat unrelated whole-fight matrices for this Scarlet change.
 
 The integrated Oboro second-cut changes retain their owner checks: both facings, upper pause, fast downward return, thinner echoes, held loop and release/restart, including the first/third-step handoffs. Use the current matching build for multiplayer. The third-cut follow-up is now implemented; after integration/build, check its still charge, sharp release, heavier violet arc, forward grip and3→1 handoff, both facing directions, high attack speed and release during charge. Real-game checks remain pending.
 

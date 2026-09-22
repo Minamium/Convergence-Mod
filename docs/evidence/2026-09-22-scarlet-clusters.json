@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-22",
+  "feature": "Scarlet fixed Ready and Final energy clusters",
+  "version": "0.3.38",
+  "protocol": 65,
+  "base": "3a8720b",
+  "observed_playtest": {
+    "loaded_build": "0.3.37[58d19f33]",
+    "topology": "solo Host & Play",
+    "fight": "b0110f3a-1d8f-4541-9982-785047b70a51",
+    "unlock": 1233,
+    "final_unlock": 11175,
+    "victory": 14598,
+    "cleaned": 14748,
+    "combat_seconds": 222.75,
+    "final_seconds": 57.05,
+    "phrases": 49,
+    "completed_cycles": 4,
+    "stack": {"success": 3, "failure": 0},
+    "spread": {"success": 3, "failure": 0, "note": "Solo does not exercise player overlap."},
+    "total_hp": 3000000,
+    "final_hp_at_transfer": 1200000,
+    "sacrifice_events": 1,
+    "peak_five_second_hp_budget_dps": 76964,
+    "notes": "One complete Scarlet Victory and cleanup. No ERROR/FATAL/Exception in server log. Client has a local connection refusal before the successful session, not a fight exception. HP-budget DPS is not equipment/player DPS. Successful chorus results do not establish failed aftermath visibility or subjective presentation acceptance.",
+    "input_sha256": {
+      "server.log": "40d22732dabdebd3e1851fc610f0af87b5b78e526fad862fbe35236b916588cd",
+      "client.log": "4685df13120715fa73ab8f7d8d3149e688c139cb3c3751221e6734adcbb3ae46"
+    },
+    "raw_logs": "External game logs, not committed. Ignored local aggregate in .local/scarlet-clusters."
+  },
+  "changes": "Doll-compatible unscaled fixed Ready bounds and all-ready head labels; Final closing slot replaces crossflow with a giant harmless emitter and five three-size bouquets. One server-issued descriptor owns all25 carriers. Shared deterministic rays, swept geometry and long flight drive native collision and rendering. Protocol65 appends a technique without renumbering existing IDs. Preserve earlier Acts, paired first beats, native hurt authority, single giant HP, music and damage-one rehearsal.",
+  "verification": {
+    "domain": "passed:349 deterministic cases, including55 Scarlet cases; all nine Final descriptors across12 phrases, forecast containment, swept flight, three sizes, player-sized gaps and actual-flight cycle gate",
+    "source_guards": "passed:18 Scarlet guards including unscaled Ready bounds, shared geometry wiring and extended owned lifetime",
+    "codec": "passed:compiled protocol65,334 round trips and54 malformed/truncated rejections; additional cluster duration/source/target/round-trip cases in domain suite",
+    "repository": "passed:82-document catalog,992-file repository policy,12 YAML files and git diff --check",
+    "shader": "passed: pinned FXC compiles ScarletCluster and updates manifest; all prior exports unchanged",
+    "gpu": "88 final linked-production FNA/D3D11 frames across22 warning/ignition/travel/exit ages, bright/dark and Reduced Effects. Actual compiled materials and production meshes, controlled world facades. Inspected charge, early/late flight and bright Reduced output. Initial dark material was revised before these final frames. Not native gameplay or FPS evidence.",
+    "gpu_relative": ".local/scarlet-clusters/frames",
+    "native_build": "passed:isolated0.3.38 candidate,0 errors/4 existing nullable warnings;26 locales accepted by installed Hjson; source inputs unchanged. Existing five generated locale edits remain local and are included in source manifest. Packaged solo admission probe covers Doll1-4, not Scarlet1-8 gameplay.",
+    "build_record_relative": ".local/builds/20260922T054534308954Z/record.json",
+    "package_sha256": "3ed5e2850a67b944c6ed68648576a56c820921bba9bbf2d6913265a8ec21ea16",
+    "runtime_not_run": [
+      "Native Ready hover/click at UI107%, zoom and matching remote peers",
+      "Final carriers with overlapping paired attacks: fairness, native hits, audio and shake",
+      "Matching-peer late snapshots, field edge exits, Defeat/Victory and repeat invocation",
+      "Reduced Effects, real camera and frame-time acceptance"
+    ]
+  }
+}
