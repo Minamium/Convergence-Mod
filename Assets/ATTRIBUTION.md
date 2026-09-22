@@ -364,6 +364,24 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - SHA256: `53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b`
 - Source SHA256: `55250e8e4894fb4d12bee34e6d546914606d71cca0e75c1c556d5f45188d83a6`
 
+### ScarletCluster original shader export — 2026-09-22
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletCluster.fxc`
+- Asset ID: scarlet-cluster-plasma-20260922
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-22
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletCluster.fx`; no foreign shader/artwork copied
+- Tool/model/version: FXC compiler/options and source/export identities in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: spherical flowing plasma, sparse forecast grains and harmless comet-tail passes; existing project-authored Doll WideCharge/WideFire cues reused without editing recordings
+- License and redistribution terms: original project asset under existing project terms; Luminance supplies runtime noise textures, not vendored
+- Required attribution: retain this provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-22; actual compiled FNA GPU frames inspected, native game/MP acceptance not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, Final cluster orb
+- Source SHA256: `4f02e9b86d7bf77fdbf65431ce1d3e1ec949751552b5f067c6688db80edf5bdc`
+- Export SHA256: `064f2124d4a40f0a0d2f9ef2725593cf6c64905a10d6009adcd5cba880c8e8d8`
+
 ### ScarletSorcery original shader export — 2026-09-20
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fxc`

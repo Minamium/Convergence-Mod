@@ -323,7 +323,8 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             sources[i] = source; counts[source]++;
             var note = rhythm.Hits[i % rhythm.Hits.Count];
             first[source] = Math.Min(first[source], musicStart + note.Fire);
-            last[source] = Math.Max(last[source], musicStart + note.End);
+            var technique = CrimsonEnsemble.Technique(phase, serial, i % rhythm.Hits.Count, i >= rhythm.Hits.Count);
+            last[source] = Math.Max(last[source], musicStart + CrimsonEnsemble.NoteEnd(technique, note));
             minimum[source] = Math.Min(minimum[source], note.End - note.Fire - 1);
         }
         var techniques = new CrimsonTechnique[4]; var from = new CrimsonPoint[4];
@@ -337,7 +338,9 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             NPC body = source == 3 ? actor.NPC : summons[source]!.NPC;
             techniques[source] = CrimsonTechnique.TrackingBeam;
             from[source] = age < poseUntil[source] ? poseExit[source] : new(body.Center.X, body.Center.Y);
-            begins[source] = Math.Max(age, poseUntil[source]);
+            // The fixed Final conductor can announce its next phrase while
+            // the previous orb's carriers are still travelling across the field.
+            begins[source] = phase == 3 ? age : Math.Max(age, poseUntil[source]);
             staging[source] = CrimsonTechniqueGeometry.Stage(field, focus, techniques[source], serial);
             if (phase == 3) staging[source] = source == 3 ? CrimsonChoreography.Conductor(field) : CrimsonEnsemble.Binding(field, source);
             targets[source] = CrimsonTechniqueGeometry.Target(field, focus, techniques[source], serial);
@@ -357,14 +360,14 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             var playerCenter = Main.player[aimed.Slot].Center;
             var aim = CrimsonTechniqueGeometry.Clamp(field, new(playerCenter.X, playerCenter.Y), 100);
             var technique = CrimsonEnsemble.Technique(phase, serial, note, i >= rhythm.Hits.Count);
-            int end = technique is CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid ? hit.Fire + CrimsonSpatialCuts.LiveTicks : hit.End;
+            int end = CrimsonEnsemble.NoteEnd(technique, hit);
             plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, (byte)i, (byte)source,
                 technique, (byte)steps[source]++, (byte)counts[source], hit.Accent,
                 begins[source], musicStart + hit.Warning, musicStart + hit.Fire, musicStart + end,
                 first[source], last[source], from[source], staging[source], aim,
                 (int)ground.X, (int)ground.Y, CrimsonPlaytestTuning.AttackDamage,
-                technique == CrimsonTechnique.SpatialGrid ? (short)-1 : aimed.Slot,
-                technique == CrimsonTechnique.SpatialGrid ? Guid.Empty : aimed.Connection);
+                technique is CrimsonTechnique.SpatialGrid or CrimsonTechnique.ClusterVolley ? (short)-1 : aimed.Slot,
+                technique is CrimsonTechnique.SpatialGrid or CrimsonTechnique.ClusterVolley ? Guid.Empty : aimed.Connection);
             plans[i].Validate();
         }
         foreach (var plan in plans)
@@ -376,11 +379,16 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         }
         // Reservation lead is not an extra musical rest between every bar.
         int recoveryEnd = phraseEnd;
-        foreach (var plan in plans) recoveryEnd = Math.Max(recoveryEnd, plan.LastEnd + CrimsonRhythm.LeaseTicks);
+        int lastEmissionEnd = 0;
+        foreach (var plan in plans)
+        {
+            lastEmissionEnd = Math.Max(lastEmissionEnd, plan.LastEnd);
+            recoveryEnd = Math.Max(recoveryEnd, plan.LastEnd + CrimsonRhythm.LeaseTicks);
+        }
         cycle.Admit(phraseEnd, recoveryEnd); phrasesSinceChorus++;
         nextPhrase = cycle.Full ? cycle.FinishAt : phraseEnd - CrimsonRhythm.LookAheadTicks;
         Project(true);
-        CrimsonPackets.Log($"event=PhysicalPhrase fight={fight.Value} phase={phase} epoch={phaseStart} serial={serial} rhythm={rhythm.Kind} notes={count} start={phraseStart} end={phraseEnd} issued={age} score_start={rhythm.Start} first_fire={plans[0].Fire} warning_ticks={plans[0].Fire - plans[0].Born} last_end={phraseEnd} skills={string.Join(",", Array.ConvertAll(plans, p => p.Technique.ToString()))}");
+        CrimsonPackets.Log($"event=PhysicalPhrase fight={fight.Value} phase={phase} epoch={phaseStart} serial={serial} rhythm={rhythm.Kind} notes={count} start={phraseStart} end={phraseEnd} issued={age} score_start={rhythm.Start} first_fire={plans[0].Fire} warning_ticks={plans[0].Fire - plans[0].Born} last_end={lastEmissionEnd} skills={string.Join(",", Array.ConvertAll(plans, p => p.Technique.ToString()))}");
     }
     private int SelectFinalSource(int start)
     {

@@ -30,6 +30,7 @@
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonTrackingBeam.cs" Link="Domain/CrimsonTrackingBeam.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonChoreography.cs" Link="Domain/CrimsonChoreography.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonEnsemble.cs" Link="Domain/CrimsonEnsemble.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonClusters.cs" Link="Domain/CrimsonClusters.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonCovenantRules.cs" Link="Domain/CrimsonCovenantRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonChorusImpactPositions.cs" Link="Domain/CrimsonChorusImpactPositions.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonSpatialCuts.cs" Link="Domain/CrimsonSpatialCuts.cs" />

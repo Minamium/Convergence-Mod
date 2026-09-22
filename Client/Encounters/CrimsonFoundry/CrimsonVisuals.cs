@@ -241,18 +241,20 @@ internal sealed class CrimsonVisuals : ModSystem
         foreach (var m in state.Members)
         {
             Player p = Main.player[m.Slot]; if (!p.active) continue;
-            Vector2 pos = Vector2.Transform(p.Top - Main.screenPosition, Main.GameViewMatrix.TransformationMatrix) - new Vector2(0, 34);
-            if (m.Slot != Main.myPlayer)
-            {
-                if (m.Ready) Utils.DrawBorderString(batch, "Ready!", pos, new Color(255, 174, 158), .68f, .5f);
-                continue;
-            }
+            Vector2 pos = Vector2.Transform(p.Top - Main.screenPosition - new Vector2(0, 24), Main.GameViewMatrix.TransformationMatrix);
+            if (m.Ready && !p.dead) Utils.DrawBorderString(batch, "Ready!", pos, new Color(255, 174, 158), .70f, .5f);
+            if (m.Slot != Main.myPlayer) continue;
             int ready = 0; foreach (var peer in state.Members) if (peer.Ready) ready++;
-            var button = new Rectangle((int)Math.Clamp(pos.X - 78, 4, view.Width - 160), (int)Math.Clamp(pos.Y - 8, 4, view.Height - 36), 156, 30);
+            // Same physical-pixel pill as Doll/Cathedral. Only the Ready! label
+            // follows a player; the button never inherits world zoom or UI scale.
+            var button = new Rectangle(view.Width / 2 - 100, 64, 200, 36);
             bool hover = button.Contains(Main.mouseX, Main.mouseY);
             Fill(button, (hover ? new Color(52, 21, 26) : new Color(15, 14, 18)) * .94f);
-            Fill(new(button.X, button.Bottom - 2, button.Width * ready / state.Members.Length, 2), new Color(222, 63, 77));
-            Utils.DrawBorderString(batch, (m.Ready ? "Ready!" : "READY") + $"  {ready}/{state.Members.Length}", new(button.Center.X, button.Y + 6), new Color(255, 205, 188), .68f, .5f);
+            Color accent = m.Ready ? new Color(255, 174, 158) : new Color(211, 194, 194);
+            Fill(new(button.X + 12, button.Bottom - 1, (button.Width - 24) * ready / state.Members.Length, 1), accent * .75f);
+            Fill(new(button.X + 14, button.Y + 13, 6, 6), accent * (m.Ready ? 1 : .25f));
+            Utils.DrawBorderString(batch, "READY", new(button.X + 30, button.Y + 8), accent, .7f);
+            Utils.DrawBorderString(batch, $"{ready}/{state.Members.Length}", new(button.Right - 13, button.Y + 8), Color.Silver, .7f, 1);
             if (hover)
             {
                 Main.LocalPlayer.mouseInterface = true;

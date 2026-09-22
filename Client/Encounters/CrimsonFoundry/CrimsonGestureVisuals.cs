@@ -39,7 +39,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             void Cue(int tick, bool impact)
             {
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
-                string asset = p.Technique == CrimsonTechnique.SideBeams ? impact ? "WideFire" : "WideCharge"
+                string asset = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley ? impact ? "WideFire" : "WideCharge"
                     : p.IsRift ? impact ? "ChargeRush" : "ChargeLock"
                     : impact ? "PortalFire" : "ChargeLock";
                 if (voices.Count < 24)
@@ -47,7 +47,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                     var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/Beams/" + asset)
                     {
                         Volume = impact ? .72f : .48f,
-                        Pitch = 0,
+                        Pitch = p.Technique == CrimsonTechnique.ClusterVolley ? -.12f : 0,
                         MaxInstances = 6, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
                         PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
                     });
@@ -56,7 +56,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 }
                 if (impact)
                 {
-                    Vector2 at = V(p.MovesBody ? p.Body(age) : p.Target);
+                    Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field) : p.MovesBody ? p.Body(age) : p.Target);
                     ScarletArticulation.Impact(p.Source, p.Accent, at);
                     ScarletAtmosphere.Emit(p, at);
                 }
@@ -97,13 +97,17 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             ScarletAtmosphere.Draw(batch);
             DrawSources(boss!, batch, age);
             DrawTrackingBeams(boss!, batch, age);
+            foreach (Projectile projectile in Main.ActiveProjectiles)
+                if (projectile.ModProjectile is CrimsonGesture cluster && cluster.Plan.Technique == CrimsonTechnique.ClusterVolley
+                    && cluster.TryBoss(out var parent) && parent == boss)
+                    ScarletClusters.Draw(batch, cluster.Plan, age);
             using var scope = new ScarletGraphicsScope(batch);
             Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
             foreach (Projectile projectile in Main.ActiveProjectiles)
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
                 var p = gesture.EffectivePlan(age, true);
-                if (p.Aimed || p.IsRift) continue;
+                if (p.Aimed || p.IsRift || p.Technique == CrimsonTechnique.ClusterVolley) continue;
                 if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
                 if (warning && DuplicateForecast(p, age)) continue;

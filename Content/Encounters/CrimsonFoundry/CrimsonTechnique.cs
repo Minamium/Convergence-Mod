@@ -11,7 +11,8 @@ internal enum CrimsonTechnique : byte
     MantleFan, MantleRush, MantleScissors,
     ChoirThrust, ChoirHook, ChoirRend,
     VesperaOrbit, VesperaPetals,
-    TrackingBeam, SideBeams, SpatialRift, SpatialGrid // Append only; never renumber old IDs.
+    TrackingBeam, SideBeams, SpatialRift, SpatialGrid,
+    ClusterVolley // Append only; never renumber old IDs.
 }
 
 internal readonly record struct CrimsonPoint(float X, float Y)
@@ -54,7 +55,8 @@ internal readonly record struct CrimsonGesturePlan(
             || Source > 3 || !Enum.IsDefined(Technique) || !Aimed && !IsRift && CrimsonTechniqueGeometry.Owner(Technique) != Source
             || Steps is < 1 or > CrimsonRhythm.MaximumHits || Step >= Steps || Accent > 2
             || Begin < Epoch || Begin > FirstFire || Born < Epoch || Born > 73000
-            || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire < 2 || (long)End - Fire > (Technique == CrimsonTechnique.SideBeams ? 180 : CrimsonRhythm.LiveTicks) || Fire > 73500
+            || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire < 2
+            || (long)End - Fire > (Technique == CrimsonTechnique.SideBeams ? 180 : Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.FlightTicks : CrimsonRhythm.LiveTicks) || Fire > 73500
             || FirstFire > Fire || LastEnd < End || LastEnd > 73500 || (long)LastEnd - FirstFire > 600
             || !From.Finite || !Stage.Finite || !Target.Finite || From.X is < 0 or > 400000 || From.Y is < 0 or > 150000
             || GroundX is < 1600 or > 400000 || GroundY is < 1440 or > 150000 || Damage is < 1 or > 2000)
@@ -175,6 +177,8 @@ internal static class CrimsonTechniqueGeometry
                 break;
             case CrimsonTechnique.SpatialGrid:
                 return CrimsonSpatialCuts.WriteGrid(p, age, destination, forecast);
+            case CrimsonTechnique.ClusterVolley:
+                return CrimsonClusters.Write(p, age, destination, forecast);
             case CrimsonTechnique.CrownRain:
                 int gap = p.Phrase % 18 + 2;
                 for (int i = 0; i < 26; i++)

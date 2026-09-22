@@ -50,7 +50,7 @@ internal static partial class Program
                 AssertEqual(pair.Second, CrimsonEnsemble.Technique(3, phrase, i, true), "simultaneous secondary");
                 AssertEqual(true, rhythm.Hits[i].Fire - rhythm.Hits[i].Warning >= CrimsonRhythm.MinimumWarningTicks, "both use full beat");
             }
-            AssertEqual(CrimsonTechnique.SideBeams, CrimsonEnsemble.Technique(3,phrase,4,false), "crossflow retained");
+            AssertEqual(CrimsonTechnique.ClusterVolley, CrimsonEnsemble.Technique(3,phrase,4,false), "Final closing volley");
         }
     }
     [DomainTest("Scarlet failed chorus preserves bounded immutable world positions")]
