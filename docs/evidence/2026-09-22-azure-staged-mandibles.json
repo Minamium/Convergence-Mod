@@ -29,7 +29,8 @@
     "gpu_preview": "PASS offline production-linked FNA/Luminance material rendering:210frames of full-chain evacuation/bite/melt and close-up separate jaws on bright/dark backgrounds, including Reduced and contact silhouette. Not native/network gameplay or performance evidence.",
     "shader": "PASS FXC exports and source/export manifest validation.",
     "native_candidate_build": "PASS0.3.37, record20260922T035518197698Z, package9dd5c6ed7e31ea73bb205182cda48c2762f78fc2616b8ecd3543adc9b29ef28e;0errors,4existing nullable warnings plus one task-local nullable warning subsequently corrected without behavior change. Final integrated build/load/install recorded locally and in PR.",
-    "static_and_integration": "PASS: catalog82, repository986files, YAML12 and347 deterministic domain tests; diff whitespace passed. Final integrated package/load/install follow in the source-identified local build record and PR."
+    "load_smoke": "PASS: isolated native dedicated content load reaches Choose World with Convergence0.3.37, Calamity2.2.4, Luminance1.0.14, Calamity Music2.1, Simple Whip1.15.12 and SharedMap0.1.5.1. Stopped before opening/creating a world; not client gameplay.",
+    "static_and_integration": "PASS: repository986files, YAML12 and347 deterministic domain tests; diff whitespace passed. Catalog82 regenerated after the final Status edit (initial CI detected the stale index). Final integrated package/install follow in the source-identified local build record and PR."
   },
   "not_run": [
     "Owner Host & Play: both gate orders and 20%-floor retreat while Liora lives, distant bite/short silhouette, Fury balance with real piercing equipment.",
