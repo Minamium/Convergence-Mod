@@ -8,13 +8,13 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Scarlet covenant selects ten current-HP targets with stable ties")]
+    [DomainTest("Scarlet covenant selects twenty current-HP targets with stable ties")]
     private static void ScarletCovenantSelection()
     {
-        var candidates = Enumerable.Range(0, 16).Select(i => new CrimsonCovenantTarget(i, (i / 2 + 1) * 100)).ToArray();
-        Span<int> slots = stackalloc int[10];
-        AssertEqual(10, CrimsonCovenantRules.Select(candidates, slots), "bounded batch");
-        AssertEqual("14,15,12,13,10,11,8,9,6,7", string.Join(",", slots.ToArray()), "highest current HP, slot tie break");
+        var candidates = Enumerable.Range(0, 26).Select(i => new CrimsonCovenantTarget(i, (i / 2 + 1) * 100)).ToArray();
+        Span<int> slots = stackalloc int[20];
+        AssertEqual(20, CrimsonCovenantRules.Select(candidates, slots), "bounded batch");
+        AssertEqual("24,25,22,23,20,21,18,19,16,17,14,15,12,13,10,11,8,9,6,7", string.Join(",", slots.ToArray()), "highest current HP, slot tie break");
         AssertEqual(0, CrimsonCovenantRules.Select(Span<CrimsonCovenantTarget>.Empty, slots), "empty targets");
         AssertEqual(0f, CrimsonCovenantRules.Opening(CrimsonCovenantRules.ChargeTicks), "charge harmless");
         AssertEqual(1f, CrimsonCovenantRules.Opening(CrimsonCovenantRules.ChargeTicks + 7), "connected amplification");
@@ -31,8 +31,41 @@ internal static partial class Program
         AssertEqual(0f, CrimsonEnsemble.Emergence(CrimsonEnsemble.ActRelease, false), "gate before summon");
         AssertEqual(1f, CrimsonEnsemble.Emergence(CrimsonEnsemble.Transition(2), false), "act visible before attacks");
         AssertEqual(1f, CrimsonEnsemble.Emergence(CrimsonEnsemble.Transition(3), true), "giant visible before attacks");
-        AssertEqual(0f, CrimsonEnsemble.Absorption(CrimsonEnsemble.FinalRelease), "bound before sacrifice");
+        AssertEqual(0f, CrimsonEnsemble.Absorption(CrimsonEnsemble.SacrificeStart), "bound before sacrifice");
         AssertEqual(1f, CrimsonEnsemble.Absorption(CrimsonEnsemble.SacrificeComplete), "all three consumed before unlock");
+        AssertEqual(true, CrimsonEnsemble.FinalRelease > CrimsonEnsemble.SacrificeComplete, "giant appears only after full convergence");
+        AssertEqual(1f, CrimsonEnsemble.ConductorAbsorption(CrimsonEnsemble.SacrificeStart), "Vespera consumed before sacrifices");
+        AssertEqual(1f, CrimsonEnsemble.RetreatDissolve(CrimsonEnsemble.ActRelease), "old apparition dissolved before next reveal");
+        AssertEqual(1f, CrimsonEnsemble.VictoryMelt(150), "melt finishes within unchanged cleanup lease");
+    }
+    [DomainTest("Scarlet covenant concentrates smoothly and starts another cast before its previous live tail ends")]
+    private static void ScarletCovenantConcentration()
+    {
+        for(int n=1;n<=20;n++)
+        {
+            AssertEqual(true, CrimsonCovenantRules.Scale(n)>=.8f && CrimsonCovenantRules.Scale(n)<=2.61f, "bounded size");
+            AssertEqual(true, CrimsonCovenantRules.DamageFactor(n)>=1 && CrimsonCovenantRules.DamageFactor(n)<=4, "bounded multiplier");
+            if(n<20) AssertEqual(true, CrimsonCovenantRules.Scale(n)>CrimsonCovenantRules.Scale(n+1)
+                && CrimsonCovenantRules.DamageFactor(n)>CrimsonCovenantRules.DamageFactor(n+1), "fewer targets concentrate");
+            foreach(float width in new[]{20f,100f,600f,2400f,4000f})
+                AssertEqual(true,CrimsonCovenantRules.HalfSpan(width,n)>width*.5f,"seals enclose entire enemy width");
+        }
+        AssertEqual(true,CrimsonCovenantRules.Cycle<CrimsonCovenantRules.Duration,"overlapping cast lifetimes");
+        AssertEqual(.82f,CrimsonCovenantRules.Scale(20),"slightly smaller minimum");
+        AssertEqual(4f,CrimsonCovenantRules.DamageFactor(1),"single-target per-hit factor");
+    }
+    [DomainTest("Scarlet covenant count codec accepts harmless empty state and rejects invalid or truncated counts")]
+    private static void ScarletCovenantCountCodec()
+    {
+        foreach(byte n in new byte[]{0,1,4,10,20})
+        { using var r=new BinaryReader(new MemoryStream(new[]{n}));AssertEqual(n,CrimsonCovenantRules.ReadBatchCount(r),"bounded count"); }
+        foreach(var bytes in new[]{new byte[]{21},new byte[]{255},Array.Empty<byte>()})
+        {
+            using var r=new BinaryReader(new MemoryStream(bytes));bool rejected=false;
+            try { CrimsonCovenantRules.ReadBatchCount(r); }
+            catch(Exception e) when(e is IOException or InvalidDataException) {rejected=true;}
+            AssertEqual(true,rejected,"malformed batch rejected before mutation");
+        }
     }
     [DomainTest("Scarlet final cycles three two-family overlaps without removing warning beats")]
     private static void ScarletEnsembleComposition()

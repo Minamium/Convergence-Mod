@@ -6,7 +6,8 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 // One accepted phase clock drives gates, bindings, native roots and presentation.
 internal static class CrimsonEnsemble
 {
-    internal const int GateOpen = 42, ActRelease = 74, FinalRelease = 120, SacrificeComplete = 192, FinalTransition = 240;
+    internal const int GateOpen = 42, ActRelease = 132, FinalRelease = 420, SacrificeComplete = 390, FinalTransition = 540;
+    internal const int SacrificeStart = 270;
     internal const int BodyWidth = 420, BodyHeight = 360;
     internal static CrimsonPoint Binding(RaidFieldGeometry field, int index)
     {
@@ -14,8 +15,14 @@ internal static class CrimsonEnsemble
         return new CrimsonPoint(field.CenterX, field.CenterY) + CrimsonPoint.Polar(-MathF.PI / 2 + index * MathF.Tau / 3, 360);
     }
     internal static int Transition(int phase) => phase == 3 ? FinalTransition : CrimsonPhaseRules.TransitionTicks;
-    internal static float Emergence(float elapsed, bool final) => CrimsonInvocation.Ease((elapsed - (final ? FinalRelease : ActRelease)) / (final ? 72 : 52));
-    internal static float Absorption(float elapsed) => CrimsonInvocation.Ease((elapsed - FinalRelease) / (SacrificeComplete - FinalRelease));
+    internal static float Emergence(float elapsed, bool final) => CrimsonInvocation.Ease((elapsed - (final ? FinalRelease : ActRelease)) / (final ? 90 : 80));
+    internal static float Absorption(float elapsed) => CrimsonInvocation.Ease((elapsed - SacrificeStart) / (SacrificeComplete - SacrificeStart));
+    internal static float RetreatDissolve(float elapsed) => CrimsonInvocation.Ease((elapsed - 62) / 48);
+    internal static float ConductorAbsorption(float elapsed) => CrimsonInvocation.Ease((elapsed - 65) / 90);
+    internal static float ChildReveal(float elapsed, int index) => CrimsonInvocation.Ease((elapsed - 18 - index * 16) / 56);
+    internal static float BloodPressure(float elapsed) => CrimsonInvocation.Ease((elapsed - 155) / 100)
+        * (1 - CrimsonInvocation.Ease((elapsed - SacrificeComplete) / 32));
+    internal static float VictoryMelt(float elapsed) => CrimsonInvocation.Ease((elapsed - 22) / 112);
     internal static (CrimsonTechnique First, CrimsonTechnique Second) Pair(int phrase) => (phrase % 3) switch
     {
         0 => (CrimsonTechnique.TrackingBeam, CrimsonTechnique.SpatialRift),

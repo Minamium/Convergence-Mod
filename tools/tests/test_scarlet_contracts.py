@@ -203,3 +203,29 @@ class ScarletContracts(unittest.TestCase):
         visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text()
         self.assertIn('cluster.TryBoss(out var parent) && parent == boss',visual)
         self.assertIn('ScarletClusters.Draw(batch, cluster.Plan, age)',visual)
+
+    def test_covenant_follows_live_target_width_and_uses_the_same_scale_for_damage_geometry(self):
+        text=(CONTENT/'CrimsonCompanion.cs').read_text()
+        ray=text.split('public sealed class CrimsonCompanionRay')[1]
+        self.assertNotIn('Projectile.ai[0] <= CrimsonCovenantRules.ChargeTicks',ray)
+        self.assertIn('target.GetGlobalNPC<CrimsonCovenantIncarnation>().Value == incarnation',ray)
+        self.assertIn('Projectile.Center = target.Center',ray)
+        self.assertIn('CrimsonCovenantRules.HalfSpan(target.width, BatchCount)',ray)
+        self.assertIn('else { Projectile.Kill(); return; }',ray)
+        self.assertIn('48 * Size * Opening',ray)
+        self.assertIn('writer.Write(BatchCount)',ray)
+        self.assertIn('ray.Size',(CLIENT/'CrimsonCompanionVisuals.cs').read_text())
+        self.assertIn('CrimsonCovenantRules.DamageFactor(count)',text)
+
+    def test_terminal_melt_is_visual_only_and_final_draw_does_not_duplicate_native_sacrifices(self):
+        rig=(CLIENT/'CrimsonRig.cs').read_text()
+        self.assertIn('ScarletInvocationScene.Victory',rig)
+        self.assertIn('if (boss!.State.Phase == 3) return false',rig)
+        self.assertIn('material.TrySetParameter("ceremony", new Vector2(dissolve, melt))',rig)
+        material=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletSurface.fx').read_text()
+        self.assertIn('float2 uv=i.U*region.zw+region.xy',material)
+        self.assertIn('material.TrySetParameter("frameSpan"',rig)
+        self.assertNotIn('(i.U-region.xy)/region.zw',material)
+        runtime=(CONTENT/'CrimsonRuntime.cs').read_text()
+        self.assertIn('ending + 150',runtime)
+        self.assertIn('CrimsonEnsemble.SacrificeComplete',runtime)

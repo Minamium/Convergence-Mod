@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-22",
+  "feature": "Scarlet Covenant concentration, transmutation, sacrificial manifestation and Victory melt",
+  "version": "0.3.39",
+  "protocol": 66,
+  "base": "20f4726",
+  "observed_playtest": {
+    "build": "0.3.38[f9c4df90]",
+    "topology": "solo Host & Play",
+    "fight": "7d4e0ced-0ce6-46a2-a6a7-6ffd3c0d67eb",
+    "unlock": 1182,
+    "final_unlock": 11124,
+    "victory": 15712,
+    "cleaned": 15862,
+    "combat_seconds": 242.1667,
+    "final_seconds": 76.4667,
+    "stack": {"success": 2, "failure": 1, "unexpired_at_victory": 1},
+    "spread": {"success": 3, "failure": 0, "note": "Solo does not test overlap."},
+    "physical_phrases": 51,
+    "completed_cycles": 4,
+    "sacrifices": 1,
+    "peak_five_second_hp_budget_dps": 50204,
+    "notes": "All four cycles, merged Final and cleanup completed. Final cluster descriptors issued successfully. Final Stack deadline15750 follows Victory15712, so cancellation is expected. No server.log ERROR/FATAL/Exception; client has an initial local connection refusal. Separate server2.log contains an EndOfStreamException in SubworldLibrary.LoadIntoSubworld/TagIO, not a Scarlet fight stack. Its cause is not established by this review. None establishes subjective visual acceptance.",
+    "input_sha256": {
+      "server.log": "9721cbd6297a9da30702466fa598e20c41a5d627ed50d9d28ac24d6966d52859",
+      "client.log": "7ce46e7acfcbdd8d7a129f709b82f5b15bd70faac3f0041cc63f884f262dc87a"
+    },
+    "raw_logs": "External, not committed. No saves or personal settings included."
+  },
+  "scope": "Owner-replicated companion native positions/spans and bounded frozen target count; existing summon lifetime/incarnation/parent guards. Server-owned protected Act/Final deadlines, unchanged HP transfer/first-cycle floors/terminal cleanup. Shared Spread geometry grows; damage budgets/music/decks and other Raids stay unchanged.",
+  "verification": {
+    "domain": "passed:351 deterministic cases; bounded batch count, concentration, overlap cadence, shared Spread spacing and ceremony ordering included",
+    "source_guards": "passed:20 Scarlet source-contract cases",
+    "codec": "passed:compiled protocol66,334 round-trips and54 malformed/truncated rejections",
+    "repository": "passed:82-document catalog,993-file repository audit and12 YAML inputs",
+    "shader": "passed:pinned FXC exports original ScarletSurface erosion and ScarletSorcery transfusion; manifest identities updated",
+    "gpu": "passed:304 final linked-production FNA/D3D11 frames spanning Act retreat/reconstitution, three-child extraction/giant emergence, Victory melt and1/4/10/20-target clamp sizes, bright/dark and Reduced Effects. Inspected representative states and revised the initial scanline-like erosion. A controlled UV diagnostic isolated local-X collapse on the pinned backend when dividing by the atlas vector; CPU reciprocal multiply/add restores both coordinates. Actual compiled shaders/production meshes; controlled world facades and representative Act root motion, not native gameplay, exact NPC travel, network tests or performance evidence.",
+    "gpu_relative": ".local/scarlet-transmutation/frames",
+    "native_build": "passed:isolated0.3.39 candidate,0 errors/4 existing nullable warnings;26 locales accepted by installed Hjson; source inputs unchanged. Five pre-existing generated locale edits remain local and are included in the source manifest. Packaged solo admission probe covers Doll1-4, not Scarlet1-8 gameplay.",
+    "build_record_relative": ".local/builds/20260922T071800606836Z/record.json",
+    "package_sha256": "ca62e8d2ecf50228f402ea05fdc378fe2defcff6d8f078a13c2beb7c5289e834",
+    "runtime_not_run": [
+      "Native moving/growing enemy tracking and remote companion visibility; NPC slot reuse/cancellation under network latency",
+      "One/four/twenty target equipped DPS, overlapping casts and actual resource/frame-time load",
+      "Act retreat/dissolution/reconstitution and9-second Final: Vespera, three sacrifices, sphere and full giant",
+      "Victory energy melt/shake, Defeat/retry, UI107%, bright/dark and Reduced Effects acceptance",
+      "Enlarged Spread with2/4/8 players, native beam hit alignment and audio mix"
+    ]
+  }
+}

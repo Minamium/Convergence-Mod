@@ -278,7 +278,8 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             bool active = phase == 3 ? (defeated & (1 << i)) == 0 : i == phase;
             Vector2 offset = i switch { 0 => new(-230, -180), 1 => new(270, -80), _ => new(-150, -290) };
             Vector2 goal = focus + offset + new Vector2(MathF.Sin(age * .023f + i * 2) * 65, MathF.Sin(age * .019f + i) * 32);
-            if (!active) goal = ground + new Vector2((i - 1) * 130, -80);
+            if (!active) goal = phase < 3 && i == phase - 1 && age < unlockAt
+                ? new(f.CenterX, f.CenterY - 200) : ground + new Vector2((i - 1) * 130, -80);
             else if (phase == 3)
             {
                 var binding = CrimsonEnsemble.Binding(f, i);
@@ -289,7 +290,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             child.NPC.target = target < 0 ? 255 : target;
             if (phase == 3 && active && age >= unlockAt)
             { child.NPC.Center = goal; child.NPC.velocity = Vector2.Zero; child.NPC.rotation = 0; }
-            else if (!active || age >= poseUntil[i]) MoveTo(child.NPC, goal, 15);
+            else if (!active || age >= poseUntil[i]) MoveTo(child.NPC, goal, age < unlockAt ? 38 : 15);
             if (age % 10 == 0) child.NPC.netUpdate = true;
         }
         void MoveTo(NPC npc, Vector2 goal, float speed)

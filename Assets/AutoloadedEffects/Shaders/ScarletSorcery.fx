@@ -88,10 +88,24 @@ float4 Flame(VO i):COLOR0 {
  float3 light=float3(.02,.003,.035)*body+float3(1,.15,.30)*lip*.95+float3(.90,.56,.75)*filaments;
  return float4(light,body*.96)*signal.z;
 }
+float4 Transfusion(VO i):COLOR0 {
+ float x=i.u.x,y=i.u.y*2-1;
+ float n=tex2D(cloud,float2(x*3-clock*1.2+shape.z,y*.5+clock*.09)).r;
+ float strands=tex2D(veins,float2(x*6-clock*2.8,y*2+n*.4)).r;
+ float wobble=sin(x*17-clock*6+shape.z)*.12+sin(x*31-clock*8)*.045;
+ float profile=exp2(-pow((y-wobble)/(.16+n*.24),2)*3);
+ float packets=.38+.62*pow(saturate(sin(x*18-clock*8+shape.z)),2);
+ float rim=pow(strands,3)*profile;
+ float ends=smoothstep(0,.09,x)*(1-smoothstep(.92,1,x));
+ float alpha=profile*.34*ends*signal.z;
+ return float4((float3(.35,.002,.024)*profile+float3(1,.035,.095)*(profile*packets+rim*.9)
+    +float3(1,.55,.55)*pow(rim,3)*.6)*ends*signal.z,alpha);
+}
 technique ScarletSorcery {
  pass AutoloadPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Seal(); }
  pass TearPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Tear(); }
  pass TearForecastPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 TearForecast(); }
  pass VaporPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Vapor(); }
  pass FlamePass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Flame(); }
+ pass TransfusionPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 Transfusion(); }
 }

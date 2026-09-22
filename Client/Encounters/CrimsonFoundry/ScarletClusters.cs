@@ -12,6 +12,23 @@ namespace Convergence.Client.Encounters.CrimsonFoundry;
 internal static class ScarletClusters
 {
     private static readonly VertexPositionColorTexture[] mesh = new VertexPositionColorTexture[6];
+    internal static void Orb(SpriteBatch batch, Vector2 center, float radius, float age, float alpha, float charge, float impact)
+    {
+        if (Main.dedServ || radius < 1 || alpha < .001f) return;
+        using var scope = new WorldGraphicsScope(batch);
+        var shader = ShaderManager.GetShader("Convergence.ScarletCluster");
+        shader.TrySetParameter("uWorldViewProjection", ScarletMaterials.WorldMatrix);
+        shader.TrySetParameter("clock", age / 60);
+        shader.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
+        shader.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value, 2, SamplerState.LinearWrap);
+        shader.TrySetParameter("signal", new Vector4(charge, impact, alpha, CrimsonVisuals.Reduced ? .25f : 1));
+        shader.TrySetParameter("shape", new Vector4(0, radius, 3, 0));
+        float size = radius * 2.8f;
+        Vector2 start = center - new Vector2(size*.5f) - Main.screenPosition;
+        mesh[0]=Vertex(start,0,0); mesh[1]=Vertex(start+new Vector2(size,0),1,0); mesh[2]=Vertex(start+new Vector2(0,size),0,1);
+        mesh[3]=mesh[1]; mesh[4]=Vertex(start+new Vector2(size),1,1); mesh[5]=mesh[2];
+        shader.Apply("AutoloadPass"); Main.instance.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList,mesh,0,2);
+    }
     internal static void Draw(SpriteBatch batch, in CrimsonGesturePlan p, float age)
     {
         if (Main.dedServ || age < p.Born || age >= p.End) return;

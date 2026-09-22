@@ -43,6 +43,11 @@ internal sealed class CrimsonVisuals : ModSystem
         return tick + (Main.gamePaused ? 0f : (float)Math.Clamp((Stopwatch.GetTimestamp() - clockReceived) / (double)Stopwatch.Frequency * 60, 0, 1));
     }
     public override void PostSetupContent() => CrimsonRig.Load();
+    internal static float EndingElapsed(CrimsonBoss boss)
+    {
+        var self = ModContent.GetInstance<CrimsonVisuals>();
+        return self.fight == boss.State.Fight && self.endingAt >= 0 ? Math.Max(0, RenderAge(boss)-self.endingAt) : 0;
+    }
     public override void Unload() { Reset(); CrimsonRig.Unload(); }
     private static readonly Rectangle Pixel = new(0, 0, 1, 1);
     internal static bool Reduced => ModContent.GetInstance<CrimsonVisualConfig>().ReducedEffects;
@@ -72,12 +77,25 @@ internal sealed class CrimsonVisuals : ModSystem
         {
             int release = boss.State.PhaseStart + (boss.State.Phase == 3 ? CrimsonEnsemble.FinalRelease : CrimsonEnsemble.ActRelease);
             if (previousAge < release && age >= release && age - release < 8)
-            { Cue("PhaseRupture", .48f, age + 150); shake = boss.State.Phase == 3 ? 11 : 7; }
+            { Cue("PhaseRupture", .48f, age + 150); shake = boss.State.Phase == 3 ? 15 : 7; }
+            if (boss.State.Phase == 3)
+            {
+                float t=age-boss.State.PhaseStart;
+                shake=Math.Max(shake,CrimsonEnsemble.BloodPressure(t)*4.5f);
+                int absorb=boss.State.PhaseStart+155;
+                if(previousAge<absorb && age>=absorb && age-absorb<8) Cue("Beams/WideCharge",.44f,age+160);
+            }
         }
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && endingAt < 0)
         {
             endingAt = age;
             Cue(boss.State.Stage == CrimsonStage.Victory ? "RaidVictory" : "RaidDefeat", .40f, age + 150); shake = 8;
+        }
+        if (boss.State.Stage == CrimsonStage.Victory && endingAt >= 0)
+        {
+            float t=age-endingAt;
+            shake=Math.Max(shake,8*Ease(t/14)*(1-Ease((t-90)/52)));
+            if(previousAge<endingAt+92 && age>=endingAt+92 && age-endingAt-92<8) { Cue("PhaseRupture",.44f,age+58);shake=13; }
         }
         foreach (Projectile p in Main.ActiveProjectiles)
         {
@@ -122,7 +140,7 @@ internal sealed class CrimsonVisuals : ModSystem
         }
         if (Reduced || !ModContent.GetInstance<CrimsonVisualConfig>().ScreenShake || shake < .05f) return;
         float t = Main.GameUpdateCount % 6000;
-        Main.screenPosition += new Vector2(MathF.Sin(t * 2.3f), MathF.Cos(t * 1.9f)) * Math.Min(shake, 11);
+        Main.screenPosition += new Vector2(MathF.Sin(t * 2.3f), MathF.Cos(t * 1.9f)) * Math.Min(shake, 15);
     }
     public override void PostDrawTiles()
     {

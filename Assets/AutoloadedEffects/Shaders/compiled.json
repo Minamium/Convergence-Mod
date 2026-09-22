@@ -63,12 +63,12 @@
       "output_sha256": "53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b"
     },
     "ScarletSorcery.fx": {
-      "source_sha256": "9d68f0d20004dde4208387492309e76bc795bcc4f6ec4d496df3c971499a1d7d",
-      "output_sha256": "545dbe271b73a2f7dbe53b1eb480539a16ec234a5ea80b0cb3462b91d8ceaf6d"
+      "source_sha256": "4ff0ae497a1aba6edd7e16440e78fb5247e7a35089632608ce09d9542cd0ace4",
+      "output_sha256": "6f6a3492f7c29ebb8250ac19aeba2705950a5f5c38d386bc6a53146a681738aa"
     },
     "ScarletSurface.fx": {
-      "source_sha256": "46dee4522c642c9adc2e2a4cdbce54319ddcaa32d14d80877571e18d8414a717",
-      "output_sha256": "768340fbe8468a352d87baad0228dc40f44dd3d127612b6fef6e3b22ddd8ed3e"
+      "source_sha256": "e39d2b568e64fb06a3fc05b9a57cd69215199983c7f1b7a8d1d372c728bb380f",
+      "output_sha256": "e064f64737d1e742aa1891c658a63fcee93a6bab9dddfe36bbea564779d42122"
     }
   }
 }
