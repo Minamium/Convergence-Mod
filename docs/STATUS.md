@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.39 / protocol66**. Scarlet Covenant tracks up to20 targets through beam completion, adapts to enemy width and concentrates size/damage against fewer targets; new casts overlap prior flight. Act changes dissolve/reconstitute bodies; Final re-summons and absorbs all three plus Vespera into a chest-orb giant; Victory projects an energy melt. Spread is larger. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns tuning and ceremony clocks. Match peers for the bounded native companion payload and longer protected transitions.
+Current source: **0.3.40 / protocol67**. Cathedral aligns ending sky/frost, BGM fade and Victory title/audio with whole-chain melting. Chorus presentation waits for the authoritative verdict; Spread is enlarged. P1 adds shuffled slash lattices around chorus windows; P2 alternates shifted diagonal/orthogonal grids outside slow worm passage. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns cadence and mechanics. Match peer builds for changed geometry/attack ownership; packet layouts/IDs are unchanged.
+
+Retained0.3.39 Scarlet Covenant tracks up to20 targets through beam completion, adapts to enemy width and concentrates size/damage against fewer targets; new casts overlap prior flight. Act changes dissolve/reconstitute bodies; Final re-summons and absorbs all three plus Vespera into a chest-orb giant; Victory projects an energy melt. Spread is larger. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns tuning and ceremony clocks. Its native companion payload and longer protected transitions are preserved.
 
 Retained0.3.38 work: fixed top-center Ready and forecast three-size clusters. Latest0.3.38 solo logs show242.17s Victory, Stack2/3 and Spread3/3, four cycles, one sacrifice and cleanup. The final pending Stack was cancelled by Victory before its deadline, not a missing resolution. [Current evidence](evidence/2026-09-22-scarlet-transmutation.json) separates that playtest from the new implementation.
 
@@ -37,7 +39,7 @@ The integrated0.3.33 Azure baseline is retained: Cathedral reduces worm HP to1/2
 
 Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
-**Latest reviewed Cathedral playtest:**0.3.35 solo Host & Play, two attempts: clean Defeat7.20s after unlock, then Victory49.97s after unlock and completed cleanup. No missing-chain invalidation; Fury lasts only1.83s. One Stack succeeds; solo does not test Spread overlap. [Azure evidence](evidence/2026-09-22-azure-staged-mandibles.json) separates logs/source diagnosis from new visual acceptance. The independent [Scarlet review](evidence/2026-09-22-scarlet-ensemble.json) remains unchanged.
+**Latest reviewed Cathedral playtest:**0.3.39 solo Host & Play, two attempts: Defeat6.63s after unlock, then Victory168.77s after unlock and complete cleanup. Fury lasts66.77s; peak sampled five-second HP-budget DPS62,273. Stack: one success/one failure; resolved Spread: one success, with a later call cancelled at Liora's defeat. No Cathedral actor-loss exception; solo does not test overlap or remote damage. [Azure evidence](evidence/2026-09-22-azure-lattice-verdicts.json) separates observed outcomes, source defects and new acceptance checks. Other encounter evidence is unchanged.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Oboro is a guaranteed single ground drop; further rewards and balance remain provisional. Cleanup and target ownership have automated coverage; actual multiplayer/re-entry and the new weapon/art need owner playtesting.
@@ -47,6 +49,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.40 Azure lattice/verdicts:** [evidence](evidence/2026-09-22-azure-lattice-verdicts.json) records22 focused/356 total domain cases, compiled protocol67, native package/projectile ownership probes and300 linked-production GPU frames. User-owned / not_run: matching-peer verdict delivery/native damage, larger Spread overlap, lattice dodge difficulty at full worm speed, slow-transit exemption, complete melt→title/audio/background handoff, UI107%/zoom, Reduced Effects and frame times. Build/offline output is not a played encounter.
 
 - **0.3.39 Scarlet transmutation:** [evidence](evidence/2026-09-22-scarlet-transmutation.json) owns scoped targeting/geometry/codec/build and linked-production shader/scene checks. User-owned / not_run: moving/growing targets and remote companion,20-target load/equipped DPS, Act return→dissolve→rebuild, Final sacrifice/chest sphere, Victory melt/shake, enlarged multiplayer Spread and Reduced Effects. Offline frames are not native gameplay or performance acceptance.
 
@@ -106,9 +110,11 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-After confirmed0.3.39 deployment, start normally without another Build + Reload. Check Scarlet Covenant against one moving large enemy and several smaller ones: overlapping charge, tracking and concentration. Use **Scarlet Grimoire** on a Foundation Core for Act reconstitution, sacrificial Final, chest sphere and Victory melt. Check wider Spread with matching peers; HP/music/attack decks are unchanged. Native sound, fairness, remote tracking and Reduced Effects remain separate from compilation/offline frames.
+After confirmed0.3.40 deployment, start normally without another Build + Reload. Use **Glacial Chime** for Cathedral: test Stack inside/outside at the deadline, wider Spread with peers, P1 chorus-bracketing grids and P2 shifted grids with clear slow passages, then melt before final title/sound/background handoff. Log analysis now includes each member's gather/nearest-peer distance and source damage budget. See the [focused smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance).
 
-The separate [Azure smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) remains pending: Glacial Chime,20% full-chain retreat, articulated bite, shared-HP Fury and staged melt→retry. Do not repeat unrelated whole-fight matrices for this Scarlet change.
+Retained Scarlet owner checks: Covenant against moving large/small enemies, overlapping charge/tracking/concentration; Act reconstitution, sacrificial Final, chest sphere, Victory melt and wider Spread. Native sound, fairness, remote tracking and Reduced Effects remain separate from compilation/offline frames.
+
+The earlier Azure20% retreat, articulated bite and shared-HP Fury behavior is retained. Do not repeat unrelated whole-fight matrices for this scoped revision.
 
 The integrated Oboro second-cut changes retain their owner checks: both facings, upper pause, fast downward return, thinner echoes, held loop and release/restart, including the first/third-step handoffs. Use the current matching build for multiplayer. The third-cut follow-up is now implemented; after integration/build, check its still charge, sharp release, heavier violet arc, forward grip and3→1 handoff, both facing directions, high attack speed and release during charge. Real-game checks remain pending.
 

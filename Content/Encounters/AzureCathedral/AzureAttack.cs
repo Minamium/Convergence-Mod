@@ -34,7 +34,8 @@ public sealed class AzureAttack : ModProjectile
         girl = Plan.Girl >= 0 && Plan.Girl < Main.maxNPCs && Main.npc[Plan.Girl].active ? Main.npc[Plan.Girl].ModNPC as AzureBoss : null;
         return girl is not null && Plan.Fight != Guid.Empty && girl.State.Fight == Plan.Fight && girl.Fresh && girl.State.Live
             && Plan.Born>=girl.State.AttackEpoch
-            && (Plan.Kind == AzureAttackKind.FrostBolt ? girl.State.WormLife > 0 : girl.State.GirlLife > 0);
+            && (Plan.Kind == AzureAttackKind.FrostBolt || Plan.Kind==AzureAttackKind.GlacialCut && girl.State.Phase==AzurePhase.Fury
+                ? girl.State.WormLife > 0 : girl.State.GirlLife > 0);
     }
     internal bool Geometry(AzureBoss girl, float age, bool forecast, out Vector2 from, out Vector2 to, out float radius)
     {

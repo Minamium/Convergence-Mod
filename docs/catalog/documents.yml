@@ -611,7 +611,7 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: e4a458f7ea52edae78d2686b014cee0649150a4360f940a89e0d1ca2de6e1c37
+  content_sha256: 5b1f084b21f9b5a7b73b3b8b1be7323935c0162364038a04e35726c89ceccca3
   document_type: spec
   status: accepted
   owners:
@@ -927,7 +927,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: b2d3f1bf5edd62aa8094735765dcbb2acf1f74ad473b54f35f73bb16c0cd367a
+  content_sha256: 45b81c3b7bc22113e8aeeeddaa2cacebe9f0cb6d85cc814c63fe1fdf7d81c01f
   document_type: evidence
   status: historical
   owners:
@@ -1326,7 +1326,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 048bdfcf4f48fad91d1150286b4fd85fc9ba7655518422a99be0bbb90de821e4
+  content_sha256: b26f6b1cac163f5abed02f4133ad88a9644208c7b755cc3d2d9e0be25e89d645
   document_type: status
   status: accepted
   owners:

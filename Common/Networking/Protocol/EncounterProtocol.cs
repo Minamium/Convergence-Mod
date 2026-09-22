@@ -2,5 +2,5 @@ namespace Convergence.Common.Networking.Protocol;
 
 internal static class EncounterProtocol
 {
-    public const ushort CurrentVersion = 66;
+    public const ushort CurrentVersion = 67;
 }

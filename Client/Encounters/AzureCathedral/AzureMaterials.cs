@@ -113,7 +113,7 @@ internal static class AzureMaterials
     internal static void Frost(SpriteBatch batch, AzureBoss girl, float age)
     {
         var state=girl.State;var field=state.Field;
-        float presence=AzureRules.Ease(age/120)*(state.EndAt<0?1:1-AzureRules.Ease((age-state.EndAt)/AzureRules.ExitDuration(state.Stage)));
+        float presence=AzureRules.Ease(age/120)*(state.EndAt<0?1:AzureRules.EndingSky(state.Stage,age-state.EndAt));
         using var scope=new WorldGraphicsScope(batch);var shader=Begin();shader.TrySetParameter("clock",age/60);
         for(int layer=0;layer<3;layer++)
         {
