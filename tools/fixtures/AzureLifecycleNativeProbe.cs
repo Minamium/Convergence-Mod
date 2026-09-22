@@ -27,7 +27,9 @@ public static class AzureLifecycleNativeProbe
         using var stream=new System.IO.MemoryStream();using var w=new System.IO.BinaryWriter(stream);
         w.Write(true);w.Write(fight.ToByteArray());w.Write(7000);w.Write(100);w.Write(1060);w.Write(-1);w.Write((byte)3);
         w.Write(5000);w.Write(5000);w.Write(2400000);w.Write(240000);w.Write(0);w.Write(50);w.Write((short)1);w.Write(true);w.Write((byte)2);w.Write(6500);w.Write((byte)1);
-        w.Write((byte)0);w.Write(System.Guid.NewGuid().ToByteArray());w.Write(true);w.Write(false);stream.Position=0;
+        w.Write((byte)0);w.Write(System.Guid.NewGuid().ToByteArray());w.Write(true);w.Write(false);
+        if(mod.GetType(content+"AzureState",true).GetProperty("StagingAt",I)!=null){w.Write(5000);w.Write((sbyte)1);}
+        stream.Position=0;
         using var r=new System.IO.BinaryReader(stream);
         var state=mod.GetType(content+"AzureState",true).GetMethod("ReadEnvelope",S).Invoke(null,new object[]{r});bossType.GetField("State",I).SetValue(boss,state);
         var actors=new object[45];
@@ -62,6 +64,31 @@ public static class AzureLifecycleNativeProbe
             wormType.GetMethod("RetainChain",S).Invoke(null,new object[]{fight});
             Require(Life(npcs.GetValue(50))==13 && !(bool)npcType.GetField("immortal",I).GetValue(npcs.GetValue(50)),"retention is exact Fight");
             System.Console.WriteLine("PASS native lethal segment StrikeNPC -> head CheckDead: all45 parts retained, late strike harmless, other Fight untouched");
+        }
+        if(!old && state.GetType().GetProperty("StagingAt",I)!=null)
+        {
+            // Exercise the packaged actor AI, not only the pure curve helper.
+            var stateType=state.GetType();var phaseType=stateType.GetProperty("Phase",I).PropertyType;
+            void Scene(int age,int phase,int start,int life)
+            {
+                var snapshot=System.Runtime.CompilerServices.RuntimeHelpers.GetObjectValue(state);
+                void P(string name,object value)=>stateType.GetProperty(name,I).SetValue(snapshot,value);
+                P("Age",age);P("StagingAt",5000);P("CeremonySide",(sbyte)1);P("Phase",System.Enum.ToObject(phaseType,phase));
+                P("PhaseAt",start);P("WormLife",life);P("Enraged",phase>=2);P("EndAt",phase==3?7000:-1);
+                P("Stage",System.Enum.ToObject(stateType.GetProperty("Stage",I).PropertyType,phase==3?4:3));
+                bossType.GetField("State",I).SetValue(boss,snapshot);
+                foreach(var actor in actors)wormType.GetMethod("AI",I).Invoke(actor,null);
+            }
+            var centerProperty=npcType.GetProperty("Center",I);var vectorType=centerProperty.PropertyType;
+            (float X,float Y) Center(int slot){var v=centerProperty.GetValue(npcs.GetValue(slot));return ((float)vectorType.GetField("X").GetValue(v),(float)vectorType.GetField("Y").GetValue(v));}
+            void Spacing(){for(int i=2;i<=45;i++){var a=Center(i-1);var b=Center(i);Require(System.Math.Abs(System.Math.Sqrt((a.X-b.X)*(a.X-b.X)+(a.Y-b.Y)*(a.Y-b.Y))-86)<.02,"native cinematic part spacing "+i);}}
+            for(int t=5000;t<=5180;t++){Scene(t,0,-1,48000);}
+            Spacing();Require(Center(1).X>7100,"native head staged outside field");
+            foreach(int t in new[]{0,180,252,396,590}){Scene(5180+t,1,5180,48000);Spacing();}
+            Set(npcs.GetValue(1),"life",960000);Scene(6000,2,6000,960000);
+            for(int i=1;i<=45;i++)Require((int)npcType.GetField("lifeMax",I).GetValue(npcs.GetValue(i))==960000,"one Fury max projected to every hitbox");
+            for(int t=7000;t<=7660;t++){Scene(t,3,7000,0);if(t>=7180)Spacing();}
+            System.Console.WriteLine("PASS packaged45-part AI: floor evacuation, staged bite, Fury shared maximum and non-bunching melt");
         }
         var systemType=mod.GetType(client+"AzureSkySystem",true);var system=System.Activator.CreateInstance(systemType,true);
         systemType.GetMethod("Load",I).Invoke(system,null);

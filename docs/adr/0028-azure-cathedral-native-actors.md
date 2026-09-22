@@ -58,6 +58,12 @@ The official [pinned NPC patch](https://github.com/tModLoader/tModLoader/blob/v2
 
 `SkyManager.Reset` / `DeactivateAll` can clear a custom sky without changing a separate ModSystem flag. Reconcile `AzureSky.IsSceneRequested` with current scene ownership; only actual activation changes call the manager. This follows the existing Doll ownership pattern and preserves fade tails/reveal timing. The owner's second/third-attempt report fits the reproduced stale-flag failure; the old logs do not prove which native reset occurred in that session. [Native probe](../../tools/check-azure-lifecycle.ps1) and [evidence](../evidence/2026-09-21-azure-lifecycle-fix.json) keep that distinction explicit.
 
+### 2026-09-22 staged chain and Fury budget (protocol64)
+
+Append bounded `StagingAt` and `CeremonySide` to the existing Azure projection; no packet IDs change. The authority selects the world-interior flank at the first Duet floor, stops worm hazards, and waits for both HP gates plus the full-chain staging deadline before Devouring. Each native part reconstructs its harmless cinematic pose from that accepted clock/side; its temporary retreat start is only presentation state. Devouring and Melting use one analytic chain axis, not the ordinary follower that previously folded over the mouth. All45native actors remain exact-Fight-owned until existing cleanup; native shared-HP lethal retention is unchanged.
+
+The frozen Duet maximum remains immutable. `WormPoolMax` derives the larger Fury maximum; only the one-way Devouring→Fury authority transition refills it. Codec bounds account for that maximum and reject malformed/reset staging epochs/sides. Body hitboxes still forward exclusively through native `realLife`; no independent life pool, double subtraction, client phase decisions or changes to player damage.
+
 ### Verification (current scope)
 
 Pure codec/clock tests and an actual Mod package/load check cover deterministic contracts and construction. Linked-production GPU frames cover material composition, not game FPS, native worm hit forwarding under installed accessories, rejoin behavior or remote presentation. Those remain explicit owner playtests in the [feature spec](../encounters/azure-cathedral/ENCOUNTER_SPEC.md).

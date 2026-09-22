@@ -9,7 +9,8 @@ internal enum AzurePhase : byte { Duet, Devouring, Fury, Melting }
 internal readonly record struct AzureMember(byte Slot, Guid Connection, bool Ready, bool Out);
 internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, int UnlockAt, int EndAt,
     AzureStage Stage, AzureMember[] Members, int GroundX, int GroundY, int GirlMax, int WormMax,
-    int GirlLife, int WormLife, short WormSlot, bool Enraged, AzurePhase Phase = AzurePhase.Duet, int PhaseAt = -1)
+    int GirlLife, int WormLife, short WormSlot, bool Enraged, AzurePhase Phase = AzurePhase.Duet, int PhaseAt = -1,
+    int StagingAt = -1, sbyte CeremonySide = 0)
 {
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
     internal bool Contains(int slot) => Array.Exists(Members ?? Array.Empty<AzureMember>(), m => m.Slot == slot && !m.Out);
@@ -17,13 +18,15 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
     internal int AttackEpoch => Phase == AzurePhase.Fury ? PhaseAt : UnlockAt;
     internal bool Cinematic => Stage is AzureStage.Deployment or AzureStage.Countdown or AzureStage.Victory or AzureStage.Defeat || Phase == AzurePhase.Devouring;
     internal int TotalLife => GirlLife + WormLife;
-    internal int TotalMax => Phase >= AzurePhase.Fury ? WormMax : GirlMax + WormMax;
+    internal int WormPoolMax => Phase >= AzurePhase.Fury ? AzureRules.FuryLife(WormMax) : WormMax;
+    internal int TotalMax => Phase >= AzurePhase.Fury ? WormPoolMax : GirlMax + WormMax;
     internal bool CanReplace(in AzureState old) => old.Fight == Guid.Empty || Fight == old.Fight && Age >= old.Age
         && Stage >= old.Stage && GroundX == old.GroundX && GroundY == old.GroundY
         && (old.MusicStart < 0 || MusicStart == old.MusicStart && UnlockAt == old.UnlockAt
             && GirlMax == old.GirlMax && WormMax == old.WormMax && GirlLife<=old.GirlLife
             && (WormLife<=old.WormLife || old.Phase<AzurePhase.Fury && Phase==AzurePhase.Fury))
         && (old.WormSlot < 0 || WormSlot == old.WormSlot)
+        && (old.StagingAt < 0 || StagingAt == old.StagingAt && CeremonySide == old.CeremonySide)
         && Phase >= old.Phase && (Phase != old.Phase || PhaseAt == old.PhaseAt)
         && (!old.Enraged || Enraged) && (old.EndAt < 0 || EndAt == old.EndAt && Stage == old.Stage);
     internal void WriteEnvelope(BinaryWriter w)
@@ -33,6 +36,7 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
         w.Write(GroundX); w.Write(GroundY); w.Write(GirlMax); w.Write(WormMax); w.Write(GirlLife); w.Write(WormLife);
         w.Write(WormSlot); w.Write(Enraged); w.Write((byte)Phase); w.Write(PhaseAt); w.Write((byte)Members.Length);
         foreach (var m in Members) { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); }
+        w.Write(StagingAt); w.Write(CeremonySide);
     }
     internal static bool Presence(BinaryReader r) => r.ReadByte() switch { 0 => false, 1 => true, _ => throw new InvalidDataException("azure.presence") };
     internal static Guid Id(BinaryReader r)
@@ -46,7 +50,7 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
         short worm = r.ReadInt16(); bool enraged = Presence(r); var phase = (AzurePhase)r.ReadByte(); int phaseAt = r.ReadInt32(), count = r.ReadByte();
         if (age is < 0 or > 72000 || !Enum.IsDefined(stage) || music is < -1 or > 72000 || unlock is < -1 or > 73000
             || ending < -1 || ending > age || x is < 1600 or > 400000 || y is < 1440 or > 150000
-            || gm is < 1 or > 15000000 || wm is < 1 or > 30000000 || gl < 0 || gl > gm || wl < 0 || wl > wm
+            || gm is < 1 or > 15000000 || wm is < 1 or > 30000000 || gl < 0 || gl > gm || wl < 0 || wl > (phase >= AzurePhase.Fury ? wm * 4L : wm)
             || worm is < -1 or >= 200 || count is < 1 or > AzureRules.Members
             || !Enum.IsDefined(phase) || (phase == AzurePhase.Duet ? phaseAt != -1 : phaseAt < unlock || phaseAt > age || unlock < 0)
             || phase != AzurePhase.Duet && (gl != 0 || stage < AzureStage.Performance)
@@ -60,7 +64,10 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
             if (slot >= 255 || i > 0 && slot <= members[i - 1].Slot) throw new InvalidDataException("azure.roster");
             members[i] = new(slot, id, ready, gone);
         }
-        return new(fight, age, music, unlock, ending, stage, members, x, y, gm, wm, gl, wl, worm, enraged, phase, phaseAt);
+        int staging = r.ReadInt32(); sbyte side = r.ReadSByte();
+        if (staging < -1 || staging > age || (staging < 0 ? side != 0 : side is not (-1 or 1) || staging < unlock || unlock < 0)
+            || phase != AzurePhase.Duet && (!AzureRules.Staged(staging, phaseAt))) throw new InvalidDataException("azure.staging");
+        return new(fight, age, music, unlock, ending, stage, members, x, y, gm, wm, gl, wl, worm, enraged, phase, phaseAt, staging, side);
     }
 }
 

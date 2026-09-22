@@ -29,12 +29,12 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Source type: generated
 - Source work and URL: Original owner-directed built-in image generation; no third-party input
 - Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
-- Human modifications: New dorsal-axis parts, nearest-neighbor1254x1254 to1024x1024 export; shader mirrors paired silhouettes about measured spines. Source SHA256 `16b86c11ed5a9e82422a58f2e8fc4c55455c06694e7f366fc485506b39afcac4`. No third-party sprite input; prior side-view original retained.
+- Human modifications: 2026-09-22 built-in edit of project-owned atlas: intact beetle-like crown and streamlined armor; nearest-neighbor1254x1254 to1024x1024 export. Shader mirrors measured spines. Source SHA256 `97d416ecec5aab8feeb45b7cea2e9e9756a92952c1072ace83787023fe65354c`; previous originals retained externally/Git.
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `64a45057948b83ccfa4f6fb5dff15a7d7e71fbbd7d7225ea4af1e57221928ece3`
+- SHA256: `af003eeb78c1dae5005e1b650530c725d733fd577fe1c68409329dbd814c0229`
 
 - Runtime file: `Assets/Textures/AzureCathedral/VitrionFury.png`
 - Asset ID: azure-vitrion-fury-20260921
@@ -44,12 +44,57 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Source type: generated
 - Source work and URL: Built-in edit of project-owned Vitrion atlas; no third-party image input
 - Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
-- Human modifications: Nearest-neighbor1280x1280 to1024x1024 transparent export; separate material spine alignment, articulated jaws and phase reveal. Source SHA256 `a290fe57c79684b1a570c1a5377618447532660897436d1a08391bd6bdf42ddd`; original retained in external image archive, first form unchanged.
+- Human modifications: 2026-09-22 built-in edit of project-owned Fury atlas: intact crown, pressure-glass armor, separate rather than head-slice jaws; nearest-neighbor1024x1024 transparent export. Source SHA256 `ca76ec96d68f4fa61fdfcccff04602f7edca364e371971adbc4801b2be9d4d0f`; previous original retained externally/Git.
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex alpha/material/offline composition inspection2026-09-21; owner game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `20863d0de5d8b183dbbf49c8e9a798fa915f900426bd78c8265e4be103716581`
+- SHA256: `75df6db33a742033e6e10466a443460b5fb4831e28e4affa82a851a9a19b0306`
+
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionMandible.png`
+- Asset ID: azure-mandible-20260922
+- Asset type: 384x256 transparent articulated mouth part
+- Creator: project-owner-directed original artwork with OpenAI
+- Creation/acquisition date: 2026-09-22
+- Source type: generated
+- Source work and URL: Original project mouth assembly; no third-party art input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Built-in alpha extraction; top-left pincer; mirrored about authored hinge at runtime. Source1536x1024 SHA256 `6597646c47765b16e8039f701c26ee1b120fa5145018a864f2a62c2232b5a050`; ffmpeg `crop=768:512:0:0,scale=384:256:flags=neighbor`; no manual repaint. Original retained externally.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha and production-shader preview inspection2026-09-22; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `85c576f746329684e2541941e93b8c622ee7372e5fa14319dd3aa4f2ab212aa4`
+
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionMouth.png`
+- Asset ID: azure-throat-20260922
+- Asset type: 384x256 transparent articulated mouth part
+- Creator: project-owner-directed original artwork with OpenAI
+- Creation/acquisition date: 2026-09-22
+- Source type: generated
+- Source work and URL: Original project mouth assembly; no third-party art input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Built-in alpha extraction; bottom-left open toothed throat. Source1536x1024 SHA256 `6597646c47765b16e8039f701c26ee1b120fa5145018a864f2a62c2232b5a050`; ffmpeg `crop=768:512:0:512,scale=384:256:flags=neighbor`; no manual repaint. Original retained externally.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha and production-shader preview inspection2026-09-22; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `e1b5876b7f9fe14049ace24678812207dbb8b04d17c549c1a433c1394ac50c4a`
+
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionMouthClosed.png`
+- Asset ID: azure-throat-closed-20260922
+- Asset type: 384x256 transparent articulated mouth part
+- Creator: project-owner-directed original artwork with OpenAI
+- Creation/acquisition date: 2026-09-22
+- Source type: generated
+- Source work and URL: Original project mouth assembly; no third-party art input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Built-in alpha extraction; bottom-right closed throat lamella. Source1536x1024 SHA256 `6597646c47765b16e8039f701c26ee1b120fa5145018a864f2a62c2232b5a050`; ffmpeg `crop=768:512:768:512,scale=384:256:flags=neighbor`; no manual repaint. Original retained externally.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha and production-shader preview inspection2026-09-22; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `17ce1b7ba041a8eb278f8ffb4ce544b30bf996f0798021fb523f12bbca96e026`
 
 - Runtime file: `Assets/Textures/AzureCathedral/Cathedral.png`
 - Asset ID: azure-cathedral-20260920
@@ -94,7 +139,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `8d43d6aeb9c28d0e9153dba2bd8cec58d7fdef6f3e8f16c2a4c9e45c1c588ebe`
+- SHA256: `7f5e84ad6ae38f81c1e7b875475fddc31df9ecbeb4ebd7af3772df64b146fe93`
 
 - Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
 - Asset ID: azure-eighth-white-night-20260920

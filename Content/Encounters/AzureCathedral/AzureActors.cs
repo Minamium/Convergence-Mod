@@ -64,6 +64,10 @@ public sealed class AzureWorm : ModNPC
     internal Guid Fight;
     internal short Girl = -1, Head = -1, Previous = -1;
     internal byte Index;
+    private int poseEpoch = -1;
+    private AzurePhase posePhase;
+    private Vector2 retreatFrom;
+    private float retreatAngle;
     public override string Texture => "Convergence/Assets/Textures/AzureCathedral/Vitrion";
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
@@ -133,7 +137,9 @@ public sealed class AzureWorm : ModNPC
         NPC.immortal = g.State.WormLife<=0 || g.State.EndAt>=0;
         NPC.chaseable = !NPC.dontTakeDamage;
         NPC.boss = Index == 0 && g.State.Live;
-        NPC.lifeMax = g.State.WormMax;
+        NPC.lifeMax = g.State.WormPoolMax;
+        if (Index > 0) { NPC.realLife = Head; NPC.life = Math.Max(1, g.State.WormLife); }
+        if (CeremonyPose(g)) return;
         if (Index == 0)
         {
             if(Main.netMode!=NetmodeID.MultiplayerClient && g.State.Phase==AzurePhase.Duet)
@@ -147,6 +153,27 @@ public sealed class AzureWorm : ModNPC
         NPC.Center = previous.Center - direction * AzureRules.SegmentSpacing;
         NPC.rotation = direction.ToRotation(); NPC.velocity = Vector2.Zero;
         NPC.realLife = Head; NPC.life = Math.Max(1, g.State.WormLife);
+    }
+    private bool CeremonyPose(AzureBoss girl)
+    {
+        var s = girl.State;
+        bool retreat = s.Phase == AzurePhase.Duet && s.StagingAt >= 0 && s.EndAt < 0;
+        if (!retreat && s.Phase is not (AzurePhase.Devouring or AzurePhase.Melting)) return false;
+        int epoch = retreat ? s.StagingAt : s.PhaseAt;
+        if (poseEpoch != epoch || posePhase != s.Phase)
+        { poseEpoch = epoch; posePhase = s.Phase; retreatFrom = NPC.Center; retreatAngle = NPC.rotation; }
+        float t = girl.VisualAge - epoch;
+        var center = new System.Numerics.Vector2(s.Field.CenterX, s.Field.CenterY);
+        var direction = AzureFlight.CeremonyDirection(center, s.CeremonySide);
+        var next = retreat || s.Phase == AzurePhase.Melting && t < AzureRules.StagingTicks
+            ? AzureFlight.Retreat(new(retreatFrom.X, retreatFrom.Y), center, s.CeremonySide, Index, t)
+            : s.Phase == AzurePhase.Devouring ? AzureFlight.DevourPosition(center, s.CeremonySide, Index, t)
+            : AzureFlight.MeltPosition(center, s.CeremonySide, Index, t);
+        float angle = MathF.Atan2(direction.Y, direction.X);
+        NPC.rotation = retreat || s.Phase == AzurePhase.Melting && t < AzureRules.StagingTicks
+            ? retreatAngle + MathHelper.WrapAngle(angle - retreatAngle) * AzureRules.Ease(t / AzureRules.StagingTicks) : angle;
+        NPC.Center = new(next.X, next.Y); NPC.velocity = Vector2.Zero; NPC.ai[2] = 0;
+        return true;
     }
     public override bool CheckDead()
     {

@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-22",
+  "feature": "azure_cathedral",
+  "source_base": "dd627d1",
+  "candidate": "0.3.37 / protocol64",
+  "observed_build": "0.3.35",
+  "source_log_sha256": { "server": "9566d1cd9df381a0b158dc5d85c5a9d21fe4feb73206388123db7dd24fec5fcb", "client": "513fbb40f140323fced338f2f5eb3531ed28898ab1fa69843d91dce086283460" },
+  "topology": "solo Host & Play; two Cathedral attempts in latest server/client logs; later Scarlet attempt excluded",
+  "attempts": [
+    { "fight": "5b1d3382-4150-4841-86bb-934b7657b1c8", "unlock": 2066, "result_tick": 2498, "result": "Defeat", "combat_seconds": 7.2, "cleanup": 2678, "remaining_hp": 2415391, "peak_five_second_combined_dps": 28249 },
+    { "fight": "04372a34-ed59-4683-9153-461933692633", "unlock": 1197, "worm_floor": 2415, "liora_defeat": 3483, "devouring": 3484, "bite": 3880, "fury": 4084, "fury_hp": 240000, "worm_defeat": 4194, "fury_seconds": 1.8333, "result_tick": 4195, "result": "Victory", "combat_seconds_including_cutscene": 49.9667, "cleanup": 4615, "peak_five_second_combined_dps": 101191, "stack_success": 1, "stack_failure": 0, "spread_called": 0 }
+  ],
+  "findings": {
+    "lifecycle": "Both attempts reach normal cleanup; no Cathedral ActorMissing or exception. Client logs record sky activation on both attempts, not proof of every rendered frame.",
+    "overlap": "Owner reports overlapping body during consumption/ending. Source confirms the old staging moved only the head while the other44parts continued ordinary follow-chain behavior. Floor preceded Devouring by1069ticks but did not begin staging; old melting stopped the head centrally and bunched the followers. No recording was supplied for this session, so the exact reported frame is not independently observed.",
+    "balance": "Observed Fury240000HP dies in110ticks. Increase only the Fury pool fourfold; this does not guarantee fourfold survival under different equipment/targets/piercing.",
+    "limits": "Five-second HP-budget deltas are not sustained equipped DPS. Solo does not exercise remote synchronization or Spread overlap. No audio listening or FPS measurement claimed."
+  },
+  "changes": [
+    "Authority freezes inward-facing staging flank/epoch at first worm20% floor and evacuates all45parts before allowing the two-gate bite.",
+    "Bounded staging fields replicate via existing Azure snapshot/native repair routes; no common IDs change. Capture only harmless local retreat origins; canonical staged/bite/melt geometry converges by accepted clocks.",
+    "Victory repeats whole-chain retreat/hold, then flows the chain through a delayed melt front. Existing exact-Fight native lethal retention and cleanup remain.",
+    "Replace first/Fury armor atlases and add original separate pincer/open-throat/closed-throat PNGs. Intact head; fixed-root paired jaw animation; shared Luminance caustics/pressure/frost/dissolve.",
+    "Fury shared HP is four times frozen Duet maximum; one native realLife pool still receives each hit once. Liora, Duet HP, music, other Raids and pre-existing English locale changes preserved."
+  ],
+  "verification": {
+    "focused_domain": "PASS:17 Azure cases, phase/HP gates, bounded projection/truncated prefixes, both staging flanks/all45parts, slow bite and non-bunching melt.",
+    "packaged_native_probe": "PASS on installed tML2026.07.3.0: actual segment StrikeNPC50->30 once; lethal and late hit retain45parts/other Fight unchanged; packaged actor AI evacuates all parts, maintains spacing through bite/melt and projects960000Fury maximum; actual SkyManager retry/reset reconciliation passes.",
+    "gpu_preview": "PASS offline production-linked FNA/Luminance material rendering:210frames of full-chain evacuation/bite/melt and close-up separate jaws on bright/dark backgrounds, including Reduced and contact silhouette. Not native/network gameplay or performance evidence.",
+    "shader": "PASS FXC exports and source/export manifest validation.",
+    "native_candidate_build": "PASS0.3.37, record20260922T035518197698Z, package9dd5c6ed7e31ea73bb205182cda48c2762f78fc2616b8ecd3543adc9b29ef28e;0errors,4existing nullable warnings plus one task-local nullable warning subsequently corrected without behavior change. Final integrated build/load/install recorded locally and in PR.",
+    "load_smoke": "PASS: isolated native dedicated content load reaches Choose World with Convergence0.3.37, Calamity2.2.4, Luminance1.0.14, Calamity Music2.1, Simple Whip1.15.12 and SharedMap0.1.5.1. Stopped before opening/creating a world; not client gameplay.",
+    "static_and_integration": "PASS: repository986files, YAML12 and347 deterministic domain tests; diff whitespace passed. Catalog82 regenerated after the final Status edit (initial CI detected the stale index). Final integrated package/install follow in the source-identified local build record and PR."
+  },
+  "not_run": [
+    "Owner Host & Play: both gate orders and 20%-floor retreat while Liora lives, distant bite/short silhouette, Fury balance with real piercing equipment.",
+    "Victory full-chain restaging/flowing melt, BGM fade, immediate retry; cancellation/all-out during protected scenes.",
+    "Matching-protocol multiplayer, delayed snapshots, distant observers, viewport zoom/UI107%, Reduced Effects and world-edge placement.",
+    "Subjective art acceptance and GPU frame-time measurement."
+  ]
+}
