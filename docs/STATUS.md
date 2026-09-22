@@ -23,11 +23,13 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.38 / protocol65**. Scarlet's Ready button now matches Doll/Cathedral's fixed top-center layout. Final's closing slot grows a giant red orb and releases forecast large/medium/small clusters; flight may overlap the next musical bar without losing its owned lifetime. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns behavior. Matching peers are required for the appended technique and its bounded flight.
+Current source: **0.3.39 / protocol66**. Scarlet Covenant tracks up to20 targets through beam completion, adapts to enemy width and concentrates size/damage against fewer targets; new casts overlap prior flight. Act changes dissolve/reconstitute bodies; Final re-summons and absorbs all three plus Vespera into a chest-orb giant; Victory projects an energy melt. Spread is larger. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns tuning and ceremony clocks. Match peers for the bounded native companion payload and longer protected transitions.
+
+Retained0.3.38 work: fixed top-center Ready and forecast three-size clusters. Latest0.3.38 solo logs show242.17s Victory, Stack2/3 and Spread3/3, four cycles, one sacrifice and cleanup. The final pending Stack was cancelled by Victory before its deadline, not a missing resolution. [Current evidence](evidence/2026-09-22-scarlet-transmutation.json) separates that playtest from the new implementation.
 
 Retained0.3.37 Cathedral work: the entire worm stages at the20% floor before consumption and again before a flowing melt. The head remains intact with separate beetle-like pincers/throat; Fury has a larger single shared HP pool. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns that unchanged behavior/tuning.
 
-Retained0.3.36 Scarlet work: opposing-seal beams target up to ten current-HP-prioritized actors; Act gates and the single giant Scarlet Eidolon preserve the combined HP budget and paired attacks. Failed chorus visuals retain resolved world positions through death. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns those mechanics; this Cathedral change does not alter them.
+Retained0.3.36 Scarlet work: Act gates and the single giant Scarlet Eidolon preserve the combined HP budget and paired attacks. Failed chorus visuals retain resolved world positions through death. New companion tuning supersedes its earlier ten-target cap.
 
 Retained0.3.35 work: Cathedral native shared-HP segment retention and sky retry repair; Oboro's26F pullback/held-charge third-cut finisher. [Azure evidence](evidence/2026-09-21-azure-lifecycle-fix.json) and [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧の3段目フィニッシュ--2026-09-20) retain their separate acceptance checks. No Azure, Doll, Oboro or music changes are made by the Scarlet revision.
 
@@ -45,6 +47,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.39 Scarlet transmutation:** [evidence](evidence/2026-09-22-scarlet-transmutation.json) owns scoped targeting/geometry/codec/build and linked-production shader/scene checks. User-owned / not_run: moving/growing targets and remote companion,20-target load/equipped DPS, Act return→dissolve→rebuild, Final sacrifice/chest sphere, Victory melt/shake, enlarged multiplayer Spread and Reduced Effects. Offline frames are not native gameplay or performance acceptance.
 
 - **0.3.38 Scarlet Ready/clusters:** [evidence](evidence/2026-09-22-scarlet-clusters.json) separates the reviewed0.3.37 solo Victory (222.75s after unlock; Stack3/3, Spread3/3, one sacrifice and completed cleanup) from new geometry/codec/source/build and actual-shader GPU checks. User-owned / not_run: native top-center click at UI107%/zoom, matching remote peers, overlapping Final clusters/corridor fairness, audio/shake, Reduced Effects and repeat invocation. Solo Spread does not test overlap and successful Stack does not prove failed aftermath visibility.
 
@@ -102,7 +106,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-After confirmed0.3.38 deployment, start normally without another Build + Reload. Use **Scarlet Grimoire** on a Foundation Core: verify the fixed Ready button, then Final's growing orb, full warning and three carrier sizes across the next bar. Match peer versions/protocol. Check native avoidance, sound and Reduced Effects; compilation/offline frames do not establish those outcomes.
+After confirmed0.3.39 deployment, start normally without another Build + Reload. Check Scarlet Covenant against one moving large enemy and several smaller ones: overlapping charge, tracking and concentration. Use **Scarlet Grimoire** on a Foundation Core for Act reconstitution, sacrificial Final, chest sphere and Victory melt. Check wider Spread with matching peers; HP/music/attack decks are unchanged. Native sound, fairness, remote tracking and Reduced Effects remain separate from compilation/offline frames.
 
 The separate [Azure smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) remains pending: Glacial Chime,20% full-chain retreat, articulated bite, shared-HP Fury and staged melt→retry. Do not repeat unrelated whole-fight matrices for this Scarlet change.
 

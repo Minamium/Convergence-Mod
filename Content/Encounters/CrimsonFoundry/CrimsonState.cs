@@ -32,7 +32,7 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         if (index is < 0 or >= 3 || (DefeatedMask & 1 << index) != 0) return 0;
         if (Phase == 3) return CrimsonInvocation.Ease((now - PhaseStart - 24 - index * 14) / 48);
         if (index == Phase) return 1;
-        return index == Phase - 1 ? 1 - CrimsonInvocation.Ease((now - PhaseStart) / 36) : 0;
+        return index == Phase - 1 ? 1 - CrimsonEnsemble.RetreatDissolve(now - PhaseStart) : 0;
     }
     internal bool CanReplace(in CrimsonState old)
     {
@@ -75,7 +75,7 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         if (f.Length != 16 || new Guid(f) == Guid.Empty || age is < 0 or > 72000 || start is < -1 or > 72000
             || final is < -1 or > 72000 || !Enum.IsDefined(stage) || count is < 1 or > MaxMembers || phase > 3
             || defeated > 7 || phase < 3 && (defeated != 0 || dead || final >= 0) || phase == 3 && final != epoch
-            || epoch < 0 || epoch > age || unlock is < -1 or > 72400 || target is < -1 or >= 255
+            || epoch < 0 || epoch > age || unlock is < -1 or > 73000 || target is < -1 or >= 255
             || !Enum.IsDefined(kind) || phrase is < -1 or > 72400 || phraseEnd is < -1 or > 72800
             || (phrase < 0) != (phraseEnd < 0) || phrase >= 0 && (phraseEnd <= phrase || phraseEnd - phrase > 720)
             || cycles is < 0 or > 1000

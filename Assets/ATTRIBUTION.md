@@ -398,9 +398,12 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Reviewer and review date: Codex,2026-09-20; actual compiled FNA GPU frames inspected, game/MP acceptance not_run
 - Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, orb-to-invocation and chorus sections
 
+September22 transmutation adds original directional red-energy streams in `TransfusionPass`; no sampled audio or foreign material. Current source/export identities remain in `compiled.json`.
+
 ### ScarletSurface original shader export — 2026-09-17
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSurface.fxc`
+  September22 revision adds original noise-eroded red edges and molten UV flow, paired with client mesh deformation for Act absorption and Victory. Zero ceremony values retain the existing ordinary surface. No new source bitmap or external artwork.
 - Asset ID: scarlet-v2-scarletsurface-20260917
 - Asset type: compiled original HLSL effect
 - Creator: project-directed independent implementation by OpenAI for Minamium

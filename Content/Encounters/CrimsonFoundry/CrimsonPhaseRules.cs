@@ -6,7 +6,7 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 internal static class CrimsonPhaseRules
 {
     internal const int FinalPhase = 3;
-    internal const int TransitionTicks = 150;
+    internal const int TransitionTicks = 240;
     internal static int RetreatLife(int maximumLife)
         => maximumLife > 0 ? (maximumLife + 4) / 5 : throw new ArgumentOutOfRangeException(nameof(maximumLife));
     internal static bool ShouldRetreat(int phase, int index, int life, int maximumLife)

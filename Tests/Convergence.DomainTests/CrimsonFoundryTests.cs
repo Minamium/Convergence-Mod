@@ -135,7 +135,8 @@ internal static partial class Program
         AssertEqual(false, (old with { Age = 999 }).CanReplace(old), "old age");
         AssertEqual(false, (old with { Age = 1100, Phase = 0 }).CanReplace(old), "late prior phase");
         AssertEqual(false, (old with { Fight = Guid.NewGuid() }).CanReplace(old), "foreign fight");
-        AssertEqual(0f, old.Presence(0, 1000), "previous withdrawn");
+        AssertEqual(true, old.Presence(0, 1000) > 0, "previous dissolves while moving to gate");
+        AssertEqual(0f, old.Presence(0, 1010), "previous withdrawn before next emergence");
         AssertEqual(1f, old.Presence(1, 1000), "current visible");
         AssertEqual(0f, old.Presence(2, 1000), "future hidden");
         var ending = old with { Stage = CrimsonStage.Defeat };

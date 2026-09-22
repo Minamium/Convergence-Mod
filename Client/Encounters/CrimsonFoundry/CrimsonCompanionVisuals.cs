@@ -19,9 +19,10 @@ internal sealed class CrimsonCompanionVisuals : GlobalProjectile
     {
         if (p.ModProjectile is CrimsonCompanion)
         {
-            if (previous < 32 && p.ai[0] >= 32 && p.ai[0] < 36) Play("PortalCharge", .36f, p.Center);
+            int chargeAt = CrimsonCompanion.Fire - CrimsonCovenantRules.ChargeTicks;
+            if (previous < chargeAt && p.ai[0] >= chargeAt && p.ai[0] < chargeAt + 4) Play("PortalCharge", .36f, p.Center);
             if (previous < CrimsonCompanion.Fire && p.ai[0] >= CrimsonCompanion.Fire && p.ai[0] < CrimsonCompanion.Fire + 4)
-                Play("PortalFire", .60f, p.Center); // One batch accent, not ten stacked samples.
+                Play("PortalFire", .60f, p.Center); // One batch accent, not twenty stacked samples.
             previous = p.ai[0];
         }
     }
@@ -34,7 +35,7 @@ internal sealed class CrimsonCompanionVisuals : GlobalProjectile
             float phase = p.ai[0];
             float charge = phase > 0 && phase < CrimsonCompanion.Fire ? CrimsonRigMotion.Charge(CrimsonCompanion.Fire - phase) : 0;
             float recoil = phase >= CrimsonCompanion.Fire ? CrimsonRigMotion.Recoil(phase - CrimsonCompanion.Fire) : 0;
-            float seal = CrimsonInvocation.Ease((phase - 20) / 14) * (1 - CrimsonInvocation.Ease((phase - 112) / 24));
+            float seal = CrimsonInvocation.Ease((phase - 2) / 7) * (1 - CrimsonInvocation.Ease((phase - 48) / 12));
             ScarletSorcery.Seal(Main.spriteBatch, p.Center + new Vector2(0, -9), 66 + charge * 30,
                 .82f, -.2f, Main.GlobalTimeWrappedHourly * 60, Math.Max(.25f, charge), seal * .9f, false, p.identity);
             CrimsonRig.DrawPerformer(Main.spriteBatch, Main.screenPosition, p.Center, Main.GlobalTimeWrappedHourly * 60,
@@ -42,7 +43,7 @@ internal sealed class CrimsonCompanionVisuals : GlobalProjectile
         }
         else if (p.ModProjectile is CrimsonCompanionRay ray)
         {
-            ScarletSorcery.CovenantClamp(Main.spriteBatch, p.Center, p.ai[1], p.ai[0]);
+            if (ray.BatchCount > 0) ScarletSorcery.CovenantClamp(Main.spriteBatch, p.Center, p.ai[1], p.ai[0], ray.Size);
         }
         return false;
     }
