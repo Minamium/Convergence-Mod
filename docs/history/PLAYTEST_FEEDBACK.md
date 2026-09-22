@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-21
+last_reviewed: 2026-09-22
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,10 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Azure staged consumption and beetle jaws — 2026-09-22 / 0.3.35 → 0.3.37
+
+Owner reports body overlap spoiling consumption/melting, requests early floor-triggered evacuation, an intact head with beetle-like opening fangs, richer worm art and a longer Fury fight. Latest two solo attempts end in one clean Defeat and one complete Victory/cleanup; the previous missing-chain invalidation does not recur in those logs. Fury lasts only110ticks. Stage all45parts at the20% floor, gate consumption on completed alignment, repeat staging before a flowing melt, split pincers/throat into original PNG layers and raise only the Fury shared pool. [Evidence](../evidence/2026-09-22-azure-staged-mandibles.json) separates observed timings, source diagnosis, offline checks and still-pending native/remote visual acceptance.
 
 ## Azure retry background and lethal chain — 2026-09-21 / 0.3.33 → 0.3.35
 

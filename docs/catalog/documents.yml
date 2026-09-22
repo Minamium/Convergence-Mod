@@ -106,7 +106,7 @@ documents:
 - doc_id: adr.0028
   path: docs/adr/0028-azure-cathedral-native-actors.md
   title: 'ADR-0028: Azure Cathedral native actors and hazards'
-  content_sha256: 60566cab25c5085542a62fc78db1e38e5c858f49a83d043ffa8607bbc14f81b0
+  content_sha256: f563bbf0569e9ad8e3c9990bb683f7ab11b53c0713d1343f109e82f918285dea
   document_type: adr
   status: accepted
   owners:
@@ -595,12 +595,12 @@ documents:
 - doc_id: encounter.azure-cathedral.assets
   path: docs/encounters/azure-cathedral/ASSET_BRIEF.md
   title: Azure Cathedral asset brief
-  content_sha256: 3c096629356f762129618d85ed63325a630188edb551970088336a7705596f94
+  content_sha256: 9181da61baa114bcb012ce95efd1bd1b01ee83fc4d5d3b04629ecf9ae50814ea
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - encounter.azure_cathedral.asset_brief
   aliases: []
@@ -611,14 +611,14 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: e547ebf834a5ec33581b57403daf029e64aab77e78c94721b80128e3d2ee30dd
+  content_sha256: e4a458f7ea52edae78d2686b014cee0649150a4360f940a89e0d1ca2de6e1c37
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - encounter.azure_cathedral.experience
   - encounter.azure_cathedral.presentation
@@ -927,12 +927,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: fcd6a0016569605f22ef55cd6f483fc4bf51c819921d0156d5c09b4e97221b97
+  content_sha256: 6fb8b15ff127562728756c7a9090730a17363f1392d936a5a6eadd407e32d06f
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-22'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1326,7 +1326,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b63043c80341e090114a632407bab7ac91c6bf51204c72eaa5a55469fda69812
+  content_sha256: 6dcaa254106a09bba06435484868165beff2e3a24952a6c63655ef1e4fe6cc87
   document_type: status
   status: accepted
   owners:
