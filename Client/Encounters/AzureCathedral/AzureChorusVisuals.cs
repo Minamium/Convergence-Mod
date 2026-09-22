@@ -11,7 +11,7 @@ internal static class AzureChorusVisuals
     internal static void Draw(SpriteBatch batch,AzureBoss girl,AzureChorus marker,float age)
     {
         var p=marker.Plan;if(age<p.Born || age>=p.End)return;
-        float progress=Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1),after=age-p.Fire;
+        float progress=Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1),after=marker.ImpactAge(age);
         float remain=1-AzureRules.Ease((after-36)/48),appear=AzureRules.Ease((age-p.Born)/24);
         bool spread=p.Kind==AzureChorusKind.Spread;
         if(!spread && after<0)
@@ -57,7 +57,7 @@ internal static class AzureChorusVisuals
                 // Paired, faceted ice jaws surround each party member. Their
                 // broad silhouette is distinct from the one true gathering ring.
                 float squeeze=failed && after>=0?AzureRules.Ease(after/7):0;
-                float fall=after>=0 && !failed?after*after*.045f:0;
+                float fall=marker.Resolved && after>=0 && !failed?after*after*.045f:0;
                 for(int side=-1;side<=1;side+=2)for(int k=0;k<3;k++)
                 {
                     float grow=AzureRules.Ease((progress-k*.16f)/.55f);

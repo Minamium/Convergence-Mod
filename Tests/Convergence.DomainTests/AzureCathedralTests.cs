@@ -160,7 +160,7 @@ internal static partial class Program
     private static void AzureChorusDamage()
     {
         var zero=System.Numerics.Vector2.Zero;
-        var points=new[]{zero,new System.Numerics.Vector2(700,0),new System.Numerics.Vector2(0,10)};
+        var points=new[]{zero,new System.Numerics.Vector2(900,0),new System.Numerics.Vector2(0,10)};
         var stack=AzureChorusRules.Resolve(AzureChorusKind.Stack,zero,points,7,7);
         AssertEqual(300,stack[0],"one third missing");AssertEqual(300,stack[1],"all living share failure");
         var death=AzureChorusRules.Resolve(AzureChorusKind.Stack,zero,points,7,5);

@@ -11,7 +11,7 @@ internal static class AzureRules
     internal const int PhraseTicks = 480, CycleTicks = PhraseTicks * 6;
     internal const int ChargeTicks = 240, ChargeWarning = 100, ChargeEnd = 188;
     internal const int StagingTicks = 180, Devouring = 600, DevourRush = 180, DevourSlow = 252, DevourContact = 396;
-    internal const int MeltRush = 240, MeltContact = 330, MeltEnding = 660;
+    internal const int MeltRush = 240, MeltContact = 330, MeltPartTicks = 60, MeltEnding = 660;
     internal const int VolleyApproach = 80, VolleyTransit = 360, VolleyWarning = 24, VolleyFire = 260;
     internal const int CutWarning = 60, CutLive = 12, CutResidue = 20;
     internal const float SegmentSpacing = 86, SegmentRadius = 43;
@@ -55,10 +55,19 @@ internal static class AzureRules
         => Ease((t-(DevourRush-20))/80)*(1-Ease((t-(DevourContact-6))/16));
     internal static float FuryReveal(float t, int part) => Ease((t-DevourContact-14-part*.8f)/90);
     internal static float Melt(float elapsed, int segment)
-        => Ease((elapsed - MeltContact - segment * (SegmentSpacing / 20)) / 60);
+        => Ease((elapsed - MeltContact - segment * (SegmentSpacing / 20)) / MeltPartTicks);
+    internal static int VictoryCue => MeltContact+MeltPartTicks;
+    internal static int MeltSettled => (int)MathF.Ceiling(MeltContact + Segments * (SegmentSpacing / 20) + MeltPartTicks);
+    internal static float EndingSky(AzureStage stage, float elapsed)
+        => 1-Ease((elapsed-(stage==AzureStage.Victory?MeltSettled:0)) /
+            (stage==AzureStage.Victory?MeltEnding-MeltSettled:Ending));
+    internal static float VictoryTitle(float elapsed)
+        => Ease((elapsed-MeltSettled)/22)*Ease((MeltEnding-elapsed)/28);
     internal static bool Silhouette(float t) => t >= DevourContact-10 && t < DevourContact+14;
     internal static float MusicGain(int music, int ending, AzureStage stage, float age)
-        => music < 0 ? 0 : Ease((age-music)/120) * (ending < 0 ? 1 : 1-Ease((age-ending)/ExitDuration(stage)));
+        => music < 0 ? 0 : Ease((age-music)/120) * (ending < 0 ? 1 :
+            1-Ease((age-ending-(stage==AzureStage.Victory?MeltContact:0)) /
+                (ExitDuration(stage)-(stage==AzureStage.Victory?MeltContact:0))));
     internal static float ThroatRadius(float distance, float radius)
         => radius * (Math.Clamp(32 / Math.Max(2*radius,1),.16f,1) + (1-Math.Clamp(32/Math.Max(2*radius,1),.16f,1))*MathF.Pow(Math.Clamp(distance/260,0,1),1.65f));
 }

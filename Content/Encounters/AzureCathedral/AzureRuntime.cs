@@ -310,6 +310,12 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private void Schedule()
     {
         int phrase = AzureRules.Phrase(age, State.AttackEpoch), t = AzureRules.Clock(age, State.AttackEpoch);
+        if((phase==AzurePhase.Fury || !girlDead) && AzureLattice.Due(phase,age-State.AttackEpoch,out int pattern))
+        {
+            var plans=AzureLattice.Create(fight.Value,(short)girl!.NPC.whoAmI,State.Field,age,pattern);
+            foreach(var plan in plans)SpawnPlan(plan);
+            AzurePackets.Log($"event=SlashLattice fight={fight.Value} age={age} phase={phase} pattern={pattern} lines={plans.Length} first_fire={plans[0].Fire} last_fire={plans[^1].Fire}");
+        }
         if (AzureRules.ChorusPhrase(phrase)) return;
         if(!girlDead && AzureRules.ChargePhrase(phrase) && t%160==60)
         {
@@ -358,8 +364,12 @@ internal sealed class AzureRuntime : IEncounterRuntime
     {
         var plan = new AzureAttackPlan(fight.Value, (short)girl!.NPC.whoAmI, kind, age, age + warning, age + warning + live,
             source.X, source.Y, direction, length, width, damage,target,emitter);
-        int slot = Projectile.NewProjectile(new AzureAttackSource(plan), source, Vector2.Zero,
-            ModContent.ProjectileType<AzureAttack>(), damage, 0, Main.myPlayer);
+        SpawnPlan(plan);
+    }
+    private void SpawnPlan(AzureAttackPlan plan)
+    {
+        int slot = Projectile.NewProjectile(new AzureAttackSource(plan), new(plan.X,plan.Y), Vector2.Zero,
+            ModContent.ProjectileType<AzureAttack>(), plan.Damage, 0, Main.myPlayer);
         if (slot >= Main.maxProjectiles) throw new InvalidOperationException("azure.attack_capacity");
         Main.projectile[slot].netUpdate = true;
     }

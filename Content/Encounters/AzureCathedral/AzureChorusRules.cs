@@ -25,9 +25,21 @@ internal readonly record struct AzureChorusPlan(Guid Fight, short Girl, AzureCho
         return p;
     }
 }
+
+internal struct AzureVerdictClock
+{
+    private bool started;
+    private float start;
+    internal float Sample(bool resolved,float age,int fire,int end)
+    {
+        if(!resolved)return -1;
+        if(!started){start=AzureChorusRules.VerdictStart(age,fire,end);started=true;}
+        return age-start;
+    }
+}
 internal static class AzureChorusRules
 {
-    internal const float StackRadius = 190, SpreadRadius = 190;
+    internal const float StackRadius = 190, SpreadRadius = 352;
     internal const int Warning = 270, ImpactTicks = 12, Damage = 900;
     internal static bool Point(Vector2 p) => float.IsFinite(p.X) && float.IsFinite(p.Y) && Math.Abs(p.X)<400000 && Math.Abs(p.Y)<150000;
     internal static int[] Resolve(AzureChorusKind kind, Vector2 center, Vector2[] positions, byte announced, byte living)
@@ -49,4 +61,8 @@ internal static class AzureChorusRules
     }
     internal static bool VerdictCanReplace(bool oldResolved, byte oldFailures, bool resolved, byte failures)
         => (!oldResolved || resolved && failures==oldFailures) && (resolved || failures==0);
+    // A deadline without a verdict is pending, never implicit success. A late
+    // accepted verdict starts locally when recovery time permits; very late
+    // receipt samples the remaining tail, never extends its owned lifetime.
+    internal static float VerdictStart(float age, int fire, int end) => Math.Clamp(age,fire,Math.Max(fire,end-48));
 }

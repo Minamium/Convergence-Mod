@@ -32,6 +32,33 @@ public static class AzureLifecycleNativeProbe
         stream.Position=0;
         using var r=new System.IO.BinaryReader(stream);
         var state=mod.GetType(content+"AzureState",true).GetMethod("ReadEnvelope",S).Invoke(null,new object[]{r});bossType.GetField("State",I).SetValue(boss,state);
+        if(!old)
+        {
+            // A Fury lattice must survive its hidden projection actor's zero HP.
+            // Probe the packaged projectile gate, not just the pure schedule.
+            var attackType=mod.GetType(content+"AzureAttack",true);
+            var planType=mod.GetType(content+"AzureAttackPlan",true);
+            var attack=System.Activator.CreateInstance(attackType,true);
+            using var data=new System.IO.MemoryStream();using var pw=new System.IO.BinaryWriter(data);
+            pw.Write(true);pw.Write(fight.ToByteArray());pw.Write((short)0);pw.Write((byte)4);
+            pw.Write(6900);pw.Write(7000);pw.Write(7012);
+            pw.Write(5000f);pw.Write(4500f);pw.Write(0f);pw.Write(4000f);pw.Write(7f);pw.Write(340);pw.Write((short)-1);pw.Write((short)-1);
+            data.Position=0;using var pr=new System.IO.BinaryReader(data);
+            var plan=planType.GetMethod("Read",S).Invoke(null,new object[]{pr});attackType.GetField("Plan",I).SetValue(attack,plan);
+            var damage=attackType.GetMethod("CanDamage",I);var valid=attackType.GetMethod("TryGirl",I);
+            Require((bool)valid.Invoke(attack,new object[]{null}),"Fury cut remains owned with Liora at zero HP");
+            Require(damage.Invoke(attack,null)==null,"Fury live slash enters native damage path");
+            foreach(int t in new[]{6999,7012})
+            {
+                var timed=System.Runtime.CompilerServices.RuntimeHelpers.GetObjectValue(state);timed.GetType().GetProperty("Age",I).SetValue(timed,t);
+                bossType.GetField("State",I).SetValue(boss,timed);
+                Require((bool)damage.Invoke(attack,null)==false,"forecast and residue cannot damage");
+            }
+            var dead=System.Runtime.CompilerServices.RuntimeHelpers.GetObjectValue(state);dead.GetType().GetProperty("WormLife",I).SetValue(dead,0);
+            bossType.GetField("State",I).SetValue(boss,dead);Require(!(bool)valid.Invoke(attack,new object[]{null}),"no slash after worm defeat");
+            bossType.GetField("State",I).SetValue(boss,state);
+            System.Console.WriteLine("PASS packaged Fury lattice ownership: zero-HP Liora, native live window, harmless forecast/residue, terminal cancellation");
+        }
         var actors=new object[45];
         for(int i=0;i<45;i++)
         {

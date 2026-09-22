@@ -19,6 +19,8 @@ public sealed class AzureChorus : ModProjectile
     internal bool Resolved;
     internal byte FailedMask;
     internal Point[] Positions = Array.Empty<Point>();
+    private AzureVerdictClock visualClock;
+    internal float ImpactAge(float age)=>visualClock.Sample(Resolved,age,Plan.Fire,Plan.End);
     public override string Texture => "Terraria/Images/Projectile_1";
     public override void SetDefaults()
     {
@@ -154,6 +156,13 @@ internal sealed class AzureChorusDirector
         }
         m.Projectile.netUpdate=true;
         AzurePackets.Log($"event=ChorusResolved fight={state.Fight} kind={m.Plan.Kind} age={state.Age} living={living} failed={m.FailedMask} source_damage={string.Join(",",damage)}");
+        for(int i=0;i<positions.Length;i++)if((living & m.Plan.Members & (1<<i))!=0)
+        {
+            float nearest=float.PositiveInfinity;
+            for(int j=0;j<positions.Length;j++)if(i!=j && (living & m.Plan.Members & (1<<j))!=0)
+                nearest=Math.Min(nearest,Point.Distance(positions[i],positions[j]));
+            AzurePackets.Log(FormattableString.Invariant($"event=ChorusMember fight={state.Fight} kind={m.Plan.Kind} age={state.Age} slot={state.Members[i].Slot} gather_distance={Point.Distance(positions[i],m.Plan.Center):F1} nearest_peer={(float.IsPositiveInfinity(nearest)?-1:nearest):F1} source_damage={damage[i]}"));
+        }
     }
     internal void Clear(Guid fight)
     {

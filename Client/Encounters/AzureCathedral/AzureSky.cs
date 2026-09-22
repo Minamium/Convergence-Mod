@@ -28,7 +28,7 @@ internal sealed class AzureSky : CustomSky
             && girl.VisualAge>=girl.State.MusicStart+AzureRules.SkyReveal;
         if(!owned)requested=false;
         float target=requested && owned?AzureRules.Ease((girl!.VisualAge-girl.State.MusicStart-AzureRules.SkyReveal)/220):0;
-        if(girl is not null && girl.State.EndAt>=0)target*=1-AzureRules.Ease((girl.VisualAge-girl.State.EndAt-240)/180);
+        if(girl is not null && girl.State.EndAt>=0)target*=AzureRules.EndingSky(girl.State.Stage,girl.VisualAge-girl.State.EndAt);
         fade = MathHelper.Clamp(fade + MathHelper.Clamp(target-fade,-.04f,.013f),0,1);
         if (girl is not null) age = AzureVisuals.RenderAge(girl);
     }

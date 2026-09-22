@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureRules.cs" Link="Domain/AzureRules.cs" />
+    <Compile Include="../../Content/Encounters/AzureCathedral/AzureLattice.cs" Link="Domain/AzureLattice.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureFlight.cs" Link="Domain/AzureFlight.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureChorusRules.cs" Link="Domain/AzureChorusRules.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureState.cs" Link="Domain/AzureState.cs" />

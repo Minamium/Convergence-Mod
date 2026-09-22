@@ -56,7 +56,16 @@ internal sealed class AzureVisuals : ModSystem
             CueAt(girl.State.MusicStart+AzureRules.SwordLight,"Beams/PortalFire",.50f,5);
             CueAt(girl.State.MusicStart+AzureRules.WormArrival,"PhaseRupture",.55f,8);
         }
-        if (girl.State.EndAt >= 0) CueAt(girl.State.EndAt, girl.State.Stage==AzureStage.Victory?"RaidVictory":"RaidDefeat",.45f,9);
+        if (girl.State.EndAt >= 0)
+        {
+            if(girl.State.Stage==AzureStage.Victory)
+            {
+                CueAt(girl.State.EndAt+AzureRules.MeltRush,"Beams/PortalCharge",.38f,3);
+                CueAt(girl.State.EndAt+AzureRules.MeltContact,"PhaseRupture",.48f,8);
+                CueAt(girl.State.EndAt+AzureRules.VictoryCue,"RaidVictory",.45f,4);
+            }
+            else CueAt(girl.State.EndAt,"RaidDefeat",.45f,9);
+        }
         if(girl.State.Phase==AzurePhase.Devouring)
         {
             CueAt(girl.State.PhaseAt,"StackSummon",.45f,3);
@@ -73,7 +82,7 @@ internal sealed class AzureVisuals : ModSystem
                 // Verdict can arrive after its scheduled fire tick on a client.
                 // Play once on receipt inside the visual recovery, not only at a
                 // tick crossing that may have preceded the authoritative packet.
-                if(m.Resolved && lastVerdict!=m.Plan.Fire && age>=m.Plan.Fire && age<m.Plan.Fire+48)
+                if(m.Resolved && lastVerdict!=m.Plan.Fire && age>=m.Plan.Fire && age<m.Plan.End)
                 {lastVerdict=m.Plan.Fire;Play(m.Plan.Kind==AzureChorusKind.Stack?"StackRelease":"SpreadRelease",.48f,.10f);shake=Math.Max(shake,m.FailedMask==0?3:8);}
             }
             if (p.ModProjectile is not AzureAttack a || a.Plan.Fight != fight) continue;
@@ -245,7 +254,7 @@ internal sealed class AzureVisuals : ModSystem
             if(opening)
                 Utils.DrawBorderString(batch,"CATHEDRAL OF THE WHITE NIGHT",new(v.Width*.5f,v.Height*.84f),new Color(201,239,250)*opacity,.92f,.5f);
             if(ending && s.Stage==AzureStage.Victory)
-                Utils.DrawBorderString(batch,"THE GLASS FALLS SILENT",new(v.Width*.5f,v.Height*.84f),new Color(201,239,250)*opacity,.86f,.5f);
+                Utils.DrawBorderString(batch,"THE GLASS FALLS SILENT",new(v.Width*.5f,v.Height*.84f),new Color(201,239,250)*AzureRules.VictoryTitle(clock),.86f,.5f);
             return false;
         }
         if(s.Stage!=AzureStage.Ready) return true;
