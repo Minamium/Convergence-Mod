@@ -17,6 +17,8 @@ Choose the mode implied by the request; no separate confirmation is needed:
 - **Implementation:** make the requested bounded change and its applicable checks.
 - **Audit-only:** inspect without editing, formatting, compiling, or producing build/bytecode output. Use Git status/diff to distinguish existing changes; use a scoped file inventory if Git is unavailable. Run static checks only when they help answer the review question.
 
+When you are the top-level `gpt-6-astra` agent implementing a change, delegate a substantial independent implementation slice to `gpt-6-sol` if you can advance other useful work alongside it. Read [Sol implementation delegation](references/sol-implementation-delegation.md) only when that condition holds. This policy does not trigger delegation for other lead models, subagents, audit/log analysis, documentation-only work or small/tightly coupled changes.
+
 ## Load references only when needed
 
 | Change | Reference |
