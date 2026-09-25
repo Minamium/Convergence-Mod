@@ -50,6 +50,10 @@
       "source_sha256": "ab810c34dda508df2d8f23b3bba37be316937803500811b7778599d87de63f16",
       "output_sha256": "8c6a64ddf9ad29cd2e2537aa19013587120c7340c6a1577c908726e7f1eb2323"
     },
+    "ScarletChoir.fx": {
+      "source_sha256": "ed46468fff4817b2e5f0cd2ed13878482af575d80cb9ed58f41b3bd9a358f376",
+      "output_sha256": "eb77cca178285ab86c4e7f353f8c2fd682d2158b2f8b5040a985bb84b28aa951"
+    },
     "ScarletCluster.fx": {
       "source_sha256": "4f02e9b86d7bf77fdbf65431ce1d3e1ec949751552b5f067c6688db80edf5bdc",
       "output_sha256": "064f2124d4a40f0a0d2f9ef2725593cf6c64905a10d6009adcd5cba880c8e8d8"
