@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-22
+last_reviewed: 2026-09-25
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -24,6 +24,8 @@ related_docs:
 ## Current build
 
 Current source: **0.3.40 / protocol67**. Cathedral aligns ending sky/frost, BGM fade and Victory title/audio with whole-chain melting. Chorus presentation waits for the authoritative verdict; Spread is enlarged. P1 adds shuffled slash lattices around chorus windows; P2 alternates shifted diagonal/orthogonal grids outside slow worm passage. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns cadence and mechanics. Match peer builds for changed geometry/attack ownership; packet layouts/IDs are unchanged.
+
+The September25 Scarlet visual revision supersedes the rejected armor puppet: Thorn Choir retains its organic four-arm source art, with independently skinned joints, beat-driven preparation/release, luminous bone material, flowing wing/sleeve membranes and a vascular heart. The same source serves Act III, sacrificial return and Final limbs. Attack clocks, hit geometry, phase rules and packet contract are unchanged; native readability and peer visibility await owner playtest. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md#luminance-presentation-v2) owns the visual contract.
 
 Retained0.3.39 Scarlet Covenant tracks up to20 targets through beam completion, adapts to enemy width and concentrates size/damage against fewer targets; new casts overlap prior flight. Act changes dissolve/reconstitute bodies; Final re-summons and absorbs all three plus Vespera into a chest-orb giant; Victory projects an energy melt. Spread is larger. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns tuning and ceremony clocks. Its native companion payload and longer protected transitions are preserved.
 
@@ -49,6 +51,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.40 Choir organic-energy revision (September25):** native build/package, localization parse and compiled-shader hashes pass (0 errors;4 pre-existing nullable warnings). Offline FNA/D3D11 renders88 bright/dark, zoom1/.65, Reduced Effects, arms-only and dissolve frames plus180 fractional-motion frames from the linked production renderer; four-arm `Born/Fire/End` continuity probes pass. Package SHA256 `674d783ef77afdf92c2754aedb35728bfe0a7a4543b14e8b25d0892e5312cdd7`; local build record `20260925T090254218792Z`. Native load, overlapping attacks/markers, sacrifice/Final composition, remote peers and frame times are **not_run**, owner-owned. The2.96ms offline Draw+GPU-readback fixture sample is not in-game performance evidence. Review harness prepared by `choir_preview` (gpt-6-sol, medium); lead authored/revised the production material and rig and inspected the resulting frames.
 
 - **0.3.40 Azure lattice/verdicts:** [evidence](evidence/2026-09-22-azure-lattice-verdicts.json) records22 focused/356 total domain cases, compiled protocol67, native package/projectile ownership probes and300 linked-production GPU frames. User-owned / not_run: matching-peer verdict delivery/native damage, larger Spread overlap, lattice dodge difficulty at full worm speed, slow-transit exemption, complete melt→title/audio/background handoff, UI107%/zoom, Reduced Effects and frame times. Build/offline output is not a played encounter.
 
@@ -109,6 +113,8 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+For the Choir revision, start the installed package normally; another Build is unnecessary. Check Act III's alternating four-arm intake/release, heart/wing visibility without obscuring forecasts, then sacrificial return and Final's reused limbs. Actual remote rendering and frame-time cost remain unmeasured.
 
 After confirmed0.3.40 deployment, start normally without another Build + Reload. Use **Glacial Chime** for Cathedral: test Stack inside/outside at the deadline, wider Spread with peers, P1 chorus-bracketing grids and P2 shifted grids with clear slow passages, then melt before final title/sound/background handoff. Log analysis now includes each member's gather/nearest-peer distance and source damage budget. See the [focused smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance).
 

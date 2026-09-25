@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-22
+last_reviewed: 2026-09-25
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,10 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Choir organic energy direction — 2026-09-25 / 0.3.40
+
+Owner rejects the nine-part armor redesign and small attack-linked wiggle; the original summoned creature was preferable. Avatar reference illustrates dark negative space against unmistakable luminous anatomy, not a request to copy that Boss. Restore the original four-arm source and separate joint choreography, vascular heart, flowing energy sleeves/wings and real-motion trails. Preserve combat clocks/geometry; retire the rejected draft to the local asset archive. Actual compiled-material frame sequences, bright/dark and Reduced Effects reviews are separate from native playtest/remote/performance acceptance, which remain owner-owned. Current behavior belongs to the [Scarlet visual contract](../encounters/crimson-foundry/ENCOUNTER_SPEC.md#luminance-presentation-v2).
 
 ## Azure ending alignment and chorus lattice — 2026-09-22 / 0.3.39 → 0.3.40
 

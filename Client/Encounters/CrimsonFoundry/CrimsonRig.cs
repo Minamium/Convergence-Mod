@@ -19,7 +19,7 @@ internal static class CrimsonRig
     private static readonly Texture2D?[] effigies = new Texture2D?[3];
     private static readonly int[] partOrder = { 3, 4, 0, 1, 2 };
     private static readonly int[] singlePart = { 0 };
-    private static readonly int[] wings = { 1, 2 }, limbs = { 3, 4 };
+    private static readonly int[] wings = { 1, 2 };
     private const int Columns = 24, Rows = 32;
     private static readonly VertexPositionColorTexture[] mesh = new VertexPositionColorTexture[Columns * Rows * 6];
     private static readonly Rectangle[] poses = { new(20, 202, 335, 540), new(422, 202, 460, 540), new(890, 190, 487, 530), new(1398, 202, 355, 540) };
@@ -28,14 +28,16 @@ internal static class CrimsonRig
     {
         if (Main.dedServ) return;
         performer = LoadTexture("ScarletConjurer");
-        string[] names = { "EmberCrown", "SableMantle", "ThornChoir" };
-        for (int i = 0; i < 3; i++) effigies[i] = LoadTexture(names[i]);
+        string[] names = { "EmberCrown", "SableMantle" };
+        for (int i = 0; i < names.Length; i++) effigies[i] = LoadTexture(names[i]);
+        CrimsonChoirRig.Load();
         // Direct FNA effect construction belongs to drawing, not this loader hook.
     }
     private static Texture2D LoadTexture(string name) => ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/" + name, AssetRequestMode.ImmediateLoad).Value;
     internal static void Unload()
     {
         performer = null; Array.Clear(effigies);
+        CrimsonChoirRig.Unload();
         ScarletMaterials.Reset();
     }
     internal static (float Charge, float Recoil) Signal(CrimsonBoss boss, int source, float age)
@@ -157,7 +159,9 @@ internal static class CrimsonRig
     }
     internal static bool DrawEffigy(CrimsonEffigy effigy, SpriteBatch batch, Vector2 screen)
     {
-        if (effigy.State.Index >= 3 || effigies[effigy.State.Index] is not { } texture || !effigy.TryBoss(out var boss)) return false;
+        if (effigy.State.Index >= 3 || !effigy.TryBoss(out var boss)) return false;
+        Texture2D? texture = effigies[effigy.State.Index];
+        if (effigy.State.Index != 2 && texture is null) return false;
         float age = CrimsonVisuals.RenderAge(boss!), born = age - effigy.State.Born;
         // Final re-summoned sacrifices are one clock-driven composition. Do not
         // also draw their retained native actors at stale offstage positions.
@@ -166,7 +170,7 @@ internal static class CrimsonRig
             ? CrimsonEnsemble.Emergence(age - boss.State.PhaseStart, false) : CrimsonInvocation.Ease(born / 62);
         float snap = MathF.Exp(-Math.Max(0, born - 12) / 14);
         var signal = Signal(boss!, effigy.State.Index, age);
-        float size = effigy.State.Index switch { 0 => 350, 1 => 430, _ => 420 };
+        float size = effigy.State.Index switch { 0 => 350, 1 => 430, _ => 490 };
         float alpha = boss!.State.Presence(effigy.State.Index, age);
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat) alpha *= .35f;
         if (alpha <= .001f) return false;
@@ -174,16 +178,26 @@ internal static class CrimsonRig
         if (boss.State.Phase != 3 && CrimsonGesture.TryPose(boss, effigy.State.Index, age, out var pose))
         {
             at = CrimsonGestureVisuals.V(pose.Body(age));
-            if (pose.Technique == CrimsonTechnique.MantleRush && pose.Live(age) && !CrimsonVisuals.Reduced)
+            if (texture is not null && pose.Technique == CrimsonTechnique.MantleRush && pose.Live(age) && !CrimsonVisuals.Reduced)
                 for (int k = 3; k >= 1; k--)
                     Mesh(batch, texture, texture.Bounds, CrimsonGestureVisuals.V(pose.Body(age - k * .35f)) - screen,
                         texture.Size() * .5f, size / texture.Height, age, 14, signal.Charge, signal.Recoil,
                         new Color(142, 98, 159) * (alpha * .09f), effigy.NPC.spriteDirection < 0, effigy.NPC.rotation, true, effigy.State.Index);
         }
         float dissolving = effigy.State.Index == boss.State.Phase - 1 ? CrimsonEnsemble.RetreatDissolve(age - boss.State.PhaseStart) : 0;
+        if (effigy.State.Index == 2)
+        {
+            Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
+            int count = ChoirCues(boss, age, cues);
+            CrimsonChoirRig.Draw(batch, at, size * (.90f + appear * .1f), age,
+                signal.Charge, signal.Recoil, appear * alpha, effigy.NPC.spriteDirection < 0,
+                effigy.NPC.rotation + signal.Recoil * .045f, dissolving, cues: cues[..count]);
+            return false;
+        }
         ScarletArticulation.DrawSecondary(batch, effigy.State.Index, age, alpha * (1-dissolving));
-        Mesh(batch, texture, texture.Bounds, at - screen, texture.Size() * .5f,
-            size / texture.Height * (.90f + appear * .1f), age + effigy.State.Index * 100,
+        Texture2D bodyTexture = texture!;
+        Mesh(batch, bodyTexture, bodyTexture.Bounds, at - screen, bodyTexture.Size() * .5f,
+            size / bodyTexture.Height * (.90f + appear * .1f), age + effigy.State.Index * 100,
             14, signal.Charge, signal.Recoil, Color.White * (appear * alpha), effigy.NPC.spriteDirection < 0,
             effigy.NPC.rotation + signal.Recoil * .045f, true, effigy.State.Index, null, dissolving);
         if (effigy.State.Index == 0)
@@ -195,10 +209,33 @@ internal static class CrimsonRig
         }
         return false;
     }
+    private static int ChoirCues(CrimsonBoss boss, float age, Span<CrimsonChoirCue> cues)
+    {
+        int count = 0;
+        foreach (Projectile projectile in Main.ActiveProjectiles)
+        {
+            if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
+            var p = gesture.Plan;
+            if (p.Source != 2 || age < p.Born || age >= p.End) continue;
+            var cue = new CrimsonChoirCue(p.Born, p.Fire, p.End, p.Step % 4,
+                p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialGrid);
+            bool duplicate = false;
+            for (int i = 0; i < count; i++) if (cues[i] == cue) { duplicate = true; break; }
+            if (!duplicate && count < cues.Length) cues[count++] = cue;
+        }
+        return count;
+    }
     internal static void DrawApparition(SpriteBatch batch, int species, Vector2 center, float age, float reveal, float dissolve, float scale = .70f)
     {
-        if (effigies[species] is not { } texture || reveal <= 0 || dissolve >= 1) return;
-        float height = species == 0 ? 350 : 430;
+        if (reveal <= 0 || dissolve >= 1) return;
+        float height = species == 0 ? 350 : species == 2 ? 490 : 430;
+        if (species == 2)
+        {
+            CrimsonChoirRig.Draw(batch, center, height * scale, age + species * 37,
+                .7f, 0, reveal, false, dissolve: dissolve);
+            return;
+        }
+        if (effigies[species] is not { } texture) return;
         Mesh(batch, texture, texture.Bounds, center - Main.screenPosition, texture.Size()*.5f,
             height*scale/texture.Height, age+species*37, 18, .7f, 0, Color.White*reveal, false, 0, true, species, null, dissolve);
     }
@@ -210,7 +247,8 @@ internal static class CrimsonRig
         float size = .48f + .52f * emergence;
         float charge = .45f + .22f * MathF.Sin(age * .065f), recoil = MathF.Exp(-emergence * 8) * emergence * 3;
         Part(1, wings, 780 * size, new(0, -48 * release), -.035f, new Color(233, 163, 185));
-        Part(2, limbs, 650 * size, new(0, 8 + 28 * release), .065f, new Color(239, 158, 181));
+        CrimsonChoirRig.Draw(batch, center + new Vector2(0, 8 + 28 * release), 650 * size,
+            age + 74, charge, recoil, emergence * alpha, false, .065f, dissolve, melt, armsOnly: true);
         Part(0, singlePart, 475 * size, new(0, -10), -.025f, new Color(255, 194, 175));
         // The common material sphere is seated in the central body, not an
         // unrelated offset light. It remains attached while the body liquefies.

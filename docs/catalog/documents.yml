@@ -635,14 +635,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: b2fc7e11c97dd0a9a55a96a66a8eb54a989d5b2d1f0540a2f3a917c0cc6400ba
+  content_sha256: c20d687679e7a7d06ab0abce617eaa9c4275dd1090b396612fc83069613827e9
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-22'
+  last_reviewed: '2026-09-25'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -927,12 +927,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 45b81c3b7bc22113e8aeeeddaa2cacebe9f0cb6d85cc814c63fe1fdf7d81c01f
+  content_sha256: aee3eac6d23496dbecce589d591a4f7d37eac3d8745610409de376be275f3d71
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-22'
+  last_reviewed: '2026-09-25'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1326,12 +1326,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b26f6b1cac163f5abed02f4133ad88a9644208c7b755cc3d2d9e0be25e89d645
+  content_sha256: cb05cec7ef751063e8ddf53160f5b4899944a8926b8ad4ca43b39471490fdc3c
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-22'
+  last_reviewed: '2026-09-25'
   source_of_truth_for:
   - project.implementation_status
   aliases:

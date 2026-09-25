@@ -400,6 +400,22 @@ New original images use the built-in generator, exact model unknown. Full briefs
 
 September22 transmutation adds original directional red-energy streams in `TransfusionPass`; no sampled audio or foreign material. Current source/export identities remain in `compiled.json`.
 
+### ScarletChoir original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletChoir.fxc`
+- Asset ID: scarlet-choir-organic-energy-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletChoir.fx`; no third-party art or shader source copied
+- Tool/model/version: FXC compiler, options and hashes pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: five original passes for retained organic albedo, emissive anatomy, flowing wing/sleeve membranes, vascular heart and sparks; no bitmap modification
+- License and redistribution terms: original project asset under existing project terms; Luminance noise borrowed at runtime, never vendored
+- Required attribution: retain this provenance and source/export manifest
+- Reviewer and review date: Codex, 2026-09-25; linked-production FNA material sequences inspected; native visual acceptance remains owner-tested
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md` Luminance presentation section
+
 ### ScarletSurface original shader export — 2026-09-17
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSurface.fxc`
@@ -484,6 +500,8 @@ September22 transmutation adds original directional red-energy streams in `Trans
 - Prompt or brief location: the following final generation brief
 - Brief: Original tall faceless black/crimson shroud with uneven branch horns, four ivory claws, hollow torso/red heart and long tendrils. True transparency, no machinery, gore, text or HUD.
 - SHA256: `2d417b7c36b9ecc12ec3e6c64a9e8f4dfb3821fef43ae3f959c72bcbb652d282`
+
+September25 presentation revision: the `ThornChoir.png` bytes above remain unchanged. Original `ScarletChoir` shader/mesh code adds independently articulated four-arm anatomy and energy materials; Luminance noise is borrowed at runtime, not redistributed. The rejected nine-cell armor atlas and its provenance are preserved in the ignored local asset archive and are not packaged. No Avatar/WotG artwork or shader code is incorporated.
 
 - Runtime file: `Assets/Textures/CrimsonFoundry/CrimsonConductor.png`
 - Asset ID: crimson-invocation-crimsonconductor-0311
