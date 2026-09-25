@@ -46,6 +46,18 @@
       "source_sha256": "b569ef5eb648aabfb653e8e828ab771dba293ce55b5177eefb08fe336d801970",
       "output_sha256": "a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70"
     },
+    "ScarletApparitions.fx": {
+      "source_sha256": "5a36791f1c6f4409df7b8b0ea92f1fe5adad27dc453f900d384b0480e496829b",
+      "output_sha256": "60ca489a6b9ffbc6192bceebe0af1efe108aad89817a8b45605bb7814b81de18"
+    },
+    "ScarletAvatarAnatomy.fx": {
+      "source_sha256": "8f4cb8a21342b81ceda507d75b0c2913107cfbac2dc7902d2264c82f8220c89c",
+      "output_sha256": "99e6842658198d5183c070f5ac32f54060c28fd3dec330149f11b73916d15b9b"
+    },
+    "ScarletAvatarComposite.fx": {
+      "source_sha256": "31c61f24094a553852b5383f9c6412f18ab0d848ed7b322846ec2486d3496d0e",
+      "output_sha256": "9f15b25ac2aa1eb3c0b6c5fc75bc11298e4d653f021d2177b492a321cce8aaea"
+    },
     "ScarletBackdrop.fx": {
       "source_sha256": "ab810c34dda508df2d8f23b3bba37be316937803500811b7778599d87de63f16",
       "output_sha256": "8c6a64ddf9ad29cd2e2537aa19013587120c7340c6a1577c908726e7f1eb2323"

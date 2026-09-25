@@ -19,7 +19,6 @@ internal static class CrimsonRig
     private static readonly Texture2D?[] effigies = new Texture2D?[3];
     private static readonly int[] partOrder = { 3, 4, 0, 1, 2 };
     private static readonly int[] singlePart = { 0 };
-    private static readonly int[] wings = { 1, 2 };
     private const int Columns = 24, Rows = 32;
     private static readonly VertexPositionColorTexture[] mesh = new VertexPositionColorTexture[Columns * Rows * 6];
     private static readonly Rectangle[] poses = { new(20, 202, 335, 540), new(422, 202, 460, 540), new(890, 190, 487, 530), new(1398, 202, 355, 540) };
@@ -31,6 +30,7 @@ internal static class CrimsonRig
         string[] names = { "EmberCrown", "SableMantle" };
         for (int i = 0; i < names.Length; i++) effigies[i] = LoadTexture(names[i]);
         CrimsonChoirRig.Load();
+        ScarletApparitionRig.Load();
         // Direct FNA effect construction belongs to drawing, not this loader hook.
     }
     private static Texture2D LoadTexture(string name) => ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/" + name, AssetRequestMode.ImmediateLoad).Value;
@@ -38,6 +38,7 @@ internal static class CrimsonRig
     {
         performer = null; Array.Clear(effigies);
         CrimsonChoirRig.Unload();
+        ScarletApparitionRig.Unload();
         ScarletMaterials.Reset();
     }
     internal static (float Charge, float Recoil) Signal(CrimsonBoss boss, int source, float age)
@@ -194,29 +195,19 @@ internal static class CrimsonRig
                 effigy.NPC.rotation + signal.Recoil * .045f, dissolving, cues: cues[..count]);
             return false;
         }
-        ScarletArticulation.DrawSecondary(batch, effigy.State.Index, age, alpha * (1-dissolving));
-        Texture2D bodyTexture = texture!;
-        Mesh(batch, bodyTexture, bodyTexture.Bounds, at - screen, bodyTexture.Size() * .5f,
-            size / bodyTexture.Height * (.90f + appear * .1f), age + effigy.State.Index * 100,
-            14, signal.Charge, signal.Recoil, Color.White * (appear * alpha), effigy.NPC.spriteDirection < 0,
-            effigy.NPC.rotation + signal.Recoil * .045f, true, effigy.State.Index, null, dissolving);
-        if (effigy.State.Index == 0)
-        {
-            CrimsonEnergy.Begin();
-            CrimsonEnergy.AddCore(at + new Vector2(0, -18), 34 + signal.Charge * 20 + snap * 22, age,
-                signal.Charge, Math.Max(signal.Recoil, snap), appear * alpha * .66f, CrimsonVisuals.Reduced);
-            CrimsonEnergy.Draw(batch);
-        }
+        ScarletApparitionRig.Draw(batch, effigy.State.Index, at, size * (.90f + appear * .1f), age,
+            signal.Charge, signal.Recoil, appear * alpha, effigy.NPC.spriteDirection < 0,
+            effigy.NPC.rotation, dissolving);
         return false;
     }
-    private static int ChoirCues(CrimsonBoss boss, float age, Span<CrimsonChoirCue> cues)
+    internal static int ChoirCues(CrimsonBoss boss, float age, Span<CrimsonChoirCue> cues, bool final = false)
     {
         int count = 0;
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
             if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
             var p = gesture.Plan;
-            if (p.Source != 2 || age < p.Born || age >= p.End) continue;
+            if ((!final && p.Source != 2) || age < p.Born || age >= p.End) continue;
             var cue = new CrimsonChoirCue(p.Born, p.Fire, p.End, p.Step % 4,
                 p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialGrid);
             bool duplicate = false;
@@ -235,31 +226,11 @@ internal static class CrimsonRig
                 .7f, 0, reveal, false, dissolve: dissolve);
             return;
         }
-        if (effigies[species] is not { } texture) return;
-        Mesh(batch, texture, texture.Bounds, center - Main.screenPosition, texture.Size()*.5f,
-            height*scale/texture.Height, age+species*37, 18, .7f, 0, Color.White*reveal, false, 0, true, species, null, dissolve);
+        ScarletApparitionRig.Draw(batch,species,center,height*scale,age,.7f,0,reveal,dissolve:dissolve);
     }
     internal static void DrawEnsemble(SpriteBatch batch, Vector2 center, float age, float emergence, float alpha, float dissolve = 0, float melt = 0)
     {
-        // The three retained masks become a fourth silhouette: broad folded
-        // mantle, lagging thorn limbs, furnace crown. Not a resized whole PNG.
-        float release = CrimsonInvocation.Ease((emergence - .30f) / .48f);
-        float size = .48f + .52f * emergence;
-        float charge = .45f + .22f * MathF.Sin(age * .065f), recoil = MathF.Exp(-emergence * 8) * emergence * 3;
-        Part(1, wings, 780 * size, new(0, -48 * release), -.035f, new Color(233, 163, 185));
-        CrimsonChoirRig.Draw(batch, center + new Vector2(0, 8 + 28 * release), 650 * size,
-            age + 74, charge, recoil, emergence * alpha, false, .065f, dissolve, melt, armsOnly: true);
-        Part(0, singlePart, 475 * size, new(0, -10), -.025f, new Color(255, 194, 175));
-        // The common material sphere is seated in the central body, not an
-        // unrelated offset light. It remains attached while the body liquefies.
-        ScarletClusters.Orb(batch, center + new Vector2(0, -20 + melt * 100), (126 + charge * 14) * (1-melt*.55f),
-            age, emergence*alpha*(1-dissolve), charge, recoil);
-        void Part(int species, int[] parts, float height, Vector2 offset, float angle, Color tint)
-        {
-            if (effigies[species] is not { } texture) return;
-            Mesh(batch, texture, texture.Bounds, center + offset - Main.screenPosition, texture.Size() * .5f,
-                height / texture.Height, age + species * 37, 18, charge, recoil, tint * (emergence * alpha), false, angle, true, species, parts, dissolve, melt);
-        }
+        ScarletAvatarTarget.Draw(batch,center,age,emergence,alpha,dissolve,melt);
     }
     internal static void DrawPressure(SpriteBatch batch, Vector2 center, int source, float age, float charge, float recoil)
     {

@@ -12,7 +12,7 @@ internal enum CrimsonTechnique : byte
     ChoirThrust, ChoirHook, ChoirRend,
     VesperaOrbit, VesperaPetals,
     TrackingBeam, SideBeams, SpatialRift, SpatialGrid,
-    ClusterVolley // Append only; never renumber old IDs.
+    ClusterVolley, ChoirRakes // Append only; never renumber old IDs.
 }
 
 internal readonly record struct CrimsonPoint(float X, float Y)
@@ -37,7 +37,9 @@ internal readonly record struct CrimsonGesturePlan(
     int GroundX, int GroundY, int Damage, short TargetSlot = -1, Guid TargetConnection = default)
 {
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
-    internal bool Aimed => Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift;
+    internal bool Aimed => NeedsTargetIdentity(Technique);
+    internal static bool NeedsTargetIdentity(CrimsonTechnique technique)
+        => technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift;
     internal bool IsRift => Technique is CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid;
     internal bool Live(float age) => age >= Fire && age < End;
     internal bool MovesBody => Technique is CrimsonTechnique.CrownCrash or CrimsonTechnique.MantleRush;
@@ -100,7 +102,7 @@ internal readonly record struct CrimsonGesturePlan(
 internal static class CrimsonTechniqueGeometry
 {
     internal const int MaximumStrokes = 192;
-    internal static int Owner(CrimsonTechnique t) => t == CrimsonTechnique.SpatialGrid ? 2 : (int)t < 9 ? (int)t / 3 : 3;
+    internal static int Owner(CrimsonTechnique t) => t is CrimsonTechnique.SpatialGrid or CrimsonTechnique.ChoirRakes ? 2 : (int)t < 9 ? (int)t / 3 : 3;
     internal static CrimsonTechnique Select(int source, int serial)
     {
         if (source is < 0 or > 3 || serial < 0) throw new ArgumentOutOfRangeException();
@@ -177,6 +179,8 @@ internal static class CrimsonTechniqueGeometry
                 break;
             case CrimsonTechnique.SpatialGrid:
                 return CrimsonSpatialCuts.WriteGrid(p, age, destination, forecast);
+            case CrimsonTechnique.ChoirRakes:
+                return CrimsonChoirRakes.Write(p, age, destination, forecast);
             case CrimsonTechnique.ClusterVolley:
                 return CrimsonClusters.Write(p, age, destination, forecast);
             case CrimsonTechnique.CrownRain:

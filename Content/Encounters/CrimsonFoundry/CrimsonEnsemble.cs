@@ -39,7 +39,7 @@ internal static class CrimsonEnsemble
     internal static int NoteEnd(CrimsonTechnique technique, CrimsonRhythmHit hit) => technique switch
     {
         CrimsonTechnique.ClusterVolley => hit.Fire + CrimsonClusters.FlightTicks,
-        CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid => hit.Fire + CrimsonSpatialCuts.LiveTicks,
+        CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid or CrimsonTechnique.ChoirRakes => hit.Fire + CrimsonSpatialCuts.LiveTicks,
         _ => hit.End
     };
 }
