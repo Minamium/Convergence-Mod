@@ -49,7 +49,7 @@ internal static partial class Program
             for (float age = p.Fire; age < p.End; age += .25f)
             {
                 int count = CrimsonTechniqueGeometry.Write(p, age, strokes);
-                if ((p.Aimed || p.IsRift || p.Technique == CrimsonTechnique.ClusterVolley) && age == p.Fire) { AssertEqual(0, count, "zero-width ignition is harmless"); continue; }
+                if ((p.Aimed || p.IsRift || p.Technique is CrimsonTechnique.ClusterVolley or CrimsonTechnique.ChoirRakes) && age == p.Fire) { AssertEqual(0, count, "zero-width ignition is harmless"); continue; }
                 AssertEqual(true, count is > 0 and <= CrimsonTechniqueGeometry.MaximumStrokes, "bounded strokes");
                 foreach (var stroke in strokes[..count])
                 {
@@ -148,6 +148,10 @@ internal static partial class Program
             CheckRejected(p with { Fire = int.MinValue });
             CheckRejected(p with { Steps = 0 });
             CheckRejected(p with { Technique = (CrimsonTechnique)255 });
+            if (technique == CrimsonTechnique.ChoirRakes) {
+                CheckRejected(p with { TargetSlot = 0 });
+                CheckRejected(p with { TargetConnection = Guid.NewGuid() });
+            }
         }
         void CheckRejected(CrimsonGesturePlan p)
         {

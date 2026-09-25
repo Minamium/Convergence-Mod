@@ -26,10 +26,22 @@ internal static partial class Program
             AssertEqual(p.End,next.Hits[0].Warning,"no blank beat after beam tail");
             AssertEqual(p.End,p.Hits[4].End,"next bar starts without extra dead time");
         }
-        AssertEqual(CrimsonTechnique.SpatialRift,CrimsonChoreography.Technique(1,2,0),"Act II alternates spatial cuts");
-        AssertEqual(CrimsonTechnique.TrackingBeam,CrimsonChoreography.Technique(1,3,0),"Act II retains pursuit contrast");
-        AssertEqual(CrimsonTechnique.SideBeams,CrimsonChoreography.Technique(1,2,4),"every phrase closes with crossflow");
-        for(int i=0;i<4;i++) AssertEqual(CrimsonTechnique.SpatialGrid,CrimsonChoreography.Technique(2,2,i),"four offset cuts in Act III");
+        for(int phrase=1;phrase<=12;phrase++) for(int i=0;i<4;i++) {
+            AssertEqual(CrimsonTechnique.SpatialRift,CrimsonEnsemble.Technique(1,phrase,i,false),"every Act II basic note is a spatial cut");
+            AssertEqual(CrimsonTechnique.ChoirRakes,CrimsonEnsemble.Technique(2,phrase,i,false),"every Act III basic note is a Choir rake volley");
+        }
+        for(int phase=0;phase<3;phase++) for(int phrase=1;phrase<=12;phrase++)
+            AssertEqual(CrimsonTechnique.SideBeams,CrimsonEnsemble.Technique(phase,phrase,4,false),"all Act I–III phrases retain closing crossflow");
+        for(int phrase=1;phrase<=12;phrase++) {
+            var pair=CrimsonEnsemble.Pair(phrase);
+            for(int i=0;i<4;i++) {
+                AssertEqual(pair.First,CrimsonEnsemble.Technique(3,phrase,i,false),"Final first family unchanged");
+                AssertEqual(pair.Second,CrimsonEnsemble.Technique(3,phrase,i,true),"Final second family unchanged");
+            }
+            AssertEqual(CrimsonTechnique.ClusterVolley,CrimsonEnsemble.Technique(3,phrase,4,false),"Final closes with clusters");
+        }
+        var hit=CrimsonChoreography.Create(score,score.IntroTicks,1,false).Hits[0];
+        AssertEqual(hit.Fire+CrimsonSpatialCuts.LiveTicks,CrimsonEnsemble.NoteEnd(CrimsonTechnique.ChoirRakes,hit),"rakes keep the cut live window");
     }
     [DomainTest("Scarlet presentation opens from orb to girl before backdrop and summons")]
     private static void ScarletOpeningOrder()
@@ -84,6 +96,68 @@ internal static partial class Program
                 AssertEqual(true,vertical?Math.Abs(s.B.Y-s.A.Y)==f.Bottom-f.Top:Math.Abs(s.B.X-s.A.X)==f.Right-f.Left,"edge to edge");
             }
             AssertEqual(true,CrimsonSpatialCuts.Spacing-CrimsonSpatialCuts.Radius*2>42,"full player can leave the next line");
+        }
+    }
+    [DomainTest("Scarlet Choir rakes rotate clockwise, bow and hook within wide forecast corridors")]
+    private static void ScarletChoirRakes()
+    {
+        var p=TechniqueExample(CrimsonTechnique.ChoirRakes) with {End=612,LastEnd=633};
+        Span<CrimsonStroke> warning=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        Span<CrimsonStroke> live=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        AssertEqual(16,(int)CrimsonTechnique.ChoirRakes,"append-only technique ID");
+        AssertEqual(2,CrimsonTechniqueGeometry.Owner(CrimsonTechnique.ChoirRakes),"Choir owns rakes");
+        AssertEqual(false,p.Aimed,"rakes have no player target identity");
+        AssertEqual(true,CrimsonChoirRakes.Spacing-2*CrimsonChoirRakes.Radius>2*(42+CrimsonChoirRakes.Radius),"parallel corridors exceed two full player/capsule footprints");
+        for(int phrase=1;phrase<=6;phrase++) for(byte pulse=0;pulse<4;pulse++) {
+            var note=p with {Phrase=phrase,Pulse=pulse};
+            note.Validate();
+            int count=CrimsonTechniqueGeometry.Write(note,note.Fire,warning,true);
+            AssertEqual(CrimsonChoirRakes.MaximumStrokes,count,"all three full curves are forecast");
+            var f=note.Field;
+            var first=warning[0].A;
+            AssertEqual(true,pulse switch {
+                0=>first.Y<f.CenterY&&Math.Abs(first.Y-(f.Top+CrimsonChoirRakes.EdgeInset))<.01f,
+                1=>first.X>f.CenterX&&Math.Abs(first.X-(f.Right-CrimsonChoirRakes.EdgeInset))<.01f,
+                2=>first.Y>f.CenterY&&Math.Abs(first.Y-(f.Bottom-CrimsonChoirRakes.EdgeInset))<.01f,
+                _=>first.X<f.CenterX&&Math.Abs(first.X-(f.Left+CrimsonChoirRakes.EdgeInset))<.01f
+            },"clockwise edge entry");
+            var midpoint=warning[15].B;
+            var tip=warning[31].B;
+            var chord=CrimsonPoint.Lerp(first,tip,.5f);
+            AssertEqual(true,(midpoint-chord).LengthSquared>2500,"bowed path visibly departs from a straight beam");
+            AssertEqual(true,(warning[32].A-warning[0].A).LengthSquared>=CrimsonChoirRakes.Spacing*CrimsonChoirRakes.Spacing-.1f,"second claw keeps its lane");
+            AssertEqual(true,(warning[64].A-warning[32].A).LengthSquared>=CrimsonChoirRakes.Spacing*CrimsonChoirRakes.Spacing-.1f,"third claw keeps its lane");
+            foreach(var stroke in warning[..count]) {
+                foreach(var point in new[]{stroke.A,stroke.B})
+                    AssertEqual(true,point.X-stroke.Radius>=f.Left&&point.X+stroke.Radius<=f.Right
+                        &&point.Y-stroke.Radius>=f.Top&&point.Y+stroke.Radius<=f.Bottom,"forecast capsule contained in arena");
+            }
+            AssertEqual(0,CrimsonTechniqueGeometry.Write(note,note.Fire,live),"zero-width ignition");
+            for(float age=note.Fire+.25f;age<note.End;age+=.25f) {
+                int visible=CrimsonTechniqueGeometry.Write(note,age,live);
+                AssertEqual(true,visible>0&&visible<=count,$"bounded travelling extension age={age} visible={visible} forecast={count}");
+                foreach(var stroke in live[..visible]) {
+                    AssertEqual(true,stroke.Radius>0&&stroke.Radius<=CrimsonChoirRakes.Radius,"tapered live width");
+                    foreach(var point in new[]{stroke.A,stroke.B})
+                        AssertEqual(true,point.X-stroke.Radius>=f.Left&&point.X+stroke.Radius<=f.Right
+                            &&point.Y-stroke.Radius>=f.Top&&point.Y+stroke.Radius<=f.Bottom,"live capsule contained in arena");
+                }
+                if(phrase==1&&(age-note.Fire)%1==.25f) {
+                    int perCut=visible/CrimsonChoirRakes.Cuts;
+                    for(int cut=0;cut<CrimsonChoirRakes.Cuts;cut++) for(int segment=0;segment<perCut;segment++) {
+                        var stroke=live[cut*perCut+segment];
+                        var forecast=warning[cut*CrimsonChoirRakes.SegmentsPerCut+segment];
+                        var axis=stroke.B-stroke.A;
+                        var normal=new CrimsonPoint(-axis.Y,axis.X)*(1/MathF.Sqrt(axis.LengthSquared));
+                        var center=CrimsonPoint.Lerp(stroke.A,stroke.B,.5f);
+                        for(int side=-1;side<=1;side++) {
+                            var point=center+normal*(side*stroke.Radius);
+                            AssertEqual(true,CrimsonTechniqueGeometry.Intersects(forecast,point.X-1,point.Y-1,2,2),"full live sweep lies inside announced capsule");
+                        }
+                    }
+                }
+            }
+            AssertEqual(0,CrimsonTechniqueGeometry.Write(note,note.End,live),"exclusive live end");
         }
     }
     [DomainTest("Scarlet chorus result payload bounds and terminal monotonicity")]

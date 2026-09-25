@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-25",
+  "feature": "Distinct Scarlet apparitions, Act II slashes, Act III Choir rakes, offscreen Eidolon composition",
+  "version": "0.3.41",
+  "protocol": 68,
+  "base": "6ddde96",
+  "observed_playtest": {
+    "build": "0.3.40[da7bde08]",
+    "topology": "solo Host & Play",
+    "fight": "4bae6356-bbb8-4fc6-949b-a6c25aa39a3c",
+    "unlock": 1277,
+    "phase_starts": [0,3778,7457,11176],
+    "final_unlock": 11716,
+    "victory": 15325,
+    "cleaned": 15475,
+    "seconds_from_preparation": 255.4167,
+    "combat_seconds": 234.1333,
+    "final_seconds_after_unlock": 60.15,
+    "stack": {"success": 2,"failure": 1},
+    "spread": {"success": 3,"failure": 0,"note": "Solo does not exercise overlapping players."},
+    "physical_phrases": 49,
+    "completed_cycles": 4,
+    "sacrifices": 1,
+    "peak_five_second_hp_budget_dps_by_act": [59343,68644,39746,84789],
+    "sampled_damage_by_act": [600000,600000,600000,1199999],
+    "notes": "Final's last 1HP is consumed between progress samples. Long zero-DPS intervals align with cycle HP floors; no HP tuning inferred. Ordinary attacks remain damage-one rehearsal, so survival balance is not measured. No Convergence exception in the fight log. Client has an initial localhost connection refusal; separate server2 has EndOfStreamException in SubworldLibrary.LoadIntoSubworld/TagIO after this fight. Cause of that external exception remains unestablished; no unrelated fix applied.",
+    "input_sha256": {
+      "server.log": "12e3aaca8e38e06a2a160a149b1fb37cafe523682587c0de39b891b0964a685c",
+      "client.log": "522ccc7e0e375e1e008dde4a0495f437ce80abcb094dcba923ac557b6310f447"
+    },
+    "raw_logs": "External, not committed. No saves or personal settings included."
+  },
+  "scope": "Server-owned existing phrase scheduling; append-only ChoirRakes16 with shared pure forecast/live capsule paths. No change to Final deck, closing Act crossflow, HP, damage budgets, music, admission or other Raids. New native projectiles/resources are not introduced. Client-only anatomy/materials and two bounded Luminance targets never supply damage geometry.",
+  "api_evidence": {
+    "accessed": "2026-09-25",
+    "baseline": "Reuse docs/VERSION_MATRIX.md; Luminance1.0.14, pinned b2468dfd2f299597602dc6826af781d436c29a57; MIT dependency, no vendored source/assets.",
+    "sources": [
+      "https://raw.githubusercontent.com/LucilleKarma/Luminance/b2468dfd2f299597602dc6826af781d436c29a57/Core/Graphics/Automators/ManagedRenderTarget.cs",
+      "https://raw.githubusercontent.com/LucilleKarma/Luminance/b2468dfd2f299597602dc6826af781d436c29a57/Core/Graphics/Automators/RenderTargetManager.cs"
+    ],
+    "confirmed": "ManagedRenderTarget lazily creates through Target; Recreate reuses its registration. Dispose does not unregister. RenderTargetUpdateLoopEvent is invoked in OnPreDraw and the manager restores target bindings. The local handler additionally restores viewport/device state, releases surfaces on render-thread cleanup and never creates wrappers per frame/fight.",
+    "prior_art": "Reuse docs/research/WOTG_RAID_BENCHMARK.md Avatar body/rig/target findings. Independent geometry/shaders; no AoE assets/code copied or quality/performance parity claimed."
+  },
+  "verification": {
+    "focused_domain": "passed:58 Scarlet cases; all phrases, retained crossflow/Final, clockwise three-lane curves, field bounds, complete forecast coverage, zero-width ignition/end and bounded serialization",
+    "shader_exports": "passed:compile_shaders.py; actual .fxc/source hashes verified",
+    "gpu_preview": "passed:36 linked-production FNA stills plus36 synthetic fractional composition frames; Crown/Mantle idle/charge/release, Final summon/full/melt, full/reduced, bright/dark backgrounds and zoom. Actual body-to-emission-to-composite shader chain renders without blank passes or visible mesh seams. Final uses a null-boss preview facade, so accepted attack cues and native target lifecycle are not covered. Melt reaches viewport edges at zoom.62 and is intact at.45; no target crop identified.",
+    "static_domain_codec": "passed:repository/catalog/YAML checks;357 deterministic domain cases;compiled protocol68 with334 round-trips and54 malformed/truncated rejections;git diff --check",
+    "native_build": "passed:0 errors and4 pre-existing nullable warnings;26 Hjson files parsed by installed runtime;normal Mods profile installed with previous package backed up;solo admission enabled",
+    "package_sha256": "4da70bae3a3e43b049d559c6d95b6fbed143aa20c9bcadee4c27f5724ab64c55",
+    "local_build_record": "20260925T095000941643Z; base6ddde96 plus recorded dirty source manifest; five pre-existing English localization edits retained. Final evidence-only updates do not change runtime inputs.",
+    "not_run": [
+      "Native load and complete Scarlet fight with the new three bodies",
+      "Act III fairness and forecast/body/chorus overlap at actual player speeds",
+      "Matching-peer new technique and visual timing",
+      "Target reset after world exit, resize/quality switch, retry and Mod reload",
+      "In-game frame times and subjective AoE-level visual acceptance"
+    ]
+  }
+}

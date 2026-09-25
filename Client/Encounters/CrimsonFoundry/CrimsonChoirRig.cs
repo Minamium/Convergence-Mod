@@ -33,14 +33,15 @@ internal static class CrimsonChoirRig
 
     internal static void Draw(SpriteBatch batch, Vector2 center, float height, float age, float charge,
         float recoil, float alpha, bool flipped, float rotation = 0, float dissolve = 0,
-        float melt = 0, bool armsOnly = false, ReadOnlySpan<CrimsonChoirCue> cues = default)
+        float melt = 0, bool armsOnly = false, ReadOnlySpan<CrimsonChoirCue> cues = default,
+        Matrix? projection = null, Vector2? screenOrigin = null)
     {
         if (Main.dedServ || body is not { } texture || alpha <= .001f || height <= 0 || dissolve >= 1) return;
         bool reduced = CrimsonVisuals.Reduced;
         float scale = height / CrimsonChoirMotion.Canvas;
         float bodyAngle = rotation + MathF.Sin(age * .014f) * .026f;
         float exposure = reduced ? .52f : 1;
-        Vector2 root = center - Main.screenPosition + new Vector2(0, MathF.Sin(age * .027f) * 3 + melt * 150 * scale);
+        Vector2 root = center - (screenOrigin ?? Main.screenPosition) + new Vector2(0, MathF.Sin(age * .027f) * 3 + melt * 150 * scale);
         float power = 0, burst = 0;
         for (int i = 0; i < 4; i++)
         {
@@ -51,7 +52,7 @@ internal static class CrimsonChoirRig
         Vector2 heart = CrimsonChoirMotion.Heart + new Vector2(MathF.Sin(age * .022f) * 9, MathF.Sin(age * .034f) * 8);
         var shader = ShaderManager.GetShader("Convergence.ScarletChoir");
         using var scope = new WorldGraphicsScope(batch);
-        shader.TrySetParameter("uWorldViewProjection", ScarletMaterials.WorldMatrix);
+        shader.TrySetParameter("uWorldViewProjection", projection ?? ScarletMaterials.WorldMatrix);
         shader.TrySetParameter("clock", age / 60);
         shader.TrySetParameter("signal", new Vector4(power, burst, alpha, exposure));
         shader.TrySetParameter("ceremony", new Vector2(dissolve, melt));

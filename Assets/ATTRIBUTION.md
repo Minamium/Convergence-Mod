@@ -400,6 +400,51 @@ New original images use the built-in generator, exact model unknown. Full briefs
 
 September22 transmutation adds original directional red-energy streams in `TransfusionPass`; no sampled audio or foreign material. Current source/export identities remain in `compiled.json`.
 
+### ScarletApparitions original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletApparitions.fxc`
+- Asset ID: scarlet-apparitions-energy-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: adjacent `ScarletApparitions.fx`; no third-party code/art copied
+- Tool/model/version: FXC/options/source-export hashes in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: flowing emissive organic skin, Crown furnace jets and Mantle hook residues; retained original PNGs
+- License and redistribution terms: original project asset under existing project terms; installed Luminance noise borrowed at runtime
+- Required attribution: retain provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-25; linked-production GPU frames inspected; native acceptance pending
+
+### ScarletAvatarAnatomy original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletAvatarAnatomy.fxc`
+- Asset ID: scarlet-avatar-anatomy-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: adjacent `ScarletAvatarAnatomy.fx`; independent equations, no external code/art
+- Tool/model/version: FXC/options/source-export hashes in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: turbulent nucleus, arterial ribs, flowing organic support tendrils, local shadow shroud and sparks
+- License and redistribution terms: original project asset under existing project terms; installed Luminance noise borrowed at runtime
+- Required attribution: retain provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-25; actual compiled GPU frames inspected; native acceptance pending
+
+### ScarletAvatarComposite original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletAvatarComposite.fxc`
+- Asset ID: scarlet-avatar-composite-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: adjacent `ScarletAvatarComposite.fx`; independent implementation informed by separated Avatar rendering in [benchmark](../docs/research/WOTG_RAID_BENCHMARK.md), no copied source/assets
+- Tool/model/version: FXC/options/source-export hashes in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: local emission extraction/blur, body composite and restrained material distortion; not a global postprocess
+- License and redistribution terms: original project asset under existing project terms; Luminance dependency resources are not redistributed
+- Required attribution: retain provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-25; actual body/extraction/composite GPU passes inspected; native acceptance pending
+
 ### ScarletChoir original shader export — 2026-09-25
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletChoir.fxc`

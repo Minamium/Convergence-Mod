@@ -361,14 +361,16 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             var playerCenter = Main.player[aimed.Slot].Center;
             var aim = CrimsonTechniqueGeometry.Clamp(field, new(playerCenter.X, playerCenter.Y), 100);
             var technique = CrimsonEnsemble.Technique(phase, serial, note, i >= rhythm.Hits.Count);
+            if (technique == CrimsonTechnique.ChoirRakes) aim = new(field.CenterX, field.CenterY);
+            bool needsTargetIdentity = CrimsonGesturePlan.NeedsTargetIdentity(technique);
             int end = CrimsonEnsemble.NoteEnd(technique, hit);
             plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, (byte)i, (byte)source,
                 technique, (byte)steps[source]++, (byte)counts[source], hit.Accent,
                 begins[source], musicStart + hit.Warning, musicStart + hit.Fire, musicStart + end,
                 first[source], last[source], from[source], staging[source], aim,
                 (int)ground.X, (int)ground.Y, CrimsonPlaytestTuning.AttackDamage,
-                technique is CrimsonTechnique.SpatialGrid or CrimsonTechnique.ClusterVolley ? (short)-1 : aimed.Slot,
-                technique is CrimsonTechnique.SpatialGrid or CrimsonTechnique.ClusterVolley ? Guid.Empty : aimed.Connection);
+                needsTargetIdentity ? aimed.Slot : (short)-1,
+                needsTargetIdentity ? aimed.Connection : Guid.Empty);
             plans[i].Validate();
         }
         foreach (var plan in plans)

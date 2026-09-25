@@ -40,7 +40,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
                 string asset = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley ? impact ? "WideFire" : "WideCharge"
-                    : p.IsRift ? impact ? "ChargeRush" : "ChargeLock"
+                    : p.IsRift || p.Technique == CrimsonTechnique.ChoirRakes ? impact ? "ChargeRush" : "ChargeLock"
                     : impact ? "PortalFire" : "ChargeLock";
                 if (voices.Count < 24)
                 {
@@ -118,7 +118,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 {
                     int forecastCount = CrimsonTechniqueGeometry.Write(p, p.Fire, strokes, true);
                     ScarletMaterials.Strokes(strokes[..forecastCount], p.Source, age, guide, true,
-                        p.Technique == CrimsonTechnique.ChoirRend, 0,
+                        p.Technique is CrimsonTechnique.ChoirRend or CrimsonTechnique.ChoirRakes, 0,
                         Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire);
                 }
                 if (warning)
@@ -130,7 +130,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 float sample = ScarletGesturePresentation.SampleAge(p, age);
                 int count = CrimsonTechniqueGeometry.Write(p, sample, strokes, warning);
                 ScarletMaterials.Strokes(strokes[..count], p.Source, age, alpha, warning,
-                    p.Technique == CrimsonTechnique.ChoirRend, warning ? 0 : (1 + p.Accent * .35f) * MathF.Exp(-(age - p.Fire) / 5),
+                    p.Technique is CrimsonTechnique.ChoirRend or CrimsonTechnique.ChoirRakes, warning ? 0 : (1 + p.Accent * .35f) * MathF.Exp(-(age - p.Fire) / 5),
                     Math.Clamp((age - p.Born) / (p.Fire - p.Born), 0, 1), age - p.Fire,
                     p.Technique == CrimsonTechnique.CrownRain);
             }
