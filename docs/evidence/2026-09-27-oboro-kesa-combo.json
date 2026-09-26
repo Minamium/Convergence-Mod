@@ -1,0 +1,82 @@
+{
+  "date": "2026-09-27",
+  "version": "0.3.47",
+  "protocol": 71,
+  "branch": "fix/oboro-kesa-combo",
+  "integration_base": "502e551",
+  "build_commit": "baa5b1bb957f070007acf18dca9950909b0258f4",
+  "scope": "Owner sketch: downward overhead cut, smaller reverse cut, large finisher; 60 to70 base ticks, weapon visible only during accepted attacks. Damage/drop/buffs/reach unchanged; DPS not claimed unchanged.",
+  "environment_reference": "docs/evidence/2026-09-19-oboro-held.json",
+  "checks": {
+    "focused_domain": {
+      "status": "passed",
+      "cases": 32
+    },
+    "native_build": {
+      "status": "passed",
+      "record": ".local/builds/20260926T182846151303Z/record.json",
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "source_changed_during_build": false,
+      "package_sha256": "0a67a65a2394c67a41ae8b2962c612d47daf29f96e92ac3e43fc961c985f39de",
+      "output": "isolated feature profile"
+    },
+    "exact_package": {
+      "status": "passed",
+      "assembly_sha256": "a703c5dd811dd5b6fbcf5014e27d7d6989a5cb4a362bbb086b5cee5efe1f2237",
+      "native_hand_basis_samples": 584,
+      "metal_hand_comparisons": 984,
+      "spectral_handoff_max_gap_px": 8.21988,
+      "scope": "Eight installed loader types including saved item identity, harmless holdout binding/generation/cleanup, native hand/wrist/gravity, DoT and bounded weapon codec."
+    },
+    "compiled_codec": {
+      "status": "passed",
+      "protocol": 71,
+      "round_trips": 334,
+      "malformed_rejections": 54
+    },
+    "presentation": {
+      "status": "offline_frames_inspected",
+      "frames": 888,
+      "scope": "Linked production renderer and actual compiled OboroMoonArc material on FNA D3D11; idle, all cuts, handoffs, loop, release; both facings, light/dark, Reduced/full; SpriteBatch restoration. Native player is replaced by an arm diagram; Luminance lookup/parameter wrapper is a fixture seam.",
+      "command": "pwsh -File tools/preview-oboro-motion.ps1 -TModLoaderPath <installed-tml> -OutputDirectory .local/oboro-kesa-preview",
+      "reused_after_merge": "Affected renderer/material/curves unchanged by upstream integration."
+    },
+    "repository": {
+      "status": "passed",
+      "catalog_documents": 82,
+      "policy_files": 1055,
+      "yaml_files": 12,
+      "domain_cases": 372,
+      "domain_failures": 0,
+      "codec_round_trips": 334,
+      "malformed_rejections": 54
+    }
+  },
+  "owner_reference": {
+    "image": "武器修正案.png",
+    "sha256": "76674fe7a85c3b0e01d9ee8d419a7a9eaa9f03cd256f31166e3fe9dad2f9d4b2",
+    "prior_clip_observations": "docs/research/2026-09-16-oboro.md"
+  },
+  "delegation": {
+    "worker": "/root/oboro_attack_presentation",
+    "model": "gpt-6-sol",
+    "effort": "medium",
+    "scope": "Attack-only client sword/arm display, wrist signs, crescent contrast and dynamic offline preview timeline.",
+    "outcome": "Integrated after parent diff review, shared curves/tests and actual GPU/package checks; no material rework."
+  },
+  "gameplay": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "SP and matching remote client",
+      "overhead-return-finisher feel",
+      "native arms/armor/mount drawing",
+      "idle invisibility, hold/release/restart",
+      "high attack speed and Reduced Effects"
+    ]
+  },
+  "deployment": {
+    "status": "not_installed",
+    "reason": "Current PR requires administrator-approved main integration; prior PR74 permission was specific to that revision."
+  }
+}
