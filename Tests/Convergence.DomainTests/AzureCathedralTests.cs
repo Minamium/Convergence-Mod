@@ -156,7 +156,7 @@ internal static partial class Program
             AssertEqual(true,d.Mark(!first),"other actor can die later");AssertEqual(true,d.Girl && d.Worm,"both required to win");
         }
     }
-    [DomainTest("Azure chorus resolves living announced members only and solo is playable")]
+    [DomainTest("Azure chorus damages standing members with frozen Stack requirement and solo is playable")]
     private static void AzureChorusDamage()
     {
         var zero=System.Numerics.Vector2.Zero;
@@ -164,7 +164,7 @@ internal static partial class Program
         var stack=AzureChorusRules.Resolve(AzureChorusKind.Stack,zero,points,7,7);
         AssertEqual(300,stack[0],"one third missing");AssertEqual(300,stack[1],"all living share failure");
         var death=AzureChorusRules.Resolve(AzureChorusKind.Stack,zero,points,7,5);
-        AssertEqual(0,death[0],"dead player not required");AssertEqual(0,death[1],"dead not damaged");
+        AssertEqual(300,death[0],"missing member remains required");AssertEqual(0,death[1],"downed or dead not damaged");
         var spread=AzureChorusRules.Resolve(AzureChorusKind.Spread,zero,points,7,7);
         AssertEqual(900,spread[0],"overlapping first");AssertEqual(0,spread[1],"isolated safe");AssertEqual(900,spread[2],"overlapping second");
         foreach(var kind in new[]{AzureChorusKind.Stack,AzureChorusKind.Spread})

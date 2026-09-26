@@ -14,8 +14,9 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.AzureCathedral;
 
-internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
+internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler, IEncounterRecoveryClientActions
 {
+    void IEncounterRecoveryClientActions.RequestReviveNearest() => RequestRecovery(revive: true);
     private static uint nonce;
     private static AzureState replica;
     private static short replicaActor=-1;
@@ -37,6 +38,48 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
         }
     }
     internal static void Log(string text) => global::Convergence.ConvergenceMod.Instance.Logger.Info("AzureCathedral " + text);
+    internal static void RequestRecovery(bool revive)
+    {
+        var actor = Boss;
+        if (actor is null || !actor.Fresh || actor.State.Stage is not (AzureStage.Countdown or AzureStage.Performance))
+        { if (revive) ShowRecovery(AzureRecoveryReply.Invalid); return; }
+        var member = Array.Find(actor.State.Members, m => m.Slot == Main.myPlayer && !m.Out);
+        if (member.Connection == Guid.Empty || member.Recovery.Revision == 0) return;
+        uint id = ++nonce; if (id == 0) id = ++nonce;
+        var request = new AzureRecoveryRequest(member.Connection, id, member.Recovery.Revision);
+        if (Main.netMode == NetmodeID.SinglePlayer)
+        {
+            bool accepted = actor.Runtime?.RecoveryRequest(Main.myPlayer, request, revive) == true;
+            if (!accepted && revive) ShowRecovery(AzureRecoveryReply.Invalid);
+            return;
+        }
+        if (Main.netMode != NetmodeID.MultiplayerClient) return;
+        // Native held-slot/position/HP messages precede the bounded request on
+        // the same connection. No client-supplied target, anchor or heal amount.
+        if (revive) NetMessage.SendData(MessageID.SyncEquipment, number: Main.myPlayer, number2: Main.LocalPlayer.selectedItem);
+        NetMessage.SendData(MessageID.PlayerControls, number: Main.myPlayer);
+        if (!revive) NetMessage.SendData(MessageID.PlayerLifeMana, number: Main.myPlayer);
+        var s = Snapshot; var packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
+        EncounterRouteCodec.WriteHeader(packet, new(EncounterProtocol.CurrentVersion,
+            revive ? EncounterPacketType.RequestReviveNearest : EncounterPacketType.RequestRaidHurtResult,
+            s.EncounterSequence, s.FightId, s.Revision), AzureDefinition.EncounterKey);
+        request.Write(packet); packet.Send();
+    }
+    internal static void RecoveryReply(int sender, AzureRecoveryReply reply)
+    {
+        Log($"event=ReviveRequest fight={Snapshot.FightId.Value} sender={sender} result={reply}");
+        if (Main.netMode == NetmodeID.SinglePlayer) { ShowRecovery(reply); return; }
+        if (Main.netMode != NetmodeID.Server) return;
+        var s = Snapshot; var packet = global::Convergence.ConvergenceMod.Instance.GetPacket();
+        EncounterRouteCodec.WriteHeader(packet, new(EncounterProtocol.CurrentVersion, EncounterPacketType.ValidationResult,
+            s.EncounterSequence, s.FightId, s.Revision), AzureDefinition.EncounterKey);
+        packet.Write(reply == AzureRecoveryReply.Revived); packet.Write((byte)reply); packet.Send(sender);
+    }
+    private static void ShowRecovery(AzureRecoveryReply reply)
+    {
+        if (reply is AzureRecoveryReply.None or AzureRecoveryReply.Revived) return;
+        Main.NewText(Terraria.Localization.Language.GetTextValue("Mods.Convergence.AzureRecovery." + reply), 170, 225, 250);
+    }
     internal static void Summon(int tileX, int tileY)
     {
         uint id = ++nonce; if (id == 0) id = ++nonce;
@@ -84,7 +127,7 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
             bool accepted = Start(sender, id, new TilePoint(x, y));
             var response = global::Convergence.ConvergenceMod.Instance.GetPacket();
             EncounterRouteCodec.WriteHeader(response, new(EncounterProtocol.CurrentVersion, EncounterPacketType.ValidationResult, 0, FightId.None, 0), AzureDefinition.EncounterKey);
-            response.Write(accepted); response.Send(sender);
+            response.Write(accepted); response.Write((byte)AzureRecoveryReply.None); response.Send(sender);
         }
         else if (header.PacketType is EncounterPacketType.RequestSetReady or EncounterPacketType.RequestCancel)
         {
@@ -97,11 +140,27 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
             connection.LastNonce = id; connection.NextRequest = Main.GameUpdateCount + 6;
             if (Boss?.Runtime?.Request(sender, new Guid(token), ready, header.PacketType == EncounterPacketType.RequestCancel) != true) return false;
         }
+        else if (header.PacketType is EncounterPacketType.RequestReviveNearest or EncounterPacketType.RequestRaidHurtResult)
+        {
+            var request = AzureRecoveryRequest.Read(reader);
+            if (Main.netMode != NetmodeID.Server || sender < 0 || sender >= Main.maxPlayers
+                || header.FightId != Snapshot.FightId || header.EncounterSequence != Snapshot.EncounterSequence
+                || header.Revision > Snapshot.Revision) return false;
+            bool revive = header.PacketType == EncounterPacketType.RequestReviveNearest;
+            bool accepted = Boss?.Runtime?.RecoveryRequest(sender, request, revive) == true;
+            if (!accepted && revive) RecoveryReply(sender, AzureRecoveryReply.Invalid);
+            if (!accepted) { failureCode = "azure.recovery_request_rejected"; return false; }
+        }
         else if (header.PacketType == EncounterPacketType.ValidationResult)
         {
-            bool accepted = AzureState.Presence(reader);
-            if (Main.netMode != NetmodeID.MultiplayerClient) return false;
-            if (!accepted) Main.NewText(Terraria.Localization.Language.GetTextValue("Mods.Convergence.AzureCathedral.Rejected"));
+            bool accepted = AzureState.Presence(reader); var reply = (AzureRecoveryReply)reader.ReadByte();
+            if (Main.netMode != NetmodeID.MultiplayerClient || !Enum.IsDefined(reply)) return false;
+            if (reply != AzureRecoveryReply.None)
+            {
+                if (header.FightId != Snapshot.FightId || header.EncounterSequence != Snapshot.EncounterSequence) return false;
+                ShowRecovery(reply);
+            }
+            else if (!accepted) Main.NewText(Terraria.Localization.Language.GetTextValue("Mods.Convergence.AzureCathedral.Rejected"));
         }
         else if (header.PacketType == EncounterPacketType.Snapshot)
         {
@@ -116,7 +175,8 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
                 AzureDefinition.EncounterKey, lifecycle, header.Revision, tick, entered, active,
                 reason == EncounterEndReason.None ? EncounterTerminationDescriptor.None : AzureTermination.End(reason)));
             if(accepted && projection is { } next && (replica.Fight!=next.Fight || next.CanReplace(replica)))
-            {replica=next;replicaActor=actor;replicaAt=Main.GameUpdateCount;}
+            {replica=next;replicaActor=actor;replicaAt=Main.GameUpdateCount;AzureRecoveryPlayer.Apply(next);}
+            if (accepted && lifecycle == EncounterLifecycle.Cleanup) AzureRecoveryPlayer.ClearFight(header.FightId.Value);
         }
         else return false;
         failureCode = string.Empty; return true;
@@ -134,6 +194,6 @@ internal sealed class AzurePackets : ModSystem, IEncounterPacketHandler
         packet.Write((short)(boss?.NPC.whoAmI??-1));(boss?.State??default).WriteEnvelope(packet);
         packet.Send(toClient);
     }
-    public void ApplyIdleSnapshot(in EncounterSnapshot snapshot) {replica=default;replicaActor=-1;replicaAt=0;}
-    public override void ClearWorld() {nonce=0;replica=default;replicaActor=-1;replicaAt=0;}
+    public void ApplyIdleSnapshot(in EncounterSnapshot snapshot) {AzureRecoveryPlayer.ClearAll();replica=default;replicaActor=-1;replicaAt=0;}
+    public override void ClearWorld() {AzureRecoveryPlayer.ClearAll();nonce=0;replica=default;replicaActor=-1;replicaAt=0;}
 }

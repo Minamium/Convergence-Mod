@@ -106,13 +106,13 @@ documents:
 - doc_id: adr.0028
   path: docs/adr/0028-azure-cathedral-native-actors.md
   title: 'ADR-0028: Azure Cathedral native actors and hazards'
-  content_sha256: f563bbf0569e9ad8e3c9990bb683f7ab11b53c0713d1343f109e82f918285dea
+  content_sha256: 5822ef4d8304d4453be5f06890a8a6818044e88a42d79538bf86d5607ecc2f0a
   document_type: adr
   status: accepted
   owners:
   - architecture
   - gameplay
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - authority.azure_cathedral
   aliases: []
@@ -611,14 +611,14 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: f59c8466164da853321bb3cf2516a42703d99755721ebaaa25a79807a2d118d1
+  content_sha256: b7e2e5b59939285a76286b691b519fccc02af8f9dfba7f318d9abba48302cfcf
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-26'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - encounter.azure_cathedral.experience
   - encounter.azure_cathedral.presentation
@@ -927,12 +927,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 6671eaa2740c57aacf4b109189842c1ca394a676d1fd2f90c28ec67efca21a67
+  content_sha256: 0367ff632040229d2ce60d629bc2535108ef3d01388299dccecc53b8c3ffd19c
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-26'
+  last_reviewed: '2026-09-27'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1326,12 +1326,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: beae41ba5f6c4454ab6f2aea515b6771189e5d07cd5b1f6c1f76208b6b0e2498
+  content_sha256: bac28ce63804122429d69d54de4f54ea95bea3e0bd527270ad5e5d35f01a3bf3
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-26'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - project.implementation_status
   aliases:

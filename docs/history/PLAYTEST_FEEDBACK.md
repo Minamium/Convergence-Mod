@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-26
+last_reviewed: 2026-09-27
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,10 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Azure multiplayer recovery/debug damage — 2026-09-26 / 0.3.43 → 0.3.44
+
+Owner reports normal death instead of Down, excessive damage and suspected God Mode/chorus failure; explicitly requests Cathedral Down/revive and temporary1damage. The two-player log has one battle Defeat and one Victory/cleanup (78.82s after unlock, Fury15.60s). One Stack resolves successfully for both members; Liora dies55ticks before the first Spread announcement, so the log does not show a failed Spread or prove a God Mode bug. An earlier one-member preparation ends ActorMissing before combat; that record alone does not isolate the missing actor/pedestal condition. Source confirms Cathedral never had a recovery adapter. Add exact-Fight native-floor Down, reusable instant ally recovery/60s recipient lockout, all-Down defeat and1damage delivery without changing God Mode, verdicts or other Raids. Native package/API and pure contracts are automated; owner multiplayer recovery/chorus acceptance remains not_run. Raw logs stay local/ignored; current rules live in the [Azure spec](../encounters/azure-cathedral/ENCOUNTER_SPEC.md#start-ownership-and-recovery).
 
 ## Choir organic energy direction — 2026-09-25 / 0.3.40
 

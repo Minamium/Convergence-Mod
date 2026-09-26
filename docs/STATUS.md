@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-26
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.43 / protocol68**. Cathedral fixes the intro's delayed invisible body/tail, adapting recent Scarlet material techniques into flowing glass armor, joint-attached frost fins and Liora's native-pixel skirt/blade refraction. Seven original ice/glass accents supplement the existing pressure sounds. Gameplay, HP, attack/ceremony clocks, protocol and music are unchanged; the [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md#presentation) owns the presentation and [revision evidence](evidence/2026-09-26-azure-refraction-entrance.json) separates offline/build checks from owner playtesting. Installation identity belongs to the source-identified build record and task handoff, not a native acceptance claim.
+Current source: **0.3.44 / protocol69**. Cathedral now has native-floor Down and instant reusable ally recovery,60-second recipient lockout, all-Down defeat and exact-Fight reset. All positive Cathedral damage is temporarily capped at1 for owner debugging; successful chorus remains0, God Mode/native hooks and other Raids are unchanged. The [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md#start-ownership-and-recovery) owns gameplay and the [ADR follow-up](adr/0028-azure-cathedral-native-actors.md#2026-09-27-native-downrecovery-adapter-protocol69) owns the appended recovery projection/request boundary. Matching peers must update together. Installation identity belongs to the source-identified build record, not a native playtest claim.
+
+Retained0.3.43 Cathedral presentation: full-chain intro visibility, flowing armor/frost fins, native-pixel Liora skirt/blade refraction and seven original ice/glass accents. [Prior evidence](evidence/2026-09-26-azure-refraction-entrance.json) retains its unplayed visual/audio acceptance separately from recovery work.
 
 Retained0.3.42 Oboro: a132px physical sword remains attached to an articulated native hand; unchanged560px attack reach uses an original Luminance spectral crescent. This addresses the owner's rejected0.3.34 oversized rotating blade; subjective acceptance remains pending. Gameplay,18/16/26F clocks, hit windows, damage, buffs and drop are unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧の刀と霊刃の分離--2026-09-21) owns that presentation.
 
@@ -55,6 +57,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.44 Azure recovery:** native package compiles with0errors/4existing nullable warnings; installed `HurtModifiers` verifies1damage ceilings for packaged attack/contact/verdict hooks and validates the new player/buff types. Domain/codec checks cover bounded health/request projection, stale health generations,1HP admission,1–8-member instant recovery, lockout and exact cleanup. Actual matching-peer Down/kit/all-Down/retry/God Mode interactions remain owner-owned `not_run`; see the [focused smoke](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance). Sol `azure_debug_damage` (gpt-6-sol, medium) implemented scoped damage mapping and eight-member service tests; lead added runtime/wire/player integration and fixed the review's1HP-admission edge. The [playtest ledger](history/PLAYTEST_FEEDBACK.md#azure-multiplayer-recoverydebug-damage--2026-09-26--0343--0344) distinguishes observed0.3.43 outcomes from this new implementation.
 
 - **0.3.43 Azure refraction/audio:** [evidence](evidence/2026-09-26-azure-refraction-entrance.json) records reproduced intro visibility, actual compiled-material frame review, ice/glass PCM checks and the source-identified native build. User-owned / not_run: actual entrance/armor/skirt/blade visibility, simultaneous attacks, in-game audio balance, matching peers, UI107%/zoom/Reduced Effects and frame times. No gameplay rule/codec changed. Sol `liora_refraction` (gpt-6-sol, medium) implemented the bounded Liora and audio slices; lead added explicit draw state, corrected native sword anchors/premultiplied alpha, shaped the veil and adjusted audio gain while implementing the worm and integration.
 
@@ -124,7 +128,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Next change
 
-Cathedral: after the0.3.43 integrated package is installed, start/reload normally; no second Build is needed. Observe the full chain just after arrival, armor/hem/blade flow and ice/glass sound balance with combat/BGM, then capture/melt and retry. The [focused smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance) retains matching-peer and accessibility cases without requiring unrelated full matrices.
+Cathedral: after the0.3.44 integrated package is installed, start/reload normally; no second Build is needed. With matching peers and God Mode off, check1damage, midair Down→kit recovery,60-second recipient lockout, all-Down defeat and retry with no frozen controls. Keep Liora alive to observe Spread. Existing visual/audio/accessibility checks remain separate in the [focused smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance); do not infer they passed from compilation.
 
 Oboro's retained owner check: compare the constant-size sword, wrist return, short pointed crescent and held three-hit loop with the supplied clips. Check both facings, release/restart, high attack speed, Reduced Effects and a matching remote peer.
 

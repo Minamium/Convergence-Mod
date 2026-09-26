@@ -15,9 +15,11 @@ internal readonly record struct RaidReviveSettings(
     ulong ReviveLockoutTicks = 0)
 {
     public const int MinimumParticipantCount = 1;
-    public const int MaximumParticipantCount = 4;
+    public const int MaximumParticipantCount = 8;
+    public const int InitialMaximumParticipantCount = 4;
 
     public bool IsValid => ParticipantCount is >= MinimumParticipantCount and <= MaximumParticipantCount
+        && (!UsesSharedTokens || ParticipantCount <= InitialMaximumParticipantCount)
         && InitialTokenCount == (UsesSharedTokens ? ParticipantCount - 1 : 0)
         && (DownedTimeoutTicks == 0 || DownedTimeoutTicks > ChannelDurationTicks)
         && DisconnectGraceTicks > 0
@@ -27,7 +29,7 @@ internal readonly record struct RaidReviveSettings(
 
     public static RaidReviveSettings CreateInitial(int participantCount)
     {
-        if (participantCount is < 2 or > MaximumParticipantCount)
+        if (participantCount is < 2 or > InitialMaximumParticipantCount)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(participantCount),
@@ -51,7 +53,7 @@ internal readonly record struct RaidReviveSettings(
             throw new ArgumentOutOfRangeException(nameof(participantCount));
         // The generic service needs no solo switch: one Downed member already
         // means all participants are Downed at the ordinary authority commit.
-        return CreateInitial(Math.Max(2, participantCount)) with
+        return CreateInitial(2) with
         {
             ParticipantCount = participantCount,
             InitialTokenCount = 0,
