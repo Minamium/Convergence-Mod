@@ -22,6 +22,8 @@ The worker implements its assigned scope and applicable checks, returns changed 
 
 Review the worker's actual diff and relevant evidence, resolve integration issues, and apply the existing [verification matrix](verification-matrix.md) to the combined result. Reuse valid checks on unchanged inputs rather than repeating every worker check. The worker's completion message alone does not establish correctness or visual acceptance; Astra owns the final outcome and user-facing report.
 
+Astra also owns [retiring worker branches/worktrees](../../../../CONTRIBUTING.md#finish-merged-work) after their work is integrated and no worker or process needs them. Delegation alone does not require a new branch, worktree or PR.
+
 Include one compact delegation note in the existing task result or handoff: worker ID/path, actual model/effort, assigned scope and outcome, including material rework. Do not add a separate report, raw logs or a token benchmark to every implementation.
 
 ## Later efficiency review, only when requested

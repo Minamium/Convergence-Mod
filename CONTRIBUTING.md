@@ -16,6 +16,15 @@ Use normal pushes and the repository's review/merge rules. Do not discard anothe
 
 For Astra-led implementation, the development Skill's [Sol delegation policy](.agents/skills/develop-convergence-raids/references/sol-implementation-delegation.md) defines when to split independent work and how to assess its efficiency later. It keeps integration with the lead agent and does not change other lead models' workflows.
 
+### Finish merged work
+
+GitHub automatically deletes merged PR head branches. Start follow-up work from integrated main; retain a shared branch through an explicit handoff and appropriate branch protection when it must outlive its PR. Local branches and worktrees still need cleanup by their task owner.
+
+- Finish a merged-PR task by retiring its unused branch/worktree or recording why it remains in use. Reuse a free checkout before adding another; keep revisions on the current task branch rather than creating a branch per build or checkpoint.
+- Before manual deletion, refresh the branch and PR state, confirm the reviewed tip was integrated into main, and check for later commits, open PRs using the branch as head or base, and ongoing contributor/agent work. A squash merge may leave the original tip outside main's ancestry: use the merged PR's exact head SHA and integration commit as evidence. Preserve a contributor's latest working branch until its handoff is clear.
+- Delete only the examined refs. For remote deletion, use an explicit expected-SHA lease so a new push causes rejection; recheck local tips and worktree use too. Prune stale remote-tracking refs after deletion. This does not authorize rewriting a surviving branch's history or closing an unfinished PR.
+- Retire only clean, unused worktrees after preserving needed ignored/local artifacts. Use Codex archive for managed worktrees, or Git worktree removal for ordinary ones; never remove another task's checkout. For bulk or historical cleanup, save a verified local Git bundle and ref-to-SHA manifest outside branch refs. Do not replace retired branches with accumulating `archive/` or `checkpoint/` branches.
+
 ## A useful task or PR
 
 State the desired outcome, affected feature, constraints that matter, and how the result can be observed. For example: a defeated or cancelled Ghost Samurai can be summoned again, with no projectiles left from the previous fight. Select the corresponding checks instead of attaching the entire multiplayer matrix.

@@ -65,5 +65,5 @@ For visual work, apply the shared [Luminance presentation policy](docs/ART_DIREC
 
 ## Shared development
 
-- Follow [Contributing](CONTRIBUTING.md#shared-development) for branches, integration and build destinations. Preserve other contributors' changes and the current version/protocol when integrating.
+- Follow [Contributing](CONTRIBUTING.md#shared-development) for branches, integration and build destinations, including [cleanup after a merged PR](CONTRIBUTING.md#finish-merged-work). Preserve other contributors' changes and the current version/protocol when integrating.
 - Keep task-specific branch/commit checkpoints in the relevant handoff, not in always-on rules. The completed Ghost Samurai integration is recorded in [Windows handoff](docs/handoff/WINDOWS.md#completed-ghost-samurai-integration).
