@@ -37,7 +37,8 @@ internal static class AzureMaterials
     {
         Array.Clear(parts);
         foreach (NPC n in Main.ActiveNPCs) if (n.ModNPC is AzureWorm a && a.Fight == head.Fight) parts[a.Index] = a;
-        float age = AzureVisuals.RenderAge(girl), presence = 1;
+        float age = AzureVisuals.RenderAge(girl);
+        float presence = AzureWormPresentation.Presence(age, girl.State.MusicStart);
         bool melting=girl.State.Phase==AzurePhase.Melting;
         if (girl.State.WormLife <= 0 && !melting) presence *= .16f;
         if (girl.State.EndAt >= 0 && !melting) presence *= 1 - AzureRules.Ease((age - girl.State.EndAt) / 150);
@@ -46,8 +47,10 @@ internal static class AzureMaterials
         using var scope = new WorldGraphicsScope(batch);
         var shader = Begin(); shader.SetTexture(art, 0, SamplerState.PointClamp); shader.TrySetParameter("clock", age / 60);
         shader.SetTexture(furyArt,2,SamplerState.PointClamp);
+        shader.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,3,SamplerState.LinearWrap);
         if(projection is { } matrix)shader.TrySetParameter("uWorldViewProjection",matrix*Matrix.CreateOrthographicOffCenter(0,Main.instance.GraphicsDevice.Viewport.Width,Main.instance.GraphicsDevice.Viewport.Height,0,-1,1));
         shader.TrySetParameter("silhouette",silhouette?1f:0f);
+        AzureWormPresentation.Wakes(shader,parts,girl,age,screen,presence,silhouette);
         for (int i = AzureRules.Segments; i >= 0; i--)
         {
             var part = parts[i]; if (part is null) continue;
@@ -61,21 +64,23 @@ internal static class AzureMaterials
             if (i == AzureRules.Segments) angle += MathHelper.Pi;
             float flex = AzureVisuals.Reduced ? 0 : MathF.Sin(age * .020f - i * .22f) * .018f;
             shader.TrySetParameter("region", uv);
-            float emerging = AzureRules.Ease((age-girl.State.MusicStart-AzureRules.WormArrival-i*6)/24);
             shader.TrySetParameter("spine",spine);
             shader.TrySetParameter("furySpine",cell<2?.610f:.485f);
             float fury=girl.State.Phase==AzurePhase.Devouring?AzureRules.FuryReveal(age-girl.State.PhaseAt,i):girl.State.Enraged?1:0;
             shader.TrySetParameter("fury",fury);
             float melt=melting?AzureRules.Melt(age-girl.State.EndAt,i):0;
             shader.TrySetParameter("dissolve",melt);
-            shader.TrySetParameter("signal", new Vector4(presence*emerging, head.NPC.ai[2]+(girl.State.Enraged?.9f:0), AzureVisuals.Reduced ? 1 : 0, i));
+            float charge=Math.Clamp(head.NPC.ai[2],0,1)+(girl.State.Enraged?.6f:0)
+                +AzureWormPresentation.ArrivalLight(age,girl.State.MusicStart,i)*.7f;
+            shader.TrySetParameter("signal", new Vector4(presence, charge, AzureVisuals.Reduced ? 1 : 0, i));
             Vector2 sag=new(0,melt*melt*(60+i*2));
             var size=new Vector2(scale*(1-melt*.32f),scale*(1+flex+melt*.45f));
             float jaw=girl.State.Phase==AzurePhase.Devouring?AzureRules.JawOpening(age-girl.State.PhaseAt):fury*(.20f+.08f*MathF.Sin(age*.075f));
             // The head carapace remains one rigid silhouette. Only separate
             // mouth/mandible sprites articulate; never cut the head image in half.
             Quad(shader, part.NPC.Center + sag - screen,size,angle,uv,Color.White);
-            if(i==0)Mouth(shader,part.NPC.Center+sag-screen,angle,jaw,age,melt,presence*emerging,silhouette);
+            if(!silhouette)Quad(shader,part.NPC.Center+sag-screen,size,angle,uv,Color.White,"WormGlowPass");
+            if(i==0)Mouth(shader,part.NPC.Center+sag-screen,angle,jaw,age,melt,presence,silhouette);
         }
         shader.TrySetParameter("silhouette",0f);shader.TrySetParameter("dissolve",0f);
         Array.Clear(parts);

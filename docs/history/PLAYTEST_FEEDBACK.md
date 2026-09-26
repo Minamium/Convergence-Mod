@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-26
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -153,6 +153,10 @@ Owner accepts the direction but wants to rebuild all ordinary attacks from a sin
 ## Scarlet invocation choreography — 2026-09-20 / 0.3.27 → 0.3.28
 
 Owner wants orb-only preparation, Vespera materialization/large summoning seal, center-fixed conductor, four-plus-two-plus-two beat attacks, ActII white/red spatial cuts, Vespera's black Stack flames/red Spread cuts and distinct apparitions; reports repetitive edge sounds and the missing BGM climax. Two solo victories/cleanup are observed. The previous99.8s music edit did omit the last34.7s; restore the full134.5s source and append the bridge instead. Small2px floor clamps could repeatedly issue native teleport notifications; remove the artificial inset and reserve notifications for major escapes (code diagnosis, not recorded event proof). Preserve approved circles/cathedral and native authority; refine bounded shader/rig choreography. [Evidence](../evidence/2026-09-20-scarlet-choreography.json) records automated/offline results separately from pending owner audio, fairness, camera and MP acceptance.
+
+## Cathedral invisible entrance and material/audio revision — 2026-09-26 / 0.3.41 → 0.3.43
+
+Owner reports that only the worm's head area is visible at arrival and requests the recent Vespera-style Luminance depth on Vitrion/Liora, plus cracking ice/glass audio. Logs show two solo attempts (Defeat6.75s; Victory125.37s plus complete11s ending), Stack1/2 and Spread2/2; no Cathedral actor-loss error. Reproduce the head-only render and replace per-joint delayed opacity with shared chain visibility plus travelling light; preserve art and mechanics, add masked refraction/attached frost and seven original sound accents. [Evidence](../evidence/2026-09-26-azure-refraction-entrance.json) separates measured logs/GPU checks from native visual, audio and remote acceptance; the secondary SubworldLibrary error is tracked separately, not claimed fixed.
 
 ## Oboro finisher reference — 2026-09-20 / 0.3.26 → 0.3.30
 
