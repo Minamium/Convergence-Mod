@@ -14,6 +14,7 @@ namespace Convergence.Content.Encounters.AzureCathedral;
 public sealed class AzureAttack : ModProjectile
 {
     internal AzureAttackPlan Plan;
+    private bool loggedNativeHit;
     public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.DeathLaser;
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 3200;
     public override void SetDefaults()
@@ -77,7 +78,17 @@ public sealed class AzureAttack : ModProjectile
         return travel < Plan.Length + 100;
     }
     public override bool? CanDamage() => TryGirl(out var g) && g!.VisualAge >= Plan.Fire && g.VisualAge < Plan.End ? null : false;
-    public override bool CanHitPlayer(Player p) => TryGirl(out var g) && g!.State.Contains(p.whoAmI);
+    public override bool CanHitPlayer(Player p) => TryGirl(out var g) && g!.State.CanFight(p.whoAmI);
+    public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
+    {
+        if(AzureRules.DebugOneDamagePlaytest)modifiers.SetMaxDamage(1);
+    }
+    public override void OnHitPlayer(Player target, Player.HurtInfo info)
+    {
+        if(loggedNativeHit || Main.netMode==NetmodeID.Server || Main.myPlayer!=target.whoAmI)return;
+        loggedNativeHit=true;
+        AzurePackets.Log($"event=AttackNativeImpact fight={Plan.Fight} kind={Plan.Kind} slot={target.whoAmI} intended_damage={Plan.Damage} native_source_damage={Projectile.damage} final_damage={info.Damage}");
+    }
     public override bool? CanHitNPC(NPC target) => false;
     public override bool? Colliding(Rectangle projectile, Rectangle target)
     {
@@ -99,6 +110,7 @@ public sealed class AzureAttack : ModProjectile
     public override void AI()
     {
         bool valid = TryGirl(out var g);
+        Projectile.damage = AzureRules.NativeSourceDamage(Plan.Damage);
         Projectile.hostile = valid && g!.VisualAge >= Plan.Fire && g.VisualAge < Plan.End;
         if (g is not null && valid)
         {
@@ -125,7 +137,7 @@ public sealed class AzureAttack : ModProjectile
                         }
                         if(Main.netMode!=NetmodeID.MultiplayerClient)Projectile.netUpdate=true;
                     }
-                    if(Main.netMode!=NetmodeID.MultiplayerClient && t<45 && g.State.Contains(Plan.Target))
+                    if(Main.netMode!=NetmodeID.MultiplayerClient && t<45 && g.State.CanFight(Plan.Target))
                     {
                         var p=Main.player[Plan.Target];
                         Projectile.ai[0]=p.Center.X;Projectile.ai[1]=p.Center.Y;Projectile.ai[2]=1;

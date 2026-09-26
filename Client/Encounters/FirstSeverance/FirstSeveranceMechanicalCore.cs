@@ -14,6 +14,11 @@ internal sealed class FirstSeveranceMechanicalCore
     private readonly Vector3[] normals=new Vector3[(Rings+1)*(Sectors+1)];
     private readonly VertexPositionColor[] vertices=new VertexPositionColor[(Rings+1)*(Sectors+1)];
     private readonly short[] indices=new short[Rings*Sectors*6];
+    private const int ShardCount = 23;
+    private readonly Vector3[] shardCenters = new Vector3[ShardCount];
+    private readonly byte[] shardGroups = new byte[Rings*Sectors*2];
+    private readonly float[] fractureDistance = new float[(Rings+1)*(Sectors+1)];
+    private readonly VertexPositionColor[] shards = new VertexPositionColor[Rings*Sectors*6];
     private BasicEffect? effect;
 
     internal FirstSeveranceMechanicalCore()
@@ -32,11 +37,42 @@ internal sealed class FirstSeveranceMechanicalCore
             indices[cursor++]=(short)a; indices[cursor++]=(short)b; indices[cursor++]=(short)(a+1);
             indices[cursor++]=(short)(a+1); indices[cursor++]=(short)b; indices[cursor++]=(short)(b+1);
         }
+        for (int i = 0; i < ShardCount; i++)
+        {
+            float z = (i + .5f) / ShardCount, a = i * 2.399963f;
+            float radial = MathF.Sqrt(1 - z * z);
+            shardCenters[i] = new(radial * MathF.Cos(a), radial * MathF.Sin(a), z);
+        }
+        // The crack network and flying plates share this exact partition.
+        for (int i = 0; i < normals.Length; i++)
+        {
+            ClosestShard(normals[i], out float distance);
+            fractureDistance[i] = distance;
+        }
+        for (int i = 0; i < shardGroups.Length; i++)
+            shardGroups[i] = (byte)ClosestShard(Vector3.Normalize(normals[indices[i*3]] +
+                normals[indices[i*3+1]] + normals[indices[i*3+2]]), out _);
+    }
+
+    private int ClosestShard(Vector3 point, out float edge)
+    {
+        float first = float.MaxValue, second = float.MaxValue;
+        int nearest = 0;
+        for (int i = 0; i < ShardCount; i++)
+        {
+            float d = Vector3.DistanceSquared(point, shardCenters[i]);
+            if (d < first) { second = first; first = d; nearest = i; }
+            else if (d < second) second = d;
+        }
+        edge = second - first;
+        return nearest;
     }
 
     internal void Draw(SpriteBatch batch,Vector2 center,float radius,float seconds,float roll,Color tint,float opacity,bool reduced,
-        float bore = 0, Vector2 boreAxis = default, bool twinBore = false, float damage = 0)
+        float bore = 0, Vector2 boreAxis = default, bool twinBore = false, float damage = 0,
+        FirstSeveranceCoreRupture rupture = default)
     {
+        opacity *= rupture.MetalOpacity;
         if(Main.dedServ||opacity<=.001f||radius<1) return;
         // The sphere's surface rotates; the highlight remains in the world
         // lighting frame. This does not spin a flat painted highlight like a coin.
@@ -85,10 +121,41 @@ internal sealed class FirstSeveranceMechanicalCore
             float flicker = .6f + .4f * MathF.Sin(seconds * 19 + local.X * 6) * MathF.Sin(seconds * 31);
             material *= 1 - damage * .38f;
             material += new Vector3(.7f, .34f, 1f) * crack * damage * flicker * (1 - occlusion);
+            // Contact arrives from the claws at the left/right limb, then
+            // fractures travel inward before the plates accelerate away.
+            float arrival = Math.Clamp((rupture.Cracks - (1 - Math.Abs(n.X)) * .6f) * 2.5f, 0, 1);
+            float split = 1 - Math.Clamp(fractureDistance[i] / (.005f + arrival * .026f), 0, 1);
+            material += new Vector3(.72f, .30f, 1f) * split * arrival * 1.5f;
             Vector2 displaced = p + axis * (crater.Depth * .20f * side);
             displaced *= 1 + damage * .022f * MathF.Sin(seconds * 13 + local.X * 9) * n.Z;
+            displaced *= new Vector2(1 - rupture.Compression, 1 + rupture.Compression * .65f);
             vertices[i]=new(new Vector3(origin+displaced*radius,0),
                 new Color(new Vector4(Vector3.Clamp(material,Vector3.Zero,Vector3.One),1)*modulation));
+        }
+        bool bursting = rupture.BurstAge > 0;
+        if (bursting)
+        {
+            float t = rupture.BurstAge / 60f, travel = 1 - MathF.Exp(-t * 6);
+            float distance = radius * (reduced ? 1.05f : 2.9f) * travel;
+            for (int i = 0; i < shardGroups.Length; i++)
+            {
+                int group = shardGroups[i];
+                Vector3 n = shardCenters[group];
+                Vector2 pivot = origin + new Vector2(n.X, n.Y) * radius;
+                float angle = (group % 2 == 0 ? 1 : -1) * t * (1.1f + group % 4 * .3f);
+                float cosine = MathF.Cos(angle), sine = MathF.Sin(angle);
+                Vector2 offset = new Vector2(n.X, n.Y) * distance +
+                    new Vector2(MathF.Sin(group * 2.1f) * t * radius * .2f, t*t*radius*(reduced?.4f:1.4f));
+                float tilt = MathF.Cos(t * (1.5f + group % 5 * .4f));
+                for (int j = 0; j < 3; j++)
+                {
+                    var v = vertices[indices[i*3+j]];
+                    Vector2 local = new Vector2(v.Position.X, v.Position.Y) - pivot;
+                    local.X *= tilt;
+                    Vector2 rotated = new(local.X*cosine-local.Y*sine, local.X*sine+local.Y*cosine);
+                    shards[i*3+j] = new(new Vector3(pivot + offset + rotated, 0), v.Color);
+                }
+            }
         }
         batch.End();
         var device=Main.instance.GraphicsDevice;
@@ -102,7 +169,11 @@ internal sealed class FirstSeveranceMechanicalCore
             device.BlendState=BlendState.AlphaBlend; device.DepthStencilState=DepthStencilState.None;
             device.RasterizerState=RasterizerState.CullNone;
             foreach(var pass in effect.CurrentTechnique.Passes)
-            { pass.Apply(); device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList,vertices,0,vertices.Length,indices,0,indices.Length/3); }
+            {
+                pass.Apply();
+                if (bursting) device.DrawUserPrimitives(PrimitiveType.TriangleList, shards, 0, shards.Length/3);
+                else device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList,vertices,0,vertices.Length,indices,0,indices.Length/3);
+            }
         }
         finally
         {

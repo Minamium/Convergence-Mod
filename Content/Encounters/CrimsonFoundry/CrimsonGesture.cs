@@ -38,7 +38,9 @@ public sealed class CrimsonGesture : ModProjectile
     public override bool ShouldUpdatePosition() => false;
     public override bool? CanHitNPC(NPC target) => false;
     public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
-        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage);
+        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.NativeFinalDamageLimit(Plan.Damage));
+    public override void OnHitPlayer(Player target, Player.HurtInfo info)
+        => CrimsonPackets.Log($"event=AttackNativeImpact fight={Plan.Fight} phase_epoch={Plan.Epoch} phrase={Plan.Phrase} kind={Plan.Technique} slot={target.whoAmI} intended={Plan.Damage} native_source={Projectile.damage} final_damage={info.Damage} life={target.statLife}");
     public override bool? CanCutTiles() => false;
     internal bool TryBoss(out CrimsonBoss? boss)
     {
@@ -52,7 +54,7 @@ public sealed class CrimsonGesture : ModProjectile
     internal static float Clock(CrimsonBoss boss) => boss.VisualAge;
     public override bool? CanDamage() => TryBoss(out var boss) && Plan.Live(Clock(boss!))
         && AimLocked && boss!.State.SourceActive(Plan.Source, Clock(boss)) ? null : false;
-    public override bool CanHitPlayer(Player target) => TryBoss(out var boss) && boss!.State.Contains(target.whoAmI);
+    public override bool CanHitPlayer(Player target) => TryBoss(out var boss) && boss!.State.CanFight(target.whoAmI);
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
         if (!TryBoss(out var boss) || !AimLocked || !boss!.State.SourceActive(Plan.Source, Clock(boss)) || !Plan.Live(Clock(boss))) return false;
@@ -66,7 +68,7 @@ public sealed class CrimsonGesture : ModProjectile
     {
         bool valid = TryBoss(out var boss);
         Projectile.hostile = valid && boss!.State.SourceActive(Plan.Source, Clock(boss)) && Plan.Live(Clock(boss));
-        Projectile.damage = CrimsonPlaytestTuning.AttackDamage;
+        Projectile.damage = CrimsonPlaytestTuning.NativeSourceDamage(Plan.Damage);
         Projectile.Center = new Vector2(Plan.Stage.X, Plan.Stage.Y);
         if (valid)
         {
@@ -76,7 +78,7 @@ public sealed class CrimsonGesture : ModProjectile
                 var target = Main.player[Plan.TargetSlot];
                 if (target.active && !target.dead && !target.ghost
                     && target.GetModPlayer<CrimsonConnection>().Token == Plan.TargetConnection
-                    && Array.Exists(boss!.State.Members, m => m.Slot == Plan.TargetSlot && m.Connection == Plan.TargetConnection && !m.Out))
+                    && Array.Exists(boss!.State.Members, m => m.Slot == Plan.TargetSlot && m.Connection == Plan.TargetConnection && !m.Out && !m.Recovery.Downed))
                 {
                     var desired = Plan.Technique == CrimsonTechnique.SideBeams
                         ? CrimsonTechniqueGeometry.Clamp(Plan.Field, new(target.Center.X, target.Center.Y), 100)

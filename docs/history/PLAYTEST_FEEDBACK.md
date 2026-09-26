@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-27
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,20 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Doll central sphere rupture direction — 2026-09-27 / 0.3.46
+
+Owner requests the claw clamp to strike the central sphere, produce cracks, burst its metallic shell and leave a persistent purple energy sphere. This is a design request, not a report of a new playtest. Connect the first Phase III crush to the same contact tick; retain the energy material through later cycles, Final and the closing check. [Current visual contract](../encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md#中央球の挟撃破裂--2026-09-27) owns the behavior; [evidence](../evidence/2026-09-27-doll-core-rupture.json) separates focused contracts/native packaging/offline frames from unplayed owner visual/audio/remote acceptance. No balance or damage change.
+
+## Scarlet recovery, one-damage rehearsal and unseen verdicts — 2026-09-27 / 0.3.43 → 0.3.45
+
+Owner asks whether Doll recovery is inherited, requests all damage1 until explicit tuning, and reports absent/weak chorus attacks while using God Mode. September26's two-player Scarlet fight won: Stack1/3 successful, Spread2/3; all three failed calls set both players' intended900-source budgets. No Scarlet Down/revive adapter existed, and ordinary attack rehearsal excluded chorus failures. Code showed verdict rendering was already independent of God Mode/Hurt, but Spread's radius7 bright cut expired within12ticks; old logs do not prove whether either recipient actually took damage or saw the effect.
+
+Connect the shared instant-unlimited recovery service through exact-Fight Scarlet native hooks/requests; cap every positive Scarlet damage source/final ceiling at1 while keeping success0 and native hooks. Preserve God Mode; add separate outcome/presentation/native-impact telemetry and a clearer bounded cosmetic tail. [Evidence](../evidence/2026-09-27-scarlet-recovery.json) distinguishes old playtest facts from new checks and pending matching-peer Down/kit/lockout/all-Down/retry and God Mode visual acceptance. No other Raid or player weapon rebalance.
+
+## Azure multiplayer recovery/debug damage — 2026-09-26 / 0.3.43 → 0.3.44
+
+Owner reports normal death instead of Down, excessive damage and suspected God Mode/chorus failure; explicitly requests Cathedral Down/revive and temporary1damage. The two-player log has one battle Defeat and one Victory/cleanup (78.82s after unlock, Fury15.60s). One Stack resolves successfully for both members; Liora dies55ticks before the first Spread announcement, so the log does not show a failed Spread or prove a God Mode bug. An earlier one-member preparation ends ActorMissing before combat; that record alone does not isolate the missing actor/pedestal condition. Source confirms Cathedral never had a recovery adapter. Add exact-Fight native-floor Down, reusable instant ally recovery/60s recipient lockout, all-Down defeat and1damage delivery without changing God Mode, verdicts or other Raids. Native package/API and pure contracts are automated; owner multiplayer recovery/chorus acceptance remains not_run. Raw logs stay local/ignored; current rules live in the [Azure spec](../encounters/azure-cathedral/ENCOUNTER_SPEC.md#start-ownership-and-recovery).
 
 ## Choir organic energy direction — 2026-09-25 / 0.3.40
 
@@ -153,6 +167,10 @@ Owner accepts the direction but wants to rebuild all ordinary attacks from a sin
 ## Scarlet invocation choreography — 2026-09-20 / 0.3.27 → 0.3.28
 
 Owner wants orb-only preparation, Vespera materialization/large summoning seal, center-fixed conductor, four-plus-two-plus-two beat attacks, ActII white/red spatial cuts, Vespera's black Stack flames/red Spread cuts and distinct apparitions; reports repetitive edge sounds and the missing BGM climax. Two solo victories/cleanup are observed. The previous99.8s music edit did omit the last34.7s; restore the full134.5s source and append the bridge instead. Small2px floor clamps could repeatedly issue native teleport notifications; remove the artificial inset and reserve notifications for major escapes (code diagnosis, not recorded event proof). Preserve approved circles/cathedral and native authority; refine bounded shader/rig choreography. [Evidence](../evidence/2026-09-20-scarlet-choreography.json) records automated/offline results separately from pending owner audio, fairness, camera and MP acceptance.
+
+## Cathedral invisible entrance and material/audio revision — 2026-09-26 / 0.3.41 → 0.3.43
+
+Owner reports that only the worm's head area is visible at arrival and requests the recent Vespera-style Luminance depth on Vitrion/Liora, plus cracking ice/glass audio. Logs show two solo attempts (Defeat6.75s; Victory125.37s plus complete11s ending), Stack1/2 and Spread2/2; no Cathedral actor-loss error. Reproduce the head-only render and replace per-joint delayed opacity with shared chain visibility plus travelling light; preserve art and mechanics, add masked refraction/attached frost and seven original sound accents. [Evidence](../evidence/2026-09-26-azure-refraction-entrance.json) separates measured logs/GPU checks from native visual, audio and remote acceptance; the secondary SubworldLibrary error is tracked separately, not claimed fixed.
 
 ## Oboro finisher reference — 2026-09-20 / 0.3.26 → 0.3.30
 

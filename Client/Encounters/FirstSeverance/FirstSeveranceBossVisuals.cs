@@ -75,6 +75,11 @@ internal sealed class FirstSeveranceBossVisuals
             stages.Reset();
             if (!fight.IsNone)
             {
+                if (state.TerminalCombat is { } terminal && terminal.FightId == fight)
+                {
+                    lastCombat = terminal;
+                    doll.SetCoreAttack(terminal, state.TerminalAuthorityTick);
+                }
                 fight = FightId.None;
                 ending.Begin(state.LastCombatEndReason, endingParticipant, Main.GameUpdateCount);
             }
@@ -105,6 +110,7 @@ internal sealed class FirstSeveranceBossVisuals
             phaseImpactTicks--;
         lastCenter = CoreCenter(combat);
         lastCombat = combat;
+        doll.SetCoreAttack(combat, state.EstimatedAuthorityTick);
         endingParticipant = combat.TryGetParticipantByServerSlot(Main.myPlayer, out var local) && local.IsConnected;
         exposure = MathHelper.Lerp(exposure,
             combat.IsCoreOpen ? 1f : 0f, 0.32f);
@@ -196,7 +202,8 @@ internal sealed class FirstSeveranceBossVisuals
             float failing = finalCheck ? .35f + .65f * (1 - combat.BossLife /
                 (float)Math.Max(1, FirstSeveranceFinalCheck.Life(combat.BossMaximumLife))) : 0;
             float entry = finalCheck ? Window(renderTick - combat.ActionStartedTick, 0, 14) : 0;
-            doll.DrawRemoteCore(batch,center,MotionSeconds,reveal*retreat*MathHelper.Lerp(1-breakup,1,entry),reduced,failing);
+            // The foreground nucleus survives the body's Final dissolution.
+            doll.DrawRemoteCore(batch,center,MotionSeconds,reveal*retreat,reduced,failing);
             if (finalCheck)
             {
                 float age = (float)(renderTick - combat.ActionStartedTick);
@@ -387,7 +394,11 @@ internal sealed class FirstSeveranceBossVisuals
                 dissolve, lastBreath * (1 - fold), lastCast * (1 - fold),
                 lastKick * (1 - fold), 1 - fold * .35f, depth: remote ? .24f : 1);
             if (remote && lastCombat is { } remnant && age < .8f)
+            {
                 DrawRemoteArms(batch, remnant, lastCenter, remnant.ResolveTick, dissolve, 1, reduced);
+                doll.DrawRemoteCore(batch,lastCenter,MotionSeconds,dissolve,reduced,
+                    scale:1-Window(age,.29,.79)*.96f,aftermath:true);
+            }
         }
         else
         {
@@ -397,6 +408,7 @@ internal sealed class FirstSeveranceBossVisuals
             DrawRig(batch, lastCenter - new Vector2(0, remote ? 190 : 0), opacity,
                 lastBreath * (1 - closure), lastCast * (1 - closure), lastKick * (1 - closure),
                 1 - closure * .4f, depth: remote ? .24f : 1);
+            if (remote) doll.DrawRemoteCore(batch,lastCenter,MotionSeconds,opacity,reduced,aftermath:true);
         }
         FirstSeveranceGrandStage.EndingFront(batch, lastCenter, age, EndingVictory, reduced);
     }

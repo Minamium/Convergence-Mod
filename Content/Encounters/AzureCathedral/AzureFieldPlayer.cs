@@ -25,7 +25,7 @@ public sealed class AzureFieldPlayer : ModPlayer
         || Main.netMode == NetmodeID.MultiplayerClient && Player.whoAmI == Main.myPlayer;
     public override void PreUpdateMovement()
     {
-        if (!OwnsMovement || !TryField(out var boss)) return;
+        if (!OwnsMovement || Player.GetModPlayer<AzureRecoveryPlayer>().IsIncapacitated || !TryField(out var boss)) return;
         var next = AzureRules.Clamp(boss!.State.Field, Player.position.X + Player.velocity.X, Player.position.Y + Player.velocity.Y, Player.width, Player.height);
         if (next.X != Player.position.X + Player.velocity.X) Player.velocity.X = 0;
         if (next.Y != Player.position.Y + Player.velocity.Y) Player.velocity.Y = 0;

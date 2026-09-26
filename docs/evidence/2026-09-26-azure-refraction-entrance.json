@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-26",
+  "feature": "azure_cathedral",
+  "source_base": "c34b3de239c8033900f55c660202041758c58bda",
+  "candidate": "0.3.43 / unchanged protocol68",
+  "observed_build": "0.3.41",
+  "source_log_sha256": {
+    "server": "23f078cdd137a5dd4b02d81f888c98bffbac889c235950e451f1104b5dafa0e4",
+    "client": "ad35ebe7968e93be7da317bcb00276e2dc52dfe392265a84adcba9b2a852d8af",
+    "secondary_server": "b0a197872ac12b933a3435eefe9a49725d13650eea9d1d1634e9cbafe2f3966b"
+  },
+  "topology": "solo Host & Play; two Cathedral attempts",
+  "attempts": [
+    { "fight": "8f537292-7961-41a9-8160-e7e07607100a", "unlock": 1281, "result_tick": 1686, "result": "Defeat", "combat_seconds": 6.75, "cleanup": 1866, "remaining_hp": 2637507 },
+    { "fight": "8e626acd-8bfa-4bdb-a156-34bcd3bc60ab", "unlock": 1260, "worm_floor": 6621, "liora_defeat": 7434, "devouring": 7435, "approach_start_distance": 2202, "fury": 8035, "fury_hp": 960000, "shared_parts": 45, "worm_defeat": 8781, "fury_seconds": 12.4333, "result_tick": 8782, "result": "Victory", "combat_seconds_including_cutscene": 125.3667, "cleanup": 9442, "ending_seconds": 11, "peak_five_second_hp_budget_dps": 101670, "stack_success": 1, "stack_failure": 1, "spread_success": 2, "duet_lattice_volleys": 8, "fury_lattice_volleys": 3 }
+  ],
+  "findings": {
+    "stack": "Success at6.3px from gather, failure at657.3px; failed event has900 source damage budget. Source damage is not measured post-defense damage. Two solo Spread successes do not test player overlap.",
+    "intro": "The previous renderer multiplied material alpha by Ease((age-music-WormArrival-index*6)/24): tail fully appeared264 ticks later than head. Actual old shader/renderer with a synthetic45-part pose reproduces a head-only scene32 ticks after arrival; patched renderer displays all joints at that same age. Existing native movement/actor creation is unchanged.",
+    "runtime": "Both attempts reach their respective cleanup; no Cathedral actor-missing exception. First attempt has two actual SkyActivated events atage781, second has one at760. This does not prove every native background frame rendered.",
+    "unrelated": "Client localhost connection refused before play. Secondary server raises EndOfStreamException in SubworldLibrary.LoadIntoSubworld/TagIO at22:03:58, after Cathedral Victory cleanup22:03:49. Not fixed or attributed to these material changes."
+  },
+  "implementation": {
+    "worm": "Shared24tick whole-chain appearance, travelling light instead of opacity delay. Original mirrored armor plus anatomy-masked caustic emission, bounded joint-attached frost ribbons, preserved silhouette/melt suppression. No gameplay/HP/phase/packet changes.",
+    "liora": "Original eight48x64 native pixel cells remain. Lower-skirt mesh, flowing asymmetric hem ribbons and measured blade anchors drive original refraction; explicit graphics-state scope and premultiplied alpha preserve NPC-pass rendering.",
+    "audio": "Seven NumPy-synthesized stereo PCM16/44100 ice/glass clips: IceBreak, GlassArrival, CrystalCharge, CrystalCut, WormRush, DevourFracture, ChainMelt. Accepted cue ticks, bounded concurrent voices/spacing, fight reset/unload cancellation. No sampled third-party source; music and chorus mix unchanged."
+  },
+  "checks": {
+    "shader": "PASS FXC effect compilation and source/export manifest; AzureGlass18ed6eae5399b555f58872900a0a0ae820cc3856bf218c03c2eb60ca3cfc26f6 and AzureLiora c851c540e0d5897a3ffe711cf39dc795e72d1a36baee4149912e4411add40cda.",
+    "gpu": "PASS24 old/new intro frames each, then120 linked-production FNA/D3D11 frames including bright/dark native-pose closeups, entrance, Fury, capture silhouette, melting and Reduced Effects. Visibility endpoints and2808 fractional samples pass. Synthetic actor poses with actual compiled materials; not a game/network/FPS test. Initial review led to measured sword-anchor correction and asymmetric veil, followed by affected frame rerender.",
+    "audio": "PASS seven PCM masters: peak -8.40..-4.15dBFS, RMS -24.54..-17.24dBFS, maxDC5.97e-5, zero clipping and zero boundary step; two repo-runnable export/routing tests. Audition is local-only and no listening quality is claimed.",
+    "native_candidate": "PASS isolated native build record20260926T133841001914Z, source basec34b3de plus task changes and five retained locale edits. Package90a0fc148dec9f94455aca719e4ddb261e2b5ccb9bbd10c1b655cfc092c7bdf0:0errors/4existing nullable warnings, source manifest unchanged during build,26locales/compiled shader hashes/package admission pass; version0.3.43, solo enabled/minimum1.",
+    "integration": "Final static checks, required CI, normal merge and integrated-main install identity belong to task PR and local build record. No Workshop publication or GitHub release."
+  },
+  "delegation": "liora_refraction: gpt-6-sol/medium; Liora renderer and independent sound synthesis/routing. Lead authored worm/material fix and log analysis, reviewed actual diff/GPU output, corrected Liora graphics state/premultiplied alpha/blade anchors/veil and adjusted audio gains before integration.",
+  "not_run": [
+    "Owner native reload/Host & Play: complete chain at arrival, full-size dynamic worm frost/armor and Liora energy readability under overlapping hazards.",
+    "Human audition and real-game ice/glass balance with combat and BGM; no listening is claimed.",
+    "Matching remote peers, UI107%/zoom, Reduced Effects/shake off, native silhouette/melt/ending continuity and GPU frame times.",
+    "Secondary SubworldLibrary stream error follow-up; no world/save edits made."
+  ]
+}

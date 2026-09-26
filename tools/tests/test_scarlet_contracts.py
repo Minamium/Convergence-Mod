@@ -33,21 +33,22 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('if (phase < 3 && thresholdLatched',text)
         self.assertIn('phraseEnd - CrimsonRhythm.LookAheadTicks',text)
     def test_damage_one_is_hostile_only_and_keeps_native_hooks(self):
-        for name in ('CrimsonGesture.cs','CrimsonActors.cs'):
+        # All hostile sources, including failed chorus, now share the owner-gated
+        # mapping. Numeric/success-zero behavior is checked by the domain suite.
+        for name, source in (('CrimsonGesture.cs', 'Plan'),
+                             ('CrimsonActors.cs', 'Hazard'),
+                             ('CrimsonChorus.cs', 'Impact')):
             text=(CONTENT/name).read_text()
-            self.assertIn('Projectile.damage = CrimsonPlaytestTuning.AttackDamage',text)
+            self.assertIn(f'Projectile.damage = CrimsonPlaytestTuning.NativeSourceDamage({source}.Damage)',text)
             self.assertIn('public override void ModifyHitPlayer',text)
-            self.assertIn('modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage)',text)
-        chorus=(CONTENT/'CrimsonChorus.cs').read_text()
-        self.assertIn('Projectile.damage = Impact.Damage',chorus)
-        self.assertIn('modifiers.SetMaxDamage(Impact.Damage)',chorus)
-        for name in ('CrimsonGesture.cs','CrimsonChorus.cs'):
-            text=(CONTENT/name).read_text()
+            self.assertIn(f'modifiers.SetMaxDamage(CrimsonPlaytestTuning.NativeFinalDamageLimit({source}.Damage))',text)
             self.assertNotIn('statLife -=',text)
             self.assertNotIn('.Hurt(',text)
             self.assertNotIn('immuneTime = 0',text)
         for path in CONTENT.glob('*Companion*.cs'):
-            self.assertNotIn('CrimsonPlaytestTuning.AttackDamage',path.read_text())
+            text=path.read_text()
+            for mapping in ('AttackDamage', 'NativeSourceDamage', 'NativeFinalDamageLimit'):
+                self.assertNotIn('CrimsonPlaytestTuning.'+mapping,text)
     def test_delayed_old_phase_cannot_reactivate_hazards(self):
         actors=(CONTENT/'CrimsonActors.cs').read_text()
         gesture=(CONTENT/'CrimsonGesture.cs').read_text()

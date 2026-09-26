@@ -1,6 +1,9 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Convergence.Common.Encounters.Runtime;
+using Convergence.Common.Networking;
+using Convergence.Common.Networking.Replication;
 
 namespace Convergence.Content.Encounters.FirstSeverance.Revive;
 
@@ -30,7 +33,14 @@ public sealed class ResuscitationKitItem : ModItem
         if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server
             && !player.GetModPlayer<FirstSeveranceRaidPlayer>().IsReviving)
         {
-            FirstSeveranceClientActions.RequestReviveNearest();
+            var snapshot = Main.netMode == NetmodeID.MultiplayerClient
+                ? ModContent.GetInstance<EncounterReplicaSystem>().Snapshot
+                : ModContent.GetInstance<EncounterCoordinatorSystem>().Snapshot;
+            if (!string.IsNullOrEmpty(snapshot.DefinitionKey) && EncounterPacketRouter.Routes.TryGet(snapshot.DefinitionKey, out var handler)
+                && handler is IEncounterRecoveryClientActions recovery)
+                recovery.RequestReviveNearest();
+            else
+                Main.NewText(Terraria.Localization.Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.CombatNotActive"));
             return true;
         }
 

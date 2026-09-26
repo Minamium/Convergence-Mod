@@ -16,8 +16,9 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.FirstSeverance;
 
-internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHandler
+internal sealed class FirstSeverancePacketSystem : ModSystem, IEncounterPacketHandler, IEncounterRecoveryClientActions
 {
+    void IEncounterRecoveryClientActions.RequestReviveNearest() => FirstSeveranceClientActions.RequestReviveNearest();
     private const ulong FastRequestWindowTicks = 60;
     private const ulong ActivationWindowTicks = 10 * 60;
     private static readonly Dictionary<RequestRateKey, RequestRateWindow> RequestWindows = new();

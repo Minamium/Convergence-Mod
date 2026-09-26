@@ -3,6 +3,7 @@ matrix uWorldViewProjection;
 sampler art : register(s0);
 sampler noiseMap : register(s1);
 sampler furyArt : register(s2);
+sampler veinMap : register(s3);
 float clock;
 float4 signal; // opacity, charge, reduced, index
 float4 region;
@@ -30,14 +31,55 @@ float4 GlassSurface(VO i,float4 a,float2 p)
  color+=float3(.22,.70,.95)*edge*a.a;
  return float4(lerp(color,float3(.003,.008,.014)*a.a,silhouette),a.a)*i.C*signal.x*retain;
 }
-float4 GlassPS(VO i):COLOR0
+float4 WormArt(float2 p)
 {
- float2 p=(i.U-region.xy)/region.zw;
  float2 sample=p;sample.y=spine-abs(p.y-.5);
  sample.x+=sin(p.y*19+clock*2)*dissolve*.035;
  float2 alternate=sample;alternate.y=furySpine-abs(p.y-.5);
- float4 a=lerp(tex2D(art,region.xy+sample*region.zw),tex2D(furyArt,region.xy+alternate*region.zw),fury);
- return GlassSurface(i,a,p);
+ return lerp(tex2D(art,region.xy+sample*region.zw),tex2D(furyArt,region.xy+alternate*region.zw),fury);
+}
+float4 GlassPS(VO i):COLOR0
+{
+ float2 p=(i.U-region.xy)/region.zw;
+ return GlassSurface(i,WormArt(p),p);
+}
+float4 WormGlowPS(VO i):COLOR0
+{
+ float2 p=(i.U-region.xy)/region.zw;
+ float4 a=WormArt(p);
+ // Original armor remains opaque beneath this masked, moving material. Pale
+ // facets catch refraction; blue recesses carry veins, not a solid glow slab.
+ float2 q=float2(p.x,abs(p.y-.5));
+ float n=tex2D(noiseMap,q*float2(3.7,5.3)+float2(-clock*.19+signal.w*.17,clock*.037)).r;
+ float vein=tex2D(veinMap,q*float2(2.3,3.9)+float2(-clock*.11,n*.16)).r;
+ float ridge=pow(saturate(1-abs(n-.48)*7),8);
+ float pulse=pow(saturate(.5+.5*sin(p.x*8-clock*3.8+signal.w*.41)),6);
+ float crystal=saturate((a.b-a.r*.6)*2)*a.a;
+ float luminance=dot(a.rgb,float3(.22,.57,.21));
+ float ice=pow(saturate(vein),2)*(.26+signal.y*.14)+ridge*(.25+pulse*.25);
+ float wet=pow(saturate(1-abs(n+q.y*.5-.63)*5),12)*luminance*.13;
+ float rim=0;
+ rim+=WormArt(p+float2(.008,0)).a;rim+=WormArt(p-float2(.008,0)).a;
+ rim+=WormArt(p+float2(0,.008)).a;rim+=WormArt(p-float2(0,.008)).a;
+ rim=saturate(rim*.25-a.a)*(.10+signal.y*.055)*(n*.45+.55);
+ float meltNoise=tex2D(noiseMap,p*float2(4,2)+float2(signal.w*.19,-clock*.10)).r;
+ float retain=dissolve>.001?1-smoothstep(meltNoise-.10,meltNoise+.10,dissolve*1.25):1;
+ float exposure=lerp(1,.44,signal.z)*signal.x*(1-silhouette)*retain;
+ float3 c=float3(.09,.46,.61)*(ice*crystal+rim)+float3(.66,.88,.94)*wet;
+ return float4(c*exposure,0)*i.C;
+}
+float4 WormRibbonPS(VO i):COLOR0
+{
+ float2 p=i.U;
+ float n=tex2D(noiseMap,p*float2(3.5,1.8)+float2(-clock*1.2+signal.w*.19,clock*.10)).r;
+ float fine=tex2D(veinMap,p*float2(4,2)+float2(-clock*.65,n*.32)).r;
+ float y=(p.y-.5)*2;
+ float feather=pow(saturate(1-y*y),2);
+ float front=smoothstep(0,.075,p.x)*(1-smoothstep(.60,1,p.x));
+ float thread=exp2(-pow((y-(n-.5)*.63)*13,2));
+ float mist=pow(saturate(n*.7+fine*.55-.3),2)*feather;
+ float3 c=float3(.07,.35,.49)*mist+float3(.48,.83,.94)*(thread*.38+pow(saturate(fine),5)*feather*.35);
+ return float4(c*front*signal.x*(.8+signal.y*.27),0)*i.C;
 }
 float4 PartPS(VO i):COLOR0
 {
@@ -146,6 +188,8 @@ technique AzureGlass
 {
  pass AutoloadPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 GlassPS(); }
  pass PartPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 PartPS(); }
+ pass WormGlowPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 WormGlowPS(); }
+ pass WormRibbonPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 WormRibbonPS(); }
  pass BackdropPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 BackdropPS(); }
  pass ShardPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 ShardPS(); }
  pass RiftPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 RiftPS(); }

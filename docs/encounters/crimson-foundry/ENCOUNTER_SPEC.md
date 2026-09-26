@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -66,7 +66,15 @@ Victory requires completed sacrifice plus the giant's defeat; the sacrifice itse
 
 `CrimsonPlaytestTuning` is the single source of tuning. Each original target budget is `750,000 + 500,000 × (participants − 1)` HP, frozen at Ready. Total one-time budgets remain3m/5m/9m/17m for1/2/4/8 players. Final transfers one full conductor budget plus the three20% remainders into **one** giant bar:1.2m/2m/3.6m/6.8m respectively. Transfer is not damage, healing or a fourth apparition refill; progress logging counts it once. The action-cycle gate prevents high-end weapons from skipping whole acts.
 
-**Ordinary Scarlet hostile gestures retain source damage1 and `SetMaxDamage(1)` for choreography rehearsal.** Contact damage remains disabled. Stack/Spread are now the requested failure-only high-damage exceptions, owned by `CrimsonChorusRules` below. All hits retain ordinary immunity/dodge/shields/accessory hooks; these are source budgets, not guaranteed HP subtraction or bypasses. Player/companion weapons, environmental damage and Doll/Ghost attacks are untouched. This remains temporary rehearsal balance.
+**All positive Scarlet hostile damage, including failed Stack/Spread, is temporarily mapped to source1 and native final-damage ceiling1.** `CrimsonPlaytestTuning.DebugOneDamagePlaytest` stays enabled until the owner explicitly starts damage tuning. Successful chorus stays0; contact damage stays disabled. The intended failure budgets below remain intact for outcome calculation and later tuning, but are not currently dealt. Native immunity/dodge/shields/accessories and God Mode remain effective, so this is not forced HP subtraction. Player/companion weapons, environmental damage and other Raids are untouched. Server `ChorusResolved` logs intended/native source budgets separately; receiving-client `ChorusNativeImpact` / `AttackNativeImpact` records actual native hits. No impact record is not proof of a missed geometric verdict: God Mode/immunity may suppress Hurt.
+
+### Down and instant recovery
+
+Scarlet uses the same `Common/Raids/Revive/RaidReviveService` instant-unlimited policy as Doll, with its own exact-Fight native adapter. An accepted native lethal/floor hit makes a participant Down at1HP, held at their in-field position even in midair; Down cannot move, attack, be targeted or satisfy a chorus assignment. Merely starting at1HP does not Down. Ordinary damage still goes through Terraria; the receiving player's bounded generation-tagged floor receipt is committed by the server, never a client-authored heal or target.
+
+Ready acceptance supplies the reusable **Resuscitation Kit** if missing. A standing ally can use it within8tiles for instant35%HP recovery and3seconds of immunity. No consumption or shared tokens. The recipient cannot be revived again for60seconds; a subsequent Down waits without an Eliminated state or timeout. All retained connected participants Down/disconnected means Defeat (also in solo). Success/cancel/invalidated/world exit clear the binding, locks and controls; Defeat clears the interceptor before ordinary death. God Mode is not bypassed.
+
+Clients share the frozen slot/connection roster and monotone recovery generations. Phase changes do not reset recovery. The common feature route sends Ready/recovery and retains a full actor projection for terminal/far-player delivery. [ADR amendment](../../adr/0026-crimson-score-and-native-projectiles.md#2026-09-27-scarlet-downrecovery-and-debug-damage-protocol70) owns the native authority boundary.
 
 ## Beat choreography and Final ensemble
 
@@ -110,6 +118,8 @@ Timing/lifetime bounds live in `CrimsonRhythm`/`CrimsonChoreography`. A beat sch
 From Act II, after five phrases, alternate a fixed gather marker and player-following separation circles. Calls last8 measured beats with2-beat recovery, in their own interval. Preserve the approved rings/arrows. **Both are Vespera's attacks**, independent of which apparition is active. Stack builds paired black engraved seals above/below each announced living player in three irregular growth steps. Complete gathering causes0 damage; otherwise each eligible member receives a900-source budget scaled by the missing fraction, shown as fast black flame between their seals. Its opaque ink core has bright crimson moving lips so it reads on both sky and cathedral. Spread grows red seals behind each member; only overlapping members receive one900-source targeted red cut, still respecting native dodge/immunity hooks. Solo Spread passes. The server evaluates once and replicates the terminal failure mask **and bounded resolve positions**, then spawns recipient-gated native impacts. A48-tick cosmetic result survives death/Defeat at the original position, never a respawn location. Delayed results can still display within that lease; clients never infer failure from local circle positions. Damage and all remaining hazards stop immediately on terminal state; phase/world/new-Fight cleanup still clears the visual.
 
 Accepted Victory projects a150-tick energy hemorrhage/melt: red streams erupt, the articulated body deforms downward and dissolves, and its chest sphere drains. This reuses the existing terminal cleanup interval, never prolongs damage/rewards or starts on sacrifice alone. Final convergence and Victory have bounded buildup/impact shake. Reduced Effects/shake-off suppress optional motion/glare. Original managed material erosion/flow and mesh deformation preserve the approved art, not a whole-image fade.
+
+Verdict VFX is driven by the accepted failure mask and recorded positions, **not** native Hurt or God Mode. Failed Spread retains a wider36-tick scarlet spatial cut; failed Stack holds its black/crimson flame more visibly before the bounded48-tick fade. These cosmetic durations never extend the12-tick native verdict window. Marker leases retain the full tail even at the shortest recovery. Spread success/failure use distinct existing Doll dissolve/execution accents. Client `ChorusPresentation` reports verdict age/positions separately from actual native impact, allowing invisible/late effects to be diagnosed without guessing from HP.
 
 Spread circles use the280px radius in `CrimsonChorusRules` (previously200): rendering and pair-overlap failure share this constant. Eight complete nonoverlapping circles fit in a four-by-two layout inside the unchanged field with tight vertical margins. Stack radius, failure budgets and chorus timing are unchanged.
 

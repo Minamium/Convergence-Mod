@@ -35,14 +35,8 @@ internal static class AzureCeremony
         float lean=frame==6?MathF.Exp(-Math.Max(0,release)/9)*-.045f:MathF.Sin(age*.021f)*.008f;
         // Logical pixel export, drawn at native density rather than shrinking a
         // 128px illustration. Align the bodies across sword/hover atlas cells.
-        batch.Draw(art,center-screen,src,(sealedGirl?new Color(181,220,239):Color.White)*alpha,lean,
-            new(24,frame>=4?40:35),1f,SpriteEffects.None,0);
-        if(cutting)
-        {
-            var sword=center+new Vector2(-6,release<0?-46:-20);
-            float glow=release<0?charge*.6f:MathF.Exp(-release/6);
-            Bloom(batch,sword,45+charge*35,glow);
-        }
+        AzureLioraPresentation.Draw(batch,art,center-screen,src,frame,age,t,consume,alpha,lean,
+            sealedGirl,cutting,charge,release);
         if(sealedGirl)AzureMaterials.Effect(batch,"IcePass",center,new(98,140),tilt,age,new(.28f,fracture,0,0));
         float broken=t-AzureRules.IceBreak;
         if(broken>=0 && broken<125)

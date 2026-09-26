@@ -385,6 +385,13 @@ internal sealed class FirstSeveranceFeedback
                 PlayCritical("CrushCataclysm", combat, tick, due);
                 scoreImpactTicks = 24;
             }
+            if (combat.CompletedPhaseCycles == 0)
+            {
+                // Contact precedes a delayed brittle release, only for the
+                // first broken shell rather than every subsequent clamp.
+                Cue(2, FirstSeveranceScoreGeometry.CrushImpactTick + FirstSeveranceCoreRupture.BurstDelay,
+                    "ShellBreak", .82f);
+            }
         }
         else if (combat.Substate == FirstSeveranceSubstate.RotatingBlade)
         {

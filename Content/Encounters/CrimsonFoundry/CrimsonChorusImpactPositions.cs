@@ -8,6 +8,15 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 internal static class CrimsonChorusImpactPositions
 {
     internal const int TailTicks = 48;
+    internal const int FailureCutTicks = 36;
+    internal const float FailureCutRadius = 18;
+    internal static int LeaseEnd(in CrimsonChorusPlan plan) => Math.Max(plan.End + 20, plan.Fire + TailTicks);
+    // A cosmetic hold, never an extension of the native 12-tick verdict hit.
+    internal static float FailureAlpha(float elapsed)
+    {
+        if (elapsed < 0 || elapsed >= TailTicks) return 0;
+        return 1 - CrimsonInvocation.Ease((elapsed - 12) / (TailTicks - 12));
+    }
     internal static void Write(BinaryWriter writer, CrimsonPoint[] positions)
     {
         writer.Write((byte)positions.Length);

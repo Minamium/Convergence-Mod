@@ -5,7 +5,7 @@ status: provisional
 owners:
   - art
   - gameplay
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - first_severance.doll_identity
 aliases:
@@ -18,6 +18,9 @@ related_code:
   - Client/Encounters/FirstSeverance/FirstSeveranceDollSurface.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceShellSurface.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceCoreRupture.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceMechanicalCore.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceEnergyCore.cs
   - Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs
   - Assets/Textures/NPCs/DollTheater
 related_docs:
@@ -81,7 +84,19 @@ Orchis的な白髪／黒衣／人形性、Avatar of Emptiness的な非対称の�
 
 `FirstSeveranceDollPose`はTerrariaに依存しない**このBoss専用の提示座標とUV**で、プレビューとゲームが共有する。`DollFrames`が追加atlasのフレーム／固定pivotを所有。`DollMannerisms`はNPCの23秒の非等間隔な待機動作と会話中の控えめな手の動きを選択。すべてsimulation tick基準で、NPCの位置・Ready・capture時刻は変えない。`DollCapture`も同様に共有し、32×52のNPCを28区画へ隙間なく分割。各片の分離→短い減速→加速吸入をaccepted SpawnIntro ageから計算し、中央で縮小・消失する。描画用actor／ゲーム乱数／保持particleを増やさず、ReducedEffectsでは横への変位と回転を抑え、残像・全面flashを省く。
 
-`DollVisuals`は読み取り専用の状態から描画し、殻・攻撃・終了処理は既存所有者が制御する。巨大な身体はdamage actorではなく、既存の固定Coreが唯一の被ダメージ領域。四隅／×印は使わない。Phase III以降は遠景の身体とは別に、実際の前景Core位置へ同じ機械球を表示する。ゲーム中に触れられる位置を見た目に合わせて移さない。
+`DollVisuals`は読み取り専用の状態から描画し、殻・攻撃・終了処理は既存所有者が制御する。巨大な身体はdamage actorではなく、既存の固定Coreが唯一の被ダメージ領域。四隅／×印は使わない。Phase III以降は遠景の身体とは別に、実際の前景Core位置へ球体を表示する。最初の挟撃までは機械球、その後は下記のエネルギー球。ゲーム中に触れられる位置を見た目に合わせて移さない。
+
+### 中央球の挟撃破裂 — 2026-09-27
+
+Phase IIIの最初の`RemoteCrush`で、左右の爪の接触と同時に金属球が横へ潰れ、両端から紫の亀裂が内部へ走る。短く持ちこたえてから、亀裂と同じ分割の金属片が急加速して飛散し、内側の紫エネルギー球を露出する。接触・亀裂保持・破裂・残骸の減速／落下を別の曲線で繋ぐ。時間の正本は`FirstSeveranceCoreRupture`、接触時点だけ既存`ScoreGeometry.CrushImpactTick`を共有する。攻撃時間、即死判定、HPや当たり領域は変更しない。
+
+- `MechanicalCore`の同じ半球mesh上に23片の分割を用い、亀裂と飛散する板を対応させる。元の金属反射を保持したまま破裂し、別画像への一瞬の切替にしない。
+- `EnergyCore`とLuminance管理の`DollCoreEnergy`材質が暗い内部空間、紫の細い光流、球面陰影と薄い周縁の揺らぎを描く。円形HUD、輪の照準、全面白フラッシュは追加しない。既存砲口軸でエネルギー表面が窪み、継続するビームも同じ実座標から出る。
+- 最初の破裂後は次のPhase III周回、Final移行、FinalのDPSチェックでも紫球を維持する。勝利時は紫球のまま既存の消滅演出へ収束し、敗北時はその材質のまま消える。次のFightは金属へ戻る。
+- 見たかどうかのローカルフラグは持たず、accepted phase／completed cycle／action ageから材質を復元する。途中参加・再接続で破裂の過去イベントを再生しない。新しいpacket／保存フィールドは不要。
+- 既存の挟撃衝撃音に、破裂時の既存`ShellBreak`を一度だけ接続する。追加の音楽／音量全体の変更なし。画面揺れは既存の最大値合成と設定を尊重。Reduced Effectsは板の飛距離と周縁光／材質流速を抑える。
+
+`tools/preview-doll-core.ps1`は実mesh／材質の明暗背景・軽減設定・分数時刻の確認用。ゲームの爪／砲口との最終的な見え方、リモート描画、音、FPSは別のユーザー実機確認。履歴／証拠は[今回の記録](../../evidence/2026-09-27-doll-core-rupture.json)へ。
 
 ### 連続した異様な動き
 

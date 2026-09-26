@@ -33,8 +33,8 @@ public sealed class AzureBoss : ModNPC
     { if (source is AzureActorSource a) { Runtime = a.Runtime; State = a.State; } }
     public override bool CheckActive() => false;
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
-    public override bool? CanBeHitByItem(Player p, Item item) => State.Contains(p.whoAmI) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile p) => State.Contains(p.owner) ? null : false;
+    public override bool? CanBeHitByItem(Player p, Item item) => State.CanFight(p.whoAmI) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile p) => State.CanFight(p.owner) ? null : false;
     public override void AI()
     {
         NPC.timeLeft = NPC.activeTime;
@@ -68,12 +68,13 @@ public sealed class AzureWorm : ModNPC
     private AzurePhase posePhase;
     private Vector2 retreatFrom;
     private float retreatAngle;
+    private ulong nextNativeHitLog;
     public override string Texture => "Convergence/Assets/Textures/AzureCathedral/Vitrion";
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
     {
         NPC.width = NPC.height = 86; NPC.lifeMax = AzureRules.Life(1, true); NPC.defense = 90;
-        NPC.damage = 360; NPC.knockBackResist = 0; NPC.aiStyle = -1;
+        NPC.damage = AzureRules.NativeSourceDamage(360); NPC.knockBackResist = 0; NPC.aiStyle = -1;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.netAlways = true;
         NPC.dontTakeDamage = true; NPC.BossBar = ModContent.GetInstance<AzureBossBar>();
         if (!Main.dedServ) NPC.HitSound = SoundID.NPCHit4;
@@ -95,11 +96,21 @@ public sealed class AzureWorm : ModNPC
     }
     public override bool CheckActive() => false;
     public override bool CanHitPlayer(Player target, ref int cooldownSlot)
-        => TryGirl(out var girl) && girl!.State.Live && girl.State.WormLife > 0 && girl.State.Contains(target.whoAmI)
+        => TryGirl(out var girl) && girl!.State.Live && girl.State.WormLife > 0 && girl.State.CanFight(target.whoAmI)
         && (Index == 0 ? NPC : Head >= 0 && Head < Main.maxNPCs ? Main.npc[Head] : NPC).ai[2] == 1;
+    public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
+    {
+        if(AzureRules.DebugOneDamagePlaytest)modifiers.SetMaxDamage(1);
+    }
+    public override void OnHitPlayer(Player target, Player.HurtInfo info)
+    {
+        if(Main.netMode==NetmodeID.Server || Main.myPlayer!=target.whoAmI || Main.GameUpdateCount<nextNativeHitLog)return;
+        nextNativeHitLog=Main.GameUpdateCount+300;
+        AzurePackets.Log($"event=WormNativeImpact fight={Fight} segment={Index} slot={target.whoAmI} intended_damage=360 native_source_damage={NPC.damage} final_damage={info.Damage}");
+    }
     private bool Hittable(AzureBoss g) => AzureRules.WormDamageable(g.State.Phase,Index,g.State.Live,g.State.WormLife,g.State.WormMax);
-    public override bool? CanBeHitByItem(Player p, Item item) => TryGirl(out var g) && Hittable(g!) && g!.State.Contains(p.whoAmI) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile p) => TryGirl(out var g) && Hittable(g!) && g!.State.Contains(p.owner) ? null : false;
+    public override bool? CanBeHitByItem(Player p, Item item) => TryGirl(out var g) && Hittable(g!) && g!.State.CanFight(p.whoAmI) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile p) => TryGirl(out var g) && Hittable(g!) && g!.State.CanFight(p.owner) ? null : false;
     public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
     {
         if(Index==0 && TryGirl(out var g) && g!.State.Phase==AzurePhase.Duet)

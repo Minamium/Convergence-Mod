@@ -1,0 +1,20 @@
+{
+  "scope": "Doll Phase III first remote-claw impact fractures the central metal sphere; persistent violet energy core thereafter",
+  "build": "0.3.46 / protocol70",
+  "base_commit": "2d68c15fdd859086ac0d025a1c1233b8532fee96",
+  "authority": "Presentation only. Phase/cycle/action-age projection; no packet, saved state, hit geometry, damage, HP, reward or score timing changes.",
+  "checks": {
+    "focused_presentation_contracts": "passed: 3 cases covering exact contact, crack-before-release, fractional bounds, cycle/Final/DPS-check reconstruction and intact new fight",
+    "shader_export": "passed: FXC export and source/compiler/output hashes in compiled.json",
+    "offline_gpu": "passed: 144 hidden D3D11 frames using production metal mesh/crater/rupture envelope and compiled energy shader. Contact/cracking/separation/fade sampled at 24 ages, bright/dark and normal/reduced; energy material sampled over 4 seconds with pressure and directed single/twin bores. Lead inspected contact, opened cracks, separating plates, bright-background debris, settled/reduced energy and attached dark muzzle. No visible game UI or server was launched.",
+    "native_build": "passed: 0 errors / 4 pre-existing CS8632 warnings; isolated existing build profile, no source changes during packaging",
+    "package_admission": "passed: development solo enabled, 1-4 participants",
+    "artifact_sha256": "9398a411f8433a1c5310e8a698f8fa030362800507e6580635ec271fc6ca02fe",
+    "local_build_record": ".local/builds/20260926T180843933712Z/record.json",
+    "native_claw_contact_muzzle_final_ending_retry": "not_run: owner GUI",
+    "remote_peer_and_rejoin": "not_run: projection contracts checked, actual multiplayer rendering not observed",
+    "actual_audio_balance_zoom_ui_scale_and_frame_time": "not_run: existing world-space matrix and optional shake controls retained; no performance claim"
+  },
+  "delegation": "doll_energy_core / gpt-6-sol medium: isolated managed energy material, renderer and offline preview. Lead reviewed and integrated it, authored crack/shard/timeline/audio/endings/tests and extended the fixture with production rupture geometry. Final material revised to keep the bore dark and avoid round eye-like rims; final export recompiled and inspected. No worker branch/worktree created.",
+  "preservation": "Existing five dirty English localization files retained outside this feature commit. Other Raid implementations and accepted Doll beams/music/weapons untouched."
+}

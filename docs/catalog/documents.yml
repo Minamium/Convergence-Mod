@@ -65,13 +65,13 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: cec316422c4f5eb0de79e4e952259c500a8bb72275cc4945d55a9d55ec81ef54
+  content_sha256: 69ef7fd14be61bcc98cf2abe07627b09f0b7e5835925b0819af550aaafef57f3
   document_type: adr
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-22'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - architecture.crimson_score_authority
   aliases:
@@ -106,13 +106,13 @@ documents:
 - doc_id: adr.0028
   path: docs/adr/0028-azure-cathedral-native-actors.md
   title: 'ADR-0028: Azure Cathedral native actors and hazards'
-  content_sha256: f563bbf0569e9ad8e3c9990bb683f7ab11b53c0713d1343f109e82f918285dea
+  content_sha256: 5822ef4d8304d4453be5f06890a8a6818044e88a42d79538bf86d5607ecc2f0a
   document_type: adr
   status: accepted
   owners:
   - architecture
   - gameplay
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - authority.azure_cathedral
   aliases: []
@@ -611,14 +611,14 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: 5b1f084b21f9b5a7b73b3b8b1be7323935c0162364038a04e35726c89ceccca3
+  content_sha256: b7e2e5b59939285a76286b691b519fccc02af8f9dfba7f318d9abba48302cfcf
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-22'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - encounter.azure_cathedral.experience
   - encounter.azure_cathedral.presentation
@@ -635,14 +635,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 9d2bd1f4c921795ca26054b28ceff2336ae708ae9b24035b67568538423194ac
+  content_sha256: 767295a7a687535666b025ef8b54c00f340752dcd5eeca5ba3815bbf7f80d803
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-25'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -678,13 +678,13 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: Requiem of the Hollow Doll — 少女人形の提示仕様
-  content_sha256: a9e85ce2fa254ab7cfd9f98a419624901cad3a664d4104326f3c96c81808121a
+  content_sha256: 3583ded359612cf607f22437cfad8d2c448a5e4861103c5087bc2a2c5934f623
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - first_severance.doll_identity
   aliases:
@@ -697,6 +697,9 @@ documents:
   - Client/Encounters/FirstSeverance/FirstSeveranceDollSurface.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceShellSurface.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceCoreRupture.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceMechanicalCore.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceEnergyCore.cs
   - Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs
   - Assets/Textures/NPCs/DollTheater
   related_docs:
@@ -927,12 +930,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 1c79e4208a94612462d39ba4528c586411f9e145832fd265ba0cddeae2684665
+  content_sha256: 86778102523e25fa27a5f8ec38d3a72656ad94b8a5d4cd54bb89e00c47e3b666
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-25'
+  last_reviewed: '2026-09-27'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1326,12 +1329,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 634b9808ad7aa513653e32e542885bea62d7b5e398f020f7d7c8737ef8c8fd7d
+  content_sha256: 88ad9c47eebb9088b9b60d216a613cc57145198ea7256728b5041e98cbc8a52f
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-26'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - project.implementation_status
   aliases:

@@ -14,6 +14,7 @@
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureFlight.cs" Link="Domain/AzureFlight.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureChorusRules.cs" Link="Domain/AzureChorusRules.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureState.cs" Link="Domain/AzureState.cs" />
+    <Compile Include="../../Content/Encounters/AzureCathedral/AzureRecoveryState.cs" Link="Domain/AzureRecoveryState.cs" />
     <Compile Include="../../Client/Encounters/GhostSamurai/SamuraiRigMotion.cs" Link="Presentation/SamuraiRigMotion.cs" />
     <Compile Include="../../Client/Weapons/OboroSwordMotion.cs" Link="OboroSwordMotion.cs" />
     <Compile Include="../../Client/Weapons/OboroSwingPresentation.cs" Link="Presentation/OboroSwingPresentation.cs" />
@@ -38,6 +39,7 @@
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonSpatialCuts.cs" Link="Domain/CrimsonSpatialCuts.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonChoirRakes.cs" Link="Domain/CrimsonChoirRakes.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonState.cs" Link="Domain/CrimsonState.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonRecoveryState.cs" Link="Domain/CrimsonRecoveryState.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonInvocation.cs" Link="Domain/CrimsonInvocation.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceNativeHurt.cs" Link="Domain/FirstSeveranceNativeHurt.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCoreCannonVolley.cs" Link="Domain/FirstSeveranceCoreCannonVolley.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceMovementSyncCadence.cs" Link="Domain/FirstSeveranceMovementSyncCadence.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Development/FirstSeveranceDevelopmentPolicy.cs" Link="Domain/FirstSeveranceDevelopmentPolicy.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEndingTimeline.cs" Link="Domain/FirstSeveranceEndingTimeline.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceCoreRupture.cs" Link="Presentation/FirstSeveranceCoreRupture.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceChoreography.cs" Link="Domain/FirstSeveranceChoreography.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs" Link="Domain/FirstSeveranceScoreGeometry.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceImpalingSwords.cs" Link="Domain/FirstSeveranceImpalingSwords.cs" />

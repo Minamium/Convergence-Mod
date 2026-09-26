@@ -36,6 +36,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private bool claimed, cleaned, cancelled, enraged;
     private readonly AzureDefeats defeats = new();
     private readonly AzureChorusDirector chorus = new();
+    private AzureRecoveryController? recovery;
     private bool girlDead => defeats.Girl;
     private bool wormDead => defeats.Worm;
     private Vector2 chargeGoal, curveA, curveB, curveC, curveD;
@@ -50,6 +51,9 @@ internal sealed class AzureRuntime : IEncounterRuntime
         girlDead ? 0 : Math.Clamp(girl?.NPC.life ?? gm, 0, gm), wormDead ? 0 : Math.Clamp(worm?.NPC.life ?? wm, 0, WormPoolMax),
         (short)(worm?.NPC.whoAmI ?? -1), enraged, phase, phaseAt, stagingAt, ceremonySide);
     internal bool Matches(AzureBoss value) => !cleaned && ReferenceEquals(girl, value) && value.State.Fight == fight.Value;
+    internal bool RecoveryRequest(int sender, AzureRecoveryRequest request, bool revive)
+        => !cleaned && ending < 0 && stage is AzureStage.Countdown or AzureStage.Performance
+            && recovery?.Receive(sender, request, revive) == true;
     internal void Killed(bool isWorm)
     {
         if (cleaned || !State.Live || isWorm && phase != AzurePhase.Fury || !defeats.Mark(isWorm)) return;
@@ -95,6 +99,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
                 Scale(); girl.NPC.life = girl.NPC.lifeMax = gm;
                 music = age + 45; unlock = music + AzureRules.Intro; stage = AzureStage.Countdown;
                 if (!pedestal.Activate(fight)) return End(EncounterEndReason.Invalidated);
+                recovery = new(fight.Value, members); recovery.Project(members);
                 Project(true);
                 AzurePackets.Log($"event=AllReady fight={fight.Value} players={members.Length} girl_hp={gm} worm_hp={wm} music={music} unlock={unlock}");
                 return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Active);
@@ -121,7 +126,8 @@ internal sealed class AzureRuntime : IEncounterRuntime
                 if (!p.active || p.dead || p.ghost || p.GetModPlayer<AzureConnection>().Token != members[i].Connection)
                     members[i] = members[i] with { Out = true };
             }
-            bool allOut = Array.TrueForAll(members, m => m.Out);
+            if (ending < 0 && recovery?.Tick(State, members) == true) Project(true);
+            bool allOut = Array.TrueForAll(members, m => m.Out) || recovery?.Failed == true;
             if (ending < 0 && (allOut || girlDead && wormDead))
             {
                 ending = age; stage = allOut ? AzureStage.Defeat : AzureStage.Victory;
@@ -225,7 +231,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
     }
     private Vector2 Focus()
     {
-        var alive = Array.FindAll(members, m => !m.Out);
+        var alive = Array.FindAll(members, m => !m.Out && !m.Recovery.Downed);
         int n = (Math.Max(0, age - State.AttackEpoch) / AzureRules.ChargeTicks) % Math.Max(1, alive.Length);
         return alive.Length == 0 ? girl!.NPC.Center : Main.player[alive[n].Slot].Center;
     }
@@ -348,7 +354,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
             Spawn(AzureAttackKind.MouthBeam, girl!.NPC.Center, (Focus()-girl.NPC.Center).ToRotation()-.6f, 3200, 66, 360, 96, 180);
         if (!wormDead && (phase==AzurePhase.Fury || stagingAt<0) && phrase is 1 or 4 && t==AzureRules.VolleyFire-AzureRules.VolleyWarning)
         {
-            var alive=Array.FindAll(members,m=>!m.Out);
+            var alive=Array.FindAll(members,m=>!m.Out && !m.Recovery.Downed);
             foreach(var n in Main.ActiveNPCs)
                 if(n.ModNPC is AzureWorm part && part.Fight==fight.Value && alive.Length>0)
                 {
@@ -369,14 +375,16 @@ internal sealed class AzureRuntime : IEncounterRuntime
     private void SpawnPlan(AzureAttackPlan plan)
     {
         int slot = Projectile.NewProjectile(new AzureAttackSource(plan), new(plan.X,plan.Y), Vector2.Zero,
-            ModContent.ProjectileType<AzureAttack>(), plan.Damage, 0, Main.myPlayer);
+            ModContent.ProjectileType<AzureAttack>(), AzureRules.NativeSourceDamage(plan.Damage), 0, Main.myPlayer);
         if (slot >= Main.maxProjectiles) throw new InvalidOperationException("azure.attack_capacity");
         Main.projectile[slot].netUpdate = true;
     }
     private void Project(bool sync)
     {
         if (girl is null) return;
-        girl.State = State; if (sync) { projectionDirty=true; girl.NPC.netUpdate = true; if (worm is not null && worm.NPC.ModNPC==worm) worm.NPC.netUpdate = true; }
+        girl.State = State;
+        AzureRecoveryPlayer.Apply(girl.State);
+        if (sync) { projectionDirty=true; girl.NPC.netUpdate = true; if (worm is not null && worm.NPC.ModNPC==worm) worm.NPC.netUpdate = true; }
     }
     private EncounterRuntimeUpdate End(EncounterEndReason reason) => EncounterRuntimeUpdate.End(AzureTermination.End(reason));
     private void ClearHazards(AzureAttackKind? kind = null)
@@ -391,6 +399,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
         try
         {
             ClearHazards();
+            recovery?.Cleanup();
             foreach (NPC n in Main.ActiveNPCs)
             {
                 if (!(n.ModNPC is AzureBoss b && b.State.Fight == fight.Value || n.ModNPC is AzureWorm w && w.Fight == fight.Value)) continue;

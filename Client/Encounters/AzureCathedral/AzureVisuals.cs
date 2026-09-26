@@ -27,7 +27,7 @@ public sealed class AzureVisualConfig : ModConfig
 internal sealed class AzureVisuals : ModSystem
 {
     private Guid fight;
-    private int previous = -1, lastCharge = -1, lastFire = -1, lastDash = -1, lastChorus=-1, lastVerdict=-1;
+    private int previous = -1, lastCharge = -1, lastFire = -1, lastDash = -1, lastChorus=-1, lastVerdict=-1, lastAzureSound=-10000;
     private float shake;
     private Matrix worldToViewport;
     private Guid projectedFight;
@@ -52,9 +52,11 @@ internal sealed class AzureVisuals : ModSystem
         shake *= .85f;
         if(girl.State.MusicStart>=0)
         {
-            CueAt(girl.State.MusicStart+AzureRules.IceBreak,"PhaseRupture",.52f,9);
+            CueAt(girl.State.MusicStart+AzureRules.IceBreak,"PhaseRupture",.44f,9);
+            if(Crossed(girl.State.MusicStart+AzureRules.IceBreak)) PlayAzure("IceBreak",.56f,age,0);
             CueAt(girl.State.MusicStart+AzureRules.SwordLight,"Beams/PortalFire",.50f,5);
-            CueAt(girl.State.MusicStart+AzureRules.WormArrival,"PhaseRupture",.55f,8);
+            CueAt(girl.State.MusicStart+AzureRules.WormArrival,"PhaseRupture",.45f,8);
+            if(Crossed(girl.State.MusicStart+AzureRules.WormArrival)) PlayAzure("GlassArrival",.48f,age,0);
         }
         if (girl.State.EndAt >= 0)
         {
@@ -62,6 +64,7 @@ internal sealed class AzureVisuals : ModSystem
             {
                 CueAt(girl.State.EndAt+AzureRules.MeltRush,"Beams/PortalCharge",.38f,3);
                 CueAt(girl.State.EndAt+AzureRules.MeltContact,"PhaseRupture",.48f,8);
+                if(Crossed(girl.State.EndAt+AzureRules.MeltContact)) PlayAzure("ChainMelt",.43f,age,0);
                 CueAt(girl.State.EndAt+AzureRules.VictoryCue,"RaidVictory",.45f,4);
             }
             else CueAt(girl.State.EndAt,"RaidDefeat",.45f,9);
@@ -70,7 +73,8 @@ internal sealed class AzureVisuals : ModSystem
         {
             CueAt(girl.State.PhaseAt,"StackSummon",.45f,3);
             CueAt(girl.State.PhaseAt+AzureRules.DevourRush,"Beams/PortalFire",.56f,5);
-            CueAt(girl.State.PhaseAt+AzureRules.DevourContact,"PhaseRupture",.68f,10);
+            CueAt(girl.State.PhaseAt+AzureRules.DevourContact,"PhaseRupture",.53f,10);
+            if(Crossed(girl.State.PhaseAt+AzureRules.DevourContact)) PlayAzure("DevourFracture",.56f,age,0);
         }
         if(girl.State.Phase==AzurePhase.Fury)CueAt(girl.State.PhaseAt,"Beams/PortalFire",.57f,8);
         foreach (Projectile p in Main.ActiveProjectiles)
@@ -86,12 +90,18 @@ internal sealed class AzureVisuals : ModSystem
                 {lastVerdict=m.Plan.Fire;Play(m.Plan.Kind==AzureChorusKind.Stack?"StackRelease":"SpreadRelease",.48f,.10f);shake=Math.Max(shake,m.FailedMask==0?3:8);}
             }
             if (p.ModProjectile is not AzureAttack a || a.Plan.Fight != fight) continue;
-            if (a.Plan.Born != lastCharge && Crossed(a.Plan.Born)) { lastCharge=a.Plan.Born; Play(a.Plan.Kind==AzureAttackKind.GlacialCut?"Beams/ChargeLock":"Beams/PortalCharge",.36f,.22f); }
+            if (a.Plan.Born != lastCharge && Crossed(a.Plan.Born))
+            {
+                lastCharge=a.Plan.Born;
+                Play(a.Plan.Kind==AzureAttackKind.GlacialCut?"Beams/ChargeLock":"Beams/PortalCharge",.36f,.22f);
+                if(a.Plan.Kind!=AzureAttackKind.FrostBolt) PlayAzure("CrystalCharge",.35f,age,14);
+            }
             if (a.Plan.Fire != lastFire && Crossed(a.Plan.Fire))
             {
                 lastFire=a.Plan.Fire;
                 bool cut=a.Plan.Kind==AzureAttackKind.GlacialCut,energy=a.Plan.Kind is AzureAttackKind.MouthBeam or AzureAttackKind.FrostBolt;
                 Play(cut?"Beams/ChargeRush":energy?"Beams/PortalFire":"CoreHit",cut?.60f:energy?.62f:.50f,.20f);
+                if(a.Plan.Kind!=AzureAttackKind.FrostBolt) PlayAzure("CrystalCut",.43f,age,10);
                 shake=Math.Max(shake,a.Plan.Kind==AzureAttackKind.MouthBeam?7:cut?4.8f:2.2f);
             }
         }
@@ -100,7 +110,7 @@ internal sealed class AzureVisuals : ModSystem
             int t = AzureRules.Clock(age,girl.State.AttackEpoch);
             int serial = (age-girl.State.AttackEpoch)/AzureRules.ChargeTicks;
             if (t%AzureRules.ChargeTicks>=AzureRules.ChargeWarning && t%AzureRules.ChargeTicks<AzureRules.ChargeWarning+5 && serial!=lastDash)
-            { lastDash=serial;Play("Beams/PortalFire",.52f,-.14f);shake=6; }
+            { lastDash=serial;Play("Beams/PortalFire",.52f,-.14f);PlayAzure("WormRush",.44f,age,12);shake=6; }
         }
         for (int i=voices.Count-1;i>=0;i--) if (!SoundEngine.TryGetActiveSound(voices[i],out _)) voices.RemoveAt(i);
         previous=age;
@@ -112,10 +122,17 @@ internal sealed class AzureVisuals : ModSystem
         if(voices.Count>=24) return;
         voices.Add(SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/"+cue){Volume=volume*(Reduced?.75f:1),Pitch=pitch,MaxInstances=3}));
     }
+    private void PlayAzure(string cue,float volume,int age,int minSpacing)
+    {
+        if(Main.dedServ || voices.Count>=22 || age-lastAzureSound<minSpacing) return;
+        voices.Add(SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/AzureCathedral/"+cue)
+        {Volume=volume*(Reduced?.65f:1),MaxInstances=1}));
+        lastAzureSound=age;
+    }
     private void Reset()
     {
         foreach(var id in voices) if(SoundEngine.TryGetActiveSound(id,out var voice)) voice.Stop();
-        voices.Clear();fight=projectedFight=Guid.Empty;previous=lastCharge=lastFire=lastDash=lastChorus=lastVerdict=-1;shake=0;
+        voices.Clear();fight=projectedFight=Guid.Empty;previous=lastCharge=lastFire=lastDash=lastChorus=lastVerdict=-1;lastAzureSound=-10000;shake=0;
     }
     public override void ClearWorld()=>Reset();
     public override void OnWorldUnload()=>Reset();
