@@ -27,6 +27,7 @@
     "other_events": "One pedestal-out-of-range rejection followed by accepted preparation. Client connection refusal before server entry and SubworldLibrary EndOfStreamException during secondary-server shutdown are separate from the completed Scarlet fight."
   },
   "checks": {
+    "tooling": "passed: 65 Python command/source-contract checks; updated the old hostile-only guard to include chorus through the shared one-damage mapping, preserving native-hook and companion exclusions",
     "domain": "passed: 368 deterministic cases, including Scarlet generation/nonce/1HP/one-damage and cosmetic lease boundaries; shared instant-unlimited 1-8-player lifecycle retained",
     "exact_package_codec": "passed: protocol70, 334 round-trips / 54 malformed rejections; Scarlet appended DTO truncation/health fields covered by domain cases",
     "native_build": "passed: 0 errors / 4 pre-existing CS8632 warnings; installed normal Mods profile; source unchanged during build",
