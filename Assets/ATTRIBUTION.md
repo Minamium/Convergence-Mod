@@ -29,12 +29,12 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Source type: generated
 - Source work and URL: Original owner-directed built-in image generation; no third-party input
 - Tool/model/version: built-in image generation, exact model not exposed; ffmpeg7.1 mechanical export where noted
-- Human modifications: New dorsal-axis parts, nearest-neighbor1254x1254 to1024x1024 export; shader mirrors paired silhouettes about measured spines. Source SHA256 `16b86c11ed5a9e82422a58f2e8fc4c55455c06694e7f366fc485506b39afcac4`. No third-party sprite input; prior side-view original retained.
+- Human modifications: 2026-09-22 built-in edit of project-owned atlas: intact beetle-like crown and streamlined armor; nearest-neighbor1254x1254 to1024x1024 export. Shader mirrors measured spines. Source SHA256 `97d416ecec5aab8feeb45b7cea2e9e9756a92952c1072ace83787023fe65354c`; previous originals retained externally/Git.
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `64a45057948b83ccfa4f6fb5dff15a7d7e71fbbd7d7225ea4af1e57221928ece3`
+- SHA256: `af003eeb78c1dae5005e1b650530c725d733fd577fe1c68409329dbd814c0229`
 
 - Runtime file: `Assets/Textures/AzureCathedral/VitrionFury.png`
 - Asset ID: azure-vitrion-fury-20260921
@@ -44,12 +44,57 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Source type: generated
 - Source work and URL: Built-in edit of project-owned Vitrion atlas; no third-party image input
 - Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
-- Human modifications: Nearest-neighbor1280x1280 to1024x1024 transparent export; separate material spine alignment, articulated jaws and phase reveal. Source SHA256 `a290fe57c79684b1a570c1a5377618447532660897436d1a08391bd6bdf42ddd`; original retained in external image archive, first form unchanged.
+- Human modifications: 2026-09-22 built-in edit of project-owned Fury atlas: intact crown, pressure-glass armor, separate rather than head-slice jaws; nearest-neighbor1024x1024 transparent export. Source SHA256 `ca76ec96d68f4fa61fdfcccff04602f7edca364e371971adbc4801b2be9d4d0f`; previous original retained externally/Git.
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex alpha/material/offline composition inspection2026-09-21; owner game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `20863d0de5d8b183dbbf49c8e9a798fa915f900426bd78c8265e4be103716581`
+- SHA256: `75df6db33a742033e6e10466a443460b5fb4831e28e4affa82a851a9a19b0306`
+
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionMandible.png`
+- Asset ID: azure-mandible-20260922
+- Asset type: 384x256 transparent articulated mouth part
+- Creator: project-owner-directed original artwork with OpenAI
+- Creation/acquisition date: 2026-09-22
+- Source type: generated
+- Source work and URL: Original project mouth assembly; no third-party art input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Built-in alpha extraction; top-left pincer; mirrored about authored hinge at runtime. Source1536x1024 SHA256 `6597646c47765b16e8039f701c26ee1b120fa5145018a864f2a62c2232b5a050`; ffmpeg `crop=768:512:0:0,scale=384:256:flags=neighbor`; no manual repaint. Original retained externally.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha and production-shader preview inspection2026-09-22; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `85c576f746329684e2541941e93b8c622ee7372e5fa14319dd3aa4f2ab212aa4`
+
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionMouth.png`
+- Asset ID: azure-throat-20260922
+- Asset type: 384x256 transparent articulated mouth part
+- Creator: project-owner-directed original artwork with OpenAI
+- Creation/acquisition date: 2026-09-22
+- Source type: generated
+- Source work and URL: Original project mouth assembly; no third-party art input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Built-in alpha extraction; bottom-left open toothed throat. Source1536x1024 SHA256 `6597646c47765b16e8039f701c26ee1b120fa5145018a864f2a62c2232b5a050`; ffmpeg `crop=768:512:0:512,scale=384:256:flags=neighbor`; no manual repaint. Original retained externally.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha and production-shader preview inspection2026-09-22; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `e1b5876b7f9fe14049ace24678812207dbb8b04d17c549c1a433c1394ac50c4a`
+
+- Runtime file: `Assets/Textures/AzureCathedral/VitrionMouthClosed.png`
+- Asset ID: azure-throat-closed-20260922
+- Asset type: 384x256 transparent articulated mouth part
+- Creator: project-owner-directed original artwork with OpenAI
+- Creation/acquisition date: 2026-09-22
+- Source type: generated
+- Source work and URL: Original project mouth assembly; no third-party art input
+- Tool/model/version: built-in image generation, exact model unavailable; ffmpeg7.1 mechanical export
+- Human modifications: Built-in alpha extraction; bottom-right closed throat lamella. Source1536x1024 SHA256 `6597646c47765b16e8039f701c26ee1b120fa5145018a864f2a62c2232b5a050`; ffmpeg `crop=768:512:768:512,scale=384:256:flags=neighbor`; no manual repaint. Original retained externally.
+- License and redistribution terms: existing project original-asset terms; no third-party art license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex alpha and production-shader preview inspection2026-09-22; owner game acceptance not_run
+- Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
+- SHA256: `17ce1b7ba041a8eb278f8ffb4ce544b30bf996f0798021fb523f12bbca96e026`
 
 - Runtime file: `Assets/Textures/AzureCathedral/Cathedral.png`
 - Asset ID: azure-cathedral-20260920
@@ -94,7 +139,7 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `8d43d6aeb9c28d0e9153dba2bd8cec58d7fdef6f3e8f16c2a4c9e45c1c588ebe`
+- SHA256: `7f5e84ad6ae38f81c1e7b875475fddc31df9ecbeb4ebd7af3772df64b146fe93`
 
 - Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
 - Asset ID: azure-eighth-white-night-20260920
@@ -319,6 +364,24 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - SHA256: `53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b`
 - Source SHA256: `55250e8e4894fb4d12bee34e6d546914606d71cca0e75c1c556d5f45188d83a6`
 
+### ScarletCluster original shader export — 2026-09-22
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletCluster.fxc`
+- Asset ID: scarlet-cluster-plasma-20260922
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-22
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletCluster.fx`; no foreign shader/artwork copied
+- Tool/model/version: FXC compiler/options and source/export identities in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: spherical flowing plasma, sparse forecast grains and harmless comet-tail passes; existing project-authored Doll WideCharge/WideFire cues reused without editing recordings
+- License and redistribution terms: original project asset under existing project terms; Luminance supplies runtime noise textures, not vendored
+- Required attribution: retain this provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-22; actual compiled FNA GPU frames inspected, native game/MP acceptance not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, Final cluster orb
+- Source SHA256: `4f02e9b86d7bf77fdbf65431ce1d3e1ec949751552b5f067c6688db80edf5bdc`
+- Export SHA256: `064f2124d4a40f0a0d2f9ef2725593cf6c64905a10d6009adcd5cba880c8e8d8`
+
 ### ScarletSorcery original shader export — 2026-09-20
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fxc`
@@ -329,15 +392,79 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Source type: original
 - Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletSorcery.fx`; no foreign shader/artwork copied
 - Tool/model/version: FXC compiler/options and source/export identities in `Assets/AutoloadedEffects/Shaders/compiled.json`
-- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; September20 crossflow receiver vapor and continuous microflutter/contracting slash residue. September21 exposes tear palette parameters for Liora's cyan variant while preserving Scarlet's red defaults. Runtime motion/composition in `ScarletSorcery.cs`; independently adapted behavioral reference recorded in [F18](../docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20), no external code/art/audio copied.
+- Human modifications: etched red/black seals, white-to-red spatial tears and flowing black flame; September20 crossflow receiver vapor and continuous microflutter/contracting slash residue. September21 exposes tear palette parameters for Liora's cyan variant while preserving Scarlet's red defaults. September22 adds a legible ink core/crimson lip/pale moving filaments to failed Stack flames; existing masked creature regions are recomposed in code for the sacrificial giant, without new image assets. Runtime motion/composition in `ScarletSorcery.cs`; independently adapted behavioral reference recorded in [F18](../docs/research/WOTG_RAID_BENCHMARK.md#f18--orderbringer-cursor-hit-reference-2026-09-20), no external code/art/audio copied.
 - License and redistribution terms: original project asset under existing project terms; Luminance supplies its runtime noise, not vendored
 - Required attribution: retain this provenance and source/export manifest
 - Reviewer and review date: Codex,2026-09-20; actual compiled FNA GPU frames inspected, game/MP acceptance not_run
 - Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, orb-to-invocation and chorus sections
 
+September22 transmutation adds original directional red-energy streams in `TransfusionPass`; no sampled audio or foreign material. Current source/export identities remain in `compiled.json`.
+
+### ScarletApparitions original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletApparitions.fxc`
+- Asset ID: scarlet-apparitions-energy-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: adjacent `ScarletApparitions.fx`; no third-party code/art copied
+- Tool/model/version: FXC/options/source-export hashes in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: flowing emissive organic skin, Crown furnace jets and Mantle hook residues; retained original PNGs
+- License and redistribution terms: original project asset under existing project terms; installed Luminance noise borrowed at runtime
+- Required attribution: retain provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-25; linked-production GPU frames inspected; native acceptance pending
+
+### ScarletAvatarAnatomy original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletAvatarAnatomy.fxc`
+- Asset ID: scarlet-avatar-anatomy-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: adjacent `ScarletAvatarAnatomy.fx`; independent equations, no external code/art
+- Tool/model/version: FXC/options/source-export hashes in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: turbulent nucleus, arterial ribs, flowing organic support tendrils, local shadow shroud and sparks
+- License and redistribution terms: original project asset under existing project terms; installed Luminance noise borrowed at runtime
+- Required attribution: retain provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-25; actual compiled GPU frames inspected; native acceptance pending
+
+### ScarletAvatarComposite original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletAvatarComposite.fxc`
+- Asset ID: scarlet-avatar-composite-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: adjacent `ScarletAvatarComposite.fx`; independent implementation informed by separated Avatar rendering in [benchmark](../docs/research/WOTG_RAID_BENCHMARK.md), no copied source/assets
+- Tool/model/version: FXC/options/source-export hashes in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: local emission extraction/blur, body composite and restrained material distortion; not a global postprocess
+- License and redistribution terms: original project asset under existing project terms; Luminance dependency resources are not redistributed
+- Required attribution: retain provenance and source/export manifest
+- Reviewer and review date: Codex,2026-09-25; actual body/extraction/composite GPU passes inspected; native acceptance pending
+
+### ScarletChoir original shader export — 2026-09-25
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletChoir.fxc`
+- Asset ID: scarlet-choir-organic-energy-20260925
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-25
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletChoir.fx`; no third-party art or shader source copied
+- Tool/model/version: FXC compiler, options and hashes pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: five original passes for retained organic albedo, emissive anatomy, flowing wing/sleeve membranes, vascular heart and sparks; no bitmap modification
+- License and redistribution terms: original project asset under existing project terms; Luminance noise borrowed at runtime, never vendored
+- Required attribution: retain this provenance and source/export manifest
+- Reviewer and review date: Codex, 2026-09-25; linked-production FNA material sequences inspected; native visual acceptance remains owner-tested
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md` Luminance presentation section
+
 ### ScarletSurface original shader export — 2026-09-17
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSurface.fxc`
+  September22 revision adds original noise-eroded red edges and molten UV flow, paired with client mesh deformation for Act absorption and Victory. Zero ceremony values retain the existing ordinary surface. No new source bitmap or external artwork.
 - Asset ID: scarlet-v2-scarletsurface-20260917
 - Asset type: compiled original HLSL effect
 - Creator: project-directed independent implementation by OpenAI for Minamium
@@ -418,6 +545,8 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Prompt or brief location: the following final generation brief
 - Brief: Original tall faceless black/crimson shroud with uneven branch horns, four ivory claws, hollow torso/red heart and long tendrils. True transparency, no machinery, gore, text or HUD.
 - SHA256: `2d417b7c36b9ecc12ec3e6c64a9e8f4dfb3821fef43ae3f959c72bcbb652d282`
+
+September25 presentation revision: the `ThornChoir.png` bytes above remain unchanged. Original `ScarletChoir` shader/mesh code adds independently articulated four-arm anatomy and energy materials; Luminance noise is borrowed at runtime, not redistributed. The rejected nine-cell armor atlas and its provenance are preserved in the ignored local asset archive and are not packaged. No Avatar/WotG artwork or shader code is incorporated.
 
 - Runtime file: `Assets/Textures/CrimsonFoundry/CrimsonConductor.png`
 - Asset ID: crimson-invocation-crimsonconductor-0311

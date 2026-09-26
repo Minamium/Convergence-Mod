@@ -43,6 +43,11 @@ internal sealed class CrimsonVisuals : ModSystem
         return tick + (Main.gamePaused ? 0f : (float)Math.Clamp((Stopwatch.GetTimestamp() - clockReceived) / (double)Stopwatch.Frequency * 60, 0, 1));
     }
     public override void PostSetupContent() => CrimsonRig.Load();
+    internal static float EndingElapsed(CrimsonBoss boss)
+    {
+        var self = ModContent.GetInstance<CrimsonVisuals>();
+        return self.fight == boss.State.Fight && self.endingAt >= 0 ? Math.Max(0, RenderAge(boss)-self.endingAt) : 0;
+    }
     public override void Unload() { Reset(); CrimsonRig.Unload(); }
     private static readonly Rectangle Pixel = new(0, 0, 1, 1);
     internal static bool Reduced => ModContent.GetInstance<CrimsonVisualConfig>().ReducedEffects;
@@ -68,10 +73,29 @@ internal sealed class CrimsonVisuals : ModSystem
             int gate=boss.State.MusicStart+CrimsonChoreography.SummonAt;
             if(previousAge<gate && age>=gate && age-gate<8) { Cue("PhaseRupture",.48f,age+150);shake=11; }
         }
+        if (boss.State.Phase > 0)
+        {
+            int release = boss.State.PhaseStart + (boss.State.Phase == 3 ? CrimsonEnsemble.FinalRelease : CrimsonEnsemble.ActRelease);
+            if (previousAge < release && age >= release && age - release < 8)
+            { Cue("PhaseRupture", .48f, age + 150); shake = boss.State.Phase == 3 ? 15 : 7; }
+            if (boss.State.Phase == 3)
+            {
+                float t=age-boss.State.PhaseStart;
+                shake=Math.Max(shake,CrimsonEnsemble.BloodPressure(t)*4.5f);
+                int absorb=boss.State.PhaseStart+155;
+                if(previousAge<absorb && age>=absorb && age-absorb<8) Cue("Beams/WideCharge",.44f,age+160);
+            }
+        }
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && endingAt < 0)
         {
             endingAt = age;
             Cue(boss.State.Stage == CrimsonStage.Victory ? "RaidVictory" : "RaidDefeat", .40f, age + 150); shake = 8;
+        }
+        if (boss.State.Stage == CrimsonStage.Victory && endingAt >= 0)
+        {
+            float t=age-endingAt;
+            shake=Math.Max(shake,8*Ease(t/14)*(1-Ease((t-90)/52)));
+            if(previousAge<endingAt+92 && age>=endingAt+92 && age-endingAt-92<8) { Cue("PhaseRupture",.44f,age+58);shake=13; }
         }
         foreach (Projectile p in Main.ActiveProjectiles)
         {
@@ -116,7 +140,7 @@ internal sealed class CrimsonVisuals : ModSystem
         }
         if (Reduced || !ModContent.GetInstance<CrimsonVisualConfig>().ScreenShake || shake < .05f) return;
         float t = Main.GameUpdateCount % 6000;
-        Main.screenPosition += new Vector2(MathF.Sin(t * 2.3f), MathF.Cos(t * 1.9f)) * Math.Min(shake, 11);
+        Main.screenPosition += new Vector2(MathF.Sin(t * 2.3f), MathF.Cos(t * 1.9f)) * Math.Min(shake, 15);
     }
     public override void PostDrawTiles()
     {
@@ -215,12 +239,12 @@ internal sealed class CrimsonVisuals : ModSystem
             if (br.Y > 0 && br.Y <= view.Height) Fill(new(left, Math.Max(0, bottom - 2), Math.Max(0, right - left), 2), edge);
         }
         bool intro = state.MusicStart >= 0 && age < state.MusicStart + CrimsonChoreography.OpeningTicks;
-        bool manifest = state.FinalStart >= 0 && age < state.FinalStart + CrimsonInvocation.ManifestTicks;
+        bool manifest = state.FinalStart >= 0 && age < state.FinalStart + CrimsonEnsemble.FinalTransition;
         bool cinematic = state.Stage == CrimsonStage.Deployment || intro || manifest || endingAt >= 0;
         if (cinematic)
         {
             float clock = endingAt >= 0 ? age - endingAt : manifest ? age - state.FinalStart : intro ? age - state.MusicStart : age;
-            float alpha = endingAt >= 0 || manifest ? Math.Min(Ease(clock / 22), Ease((150 - clock) / 32))
+            float alpha = endingAt >= 0 || manifest ? Math.Min(Ease(clock / 22), Ease(((manifest ? CrimsonEnsemble.FinalTransition : 150) - clock) / 32))
                 : CrimsonInvocation.OpeningBars(state.Stage, age, state.MusicStart, CrimsonChoreography.OpeningTicks);
             Fill(new(0, 0, view.Width, (int)(view.Height * .11f)), Color.Black * alpha);
             Fill(new(0, (int)(view.Height * .89f), view.Width, (int)(view.Height * .12f)), Color.Black * alpha);
@@ -235,18 +259,20 @@ internal sealed class CrimsonVisuals : ModSystem
         foreach (var m in state.Members)
         {
             Player p = Main.player[m.Slot]; if (!p.active) continue;
-            Vector2 pos = Vector2.Transform(p.Top - Main.screenPosition, Main.GameViewMatrix.TransformationMatrix) - new Vector2(0, 34);
-            if (m.Slot != Main.myPlayer)
-            {
-                if (m.Ready) Utils.DrawBorderString(batch, "Ready!", pos, new Color(255, 174, 158), .68f, .5f);
-                continue;
-            }
+            Vector2 pos = Vector2.Transform(p.Top - Main.screenPosition - new Vector2(0, 24), Main.GameViewMatrix.TransformationMatrix);
+            if (m.Ready && !p.dead) Utils.DrawBorderString(batch, "Ready!", pos, new Color(255, 174, 158), .70f, .5f);
+            if (m.Slot != Main.myPlayer) continue;
             int ready = 0; foreach (var peer in state.Members) if (peer.Ready) ready++;
-            var button = new Rectangle((int)Math.Clamp(pos.X - 78, 4, view.Width - 160), (int)Math.Clamp(pos.Y - 8, 4, view.Height - 36), 156, 30);
+            // Same physical-pixel pill as Doll/Cathedral. Only the Ready! label
+            // follows a player; the button never inherits world zoom or UI scale.
+            var button = new Rectangle(view.Width / 2 - 100, 64, 200, 36);
             bool hover = button.Contains(Main.mouseX, Main.mouseY);
             Fill(button, (hover ? new Color(52, 21, 26) : new Color(15, 14, 18)) * .94f);
-            Fill(new(button.X, button.Bottom - 2, button.Width * ready / state.Members.Length, 2), new Color(222, 63, 77));
-            Utils.DrawBorderString(batch, (m.Ready ? "Ready!" : "READY") + $"  {ready}/{state.Members.Length}", new(button.Center.X, button.Y + 6), new Color(255, 205, 188), .68f, .5f);
+            Color accent = m.Ready ? new Color(255, 174, 158) : new Color(211, 194, 194);
+            Fill(new(button.X + 12, button.Bottom - 1, (button.Width - 24) * ready / state.Members.Length, 1), accent * .75f);
+            Fill(new(button.X + 14, button.Y + 13, 6, 6), accent * (m.Ready ? 1 : .25f));
+            Utils.DrawBorderString(batch, "READY", new(button.X + 30, button.Y + 8), accent, .7f);
+            Utils.DrawBorderString(batch, $"{ready}/{state.Members.Length}", new(button.Right - 13, button.Y + 8), Color.Silver, .7f, 1);
             if (hover)
             {
                 Main.LocalPlayer.mouseInterface = true;

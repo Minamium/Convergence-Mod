@@ -4,7 +4,7 @@ document_type: spec
 status: accepted
 owners:
   - art
-last_reviewed: 2026-09-21
+last_reviewed: 2026-09-22
 source_of_truth_for:
   - encounter.azure_cathedral.asset_brief
 aliases: []
@@ -16,7 +16,7 @@ related_docs:
 
 # Azure Cathedral asset brief
 
-All five current images are original built-in image generation, not API/CLI generation; no specific model name is verifiable. No Calamity/WotG artwork was supplied or copied. Generated originals remain in the local external image archive; only game exports are distributed. [Feature spec](ENCOUNTER_SPEC.md) owns the design and [Attribution](../../../Assets/ATTRIBUTION.md#azure-cathedral--2026-09-20) owns rights and export identity. These prompts are optional asset-maintenance references, not normal startup reading.
+Current images are original built-in image generation, not API/CLI generation; no specific model name is verifiable. No Calamity/WotG artwork was supplied or copied. Generated originals remain in the local external image archive; only game exports are distributed. [Feature spec](ENCOUNTER_SPEC.md) owns the design and [Attribution](../../../Assets/ATTRIBUTION.md#azure-cathedral--2026-09-20) owns rights and export identity. These prompts are optional asset-maintenance references, not normal startup reading.
 
 ## Integration
 
@@ -58,7 +58,21 @@ Background extraction edit: Remove the entire dark blue background and all soft 
 
 Use case: stylized-concept. Asset type: transparent production sprite PARTS atlas for an ORIGINAL ice-glass giant worm named Vitrion, for a2D action game. Square image, precise2by2 equal quadrant grid, isolated parts with real transparent alpha. This is a modular top-down DORSAL VIEW leviathan, absolutely NOT a side-view fish or koi, no fabric fins. Every part has strict bilateral symmetry about its horizontal longitudinal axis, paired identical structures above and below, all parts facing RIGHT. Top-left quadrant: massive wedge-like crystalline DRAGON WORM HEAD, viewed straight from above, symmetrical twin sets of swept-back horns and armored mandibles, narrow bright icy water-laser mouth at the right tip, axial cyan core. Top-right: one stout overlapping annular BODY SEGMENT viewed from above, centered spinal ridge along X, two symmetrical sweeping solid glass armor blades on both sides; the front/back ends connect left-right to identical segments. Bottom-left: an alternate same-scale annular BODY SEGMENT with three paired shorter glass blades, same silhouette size and connection axis. Bottom-right: long slender symmetric TAIL with root left, needle point right, paired decreasing spikes; no fish tail. Each silhouette completely contained in its quadrant with ample12% transparent gutter. Render as deliberate clean sharp PIXEL ART, clustered faceted ice and pale cyan stained glass, dark navy silver frames, strong bright sharp cyan edge highlights, quieter deep teal glass interiors; not a photoreal/painted illustration, no airbrush noise. Strong simple shape hierarchy, noble formidable ancient glacial cathedral guardian. Do not reproduce any existing game boss. No background, no text, no labels, no grid lines, no cast ground shadows, no extra motifs. Source orientation and exact2x2 layout are critical for a continuously articulated game worm.
 
-## VitrionFury.png / 0.3.33
+## Intact armor and articulated beetle mouth / 0.3.37
+
+Built-in edits of the project-owned first/Fury atlases; original detached mouth assembly. Keep two2×2 atlases with existing head/body/alternate/tail roles, but the head is now one rigid carapace. New `VitrionMandible.png`, `VitrionMouth.png` and `VitrionMouthClosed.png` provide independently articulated pincers, toothed throat and closed lamella. One pincer is mirrored to guarantee paired bilateral roots; do not split the entire head texture. `AzureMaterials.Mouth` owns measured hinge/orientation and `AzureGlass.PartPass` supplies the same caustics, pressure and dissolution as armor. Frost exits the opening; no detached UI ring is added.
+
+Production briefs:
+
+> First-form atlas: edit the project-owned2×2 Vitrion sheet, preserving dorsal right-facing roles and transparent padding. A single intact dark cobalt beetle-like crown with a small recessed nose aperture, no separable skull halves or baked moving jaws. Streamlined cyan stained-glass armor with navy interiors and silver rim clusters; bold paired swept-back blades, no fish fins, gore, guns, scenery or letters. Retain readable connected body/tail roots and genuine transparent alpha.
+
+> Fury atlas: preserve that exact layout and attachment axes, with leaner smoked-indigo pressure glass, stronger white-cyan stress veins and sharper paired crystalline armor. Keep one intact head shell and inset mouth, not a bisected head. Original project design only; no copied game sprite.
+
+> Detached assembly: original icy stained-glass stag-beetle pincers with fixed left-hand hinge, hooked right tips and internal teeth; a toothed recessed throat and closed lamella. Navy glass, bright cyan facets and silver edge clusters, transparent outside every part, no ground/background. Generate2×2 equal cells: upper pincer, lower pincer, open throat, closed throat. Preserve the first upper pincer as the symmetric pair's common source. Remove the surrounding background with the built-in tool, preserving interior throat detail and part positions.
+
+Exports are mechanical nearest-neighbor only: first atlas1254²→1024²; Fury atlas→1024²; final1536×1024 assembly cropped to768×512 top-left/bottom-left/bottom-right, then384×256 each. Original sources and earlier art remain external/Git history. Alpha was checked numerically and against bright/dark actual-shader previews; an RGB-only preview may display hidden background colors. No manual painted/reconstructed alpha or extracted third-party art.
+
+## Superseded VitrionFury.png brief / 0.3.33
 
 Dedicated second-form atlas, not an overwrite of `Vitrion.png`. Built-in image edit of the project-owned original atlas only. Generated1280×1280 →1024×1024 with ffmpeg `scale=1024:1024:flags=neighbor`, preserving real alpha. Four unchanged cell roles; material mirrors each axial spine, morphs from the old atlas after the bite, and code opens the front two mandibles around a retained rear hinge. Authored texture changes armor; motion, pressure waves and transition remain continuous code/shader work. Source/export hashes are in Attribution.
 

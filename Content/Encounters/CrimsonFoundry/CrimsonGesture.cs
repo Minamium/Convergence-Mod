@@ -126,6 +126,7 @@ public sealed class CrimsonGesture : ModProjectile
     {
         if (source == 3) return false; // Conductor stays at the authority-owned center.
         float age = Clock(boss);
+        if (boss.State.Phase == 3) return false; // Bound apparitions never stage at an attack's aim point.
         if (!TryPose(boss, source, age, out var plan)) return false;
         var point = plan.Body(age); var previous = plan.Body(age - 1);
         npc.Center = new(point.X, point.Y);

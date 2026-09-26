@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -47,11 +48,12 @@ public sealed class CrimsonPactBuff : ModBuff
 public sealed class CrimsonCompanion : ModProjectile
 {
     private int grounded, blocked;
-    internal const int Cycle = 150, Fire = 70;
+    private readonly int[] targetSlots = new int[CrimsonCovenantRules.MaximumTargets];
+    internal const int Cycle = CrimsonCovenantRules.Cycle, Fire = CrimsonCovenantRules.Fire;
     public override string Texture => "Convergence/Assets/Textures/CrimsonFoundry/ScarletConjurer";
     public override void SetStaticDefaults()
     {
-        Main.projPet[Type] = true; ProjectileID.Sets.MinionTargettingFeature[Type] = true;
+        Main.projPet[Type] = true; // HP-priority covenant, not the manual single-target Doll behavior.
         ProjectileID.Sets.MinionSacrificable[Type] = true; ProjectileID.Sets.CultistIsResistantTo[Type] = true;
     }
     public override void SetDefaults()
@@ -73,7 +75,8 @@ public sealed class CrimsonCompanion : ModProjectile
         if (!owner.active || owner.dead || authority && !owner.HasBuff(ModContent.BuffType<CrimsonPactBuff>()))
         { Projectile.Kill(); return; } // Remote player buffs are not a lifetime authority.
         Projectile.timeLeft = 2;
-        NPC? target = !owner.noItems && !owner.CCed ? Target(owner) : null;
+        int count = authority && !owner.noItems && !owner.CCed ? Targets() : 0;
+        NPC? target = count > 0 ? Main.npc[targetSlots[0]] : null;
         if (authority)
         {
             float before = Projectile.ai[0]; Projectile.ai[0] = target is null ? 0 : (before + 1) % Cycle;
@@ -121,23 +124,27 @@ public sealed class CrimsonCompanion : ModProjectile
         float face = target is null ? Projectile.velocity.X : target.Center.X - Projectile.Center.X;
         if (Math.Abs(face) > .3f) Projectile.spriteDirection = Math.Sign(face);
         Projectile.rotation = MathHelper.Lerp(Projectile.rotation, floating ? Projectile.velocity.X * .009f : 0, .16f);
-        if (authority && target is not null && (int)Projectile.ai[0] == Fire)
-            Projectile.NewProjectile(Projectile.GetSource_FromThis(), Orb(Projectile),
-                (target.Center - Orb(Projectile)).SafeNormalize(Vector2.UnitX), ModContent.ProjectileType<CrimsonCompanionRay>(),
-                Projectile.damage, Projectile.knockBack, Projectile.owner, 0, target.whoAmI, Projectile.identity);
+        if (authority && (int)Projectile.ai[0] == Fire - CrimsonCovenantRules.ChargeTicks)
+            for (int i = 0; i < count; i++)
+            {
+                NPC enemy = Main.npc[targetSlots[i]];
+                Projectile.NewProjectile(new CrimsonCovenantSource(enemy, (byte)count), enemy.Center, Vector2.Zero,
+                    ModContent.ProjectileType<CrimsonCompanionRay>(), (int)Math.Min(int.MaxValue, (double)Projectile.damage * CrimsonCovenantRules.DamageFactor(count)), Projectile.knockBack,
+                    Projectile.owner, 0, CrimsonCovenantRules.HalfSpan(enemy.width, count), Projectile.identity);
+            }
     }
-    private NPC? Target(Player owner)
+    private int Targets()
     {
-        NPC? best = null; float distance = 1600 * 1600;
-        if (owner.HasMinionAttackTargetNPC && Main.npc[owner.MinionAttackTargetNPC] is { } manual
-            && manual.CanBeChasedBy(Projectile) && Vector2.DistanceSquared(manual.Center, Projectile.Center) < distance) return manual;
+        Span<CrimsonCovenantTarget> candidates = stackalloc CrimsonCovenantTarget[Main.maxNPCs];
+        int count = 0;
         foreach (NPC n in Main.ActiveNPCs)
         {
             float d = Vector2.DistanceSquared(n.Center, Projectile.Center);
-            if (n.CanBeChasedBy(Projectile) && d < distance && Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, n.position, n.width, n.height))
-            { distance = d; best = n; }
+            if (n.CanBeChasedBy(Projectile) && d < 1600 * 1600
+                && Collision.CanHitLine(Projectile.position, Projectile.width, Projectile.height, n.position, n.width, n.height))
+                candidates[count++] = new(n.whoAmI, n.life);
         }
-        return best;
+        return CrimsonCovenantRules.Select(candidates[..count], targetSlots);
     }
     internal static Vector2 Orb(Projectile p) => p.Center + new Vector2(p.spriteDirection * 28, -13).RotatedBy(p.rotation);
     internal static bool Parent(Projectile child, out Projectile parent)
@@ -154,38 +161,85 @@ public sealed class CrimsonCompanion : ModProjectile
     }
 }
 
+internal sealed record CrimsonCovenantSource(NPC Target, byte Count) : IEntitySource
+{ public string Context => "ScarletCovenantClamp"; }
+
+// A local incarnation guard is sufficient: only the projectile owner follows
+// a target throughout charge AND flight. Other peers consume native positions,
+// widths and the frozen batch count, never choose targets or damage multipliers.
+internal sealed class CrimsonCovenantIncarnation : GlobalNPC
+{
+    public override bool InstancePerEntity => true;
+    private static ulong sequence;
+    internal ulong Value;
+    public override void OnSpawn(NPC npc, IEntitySource source) => Value = ++sequence;
+}
+
 public sealed class CrimsonCompanionRay : ModProjectile
 {
-    internal float Opening => CrimsonInvocation.Ease(Projectile.ai[0] / 7) * CrimsonInvocation.Ease((64 - Projectile.ai[0]) / 10);
-    internal float Reach => 1500 * CrimsonInvocation.Ease(Projectile.ai[0] / 7);
+    private NPC? target;
+    private ulong incarnation;
+    private int parentWait;
+    internal byte BatchCount { get; private set; }
+    internal float Size => CrimsonCovenantRules.Scale(BatchCount);
+    internal float Opening => CrimsonCovenantRules.Opening(Projectile.ai[0]);
+    internal float Reach => Projectile.ai[1] * 2;
     public override string Texture => "Terraria/Images/Projectile_1";
     public override void SetStaticDefaults()
-    { ProjectileID.Sets.MinionShot[Type] = true; ProjectileID.Sets.DrawScreenCheckFluff[Type] = 1700; }
+    { ProjectileID.Sets.MinionShot[Type] = true; ProjectileID.Sets.DrawScreenCheckFluff[Type] = 2700; }
     public override void SetDefaults()
     {
         Projectile.width = Projectile.height = 14; Projectile.friendly = true; Projectile.DamageType = DamageClass.Summon;
-        Projectile.penetrate = -1; Projectile.tileCollide = false; Projectile.ignoreWater = true; Projectile.timeLeft = 64;
+        Projectile.penetrate = -1; Projectile.tileCollide = false; Projectile.ignoreWater = true;
+        Projectile.timeLeft = CrimsonCovenantRules.Duration; Projectile.netImportant = true;
         Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 12;
     }
     public override bool ShouldUpdatePosition() => false;
     public override bool CanHitPvp(Player target) => false;
     public override bool? CanCutTiles() => false;
+    public override bool? CanDamage() => BatchCount is >= 1 and <= CrimsonCovenantRules.MaximumTargets && Opening > 0 && CrimsonCompanion.Parent(Projectile, out _) ? null : false;
+    public override void OnSpawn(IEntitySource source)
+    {
+        if (source is CrimsonCovenantSource own)
+        { target = own.Target; BatchCount = own.Count; incarnation = target.GetGlobalNPC<CrimsonCovenantIncarnation>().Value; }
+    }
+    public override void SendExtraAI(BinaryWriter writer) => writer.Write(BatchCount);
+    public override void ReceiveExtraAI(BinaryReader reader)
+    {
+        BatchCount = CrimsonCovenantRules.ReadBatchCount(reader);
+    }
     public override void AI()
     {
-        if (!CrimsonCompanion.Parent(Projectile, out var parent)) { Projectile.Kill(); return; }
-        Projectile.Center = CrimsonCompanion.Orb(parent); Projectile.ai[0]++;
-        int slot = (int)Projectile.ai[1];
-        if (slot >= 0 && slot < Main.maxNPCs && Main.npc[slot].CanBeChasedBy(Projectile))
+        if (!float.IsFinite(Projectile.ai[0]) || !float.IsFinite(Projectile.ai[1])
+            || Projectile.ai[0] < 0 || Projectile.ai[0] > CrimsonCovenantRules.Duration || Projectile.ai[1] is < 100 or > 2400)
+        { Projectile.Kill(); return; }
+        if (!CrimsonCompanion.Parent(Projectile, out _))
         {
-            float target = (Main.npc[slot].Center - Projectile.Center).ToRotation();
-            Projectile.velocity = Projectile.velocity.ToRotation().AngleTowards(target, .035f).ToRotationVector2();
+            // A remote native child can precede its parent packet. It stays harmless.
+            if (Projectile.owner == Main.myPlayer || ++parentWait > 20) Projectile.Kill();
+            return;
         }
+        parentWait = 0;
+        Projectile.ai[0]++;
+        if (Projectile.owner == Main.myPlayer)
+        {
+            if (target is not null && target.active && target.CanBeChasedBy(Projectile)
+                && target.GetGlobalNPC<CrimsonCovenantIncarnation>().Value == incarnation)
+            {
+                Projectile.Center = target.Center;
+                Projectile.ai[1] = CrimsonCovenantRules.HalfSpan(target.width, BatchCount);
+            }
+            else { Projectile.Kill(); return; }
+            if (Projectile.ai[0] % 4 == 0 || Projectile.ai[0] == CrimsonCovenantRules.ChargeTicks) Projectile.netUpdate = true;
+        }
+        if (Projectile.ai[0] >= CrimsonCovenantRules.Duration) Projectile.Kill();
     }
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
-        if (Opening <= 0 || !CrimsonCompanion.Parent(Projectile, out _)) return false;
+        if (BatchCount == 0 || Opening <= 0 || !CrimsonCompanion.Parent(Projectile, out _)) return false;
         float point = 0;
-        return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), Projectile.Center,
-            Projectile.Center + Projectile.velocity.SafeNormalize(Vector2.UnitX) * Reach, 24 * Opening, ref point);
+        Vector2 start = Projectile.Center + new Vector2(Projectile.ai[1], 0);
+        return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), start,
+            start - new Vector2(Reach * CrimsonInvocation.Ease((Projectile.ai[0] - CrimsonCovenantRules.ChargeTicks) / 7), 0), 48 * Size * Opening, ref point);
     }
 }

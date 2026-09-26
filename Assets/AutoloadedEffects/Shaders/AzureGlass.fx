@@ -14,13 +14,9 @@ float2 orbSize;
 struct VI { float4 P:POSITION0; float4 C:COLOR0; float2 U:TEXCOORD0; };
 struct VO { float4 P:SV_POSITION; float4 C:COLOR0; float2 U:TEXCOORD0; };
 VO VS(VI v) { VO o=(VO)0; o.P=mul(v.P,uWorldViewProjection); o.C=v.C; o.U=v.U; return o; }
-float4 GlassPS(VO i):COLOR0
+float4 GlassSurface(VO i,float4 a,float2 p)
 {
- float2 p=(i.U-region.xy)/region.zw;
- float2 sample=p; sample.y=spine-abs(p.y-.5);
- sample.x+=sin(p.y*19+clock*2)*dissolve*.035;
- float2 alternate=sample;alternate.y=furySpine-abs(p.y-.5);
- float4 a=lerp(tex2D(art,region.xy+sample*region.zw),tex2D(furyArt,region.xy+alternate*region.zw),fury);clip(a.a-.005);
+ clip(a.a-.005);
  float n=tex2D(noiseMap,p*2+float2(clock*.032,-clock*.075+signal.w*.17)).r;
  float caustic=pow(saturate(1-abs(n-.48)*5),8);
  float light=pow(saturate(.5+.5*sin(p.x*9+p.y*7-clock*1.8-signal.w*.35)),22);
@@ -33,6 +29,21 @@ float4 GlassPS(VO i):COLOR0
  float edge=exp(-abs(meltNoise-dissolve*1.25)*32)*step(.001,dissolve);
  color+=float3(.22,.70,.95)*edge*a.a;
  return float4(lerp(color,float3(.003,.008,.014)*a.a,silhouette),a.a)*i.C*signal.x*retain;
+}
+float4 GlassPS(VO i):COLOR0
+{
+ float2 p=(i.U-region.xy)/region.zw;
+ float2 sample=p;sample.y=spine-abs(p.y-.5);
+ sample.x+=sin(p.y*19+clock*2)*dissolve*.035;
+ float2 alternate=sample;alternate.y=furySpine-abs(p.y-.5);
+ float4 a=lerp(tex2D(art,region.xy+sample*region.zw),tex2D(furyArt,region.xy+alternate*region.zw),fury);
+ return GlassSurface(i,a,p);
+}
+float4 PartPS(VO i):COLOR0
+{
+ // Detached pincers/throat share refraction, pressure and dissolve with the
+ // intact armor, but are never atlas-spine mirrored or head-slice transformed.
+ return GlassSurface(i,tex2D(art,i.U),i.U);
 }
 float4 EnergyOrbPS(VO i):COLOR0
 {
@@ -134,6 +145,7 @@ float4 CirclePS(VO i):COLOR0
 technique AzureGlass
 {
  pass AutoloadPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 GlassPS(); }
+ pass PartPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 PartPS(); }
  pass BackdropPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 BackdropPS(); }
  pass ShardPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 ShardPS(); }
  pass RiftPass { VertexShader=compile vs_3_0 VS(); PixelShader=compile ps_3_0 RiftPS(); }

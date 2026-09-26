@@ -65,13 +65,13 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: c5649dc0544ad3abe90ef79077fa51443e813dbe30ee6481c0f5c984c5b73a91
+  content_sha256: cec316422c4f5eb0de79e4e952259c500a8bb72275cc4945d55a9d55ec81ef54
   document_type: adr
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-16'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - architecture.crimson_score_authority
   aliases:
@@ -106,7 +106,7 @@ documents:
 - doc_id: adr.0028
   path: docs/adr/0028-azure-cathedral-native-actors.md
   title: 'ADR-0028: Azure Cathedral native actors and hazards'
-  content_sha256: 3b9ad88104136d61ab9cb693584cce7cdd24831b7f74c4612ca207cfae19160c
+  content_sha256: f563bbf0569e9ad8e3c9990bb683f7ab11b53c0713d1343f109e82f918285dea
   document_type: adr
   status: accepted
   owners:
@@ -595,12 +595,12 @@ documents:
 - doc_id: encounter.azure-cathedral.assets
   path: docs/encounters/azure-cathedral/ASSET_BRIEF.md
   title: Azure Cathedral asset brief
-  content_sha256: 3c096629356f762129618d85ed63325a630188edb551970088336a7705596f94
+  content_sha256: 9181da61baa114bcb012ce95efd1bd1b01ee83fc4d5d3b04629ecf9ae50814ea
   document_type: spec
   status: accepted
   owners:
   - art
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - encounter.azure_cathedral.asset_brief
   aliases: []
@@ -611,14 +611,14 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: e727b584f6da43a44cf24f8ef420f745b5ed8de67dbbc0d678d61709c90e2e60
+  content_sha256: 5b1f084b21f9b5a7b73b3b8b1be7323935c0162364038a04e35726c89ceccca3
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-22'
   source_of_truth_for:
   - encounter.azure_cathedral.experience
   - encounter.azure_cathedral.presentation
@@ -635,14 +635,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: d15c8157d5ef8ba7900f5e33a6e1c2db8288b473466360b186f7da8594f3c381
+  content_sha256: 9d2bd1f4c921795ca26054b28ceff2336ae708ae9b24035b67568538423194ac
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-25'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -927,12 +927,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 4017599a6f4ea0dfa9fccc0ede952875aae0a918a9bc57d60e77b05d1f84dec4
+  content_sha256: 1c79e4208a94612462d39ba4528c586411f9e145832fd265ba0cddeae2684665
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-25'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1326,12 +1326,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 5a9fd7cd395a5b9a1f7631844864d93e1c1321cef0cfa89b7d4dbe833e5b2173
+  content_sha256: 634b9808ad7aa513653e32e542885bea62d7b5e398f020f7d7c8737ef8c8fd7d
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-21'
+  last_reviewed: '2026-09-26'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1690,13 +1690,13 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: 011b91c15e31723c15e2dbe39ffb81e44f2870deaff393a87cec5e126e726997
+  content_sha256: d24fc30b218510fed0f23fcc6e1804ede5639458453b6d42572fc39523332a21
   document_type: plan
   status: accepted
   owners:
   - quality
   - networking
-  last_reviewed: '2026-09-07'
+  last_reviewed: '2026-09-21'
   source_of_truth_for:
   - verification.test_matrix
   aliases:

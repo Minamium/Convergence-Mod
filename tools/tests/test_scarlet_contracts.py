@@ -27,7 +27,7 @@ class ScarletContracts(unittest.TestCase):
         self.assertLess(text.index('plans[i].Validate()'),text.index('Projectile.NewProjectile'))
         self.assertIn('cycle.Admit(phraseEnd, recoveryEnd)',text)
         self.assertIn('cycle.TryComplete(age, chorus is not null)',text)
-        self.assertIn('ClearChorus(source)',text)
+        self.assertIn('ClearChorus(source, preserveVerdict)',text)
         self.assertIn('if (!TryScheduleChorus()) SchedulePhrase()',text)
         self.assertLess(text.index('TickChorus();'),text.index('cycle.TryComplete('))
         self.assertIn('if (phase < 3 && thresholdLatched',text)
@@ -163,3 +163,69 @@ class ScarletContracts(unittest.TestCase):
                      'prep.EncounterSequence == snapshot.EncounterSequence','prep.GroundX - core.GroundCenter.X',
                      '!OwnsDollPreparation(core)','&& !onStage) Retire(NPC)'):
             self.assertIn(rule,text)
+
+    def test_sacrifice_validates_all_native_owners_before_retiring_any(self):
+        text=(CONTENT/'CrimsonRuntime.cs').read_text()
+        body=text[text.index('private bool SacrificeSummons()'):text.index('private void SpawnSummon')]
+        guard='child.NPC.ModNPC != child || !Matches(child)'
+        self.assertLess(body.index(guard),body.index('child.NPC.active = false'))
+        self.assertNotIn('StrikeNPC',body)
+        self.assertNotIn('checkDead',body)
+        self.assertIn('defeated == CrimsonInvocation.AllDefeated',body)
+        self.assertIn('!SacrificeSummons()) return End(EncounterEndReason.EncounterActorMissing)',text)
+
+    def test_companion_uses_owner_target_incarnation_and_resolved_tail_is_harmless(self):
+        companion=(CONTENT/'CrimsonCompanion.cs').read_text()
+        for rule in ('CrimsonCovenantRules.Select','CrimsonCovenantIncarnation','InstancePerEntity => true','Projectile.owner == Main.myPlayer'):
+            self.assertIn(rule,companion)
+        chorus=(CONTENT/'CrimsonChorus.cs').read_text()
+        self.assertIn('CrimsonChorusImpactPositions.Read',chorus)
+        self.assertIn('ImpactPositions.AsSpan().SequenceEqual',chorus)
+        self.assertIn('TryBoss(Plan, out var boss, Resolved)',chorus)
+        self.assertIn('!CrimsonChorus.TryBoss(Impact.Plan, out var boss)',chorus)
+
+    def test_ready_pill_matches_doll_and_does_not_follow_player_or_ui_scale(self):
+        doll=(ROOT/'Client/Encounters/FirstSeverance/FirstSeverancePreparationVisuals.cs').read_text()
+        scarlet=(CLIENT/'CrimsonVisuals.cs').read_text()
+        self.assertIn('new Rectangle(width / 2 - 100, 64, 200, 36)',doll)
+        self.assertIn('new Rectangle(view.Width / 2 - 100, 64, 200, 36)',scarlet)
+        self.assertIn('InterfaceScaleType.None',scarlet)
+        self.assertNotIn('Math.Clamp(pos.X - 78',scarlet)
+        self.assertNotIn('Main.UIScale',scarlet)
+        self.assertIn('if (m.Ready && !p.dead)',scarlet)
+
+    def test_cluster_flight_uses_actual_end_and_fixed_conductor_can_overlap_next_bar(self):
+        text=(CONTENT/'CrimsonRuntime.cs').read_text()
+        self.assertIn('last[source] = Math.Max(last[source], musicStart + CrimsonEnsemble.NoteEnd(technique, note))',text)
+        self.assertIn('begins[source] = phase == 3 ? age : Math.Max(age, poseUntil[source])',text)
+        self.assertIn('plan.LastEnd + CrimsonRhythm.LeaseTicks',text)
+        self.assertIn('cycle.Admit(phraseEnd, recoveryEnd)',text)
+        visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text()
+        self.assertIn('cluster.TryBoss(out var parent) && parent == boss',visual)
+        self.assertIn('ScarletClusters.Draw(batch, cluster.Plan, age)',visual)
+
+    def test_covenant_follows_live_target_width_and_uses_the_same_scale_for_damage_geometry(self):
+        text=(CONTENT/'CrimsonCompanion.cs').read_text()
+        ray=text.split('public sealed class CrimsonCompanionRay')[1]
+        self.assertNotIn('Projectile.ai[0] <= CrimsonCovenantRules.ChargeTicks',ray)
+        self.assertIn('target.GetGlobalNPC<CrimsonCovenantIncarnation>().Value == incarnation',ray)
+        self.assertIn('Projectile.Center = target.Center',ray)
+        self.assertIn('CrimsonCovenantRules.HalfSpan(target.width, BatchCount)',ray)
+        self.assertIn('else { Projectile.Kill(); return; }',ray)
+        self.assertIn('48 * Size * Opening',ray)
+        self.assertIn('writer.Write(BatchCount)',ray)
+        self.assertIn('ray.Size',(CLIENT/'CrimsonCompanionVisuals.cs').read_text())
+        self.assertIn('CrimsonCovenantRules.DamageFactor(count)',text)
+
+    def test_terminal_melt_is_visual_only_and_final_draw_does_not_duplicate_native_sacrifices(self):
+        rig=(CLIENT/'CrimsonRig.cs').read_text()
+        self.assertIn('ScarletInvocationScene.Victory',rig)
+        self.assertIn('if (boss!.State.Phase == 3) return false',rig)
+        self.assertIn('material.TrySetParameter("ceremony", new Vector2(dissolve, melt))',rig)
+        material=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletSurface.fx').read_text()
+        self.assertIn('float2 uv=i.U*region.zw+region.xy',material)
+        self.assertIn('material.TrySetParameter("frameSpan"',rig)
+        self.assertNotIn('(i.U-region.xy)/region.zw',material)
+        runtime=(CONTENT/'CrimsonRuntime.cs').read_text()
+        self.assertIn('ending + 150',runtime)
+        self.assertIn('CrimsonEnsemble.SacrificeComplete',runtime)

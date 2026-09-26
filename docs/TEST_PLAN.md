@@ -5,7 +5,7 @@ status: accepted
 owners:
   - quality
   - networking
-last_reviewed: 2026-09-07
+last_reviewed: 2026-09-21
 source_of_truth_for:
   - verification.test_matrix
 aliases:
@@ -38,6 +38,7 @@ Current [encounter](encounters/first-severance/ENCOUNTER_SPEC.md) and [recovery]
 - Pass `-- --list` or `-- --filter "name substring"` to `dotnet run --project Tests/Convergence.DomainTests/Convergence.DomainTests.csproj --configuration Release`. An unmatched filter fails, rather than reporting a false pass. Use the built DLL directly if inputs have not changed.
 - [check-codec.ps1](../tools/check-codec.ps1) takes an explicit compiled assembly and records its hash. PowerShell 7+ is required. Public candidates, like development builds, must pass enabled solo admission. [check-package-admission.ps1](../tools/check-package-admission.ps1) inspects the actual TMOD without a game load; `tools/dev.py` runs it automatically. `-InspectOnly` is for diagnosing historical artifacts, never a publication gate.
 - For native-Hurt/teardown changes, [check-native-hurt.ps1](../tools/check-native-hurt.ps1) takes `-PackagePath`, `-TModLoaderPath` and an ignored `-AssemblyOutput`. It checks installed HurtModifiers math and the packaged Doll player/buff types and exact-Fight cleanup, then extracts that package's DLL for the codec check. It does not start a game or prove installed accessory hooks/multiplayer behavior.
+- For Azure shared-HP/sky lifecycle changes, run `pwsh -NoProfile -File tools/check-azure-lifecycle.ps1 -PackagePath <candidate.tmod> -TModLoaderPath <installed/tModLoader.dll>`. Actual native StrikeNPC/CheckDead and SkyManager methods exercise nonlethal sharing, lethal/late-hit retention, exact-Fight isolation and reset/deactivation/retry/fade-tail recovery. Optional `-ExpectOldFailure` reproduces the old0.3.33 defects; it is not a candidate pass. This isolated engine fixture does not play a world or certify accessories, network transport or on-screen acceptance.
 - [Tool tests](../tools/tests/test_development_tools.py) exercise verifier option exclusion, build reuse, fail-fast/exit propagation and source identity without starting builds or network calls.
 - [Cinematic coordinate guards](../tools/tests/test_presentation_contracts.py) keep start/phase/result callbacks in unscaled physical-viewport space; run through the same `unittest discover -s tools/tests` CI entry. These prevent the107% double-scale regression but do not replace actual screen checks.
 - [Normal CI](../.github/workflows/repository-checks.yml) runs static, tool, linked domain and compiled codec checks on push/PR, with no game installation.

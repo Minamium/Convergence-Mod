@@ -49,6 +49,28 @@ internal static class ScarletSorcery
         var n=new Vector2(-d.Y,d.X)/d.Length()*width;
         Draw(batch,from-n,d,n*2,age,new(1,1,alpha,0),new(d.Length(),width,0,1),"FlamePass");
     }
+    internal static void CovenantClamp(SpriteBatch batch, Vector2 center, float halfSpan, float age, float scale = 1)
+    {
+        const int fire = CrimsonCovenantRules.ChargeTicks, end = CrimsonCovenantRules.Duration;
+        float charge = Math.Clamp(age / fire, 0, 1), opening = CrimsonCovenantRules.Opening(age);
+        float alpha = CrimsonInvocation.Ease(age / 9) * (1 - CrimsonInvocation.Ease((age - (end - 12)) / 12));
+        Vector2 offset = new(halfSpan, 0);
+        float radius = (48 + charge * 45 + MathF.Exp(-Math.Abs(age - fire) / 8) * 18) * scale;
+        Seal(batch, center + offset, radius, .27f, MathF.PI / 2, age, charge, alpha, false, 1);
+        Seal(batch, center - offset, radius, .27f, MathF.PI / 2, age, charge, alpha, false, 2);
+        CrimsonEnergy.Begin();
+        CrimsonEnergy.Add(center + offset, -Vector2.UnitX, halfSpan * 2 * (age < fire ? 1 : CrimsonInvocation.Ease((age - fire) / 7)),
+            (age < fire ? 24 : 24 * opening) * scale, age, fire, end, alpha, CrimsonVisuals.Reduced, 0, true);
+        CrimsonEnergy.Draw(batch);
+    }
+    internal static void Transfusion(SpriteBatch batch, Vector2 from, Vector2 to, float width, float age, float alpha, float seed)
+    {
+        Vector2 delta = to - from;
+        if (delta.LengthSquared() < 1 || alpha < .001f) return;
+        Vector2 normal = new Vector2(-delta.Y, delta.X) / delta.Length() * width;
+        Draw(batch, from - normal, delta, normal * 2, age, new(1, 0, alpha, CrimsonVisuals.Reduced ? 1 : 0),
+            new(delta.Length(), width, seed, 0), "TransfusionPass");
+    }
     private static void Draw(SpriteBatch batch,Vector2 origin,Vector2 u,Vector2 v,float age,Vector4 signal,Vector4 shape,string pass)
     {
         using var scope=new Convergence.Client.Graphics.WorldGraphicsScope(batch);

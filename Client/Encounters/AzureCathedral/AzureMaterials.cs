@@ -63,7 +63,7 @@ internal static class AzureMaterials
             shader.TrySetParameter("region", uv);
             float emerging = AzureRules.Ease((age-girl.State.MusicStart-AzureRules.WormArrival-i*6)/24);
             shader.TrySetParameter("spine",spine);
-            shader.TrySetParameter("furySpine",cell<2?.555f:.455f);
+            shader.TrySetParameter("furySpine",cell<2?.610f:.485f);
             float fury=girl.State.Phase==AzurePhase.Devouring?AzureRules.FuryReveal(age-girl.State.PhaseAt,i):girl.State.Enraged?1:0;
             shader.TrySetParameter("fury",fury);
             float melt=melting?AzureRules.Melt(age-girl.State.EndAt,i):0;
@@ -72,31 +72,48 @@ internal static class AzureMaterials
             Vector2 sag=new(0,melt*melt*(60+i*2));
             var size=new Vector2(scale*(1-melt*.32f),scale*(1+flex+melt*.45f));
             float jaw=girl.State.Phase==AzurePhase.Devouring?AzureRules.JawOpening(age-girl.State.PhaseAt):fury*(.20f+.08f*MathF.Sin(age*.075f));
-            if(i==0 && jaw>.001f)Head(shader,part.NPC.Center+sag-screen,size,angle,uv,jaw);
-            else Quad(shader, part.NPC.Center + sag - screen,size,angle,uv,Color.White);
+            // The head carapace remains one rigid silhouette. Only separate
+            // mouth/mandible sprites articulate; never cut the head image in half.
+            Quad(shader, part.NPC.Center + sag - screen,size,angle,uv,Color.White);
+            if(i==0)Mouth(shader,part.NPC.Center+sag-screen,angle,jaw,age,melt,presence*emerging,silhouette);
         }
         shader.TrySetParameter("silhouette",0f);shader.TrySetParameter("dissolve",0f);
         Array.Clear(parts);
     }
-    // Three articulated pieces from the authored head. Rear armor stays attached;
-    // the front upper/lower mandibles rotate about their shared throat hinge.
-    private static void Head(ManagedShader shader,Vector2 center,Vector2 size,float rotation,Vector4 uv,float opening)
+    private static void Mouth(ManagedShader shader,Vector2 center,float rotation,float opening,float age,float melt,float presence,bool silhouette)
     {
-        Vector2 axis=rotation.ToRotationVector2();const float joint=.36f;
-        Quad(shader,center-axis*size.X*(1-joint)*.5f,new(size.X*joint,size.Y),rotation,new(uv.X,uv.Y,uv.Z*joint,uv.W),Color.White);
-        Vector2 pivot=center+axis*size.X*(joint-.5f);
+        const string path="Convergence/Assets/Textures/AzureCathedral/";
+        float shrink=1-melt*.32f;
+        Vector2 axis=rotation.ToRotationVector2(),normal=new(-axis.Y,axis.X);
+        Vector2 mouth=center+axis*(AzureRules.MouthReach*shrink);
+        shader.TrySetParameter("signal",new Vector4(presence,opening,AzureVisuals.Reduced?1:0,0));
+        shader.SetTexture(ModContent.Request<Texture2D>(path+"VitrionMouth").Value,0,SamplerState.PointClamp);
+        Quad(shader,mouth,new Vector2(72,28+opening*104)*shrink,rotation,new(0,0,1,1),Color.White*opening,"PartPass");
+        shader.SetTexture(ModContent.Request<Texture2D>(path+"VitrionMouthClosed").Value,0,SamplerState.PointClamp);
+        Quad(shader,mouth,new Vector2(76,62)*shrink,rotation,new(0,0,1,1),Color.White*(1-opening),"PartPass");
+        shader.SetTexture(ModContent.Request<Texture2D>(path+"VitrionMandible").Value,0,SamplerState.PointClamp);
         for(int half=0;half<2;half++)
         {
-            float sign=half==0?-1:1,angle=rotation+sign*opening*.36f;
-            var local=new Vector2(size.X*(1-joint)*.5f,sign*size.Y*.25f).RotatedBy(angle);
-            Quad(shader,pivot+local,new(size.X*(1-joint),size.Y*.5f),angle,
-                new(uv.X+uv.Z*joint,uv.Y+uv.W*half*.5f,uv.Z*(1-joint),uv.W*.5f),Color.White);
+            float sign=half==0?-1:1;
+            // One original pincer mirrored about the throat, with an authored
+            // hinge at (0.155,0.45), so roots do not slide when the jaws rotate.
+            float tremble=AzureVisuals.Reduced?0:MathF.Sin(age*.23f)*opening*.009f;
+            float angle=rotation+sign*(.24f+opening*.60f+tremble);
+            Vector2 size=new Vector2(112,75)*shrink;
+            Vector2 pivot=center+axis*(99*shrink)+normal*(sign*15*shrink);
+            Vector2 offset=new Vector2(size.X*.345f,-sign*size.Y*.05f).RotatedBy(angle);
+            Quad(shader,pivot+offset,size,angle,half==0?new(0,0,1,1):new(0,1,1,-1),Color.White,"PartPass");
+        }
+        if(opening>.03f && !silhouette)
+        {
+            shader.TrySetParameter("signal",new Vector4(presence*opening*(1-melt)*.26f,0,0,9));
+            Quad(shader,mouth+axis*32,new(190,110),rotation,new(0,0,1,1),Color.White,"FrostPass");
         }
     }
     internal static void Frost(SpriteBatch batch, AzureBoss girl, float age)
     {
         var state=girl.State;var field=state.Field;
-        float presence=AzureRules.Ease(age/120)*(state.EndAt<0?1:1-AzureRules.Ease((age-state.EndAt)/AzureRules.ExitDuration(state.Stage)));
+        float presence=AzureRules.Ease(age/120)*(state.EndAt<0?1:AzureRules.EndingSky(state.Stage,age-state.EndAt));
         using var scope=new WorldGraphicsScope(batch);var shader=Begin();shader.TrySetParameter("clock",age/60);
         for(int layer=0;layer<3;layer++)
         {

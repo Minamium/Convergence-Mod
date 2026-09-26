@@ -38,10 +38,16 @@ public sealed class CrimsonBoss : ModNPC
     public override void AI()
     {
         NPC.timeLeft = NPC.activeTime;
+        // The giant avatar shares the conductor's existing HP budget, not a fifth target.
+        Vector2 root = NPC.Center;
+        NPC.width = State.Phase == 3 ? CrimsonEnsemble.BodyWidth : 28;
+        NPC.height = State.Phase == 3 ? CrimsonEnsemble.BodyHeight : 56;
+        NPC.Center = root;
         // Project vulnerability on EVERY peer, otherwise clients never submit hits.
         NPC.dontTakeDamage = !Fresh || !State.Vulnerable(VisualAge) || NPC.life <= State.DamageFloor(3);
         NPC.boss = State.Stage is CrimsonStage.Countdown or CrimsonStage.Performance;
-        if (State.TargetLife > 0) NPC.lifeMax = State.TargetLife;
+        if (State.TargetLife > 0) NPC.lifeMax = CrimsonPhaseRules.BarMaximum(State.Phase, State.TargetLife);
+        NPC.GivenName = State.Phase == 3 ? Terraria.Localization.Language.GetTextValue("Mods.Convergence.CrimsonFoundry.FinalApparitionName") : string.Empty;
         CrimsonGesture.ProjectMotion(NPC, this, 3);
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {

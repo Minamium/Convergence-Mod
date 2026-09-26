@@ -11,8 +11,8 @@
       "output_sha256": "9830c065065c36562ec30b5c2ee453e0c5e3ded65fdf4f67fd2388d4a16d82c8"
     },
     "AzureGlass.fx": {
-      "source_sha256": "7fc6b3668b28e1b282c4e123987b66ed248663045326e64cb4dec305c3bb2ccb",
-      "output_sha256": "8d43d6aeb9c28d0e9153dba2bd8cec58d7fdef6f3e8f16c2a4c9e45c1c588ebe"
+      "source_sha256": "26588595df1a19d70ea6d6ceca35b06776f80f820995107858a279bcf765fec9",
+      "output_sha256": "7f5e84ad6ae38f81c1e7b875475fddc31df9ecbeb4ebd7af3772df64b146fe93"
     },
     "CrimsonReactor.fx": {
       "source_sha256": "e016c33b62286a5781a530d027a7a6b8ae99999bceccd52bbb7cd54933b90607",
@@ -50,9 +50,29 @@
       "source_sha256": "b569ef5eb648aabfb653e8e828ab771dba293ce55b5177eefb08fe336d801970",
       "output_sha256": "a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70"
     },
+    "ScarletApparitions.fx": {
+      "source_sha256": "5a36791f1c6f4409df7b8b0ea92f1fe5adad27dc453f900d384b0480e496829b",
+      "output_sha256": "60ca489a6b9ffbc6192bceebe0af1efe108aad89817a8b45605bb7814b81de18"
+    },
+    "ScarletAvatarAnatomy.fx": {
+      "source_sha256": "8f4cb8a21342b81ceda507d75b0c2913107cfbac2dc7902d2264c82f8220c89c",
+      "output_sha256": "99e6842658198d5183c070f5ac32f54060c28fd3dec330149f11b73916d15b9b"
+    },
+    "ScarletAvatarComposite.fx": {
+      "source_sha256": "31c61f24094a553852b5383f9c6412f18ab0d848ed7b322846ec2486d3496d0e",
+      "output_sha256": "9f15b25ac2aa1eb3c0b6c5fc75bc11298e4d653f021d2177b492a321cce8aaea"
+    },
     "ScarletBackdrop.fx": {
       "source_sha256": "ab810c34dda508df2d8f23b3bba37be316937803500811b7778599d87de63f16",
       "output_sha256": "8c6a64ddf9ad29cd2e2537aa19013587120c7340c6a1577c908726e7f1eb2323"
+    },
+    "ScarletChoir.fx": {
+      "source_sha256": "ed46468fff4817b2e5f0cd2ed13878482af575d80cb9ed58f41b3bd9a358f376",
+      "output_sha256": "eb77cca178285ab86c4e7f353f8c2fd682d2158b2f8b5040a985bb84b28aa951"
+    },
+    "ScarletCluster.fx": {
+      "source_sha256": "4f02e9b86d7bf77fdbf65431ce1d3e1ec949751552b5f067c6688db80edf5bdc",
+      "output_sha256": "064f2124d4a40f0a0d2f9ef2725593cf6c64905a10d6009adcd5cba880c8e8d8"
     },
     "ScarletResidue.fx": {
       "source_sha256": "b0a99ea0bc87086f2e190b678c9a4882e75c68538a6e8d54dc6f686b8a424090",
@@ -63,12 +83,12 @@
       "output_sha256": "53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b"
     },
     "ScarletSorcery.fx": {
-      "source_sha256": "e9843d23f0b0ca6846b388eb72115a84a6a05fe0ffc8660b2ec8f1a680cc616f",
-      "output_sha256": "963b724a40338569e64cd96f85df00788c2831fa0defcb71915b72e6e8a3ee79"
+      "source_sha256": "4ff0ae497a1aba6edd7e16440e78fb5247e7a35089632608ce09d9542cd0ace4",
+      "output_sha256": "6f6a3492f7c29ebb8250ac19aeba2705950a5f5c38d386bc6a53146a681738aa"
     },
     "ScarletSurface.fx": {
-      "source_sha256": "46dee4522c642c9adc2e2a4cdbce54319ddcaa32d14d80877571e18d8414a717",
-      "output_sha256": "768340fbe8468a352d87baad0228dc40f44dd3d127612b6fef6e3b22ddd8ed3e"
+      "source_sha256": "e39d2b568e64fb06a3fc05b9a57cd69215199983c7f1b7a8d1d372c728bb380f",
+      "output_sha256": "e064f64737d1e742aa1891c658a63fcee93a6bab9dddfe36bbea564779d42122"
     }
   }
 }

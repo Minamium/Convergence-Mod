@@ -33,8 +33,8 @@ internal static class CrimsonChoreography
     }
     internal static CrimsonTechnique Technique(int phase, int phrase, int note)
         => note == BasicNotes ? CrimsonTechnique.SideBeams
-            : phase == 2 && phrase % 2 == 0 ? CrimsonTechnique.SpatialGrid
-            : phase == 1 && phrase % 2 == 0 ? CrimsonTechnique.SpatialRift : CrimsonTechnique.TrackingBeam;
+            : phase == 2 ? CrimsonTechnique.ChoirRakes
+            : phase == 1 ? CrimsonTechnique.SpatialRift : CrimsonTechnique.TrackingBeam;
     // Same capped eighteen-tick velocity lead as Doll's eight pursuit prisms.
     // One authority observation at the warning; never drag a shown forecast.
     internal static CrimsonPoint Predict(RaidFieldGeometry field, CrimsonPoint position, CrimsonPoint velocity)

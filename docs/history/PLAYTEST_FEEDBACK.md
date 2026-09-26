@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-21
+last_reviewed: 2026-09-25
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -18,6 +18,22 @@ related_docs:
 # Playtest feedback ledger
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
+
+## Choir organic energy direction — 2026-09-25 / 0.3.40
+
+Owner rejects the nine-part armor redesign and small attack-linked wiggle; the original summoned creature was preferable. Avatar reference illustrates dark negative space against unmistakable luminous anatomy, not a request to copy that Boss. Restore the original four-arm source and separate joint choreography, vascular heart, flowing energy sleeves/wings and real-motion trails. Preserve combat clocks/geometry; retire the rejected draft to the local asset archive. Actual compiled-material frame sequences, bright/dark and Reduced Effects reviews are separate from native playtest/remote/performance acceptance, which remain owner-owned. Current behavior belongs to the [Scarlet visual contract](../encounters/crimson-foundry/ENCOUNTER_SPEC.md#luminance-presentation-v2).
+
+## Azure ending alignment and chorus lattice — 2026-09-22 / 0.3.39 → 0.3.40
+
+Owner reports ending cues preceding the slow melt, apparent falling ice outside Stack, undersized Spread and requests staggered slash grids in both forms. Two solo attempts finish Defeat then Victory; the latter has one successful/one failed Stack and one resolved successful Spread (another cancelled at Liora's defeat). The failed Stack records a900 source budget, not proof of native post-defense damage. Source confirms premature success animation before verdict receipt and obsolete ending fades. Hold unresolved ice, expand Spread to Doll size, log per-member verdict geometry, align sky/music/title/SFX to the melt, and add authority-planned P1 chorus brackets / P2 shifted grids excluding slow transit. [Evidence](../evidence/2026-09-22-azure-lattice-verdicts.json) separates logs and automated/offline checks from unplayed native/remote acceptance.
+
+## Azure staged consumption and beetle jaws — 2026-09-22 / 0.3.35 → 0.3.37
+
+Owner reports body overlap spoiling consumption/melting, requests early floor-triggered evacuation, an intact head with beetle-like opening fangs, richer worm art and a longer Fury fight. Latest two solo attempts end in one clean Defeat and one complete Victory/cleanup; the previous missing-chain invalidation does not recur in those logs. Fury lasts only110ticks. Stage all45parts at the20% floor, gate consumption on completed alignment, repeat staging before a flowing melt, split pincers/throat into original PNG layers and raise only the Fury shared pool. [Evidence](../evidence/2026-09-22-azure-staged-mandibles.json) separates observed timings, source diagnosis, offline checks and still-pending native/remote visual acceptance.
+
+## Azure retry background and lethal chain — 2026-09-21 / 0.3.33 → 0.3.35
+
+Owner reports missing background on the second or third attempt and a disappearing worm. Three solo logs show two clean Defeats, then one Fury defeat immediately invalidated by45→40 missing parts; Victory/melting never runs. Actual old-package engine probes reproduce lethal shared-HP child loss and a stale sky flag after native visual reset. Retain all owned native shells at lethal damage and reconcile the actual sky state, preserving gameplay/tuning and incoming Oboro work. [Evidence](../evidence/2026-09-21-azure-lifecycle-fix.json) separates confirmed log events/reproduction from the inferred reset trigger and still-unrun repeated Host & Play / remote visual acceptance.
 
 ## Azure Fury refinement — 2026-09-21 / 0.3.32 → 0.3.33
 
@@ -142,6 +158,22 @@ Owner wants orb-only preparation, Vespera materialization/large summoning seal, 
 
 Owner requests a26F pullback/held charge/explosive final cut, more forward weapon movement, and supplies Murasama plus DMC Vergil clips as the durable motion target. This is a design request/reference, not a reported0.3.30 playtest. Author the five-beat third curve, align its live window after the charge, add violet condensation/release accents and retain the follow-through into the next harmless stance. [Evidence](../evidence/2026-09-20-oboro-third-swing.json) separates shared-geometry/native-package/offline checks from user-owned gameplay and subjective feel; third-party recordings remain local.
 
-## Oboro rigid oversized blade — 2026-09-21 / 0.3.34 → 0.3.35
+## Oboro rigid oversized blade — 2026-09-21 / 0.3.34 → 0.3.42
 
 Owner rejects the installed motion as lacking the feeling of swinging a sword and asks to approach the supplied Murasama/Vergil clips. Dense recorded frames show the very large rigid blade; code confirms the PNG was scaled to560px. Keep the gameplay curves/range and split132px metal/native wrist articulation from a Luminance-managed spectral crescent, pointed leading blade and shorter8/6/10tick tails. [Evidence](../evidence/2026-09-21-oboro-natural-motion.json) separates compiled/native/offline results from pending in-game arm drawing, input feel and subjective acceptance. The previous offline pass does not override this user-reported failure.
+
+## Scarlet distinct apparitions — 2026-09-25 / 0.3.40 → 0.3.41
+
+Owner approves the revised organic Choir and requests comparable but distinct Crown/Mantle/Eidolon energy anatomy; Act II should use slashes, Act III a new identity, with closing crossflow retained. Reviewed solo log:255.42s from preparation to Victory (234.13s after unlock), Stack2/3, Spread3/3, all four cycles and cleanup. Implement venting Crown, hooked shroud Mantle, four-direction curved Choir rake volleys and a two-target Luminance Eidolon composition; preserve HP, rehearsal damage, musical clock and Final deck. [Evidence](../evidence/2026-09-25-scarlet-apparitions.json) separates measured logs/checks from pending native visual/fairness/performance/peer acceptance. Prior Choir approval does not establish the new three bodies' acceptance.
+
+## Scarlet companion concentration and transmutation — 2026-09-22 / 0.3.38 → 0.3.39
+
+Owner requests live enemy-following/width-aware clamps, overlapping casts,20 targets and stronger larger single-target fire; asks for connected Act transmutation, explicit three-body/Vespera sacrifice, a chest sphere, bleeding-energy Victory melt/shake and bolder Spread. Latest solo logs show242.17s Victory, Stack2/3 and Spread3/3; all cycles/sacrifice/cleanup complete and the final unexpired Stack is cancelled by Victory. Implement bounded owner-replicated count/geometry, preserve target incarnations and damage hooks, add original material erosion/flow within accepted clocks and widen the shared Spread radius. [Evidence](../evidence/2026-09-22-scarlet-transmutation.json) distinguishes those logs and scoped checks from pending native visual, audio, fairness,20-target performance and remote acceptance.
+
+## Scarlet Ready and Final energy clusters — 2026-09-22 / 0.3.37 → 0.3.38
+
+Owner reports Ready placement differs from Doll/Cathedral and requests a giant Final red orb firing forecast large/medium/small clusters. Latest solo fight completes Victory in222.75s with Stack3/3, Spread3/3, one three-apparition sacrifice and cleanup; no server exception is observed. Move only Scarlet's button to the shared fixed top-center layout, preserving head labels. Replace Final's closing crossflow slot with five radial bouquets, frozen warnings and a long connected flight that overlaps the next bar; keep the first four paired beats, HP, rehearsal damage and other Acts. [Evidence](../evidence/2026-09-22-scarlet-clusters.json) separates logs/geometry/offline rendering from pending native UI, fairness, audio and multiplayer acceptance.
+
+## Scarlet sacrificial Final and companion — 2026-09-22 / 0.3.35 → 0.3.36
+
+Owner requests ten simultaneous highest-HP companion targets with opposing beam seals, proper Act summoning, and three bound apparitions sacrificed into **one** giant Final target; also reports failed Stack fire is difficult to see. Latest solo logs reach Final, then Defeat/cleanup after187.53s: Stack0/3, solo Spread2/2; the old four targets are intentionally held at1HP pending their unfinished first cycle. Preserve the total HP budget while merging it into the giant, overlap two attack families, add epoch-driven gates/bindings/absorption, and keep captured verdict visuals briefly through death instead of filtering dead/Out players or deleting the marker immediately. The flame gains an opaque dark core and visible crimson edges. [Evidence](../evidence/2026-09-22-scarlet-ensemble.json) separates log facts and code diagnosis from pending real-game visibility, fairness, companion/remote synchronization and repeat-start acceptance.

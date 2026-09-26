@@ -79,7 +79,7 @@ internal static class AzureCeremony
         if(state.Phase==AzurePhase.Melting)
         {
             float c=age-state.EndAt;
-            float e=AzureRules.Ease((c-65)/30)*(1-AzureRules.Ease((c-290)/100));
+            float e=AzureRules.Ease((c-AzureRules.MeltContact)/30)*(1-AzureRules.Ease((c-AzureRules.MeltEnding+120)/120));
             AzureMaterials.Effect(batch,"FrostPass",center+new Vector2(0,190),new(1000,410),0,age,new(e*.65f,0,0,4));
             if(!AzureVisuals.Reduced)
                 for(int i=0;i<24;i++)

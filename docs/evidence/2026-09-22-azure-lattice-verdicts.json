@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-22",
+  "feature": "azure_cathedral",
+  "source_base": "39ecfbf",
+  "candidate": "0.3.40 / protocol67",
+  "observed_build": "0.3.39",
+  "source_log_sha256": {
+    "server": "1e9c4c37ef7d5e6cdcfbb97f63d013e7c88cebc1a84204c1acedc54bf94d9424",
+    "client": "070d7b4a0f5adde26129fdcfad339ced92e20d6d699eec72267be998ff224ee8"
+  },
+  "topology": "solo Host & Play; two Cathedral attempts; intervening Scarlet preparation excluded",
+  "attempts": [
+    { "fight": "5213f35d-7cdd-42e7-9c99-6d58ea6f6213", "unlock": 1255, "result_tick": 1653, "result": "Defeat", "combat_seconds": 6.6333, "cleanup": 1833, "remaining_hp": 2637967 },
+    { "fight": "ef3f1f8e-15c6-4934-9333-1283314fcb6e", "unlock": 1208, "worm_floor": 6347, "liora_defeat": 6726, "devouring": 6727, "fury": 7327, "fury_hp": 960000, "worm_defeat": 11333, "fury_seconds": 66.7667, "result_tick": 11334, "result": "Victory", "combat_seconds_including_cutscene": 168.7667, "cleanup": 11994, "ending_seconds": 11, "peak_five_second_hp_budget_dps": 62273, "stack_success": 1, "stack_failure": 1, "spread_success": 1, "spread_cancelled_on_liora_defeat": 1 }
+  ],
+  "findings": {
+    "ending": "Owner reports melt lagging other cues. Source confirms sky fade ended at420 while final-segment melt completes around580; Victory title/SFX and BGM fade started at0. Preserve the staged melt and authority ending, synchronize the other cues to contact/tail completion.",
+    "stack": "Server resolves Stack at2462 as success/source0 and5342 as failure/source900. Source incorrectly treated unresolved client verdict as success for falling/rotating ice. Hold charged ice until verdict, then use immutable impact positions and a bounded late-receipt cosmetic clock. No claim of actual native damage900; equipment/defense/dodge/immunity still apply.",
+    "spread": "Only solo success observed; no peer overlap was tested. Existing pairwise authoritative rule is correct at strict overlap/inclusive-touch boundaries; expand the shared rendered/collision radius to Doll size.",
+    "lifecycle": "Both attempts reach cleanup; both clients' sky activations logged; no Cathedral ActorMissing or exception. An already_active rejection between attempts corresponds to active Scarlet preparation, not a stale Cathedral session.",
+    "unrelated": "Client initially logs a refused localhost connection before this session. Scarlet logs two crimson.packet_invalid warnings during its intervening preparation; not attributed to or changed by this Cathedral task.",
+    "limits": "Five-second HP-budget deltas are not sustained equipped DPS or received player damage. No new recording, multiplayer observation, listening or FPS measurement."
+  },
+  "changes": [
+    "Shared melt-derived sky/floor-frost/music/title/SFX clocks; no change to native shared HP, staging, terminal authority or cleanup duration.",
+    "Authoritative pending/success/failure presentation and per-member gather/nearest-peer/source-budget diagnostics; enlarged Spread with unchanged native damage hooks.",
+    "Authority-planned shuffled cyan slash grids before Stack and before/during/after Spread; Fury shifted diagonal/orthogonal/diagonal grids wholly outside slow transit phrases.",
+    "Reuse bounded native slash descriptors and original managed ScarletSorcery material; Fury owns valid cuts with hidden zero-HP Liora. No new wire fields or common packet IDs; protocol67 requires matching clients for new geometry semantics.",
+    "Preserve Scarlet/Doll/Oboro work and five pre-existing generated English localization edits. No new third-party assets, textures or shader exports."
+  ],
+  "verification": {
+    "domain": "PASS:22 focused Azure cases;356 total deterministic domain cases. Grid line count/order/shift/codec, full-loop timing/transit exclusions,1/2/3/4/8-player chorus boundaries, pending/early/late verdict clock and whole-chain ending cue bounds.",
+    "codec": "PASS compiled protocol67:334 round-trips and54 malformed/truncated rejections using current linked-source harness.",
+    "native_candidate": "PASS:record20260922T111619559170Z;packageadbc98dc376b7e544f1e603f0ae33385c7647a377d48e81d53589ddfc959aa53;0errors/4existing nullable warnings; source unchanged during build; localization/shader exports/admission pass.",
+    "native_probe": "PASS actual packaged Fury slash gate with Liora0HP, live/forecast/residue/terminal ownership; installed-engine shared HP/late lethal chain retention,45-part ceremony AI and sky Reset/retry checks.",
+    "gpu": "PASS300 linked-production FNA frames using actual compiled managed materials: orthogonal/diagonal forecast-stagger-residue, delayed Stack/Spread success/failure and whole-chain melt/background fade;20-frame contact sheet inspected. Includes Reduced Effects. Offline adapter, not native player/UI/network rendering or performance acceptance.",
+    "integration": "Final catalog/policy/YAML, normal merge and integrated-main build/install results belong to the task PR and source-identified local build record. No Workshop publication or GitHub release requested."
+  },
+  "not_run": [
+    "Owner Host & Play: inside/outside Stack deadlines and actual equipped damage,2+ players Spread touching/overlap, delayed remote verdict and impact visibility.",
+    "P1 four chorus-bracketing volleys and P2 shifted grids with worm charge; actual dodge difficulty, matching peers and absence throughout slow transit.",
+    "Melt contact/tail completion versus BGM, Victory cue/title and backdrop restoration, then retry; subjective audio acceptance.",
+    "Native bright/dark rendering,107% UI/zoom, Reduced Effects/shake off and GPU frame times."
+  ]
+}

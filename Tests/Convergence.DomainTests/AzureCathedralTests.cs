@@ -26,13 +26,15 @@ internal static partial class Program
     [DomainTest("Azure phase and full projection reject regression malformed epochs and every truncated prefix")]
     private static void AzurePhaseCodec()
     {
-        var a=AzureExample() with{Stage=AzureStage.Performance,Age=2100,GirlLife=0,WormLife=AzureRules.WormFloor(AzureRules.Life(1,true)),Phase=AzurePhase.Devouring,PhaseAt=2000};
-        var b=a with{Age=2480,Phase=AzurePhase.Fury,PhaseAt=2480,WormLife=a.WormMax,Enraged=true};
+        var a=AzureExample() with{Stage=AzureStage.Performance,Age=2100,GirlLife=0,WormLife=AzureRules.WormFloor(AzureRules.Life(1,true)),Phase=AzurePhase.Devouring,PhaseAt=2000,StagingAt=1700,CeremonySide=1};
+        var b=a with{Age=2600,Phase=AzurePhase.Fury,PhaseAt=2600,WormLife=AzureRules.FuryLife(a.WormMax),Enraged=true};
         var c=b with{Age=3000,Phase=AzurePhase.Melting,PhaseAt=3000,Stage=AzureStage.Victory,EndAt=3000,WormLife=0};
         AssertEqual(true,b.CanReplace(a),"refill advances phase not old life");AssertEqual(false,a.CanReplace(b),"no old phase");
         AssertEqual(false,(b with{Age=2500,PhaseAt=2490}).CanReplace(b),"no clock restart");
         AssertEqual(false,(b with{Age=2500,GirlLife=1}).CanReplace(b),"no stale resurrection");
-        AssertEqual(false,(b with{Age=2501,WormLife=b.WormMax}).CanReplace(b with{Age=2500,WormLife=b.WormMax-1}),"no duplicate refill");
+        AssertEqual(false,(b with{Age=2601,WormLife=b.WormPoolMax}).CanReplace(b with{Age=2600,WormLife=b.WormPoolMax-1}),"no duplicate refill");
+        AssertEqual(false,(b with{StagingAt=1701}).CanReplace(b),"staging clock cannot restart");
+        AssertEqual(false,(b with{CeremonySide=-1}).CanReplace(b),"staging side cannot flip");
         AssertEqual(true,c.CanReplace(b),"committed victory retained through melt");
         foreach(var state in new[]{a,b,c})
         {
@@ -41,7 +43,7 @@ internal static partial class Program
             byte[] bytes=m.ToArray();for(int count=0;count<bytes.Length;count++)
             {bool rejected=false;try{using var r=new BinaryReader(new MemoryStream(bytes,0,count));AzureState.ReadEnvelope(r);}catch(Exception e)when(e is EndOfStreamException or InvalidDataException){rejected=true;}AssertEqual(true,rejected,"truncated projection");}
         }
-        foreach(var invalid in new[]{a with{PhaseAt=2200},a with{GirlLife=1},b with{Enraged=false},c with{Stage=AzureStage.Performance},a with{Phase=(AzurePhase)9}})
+        foreach(var invalid in new[]{a with{PhaseAt=2200},a with{GirlLife=1},b with{Enraged=false},c with{Stage=AzureStage.Performance},a with{Phase=(AzurePhase)9},a with{StagingAt=1900},a with{CeremonySide=0},b with{WormLife=b.WormPoolMax+1}})
         {bool bad=false;try{AzureRead(invalid);}catch(InvalidDataException){bad=true;}AssertEqual(true,bad,"invalid phase rejected");}
     }
     [DomainTest("Azure fast braking slow consumption and melting are continuous and bounded")]
@@ -56,8 +58,8 @@ internal static partial class Program
         {AssertEqual(0f,AzureRules.Melt(0,i),"whole body on arrival");AssertEqual(1f,AzureRules.Melt(AzureRules.MeltEnding,i),"every segment gone before cleanup");}
         AssertEqual(0f,AzureRules.MusicGain(-1,-1,AzureStage.Ready,200),"silent ready");
         AssertEqual(1f,AzureRules.MusicGain(100,-1,AzureStage.Performance,400),"full battle mix");
-        AssertEqual(0f,AzureRules.MusicGain(100,1000,AzureStage.Victory,1420),"fade complete before native handoff");
-        float gain=1;for(int i=1000;i<=1420;i++){float next=AzureRules.MusicGain(100,1000,AzureStage.Victory,i);AssertEqual(true,next<=gain,"no ending swell");gain=next;}
+        AssertEqual(0f,AzureRules.MusicGain(100,1000,AzureStage.Victory,1000+AzureRules.MeltEnding),"fade complete before native handoff");
+        float gain=1;for(int i=1000;i<=1000+AzureRules.MeltEnding;i++){float next=AzureRules.MusicGain(100,1000,AzureStage.Victory,i);AssertEqual(true,next<=gain,"no ending swell");gain=next;}
     }
     [DomainTest("Azure frost volley has a bounded short warning and recipient while Liora throat stays inside the jet")]
     private static void AzureVolleyAndBell()
@@ -158,7 +160,7 @@ internal static partial class Program
     private static void AzureChorusDamage()
     {
         var zero=System.Numerics.Vector2.Zero;
-        var points=new[]{zero,new System.Numerics.Vector2(700,0),new System.Numerics.Vector2(0,10)};
+        var points=new[]{zero,new System.Numerics.Vector2(900,0),new System.Numerics.Vector2(0,10)};
         var stack=AzureChorusRules.Resolve(AzureChorusKind.Stack,zero,points,7,7);
         AssertEqual(300,stack[0],"one third missing");AssertEqual(300,stack[1],"all living share failure");
         var death=AzureChorusRules.Resolve(AzureChorusKind.Stack,zero,points,7,5);
@@ -203,6 +205,7 @@ internal static partial class Program
             int hp=AzureRules.Life(n,true);
             AssertEqual((4800000+(n-1)*2600000)/20,hp,"worm budget only");
             AssertEqual(2400000+(n-1)*1300000,AzureRules.Life(n,false),"Liora unchanged");
+            AssertEqual(960000+(n-1)*520000,AzureRules.FuryLife(hp),"Fury shared budget four times Duet");
             for(int part=0;part<=AzureRules.Segments;part++)
             {
                 AssertEqual(part==0,AzureRules.WormDamageable(AzurePhase.Duet,part,true,hp,hp),"duet armor");
@@ -224,27 +227,49 @@ internal static partial class Program
         }
         AssertEqual(true,AzureRules.VolleyFire-AzureRules.VolleyWarning>AzureRules.VolleyApproach && AzureRules.VolleyFire<AzureRules.VolleyApproach+AzureRules.VolleyTransit,"fire while crossing");
         var center=System.Numerics.Vector2.Zero;
-        foreach(var from in new[]{new System.Numerics.Vector2(1,0),new System.Numerics.Vector2(-50,-20),new System.Numerics.Vector2(1800,-800)})
+        foreach(int side in new[]{-1,1})
         {
-            var velocity=new System.Numerics.Vector2(35,15);
-            var start=AzureFlight.DevourPosition(from,velocity,center,AzureRules.DevourRush);
-            var slow=AzureFlight.DevourPosition(from,velocity,center,AzureRules.DevourSlow);
-            var contact=AzureFlight.DevourPosition(from,velocity,center,AzureRules.DevourContact);
+            var start=AzureFlight.DevourPosition(center,side,0,AzureRules.DevourRush);
+            var slow=AzureFlight.DevourPosition(center,side,0,AzureRules.DevourSlow);
+            var contact=AzureFlight.DevourPosition(center,side,0,AzureRules.DevourContact);
             AssertEqual(true,start.Length()>2200,"even a near starting head first retreats");
             AssertEqual(true,slow.Length()-AzureRules.MouthReach>260,"visible gap at time dilation");
             AssertEqual(true,Math.Abs(contact.Length()-AzureRules.MouthReach)<.01,"visible mouth touches girl at silhouette");
-            var previous=from;
+            var previous=start;
             for(float t=.125f;t<=AzureRules.Devouring;t+=.125f)
             {
-                var p=AzureFlight.DevourPosition(from,velocity,center,t);
+                var p=AzureFlight.DevourPosition(center,side,0,t);
                 AssertEqual(true,System.Numerics.Vector2.Distance(p,previous)<6,"continuous retreat/rush/slow/overrun");previous=p;
             }
         }
         AssertEqual(true,AzureRules.JawOpening(AzureRules.DevourSlow)>.99,"open through slow approach");
         AssertEqual(0f,AzureRules.JawOpening(AzureRules.DevourContact+10),"closed just after bite");
-        var staged=AzureFlight.DevourStaging(new(1,0),center);
-        var stationary=AzureFlight.DevourPosition(staged,System.Numerics.Vector2.Zero,center,30);
-        AssertEqual(true,float.IsFinite(stationary.X)&&float.IsFinite(stationary.Y),"already staged stationary head has a finite retreat tangent");
+        AssertEqual(false,AzureRules.Staged(2000,2179),"cannot consume before full chain evacuation");
+        AssertEqual(true,AzureRules.Staged(2000,2180),"staging deadline");
+        foreach(int side in new[]{-1,1})
+        {
+            var direction=AzureFlight.CeremonyDirection(center,side);
+            for(int part=0;part<=AzureRules.Segments;part++)
+            {
+                var from=new System.Numerics.Vector2(100-part*45,50);
+                var staged=AzureFlight.StagingPart(center,side,part);
+                AssertEqual(from,AzureFlight.Retreat(from,center,side,part,0),"retreat starts without teleport");
+                AssertEqual(true,System.Numerics.Vector2.Distance(staged,AzureFlight.Retreat(from,center,side,part,AzureRules.StagingTicks))<.001,"all parts arrive at staging pose");
+                AssertEqual(0f,AzureRules.Melt(AzureRules.MeltRush,part),"no dissolve during retreat/hold");
+                for(int t=0;t<=AzureRules.Devouring;t+=3)
+                {
+                    var head=AzureFlight.DevourPosition(center,side,0,t);
+                    var body=AzureFlight.DevourPosition(center,side,part,t);
+                    AssertEqual(true,Math.Abs(System.Numerics.Vector2.Dot(head-body,direction)-part*AzureRules.SegmentSpacing)<.01,"body remains strictly behind mouth, not folded over Liora");
+                }
+                if(part>0)
+                {
+                    var front=AzureFlight.MeltPosition(center,side,part-1,500);
+                    var rear=AzureFlight.MeltPosition(center,side,part,500);
+                    AssertEqual(true,Math.Abs(System.Numerics.Vector2.Distance(front,rear)-AzureRules.SegmentSpacing)<.01,"melt never piles body on stopped head");
+                }
+            }
+        }
     }
     [DomainTest("Azure cut and moving segment emitter codecs retain bounded targets and harmless residue")]
     private static void AzureCutsAndEmitters()

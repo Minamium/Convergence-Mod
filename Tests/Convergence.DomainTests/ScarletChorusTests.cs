@@ -47,10 +47,11 @@ internal static partial class Program
     [DomainTest("Scarlet Spread checks all pairs once and tangent or solo markers are harmless")]
     private static void ScarletChorusSpreadPairs()
     {
-        CrimsonPoint[] p = { new(0, 0), new(400, 0), new(800, 0) };
+        float diameter = CrimsonChorusRules.SpreadRadius * 2;
+        CrimsonPoint[] p = { new(0, 0), new(diameter, 0), new(diameter * 2, 0) };
         var d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(0, 0), p, 7, 7);
         foreach (int damage in d) AssertEqual(0, damage, "tangent circles pass");
-        p[1] = new(399, 0);
+        p[1] = new(diameter - 1, 0);
         d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(0, 0), p, 7, 7);
         AssertEqual(900, d[0], "first overlap"); AssertEqual(900, d[1], "second overlap"); AssertEqual(0, d[2], "uninvolved third member");
         Array.Fill(p, new CrimsonPoint(0, 0));
@@ -62,7 +63,7 @@ internal static partial class Program
     private static void ScarletChorusEightSpace()
     {
         var field = ChorusExample().Field; var positions = new CrimsonPoint[8];
-        for (int i = 0; i < 8; i++) positions[i] = new(field.CenterX - 600 + (i % 4) * 400, field.CenterY - 200 + (i / 4) * 400);
+        for (int i = 0; i < 8; i++) positions[i] = new(field.CenterX - 900 + (i % 4) * 600, field.CenterY - 280 + (i / 4) * 560);
         var d = CrimsonChorusRules.Resolve(CrimsonChorusKind.Spread, new(field.CenterX, field.CenterY), positions, 255, 255);
         for (int i = 0; i < 8; i++)
         {

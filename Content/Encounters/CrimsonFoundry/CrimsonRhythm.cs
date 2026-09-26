@@ -14,7 +14,7 @@ internal static class CrimsonRhythm
     internal const int LookAheadTicks = 30;
     internal const int MinimumWarningTicks = 20;
     internal const int MaximumWarningTicks = 180;
-    internal const int MaximumHits = 6;
+    internal const int MaximumHits = 10; // Final: four paired beats plus one crossflow (nine notes).
     internal const int MaximumLanes = 40;
     internal const int LiveTicks = 32;
     internal const int ResidueTicks = 24;

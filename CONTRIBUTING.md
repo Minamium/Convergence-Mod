@@ -14,6 +14,8 @@ Use a short-lived branch or an explicit worktree from the latest integrated `ori
 
 Use normal pushes and the repository's review/merge rules. Do not discard another person's work, force-switch their worktree, hard reset, force push, or restore an old source copy over current files. Current review ownership is recorded in [CODEOWNERS](.github/CODEOWNERS); contributing code does not automatically change maintainer permissions.
 
+For Astra-led implementation, the development Skill's [Sol delegation policy](.agents/skills/develop-convergence-raids/references/sol-implementation-delegation.md) defines when to split independent work and how to assess its efficiency later. It keeps integration with the lead agent and does not change other lead models' workflows.
+
 ## A useful task or PR
 
 State the desired outcome, affected feature, constraints that matter, and how the result can be observed. For example: a defeated or cancelled Ghost Samurai can be summoned again, with no projectiles left from the previous fight. Select the corresponding checks instead of attaching the entire multiplayer matrix.
