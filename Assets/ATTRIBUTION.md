@@ -2,6 +2,78 @@
 
 ## Records
 
+### Samurai spectral composite and DXOboro trial — 2026-09-27
+
+Original Convergence images and procedural materials; existing VioletRig, Oboro art and all recordings are retained. The SamuraiSpirit material was revised under its existing provenance; current source/export identities are in `compiled.json`, superseding its historical hashes below. Generated originals remain outside the source tree. No WotG/Calamity sprite, shader or recording is imported.
+
+- Runtime file: `Assets/Textures/Items/GhostSamurai/SealedMask.png`
+- Asset ID: ghost-samurai-sealed-mask-20260927
+- Asset type: 64×64 RGBA summon icon
+- Creator: project-owner-directed original work with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: generated
+- Source work and URL: original Convergence image generation; no third-party source artwork
+- Tool/model/version: Built-in OpenAI image generation; exact underlying model undisclosed
+- Human modifications: Original ivory oni mask, indigo horns, worn gold, one paper seal and violet ghost flame; transparent game-item silhouette. Newly generated, not traced from external art. System.Drawing bicubic size export; source retained externally.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
+- SHA256: `a11cb0c54c73d16af44a2d7dc1902376c582bb784cec6ec9e119c0f55b843d87`
+
+- Runtime file: `Assets/Textures/Items/DXOboro/Blade.png`
+- Asset ID: dx-oboro-blade-20260927
+- Asset type: 768×512 RGBA weapon part/icon
+- Creator: project-owner-directed original work with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: generated
+- Source work and URL: original Convergence image generation; no third-party source artwork
+- Tool/model/version: Built-in OpenAI image generation; exact underlying model undisclosed
+- Human modifications: Original curved indigo/ivory blade, violet energy seam, restrained gold guard and black-wrapped hilt. New generation; no prior weapon image input. Bicubic half-size export; grip/pivot and inventory scale calibrated in code; source retained externally.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
+- SHA256: `eaca9440f365ec6982150521cb4654b7bf14ed239ecd13daafe78046585a2080`
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiEnergy.fxc`
+- Asset ID: samuraienergy-20260927
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned SamuraiEnergy.fx; independently authored flow/emission/analytic masks. Luminance API/noise references are runtime dependencies, not vendored textures.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiComposite.fxc`
+- Asset ID: samuraicomposite-20260927
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned SamuraiComposite.fx; independently authored flow/emission/analytic masks. Luminance API/noise references are runtime dependencies, not vendored textures.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DXOboroVeil.fxc`
+- Asset ID: dxoboroveil-20260927
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DXOboroVeil.fx; independently authored flow/emission/analytic masks. Luminance API/noise references are runtime dependencies, not vendored textures.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
+
+
 ### Doll ruptured energy core — 2026-09-27
 
 `Assets/AutoloadedEffects/Shaders/DollCoreEnergy.fx` and `Assets/AutoloadedEffects/Shaders/DollCoreEnergy.fxc`: original Convergence code-authored violet-volume material, created with OpenAI Codex assistance for the owner-requested claw impact/metal-shell rupture. Existing project code/asset terms apply; no third-party image, sound or shader was copied. Luminance's installed noise textures are referenced at runtime, not redistributed as extracted copies. `tools/compile_shaders.py` records the exact source/export/compiler hashes in `compiled.json`; `tools/preview-doll-core.ps1` renders the export for offline inspection. The existing `ShellBreak` recording is reused unchanged under its original entry.

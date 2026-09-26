@@ -1,0 +1,89 @@
+{
+  "date": "2026-09-27",
+  "version": "0.3.48",
+  "protocol": 72,
+  "integration_base": "3a52b737579e2c3d9ef0c1429cffd9ffe34f12d7",
+  "scope": "Ghost Samurai Host & Play movement and Oboro-only input repair; spectral body/hazards, independent DXOboro trial and summon icon. Preserve other Raids, original Oboro art/combo/stats/drop and existing gameplay damage/geometry.",
+  "environment": {
+    "tmodloader": "2026.07.3.0",
+    "tml_source": "666f69962d3bdffde54fc14025f02634965b4e7c",
+    "luminance": "1.0.14",
+    "calamity": "2.2.4",
+    "render_probe": "Installed FNA, D3D11, actual compiled materials and installed Luminance noise; no copied dependency assets"
+  },
+  "prior_playtest": {
+    "source": "Local archived server2026-09-26-9 and client2026-09-26-8 logs, not committed",
+    "version": "0.3.43",
+    "fight": "3f5c88c6-12cc-4d34-a7cc-0f985c333bd8",
+    "players": 2,
+    "maximum_life": 2400000,
+    "last_age_ticks": 1421,
+    "last_life": 2156860,
+    "sampled_hp_loss": 243140,
+    "simulated_seconds": 23.6833,
+    "sampled_hp_budget_dps_approx": 10266,
+    "terminal": "WorldUnload; cleanup complete",
+    "limitations": "Not a completed encounter or current-build balance test. No Oboro rejection telemetry or proof of one unique input-failure cause; owner specifically reports only Oboro unusable. No Ghost Samurai exception in this fight's reviewed logs."
+  },
+  "diagnosis": {
+    "movement": "Native periodic position replication lacked continuous harmless-motion projection. Accept finite complete samples, reject duplicate/stale age, bound extrapolation and convergence; preserve exact damaging rush/combo curves and server collision.",
+    "oboro": "Repair missing/stale generation handshake and expire visual leases; send native held equipment/selected-slot state before custom Swing/Zanshin. Requests still validate owner generation/nonce/holding and authority owns hits; add bounded rejection reasons.",
+    "shader": "Actual GPU preview exposed identical warning/live pixels and wrong low-mode dispatch despite changed Effect parameters. Branchless numeric material selection restores distinction; static compilation alone did not detect this."
+  },
+  "checks": {
+    "native_csharp_and_package": {
+      "status": "passed",
+      "record": ".local/builds/20260926T194328934382Z/record.json",
+      "errors": 0,
+      "existing_CS8632_warnings": 4,
+      "source_changed_during_build": false,
+      "note": "Pre-final-shader C# verification; final installed package identity recorded separately."
+    },
+    "exact_package_native": {
+      "status": "passed",
+      "scope": "Installed loader validates Ghost presentation/composite/summon and DX types; absent actor envelope preserves following shared-buffer bytes; exact-Fight teardown;202 Luminance easing samples;1200 Verlet ticks and20-node bound; frame-independent mist; FNA state accessors. Oboro's8 types, held identity/slot-generation reuse,584 hand anchors, native DoT and request/snapshot/burst bounds pass."
+    },
+    "dx_preview": {
+      "status": "passed_offline",
+      "motion_frames": 384,
+      "icon_frames": 2,
+      "scope": "Production renderer/material; both facings, three cuts, bright/dark and Reduced/full; actual inventory/world hooks against Oboro icon. Corrected native incoming scale double-fit (32/768) before acceptance."
+    },
+    "samurai_preview": {
+      "status": "passed_offline_frames_inspected",
+      "frames": 272,
+      "body_frames": 96,
+      "hazard_frames": 160,
+      "ending_wisp_frames": 16,
+      "composite_passes": 192,
+      "same_clock_warning_live_changed_pixels": 30480,
+      "mode_changed_pixels": 30440,
+      "scope": "Linked production body/composite/hazards, pure encounter rules and fractional SamuraiRigMotion. Real installed noise replaces an inadequate synthetic-noise first pass. Same-clock warning/live and mode distinctions, analytic safe holes/rear mask, caller device/batch restoration. Lead increased exterior aura, suppressed neutral armor whitening and added dark-underlaid warning axes/rims for light backgrounds. FNA output is real; Terraria world/actor and Luminance resource/parameter wrappers are fixture seams, not a played encounter."
+    },
+    "repository": {
+      "status": "passed",
+      "documents": 82,
+      "policy_files": 1082,
+      "yaml_files": 12,
+      "domain_cases": 378,
+      "domain_failures": 0,
+      "codec_round_trips": 334,
+      "malformed_codec_rejections": 54,
+      "command": "python .agents/skills/develop-convergence-raids/scripts/verify_repo.py . --write-catalog --with-domain --with-codec"
+    }
+  },
+  "native_user_owned_not_run": [
+    "Matching-peer Host & Play join/rejoin, smooth hover, exact rush/combo and state changes",
+    "Oboro immediately after hotbar/equipment/connection change, sustained holds, release and remote visibility",
+    "DXOboro native use, NPC hits, armor/mount/gravity layering and attack-speed equipment",
+    "Boss aura/forecast/live/ending with overlapping attacks in bright and dark scenes, zoom/UI107% and Reduced Effects",
+    "Real-game graphics-device/resize/world retry and frame times; no FPS or WotG/Vespera parity claim"
+  ],
+  "delegation": {
+    "dx_oboro": "gpt-6-sol medium; separate DX content/art hooks/material and offline fixture, reviewed by lead; native inventory double-scaling found and corrected",
+    "samurai_preview": "gpt-6-sol medium; real-FNA linked-production preview and scoped SamuraiEnergy branchless repair after reproduced GPU defect; lead owns networking, integration and final art review"
+  },
+  "rights": "Original generated mask/blade and independently authored materials recorded in Assets/ATTRIBUTION.md; raw generated originals retained externally, no third-party WotG/Calamity art or recordings imported.",
+  "installation_identity": "The final integrated-main native build writes its commit, dirty-file hashes, exact package SHA256, admission result and backup to the local source-identified .local/builds record. That artifact record, rather than a checked-in self-referential source hash, identifies the installed package.",
+  "publication": "Development integration only; no Workshop publication or GitHub release."
+}

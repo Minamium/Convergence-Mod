@@ -26,6 +26,19 @@ internal sealed class OboroPackets : ModSystem, IEncounterPacketHandler
         var request = new OboroRequest(action, state.View.Generation, ++state.RequestNonce, angle);
         if (Main.netMode == NetmodeID.SinglePlayer) { state.Handle(request); return; }
         if (Main.netMode != NetmodeID.MultiplayerClient || player.whoAmI != Main.myPlayer) return;
+        if (action == OboroAction.Hello) state.NextHello = Main.GameUpdateCount + OboroNetworkRules.HelloRetryTicks;
+        else if (state.View.Generation == 0)
+        {
+            if (Main.GameUpdateCount >= state.NextHello) Request(player, OboroAction.Hello, 0);
+            return;
+        }
+        if (action is OboroAction.Swing or OboroAction.Zanshin)
+        {
+            // Inventory/selected slot must reach the server BEFORE the custom
+            // request, including immediately after Cheat Sheet or a hotbar swap.
+            NetMessage.SendData(MessageID.SyncEquipment, number: player.whoAmI, number2: player.selectedItem);
+            NetMessage.SendData(MessageID.PlayerControls, number: player.whoAmI);
+        }
         var packet = Packet(EncounterPacketType.RequestWeaponUse); request.Write(packet); packet.Send();
     }
     private static ModPacket Packet(EncounterPacketType type)

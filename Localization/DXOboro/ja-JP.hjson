@@ -1,0 +1,13 @@
+Mods: {
+  Convergence: {
+    Items.DXOboro: {
+      DisplayName: DXOboro
+      Tooltip:
+        '''
+        左クリック長押しで三連の霊刃を放つ
+        実験用の刀。朧のWraith Fireと残心は使用できない
+        試用のため作業台で落ちた星1個から作成可能
+        '''
+    }
+  }
+}

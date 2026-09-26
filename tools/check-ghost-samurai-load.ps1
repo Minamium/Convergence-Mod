@@ -3,6 +3,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$PackagePath,
     [Parameter(Mandatory=$true)][string]$TModLoaderPath,
+    [string]$LuminancePackage,
     [switch]$ExpectOldFailure,
     [switch]$CheckLifecycle,
     [switch]$CheckSlashArt,
@@ -53,13 +54,14 @@ public static class GhostSamuraiLoadCheck
         return output.ToArray();
     }
 
-    public static void Run(string package, string loader, bool expectOldFailure, bool checkLifecycle, bool checkSlashArt, bool checkRig)
+    public static void Run(string package, string loader, string luminancePackage, bool expectOldFailure, bool checkLifecycle, bool checkSlashArt, bool checkRig)
     {
         var resolver = new AssemblyDependencyResolver(loader);
         var context = new AssemblyLoadContext("GhostSamuraiValidation", isCollectible: true);
         context.Resolving += (alc, name) => {
             if (name.Name == "Luminance") {
-                using var dependency = new MemoryStream(ReadModAssembly(Path.Combine(Path.GetDirectoryName(package), "Luminance.tmod"), "Luminance"));
+                string location = string.IsNullOrEmpty(luminancePackage) ? Path.Combine(Path.GetDirectoryName(package), "Luminance.tmod") : luminancePackage;
+                using var dependency = new MemoryStream(ReadModAssembly(location, "Luminance"));
                 return alc.LoadFromStream(dependency);
             }
             string resolved = resolver.ResolveAssemblyToPath(name);
@@ -133,4 +135,5 @@ public static class GhostSamuraiLoadCheck
 Add-Type -TypeDefinition ($loadSource + [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'fixtures/SamuraiRigNativeProbe.cs')))
 $package = (Resolve-Path -LiteralPath $PackagePath).Path
 $loader = Join-Path (Resolve-Path -LiteralPath $TModLoaderPath).Path 'tModLoader.dll'
-[GhostSamuraiLoadCheck]::Run($package, $loader, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent, $CheckSlashArt.IsPresent, $CheckRig.IsPresent)
+$luminance = if ($LuminancePackage) { (Resolve-Path -LiteralPath $LuminancePackage).Path } else { '' }
+[GhostSamuraiLoadCheck]::Run($package, $loader, $luminance, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent, $CheckSlashArt.IsPresent, $CheckRig.IsPresent)

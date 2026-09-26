@@ -116,7 +116,7 @@ internal sealed partial class GhostSamuraiRuntime : IEncounterRuntime
         actor.AttackTimer = attack == SamuraiAttack.Idle ? timer : Math.Max(0, timer - 1 - (attack == SamuraiAttack.GridSlash ? gridSequenceOffset : 0));
         actor.TransitionRemaining = transition; actor.Combo = combo;
         // Snapshots also re-anchor client-only clocks during long attacks / late join.
-        if (age % 15 == 0) npc.netUpdate = true;
+        if (age % SamuraiClientMotion.SyncTicks == 0) npc.netUpdate = true;
     }
 
     private Player? ResolveTarget(NPC npc)

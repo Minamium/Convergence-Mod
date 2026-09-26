@@ -26,6 +26,10 @@
       "source_sha256": "0fcd99e26729469836f0810a4f44610ed2363c49b943ca9f00f2d1ef2202dc44",
       "output_sha256": "fe6dfa63f474651f7f213d8230559b61b14459c02254185de478d757f4d83b11"
     },
+    "DXOboroVeil.fx": {
+      "source_sha256": "53ed2b8bf73c2df8626952c79be7655f5a600cb465e98e214532bfa237f96896",
+      "output_sha256": "2e1a0f35a3b931ed31a18aa25541cf50e9aadd50283948600284cb4bdb2175dc"
+    },
     "MechanicRing.fx": {
       "source_sha256": "b685e8922f20aa34fad6f86d6da927d5033885dc2b7229be9fc956e6aec80aa3",
       "output_sha256": "7556fe157bf8afe6c8d394d87b45f4170660de127044620f358b94487881a20e"
@@ -46,6 +50,14 @@
       "source_sha256": "924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8",
       "output_sha256": "299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7"
     },
+    "SamuraiComposite.fx": {
+      "source_sha256": "da4a7acd90030227e79cfa69a1b2f2650621d1bca048c80dda615e89c704983a",
+      "output_sha256": "98e41b6f607b6c73ea314a01651b8a565922cd419d42d5fc5619c454fe7fea9b"
+    },
+    "SamuraiEnergy.fx": {
+      "source_sha256": "296cb199bbbdfd04f0b46428eca747c84d287ed969aae29689ce0316390c4a61",
+      "output_sha256": "895e9c94e6aa0f363ef58a9b326dd7a8751626b47f7162188e87d348bf31772c"
+    },
     "SamuraiMist.fx": {
       "source_sha256": "aa12892f9724b06b791b7851ba28727b51125f15d28fa0a22866dfc721508bca",
       "output_sha256": "fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065"
@@ -55,8 +67,8 @@
       "output_sha256": "474fa47eed26d1ed1ec43d4b851dc6196dfddc9e85cfa76e41d4b06d5f96fc30"
     },
     "SamuraiSpirit.fx": {
-      "source_sha256": "b569ef5eb648aabfb653e8e828ab771dba293ce55b5177eefb08fe336d801970",
-      "output_sha256": "a57a91104b48c8913b270f3baf504d04153db13e46853c98759c452523354b70"
+      "source_sha256": "4bcefe5c21ae4fa8672428eb7f17b6e6d8d7a9ef956bceeb7b21509a6c8234a3",
+      "output_sha256": "4a92d0c5f055470ab24f08979a2e4f894690ace9595423849c20626f14256e7e"
     },
     "ScarletApparitions.fx": {
       "source_sha256": "5a36791f1c6f4409df7b8b0ea92f1fe5adad27dc453f900d384b0480e496829b",

@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.47 / protocol71**. Oboro follows the owner’s overhead-cut sketch:22F downward cut,18F smaller return,30F held-charge finisher. The metal sword and arm pose exist only during an accepted attack; Luminance spectral cuts retain the560px reach. Base damage, drop and buffs remain unchanged; slower timing changes potential DPS. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19) owns curves and visibility. This feature package awaits approved main integration and normal-profile installation.
+Current source: **0.3.48 / protocol72**. Ghost Samurai gains accepted-snapshot movement smoothing, independently moving spectral limbs and a two-target Luminance body/emission composite with shared analytic hazard materials. Oboro's Host & Play state repair preserves its existing art, combo, stats and server-hit contract. DXOboro is a separate trial weapon, not a replacement; the summon item gets its own sealed-mask icon. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#霊気合成と新規試作武器--2026-09-27) owns behavior and limits. Native multiplayer/visual acceptance remains user-owned, not established by compilation or offline frames.
+
+Retained0.3.47: Oboro follows the owner's22F downward cut,18F smaller return,30F held-charge finisher. The metal sword and arm pose exist only during an accepted attack; Luminance spectral cuts retain560px reach. Damage/drop/buffs remain unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19) owns those curves.
 
 Retained0.3.46: Doll's first Phase III claw crush now breaks its foreground metal sphere into a persistent violet energy core, through Final and its DPS check. Gameplay, packets, rewards and the other Raids are unchanged. See the [visual contract](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md#中央球の挟撃破裂--2026-09-27) and [evidence](evidence/2026-09-27-doll-core-rupture.json); native/remote visual acceptance is still user-owned.
 
@@ -63,6 +65,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.48 Samurai/Oboro repair:** [evidence](evidence/2026-09-27-samurai-spectral.json) separates old two-player logs, accepted-motion/native envelope and weapon-state contracts, exact-package loader checks, actual-shader body/hazard/ending previews and DX inventory scaling. The preview caught and repaired collapsed shader warning/live dispatch; the final pass adds dark warning under-edges and readable exterior aura. Native Host & Play input/movement, remote layering, visual acceptance and frame times remain user-owned / `not_run`. Sol `dx_oboro` and `samurai_preview` (medium) implemented the bounded trial/preview slices; lead owns network repair, integration and final material/readability revision.
 
 - **0.3.47 Oboro sketch revision:** [evidence](evidence/2026-09-27-oboro-kesa-combo.json) records native compilation, shared-motion/visibility checks, exact-package hand and codec probes and888 linked-production material frames. Idle, all three strokes, loop, release, both facings and light/dark Reduced/full are inspected offline. Actual SP/MP input, player armor/mount layering and subjective motion acceptance are user-owned / not_run.
 
@@ -139,6 +143,8 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Ghost Samurai: matching0.3.48 peers should check initial/join/rejoin movement, rush/combo alignment and using Oboro immediately after hotbar/equipment changes. Inspect new aura/hazards in bright/dark scenes and Reduced Effects; DXOboro can be crafted with one Fallen Star at a Work Bench. These are native checks, not claims from the offline preview. Other Raids and the existing Oboro mechanics are preserved.
 
 Doll: after the matching0.3.46 package is installed, check the first Phase III claw clamp (contact → held cracks → shell burst), continued purple sphere/attached muzzle through Final/DPS check, Victory/Defeat fade and a fresh intact retry. Compare a matching peer and Reduced Effects. These native checks are owner-owned `not_run`; shader/mesh previews are separate evidence.
 

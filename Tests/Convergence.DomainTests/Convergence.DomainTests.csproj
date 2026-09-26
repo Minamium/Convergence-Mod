@@ -19,6 +19,8 @@
     <Compile Include="../../Client/Weapons/OboroSwordMotion.cs" Link="OboroSwordMotion.cs" />
     <Compile Include="../../Client/Weapons/OboroSwingPresentation.cs" Link="Presentation/OboroSwingPresentation.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroRules.cs" Link="Domain/OboroRules.cs" />
+    <Compile Include="../../Content/Items/Oboro/OboroNetworkRules.cs" Link="Domain/OboroNetworkRules.cs" />
+    <Compile Include="../../Content/Items/DXOboro/DXOboroMotion.cs" Link="Domain/DXOboroMotion.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroComboSettings.cs" Link="Domain/OboroComboSettings.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroFirstSwingMotion.cs" Link="Domain/OboroFirstSwingMotion.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroSecondSwingMotion.cs" Link="Domain/OboroSecondSwingMotion.cs" />
@@ -56,6 +58,7 @@
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiWaveRules.cs" Link="Domain/SamuraiWaveRules.cs" />
     <Compile Include="../../Client/Encounters/GhostSamurai/SamuraiCueClock.cs" Link="Presentation/SamuraiCueClock.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiActorSnapshot.cs" Link="Domain/SamuraiActorSnapshot.cs" />
+    <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiClientMotion.cs" Link="Domain/SamuraiClientMotion.cs" />
     <Compile Include="../../Content/Encounters/GhostSamurai/SamuraiArenaBounds.cs" Link="Domain/SamuraiArenaBounds.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/DollCompanionRules.cs" Link="Domain/DollCompanionRules.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollPose.cs" Link="Presentation/FirstSeveranceDollPose.cs" />

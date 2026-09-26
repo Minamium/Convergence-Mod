@@ -53,7 +53,9 @@ public sealed class OboroHeldProj : ModProjectile
         Player player = Main.player[Projectile.owner];
         var state = player.GetModPlayer<OboroPlayer>();
         if (!state.Usable || !state.Holding || ConnectionGeneration == 0
-            || state.View.Generation != ConnectionGeneration || !state.BindHeld(this))
+            || state.View.Generation != ConnectionGeneration
+            || !OboroPlayer.Authority && !OboroNetworkRules.Fresh(Main.GameUpdateCount, state.ReceivedAt)
+            || !state.BindHeld(this))
         {
             if (OboroPlayer.Authority) Projectile.Kill();
             return; // Clients wait silently for matching state; never show another connection's sword.

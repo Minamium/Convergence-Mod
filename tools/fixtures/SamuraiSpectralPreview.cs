@@ -1,0 +1,364 @@
+// Hidden FNA D3D11 preview linked directly to the production Samurai renderers.
+// Terraria, Luminance resource management and encounter snapshots are shims.
+#nullable disable
+using System;
+using System.IO;
+using System.Collections.Generic;
+using System.IO.Compression;
+using System.Runtime.InteropServices;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Convergence.Client.Encounters.GhostSamurai;
+using Convergence.Client.Graphics;
+using Convergence.Content.Encounters.GhostSamurai;
+
+internal static class SamuraiSpectralPreview
+{
+    [DllImport("SDL2",CallingConvention=CallingConvention.Cdecl)] static extern int SDL_Init(uint flags);
+    [DllImport("FNA3D",CallingConvention=CallingConvention.Cdecl)] static extern uint FNA3D_PrepareWindowAttributes();
+    [DllImport("SDL2",CallingConvention=CallingConvention.Cdecl)] static extern IntPtr SDL_CreateWindow(string title,int x,int y,int w,int h,uint flags);
+    [DllImport("SDL2",CallingConvention=CallingConvention.Cdecl)] static extern void SDL_DestroyWindow(IntPtr window);
+    [DllImport("SDL2",CallingConvention=CallingConvention.Cdecl)] static extern void SDL_Quit();
+    internal static string Root,LuminancePackage;
+    static readonly float[] BodyAges={12.25f,47.5f,53.75f,54.5f,60.75f,72.25f};
+    static readonly float[] HazardAges={48.25f,53.75f,54f,55.25f,64.5f};
+    internal static GraphicsDevice Device;
+    internal static readonly Dictionary<string,Texture2D> Textures=new();
+    internal static Texture2D Texture(string path)
+    {
+        if(Textures.TryGetValue(path,out var found)) return found;
+        using var stream=File.OpenRead(Path.Combine(Root,path.Replace("Convergence/","")+".png"));
+        var texture=Texture2D.FromStream(Device,stream);
+        var pixels=new Color[texture.Width*texture.Height];texture.GetData(pixels);
+        for(int i=0;i<pixels.Length;i++) pixels[i]=Color.FromNonPremultiplied(pixels[i].ToVector4());
+        texture.SetData(pixels);Textures.Add(path,texture);return texture;
+    }
+    internal static Texture2D Noise(string name)
+    {
+        if(Textures.TryGetValue(name,out var found))return found;
+        using var file=File.OpenRead(LuminancePackage);
+        using var reader=new BinaryReader(file);
+        if(System.Text.Encoding.ASCII.GetString(reader.ReadBytes(4))!="TMOD")throw new InvalidDataException("TMOD magic");
+        reader.ReadString();reader.ReadBytes(276);reader.ReadInt32();reader.ReadString();reader.ReadString();
+        int count=reader.ReadInt32(),offset=0,position=-1,length=0,stored=0;
+        for(int i=0;i<count;i++)
+        {
+            string path=reader.ReadString();int size=reader.ReadInt32(),compressed=reader.ReadInt32();
+            if(path=="Assets/Noise/"+name+".rawimg"){position=offset;length=size;stored=compressed;}
+            offset+=compressed;
+        }
+        if(position<0)throw new FileNotFoundException("Luminance noise: "+name);
+        file.Position+=position;
+        using var bytes=new MemoryStream(reader.ReadBytes(stored));
+        using Stream data=length==stored?bytes:new DeflateStream(bytes,CompressionMode.Decompress);
+        using var raw=new BinaryReader(data);
+        if(raw.ReadInt32()!=1)throw new InvalidDataException("rawimg version");
+        int width=raw.ReadInt32(),height=raw.ReadInt32();
+        var texture=new Texture2D(Device,width,height);texture.SetData(raw.ReadBytes(width*height*4));
+        Textures.Add(name,texture);return texture;
+    }
+    static void Main(string[] args)
+    {
+        Root=args[0];LuminancePackage=args[1];string native=args[2],output=args[3];
+        IntPtr Resolve(string name,System.Reflection.Assembly a,DllImportSearchPath? p)
+        {string file=Path.Combine(native,name.EndsWith(".dll")?name:name+".dll");return File.Exists(file)?NativeLibrary.Load(file):IntPtr.Zero;}
+        NativeLibrary.SetDllImportResolver(typeof(SamuraiSpectralPreview).Assembly,Resolve);
+        NativeLibrary.SetDllImportResolver(typeof(GraphicsDevice).Assembly,Resolve);
+        if(SDL_Init(0x20)!=0)throw new Exception("SDL video initialization failed");
+        IntPtr window=SDL_CreateWindow("Samurai offline preview",0,0,720,720,FNA3D_PrepareWindowAttributes()|0x8);
+        if(window==IntPtr.Zero)throw new Exception("Hidden device surface unavailable");
+        try
+        {
+            using var device=new GraphicsDevice(GraphicsAdapter.DefaultAdapter,GraphicsProfile.HiDef,new PresentationParameters{
+                DeviceWindowHandle=window,BackBufferWidth=720,BackBufferHeight=720,BackBufferFormat=SurfaceFormat.Color,
+                IsFullScreen=false,DepthStencilFormat=DepthFormat.None,PresentationInterval=PresentInterval.Immediate});
+            Device=device;
+            using var target=new RenderTarget2D(device,720,720,false,SurfaceFormat.Color,DepthFormat.None);
+            using var batch=new SpriteBatch(device);Terraria.Main.spriteBatch=batch;
+            using var pixel=new Texture2D(device,1,1);pixel.SetData(new[]{Color.White});
+            new GhostSamuraiComposite().Load();
+            int frames=0,composites=0;
+            foreach(float zoom in new[]{1f,.65f})
+            foreach(bool reduced in new[]{false,true})
+            foreach(int facing in new[]{1,-1})
+            foreach(bool light in new[]{false,true})
+            foreach(float age in BodyAges)
+            {
+                Terraria.Main.GameViewMatrix.Scale=zoom;
+                Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig.Instance.ReducedEffects=reduced;
+                var left=SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash,SamuraiPhase.Phase1,age,age,-1,facing,default,false);
+                var right=SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash,SamuraiPhase.Phase1,age,age,1,facing,default,false);
+                float cut=Math.Clamp((age-GhostSamuraiRules.SlashWarning)/6,0,1);
+                var pose=new SamuraiRigPose(360,360,age,.04f*facing,1,left,right,cut*.3f,cut*70,cut*.2f);
+                GhostSamuraiPresentation.Pose=pose;
+                var blendBefore=device.BlendState;var depthBefore=device.DepthStencilState;
+                var rasterBefore=device.RasterizerState;var viewportBefore=device.Viewport;
+                var targetBefore=device.GetRenderTargets();
+                Luminance.Core.Graphics.RenderTargetManager.Pulse();
+                if(device.BlendState!=blendBefore||device.DepthStencilState!=depthBefore||
+                    device.RasterizerState!=rasterBefore||!device.Viewport.Equals(viewportBefore)||
+                    device.GetRenderTargets().Length!=targetBefore.Length)
+                    throw new Exception("Composite changed caller device state");
+                device.SetRenderTarget(target);device.Clear(light?new Color(188,201,212):new Color(17,22,36));
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                var state=WorldBatchParameters.Capture(batch);
+                GhostSamuraiRigArt.Draw(batch,pose,Vector2.Zero,null,age);
+                if(state!=WorldBatchParameters.Capture(batch))throw new Exception("Body changed caller SpriteBatch state");
+                batch.End();device.SetRenderTarget(null);
+                Save(target,output,$"body-z{zoom:0.00}-{(facing==1?"right":"left")}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{age:00.00}.png");
+                frames++;composites++;
+            }
+            foreach(float zoom in new[]{1f,.65f})
+            foreach(bool reduced in new[]{false,true})
+            foreach(bool light in new[]{false,true})
+            foreach(string shape in new[]{"line","annulus","halfdisc","wave"})
+            foreach(float age in HazardAges)
+            {
+                Terraria.Main.GameViewMatrix.Scale=zoom;
+                device.SetRenderTarget(target);device.Clear(light?new Color(188,201,212):new Color(17,22,36));
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                var state=WorldBatchParameters.Capture(batch);
+                if(shape=="line")GhostSamuraiEnergy.Line(batch,new(150,300),new(570,420),35,age,
+                    Math.Clamp(age/GhostSamuraiRules.SlashWarning,0,1),age>=54&&age<64,age-54,64-age,reduced);
+                else if(shape=="wave")
+                {
+                    Vector2 center=new(250+(age-48)*8,425);
+                    GhostSamuraiEnergy.Line(batch,center-new Vector2(140,0),center+new Vector2(140,0),
+                        32,age,Math.Clamp(age/54,0,1),age>=54&&age<64,age-54,64-age,reduced);
+                }
+                else
+                {
+                    var kind=shape=="annulus"?SamuraiShape.OuterSlash:SamuraiShape.FrontalCleave;
+                    var hazard=new SamuraiHazard(kind,360,360,1,0,shape=="annulus"?105:0,170,0,54,64,1);
+                    var at=new Vector2(360,360);
+                    GhostSamuraiEnergy.Field(batch,hazard,at,age,new Rectangle(0,0,720,720),reduced);
+                }
+                if(state!=WorldBatchParameters.Capture(batch))throw new Exception("Hazard changed caller SpriteBatch state");
+                batch.End();device.SetRenderTarget(null);
+                if(shape=="annulus"&&age>=54&&age<64)
+                    AssertBackground(target,360,360,light?new Color(188,201,212):new Color(17,22,36),"annulus safe hole");
+                if(shape=="halfdisc"&&age>=54&&age<64)
+                    AssertBackground(target,300,360,light?new Color(188,201,212):new Color(17,22,36),"halfdisc safe side");
+                Save(target,output,$"hazard-z{zoom:0.00}-{shape}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{age:00.00}.png");frames++;
+            }
+            Terraria.Main.GameViewMatrix.Scale=1;
+            var diagnostic=new Color[2][];
+            for(int live=0;live<2;live++)
+            {
+                device.SetRenderTarget(target);device.Clear(new Color(17,22,36));
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                GhostSamuraiEnergy.Line(batch,new(150,300),new(570,420),35,56,1,live==1,2,8,false);
+                batch.End();device.SetRenderTarget(null);
+                diagnostic[live]=new Color[720*720];target.GetData(diagnostic[live]);
+                Save(target,output,$"diagnostic-line-{(live==1?"live":"warning")}.png");
+            }
+            int changed=0,warningPixels=0,livePixels=0;
+            var background=new Color(17,22,36);
+            for(int i=0;i<diagnostic[0].Length;i++)
+            {
+                if(diagnostic[0][i]!=diagnostic[1][i])changed++;
+                if(diagnostic[0][i]!=background)warningPixels++;
+                if(diagnostic[1][i]!=background)livePixels++;
+            }
+            if(changed<5000||livePixels<=warningPixels)
+                throw new Exception($"Energy warning/live material collapsed: changed={changed}, warning={warningPixels}, live={livePixels}");
+            Console.WriteLine($"ENERGY DIFFERENTIAL same clock/geometry: {changed} changed pixels, warning={warningPixels}, live={livePixels}");
+            var modeImages=new Color[2][];
+            for(int mode=0;mode<2;mode++)
+            {
+                Luminance.Core.Graphics.ManagedShader.EnergyModeOverride=mode;
+                device.SetRenderTarget(target);device.Clear(background);
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                GhostSamuraiEnergy.Line(batch,new(150,300),new(570,420),35,56,1,true,2,8,false);
+                batch.End();device.SetRenderTarget(null);
+                modeImages[mode]=new Color[720*720];target.GetData(modeImages[mode]);
+                Save(target,output,$"diagnostic-mode-{mode}.png");
+            }
+            Luminance.Core.Graphics.ManagedShader.EnergyModeOverride=null;
+            changed=0;for(int i=0;i<modeImages[0].Length;i++)if(modeImages[0][i]!=modeImages[1][i])changed++;
+            if(changed<5000)throw new Exception($"Energy line/field mode selection collapsed: {changed} changed pixels");
+            Console.WriteLine($"ENERGY MODE DIFFERENTIAL line vs field: {changed} changed pixels");
+            // Exercise the remaining changed material path and teardown visual,
+            // not just the static body. No encounter timing is simulated here.
+            int extraFrames=0;
+            foreach(bool light in new[]{false,true})foreach(bool reduced in new[]{false,true})
+            foreach(float deathAge in new[]{24f,52f,78f,96f})
+            {
+                Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig.Instance.ReducedEffects=reduced;
+                device.SetRenderTarget(target);device.Clear(light?new Color(188,201,212):background);
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone);
+                var state=WorldBatchParameters.Capture(batch);
+                GhostSamuraiRigArt.DrawDeath(batch,GhostSamuraiPresentation.Pose,Vector2.Zero,deathAge);
+                GhostSamuraiEnergy.Wisp(batch,new(110,220),24,deathAge,Vector2.UnitX,reduced);
+                if(state!=WorldBatchParameters.Capture(batch))throw new Exception("Ending/wisp changed caller state");
+                batch.End();device.SetRenderTarget(null);
+                Save(target,output,$"ending-wisp-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{deathAge:00}.png");
+                frames++;extraFrames++;
+            }
+            Console.WriteLine($"PASS {extraFrames} additional ending/wisp frames");
+            if(Luminance.Core.Graphics.ShaderManager.CompositeDraws!=composites*2)
+                throw new Exception($"Composite pass count {Luminance.Core.Graphics.ShaderManager.CompositeDraws} != {composites*2}");
+            if(Luminance.Core.Graphics.ManagedRenderTarget.Sizes[1024]<1||
+                Luminance.Core.Graphics.ManagedRenderTarget.Sizes[512]<2||
+                Luminance.Core.Graphics.ManagedRenderTarget.Sizes[256]<1)
+                throw new Exception("Composite target dimensions omitted normal or Reduced sizes");
+            foreach(float zoom in new[]{1f,.65f})foreach(bool reduced in new[]{false,true})
+            {
+                var names=new List<string>();
+                foreach(int facing in new[]{1,-1})foreach(bool light in new[]{false,true})
+                foreach(float age in BodyAges)
+                    names.Add($"body-z{zoom:0.00}-{(facing==1?"right":"left")}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{age:00.00}.png");
+                Sheet(device,batch,output,$"contact-body-z{zoom:0.00}-{(reduced?"reduced":"normal")}.png",names,BodyAges.Length,4);
+            }
+            foreach(float zoom in new[]{1f,.65f})foreach(bool reduced in new[]{false,true})foreach(bool light in new[]{false,true})
+            {
+                var names=new List<string>();
+                foreach(float age in HazardAges)
+                foreach(string shape in new[]{"line","annulus","halfdisc","wave"})
+                    names.Add($"hazard-z{zoom:0.00}-{shape}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{age:00.00}.png");
+                Sheet(device,batch,output,$"contact-hazards-z{zoom:0.00}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}.png",names,4,HazardAges.Length);
+            }
+            new GhostSamuraiComposite().Unload();
+            Luminance.Core.Graphics.ShaderManager.Clear();
+            foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();
+            Console.WriteLine($"PASS {frames} linked-production FNA frames ({composites} body/composite, {frames-composites} hazard), {composites*2} composite passes; normal/reduced, light/dark, both facings, fractional warning/live/recovery, SpriteBatch state restored. Offline only.");
+        }
+        finally{SDL_DestroyWindow(window);SDL_Quit();}
+    }
+    static void Save(RenderTarget2D target,string output,string name)
+    {using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,720,720);}
+    static void AssertBackground(RenderTarget2D target,int x,int y,Color expected,string description)
+    {
+        var pixel=new Color[1];target.GetData(0,new Rectangle(x,y,1,1),pixel,0,1);
+        if(pixel[0]!=expected)throw new Exception($"{description} changed pixel {x},{y}: {pixel[0]} vs {expected}");
+    }
+    static void Sheet(GraphicsDevice device,SpriteBatch batch,string output,string name,List<string> images,int columns,int rows)
+    {
+        using var sheet=new RenderTarget2D(device,columns*180,rows*180,false,SurfaceFormat.Color,DepthFormat.None);
+        device.SetRenderTarget(sheet);device.Clear(Color.Black);
+        batch.Begin(SpriteSortMode.Immediate,BlendState.Opaque,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone);
+        for(int i=0;i<images.Count;i++)
+        {
+            using var stream=File.OpenRead(Path.Combine(output,images[i]));using var texture=Texture2D.FromStream(device,stream);
+            batch.Draw(texture,new Rectangle((i%columns)*180,(i/columns)*180,180,180),Color.White);
+        }
+        batch.End();device.SetRenderTarget(null);
+        using var file=File.Create(Path.Combine(output,name));sheet.SaveAsPng(file,columns*180,rows*180);
+    }
+}
+
+namespace ReLogic.Content { public enum AssetRequestMode{ImmediateLoad} public sealed class Asset<T>{public T Value;} }
+namespace Terraria
+{
+    public static class Main
+    {
+        public static bool dedServ;public static int screenWidth=720,screenHeight=720;
+        public static SpriteBatch spriteBatch;public static GraphicsDeviceManager instance=new();
+        public static PreviewView GameViewMatrix=new();
+        public static void QueueMainThreadAction(Action action)=>action();
+    }
+    public sealed class GraphicsDeviceManager { public GraphicsDevice GraphicsDevice=>SamuraiSpectralPreview.Device; }
+    public sealed class PreviewView
+    {
+        public float Scale=1;
+        public Matrix TransformationMatrix=>Matrix.CreateTranslation(-360,-360,0)*Matrix.CreateScale(Scale)*Matrix.CreateTranslation(360,360,0);
+    }
+    public static class PreviewVectorExtensions
+    {
+        public static Vector2 RotatedBy(this Vector2 v,float r)=>new(v.X*MathF.Cos(r)-v.Y*MathF.Sin(r),v.X*MathF.Sin(r)+v.Y*MathF.Cos(r));
+        public static Vector2 ToRotationVector2(this float r)=>new(MathF.Cos(r),MathF.Sin(r));
+        public static float ToRotation(this Vector2 v)=>MathF.Atan2(v.Y,v.X);
+        public static Vector2 SafeNormalize(this Vector2 v,Vector2 fallback)=>v.LengthSquared()<.0001f?fallback:Vector2.Normalize(v);
+    }
+}
+namespace Terraria.ModLoader
+{
+    public enum ModSide{Client}
+    [AttributeUsage(AttributeTargets.Class)] public sealed class AutoloadAttribute:Attribute{public ModSide Side{get;set;}}
+    public class ModSystem{public virtual void Load(){}public virtual void Unload(){}public virtual void ClearWorld(){}public virtual void OnWorldUnload(){}}
+    public static class ModContent
+    {
+        public static ReLogic.Content.Asset<T> Request<T>(string path,ReLogic.Content.AssetRequestMode mode)
+            =>new(){Value=(T)(object)SamuraiSpectralPreview.Texture(path)};
+        public static T GetInstance<T>() where T:class=>
+            (T)(object)Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig.Instance;
+    }
+}
+namespace Convergence.Client.Encounters.FirstSeverance
+{public sealed class FirstSeveranceVisualConfig{public static readonly FirstSeveranceVisualConfig Instance=new();public bool ReducedEffects;}}
+namespace Convergence
+{public sealed class ConvergenceMod{public static readonly ConvergenceMod Instance=new();public readonly PreviewLogger Logger=new();}public sealed class PreviewLogger{public void Warn(string message)=>Console.Error.WriteLine(message);}}
+namespace Convergence.Client.Encounters.GhostSamurai
+{
+    internal static class GhostSamuraiPresentation
+    {internal static SamuraiRigPose Pose;internal static readonly Guid Fight=Guid.NewGuid();internal static bool TryPose(out SamuraiRigPose pose,out Guid fight){pose=Pose;fight=Fight;return true;}internal static bool Talisman(int i,out Vector2 tether,out float angle){tether=default;angle=0;return false;}}
+    internal static class GhostSamuraiVisuals
+    {internal static void Stroke(SpriteBatch b,Vector2 a,Vector2 c,float width,Color color){}
+    }
+}
+namespace Luminance.Assets
+{
+    public static class MiscTexturesRegistry
+    {
+        public static readonly ReLogic.Content.Asset<Texture2D> TurbulentNoise=new(){Value=SamuraiSpectralPreview.Noise("TurbulentNoise")};
+        public static readonly ReLogic.Content.Asset<Texture2D> DendriticNoiseZoomedOut=new(){Value=SamuraiSpectralPreview.Noise("DendriticNoiseZoomedOut")};
+        public static readonly ReLogic.Content.Asset<Texture2D> WavyBlotchNoise=new(){Value=SamuraiSpectralPreview.Noise("WavyBlotchNoise")};
+    }
+}
+namespace Luminance.Core.Graphics
+{
+    public static class ShaderManager
+    {
+        static readonly Dictionary<string,ManagedShader> shaders=new();
+        public static int CompositeDraws;
+        public static ManagedShader GetShader(string name)
+        {if(!shaders.TryGetValue(name,out var s))shaders[name]=s=new ManagedShader(name);return s;}
+        public static void Clear(){foreach(var s in shaders.Values)s.Effect.Dispose();shaders.Clear();}
+    }
+    public sealed class ManagedShader
+    {
+        public static float? EnergyModeOverride;
+        public readonly Effect Effect;readonly Texture[] textures=new Texture[4];readonly SamplerState[] samplers=new SamplerState[4];readonly string name;
+        public ManagedShader(string name)
+        {
+            this.name=name;
+            string path=Path.Combine(SamuraiSpectralPreview.Root,"Assets/AutoloadedEffects/Shaders/"+name.Split('.')[1]+".fxc");
+            Effect=new Effect(SamuraiSpectralPreview.Device,File.ReadAllBytes(path));
+        }
+        public void TrySetParameter(string name,float value)=>Effect.Parameters[name]?.SetValue(value);
+        public void TrySetParameter(string name,Vector2 value)=>Effect.Parameters[name]?.SetValue(value);
+        public void TrySetParameter(string name,Vector4 value)=>Effect.Parameters[name]?.SetValue(value);
+        public void TrySetParameter(string name,Matrix value)=>Effect.Parameters[name]?.SetValue(value);
+        public void SetTexture(Texture texture,int slot,SamplerState sampler){textures[slot]=texture;samplers[slot]=sampler;}
+        public void Apply(string pass="AutoloadPass")
+        {
+            if(name=="Convergence.SamuraiComposite")ShaderManager.CompositeDraws++;
+            if(name=="Convergence.SamuraiEnergy")
+            {
+                if(EnergyModeOverride.HasValue)Effect.Parameters["mode"].SetValue(EnergyModeOverride.Value);
+            }
+            Effect.CurrentTechnique.Passes[pass].Apply();var d=SamuraiSpectralPreview.Device;
+            for(int i=0;i<textures.Length;i++)if(textures[i]!=null){d.Textures[i]=textures[i];d.SamplerStates[i]=samplers[i];}
+        }
+    }
+    public sealed class ManagedRenderTarget:IDisposable
+    {
+        public static readonly Dictionary<int,int> Sizes=new(){{1024,0},{512,0},{256,0}};
+        readonly Func<int,int,RenderTarget2D> factory;RenderTarget2D target;
+        readonly List<RenderTarget2D> retired=new();
+        public ManagedRenderTarget(bool resize,Func<int,int,RenderTarget2D> factory,bool auto){this.factory=factory;}
+        public RenderTarget2D Target=>target;public bool IsDisposed=>target?.IsDisposed??true;
+        public bool IsUninitialized=>target==null;
+        public void Recreate(int w,int h){if(target!=null)retired.Add(target);target=factory(w,h);Sizes[target.Width]++;}
+        public void Dispose(){target?.Dispose();foreach(var old in retired)old.Dispose();retired.Clear();}
+    }
+    public static class RenderTargetManager
+    {public static event Action RenderTargetUpdateLoopEvent;public static void Pulse()=>RenderTargetUpdateLoopEvent?.Invoke();}
+    public sealed record PrimitiveSettings(Func<float,float> Width,Func<float,Color> Color,bool Smoothen,ManagedShader Shader);
+    public static class PrimitiveRenderer{public static void RenderTrail(List<Vector2> points,PrimitiveSettings settings,int count){}}
+}
