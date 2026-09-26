@@ -91,7 +91,8 @@ public sealed class AzureRecoveryPlayer : ModPlayer
     { if (OwnsHurt && Active && Player.statLife <= 1) LatchFloor("Hurt"); }
     public override bool ImmuneTo(PlayerDeathReason damageSource, int cooldownCounter, bool dodgeable)
     {
-        if (OwnsHurt && Active && Player.statLife <= 1 && !IsIncapacitated) LatchFloor("NativeFloor");
+        // Do not infer a hit here: another Mod may grant immunity or dodge.
+        // Actual Hurt/PreKill (and the post-admission floor edge) own Down.
         return Active && (IsIncapacitated || Main.GameUpdateCount < immunityUntil);
     }
     public override bool PreKill(double damage, int hitDirection, bool pvp,
