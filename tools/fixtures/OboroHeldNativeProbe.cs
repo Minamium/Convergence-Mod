@@ -130,7 +130,7 @@ public static class OboroHeldNativeProbe
             foreach (int step in new[] { 0, 1, 2 })
             {
               var motion = mod.GetType("Convergence.Content.Items.Oboro." + (step == 0 ? "OboroFirstSwingMotion" : step == 1 ? "OboroSecondSwingMotion" : "OboroThirdSwingMotion"), true);
-              int duration = step == 0 ? 18 : step == 1 ? 16 : 26, ready = step == 0 ? 4 : 3, follow = step == 0 ? 16 : 14;
+              int duration = step == 0 ? 22 : step == 1 ? 18 : 30, ready = step == 0 ? 5 : 3, follow = step == 0 ? 19 : 15;
               for (int frame = 0; frame <= duration; frame++)
               {
                 float progress = frame / (float)duration;
@@ -147,8 +147,8 @@ public static class OboroHeldNativeProbe
                 float gap = System.MathF.Sqrt(System.MathF.Pow(X(actual) - x, 2) + System.MathF.Pow(Y(actual) - y, 2));
                 largestGap = System.MathF.Max(largestGap, gap);
                 // Endpoints retain the centered grip of the next step. Native
-                // stretch is discrete: the unchanged third-step150-degree pose
-                // has a minimum9.333px gap under inverted gravity (None stretch).
+                // stretch is discrete; the spectral root returns to the body
+                // between steps while the visible metal grip remains exactly on the hand.
                 // Keep active strokes exact; allow only this harmless hilt join.
                 Require(gap < (step == 0 ? 9 : 10), "hand stays within the hilt during root transition: step=" + step + " frame=" + frame + " facing=" + facing + " gravity=" + grav + " gap=" + gap + " stretch=" + selected);
                 if (step < 2 && frame >= ready && frame <= follow) Require(gap < .0001f, "active stroke must be exactly hand anchored");
@@ -156,6 +156,6 @@ public static class OboroHeldNativeProbe
             }
         }
         System.Console.WriteLine("PASS " + count + " installed hand-anchor samples: facing, counter-facing, gravity and full rotation");
-        System.Console.WriteLine("PASS authored grips: first 4-16F and second 3-14F exact; third thrust and all handoffs hilt gap <= " + largestGap + " pixels");
+        System.Console.WriteLine("PASS authored grips: first 5-19F and second 3-15F exact; third thrust and all handoffs hilt gap <= " + largestGap + " pixels");
     }
 }

@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.46 / protocol70**. Doll's first Phase III claw crush now breaks its foreground metal sphere into a persistent violet energy core, through Final and its DPS check. Gameplay, packets, rewards and the other Raids are unchanged. See the [visual contract](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md#中央球の挟撃破裂--2026-09-27) and [evidence](evidence/2026-09-27-doll-core-rupture.json); native/remote visual acceptance is still user-owned.
+Current source: **0.3.47 / protocol71**. Oboro follows the owner’s overhead-cut sketch:22F downward cut,18F smaller return,30F held-charge finisher. The metal sword and arm pose exist only during an accepted attack; Luminance spectral cuts retain the560px reach. Base damage, drop and buffs remain unchanged; slower timing changes potential DPS. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19) owns curves and visibility. This feature package awaits approved main integration and normal-profile installation.
+
+Retained0.3.46: Doll's first Phase III claw crush now breaks its foreground metal sphere into a persistent violet energy core, through Final and its DPS check. Gameplay, packets, rewards and the other Raids are unchanged. See the [visual contract](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md#中央球の挟撃破裂--2026-09-27) and [evidence](evidence/2026-09-27-doll-core-rupture.json); native/remote visual acceptance is still user-owned.
 
 Retained0.3.45 Scarlet connects native-floor Down and Doll's shared instant-unlimited revive policy. Every positive Scarlet attack, including failed Stack/Spread, is capped at1 until the owner explicitly starts tuning; successful verdicts stay0 and God Mode/native hooks remain effective. Accepted verdict cosmetics are separate from damage, with a clearer failure tail and presentation/native-impact telemetry. The [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md#down-and-instant-recovery) owns behavior; the [ADR amendment](adr/0026-crimson-score-and-native-projectiles.md#2026-09-27-scarlet-downrecovery-and-debug-damage-protocol70) owns protocol/authority. Matching peers must update together. Installation identity belongs to the source-identified build record, not a native playtest claim.
 
@@ -31,7 +33,7 @@ Retained0.3.44 Cathedral: native-floor Down/instant recovery and one-damage debu
 
 Retained0.3.43 Cathedral presentation: full-chain intro visibility, flowing armor/frost fins, native-pixel Liora skirt/blade refraction and seven original ice/glass accents. [Prior evidence](evidence/2026-09-26-azure-refraction-entrance.json) retains its unplayed visual/audio acceptance separately from recovery work.
 
-Retained0.3.42 Oboro: a132px physical sword remains attached to an articulated native hand; unchanged560px attack reach uses an original Luminance spectral crescent. This addresses the owner's rejected0.3.34 oversized rotating blade; subjective acceptance remains pending. Gameplay,18/16/26F clocks, hit windows, damage, buffs and drop are unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧の刀と霊刃の分離--2026-09-21) owns that presentation.
+Retained0.3.42 Oboro: a132px physical sword remains attached to an articulated native hand; unchanged560px attack reach uses an original Luminance spectral crescent. This addresses the owner's rejected0.3.34 oversized rotating blade; subjective acceptance remains pending. The old18/16/26F clocks and trajectories are superseded by the current definition table; damage, buffs and drop remain unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧の刀と霊刃の分離--2026-09-21) owns that presentation.
 
 Retained0.3.41 baseline: Scarlet Act II uses four slashes; Act III uses four clockwise curved-claw volleys, retaining the closing crossflow. Crown/Mantle now have distinct articulated energy anatomy; the giant Eidolon uses a dedicated body/emission composite. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns mechanics and visuals. Matching peers are required for appended technique16; existing packet/technique IDs and payload layout are unchanged. Cathedral's0.3.40 lattice/verdict/ending work is retained without further changes.
 
@@ -61,6 +63,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.47 Oboro sketch revision:** [evidence](evidence/2026-09-27-oboro-kesa-combo.json) records native compilation, shared-motion/visibility checks, exact-package hand and codec probes and888 linked-production material frames. Idle, all three strokes, loop, release, both facings and light/dark Reduced/full are inspected offline. Actual SP/MP input, player armor/mount layering and subjective motion acceptance are user-owned / not_run.
 
 Doll0.3.46: native package builds with no errors and the existing4nullable warnings; actual packaged1-4-player admission passes. Three focused rupture contracts and144compiled-material/production-mesh GPU frames pass. [Evidence](evidence/2026-09-27-doll-core-rupture.json) retains exact package/source identity and the separate native contact/muzzle/ending/remote/audio checks still `not_run`.
 
@@ -142,7 +146,7 @@ Scarlet: reload the matching0.3.45 package on every peer. Check deliberate Stack
 
 Cathedral: after the0.3.44 integrated package is installed, start/reload normally; no second Build is needed. With matching peers and God Mode off, check1damage, midair Down→kit recovery,60-second recipient lockout, all-Down defeat and retry with no frozen controls. Keep Liora alive to observe Spread. Existing visual/audio/accessibility checks remain separate in the [focused smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance); do not infer they passed from compilation.
 
-Oboro's retained owner check: compare the constant-size sword, wrist return, short pointed crescent and held three-hit loop with the supplied clips. Check both facings, release/restart, high attack speed, Reduced Effects and a matching remote peer.
+Oboro: after approved integration/install, Reload and check the new overhead cut → compact return → heavy finisher, slightly slower cadence, invisible idle sword, release/restart and continuous loop. Check both facings, high attack speed, Reduced Effects and a matching remote peer. PR #74’s earlier0.3.42 was installed successfully; that approval does not cover the current new motion revision.
 
 For the Choir revision, start the installed package normally; another Build is unnecessary. Check Act III's alternating four-arm intake/release, heart/wing visibility without obscuring forecasts, then sacrificial return and Final's reused limbs. Actual remote rendering and frame-time cost remain unmeasured.
 
@@ -152,7 +156,7 @@ Retained Scarlet owner checks: Covenant against moving large/small enemies, over
 
 The earlier Azure20% retreat, articulated bite and shared-HP Fury behavior is retained. Do not repeat unrelated whole-fight matrices for this scoped revision.
 
-The integrated Oboro second-cut changes retain their owner checks: both facings, upper pause, fast downward return, thinner echoes, held loop and release/restart, including the first/third-step handoffs. Use the current matching build for multiplayer. The third-cut follow-up is now implemented; after integration/build, check its still charge, sharp release, heavier violet arc, forward grip and3→1 handoff, both facing directions, high attack speed and release during charge. Real-game checks remain pending.
+The old first/second/third-cut playtest handoffs are superseded by the current sketch revision above; their historical evidence remains available. No in-game acceptance is inferred from compilation or offline frames.
 
 The earlier0.3.22 Ghost Samurai rig checks remain user-owned: Idle, movement, each attack/phase transition, connected blade poses and the Victory-only96-tick ending. Compare a matching remote client, bright/dark backgrounds, ReducedEffects and high FPS. Offline checks are not a game playtest.
 

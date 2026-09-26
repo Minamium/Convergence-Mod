@@ -9,21 +9,21 @@ internal static partial class Program
     [DomainTest("Oboro finisher holds still then releases faster than both opening cuts")]
     private static void OboroFinisherBeats()
     {
-        float Angle(float f) => OboroRules.Offset(2, f / 26) * 180 / MathF.PI;
-        float[] frames = { 0, 8, 14, 18, 22, 26 }, angles = { 150, 170, 170, 60, -70, -95 };
+        float Angle(float f) => OboroRules.Offset(2, f / 30) * 180 / MathF.PI;
+        float[] frames = { 0, 8, 16, 20, 25, 30 }, angles = { -65, -130, -130, -30, 90, 110 };
         for (int i = 0; i < frames.Length; i++)
             AssertEqual(true, Math.Abs(Angle(frames[i]) - angles[i]) < .0001f, "authored finisher pose");
-        foreach (float f in new[] { 8f, 14, 18, 22 })
+        foreach (float f in new[] { 8f, 16, 20, 25 })
         {
             const float h = .001f;
             AssertEqual(true, Math.Abs((Angle(f + h) - Angle(f)) / h - (Angle(f) - Angle(f - h)) / h) < .2f, "connected angular velocity");
         }
-        for (float f = 8; f < 14; f += .125f)
+        for (float f = 8; f < 16; f += .125f)
         {
-            AssertEqual(OboroRules.Offset(2, 8f / 26), OboroRules.Offset(2, f / 26), "held blade angle");
-            AssertEqual(-4f, OboroThirdSwingMotion.Forward(f / 26), "held grip");
-            AssertEqual(false, OboroRules.Live(2, f / 26), "charge cannot damage");
-            AssertEqual(OboroMotionPhase.Charge, OboroThirdSwingMotion.Phase(f / 26), "explicit charge beat");
+            AssertEqual(OboroRules.Offset(2, 8f / 30), OboroRules.Offset(2, f / 30), "held blade angle");
+            AssertEqual(-4f, OboroThirdSwingMotion.Forward(f / 30), "held grip");
+            AssertEqual(false, OboroRules.Live(2, f / 30), "charge cannot damage");
+            AssertEqual(OboroMotionPhase.Charge, OboroThirdSwingMotion.Phase(f / 30), "explicit charge beat");
         }
         float Peak(int step)
         {
@@ -33,9 +33,9 @@ internal static partial class Program
             return peak;
         }
         AssertEqual(true, Peak(2) > Math.Max(Peak(0), Peak(1)) * 1.4f, "explosive release, not just a longer cut");
-        AssertEqual(8f, OboroThirdSwingMotion.Forward(18f / 26), "largest forward impulse");
+        AssertEqual(8f, OboroThirdSwingMotion.Forward(20f / 30), "largest forward impulse");
         AssertEqual(0f, OboroThirdSwingMotion.Forward(1), "no accumulated displacement");
-        AssertEqual(26, OboroRules.Duration(2, 1), "unchanged total frames");
+        AssertEqual(30, OboroRules.Duration(2, 1), "longer held-charge finisher");
     }
 
     [DomainTest("Oboro finisher entry settles before the hold and looping first cut inherits its pose")]
@@ -44,20 +44,20 @@ internal static partial class Program
         foreach (int facing in new[] { -1, 1 })
         {
             var visual = new OboroSwingPresentation(); ulong now = 100;
-            var view = OboroSample with { Step = 2, Swing = 3, Duration = 26, Aim = .9f, Facing = (sbyte)facing };
-            for (int f = 0; f <= 26; f++)
+            var view = OboroSample with { Step = 2, Swing = 3, Duration = 30, Aim = .9f, Facing = (sbyte)facing };
+            for (int f = 0; f <= 30; f++)
             {
                 visual.Update(view, f, true, true, 0, 0, facing, now++);
                 if (f >= 8)
-                    AssertEqual(view.Aim + facing * OboroRules.Offset(2, f / 26f), visual.Pose.Angle, "aim correction must finish before charge");
+                    AssertEqual(view.Aim + facing * OboroRules.Offset(2, f / 30f), visual.Pose.Angle, "aim correction must finish before charge");
             }
             var end = visual.Pose;
-            view = view with { Step = 0, Swing = 4, Duration = 18, Aim = -.4f };
+            view = view with { Step = 0, Swing = 4, Duration = 22, Aim = -.4f };
             visual.Update(view, 0, true, true, 0, 0, facing, now++);
             AssertEqual(true, Math.Abs(OboroSwingPresentation.Wrap(end.Angle - visual.Pose.Angle)) < .000001f, "no angular pop on loop with changed aim");
             AssertEqual(end.X, visual.Pose.X, "same loop root");
-            visual.Update(view, 4, true, true, 0, 0, facing, now++);
-            AssertEqual(view.Aim + facing * OboroRules.Offset(0, 4f / 18), visual.Pose.Angle, "live first cut rejoined server");
+            visual.Update(view, 5, true, true, 0, 0, facing, now++);
+            AssertEqual(view.Aim + facing * OboroRules.Offset(0, 5f / 22), visual.Pose.Angle, "live first cut rejoined server");
         }
     }
 

@@ -35,9 +35,9 @@ internal static class OboroComboSettings
     internal static OboroComboStep For(int comboIndex) => comboIndex switch
     {
         //            総F   開始    引き    終点   Hit開始 終了 前進px
-        0 => new(     18,   110,   135,    -35,       4,  13,     0), // 斬り上げ
-        1 => new(     16,   -50,   -80,    120,       3,  12,     0), // 返し斬り
-        2 => new(     26,   150,   170,    -70,      14,  23,     8), // 重い斬撃
+        0 => new(     22,   -65,  -100,     65,       5,  15,     0), // 上段からの袈裟斬り
+        1 => new(     18,    90,   102,    -40,       3,  12,     0), // 小さな切り返し
+        2 => new(     30,   -65,  -130,     90,      16,  26,     8), // 大きな振り抜き
         _ => throw new ArgumentOutOfRangeException(nameof(comboIndex))
     };
 }

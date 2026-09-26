@@ -17,7 +17,7 @@ internal static class OboroFinisherArt
         if (f < OboroThirdSwingMotion.HoldEnd)
         {
             float charge = OboroRules.Ease(f / OboroThirdSwingMotion.PullEnd);
-            // 輪を刀へ収束させる。刀と手は8～14Fで静止し、霊気だけが細く凝縮する。
+            // 輪を刀へ収束させる。刀と手はPullEnd～HoldEndで静止し、霊気だけが細く凝縮する。
             float tension = Math.Clamp((f - OboroThirdSwingMotion.PullEnd) / (OboroThirdSwingMotion.HoldEnd - OboroThirdSwingMotion.PullEnd), 0, 1);
             int count = reduced ? 2 : 4;
             for (int i = 0; i < count; i++)

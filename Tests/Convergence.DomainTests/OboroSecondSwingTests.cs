@@ -6,32 +6,32 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Oboro return cut pauses above then reverses faster with five continuous beats")]
+    [DomainTest("Oboro return cut turns below then returns on a smaller arc with five continuous beats")]
     private static void OboroReturnBeats()
     {
-        float Angle(float frame) => OboroRules.Offset(1, frame / 16) * 180 / MathF.PI;
-        float[] frames = { 0, 3, 6, 10, 14, 16 }, angles = { -50, -80, -20, 120, 143, 150 };
+        float Angle(float frame) => OboroRules.Offset(1, frame / 18) * 180 / MathF.PI;
+        float[] frames = { 0, 3, 6, 11, 15, 18 }, angles = { 90, 102, 60, -40, -55, -65 };
         OboroMotionPhase[] phases = { OboroMotionPhase.Windup, OboroMotionPhase.Acceleration,
             OboroMotionPhase.Cut, OboroMotionPhase.FollowThrough, OboroMotionPhase.Transition };
         for (int i = 0; i < frames.Length; i++)
         {
             AssertEqual(true, Math.Abs(Angle(frames[i]) - angles[i]) < .0001f, "authored return pose");
-            if (i < phases.Length) AssertEqual(phases[i], OboroSecondSwingMotion.Phase((frames[i] + .01f) / 16), "named beat");
+            if (i < phases.Length) AssertEqual(phases[i], OboroSecondSwingMotion.Phase((frames[i] + .01f) / 18), "named beat");
         }
         const float h = .001f;
-        foreach (float f in new[] { 3f, 6, 10, 14 })
+        foreach (float f in new[] { 3f, 6, 11, 15 })
             AssertEqual(true, Math.Abs((Angle(f + h) - Angle(f)) / h - (Angle(f) - Angle(f - h)) / h) < .15f, "continuous angular speed");
-        AssertEqual(true, Math.Abs(Angle(3.1f) - Angle(2.9f)) < .2f, "brief upper tension beat");
+        AssertEqual(true, Math.Abs(Angle(3.1f) - Angle(2.9f)) < .2f, "brief lower reversal beat");
         float firstPeak = 0, secondPeak = 0;
-        for (int i = 0; i < 1800; i++)
+        for (int i = 0; i < 2200; i++)
         {
             float f = i / 100f;
-            firstPeak = Math.Max(firstPeak, Math.Abs(OboroRules.Offset(0, (f + .01f) / 18) - OboroRules.Offset(0, f / 18)));
-            if (f >= 3 && f < 16) AssertEqual(true, Angle(f + .01f) >= Angle(f) - .0001f, "single decisive downstroke without recoil reversal");
-            secondPeak = Math.Max(secondPeak, Math.Abs(OboroRules.Offset(1, (f + .01f) / 16) - OboroRules.Offset(1, f / 16)));
+            firstPeak = Math.Max(firstPeak, Math.Abs(OboroRules.Offset(0, (f + .01f) / 22) - OboroRules.Offset(0, f / 22)));
+            if (f >= 3 && f < 18) AssertEqual(true, Angle(f + .01f) <= Angle(f) + .0001f, "single decisive return stroke without recoil reversal");
+            secondPeak = Math.Max(secondPeak, Math.Abs(OboroRules.Offset(1, (f + .01f) / 18) - OboroRules.Offset(1, f / 18)));
         }
-        AssertEqual(true, secondPeak > firstPeak * 1.2f, "noticeably sharper than first cut");
-        AssertEqual(16, OboroRules.Duration(1, 1), "unchanged total frames");
+        AssertEqual(true, secondPeak > firstPeak * .9f && secondPeak < firstPeak * 1.1f, "compact cut retains a sharp release");
+        AssertEqual(18, OboroRules.Duration(1, 1), "slightly slower compact return");
     }
 
     [DomainTest("Oboro return hand and visible live blade agree through mirroring speed and combo joins")]
@@ -68,14 +68,14 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Oboro return echoes fade sooner than ascent and finisher without leaking on cancellation")]
+    [DomainTest("Oboro return echoes fade sooner than overhead cut and finisher without leaking on cancellation")]
     private static void OboroReturnEchoes()
     {
         AssertEqual(0f, OboroSwingPresentation.Opacity(100, 106, 1), "return afterimage expires at six ticks");
         AssertEqual(true, OboroSwingPresentation.Opacity(100, 106, 0) > 0 && OboroSwingPresentation.Opacity(100, 106, 2) > 0, "other echoes preserved after return fades");
         var visual = new OboroSwingPresentation();
-        var view = OboroSample with { Step = 1, Swing = 2, Duration = 16 };
-        for (int age = 0; age <= 16; age++) visual.Update(view, age, true, true, 0, 0, 1, (ulong)(100 + age));
+        var view = OboroSample with { Step = 1, Swing = 2, Duration = 18 };
+        for (int age = 0; age <= 12; age++) visual.Update(view, age, true, true, 0, 0, 1, (ulong)(100 + age));
         AssertEqual(true, visual.Count > 0 && visual.Count <= OboroSwingPresentation.Capacity, "bounded return history");
         visual.Update(view with { Duration = 0 }, 0, false, true, 0, 0, 1, 125);
         AssertEqual(0, visual.Count, "all return echoes expire");

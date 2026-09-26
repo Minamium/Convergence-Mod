@@ -10,7 +10,7 @@ internal static partial class Program
     private static void OboroReleaseBoundaries()
     {
         for (int releaseStep = 0; releaseStep < 3; releaseStep++)
-        for (int releaseFrame = 0; releaseFrame < new[] { 18, 16, 26 }[releaseStep]; releaseFrame++)
+        for (int releaseFrame = 0; releaseFrame < new[] { 22, 18, 30 }[releaseStep]; releaseFrame++)
         {
             var clock = new OboroTiming(); ulong now = 100;
             clock.SetHeld(true, now); clock.TryBegin(now, 1);
@@ -37,10 +37,10 @@ internal static partial class Program
     {
         var clock = new OboroTiming(); ulong now = 100;
         clock.SetHeld(true, now); clock.TryBegin(now, 1);
-        for (int i = 0; i < 17; i++) AssertEqual(OboroAdvance.None, clock.AdvanceSwing(++now, 3), "current duration fixed");
-        AssertEqual(18, clock.Duration, "speed does not shorten running step");
+        for (int i = 0; i < 21; i++) AssertEqual(OboroAdvance.None, clock.AdvanceSwing(++now, 3), "current duration fixed");
+        AssertEqual(22, clock.Duration, "speed does not shorten running step");
         AssertEqual(OboroAdvance.NextStep, clock.AdvanceSwing(++now, .5f), "next step");
-        AssertEqual(32, clock.Duration, "new speed at boundary");
+        AssertEqual(36, clock.Duration, "new speed at boundary");
         int remaining = clock.Duration;
         for (int i = 0; i < remaining; i++)
             AssertEqual(i + 1 == remaining ? OboroAdvance.Finished : OboroAdvance.None,
@@ -54,8 +54,8 @@ internal static partial class Program
     [DomainTest("Oboro definitions match requested degrees and exact half-open frame windows")]
     private static void OboroFrameDefinitions()
     {
-        int[] total = { 18, 16, 26 }, begin = { 4, 3, 14 }, end = { 13, 12, 23 };
-        float[] starts = { 110, -50, 150 }, winds = { 135, -80, 170 }, ends = { -35, 120, -70 };
+        int[] total = { 22, 18, 30 }, begin = { 5, 3, 16 }, end = { 15, 12, 26 };
+        float[] starts = { -65, 90, -65 }, winds = { -100, 102, -130 }, ends = { 65, -40, 90 };
         for (int step = 0; step < 3; step++)
         {
             var settings = OboroComboSettings.For(step);

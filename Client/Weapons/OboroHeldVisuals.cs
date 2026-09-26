@@ -33,7 +33,7 @@ public sealed class OboroHeldVisuals : GlobalProjectile
         projectile.Center = new(visual.SwordPose.X, visual.SwordPose.Y);
         projectile.rotation = visual.Pose.Angle;
         if (visual.Swinging) player.ChangeDir(state.View.Facing);
-        if (visual.Swinging || visual.Settling)
+        if (visual.Swinging)
         {
             var stretch = OboroHandAnchor.Stretch(player, projectile.Center, visual.ArmAngle);
             player.SetCompositeArmFront(true, stretch, visual.ArmAngle - MathF.PI / 2);
