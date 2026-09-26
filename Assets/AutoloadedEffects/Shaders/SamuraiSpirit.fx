@@ -20,8 +20,13 @@ float4 PS(VO i):COLOR0
  float blade=(1-step(.5,abs(part-4)));
  float threads=pow(saturate(f*1.23),5);
  float3 light=float3(.54,.33,1);
- float3 pigment=base.rgb*(.97+n*.07);
- pigment+=base.a*light*(edge*(.26+charge*.30)+threads*(ghost*.25+blade*charge*.36));
+ float3 pigment=base.rgb*(.92+n*.12);
+ // Flow follows violet emissive pigment, leaving gold/ivory metal readable.
+ float emissive=saturate((base.b-base.g*1.20)*3.1)*base.a;
+ float surge=pow(saturate(.5+.5*sin(uv.y*16-clock*9+n*2)),6);
+ pigment+=base.a*light*edge*(.38+charge*.65);
+ pigment+=emissive*(light*(threads*.85+surge*.22)+float3(.85,.69,1)*threads*charge*.8);
+ pigment+=base.a*light*threads*(ghost*.40+blade*charge*.55);
  pigment=lerp(pigment,base.a*float3(1,.91,1),hit*.54);
  float erosion=smoothstep(dissolution-.07,dissolution+.07,1-uv.y*.65-n*.35);
  if(dissolution<.001) erosion=1;

@@ -9,8 +9,7 @@ namespace Convergence.Content.Encounters.GhostSamurai;
 
 public sealed class GhostSamuraiSummon : ModItem
 {
-    // Vanilla asset reference only; no extracted asset is distributed.
-    public override string Texture => "Terraria/Images/Item_" + ItemID.MechanicalSkull;
+    public override string Texture => "Convergence/Assets/Textures/Items/GhostSamurai/SealedMask";
     public override void SetDefaults()
     {
         Item.width = 32; Item.height = 32;

@@ -13,7 +13,7 @@ public static class SamuraiRigNativeProbe
         Assembly lumi = context.LoadFromAssemblyName(new AssemblyName("Luminance"));
         Type presentation = mod.GetType(Prefix + "GhostSamuraiPresentation", true);
         object system = Activator.CreateInstance(presentation, true);
-        foreach (string name in new[] { "GhostSamuraiPresentation", "GhostSamuraiRigArt", "GhostSamuraiMist" }) {
+        foreach (string name in new[] { "GhostSamuraiPresentation", "GhostSamuraiRigArt", "GhostSamuraiMist", "GhostSamuraiComposite" }) {
             Type t = mod.GetType(Prefix + name, true);
             t.GetMethod("ValidateType", Instance)?.Invoke(Activator.CreateInstance(t, true), null);
         }
@@ -26,6 +26,26 @@ public static class SamuraiRigNativeProbe
             Require(Math.Abs(actual-expected)<.00001f,"Installed Luminance curve mismatch");
         }
         Console.WriteLine("PASS installed Luminance easing binding: 202 samples and client type validation");
+
+        Type frame = mod.GetType("Convergence.Content.Encounters.GhostSamurai.SamuraiNativeFrame", true);
+        Type actor = mod.GetType("Convergence.Content.Encounters.GhostSamurai.SamuraiActorSnapshot", true);
+        Type motionSample = mod.GetType("Convergence.Content.Encounters.GhostSamurai.SamuraiMotionSample", true);
+        using (var buffer = new MemoryStream()) {
+            using var writer = new BinaryWriter(buffer, System.Text.Encoding.UTF8, true);
+            frame.GetMethod("Write", Static).Invoke(null, new[] { writer, Activator.CreateInstance(actor), Activator.CreateInstance(motionSample) });
+            Require(buffer.Length == 1 && buffer.ToArray()[0] == 0, "Unowned NPC must serialize an absent marker");
+            writer.Write(123456); buffer.Position = 0;
+            using var reader = new BinaryReader(buffer, System.Text.Encoding.UTF8, true);
+            object[] args = { reader, Activator.CreateInstance(actor), Activator.CreateInstance(motionSample) };
+            Require(!(bool)frame.GetMethod("TryRead", Static).Invoke(null, args) && reader.ReadInt32() == 123456,
+                "Native envelope consumed following buffer or decoded an unowned arena");
+        }
+        foreach (string name in new[] { "Convergence.Content.Items.DXOboro.DXOboro", "Convergence.Content.Items.DXOboro.DXOboroCut",
+            "Convergence.Client.Weapons.DXOboroItemVisuals", "Convergence.Client.Weapons.DXOboroVisuals" }) {
+            Type t = mod.GetType(name, true);
+            t.GetMethod("ValidateType", Instance)?.Invoke(Activator.CreateInstance(t, true), null);
+        }
+        Console.WriteLine("PASS exact-package absent native actor envelope and independent DXOboro loader types");
 
         Type segment = lumi.GetType("Luminance.Common.VerletIntergration.VerletSegment",true);
         Type vector = segment.GetField("Position").FieldType;

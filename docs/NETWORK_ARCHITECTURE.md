@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-15
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -23,7 +23,13 @@ related_docs:
 
 # Network Architecture
 
-## Current development protocol v44
+## Current replication boundary
+
+[Status](STATUS.md) and `EncounterProtocol.CurrentVersion` own the current version. Protocol72 adds Ghost Samurai's native actor presence byte and16-byte finite position/velocity sample; its actor/aim/arena contracts remain intact. A not-yet-owned native NPC writes only the absent marker. Decode the complete bounded frame before validating direction, Fight, arena and strictly newer age. Clients interpolate the accepted movement sample, never choose a target or simulate damage; exact rush/combo trajectories retain their shared authoritative clocks. [Ghost Samurai specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md#判定同期後始末) owns timing and leases.
+
+Oboro still uses server-accepted connection generation, nonce, attack clocks and hit resolution. A bounded Hello retry repairs a missing/stale owner state; expired client visuals cannot keep item input locked. Native equipment/selected-slot synchronization precedes a Swing/Zanshin request. This repairs admission/replication without accepting client hit reports. DXOboro is a separate native owner-projectile trial; it does not replace that protocol or claim Oboro feature parity. All peers must use the matching current build.
+
+## Historical development protocol v44
 
 Ghost Samurai's FrontalCleaveShockwave retains the v40 actor/aim/hazard layouts, stable IDs and authority ownership. The server now selects a clear staging point above the arena's bottom center; the existing origin/anchor/ground floats determine a speed-capped arrival duration. Charge, blade growth, downswing/contact and ground-front growth derive from the same accepted attack/hazard clocks. Clients never choose terrain or add damage. ShockGeometry keeps the floor fixed while widening/raising the current rectangle for both rendering and the server hit path. Protocol44 prevents old peers from deriving the former path, fire time or constant-size front from unchanged payloads. Target invalidation, event counters, sound deduplication and exact-Fight cleanup are retained; no per-frame scale packets or new native damage exceptions are added. The [attack specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md#正面大斬撃衝撃波--frontalcleaveshockwave) owns tuning.
 

@@ -29,3 +29,27 @@ internal readonly record struct SamuraiActorSnapshot(Guid Fight, int Age, Samura
         return result;
     }
 }
+
+// Native NPCs may sync before fight ownership is installed. Keep that absence
+// explicit, and consume the complete bounded payload before authority checks.
+internal static class SamuraiNativeFrame
+{
+    internal static void Write(BinaryWriter writer, SamuraiActorSnapshot state, SamuraiMotionSample motion)
+    {
+        bool present = state.IsValid && motion.Valid;
+        writer.Write(present);
+        if (!present) return;
+        state.Write(writer); motion.Write(writer);
+    }
+    internal static bool TryRead(BinaryReader reader, out SamuraiActorSnapshot state, out SamuraiMotionSample motion)
+    {
+        state = default; motion = default;
+        byte present = reader.ReadByte();
+        if (present > 1) throw new InvalidDataException("ghost_samurai.actor_presence_invalid");
+        if (present == 0) return false;
+        var next = SamuraiActorSnapshot.Read(reader);
+        var movement = SamuraiMotionSample.Read(reader);
+        state = next; motion = movement;
+        return true;
+    }
+}

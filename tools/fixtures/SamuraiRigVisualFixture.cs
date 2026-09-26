@@ -3,6 +3,7 @@
 // in-game timing are explicitly outside this offline art-layout fixture.
 namespace Microsoft.Xna.Framework
 {
+    public struct Matrix { }
     public record struct Vector2(float X, float Y)
     {
         public Vector2(float v) : this(v, v) { }
@@ -93,9 +94,13 @@ namespace Convergence.Client.Encounters.GhostSamurai
     using Microsoft.Xna.Framework.Graphics;
     internal static class GhostSamuraiPresentation { internal static bool Talisman(int i,out Vector2 p,out float a) { p=default;a=0;return false; } }
     internal static class GhostSamuraiVisuals { internal static void Stroke(SpriteBatch b,Vector2 a,Vector2 end,float w,Color c) { } }
+    // Legacy part-transform capture only. The spectral GPU fixture covers the
+    // real energy/composite; this capture does not pretend to render them.
+    internal static class GhostSamuraiEnergy { internal static void Body(SpriteBatch b,in SamuraiRigPose p,Vector2 s,bool front,float opacity=1) { } }
+    internal static class GhostSamuraiComposite { internal static bool Draw(SpriteBatch b,in SamuraiRigPose p,Vector2 s) => false; }
     internal static class GhostSamuraiMaterials
     {
-        internal static void Prepare(float age,float charge,float hit,float death)
+        internal static void Prepare(float age,float charge,float hit,float death,Matrix? projection=null)
         { var b=Convergence.Client.Graphics.WorldGraphicsScope.Batch; b.Clock=age; b.Charge=charge; b.Hit=hit; b.Dissolve=death; }
         internal static void Trails(SpriteBatch batch,in SamuraiRigPose p,SamuraiRigHistory h,double tick) { }
         internal static void Part(Texture2D t,int part,Vector2 at,Rectangle r,Color c,float rot,Vector2 origin,Vector2 scale,bool flip)

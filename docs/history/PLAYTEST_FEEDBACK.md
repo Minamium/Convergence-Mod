@@ -19,6 +19,12 @@ related_docs:
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
 
+## Ghost Samurai Host & Play and spectral refresh — 2026-09-27 / 0.3.48
+
+Owner reports smooth SP but jerky Host & Play Boss motion and inability to swing **Oboro only**; asks to keep Oboro while adding DXOboro and a summon icon, with visible Luminance energy beyond a lightly animated PNG. Archived0.3.43 logs show one two-player fight ending at WorldUnload, not a complete test of the current0.3.47 baseline; they contain no weapon-rejection detail and cannot prove a unique cause. Code review identifies unsmoothed periodic native position updates, unrepaired Oboro generation/state leases and custom use preceding native held-item synchronization.
+
+Add bounded accepted-sample smoothing, canonical initial actor presence, owner-state repair/lease expiry and ordered native equipment synchronization. Preserve authority, damage and Oboro art/combo. Add body/emission targets, independently connected limb flames, warning/live spectral materials and a separate native-projectile DX trial. Actual-shader preview found a warning/live distinction defect during implementation; GPU evidence, source-identified build and remaining Host & Play/visual acceptance are recorded in [evidence](../evidence/2026-09-27-samurai-spectral.json). The owner's quality target is not a claim of WotG/Vespera parity.
+
 ## Doll central sphere rupture direction — 2026-09-27 / 0.3.46
 
 Owner requests the claw clamp to strike the central sphere, produce cracks, burst its metallic shell and leave a persistent purple energy sphere. This is a design request, not a report of a new playtest. Connect the first Phase III crush to the same contact tick; retain the energy material through later cycles, Final and the closing check. [Current visual contract](../encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md#中央球の挟撃破裂--2026-09-27) owns the behavior; [evidence](../evidence/2026-09-27-doll-core-rupture.json) separates focused contracts/native packaging/offline frames from unplayed owner visual/audio/remote acceptance. No balance or damage change.

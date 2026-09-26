@@ -853,7 +853,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 8c2c96098893a8fb7c8e46b70c2b288f52dda312defa54df17e686da0163fa24
+  content_sha256: 8314dd149e14d84ef6011d321c48098edac3bd6acb926ee1d459581bac30a10f
   document_type: spec
   status: provisional
   owners:
@@ -930,7 +930,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 15bf946673477a5870d55e3330e8e84671aabc8b6ccc56453c6edfb357d6dc93
+  content_sha256: bbefc6a10ad956a703da1c0f0a476148eaa839453e2f46ff724e09c3a28a7452
   document_type: evidence
   status: historical
   owners:
@@ -1284,12 +1284,12 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: a9e267ef223821c587bfd227ca991c2f3d127a3d6006f9889c3b2d96c7f1adaa
+  content_sha256: 8bf2d30bc1debfb3b25128a4abd55c12116702bfce3b7f322886ab9ec2cf4341
   document_type: governance
   status: accepted
   owners:
   - networking
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -1329,7 +1329,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: aa81534765c614478e68d3318700510c4d19490e7bf551d6ea5cbbbfc1094739
+  content_sha256: 98ac384dd09b543d94d75bfb7c2b5d40f9da3467cf6d2b88a8731ddb7433678a
   document_type: status
   status: accepted
   owners:

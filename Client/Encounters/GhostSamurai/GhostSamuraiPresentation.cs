@@ -91,12 +91,12 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         if (!ReferenceEquals(owner, active) || fight != active.Fight)
         {
             DropOwner(); owner = active; fight = active.Fight; death = false;
-            lastCenter = active.NPC.Center; current = previous = Neutral(active);
+            lastCenter = active.PresentationCenter; current = previous = Neutral(active);
             lastAttack = active.Attack; lastFacing = active.NPC.direction; lastTransition = active.TransitionRemaining > 0;
         }
         missingSince = 0;
         if (updated == now && history.Count > 0) return;
-        Vector2 center = active.NPC.Center, velocity = center - lastCenter;
+        Vector2 center = active.PresentationCenter, velocity = center - lastCenter;
         bool teleported = velocity.LengthSquared() > 320 * 320;
         if (teleported) { history.Clear(); secondary.Clear(); mist.ClearOwned(); velocity = Vector2.Zero; momentum = Vector2.Zero; }
         lastCenter = center;
@@ -152,11 +152,11 @@ internal sealed class GhostSamuraiPresentation : ModSystem
             if (blade.Trail > 0 && oldBlade.Trail == 0 && history.Count > 0)
             {
                 mist.Emit(fight, tip, (tip - hand).SafeNormalize(Vector2.UnitY) * 2, 38);
-                if (shakes.Count < 4 && blade.Size > 1.2f && !GhostSamuraiRigArt.Reduced
+                if (shakes.Count < 4 && !GhostSamuraiRigArt.Reduced
                     && Main.LocalPlayer.GetModPlayer<GhostSamuraiContainmentPlayer>().BoundTo(active)
                     && ModContent.GetInstance<FirstSeveranceVisualConfig>().ScreenShake)
-                    shakes.Add(ScreenShakeSystem.StartShakeAtPoint(center, 1.8f, angularVariance: .3f,
-                        shakeDirection: Vector2.UnitY, shakeStrengthDissipationIncrement: .3f));
+                    shakes.Add(ScreenShakeSystem.StartShakeAtPoint(center, blade.Size > 1.2f ? 4.8f : 2.4f, angularVariance: .3f,
+                        shakeDirection: (tip - hand).SafeNormalize(Vector2.UnitY), shakeStrengthDissipationIncrement: .5f));
             }
         }
         history.Add(fight, active.NPC.whoAmI, current, now);
@@ -168,7 +168,7 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         if (Main.dedServ || !ReferenceEquals(owner, boss) || fight != boss.Fight) return;
         if (!hitSeen || Main.GameUpdateCount - hitAt >= 6) { hitAt = Main.GameUpdateCount; hitSeen = true; }
     }
-    private static SamuraiRigPose Neutral(GhostSamuraiBoss boss) => new(boss.NPC.Center.X, boss.NPC.Center.Y,
+    private static SamuraiRigPose Neutral(GhostSamuraiBoss boss) => new(boss.PresentationCenter.X, boss.PresentationCenter.Y,
         boss.VisualAge, 0, 1, new(2.16f, 1, 0, 0), new(.98f, 1, 0, 0), 0, 0, 0);
     internal static void Draw(SpriteBatch batch, GhostSamuraiBoss boss, Vector2 screen)
     {
@@ -177,6 +177,13 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         // Fallback remains visible even before the first accepted replica/tick.
         if (owns) mist?.Draw(batch);
         GhostSamuraiRigArt.Draw(batch, pose, screen, owns ? history : null, Main.GameUpdateCount + (double)Fraction - 1);
+    }
+    internal static bool TryPose(out SamuraiRigPose pose, out Guid ownerFight)
+    {
+        pose = SamuraiRigMotion.Interpolate(previous, current, Fraction);
+        ownerFight = fight;
+        return !Main.dedServ && !Main.gameMenu && !death && owner is { ProjectionFresh: true }
+            && owner.NPC.active && fight != Guid.Empty && owner.Fight == fight;
     }
     public override void PostDrawTiles()
     {
@@ -200,5 +207,5 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     { DropOwner(); retiredFight = Guid.Empty; death = false; deathAt = 0; stamp = 0; systemTick = ulong.MaxValue; current = previous = deathPose = default; }
     public override void ClearWorld() => Clear();
     public override void OnWorldUnload() => Clear();
-    public override void Unload() { Clear(); mist = null; SamuraiRigMotion.ClearEasing(); GhostSamuraiMaterials.Reset(); }
+    public override void Unload() { Clear(); mist = null; SamuraiRigMotion.ClearEasing(); GhostSamuraiMaterials.Reset(); GhostSamuraiEnergy.Reset(); }
 }

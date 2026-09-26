@@ -47,18 +47,23 @@ internal sealed class GhostSamuraiRigArt : ModSystem
             }
         }
         Smoke(batch, pose, screen, reduced, false, 1);
+        GhostSamuraiEnergy.Body(batch, pose, screen, false);
         Color tint = Color.Lerp(Color.White, new Color(243, 214, 255), pose.Hit * .7f) * SamuraiSpriteFrames.BodyOpacity(pose.Age);
-        using (var scope = new WorldGraphicsScope(batch))
-        {
-            GhostSamuraiMaterials.Prepare(pose.Age, Math.Max(pose.Left.Charge, pose.Right.Charge), pose.Hit, 0);
-            surfaceParts = true;
-            try { Form(batch, pose, screen, tint, false); }
-            finally { surfaceParts = false; }
-        }
+        if (!GhostSamuraiComposite.Draw(batch, pose, screen)) DrawCore(batch, pose, screen, tint);
         if (history is not null) GhostSamuraiMaterials.Trails(batch, pose, history, tick);
         if (history is not null) Trails(batch, pose, screen, history, tick, reduced);
         Smoke(batch, pose, screen, reduced, true, 1);
         Wisps(batch, pose, screen, 1);
+        GhostSamuraiEnergy.Body(batch, pose, screen, true);
+    }
+
+    internal static void DrawCore(SpriteBatch batch, in SamuraiRigPose pose, Vector2 screen, Color tint, Matrix? projection = null)
+    {
+        using var scope = new WorldGraphicsScope(batch);
+        GhostSamuraiMaterials.Prepare(pose.Age, Math.Max(pose.Left.Charge, pose.Right.Charge), pose.Hit, 0, projection);
+        surfaceParts = true;
+        try { Form(batch, pose, screen, tint, false); }
+        finally { surfaceParts = false; }
     }
 
     private static Vector2 Root(in SamuraiRigPose p, Vector2 screen) => new Vector2(p.X, p.Y) - screen;
@@ -123,8 +128,10 @@ internal sealed class GhostSamuraiRigArt : ModSystem
     {
         var blade = side < 0 ? p.Left : p.Right;
         // Unit-circle orbit has no angle-wrap seam during an overhead swing.
-        float armAngle = blade.Angle + side * .30f;
-        return new Vector2(p.X, p.Y) + Offset(new Vector2(side * 44, -38) + armAngle.ToRotationVector2() * 91, p);
+        float drift = MathF.Sin(p.Age * .051f + side * 2.2f) * (1 - blade.Trail) * .055f;
+        float armAngle = blade.Angle + side * .30f + drift;
+        float extension = 91 + blade.Charge * 9 + blade.Trail * 13;
+        return new Vector2(p.X, p.Y) + Offset(new Vector2(side * 44, -38) + armAngle.ToRotationVector2() * extension, p);
     }
     internal static Vector2 Tip(in SamuraiRigPose p, int side)
     {
@@ -231,6 +238,7 @@ internal sealed class GhostSamuraiRigArt : ModSystem
         float end = 1 - SamuraiRigMotion.Smooth((age - 82) / 14);
         var smokePose = p with { Age = p.Age + age, Hit = scatter };
         Smoke(batch, smokePose, screen, Reduced, false, end);
+        GhostSamuraiEnergy.Body(batch, smokePose, screen, false, end * (1 + scatter));
         using (var scope = new WorldGraphicsScope(batch))
         {
             GhostSamuraiMaterials.Prepare(p.Age + age, 0, 0, SamuraiRigMotion.Smooth((age - 34) / 54));
@@ -253,6 +261,7 @@ internal sealed class GhostSamuraiRigArt : ModSystem
             Part(batch, 8, root + new Vector2(0, -66 - (age - 52) * .35f), new(.5f, .78f), new(45, 84), 0,
                 Color.White * SamuraiRigMotion.Smooth((age - 52) / 20) * end);
         Wisps(batch, smokePose, screen, end * (1 - scatter * .8f));
+        GhostSamuraiEnergy.Body(batch, smokePose, screen, true, end);
     }
 
     private static void Part(SpriteBatch batch, int index, Vector2 position, Vector2 pivot, Vector2 size,

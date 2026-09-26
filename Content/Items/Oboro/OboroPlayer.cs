@@ -25,6 +25,8 @@ public sealed partial class OboroPlayer : ModPlayer
     private Item swingItem;
     private bool rightHeld, leftHeld;
     private ulong lastHoldSent;
+    internal ulong NextHello;
+    private ulong nextRejectLog;
     private OboroHeldProj held;
     internal bool HasHeld => held is not null && held.Projectile.active
         && ReferenceEquals(held.Projectile.ModProjectile, held) && held.ConnectionGeneration == View.Generation;
@@ -58,7 +60,8 @@ public sealed partial class OboroPlayer : ModPlayer
     private readonly Dictionary<ulong, OboroWounds> wounds = new();
     internal static bool Authority => Main.netMode != NetmodeID.MultiplayerClient;
     internal float VisualAge => View.Duration == 0 ? 0 : Math.Min(View.Duration, View.Age + Math.Min(12UL, Main.GameUpdateCount - ReceivedAt));
-    internal bool SwingVisible => View.Duration > 0 && VisualAge < View.Duration;
+    internal bool SwingVisible => View.Duration > 0 && VisualAge < View.Duration
+        && (Authority || OboroNetworkRules.Fresh(Main.GameUpdateCount, ReceivedAt));
     internal int ZanshinRemaining => Authority ? zanshin : Math.Max(0, View.Zanshin - (int)Math.Min(300UL, Main.GameUpdateCount - ReceivedAt));
     internal bool Usable => Player.active && !Player.dead && !Player.noItems && !Player.CCed;
     internal bool Holding => Player.HeldItem.type == ModContent.ItemType<Oboro>();
@@ -66,7 +69,7 @@ public sealed partial class OboroPlayer : ModPlayer
     {
         generation = 0; View = default; revision = RequestNonce = LastNonce = 0;
         timing.Initialize(); facing = 1; aim = nextAim = 0;
-        ReceivedAt = lastHoldSent = 0; rightHeld = leftHeld = false; held = null;
+        ReceivedAt = lastHoldSent = NextHello = nextRejectLog = 0; rightHeld = leftHeld = false; held = null;
         wounds.Clear(); struck.Clear(); swingItem = null;
     }
     public override void OnEnterWorld()
@@ -81,7 +84,16 @@ public sealed partial class OboroPlayer : ModPlayer
         if (!Authority) return;
         EnsureGeneration();
         if (request.Action == OboroAction.Hello) { Publish(Player.whoAmI); return; }
-        if (!Usable || !Holding || request.Generation != generation || request.Nonce <= LastNonce) return;
+        if (!Usable || !Holding || request.Generation != generation || request.Nonce <= LastNonce)
+        {
+            if (request.Action == OboroAction.Swing && Main.GameUpdateCount >= nextRejectLog)
+            {
+                nextRejectLog = Main.GameUpdateCount + 60;
+                if (request.Generation != generation) Publish(Player.whoAmI);
+                global::Convergence.ConvergenceMod.Instance.Logger.Info($"Oboro event=UseRejected slot={Player.whoAmI} usable={Usable} holding={Holding} generation_match={request.Generation == generation} stale_nonce={request.Nonce <= LastNonce}");
+            }
+            return;
+        }
         LastNonce = request.Nonce;
         if (request.Action is OboroAction.Hold or OboroAction.Release)
         {
@@ -136,6 +148,9 @@ public sealed partial class OboroPlayer : ModPlayer
     }
     public override void PostUpdate()
     {
+        if (!Authority && Player.whoAmI == Main.myPlayer && Holding && Player.active && !Player.dead
+            && OboroNetworkRules.NeedRepair(View.Generation, Main.GameUpdateCount, ReceivedAt, NextHello))
+            OboroPackets.Request(Player, OboroAction.Hello, 0);
         if (!Authority) return;
         EnsureGeneration();
         if (!Player.active || Player.dead) { ClearCombat(); return; }

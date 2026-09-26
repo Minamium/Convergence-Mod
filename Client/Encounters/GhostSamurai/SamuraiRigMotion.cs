@@ -97,13 +97,15 @@ internal static class SamuraiRigMotion
             float begin = Math.Max(i == 0 ? 0 : fires[i - 1] + 12, fires[i] - windup);
             if (tick < fires[i])
             {
-                float charge = Cubic((tick - begin) / Math.Max(1, fires[i] - 4 - begin));
+                // Snap into the raised pose, brake under tension, then release
+                // at the existing server fire tick (no timing/geometry change).
+                float charge = Out((tick - begin) / Math.Max(1, fires[i] - 5 - begin));
                 return new(Mix(from, start, charge), 1, charge, 0);
             }
             float local = tick - fires[i];
             float over = end + MathF.Sign(end - start) * .16f;
             if (local < 6)
-                return new(Mix(start, over, Cubic(local / 6)), 1, 1, 1);
+                return new(Mix(start, over, Out(local / 6)), 1, 1, 1);
             if (local < 12)
                 return new(Mix(over, end, Out((local - 6) / 6)), 1, 1 - Smooth((local - 6) / 6), 1 - (local - 6) / 6);
             previous = end;

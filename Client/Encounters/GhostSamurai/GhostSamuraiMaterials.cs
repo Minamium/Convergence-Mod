@@ -18,14 +18,14 @@ internal static class GhostSamuraiMaterials
     private static readonly List<Vector2> points = new(16);
     private static float trailRadius, trailAlpha, completionScale = 1;
     internal static void Reset() { surface = ribbon = null; trailSettings = null; points.Clear(); }
-    internal static void Prepare(float age, float charge, float hit, float dissolution)
+    internal static void Prepare(float age, float charge, float hit, float dissolution, Matrix? projection = null)
     {
         surface ??= ShaderManager.GetShader("Convergence.SamuraiSpirit");
         surface.TrySetParameter("clock", age / 60);
         surface.TrySetParameter("charge", charge); surface.TrySetParameter("hit", hit);
         surface.TrySetParameter("dissolution", dissolution);
-        surface.TrySetParameter("uWorldViewProjection", Main.GameViewMatrix.TransformationMatrix *
-            Matrix.CreateOrthographicOffCenter(0, Main.instance.GraphicsDevice.Viewport.Width, Main.instance.GraphicsDevice.Viewport.Height, 0, -1, 1));
+        surface.TrySetParameter("uWorldViewProjection", projection ?? (Main.GameViewMatrix.TransformationMatrix *
+            Matrix.CreateOrthographicOffCenter(0, Main.instance.GraphicsDevice.Viewport.Width, Main.instance.GraphicsDevice.Viewport.Height, 0, -1, 1)));
         surface.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value, 1, SamplerState.LinearWrap);
         surface.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value, 2, SamplerState.LinearWrap);
     }
@@ -69,8 +69,8 @@ internal static class GhostSamuraiMaterials
                 Vector2 point = GhostSamuraiRigArt.Tip(h.Pose, side);
                 if (points.Count > 0 && Vector2.DistanceSquared(points[^1], point) > 200 * 200) Flush();
                 if (points.Count == 0 || Vector2.DistanceSquared(points[^1], point) > .01f) points.Add(point);
-                trailRadius = Math.Max(trailRadius, blade.Size * 12);
-                trailAlpha = Math.Max(trailAlpha, SamuraiRigMotion.Fade(age) * blade.Trail * .7f);
+                trailRadius = Math.Max(trailRadius, blade.Size * 26);
+                trailAlpha = Math.Max(trailAlpha, SamuraiRigMotion.Fade(age) * blade.Trail * .88f);
             }
             var current = side < 0 ? pose.Left : pose.Right;
             if (current.Trail > 0 && points.Count > 0)

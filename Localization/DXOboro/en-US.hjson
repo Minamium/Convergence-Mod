@@ -1,0 +1,13 @@
+Mods: {
+  Convergence: {
+    Items.DXOboro: {
+      DisplayName: DXOboro
+      Tooltip:
+        '''
+        Hold left-click for three spectral cuts
+        Experimental cut prototype; Oboro's Wraith Fire and Zanshin are not on this sword
+        Crafted with a Fallen Star at a Work Bench for testing
+        '''
+    }
+  }
+}
