@@ -87,6 +87,7 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceMovementSyncCadence.cs" Link="Domain/FirstSeveranceMovementSyncCadence.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Development/FirstSeveranceDevelopmentPolicy.cs" Link="Domain/FirstSeveranceDevelopmentPolicy.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEndingTimeline.cs" Link="Domain/FirstSeveranceEndingTimeline.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceCoreRupture.cs" Link="Presentation/FirstSeveranceCoreRupture.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceChoreography.cs" Link="Domain/FirstSeveranceChoreography.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceScoreGeometry.cs" Link="Domain/FirstSeveranceScoreGeometry.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceImpalingSwords.cs" Link="Domain/FirstSeveranceImpalingSwords.cs" />

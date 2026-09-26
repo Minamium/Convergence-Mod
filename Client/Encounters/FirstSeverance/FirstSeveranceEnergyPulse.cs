@@ -52,6 +52,11 @@ internal static class FirstSeveranceEnergyPulse
         double age = tick - c.ActionStartedTick;
         if (c.Substate == FirstSeveranceSubstate.FinalCoreCheck)
             value = Math.Max(value, Kick(age, 0, 18));
+        if (c.Substate == FirstSeveranceSubstate.RemoteCrush && c.CompletedPhaseCycles == 0)
+        {
+            int burst = FirstSeveranceScoreGeometry.CrushImpactTick + FirstSeveranceCoreRupture.BurstDelay;
+            value = Math.Max(value, Kick(age, burst, burst + 12));
+        }
         if (c.Substate == FirstSeveranceSubstate.RotatingBlade)
         {
             value = Math.Max(value, 8 * Charge(age, 0, FirstSeveranceChoreography.BladeWindup));

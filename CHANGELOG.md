@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Doll's first Phase III claw crush fractures the central metallic sphere and bursts its shell into a persistent violet energy core. Preserve all combat timings, damage and targeting; retain the energy form through Final and the closing DPS check.
+
 - Replace Oboro's oversized rotating sword with a constant-size katana, articulated wrist and original violet spectral crescents. Preserve combo timing, damage, reach and rewards.
 
 - Rebuild Ghost Samurai presentation as independently articulated armor, arms and blades, with Luminance easing, talisman physics, violet ribbons, shader-driven spirit smoke and a staged victory dissolve. Preserve all attack AI, timings, hit volumes and weapon balance.
