@@ -24,6 +24,7 @@ internal sealed class AzureRecoveryController
     private readonly AzureRecoveryState[] health;
     private readonly AzureNativeFloor[] floors;
     private readonly uint[] downNonces, reviveNonces;
+    private readonly bool[] pendingDowns;
     private readonly AzureRecoveryRequest?[] pendingRevives;
     internal bool Failed => service.FailureReason != RaidReviveFailureReason.None;
 
@@ -33,6 +34,7 @@ internal sealed class AzureRecoveryController
         connections = new Guid[roster.Length]; health = new AzureRecoveryState[roster.Length];
         floors = new AzureNativeFloor[roster.Length];
         downNonces = new uint[roster.Length]; reviveNonces = new uint[roster.Length];
+        pendingDowns = new bool[roster.Length];
         pendingRevives = new AzureRecoveryRequest?[roster.Length];
         for (int i = 0; i < roster.Length; i++)
         {
@@ -70,10 +72,10 @@ internal sealed class AzureRecoveryController
         {
             // The packet cannot invent damage, an anchor, or health. Terraria's
             // preceding PlayerLifeMana message must already expose the floor.
-            if (request.Nonce <= downNonces[i] || Main.player[sender].statLife > 1 || health[i].Downed) return false;
+            if (!health[i].AcceptsFloor(request.HealthRevision, request.Nonce, downNonces[i], Main.player[sender].statLife)) return false;
             downNonces[i] = request.Nonce;
-            floors[i].Observe(1, nativeLethalReceipt: true);
-            return true; // The single authority Tick samples/commits the floor.
+            pendingDowns[i] = true;
+            return true; // The single authority Tick commits the validated floor.
         }
         if (request.Nonce <= reviveNonces[i] || health[i].Downed || pendingRevives[i].HasValue) return false;
         reviveNonces[i] = request.Nonce; pendingRevives[i] = request;
@@ -98,10 +100,15 @@ internal sealed class AzureRecoveryController
                     changed = true;
                 }
                 pendingRevives[i] = null;
+                pendingDowns[i] = false;
                 continue;
             }
             var player = Main.player[bindings[i].PlayerSlot];
-            if (!health[i].Downed && floors[i].Observe(player.statLife))
+            // Untagged native HP sync may arrive late after a revive. In MP,
+            // only a receipt bound to the current health generation can Down.
+            bool nativeFloor = pendingDowns[i] || Main.netMode == NetmodeID.SinglePlayer && floors[i].Observe(player.statLife);
+            pendingDowns[i] = false;
+            if (!health[i].Downed && nativeFloor)
             {
                 var result = service.Apply(new AuthoritativeParticipantDownedCommand(fight, bindings[i], tick));
                 if (result.HasObservableChange)
@@ -178,6 +185,7 @@ internal sealed class AzureRecoveryController
     {
         service.TryCleanup(fight);
         Array.Clear(pendingRevives);
+        Array.Clear(pendingDowns);
         AzureRecoveryPlayer.ClearFight(fight.Value);
     }
 }

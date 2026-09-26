@@ -12,6 +12,8 @@ internal readonly record struct AzureRecoveryState(uint Revision, bool Downed, i
           && float.IsFinite(X) && float.IsFinite(Y) && X is >= 0 and <= 400000 && Y is >= 0 and <= 150000
           && ImmunityUntil is >= 0 and <= 76000 && LockoutUntil is >= 0 and <= 76000;
     internal bool CanReplace(AzureRecoveryState old) => Revision > old.Revision || this == old;
+    internal bool AcceptsFloor(uint generation, uint nonce, uint previousNonce, int nativeLife)
+        => Revision > 0 && generation == Revision && !Downed && nonce > previousNonce && nativeLife <= 1;
     internal void Write(BinaryWriter w)
     { w.Write(Revision); w.Write(Downed); w.Write(Life); w.Write(X); w.Write(Y); w.Write(ImmunityUntil); w.Write(LockoutUntil); }
     internal static AzureRecoveryState Read(BinaryReader r)

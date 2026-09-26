@@ -17,6 +17,11 @@ internal static partial class Program
         var restored = state with { Age = state.Age + 1, Members = new[] { state.Members[0] with
             { Recovery = down with { Revision = 3, Downed = false, Life = 350, ImmunityUntil = 700, LockoutUntil = 4120 } } } };
         AssertEqual(true, restored.CanReplace(state), "authority revive generation");
+        var resumed = restored.Members[0].Recovery;
+        AssertEqual(false, resumed.AcceptsFloor(2, 6, 5, 1), "late untagged native HP plus pre-revive receipt cannot Down again");
+        AssertEqual(false, resumed.AcceptsFloor(3, 5, 5, 1), "floor receipt is one-shot");
+        AssertEqual(false, resumed.AcceptsFloor(3, 6, 5, 350), "native floor must precede receipt");
+        AssertEqual(true, resumed.AcceptsFloor(3, 6, 5, 1), "current-generation native lethal receipt");
         AssertEqual(false, state.CanReplace(restored), "late Down cannot undo revive");
         var differentConnection = state with { Members = new[] { state.Members[0] with { Connection = Guid.NewGuid() } } };
         AssertEqual(false, differentConnection.CanReplace(state), "frozen slot cannot rebind");
