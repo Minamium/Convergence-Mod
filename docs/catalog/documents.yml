@@ -853,13 +853,13 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: b9642f72ee3d1dd54ba7cd60fe97a2a152457fc5a1fd83ba013c2094a7081903
+  content_sha256: 8c2c96098893a8fb7c8e46b70c2b288f52dda312defa54df17e686da0163fa24
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-18'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - ghost_samurai.behavior
   aliases:
