@@ -47,7 +47,7 @@ public sealed class OboroVisuals : ModSystem
                 // Only an idle fallback before the first accepted click/replica arrives.
                 // The holdout is the sole owner of active blade/echo/arm rendering.
                 if (state.Holding && !state.HeldReady)
-                    OboroArt.Sword(b, p.MountedCenter + new Vector2(p.direction * 12, 8), p.direction == 1 ? -1.1f : -2.04f, 145, Color.White);
+                    OboroArt.Sword(b, p.MountedCenter + new Vector2(p.direction * 12, 8), p.direction == 1 ? -1.1f : MathF.PI + 1.1f, OboroSwingPresentation.SwordLength, Color.White, p.direction < 0);
                 if (state.ZanshinRemaining > 0)
                     for (int i = 0; i < 3; i++)
                     {

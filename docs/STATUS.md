@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-26
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.41 / protocol68**. Scarlet Act II uses four slashes; Act III uses four clockwise curved-claw volleys, retaining the closing crossflow. Crown/Mantle now have distinct articulated energy anatomy; the giant Eidolon uses a dedicated body/emission composite. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns mechanics and visuals. Matching peers are required for appended technique16; existing packet/technique IDs and payload layout are unchanged. Cathedral's0.3.40 lattice/verdict/ending work is retained without further changes.
+Current source: **0.3.42 / protocol68**. Oboro now keeps a132px physical sword attached to an articulated native hand, and renders its unchanged560px attack reach with an original Luminance-managed spectral crescent. This addresses the owner's rejected0.3.34 oversized rotating-blade presentation; subjective acceptance is pending. Gameplay,18/16/26F clocks, hit windows, damage, buffs and drop are unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧の刀と霊刃の分離--2026-09-21) owns the new presentation. This branch is not deployed to the normal playtest profile.
+
+Retained0.3.41 baseline: Scarlet Act II uses four slashes; Act III uses four clockwise curved-claw volleys, retaining the closing crossflow. Crown/Mantle now have distinct articulated energy anatomy; the giant Eidolon uses a dedicated body/emission composite. [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns mechanics and visuals. Matching peers are required for appended technique16; existing packet/technique IDs and payload layout are unchanged. Cathedral's0.3.40 lattice/verdict/ending work is retained without further changes.
 
 The owner approves the September25 organic Choir revision. Its four-arm source art, independent joints, beat-driven preparation/release, luminous bone, wing/sleeve membranes and vascular heart remain. The new Crown/Mantle/Eidolon renderers have not yet received that acceptance. Latest0.3.40 solo playtest reaches Victory and complete cleanup with all four cycles, Stack2/3 and Spread3/3; [current evidence](evidence/2026-09-25-scarlet-apparitions.json) separates this result from the new build and remaining native checks.
 
@@ -39,7 +41,7 @@ Retained0.3.35 work: Cathedral native shared-HP segment retention and sky retry 
 
 The integrated0.3.33 Azure baseline is retained: Cathedral reduces worm HP to1/20, enables full-body native shared-HP hits in Fury, lengthens diagonal passage, attaches its volley to moving segments and adds Liora's cyan spatial cuts. Distant retreat/rush/slow jaw consumption reveals new Fury armor; streaming energy replaces solid-looking segment missiles. [Azure spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns mechanics and owner checks. Liora HP, music, other Raid gameplay and four pre-existing generated English locale edits are preserved; Scarlet's shared slash material keeps its red palette. Matching peers are required; common packet IDs remain unchanged. This is not a Workshop publication or GitHub release; public baseline remains [0.3.1 / protocol37](releases/0.3.1.md).
 
-Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
+Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible spectral blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
 **Latest reviewed Cathedral playtest:**0.3.39 solo Host & Play, two attempts: Defeat6.63s after unlock, then Victory168.77s after unlock and complete cleanup. Fury lasts66.77s; peak sampled five-second HP-budget DPS62,273. Stack: one success/one failure; resolved Spread: one success, with a later call cancelled at Liora's defeat. No Cathedral actor-loss exception; solo does not test overlap or remote damage. [Azure evidence](evidence/2026-09-22-azure-lattice-verdicts.json) separates observed outcomes, source defects and new acceptance checks. Other encounter evidence is unchanged.
 
@@ -51,6 +53,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.42 Oboro presentation:** [evidence](evidence/2026-09-21-oboro-natural-motion.json) records the isolated native build (0 errors,4 existing warnings),712 reused linked-production compiled-material frames with SpriteBatch restoration, and installed native hand/identity checks. The0.3.34 owner playtest rejected the visual feel; the new actual SP/MP motion, armor/mount interaction, high attack speed, bright/dark readability and subjective acceptance are user-owned / not_run. No game/server was launched.
 
 - **0.3.41 distinct Scarlet apparitions:** [evidence](evidence/2026-09-25-scarlet-apparitions.json) owns the reviewed0.3.40 logs, new Act II/III geometry/codec checks and actual-shader GPU previews. Native load/playthrough, multi-peer new volleys, attack/marker overlap, Final surface recreation through resize/world exit, and frame times remain user-owned / **not_run**. Offline rendering does not establish AoE quality parity. Sol workers `scarlet_act_decks` and `choir_preview` (gpt-6-sol, medium) handled the bounded domain deck and target/preview slices; lead authored/reviewed the species materials, giant anatomy and integration.
 
@@ -115,6 +119,8 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Oboro: after administrator-approved integration and normal-profile build, Reload and compare the constant-size sword, wrist return, short pointed crescent and held three-hit loop with the supplied clips. Check both facings, release/restart, high attack speed, Reduced Effects and a matching remote peer. Current0.3.42 is an isolated feature package, not installed in the normal profile.
 
 For the Choir revision, start the installed package normally; another Build is unnecessary. Check Act III's alternating four-arm intake/release, heart/wing visibility without obscuring forecasts, then sacrificial return and Final's reused limbs. Actual remote rendering and frame-time cost remain unmeasured.
 

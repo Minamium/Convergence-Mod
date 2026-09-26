@@ -110,6 +110,23 @@ public static class OboroHeldNativeProbe
                     && System.MathF.Abs(Y(actual) - Y(center) - by) < .0001f, "native hand basis must reconstruct rotation and mirroring");
                 count++;
             }
+            // Verify the new articulated grip against the installed engine hand,
+            // independently of the unchanged damage root.
+            var poseType = mod.GetType("Convergence.Client.Weapons.OboroBladePose", true);
+            var swordMotion = mod.GetType("Convergence.Client.Weapons.OboroSwordMotion", true);
+            foreach (int step in new[] { 0, 1, 2 })
+            for (int frame = 0; frame <= 40; frame++)
+            {
+                float progress = frame / 40f, angle = progress * System.MathF.Tau;
+                float wrist = (float)swordMotion.GetMethod("Wrist", S).Invoke(null, new object[] { step, progress });
+                object pose = System.Activator.CreateInstance(poseType, new object[] { X(center), Y(center), angle, 560f, progress, step, facing });
+                object metal = swordMotion.GetMethod("AtHand", S).Invoke(null, new object[] { pose, X(center), Y(center), basis, true });
+                object hand = native.Invoke(player, new object[] { full, angle + facing * wrist - System.MathF.PI / 2 });
+                Require(System.MathF.Abs((float)poseType.GetProperty("X", I).GetValue(metal) - X(hand)) < .0001f
+                    && System.MathF.Abs((float)poseType.GetProperty("Y", I).GetValue(metal) - Y(hand)) < .0001f,
+                    "articulated metal grip on installed native hand");
+                Require((float)poseType.GetProperty("Length", I).GetValue(metal) == 132f, "metal never inflates to damage reach");
+            }
             foreach (int step in new[] { 0, 1, 2 })
             {
               var motion = mod.GetType("Convergence.Content.Items.Oboro." + (step == 0 ? "OboroFirstSwingMotion" : step == 1 ? "OboroSecondSwingMotion" : "OboroThirdSwingMotion"), true);

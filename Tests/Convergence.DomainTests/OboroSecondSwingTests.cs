@@ -68,11 +68,11 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Oboro return echoes fade sooner without changing other cuts or leaking on cancellation")]
+    [DomainTest("Oboro return echoes fade sooner than ascent and finisher without leaking on cancellation")]
     private static void OboroReturnEchoes()
     {
-        AssertEqual(0f, OboroSwingPresentation.Opacity(100, 109, 1), "return afterimage expires at nine ticks");
-        AssertEqual(true, OboroSwingPresentation.Opacity(100, 109, 0) > 0 && OboroSwingPresentation.Opacity(100, 109, 2) > 0, "other echoes preserved");
+        AssertEqual(0f, OboroSwingPresentation.Opacity(100, 106, 1), "return afterimage expires at six ticks");
+        AssertEqual(true, OboroSwingPresentation.Opacity(100, 106, 0) > 0 && OboroSwingPresentation.Opacity(100, 106, 2) > 0, "other echoes preserved after return fades");
         var visual = new OboroSwingPresentation();
         var view = OboroSample with { Step = 1, Swing = 2, Duration = 16 };
         for (int age = 0; age <= 16; age++) visual.Update(view, age, true, true, 0, 0, 1, (ulong)(100 + age));

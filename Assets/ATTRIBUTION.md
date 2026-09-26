@@ -3277,6 +3277,22 @@ The September16 boards replace the earlier cyan appearance only. The old Boss at
 - Reviewer and review date: Codex, 2026-09-17; source appearance and alpha checked, in-game acceptance pending
 - SHA256: `729c27ea3b9f1e5c0261b012a091597fba15f7f06a516838b5f6706f57573cf8`
 
+### OboroMoonArc original shader export — 2026-09-21
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/OboroMoonArc.fxc`
+- Asset ID: oboro-moon-arc-20260921
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by OpenAI for Minamium
+- Creation/acquisition date: 2026-09-21
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/OboroMoonArc.fx`; no third-party shader copied
+- Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: project-authored spectral crescent mesh, sharp lip, violet flow and lifetime; approved images unchanged
+- License and redistribution terms: original project code under existing project terms; no dependency assets bundled
+- Required attribution: retain this provenance, source and compiler/export identity manifest
+- Reviewer and review date: automated source/export checks and offline FNA inspection, 2026-09-21; owner visual approval not_run
+- Prompt or brief location: `docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md`, Oboro metal and spectral blade separation
+
 ## Record template
 
 Copy this section for each asset family. In the Records section above, add one exact Markdown entry in the form `- Runtime file: \`path/from/repository/root\`` for every exported file. The repository check parses only that section and verifies both directions.
@@ -3723,3 +3739,7 @@ Three original `.fx` sources and distributable `.fxc` exports use Luminance's pu
 | `Assets/AutoloadedEffects/Shaders/SamuraiRibbon.fxc` | `474fa47eed26d1ed1ec43d4b851dc6196dfddc9e85cfa76e41d4b06d5f96fc30` |
 | `Assets/AutoloadedEffects/Shaders/SamuraiMist.fx` | `aa12892f9724b06b791b7851ba28727b51125f15d28fa0a22866dfc721508bca` |
 | `Assets/AutoloadedEffects/Shaders/SamuraiMist.fxc` | `fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065` |
+
+## Oboro spectral crescent — 2026-09-21
+
+`Assets/AutoloadedEffects/Shaders/OboroMoonArc.fx` and `Assets/AutoloadedEffects/Shaders/OboroMoonArc.fxc`: original Convergence code-authored procedural material, created for this task with OpenAI Codex assistance; project code licensing applies. Sharp moonlit lip and flowing violet interior reference only the motion principles in the owner's Murasama/Vergil clips. No copied shader, image, extracted game asset or video frame is included. Uses the installed Luminance ManagedShader API; the source/export hashes and compiler identity are recorded in `Assets/AutoloadedEffects/Shaders/compiled.json`. Existing approved Oboro Blade/Spirit images are unchanged.

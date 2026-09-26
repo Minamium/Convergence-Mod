@@ -850,7 +850,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 75ced0302379209b046eb32ccb13a29009c30ab0ee0e221dcef074e12f1f2ce2
+  content_sha256: cd96e82ce09bf0eb1990747293c97bcc6dcd6446961c619d94c0435162341930
   document_type: spec
   status: provisional
   owners:
@@ -927,7 +927,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 2bad2b845b3fb0cd2138c925f063ea22b05acabd5bca60c00ccf5120b405e511
+  content_sha256: 1c79e4208a94612462d39ba4528c586411f9e145832fd265ba0cddeae2684665
   document_type: evidence
   status: historical
   owners:
@@ -1326,12 +1326,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8217cce3baf27d80b02b2ceb981cd33375d0d13beefc8f92ca7ade525ec65981
+  content_sha256: 634b9808ad7aa513653e32e542885bea62d7b5e398f020f7d7c8737ef8c8fd7d
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-25'
+  last_reviewed: '2026-09-26'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1582,7 +1582,7 @@ documents:
 - doc_id: research.oboro-20260916
   path: docs/research/2026-09-16-oboro.md
   title: 'Oboro: API and comparison boundary'
-  content_sha256: 453684135ca19b2f6f57e2c74323b6ba4ccc296264c2142d5096453372c5b4eb
+  content_sha256: cd217898b6ea770253069450e019c35e31331b1dc03b97101259092c9730217c
   document_type: research
   status: provisional
   owners:
