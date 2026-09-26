@@ -6,7 +6,7 @@ namespace Convergence.Content.Encounters.AzureCathedral;
 
 internal enum AzureStage : byte { Deployment, Ready, Countdown, Performance, Victory, Defeat }
 internal enum AzurePhase : byte { Duet, Devouring, Fury, Melting }
-internal readonly record struct AzureMember(byte Slot, Guid Connection, bool Ready, bool Out);
+internal readonly record struct AzureMember(byte Slot, Guid Connection, bool Ready, bool Out, AzureRecoveryState Recovery = default);
 internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, int UnlockAt, int EndAt,
     AzureStage Stage, AzureMember[] Members, int GroundX, int GroundY, int GirlMax, int WormMax,
     int GirlLife, int WormLife, short WormSlot, bool Enraged, AzurePhase Phase = AzurePhase.Duet, int PhaseAt = -1,
@@ -14,6 +14,7 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
 {
     internal RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
     internal bool Contains(int slot) => Array.Exists(Members ?? Array.Empty<AzureMember>(), m => m.Slot == slot && !m.Out);
+    internal bool CanFight(int slot) => Array.Exists(Members ?? Array.Empty<AzureMember>(), m => m.Slot == slot && !m.Out && !m.Recovery.Downed);
     internal bool Live => Fight != Guid.Empty && Stage == AzureStage.Performance && Phase is AzurePhase.Duet or AzurePhase.Fury;
     internal int AttackEpoch => Phase == AzurePhase.Fury ? PhaseAt : UnlockAt;
     internal bool Cinematic => Stage is AzureStage.Deployment or AzureStage.Countdown or AzureStage.Victory or AzureStage.Defeat || Phase == AzurePhase.Devouring;
@@ -28,14 +29,24 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
         && (old.WormSlot < 0 || WormSlot == old.WormSlot)
         && (old.StagingAt < 0 || StagingAt == old.StagingAt && CeremonySide == old.CeremonySide)
         && Phase >= old.Phase && (Phase != old.Phase || PhaseAt == old.PhaseAt)
-        && (!old.Enraged || Enraged) && (old.EndAt < 0 || EndAt == old.EndAt && Stage == old.Stage);
+        && (!old.Enraged || Enraged) && (old.EndAt < 0 || EndAt == old.EndAt && Stage == old.Stage)
+        && RecoveryCanReplace(old);
+    private bool RecoveryCanReplace(in AzureState old)
+    {
+        if (old.Stage < AzureStage.Countdown) return true; // Preparation may rebuild the roster.
+        if (Members.Length != old.Members.Length) return false;
+        for (int i = 0; i < Members.Length; i++)
+            if (Members[i].Slot != old.Members[i].Slot || Members[i].Connection != old.Members[i].Connection
+                || old.Members[i].Out && !Members[i].Out || !Members[i].Recovery.CanReplace(old.Members[i].Recovery)) return false;
+        return true;
+    }
     internal void WriteEnvelope(BinaryWriter w)
     {
         w.Write(Fight != Guid.Empty); if (Fight == Guid.Empty) return;
         w.Write(Fight.ToByteArray()); w.Write(Age); w.Write(MusicStart); w.Write(UnlockAt); w.Write(EndAt); w.Write((byte)Stage);
         w.Write(GroundX); w.Write(GroundY); w.Write(GirlMax); w.Write(WormMax); w.Write(GirlLife); w.Write(WormLife);
         w.Write(WormSlot); w.Write(Enraged); w.Write((byte)Phase); w.Write(PhaseAt); w.Write((byte)Members.Length);
-        foreach (var m in Members) { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); }
+        foreach (var m in Members) { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); m.Recovery.Write(w); }
         w.Write(StagingAt); w.Write(CeremonySide);
     }
     internal static bool Presence(BinaryReader r) => r.ReadByte() switch { 0 => false, 1 => true, _ => throw new InvalidDataException("azure.presence") };
@@ -62,7 +73,7 @@ internal readonly record struct AzureState(Guid Fight, int Age, int MusicStart, 
         {
             byte slot = r.ReadByte(); var id = Id(r); bool ready = Presence(r), gone = Presence(r);
             if (slot >= 255 || i > 0 && slot <= members[i - 1].Slot) throw new InvalidDataException("azure.roster");
-            members[i] = new(slot, id, ready, gone);
+            members[i] = new(slot, id, ready, gone, AzureRecoveryState.Read(r));
         }
         int staging = r.ReadInt32(); sbyte side = r.ReadSByte();
         if (staging < -1 || staging > age || (staging < 0 ? side != 0 : side is not (-1 or 1) || staging < unlock || unlock < 0)

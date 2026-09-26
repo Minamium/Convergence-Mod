@@ -47,7 +47,10 @@ internal static class AzureChorusRules
         if (positions.Length is < 1 or > 8) throw new ArgumentOutOfRangeException(nameof(positions));
         int[] damage=new int[positions.Length];byte active=(byte)(announced & living);int count=0,gathered=0;
         for(int i=0;i<positions.Length;i++)
-            if((active & (1<<i))!=0) { count++; if(Vector2.DistanceSquared(center,positions[i])<=StackRadius*StackRadius)gathered++; }
+        {
+            if((announced & (1<<i))!=0)count++;
+            if((active & (1<<i))!=0 && Vector2.DistanceSquared(center,positions[i])<=StackRadius*StackRadius)gathered++;
+        }
         if(kind==AzureChorusKind.Stack)
         {
             int source=count==0?0:(int)Math.Ceiling(Damage*(count-gathered)/(double)count);

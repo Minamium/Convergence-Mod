@@ -82,6 +82,20 @@ public static class NativeHurtCheck
             Require((float)getDamage.Invoke(h, new object[] {1000f, 0f, .5f}) == 1, "Zero cap is NOT immunity");
             Console.WriteLine("PASS installed HurtModifiers: defense/DR, lethal floor, minimum1 and competing ceilings");
 
+            string azure = "Convergence.Content.Encounters.AzureCathedral.";
+            foreach (string name in new[] { "AzureAttack", "AzureWorm", "AzureChorusStrike" }) {
+                Type type = mod.GetType(azure + name, false);
+                if (type == null || mod.GetType(azure + "AzureRecoveryPlayer", false) == null) continue;
+                object actor = Activator.CreateInstance(type, true);
+                if (name == "AzureChorusStrike") type.GetField("Budget", Instance).SetValue(actor, 900);
+                object[] arguments = { null, Activator.CreateInstance(modifiers) };
+                type.GetMethod("ModifyHitPlayer").Invoke(actor, arguments);
+                bool rehearsal = (bool)mod.GetType(azure + "AzureRules").GetField("DebugOneDamagePlaytest", Static).GetRawConstantValue();
+                if (rehearsal) Require((float)getDamage.Invoke(arguments[1], new object[] {1800f, 0f, .5f}) == 1,
+                    "Azure native final cap: " + name);
+            }
+            Console.WriteLine("PASS packaged Azure attack/contact/verdict final-damage ceilings");
+
             // Calibration example, not a simulation of the owner's equipment.
             int beamSource = (int)mod.GetType("Convergence.Content.Encounters.FirstSeverance.FirstSeveranceCombatRules", true)
                 .GetField("BeamDamage", Static).GetRawConstantValue();
@@ -103,6 +117,8 @@ public static class NativeHurtCheck
             Console.WriteLine("PASS packaged Raid player/buff loader type validation");
 
             foreach (string name in new[] {
+                "Convergence.Content.Encounters.AzureCathedral.AzureRecoveryPlayer",
+                "Convergence.Content.Encounters.AzureCathedral.AzureDownedDebuff",
                 "Convergence.Client.Encounters.CrimsonFoundry.CrimsonBossVisuals",
                 "Convergence.Client.Encounters.CrimsonFoundry.CrimsonAttackVisuals",
                 "Convergence.Content.Encounters.CrimsonFoundry.CrimsonBoss",

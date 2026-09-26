@@ -92,17 +92,23 @@ public sealed class AzureChorusStrike : ModProjectile
         p=null;
         if(spent || Budget<=0 || !AzureChorus.TryGirl(Plan,out var g) || Member>=g!.State.Members.Length
             || g.VisualAge<Plan.Fire || g.VisualAge>=Plan.Fire+AzureChorusRules.ImpactTicks)return false;
-        var m=g.State.Members[Member];if(m.Out)return false;p=Main.player[m.Slot];
+        var m=g.State.Members[Member];if(m.Out || m.Recovery.Downed)return false;p=Main.player[m.Slot];
         return p.active && !p.dead && !p.ghost && (Main.netMode!=NetmodeID.MultiplayerClient || Main.myPlayer==m.Slot);
     }
     public override bool? CanDamage()=>Eligible(out _)?null:false;
     public override bool CanHitPlayer(Player target)=>Eligible(out var p) && p!.whoAmI==target.whoAmI;
     public override bool? Colliding(Rectangle a,Rectangle b)=>Eligible(out _);
-    public override void ModifyHitPlayer(Player target,ref Player.HurtModifiers modifiers)=>modifiers.SetMaxDamage(Budget);
-    public override void OnHitPlayer(Player target,Player.HurtInfo info){spent=true;Projectile.hostile=false;}
+    public override void ModifyHitPlayer(Player target,ref Player.HurtModifiers modifiers)
+        => modifiers.SetMaxDamage(AzureRules.NativeFinalDamageLimit(Budget));
+    public override void OnHitPlayer(Player target,Player.HurtInfo info)
+    {
+        spent=true;Projectile.hostile=false;
+        if(Main.netMode!=NetmodeID.Server && Main.myPlayer==target.whoAmI)
+            AzurePackets.Log($"event=ChorusNativeImpact fight={Plan.Fight} kind={Plan.Kind} member={Member} slot={target.whoAmI} intended_damage={Budget} native_source_damage={Projectile.damage} final_damage={info.Damage}");
+    }
     public override void AI()
     {
-        Projectile.damage=Budget;Projectile.hostile=Eligible(out var player);if(player is not null)Projectile.Center=player.Center;
+        Projectile.damage=AzureRules.NativeSourceDamage(Budget);Projectile.hostile=Eligible(out var player);if(player is not null)Projectile.Center=player.Center;
         if(AzureChorus.TryGirl(Plan,out var g))
         {Projectile.timeLeft=Math.Max(2,Plan.Fire+AzureChorusRules.ImpactTicks+2-(int)g!.VisualAge);if(Main.netMode!=NetmodeID.MultiplayerClient && g.VisualAge>=Plan.Fire+AzureChorusRules.ImpactTicks)Projectile.Kill();}
         else if(Main.netMode!=NetmodeID.MultiplayerClient)Projectile.Kill();
@@ -126,7 +132,9 @@ internal sealed class AzureChorusDirector
         int phrase=AzureRules.Phrase(state.Age,state.UnlockAt),clock=AzureRules.Clock(state.Age,state.UnlockAt);
         if(AzureRules.ChorusPhrase(phrase) && clock==24)
         {
-            byte mask=0;for(int i=0;i<state.Members.Length;i++)if(!state.Members[i].Out)mask|=(byte)(1<<i);
+            byte mask=0;for(int i=0;i<state.Members.Length;i++)
+                if(phrase==2 || !state.Members[i].Out && !state.Members[i].Recovery.Downed)mask|=(byte)(1<<i);
+            if(mask==0)return;
             var plan=new AzureChorusPlan(state.Fight,(short)girl.NPC.whoAmI,phrase==2?AzureChorusKind.Stack:AzureChorusKind.Spread,
                 mask,state.Age,state.Age+AzureChorusRules.Warning,state.Age+AzureChorusRules.Warning+84,new(state.Field.CenterX,state.Field.CenterY+175));
             int slot=Projectile.NewProjectile(new AzureChorusSource(plan),new(plan.Center.X,plan.Center.Y),Vector2.Zero,ModContent.ProjectileType<AzureChorus>(),0,0,Main.myPlayer);
@@ -142,7 +150,7 @@ internal sealed class AzureChorusDirector
         for(int i=0;i<positions.Length;i++)
         {
             var member=state.Members[i];var p=Main.player[member.Slot];positions[i]=new(p.Center.X,p.Center.Y);
-            if(!member.Out && p.active && !p.dead && !p.ghost && p.GetModPlayer<AzureConnection>().Token==member.Connection)living|=(byte)(1<<i);
+            if(!member.Out && !member.Recovery.Downed && p.active && !p.dead && !p.ghost && p.GetModPlayer<AzureConnection>().Token==member.Connection)living|=(byte)(1<<i);
         }
         var damage=AzureChorusRules.Resolve(m.Plan.Kind,m.Plan.Center,positions,m.Plan.Members,living);
         m.Positions=positions;m.Resolved=true;
@@ -150,18 +158,18 @@ internal sealed class AzureChorusDirector
         {
             m.FailedMask|=(byte)(1<<i);
             int slot=Projectile.NewProjectile(new AzureStrikeSource(m.Plan,i,damage[i]),Main.player[state.Members[i].Slot].Center,
-                Vector2.Zero,ModContent.ProjectileType<AzureChorusStrike>(),damage[i],0,Main.myPlayer);
+                Vector2.Zero,ModContent.ProjectileType<AzureChorusStrike>(),AzureRules.NativeSourceDamage(damage[i]),0,Main.myPlayer);
             if(slot>=Main.maxProjectiles)throw new InvalidOperationException("azure.impact_capacity");
             Main.projectile[slot].netUpdate=true;
         }
         m.Projectile.netUpdate=true;
-        AzurePackets.Log($"event=ChorusResolved fight={state.Fight} kind={m.Plan.Kind} age={state.Age} living={living} failed={m.FailedMask} source_damage={string.Join(",",damage)}");
+        AzurePackets.Log($"event=ChorusResolved fight={state.Fight} kind={m.Plan.Kind} age={state.Age} living={living} failed={m.FailedMask} intended_damage={string.Join(",",damage)} native_source_damage={string.Join(",",Array.ConvertAll(damage,AzureRules.NativeSourceDamage))}");
         for(int i=0;i<positions.Length;i++)if((living & m.Plan.Members & (1<<i))!=0)
         {
             float nearest=float.PositiveInfinity;
             for(int j=0;j<positions.Length;j++)if(i!=j && (living & m.Plan.Members & (1<<j))!=0)
                 nearest=Math.Min(nearest,Point.Distance(positions[i],positions[j]));
-            AzurePackets.Log(FormattableString.Invariant($"event=ChorusMember fight={state.Fight} kind={m.Plan.Kind} age={state.Age} slot={state.Members[i].Slot} gather_distance={Point.Distance(positions[i],m.Plan.Center):F1} nearest_peer={(float.IsPositiveInfinity(nearest)?-1:nearest):F1} source_damage={damage[i]}"));
+            AzurePackets.Log(FormattableString.Invariant($"event=ChorusMember fight={state.Fight} kind={m.Plan.Kind} age={state.Age} slot={state.Members[i].Slot} gather_distance={Point.Distance(positions[i],m.Plan.Center):F1} nearest_peer={(float.IsPositiveInfinity(nearest)?-1:nearest):F1} intended_damage={damage[i]} native_source_damage={AzureRules.NativeSourceDamage(damage[i])}"));
         }
     }
     internal void Clear(Guid fight)

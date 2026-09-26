@@ -5,7 +5,7 @@ status: accepted
 owners:
   - architecture
   - gameplay
-last_reviewed: 2026-09-21
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - authority.azure_cathedral
 aliases: []
@@ -63,6 +63,14 @@ The official [pinned NPC patch](https://github.com/tModLoader/tModLoader/blob/v2
 Append bounded `StagingAt` and `CeremonySide` to the existing Azure projection; no packet IDs change. The authority selects the world-interior flank at the first Duet floor, stops worm hazards, and waits for both HP gates plus the full-chain staging deadline before Devouring. Each native part reconstructs its harmless cinematic pose from that accepted clock/side; its temporary retreat start is only presentation state. Devouring and Melting use one analytic chain axis, not the ordinary follower that previously folded over the mouth. All45native actors remain exact-Fight-owned until existing cleanup; native shared-HP lethal retention is unchanged.
 
 The frozen Duet maximum remains immutable. `WormPoolMax` derives the larger Fury maximum; only the one-way Devouring→Fury authority transition refills it. Codec bounds account for that maximum and reject malformed/reset staging epochs/sides. Body hitboxes still forward exclusively through native `realLife`; no independent life pool, double subtraction, client phase decisions or changes to player damage.
+
+### 2026-09-27 native Down/recovery adapter (protocol69)
+
+Supersede the initial normal-death/no-recovery policy for Cathedral only. Keep receiving-player native Hurt and its equipment/immunity hooks; cap an eligible lethal hit at1HP, latch controls locally pending acknowledgement, and send the ordinary native life/position messages before a bounded floor receipt. The server validates exact Fight/sequence, sender connection GUID, nonce, health generation and observed native floor. It never accepts a client heal amount, target binding or coordinates. An initial1HP admission is not a new lethal transition. Scoped PreKill fallback covers lethal DoT outside Hurt, but does not promise to suppress other Mods' PreKill side effects or bypass their death prevention. HP writes are only Down/revive/cleanup corrections, not an alternate damage pipeline.
+
+`AzureRuntime` remains the only authority tick/result/cleanup owner. Its `AzureRecoveryController` binds the existing Terraria-independent `RaidReviveService`, processes disconnects/native floors before one stable-ID revive batch, commits once, and evaluates all-Down before Victory. Instant unlimited recovery now supports1–8 bindings; Doll's roster and historical2–4-member token policy remain unchanged. The reusable kit dispatches through an optional definition-scoped client capability, not a global encounter switch or an import of Doll's runtime. Range/held kit/recipient lockout are checked on authority at commit.
+
+Append bounded health generation, Down state, anchor and immunity/lockout deadlines to each frozen Azure member. Older or same-generation altered health cannot clear a Down or undo recovery; an old Alive snapshot cannot release the local pending latch. Ordinary damage/HP is not repeatedly overwritten by snapshots. Down retains arena membership but is excluded from targeting, damage and outgoing attacks. Accepted terminal/Idle, expiry, disconnect and unload clear only matching bindings; no saved recovery state or client-owned terminal decision. Existing common packet IDs are unchanged; matching protocol69 peers are required. The feature spec owns player-facing timing and temporary one-damage tuning.
 
 ### Verification (current scope)
 

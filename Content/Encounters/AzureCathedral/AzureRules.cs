@@ -6,6 +6,13 @@ namespace Convergence.Content.Encounters.AzureCathedral;
 // Pure clocks and geometry: the same envelope drives native collision and art.
 internal static class AzureRules
 {
+    // Temporary Cathedral-only playtest switch. Disable to restore every original
+    // source budget and native final-damage limit without changing encounter plans.
+    internal const bool DebugOneDamagePlaytest = true;
+    internal static int NativeSourceDamage(int intended)
+        => intended <= 0 ? 0 : DebugOneDamagePlaytest ? 1 : intended;
+    internal static int NativeFinalDamageLimit(int intended)
+        => NativeSourceDamage(intended);
     internal const int Members = 8, Segments = 44, Deploy = 120, Intro = 960, Ending = 180;
     internal const int IceBreak = 180, SwordLight = 430, SkyReveal = 460, WormArrival = 610;
     internal const int PhraseTicks = 480, CycleTicks = PhraseTicks * 6;
