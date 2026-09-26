@@ -1,0 +1,17 @@
+Mods: {
+  Convergence: {
+    CrimsonRecovery: {
+      NoTarget: No downed ally within 8 tiles.
+      Locked: This ally cannot be revived again yet (60-second recovery lockout).
+      RequiresKit: Hold the Resuscitation Kit to revive an ally.
+      Invalid: Recovery is unavailable for this participant or encounter state.
+      DefeatReason: "{0} was lost in the scarlet invocation."
+    }
+    Buffs: {
+      CrimsonDownedDebuff: {
+        DisplayName: Downed
+        Description: "Unable to move or attack. An ally can revive you with a Resuscitation Kit."
+      }
+    }
+  }
+}

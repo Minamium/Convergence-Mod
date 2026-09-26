@@ -1,0 +1,43 @@
+{
+  "scope": "Scarlet Invocation: native Down/revive, one-damage rehearsal, independent verdict visibility",
+  "observed_build": "0.3.43",
+  "target_build": "0.3.45 / protocol70",
+  "observed_session": {
+    "date": "2026-09-26",
+    "topology": "two-player Host & Play",
+    "server_sha256": "0C8713BBF299436D3495AA78F447FD901E47184D1F2E1668CB2E408871C0EF7B",
+    "client_sha256": "15835F72737AA67AA79F1860EF5CFE7D64850B9804F37676C1CCF535E1C263F1",
+    "fight": "575a96c7-173b-47ac-98aa-23a71d4c9d4b",
+    "participants": 2,
+    "outcome": "Victory",
+    "seconds_from_preparation": 257.55,
+    "seconds_after_unlock": 234.1333,
+    "cleanup_seconds_after_victory": 2.5,
+    "original_total_hp": 5000000,
+    "peak_five_second_hp_budget_dps": 119118,
+    "completed_act_cycles": 4,
+    "stack": { "successful": 1, "failed": 2 },
+    "spread": { "successful": 2, "failed": 1 },
+    "failed_calls": [
+      { "serial": 2, "kind": "Spread", "failed_mask": 3, "intended_sources": [900, 900] },
+      { "serial": 3, "kind": "Stack", "failed_mask": 3, "intended_sources": [900, 900] },
+      { "serial": 5, "kind": "Stack", "failed_mask": 3, "intended_sources": [900, 900] }
+    ],
+    "limits": "living=3 is a two-member bitmask, not three players. Old build has no Scarlet native impact/presentation receipts; source900 does not prove actual HP loss or visible effects. No Scarlet Down/revive integration existed.",
+    "other_events": "One pedestal-out-of-range rejection followed by accepted preparation. Client connection refusal before server entry and SubworldLibrary EndOfStreamException during secondary-server shutdown are separate from the completed Scarlet fight."
+  },
+  "checks": {
+    "tooling": "passed: 65 Python command/source-contract checks; updated the old hostile-only guard to include chorus through the shared one-damage mapping, preserving native-hook and companion exclusions",
+    "domain": "passed: 368 deterministic cases, including Scarlet generation/nonce/1HP/one-damage and cosmetic lease boundaries; shared instant-unlimited 1-8-player lifecycle retained",
+    "exact_package_codec": "passed: protocol70, 334 round-trips / 54 malformed rejections; Scarlet appended DTO truncation/health fields covered by domain cases",
+    "native_build": "passed: 0 errors / 4 pre-existing CS8632 warnings; installed normal Mods profile; source unchanged during build",
+    "native_hurt_and_types": "passed: packaged Scarlet legacy hazard, gesture and chorus final-damage cap1 under installed HurtModifiers; recovery player/buff ValidateType; actual hooked game simulation not_run",
+    "offline_chorus_preview": "44 old/new PNG frames rendered through the actual compiled ScarletSorcery shader on dark/bright backgrounds with full/reduced effects. Lead inspected the early flash, extended24-tick Spread cut and36-tick fade. This is not game-layer, network, audio or frame-time evidence.",
+    "artifact_sha256": "e1d4c7893fb5638680759f31c065b3c9297b711a2c0253b5623361a1394ec002",
+    "local_build_record": ".local/builds/20260926T153714669602Z/record.json",
+    "matching_peer_down_revive_lockout_all_down_retry": "not_run: user-owned GUI",
+    "god_mode_on_off_failed_stack_spread_visual_and_native_hit": "not_run: user-owned GUI",
+    "actual_audio_balance_and_remote_visual_latency": "not_run"
+  },
+  "delegation": "scarlet_recovery / gpt-6-sol medium: three native recovery adapter files; lead owns damage/runtime/wire integration, stale projection lease fix, tests and documentation. Same worker performed read-only chorus visibility audit and repaired the ignored isolated GPU preview fixture; lead reviewed rendered frames."
+}

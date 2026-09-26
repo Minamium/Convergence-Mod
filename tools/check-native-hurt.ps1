@@ -95,6 +95,24 @@ public static class NativeHurtCheck
                     "Azure native final cap: " + name);
             }
             Console.WriteLine("PASS packaged Azure attack/contact/verdict final-damage ceilings");
+            string scarlet = "Convergence.Content.Encounters.CrimsonFoundry.";
+            if (mod.GetType(scarlet + "CrimsonRecoveryPlayer", false) != null) {
+                foreach (string name in new[] { "CrimsonAttack", "CrimsonGesture", "CrimsonChorusStrike" }) {
+                    Type type = mod.GetType(scarlet + name, true);
+                    object actor = Activator.CreateInstance(type, true);
+                    string fieldName = name == "CrimsonAttack" ? "Hazard" : name == "CrimsonGesture" ? "Plan" : "Impact";
+                    var field = type.GetField(fieldName, Instance);
+                    object descriptor = Activator.CreateInstance(field.FieldType);
+                    field.FieldType.GetField("<Damage>k__BackingField", Instance).SetValue(descriptor, 900);
+                    field.SetValue(actor, descriptor);
+                    object[] arguments = { null, Activator.CreateInstance(modifiers) };
+                    type.GetMethod("ModifyHitPlayer").Invoke(actor, arguments);
+                    bool rehearsal = (bool)mod.GetType(scarlet + "CrimsonPlaytestTuning").GetField("DebugOneDamagePlaytest", Static).GetRawConstantValue();
+                    Require((float)getDamage.Invoke(arguments[1], new object[] {1800f, 0f, .5f}) == (rehearsal ? 1 : 900),
+                        "Scarlet native final cap: " + name);
+                }
+                Console.WriteLine("PASS packaged Scarlet attack/gesture/verdict final-damage ceilings");
+            }
 
             // Calibration example, not a simulation of the owner's equipment.
             int beamSource = (int)mod.GetType("Convergence.Content.Encounters.FirstSeverance.FirstSeveranceCombatRules", true)
@@ -119,6 +137,8 @@ public static class NativeHurtCheck
             foreach (string name in new[] {
                 "Convergence.Content.Encounters.AzureCathedral.AzureRecoveryPlayer",
                 "Convergence.Content.Encounters.AzureCathedral.AzureDownedDebuff",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonRecoveryPlayer",
+                "Convergence.Content.Encounters.CrimsonFoundry.CrimsonDownedDebuff",
                 "Convergence.Client.Encounters.CrimsonFoundry.CrimsonBossVisuals",
                 "Convergence.Client.Encounters.CrimsonFoundry.CrimsonAttackVisuals",
                 "Convergence.Content.Encounters.CrimsonFoundry.CrimsonBoss",

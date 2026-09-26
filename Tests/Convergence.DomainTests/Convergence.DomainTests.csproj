@@ -39,6 +39,7 @@
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonSpatialCuts.cs" Link="Domain/CrimsonSpatialCuts.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonChoirRakes.cs" Link="Domain/CrimsonChoirRakes.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonState.cs" Link="Domain/CrimsonState.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonRecoveryState.cs" Link="Domain/CrimsonRecoveryState.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonInvocation.cs" Link="Domain/CrimsonInvocation.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceNativeHurt.cs" Link="Domain/FirstSeveranceNativeHurt.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceCoreCannonVolley.cs" Link="Domain/FirstSeveranceCoreCannonVolley.cs" />

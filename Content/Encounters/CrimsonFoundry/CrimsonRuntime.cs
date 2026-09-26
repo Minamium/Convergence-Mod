@@ -35,6 +35,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
     private readonly int[] poseUntil = new int[4];
     private readonly CrimsonPoint[] poseExit = new CrimsonPoint[4];
     private CrimsonBoss? actor;
+    private CrimsonRecoveryController? recovery;
     private CrimsonMember[] members = Array.Empty<CrimsonMember>();
     private int age, musicStart = -1, finalStart = -1, ending = -1;
     private int phaseStart, unlockAt = -1, target = -1, nextPhrase, phraseSerial;
@@ -80,6 +81,9 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         else members[index] = members[index] with { Ready = ready };
         Project(true); return true;
     }
+    internal bool RecoveryRequest(int sender, CrimsonRecoveryRequest request, bool revive)
+        => !cleaned && ending < 0 && stage is CrimsonStage.Countdown or CrimsonStage.Performance
+            && recovery?.Receive(sender, request, revive) == true;
     public EncounterRuntimeUpdate Tick(in EncounterRuntimeContext context)
     {
         if (cleaned || Main.netMode == NetmodeID.MultiplayerClient) return EncounterRuntimeUpdate.None;
@@ -115,8 +119,10 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                 targetLife = CrimsonInvocation.TargetLife(members.Length);
                 actor.NPC.life = actor.NPC.lifeMax = targetLife;
                 if (!pedestal.Activate(fight)) return End(EncounterEndReason.Invalidated);
+                recovery = new CrimsonRecoveryController(fight.Value, members);
+                recovery.Project(members);
                 Project(true);
-                CrimsonPackets.Log($"event=AllReady fight={fight.Value} music_start={musicStart} unlock={unlockAt}");
+                CrimsonPackets.Log($"event=AllReady fight={fight.Value} music_start={musicStart} unlock={unlockAt} debug_one_damage={CrimsonPlaytestTuning.DebugOneDamagePlaytest} recovery=InstantUnlimited");
                 return EncounterRuntimeUpdate.TransitionTo(EncounterLifecycle.Active);
             }
             if (age > 60 * 180) return End(EncounterEndReason.Cancelled);
@@ -129,7 +135,8 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                 if (!p.active || p.dead || p.ghost || p.GetModPlayer<CrimsonConnection>().Token != members[i].Connection)
                     members[i] = members[i] with { Out = true };
             }
-            bool allOut = Array.TrueForAll(members, m => m.Out);
+            if (ending < 0 && recovery?.Tick(State, members) == true) Project(true);
+            bool allOut = Array.TrueForAll(members, m => m.Out) || recovery?.Failed == true;
             bool won = CrimsonPhaseRules.Victory(phase, defeated, performerDefeated, allOut);
             if (ending < 0 && (allOut || won))
             {
@@ -234,11 +241,11 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
     }
     private void Retarget()
     {
-        if (target >= 0 && Array.Exists(members, m => m.Slot == target && !m.Out)) return;
+        if (target >= 0 && Array.Exists(members, m => m.Slot == target && !m.Out && !m.Recovery.Downed)) return;
         target = -1; float best = float.MaxValue;
         foreach (var m in members)
         {
-            if (m.Out) continue;
+            if (m.Out || m.Recovery.Downed) continue;
             float distance = Vector2.DistanceSquared(Main.player[m.Slot].Center, actor!.NPC.Center);
             if (distance < best) { best = distance; target = m.Slot; }
         }
@@ -355,7 +362,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         for (int i = 0; i < count; i++)
         {
             int source = sources[i], note = i % rhythm.Hits.Count; var hit = rhythm.Hits[note];
-            var eligible = Array.FindAll(members, m => !m.Out && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
+            var eligible = Array.FindAll(members, m => !m.Out && !m.Recovery.Downed && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
             if (eligible.Length == 0) throw new InvalidOperationException("crimson.no_phrase_target");
             var aimed = eligible[CrimsonTrackingBeam.TargetIndex(serial, note, eligible.Length)];
             var playerCenter = Main.player[aimed.Slot].Center;
@@ -402,7 +409,13 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         }
         return -1;
     }
-    private void Project(bool sync) { if (actor is null) return; actor.State = State; if (sync) actor.NPC.netUpdate = true; }
+    private void Project(bool sync)
+    {
+        if (actor is null) return;
+        actor.State = State;
+        CrimsonRecoveryPlayer.Apply(actor.State);
+        if (sync) actor.NPC.netUpdate = true;
+    }
     private EncounterRuntimeUpdate End(EncounterEndReason reason) => EncounterRuntimeUpdate.End(CrimsonTermination.End(reason));
     private void ClearHazards(int source = -1, bool preserveVerdict = false)
     {
@@ -426,7 +439,12 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                 if (Main.netMode == NetmodeID.Server) NetMessage.SendData(MessageID.SyncNPC, number: n.whoAmI);
             }
         }
-        finally { if (claimed) { pedestal.Release(fight); claimed = false; } }
+        finally
+        {
+            recovery?.Cleanup();
+            CrimsonRecoveryPlayer.ClearFight(fight.Value);
+            if (claimed) { pedestal.Release(fight); claimed = false; }
+        }
         cleaned = true;
         CrimsonPackets.Log($"event=Cleaned fight={fight.Value} reason={context.EndReason} age={age}");
     }
