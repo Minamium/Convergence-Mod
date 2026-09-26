@@ -38,6 +38,8 @@ For new mechanics, define assignment, telegraph/resolve ticks, authority result,
 
 Update the document that owns each changed fact. Do not copy the same implementation report into the spec, plan, README, and skill. Review the final diff for affected invariants and finish under the [AGENTS completion contract](../../../AGENTS.md#verification), selecting checks from the verification matrix.
 
+When the task includes merging a PR, finish its [branch/worktree cleanup](../../../CONTRIBUTING.md#finish-merged-work) or record the remaining owner/use. An implementation-only task does not gain permission to merge or clean up other work.
+
 Report concrete defects and missing applicable evidence. Distinguish an implementation defect from a future release gate or a user-owned playtest that has not run.
 
 ## Keep playtest feedback lightweight
