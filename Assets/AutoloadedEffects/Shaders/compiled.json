@@ -11,8 +11,12 @@
       "output_sha256": "9830c065065c36562ec30b5c2ee453e0c5e3ded65fdf4f67fd2388d4a16d82c8"
     },
     "AzureGlass.fx": {
-      "source_sha256": "26588595df1a19d70ea6d6ceca35b06776f80f820995107858a279bcf765fec9",
-      "output_sha256": "7f5e84ad6ae38f81c1e7b875475fddc31df9ecbeb4ebd7af3772df64b146fe93"
+      "source_sha256": "edf2de7810b70ffd6d0e2e1a45205314eeddf882e2710edca1f4e6d4928fdb0d",
+      "output_sha256": "18ed6eae5399b555f58872900a0a0ae820cc3856bf218c03c2eb60ca3cfc26f6"
+    },
+    "AzureLiora.fx": {
+      "source_sha256": "41f3e0854e94ddf47bb54f72a282706bde9ffb2356fc6b75623e2436f895c2f5",
+      "output_sha256": "c851c540e0d5897a3ffe711cf39dc795e72d1a36baee4149912e4411add40cda"
     },
     "CrimsonReactor.fx": {
       "source_sha256": "e016c33b62286a5781a530d027a7a6b8ae99999bceccd52bbb7cd54933b90607",

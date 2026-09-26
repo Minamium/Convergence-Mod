@@ -2,6 +2,122 @@
 
 ## Records
 
+### Azure material and ice/glass audio revision — 2026-09-26
+
+Original code-authored materials and synthesized audio; no external samples or texture extraction. Original Vitrion/Liora PNGs and music remain unchanged. The latest project-owned Scarlet renderer supplies techniques (masked emission, attached lagging ribbons), not copied red anatomy. Audio listening/in-game mix acceptance remains pending.
+
+- Runtime file: `Assets/Sounds/AzureCathedral/IceBreak.wav`
+- Asset ID: azure-icebreak-20260926
+- Asset type: stereo PCM16 44100Hz 0.88s low ice-sheet split and falling glass grains
+- Creator: project-owner-directed original synthesis with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
+- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
+- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
+- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
+- SHA256: `363094ef71aa2e7050d0b6727cb8566ffe976bbacb006c324e094eb30a3257ff`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/GlassArrival.wav`
+- Asset ID: azure-glassarrival-20260926
+- Asset type: stereo PCM16 44100Hz 0.86s refractive rift fracture and cold pressure
+- Creator: project-owner-directed original synthesis with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
+- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
+- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
+- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
+- SHA256: `dd7380ef352c6aeee86c3b8577e717d2f84b4be558fb371d4b7e41586a27a656`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/CrystalCharge.wav`
+- Asset ID: azure-crystalcharge-20260926
+- Asset type: stereo PCM16 44100Hz 0.38s short gathering crystal resonance
+- Creator: project-owner-directed original synthesis with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
+- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
+- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
+- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
+- SHA256: `8c1091dfa8ddf6a9f6bee3b86422091b860bd6be7b89a7bc494c65db39c02091`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/CrystalCut.wav`
+- Asset ID: azure-crystalcut-20260926
+- Asset type: stereo PCM16 44100Hz 0.48s glass edge fracture over a short air release
+- Creator: project-owner-directed original synthesis with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
+- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
+- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
+- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
+- SHA256: `ac382ead56cda5c663470b29e8d005655d9f12f5b3ad39a77b1d45bcf75ce8d1`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/WormRush.wav`
+- Asset ID: azure-wormrush-20260926
+- Asset type: stereo PCM16 44100Hz 0.64s heavy icy rush with sparse crystal grains
+- Creator: project-owner-directed original synthesis with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
+- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
+- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
+- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
+- SHA256: `d9e269074b7c2b5644d6d881e246bf366bd102cc9f090213facef5626a1aa855`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/DevourFracture.wav`
+- Asset ID: azure-devourfracture-20260926
+- Asset type: stereo PCM16 44100Hz 1.02s low crushing ice and inharmonic shard burst
+- Creator: project-owner-directed original synthesis with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
+- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
+- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
+- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
+- SHA256: `a566f9bf8cc3392ac3409b33b7aff6fcb44efd9a902a81cc35649c7bc9f56965`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/ChainMelt.wav`
+- Asset ID: azure-chainmelt-20260926
+- Asset type: stereo PCM16 44100Hz 2.64s descending whole-chain fractures and dissolving glass
+- Creator: project-owner-directed original synthesis with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
+- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
+- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
+- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
+- Required attribution: preserve project provenance and generation disclosure
+- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
+- SHA256: `4db89927823956f4516777eab084be7593c6c5af678d1c601eb9b0e848819495`
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/AzureLiora.fxc`
+- Asset ID: azure-liora-refraction-20260926
+- Asset type: original compiled native-atlas/refraction/veil/sword material
+- Creator: project-owner-directed original implementation with OpenAI
+- Creation/acquisition date: 2026-09-26
+- Source type: original
+- Source work and URL: Repository-owned AzureLiora.fx; no external shader code
+- Tool/model/version: FXC identity/options in Assets/AutoloadedEffects/Shaders/compiled.json
+- Human modifications: Masked cloth caustics, premultiplied native pixel skin, flowing attached strips; original atlas retained
+- License and redistribution terms: existing project original-asset terms
+- Required attribution: preserve project provenance
+- Reviewer and review date: Codex compiled GPU/native-pose inspection2026-09-26; owner native acceptance not_run
+- SHA256: `c851c540e0d5897a3ffe711cf39dc795e72d1a36baee4149912e4411add40cda`
+
 ### Azure Cathedral — 2026-09-20
 
 New original images use the built-in generator, exact model unknown. Full briefs: [asset brief](../docs/encounters/azure-cathedral/ASSET_BRIEF.md). Existing project-owned Doll sound/beam materials are reused by reference with feature-local gain/pitch/cyan tuning, not replaced. Original image files remain externally archived. Luminance noise textures are referenced at runtime, never vendored.
@@ -132,14 +248,14 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Creator: project-owner-directed original implementation/artwork with OpenAI
 - Creation/acquisition date: 2026-09-20
 - Source type: original
-- Source work and URL: Repository-owned AzureGlass.fx; no external shader code
+- Source work and URL: Repository-owned AzureGlass.fx; no external shader code. September26 adds anatomy-masked flowing caustics and attached cold-vapor ribbon passes, retaining original opaque armor.
 - Tool/model/version: FXC identity/options pinned in Assets/AutoloadedEffects/Shaders/compiled.json
 - Human modifications: FXC compilation only; identity/options in compiled.json
 - License and redistribution terms: existing project original-asset terms; no third-party art license implied
 - Required attribution: preserve project provenance and generation disclosure
 - Reviewer and review date: Codex asset/material inspection2026-09-20; owner in-game acceptance not_run
 - Prompt or brief location: `docs/encounters/azure-cathedral/ASSET_BRIEF.md`
-- SHA256: `7f5e84ad6ae38f81c1e7b875475fddc31df9ecbeb4ebd7af3772df64b146fe93`
+- SHA256: `18ed6eae5399b555f58872900a0a0ae820cc3856bf218c03c2eb60ca3cfc26f6`
 
 - Runtime file: `Assets/Music/AzureCathedral/WhiteNight.ogg`
 - Asset ID: azure-eighth-white-night-20260920
