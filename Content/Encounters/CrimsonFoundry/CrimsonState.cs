@@ -5,7 +5,7 @@ using Convergence.Common.Raids.Arena;
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
 internal enum CrimsonStage : byte { Deployment, Ready, Countdown, Performance, Victory, Defeat }
-internal readonly record struct CrimsonMember(byte Slot, Guid Connection, bool Ready, bool Out);
+internal readonly record struct CrimsonMember(byte Slot, Guid Connection, bool Ready, bool Out, CrimsonRecoveryState Recovery = default);
 internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart, int FinalStart, CrimsonStage Stage, CrimsonMember[] Members,
     int GroundX, int GroundY, byte DefeatedMask = 0, byte Phase = 0, int PhaseStart = 0, int UnlockAt = -1,
     short Target = -1, int PhraseStart = -1, int PhraseEnd = -1, CrimsonRhythmKind PhraseKind = CrimsonRhythmKind.Groove,
@@ -20,6 +20,8 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         && UnlockAt >= 0 && Age >= UnlockAt && index is >= 0 and < CrimsonInvocation.SummonCount
         && CrimsonPhaseRules.ActiveSource(Phase, DefeatedMask, PerformerDefeated, index);
     internal bool Contains(int slot) => Array.Exists(Members ?? Array.Empty<CrimsonMember>(), m => m.Slot == slot && !m.Out);
+    internal bool CanFight(int slot) => Array.Exists(Members ?? Array.Empty<CrimsonMember>(),
+        m => m.Slot == slot && !m.Out && !m.Recovery.Downed);
     internal bool SourceActive(int source, float now) => source == 3 ? Vulnerable(now) : SummonVulnerable(source);
     internal int LifeFor(int index) => index switch { 0 => Life0, 1 => Life1, 2 => Life2, _ => Life3 };
     internal int DamageFloor(int source) => Phase < 3 ? CrimsonPhaseRules.RetreatLife(TargetLife) : CompletedCycles == 0 ? 1 : 0;
@@ -45,6 +47,14 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         if (Phase == old.Phase && (PhaseStart != old.PhaseStart || old.UnlockAt >= 0 && UnlockAt != old.UnlockAt)) return false;
         if ((DefeatedMask & old.DefeatedMask) != old.DefeatedMask || old.PerformerDefeated && !PerformerDefeated) return false;
         if (old.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && Stage != old.Stage) return false;
+        if (old.Stage >= CrimsonStage.Countdown)
+        {
+            if (Members.Length != old.Members.Length) return false;
+            for (int i = 0; i < Members.Length; i++)
+                if (Members[i].Slot != old.Members[i].Slot || Members[i].Connection != old.Members[i].Connection
+                    || old.Members[i].Out && !Members[i].Out
+                    || !Members[i].Recovery.CanReplace(old.Members[i].Recovery)) return false;
+        }
         return old.MusicStart < 0 || MusicStart == old.MusicStart;
     }
     internal void Write(BinaryWriter w)
@@ -55,7 +65,8 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         w.Write(PhraseStart); w.Write(PhraseEnd); w.Write((byte)PhraseKind); w.Write(TargetLife);
         w.Write(Life0); w.Write(Life1); w.Write(Life2); w.Write(Life3); w.Write(PerformerDefeated); w.Write(CompletedCycles);
         w.Write((byte)Members.Length);
-        foreach (var m in Members) { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); }
+        foreach (var m in Members)
+        { w.Write(m.Slot); w.Write(m.Connection.ToByteArray()); w.Write(m.Ready); w.Write(m.Out); m.Recovery.Write(w); }
     }
     // Native debug/unowned spawns can be synced before an encounter installs
     // state, including the despawn packet. Never serialize a default DTO.
@@ -87,10 +98,11 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
         var members = new CrimsonMember[count];
         for (int i = 0; i < count; i++)
         {
-            byte slot = r.ReadByte(); byte[] bytes = r.ReadBytes(16); bool ready = r.ReadBoolean(), eliminated = r.ReadBoolean();
+            byte slot = r.ReadByte(); byte[] bytes = r.ReadBytes(16); bool ready = ReadPresence(r), disconnected = ReadPresence(r);
+            var recovery = CrimsonRecoveryState.Read(r);
             if (slot >= 255 || bytes.Length != 16 || new Guid(bytes) == Guid.Empty
                 || i > 0 && slot <= members[i - 1].Slot) throw new InvalidDataException("crimson.member_invalid");
-            members[i] = new(slot, new Guid(bytes), ready, eliminated);
+            members[i] = new(slot, new Guid(bytes), ready, disconnected, recovery);
         }
         if (stage is CrimsonStage.Countdown or CrimsonStage.Performance && (start < 0 || unlock < 0))
             throw new InvalidDataException("crimson.clock_missing");

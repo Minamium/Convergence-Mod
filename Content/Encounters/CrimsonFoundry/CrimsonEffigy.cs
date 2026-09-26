@@ -58,8 +58,8 @@ public sealed class CrimsonEffigy : ModNPC
     public override bool CheckActive() => false;
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
     private bool AboveRetreatFloor(CrimsonBoss boss) => NPC.life > boss.State.DamageFloor(State.Index);
-    public override bool? CanBeHitByItem(Player player, Item item) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.Contains(player.whoAmI) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile projectile) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.Contains(projectile.owner) ? null : false;
+    public override bool? CanBeHitByItem(Player player, Item item) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.CanFight(player.whoAmI) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile projectile) => TryBoss(out var boss) && AboveRetreatFloor(boss!) && boss!.State.CanFight(projectile.owner) ? null : false;
     public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
     {
         if (TryBoss(out var boss) && boss!.State.DamageFloor(State.Index) > 0)

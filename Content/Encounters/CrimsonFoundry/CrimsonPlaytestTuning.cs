@@ -5,7 +5,12 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 // Temporary rehearsal tuning: does not touch player weapons or other raids.
 internal static class CrimsonPlaytestTuning
 {
+    // Owner-controlled rehearsal mode. Do not remove before explicit damage tuning.
+    internal const bool DebugOneDamagePlaytest = true;
     internal const int AttackDamage = 1;
+    internal static int NativeSourceDamage(int intended)
+        => intended <= 0 ? 0 : DebugOneDamagePlaytest ? 1 : intended;
+    internal static int NativeFinalDamageLimit(int intended) => NativeSourceDamage(intended);
     internal const int SoloTargetLife = 750000;
     internal const int ExtraPlayerTargetLife = 500000;
     internal static int TargetLife(int members)

@@ -49,8 +49,9 @@ public sealed class CrimsonChorus : ModProjectile
         Projectile.Center = new(Plan.Center.X, Plan.Center.Y);
         if (TryBoss(Plan, out var boss, Resolved))
         {
-            Projectile.timeLeft = Math.Max(2, Plan.End + 20 - (int)boss!.VisualAge);
-            if (Main.netMode != NetmodeID.MultiplayerClient && boss.VisualAge >= Plan.End + 20) Projectile.Kill();
+            int leaseEnd = CrimsonChorusImpactPositions.LeaseEnd(Plan);
+            Projectile.timeLeft = Math.Max(2, leaseEnd - (int)boss!.VisualAge);
+            if (Main.netMode != NetmodeID.MultiplayerClient && boss.VisualAge >= leaseEnd) Projectile.Kill();
         }
         else if (Main.netMode != NetmodeID.MultiplayerClient) Projectile.Kill();
     }
@@ -86,7 +87,7 @@ public sealed class CrimsonChorusStrike : ModProjectile
     public override bool? CanCutTiles() => false;
     public override bool? CanHitNPC(NPC target) => false;
     public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
-        => modifiers.SetMaxDamage(Impact.Damage);
+        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.NativeFinalDamageLimit(Impact.Damage));
     public override bool PreDraw(ref Color lightColor) => false;
     public override void OnSpawn(IEntitySource source)
     { if (source is CrimsonChorusImpactSource own) { own.Impact.Validate(); Impact = own.Impact; } }
@@ -98,7 +99,7 @@ public sealed class CrimsonChorusStrike : ModProjectile
         float age = boss.VisualAge;
         if (age < Impact.Plan.Fire || age >= Impact.Plan.Fire + CrimsonChorusRules.ImpactTicks) return false;
         var member = boss.State.Members[Impact.Member];
-        if (member.Out) return false;
+        if (member.Out || member.Recovery.Downed) return false;
         player = Main.player[member.Slot];
         return player.active && !player.dead && !player.ghost
             && (Main.netMode != NetmodeID.MultiplayerClient || Main.myPlayer == member.Slot);
@@ -106,10 +107,14 @@ public sealed class CrimsonChorusStrike : ModProjectile
     public override bool? CanDamage() => Eligible(out _) ? null : false;
     public override bool CanHitPlayer(Player target) => Eligible(out var recipient) && recipient!.whoAmI == target.whoAmI;
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox) => Eligible(out _);
-    public override void OnHitPlayer(Player target, Player.HurtInfo info) { spent = true; Projectile.hostile = false; }
+    public override void OnHitPlayer(Player target, Player.HurtInfo info)
+    {
+        spent = true; Projectile.hostile = false;
+        CrimsonPackets.Log($"event=ChorusNativeImpact fight={Impact.Plan.Fight} serial={Impact.Plan.Serial} kind={Impact.Plan.Kind} slot={target.whoAmI} intended={Impact.Damage} native_source={Projectile.damage} final_damage={info.Damage} life={target.statLife}");
+    }
     public override void AI()
     {
-        Projectile.damage = Impact.Damage;
+        Projectile.damage = CrimsonPlaytestTuning.NativeSourceDamage(Impact.Damage);
         Projectile.hostile = Eligible(out var player);
         if (player is not null) Projectile.Center = player.Center;
         if (CrimsonChorus.TryBoss(Impact.Plan, out var boss))
@@ -141,7 +146,7 @@ internal sealed partial class CrimsonRuntime
         int earliest = Math.Max(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks), cycle.FinishAt) - musicStart;
         var beats = CrimsonRhythm.NextBeats(score, earliest, 11);
         byte mask = 0;
-        for (int i = 0; i < members.Length; i++) if (!members[i].Out) mask |= (byte)(1 << i);
+        for (int i = 0; i < members.Length; i++) if (!members[i].Out && !members[i].Recovery.Downed) mask |= (byte)(1 << i);
         var field = State.Field;
         var plan = new CrimsonChorusPlan(fight.Value, (short)actor.NPC.whoAmI, phaseStart, ++chorusOrdinal,
             3, chorusOrdinal % 2 == 1 ? CrimsonChorusKind.Stack : CrimsonChorusKind.Spread, mask,
@@ -152,7 +157,7 @@ internal sealed partial class CrimsonRuntime
             Vector2.Zero, ModContent.ProjectileType<CrimsonChorus>(), 0, 0, Main.myPlayer);
         if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.chorus_capacity");
         chorus = plan; chorusSlot = slot; chorusResolved = false; phrasesSinceChorus = 0;
-        Main.projectile[slot].timeLeft = plan.End + 20 - age; Main.projectile[slot].netUpdate = true;
+        Main.projectile[slot].timeLeft = CrimsonChorusImpactPositions.LeaseEnd(plan) - age; Main.projectile[slot].netUpdate = true;
         nextPhrase = plan.End;
         CrimsonPackets.Log($"event=ChorusCalled fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} born={plan.Born} fire={plan.Fire} members={mask}");
         return true;
@@ -173,7 +178,7 @@ internal sealed partial class CrimsonRuntime
         {
             Player p = Main.player[members[i].Slot];
             positions[i] = new(p.Center.X, p.Center.Y);
-            if (!members[i].Out && p.active && !p.dead && !p.ghost
+            if (!members[i].Out && !members[i].Recovery.Downed && p.active && !p.dead && !p.ghost
                 && p.GetModPlayer<CrimsonConnection>().Token == members[i].Connection) living |= (byte)(1 << i);
         }
         int[] damage = CrimsonChorusRules.Resolve(plan.Kind, plan.Center, positions, plan.Members, living);
@@ -189,11 +194,11 @@ internal sealed partial class CrimsonRuntime
             if (damage[i] == 0) continue;
             var impact = new CrimsonChorusImpact(plan, (byte)i, damage[i]); impact.Validate();
             int slot = Projectile.NewProjectile(new CrimsonChorusImpactSource(impact), Main.player[members[i].Slot].Center,
-                Vector2.Zero, ModContent.ProjectileType<CrimsonChorusStrike>(), damage[i], 0, Main.myPlayer);
+                Vector2.Zero, ModContent.ProjectileType<CrimsonChorusStrike>(), CrimsonPlaytestTuning.NativeSourceDamage(damage[i]), 0, Main.myPlayer);
             if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.chorus_capacity");
             Main.projectile[slot].netUpdate = true;
         }
-        CrimsonPackets.Log($"event=ChorusResolved fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} living={living} failed_mask={marker.FailedMask} budget_sources={string.Join(",", damage)}");
+        CrimsonPackets.Log($"event=ChorusResolved fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} living={living} failed_mask={marker.FailedMask} budget_sources={string.Join(",", damage)} native_sources={string.Join(",", Array.ConvertAll(damage, CrimsonPlaytestTuning.NativeSourceDamage))}");
     }
     private void ClearChorus(int source, bool preserveVerdict = false)
     {

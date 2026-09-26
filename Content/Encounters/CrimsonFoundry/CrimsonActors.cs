@@ -16,6 +16,11 @@ public sealed class CrimsonBoss : ModNPC
     private ulong receivedAt;
     internal float VisualAge => State.Age + (Main.netMode == NetmodeID.MultiplayerClient ? (float)Math.Min(30UL, Main.GameUpdateCount - receivedAt) : 0);
     internal bool Fresh => Main.netMode != NetmodeID.MultiplayerClient || Main.GameUpdateCount - receivedAt <= 60;
+    internal void ApplyProjection(in CrimsonState next, ulong at)
+    {
+        if (!next.CanReplace(State)) return;
+        State = next; receivedAt = Math.Max(receivedAt, at);
+    }
     public override string Texture => "Convergence/Assets/Textures/CrimsonFoundry/ScarletConjurer";
     public override void SetStaticDefaults() => NPCID.Sets.ImmuneToRegularBuffs[Type] = true;
     public override void SetDefaults()
@@ -29,8 +34,8 @@ public sealed class CrimsonBoss : ModNPC
     }
     public override bool CheckActive() => false;
     public override bool CanHitPlayer(Player target, ref int cooldownSlot) => false;
-    public override bool? CanBeHitByItem(Player player, Item item) => State.Contains(player.whoAmI) && NPC.life > State.DamageFloor(3) ? null : false;
-    public override bool? CanBeHitByProjectile(Projectile projectile) => State.Contains(projectile.owner) && NPC.life > State.DamageFloor(3) ? null : false;
+    public override bool? CanBeHitByItem(Player player, Item item) => State.CanFight(player.whoAmI) && NPC.life > State.DamageFloor(3) ? null : false;
+    public override bool? CanBeHitByProjectile(Projectile projectile) => State.CanFight(projectile.owner) && NPC.life > State.DamageFloor(3) ? null : false;
     public override void OnSpawn(IEntitySource source)
     {
         if (source is CrimsonActorSource owned) { Runtime = owned.Runtime; State = owned.State; }
@@ -73,7 +78,8 @@ public sealed class CrimsonBoss : ModNPC
         var payload = CrimsonState.ReadEnvelope(reader);
         if (payload is not { } next) return;
         if (Main.netMode == NetmodeID.Server || !next.CanReplace(State)) return;
-        State = next; receivedAt = Main.GameUpdateCount;
+        ApplyProjection(next, Main.GameUpdateCount);
+        if (next.Fight == CrimsonPackets.Snapshot.FightId.Value) CrimsonRecoveryPlayer.Apply(next);
     }
 }
 
@@ -104,10 +110,12 @@ public sealed class CrimsonAttack : ModProjectile
     internal float Age(CrimsonBoss boss) => boss.VisualAge + (Main.netMode == NetmodeID.MultiplayerClient ? 0 : 1);
     public override bool? CanDamage() => TryBoss(out var boss) && boss!.State.SourceActive(Hazard.Source, Age(boss))
         && Hazard.Live(Age(boss)) ? null : false;
-    public override bool CanHitPlayer(Player target) => TryBoss(out var boss) && boss!.State.Contains(target.whoAmI);
+    public override bool CanHitPlayer(Player target) => TryBoss(out var boss) && boss!.State.CanFight(target.whoAmI);
     public override bool? CanHitNPC(NPC target) => false;
     public override void ModifyHitPlayer(Player target, ref Player.HurtModifiers modifiers)
-        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.AttackDamage);
+        => modifiers.SetMaxDamage(CrimsonPlaytestTuning.NativeFinalDamageLimit(Hazard.Damage));
+    public override void OnHitPlayer(Player target, Player.HurtInfo info)
+        => CrimsonPackets.Log($"event=AttackNativeImpact fight={Hazard.Fight} phase_epoch={Hazard.Epoch} kind={Hazard.Shape} slot={target.whoAmI} intended={Hazard.Damage} native_source={Projectile.damage} final_damage={info.Damage} life={target.statLife}");
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
         if (!TryBoss(out var boss) || !boss!.State.SourceActive(Hazard.Source, Age(boss)) || !Hazard.Live(Age(boss))) return false;
@@ -120,7 +128,7 @@ public sealed class CrimsonAttack : ModProjectile
     public override void AI()
     {
         Projectile.hostile = TryBoss(out var boss) && boss!.State.SourceActive(Hazard.Source, Age(boss)) && Hazard.Live(Age(boss));
-        Projectile.damage = CrimsonPlaytestTuning.AttackDamage;
+        Projectile.damage = CrimsonPlaytestTuning.NativeSourceDamage(Hazard.Damage);
         if (boss is not null)
         {
             float age = Age(boss);

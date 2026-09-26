@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-22
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - architecture.crimson_score_authority
 aliases:
@@ -34,6 +34,16 @@ The immutable score is derived from an authorized local recording. A client audi
 API evidence: same pinned tML2026.07.3.0/666f69962d3bdffde54fc14025f02634965b4e7c Projectile/Player hooks as [ADR-0023](0023-ghost-samurai-native-wave-damage.md). The [OGGAudioTrack patch](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Audio/OGGAudioTrack.cs.patch) confirms parsed LOOPSTART/LOOPEND tags. [FNA SoundEffect](https://github.com/FNA-XNA/FNA/blob/cf6b3664866faaa9237a763fe61e01bfcd473a10/src/Audio/SoundEffect.cs) documents PCM offset/count and loopStart/loopLength; compiled against installedFNA1.0.0. No FNA source is copied. `PostUpdateInput` handles pause/focus audio independent of world simulation. Inspected2026-09-15; hardware playback remains owner-tested.
 
 The first implementation withheld the recording from Git pending a distribution decision. Later on2026-09-15, the owner approved the game-facing loop edit for the Mod and its public source tree, with author credit and exclusion from the project license. [Feature music policy](../encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-and-musical-presentation) owns that current packaging decision. The missing-audio guard remains an incomplete-package safeguard; this ADR does not grant standalone music rights.
+
+## 2026-09-27 Scarlet Down/recovery and debug damage (protocol70)
+
+This supersedes the earlier absence of recovery integration, not the native damage boundary. `CrimsonRuntime` owns one `CrimsonRecoveryController` using the same Terraria-independent instant-unlimited service as Doll. One authority tick accepts native-floor Downs/disconnects, resolves the stable-ID ally-revive batch, commits failure, then schedules attacks. Down is not Out; field membership persists while targeting, attacks and chorus eligibility exclude Down. Frozen connection identity, Fight, health generation and separate nonces reject stale/replayed requests. MP requires the preceding native HP-floor update and tagged receipt; stale untagged HP cannot re-Down a revived player.
+
+The receiving-player adapter caps lethal native Hurt at1HP and reports a floor receipt. Its scoped PreKill fallback handles DoT/foreign death paths without assuming it can cancel other Mods' hooks. It never invents damage, bypasses God Mode or replaces ordinary armor/accessory processing. Instant recovery alone applies authoritative health corrections. Exact-Fight/world/disconnect cleanup clears temporary controls and buffs; all-Down failure clears interception before ordinary terminal death.
+
+Protocol70 appends bounded recovery state to Scarlet's native actor and routed lifecycle snapshot, reuses definition-scoped recovery/floor packet IDs, and tags validation replies. Common router/coordinator have no new feature switch. Monotone recovery state/frozen identities reject actor rollback; full snapshots preserve terminal delivery independently of NPC relevance. Other encounters and their wire formats are unchanged; all peers still require the shared protocol version.
+
+The owner-directed1damage switch covers gestures, legacy native hazards and chorus impacts at both source and final native ceiling. It does not change success/failure masks, collision clocks, God Mode or other encounters. Outcome cosmetics and presentation telemetry remain independent of native-hit telemetry.
 
 ## Shared pedestal and bounded stage amendment — 2026-09-15
 
