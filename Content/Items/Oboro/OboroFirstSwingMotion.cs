@@ -2,12 +2,12 @@ using System;
 
 namespace Convergence.Content.Items.Oboro;
 
-// 1段目専用。Fは速度補正前の18Fに正規化する。2・3段目はこの曲線を使わない。
+// 上段から前方下へ落とす袈裟斬り。Fは速度補正前の22F。
 internal static class OboroFirstSwingMotion
 {
-    internal const float ReadyEnd = 4, AccelerationEnd = 8, CutEnd = 12, FollowEnd = 16;
-    internal const float AccelerationAngle = 65, FollowAngle = -47;
-    internal const float PeakSpeed = -35, ExitSpeed = -5, ReturnSpeed = -1; // 度/F
+    internal const float ReadyEnd = 5, AccelerationEnd = 9, CutEnd = 14, FollowEnd = 19;
+    internal const float AccelerationAngle = -25, FollowAngle = 85;
+    internal const float PeakSpeed = 34, ExitSpeed = 4, ReturnSpeed = 1; // 度/F
 
     internal static float Frame(float progress) => Math.Clamp(progress, 0, 1) * OboroComboSettings.For(0).TotalFrames;
     internal static OboroMotionPhase Phase(float progress)
@@ -21,7 +21,7 @@ internal static class OboroFirstSwingMotion
         float f = Frame(progress);
         var step = OboroComboSettings.For(0);
         float degrees;
-        // 接点の速度を共有するHermite補間。予備は静かに、8F付近で最速、以後は余韻。
+        // 接点速度を共有するHermite補間。上で止め、9F付近で最速、下で減速。
         if (f < ReadyEnd) degrees = Segment(f, 0, ReadyEnd, step.StartDegrees, step.WindupDegrees, 0, 0);
         else if (f < AccelerationEnd) degrees = Segment(f, ReadyEnd, AccelerationEnd, step.WindupDegrees, AccelerationAngle, 0, PeakSpeed);
         else if (f < CutEnd) degrees = Segment(f, AccelerationEnd, CutEnd, AccelerationAngle, step.EndDegrees, PeakSpeed, ExitSpeed);

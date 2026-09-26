@@ -11,7 +11,7 @@ internal readonly record struct OboroEcho(OboroBladePose Pose, OboroBladePose Sw
 // or packets. Plain values keep cleanup/late-snapshot behavior testable without graphics.
 internal sealed class OboroSwingPresentation
 {
-    internal const int Capacity = 16, FadeTicks = 8, SettleTicks = 10;
+    internal const int Capacity = 16, FadeTicks = 8;
     internal const int ReturnCutFadeTicks = 6, FinisherFadeTicks = 10;
     // 実体の刀は常に人が握れる長さ。560pxの攻撃範囲は斬撃時だけ霊刃で表す。
     internal const float SwordLength = 132;
@@ -22,14 +22,12 @@ internal sealed class OboroSwingPresentation
     private readonly OboroEcho[] echoes = new OboroEcho[Capacity];
     private int head, count;
     private bool initialized, wasSwinging, swingSeen;
-    private ulong generation, settleAt;
+    private ulong generation;
     private uint swing;
-    private float entryCorrection, lastAge, settleX, settleY;
-    private OboroBladePose settleFrom;
+    private float entryCorrection, lastAge;
     internal OboroBladePose Pose { get; private set; }
     internal OboroBladePose SwordPose { get; private set; }
     internal float ArmAngle => SwordPose.Angle + (Swinging ? SwordPose.Facing * OboroSwordMotion.Wrist(SwordPose.Step, SwordPose.Progress) : 0);
-    internal bool Settling { get; private set; }
     internal bool Swinging => wasSwinging;
     internal int Count => count;
     internal OboroEcho Echo(int index) => echoes[(head + index) % Capacity];
@@ -43,9 +41,9 @@ internal sealed class OboroSwingPresentation
     }
     internal void Clear()
     {
-        head = count = 0; initialized = wasSwinging = swingSeen = Settling = false;
-        generation = settleAt = 0; swing = 0; entryCorrection = lastAge = 0;
-        Pose = SwordPose = settleFrom = default; settleX = settleY = 0;
+        head = count = 0; initialized = wasSwinging = swingSeen = false;
+        generation = 0; swing = 0; entryCorrection = lastAge = 0;
+        Pose = SwordPose = default;
         Array.Clear(echoes);
     }
     internal void Update(OboroSnapshot view, float age, bool swinging, bool eligible,
@@ -54,11 +52,11 @@ internal sealed class OboroSwingPresentation
         if (!eligible) { if (initialized) Clear(); return; }
         if (initialized && (generation != view.Generation
             || (Pose.X - x) * (Pose.X - x) + (Pose.Y - y) * (Pose.Y - y) > 320 * 320)) Clear();
-        float restAngle = facing == 1 ? -1.1f : MathF.PI + 1.1f;
+        float entryAngle = view.Aim + view.Facing * OboroRules.Offset(view.Step, 0);
         if (!initialized)
         {
             initialized = true; generation = view.Generation;
-            Pose = new(x + facing * 12, y + 8, restAngle, SwordLength, 1, 0, facing);
+            Pose = new(x, y, entryAngle, 0, 1, view.Step, facing);
             SwordPose = Pose;
         }
         while (count > 0 && Opacity(Echo(0).At, now, Echo(0).Pose.Step) == 0)
@@ -74,7 +72,7 @@ internal sealed class OboroSwingPresentation
                 // Blend a changed aim only while harmless; reach the authoritative
                 // angle exactly before the live window begins.
                 entryCorrection = Wrap(Pose.Angle - (view.Aim + view.Facing * OboroRules.Offset(view.Step, 0)));
-                // First cut from idle begins in the authored low stance; do not spend
+                // First cut from idle begins in the authored high guard; do not spend
                 // its entire anticipation rotating from the unrelated inventory pose.
                 if (view.Step == 0 && !wasSwinging) entryCorrection = 0;
                 swing = view.Swing; swingSeen = true; lastAge = -1;
@@ -93,18 +91,15 @@ internal sealed class OboroSwingPresentation
                 if (count == Capacity) { head = (head + 1) % Capacity; count--; }
                 echoes[(head + count++) % Capacity] = new(Pose, SwordPose, swing, now);
             }
-            lastAge = age; wasSwinging = true; Settling = false;
+            lastAge = age; wasSwinging = true;
         }
         else
         {
-            if (wasSwinging) { settleAt = now; settleFrom = SwordPose; settleX = SwordPose.X - x; settleY = SwordPose.Y - y; Settling = true; }
+            // Retain the accepted angle for the next replica; hide weapon and arm
+            // immediately. Only bounded spectral cut residue may outlive the swing.
             wasSwinging = false;
-            float t = Settling ? OboroRules.Ease(Math.Min(SettleTicks, now - settleAt) / (float)SettleTicks) : 1;
-            Pose = new(x + (Settling ? settleX * (1 - t) : 0) + facing * 12 * t, y + (Settling ? settleY * (1 - t) : 0) + 8 * t,
-                Settling ? settleFrom.Angle + Wrap(restAngle - settleFrom.Angle) * t : restAngle,
-                SwordLength, 1, Pose.Step, Settling ? settleFrom.Facing : facing);
+            Pose = Pose with { X = x, Y = y, Length = 0, Progress = 1, Facing = facing };
             SwordPose = Pose;
-            if (t >= 1) Settling = false;
         }
     }
 }

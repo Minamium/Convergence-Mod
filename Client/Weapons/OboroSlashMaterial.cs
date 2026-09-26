@@ -28,7 +28,7 @@ internal static class OboroSlashMaterial
             float turn = b.Pose.Angle - a.Pose.Angle;
             if (Math.Abs(turn) < .001f || fadeB <= 0) continue;
             int count = Math.Clamp((int)MathF.Ceiling(Math.Abs(turn) / (reduced ? .085f : .045f)), 1, 48);
-            float width = a.Pose.Step switch { 1 => 95, 2 => 190, _ => 140 };
+            float width = a.Pose.Step switch { 1 => 70, 2 => 210, _ => 140 };
             for (int n = 0; n < count; n++)
             {
                 float t0 = n / (float)count, t1 = (n + 1f) / count;
@@ -56,7 +56,7 @@ internal static class OboroSlashMaterial
         // 残像は無害だが、現フレームの白い刃先は判定の終点と一致する。
         Vector2 root = new(pose.X, pose.Y), axis = pose.Angle.ToRotationVector2(), normal = new(-axis.Y, axis.X);
         Vector2 start = root + axis * (OboroSwingPresentation.SwordLength * .55f), end = root + axis * OboroRules.Reach;
-        float halfWidth = pose.Step == 2 ? 17 : 12;
+        float halfWidth = pose.Step switch { 1 => 8, 2 => 19, _ => 12 };
         Quad(start, end, normal * halfWidth);
         shader.Apply("BladePass"); device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, 2);
     }

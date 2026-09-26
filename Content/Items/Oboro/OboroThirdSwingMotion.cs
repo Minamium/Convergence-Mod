@@ -2,12 +2,12 @@ using System;
 
 namespace Convergence.Content.Items.Oboro;
 
-// フィニッシュ専用。角度・根元・判定・演出が同じ26Fの時計を読む。
+// 大きな袈裟斬りのフィニッシュ。角度・根元・判定・演出が同じ30Fを読む。
 internal static class OboroThirdSwingMotion
 {
-    internal const float PullEnd = 8, HoldEnd = 14, AccelerationEnd = 18, CutEnd = 22;
-    internal const float AccelerationAngle = 60, FollowAngle = -95;
-    internal const float PeakSpeed = -72, ExitSpeed = -8; // 度/F。他2段より大きい解放速度。
+    internal const float PullEnd = 8, HoldEnd = 16, AccelerationEnd = 20, CutEnd = 25;
+    internal const float AccelerationAngle = -30, FollowAngle = 110;
+    internal const float PeakSpeed = 55, ExitSpeed = 7; // 度/F。他2段より大きい解放速度。
     internal const float PullDistance = -4; // 根元だけを引く。プレイヤーは移動しない。
 
     internal static float Frame(float progress) => Math.Clamp(progress, 0, 1) * OboroComboSettings.For(2).TotalFrames;
@@ -23,7 +23,7 @@ internal static class OboroThirdSwingMotion
         var step = OboroComboSettings.For(2);
         float degrees;
         if (f < PullEnd) degrees = Segment(f, 0, PullEnd, step.StartDegrees, step.WindupDegrees, 0, 0);
-        else if (f < HoldEnd) degrees = step.WindupDegrees; // 6Fは静止。揺れで溜めを曖昧にしない。
+        else if (f < HoldEnd) degrees = step.WindupDegrees; // 8Fは静止。溜めと解放を明確に分ける。
         else if (f < AccelerationEnd) degrees = Segment(f, HoldEnd, AccelerationEnd, step.WindupDegrees, AccelerationAngle, 0, PeakSpeed);
         else if (f < CutEnd) degrees = Segment(f, AccelerationEnd, CutEnd, AccelerationAngle, step.EndDegrees, PeakSpeed, ExitSpeed);
         else degrees = Segment(f, CutEnd, step.TotalFrames, step.EndDegrees, FollowAngle, ExitSpeed, 0);

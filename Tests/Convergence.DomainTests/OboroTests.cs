@@ -20,7 +20,7 @@ internal static partial class Program
             AssertEqual((uint)(i + 1), clock.Serial, "one serial per step");
             AssertEqual(false, clock.TryBegin(now, 1), "duplicate overlap");
             int total = clock.Duration;
-            AssertEqual(new[] { 18, 16, 26 }[i % 3], total, "requested base ticks");
+            AssertEqual(new[] { 22, 18, 30 }[i % 3], total, "requested base ticks");
             for (int tick = 1; tick <= total; tick++)
             {
                 if (tick % 6 == 0) clock.SetHeld(true, now);
@@ -28,7 +28,7 @@ internal static partial class Program
                     clock.AdvanceSwing(++now, 1), "one exact boundary");
             }
         }
-        AssertEqual(240UL, now - 200, "four loops of exactly 60 frames");
+        AssertEqual(280UL, now - 200, "four loops of exactly 70 frames");
     }
     [DomainTest("Oboro manual and timed Zanshin detonate once then clear on death or exit")]
     private static void OboroZanshinLifecycle()
@@ -63,8 +63,10 @@ internal static partial class Program
     [DomainTest("Oboro return cut reverses direction and poses are continuous at boundaries")]
     private static void OboroMotionContinuity()
     {
-        AssertEqual(true, OboroRules.Offset(0, .5f) < OboroRules.Offset(0, .3f), "upstroke");
-        AssertEqual(true, OboroRules.Offset(1, .5f) > OboroRules.Offset(1, .3f), "return direction");
+        AssertEqual(true, OboroRules.Offset(0, .5f) > OboroRules.Offset(0, .3f), "overhead downstroke");
+        AssertEqual(true, OboroRules.Offset(1, .5f) < OboroRules.Offset(1, .3f), "smaller upward return");
+        AssertEqual(true, Math.Abs(OboroComboSettings.For(1).EndDegrees - OboroComboSettings.For(1).WindupDegrees)
+            < Math.Abs(OboroComboSettings.For(0).EndDegrees - OboroComboSettings.For(0).WindupDegrees), "return arc is smaller");
         for (int step = 0; step < 3; step++)
         foreach (float at in new[] { OboroRules.Windup(step), OboroComboSettings.For(step).HitEnd })
             AssertEqual(true, Math.Abs(OboroRules.Offset(step, at - .0001f) - OboroRules.Offset(step, at + .0001f)) < .005f, "connected pose");

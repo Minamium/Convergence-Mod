@@ -57,19 +57,28 @@ internal static class OboroMotionPreview
             // Production binds the installed Luminance implementation instead.
             OboroSwingPresentation.ComboEntryEase=t=>t<.5f?4*t*t*t:1-MathF.Pow(-2*t+2,3)/2;
             int frames=0;
+            const int idleLead = 6;
+            int first = OboroComboSettings.For(0).TotalFrames;
+            int second = OboroComboSettings.For(1).TotalFrames;
+            int third = OboroComboSettings.For(2).TotalFrames;
+            int activeEnd = idleLead + first + second + third + first;
+            int previewEnd = activeEnd + OboroSwingPresentation.FinisherFadeTicks + 2;
             foreach(int facing in new[]{1,-1})
             foreach(bool bright in new[]{false,true})
             foreach(bool reduced in new[]{false,true})
             {
                 Reduced=reduced;var visual=new OboroSwingPresentation();
                 var hand=new OboroHandBasis(-4*facing,-2,10,3*facing,-3*facing,10);
-                for(int frame=0;frame<=88;frame++)
+                for(int frame=0;frame<=previewEnd;frame++)
                 {
                     Terraria.Main.GameUpdateCount=(ulong)frame+100;
-                    byte step=(byte)(frame<18?0:frame<34?1:frame<60?2:0);
-                    float age=frame-(frame<60?(step==0?0:step==1?18:34):60);
-                    bool swinging=frame<78;
-                    var view=new OboroSnapshot(0,1,1,frame<60?(uint)step+1:4u,step,(ushort)age,(ushort)OboroComboSettings.For(step).TotalFrames,
+                    int elapsed = frame - idleLead;
+                    byte step = (byte)(elapsed < first ? 0 : elapsed < first + second ? 1 : elapsed < first + second + third ? 2 : 0);
+                    int start = step == 1 ? first : step == 2 ? first + second : elapsed >= first + second + third ? first + second + third : 0;
+                    bool swinging = frame >= idleLead && frame < activeEnd;
+                    float age = swinging ? elapsed - start : 0;
+                    uint serial = elapsed < first ? 1u : elapsed < first + second ? 2u : elapsed < first + second + third ? 3u : 4u;
+                    var view=new OboroSnapshot(0,1,1,serial,step,(ushort)age,(ushort)OboroComboSettings.For(step).TotalFrames,
                         facing==1?0:MathF.PI,(sbyte)facing,0);
                     visual.Update(view,age,swinging,true,0,0,facing,Terraria.Main.GameUpdateCount,hand);
                     device.SetRenderTarget(target);device.Clear(bright?new Color(176,190,204):new Color(15,18,32));
@@ -79,12 +88,15 @@ internal static class OboroMotionPreview
                     OboroSlashMaterial.Draw(batch,visual);
                     if(before!=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch))
                         throw new Exception("Material changed its caller's SpriteBatch state");
-                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.SwordPose,swinging);
+                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.SwordPose,visual.Swinging);
                     OboroArt.Line(batch,new(-10,-18),new(10,-18),4,Color.Gray);
                     OboroArt.Line(batch,new(0,-12),new(0,20),10,Color.Gray);
-                    var shoulder=new Vector2(-4*facing,-2);var grip=new Vector2(visual.SwordPose.X,visual.SwordPose.Y);
-                    OboroArt.Line(batch,shoulder,grip,4,new Color(255,188,109));
-                    batch.Draw(pixel,grip,null,Color.Cyan,0,new(.5f),new Vector2(4),SpriteEffects.None,0);
+                    if (visual.Swinging)
+                    {
+                        var shoulder=new Vector2(-4*facing,-2);var grip=new Vector2(visual.SwordPose.X,visual.SwordPose.Y);
+                        OboroArt.Line(batch,shoulder,grip,4,new Color(255,188,109));
+                        batch.Draw(pixel,grip,null,Color.Cyan,0,new(.5f),new Vector2(4),SpriteEffects.None,0);
+                    }
                     batch.End();device.SetRenderTarget(null);
                     string name=$"{(facing==1?"right":"left")}-{(bright?"light":"dark")}-{(reduced?"reduced":"normal")}-{frame:D2}.png";
                     using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,640,640);frames++;
@@ -93,7 +105,7 @@ internal static class OboroMotionPreview
             new SpectralSpriteCutouts().Unload();
             Luminance.Core.Graphics.ShaderManager.Clear();
             foreach(var texture in textures.Values)texture.Dispose();textures.Clear();
-            Console.WriteLine($"PASS {frames} production-renderer frames: all three cuts, all handoffs including looping first cut and settling, both facings, bright/dark, reduced/full. Offline only.");
+            Console.WriteLine($"PASS {frames} production-renderer frames: initial idle, all three cuts, all handoffs including looping first cut, immediate hidden weapon/arm at release and residue fade, both facings, bright/dark, reduced/full. Offline only.");
         }
         finally{SDL_DestroyWindow(window);SDL_Quit();}
     }

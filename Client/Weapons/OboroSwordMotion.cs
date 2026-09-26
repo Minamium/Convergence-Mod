@@ -12,9 +12,12 @@ internal static class OboroSwordMotion
         float f = progress * OboroComboSettings.For(step).TotalFrames;
         return step switch
         {
-            0 => Curve(f, 4, 8, 12, 18, .32f, -.24f),
-            1 => Curve(f, 3, 6, 10, 16, -.32f, .26f),
-            _ => Curve(f, 14, 18, 22, 26, .42f, -.30f)
+            0 => Curve(f, OboroFirstSwingMotion.ReadyEnd, OboroFirstSwingMotion.AccelerationEnd,
+                OboroFirstSwingMotion.CutEnd, OboroComboSettings.For(0).TotalFrames, -.32f, .24f),
+            1 => Curve(f, OboroSecondSwingMotion.ReadyEnd, OboroSecondSwingMotion.AccelerationEnd,
+                OboroSecondSwingMotion.CutEnd, OboroComboSettings.For(1).TotalFrames, .26f, -.20f),
+            _ => Curve(f, OboroThirdSwingMotion.HoldEnd, OboroThirdSwingMotion.AccelerationEnd,
+                OboroThirdSwingMotion.CutEnd, OboroComboSettings.For(2).TotalFrames, -.42f, .30f)
         };
     }
     private static float Curve(float f, float load, float release, float cut, float end, float drawn, float through)

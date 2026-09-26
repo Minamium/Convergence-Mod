@@ -2,12 +2,12 @@ using System;
 
 namespace Convergence.Content.Items.Oboro;
 
-// 2段目専用の返し斬り。Fは速度補正前の16F。基本角度はComboSettingsで調整する。
+// 下の振り抜きを受け、短い弧で上へ返す。Fは速度補正前の18F。
 internal static class OboroSecondSwingMotion
 {
-    internal const float ReadyEnd = 3, AccelerationEnd = 6, CutEnd = 10, FollowEnd = 14;
-    internal const float AccelerationAngle = -20, FollowAngle = 143;
-    internal const float PeakSpeed = 42, ExitSpeed = 6, ReturnSpeed = 2; // 度/F
+    internal const float ReadyEnd = 3, AccelerationEnd = 6, CutEnd = 11, FollowEnd = 15;
+    internal const float AccelerationAngle = 60, FollowAngle = -55;
+    internal const float PeakSpeed = -33, ExitSpeed = -4, ReturnSpeed = -2; // 度/F
 
     internal static float Frame(float progress) => Math.Clamp(progress, 0, 1) * OboroComboSettings.For(1).TotalFrames;
     internal static OboroMotionPhase Phase(float progress)
@@ -21,8 +21,8 @@ internal static class OboroSecondSwingMotion
         float f = Frame(progress);
         var step = OboroComboSettings.For(1);
         float degrees;
-        // 1段目終端の-50度を受け、上で-80度まで引いて一瞬減速する。
-        // 6Fの速度は1段目より速い。符号も逆で、同じ振りの使い回しにしない。
+        // 1段目終端+90度から小さく引き、逆向きの142度の弧で返す。
+        // 1段目より短い構え・加速区間。大振りにせず手首を返すテンポ。
         // Hermiteの接点速度を共有し、急加速後も刀を瞬間移動させない。
         if (f < ReadyEnd) degrees = Segment(f, 0, ReadyEnd, step.StartDegrees, step.WindupDegrees, 0, 0);
         else if (f < AccelerationEnd) degrees = Segment(f, ReadyEnd, AccelerationEnd, step.WindupDegrees, AccelerationAngle, 0, PeakSpeed);
@@ -31,8 +31,8 @@ internal static class OboroSecondSwingMotion
         else degrees = Segment(f, FollowEnd, step.TotalFrames, FollowAngle, OboroComboSettings.For(2).StartDegrees, ReturnSpeed, 0);
         return degrees * MathF.PI / 180;
     }
-    // 上の構えからnativeの手に接続し、下へ振り抜く。プレイヤー本体は動かさない。
-    // 入口は1段目終端、出口は既存3段目の中心持ちへ接続する。
+    // 入口は1段目の低い姿勢、出口は3段目の上段構えに接続する。
+    // nativeの手に沿って根元を動かす。プレイヤー本体は移動しない。
     internal static float HandWeight(float progress)
     {
         float f = Frame(progress);

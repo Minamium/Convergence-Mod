@@ -32,6 +32,7 @@ internal static class OboroArt
             length / SourceLength, mirror ? SpriteEffects.FlipVertically : SpriteEffects.None, 0);
     internal static void Afterimages(SpriteBatch b, OboroSwingPresentation history)
     {
+        if (!history.Swinging) return;
         bool reduced = Reduced;
         // 小さい実体の刀だけを2枚残す。広い霊刃はManagedShaderが担当する。
         int shown = 0;
@@ -46,9 +47,9 @@ internal static class OboroArt
     }
     internal static void Swing(SpriteBatch b, OboroBladePose pose, bool swinging)
     {
+        if (!swinging) return;
         Vector2 center = new(pose.X, pose.Y);
         Sword(b, center, pose.Angle, pose.Length, Color.White, pose.Facing < 0);
-        if (!swinging) return;
         if (pose.Step == 2) { OboroFinisherArt.Draw(b, pose, Reduced); return; }
         int flames = Reduced ? 1 : 2;
         for (int i = 0; i < flames; i++)

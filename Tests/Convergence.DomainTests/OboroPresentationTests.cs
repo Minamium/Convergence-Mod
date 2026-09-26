@@ -6,6 +6,37 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Oboro sword exists only through an accepted attack and never reappears from an old replica")]
+    private static void OboroAttackOnlySword()
+    {
+        foreach (int facing in new[] { -1, 1 })
+        foreach (float speed in new[] { .5f, 1f, 3f })
+        for (byte step = 0; step < 3; step++)
+        {
+            var visual = new OboroSwingPresentation();
+            int duration = OboroRules.Duration(step, speed);
+            var view = OboroSample with { Facing = (sbyte)facing, Step = step, Duration = (ushort)duration, Swing = 11 };
+            visual.Update(view, 0, false, true, 0, 0, facing, 100);
+            AssertEqual(false, visual.Swinging, "holding the item does not show a sword");
+            AssertEqual(0f, visual.SwordPose.Length, "initial hidden pose");
+            for (int frame = 0; frame < duration; frame++)
+            {
+                visual.Update(view, frame, true, true, 0, 0, facing, (ulong)frame + 101);
+                AssertEqual(true, visual.Swinging, "windup cut and follow-through remain visible");
+                AssertEqual(132f, visual.SwordPose.Length, "constant hand-sized metal blade");
+            }
+            visual.Update(view, duration, false, true, 0, 0, facing, (ulong)duration + 101);
+            AssertEqual(false, visual.Swinging, "hide immediately when the accepted cut ends");
+            AssertEqual(0f, visual.SwordPose.Length, "no lingering equipped sprite");
+            visual.Update(view, duration - 3, true, true, 0, 0, facing, (ulong)duration + 102);
+            AssertEqual(false, visual.Swinging, "late snapshot cannot resurrect completed weapon");
+            visual.Update(view with { Swing = 12 }, 0, true, true, 0, 0, facing, (ulong)duration + 103);
+            AssertEqual(true, visual.Swinging, "new accepted click materializes the blade");
+            visual.Update(view, 1, true, false, 0, 0, facing, (ulong)duration + 104);
+            AssertEqual(false, visual.Swinging, "death swap or invalid binding hides immediately");
+            AssertEqual(0, visual.Count, "invalid owner cannot leave echoes");
+        }
+    }
     [DomainTest("Oboro metal blade stays hand sized with mirrored wrist articulation and unchanged spectral reach")]
     private static void OboroHumanSword()
     {
@@ -110,14 +141,18 @@ internal static partial class Program
         var visual = new OboroSwingPresentation();
         int duration = OboroRules.Duration(0, 1);
         var view = OboroSample with { Step = 0, Duration = (ushort)duration, Swing = 1 };
-        for (int age = 0; age < duration; age++) visual.Update(view, age, true, true, age, 100, 1, (ulong)age + 100);
+        // At release/cancellation the blade disappears immediately, while a
+        // still-young harmless spectral residue can finish its bounded fade.
+        int lastLive = OboroComboSettings.For(0).HitEndFrame - 1;
+        for (int age = 0; age <= lastLive; age++) visual.Update(view, age, true, true, age, 100, 1, (ulong)age + 100);
         AssertEqual(true, visual.Count > 0 && visual.Count <= OboroSwingPresentation.Capacity, "bounded echoes after live window");
         int count = visual.Count;
-        visual.Update(view with { Duration = 0 }, 0, false, true, duration, 100, 1, (ulong)duration + 100);
-        AssertEqual(true, visual.Count > 0 && visual.Count <= count && visual.Settling, "normal end preserves fading echoes");
+        visual.Update(view with { Duration = 0 }, 0, false, true, duration, 100, 1, (ulong)lastLive + 101);
+        AssertEqual(true, visual.Count > 0 && visual.Count <= count && !visual.Swinging, "end preserves only fading spectral echoes");
+        AssertEqual(0f, visual.SwordPose.Length, "no idle or settling weapon");
         visual.Update(view with { Duration = 0 }, 0, false, true, duration, 100, 1, (ulong)duration + 122);
-        AssertEqual(0, visual.Count, "expired"); AssertEqual(false, visual.Settling, "idle reached");
-        AssertEqual(OboroSwingPresentation.SwordLength, visual.Pose.Length, "idle scale");
+        AssertEqual(0, visual.Count, "expired"); AssertEqual(false, visual.Swinging, "idle reached");
+        AssertEqual(0f, visual.SwordPose.Length, "idle weapon stays hidden");
         float opacity = 1;
         for (ulong tick = 0; tick <= 15; tick++)
         {

@@ -9,27 +9,27 @@ internal static partial class Program
     [DomainTest("Oboro first cut has five connected beats with fast release and quiet follow-through")]
     private static void OboroFirstBeats()
     {
-        float Angle(float frame) => OboroRules.Offset(0, frame / 18) * 180 / MathF.PI;
-        float[] frames = { 0, 4, 8, 12, 16, 18 }, angles = { 110, 135, 65, -35, -47, -50 };
+        float Angle(float frame) => OboroRules.Offset(0, frame / 22) * 180 / MathF.PI;
+        float[] frames = { 0, 5, 9, 14, 19, 22 }, angles = { -65, -100, -25, 65, 85, 90 };
         for (int i = 0; i < frames.Length; i++)
             AssertEqual(true, Math.Abs(Angle(frames[i]) - angles[i]) < .0001f, "authored knot");
         OboroMotionPhase[] phases = { OboroMotionPhase.Windup, OboroMotionPhase.Acceleration,
             OboroMotionPhase.Cut, OboroMotionPhase.FollowThrough, OboroMotionPhase.Transition };
         for (int i = 0; i < phases.Length; i++)
-            AssertEqual(phases[i], OboroFirstSwingMotion.Phase((frames[i] + .01f) / 18), "half-open named phase");
+            AssertEqual(phases[i], OboroFirstSwingMotion.Phase((frames[i] + .01f) / 22), "half-open named phase");
         const float h = .001f;
-        foreach (float at in new[] { 4f, 8, 12, 16 })
+        foreach (float at in new[] { 5f, 9, 14, 19 })
             AssertEqual(true, Math.Abs((Angle(at + h) - Angle(at)) / h - (Angle(at) - Angle(at - h)) / h) < .12f, "continuous angular velocity");
         float peak = 0, prep = 0, tail = 0;
-        for (int i = 0; i < 1800; i++)
+        for (int i = 0; i < 2200; i++)
         {
             float f = i / 100f, speed = Math.Abs(Angle(f + .01f) - Angle(f));
-            if (f < 4) prep = Math.Max(prep, speed);
-            else if (f < 12) peak = Math.Max(peak, speed);
+            if (f < 5) prep = Math.Max(prep, speed);
+            else if (f < 14) peak = Math.Max(peak, speed);
             else tail = Math.Max(tail, speed);
         }
         AssertEqual(true, peak > prep * 3 && peak > tail * 5, "sharp acceleration and lingering return");
-        AssertEqual(18, OboroRules.Duration(0, 1), "unchanged duration");
+        AssertEqual(22, OboroRules.Duration(0, 1), "slightly slower overhead cut");
     }
 
     [DomainTest("Oboro first cut hand motion and visible live blade mirror the authority exactly")]
@@ -55,9 +55,9 @@ internal static partial class Program
                 AssertEqual(OboroRules.Offset(0, p), rv.Pose.Angle, "exact server angle");
             }
         }
-        var back = OboroRules.RootOffset(0, 4f / 18, 0, OboroRules.Offset(0, 4f / 18), right);
-        var front = OboroRules.RootOffset(0, 10f / 18, 0, OboroRules.Offset(0, 10f / 18), right);
-        AssertEqual(true, front.X > back.X + 14, "small forward hand stroke after pullback");
+        var back = OboroRules.RootOffset(0, 5f / 22, 0, OboroRules.Offset(0, 5f / 22), right);
+        var front = OboroRules.RootOffset(0, 9f / 22, 0, OboroRules.Offset(0, 9f / 22), right);
+        AssertEqual(true, front.X > back.X + 8, "small forward hand stroke after pullback");
         AssertEqual(0f, OboroFirstSwingMotion.HandWeight(1), "root meets existing second step");
     }
 }
