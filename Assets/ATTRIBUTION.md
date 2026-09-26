@@ -2,6 +2,23 @@
 
 ## Records
 
+### Doll ruptured energy core — 2026-09-27
+
+`Assets/AutoloadedEffects/Shaders/DollCoreEnergy.fx` and `Assets/AutoloadedEffects/Shaders/DollCoreEnergy.fxc`: original Convergence code-authored violet-volume material, created with OpenAI Codex assistance for the owner-requested claw impact/metal-shell rupture. Existing project code/asset terms apply; no third-party image, sound or shader was copied. Luminance's installed noise textures are referenced at runtime, not redistributed as extracted copies. `tools/compile_shaders.py` records the exact source/export/compiler hashes in `compiled.json`; `tools/preview-doll-core.ps1` renders the export for offline inspection. The existing `ShellBreak` recording is reused unchanged under its original entry.
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollCoreEnergy.fxc`
+- Asset ID: doll-ruptured-energy-core-20260927
+- Asset type: compiled procedural spherical energy material
+- Creator: project-owner-directed original code with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: original
+- Source work and URL: repository-owned `Assets/AutoloadedEffects/Shaders/DollCoreEnergy.fx`; no external source copied
+- Tool/model/version: FXC fx_2_0 O3; exact compiler/source/export hashes in `compiled.json`
+- Human modifications: requested metal rupture, lasting violet energy and continued directional muzzle; code-authored turbulence, depth and softened silhouette
+- License and redistribution terms: existing project original code/asset terms; dependency noise referenced at runtime only
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Codex compiled-material/production-mesh frame inspection2026-09-27; native playtest not_run
+
 ### Azure material and ice/glass audio revision — 2026-09-26
 
 Original code-authored materials and synthesized audio; no external samples or texture extraction. Original Vitrion/Liora PNGs and music remain unchanged. The latest project-owned Scarlet renderer supplies techniques (masked emission, attached lagging ribbons), not copied red anatomy. Audio listening/in-game mix acceptance remains pending.

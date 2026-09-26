@@ -19,6 +19,10 @@ related_docs:
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
 
+## Doll central sphere rupture direction — 2026-09-27 / 0.3.46
+
+Owner requests the claw clamp to strike the central sphere, produce cracks, burst its metallic shell and leave a persistent purple energy sphere. This is a design request, not a report of a new playtest. Connect the first Phase III crush to the same contact tick; retain the energy material through later cycles, Final and the closing check. [Current visual contract](../encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md#中央球の挟撃破裂--2026-09-27) owns the behavior; [evidence](../evidence/2026-09-27-doll-core-rupture.json) separates focused contracts/native packaging/offline frames from unplayed owner visual/audio/remote acceptance. No balance or damage change.
+
 ## Scarlet recovery, one-damage rehearsal and unseen verdicts — 2026-09-27 / 0.3.43 → 0.3.45
 
 Owner asks whether Doll recovery is inherited, requests all damage1 until explicit tuning, and reports absent/weak chorus attacks while using God Mode. September26's two-player Scarlet fight won: Stack1/3 successful, Spread2/3; all three failed calls set both players' intended900-source budgets. No Scarlet Down/revive adapter existed, and ordinary attack rehearsal excluded chorus failures. Code showed verdict rendering was already independent of God Mode/Hurt, but Spread's radius7 bright cut expired within12ticks; old logs do not prove whether either recipient actually took damage or saw the effect.

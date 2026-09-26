@@ -27,6 +27,7 @@ internal sealed class FirstSeveranceDollVisuals
     private FirstSeveranceGridVolley? coreVolley;
     private FirstSeveranceCoreCannonVolley? lastCannon;
     private Vector2 coreAxis = Vector2.UnitY;
+    private FirstSeveranceCoreRupture coreRupture;
     private readonly FirstSeveranceDollPose pose = new();
     private readonly FirstSeveranceAttackAccents captureAccents = new();
     private readonly FirstSeveranceDollSurface surface = new();
@@ -37,10 +38,13 @@ internal sealed class FirstSeveranceDollVisuals
     {
         coreBore = 0; twinBore = false; coreVolley = null; lastCannon = null;
         coreAxis = Vector2.UnitY;
+        coreRupture = default;
     }
 
     internal void SetCoreAttack(FirstSeveranceCombatProjection combat, double tick)
     {
+        coreRupture = FirstSeveranceCoreRupture.At(combat.BossPhase, combat.Substate,
+            combat.CompletedPhaseCycles, tick - combat.ActionStartedTick);
         coreBore = 0;
         twinBore = false;
         if (combat.Substate is not (FirstSeveranceSubstate.FinalBullets or FirstSeveranceSubstate.FinalCoreCheck)) lastCannon = null;
@@ -312,14 +316,32 @@ internal sealed class FirstSeveranceDollVisuals
         if(!hand)
             // Cover the baked reference globe at every authored jaw opening;
             // a constant radius prevents the sphere itself pulsing by cel.
-            mechanicalCore.Draw(batch,at,33*scale.X,time/60,rotation,tint,
+            DrawCore(batch,at,33*scale.X,time/60,rotation,tint,
                 (1-Window(breakup,.05,.55))*(1-consume),reduced,coreBore,coreAxis,twinBore);
     }
 
     // The Distant body is scenery; this physical relay stays over the real
     // foreground hit target. It replaces the old floating square/X stamp.
-    internal void DrawRemoteCore(SpriteBatch batch,Vector2 center,float seconds,float opacity,bool reduced,float damage = 0)
-        => mechanicalCore.Draw(batch,center,66,seconds,.3f,Color.White,opacity,reduced,coreBore,coreAxis,twinBore,damage);
+    internal void DrawRemoteCore(SpriteBatch batch,Vector2 center,float seconds,float opacity,bool reduced,float damage = 0,
+        float scale = 1, bool aftermath = false)
+    {
+        DrawCore(batch,center,66*scale,seconds,.3f,Color.White,opacity,reduced,
+            aftermath ? 0 : coreBore,coreAxis,aftermath ? false : twinBore,damage);
+        if (!aftermath && coreRupture.Flash > .002f)
+            FirstSeveranceRaidVfx.Flare(batch,center,seconds*60,coreRupture.Flash*opacity*.7f,
+                new Color(210,161,255),reduced,1.6f);
+    }
+
+    private void DrawCore(SpriteBatch batch,Vector2 center,float radius,float seconds,float roll,Color tint,float opacity,
+        bool reduced,float bore,Vector2 axis,bool twin,float damage = 0)
+    {
+        if (opacity <= .001f || radius < 1) return;
+        FirstSeveranceRaidVfx.Flush(batch);
+        if (coreRupture.Energy > 0)
+            FirstSeveranceEnergyCore.Draw(batch,center,radius,seconds,opacity*coreRupture.Energy,reduced,
+                Math.Max(damage,coreRupture.Flash),bore,axis,twin);
+        mechanicalCore.Draw(batch,center,radius,seconds,roll,tint,opacity,reduced,bore,axis,twin,damage,coreRupture);
+    }
 
     private void Ensure()
     {

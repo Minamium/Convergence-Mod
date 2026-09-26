@@ -678,13 +678,13 @@ documents:
 - doc_id: encounter.first-severance.doll-theater
   path: docs/encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md
   title: Requiem of the Hollow Doll — 少女人形の提示仕様
-  content_sha256: a9e85ce2fa254ab7cfd9f98a419624901cad3a664d4104326f3c96c81808121a
+  content_sha256: 3583ded359612cf607f22437cfad8d2c448a5e4861103c5087bc2a2c5934f623
   document_type: spec
   status: provisional
   owners:
   - art
   - gameplay
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - first_severance.doll_identity
   aliases:
@@ -697,6 +697,9 @@ documents:
   - Client/Encounters/FirstSeverance/FirstSeveranceDollSurface.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs
   - Client/Encounters/FirstSeverance/FirstSeveranceShellSurface.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceCoreRupture.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceMechanicalCore.cs
+  - Client/Encounters/FirstSeverance/FirstSeveranceEnergyCore.cs
   - Content/Encounters/FirstSeverance/Actors/FirstSeveranceDollAttendant.cs
   - Assets/Textures/NPCs/DollTheater
   related_docs:
@@ -927,7 +930,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: daf2d5ee50b5d083abf898dde77561a8bba2e5f6ad29db3e4c410a339c87a11c
+  content_sha256: 86778102523e25fa27a5f8ec38d3a72656ad94b8a5d4cd54bb89e00c47e3b666
   document_type: evidence
   status: historical
   owners:
@@ -1326,7 +1329,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: fc7596e04637f6b2475d31b92b749da38d3a56b6be886d0ae242a4d54aa6b171
+  content_sha256: 88ad9c47eebb9088b9b60d216a613cc57145198ea7256728b5041e98cbc8a52f
   document_type: status
   status: accepted
   owners:
