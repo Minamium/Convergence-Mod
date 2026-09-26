@@ -5,14 +5,16 @@ using Convergence.Content.Items.Oboro;
 namespace Convergence.Client.Weapons;
 
 internal readonly record struct OboroBladePose(float X, float Y, float Angle, float Length, float Progress, int Step, int Facing = 1);
-internal readonly record struct OboroEcho(OboroBladePose Pose, uint Swing, ulong At);
+internal readonly record struct OboroEcho(OboroBladePose Pose, OboroBladePose Sword, uint Swing, ulong At);
 
 // Per-player, client-only presentation history. No hit decisions, projectile spawns
 // or packets. Plain values keep cleanup/late-snapshot behavior testable without graphics.
 internal sealed class OboroSwingPresentation
 {
-    internal const int Capacity = 16, FadeTicks = 14, SettleTicks = 10;
-    internal const int ReturnCutFadeTicks = 9; // 返しは細く短い残光。1段目と重い3段目には余韻を残す。
+    internal const int Capacity = 16, FadeTicks = 8, SettleTicks = 10;
+    internal const int ReturnCutFadeTicks = 6, FinisherFadeTicks = 10;
+    // 実体の刀は常に人が握れる長さ。560pxの攻撃範囲は斬撃時だけ霊刃で表す。
+    internal const float SwordLength = 132;
     // Runtime binds Luminance's installed Cubic InOut. It only softens harmless entry.
     internal static Func<float, float>? ComboEntryEase { get; set; }
     private static float EntryEase(int step, float t) => ComboEntryEase is not null
@@ -22,9 +24,11 @@ internal sealed class OboroSwingPresentation
     private bool initialized, wasSwinging, swingSeen;
     private ulong generation, settleAt;
     private uint swing;
-    private float entryCorrection, entryLength, lastAge, settleX, settleY;
+    private float entryCorrection, lastAge, settleX, settleY;
     private OboroBladePose settleFrom;
     internal OboroBladePose Pose { get; private set; }
+    internal OboroBladePose SwordPose { get; private set; }
+    internal float ArmAngle => SwordPose.Angle + (Swinging ? SwordPose.Facing * OboroSwordMotion.Wrist(SwordPose.Step, SwordPose.Progress) : 0);
     internal bool Settling { get; private set; }
     internal bool Swinging => wasSwinging;
     internal int Count => count;
@@ -32,7 +36,7 @@ internal sealed class OboroSwingPresentation
     internal static float Wrap(float angle) => MathF.IEEERemainder(angle, MathF.Tau);
     internal static float Opacity(ulong at, ulong now, int step = 0)
     {
-        int duration = step == 1 ? ReturnCutFadeTicks : FadeTicks;
+        int duration = step switch { 1 => ReturnCutFadeTicks, 2 => FinisherFadeTicks, _ => FadeTicks };
         if (now < at || now - at >= (ulong)duration) return 0;
         float remaining = 1 - (now - at) / (float)duration;
         return remaining * remaining;
@@ -40,8 +44,8 @@ internal sealed class OboroSwingPresentation
     internal void Clear()
     {
         head = count = 0; initialized = wasSwinging = swingSeen = Settling = false;
-        generation = settleAt = 0; swing = 0; entryCorrection = entryLength = lastAge = 0;
-        Pose = settleFrom = default; settleX = settleY = 0;
+        generation = settleAt = 0; swing = 0; entryCorrection = lastAge = 0;
+        Pose = SwordPose = settleFrom = default; settleX = settleY = 0;
         Array.Clear(echoes);
     }
     internal void Update(OboroSnapshot view, float age, bool swinging, bool eligible,
@@ -50,11 +54,12 @@ internal sealed class OboroSwingPresentation
         if (!eligible) { if (initialized) Clear(); return; }
         if (initialized && (generation != view.Generation
             || (Pose.X - x) * (Pose.X - x) + (Pose.Y - y) * (Pose.Y - y) > 320 * 320)) Clear();
-        float restAngle = facing == 1 ? -1.1f : -2.04f;
+        float restAngle = facing == 1 ? -1.1f : MathF.PI + 1.1f;
         if (!initialized)
         {
             initialized = true; generation = view.Generation;
-            Pose = new(x + facing * 12, y + 8, restAngle, 145, 1, 0);
+            Pose = new(x + facing * 12, y + 8, restAngle, SwordLength, 1, 0, facing);
+            SwordPose = Pose;
         }
         while (count > 0 && Opacity(Echo(0).At, now, Echo(0).Pose.Step) == 0)
         { head = (head + 1) % Capacity; count--; }
@@ -72,7 +77,6 @@ internal sealed class OboroSwingPresentation
                 // First cut from idle begins in the authored low stance; do not spend
                 // its entire anticipation rotating from the unrelated inventory pose.
                 if (view.Step == 0 && !wasSwinging) entryCorrection = 0;
-                entryLength = Pose.Length;
                 swing = view.Swing; swingSeen = true; lastAge = -1;
             }
             age = Math.Max(age, lastAge); // a delayed snapshot must not rewind a trail
@@ -80,24 +84,26 @@ internal sealed class OboroSwingPresentation
             float angle = view.Aim + view.Facing * OboroRules.Offset(view.Step, p);
             if (p < OboroRules.EntryEnd(view.Step))
                 angle += entryCorrection * (1 - EntryEase(view.Step, p / OboroRules.EntryEnd(view.Step)));
-            float drawLength = entryLength + (OboroRules.Reach - entryLength) * EntryEase(view.Step, p / OboroRules.EntryEnd(view.Step));
+            float drawLength = OboroRules.Reach;
             var root = OboroRules.RootOffset(view.Step, p, view.Aim, angle, hand);
             Pose = new(x + root.X, y + root.Y, angle, drawLength, p, view.Step, view.Facing);
+            SwordPose = OboroSwordMotion.AtHand(Pose, x, y, hand, true);
             if (age > lastAge && OboroRules.Live(view.Step, p))
             {
                 if (count == Capacity) { head = (head + 1) % Capacity; count--; }
-                echoes[(head + count++) % Capacity] = new(Pose, swing, now);
+                echoes[(head + count++) % Capacity] = new(Pose, SwordPose, swing, now);
             }
             lastAge = age; wasSwinging = true; Settling = false;
         }
         else
         {
-            if (wasSwinging) { settleAt = now; settleFrom = Pose; settleX = Pose.X - x; settleY = Pose.Y - y; Settling = true; }
+            if (wasSwinging) { settleAt = now; settleFrom = SwordPose; settleX = SwordPose.X - x; settleY = SwordPose.Y - y; Settling = true; }
             wasSwinging = false;
             float t = Settling ? OboroRules.Ease(Math.Min(SettleTicks, now - settleAt) / (float)SettleTicks) : 1;
             Pose = new(x + (Settling ? settleX * (1 - t) : 0) + facing * 12 * t, y + (Settling ? settleY * (1 - t) : 0) + 8 * t,
                 Settling ? settleFrom.Angle + Wrap(restAngle - settleFrom.Angle) * t : restAngle,
-                Settling ? settleFrom.Length + (145 - settleFrom.Length) * t : 145, 1, Pose.Step, Settling ? settleFrom.Facing : facing);
+                SwordLength, 1, Pose.Step, Settling ? settleFrom.Facing : facing);
+            SwordPose = Pose;
             if (t >= 1) Settling = false;
         }
     }

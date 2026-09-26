@@ -23,8 +23,8 @@ internal static class OboroFinisherArt
             for (int i = 0; i < count; i++)
             {
                 float along = .36f + i * .14f;
-                Vector2 at = root + axis * (pose.Length * along) + normal * ((i % 2 == 0 ? 1 : -1) * (32 - 28 * tension));
-                OboroArt.Flame(batch, at, 30 - 14 * tension, charge * .55f);
+                Vector2 at = root + axis * (pose.Length * along) + normal * ((i % 2 == 0 ? 1 : -1) * (14 - 11 * tension));
+                OboroArt.Flame(batch, at, 18 - 8 * tension, charge * .55f);
             }
             OboroArt.Line(batch, root + axis * (pose.Length * .28f), root + axis * (pose.Length * .92f),
                 2 + tension * 2, new Color(180, 126, 255, 0) * (charge * .48f));

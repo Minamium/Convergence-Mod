@@ -22,6 +22,10 @@
       "source_sha256": "b685e8922f20aa34fad6f86d6da927d5033885dc2b7229be9fc956e6aec80aa3",
       "output_sha256": "7556fe157bf8afe6c8d394d87b45f4170660de127044620f358b94487881a20e"
     },
+    "OboroMoonArc.fx": {
+      "source_sha256": "a2c4fa6476be9271fb1e9439f50847c99e940c1665a451978abc69b73e142c94",
+      "output_sha256": "04219fd031965152f36cffc0e4519535e7bf2cc818a5a2e097efc9e2f2c1de41"
+    },
     "PortalBeam.fx": {
       "source_sha256": "645ffd856e4ee9cdfc7d663eca01f626aab8e3b883a726876559f7d73eaec1d8",
       "output_sha256": "cf2ffeb0e7441e6b0c0597f2f9cfd87c77a58af87bc51e4f59b333e73a28d699"

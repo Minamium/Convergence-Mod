@@ -141,3 +141,7 @@ Owner wants orb-only preparation, Vespera materialization/large summoning seal, 
 ## Oboro finisher reference — 2026-09-20 / 0.3.26 → 0.3.30
 
 Owner requests a26F pullback/held charge/explosive final cut, more forward weapon movement, and supplies Murasama plus DMC Vergil clips as the durable motion target. This is a design request/reference, not a reported0.3.30 playtest. Author the five-beat third curve, align its live window after the charge, add violet condensation/release accents and retain the follow-through into the next harmless stance. [Evidence](../evidence/2026-09-20-oboro-third-swing.json) separates shared-geometry/native-package/offline checks from user-owned gameplay and subjective feel; third-party recordings remain local.
+
+## Oboro rigid oversized blade — 2026-09-21 / 0.3.34 → 0.3.35
+
+Owner rejects the installed motion as lacking the feeling of swinging a sword and asks to approach the supplied Murasama/Vergil clips. Dense recorded frames show the very large rigid blade; code confirms the PNG was scaled to560px. Keep the gameplay curves/range and split132px metal/native wrist articulation from a Luminance-managed spectral crescent, pointed leading blade and shorter8/6/10tick tails. [Evidence](../evidence/2026-09-21-oboro-natural-motion.json) separates compiled/native/offline results from pending in-game arm drawing, input feel and subjective acceptance. The previous offline pass does not override this user-reported failure.

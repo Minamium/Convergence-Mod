@@ -14,6 +14,7 @@
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureChorusRules.cs" Link="Domain/AzureChorusRules.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureState.cs" Link="Domain/AzureState.cs" />
     <Compile Include="../../Client/Encounters/GhostSamurai/SamuraiRigMotion.cs" Link="Presentation/SamuraiRigMotion.cs" />
+    <Compile Include="../../Client/Weapons/OboroSwordMotion.cs" Link="OboroSwordMotion.cs" />
     <Compile Include="../../Client/Weapons/OboroSwingPresentation.cs" Link="Presentation/OboroSwingPresentation.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroRules.cs" Link="Domain/OboroRules.cs" />
     <Compile Include="../../Content/Items/Oboro/OboroComboSettings.cs" Link="Domain/OboroComboSettings.cs" />

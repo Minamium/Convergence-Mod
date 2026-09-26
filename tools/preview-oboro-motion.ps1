@@ -7,6 +7,7 @@ $tml=(Resolve-Path -LiteralPath $TModLoaderPath).Path
 $work=Join-Path $root $OutputDirectory
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 $files=@('tools/fixtures/OboroMotionPreview.cs','Client/Weapons/OboroArt.cs','Client/Weapons/OboroFinisherArt.cs','Client/Weapons/SpectralSpriteCutouts.cs','Client/Weapons/OboroSwingPresentation.cs',
+    'Client/Weapons/OboroSwordMotion.cs','Client/Weapons/OboroSlashMaterial.cs','Client/Graphics/WorldGraphicsScope.cs',
     'Content/Items/Oboro/OboroRules.cs','Content/Items/Oboro/OboroComboSettings.cs','Content/Items/Oboro/OboroFirstSwingMotion.cs',
     'Content/Items/Oboro/OboroThirdSwingMotion.cs','Content/Items/Oboro/OboroSecondSwingMotion.cs','Content/Items/Oboro/OboroWire.cs')
 $includes=($files | ForEach-Object { '<Compile Include="'+[Security.SecurityElement]::Escape((Join-Path $root $_))+'" />' }) -join ''

@@ -75,10 +75,14 @@ internal static class OboroMotionPreview
                     device.SetRenderTarget(target);device.Clear(bright?new Color(176,190,204):new Color(15,18,32));
                     batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,
                         null,Matrix.CreateScale(.46f)*Matrix.CreateTranslation(320,320,0));
-                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.Pose,swinging);
+                    var before=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch);
+                    OboroSlashMaterial.Draw(batch,visual);
+                    if(before!=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch))
+                        throw new Exception("Material changed its caller's SpriteBatch state");
+                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.SwordPose,swinging);
                     OboroArt.Line(batch,new(-10,-18),new(10,-18),4,Color.Gray);
                     OboroArt.Line(batch,new(0,-12),new(0,20),10,Color.Gray);
-                    var shoulder=new Vector2(-4*facing,-2);var grip=new Vector2(visual.Pose.X,visual.Pose.Y);
+                    var shoulder=new Vector2(-4*facing,-2);var grip=new Vector2(visual.SwordPose.X,visual.SwordPose.Y);
                     OboroArt.Line(batch,shoulder,grip,4,new Color(255,188,109));
                     batch.Draw(pixel,grip,null,Color.Cyan,0,new(.5f),new Vector2(4),SpriteEffects.None,0);
                     batch.End();device.SetRenderTarget(null);
@@ -87,6 +91,7 @@ internal static class OboroMotionPreview
                 }
             }
             new SpectralSpriteCutouts().Unload();
+            Luminance.Core.Graphics.ShaderManager.Clear();
             foreach(var texture in textures.Values)texture.Dispose();textures.Clear();
             Console.WriteLine($"PASS {frames} production-renderer frames: all three cuts, all handoffs including looping first cut and settling, both facings, bright/dark, reduced/full. Offline only.");
         }
@@ -102,9 +107,12 @@ namespace Terraria
     {
         public static Vector2 screenPosition;public static ulong GameUpdateCount;
         public static GraphicsDeviceManager graphics=new();
+        public static GraphicsDeviceManager instance=graphics;
+        public static PreviewView GameViewMatrix=new();
         public static void QueueMainThreadAction(Action action)=>action();
     }
     public sealed class GraphicsDeviceManager { public GraphicsDevice GraphicsDevice=>OboroMotionPreview.Device; }
+    public sealed class PreviewView { public Matrix TransformationMatrix=>Matrix.CreateScale(.46f)*Matrix.CreateTranslation(320,320,0); }
     public static class PreviewVectorExtensions
     {
         public static Vector2 Size(this Texture2D t)=>new(t.Width,t.Height);
@@ -125,3 +133,22 @@ namespace Terraria.ModLoader
     }
 }
 namespace Convergence.Client.Encounters.FirstSeverance { public sealed class FirstSeveranceVisualConfig { public bool ReducedEffects=>OboroMotionPreview.Reduced; } }
+
+// The real compiled material runs on FNA. Only Luminance's lookup/parameter wrapper
+// is substituted here; integration with the installed library is checked by the native build.
+namespace Luminance.Core.Graphics
+{
+    public static class ShaderManager
+    {
+        private static ManagedShader shader;
+        public static ManagedShader GetShader(string name)=>shader??=new ManagedShader();
+        public static void Clear(){shader?.Effect.Dispose();shader=null;}
+    }
+    public sealed class ManagedShader
+    {
+        public readonly Effect Effect=new(OboroMotionPreview.Device,File.ReadAllBytes(Path.Combine(OboroMotionPreview.Root,"Assets/AutoloadedEffects/Shaders/OboroMoonArc.fxc")));
+        public void TrySetParameter(string name,float value)=>Effect.Parameters[name].SetValue(value);
+        public void TrySetParameter(string name,Matrix value)=>Effect.Parameters[name].SetValue(value);
+        public void Apply(string pass="AutoloadPass")=>Effect.CurrentTechnique.Passes[pass].Apply();
+    }
+}

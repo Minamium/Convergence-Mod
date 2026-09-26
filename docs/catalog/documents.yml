@@ -850,7 +850,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 75ced0302379209b046eb32ccb13a29009c30ab0ee0e221dcef074e12f1f2ce2
+  content_sha256: cd96e82ce09bf0eb1990747293c97bcc6dcd6446961c619d94c0435162341930
   document_type: spec
   status: provisional
   owners:
@@ -927,7 +927,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 9207a0640a465fb09badaee36e7cdace728cd4fe87169871f40d5948e30c98ed
+  content_sha256: 4017599a6f4ea0dfa9fccc0ede952875aae0a918a9bc57d60e77b05d1f84dec4
   document_type: evidence
   status: historical
   owners:
@@ -1326,7 +1326,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 7d26814e05db3e31dacdb24beb6baef0164883dab83b6a9e347ab480b31c869f
+  content_sha256: 5a9fd7cd395a5b9a1f7631844864d93e1c1321cef0cfa89b7d4dbe833e5b2173
   document_type: status
   status: accepted
   owners:
@@ -1582,7 +1582,7 @@ documents:
 - doc_id: research.oboro-20260916
   path: docs/research/2026-09-16-oboro.md
   title: 'Oboro: API and comparison boundary'
-  content_sha256: 453684135ca19b2f6f57e2c74323b6ba4ccc296264c2142d5096453372c5b4eb
+  content_sha256: cd217898b6ea770253069450e019c35e31331b1dc03b97101259092c9730217c
   document_type: research
   status: provisional
   owners:

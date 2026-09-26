@@ -29,15 +29,14 @@ public sealed class OboroHeldVisuals : GlobalProjectile
         visual.Update(state.View, state.VisualAge, state.SwingVisible, true,
             center.X, center.Y, player.direction, Main.GameUpdateCount, hand);
 
-        // Every update uses the same pose for blade, root and front arm. The
-        // existing windup-only blend reaches the server's angle before damage.
-        projectile.Center = new(visual.Pose.X, visual.Pose.Y);
+        // 霊刃の軸は判定と一致。実体の柄は手首の角度に合わせたnative handへ接続。
+        projectile.Center = new(visual.SwordPose.X, visual.SwordPose.Y);
         projectile.rotation = visual.Pose.Angle;
         if (visual.Swinging) player.ChangeDir(state.View.Facing);
         if (visual.Swinging || visual.Settling)
         {
-            var stretch = OboroHandAnchor.Stretch(player, projectile.Center, projectile.rotation);
-            player.SetCompositeArmFront(true, stretch, projectile.rotation - MathF.PI / 2);
+            var stretch = OboroHandAnchor.Stretch(player, projectile.Center, visual.ArmAngle);
+            player.SetCompositeArmFront(true, stretch, visual.ArmAngle - MathF.PI / 2);
         }
 
         float soundAt = state.View.Step == 0 ? OboroFirstSwingMotion.AccelerationEnd / OboroComboSettings.For(0).TotalFrames
@@ -54,8 +53,9 @@ public sealed class OboroHeldVisuals : GlobalProjectile
     {
         if (projectile.ModProjectile is OboroHeldProj { Ready: true })
         {
+            OboroSlashMaterial.Draw(Main.spriteBatch, visual);
             OboroArt.Afterimages(Main.spriteBatch, visual);
-            OboroArt.Swing(Main.spriteBatch, visual.Pose, visual.Swinging);
+            OboroArt.Swing(Main.spriteBatch, visual.SwordPose, visual.Swinging);
         }
         return false;
     }

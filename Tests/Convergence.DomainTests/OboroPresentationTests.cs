@@ -6,6 +6,33 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
+    [DomainTest("Oboro metal blade stays hand sized with mirrored wrist articulation and unchanged spectral reach")]
+    private static void OboroHumanSword()
+    {
+        var right = new OboroHandBasis(-4, -2, 10, 3, -3, 10);
+        var left = new OboroHandBasis(4, -2, 10, -3, 3, 10);
+        for (byte step = 0; step < 3; step++)
+        {
+            var rv = new OboroSwingPresentation(); var lv = new OboroSwingPresentation();
+            int duration = OboroComboSettings.For(step).TotalFrames;
+            for (int frame = 0; frame < duration * 4; frame++)
+            {
+                float age = frame / 4f;
+                var view = OboroSample with { Step = step, Duration = (ushort)duration, Aim = 0, Facing = 1 };
+                rv.Update(view, age, true, true, 0, 0, 1, (ulong)frame, right);
+                lv.Update(view with { Aim = MathF.PI, Facing = -1 }, age, true, true, 0, 0, -1, (ulong)frame, left);
+                AssertEqual(OboroSwingPresentation.SwordLength, rv.SwordPose.Length, "no inflated PNG at any beat");
+                AssertEqual(true, Math.Abs(rv.SwordPose.X + lv.SwordPose.X) < .0001f
+                    && Math.Abs(rv.SwordPose.Y - lv.SwordPose.Y) < .0001f, "mirrored hands");
+                var grip = right.At(rv.ArmAngle);
+                AssertEqual(grip.X, rv.SwordPose.X, "grip on articulated hand x");
+                AssertEqual(grip.Y, rv.SwordPose.Y, "grip on articulated hand y");
+                AssertEqual(OboroRules.Reach, rv.Pose.Length, "spectral reach stays authoritative");
+                AssertEqual(true, Math.Abs(rv.ArmAngle - rv.Pose.Angle) <= .421f, "bounded wrist bend");
+            }
+            rv.Clear(); AssertEqual(default(OboroBladePose), rv.SwordPose, "no stale hand after cancellation");
+        }
+    }
     [DomainTest("Oboro live curve accelerates without overshoot or swept-hit gaps")]
     private static void OboroBurstCurve()
     {
@@ -90,7 +117,7 @@ internal static partial class Program
         AssertEqual(true, visual.Count > 0 && visual.Count <= count && visual.Settling, "normal end preserves fading echoes");
         visual.Update(view with { Duration = 0 }, 0, false, true, duration, 100, 1, (ulong)duration + 122);
         AssertEqual(0, visual.Count, "expired"); AssertEqual(false, visual.Settling, "idle reached");
-        AssertEqual(145f, visual.Pose.Length, "idle scale");
+        AssertEqual(OboroSwingPresentation.SwordLength, visual.Pose.Length, "idle scale");
         float opacity = 1;
         for (ulong tick = 0; tick <= 15; tick++)
         {

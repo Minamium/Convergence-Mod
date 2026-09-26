@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-21",
+  "version": "0.3.35",
+  "protocol": 62,
+  "branch": "fix/oboro-natural-sword-motion",
+  "base_commit": "46586ad1743d00aceed015b90b76b0c1de979c62",
+  "scope": "Client-only metal/wrist articulation and original Luminance spectral crescent. Gameplay curves, durations, hit windows, damage,560px reach, drops and protocol unchanged.",
+  "environment_reference": "docs/evidence/2026-09-19-oboro-held.json",
+  "native_build": {
+    "status": "passed",
+    "record": ".local/builds/20260921T021034591542Z/record.json",
+    "package_sha256": "3f68c26a12ab8bce7509ab36b8707b0e0f15187d98cebb1b95bcc410b66a76c3",
+    "errors": 0,
+    "existing_CS8632_warnings": 4,
+    "locales": 24,
+    "source_changed_during_build": false,
+    "output": "isolated feature profile"
+  },
+  "checks": {
+    "exact_package": {
+      "status": "passed",
+      "scope": "Saved item/types, harmless holdout identity and cleanup,584 existing native hand-basis samples plus984 articulated-metal/native-hand comparisons across both actual/accepted facings and gravity signs, retained DoT and typed codec checks."
+    },
+    "presentation": {
+      "status": "offline_frames_inspected",
+      "frames": 712,
+      "scope": "Linked production pose, physical sword, shader mesh and actual compiled HLSL on FNA D3D11. All cuts, handoffs, loop, settle, both facings, light/dark and Reduced Effects. Each draw verifies SpriteBatch parameters restored. An arm diagram replaces native player drawing; Luminance lookup/parameter wrapper is a fixture seam.",
+      "command": "pwsh -File tools/preview-oboro-motion.ps1 -TModLoaderPath <installed-tml> -OutputDirectory .local/oboro-natural-preview"
+    },
+    "repository": {
+      "status": "passed",
+      "catalog_documents": 82,
+      "policy_files": 976,
+      "yaml_files": 12,
+      "domain_cases": 344,
+      "domain_failures": 0,
+      "regression_found_and_fixed": "The new mirrored-wrist test found an imprecise old left idle angle. Both idle paths now mirror exactly; final native package and frames rebuilt. Attribution record parser required an exact entry inside Records; corrected and policy/YAML passed."
+    }
+  },
+  "owner_feedback": {
+    "source_version": "0.3.34",
+    "result": "rejected motion feel: does not look like swinging a sword",
+    "clip": "unknown_2026.09.21-01.01.mp4",
+    "sha256": "9f5d0d09b4d8d6e39af5cc2aed78466ba660c0875982327e2c8f124f1039ea86",
+    "research": "docs/research/2026-09-16-oboro.md"
+  },
+  "gameplay": {
+    "status": "not_run; user-owned",
+    "checks": [
+      "actual arms/armor/mount drawing",
+      "left/right loop and release/restart",
+      "high attack speed and Reduced Effects",
+      "SP and matching remote client",
+      "subjective comparison to supplied Murasama/Vergil clips"
+    ]
+  },
+  "deployment": {
+    "status": "not_installed",
+    "normal_profile_version": "0.3.34",
+    "reason": "New PR requires administrator-approved main integration."
+  }
+}
