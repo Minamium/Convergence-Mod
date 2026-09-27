@@ -80,7 +80,7 @@ public static class GhostSamuraiLoadCheck
             using var bytes = new MemoryStream(ReadModAssembly(package));
             Assembly assembly = context.LoadFromStream(bytes);
             const string prefix = "Convergence.Client.Encounters.GhostSamurai.";
-            string[] names = checkSlashArt ? new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals", "GhostSamuraiSlashArt" }
+            string[] names = checkSlashArt ? new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals", "GhostSamuraiSlashArt", "GhostSamuraiSummonVisuals" }
                 : new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals" };
             foreach (string name in names) {
                 Type type = assembly.GetType(prefix + name, throwOnError: true);

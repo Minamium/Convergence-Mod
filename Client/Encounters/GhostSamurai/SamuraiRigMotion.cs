@@ -77,7 +77,7 @@ internal static class SamuraiRigMotion
         SamuraiBladeMotion result = Sequence(tick, fires[..count], basisIdle, windup,
             reverse: side != facing && attack == SamuraiAttack.DirectionalSlash,
             downwardOnly: attack is SamuraiAttack.TripleVerticalSlash or SamuraiAttack.FrontalCleaveShockwave);
-        float size = heavy ? 1 + result.Charge * (attack == SamuraiAttack.FrontalCleaveShockwave ? 1.1f : .4f) : 1;
+        float size = 1 + result.Charge * (heavy ? .36f : .12f) + result.Trail * .25f;
         if (attack == SamuraiAttack.FrontalCleaveShockwave && tick >= SamuraiComboRules.CleaveWindup)
             size = SamuraiComboRules.HorizontalSwordScale(tick);
         if (attack == SamuraiAttack.Phase3CircleAttack && tick >= 2 * GhostSamuraiRules.Phase3CircleStepInterval)
@@ -88,13 +88,14 @@ internal static class SamuraiRigMotion
     internal static SamuraiBladeMotion Sequence(float tick, ReadOnlySpan<float> fires, float idle,
         float windup, bool reverse = false, bool downwardOnly = false)
     {
+        if (fires.IsEmpty) return new(idle, 1, 0, 0);
         float previous = idle;
         for (int i = 0; i < fires.Length; i++)
         {
             bool back = !downwardOnly && ((i & 1) != 0) != reverse;
-            float start = back ? 1.30f : -2.20f, end = back ? -2.20f : 1.30f;
+            float start = back ? 1.50f : -2.50f, end = back ? -2.50f : 1.50f;
             float from = i == 0 ? idle : previous;
-            float begin = Math.Max(i == 0 ? 0 : fires[i - 1] + 12, fires[i] - windup);
+            float begin = Math.Max(i == 0 ? 0 : fires[i - 1] + 14, fires[i] - windup);
             if (tick < fires[i])
             {
                 // Snap into the raised pose, brake under tension, then release
@@ -103,15 +104,28 @@ internal static class SamuraiRigMotion
                 return new(Mix(from, start, charge), 1, charge, 0);
             }
             float local = tick - fires[i];
-            float over = end + MathF.Sign(end - start) * .16f;
-            if (local < 6)
-                return new(Mix(start, over, Out(local / 6)), 1, 1, 1);
-            if (local < 12)
-                return new(Mix(over, end, Out((local - 6) / 6)), 1, 1 - Smooth((local - 6) / 6), 1 - (local - 6) / 6);
+            float over = end + MathF.Sign(end - start) * .22f;
+            // Continuous fractional samples: a brief release acceleration, a
+            // large fast cut, then deceleration into wrist/cloth follow-through.
+            if (local < 8)
+                return new(Mix(start, over, Cubic(local / 8)), 1, 1, 1);
+            if (local < 14)
+                return new(Mix(over, end, Out((local - 8) / 6)), 1, 1 - Smooth((local - 8) / 6), 1 - (local - 8) / 6);
             previous = end;
         }
-        float recovery = Smooth((tick - fires[^1] - 12) / 18);
+        float recovery = Smooth((tick - fires[^1] - 14) / 18);
         return new(Mix(previous, idle, recovery), 1, 0, 0);
+    }
+
+    internal static float ActionLean(SamuraiBladeMotion left, SamuraiBladeMotion right, int facing)
+    {
+        // Weight transfers through the shoulders instead of rotating two arms
+        // on an otherwise motionless PNG. Both handed cuts share this envelope.
+        var blade = left.Trail > right.Trail ? left : right;
+        if (left.Trail == right.Trail && facing < 0) blade = left;
+        float angle = facing < 0 ? MathF.PI - blade.Angle : blade.Angle;
+        return facing * (-.12f * Math.Max(left.Charge, right.Charge)
+            + blade.Trail * (.20f + .19f * MathF.Cos(angle)));
     }
 
     internal static float DashCompression(SamuraiAttack attack, float timer)

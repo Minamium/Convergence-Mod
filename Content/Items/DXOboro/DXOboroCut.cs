@@ -40,11 +40,11 @@ public sealed class DXOboroCut : ModProjectile
         Projectile.localNPCHitCooldown = 24;
         Projectile.netImportant = true;
         Projectile.hide = true;
-        Projectile.timeLeft = DXOboroMotion.Duration + 2;
+        Projectile.timeLeft = DXOboroMotion.MaximumDuration + 2;
     }
 
     public override bool ShouldUpdatePosition() => false;
-    public override bool? CanDamage() => DXOboroMotion.Live(Age);
+    public override bool? CanDamage() => DXOboroMotion.Live(Step, Age);
     public override bool? CanCutTiles() => false;
     public override bool PreDraw(ref Color lightColor) => false;
 
@@ -64,23 +64,23 @@ public sealed class DXOboroCut : ModProjectile
         Projectile.localAI[1] = 0;
         if (!float.IsFinite(Aim) || Projectile.ai[0] < 0 || Projectile.ai[0] > 2
             || !float.IsFinite(Projectile.ai[2]) || Projectile.ai[2] < 0
-            || Projectile.ai[2] > DXOboroMotion.Duration + 2)
+            || Projectile.ai[2] > DXOboroMotion.MaximumDuration + 2)
         { Projectile.Kill(); return; }
 
         Projectile.ai[2]++;
         if (Projectile.owner == Main.myPlayer &&
-            (Age == 1 || Age == DXOboroMotion.ReleaseFrame || Age % 6 == 0))
+            (Age == 1 || Age == DXOboroMotion.Release(Step) || Age % 6 == 0))
             Projectile.netUpdate = true;
         Projectile.Center = Hand(owner, BladeAngle);
         Projectile.rotation = BladeAngle;
         Projectile.direction = Projectile.spriteDirection = Facing;
         Projectile.velocity = Vector2.Zero;
-        if (Age >= DXOboroMotion.Duration) Projectile.Kill();
+        if (Age >= DXOboroMotion.Duration(Step)) Projectile.Kill();
     }
 
     public override bool? Colliding(Rectangle projectileHitbox, Rectangle targetHitbox)
     {
-        if (!DXOboroMotion.Live(Age)) return false;
+        if (!DXOboroMotion.Live(Step, Age)) return false;
         Vector2 root = Projectile.Center;
         Vector2 topLeft = new(targetHitbox.X, targetHitbox.Y);
         Vector2 size = new(targetHitbox.Width, targetHitbox.Height);
@@ -88,7 +88,7 @@ public sealed class DXOboroCut : ModProjectile
         // cannot tunnel past narrow enemies between game ticks.
         for (int i = 0; i <= 8; i++)
         {
-            float sampleAge = Math.Max(DXOboroMotion.ReleaseFrame, Age - 1f + i / 8f);
+            float sampleAge = Math.Max(DXOboroMotion.Release(Step), Age - 1f + i / 8f);
             float angle = DXOboroMotion.Angle(Step, sampleAge, Aim, Facing);
             float collision = 0;
             if (Collision.CheckAABBvLineCollision(topLeft, size, root,

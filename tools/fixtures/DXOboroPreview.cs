@@ -49,11 +49,12 @@ internal static class DXOboroPreview
             using var batch=new SpriteBatch(device);
             using var pixel=new Texture2D(device,1,1);pixel.SetData(new[]{Color.White});
             int frames=0;
+            if(args.Length < 4 || !bool.Parse(args[3]))
             foreach(int facing in new[]{1,-1})
             foreach(bool bright in new[]{false,true})
             foreach(bool reduced in new[]{false,true})
             foreach(int step in new[]{0,1,2})
-            for(int age=0;age<=DXOboroMotion.Duration;age+=2)
+            for(int age=0;age<=DXOboroMotion.Duration(step);age++)
             {
                 Terraria.Main.GameUpdateCount=(ulong)(step*40+age+100);
                 float aim=facing==1?0:MathF.PI;
@@ -67,7 +68,7 @@ internal static class DXOboroPreview
                 if(before!=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch))
                     throw new Exception("DX material changed caller SpriteBatch state");
                 Line(batch,pixel,shoulder,hand,5,new Color(213,187,153));
-                DXOboroArt.Sword(batch,hand,angle,136,Color.White,facing<0);
+                DXOboroArt.Sword(batch,hand,angle,DXOboroMotion.BladeLength(step,age),Color.White,facing<0);
                 batch.Draw(pixel,hand,null,Color.Gold,0,new(.5f),new Vector2(4),SpriteEffects.None,0);
                 batch.End();device.SetRenderTarget(null);
                 string name=$"{(facing==1?"right":"left")}-{(bright?"light":"dark")}-{(reduced?"reduced":"normal")}-step{step}-{age:D2}.png";
@@ -83,19 +84,17 @@ internal static class DXOboroPreview
                 hooks.PreDrawInInventory(new Terraria.Item(),batch,new(-75,0),
                     new Rectangle(0,0,768,512),Color.White,Color.White,Vector2.Zero,32f/768f);
                 Texture2D peer=Texture("Convergence/Assets/Textures/Items/Oboro/Blade");
-                batch.Draw(peer,Vector2.Zero,null,Color.White,0,new Vector2(peer.Width,peer.Height)*.5f,
-                    32f/Math.Max(peer.Width,peer.Height),SpriteEffects.None,0);
-                var worldItem=new Terraria.Item{Center=new Vector2(75,0)};
-                float rotation=.2f,worldScale=1f;
-                hooks.PreDrawInWorld(worldItem,batch,Color.White,Color.White,
-                    ref rotation,ref worldScale,0);
+                var framed=new Convergence.Client.Graphics.ReadableItemIcon();
+                framed.Draw(batch,peer,Vector2.Zero,43.2f,Color.White);
+                var mask=Texture("Convergence/Assets/Textures/Items/GhostSamurai/SealedMask");
+                framed.Draw(batch,mask,new Vector2(75,0),43.2f,Color.White);
                 batch.End();device.SetRenderTarget(null);
                 using var file=File.Create(Path.Combine(output,$"icons-{(bright?"light":"dark")}.png"));
                 target.SaveAsPng(file,720,720);
             }
             Luminance.Core.Graphics.ShaderManager.Clear();
             foreach(var texture in textures.Values)texture.Dispose();textures.Clear();
-            Console.WriteLine($"PASS {frames} linked-production DXOboro motion frames plus 2 zoomed icon comparisons (DX inventory, Oboro reference, DX world): all three cuts, both facings, bright/dark, reduced/full, arrival through recovery, and SpriteBatch restoration. Offline only.");
+            Console.WriteLine($"PASS {frames} linked-production Soboro motion frames plus 2 icon frames (Soboro / Oboro / sealed mask), actual alpha-framing helper. Offline only.");
         }
         finally{SDL_DestroyWindow(window);SDL_Quit();}
     }

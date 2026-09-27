@@ -18,7 +18,8 @@ public sealed class DXOboroItemVisuals : GlobalItem
     {
         // tML already fits the source frame into the inventory slot and passes
         // that fitted scale here. Recover the intended on-screen dimension once.
-        DXOboroArt.Icon(batch, position, 0, Math.Max(frame.Width, frame.Height) * scale, Color.White);
+        DXOboroArt.Icon(batch, position, 0,
+            Math.Min(44f, Math.Max(frame.Width, frame.Height) * scale * 1.35f), Color.White);
         return false;
     }
 

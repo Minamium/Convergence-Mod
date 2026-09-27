@@ -89,7 +89,7 @@ internal static class SamuraiSpectralPreview
                 var left=SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash,SamuraiPhase.Phase1,age,age,-1,facing,default,false);
                 var right=SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash,SamuraiPhase.Phase1,age,age,1,facing,default,false);
                 float cut=Math.Clamp((age-GhostSamuraiRules.SlashWarning)/6,0,1);
-                var pose=new SamuraiRigPose(360,360,age,.04f*facing,1,left,right,cut*.3f,cut*70,cut*.2f);
+                var pose=new SamuraiRigPose(360,360,age,SamuraiRigMotion.ActionLean(left,right,facing),1,left,right,cut*.3f,cut*70,cut*.2f);
                 GhostSamuraiPresentation.Pose=pose;
                 var blendBefore=device.BlendState;var depthBefore=device.DepthStencilState;
                 var rasterBefore=device.RasterizerState;var viewportBefore=device.Viewport;
@@ -223,6 +223,27 @@ internal static class SamuraiSpectralPreview
                     names.Add($"hazard-z{zoom:0.00}-{shape}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{age:00.00}.png");
                 Sheet(device,batch,output,$"contact-hazards-z{zoom:0.00}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}.png",names,4,HazardAges.Length);
             }
+            // Dense release samples show the actual articulated shoulder/hand
+            // trajectory; a few disconnected keyframes can hide a discontinuity.
+            Terraria.Main.GameViewMatrix.Scale=.65f;
+            Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig.Instance.ReducedEffects=false;
+            var motionImages=new List<string>();
+            for(int sub=0;sub<32;sub++)
+            {
+                float age=50+sub*.5f;
+                var left=SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash,SamuraiPhase.Phase1,age,age,-1,1,default,false);
+                var right=SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash,SamuraiPhase.Phase1,age,age,1,1,default,false);
+                var pose=new SamuraiRigPose(360,360,age,SamuraiRigMotion.ActionLean(left,right,1),1,left,right,0,0,0);
+                GhostSamuraiPresentation.Pose=pose;
+                Luminance.Core.Graphics.RenderTargetManager.Pulse();
+                device.SetRenderTarget(target);device.Clear(new Color(17,22,36));
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                GhostSamuraiRigArt.Draw(batch,pose,Vector2.Zero,null,age);
+                batch.End();device.SetRenderTarget(null);
+                string name=$"motion-release-{sub:00}.png";Save(target,output,name);motionImages.Add(name);frames++;composites++;
+            }
+            Sheet(device,batch,output,"contact-motion-release.png",motionImages,8,4);
             new GhostSamuraiComposite().Unload();
             Luminance.Core.Graphics.ShaderManager.Clear();
             foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();

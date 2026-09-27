@@ -130,7 +130,8 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         previous = current;
         current = new(center.X + overrun.X - active.NPC.direction * hit * 3,
             center.Y + overrun.Y + MathF.Sin(age * .035f) * 4, age,
-            lean + MathF.Sin(age * .023f) * .025f, SamuraiRigMotion.DashCompression(active.Attack, timer),
+            lean + SamuraiRigMotion.ActionLean(left, right, active.NPC.direction) + MathF.Sin(age * .023f) * .025f,
+            SamuraiRigMotion.DashCompression(active.Attack, timer),
             left, right, hit, velocity.Length(), lag);
         if (teleported || history.Count == 0) previous = current;
         secondary.Update(current, velocity);

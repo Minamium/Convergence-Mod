@@ -10,22 +10,33 @@ namespace Convergence.Client.Weapons;
 
 internal static class DXOboroMaterial
 {
-    private static readonly VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[18 * 6];
+    // Two bounded ribbons and a short leading wedge. All use the cut's own
+    // fractional angle; no stored draw-history can detach on teleport/cancel.
+    private static readonly VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[24 * 6 * 2];
 
     internal static void Draw(SpriteBatch batch, int age, int step, float aim, int facing, Vector2 root, bool reduced)
     {
-        if (age < DXOboroMotion.ReleaseFrame || age > DXOboroMotion.Duration) return;
-        float tail = MathF.Min(age - DXOboroMotion.ReleaseFrame, reduced ? 4f : 8f);
-        if (tail <= 0) return;
-        int sections = reduced ? 8 : 16;
+        int release = DXOboroMotion.Release(step), liveEnd = DXOboroMotion.LiveEnd(step);
+        if (age <= release || age >= DXOboroMotion.Duration(step)) return;
+        float elapsed = age - release;
+        float life = MathF.Min(1f, (DXOboroMotion.Duration(step) - age) / (step == 2 ? 5f : 3f));
+        int sections = reduced ? 10 : 20;
         int used = 0;
+
+        // The outer torn wing has real radial depth. Its tail is narrow at the
+        // previous angle; the luminous leading edge tapers into the blade tip.
         for (int i = 0; i < sections; i++)
         {
             float u0 = i / (float)sections, u1 = (i + 1f) / sections;
-            Edge(u0, out var a, out var b);
-            Edge(u1, out var c, out var d);
-            vertices[used++] = a; vertices[used++] = b; vertices[used++] = c;
-            vertices[used++] = c; vertices[used++] = b; vertices[used++] = d;
+            Wing(u0, 0, out var a, out var b);
+            Wing(u1, 0, out var c, out var d);
+            Quad(a, b, c, d);
+            if (!reduced)
+            {
+                Wing(u0, 1, out a, out b);
+                Wing(u1, 1, out c, out d);
+                Quad(a, b, c, d);
+            }
         }
 
         using var scope = new WorldGraphicsScope(batch);
@@ -39,47 +50,54 @@ internal static class DXOboroMaterial
         shader.Apply();
         device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, used / 3);
 
-        if (!DXOboroMotion.Live(age)) return;
-        // The narrow live spine grows directly from the physical blade into the
-        // moon rim. It is sampled from the same angle and never exceeds Reach.
+        if (!DXOboroMotion.Live(step, age)) return;
+        used = 0;
         Vector2 axis = DXOboroMotion.Angle(step, age, aim, facing).ToRotationVector2();
         Vector2 normal = new(-axis.Y, axis.X);
-        used = 0;
-        const int spineSections = 8;
-        for (int i = 0; i < spineSections; i++)
+        float blade = DXOboroMotion.BladeLength(step, age);
+        // Front flare connects the physical tip to the spectral limit. The
+        // short tapered wedge makes the present cutting direction unambiguous.
+        for (int i = 0; i < 8; i++)
         {
-            Spine(i / (float)spineSections, out var a, out var b);
-            Spine((i + 1f) / spineSections, out var c, out var d);
-            vertices[used++] = a; vertices[used++] = b; vertices[used++] = c;
-            vertices[used++] = c; vertices[used++] = b; vertices[used++] = d;
+            Flare(i / 8f, out var a, out var b);
+            Flare((i + 1f) / 8f, out var c, out var d);
+            Quad(a, b, c, d);
         }
         shader.Apply();
         device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, used / 3);
 
-        void Edge(float u, out VertexPositionColorTexture inner, out VertexPositionColorTexture outer)
+        void Quad(VertexPositionColorTexture a, VertexPositionColorTexture b,
+            VertexPositionColorTexture c, VertexPositionColorTexture d)
         {
-            float sampleAge = age - tail * (1 - u);
-            float angle = DXOboroMotion.Angle(step, sampleAge, aim, facing);
-            Vector2 direction = angle.ToRotationVector2();
-            float fade = MathF.Min(1f, (DXOboroMotion.Duration - age) / 7f) *
-                MathF.Pow(u, .72f);
-            float envelope = MathF.Pow(MathF.Max(0f, MathF.Sin(u * MathF.PI)), .45f);
-            float depth = 4f + (52f + 26f * MathF.Sin(u * MathF.PI)) * envelope;
-            var color = Color.White * fade;
-            inner = new(new(root + direction * (DXOboroMotion.Reach - depth) - Main.screenPosition, 0),
-                color, new(u, 0));
-            outer = new(new(root + direction * DXOboroMotion.Reach - Main.screenPosition, 0),
-                color, new(u, 1));
+            vertices[used++] = a; vertices[used++] = b; vertices[used++] = c;
+            vertices[used++] = c; vertices[used++] = b; vertices[used++] = d;
         }
 
-        void Spine(float u, out VertexPositionColorTexture lower, out VertexPositionColorTexture upper)
+        void Wing(float u, int layer, out VertexPositionColorTexture inner,
+            out VertexPositionColorTexture outer)
         {
-            float radius = MathHelper.Lerp(112f, DXOboroMotion.Reach, u);
-            float width = 3f + 9f * MathF.Sin(u * MathF.PI);
-            float fade = 1f - .4f * (age - DXOboroMotion.ReleaseFrame) /
-                (DXOboroMotion.LiveEndFrame - DXOboroMotion.ReleaseFrame);
+            float history = MathF.Min(elapsed, step == 2 ? 8f : 5f);
+            float sampleAge = age - history * (1f - u);
+            Vector2 axisAt = DXOboroMotion.Angle(step, sampleAge, aim, facing).ToRotationVector2();
+            float body = MathF.Pow(MathF.Max(0f, MathF.Sin(MathF.PI * u)), .56f);
+            float tear = .72f + .17f * MathF.Sin(u * 31f + step * 4.2f)
+                + .11f * MathF.Sin(u * 73f - elapsed * .35f);
+            float radius = DXOboroMotion.Reach - (layer == 0 ? 0f : 24f);
+            float depth = (layer == 0 ? (step == 2 ? 112f : 91f) : 53f) * body * tear;
+            float innerRadius = radius - depth - (layer == 0 ? 4f : 8f);
+            float opacity = life * (layer == 0 ? .93f : .38f) * MathF.Min(1f, elapsed / 2f);
+            var color = Color.White * opacity;
+            inner = new(new(root + axisAt * innerRadius - Main.screenPosition, 0), color, new(u, 0));
+            outer = new(new(root + axisAt * radius - Main.screenPosition, 0), color, new(u, 1));
+        }
+
+        void Flare(float u, out VertexPositionColorTexture lower,
+            out VertexPositionColorTexture upper)
+        {
+            float radius = MathHelper.Lerp(blade - 8f, DXOboroMotion.Reach, u);
+            float width = (step == 2 ? 27f : 19f) * MathF.Sin(MathF.PI * u) + 2f;
             Vector2 center = root + axis * radius - Main.screenPosition;
-            var color = Color.White * fade;
+            var color = Color.White * life;
             lower = new(new(center - normal * width, 0), color, new(u, 0));
             upper = new(new(center + normal * width, 0), color, new(u, 1));
         }

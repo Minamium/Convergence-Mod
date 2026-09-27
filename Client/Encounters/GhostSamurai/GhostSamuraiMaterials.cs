@@ -67,7 +67,7 @@ internal static class GhostSamuraiMaterials
                 var blade = side < 0 ? h.Pose.Left : h.Pose.Right;
                 if (blade.Trail <= 0) { Flush(); continue; }
                 Vector2 point = GhostSamuraiRigArt.Tip(h.Pose, side);
-                if (points.Count > 0 && Vector2.DistanceSquared(points[^1], point) > 200 * 200) Flush();
+                if (points.Count > 0 && Vector2.DistanceSquared(points[^1], point) > 360 * 360) Flush();
                 if (points.Count == 0 || Vector2.DistanceSquared(points[^1], point) > .01f) points.Add(point);
                 trailRadius = Math.Max(trailRadius, blade.Size * 26);
                 trailAlpha = Math.Max(trailAlpha, SamuraiRigMotion.Fade(age) * blade.Trail * .88f);
@@ -77,7 +77,7 @@ internal static class GhostSamuraiMaterials
             {
                 Vector2 tip = GhostSamuraiRigArt.Tip(pose, side);
                 float distance = Vector2.DistanceSquared(points[^1], tip);
-                if (distance > .01f && distance < 200 * 200) points.Add(tip);
+                if (distance > .01f && distance < 360 * 360) points.Add(tip);
             }
             Flush();
         }

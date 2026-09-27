@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Convergence.Content.Items.Oboro;
+using Convergence.Client.Graphics;
 using Luminance.Common.Easings;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -83,12 +84,13 @@ public sealed class OboroVisuals : ModSystem
 [Autoload(Side = ModSide.Client)]
 public sealed class OboroItemVisuals : GlobalItem
 {
+    private static readonly ReadableItemIcon icon = new();
     public override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.ModItem is OboroItem;
     public override bool PreDrawInInventory(Item item, SpriteBatch b, Vector2 position, Rectangle frame,
         Color drawColor, Color itemColor, Vector2 origin, float scale)
     {
         Texture2D texture = OboroArt.Blade;
-        b.Draw(texture, position, null, Color.White, 0, texture.Size() * .5f, scale, SpriteEffects.None, 0);
+        icon.Draw(b, texture, position, ReadableItemIcon.InventoryExtent(frame, scale), Color.White);
         return false;
     }
     public override bool PreDrawInWorld(Item item, SpriteBatch b, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)

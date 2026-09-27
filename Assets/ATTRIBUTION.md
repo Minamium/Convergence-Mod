@@ -2,6 +2,21 @@
 
 ## Records
 
+### Ghost Samurai battlefield — 2026-09-27
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiBattlefield.fxc`
+- Asset ID: samurai-battlefield-20260927
+- Asset type: compiled original procedural backdrop
+- Creator: Convergence, project-owner-directed work with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: original
+- Source work and URL: original SamuraiBattlefield.fx in this repository; no external artwork or shader copied
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original flags, spears, graves and layered violet mist; Luminance noise is referenced from the dependency, not redistributed. Runtime world-anchored field composition.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance
+- Reviewer and review date: Codex compiled-material preview2026-09-27; native gameplay not_run
+
 ### Samurai spectral composite and DXOboro trial — 2026-09-27
 
 Original Convergence images and procedural materials; existing VioletRig, Oboro art and all recordings are retained. The SamuraiSpirit material was revised under its existing provenance; current source/export identities are in `compiled.json`, superseding its historical hashes below. Generated originals remain outside the source tree. No WotG/Calamity sprite, shader or recording is imported.

@@ -19,6 +19,12 @@ related_docs:
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
 
+## Ghost Samurai missing launches and Soboro — 2026-09-27 / 0.3.48 → 0.3.49
+
+Owner's118.84s Seahorse Scrutiny clip reports missing launched slashes/continued SP vs Host & Play differences, unusable Oboro, stiff Boss cuts, thin DXOboro effects and tiny icons. Requested battlefield/black exterior and the display name Soboro. Logs show one solo Host & Play Victory/cleanup in61s, not proof the missing attacks worked. Dense video frames show the grid flash without the travelling wave and no Oboro blade; final Murasama use supplies the broad bright edge/three-beat reference.
+
+Pinned/installed native inspection finds two distinct send gaps: server-created player-owned holdout auto-send never occurs; PostUpdateWorld aim flags are cleared before the next Projectile.AI. Explicitly publish complete authority state, preserve existing Oboro rules, add connected accelerated Boss cuts, a bounded shader battlefield/mask, larger alpha-framed icons and independent violet Soboro cuts. [Evidence](../evidence/2026-09-27-samurai-hostplay.json) separates native call-contract/offline results from pending real multiplayer delivery, feel and visual acceptance. No reference sprites/audio are copied.
+
 ## Ghost Samurai Host & Play and spectral refresh — 2026-09-27 / 0.3.48
 
 Owner reports smooth SP but jerky Host & Play Boss motion and inability to swing **Oboro only**; asks to keep Oboro while adding DXOboro and a summon icon, with visible Luminance energy beyond a lightly animated PNG. Archived0.3.43 logs show one two-player fight ending at WorldUnload, not a complete test of the current0.3.47 baseline; they contain no weapon-rejection detail and cannot prove a unique cause. Code review identifies unsmoothed periodic native position updates, unrepaired Oboro generation/state leases and custom use preceding native held-item synchronization.

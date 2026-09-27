@@ -5,25 +5,33 @@ namespace Convergence.Content.Items.DXOboro;
 // One normalized clock drives blade pose, native collision, and all visible material.
 internal static class DXOboroMotion
 {
-    internal const int Duration = 30;
+    internal const int MaximumDuration = 26;
     internal const float Reach = 290f;
     internal const float Width = 22f;
-    internal const int ReleaseFrame = 12;
-    internal const int LiveEndFrame = 23;
+    internal static int Duration(int step) => step switch { 1 => 16, 2 => 26, _ => 18 };
+    internal static int Release(int step) => step switch { 1 => 6, 2 => 11, _ => 7 };
+    internal static int LiveEnd(int step) => step switch { 1 => 13, 2 => 22, _ => 15 };
+    internal static float BladeLength(int step, float age)
+    {
+        float extended = step switch { 1 => 190f, 2 => 230f, _ => 188f };
+        return 140f + (extended - 140f) * EaseOut((age - Release(step)) / 2.5f);
+    }
 
-    internal static bool Live(int age) => age >= ReleaseFrame && age < LiveEndFrame;
+    internal static bool Live(int step, int age) => age >= Release(step) && age < LiveEnd(step);
 
     internal static float Angle(int step, float age, float aim, int facing)
     {
-        float start = step switch { 1 => 1.35f, 2 => -1.8f, _ => -1.55f };
-        float end = step switch { 1 => -1.35f, 2 => 1.9f, _ => 1.25f };
+        float start = step switch { 1 => 1.2f, 2 => -1.65f, _ => -1.5f };
+        float end = step switch { 1 => -1.1f, 2 => 1.75f, _ => 1.15f };
+        int release = Release(step), liveEnd = LiveEnd(step), duration = Duration(step);
         // Arrival is brisk, then a short held tension beat. The slash accelerates
         // into its contact arc and leaves the wrist with a small recoil.
         float offset;
-        if (age < 5f) offset = Lerp(start * .57f, start, EaseOut(age / 5f));
-        else if (age < ReleaseFrame) offset = start + MathF.Sin((age - 5f) * .6f) * .018f;
-        else if (age < 22f) offset = Lerp(start, end, EaseIn((age - ReleaseFrame) / 10f));
-        else offset = Lerp(end, end - MathF.Sign(end - start) * .13f, EaseOut((age - 22f) / 8f));
+        if (age < release - 2f) offset = Lerp(start * .61f, start, EaseOut(age / (release - 2f)));
+        else if (age < release) offset = start + MathF.Sin((age - release + 2f) * 2.1f) * .012f;
+        else if (age < liveEnd) offset = Lerp(start, end, EaseIn((age - release) / (liveEnd - release)));
+        else offset = Lerp(end, end - MathF.Sign(end - start) * (step == 2 ? .23f : .14f),
+            EaseOut((age - liveEnd) / (duration - liveEnd)));
         return aim + facing * offset;
     }
 
