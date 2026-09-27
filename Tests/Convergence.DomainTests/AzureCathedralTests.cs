@@ -136,8 +136,8 @@ internal static partial class Program
     [DomainTest("Azure solo scales without changing other encounters and floor has no teleport offset")]
     private static void AzureScalingAndFloor()
     {
-        AssertEqual(2640000,AzureRules.Life(1,true)+AzureRules.Life(1,false),"solo total");
-        AssertEqual(12650000,AzureRules.Life(8,true)+AzureRules.Life(8,false),"eight total");
+        AssertEqual(5280000,AzureRules.Life(1,true)+AzureRules.Life(1,false),"solo total doubled");
+        AssertEqual(25300000,AzureRules.Life(8,true)+AzureRules.Life(8,false),"eight total doubled");
         var f=RaidFieldGeometry.FromGround(8000,6000);var p=AzureRules.Clamp(f,8000,6000-42,20,42);
         AssertEqual(5958f,p.Y,"floor aligned");
         AssertEqual(false,AzureRules.Completed(0,1),"both actors required");AssertEqual(true,AzureRules.Completed(0,0),"both defeated");
@@ -197,23 +197,30 @@ internal static partial class Program
         AssertEqual(true,Math.Abs(Math.Atan2(next.Y,next.X))<=.04501,"large turn cannot oscillate instantly");
         AssertEqual(true,AzureRules.ChorusPhrase(2) && AzureRules.ChorusPhrase(5),"dedicated stack/spread windows");
     }
-    [DomainTest("Azure worm HP is one twentieth and Fury shares all parts while Duet stays head-only")]
+    [DomainTest("Azure doubled actor HP scales through eight members and Fury shares one mitigated segment pool")]
     private static void AzureFuryVulnerability()
     {
         for(int n=1;n<=8;n++)
         {
             int hp=AzureRules.Life(n,true);
-            AssertEqual((4800000+(n-1)*2600000)/20,hp,"worm budget only");
-            AssertEqual(2400000+(n-1)*1300000,AzureRules.Life(n,false),"Liora unchanged");
-            AssertEqual(960000+(n-1)*520000,AzureRules.FuryLife(hp),"Fury shared budget four times Duet");
+            AssertEqual(480000+(n-1)*260000,hp,"Duet worm doubled at each roster size");
+            AssertEqual(4800000+(n-1)*2600000,AzureRules.Life(n,false),"Liora doubled at each roster size");
+            AssertEqual(1920000+(n-1)*1040000,AzureRules.FuryLife(hp),"Fury remains four times doubled Duet");
             for(int part=0;part<=AzureRules.Segments;part++)
             {
                 AssertEqual(part==0,AzureRules.WormDamageable(AzurePhase.Duet,part,true,hp,hp),"duet armor");
                 AssertEqual(true,AzureRules.WormDamageable(AzurePhase.Fury,part,true,hp,hp),"body and tail exposed");
+                AssertEqual(part==0?1f:.1f,AzureRules.WormIncomingDamageMultiplier(AzurePhase.Fury,part),"Fury head full damage; body and tail ten percent");
+                AssertEqual(1f,AzureRules.WormIncomingDamageMultiplier(AzurePhase.Duet,part),"Duet head damage unchanged");
                 AssertEqual(false,AzureRules.WormDamageable(AzurePhase.Duet,part,true,AzureRules.WormFloor(hp),hp),"floor stops incoming hits");
                 foreach(var phase in new[]{AzurePhase.Duet,AzurePhase.Devouring,AzurePhase.Fury,AzurePhase.Melting})
                     AssertEqual(false,AzureRules.WormDamageable(phase,part,false,hp,hp),"protected/ended scene");
             }
+        }
+        for(int phrase=0;phrase<6;phrase++)
+        {
+            AssertEqual(false,AzureRules.SegmentVolleyPhrase(AzurePhase.Duet,phrase),"Duet never fires segment bolts");
+            AssertEqual(phrase is 1 or 4,AzureRules.SegmentVolleyPhrase(AzurePhase.Fury,phrase),"Fury transit and volley share one phrase gate");
         }
     }
     [DomainTest("Azure diagonal flight crosses slowly without stopping and consumption stages away from Liora")]

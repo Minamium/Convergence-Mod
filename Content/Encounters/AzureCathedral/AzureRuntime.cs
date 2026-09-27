@@ -275,7 +275,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
             else if (dash < AzureRules.ChargeEnd) return;
             else { goal = new(f.CenterX, f.Top - 680); speed = 42; }
         }
-        else if(State.Live && phrase is 1 or 4)
+        else if(State.Live && AzureRules.SegmentVolleyPhrase(phase,phrase))
         {
             // Join a six-second straight diagonal crossing with a matched tangent.
             // The whole chain travels while firing; there is no stop-and-shoot hold.
@@ -352,7 +352,7 @@ internal sealed class AzureRuntime : IEncounterRuntime
         }
         if (!girlDead && phrase is 1 or 4 && t == 200)
             Spawn(AzureAttackKind.MouthBeam, girl!.NPC.Center, (Focus()-girl.NPC.Center).ToRotation()-.6f, 3200, 66, 360, 96, 180);
-        if (!wormDead && (phase==AzurePhase.Fury || stagingAt<0) && phrase is 1 or 4 && t==AzureRules.VolleyFire-AzureRules.VolleyWarning)
+        if (!wormDead && AzureRules.SegmentVolleyPhrase(phase,phrase) && t==AzureRules.VolleyFire-AzureRules.VolleyWarning)
         {
             var alive=Array.FindAll(members,m=>!m.Out && !m.Recovery.Downed);
             foreach(var n in Main.ActiveNPCs)

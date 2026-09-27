@@ -1,0 +1,38 @@
+{
+  "scope": "Cathedral Stack/Spread verdict publication, phase-specific worm offense and HP/shared-pool mitigation",
+  "observed_build": "0.3.53 / protocol74",
+  "target_build": "0.3.54 / protocol74 unchanged; matching package versions required",
+  "logs": {
+    "session": "September28 05:51:46-05:54:23, solo Host & Play",
+    "fight": "4fa9c8a2-115e-4dc2-a96f-cdce79bbd016",
+    "server_sha256": "F6740C596421E6966FCC1E185A6999A93884B4A70210DE18F1685BF9E9B0B773",
+    "client_sha256": "8820A2643EF961B954E45436F9138D8C677F21EF78853886A3201B3C89E26E16",
+    "participants": 1,
+    "unlock_age": 1576,
+    "victory_age": 8792,
+    "cleanup_age": 9452,
+    "fury_duration_ticks": 2087,
+    "peak_five_second_hp_budget_dps": 49817,
+    "stack": { "failed": 1, "native_damage": 1, "gather_distance_px": 462.4, "pending_cancelled_on_liora_defeat": 1 },
+    "spread": { "successful": 1, "failed": 0, "limit": "Solo cannot exercise overlap" },
+    "native_impacts": { "attacks": 18, "worm_contact": 4, "chorus": 1, "all_recorded_final_damage": 1 },
+    "errors": "No Cathedral actor-loss or terminal error. Secondary server2 SubworldLibrary.LoadIntoSubworld EndOfStreamException at05:54:32 follows completed cleanup; separate unresolved third-party shutdown path. Initial localhost connection refusal was followed by a successful session.",
+    "limit": "No previous Cathedral result-receipt telemetry; the compiled publication defect plus reported visuals diagnose delivery, not every rendered pixel. No Down/revive or multi-person acceptance observed."
+  },
+  "cause": "The authority director commits Resolved/FailedMask/Positions after Projectile.Update and sets netUpdate. The next native Update clears the flag before AI/send. Separately spawned damage reaches the receiving player but the harmless marker remains pending, so its ice/rift release and sound never start.",
+  "repair": "Server-only SyncProjectile after full marker initialization and verdict commit; keep immutable bounded native payloads, native damage hooks, exact-Fight cleanup and current Luminance materials. Add one-time replica/presentation/draw-submission receipts. A Liora defeat cancels an unfinished chorus intentionally.",
+  "balance": "Double all roster-scaled Liora and worm HP, including derived Fury pool. Duet worm charges only, with harmless orbit elsewhere; diagonal segment volley remains Fury-only. Fury head incoming100%, body/tail10% through native HitModifiers.FinalDamage before native realLife subtraction. No separate segment HP. Outgoing rehearsal cap1 remains.",
+  "checks": {
+    "static_domain_codec": "passed: catalog/repository/YAML,386 deterministic domain tests including1-8 HP and Stack/Spread boundaries; compiled protocol74 checks334 round trips/54 malformed cases",
+    "native_package": "passed:0errors/4existing CS8632 warnings, localization parsing and packaged solo admission; source stable during isolated build",
+    "native_chorus_publication": "passed: exact packaged assembly commits before both explicit sends;28 Azure native marker cases across1/2/3/4/8 members and2080 truncated prefixes, immutable results and sender/authority guards. Reused probe's default Scarlet12cases/1136prefixes also pass. No socket simulation.",
+    "native_shared_pool_and_mitigation": "passed: actual packaged ModifyIncomingHit gives head100% and sampled body/middle/tail10%; installed StrikeNPC subtracts shared HP once, retains all45 parts on lethal/late hits and preserves exact-Fight ownership. Cinematic chain and sky retry probes pass. Test fixture updated for existing recovery envelope; no production recovery change.",
+    "artifact_sha256": "6d546906cf3d09d6afa1049462ad564dcf101d5a24c461d845d57e404275dee4",
+    "local_build_record": ".local/builds/20260927T211138086836Z/record.json",
+    "artifact_identity": "Pinned Convergence.verified.tmod beside the source-identified record; hash matches before/after probes. Existing unrelated localization edits were preserved and packaged, not staged in this task.",
+    "actual_hostplay_remote_stack_spread": "not_run: compare failed Stack and overlapping/non-overlapping Spread on matching peers; verify effect/audio and delayed receipt",
+    "actual_balance": "not_run: verify charge-only Duet, Fury segment volley, body/tail mitigation and HP feel",
+    "offline_material_preview": "not repeated: accepted ice/rift geometry, material and motion curves unchanged; this fix supplies the missing authority verdict"
+  },
+  "delegation": "azure_worm_balance / gpt-6-sol medium: Rules/Actors/Runtime and focused tests for HP, Fury mitigation and P1 offense. Lead reviewed the diff, fixed HP codec limits, owns log analysis/publication and combined checks. No material worker rework."
+}

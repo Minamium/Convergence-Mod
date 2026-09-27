@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.53 / protocol74**. Soboro's three cuts gain distinct deforming white-violet surfaces, large fracture strokes, quiet recovery, five original sound cues and bounded local native-hit accents. Gameplay geometry/timing/damage, original Oboro and Boss art are unchanged. [Soboro contract](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroの3段斬撃面--2026-09-28) owns the presentation; native quality/mix/remote acceptance remains user-owned.
+Current source: **0.3.54 / protocol74**. Cathedral explicitly publishes Stack/Spread verdicts so the accepted ice compression/rift attack and audio can start on clients. Liora/Vitrion HP budgets double; Duet worm attacks are charge-only and Fury body/tail take10% incoming damage through the same single native HP pool. Player-facing outgoing damage remains capped at1 for rehearsal. [Cathedral spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns current behavior; native multi-client visual/overlap acceptance remains user-owned.
+
+Retained0.3.53: Soboro's three cuts gain distinct deforming white-violet surfaces, large fracture strokes, quiet recovery, five original sound cues and bounded local native-hit accents. Gameplay geometry/timing/damage, original Oboro and Boss art are unchanged. [Soboro contract](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroの3段斬撃面--2026-09-28) owns the presentation; native quality/mix/remote acceptance remains user-owned.
 
 Retained0.3.52: Scarlet explicitly publishes its complete Stack/Spread verdict after the authority tick commits it. The old post-update `netUpdate` flag was cleared before native sending, leaving clients without the failed attack's VFX/audio despite real damage. Receive and draw-submission diagnostics are separate from native-hit logs. Solo admission/outcomes, damage1 and accepted artwork are unchanged; [Scarlet evidence](evidence/2026-09-28-scarlet-chorus-publication.json) distinguishes observed solo hits from unplayed repaired delivery.
 
@@ -59,7 +61,7 @@ The integrated0.3.33 Azure baseline is retained: Cathedral reduces worm HP to1/2
 
 Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rarity, drop, Zanshin and Wraith Fire. Durations/angles and provisional live windows now follow the [owning definition table](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19). Shared motion and root geometry drive the server hit test and visible spectral blade; equipped DPS has not been measured and is not claimed unchanged after the requested timing update.
 
-**Latest reviewed Cathedral playtest:**0.3.41 solo Host & Play, two attempts: Defeat6.75s after unlock, then Victory125.37s after unlock and complete cleanup11s later. Fury lasts12.43s; peak sampled five-second HP-budget DPS101,670. Stack: one success/one failure; Spread: two solo successes. No Cathedral actor-loss exception. A secondary SubworldLibrary stream exception occurs after cleanup and is not evidence for the visual defect. [Azure evidence](evidence/2026-09-26-azure-refraction-entrance.json) preserves the details and limitations; solo does not establish overlap/remote behavior or the new visuals. Other encounter evidence is unchanged.
+**Latest reviewed Cathedral playtest:**0.3.53 solo Host & Play: Victory120.27s after unlock, Fury34.78s, cleanup11s after Victory. One failed Stack deals the capped1damage, one solo Spread succeeds; the second pending Stack is cancelled when Liora dies before its deadline. No Cathedral actor-loss error; the independent SubworldLibrary shutdown stream exception remains. [Azure evidence](evidence/2026-09-28-azure-chorus-balance.json) separates logs, publication defect, checks and remaining peer acceptance; prior [entrance evidence](evidence/2026-09-26-azure-refraction-entrance.json) is retained.
 
 - **Requiem of the Hollow Doll — initial prototype complete**, as designated by the owner on 2026-09-14. Boss: **Lacrimosa — The Bound Heart**. Connected-party preparation, Ready, P1/P2/P3/Final, revival and reward loop are implemented. “Complete prototype” is not final balance or compatibility certification.
 - **Ghost Samurai — in development.** Oboro is a guaranteed single ground drop; further rewards and balance remain provisional. Cleanup and target ownership have automated coverage; actual multiplayer/re-entry and the new weapon/art need owner playtesting.
@@ -69,6 +71,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.54 Cathedral:** [evidence](evidence/2026-09-28-azure-chorus-balance.json) tracks bounded chorus publication/codecs, all-roster HP and native shared-pool mitigation checks. The accepted ice/rift material and motion are unchanged; native failed/successful results on matching peers remain a concrete user playtest, not an offline-art approval.
 
 - **0.3.53 Soboro presentation:** [evidence](evidence/2026-09-28-soboro-three-cuts.json) identifies the focused native package, actual-material frame sequences and numerical audio checks. No new native gameplay or hearing acceptance is claimed. Other Raids' pending checks remain separate.
 
@@ -157,6 +161,8 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Cathedral: matching0.3.54 Host & Play clients should compare one failed Stack, then overlapping/non-overlapping Spread. Check that ice compresses instead of silently disappearing, both overlapping players see the rift attack, P1 emits no segment bolts and Fury body hits remain visibly weaker than head hits. Native overlap/latency and new HP feel are user-owned / not_run; all incoming Cathedral hits remain1 for this rehearsal.
 
 Soboro: reload matching0.3.53 peers and compare only its1→2→3 loop, heavy-cut silhouette, blade/hand attachment, cancellation, Reduced Effects and dedicated swing/hit audio. The new hit accents are owner-local; no remote-hit broadcast was added. Native feel, mix and performance are user-owned / not_run. No additional Build is needed for an already installed matching package.
 
