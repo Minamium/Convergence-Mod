@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-27
+last_reviewed: 2026-09-28
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.51 / protocol74**. Oboro/Soboro and Ghost Samurai gain connected, fractionally sampled hand/blade acting: held anticipation, sharp angular acceleration, braking and follow-through, plus original Luminance violet lightning. Soboro's hand/length curves and both weapons' sweep timing change; keep damage, reach and hit windows. Boss AI/hazard clocks and other Raids are unchanged. Matching peers must update together. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#武器の連続描画--2026-09-27) owns presentation. Native feel, remote visuals and FPS remain user-owned/unmeasured; rendered frame count is not acceptance. Retain0.3.50's opaque battlefield mask, flag removal and flowing sword-tear hazards.
+Current source: **0.3.52 / protocol74**. Scarlet explicitly publishes its complete Stack/Spread verdict after the authority tick commits it. The old post-update `netUpdate` flag was cleared before native sending, leaving clients without the failed attack's VFX/audio despite real damage. Receive and draw-submission diagnostics are separate from native-hit logs. Solo admission/outcomes, damage1, accepted artwork and other Raids are unchanged; [Scarlet evidence](evidence/2026-09-28-scarlet-chorus-publication.json) distinguishes the observed solo hits from unplayed repaired delivery.
+
+Retained0.3.51: Oboro/Soboro and Ghost Samurai gain connected, fractionally sampled hand/blade acting: held anticipation, sharp angular acceleration, braking and follow-through, plus original Luminance violet lightning. Soboro's hand/length curves and both weapons' sweep timing change; keep damage, reach and hit windows. Boss AI/hazard clocks and other Raids are unchanged. Matching peers must update together. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#武器の連続描画--2026-09-27) owns presentation. Native feel, remote visuals and FPS remain user-owned/unmeasured; rendered frame count is not acceptance. Retain0.3.50's opaque battlefield mask, flag removal and flowing sword-tear hazards.
 
 Retained0.3.47: Oboro follows the owner's22F downward cut,18F smaller return,30F held-charge finisher. The metal sword and arm pose exist only during an accepted attack; Luminance spectral cuts retain560px reach. Damage/drop/buffs remain unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19) owns those curves.
 
@@ -65,6 +67,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.52 Scarlet chorus:**62 focused domain cases and21 Scarlet source-wiring checks pass. The owning [evidence](evidence/2026-09-28-scarlet-chorus-publication.json) records exact-package publication/codec checks and remaining native delivery/render acceptance. The existing material is unchanged; no new offline-art approval is claimed. A requested Sol-medium probe worker was unavailable at capacity, so the lead implemented the bounded native regression locally.
 
 - **0.3.51 continuous sword performance:** [evidence](evidence/2026-09-27-sword-performance.json) records the supplied critique/reference observations, changed shared curves, fractional draw-only arms, actual shader sequence renders and scoped checks. No new gameplay session is claimed. Native armor/mount/gravity layering, input feel, matching Host & Play views and frame-time cost require user playtesting.
 
@@ -154,7 +158,7 @@ Ghost Samurai: on matching0.3.51 peers, check both weapons' three-stroke loop, r
 
 Doll: after the matching0.3.46 package is installed, check the first Phase III claw clamp (contact → held cracks → shell burst), continued purple sphere/attached muzzle through Final/DPS check, Victory/Defeat fade and a fresh intact retry. Compare a matching peer and Reduced Effects. These native checks are owner-owned `not_run`; shader/mesh previews are separate evidence.
 
-Scarlet: reload the matching0.3.45 package on every peer. Check deliberate Stack/Spread failures both with and without God Mode: result VFX should appear in both, actual1damage only when native Hurt is allowed. With God Mode off and suitably low HP, check midair Down → nearby kit recovery,60-second recipient lockout, all-Down defeat and retry without frozen controls. These are owner-owned `not_run`; server outcome logs and receiving-client impact/presentation logs must not be conflated. Do not retune damage without the owner's explicit instruction.
+Scarlet: use matching0.3.52 peers. Solo Host & Play should show Act II's Stack seals and black/crimson flame when standing outside the gather circle; standing inside succeeds with0damage. Check a remote peer and failed Spread too. Compare server `ChorusResolved` with client `ChorusReplicaReceived`, `ChorusPresentation`, `ChorusDrawn` and independent native-hit receipts; draw submission is not proof of visible pixels. The repaired socket/render path and God Mode on/off remain owner-owned `not_run`. Prior midair Down/kit/60s lockout/all-Down/retry checks remain pending separately. Do not retune damage without the owner's explicit instruction.
 
 Cathedral: after the0.3.44 integrated package is installed, start/reload normally; no second Build is needed. With matching peers and God Mode off, check1damage, midair Down→kit recovery,60-second recipient lockout, all-Down defeat and retry with no frozen controls. Keep Liora alive to observe Spread. Existing visual/audio/accessibility checks remain separate in the [focused smoke list](encounters/azure-cathedral/ENCOUNTER_SPEC.md#assets-and-pending-acceptance); do not infer they passed from compilation.
 

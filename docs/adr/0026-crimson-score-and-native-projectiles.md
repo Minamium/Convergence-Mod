@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-27
+last_reviewed: 2026-09-28
 source_of_truth_for:
   - architecture.crimson_score_authority
 aliases:
@@ -21,7 +21,7 @@ related_docs:
 
 # ADR-0026: Crimson score clock and native projectiles
 
-Current amendment: [single sacrificial Final](#single-sacrificial-final-and-verdict-tail--2026-09-22). Earlier amendments retain historical decisions, not current visual/phase instructions; the owning spec supplies current tuning.
+Current amendments: [native chorus publication](#native-chorus-publication--2026-09-28), [Down/recovery](#2026-09-27-scarlet-downrecovery-and-debug-damage-protocol70) and [single sacrificial Final](#single-sacrificial-final-and-verdict-tail--2026-09-22). Earlier amendments retain historical decisions, not current visual/phase instructions; the owning spec supplies current tuning.
 
 The owner requests a separate music-led Raid without a fixed arena, then a50% armored→fast-machine transformation. Reuse the definition-routed coordinator/transport, not either prior encounter's runtime. `crimson_foundry` owns a runtime, preparation roster, native NPC projection, immutable hazard projectiles and terminal cleanup; no global encounter switch, extra assembly or persisted session is added. Feature termination schema3/version1 and protocol42 distinguish matching peers without renumbering prior packet IDs.
 
@@ -44,6 +44,10 @@ The receiving-player adapter caps lethal native Hurt at1HP and reports a floor r
 Protocol70 appends bounded recovery state to Scarlet's native actor and routed lifecycle snapshot, reuses definition-scoped recovery/floor packet IDs, and tags validation replies. Common router/coordinator have no new feature switch. Monotone recovery state/frozen identities reject actor rollback; full snapshots preserve terminal delivery independently of NPC relevance. Other encounters and their wire formats are unchanged; all peers still require the shared protocol version.
 
 The owner-directed1damage switch covers gestures, legacy native hazards and chorus impacts at both source and final native ceiling. It does not change success/failure masks, collision clocks, God Mode or other encounters. Outcome cosmetics and presentation telemetry remain independent of native-hit telemetry.
+
+## Native chorus publication — 2026-09-28
+
+`CrimsonRuntime.TickChorus` commits after native projectile updates. The pinned/installed2026.07.3.0 behavior already recorded in the [native publication evidence](../research/2026-09-16-oboro.md#native-projectile-publication--2026-09-27) clears `netUpdate` before the next AI/send; a flag set here cannot publish the verdict. Explicitly send native `SyncProjectile` after complete marker initialization and after `Resolved`/failure mask/immutable positions are committed. Do not turn the harmless marker hostile, infer success from local positions, or depend on a native Hurt event. Keep server-only publication, full bounded ExtraAI parsing, immutable Fight/plan, monotone terminal values and exact-Fight cleanup. No wire layout or protocol change is required. `tools/check-scarlet-chorus.ps1` checks the exact compiled publication boundary and native marker decoder, not socket delivery or visible effects.
 
 ## Shared pedestal and bounded stage amendment — 2026-09-15
 

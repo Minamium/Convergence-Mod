@@ -7,6 +7,21 @@ CONTENT = ROOT/'Content/Encounters/CrimsonFoundry'
 CLIENT = ROOT/'Client/Encounters/CrimsonFoundry'
 
 class ScarletContracts(unittest.TestCase):
+    def test_chorus_publishes_the_committed_verdict_not_an_out_of_tick_flag(self):
+        text=(CONTENT/'CrimsonChorus.cs').read_text()
+        sync=text[text.index('internal void Synchronize()'):text.index('public override void ReceiveExtraAI')]
+        self.assertIn('Main.netMode == NetmodeID.Server',sync)
+        self.assertIn('Plan.Fight != Guid.Empty && Projectile.active',sync)
+        self.assertIn('NetMessage.SendData(MessageID.SyncProjectile',sync)
+        resolve=text[text.index('private void TickChorus()'):text.index('private void ClearChorus')]
+        self.assertLess(resolve.index('marker.ImpactPositions = positions'),resolve.index('marker.Synchronize();'))
+        self.assertLess(resolve.index('marker.FailedMask |='),resolve.index('marker.Synchronize();'))
+        self.assertNotIn('marker.Projectile.netUpdate',resolve)
+        self.assertIn('ChorusReplicaReceived',text)
+        visual=(CLIENT/'CrimsonChorusVisuals.cs').read_text()
+        self.assertIn('event=ChorusDrawn',visual)
+        self.assertIn('drawnResults.Clear()',visual)
+
     def test_native_floor_and_boss_bar_are_wired(self):
         for name in ('CrimsonEffigy.cs','CrimsonActors.cs'):
             text=(CONTENT/name).read_text()
