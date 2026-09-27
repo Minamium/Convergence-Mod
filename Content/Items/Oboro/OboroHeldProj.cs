@@ -12,6 +12,7 @@ namespace Convergence.Content.Items.Oboro;
 public sealed class OboroHeldProj : ModProjectile
 {
     internal ulong ConnectionGeneration;
+    private bool replicaLogged;
     internal int comboIndex { get; private set; }
     internal float timer { get; private set; }
     internal int attackDuration { get; private set; }
@@ -42,6 +43,14 @@ public sealed class OboroHeldProj : ModProjectile
     public override bool? CanCutTiles() => false;
     public override bool PreDraw(ref Color lightColor) => false; // Client GlobalProjectile draws it.
 
+    internal void Synchronize(int toClient = -1)
+    {
+        // netUpdate / NewProjectile auto-send only on Projectile.owner's peer.
+        // Authority deliberately creates this harmless player-owned holdout.
+        if (Main.netMode == NetmodeID.Server && ConnectionGeneration != 0 && Projectile.active)
+            NetMessage.SendData(MessageID.SyncProjectile, toClient, number: Projectile.whoAmI);
+    }
+
     public override void AI()
     {
         Ready = false;
@@ -54,7 +63,7 @@ public sealed class OboroHeldProj : ModProjectile
         var state = player.GetModPlayer<OboroPlayer>();
         if (!state.Usable || !state.Holding || ConnectionGeneration == 0
             || state.View.Generation != ConnectionGeneration
-            || !OboroPlayer.Authority && !OboroNetworkRules.Fresh(Main.GameUpdateCount, state.ReceivedAt)
+            || !OboroPlayer.Authority && state.View.Duration > 0 && !OboroNetworkRules.Fresh(Main.GameUpdateCount, state.ReceivedAt)
             || !state.BindHeld(this))
         {
             if (OboroPlayer.Authority) Projectile.Kill();
@@ -62,6 +71,11 @@ public sealed class OboroHeldProj : ModProjectile
         }
 
         Ready = true;
+        if (Main.netMode == NetmodeID.MultiplayerClient && !replicaLogged)
+        {
+            replicaLogged = true;
+            global::Convergence.ConvergenceMod.Instance.Logger.Info($"Oboro event=HeldReplicaReady slot={Projectile.owner} identity={Projectile.identity} generation={ConnectionGeneration}");
+        }
         Projectile.timeLeft = 180;
         comboIndex = state.View.Step;
         timer = state.VisualAge;

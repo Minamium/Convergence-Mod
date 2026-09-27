@@ -72,7 +72,77 @@ public static class OboroHeldNativeProbe
         playerType.GetMethod("ReleaseHeld", I).Invoke(state, new[] { second });
         playerType.GetMethod("ClearCombat", I).Invoke(state, null);
         System.Console.WriteLine("PASS native held projectile defaults, full identity replication, one-per-player binding, stale cleanup and slot/connection reuse");
+        CheckPublication(mod, engine);
         CheckHand(mod, engine);
+    }
+
+    // Native Terraria clears Projectile.netUpdate in Update before this raid's
+    // post-update authority code changes aim. Check the compiled call graph,
+    // including initial server publication and a targeted Hello replay. This
+    // does not claim that a socket delivered the resulting packet.
+    static void CheckPublication(System.Reflection.Assembly mod, System.Reflection.Assembly engine)
+    {
+        var held = mod.GetType("Convergence.Content.Items.Oboro.OboroHeldProj", true);
+        var player = mod.GetType("Convergence.Content.Items.Oboro.OboroPlayer", true);
+        var attack = mod.GetType("Convergence.Content.Encounters.GhostSamurai.GhostSamuraiAttackProjectile", true);
+        var runtime = mod.GetType("Convergence.Content.Encounters.GhostSamurai.GhostSamuraiRuntime", true);
+        var net = engine.GetType("Terraria.NetMessage", true);
+        var message = engine.GetType("Terraria.ID.MessageID", true);
+        Require(message.GetField("SyncProjectile", S) != null, "installed native projectile message absent");
+        Require(Calls(held.GetMethod("Synchronize", I), net, "SendData"), "Oboro lacks explicit native publication");
+        var ensure = player.GetMethod("EnsureHeld", I);
+        Require(Calls(ensure, held, "Synchronize"), "new holdout lacks publication after generation assignment");
+        int generationStore = StoreIndex(ensure, held.GetField("ConnectionGeneration", I));
+        Require(generationStore != int.MaxValue && CallIndex(ensure, held, "Synchronize", generationStore) > generationStore,
+            "holdout published before generation assignment");
+        Require(Calls(player.GetMethod("Handle", I), held, "Synchronize"), "Hello lacks targeted holdout replay");
+        Require(Calls(attack.GetMethod("Synchronize", I), net, "SendData"), "Samurai lacks explicit native publication");
+        Require(Calls(runtime.GetMethod("Spawn", I), attack, "Synchronize"), "spawn lacks full native publication");
+        foreach (string name in new[] { "Aim", "AimArrival", "AdvanceWisp" })
+        {
+            var update = attack.GetMethod(name, I);
+            int publication = CallIndex(update, attack, "Synchronize");
+            Require(publication >= 0, name + " lacks post-update publication");
+            string stateName = name == "AdvanceWisp" ? "WispMotion" : "SlashAim";
+            Require(StoreIndex(update, attack.GetField(stateName, I)) < publication,
+                name + " publishes before its accepted state mutation");
+        }
+        System.Console.WriteLine("PASS installed compiled publication call graph: Oboro create/Hello and Samurai spawn/aim/arrival/wisp reach native SendData; socket delivery not simulated");
+    }
+
+    static bool Calls(System.Reflection.MethodBase source, System.Type targetType, string targetName)
+        => CallIndex(source, targetType, targetName) >= 0;
+
+    static int StoreIndex(System.Reflection.MethodBase source, System.Reflection.FieldInfo field)
+    {
+        byte[] il = source.GetMethodBody()?.GetILAsByteArray();
+        Require(il != null && field != null, "publication field IL missing");
+        for (int i = 0; i + 4 < il.Length; i++)
+        {
+            if (il[i] != 0x7D) continue; // stfld
+            try { if (source.Module.ResolveField(System.BitConverter.ToInt32(il, i + 1)) == field) return i; }
+            catch (System.Exception ex) when (ex is System.ArgumentException or System.BadImageFormatException or System.TypeLoadException) { }
+        }
+        return int.MaxValue;
+    }
+
+    static int CallIndex(System.Reflection.MethodBase source, System.Type targetType, string targetName, int after = -1)
+    {
+        Require(source != null, "publication source method missing");
+        byte[] il = source.GetMethodBody()?.GetILAsByteArray();
+        Require(il != null, "publication source IL missing");
+        for (int i = Math.Max(0, after + 1); i + 4 < il.Length; i++)
+        {
+            if (il[i] != 0x28 && il[i] != 0x6F) continue; // call / callvirt
+            try
+            {
+                int token = System.BitConverter.ToInt32(il, i + 1);
+                var called = source.Module.ResolveMethod(token);
+                if (called?.DeclaringType == targetType && called.Name == targetName) return i;
+            }
+            catch (System.Exception ex) when (ex is System.ArgumentException or System.BadImageFormatException or System.TypeLoadException) { }
+        }
+        return -1;
     }
 
     static void CheckHand(System.Reflection.Assembly mod, System.Reflection.Assembly engine)

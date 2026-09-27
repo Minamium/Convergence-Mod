@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-19
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - architecture.oboro_weapon_authority
 aliases:
@@ -35,6 +35,10 @@ The generated art, keyed sprite cache and sounds are client-only. GPU allocation
 The accepted left-click request now creates one harmless `OboroHeldProj` per connection, retained across combo steps while the weapon is held. `Shoot` suppresses native owner-client spawning. The existing `OboroTiming`/snapshot remains the sole combo clock and `OboroCombat` remains the sole hit path. The holdout reads combo index, timer and duration each update; its native damage and tile-cut paths are disabled. Packet IDs/layout and server hit hooks do not change.
 
 Projectile ExtraAI carries the full connection generation. A client waits for matching weapon state before drawing; the server consumes but does not trust a client-supplied generation. The player cache checks the exact ModProjectile instance as well as generation/active state, rejecting duplicates and native slot reuse. Weapon switch, loss of control, death and disconnect release it; native world teardown releases projectile-local presentation. The client-only per-entity `OboroHeldVisuals` owns blade/arm/echo updates. It draws in the `overPlayers` projectile layer without locking item timers or also using `player.heldProj`, so autoReuse can still request the next accepted step. The old world renderer only supplies the idle fallback before a holdout is ready.
+
+## Native publication correction — 2026-09-27
+
+The holdout is created on the server but has the wielder's native `owner`, not255. Native `NewProjectile`/`netUpdate` auto-publication is owner-peer-only, so it is insufficient on the server. After assigning the full generation, explicitly send `SyncProjectile`; replay the existing holdout at a new accepted sequence and to the requesting peer on Hello. Explicitly send its native identity/owner on authority removal. Idle holdouts do not expire merely because no new combo snapshot is needed. This changes replication, not swing input, damage or ownership. Bounded create/accepted/ready logs distinguish server acceptance from client visibility. [Installed API evidence](../research/2026-09-16-oboro.md#native-projectile-publication--2026-09-27) records the native update-order trap shared with Ghost Samurai.
 
 ## Continuous combo progression — 2026-09-19
 

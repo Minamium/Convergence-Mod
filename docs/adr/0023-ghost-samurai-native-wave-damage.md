@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-13
+last_reviewed: 2026-09-27
 source_of_truth_for:
   - architecture.ghost_samurai_native_wave_damage
 aliases:
@@ -32,6 +32,8 @@ Cleanup/phase transition removes all exact-Fight wave entities through the exist
 
 ## Evidence and limits
 
+September27 correction: the authority runtime mutates aim/wisps in PostUpdateWorld, **after** native Projectile.Update. Native Update clears `netUpdate` before invoking AI on its next tick; setting that flag in the runtime does not publish the accepted lock. Publish native `SyncProjectile` directly after complete spawn/aim/lock/wisp mutations, using the existing bounded aim/wisp cadence. Preserve full ExtraAI parsing, exact-Fight and stale-age validation; neither unlock a client-side stale wave nor invent client targeting. [Native API evidence](../research/2026-09-16-oboro.md#native-projectile-publication--2026-09-27) and the current playtest evidence distinguish this code cause from end-to-end network acceptance.
+
 [Feature specification](../encounters/ghost-samurai/ENCOUNTER_SPEC.md) owns tuning and the focused user-owned smoke. Compilation and domain checks do not prove a particular accessory's invulnerability duration or multiplayer latency behavior.
 
 Source review pins tModLoader2026.07.3.0 / commit 666f69962d3bdffde54fc14025f02634965b4e7c, Terraria1.4.4.9. tModLoader-authored patches are MIT; underlying Terraria code/assets remain proprietary. Only API observations and built-in SoundStyle references are used; no third-party code/audio/assets are copied.
@@ -40,4 +42,3 @@ Source review pins tModLoader2026.07.3.0 / commit 666f69962d3bdffde54fc14025f026
 - [Player patch](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Player.cs.patch): player immunity and local-only dodge hooks explain why server manual Hurt cannot replace this native wave path.
 - [Main patch](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Main.cs.patch) and [ModSystem](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModSystem.cs): projectile updates precede the SP/server world tick, so the native wave adapter advances the prior authority age by one; PostUpdateEverything provides a common client/SP audio point after the world clock update.
 - [SoundID](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ID/SoundID.TML.cs): Item1 is the shared sword cue; ScaryScream references Roar_2 for the locked dash cue.
-

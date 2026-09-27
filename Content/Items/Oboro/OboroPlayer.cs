@@ -42,18 +42,30 @@ public sealed partial class OboroPlayer : ModPlayer
     {
         var previous = held; held = null;
         if (previous is not null && previous.Projectile.active
-            && ReferenceEquals(previous.Projectile.ModProjectile, previous)) previous.Projectile.Kill();
+            && ReferenceEquals(previous.Projectile.ModProjectile, previous))
+        {
+            // A server-created player-owned holdout has no native owner-side
+            // Kill broadcast on this server. Send the exact native identity.
+            if (Main.netMode == NetmodeID.Server)
+                NetMessage.SendData(MessageID.KillProjectile, number: previous.Projectile.identity, number2: previous.Projectile.owner);
+            previous.Projectile.Kill();
+        }
     }
-    private bool EnsureHeld()
+    private bool EnsureHeld(bool publishExisting = false)
     {
         if (!Authority) return false;
-        if (HasHeld) return true;
+        if (HasHeld)
+        {
+            if (publishExisting) held.Synchronize();
+            return true;
+        }
         int index = Projectile.NewProjectile(Player.GetSource_ItemUse(Player.HeldItem), Player.MountedCenter,
             Vector2.Zero, ModContent.ProjectileType<OboroHeldProj>(), 0, 0, Player.whoAmI);
         if (index < 0 || index >= Main.maxProjectiles) return false;
         held = (OboroHeldProj)Main.projectile[index].ModProjectile;
         held.ConnectionGeneration = generation;
-        held.Projectile.netUpdate = true;
+        held.Synchronize();
+        global::Convergence.ConvergenceMod.Instance.Logger.Info($"Oboro event=HeldPublished slot={Player.whoAmI} identity={held.Projectile.identity} generation={generation} side={Main.netMode}");
         return true;
     }
     private readonly HashSet<ulong> struck = new();
@@ -83,7 +95,12 @@ public sealed partial class OboroPlayer : ModPlayer
     {
         if (!Authority) return;
         EnsureGeneration();
-        if (request.Action == OboroAction.Hello) { Publish(Player.whoAmI); return; }
+        if (request.Action == OboroAction.Hello)
+        {
+            Publish(Player.whoAmI);
+            if (HasHeld) held.Synchronize(Player.whoAmI);
+            return;
+        }
         if (!Usable || !Holding || request.Generation != generation || request.Nonce <= LastNonce)
         {
             if (request.Action == OboroAction.Swing && Main.GameUpdateCount >= nextRejectLog)
@@ -114,7 +131,8 @@ public sealed partial class OboroPlayer : ModPlayer
         nextAim = request.Aim;
         BeginStep();
         Publish();
-        if (!EnsureHeld()) { timing.CancelSwing(); Publish(); }
+        global::Convergence.ConvergenceMod.Instance.Logger.Info($"Oboro event=SwingAccepted slot={Player.whoAmI} serial={timing.Serial} generation={generation}");
+        if (!EnsureHeld(publishExisting: true)) { timing.CancelSwing(); Publish(); }
     }
     private void BeginStep()
     {
