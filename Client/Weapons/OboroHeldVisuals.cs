@@ -53,11 +53,22 @@ public sealed class OboroHeldVisuals : GlobalProjectile
     {
         if (projectile.ModProjectile is OboroHeldProj { Ready: true })
         {
+            visual.PrepareDraw(WeaponDrawClock.Fraction);
             OboroSlashMaterial.Draw(Main.spriteBatch, visual);
             OboroArt.Afterimages(Main.spriteBatch, visual);
-            OboroArt.Swing(Main.spriteBatch, visual.SwordPose, visual.Swinging);
+            OboroArt.Swing(Main.spriteBatch, visual.RenderSword, visual.Swinging);
+            OboroSlashMaterial.Lightning(Main.spriteBatch, visual);
         }
         return false;
+    }
+
+    internal bool TryGetArmPose(Projectile projectile, out float armRotation)
+    {
+        armRotation = 0;
+        if (projectile.ModProjectile is not OboroHeldProj { Ready: true } || !visual.Swinging) return false;
+        visual.PrepareDraw(WeaponDrawClock.Fraction);
+        armRotation = visual.RenderArmAngle - MathF.PI / 2;
+        return true;
     }
 
     public override void OnKill(Projectile projectile, int timeLeft) { visual.Clear(); sounded = default; }

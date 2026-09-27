@@ -4,7 +4,10 @@ using Convergence.Content.Encounters.GhostSamurai;
 
 namespace Convergence.Client.Encounters.GhostSamurai;
 
-internal readonly record struct SamuraiBladeMotion(float Angle, float Size, float Charge, float Trail);
+// ArmLead and Reach animate the hand independently of the blade's wrist angle.
+// Their defaults keep neutral/terminal poses valid before a replicated action.
+internal readonly record struct SamuraiBladeMotion(float Angle, float Size, float Charge, float Trail,
+    float ArmLead = 0, float Reach = 0);
 internal readonly record struct SamuraiRigPose(float X, float Y, float Age, float Lean, float Scale,
     SamuraiBladeMotion Left, SamuraiBladeMotion Right, float Hit, float Speed, float Lag);
 internal readonly record struct SamuraiRigSample(SamuraiRigPose Pose, ulong Tick);
@@ -78,7 +81,7 @@ internal static class SamuraiRigMotion
             reverse: side != facing && attack == SamuraiAttack.DirectionalSlash,
             downwardOnly: attack is SamuraiAttack.TripleVerticalSlash or SamuraiAttack.FrontalCleaveShockwave);
         float size = 1 + result.Charge * (heavy ? .36f : .12f) + result.Trail * .25f;
-        if (attack == SamuraiAttack.FrontalCleaveShockwave && tick >= SamuraiComboRules.CleaveWindup)
+        if (attack == SamuraiAttack.FrontalCleaveShockwave)
             size = SamuraiComboRules.HorizontalSwordScale(tick);
         if (attack == SamuraiAttack.Phase3CircleAttack && tick >= 2 * GhostSamuraiRules.Phase3CircleStepInterval)
             result = result with { Angle = result.Angle + MathF.Sin(tick * .08f) * result.Charge * .22f };
@@ -93,28 +96,73 @@ internal static class SamuraiRigMotion
         for (int i = 0; i < fires.Length; i++)
         {
             bool back = !downwardOnly && ((i & 1) != 0) != reverse;
-            float start = back ? 1.50f : -2.50f, end = back ? -2.50f : 1.50f;
+            float start = back ? 1.65f : -2.70f, end = back ? -2.70f : 1.65f;
             float from = i == 0 ? idle : previous;
-            float begin = Math.Max(i == 0 ? 0 : fires[i - 1] + 14, fires[i] - windup);
-            if (tick < fires[i])
+            float fire = fires[i];
+            float begin = Math.Max(i == 0 ? 0 : fires[i - 1] + 12, fire - windup);
+            float releaseStart = fire - 4;
+            float arrivalEnd = Math.Min(releaseStart - 4, begin + 18);
+            float priorReach = i == 0 ? 0 : 16 * (1 - Smooth((begin - fires[i - 1] - 12) / 12));
+            float sign = MathF.Sign(end - start);
+            if (tick < releaseStart)
             {
-                // Snap into the raised pose, brake under tension, then release
-                // at the existing server fire tick (no timing/geometry change).
-                float charge = Out((tick - begin) / Math.Max(1, fires[i] - 5 - begin));
-                return new(Mix(from, start, charge), 1, charge, 0);
+                // Arrival reaches a readable high silhouette; the accepted long
+                // cleave charge breathes while the wrist continues to coil.
+                float arrival = Out((tick - begin) / Math.Max(1, arrivalEnd - begin));
+                if (tick < arrivalEnd)
+                    return new(Mix(from, start - sign * .13f, arrival), 1,
+                        arrival * .83f, 0, -sign * .16f * arrival, Mix(priorReach, 27, arrival));
+                float tension = Clamp((tick - arrivalEnd) / Math.Max(1, releaseStart - arrivalEnd));
+                float breath = MathF.Sin((tick - arrivalEnd) * .42f) * .023f * MathF.Sin(MathHelperPi * tension);
+                return new(start - sign * .13f + sign * .13f * Smooth(tension) + breath, 1,
+                    .83f + .17f * tension, 0, -sign * (.16f - .08f * tension), 27 + 7 * tension);
             }
-            float local = tick - fires[i];
-            float over = end + MathF.Sign(end - start) * .22f;
-            // Continuous fractional samples: a brief release acceleration, a
-            // large fast cut, then deceleration into wrist/cloth follow-through.
+            float swing = tick - releaseStart;
+            float over = end + sign * .24f;
+            // The blade crosses its forward/contact angle at the authoritative
+            // fire tick, halfway through this eight-tick whip, with high speed.
+            if (swing < 8)
+            {
+                float t = Cubic(swing / 8);
+                float speed = MathF.Sin(MathHelperPi * Clamp(swing / 8));
+                return new(Mix(start, end, t), 1, 1 - .28f * t,
+                    speed, sign * (-.08f + .18f * t + .25f * speed), 34 + 12 * speed);
+            }
+            float local = swing - 8;
+            if (local < 4)
+                return new(Mix(end, over, Out(local / 4)), 1,
+                    .72f * (1 - Smooth(local / 4)), 0,
+                    sign * (.10f - .23f * Smooth(local / 4)), 34 - 8 * Smooth(local / 4));
             if (local < 8)
-                return new(Mix(start, over, Cubic(local / 8)), 1, 1, 1);
-            if (local < 14)
-                return new(Mix(over, end, Out((local - 8) / 6)), 1, 1 - Smooth((local - 8) / 6), 1 - (local - 8) / 6);
+                return new(Mix(over, end, Smooth((local - 4) / 4)), 1, 0,
+                    0, -sign * .13f * (1 - Smooth((local - 4) / 4)),
+                    26 - 10 * Smooth((local - 4) / 4));
+            if (i + 1 < fires.Length)
+            {
+                float nextBegin = Math.Max(fire + 12, fires[i + 1] - windup);
+                if (tick < nextBegin)
+                    return new(end, 1, 0, 0, 0, 16 * (1 - Smooth((tick - fire - 12) / 12)));
+            }
             previous = end;
         }
-        float recovery = Smooth((tick - fires[^1] - 14) / 18);
-        return new(Mix(previous, idle, recovery), 1, 0, 0);
+        float recovery = Smooth((tick - fires[^1] - 12) / 20);
+        return new(Mix(previous, idle, recovery), 1, 0, 0, 0, 16 * (1 - recovery));
+    }
+
+    private const float MathHelperPi = MathF.PI;
+
+    // Pure two-bone solution shared by renderer and domain checks. The hand path
+    // stays inside the 78+76 reach, so these are true fixed-length segments.
+    internal static (float X, float Y) SolveElbow(float sx, float sy, float hx, float hy, int side, float scale)
+    {
+        float upper = 78 * scale, lower = 76 * scale;
+        float dx = hx - sx, dy = hy - sy;
+        float distance = MathF.Max(.001f, MathF.Sqrt(dx * dx + dy * dy));
+        float along = (upper * upper - lower * lower + distance * distance) / (2 * distance);
+        float height = MathF.Sqrt(MathF.Max(0, upper * upper - along * along));
+        float ux = dx / distance, uy = dy / distance;
+        return (sx + ux * along + uy * height * side,
+            sy + uy * along - ux * height * side);
     }
 
     internal static float ActionLean(SamuraiBladeMotion left, SamuraiBladeMotion right, int facing)
@@ -142,7 +190,8 @@ internal static class SamuraiRigMotion
             LerpBlade(a.Left, b.Left, t), LerpBlade(a.Right, b.Right, t), Mix(a.Hit, b.Hit, t), Mix(a.Speed, b.Speed, t), Mix(a.Lag, b.Lag, t));
     }
     private static SamuraiBladeMotion LerpBlade(SamuraiBladeMotion a, SamuraiBladeMotion b, float t)
-        => new(Angle(a.Angle, b.Angle, t), Mix(a.Size, b.Size, t), Mix(a.Charge, b.Charge, t), Mix(a.Trail, b.Trail, t));
+        => new(Angle(a.Angle, b.Angle, t), Mix(a.Size, b.Size, t), Mix(a.Charge, b.Charge, t), Mix(a.Trail, b.Trail, t),
+            Mix(a.ArmLead, b.ArmLead, t), Mix(a.Reach, b.Reach, t));
 }
 
 // Bounded world-space tick history. Rendering can sample it repeatedly without

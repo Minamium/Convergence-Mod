@@ -22,11 +22,15 @@ internal static class OboroSwordMotion
     }
     private static float Curve(float f, float load, float release, float cut, float end, float drawn, float through)
     {
-        // 構えで手首を引く→腕が先行→切っ先が追い越す→手首を戻して次段へ。
-        if (f < load) return drawn * OboroRules.Ease(f / Math.Min(load, 8));
-        if (f < release) return drawn + (through - drawn) * OboroRules.Ease((f - load) / (release - load));
-        if (f < cut) return through;
-        return through * (1 - OboroRules.Ease((f - cut) / (end - cut)));
+        // Hand leads the launch; the heavy tip overtakes it during the cut.
+        // The wrist then flexes in the opposite direction before relaxing.
+        // This changes arm acting, not the shared sword axis or damage volume.
+        if (f < load) return drawn * OboroRules.Ease(f / Math.Min(load, 6));
+        float lead = load + (release - load) * .68f;
+        if (f < lead) return drawn + (through - drawn) * OboroRules.Ease((f - load) / (lead - load));
+        float recoil = -through * .58f;
+        if (f < cut) return through + (recoil - through) * OboroRules.Ease((f - lead) / (cut - lead));
+        return recoil * (1 - OboroRules.Ease((f - cut) / (end - cut)));
     }
 
     internal static OboroBladePose AtHand(OboroBladePose slash, float bodyX, float bodyY, OboroHandBasis hand, bool swinging)

@@ -7,7 +7,7 @@ internal static class OboroThirdSwingMotion
 {
     internal const float PullEnd = 8, HoldEnd = 16, AccelerationEnd = 20, CutEnd = 25;
     internal const float AccelerationAngle = -30, FollowAngle = 110;
-    internal const float PeakSpeed = 55, ExitSpeed = 7; // 度/F。他2段より大きい解放速度。
+    internal const float PeakSpeed = 70, ExitSpeed = 7; // 度/F。他2段より大きい解放速度。
     internal const float PullDistance = -4; // 根元だけを引く。プレイヤーは移動しない。
 
     internal static float Frame(float progress) => Math.Clamp(progress, 0, 1) * OboroComboSettings.For(2).TotalFrames;

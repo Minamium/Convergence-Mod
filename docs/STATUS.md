@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.50 / protocol73**. Ghost Samurai removes battlefield flags and the transparent arena-edge fade. Dedicated Luminance sword tears replace flat slash/grid/wave materials: connected incision, amplification, travelling blade sheets and harmless contraction. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#霊気合成と新規試作武器--2026-09-27) owns behavior and limits. Retain0.3.49's explicit native aim/Oboro publication, connected body rig, inventory framing and independent Soboro trial. Damage, attack clocks/geometry, original Oboro and other Raids are unchanged. Updated native multiplayer/visual acceptance remains user-owned, not established by compilation or offline frames.
+Current source: **0.3.51 / protocol74**. Oboro/Soboro and Ghost Samurai gain connected, fractionally sampled hand/blade acting: held anticipation, sharp angular acceleration, braking and follow-through, plus original Luminance violet lightning. Soboro's hand/length curves and both weapons' sweep timing change; keep damage, reach and hit windows. Boss AI/hazard clocks and other Raids are unchanged. Matching peers must update together. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#武器の連続描画--2026-09-27) owns presentation. Native feel, remote visuals and FPS remain user-owned/unmeasured; rendered frame count is not acceptance. Retain0.3.50's opaque battlefield mask, flag removal and flowing sword-tear hazards.
 
 Retained0.3.47: Oboro follows the owner's22F downward cut,18F smaller return,30F held-charge finisher. The metal sword and arm pose exist only during an accepted attack; Luminance spectral cuts retain560px reach. Damage/drop/buffs remain unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19) owns those curves.
 
@@ -65,6 +65,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.51 continuous sword performance:** [evidence](evidence/2026-09-27-sword-performance.json) records the supplied critique/reference observations, changed shared curves, fractional draw-only arms, actual shader sequence renders and scoped checks. No new gameplay session is claimed. Native armor/mount/gravity layering, input feel, matching Host & Play views and frame-time cost require user playtesting.
 
 - **0.3.50 Samurai sword tears:** [evidence](evidence/2026-09-27-samurai-flowing-cuts.json) separates the0.3.49 SP defeat/complete cleanup from current material/mask previews and package checks. Latest logs have no exception but do not exercise Host & Play. Sol-medium `samurai_battlefield` owns the bounded background removal/opacity repair; lead owns logs, cut materials, residue, preview review and integration. Native field edges, slash/grid readability, remote delivery and frame time remain user-owned / not_run.
 
@@ -148,7 +150,7 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 
 ## Next change
 
-Ghost Samurai: use0.3.50 to inspect the background at all arena edges/zoom, the incision→wide slash→contraction and flowing grid, including safe-cell readability under Reduced Effects. Matching Host & Play peers should still check Oboro press/hold/release/switching and travelling-wave delivery; the latest session was SP only. Soboro keeps its one-Fallen-Star Work Bench recipe and saved DXOboro ID. GUI is user-owned; other Raids and original Oboro mechanics remain unchanged.
+Ghost Samurai: on matching0.3.51 peers, check both weapons' three-stroke loop, release/switch, mirrored/high-speed native arms and violet discharge; check the boss's raised guard→fast cut→recoil, travelling-wave alignment and Reduced Effects. Compare SP and Host & Play rather than assuming offline samples reproduce player drawing/network delivery. Soboro keeps its one-Fallen-Star Work Bench recipe and saved DXOboro ID. GUI and subjective acceptance are user-owned. Earlier battlefield edge/zoom checks remain pending, not repeated as a prerequisite to each minor edit.
 
 Doll: after the matching0.3.46 package is installed, check the first Phase III claw clamp (contact → held cracks → shell burst), continued purple sphere/attached muzzle through Final/DPS check, Victory/Defeat fade and a fresh intact retry. Compare a matching peer and Reduced Effects. These native checks are owner-owned `not_run`; shader/mesh previews are separate evidence.
 

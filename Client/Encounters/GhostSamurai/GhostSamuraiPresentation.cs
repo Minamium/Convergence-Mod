@@ -33,7 +33,15 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     private static float lean, lag, entryLeft, entryRight;
     private static int lastFacing;
     private static SamuraiAttack lastAttack;
+    private static SamuraiPhase lastPhase;
     private static bool lastTransition;
+    private static SamuraiAttack sampleAttack;
+    private static SamuraiPhase samplePhase;
+    private static SamuraiComboSnapshot sampleCombo;
+    private static SamuraiBeat sampleBeat;
+    private static int sampleFacing;
+    private static float sampleTimer;
+    private static bool sampleTransition, sampleReady, sampleSmooth;
     private static ulong entryAt;
     private static ulong systemTick = ulong.MaxValue;
     private static GhostSamuraiMist? mist;
@@ -92,7 +100,7 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         {
             DropOwner(); owner = active; fight = active.Fight; death = false;
             lastCenter = active.PresentationCenter; current = previous = Neutral(active);
-            lastAttack = active.Attack; lastFacing = active.NPC.direction; lastTransition = active.TransitionRemaining > 0;
+            lastAttack = active.Attack; lastPhase = active.Phase; lastFacing = active.NPC.direction; lastTransition = active.TransitionRemaining > 0;
         }
         missingSince = 0;
         if (updated == now && history.Count > 0) return;
@@ -108,11 +116,12 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         float age = active.VisualAge;
         var left = SamuraiRigMotion.Blade(active.Attack, active.Phase, timer, age, -1, active.NPC.direction, active.Combo, transition);
         var right = SamuraiRigMotion.Blade(active.Attack, active.Phase, timer, age, 1, active.NPC.direction, active.Combo, transition);
-        if (lastAttack != active.Attack || lastFacing != active.NPC.direction || lastTransition != transition)
+        if (lastAttack != active.Attack || lastPhase != active.Phase || lastFacing != active.NPC.direction || lastTransition != transition)
         {
             entryLeft = SamuraiRigMotion.Wrap(current.Left.Angle - left.Angle);
             entryRight = SamuraiRigMotion.Wrap(current.Right.Angle - right.Angle);
-            entryAt = now; lastAttack = active.Attack; lastFacing = active.NPC.direction; lastTransition = transition;
+            entryAt = now; lastAttack = active.Attack; lastPhase = active.Phase;
+            lastFacing = active.NPC.direction; lastTransition = transition;
         }
         float blend = 1 - SamuraiRigMotion.Smooth((now - entryAt) / 10f);
         // Finish reorientation during the harmless start of a new state. A late
@@ -133,6 +142,14 @@ internal sealed class GhostSamuraiPresentation : ModSystem
             lean + SamuraiRigMotion.ActionLean(left, right, active.NPC.direction) + MathF.Sin(age * .023f) * .025f,
             SamuraiRigMotion.DashCompression(active.Attack, timer),
             left, right, hit, velocity.Length(), lag);
+        sampleSmooth = sampleReady && !teleported && sampleAttack == active.Attack
+            && samplePhase == active.Phase && sampleCombo.Equals(active.Combo)
+            && sampleFacing == active.NPC.direction && sampleTransition == transition
+            && Math.Abs(timer - sampleTimer - 1) < .001f && Math.Abs(current.Age - previous.Age - 1) < .001f;
+        sampleAttack = active.Attack; samplePhase = active.Phase; sampleCombo = active.Combo;
+        sampleBeat = active.Beat; sampleFacing = active.NPC.direction;
+        sampleTimer = timer; sampleTransition = transition; sampleReady = true;
+        if (!sampleSmooth) history.Clear();
         if (teleported || history.Count == 0) previous = current;
         secondary.Update(current, velocity);
         if (now % 3 == 0)
@@ -174,14 +191,37 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     internal static void Draw(SpriteBatch batch, GhostSamuraiBoss boss, Vector2 screen)
     {
         bool owns = ReferenceEquals(owner, boss) && fight == boss.Fight;
-        SamuraiRigPose pose = owns ? SamuraiRigMotion.Interpolate(previous, current, Fraction) : Neutral(boss);
+        float fraction = Fraction;
+        SamuraiRigPose pose = owns ? SamplePose(fraction) : Neutral(boss);
+        double renderTick = Main.GameUpdateCount + (double)fraction - 1;
+        if (owns && GhostSamuraiComposite.TryPreparedPose(fight, out var prepared, out var preparedTick))
+        { pose = prepared; renderTick = preparedTick; }
         // Fallback remains visible even before the first accepted replica/tick.
         if (owns) mist?.Draw(batch);
-        GhostSamuraiRigArt.Draw(batch, pose, screen, owns ? history : null, Main.GameUpdateCount + (double)Fraction - 1);
+        GhostSamuraiRigArt.Draw(batch, pose, screen, owns ? history : null, renderTick);
+    }
+    // Evaluate accepted action clocks at render frequency. The tick history
+    // remains bounded and authority-owned fire/geometry never comes from here.
+    private static SamuraiRigPose SamplePose(float fraction)
+    {
+        if (!sampleReady || !sampleSmooth) return current;
+        var pose = SamuraiRigMotion.Interpolate(previous, current, fraction);
+        float timer = sampleTimer - 1 + fraction, age = previous.Age + fraction;
+        var left = SamuraiRigMotion.Blade(sampleAttack, samplePhase, timer, age, -1, sampleFacing, sampleCombo, sampleTransition);
+        var right = SamuraiRigMotion.Blade(sampleAttack, samplePhase, timer, age, 1, sampleFacing, sampleCombo, sampleTransition);
+        float entryBlend = 1 - SamuraiRigMotion.Smooth((Main.GameUpdateCount - 1 + fraction - entryAt) / 10f);
+        if (sampleBeat != SamuraiBeat.Strike)
+        {
+            left = left with { Angle = left.Angle + entryLeft * entryBlend };
+            right = right with { Angle = right.Angle + entryRight * entryBlend };
+        }
+        float neutralLean = current.Lean - SamuraiRigMotion.ActionLean(current.Left, current.Right, sampleFacing);
+        return pose with { Age = age, Left = left, Right = right,
+            Lean = neutralLean + SamuraiRigMotion.ActionLean(left, right, sampleFacing) };
     }
     internal static bool TryPose(out SamuraiRigPose pose, out Guid ownerFight)
     {
-        pose = SamuraiRigMotion.Interpolate(previous, current, Fraction);
+        pose = SamplePose(Fraction);
         ownerFight = fight;
         return !Main.dedServ && !Main.gameMenu && !death && owner is { ProjectionFresh: true }
             && owner.NPC.active && fight != Guid.Empty && owner.Fight == fight;
@@ -203,6 +243,7 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         foreach (var shake in shakes) shake.ShakeStrength = 0;
         shakes.Clear();
         hitSeen = false; momentum = Vector2.Zero; lean = lag = entryLeft = entryRight = 0;
+        sampleReady = sampleSmooth = false; sampleTimer = 0; sampleCombo = default;
     }
     private static void Clear()
     { DropOwner(); retiredFight = Guid.Empty; death = false; deathAt = 0; stamp = 0; systemTick = ulong.MaxValue; current = previous = deathPose = default; }

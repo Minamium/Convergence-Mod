@@ -18,9 +18,10 @@ public sealed class DXOboroCut : ModProjectile
     internal int Age => (int)Projectile.ai[2];
     internal int Facing => MathF.Cos(Aim) < 0 ? -1 : 1;
     internal float BladeAngle => DXOboroMotion.Angle(Step, Age, Aim, Facing);
-    internal Vector2 Hand(Player owner, float angle)
+    internal Vector2 Hand(Player owner, float age)
     {
-        var point = OboroHandAnchor.Capture(owner, Facing).At(angle);
+        var point = OboroHandAnchor.Capture(owner, Facing).At(
+            DXOboroMotion.ArmAngle(Step, age, Aim, Facing));
         return owner.MountedCenter + new Vector2(point.X, point.Y);
     }
 
@@ -71,7 +72,7 @@ public sealed class DXOboroCut : ModProjectile
         if (Projectile.owner == Main.myPlayer &&
             (Age == 1 || Age == DXOboroMotion.Release(Step) || Age % 6 == 0))
             Projectile.netUpdate = true;
-        Projectile.Center = Hand(owner, BladeAngle);
+        Projectile.Center = Hand(owner, Age);
         Projectile.rotation = BladeAngle;
         Projectile.direction = Projectile.spriteDirection = Facing;
         Projectile.velocity = Vector2.Zero;
@@ -81,7 +82,8 @@ public sealed class DXOboroCut : ModProjectile
     public override bool? Colliding(Rectangle projectileHitbox, Rectangle targetHitbox)
     {
         if (!DXOboroMotion.Live(Step, Age)) return false;
-        Vector2 root = Projectile.Center;
+        Player owner = Main.player[Projectile.owner];
+        var hand = OboroHandAnchor.Capture(owner, Facing);
         Vector2 topLeft = new(targetHitbox.X, targetHitbox.Y);
         Vector2 size = new(targetHitbox.Width, targetHitbox.Height);
         // Sweep the same advancing curve rendered by the ribbon. Fast release
@@ -90,6 +92,8 @@ public sealed class DXOboroCut : ModProjectile
         {
             float sampleAge = Math.Max(DXOboroMotion.Release(Step), Age - 1f + i / 8f);
             float angle = DXOboroMotion.Angle(Step, sampleAge, Aim, Facing);
+            var point = hand.At(DXOboroMotion.ArmAngle(Step, sampleAge, Aim, Facing));
+            Vector2 root = owner.MountedCenter + new Vector2(point.X, point.Y);
             float collision = 0;
             if (Collision.CheckAABBvLineCollision(topLeft, size, root,
                     root + angle.ToRotationVector2() * DXOboroMotion.Reach,

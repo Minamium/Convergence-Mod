@@ -7,7 +7,7 @@ internal static class OboroSecondSwingMotion
 {
     internal const float ReadyEnd = 3, AccelerationEnd = 6, CutEnd = 11, FollowEnd = 15;
     internal const float AccelerationAngle = 60, FollowAngle = -55;
-    internal const float PeakSpeed = -33, ExitSpeed = -4, ReturnSpeed = -2; // 度/F
+    internal const float PeakSpeed = -42, ExitSpeed = -4, ReturnSpeed = -2; // 度/F: compact accelerating reversal
 
     internal static float Frame(float progress) => Math.Clamp(progress, 0, 1) * OboroComboSettings.For(1).TotalFrames;
     internal static OboroMotionPhase Phase(float progress)

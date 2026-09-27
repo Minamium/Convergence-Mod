@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Rework Oboro/Soboro and Ghost Samurai's sword acting around fractional poses, linked arms, held anticipation, explosive angular acceleration and braking. Soboro gains connected three-stroke choreography, overshoot and blade extension/retraction; original Luminance violet lightning branches from all three's actual blades. Hit windows, damage and reach stay unchanged; matching protocol74 peers are required for the weapons' revised sweeps. Native feel/visual acceptance remains a playtest item.
+
 - Doll's first Phase III claw crush fractures the central metallic sphere and bursts its shell into a persistent violet energy core. Preserve all combat timings, damage and targeting; retain the energy form through Final and the closing DPS check.
 
 - Replace Oboro's oversized rotating sword with a constant-size katana, articulated wrist and original violet spectral crescents. Preserve combo timing, damage, reach and rewards.

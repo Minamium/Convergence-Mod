@@ -853,7 +853,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 68bc937ca3e262b3faaecc1227e2bbb3d1af699f00f43b424cf1bede1c971153
+  content_sha256: bc7fe78248f41895a4914e0c1e9ab3ff90f483472df612f010d1a0f4dd6c733a
   document_type: spec
   status: provisional
   owners:
@@ -930,7 +930,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 5486129b94d289eb422d07242aaca1de941d1e52a766e1d99851b39e3981b1df
+  content_sha256: adb99e9723db50c8139d449f5fad797477b6a90413fabf1a16b4f5eef5b9b60f
   document_type: evidence
   status: historical
   owners:
@@ -1010,7 +1010,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 42c32858792424b397cd01337e3b9acdd44c0ffb2f1810369d22ab71a7a56135
+  content_sha256: 0f5edf9d841a1f8e1b5496600ec285dae808374fa967fd6fd8a82a7644c37847
   document_type: policy
   status: accepted
   owners:
@@ -1329,7 +1329,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 1c8c07e3c7511ebf52102e87bf81700d83bcaa7c26c410e10c1e55340a03be5e
+  content_sha256: 445d8245ed89934358890a0526a1d8de0f3c289a5b97d0fef690e1fcc7b79807
   document_type: status
   status: accepted
   owners:
@@ -1585,7 +1585,7 @@ documents:
 - doc_id: research.oboro-20260916
   path: docs/research/2026-09-16-oboro.md
   title: 'Oboro: API and comparison boundary'
-  content_sha256: 7ed0812524e5b200230df7c22e5777183c6aa70b47b6dd991c755af12a7ec9fc
+  content_sha256: 4342c709447672ddee861e9d7df35a3100ea14f0791c17a3a6111b5997dee80c
   document_type: research
   status: provisional
   owners:
@@ -1624,7 +1624,7 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: 48d3b0074ce62b156bd32a7445f307640459cb65df8d303e4635d44bfbacfd00
+  content_sha256: a37d789b7e5e012a21b6323bcfca01ad0b588bfb0a27f64a866e09568ea0091b
   document_type: research
   status: historical
   owners:

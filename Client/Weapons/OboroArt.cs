@@ -39,7 +39,7 @@ internal static class OboroArt
         for (int i = history.Count - 3; i >= 0 && shown < (reduced ? 1 : 2); i -= 3)
         {
             OboroEcho echo = history.Echo(i);
-            float fade = OboroSwingPresentation.Opacity(echo.At, Main.GameUpdateCount, echo.Pose.Step);
+            float fade = OboroSwingPresentation.Fade(history.RenderNow - echo.At, echo.Pose.Step);
             Sword(b, new(echo.Sword.X, echo.Sword.Y), echo.Sword.Angle, echo.Sword.Length,
                 new Color(165, 101, 248) * (fade * .20f), echo.Sword.Facing < 0);
             shown++;
