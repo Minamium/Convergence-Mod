@@ -45,7 +45,7 @@ internal sealed class GhostSamuraiBattlefieldSky : CustomSky
         && !Main.gameMenu && Main.LocalPlayer is { active: true, dead: false, ghost: false } player
         && player.GetModPlayer<GhostSamuraiContainmentPlayer>().BoundTo(boss);
     public override void Reset() { active = false; fight = Guid.Empty; arena = default; owner = null; age = 0; }
-    public override float GetCloudAlpha() => IsActive() ? .15f : 1f;
+    public override float GetCloudAlpha() => IsActive() ? 0f : 1f;
     public override void Update(GameTime gameTime) { }
 
     public override void Draw(SpriteBatch batch, float minDepth, float maxDepth)
@@ -60,13 +60,19 @@ internal sealed class GhostSamuraiBattlefieldSky : CustomSky
         shader.TrySetParameter("reduced", GhostSamuraiRigArt.Reduced ? 1f : 0f);
         shader.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value, 1, SamplerState.LinearWrap);
         shader.SetTexture(MiscTexturesRegistry.DendriticNoiseZoomedOut.Value, 2, SamplerState.LinearWrap);
-        Vector2 at = new(arena.Left - Main.screenPosition.X, arena.Top - Main.screenPosition.Y);
-        Vector2 size = new(arena.Right - arena.Left, arena.Bottom - arena.Top);
+        // One small world-space bleed keeps fractional raster/zoom edges filled.
+        // The physical viewport mask below covers the bleed outside the field.
+        const float bleed = 4f;
+        Vector2 at = new(arena.Left - Main.screenPosition.X - bleed, arena.Top - Main.screenPosition.Y - bleed);
+        Vector2 fieldSize = new(arena.Right - arena.Left, arena.Bottom - arena.Top);
+        Vector2 size = fieldSize + new Vector2(bleed * 2);
+        Vector2 uvMin = new(-bleed / fieldSize.X, -bleed / fieldSize.Y);
+        Vector2 uvSize = size / fieldSize;
         for (int i = 0; i < 6; i++)
         {
             int corner = i switch { 0 => 0, 1 => 2, 2 => 1, 3 => 1, 4 => 2, _ => 3 };
-            Vector2 uv = new(corner % 2, corner / 2);
-            quad[i] = new(new(at + uv * size, 0), Color.White, uv);
+            Vector2 cornerUv = new(corner % 2, corner / 2);
+            quad[i] = new(new(at + cornerUv * size, 0), Color.White, uvMin + cornerUv * uvSize);
         }
         shader.Apply();
         device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);

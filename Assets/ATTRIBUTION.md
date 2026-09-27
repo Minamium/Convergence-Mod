@@ -2,6 +2,21 @@
 
 ## Records
 
+### Ghost Samurai sword tears — 2026-09-27
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiCut.fxc`
+- Asset ID: samurai-cut-20260927
+- Asset type: compiled original procedural slash material
+- Creator: Convergence, project-owner-directed work with OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-27
+- Source type: original
+- Source work and URL: original SamuraiCut.fx; local ScarletSorcery.fx / AzureMaterials.Slash are choreography references, not third-party sources
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Violet sword incisions, counterflowing tapered sheets, micro-amplitude blade motion, crescent/annulus masks and harmless smoky contraction. No beam or portal renderer imported; installed Luminance noise is referenced, not redistributed.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance
+- Reviewer and review date: Codex compiled-material sequence review2026-09-27; native gameplay not_run
+
 ### Ghost Samurai battlefield — 2026-09-27
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiBattlefield.fxc`
@@ -12,7 +27,7 @@
 - Source type: original
 - Source work and URL: original SamuraiBattlefield.fx in this repository; no external artwork or shader copied
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Original flags, spears, graves and layered violet mist; Luminance noise is referenced from the dependency, not redistributed. Runtime world-anchored field composition.
+- Human modifications: Original spears, low arched graves and layered violet mist; flags and floating rectangular stones removed. Opaque field edge with a small masked bleed. Luminance noise is referenced from the dependency, not redistributed.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance
 - Reviewer and review date: Codex compiled-material preview2026-09-27; native gameplay not_run
