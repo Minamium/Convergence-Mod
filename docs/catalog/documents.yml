@@ -853,13 +853,13 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: bc7fe78248f41895a4914e0c1e9ab3ff90f483472df612f010d1a0f4dd6c733a
+  content_sha256: 91383ecaa9862a63c177e54fa5746f7cb561797cb0b2b4fe4bfbba82cab3cdd4
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-09-28'
   source_of_truth_for:
   - ghost_samurai.behavior
   aliases:
@@ -930,7 +930,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 52cb53040e13d20f5041ac8eebddeba0b538439c3822eaaff4252a8e9b504fb9
+  content_sha256: 3688fb596cfa84f7e3427366d6945ddba60de6685e40fb23b1c59837911dc835
   document_type: evidence
   status: historical
   owners:
@@ -1010,13 +1010,13 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 0f5edf9d841a1f8e1b5496600ec285dae808374fa967fd6fd8a82a7644c37847
+  content_sha256: 62b34db89a831dbaa58e02a2fd04cbf49f97dbb8bf08ab7cc4c2099c48a1cdbb
   document_type: policy
   status: accepted
   owners:
   - project
   - art
-  last_reviewed: '2026-09-19'
+  last_reviewed: '2026-09-28'
   source_of_truth_for:
   - policy.ip_provenance
   aliases:
@@ -1329,7 +1329,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: de766042dc88ebe087d6545401f18b628509c4fdcc18bace0fe28db0cbd5c008
+  content_sha256: 3447bce432265740dc427b705d88ed9bde8ef39909572b21fdf8dd1937039442
   document_type: status
   status: accepted
   owners:
@@ -1585,12 +1585,12 @@ documents:
 - doc_id: research.oboro-20260916
   path: docs/research/2026-09-16-oboro.md
   title: 'Oboro: API and comparison boundary'
-  content_sha256: 4342c709447672ddee861e9d7df35a3100ea14f0791c17a3a6111b5997dee80c
+  content_sha256: b78682c0b8150a8405117c64a6ab93df3c0f6f0f4a2638d50d97f73d66cc631f
   document_type: research
   status: provisional
   owners:
   - gameplay
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-09-28'
   source_of_truth_for:
   - research.oboro_api_evidence
   aliases:
@@ -1624,12 +1624,12 @@ documents:
 - doc_id: research.sources
   path: docs/SOURCES.md
   title: Research Sources
-  content_sha256: a37d789b7e5e012a21b6323bcfca01ad0b588bfb0a27f64a866e09568ea0091b
+  content_sha256: b6d225a4008cf8a0add0d35c8ca97d8255cf499a27803a99d5a623fb386587ce
   document_type: research
   status: historical
   owners:
   - research
-  last_reviewed: '2026-09-19'
+  last_reviewed: '2026-09-28'
   source_of_truth_for: []
   aliases:
   - research sources

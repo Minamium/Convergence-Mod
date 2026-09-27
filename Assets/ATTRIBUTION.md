@@ -2,6 +2,73 @@
 
 ## Records
 
+### Soboro three-cut audio — 2026-09-28
+
+- Runtime file: `Assets/Sounds/Weapons/Soboro/CutDown.ogg`
+- Asset ID: soboro-cutdown-20260928
+- Asset type: original stereo weapon sound
+- Creator: Convergence, owner-directed OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-28
+- Source type: original
+- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
+- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
+- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
+- License and redistribution terms: existing project original code/asset terms; no third-party recording
+- Required attribution: retain project provenance
+- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+
+- Runtime file: `Assets/Sounds/Weapons/Soboro/CutReverse.ogg`
+- Asset ID: soboro-cutreverse-20260928
+- Asset type: original stereo weapon sound
+- Creator: Convergence, owner-directed OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-28
+- Source type: original
+- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
+- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
+- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
+- License and redistribution terms: existing project original code/asset terms; no third-party recording
+- Required attribution: retain project provenance
+- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+
+- Runtime file: `Assets/Sounds/Weapons/Soboro/CutHeavy.ogg`
+- Asset ID: soboro-cutheavy-20260928
+- Asset type: original stereo weapon sound
+- Creator: Convergence, owner-directed OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-28
+- Source type: original
+- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
+- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
+- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
+- License and redistribution terms: existing project original code/asset terms; no third-party recording
+- Required attribution: retain project provenance
+- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+
+- Runtime file: `Assets/Sounds/Weapons/Soboro/HitOrganic.ogg`
+- Asset ID: soboro-hitorganic-20260928
+- Asset type: original stereo weapon sound
+- Creator: Convergence, owner-directed OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-28
+- Source type: original
+- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
+- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
+- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
+- License and redistribution terms: existing project original code/asset terms; no third-party recording
+- Required attribution: retain project provenance
+- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+
+- Runtime file: `Assets/Sounds/Weapons/Soboro/HitMetal.ogg`
+- Asset ID: soboro-hitmetal-20260928
+- Asset type: original stereo weapon sound
+- Creator: Convergence, owner-directed OpenAI Codex assistance
+- Creation/acquisition date: 2026-09-28
+- Source type: original
+- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
+- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
+- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
+- License and redistribution terms: existing project original code/asset terms; no third-party recording
+- Required attribution: retain project provenance
+- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+
 ### Ghost Samurai sword tears — 2026-09-27
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiCut.fxc`
@@ -98,7 +165,7 @@ Original Convergence images and procedural materials; existing VioletRig, Oboro 
 - Source type: original
 - Source work and URL: original Convergence HLSL source alongside runtime export
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Original repository-owned DXOboroVeil.fx; independently authored flow/emission/analytic masks. Luminance API/noise references are runtime dependencies, not vendored textures.
+- Human modifications: Original repository-owned DXOboroVeil.fx. Revised2026-09-28 for independently authored white-violet cutting surfaces, torn negative space and large fracture strokes; no Calamity art/code/sample imported. Current source/export identity is in compiled.json.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance and generation disclosure
 - Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run

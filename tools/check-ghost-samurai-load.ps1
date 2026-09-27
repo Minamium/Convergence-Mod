@@ -7,7 +7,8 @@ param(
     [switch]$ExpectOldFailure,
     [switch]$CheckLifecycle,
     [switch]$CheckSlashArt,
-    [switch]$CheckRig
+    [switch]$CheckRig,
+    [switch]$CheckSoboro
 )
 $ErrorActionPreference = 'Stop'
 $loadSource = @'
@@ -54,7 +55,7 @@ public static class GhostSamuraiLoadCheck
         return output.ToArray();
     }
 
-    public static void Run(string package, string loader, string luminancePackage, bool expectOldFailure, bool checkLifecycle, bool checkSlashArt, bool checkRig)
+    public static void Run(string package, string loader, string luminancePackage, bool expectOldFailure, bool checkLifecycle, bool checkSlashArt, bool checkRig, bool checkSoboro)
     {
         var resolver = new AssemblyDependencyResolver(loader);
         var context = new AssemblyLoadContext("GhostSamuraiValidation", isCollectible: true);
@@ -80,10 +81,11 @@ public static class GhostSamuraiLoadCheck
             using var bytes = new MemoryStream(ReadModAssembly(package));
             Assembly assembly = context.LoadFromStream(bytes);
             const string prefix = "Convergence.Client.Encounters.GhostSamurai.";
-            string[] names = checkSlashArt ? new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals", "GhostSamuraiSlashArt", "GhostSamuraiSummonVisuals" }
+            string[] names = checkSoboro ? new[] { "DXOboroVisuals", "DXOboroItemVisuals" }
+                : checkSlashArt ? new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals", "GhostSamuraiSlashArt", "GhostSamuraiSummonVisuals" }
                 : new[] { "GhostSamuraiVisuals", "GhostSamuraiHazardVisuals" };
             foreach (string name in names) {
-                Type type = assembly.GetType(prefix + name, throwOnError: true);
+                Type type = assembly.GetType((checkSoboro ? "Convergence.Client.Weapons." : prefix) + name, throwOnError: true);
                 object instance = Activator.CreateInstance(type, nonPublic: true);
                 MethodInfo validate = type.GetMethod("ValidateType", BindingFlags.Instance | BindingFlags.NonPublic);
                 bool rejected = false;
@@ -96,8 +98,22 @@ public static class GhostSamuraiLoadCheck
                 if (expectOldFailure && name == "GhostSamuraiVisuals" && !rejected)
                     throw new Exception("The regression check did not reproduce the old failure");
                 if (!rejected) Console.WriteLine("PASS installed tModLoader ValidateType: " + name);
+                if (checkSoboro && name == "DXOboroVisuals") {
+                    const BindingFlags fields = BindingFlags.Instance | BindingFlags.NonPublic;
+                    type.GetField("impactCount", fields).SetValue(instance, 2);
+                    type.GetField("released", fields).SetValue(instance, true);
+                    type.GetField("lastObservedAge", fields).SetValue(instance, 19);
+                    type.GetMethod("OnKill").Invoke(instance, new object[] { null, 0 });
+                    type.GetMethod("OnKill").Invoke(instance, new object[] { null, 0 });
+                    if ((int)type.GetField("impactCount", fields).GetValue(instance) != 0
+                        || (bool)type.GetField("released", fields).GetValue(instance)
+                        || (int)type.GetField("lastObservedAge", fields).GetValue(instance) != -1)
+                        throw new Exception("Soboro retained a release/impact after repeated cancellation");
+                    Console.WriteLine("PASS Soboro repeated cancellation without graphics or player state");
+                }
             }
-            Type summon = assembly.GetType("Convergence.Content.Encounters.GhostSamurai.GhostSamuraiSummon", throwOnError: true);
+            Type summon = assembly.GetType(checkSoboro ? "Convergence.Content.Items.DXOboro.DXOboro"
+                : "Convergence.Content.Encounters.GhostSamurai.GhostSamuraiSummon", throwOnError: true);
             Console.WriteLine("PASS saved item type retained: Convergence/" + summon.Name);
             if (checkLifecycle) {
                 const string contentPrefix = "Convergence.Content.Encounters.GhostSamurai.";
@@ -146,4 +162,4 @@ Add-Type -TypeDefinition ($loadSource + [IO.File]::ReadAllText((Join-Path $PSScr
 $package = (Resolve-Path -LiteralPath $PackagePath).Path
 $loader = Join-Path (Resolve-Path -LiteralPath $TModLoaderPath).Path 'tModLoader.dll'
 $luminance = if ($LuminancePackage) { (Resolve-Path -LiteralPath $LuminancePackage).Path } else { '' }
-[GhostSamuraiLoadCheck]::Run($package, $loader, $luminance, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent, $CheckSlashArt.IsPresent, $CheckRig.IsPresent)
+[GhostSamuraiLoadCheck]::Run($package, $loader, $luminance, $ExpectOldFailure.IsPresent, $CheckLifecycle.IsPresent, $CheckSlashArt.IsPresent, $CheckRig.IsPresent, $CheckSoboro.IsPresent)

@@ -84,13 +84,32 @@ internal static class DXOboroPreview
                     throw new Exception("DX material changed caller SpriteBatch state");
                 Line(batch,pixel,shoulder,hand,5,new Color(213,187,153));
                 DXOboroArt.Sword(batch,hand,angle,DXOboroMotion.BladeLength(step,age),Color.White,facing<0);
-                DXOboroMaterial.Lightning(batch,age,step,aim,facing,hand,frame*.5+100,reduced);
+                DXOboroMaterial.BladeAndFracture(batch,age,step,aim,facing,hand,reduced);
+                if(before!=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch))
+                    throw new Exception("DX blade/fracture changed caller SpriteBatch state");
                 batch.Draw(pixel,hand,null,Color.Gold,0,new(.5f),new Vector2(4),SpriteEffects.None,0);
                 batch.End();device.SetRenderTarget(null);
                 string name=$"{(facing==1?"right":"left")}-{(bright?"light":"dark")}-{(reduced?"reduced":"normal")}-{frame:D4}.png";
                 using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,720,720);frames++;
             }
             // A cancelled owner has no persistent ribbon or stale blade frame.
+            // Synthetic native-hit samples exercise the same bounded impact
+            // material, not a claim that a native callback was delivered.
+            if(args.Length < 4 || !bool.Parse(args[3]))
+            foreach(bool reduced in new[]{false,true})
+            for(int frame=0;frame<15;frame++)
+            {
+                device.SetRenderTarget(target);device.Clear(new Color(14,17,31));
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                var before=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch);
+                DXOboroMaterial.Impact(batch,Vector2.Zero,.2f,frame*.5f,2,reduced);
+                if(before!=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch))
+                    throw new Exception("DX impact changed caller SpriteBatch state");
+                batch.End();device.SetRenderTarget(null);
+                using var file=File.Create(Path.Combine(output,$"impact-{(reduced?"reduced":"normal")}-{frame:D2}.png"));
+                target.SaveAsPng(file,720,720);
+            }
             if(args.Length < 4 || !bool.Parse(args[3]))
             for(int frame=0;frame<6;frame++)
             {

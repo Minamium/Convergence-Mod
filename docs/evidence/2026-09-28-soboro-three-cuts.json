@@ -1,0 +1,24 @@
+{
+  "scope": "Soboro cuts 1-3 presentation only; original Oboro, Ghost Samurai, native damage, reach, hit windows, durations and networking unchanged",
+  "target_build": "0.3.53 / protocol74 unchanged",
+  "integration_base": "3aa75e0 (includes Scarlet publication fix PR85)",
+  "reference": {
+    "research": "docs/research/2026-09-16-oboro.md#installed-murasama-comparison--2026-09-28",
+    "installed": "Calamity2.2.4 Murasama: distinct authored cut silhouettes, broad white fracture shapes and a quiet recovery; independently recreated with Soboro's existing fractional motion and original procedural surfaces/audio, without copying third-party art, sound or source",
+    "limit": "Not an assertion of Murasama parity or native feel acceptance"
+  },
+  "checks": {
+    "static": "passed: documentation catalog82, repository checks1112 files and YAML12; one final scoped wrapper run after document edits",
+    "native_feature_build": "passed:0errors/4existing CS8632 warnings, source unchanged during build; isolated profile before the unrelated Scarlet integration",
+    "feature_package_sha256": "a0a0141a51974ce60b289f689ccf2d9b0bbf75eeeceace083277f636e441fe6b",
+    "feature_build_record": ".local/builds/20260927T202036056284Z/record.json",
+    "installed_loader_probe": "passed: DXOboroVisuals/DXOboroItemVisuals type validation against installed tML/Luminance; idempotent local release/impact cleanup and stable DXOboro item identity",
+    "material": "passed: current DXOboroVeil source/export hashes recorded in compiled.json; actual FNA D3D11 production renderer exercised with shader/mesh and caller SpriteBatch restoration",
+    "sequence_review": "reviewed:1920 sequential120fps frames across three cuts, left/right, light/dark and normal/reduced;30 synthetic impact frames,6 cancellation frames and2 icon views. Repaired disconnected fracture joins and the faint first-live-tick blade spine during review. Proxy player/offline draw, not a Terraria playtest or measured game FPS",
+    "audio": "passed: five original deterministic OGG exports, repeat-run SHA256 equality, zero sampled clipping and bounded local per-cut/per-hit playback; decoded heavy cue peak-3.41dBFS. Synthetic two-cycle audition uses actual release cadence and illustrative hit timings, not game capture; no subjective listening claim",
+    "unchanged_scope": "passed: no diff under Content, Common, Client/Encounters, Client/Graphics or Oboro presentation against integrated main",
+    "native_player_and_remote": "not_run: owner to check the three cuts while standing/moving/flying, cancellation, target contact and music mix in Single Player/Host & Play. Remote swing uses existing native projectile state; new contact accents are native-owner local, not a new broadcast. No performance/remote quality claim",
+    "shared_install": "After integration, the canonical build receipt owns the installed package/source identity; do not treat the isolated feature package as the shared deployment"
+  },
+  "delegation": "Lead retained choreography/material/review/integration. soboro_audio used gpt-6-sol medium for the bounded five-cue original synthesis/helper task; lead inspected hooks, metrics and deterministic output, then requested one cadence correction. No gameplay or unrelated worker changes integrated."
+}

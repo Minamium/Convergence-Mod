@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.52 / protocol74**. Scarlet explicitly publishes its complete Stack/Spread verdict after the authority tick commits it. The old post-update `netUpdate` flag was cleared before native sending, leaving clients without the failed attack's VFX/audio despite real damage. Receive and draw-submission diagnostics are separate from native-hit logs. Solo admission/outcomes, damage1, accepted artwork and other Raids are unchanged; [Scarlet evidence](evidence/2026-09-28-scarlet-chorus-publication.json) distinguishes the observed solo hits from unplayed repaired delivery.
+Current source: **0.3.53 / protocol74**. Soboro's three cuts gain distinct deforming white-violet surfaces, large fracture strokes, quiet recovery, five original sound cues and bounded local native-hit accents. Gameplay geometry/timing/damage, original Oboro and Boss art are unchanged. [Soboro contract](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroの3段斬撃面--2026-09-28) owns the presentation; native quality/mix/remote acceptance remains user-owned.
+
+Retained0.3.52: Scarlet explicitly publishes its complete Stack/Spread verdict after the authority tick commits it. The old post-update `netUpdate` flag was cleared before native sending, leaving clients without the failed attack's VFX/audio despite real damage. Receive and draw-submission diagnostics are separate from native-hit logs. Solo admission/outcomes, damage1 and accepted artwork are unchanged; [Scarlet evidence](evidence/2026-09-28-scarlet-chorus-publication.json) distinguishes observed solo hits from unplayed repaired delivery.
 
 Retained0.3.51: Oboro/Soboro and Ghost Samurai gain connected, fractionally sampled hand/blade acting: held anticipation, sharp angular acceleration, braking and follow-through, plus original Luminance violet lightning. Soboro's hand/length curves and both weapons' sweep timing change; keep damage, reach and hit windows. Boss AI/hazard clocks and other Raids are unchanged. Matching peers must update together. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#武器の連続描画--2026-09-27) owns presentation. Native feel, remote visuals and FPS remain user-owned/unmeasured; rendered frame count is not acceptance. Retain0.3.50's opaque battlefield mask, flag removal and flowing sword-tear hazards.
 
@@ -67,6 +69,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.53 Soboro presentation:** [evidence](evidence/2026-09-28-soboro-three-cuts.json) identifies the focused native package, actual-material frame sequences and numerical audio checks. No new native gameplay or hearing acceptance is claimed. Other Raids' pending checks remain separate.
 
 - **0.3.52 Scarlet chorus:**62 focused domain cases and21 Scarlet source-wiring checks pass. The owning [evidence](evidence/2026-09-28-scarlet-chorus-publication.json) records exact-package publication/codec checks and remaining native delivery/render acceptance. The existing material is unchanged; no new offline-art approval is claimed. A requested Sol-medium probe worker was unavailable at capacity, so the lead implemented the bounded native regression locally.
 
@@ -153,6 +157,8 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Soboro: reload matching0.3.53 peers and compare only its1→2→3 loop, heavy-cut silhouette, blade/hand attachment, cancellation, Reduced Effects and dedicated swing/hit audio. The new hit accents are owner-local; no remote-hit broadcast was added. Native feel, mix and performance are user-owned / not_run. No additional Build is needed for an already installed matching package.
 
 Ghost Samurai: on matching0.3.51 peers, check both weapons' three-stroke loop, release/switch, mirrored/high-speed native arms and violet discharge; check the boss's raised guard→fast cut→recoil, travelling-wave alignment and Reduced Effects. Compare SP and Host & Play rather than assuming offline samples reproduce player drawing/network delivery. Soboro keeps its one-Fallen-Star Work Bench recipe and saved DXOboro ID. GUI and subjective acceptance are user-owned. Earlier battlefield edge/zoom checks remain pending, not repeated as a prerequisite to each minor edit.
 
