@@ -57,6 +57,14 @@ public sealed class CrimsonChorus : ModProjectile
     }
     public override void SendExtraAI(BinaryWriter writer)
     { Plan.Write(writer); writer.Write(Resolved); writer.Write(FailedMask); CrimsonChorusImpactPositions.Write(writer, ImpactPositions); }
+    internal void Synchronize()
+    {
+        // The runtime commits after native Projectile.Update. Its next Update
+        // clears netUpdate before AI, so that flag alone loses the verdict.
+        // Publish the complete marker explicitly, not a cosmetic hit inference.
+        if (Main.netMode == NetmodeID.Server && Plan.Fight != Guid.Empty && Projectile.active)
+            NetMessage.SendData(MessageID.SyncProjectile, number: Projectile.whoAmI);
+    }
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         var next = CrimsonChorusPlan.Read(reader);
@@ -65,7 +73,10 @@ public sealed class CrimsonChorus : ModProjectile
         if (Main.netMode == NetmodeID.Server || Plan.Fight != Guid.Empty && Plan != next
             || !CrimsonChorusRules.CanReplaceVerdict(Resolved, FailedMask, resolved, failures)) return;
         if (Resolved && !ImpactPositions.AsSpan().SequenceEqual(positions)) return;
+        bool changed = Plan.Fight == Guid.Empty || Resolved != resolved;
         Plan = next; Resolved = resolved; FailedMask = failures; ImpactPositions = positions;
+        if (changed && Main.netMode == NetmodeID.MultiplayerClient)
+            CrimsonPackets.Log($"event=ChorusReplicaReceived fight={Plan.Fight} serial={Plan.Serial} kind={Plan.Kind} resolved={Resolved} failed_mask={FailedMask} result_positions={ImpactPositions.Length} observer={Main.myPlayer}");
     }
 }
 
@@ -157,7 +168,8 @@ internal sealed partial class CrimsonRuntime
             Vector2.Zero, ModContent.ProjectileType<CrimsonChorus>(), 0, 0, Main.myPlayer);
         if (slot >= Main.maxProjectiles) throw new InvalidOperationException("crimson.chorus_capacity");
         chorus = plan; chorusSlot = slot; chorusResolved = false; phrasesSinceChorus = 0;
-        Main.projectile[slot].timeLeft = CrimsonChorusImpactPositions.LeaseEnd(plan) - age; Main.projectile[slot].netUpdate = true;
+        Main.projectile[slot].timeLeft = CrimsonChorusImpactPositions.LeaseEnd(plan) - age;
+        ((CrimsonChorus)Main.projectile[slot].ModProjectile).Synchronize();
         nextPhrase = plan.End;
         CrimsonPackets.Log($"event=ChorusCalled fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} born={plan.Born} fire={plan.Fire} members={mask}");
         return true;
@@ -184,7 +196,7 @@ internal sealed partial class CrimsonRuntime
         int[] damage = CrimsonChorusRules.Resolve(plan.Kind, plan.Center, positions, plan.Members, living);
         marker.Resolved = true; marker.FailedMask = 0; marker.ImpactPositions = positions;
         for (int i = 0; i < damage.Length; i++) if (damage[i] > 0) marker.FailedMask |= (byte)(1 << i);
-        marker.Projectile.netUpdate = true;
+        marker.Synchronize();
         int needed = 0, free = 0;
         foreach (int d in damage) if (d > 0) needed++;
         foreach (Projectile p in Main.projectile) if (!p.active) free++;

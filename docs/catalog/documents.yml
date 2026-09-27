@@ -65,13 +65,13 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: 69ef7fd14be61bcc98cf2abe07627b09f0b7e5835925b0819af550aaafef57f3
+  content_sha256: 9bcec9cb4faf64b6ba0791f320fee70c8ba239a7914bf3fb4f2dd0908f6ac88f
   document_type: adr
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-09-28'
   source_of_truth_for:
   - architecture.crimson_score_authority
   aliases:
@@ -635,14 +635,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 767295a7a687535666b025ef8b54c00f340752dcd5eeca5ba3815bbf7f80d803
+  content_sha256: 5beacdb84777b330e6a20fc8eefe32ba84e2794c3c56dec89094a49c09eeff49
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-09-28'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -930,12 +930,12 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: adb99e9723db50c8139d449f5fad797477b6a90413fabf1a16b4f5eef5b9b60f
+  content_sha256: 52cb53040e13d20f5041ac8eebddeba0b538439c3822eaaff4252a8e9b504fb9
   document_type: evidence
   status: historical
   owners:
   - project
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-09-28'
   source_of_truth_for: []
   aliases:
   - playtest feedback
@@ -1329,12 +1329,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 445d8245ed89934358890a0526a1d8de0f3c289a5b97d0fef690e1fcc7b79807
+  content_sha256: de766042dc88ebe087d6545401f18b628509c4fdcc18bace0fe28db0cbd5c008
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-09-28'
   source_of_truth_for:
   - project.implementation_status
   aliases:

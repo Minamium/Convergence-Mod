@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-09-27
+last_reviewed: 2026-09-28
 source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -120,6 +120,8 @@ From Act II, after five phrases, alternate a fixed gather marker and player-foll
 Accepted Victory projects a150-tick energy hemorrhage/melt: red streams erupt, the articulated body deforms downward and dissolves, and its chest sphere drains. This reuses the existing terminal cleanup interval, never prolongs damage/rewards or starts on sacrifice alone. Final convergence and Victory have bounded buildup/impact shake. Reduced Effects/shake-off suppress optional motion/glare. Original managed material erosion/flow and mesh deformation preserve the approved art, not a whole-image fade.
 
 Verdict VFX is driven by the accepted failure mask and recorded positions, **not** native Hurt or God Mode. Failed Spread retains a wider36-tick scarlet spatial cut; failed Stack holds its black/crimson flame more visibly before the bounded48-tick fade. These cosmetic durations never extend the12-tick native verdict window. Marker leases retain the full tail even at the shortest recovery. Spread success/failure use distinct existing Doll dissolve/execution accents. Client `ChorusPresentation` reports verdict age/positions separately from actual native impact, allowing invisible/late effects to be diagnosed without guessing from HP.
+
+Solo uses the same Stack call from Act II: inside the fixed gather circle succeeds; outside fails and shows the black/crimson flame. No second player is required to schedule or resolve it. Successful Stack remains harmless and releases its seals rather than showing the failure flame. Server commits are explicitly published through native marker synchronization, including success; clients never infer the verdict from damage. `ChorusReplicaReceived` records accepted updates and `ChorusDrawn` records one draw submission per result, distinct from actual visible-pixel or audio acceptance.
 
 Spread circles use the280px radius in `CrimsonChorusRules` (previously200): rendering and pair-overlap failure share this constant. Eight complete nonoverlapping circles fit in a four-by-two layout inside the unchanged field with tight vertical margins. Stack radius, failure budgets and chorus timing are unchanged.
 

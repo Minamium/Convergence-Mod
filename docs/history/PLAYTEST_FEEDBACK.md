@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-27
+last_reviewed: 2026-09-28
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -16,6 +16,10 @@ related_docs:
 ---
 
 # Playtest feedback ledger
+
+## Scarlet invisible solo Stack — 2026-09-28 / observed0.3.46 → 0.3.52
+
+Owner still cannot see Stack and asks whether it occurs alone. The latest complete archived Scarlet solo Host & Play won with three Stack calls: two failures each produced an actual native1damage receipt, while the third succeeded; all three Spread calls succeeded. No chorus presentation receipt exists. A later four-player log stops at Act I startup, so it supplies no chorus evidence. The earlier0.3.45 cosmetic-tail change did not repair PostUpdateWorld's lost `netUpdate` verdict flag. Explicitly publish complete marker state at spawn/resolve and add distinct receive/draw-submission diagnostics; retain solo rules, damage1, native God Mode and approved art. [Evidence](../evidence/2026-09-28-scarlet-chorus-publication.json) separates actual prior hits, compiled regression checks and user-owned repaired multiplayer visibility.
 
 ## Ghost Samurai and both swords: motion quality — 2026-09-27 / 0.3.50 → 0.3.51
 

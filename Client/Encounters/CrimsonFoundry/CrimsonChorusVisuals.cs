@@ -119,7 +119,8 @@ internal sealed class CrimsonChorusVisuals : ModSystem
         }
         finally { batch.End(); }
     }
-    private static void DrawSorcery(CrimsonBoss boss,SpriteBatch batch,float age)
+    private readonly HashSet<int> drawnResults = new();
+    private void DrawSorcery(CrimsonBoss boss,SpriteBatch batch,float age)
     {
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
@@ -131,11 +132,13 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                 +42*CrimsonInvocation.Ease((progress-.34f)*15)+50*CrimsonInvocation.Ease((progress-.72f)*18);
             float tail=age<p.Fire?1:1-CrimsonInvocation.Ease((age-p.Fire)/CrimsonChorusImpactPositions.TailTicks);
             float failureAlpha=CrimsonChorusImpactPositions.FailureAlpha(age-p.Fire);
+            int submitted = 0;
             for(int i=0;i<boss.State.Members.Length;i++)
             {
                 var member=boss.State.Members[i];var player=Main.player[member.Slot];
                 bool failed=marker.Resolved && (marker.FailedMask & 1<<i)!=0;
                 if((p.Members & 1<<i)==0 || !failed && (member.Out || member.Recovery.Downed || !player.active || player.dead))continue;
+                submitted++;
                 Vector2 at=marker.Resolved && i<marker.ImpactPositions.Length
                     ? new(marker.ImpactPositions[i].X,marker.ImpactPositions[i].Y) : player.Center;
                 if(p.Kind==CrimsonChorusKind.Stack)
@@ -156,12 +159,17 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                     }
                 }
             }
+            if (marker.Resolved && age >= p.Fire && submitted > 0 && drawnResults.Add(p.Serial))
+            {
+                CrimsonPackets.Log($"event=ChorusDrawn fight={p.Fight} serial={p.Serial} kind={p.Kind} failed_mask={marker.FailedMask} verdict_delay_ticks={age-p.Fire:F1} submitted_members={submitted} observer={Main.myPlayer} reduced={CrimsonVisuals.Reduced}");
+                drawnResults.RemoveWhere(serial => serial < p.Serial - 2);
+            }
         }
     }
     private void Reset()
     {
         foreach (var v in voices) if (SoundEngine.TryGetActiveSound(v.Id, out var sound)) sound.Stop();
-        voices.Clear(); heard.Clear(); fight = Guid.Empty; previous = -1;
+        voices.Clear(); heard.Clear(); drawnResults.Clear(); fight = Guid.Empty; previous = -1;
     }
     public override void OnWorldUnload() => Reset();
     public override void ClearWorld() => Reset();
