@@ -35,8 +35,10 @@ internal static partial class Program
             int fire = GhostSamuraiRules.DirectionalSpawnTime(step) + GhostSamuraiRules.SlashWarning;
             var before = SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash, SamuraiPhase.Phase1, fire - .01f, fire, side, 1, default, false);
             var cut = SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash, SamuraiPhase.Phase1, fire, fire, side, 1, default, false);
-            AssertEqual(0f, before.Trail, "no active trail during warning");
+            AssertEqual(true, before.Trail is > 0 and < 1, "cosmetic trail approaches contact continuously");
             AssertEqual(1f, cut.Trail, "active trail on authority fire");
+            AssertEqual(true, Math.Abs(SamuraiRigMotion.Wrap(cut.Angle - before.Angle)) > .001f,
+                "blade is still moving into authority fire");
         }
         foreach (int fire in new[] { 42, 108, 174 })
             AssertEqual(1f, SamuraiRigMotion.Blade(SamuraiAttack.TripleVerticalSlash, SamuraiPhase.Phase1, fire, fire, 1, 1, default, false).Trail, "vertical authority fire");
@@ -59,9 +61,11 @@ internal static partial class Program
     {
         float[] fire = { 54 };
         float At(float age) => SamuraiRigMotion.Sequence(age, fire, .98f, 20).Angle;
-        AssertEqual(true, Math.Abs(At(58) - At(57)) > Math.Abs(At(55) - At(54)) * 8,
-            "acceleration after tension hold");
-        AssertEqual(true, Math.Abs(At(62) - At(54)) > 4, "wide release rather than a small wrist twitch");
+        AssertEqual(true, Math.Abs(At(54) - At(53)) > Math.Abs(At(51) - At(50)) * 8,
+            "release accelerates out of the tension hold into authority fire");
+        AssertEqual(true, Math.Abs(At(58) - At(57)) < Math.Abs(At(54) - At(53)) * .2f,
+            "release brakes after contact");
+        AssertEqual(true, Math.Abs(At(58) - At(50)) > 4, "wide release rather than a small wrist twitch");
         for (int sub = 0; sub <= 1000; sub++)
         {
             float age = sub / 10f;

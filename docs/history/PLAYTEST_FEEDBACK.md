@@ -17,6 +17,10 @@ related_docs:
 
 # Playtest feedback ledger
 
+## Ghost Samurai and both swords: motion quality — 2026-09-27 / 0.3.50 → 0.3.51
+
+Owner still rejects the weapons' limited motion, supplies two implementation/acceptance critiques, explicitly includes the boss's own sword action, and requests strong angular acceleration/braking and higher-quality violet lightning. This is feedback/design direction, not a new recorded playtest. Recheck Murasama's authored silhouettes and WotG's leading-cut/residue separation; independently connect sampled hand/blade/body poses, rewrite Soboro's pose knots, sharpen Oboro's shared angular curves and add attached branching discharges. Keep boss attack clocks and both weapons' damage/reach/windows. [Evidence](../evidence/2026-09-27-sword-performance.json) separates sequence/native-package checks from user-owned gameplay, remote visuals, FPS and subjective acceptance; offline frame count is not a quality verdict.
+
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
 
 ## Ghost Samurai flowing sword tears — 2026-09-27 / 0.3.49 → 0.3.50

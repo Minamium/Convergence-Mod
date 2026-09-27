@@ -7,15 +7,17 @@ VO VS(VI v) { VO o; o.P=mul(v.P,uWorldViewProjection); o.P.z=0; o.C=v.C; o.U=v.U
 float4 Arc(VO i):COLOR0
 {
  float u=i.U.x, v=i.U.y;
- float flow=sin(u*17-clock*15+sin(u*7+clock*4)*1.6)*.6+sin(u*39+clock*9)*.25;
- float torn=smoothstep(.04,.48,v+flow*.14*(1-reduced*.65));
+ float flow=sin(u*11-clock*11+sin(u*5+clock*3)*1.1)*.6+sin(u*29+clock*7)*.25;
+ float torn=smoothstep(.08,.52,v+flow*.20*(1-reduced*.65));
  float body=sin(saturate(v)*3.141593)*torn;
- float lip=exp2(-pow((v-.94)*35,2));
- float core=exp2(-pow((v-.74-flow*.04)*6,2))*torn;
- float strand=pow(saturate(.5+.5*sin(v*19+flow*3+u*9-clock*20)),11)*body;
- float3 violet=float3(.32,.05,.65)*body*(.8+.14*flow);
- float3 light=violet+float3(.68,.32,1)*core*.66+float3(.61,.27,1)*strand*.33+float3(.94,.84,1)*lip;
- return float4(light*i.C.a,body*.36*i.C.a);
+ // A broad moon-white cutting shoulder, violet depth and tapering inner tears.
+ // The former thin rim made the entire swing read as a wire circle.
+ float lip=exp2(-pow((v-.92)*17,2));
+ float core=exp2(-pow((v-.76-flow*.055)*8,2))*torn;
+ float strand=pow(saturate(.5+.5*sin(v*15+flow*2+u*7-clock*14)),7)*body;
+ float3 violet=float3(.26,.045,.53)*body*(.78+.14*flow);
+ float3 light=violet+float3(.77,.46,1)*core*.82+float3(.52,.23,.92)*strand*.34+float3(.92,.85,1)*lip;
+ return float4(light*i.C.a,body*.30*i.C.a);
 }
 float4 Blade(VO i):COLOR0
 {

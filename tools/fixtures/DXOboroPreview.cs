@@ -49,30 +49,59 @@ internal static class DXOboroPreview
             using var batch=new SpriteBatch(device);
             using var pixel=new Texture2D(device,1,1);pixel.SetData(new[]{Color.White});
             int frames=0;
+            bool oneSequence=args.Length>4 && bool.Parse(args[4]);
+            int comboTicks=DXOboroMotion.Duration(0)+DXOboroMotion.Duration(1)+DXOboroMotion.Duration(2);
             if(args.Length < 4 || !bool.Parse(args[3]))
             foreach(int facing in new[]{1,-1})
             foreach(bool bright in new[]{false,true})
             foreach(bool reduced in new[]{false,true})
-            foreach(int step in new[]{0,1,2})
-            for(int age=0;age<=DXOboroMotion.Duration(step);age++)
+            for(int frame=0;frame<comboTicks*4;frame++)
             {
-                Terraria.Main.GameUpdateCount=(ulong)(step*40+age+100);
+                if(oneSequence && (facing!=1 || bright || reduced)) continue;
+                float action=(frame*.5f)%comboTicks;
+                int step=action<DXOboroMotion.Duration(0)?0
+                    :action<DXOboroMotion.Duration(0)+DXOboroMotion.Duration(1)?1:2;
+                float age=action-(step==0?0:step==1?DXOboroMotion.Duration(0)
+                    :DXOboroMotion.Duration(0)+DXOboroMotion.Duration(1));
+                Terraria.Main.GameUpdateCount=(ulong)(frame/2+100);
                 float aim=facing==1?0:MathF.PI;
                 float angle=DXOboroMotion.Angle(step,age,aim,facing);
-                Vector2 shoulder=new(-16f*facing,-12),hand=new(10f*facing+MathF.Cos(angle)*9,-6+MathF.Sin(angle)*7);
+                float armAngle=DXOboroMotion.ArmAngle(step,age,aim,facing);
+                Vector2 shoulder=new(-4f*facing,-9),handCenter=new(0,-9),handAlong=new(11,0),handAcross=new(0,10);
+                Vector2 hand=handCenter+handAlong*MathF.Cos(armAngle)+handAcross*MathF.Sin(armAngle);
                 device.SetRenderTarget(target);device.Clear(bright?new Color(181,195,207):new Color(14,17,31));
                 batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
                     DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                batch.Draw(pixel,new Vector2(-8,-11),null,new Color(40,46,61),0,Vector2.Zero,
+                    new Vector2(16,27),SpriteEffects.None,0);
+                batch.Draw(pixel,new Vector2(-7,-27),null,new Color(188,175,163),0,Vector2.Zero,
+                    new Vector2(14,14),SpriteEffects.None,0);
+                Line(batch,pixel,new(-4,16),new(-7,39),5,new Color(39,42,55));
+                Line(batch,pixel,new(4,16),new(9,39),5,new Color(39,42,55));
                 var before=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch);
-                DXOboroMaterial.Draw(batch,age,step,aim,facing,hand,reduced);
+                DXOboroMaterial.Draw(batch,age,step,aim,facing,handCenter,handAlong,handAcross,reduced);
                 if(before!=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch))
                     throw new Exception("DX material changed caller SpriteBatch state");
                 Line(batch,pixel,shoulder,hand,5,new Color(213,187,153));
                 DXOboroArt.Sword(batch,hand,angle,DXOboroMotion.BladeLength(step,age),Color.White,facing<0);
+                DXOboroMaterial.Lightning(batch,age,step,aim,facing,hand,frame*.5+100,reduced);
                 batch.Draw(pixel,hand,null,Color.Gold,0,new(.5f),new Vector2(4),SpriteEffects.None,0);
                 batch.End();device.SetRenderTarget(null);
-                string name=$"{(facing==1?"right":"left")}-{(bright?"light":"dark")}-{(reduced?"reduced":"normal")}-step{step}-{age:D2}.png";
+                string name=$"{(facing==1?"right":"left")}-{(bright?"light":"dark")}-{(reduced?"reduced":"normal")}-{frame:D4}.png";
                 using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,720,720);frames++;
+            }
+            // A cancelled owner has no persistent ribbon or stale blade frame.
+            if(args.Length < 4 || !bool.Parse(args[3]))
+            for(int frame=0;frame<6;frame++)
+            {
+                device.SetRenderTarget(target);device.Clear(new Color(14,17,31));
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                batch.Draw(pixel,new Vector2(-8,-11),null,new Color(40,46,61),0,Vector2.Zero,
+                    new Vector2(16,27),SpriteEffects.None,0);
+                batch.End();device.SetRenderTarget(null);
+                using var file=File.Create(Path.Combine(output,$"cancel-{frame:D2}.png"));
+                target.SaveAsPng(file,720,720);
             }
             foreach(bool bright in new[]{false,true})
             {
@@ -94,7 +123,7 @@ internal static class DXOboroPreview
             }
             Luminance.Core.Graphics.ShaderManager.Clear();
             foreach(var texture in textures.Values)texture.Dispose();textures.Clear();
-            Console.WriteLine($"PASS {frames} linked-production Soboro motion frames plus 2 icon frames (Soboro / Oboro / sealed mask), actual alpha-framing helper. Offline only.");
+            Console.WriteLine($"PASS {frames} sequential 120fps linked-production Soboro frames ({(oneSequence ? "right/dark/full" : "both facings, bright/dark, reduced/full")}), cancel/icon outputs. SpriteBatch restoration verified. Offline only; no native player or multiplayer acceptance.");
         }
         finally{SDL_DestroyWindow(window);SDL_Quit();}
     }
@@ -146,14 +175,16 @@ namespace Luminance.Core.Graphics
 {
     public static class ShaderManager
     {
-        private static ManagedShader shader;
-        public static ManagedShader GetShader(string name)=>shader??=new ManagedShader();
-        public static void Clear(){shader?.Effect.Dispose();shader=null;}
+        private static readonly Dictionary<string,ManagedShader> shaders=new();
+        public static ManagedShader GetShader(string name)
+        { if(!shaders.TryGetValue(name,out var s))shaders[name]=s=new ManagedShader(name);return s; }
+        public static void Clear(){foreach(var s in shaders.Values)s.Effect.Dispose();shaders.Clear();}
     }
     public sealed class ManagedShader
     {
-        public readonly Effect Effect=new(DXOboroPreview.Device,
-            File.ReadAllBytes(Path.Combine(DXOboroPreview.Root,"Assets/AutoloadedEffects/Shaders/DXOboroVeil.fxc")));
+        public readonly Effect Effect;
+        public ManagedShader(string name)=>Effect=new(DXOboroPreview.Device,
+            File.ReadAllBytes(Path.Combine(DXOboroPreview.Root,"Assets/AutoloadedEffects/Shaders/"+name.Split('.')[^1]+".fxc")));
         public void TrySetParameter(string name,float value)=>Effect.Parameters[name].SetValue(value);
         public void TrySetParameter(string name,Matrix value)=>Effect.Parameters[name].SetValue(value);
         public void Apply(string pass="AutoloadPass")=>Effect.CurrentTechnique.Passes[pass].Apply();

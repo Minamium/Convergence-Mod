@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-27",
+  "version": "0.3.51",
+  "protocol": 74,
+  "integration_base": "0acff40b9dfab2267fe542d8349821544121847e",
+  "scope": "Oboro, Soboro and Ghost Samurai blade acting, draw-only fractional poses, stronger angular velocity variation and original attached violet discharge. No new gameplay session or subjective approval claimed.",
+  "references": {
+    "research": "docs/research/2026-09-16-oboro.md#continuous-weapon-performance--2026-09-27",
+    "owner_clip": "Terraria_ Seahorse Scrutiny 2026-09-27 13-09-18.mp4",
+    "clip_sha256": "196df6182d47db067bc83a8ac9673c3ee7a55a42b746ccfdf2e30376722eb690",
+    "observation": "Previously supplied 118.84-second clip; re-inspected Murasama108-109.5s and Soboro98s frame sequences. Weapon silhouettes/accents inform independently authored motion. The recorded frame rate is not game FPS. No audio-listening claim and no third-party media/code distributed."
+  },
+  "ownership": {
+    "authority": "Existing Oboro server/shared geometry and native Soboro projectile hit paths. Both weapons share new angular curves with their visible sweep. Damage, reach and live windows remain; exact hit results need not be identical.",
+    "presentation": "WeaponDrawClock/WeaponArmDraw change only draw sampling and PlayerDrawSet rotation. Boss fixed-length IK, analytic accepted-action poses and composed-body pose reuse remain client-only. Shader discharges have fixed vertex bounds and no per-draw gameplay/particle spawning.",
+    "cleanup": "Existing per-projectile and exact-Fight history clearing, no new RenderTarget. New draw clock resets on world/Mod unload."
+  },
+  "verification": {
+    "domain": "37 Oboro and 60 Samurai deterministic checks passed after the final shared angular curves/cleave size fix. Soboro connected-pose checks passed with the worker's earlier 382-test run; later edits were client lightning/trail presentation only.",
+    "render": "Final linked-production FNA D3D11 sequences: Oboro 221 frames, Soboro 240 frames, boss cleave/directional-right/directional-left 499 frames, sampled at 120fps. Lead inspected consecutive release frames and worker inspected both boss facings. Weapon previews use a proxy player. Boss preview executes production shader/rig/material functions but substitutes a bounded FNA primitive tessellator for Luminance's installed tessellator. These are offline sequences, not measured game FPS or native gameplay acceptance.",
+    "native_package": "Isolated 0.3.51 build passed, zero errors and four existing CS8632 warnings; package SHA256 05a542a02cc99597c45f9b23972bbf7d4052d4b6c7a766e938a0a54eabb09e25, local receipt 20260927T100745803899Z. Installed tML/Luminance headless type, PlayerDrawSet field, exact-Fight lifecycle and rig probes passed. This package predates the final pure cleave-size continuity fix; the integrated normal-profile package is produced by dev.py build --native with its own source/hash receipt. Neither probe nor build establishes full in-game Mod load success.",
+    "repository": "Final verification uses verify_repo.py --write-catalog; generated catalog and scoped diff reviewed before commit. Native SP/Host & Play approval remains separate."
+  },
+  "runtime": {
+    "status": "not_run",
+    "owner": "user",
+    "next": "Matching peers reload0.3.51. Check Oboro/Soboro 1-2-3-loop, press/hold/release/switch, both facings, high attack speed, native armor/mount/gravity hand attachment, boss raised guard/cut/recoil and Reduced Effects. Compare remote visuals and measure frame time if needed."
+  },
+  "delegation": "Existing Sol-medium workers soboro_refresh and samurai_preview supply bounded Soboro and boss articulation slices. Lead reviews code/actual frame sequences, owns Oboro curves/draw hooks, shared lightning, research, docs, build and integration. No log-analysis delegation."
+}

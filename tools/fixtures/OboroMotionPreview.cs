@@ -41,15 +41,15 @@ internal static class OboroMotionPreview
         NativeLibrary.SetDllImportResolver(typeof(OboroMotionPreview).Assembly,Resolve);
         NativeLibrary.SetDllImportResolver(typeof(GraphicsDevice).Assembly,Resolve);
         if(SDL_Init(0x20)!=0)throw new Exception("SDL initialization failed");
-        IntPtr window=SDL_CreateWindow("Offline Oboro motion",0,0,640,640,FNA3D_PrepareWindowAttributes()|0x8);
+        IntPtr window=SDL_CreateWindow("Offline Oboro motion",0,0,1280,1280,FNA3D_PrepareWindowAttributes()|0x8);
         if(window==IntPtr.Zero)throw new Exception("Hidden device unavailable");
         try
         {
             using var device=new GraphicsDevice(GraphicsAdapter.DefaultAdapter,GraphicsProfile.HiDef,new PresentationParameters {
-                DeviceWindowHandle=window,BackBufferWidth=640,BackBufferHeight=640,BackBufferFormat=SurfaceFormat.Color,
+                DeviceWindowHandle=window,BackBufferWidth=1280,BackBufferHeight=1280,BackBufferFormat=SurfaceFormat.Color,
                 IsFullScreen=false,DepthStencilFormat=DepthFormat.None,PresentationInterval=PresentInterval.Immediate});
             Device=device;
-            using var target=new RenderTarget2D(device,640,640,false,SurfaceFormat.Color,DepthFormat.None);
+            using var target=new RenderTarget2D(device,1280,1280,false,SurfaceFormat.Color,DepthFormat.None);
             using var batch=new SpriteBatch(device);
             using var pixel=new Texture2D(device,1,1);pixel.SetData(new[]{Color.White});
             Terraria.GameContent.TextureAssets.MagicPixel=new(){Value=pixel};
@@ -57,6 +57,7 @@ internal static class OboroMotionPreview
             // Production binds the installed Luminance implementation instead.
             OboroSwingPresentation.ComboEntryEase=t=>t<.5f?4*t*t*t:1-MathF.Pow(-2*t+2,3)/2;
             int frames=0;
+            bool oneSequence=args.Length>3 && bool.Parse(args[3]);
             const int idleLead = 6;
             int first = OboroComboSettings.For(0).TotalFrames;
             int second = OboroComboSettings.For(1).TotalFrames;
@@ -67,10 +68,12 @@ internal static class OboroMotionPreview
             foreach(bool bright in new[]{false,true})
             foreach(bool reduced in new[]{false,true})
             {
+                if(oneSequence && (facing!=1 || bright || reduced))continue;
                 Reduced=reduced;var visual=new OboroSwingPresentation();
                 var hand=new OboroHandBasis(-4*facing,-2,10,3*facing,-3*facing,10);
-                for(int frame=0;frame<=previewEnd;frame++)
+                for(int sample=0;sample<=previewEnd*2;sample++)
                 {
+                    int frame=sample/2;
                     Terraria.Main.GameUpdateCount=(ulong)frame+100;
                     int elapsed = frame - idleLead;
                     byte step = (byte)(elapsed < first ? 0 : elapsed < first + second ? 1 : elapsed < first + second + third ? 2 : 0);
@@ -80,32 +83,38 @@ internal static class OboroMotionPreview
                     uint serial = elapsed < first ? 1u : elapsed < first + second ? 2u : elapsed < first + second + third ? 3u : 4u;
                     var view=new OboroSnapshot(0,1,1,serial,step,(ushort)age,(ushort)OboroComboSettings.For(step).TotalFrames,
                         facing==1?0:MathF.PI,(sbyte)facing,0);
-                    visual.Update(view,age,swinging,true,0,0,facing,Terraria.Main.GameUpdateCount,hand);
+                    if(sample%2==0) visual.Update(view,age,swinging,true,0,0,facing,Terraria.Main.GameUpdateCount,hand);
+                    visual.PrepareDraw(sample%2*.5f);
                     device.SetRenderTarget(target);device.Clear(bright?new Color(176,190,204):new Color(15,18,32));
                     batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,
-                        null,Matrix.CreateScale(.46f)*Matrix.CreateTranslation(320,320,0));
+                        null,Terraria.Main.GameViewMatrix.TransformationMatrix);
                     var before=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch);
                     OboroSlashMaterial.Draw(batch,visual);
                     if(before!=Convergence.Client.Graphics.WorldBatchParameters.Capture(batch))
                         throw new Exception("Material changed its caller's SpriteBatch state");
-                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.SwordPose,visual.Swinging);
-                    OboroArt.Line(batch,new(-10,-18),new(10,-18),4,Color.Gray);
-                    OboroArt.Line(batch,new(0,-12),new(0,20),10,Color.Gray);
+                    OboroArt.Afterimages(batch,visual);OboroArt.Swing(batch,visual.RenderSword,visual.Swinging);
+                    OboroSlashMaterial.Lightning(batch,visual);
+                    // 1 world pixel = 1 output pixel. This humanoid is a scale
+                    // proxy, not native player/armor rendering evidence.
+                    OboroArt.Line(batch,new(0,-21),new(0,-12),11,new Color(129,111,122));
+                    OboroArt.Line(batch,new(0,-10),new(0,12),14,new Color(57,67,91));
+                    OboroArt.Line(batch,new(-4,12),new(-6,23),5,Color.Gray);
+                    OboroArt.Line(batch,new(4,12),new(7,23),5,Color.Gray);
                     if (visual.Swinging)
                     {
-                        var shoulder=new Vector2(-4*facing,-2);var grip=new Vector2(visual.SwordPose.X,visual.SwordPose.Y);
+                        var shoulder=new Vector2(-4*facing,-2);var grip=new Vector2(visual.RenderSword.X,visual.RenderSword.Y);
                         OboroArt.Line(batch,shoulder,grip,4,new Color(255,188,109));
                         batch.Draw(pixel,grip,null,Color.Cyan,0,new(.5f),new Vector2(4),SpriteEffects.None,0);
                     }
                     batch.End();device.SetRenderTarget(null);
-                    string name=$"{(facing==1?"right":"left")}-{(bright?"light":"dark")}-{(reduced?"reduced":"normal")}-{frame:D2}.png";
-                    using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,640,640);frames++;
+                    string name=$"{(facing==1?"right":"left")}-{(bright?"light":"dark")}-{(reduced?"reduced":"normal")}-{sample:D4}.png";
+                    using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,1280,1280);frames++;
                 }
             }
             new SpectralSpriteCutouts().Unload();
             Luminance.Core.Graphics.ShaderManager.Clear();
             foreach(var texture in textures.Values)texture.Dispose();textures.Clear();
-            Console.WriteLine($"PASS {frames} production-renderer frames: initial idle, all three cuts, all handoffs including looping first cut, immediate hidden weapon/arm at release and residue fade, both facings, bright/dark, reduced/full. Offline only.");
+            Console.WriteLine($"Rendered {frames} consecutive120fps production-material frames at1x:60Hz updates, fractional draw, three cuts plus loop/release; {(oneSequence?"right/dark/full":"both facings, light/dark, reduced/full")}. Proxy player, offline only; native visual acceptance NOT established.");
         }
         finally{SDL_DestroyWindow(window);SDL_Quit();}
     }
@@ -124,7 +133,7 @@ namespace Terraria
         public static void QueueMainThreadAction(Action action)=>action();
     }
     public sealed class GraphicsDeviceManager { public GraphicsDevice GraphicsDevice=>OboroMotionPreview.Device; }
-    public sealed class PreviewView { public Matrix TransformationMatrix=>Matrix.CreateScale(.46f)*Matrix.CreateTranslation(320,320,0); }
+    public sealed class PreviewView { public Matrix TransformationMatrix=>Matrix.CreateTranslation(640,640,0); }
     public static class PreviewVectorExtensions
     {
         public static Vector2 Size(this Texture2D t)=>new(t.Width,t.Height);
@@ -152,13 +161,15 @@ namespace Luminance.Core.Graphics
 {
     public static class ShaderManager
     {
-        private static ManagedShader shader;
-        public static ManagedShader GetShader(string name)=>shader??=new ManagedShader();
-        public static void Clear(){shader?.Effect.Dispose();shader=null;}
+        private static readonly Dictionary<string,ManagedShader> shaders=new();
+        public static ManagedShader GetShader(string name)
+        { if(!shaders.TryGetValue(name,out var s))shaders[name]=s=new ManagedShader(name);return s; }
+        public static void Clear(){foreach(var s in shaders.Values)s.Effect.Dispose();shaders.Clear();}
     }
     public sealed class ManagedShader
     {
-        public readonly Effect Effect=new(OboroMotionPreview.Device,File.ReadAllBytes(Path.Combine(OboroMotionPreview.Root,"Assets/AutoloadedEffects/Shaders/OboroMoonArc.fxc")));
+        public readonly Effect Effect;
+        public ManagedShader(string name)=>Effect=new(OboroMotionPreview.Device,File.ReadAllBytes(Path.Combine(OboroMotionPreview.Root,"Assets/AutoloadedEffects/Shaders/"+name.Split('.')[^1]+".fxc")));
         public void TrySetParameter(string name,float value)=>Effect.Parameters[name].SetValue(value);
         public void TrySetParameter(string name,Matrix value)=>Effect.Parameters[name].SetValue(value);
         public void Apply(string pass="AutoloadPass")=>Effect.CurrentTechnique.Passes[pass].Apply();

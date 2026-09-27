@@ -25,26 +25,69 @@ internal sealed class OboroSwingPresentation
     private ulong generation;
     private uint swing;
     private float entryCorrection, lastAge;
+    private OboroSnapshot accepted;
+    private OboroHandBasis basis;
+    private float bodyX, bodyY;
+    private ulong tick;
     internal OboroBladePose Pose { get; private set; }
     internal OboroBladePose SwordPose { get; private set; }
+    internal OboroBladePose RenderPose { get; private set; }
+    internal OboroBladePose RenderSword { get; private set; }
+    internal double RenderNow { get; private set; }
+    internal float RenderArmAngle => RenderSword.Angle + (Swinging
+        ? RenderSword.Facing * OboroSwordMotion.Wrist(RenderSword.Step, RenderSword.Progress) : 0);
+    internal bool RenderLive => Swinging && OboroRules.Live(Pose.Step, Pose.Progress);
     internal float ArmAngle => SwordPose.Angle + (Swinging ? SwordPose.Facing * OboroSwordMotion.Wrist(SwordPose.Step, SwordPose.Progress) : 0);
     internal bool Swinging => wasSwinging;
     internal int Count => count;
     internal OboroEcho Echo(int index) => echoes[(head + index) % Capacity];
     internal static float Wrap(float angle) => MathF.IEEERemainder(angle, MathF.Tau);
     internal static float Opacity(ulong at, ulong now, int step = 0)
+        => Fade(now < at ? -1 : now - at, step);
+    internal static float Fade(double age, int step)
     {
         int duration = step switch { 1 => ReturnCutFadeTicks, 2 => FinisherFadeTicks, _ => FadeTicks };
-        if (now < at || now - at >= (ulong)duration) return 0;
-        float remaining = 1 - (now - at) / (float)duration;
+        if (age < 0 || age >= duration) return 0;
+        float remaining = 1 - (float)age / duration;
         return remaining * remaining;
     }
     internal void Clear()
     {
         head = count = 0; initialized = wasSwinging = swingSeen = false;
         generation = 0; swing = 0; entryCorrection = lastAge = 0;
-        Pose = SwordPose = default;
+        Pose = SwordPose = RenderPose = RenderSword = default;
+        accepted = default; basis = default; bodyX = bodyY = 0; tick = 0; RenderNow = 0;
         Array.Clear(echoes);
+    }
+    // Pure draw projection: no new echoes, sounds, accepted clocks or hit state.
+    // At a harmless/live boundary use the accepted sample rather than delaying
+    // the damage cue. Between samples evaluate the actual curve, not angle Lerp.
+    internal void PrepareDraw(float fraction)
+    {
+        fraction = Math.Clamp(fraction, 0, 1);
+        RenderNow = Math.Max(0, (double)tick - 1 + fraction);
+        RenderPose = Pose; RenderSword = SwordPose;
+        if (!Swinging || accepted.Duration == 0) return;
+        float age = Math.Max(0, lastAge - 1 + fraction);
+        float p = Math.Clamp(age / accepted.Duration, 0, 1);
+        if (OboroRules.Live(accepted.Step, p) != OboroRules.Live(Pose.Step, Pose.Progress)) p = Pose.Progress;
+        RenderPose = Sample(p);
+        RenderSword = OboroSwordMotion.AtHand(RenderPose, bodyX, bodyY, basis, true);
+    }
+    private OboroBladePose Sample(float p)
+    {
+        float angle = accepted.Aim + accepted.Facing * OboroRules.Offset(accepted.Step, p);
+        if (p < OboroRules.EntryEnd(accepted.Step))
+            angle += entryCorrection * (1 - EntryEase(accepted.Step, p / OboroRules.EntryEnd(accepted.Step)));
+        var root = OboroRules.RootOffset(accepted.Step, p, accepted.Aim, angle, basis);
+        return new(bodyX + root.X, bodyY + root.Y, angle, OboroRules.Reach, p, accepted.Step, accepted.Facing);
+    }
+    internal (OboroBladePose Pose, uint Swing, double At) RenderEcho(int index)
+    {
+        var e = Echo(index);
+        if (Swinging && e.Swing == swing && e.At > RenderNow)
+            return (RenderPose, e.Swing, RenderNow);
+        return (e.Pose, e.Swing, e.At);
     }
     internal void Update(OboroSnapshot view, float age, bool swinging, bool eligible,
         float x, float y, int facing, ulong now, OboroHandBasis hand = default)
@@ -101,5 +144,7 @@ internal sealed class OboroSwingPresentation
             Pose = Pose with { X = x, Y = y, Length = 0, Progress = 1, Facing = facing };
             SwordPose = Pose;
         }
+        accepted = view; basis = hand; bodyX = x; bodyY = y; tick = now;
+        PrepareDraw(1);
     }
 }

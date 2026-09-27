@@ -41,17 +41,22 @@ public static class SamuraiRigNativeProbe
                 "Native envelope consumed following buffer or decoded an unowned arena");
         }
         foreach (string name in new[] { "Convergence.Content.Items.DXOboro.DXOboro", "Convergence.Content.Items.DXOboro.DXOboroCut",
-            "Convergence.Client.Weapons.DXOboroItemVisuals", "Convergence.Client.Weapons.DXOboroVisuals" }) {
+            "Convergence.Client.Weapons.DXOboroItemVisuals", "Convergence.Client.Weapons.DXOboroVisuals",
+            "Convergence.Client.Weapons.WeaponDrawClock", "Convergence.Client.Weapons.WeaponArmDraw" }) {
             Type t = mod.GetType(name, true);
             t.GetMethod("ValidateType", Instance)?.Invoke(Activator.CreateInstance(t, true), null);
         }
+        Type drawSet = context.LoadFromAssemblyName(new AssemblyName("tModLoader"))
+            .GetType("Terraria.DataStructures.PlayerDrawSet", true);
+        FieldInfo frontArm = drawSet.GetField("compositeFrontArmRotation", BindingFlags.Public | BindingFlags.Instance);
+        Require(frontArm is not null && frontArm.FieldType == typeof(float), "Installed PlayerDrawSet front arm rotation contract changed");
         Console.WriteLine("PASS exact-package absent native actor envelope and independent DXOboro loader types");
 
         Type segment = lumi.GetType("Luminance.Common.VerletIntergration.VerletSegment",true);
         Type vector = segment.GetField("Position").FieldType;
         object V(float x,float y) => Activator.CreateInstance(vector,new object[]{x,y});
         Type blade=mod.GetType(Prefix+"SamuraiBladeMotion",true), pose=mod.GetType(Prefix+"SamuraiRigPose",true);
-        object B(float angle) => Activator.CreateInstance(blade,new object[]{angle,1f,0f,0f});
+        object B(float angle) => Activator.CreateInstance(blade,new object[]{angle,1f,0f,0f,0f,0f});
         Type secondary=mod.GetType(Prefix+"GhostSamuraiSecondaryMotion",true);
         object rig=Activator.CreateInstance(secondary,true);
         float lastX=8000;

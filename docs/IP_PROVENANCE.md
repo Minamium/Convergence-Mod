@@ -132,4 +132,6 @@ The September17 [Murasama motion survey](research/2026-09-16-oboro.md#murasama-m
 
 ## Ghost Samurai articulated presentation — 2026-09-18
 
+The2026-09-27 weapon revision adds [WotG LightSlash/LightSlashDrawer observation](research/2026-09-16-oboro.md#continuous-weapon-performance--2026-09-27): advancing front and temporally distinct residue inform an independently authored bounded curve/history design. No WotG render target, shader, equation, implementation or texture is copied. The original Oboro/Soboro source art stays intact; original material exports retain their exact attribution records.
+
 The owner requested extensive use of the existing Luminance dependency. [Research](research/2026-09-18-ghost-samurai-luminance.md) separates public API inventory, inspected implementations and installed-binary checks. Calamity Catastrophe/Murasama informs motion emphasis only. The detached purple rig was generated from the existing project-authored atlas; all three materials and articulation code are original. Luminance retains ownership of runtime noise/bloom textures and render targets. No extracted asset, code mirror or dependency binary is imported; [attribution](../Assets/ATTRIBUTION.md#ghost-samurai-articulated-rig-and-luminance-materials--2026-09-18) owns exact exports/prompts/hashes.

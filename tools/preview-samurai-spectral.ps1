@@ -2,7 +2,8 @@
 param([Parameter(Mandatory=$true)][string]$TModLoaderPath,
       [Parameter(Mandatory=$true)][string]$LuminancePackage,
       [string]$OutputDirectory='.local/samurai-spectral-preview',
-      [switch]$CutsOnly)
+      [switch]$CutsOnly,
+      [switch]$BossMotionOnly)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $tml=(Resolve-Path -LiteralPath $TModLoaderPath).Path
@@ -16,6 +17,7 @@ $files=@('tools/fixtures/SamuraiSpectralPreview.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiComposite.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiMaterials.cs',
     'Client/Encounters/GhostSamurai/SamuraiRigMotion.cs',
+    'Client/Graphics/SwordLightning.cs',
     'Client/Encounters/GhostSamurai/SamuraiSpriteFrames.cs',
     'Content/Encounters/GhostSamurai/GhostSamuraiRules.cs',
     'Content/Encounters/GhostSamurai/SamuraiArenaBounds.cs',
@@ -29,5 +31,5 @@ $project='<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.
 dotnet build (Join-Path $work 'SamuraiSpectralPreview.csproj') -c Release --nologo
 if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
 $env:FNA3D_FORCE_DRIVER='D3D11'
-dotnet (Join-Path $work 'bin/Release/net8.0/SamuraiSpectralPreview.dll') $root $lumi (Join-Path $tml 'Libraries/Native/Windows') $work $CutsOnly.IsPresent
+dotnet (Join-Path $work 'bin/Release/net8.0/SamuraiSpectralPreview.dll') $root $lumi (Join-Path $tml 'Libraries/Native/Windows') $work $CutsOnly.IsPresent $BossMotionOnly.IsPresent
 exit $LASTEXITCODE

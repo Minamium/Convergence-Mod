@@ -20,6 +20,9 @@ internal sealed class GhostSamuraiComposite : ModSystem
     private static readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private static Guid preparedFight;
     private static float preparedAge;
+    private static SamuraiRigPose preparedPose;
+    private static double preparedTick;
+    private static ulong preparedUpdate;
     private static int bodySize, emissionSize;
     private static bool reducedTarget, pendingRelease, disabled;
     public override void Load() { if (!Main.dedServ) RenderTargetManager.RenderTargetUpdateLoopEvent += Prepare; }
@@ -33,7 +36,8 @@ internal sealed class GhostSamuraiComposite : ModSystem
     }
     public override void ClearWorld() { Invalidate(); disabled = false; }
     public override void OnWorldUnload() { Invalidate(); disabled = false; }
-    private static void Invalidate() { preparedFight = Guid.Empty; pendingRelease = true; }
+    private static void Invalidate()
+    { preparedFight = Guid.Empty; pendingRelease = true; preparedPose = default; preparedTick = 0; preparedUpdate = 0; }
     private static void Release()
     {
         if (!pendingRelease) return;
@@ -54,14 +58,27 @@ internal sealed class GhostSamuraiComposite : ModSystem
             if (body.IsDisposed || reducedTarget != reduced) body.Recreate(Main.screenWidth, Main.screenHeight);
             if (emission.IsDisposed || reducedTarget != reduced) emission.Recreate(Main.screenWidth, Main.screenHeight);
             reducedTarget = reduced;
+            double sampledTick = Main.GameUpdateCount + (double)GhostSamuraiPresentation.Fraction - 1;
             Compose(pose);
             preparedFight = fight; preparedAge = pose.Age;
+            preparedPose = pose; preparedUpdate = Main.GameUpdateCount;
+            preparedTick = sampledTick;
         }
         catch (Exception exception)
         {
             Invalidate(); disabled = true; Release();
             global::Convergence.ConvergenceMod.Instance.Logger.Warn($"Samurai spectral composite disabled; direct rig retained: {exception}");
         }
+    }
+    // The already composed body, its swords and the external trails must use
+    // one rendered pose, not separately sampled wall clocks during the frame.
+    internal static bool TryPreparedPose(Guid fight, out SamuraiRigPose pose, out double renderTick)
+    {
+        pose = preparedPose; renderTick = preparedTick;
+        return !Main.dedServ && !disabled && !pendingRelease && fight != Guid.Empty
+            && preparedFight == fight && Main.GameUpdateCount == preparedUpdate
+            && body is { IsDisposed: false, IsUninitialized: false }
+            && emission is { IsDisposed: false, IsUninitialized: false };
     }
     private static void Compose(in SamuraiRigPose pose)
     {

@@ -7,7 +7,7 @@ internal static class OboroFirstSwingMotion
 {
     internal const float ReadyEnd = 5, AccelerationEnd = 9, CutEnd = 14, FollowEnd = 19;
     internal const float AccelerationAngle = -25, FollowAngle = 85;
-    internal const float PeakSpeed = 34, ExitSpeed = 4, ReturnSpeed = 1; // 度/F
+    internal const float PeakSpeed = 46, ExitSpeed = 4, ReturnSpeed = 1; // 度/F: held guard → whip → brake
 
     internal static float Frame(float progress) => Math.Clamp(progress, 0, 1) * OboroComboSettings.For(0).TotalFrames;
     internal static OboroMotionPhase Phase(float progress)

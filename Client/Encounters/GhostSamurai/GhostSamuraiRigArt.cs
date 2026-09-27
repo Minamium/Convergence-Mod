@@ -52,6 +52,13 @@ internal sealed class GhostSamuraiRigArt : ModSystem
         if (!GhostSamuraiComposite.Draw(batch, pose, screen)) DrawCore(batch, pose, screen, tint);
         if (history is not null) GhostSamuraiMaterials.Trails(batch, pose, history, tick);
         if (history is not null) Trails(batch, pose, screen, history, tick, reduced);
+        for (int side = -1; side <= 1; side += 2)
+        {
+            SamuraiBladeMotion blade = side < 0 ? pose.Left : pose.Right;
+            if (blade.Trail > 0)
+                SwordLightning.Draw(batch, Hand(pose, side), Tip(pose, side),
+                    tick, blade.Trail, reduced, 23 + side);
+        }
         Smoke(batch, pose, screen, reduced, true, 1);
         Wisps(batch, pose, screen, 1);
         GhostSamuraiEnergy.Body(batch, pose, screen, true);
@@ -125,14 +132,20 @@ internal sealed class GhostSamuraiRigArt : ModSystem
         }
     }
 
+    internal static Vector2 Shoulder(in SamuraiRigPose p, int side)
+    {
+        var blade = side < 0 ? p.Left : p.Right;
+        return new Vector2(p.X, p.Y) + Offset(new Vector2(side * (44 + blade.Charge * 7),
+            -38 - blade.Charge * 7), p);
+    }
     internal static Vector2 Hand(in SamuraiRigPose p, int side)
     {
         var blade = side < 0 ? p.Left : p.Right;
-        // Unit-circle orbit has no angle-wrap seam during an overhead swing.
-        float drift = MathF.Sin(p.Age * .051f + side * 2.2f) * (1 - blade.Trail) * .055f;
-        float armAngle = blade.Angle + side * .30f + drift;
-        float extension = 91 + blade.Charge * 19 + blade.Trail * 29;
-        return new Vector2(p.X, p.Y) + Offset(new Vector2(side * 44, -38) + armAngle.ToRotationVector2() * extension, p);
+        // The shoulder leads the blade into a cut; the wrist keeps the sword's
+        // separate angle. The hand remains within the fixed two-bone reach.
+        float drift = MathF.Sin(p.Age * .051f + side * 2.2f) * (1 - blade.Trail) * .035f;
+        float armAngle = blade.Angle + side * .30f + blade.ArmLead + drift;
+        return Shoulder(p, side) + Offset(armAngle.ToRotationVector2() * (86 + blade.Reach), p);
     }
     internal static Vector2 Tip(in SamuraiRigPose p, int side)
     {
@@ -143,9 +156,9 @@ internal sealed class GhostSamuraiRigArt : ModSystem
     {
         for (int side = -1; side <= 1; side += 2)
         {
-            Vector2 shoulder = new Vector2(p.X, p.Y) + Offset(new(side * 44, -38), p);
-            Vector2 hand = Hand(p, side), delta = hand - shoulder;
-            Vector2 elbow = shoulder + delta * .5f + new Vector2(-delta.Y, delta.X).SafeNormalize(Vector2.UnitX) * (side * -27 * p.Scale);
+            Vector2 shoulder = Shoulder(p, side), hand = Hand(p, side);
+            var joint = SamuraiRigMotion.SolveElbow(shoulder.X, shoulder.Y, hand.X, hand.Y, side, p.Scale);
+            Vector2 elbow = new(joint.X, joint.Y);
             Segment(batch, 2, shoulder - screen, elbow - screen, 37 * p.Scale, tint, side < 0);
             Segment(batch, 3, elbow - screen, hand - screen, 25 * p.Scale, tint, side < 0);
         }

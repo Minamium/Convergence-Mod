@@ -3522,11 +3522,27 @@ The September16 boards replace the earlier cyan appearance only. The old Boss at
 - Source type: original
 - Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/OboroMoonArc.fx`; no third-party shader copied
 - Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
-- Human modifications: project-authored spectral crescent mesh, sharp lip, violet flow and lifetime; approved images unchanged
+- Human modifications: project-authored spectral crescent mesh, sharp lip, violet flow and lifetime; September27 adds a broader cutting shoulder, connected fractional leading geometry and continuous fading. Approved images unchanged; no source shader copied.
 - License and redistribution terms: original project code under existing project terms; no dependency assets bundled
 - Required attribution: retain this provenance, source and compiler/export identity manifest
 - Reviewer and review date: automated source/export checks and offline FNA inspection, 2026-09-21; owner visual approval not_run
 - Prompt or brief location: `docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md`, Oboro metal and spectral blade separation
+
+### Articulated sword lightning — 2026-09-27
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SwordLightning.fxc`
+- Asset ID: articulated-sword-lightning-20260927
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation with OpenAI Codex assistance for Minamium
+- Creation/acquisition date: 2026-09-27
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/SwordLightning.fx`; no third-party shader, texture or sound copied
+- Tool/model/version: FXC compiler and options pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`; no image-generation model used
+- Human modifications: original bounded forked geometry attached to the actual Oboro, Soboro and Ghost Samurai blades; white-violet filament, saturated corona, ion glow and coherent overlapping discharge decay
+- License and redistribution terms: original project code under existing project terms; no dependency assets bundled
+- Required attribution: retain this provenance, source and compiler/export identity manifest
+- Reviewer and review date: automated source/export checks and offline linked-production FNA sequence inspection, 2026-09-27; native owner visual approval not_run
+- Prompt or brief location: `docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md`, continuous sword acting and attached violet lightning
 
 ## Record template
 

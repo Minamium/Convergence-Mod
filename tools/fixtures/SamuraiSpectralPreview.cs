@@ -83,6 +83,13 @@ internal static class SamuraiSpectralPreview
                 foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();
                 return;
             }
+            if(args.Length>5 && bool.Parse(args[5]))
+            {
+                BossMotion(device,target,batch,output);
+                GhostSamuraiCuts.Reset();Luminance.Core.Graphics.ShaderManager.Clear();
+                foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();
+                return;
+            }
             new GhostSamuraiComposite().Load();
             int frames=0,composites=0;
             foreach(float zoom in new[]{1f,.65f})
@@ -260,6 +267,55 @@ internal static class SamuraiSpectralPreview
     }
     static void Save(RenderTarget2D target,string output,string name)
     {using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,720,720);}
+    static void BossMotion(GraphicsDevice device,RenderTarget2D target,SpriteBatch batch,string output)
+    {
+        new GhostSamuraiComposite().Load();
+        Terraria.Main.GameViewMatrix.Scale=.75f;
+        Convergence.Client.Encounters.FirstSeverance.FirstSeveranceVisualConfig.Instance.ReducedEffects=false;
+        var combo=new SamuraiComboSnapshot(0,1,true,360,360,360,360,360);
+        int frames=0;
+        foreach(var clip in new[]{
+            (Name:"cleave-right",Attack:SamuraiAttack.FrontalCleaveShockwave,Facing:1,From:88,To:156),
+            (Name:"directional-right",Attack:SamuraiAttack.DirectionalSlash,Facing:1,From:36,To:126),
+            (Name:"directional-left",Attack:SamuraiAttack.DirectionalSlash,Facing:-1,From:36,To:126)})
+        {
+            string dir=Path.Combine(output,clip.Name);Directory.CreateDirectory(dir);
+            var history=new SamuraiRigHistory();var selected=new List<string>();
+            int lastTick=0;
+            SamuraiRigPose Pose(float age)
+            {
+                var left=SamuraiRigMotion.Blade(clip.Attack,SamuraiPhase.Phase1,age,age,-1,clip.Facing,combo,false);
+                var right=SamuraiRigMotion.Blade(clip.Attack,SamuraiPhase.Phase1,age,age,1,clip.Facing,combo,false);
+                float speed=Math.Max(left.Trail,right.Trail)*70;
+                return new(360,360,age,SamuraiRigMotion.ActionLean(left,right,clip.Facing),1,left,right,0,speed,0);
+            }
+            for(int frame=0;frame<=(clip.To-clip.From)*2;frame++)
+            {
+                float age=clip.From+frame*.5f;
+                int tick=(int)MathF.Floor(age);
+                while(lastTick<=tick)
+                {history.Add(GhostSamuraiPresentation.Fight,1,Pose(lastTick),(ulong)lastTick);lastTick++;}
+                var pose=Pose(age);
+                Terraria.Main.GameUpdateCount=(ulong)tick;
+                GhostSamuraiPresentation.Fraction=age-tick;
+                GhostSamuraiPresentation.Pose=pose;
+                Luminance.Core.Graphics.RenderTargetManager.Pulse();
+                device.SetRenderTarget(target);device.Clear(new Color(17,22,36));
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                var state=WorldBatchParameters.Capture(batch);
+                GhostSamuraiRigArt.Draw(batch,pose,Vector2.Zero,history,age);
+                if(state!=WorldBatchParameters.Capture(batch))throw new Exception("Boss motion changed SpriteBatch state");
+                batch.End();device.SetRenderTarget(null);
+                string name=$"frame-{frame:0000}.png";Save(target,dir,name);frames++;
+                if(frame%12==0 && selected.Count<24)selected.Add(name);
+            }
+            Sheet(device,batch,dir,"contact.png",selected,8,(selected.Count+7)/8);
+            Console.WriteLine($"{clip.Name}: {(clip.To-clip.From)*2+1} 120fps production-linked frames; {selected.Count} contact samples");
+        }
+        new GhostSamuraiComposite().Unload();
+        Console.WriteLine($"PASS {frames} chronological boss frames at 120fps; actual installed noise and production body/composite/lightning, history supplied; no native gameplay launch.");
+    }
     static void CutSequences(GraphicsDevice device,RenderTarget2D target,SpriteBatch batch,string output)
     {
         float[] offsets={-24,-8,-2,-.1f,0,.5f,1,2,3.5f,5,7,9,11.5f,12,15,20,26,28};
@@ -346,6 +402,7 @@ namespace Terraria
     public static class Main
     {
         public static bool dedServ;public static int screenWidth=720,screenHeight=720;
+        public static ulong GameUpdateCount;public static Vector2 screenPosition;
         public static SpriteBatch spriteBatch;public static GraphicsDeviceManager instance=new();
         public static PreviewView GameViewMatrix=new();
         public static void QueueMainThreadAction(Action action)=>action();
@@ -384,7 +441,7 @@ namespace Convergence
 namespace Convergence.Client.Encounters.GhostSamurai
 {
     internal static class GhostSamuraiPresentation
-    {internal static SamuraiRigPose Pose;internal static readonly Guid Fight=Guid.NewGuid();internal static bool TryPose(out SamuraiRigPose pose,out Guid fight){pose=Pose;fight=Fight;return true;}internal static bool Talisman(int i,out Vector2 tether,out float angle){tether=default;angle=0;return false;}}
+    {internal static SamuraiRigPose Pose;internal static readonly Guid Fight=Guid.NewGuid();internal static float Fraction=1;internal static bool TryPose(out SamuraiRigPose pose,out Guid fight){pose=Pose;fight=Fight;return true;}internal static bool Talisman(int i,out Vector2 tether,out float angle){tether=default;angle=0;return false;}}
     internal static class GhostSamuraiVisuals
     {internal static void Stroke(SpriteBatch b,Vector2 a,Vector2 c,float width,Color color){}
     }
@@ -448,5 +505,49 @@ namespace Luminance.Core.Graphics
     public static class RenderTargetManager
     {public static event Action RenderTargetUpdateLoopEvent;public static void Pulse()=>RenderTargetUpdateLoopEvent?.Invoke();}
     public sealed record PrimitiveSettings(Func<float,float> Width,Func<float,Color> Color,bool Smoothen,ManagedShader Shader);
-    public static class PrimitiveRenderer{public static void RenderTrail(List<Vector2> points,PrimitiveSettings settings,int count){}}
+    // Offline replacement for Luminance's tessellator only: production supplies
+    // the exact history points, width/color curves, uniforms and SamuraiRibbon
+    // shader. The installed native tessellator is not exercised by this fixture.
+    public static class PrimitiveRenderer
+    {
+        struct TrailVertex:IVertexType
+        {
+            public Vector3 Position;public Color Color;public Vector3 UV;
+            public VertexDeclaration VertexDeclaration=>Declaration;
+            static readonly VertexDeclaration Declaration=new(
+                new VertexElement(0,VertexElementFormat.Vector3,VertexElementUsage.Position,0),
+                new VertexElement(12,VertexElementFormat.Color,VertexElementUsage.Color,0),
+                new VertexElement(16,VertexElementFormat.Vector3,VertexElementUsage.TextureCoordinate,0));
+        }
+        static readonly TrailVertex[] strip=new TrailVertex[SamuraiRigMotion.TrailCapacity*6];
+        public static void RenderTrail(List<Vector2> points,PrimitiveSettings settings,int count)
+        {
+            int end=Math.Min(count-2,points.Count-2);if(end<1)return;
+            int used=0;
+            for(int i=0;i<end;i++)
+            {
+                Edge(i,out var a,out var b);Edge(i+1,out var c,out var d);
+                strip[used++]=a;strip[used++]=b;strip[used++]=c;
+                strip[used++]=c;strip[used++]=b;strip[used++]=d;
+            }
+            var device=SamuraiSpectralPreview.Device;
+            settings.Shader.TrySetParameter("uWorldViewProjection",
+                Matrix.CreateTranslation(-Terraria.Main.screenPosition.X,-Terraria.Main.screenPosition.Y,0)*
+                Terraria.Main.GameViewMatrix.TransformationMatrix*
+                Matrix.CreateOrthographicOffCenter(0,device.Viewport.Width,device.Viewport.Height,0,-1,1));
+            settings.Shader.Apply();device.DrawUserPrimitives(PrimitiveType.TriangleList,strip,0,used/3);
+            void Edge(int i,out TrailVertex a,out TrailVertex b)
+            {
+                float u=i/(float)(count-1);
+                Vector2 tangent=points[Math.Min(i+1,count-1)]-points[Math.Max(i-1,0)];
+                tangent=tangent.LengthSquared()<.0001f?Vector2.UnitX:Vector2.Normalize(tangent);
+                Vector2 normal=new(-tangent.Y,tangent.X);
+                float width=settings.Width(u);
+                Color color=settings.Color(u);
+                Vector2 p=points[i];
+                a=new(){Position=new(p-normal*width,0),Color=color,UV=new(u,0,1)};
+                b=new(){Position=new(p+normal*width,0),Color=color,UV=new(u,1,1)};
+            }
+        }
+    }
 }
