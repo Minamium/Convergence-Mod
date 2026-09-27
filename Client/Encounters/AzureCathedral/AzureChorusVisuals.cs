@@ -20,10 +20,12 @@ internal static class AzureChorusVisuals
             Circle(batch,center,AzureChorusRules.StackRadius,age,progress,appear);
             Arrows(batch,center,AzureChorusRules.StackRadius,age,false,appear);
         }
+        int submitted=0;
         for(int i=0;i<girl.State.Members.Length;i++)
         {
             var member=girl.State.Members[i];if((p.Members & (1<<i))==0 || member.Out && !marker.Resolved)continue;
             var player=Main.player[member.Slot];if(!player.active)continue;
+            submitted++;
             var center=marker.Resolved && i<marker.Positions.Length?new Vector2(marker.Positions[i].X,marker.Positions[i].Y):player.Center;
             bool failed=marker.Resolved && (marker.FailedMask & (1<<i))!=0;
             if(spread)
@@ -81,6 +83,13 @@ internal static class AzureChorusVisuals
                     }
                 }
             }
+        }
+        // Submission telemetry is separate from receipt and native damage. It
+        // proves the verdict reached this layer, not that a peer saw every pixel.
+        if(after>=0 && !marker.DrawLogged && submitted>0)
+        {
+            marker.DrawLogged=true;
+            AzurePackets.Log(FormattableString.Invariant($"event=ChorusDrawn fight={p.Fight} born={p.Born} kind={p.Kind} failed_mask={marker.FailedMask} verdict_delay_ticks={age-p.Fire:F1} submitted_members={submitted} observer={Main.myPlayer} reduced={AzureVisuals.Reduced}"));
         }
     }
     private static void Circle(SpriteBatch batch,Vector2 center,float radius,float age,float progress,float alpha)

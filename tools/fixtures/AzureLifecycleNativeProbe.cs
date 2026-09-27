@@ -28,6 +28,9 @@ public static class AzureLifecycleNativeProbe
         w.Write(true);w.Write(fight.ToByteArray());w.Write(7000);w.Write(100);w.Write(1060);w.Write(-1);w.Write((byte)3);
         w.Write(5000);w.Write(5000);w.Write(2400000);w.Write(240000);w.Write(0);w.Write(50);w.Write((short)1);w.Write(true);w.Write((byte)2);w.Write(6500);w.Write((byte)1);
         w.Write((byte)0);w.Write(System.Guid.NewGuid().ToByteArray());w.Write(true);w.Write(false);
+        // Newer native actor envelopes carry a default health-transition state.
+        if(mod.GetType(content+"AzureRecoveryState")!=null)
+        {w.Write(0u);w.Write(false);w.Write(0);w.Write(0f);w.Write(0f);w.Write(0);w.Write(0);}
         if(mod.GetType(content+"AzureState",true).GetProperty("StagingAt",I)!=null){w.Write(5000);w.Write((sbyte)1);}
         stream.Position=0;
         using var r=new System.IO.BinaryReader(stream);
@@ -66,6 +69,22 @@ public static class AzureLifecycleNativeProbe
             wormType.GetField("Fight",I).SetValue(a,fight);wormType.GetField("Girl",I).SetValue(a,(short)0);
             wormType.GetField("Index",I).SetValue(a,(byte)i);wormType.GetField("Head",I).SetValue(a,(short)(i==0?-1:1));wormType.GetField("Previous",I).SetValue(a,(short)(i==0?-1:i));
             Set(npcs.GetValue(i+1),"realLife",i==0?-1:1);
+        }
+        if(!old && mod.GetType(content+"AzureRules",true).GetMethod("WormIncomingDamageMultiplier",S)!=null)
+        {
+            var modifiersType=npcType.GetNestedType("HitModifiers");
+            var finalField=modifiersType.GetField("FinalDamage",I);
+            var modifierType=finalField.FieldType;
+            foreach(int part in new[]{0,1,22,44})
+            {
+                var modifiers=System.Activator.CreateInstance(modifiersType);
+                finalField.SetValue(modifiers,modifierType.GetField("Default",S).GetValue(null));
+                var args=new[]{modifiers};wormType.GetMethod("ModifyIncomingHit",I).Invoke(actors[part],args);
+                var final=finalField.GetValue(args[0]);
+                float damage=(float)modifierType.GetMethod("ApplyTo",I).Invoke(final,new object[]{1000f});
+                Require(System.Math.Abs(damage-(part==0?1000f:100f))<.01f,"native Fury incoming hit multiplier on part "+part);
+            }
+            System.Console.WriteLine("PASS packaged native Fury hit hook: head100%, body/middle/tail10%, before single shared-pool subtraction");
         }
         var hitType=npcType.GetNestedType("HitInfo");var hit=System.Activator.CreateInstance(hitType);
         hitType.GetProperty("Damage").SetValue(hit,20);hitType.GetField("HideCombatText").SetValue(hit,true);

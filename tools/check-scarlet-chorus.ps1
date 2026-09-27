@@ -1,7 +1,9 @@
-# Exact-package publication and native marker codec probe; no game or sockets.
+# Shared exact-assembly marker publication/codec probe; no game or sockets.
+# Default retains the Scarlet command; Azure exercises the same native boundary.
 param(
     [Parameter(Mandatory=$true)][string]$AssemblyPath,
-    [Parameter(Mandatory=$true)][string]$TModLoaderPath
+    [Parameter(Mandatory=$true)][string]$TModLoaderPath,
+    [ValidateSet('Scarlet','Azure')][string]$Encounter='Scarlet'
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -TypeDefinition @'
@@ -46,15 +48,28 @@ public static class ScarletChorusCheck
         }
         return result;
     }
-    static void CheckPublication(Assembly mod)
+    static void CheckPublication(Assembly mod, bool azure)
     {
-        string prefix = "Convergence.Content.Encounters.CrimsonFoundry.";
-        var marker = mod.GetType(prefix + "CrimsonChorus", true);
+        string prefix = azure ? "Convergence.Content.Encounters.AzureCathedral." : "Convergence.Content.Encounters.CrimsonFoundry.";
+        var marker = mod.GetType(prefix + (azure ? "AzureChorus" : "CrimsonChorus"), true);
         var publish = marker.GetMethod("Synchronize", Methods);
         Require(publish != null, "Missing explicit marker publication");
         var sends = ReadIL(publish).Where(i => i.Operand is MethodInfo m
             && m.DeclaringType.FullName == "Terraria.NetMessage" && m.Name == "SendData").ToArray();
         Require(sends.Length == 1, "Marker must use one native publication boundary");
+        if (azure) {
+            var director = mod.GetType(prefix + "AzureChorusDirector", true);
+            var il = ReadIL(director.GetMethod("Tick", Methods));
+            var calls = il.Where(i => Equals(i.Operand, publish)).ToArray();
+            Require(calls.Length == 2, "Azure must publish spawn and verdict explicitly");
+            foreach (string field in new[] { "Resolved", "FailedMask", "Positions" }) {
+                var writes = il.Where(i => i.Op == OpCodes.Stfld && i.Operand is FieldInfo f && f.Name == field).ToArray();
+                Require(writes.Length > 0 && writes.All(i => i.Offset > calls[0].Offset && i.Offset < calls[1].Offset),
+                    "Azure publishes before complete verdict " + field);
+            }
+            Console.WriteLine("PASS compiled Azure spawn and complete verdict reach native SyncProjectile");
+            return;
+        }
         var runtime = mod.GetType(prefix + "CrimsonRuntime", true);
         foreach (string name in new[] { "TryScheduleChorus", "TickChorus" }) {
             var il = ReadIL(runtime.GetMethod(name, Methods));
@@ -68,12 +83,15 @@ public static class ScarletChorusCheck
         }
         Console.WriteLine("PASS compiled marker publication after spawn initialization and complete verdict commit");
     }
-    static byte[] Payload(int count, byte kind, bool resolved, byte failed, Guid fight, float offset = 0)
+    static byte[] Payload(bool azure, int count, byte kind, bool resolved, byte failed, Guid fight, float offset = 0)
     {
         using var stream = new MemoryStream(); using var w = new BinaryWriter(stream);
-        w.Write(fight.ToByteArray()); w.Write((short)3); w.Write(500); w.Write(1);
-        w.Write((byte)3); w.Write(kind); w.Write((byte)((1 << count) - 1));
-        w.Write(600); w.Write(824); w.Write(880); w.Write(8000); w.Write(6000);
+        if (azure) w.Write(true);
+        w.Write(fight.ToByteArray()); w.Write((short)3);
+        if (!azure) { w.Write(500); w.Write(1); w.Write((byte)3); }
+        w.Write(kind); w.Write((byte)((1 << count) - 1));
+        w.Write(600); w.Write(824); w.Write(880);
+        if (!azure) { w.Write(8000); w.Write(6000); }
         w.Write(8000f); w.Write(5440f); w.Write(resolved); w.Write(failed);
         w.Write((byte)(resolved ? count : 0));
         if (resolved) for (int i = 0; i < count; i++) { w.Write(8000f + offset + i); w.Write(5440f); }
@@ -91,7 +109,7 @@ public static class ScarletChorusCheck
         marker.GetType().GetMethod("SendExtraAI").Invoke(marker, new object[] { w });
         return stream.ToArray();
     }
-    public static void Run(string assembly, string loader)
+    public static void Run(string assembly, string loader, bool azure)
     {
         var resolver = new AssemblyDependencyResolver(loader);
         var context = new AssemblyLoadContext("ScarletChorusChecks", true);
@@ -104,29 +122,31 @@ public static class ScarletChorusCheck
         try {
             var engine = context.LoadFromAssemblyPath(loader);
             var mod = context.LoadFromAssemblyPath(assembly);
-            CheckPublication(mod);
+            CheckPublication(mod, azure);
             engine.GetType("Terraria.Program", true).GetField("SavePath", Methods)
                 .SetValue(null, Path.GetDirectoryName(assembly));
-            var type = mod.GetType("Convergence.Content.Encounters.CrimsonFoundry.CrimsonChorus", true);
+            var type = mod.GetType(azure ? "Convergence.Content.Encounters.AzureCathedral.AzureChorus"
+                : "Convergence.Content.Encounters.CrimsonFoundry.CrimsonChorus", true);
             var mode = engine.GetType("Terraria.Main", true).GetField("netMode", Methods);
             // SP uses the same non-server decoder acceptance path without logging
             // a fictitious receiving client. This is not a network simulation.
             mode.SetValue(null, 0);
             int cases = 0, rejectedPrefixes = 0;
-            foreach (int count in new[] { 1, 4, 8 }) foreach (byte kind in new byte[] { 0, 1 })
-            foreach (byte failures in new byte[] { 0, (byte)((1 << count) - 1) }) {
+            foreach (int count in (azure ? new[] { 1, 2, 3, 4, 8 } : new[] { 1, 4, 8 })) foreach (byte kind in new byte[] { 0, 1 })
+            foreach (byte failures in (azure ? new byte[] { 0, 1, (byte)((1 << count) - 1) }.Distinct()
+                : new byte[] { 0, (byte)((1 << count) - 1) })) {
                 Guid fight = Guid.NewGuid(); object marker = Activator.CreateInstance(type, true);
-                byte[] pending = Payload(count, kind, false, 0, fight), verdict = Payload(count, kind, true, failures, fight);
+                byte[] pending = Payload(azure, count, kind, false, 0, fight), verdict = Payload(azure, count, kind, true, failures, fight);
                 Read(marker, pending); Require(Write(marker).SequenceEqual(pending), "Initial native marker round trip");
                 Read(marker, verdict); Require(Write(marker).SequenceEqual(verdict), "Resolved native marker round trip");
                 Read(marker, verdict); Read(marker, pending);
-                Read(marker, Payload(count, kind, true, failures, Guid.NewGuid()));
-                Read(marker, Payload(count, kind, true, failures, fight, 24));
-                Read(marker, Payload(count, kind, true, (byte)(failures ^ 1), fight));
+                Read(marker, Payload(azure, count, kind, true, failures, Guid.NewGuid()));
+                Read(marker, Payload(azure, count, kind, true, failures, fight, 24));
+                Read(marker, Payload(azure, count, kind, true, (byte)(failures ^ 1), fight));
                 Require(Write(marker).SequenceEqual(verdict), "Stale/foreign/conflicting verdict changed accepted state");
                 for (int n = 0; n < verdict.Length; n++) {
                     try { Read(marker, verdict.Take(n).ToArray()); throw new Exception("Truncated marker accepted"); }
-                    catch (TargetInvocationException ex) when (ex.InnerException is IOException) { rejectedPrefixes++; }
+                    catch (TargetInvocationException ex) when (ex.InnerException is IOException or InvalidDataException) { rejectedPrefixes++; }
                     Require(Write(marker).SequenceEqual(verdict), "Truncation partially mutated marker");
                 }
                 // No valid local client/SP object may publish an authority packet.
@@ -141,11 +161,11 @@ public static class ScarletChorusCheck
                 sync.Invoke(marker, null); // Inactive native marker cannot publish.
                 mode.SetValue(null, 0); cases++;
             }
-            Console.WriteLine($"PASS {cases} native marker cases / {rejectedPrefixes} truncated prefixes; solo and4/8, both outcomes, immutable terminal, server authority and sender guards");
+            Console.WriteLine($"PASS {cases} native marker cases / {rejectedPrefixes} truncated prefixes; supported sampled rosters, both outcomes, immutable terminal, server authority and sender guards");
             Console.WriteLine("NOT_RUN: socket delivery, draw-layer visibility, sound, latency and actual Host & Play");
         } finally { context.Unload(); }
     }
 }
 '@
 [ScarletChorusCheck]::Run((Resolve-Path -LiteralPath $AssemblyPath).Path,
-    (Join-Path (Resolve-Path -LiteralPath $TModLoaderPath).Path 'tModLoader.dll'))
+    (Join-Path (Resolve-Path -LiteralPath $TModLoaderPath).Path 'tModLoader.dll'), ($Encounter -eq 'Azure'))

@@ -17,6 +17,10 @@ related_docs:
 
 # Playtest feedback ledger
 
+## Cathedral silent chorus verdict and worm balance — 2026-09-28 / 0.3.53 → 0.3.54
+
+Owner reports motionless Stack ice disappearing even on failure; Spread was solo-only. One complete Host & Play attempt confirms failed Stack/native1damage, successful solo Spread and cancellation of another Stack when Liora dies early. Diagnose the same lost post-Projectile.Update verdict flag as Scarlet; explicitly publish the complete result and add receive/presentation/draw receipts without replacing accepted ice/rift art. Double both actors' HP, make Duet worm charge-only and apply90% incoming reduction to Fury body/tail while retaining its one shared pool. [Evidence](../evidence/2026-09-28-azure-chorus-balance.json) separates actual logs and native/codec checks from pending multiplayer overlap, delivery and balance feel. Rehearsal incoming damage stays1.
+
 ## Soboro three-cut reference gap — 2026-09-28 / 0.3.51 → 0.3.53
 
 Owner says the swords remain far below Murasama, requests a rigorous implementation comparison, then limits the refresh to Soboro's three cuts. This is reported dissatisfaction/design direction, not new runtime footage. Compare installed2.2.4 art/IL/audio with existing fractionally rotated ribbons; replace uniform circular surfaces with independently authored cut profiles, large white-violet fractures, torn contraction/quiet gaps and five original sounds. Keep Oboro, Boss and gameplay unchanged. [Evidence](../evidence/2026-09-28-soboro-three-cuts.json) separates compiled-renderer/package checks from user-owned native feel, hearing and remote acceptance.

@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-09-27
+last_reviewed: 2026-09-28
 source_of_truth_for:
   - encounter.azure_cathedral.experience
   - encounter.azure_cathedral.presentation
@@ -47,10 +47,10 @@ Each phrase is8 seconds. The repeating first-pass order is:
 | Phrase | Vitrion | Liora |
 |---|---|---|
 | 1 — Refracted pursuit | Two broad outside-flank approaches, locked charges across/out of the field, curved recovery | Sword fans plus three frozen-target, full-field cyan spatial cuts |
-| 2 — Glacial crossfire | Curved entry → six-second slow diagonal passage; segment-attached thin target lines and limited-homing energy volley during transit | Glass rain with two adjacent missing columns per five; a fixed-origin sweeping cyan sword beam |
+| 2 — Glacial crossfire | Harmless wide orbit; no segment volley in Duet | Glass rain with two adjacent missing columns per five; a fixed-origin sweeping cyan sword beam |
 | 3 — Glacial covenant | Harmless wide orbit; no overlapping mouth/contact attack | Stack: fixed gathering site below Liora; paired ice jaws grow beside participants |
 | 4 — Broken reflection | Two more full-field charges; target rotates among surviving members | Repeated sword fans and cyan spatial cuts |
-| 5 — White-night deluge | Mirrored slow passage and segment volley, without a stationary hold | Offset rain and second sword-beam sweep |
+| 5 — White-night deluge | Harmless wide orbit; slow passage/segment volley reserved for Fury | Offset rain and second sword-beam sweep |
 | 6 — Rift judgment | Harmless wide orbit | Spread: growing rift below each player, then judgment; loop |
 
 Starting clocks/radii/source-damage values live only in `AzureRules`, `AzureRuntime.Schedule` and `AzureAttack.Geometry`. Icicles travel, not full-length instant lasers. **All sweeping beams originate at fixed Liora**, never the moving worm. Their initial direction is frozen by authority; the smooth sweep, growing/narrowing width and bell-shaped throat share collision geometry. Doll's P2 managed portal material supplies pulsing charge, a connected narrow throat and broad flowing jet. The worm only has contact damage during announced charges. Segment missiles lock their initial target/direction on authority, briefly steer with a capped turn rate, then travel ballistically; they cannot make a chasing U-turn. Each segment distributes its target over the living frozen roster.
@@ -62,7 +62,7 @@ Starting clocks/radii/source-damage values live only in `AzureRules`, `AzureRunt
 - **Duet / P1:** one orthogonal volley finishes immediately before Stack begins. Spread gets three volleys: immediately before its announcement, during its warning, and after its verdict. The gathering window itself remains free of lattice strikes; other existing attacks are retained.
 - **Fury / P2:** diagonal → orthogonal → shifted diagonal volleys during every non-transit phrase. Forecast, live slash and residue all finish before slow diagonal passage phrases; no lattice is added during those passages. Fury cuts remain valid after Liora's defeat and belong to the surviving worm's phase, without another actor or HP pool.
 
-Actors retain independent native HP scaled in `AzureRules.Life`, frozen at Ready. Worm base and per-player HP are one twentieth of the previous iteration; Liora is unchanged. **Duet accepts head hits only; Fury accepts head, body and tail hits through one native `realLife` HP pool.** Do not manually forward/subtract segment damage a second time. Native projectile piercing/immunity behavior remains intact; balance under equipped piercing weapons needs playtesting. The normal boss bar shows Liora + Vitrion, then only Vitrion in Fury. No bespoke drop or companion was requested.
+Actors retain independent native HP scaled in `AzureRules.Life`, frozen at Ready; current Liora and worm budgets are doubled from the0.3.53 playtest. **Duet accepts head hits only; Fury accepts head, body and tail hits through one native `realLife` HP pool.** In Fury, the head retains full incoming damage while body/tail take10% final damage through the normal hit-modifier hook. Do not manually forward/subtract segment damage a second time. Native projectile piercing/immunity behavior remains intact; balance under equipped piercing weapons needs playtesting. Duet Vitrion attacks only through its announced charges; segment-emitted missiles and their slow diagonal transit are Fury-only. The normal boss bar shows Liora + Vitrion, then only Vitrion in Fury. No bespoke drop or companion was requested.
 
 ## Devouring storm and ending
 
@@ -76,6 +76,8 @@ Native shared-HP death must retain every segment shell until that cleanup, inclu
 Stack/Spread use `AzureChorusRules` for warning, radii and original damage budgets. The server resolves standing, announced connection-bound members at the deadline; Downed bodies neither share nor cause Spread overlaps and cannot receive another hit. Stack keeps the frozen required roster, so missing/Downed members proportionally increase its failure budget for the standing party. Full gather / no overlap deals zero damage; every overlapping Spread participant fails. Solo can satisfy both. Verdicts and impact positions are immutable and synchronized; clients never infer success from their own local positions. A bounded recipient-only hostile projectile delivers each failed impact through normal equipment/defense/dodge/immunity hooks (subject to the temporary rehearsal cap above). No direct damage subtraction or immunity reset. Growing ice compresses and bursts on Stack failure, falls away on success; a light sword thrusts from the rift on Spread failure, while successful rifts dissipate.
 
 Stack ice grows around **every announced participant**, including people outside the circle; it is not itself an extra falling-ice damage volume. Leaving/entering before the deadline does not decide the outcome. Pending verdicts hold the charged pose, never play success/falling ice; receipt starts a bounded cosmetic recovery at the frozen authority positions without moving the damage deadline. Spread uses Doll-sized circles; touching edges are safe, any true overlap fails both members. Per-member resolution logs record distance to gather center, nearest living peer and native source budget (not actual post-defense damage). Solo tests cannot establish multiplayer overlap or packet-latency acceptance.
+
+The authority runtime explicitly publishes the native marker after spawn initialization and after committing the full verdict/positions. A post-update `netUpdate` flag alone is insufficient: native Projectile.Update clears it before sending. `ChorusReplicaReceived`, `ChorusPresentation` and `ChorusDrawn` distinguish packet acceptance, local result-clock start and draw submission from native damage. These bounded receipts are not proof of pixel visibility or audible output. Liora's defeat cancels an unfinished chorus; it must not invent a failure or success after its owner stops attacking.
 
 ## Presentation
 

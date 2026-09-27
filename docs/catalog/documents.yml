@@ -611,14 +611,14 @@ documents:
 - doc_id: encounter.azure-cathedral.spec
   path: docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md
   title: Cathedral of the White Night
-  content_sha256: b7e2e5b59939285a76286b691b519fccc02af8f9dfba7f318d9abba48302cfcf
+  content_sha256: 9f727ef5b2cf24e78f56e28f249389b14e6a250ecc0e9b77676540499cbaf3f1
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-27'
+  last_reviewed: '2026-09-28'
   source_of_truth_for:
   - encounter.azure_cathedral.experience
   - encounter.azure_cathedral.presentation
@@ -930,7 +930,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: 3688fb596cfa84f7e3427366d6945ddba60de6685e40fb23b1c59837911dc835
+  content_sha256: 013678cc2482c6ff471e119e6d839cae43201b305a50ab5537375006aef4abdf
   document_type: evidence
   status: historical
   owners:
@@ -1329,7 +1329,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 3447bce432265740dc427b705d88ed9bde8ef39909572b21fdf8dd1937039442
+  content_sha256: ea7856288e95c90f33b3a011ed93d9d59e39bb427e1ac3d7c8c1868e9b0226c8
   document_type: status
   status: accepted
   owners:

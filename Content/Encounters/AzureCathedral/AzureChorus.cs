@@ -20,7 +20,18 @@ public sealed class AzureChorus : ModProjectile
     internal byte FailedMask;
     internal Point[] Positions = Array.Empty<Point>();
     private AzureVerdictClock visualClock;
-    internal float ImpactAge(float age)=>visualClock.Sample(Resolved,age,Plan.Fire,Plan.End);
+    private bool presentationLogged;
+    internal bool DrawLogged;
+    internal float ImpactAge(float age)
+    {
+        float after=visualClock.Sample(Resolved,age,Plan.Fire,Plan.End);
+        if(Resolved && after>=0 && !presentationLogged && Main.netMode!=NetmodeID.Server)
+        {
+            presentationLogged=true;
+            AzurePackets.Log(FormattableString.Invariant($"event=ChorusPresentation fight={Plan.Fight} born={Plan.Born} kind={Plan.Kind} failed_mask={FailedMask} verdict_delay_ticks={age-Plan.Fire:F1} result_positions={Positions.Length} observer={Main.myPlayer}"));
+        }
+        return after;
+    }
     public override string Texture => "Terraria/Images/Projectile_1";
     public override void SetDefaults()
     {
@@ -54,6 +65,14 @@ public sealed class AzureChorus : ModProjectile
         w.Write(Resolved);w.Write(FailedMask);w.Write((byte)Positions.Length);
         foreach(var p in Positions){w.Write(p.X);w.Write(p.Y);}
     }
+    internal void Synchronize()
+    {
+        // The authority runtime runs after native Projectile.Update. That next
+        // update clears netUpdate before AI, losing a post-update verdict flag.
+        // Publish the fully committed marker through native ExtraAI explicitly.
+        if(Main.netMode==NetmodeID.Server && Plan.Fight!=Guid.Empty && Projectile.active)
+            NetMessage.SendData(MessageID.SyncProjectile,number:Projectile.whoAmI);
+    }
     public override void ReceiveExtraAI(BinaryReader r)
     {
         var parsed=AzureChorusPlan.Read(r);if(parsed is not {} next)return;
@@ -66,7 +85,10 @@ public sealed class AzureChorus : ModProjectile
             || !AzureChorusRules.VerdictCanReplace(Resolved,FailedMask,resolved,failures))return;
         if(Resolved)
         {if(Positions.Length!=positions.Length)return;for(int i=0;i<count;i++)if(Positions[i]!=positions[i])return;}
+        bool changed=Plan.Fight==Guid.Empty || Resolved!=resolved;
         Plan=next;Resolved=resolved;FailedMask=failures;Positions=positions;
+        if(changed && Main.netMode==NetmodeID.MultiplayerClient)
+            AzurePackets.Log($"event=ChorusReplicaReceived fight={Plan.Fight} born={Plan.Born} kind={Plan.Kind} resolved={Resolved} failed_mask={FailedMask} result_positions={Positions.Length} observer={Main.myPlayer}");
     }
 }
 
@@ -139,7 +161,8 @@ internal sealed class AzureChorusDirector
                 mask,state.Age,state.Age+AzureChorusRules.Warning,state.Age+AzureChorusRules.Warning+84,new(state.Field.CenterX,state.Field.CenterY+175));
             int slot=Projectile.NewProjectile(new AzureChorusSource(plan),new(plan.Center.X,plan.Center.Y),Vector2.Zero,ModContent.ProjectileType<AzureChorus>(),0,0,Main.myPlayer);
             if(slot>=Main.maxProjectiles)throw new InvalidOperationException("azure.chorus_capacity");
-            marker=(AzureChorus)Main.projectile[slot].ModProjectile;marker.Projectile.netUpdate=true;
+            marker=(AzureChorus)Main.projectile[slot].ModProjectile;
+            marker.Synchronize();
             AzurePackets.Log($"event=ChorusCalled fight={state.Fight} kind={plan.Kind} born={plan.Born} fire={plan.Fire} members={mask}");
         }
         if(marker is not {} m)return;
@@ -154,15 +177,16 @@ internal sealed class AzureChorusDirector
         }
         var damage=AzureChorusRules.Resolve(m.Plan.Kind,m.Plan.Center,positions,m.Plan.Members,living);
         m.Positions=positions;m.Resolved=true;
-        for(byte i=0;i<damage.Length;i++)if(damage[i]>0 && state.Age<m.Plan.Fire+AzureChorusRules.ImpactTicks)
+        for(byte i=0;i<damage.Length;i++)if(damage[i]>0)
         {
             m.FailedMask|=(byte)(1<<i);
+            if(state.Age>=m.Plan.Fire+AzureChorusRules.ImpactTicks)continue;
             int slot=Projectile.NewProjectile(new AzureStrikeSource(m.Plan,i,damage[i]),Main.player[state.Members[i].Slot].Center,
                 Vector2.Zero,ModContent.ProjectileType<AzureChorusStrike>(),AzureRules.NativeSourceDamage(damage[i]),0,Main.myPlayer);
             if(slot>=Main.maxProjectiles)throw new InvalidOperationException("azure.impact_capacity");
             Main.projectile[slot].netUpdate=true;
         }
-        m.Projectile.netUpdate=true;
+        m.Synchronize();
         AzurePackets.Log($"event=ChorusResolved fight={state.Fight} kind={m.Plan.Kind} age={state.Age} living={living} failed={m.FailedMask} intended_damage={string.Join(",",damage)} native_source_damage={string.Join(",",Array.ConvertAll(damage,AzureRules.NativeSourceDamage))}");
         for(int i=0;i<positions.Length;i++)if((living & m.Plan.Members & (1<<i))!=0)
         {

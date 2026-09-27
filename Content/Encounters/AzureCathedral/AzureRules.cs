@@ -23,7 +23,7 @@ internal static class AzureRules
     internal const int CutWarning = 60, CutLive = 12, CutResidue = 20;
     internal const float SegmentSpacing = 86, SegmentRadius = 43;
     internal const float MouthReach = 126, CutRadius = 7;
-    internal static int Life(int members, bool worm) => checked((worm ? 240000 : 2400000) + (members - 1) * (worm ? 130000 : 1300000));
+    internal static int Life(int members, bool worm) => checked((worm ? 480000 : 4800000) + (members - 1) * (worm ? 260000 : 2600000));
     internal static int FuryLife(int duetMaximum) => checked(duetMaximum * 4);
     internal static bool Staged(int started, int age) => started >= 0 && age >= started + StagingTicks;
     internal static float Ease(float x) { x = Math.Clamp(x, 0, 1); return x * x * (3 - 2 * x); }
@@ -32,6 +32,8 @@ internal static class AzureRules
     internal static int Phrase(int age, int unlock) => Math.Max(0, age - unlock) / PhraseTicks % 6;
     internal static bool ChargePhrase(int phrase) => phrase is 0 or 3;
     internal static bool ChorusPhrase(int phrase) => phrase is 2 or 5;
+    internal static bool SegmentVolleyPhrase(AzurePhase phase, int phrase)
+        => phase == AzurePhase.Fury && phrase is 1 or 4;
     internal static int Clock(int age, int unlock) => Math.Max(0, age - unlock) % PhraseTicks;
     internal static (float X, float Y) Clamp(RaidFieldGeometry field, float x, float y, int w, int h)
     {
@@ -49,6 +51,8 @@ internal static class AzureRules
     internal static bool WormDamageable(AzurePhase phase, int index, bool live, int life, int maximum)
         => live && life > 0 && index >= 0 && index <= Segments
         && (phase == AzurePhase.Fury || phase == AzurePhase.Duet && index == 0 && life > WormFloor(maximum));
+    internal static float WormIncomingDamageMultiplier(AzurePhase phase, int index)
+        => phase == AzurePhase.Fury && index > 0 && index <= Segments ? .1f : 1f;
     internal static float VolleyProgress(float t) => Math.Clamp((t-VolleyApproach)/VolleyTransit,0,1);
     internal static float CutReach(float t) => Ease(t/2);
     internal static float CutWidth(float t) => CutReach(t)*(1-Ease((t-(CutLive-8))/8));

@@ -113,8 +113,10 @@ public sealed class AzureWorm : ModNPC
     public override bool? CanBeHitByProjectile(Projectile p) => TryGirl(out var g) && Hittable(g!) && g!.State.CanFight(p.owner) ? null : false;
     public override void ModifyIncomingHit(ref NPC.HitModifiers modifiers)
     {
-        if(Index==0 && TryGirl(out var g) && g!.State.Phase==AzurePhase.Duet)
-            modifiers.SetMaxDamage(Math.Max(1,NPC.life-AzureRules.WormFloor(g.State.WormMax)));
+        if (!TryGirl(out var g)) return;
+        if (Index == 0 && g!.State.Phase == AzurePhase.Duet)
+            modifiers.SetMaxDamage(Math.Max(1, NPC.life - AzureRules.WormFloor(g.State.WormMax)));
+        modifiers.FinalDamage *= AzureRules.WormIncomingDamageMultiplier(g!.State.Phase, Index);
     }
     public override void HitEffect(NPC.HitInfo hit)
     {
