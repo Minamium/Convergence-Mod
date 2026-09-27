@@ -47,12 +47,31 @@ internal static partial class Program
         float[] fires = { 54, 102, 150, 198 };
         for (int i = 0; i < 3; i++)
         {
-            float end = SamuraiRigMotion.Sequence(fires[i] + 12, fires, .98f, 20).Angle;
+            float end = SamuraiRigMotion.Sequence(fires[i] + 14, fires, .98f, 20).Angle;
             float nextStart = SamuraiRigMotion.Sequence(fires[i + 1] - 20, fires, .98f, 20).Angle;
             AssertEqual(true, Math.Abs(end - nextStart) < .001f, "connected last endpoint");
             AssertEqual(true, Math.Abs(end - .98f) > .2f, "not neutral between cuts");
         }
         AssertEqual(.98f, SamuraiRigMotion.Sequence(240, fires, .98f, 20).Angle, "final recovery ends");
+    }
+    [DomainTest("Samurai release accelerates through a broad cut and torso mirrors without moving authority")]
+    private static void RigWeightTransfer()
+    {
+        float[] fire = { 54 };
+        float At(float age) => SamuraiRigMotion.Sequence(age, fire, .98f, 20).Angle;
+        AssertEqual(true, Math.Abs(At(58) - At(57)) > Math.Abs(At(55) - At(54)) * 8,
+            "acceleration after tension hold");
+        AssertEqual(true, Math.Abs(At(62) - At(54)) > 4, "wide release rather than a small wrist twitch");
+        for (int sub = 0; sub <= 1000; sub++)
+        {
+            float age = sub / 10f;
+            var l = SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash, SamuraiPhase.Phase1, age, age, -1, 1, default, false);
+            var r = SamuraiRigMotion.Blade(SamuraiAttack.DirectionalSlash, SamuraiPhase.Phase1, age, age, 1, 1, default, false);
+            float lean = SamuraiRigMotion.ActionLean(l, r, 1);
+            float mirror = SamuraiRigMotion.ActionLean(r with { Angle = MathF.PI - r.Angle }, l with { Angle = MathF.PI - l.Angle }, -1);
+            AssertEqual(true, float.IsFinite(lean) && Math.Abs(lean) <= .4f, "bounded cosmetic lean");
+            AssertEqual(true, Math.Abs(lean + mirror) < .00001f, "mirrored shoulders");
+        }
     }
     [DomainTest("Samurai rig tick history is bounded and renderer sampling is frame-rate independent")]
     private static void RigHistoryBounds()

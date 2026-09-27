@@ -18,6 +18,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
     internal SamuraiHazard Hazard;
     internal SamuraiWispMotion WispMotion;
     internal SamuraiSlashAim SlashAim;
+    private bool lockedReplicaLogged;
     internal SamuraiHazard DisplayHazard => Hazard.HasAim ? SlashAim.Geometry(Hazard) : Hazard;
     public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.DeathLaser;
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = (int)GhostSamuraiRules.Phase3CircleOuterRadius + 1000;
@@ -104,12 +105,21 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
         => new Vector2(h.X, h.Y) + new Vector2(h.DX, h.DY) * h.Length
             * GhostSamuraiRules.RushProgress(age - h.Fire + 1, h.End - h.Fire);
 
+    internal void Synchronize()
+    {
+        // Runtime mutates aim AFTER native Projectile.Update. The next Update
+        // clears netUpdate before AI, so setting that flag here loses the lock
+        // forever on clients. Publish the complete bounded state at this boundary.
+        if (Main.netMode == NetmodeID.Server && Fight != Guid.Empty && Projectile.active)
+            NetMessage.SendData(MessageID.SyncProjectile, number: Projectile.whoAmI);
+    }
+
     internal void Aim(int age, Vector2 start, Vector2 direction)
     {
         if (Main.netMode == NetmodeID.MultiplayerClient || !Hazard.HasAim || SlashAim.Locked) return;
         SlashAim = SlashAim.Advance(Hazard, age, start.X, start.Y, direction.X, direction.Y);
         Projectile.Center = new(SlashAim.X, SlashAim.Y);
-        if (SlashAim.Locked || age % GhostSamuraiRules.AimSyncInterval == 0) Projectile.netUpdate = true;
+        if (SlashAim.Locked || age % GhostSamuraiRules.AimSyncInterval == 0) Synchronize();
     }
 
     internal void AimArrival(int age, Vector2 start, Vector2 direction, Rectangle target)
@@ -118,7 +128,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
         SlashAim = SlashAim.TrackArrival(Hazard, age, start.X, start.Y, direction.X, direction.Y,
             target.Center.X, target.Center.Y, target.Width * .5f, target.Height * .5f);
         Projectile.Center = new(SlashAim.X, SlashAim.Y);
-        if (SlashAim.Locked || age % GhostSamuraiRules.AimSyncInterval == 0) Projectile.netUpdate = true;
+        if (SlashAim.Locked || age % GhostSamuraiRules.AimSyncInterval == 0) Synchronize();
     }
 
     internal void AdvanceWisp(int age, Vector2 target)
@@ -129,7 +139,7 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
         Projectile.Center = new(WispMotion.X, WispMotion.Y);
         // Stagger full snapshots; no target/steering is inferred from a client player.
         if (age == Hazard.Born || age == Hazard.Fire || (age + Projectile.identity) % GhostSamuraiRules.WispSyncInterval == 0)
-            Projectile.netUpdate = true;
+            Synchronize();
     }
 
     internal bool Hits(int age, Player p) => Hazard.Shape == SamuraiShape.Wisp
@@ -158,5 +168,10 @@ public sealed class GhostSamuraiAttackProjectile : ModProjectile
         Fight = new Guid(bytes); BossSlot = slot; Hazard = hazard;
         WispMotion = motion;
         SlashAim = aim;
+        if (hazard.Shape == SamuraiShape.SlashWave && aim.Locked && !lockedReplicaLogged)
+        {
+            lockedReplicaLogged = true;
+            GhostSamuraiPackets.Log($"event=WaveReplicaLocked fight={Fight} identity={Projectile.identity} born={hazard.Born} fire={aim.ReleaseTick} aim_tick={aim.Tick}");
+        }
     }
 }

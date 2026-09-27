@@ -453,7 +453,7 @@ internal sealed partial class GhostSamuraiRuntime : IEncounterRuntime
         var p = (GhostSamuraiAttackProjectile)Main.projectile[slot].ModProjectile;
         hazards.Add(p); // Register before any further mutation/synchronization.
         p.Projectile.timeLeft = hazard.End - age + 30;
-        p.Projectile.netUpdate = true;
+        p.Synchronize();
         return p;
     }
 

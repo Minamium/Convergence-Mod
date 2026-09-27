@@ -31,16 +31,16 @@ public sealed class DXOboroVisuals : GlobalProjectile
         player.ChangeDir(cut.Facing);
         player.SetCompositeArmFront(true, OboroHandAnchor.Stretch(player, cut.Hand(player, angle), angle),
             angle - MathF.PI / 2);
-        if (cut.Age != DXOboroMotion.ReleaseFrame || released) return;
+        if (cut.Age != DXOboroMotion.Release(cut.Step) || released) return;
         released = true;
-        SoundEngine.PlaySound(SoundID.Item1 with
+        SoundEngine.PlaySound(SoundID.Item71 with
         {
-            Volume = .72f,
-            Pitch = cut.Step == 2 ? -.4f : .1f + cut.Step * .12f,
+            Volume = cut.Step == 2 ? .62f : .48f,
+            Pitch = cut.Step == 2 ? -.38f : .19f + cut.Step * .12f,
             MaxInstances = 4
         }, player.Center);
         if (cut.Step == 2)
-            SoundEngine.PlaySound(SoundID.Item71 with { Volume = .34f, Pitch = -.25f, MaxInstances = 3 }, player.Center);
+            SoundEngine.PlaySound(SoundID.Item1 with { Volume = .38f, Pitch = -.44f, MaxInstances = 3 }, player.Center);
         var config = ModContent.GetInstance<FirstSeveranceVisualConfig>();
         if (projectile.owner == Main.myPlayer && !config.ReducedEffects && config.ScreenShake)
             shake = ScreenShakeSystem.StartShakeAtPoint(player.Center, cut.Step == 2 ? 2.2f : 1.1f,
@@ -56,7 +56,7 @@ public sealed class DXOboroVisuals : GlobalProjectile
         Vector2 grip = cut.Hand(player, cut.BladeAngle);
         bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
         DXOboroMaterial.Draw(Main.spriteBatch, cut.Age, cut.Step, cut.Aim, cut.Facing, grip, reduced);
-        if (cut.Age < DXOboroMotion.ReleaseFrame)
+        if (cut.Age < DXOboroMotion.Release(cut.Step))
         {
             int motes = reduced ? 1 : 3;
             for (int i = 0; i < motes; i++)
@@ -67,10 +67,11 @@ public sealed class DXOboroVisuals : GlobalProjectile
                 Vector2 at = grip + along * (46f + 20f * i / motes)
                     + side * MathF.Sin(drift) * (9f + i * 3f);
                 OboroArt.Flame(Main.spriteBatch, at, 8f + 2f * i,
-                    .24f + .2f * cut.Age / DXOboroMotion.ReleaseFrame);
+                    .24f + .2f * cut.Age / DXOboroMotion.Release(cut.Step));
             }
         }
-        DXOboroArt.Sword(Main.spriteBatch, grip, cut.BladeAngle, 136f,
+        DXOboroArt.Sword(Main.spriteBatch, grip, cut.BladeAngle,
+            DXOboroMotion.BladeLength(cut.Step, cut.Age),
             Color.White, cut.Facing < 0);
         return false;
     }

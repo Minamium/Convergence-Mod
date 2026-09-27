@@ -45,13 +45,13 @@ documents:
 - doc_id: adr.0023
   path: docs/adr/0023-ghost-samurai-native-wave-damage.md
   title: 'ADR-0023: Native player damage for Ghost Samurai slash waves'
-  content_sha256: 4fd527238d8de4bcfd63cfb55096af24cd470875ced200d34cbd888e99c6fa9a
+  content_sha256: a6939b7e2c331f23ca79e9e18dccbeb60c9b6f20d9b0f38fc616db2de7059c27
   document_type: adr
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-13'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - architecture.ghost_samurai_native_wave_damage
   aliases:
@@ -86,13 +86,13 @@ documents:
 - doc_id: adr.0027
   path: docs/adr/0027-oboro-authoritative-weapon.md
   title: 'ADR-0027: Server-owned Oboro swings and wounds'
-  content_sha256: 8f9524aeb8c59ad4fb31400d70047338b498644b7e5be3acb5315dc377f8965d
+  content_sha256: a3bd56dda36045f911206dbfc4b4cf07c023c1f924e07f3739d3154177432555
   document_type: adr
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-19'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - architecture.oboro_weapon_authority
   aliases:
@@ -853,7 +853,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: 8314dd149e14d84ef6011d321c48098edac3bd6acb926ee1d459581bac30a10f
+  content_sha256: 7b8d56089a803f85004109c6a842c3dccc3261eb0fc6af3521a086eb16476684
   document_type: spec
   status: provisional
   owners:
@@ -930,7 +930,7 @@ documents:
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
-  content_sha256: bbefc6a10ad956a703da1c0f0a476148eaa839453e2f46ff724e09c3a28a7452
+  content_sha256: bfee5d76eedf43be3e9532176e539371c4ef74a404d5657352b38201308b8ba2
   document_type: evidence
   status: historical
   owners:
@@ -1329,7 +1329,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 98ac384dd09b543d94d75bfb7c2b5d40f9da3467cf6d2b88a8731ddb7433678a
+  content_sha256: dd9d96ffd7e3e98985c1f61514bb3f2a3f4d1961c2619228f2976d3436999dfb
   document_type: status
   status: accepted
   owners:
@@ -1585,12 +1585,12 @@ documents:
 - doc_id: research.oboro-20260916
   path: docs/research/2026-09-16-oboro.md
   title: 'Oboro: API and comparison boundary'
-  content_sha256: cd217898b6ea770253069450e019c35e31331b1dc03b97101259092c9730217c
+  content_sha256: 7ed0812524e5b200230df7c22e5777183c6aa70b47b6dd991c755af12a7ec9fc
   document_type: research
   status: provisional
   owners:
   - gameplay
-  last_reviewed: '2026-09-20'
+  last_reviewed: '2026-09-27'
   source_of_truth_for:
   - research.oboro_api_evidence
   aliases:

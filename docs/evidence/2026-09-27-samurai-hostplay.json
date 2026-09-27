@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-27",
+  "version": "0.3.49",
+  "protocol": 73,
+  "integration_base": "32c774d7b597c1989b1b84fb862fae78ac2cf8b8",
+  "scope": "Ghost Samurai and Oboro Host & Play publication; connected larger blade choreography, Luminance battlefield/exterior mask, Soboro display rename and independent violet trial cuts, inventory framing. No other Raid changes.",
+  "previous_playtest": {
+    "version": "0.3.48",
+    "players": 1,
+    "mode": "Host & Play",
+    "fight": "34e09ee1-7049-4b51-b6cf-6b1e299649fe",
+    "started_local": "13:09:22.685",
+    "maximum_life": 2400000,
+    "phase_2_age": 1961,
+    "phase_2_life": 1580234,
+    "phase_3_age": 2776,
+    "phase_3_life": 782045,
+    "terminal_age": 3660,
+    "simulated_seconds": 61,
+    "terminal": "Victory; cleanup complete; client subsequently Idle",
+    "exceptions": "No Ghost Samurai encounter exception. Earlier pre-connection SocketException and later secondary SubworldLibrary EndOfStreamException are separate; not claimed fixed.",
+    "limitation": "No old Oboro acceptance/ready telemetry; absence of rejected-use records cannot prove requests were absent. Victory is not proof of a correctly rendered or damaging wave. No multiplayer DPS/balance conclusion."
+  },
+  "video": {
+    "basename": "Terraria_ Seahorse Scrutiny 2026-09-27 13-09-18.mp4",
+    "sha256": "196df6182d47db067bc83a8ac9673c3ee7a55a42b746ccfdf2e30376722eb690",
+    "seconds": 118.84,
+    "resolution": "1920x1080",
+    "capture_fps_approx": 29.98,
+    "inspected": "4-second overview; 5-13s at4fps; 12.5-15.5s at8fps; Oboro88-96s at2fps; DX98-102s at4fps; Murasama108-111s at10fps",
+    "observed": "Grid material flashes but no charged travelling slash appears in the inspected launch sequence. Oboro selected without its blade; DX presents thin violet lines. Final Murasama shows a bright leading edge, denser torn ribbons and distinct accents. Existing arena shows vanilla daylight rather than a battlefield.",
+    "limits": "Capture pacing is not measured game FPS. Sampled frames, not direct audio listening; no sound-quality claims. Input attempts cannot be reconstructed exactly. No third-party media is redistributed."
+  },
+  "diagnosis": {
+    "source": "Official tML pinned666f69962d3bdffde54fc14025f02634965b4e7c plus installed2026.07.3.0 native IL",
+    "oboro": "NewProjectile and netUpdate auto-send are owner-peer-only; server-created holdout owner is the player, not server255. Explicit SyncProjectile after full generation assignment; replay new sequences/Hello; explicit native removal.",
+    "samurai": "Runtime mutates aim/wisps after native Projectile.Update; its next update clears netUpdate before AI. Publish full authority changes explicitly at existing bounded cadence and final lock; keep client locked-aim safety guard.",
+    "telemetry": "Server SwingAccepted/HeldPublished; client HeldReplicaReady and WaveReplicaLocked. These report distinct stages, not guaranteed delivery."
+  },
+  "checks": {
+    "shader_export": "passed; pinned FXC and source/export manifest",
+    "samurai_preview": "passed:304 FNA linked-production frames, including32 dense half-tick release poses; actual shaders/noise; caller graphics state restored",
+    "soboro_preview": "passed:504 FNA linked-production motion frames, three cuts/both facings/light-dark/reduced-full; inspected by worker and lead",
+    "battlefield_preview": "passed_offline:12 compiled-material frames with procedural fixture noise, drift/light-dark/reduced-full; physical mask arithmetic at UI107%; native world composition not simulated",
+    "icon_preview": "passed_offline:2 frames of actual alpha-framing for Soboro/Oboro/mask; source artwork unchanged",
+    "repository": "passed:82 indexed documents;1088 policy files;12 YAML files;379 deterministic domain cases, zero failures; protocol73 compiled codec334 round-trips and54 malformed/truncated rejections. Missing exact new shader attribution record was repaired before the passing policy check.",
+    "native_package": "passed; isolated profile build record .local/builds/20260927T050352462377Z/record.json; zero errors, four existing CS8632 warnings; unchanged source during build; SHA256 a5395e6330e012cc56887a9756492b27d491ee627844f1320e15afca37263108; original solo admission retained. Exact-package Samurai/Oboro loader/lifecycle/hand/identity probes passed.",
+    "native_publication_probe": "passed; installed compiled mutation/send call contract for holdout create/Hello and Samurai spawn/aim/arrival/wisp; no socket delivery simulated"
+  },
+  "runtime": {
+    "status": "not_run",
+    "owner": "user",
+    "next": "Matching0.3.49 Host & Play peers: use Oboro immediately and after switching/idle; see the travelling wave after grid locally/remotely; inspect battlefield exterior at107% UI and zoom; judge Boss/Soboro feel and frame time. GUI remains user-owned."
+  },
+  "delegation": "Sol-medium samurai_battlefield: shader sky/mask and native call probe; reserved HLSL identifier repaired before preview. Sol-medium soboro_refresh: bounded trial motion/material/preview; initial checker-like material revised. Lead owns log/video analysis, native cause and publication changes, connected Boss motion, shared icon framing, review/integration and all acceptance claims."
+}

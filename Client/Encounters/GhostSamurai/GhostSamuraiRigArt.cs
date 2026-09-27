@@ -87,7 +87,7 @@ internal sealed class GhostSamuraiRigArt : ModSystem
 
     private static void Head(SpriteBatch batch, in SamuraiRigPose p, Vector2 screen, Color tint)
         => Part(batch, 1, Root(p, screen) + Offset(new(0, -39), p), new(.5f, .88f), new Vector2(112, 122) * p.Scale,
-            p.Lean * .65f + MathF.Sin(p.Age * .029f) * .015f, tint);
+            p.Lean * .45f - p.Lag * .25f + MathF.Sin(p.Age * .029f) * .015f, tint);
 
     private static void Hem(SpriteBatch batch, in SamuraiRigPose p, Vector2 screen, Color tint, float remaining)
     {
@@ -98,7 +98,8 @@ internal sealed class GhostSamuraiRigArt : ModSystem
             int y = i * source.Height / strips, next = (i + 1) * source.Height / strips;
             float flow = i / (float)strips;
             float opacity = SamuraiRigMotion.Smooth((remaining - flow) * strips);
-            Vector2 position = Root(p, screen) + Offset(new(MathF.Sin(p.Age * .044f - flow * 3) * flow * 9 - p.Lag * flow * 35, 57 + flow * 180), p);
+            Vector2 position = Root(p, screen) + Offset(new(MathF.Sin(p.Age * .044f - flow * 3) * flow * 9
+                - p.Lag * flow * 35 - p.Lean * flow * flow * 90, 57 + flow * 180), p);
             var cell = new Rectangle(source.X, source.Y + y, source.Width, next - y);
             DrawPart(batch, 7, position, cell, tint * opacity, p.Lean, new(source.Width * .5f, 0),
                 new Vector2(172f / source.Width, 180f / source.Height) * p.Scale, false);
@@ -130,7 +131,7 @@ internal sealed class GhostSamuraiRigArt : ModSystem
         // Unit-circle orbit has no angle-wrap seam during an overhead swing.
         float drift = MathF.Sin(p.Age * .051f + side * 2.2f) * (1 - blade.Trail) * .055f;
         float armAngle = blade.Angle + side * .30f + drift;
-        float extension = 91 + blade.Charge * 9 + blade.Trail * 13;
+        float extension = 91 + blade.Charge * 19 + blade.Trail * 29;
         return new Vector2(p.X, p.Y) + Offset(new Vector2(side * 44, -38) + armAngle.ToRotationVector2() * extension, p);
     }
     internal static Vector2 Tip(in SamuraiRigPose p, int side)
@@ -181,7 +182,7 @@ internal sealed class GhostSamuraiRigArt : ModSystem
             if (blade.Trail <= 0) continue;
             var next = i + 1 < history.Count && history.At(i + 1).Tick <= tick ? history.At(i + 1).Pose : p;
             Vector2 from = Tip(sample.Pose, side) - screen, to = Tip(next, side) - screen;
-            if (Vector2.DistanceSquared(from, to) > 200 * 200) continue;
+            if (Vector2.DistanceSquared(from, to) > 360 * 360) continue;
             float fade = SamuraiRigMotion.Fade(age) * blade.Trail;
             // The full ribbon is a Luminance primitive. Reduced effects retain
             // a thin readable trace without duplicating its broad glow.

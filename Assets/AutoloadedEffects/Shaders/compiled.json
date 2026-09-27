@@ -27,8 +27,8 @@
       "output_sha256": "fe6dfa63f474651f7f213d8230559b61b14459c02254185de478d757f4d83b11"
     },
     "DXOboroVeil.fx": {
-      "source_sha256": "53ed2b8bf73c2df8626952c79be7655f5a600cb465e98e214532bfa237f96896",
-      "output_sha256": "2e1a0f35a3b931ed31a18aa25541cf50e9aadd50283948600284cb4bdb2175dc"
+      "source_sha256": "b20b72bdd853afdf2e2d3db1bf11fad93729a1874ead67f7139a6416b8b132f9",
+      "output_sha256": "f90d50da1bd898b283a7c1e4a02a23968469df78b55d25efb515df856790979b"
     },
     "MechanicRing.fx": {
       "source_sha256": "b685e8922f20aa34fad6f86d6da927d5033885dc2b7229be9fc956e6aec80aa3",
@@ -49,6 +49,10 @@
     "RaidEnergy.fx": {
       "source_sha256": "924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8",
       "output_sha256": "299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7"
+    },
+    "SamuraiBattlefield.fx": {
+      "source_sha256": "67812705ed52f0381232af2fb16467c2d67f6b86942d6b4055bc7081f9516ef1",
+      "output_sha256": "2f52c2a39f732b24217abd4baceaff9635d4a0d7177ea26e44b3e204abebaefe"
     },
     "SamuraiComposite.fx": {
       "source_sha256": "da4a7acd90030227e79cfa69a1b2f2650621d1bca048c80dda615e89c704983a",

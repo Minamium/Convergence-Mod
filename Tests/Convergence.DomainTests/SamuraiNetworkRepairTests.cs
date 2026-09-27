@@ -105,16 +105,25 @@ internal static partial class Program
     private static void DXOboroSharedMotion()
     {
         for (int step = 0; step < 3; step++)
-        for (int i = 0; i <= DXOboroMotion.Duration * 10; i++)
         {
-            float age = i / 10f, aim = .2f;
-            float right = DXOboroMotion.Angle(step, age, aim, 1), left = DXOboroMotion.Angle(step, age, aim, -1);
-            AssertEqual(true, float.IsFinite(right) && Math.Abs(right + left - aim * 2) < .00001f, "mirrored real curve");
-            if (i > 0) AssertEqual(true, Math.Abs(right - DXOboroMotion.Angle(step, age - .1f, aim, 1)) < .16f, "continuous sampled release");
+            int release = DXOboroMotion.Release(step), liveEnd = DXOboroMotion.LiveEnd(step);
+            AssertEqual(true, release < liveEnd && liveEnd < DXOboroMotion.Duration(step), "ordered attack beats");
+            AssertEqual(false, DXOboroMotion.Live(step, release - 1), "warning harmless");
+            AssertEqual(true, DXOboroMotion.Live(step, release), "release active");
+            AssertEqual(true, DXOboroMotion.Live(step, liveEnd - 1), "last live tick");
+            AssertEqual(false, DXOboroMotion.Live(step, liveEnd), "aftermath harmless");
+            AssertEqual(true, Math.Abs(DXOboroMotion.BladeLength(step, release - 1) - 140f) < .001f,
+                "physical blade waits for release");
+            for (int i = 0; i <= DXOboroMotion.Duration(step) * 10; i++)
+            {
+                float age = i / 10f, aim = .2f;
+                float right = DXOboroMotion.Angle(step, age, aim, 1), left = DXOboroMotion.Angle(step, age, aim, -1);
+                AssertEqual(true, float.IsFinite(right) && Math.Abs(right + left - aim * 2) < .00001f, "mirrored real curve");
+                if (i > 0) AssertEqual(true, Math.Abs(right - DXOboroMotion.Angle(step, age - .1f, aim, 1)) < .16f,
+                    "continuous sampled release");
+            }
         }
-        AssertEqual(false, DXOboroMotion.Live(DXOboroMotion.ReleaseFrame - 1), "warning harmless");
-        AssertEqual(true, DXOboroMotion.Live(DXOboroMotion.ReleaseFrame), "release active");
-        AssertEqual(true, DXOboroMotion.Live(DXOboroMotion.LiveEndFrame - 1), "last live tick");
-        AssertEqual(false, DXOboroMotion.Live(DXOboroMotion.LiveEndFrame), "aftermath harmless");
+        AssertEqual(true, DXOboroMotion.Duration(1) < DXOboroMotion.Duration(0)
+            && DXOboroMotion.Duration(0) < DXOboroMotion.Duration(2), "quick return and heavy accent");
     }
 }

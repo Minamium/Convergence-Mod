@@ -21,7 +21,8 @@ public sealed class DXOboro : ModItem
         Item.DamageType = CalamityTrueMelee.Damage;
         Item.knockBack = 9;
         Item.useStyle = ItemUseStyleID.Shoot;
-        Item.useTime = Item.useAnimation = DXOboroMotion.Duration + 2;
+        // The owned projectile gates retries; the next step begins when it ends.
+        Item.useTime = Item.useAnimation = 2;
         Item.autoReuse = true;
         Item.noMelee = true;
         Item.noUseGraphic = true;

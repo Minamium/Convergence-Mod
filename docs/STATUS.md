@@ -23,7 +23,7 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.48 / protocol72**. Ghost Samurai gains accepted-snapshot movement smoothing, independently moving spectral limbs and a two-target Luminance body/emission composite with shared analytic hazard materials. Oboro's Host & Play state repair preserves its existing art, combo, stats and server-hit contract. DXOboro is a separate trial weapon, not a replacement; the summon item gets its own sealed-mask icon. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#霊気合成と新規試作武器--2026-09-27) owns behavior and limits. Native multiplayer/visual acceptance remains user-owned, not established by compilation or offline frames.
+Current source: **0.3.49 / protocol73**. Ghost Samurai explicitly publishes server aim locks and Oboro's server-created player-owned holdout; the supplied0.3.48 Host & Play recording exposed both missing visuals despite a completed fight. Add a Luminance ruined battlefield/black exterior, broader connected body cuts, enlarged inventory framing and the separate **Soboro** trial (saved DXOboro ID retained). Original Oboro combo/stats/hit authority and other Raids remain unchanged. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#霊気合成と新規試作武器--2026-09-27) owns behavior and limits. Updated native multiplayer/visual acceptance remains user-owned, not established by compilation or offline frames.
 
 Retained0.3.47: Oboro follows the owner's22F downward cut,18F smaller return,30F held-charge finisher. The metal sword and arm pose exist only during an accepted attack; Luminance spectral cuts retain560px reach. Damage/drop/buffs remain unchanged. [Oboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#朧のheld-projectileと3段コンボ定義--2026-09-19) owns those curves.
 
@@ -65,6 +65,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.49 Host & Play follow-up:** [evidence](evidence/2026-09-27-samurai-hostplay.json) records the supplied118.84s clip, one61s solo Host & Play victory, native publication causes, continuous articulation/Soboro/battlefield previews and scoped package checks. The previous build's successful package/preview did not establish multiplayer correctness. Lead inspected the actual output of Sol-medium `samurai_battlefield` (sky/mask and publication probe) and `soboro_refresh` (trial weapon/material); native player input, remote wave visibility, field-mask alignment and performance still require user playtesting.
 
 - **0.3.48 Samurai/Oboro repair:** [evidence](evidence/2026-09-27-samurai-spectral.json) separates old two-player logs, accepted-motion/native envelope and weapon-state contracts, exact-package loader checks, actual-shader body/hazard/ending previews and DX inventory scaling. The preview caught and repaired collapsed shader warning/live dispatch; the final pass adds dark warning under-edges and readable exterior aura. Native Host & Play input/movement, remote layering, visual acceptance and frame times remain user-owned / `not_run`. Sol `dx_oboro` and `samurai_preview` (medium) implemented the bounded trial/preview slices; lead owns network repair, integration and final material/readability revision.
 
@@ -144,7 +146,7 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 
 ## Next change
 
-Ghost Samurai: matching0.3.48 peers should check initial/join/rejoin movement, rush/combo alignment and using Oboro immediately after hotbar/equipment changes. Inspect new aura/hazards in bright/dark scenes and Reduced Effects; DXOboro can be crafted with one Fallen Star at a Work Bench. These are native checks, not claims from the offline preview. Other Raids and the existing Oboro mechanics are preserved.
+Ghost Samurai: matching0.3.49 peers should check Oboro press/hold/release and switching back to it, then the travelling slash after a grid (including remote visibility). Check the battlefield/black boundary at UI107% and zoom, and the larger connected blade poses. Soboro is crafted with one Fallen Star at a Work Bench; saved DXOboro items become Soboro without migration. These are native checks, not claims from offline previews. Other Raids and original Oboro mechanics are preserved.
 
 Doll: after the matching0.3.46 package is installed, check the first Phase III claw clamp (contact → held cracks → shell burst), continued purple sphere/attached muzzle through Final/DPS check, Victory/Defeat fade and a fresh intact retry. Compare a matching peer and Reduced Effects. These native checks are owner-owned `not_run`; shader/mesh previews are separate evidence.
 
