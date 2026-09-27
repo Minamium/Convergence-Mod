@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-27",
+  "version": "0.3.50",
+  "protocol": 73,
+  "integration_base": "7cc8b02a00c4757f03372c370890a5ff268e2cd7",
+  "scope": "Ghost Samurai battlefield opacity/flag removal and original Luminance sword-tear material for slash/grid/wave/circular cuts. No authority, geometry, attack timing, damage, weapon or other Raid changes.",
+  "observed_playtest": {
+    "version": "0.3.49",
+    "mode": "Single Player; side=0 and net_mode=0, not Host & Play",
+    "players": 1,
+    "log_sha256": "567405f10839ebe9d14ce5bdd3c217546ffd9ac089517bbfe89ea2c5cd90a2b8",
+    "started_local": "14:23:09.150",
+    "maximum_life": 2400000,
+    "phase_2": { "age": 5332, "life": 1569527 },
+    "phase_3": { "age": 6108, "life": 791037 },
+    "terminal": { "age": 7393, "simulated_seconds": 123.2167, "reason": "Defeat", "life": 23771, "remaining_percent": 0.9905, "cleanup": "complete" },
+    "telemetry": { "OboroSwingAccepted": 10, "OboroHeldPublished": 2, "GridWaveLocked": 5 },
+    "exceptions": 0,
+    "other_warnings": "25 Calamity SetDamageReductionSpecific invalid-call warnings; no corresponding caller exists in Convergence Common/Content. Unattributed external compatibility warning, not silently claimed repaired. Existing asset-load/icon warnings also remain.",
+    "limits": "Older server logs end13:11 and are not evidence for this14:23 session. No per-hit/player damage summary is available; phase HP deltas are not equipment DPS. SP acceptance/publication logs do not prove remote delivery. Visual rejection is the owner's observation, not inferred from text logs."
+  },
+  "design": {
+    "local_references": ["Assets/AutoloadedEffects/Shaders/ScarletSorcery.fx:TearForecast/Tear", "Client/Encounters/AzureCathedral/AzureMaterials.cs:Slash"],
+    "independent_material": "SamuraiCut: incision, continuous micro-amplitude, acceleration, unequal tapered sheets with head/tail, exact-volume fibers/rim, contraction and dark violet soot. Grid uses the same sword material with stable opposite flow; no Beam/Portal renderer copied.",
+    "boundary": "Remove banner code and floating rectangular graves; alpha1 at every backdrop edge,4world-pixel under-mask bleed, native clouds suppressed. Physical mask excludes UI scale.",
+    "ownership": "Client-only residue retains accepted geometry for16ticks after End, at most MaximumHazards*2 entries, exact Fight/NPC guarded. No projectile lifetime or damage extension. World/Mod teardown clears state without graphics initialization."
+  },
+  "checks": {
+    "shader_export": "passed; pinned FXC and source/export manifest",
+    "cut_preview": "passed_offline:864 final FNA D3D11 frames through production renderer and compiled material, installed Luminance noise, actual30-line grid descriptors, normal/vertical/wave/annulus/cleave, zoom1/.65, light-dark/reduced-full.18 fractional timestamps span forecast/amplification/cut/contraction/expiry. Grid safe cells, annulus hole, cleave back side, expiry and SpriteBatch-state probes pass; lead inspected contact sheets and full-size frames. Not native gameplay or performance evidence.",
+    "battlefield_preview": "passed_offline:12 compiled D3D11 frames with procedural fixture noise, dark/light underlay, full/reduced,0/4/9s. Fractional physical boundaries at0.65zoom; inside-edge opacity/outside black pixel probes; UI107% is an arithmetic exclusion check, not an in-game UI run. Worker and lead inspect actual frames.",
+    "native_package": "passed; isolated build .local/builds/20260927T055015065601Z/record.json; zero errors/four existing CS8632 warnings. Source unchanged during build. SHA256 a24ec5fdf48e9f19a56d5db13b8bf990800d3c52c7033e61d02879f3f65c7cf4. Existing solo admission retained.",
+    "native_type_lifecycle": "passed; installed-loader Global type checks and exact-Fight teardown; new cut residue repeated world/Mod cleanup without initialized players/graphics",
+    "repository": "passed:82-document catalog regenerated/validated,1093 policy files and12 YAML files. No gameplay/domain/codec change, so unchanged local suites were not repeated."
+  },
+  "runtime": {
+    "status": "not_run",
+    "owner": "user",
+    "next": "0.3.50 native SP/Host & Play: inspect arena edges at daylight/zoom/UI107, slash forecast/amplification/impact/contraction, grid safe cells, travelling crescent, wipe/retry residue cleanup and Reduced Effects. Original Oboro remote-use/wave-publication smoke remains pending; performance is unmeasured."
+  },
+  "delegation": "Sol-medium samurai_battlefield: bounded banner/edge removal and compiled background preview. Lead reviews actual diff/frames, owns logs, all sword materials/renderer/residue, checks and integration. No agent log-analysis delegation."
+}

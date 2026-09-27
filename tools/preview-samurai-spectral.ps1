@@ -1,7 +1,8 @@
 # Hidden FNA device exercising the linked production Samurai body and hazard renderers.
 param([Parameter(Mandatory=$true)][string]$TModLoaderPath,
       [Parameter(Mandatory=$true)][string]$LuminancePackage,
-      [string]$OutputDirectory='.local/samurai-spectral-preview')
+      [string]$OutputDirectory='.local/samurai-spectral-preview',
+      [switch]$CutsOnly)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $tml=(Resolve-Path -LiteralPath $TModLoaderPath).Path
@@ -11,6 +12,7 @@ New-Item -ItemType Directory -Force -Path $work | Out-Null
 $files=@('tools/fixtures/SamuraiSpectralPreview.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiRigArt.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiEnergy.cs',
+    'Client/Encounters/GhostSamurai/GhostSamuraiCuts.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiComposite.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiMaterials.cs',
     'Client/Encounters/GhostSamurai/SamuraiRigMotion.cs',
@@ -27,5 +29,5 @@ $project='<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.
 dotnet build (Join-Path $work 'SamuraiSpectralPreview.csproj') -c Release --nologo
 if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
 $env:FNA3D_FORCE_DRIVER='D3D11'
-dotnet (Join-Path $work 'bin/Release/net8.0/SamuraiSpectralPreview.dll') $root $lumi (Join-Path $tml 'Libraries/Native/Windows') $work
+dotnet (Join-Path $work 'bin/Release/net8.0/SamuraiSpectralPreview.dll') $root $lumi (Join-Path $tml 'Libraries/Native/Windows') $work $CutsOnly.IsPresent
 exit $LASTEXITCODE

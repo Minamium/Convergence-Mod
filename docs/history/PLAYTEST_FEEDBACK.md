@@ -19,6 +19,12 @@ related_docs:
 
 Optional history, not a startup reading list or current specification. Search by feature/build only when useful. Each entry distinguishes **player report**, **response**, and **evidence/remaining check**. Append a few lines per meaningful session; combine follow-ups, link detailed evidence, and never paste raw logs or chat. Current behavior belongs to the feature specs, current progress to [Status](../STATUS.md).
 
+## Ghost Samurai flowing sword tears — 2026-09-27 / 0.3.49 → 0.3.50
+
+Owner rejects battlefield flags, vanilla sky at the field edge and flat slash/grid presentation. Wants Cathedral/Vespera's connected incision→amplification→cut→contraction, with grid energy as a slash derivative, not copied beams. Latest0.3.49 logs show one SP fight ending in Phase3 Defeat after123.22s at23,771/2,400,000HP, complete cleanup and no exceptions;10 accepted Oboro inputs/2 holdout publications and5 grid-wave locks are not multiplayer delivery evidence.
+
+Remove flag shapes/transparent side fade; use an opaque world backdrop with masked bleed. Add a dedicated violet sword-tear material, tapered counterflowing grid sheets and bounded harmless residue, preserving authority geometry/times/damage. [Evidence](../evidence/2026-09-27-samurai-flowing-cuts.json) owns the scoped checks; actual native visual acceptance/remote synchronization remains user-owned.
+
 ## Ghost Samurai missing launches and Soboro — 2026-09-27 / 0.3.48 → 0.3.49
 
 Owner's118.84s Seahorse Scrutiny clip reports missing launched slashes/continued SP vs Host & Play differences, unusable Oboro, stiff Boss cuts, thin DXOboro effects and tiny icons. Requested battlefield/black exterior and the display name Soboro. Logs show one solo Host & Play Victory/cleanup in61s, not proof the missing attacks worked. Dense video frames show the grid flash without the travelling wave and no Oboro blade; final Murasama use supplies the broad bright edge/three-beat reference.

@@ -205,7 +205,9 @@ API確認（2026-09-14、固定source666f69962d3bdffde54fc14025f02634965b4e7c）
 
 本体を1024²のLuminance ManagedRenderTargetへ組み、紫の発光成分を512²へ抽出して流動/blur合成する。顔・金具・黒い鎧は読めるまま残し、外側は両腕/刀/裾に別位相の霊炎を付ける。Reduced Effectsは512²/256²・少ない霊炎、失敗時は元の直接rig描画へ戻す。Fight差し替え・退出/Unloadで無効化/描画スレッド解放する。大きな固定PNGや全画面白塗りを品質向上の代用にしない。
 
-`SamuraiEnergy` は予告の細い軸/内側境界/疎らな光粒と、発射後に流れる白紫の霊圧を分離する。線、内外円、正面半円、移動波、鬼火は同じ受信済み幾何から解析マスクを作る。穴・背面・格子の隙間は塗らない。突進ルートは無害な予告であり、経路全体が同時に攻撃になるような表示にしない。既存の採用済み斬撃素材は大斬撃/波の曲面として残す。予告・発射・解放の差と通常/Reduced・明暗の読みやすさを、実shaderの連続frameで確認する。実機の品質/性能合格は別判定。
+`GhostSamuraiCuts` / `SamuraiCut` が通常/縦/格子/円形/正面斬撃と移動波を描く。Cathedralの`AzureMaterials.Slash`とVesperaの`ScarletSorcery.Tear`から、細い切れ目→直前の圧縮/微振動→太い刀光→収束/煙という連続性を採用する。ビームの砲口・円筒材質・既存Beam rendererは流用しない。格子は同じ斬撃の幅広派生として、尖った先端と裂けた長い尾を持つ非対称な帯を逆向きにも走らせる。時差があるのは材質内の流れだけで、全線のFire/End、幅、間隔とサーバー判定は維持する。危険幅の内側境界と薄い繊維は発動中に残す。穴・背面・格子の隙間は塗らない。
+
+`GhostSamuraiCutResidue` は受信済みの確定幾何のみ最大`MaximumHazards * 2`件保持し、End後16tickまで暗紫の無害な残滓を描く。白い切先はEndで消え、Projectile寿命・当たり判定・音・通信は延長しない。正確なFight/所有NPCの失効、退出/Unloadで即時破棄する。`SamuraiEnergy`は身体の霊炎/鬼火/無害な突進予告を保持。旧5枚の斬撃素材原本は保存するが、直線・格子・円形・移動波の現行材質は上記が優先する。通常/Reduced・明暗・ズーム・時刻境界の実shader連続frameと実機の品質/性能合格は別判定。
 
 召喚鈴は独自の封印面64pxアイコンへ変更する。封印面・Oboro・Soboroは透明余白を初回だけ計測し、ネイティブのslot倍率を保持して最大44pxまで拡大する。既存のアイテムID・レシピ・使用条件は保持する。
 
@@ -213,7 +215,7 @@ API確認（2026-09-14、固定source666f69962d3bdffde54fc14025f02634965b4e7c）
 
 September27動画修正：本体の振り抜きは発射時刻を維持し、8tickの加速→減速、6tickの反動へ拡張。約4radの大きな弧に肩・胴・手首・裾を接続する。60Hz更新間も補間し、描画frameからゲーム状態を進めない。既存の1024²合成材質・刀/腕/裾の独立霊炎を使い、単に全体PNGを回転させない。予告・攻撃の判定時間/幅は変更しない。
 
-戦場跡は`SamuraiBattlefield`のLuminance shaderを地形/プレイヤーより後ろへ描く。傾いた槍、破れた旗、墓標、層ごとに流れる紫霧と霊気を、確定したarenaの世界座標へ固定する。外側は完全な黒。Dollと同じphysical-viewportマスク変換を使い、UI107%等を再乗算しない。参加者と正確なFightに限定し、死亡/終了/退出/Unloadで解除する。Reduced Effectsは霊気/霧を減らすが境界を変えない。
+戦場跡は`SamuraiBattlefield`のLuminance shaderを地形/プレイヤーより後ろへ描く。傾いた槍、地面から出た低い墓標、層ごとに流れる紫霧と霊気を、確定したarenaの世界座標へ固定する。旗/浮いた長方形は置かない。内側は端まで不透明、外側は完全な黒。4world-pixelだけ下地を延長して端の小数座標の隙間を防ぎ、外側の延長部分を正確なマスクで隠す。Dollと同じphysical-viewport変換を使い、UI107%等を再乗算しない。参加者と正確なFightに限定し、死亡/終了/退出/Unloadで解除する。Reduced Effectsは霊気/霧を減らすが境界を変えない。
 
 OboroのHost & Play修復は、接続世代のHelloを60tick間隔で再要求し、90tick以上更新のない表示stateを入力ロックへ使わない。Swing/Zanshin要求前にnative装備とselected slotを同期する。既存の22/18/30Fコンボ・素材・数値・ドロップ・サーバー命中権威を保持する。旧ログだけでは入力拒否の一因を断定できないため、今後の拒否は理由を頻度制限付きで記録する。
 
@@ -247,7 +249,7 @@ API確認の根拠
 - [Player.cs.patch](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Player.cs.patch): `Hurt(... out HurtInfo ...)` が防御・フックを計算し、`Hurt(HurtInfo, quiet)` が確定結果を適用する。ローカル専用の回避フックには上記の制約がある。
 - [NetMessage.cs.patch](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/NetMessage.cs.patch)／[MessageBuffer.cs.patch](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/MessageBuffer.cs.patch): `SendPlayerHurt(int,HurtInfo,int)` とmessage117のdirect-Hurt受信経路を確認。第三者の実装コード・画像・音声は移植していない。
 
-円形表示は GhostSamuraiCircleVisuals.cs から現在の `SamuraiEnergy` 解析マスクへ渡す。予告/発動を分け、内外境界と安全な穴を保持する。元の本体と刀の素材は変更しない。
+円形表示は GhostSamuraiCircleVisuals.cs から現在の `SamuraiCut` 解析マスクへ渡す。予告/発動を分け、内外境界と安全な穴を保持する。元の本体と刀の素材は変更しない。
 
 円形のquadをズームを含む表示範囲へクリップしてから描く。半径/内半径と正面向きはshaderへそのまま渡し、分割線ではなく解析式で境界を作る。範囲を広げてもProjectileは4個のまま。
 

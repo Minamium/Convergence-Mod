@@ -76,6 +76,13 @@ internal static class SamuraiSpectralPreview
             using var target=new RenderTarget2D(device,720,720,false,SurfaceFormat.Color,DepthFormat.None);
             using var batch=new SpriteBatch(device);Terraria.Main.spriteBatch=batch;
             using var pixel=new Texture2D(device,1,1);pixel.SetData(new[]{Color.White});
+            if(args.Length>4 && bool.Parse(args[4]))
+            {
+                CutSequences(device,target,batch,output);
+                GhostSamuraiCuts.Reset();Luminance.Core.Graphics.ShaderManager.Clear();
+                foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();
+                return;
+            }
             new GhostSamuraiComposite().Load();
             int frames=0,composites=0;
             foreach(float zoom in new[]{1f,.65f})
@@ -253,6 +260,66 @@ internal static class SamuraiSpectralPreview
     }
     static void Save(RenderTarget2D target,string output,string name)
     {using var file=File.Create(Path.Combine(output,name));target.SaveAsPng(file,720,720);}
+    static void CutSequences(GraphicsDevice device,RenderTarget2D target,SpriteBatch batch,string output)
+    {
+        float[] offsets={-24,-8,-2,-.1f,0,.5f,1,2,3.5f,5,7,9,11.5f,12,15,20,26,28};
+        int frames=0;
+        foreach(float zoom in new[]{1f,.65f})foreach(bool light in new[]{false,true})foreach(bool reduced in new[]{false,true})
+        foreach(string kind in new[]{"slash","vertical","grid","wave","annulus","cleave"})
+        {
+            var images=new List<string>();var bg=light?new Color(188,201,212):new Color(17,22,36);
+            for(int step=0;step<offsets.Length;step++)
+            {
+                float fire=54,age=fire+offsets[step];
+                Terraria.Main.GameViewMatrix.Scale=zoom;
+                device.SetRenderTarget(target);device.Clear(bg);
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,Terraria.Main.GameViewMatrix.TransformationMatrix);
+                var state=WorldBatchParameters.Capture(batch);
+                if(kind=="grid")
+                {
+                    // Actual production 15+15 grid descriptors, not a 280px
+                    // stand-in beam. End/width/spacing are exactly the rules.
+                    for(int axis=0;axis<2;axis++)for(int line=0;line<GhostSamuraiRules.GridVerticalLineCount;line++)
+                    {
+                        var h=GhostSamuraiRules.GridLine(axis==0,line,360,360,0);
+                        GhostSamuraiCuts.Slash(batch,h,new(h.X,h.Y),h.Fire+offsets[step],reduced);
+                    }
+                }
+                else if(kind=="annulus"||kind=="cleave")
+                {
+                    var h=new SamuraiHazard(kind=="annulus"?SamuraiShape.OuterSlash:SamuraiShape.FrontalCleave,
+                        360,360,1,0,kind=="annulus"?145:0,315,0,54,66,1);
+                    GhostSamuraiCuts.Field(batch,h,new(360,360),age,new Rectangle(0,0,720,720),reduced);
+                }
+                else if(kind=="wave")
+                {
+                    var h=new SamuraiHazard(SamuraiShape.SlashWave,180,360,1,0,SamuraiWaveRules.ChargedSlashWaveWidth,
+                        SamuraiWaveRules.ChargedSlashWaveHeight/2,0,54,66,1);
+                    GhostSamuraiCuts.Wave(batch,h,new(270+Math.Max(0,offsets[step])*8,360),age,reduced);
+                }
+                else
+                {
+                    bool vertical=kind=="vertical";
+                    var h=new SamuraiHazard(vertical?SamuraiShape.VerticalSlash:SamuraiShape.Slash,
+                        vertical?360:-340,vertical?-200:360,vertical?0:1,vertical?1:0,
+                        vertical?1120:GhostSamuraiRules.SlashLength,vertical?SamuraiComboRules.VerticalHalfWidth:GhostSamuraiRules.SlashHalfWidth,
+                        0,54,vertical?54+SamuraiComboRules.VerticalLive:54+GhostSamuraiRules.SlashLive,1);
+                    GhostSamuraiCuts.Slash(batch,h,new(h.X,h.Y),age,reduced);
+                }
+                if(state!=WorldBatchParameters.Capture(batch))throw new Exception("Cut changed caller SpriteBatch state");
+                batch.End();device.SetRenderTarget(null);
+                if(kind=="annulus")AssertBackground(target,360,360,bg,"cut annulus hole");
+                if(kind=="cleave")AssertBackground(target,300,360,bg,"cut cleave safe side");
+                if(kind=="grid")AssertBackground(target,360+(int)(90*zoom),360+(int)(90*zoom),bg,"grid safe cell");
+                if(offsets[step]>=28)AssertBackground(target,360,360,bg,"cut residue expires");
+                string name=$"cut-{kind}-z{zoom:0.00}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{step:00}.png";
+                Save(target,output,name);images.Add(name);frames++;
+            }
+            Sheet(device,batch,output,$"contact-cut-{kind}-z{zoom:0.00}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}.png",images,6,3);
+        }
+        Console.WriteLine($"PASS {frames} production-cut frames: exact grid30 descriptors, slash/vertical/wave/annulus/cleave, forecast-amplify-cut-contract, zoom/full/reduced/light/dark; safe cells/holes/sides, expiry and batch state. Offline only.");
+    }
     static void AssertBackground(RenderTarget2D target,int x,int y,Color expected,string description)
     {
         var pixel=new Color[1];target.GetData(0,new Rectangle(x,y,1,1),pixel,0,1);

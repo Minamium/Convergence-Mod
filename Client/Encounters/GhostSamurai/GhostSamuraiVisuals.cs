@@ -70,7 +70,7 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
             GhostSamuraiSlashArt.Strip(batch, SamuraiSlashArt.Wind, position - heading * h.Radius * 3, position,
                 h.Radius * .75f, reduced ? .15f : .28f);
         }
-        else GhostSamuraiEnergy.Slash(batch, h, position, age, reduced);
+        else GhostSamuraiCuts.Slash(batch, h, position, age, reduced);
         return false;
     }
     private static void DrawRush(SpriteBatch batch, GhostSamuraiAttackProjectile p, Vector2 start, float age, bool reduced)

@@ -124,6 +124,16 @@ public static class GhostSamuraiLoadCheck
                     systemType.GetMethod(hook).Invoke(system, null);
                 if ((int)count.GetValue(registry) != 0) throw new Exception("World cleanup left leases");
                 Console.WriteLine("PASS exact-fight leases, repeated world/Mod teardown and uninitialized player/type state");
+                Type residueType = assembly.GetType(prefix + "GhostSamuraiCutResidue", throwOnError: true);
+                object residue = Activator.CreateInstance(residueType, true);
+                var residueFight = residueType.GetField("fight", BindingFlags.Instance | BindingFlags.NonPublic);
+                residueFight.SetValue(residue, Guid.NewGuid());
+                foreach (string hook in new[] { "ClearWorld", "OnWorldUnload", "OnWorldUnload", "Unload" })
+                    residueType.GetMethod(hook).Invoke(residue, null);
+                if ((Guid)residueFight.GetValue(residue) != Guid.Empty) throw new Exception("Cut residue retained Fight after teardown");
+                var scars = (System.Collections.ICollection)residueType.GetField("scars", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(residue);
+                if (scars.Count != 0) throw new Exception("Cut residue retained scars after teardown");
+                Console.WriteLine("PASS client-only cut residue repeated teardown without initialized player/graphics");
             }
             if (checkRig) SamuraiRigNativeProbe.Run(assembly, context);
             Console.WriteLine("Only headless type/CPU checks executed; full Mod load, graphics and item restoration remain user-owned.");
