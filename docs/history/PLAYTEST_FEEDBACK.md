@@ -17,6 +17,10 @@ related_docs:
 
 # Playtest feedback ledger
 
+## Soboro three-cut reference gap — 2026-09-28 / 0.3.51 → 0.3.53
+
+Owner says the swords remain far below Murasama, requests a rigorous implementation comparison, then limits the refresh to Soboro's three cuts. This is reported dissatisfaction/design direction, not new runtime footage. Compare installed2.2.4 art/IL/audio with existing fractionally rotated ribbons; replace uniform circular surfaces with independently authored cut profiles, large white-violet fractures, torn contraction/quiet gaps and five original sounds. Keep Oboro, Boss and gameplay unchanged. [Evidence](../evidence/2026-09-28-soboro-three-cuts.json) separates compiled-renderer/package checks from user-owned native feel, hearing and remote acceptance.
+
 ## Scarlet invisible solo Stack — 2026-09-28 / observed0.3.46 → 0.3.52
 
 Owner still cannot see Stack and asks whether it occurs alone. The latest complete archived Scarlet solo Host & Play won with three Stack calls: two failures each produced an actual native1damage receipt, while the third succeeded; all three Spread calls succeeded. No chorus presentation receipt exists. A later four-player log stops at Act I startup, so it supplies no chorus evidence. The earlier0.3.45 cosmetic-tail change did not repair PostUpdateWorld's lost `netUpdate` verdict flag. Explicitly publish complete marker state at spawn/resolve and add distinct receive/draw-submission diagnostics; retain solo rules, damage1, native God Mode and approved art. [Evidence](../evidence/2026-09-28-scarlet-chorus-publication.json) separates actual prior hits, compiled regression checks and user-owned repaired multiplayer visibility.

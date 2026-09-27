@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-09-19
+last_reviewed: 2026-09-28
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -131,6 +131,8 @@ The owner supplied the weapon sketch and eight violet Boss/weapon boards and req
 The September17 [Murasama motion survey](research/2026-09-16-oboro.md#murasama-motion-reference--2026-09-17) informs the three-beat presentation and heavier final-cut emphasis. Oboro's easing, pose history, violet ribbons and sprite echoes are independently written; existing project-authored textures are reused. No new third-party asset or implementation is imported. The September20 [supplied motion clips](research/2026-09-16-oboro.md#supplied-motion-clips--2026-09-20) add observed Murasama and owner-identified DMC Vergil anticipation/release/residue references. Recordings and decoded frames stay local; independently authored third-cut curves and violet accents retain existing project art.
 
 ## Ghost Samurai articulated presentation — 2026-09-18
+
+Soboro's2026-09-28 refresh adopts only presentation principles from the [installed Murasama comparison](research/2026-09-16-oboro.md#installed-murasama-comparison--2026-09-28). Three deforming violet sweep profiles, managed materials and five synthesized cues are original. Calamity's sheet, samples, source and in-memory inspection data are not distributed; exact project exports remain in [Attribution](../Assets/ATTRIBUTION.md).
 
 The2026-09-27 weapon revision adds [WotG LightSlash/LightSlashDrawer observation](research/2026-09-16-oboro.md#continuous-weapon-performance--2026-09-27): advancing front and temporally distinct residue inform an independently authored bounded curve/history design. No WotG render target, shader, equation, implementation or texture is copied. The original Oboro/Soboro source art stays intact; original material exports retain their exact attribution records.
 

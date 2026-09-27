@@ -22,6 +22,10 @@ public sealed class DXOboroVisuals : GlobalProjectile
     private bool released;
     private int lastObservedAge = -1;
     private ScreenShakeSystem.ShakeInfo? shake;
+    private ulong impactTick;
+    private Vector2 impactPosition;
+    private float impactAngle;
+    private int impactCount;
 
     private static float DrawAge(DXOboroCut cut)
     {
@@ -61,19 +65,30 @@ public sealed class DXOboroVisuals : GlobalProjectile
             || cut.Age < DXOboroMotion.Release(cut.Step)
             || cut.Age > DXOboroMotion.Release(cut.Step) + 2) return;
         released = true;
-        SoundEngine.PlaySound(SoundID.Item71 with
-        {
-            Volume = cut.Step == 2 ? .62f : .48f,
-            Pitch = cut.Step == 2 ? -.38f : .19f + cut.Step * .12f,
-            MaxInstances = 4
-        }, player.Center);
-        if (cut.Step == 2)
-            SoundEngine.PlaySound(SoundID.Item1 with { Volume = .38f, Pitch = -.44f, MaxInstances = 3 }, player.Center);
+        DXOboroAudio.Swing(cut.Step, player.Center);
         var config = ModContent.GetInstance<FirstSeveranceVisualConfig>();
         if (projectile.owner == Main.myPlayer && !config.ReducedEffects && config.ScreenShake)
-            shake = ScreenShakeSystem.StartShakeAtPoint(player.Center, cut.Step == 2 ? 2.2f : 1.1f,
+            shake = ScreenShakeSystem.StartShakeAtPoint(player.Center, cut.Step == 2 ? 3.5f : 1.35f,
                 angularVariance: .22f, shakeDirection: angle.ToRotationVector2(),
-                shakeStrengthDissipationIncrement: .45f);
+                shakeStrengthDissipationIncrement: cut.Step == 2 ? .65f : .45f);
+    }
+
+    // Pure local feedback for tML's native hit callback; no new damage path or
+    // network event. A crowd cannot stack a sound/flash for every target.
+    public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
+    {
+        if (Main.dedServ || projectile.ModProjectile is not DXOboroCut cut || damageDone <= 0
+            || impactCount >= (cut.Step == 2 ? 2 : 1)
+            || (impactCount > 0 && Main.GameUpdateCount - impactTick < 4)) return;
+        impactCount++;
+        impactTick = Main.GameUpdateCount;
+        Vector2 grip = cut.Hand(Main.player[projectile.owner], cut.Age);
+        Vector2 tip = grip + cut.BladeAngle.ToRotationVector2() * DXOboroMotion.Reach;
+        impactPosition = new Vector2(Math.Clamp(tip.X, target.Left.X, target.Right.X),
+            Math.Clamp(tip.Y, target.Top.Y, target.Bottom.Y));
+        impactAngle = cut.BladeAngle;
+        bool metallic = target.HitSound is SoundStyle sound && sound.Equals(SoundID.NPCHit4);
+        DXOboroAudio.Hit(impactPosition, cut.Step == 2, metallic);
     }
 
     public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -108,8 +123,10 @@ public sealed class DXOboroVisuals : GlobalProjectile
         DXOboroArt.Sword(Main.spriteBatch, grip, bladeAngle,
             DXOboroMotion.BladeLength(cut.Step, age),
             Color.White, cut.Facing < 0);
-        DXOboroMaterial.Lightning(Main.spriteBatch, age, cut.Step, cut.Aim, cut.Facing, grip,
-            Main.GameUpdateCount - 1d + WeaponDrawClock.Fraction, reduced);
+        DXOboroMaterial.BladeAndFracture(Main.spriteBatch, age, cut.Step, cut.Aim, cut.Facing, grip, reduced);
+        if (impactCount > 0)
+            DXOboroMaterial.Impact(Main.spriteBatch, impactPosition, impactAngle,
+                (float)(Main.GameUpdateCount - impactTick) + WeaponDrawClock.Fraction, cut.Step, reduced);
         return false;
     }
 
@@ -119,5 +136,6 @@ public sealed class DXOboroVisuals : GlobalProjectile
         shake = null;
         released = false;
         lastObservedAge = -1;
+        impactCount = 0;
     }
 }
