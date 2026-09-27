@@ -41,8 +41,9 @@
     "native_marker_probe": "passed: exact compiled runtime calls explicit synchronization after full spawn/verdict writes;12 native SendExtraAI/ReceiveExtraAI cases for1/4/8 members, both kinds/results, immutable terminal and authority/sender guards;1136 truncated prefixes rejected without mutation. No sockets simulated.",
     "pre_fix_regression": "The same native probe rejects the retained pre-fix compiled assembly at Missing explicit marker publication, before game initialization.",
     "native_damage_and_loader": "passed: exact package native final cap1, recovery/Scarlet loader-type checks and existing native hook probes",
-    "artifact_sha256": "b293ddf81b675f4b5010ebe99f81bb5f780b2e0a691f706370976ff9eb4ad123",
-    "local_build_record": ".local/builds/20260927T194719835609Z/record.json",
+    "artifact_sha256": "5c5e496f1262b85a6b6d7d16688c5e4329c1dcdc13c6092264b4e4e2911a2cd8",
+    "local_build_record": ".local/builds/20260927T195448386756Z/record.json",
+    "artifact_identity": "First scratch output later differed from its recorded hash; it was not deployed. Rebuilt unchanged gameplay, pinned Convergence.verified.tmod beside the new record and repeated native package probes. Pinned SHA256 matches both before and after probes. The earlier scratch mutation cause is unconfirmed; no claim of tampering or source change.",
     "actual_hostplay_remote_failed_stack_spread_godmode": "not_run: user-owned; compare resolved, received, presentation, drawn and independent native-impact logs",
     "offline_material_preview": "not repeated: accepted material/curves/geometry unchanged; previous isolated renders did not exercise the missing network verdict"
   },
