@@ -26,6 +26,14 @@
       "source_sha256": "0fcd99e26729469836f0810a4f44610ed2363c49b943ca9f00f2d1ef2202dc44",
       "output_sha256": "fe6dfa63f474651f7f213d8230559b61b14459c02254185de478d757f4d83b11"
     },
+    "EbonManor.fx": {
+      "source_sha256": "8a806ae90933dff20bba468f70a705d4543e905b67877b9fca49781197dd3c49",
+      "output_sha256": "e83adecbfe62a34ca42d8d47c96d4610256e6286b04d55154b320211198e65c4"
+    },
+    "EbonSilk.fx": {
+      "source_sha256": "70adae2a0fa8d892f9b0dc876b5dab375f65dc0f6b8c5938f9101a6c13006fc3",
+      "output_sha256": "29ab697695e19b9cc77ffd04c3cb19ac1141568972bb408eaabd553a75ca58c8"
+    },
     "MechanicRing.fx": {
       "source_sha256": "b685e8922f20aa34fad6f86d6da927d5033885dc2b7229be9fc956e6aec80aa3",
       "output_sha256": "7556fe157bf8afe6c8d394d87b45f4170660de127044620f358b94487881a20e"
