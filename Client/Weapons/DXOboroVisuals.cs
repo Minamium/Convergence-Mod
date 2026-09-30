@@ -23,8 +23,6 @@ public sealed class DXOboroVisuals : GlobalProjectile
     private int lastObservedAge = -1;
     private ScreenShakeSystem.ShakeInfo? shake;
     private ulong impactTick;
-    private Vector2 impactPosition;
-    private float impactAngle;
     private int impactCount;
 
     private static float DrawAge(DXOboroCut cut)
@@ -59,6 +57,7 @@ public sealed class DXOboroVisuals : GlobalProjectile
         player.ChangeDir(cut.Facing);
         player.SetCompositeArmFront(true, OboroHandAnchor.Stretch(player, cut.Hand(player, cut.Age), arm),
             arm - MathF.PI / 2);
+        SoboroSlashLayer.Track(projectile, cut, player);
         int previousAge = lastObservedAge;
         lastObservedAge = cut.Age;
         if (released || previousAge >= DXOboroMotion.Release(cut.Step)
@@ -84,9 +83,9 @@ public sealed class DXOboroVisuals : GlobalProjectile
         impactTick = Main.GameUpdateCount;
         Vector2 grip = cut.Hand(Main.player[projectile.owner], cut.Age);
         Vector2 tip = grip + cut.BladeAngle.ToRotationVector2() * DXOboroMotion.Reach;
-        impactPosition = new Vector2(Math.Clamp(tip.X, target.Left.X, target.Right.X),
+        Vector2 impactPosition = new(Math.Clamp(tip.X, target.Left.X, target.Right.X),
             Math.Clamp(tip.Y, target.Top.Y, target.Bottom.Y));
-        impactAngle = cut.BladeAngle;
+        SoboroSlashLayer.Impact(projectile, impactPosition);
         bool metallic = target.HitSound is SoundStyle sound && sound.Equals(SoundID.NPCHit4);
         DXOboroAudio.Hit(impactPosition, cut.Step == 2, metallic);
     }
@@ -101,37 +100,17 @@ public sealed class DXOboroVisuals : GlobalProjectile
         var basis = OboroHandAnchor.Capture(player, cut.Facing);
         var point = basis.At(DXOboroMotion.ArmAngle(cut.Step, age, cut.Aim, cut.Facing));
         Vector2 grip = player.MountedCenter + new Vector2(point.X, point.Y);
-        bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
-        DXOboroMaterial.Draw(Main.spriteBatch, age, cut.Step, cut.Aim, cut.Facing,
-            player.MountedCenter + new Vector2(basis.X, basis.Y),
-            new Vector2(basis.AlongX, basis.AlongY),
-            new Vector2(basis.AcrossX, basis.AcrossY), reduced);
-        if (age < DXOboroMotion.Release(cut.Step))
-        {
-            int motes = reduced ? 1 : 3;
-            for (int i = 0; i < motes; i++)
-            {
-                float drift = age * .17f + i * MathHelper.TwoPi / motes;
-                Vector2 along = bladeAngle.ToRotationVector2();
-                Vector2 side = new(-along.Y, along.X);
-                Vector2 at = grip + along * (46f + 20f * i / motes)
-                    + side * MathF.Sin(drift) * (9f + i * 3f);
-                OboroArt.Flame(Main.spriteBatch, at, 8f + 2f * i,
-                    .24f + .2f * age / DXOboroMotion.Release(cut.Step));
-            }
-        }
+        // The crescent, lightning, sparks and hit star live in SoboroSlashLayer's
+        // pixel layer; only the physical blade is drawn over the player here.
         DXOboroArt.Sword(Main.spriteBatch, grip, bladeAngle,
             DXOboroMotion.BladeLength(cut.Step, age),
             Color.White, cut.Facing < 0);
-        DXOboroMaterial.BladeAndFracture(Main.spriteBatch, age, cut.Step, cut.Aim, cut.Facing, grip, reduced);
-        if (impactCount > 0)
-            DXOboroMaterial.Impact(Main.spriteBatch, impactPosition, impactAngle,
-                (float)(Main.GameUpdateCount - impactTick) + WeaponDrawClock.Fraction, cut.Step, reduced);
         return false;
     }
 
     public override void OnKill(Projectile projectile, int timeLeft)
     {
+        SoboroSlashLayer.Release(projectile);
         if (shake is not null) shake.ShakeStrength = 0;
         shake = null;
         released = false;

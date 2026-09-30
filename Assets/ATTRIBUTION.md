@@ -2,72 +2,95 @@
 
 ## Records
 
-### Soboro three-cut audio — 2026-09-28
+### Soboro recorded blade audio — 2026-10-01
+
+Replaces the 2026-09-28 synthesized Soboro cues at the same runtime paths; the owner selected CC0 recordings for these masters on2026-10-01. [`tools/remix_soboro_sfx.py`](../tools/remix_soboro_sfx.py) owns exact windows, filters, gains, loudness targets and source hashes. The recordings stay in a local source store and are not committed. Every source below showed Creative Commons0 (https://creativecommons.org/publicdomain/zero/1.0/) on its page on2026-10-01. Freesound files are the public HQ preview renders of those CC0 uploads.
+
+| Key | Recording | Author | Source | Source SHA256 |
+|---|---|---|---|---|
+| energy_wave | sword slash energy wave | greyfeather | https://freesound.org/s/724716/ | `5b9fbd1c8b78cd2e69c0ebfd178e229308b37058fe71da1cd4311c7f70a94b59` |
+| samurai_slash | samurai slash | nekoninja | https://freesound.org/s/370204/ | `283b188b2f04f6676ae23be36e58a536bb78d5e7cf4bf5ab8cc95ca13b0065c2` |
+| swoosh | swoosh.wav | PorkMuncher | https://freesound.org/s/263595/ | `5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058` |
+| stick_woosh | Woosh (stick swung in the air) | Dalesome | https://freesound.org/s/352719/ | `5dc0966b3f689fde08955ab18a3b8dc636cc3db96d105e90b427af54184c3016` |
+| swish_short | swish-10.wav, Swishes Sound Pack | artisticdude | https://opengameart.org/content/swishes-sound-pack | `4f7381a76f280d3f36f962ac3f44f16f77eec44797f30715d063c81ea3859024` |
+| anime_shing | Anime_drama_shing_sword_2.wav | Euphrosyyn | https://freesound.org/s/529019/ | `a8278823afb4c25a06d55ec2adfdeb7993bb738b1077310555be1e592063d02f` |
+| anime_ring | Nice anime sword hit | xkeril | https://freesound.org/s/706204/ | `2a28c06b3674240e46bbf79516f87e5fbbe9522a1d272b55448f0af2c8599137` |
+| sword_hit | Sword Hit | qubodup | https://freesound.org/s/442769/ | `93d72e63bb8d9b8a60d2c0ac665c153171515645fbb85f4ec028e4a253e7b167` |
+| armor_strike | Sword sound 1.wav | Merrick079 | https://freesound.org/s/568170/ | `5f9ab16b7a74a205b1490001d4c913d0d55f561df796cb2d43c1a30b97c351b1` |
+| bloody_blade | Bloody Blade 2.wav | Kreastricon62 | https://freesound.org/s/323526/ | `42f16fc3e230066399282c90187e83d20fecd851f32cdf1553b9a9e1225dcb98` |
+| slashkut | slashkut.wav | Abyssmal | https://freesound.org/s/35213/ | `110aa6c69e8705bc14152f19f55fb53bdaf7e8582c4d95bb175311bdaf592ca8` |
+| chop | chop.ogg, RPG Audio (RPGsounds_Kenney.zip) | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486` |
+| zap | Electric zap.wav | michael_grinnell | https://freesound.org/s/512471/ | `8630ae76d1c6178d0fb0b9192b89326540e7b87cd3619683c2eee1c07dfe6575` |
 
 - Runtime file: `Assets/Sounds/Weapons/Soboro/CutDown.ogg`
-- Asset ID: soboro-cutdown-20260928
-- Asset type: original stereo weapon sound
-- Creator: Convergence, owner-directed OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-28
-- Source type: original
-- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
-- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
-- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
-- License and redistribution terms: existing project original code/asset terms; no third-party recording
-- Required attribution: retain project provenance
-- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+- Asset ID: soboro-cutdown-20261001
+- Asset type: stereo44.1kHz Vorbis Soboro first blade cue layered from CC0 recordings
+- Creator: recordings by greyfeather, nekoninja, PorkMuncher, Euphrosyyn and michael_grinnell; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: energy_wave, samurai_slash, swoosh, anime_shing, zap in the table above
+- Tool/model/version: `tools/remix_soboro_sfx.py` (score, windows, filters and loudness targets); NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, layered on the accepted cut clock and loudness-matched to the replaced cue; the small low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `015409da709f8c7e6973509542cc79c545e9fd76b0e1b2fba41ad237108dd09e`
 
 - Runtime file: `Assets/Sounds/Weapons/Soboro/CutReverse.ogg`
-- Asset ID: soboro-cutreverse-20260928
-- Asset type: original stereo weapon sound
-- Creator: Convergence, owner-directed OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-28
-- Source type: original
-- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
-- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
-- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
-- License and redistribution terms: existing project original code/asset terms; no third-party recording
-- Required attribution: retain project provenance
-- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+- Asset ID: soboro-cutreverse-20261001
+- Asset type: stereo44.1kHz Vorbis Soboro second blade cue layered from CC0 recordings
+- Creator: recordings by greyfeather, PorkMuncher, artisticdude, Euphrosyyn and michael_grinnell; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: energy_wave, swoosh, swish_short, anime_shing, zap in the table above
+- Tool/model/version: `tools/remix_soboro_sfx.py` (score, windows, filters and loudness targets); NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, layered on the accepted cut clock and loudness-matched to the replaced cue; the small low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `936b6ae192935baf4047ec03822be0a8f6d425d6da511af698c28dea434ddd81`
 
 - Runtime file: `Assets/Sounds/Weapons/Soboro/CutHeavy.ogg`
-- Asset ID: soboro-cutheavy-20260928
-- Asset type: original stereo weapon sound
-- Creator: Convergence, owner-directed OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-28
-- Source type: original
-- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
-- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
-- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
-- License and redistribution terms: existing project original code/asset terms; no third-party recording
-- Required attribution: retain project provenance
-- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
-
-- Runtime file: `Assets/Sounds/Weapons/Soboro/HitOrganic.ogg`
-- Asset ID: soboro-hitorganic-20260928
-- Asset type: original stereo weapon sound
-- Creator: Convergence, owner-directed OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-28
-- Source type: original
-- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
-- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
-- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
-- License and redistribution terms: existing project original code/asset terms; no third-party recording
-- Required attribution: retain project provenance
-- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+- Asset ID: soboro-cutheavy-20261001
+- Asset type: stereo44.1kHz Vorbis Soboro third blade cue layered from CC0 recordings
+- Creator: recordings by Dalesome, greyfeather, nekoninja, Euphrosyyn, xkeril and michael_grinnell; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: stick_woosh, energy_wave, samurai_slash, anime_shing, anime_ring, zap in the table above
+- Tool/model/version: `tools/remix_soboro_sfx.py` (score, windows, filters and loudness targets); NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, layered on the accepted cut clock and loudness-matched to the replaced cue; the small low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `38a222251627fd421e05277e797ff66a62cdddb179ec83cbfd68c37d8ed4b641`
 
 - Runtime file: `Assets/Sounds/Weapons/Soboro/HitMetal.ogg`
-- Asset ID: soboro-hitmetal-20260928
-- Asset type: original stereo weapon sound
-- Creator: Convergence, owner-directed OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-28
-- Source type: original
-- Source work and URL: deterministic synthesis in `tools/generate_soboro_sfx.py`; no external samples
-- Tool/model/version: NumPy DSP, FFmpeg7.1/libvorbis q5 with bitexact export
-- Human modifications: Authored blade rush, electric-metal tearing and bounded resonance; local WAV masters/audition are regenerable and excluded from distribution.
-- License and redistribution terms: existing project original code/asset terms; no third-party recording
-- Required attribution: retain project provenance
-- Reviewer and review date: numerical headroom/determinism checked2026-09-28; subjective listening remains owner-owned
+- Asset ID: soboro-hitmetal-20261001
+- Asset type: stereo44.1kHz Vorbis Soboro metal contact cue layered from CC0 recordings
+- Creator: recordings by qubodup, Merrick079 and Kenney; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: sword_hit, armor_strike, chop in the table above
+- Tool/model/version: `tools/remix_soboro_sfx.py` (score, windows, filters and loudness targets); NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, layered on the accepted cut clock and loudness-matched to the replaced cue; the small low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `ea4b5f08f76d957aad1a3f2cf4260006e2467f6ce41c1fd93aaa13c3e9738fb3`
+
+- Runtime file: `Assets/Sounds/Weapons/Soboro/HitOrganic.ogg`
+- Asset ID: soboro-hitorganic-20261001
+- Asset type: stereo44.1kHz Vorbis Soboro organic contact cue layered from CC0 recordings
+- Creator: recordings by Kreastricon62, Abyssmal and Kenney; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: bloody_blade, slashkut, chop in the table above
+- Tool/model/version: `tools/remix_soboro_sfx.py` (score, windows, filters and loudness targets); NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, layered on the accepted cut clock and loudness-matched to the replaced cue; the small low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `73a9735f6932b9140e7752a75e92886d52629570f01b18c7ddd87951625a45ca`
 
 ### Ghost Samurai sword tears — 2026-09-27
 
@@ -157,18 +180,32 @@ Original Convergence images and procedural materials; existing VioletRig, Oboro 
 - Required attribution: retain project provenance and generation disclosure
 - Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
 
-- Runtime file: `Assets/AutoloadedEffects/Shaders/DXOboroVeil.fxc`
-- Asset ID: dxoboroveil-20260927
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SoboroPixelSlash.fxc`
+- Asset ID: soboropixelslash-20261001
 - Asset type: compiled original material
-- Creator: project-owner-directed original work with OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-27
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-01
 - Source type: original
 - Source work and URL: original Convergence HLSL source alongside runtime export
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Original repository-owned DXOboroVeil.fx. Revised2026-09-28 for independently authored white-violet cutting surfaces, torn negative space and large fracture strokes; no Calamity art/code/sample imported. Current source/export identity is in compiled.json.
+- Human modifications: Original repository-owned SoboroPixelSlash.fx: a swept crescent evaluated per art pixel in a half-resolution target, quantized to a six-tone violet palette with a checker-dithered deep tone, then point-upscaled with a one-pixel outline and restrained glow. Replaces the retired DXOboroVeil material; no Calamity or other third-party art/code/sample imported.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance and generation disclosure
-- Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
+- Reviewer and review date: Claude offline compiled-material sequence review 2026-10-01; native playtest not_run
+
+- Runtime file: `Assets/Textures/Items/DXOboro/SlashNoise.png`
+- Asset ID: soboro-slash-noise-20261001
+- Asset type: 128×128 RGB tileable noise texture
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: generated
+- Source work and URL: procedural output of repository script `tools/generate_soboro_noise.py`; no source artwork
+- Tool/model/version: tools/generate_soboro_noise.py (NumPy value-noise FBM, seeds 1709/2851/4441, 16/32/64-cell octaves)
+- Human modifications: none after generation; the script regenerates the file deterministically
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline material inspection 2026-10-01; native playtest not_run
+- SHA256: `598cfadd25244ad3e582171c2cf1cfc2cbb1a37fbeb79ff7eb8319b7ec7d67f8`
 
 
 ### Doll ruptured energy core — 2026-09-27

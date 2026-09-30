@@ -27,6 +27,7 @@ internal static class DXOboroAudio
         SoundEngine.PlaySound(new SoundStyle(Root + name)
         {
             Volume = volume,
+            PitchVariance = .06f,
             MaxInstances = 2,
             SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused,
@@ -43,6 +44,7 @@ internal static class DXOboroAudio
         {
             Volume = heavy ? .62f : .52f,
             Pitch = heavy ? -.09f : 0f,
+            PitchVariance = .1f,
             MaxInstances = 2,
             SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
             PauseBehavior = PauseBehavior.StopWhenGamePaused,

@@ -2,6 +2,6 @@ namespace Convergence.Common.Networking.Protocol;
 
 internal static class EncounterProtocol
 {
-    // Oboro/Soboro's angular velocity and accepted sweep changed; matching peers only.
-    public const ushort CurrentVersion = 74;
+    // Soboro's flowing kata changed the accepted sweep timing; matching peers only.
+    public const ushort CurrentVersion = 75;
 }

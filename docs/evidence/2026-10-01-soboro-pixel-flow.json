@@ -1,0 +1,28 @@
+{
+  "scope": "Soboro presentation only: pixel-art slash layer, flowing kata and CC0-layered audio. Damage, reach, width, hit windows, recipe, saved DXOboro ID, original Oboro and Ghost Samurai are unchanged; the sweep timing outside the live windows changes, so matching protocol75 peers are required",
+  "target_build": "0.3.56 / protocol75",
+  "integration_base": "3b3ddee (main after PR87)",
+  "commits": {
+    "visual_and_motion": "d270a4c",
+    "audio": "2ef02e4"
+  },
+  "owner_direction": {
+    "visual": "2026-10-01: approved a pixel-art slash direction for Soboro",
+    "motion": "2026-10-01: the top and bottom of each cut brake too abruptly; make it flow like swordsmanship",
+    "audio": "2026-10-01: auditioned raw Sonniss GDC bundle and CC0 candidates, then a designed Sonniss-including master against a CC0-only master, and selected the CC0-only master. No Sonniss recording is used, committed or packaged"
+  },
+  "checks": {
+    "static": "passed: documentation catalog82, repository checks and YAML via the scoped wrapper after the final document edits; tools unittest66 passed",
+    "domain": "passed at d270a4c:387 cases, including 'Soboro flowing kata keeps each live sweep and never brakes abruptly' (release angles, end angles, join speed continuity <0.01, peak angular acceleration <0.3). Motion sources are unchanged by the audio commit",
+    "motion_metrics": "live sweeps identical to0.3.55's accepted windows; live peak angular speed0.55/0.50/0.52 rad/tick (previously0.56/0.52/0.52); peak angular acceleration1.96/1.68/0.74 -> 0.195/0.154/0.140 rad/tick^2; entry/exit joins continuous in pose and speed",
+    "shader": "passed: SoboroPixelSlash compiled by the pinned FXC fx_2_0 /O3 whose compiler hash matches compiled.json; unchanged shaders recompile byte-identically; DXOboroVeil and DXOboroMaterial removed",
+    "offline_sequences": "reviewed: production SoboroSlashArt/SoboroPixelSlash code rendered through tools/preview-dx-oboro.ps1 for the three cuts, torn residue and a synthetic impact. Repaired dissolve pinholes, outlined bright pinholes, wood-grain streaks and muddy residue during review. Proxy player/offline draw, not a Terraria playtest or FPS measurement",
+    "audio": "passed: five cues rendered by tools/remix_soboro_sfx.py from hash-verified CC0 recordings; repeat renders are byte-identical (pinned Ogg serial); decoded true peak <=-1.99dBTP; K-weighted peak-100ms loudness -10.3/-10.6/-8.7/-12.2/-12.7dB (CutDown/CutReverse/CutHeavy/HitMetal/HitOrganic) against the replaced cues' -10.4/-8.8/-8.9/-12.3/-13.5dB, so the in-code volumes stay unchanged; swing envelope peaks about40/40/90ms after the release trigger. Two-cycle cadence audition uses the real release ticks and illustrative contact delays, not a game capture",
+    "native_build": "passed:0errors/4existing CS8632 warnings; source unchanged during build",
+    "package": "0.3.56, 105752575 bytes, sha256 a112e955f06135647e0a989d98280349dd2b5576253acbf9d7e9a5af04a49882; packaged1-4 player admission passed",
+    "package_identity": "build source_sha256 8b4672143d7bebd5d09f46c0d0bcc6438e7d2476166d459b179def3138a415c4 equals commit2ef02e4 plus an uncommitted draft of the Soboro spec edit (docs are buildIgnored); all five packaged Soboro OGGs byte-match the committed assets and no Licensed/ entry exists",
+    "install": "installed pre-merge into the owner's normal Mods profile at the owner's explicit request for Host & Play; the previous package is retained in the ignored local build record",
+    "native_player_and_remote": "not_run: owner to check the 1->2->3->1 loop standing/moving/flying, flow at the top/bottom, arm/armor while the blade circles behind, readability over boss telegraphs, the layer staying attached while moving, zoom/Reduced Effects, FPS, swing/hit mix on organic and NPCHit4 targets, and a matching remote peer"
+  },
+  "delegation": "Lead (Claude) implemented the layer, shader, kata, audio score and integration. Read-only research agents catalogued the Sonniss bundle distribution/license and CC0 candidates; no delegated code or asset was integrated."
+}
