@@ -45,6 +45,11 @@ docs/.cache/
 *.pfx
 *.p12
 
+# Claude Code: only the shared Skill adapters are tracked; settings, worktrees and personal notes stay local.
+.claude/*
+!.claude/skills/
+CLAUDE.local.md
+
 # IDE and editor state
 .vs/
 .vscode/

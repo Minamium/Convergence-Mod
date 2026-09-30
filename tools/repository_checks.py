@@ -31,6 +31,7 @@ REQUIRED_PATHS = (
     ".agents/skills/research-tmodloader-sources/SKILL.md",
     ".agents/skills/research-tmodloader-sources/agents/openai.yaml",
     "AGENTS.md",
+    "CLAUDE.md",
     "ConvergenceMod.csproj",
     "ConvergenceMod.cs",
     "build.txt",
@@ -258,6 +259,7 @@ REQUIRED_BUILD_IGNORE_MASKS = {
     ".git\\*",
     ".github\\*",
     ".agents\\*",
+    ".claude\\*",
     "*\\__pycache__\\*",
     "docs\\*",
     "tools\\*",
@@ -277,6 +279,8 @@ REQUIRED_BUILD_IGNORE_MASKS = {
     "Assets\\Sounds\\Source\\*",
     "README.md",
     "AGENTS.md",
+    "CLAUDE.md",
+    "CLAUDE.local.md",
     "CONTRIBUTING.md",
     "SECURITY.md",
     "Directory.Build.props",
@@ -557,6 +561,24 @@ def check_build_ignore(errors: list[str]) -> None:
         errors.append("includeSource must remain false until a source license exists")
 
 
+def read_skill_frontmatter(skill_path: Path, errors: list[str]) -> dict[str, str] | None:
+    content = read_utf8(skill_path, errors)
+    if content is None:
+        return None
+    if not content.startswith("---\n") or "\n---\n" not in content[4:]:
+        errors.append(f"Skill has invalid YAML frontmatter delimiters: {relative(skill_path)}")
+        return None
+
+    frontmatter = content[4:].split("\n---\n", 1)[0]
+    fields: dict[str, str] = {}
+    for line in frontmatter.splitlines():
+        if not line.strip() or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        fields[key.strip()] = value.strip()
+    return fields
+
+
 def check_repository_skills(errors: list[str]) -> None:
     skills_root = ROOT / ".agents" / "skills"
     if not skills_root.is_dir():
@@ -581,20 +603,9 @@ def check_repository_skills(errors: list[str]) -> None:
             errors.append(f"Skill is missing SKILL.md: {relative_directory}")
             continue
 
-        content = read_utf8(skill_path, errors)
-        if content is None:
+        fields = read_skill_frontmatter(skill_path, errors)
+        if fields is None:
             continue
-        if not content.startswith("---\n") or "\n---\n" not in content[4:]:
-            errors.append(f"Skill has invalid YAML frontmatter delimiters: {relative(skill_path)}")
-            continue
-
-        frontmatter = content[4:].split("\n---\n", 1)[0]
-        fields: dict[str, str] = {}
-        for line in frontmatter.splitlines():
-            if not line.strip() or ":" not in line:
-                continue
-            key, value = line.split(":", 1)
-            fields[key.strip()] = value.strip()
 
         if fields.get("name") != directory.name:
             errors.append(
@@ -604,6 +615,48 @@ def check_repository_skills(errors: list[str]) -> None:
             errors.append(f"Skill frontmatter requires a description: {relative(skill_path)}")
         if not (directory / "agents" / "openai.yaml").is_file():
             errors.append(f"Skill is missing agents/openai.yaml: {relative_directory}")
+
+
+def check_claude_code_adapters(errors: list[str]) -> None:
+    # A CLAUDE.md stops Claude Code from reading AGENTS.md natively, so it must import it.
+    claude_path = ROOT / "CLAUDE.md"
+    if claude_path.is_file():
+        content = read_utf8(claude_path, errors)
+        if content is not None and "@AGENTS.md" not in (line.strip() for line in content.splitlines()):
+            errors.append("CLAUDE.md must import the shared agreement on its own '@AGENTS.md' line")
+
+    # Claude Code does not read .agents/; each canonical Skill needs a metadata-only adapter.
+    canonical_root = ROOT / ".agents" / "skills"
+    adapter_root = ROOT / ".claude" / "skills"
+    canonical = {path.name: path for path in canonical_root.iterdir() if path.is_dir()} if canonical_root.is_dir() else {}
+    adapters = {path.name: path for path in adapter_root.iterdir() if path.is_dir()} if adapter_root.is_dir() else {}
+
+    for name in sorted(canonical.keys() - adapters.keys()):
+        errors.append(f"Skill has no Claude Code adapter: .claude/skills/{name}/SKILL.md")
+    for name in sorted(adapters.keys() - canonical.keys()):
+        errors.append(f"Claude Code adapter has no canonical Skill: .claude/skills/{name}")
+
+    for name in sorted(canonical.keys() & adapters.keys()):
+        adapter_path = adapters[name] / "SKILL.md"
+        canonical_path = canonical[name] / "SKILL.md"
+        if not adapter_path.is_file():
+            errors.append(f"Claude Code adapter is missing SKILL.md: .claude/skills/{name}")
+            continue
+        if not canonical_path.is_file():
+            continue
+
+        adapter_fields = read_skill_frontmatter(adapter_path, errors)
+        canonical_fields = read_skill_frontmatter(canonical_path, errors)
+        if adapter_fields is None or canonical_fields is None:
+            continue
+        if adapter_fields.get("name") != name:
+            errors.append(f"Claude Code adapter name must match its directory: {relative(adapter_path)}")
+        if adapter_fields.get("description") != canonical_fields.get("description"):
+            errors.append(f"Claude Code adapter description must match its canonical Skill: {relative(adapter_path)}")
+
+        content = read_utf8(adapter_path, errors)
+        if content is not None and f".agents/skills/{name}/SKILL.md" not in content:
+            errors.append(f"Claude Code adapter must point to .agents/skills/{name}/SKILL.md: {relative(adapter_path)}")
 
 
 def check_architecture_boundaries(files: list[Path], errors: list[str]) -> None:
@@ -752,6 +805,7 @@ def main() -> int:
     check_tmod_identity(files, errors)
     check_build_ignore(errors)
     check_repository_skills(errors)
+    check_claude_code_adapters(errors)
     check_architecture_boundaries(files, errors)
     check_asset_attribution(files, errors)
 

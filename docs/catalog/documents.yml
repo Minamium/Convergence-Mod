@@ -574,7 +574,7 @@ documents:
 - doc_id: docs.system
   path: docs/DOCUMENTATION_SYSTEM.md
   title: Documentation and Knowledge-Base Design
-  content_sha256: e276ef9f099a4248646af5014544914b28e24fa906505d5ed143d894edf08f3d
+  content_sha256: 5d9134e2f1e4558d85ccf72e91f18e4b2403dbb42a438bd4fca02a9d33e07f8d
   document_type: governance
   status: accepted
   owners:
@@ -1307,7 +1307,7 @@ documents:
 - doc_id: project.repository-layout
   path: docs/REPOSITORY_LAYOUT.md
   title: Repository Layout
-  content_sha256: f2792c04bb08b52a3085465ab65cd80e7ece70c2aef390cf6046ad9c69df8c51
+  content_sha256: 3e06a5da30e5cce47f0f83378ab09e77609283225cb2f23c41a7f34fa5a188ae
   document_type: governance
   status: accepted
   owners:

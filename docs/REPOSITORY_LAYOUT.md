@@ -54,7 +54,9 @@ related_docs:
 │  ├─ evidence/ / catalog/       verification format and generated metadata index
 │  ├─ adr/ / research/           decisions and supporting observations
 │  └─ stable root documents      project-wide policies kept at existing paths
-├─ .agents/skills/               repository-local repeatable workflows
+├─ AGENTS.md / CLAUDE.md         agent agreement / Claude Code import and Skill routing
+├─ .agents/skills/               repository-local repeatable workflows (canonical)
+├─ .claude/skills/               Claude Code adapters: canonical name/description only
 ├─ Tests/                        tModLoader-free domain harnesses
 ├─ tools/                        local build/provenance, static/codec/tool checks
 └─ .github/                      review, issue, ownership, and CI policy
