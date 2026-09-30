@@ -18,6 +18,8 @@ This is a public playtest, not a finished or stability-certified release. **Solo
 
 The new **Cathedral of the White Night** prototype pairs an ice-glass leviathan with Liora, an NPC-sized sword-bearing girl. Use **Glacial Chime** on the shared pedestal and confirm Ready (1–8 players). It uses normal deaths and native damage, with provisional balance and no bespoke rewards yet. [Encounter guide](docs/encounters/azure-cathedral/ENCOUNTER_SPEC.md).
 
+The new **Waltz of the Ebon Manor** (first version) is a moonlit-manor Raid against Noirette, a mistress who dances the manor's furniture on silk threads to EigHt's *AutoMatador*: thrown furniture, falling chandeliers, loom strings, giant shears and a parasol waltz across three acts. Use **Black Invitation** on the shared pedestal and confirm Ready (1–8 players). Balance is untuned and hits are capped at 1 for rehearsal. [Encounter guide](docs/encounters/ebon-manor/ENCOUNTER_SPEC.md).
+
 Use the supported tModLoader version and dependency versions in the [version matrix](docs/VERSION_MATRIX.md). **Calamity Mod and Luminance are required**, together with the dependencies requested by tModLoader. Recommended equipment is Calamity endgame gear. Client and server must run matching Convergence builds and protocols.
 
 The three setup items currently have no normal recipes. Obtain **Foundation Core**, **Theater Doll** and **Resuscitation Kit** through an item browser/spawner such as Cheat Sheet (a setup aid, not a dependency).
@@ -63,6 +65,8 @@ The 0.3.1 public-test candidate and its limits are described in [release notes](
 ## License and credits
 
 **Azure Cathedral music: EigHt — 白夜に耀うステンドグラス.** [Creator video](https://www.youtube.com/watch?v=k0-SQQkRxis) · [Original work](https://bgm-cathedral.booth.pm/items/6112209) · [Use terms](https://eight-novel.fanbox.cc/posts/7647818). Used as game background music; not a standalone soundtrack or a project-original composition.
+
+**Ebon Manor music: EigHt — AutoMatador.** [Creator video](https://www.youtube.com/watch?v=twMGsSzV_SQ) · [Original work](https://bgm-cathedral.booth.pm/items/6178144) · [Use terms](https://eight-novel.fanbox.cc/posts/7647818). Used as game background music; not a standalone soundtrack or a project-original composition.
 
 Maintained by [Minamium](https://github.com/Minamium), with contributions including Ghost Samurai by [mac10101010](https://github.com/mac10101010). See [contributors](https://github.com/Minamium/Convergence-Mod/graphs/contributors) for the project history.
 

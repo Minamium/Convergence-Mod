@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.56 / protocol75**. Soboro replaces 0.3.53's smooth surfaces with a client-only half-resolution pixel-art slash layer (six-tone violet palette, 1px outline, torn residue, pixel lightning/sparks/impact star), flows through the top and bottom of each cut instead of braking (same live-window angles and peak speed, about one tenth of the peak angular acceleration) and uses layered CC0 recordings for its three swing and two hit cues. Damage, reach, hit windows, recipe and saved `DXOboro` ID are unchanged; the new sweep timing needs matching protocol75 peers. [Soboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroのドット絵斬撃と流れる型--2026-10-01) owns the presentation; native feel, mix, FPS and remote views remain user-owned.
+Current source: **0.3.57 / protocol76**. Adds **Waltz of the Ebon Manor** v1 (`ebon_manor`): Noirette's three acts on AutoMatador's 125 BPM beat grid (Act One → 62% → Act II → 28% → Finale), with thrown furniture, chandeliers, loom strings, shears, a parasol waltz and Binding/Torn Stitch calls; crafted Black Invitation, 1–8 players, shared instant recovery, and the one-damage rehearsal cap. Native hazard/stitch damage is scoped by [ADR-0029](adr/0029-ebon-manor-native-actors.md). [Ebon Manor spec](encounters/ebon-manor/ENCOUNTER_SPEC.md) owns behavior and presentation; balance is untuned, and play, hearing, FPS and peers remain user-owned.
+
+Retained0.3.56: Soboro replaces 0.3.53's smooth surfaces with a client-only half-resolution pixel-art slash layer (six-tone violet palette, 1px outline, torn residue, pixel lightning/sparks/impact star), flows through the top and bottom of each cut instead of braking (same live-window angles and peak speed, about one tenth of the peak angular acceleration) and uses layered CC0 recordings for its three swing and two hit cues. Damage, reach, hit windows, recipe and saved `DXOboro` ID are unchanged; the new sweep timing needs matching protocol75 peers. [Soboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroのドット絵斬撃と流れる型--2026-10-01) owns the presentation; native feel, mix, FPS and remote views remain user-owned.
 
 Retained0.3.54: Cathedral explicitly publishes Stack/Spread verdicts so the accepted ice compression/rift attack and audio can start on clients. Liora/Vitrion HP budgets double; Duet worm attacks are charge-only and Fury body/tail take10% incoming damage through the same single native HP pool. Player-facing outgoing damage remains capped at1 for rehearsal. [Cathedral spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns current behavior; native multi-client visual/overlap acceptance remains user-owned.
 
@@ -71,6 +73,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.57 Ebon Manor v1:** [evidence](evidence/2026-10-01-ebon-manor-v1.json) records the domain suite, compiled shader identity, offline GPU material frames on the real textures, deterministic music/SFX exports and the native package. No native play, hearing, FPS or peer acceptance is claimed.
 
 - **0.3.56 Soboro pixel slash, flowing kata and CC0 audio:** [evidence](evidence/2026-10-01-soboro-pixel-flow.json) records the motion metrics, focused domain test, compiled shader identity, offline production-renderer sequences, deterministic audio exports and the exact installed package/source identity. No native gameplay, hearing or FPS acceptance is claimed.
 
@@ -163,6 +167,8 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Ebon Manor: Reload (not Build + Reload) the installed 0.3.57 package and craft a Black Invitation (10 Silk, 1 Black Ink at a Work Bench). Play Act One → Act II → Finale → Victory, then Defeat once. Check music sync through the entrance, act lead-ins and loops; forecast readability of throws, chandeliers, loom strings, shears and the waltz; Stack/Spread verdicts; Noirette's size, poses and threads; the Finale hall tear; Reduced Effects, shake off, UI 107%/zoom and FPS; then a matching peer. All user-owned / not_run.
 
 Cathedral: matching0.3.54 Host & Play clients should compare one failed Stack, then overlapping/non-overlapping Spread. Check that ice compresses instead of silently disappearing, both overlapping players see the rift attack, P1 emits no segment bolts and Fury body hits remain visibly weaker than head hits. Native overlap/latency and new HP feel are user-owned / not_run; all incoming Cathedral hits remain1 for this rehearsal.
 

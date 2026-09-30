@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Add **Waltz of the Ebon Manor** (first version): Noirette, mistress of a moonlit manor, dances its furniture on silk threads in three acts synced to EigHt's *AutoMatador* — thrown furniture, falling chandeliers, loom strings, giant shears, a parasol waltz and Binding/Torn Stitch calls. Crafted **Black Invitation** summons it on the shared pedestal for 1–8 players with the shared instant revival. Includes painted hall/props, pixel boss art, bar-exact music edits, 20 original cues and Luminance materials. Balance is untuned and hits are capped at 1 for rehearsal; matching protocol76 peers are required.
+
 - Redraw Soboro's slash as a crisp pixel-art crescent with a dark outline, torn residue and pixel lightning/sparks, let its three cuts flow through the top and bottom instead of braking, and replace its synthesized swing/hit sounds with layered CC0 recordings. Damage, reach and hit windows are unchanged; the new sweep timing requires matching protocol75 peers.
 
 - Fix Cathedral Stack/Spread verdict delivery to client effects/audio. Double Liora/Vitrion HP, reserve worm segment volleys for Fury, and reduce Fury body/tail incoming damage by90% while preserving one shared worm HP pool and the one-damage rehearsal cap.

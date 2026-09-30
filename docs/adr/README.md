@@ -57,3 +57,4 @@ Accepted ADRs are not rewritten to hide later changes. Add a new ADR and mark th
 | [0027](0027-oboro-authoritative-weapon.md) | Accepted for Oboro | Session-independent server-owned weapon swings, per-wielder wounds and bounded presentation transport |
 
 | [0028](0028-azure-cathedral-native-actors.md) | Accepted for Azure Cathedral only | Separate shared-pedestal worm/girl runtime, bounded native actor/hazard damage and exact-Fight cleanup; protocol58 |
+| [0029](0029-ebon-manor-native-actors.md) | Accepted for Ebon Manor only | Thread-mistress runtime on the shared pedestal, beat-clocked native hazard/stitch damage, shared recovery adapter and exact-Fight cleanup; protocol76 |

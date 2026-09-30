@@ -1,0 +1,29 @@
+{
+  "scope": "Waltz of the Ebon Manor v1: new definition-routed Raid ebon_manor (runtime, hazards, stitches, recovery adapter, localization), Luminance presentation, generated art exports, AutoMatador act edits and twenty cues. Other Raids, weapons and common packet IDs are unchanged; the protocol bump requires matching protocol76 peers",
+  "target_build": "0.3.57 / protocol76",
+  "integration_base": "6479b96 (main after PR89)",
+  "commits": {
+    "runtime": "f03919d",
+    "assets_and_tools": "a21dbe7",
+    "presentation_and_tests": "f9aa715"
+  },
+  "owner_direction": {
+    "concept": "2026-10-01: a new Raid with EigHt's AutoMatador, a gothic-lolita woman with very long black twin tails who manipulates threads to hurl things, in a creepy Western mansion; painted detail like Cathedral/Vespera/Doll",
+    "art": "2026-10-01: Codex generates from Claude's brief; Noirette candidate b as delivered, tilted invitation b, no doll prop and few doll/marionette elements",
+    "scope": "2026-10-01: build v1 with Act One, Act II and Finale referencing the other Raids; edit and loop the BGM carefully; presentation at the other Raids' level with Luminance"
+  },
+  "checks": {
+    "static": "passed after the final document edits: documentation catalog (85 documents), repository checks including 35 new exact ATTRIBUTION records",
+    "domain": "passed: 395 deterministic cases, 8 new Ebon cases (beat grid without drift, act floors and codec bounds for 1-8 members, furniture/chandelier kinematics, schedule-to-plan codec bounds and malformed plans, station continuity and centred waltz spins, projection regression/truncation, stitch rules/codec, hall tear completing on the A-prime epoch tick)",
+    "shader": "passed: EbonManor and EbonSilk compiled by the pinned FXC fx_2_0 /O3; existing shaders recompile byte-identically; compiled.json verified",
+    "offline_sequences": "reviewed: tools/preview-ebon-manor.ps1 rendered 25 FNA D3D11 frames of the compiled materials on the real textures (hall entrance/acts/tear progression, throw warning/tight/flight, chandelier warning/fall/burst, loom, shears warning/live, waltz, stack/spread, eight poses, weave sequence). Review repaired a lightning-like hall seam, grey aura bubbles, coarse weave lattice, noisy invitation rim, faint lane bodies and a purple-leaning tear palette. Offline parameters mirror the renderer but are not a Terraria capture or FPS measurement",
+    "music": "four bar-exact AutoMatador section edits with native LOOPSTART/LOOPEND (ActOne bars 6-44 loop 20-44, ActTwo 36-50 loop 38-50, Finale 51-69 loop 57-69, Curtain 72-end); loop points chosen by beat-timbre seam scores, 60 ms equal-power seams, sample-step discontinuities and RMS continuity checked numerically; audition page provided",
+    "audio": "twenty cues rendered by tools/generate_ebon_sfx.py from hash-verified CC0 recordings plus original synthesis in B minor (the recording's estimated key); repeat renders byte-identical (pinned Ogg serial); short-term loudness targets -25 to -15 LUFS with true peaks <= -0.9 dBFS; spectrogram review fixed abrupt chime cut-offs and an act-change cue that started with near-silence; audition page with a cadence combo provided",
+    "native_build": "passed: 0 errors / 4 existing CS8632 warnings; source unchanged during build",
+    "package": "0.3.57, 119351536 bytes, sha256 45a18e7d82d79c889e62cc8d874a9a82f9347a2614945ed361254bea0203c1f0; packaged solo admission passed",
+    "package_identity": "build source_sha256 b51f2e2c7ba193c034d77ca1d13a5568256a0f76f9f8e10d0f2a17ee17258ab1 equals commit f9aa715 plus the uncommitted drafts of this documentation commit (docs are not packaged)",
+    "install": "installed pre-merge into the owner's normal Mods profile for Host & Play. It replaced the Ghost Samurai thread's 0.3.57 playtest package (feat/samurai-pixel-cuts, installed 2026-10-01 05:51 JST), which is retained in the ignored local build record for restoration",
+    "native_player_and_remote": "not_run: owner to play Act One -> Act II -> Finale -> Victory and one Defeat; music sync through the entrance, lead-ins, loops and curtain; forecast readability of every hazard over the hall; Stack/Spread verdicts; Noirette's scale, poses and thread anchoring; the Finale tear; Reduced Effects, shake off, UI 107%/zoom, FPS; a matching peer. Balance is untuned; hits are capped at 1"
+  },
+  "delegation": "Lead (Claude) wrote the brief, runtime, presentation, shaders, music edits, audio score, tests and integration. Codex generated the images from the brief; no delegated code was integrated."
+}

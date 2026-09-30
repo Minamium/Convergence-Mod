@@ -121,6 +121,24 @@ documents:
   related_docs:
   - encounter.azure-cathedral.spec
   - adr.0026
+- doc_id: adr.0029
+  path: docs/adr/0029-ebon-manor-native-actors.md
+  title: 'ADR-0029: Ebon Manor native actors and hazards'
+  content_sha256: 5e1e00d4aa13eea25fc5c71667c427d8b53188e8918010518585e12cbea3fa73
+  document_type: adr
+  status: accepted
+  owners:
+  - architecture
+  - gameplay
+  last_reviewed: '2026-10-01'
+  source_of_truth_for:
+  - authority.ebon_manor
+  aliases: []
+  related_code:
+  - Content/Encounters/EbonManor
+  related_docs:
+  - encounter.ebon-manor.spec
+  - adr.0028
 - doc_id: compatibility.version-matrix
   path: docs/VERSION_MATRIX.md
   title: Version Matrix
@@ -448,7 +466,7 @@ documents:
 - doc_id: decisions.adr-index
   path: docs/adr/README.md
   title: Architecture Decision Records
-  content_sha256: f0b5d713397a97f40dff0306b14b2a9fd8394050a504106041c08c4a0540fa4f
+  content_sha256: f9f4714e2ce866886b2d396dcc8b55e3b9e8165bbe7cc275746de7392f47295b
   document_type: index
   status: accepted
   owners:
@@ -536,7 +554,7 @@ documents:
 - doc_id: docs.entrypoint
   path: docs/README.md
   title: Documentation Home
-  content_sha256: 2da59d85a21a3915ce2944628d5a402e8044329f59faa003d210c94c8b166907
+  content_sha256: 6e1640add182be38af2d4570612db1ad515bd0c154e6c137119e0aa78245eee9
   document_type: index
   status: accepted
   owners:
@@ -656,6 +674,49 @@ documents:
   related_docs:
   - project.status
   - adr.0026
+- doc_id: encounter.ebon-manor.assets
+  path: docs/encounters/ebon-manor/ASSET_BRIEF.md
+  title: Ebon Manor asset brief
+  content_sha256: 2398eb905206bd8ccc5f5301c82d5e557b182f3fb6719b24de5fbda3c70ed6e9
+  document_type: spec
+  status: accepted
+  owners:
+  - art
+  last_reviewed: '2026-10-01'
+  source_of_truth_for:
+  - encounter.ebon_manor.asset_brief
+  aliases: []
+  related_code:
+  - Assets/Textures/EbonManor
+  - tools/export_ebon_art.py
+  related_docs:
+  - encounter.ebon-manor.spec
+- doc_id: encounter.ebon-manor.spec
+  path: docs/encounters/ebon-manor/ENCOUNTER_SPEC.md
+  title: Waltz of the Ebon Manor
+  content_sha256: 9feff3334ad7c674e7c5bd454280662bcf6bfc0759bbf37d1168054ef99cd174
+  document_type: spec
+  status: provisional
+  owners:
+  - gameplay
+  - art
+  - audio
+  last_reviewed: '2026-10-01'
+  source_of_truth_for:
+  - encounter.ebon_manor.experience
+  - encounter.ebon_manor.presentation
+  aliases:
+  - Waltz of the Ebon Manor
+  - Noirette
+  - ノワレット
+  - 黒絹の館
+  related_code:
+  - Content/Encounters/EbonManor
+  - Client/Encounters/EbonManor
+  related_docs:
+  - project.status
+  - adr.0029
+  - encounter.ebon-manor.assets
 - doc_id: encounter.first-severance.backlog
   path: docs/encounters/first-severance/BACKLOG.md
   title: First Severance Deferred Backlog
@@ -1010,7 +1071,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: b026f1417b1ebc0f61e0aecf929354b0220628fd303a756e3c1ac8db0ff18065
+  content_sha256: eb7053668c8b98159aae9f254a05dc69992a4357cff260bd64ead55ab051ea55
   document_type: policy
   status: accepted
   owners:
@@ -1329,7 +1390,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 8789f1b3c9d0e09a0352bab8bc07d9dc9046a1fe258eac4da9b6706823ce8834
+  content_sha256: fd2fe925c1ee19c9f3e9b180f2bfb7ddb1a7574dd681f26202206c680c96ecf8
   document_type: status
   status: accepted
   owners:
