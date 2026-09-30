@@ -1,0 +1,45 @@
+Mods: {
+ Convergence: {
+  EbonManor: { Rejected: "館の扉が開きません。台座・人数・フィールドの位置を確認してください。" }
+  Items: {
+   EbonInvitation: {
+    DisplayName: 黒い招待状
+    Tooltip: '''
+      Foundation Coreに使用して「Waltz of the Ebon Manor」を準備する
+      接続中の全員がReadyで開始。1～8人、マルチプレイ推奨
+      月夜の館の主が、糸で家具を躍らせる
+      手に持って右クリックで準備を中止
+      消費しない
+      '''
+   }
+  }
+  NPCs: {
+   EbonBoss: { DisplayName: "ノワレット ― 黒絹の館の主" }
+  }
+  Projectiles: {
+   EbonAttack: { DisplayName: "絹の罠" }
+   EbonStitch: { DisplayName: "縫い留めの糸" }
+   EbonStitchStrike: { DisplayName: "ほどけた縫い目" }
+  }
+  EbonRecovery: {
+   NoTarget: "8タイル以内にダウンした仲間がいません。"
+   Locked: "この仲間はまだ再蘇生できません（60秒の再蘇生制限）。"
+   RequiresKit: "蘇生キットを持って仲間を蘇生してください。"
+   Invalid: "この参加者または戦闘の状態では蘇生できません。"
+   DefeatReason: "{0}は館の絹に囚われた。"
+  }
+  Buffs: {
+   EbonDownedDebuff: {
+    DisplayName: ダウン
+    Description: "移動も攻撃もできない。仲間が蘇生キットで蘇生できる。"
+   }
+  }
+  Configs: {
+   EbonVisualConfig: {
+    DisplayName: 黒絹の館の演出
+    ReducedEffects: { Label: "演出を軽くする", Tooltip: "攻撃を隠さずに、塵・残像・動きを減らす" }
+    ScreenShake: { Label: "画面の揺れ", Tooltip: "着弾時の小さな画面の揺れを許可する" }
+   }
+  }
+ }
+}
