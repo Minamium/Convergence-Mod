@@ -8,8 +8,8 @@ $tml=(Resolve-Path -LiteralPath $TModLoaderPath).Path
 $work=Join-Path $root $OutputDirectory
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 $files=@('tools/fixtures/DXOboroPreview.cs','Content/Items/DXOboro/DXOboroMotion.cs',
-    'Client/Weapons/DXOboroArt.cs','Client/Weapons/DXOboroItemVisuals.cs','Client/Weapons/DXOboroMaterial.cs',
-    'Client/Graphics/WorldGraphicsScope.cs','Client/Graphics/ReadableItemIcon.cs','Client/Graphics/SwordLightning.cs')
+    'Client/Weapons/DXOboroArt.cs','Client/Weapons/DXOboroItemVisuals.cs','Client/Weapons/SoboroSlashArt.cs',
+    'Client/Graphics/ReadableItemIcon.cs')
 $includes=($files | ForEach-Object { '<Compile Include="'+[Security.SecurityElement]::Escape((Join-Path $root $_))+'" />' }) -join ''
 $fna=[Security.SecurityElement]::Escape((Join-Path $tml 'Libraries/FNA/1.0.0/FNA.dll'))
 $project='<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework><OutputType>Exe</OutputType><EnableDefaultCompileItems>false</EnableDefaultCompileItems><UseAppHost>false</UseAppHost></PropertyGroup><ItemGroup><Reference Include="FNA"><HintPath>'+$fna+'</HintPath></Reference>'+$includes+'</ItemGroup></Project>'

@@ -40,42 +40,48 @@ internal static class DXOboroMotion
         age = Math.Clamp(age, 0f, Duration(step));
         return step switch
         {
-            // Long draw from the prior finish, a nearly held high guard,
-            // acceleration to the middle of contact, then brake/overshoot.
+            // One flowing kata: the cut, a rounded turn and the next cut's
+            // preparation share momentum. Live-window endpoints and peak speed
+            // keep the accepted sweep; only the dead stops at the ends are gone.
             1 => Reverse(age),
             2 => Heavy(age),
             _ => Downward(age)
         };
     }
 
+    // The previous finisher's momentum carries the blade around the back and
+    // over the head (2.90 - 2pi is the finisher's exit pose), easing slightly at
+    // the crest before the accelerating cut, then gliding into the lower turn.
     private static float Downward(float t)
     {
-        if (t < 3f) return Knot(t, 0, 3, 1.2f, -1.83f, 0, 0);
-        if (t < 7f) return Knot(t, 3, 7, -1.83f, -1.58f, 0, .04f);
-        if (t < 10.7f) return Knot(t, 7, 10.7f, -1.58f, -.10f, .04f, .55f);
-        if (t < 15f) return Knot(t, 10.7f, 15, -.10f, 1.17f, .55f, .04f);
-        if (t < 16.2f) return Knot(t, 15, 16.2f, 1.17f, 1.37f, .04f, 0);
-        return Knot(t, 16.2f, 18, 1.37f, 1.2f, 0, 0);
+        if (t < 4.2f) return Knot(t, 0, 4.2f, -3.3832f, -2.30f, .32f, .26f);
+        if (t < 7f) return Knot(t, 4.2f, 7, -2.30f, -1.58f, .26f, .20f);
+        if (t < 10.7f) return Knot(t, 7, 10.7f, -1.58f, -.10f, .20f, .55f);
+        if (t < 15f) return Knot(t, 10.7f, 15, -.10f, 1.17f, .55f, .21f);
+        return Knot(t, 15, 18, 1.17f, 1.62f, .21f, .09f);
     }
 
+    // A rounded turn below the body instead of a brake, then the rising cut
+    // continues past the guard toward the finisher's high coil.
     private static float Reverse(float t)
     {
-        if (t < 2.3f) return Knot(t, 0, 2.3f, 1.2f, 1.48f, 0, 0);
-        if (t < 6f) return Knot(t, 2.3f, 6, 1.48f, 1.32f, 0, -.04f);
-        if (t < 9.1f) return Knot(t, 6, 9.1f, 1.32f, .12f, -.04f, -.50f);
-        if (t < 13f) return Knot(t, 9.1f, 13, .12f, -1.13f, -.50f, -.04f);
-        if (t < 14.2f) return Knot(t, 13, 14.2f, -1.13f, -1.58f, -.04f, 0);
-        return Knot(t, 14.2f, 16, -1.58f, -1.5f, 0, 0);
+        if (t < 2.6f) return Knot(t, 0, 2.6f, 1.62f, 1.76f, .09f, 0);
+        if (t < 6f) return Knot(t, 2.6f, 6, 1.76f, 1.32f, 0, -.21f);
+        if (t < 9.1f) return Knot(t, 6, 9.1f, 1.32f, .12f, -.21f, -.50f);
+        if (t < 13f) return Knot(t, 9.1f, 13, .12f, -1.13f, -.50f, -.26f);
+        return Knot(t, 13, 16, -1.13f, -1.84f, -.26f, -.13f);
     }
 
+    // The high coil keeps moving forward instead of holding, the cut releases
+    // at full weight, and the follow-through keeps travelling around the back.
     private static float Heavy(float t)
     {
-        if (t < 5f) return Knot(t, 0, 5, -1.5f, -1.94f, 0, 0);
-        if (t < 11f) return Knot(t, 5, 11, -1.94f, -1.72f, 0, .04f);
-        if (t < 17f) return Knot(t, 11, 17, -1.72f, .08f, .04f, .52f);
-        if (t < 22f) return Knot(t, 17, 22, .08f, 1.75f, .52f, .06f);
-        if (t < 23.4f) return Knot(t, 22, 23.4f, 1.75f, 2.03f, .06f, 0);
-        return Knot(t, 23.4f, 26, 2.03f, 1.2f, 0, 0);
+        if (t < 3.2f) return Knot(t, 0, 3.2f, -1.84f, -2.04f, -.13f, 0);
+        if (t < 7.5f) return Knot(t, 3.2f, 7.5f, -2.04f, -1.93f, 0, .05f);
+        if (t < 11f) return Knot(t, 7.5f, 11, -1.93f, -1.72f, .05f, .13f);
+        if (t < 17f) return Knot(t, 11, 17, -1.72f, .08f, .13f, .52f);
+        if (t < 22f) return Knot(t, 17, 22, .08f, 1.75f, .52f, .32f);
+        return Knot(t, 22, 26, 1.75f, 2.90f, .32f, .32f);
     }
 
     // Hermite tangents are radians per tick, so each adjacent beat has the

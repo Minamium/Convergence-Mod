@@ -35,8 +35,9 @@ def compile_all(compiler: Path) -> None:
         # FXC writes the runtime export; this is asset compilation, not source editing.
         subprocess.run([str(compiler.resolve()), "/T", "fx_2_0", "/O3", "/Fo", str(target), str(source)], check=True)
         files[source.name] = {"source_sha256": digest(source), "output_sha256": digest(target)}
+    # Explicit LF: the repository policy rejects CRLF, which Windows text mode would write.
     MANIFEST.write_text(json.dumps({"compiler_sha256": digest(compiler), "flags": ["/T", "fx_2_0", "/O3"],
-                                   "files": files}, indent=2) + "\n", encoding="utf-8")
+                                   "files": files}, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

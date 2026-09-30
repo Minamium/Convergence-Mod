@@ -157,18 +157,32 @@ Original Convergence images and procedural materials; existing VioletRig, Oboro 
 - Required attribution: retain project provenance and generation disclosure
 - Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
 
-- Runtime file: `Assets/AutoloadedEffects/Shaders/DXOboroVeil.fxc`
-- Asset ID: dxoboroveil-20260927
+- Runtime file: `Assets/AutoloadedEffects/Shaders/SoboroPixelSlash.fxc`
+- Asset ID: soboropixelslash-20261001
 - Asset type: compiled original material
-- Creator: project-owner-directed original work with OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-27
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-01
 - Source type: original
 - Source work and URL: original Convergence HLSL source alongside runtime export
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Original repository-owned DXOboroVeil.fx. Revised2026-09-28 for independently authored white-violet cutting surfaces, torn negative space and large fracture strokes; no Calamity art/code/sample imported. Current source/export identity is in compiled.json.
+- Human modifications: Original repository-owned SoboroPixelSlash.fx: a swept crescent evaluated per art pixel in a half-resolution target, quantized to a six-tone violet palette with a checker-dithered deep tone, then point-upscaled with a one-pixel outline and restrained glow. Replaces the retired DXOboroVeil material; no Calamity or other third-party art/code/sample imported.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance and generation disclosure
-- Reviewer and review date: Codex offline asset/material inspection2026-09-27; native playtest not_run
+- Reviewer and review date: Claude offline compiled-material sequence review 2026-10-01; native playtest not_run
+
+- Runtime file: `Assets/Textures/Items/DXOboro/SlashNoise.png`
+- Asset ID: soboro-slash-noise-20261001
+- Asset type: 128×128 RGB tileable noise texture
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: generated
+- Source work and URL: procedural output of repository script `tools/generate_soboro_noise.py`; no source artwork
+- Tool/model/version: tools/generate_soboro_noise.py (NumPy value-noise FBM, seeds 1709/2851/4441, 16/32/64-cell octaves)
+- Human modifications: none after generation; the script regenerates the file deterministically
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline material inspection 2026-10-01; native playtest not_run
+- SHA256: `598cfadd25244ad3e582171c2cf1cfc2cbb1a37fbeb79ff7eb8319b7ec7d67f8`
 
 
 ### Doll ruptured energy core — 2026-09-27
