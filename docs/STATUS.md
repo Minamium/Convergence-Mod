@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-09-28
+last_reviewed: 2026-10-01
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,9 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.54 / protocol74**. Cathedral explicitly publishes Stack/Spread verdicts so the accepted ice compression/rift attack and audio can start on clients. Liora/Vitrion HP budgets double; Duet worm attacks are charge-only and Fury body/tail take10% incoming damage through the same single native HP pool. Player-facing outgoing damage remains capped at1 for rehearsal. [Cathedral spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns current behavior; native multi-client visual/overlap acceptance remains user-owned.
+Current source: **0.3.56 / protocol75**. Soboro replaces 0.3.53's smooth surfaces with a client-only half-resolution pixel-art slash layer (six-tone violet palette, 1px outline, torn residue, pixel lightning/sparks/impact star), flows through the top and bottom of each cut instead of braking (same live-window angles and peak speed, about one tenth of the peak angular acceleration) and uses layered CC0 recordings for its three swing and two hit cues. Damage, reach, hit windows, recipe and saved `DXOboro` ID are unchanged; the new sweep timing needs matching protocol75 peers. [Soboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroのドット絵斬撃と流れる型--2026-10-01) owns the presentation; native feel, mix, FPS and remote views remain user-owned.
 
-Retained0.3.53: Soboro's three cuts gain distinct deforming white-violet surfaces, large fracture strokes, quiet recovery, five original sound cues and bounded local native-hit accents. Gameplay geometry/timing/damage, original Oboro and Boss art are unchanged. [Soboro contract](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroの3段斬撃面--2026-09-28) owns the presentation; native quality/mix/remote acceptance remains user-owned.
+Retained0.3.54: Cathedral explicitly publishes Stack/Spread verdicts so the accepted ice compression/rift attack and audio can start on clients. Liora/Vitrion HP budgets double; Duet worm attacks are charge-only and Fury body/tail take10% incoming damage through the same single native HP pool. Player-facing outgoing damage remains capped at1 for rehearsal. [Cathedral spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns current behavior; native multi-client visual/overlap acceptance remains user-owned.
 
 Retained0.3.52: Scarlet explicitly publishes its complete Stack/Spread verdict after the authority tick commits it. The old post-update `netUpdate` flag was cleared before native sending, leaving clients without the failed attack's VFX/audio despite real damage. Receive and draw-submission diagnostics are separate from native-hit logs. Solo admission/outcomes, damage1 and accepted artwork are unchanged; [Scarlet evidence](evidence/2026-09-28-scarlet-chorus-publication.json) distinguishes observed solo hits from unplayed repaired delivery.
 
@@ -71,6 +71,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.56 Soboro pixel slash, flowing kata and CC0 audio:** [evidence](evidence/2026-10-01-soboro-pixel-flow.json) records the motion metrics, focused domain test, compiled shader identity, offline production-renderer sequences, deterministic audio exports and the exact installed package/source identity. No native gameplay, hearing or FPS acceptance is claimed.
 
 - **0.3.54 Cathedral:** [evidence](evidence/2026-09-28-azure-chorus-balance.json) tracks bounded chorus publication/codecs, all-roster HP and native shared-pool mitigation checks. The accepted ice/rift material and motion are unchanged; native failed/successful results on matching peers remain a concrete user playtest, not an offline-art approval.
 
@@ -164,7 +166,7 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 
 Cathedral: matching0.3.54 Host & Play clients should compare one failed Stack, then overlapping/non-overlapping Spread. Check that ice compresses instead of silently disappearing, both overlapping players see the rift attack, P1 emits no segment bolts and Fury body hits remain visibly weaker than head hits. Native overlap/latency and new HP feel are user-owned / not_run; all incoming Cathedral hits remain1 for this rehearsal.
 
-Soboro: reload matching0.3.53 peers and compare only its1→2→3 loop, heavy-cut silhouette, blade/hand attachment, cancellation, Reduced Effects and dedicated swing/hit audio. The new hit accents are owner-local; no remote-hit broadcast was added. Native feel, mix and performance are user-owned / not_run. No additional Build is needed for an already installed matching package.
+Soboro: Reload (not Build + Reload) the installed matching0.3.56 package and play its1→2→3→1 loop standing, moving and flying. Check the flow through the top/bottom of each cut, arm/armor while the blade circles behind, slash size/readability over boss telegraphs, the pixel layer staying attached while moving, zoom/Reduced Effects, FPS, and the new swing/hit mix on organic and `NPCHit4` targets. A matching remote peer needs0.3.56. Hit accents stay owner-local; no remote-hit broadcast was added. These checks are user-owned / not_run.
 
 Ghost Samurai: on matching0.3.51 peers, check both weapons' three-stroke loop, release/switch, mirrored/high-speed native arms and violet discharge; check the boss's raised guard→fast cut→recoil, travelling-wave alignment and Reduced Effects. Compare SP and Host & Play rather than assuming offline samples reproduce player drawing/network delivery. Soboro keeps its one-Fallen-Star Work Bench recipe and saved DXOboro ID. GUI and subjective acceptance are user-owned. Earlier battlefield edge/zoom checks remain pending, not repeated as a prerequisite to each minor edit.
 

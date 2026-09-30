@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-09-28
+last_reviewed: 2026-10-01
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -135,5 +135,7 @@ The September17 [Murasama motion survey](research/2026-09-16-oboro.md#murasama-m
 Soboro's2026-09-28 refresh adopts only presentation principles from the [installed Murasama comparison](research/2026-09-16-oboro.md#installed-murasama-comparison--2026-09-28). Three deforming violet sweep profiles, managed materials and five synthesized cues are original. Calamity's sheet, samples, source and in-memory inspection data are not distributed; exact project exports remain in [Attribution](../Assets/ATTRIBUTION.md).
 
 The2026-09-27 weapon revision adds [WotG LightSlash/LightSlashDrawer observation](research/2026-09-16-oboro.md#continuous-weapon-performance--2026-09-27): advancing front and temporally distinct residue inform an independently authored bounded curve/history design. No WotG render target, shader, equation, implementation or texture is copied. The original Oboro/Soboro source art stays intact; original material exports retain their exact attribution records.
+
+Soboro's2026-10-01 swing and hit cues layer CC0 recordings from Freesound and OpenGameArt with a small original sine body. The owner approved these exact CC0 masters on2026-10-01 after auditioning them against locally downloaded Sonniss GDC bundle candidates; no Sonniss recording is used, committed or packaged. The recordings stay in a local store; [Attribution](../Assets/ATTRIBUTION.md#soboro-recorded-blade-audio--2026-10-01) owns authors, pages, hashes and the processing recipe. The pixel-art slash layer, its noise texture and the flowing kata are original.
 
 The owner requested extensive use of the existing Luminance dependency. [Research](research/2026-09-18-ghost-samurai-luminance.md) separates public API inventory, inspected implementations and installed-binary checks. Calamity Catastrophe/Murasama informs motion emphasis only. The detached purple rig was generated from the existing project-authored atlas; all three materials and articulation code are original. Luminance retains ownership of runtime noise/bloom textures and render targets. No extracted asset, code mirror or dependency binary is imported; [attribution](../Assets/ATTRIBUTION.md#ghost-samurai-articulated-rig-and-luminance-materials--2026-09-18) owns exact exports/prompts/hashes.
