@@ -1,14 +1,14 @@
 {
   "scope": "Ghost Samurai field presentation rebuilt as the seal the mourning bell raises: in-field parallax night (AutoloadPass), opaque abyss and outer-face decoration above the world (SealPass), thin in-field rim light behind actors (RimPass), deploy/victory/fallen/onlooker behaviour and a daylight cap. Field bounds, containment, hazards, clocks, damage, packets and protocol76 are unchanged",
   "target_build": "0.3.62 / protocol76 unchanged",
-  "integration_base": "6cc4532 (main after PR95)",
+  "integration_base": "3d27249 (main after PR91, merged into the branch)",
   "owner_direction": "2026-10-02: after adopting the v2 theme the owner called the raid's background garbage, especially the outside of the field and its edge, and asked for something cool that accounts for this raid operating differently from the other raids",
   "design_review": "three independent concepts (seal, depth, readability) and two judges (art direction, graphics engineering) reviewed the work in progress; applied: still indigo edge distinct from the marching violet forecast vocabulary, in-field light moved behind actors, wall-only pasted talismans, luminance ceiling, Min daylight cap, phase-linked eclipse, guaranteed steady exterior opacity, Bayer-dithered victory melt ordered inside-first, no onlooker veil, black-mask fallback",
   "checks": {
     "shader": "passed: SamuraiBattlefield recompiled by the pinned FXC fx_2_0 /O3 through tools/compile_shaders.py; source/export hashes verified by the build; other shaders unchanged",
     "field_preview": "passed: tools/preview-samurai-field.ps1 rendered 16 frames on a hidden FNA D3D11 device from the production SamuraiFieldRenderer, the exported .fxc and Luminance 1.0.14's real noise over a stand-in world (daylit sky, dirt/grass tiles, a player, a boss and a violet forecast band): floor centre, left wall, roof corner, right wall at zoom 1.5, 2560x1440, deploy 35/75%, victory burn/melt, Phase 3 transition, onlooker, Reduced Effects, wall ripples, backdrop only and two scenery-only frames. Frames reviewed; images kept local",
     "luminance_gate": "passed: scenery-only frames inside the field measured mean Y 0.0036 / p99.9 0.0138 (Phase 1) and 0.0054 / 0.0289 (Phase 3 storm, transition surge); pixels above the Tone2 forecast fill (Y 0.0323) 0.000% and 0.057% (lightning core only); none above Tone3; median scenery hue 248-250 degrees against the forecast violet near 264",
-    "native_build": "passed: python tools/dev.py build --native into the isolated automated profile, 0 errors and the existing 4 nullable warnings; package 0.3.62 sha256 555cfcb9254b1d9dfcc4f212c4b843ce7a82eaa9c55690e3cdc4ab5bb7dc172a; admission check solo enabled, 1-4 players"
+    "native_build": "passed: python tools/dev.py build --native into the isolated automated profile, 0 errors and the existing 4 nullable warnings; package 0.3.62 (after merging main 3d27249) sha256 a2b7f552d8cfced2b0604bf478c0414908b45693671014c20d1c4d76136ccab2; admission check solo enabled, 1-4 players"
   },
   "not_run": [
     "in-game look and readability with real terrain, lighting and the production forecasts at the edge and floor",
