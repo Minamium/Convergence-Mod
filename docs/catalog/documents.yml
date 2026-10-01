@@ -677,7 +677,7 @@ documents:
 - doc_id: encounter.ebon-manor.assets
   path: docs/encounters/ebon-manor/ASSET_BRIEF.md
   title: Ebon Manor asset brief
-  content_sha256: 2398eb905206bd8ccc5f5301c82d5e557b182f3fb6719b24de5fbda3c70ed6e9
+  content_sha256: 106a4389c07060ea474ec0a5716dfa19530dac9c176a54404a94d6dc09e35a56
   document_type: spec
   status: accepted
   owners:
@@ -691,6 +691,30 @@ documents:
   - tools/export_ebon_art.py
   related_docs:
   - encounter.ebon-manor.spec
+- doc_id: encounter.ebon-manor.rewards
+  path: docs/encounters/ebon-manor/REWARDS.md
+  title: Waltz of the Ebon Manor — rewards
+  content_sha256: de5e787f7c2699274f4c5aed85c6698f863feaed1b63eb25064a4b04053163be
+  document_type: spec
+  status: provisional
+  owners:
+  - gameplay
+  - art
+  - audio
+  last_reviewed: '2026-10-02'
+  source_of_truth_for:
+  - encounter.ebon_manor.rewards
+  aliases:
+  - Ebon Hatbox
+  - 黒絹の帽子箱
+  - Ebon reward weapons
+  related_code:
+  - Content/Encounters/EbonManor
+  - Client/Encounters/EbonManor
+  related_docs:
+  - encounter.ebon-manor.spec
+  - encounter.ebon-manor.assets
+  - encounter.first-severance.weapons
 - doc_id: encounter.ebon-manor.spec
   path: docs/encounters/ebon-manor/ENCOUNTER_SPEC.md
   title: Waltz of the Ebon Manor
@@ -1071,7 +1095,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: eb7053668c8b98159aae9f254a05dc69992a4357cff260bd64ead55ab051ea55
+  content_sha256: be2d8cdb91e75548ba203edcc413ac97d5e6e8668ff23db983e0e32d79a7f04e
   document_type: policy
   status: accepted
   owners:
@@ -1390,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b2d58e5f33e91394d4969d039f549f13814e957df4c4fe9c94f8bfee2aa01256
+  content_sha256: fb66681331c4c3cd386b323ff9239d69c9a901f2b176af4883b1e680c8365c2c
   document_type: status
   status: accepted
   owners:

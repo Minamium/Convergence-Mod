@@ -67,6 +67,35 @@ internal static partial class Program
         AssertTrue(EbonLoomHarpRules.Advance(float.NaN).State == 0, "a corrupt state is flushed to idle, never plucked");
     }
 
+    [DomainTest("Moonloom Harp schedule published from the string's own update still carries rank and last to a peer")]
+    private static void EbonLoomHarpPublishedSchedule()
+    {
+        for (int rank = 0; rank < EbonRewardRules.MaxStrings; rank++)
+        foreach (bool last in new[] { false, true })
+        {
+            // The owner can only publish from the string's AI (native Update clears netUpdate first), so what peers
+            // receive is the schedule after the click tick's own update has advanced it once.
+            var published = EbonLoomHarpRules.Advance(EbonLoomHarpRules.Schedule(rank, last));
+            AssertTrue(!published.Plucked && !published.Spent, "the click tick never plucks");
+            AssertTrue(EbonLoomHarpRules.TryDecode(published.State, out int r, out bool l, out int countdown), "the published state decodes");
+            AssertEqual(rank, r, "rank survives the publish");
+            AssertEqual(last, l, "last flag survives the publish");
+            AssertEqual(EbonRewardRules.PluckTick(rank), countdown, "the replication tick is already spent");
+            AssertTrue(EbonLoomHarpRules.Valid(published.State) && !EbonLoomHarpRules.Live(published.State), "published is valid and harmless");
+
+            // A peer runs the same countdown from receipt; the first string (countdown 0) plucks in its very first update.
+            float state = published.State;
+            int plucked = -1;
+            for (int tick = 0; tick < 200 && plucked < 0; tick++)
+            {
+                var step = EbonLoomHarpRules.Advance(state);
+                state = step.State;
+                if (step.Plucked) plucked = tick;
+            }
+            AssertEqual(countdown, plucked, "a peer plucks after the countdown it received");
+        }
+    }
+
     [DomainTest("Moonloom Harp keeps at most eight strings and retires the oldest first")]
     private static void EbonLoomHarpStringLimit()
     {

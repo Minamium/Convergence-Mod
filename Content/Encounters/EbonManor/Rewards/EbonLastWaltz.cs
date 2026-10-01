@@ -118,13 +118,17 @@ public sealed class EbonLastWaltzCompanion : ModProjectile
         bool usable = EbonRewardItems.Usable(owner) && !owner.noItems && !owner.CCed;
         NPC? target = usable ? RitualTargeting.Acquire(Projectile, owner, manual: true) : null;
         int before = (int)Projectile.ai[0], tick = EbonLastWaltzRules.Advance(before, target is not null);
-        Projectile.ai[0] = tick;
-        if (authority && (before == 0 && tick == 1 || before > 0 && tick == 0 || tick > 0 && tick % 45 == 0)) Projectile.netUpdate = true;
-        // A target that flickers in and out of sight restarts the score each time; the piece lifted on the
-        // restart beat is skipped unless the score has been idle for RestartCooldown ticks.
+        // A target that flickers in and out of sight restarts the score each time. A restart less than RestartCooldown
+        // ticks after the previous score started skips the first piece together with its lift and yank: the score
+        // resumes right after them, so nobody sees (or hears) an empty throw, and the second piece still lands on its beat.
         if (restart > 0) restart--;
-        bool skipFirst = false;
-        if (authority && before == 0 && tick == 1) { skipFirst = restart > 0; restart = EbonLastWaltzRules.RestartCooldown; }
+        if (authority && before == 0 && tick == 1)
+        {
+            if (restart > 0) tick = EbonLastWaltzRules.ResumeTick;
+            restart = EbonLastWaltzRules.RestartCooldown;
+        }
+        Projectile.ai[0] = tick;
+        if (authority && (before == 0 && tick > 0 || before > 0 && tick == 0 || tick > 0 && tick % 45 == 0)) Projectile.netUpdate = true;
 
         // Floats at the owner's shoulder: a soft spring, no ground state.
         Vector2 home = owner.Center + new Vector2(-owner.direction * 54, -38 * owner.gravDir);
@@ -143,7 +147,7 @@ public sealed class EbonLastWaltzCompanion : ModProjectile
 
         // Only the owner spawns children; peers consume the native projectile replication.
         if (!authority || target is null || !usable) return;
-        if (EbonLastWaltzRules.FlingAt(tick, out int piece) && !skipFirst)
+        if (EbonLastWaltzRules.FlingAt(tick, out int piece))
             Projectile.NewProjectile(Projectile.GetSource_FromThis(), Hand(Projectile), Vector2.Zero,
                 ModContent.ProjectileType<EbonWaltzFling>(), EbonRewardItems.Hit(Projectile.damage, EbonRewardRules.FlingMultiplier),
                 Projectile.knockBack, Projectile.owner, piece, target.whoAmI, Projectile.identity);
@@ -154,10 +158,13 @@ public sealed class EbonLastWaltzCompanion : ModProjectile
                     Projectile.knockBack, Projectile.owner, spoke, target.whoAmI, Projectile.identity);
     }
 
-    // Where a flung piece is lifted from; the visual layer draws the real fingertip from the pose.
+    // Where a flung piece is lifted from: the raised fingertip of the cast cell (Noirette.png (44, 9) against the
+    // body pivot (26, 33), drawn at one texel per pixel). The visual layer draws the real fingertip from the pose.
     internal static Vector2 Hand(Projectile parent) => parent.Center + new Vector2(parent.spriteDirection * HandX, HandY);
 
-    internal static bool TryGetParent(Projectile child, out Projectile parent)
+    // `slot` is the caller's remembered parent slot: it is re-validated (active, owner, identity, type) before use and
+    // the projectile list is scanned only on a miss, so a child costs one array read per tick instead of a full scan.
+    internal static bool TryGetParent(Projectile child, ref int slot, out Projectile parent)
     {
         parent = null!;
         if (!RitualTargeting.ValidState(child) || child.ai[2] < 0 || child.ai[2] != (int)child.ai[2]) return false;
@@ -165,11 +172,18 @@ public sealed class EbonLastWaltzCompanion : ModProjectile
         if (!EbonRewardItems.Usable(owner) || owner.noItems || owner.CCed
             || EbonLastWaltzRules.DismissForMissingBuff(child.owner == Main.myPlayer,
                 owner.HasBuff(ModContent.BuffType<EbonLastWaltzBuff>()))) return false;
+        int identity = (int)child.ai[2];
+        if (slot >= 0 && slot < Main.maxProjectiles && IsParent(Main.projectile[slot], child.owner, identity))
+        { parent = Main.projectile[slot]; return true; }
         foreach (Projectile candidate in Main.ActiveProjectiles)
-            if (candidate.owner == child.owner && candidate.identity == (int)child.ai[2] && candidate.ModProjectile is EbonLastWaltzCompanion)
-            { parent = candidate; return true; }
+            if (IsParent(candidate, child.owner, identity))
+            { slot = candidate.whoAmI; parent = candidate; return true; }
+        slot = -1;
         return false;
     }
+
+    private static bool IsParent(Projectile candidate, int owner, int identity)
+        => candidate.active && candidate.owner == owner && candidate.identity == identity && candidate.ModProjectile is EbonLastWaltzCompanion;
 
     // The NPC a child was aimed at when the owner spawned it, if it is still the same living target.
     internal static NPC? Aimed(Projectile child, bool mustBeHittable)
@@ -186,8 +200,10 @@ public sealed class EbonLastWaltzCompanion : ModProjectile
 // Local immunity -1 and penetrate 1: one piece can hit one NPC once, however many segments it overlaps.
 public sealed class EbonWaltzFling : ModProjectile
 {
+    // Where a piece hangs from the fingertip while it is lifted: a short thread, clear of her skirt.
+    internal const float HangX = 34, HangY = 44;
     private Vector2 last;
-    private int parentWait;
+    private int parentWait, parentSlot = -1;
     internal int Piece => (int)Projectile.ai[0];
     // Local tick counter: replicas count from their own spawn, only the owner's contacts matter.
     internal int Age => (int)Projectile.localAI[0];
@@ -208,7 +224,7 @@ public sealed class EbonWaltzFling : ModProjectile
 
     public override void AI()
     {
-        if (Piece < 0 || Piece >= EbonLastWaltzRules.Flings || !EbonLastWaltzCompanion.TryGetParent(Projectile, out Projectile parent))
+        if (Piece < 0 || Piece >= EbonLastWaltzRules.Flings || !EbonLastWaltzCompanion.TryGetParent(Projectile, ref parentSlot, out Projectile parent))
         {
             // A replica can precede its parent's packet: it stays harmless for a moment.
             if (Projectile.owner == Main.myPlayer || ++parentWait > 20 || Piece < 0 || Piece >= EbonLastWaltzRules.Flings) Projectile.Kill();
@@ -220,11 +236,12 @@ public sealed class EbonWaltzFling : ModProjectile
         Projectile.damage = EbonRewardItems.Hit(parent.damage, EbonRewardRules.FlingMultiplier);
         if (age < EbonLastWaltzRules.Lift)
         {
-            // Rises out of the dark and dangles from her raised fingertip, bobbing.
-            Vector2 hold = EbonLastWaltzCompanion.Hand(parent) + new Vector2(parent.spriteDirection * 58, 40);
+            // Rises out of the dark and dangles from her raised fingertip, bobbing; the piece faces the way she does.
+            Vector2 hold = EbonLastWaltzCompanion.Hand(parent) + new Vector2(parent.spriteDirection * HangX, HangY);
             float rise = EbonRewardRules.Smooth(age / (float)EbonLastWaltzRules.Lift);
             Projectile.Center = hold + new Vector2(0, (1 - rise) * 44 + MathF.Sin(age * .5f) * 2);
             Projectile.velocity = Vector2.Zero;
+            Projectile.spriteDirection = parent.spriteDirection;
             last = Projectile.Center;
         }
         else
@@ -237,6 +254,8 @@ public sealed class EbonWaltzFling : ModProjectile
                 // The yank: a flat throw at the target, or a short toss if it has gone.
                 Vector2 aim = target is null ? new Vector2(parent.spriteDirection, -.2f) : target.Center - Projectile.Center;
                 Projectile.velocity = EbonRewardItems.Aim(aim, parent.spriteDirection) * speed;
+                // The tumble turns the way the throw travels (spriteDirection is only read by the visual layer).
+                Projectile.spriteDirection = Projectile.velocity.X < 0 ? -1 : 1;
                 if (Projectile.owner == Main.myPlayer) Projectile.netUpdate = true;
             }
             else if (target is not null) RitualTargeting.Home(Projectile, target.Center, target.velocity, speed);
@@ -261,7 +280,7 @@ public sealed class EbonWaltzFling : ModProjectile
 public sealed class EbonWaltzSpoke : ModProjectile
 {
     private int[]? rearm;
-    private int parentWait, hubType = -1;
+    private int parentWait, parentSlot = -1, hubType = -1;
     internal int Index => (int)Projectile.ai[0];
     internal int Age => (int)Projectile.localAI[0];
     internal float Phase => EbonLastWaltzRules.SpokePhase((int)Projectile.ai[2]);
@@ -289,7 +308,7 @@ public sealed class EbonWaltzSpoke : ModProjectile
     public override void AI()
     {
         if (Index < 0 || Index >= EbonRewardRules.Spokes || Age >= EbonLastWaltzRules.SpokeLife
-            || !EbonLastWaltzCompanion.TryGetParent(Projectile, out Projectile parent))
+            || !EbonLastWaltzCompanion.TryGetParent(Projectile, ref parentSlot, out Projectile parent))
         {
             if (Projectile.owner == Main.myPlayer || ++parentWait > 20 || Index < 0 || Index >= EbonRewardRules.Spokes
                 || Age >= EbonLastWaltzRules.SpokeLife) Projectile.Kill();

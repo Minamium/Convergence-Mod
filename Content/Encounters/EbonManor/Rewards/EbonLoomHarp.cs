@@ -13,8 +13,9 @@ namespace Convergence.Content.Encounters.EbonManor.Rewards;
 // Moonloom Harp (docs/encounters/ebon-manor/REWARDS.md, "Ranged"): a lyre-shaped bow. Every arrow becomes a silver
 // needle (ammo damage and conservation stay native through PickAmmo); where the needle ends it leaves a taut silk
 // string back to the bow. The right click plucks every string, oldest first, one per sixteenth.
-// Ownership: the owner client spends ammo, spawns the needle, the strings and the glissando schedule through native
-// projectile replication (netImportant + netUpdate); peers only read replicated projectile state. No packet.
+// Ownership: the owner client spends ammo, spawns the needle and the strings, and publishes the glissando schedule
+// from each string's own AI, all through native projectile replication (netImportant); peers only read replicated
+// projectile state. No packet.
 public sealed class EbonLoomHarp : ModItem
 {
     // Where the needle leaves the bow, px ahead of the hand along the aim.
@@ -27,8 +28,9 @@ public sealed class EbonLoomHarp : ModItem
     public override void SetDefaults()
     {
         EbonRewardItems.Defaults(Item, EbonRewardKind.Ranged);
-        Item.width = 26;
-        Item.height = 48;
+        // The size of the final icon (EbonLoomHarp.png, 24x60).
+        Item.width = 24;
+        Item.height = 60;
         Item.useStyle = ItemUseStyleID.Shoot;
         Item.noMelee = true;
         // The bow is drawn in code (Client/.../LoomHarpVisuals) so its string can follow the draw.
@@ -73,10 +75,10 @@ public sealed class EbonLoomHarp : ModItem
         if (player.whoAmI != Main.myPlayer || !EbonRewardItems.Usable(player)) return false;
         Vector2 aim = EbonRewardItems.Aim(velocity, player.direction);
         Vector2 muzzle = MuzzleOf(player, aim);
-        // ai[0], ai[1]: the fire point, from which the string will run to wherever the needle ends.
-        int index = Projectile.NewProjectile(source, muzzle, aim * EbonRewardRules.ArrowSpeed, type, damage, knockback,
+        // ai[0], ai[1]: the fire point, from which the string will run to wherever the needle ends. NewProjectile sends
+        // the creation message with them by itself (a netUpdate set here would be cleared by the native Update first).
+        Projectile.NewProjectile(source, muzzle, aim * EbonRewardRules.ArrowSpeed, type, damage, knockback,
             player.whoAmI, muzzle.X, muzzle.Y);
-        if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].netUpdate = true;
         return false;
     }
 
@@ -124,10 +126,7 @@ internal static class EbonHarpStrings
         List<Projectile> strings = Idle(player.whoAmI);
         int count = Math.Min(strings.Count, EbonRewardRules.MaxStrings);
         for (int i = 0; i < count; i++)
-        {
-            strings[i].ai[2] = EbonLoomHarpRules.Schedule(i, i == count - 1);
-            strings[i].netUpdate = true;
-        }
+            if (strings[i].ModProjectile is EbonHarpString harp) harp.Arm(i, i == count - 1);
     }
 
     // A needle ended at `to` after leaving the bow at `from`: the owner leaves a string between them, retiring
@@ -141,10 +140,10 @@ internal static class EbonHarpStrings
         int index = Projectile.NewProjectile(arrow.GetSource_FromThis(), from, Vector2.Zero, StringType,
             EbonRewardItems.Hit(arrow.damage, EbonRewardRules.PluckMultiplier), arrow.knockBack * .5f, arrow.owner, to.X, to.Y, 0);
         if (index < 0 || index >= Main.maxProjectiles) return;
+        // The creation message already carries the end point; crit and penetration only matter to the owner's hits.
         Projectile created = Main.projectile[index];
         created.CritChance = arrow.CritChance;
         created.ArmorPenetration = arrow.ArmorPenetration;
-        created.netUpdate = true;
     }
 
     internal static bool InWorld(Vector2 point)
@@ -153,7 +152,8 @@ internal static class EbonHarpStrings
 }
 
 // The silver needle. extraUpdates 1, penetrate 1: it ends on its first NPC, a tile, or ArrowRange px from the bow,
-// and the owner leaves a string where it ended. Drawn by the Ebon pixel layer (Client/.../LoomHarpVisuals).
+// and the owner leaves a string where it ended. Drawn by Client/.../LoomHarpVisuals (final needle art as a point
+// sampled sprite, the placeholder by the Ebon pixel layer).
 public sealed class EbonNeedleArrow : ModProjectile
 {
     public override string Texture => "Terraria/Images/Projectile_" + ProjectileID.WoodenArrowFriendly;
@@ -176,6 +176,7 @@ public sealed class EbonNeedleArrow : ModProjectile
     }
 
     public override bool PreDraw(ref Color lightColor) => false;
+    public override bool CanHitPvp(Player target) => false;
 
     public override void AI()
     {
@@ -202,6 +203,8 @@ public sealed class EbonHarpString : ModProjectile
     // Roots (realLife or whoAmI) already struck by this pluck, so a segmented NPC counts once. Only the owner
     // damages, and the field stays null in the type's template (clones share references).
     private List<int>? struck;
+    // Owner only: the schedule was written outside this projectile's AI and still has to be published.
+    private bool resync;
 
     public override string Texture => "Terraria/Images/Projectile_1";
 
@@ -231,6 +234,14 @@ public sealed class EbonHarpString : ModProjectile
     public override bool? CanCutTiles() => false;
     public override bool PreDraw(ref Color lightColor) => false;
     public override bool? CanDamage() => EbonLoomHarpRules.Live(State);
+    public override bool CanHitPvp(Player target) => false;
+
+    // Owner only, from the glissando (inside the player's update): the pluck is scheduled for this string.
+    internal void Arm(int rank, bool last)
+    {
+        Projectile.ai[2] = EbonLoomHarpRules.Schedule(rank, last);
+        resync = true;
+    }
 
     private bool Sane()
         => EbonHarpStrings.InWorld(From) && EbonHarpStrings.InWorld(To) && EbonLoomHarpRules.Valid(State)
@@ -242,6 +253,9 @@ public sealed class EbonHarpString : ModProjectile
         if (Projectile.owner < 0 || Projectile.owner >= Main.maxPlayers) { Projectile.Kill(); return; }
         Player owner = Main.player[Projectile.owner];
         if (!owner.active || owner.dead || !Sane()) { Projectile.Kill(); return; }
+        // The glissando wrote the schedule during the player's update and the native Update clears netUpdate before
+        // AI: publish from here so the flag survives to the send block and peers learn the schedule.
+        if (resync && Projectile.owner == Main.myPlayer) { resync = false; Projectile.netUpdate = true; }
         // Down in a Raid mid-glissando: the owner calls the schedule off and the string stands idle again.
         if (State > 0 && Projectile.owner == Main.myPlayer && !EbonRewardItems.Usable(owner))
         {

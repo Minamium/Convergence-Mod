@@ -13,27 +13,48 @@ using Terraria.ModLoader;
 namespace Convergence.Client.Encounters.EbonManor.Rewards;
 
 // Presentation for The Last Waltz. Content never references this file: it enters as a client-only
-// GlobalProjectile. Noirette is drawn from her Raid sheet (48x64 cells at 1x, point sampled) through the
-// Manor BodyPass with a compact twin-tail mesh; EbonNoirette's own mesh owns static boss state, so it cannot
-// be called without a boss. Threads, spokes, stars and debris are retained sources of the Ebon pixel layer.
-// Everything is drawn between two accepted ticks (WeaponDrawClock.Fraction); sounds fire from the same
-// event as the visual peak (yank, crash, spokes opening).
+// GlobalProjectile. Noirette is drawn from her Raid sheet (48x64 cells, point sampled) and, when delivered, the
+// four NoiretteWaltz.png poses (twirl A and B, fling, curtsy) through the Manor BodyPass with a compact twin-tail
+// mesh; EbonNoirette's own mesh owns static boss state, so it cannot be called without a boss. Threads, spokes,
+// stars and debris are retained sources of the Ebon pixel layer. Everything is drawn between two accepted ticks
+// (WeaponDrawClock.Fraction); sounds fire from the same event as the visual peak (yank, crash, spokes opening).
 [Autoload(Side = ModSide.Client)]
 internal sealed class LastWaltzVisuals : GlobalProjectile
 {
     private const int Columns = 12, Rows = 16;
-    private const float BodyScale = 1;
-    // Same measurements as EbonNoirette (private there): logical pixel under the centre, tail masks, fingertips.
-    private static readonly Vector2 Pivot = new(26, 33);
+    // One texel per world pixel: half the boss's 2x (EbonNoirette.Scale; REWARDS.md draws her sheet at 1x). She stands
+    // 54 px tall beside the 42 px player (108 px at EbonRewardArt.PixelScale would tower over it), her thrown furniture
+    // keeps its proportions to her (armchair 32 px, cello 40 px) and matches the 34 px fling hitbox. Pieces and body
+    // share this one texel size; the Content hand and hang offsets are measured at it.
+    private const float TexelScale = EbonRewardArt.PixelScale * .5f;
+    // Per drawn cell (0-7 Noirette.png, 8-11 NoiretteWaltz.png): logical pixel under the centre, tail masks, fingertips.
+    // Cells 0-7 are EbonNoirette's measurements (private there). NoiretteWaltz.png has its feet on row 61 against row
+    // 58, so its pivot row is 3 lower and both sheets share a baseline; its pivot column is the dress centre, the
+    // tail masks start below the parasol, and the hands are the free glove (twirls, fling) or the one holding the
+    // closed parasol (curtsy). Measured on the exported sheet (.local/ebon-reward-art/report.json).
+    private static readonly Vector2[] Pivots =
+    {
+        new(26, 33), new(26, 33), new(26, 33), new(26, 33), new(26, 33), new(26, 33), new(26, 33), new(26, 33),
+        new(28, 36), new(27, 36), new(24, 36), new(25, 36),
+    };
     private static readonly Vector3[] Tails =
     {
         new(20, 8, 40), new(20, 8, 40), new(20, 8, 40), new(20, 8, 40),
         new(16, 10, 38), new(13, 8, 40), new(18, 22, 44), new(20, 8, 40),
+        new(20, 25, 38), new(22, 23, 38), new(20, 22, 36), new(19, 24, 42),
     };
     private static readonly Vector2[] Hands =
     {
         new(30, 36), new(30, 36), new(31, 36), new(30, 35),
         new(44, 9), new(15, 28), new(31, 27), new(44, 22),
+        new(35, 30), new(35, 30), new(45, 33), new(37.5f, 39),
+    };
+    // Until NoiretteWaltz.png is delivered the waltz poses borrow the closest Raid cells: parasol, parasol, pull, float.
+    private static readonly int[] Borrowed = { 6, 6, 5, 2 };
+    // Furniture.png eyelets (report.json eyelet_in_cell, texels in the 48x64 cell): where the silk is tied, per prop.
+    private static readonly Vector2[] Eyelets =
+    {
+        new(24, 16), new(23.5f, 13), new(24, 19), new(24, 12), new(23.5f, 16), new(24, 13), new(23.5f, 22), new(24, 12),
     };
     private static readonly VertexPositionColorTexture[] grid = new VertexPositionColorTexture[(Columns + 1) * (Rows + 1)];
     private static readonly VertexPositionColorTexture[] skin = new VertexPositionColorTexture[Columns * Rows * 6];
@@ -41,6 +62,32 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
     private Vector2 before, now, lastVelocity, tail, tailVelocity, hem, hemVelocity;
     private bool initialized, entered, registered, layerOk, yanked, noted;
     private int frame, idle, previousTick = -1, enteredAt, hitDelay;
+    // The pixel layer stamps this on every frame it draws a spoke; a stale stamp means it is gone (see PreDraw).
+    private ulong emitted;
+
+    // Logical pose -> drawn cell and its sheet texture and source rectangle. EbonRewardArt caches the textures
+    // and the furniture sprites, so asking every frame is a dictionary read.
+    private static int Cell(int logical, out Texture2D sheet, out Rectangle source)
+    {
+        Texture2D? waltz = logical >= EbonLastWaltzRules.WaltzFrame ? WaltzSheet() : null;
+        int cell = logical >= EbonLastWaltzRules.WaltzFrame && waltz is null ? Borrowed[logical - EbonLastWaltzRules.WaltzFrame] : logical;
+        if (cell >= EbonLastWaltzRules.WaltzFrame)
+        {
+            sheet = waltz!;
+            source = new Rectangle((cell - EbonLastWaltzRules.WaltzFrame) * 48, 0, 48, 64);
+        }
+        else
+        {
+            sheet = EbonRewardArt.Raid("Noirette");
+            source = new Rectangle(cell % 4 * 48, cell / 4 * 64, 48, 64);
+        }
+        return cell;
+    }
+
+    private static Texture2D? WaltzSheet() => EbonRewardArt.HasFinal("NoiretteWaltz") ? EbonRewardArt.Final("NoiretteWaltz") : null;
+
+    // The prop of a fling piece (ai[0] arrives from the network, so it is wrapped like EbonRewardArt.Furniture does).
+    private static int Prop(int piece) => (piece % EbonRewardArt.FurnitureCount + EbonRewardArt.FurnitureCount) % EbonRewardArt.FurnitureCount;
 
     public override bool InstancePerEntity => true;
     public override bool AppliesToEntity(Projectile p, bool lateInstantiation)
@@ -72,7 +119,7 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
         if (!entered) { entered = true; Entrance(p); }
         else enteredAt++;
         idle = (idle + 1) % 2520;
-        frame = Math.Clamp(EbonLastWaltzRules.Frame(tick, p.velocity.LengthSquared() > 3.5f * 3.5f, idle), 0, EbonLastWaltzRules.FrameCount - 1);
+        frame = Math.Clamp(EbonLastWaltzRules.Frame(tick, p.velocity.LengthSquared() > 3.5f * 3.5f, idle, enteredAt), 0, EbonLastWaltzRules.FrameCount - 1);
         // Damped springs lag behind the body: the tails swing longer than the hem.
         Vector2 motion = Vector2.Clamp(now - before, new(-24), new(24));
         tailVelocity += -tail * .045f - tailVelocity * .09f - motion * .42f;
@@ -93,31 +140,37 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
         EbonRewardAudio.Play("WaltzOpen", p.Center, .3f, -.2f);
     }
 
-    // Pose offsets on the fractional clock: cast leans back, the yank recoils, the parasol sways.
+    // Pose offsets on the fractional clock: cast leans back, the thread is drawn back, the fling lunges
+    // forward, the parasol sways. Cases name the logical pose; Cell picks the cell actually drawn.
     private void Pose(Projectile p, out Vector2 root, out float lean, out int facing, out float flash)
     {
         float fraction = WeaponDrawClock.Fraction, time = (float)(Main.GameUpdateCount % 1_000_000) + fraction;
         facing = p.spriteDirection < 0 ? -1 : 1;
-        lean = Math.Clamp(p.rotation, -.2f, .2f);
+        // Map multiplies lean by facing, so lean is facing-relative; rotation is world-space (leans into the glide).
+        lean = Math.Clamp(p.rotation * facing, -.2f, .2f);
         flash = 0;
         Vector2 offset = new(0, MathF.Sin(time * .05f + p.identity) * 2.5f);
         switch (frame)
         {
-            case 4: lean -= .05f; offset.Y -= 3; break;
-            case 5:
+            case EbonLastWaltzRules.FrameCast: lean -= .05f; offset.Y -= 3; break;
+            case EbonLastWaltzRules.FramePull: lean -= .09f; offset.X -= 3 * facing; break;
+            case EbonLastWaltzRules.FrameFling:
+            {
                 float since = EbonLastWaltzRules.SinceYank((int)p.ai[0]) + fraction;
-                float kick = EbonVisualsMath.Pulse(since, 7);
-                lean -= .12f * kick; offset.X -= 7 * kick * facing; flash = .6f * EbonVisualsMath.Pulse(since, 4);
+                float kick = EbonVisualsMath.Pulse(since, 6);
+                lean += .06f * kick; offset.X += 4 * kick * facing; flash = .6f * EbonVisualsMath.Pulse(since, 4);
                 break;
-            case 6: lean += MathF.Sin(time * .11f) * .06f; break;
-            case 7: lean -= .04f; break;
+            }
+            case EbonLastWaltzRules.FrameTwirlA:
+            case EbonLastWaltzRules.FrameTwirlB: lean += MathF.Sin(time * .11f) * .06f; break;
+            case EbonLastWaltzRules.FrameCommand: lean -= .04f; break;
         }
         root = Center(p) + offset;
     }
 
-    private static Vector2 Map(int facing, float lean, Vector2 root, Vector2 local)
+    private static Vector2 Map(int facing, float lean, Vector2 root, Vector2 pivot, Vector2 local)
     {
-        Vector2 p = (local - Pivot) * BodyScale;
+        Vector2 p = (local - pivot) * TexelScale;
         if (facing < 0) p.X = -p.X;
         float angle = lean * facing;
         return root + new Vector2(p.X * MathF.Cos(angle) - p.Y * MathF.Sin(angle), p.X * MathF.Sin(angle) + p.Y * MathF.Cos(angle));
@@ -127,26 +180,28 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
     internal Vector2 Hand(Projectile p)
     {
         Pose(p, out Vector2 root, out float lean, out int facing, out _);
-        return Map(facing, lean, root, Hands[Math.Clamp(frame, 0, Hands.Length - 1)]);
+        int cell = Cell(frame, out _, out _);
+        return Map(facing, lean, root, Pivots[cell], Hands[cell]);
     }
 
     private void DrawBody(SpriteBatch batch, Projectile p)
     {
         Pose(p, out Vector2 root, out float lean, out int facing, out float flash);
-        var art = EbonMaterials.Texture("Noirette");
+        int cell = Cell(frame, out Texture2D art, out Rectangle src);
+        Vector2 pivot = Pivots[cell];
+        float drop = pivot.Y - Pivots[0].Y; // the waltz cells stand 3 rows lower in their cell: the hem band follows
         bool reduced = EbonVisuals.Reduced;
         float motion = reduced ? .3f : 1;
         float time = (float)(Main.GameUpdateCount % 1_000_000) + WeaponDrawClock.Fraction;
         float woven = EbonVisualsMath.Ease((enteredAt + WeaponDrawClock.Fraction) / 40f);
         using var scope = new WorldGraphicsScope(batch);
         var shader = EbonMaterials.Manor(time);
-        var src = new Rectangle(frame % 4 * 48, frame / 4 * 64, 48, 64);
         shader.SetTexture(art, 0, SamplerState.PointClamp);
         shader.TrySetParameter("region", new Vector4(src.X / (float)art.Width, src.Y / (float)art.Height, src.Width / (float)art.Width, src.Height / (float)art.Height));
         shader.TrySetParameter("signal", new Vector4(1, woven, reduced ? 1 : 0, p.identity * .29f));
         shader.TrySetParameter("shape", new Vector4(flash, .30f, 48, 64));
         shader.TrySetParameter("weaveDensity", 9f);
-        var mask = Tails[Math.Clamp(frame, 0, Tails.Length - 1)];
+        var mask = Tails[cell];
         float sway = MathF.Sin(time * .045f + p.identity) * 1.2f * motion;
         for (int y = 0; y <= Rows; y++)
             for (int x = 0; x <= Columns; x++)
@@ -158,10 +213,10 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
                 float reach = MathF.Pow(Math.Clamp((point.Y - mask.Y) / 30, 0, 1), 2);
                 point += new Vector2((tail.X * motion + sway) * facing, tail.Y * .35f * motion) * reach * wt;
                 // Hem: petticoat flutter with a short lag; the legs stay put.
-                float wh = EbonVisualsMath.Ease((point.Y - 36) / 12) * EbonVisualsMath.Ease((56 - point.Y) / 6);
+                float wh = EbonVisualsMath.Ease((point.Y - 36 - drop) / 12) * EbonVisualsMath.Ease((56 + drop - point.Y) / 6);
                 point += new Vector2(MathF.Sin(time * .05f - point.Y * .2f + point.X * .1f) * .6f * motion + hem.X * facing * .5f * motion,
                     MathF.Sin(time * .06f + point.X * .3f) * .3f * motion) * wh;
-                grid[y * (Columns + 1) + x] = new(new(Map(facing, lean, root, point) - Main.screenPosition, 0), Color.White, uv);
+                grid[y * (Columns + 1) + x] = new(new(Map(facing, lean, root, pivot, point) - Main.screenPosition, 0), Color.White, uv);
             }
         int n = 0;
         for (int y = 0; y < Rows; y++)
@@ -184,30 +239,37 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
         EbonRewardAudio.Play("FurnitureYank", p.Center, .5f, fling.Piece * .03f - .07f, .03f);
     }
 
-    private static void FlingPose(EbonWaltzFling fling, out EbonRewardArt.Sprite sprite, out float rotation, out float scale)
+    // Furniture.png cells are 48x64 texels with the prop centred (the sprite origin) and the eyelet near its top.
+    // Final art keeps whole texels at the body's TexelScale and fades in; painted placeholders are scaled down and grow in.
+    // The tumble turns the way the throw travels (spriteDirection, set by the fling); the props are frontal and
+    // lit from above, so they are not mirrored.
+    private static void FlingPose(Projectile p, EbonWaltzFling fling, out EbonRewardArt.Sprite sprite, out float rotation,
+        out float scale, out float opacity)
     {
         sprite = EbonRewardArt.Furniture(fling.Piece);
-        float age = Math.Max(0, fling.Age - 1 + WeaponDrawClock.Fraction);
-        // Final art keeps its own dot (1x here, like Noirette); painted placeholders are scaled down.
-        scale = (sprite.Pixel ? 1f : sprite.Scale * .7f) * (.55f + .45f * EbonVisualsMath.Ease(age / 6));
-        rotation = fling.Flying ? (age - EbonLastWaltzRules.Lift) * .2f * (fling.Piece % 2 == 0 ? 1 : -1) : MathF.Sin(age * .5f) * .08f;
+        float age = Math.Max(0, fling.Age - 1 + WeaponDrawClock.Fraction), rise = EbonVisualsMath.Ease(age / 6);
+        scale = sprite.Pixel ? TexelScale : sprite.Scale * .7f * (.55f + .45f * rise);
+        opacity = sprite.Pixel ? rise : 1;
+        rotation = fling.Flying ? (age - EbonLastWaltzRules.Lift) * .2f * (p.spriteDirection < 0 ? -1 : 1) : MathF.Sin(age * .5f) * .08f;
         if (sprite.Pixel) { const float step = MathF.Tau / 16; rotation = MathF.Round(rotation / step) * step; }
     }
 
-    // The silk eyelet at the top centre of the piece, where the thread is tied.
+    // The silk eyelet where the thread is tied: the measured one on the final art (relative to the sprite origin,
+    // rotated with the piece); the top centre of the painted placeholder.
     internal Vector2 Eyelet(Projectile p, EbonWaltzFling fling)
     {
-        FlingPose(fling, out var sprite, out float rotation, out float scale);
-        return Center(p) + new Vector2(0, -sprite.Source.Height * scale * .5f).RotatedBy(rotation);
+        FlingPose(p, fling, out var sprite, out float rotation, out float scale, out _);
+        Vector2 eyelet = sprite.Pixel ? Eyelets[Prop(fling.Piece)] - sprite.Origin : new Vector2(0, -sprite.Source.Height * .5f);
+        return Center(p) + (eyelet * scale).RotatedBy(rotation);
     }
 
     private void DrawFling(SpriteBatch batch, Projectile p, EbonWaltzFling fling, Color light)
     {
-        FlingPose(fling, out var sprite, out float rotation, out float scale);
+        FlingPose(p, fling, out var sprite, out float rotation, out float scale, out float opacity);
         using var scope = new WorldGraphicsScope(batch);
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, sprite.Pixel ? SamplerState.PointClamp : SamplerState.LinearClamp,
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-        batch.Draw(sprite.Texture, Center(p) - Main.screenPosition, sprite.Source, Color.Lerp(light, Color.White, .5f),
+        batch.Draw(sprite.Texture, Center(p) - Main.screenPosition, sprite.Source, Color.Lerp(light, Color.White, .5f) * opacity,
             rotation, sprite.Origin, scale, SpriteEffects.None, 0);
         batch.End();
     }
@@ -239,6 +301,7 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
     {
         if (registered) return;
         registered = true;
+        emitted = Main.GameUpdateCount;
         layerOk = EbonPixelLayer.Add(new SpokeSource(Ref.Of(p)));
         if (spoke.Index != 0) return;
         // The release: one chord as the parasol opens, lace and silk from the hub, a small local shake.
@@ -277,12 +340,17 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
         {
             case EbonLastWaltzCompanion: if (initialized) DrawBody(batch, p); break;
             case EbonWaltzFling fling: if (initialized) DrawFling(batch, p, fling, lightColor); break;
-            case EbonWaltzSpoke spoke: if (registered && !layerOk) DrawPlainSpoke(batch, p, spoke); break;
+            case EbonWaltzSpoke spoke: if (registered && !LayerDrawing) DrawPlainSpoke(batch, p, spoke); break;
         }
         return false;
     }
 
-    // Only if the pixel layer refused the source: the spokes are gameplay and must stay readable.
+    // The layer draws a spoke while it keeps emitting its source (once per rendered frame, before the projectiles). It
+    // refused the source (layerOk), or stopped emitting it (disabled after an exception, or the source was dropped):
+    // the stamp goes stale within a few ticks, then the plain spoke takes over.
+    private bool LayerDrawing => layerOk && (long)(Main.GameUpdateCount - emitted) <= 3;
+
+    // Only if the pixel layer refused or lost the source: the spokes are gameplay and must stay readable.
     private void DrawPlainSpoke(SpriteBatch batch, Projectile p, EbonWaltzSpoke spoke)
     {
         float age = Math.Max(0, spoke.Age - 1 + WeaponDrawClock.Fraction), length = spoke.Length(age);
@@ -314,9 +382,11 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
         public bool Emit(EbonPixelCanvas c)
         {
             if (!projectile.TryGet(out Projectile p) || p.ModProjectile is not EbonWaltzSpoke spoke) return false;
+            LastWaltzVisuals visuals = p.GetGlobalProjectile<LastWaltzVisuals>();
+            visuals.emitted = Main.GameUpdateCount;
             float age = Math.Max(0, spoke.Age - 1 + c.Fraction), length = spoke.Length(age);
             if (length < 1) return true;
-            Vector2 hub = p.GetGlobalProjectile<LastWaltzVisuals>().Center(p), axis = spoke.Angle(age).ToRotationVector2();
+            Vector2 hub = visuals.Center(p), axis = spoke.Angle(age).ToRotationVector2();
             Vector2 start = hub + axis * EbonLastWaltzRules.SpokeInner, tip = hub + axis * length;
             float alpha = Math.Clamp(length / 40f, 0, 1);
             // Beat steps: the turn is fastest on each beat, so the strand flares there.
@@ -342,10 +412,12 @@ internal sealed class LastWaltzVisuals : GlobalProjectile
     // The silk that holds a piece up: tied at the eyelet, plucked taut at the yank, fading in flight.
     private sealed class FlingThread(Ref projectile) : IEbonPixelSource
     {
+        private int parentSlot = -1;
+
         public bool Emit(EbonPixelCanvas c)
         {
             if (!projectile.TryGet(out Projectile p) || p.ModProjectile is not EbonWaltzFling fling
-                || !EbonLastWaltzCompanion.TryGetParent(p, out Projectile parent)) return false;
+                || !EbonLastWaltzCompanion.TryGetParent(p, ref parentSlot, out Projectile parent)) return false;
             Vector2 hand = parent.GetGlobalProjectile<LastWaltzVisuals>().Hand(parent);
             Vector2 eyelet = p.GetGlobalProjectile<LastWaltzVisuals>().Eyelet(p, fling);
             float age = Math.Max(0, fling.Age - 1 + c.Fraction), flight = age - EbonLastWaltzRules.Lift;

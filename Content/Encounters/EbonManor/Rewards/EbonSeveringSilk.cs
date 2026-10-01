@@ -37,7 +37,7 @@ public sealed class EbonSeveringSilk : CalamityRogueArmament
     {
         EbonRewardItems.Defaults(Item, EbonRewardKind.Rogue);
         Item.DamageType = RogueClass;
-        Item.width = 30; Item.height = 34;
+        Item.width = 40; Item.height = 30; // the 64x48 icon (three spools and a needle) lies wider than it is tall
         Item.useStyle = ItemUseStyleID.Swing;
         Item.autoReuse = true; Item.noMelee = true; Item.noUseGraphic = true;
         Item.shootSpeed = EbonRewardRules.SpoolSpeed;
@@ -145,7 +145,7 @@ public sealed class EbonSilkStrand : ModProjectile
     public override bool? CanHitNPC(NPC target) => hitRoots.Contains(EbonSilkUtil.Root(target)) ? false : null;
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) => hitRoots.Add(EbonSilkUtil.Root(target));
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
-        => EbonRewardRules.BoxTouchesSegment(new Num(targetHitbox.Left, targetHitbox.Top), new Num(targetHitbox.Right, targetHitbox.Bottom),
+        => EbonSilkMath.StrandTouchesBox(new Num(targetHitbox.Left, targetHitbox.Top), new Num(targetHitbox.Right, targetHitbox.Bottom),
             EbonSilkUtil.N(Projectile.Center), EbonSilkUtil.N(End), EbonRewardRules.StrandWidth);
 
     public override void SendExtraAI(BinaryWriter writer)

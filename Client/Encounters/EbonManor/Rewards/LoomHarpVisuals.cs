@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using Convergence.Client.Graphics;
 using Convergence.Client.Weapons;
 using Convergence.Content.Encounters.EbonManor.Rewards;
 using Luminance.Core.Graphics;
@@ -15,26 +16,54 @@ using NVector2 = System.Numerics.Vector2;
 namespace Convergence.Client.Encounters.EbonManor.Rewards;
 
 // Moonloom Harp presentation (docs/encounters/ebon-manor/REWARDS.md, "Ranged"). The bow body and its bowstring are
-// drawn in the player's own draw set, aimed at the cursor and held at the hand; the string's two pegs are the
-// left-most tips of the art. The string is released and ringing at the shot, then drawn back toward the player over
-// the rest of the use time so full draw lands on the next shot. Needles unspool a thread from the fire point;
-// strings shimmer, quiver when an enemy crosses, brighten when armed and ring out when plucked (pixel layer).
+// drawn in the player's own draw set, aimed at the cursor and held at the hand; the string's two pegs are the horn
+// tips of the art. The string is released and ringing at the shot, then drawn back toward the player over the rest
+// of the use time so full draw lands on the next shot. Needles unspool a thread from the fire point; strings
+// shimmer, quiver when an enemy crosses, brighten when armed and ring out when plucked (pixel layer).
 // Everything is read from replicated projectile and player state on a fractional clock (WeaponDrawClock.Fraction);
 // nothing here decides a hit, spends a resource or sends a packet.
 
-// Resolved bow art: final LoomHarp.png at the 2 px dot, else a vanilla bow by reference. Grip and pegs are found
-// from the art's own opaque pixels (grip = the belly of the ')' shape, pegs = its left-most tips), in pixels
-// relative to Source's top-left, so any delivered silhouette works.
-internal sealed record LoomHarpArt(Texture2D Texture, Rectangle Source, float Scale, bool Pixel, Vector2 Grip, Vector2 PegTop, Vector2 PegBottom);
+// Resolved bow art: final LoomHarp.png, else a vanilla bow by reference. Texture and Source are what is drawn; Sub is
+// the draw texture's pixels per art texel (final art is enlarged by nearest neighbour, see LoomHarp.Enlarge) and
+// Scale the screen pixels per art texel. Grip and pegs are in art texels from the art's top-left corner.
+internal sealed record LoomHarpArt(Texture2D Texture, Rectangle Source, float Scale, int Sub, bool Pixel, Vector2 Grip, Vector2 PegTop, Vector2 PegBottom)
+{
+    internal float DrawScale => Scale / Sub;
+    // Rotation origin in the draw texture. A bow aimed left is drawn turned over, so the grip row turns with it.
+    internal Vector2 Origin(bool flip) => new(Grip.X * Sub, flip ? Source.Height - Grip.Y * Sub : Grip.Y * Sub);
+}
 
-// Where the bow is and how far the string is drawn, for one player at one draw fraction.
+// The final needle as it lies nocked on the drawn string: same enlargement as the bow. Size is in art texels; the
+// point is the right edge and the nock the left edge, on the middle row.
+internal sealed record LoomNeedleArt(Texture2D Texture, float Scale, int Sub, Vector2 Size)
+{
+    internal float DrawScale => Scale / Sub;
+    internal Vector2 PointOrigin => new(Size.X * Sub, Size.Y * Sub * .5f);
+}
+
+// Where the bow is and how far the string is drawn, for one player at one draw fraction. Dot is the weight of the
+// string in px (its outline adds one px on each side).
 internal readonly record struct LoomHarpPose(Vector2 Grip, Vector2 Aim, float Rotation, bool Flip, Vector2 PegTop, Vector2 PegBottom,
-    float Pull, float PullDistance, float Ring, float RingPhase, bool Strum);
+    float Pull, float PullDistance, float Ring, float RingPhase, bool Strum, float Dot);
 
 internal static class LoomHarp
 {
+    // Final art is 18x56 logical texels. At the 2 px dot (EbonRewardArt.PixelScale) that is a 112 px bow next to a 42 px
+    // tall player (its tips would hang below the feet), so the held bow and needle are drawn one px per texel: 56 px,
+    // about the 60 px of the inventory icon. The needle (35 texels) keeps the bow's proportion at the same scale.
+    internal const float HeldScale = 1f;
+    // The player's draw set cannot switch to point sampling, so final art is enlarged this many times by nearest
+    // neighbour and drawn at 1/Sub: the sampler then only blends within a quarter pixel of a texel edge.
+    private const int Sub = 4;
+
+    // Anchors of the exported LoomHarp.png from the export report (tools/export_ebon_reward_art.py; texture space,
+    // top-left corner origin, texel centre +0.5): horn-tip pegs and the centre of the rose-wrapped grip.
+    private const int FinalWidth = 18, FinalHeight = 56;
+    private static readonly Vector2 FinalGrip = new(14.19f, 28.33f), FinalPegTop = new(1.5f, 2f), FinalPegBottom = new(1.5f, 54f);
+
     private static LoomHarpArt? art;
-    private static bool failed;
+    private static LoomNeedleArt? needle;
+    private static bool failed, needleFailed;
 
     internal static LoomHarpArt? Art
     {
@@ -51,21 +80,83 @@ internal static class LoomHarp
         }
     }
 
-    internal static void Reset() { art = null; failed = false; }
+    // The final needle for the nocked arrow, or null: the placeholder needle is drawn in code.
+    internal static LoomNeedleArt? Needle
+    {
+        get
+        {
+            if (needle is not null || needleFailed || !EbonRewardArt.HasFinal("NeedleArrow")) return needle;
+            try
+            {
+                Texture2D texture = EbonRewardArt.Final("NeedleArrow");
+                needle = new LoomNeedleArt(Enlarge(texture, Pixels(texture), texture.Bounds), HeldScale, Sub, new Vector2(texture.Width, texture.Height));
+            }
+            catch (Exception e)
+            {
+                needleFailed = true;
+                global::Convergence.ConvergenceMod.Instance.Logger.Warn("Moonloom Harp needle art unavailable; the nocked needle is drawn in code.", e);
+            }
+            return needle;
+        }
+    }
+
+    // The enlarged copies are ours; the vanilla and mod textures are not.
+    internal static void Reset()
+    {
+        Texture2D? bow = art is not null && art.Sub > 1 ? art.Texture : null, shaft = needle?.Texture;
+        art = null;
+        needle = null;
+        failed = needleFailed = false;
+        if (bow is not null || shaft is not null) Main.QueueMainThreadAction(() => { bow?.Dispose(); shaft?.Dispose(); });
+    }
 
     private static LoomHarpArt Resolve()
     {
-        if (EbonRewardArt.HasFinal("LoomHarp")) return Measure(EbonRewardArt.Final("LoomHarp"), EbonRewardArt.PixelScale, true);
+        if (EbonRewardArt.HasFinal("LoomHarp"))
+        {
+            Texture2D texture = EbonRewardArt.Final("LoomHarp");
+            Color[] data = Pixels(texture);
+            // The delivered 18x56 export has measured anchors; any other silhouette is measured from its pixels.
+            if (texture.Width == FinalWidth && texture.Height == FinalHeight)
+                return new LoomHarpArt(Enlarge(texture, data, texture.Bounds), new Rectangle(0, 0, FinalWidth * Sub, FinalHeight * Sub),
+                    HeldScale, Sub, true, FinalGrip, FinalPegTop, FinalPegBottom);
+            Anchors found = Measure(data, texture.Width, texture.Height);
+            return new LoomHarpArt(Enlarge(texture, data, found.Source), new Rectangle(0, 0, found.Source.Width * Sub, found.Source.Height * Sub),
+                HeldScale, Sub, true, found.Grip, found.PegTop, found.PegBottom);
+        }
         var asset = TextureAssets.Item[ItemID.Marrow];
         if (!asset.IsLoaded) Main.instance.LoadItem(ItemID.Marrow);
-        return Measure(asset.Value, 1f, false);
+        Texture2D vanilla = asset.Value;
+        Anchors guessed = Measure(Pixels(vanilla), vanilla.Width, vanilla.Height);
+        return new LoomHarpArt(vanilla, guessed.Source, 1f, 1, false, guessed.Grip, guessed.PegTop, guessed.PegBottom);
     }
 
-    private static LoomHarpArt Measure(Texture2D texture, float scale, bool pixel)
+    private static Color[] Pixels(Texture2D texture)
     {
-        int w = texture.Width, h = texture.Height;
-        var data = new Color[w * h];
+        var data = new Color[texture.Width * texture.Height];
         texture.GetData(data);
+        return data;
+    }
+
+    // `source` of the texture (whose pixels are `data`) enlarged Sub times by nearest neighbour.
+    private static Texture2D Enlarge(Texture2D texture, Color[] data, Rectangle source)
+    {
+        int width = source.Width * Sub, height = source.Height * Sub;
+        var big = new Color[width * height];
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+            big[y * width + x] = data[(source.Y + y / Sub) * texture.Width + source.X + x / Sub];
+        var result = new Texture2D(texture.GraphicsDevice, width, height);
+        result.SetData(big);
+        return result;
+    }
+
+    // Opaque bounds, grip and pegs found from the art's own pixels (grip = the belly of the ')' shape, pegs = its
+    // left-most tips), in texels relative to Source's top-left. Used by the placeholder and by a re-exported bow.
+    private readonly record struct Anchors(Rectangle Source, Vector2 Grip, Vector2 PegTop, Vector2 PegBottom);
+
+    private static Anchors Measure(Color[] data, int w, int h)
+    {
         int minX = w, minY = h, maxX = -1, maxY = -1;
         for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
@@ -75,7 +166,7 @@ internal static class LoomHarp
             maxX = Math.Max(maxX, x); maxY = Math.Max(maxY, y);
         }
         if (maxX < 0)
-            return new LoomHarpArt(texture, texture.Bounds, scale, pixel, new Vector2(w * .8f, h * .5f), new Vector2(w * .1f, h * .06f), new Vector2(w * .1f, h * .94f));
+            return new Anchors(new Rectangle(0, 0, w, h), new Vector2(w * .8f, h * .5f), new Vector2(w * .1f, h * .06f), new Vector2(w * .1f, h * .94f));
         var source = new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
         // The belly: the mean row of the right-most opaque pixels, held a pixel and a half inside the edge.
         float sum = 0; int count = 0;
@@ -96,8 +187,7 @@ internal static class LoomHarp
             if (away > bestBottom) { bestBottom = away; bottom = new Vector2(x, y); }
         }
         Vector2 ToArt(Vector2 p) => new(p.X - minX + .5f, p.Y - minY + .5f);
-        return new LoomHarpArt(texture, source, scale, pixel,
-            new Vector2(Math.Max(.5f, source.Width - 1.5f), gripY - minY + .5f), ToArt(top), ToArt(bottom));
+        return new Anchors(source, new Vector2(Math.Max(.5f, source.Width - 1.5f), gripY - minY + .5f), ToArt(top), ToArt(bottom));
     }
 
     // The bow at a draw fraction, or false when this player is not drawing the harp. Peg points follow the art's
@@ -124,8 +214,10 @@ internal static class LoomHarp
         bool strum = state.Strumming;
         float pull = strum ? 0 : EbonLoomHarpRules.Pull(Math.Clamp(since / state.CycleLength, 0f, 1f));
         float ring = Math.Max(EbonLoomHarpRules.Ring(since, pull), EbonLoomHarpRules.Ring(state.SincePulse(fraction), 0, EbonLoomHarpRules.PulsePeak));
-        float distance = Math.Clamp(Vector2.Distance(top, bottom) * .22f, 10f, 22f);
-        pose = new LoomHarpPose(grip, aim, rotation, flip, top, bottom, pull, distance, ring, (Main.GameUpdateCount + fraction) * 2.1f, strum);
+        float distance = Math.Clamp(Vector2.Distance(top, bottom) * .28f, 10f, 22f);
+        // Pixel art keeps its own dot; the placeholder string is the 2 px dot.
+        float dot = art.Pixel ? art.Scale : 2f;
+        pose = new LoomHarpPose(grip, aim, rotation, flip, top, bottom, pull, distance, ring, (Main.GameUpdateCount + fraction) * 2.1f, strum, dot);
         return true;
     }
 }
@@ -194,10 +286,13 @@ internal sealed class LoomHarpPlayer : ModPlayer
         if (Posing) Player.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, Aim.ToRotation() - MathHelper.PiOver2);
     }
 
-    // The arm follows the same aim the bow is drawn at, whatever pose the vanilla use style left behind.
+    // The arm follows the same aim the bow is drawn at, whatever pose the vanilla use style left behind. Native
+    // SetCompositeArmFront negates the rotation at inverted gravity; this draw-only override keeps that transform.
     public override void ModifyDrawInfo(ref PlayerDrawSet drawInfo)
     {
-        if (Posing && !drawInfo.headOnlyRender) drawInfo.compositeFrontArmRotation = Aim.ToRotation() - MathHelper.PiOver2;
+        if (!Posing || drawInfo.headOnlyRender) return;
+        float arm = Aim.ToRotation() - MathHelper.PiOver2;
+        drawInfo.compositeFrontArmRotation = Player.gravDir == -1f ? -arm : arm;
     }
 }
 
@@ -219,11 +314,10 @@ internal sealed class LoomHarpBowLayer : PlayerDrawLayer
     {
         Player player = drawInfo.drawPlayer;
         if (!LoomHarp.TryGet(player, WeaponDrawClock.Fraction, out LoomHarpPose pose) || LoomHarp.Art is not { } art) return;
-        Vector2 origin = art.Grip;
-        SpriteEffects effects = SpriteEffects.None;
-        if (pose.Flip) { origin.Y = art.Source.Height - origin.Y; effects = SpriteEffects.FlipVertically; }
+        SpriteEffects effects = pose.Flip ? SpriteEffects.FlipVertically : SpriteEffects.None;
         Color color = Lighting.GetColor(pose.Grip.ToTileCoordinates());
-        drawInfo.DrawDataCache.Add(new DrawData(art.Texture, pose.Grip - Main.screenPosition, art.Source, color, pose.Rotation, origin, art.Scale, effects));
+        drawInfo.DrawDataCache.Add(new DrawData(art.Texture, pose.Grip - Main.screenPosition, art.Source, color, pose.Rotation,
+            art.Origin(pose.Flip), art.DrawScale, effects));
         DrawString(ref drawInfo, pose);
     }
 
@@ -260,19 +354,28 @@ internal sealed class LoomHarpBowLayer : PlayerDrawLayer
             count = 2;
         }
         Color outline = EbonPixelArt.Palette[(int)EbonTone.Outline], ivory = EbonPixelArt.Palette[(int)EbonTone.Ivory];
-        for (int i = 1; i < count; i++) Segment(ref drawInfo, points[i - 1], points[i], outline, 4f);
-        for (int i = 1; i < count; i++) Segment(ref drawInfo, points[i - 1], points[i], ivory, 2f);
-        // The needle rests on the drawn string, its tip at the grip.
+        for (int i = 1; i < count; i++) Segment(ref drawInfo, points[i - 1], points[i], outline, pose.Dot + 2f);
+        for (int i = 1; i < count; i++) Segment(ref drawInfo, points[i - 1], points[i], ivory, pose.Dot);
+        // The needle rests on the drawn string, its point at the grip (final art: just past it, as an arrow is longer than the draw).
         if (pose.Pull > .35f && !pose.Strum)
         {
-            Vector2 nock = points[1], tip = nock + pose.Aim * (pose.PullDistance + 14f);
-            Segment(ref drawInfo, nock, tip, outline, 4f);
-            Segment(ref drawInfo, nock, tip, EbonPixelArt.Palette[(int)EbonTone.Silver], 2f);
-            Segment(ref drawInfo, tip - pose.Aim * 2f, tip, EbonPixelArt.Palette[(int)EbonTone.Moon], 2f);
+            Vector2 nock = points[1];
+            if (LoomHarp.Needle is { } shaft)
+            {
+                // Final art: the butt on the string, lying along the aim, turned over with the bow when aimed left.
+                Vector2 point = nock + pose.Aim * ((shaft.Size.X - 1f) * shaft.Scale);
+                drawInfo.DrawDataCache.Add(new DrawData(shaft.Texture, point - Main.screenPosition, shaft.Texture.Bounds, Color.White,
+                    pose.Rotation, shaft.PointOrigin, shaft.DrawScale, pose.Flip ? SpriteEffects.FlipVertically : SpriteEffects.None));
+                return;
+            }
+            Vector2 tip = nock + pose.Aim * (pose.PullDistance + 14f);
+            Segment(ref drawInfo, nock, tip, outline, pose.Dot + 2f);
+            Segment(ref drawInfo, nock, tip, EbonPixelArt.Palette[(int)EbonTone.Silver], pose.Dot);
+            Segment(ref drawInfo, tip - pose.Aim * 2f, tip, EbonPixelArt.Palette[(int)EbonTone.Moon], pose.Dot);
         }
     }
 
-    // One straight run, thickness in px (the 2 px dot or its outline), with a pixel of overlap at both joints.
+    // One straight run, thickness in px (the dot or its outline), with a pixel of overlap at both joints.
     private static void Segment(ref PlayerDrawSet drawInfo, Vector2 from, Vector2 to, Color color, float thickness)
     {
         Vector2 delta = to - from;
@@ -293,10 +396,28 @@ internal sealed class LoomHarpProjectiles : GlobalProjectile
     public override bool AppliesToEntity(Projectile entity, bool lateInstantiation)
         => entity.ModProjectile is EbonNeedleArrow or EbonHarpString;
 
+    // Final needle art is drawn with its point this far ahead of the projectile's centre: the half of the 14 px hitbox.
+    private const float NeedleLead = 7f;
+
     private LoomHarpNeedleSource? needle;
     private LoomHarpStringSource? thread;
-    private bool seen, crossing;
+    private bool seen, crossing, scheduledLast;
     private float lastState;
+    private int scheduledRank;
+
+    // Before the string's own update advances its state. A schedule replicated with its countdown already at 0
+    // (the first string, which the owner advanced once before publishing) plucks in that very update, so the rank and
+    // last flag are read here rather than from the state the update leaves behind.
+    public override bool PreAI(Projectile projectile)
+    {
+        if (projectile.ModProjectile is EbonHarpString
+            && EbonLoomHarpRules.TryDecode(projectile.ai[2], out int rank, out bool last, out _))
+        {
+            scheduledRank = rank;
+            scheduledLast = last;
+        }
+        return true;
+    }
 
     public override void PostAI(Projectile projectile)
     {
@@ -354,8 +475,9 @@ internal sealed class LoomHarpProjectiles : GlobalProjectile
     // The pluck begins this tick: note, flash, the bow's own string rings, and the last string lands the chord.
     private void Struck(Projectile projectile)
     {
-        // A string that arrived already plucked (late peer) has lost its rank: it sounds as the first.
-        EbonLoomHarpRules.TryDecode(lastState, out int rank, out bool last, out _);
+        // A string that arrived already plucked (late peer) never showed its schedule: it sounds as the first.
+        int rank = scheduledRank;
+        bool last = scheduledLast;
         thread?.Pluck(rank, last);
         Vector2 a = projectile.Center, b = new(projectile.ai[0], projectile.ai[1]), middle = (a + b) * .5f;
         EbonRewardAudio.Note(rank, middle, .5f + rank * .03f);
@@ -402,12 +524,26 @@ internal sealed class LoomHarpProjectiles : GlobalProjectile
     public override bool PreDraw(Projectile projectile, ref Color lightColor)
     {
         if (projectile.ModProjectile is EbonNeedleArrow && EbonRewardArt.HasFinal("NeedleArrow"))
-        {
-            Texture2D texture = EbonRewardArt.Final("NeedleArrow");
-            Main.spriteBatch.Draw(texture, projectile.Center - Main.screenPosition, null, Color.White, projectile.rotation,
-                texture.Size() * .5f, EbonRewardArt.PixelScale, SpriteEffects.None, 0);
-        }
+            DrawNeedle(EbonRewardArt.Final("NeedleArrow"), projectile.Center, projectile.rotation);
         return false;
+    }
+
+    // Final art is pixel art: point sampling. The projectile batch is swapped for one that is and restored after,
+    // as the silk spool does. The art points right (point = right edge, middle row) and is turned over when the
+    // needle flies left so its light stays on top. The point sits NeedleLead ahead of the centre.
+    private static void DrawNeedle(Texture2D texture, Vector2 center, float rotation)
+    {
+        if (!float.IsFinite(rotation)) return;
+        SpriteBatch batch = Main.spriteBatch;
+        WorldBatchParameters saved = WorldBatchParameters.Capture(batch);
+        batch.End();
+        batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None,
+            saved.Raster, null, saved.Transform);
+        batch.Draw(texture, center + rotation.ToRotationVector2() * NeedleLead - Main.screenPosition, null, Color.White, rotation,
+            new Vector2(texture.Width, texture.Height * .5f), LoomHarp.HeldScale,
+            MathF.Cos(rotation) < 0 ? SpriteEffects.FlipVertically : SpriteEffects.None, 0);
+        batch.End();
+        saved.Restore(batch);
     }
 
     public override void OnKill(Projectile projectile, int timeLeft)

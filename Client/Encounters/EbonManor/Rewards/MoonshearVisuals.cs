@@ -18,11 +18,20 @@ namespace Convergence.Client.Encounters.EbonManor.Rewards;
 // Nothing here writes positions, input, hits or packets; dedicated servers never load it.
 internal static class MoonshearArt
 {
-    // Placeholder: the Raid's Shears.png, two 360x140 halves with the pivot holes EbonScene measured.
+    // Placeholder: the Raid's Shears.png, two 360x140 halves with the pivot holes EbonScene measured. Its blades
+    // run 201 px (upper) and 222 px (lower) from the pivot at 1x, so one shared 1x scale puts both tips at the
+    // 210 px hit reach, within about 6%.
     private static readonly Rectangle UpperSource = new(0, 0, 360, 140), LowerSource = new(0, 140, 360, 140);
     private static readonly Vector2 UpperPivot = new(159f, 21.5f), LowerPivot = new(137.7f, 121.8f);
-    private const float PlaceholderScale = .6f; // one blade about 120 px
+    private const float PlaceholderScale = EbonRewardRules.ShearReach / 208f; // Raid sheet tips ~201/222 px beyond the pivots
     internal const float Reach = EbonRewardRules.ShearReach;
+
+    // Final art (tools/export_ebon_reward_art.py): ShearUpper.png 131x25 and ShearLower.png 132x29, blades along
+    // +X with the ring bow behind the pivot screw. Pivot holes as the export measured them (texel space, origin
+    // at the top-left corner); the tips lie 80.8 / 80.6 texels beyond them. Drawn at the shared 2 px dot, so the
+    // tip lands on EbonRewardRules.ShearReach (162 = 80.7 x 2): the hit reach follows the art, not the reverse.
+    private static readonly Vector2 FinalUpperPivot = new(50.21f, 15f), FinalLowerPivot = new(51.42f, 12.83f);
+    private const float FinalScale = EbonRewardArt.PixelScale;
 
     // Both halves turn about one shared pivot; a left facing mirrors them across their own axis.
     internal static void Draw(SpriteBatch batch, Vector2 pivot, float upper, float lower, int facing, float alpha)
@@ -30,14 +39,16 @@ internal static class MoonshearArt
         if (alpha <= .01f) return;
         if (EbonRewardArt.HasFinal("ShearUpper") && EbonRewardArt.HasFinal("ShearLower"))
         {
-            // Final pixel art: point sampled at the 2 px dot, pivot hole at 40% x / 50% y of each export.
-            using var scope = new WorldGraphicsScope(batch);
-            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None,
-                Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-            Texture2D bottom = EbonRewardArt.Final("ShearLower"), top = EbonRewardArt.Final("ShearUpper");
-            Half(batch, bottom, bottom.Bounds, new Vector2(bottom.Width * .4f, bottom.Height * .5f), EbonRewardArt.PixelScale, pivot, lower, facing, alpha);
-            Half(batch, top, top.Bounds, new Vector2(top.Width * .4f, top.Height * .5f), EbonRewardArt.PixelScale, pivot, upper, facing, alpha);
+            // Final pixel art is point sampled; the caller's batch state is captured and restored around the swap.
+            WorldBatchParameters saved = WorldBatchParameters.Capture(batch);
             batch.End();
+            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None,
+                saved.Raster, null, saved.Transform);
+            Texture2D bottom = EbonRewardArt.Final("ShearLower"), top = EbonRewardArt.Final("ShearUpper");
+            Half(batch, bottom, bottom.Bounds, FinalLowerPivot, FinalScale, pivot, lower, facing, alpha);
+            Half(batch, top, top.Bounds, FinalUpperPivot, FinalScale, pivot, upper, facing, alpha);
+            batch.End();
+            saved.Restore(batch);
             return;
         }
         Texture2D sheet = EbonRewardArt.Raid("Shears");
@@ -254,7 +265,8 @@ internal sealed class MoonshearMarkSource : IEbonPixelSource
         Vector2 min = Main.screenPosition + (screen - view) * .5f + new Vector2(24, 36), max = min + view - new Vector2(48, 72);
         for (int i = 0; i < marks.Capacity; i++)
         {
-            int count = marks.Count(i);
+            // Committed marks stay drawn until their pop bursts, one stitch at a time.
+            int count = marks.Shown(i);
             if (count == 0 || !Main.npc[i].active) continue;
             NPC npc = Main.npc[i];
             float age = MoonshearArt.Elapsed(now, marks.Stamp(i)) + canvas.Fraction;
@@ -279,7 +291,7 @@ internal sealed class MoonshearStrokeVisuals : GlobalProjectile
     public override bool AppliesToEntity(Projectile entity, bool lateInstantiation) => entity.ModProjectile is MoonshearStroke;
 
     private MoonshearStrokeSource? source;
-    private bool sourceTried, released, closed;
+    private bool sourceTried, swung, closed;
     internal bool Noted;
     private int lastObservedAge = -1, impactCount;
     private ulong impactTick;
@@ -302,15 +314,15 @@ internal sealed class MoonshearStrokeVisuals : GlobalProjectile
         }
         source?.Track(projectile, cut, player);
 
-        int previous = lastObservedAge, release = MoonshearMotion.Release(cut.Stroke);
+        int previous = lastObservedAge, swing = MoonshearMotion.SwingCue(cut.Stroke);
         lastObservedAge = cut.Age;
-        if (!released && previous < release && cut.Age >= release && cut.Age <= release + 2)
+        if (!swung && previous < swing && cut.Age >= swing && cut.Age <= swing + 2)
         {
-            released = true;
-            // The swing cue fires with the crescent's first live frame.
-            if (cut.Stroke == MoonshearMotion.Rise) EbonRewardAudio.Play("ShearSwingRise", player.Center, .72f);
-            else if (cut.Stroke == MoonshearMotion.Snip) EbonRewardAudio.Play("ShearSwing", player.Center, .55f, -.2f);
-            else EbonRewardAudio.Play("ShearSwing", player.Center, .7f, cut.Stroke == MoonshearMotion.Wide ? -.08f : 0);
+            swung = true;
+            // A-C: ShearSwing, started a few ticks early so its peak meets the crescent's first live frame, a touch
+            // higher each stroke. D: ShearSwingRise from the start, cresting just before the close's ShearSnip.
+            if (cut.Stroke == MoonshearMotion.Snip) EbonRewardAudio.Play("ShearSwingRise", player.Center, .72f);
+            else EbonRewardAudio.Play("ShearSwing", player.Center, .7f, .04f * cut.Stroke);
         }
         int close = MoonshearMotion.SnipClose;
         if (cut.Stroke != MoonshearMotion.Snip || closed || previous >= close || cut.Age < close || cut.Age > close + 2) return;
@@ -389,7 +401,8 @@ internal sealed class MoonshearCutVisuals : GlobalProjectile
         if (!launched && previous < MoonshearMotion.TravelStart && age >= MoonshearMotion.TravelStart && age <= MoonshearMotion.TravelStart + 2)
         {
             launched = true;
-            EbonRewardAudio.Play("ShearSwing", cut.Start, .6f, .15f);
+            // The racing shears are D's riser played 1.32x quick: its crest lands as the tear opens, 12 ticks on.
+            EbonRewardAudio.Play("ShearSwingRise", cut.Start, .55f, .4f);
         }
         if (!torn && previous < MoonshearMotion.TearStart && age >= MoonshearMotion.TearStart && age <= MoonshearMotion.TearStart + 2)
         {
@@ -410,10 +423,12 @@ internal sealed class MoonshearCutVisuals : GlobalProjectile
         float alpha = 1;
         if (age < MoonshearMotion.TravelStart)
         {
-            // Held at the hand, pointing down the chalk, opening as the line is measured out.
+            // Held at the hand, pointing down the chalk, opening as the line is measured out. The chalk stays where
+            // it was cast, so the shears glide from the live hand onto its start and the launch begins from there.
             if (player.HeldItem.type != ModContent.ItemType<EbonMoonshear>()) return false;
             var point = OboroHandAnchor.Capture(player, facing).At(angle);
-            pivot = player.MountedCenter + new Vector2(point.X, point.Y);
+            pivot = Vector2.Lerp(player.MountedCenter + new Vector2(point.X, point.Y), cut.Start,
+                EbonRewardRules.Smooth(age / MoonshearMotion.TravelStart));
         }
         else
         {
@@ -445,7 +460,8 @@ internal sealed class MoonshearPopVisuals : GlobalProjectile
         Vector2 at = projectile.Center;
         EbonPixelLayer.Add(new MoonshearPopSource(at, projectile.identity * 17 + pop.Step * 5, pop.Last));
         EbonRewardAudio.Note(pop.Step, at, .62f);
-        if (pop.Last) EbonRewardAudio.Play("ShearCut", at, .75f, 0, .02f, 2);
+        // The chord alone: ShearCut already ran at the tear's start and must not be struck twice.
+        if (pop.Last) EbonRewardAudio.Play("HarpChord", at, .7f, 0, .02f, 2);
     }
 }
 

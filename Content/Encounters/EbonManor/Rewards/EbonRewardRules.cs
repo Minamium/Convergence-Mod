@@ -44,7 +44,7 @@ internal static class EbonRewardRules
     internal static int Note(int step) => ((step % NoteCount) + NoteCount) % NoteCount;
 
     // --- Melee: Moonshear ---------------------------------------------------------------
-    internal const float ShearReach = 210, ShearWidth = 26, SnipMultiplier = 2.2f;
+    internal const float ShearReach = 162, ShearWidth = 26, SnipMultiplier = 2.2f;
     internal const int ComboResetTicks = 80, StrokeImmunity = 24;
     internal const int MaxMarks = 5, MarkLife = 360;
     internal const float CutRange = 900, CutWidth = 64, CutMultiplier = 1.5f, PopMultiplier = .8f;

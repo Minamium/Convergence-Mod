@@ -58,30 +58,90 @@ internal static partial class Program
         AssertEqual(false, EbonLastWaltzRules.ValidTick(float.NaN), "not finite");
     }
 
-    [DomainTest("Ebon Last Waltz poses stay inside the sheet and follow cast, pull and parasol")]
+    [DomainTest("Ebon Last Waltz poses stay inside the sheets and follow cast, pull, fling and twirl")]
     private static void EbonLastWaltzPose()
     {
+        AssertEqual(12, EbonLastWaltzRules.FrameCount, "eight Raid cells and four waltz cells");
         for (int idle = 0; idle < 2520; idle += 7)
             foreach (bool moving in new[] { false, true })
-                for (int tick = 0; tick <= EbonLastWaltzRules.Cycle; tick++)
-                {
-                    int frame = EbonLastWaltzRules.Frame(tick, moving, idle);
-                    AssertEqual(true, frame >= 0 && frame < EbonLastWaltzRules.FrameCount, "sheet cell bounds");
-                }
-        AssertEqual(2, EbonLastWaltzRules.Frame(0, false, 0), "idle floats");
-        AssertEqual(3, EbonLastWaltzRules.Frame(0, true, 0), "glide while following");
+                for (int summoned = 0; summoned < 2 * EbonLastWaltzRules.CurtsyTicks; summoned += 9)
+                    for (int tick = 0; tick <= EbonLastWaltzRules.Cycle; tick++)
+                    {
+                        int frame = EbonLastWaltzRules.Frame(tick, moving, idle, summoned);
+                        AssertEqual(true, frame >= 0 && frame < EbonLastWaltzRules.FrameCount, "sheet cell bounds");
+                    }
+        AssertEqual(EbonLastWaltzRules.FrameFloat, EbonLastWaltzRules.Frame(0, false, 0), "idle floats");
+        AssertEqual(EbonLastWaltzRules.FrameGlide, EbonLastWaltzRules.Frame(0, true, 0), "glide while following");
         AssertEqual(1, EbonLastWaltzRules.Frame(0, false, 310), "a sway once in a while");
         for (int piece = 0; piece < EbonLastWaltzRules.Flings; piece++)
         {
-            AssertEqual(4, EbonLastWaltzRules.Frame(EbonLastWaltzRules.BeatTick(piece), false, 0), "lifts on the beat");
-            AssertEqual(5, EbonLastWaltzRules.Frame(EbonLastWaltzRules.YankTick(piece), false, 0), "pulls at the yank");
-            AssertEqual(0, EbonLastWaltzRules.SinceYank(EbonLastWaltzRules.YankTick(piece)), "recoil clock starts at the yank");
+            int beat = EbonLastWaltzRules.BeatTick(piece), yank = EbonLastWaltzRules.YankTick(piece);
+            AssertEqual(EbonLastWaltzRules.FrameCast, EbonLastWaltzRules.Frame(beat, false, 0), "lifts on the beat");
+            AssertEqual(EbonLastWaltzRules.FrameCast, EbonLastWaltzRules.Frame(yank - EbonLastWaltzRules.Windup - 1, false, 0), "holds the piece up");
+            AssertEqual(EbonLastWaltzRules.FramePull, EbonLastWaltzRules.Frame(yank - EbonLastWaltzRules.Windup, false, 0), "draws the thread back");
+            AssertEqual(EbonLastWaltzRules.FramePull, EbonLastWaltzRules.Frame(yank - 1, false, 0), "still drawn back before the yank");
+            AssertEqual(EbonLastWaltzRules.FrameFling, EbonLastWaltzRules.Frame(yank, false, 0), "flings at the yank");
+            AssertEqual(EbonLastWaltzRules.FrameFling, EbonLastWaltzRules.Frame(yank + EbonLastWaltzRules.PullHold - 1, false, 0), "fling is held");
+            AssertEqual(0, EbonLastWaltzRules.SinceYank(yank), "recoil clock starts at the yank");
         }
+        // The last piece's fling runs straight into the pointing cell; the others settle into a float.
+        for (int piece = 0; piece < EbonLastWaltzRules.Flings - 1; piece++)
+            AssertEqual(EbonLastWaltzRules.FrameFloat, EbonLastWaltzRules.Frame(EbonLastWaltzRules.YankTick(piece) + EbonLastWaltzRules.PullHold, false, 0), "floats after the fling");
+        AssertEqual(EbonLastWaltzRules.WaltzStart - EbonLastWaltzRules.Anticipation,
+            EbonLastWaltzRules.YankTick(EbonLastWaltzRules.Flings - 1) + EbonLastWaltzRules.PullHold, "last fling ends as the pointing begins");
         AssertEqual(-1, EbonLastWaltzRules.SinceYank(EbonLastWaltzRules.YankTick(0) - 1), "no recoil before the first yank");
-        AssertEqual(7, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart - 1, false, 0), "points before the parasol opens");
-        AssertEqual(6, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart, false, 0), "parasol opens on the beat");
-        AssertEqual(6, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart + 40, true, 0), "parasol twirl");
-        AssertEqual(2, EbonLastWaltzRules.Frame(EbonLastWaltzRules.Cycle, false, 0), "settles before the next bar");
+        AssertEqual(EbonLastWaltzRules.FrameCommand, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart - 1, false, 0), "points before the parasol opens");
+        AssertEqual(EbonLastWaltzRules.FrameTwirlA, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart, false, 0), "twirl opens on the beat");
+        AssertEqual(EbonLastWaltzRules.FrameTwirlA, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart + 7, true, 0), "first sixteenth still twirl A");
+        AssertEqual(EbonLastWaltzRules.FrameTwirlB, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart + 8, true, 0), "twirl B on the second sixteenth");
+        AssertEqual(EbonLastWaltzRules.FrameTwirlA, EbonLastWaltzRules.Frame(EbonLastWaltzRules.WaltzStart + 15, true, 0), "and back to twirl A");
+        int twirlA = 0, twirlB = 0;
+        for (int tick = EbonLastWaltzRules.WaltzStart; tick < EbonLastWaltzRules.Cycle - EbonLastWaltzRules.Settle; tick++)
+        {
+            int frame = EbonLastWaltzRules.Frame(tick, false, 0);
+            AssertEqual(true, frame == EbonLastWaltzRules.FrameTwirlA || frame == EbonLastWaltzRules.FrameTwirlB, "only the two twirl poses in the waltz");
+            if (frame == EbonLastWaltzRules.FrameTwirlA) twirlA++; else twirlB++;
+        }
+        AssertEqual(true, twirlA > 0 && twirlB > 0 && Math.Abs(twirlA - twirlB) <= 8, "both twirl poses trade turns");
+        AssertEqual(EbonLastWaltzRules.FrameFloat, EbonLastWaltzRules.Frame(EbonLastWaltzRules.Cycle - EbonLastWaltzRules.Settle, false, 0), "settles before the next bar");
+        AssertEqual(EbonLastWaltzRules.FrameFloat, EbonLastWaltzRules.Frame(EbonLastWaltzRules.Cycle, false, 0), "settled at the end of the bar");
+    }
+
+    [DomainTest("Ebon Last Waltz curtsies when summoned, then goes about her business")]
+    private static void EbonLastWaltzCurtsy()
+    {
+        AssertEqual(EbonLastWaltzRules.FrameCurtsy, EbonLastWaltzRules.Frame(0, false, 0, 0), "curtsy on arrival");
+        AssertEqual(EbonLastWaltzRules.FrameCurtsy, EbonLastWaltzRules.Frame(0, true, 0, 10), "the curtsy outranks the glide");
+        AssertEqual(EbonLastWaltzRules.FrameCurtsy, EbonLastWaltzRules.Frame(0, false, 310, EbonLastWaltzRules.CurtsyTicks - 1), "the curtsy outranks the sway");
+        AssertEqual(EbonLastWaltzRules.FrameFloat, EbonLastWaltzRules.Frame(0, false, 0, EbonLastWaltzRules.CurtsyTicks), "then she floats");
+        AssertEqual(EbonLastWaltzRules.FrameGlide, EbonLastWaltzRules.Frame(0, true, 0, EbonLastWaltzRules.CurtsyTicks), "or glides");
+        AssertEqual(EbonLastWaltzRules.FrameCast, EbonLastWaltzRules.Frame(EbonLastWaltzRules.BeatTick(0), false, 0, 0), "a target interrupts the curtsy");
+        AssertEqual(EbonLastWaltzRules.FrameFloat, EbonLastWaltzRules.Frame(0, false, 0), "no summon clock means no curtsy");
+        AssertEqual(true, EbonLastWaltzRules.CurtsyTicks >= 40, "the curtsy outlasts the 40 tick weave-in");
+    }
+
+    [DomainTest("Ebon Last Waltz resumes after the first piece when a flickering target comes back")]
+    private static void EbonLastWaltzResume()
+    {
+        int resume = EbonLastWaltzRules.ResumeTick;
+        AssertEqual(21, resume, "after the first lift and yank");
+        AssertEqual(true, EbonLastWaltzRules.ValidTick(resume), "valid tick");
+        AssertEqual(EbonLastWaltzRules.FrameFloat, EbonLastWaltzRules.Frame(resume, false, 0), "no empty throw is shown");
+        AssertEqual(false, EbonLastWaltzRules.FlingAt(resume, out _), "no piece on the resume tick");
+        for (int tick = 1; tick <= resume; tick++)
+            AssertEqual(false, EbonLastWaltzRules.FlingAt(tick, out int skipped) && skipped != 0, "only the first piece is skipped");
+        AssertEqual(true, EbonLastWaltzRules.BeatTick(1) > resume, "the second piece still lands on its own beat");
+        // From the resume tick one score still flings the other five pieces and opens the parasol once.
+        int flings = 0, waltzes = 0, now = resume;
+        for (int step = 0; step < EbonLastWaltzRules.Cycle - resume; step++)
+        {
+            now = EbonLastWaltzRules.Advance(now, true);
+            if (EbonLastWaltzRules.FlingAt(now, out _)) flings++;
+            if (EbonLastWaltzRules.WaltzAt(now)) waltzes++;
+        }
+        AssertEqual(EbonLastWaltzRules.Flings - 1, flings, "five pieces after a skipped first");
+        AssertEqual(1, waltzes, "the waltz is never skipped");
+        AssertEqual(true, EbonLastWaltzRules.RestartCooldown > 0 && EbonLastWaltzRules.Windup < EbonLastWaltzRules.Lift, "timing constants");
     }
 
     [DomainTest("Ebon Last Waltz spokes unfurl, turn exactly once in beat steps and fold")]
@@ -145,9 +205,12 @@ internal static partial class Program
             lateRearm = EbonLastWaltzRules.SpokeRearm(age);
         }
         AssertEqual(1, late, "one contact in the last beat");
-        // Six spokes at x0.6 per contact on one body: at most 7.2x per waltz plus 3.6x of flings.
+        // Nominal per 230-tick score on one body: six flings (3.6x) plus at most two contacts on each of six spokes
+        // (12 x 0.6 = 7.2x), 10.8x base. REWARDS.md states the two-contact rule this ledger implements.
         AssertEqual(true, MathF.Abs(EbonRewardRules.Spokes * 2 * EbonRewardRules.SpokeMultiplier - 7.2f) < .0001f, "spoke budget");
         AssertEqual(true, MathF.Abs(EbonLastWaltzRules.Flings * EbonRewardRules.FlingMultiplier - 3.6f) < .0001f, "fling budget");
+        AssertEqual(true, MathF.Abs(EbonLastWaltzRules.Flings * EbonRewardRules.FlingMultiplier
+            + EbonRewardRules.Spokes * 2 * EbonRewardRules.SpokeMultiplier - 10.8f) < .0001f, "nominal per score");
     }
 
     [DomainTest("Ebon Last Waltz fling accelerates from the yank speed to the cap")]

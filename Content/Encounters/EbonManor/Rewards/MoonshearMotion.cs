@@ -24,6 +24,12 @@ internal static class MoonshearMotion
     internal static float Multiplier(int stroke) => stroke == Snip ? EbonRewardRules.SnipMultiplier : 1f;
     internal static bool Marks(int stroke) => stroke != Snip;
 
+    // Stroke age at which the swing cue starts. A-C: ShearSwing peaks about 0.07 s (4 ticks) in, so it starts
+    // that long before the release and peaks on the crescent's first live frame. D: ShearSwingRise peaks about
+    // 0.25 s (15 ticks) in, so starting with the stroke it crests just before the close (ShearSnip).
+    internal const int SwingLead = 4;
+    internal static int SwingCue(int stroke) => stroke == Snip ? 1 : Release(stroke) - SwingLead;
+
     // (tick, offset, speed) triples.
     private static readonly float[][] AxisKnots =
     {
@@ -150,53 +156,74 @@ internal sealed class MoonshearCombo
 
 // Owner-side chalk marks keyed by NPC slot with the NPC type that earned them: at most MaxMarks,
 // all expiring MarkLife ticks after the newest; a slot reused by another NPC never inherits them.
+// A Cut Line commits marks (Take) when the tear closes: they leave `count` at once, so nothing refreshes or
+// expires them, but stay `pending` (still drawn) until their pop bursts (Settle) or the cut is cancelled (Refund).
 internal sealed class MoonshearMarks
 {
-    private readonly int[] type, count;
+    private readonly int[] type, count, pending;
     private readonly ulong[] stamp;
 
     internal MoonshearMarks(int capacity)
     {
-        type = new int[capacity]; count = new int[capacity]; stamp = new ulong[capacity];
+        type = new int[capacity]; count = new int[capacity]; pending = new int[capacity]; stamp = new ulong[capacity];
     }
 
     internal int Capacity => count.Length;
+    // Marks still on the NPC, free to be committed by the next cut.
     internal int Count(int index) => (uint)index < (uint)count.Length ? count[index] : 0;
+    // What the stitches show: free marks plus committed ones whose pop has not burst yet.
+    internal int Shown(int index) => (uint)index < (uint)count.Length ? count[index] + pending[index] : 0;
     internal ulong Stamp(int index) => (uint)index < (uint)stamp.Length ? stamp[index] : 0;
 
     internal int Add(int index, int npcType, ulong now)
     {
         if ((uint)index >= (uint)count.Length) return 0;
-        if (count[index] > 0 && type[index] != npcType) count[index] = 0;
+        if (type[index] != npcType) { count[index] = 0; pending[index] = 0; }
         type[index] = npcType;
         count[index] = Math.Min(EbonRewardRules.MaxMarks, count[index] + 1);
         stamp[index] = now;
         return count[index];
     }
 
-    internal int Take(int index, int npcType)
+    // Commit up to `max` marks (the pops a cut can still schedule); the rest stay on the NPC.
+    internal int Take(int index, int npcType, int max = int.MaxValue)
     {
-        if ((uint)index >= (uint)count.Length) return 0;
-        int marks = type[index] == npcType ? count[index] : 0;
-        count[index] = 0;
+        if ((uint)index >= (uint)count.Length || type[index] != npcType) return 0;
+        int marks = Math.Clamp(max, 0, count[index]);
+        count[index] -= marks;
+        pending[index] += marks;
         return marks;
     }
 
-    // liveType < 0: the NPC in this slot is gone or dead.
+    // One committed mark's pop went out (or was dropped with its target gone).
+    internal void Settle(int index, int npcType)
+    {
+        if ((uint)index < (uint)count.Length && type[index] == npcType && pending[index] > 0) pending[index]--;
+    }
+
+    // A cancelled cut hands an unspent committed mark back to the NPC.
+    internal void Refund(int index, int npcType)
+    {
+        if ((uint)index >= (uint)count.Length || type[index] != npcType || pending[index] <= 0) return;
+        pending[index]--;
+        count[index] = Math.Min(EbonRewardRules.MaxMarks, count[index] + 1);
+    }
+
+    // liveType < 0: the NPC in this slot is gone or dead. Committed marks are exempt from the MarkLife timer.
     internal bool Expire(int index, int liveType, ulong now)
     {
-        if (Count(index) == 0) return false;
-        if (liveType >= 0 && liveType == type[index] && now >= stamp[index]
-            && now - stamp[index] <= (ulong)EbonRewardRules.MarkLife) return false;
+        if (Shown(index) == 0) return false;
+        if (liveType < 0 || liveType != type[index]) { count[index] = 0; pending[index] = 0; return true; }
+        if (count[index] == 0 || (now >= stamp[index] && now - stamp[index] <= (ulong)EbonRewardRules.MarkLife)) return false;
         count[index] = 0;
         return true;
     }
 
     internal bool Any()
     {
-        foreach (int marks in count) if (marks > 0) return true;
+        for (int i = 0; i < count.Length; i++) if (count[i] > 0 || pending[i] > 0) return true;
         return false;
     }
 
-    internal void Clear() => Array.Clear(count);
+    internal void Clear() { Array.Clear(count); Array.Clear(pending); }
 }

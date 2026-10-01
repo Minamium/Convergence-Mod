@@ -161,6 +161,63 @@ internal static partial class Program
         AssertEqual(false, marks.Any(), "clear empties the ledger");
     }
 
+    [DomainTest("Moonshear committed marks stay drawn until their pop bursts and return when the cut is cancelled")]
+    private static void MoonshearCommittedMarks()
+    {
+        var marks = new MoonshearMarks(8);
+        for (int i = 0; i < 4; i++) marks.Add(1, 9, (ulong)(10 + i));
+        AssertEqual(3, marks.Take(1, 9, 3), "a cut commits only the pops it can still schedule");
+        AssertEqual(1, marks.Count(1), "the rest stay on the NPC");
+        AssertEqual(4, marks.Shown(1), "committed stitches stay drawn until their pop bursts");
+        AssertEqual(0, marks.Take(1, 8, 3), "another NPC type cannot commit them");
+        AssertEqual(1, marks.Count(1), "a wrong-type take leaves the marks alone");
+        marks.Settle(1, 8);
+        AssertEqual(4, marks.Shown(1), "another NPC type cannot settle them");
+        marks.Settle(1, 9);
+        AssertEqual(3, marks.Shown(1), "a burst stitch disappears");
+        marks.Refund(1, 9); marks.Refund(1, 9);
+        AssertEqual(3, marks.Count(1), "a cancelled cut hands its unspent marks back");
+        marks.Refund(1, 9);
+        AssertEqual(3, marks.Shown(1), "nothing committed is left to refund");
+
+        AssertEqual(3, marks.Take(1, 9), "an uncapped take commits every mark");
+        AssertEqual(0, marks.Count(1), "committed marks leave the free count");
+        AssertEqual(false, marks.Expire(1, 9, 10 + 3 + (ulong)EbonRewardRules.MarkLife + 500), "committed marks outlive the timer until they burst");
+        AssertEqual(true, marks.Any(), "committed marks keep the mark layer registered");
+        marks.Add(1, 9, 2000);
+        AssertEqual(1, marks.Count(1), "a stroke during the pops adds a fresh mark");
+        AssertEqual(4, marks.Shown(1), "fresh and committed marks are both drawn");
+        AssertEqual(true, marks.Expire(1, -1, 2001), "a dead NPC loses its committed marks too");
+        AssertEqual(0, marks.Shown(1), "nothing is left to draw");
+        AssertEqual(false, marks.Any(), "an empty ledger unregisters the layer");
+
+        marks.Add(2, 5, 1); marks.Take(2, 5);
+        AssertEqual(1, marks.Add(2, 6, 2), "a reused slot drops the old NPC's committed marks");
+        marks.Settle(2, 5);
+        AssertEqual(1, marks.Shown(2), "the old NPC's pops cannot touch the new one");
+        for (int i = 0; i < 7; i++) marks.Add(3, 5, 1);
+        marks.Take(3, 5, 5);
+        for (int i = 0; i < 5; i++) marks.Add(3, 5, 2);
+        marks.Refund(3, 5);
+        AssertEqual(EbonRewardRules.MaxMarks, marks.Count(3), "refunds never exceed the mark cap");
+        marks.Clear();
+        AssertEqual(false, marks.Any(), "clear drops committed marks");
+    }
+
+    [DomainTest("Moonshear swing cues lead the live window and D's riser crests at the close")]
+    private static void MoonshearCueClock()
+    {
+        for (int stroke = 0; stroke < MoonshearMotion.Snip; stroke++)
+        {
+            int cue = MoonshearMotion.SwingCue(stroke);
+            AssertEqual(MoonshearMotion.SwingLead, MoonshearMotion.Release(stroke) - cue, "the early-peaking swing starts 4 ticks before the release");
+            AssertEqual(true, cue >= 1 && cue < MoonshearMotion.Release(stroke), "the cue starts inside the stroke, before it goes live");
+        }
+        int rise = MoonshearMotion.SwingCue(MoonshearMotion.Snip), crest = MoonshearMotion.SnipClose - rise;
+        AssertEqual(1, rise, "D's riser starts with the stroke");
+        AssertEqual(true, crest >= 15 && crest <= 20, "the riser (peak about 15 ticks in) crests just before the snip");
+    }
+
     [DomainTest("Moonshear Cut Line runs forecast, travel, tear then pops on its clock")]
     private static void MoonshearCutClock()
     {

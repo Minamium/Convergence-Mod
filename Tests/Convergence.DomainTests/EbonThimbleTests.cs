@@ -197,6 +197,79 @@ internal static partial class Program
                 "neighbouring pieces tumble opposite ways");
     }
 
+    [DomainTest("Ebon Thimble fingertip pulse is phased so that it peaks on each lift")]
+    private static void EbonThimbleBeatPhase()
+    {
+        AssertEqual(0f, EbonThimbleScore.BeatPhase(EbonRewardRules.FirstLift), "the pulse restarts on the first lift");
+        for (int piece = 0; piece < EbonRewardRules.Pieces; piece++)
+        {
+            float phase = EbonThimbleScore.BeatPhase(EbonRewardRules.LiftTick(piece));
+            AssertEqual(true, phase < .03f || phase > .97f, $"lift {piece} lands on the pulse peak, not 6 ticks after it");
+        }
+        AssertEqual(true, MathF.Abs(EbonThimbleScore.BeatPhase(EbonRewardRules.FirstLift + EbonRewardRules.BeatTicks * .5f) - .5f) < .001f,
+            "half a beat later");
+        for (float tick = -60; tick < 4000; tick += 3.7f)
+        {
+            float phase = EbonThimbleScore.BeatPhase(tick);
+            AssertEqual(true, phase >= 0 && phase < 1, "always inside the beat");
+        }
+        AssertEqual(-1, EbonThimbleScore.BeatIndex(EbonRewardRules.FirstLift - 1), "the ticks before the first lift are the beat before it");
+        AssertEqual(0, EbonThimbleScore.BeatIndex(EbonRewardRules.FirstLift), "the first lift starts beat 0");
+        AssertEqual(1, EbonThimbleScore.BeatIndex(EbonRewardRules.FirstLift + EbonRewardRules.BeatTicks + .01f), "one beat later");
+    }
+
+    [DomainTest("Ebon Thimble resends the aim for a slow cursor sweep")]
+    private static void EbonThimbleAimResend()
+    {
+        // One degree per tick is far below the per-tick threshold, so only a comparison with the last sent aim adds up.
+        AssertEqual(false, EbonThimbleScore.AimDue(new Vector2(MathF.Cos(MathF.PI / 180), MathF.Sin(MathF.PI / 180)), Vector2.UnitX, 1),
+            "one degree alone is not worth a packet");
+        AssertEqual(true, EbonThimbleScore.AimDue(Vector2.UnitX, Vector2.UnitX, EbonThimbleScore.AimResendTicks), "a steady aim is still resent four times a second");
+        Vector2 sent = Vector2.Zero;
+        int resends = 0;
+        float worst = 0;
+        for (int age = 0; age < 240; age++)
+        {
+            float angle = age * MathF.PI / 180f;
+            var wanted = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+            if (EbonThimbleScore.AimDue(wanted, sent, age)) { sent = wanted; resends++; }
+            worst = MathF.Max(worst, MathF.Acos(Math.Clamp(Vector2.Dot(wanted, Vector2.Normalize(sent)), -1, 1)));
+        }
+        AssertEqual(true, worst < 7f * MathF.PI / 180f, "peers never see an aim more than seven degrees stale");
+        AssertEqual(true, resends >= 240 / EbonThimbleScore.AimResendTicks, "at least four resends a second");
+        AssertEqual(true, resends < 60, "but not a packet every tick");
+    }
+
+    [DomainTest("Ebon Thimble tap shorter than the first lift still raises the piece it paid for")]
+    private static void EbonThimbleTap()
+    {
+        for (int age = 0; age < EbonRewardRules.FirstLift; age++)
+            AssertEqual(true, !EbonThimbleScore.LiftDue(age, 0) && EbonThimbleScore.OwesFirstPiece(0, EbonThimbleScore.Channeling),
+                "a release before the first lift owes the first piece");
+        AssertEqual(false, EbonThimbleScore.OwesFirstPiece(1, EbonThimbleScore.Channeling), "a raised piece is already paid for");
+        AssertEqual(false, EbonThimbleScore.OwesFirstPiece(0, EbonThimbleScore.Spent), "a failed spawn is not retried");
+        AssertEqual(false, EbonThimbleScore.OwesFirstPiece(0, EbonThimbleScore.Releasing), "a volley in progress owes nothing");
+    }
+
+    [DomainTest("Ebon Thimble hangs furniture from the measured eyelet and faces the piano keyboard at the owner")]
+    private static void EbonThimbleArtAnchors()
+    {
+        AssertEqual(EbonRewardRules.Pieces, EbonThimbleScore.FurnitureEyelets.Length, "one eyelet per piece of furniture");
+        for (int i = 0; i < EbonThimbleScore.FurnitureEyelets.Length; i++)
+        {
+            Vector2 eyelet = EbonThimbleScore.FurnitureEyelet(i);
+            AssertEqual(true, eyelet.X >= 23.5f && eyelet.X <= 24f, $"eyelet {i} is on the centre line of its 48x64 cell");
+            AssertEqual(true, eyelet.Y >= 12f && eyelet.Y <= 22f, $"eyelet {i} is on top of its prop, above the cell centre");
+        }
+        AssertEqual(EbonThimbleScore.FurnitureEyelet(7), EbonThimbleScore.FurnitureEyelet(-1), "negative indices wrap");
+        AssertEqual(EbonThimbleScore.FurnitureEyelet(0), EbonThimbleScore.FurnitureEyelet(8), "indices wrap");
+        AssertEqual(new Vector2(65.5f, 0f), EbonThimbleScore.PianoEyeletFor(76, false), "the ring on the tip of the lid");
+        AssertEqual(new Vector2(10.5f, 0f), EbonThimbleScore.PianoEyeletFor(76, true), "and on the other side when mirrored");
+        AssertEqual(true, EbonThimbleScore.PianoMirrored(1000, 1200), "an owner on the right sees the keyboard end on the right");
+        AssertEqual(false, EbonThimbleScore.PianoMirrored(1000, 800), "an owner on the left keeps the art as drawn");
+        AssertEqual(false, EbonThimbleScore.PianoMirrored(1000, 1000), "directly below keeps the art as drawn");
+    }
+
     [DomainTest("Ebon Thimble rejects malformed replicated state")]
     private static void EbonThimbleStateValidation()
     {

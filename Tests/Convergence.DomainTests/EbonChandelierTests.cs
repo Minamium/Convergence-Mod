@@ -105,7 +105,7 @@ internal static partial class Program
         AssertEqual(true, EbonChandelierRules.ReelStep(EbonRewardRules.ReweaveTicks) < EbonChandelierRules.ReelStep(EbonRewardRules.ReweaveTicks / 2), "eases out");
 
         // Candles relight one by one, in order, and all are lit before the reweave ends.
-        foreach (int count in new[] { 3, 4, 5, 6 })
+        foreach (int count in new[] { 2, 3, 4, 5, 6 }) // the final small body has two candles, the large one four
         {
             float previousStart = -1;
             for (int candle = 0; candle < count; candle++)
@@ -172,5 +172,102 @@ internal static partial class Program
         // The corner is measured diagonally, not along an axis.
         AssertEqual(false, EbonChandelierRules.CircleTouchesBox(new Vector2(220, 260), 110, min, max), "corner is farther than the radius");
         AssertEqual(true, EbonChandelierRules.CircleTouchesBox(new Vector2(200, 240), 110, min, max), "corner within the radius");
+    }
+
+    [DomainTest("Ebon chandelier order follows summon order, not the projectile slot, and a newcomer never reshuffles the row")]
+    private static void EbonChandelierSummonOrder()
+    {
+        // The owner's stamp is positive and strictly increasing with the update count.
+        int last = 0;
+        for (ulong tick = 0; tick < 5000; tick += 7)
+        {
+            int stamp = EbonChandelierRules.SummonOrder(tick);
+            AssertEqual(true, stamp > last, "a later summon gets a later stamp");
+            last = stamp;
+        }
+        AssertEqual(1, EbonChandelierRules.SummonOrder(0), "the first update stamps 1");
+        AssertEqual((int)EbonChandelierRules.SummonOrderWrap, EbonChandelierRules.SummonOrder((ulong)(EbonChandelierRules.SummonOrderWrap - 1)), "the last stamp");
+        AssertEqual(1, EbonChandelierRules.SummonOrder((ulong)EbonChandelierRules.SummonOrderWrap), "wraps to the first");
+
+        // Slots 900, 12 and 400 were summoned in that order: the slot number does not decide the rank.
+        long first = EbonChandelierRules.RosterKey(100, 900), second = EbonChandelierRules.RosterKey(160, 12), third = EbonChandelierRules.RosterKey(190, 400);
+        AssertEqual(true, first < second && second < third, "summon order, not slot order");
+        AssertEqual(true, EbonChandelierRules.RosterKey(100, 3) < EbonChandelierRules.RosterKey(100, 4), "the slot only breaks a tie");
+        // A chandelier whose stamp has not arrived yet sorts after every stamped one, even from a lower slot,
+        // and keeps that place once its stamp (the newest) arrives, so nothing already out is renumbered.
+        long unstamped = EbonChandelierRules.RosterKey(0, 1);
+        AssertEqual(true, unstamped > third && unstamped > EbonChandelierRules.RosterKey((int)EbonChandelierRules.SummonOrderWrap, 1023), "unstamped sorts last");
+        AssertEqual(true, EbonChandelierRules.RosterKey(250, 1) > third, "the newest stamp is also last");
+
+        // Ranks as the minion computes them: how many of the owner's keys are smaller.
+        long[] row = { third, first, second, EbonChandelierRules.RosterKey(250, 7) };
+        int[] expected = { 2, 0, 1, 3 };
+        for (int i = 0; i < row.Length; i++)
+        {
+            int rank = 0;
+            foreach (long key in row) if (key < row[i]) rank++;
+            AssertEqual(expected[i], rank, "rank of chandelier " + i);
+        }
+        // Removing the oldest renumbers the later ones down by one; the order among them is unchanged.
+        long[] shorter = { third, second, EbonChandelierRules.RosterKey(250, 7) };
+        int[] after = { 1, 0, 2 };
+        for (int i = 0; i < shorter.Length; i++)
+        {
+            int rank = 0;
+            foreach (long key in shorter) if (key < shorter[i]) rank++;
+            AssertEqual(after[i], rank, "rank after the oldest leaves, chandelier " + i);
+        }
+    }
+
+    [DomainTest("Ebon chandelier hover row spreads the cascade across the target in drop order and keeps every fall on the target")]
+    private static void EbonChandelierHoverRow()
+    {
+        const float reach = 60;
+        for (int count = 1; count <= 16; count++)
+        {
+            var slots = new System.Collections.Generic.HashSet<int>();
+            for (int ordinal = 0; ordinal < count; ordinal++)
+            {
+                int slot = EbonChandelierRules.HoverSlot(ordinal, count);
+                AssertEqual(true, slot >= 0 && slot < count, "inside the row");
+                AssertEqual(true, slots.Add(slot), "no two chandeliers hang at the same place");
+                AssertEqual(true, MathF.Abs(EbonChandelierRules.HoverSpread(slot, count, reach)) < reach, "inside the reach");
+                // Chandeliers that share a beat (ordinal and ordinal + 4) hang side by side.
+                if (ordinal >= EbonRewardRules.CycleBeats)
+                    AssertEqual(slot, EbonChandelierRules.HoverSlot(ordinal - EbonRewardRules.CycleBeats, count) + 1, "a repeated beat is the next slot");
+                // The first cycle sweeps one way: later beats are farther along the row.
+                if (ordinal > 0 && ordinal < EbonRewardRules.CycleBeats)
+                    AssertEqual(true, slot > EbonChandelierRules.HoverSlot(ordinal - 1, count), "the cascade sweeps across the target");
+            }
+
+            float sum = 0;
+            for (int slot = 0; slot < count; slot++)
+            {
+                sum += EbonChandelierRules.HoverSpread(slot, count, reach);
+                if (slot > 0)
+                {
+                    float pitch = EbonChandelierRules.HoverSpread(slot, count, reach) - EbonChandelierRules.HoverSpread(slot - 1, count, reach);
+                    AssertEqual(true, MathF.Abs(pitch - 2 * reach / count) < .001f, "equal shares");
+                }
+                // Neighbouring slots hang at different heights, except for a lone chandelier, which keeps the spec height.
+                if (count > 1) AssertEqual(true, EbonChandelierRules.HoverRaise(slot, count) != EbonChandelierRules.HoverRaise(slot + 1, count), "neighbours alternate in height");
+            }
+            AssertEqual(true, MathF.Abs(sum) < .01f, "centred on the target");
+        }
+        AssertEqual(0f, EbonChandelierRules.HoverSpread(EbonChandelierRules.HoverSlot(0, 1), 1, reach), "a lone chandelier hangs straight above");
+        AssertEqual(0f, EbonChandelierRules.HoverRaise(1, 1), "and at the spec height");
+
+        // Four chandeliers fall left to right in drop order: 0 at the left edge of the row, 3 at the right.
+        AssertEqual(true, EbonChandelierRules.HoverSpread(EbonChandelierRules.HoverSlot(0, 4), 4, reach) < 0
+            && EbonChandelierRules.HoverSpread(EbonChandelierRules.HoverSlot(3, 4), 4, reach) > 0, "sweeps from left to right");
+
+        // A fall is straight and its 40 px foot must still overlap the hitbox: the row never reaches farther
+        // than the foot's half-width beyond the target's edge, and is bounded for huge targets.
+        for (float width = 0; width <= 600; width += 5)
+        {
+            float row = EbonChandelierRules.HoverReach(width);
+            AssertEqual(true, row <= width * .5f + 20 && row >= EbonChandelierRules.MinSpread && row <= EbonChandelierRules.MaxSpread, "reach for width " + width);
+        }
+        AssertEqual(EbonChandelierRules.MaxSpread, EbonChandelierRules.HoverReach(5000), "a huge boss does not spread the row without bound");
     }
 }

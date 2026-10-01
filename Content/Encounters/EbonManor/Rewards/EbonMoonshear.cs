@@ -302,7 +302,8 @@ public sealed class MoonshearCutLine : ModProjectile
         };
     }
 
-    // Order the touched NPCs along the chalk, then queue one pop per mark they carried.
+    // Order the touched NPCs along the chalk, then queue one pop per mark they carried. Marks are committed
+    // only for pops that fit (MaxPops) and stay drawn until their pop bursts; the rest remain on their NPCs.
     private void Schedule(Player owner)
     {
         for (int i = 1; i < touchedCount; i++)
@@ -315,16 +316,18 @@ public sealed class MoonshearCutLine : ModProjectile
         var state = owner.GetModPlayer<MoonshearPlayer>();
         for (int i = 0; i < touchedCount; i++)
         {
-            int marks = state.TakeMarks(touched[i].Root, touched[i].RootType);
-            for (int m = 0; m < marks && popCount < pops.Length; m++) pops[popCount++] = touched[i];
+            int marks = state.TakeMarks(touched[i].Root, touched[i].RootType, pops.Length - popCount);
+            for (int m = 0; m < marks; m++) pops[popCount++] = touched[i];
         }
     }
 
     private void Pop()
     {
+        var state = Main.player[Projectile.owner].GetModPlayer<MoonshearPlayer>();
         while (popNext < popCount)
         {
             Touch entry = pops[popNext++];
+            state.SettleMark(entry.Root, entry.RootType);
             if (!Target(entry, out NPC? npc)) continue;
             bool last = true;
             for (int i = popNext; i < popCount && last; i++) last = !Target(pops[i], out _);
@@ -336,6 +339,14 @@ public sealed class MoonshearCutLine : ModProjectile
             if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].netUpdate = true;
             return;
         }
+    }
+
+    // A cut cancelled before its last pop (item change, Down, death) hands the unspent marks back.
+    public override void OnKill(int timeLeft)
+    {
+        if (Projectile.owner != Main.myPlayer || popNext >= popCount) return;
+        var state = Main.player[Projectile.owner].GetModPlayer<MoonshearPlayer>();
+        for (; popNext < popCount; popNext++) state.RefundMark(pops[popNext].Root, pops[popNext].RootType);
     }
 
     // The touched segment, or its body's root when that segment is gone.
@@ -424,7 +435,10 @@ public sealed class MoonshearPlayer : ModPlayer
         int root = MoonshearStroke.Root(target);
         return (marks ??= new MoonshearMarks(Main.maxNPCs)).Add(root, Main.npc[root].type, Main.GameUpdateCount);
     }
-    internal int TakeMarks(int root, int type) => marks?.Take(root, type) ?? 0;
+    // A cut commits at most `max` of the NPC's marks; Settle/Refund then resolve each when its pop goes out or is cancelled.
+    internal int TakeMarks(int root, int type, int max) => marks?.Take(root, type, max) ?? 0;
+    internal void SettleMark(int root, int type) => marks?.Settle(root, type);
+    internal void RefundMark(int root, int type) => marks?.Refund(root, type);
 
     public override void PostUpdate()
     {
@@ -433,7 +447,7 @@ public sealed class MoonshearPlayer : ModPlayer
         ulong now = Main.GameUpdateCount;
         for (int i = 0; i < marks.Capacity; i++)
         {
-            if (marks.Count(i) == 0) continue;
+            if (marks.Shown(i) == 0) continue;
             NPC npc = Main.npc[i];
             marks.Expire(i, npc.active && npc.life > 0 ? npc.type : -1, now);
         }

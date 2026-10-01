@@ -29,7 +29,7 @@ public sealed class EbonChandelierPole : ModItem
     public override void SetDefaults()
     {
         EbonRewardItems.Defaults(Item, EbonRewardKind.Summon);
-        Item.width = Item.height = 40;
+        Item.width = Item.height = 32; // the 62x64 icon is a 2x drawing of a 31x32 pole
         Item.mana = 10;
         Item.shootSpeed = 1;
         Item.useStyle = ItemUseStyleID.Swing;
@@ -56,7 +56,7 @@ public sealed class EbonChandelierPole : ModItem
 
 public sealed class EbonChandelierBuff : ModBuff
 {
-    // Final icon is the ER07 buff cell; until it is delivered a vanilla minion buff icon stands in.
+    // The ER07 buff cell (EbonChandelierBuff.png, 16x16 drawn at 2x); a vanilla minion buff icon stands in if it is missing.
     public override string Texture => ModContent.HasAsset(EbonRewardItems.TextureRoot + nameof(EbonChandelierBuff))
         ? EbonRewardItems.TextureRoot + nameof(EbonChandelierBuff)
         : "Terraria/Images/Buff_" + BuffID.StardustDragonMinion;
@@ -75,11 +75,16 @@ public sealed class EbonChandelierBuff : ModBuff
 // The owner decides every transition except the two that are deterministic from local data and are also
 // run by peers so a falling chandelier never overshoots its target while a packet is in flight:
 // Fall -> Reweave (impact) and Reweave -> Seek/Idle (timer). Only the owner spawns the damage child.
+// The owner also stamps each chandelier once with its summon order and size; both ride the extra AI.
 public sealed class EbonChandelierMinion : ModProjectile
 {
-    private int wait = -1, dropIndex = -1, serial, fallSerial = -1;
+    // One pass over the projectile array per update serves every chandelier of every owner.
+    private static readonly List<(int Owner, long Key)> roll = new();
+    private static ulong rollTick = ulong.MaxValue;
+
+    private int wait = -1, dropIndex = -1, serial, fallSerial = -1, order;
     private long dropAt = -1;
-    private bool ignoreTiles, entered;
+    private bool ignoreTiles, entered, small;
     private Vector2 impact;
 
     internal ChandelierState State => (ChandelierState)Math.Clamp((int)Projectile.ai[0], 0, (int)ChandelierState.Reweave);
@@ -90,9 +95,14 @@ public sealed class EbonChandelierMinion : ModProjectile
     internal int Wait => wait;
     // Lowest point of the last fall: the shatter centre.
     internal Vector2 Impact => impact;
-    // Stable order among the owner's chandeliers (Projectile.identity), and how many there are.
+    // Rank among the owner's chandeliers by summon order (the beat it owns, the slot in the row), and how many
+    // there are. Only a chandelier leaving the row renumbers the ones summoned after it.
     internal int Ordinal { get; private set; }
     internal int Count { get; private set; } = 1;
+    // The small body, chosen once when it is summoned (every second chandelier) so it never changes shape.
+    internal bool Small => small;
+    // The owner has stamped the summon order and size; a peer only learns them from the packet after the spawn.
+    internal bool Stamped => order > 0;
 
     public override string Texture => EbonRewardItems.Icon(nameof(EbonChandelierMinion), ItemID.StardustDragonStaff);
 
@@ -136,6 +146,13 @@ public sealed class EbonChandelierMinion : ModProjectile
         Projectile.ai[2]++;
         if (wait > 0) wait--;
         Roster();
+        if (authority && order == 0)
+        {
+            // First update on the owner: fix the place in the summon order and the size once; peers learn both from the packet.
+            order = EbonChandelierRules.SummonOrder(Main.GameUpdateCount);
+            small = Count % 2 == 0; // Count includes this one, so the second, fourth... are small
+            Projectile.netUpdate = true;
+        }
         bool usable = EbonRewardItems.Usable(owner) && !owner.noItems && !owner.CCed;
         NPC? target = Acquire(owner, usable);
         ChandelierState state = State;
@@ -302,14 +319,26 @@ public sealed class EbonChandelierMinion : ModProjectile
         return chosen;
     }
 
+    // Rank and count among this owner's chandeliers. The projectile array is scanned once per update for all of
+    // them; each chandelier then ranks itself in the (short) list by summon order, ties broken by slot.
     private void Roster()
     {
+        ulong now = Main.GameUpdateCount;
+        if (rollTick != now)
+        {
+            rollTick = now;
+            roll.Clear();
+            foreach (Projectile p in Main.ActiveProjectiles)
+                if (p.type == Type && p.ModProjectile is EbonChandelierMinion other)
+                    roll.Add((p.owner, EbonChandelierRules.RosterKey(other.order, p.identity)));
+        }
+        long own = EbonChandelierRules.RosterKey(order, Projectile.identity);
         Ordinal = 0; Count = 0;
-        foreach (Projectile p in Main.ActiveProjectiles)
-            if (p.owner == Projectile.owner && p.type == Type)
+        foreach ((int owner, long key) in roll)
+            if (owner == Projectile.owner)
             {
                 Count++;
-                if (p.identity < Projectile.identity) Ordinal++;
+                if (key < own) Ordinal++;
             }
         Count = Math.Max(Count, 1);
     }
@@ -321,15 +350,22 @@ public sealed class EbonChandelierMinion : ModProjectile
     }
 
     // EbonRewardRules.HoverHeight above the target, leading its velocity by one fall; lowered under a ceiling
-    // so the body never hangs inside a tile.
+    // so the body never hangs inside a tile. With several chandeliers each hangs at its own slot of a row
+    // across the target (and odd slots a little higher), so the cascade is a sweep of separate bodies, not
+    // one stack; the row stays within what a straight fall still lands on.
     private Vector2 Hover(NPC target)
     {
-        float room = Clearance(new Vector2(target.Center.X, target.Top.Y), EbonRewardRules.HoverHeight + 80)
-            + target.height * .5f - 44f;
-        float lift = Math.Clamp(room, EbonChandelierRules.MinHover, EbonRewardRules.HoverHeight);
+        int slot = EbonChandelierRules.HoverSlot(Ordinal, Count);
+        float raise = EbonChandelierRules.HoverRaise(slot, Count);
+        float room = Clearance(new Vector2(target.Center.X, target.Top.Y),
+                EbonRewardRules.HoverHeight + EbonChandelierRules.HoverStagger + EbonChandelierRules.BodyRise + 40)
+            + target.height * .5f - EbonChandelierRules.BodyRise;
+        float lift = Math.Clamp(room - (Count > 1 ? EbonChandelierRules.HoverStagger : 0f), EbonChandelierRules.MinHover, EbonRewardRules.HoverHeight)
+            + raise;
         int fall = EbonChandelierRules.FallTicks(lift - EbonChandelierRules.BodyHalfHeight - target.height * .5f);
         var lead = EbonChandelierRules.Lead(new System.Numerics.Vector2(target.velocity.X, target.velocity.Y), fall);
-        return target.Center + new Vector2(lead.X, lead.Y) - new Vector2(0, lift);
+        float spread = EbonChandelierRules.HoverSpread(slot, Count, EbonChandelierRules.HoverReach(target.width));
+        return target.Center + new Vector2(lead.X + spread, lead.Y) - new Vector2(0, lift);
     }
 
     // Free air above `from`, in 16 px steps up to `limit`. Platforms do not count as a ceiling.
@@ -372,21 +408,26 @@ public sealed class EbonChandelierMinion : ModProjectile
         if (!float.IsFinite(Projectile.ai[2]) || Projectile.ai[2] < 0 || Projectile.ai[2] > 100000) Projectile.ai[2] = 0;
     }
 
-    // Drop count, countdown and shatter centre ride the ordinary projectile sync (netImportant + netUpdate).
+    // Drop count, countdown, shatter centre, summon order and size ride the ordinary projectile sync (netImportant + netUpdate).
     public override void SendExtraAI(BinaryWriter writer)
     {
         writer.Write(serial);
         writer.Write((short)Math.Clamp(wait, -1, 300));
         writer.Write(impact.X); writer.Write(impact.Y);
+        writer.Write(order); writer.Write(small);
     }
 
     public override void ReceiveExtraAI(BinaryReader reader)
     {
         int count = reader.ReadInt32(), countdown = reader.ReadInt16();
         float x = reader.ReadSingle(), y = reader.ReadSingle();
+        int stamp = reader.ReadInt32();
+        bool tiny = reader.ReadBoolean();
         if (count < serial || countdown < -1 || countdown > 300
             || !float.IsFinite(x) || !float.IsFinite(y) || Math.Abs(x) > 1_000_000 || Math.Abs(y) > 1_000_000) return;
         serial = count; wait = countdown; impact = new Vector2(x, y);
+        // The stamp is written once by the owner (0 = not stamped yet) and never changes after that.
+        if (stamp > 0 && stamp <= EbonChandelierRules.SummonOrderWrap) { order = stamp; small = tiny; }
     }
 }
 

@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Add the **Waltz of the Ebon Manor rewards**: winning drops an Ebon Hatbox per member that opens to one of five pixel-art weapons — Moonshear (a four-stroke giant-shears kata whose marks burst along a chalk cut line), Moonloom Harp (needle arrows leave strings you pluck in a glissando), Ebon Thimble (furniture lifted on the beat and hurled, with a grand piano finale), Ballroom Chandelier (minions that fall in a beat cascade) and Severing Silk (spools string a web that a stealth strike severs at once). All five craft The Last Waltz, a 10-slot companion of Noirette. Balance is untuned.
+
 - Add **Waltz of the Ebon Manor** (first version): Noirette, mistress of a moonlit manor, dances its furniture on silk threads in three acts synced to EigHt's *AutoMatador* — thrown furniture, falling chandeliers, loom strings, giant shears, a parasol waltz that steps on the beat, a severing web of irregular strands from Act II, and Binding/Torn Stitch calls. The entrance plays the song's whole intro and its landmarks; warnings are silk gauze rather than dashed lines. Crafted **Black Invitation** summons it on the shared pedestal for 1–8 players with the shared instant revival. Includes painted hall/props, pixel boss art, bar-exact music edits, 22 original cues and Luminance materials. Balance is untuned and hits are capped at 1 for rehearsal; matching protocol76 peers are required.
 
 - Redraw Ghost Samurai's forecasts, cuts, residue and wisps in Soboro's pixel-art style, add a display-only step into each boss swing, and replace the boss's borrowed vanilla sounds with nine layered CC0 cues. Attack shapes, timings, damage and protocol75 are unchanged.

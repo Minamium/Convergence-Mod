@@ -12,7 +12,7 @@ script's scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak
 at most -1 dBTP after the Vorbis round trip. Deterministic: cue seeds derive from
 the cue name and the Ogg stream serials are pinned. Requires numpy, scipy and
 soundfile (local audio tools, not CI).
-Run: py -3.12 tools/generate_ebon_reward_sfx.py --sources <cc0 store> [--preview DIR] [--attribution-section FILE]
+Run: py -3.12 tools/generate_ebon_reward_sfx.py --sources <cc0 store> [--only CUE,...] [--preview DIR] [--attribution-section FILE]
 """
 import argparse
 import hashlib
@@ -307,29 +307,33 @@ def note_builder(i):
     return build
 
 
+HATBOX_POP = 10 * TICK  # EbonHatboxVisuals.ReleaseTick: the lid leaves the box 10 ticks (0.167 s) after the open
+HATBOX_CHORD = HATBOX_POP + 0.155  # lands in the burst (ticks 12-40) and the star/ring, while the box is still shown (to tick 58)
+
+
 def cue_hatbox_open(s, rng):
-    mix = seconds(2.8)
-    # The ribbon bow unties and its two streamers fly off to either side.
-    lay(mix, s, "cloth1", 0.08, 0.50, 0.00, -6, hp_=400, lp_=6000, fade_out=0.08)
-    lay(mix, s, "cloth4", 0.02, 0.30, 0.05, -10, hp_=1500, side=-0.5)
-    lay(mix, s, "swoosh", 0.03, 0.24, 0.18, -8, rate=1.15, hp_=600, side=-0.8, fade_out=0.08)
-    lay(mix, s, "swoosh", 0.50, 0.72, 0.24, -9, rate=1.05, hp_=600, side=0.8, fade_out=0.08)
-    # The lid unlatches, pops and spins away.
-    lay(mix, s, "metal_latch", 0.03, 0.20, 0.30, -4, hp_=900)
-    place(mix, thump(150, 62, 0.28, rng), 0.31, -13)
-    lay(mix, s, "air_cut", 0.05, 0.40, 0.32, -9, rate=1.3, hp_=500, orbit_turns=1.5, fade_out=0.1)
-    # A rising run of silk plucks (B3..D6) lands on a B minor chord.
+    mix = seconds(2.4)
+    # The ribbon bow unties over ticks 0-10 and its two streamers fly off to either side as the lid goes.
+    lay(mix, s, "cloth1", 0.08, 0.40, 0.00, -6, hp_=400, lp_=6000, fade_out=0.08)
+    lay(mix, s, "cloth4", 0.02, 0.30, 0.04, -10, hp_=1500, side=-0.5)
+    lay(mix, s, "swoosh", 0.03, 0.24, HATBOX_POP - 0.01, -8, rate=1.15, hp_=600, side=-0.8, fade_out=0.08)
+    lay(mix, s, "swoosh", 0.50, 0.72, HATBOX_POP + 0.03, -9, rate=1.05, hp_=600, side=0.8, fade_out=0.08)
+    # The lid unlatches, pops and spins away: the click and the thump land on the release tick.
+    lay(mix, s, "metal_latch", 0.03, 0.20, HATBOX_POP - 0.012, -3, hp_=900)
+    place(mix, thump(150, 62, 0.28, rng), HATBOX_POP, -10)
+    lay(mix, s, "air_cut", 0.05, 0.40, HATBOX_POP + 0.01, -9, rate=1.3, hp_=500, orbit_turns=1.5, fade_out=0.1)
+    # A quick rising run of silk plucks (B3..D6) climbs out of the box with the lid and lands on a B minor chord.
     for i, (name, octave) in enumerate(NOTES):
-        pl(mix, hz(name, octave), 0.8, rng, 0.40 + i * 0.062, -15 + 0.9 * i, -0.55 + 1.1 * i / 7,
+        pl(mix, hz(name, octave), 0.8, rng, HATBOX_POP + 0.008 + i * 0.019, -15 + 0.9 * i, -0.55 + 1.1 * i / 7,
            bright=0.88, sustain=0.995, pick=0.12)
     strum(mix, [hz(n, o) for n, o in (("B", 3), ("F#", 4), ("B", 4), ("D", 5), ("F#", 5), ("B", 5))], 2.0, rng,
-          0.90, -6.5, spread=0.009, bright=0.9, sustain=0.9984, pick=0.1)
-    place(mix, chime(hz("B", 6), 1.4, rng, decay=0.7, partials=SPARKLE), 0.92, -14)
-    # Lace and moonlight motes.
+          HATBOX_CHORD, -6.5, spread=0.009, bright=0.9, sustain=0.9984, pick=0.1)
+    place(mix, chime(hz("B", 6), 1.4, rng, decay=0.7, partials=SPARKLE), HATBOX_CHORD + 0.01, -14)
+    # Lace and moonlight motes twinkle through the burst and the settling box (ticks 12-58 = 0.2-0.97 s).
     for _ in range(12):
         f = hz(*(("F#", 6), ("B", 6), ("D", 7), ("F#", 7))[int(rng.integers(0, 4))])
-        place(mix, chime(f, 0.9, rng, decay=0.35, partials=SPARKLE), 0.55 + rng.uniform(0, 1.6), -25 + rng.uniform(-3, 3))
-    return room(mix, 0.3, 2.7, 0.7)
+        place(mix, chime(f, 0.9, rng, decay=0.35, partials=SPARKLE), HATBOX_CHORD + 0.04 + rng.uniform(0, 0.6), -25 + rng.uniform(-3, 3))
+    return room(mix, 0.3, 2.3, 0.7)
 
 
 def cue_shear_swing(s, rng):
@@ -566,7 +570,7 @@ def cue_waltz_open(s, rng):
 
 
 # name: (builder, short-term loudness target LUFS (generate_ebon_sfx scale), weapon group, audition description)
-CUES = {"HatboxOpen": (cue_hatbox_open, -17, "Hatbox", "リボンがほどけて流れ、蓋が跳ねて回り、B3からD6への撥弦ランがBマイナーの和音に着地する。")}
+CUES = {"HatboxOpen": (cue_hatbox_open, -17, "Hatbox", "リボンがほどけて流れ、約0.17 s（演出の開放 tick 10）に蓋が跳ねて回り、続けてB3からD6への撥弦ランが約0.32 s でBマイナーの和音に着地する。")}
 CUES.update({f"Note{i}": (note_builder(i), -20, "Notes", f"絹の撥弦 {NOTES[i][0]}{NOTES[i][1]}。ヒットを重ねるたびに1段ずつ上る。") for i in range(8)})
 CUES.update({
     "ShearSwing": (cue_shear_swing, -17, "Moonshear", "A/B/C の振り。短く、早めにピークが来る。糸の擦れとブレードの輝き。"),
@@ -821,10 +825,16 @@ def main():
     parser.add_argument("--preview", type=Path, help="write WAV previews, combos, report and index.html here")
     parser.add_argument("--output", type=Path, default=OUTPUT_DIR, help="Ogg output folder")
     parser.add_argument("--attribution-section", type=Path, help="write the Assets/ATTRIBUTION.md section here")
+    parser.add_argument("--only", help="comma-separated cue names: render just these (each cue is seeded by its own name, so the "
+                                       "bytes equal a full run); the combos and the audition page need every cue and are skipped")
     args = parser.parse_args()
+    names = [n.strip() for n in args.only.split(",")] if args.only else list(CUES)
+    unknown = [n for n in names if n not in CUES]
+    if unknown:
+        parser.error("unknown cue(s): " + ", ".join(unknown))
     store = Store(args.sources, ATTRIBUTION.read_text(encoding="utf-8"))
     samples, report = {}, {}
-    for name in CUES:
+    for name in names:
         samples[name], used = render_cue(name, store, args.output)
         report[name] = analyse(name, samples[name], args.output / f"{name}.ogg", used)
     record = {"recipe": "tools/" + Path(__file__).name, "recipe_sha256": sha256(Path(__file__).read_bytes()),
@@ -836,10 +846,11 @@ def main():
         args.preview.mkdir(parents=True, exist_ok=True)
         for name, x in samples.items():
             sf.write(str(args.preview / f"{name}.wav"), x.astype(np.float32), RATE, subtype="PCM_16")
-        mixes = combos(samples)
-        for name, x in mixes.items():
-            sf.write(str(args.preview / f"{name}.wav"), x.astype(np.float32), RATE, subtype="PCM_16")
-        page(args.preview, report, list(mixes))
+        if not args.only:
+            mixes = combos(samples)
+            for name, x in mixes.items():
+                sf.write(str(args.preview / f"{name}.wav"), x.astype(np.float32), RATE, subtype="PCM_16")
+            page(args.preview, report, list(mixes))
         (args.preview / "ebon-reward-sfx-report.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n")
     if args.attribution_section:
         args.attribution_section.write_text(attribution_section(report, store.hashes), encoding="utf-8", newline="\n")

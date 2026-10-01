@@ -15,17 +15,24 @@ namespace Convergence.Client.Encounters.EbonManor.Rewards;
 
 // Presentation of Severing Silk (REWARDS.md "Rogue"). Client only: it reads the projectiles' replicated state
 // and never decides a hit. Silk, knots, the cut, the placeholder spool/scissors and every spark are pixel-layer
-// primitives from retained sources; final spool/scissors art (EbonRewardArt "Spool", "ScissorsClosed",
-// "ScissorsOpen": upright spool, beak pointing right, centred) is drawn in PreDraw with point sampling.
+// primitives from retained sources; final spool/scissors art is drawn in PreDraw at EbonRewardArt.PixelScale
+// with point sampling: "Spool" (11x18, upright, tumbling about its centre) and "ScissorsClosed"/"ScissorsOpen"
+// (35x18, beak pointing right, finger loops behind) on one canvas whose beak hinge sits on the projectile centre.
 // Time is the per-client tick count plus WeaponDrawClock.Fraction (canvas.Fraction); the sever clock is the
 // strand's own Phase, so the strands of one snip share a beat exactly.
 [Autoload(Side = ModSide.Client)]
 internal sealed class SeveringSilkVisuals : GlobalProjectile
 {
     private const int KnotGlint = 24, PinGlint = 10;
+    // Anchor from the art report (.local/ebon-reward-art/report.json, texture space with (0,0) at the top-left
+    // corner): the beak hinge shared by both scissors canvases, 26 texels (52 px) in from the loops.
+    private static readonly Vector2 ScissorsHinge = new(26f, 8f);
+    // The two scissors frames swap where the beak has opened this far; it stays shut for the whole flight.
+    private const float OpenFrame = .3f;
     private static readonly List<ScreenShakeSystem.ShakeInfo> shakes = new(4);
     private static long popTick;
     private static int pops;
+    private static bool ScissorsArt => EbonRewardArt.HasFinal("ScissorsClosed") && EbonRewardArt.HasFinal("ScissorsOpen");
 
     private Vector2 previous, current;
     private float previousSpin, currentSpin, armedSettle = 1;
@@ -113,8 +120,8 @@ internal sealed class SeveringSilkVisuals : GlobalProjectile
         }
     }
 
-    // Sounds fire from the same tick as the visual they belong to: the chord with the parting, each note with
-    // its strand's curls, the snip with the beak shutting.
+    // Sounds fire from the same tick as the visual they belong to: the scissors' bite as the silk tightens, the
+    // chord with the parting, each note with its strand's curls.
     private void Tick(Projectile p, EbonSilkStrand s)
     {
         int phase = s.Phase;
@@ -134,9 +141,12 @@ internal sealed class SeveringSilkVisuals : GlobalProjectile
     private void Tick(Projectile p, EbonSilkScissors s)
     {
         int phase = s.Phase;
+        // The bite comes on the arming tick, six ticks ahead of the chord (the audition combo's order), so the
+        // build-up is heard and the parting is left to SeverAll alone; it is also the quieter cue.
+        if (lastPhase < 1 && phase >= 1)
+            EbonRewardAudio.Play("ScissorsSnip", p.Center, .65f, 0, .02f, 2);
         if (lastPhase < EbonSilkMath.SeverPhase && phase >= EbonSilkMath.SeverPhase)
         {
-            EbonRewardAudio.Play("ScissorsSnip", p.Center, .85f, 0, .02f, 2);
             Lighting.AddLight(p.Center, .55f, .6f, .85f);
             if (p.owner == Main.myPlayer)
             {
@@ -196,13 +206,19 @@ internal sealed class SeveringSilkVisuals : GlobalProjectile
         switch (p.ModProjectile)
         {
             case EbonSilkSpool when EbonRewardArt.HasFinal("Spool"):
-                DrawSprite(EbonRewardArt.Final("Spool"), At(p, f), Spin(p, f), Color.White, SpriteEffects.None);
+            {
+                Texture2D spool = EbonRewardArt.Final("Spool");
+                DrawSprite(spool, spool.Size() * .5f, At(p, f), Spin(p, f), Color.White, SpriteEffects.None);
                 break;
-            case EbonSilkScissors s when EbonRewardArt.HasFinal("ScissorsClosed") && EbonRewardArt.HasFinal("ScissorsOpen"):
+            }
+            case EbonSilkScissors s when ScissorsArt:
             {
                 ScissorsPose pose = Pose(p, s, f);
                 if (pose.Alpha <= .01f) break;
-                DrawSprite(EbonRewardArt.Final(pose.Gape > .45f ? "ScissorsOpen" : "ScissorsClosed"), pose.Center, pose.Angle,
+                // Shut in flight, open from the arming tick until the parting, shut again from the parting on.
+                bool open = pose.Gape > OpenFrame && pose.Time < EbonRewardRules.TightenTicks;
+                // Beak along the heading; flying leftward the sprite is mirrored so the scissors stay right way up.
+                DrawSprite(EbonRewardArt.Final(open ? "ScissorsOpen" : "ScissorsClosed"), ScissorsHinge, pose.Center, pose.Angle,
                     Color.White * pose.Alpha, MathF.Cos(pose.Angle) < 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
                 break;
             }
@@ -210,16 +226,18 @@ internal sealed class SeveringSilkVisuals : GlobalProjectile
         return false; // everything else is drawn by the pixel layer
     }
 
-    // Final art is pixel art: one texel per logical pixel at the 2 px dot, point sampling. The caller's batch
-    // state is captured and restored around the swap.
-    private static void DrawSprite(Texture2D texture, Vector2 center, float rotation, Color color, SpriteEffects effects)
+    // Final art is pixel art: one texel per logical pixel at the 2 px dot, point sampling. `anchor` is the texel
+    // position (texture space) that lands on `center`; a vertical flip mirrors the texture but not the origin,
+    // so the anchor is mirrored with it. The caller's batch state is captured and restored around the swap.
+    private static void DrawSprite(Texture2D texture, Vector2 anchor, Vector2 center, float rotation, Color color, SpriteEffects effects)
     {
+        if ((effects & SpriteEffects.FlipVertically) != 0) anchor.Y = texture.Height - anchor.Y;
         SpriteBatch batch = Main.spriteBatch;
         WorldBatchParameters saved = WorldBatchParameters.Capture(batch);
         batch.End();
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None,
             saved.Raster, null, saved.Transform);
-        batch.Draw(texture, center - Main.screenPosition, null, color, rotation, texture.Size() * .5f,
+        batch.Draw(texture, center - Main.screenPosition, null, color, rotation, anchor,
             EbonRewardArt.PixelScale, effects, 0);
         batch.End();
         saved.Restore(batch);
@@ -410,15 +428,16 @@ internal sealed class SeveringSilkVisuals : GlobalProjectile
             Vector2 heading = pose.Angle.ToRotationVector2();
             if (Model.Phase == 0)
             {
-                // Streak of the flight, longest at cruise speed.
-                float length = P.velocity.Length() * 1.7f;
+                // Streak of the flight, longest at cruise speed. It trails from behind the finger loops of the
+                // final art (the layer is composited over the sprite) or from the centre of the placeholder.
+                float length = P.velocity.Length() * 1.7f, back = ScissorsArt ? ScissorsHinge.X * EbonRewardArt.PixelScale : 0;
                 if (length > 4)
                 {
-                    c.Thread(pose.Center, pose.Center - heading * length, EbonTone.Ivory, 1, .55f);
-                    c.Thread(pose.Center - heading * length * .5f, pose.Center - heading * length * 1.3f, EbonTone.Silver, 1, .3f);
+                    c.Thread(pose.Center - heading * back, pose.Center - heading * (back + length), EbonTone.Ivory, 1, .55f);
+                    c.Thread(pose.Center - heading * (back + length * .5f), pose.Center - heading * (back + length * 1.3f), EbonTone.Silver, 1, .3f);
                 }
             }
-            if (pose.Alpha > .01f && (!EbonRewardArt.HasFinal("ScissorsClosed") || !EbonRewardArt.HasFinal("ScissorsOpen")))
+            if (pose.Alpha > .01f && !ScissorsArt)
                 Body(c, pose, heading);
             float t = pose.Time;
             if (t > 0 && t < EbonRewardRules.TightenTicks && !c.Reduced)

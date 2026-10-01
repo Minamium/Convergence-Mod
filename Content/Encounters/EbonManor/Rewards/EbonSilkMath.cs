@@ -135,4 +135,14 @@ internal static class EbonSilkMath
     // --- Hit shapes -------------------------------------------------------------------------
     internal static bool CircleTouchesBox(Vector2 center, float radius, Vector2 min, Vector2 max)
         => Vector2.DistanceSquared(center, Vector2.Clamp(center, min, max)) <= radius * radius;
+    // The strand's hit test. Vanilla asks every live NPC, so a conservative axis-aligned rejection (the box
+    // grown by the strand's half width against the strand's own bounds) goes in front of the sampled segment
+    // test: a far NPC costs four comparisons instead of up to 256 samples, and the answer never changes.
+    internal static bool StrandTouchesBox(Vector2 min, Vector2 max, Vector2 a, Vector2 b, float width)
+    {
+        float reach = width * .5f;
+        if (max.X < MathF.Min(a.X, b.X) - reach || min.X > MathF.Max(a.X, b.X) + reach
+            || max.Y < MathF.Min(a.Y, b.Y) - reach || min.Y > MathF.Max(a.Y, b.Y) + reach) return false;
+        return EbonRewardRules.BoxTouchesSegment(min, max, a, b, width);
+    }
 }

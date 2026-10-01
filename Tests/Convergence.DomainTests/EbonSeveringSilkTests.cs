@@ -188,6 +188,35 @@ internal static partial class Program
         AssertEqual(true, EbonSilkMath.CircleTouchesBox(center, EbonRewardRules.ScissorsRadius, new(-5, -5), new(5, 5)), "snip hits a box around its centre");
     }
 
+    [DomainTest("Severing Silk strand hit test rejects far boxes early without changing any answer")]
+    private static void SeveringSilkStrandRejection()
+    {
+        float width = EbonRewardRules.StrandWidth, reach = width * .5f;
+        (Vector2 A, Vector2 B)[] strands =
+        {
+            (new(0, 0), new(400, 0)), (new(400, 0), new(0, 0)), (new(0, 0), new(0, 300)), (new(0, 0), new(400, 300)),
+            (new(400, 300), new(100, -80)), (new(50, 50), new(1650, 50)),
+        };
+        int touching = 0, apart = 0;
+        foreach ((Vector2 a, Vector2 b) in strands)
+            for (float x = -80; x <= 1700; x += 20)
+                for (float y = -120; y <= 360; y += 20)
+                {
+                    Vector2 min = new(x, y), max = new(x + 14, y + 22);
+                    bool sampled = EbonRewardRules.BoxTouchesSegment(min, max, a, b, width);
+                    AssertEqual(sampled, EbonSilkMath.StrandTouchesBox(min, max, a, b, width), "the early rejection never changes the answer");
+                    if (sampled) touching++; else apart++;
+                }
+        AssertEqual(true, touching > 100 && apart > 100, "the grid covers both touching and separate boxes");
+
+        Vector2 from = new(0, 0), to = new(400, 0);
+        AssertEqual(false, EbonSilkMath.StrandTouchesBox(new(5000, 5000), new(5030, 5060), from, to, width), "a far box is rejected");
+        AssertEqual(false, EbonSilkMath.StrandTouchesBox(new(100, reach + 1), new(120, 60), from, to, width), "just beyond the strand width is rejected");
+        AssertEqual(true, EbonSilkMath.StrandTouchesBox(new(100, reach), new(120, 60), from, to, width), "exactly at the strand width still touches");
+        AssertEqual(true, EbonSilkMath.StrandTouchesBox(new(-reach - 6, -3), new(-reach, 3), from, to, width), "a box at the strand end still touches");
+        AssertEqual(false, EbonSilkMath.StrandTouchesBox(new(400 + reach + 1, -3), new(460, 3), from, to, width), "past the strand end is rejected");
+    }
+
     [DomainTest("Severing Silk nominal budget is thirty-two times base")]
     private static void SeveringSilkBudget()
     {

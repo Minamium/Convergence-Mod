@@ -64,6 +64,8 @@ public sealed class EbonThimbleChannel : ModProjectile
     internal int Lifted => (int)Projectile.ai[1];
     internal int Phase => (int)Projectile.ai[2];
     private bool IsOwner => Projectile.owner == Main.myPlayer;
+    // The aim last queued for the peers (owner only).
+    private Vector2 sentAxis;
 
     public override string Texture => "Terraria/Images/Projectile_1";
 
@@ -114,11 +116,13 @@ public sealed class EbonThimbleChannel : ModProjectile
         if (IsOwner)
         {
             Vector2 wanted = EbonRewardItems.Aim(Main.MouseWorld - owner.MountedCenter, owner.direction);
-            if (Vector2.Dot(wanted, axis) < .995f || Age % 15 == 0) Projectile.netUpdate = true;
+            // Compared with what the peers last received, not with last tick: a slow sweep must still add up to a resend.
+            if (Score.AimDue(ThimbleSupport.Num(wanted), ThimbleSupport.Num(sentAxis), Age)) { Projectile.netUpdate = true; sentAxis = wanted; }
             axis = wanted; Projectile.velocity = axis;
             owner.manaRegenDelay = Math.Max(owner.manaRegenDelay, 60);
+            // Peers get the facing with the player's own sync; turning them from a stale aim would fight it.
+            owner.ChangeDir(axis.X >= 0 ? 1 : -1);
         }
-        owner.ChangeDir(axis.X >= 0 ? 1 : -1);
         Projectile.Center = owner.RotatedRelativePoint(owner.MountedCenter, true);
         Projectile.timeLeft = 2;
         owner.heldProj = Projectile.whoAmI;
@@ -170,6 +174,8 @@ public sealed class EbonThimbleChannel : ModProjectile
 
     private void Release(Player owner)
     {
+        // A tap shorter than the first lift already paid for a piece: it rises and is yanked on this release.
+        if (Score.OwesFirstPiece(Lifted, Phase)) Lift(owner);
         int lifted = Lifted;
         if (lifted <= 0) { Projectile.Kill(); return; }
         foreach (Projectile other in Main.ActiveProjectiles)
@@ -270,6 +276,8 @@ public sealed class EbonThimblePiece : ModProjectile
         if (!ThimbleSupport.ValidOwner(Projectile) || !Score.ValidPiece(Projectile.ai[0], Projectile.ai[1], Projectile.ai[2])
             || !ThimbleSupport.Finite(Projectile.velocity) || !ThimbleSupport.Finite(Projectile.Center)) { Projectile.Kill(); return; }
         Player owner = Main.player[Projectile.owner];
+        // The owner left: no client can steer or settle this copy any more, and the state refreshes below would keep it alive.
+        if (!owner.active) { Projectile.Kill(); return; }
         // Death, Down or a stun: the silk is cut wherever the piece is.
         if (IsOwner && (State is Score.Hanging or Score.Armed or Score.Flying) && !EbonRewardItems.Usable(owner)) Drop();
         int before = State;
@@ -290,12 +298,27 @@ public sealed class EbonThimblePiece : ModProjectile
         return ThimbleSupport.Finite(hand) ? hand : owner.Center;
     }
 
+    // The controller's slot is remembered in localAI (never sent: every client resolves its own) and checked each tick;
+    // the projectile list is only scanned on a miss.
+    private Projectile? Controller()
+    {
+        int cached = (int)Projectile.localAI[0] - 1;
+        if (cached >= 0 && cached < Main.maxProjectiles)
+        {
+            Projectile known = Main.projectile[cached];
+            if (known.active && known.owner == Projectile.owner && known.ModProjectile is EbonThimbleChannel) return known;
+        }
+        Projectile? found = EbonThimbleChannel.Find(Projectile.owner);
+        Projectile.localAI[0] = found is null ? 0 : found.whoAmI + 1;
+        return found;
+    }
+
     private void Hang(Player owner)
     {
         Projectile.timeLeft = 120; Projectile.tileCollide = false;
         float clock = ThimbleSupport.Clock;
         Vector2 target = owner.Center + ThimbleSupport.Xna(Score.Slot(Index, owner.direction, clock));
-        Projectile? controller = EbonThimbleChannel.Find(Projectile.owner);
+        Projectile? controller = Controller();
         Vector2 hand = Hand(owner, controller);
         // Rise from the fingertip with a small overshoot, then trail the owner on a soft spring.
         Vector2 center = State == Score.Hanging && Age < Score.LiftEaseTicks
@@ -363,7 +386,8 @@ public sealed class EbonThimblePiece : ModProjectile
 // The finale. ai[0] ticks since the release, ai[1] the height it lands at (the release cursor), ai[2] 0 while
 // alive, n > 0 crashed for n - 1 ticks, n < 0 dropped for -n - 1 ticks. It waits unseen where the silk will
 // drop it, appears PianoHeight above the cursor on EbonRewardRules.PianoTick(8), falls, and crashes on a tile or
-// at the cursor height. Only the crash damages: PianoRadius, once per NPC root (segments share a root).
+// at the cursor height. Only the crash damages: PianoRadius around the impact point (the bottom edge, where the
+// ring promised it), once per NPC root (segments share a root).
 public sealed class EbonThimblePiano : ModProjectile
 {
     private readonly HashSet<int> struckRoots = new();
@@ -383,7 +407,8 @@ public sealed class EbonThimblePiano : ModProjectile
 
     public override void SetDefaults()
     {
-        Projectile.width = 120; Projectile.height = 56;
+        // Piano.png at 2x is 152x114 px; the body and legs are the bottom 56 px, and the legs sit inside +-66 px of the centre.
+        Projectile.width = 132; Projectile.height = 56;
         Projectile.friendly = true; Projectile.DamageType = DamageClass.Magic;
         Projectile.penetrate = -1; Projectile.tileCollide = false; Projectile.ignoreWater = true;
         Projectile.netImportant = true; Projectile.timeLeft = 120;
@@ -400,7 +425,7 @@ public sealed class EbonThimblePiano : ModProjectile
     { fallThrough = false; return true; }
 
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
-        => Crashed && Score.CircleTouchesBox(ThimbleSupport.Num(Projectile.Center), EbonRewardRules.PianoRadius,
+        => Crashed && Score.CircleTouchesBox(ThimbleSupport.Num(Projectile.Bottom), EbonRewardRules.PianoRadius,
             ThimbleSupport.Num(targetHitbox.TopLeft()), ThimbleSupport.Num(targetHitbox.BottomRight()));
 
     public override bool OnTileCollide(Vector2 oldVelocity)
@@ -421,6 +446,8 @@ public sealed class EbonThimblePiano : ModProjectile
         if (!ThimbleSupport.ValidOwner(Projectile) || !Score.ValidPiano(Projectile.ai[0], Projectile.ai[1], Projectile.ai[2])
             || !ThimbleSupport.Finite(Projectile.velocity) || !ThimbleSupport.Finite(Projectile.Center)) { Projectile.Kill(); return; }
         Player owner = Main.player[Projectile.owner];
+        // The owner left: nobody can drop or settle the piano, and the refresh below would keep this copy alive.
+        if (!owner.active) { Projectile.Kill(); return; }
         Projectile.timeLeft = 120;
         if (Crashed)
         {

@@ -13,7 +13,10 @@ internal enum ChandelierState : byte { Idle, Seek, Settle, Fall, Reweave }
 internal static class EbonChandelierRules
 {
     // Centre -> lowest point of a chandelier (the crash point), and how far a shattered one is reeled up.
-    internal const float BodyHalfHeight = 34, ReelRise = 190, MinHover = 70, MaxLead = 24;
+    // BodyRise is centre -> top of the tallest body: the large final sprite is 68 texels, 136 px at the 2 px
+    // pixel scale, hung from its ring so that the lowest 34 px sit below the centre and 102 above it (plus a
+    // little sway), which is how much air a hovering chandelier needs under a ceiling.
+    internal const float BodyHalfHeight = 34, BodyRise = 104, ReelRise = 190, MinHover = 70, MaxLead = 24;
     internal const float AcquireRange = 1600, RetainRange = 2000;
     // ChandelierReel is mixed 0.12 s (about 7 ticks) after ChandelierShatter, when the pieces have turned back.
     internal const int AnticipationTicks = 10, ReelCueTicks = 7, SnipTicks = 22, ShatterTicks = 34, CatchTicks = 3;
@@ -54,6 +57,47 @@ internal static class EbonChandelierRules
     // 0 until the drop is scheduled (wait < 0), then a smooth build over the last AnticipationTicks, 1 at the cut.
     internal static float Anticipation(int wait)
         => wait < 0 ? 0 : wait == 0 ? 1 : EbonRewardRules.Smooth(1f - wait / (float)AnticipationTicks);
+
+    // --- Summon order -------------------------------------------------------------------------
+    // The owner stamps each chandelier with the update it first ran on (1..SummonOrderWrap) and the stamp rides
+    // with the projectile, so a chandelier's rank follows summon order whichever projectile slot it landed in.
+    internal const long SummonOrderWrap = 2_000_000_000;
+    internal static int SummonOrder(ulong tick) => 1 + (int)(tick % (ulong)SummonOrderWrap);
+
+    // Sort key among one owner's chandeliers: summon order, then the projectile slot as the tie-break. Order 0
+    // (the stamp has not arrived yet) sorts last, so a newcomer never shuffles the chandeliers already out.
+    internal static long RosterKey(int order, int slot)
+        => ((order > 0 ? order : (long)int.MaxValue) << 10) | (long)Math.Clamp(slot, 0, 1023);
+
+    // --- Hover over a target ------------------------------------------------------------------
+    // The row is ordered by drop beat (beat 0 of every repeat, then beat 1, ...), so the cascade sweeps across
+    // the target from one side to the other and chandeliers that share a beat hang next to each other.
+    internal const float HoverStagger = 28, SpreadMargin = 16, MinSpread = 20, MaxSpread = 120;
+
+    // Position of chandelier `ordinal` of `count` in that row (0 = leftmost); a permutation of 0..count-1.
+    internal static int HoverSlot(int ordinal, int count)
+    {
+        count = Math.Max(count, 1);
+        ordinal = Math.Clamp(ordinal, 0, count - 1);
+        int beats = EbonRewardRules.CycleBeats, slot = ordinal / beats;
+        // Everything on an earlier beat sits to the left: j < count with j % beats == b is (count - b + beats - 1) / beats.
+        for (int beat = 0; beat < ordinal % beats; beat++) slot += (count - beat + beats - 1) / beats;
+        return slot;
+    }
+
+    // Half the width of the row. A fall is straight, so a chandelier only lands on its target while the 40 px
+    // foot still overlaps the hitbox: the row reaches a margin beyond the target's edges, always less than the
+    // foot's 20 px half-width (the slots are middles of equal shares, so none sits on the reach itself).
+    internal static float HoverReach(float targetWidth) => Math.Clamp(targetWidth * .5f + SpreadMargin, MinSpread, MaxSpread);
+
+    // Horizontal offset (px) of a slot from the point straight above the target: the middles of `count` equal
+    // shares of [-reach, reach].
+    internal static float HoverSpread(int slot, int count, float reach)
+        => ((Math.Clamp(slot, 0, Math.Max(count, 1) - 1) + .5f) / Math.Max(count, 1) - .5f) * 2f * reach;
+
+    // Odd slots hang one stagger higher, so neighbours whose bodies overlap sideways still read as separate
+    // chandeliers (the idle row alternates height the same way). A lone chandelier keeps the spec's exact height.
+    internal static float HoverRaise(int slot, int count) => count > 1 ? (slot & 1) * HoverStagger : 0f;
 
     // --- Idle row -----------------------------------------------------------------------------
     // Offset from the owner's shoulders: a staggered row behind the owner (opposite to `facing`), small and

@@ -23,11 +23,26 @@ namespace Convergence.Client.Encounters.EbonManor.Rewards;
 internal sealed class EbonHatboxVisuals : ModSystem
 {
     private const int Life = 60, ReleaseTick = 10, BurstTick = 12, MaxShows = 4;
-    private const float HoverHeight = 70;
+    // The closed box's floor floats this far above the opener's head (the box is taller in the final art).
+    private const float Clearance = 42;
 
-    // The cue is one rising pluck run ending on a chord; it starts with the open and is expected to land its
-    // chord about when the lid pops (ReleaseTick), so no visual is delayed for it.
+    // The cue starts with the open and is timed to the show (tools/generate_ebon_reward_sfx.py cue_hatbox_open):
+    // the latch click and thump land on ReleaseTick (0.167 s) with the lid, a quick rising pluck run follows and
+    // the chord arrives about 0.155 s later (~0.32 s, tick 19) in the middle of the star and the burst, well
+    // before the box dissolves (44-58). No visual is delayed for it.
     private const string Cue = "HatboxOpen";
+
+    // Final art (HatboxBody 33x26, HatboxLid 38x19, HatboxBow 23x19 logical pixels, one texel per pixel, cropped
+    // tight by tools/export_ebon_reward_art.py so each texture's bounds are its opaque bounds). The closed box is
+    // laid out in the 38x36 frame of the delivered drawing (ER01_d; offsets measured against it): the lid at
+    // (0, 5), the body at (2, 10) with its floor on the last row, the bow at (7, 0). The body's rim opening
+    // (the ellipse the lid leaves) is centred on row 5.5 of the body texture. The drawing is lit from the left,
+    // so nothing is mirrored; the sides only choose where things fly.
+    private const int FrameWidth = 38, FrameHeight = 36;
+    private const float MouthRow = 5.5f;
+    private static readonly Point BodyAt = new(2, 10), LidAt = new(0, 5), BowAt = new(7, 0);
+    // Width of the placeholder box; the show's rings and star scale with the box relative to it.
+    private const float BaselineWidth = 54;
 
     private static readonly List<Show> shows = new(MaxShows);
     private static readonly Vector2[] ribbon = new Vector2[16];
@@ -35,9 +50,16 @@ internal sealed class EbonHatboxVisuals : ModSystem
     private static bool failed;
     private static int opened;
 
-    // Resolved box art and the closed-box layout (pixels, y down, origin at the closed box's centre).
+    // Resolved box art and the closed-box layout (pixels, y down, origin at the closed box's centre). BodyX and
+    // BowX are the parts' offsets from the box axis, Width the closed box's width; Hover is the height of the
+    // box's centre above the opener's head top.
     private sealed record BoxArt(Texture2D Body, Texture2D Lid, Texture2D? Bow, Rectangle BodySrc, Rectangle LidSrc, Rectangle BowSrc,
-        float Scale, bool Pixel, float BodyHeight, float BodyBottom, float LidY, float BowY, float MouthY);
+        float Scale, bool Pixel, float BodyHeight, float BodyBottom, float LidY, float BowY, float MouthY, float BodyX, float BowX,
+        float Width)
+    {
+        internal float Hover => BodyBottom + Clearance;
+        internal float Reach => Math.Clamp(Width / BaselineWidth, 1f, 1.6f);
+    }
 
     private sealed class Show : IEbonPixelSource
     {
@@ -51,7 +73,7 @@ internal sealed class EbonHatboxVisuals : ModSystem
         internal Show(BoxArt art, Player player, int seed, Vector2 jitter)
         {
             Art = art; Owner = player.whoAmI; Seed = seed; Side = (seed & 1) == 0 ? 1 : -1; Jitter = jitter;
-            Previous = Anchor = Target(player) + jitter;
+            Previous = Anchor = Target(player, art.Hover) + jitter;
         }
 
         internal bool Done => Dead || Ticks > Life + 1;
@@ -68,7 +90,7 @@ internal sealed class EbonHatboxVisuals : ModSystem
             Player player = Main.player[Owner];
             if (player.active)
             {
-                Vector2 want = Target(player) + Jitter;
+                Vector2 want = Target(player, Art.Hover) + Jitter;
                 if (Vector2.DistanceSquared(Anchor, want) > 400f * 400f) Previous = Anchor = want;
                 else Anchor = Vector2.Lerp(Anchor, want, .35f);
             }
@@ -86,7 +108,11 @@ internal sealed class EbonHatboxVisuals : ModSystem
     }
 
     public override void Load() => EbonHatbox.Opened = Open;
-    public override void Unload() { EbonHatbox.Opened = null; Clear(); art = null; failed = false; }
+    public override void Unload()
+    {
+        EbonHatbox.Opened = null; Clear(); art = null; failed = false;
+        EbonRewardArt.Reset(); EbonRewardAudio.Reset();
+    }
     public override void ClearWorld() => Clear();
     public override void OnWorldUnload() => Clear();
 
@@ -163,8 +189,8 @@ internal sealed class EbonHatboxVisuals : ModSystem
         return 1 + 2.70158f * x * x * x + 1.70158f * x * x;
     }
 
-    private static Vector2 Target(Player player)
-        => (player.gravDir >= 0 ? player.Top : player.Bottom) + new Vector2(0, -HoverHeight * (player.gravDir >= 0 ? 1 : -1));
+    private static Vector2 Target(Player player, float hover)
+        => (player.gravDir >= 0 ? player.Top : player.Bottom) + new Vector2(0, -hover * (player.gravDir >= 0 ? 1 : -1));
 
     // The box rises from the head with a small overshoot, hovers, then lifts a little as it dissolves.
     private static Vector2 BoxOffset(float a)
@@ -207,11 +233,11 @@ internal sealed class EbonHatboxVisuals : ModSystem
         if (a < ReleaseTick || !s.Released)
         {
             velocity = default;
-            return s.Live(fraction, a) + Map(box, new(0, box.BowY - 5 * Ease((a - 3) / 7)), a);
+            return s.Live(fraction, a) + Map(box, new(box.BowX, box.BowY - 5 * Ease((a - 3) / 7)), a);
         }
         float t = a - ReleaseTick;
         velocity = new(s.Side * 2.5f, -5.4f + .3f * t);
-        return s.Free + Map(box, new(0, box.BowY - 5), ReleaseTick) + new Vector2(s.Side * 2.5f * t, -5.4f * t + .15f * t * t);
+        return s.Free + Map(box, new(box.BowX, box.BowY - 5), ReleaseTick) + new Vector2(s.Side * 2.5f * t, -5.4f * t + .15f * t * t);
     }
 
     // ---- Sprites ----------------------------------------------------------------------------------
@@ -228,7 +254,7 @@ internal sealed class EbonHatboxVisuals : ModSystem
         Color color = Color.White * alpha;
         bool closed = a < ReleaseTick || !s.Released;
 
-        Draw(batch, box.Body, box.BodySrc, live + Map(box, new(0, box.BodyBottom - box.BodyHeight * .5f), a) - screen, 0, scale, color);
+        Draw(batch, box.Body, box.BodySrc, live + Map(box, new(box.BodyX, box.BodyBottom - box.BodyHeight * .5f), a) - screen, 0, scale, color);
         if (closed)
             Draw(batch, box.Lid, box.LidSrc, live + Map(box, new(0, box.LidY), a) - screen, 0, scale, color);
         else
@@ -262,20 +288,20 @@ internal sealed class EbonHatboxVisuals : ModSystem
         Streamers(s, c, a);
         if (!s.Released || a < ReleaseTick) return;
         BoxArt box = s.Art;
-        float t = a - ReleaseTick;
+        float t = a - ReleaseTick, k = box.Reach;
         Vector2 mouth = s.Free + Map(box, new(0, box.MouthY), ReleaseTick);
 
-        // The release: one star at the rim and a soft ring (a rose echo follows unless reduced).
-        if (t < 10) c.Star(mouth, 30, t / 10, s.Seed);
+        // The release: one star at the rim and a soft ring (a rose echo follows unless reduced), sized to the box.
+        if (t < 10) c.Star(mouth, 30 * k, t / 10, s.Seed);
         if (t < 16)
         {
             float x = t / 16;
-            c.Ring(mouth, 12 + 44 * EbonVisualsMath.OutExpo(x), EbonTone.Moon, 1, .85f * (1 - x));
+            c.Ring(mouth, (12 + 44 * EbonVisualsMath.OutExpo(x)) * k, EbonTone.Moon, 1, .85f * (1 - x));
         }
         if (!c.Reduced && t >= 3 && t < 19)
         {
             float x = (t - 3) / 16;
-            c.Ring(mouth, 8 + 30 * EbonVisualsMath.OutExpo(x), EbonTone.Rose, 1, .6f * (1 - x));
+            c.Ring(mouth, (8 + 30 * EbonVisualsMath.OutExpo(x)) * k, EbonTone.Rose, 1, .6f * (1 - x));
         }
 
         // Lace and silk fly up and flutter down; moon motes drift upward. All end by tick 40.
@@ -287,7 +313,7 @@ internal sealed class EbonHatboxVisuals : ModSystem
         // Recovery: the box lets go of a few last motes as it dissolves, attached to the box.
         float dt = a - 42;
         if (!c.Reduced && dt >= 0 && dt < 16)
-            Motes(c, s.Live(c.Fraction, a) + Map(box, new(0, box.BodyBottom - box.BodyHeight * .5f), a), s.Seed + 3, 6, dt, 16, 1.2f);
+            Motes(c, s.Live(c.Fraction, a) + Map(box, new(box.BodyX, box.BodyBottom - box.BodyHeight * .5f), a), s.Seed + 3, 6, dt, 16, 1.2f);
     }
 
     private const float Up = -MathF.PI / 2;
@@ -363,18 +389,18 @@ internal sealed class EbonHatboxVisuals : ModSystem
         return asset.Value;
     }
 
-    // Final art: the three parts are assembled from their opaque bounds (the exported cells may or may not be
-    // cropped), body base on the floor of the layout, lid resting on the rim, knot resting on the lid.
+    // Final art laid out from the measured frame above. The parts' offsets are whole logical pixels (two screen pixels
+    // each) in that frame; the body (33 wide) and the bow (23 wide) have odd widths, so their centres sit half a pixel left of the axis.
     private static BoxArt BuildFinal(Texture2D body)
     {
         Texture2D lid = EbonRewardArt.Final("HatboxLid"), bow = EbonRewardArt.Final("HatboxBow");
         float s = EbonRewardArt.PixelScale;
-        Rectangle bs = OpaqueBounds(body), ls = OpaqueBounds(lid), ws = OpaqueBounds(bow);
-        float bh = bs.Height * s, lh = ls.Height * s, wh = ws.Height * s;
-        float lidOverlap = MathF.Max(s, bh * .1f), bowOverlap = MathF.Max(s, wh * .2f);
-        float bottom = (bh + lh - lidOverlap + wh - bowOverlap) * .5f, top = bottom - bh;
-        float lidY = top + lidOverlap - lh * .5f, bowY = lidY - lh * .5f + bowOverlap - wh * .5f;
-        return new BoxArt(body, lid, bow, bs, ls, ws, s, true, bh, bottom, lidY, bowY, top);
+        Rectangle bs = body.Bounds, ls = lid.Bounds, ws = bow.Bounds;
+        Vector2 centre = new(FrameWidth * .5f, FrameHeight * .5f);
+        float bodyX = (BodyAt.X + bs.Width * .5f - centre.X) * s, bowX = (BowAt.X + ws.Width * .5f - centre.X) * s;
+        float bottom = (BodyAt.Y + bs.Height - centre.Y) * s, lidY = (LidAt.Y + ls.Height * .5f - centre.Y) * s;
+        float bowY = (BowAt.Y + ws.Height * .5f - centre.Y) * s, mouthY = (BodyAt.Y + MouthRow - centre.Y) * s;
+        return new BoxArt(body, lid, bow, bs, ls, ws, s, true, bs.Height * s, bottom, lidY, bowY, mouthY, bodyX, bowX, FrameWidth * s);
     }
 
     private static BoxArt BuildPlaceholder(Texture2D texture)
@@ -382,10 +408,10 @@ internal sealed class EbonHatboxVisuals : ModSystem
         Rectangle all = OpaqueBounds(texture);
         int cut = Math.Clamp((int)MathF.Round(all.Height * .4f), 1, Math.Max(1, all.Height - 1));
         Rectangle lidSrc = new(all.X, all.Y, all.Width, cut), bodySrc = new(all.X, all.Y + cut, all.Width, all.Height - cut);
-        float s = Math.Clamp(54f / Math.Max(1, all.Width), 1f, 3f);
+        float s = Math.Clamp(BaselineWidth / Math.Max(1, all.Width), 1f, 3f);
         float bh = bodySrc.Height * s, lh = lidSrc.Height * s, bottom = (bh + lh) * .5f, top = bottom - bh, lidY = top - lh * .5f;
         // No separate bow: the streamers unspool from the top of the lid.
-        return new BoxArt(texture, texture, null, bodySrc, lidSrc, default, s, false, bh, bottom, lidY, lidY - lh * .5f, top);
+        return new BoxArt(texture, texture, null, bodySrc, lidSrc, default, s, false, bh, bottom, lidY, lidY - lh * .5f, top, 0, 0, all.Width * s);
     }
 
     private static Rectangle OpaqueBounds(Texture2D texture)

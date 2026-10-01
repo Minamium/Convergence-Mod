@@ -86,6 +86,27 @@ internal static class EbonThimbleScore
     internal static float Sway(int index, float tick, float velocityX)
         => MathF.Sin(tick * .05f + index * 1.1f) * .07f + Math.Clamp(velocityX * .012f, -.22f, .22f);
 
+    // --- Beat and replication -------------------------------------------------------------
+    // Position inside the current beat, phased on the lift schedule (the first lift at FirstLift) so a pulse
+    // that restarts at 0 peaks on the lift itself instead of FirstLift ticks before it.
+    internal static float BeatPhase(float tick)
+    {
+        float beats = (tick - EbonRewardRules.FirstLift) / EbonRewardRules.BeatTicks;
+        return Math.Min(beats - MathF.Floor(beats), .9999f);
+    }
+    internal static int BeatIndex(float tick) => (int)MathF.Floor((tick - EbonRewardRules.FirstLift) / EbonRewardRules.BeatTicks);
+
+    // The owner resends the aim when it has turned about 5.7 degrees away from what the peers last received
+    // (not from last tick, or a slow sweep never adds up), and at least four times a second.
+    internal const float AimResendDot = .995f;
+    internal const int AimResendTicks = 15;
+    internal static bool AimDue(Vector2 wanted, Vector2 sent, int age)
+        => Vector2.Dot(wanted, sent) < AimResendDot || age % AimResendTicks == 0;
+
+    // The use already paid 12 mana for the first piece. A tap released before that piece rises (FirstLift ticks)
+    // must still raise it, so the mana never buys nothing.
+    internal static bool OwesFirstPiece(int lifted, int phase) => lifted <= 0 && phase == Channeling;
+
     // --- Arm pose ------------------------------------------------------------------------
     internal static float Side(int facing) => facing < 0 ? -1 : 1;
     internal static float RaisedAngle(int facing) => -MathF.PI * .5f + Side(facing) * .5f;
@@ -128,6 +149,20 @@ internal static class EbonThimbleScore
         _ => Material.Wood,
     };
     internal static int Seed(int identity, int index) => unchecked(identity * 7919 + index * 104729 + 17);
+
+    // Final art anchors, in texels from the top-left corner (tools/export_ebon_reward_art.py, report.json).
+    // Furniture.png: eight 48x64 cells; every prop is centred on (24, 32) and hangs from the eyelet ring on top of it.
+    internal static readonly Vector2[] FurnitureEyelets =
+    {
+        new(24f, 16f), new(23.5f, 13f), new(24f, 19f), new(24f, 12f),
+        new(23.5f, 16f), new(24f, 13f), new(23.5f, 22f), new(24f, 12f),
+    };
+    internal static Vector2 FurnitureEyelet(int index) => FurnitureEyelets[((index % FurnitureEyelets.Length) + FurnitureEyelets.Length) % FurnitureEyelets.Length];
+    // Piano.png (76x57): keyboard end on the left, the ring on the tip of the raised lid at the top right.
+    internal static readonly Vector2 PianoEyelet = new(65.5f, 0f);
+    internal static Vector2 PianoEyeletFor(float width, bool mirrored) => mirrored ? new Vector2(width - PianoEyelet.X, PianoEyelet.Y) : PianoEyelet;
+    // The keyboard end faces the owner, so the piano is mirrored when the owner stands to its right.
+    internal static bool PianoMirrored(float pianoX, float ownerX) => pianoX < ownerX;
 
     // --- Finale --------------------------------------------------------------------------
     // Where the piano waits (PianoHeight above the release cursor) and the height it lands at.

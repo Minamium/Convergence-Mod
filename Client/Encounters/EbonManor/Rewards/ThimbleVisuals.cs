@@ -14,16 +14,20 @@ namespace Convergence.Client.Encounters.EbonManor.Rewards;
 
 // Presentation of the Ebon Thimble (Content/Encounters/EbonManor/Rewards/EbonThimble.cs). Everything here is
 // derived from replicated projectile state, so a second peer sees the same lift, yank, crash and piano; nothing
-// here changes gameplay. Furniture sprites are drawn here (point sampling for final art, snapped to the 2 px dot);
-// silk threads, the fingertip glint, the landing circle and the debris are Ebon pixel-layer sources.
+// here changes gameplay. Furniture sprites are drawn here (point sampling for final art, snapped to the 2 px dot,
+// hung from the measured eyelets of Furniture.png and Piano.png); silk threads, the fingertip glint, the landing
+// circle and the debris are Ebon pixel-layer sources.
 [Autoload(Side = ModSide.Client)]
 internal sealed class ThimbleVisuals : GlobalProjectile
 {
     private const float RotationStep = MathF.PI / 24f;
     private static readonly Projectile?[] controllers = new Projectile?[Main.maxPlayers];
 
+    private static readonly EbonRewardArt.Sprite?[] furnitureSprites = new EbonRewardArt.Sprite?[EbonRewardArt.FurnitureCount];
+    private static EbonRewardArt.Sprite? pianoSprite;
+
     private Vector2 before, now, handBefore, handNow, flightDirection = Vector2.UnitX;
-    private bool seen, registered;
+    private bool seen, registered, mirrored;
     private int state = -1;
     private ulong retryAt;
 
@@ -31,7 +35,37 @@ internal sealed class ThimbleVisuals : GlobalProjectile
     public override bool AppliesToEntity(Projectile p, bool lateInstantiation)
         => p.ModProjectile is EbonThimbleChannel or EbonThimblePiece or EbonThimblePiano;
 
-    internal static void Clear() => Array.Clear(controllers);
+    internal static void Clear()
+    {
+        Array.Clear(controllers);
+        Array.Clear(furnitureSprites);
+        pianoSprite = null;
+    }
+
+    // Sprites are resolved once and reused every frame (a lookup builds strings and walks the asset repository);
+    // a disposed texture (a graphics or resource reload) is resolved again.
+    private static EbonRewardArt.Sprite FurnitureSprite(int index)
+    {
+        index = Math.Clamp(index, 0, EbonRewardArt.FurnitureCount - 1);
+        if (furnitureSprites[index] is { } known && !known.Texture.IsDisposed) return known;
+        EbonRewardArt.Sprite sprite = EbonRewardArt.Furniture(index);
+        furnitureSprites[index] = sprite;
+        return sprite;
+    }
+
+    private static EbonRewardArt.Sprite PianoSprite()
+    {
+        if (pianoSprite is { } known && !known.Texture.IsDisposed) return known;
+        EbonRewardArt.Sprite sprite = EbonRewardArt.Piano();
+        pianoSprite = sprite;
+        return sprite;
+    }
+
+    // Where the silk ties on, in texels from the sprite's top-left: the measured eyelet of final art, the top edge
+    // of a painted placeholder. EyeletOffset is the same point relative to the sprite's centre, in world px.
+    private static Vector2 Eyelet(EbonRewardArt.Sprite sprite, int index)
+        => sprite.Pixel ? ThimbleSupport.Xna(Score.FurnitureEyelet(index)) : new Vector2(sprite.Source.Width * .5f, 0);
+    private static Vector2 EyeletOffset(EbonRewardArt.Sprite sprite, int index) => (Eyelet(sprite, index) - sprite.Origin) * sprite.Scale;
 
     // Two accepted simulation samples, taken once per tick after everything has moved (see ThimbleSystem).
     internal void Sample(Projectile p)
@@ -126,14 +160,17 @@ internal sealed class ThimbleVisuals : GlobalProjectile
     {
         // 0 unseen and waiting, 1 falling, 2 crashed, 3 dropped.
         int phase = piano.Dropped ? 3 : piano.Crashed ? 2 : piano.Pending ? 0 : 1;
+        // Fixed when first seen, so it cannot flip while the owner walks past it.
+        if (first && ThimbleSupport.ValidOwner(p)) mirrored = Score.PianoMirrored(p.Center.X, Main.player[p.owner].Center.X);
         if (!first && phase != state)
         {
             if (phase == 1) EbonRewardAudio.Play("ThimbleLift", p.Center, .55f, -.45f, .02f, 2);
             else if (phase == 2)
             {
+                // The impact point is the bottom edge: the centre of the true damage circle and of the landing ring.
                 EbonRewardAudio.Play("PianoCrash", p.Bottom, 1f, 0, .02f, 2);
-                Shake(p.Center, 4f);
-                EbonPixelLayer.Add(new Fx(FxKind.Piano, p.Center, Score.Seed(p.identity, 9), 0, p.owner, Vector2.Zero));
+                Shake(p.Bottom, 4f);
+                EbonPixelLayer.Add(new Fx(FxKind.Piano, p.Bottom, Score.Seed(p.identity, 9), 0, p.owner, Vector2.Zero));
             }
         }
         state = phase;
@@ -161,7 +198,7 @@ internal sealed class ThimbleVisuals : GlobalProjectile
     {
         int s = piece.State;
         if (s == Score.Crashed && piece.Age > 0) return; // the debris source takes over after the impact frame
-        EbonRewardArt.Sprite sprite = EbonRewardArt.Furniture(piece.Index);
+        EbonRewardArt.Sprite sprite = FurnitureSprite(piece.Index);
         float fraction = WeaponDrawClock.Fraction;
         float alpha = s switch
         {
@@ -169,30 +206,42 @@ internal sealed class ThimbleVisuals : GlobalProjectile
             Score.Dropped => 1 - Math.Clamp((piece.Age + fraction) / Score.DropLife, 0, 1),
             _ => 1f,
         };
-        // Painted placeholders may pop in; pixel art keeps its exact scale and only fades.
+        // Painted placeholders may pop in and squash on impact; pixel art keeps its exact scale and only fades.
         float pop = sprite.Pixel ? 1f : .62f + .38f * Math.Min(1, Score.LiftEase(s == Score.Hanging ? piece.Age : Score.LiftEaseTicks));
-        Vector2 scale = s == Score.Crashed ? new Vector2(1.18f, .8f) : new Vector2(pop);
-        // Hanging pieces swing from their eyelet; thrown ones tumble about their centre.
+        Vector2 scale = s == Score.Crashed && !sprite.Pixel ? new Vector2(1.18f, .8f) : new Vector2(pop);
+        // Hanging pieces swing from their eyelet; thrown ones tumble about their centre. The props are front-on and
+        // left-right symmetric, so they are never mirrored with the owner's facing.
         bool hung = s is Score.Hanging or Score.Armed;
         Vector2 center = Center(p);
-        Draw(sprite, hung ? center + new Vector2(0, -sprite.Size.Y * .5f) : center,
-            hung ? new Vector2(sprite.Source.Width * .5f, 0) : sprite.Origin, p.rotation, scale, alpha);
+        if (hung) Draw(sprite, center + EyeletOffset(sprite, piece.Index), Eyelet(sprite, piece.Index), p.rotation, scale, alpha);
+        else Draw(sprite, center, sprite.Origin, p.rotation, scale, alpha);
     }
 
     private void DrawPiano(Projectile p, EbonThimblePiano piano)
     {
         if (piano.Pending || (piano.Crashed && piano.CrashAge > 1)) return;
-        EbonRewardArt.Sprite sprite = EbonRewardArt.Piano();
+        EbonRewardArt.Sprite sprite = PianoSprite();
         float fraction = WeaponDrawClock.Fraction;
         float alpha = piano.Dropped ? 1 - Math.Clamp((piano.DropAge + fraction) / Score.PianoFade, 0, 1)
             : Math.Clamp((piano.FallAge + fraction + 1) / 6f, 0, 1);
-        // Anchored on the bottom edge so the crash squash settles onto the floor.
+        // Anchored on the bottom edge (the feet of the final art) so a placeholder's crash squash settles onto the floor.
+        // The final piano keeps its exact scale and is mirrored so that its keyboard end faces the owner.
         Vector2 bottom = Center(p) + new Vector2(0, p.height * .5f);
         Draw(sprite, bottom, new Vector2(sprite.Source.Width * .5f, sprite.Source.Height), 0,
-            piano.Crashed ? new Vector2(1.2f, .76f) : Vector2.One, alpha);
+            piano.Crashed && !sprite.Pixel ? new Vector2(1.2f, .76f) : Vector2.One, alpha, sprite.Pixel && mirrored);
     }
 
-    private static void Draw(EbonRewardArt.Sprite sprite, Vector2 world, Vector2 origin, float rotation, Vector2 scale, float alpha)
+    // The texture's own corner is snapped to the dot grid (not the origin: eyelets sit on half texels), so an
+    // unrotated sprite always lies on whole dots. A mirrored sprite keeps the same origin and corner: the flip only
+    // reverses the texels inside the quad.
+    private static Vector2 Snap(Vector2 v)
+    {
+        const float dot = EbonRewardArt.PixelScale;
+        return new Vector2(MathF.Round(v.X / dot) * dot, MathF.Round(v.Y / dot) * dot);
+    }
+    private static float Step(float rotation) => MathF.Round(rotation / RotationStep) * RotationStep;
+
+    private static void Draw(EbonRewardArt.Sprite sprite, Vector2 world, Vector2 origin, float rotation, Vector2 scale, float alpha, bool mirror = false)
     {
         if (alpha <= .01f) return;
         SpriteBatch batch = Main.spriteBatch;
@@ -200,16 +249,18 @@ internal sealed class ThimbleVisuals : GlobalProjectile
         WorldBatchParameters saved = default;
         if (sprite.Pixel)
         {
-            // Final art: whole 2 px dots, stepped rotation, nearest-neighbour sampling, in the caller's own batch state.
-            at = new Vector2(MathF.Round(at.X * .5f) * 2f, MathF.Round(at.Y * .5f) * 2f);
-            rotation = MathF.Round(rotation / RotationStep) * RotationStep;
+            // Final art: whole dots, stepped rotation, nearest-neighbour sampling, in the caller's own batch state.
+            Vector2 corner = origin * scale * sprite.Scale;
+            at = Snap(at - corner) + corner;
+            rotation = Step(rotation);
             saved = WorldBatchParameters.Capture(batch);
             batch.End();
             batch.Begin(saved.Sort, saved.Blend, SamplerState.PointClamp, saved.Depth, saved.Raster, saved.Effect, saved.Transform);
         }
         try
         {
-            batch.Draw(sprite.Texture, at, sprite.Source, Color.White * alpha, rotation, origin, scale * sprite.Scale, SpriteEffects.None, 0f);
+            batch.Draw(sprite.Texture, at, sprite.Source, Color.White * alpha, rotation, origin, scale * sprite.Scale,
+                mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0f);
         }
         finally
         {
@@ -301,9 +352,12 @@ internal sealed class ThimbleVisuals : GlobalProjectile
             if (!p.active || p.identity != identity || p.owner != owner || p.ModProjectile is not EbonThimblePiece piece) return false;
             int s = piece.State;
             if (s is not (Score.Hanging or Score.Armed or Score.Flying)) return false;
-            EbonRewardArt.Sprite sprite = EbonRewardArt.Furniture(piece.Index);
+            EbonRewardArt.Sprite sprite = FurnitureSprite(piece.Index);
             Vector2 center = p.GetGlobalProjectile<ThimbleVisuals>().Center(p);
-            Vector2 eyelet = center + (s == Score.Flying ? new Vector2(0, -sprite.Size.Y * .5f).RotatedBy(p.rotation) : new Vector2(0, -sprite.Size.Y * .5f));
+            // The silk ends on the eyelet. A hanging piece swings from it; a thrown one tumbles about its centre, so
+            // its eyelet turns with it (by the angle the sprite is actually drawn at).
+            Vector2 tie = EyeletOffset(sprite, piece.Index);
+            Vector2 eyelet = center + (s == Score.Flying ? tie.RotatedBy(sprite.Pixel ? Step(p.rotation) : p.rotation) : tie);
             Vector2 tip = Tip(owner);
             float age = piece.Age + canvas.Fraction;
             if (s == Score.Flying)
@@ -360,13 +414,14 @@ internal sealed class ThimbleVisuals : GlobalProjectile
                 return true;
             }
             bool spent = c.Phase == Score.Spent, ready = Score.Finale(c.Lifted);
-            float beat = clock % EbonRewardRules.BeatTicks / EbonRewardRules.BeatTicks;
+            // Phased on the lift schedule so the pulse peaks on each lift instead of flashing once just before it.
+            float beat = Score.BeatPhase(clock);
             float pulse = MathF.Pow(1 - beat, 3), lift = Score.LiftKick(c.Age, c.Lifted);
             canvas.Dot(tip, spent ? EbonTone.Rose : ready ? EbonTone.Moon : EbonTone.Silver, 1, spent ? .6f : 1);
             float glow = Math.Max(pulse, lift);
             if (!spent && glow > .08f)
                 canvas.Star(tip, 4 + 7 * pulse + 9 * lift + (ready ? 3 : 0), Math.Clamp(1 - glow, 0, .9f),
-                    owner * 17 + (int)(clock / EbonRewardRules.BeatTicks));
+                    owner * 17 + Score.BeatIndex(clock));
             if (ready && owner == Main.myPlayer)
             {
                 // Where the piano will come down: the true crash radius, and the silk it falls along.
@@ -405,10 +460,20 @@ internal sealed class ThimbleVisuals : GlobalProjectile
             if (piano.Pending) return true;
             float fall = piano.FallAge + canvas.Fraction;
             if (fall >= 12) return true;
-            // It was woven in on three strands, cut as it drops: they trail upward and fade.
-            EbonRewardArt.Sprite sprite = EbonRewardArt.Piano();
+            // It was woven in and is cut as it drops: the silk trails upward and fades.
+            EbonRewardArt.Sprite sprite = PianoSprite();
             Vector2 center = p.GetGlobalProjectile<ThimbleVisuals>().Center(p);
-            float topY = center.Y + p.height * .5f - sprite.Size.Y, fade = 1 - fall / 12f;
+            float bottomY = center.Y + p.height * .5f, topY = bottomY - sprite.Size.Y, fade = 1 - fall / 12f;
+            if (sprite.Pixel)
+            {
+                // Final art: one strand, tied to the ring on the tip of the lid (on the far side when mirrored).
+                Vector2 ring = ThimbleSupport.Xna(Score.PianoEyeletFor(sprite.Source.Width, p.GetGlobalProjectile<ThimbleVisuals>().mirrored));
+                Vector2 eyelet = new(center.X + (ring.X - sprite.Source.Width * .5f) * sprite.Scale, bottomY - (sprite.Source.Height - ring.Y) * sprite.Scale);
+                canvas.Thread(new Vector2(eyelet.X, startY - 480), eyelet, EbonTone.Silver, 1, fade, 1);
+                if (fall < 8) canvas.Star(eyelet, 40, fall / 8f, Score.Seed(identity, 3));
+                return true;
+            }
+            // The painted stand-in hangs on three strands.
             for (int k = -1; k <= 1; k++)
                 canvas.Thread(new Vector2(center.X + k * 44, startY - 480), new Vector2(center.X + k * 44, topY), EbonTone.Silver, 1, fade, 1);
             if (fall < 8) canvas.Star(new Vector2(center.X, topY), 40, fall / 8f, Score.Seed(identity, 3));

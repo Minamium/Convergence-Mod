@@ -492,7 +492,8 @@ internal static class EbonPixelArt
     private static readonly VertexPositionTexture[] quad = new VertexPositionTexture[6];
 
     // Point-upscales the half-resolution layer over `screenBounds` (screen pixels, before `view`)
-    // with the one-dot navy outline and a small glow (none when reduced).
+    // with the one-dot navy outline and a small glow. Reduced uses the plain pass, which has no glow
+    // and none of its 16 extra texture reads per pixel.
     internal static void Composite(GraphicsDevice device, Effect effect, Texture2D scene, Rectangle screenBounds, Matrix view, bool reduced)
     {
         float width = scene.Width, height = scene.Height;
@@ -509,7 +510,7 @@ internal static class EbonPixelArt
         Set(effect, "glowStrength", reduced ? 0f : .5f);
         device.Textures[0] = scene;
         device.SamplerStates[0] = SamplerState.PointClamp;
-        Apply(effect, "CompositePass");
+        Apply(effect, reduced ? "CompositePlainPass" : "CompositePass");
         device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
     }
 
@@ -520,7 +521,10 @@ internal static class EbonPixelArt
 }
 
 // Caller's device state around the layer's target and composite. Render targets are read through FNA's
-// allocation-free accessor into fixed arrays (FNA allows at most four bound targets).
+// allocation-free accessor into fixed arrays (FNA allows at most four bound targets). Vertex buffers are not
+// captured: GetVertexBuffers allocates an array per call, both draws use DrawUserPrimitives (which leaves the
+// managed bindings alone and has FNA re-apply them on the next buffered draw), and SpriteBatch binds its own
+// vertex and index buffers on every flush.
 internal readonly struct EbonDeviceState
 {
     private static readonly RenderTargetBinding[][] targets =
@@ -535,7 +539,6 @@ internal readonly struct EbonDeviceState
     private readonly Rectangle scissor;
     private readonly SamplerState sampler0, sampler1;
     private readonly Texture? texture0, texture1;
-    private readonly VertexBufferBinding[] vertices;
     private readonly IndexBuffer? indices;
     private readonly int targetCount;
 
@@ -549,7 +552,6 @@ internal readonly struct EbonDeviceState
         sampler1 = device.SamplerStates[1];
         texture0 = device.Textures[0];
         texture1 = device.Textures[1];
-        vertices = device.GetVertexBuffers();
         indices = device.Indices;
         targetCount = -1;
         if (!withTargets) return;
@@ -567,7 +569,6 @@ internal readonly struct EbonDeviceState
         device.Textures[1] = texture1;
         device.SamplerStates[0] = sampler0;
         device.SamplerStates[1] = sampler1;
-        device.SetVertexBuffers(vertices);
         device.Indices = indices;
         device.BlendState = blend;
         device.DepthStencilState = depth;

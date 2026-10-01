@@ -10,8 +10,11 @@ internal static class EbonLastWaltzRules
 {
     // The first six beats of the eight-beat score fling a piece; the last two are the waltz.
     internal const int Slots = EbonRewardRules.CompanionSlots, Mana = 10, Flings = EbonRewardRules.ScoreBeats - 2;
-    // One fling: Noirette lifts the piece for Lift ticks (cast pose), yanks it (pull pose, PullHold ticks) and it flies.
-    internal const int Lift = 12, PullHold = 8, MaxFlight = 80, Anticipation = 9, Settle = 6, RestartCooldown = 30;
+    // One fling: Noirette lifts the piece for Lift ticks (cast pose; the last Windup of them draw the thread back),
+    // yanks it (fling pose, PullHold ticks) and it flies.
+    internal const int Lift = 12, PullHold = 8, Windup = 3, MaxFlight = 80, Anticipation = 9, Settle = 6, RestartCooldown = 30;
+    // The summoning curtsy lasts this long (client ticks since she appeared); the weave-in is 40 of them.
+    internal const int CurtsyTicks = 56;
     // Spokes: staggered unfurl, a short fold at the end; below SpokeLive px a spoke is too short to touch anything.
     internal const float SpokeReach = 240, SpokeInner = 22, SpokeWidth = 22, SpokeLive = 24;
     internal const int SpokeStagger = 2, SpokeOpen = 8, SpokeClose = 8;
@@ -33,6 +36,9 @@ internal static class EbonLastWaltzRules
     internal static int WaltzStart => BeatTick(Flings);
     internal static int SpokeLife => Cycle - WaltzStart - 1;
     internal static int YankTick(int piece) => BeatTick(piece) + Lift;
+    // Where a score restarted within RestartCooldown ticks of the previous start resumes: just after the first
+    // piece's lift and yank, which are skipped with the piece, so the second piece still lands on its beat.
+    internal static int ResumeTick => YankTick(0) + PullHold;
     internal static bool FlingAt(int tick, out int piece)
     {
         for (piece = 0; piece < Flings; piece++)
@@ -54,22 +60,28 @@ internal static class EbonLastWaltzRules
         return -1;
     }
 
-    // --- Pose (Noirette.png cells: 0 idle, 1 sway, 2 float, 3 glide, 4 cast, 5 pull, 6 parasol, 7 command) ---
-    internal const int FrameCount = 8;
-    internal static int Frame(int tick, bool moving, int idle)
+    // --- Pose ---------------------------------------------------------------------------------
+    // Cells 0-7 are Noirette.png (0 idle, 1 sway, 2 float, 3 glide, 4 cast, 5 pull, 6 parasol, 7 command);
+    // cells 8-11 are the four NoiretteWaltz.png poses (twirl A, twirl B, fling, curtsy).
+    internal const int FrameCount = 12, WaltzFrame = 8;
+    internal const int FrameFloat = 2, FrameGlide = 3, FrameCast = 4, FramePull = 5, FrameCommand = 7,
+        FrameTwirlA = 8, FrameTwirlB = 9, FrameFling = 10, FrameCurtsy = 11;
+    // sinceSummon: client ticks since she appeared; she curtsies while idle at first.
+    internal static int Frame(int tick, bool moving, int idle, int sinceSummon = int.MaxValue)
     {
-        if (tick <= 0) return moving ? 3 : (idle % 420 is >= 300 and < 322) ? 1 : 2;
-        if (tick >= Cycle - Settle) return 2;
-        if (tick >= WaltzStart) return 6;
+        if (tick <= 0) return sinceSummon < CurtsyTicks ? FrameCurtsy : moving ? FrameGlide : (idle % 420 is >= 300 and < 322) ? 1 : FrameFloat;
+        if (tick >= Cycle - Settle) return FrameFloat;
+        // The parasol twirls on the sixteenth: two poses trading places for the whole waltz.
+        if (tick >= WaltzStart) return (int)((tick - WaltzStart) / EbonRewardRules.SixteenthTicks) % 2 == 0 ? FrameTwirlA : FrameTwirlB;
         // The last fling's recovery blends into a pointing "command" cell before the parasol opens.
-        if (tick >= WaltzStart - Anticipation) return 7;
+        if (tick >= WaltzStart - Anticipation) return FrameCommand;
         for (int piece = Flings - 1; piece >= 0; piece--)
         {
             int since = tick - BeatTick(piece);
             if (since < 0) continue;
-            return since < Lift ? 4 : since < Lift + PullHold ? 5 : 2;
+            return since < Lift - Windup ? FrameCast : since < Lift ? FramePull : since < Lift + PullHold ? FrameFling : FrameFloat;
         }
-        return 2;
+        return FrameFloat;
     }
 
     // --- Spokes ------------------------------------------------------------------------------

@@ -4,7 +4,9 @@
 // palette: swept crescents, chalk/tear bands and 1-3 dot threads, strings and
 // rings. FlatPass fills dot runs plotted on the CPU (stars, debris, stitches).
 // CompositePass point-upscales the target with a one-dot navy outline and a
-// small bounded glow. Inputs are presentation state only; nothing here decides hits.
+// small bounded glow; CompositePlainPass is the same without the glow (and
+// without its 16 extra texture reads), used by Reduced Effects. Inputs are
+// presentation state only; nothing here decides hits.
 matrix uWorldViewProjection;
 float shimmerOffset;
 float reduced;
@@ -274,33 +276,48 @@ float Bright(float4 c)
     return saturate(dot(c.rgb, float3(0.3, 0.3, 0.4)) * 1.6 - 0.6);
 }
 
-float4 CompositePS(CompositeOut i) : COLOR0
+// The glow is a compile-time switch: the plain variant has no sampling loop at all.
+float4 Composite(float2 uv, bool withGlow)
 {
-    float4 c = tex2D(sceneTex, i.U);
-    float4 east = tex2D(sceneTex, i.U + float2(texel.x, 0)), west = tex2D(sceneTex, i.U - float2(texel.x, 0));
-    float4 south = tex2D(sceneTex, i.U + float2(0, texel.y)), north = tex2D(sceneTex, i.U - float2(0, texel.y));
+    float4 c = tex2D(sceneTex, uv);
+    float4 east = tex2D(sceneTex, uv + float2(texel.x, 0)), west = tex2D(sceneTex, uv - float2(texel.x, 0));
+    float4 south = tex2D(sceneTex, uv + float2(0, texel.y)), north = tex2D(sceneTex, uv - float2(0, texel.y));
     float touch = max(max(east.a, west.a), max(south.a, north.a));
     float solid = step(0.5, east.a) + step(0.5, west.a) + step(0.5, south.a) + step(0.5, north.a);
     // a pinhole enclosed by pale dots is filled, not outlined (no dark specks)
     float4 average = (east + west + south + north) * 0.25;
     float enclosedBright = step(3.5, solid) * step(0.45, dot(average.rgb, float3(0.3, 0.3, 0.4)));
-    float3 glowColour = 0;
-    float glow = 0;
-    [unroll] for (int n = 0; n < 8; n++)
+    float4 halo = 0;
+    if (withGlow)
     {
-        float angle = n * 0.785398 + 0.39;
-        float2 direction = float2(cos(angle), sin(angle)) * texel;
-        float4 nearSample = tex2D(sceneTex, i.U + direction * 2.2), farSample = tex2D(sceneTex, i.U + direction * 4.6);
-        float bn = Bright(nearSample), bf = 0.6 * Bright(farSample);
-        glow += bn + bf;
-        glowColour += nearSample.rgb * bn + farSample.rgb * bf;
+        float3 glowColour = 0;
+        float glow = 0;
+        [unroll] for (int n = 0; n < 8; n++)
+        {
+            float angle = n * 0.785398 + 0.39;
+            float2 direction = float2(cos(angle), sin(angle)) * texel;
+            float4 nearSample = tex2D(sceneTex, uv + direction * 2.2), farSample = tex2D(sceneTex, uv + direction * 4.6);
+            float bn = Bright(nearSample), bf = 0.6 * Bright(farSample);
+            glow += bn + bf;
+            glowColour += nearSample.rgb * bn + farSample.rgb * bf;
+        }
+        glowColour /= max(glow, 0.001);
+        glow = saturate(glow / 12.8) * glowStrength;
+        halo = float4(glowColour * glow, glow);
     }
-    glowColour /= max(glow, 0.001);
-    glow = saturate(glow / 12.8) * glowStrength;
-    float4 halo = float4(glowColour * glow, glow);
     float4 empty = touch > 0.004 ? float4(Outline * touch, touch) : halo;
     empty = enclosedBright > 0.5 ? average : empty;
     return c.a > 0.004 ? c : empty;
+}
+
+float4 CompositePS(CompositeOut i) : COLOR0
+{
+    return Composite(i.U, true);
+}
+
+float4 CompositePlainPS(CompositeOut i) : COLOR0
+{
+    return Composite(i.U, false);
 }
 
 technique EbonPixel
@@ -310,4 +327,5 @@ technique EbonPixel
     pass LinePass { VertexShader = compile vs_3_0 PrimVS(); PixelShader = compile ps_3_0 LinePS(); }
     pass FlatPass { VertexShader = compile vs_3_0 FlatVS(); PixelShader = compile ps_3_0 FlatPS(); }
     pass CompositePass { VertexShader = compile vs_3_0 CompositeVS(); PixelShader = compile ps_3_0 CompositePS(); }
+    pass CompositePlainPass { VertexShader = compile vs_3_0 CompositeVS(); PixelShader = compile ps_3_0 CompositePlainPS(); }
 }
