@@ -1,0 +1,69 @@
+Mods: {
+	Convergence: {
+		Items: {
+			EbonHatbox: {
+				DisplayName: Ebon Hatbox
+				Tooltip:
+					'''
+					Right click to open
+					Contains one of the five Ebon Manor weapons, each with an equal 20% chance
+					Collect all five weapons to craft The Last Waltz at a Work Bench
+					A parting gift from the mistress of the manor, tied in black silk
+					'''
+			}
+			EbonMoonshear: {
+				DisplayName: Moonshear
+				Tooltip:
+					'''
+					Swing giant tailor's shears as twin blades in a four-stroke kata
+					The fourth stroke closes the shears with a snip
+					Strokes leave chalk marks on enemies, up to five each
+					Right click to cut along a chalk line; every mark on the line bursts in turn
+					'''
+			}
+			EbonLoomHarp: {
+				DisplayName: Moonloom Harp
+				Tooltip:
+					'''
+					Fires silver needle arrows that leave taut silk strings behind
+					Right click to pluck every string in a glissando, cutting all who cross them
+					Holds up to eight strings
+					'''
+			}
+			EbonThimble: {
+				DisplayName: Ebon Thimble
+				Tooltip:
+					'''
+					Hold to lift the manor's furniture on silk threads, one piece per beat
+					Release to hurl them at the cursor
+					Release with all eight raised to bring down a grand piano
+					'''
+			}
+			EbonChandelierPole: {
+				DisplayName: Ballroom Chandelier
+				Tooltip:
+					'''
+					Summons a chandelier that hangs above your foes and falls when its thread is cut
+					Shattered chandeliers weave themselves whole and are reeled back up
+					Several chandeliers fall in turn on the beat
+					'''
+			}
+			EbonSeveringSilk: {
+				DisplayName: Severing Silk
+				Tooltip:
+					'''
+					Throws spools that string silk strands across the field
+					Stealth strikes throw embroidery scissors that sever every strand at once
+					'''
+			}
+			EbonLastWaltz: {
+				DisplayName: The Last Waltz
+				Tooltip:
+					'''
+					Noirette accompanies you, flinging furniture and waltzing her silk spokes around your foes
+					Requires 10 minion slots; only one may attend you
+					'''
+			}
+		}
+	}
+}
