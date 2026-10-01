@@ -1,0 +1,16 @@
+Mods: {
+	Convergence: {
+		Buffs: {
+			EbonLastWaltzBuff: {
+				DisplayName: The Last Waltz
+				Description: Noirette attends you. Uses 10 minion slots.
+			}
+		}
+
+		Projectiles: {
+			EbonLastWaltzCompanion.DisplayName: Noirette
+			EbonWaltzFling.DisplayName: Flung Furniture
+			EbonWaltzSpoke.DisplayName: Silk Spoke
+		}
+	}
+}

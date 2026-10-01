@@ -1,0 +1,18 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonChandelierMinion: {
+				DisplayName: 舞踏会のシャンデリア
+			}
+			EbonChandelierShatter: {
+				DisplayName: 砕けたシャンデリア
+			}
+		}
+		Buffs: {
+			EbonChandelierBuff: {
+				DisplayName: 舞踏会のシャンデリア
+				Description: 頭上に吊られたシャンデリアが、敵に落ちる時を待っている
+			}
+		}
+	}
+}

@@ -1,0 +1,12 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonNeedleArrow: {
+				DisplayName: 月光の針
+			}
+			EbonHarpString: {
+				DisplayName: 月光の糸
+			}
+		}
+	}
+}

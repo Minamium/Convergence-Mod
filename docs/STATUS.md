@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-02
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,15 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.56 / protocol75**. Soboro replaces 0.3.53's smooth surfaces with a client-only half-resolution pixel-art slash layer (six-tone violet palette, 1px outline, torn residue, pixel lightning/sparks/impact star), flows through the top and bottom of each cut instead of braking (same live-window angles and peak speed, about one tenth of the peak angular acceleration) and uses layered CC0 recordings for its three swing and two hit cues. Damage, reach, hit windows, recipe and saved `DXOboro` ID are unchanged; the new sweep timing needs matching protocol75 peers. [Soboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroのドット絵斬撃と流れる型--2026-10-01) owns the presentation; native feel, mix, FPS and remote views remain user-owned.
+Current source: **0.3.61 / protocol76**. Adds the **Waltz of the Ebon Manor rewards**: accepted Victory drops one Ebon Hatbox per frozen member; it opens to one of five weapons (Moonshear shear kata and cut line, Moonloom Harp strings and glissando, Ebon Thimble furniture and grand piano, Ballroom Chandelier beat cascade, Severing Silk web and stealth sever), and all five craft The Last Waltz, a 10-slot Noirette companion. Codex pixel art from Claude's brief, a shared half-resolution Ebon pixel layer and 27 CC0-layered cues; no packet or protocol change. [Rewards spec](encounters/ebon-manor/REWARDS.md) owns behavior; balance is untuned and play, hearing, FPS and peers remain user-owned.
+
+Retained0.3.60: Ghost Samurai gets its own music: the original theme 紫電の亡霊武者 / *Violet Phantom Blade* (168 BPM, Miyako-bushi over a Phrygian orchestra, temple-bell opening, one-time intro and an exact native loop) replaces vanilla Boss 3 for players inside the seal, held under the victory dissolve. Client presentation only; gameplay, timings and protocol are unchanged. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#音楽--2026-10-02) owns the behaviour; the in-game mix against its cues remains user-owned.
+
+Retained 0.3.59: adds **Waltz of the Ebon Manor** v1 (`ebon_manor`): Noirette's three acts on AutoMatador's 125 BPM beat grid (Act One → 62% → Act II → 28% → Finale), with thrown furniture, chandeliers, loom strings, shears, a beat-stepping parasol waltz, a severing web from Act II and Binding/Torn Stitch calls; the entrance follows the song's whole intro, and warnings are silk gauze; crafted Black Invitation, 1–8 players, shared instant recovery, and the one-damage rehearsal cap. Native hazard/stitch damage is scoped by [ADR-0029](adr/0029-ebon-manor-native-actors.md). [Ebon Manor spec](encounters/ebon-manor/ENCOUNTER_SPEC.md) owns behavior and presentation; balance is untuned, and play, hearing, FPS and peers remain user-owned.
+
+Retained0.3.58: Ghost Samurai's forecasts, cuts, residue and wisps use Soboro's pixel-art language: each accepted hazard is evaluated per world-aligned 2x2 art pixel in the six-tone violet palette, lighting only cells inside the footprint (marching contour and dither forecast, sweeping white-edged cuts, torn residue, a white-cored flame wisp). Each boss swing adds a display-only step and a stronger shoulder turn, and nine layered CC0 cues replace the borrowed vanilla sounds on their existing ticks. Attack shapes, timings, damage, NPC position and protocol75 are unchanged. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#ドット絵の斬撃と鬼火--2026-10-01) owns the presentation; native readability, mix, FPS and remote views remain user-owned.
+
+Retained0.3.56: Soboro replaces 0.3.53's smooth surfaces with a client-only half-resolution pixel-art slash layer (six-tone violet palette, 1px outline, torn residue, pixel lightning/sparks/impact star), flows through the top and bottom of each cut instead of braking (same live-window angles and peak speed, about one tenth of the peak angular acceleration) and uses layered CC0 recordings for its three swing and two hit cues. Damage, reach, hit windows, recipe and saved `DXOboro` ID are unchanged; the new sweep timing needs matching protocol75 peers. [Soboro spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#soboroのドット絵斬撃と流れる型--2026-10-01) owns the presentation; native feel, mix, FPS and remote views remain user-owned.
 
 Retained0.3.54: Cathedral explicitly publishes Stack/Spread verdicts so the accepted ice compression/rift attack and audio can start on clients. Liora/Vitrion HP budgets double; Duet worm attacks are charge-only and Fury body/tail take10% incoming damage through the same single native HP pool. Player-facing outgoing damage remains capped at1 for rehearsal. [Cathedral spec](encounters/azure-cathedral/ENCOUNTER_SPEC.md) owns current behavior; native multi-client visual/overlap acceptance remains user-owned.
 
@@ -71,6 +79,14 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.61 Ebon Manor rewards:** [evidence](evidence/2026-10-02-ebon-rewards.json) records the domain suite (451), static/catalog/tools checks, the compiled pixel material and its offline frames, the deterministic reward audio, the mechanical pixel-art export and the native package. No native play, hearing, FPS or peer acceptance is claimed.
+
+- **0.3.60 Ghost Samurai music:** [evidence](evidence/2026-10-02-samurai-theme.json) records the owner's v1/v2 audition and choice, the deterministic re-render from the external recipe, loudness/true-peak/seam/click checks, the comparison against the adopted tracks and the native package. No in-game hearing or mix acceptance is claimed.
+
+- **Ebon Manor v1 (0.3.57 playtests; 0.3.59 with main):** [evidence](evidence/2026-10-01-ebon-manor-v1.json) records the domain suite, compiled shader identity, offline GPU material frames on the real textures, deterministic music/SFX exports and the native package. No native play, hearing, FPS or peer acceptance is claimed.
+
+- **0.3.58 Ghost Samurai pixel cuts and CC0 audio:** [evidence](evidence/2026-10-01-samurai-pixel-cuts.json) records the production-cut sequence checks, the before/after comparison, deterministic audio exports, domain tests and the exact installed package identity. No native gameplay, hearing or FPS acceptance is claimed.
 
 - **0.3.56 Soboro pixel slash, flowing kata and CC0 audio:** [evidence](evidence/2026-10-01-soboro-pixel-flow.json) records the motion metrics, focused domain test, compiled shader identity, offline production-renderer sequences, deterministic audio exports and the exact installed package/source identity. No native gameplay, hearing or FPS acceptance is claimed.
 
@@ -164,9 +180,15 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 
 ## Next change
 
+Ebon rewards: Reload the installed 0.3.61 package, win the Ebon Manor Raid (or take a hatbox from a cheat menu) and open the hatbox. Try each weapon on a target dummy and in the Raid: Moonshear's four-stroke flow, marks and cut line; the harp's strings and glissando; the thimble's eight lifts and piano; one and four chandeliers; the web and stealth sever; then craft The Last Waltz. Report sizes (shears, bow, chandeliers, Noirette), readability over bright/dark ground, the mix, Reduced Effects, FPS and a second peer.
+
+Ebon Manor: Reload (not Build + Reload) the installed 0.3.57 package and craft a Black Invitation (10 Silk, 1 Black Ink at a Work Bench). Play Act One → Act II → Finale → Victory, then Defeat once. Check music sync through the entrance, act lead-ins and loops; forecast readability of throws, chandeliers, loom strings, shears and the waltz; Stack/Spread verdicts; Noirette's size, poses and threads; the Finale hall tear; Reduced Effects, shake off, UI 107%/zoom and FPS; then a matching peer. All user-owned / not_run.
+
 Cathedral: matching0.3.54 Host & Play clients should compare one failed Stack, then overlapping/non-overlapping Spread. Check that ice compresses instead of silently disappearing, both overlapping players see the rift attack, P1 emits no segment bolts and Fury body hits remain visibly weaker than head hits. Native overlap/latency and new HP feel are user-owned / not_run; all incoming Cathedral hits remain1 for this rehearsal.
 
 Soboro: Reload (not Build + Reload) the installed matching0.3.56 package and play its1→2→3→1 loop standing, moving and flying. Check the flow through the top/bottom of each cut, arm/armor while the blade circles behind, slash size/readability over boss telegraphs, the pixel layer staying attached while moving, zoom/Reduced Effects, FPS, and the new swing/hit mix on organic and `NPCHit4` targets. A matching remote peer needs0.3.56. Hit accents stay owner-local; no remote-hit broadcast was added. These checks are user-owned / not_run.
+
+Ghost Samurai: Reload (not Build + Reload) the installed matching0.3.58 package and fight through all three phases. Check that every forecast reads before it fires on bright and dark backgrounds, that the grid's safe cells, the annulus hole and the cleave's back half stay empty, how the new slash/grid/wind/wave/cleave/shockwave/shout/chime cues sit in the mix, the wisps' flame readability, the boss's step into each swing, and FPS with thirty grid lines. These checks are user-owned / not_run.
 
 Ghost Samurai: on matching0.3.51 peers, check both weapons' three-stroke loop, release/switch, mirrored/high-speed native arms and violet discharge; check the boss's raised guard→fast cut→recoil, travelling-wave alignment and Reduced Effects. Compare SP and Host & Play rather than assuming offline samples reproduce player drawing/network delivery. Soboro keeps its one-Fallen-Star Work Bench recipe and saved DXOboro ID. GUI and subjective acceptance are user-owned. Earlier battlefield edge/zoom checks remain pending, not repeated as a prerequisite to each minor edit.
 

@@ -1,0 +1,12 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonNeedleArrow: {
+				DisplayName: Moonloom Needle
+			}
+			EbonHarpString: {
+				DisplayName: Moonloom String
+			}
+		}
+	}
+}

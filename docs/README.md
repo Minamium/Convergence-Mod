@@ -54,6 +54,7 @@ Select checks from the shared [Verification Matrix](../.agents/skills/develop-co
 | What governs the independent summoned Boss? | [Ghost Samurai specification](encounters/ghost-samurai/ENCOUNTER_SPEC.md) |
 | What governs the scarlet summoner / music-led Raid prototype? | [Crimson Invocation](encounters/crimson-foundry/ENCOUNTER_SPEC.md): shared pedestal/field, independent apparitions, small performer/companion, score and music rights |
 | What governs the ice-glass leviathan and small sword-bearing girl? | [Azure Cathedral](encounters/azure-cathedral/ENCOUNTER_SPEC.md): independent Raid, Ready, linked worm, native damage and EigHt music |
+| What governs the thread-mistress manor Raid? | [Ebon Manor](encounters/ebon-manor/ENCOUNTER_SPEC.md): Noirette, three acts on AutoMatador's beat grid, furniture/chandelier/loom/shears/waltz hazards and stitches |
 | What gets implemented in the Raid, and in what order? | [Doll Raid implementation plan](encounters/first-severance/IMPLEMENTATION_PLAN.md) |
 | How does Downed/Revive feel to players? | [Revive specification](encounters/first-severance/REVIVE_SPEC.md) |
 | Which weapon forms, inputs and macro timelines are current? | [Weapons](encounters/first-severance/WEAPONS.md) |

@@ -1,149 +1,284 @@
-// Original violet sword-tear material. ScarletSorcery's incision/recoil/smoke
-// choreography is the reference, not a beam/nozzle/portal implementation.
+// Ghost Samurai pixel-art sword cuts. Original repository material.
+// Each pass evaluates the accepted hazard once per world-aligned 2x2 art pixel,
+// quantizes it to Soboro's violet palette and lights only art pixels that lie
+// wholly inside the gameplay footprint. Forecast, live cut and torn residue
+// follow the same Fire/End clock; nothing here decides hits.
 matrix uWorldViewProjection;
+float2 uScreenPosition;
+float2 frameOrigin;
+float2 frameX;
+float2 frameY;
+float clock;
+float4 phase; // ticks relative to Fire, live duration, forecast progress, reduced
+float4 shape; // stroke: length, half width, seed, route | field: radius, inner radius, facing, wind | wave: length, half width, seed, 0
 sampler cloud : register(s1);
 sampler veins : register(s2);
-float clock;
-float4 phase; // ticks relative to Fire, live duration, warning progress, reduced
-float4 shape; // stroke length/field radius, width/inner radius, seed/facing, route/wind
-struct VI { float4 P:POSITION0; float4 C:COLOR0; float2 U:TEXCOORD0; };
-struct VO { float4 P:SV_POSITION; float4 C:COLOR0; float2 U:TEXCOORD0; };
-VO VS(VI v) { VO o; o.P=mul(v.P,uWorldViewProjection); o.C=v.C; o.U=v.U; return o; }
-float3 ink=float3(.019,.006,.041),violet=float3(.36,.045,.94),lavender=float3(.67,.30,1),ivory=float3(.94,.86,1);
-float bell(float x,float radius) { float s=x/max(.1,radius);return exp2(-s*s*2.8); }
-float noise(float2 uv) { return tex2D(cloud,uv).r; }
-float aa(float d) { return max(.8,(abs(ddx(d))+abs(ddy(d)))*.62); }
-float lifetime() { return 1-smoothstep(phase.y,phase.y+16,phase.x); }
-float live() { return step(0,phase.x)*(1-step(phase.y,phase.x)); }
-float contraction() { return 1-smoothstep(max(2,phase.y-4),phase.y,phase.x); }
 
-// A sparse fracture instead of an opaque corridor. Boundary ink never extends
-// beyond the gameplay footprint. Charge, release and recoil share this spine.
-float4 Forecast(float x,float y,float radius,float seed,float extent)
+static const float3 Tone1 = float3(0.086, 0.020, 0.188); // contour
+static const float3 Tone2 = float3(0.243, 0.063, 0.541); // deep violet
+static const float3 Tone3 = float3(0.439, 0.157, 0.871); // violet
+static const float3 Tone4 = float3(0.667, 0.424, 1.000); // lilac
+static const float3 Tone5 = float3(0.863, 0.769, 1.000); // pale
+static const float3 Tone6 = float3(1.000, 1.000, 1.000); // white-hot edge
+static const float Inset = 1.42;  // half diagonal of an art pixel: lit cells stay inside the footprint
+static const float Residue = 16;
+
+struct VI { float4 P : POSITION0; float4 C : COLOR0; float2 U : TEXCOORD0; };
+struct VO { float4 P : POSITION0; float4 C : COLOR0; float2 U : TEXCOORD0; float2 S : TEXCOORD1; };
+
+VO VS(VI v)
 {
- float pixel=aa(y),distance=abs(y),edge=bell(distance-(radius-pixel*1.3),pixel);
- float rise=smoothstep(0,.12,phase.z),charge=smoothstep(-13,0,phase.x);
- float flutter=(sin(x*.043-clock*23+seed)*.65+sin(x*.097+clock*39)*.3)*(1-phase.w*.75);
- float spine=bell(y-flutter,pixel*(.75+charge*.6));
- float thin=bell(y,pixel*3.7),under=bell(distance-(radius-pixel*2),pixel*2.2);
- float cell=floor(x/67),cx=frac(x/67+clock*.22)-.5;
- float glint=bell(cx,.037)*bell(y-sin(cell*7.79+seed)*radius*.78,pixel*1.7)*.60;
- float signal=(spine*(.65+charge*.60)+edge*(.27+charge*.25)+glint)*rise;
- float alpha=(thin*.54+under*.34)*rise;
- float3 color=ink*alpha+lerp(lavender,ivory,.38+charge*.43)*signal;
- return float4(color,alpha)*extent;
+    VO o;
+    o.P = mul(v.P, uWorldViewProjection);
+    o.C = v.C;
+    o.U = v.U;
+    o.S = v.P.xy;
+    return o;
 }
 
-// A tapered moving blade sheet with a pointed head and much longer torn tail.
-// Several unequal sheets pass along the incision; no uniform beam-body fill.
-float3 Sheet(float u,float y,float radius,float seed,float lane)
+// Art pixels are fixed to the world, so a moving camera never shifts them.
+float2 Cell(float2 s) { return floor((s + uScreenPosition) * .5); }
+float2 Center(float2 cell) { return cell * 2 + 1 - uScreenPosition; }
+float2 Local(float2 cell)
 {
- float t=phase.x;
- float head=-.09+t*.23-lane*.23;
- float behind=head-u;
- float packet=saturate(smoothstep(-.025,.045,behind)*(1-smoothstep(.10,.78,behind)));
- float n=noise(float2(u*7-clock*2.3+seed,y*.016-lane*.2));
- float grain=tex2D(veins,float2(u*13-clock*4.8+seed,y*.035+n*.2)).r;
- float flutter=(sin(u*41-clock*47+seed+lane)*.65+sin(u*97+clock*33)*.35)*(1-phase.w*.72);
- float curve=sin(u*3.14159)*(lane-1)*radius*.31+flutter*(1+radius*.025);
- float arrival=smoothstep(-.25,2.2,t),collapse=contraction();
- float width=radius*(.04+.81*pow(packet,.7))*arrival*collapse*(1-lane*.16);
- float core=bell(y-curve,max(aa(y),width*.15));
- float skin=bell(y-curve,max(.8,width))*(.25+n*.40+grain*.36);
- float tears=pow(saturate(grain*1.42-.34),3)*bell(y-curve,width*1.17)*.50;
- float tip=bell(behind,.045)*bell(y-curve,max(1,radius*.24))*arrival;
- return (violet*skin*.74+lavender*tears+ivory*(core*.85+tip*.65))*packet*collapse;
+    float2 d = Center(cell) - frameOrigin;
+    return float2(dot(d, frameX), dot(d, frameY));
 }
 
-float4 Stroke(VO i):COLOR0
+float B2(float2 p) { return fmod(2 * p.x + 3 * p.y, 4); }
+float Bayer(float2 cell)
 {
- float u=i.U.x,x=u*shape.x,y=(i.U.y*2-1)*shape.y,t=phase.x;
- float pixel=aa(y),mask=1-smoothstep(shape.y-pixel*.7,shape.y,abs(y));
- float extent=(.45+.55*saturate(x/8)*saturate((shape.x-x)/8))*mask;
- float seed=shape.z;
- float4 warning=Forecast(x,y,shape.y,seed,extent);
- float attack=smoothstep(-.15,1.4,t),hold=live(),tail=lifetime();
- float charge=smoothstep(-10,0,t)*(1-smoothstep(0,2.5,t));
- float n=noise(float2(x*.008-clock*2.8+seed,y*.027+clock*.12));
- float grain=tex2D(veins,float2(x*.013-clock*5.2+seed,y*.033+n*.2)).r;
- float envelope=contraction();
- float tremor=(sin(x*.047-clock*49+seed)+sin(x*.089+clock*37)*.4)*(1-phase.w*.75);
- float spine=bell(y-tremor,max(pixel,shape.y*(.02+.065*attack)*envelope));
- float edge=bell(abs(y)-(shape.y-pixel*1.4),pixel);
- // The full hit footprint remains readable even ahead of the moving bright
- // blade. Dim combed fibers + its rim, never a solid colored rectangle.
- float fibers=pow(saturate(grain*1.45-.38),3)*(.04+n*.13)*hold;
- // Stable opposite travelling strokes across neighbouring grid cuts. This is
- // material motion only: it never staggers or postpones their shared hit tick.
- float flowU=lerp(u,1-u,step(.5,frac(seed*.113)));
- float3 sheets=Sheet(flowU,y,shape.y,seed,0)+Sheet(flowU,y,shape.y,seed,1)*.67;
- sheets+=Sheet(flowU,y,shape.y,seed,2)*.43*(1-phase.w);
- float flare=exp2(-max(0,t)*.44)*attack*(1-phase.w*.45);
- float cell=floor(x/157),local=frac(x/157)-.5;
- float shard=(bell(local,.009)*bell(y,shape.y*.65)+bell(local,.21)*bell(y,pixel))*flare;
- shard*=pow(saturate(sin(cell*4.19+seed)),4)*.50;
- float vapor=smoothstep(2,7,t)*tail*pow(saturate(n*.72+grain*.5-.48),2)*bell(y,shape.y*.76)*(1-phase.w*.60);
- float3 light=sheets+(lavender*.55+ivory*.24)*spine*(charge*.24+attack*.38*envelope);
- light+=lavender*(fibers+edge*.43*hold)+ivory*shard+violet*vapor*.43;
- float shadow=(bell(y,shape.y*.72)*.13+edge*.29)*hold+vapor*.28;
- float4 slash=float4(light+ink*shadow,shadow)*extent;
- // Smoothly leave the forecast; its actual-width rim remains until End. Routes
- // deliberately use only the forecast; the projectile owns travelling damage.
- return lerp(lerp(warning,slash,attack),warning,shape.w)*i.C;
+    float2 c = cell - 4 * floor(cell * .25);
+    float2 hi = floor(c * .5);
+    return (4 * B2(c - 2 * hi) + B2(hi) + .5) / 16;
 }
 
-float4 Field(VO i):COLOR0
+// 0 = empty, 1 = contour, 2..6 = the violet ramp
+float3 Tone(float level)
 {
- float2 q=(i.U*2-1)*shape.x;
- float r=length(q),theta=atan2(q.y+step(r,.001)*.001,q.x),pixel=aa(r),t=phase.x;
- float mask=1-smoothstep(shape.x-pixel,shape.x,r);
- float inner=step(.5,shape.y),front=step(.5,abs(shape.z));
- mask*=lerp(1,smoothstep(shape.y,shape.y+pixel,r),inner);
- mask*=lerp(1,smoothstep(0,pixel,q.x*shape.z),front);
- float edge=bell(r-(shape.x-pixel*1.3),pixel)+inner*bell(r-(shape.y+pixel*1.3),pixel);
- edge+=front*bell(q.x-pixel*1.3*shape.z,pixel);
- float charge=smoothstep(-13,0,t),attack=smoothstep(-.15,1.4,t),hold=live();
- float n=noise(q*.006+float2(-clock*2.3,clock*.17));
- float grain=tex2D(veins,q*.017+float2(clock*1.2,-clock*2.9)).r;
- float pre=pow(saturate(grain*1.14-.16),9)*.18;
- float4 forecast=float4(ink*edge*.4+ivory*(edge*(.42+charge*.45)+pre),edge*.37)*smoothstep(0,.13,phase.z);
- // Broad, accelerating curved cuts sweep the disk. The exact disk/annulus
- // mask survives the bright blade, and its safe hole is never filled.
- float angle=theta*2.0-r*.004-t*(.22+.015*max(0,t))+n*.52;
- float crest=pow(saturate(.5+.5*sin(angle)),20);
- float wake=pow(saturate(.5+.5*sin(angle+.48)),5)*.34;
- float fringe=pow(saturate(grain*1.5-.35),3);
- float width=contraction(),envelope=attack*width;
- float spine=pow(crest,2.7)*envelope;
- float3 light=violet*(crest+wake)*envelope*(.30+n*.35)+ivory*spine*.84;
- light+=lavender*(fringe*.15+edge*.58)*hold;
- float vapor=smoothstep(2,8,t)*lifetime()*fringe*.19*(1-phase.w*.6);
- light+=violet*vapor;
- float4 cut=float4(light,edge*.24*hold+vapor*.22);
- return lerp(forecast,cut,attack)*mask*i.C;
+    return level > 5.5 ? Tone6 : level > 4.5 ? Tone5 : level > 3.5 ? Tone4 : level > 2.5 ? Tone3 : level > 1.5 ? Tone2 : Tone1;
 }
 
-float4 Wave(VO i):COLOR0
+float Cooling() { return 1 - saturate((phase.x - 2) / max(phase.y - 2, 1)); }
+float Fade() { return saturate((phase.x - phase.y) / Residue); }
+
+// A marching contour one art pixel inside the footprint, a dark inner contour
+// for bright backgrounds and an ordered-dither fill that thickens toward Fire.
+// The last eight ticks blink unless effects are reduced.
+float Forecast(float d, float s, float2 cell, float core)
 {
- float x=(i.U.x-.5)*shape.x,y=(i.U.y*2-1)*shape.y,t=phase.x;
- float v=y/shape.y,pixel=aa(x),mask=(1-smoothstep(.97,1,abs(v)))*(1-smoothstep(.94,1,abs(x)/(shape.x*.5)));
- float bend=(1-v*v)*shape.x*.39-shape.x*.08;
- float n=noise(float2(y*.014-clock*3.8,x*.021+shape.z));
- float grain=tex2D(veins,float2(y*.028-clock*6,x*.056+n*.26)).r;
- float flutter=(sin(y*.043-clock*43)+sin(y*.071+clock*29)*.35)*(1-phase.w*.7);
- float width=(7+shape.x*.19)*contraction()*(.55+.45*smoothstep(0,2,t));
- float distance=x-bend-flutter;
- float spine=bell(distance,max(pixel,width*.13)),blade=bell(distance,width)*(.34+n*.45);
- float trailing=exp2(-max(0,-distance)/max(2,width*2.5))*step(distance,0)*pow(saturate(grain*1.5-.25),3);
- float pulse=.70+.30*sin(y*.028-clock*22+n*3);
- float envelope=lifetime(),hot=live();
- float3 light=(ivory*spine*.92+violet*(blade+trailing*.58)+lavender*trailing*pulse*.40)*contraction();
- float smoke=smoothstep(phase.y-3,phase.y+5,t)*pow(saturate(n+grain-.8),2)*.25;
- return float4((light*hot+violet*smoke)*envelope,(blade*.13*hot+smoke*.28)*envelope)*mask*i.C;
+    float progress = saturate(phase.z);
+    float rim = step(d, Inset + 2);
+    float shade = step(d, Inset + 4) * (1 - rim);
+    float march = step(frac((s * .5 + clock * 12) / 6), .62);
+    float blink = (1 - phase.w) * step(-8, phase.x) * step(frac(phase.x * .25), .5);
+    float fill = step(Bayer(cell), .04 + .26 * pow(progress, 1.6));
+    float incision = step(core, 2 + 2 * progress) * step(.15, progress);
+    float level = fill * 2;
+    level = max(level, incision * (progress > .75 ? 5 : 4));
+    level = shade > .5 ? 1 : level;
+    level = rim > .5 ? (blink > .5 ? 6 : march > .5 ? 4 : 2) : level;
+    return level;
 }
+
+// Torn cooling fragments: already broken at End, deep tones only, thinning
+// to a checker once half cold.
+float Tear(float keep, float grain, float2 cell)
+{
+    float fade = Fade();
+    float checker = fmod(cell.x + cell.y, 2);
+    float alive = keep * step(.38 + fade * .72, grain) * max(step(fade, .45), 1 - checker);
+    return alive * (grain > .8 ? 3 : 2);
+}
+
+float StrokeBody(float2 p, float t, float2 cell, out float edge)
+{
+    float L = shape.x, R = shape.y, seed = shape.z;
+    float u = p.x / max(L, 1), v = p.y / max(R, 1);
+    // neighbouring grid cuts run opposite ways; the shared hit tick is unchanged
+    u = lerp(u, 1 - u, step(.5, frac(seed * .113)));
+    float front = saturate(t / 3) * 1.25 - .12 - .12 * (1 - v * v);
+    float swept = step(u, front);
+    edge = swept * step(front - .045, u) * step(abs(p.y), R - Inset - 2);
+    float cooling = Cooling();
+    // a blade profile: full width through the middle, drawn to points at both ends
+    float taper = pow(saturate(sin(3.14159 * saturate(p.x / max(L, 1)))), .35);
+    float body = R * (.3 + .7 * cooling) * taper;
+    float a = abs(p.y) / max(body, 1);
+    // speed lines run along the cut and push the tones outward
+    float streak = tex2D(cloud, float2(p.x * .0025 - clock * 3.1 + seed, p.y * .045)).r;
+    float lift = (streak - .5) * .35 * (1 - phase.w);
+    float level = a < .16 + lift * .3 ? 6 : a < .38 + lift ? 5 : a < .68 + lift ? 4 : 3;
+    level = cooling < .4 ? min(level, 5) : level; // the white core cools first
+    return swept * step(abs(p.y), body) * level;
+}
+
+float4 Stroke(VO i) : COLOR0
+{
+    float2 cell = Cell(i.S), p = Local(cell);
+    float L = shape.x, R = shape.y, t = phase.x;
+    float d = min(R - abs(p.y), min(p.x, L - p.x));
+    float level = 0, edge;
+    if (t < 0)
+        level = Forecast(d, p.x + abs(p.y), cell, abs(p.y));
+    else if (shape.w > .5)
+        level = 0; // routes are forecasts only; the travelling projectile owns its cut
+    else if (t < phase.y)
+    {
+        level = step(Bayer(cell), .3) * 2;          // the whole footprint stays readable until End
+        level = max(level, step(d, Inset + 2) * 4);
+        level = max(level, StrokeBody(p, t, cell, edge));
+        level = max(level, edge * 6);
+    }
+    else
+    {
+        // two unrelated noise periods, stretched along the cut, so fragments never tile
+        float grain = tex2D(veins, float2(p.x * .0023 + shape.z, p.y * .03 + Fade() * .2)).r * .65
+            + tex2D(cloud, float2(p.x * .0061 - shape.z, p.y * .05)).r * .35;
+        float taper = pow(saturate(sin(3.14159 * saturate(p.x / max(L, 1)))), .35);
+        float keep = step(abs(p.y), R * (.22 + .28 * Fade()) * taper);
+        level = Tear(keep, grain, cell);
+    }
+    clip(min(d - Inset, level - .5));
+    return float4(Tone(level), 1) * i.C;
+}
+
+float FieldCuts(float2 q, float r, float t)
+{
+    float R = shape.x, facing = shape.z, cooling = Cooling();
+    float level = 0;
+    if (abs(facing) > .5)
+    {
+        // Frontal cleave: one enormous blade falls from above to below on the facing side.
+        float angle = atan2(q.y, q.x * facing);
+        float fall = lerp(-1.75, 1.75, saturate(t / 4));
+        float behind = fall - angle;               // radians behind the falling blade
+        float k = behind / (.25 + 1.2 * cooling);  // 0 at the blade .. 1 at the end of its trail
+        // tangential speed lines: slow along the arc, fast across radii
+        float streak = tex2D(cloud, float2(angle * .6 - clock * .5, r * .02)).r;
+        float lift = (streak - .5) * .5 * (1 - phase.w);
+        float trail = step(0, behind) * step(k, 1);
+        level = trail * (k < .12 + lift * .2 ? 5 : k < .45 + lift ? 4 : 3);
+        level = max(level, step(0, behind) * step(behind * r, 6) * 6);
+        [unroll] for (int e = 1; e <= 2; e++)
+        {
+            float echo = behind - e * .16;
+            level = max(level, trail * step(0, echo) * step(echo * r, 3) * (6 - e) * (1 - phase.w * (e - 1)));
+        }
+    }
+    else if (shape.w > .5)
+    {
+        // Kamaitachi: curved wind blades wheel around the centre.
+        float n = tex2D(cloud, q * .004 + float2(-clock * 1.3, clock * .2)).r;
+        float crest = frac((atan2(q.y, q.x) * 3 - r * .006 - t * .32 + n * .6) / 6.2831853);
+        float reach = .08 + .26 * cooling;
+        level = step(crest, .035) * 6;
+        level = max(level, step(crest, .1) * 5);
+        level = max(level, step(crest, reach) * (3 + step(.62, n)));
+    }
+    else
+    {
+        // Straight slashes: staggered strokes cross the area and grow along their length.
+        [unroll] for (int k = 0; k < 4; k++)
+        {
+            float a = .42 + k * 1.21;
+            float2 n = float2(cos(a), sin(a));
+            float offset = (k - 1.5) * R * .3;
+            float across = abs(dot(q, n) - offset);
+            float along = dot(q, float2(-n.y, n.x));
+            float born = k * .9;
+            float grown = step(born, t) * step(along, saturate((t - born) / 2.2) * R * 2.2 - R * 1.1);
+            float width = 2 + max(3, R * .045) * cooling;
+            float use = 1 - phase.w * step(1.5, k);
+            float cut = step(across, 2.5) * 6;
+            cut = max(cut, step(across, width) * 4);
+            cut = max(cut, step(across, width * 2.2) * 3);
+            level = max(level, grown * use * cut);
+        }
+    }
+    return level;
+}
+
+float4 Field(VO i) : COLOR0
+{
+    float2 cell = Cell(i.S);
+    float2 q = Center(cell) - frameOrigin;
+    float R = shape.x, r = length(q), t = phase.x;
+    float d = R - r;
+    if (shape.y > .5) d = min(d, r - shape.y);
+    if (abs(shape.z) > .5) d = min(d, q.x * shape.z);
+    float level;
+    if (t < 0)
+        level = Forecast(d, atan2(q.y, q.x) * r, cell, 1e5);
+    else if (t < phase.y)
+    {
+        level = step(Bayer(cell), .26) * 2;
+        level = max(level, step(d, Inset + 2) * 4);
+        level = max(level, FieldCuts(q, r, t));
+    }
+    else
+    {
+        float grain = tex2D(veins, q * .0041 + Fade() * .15).r * .65 + tex2D(cloud, q * .009).r * .35;
+        level = Tear(step(2.5, FieldCuts(q, r, phase.y - 1)), grain, cell);
+    }
+    clip(min(d - Inset, level - .5));
+    return float4(Tone(level), 1) * i.C;
+}
+
+float WaveBlade(float2 p, float2 cell)
+{
+    float L = shape.x, R = shape.y;
+    float v = p.y / max(R, 1);
+    // a thick crescent whose edge bulges forward in the middle, with a torn tail
+    float ahead = p.x - L * (.42 - .3 * v * v);
+    float k = -ahead / max(L * (.35 + .3 * (1 - v * v)), 1); // 0 at the edge .. 1 at the back
+    float streak = tex2D(cloud, float2(p.x * .008 - clock * 3.8, p.y * .045 + shape.z)).r;
+    float lift = (streak - .5) * .4 * (1 - phase.w);
+    float level = step(0, k) * step(k, 1) * (k < .1 ? 6 : k < .3 + lift * .3 ? 5 : k < .62 + lift ? 4 : 3);
+    level = max(level, step(1, k) * step(k, 1.9) * step(.42 + .3 * (k - 1), streak) * 2);
+    return level;
+}
+
+// A spirit-fire wisp: a white-cored flame whose head is the hit circle and
+// whose flickering tail trails behind its heading. The tail is decoration only.
+float4 Wisp(VO i) : COLOR0
+{
+    float2 cell = Cell(i.S), p = Local(cell);
+    float R = shape.x;
+    float n = tex2D(cloud, float2(p.x * .03 - clock * 4.5 + shape.z, p.y * .05)).r;
+    // the head is drawn back into a flame, still no larger than the hit circle ahead
+    float head = length(float2(p.x < 0 ? p.x * .72 : p.x, p.y)) / max(R, 1);
+    // tail half width shrinks with distance behind the head and flickers
+    float behind = saturate(-p.x / (R * 3.2 * (.82 + .3 * n)));
+    float tail = step(p.x, 0) * step(abs(p.y), R * pow(1 - behind, .8) * (.72 + .4 * n)) * step(behind, .999);
+    float level = step(head, 1) * (head < .3 ? 6 : head < .58 ? 5 : head < .84 ? 4 : 3);
+    level = max(level, tail * (behind < .3 ? 4 : behind < .65 ? 3 : 2));
+    // a dark contour keeps the head readable on bright backgrounds
+    level = max(level, step(head, 1.18) * step(1, head) * (1 - tail));
+    clip(level - .5);
+    return float4(Tone(level), 1) * i.C;
+}
+
+float4 Wave(VO i) : COLOR0
+{
+    float2 cell = Cell(i.S), p = Local(cell);
+    float L = shape.x, R = shape.y, t = phase.x;
+    float d = min(R - abs(p.y), L * .5 - abs(p.x));
+    float level = WaveBlade(p, cell);
+    if (t >= phase.y)
+    {
+        float grain = tex2D(veins, float2(p.y * .0047 + shape.z, p.x * .03 + Fade() * .2)).r * .65
+            + tex2D(cloud, float2(p.y * .011 - shape.z, p.x * .05)).r * .35;
+        level = Tear(step(2.5, level), grain, cell);
+    }
+    clip(min(d - Inset, level - .5));
+    return float4(Tone(level), 1) * i.C;
+}
+
 technique SamuraiCut
 {
- pass AutoloadPass { VertexShader=compile vs_3_0 VS();PixelShader=compile ps_3_0 Stroke(); }
- pass FieldPass { VertexShader=compile vs_3_0 VS();PixelShader=compile ps_3_0 Field(); }
- pass WavePass { VertexShader=compile vs_3_0 VS();PixelShader=compile ps_3_0 Wave(); }
+    pass AutoloadPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 Stroke(); }
+    pass FieldPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 Field(); }
+    pass WavePass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 Wave(); }
+    pass WispPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 Wisp(); }
 }

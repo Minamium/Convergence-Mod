@@ -15,6 +15,20 @@
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureChorusRules.cs" Link="Domain/AzureChorusRules.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureState.cs" Link="Domain/AzureState.cs" />
     <Compile Include="../../Content/Encounters/AzureCathedral/AzureRecoveryState.cs" Link="Domain/AzureRecoveryState.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/EbonRules.cs" Link="Domain/EbonRules.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/EbonSchedule.cs" Link="Domain/EbonSchedule.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/EbonState.cs" Link="Domain/EbonState.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/EbonRecoveryState.cs" Link="Domain/EbonRecoveryState.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/EbonStitchRules.cs" Link="Domain/EbonStitchRules.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/EbonWeb.cs" Link="Domain/EbonWeb.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/Rewards/EbonRewardRules.cs" Link="Domain/EbonRewardRules.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/Rewards/MoonshearMotion.cs" Link="Domain/MoonshearMotion.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/Rewards/EbonLoomHarpRules.cs" Link="Domain/EbonLoomHarpRules.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/Rewards/EbonThimbleScore.cs" Link="Domain/EbonThimbleScore.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/Rewards/EbonChandelierRules.cs" Link="Domain/EbonChandelierRules.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/Rewards/EbonSilkMath.cs" Link="Domain/EbonSilkMath.cs" />
+    <Compile Include="../../Content/Encounters/EbonManor/Rewards/EbonLastWaltzRules.cs" Link="Domain/EbonLastWaltzRules.cs" />
+    <Compile Include="../../Client/Encounters/EbonManor/EbonHall.cs" Link="Presentation/EbonHall.cs" />
     <Compile Include="../../Client/Encounters/GhostSamurai/SamuraiRigMotion.cs" Link="Presentation/SamuraiRigMotion.cs" />
     <Compile Include="../../Client/Weapons/OboroSwordMotion.cs" Link="OboroSwordMotion.cs" />
     <Compile Include="../../Client/Weapons/OboroSwingPresentation.cs" Link="Presentation/OboroSwingPresentation.cs" />

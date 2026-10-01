@@ -172,8 +172,17 @@ internal static class SamuraiRigMotion
         var blade = left.Trail > right.Trail ? left : right;
         if (left.Trail == right.Trail && facing < 0) blade = left;
         float angle = facing < 0 ? MathF.PI - blade.Angle : blade.Angle;
-        return facing * (-.12f * Math.Max(left.Charge, right.Charge)
-            + blade.Trail * (.20f + .19f * MathF.Cos(angle)));
+        return facing * (-.16f * Math.Max(left.Charge, right.Charge)
+            + blade.Trail * (.27f + .23f * MathF.Cos(angle)));
+    }
+
+    // A display-only step into each cut: the body draws back while the wrist
+    // coils, drives forward and dips through the whip, then settles. The
+    // presentation smooths the return; NPC.Center and every hazard are unchanged.
+    internal static (float X, float Y) Lunge(SamuraiBladeMotion left, SamuraiBladeMotion right, int facing)
+    {
+        float charge = Math.Max(left.Charge, right.Charge), trail = Math.Max(left.Trail, right.Trail);
+        return (facing * (22 * trail - 7 * charge), 6 * trail - 2 * charge);
     }
 
     internal static float DashCompression(SamuraiAttack attack, float timer)

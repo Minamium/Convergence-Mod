@@ -29,7 +29,7 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     private static ulong updated, missingSince, hitAt, deathAt;
     private static bool hitSeen, death;
     private static long stamp;
-    private static Vector2 lastCenter, momentum;
+    private static Vector2 lastCenter, momentum, lunge;
     private static float lean, lag, entryLeft, entryRight;
     private static int lastFacing;
     private static SamuraiAttack lastAttack;
@@ -50,6 +50,8 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     public override void Load() => SamuraiRigMotion.BindEasing(
         x => EasingCurves.Cubic.Evaluate(EasingType.InOut, x), x => EasingCurves.Cubic.Evaluate(EasingType.Out, x));
     internal static bool Talisman(int index, out Vector2 anchor, out float angle) => secondary.Sample(index, Fraction, out anchor, out angle);
+    // The client-only victory dissolve outlives the native NPC; music holds under it.
+    internal static ulong? EndingSince => death ? deathAt : null;
     internal static float Fraction => Main.gamePaused || stamp == 0 ? 1 : (float)Math.Clamp((Stopwatch.GetTimestamp() - stamp) * 60d / Stopwatch.Frequency, 0, 1);
 
     public override void PostUpdateEverything()
@@ -106,7 +108,7 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         if (updated == now && history.Count > 0) return;
         Vector2 center = active.PresentationCenter, velocity = center - lastCenter;
         bool teleported = velocity.LengthSquared() > 320 * 320;
-        if (teleported) { history.Clear(); secondary.Clear(); mist.ClearOwned(); velocity = Vector2.Zero; momentum = Vector2.Zero; }
+        if (teleported) { history.Clear(); secondary.Clear(); mist.ClearOwned(); velocity = Vector2.Zero; momentum = lunge = Vector2.Zero; }
         lastCenter = center;
         momentum = Vector2.Lerp(momentum, velocity, .2f);
         lean = MathHelper.Lerp(lean, MathHelper.Clamp(velocity.X * .004f, -.22f, .22f), .2f);
@@ -136,9 +138,13 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         // it never changes NPC.Center, contact damage or an attack's origin.
         Vector2 overrun = momentum * .12f;
         if (overrun.LengthSquared() > 12 * 12) overrun = Vector2.Normalize(overrun) * 12;
+        // Drive into the step quickly, settle out of it slowly.
+        var (stepX, stepY) = SamuraiRigMotion.Lunge(left, right, active.NPC.direction);
+        Vector2 step = new(stepX, stepY);
+        lunge = Vector2.Lerp(lunge, step, step.LengthSquared() > lunge.LengthSquared() ? .55f : .16f);
         previous = current;
-        current = new(center.X + overrun.X - active.NPC.direction * hit * 3,
-            center.Y + overrun.Y + MathF.Sin(age * .035f) * 4, age,
+        current = new(center.X + overrun.X + lunge.X - active.NPC.direction * hit * 3,
+            center.Y + overrun.Y + lunge.Y + MathF.Sin(age * .035f) * 4, age,
             lean + SamuraiRigMotion.ActionLean(left, right, active.NPC.direction) + MathF.Sin(age * .023f) * .025f,
             SamuraiRigMotion.DashCompression(active.Attack, timer),
             left, right, hit, velocity.Length(), lag);
@@ -242,7 +248,7 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         secondary.Clear(); mist?.ClearOwned();
         foreach (var shake in shakes) shake.ShakeStrength = 0;
         shakes.Clear();
-        hitSeen = false; momentum = Vector2.Zero; lean = lag = entryLeft = entryRight = 0;
+        hitSeen = false; momentum = lunge = Vector2.Zero; lean = lag = entryLeft = entryRight = 0;
         sampleReady = sampleSmooth = false; sampleTimer = 0; sampleCombo = default;
     }
     private static void Clear()

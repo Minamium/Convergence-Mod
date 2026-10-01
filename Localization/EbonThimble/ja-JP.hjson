@@ -1,0 +1,9 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonThimbleChannel.DisplayName: 指ぬきの絹糸
+			EbonThimblePiece.DisplayName: 投げつけられた家具
+			EbonThimblePiano.DisplayName: 落ちてくるグランドピアノ
+		}
+	}
+}
