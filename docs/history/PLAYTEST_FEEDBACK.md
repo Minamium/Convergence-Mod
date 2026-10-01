@@ -4,7 +4,7 @@ document_type: evidence
 status: historical
 owners:
   - project
-last_reviewed: 2026-09-28
+last_reviewed: 2026-10-02
 source_of_truth_for: []
 aliases:
   - playtest feedback
@@ -16,6 +16,10 @@ related_docs:
 ---
 
 # Playtest feedback ledger
+
+## Ghost Samurai field and music — 2026-10-02 / 0.3.59 → 0.3.62
+
+Owner chose the v2 original theme by ear ("新しいやつ") for the boss, then called the raid's background garbage, especially the outside and the edge, and asked for something cool that accounts for this raid's different operation (summoned anywhere, no preparation, field at the summoner's feet). Reported dissatisfaction, not new footage. Code reading found half of a grounded 1080p view black under the floor line, a cyan UI-like ruler edge half hidden by the mask, a near-black backdrop with its painted ground above the real floor, and instant appear/vanish. Rebuild the field as the seal the mourning bell raises (indigo still edge, spirit fire, abyss and mirrored lake, parallax night, deploy/victory/fallen/onlooker behaviour, daylight cap); bounds, hazards and protocol unchanged. [Evidence](../evidence/2026-10-02-samurai-sealed-field.json) separates offline GPU frames and the luminance gate from user-owned native readability, locations, FPS and peers.
 
 ## Cathedral silent chorus verdict and worm balance — 2026-09-28 / 0.3.53 → 0.3.54
 
