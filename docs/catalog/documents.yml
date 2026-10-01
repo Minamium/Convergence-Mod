@@ -938,7 +938,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: fb74dd80dd8da99453329ed32e4645d83d5eeccd4df3df36416587280086c2da
+  content_sha256: 79758a423b7cd4bcc4e74cc12ac08aa8e79cc0882f4405260b12723be90a52c8
   document_type: spec
   status: provisional
   owners:
@@ -1095,7 +1095,7 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: be2d8cdb91e75548ba203edcc413ac97d5e6e8668ff23db983e0e32d79a7f04e
+  content_sha256: 29dd84949cbaab3088e40b9bd9d6dea9eb29375f3946032794f8288bfb856aee
   document_type: policy
   status: accepted
   owners:
@@ -1414,12 +1414,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: fb66681331c4c3cd386b323ff9239d69c9a901f2b176af4883b1e680c8365c2c
+  content_sha256: 715ea44fbfc5ab69a8111c346cbd67a66b78f757f0e25d61878aecbb04ce2bfe
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-10-01'
+  last_reviewed: '2026-10-02'
   source_of_truth_for:
   - project.implementation_status
   aliases:

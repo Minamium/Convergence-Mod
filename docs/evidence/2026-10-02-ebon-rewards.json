@@ -1,6 +1,6 @@
 {
   "scope": "Waltz of the Ebon Manor rewards: Victory drops one Ebon Hatbox per frozen member; the hatbox opens to one of five weapons (Moonshear, Moonloom Harp, Ebon Thimble, Ballroom Chandelier, Severing Silk); all five craft The Last Waltz companion. Shared half-resolution Ebon pixel layer, reward pixel art and 27 cues. No packet, protocol or Raid timing change",
-  "target_build": "0.3.60 / protocol76",
+  "target_build": "0.3.61 / protocol76 (0.3.60 during the pre-merge playtests; re-bumped after #96 took 0.3.60)",
   "integration_base": "2d1c1b3 (main after PR94)",
   "commits": {
     "foundation": "d5dd187",

@@ -46,7 +46,9 @@ public sealed class GhostSamuraiBoss : ModNPC
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.boss = NPC.netAlways = true;
         NPC.aiStyle = -1;
         NPC.value = 0;
-        if (!Main.dedServ) { NPC.HitSound = SoundID.NPCHit2; NPC.DeathSound = SoundID.NPCDeath2; Music = MusicID.Boss3; }
+        // The fight's own track comes from GhostSamuraiMusicScene for players inside the seal;
+        // 0 keeps vanilla boss music from starting for anyone else near the actor.
+        if (!Main.dedServ) { NPC.HitSound = SoundID.NPCHit2; NPC.DeathSound = SoundID.NPCDeath2; Music = 0; }
     }
     public override void ApplyDifficultyAndPlayerScaling(int numPlayers, float balance, float bossAdjustment)
         => NPC.lifeMax = (int)(GhostSamuraiRules.Life * (1 + .55f * Math.Max(0, numPlayers - 1)));
