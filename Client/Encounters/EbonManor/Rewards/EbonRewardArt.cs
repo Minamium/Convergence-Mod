@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.EbonManor.Rewards;
@@ -27,17 +28,20 @@ internal static class EbonRewardArt
         return ok;
     }
 
+    // Cached textures must be loaded ones: an AsyncLoad request's Value is an empty placeholder until the load
+    // finishes, and caching that placeholder left every final sprite invisible for the session. These sprites
+    // are small, so the first use loads them synchronously.
     internal static Texture2D Final(string name)
     {
         if (!finals.TryGetValue(name, out Texture2D texture))
-            finals[name] = texture = ModContent.Request<Texture2D>(Root + name).Value;
+            finals[name] = texture = ModContent.Request<Texture2D>(Root + name, AssetRequestMode.ImmediateLoad).Value;
         return texture;
     }
 
     internal static Texture2D Raid(string name)
     {
         if (!raids.TryGetValue(name, out Texture2D texture))
-            raids[name] = texture = EbonMaterials.Texture(name);
+            raids[name] = texture = ModContent.Request<Texture2D>(EbonMaterials.Path + name, AssetRequestMode.ImmediateLoad).Value;
         return texture;
     }
 
