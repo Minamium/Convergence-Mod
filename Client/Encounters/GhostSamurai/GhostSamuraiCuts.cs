@@ -10,8 +10,9 @@ using Terraria;
 
 namespace Convergence.Client.Encounters.GhostSamurai;
 
-// Sword incisions, not beam emitters. Every pass uses the accepted rectangle,
-// disk/annulus or travelling crescent and its fractional Fire/End clock.
+// Pixel-art sword incisions, not beam emitters. Every pass uses the accepted
+// rectangle, disk/annulus or travelling crescent and its fractional Fire/End
+// clock; the shader lights only world-aligned art pixels inside that footprint.
 internal static class GhostSamuraiCuts
 {
     internal const int ResidueTicks = 16;
@@ -33,8 +34,9 @@ internal static class GhostSamuraiCuts
         float length = d.Length();
         if (Main.dedServ || !float.IsFinite(length) || length < 1 || radius <= 0 || age < born || age >= end + ResidueTicks) return;
         using var scope = new WorldGraphicsScope(batch);
-        Prepare(age, born, fire, end, reduced, new(length, radius, seed, route ? 1 : 0));
-        Vector2 n = new Vector2(-d.Y, d.X) / length * radius;
+        Vector2 along = d / length, across = new(-along.Y, along.X);
+        Prepare(age, born, fire, end, reduced, new(length, radius, seed, route ? 1 : 0), a, along, across);
+        Vector2 n = across * radius;
         Draw(a - n, b - n, a + n, b + n, Vector2.Zero, Vector2.One, "AutoloadPass");
     }
 
@@ -48,7 +50,8 @@ internal static class GhostSamuraiCuts
         Vector2 a = new(clip.Left, clip.Top), b = new(clip.Right, clip.Bottom), origin = at - new Vector2(h.Radius);
         using var scope = new WorldGraphicsScope(batch);
         Prepare(age, h.Born, h.Fire, h.End, reduced,
-            new(h.Radius, h.IsOuter ? h.Length : 0, h.Shape == SamuraiShape.FrontalCleave ? h.DX : 0, h.IsWind ? 1 : 0));
+            new(h.Radius, h.IsOuter ? h.Length : 0, h.Shape == SamuraiShape.FrontalCleave ? h.DX : 0, h.IsWind ? 1 : 0),
+            at, Vector2.UnitX, Vector2.UnitY);
         Draw(a, new(b.X, a.Y), new(a.X, b.Y), b, (a - origin) / (h.Radius * 2),
             (b - origin) / (h.Radius * 2), "FieldPass");
     }
@@ -64,15 +67,30 @@ internal static class GhostSamuraiCuts
         }
         if (Main.dedServ || age >= h.End + ResidueTicks) return;
         using var scope = new WorldGraphicsScope(batch);
-        Prepare(age, h.Born, h.Fire, h.End, reduced, new(h.Length, h.Radius, Seed(h), 0));
+        Prepare(age, h.Born, h.Fire, h.End, reduced, new(h.Length, h.Radius, Seed(h), 0), at, d, n);
         d *= h.Length * .5f; n *= h.Radius;
         Draw(at - d - n, at + d - n, at - d + n, at + d + n, Vector2.Zero, Vector2.One, "WavePass");
     }
 
-    private static void Prepare(float age, float born, float fire, float end, bool reduced, Vector4 shape)
+    internal static void Wisp(SpriteBatch batch, Vector2 at, float radius, float age, Vector2 heading, float seed, bool reduced)
+    {
+        if (Main.dedServ || radius <= 0) return;
+        Vector2 d = heading.SafeNormalize(Vector2.UnitX), n = new(-d.Y, d.X);
+        using var scope = new WorldGraphicsScope(batch);
+        Prepare(age, 0, 0, 1, reduced, new(radius, 0, seed, 0), at, d, n);
+        Vector2 front = at + d * radius * 1.3f, back = at - d * radius * 3.4f, side = n * radius * 1.3f;
+        Draw(back - side, front - side, back + side, front + side, Vector2.Zero, Vector2.One, "WispPass");
+    }
+
+    private static void Prepare(float age, float born, float fire, float end, bool reduced, Vector4 shape,
+        Vector2 origin, Vector2 axisX, Vector2 axisY)
     {
         material ??= ShaderManager.GetShader("Convergence.SamuraiCut");
         material.TrySetParameter("clock", age / 60);
+        material.TrySetParameter("uScreenPosition", Main.screenPosition);
+        material.TrySetParameter("frameOrigin", origin);
+        material.TrySetParameter("frameX", axisX);
+        material.TrySetParameter("frameY", axisY);
         material.TrySetParameter("phase", new Vector4(age - fire, Math.Max(1, end - fire),
             Math.Clamp((age - born) / Math.Max(1, fire - born), 0, 1), reduced ? 1 : 0));
         material.TrySetParameter("shape", shape);

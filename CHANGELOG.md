@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Redraw Ghost Samurai's forecasts, cuts, residue and wisps in Soboro's pixel-art style, add a display-only step into each boss swing, and replace the boss's borrowed vanilla sounds with nine layered CC0 cues. Attack shapes, timings, damage and protocol75 are unchanged.
+
 - Redraw Soboro's slash as a crisp pixel-art crescent with a dark outline, torn residue and pixel lightning/sparks, let its three cuts flow through the top and bottom instead of braking, and replace its synthesized swing/hit sounds with layered CC0 recordings. Damage, reach and hit windows are unchanged; the new sweep timing requires matching protocol75 peers.
 
 - Fix Cathedral Stack/Spread verdict delivery to client effects/audio. Double Liora/Vitrion HP, reserve worm segment volleys for Fury, and reduce Fury body/tail incoming damage by90% while preserving one shared worm HP pool and the one-damage rehearsal cap.

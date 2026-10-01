@@ -208,7 +208,7 @@ internal static class SamuraiSpectralPreview
                     DepthStencilState.None,RasterizerState.CullNone);
                 var state=WorldBatchParameters.Capture(batch);
                 GhostSamuraiRigArt.DrawDeath(batch,GhostSamuraiPresentation.Pose,Vector2.Zero,deathAge);
-                GhostSamuraiEnergy.Wisp(batch,new(110,220),24,deathAge,Vector2.UnitX,reduced);
+                GhostSamuraiCuts.Wisp(batch,new(110,220),24,deathAge,Vector2.UnitX,0,reduced);
                 if(state!=WorldBatchParameters.Capture(batch))throw new Exception("Ending/wisp changed caller state");
                 batch.End();device.SetRenderTarget(null);
                 Save(target,output,$"ending-wisp-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{deathAge:00}.png");
@@ -287,7 +287,9 @@ internal static class SamuraiSpectralPreview
                 var left=SamuraiRigMotion.Blade(clip.Attack,SamuraiPhase.Phase1,age,age,-1,clip.Facing,combo,false);
                 var right=SamuraiRigMotion.Blade(clip.Attack,SamuraiPhase.Phase1,age,age,1,clip.Facing,combo,false);
                 float speed=Math.Max(left.Trail,right.Trail)*70;
-                return new(360,360,age,SamuraiRigMotion.ActionLean(left,right,clip.Facing),1,left,right,0,speed,0);
+                // Raw production step target; the game additionally eases its return.
+                var (stepX,stepY)=SamuraiRigMotion.Lunge(left,right,clip.Facing);
+                return new(360+stepX,360+stepY,age,SamuraiRigMotion.ActionLean(left,right,clip.Facing),1,left,right,0,speed,0);
             }
             for(int frame=0;frame<=(clip.To-clip.From)*2;frame++)
             {
@@ -321,7 +323,7 @@ internal static class SamuraiSpectralPreview
         float[] offsets={-24,-8,-2,-.1f,0,.5f,1,2,3.5f,5,7,9,11.5f,12,15,20,26,28};
         int frames=0;
         foreach(float zoom in new[]{1f,.65f})foreach(bool light in new[]{false,true})foreach(bool reduced in new[]{false,true})
-        foreach(string kind in new[]{"slash","vertical","grid","wave","annulus","cleave"})
+        foreach(string kind in new[]{"slash","vertical","grid","wave","annulus","wind","cleave"})
         {
             var images=new List<string>();var bg=light?new Color(188,201,212):new Color(17,22,36);
             for(int step=0;step<offsets.Length;step++)
@@ -342,10 +344,11 @@ internal static class SamuraiSpectralPreview
                         GhostSamuraiCuts.Slash(batch,h,new(h.X,h.Y),h.Fire+offsets[step],reduced);
                     }
                 }
-                else if(kind=="annulus"||kind=="cleave")
+                else if(kind=="annulus"||kind=="cleave"||kind=="wind")
                 {
-                    var h=new SamuraiHazard(kind=="annulus"?SamuraiShape.OuterSlash:SamuraiShape.FrontalCleave,
-                        360,360,1,0,kind=="annulus"?145:0,315,0,54,66,1);
+                    var shape=kind=="annulus"?SamuraiShape.OuterSlash:kind=="wind"?SamuraiShape.InnerKamaitachi:SamuraiShape.FrontalCleave;
+                    var h=new SamuraiHazard(shape,360,360,1,0,kind=="annulus"?145:0,315,0,54,
+                        kind=="wind"?54+GhostSamuraiRules.Phase3KamaitachiDuration:66,1);
                     GhostSamuraiCuts.Field(batch,h,new(360,360),age,new Rectangle(0,0,720,720),reduced);
                 }
                 else if(kind=="wave")
@@ -368,7 +371,7 @@ internal static class SamuraiSpectralPreview
                 if(kind=="annulus")AssertBackground(target,360,360,bg,"cut annulus hole");
                 if(kind=="cleave")AssertBackground(target,300,360,bg,"cut cleave safe side");
                 if(kind=="grid")AssertBackground(target,360+(int)(90*zoom),360+(int)(90*zoom),bg,"grid safe cell");
-                if(offsets[step]>=28)AssertBackground(target,360,360,bg,"cut residue expires");
+                if(offsets[step]>=28&&kind!="wind")AssertBackground(target,360,360,bg,"cut residue expires");
                 string name=$"cut-{kind}-z{zoom:0.00}-{(light?"light":"dark")}-{(reduced?"reduced":"normal")}-{step:00}.png";
                 Save(target,output,name);images.Add(name);frames++;
             }

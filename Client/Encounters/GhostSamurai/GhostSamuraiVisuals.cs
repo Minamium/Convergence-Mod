@@ -65,10 +65,8 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         else if (h.Shape == SamuraiShape.Wisp)
         {
             Vector2 heading = new Vector2(p.WispMotion.VX, p.WispMotion.VY).SafeNormalize(new(h.DX, h.DY));
-            GhostSamuraiEnergy.Wisp(batch, position, h.Radius, age, heading, reduced);
-            // Dim, narrow decorative tail, not a second collision shape.
-            GhostSamuraiSlashArt.Strip(batch, SamuraiSlashArt.Wind, position - heading * h.Radius * 3, position,
-                h.Radius * .75f, reduced ? .15f : .28f);
+            // The flame's tail is decoration, not a second collision shape.
+            GhostSamuraiCuts.Wisp(batch, position, h.Radius, age, heading, GhostSamuraiCuts.Seed(h), reduced);
         }
         else GhostSamuraiCuts.Slash(batch, h, position, age, reduced);
         return false;
@@ -80,8 +78,8 @@ internal sealed class GhostSamuraiHazardVisuals : GlobalProjectile
         if (!h.Live(age))
         {
             float radius = Math.Abs(n.X) * GhostSamuraiRules.BodyWidth / 2 + Math.Abs(n.Y) * GhostSamuraiRules.BodyHeight / 2;
-            GhostSamuraiEnergy.Line(batch, start, end, radius, age,
-                Math.Clamp((age - h.Born) / Math.Max(1, h.Fire - h.Born), 0, 1), false, 0, 0, reduced, route: true);
+            GhostSamuraiCuts.Stroke(batch, start, end, radius, age, h.Born, h.Fire, h.End, reduced,
+                GhostSamuraiCuts.Seed(h), route: true);
         }
         else
         {
