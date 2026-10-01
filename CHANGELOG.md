@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Polish Waltz of the Ebon Manor: AutoMatador now loops long stretches of the song with natural joins at its own repeats; attack warnings are quieter (a soft silk veil or a single strung thread instead of crisp lines and nets); damaging threads glow as razor silk with a white-hot core, bloom, flowing glints, an ignition and a fray. Hitboxes and timings are unchanged.
+
 - Add the **Waltz of the Ebon Manor rewards**: winning drops an Ebon Hatbox per member that opens to one of five pixel-art weapons — Moonshear (a four-stroke giant-shears kata whose marks burst along a chalk cut line), Moonloom Harp (needle arrows leave strings you pluck in a glissando), Ebon Thimble (furniture lifted on the beat and hurled, with a grand piano finale), Ballroom Chandelier (minions that fall in a beat cascade) and Severing Silk (spools string a web that a stealth strike severs at once). All five craft The Last Waltz, a 10-slot companion of Noirette. Balance is untuned.
 
 - Give Ghost Samurai its own music: the original theme **紫電の亡霊武者 / Violet Phantom Blade** replaces vanilla Boss 3 for everyone fighting inside the seal (and fallen players watching from inside). It opens on a low temple bell, loops seamlessly after its one-time intro, and fades under the victory dissolve. Gameplay, timings and protocol are unchanged.

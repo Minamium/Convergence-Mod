@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.61 / protocol76**. Adds the **Waltz of the Ebon Manor rewards**: accepted Victory drops one Ebon Hatbox per frozen member; it opens to one of five weapons (Moonshear shear kata and cut line, Moonloom Harp strings and glissando, Ebon Thimble furniture and grand piano, Ballroom Chandelier beat cascade, Severing Silk web and stealth sever), and all five craft The Last Waltz, a 10-slot Noirette companion. Codex pixel art from Claude's brief, a shared half-resolution Ebon pixel layer and 27 CC0-layered cues; no packet or protocol change. [Rewards spec](encounters/ebon-manor/REWARDS.md) owns behavior; balance is untuned and play, hearing, FPS and peers remain user-owned.
+Current source: **0.3.62 / protocol76**. Ebon Manor polish from the owner's play: AutoMatador now loops long stretches of the song (40/29/51 bars) at its own repeats with one-beat downbeat crossfades; warnings are one quiet element each (a feathered veil or a strung hairline, no crisp edge lines), and live strands are Luminance razor silk (white-hot core, moon-silver bloom, flowing energy, glints, ignition, twang, fray). Hit footprints, timings and protocol are unchanged. [Ebon Manor spec](encounters/ebon-manor/ENCOUNTER_SPEC.md) owns the presentation and music; hearing, readability in play and FPS remain user-owned.
+
+Retained0.3.61: adds the **Waltz of the Ebon Manor rewards**: accepted Victory drops one Ebon Hatbox per frozen member; it opens to one of five weapons (Moonshear shear kata and cut line, Moonloom Harp strings and glissando, Ebon Thimble furniture and grand piano, Ballroom Chandelier beat cascade, Severing Silk web and stealth sever), and all five craft The Last Waltz, a 10-slot Noirette companion. Codex pixel art from Claude's brief, a shared half-resolution Ebon pixel layer and 27 CC0-layered cues; no packet or protocol change. [Rewards spec](encounters/ebon-manor/REWARDS.md) owns behavior; balance is untuned and play, hearing, FPS and peers remain user-owned.
 
 Retained0.3.60: Ghost Samurai gets its own music: the original theme 紫電の亡霊武者 / *Violet Phantom Blade* (168 BPM, Miyako-bushi over a Phrygian orchestra, temple-bell opening, one-time intro and an exact native loop) replaces vanilla Boss 3 for players inside the seal, held under the victory dissolve. Client presentation only; gameplay, timings and protocol are unchanged. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#音楽--2026-10-02) owns the behaviour; the in-game mix against its cues remains user-owned.
 
@@ -79,6 +81,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.62 Ebon Manor music and warning polish:** [evidence](evidence/2026-10-02-ebon-polish.json) records the loop analysis and seam checks, the before/after offline material frames with an independent critique, compiled shader identity and the native package. No in-game hearing, readability or FPS acceptance is claimed.
 
 - **0.3.61 Ebon Manor rewards:** [evidence](evidence/2026-10-02-ebon-rewards.json) records the domain suite (451), static/catalog/tools checks, the compiled pixel material and its offline frames, the deterministic reward audio, the mechanical pixel-art export and the native package. No native play, hearing, FPS or peer acceptance is claimed.
 
@@ -179,6 +183,8 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Ebon polish: on the installed 0.3.62 package, play Act One through the Finale and listen across each loop join (Act One at about 1:47 into the act, Act II and the Finale after their first pass). Check that warnings read cleanly without clutter over the hall and bright windows, that live strands look dangerous and beautiful, the fray after a cut, Reduced Effects, zoom and FPS.
 
 Ebon rewards: Reload the installed 0.3.61 package, win the Ebon Manor Raid (or take a hatbox from a cheat menu) and open the hatbox. Try each weapon on a target dummy and in the Raid: Moonshear's four-stroke flow, marks and cut line; the harp's strings and glissando; the thimble's eight lifts and piano; one and four chandeliers; the web and stealth sever; then craft The Last Waltz. Report sizes (shears, bow, chandeliers, Noirette), readability over bright/dark ground, the mix, Reduced Effects, FPS and a second peer.
 

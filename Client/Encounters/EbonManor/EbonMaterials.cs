@@ -17,13 +17,19 @@ internal static class EbonMaterials
 {
     internal const string Path = "Convergence/Assets/Textures/EbonManor/";
     internal static readonly Vector3 Moon = new(.62f, .70f, .90f), Silk = new(.66f, .68f, .86f), Rose = new(.86f, .46f, .56f),
-        Chalk = new(.84f, .80f, .72f), Gold = new(.90f, .72f, .44f), Candle = new(1f, .70f, .38f), Hot = new(1f, .84f, .88f);
+        Chalk = new(.84f, .80f, .72f), Gold = new(.90f, .72f, .44f), Candle = new(1f, .70f, .38f), Hot = new(1f, .84f, .88f),
+        // Live silk: moon-silver bloom and a dusty-rose fringe around a white-hot core.
+        Bloom = new(.74f, .80f, 1f), Dusty = new(.90f, .58f, .70f), Pale = new(.90f, .93f, 1f);
     private static readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private static readonly List<Vector2> points = new(72);
     private static ManagedShader? silk;
     private static PrimitiveSettings? silkSettings;
     private static float silkHalfWidth = 4, completion = 1;
     private static bool taper;
+    private static float Reduced => EbonVisuals.Reduced ? 1 : 0;
+    // World px per screen px: hairlines, razor cores and glints keep at least
+    // ~.75 screen px when the game view is zoomed out.
+    private static float View => 1f / Math.Max(.1f, Main.GameViewMatrix.Zoom.X);
 
     internal static void Reset() { silk = null; silkSettings = null; points.Clear(); }
     internal static Texture2D Texture(string name) => ModContent.Request<Texture2D>(Path + name).Value;
@@ -41,6 +47,7 @@ internal static class EbonMaterials
         var shader = ShaderManager.GetShader("Convergence.EbonManor");
         shader.TrySetParameter("uWorldViewProjection", matrix ?? World);
         shader.TrySetParameter("clock", age / 60);
+        shader.TrySetParameter("view", View);
         shader.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
         shader.SetTexture(MiscTexturesRegistry.TurbulentNoise.Value, 2, SamplerState.LinearWrap);
         return shader;
@@ -79,31 +86,70 @@ internal static class EbonMaterials
         Submit(shader, pass, Corner(0, 0), Corner(1, 0), Corner(0, 1), Corner(1, 1));
     }
 
-    internal static void Lane(ManagedShader shader, Vector2 a, Vector2 b, float radius, float progress, float live, Vector3 tint,
-        float opacity, float heat, float seed)
+    // Broad warning footprint: a feathered silk veil exactly over a straight band,
+    // with no boundary lines. live warms it while the furniture is in flight.
+    // clip > 0 fades the veil out inside a disc of that radius centred on b, so a
+    // fall corridor meets its burst disc without stacking a denser band.
+    internal static void Veil(ManagedShader shader, Vector2 a, Vector2 b, float radius, float progress, float opacity, float seed, float live = 0,
+        float clip = 0)
     {
         float length = Vector2.Distance(a, b);
         if (length < 1 || opacity <= .002f) return;
         shader.TrySetParameter("shape", new Vector4(length, radius, Math.Clamp(progress, 0, 1), Math.Clamp(live, 0, 1)));
-        shader.TrySetParameter("signal", new Vector4(opacity, heat, EbonVisuals.Reduced ? 1 : 0, seed));
-        shader.TrySetParameter("tint", tint);
-        Quad(shader, "LanePass", (a + b) * .5f, new Vector2(length, radius * 2), (b - a).ToRotation());
+        shader.TrySetParameter("signal", new Vector4(opacity, clip > 0 ? clip : -1e4f, Reduced, seed));
+        Quad(shader, "VeilPass", (a + b) * .5f, new Vector2(length, radius * 2), (b - a).ToRotation());
     }
 
-    internal static void Tear(ManagedShader shader, Vector2 a, Vector2 b, float radius, float sinceFire, float live, float opacity, float seed)
+    // Thread-width warning footprint: one hairline strung from a toward b (the
+    // quad is the honest band), trembling less as it tightens. The tremble is a
+    // fixed three-half-wave shape, so it is capped by length: short strands
+    // shiver instead of folding into an S.
+    internal static void Hairline(ManagedShader shader, Vector2 a, Vector2 b, float radius, float progress, float opacity, float seed,
+        float reveal = 1, float tremble = 0)
+    {
+        float length = Vector2.Distance(a, b);
+        if (length < 1 || opacity <= .002f) return;
+        tremble = Math.Clamp(tremble * (EbonVisuals.Reduced ? .4f : 1), 0, Math.Max(0, Math.Min(radius - 2, length * .006f)));
+        shader.TrySetParameter("shape", new Vector4(length, radius, Math.Clamp(progress, 0, 1), Math.Clamp(reveal, 0, 1)));
+        shader.TrySetParameter("signal", new Vector4(opacity, tremble, Reduced, seed));
+        Quad(shader, "HairlinePass", (a + b) * .5f, new Vector2(length, radius * 2), (b - a).ToRotation());
+    }
+
+    // Circular warning footprint (the chandelier burst): the same veil on a disc.
+    internal static void VeilDisc(ManagedShader shader, Vector2 center, float radius, float progress, float opacity, float seed)
+    {
+        if (opacity <= .002f || radius < 1) return;
+        shader.TrySetParameter("shape", new Vector4(radius, Math.Clamp(progress, 0, 1), 0, 0));
+        shader.TrySetParameter("signal", new Vector4(opacity, 0, Reduced, seed));
+        Quad(shader, "DiscPass", center, new Vector2(radius * 2), 0);
+    }
+
+    // A small crisp four-point glint; rays lie along rotation and its normal.
+    internal static void Glint(ManagedShader shader, Vector2 center, float size, Vector3 tint, float opacity, float rays = 1, float rotation = 0)
+    {
+        if (opacity <= .002f || size < 1) return;
+        shader.TrySetParameter("signal", new Vector4(opacity, rays, size, 0));
+        shader.TrySetParameter("tint", tint);
+        Quad(shader, "GlintPass", center, new Vector2(size), rotation);
+    }
+
+    // blade: px along a->b where the shears are snipping (a glint rides there); < 0 for none.
+    internal static void Tear(ManagedShader shader, Vector2 a, Vector2 b, float radius, float sinceFire, float live, float opacity, float seed,
+        float blade = -1)
     {
         float length = Vector2.Distance(a, b);
         if (length < 1 || opacity <= .002f) return;
         shader.TrySetParameter("shape", new Vector4(length, radius, Math.Max(0, sinceFire), live));
-        shader.TrySetParameter("signal", new Vector4(opacity, 0, EbonVisuals.Reduced ? 1 : 0, seed));
+        shader.TrySetParameter("signal", new Vector4(opacity, blade >= 0 ? blade : -1e4f, Reduced, seed));
         Quad(shader, "TearPass", (a + b) * .5f, new Vector2(length, radius * 2), (b - a).ToRotation());
     }
 
     private static readonly VertexPositionColorTexture[] fan = new VertexPositionColorTexture[16 * 6];
     // A dim angular wedge between two spoke angles (afterglow or turn preview),
-    // clipped per angle to the field like the spokes themselves.
+    // clipped per angle to the field like the spokes themselves. outer > 0 keeps
+    // only the part of the wedge beyond that fraction of the reach.
     internal static void Sweep(ManagedShader shader, Convergence.Common.Raids.Arena.RaidFieldGeometry field, Vector2 center,
-        float from, float to, float inner, float reach, Vector3 tint, float opacity, float seed)
+        float from, float to, float inner, float reach, Vector3 tint, float opacity, float seed, float outer = 0)
     {
         if (opacity <= .002f || MathF.Abs(to - from) < .002f) return;
         const int steps = 16;
@@ -124,19 +170,10 @@ internal static class EbonMaterials
             fan[n++] = new(new(i0, 0), Color.White, new(0, u0)); fan[n++] = new(new(o0, 0), Color.White, new(1, u0)); fan[n++] = new(new(i1, 0), Color.White, new(0, u1));
             fan[n++] = new(new(o0, 0), Color.White, new(1, u0)); fan[n++] = new(new(o1, 0), Color.White, new(1, u1)); fan[n++] = new(new(i1, 0), Color.White, new(0, u1));
         }
-        shader.TrySetParameter("signal", new Vector4(opacity * (EbonVisuals.Reduced ? .5f : 1), 0, EbonVisuals.Reduced ? 1 : 0, seed));
+        shader.TrySetParameter("signal", new Vector4(opacity * (EbonVisuals.Reduced ? .5f : 1), outer > 0 ? outer : -1, Reduced, seed));
         shader.TrySetParameter("tint", tint);
         shader.Apply("SweepPass");
         Main.instance.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, fan, 0, n / 3);
-    }
-
-    // The waltz hub: a lace parasol rosette whose ribs follow the spokes.
-    internal static void Lace(ManagedShader shader, Vector2 center, float radius, int ribs, float rotation, float open, float opacity, float seed)
-    {
-        if (opacity <= .002f) return;
-        shader.TrySetParameter("shape", new Vector4(ribs, rotation, radius, open));
-        shader.TrySetParameter("signal", new Vector4(opacity, 0, EbonVisuals.Reduced ? 1 : 0, seed));
-        Quad(shader, "LacePass", center, new Vector2(radius * 2), 0);
     }
 
     // The true radius is the centre of the hoop's thin boundary line.
@@ -194,9 +231,66 @@ internal static class EbonMaterials
         return (x & 0xFFFFFF) / 16777216f;
     }
 
-    // Silk threads through Luminance's primitive renderer.
+    // Silk threads through Luminance's primitive renderer (classic silk): every
+    // harmless strand (hanging, control, flung, recoiling, ceremony).
     internal static void Thread(IReadOnlyList<Vector2> path, float halfWidth, Vector3 tint, float opacity, float tension,
         float heat, float seed, float age, bool tapered = false)
+        => Render(path, halfWidth, tint, opacity, tension, heat, seed, age, tapered, Vector4.Zero, Vector2.Zero, Vector4.Zero, Vector4.Zero, Vector4.Zero);
+
+    // Live razor silk on an honest straight band of the given hit radius: the
+    // ribbon stays on the accepted line while the shader twangs only the core.
+    // since: ticks since the strand snapped taut (snap bead, ignition, flash);
+    // flash scales that snap (repeated beats use less); openStart/openEnd fade an
+    // end that finishes in open space instead of at an anchor.
+    internal static void Razor(Vector2 a, Vector2 b, float radius, float opacity, float since, float seed, float age,
+        float twangAmplitude = 0, float twangRate = 0, float flash = 1, bool openStart = false, bool openEnd = false)
+    {
+        line.Clear(); line.Add(a); line.Add(b);
+        RazorPath(line, radius, opacity, since, seed, age, twangAmplitude, twangRate, flash, openStart, openEnd);
+    }
+    internal static void RazorPath(IReadOnlyList<Vector2> path, float radius, float opacity, float since, float seed, float age,
+        float twangAmplitude = 0, float twangRate = 0, float flash = 1, bool openStart = false, bool openEnd = false)
+    {
+        radius = Math.Max(1, radius);
+        float length = Length(path), gain = Math.Max(0, flash), t = Math.Max(0, since);
+        // The twang is a fixed three-half-wave shape: cap it by length so short strands never fold.
+        float amplitude = Math.Min(twangAmplitude * (EbonVisuals.Reduced ? .4f : 1), Math.Max(0, Math.Min(radius - 1.5f, length * .006f)));
+        // Snap: a bead races in from both anchors (ease-out over ~6 ticks) and
+        // ignites the core behind it; ahead of it the core idles at 35%.
+        float meet = 1 - MathF.Pow(1 - Math.Clamp(t / 6, 0, 1), 3);
+        var snap = new Vector4(1 - .65f * gain, meet * (length * .5f + 16), .8f * (1 - EbonVisualsMath.Ease((meet - .86f) / .14f)) * gain,
+            MathF.Pow(2, -t / 3.5f) * (1 - Reduced * .5f) * gain);
+        Render(path, radius + Math.Max(8, radius * .7f), Bloom, opacity, 1, 1, seed, age, false,
+            new Vector4(radius, t, -1, Reduced), new Vector2(amplitude, twangRate),
+            new Vector4(openStart ? 1 : 0, openEnd ? 1 : 0, Math.Min(radius, 12), Math.Max(.6f, .75f * View)), snap, Vector4.Zero);
+    }
+
+    // A strand that has stopped dealing damage: cool silver, no band, no white
+    // heat; it thins evenly, parts at one or two hashed points and frays into
+    // motes (fray 0..1). freeStart/freeEnd mark the broken end(s), which recede.
+    internal static void Frayed(IReadOnlyList<Vector2> path, float radius, float fray, int seed, float age, bool freeStart, bool freeEnd)
+    {
+        if (fray >= 1) return;
+        float f = Math.Clamp(fray, 0, 1), length = Length(path), left = 1 - f;
+        bool second = Hash(seed, 5, 3) >= .45f && length >= 260;
+        // Gap half-widths start closed (-14) so a break opens smoothly instead of popping.
+        var breaks = new Vector4((.3f + .4f * Hash(seed, 5, 1)) * length, -14 + 75 * f,
+            (.12f + .2f * Hash(seed, 5, 2)) * length, second ? -14 + 54 * Math.Clamp(f * 1.6f - .5f, 0, 1) : -100);
+        var snap = new Vector4(left * left, EbonVisualsMath.Ease((f - .15f) / .25f) * left, 0, 0);
+        Render(path, Math.Max(1, radius) + 8, Bloom, 1, 1, 0, seed, age, false,
+            new Vector4(Math.Max(1, radius), 0, f, Reduced), Vector2.Zero,
+            new Vector4(freeStart ? 1 : 0, freeEnd ? 1 : 0, 10 + 170 * f, Math.Max(.75f * (1 - .3f * f), .75f * View)), snap, breaks);
+    }
+
+    private static float Length(IReadOnlyList<Vector2> path)
+    {
+        float length = 0;
+        for (int i = 1; i < path.Count; i++) length += Vector2.Distance(path[i - 1], path[i]);
+        return length;
+    }
+
+    private static void Render(IReadOnlyList<Vector2> path, float halfWidth, Vector3 tint, float opacity, float tension,
+        float heat, float seed, float age, bool tapered, Vector4 razor, Vector2 twang, Vector4 razorEx, Vector4 snap, Vector4 breaks)
     {
         if (Main.dedServ || path.Count < 2 || opacity <= .003f) return;
         silk ??= ShaderManager.GetShader("Convergence.EbonSilk");
@@ -222,6 +316,11 @@ internal static class EbonMaterials
         silk.TrySetParameter("signal", new Vector4(opacity * (EbonVisuals.Reduced ? .85f : 1), tension, heat, seed));
         silk.TrySetParameter("tint", tint);
         silk.TrySetParameter("footprint", new Vector2(Math.Max(1, length), halfWidth));
+        silk.TrySetParameter("razor", razor);
+        silk.TrySetParameter("twang", twang);
+        silk.TrySetParameter("razorEx", razorEx);
+        silk.TrySetParameter("snap", snap);
+        silk.TrySetParameter("breaks", breaks);
         silk.SetTexture(MiscTexturesRegistry.WavyBlotchNoise.Value, 1, SamplerState.LinearWrap);
         PrimitiveRenderer.RenderTrail(points, silkSettings, points.Count);
     }

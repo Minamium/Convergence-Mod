@@ -1,5 +1,6 @@
-// Original Ebon Manor materials: the moonlit hall, woven furniture, silk-gauze
-// lanes, shears tears, stitch hoops and the waltz's lace hub and afterglow.
+// Original Ebon Manor materials: the moonlit hall, woven furniture, quiet silk
+// warnings (veils, hairlines), shears tears, stitch hoops, glints and the
+// waltz's turn fan and afterglow.
 // Every danger footprint is drawn from accepted plan geometry; noise only
 // moves pigment inside it.
 matrix uWorldViewProjection;
@@ -13,6 +14,10 @@ float4 shape;
 float4 region;
 float3 tint;
 float weaveDensity;
+float view; // world px per screen px (1 / game zoom); fine lines never thin below ~.75 screen px
+// Uniform-only selections (clip on/off, blade, outer fan) arrive as sentinel
+// values from the CPU rather than ternaries: the FNA effect runtime
+// mis-evaluates some fx_2_0 preshader code.
 struct QI { float4 P:POSITION0; float4 C:COLOR0; float2 U:TEXCOORD0; };
 struct VO { float4 P:SV_POSITION; float4 C:COLOR0; float2 U:TEXCOORD0; };
 VO VS(QI v) { VO o=(VO)0; o.P=mul(v.P,uWorldViewProjection); o.C=v.C; o.U=v.U; return o; }
@@ -86,52 +91,100 @@ float4 AuraPS(VO i) : COLOR0
     return float4(c, a) * i.C;
 }
 
-// Silk-gauze lane on an accepted straight footprint: woven threads drift along
-// the lane inside one continuous luminous boundary; no dashes or rails.
-// U.x runs along, U.y across the full diameter. shape: length, radius,
-// warning progress, live. signal: opacity, heat, reduced, seed.
-float4 LanePS(VO i) : COLOR0
+// ---- Warnings: quiet moonlit silk -------------------------------------------
+// One element per hazard, exactly on the accepted footprint and with no
+// boundary lines, dashes or rails. Mid-tone colours are composited over the
+// hall (never added): a veil lifts the dark hall and tints the bright windows,
+// and overlapping veils converge on the same film instead of adding to white.
+// Cool silver-lilac warms to dusty rose only in the last beat.
+float3 VeilTone(float progress) { return lerp(float3(.56, .58, .80), float3(.78, .60, .70), smoothstep(.66, 1, progress)); }
+float3 HairTone(float progress) { return lerp(float3(.84, .86, 1), float3(1, .80, .87), smoothstep(.66, 1, progress)); }
+float Fine() { return .75 * view; }
+
+// Film density over a footprint: even to the true edge (anti-aliased within
+// 2 px, no brighter hem). inside: px from the edge. m: material coordinates in
+// px (x along the footprint); a fine silk sheen of long streaks drifts along it.
+float Film(float inside, float2 m, float seed, float motion)
+{
+    float hem = smoothstep(0, 2, inside);
+    float n = tex2D(noise, m * float2(.0024, .0042) + float2(-clock * .03 * motion + seed, seed * .7)).r;
+    float f = tex2D(detail, m * float2(.0015, .035) + float2(-clock * .05 * motion, seed * 1.3)).r;
+    return hem * (.86 + .22 * n + .20 * (f - .5));
+}
+
+// Broad straight footprint (thrown furniture route, chandelier fall, shears
+// band): a feathered silk veil, fullest along its spine, with one soft swell
+// of light drifting toward the far end. U.x runs along, U.y across the full
+// diameter. shape: length, radius, progress, live (furniture in flight).
+// signal: opacity, clip radius (> 0: fade out inside a disc of this radius
+// centred on the far end, so a fall corridor meets its burst without
+// stacking; -1e4 = none), reduced, seed.
+float4 VeilPS(VO i) : COLOR0
 {
     float along = i.U.x * shape.x;
     float across = (i.U.y * 2 - 1) * shape.y;
     float inside = shape.y - abs(across);
-    float d = abs(across) / max(1, shape.y);
-    float progress = shape.z;
-    // Thread-wide lanes read as one soft ribbon around a bright core; broad
-    // lanes keep a fine continuous boundary around their gauze.
-    float narrow = 1 - smoothstep(14, 30, shape.y);
-    float n = tex2D(noise, float2(along * .003 - clock * .04 + signal.w, i.U.y * .7)).r;
-    float flow = clock * (14 + 70 * progress) * (1 - signal.z * .6);
-    float density = lerp(.075, .12, progress);
-    float w1 = abs(frac((along * .57 + across * .82 - flow) * density + n * .35) - .5) * 2;
-    float w2 = abs(frac((along * .57 - across * .82 - flow * .7) * density - n * .35) - .5) * 2;
-    float weave = (pow(w1, 6) + pow(w2, 6)) * (1 - .6 * narrow);
-    // A thread-wide lane is an even soft ribbon to its true edge, then a feathered rim.
-    float ribbon = (1 - smoothstep(.72, 1, d)) * (.22 + .26 * progress) * (.8 + .2 * n);
-    float body = lerp((.07 + .10 * progress) * (.7 + .3 * n), ribbon, narrow);
-    float rim = exp2(-pow((inside - 1.3) / 1.0, 2)) * (1 - .6 * narrow);
-    float sheen = .6 + .4 * sin(along * .018 - clock * 2.2 + signal.w * 3);
-    float edgeGlow = exp2(-pow(inside / 9, 2)) * (.12 + .22 * progress) * (1 - narrow);
-    float core = exp2(-pow(across / (.8 + .6 * progress), 2)) * (.10 + .65 * progress);
-    float run = frac(along / 260 - clock * (.25 + 1.1 * progress) + signal.w);
-    float glint = pow(saturate(1 - abs(run - .5) * 2), 14) * core * progress;
-    float ends = smoothstep(0, 28, along) * smoothstep(0, 28, shape.x - along);
-    float inBand = 1 - smoothstep(-.4, .6, -inside);
-    float3 tone = lerp(tint, float3(.95, .58, .66), saturate(progress * progress * signal.y));
-    float3 light = lerp(tone, float3(1, 1, 1), .6);
-    float3 c = tone * (body + weave * (.10 + .18 * progress) + edgeGlow) + light * (rim * (.45 + .3 * sheen) + core * .7) + float3(1, .97, .98) * glint;
-    float a = saturate(body * 1.3 + weave * (.08 + .14 * progress) + edgeGlow + rim * .7 + core * .5 + glint) * ends * inBand;
-    // Live: the whole honest band lights evenly, brightest along its spine.
-    float3 hot = lerp(float3(.95, .66, .72), float3(1, .97, .96), exp2(-pow(d / .42, 2)));
-    float3 lc = hot * (.72 + .14 * n) + light * rim * .35 + float3(1, .98, .97) * glint * .5;
-    float la = saturate(.80 + rim * .15) * inBand * ends;
-    c = lerp(c, lc, shape.w);
-    a = lerp(a, la, shape.w);
-    return float4(c * a, a) * signal.x * i.C;
+    float progress = shape.z, live = shape.w, motion = 1 - signal.z * .7;
+    float film = Film(inside, float2(along, across), signal.w, motion) * (.85 + .15 * cos(abs(across) / shape.y * 3.14159));
+    float run = frac(along / 640 - clock * (.10 + .40 * progress + .9 * live) * motion + signal.w);
+    float swell = exp2(-pow((run - .5) * 640 / 150, 2)) * (.16 + .24 * live);
+    float clip = smoothstep(signal.y - 6, signal.y + 10, length(float2(shape.x - along, across)));
+    float ends = smoothstep(0, 18, along) * smoothstep(0, 18, shape.x - along + saturate(signal.y) * 1e5) * clip;
+    float density = lerp(lerp(.12, .22, progress * progress), .17, live);
+    float3 tone = lerp(VeilTone(progress), float3(.84, .58, .68), live);
+    float a = saturate(density * (film + swell)) * ends;
+    return float4(tone * a, a) * signal.x * i.C;
 }
 
-// A live shears cut: a ragged slit through the accepted band with fibres at the
-// torn edges. shape: length, radius, ticks since fire, live duration. signal: opacity, -, reduced, seed.
+// Thread-width footprint (loom string, web strand, waltz spoke): one hairline
+// strung along the true centre, a faint film over the honest band, a small
+// glint running along it and a bead at the tip while it is being strung. A
+// faint dark under-shadow keeps it legible over the bright windows (invisible
+// on the dark hall). shape: length, radius, progress, reveal (1 = strung
+// anchor to anchor). signal: opacity, tremble px, reduced, seed.
+float4 HairlinePS(VO i) : COLOR0
+{
+    float x = i.U.x;
+    float along = x * shape.x;
+    float across = (i.U.y * 2 - 1) * shape.y;
+    float inside = shape.y - abs(across);
+    float progress = shape.z, motion = 1 - signal.z * .7;
+    float wave = sin(x * 3.14159) * sin(x * 9.42478 + clock * 60 * (.10 + .30 * progress) * motion) * signal.y;
+    float pc = abs(across - wave);
+    float core = exp2(-pow(pc / max(.78 + .25 * progress, Fine()), 2)) * (.30 + .42 * progress);
+    float halo = exp2(-pow(pc / 3.2, 2)) * (.05 + .06 * progress);
+    float shade = exp2(-pow(pc / max(2.6, 3 * Fine()), 2)) * .17;
+    float film = Film(inside, float2(along, across), signal.w, motion) * lerp(.05, .12, progress * progress);
+    float run = frac(along / 560 - clock * (.16 + .62 * progress) * motion + signal.w);
+    float glint = exp2(-pow((run - .5) * 560 / 11, 2)) * exp2(-pow(pc / max(1.7, 1.4 * Fine()), 2)) * (.45 + .45 * progress);
+    float strung = step(.999, shape.w);
+    float tip = exp2(-pow((shape.x - along) / 7, 2)) * exp2(-pow(pc / 2.2, 2)) * (1 - strung);
+    float ends = smoothstep(0, 8, along) * lerp(1, smoothstep(0, 8, shape.x - along), strung);
+    float3 c = VeilTone(progress) * film + HairTone(progress) * (core + halo) + float3(1, .97, 1) * (glint + tip);
+    float a = saturate(film + core * .9 + halo * .5 + (glint + tip) * .4 + shade);
+    return float4(c, a) * ends * signal.x * i.C;
+}
+
+// Circular footprint veil (chandelier burst) with a slow breath gathering
+// toward the landing point. shape: radius px, progress. signal: opacity, -, reduced, seed.
+float4 DiscPS(VO i) : COLOR0
+{
+    float2 p = (i.U * 2 - 1) * shape.x;
+    float r = length(p);
+    float inside = shape.x - r;
+    float progress = shape.y, motion = 1 - signal.z * .7;
+    float film = Film(inside, p, signal.w, motion) * (.85 + .15 * cos(saturate(r / shape.x) * 3.14159));
+    float breath = exp2(-pow((r / shape.x - frac(-clock * .35 * motion + signal.w)) * 5, 2)) * .22 * progress * motion;
+    float density = lerp(.10, .22, progress * progress);
+    float a = saturate(density * (film + breath)) * step(0, inside);
+    return float4(VeilTone(progress) * a, a) * signal.x * i.C;
+}
+
+// A live shears cut: a ragged dark slit through the accepted band, a fine
+// white seam whose light flows with the energy along it, a soft moon-silver
+// bloom, quiet dusty-rose torn edges and fine fibres hanging only from the
+// edges; a glint rides with the blades. shape: length, radius, ticks since
+// fire, live duration. signal: opacity, blade position px along (-1e4 = none), reduced, seed.
 float4 TearPS(VO i) : COLOR0
 {
     float along = i.U.x * shape.x;
@@ -139,17 +192,26 @@ float4 TearPS(VO i) : COLOR0
     float d = abs(across);
     float t = saturate(shape.z / max(1, shape.w));
     float open = 1 - exp(-shape.z / 1.8);
+    float calm = 1 - signal.z * .7;
     float n = tex2D(noise, float2(along * .005 + signal.w, i.U.y * .9 + clock * .08)).r;
     float f = tex2D(detail, float2(along * .012, i.U.y * 2.2 - clock * .3)).r;
+    float flow = tex2D(noise, float2(along * .0036 - clock * 1.9 * calm, .21 + signal.w)).r;
+    float energy = smoothstep(.25, .85, flow);
     float ragged = d + (n - .5) * .16;
-    float slit = 1 - smoothstep(open * .96 - .04, open * .96 + .02, ragged);
-    float edge = exp(-abs(ragged - open * .96) * 24) * open;
-    float core = exp2(-pow(d / (.06 + .16 * open), 2));
-    float fibres = pow(saturate(1 - abs(frac(along * .045 + n * 2) - .5) * 5), 3) * slit * (1 - core) * (1 - signal.z * .6);
+    float rim = open * .96;
+    float slit = 1 - smoothstep(rim - .04, rim + .02, ragged);
+    float edge = exp(-abs(ragged - rim) * 14) * open;
+    float px = d * shape.y;
+    float core = exp2(-pow(px / (max(.9, Fine()) + 1.2 * open), 2)) * (.8 + .35 * energy);
+    float bloom = exp2(-pow(px / (9 + 16 * open), 2));
+    float fibres = pow(saturate(1 - abs(frac(along * .05 + n * 2) - .5) * 6), 4) * exp(-max(0, rim - ragged) * 14)
+        * slit * (1 - signal.z * .6);
+    float blade = exp2(-pow((along - signal.y) / 26, 2));
+    float glint = blade * (exp2(-pow(px / 3, 2)) + exp2(-pow(px / 14, 2)) * .3);
     float fade = 1 - smoothstep(.6, 1, t);
-    float3 c = float3(.035, .025, .02) * slit + float3(1, .95, .92) * core * 1.2
-        + lerp(float3(.94, .60, .56), float3(1, .93, .84), f) * edge * 1.2 + float3(1, .94, .86) * fibres * .55;
-    float a = saturate(slit * .78 + core + edge + fibres * .5);
+    float3 c = float3(.025, .018, .035) * slit + float3(1, .985, 1) * (core + glint) + float3(.74, .80, 1) * bloom * (.30 + .14 * energy)
+        + lerp(float3(.80, .60, .70), float3(.80, .84, .98), f) * edge * .35 + float3(.86, .88, 1) * fibres * .30;
+    float a = saturate(slit * .58 + core + glint * .6 + edge * .3 + fibres * .28 + bloom * .08);
     return float4(c, a) * fade * signal.x * i.C;
 }
 
@@ -191,39 +253,18 @@ float4 RingPS(VO i) : COLOR0
 
 // Angular afterglow / turn preview of a waltz spoke. U.x radial (0 hub ..
 // 1 wall), U.y angular (0 at the spoke .. 1 at the wedge's far edge). Purely
-// decorative and dim: it trails or previews, never covers a live spoke.
-// signal: opacity, -, reduced, seed.
+// decorative and faint: a soft fan that trails or leans, never covers a live
+// spoke and never draws its own edge. signal: opacity, outer-only start (-1 =
+// the whole wedge; e.g. .6 keeps only the rim nearest the walls), reduced, seed.
 float4 SweepPS(VO i) : COLOR0
 {
     float r = i.U.x, v = i.U.y;
-    float n = tex2D(noise, float2(r * 2.5 - clock * .9 + signal.w, v * .6)).r;
-    float fall = pow(saturate(1 - v), 2.4);
-    float radial = smoothstep(0, .05, r) * (1 - smoothstep(.9, 1, r));
-    float threads = .6 + .4 * pow(saturate(sin(v * 40 + n * 6)), 4);
-    float a = fall * radial * (.55 + .45 * n) * threads * signal.x;
-    return float4(tint * a, a * .3) * i.C;
-}
-
-// Lace parasol rosette at the waltz hub, ribs aligned with the spokes.
-// shape: ribs, rotation, radius px, open 0..1. signal: opacity, -, reduced, seed.
-float4 LacePS(VO i) : COLOR0
-{
-    float2 p = i.U * 2 - 1;
-    float r = length(p);
-    float ang = atan2(p.y, p.x) - shape.y;
-    float s = frac(ang / 6.2831853 * shape.x + .5);
-    float ribDist = abs(s - .5) * 6.2831853 / max(1, shape.x) * r * shape.z;
-    float edge = .84 + .08 * cos(s * 6.2831853) * shape.w;
-    float canopy = (1 - smoothstep(edge - .02, edge + .015, r)) * shape.w;
-    float rib = exp2(-pow(ribDist / 1.2, 2)) * smoothstep(.06, .12, r) * (1 - smoothstep(edge, edge + .05, r));
-    float rimLine = exp2(-pow((r - edge) * shape.z / 1.2, 2)) * shape.w;
-    float rings = abs(frac(r * 6 - clock * .2) - .5) * 2;
-    float holes = smoothstep(.6, .85, rings) * smoothstep(.35, .7, abs(frac(s * 3) - .5) * 2);
-    float n = tex2D(noise, i.U * 2 + clock * .02 + signal.w).r;
-    float lace = canopy * (.30 + .30 * n) * (1 - holes * .8);
-    float3 c = float3(.05, .04, .06) * lace + float3(.85, .86, .96) * (rib * .9 + rimLine * .8 + holes * canopy * .18);
-    float a = saturate(lace * .75 + rib * .85 + rimLine * .75);
-    return float4(c, a) * signal.x * i.C;
+    float n = tex2D(noise, float2(r * 2.2 - clock * .6 * (1 - signal.z * .7) + signal.w, v * .5)).r;
+    float fall = pow(saturate(1 - v), 2.2);
+    float outer = smoothstep(signal.y, signal.y + .2, r);
+    float radial = smoothstep(0, .06, r) * (1 - smoothstep(.85, 1, r)) * outer;
+    float a = fall * radial * (.6 + .4 * n) * signal.x;
+    return float4(tint * a, a * .55) * i.C;
 }
 
 // Glass, wood and silk fragments on analytic arcs. shape.x: kind. signal: opacity, glint.
@@ -248,6 +289,25 @@ float4 GlowPS(VO i) : COLOR0
     float g = shape.x <= 0 ? exp2(-r * r * 4.5) : exp2(-pow((r - shape.x) / max(.01, shape.y), 2));
     g *= 1 - smoothstep(.9, 1, r);
     return float4(tint * g, g * (1 - shape.z)) * signal.x * i.C;
+}
+
+// A small crisp four-point glint (anchor pins, web crossings, spoke tips): a
+// tiny hot core and two hairline rays along the quad axes, never a blob. Core
+// and ray widths are in pixels (never under ~.9 px, wider when zoomed out).
+// signal: opacity, ray strength, size px. tint: the cool colour of the halo.
+float4 GlintPS(VO i) : COLOR0
+{
+    float2 p = i.U * 2 - 1;
+    float2 q = p * max(1, signal.z) * .5;
+    float r2 = dot(p, p);
+    float w = max(.9, Fine()), cs = max(w, signal.z * .06);
+    float core = exp2(-dot(q, q) / (cs * cs));
+    float halo = exp2(-r2 * 7) * .20;
+    float rays = (exp2(-pow(q.y / w, 2)) * pow(saturate(1 - abs(p.x)), 2.5)
+        + exp2(-pow(q.x / w, 2)) * pow(saturate(1 - abs(p.y)), 2.5)) * signal.y;
+    float g = core + halo + rays * .55;
+    float3 c = lerp(tint, float3(1, .99, 1), saturate(core * 1.4 + rays * .6));
+    return float4(c * g, saturate(core + rays * .5) * .6) * signal.x * i.C;
 }
 
 // The hall. U is the screen quad; region maps it into the painting (parallax).
@@ -298,9 +358,10 @@ float4 BackdropPS(VO i) : COLOR0
         float2 dir = float2(cos(a0), sin(a0));
         float off = dot(uv - float2(.5, .35), float2(-dir.y, dir.x)) - (k - 2) * .09;
         float vib = sin(dot(uv, dir) * 40 + clock * (3 + k)) * .0012 * (.3 + shape.y);
-        strands += exp2(-pow((off + vib) * 900, 2)) * (.45 + .55 * frac(k * .618 + clock * .05));
+        strands += exp2(-pow((off + vib) * 380, 2)) * (.45 + .55 * frac(k * .618 + clock * .05));
     }
-    strands *= saturate(signal.w) * (1 - smoothstep(.6, .95, uv.y)) * .32;
+    // Soft and dim, so the hall's own silk never reads like a warning hairline.
+    strands *= saturate(signal.w) * (1 - smoothstep(.6, .95, uv.y)) * .12;
 
     float3 moon = float3(.62, .70, .90);
     color *= shape.z;
@@ -335,7 +396,9 @@ technique EbonManor
     pass AutoloadPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 PropPS(); }
     pass BodyPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 BodyPS(); }
     pass AuraPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 AuraPS(); }
-    pass LanePass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 LanePS(); }
+    pass VeilPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 VeilPS(); }
+    pass HairlinePass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 HairlinePS(); }
+    pass DiscPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 DiscPS(); }
     pass TearPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 TearPS(); }
     pass RingPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 RingPS(); }
     pass ShardPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 ShardPS(); }
@@ -343,5 +406,5 @@ technique EbonManor
     pass BackdropPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 BackdropPS(); }
     pass FramePass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 FramePS(); }
     pass SweepPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 SweepPS(); }
-    pass LacePass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 LacePS(); }
+    pass GlintPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 GlintPS(); }
 }
