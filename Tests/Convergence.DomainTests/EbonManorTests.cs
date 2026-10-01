@@ -177,6 +177,29 @@ internal static partial class Program
         }
     }
 
+    [DomainTest("Ebon replicas accept the whole lifecycle from deployment to the curtain")]
+    private static void EbonLifecycleReplication()
+    {
+        var fight = Guid.NewGuid();
+        var roster = new[] { new EbonMember(0, Guid.NewGuid(), false, false) };
+        int max = EbonRules.Life(1), music = 827;
+        var deploy = new EbonState(fight, 30, -1, -1, -1, EbonStage.Deployment, roster, 8000, 6000, max, max, EbonPhase.ActOne, -1);
+        var ready = deploy with { Age = 140, Stage = EbonStage.Ready, Members = new[] { roster[0] with { Ready = true } } };
+        var countdown = ready with { Age = music, MusicStart = music, UnlockAt = music + EbonRules.Intro, Stage = EbonStage.Countdown, PhaseAt = music };
+        var act = countdown with { Age = music + EbonRules.Intro + 60, Stage = EbonStage.Performance, Life = max - 10 };
+        var two = act with { Age = act.Age + 900, Phase = EbonPhase.ActTwo, PhaseAt = act.Age + 900, Life = EbonRules.Floor(max, EbonPhase.ActOne) };
+        var finale = two with { Age = two.Age + 900, Phase = EbonPhase.Finale, PhaseAt = two.Age + 900, Life = EbonRules.Floor(max, EbonPhase.ActTwo) };
+        var curtain = finale with { Age = finale.Age + 900, Stage = EbonStage.Victory, EndAt = finale.Age + 900, Life = 0 };
+        var chain = new[] { deploy, ready, countdown, act, two, finale, curtain };
+        for (int i = 1; i < chain.Length; i++)
+        {
+            AssertEqual(true, chain[i].CanReplace(chain[i - 1]), $"step {i} replaces its predecessor on a client");
+            AssertEqual(chain[i].Stage, EbonRead(chain[i])!.Value.Stage, $"step {i} parses");
+            AssertEqual(false, chain[i - 1].CanReplace(chain[i]), $"step {i} cannot be undone");
+        }
+        AssertEqual(false, (countdown with { Age = countdown.Age + 5, MusicStart = music + 1, UnlockAt = music + 1 + EbonRules.Intro, PhaseAt = music + 1 }).CanReplace(countdown), "music clock is immutable once set");
+    }
+
     [DomainTest("Ebon stitches punish only the unmet call and their plans are bounded")]
     private static void EbonStitchRulesAndCodec()
     {

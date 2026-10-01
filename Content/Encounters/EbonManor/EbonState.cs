@@ -26,7 +26,9 @@ internal readonly record struct EbonState(Guid Fight, int Age, int MusicStart, i
     internal bool CanReplace(in EbonState old) => old.Fight == Guid.Empty || Fight == old.Fight && Age >= old.Age
         && Stage >= old.Stage && GroundX == old.GroundX && GroundY == old.GroundY
         && (old.MusicStart < 0 || MusicStart == old.MusicStart && UnlockAt == old.UnlockAt && MaxLife == old.MaxLife && Life <= old.Life)
-        && Phase >= old.Phase && (Phase != old.Phase || PhaseAt == old.PhaseAt)
+        // Act One's clock is the music start, first assigned at AllReady; afterwards
+        // an act's start tick is immutable.
+        && Phase >= old.Phase && (Phase != old.Phase || PhaseAt == old.PhaseAt || old.MusicStart < 0)
         && (old.EndAt < 0 || EndAt == old.EndAt && Stage == old.Stage)
         && RecoveryCanReplace(old);
     private bool RecoveryCanReplace(in EbonState old)
