@@ -1,0 +1,15 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonSilkSpool: {
+				DisplayName: Silk Spool
+			}
+			EbonSilkStrand: {
+				DisplayName: Severing Strand
+			}
+			EbonSilkScissors: {
+				DisplayName: Embroidery Scissors
+			}
+		}
+	}
+}

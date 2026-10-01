@@ -32,6 +32,7 @@ internal sealed class EbonRuntime : IEncounterRuntime
     private readonly EbonStitchDirector stitch = new();
     private EbonRecoveryController? recovery;
     private int previousDamage;
+    private int rewardsAttempted; // counted before each grant: a cleanup retry never duplicates a box
     private bool projectionDirty;
 
     internal EbonRuntime(FightId id, int sender, IRaidPedestal core, ulong seq)
@@ -318,11 +319,31 @@ internal sealed class EbonRuntime : IEncounterRuntime
         foreach (Projectile p in Main.ActiveProjectiles)
             if (p.ModProjectile is EbonAttack a && a.Plan.Fight == fight.Value) p.Kill();
     }
+    // Accepted Victory only: one shared Ebon Hatbox per frozen member at the field's ground centre.
+    private void DropRewards()
+    {
+        int count = members.Length;
+        var ground = pedestal.Ground;
+        while (rewardsAttempted < count)
+        {
+            int index = rewardsAttempted++;
+            try
+            {
+                int item = Item.NewItem(new EntitySource_Misc("Convergence:EbonManorVictory"),
+                    new Rectangle((int)ground.X + index * 36 - count * 18, (int)ground.Y - 180, 32, 32), ModContent.ItemType<Rewards.EbonHatbox>());
+                EbonPackets.Log(item < Main.maxItems
+                    ? $"event=VictoryRewardDropped fight={fight.Value} index={index} item={item}"
+                    : $"event=VictoryRewardFailed fight={fight.Value} index={index} reason=item_limit");
+            }
+            catch (Exception e) { EbonPackets.Log($"event=VictoryRewardFailed fight={fight.Value} index={index} reason={e.GetType().Name}"); }
+        }
+    }
     public void Cleanup(in EncounterCleanupContext context)
     {
         if (cleaned || context.FightId != fight) return;
         try
         {
+            if (context.EndReason == EncounterEndReason.Victory) DropRewards();
             ClearHazards();
             recovery?.Cleanup();
             foreach (NPC n in Main.ActiveNPCs)

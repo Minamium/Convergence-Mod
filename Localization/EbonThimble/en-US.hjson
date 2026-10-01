@@ -1,0 +1,9 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonThimbleChannel.DisplayName: Thimble Silk
+			EbonThimblePiece.DisplayName: Hurled Furniture
+			EbonThimblePiano.DisplayName: Grand Piano
+		}
+	}
+}

@@ -1,0 +1,18 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonChandelierMinion: {
+				DisplayName: Ballroom Chandelier
+			}
+			EbonChandelierShatter: {
+				DisplayName: Shattered Chandelier
+			}
+		}
+		Buffs: {
+			EbonChandelierBuff: {
+				DisplayName: Ballroom Chandelier
+				Description: Chandeliers hang above you, waiting to fall on your foes
+			}
+		}
+	}
+}

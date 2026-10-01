@@ -30,6 +30,10 @@
       "source_sha256": "e659fa5154ec1c23782f267e45b71b546c0f8315439f86cfd344987dc66d54a5",
       "output_sha256": "4fa244940362c3bcc2704a690bd31943a3ac26b773d2e4dc9b0efed5495b534d"
     },
+    "EbonPixel.fx": {
+      "source_sha256": "3e69fed941335aa64e7ef05a62304ce2a0ac1b959f0adf0a4f2217aebdca18cc",
+      "output_sha256": "8e2b52dbad1ef68a620cdc28c8f9e05834cc0bf54726e38cbc331dddc5b7acbb"
+    },
     "EbonSilk.fx": {
       "source_sha256": "70adae2a0fa8d892f9b0dc876b5dab375f65dc0f6b8c5938f9101a6c13006fc3",
       "output_sha256": "29ab697695e19b9cc77ffd04c3cb19ac1141568972bb408eaabd553a75ca58c8"

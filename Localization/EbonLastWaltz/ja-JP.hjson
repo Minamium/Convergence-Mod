@@ -1,0 +1,16 @@
+Mods: {
+	Convergence: {
+		Buffs: {
+			EbonLastWaltzBuff: {
+				DisplayName: 最後の円舞曲
+				Description: ノワレットがそばに付き添っている。ミニオン枠を10使用。
+			}
+		}
+
+		Projectiles: {
+			EbonLastWaltzCompanion.DisplayName: ノワレット
+			EbonWaltzFling.DisplayName: 投げつけられた家具
+			EbonWaltzSpoke.DisplayName: 絹の傘骨
+		}
+	}
+}

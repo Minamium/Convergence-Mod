@@ -52,3 +52,25 @@ Prompts are kept for maintenance; generation does not reproduce identical art.
 - **EM05F:** edit of the chosen hall with the same camera: the ceiling and upper back wall torn open by an unseen force, revealing a huge pale full moon; fragments of ceiling, frames and chairs suspended in the air; the lower middle third stays dark.
 - **EM06:** a transparent foreground frame: dark velvet curtains with gold tassels at the far left/right, a carved pillar inside each, ornate moulding along the top; the central 70% fully transparent.
 - **EM07:** an original sealed black invitation envelope with an ivory lace edge, a dusty-rose wax seal with a spider-web crest and a loose silver thread bow, chunky pixel-art clusters.
+
+## Reward set (2026-10-02)
+
+Claude wrote the brief for the hatbox, the five reward weapons and The Last Waltz; Codex generated every image with its built-in image generation (plus one built-in background extraction, ER10) and delivered candidates, raw files, a generation manifest and a report to the local delivery folder `asset-deliveries/ebon-rewards/2026-10-02/`, which stays outside the repository. The rules above applied; every image is pixel art for a nominal 8 px logical pixel. The picks are Codex's recommendations; Codex marked all of them `accepted_by_codex=false` only for the strict grid and size limits. The [rewards spec](REWARDS.md) owns the design; [Attribution](../../../Assets/ATTRIBUTION.md#waltz-of-the-ebon-manor-reward-pixel-art--2026-10-02) owns rights and exact export identities.
+
+| ID | Content | Picked | Runtime export |
+|---|---|---|---|
+| ER01 | Ebon Hatbox: complete box, body, lid, bow (2×2) | d | `EbonHatbox.png` icon (32×30 logical at 2×); `HatboxBody.png` 33×26, `HatboxLid.png` 38×19, `HatboxBow.png` 23×19 |
+| ER02 | Moonshear blade halves (1×2) | c | `ShearUpper.png` 131×25 and `ShearLower.png` 132×29, pivot holes measured |
+| ER02I | Moonshear icon (edit of ER02 c) | c | `EbonMoonshear.png` icon (32×31) |
+| ER03 | Moonloom Harp bow, needle arrow, icon (3×1) | d | `LoomHarp.png` 18×56 with peg and grip anchors, `NeedleArrow.png` 35×8, `EbonLoomHarp.png` icon (12×30) |
+| ER04 | Ebon Thimble icon | a | `EbonThimble.png` icon (27×32) |
+| ER05 | Eight thrown props (4×2) | d | `Furniture.png` 384×64: eight 48×64 cells (armchair, candelabra, portrait, clock, birdcage, mirror, music box, cello), each prop centred, eyelet on top |
+| ER06 | Grand piano (edit with ER05 d as the dot reference) | d | `Piano.png` 76×57 |
+| ER07 | Chandeliers, pole, flames, crystal, buff (3×2) | d | `Chandelier.png` 41×68, `ChandelierSmall.png` 34×49, `EbonChandelierPole.png` icon (31×32), `ChandelierFlame.png` two 8×14 frames, `ChandelierCrystal.png` 12×26, `EbonChandelierBuff.png` 32×32 |
+| ER08 | Spool, icon, bird scissors closed/open (4×1) | b | `Spool.png` 11×18, `EbonSeveringSilk.png` icon (32×24), `ScissorsClosed.png` and `ScissorsOpen.png` 35×18 on one canvas with a shared hinge |
+| ER09 | The Last Waltz parasol icon and buff (2×1) | c | `EbonLastWaltz.png` icon (28×32), `EbonLastWaltzBuff.png` 32×32 |
+| ER10 | Four companion poses (edit of EM01 b, top row of 4×2) | a | `NoiretteWaltz.png` 192×64: four 48×64 cells as in `Noirette.png`, feet on row 61 (`Noirette.png` row 58) |
+
+All files are in `Assets/Textures/Items/EbonRewards`. `tools/export_ebon_reward_art.py` is mechanical and verifies each input hash: alpha below 16 becomes 0, each drawing is cut out alone, the dot pitch is measured per sheet from edge phases, a logical pixel is the whole number of drawn dots nearest 8 px (two dots for ER03, ER05, ER06, ER08 and ER10, which were drawn with ~4 px dots), and block_mode takes the majority colour of each logical cell, opaque at half coverage. Icons over 32×32 logical (buffs 16×16) are fitted by the same resample; icons are stored at 2×, everything else at one texel per logical pixel and drawn at 2× in game. The measured anchors (shear pivots, harp pegs and grip, wick tops, eyelets, scissors hinge, companion baseline) are listed in the tool header and its local report.
+
+Full prompts live in the delivery `manifest.json` (per file, with derivation inputs and alpha measurements) and are summarised in the delivery `BRIEF.md`; they are not repeated here.

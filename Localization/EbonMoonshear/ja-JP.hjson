@@ -1,0 +1,15 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			MoonshearStroke: {
+				DisplayName: 月裁ちの大鋏
+			}
+			MoonshearCutLine: {
+				DisplayName: チャコの裁ち線
+			}
+			MoonshearPop: {
+				DisplayName: 弾ける裁ち線の印
+			}
+		}
+	}
+}
