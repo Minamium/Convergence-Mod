@@ -1,0 +1,15 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			MoonshearStroke: {
+				DisplayName: Moonshear
+			}
+			MoonshearCutLine: {
+				DisplayName: Moonshear Cut Line
+			}
+			MoonshearPop: {
+				DisplayName: Bursting Chalk Mark
+			}
+		}
+	}
+}

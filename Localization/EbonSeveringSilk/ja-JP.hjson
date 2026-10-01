@@ -1,0 +1,15 @@
+Mods: {
+	Convergence: {
+		Projectiles: {
+			EbonSilkSpool: {
+				DisplayName: 糸巻き
+			}
+			EbonSilkStrand: {
+				DisplayName: 断ち糸の張り糸
+			}
+			EbonSilkScissors: {
+				DisplayName: 刺繍鋏
+			}
+		}
+	}
+}

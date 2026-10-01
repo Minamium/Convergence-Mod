@@ -2,6 +2,433 @@
 
 ## Records
 
+### Waltz of the Ebon Manor reward pixel layer — 2026-10-02
+
+The Ebon reward weapons share one original half-resolution pixel material ([reward spec](../docs/encounters/ebon-manor/REWARDS.md)); it follows the Soboro technique with its own palette and primitives.
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/EbonPixel.fxc`
+- Asset ID: ebonpixel-20261002
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned EbonPixel.fx for the Ebon reward pixel layer: swept crescents, tailor's-chalk and torn bands, and 1-3 dot threads, standing-wave strings and rings evaluated per art dot in a screen-aligned half-resolution target, plus a flat pass for CPU-plotted dot runs, quantized to the Ebon palette (navy outline, charcoal, dusty rose, silver, ivory, moon, gold, candle, internal debris wood); a composite pass point-upscales it with a one-dot navy outline and a small bounded glow. References the existing SlashNoise.png at runtime; no Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material sheet/sequence review 2026-10-02; native playtest not_run
+
+### Waltz of the Ebon Manor reward weapon audio — 2026-10-02
+
+Twenty-seven weapon cues for the five Ebon Hatbox weapons, the hatbox and The Last Waltz ([rewards spec](../docs/encounters/ebon-manor/REWARDS.md#art-and-audio)). [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; it reuses the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py). Each cue layers trimmed CC0 recordings with original synthesis (tuned Karplus-Strong silk strings in B minor, a struck-string piano, modal glass and chain partials, fabric rips, band-swept air, thread ratchets, a synthetic hall tail); Note0 to Note7 are pure synthesis. The recordings are the ones already attributed above in the Ebon Manor and Soboro tables (Kenney RPG Audio and the artisticdude Swishes pack on OpenGameArt; Freesound uploads that showed Creative Commons 0 on their pages on 2026-10-01, public HQ preview renders). They stay in the local store, are SHA-256 verified before use and are not committed; the audition WAVs and report stay in the git-ignored `.local`. Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after the Vorbis round trip.
+
+| Key | Store file | Source | Source SHA256 |
+|---|---|---|---|
+| air_cut | wind-FS60030-qubodup-air_cut.mp3 | https://freesound.org/s/60030/ (qubodup, HQ preview) | `0301adf448c60b80c09b89df57510fd09949d6b15bb457ef7c9e70999b8a2ad0` |
+| anime_ring | ring-FS706204-xkeril-nice_anime_sword_hit.mp3 | https://freesound.org/s/706204/ (xkeril, HQ preview) | `2a28c06b3674240e46bbf79516f87e5fbbe9522a1d272b55448f0af2c8599137` |
+| anime_shing | ring-FS529019-Euphrosyyn-anime_shing_sword_2.mp3 | https://freesound.org/s/529019/ (Euphrosyyn, HQ preview) | `a8278823afb4c25a06d55ec2adfdeb7993bb738b1077310555be1e592063d02f` |
+| armor_strike | metal-FS568170-Merrick079-sword_sound_1.mp3 | https://freesound.org/s/568170/ (Merrick079, HQ preview) | `5f9ab16b7a74a205b1490001d4c913d0d55f561df796cb2d43c1a30b97c351b1` |
+| book_flip | pack-OGA-Kenney-RPGsounds.zip!OGG/bookFlip3.ogg | Kenney RPG Audio bookFlip3.ogg | `c85db5dceb3f1df073e960630277eaa88a5afda0477c1ddd68dad707621767be` |
+| chop | pack-OGA-Kenney-RPGsounds.zip!OGG/chop.ogg | Kenney RPG Audio chop.ogg | `d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486` |
+| cloth1 | pack-OGA-Kenney-RPGsounds.zip!OGG/cloth1.ogg | Kenney RPG Audio cloth1.ogg | `ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d` |
+| cloth4 | pack-OGA-Kenney-RPGsounds.zip!OGG/cloth4.ogg | Kenney RPG Audio cloth4.ogg | `e7ab9a6c4466dea874196c61f59bf1da05cfe58748f42fadd695d441a154a99b` |
+| creak1 | pack-OGA-Kenney-RPGsounds.zip!OGG/creak1.ogg | Kenney RPG Audio creak1.ogg | `8a346186fd297254248cab8e8117060a52a5cf2a84f603153a762108550ea95e` |
+| creak2 | pack-OGA-Kenney-RPGsounds.zip!OGG/creak2.ogg | Kenney RPG Audio creak2.ogg | `8a990afdc03aebb91d528f5385e2f95582dbfa8e2c12c71098ab01be9142294a` |
+| door_close | pack-OGA-Kenney-RPGsounds.zip!OGG/doorClose_4.ogg | Kenney RPG Audio doorClose_4.ogg | `fd21c0e7a9d0317375d2561590f0770dd3380ee35507d064862cb44d6f71595b` |
+| draw_knife | pack-OGA-Kenney-RPGsounds.zip!OGG/drawKnife3.ogg | Kenney RPG Audio drawKnife3.ogg | `a11ae62fb1a628425769d11a9de394980ad8909c31f4c9a4316f226963e21caf` |
+| energy_wave | swing-FS724716-greyfeather-sword_slash_energy_wave.mp3 | https://freesound.org/s/724716/ (greyfeather, HQ preview) | `5b9fbd1c8b78cd2e69c0ebfd178e229308b37058fe71da1cd4311c7f70a94b59` |
+| knife_slice | pack-OGA-Kenney-RPGsounds.zip!OGG/knifeSlice2.ogg | Kenney RPG Audio knifeSlice2.ogg | `6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def` |
+| low_impact | impact-FS541029-AudioPapkin-very_low_impact.mp3 | https://freesound.org/s/541029/ (AudioPapkin, HQ preview) | `73c25c4f49baa34cb9ad42290324fc61340124028dc0161299880b78580e335a` |
+| metal_click | pack-OGA-Kenney-RPGsounds.zip!OGG/metalClick.ogg | Kenney RPG Audio metalClick.ogg | `9851a69d0c613e13bceef08060ecc4148f098ef487927cbebe270d642398a3b3` |
+| metal_latch | pack-OGA-Kenney-RPGsounds.zip!OGG/metalLatch.ogg | Kenney RPG Audio metalLatch.ogg | `ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708` |
+| metal_pot | pack-OGA-Kenney-RPGsounds.zip!OGG/metalPot1.ogg | Kenney RPG Audio metalPot1.ogg | `159def979e8e386c2c539f5e99cc30a080eb2dcb6c911fa2e4ccc0785b2522fd` |
+| rock_tumble | impact-FS389618-_stubb-rock_tumble_2.mp3 | https://freesound.org/s/389618/ (_stubb, HQ preview) | `199521191be552261d6e604c8d34e40cfeac4b3d7f3075906dd27182c73adb4a` |
+| samurai_slash | swing-FS370204-nekoninja-samurai_slash.mp3 | https://freesound.org/s/370204/ (nekoninja, HQ preview) | `283b188b2f04f6676ae23be36e58a536bb78d5e7cf4bf5ab8cc95ca13b0065c2` |
+| stick_woosh | swing-FS352719-Dalesome-woosh_stick.mp3 | https://freesound.org/s/352719/ (Dalesome, HQ preview) | `5dc0966b3f689fde08955ab18a3b8dc636cc3db96d105e90b427af54184c3016` |
+| swish | swishes/swish-4.wav | https://opengameart.org/content/swishes-sound-pack (artisticdude, swish-4.wav) | `0060f4a7040edce4cc50d1daa10a9cb76764128a942e4688339e69cd1d5d784c` |
+| swoosh | swing-FS263595-PorkMuncher-swoosh.mp3 | https://freesound.org/s/263595/ (PorkMuncher, HQ preview) | `5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058` |
+| sword_hit | metal-FS442769-qubodup-sword_hit.mp3 | https://freesound.org/s/442769/ (qubodup, HQ preview) | `93d72e63bb8d9b8a60d2c0ac665c153171515645fbb85f4ec028e4a253e7b167` |
+| woosh | wind-FS683096-florianreichelt-woosh.mp3 | https://freesound.org/s/683096/ (florianreichelt, HQ preview) | `3c641d4d6ea0c6b65423d8fe1a7d72bf7bfb08a91c1640f9e9a0ab9d5d23b265` |
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/HatboxOpen.ogg`
+- Asset ID: ebon-reward-sfx-hatboxopen-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (2.62 s)
+- Creator: recordings by Kenney, PorkMuncher and qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: air_cut, cloth1, cloth4, metal_latch, swoosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS, true peak -9.9 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `6c7590540791124d7f3676dab34a20e8637f3186d4367691ca1f42176358c667`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note0.ogg`
+- Asset ID: ebon-reward-sfx-note0-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.36 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to B3); short-term loudness -20.0 LUFS, true peak -5.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `b9661da6bfbc8da7b136c4ffc934c30ccd8c8eefe107c5e18b754c410891d28e`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note1.ogg`
+- Asset ID: ebon-reward-sfx-note1-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.36 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to D4); short-term loudness -20.0 LUFS, true peak -5.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `ce1d626229a69c32fb0af7631670168924746e034289c7a8c0a1c92217f9686b`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note2.ogg`
+- Asset ID: ebon-reward-sfx-note2-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.36 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to F#4); short-term loudness -20.0 LUFS, true peak -5.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `24a035d633b3e743bf3c6e17dff4881fc05567959ef4c53febbcf75343631338`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note3.ogg`
+- Asset ID: ebon-reward-sfx-note3-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.36 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to B4); short-term loudness -20.0 LUFS, true peak -4.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `e0092a0df0953742586c21ad3e3f88135f455aaca167732e136215249e518695`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note4.ogg`
+- Asset ID: ebon-reward-sfx-note4-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.36 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to D5); short-term loudness -20.1 LUFS, true peak -4.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `a060568bf9cf1c5ed1ae836efbbc50b80509fd968b3833b805e9110418c6abf7`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note5.ogg`
+- Asset ID: ebon-reward-sfx-note5-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.36 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to F#5); short-term loudness -20.0 LUFS, true peak -4.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `e9a2c98ac66876005707dff7be9a60f7379f4d2a20c35dedbcceb7796e8550bb`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note6.ogg`
+- Asset ID: ebon-reward-sfx-note6-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.36 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to B5); short-term loudness -20.0 LUFS, true peak -4.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `f3c60bbe9424338a8f00d300194551d0e6bafb54e0db49c9347a5facd535f011`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/Note7.ogg`
+- Asset ID: ebon-reward-sfx-note7-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.35 s)
+- Creator: original synthesis by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis only (Karplus-Strong silk string, tuned to D6); short-term loudness -20.0 LUFS, true peak -1.6 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; pitch checked against the tuned note within 3 cents; subjective listening and in-game mix not_run
+- SHA256: `775f419549fbdd57017e6a320ef4d0b0acd91568abf5d3207468958c43c9fa36`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ShearSwing.ogg`
+- Asset ID: ebon-reward-sfx-shearswing-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.40 s)
+- Creator: recordings by Dalesome, Euphrosyyn, Kenney, nekoninja and PorkMuncher; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: anime_shing, cloth4, samurai_slash, stick_woosh, swoosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.2 LUFS, true peak -7.4 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `fe974b9de85e667c9b2c0dd36c243294baa0a1074eecf4f32368dcfaa7df9328`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ShearSwingRise.ogg`
+- Asset ID: ebon-reward-sfx-shearswingrise-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.50 s)
+- Creator: recordings by Euphrosyyn, greyfeather and PorkMuncher; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: anime_shing, energy_wave, swoosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -16.2 LUFS, true peak -8.7 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `be2b41973ad22ce59c52d266d126da81a5b6723ac2d1212406d1b784c35ac500`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ShearSnip.ogg`
+- Asset ID: ebon-reward-sfx-shearsnip-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.48 s)
+- Creator: recordings by Euphrosyyn, Kenney and Merrick079; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: anime_shing, armor_strike, knife_slice, metal_latch, metal_pot in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -14.1 LUFS, true peak -2.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `6220552ec878b2dab292a2f6c945c76aaa9a9b9bc2bc898631266df347ef86d4`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ShearCut.ogg`
+- Asset ID: ebon-reward-sfx-shearcut-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.97 s)
+- Creator: recordings by Kenney, nekoninja and xkeril; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: anime_ring, draw_knife, knife_slice, samurai_slash in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.3 LUFS, true peak -6.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `6db42a80523f5932b34ff1c6201449557a0a010cfab3062c03441bdc80a25655`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/HarpLoose.ogg`
+- Asset ID: ebon-reward-sfx-harploose-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.54 s)
+- Creator: recordings by artisticdude, Kenney and qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: air_cut, chop, swish in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -18.0 LUFS, true peak -5.7 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `0255629bef4096392008c540e99fa7f94e3f06c5a765602059953502d33e532e`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/HarpChord.ogg`
+- Asset ID: ebon-reward-sfx-harpchord-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (1.57 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -14.0 LUFS, true peak -6.7 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `15cf55fe5cff23b2e112444dcfa2abf03404e4b019bea0a581f553ef025ea156`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ThimbleLift.ogg`
+- Asset ID: ebon-reward-sfx-thimblelift-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.62 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cloth1, cloth4, creak1 in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -19.0 LUFS, true peak -14.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `d45372f1b8da0879c734dc1278cfe84de68bccad2133244dade41955595a80ac`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/FurnitureYank.ogg`
+- Asset ID: ebon-reward-sfx-furnitureyank-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.50 s)
+- Creator: recordings by Dalesome, Kenney and PorkMuncher; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cloth4, stick_woosh, swoosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -16.1 LUFS, true peak -5.9 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `2cb546aa01371566b3af3f286a188af8652fa16477b8021aa17bc38423c9cd8c`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/FurnitureCrash.ogg`
+- Asset ID: ebon-reward-sfx-furniturecrash-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.72 s)
+- Creator: recordings by _stubb and Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chop, door_close, rock_tumble in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -14.1 LUFS, true peak -3.6 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `26c03066015e1476e9812f23a3ebc49a89d3aff599ff702face895072bb68522`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/PianoCrash.ogg`
+- Asset ID: ebon-reward-sfx-pianocrash-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (2.13 s)
+- Creator: recordings by _stubb, AudioPapkin and Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chop, creak2, door_close, low_impact, metal_pot, rock_tumble in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -12.0 LUFS, true peak -5.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `a11b1460b472a2c28ae6ac122792f7795640b279ace553aaa4d00ade2bc50fe1`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ChandelierSnip.ogg`
+- Asset ID: ebon-reward-sfx-chandeliersnip-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.44 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: creak1, knife_slice, metal_click, metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -16.1 LUFS, true peak -2.9 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `4cdabfc19ad39134d39ed4ee2ebc834268e64c480e954dba78c157fa270b951f`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ChandelierShatter.ogg`
+- Asset ID: ebon-reward-sfx-chandeliershatter-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (1.39 s)
+- Creator: recordings by AudioPapkin and Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: low_impact, metal_pot in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.1 LUFS, true peak -7.6 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `ef19e6bc7c6987ad65e39dac0ace99184aab5bad19e83d9502e84090c4483477`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ChandelierReel.ogg`
+- Asset ID: ebon-reward-sfx-chandelierreel-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (1.30 s)
+- Creator: recordings by Kenney and qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: air_cut, creak1, metal_click in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -19.1 LUFS, true peak -13.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `2b51775414a17b5c1d7c53767af09a95ac8c0e5801a48b08f68a63101ea166d5`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/SpoolThrow.ogg`
+- Asset ID: ebon-reward-sfx-spoolthrow-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.45 s)
+- Creator: recordings by PorkMuncher and qubodup; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: air_cut, swoosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.1 LUFS, true peak -3.5 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `969bccfb37174e5386636af8bfd011ed055d4eb4336f40b6cbf1f519ca91f858`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/SilkPin.ogg`
+- Asset ID: ebon-reward-sfx-silkpin-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.54 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chop, metal_click in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -18.0 LUFS, true peak -2.8 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `c830078421b2921f85474258de9f8ce9616d8955582d29489bfb1680b12423e0`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/ScissorsSnip.ogg`
+- Asset ID: ebon-reward-sfx-scissorssnip-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (0.50 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: knife_slice, metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -14.0 LUFS, true peak -7.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `10142db595bfc44a5e669793feb1774508658170b2829842f20ea9a0b81b6975`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/SeverAll.ogg`
+- Asset ID: ebon-reward-sfx-severall-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (1.51 s)
+- Creator: recordings by AudioPapkin, Kenney, qubodup and xkeril; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: anime_ring, knife_slice, low_impact, sword_hit in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -12.2 LUFS, true peak -4.1 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `a0198fec92012b19c2fd2bbbbbdeca5dd17aa17da4542dd9f74f72967e7bb23e`
+
+- Runtime file: `Assets/Sounds/Weapons/EbonRewards/WaltzOpen.ogg`
+- Asset ID: ebon-reward-sfx-waltzopen-20261002
+- Asset type: stereo 44.1 kHz Vorbis Ebon reward cue (1.59 s)
+- Creator: recordings by florianreichelt and Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: book_flip, cloth4, metal_click, woosh in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_ebon_reward_sfx.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS, true peak -9.0 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, loudness and true-peak checks; subjective listening and in-game mix not_run
+- SHA256: `dee506c9ab9e6f8b0b64022aac723e3377e76c8a69dc5c66f87ca203544d47dc`
+
 ### Waltz of the Ebon Manor — 2026-10-01
 
 Original characters, props and hall for the new Raid, generated by Codex from Claude's owner-directed brief; no artist, work or franchise imitation was requested. Full prompts, candidates and owner selections: [asset brief](../docs/encounters/ebon-manor/ASSET_BRIEF.md). Delivery originals and the owner-supplied recording stay outside the repository. Luminance noise textures are referenced at runtime, never vendored.
