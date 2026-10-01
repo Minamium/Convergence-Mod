@@ -563,6 +563,157 @@ Silk, furniture and hall cues layer trimmed CC0 recordings with original NumPy s
 - SHA256: `29ab697695e19b9cc77ffd04c3cb19ac1141568972bb408eaabd553a75ca58c8`
 - Source SHA256: `70adae2a0fa8d892f9b0dc876b5dab375f65dc0f6b8c5938f9101a6c13006fc3`
 
+### Ghost Samurai recorded attack audio — 2026-10-01
+
+Replaces the boss's borrowed vanilla Item1/ScaryScream/Item4/Item14 references; the owner approved CC0 recordings for these cues on2026-10-01. [`tools/remix_samurai_sfx.py`](../tools/remix_samurai_sfx.py) owns exact windows, filters, gains, loudness targets and source hashes, using the shared [`tools/sfx_layers.py`](../tools/sfx_layers.py). The recordings stay in a local source store and are not committed. Every source below showed Creative Commons0 (https://creativecommons.org/publicdomain/zero/1.0/) on its page on2026-10-01. Freesound files are the public HQ preview renders of those CC0 uploads.
+
+| Key | Recording | Author | Source | Source SHA256 |
+|---|---|---|---|---|
+| air_cut | Swosh / Whoosh / Air Cut | qubodup | https://freesound.org/s/60030/ | `0301adf448c60b80c09b89df57510fd09949d6b15bb457ef7c9e70999b8a2ad0` |
+| anime_ring | Nice anime sword hit | xkeril | https://freesound.org/s/706204/ | `2a28c06b3674240e46bbf79516f87e5fbbe9522a1d272b55448f0af2c8599137` |
+| anime_shing | Anime_drama_shing_sword_2.wav | Euphrosyyn | https://freesound.org/s/529019/ | `a8278823afb4c25a06d55ec2adfdeb7993bb738b1077310555be1e592063d02f` |
+| concrete_smash | Concrete SMASH 2 | magnuswaker | https://freesound.org/s/522099/ | `b182dec5699903068a509113e09e0b4c02a78f42b7aa73f875b23fc24ce34c6e` |
+| demon_howl | Demon Giant Howl.wav | Bananaboatman33 | https://freesound.org/s/257635/ | `2a6487786a58fabe2f20ce051408e5caf04b552a83663f0bf377711646ffe58b` |
+| energy_wave | sword slash energy wave | greyfeather | https://freesound.org/s/724716/ | `5b9fbd1c8b78cd2e69c0ebfd178e229308b37058fe71da1cd4311c7f70a94b59` |
+| metal_bowl | metal bowl - hit - with wooden spoon 01.wav | Anthousai | https://freesound.org/s/405665/ | `d5814c36039e2d231a324468afd12ffd98bec2d5fabf9e0142d6bf83f0357290` |
+| rock_tumble | Rock Tumble 2.wav | _stubb | https://freesound.org/s/389618/ | `199521191be552261d6e604c8d34e40cfeac4b3d7f3075906dd27182c73adb4a` |
+| samurai_slash | samurai slash | nekoninja | https://freesound.org/s/370204/ | `283b188b2f04f6676ae23be36e58a536bb78d5e7cf4bf5ab8cc95ca13b0065c2` |
+| singing_bowl | singing bowl strike sound | inoshirodesign | https://freesound.org/s/271370/ | `5841d9a2a3ad026c69ec9c72f0a604a540e48235a0bc9aaf5c1c900986f780bc` |
+| stick_woosh | Woosh (stick swung in the air) | Dalesome | https://freesound.org/s/352719/ | `5dc0966b3f689fde08955ab18a3b8dc636cc3db96d105e90b427af54184c3016` |
+| stone_crash | Stone crash | discofield | https://freesound.org/s/711657/ | `91cca28a4c4a9eae31cdad60b8e73414b2b3fe261a9779aa719060a2c57a1503` |
+| swish_short | swish-10.wav, Swishes Sound Pack | artisticdude | https://opengameart.org/content/swishes-sound-pack | `4f7381a76f280d3f36f962ac3f44f16f77eec44797f30715d063c81ea3859024` |
+| swoosh | swoosh.wav | PorkMuncher | https://freesound.org/s/263595/ | `5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058` |
+| temple_bell | Bell at Daitokuji temple,kyoto.wav | nahmandub | https://freesound.org/s/131348/ | `c111ac138f867e07ea2a62ce0b75e9bf27ed9cd17fcaa6cfe0803f8252418bf2` |
+| war_cry | Middle Ages War Cry.wav | joelcarrsound | https://freesound.org/s/521830/ | `380347fb94625c279ce05e29bab2ec94a2d4df6282b07aba4c075061ec929a84` |
+| wind_whirl | Wind Whirl (Small Air Blow) | DARTEKZ_GAMEZ | https://freesound.org/s/719560/ | `5b41e14eaa752d4715ee7c706b99581f3adf5b02630c1d6c565b445a4e725c75` |
+| zap | Electric zap.wav | michael_grinnell | https://freesound.org/s/512471/ | `8630ae76d1c6178d0fb0b9192b89326540e7b87cd3619683c2eee1c07dfe6575` |
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiSlash.ogg`
+- Asset ID: ghost-samurai-slash-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai directional, vertical and circle slash cue layered from CC0 recordings
+- Creator: recordings by Dalesome, Euphrosyyn, greyfeather and nekoninja; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: anime_shing, energy_wave, samurai_slash, stick_woosh in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `ba5547167c95ffdaf0d6bd88ccf01fb8318653105bcd2a4ed810ee12165fb9a5`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiGrid.ogg`
+- Asset ID: ghost-samurai-grid-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai grid tear cue layered from CC0 recordings
+- Creator: recordings by greyfeather, michael_grinnell, nekoninja and xkeril; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: anime_ring, energy_wave, samurai_slash, zap in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `aef159e55d62f496e81166f075b270cec4233e984b88e1f3546d80f630ce43a5`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiWave.ogg`
+- Asset ID: ghost-samurai-wave-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai charged wave release cue layered from CC0 recordings
+- Creator: recordings by Dalesome, greyfeather, nekoninja and xkeril; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: anime_ring, energy_wave, samurai_slash, stick_woosh in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `146e6e948ebaf33d065a1c4044a34aa3b8ffd9fce708719e2d78eb1bbb2ec8fe`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiCleave.ogg`
+- Asset ID: ghost-samurai-cleave-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai frontal cleave cue layered from CC0 recordings
+- Creator: recordings by Dalesome, Euphrosyyn, greyfeather, michael_grinnell, nekoninja and xkeril; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: anime_ring, anime_shing, energy_wave, samurai_slash, stick_woosh, zap in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `78b86550efc4b7493f8063cb71dbaced1a47b57c08b08235952e0d337c30fe76`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiRush.ogg`
+- Asset ID: ghost-samurai-rush-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai dash cue layered from CC0 recordings
+- Creator: recordings by artisticdude, greyfeather, nekoninja and PorkMuncher; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: energy_wave, samurai_slash, swish_short, swoosh in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `72b8ca0c2c883f8818fd472a36908aec58400d2357db133c22bade844ebea2a2`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiShout.ogg`
+- Asset ID: ghost-samurai-shout-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai dash shout cue layered from CC0 recordings
+- Creator: recordings by Bananaboatman33 and joelcarrsound; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: demon_howl, war_cry in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `ead66d99c34b09b7d4f5a61fd076b4aa8a525975895757826c755db38bd4289e`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiChime.ogg`
+- Asset ID: ghost-samurai-chime-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai telegraph chime cue layered from CC0 recordings
+- Creator: recordings by Anthousai, inoshirodesign and nahmandub; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: metal_bowl, singing_bowl, temple_bell in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `b7522eb0aba3f685cd12e9e40b9f3ef89767e90d2983fc327c749c0f4c5e63b0`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiWind.ogg`
+- Asset ID: ghost-samurai-wind-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai kamaitachi wind cue layered from CC0 recordings
+- Creator: recordings by DARTEKZ_GAMEZ, greyfeather and qubodup; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: air_cut, energy_wave, wind_whirl in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `f5a9d9b5bcdfc203cfc16d63c11fe6aefd2ff0baf1eeb2ecab950070539528a1`
+
+- Runtime file: `Assets/Sounds/GhostSamurai/SamuraiShock.ogg`
+- Asset ID: ghost-samurai-shock-20261001
+- Asset type: stereo44.1kHz Vorbis Ghost Samurai ground shockwave cue layered from CC0 recordings
+- Creator: recordings by _stubb, discofield and magnuswaker; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-01
+- Source type: public-domain
+- Source work and URL: concrete_smash, rock_tumble, stone_crash in the table above
+- Tool/model/version: `tools/remix_samurai_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, layered on the accepted attack clock and loudness-matched; any low body is original sine synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-01; source licenses, timing, loudness, true peak and boundaries checked numerically; subjective listening and in-game mix remain owner-owned
+- SHA256: `3a629c14947d45c0ad8a30a981426519b3917c04263c5fb67339488bbb90ad02`
+
 ### Soboro recorded blade audio — 2026-10-01
 
 Replaces the 2026-09-28 synthesized Soboro cues at the same runtime paths; the owner selected CC0 recordings for these masters on2026-10-01. [`tools/remix_soboro_sfx.py`](../tools/remix_soboro_sfx.py) owns exact windows, filters, gains, loudness targets and source hashes. The recordings stay in a local source store and are not committed. Every source below showed Creative Commons0 (https://creativecommons.org/publicdomain/zero/1.0/) on its page on2026-10-01. Freesound files are the public HQ preview renders of those CC0 uploads.
@@ -656,17 +807,17 @@ Replaces the 2026-09-28 synthesized Soboro cues at the same runtime paths; the o
 ### Ghost Samurai sword tears — 2026-09-27
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/SamuraiCut.fxc`
-- Asset ID: samurai-cut-20260927
-- Asset type: compiled original procedural slash material
-- Creator: Convergence, project-owner-directed work with OpenAI Codex assistance
-- Creation/acquisition date: 2026-09-27
+- Asset ID: samurai-cut-pixel-20261001
+- Asset type: compiled original procedural pixel-art slash material
+- Creator: Convergence, project-owner-directed work with OpenAI Codex (2026-09-27 material) and Claude (2026-10-01 pixel-art rewrite) assistance
+- Creation/acquisition date: 2026-10-01
 - Source type: original
-- Source work and URL: original SamuraiCut.fx; local ScarletSorcery.fx / AzureMaterials.Slash are choreography references, not third-party sources
+- Source work and URL: original SamuraiCut.fx; Soboro's original SoboroPixelSlash palette is the style reference, not a third-party source
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Violet sword incisions, counterflowing tapered sheets, micro-amplitude blade motion, crescent/annulus masks and harmless smoky contraction. No beam or portal renderer imported; installed Luminance noise is referenced, not redistributed.
+- Human modifications: Rewritten to evaluate each accepted hazard per world-aligned 2x2 art pixel with Soboro's six-tone violet palette, lighting only cells wholly inside the footprint: marching-contour/dither forecasts, sweeping white-edged cuts, straight/wind/cleave field cuts, a thick travelling crescent, torn residue and a spirit-fire wisp pass. Installed Luminance noise is referenced, not redistributed.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance
-- Reviewer and review date: Codex compiled-material sequence review2026-09-27; native gameplay not_run
+- Reviewer and review date: Claude compiled-material sequence review2026-10-01; native gameplay not_run
 
 ### Ghost Samurai battlefield — 2026-09-27
 

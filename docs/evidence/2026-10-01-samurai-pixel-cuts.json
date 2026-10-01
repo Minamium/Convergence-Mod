@@ -1,0 +1,26 @@
+{
+  "scope": "Ghost Samurai presentation pass 1: pixel-art forecasts/cuts/residue/wisps, dash forecast, display-only swing step and nine CC0 attack cues. Hazard geometry, Fire/End clocks, damage, NPC position, packets and protocol75 are unchanged",
+  "target_build": "0.3.58 / protocol75 unchanged",
+  "integration_base": "6479b96 (main after PR89)",
+  "commits": {
+    "shared_audio_layers": "da7cc81",
+    "pixel_cuts_and_step": "284b4f9",
+    "attack_audio": "a7c79a7",
+    "docs": "e9fdb21"
+  },
+  "owner_direction": "2026-10-01: after Soboro's acceptance the owner asked for Ghost Samurai to be overhauled the same way and approved pass 1 (attack visuals in Soboro's pixel-art language, dedicated CC0 audio, larger body acting); the body art itself is deferred to pass 2",
+  "checks": {
+    "static": "passed: documentation catalog82, repository checks and YAML; tools unittest66 passed",
+    "domain": "passed: 387 deterministic domain tests, including the bounded mirrored rig lean with the stronger shoulder turn",
+    "shader": "passed: SamuraiCut recompiled by the pinned FXC fx_2_0 /O3 whose compiler hash matches compiled.json; every other .fxc recompiled byte-identical",
+    "cut_sequences": "passed: tools/preview-samurai-spectral.ps1 -CutsOnly rendered 1008 production-cut frames (slash, vertical, grid30, wave, annulus, kamaitachi, cleave; forecast through residue; normal/reduced; light/dark; zoom1.00/0.65) with the final shader; grid safe cells, annulus hole and cleave back half empty, residue expiry and caller SpriteBatch state asserted. A before/after sheet against main's renderer was reviewed",
+    "body_and_motion": "passed: default preview 304 body/composite/hazard frames plus 16 ending/wisp frames with the production wisp pass; 499 chronological boss-motion frames with the raw step target (the game additionally eases the return)",
+    "audio": "passed: nine cues rendered by tools/remix_samurai_sfx.py (shared tools/sfx_layers.py) from hash-verified CC0 recordings; repeat renders byte-identical (pinned Ogg serial); decoded true peak <=-2.16dBTP; K-weighted peak-100ms loudness Slash-10.2/Grid-9.2/Wave-8.6/Cleave-7.7/Rush-10.1/Shout-10.1/Chime-13.0/Wind-10.1/Shock-9.1dB; envelope peaks 40-150ms after the trigger. Six attack-cadence auditions use the encounter rules' ticks, not a game capture. Soboro's OGGs re-render byte-identical after the shared-layer refactor",
+    "native_build": "passed: tML -build with the pinned tModLoader into the isolated automated-check profile: 0 errors / 4 existing CS8632 warnings; clean tree at e9fdb21; source unchanged during build",
+    "package": "0.3.58, 105932315 bytes, sha256 60ee0e501feef2126ff000302399b30bda16ee29ed867dc4c67db63f68b7a692; packaged 1-4 player admission passed",
+    "package_identity": "build source_sha256 baed4dee09cc72c467566fe9ecf645c2648484dd3fe9ea0798166d8c14f42ebe is commit e9fdb21 exactly; all nine packaged Ghost Samurai OGGs and SamuraiCut.fxc byte-match the committed files",
+    "install": "not installed in the owner's shared Mods profile: the owner was playtesting the parallel Ebon manor branch's package there; built only in the isolated automated-check profile",
+    "native_player_and_remote": "not_run: owner to fight all three phases on bright/dark backgrounds and check forecast readability before Fire, empty safe cells/hole/back half, wisp readability, the boss's step into each swing, the new cues in the mix, FPS with thirty grid lines and a matching remote peer"
+  },
+  "delegation": "Lead (Claude) implemented the shader, renderers, rig step, audio scores and integration. A read-only research agent catalogued CC0 shout/chime/wind/impact candidates; no delegated code or asset was integrated."
+}
