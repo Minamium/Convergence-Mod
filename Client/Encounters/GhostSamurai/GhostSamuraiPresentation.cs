@@ -50,6 +50,8 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     public override void Load() => SamuraiRigMotion.BindEasing(
         x => EasingCurves.Cubic.Evaluate(EasingType.InOut, x), x => EasingCurves.Cubic.Evaluate(EasingType.Out, x));
     internal static bool Talisman(int index, out Vector2 anchor, out float angle) => secondary.Sample(index, Fraction, out anchor, out angle);
+    // The client-only victory dissolve outlives the native NPC; music holds under it.
+    internal static ulong? EndingSince => death ? deathAt : null;
     internal static float Fraction => Main.gamePaused || stamp == 0 ? 1 : (float)Math.Clamp((Stopwatch.GetTimestamp() - stamp) * 60d / Stopwatch.Frequency, 0, 1);
 
     public override void PostUpdateEverything()
