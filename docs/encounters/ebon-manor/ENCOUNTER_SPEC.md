@@ -41,12 +41,12 @@ Noirette has one native HP pool, `EbonRules.Life` = 5.2M + 2.8M per extra member
 
 | Act | HP | Music cue | Lead-in | Attack epoch |
 |---|---|---|---|---|
-| Act One | 100%→62% | AutoMatador bars 6–44, loop 20–44 | 8 bars (922 ticks) protected entrance | A drop, bar 14 |
-| Act II | 62%→28% | bars 36–50, loop 38–50 | 2 bars (230 ticks) | B section, bar 38 |
-| Finale | 28%→0 | bars 51–69, loop 57–69 | 3 bars (346 ticks) | A′, bar 54 |
-| Curtain (Victory) | — | bar 72 to the end | — | — |
+| Act One | 100%→62% | AutoMatador from its two-beat pickup, loop 20–44 | pickup + the whole 14-bar intro (1670 ticks) as the protected entrance | A drop, bar 14 |
+| Act II | 62%→28% | bars 36–48, loop 40–48 | 2 bars (230 ticks) | B section, bar 38 |
+| Finale | 28%→0 | bars 51–68, loop 56–68 | 3 bars (346 ticks) | A′, bar 54 |
+| Curtain (Victory) | — | bar 71 (outro) to the end | — | — |
 
-The runtime publishes the act and its start tick; each act's attack clock is its **epoch**. AutoMatador is a steady 125 BPM: one beat is 28.8 ticks, one bar 115.2. Every warning and every live window starts exactly on a beat (`EbonRules.Beat` rounds each beat from the epoch, so no drift accumulates). Act changes clear every owned hazard and pending stitch; the lead-in bars carry no hazards.
+The runtime publishes the act and its start tick; each act's attack clock is its **epoch**. AutoMatador is a steady 125 BPM: one beat is 28.8 ticks, one bar 115.2. Its first audible beat is a two-beat pickup; bar 0 starts at 1.195 s, where every section entry (A drop, B, A′, climax) lands, so each epoch is the music's actual downbeat. Every warning and every live window starts exactly on a beat (`EbonRules.Beat` rounds each beat from the epoch, so no drift accumulates). Act changes clear every owned hazard and pending stitch; the lead-in bars carry no hazards.
 
 Noirette glides between four stations per 16-bar cycle (centre, left, centre, right), one smooth bar per 4-bar block, as a pure function of the epoch. Her server hitbox and every client's sprite use the same function, so no client extrapolates her position between NPC syncs.
 
@@ -58,21 +58,22 @@ Each act repeats a 16-bar table in `EbonSchedule`; the runtime resolves targets 
 - **Chandelier:** a chandelier lowers into place over a focused member (or away from a pending gathering point). Three beats later its silk is cut; it falls with gravity (118 px body) and bursts on the floor (270 px dome for 10 ticks).
 - **Loom:** 13 parallel diagonal silk strings (28 px wide, 300 px apart) stretch across the whole field, rising or falling; the offset changes each cycle. After three beats of tightening they twang live for 12 ticks.
 - **Shears:** giant tailor's shears open beside a horizontal or vertical line through a focused member. Two beats later they snip: the whole 148 px band tears for 14 ticks while the blades race along it.
-- **Parasol waltz:** Noirette opens her parasol at the centre station; 6 (Act II) or 8 (Finale) silk spokes forecast for four beats, then turn around her for twelve beats, alternating direction by cycle. The 40 px hub is safe; spokes reach the field edge.
+- **Parasol waltz:** Noirette opens her parasol at the centre station; 6 (Act II) or 8 (Finale) silk spokes are drawn out to the walls and forecast for four beats, then turn around her for twelve beats, alternating direction by cycle. They step with the music: fastest on every beat, easing between (`EbonRules.WaltzTurn`, the plan's average speed, never turning back); collision and art share the function. The 40 px hub is safe; spokes reach the field edge.
+- **Severing web (Act II onward):** silk is flung from her hands across the hall, one irregular wall-to-wall strand per sixteenth note (8 in Act II, 11 in the Finale, chords between two different walls). Four beats after the call every strand cuts at once for 12 ticks (22 px wide each). Strands never cross a pending Binding Stitch circle, so the gathering point stays reachable. `EbonWeb` owns the deterministic strand choice.
 - **Binding Stitch (Stack) / Torn Stitch (Spread):** the same bounded marker/verdict/recipient-strike contract as the Cathedral chorus. Stack gathers inside 190 px around a fixed point near the floor; Spread fails every pair of standing members closer than two 352 px radii. 270-tick warning, 900 budget; the table's call alternates Stack/Spread each cycle so every act shows both.
 
 | Act | Choreography per 16 bars |
 |---|---|
 | Act One | Throw bursts, loom (rising, then falling), chandelier triplets |
-| Act II | Waltz (bar 0), throws, Stack/Spread, chandeliers, shears across then down, both looms, throw burst |
-| Finale | Eight-throw barrage, loom, chandeliers, both shears, Spread/Stack, waltz (bar 8), loom, throws, four-chandelier cascade |
+| Act II | Waltz (bar 0), throws, Stack/Spread, chandeliers, severing web (bar 6), shears across then down, both looms, throw burst |
+| Finale | Eight-throw barrage, loom, chandeliers, both shears, Spread/Stack, severing web (bar 6), waltz (bar 8), loom, throws, four-chandelier cascade |
 
 ## Presentation
 
 - **Luminance:** original `EbonManor` managed material (hall, frame, woven furniture/body, chalk lanes, shears tear, stitch hoops, shards, glow) and `EbonSilk` for primitive silk ribbons; bounded Verlet control threads; `CameraPanSystem` framing and `ScreenShakeSystem` impacts; Luminance noise by runtime reference.
-- **Readable danger:** every warning is a tailor's-chalk lane or dome on the exact accepted footprint, brightening and warming toward rose as it tightens; live windows light the whole honest band. Furniture, chandeliers and shears sit where their collision is. Decoration never covers a future safe gap; Reduced Effects lowers motion, debris and exposure but keeps every footprint.
+- **Readable danger:** every warning is silk gauze on the exact accepted footprint — broad lanes are a drifting woven net inside one continuous fine boundary, thread-wide lanes an even soft ribbon around a bright core thread — tightening and warming toward rose as fire approaches; no dashes or rails. Live windows light the whole honest band evenly. Furniture, chandeliers and shears sit where their collision is. The waltz adds a lace rosette at its hub, a faint per-beat swing showing the coming turn direction and an afterglow behind each spoke as long as the arc it just swept; web crossings glow as knots. Decoration never covers a future safe gap; Reduced Effects lowers motion, debris and exposure but keeps every footprint.
 - **Noirette:** her authored 48×64 pixel atlas at the 2× Terraria pixel size. A deforming mesh adds lagging twin tails and petticoat flutter; she floats, glides between stations, casts/commands during warnings and yanks back on release with a braked recoil. Silk leaves her measured fingertips. A dark haze with a thin moonlit ring keeps her readable over the painted hall.
-- **Entrance (8 bars):** hall reveal in moonlight, candles lighting outward beat by beat, the Black Invitation hanging on one thread, six threads descending to it, the card unravelling as Noirette is woven in, parasol twirl, then she points on the A drop (flash, ring, radiating silk).
+- **Entrance (the whole intro, `EbonIntro`):** pickup and quiet opening motif — moonlight only, the Black Invitation on one thread, the raid title. Bar 2 (bass and groove enter) — candles light outward one per beat. Bar 4 — a thread falls to the card every half bar; the first build tightens them and the card trembles. Bar 8 (the build's peak) — the card bursts into silk. Bar 9 (the near-silent break) — a moonlit spotlight while a silk cocoon unwinds and Noirette is woven in; her name appears. Bar 10 (second build) — the parasol opens and twirls. Bar 12.5 (the bass returns) — threads run from the walls into her hands. Bar 13.5 (two held beats) — the hall hushes and she points. Bar 14 — the A drop: flash, ring, radiating silk and the first attacks.
 - **Act changes:** threads snap, she unravels at her station and re-weaves at the centre along silk streaks; "ACT II" / "FINALE" titles. The Finale rips the hall apart one widening tear per beat for two bars; the last rip lands on A′ to reveal the collapsed moonlit hall.
 - **Endings:** Victory holds her recoil, snaps her last six threads to the walls on consecutive beats, unravels her upward and titles "THE CURTAIN FALLS" over the outro. Defeat closes silk in from every wall while she curtsies and the music fades.
 - Physical-pixel field mask, letterbox and Ready pill follow the Doll/Cathedral coordinate contract. The custom sky reconciles its requested state like Cathedral's.
@@ -82,7 +83,7 @@ Each act repeats a 16-bar table in `EbonSchedule`; the runtime resolves targets 
 
 **Music: EigHt — AutoMatador.** [Creator video](https://www.youtube.com/watch?v=twMGsSzV_SQ), [creator's BOOTH entry](https://bgm-cathedral.booth.pm/items/6178144), [governing terms](https://eight-novel.fanbox.cc/posts/7647818). The owner supplied the exact recording and selected it. The public terms permit game background use and editing; they forbid standalone redistribution/sale, streaming-service and Content ID registration, and ask for contact about music-game inclusion. This Raid is an action fight with background music.
 
-Four bar-exact section edits (`tools/edit_ebon_music.py`) carry native `LOOPSTART`/`LOOPEND` tags; loop points were chosen by beat-timbre seam scores and joined with a 60 ms equal-power seam. The scene selects the act's cue at its start tick; our outgoing cue ducks within a beat and the incoming cue starts at full weight so its lead-in bars are heard. The player's volume setting is never changed. Music is presentation only, not the hit clock. [Attribution](../../../Assets/ATTRIBUTION.md#waltz-of-the-ebon-manor--2026-10-01) owns exact edits and terms.
+Four bar-exact section edits (`tools/edit_ebon_music.py`) on the corrected bar grid carry native `LOOPSTART`/`LOOPEND` tags; loop points were chosen by beat-timbre seam scores and joined with a 60 ms equal-power seam. Act One keeps the recording's whole intro for the entrance. The scene selects the act's cue at its start tick; our outgoing cue ducks within a beat and the incoming cue starts at full weight so its lead-in bars are heard. The player's volume setting is never changed. Music is presentation only, not the hit clock. [Attribution](../../../Assets/ATTRIBUTION.md#waltz-of-the-ebon-manor--2026-10-01) owns exact edits and terms.
 
 ## Assets and pending acceptance
 

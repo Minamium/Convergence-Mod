@@ -694,7 +694,7 @@ documents:
 - doc_id: encounter.ebon-manor.spec
   path: docs/encounters/ebon-manor/ENCOUNTER_SPEC.md
   title: Waltz of the Ebon Manor
-  content_sha256: 9feff3334ad7c674e7c5bd454280662bcf6bfc0759bbf37d1168054ef99cd174
+  content_sha256: b4e7651160544465ccc2e6db31b9a468f3d4ec210badd4c6343c26c0478fad69
   document_type: spec
   status: provisional
   owners:
@@ -1390,7 +1390,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: fd2fe925c1ee19c9f3e9b180f2bfb7ddb1a7574dd681f26202206c680c96ecf8
+  content_sha256: da44327a6c7c80b3a8f64154eca964e9fa6d72595b00c8e98236d3ed6f3a636d
   document_type: status
   status: accepted
   owners:
