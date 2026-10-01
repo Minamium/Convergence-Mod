@@ -5,7 +5,8 @@
   "commits": {
     "runtime": "f03919d",
     "assets_and_tools": "a21dbe7",
-    "presentation_and_tests": "f9aa715"
+    "presentation_and_tests": "f9aa715",
+    "multiplayer_replica_fix": "25169cd"
   },
   "owner_direction": {
     "concept": "2026-10-01: a new Raid with EigHt's AutoMatador, a gothic-lolita woman with very long black twin tails who manipulates threads to hurl things, in a creepy Western mansion; painted detail like Cathedral/Vespera/Doll",
@@ -23,7 +24,9 @@
     "package": "0.3.57, 119351536 bytes, sha256 45a18e7d82d79c889e62cc8d874a9a82f9347a2614945ed361254bea0203c1f0; packaged solo admission passed",
     "package_identity": "build source_sha256 b51f2e2c7ba193c034d77ca1d13a5568256a0f76f9f8e10d0f2a17ee17258ab1 equals commit f9aa715 plus the uncommitted drafts of this documentation commit (docs are not packaged)",
     "install": "installed pre-merge into the owner's normal Mods profile for Host & Play. It replaced the Ghost Samurai thread's 0.3.57 playtest package (feat/samurai-pixel-cuts, installed 2026-10-01 05:51 JST), which is retained in the ignored local build record for restoration",
-    "native_player_and_remote": "not_run: owner to play Act One -> Act II -> Finale -> Victory and one Defeat; music sync through the entrance, lead-ins, loops and curtain; forecast readability of every hazard over the hall; Stack/Spread verdicts; Noirette's scale, poses and thread anchoring; the Finale tear; Reduced Effects, shake off, UI 107%/zoom, FPS; a matching peer. Balance is untuned; hits are capped at 1"
+    "native_player_and_remote": "not_run after the fix: owner to play Act One -> Act II -> Finale -> Victory and one Defeat; music sync through the entrance, lead-ins, loops and curtain; forecast readability of every hazard over the hall; Stack/Spread verdicts; Noirette's scale, poses and thread anchoring; the Finale tear; Reduced Effects, shake off, UI 107%/zoom, FPS; a matching peer. Balance is untuned; hits are capped at 1",
+    "first_owner_hostplay": "2026-10-01 09:39-09:40 Host & Play on 0.3.57 (45a18e7d): the server summoned, readied (music 827, unlock 1749) and ran Act One (two loom calls logged) while boss HP stayed 5200000 with zero interval DPS; the client logged no EbonManor event and the owner re-used the invitation (rejected: encounter.already_active). Defeat followed only the client's disconnect. Cause: EbonState.CanReplace rejected Act One's start tick when it was first assigned at AllReady, so multiplayer clients kept the Ready projection (no countdown, sky, music or hazards; boss invulnerable on the client). Single Player was unaffected because the runtime writes the boss state directly",
+    "fix_verification": "25169cd allows that first assignment only while the music clock is unset; a new domain case walking deployment, Ready, countdown, Act One, Act II, Finale and Victory fails on the old guard at the Ready-to-countdown step and passes on the fix (396/396). Repacked 0.3.57, 119351746 bytes, sha256 8f52b9cda28eae6d38518c7bbef8dcd3838365a553a77fcb1df26dbe272923df, built from 25169cd with tModLoader's own whitespace/nesting rewrite of nine en-US.hjson files (no key or text change), installed to the owner's Mods profile at 09:44. The tool's post-build admission check (pwsh) did not return when launched by dev.py; the same script run directly passed in under a second"
   },
   "delegation": "Lead (Claude) wrote the brief, runtime, presentation, shaders, music edits, audio score, tests and integration. Codex generated the images from the brief; no delegated code was integrated."
 }
