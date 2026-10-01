@@ -1,0 +1,28 @@
+{
+  "scope": "Waltz of the Ebon Manor rewards: Victory drops one Ebon Hatbox per frozen member; the hatbox opens to one of five weapons (Moonshear, Moonloom Harp, Ebon Thimble, Ballroom Chandelier, Severing Silk); all five craft The Last Waltz companion. Shared half-resolution Ebon pixel layer, reward pixel art and 27 cues. No packet, protocol or Raid timing change",
+  "target_build": "0.3.60 / protocol76",
+  "integration_base": "2d1c1b3 (main after PR94)",
+  "commits": {
+    "foundation": "d5dd187",
+    "weapons_layer_audio": "961f9ba",
+    "art_fixes_docs": "7cfb48b"
+  },
+  "owner_direction": {
+    "request": "2026-10-02: design a Doll-style treasure box and one weapon per class for the Ebon Manor, dopamine-heavy; build them with the care the owner liked in Soboro; brief Codex first, then proceed with what does not need art",
+    "concept": "each weapon turns one of Noirette's techniques into the player's (shears, loom strings, thrown furniture, chandeliers, severing web); the companion brings the parasol waltz and Noirette herself; builds climb a B-minor pluck arpeggio and releases land on a chord"
+  },
+  "checks": {
+    "static": "passed: documentation catalog (86 documents), repository checks, YAML; tools unit tests 66/66",
+    "domain": "passed: 451 deterministic cases (52 new reward cases: Moonshear knot continuity and cue clock, harp string state and published schedule, thimble score/anchors/aim resend, chandelier beat slots and hover spread, silk strand math and rejection, companion score/spoke ledger/poses)",
+    "shader": "passed: EbonPixel compiled by the pinned FXC fx_2_0 /O3 with a glow-free Reduced pass; existing shaders recompile byte-identically",
+    "offline_layer": "reviewed: tools/preview-ebon-rewards.ps1 rendered the pixel layer's primitives (crescents, chalk and torn bands, threads/strings, debris kinds, stars, rings, stitches) on dark and bright backgrounds, normal and Reduced; its pixel checks (thread thickness at 6 angles, unbroken chalk, connected strings, budgets, culling, rollback, render-target restore) passed. Weapon emitters were not rendered offline",
+    "art": "Codex delivered 46 raw + 16 transparent candidates (all accepted_by_codex=false for strict grid/size reasons only); Claude picked Codex's recommendations and exported 26 textures mechanically (per-sheet dot pitch, logical-cell majority colour, binary alpha), with measured pivots, pegs, eyelets, wick tops and the companion baseline",
+    "audio": "27 cues from tools/generate_ebon_reward_sfx.py, attributed CC0 recordings plus original synthesis; repeat renders byte-identical; -20 LUFS notes, -19 to -12 LUFS weapons, true peak <= -1.6 dBTP; HatboxOpen re-timed to the opening show",
+    "review": "eight per-feature reviewers (runtime, multiplayer, spec, performance, presentation) reported 39 verified findings, no blockers; all majors fixed (shear cues per stroke and placeholder scale, harp schedule now published from the strings' own AI, chandelier hover slots, hatbox audio sync, docs catalog) and minors fixed or justified",
+    "native_build": "passed: 0 errors / 4 existing CS8632 warnings",
+    "package": "0.3.60, 120626074 bytes, sha256 5cbbb6721d1729881dfc3d5d66fe84fe8f7ca6636cf2ecd5e882f368a1959c87, built from clean 7cfb48b; packaged solo admission passed",
+    "install": "installed pre-merge into the owner's normal Mods profile on 2026-10-02 04:07 JST, replacing the 0.3.59 main build (kept as the build record's previous package)",
+    "native_player_and_remote": "not_run: opening hatboxes, each weapon's build-up and release, sizes of the shears/bow/chandeliers/companion next to the player, readability on bright/dark ground and inside the Raid, the mix, Reduced Effects, FPS with ten chandeliers or full webs, a second peer, balance against Calamity endgame gear"
+  },
+  "delegation": "Claude wrote the concept, spec, foundation, Codex brief and integration; nine Claude subagents implemented the layer, five weapons, companion, hatbox show and audio against the committed contracts, eight reviewed them, and seven applied the fixes; Codex generated the images from Claude's brief"
+}
