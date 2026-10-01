@@ -41,9 +41,9 @@ Noirette has one native HP pool, `EbonRules.Life` = 5.2M + 2.8M per extra member
 
 | Act | HP | Music cue | Lead-in | Attack epoch |
 |---|---|---|---|---|
-| Act One | 100%→62% | AutoMatador from its two-beat pickup, loop 20–44 | pickup + the whole 14-bar intro (1670 ticks) as the protected entrance | A drop, bar 14 |
-| Act II | 62%→28% | bars 36–48, loop 40–48 | 2 bars (230 ticks) | B section, bar 38 |
-| Finale | 28%→0 | bars 51–68, loop 56–68 | 3 bars (346 ticks) | A′, bar 54 |
+| Act One | 100%→62% | AutoMatador from its two-beat pickup; at A′ (bar 54) it returns to the A drop (loop 14–54, 40 bars) | pickup + the whole 14-bar intro (1670 ticks) as the protected entrance | A drop, bar 14 |
+| Act II | 62%→28% | from bar 36; the gap before the climax returns to the breakdown (loop 32–61, 29 bars) | 2 bars (230 ticks) | B section, bar 38 |
+| Finale | 28%→0 | from bar 51 through A′ and the first climax phrase; then back to A (loop 16–67, 51 bars) | 3 bars (346 ticks) | A′, bar 54 |
 | Curtain (Victory) | — | bar 71 (outro) to the end | — | — |
 
 The runtime publishes the act and its start tick; each act's attack clock is its **epoch**. AutoMatador is a steady 125 BPM: one beat is 28.8 ticks, one bar 115.2. Its first audible beat is a two-beat pickup; bar 0 starts at 1.195 s, where every section entry (A drop, B, A′, climax) lands, so each epoch is the music's actual downbeat. Every warning and every live window starts exactly on a beat (`EbonRules.Beat` rounds each beat from the epoch, so no drift accumulates). Act changes clear every owned hazard and pending stitch; the lead-in bars carry no hazards.
@@ -83,7 +83,7 @@ Each act repeats a 16-bar table in `EbonSchedule`; the runtime resolves targets 
 
 **Music: EigHt — AutoMatador.** [Creator video](https://www.youtube.com/watch?v=twMGsSzV_SQ), [creator's BOOTH entry](https://bgm-cathedral.booth.pm/items/6178144), [governing terms](https://eight-novel.fanbox.cc/posts/7647818). The owner supplied the exact recording and selected it. The public terms permit game background use and editing; they forbid standalone redistribution/sale, streaming-service and Content ID registration, and ask for contact about music-game inclusion. This Raid is an action fight with background music.
 
-Four bar-exact section edits (`tools/edit_ebon_music.py`) on the corrected bar grid carry native `LOOPSTART`/`LOOPEND` tags; loop points were chosen by beat-timbre seam scores and joined with a 60 ms equal-power seam. Act One keeps the recording's whole intro for the entrance. The scene selects the act's cue at its start tick; our outgoing cue ducks within a beat and the incoming cue starts at full weight so its lead-in bars are heard. The player's volume setting is never changed. Music is presentation only, not the hit clock. [Attribution](../../../Assets/ATTRIBUTION.md#waltz-of-the-ebon-manor--2026-10-01) owns exact edits and terms.
+Four section edits (`tools/edit_ebon_music.py`) on the corrected bar grid carry native `LOOPSTART`/`LOOPEND` tags. The owner asked (2026-10-02) for loops that keep the song's development rather than repeating a short part, with natural joins: each act keeps its entry and then plays a long stretch of the song, and every jump follows the song's own repetition (A′ returns to A; the gap before the climax returns to the breakdown; the climax's second phrase returns to A), chosen by beat-synchronous chroma/timbre/energy similarity of the bars before and after the jump. The join is a one-beat crossfade landing on the loop start's downbeat with correlation-compensated constant-power gains and cross-correlation alignment; a never-played bar after `LOOPEND` keeps the encoded frames continuous. Act One keeps the recording's whole intro for the entrance. The scene selects the act's cue at its start tick; our outgoing cue ducks within a beat and the incoming cue starts at full weight so its lead-in bars are heard. The player's volume setting is never changed. Music is presentation only, not the hit clock. [Attribution](../../../Assets/ATTRIBUTION.md#waltz-of-the-ebon-manor--2026-10-01) owns exact edits and terms.
 
 ## Assets and pending acceptance
 
