@@ -1,6 +1,6 @@
-# Sol implementation delegation under Astra
+# GPT-6.1 Sol implementation delegation under Astra
 
-Apply only when the current agent is the top-level `gpt-6-astra` agent doing implementation. This project policy authorizes a bounded Sol worker when its work is independent and Astra can make useful progress concurrently. Other lead models and workers do not activate this policy; Luna and log-analysis delegation are outside this trial.
+Apply only in Codex when the current agent is the top-level `gpt-6-astra` agent doing implementation. This project policy authorizes a bounded Sol worker when its work is independent and Astra can make useful progress concurrently. Claude Code, other lead models and workers do not activate this policy; Luna and log-analysis delegation are outside this trial.
 
 ## Choose a useful split
 
@@ -10,7 +10,7 @@ Apply only when the current agent is the top-level `gpt-6-astra` agent doing imp
 
 ## Launch with a compact brief
 
-Explicitly select `gpt-6-sol` and start at `medium` reasoning; raise effort only when the assigned logic warrants it. An unspecified model can inherit Astra. Use a fresh, bounded context (`fork_turns: "none"` where supported), not a full conversation fork.
+Explicitly select `gpt-6.1-sol` and start at `medium` reasoning; raise effort only when the assigned logic warrants it. An unspecified model can inherit Astra. Use a fresh, bounded context (`fork_turns: "none"` where supported), not a full conversation fork.
 
 Pass the outcome, exact checkout/base state and owned files, relevant constraints/spec sections, applicable checks and expected return. Point to the repository agreement and necessary feature guidance rather than copying the whole document set. Supply any uncommitted inputs the worker actually needs; a new worktree does not inherit them.
 
@@ -28,10 +28,10 @@ Include one compact delegation note in the existing task result or handoff: work
 
 ## Later efficiency review, only when requested
 
-Use the native parent/child session records and the delegation note. Preserve the pre-policy baseline and later aggregates locally under ignored `.local/`; do not commit private session history. Identify the policy commit/date and comparison window.
+Use the native parent/child session records and the delegation note. Preserve the pre-policy baseline and later aggregates locally under ignored `.local/`; do not commit private session history. Identify the policy commit/date, comparison window and actual worker model; keep GPT-6 Sol and GPT-6.1 Sol results separate.
 
 Sum per-request usage across the parent and its workers, deduplicating response IDs and excluding inherited history/cumulative counters. Separate uncached input, cached input and output; reasoning tokens are part of output, not an extra amount. Include planning, review, repairs and retries. Record missing usage as unknown rather than zero.
 
 Compare tasks with similar scope and acceptance criteria using total weighted cost, elapsed time, successful checks and material rework. Keep raw token count, credit/API cost and subscription allowance distinct; use the applicable model/speed rates at the time. An uncontrolled before/after comparison is an estimate, not proof of a savings percentage.
 
-Model selection and inheritance are documented in [OpenAI Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents) and [Models](https://learn.chatgpt.com/docs/models) (checked 2026-09-23). The Astra-only scope above is this project's trial policy.
+Model selection and inheritance are documented in [OpenAI Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents); the exact model ID and supported reasoning levels are listed in [GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol) (checked 2026-10-01). The Codex/Astra-only scope above is this project's trial policy.

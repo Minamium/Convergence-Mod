@@ -14,7 +14,7 @@ Use a short-lived branch or an explicit worktree from the latest integrated `ori
 
 Use normal pushes and the repository's review/merge rules. Do not discard another person's work, force-switch their worktree, hard reset, force push, or restore an old source copy over current files. Current review ownership is recorded in [CODEOWNERS](.github/CODEOWNERS); contributing code does not automatically change maintainer permissions.
 
-For Astra-led implementation, the development Skill's [Sol delegation policy](.agents/skills/develop-convergence-raids/references/sol-implementation-delegation.md) defines when to split independent work and how to assess its efficiency later. It keeps integration with the lead agent and does not change other lead models' workflows.
+For Codex implementation led by Astra, the development Skill's [Sol delegation policy](.agents/skills/develop-convergence-raids/references/sol-implementation-delegation.md) defines the worker model, when to split independent work and how to assess its efficiency later. It keeps integration with the lead agent; Claude and other lead models retain their own workflows.
 
 ### Finish merged work
 
@@ -24,6 +24,24 @@ GitHub automatically deletes merged PR head branches. Start follow-up work from 
 - Before manual deletion, refresh the branch and PR state, confirm the reviewed tip was integrated into main, and check for later commits, open PRs using the branch as head or base, and ongoing contributor/agent work. A squash merge may leave the original tip outside main's ancestry: use the merged PR's exact head SHA and integration commit as evidence. Preserve a contributor's latest working branch until its handoff is clear.
 - Delete only the examined refs. For remote deletion, use an explicit expected-SHA lease so a new push causes rejection; recheck local tips and worktree use too. Prune stale remote-tracking refs after deletion. This does not authorize rewriting a surviving branch's history or closing an unfinished PR.
 - Retire only clean, unused worktrees after preserving needed ignored/local artifacts. Use Codex archive for managed worktrees, or Git worktree removal for ordinary ones; never remove another task's checkout. For bulk or historical cleanup, save a verified local Git bundle and ref-to-SHA manifest outside branch refs. Do not replace retired branches with accumulating `archive/` or `checkpoint/` branches.
+
+## Agent instructions and Skills
+
+Keep one shared development policy and load task guidance on demand:
+
+| Location | Role |
+|---|---|
+| `AGENTS.md`, `docs/` | Shared development rules, specifications and Luminance presentation policy |
+| `.agents/skills/` | Canonical Skill bodies, references and scripts; native Codex discovery |
+| `.agents/skills/*/agents/openai.yaml` | Codex Skill display/prompt metadata |
+| `CLAUDE.md` | Claude entry point importing `AGENTS.md` |
+| `.claude/skills/` | Claude discovery adapters that load the canonical Skills from the active checkout |
+
+Edit shared procedures under `.agents/skills/`; update the matching Claude adapter only when its name or trigger description changes. The adapters expose `/develop-convergence-raids` and `/research-tmodloader-sources` without duplicating their workflows. The Codex/Astra delegation rule is conditional guidance, not a Claude model configuration or a file-access boundary.
+
+After integrating these files into a working branch, start Claude Code from that checkout. Use `/context` to check project instructions and the `/` menu to check the two Skills. Preserve ongoing work before updating a branch; another worktree's files are not automatically updated by a merge. Keep personal overrides in ignored `CLAUDE.local.md` or `.claude/settings.local.json`.
+
+Claude's direct `AGENTS.md` support depends on its version/settings; the explicit import follows its [shared-instructions guidance](https://code.claude.com/docs/en/memory#share-one-file-with-other-coding-tools). The adapters use its documented [project Skill discovery](https://code.claude.com/docs/en/skills#where-skills-live) (checked 2026-10-01). Recent Claude versions can fall back to the main checkout's Skills when a linked worktree has none; adapters still resolve the shared body in the active checkout.
 
 ## A useful task or PR
 

@@ -53,6 +53,11 @@ docs/.cache/
 *.suo
 *.userprefs
 
+# Claude Code personal state; shared instructions and Skill adapters are tracked.
+/CLAUDE.local.md
+/.claude/settings.local.json
+/.claude/worktrees/
+
 # Operating system files
 .DS_Store
 Thumbs.db
