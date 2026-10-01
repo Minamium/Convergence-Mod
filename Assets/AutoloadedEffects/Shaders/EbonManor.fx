@@ -1,6 +1,7 @@
-// Original Ebon Manor materials: the moonlit hall, woven furniture, tailor's
-// chalk lanes, shears tears and stitch hoops. Every danger footprint is drawn
-// from accepted plan geometry; noise only moves pigment inside it.
+// Original Ebon Manor materials: the moonlit hall, woven furniture, silk-gauze
+// lanes, shears tears, stitch hoops and the waltz's lace hub and afterglow.
+// Every danger footprint is drawn from accepted plan geometry; noise only
+// moves pigment inside it.
 matrix uWorldViewProjection;
 sampler art : register(s0);
 sampler noise : register(s1);
@@ -85,32 +86,47 @@ float4 AuraPS(VO i) : COLOR0
     return float4(c, a) * i.C;
 }
 
-// Tailor's chalk lane on an accepted straight footprint. U.x runs along,
-// U.y across the full diameter. shape: length, radius, warning progress, live.
-// signal: opacity, heat, reduced, seed.
+// Silk-gauze lane on an accepted straight footprint: woven threads drift along
+// the lane inside one continuous luminous boundary; no dashes or rails.
+// U.x runs along, U.y across the full diameter. shape: length, radius,
+// warning progress, live. signal: opacity, heat, reduced, seed.
 float4 LanePS(VO i) : COLOR0
 {
     float along = i.U.x * shape.x;
-    float d = abs(i.U.y * 2 - 1);
-    float px = d * shape.y;
-    float inside = shape.y - px;
-    float n = tex2D(noise, float2(along * .004 - clock * .05, i.U.y * .8 + signal.w)).r;
-    float dash = step(frac((along - clock * 20 * (1 - signal.z)) / 26), .56);
-    float edgeLine = exp2(-pow((inside - 2.2) / 1.3, 2)) * dash;
-    float core = exp2(-pow(px / (.9 + shape.z * .7), 2)) * (.20 + .80 * shape.z);
-    float run = frac(along / 220 - clock * (.3 + 1.4 * shape.z));
-    float glint = pow(saturate(1 - abs(run - .5) * 2), 12) * shape.z * core;
-    float body = (.05 + .10 * shape.z) * (.65 + .35 * n) * (1 - smoothstep(.97, 1, d));
-    float rimGlow = exp2(-pow(inside / 6, 2)) * (.16 + .30 * shape.z) * (1 - smoothstep(.99, 1, d));
-    float ends = smoothstep(0, 24, along) * smoothstep(0, 24, shape.x - along);
-    float3 chalk = lerp(tint, float3(.92, .56, .64), saturate(shape.z * shape.z * signal.y));
-    float3 c = chalk * (edgeLine * .95 + core * .8 + body + rimGlow) + float3(1, .97, .98) * glint;
-    float a = saturate(edgeLine * .85 + core * .6 + body * 1.4 + rimGlow + glint) * ends;
-    // Live: the whole honest band is lit, brightest along its spine.
-    float fill = shape.w * (1 - smoothstep(.93, 1, d));
-    float3 hot = lerp(float3(.96, .62, .70), float3(1, .97, .98), exp2(-pow(px / max(1, shape.y * .38), 2)));
-    c = lerp(c, hot * (.72 + .28 * n), fill);
-    a = lerp(a, .82 * fill + .08, shape.w);
+    float across = (i.U.y * 2 - 1) * shape.y;
+    float inside = shape.y - abs(across);
+    float d = abs(across) / max(1, shape.y);
+    float progress = shape.z;
+    // Thread-wide lanes read as one soft ribbon around a bright core; broad
+    // lanes keep a fine continuous boundary around their gauze.
+    float narrow = 1 - smoothstep(14, 30, shape.y);
+    float n = tex2D(noise, float2(along * .003 - clock * .04 + signal.w, i.U.y * .7)).r;
+    float flow = clock * (14 + 70 * progress) * (1 - signal.z * .6);
+    float density = lerp(.075, .12, progress);
+    float w1 = abs(frac((along * .57 + across * .82 - flow) * density + n * .35) - .5) * 2;
+    float w2 = abs(frac((along * .57 - across * .82 - flow * .7) * density - n * .35) - .5) * 2;
+    float weave = (pow(w1, 6) + pow(w2, 6)) * (1 - .6 * narrow);
+    // A thread-wide lane is an even soft ribbon to its true edge, then a feathered rim.
+    float ribbon = (1 - smoothstep(.72, 1, d)) * (.22 + .26 * progress) * (.8 + .2 * n);
+    float body = lerp((.07 + .10 * progress) * (.7 + .3 * n), ribbon, narrow);
+    float rim = exp2(-pow((inside - 1.3) / 1.0, 2)) * (1 - .6 * narrow);
+    float sheen = .6 + .4 * sin(along * .018 - clock * 2.2 + signal.w * 3);
+    float edgeGlow = exp2(-pow(inside / 9, 2)) * (.12 + .22 * progress) * (1 - narrow);
+    float core = exp2(-pow(across / (.8 + .6 * progress), 2)) * (.10 + .65 * progress);
+    float run = frac(along / 260 - clock * (.25 + 1.1 * progress) + signal.w);
+    float glint = pow(saturate(1 - abs(run - .5) * 2), 14) * core * progress;
+    float ends = smoothstep(0, 28, along) * smoothstep(0, 28, shape.x - along);
+    float inBand = 1 - smoothstep(-.4, .6, -inside);
+    float3 tone = lerp(tint, float3(.95, .58, .66), saturate(progress * progress * signal.y));
+    float3 light = lerp(tone, float3(1, 1, 1), .6);
+    float3 c = tone * (body + weave * (.10 + .18 * progress) + edgeGlow) + light * (rim * (.45 + .3 * sheen) + core * .7) + float3(1, .97, .98) * glint;
+    float a = saturate(body * 1.3 + weave * (.08 + .14 * progress) + edgeGlow + rim * .7 + core * .5 + glint) * ends * inBand;
+    // Live: the whole honest band lights evenly, brightest along its spine.
+    float3 hot = lerp(float3(.95, .66, .72), float3(1, .97, .96), exp2(-pow(d / .42, 2)));
+    float3 lc = hot * (.72 + .14 * n) + light * rim * .35 + float3(1, .98, .97) * glint * .5;
+    float la = saturate(.80 + rim * .15) * inBand * ends;
+    c = lerp(c, lc, shape.w);
+    a = lerp(a, la, shape.w);
     return float4(c * a, a) * signal.x * i.C;
 }
 
@@ -137,7 +153,9 @@ float4 TearPS(VO i) : COLOR0
     return float4(c, a) * fade * signal.x * i.C;
 }
 
-// Stitch hoops. shape: kind (0 stack, 1 spread), clock progress, radius, reduced.
+// Stitch hoops: one continuous thread on the true radius, a lace band just
+// inside it and a continuous clock thread contracting from 92% to 12%.
+// shape: kind (0 stack, 1 spread), clock progress, radius, reduced.
 // signal: opacity, verdict flash, failed, seed.
 float4 RingPS(VO i) : COLOR0
 {
@@ -145,26 +163,66 @@ float4 RingPS(VO i) : COLOR0
     float r = length(p);
     float ang = atan2(p.y, p.x);
     float inside = (1 - r) * shape.z;
-    float perimeter = 6.2831853 * shape.z;
-    float along = (ang / 6.2831853 + .5) * perimeter;
     float dir = shape.x < .5 ? -1 : 1;
     float motion = 1 - shape.w * .7;
-    float dash = step(frac((along + dir * clock * 24 * motion) / 28), .55);
-    float boundary = exp2(-pow((inside - 2.4) / 1.5, 2));
-    float running = exp2(-pow((inside - 10) / 2.2, 2)) * dash;
-    // A broken inner ring contracts from 92% to 12% as the call closes: a clock only.
+    float boundary = exp2(-pow((inside - 2.4) / 1.3, 2));
+    // Scalloped lace band: arcs and small eyelets, slowly turning.
+    float perimeter = 6.2831853 * shape.z;
+    float along = (ang / 6.2831853 + .5) * perimeter + dir * clock * 16 * motion;
+    float cell = frac(along / 22);
+    float scallop = 9 + 4 * sin(cell * 3.14159);
+    float band = smoothstep(scallop + 1.5, scallop - .5, inside) * smoothstep(3.2, 4.6, inside);
+    float eyelet = 1 - smoothstep(1.4, 2.4, length(float2((cell - .5) * 22, inside - 7.5)));
+    float lace = band * (.30 + .45 * (1 - eyelet)) + exp2(-pow((inside - scallop) / 1.0, 2)) * .7;
     float clockR = lerp(.92, .12, saturate(shape.y));
-    float broken = step(frac(ang * 12 / 6.2831853 + clock * .08 * dir * motion), .72);
-    float clockRing = exp2(-pow((r - clockR) * shape.z / 2.2, 2)) * broken;
+    float clockRing = exp2(-pow((r - clockR) * shape.z / 1.8, 2));
+    float clockGlow = exp2(-pow((r - clockR) * shape.z / 9, 2)) * .25;
     float n = tex2D(noise, i.U * 2.3 + float2(clock * .02, signal.w)).r;
-    float under = (1 - smoothstep(.95, 1, r)) * (.09 + .05 * n) * (1 - shape.w * .3);
+    float under = (1 - smoothstep(.95, 1, r)) * (.08 + .05 * n) * (1 - shape.w * .3);
     float3 thread = lerp(tint, float3(1, .98, .95), .35);
-    float3 c = thread * (boundary + running * .75 + clockRing * .55) + float3(1, .96, .97) * boundary * .25;
-    float lit = saturate(boundary * .95 + running * .6 + clockRing * .45);
+    float3 c = thread * (boundary + lace * .55 + clockRing * .7 + clockGlow) + float3(1, .96, .97) * boundary * .25;
+    float lit = saturate(boundary * .95 + lace * .45 + clockRing * .6 + clockGlow * .6);
     float flash = signal.y * (1 - smoothstep(.9, 1, r));
     float3 verdict = signal.z > .5 ? float3(.95, .45, .55) : float3(.98, .88, .64);
     c = c * lit + verdict * flash * (.4 + .6 * n);
     float a = saturate(lit + under + flash * .5);
+    return float4(c, a) * signal.x * i.C;
+}
+
+// Angular afterglow / turn preview of a waltz spoke. U.x radial (0 hub ..
+// 1 wall), U.y angular (0 at the spoke .. 1 at the wedge's far edge). Purely
+// decorative and dim: it trails or previews, never covers a live spoke.
+// signal: opacity, -, reduced, seed.
+float4 SweepPS(VO i) : COLOR0
+{
+    float r = i.U.x, v = i.U.y;
+    float n = tex2D(noise, float2(r * 2.5 - clock * .9 + signal.w, v * .6)).r;
+    float fall = pow(saturate(1 - v), 2.4);
+    float radial = smoothstep(0, .05, r) * (1 - smoothstep(.9, 1, r));
+    float threads = .6 + .4 * pow(saturate(sin(v * 40 + n * 6)), 4);
+    float a = fall * radial * (.55 + .45 * n) * threads * signal.x;
+    return float4(tint * a, a * .3) * i.C;
+}
+
+// Lace parasol rosette at the waltz hub, ribs aligned with the spokes.
+// shape: ribs, rotation, radius px, open 0..1. signal: opacity, -, reduced, seed.
+float4 LacePS(VO i) : COLOR0
+{
+    float2 p = i.U * 2 - 1;
+    float r = length(p);
+    float ang = atan2(p.y, p.x) - shape.y;
+    float s = frac(ang / 6.2831853 * shape.x + .5);
+    float ribDist = abs(s - .5) * 6.2831853 / max(1, shape.x) * r * shape.z;
+    float edge = .84 + .08 * cos(s * 6.2831853) * shape.w;
+    float canopy = (1 - smoothstep(edge - .02, edge + .015, r)) * shape.w;
+    float rib = exp2(-pow(ribDist / 1.2, 2)) * smoothstep(.06, .12, r) * (1 - smoothstep(edge, edge + .05, r));
+    float rimLine = exp2(-pow((r - edge) * shape.z / 1.2, 2)) * shape.w;
+    float rings = abs(frac(r * 6 - clock * .2) - .5) * 2;
+    float holes = smoothstep(.6, .85, rings) * smoothstep(.35, .7, abs(frac(s * 3) - .5) * 2);
+    float n = tex2D(noise, i.U * 2 + clock * .02 + signal.w).r;
+    float lace = canopy * (.30 + .30 * n) * (1 - holes * .8);
+    float3 c = float3(.05, .04, .06) * lace + float3(.85, .86, .96) * (rib * .9 + rimLine * .8 + holes * canopy * .18);
+    float a = saturate(lace * .75 + rib * .85 + rimLine * .75);
     return float4(c, a) * signal.x * i.C;
 }
 
@@ -284,4 +342,6 @@ technique EbonManor
     pass GlowPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 GlowPS(); }
     pass BackdropPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 BackdropPS(); }
     pass FramePass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 FramePS(); }
+    pass SweepPass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 SweepPS(); }
+    pass LacePass { VertexShader = compile vs_3_0 VS(); PixelShader = compile ps_3_0 LacePS(); }
 }

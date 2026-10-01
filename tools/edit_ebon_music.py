@@ -5,11 +5,14 @@ The owner supplied the official free-BGM MP3 (BOOTH item 6178144). EigHt's terms
 background use and editing, not standalone music distribution, Content ID or
 streaming registration. Assets/ATTRIBUTION.md records credit and limits.
 
-The track is a steady 125.000 BPM with its first beat at 0.235 s, so bar k starts
-at 0.235 + 1.92 k seconds. Every cue starts on a bar line. LOOPSTART/LOOPEND are
-bar lines whose following material matches (measured beat-timbre similarity
-0.90-0.98); the last 60 ms before LOOPEND crossfade into the audio that precedes
-LOOPSTART, so tModLoader's sample-exact jump is continuous. Headroom -1.5 dB.
+The track is a steady 125.000 BPM. Its first audible beat (0.235 s) is a
+two-beat pickup: every section entry (the A drop, B, A' and the climax) lands
+on the grid whose bar 0 starts at 1.195 s, so bar k starts at 1.195 + 1.92 k
+seconds. Act One plays the whole intro from the pickup; the other cues start on
+bar lines. LOOPSTART/LOOPEND are bar lines whose following material matches
+(measured beat-timbre similarity 0.89-0.98); the last 60 ms before LOOPEND
+crossfade into the audio that precedes LOOPSTART, so tModLoader's sample-exact
+jump is continuous. Headroom -1.5 dB.
 Requires numpy and soundfile (local audio tools, not CI).
 """
 import argparse
@@ -28,22 +31,22 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "Assets" / "Music" / "EbonManor"
 SOURCE_SHA256 = "af0e07f5fa3b7b0846e98cba94281cd507a20982d60c1d179842d79bf01eef43"
 RATE = 48000
-FIRST_BEAT = 0.235
+DOWNBEAT = 1.195
 BAR = 1.92
 GAIN_DB = -1.5
 SEAM = 0.06
 
 # name: (first bar, loop start bar, loop end bar or None, bars before the first attack downbeat)
 CUES = {
-    "ActOne": (6, 20, 44, 8),      # intro -> A drop at bar 14; loop A -> breakdown -> B
-    "ActTwo": (36, 38, 50, 2),     # build -> B; loop the whole B section
-    "Finale": (51, 57, 69, 3),     # break -> A' drop at bar 54; loop A' -> gap -> climax
-    "Curtain": (72, None, None, 0),  # outro after Victory, no loop tags
+    "ActOne": (-0.5, 20, 44, 14.5),  # pickup + whole intro -> A drop at bar 14; loop A -> breakdown -> B
+    "ActTwo": (36, 40, 48, 2),       # build -> B at bar 38; loop the B groove
+    "Finale": (51, 56, 68, 3),       # break -> A' at bar 54; loop A' -> gap -> climax
+    "Curtain": (71, None, None, 0),  # outro after Victory, no loop tags
 }
 
 
 def bar_sample(bar):
-    return round((FIRST_BEAT + BAR * bar) * RATE)
+    return round((DOWNBEAT + BAR * bar) * RATE)
 
 
 def sha256(path):
@@ -104,7 +107,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     args.preview.mkdir(parents=True, exist_ok=True)
     report = {"recipe": "tools/" + Path(__file__).name, "recipe_sha256": sha256(Path(__file__)),
-              "source_sha256": SOURCE_SHA256, "tempo_bpm": 125.0, "first_beat_s": FIRST_BEAT,
+              "source_sha256": SOURCE_SHA256, "tempo_bpm": 125.0, "bar0_s": DOWNBEAT,
               "libraries": {"numpy": np.__version__, "soundfile": sf.__version__, "libsndfile": sf.__libsndfile_version__},
               "cues": {}}
     for name, (first, loop_start, loop_end, lead_bars) in CUES.items():

@@ -533,6 +533,32 @@ def cue_curtain_fall(s, rng):
     return hall(mix, 0.36)
 
 
+def cue_web_weave(s, rng):
+    # One strand per sixteenth note at 125 BPM, climbing B natural minor.
+    mix = seconds(2.4)
+    scale = (("B", 4), ("C#", 5), ("D", 5), ("E", 5), ("F#", 5), ("G", 5), ("A", 5), ("B", 5), ("C#", 6), ("D", 6), ("E", 6))
+    step = 60 / 125 / 4
+    for i, (note, octv) in enumerate(scale):
+        side = -0.6 if i % 2 == 0 else 0.6
+        place(mix, pan(pluck(hz(note, octv), 0.9, rng, bright=0.9, sustain=0.994, pick=0.12), side), i * step, -7 - i * 0.3)
+        place(mix, pan(hp(cut(s.get("swish"), 0.03, 0.15), 1500), side), i * step, -18)
+    place(mix, cut(s.get("cloth1"), 0.1, 0.66), 0.0, -15)
+    return hall(mix, 0.26)
+
+
+def cue_web_sever(s, rng):
+    # Every strand cut at once: a bright string cluster, a blade's long ring and a rip.
+    mix = seconds(2.4)
+    chord = (hz("B", 4), hz("D", 5), hz("F#", 5), hz("B", 5), hz("D", 6), hz("F#", 6))
+    for i, f in enumerate(chord):
+        place(mix, pan(pluck(f, 1.2, rng, bright=0.98, sustain=0.991, pick=0.05), -0.7 + 0.28 * i), i * 0.004, -6)
+    place(mix, hp(speed(cut(s.get("draw_knife"), 0.06, 0.48), 1.25), 1800), 0.0, -2)
+    place(mix, cut(s.get("knife_slice"), 0.01, 0.42), 0.0, -6)
+    place(mix, rip(0.6, rng, density=(1200, 150), low=1500, high=9000), 0.01, -8)
+    place(mix, thump(140, 50, 0.4, rng), 0.0, -9)
+    return hall(mix, 0.24)
+
+
 CUES = {
     # name: (builder, short-term loudness target in LUFS)
     "SilkCast": (cue_silk_cast, -25),
@@ -555,6 +581,8 @@ CUES = {
     "ActChange": (cue_act_change, -17),
     "ManorTear": (cue_manor_tear, -16),
     "CurtainFall": (cue_curtain_fall, -17),
+    "WebWeave": (cue_web_weave, -22),
+    "WebSever": (cue_web_sever, -16),
 }
 
 

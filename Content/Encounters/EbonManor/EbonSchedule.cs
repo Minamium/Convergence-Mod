@@ -5,7 +5,7 @@ namespace Convergence.Content.Encounters.EbonManor;
 
 internal enum EbonCue : byte
 {
-    Throw, Chandelier, LoomRising, LoomFalling, ShearsAcross, ShearsDown, Waltz, Stack, Spread,
+    Throw, Chandelier, LoomRising, LoomFalling, ShearsAcross, ShearsDown, Waltz, Stack, Spread, Web,
 }
 
 // The 16-bar attack cycle of each phase, written as (bar, beat, cue) on
@@ -28,6 +28,7 @@ internal static class EbonSchedule
     {
         (0, 0, EbonCue.Waltz), (3, 2, EbonCue.Throw), (3, 3, EbonCue.Throw),
         (4, 0, EbonCue.Stack), (4, 2, EbonCue.Chandelier), (5, 2, EbonCue.Chandelier),
+        (6, 0, EbonCue.Web),
         (8, 0, EbonCue.ShearsAcross), (9, 0, EbonCue.ShearsDown),
         (10, 0, EbonCue.LoomRising), (11, 0, EbonCue.LoomFalling),
         (12, 0, EbonCue.Throw), (12, 1, EbonCue.Throw), (12, 2, EbonCue.Throw), (12, 3, EbonCue.Throw),
@@ -40,6 +41,7 @@ internal static class EbonSchedule
         (2, 0, EbonCue.LoomRising), (2, 2, EbonCue.Chandelier), (3, 0, EbonCue.Chandelier),
         (4, 0, EbonCue.ShearsAcross), (4, 2, EbonCue.ShearsDown),
         (5, 0, EbonCue.Spread),
+        (6, 0, EbonCue.Web),
         (8, 0, EbonCue.Waltz),
         (12, 0, EbonCue.LoomFalling), (12, 2, EbonCue.Throw), (12, 3, EbonCue.Throw), (13, 0, EbonCue.Throw), (13, 1, EbonCue.Throw),
         (14, 0, EbonCue.Chandelier), (14, 1, EbonCue.Chandelier), (14, 2, EbonCue.Chandelier), (14, 3, EbonCue.Chandelier),

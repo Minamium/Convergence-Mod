@@ -250,11 +250,37 @@ internal sealed class EbonRuntime : IEncounterRuntime
                     EbonRules.WaltzDamage, EbonRules.Beat(epoch, beat + 4), EbonRules.Beat(epoch, beat + 16), (byte)(finale ? 8 : 6), spin);
                 break;
             }
+            case EbonCue.Web:
+            {
+                // Irregular silk strung wall to wall, one strand per sixteenth note, all
+                // cutting together on the fourth beat; a pending gathering circle stays clear.
+                int count = phase == EbonPhase.Finale ? EbonRules.FinaleWebStrands : EbonRules.WebStrands;
+                int fire = EbonRules.Beat(epoch, beat + 4);
+                var gather = PendingGather();
+                var strands = EbonWeb.Strands(f, EbonWeb.Seed(fight.Value, beat), count,
+                    gather is { } g ? new System.Numerics.Vector2(g.X, g.Y) : null);
+                for (int k = 0; k < strands.Count; k++)
+                {
+                    var (a, b) = strands[k];
+                    var mid = (a + b) * .5f;
+                    SpawnPlan(new EbonAttackPlan(fight.Value, (short)boss!.NPC.whoAmI, EbonAttackKind.Web, EbonRules.WebBorn(epoch, beat, k), fire,
+                        fire + EbonRules.WebLive, mid.X, mid.Y, MathF.Atan2(b.Y - a.Y, b.X - a.X), 3000, EbonRules.WebRadius, EbonRules.WebDamage, (byte)k));
+                }
+                EbonPackets.Log($"event=Web fight={fight.Value} age={age} strands={strands.Count} fire={fire} gather={(gather is null ? "none" : "kept")}");
+                break;
+            }
             case EbonCue.Stack or EbonCue.Spread:
                 stitch.Call(s, boss!, cue == EbonCue.Stack ? EbonStitchKind.Stack : EbonStitchKind.Spread,
                     new(f.CenterX, f.Bottom - 220));
                 break;
         }
+    }
+    private Vector2? PendingGather()
+    {
+        foreach (Projectile p in Main.ActiveProjectiles)
+            if (p.ModProjectile is EbonStitch m && m.Plan.Fight == fight.Value && !m.Resolved && m.Plan.Kind == EbonStitchKind.Stack)
+                return new Vector2(m.Plan.Center.X, m.Plan.Center.Y);
+        return null;
     }
     private bool stitchPending
     {

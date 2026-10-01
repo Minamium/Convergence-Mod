@@ -95,6 +95,9 @@ internal static class EbonManorPreview
                 ("shears-03-live-late", () => Shears(1, 9)),
                 ("waltz-01-warning", () => Waltz(.5f, false)),
                 ("waltz-02-live", () => Waltz(1, true)),
+                ("web-01-weaving", () => Web(.35f, -1)),
+                ("web-02-tight", () => Web(.95f, -1)),
+                ("web-03-live", () => Web(1, 2)),
                 ("stitch-01-stack", () => Stitch(false)),
                 ("stitch-02-spread", () => Stitch(true)),
                 ("noirette-01-poses", () => Poses()),
@@ -296,21 +299,79 @@ internal static class EbonManorPreview
         Sprite(shears, new Rectangle(0, 0, 360, 140), pivot, new(159, 21.5f), .92f, rotation - open, false, sig);
         Sprite(shears, new Rectangle(0, 140, 360, 140), pivot, new(137.7f, 121.8f), .92f, rotation + open, false, sig);
     }
+    static void Sweep(Vector2 c, float from, float to, float inner, float reach, Vector3 tint, float opacity)
+    {
+        var fan = new List<VertexPositionColorTexture>();
+        const int steps = 16;
+        for (int k = 0; k < steps; k++)
+        {
+            float u0 = k / (float)steps, u1 = (k + 1) / (float)steps, a0 = MathHelper.Lerp(from, to, u0), a1 = MathHelper.Lerp(from, to, u1);
+            Vector2 d0 = new(MathF.Cos(a0), MathF.Sin(a0)), d1 = new(MathF.Cos(a1), MathF.Sin(a1));
+            Vector2 i0 = c + d0 * inner, i1 = c + d1 * inner, o0 = c + d0 * reach, o1 = c + d1 * reach;
+            fan.Add(new(new(i0, 0), Color.White, new(0, u0))); fan.Add(new(new(o0, 0), Color.White, new(1, u0))); fan.Add(new(new(i1, 0), Color.White, new(0, u1)));
+            fan.Add(new(new(o0, 0), Color.White, new(1, u0))); fan.Add(new(new(o1, 0), Color.White, new(1, u1))); fan.Add(new(new(i1, 0), Color.White, new(0, u1)));
+        }
+        Set(manor, "signal", new Vector4(opacity, 0, 0, .3f)); Set(manor, "tint", tint);
+        Pass("SweepPass", null, SamplerState.LinearClamp);
+        var array = fan.ToArray(); device.DrawUserPrimitives(PrimitiveType.TriangleList, array, 0, array.Length / 3);
+    }
+    static void Lace(Vector2 c, float radius, int ribs, float rotation, float open, float opacity)
+    {
+        Set(manor, "shape", new Vector4(ribs, rotation, radius, open)); Set(manor, "signal", new Vector4(opacity, 0, 0, .2f));
+        Quad("LacePass", null, c, new Vector2(radius * 2), 0);
+    }
     static void Waltz(float progress, bool live)
     {
         Hall(1, 1, 1, 1, 0, 0);
-        Vector2 c = new(640, 300); int count = live ? 8 : 6; float spin = live ? .5f : 0;
+        Vector2 c = new(640, 300); int count = live ? 8 : 6; float spin = live ? .5f : 0, sign = 1;
+        Lace(c, 58, count, .3f + spin, 1, .8f);
         for (int k = 0; k < count; k++)
         {
             float a = .3f + MathF.Tau * k / count + spin; var d = new Vector2(MathF.Cos(a), MathF.Sin(a));
             var end = c + d * 900;
-            Lane(c + d * 40, end, 13, live ? 1 : progress, live ? 1 : 0, SilkTint, live ? 1 : .85f);
-            Straight(c + d * 6, c + d * 40, 1.8f, SilkTint, .6f, 1, 0);
-            if (live) Straight(c + d * 40, end, 4.5f, Hot, 1, 1, 1); else Straight(c + d * 40, end, 2.2f, SilkTint, .45f, progress, 0, 1.5f * (1 - progress), .3f);
+            if (live)
+            {
+                Sweep(c, a, a - sign * .17f, 40, 900, Rose, .17f);
+                Lane(c + d * 40, end, 13, 1, 1, SilkTint, 1);
+                Straight(c + d * 40, end, 4.4f, Hot, .95f, 1, .9f, 1.2f, 2.6f);
+            }
+            else
+            {
+                Sweep(c, a, a + sign * .2f, 40, 900, SilkTint, .16f);
+                Lane(c + d * 40, end, 13, progress, 0, SilkTint, .85f);
+                Straight(c + d * 40, end, 2.2f, SilkTint, .5f, progress, 0, 1.5f * (1 - progress), .3f);
+            }
         }
-        Glow(c, 120, Moon, .4f);
+        Glow(c, 150, Moon, .35f);
         Body(c, 6, 1, 1);
         Player(new(900, 560));
+    }
+    static void Web(float progress, float live)
+    {
+        Hall(1, 1, 1, 1, 0, 0);
+        var lines = new (Vector2 A, Vector2 B)[]
+        {
+            (new(0, 120), new(1280, 520)), (new(160, 0), new(980, 720)), (new(1280, 90), new(300, 720)), (new(0, 610), new(1280, 260)),
+            (new(560, 0), new(0, 520)), (new(1280, 640), new(700, 0)), (new(400, 720), new(1280, 380)), (new(860, 720), new(0, 330)),
+        };
+        int shown = live >= 0 ? lines.Length : Math.Max(1, (int)(lines.Length * Math.Min(1, progress * 2.4f)));
+        for (int i = 0; i < shown; i++)
+        {
+            var (a, b) = lines[i];
+            if (live < 0) { Lane(a, b, 11, progress, 0, SilkTint, .85f); Straight(a, b, 2.6f, SilkTint, .7f, progress, 0, 4 * (1 - progress) + .5f, .15f + .5f * progress); }
+            else { Lane(a, b, 11, 1, 1, SilkTint, 1); Straight(a, b, 4.5f, Hot, 1, 1, 1, 3.5f * MathF.Exp(-live / 3), 2.2f); }
+        }
+        for (int i = 0; i < shown; i++)
+            for (int j = i + 1; j < shown; j++)
+            {
+                var (a, b) = lines[i]; var (c, d) = lines[j];
+                Vector2 r = b - a, q = d - c; float den = r.X * q.Y - r.Y * q.X; if (MathF.Abs(den) < 1e-3f) continue;
+                float t = ((c.X - a.X) * q.Y - (c.Y - a.Y) * q.X) / den, u = ((c.X - a.X) * r.Y - (c.Y - a.Y) * r.X) / den;
+                if (t is < 0 or > 1 || u is < 0 or > 1) continue;
+                Glow(a + r * t, live >= 0 ? 60 : 34, live >= 0 ? Hot : SilkTint, live >= 0 ? 1 : .5f);
+            }
+        Body(new(640, 300), live >= 0 ? 5 : 4, 1, 1);
+        Player(new(820, 470)); Player(new(330, 380));
     }
     static void Stitch(bool spread)
     {

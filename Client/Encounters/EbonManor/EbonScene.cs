@@ -105,6 +105,7 @@ internal static class EbonScene
         shader = EbonMaterials.Manor(age);
         foreach (Projectile p in Main.ActiveProjectiles)
             if (p.ModProjectile is EbonAttack a && a.Plan.Fight == s.Fight && a.TryBoss(out _)) Body(shader, s, a.Plan, age);
+        WebKnots(shader, s, age);
         Aftermath(shader, s, age);
         EbonCeremony.Front(shader, boss, pose, age);
     }
@@ -151,18 +152,46 @@ internal static class EbonScene
                     EbonMaterials.Lane(shader, a, b, p.Width, 1, 1, tint, 1 - EbonVisualsMath.Ease((age - p.End + 3) / 3), 1, seed);
                 break;
             }
+            case EbonAttackKind.Web:
+            {
+                if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
+                float extend = EbonVisualsMath.OutExpo((age - p.Born) / 8);
+                if (age < p.Fire) EbonMaterials.Lane(shader, a, Vector2.Lerp(a, b, extend), p.Width, progress, 0, EbonMaterials.Silk, appear * .85f, 1, seed);
+                else EbonMaterials.Lane(shader, a, b, p.Width, 1, 1, EbonMaterials.Silk, 1 - EbonVisualsMath.Ease((age - p.End + 3) / 3), 1, seed);
+                break;
+            }
             case EbonAttackKind.Waltz:
             {
                 if (age >= p.End) return;
                 var c = EbonGeometry.Center(s, age);
                 bool live = age >= p.Fire;
                 float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6);
+                float extend = EbonVisualsMath.OutExpo((age - p.Born) / 24), sign = p.Spin >= 0 ? 1 : -1;
+                float within = (age - p.Born) / EbonRules.BeatTicks % 1, liveT = age - p.Fire;
+                // The lace hub opens with the parasol and turns with the spokes.
+                EbonMaterials.Lace(shader, c, 58, p.Variant, EbonGeometry.SpokeAngle(p, 0, age),
+                    EbonVisualsMath.Ease((age - p.Born) / 30), .8f * fade, p.Born * .01f);
                 for (int k = 0; k < p.Variant; k++)
                 {
-                    var d = EbonGeometry.SpokeAngle(p, k, age).ToRotationVector2();
+                    float angle = EbonGeometry.SpokeAngle(p, k, age);
+                    var d = angle.ToRotationVector2();
                     if (!s.Field.ClipAxis(c.X, c.Y, d.X, d.Y, out _, out float last) || last <= 40) continue;
-                    EbonMaterials.Lane(shader, c + d * 40, c + d * Math.Min(last, p.Length), p.Width, live ? 1 : progress, live ? 1 : 0,
-                        EbonMaterials.Silk, (live ? fade : appear * .85f), 1, seed + k);
+                    float reach = Math.Min(last, p.Length);
+                    if (!live)
+                    {
+                        // Threads are drawn out to the walls, then each beat swings a faint
+                        // preview the way the spokes will turn.
+                        EbonMaterials.Sweep(shader, s.Field, c, angle, angle + sign * .30f * EbonVisualsMath.OutExpo(within / .7f), 40, reach,
+                            EbonMaterials.Silk, .22f * (1 - within) * (1 - within) * extend, seed + k);
+                        EbonMaterials.Lane(shader, c + d * 40, c + d * (40 + (reach - 40) * extend), p.Width, progress, 0, EbonMaterials.Silk, appear * .85f, 1, seed + k);
+                    }
+                    else
+                    {
+                        // Afterglow behind each spoke, as long as the arc it just swept.
+                        float trail = Math.Abs(p.Spin) * EbonRules.WaltzRate(liveT) * 16;
+                        EbonMaterials.Sweep(shader, s.Field, c, angle, angle - sign * trail, 40, reach, EbonMaterials.Rose, .17f * fade, seed + k);
+                        EbonMaterials.Lane(shader, c + d * 40, c + d * reach, p.Width, 1, 1, EbonMaterials.Silk, fade, 1, seed + k);
+                    }
                 }
                 break;
             }
@@ -256,6 +285,22 @@ internal static class EbonScene
                 }
                 break;
             }
+            case EbonAttackKind.Web:
+            {
+                if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
+                float t0 = age - p.Born, extend = EbonVisualsMath.OutExpo(t0 / 8);
+                // Each strand is flung from her hand to its first anchor, then drawn across.
+                if (t0 < 10)
+                {
+                    var hand = EbonNoirette.Hand(pose, p.Variant % 2);
+                    EbonMaterials.Straight(hand, Vector2.Lerp(hand, a, EbonVisualsMath.OutExpo(t0 / 6)), 2.4f, EbonMaterials.Hot, 1 - t0 / 10, 1, .5f, seed, age);
+                }
+                if (age < p.Fire)
+                    EbonMaterials.Straight(a, Vector2.Lerp(a, b, extend), 2.6f, EbonMaterials.Silk, .7f * appear, progress, 0, seed, age, 4 * (1 - progress) + .5f, .15f + .5f * progress);
+                else
+                    EbonMaterials.Straight(a, b, 4.5f, EbonMaterials.Hot, 1, 1, 1, seed, age, 3.5f * EbonVisualsMath.Pulse(age - p.Fire, 3), 2.2f);
+                break;
+            }
             case EbonAttackKind.Shears:
             {
                 if (age >= p.Fire || !Segment(s, p, out var a, out var b)) return;
@@ -269,17 +314,21 @@ internal static class EbonScene
                 if (age >= p.End) return;
                 var c = EbonGeometry.Center(s, age);
                 bool live = age >= p.Fire;
-                float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6), open = EbonVisualsMath.Ease((age - p.Born) / 40);
+                float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6), extend = EbonVisualsMath.OutExpo((age - p.Born) / 24);
+                // Every beat the taut threads twang and brighten with the step.
+                float step = live ? EbonVisualsMath.Pulse((age - p.Fire) % EbonRules.BeatTicks, 7) : 0;
                 for (int k = 0; k < p.Variant; k++)
                 {
                     float angle = EbonGeometry.SpokeAngle(p, k, age);
                     var d = angle.ToRotationVector2();
-                    // Parasol ribs inside the safe hub.
-                    EbonMaterials.Straight(c + d * 6, c + d * 40 * open, 1.8f, EbonMaterials.Silk, .6f * open * fade, 1, 0, seed + k, age);
                     if (!s.Field.ClipAxis(c.X, c.Y, d.X, d.Y, out _, out float last) || last <= 40) continue;
-                    var end = c + d * Math.Min(last, p.Length);
-                    if (live) EbonMaterials.Straight(c + d * 40, end, 4.5f, EbonMaterials.Hot, fade, 1, 1, seed + k, age);
-                    else EbonMaterials.Straight(c + d * 40, end, 2.2f, EbonMaterials.Silk, .45f * appear, progress, 0, seed + k, age, 1.5f * (1 - progress), .3f);
+                    float reach = Math.Min(last, p.Length);
+                    if (live)
+                        EbonMaterials.Straight(c + d * 40, c + d * reach, 3.4f + 1.6f * step, EbonMaterials.Hot, fade * (.82f + .18f * step), 1,
+                            .75f + .25f * step, seed + k, age, 1.6f * step, 2.6f);
+                    else
+                        EbonMaterials.Straight(c + d * 40, c + d * (40 + (reach - 40) * extend), 2.2f, EbonMaterials.Silk, .5f * appear, progress, 0,
+                            seed + k, age, 1.5f * (1 - progress), .3f);
                 }
                 break;
             }
@@ -317,6 +366,14 @@ internal static class EbonScene
                 shader.TrySetParameter("signal", new Vector4(1, weave, falling * .35f * EbonVisualsMath.Pulse(age - p.Fire, 6), p.Born * .11f));
                 EbonMaterials.Sprite(shader, "AutoloadPass", art, new Rectangle(0, 0, art.Width, art.Height), body, c.Centroid, c.Scale,
                     ChandelierSway(p, age), false, SamplerState.LinearClamp);
+                break;
+            }
+            case EbonAttackKind.Web:
+            {
+                if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
+                float glint = age >= p.Fire ? 1 - (age - p.Fire) / EbonRules.WebLive : .3f + .45f * progress;
+                EbonMaterials.Glow(shader, a, 40, EbonMaterials.Silk, glint);
+                if (age >= p.Born + 8) EbonMaterials.Glow(shader, b, 40, EbonMaterials.Silk, glint);
                 break;
             }
             case EbonAttackKind.Loom:
@@ -360,13 +417,19 @@ internal static class EbonScene
                 var c = EbonGeometry.Center(s, age);
                 bool live = age >= p.Fire;
                 float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6);
-                EbonMaterials.Glow(shader, c, 120, EbonMaterials.Moon, (.25f + .2f * progress) * fade);
+                EbonMaterials.Glow(shader, c, 150, EbonMaterials.Moon, (.22f + .18f * progress) * fade);
                 if (!live) return;
+                float t = age - p.Fire;
                 for (int k = 0; k < p.Variant; k++)
                 {
-                    var d = EbonGeometry.SpokeAngle(p, k, age).ToRotationVector2();
-                    if (s.Field.ClipAxis(c.X, c.Y, d.X, d.Y, out _, out float last) && last > 40)
-                        EbonMaterials.Glow(shader, c + d * Math.Min(last, p.Length), 54, EbonMaterials.Hot, .7f * fade);
+                    float angle = EbonGeometry.SpokeAngle(p, k, age);
+                    var d = angle.ToRotationVector2();
+                    if (!s.Field.ClipAxis(c.X, c.Y, d.X, d.Y, out _, out float last) || last <= 40) continue;
+                    var end = c + d * Math.Min(last, p.Length);
+                    EbonMaterials.Glow(shader, end, 64, EbonMaterials.Hot, .75f * fade);
+                    // Silk sparks where each spoke scrapes along the wall.
+                    if (!EbonVisuals.Reduced)
+                        EbonMaterials.Burst(shader, end, p.Born + k * 31 + (int)(t / 18) * 7, 4, t % 18, 18, 2, 3.5f, .03f, 12, 1.4f, angle + MathHelper.Pi);
                 }
                 break;
             }
@@ -418,6 +481,40 @@ internal static class EbonScene
                     break;
             }
         }
+    }
+
+    // Where web strands cross, the silk knots: small lights that make the web
+    // read as one woven trap. Purely decorative; each strand owns its footprint.
+    private static readonly List<(Vector2 A, Vector2 B, float Show, int Fire)> strands = new(16);
+    private static void WebKnots(ManagedShader shader, in EbonState s, float age)
+    {
+        strands.Clear();
+        foreach (Projectile p in Main.ActiveProjectiles)
+        {
+            if (p.ModProjectile is not EbonAttack a || a.Plan.Fight != s.Fight || a.Plan.Kind != EbonAttackKind.Web || age < a.Plan.Born + 8
+                || age >= a.Plan.End || strands.Count >= 16 || !a.TryBoss(out _) || !Segment(s, a.Plan, out var from, out var to)) continue;
+            strands.Add((from, to, EbonVisualsMath.Ease((age - a.Plan.Born - 8) / 10), a.Plan.Fire));
+        }
+        for (int i = 0; i < strands.Count; i++)
+            for (int j = i + 1; j < strands.Count; j++)
+            {
+                if (strands[i].Fire != strands[j].Fire || !Cross(strands[i].A, strands[i].B, strands[j].A, strands[j].B, out var knot)) continue;
+                int fire = strands[i].Fire;
+                float live = age >= fire ? 1 - (age - fire) / EbonRules.WebLive : 0;
+                float show = Math.Min(strands[i].Show, strands[j].Show);
+                EbonMaterials.Glow(shader, knot, 34 + 26 * live, live > 0 ? EbonMaterials.Hot : EbonMaterials.Silk, show * (.45f + .55f * live));
+            }
+    }
+    private static bool Cross(Vector2 a, Vector2 b, Vector2 c, Vector2 d, out Vector2 at)
+    {
+        at = default;
+        Vector2 r = b - a, q = d - c;
+        float denominator = r.X * q.Y - r.Y * q.X;
+        if (MathF.Abs(denominator) < 1e-3f) return false;
+        float t = ((c.X - a.X) * q.Y - (c.Y - a.Y) * q.X) / denominator, u = ((c.X - a.X) * r.Y - (c.Y - a.Y) * r.X) / denominator;
+        if (t is < 0 or > 1 || u is < 0 or > 1) return false;
+        at = a + r * t;
+        return true;
     }
 
     // Primitive-only residue (snapping silk) drawn with the silk layer.

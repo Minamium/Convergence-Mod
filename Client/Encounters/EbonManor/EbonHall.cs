@@ -8,19 +8,38 @@ namespace Convergence.Client.Encounters.EbonManor;
 // Hall lighting on AutoMatador's bar grid, from the accepted clock only.
 internal readonly record struct EbonHallLight(float Fade, float Tear, float Tension, float Candles, float Pulse, float Exposure, float Flash);
 
+// The entrance follows AutoMatador's intro on its true bar grid: a two-beat
+// pickup, then bar 0. The quiet motif opens (0-2), bass and the groove enter
+// (2), the build peaks (8), one bar breaks almost silent (9), the second build
+// rises (10), the bass returns (12.5), two held beats (13.5) and the A drop (14).
+internal static class EbonIntro
+{
+    internal const float Groove = 2, Threads = 4, Burst = 8, Break = 9, Bloom = 10, Gather = 12.5f, Hush = 13.5f, Drop = 14;
+    internal static float Bars(in EbonState s, float age)
+        => s.MusicStart < 0 ? -1 : (age - s.MusicStart - EbonRules.IntroPickup) / EbonRules.BarTicks;
+    internal static int Tick(in EbonState s, float bar)
+        => s.MusicStart + (int)MathF.Round(EbonRules.IntroPickup + bar * EbonRules.BarTicks);
+}
+
 internal static class EbonHall
 {
     internal static EbonHallLight Light(in EbonState s, float age)
     {
         if (s.MusicStart < 0 || age < s.MusicStart) return default;
-        float t = age - s.MusicStart, bars = t / EbonRules.BarTicks;
-        float fade = EbonVisualsMath.Ease(t / 120);
-        // Entrance: moonlight first, then the candles light outward one beat at a time.
-        float candles = Math.Clamp(MathF.Floor((bars - 1) * 4) / 8, 0, 1);
-        float exposure = EbonVisualsMath.Lerp(.3f, 1, EbonVisualsMath.Ease((bars - .5f) / 3.5f));
+        float t = age - s.MusicStart, bars = EbonIntro.Bars(s, age);
+        float fade = EbonVisualsMath.Ease(t / 90);
+        // Moonlight carries the quiet opening; with the groove the candles light
+        // outward one beat at a time and bring the hall up.
+        float candles = Math.Clamp(MathF.Floor((bars - EbonIntro.Groove) * 4 + 1) / 8, 0, 1);
+        float exposure = EbonVisualsMath.Lerp(.22f, .55f, EbonVisualsMath.Ease((bars + .5f) / 2.5f));
+        exposure = EbonVisualsMath.Lerp(exposure, 1, EbonVisualsMath.Ease((bars - EbonIntro.Groove) / 2));
+        // The break dims the hall around her weaving; the held beats before the drop hush it.
+        exposure *= 1 - .3f * EbonVisualsMath.Ease((bars - EbonIntro.Break) * 3) * (1 - EbonVisualsMath.Ease((bars - EbonIntro.Bloom) * 3));
+        exposure *= 1 - .32f * EbonVisualsMath.Ease((bars - EbonIntro.Hush) * 4) * (1 - EbonVisualsMath.Ease((bars - EbonIntro.Drop) * 8));
         float beat = s.UnlockAt >= 0 && age >= s.UnlockAt ? (age - s.UnlockAt) / EbonRules.BeatTicks % 1 : 1;
         float pulse = MathF.Exp(-beat * 4);
         float flash = s.UnlockAt >= 0 ? .8f * EbonVisualsMath.Pulse(age - s.UnlockAt, 12) : 0;
+        flash = Math.Max(flash, .4f * EbonVisualsMath.Pulse(age - EbonIntro.Tick(s, EbonIntro.Burst), 14));
         float tension = 0, tear = 0;
         if (s.Phase != EbonPhase.ActOne && s.PhaseAt >= 0)
         {

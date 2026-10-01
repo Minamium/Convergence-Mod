@@ -19,7 +19,8 @@ internal static class EbonRules
     // AutoMatador is a steady 125 BPM: one beat is 28.8 ticks, one bar 115.2.
     internal const float BeatTicks = 28.8f, BarTicks = BeatTicks * 4;
     internal const int CycleBeats = 64;                 // one 16-bar attack cycle
-    internal const int Intro = 922;                     // ActOne cue: 8 bars to the A drop
+    internal const int Intro = 1670;                    // ActOne cue: 2-beat pickup + the 14-bar intro to the A drop
+    internal const float IntroPickup = BeatTicks * 2;    // the recording's pickup before intro bar 0
     internal const int ActTwoLead = 230, FinaleLead = 346; // 2 and 3 bars of the next cue
 
     internal const float ActTwoThreshold = .62f, FinaleThreshold = .28f;
@@ -44,7 +45,7 @@ internal static class EbonRules
 
     // Damage budgets before the rehearsal cap.
     internal const int ThreadDamage = 300, ChandelierDamage = 340, LoomDamage = 280,
-        ShearsDamage = 340, WaltzDamage = 260;
+        ShearsDamage = 340, WaltzDamage = 260, WebDamage = 300;
 
     // Thrown furniture
     internal const float PropRadius = 46, PropLaunchSpeed = 9, PropAcceleration = 1.15f;
@@ -67,8 +68,18 @@ internal static class EbonRules
     internal const float LoomRadius = 14, LoomSpacing = 300, ShearsRadius = 74;
     internal const int LoomLive = 12, ShearsLive = 14;
 
-    // Parasol waltz
-    internal const float SpokeRadius = 13, SpokeReach = 2600;
+    // Severing web: irregular wall-to-wall strands, one per sixteenth note,
+    // all cutting together four beats after the call.
+    internal const float WebRadius = 11, WebMargin = 40;
+    internal const int WebLive = 12, WebStrands = 8, FinaleWebStrands = 11;
+    internal static int WebBorn(int epoch, int beat, int strand) => Beat(epoch, beat) + (int)MathF.Round(strand * BeatTicks / 4);
+
+    // Parasol waltz. The spokes turn in steps: fastest on every beat, easing
+    // between beats, with the plan's average speed. Rate stays positive.
+    internal const float SpokeRadius = 13, SpokeReach = 2600, WaltzLilt = .7f;
+    internal static float WaltzTurn(float ticks)
+        => ticks <= 0 ? 0 : ticks + WaltzLilt * BeatTicks / MathF.Tau * MathF.Sin(MathF.Tau * ticks / BeatTicks);
+    internal static float WaltzRate(float ticks) => ticks <= 0 ? 0 : 1 + WaltzLilt * MathF.Cos(MathF.Tau * ticks / BeatTicks);
 
     internal static float Ease(float x) { x = Math.Clamp(x, 0, 1); return x * x * (3 - 2 * x); }
     internal static float Envelope(float elapsed, float duration)

@@ -45,7 +45,7 @@ internal static class EbonGeometry
     }
 
     internal static float SpokeAngle(in EbonAttackPlan p, int k, float age)
-        => p.Angle + MathHelper.TwoPi * k / p.Variant + p.Spin * Math.Max(0, age - p.Fire);
+        => p.Angle + MathHelper.TwoPi * k / p.Variant + p.Spin * EbonRules.WaltzTurn(age - p.Fire);
     internal static Vector2 Center(in EbonState s, float age)
     { var c = EbonRules.BossPosition(s.Field, s.Epoch, age); return new(c.X, c.Y); }
 }

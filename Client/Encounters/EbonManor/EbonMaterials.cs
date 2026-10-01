@@ -99,6 +99,46 @@ internal static class EbonMaterials
         Quad(shader, "TearPass", (a + b) * .5f, new Vector2(length, radius * 2), (b - a).ToRotation());
     }
 
+    private static readonly VertexPositionColorTexture[] fan = new VertexPositionColorTexture[16 * 6];
+    // A dim angular wedge between two spoke angles (afterglow or turn preview),
+    // clipped per angle to the field like the spokes themselves.
+    internal static void Sweep(ManagedShader shader, Convergence.Common.Raids.Arena.RaidFieldGeometry field, Vector2 center,
+        float from, float to, float inner, float reach, Vector3 tint, float opacity, float seed)
+    {
+        if (opacity <= .002f || MathF.Abs(to - from) < .002f) return;
+        const int steps = 16;
+        int n = 0;
+        Vector2 Outer(float a)
+        {
+            var d = a.ToRotationVector2();
+            float r = reach;
+            if (field.ClipAxis(center.X, center.Y, d.X, d.Y, out _, out float last)) r = Math.Min(r, last);
+            return center + d * Math.Max(inner + 1, r) - Main.screenPosition;
+        }
+        for (int k = 0; k < steps; k++)
+        {
+            float u0 = k / (float)steps, u1 = (k + 1) / (float)steps;
+            float a0 = MathHelper.Lerp(from, to, u0), a1 = MathHelper.Lerp(from, to, u1);
+            Vector2 i0 = center + a0.ToRotationVector2() * inner - Main.screenPosition, i1 = center + a1.ToRotationVector2() * inner - Main.screenPosition;
+            Vector2 o0 = Outer(a0), o1 = Outer(a1);
+            fan[n++] = new(new(i0, 0), Color.White, new(0, u0)); fan[n++] = new(new(o0, 0), Color.White, new(1, u0)); fan[n++] = new(new(i1, 0), Color.White, new(0, u1));
+            fan[n++] = new(new(o0, 0), Color.White, new(1, u0)); fan[n++] = new(new(o1, 0), Color.White, new(1, u1)); fan[n++] = new(new(i1, 0), Color.White, new(0, u1));
+        }
+        shader.TrySetParameter("signal", new Vector4(opacity * (EbonVisuals.Reduced ? .5f : 1), 0, EbonVisuals.Reduced ? 1 : 0, seed));
+        shader.TrySetParameter("tint", tint);
+        shader.Apply("SweepPass");
+        Main.instance.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, fan, 0, n / 3);
+    }
+
+    // The waltz hub: a lace parasol rosette whose ribs follow the spokes.
+    internal static void Lace(ManagedShader shader, Vector2 center, float radius, int ribs, float rotation, float open, float opacity, float seed)
+    {
+        if (opacity <= .002f) return;
+        shader.TrySetParameter("shape", new Vector4(ribs, rotation, radius, open));
+        shader.TrySetParameter("signal", new Vector4(opacity, 0, EbonVisuals.Reduced ? 1 : 0, seed));
+        Quad(shader, "LacePass", center, new Vector2(radius * 2), 0);
+    }
+
     // The true radius is the centre of the hoop's thin boundary line.
     internal static void Ring(ManagedShader shader, Vector2 center, float radius, bool spread, float progress, Vector3 tint,
         float opacity, float flash, bool failed, float seed)

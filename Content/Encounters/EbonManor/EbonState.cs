@@ -74,7 +74,7 @@ internal readonly record struct EbonState(Guid Fight, int Age, int MusicStart, i
     }
 }
 
-internal enum EbonAttackKind : byte { Thread, Chandelier, Loom, Shears, Waltz }
+internal enum EbonAttackKind : byte { Thread, Chandelier, Loom, Shears, Waltz, Web }
 
 // An immutable authority hazard. Geometry for any tick derives from these
 // fields and EbonRules only, on the server (collision) and on clients (art).
@@ -104,6 +104,7 @@ internal readonly record struct EbonAttackPlan(Guid Fight, short Boss, EbonAttac
                 EbonAttackKind.Thread => variant > 6 || spin != 0,
                 EbonAttackKind.Chandelier => variant > 1 || spin != 0,
                 EbonAttackKind.Waltz => variant is < 3 or > 10,
+                EbonAttackKind.Web => variant > 15 || spin != 0,
                 _ => variant != 0 || spin != 0,
             }) throw new InvalidDataException("ebon.attack");
         return new(id, boss, kind, born, fire, end, x, y, angle, length, width, damage, variant, spin);

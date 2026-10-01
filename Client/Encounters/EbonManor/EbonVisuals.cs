@@ -90,9 +90,12 @@ internal sealed class EbonVisuals : ModSystem
         var s = boss.State;
         if (s.MusicStart >= 0)
         {
-            int bar(float n) => s.MusicStart + (int)MathF.Round(n * EbonRules.BarTicks);
-            if (Crossed(bar(5), age)) Play("Weave", .55f);
-            if (Crossed(bar(7.5f), age)) Play("SilkCast", .5f, .15f);
+            // Entrance accents ride the intro's own landmarks (see EbonIntro).
+            int bar(float n) => EbonIntro.Tick(s, n);
+            if (Crossed(bar(EbonIntro.Burst), age)) { Play("ThreadSnap", .42f, -.1f); Shake(boss.NPC.Center, 3, Vector2.UnitY); }
+            if (Crossed(bar(EbonIntro.Break), age)) Play("Weave", .55f);
+            if (Crossed(bar(EbonIntro.Bloom), age)) Play("WaltzOpen", .42f);
+            if (Crossed(bar(EbonIntro.Hush), age)) Play("SilkCast", .5f, .15f);
             if (Crossed(s.UnlockAt, age)) { Play("SilkBurst", .6f); Shake(boss.NPC.Center, 6, Vector2.UnitY); }
         }
         if (s.Phase != EbonPhase.ActOne && s.PhaseAt >= 0)
@@ -135,6 +138,7 @@ internal sealed class EbonVisuals : ModSystem
                     case EbonAttackKind.Loom: Play("LoomTighten", .5f); break;
                     case EbonAttackKind.Shears: Play("ShearsOpen", .52f); break;
                     case EbonAttackKind.Waltz: Play("WaltzOpen", .56f); break;
+                    case EbonAttackKind.Web when h.Variant == 0: Play("WebWeave", .55f); break;
                 }
             if (Crossed(h.Fire, age) && Once(h.Kind, h.Fire, true))
                 switch (h.Kind)
@@ -144,6 +148,7 @@ internal sealed class EbonVisuals : ModSystem
                     case EbonAttackKind.Loom: Play("LoomTwang", .6f); Shake(Main.LocalPlayer.Center, 2.5f, Vector2.UnitX); break;
                     case EbonAttackKind.Shears: Play("ShearsSnip", .64f); Shake(Main.LocalPlayer.Center, 5, h.Angle.ToRotationVector2()); break;
                     case EbonAttackKind.Waltz: Play("WaltzRelease", .55f); break;
+                    case EbonAttackKind.Web: Play("WebSever", .62f); Shake(Main.LocalPlayer.Center, 4.5f, h.Angle.ToRotationVector2()); break;
                 }
             switch (h.Kind)
             {
@@ -163,7 +168,7 @@ internal sealed class EbonVisuals : ModSystem
                     Shake(at, 7, Vector2.UnitY);
                     break;
                 }
-                case EbonAttackKind.Loom when Crossed(h.End, age) && EbonScene.Segment(s, h, out var la, out var lb):
+                case EbonAttackKind.Loom or EbonAttackKind.Web when Crossed(h.End, age) && EbonScene.Segment(s, h, out var la, out var lb):
                     EbonScene.Add(s.Fight, new(true, EbonAftermathKind.LoomSnap, la, lb, 0, h.End, h.Born + (int)h.X, 0));
                     break;
                 case EbonAttackKind.Shears when Crossed(h.End, age) && EbonScene.Segment(s, h, out var sa, out var sb):
@@ -309,9 +314,14 @@ internal sealed class EbonVisuals : ModSystem
             var ivory = new Color(232, 222, 206);
             if (opening)
             {
-                float bars = clock / EbonRules.BarTicks;
-                float title = EbonVisualsMath.Ease((bars - 4) / .6f) * (1 - EbonVisualsMath.Ease((bars - 7.4f) / .5f));
+                // The raid title over the quiet opening motif; her name as she is woven in.
+                float bars = EbonIntro.Bars(s, age);
+                float title = EbonVisualsMath.Ease((bars - .25f) / .6f) * (1 - EbonVisualsMath.Ease((bars - 3.2f) / .5f));
                 Utils.DrawBorderString(batch, "WALTZ OF THE EBON MANOR", new(v.Width * .5f, v.Height * .84f), ivory * title, .92f, .5f);
+                float name = EbonVisualsMath.Ease((bars - 9.6f) / .5f) * (1 - EbonVisualsMath.Ease((bars - 12.2f) / .5f));
+                if (name > .01f)
+                    Utils.DrawBorderString(batch, Lang.GetNPCNameValue(ModContent.NPCType<EbonBoss>()), new(v.Width * .5f, v.Height * .84f),
+                        new Color(236, 206, 210) * name, .8f, .5f);
             }
             if (turning)
             {

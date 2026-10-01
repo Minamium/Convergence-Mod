@@ -12,7 +12,7 @@ internal static partial class Program
     [DomainTest("Ebon beat grid follows 125 BPM without drift and every beat tick is unique")]
     private static void EbonBeatGrid()
     {
-        AssertEqual(922, EbonRules.Intro, "eight intro bars to the A drop");
+        AssertEqual((int)MathF.Round(58 * EbonRules.BeatTicks), EbonRules.Intro, "two-beat pickup plus fourteen intro bars to the A drop");
         AssertEqual((int)MathF.Round(8 * EbonRules.BeatTicks), EbonRules.ActTwoLead, "two lead-in bars");
         AssertEqual((int)MathF.Round(12 * EbonRules.BeatTicks), EbonRules.FinaleLead, "three lead-in bars");
         const int epoch = 1234;
@@ -92,10 +92,14 @@ internal static partial class Program
                         EbonCue.LoomRising or EbonCue.LoomFalling => (EbonAttackKind.Loom, EbonRules.Beat(epoch, b + 3), EbonRules.Beat(epoch, b + 3) + EbonRules.LoomLive, 3000, EbonRules.LoomRadius, (byte)0, 0),
                         EbonCue.ShearsAcross or EbonCue.ShearsDown => (EbonAttackKind.Shears, EbonRules.Beat(epoch, b + 2), EbonRules.Beat(epoch, b + 2) + EbonRules.ShearsLive, 3000, EbonRules.ShearsRadius, (byte)0, 0),
                         EbonCue.Waltz => (EbonAttackKind.Waltz, EbonRules.Beat(epoch, b + 4), EbonRules.Beat(epoch, b + 16), EbonRules.SpokeReach, EbonRules.SpokeRadius, (byte)8, .0102f),
+                        EbonCue.Web => (EbonAttackKind.Web, EbonRules.Beat(epoch, b + 4), EbonRules.Beat(epoch, b + 4) + EbonRules.WebLive, 3000, EbonRules.WebRadius,
+                            (byte)(EbonRules.FinaleWebStrands - 1), 0),
                         _ => null,
                     };
                     if (plan is not { } p) continue;
-                    var attack = new EbonAttackPlan(Guid.NewGuid(), 3, p.Kind, born, p.Fire, p.End, field.CenterX, field.Top + 30, .64f, p.Length, p.Width, 340, p.Variant, p.Spin);
+                    // The web's last strand is born latest; it must still carry a full warning.
+                    int bornAt = cue == EbonCue.Web ? EbonRules.WebBorn(epoch, b, EbonRules.FinaleWebStrands - 1) : born;
+                    var attack = new EbonAttackPlan(Guid.NewGuid(), 3, p.Kind, bornAt, p.Fire, p.End, field.CenterX, field.Top + 30, .64f, p.Length, p.Width, 340, p.Variant, p.Spin);
                     using var m = new MemoryStream();
                     using (var w = new BinaryWriter(m, System.Text.Encoding.UTF8, true)) attack.Write(w);
                     m.Position = 0;
@@ -107,7 +111,7 @@ internal static partial class Program
         var bad = new EbonAttackPlan(Guid.NewGuid(), 3, EbonAttackKind.Thread, 100, 110, 200, 1, 1, 0, 100, 40, 300, 7);
         foreach (var invalid in new[] { bad, bad with { Fire = 130, Variant = 7 }, bad with { Fire = 130, Variant = 1, Spin = .01f },
                      bad with { Kind = EbonAttackKind.Waltz, Fire = 130, Variant = 2 }, bad with { Kind = EbonAttackKind.Loom, Fire = 130, Variant = 1 },
-                     bad with { Fire = 130, Variant = 0, End = 600 } })
+                     bad with { Fire = 130, Variant = 0, End = 600 }, bad with { Kind = EbonAttackKind.Web, Fire = 130, Variant = 16 } })
         {
             bool rejected = false;
             using var m = new MemoryStream();
@@ -198,6 +202,59 @@ internal static partial class Program
             AssertEqual(false, chain[i - 1].CanReplace(chain[i]), $"step {i} cannot be undone");
         }
         AssertEqual(false, (countdown with { Age = countdown.Age + 5, MusicStart = music + 1, UnlockAt = music + 1 + EbonRules.Intro, PhaseAt = music + 1 }).CanReplace(countdown), "music clock is immutable once set");
+    }
+
+    [DomainTest("Ebon waltz steps on every beat yet keeps its average speed and never turns back")]
+    private static void EbonWaltzSteps()
+    {
+        float previous = 0;
+        for (float t = 0; t < EbonRules.BeatTicks * 16; t += .25f)
+        {
+            float turn = EbonRules.WaltzTurn(t);
+            AssertEqual(true, turn >= previous - 1e-4f, "never turns back");
+            AssertEqual(true, MathF.Abs(turn - t) <= EbonRules.WaltzLilt * EbonRules.BeatTicks / MathF.Tau + 1e-3f, "bounded lilt");
+            previous = turn;
+        }
+        for (int beat = 1; beat <= 12; beat++)
+            AssertEqual(true, MathF.Abs(EbonRules.WaltzTurn(beat * EbonRules.BeatTicks) - beat * EbonRules.BeatTicks) < .01f, "plan speed on every beat");
+        AssertEqual(true, EbonRules.WaltzRate(.001f) > EbonRules.WaltzRate(EbonRules.BeatTicks / 2), "fastest on the beat");
+        AssertEqual(0f, EbonRules.WaltzTurn(-5), "still before fire");
+    }
+
+    [DomainTest("Ebon web strands run wall to wall and keep a pending gathering circle clear")]
+    private static void EbonWebStrands()
+    {
+        var field = RaidFieldGeometry.FromGround(8000, 6000);
+        var gather = new System.Numerics.Vector2(field.CenterX, field.Bottom - 220);
+        float clear = EbonStitchRules.StackRadius + EbonRules.WebRadius + EbonRules.WebMargin;
+        bool OnWall(System.Numerics.Vector2 p) => MathF.Abs(p.X - field.Left) < .01f || MathF.Abs(p.X - field.Right) < .01f
+            || MathF.Abs(p.Y - field.Top) < .01f || MathF.Abs(p.Y - field.Bottom) < .01f;
+        for (int beat = 0; beat < 400; beat += 7)
+            foreach (var withGather in new[] { false, true })
+            {
+                var strands = EbonWeb.Strands(field, EbonWeb.Seed(Guid.Parse("6f0b8c1e-3a8e-4a5e-9c34-1d2a0c5b7e90"), beat), EbonRules.FinaleWebStrands,
+                    withGather ? gather : null);
+                AssertEqual(EbonRules.FinaleWebStrands, strands.Count, "every call finds its strands");
+                foreach (var (a, b) in strands)
+                {
+                    AssertEqual(true, OnWall(a) && OnWall(b) && System.Numerics.Vector2.Distance(a, b) >= EbonWeb.MinimumLength, "wall to wall across the hall");
+                    if (withGather) AssertEqual(true, EbonWeb.Distance(gather, a, b) >= clear, "gathering circle stays clear");
+                }
+            }
+        var again = EbonWeb.Strands(field, EbonWeb.Seed(Guid.Parse("6f0b8c1e-3a8e-4a5e-9c34-1d2a0c5b7e90"), 21), 8, null);
+        var once = EbonWeb.Strands(field, EbonWeb.Seed(Guid.Parse("6f0b8c1e-3a8e-4a5e-9c34-1d2a0c5b7e90"), 21), 8, null);
+        AssertEqual(true, again.SequenceEqual(once), "deterministic per call");
+    }
+
+    [DomainTest("Ebon entrance landmarks sit on the intro's bars and the drop is the attack epoch")]
+    private static void EbonIntroLandmarks()
+    {
+        var s = EbonExample();
+        AssertEqual(s.UnlockAt, EbonIntro.Tick(s, EbonIntro.Drop), "drop tick is the unlock");
+        AssertEqual(s.MusicStart, EbonIntro.Tick(s, -.5f), "the pickup starts with the music");
+        float[] marks = { EbonIntro.Groove, EbonIntro.Threads, EbonIntro.Burst, EbonIntro.Break, EbonIntro.Bloom, EbonIntro.Gather, EbonIntro.Hush, EbonIntro.Drop };
+        for (int i = 1; i < marks.Length; i++) AssertEqual(true, marks[i] > marks[i - 1], "landmarks in order");
+        AssertEqual(true, EbonHall.Light(s, EbonIntro.Tick(s, .5f)).Candles == 0 && EbonHall.Light(s, EbonIntro.Tick(s, 4.1f)).Candles == 1, "candles light with the groove");
     }
 
     [DomainTest("Ebon stitches punish only the unmet call and their plans are bounded")]

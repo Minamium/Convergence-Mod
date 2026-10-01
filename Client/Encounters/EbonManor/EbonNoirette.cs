@@ -83,18 +83,21 @@ internal static class EbonNoirette
         var s = boss.State;
         int facing = boss.NPC.spriteDirection < 0 ? -1 : 1;
         Vector2 root = Root(boss, age);
-        float bars(float from) => (age - from) / EbonRules.BarTicks;
         if (s.Stage is EbonStage.Deployment or EbonStage.Ready || s.MusicStart < 0 || age < s.MusicStart)
             return new(2, 0, 0, Vector2.Zero, 0, facing, 0, root, true);
         if (s.Stage == EbonStage.Countdown || age < s.UnlockAt)
         {
-            float b = bars(s.MusicStart);
-            if (b < 5) return new(2, 0, 0, Vector2.Zero, 0, facing, 0, root, true);
-            float weave = EbonVisualsMath.Ease((b - 5) / 1f);
-            int frame = b < 6 ? 2 : b < 7.5f ? 6 : 7;
-            float lean = frame == 6 ? MathF.Sin(age * .09f) * .05f : frame == 7 ? -.04f : 0;
-            float flash = frame == 7 ? EbonVisualsMath.Pulse(age - (s.MusicStart + 7.5f * EbonRules.BarTicks), 10) : 0;
-            return new(frame, weave, lean, new(0, -6 * (1 - weave)), flash, facing, 1, root, false);
+            // Woven in through the intro's near-silent break, the parasol opens on the
+            // second build, she draws the silk in as the bass returns and points
+            // through the two held beats before the drop.
+            float b = EbonIntro.Bars(s, age);
+            if (b < EbonIntro.Break) return new(2, 0, 0, Vector2.Zero, 0, facing, 0, root, true);
+            float weave = EbonVisualsMath.Ease(b - EbonIntro.Break);
+            int frame = b < EbonIntro.Bloom ? 2 : b < EbonIntro.Gather ? 6 : b < EbonIntro.Hush ? 4 : 7;
+            float draw = EbonVisualsMath.Ease((b - EbonIntro.Gather) * 2);
+            float lean = frame == 6 ? MathF.Sin(age * .09f) * .05f : frame == 4 ? -.05f * draw : frame == 7 ? -.04f : 0;
+            float flash = frame == 7 ? EbonVisualsMath.Pulse(age - EbonIntro.Tick(s, EbonIntro.Hush), 10) : 0;
+            return new(frame, weave, lean, new(0, -10 * (1 - weave) - (frame == 4 ? 4 * draw : 0)), flash, facing, 1, root, false);
         }
         if (s.EndAt >= 0)
         {
