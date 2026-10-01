@@ -1,0 +1,33 @@
+{
+  "scope": "Ghost Samurai original music: 紫電の亡霊武者 / Violet Phantom Blade replaces vanilla Boss 3 through a client-only BossHigh scene effect. Hazards, clocks, damage, packets and protocol76 are unchanged",
+  "target_build": "0.3.60 / protocol76 unchanged",
+  "integration_base": "2d1c1b3 (main after PR94)",
+  "owner_direction": "2026-10-02: the owner asked Claude to set up a composition environment and write a track; v1 was praised, the owner then asked for a brush-up that references the adopted music without breaking the Ghost Samurai world view, compared v1 and v2 by ear and chose v2 for the encounter",
+  "recipe": {
+    "location": "external studio (.claude-tools/music/studio), not committed",
+    "sha256": {
+      "samurai_theme.py": "781d3e4b072c695909c9f663be79220d4dbf1193d9441b42389cc94e4fb7e63c",
+      "theory.py": "6bfe442adf3036e38cd867d9cfe8a4ddba2ec40281bde6abee69ad4b599c5f00",
+      "synths.py": "44aca9da1a206ccd1c144e44852d0f35424c81b8caad2b00b0e48df0584ea794",
+      "engine.py": "36de9045f74bff3cf599c097b1ef07143744bffeb905f809d0b6d82536a3b5d3",
+      "render.py": "60a581ee9b2e7eaafc3f076d8dccb3083e6496d2e8f536cae5d8ed164e772454",
+      "mixdown.py": "cfaebc50bc3f1f61e438a84bd473a29524ee77e8cf5b3ff612b54dba9ddada83"
+    },
+    "libraries": "VSCO 2 CE 1.1.0 archive sha256 4a4446628df0e1a12aaee58e9f65f8fa7cde51971e961abb1b43083a6d3a8ab7; VCSL commit b6e6ac82d22248edee98a0bde185eb9ef6d439ad (both CC0)"
+  },
+  "checks": {
+    "determinism": "passed: a fresh render+mixdown from the recipe above decodes sample-identical to the auditioned v2 file; the runtime OGG sha256 5b9de70ac5e129715dbd437d015f454e218da055ac25b9110cde956170f79060 matches Assets/ATTRIBUTION.md",
+    "format": "passed: 48 kHz stereo Vorbis, 131.429 s (6308572 frames), LOOPSTART 1097143 / LOOPEND 6308572 (= file end), UTF-8 TITLE, pinned Ogg serial, 3.37 MB",
+    "loudness": "passed: loop -13.09 LUFS-I, whole file -13.34, decoded true peak -1.14 dBTP; sections intro -15.4, A -13.9, A2 -13.6, B -13.6, break -16.7, climax -10.9, turn -13.6 LUFS-I",
+    "loop_seam": "passed: the second before LOOPEND matches the second before LOOPSTART at -73.8 dB before encoding (exact wrap layout: intro once, loop, first eight loop bars again); the decoded difference -22.9 dB is Vorbis coding noise, not a discontinuity",
+    "clicks": "passed: high-band click scan of the master finds 9 candidates, all percussion attacks (worst x17 on a tom fill), versus 11 in v1; synth stems with earlier filter-state and truncation clicks (drone, sub drop, shamisen attack) were fixed before v1 and stay clean",
+    "reference_comparison": "informational: against the owner-adopted EigHt/kuku tracks (median loop -10.7 LUFS-I), v2 moves from v1's -14.1 to -13.1 LUFS-I, 250 Hz-1 kHz share -3.8 to -4.6 dB (reference median -6.6), 4-10 kHz share -19.2 to -17.3 dB (reference -14.8); absolute levels in the attack-cue bands rise about +0.6 to +1.3 dB with the loudness lift (40-110 Hz -21.9, 650 Hz-2 kHz -25.0, 2-5 kHz -29.7, 3-12 kHz -31.3 dBFS)",
+    "static": "passed: verify_repo.py with catalog regeneration (documentation catalog 85, repository checks 1210 files, YAML 12)",
+    "native_build": "passed: python tools/dev.py build --native into the isolated automated profile, 0 errors and the existing 4 nullable warnings; package version 0.3.60, sha256 9128ef6bd23d6a52e7f2c2e1d2704db0e561c8c8eb97ad2a5a7254e03c6183c5, contains Assets/Music/GhostSamurai/VioletPhantomBlade"
+  },
+  "not_run": [
+    "in-game hearing: entry ramp under the opening bell, loop wrap, victory fade under the dissolve, music for a fallen player inside the seal and for a late joiner",
+    "in-game mix of the theme against the nine Ghost Samurai attack cues and the telegraph chimes",
+    "multiplayer: other players' scene selection and vanilla boss music suppressed near the actor"
+  ]
+}
