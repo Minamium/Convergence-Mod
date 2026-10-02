@@ -400,9 +400,13 @@ def main(argv: list | None = None) -> int:
             continue
         name = f'{r["scene"]}-{r["camera"]}-{r["variant"]}'
         if mixer is None:
+            # No audio asked for: keep any video an earlier run muxed; only a missing one gets the silent copy.
             target = videos_dir / f'{name}.webm'
-            target.write_bytes(silent.read_bytes())
-            videos.append({'scene': r['scene'], 'file': target.name, 'note': 'silent'})
+            if not target.exists():
+                target.write_bytes(silent.read_bytes())
+            videos.append({'scene': r['scene'], 'file': target.name, 'note': ''})
+            if (videos_dir / f'{name}-bgm.webm').exists():
+                videos.append({'scene': r['scene'], 'file': f'{name}-bgm.webm', 'note': 'BGM'})
             continue
         frames = r['frames']
         if args.sfx_a:
@@ -432,11 +436,25 @@ def main(argv: list | None = None) -> int:
                 pair(ff, left, right, target)
                 pairs.append({'scene': scene, 'file': target.name, 'note': 'left off, right on'})
                 print(f'{target.name}: side by side')
-    (videos_dir / 'audio.json').write_text(json.dumps({'note': NOTICE, 'table': mixer.table if mixer else None, 'videos': report},
+    if not args.pairs:
+        for path in sorted(videos_dir.glob('*offon.webm')):
+            pairs.append({'scene': path.name.split('-')[0] + '-' + path.name.split('-')[1], 'file': path.name, 'note': 'left off, right on'})
+    if mixer is None and (videos_dir / 'audio.json').exists():
+        report = None
+    if report is not None:
+        (videos_dir / 'audio.json').write_text(json.dumps({'note': NOTICE, 'table': mixer.table if mixer else None, 'videos': report},
                                                       ensure_ascii=False, indent=1), encoding='utf-8')
     if args.page:
-        target = page(out, index, gates, videos, pairs, curve_sets,
-                      {'sliders': f'{args.sliders} (sound {SLIDERS[args.sliders][0]}, music {SLIDERS[args.sliders][1]})'} if mixer else {})
+        audio_meta = {}
+        if mixer:
+            audio_meta = {'sliders': f'{args.sliders} (sound {SLIDERS[args.sliders][0]}, music {SLIDERS[args.sliders][1]})'}
+        elif (videos_dir / 'audio.json').exists():
+            earlier = json.loads((videos_dir / 'audio.json').read_text(encoding='utf-8')).get('videos') or {}
+            first = next(iter(earlier.values()), None)
+            if first:
+                s = first['sliders']
+                audio_meta = {'sliders': f'{s["name"]} (sound {s["sound"]}, music {s["music"]})'}
+        target = page(out, index, gates, videos, pairs, curve_sets, audio_meta)
         print(f'page: {target}')
         print(f'serve {out} with a Range-capable local HTTP server and open /review/index.html')
     return 0
