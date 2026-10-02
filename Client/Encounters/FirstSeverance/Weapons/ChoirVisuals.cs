@@ -22,7 +22,7 @@ internal static class ChoirClient
 {
     internal const float PeerVolume = .7f;
     // Call-site volumes; tools/generate_doll_weapon_sfx.py records the same values for the audition page.
-    internal const float SummonVolume = .7f, VerseWarnVolume = .8f, VerseVolume = .55f, OrganRiseVolume = .75f, PipeVolume = .6f;
+    internal const float SummonVolume = .7f, VerseWarnVolume = .8f, VerseVolume = .7f, OrganRiseVolume = .75f, PipeVolume = .6f;
     internal const float ChorusWarnVolume = .85f, ChorusFireVolume = .9f, ChorusEndVolume = .7f, MissVolume = .8f;
     internal const float NoteHitVolume = .6f, ChorusHitVolume = .55f;
     internal static readonly string[] VerseFire =
