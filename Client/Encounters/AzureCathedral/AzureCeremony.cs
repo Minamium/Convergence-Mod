@@ -91,7 +91,7 @@ internal static class AzureCeremony
                 state.MusicStart+760,e,AzureVisuals.Reduced,state.MusicStart+AzureRules.SwordLight-100,true);
             Bloom(batch,sword,85+45*MathF.Sin(t*.09f)*MathF.Sin(t*.09f),.65f*e);
         }
-        float open=AzureRules.Ease((t-540)/70)*(1-AzureRules.Ease((t-790)/145));
+        float open=AzureRules.Ease((t-AzureCueRules.RiftVisual)/70)*(1-AzureRules.Ease((t-790)/145));
         if(open>0)
         {
             Vector2 portal=center+new Vector2(1050,-280);
