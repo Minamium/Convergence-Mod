@@ -1464,6 +1464,13 @@ CHORUS_LINES = (("Ab5", "C6", "C6"), ("F5", "Ab5", "F5"), ("Eb5", "Eb5", "C5"), 
 CHORUS_ORGAN = ((("Bb1", "Bb2"), ("F3", "Ab3", "Eb4")), (("F1", "F2"), ("C3", "Ab3", "Eb4")), (("F1", "F2"), ("C3", "F3", "C4")))
 CHORUS_CHANGES = (0.0, 1.2, 2.4)
 CHORUS_CUT = 3.0
+# The close is restrained (the owner's 2026-10-03 A/B on another raid's finishers: a quiet organ and a soft gong with a
+# long tail over an organ played out loud): the open fifth falls away by CHORUS_FALL dB into the cut, and
+# ChoirChorusEnd, which plays on the cut, carries the ending.
+CHORUS_FALL = 7.0
+# Ticks over which a stopped chorus cue fades: a lost target (ChoirConcertRules.CloseTicks) and a target that died
+# under the quiet close (ChoirClient.FinishFadeTicks).
+CHORUS_CANCEL_FADE, CHORUS_FINISH_FADE = 6, 30
 
 # Soprano formants (Hz, bandwidth Hz, dB): a dark "ah" leaning to "oh", and a closed-mouth hum.
 VOWEL_AH = ((640, 90, 0.0), (1050, 110, -8.0), (2860, 150, -26.0), (3850, 190, -22.0), (4950, 240, -46.0))
@@ -1545,6 +1552,33 @@ def organ_glide(freqs, dur, rng, cents, attack=0.02, harmonics=9, rolloff=1.25, 
     return out + lp(hp(base.noise(n, rng), 300), 2200) * breath * np.clip(t / attack, 0, 1)[:, None]
 
 
+# The Choir's own soft gong (Pale Meridian's soft_gong and Last Witness's brass_gong are separate blocks): (ratio,
+# level, decay factor) per mode, each mode a slowly beating pair. Low and long; the upper modes bloom a moment after
+# the felt-mallet strike, as a struck gong's sound spreads upward.
+CHOIR_GONG_MODES = ((1.0, 0.55, 1.0), (1.48, 0.45, 0.85), (2.02, 0.6, 0.72), (2.71, 0.52, 0.6), (3.42, 0.46, 0.52),
+                    (4.18, 0.4, 0.44), (5.37, 0.32, 0.36), (6.62, 0.25, 0.3), (8.13, 0.18, 0.24), (9.94, 0.12, 0.19),
+                    (12.31, 0.08, 0.15))
+
+
+def choir_gong(freq, dur, rng, tau=1.5, mallet=0.014, beat=0.3, bloom=0.16):
+    """A soft gong-like resonance on `freq`: inharmonic modes, each a pair `beat` Hz apart panned apart, a felt
+    mallet onset and decays of `tau` x the mode's factor; modes from the third bloom in over `bloom` s."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    out = np.zeros((n, 2))
+    for m, (ratio, level, decay) in enumerate(CHOIR_GONG_MODES):
+        f = freq * ratio
+        if f * 1.01 >= dsp.CEILING_HZ:
+            break
+        env = np.exp(-t / (tau * decay)) * (1 - np.exp(-t / bloom) if m >= 2 else 1)
+        for side, shift in ((-0.35, -beat), (0.35, beat)):
+            y = np.sin(2 * np.pi * (f + shift * ratio ** 0.5) * t + rng.uniform(0, 2 * np.pi)) * env * level * 0.5
+            out += pan(y, side)
+    out *= (0.5 - 0.5 * np.cos(np.pi * np.clip(t / mallet, 0, 1)))[:, None]
+    out += lp(base.noise(n, rng), 900) * (np.exp(-t / 0.03) * 0.04)[:, None]   # the felt touching the metal
+    return out / max(1e-9, np.abs(out).max())
+
+
 def tap(rng, ring, gain=0.0):
     """The porcelain baton tapping the brass music stand: a dry tick, a brass ping and a porcelain ring."""
     x = np.zeros((round(0.22 * RATE), 2))
@@ -1573,9 +1607,17 @@ def pipe_pip(rank, rng):
     return room(mix, 0.18, 0.38, 0.1)
 
 
+def fall_away(n, start, offset=0.0):
+    """A per-sample gain for a part placed at `offset` s: 1 until `start` s, then a half-cosine fall of CHORUS_FALL dB
+    to the cut."""
+    t = offset + np.arange(n) / RATE
+    k = np.clip((t - start) / (CHORUS_CUT - start), 0, 1)
+    return 10 ** (-CHORUS_FALL * (0.5 - 0.5 * np.cos(np.pi * k)) / 20)
+
+
 def chorus(voices, rng):
     """The chorus: organ and n doll lines through Bb7sus -> Fm9 -> the open fifth, a swell and music-box glints on
-    every beat, cut together at 3.0 s into the hall."""
+    every beat; the open fifth falls away into the cut at 3.0 s and the hall, where ChoirChorusEnd takes over."""
     length = CHORUS_CUT + 1.2
     mix = seconds(length)
     # Organ: pedal and manual per chord, crossfading at the changes; the last chord is cut with everyone.
@@ -1587,6 +1629,10 @@ def chorus(voices, rng):
                               harmonics=12, rolloff=1.2, chiff=0.02 if k else 0.08, breath=0.07, spread=0.2)
         chord = dsp.organ_pad([dsp.hz(n) for n in manual], seg, rng, attack=0.05 if k else 0.015, release=0.07,
                               harmonics=9, rolloff=1.35, chiff=0.02 if k else 0.1, breath=0.05, spread=0.7)
+        if k == len(CHORUS_ORGAN) - 1:
+            # The open fifth is sung, not blasted: it falls away into the cut.
+            fall = fall_away(len(pedal), start, offset=start)[:, None]
+            pedal, chord = pedal * fall, chord * fall
         place(mix, pedal, start, -2 + 0.4 * voices)
         place(mix, chord, start, -4 + 0.3 * voices)
     # The doll lines, one per voice (up to six), each its own pan, slightly late and slightly detuned.
@@ -1596,6 +1642,7 @@ def chorus(voices, rng):
                                 CHORUS_CUT)
         side = (0.0, -0.45, 0.45, -0.75, 0.75, -0.2)[i]
         line = doll_voice(contour, CHORUS_CUT, rng, attack=0.035, release=0.1, vibrato=0.0045, breath=0.07, side=side)
+        line *= fall_away(len(line), CHORUS_CHANGES[2])[:, None]
         place(mix, line, 0.0, (-3, -6, -7, -8, -9, -9)[i] - 1.2 * np.log2(max(1, voices)))
     # Every beat: a short swell into it and music-box glints on the chord's tones.
     glints = (("Bb5", "Eb6", "F6"), ("C6", "Ab6", "F6"), ("C6", "F6", "C7"))
@@ -1603,11 +1650,12 @@ def chorus(voices, rng):
         at = beat * CHOIR_BEAT
         chord = 0 if at < 1.2 else 1 if at < 2.4 else 2
         for j, note in enumerate(glints[chord][: 1 + min(2, voices // 2)]):
-            place(mix, pan(dsp.box_tine(dsp.hz(note), 0.5, rng, body=0.15), -0.4 + 0.4 * j), at + 0.006 * j, -16 - 2 * j)
+            place(mix, pan(dsp.box_tine(dsp.hz(note), 0.5, rng, body=0.15), -0.4 + 0.4 * j), at + 0.006 * j,
+                  -16 - 2 * j - (4 if chord == 2 else 0))
         place(mix, dsp.shimmer(0.35, rng, count=4 + beat), at, -24)
     place(mix, dsp.thump(110, 46, 0.5, rng), 0.0, -10)
     place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.4, rng, decay=0.08, side=0.25), 0.0, -16)
-    head = fades(mix[:round(CHORUS_CUT * RATE)].copy(), 0.0005, 0.08)
+    head = fades(mix[:round(CHORUS_CUT * RATE)].copy(), 0.0005, 0.14)
     out = seconds(length)
     out[:len(head)] = head
     return room(out, 0.34, length, 0.4)
@@ -1756,7 +1804,8 @@ def choir_chorus_warn(s, rng):
 def _chorus_description(voices):
     lines = ("主旋律", "アルト", "第3声", "第4声", "第5声（Fm9 の9度 G）", "バス")
     return (f"合唱の光線（拍11〜15、声 {voices} 本）。オルガンと人形の合唱が B♭7sus → Fm9 → F の空虚五度と進み、"
-            f"拍ごとにふくらみとオルゴールのきらめき、3.0 秒で全員がそろって切って残響。重なる声: {'、'.join(lines[:voices])}。")
+            f"拍ごとにふくらみとオルゴールのきらめき。最後の空虚五度は鳴らし切らずに引いていき、3.0 秒で切れて残響へ"
+            f"（締めは ChoirChorusEnd）。重なる声: {'、'.join(lines[:voices])}。")
 
 
 @cue("ChoirChorusFire1", -11.5, "Choir", 4.3, 0.9, _chorus_description(1))
@@ -1789,21 +1838,27 @@ def choir_chorus_fire6(s, rng):
     return chorus(6, rng)
 
 
-@cue("ChoirChorusEnd", -13, "Choir", 0.9, 0.7,
-     "合唱が終わってオルガンが沈む（拍16、成功）。真鍮の歯車がゆっくり逆に回り、空気が抜け、0.5 秒にケースが柔らかく閉じる。")
+@cue("ChoirChorusEnd", -13, "Choir", 3.4, 0.7,
+     "合唱の締め（拍16、成功。合唱の途中で標的を倒したときも）。合唱の F の空虚五度が引いたところへ、低い F の柔らかい"
+     "ゴングのような響きが入り、静かなオルガン（F と C）がその下で鳴って、長い余韻で消えていく。真鍮の歯車がゆっくり"
+     "戻る音（パイプが沈む）はごく小さく残す。オルガンを鳴らし切らず、抑えて余韻で締める版。")
 def choir_chorus_end(s, rng):
-    mix = seconds(0.95)
-    gaps = np.linspace(0.05, 0.11, 7)
-    times = tuple(np.concatenate(([0.0], np.cumsum(gaps)))[:7])
-    place(mix, dsp.ratchet(times, rng, freq=1700, gains_db=tuple(np.linspace(0, -9, len(times))), side=0.2), 0.0, -9)
-    n = round(0.6 * RATE)
-    t = np.arange(n) / RATE
-    air = lp(hp(base.noise(n, rng), 250), 1800) * (np.exp(-t / 0.22) * np.clip(t / 0.02, 0, 1))[:, None]
-    place(mix, air, 0.04, -13)
-    breath = dsp.organ_pad([dsp.hz("F3"), dsp.hz("C4")], 0.5, rng, attack=0.02, release=0.4, harmonics=8, chiff=0.0, breath=0.08)
-    place(mix, breath, 0.0, -14)
-    place(mix, dsp.thump(120, 55, 0.3, rng), 0.5, -8)
-    return room(mix, 0.2, 0.88, 0.12)
+    length = 3.3
+    mix = seconds(length)
+    # The soft gong on low F, the ending's weight: struck with a felt mallet, long and slowly beating.
+    place(mix, choir_gong(dsp.hz("F2"), 3.25, rng), 0.0, -2)
+    # The quiet organ: the open fifth the chorus fell away from, now low and soft, swelling in under the strike and
+    # dying with the gong.
+    pad = dsp.organ_pad([dsp.hz("F2"), dsp.hz("C3"), dsp.hz("F3"), dsp.hz("C4")], 2.7, rng, attack=0.22, release=2.1,
+                        harmonics=7, rolloff=1.7, chiff=0.0, breath=0.04, spread=0.5)
+    place(mix, pad, 0.03, -10)
+    # The pipes sinking: a few slow brass gear teeth, far back.
+    gaps = np.linspace(0.12, 0.2, 5)
+    times = tuple(0.35 + np.concatenate(([0.0], np.cumsum(gaps)))[:5])
+    place(mix, dsp.ratchet(times, rng, freq=1500, gains_db=tuple(np.linspace(0, -8, len(times))), side=0.2), 0.0, -24)
+    # The dolls close their mouths: one faint porcelain C6 on the strike.
+    place(mix, dsp.porcelain_ring(dsp.hz("C6"), 0.5, rng, decay=0.09, side=-0.2), 0.004, -22)
+    return room(mix, 0.3, length, 0.9)
 
 
 @cue("ChoirChorusMiss", -13, "Choir", 0.7, 0.8,
@@ -1846,10 +1901,11 @@ def choir_chorus_hit(s, rng):
     return room(mix, 0.12, 0.34, 0.06)
 
 
-def choir_concert(samples, voices, cancel=None):
+def choir_concert(samples, voices, cancel=None, finish=None):
     """The whole concert at its in-game levels: count-in, verse (voices sharing a part sing one louder cue), organ,
     raised pipes, inhale, the chorus for this many voices and the release; or, with `cancel` (a concert tick), the
-    failure cue there with the chorus fading over 6 ticks. Returns (mix, [(seconds, cue)])."""
+    failure cue there with the chorus fading over CHORUS_CANCEL_FADE ticks; or, with `finish` (the target died),
+    the success close there with the chorus fading over CHORUS_FINISH_FADE ticks. Returns (mix, [(seconds, cue)])."""
     events = [(CHOIR_TAPS[0], "ChoirVerseWarn", CUES["ChoirVerseWarn"].volume)]
     for beat in range(6):
         for part in range(4):
@@ -1864,15 +1920,17 @@ def choir_concert(samples, voices, cancel=None):
     fire = f"ChoirChorusFire{min(6, voices)}"
     events.append((CHOIR_FIRE, fire, CUES[fire].volume))
     events.append((CHOIR_RELEASE, "ChoirChorusEnd", CUES["ChoirChorusEnd"].volume))
-    if cancel is not None:
-        events = [e for e in events if e[0] < cancel] + [(cancel, "ChoirChorusMiss", CUES["ChoirChorusMiss"].volume)]
+    stop, fade = (cancel, CHORUS_CANCEL_FADE) if cancel is not None else (finish, CHORUS_FINISH_FADE)
+    if stop is not None:
+        close = "ChoirChorusMiss" if cancel is not None else "ChoirChorusEnd"
+        events = [e for e in events if e[0] < stop] + [(stop, close, CUES[close].volume)]
     end = max(at * CHOIR_TICK + len(samples[name]) / RATE for at, name, _ in events)
     mix = seconds(end + 0.1)
     for at, name, volume in events:
         x = samples[name] * volume
-        if cancel is not None and name.startswith("ChoirChorusFire"):
-            keep = round((cancel - at) * CHOIR_TICK * RATE)
-            x = x[:max(1, keep + round(6 * CHOIR_TICK * RATE))].copy()
+        if stop is not None and name.startswith("ChoirChorusFire"):
+            keep = round((stop - at) * CHOIR_TICK * RATE)
+            x = x[:max(1, keep + round(fade * CHOIR_TICK * RATE))].copy()
             x[keep:] *= np.linspace(1, 0, len(x) - keep)[:, None]
         place(mix, x, at * CHOIR_TICK)
     return mix, [(round(at * CHOIR_TICK, 3), name) for at, name, _ in events]
@@ -2118,7 +2176,10 @@ PAGES = {
         "BGM の行は、実際の Doll の BGM（44.1 kHz に変換し、元の速さと音程のまま、拍の頭から切り出し）に重ねています（効果音と音楽の音量設定はどちらも 100%）。</p>\n"
         "<p><small>調は全武器共通の F マイナー・ペンタトニック（F A♭ B♭ C E♭）。歌は Fm7 Fm7 B♭7sus B♭7sus A♭maj7 E♭sus、合唱は B♭7sus → Fm9 → F の空虚五度"
         "（旧版の D メジャーの終止はやめました）。人形の声は録音ではなく、ソプラノのフォルマントで作った合成音です。"
-        "演目は武器自身のテンポ（100 BPM）で、BGM の拍とは同期しません。</small></p>")),
+        "演目は武器自身のテンポ（100 BPM）で、BGM の拍とは同期しません。</small></p>\n"
+        "<p><small>締めは、別の Raid の A/B（2026-10-03）で選ばれた「静かなオルガン＋ゴング」の方向です。合唱の最後の F の空虚五度は"
+        "鳴らし切らずに引いていき、切れ目で ChoirChorusEnd（柔らかいゴングと静かなオルガン、長い余韻）が締めます。"
+        "合唱の途中で標的を倒したときも、失敗の音ではなくこの締めの音で静かに閉じます。</small></p>")),
 }
 
 # Build-up-to-release sequences per group: (file stem, label, builder(samples) -> (mix, [(s, cue)])). The first entry
@@ -2129,6 +2190,8 @@ SEQUENCES = {
         ("ChoirConcert1", "通しの演奏・声1本（主旋律だけ、パイプ3本、合唱1声）", lambda x: choir_concert(x, 1)),
         ("ChoirConcert6", "通しの演奏・声6本（重なる声部は少し大きく、パイプ11本、合唱6声）", lambda x: choir_concert(x, 6)),
         ("ChoirCancel4", "失敗の例・声4本（予兆の途中、拍10.6 で標的を失う）", lambda x: choir_concert(x, 4, cancel=382)),
+        ("ChoirFinish4", "合唱の途中で標的を倒した例・声4本（拍13.3 で倒す。失敗の音ではなく、締めの音で静かに閉じる）",
+         lambda x: choir_concert(x, 4, finish=480)),
     ),
 }
 
@@ -2657,14 +2720,16 @@ GROUP_ATTRIBUTION = {
 RECORDS = {
     "Choir": ("2026-10-03", "20261003",
               "Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert "
-              "combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened); owner audition "
-              "pending; in-game mix not_run",
+              "combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close "
+              "re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's "
+              "finishers); owner audition pending; in-game mix not_run",
               "Choir of the Unmade cues — 2026-10-03",
               "The refreshed Choir of the Unmade's 29 cues (summon, count-in and nine sung verse notes, organ rise and six pipes, "
               "the chorus warning, six chorus renders by voice count, the success close and the failure, two hit accents). "
               "[`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns every pitch, time, gain and "
               "loudness target; it adds the Choir's own original synthesis (a faceless doll voice: harmonics through soprano "
-              "formants with vibrato and breath, its inhale, a failing-wind organ) to the blocks of "
+              "formants with vibrato and breath, its inhale, a failing-wind organ, a soft gong of beating inharmonic "
+              "modes) to the blocks of "
               "[`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) and the unmodified helpers of "
               "[`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and "
               "[`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py). No recording is used. Every "

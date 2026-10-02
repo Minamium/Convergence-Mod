@@ -125,6 +125,18 @@ class ChoirCueRouting(unittest.TestCase):
             for name in names:
                 self.assertAlmostEqual(self.cues[name][3], value, msg=f"{name} audition volume vs {field}")
 
+    def test_a_stopped_chorus_fades_as_the_audition_renders_it(self):
+        gen = GENERATOR.read_text(encoding="utf-8")
+        rules = RULES.read_text(encoding="utf-8")
+        cancel, finish = re.search(r"^CHORUS_CANCEL_FADE, CHORUS_FINISH_FADE = (\d+), (\d+)$", gen, re.M).groups()
+        self.assertEqual(const(rules, "CloseTicks"), cancel, "a lost target fades the chorus over CloseTicks")
+        self.assertEqual(const(self.visuals, "FinishFadeTicks"), finish, "a target that died fades it under the quiet close")
+        # A target that died closes with the success cue; only a loss sounds the failure.
+        finish_body = self.visuals[self.visuals.index("private static void Finish("):self.visuals.index("private static void Cancel(")]
+        self.assertIn('DollWeaponAudio.Play("ChoirChorusEnd"', finish_body)
+        self.assertNotIn("ChoirChorusMiss", finish_body)
+        self.assertIn("Died(o.Target)", self.visuals)
+
     def test_cues_play_on_the_accepted_clock_through_the_shared_player(self):
         self.assertIn("DollCueClock.Take(ref o.Cues[SlotFire], previous, clock, ChoirConcertRules.Fire)", self.visuals)
         self.assertIn("DollCueClock.Take(ref summonCue, previousLife, voice.Life, 1)", self.visuals)
@@ -140,9 +152,16 @@ class ChoirMaterialAndWiring(unittest.TestCase):
     def test_material_is_branchless_on_uniforms_and_declares_its_passes(self):
         shader = SHADER.read_text(encoding="utf-8")
         body = re.sub(r"//[^\n]*", "", shader)
-        uniforms = {"clock", "reduced", "throat", "throatLength"}
+        uniforms = {"tick", "sparkleShift", "detail", "throat", "throatInverse", "dotOrigin"}
         for match in re.finditer(r"\bif\s*\(([^)]*)\)", body):
             self.assertFalse(set(re.findall(r"\w+", match.group(1))) & uniforms, f"uniform branch: {match.group(0)}")
+        # Uniform-only quantities come from the CPU, not preshader math: no raw clock or Reduced flag in the shader.
+        for gone in ("float clock;", "float reduced;", "float throatLength;"):
+            self.assertNotIn(gone, body)
+        apply = code(PRESENTATION)
+        apply = apply[apply.index("public bool Apply(GraphicsDevice device"):]
+        for name in ("tick", "sparkleShift", "detail", "throat", "throatInverse"):
+            self.assertIn(f'DollPixelArt.Set(effect, "{name}"', apply)
         for name in ("Hymn", "Iris", "Trail"):
             self.assertIn(f"pass {name} {{", shader)
         self.assertIn('passes = { "Hymn", "Iris", "Trail" }', PRESENTATION.read_text(encoding="utf-8"))
@@ -191,12 +210,38 @@ class ChoirRender(unittest.TestCase):
         import generate_doll_weapon_sfx as gen
         store = gen.Store(None, (ROOT / "Assets/ATTRIBUTION.md").read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as folder:
-            for name in ("ChoirVerseFire3", "ChoirChorusMiss", "ChoirChorusFire4"):
+            for name in ("ChoirVerseFire3", "ChoirChorusMiss", "ChoirChorusFire4", "ChoirChorusEnd"):
                 with self.subTest(cue=name):
                     gen.render_cue(name, store, Path(folder))
                     rendered = (Path(folder) / f"{name}.ogg").read_bytes()
                     self.assertEqual(hashlib.sha256((SOUNDS / f"{name}.ogg").read_bytes()).hexdigest(),
                                      hashlib.sha256(rendered).hexdigest(), f"{name} reproduces byte for byte")
+
+    def test_the_chorus_closes_restrained(self):
+        """The owner's taste for big closings (2026-10-03): a quiet organ and a soft gong with a long tail, not an organ
+        played out loud. The open fifth falls away into the cut and ChoirChorusEnd stays at most T2 with a long tail."""
+        sys.path.insert(0, str(TOOLS))
+        import numpy as np
+        import soundfile as sf
+        import generate_ebon_sfx as base
+        import generate_doll_weapon_sfx as gen
+
+        def short_term(x):
+            power = (base.k_weight(x) ** 2).sum(axis=1)
+            block = round(0.4 * gen.RATE)
+            c = np.concatenate(([0.0], np.cumsum(power)))
+            return -0.691 + 10 * np.log10(np.maximum((c[block:] - c[:-block]) / block, 1e-12))
+
+        for voices in range(1, 7):
+            x, rate = sf.read(str(SOUNDS / f"ChoirChorusFire{voices}.ogg"), always_2d=True)
+            st = short_term(x)
+            last = st[round((gen.CHORUS_CUT - 0.4) * rate)]
+            self.assertLessEqual(last, st.max() - 3.5, f"ChoirChorusFire{voices}: the last 0.4 s before the cut falls away")
+        end, rate = sf.read(str(SOUNDS / "ChoirChorusEnd.ogg"), always_2d=True)
+        self.assertLessEqual(gen.CUES["ChoirChorusEnd"].target_lufs, -13, "the close stays at most T2")
+        self.assertLessEqual(gen.loudness(end), -12.9)
+        self.assertGreaterEqual(gen.character(end)["decay_20db_ms"], 1500, "a long decaying tail")
+        self.assertGreaterEqual(len(end) / rate, 2.5)
 
 
 if __name__ == "__main__":
