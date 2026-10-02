@@ -25,6 +25,12 @@ internal sealed record PreviewPhrase(
         => p.IsRift ? CrimsonSpatialCuts.ResidueTicks : CrimsonRhythm.ResidueTicks;
 }
 
+// The production beat grid (CrimsonMeter), the only one gameplay uses since #101.
+internal sealed class PreviewGrid
+{
+    internal float Pulse(double tick) => CrimsonMeter.Pulse(tick);
+}
+
 internal static class PreviewPlanner
 {
     internal const int GroundX = 12800, GroundY = 6400; // field 11520..14080 x 5280..6400 (160 x 70 tiles)
@@ -32,24 +38,9 @@ internal static class PreviewPlanner
     internal static readonly Guid Connection = new("5c4a1e00-0000-4000-8000-0000000000c1");
     internal static RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
 
-    internal static CrimsonScore LoadScore(string root)
-        => CrimsonScore.Read(File.ReadAllBytes(Path.Combine(root, "Assets/Music/CrimsonFoundry/Score.json")));
-
-    // Constant tempo from musicStart: beat k = k * 3600 / bpm ticks (28.125 at 128 BPM).
-    // CrimsonScore.BeatTicks is int[], so each beat is rounded to a whole tick (28/29 alternating).
-    internal static CrimsonScore ConstantScore(double bpm)
-    {
-        double beat = 3600d / bpm;
-        const int beats = 256; // 32 beats x 8 = 7200 ticks at 128 BPM, far longer than any phrase
-        var ticks = new int[beats];
-        var energy = new float[beats];
-        for (int k = 0; k < beats; k++) { ticks[k] = (int)Math.Round(k * beat); energy[k] = 1f; }
-        return new CrimsonScore
-        {
-            SampleRate = 48000, LoopStartSample = 0, LoopEndSample = (int)Math.Round(beats * beat * 800),
-            IntroTicks = 900, BeatTicks = ticks, Energy = energy
-        };
-    }
+    // Graceful Ordeal's fixed 128 BPM grid (CrimsonMeter) replaced the beat-tracked Score.json in #101; the preview
+    // keeps one handle so the backdrop pulse and the phrase builder read the same grid production uses.
+    internal static readonly PreviewGrid Grid = new();
 
     internal static PreviewPlayer[] Players()
     {
@@ -63,11 +54,11 @@ internal static class PreviewPlanner
     }
 
     // phase: 0..2 = Acts I..III, 3 = Final. serial = the 1-based phrase serial CrimsonRuntime hands to the techniques.
-    internal static PreviewPhrase Build(string name, CrimsonScore score, int phase, int serial,
+    internal static PreviewPhrase Build(string name, PreviewGrid grid, int phase, int serial,
         PreviewPlayer player, int scoreStart, int musicStart = 3000)
     {
         var field = Field;
-        var rhythm = CrimsonChoreography.Create(score, scoreStart, serial - 1, phase == 3);
+        var rhythm = CrimsonChoreography.Create(scoreStart, serial - 1, phase == 3);
         int count = rhythm.Hits.Count + (phase == 3 ? CrimsonChoreography.BasicNotes : 0);
         var sources = new int[count];
         var counts = new int[4]; var steps = new int[4]; var first = new int[4]; var last = new int[4];
@@ -115,7 +106,7 @@ internal static class PreviewPlanner
                 aimedIdentity ? (short)0 : (short)-1, aimedIdentity ? Connection : Guid.Empty);
             plans[i].Validate();
         }
-        var beats = CrimsonRhythm.NextBeats(score, Math.Max(0, scoreStart - .499999d), 9);
+        var beats = CrimsonMeter.NextBeats(Math.Max(0, scoreStart - .499999d), 9);
         var absolute = new int[beats.Length];
         for (int i = 0; i < beats.Length; i++) absolute[i] = musicStart + (int)Math.Round(beats[i]);
         return new PreviewPhrase(name, phase, serial, player, musicStart, absolute, plans);

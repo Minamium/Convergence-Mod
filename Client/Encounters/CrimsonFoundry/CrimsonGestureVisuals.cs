@@ -87,6 +87,8 @@ internal sealed class CrimsonGestureVisuals : ModSystem
     public override void Unload() => Reset();
     public override void PostDrawTiles()
     {
+        // Reward black blood lies beneath the Raid's forecasts (frame-stamped: drawn once, by whoever is first).
+        ScarletRewardInk.DrawWorld();
         var boss = CrimsonPackets.Boss;
         if (!ScarletArticulation.Participant(boss)) return;
         float age = CrimsonVisuals.RenderAge(boss!);

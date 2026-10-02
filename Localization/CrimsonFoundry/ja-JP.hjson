@@ -11,11 +11,11 @@ Mods: {
           '''
       }
       CrimsonPact: {
-        DisplayName: 紅の盟約
+        DisplayName: 緋の契約
         Tooltip: '''
           等身大の紅の召喚師が同行する
-          地上では歩き、飛行時は浮遊して追従。現在HPが多い敵から最大10体を左右の魔法陣とビームで挟む
-          ミニオン枠を10使用。Raidの参加人数には含まれない
+          地上では歩き、飛行時は浮遊して追従。現在HPが多い敵から最大20体を左右の魔法陣とビームで挟む
+          ミニオン枠を10使用。Raidの参加人数には含まれない。ダウン中は攻撃しない
           '''
       }
     }
@@ -23,9 +23,9 @@ Mods: {
     Projectiles: {
       CrimsonAttack: { DisplayName: "紅の召喚" }
       CrimsonCompanion: { DisplayName: "紅の同行者" }
-      CrimsonCompanionRay: { DisplayName: "紅の盟約" }
+      CrimsonCompanionRay: { DisplayName: "緋の契約" }
     }
-    Buffs.CrimsonPactBuff: { DisplayName: "紅の盟約" Description: "紅の召喚師が同行している" }
+    Buffs.CrimsonPactBuff: { DisplayName: "緋の契約" Description: "紅の召喚師が同行している" }
     CrimsonFoundry: { RaidTitle: "SCARLET INVOCATION" Rejected: "起動できません。指揮装置を持ってFoundation Coreの台の近くで使用し、他の戦闘を終了して8人以下で開始してください。" }
     Configs: {
       CrimsonVisualConfig: {

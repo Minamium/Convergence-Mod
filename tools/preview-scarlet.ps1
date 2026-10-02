@@ -31,7 +31,8 @@ param(
     [switch]$NoMatrix,
     [switch]$NoSmoke,
     [switch]$NoContract,                        # skip the pixel check of the overlay against the authoritative capsules
-    [switch]$SheetsOnly                         # write contact sheets only, no per-frame PNGs
+    [switch]$SheetsOnly,                        # write contact sheets only, no per-frame PNGs
+    [switch]$Rewards                            # reward black blood (ScarletRewardInk path passes, particles, sprite burn) instead of the Raid
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -80,8 +81,12 @@ $files = @(
 $authority = 'CrimsonTechnique', 'CrimsonTrackingBeam', 'CrimsonChoirRakes', 'CrimsonClusters', 'CrimsonSpatialCuts',
     'CrimsonChoreography', 'CrimsonEnsemble', 'CrimsonInvocation', 'CrimsonRhythm', 'CrimsonPhaseRules',
     'CrimsonCovenantRules', 'CrimsonChorusRules', 'CrimsonChorusImpactPositions', 'CrimsonState',
-    'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonScore'
+    'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonMeter',
+    # The reward rule files are pure; the reward scenes (tools/fixtures/ScarletRewardsPreview*.cs) may use any of them.
+    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/CanticleRules',
+    'Rewards/BatonRules', 'Rewards/CenserRules', 'Rewards/QuillRules'
 $files += $authority | ForEach-Object { "Content/Encounters/CrimsonFoundry/$_.cs" }
+$files += Get-ChildItem -LiteralPath (Join-Path $root 'tools/fixtures') -Filter 'ScarletRewardsPreview*.cs' | ForEach-Object { "tools/fixtures/$($_.Name)" }
 $includes = ($files | ForEach-Object { '<Compile Include="' + [Security.SecurityElement]::Escape((Join-Path $root $_)) + '" />' }) -join ''
 $includes += '<Compile Include="' + [Security.SecurityElement]::Escape((Join-Path $root 'Client/Encounters/CrimsonFoundry/Vfx')) + '/*.cs" />'
 $fna = [Security.SecurityElement]::Escape((Join-Path $tml 'Libraries/FNA/1.0.0/FNA.dll'))
@@ -99,6 +104,7 @@ if ($NoMatrix) { $options += '--no-matrix' }
 if ($NoSmoke) { $options += '--no-smoke' }
 if ($NoContract) { $options += '--no-contract' }
 if ($SheetsOnly) { $options += '--sheets-only' }
+if ($Rewards) { $options += '--rewards' }
 $env:FNA3D_FORCE_DRIVER = 'D3D11'
 dotnet (Join-Path $work 'bin/Release/net8.0/ScarletPreview.dll') $root $lumi (Join-Path $tml 'Libraries/Native/Windows') $out @options
 exit $LASTEXITCODE

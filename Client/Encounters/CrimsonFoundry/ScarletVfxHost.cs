@@ -35,6 +35,7 @@ internal sealed class ScarletVfxHost : IScarletAssets
         "Noise/WavyBlotchNoise" => MiscTexturesRegistry.WavyBlotchNoise.Value,
         "Noise/TurbulentNoise" => MiscTexturesRegistry.TurbulentNoise.Value,
         "Noise/DendriticNoiseZoomedOut" => MiscTexturesRegistry.DendriticNoiseZoomedOut.Value,
+        "Luminance/BloomCircleSmall" => MiscTexturesRegistry.BloomCircleSmall.Value,
         _ => throw new ArgumentException("Scarlet Vfx has no production texture named " + name, nameof(name))
     };
 
