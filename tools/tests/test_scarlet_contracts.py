@@ -1,6 +1,7 @@
 """Source wiring guards, not visual-quality or native gameplay approval."""
 from pathlib import Path
 import hashlib
+import re
 import unittest
 ROOT = Path(__file__).resolve().parents[2]
 CONTENT = ROOT/'Content/Encounters/CrimsonFoundry'
@@ -61,7 +62,9 @@ class ScarletContracts(unittest.TestCase):
         for folder in (CONTENT,CLIENT):
             for path in folder.rglob('*.cs'):
                 text=path.read_text(encoding='utf-8')
-                for stale in ('CrimsonScore','Score.json','CrimsonRegistration.Score','score.Events(','NextBeats(score'):
+                # Whole word: the reward box CrimsonScoreReliquary is not the retired CrimsonScore beat map.
+                self.assertIsNone(re.search(r'\bCrimsonScore\b',text),f'{path.name} still reads the retired recorded beat map')
+                for stale in ('Score.json','CrimsonRegistration.Score','score.Events(','NextBeats(score'):
                     self.assertNotIn(stale,text,f'{path.name} still reads the retired recorded beat map')
         meter=(CONTENT/'CrimsonMeter.cs').read_text(encoding='utf-8')
         self.assertIn('BeatSamples = 22500',meter)
@@ -434,10 +437,11 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('CrimsonRig.DrawPressure(batch, boss.NPC.Center, conductor,',sources)
         self.assertNotIn('for (int source',sources)
         self.assertEqual(1,visual.count('DrawPressure('))
-        # The approved ink shader is untouched (offline: the basic-beam ink frames are byte-identical).
+        # The approved ink shader is untouched by the Raid (main #110 only added the reward Path* passes; offline the
+        # basic-beam ink frames stay byte-identical).
         shaders=ROOT/'Assets/AutoloadedEffects/Shaders'
-        self.assertEqual('e801511955804f740b45cb1472f3005f4ab48e12ce19fc2aa1f8e180bc64a227',hashlib.sha256((shaders/'ScarletInk.fx').read_bytes()).hexdigest())
-        self.assertEqual('689a5d7bd1136d8104d8a094c3f317be4578498b2b882c60c44c51a87b1020f2',hashlib.sha256((shaders/'ScarletInk.fxc').read_bytes()).hexdigest())
+        self.assertEqual('79d27870a6977e089e3dd02f677e39e93a8620c3f1d3644330eccb7986d34ee8',hashlib.sha256((shaders/'ScarletInk.fx').read_bytes()).hexdigest())
+        self.assertEqual('9d8a2cfe1d321915ef50c799fc22e1949e0c1f8fa41fec822b7225d459b15468',hashlib.sha256((shaders/'ScarletInk.fxc').read_bytes()).hexdigest())
 
     def test_offline_preview_plans_the_current_meter_and_signature_moves(self):
         planner=(ROOT/'tools/fixtures/ScarletPreviewPlanner.cs').read_text(encoding='utf-8')

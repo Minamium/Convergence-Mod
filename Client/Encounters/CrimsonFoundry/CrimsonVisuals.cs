@@ -183,6 +183,7 @@ internal sealed class CrimsonVisuals : ModSystem
     }
     public override void PostDrawTiles()
     {
+        Vfx.ScarletRewardInk.DrawWorld(); // reward ink lies under the Raid's forecasts and portals (idempotent per frame)
         var boss = CrimsonPackets.Boss;
         if (Main.gameMenu || boss is null) return;
         var batch = Main.spriteBatch;

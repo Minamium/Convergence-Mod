@@ -24,7 +24,7 @@ internal sealed class PreviewOptions
 {
     internal string Only = "";
     internal int Step = 8, PhraseStart = 1000, Width = 1920, Height = 1080;
-    internal bool Sequences = true, Matrix = true, Smoke = true, Files = true, Contract = true;
+    internal bool Sequences = true, Matrix = true, Smoke = true, Files = true, Contract = true, Rewards;
     internal Backdrop[] Backdrops = { Backdrop.Sanctum, Backdrop.Night, Backdrop.Day };
     internal float[] Zooms = { .65f, 1f, 2f };
     internal Backdrop SequenceBackdrop = Backdrop.Night;
@@ -108,6 +108,7 @@ internal static class ScarletPreview
                 case "no-smoke": o.Smoke = false; break;
                 case "no-contract": o.Contract = false; break;
                 case "sheets-only": o.Files = false; break;
+                case "rewards": o.Rewards = true; break;
                 default: throw new ArgumentException("unknown option --" + key);
             }
         }
@@ -145,6 +146,7 @@ internal sealed class PreviewRun
 
     internal int Execute()
     {
+        if (options.Rewards) return RewardsPreview.Run(renderer, options, output);
         const string beats = "CrimsonMeter: 128 BPM, beat k at (225k + 4) / 8 ticks after musicStart";
         ScarletResidueYield.Enabled = options.Yield;
         Console.WriteLine($"beats: {beats}; phrase start (earliest tick after musicStart): {options.PhraseStart}; signature residue yield {(options.Yield ? "on" : "off")}");
@@ -334,6 +336,8 @@ internal sealed class PreviewRenderer : IDisposable
     private readonly ScarletGeometryOverlay overlay;
     private readonly ScarletInkStroke ink = new();
     private readonly SpriteBatch batch;
+    internal SpriteBatch Batch => batch;
+    internal PreviewAssets Assets => assets;
     private readonly Texture2D disc;
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private RenderTarget2D? target;
@@ -372,7 +376,7 @@ internal sealed class PreviewRenderer : IDisposable
         overlay.Dispose(); batch.Dispose(); Pixel.Dispose(); disc.Dispose(); target?.Dispose();
     }
 
-    private RenderTarget2D Target(int width, int height)
+    internal RenderTarget2D Target(int width, int height)
     {
         if (target is null || target.Width != width || target.Height != height)
         {
@@ -424,7 +428,7 @@ internal sealed class PreviewRenderer : IDisposable
         return rt;
     }
 
-    private void DrawBackdrop(in ScarletView view, Backdrop kind, PreviewPhrase phrase)
+    internal void DrawBackdrop(in ScarletView view, Backdrop kind, PreviewPhrase phrase)
     {
         int w = view.Width, h = view.Height;
         if (kind == Backdrop.Sanctum)

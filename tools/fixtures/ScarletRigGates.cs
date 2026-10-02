@@ -47,8 +47,8 @@ internal sealed class RigGates
     // Shaders the attack expression must not change (design §2.0.6, G11). .fx hashed with LF line ends.
     private static readonly Dictionary<string, string> Pinned = new()
     {
-        ["ScarletInk.fx"] = "e801511955804f740b45cb1472f3005f4ab48e12ce19fc2aa1f8e180bc64a227",
-        ["ScarletInk.fxc"] = "689a5d7bd1136d8104d8a094c3f317be4578498b2b882c60c44c51a87b1020f2",
+        ["ScarletInk.fx"] = "79d27870a6977e089e3dd02f677e39e93a8620c3f1d3644330eccb7986d34ee8",
+        ["ScarletInk.fxc"] = "9d8a2cfe1d321915ef50c799fc22e1949e0c1f8fa41fec822b7225d459b15468",
         ["PortalBeam.fx"] = "645ffd856e4ee9cdfc7d663eca01f626aab8e3b883a726876559f7d73eaec1d8",
         ["PortalBeam.fxc"] = "cf2ffeb0e7441e6b0c0597f2f9cfd87c77a58af87bc51e4f59b333e73a28d699",
         ["RaidEnergy.fx"] = "924c0c25abdd983ed7e94f4e2880a015f4afa07fcf5ac4c16425f7a1d6c35fb8",

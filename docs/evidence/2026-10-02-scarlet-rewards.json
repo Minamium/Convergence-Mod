@@ -1,0 +1,158 @@
+{
+  "scope": "Scarlet Invocation reward set (docs/encounters/crimson-foundry/REWARDS.md): the Scarlet Score Reliquary Victory drop and opening show, Sable Scythe, Canticle Organ, Scarlet Baton, Ember Censer and Bloodink Quill, and the Scarlet Covenant re-crafted from the five weapons (1500 damage, mana 10, 緋の契約, stops while its owner is dead or Down). Owner-client weapons with native projectile replication; reward ink through new ScarletInk.fx path passes and one shared renderer drawn beneath every Raid's forecasts. No packet, protocol, persistence or Raid behaviour change",
+  "target_build": "0.3.78 / protocol79 (on main's 0.3.77 / protocol79 after merging main at bcb5433: #103 the Scarlet signature moves at 0.3.76 / protocol79 and #111 the owner-approved Raid sound set at 0.3.77; the rewards add no wire change)",
+  "integration_base": "b575f13 (main after PR105); five weapon slices merged with --no-ff (679368f scythe, 7b5a7a4 organ, 06d200c baton, 1c94492 censer, 4e8bd2a quill), shared integration 61aed69, review fixes 052e78c, then main at c1d44f6 (PR106-108) merged in, the Codex art export 0672a65 and its review fixes 9d8c525, then main at f3382d0 (PR109) merged in, then rw/audio at 83a64eb (the owner-picked reward sound takes, branched from 0672a65 before the art review fixes) merged in, then main at bcb5433 (#103, #111) merged in (CrimsonRuntime and the encounter spec merged without conflict: the reward drop and the signature moves touch different hunks), and the reward cue levels staged against the Raid's new sound set by per-role playback offsets",
+  "owner_direction": "2026-10-02: a reward set built like Waltz of the Ebon Manor's (box, one weapon per class, companion from all five). Owner defaults for the open decisions: the reliquary is a shared world item, one per frozen member at the field's ground centre; quill ink stays where it was written; the Covenant stops while its owner is dead or Down; keep the spec's damage and mana numbers. Art from Codex was played as vanilla placeholders until delivered; on 2026-10-03 its recommended candidates were exported (selections in REWARDS.md#art-and-audio)",
+  "review_fixes": [
+    "Staff Reap's lock lives on the player (released until the follow-through ends), so an item swap no longer cuts a release short",
+    "the Covenant recipe is not decraftable, so Shimmer cannot turn an old Grimoire-recipe Covenant into the five weapons",
+    "every staff engraving after the first republishes from the carrier's own AI (netUpdate was cleared before it), so peers see the whole staff",
+    "root ledgers have a bit for each of the 200 NPC slots (the old 64-root cap failed open)",
+    "the dormant build's lip lies inside the dried scar at ResiduePass's fade-0.6 strength instead of two hairlines outside it",
+    "reward ink is drawn first by every Raid's forecast drawer (Azure, Scarlet, Ebon, Doll, Ghost Samurai) through Client/Graphics/FriendlyWorldInk, independent of ModSystem order",
+    "live reward ink closes over its last 6 ticks into the scar it dries into (style.w), with no burning cap behind a moving tail and no doubled cap or lip ring at the joint",
+    "Reduced Effects halves particles once, where they are spawned",
+    "the opened reliquary stays where it opened, so the glow, its light, droplets, staff and burn share one place",
+    "censer and quill bodies restart the projectile batch only for a sampler it lacks; additive accents are alpha-0 colours in the AlphaBlend batch",
+    "the sprite table records icon texel scale (item and buff icons exported at 2 texels per logical pixel)",
+    "tests derive the Covenant's 16-20x and the Ebon comparison from their rules, check the nominal table, the one reward pool, exact localization keys and the Raid shader prefix hash",
+    "docs: CHANGELOG, BatonSwing state row, stale constants and comments, unverified assumptions",
+    "audio: every reward cue call names its owner and other players' cues use a voice pool of their own, so several players' censers, finales or melodies no longer cut the local player's cues mid-sound",
+    "audio: the Whip's lash no longer rings twice on a peer when a late sync steps the stroke back",
+    "audio: REWARDS.md names every library instrument the shipped takes use, the level reference is stated as measured (CrownRupture.wav) beside the Raid strikes actually played, and the feat/scarlet-sfx merge is recorded as needing a re-level; Attribution's toll records name pitch classes; IP_PROVENANCE summarises the reward audio and the VSCO credit request"
+  ],
+  "checks": {
+    "static": "passed: verify_repo.py . --write-catalog --with-domain (catalog 87 documents, repository checks 1596 files including the Attribution register, YAML) and git diff --check, after merging main's 0.3.77 and staging the reward levels. Earlier: after merging rw/audio (catalog 87, 1575 files); on rw/audio after the cue integration and its review fixes; after the art review fixes and main's 0.3.74 merge (catalog 87, 1527 files)",
+    "domain": "passed: 567 deterministic domain tests, 0 failures, with main's signature-move and sound-set tests, after staging the levels: the reward cue table test also holds each cue's level role (tolls; one-shots including the censer's summon and swing; windups and braces; cascade parts; finales with the Cadence; the reliquary's show) and that a role's offset only lowers its files. The four ScarletRewardAudioTests still hold every lead, the owner's picks, the audiences and voices; the censer's bowl drop asserts the measured 34 px and the scythe's turn bound the measured 117.89 px reach. Earlier: 553 after merging rw/audio and on rw/audio, 549 after the art review fixes and after the art export",
+    "tools": "passed: unittest discover -s tools/tests, 160 tests with main's: under Python 3.12 (Pillow, NumPy, SciPy) all pass with 3 skipped (the 2 Doll audio-render tests and the reward level re-measurement, which need soundfile); under Python 3.13 without NumPy 27 are skipped; with the local audio packages (PYTHONPATH=.audio-python-deps, numpy 2.4.4, soundfile 0.14.0) the Scarlet reward and Raid audio tests all run and pass, including the re-measurement of all 54 files on both meters within 0.02 dB. The rw/audio tripwire that pinned the retired CrownRupture.wav failed on main's sound set as expected and is replaced by the level-relationship test (the measured files pinned by digest; every rule held on both meters). main's test_scarlet_audio now names the reward player among the files that build a SoundStyle. Includes the sprite check and the ScarletRewardAudioContract checks. Earlier: 151 after merging rw/audio, 123 on rw/audio, 143 after the art review fixes",
+    "shader": "passed: ScarletInk.fx compiled by the pinned FXC fx_2_0 /O3 and the manifest refreshed by tools/compile_shaders.py; only ScarletInk.fxc changed. The part of ScarletInk.fx before the reward section (the Raid's Live/Forecast/Residue and Local/Segment/Pixel) hashes to main's (sha256 1c3e259c35cb0fc5ecdcd07df7dbb2e1f1c43df8283800864465c9004d1c1773), and the rewards never use ForecastPass",
+    "raid_frames": "passed: tools/preview-scarlet.ps1 -Only act1-center -Look proposal -Beats 128 -Step 3 (sanctum, zoom 1, hidden FNA D3D11) rendered with this branch's ScarletInk.fxc and with main's: all 87 PNGs pixel-identical (max channel difference 0) (main's ScarletInk.fxc is unchanged by PR106-108)",
+    "reward_frames": "reviewed: tools/preview-scarlet.ps1 -Rewards (sanctum and day, zoom 1 and 2, every weapon scene and the shared scene) through the production ScarletRewardInk and ScarletInk.fxc. The live river now dries into its scar without a burning cap, ring or gap; dormant builds read as a dark dried stroke on bright ground and as a faint stroke with a soft crimson lip on the dark sanctum. Placeholder bodies are not composited (the preview cannot load vanilla textures)",
+    "native_build": "passed: python tools/dev.py build --native into the isolated profile after merging main's 0.3.77 and staging the levels, 0 errors and the existing 4 CS8632 warnings; package 0.3.78 sha256 9baf58e1a6e52e8561006d81e944efa5e64cb293949d0a2ce19ba59d1702d936 with the 20 exported textures, all 38 reward cue files and the Raid's 16 cues; the build rewrote no Localization file. Earlier: 0.3.75 after merging rw/audio 76798811edb9e38c109c90dbe004831d3ded186d12123f381591b415b3b3d73c; after the art review fixes and main's merge c7f0fbf85d1991ce711c4c4a91bcbbe51d2c56b7965912f37057caa856f8eeab; on rw/audio after its review fixes 02c438aed02a61a8e5b26e1a19ff38ea8aee02a97faae132960d9458ab388c09 (26eeff4e35cc84b734f8b8127556c484f213e4a104be6ee4540bf89f6f4ad72b before them); after the art export e8dc606095aa844ed576cafdce2cc7209836823a6cdb238981e5f889ecbc0668",
+    "game_not_started": "the game was not started in this work",
+    "reward_frames_after_art": "passed: tools/preview-scarlet.ps1 -Rewards (sanctum and day, zoom 1 and 2; 563 frames) rendered before and after the art export and measured anchors: the baton (88), organ (80), quill (88) and shared (48) frames are pixel-identical; the scythe (172) and censer (80) frames change only through the measured 117.82 px reach and 27.66 px bowl drop (the same figure eight, scaled; shorter pendulum sweeps), reviewed. The preview still draws stand-in bodies",
+    "reward_frames_after_review": "passed: tools/preview-scarlet.ps1 -Rewards -Backgrounds sanctum,day -Zooms 1,2 (563 PNGs, 7 scenes) re-rendered after the art review fixes and compared with the art-export run: the baton (88), quill (88) and shared (48) frames are pixel-identical; the censer (80) frames move with the 34 px bowl drop (the pours start lower and sweep wider), the organ (60 of 80) with the per-pipe mouth rows, and the scythe (92 measure, 34 of 80 reap) by about a pixel with the 117.89 px reach and refitted knots; all reviewed. The preview still draws stand-in bodies",
+    "levels_measured": "measured 2026-10-03 with the recipe's own interpreter (.claude-tools/music/venv: Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0): every Raid and reward file's maximum 400 ms momentary loudness through kit.loudness_stats (it reproduces the retired CrownRupture.wav at -7.57 and each role's render target) and through the same biquads along time (BS.1770); see levels_against_raid"
+  },
+  "not_run": [
+    "in-game play of every weapon's build, release and finale, the reliquary drop and opening show, and crafting and using the Scarlet Covenant at 1500",
+    "a second player seeing the builds and releases, dimming, and the native replication of the staff, strokes, quills and hands",
+    "Reduced Effects and screen shake in the game; FPS with eight players' full builds and ten censers",
+    "readability of friendly black blood against the Raid's strikes and forecasts in a real fight, especially the faint dormant builds on the dark sanctum",
+    "balance against current Calamity endgame gear, including the staff's crowd cuts, the Covenant against crowds and the censer spread (open for the owner)",
+    "the art in play: sizes against the player (scythe reach 118 px, organ 86x44 px, baton 85 px, censer 60x72 px, bone hand 40x64 px), the reliquary's opening with the real parts, and readability over the sanctum and bright ground; owner acceptance of the selected candidates and their remaining shortfalls (art_export.shortfalls)",
+    "the cues in play: each cue at its moment, the staged levels against the Raid's cues and Graceful Ordeal and outside the Raid (the owner's in-game listening is the acceptance of the per-role offsets), and what a second player hears (no tolls; per-swing and per-shot cues 8 dB lower with one voice). The takes were chosen on the local audition page (2026-10-03), not in the game",
+    "unverified assumptions: the Hymn with zero bullets (CanUseItem before the ammo check), fresh per-entity globals for a new NPC in a client's slot (CrimsonCovenantIncarnation), and vanilla syncing the quill's itemRotation for its Shoot use style"
+  ],
+  "delegation": "Claude: five weapon slices by delegated agents, integration and review fixes by the lead agent",
+  "art_export": {
+    "delivery": "asset-deliveries/scarlet-rewards/2026-10-02 (kept outside the repository): 40 raw candidates and 10 recommended alpha copies, all accepted_by_codex=false: none meets the strict 8 px grid with clean edges (a semi-transparent fringe and specks remain), and Codex recorded size, layout and shape shortfalls for several (listed per record in Assets/ATTRIBUTION.md and in REWARDS.md); the recommended SR01_a, SR01P_c, SR02_c, SR02I_c, SR03_d, SR04_c, SR04I_b, SR05_d, SR06_d and SR07_b are used, SHA-256-pinned in tools/export_scarlet_reward_art.py",
+    "export": "tools/export_scarlet_reward_art.py (Pillow 12.1.1, NumPy 2.4.4, SciPy 1.17.1): haze cut, object cut, dot pitch measured per sheet (5.76-10.84 px), majority-colour resample without dither at each object's best-agreeing whole-px lattice phase (the fewest disagreeing px, never growing the object), drawings over the brief's limits fitted to them (reliquary icon 50x39 -> 32x25, scythe 84x73 -> 64x56, organ 80x41 -> 43x22, hand 36x56 -> 20x32, censer 37x45 -> 30x36, quill 51x13 -> 28x7 (25x7 after the bead cut), score 42x20 -> 24x11 (24x10 drawn), icons and buffs likewise; baton 37x38 and the scythe, baton and censer-buff icons within limits), icons and buffs doubled, no repaint; 20 PNGs in Assets/Textures/Items/ScarletRewards, rerun byte-identical",
+    "reliquary": "SR01_a's complete casket is the icon; SR01P_c's body, lid and seal are the opening parts (its lid fits its body; SR01_a's own lid overhangs). The lid is centred across the body's front rim (overhang 0 / 1 texel) at the height an FFT search over the velvet and the front prefers; body and lid share one lattice of 10.562 px and one phase so the closed casket is the icon's 32 wide: lid at (1, -7), hinge (1, 11) = the left-most corner of the lid's bottom edge resting on the body (texel centres at most 1.22 apart from 0 to 118 degrees), seal 11x11 at (8, 5) (at the lattice's 10 cells no phase keeps its three bars apart)",
+    "anchors": "measured on the exports and set in code: ScytheArt grip (5.74, 50.61) and tip (61.5, 31.5), ScytheReach 136 -> 117.89 px, BladeKnots from the blade's geodesic thirds; OrganArt grip/gem/palm, CanticleRules.MouthForward 56 -> 72.78 px and MouthAcross per pipe (-27.68, -21.68, -13.68, -7.68); BatonArt grip/gem; CenserBody ring/mouth/drapes with the mouth on the saturated-gold rim (the bone thorns no longer pass for it) and BowlDrop 60 -> 34 px; QuillArt nib/seal; the reliquary show's lid, hinge, seal and mouth; mirrored bone hands mirror their palm origin, and mirrored quill and score art mirror QuillArt.Body.Point; the held organ is enlarged 4x for the player draw set",
+    "motion_bound": "with the measured reach (117.82 px at the export, 117.89 px after the phased resample) the unchanged figure eight's tightest turn is about 22 px (Over/Under) and 23 px (Whip), so MinTurnRadius became 24/136 of the reach (20.80 px) instead of a fixed 24 px; knot refits that keep 24 px needed visible choreography changes (the Over's forward hand push) and were not adopted",
+    "quill_bead": "Codex drew the quill's ink bead detached ahead of the nib (its REPORT notes it); the exporter keeps the largest piece (after the phased resample one texel is cut)",
+    "review": "reviewed after the review fixes: .local/scarlet-reward-art/contact.png (every texture at real screen size and x2 on the sanctum dark and mid tones, a bright sky and the sanctum painting), anchors.png (anchors marked at 8x) and mockups.png/-x2 (scythe, organ and baton held by a 20x42 player, quill thrown and stuck, the sealed score right and mirrored with its seal anchor, bone hand on a target, censer idle/apex/pouring with the ring on the pivot, the reliquary closed and with its lid at 40 and 110 degrees 70 px above the head); every lattice phase of the two seals and the organ icon was inspected",
+    "censer_sway": "the censer's free pendulum keeps the 60 px lever its drive was tuned on (CenserVisuals.SwayLever), so the measured 34 px bowl drop moves the mouth and the pours but not how far an idle or seeking censer trails a running owner",
+    "shortfalls": "kept for the owner's acceptance (a fix needs a new Codex drawing, never a repaint): the censer icon shows 3 of the briefed 5 thorns; the bone hand is three-quarter front; the score's marks are more prominent than briefed; the organ icon's four diagonal barrels merge into one mottled bone mass at 27x28 at every lattice phase; the reliquary icon's seal keeps no bars at 32x25 (a plain round seal); SR01P_c's parts are drawn larger than SR01_a's casket and were fitted by the exporter"
+  },
+  "review_fixes_art": [
+    "every object is resampled at its best-agreeing lattice phase, so the seals' three bars survive (Covenant buff and icon; the reliquary seal at 11 cells)",
+    "the reliquary lid is centred on the body and turns on a hinge that rests on the body, so it no longer floats beside the body as it opens",
+    "the censer's bowl mouth is on its gold rim, not among the bone thorns (BowlDrop 34 px), and its free pendulum keeps its 60 px tuning lever",
+    "mirrored quill and score art mirror their anchor points, and the score's wax flakes leave the drawn seal at its current pose",
+    "Attribution, REWARDS.md, this evidence and the exporter state Codex's real non-acceptance reasons and the remaining shortfalls"
+  ],
+  "audio": {
+    "owner_choice": "2026-10-03, on the local audition page (two takes of each of 28 cue blocks): B for Cadence, ReliquaryOpen, ScytheWhip, StaffWindup, StaffBarline and RiverRelease; A for every other block (Toll = the whole Toll0..Toll7 ladder; OrganShot = all four pipe files of take A). The choice is the approval recorded in Assets/ATTRIBUTION.md (\"Scarlet Invocation reward weapon audio - 2026-10-03\")",
+    "files": "35 cues in 38 files in Assets/Sounds/Weapons/ScarletRewards/ (OrganShot1..OrganShot4, one per pipe): byte copies of the picked audition masters, each SHA-256 equal to the audition report; a fresh render of the 35 picked takes from the hash-locked external recipe (sfx-scarlet-rewards, 73 locked sources) reproduced all 38 byte for byte",
+    "rights": "59 sources used by the picks, all CC0 1.0 and confirmed locally: 13 Freesound/OpenGameArt recordings with the same SHA-256 as rows in the Ghost Samurai, Soboro, Ebon and Cathedral records (pages surveyed 2026-10-01); 8 Kenney RPG Audio files (the pack's license.txt, all already itemised); 18 VSCO 2 CE 1.1.0 files (bundled LICENSE; each compared with its member of the release archive, sha256 4a44466...; the organ Info.txt grants redistribution); 20 VCSL files (README; each tracked and unmodified at commit b6e6ac8). No cue is held back",
+    "levels": "the files keep the levels they were rendered and auditioned at (maximum 400 ms momentary loudness on the recipe's meter against the Raid's loudest strike of the time, -7.6 LUFS measured on the retired CrownRupture.wav: finales -9.6, cadence -11, show -13, windups -15, cascade parts -15.5, per-shot -17, tolls -19; true peak <= -1 dBTP after the Vorbis round trip). They are never re-rendered for level: in the game each cue plays at its role's offset against the Raid's own sound set (levels_against_raid); call offsets on top: other players' per-swing and per-shot cues -8 dB, the rolled score's throw -2 dB, a score burst without the Full Melody -2 dB. No pitch variance",
+    "wiring": "ScarletRewardCues (Terraria-free, linked by the domain tests) holds the files, takes, audiences, voices and leads; ScarletRewardAudio builds SoundStyle only on a client outside the menu with focus and the game unpaused, bounds voices per file (MaxInstances, replace oldest for the local player); every call names the cue's owner and other players' voices are a pool of their own (a ':peer' Identifier, which tML's IsTheSameAs compares before the path): one voice of a per-shot file (replace oldest) and one owner's voices of any other file (ignore new), so another player's windup, finale or playback toll never cuts the local player's, stops on pause and skips a missing file. Timing fixes against the rendered files: the Whip's lash fires as the blade goes live (was 4 ticks early), its brace with the draw-back, the baton's swish on the gesture's first tick, each pipe plays its own OrganShot, a censer brace only when its Grand Pour will sound; the scythe's cues cross from the furthest stroke age seen, so a late sync that steps a peer's stroke back (the sync at 12 after the lash at 15) never rings the lash twice",
+    "not_run": "hearing the cues in the game (see not_run)"
+  },
+  "levels_against_raid": {
+    "method": "maximum 400 ms momentary loudness in LUFS of each shipped file, padded 0.2 s before and 0.5 s after, 10 ms steps, on two meters: 'recipe' = kit.loudness_stats, the meter the reward files were rendered and auditioned with, and 'bs1770' = the same pyloudnorm K-weighting biquads run along time. The recipe's meter passes (n, 2) arrays to pyloudnorm's IIRfilter.apply_filter, which calls scipy.signal.lfilter without an axis, so the biquads run across the two channels and in effect weight no frequency; the meters disagree by +0.07 to -5.66 dB per file. The Raid plays every cue at ScarletSounds.Gain 1 (not positional); a reward cue plays at gain 1 times its role's offset, positional",
+    "raid_recipe_bs1770": {
+      "ScarletVictory": [
+        -9.58,
+        -11.86
+      ],
+      "ScarletStackFail": [
+        -9.92,
+        -15.58
+      ],
+      "ScarletActChange": [
+        -10.17,
+        -13.74
+      ],
+      "ScarletCrossflowRelease": [
+        -10.4,
+        -14.0
+      ],
+      "ScarletSpreadFail": [
+        -13.86,
+        -14.31
+      ],
+      "ScarletSacrifice": [
+        -13.99,
+        -15.93
+      ],
+      "ScarletStackSummon": [
+        -15.67,
+        -19.32
+      ],
+      "ScarletDown": [
+        -16.2,
+        -20.5
+      ],
+      "ScarletStackSuccess": [
+        -16.35,
+        -18.26
+      ],
+      "ScarletSpreadSummon": [
+        -16.76,
+        -17.53
+      ],
+      "ScarletRevive": [
+        -16.89,
+        -18.97
+      ],
+      "ScarletSpreadSuccess": [
+        -17.24,
+        -18.73
+      ],
+      "ScarletCrossflowCharge": [
+        -18.43,
+        -21.74
+      ],
+      "ScarletImpact": [
+        -20.04,
+        -20.35
+      ],
+      "ScarletForetell": [
+        -22.77,
+        -25.73
+      ],
+      "ScarletReady": [
+        -24.53,
+        -27.13
+      ]
+    },
+    "offsets_db": {
+      "tolls (Toll0-Toll7)": -8.5,
+      "one-shots (ScytheSwingHigh/Low, ScytheWhip, OrganShot1-4, BatonStroke, QuillThrow, QuillStick, CenserSummon, CenserSwing)": -8.5,
+      "windups and braces (StaffWindup, ScytheWhipBrace, HymnInhale, BatonLift, CenserBrace, ScoreUnseal)": -8.5,
+      "cascade parts (StaffCut, HandSlam, InkIgnite, CenserPour, InkBlaze)": -8.5,
+      "finales (StaffBarline, ChoirClasp, RiverRelease, CenserGrandPour, ScoreChord) and Cadence": -3.0,
+      "ReliquaryOpen": -3.0
+    },
+    "played_recipe": "tolls -27.53..-27.44; one-shots -25.82..-23.60 (CenserSwing loudest); windups -26.96..-23.54; cascade parts -24.62..-20.58 (InkBlaze loudest); finales and Cadence -13.99..-12.63; ReliquaryOpen -16.00",
+    "played_bs1770": "tolls -30.84..-29.60; one-shots -28.90..-25.41; windups -27.09..-23.89 (CenserBrace loudest); cascade parts -29.56..-24.32; finales and Cadence -17.40..-14.98; ReliquaryOpen -19.19",
+    "rules": "held on both meters: one-shots at least 3 dB under ScarletImpact (margin 0.56 recipe / 2.06 bs1770 dB); tolls under every one-shot (1.62 / 0.70); windups and braces at most ScarletForetell + 2 dB (2.77 / 0.16); cascade parts under ScarletImpact (0.54 / 3.97); finales at most ScarletCrossflowRelease (2.23 / 0.98); ReliquaryOpen at most ScarletVictory (6.42 / 7.33)",
+    "why": "the one-shot rule for CenserSwing (rendered 2 dB over the other one-shots) and the impact rule for InkBlaze each need about -8 dB on their role, so every role that sounds in play takes -8.5 dB and keeps its auditioned balance with the others (tolls 2 dB under the one-shots, a brace over its lash); the finales and Cadence take -3 dB, about 2 dB under ScarletCrossflowRelease on the recipe's meter (the spec's earlier rule: releases about 2 dB under the Raid's loudest strike), and the show keeps its auditioned 3.4 dB under the finales. The in-play cues now sit 5.5 dB further under the finales than on the audition page",
+    "wiring": "ScarletCueRole on every ScarletRewardCues row and ScarletRewardCues.RoleDecibels (Build, Shot, Windup and Release -8.5 dB, Finale and Show -3 dB); ScarletRewardAudio.Emit plays Gain x 10^((role offset + call offset) / 20), clamped to 0..1. The owner-picked files are unchanged (their Ogg serials and Attribution hashes still pass)",
+    "test": "tools/tests/test_scarlet_rewards.py: test_the_level_table_measures_the_shipped_files (every Raid and reward file measured, pinned by a digest of their SHA-256), test_reward_levels_sit_under_the_raid_cues_they_answer (the role groups, offsets <= 0, call offsets <= 0, every rule on both meters, Raid gain read from ScarletSounds.cs) and test_the_level_table_matches_a_fresh_measurement (local only: decodes all 54 files and re-measures both meters within 0.02 dB)",
+    "not_run": "the owner's in-game listening is the acceptance of these offsets (see not_run)"
+  }
+}

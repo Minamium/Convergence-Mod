@@ -213,6 +213,7 @@ internal sealed class FirstSeverancePrototypePresentation : ModSystem
 
     public override void PostDrawTiles()
     {
+        Convergence.Client.Graphics.FriendlyWorldInk.BeneathForecasts(); // friendly weapon ink lies under every forecast
         fieldMask = null;
         if (Main.dedServ || Main.gameMenu)
             return;

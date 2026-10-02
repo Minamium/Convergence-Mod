@@ -236,6 +236,7 @@ internal sealed class GhostSamuraiBattlefield : ModSystem
 
     public override void PostDrawTiles()
     {
+        FriendlyWorldInk.BeneathForecasts(); // friendly weapon ink lies under every forecast
         screenReady = false;
         fallbackMask = null;
         if (Main.dedServ || Main.gameMenu) return;

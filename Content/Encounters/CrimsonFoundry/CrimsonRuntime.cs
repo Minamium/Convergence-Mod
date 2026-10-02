@@ -449,6 +449,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         if (cleaned || context.FightId != fight) return;
         try
         {
+            if (context.EndReason == EncounterEndReason.Victory) DropRewards();
             ClearHazards();
             foreach (NPC n in Main.ActiveNPCs)
             {
