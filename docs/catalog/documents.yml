@@ -896,7 +896,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 2d46e1a9625417ac4f7f77ddd45b1909cadd8ad30c2d066ed81f3a7602254602
+  content_sha256: fe9a8f5d8cba5d8f275a58d3454902d68189bc1ec9e017d5d0d1e395a09c2ae5
   document_type: spec
   status: provisional
   owners:
@@ -1414,12 +1414,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 2d7bdcf65a577e06820f30443d24b84d92a092fd0de193286c00f3450979ce28
+  content_sha256: 387f8cd478635ac133f5d0f2c46de649c3da394acba3fa5738af4035bb40f55f
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-10-02'
+  last_reviewed: '2026-10-03'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1778,7 +1778,7 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: d24fc30b218510fed0f23fcc6e1804ede5639458453b6d42572fc39523332a21
+  content_sha256: 740657079474dc58fef78c7ade5329603c1a763995e3954e53b799e368574271
   document_type: plan
   status: accepted
   owners:
