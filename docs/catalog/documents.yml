@@ -653,14 +653,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 5beacdb84777b330e6a20fc8eefe32ba84e2794c3c56dec89094a49c09eeff49
+  content_sha256: 46df7acca9c52261129600c277022dbb1fe6f9e352beab12b5df1ae1accc38ce
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-09-28'
+  last_reviewed: '2026-10-02'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
