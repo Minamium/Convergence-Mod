@@ -244,6 +244,22 @@ internal static partial class Program
                     reason, true), "non-defeat never kills");
     }
 
+    [DomainTest("Single Player applies the retained terminal only to the held Fight")]
+    private static void RetainedTerminalEligibility()
+    {
+        FightId fight = CreateContext(2).FightId;
+        AssertEqual(true, FirstSeveranceCombatRules.ShouldApplyRetainedTerminal(4, fight, 4, fight, true),
+            "held Fight ended");
+        AssertEqual(false, FirstSeveranceCombatRules.ShouldApplyRetainedTerminal(4, fight, 4, fight, false),
+            "not terminal");
+        AssertEqual(false, FirstSeveranceCombatRules.ShouldApplyRetainedTerminal(5, fight, 4, fight, true),
+            "older encounter");
+        AssertEqual(false, FirstSeveranceCombatRules.ShouldApplyRetainedTerminal(4, fight, 4, FightId.None, true),
+            "other Fight");
+        AssertEqual(false, FirstSeveranceCombatRules.ShouldApplyRetainedTerminal(0, FightId.None, 0, FightId.None, true),
+            "nothing held");
+    }
+
     [DomainTest("Lance finite corridor geometry")]
     private static void LanceFiniteCorridorGeometry()
     {
