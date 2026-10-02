@@ -1677,10 +1677,10 @@ Replaces the 2026-09-28 synthesized Soboro cues at the same runtime paths; the o
 - Source type: original
 - Source work and URL: original SamuraiBattlefield.fx in this repository; no external artwork or shader copied
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Original spears, low arched graves and layered violet mist; flags and floating rectangular stones removed. Opaque field edge with a small masked bleed. Luminance noise is referenced from the dependency, not redistributed.
+- Human modifications: Original spears, low arched graves and layered violet mist; flags and floating rectangular stones removed. Opaque field edge with a small masked bleed. Luminance noise is referenced from the dependency, not redistributed. 2026-10-02 rework by Claude (Anthropic) at the owner's request: three passes (parallax night with a phase-linked eclipse, ridges, graves and spears planted on the floor line, distant lightning, a luminance ceiling under the forecast fill; the opaque abyss with a mirrored lake, spirit fire, pasted wall talismans and corner seals; the thin in-field rim light), a deploy trace from the summoner's feet and a Bayer-dithered victory melt. Original math only; no external shader or image.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance
-- Reviewer and review date: Codex compiled-material preview2026-09-27; native gameplay not_run
+- Reviewer and review date: Codex compiled-material preview 2026-09-27; Claude offline FNA/D3D11 preview of the 2026-10-02 rework (16 frames, luminance gate) 2026-10-02; native gameplay not_run
 
 ### Samurai spectral composite and DXOboro trial — 2026-09-27
 
