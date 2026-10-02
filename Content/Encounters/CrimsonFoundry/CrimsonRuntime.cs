@@ -383,10 +383,11 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                 aim = new(field.CenterX, field.CenterY);
             else if (technique == CrimsonTechnique.CinderCurtain)
             {
-                // One observation for the whole walk: every note of the phrase carries the first note's member.
-                var walker = eligible[CrimsonTrackingBeam.TargetIndex(serial, 0, eligible.Length)];
-                var walkerCenter = Main.player[walker.Slot].Center;
-                aim = CrimsonTechniqueGeometry.Clamp(field, new(walkerCenter.X, walkerCenter.Y), 100);
+                // One observation of every eligible member for all four notes: each occupied column opens its own corridor.
+                int occupied = 0;
+                foreach (var member in eligible)
+                    occupied |= 1 << CrimsonSignatureMoves.CurtainColumn(field, Main.player[member.Slot].Center.X);
+                aim = CrimsonSignatureMoves.CurtainTarget(occupied);
             }
             bool needsTargetIdentity = CrimsonGesturePlan.NeedsTargetIdentity(technique);
             int end = CrimsonEnsemble.NoteEnd(technique, hit);

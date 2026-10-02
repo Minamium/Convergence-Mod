@@ -16,7 +16,8 @@ internal static partial class Program
             (byte)CrimsonTechniqueGeometry.Owner(technique), technique, (byte)step, 3, 1,
             520, 544 + step * 14, 600 + step * 14, 605 + step * 14, 600, 633,
             new(8000, 5230), CrimsonTechniqueGeometry.Stage(f, focus, technique, 8),
-            CrimsonTechniqueGeometry.Target(f, focus, technique, 8), 8000, 6000, 450,
+            // A curtain's Target is the mask of occupied columns (the focus stands in column 5).
+            technique == CrimsonTechnique.CinderCurtain ? CrimsonSignatureMoves.CurtainTarget(1 << 5) : CrimsonTechniqueGeometry.Target(f, focus, technique, 8), 8000, 6000, 450,
             technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift ? (short)0 : (short)-1,
             technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift ? Guid.Parse("3c051a1d-dd29-4844-8353-56347645a879") : Guid.Empty);
     }

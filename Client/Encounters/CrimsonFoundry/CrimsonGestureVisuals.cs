@@ -56,7 +56,10 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 }
                 if (impact)
                 {
-                    Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field) : p.MovesBody ? p.Body(age) : p.Target);
+                    Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field)
+                        : p.MovesBody ? p.Body(age)
+                        : p.Technique == CrimsonTechnique.CinderCurtain ? new CrimsonPoint(p.Field.CenterX, p.Field.CenterY) // Target is the column mask
+                        : p.Target);
                     ScarletArticulation.Impact(p.Source, p.Accent, at);
                     ScarletAtmosphere.Emit(p, at);
                 }

@@ -13,14 +13,16 @@ internal static partial class Program
     private const float ScarletPlayerWidth = 20, ScarletPlayerHeight = 42;
     private static readonly Guid ScarletSignatureFight = Guid.Parse("5b1d3a52-0f0e-4c42-9a55-1d4c6a0b7e11");
 
-    private static CrimsonGesturePlan ScarletSignaturePlan(int phase, int phrase, int note, float observedX, int groundX = 8000, int groundY = 6000, int earliest = -1)
+    private static CrimsonGesturePlan ScarletSignaturePlan(int phase, int phrase, int note, float observedX, int groundX = 8000, int groundY = 6000, int earliest = -1, int curtainMask = 0)
     {
         var f = RaidFieldGeometry.FromGround(groundX, groundY);
         var rhythm = CrimsonChoreography.Create(earliest < 0 ? CrimsonChoreography.OpeningTicks : earliest, phrase, false);
         var hit = rhythm.Hits[note];
         var technique = CrimsonEnsemble.Technique(phase, phrase, note, false);
         var stage = new CrimsonPoint(f.CenterX, f.Top + 210);
-        var target = phase == 0 ? new CrimsonPoint(observedX, f.CenterY) : new CrimsonPoint(f.CenterX, f.CenterY);
+        // A curtain carries the occupied-column mask (solo: the observed column) instead of a position.
+        var target = phase == 0 ? CrimsonSignatureMoves.CurtainTarget(curtainMask > 0 ? curtainMask : 1 << ScarletColumnOf(f, observedX))
+            : new CrimsonPoint(f.CenterX, f.CenterY);
         return new(ScarletSignatureFight, 3, 500, phrase, (byte)note, (byte)phase, technique, (byte)note, 4, hit.Accent,
             rhythm.Start - 30, hit.Warning, hit.Fire, CrimsonEnsemble.NoteEnd(technique, hit),
             rhythm.Hits[0].Fire, CrimsonEnsemble.NoteEnd(technique, rhythm.Hits[3]),
@@ -98,7 +100,7 @@ internal static partial class Program
             {
                 var plan = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * observed + 128, groundX, groundY);
                 plan.Validate();
-                int corridor = CrimsonSignatureMoves.CurtainCorridor(f, plan.Target, plan.Phrase, note);
+                int corridor = CrimsonSignatureMoves.CurtainCorridor(observed, plan.Phrase, note);
                 AssertEqual(true, corridor is >= 0 and <= 7, "corridor stays inside the field");
                 float gapLeft = f.Left + 256 * corridor, gapRight = gapLeft + 768;
                 int nf = CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true);
@@ -167,7 +169,7 @@ internal static partial class Program
                         plans[note] = ScarletSignaturePlan(0, phrase, note, observed, groundX, groundY);
                         plans[note].Validate();
                         AssertEqual(CrimsonTechnique.CinderCurtain, plans[note].Technique, "Act I signature");
-                        corridors[note] = CrimsonSignatureMoves.CurtainCorridor(f, plans[note].Target, plans[note].Phrase, note);
+                        corridors[note] = CrimsonSignatureMoves.CurtainCorridor(column, plans[note].Phrase, note);
                         AssertEqual(start + note * direction, corridors[note], $"one column per beat in the stated direction phrase={phrase} column={column}");
                         AssertEqual(true, corridors[note] is >= 0 and <= 7, "corridor stays inside the field");
                     }
@@ -331,7 +333,7 @@ internal static partial class Program
                     previousSafe = safe;
 
                     int count = CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true);
-                    AssertEqual(6, count, "three claws in each of two quarters");
+                    AssertEqual(6, count, "three fingers in each of two quarters");
                     AssertEqual(0, CrimsonTechniqueGeometry.Write(plan, plan.Fire, live), "zero-width ignition is harmless");
                     AssertEqual(16, plan.End - plan.Fire, "live window");
                     int liveCount = CrimsonTechniqueGeometry.Write(plan, plan.Fire + 8, live);
@@ -343,9 +345,15 @@ internal static partial class Program
                         AssertEqual(640f, right - left, "quarter width");
                         if (isStruck[q])
                         {
-                            for (float x = left + 8; x <= right - 8; x += 3)
-                                for (float y = f.Top; y <= f.Bottom; y += 56)
-                                    AssertEqual(true, ScarletHits(forecast[..count], x, y, .001f, .001f), $"slammed quarter {q} is solid x={x - left} y={y - f.Top}");
+                            // Three fingers 213 px apart: solid across their width, open between them.
+                            for (int finger = -1; finger <= 1; finger++)
+                                foreach (float y in new[] { f.Top, f.CenterY, f.Bottom - 1 })
+                                {
+                                    float axis = left + 320 + finger * 213;
+                                    AssertEqual(true, ScarletHits(forecast[..count], axis - 74, y, .001f, .001f), $"finger {finger} of quarter {q} is solid left");
+                                    AssertEqual(true, ScarletHits(forecast[..count], axis + 74, y, .001f, .001f), $"finger {finger} of quarter {q} is solid right");
+                                    AssertEqual(false, ScarletHits(forecast[..count], axis + 106.5f, y, .001f, .001f), $"gap after finger {finger} of quarter {q} is open");
+                                }
                         }
                         else
                         {
@@ -361,7 +369,7 @@ internal static partial class Program
                         int q = (int)MathF.Floor(((forecast[i].A.X + forecast[i].B.X) * .5f - f.Left) / 640);
                         var (left, right) = CrimsonSignatureMoves.HandsQuarter(f, q);
                         AssertEqual(true, lo >= left - 8 && hi <= right + 8, "claw union stays inside its quarter within 8 px");
-                        AssertEqual(110f, forecast[i].Radius, "claw radius");
+                        AssertEqual(75f, forecast[i].Radius, "finger radius");
                     }
                 }
                 for (int q = 0; q < 4; q++) AssertEqual(2, struckCount[q], "every quarter is slammed twice and spared twice per phrase");
@@ -371,6 +379,184 @@ internal static partial class Program
             for (int phrase = 3; phrase <= 12; phrase += 3) seen.Add(CrimsonSignatureMoves.HandsStruck(phrase, 0));
             AssertEqual(4, seen.Count, "four signature phrases of a cycle open on four different pairs");
         }
+    }
+
+    [DomainTest("Scarlet four hands fingers leave body-sized gaps and a clear spot within a beat's run")]
+    private static void ScarletFourHandsFingers()
+    {
+        Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        float worst = 0, narrowest = float.MaxValue, wallStrip = float.MaxValue;
+        int positions = (int)(f.Right - f.Left - ScarletPlayerWidth) + 1;
+        for (int phrase = 3; phrase <= 48; phrase += 3) for (int note = 0; note < 4; note++)
+        {
+            var plan = ScarletSignaturePlan(2, phrase, note, 0);
+            int count = CrimsonTechniqueGeometry.Write(plan, plan.Fire, strokes, true);
+            var fingers = strokes[..count].ToArray();
+            // Nearest standing spot (left edge, 1 px grid) that is clear of every finger, from every x along the floor.
+            var clear = new bool[positions];
+            for (int i = 0; i < positions; i++) clear[i] = !ScarletHits(fingers, f.Left + i, f.Bottom - ScarletPlayerHeight);
+            for (int i = 0; i < positions; i++)
+            {
+                int distance = 0;
+                while ((i - distance < 0 || !clear[i - distance]) && (i + distance >= positions || !clear[i + distance]))
+                    if (++distance > positions) throw new InvalidOperationException("no clear spot at all");
+                worst = Math.Max(worst, distance);
+            }
+            // Every gap between neighbouring fingers admits the body with at least 10 px on each side.
+            var axes = new System.Collections.Generic.List<float>();
+            foreach (var finger in fingers) axes.Add(finger.A.X);
+            axes.Sort();
+            for (int i = 0; i + 1 < axes.Count; i++)
+            {
+                float gapLeft = axes[i] + 75, gapRight = axes[i + 1] - 75;
+                if (gapRight - gapLeft > 100) continue; // a whole spared quarter, not a finger gap
+                narrowest = Math.Min(narrowest, gapRight - gapLeft);
+                AssertEqual(true, gapRight - gapLeft - ScarletPlayerWidth >= 20, $"a body fits a finger gap with 10 px each side ({gapRight - gapLeft})");
+                foreach (float y in new[] { f.Top, f.CenterY, f.Bottom - ScarletPlayerHeight })
+                    for (float x = gapLeft + 10; x <= gapRight - 10 - ScarletPlayerWidth; x += 1)
+                        AssertEqual(false, ScarletHits(fingers, x, y), $"finger gap admits a body x={x - f.Left} y={y - f.Top}");
+            }
+            // A slammed quarter against a field wall leaves a strip the body fits in.
+            foreach (float strip in new[] { axes[0] - 75 - f.Left, f.Right - (axes[^1] + 75) })
+                if (strip < 100) wallStrip = Math.Min(wallStrip, strip);
+        }
+        AssertEqual(true, narrowest >= 63f - .01f, $"finger gaps are at least 63 px ({narrowest})");
+        AssertEqual(true, wallStrip >= 32f - .01f && wallStrip - ScarletPlayerWidth >= 10, $"the strip against a wall takes a body ({wallStrip})");
+        // On the 1 px grid the farthest is 86 px (from the middle of a finger); the touching limit is 85 px,
+        // 3.0 px per tick over the 28 ticks of one beat.
+        AssertEqual(true, worst >= 80 && worst <= 86, $"the worst standing spot is within 86 px of a clear one ({worst})");
+    }
+
+    [DomainTest("Scarlet cinder curtain gives every observed member a corridor and burns only the rest")]
+    private static void ScarletCinderCurtainCrowd()
+    {
+        Span<CrimsonStroke> forecast = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        Span<CrimsonStroke> live = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        // Pure walk over every mask: a member's whole corridor is safe, so their column is safe for the promised notes.
+        for (int mask = 1; mask <= CrimsonSignatureMoves.MaximumCurtainMask; mask++) foreach (int phrase in new[] { 3, 6, 9, 12 }) for (int note = 0; note < 4; note++)
+        {
+            int safe = CrimsonSignatureMoves.CurtainSafe(mask, phrase, note);
+            for (int column = 0; column < 10; column++)
+            {
+                if ((mask >> column & 1) == 0) continue;
+                int promised = column is >= 2 and <= 7 ? 3 : column is 1 or 8 ? 2 : 1;
+                if (note < promised) AssertEqual(true, (safe >> column & 1) != 0, $"member in column {column} is safe on note {note} mask={mask} phrase={phrase}");
+                int corridor = CrimsonSignatureMoves.CurtainCorridor(column, phrase, note);
+                for (int k = 0; k < 3; k++) AssertEqual(true, (safe >> (corridor + k) & 1) != 0, "a member's whole corridor is safe");
+            }
+        }
+        // Geometry for every single column, the full mask and pseudo-random crowds.
+        var masks = new System.Collections.Generic.List<int>();
+        for (int c = 0; c < 10; c++) masks.Add(1 << c);
+        masks.Add(CrimsonSignatureMoves.MaximumCurtainMask);
+        var random = new Random(0x5CA1E7);
+        while (masks.Count < 160) masks.Add(random.Next(1, 1024));
+        foreach (int mask in masks) foreach (int phrase in new[] { 3, 6 }) for (int note = 0; note < 4; note++)
+        {
+            var plan = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: mask);
+            plan.Validate();
+            AssertEqual(mask, CrimsonSignatureMoves.CurtainMask(plan), "the mask travels in Target");
+            int safe = CrimsonSignatureMoves.CurtainSafe(mask, phrase, note);
+            int count = CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true);
+            AssertEqual(10 - System.Numerics.BitOperations.PopCount((uint)safe), count, "every column outside every corridor burns");
+            AssertEqual(count, CrimsonTechniqueGeometry.Write(plan, plan.Fire + 10, live), "live curtain has the announced columns");
+            for (int i = 0; i < count; i++) AssertEqual(forecast[i], live[i], "fallen strokes are the announced strokes");
+            for (int column = 0; column < 10; column++)
+            {
+                bool isSafe = (safe >> column & 1) != 0, nextSafe = column < 9 && (safe >> (column + 1) & 1) != 0;
+                float columnLeft = f.Left + 256 * column;
+                AssertEqual(!isSafe, ScarletHits(forecast[..count], columnLeft + 127.5f, f.Bottom - 1, 1, 1), $"column {column} burns exactly when no corridor covers it");
+                if (isSafe)
+                    for (float x = columnLeft + .5f; x <= columnLeft + 256 - ScarletPlayerWidth - .5f; x += 9)
+                        AssertEqual(false, ScarletHits(forecast[..count], x, f.Bottom - ScarletPlayerHeight), "a body fits a safe column");
+                if (isSafe && nextSafe)
+                    AssertEqual(false, ScarletHits(forecast[..count], columnLeft + 246, f.Bottom - ScarletPlayerHeight), "a body straddling two safe columns is safe");
+            }
+            for (int i = 0; i < count; i++)
+            {
+                int column = ScarletColumnOf(f, forecast[i].A.X);
+                bool touchesSafe = column > 0 && (safe >> (column - 1) & 1) != 0 || column < 9 && (safe >> (column + 1) & 1) != 0;
+                AssertEqual(touchesSafe ? 128f : 130f, forecast[i].Radius, "half-column wall beside a safe column, overlap between burning neighbours");
+            }
+        }
+        // A solo mask is exactly the single-corridor curtain.
+        foreach (int phrase in new[] { 3, 6, 9, 12 }) for (int column = 0; column < 10; column++) for (int note = 0; note < 4; note++)
+        {
+            var plan = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * column + 128);
+            var (start, direction) = ScarletCurtainExpectedWalk(column, phrase);
+            int corridor = Math.Clamp(start + note * direction, 0, 7);
+            int count = CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true), expected = 0;
+            for (int burning = 0; burning < 10; burning++)
+            {
+                if (burning >= corridor && burning < corridor + 3) continue;
+                bool touches = burning == corridor - 1 || burning == corridor + 3;
+                float x = f.Left + 256 * (burning + .5f);
+                AssertEqual(new CrimsonStroke(new(x, f.Top), new(x, f.Bottom), touches ? 128f : 130f), forecast[expected++], "solo geometry is the single-corridor curtain");
+            }
+            AssertEqual(expected, count, "solo burns exactly the columns outside the corridor");
+        }
+        // The full crowd is accepted even where nothing is left to burn.
+        var full = ScarletSignaturePlan(0, 3, 0, 0, curtainMask: CrimsonSignatureMoves.MaximumCurtainMask);
+        full.Validate();
+        AssertEqual(true, CrimsonTechniqueGeometry.Write(full, full.Fire, forecast, true) <= 7, "bounded strokes");
+    }
+
+    [DomainTest("Scarlet cinder curtain follow speeds are unchanged by the other members in the field")]
+    private static void ScarletCinderCurtainCrowdFollow()
+    {
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        var random = new Random(0xC40D);
+        for (int column = 0; column < 10; column++) foreach (int phrase in new[] { 3, 6 })
+        {
+            var (_, direction) = ScarletCurtainExpectedWalk(column, phrase);
+            bool wall = column is 0 or 1 or 8 or 9;
+            var solo = new CrimsonGesturePlan[4];
+            for (int note = 0; note < 4; note++) solo[note] = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: 1 << column);
+            float begin = wall ? solo[0].Born : solo[1].Born;
+            float soloSpeed = ScarletCurtainSlowestRunner(f, solo, column, direction, begin);
+            for (int trial = 0; trial < 4; trial++)
+            {
+                int mask = trial == 0 ? CrimsonSignatureMoves.MaximumCurtainMask : random.Next(1, 1024) | 1 << column;
+                var crowd = new CrimsonGesturePlan[4];
+                for (int note = 0; note < 4; note++) crowd[note] = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: mask);
+                AssertEqual(true, ScarletCurtainRuns(f, crowd, f.Left + 256 * column + 118, direction, soloSpeed, begin), $"the solo speed still follows with mask={mask}");
+                float crowdSpeed = ScarletCurtainSlowestRunner(f, crowd, column, direction, begin);
+                AssertEqual(true, crowdSpeed <= soloSpeed + .0001f, $"other members never slow a member down column={column} mask={mask} ({crowdSpeed} vs {soloSpeed})");
+            }
+        }
+    }
+
+    [DomainTest("Scarlet cinder curtain column mask round trips and every malformed mask is rejected")]
+    private static void ScarletCinderCurtainMaskCodec()
+    {
+        foreach (int mask in new[] { 1, 2, 513, 1023 })
+        {
+            var p = ScarletSignaturePlan(0, 9, 1, 0, curtainMask: mask);
+            using var stream = new MemoryStream();
+            using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8, true)) p.Write(writer);
+            byte[] bytes = stream.ToArray();
+            using (var reader = new BinaryReader(new MemoryStream(bytes))) AssertEqual(p, CrimsonGesturePlan.Read(reader), "descriptor round trip");
+            AssertEqual(mask, CrimsonSignatureMoves.CurtainMask(p), "mask survives");
+            for (int length = 0; length < bytes.Length; length++)
+            {
+                bool rejected = false;
+                try { using var reader = new BinaryReader(new MemoryStream(bytes, 0, length)); CrimsonGesturePlan.Read(reader); }
+                catch (IOException) { rejected = true; }
+                AssertEqual(true, rejected, "all truncated prefixes rejected");
+            }
+        }
+        var good = ScarletSignaturePlan(0, 9, 1, 0, curtainMask: 33);
+        foreach (var bad in new CrimsonPoint[] { new(0, 0), new(1024, 0), new(5.5f, 0), new(33.0001f, 0), new(float.NaN, 0), new(float.PositiveInfinity, 0),
+            new(-3, 0), new(3, 1), new(3, -.5f), new(8000, 5500) })
+        {
+            bool rejected = false;
+            try { (good with { Target = bad }).Validate(); } catch (InvalidDataException) { rejected = true; }
+            AssertEqual(true, rejected, $"malformed mask ({bad.X}, {bad.Y}) rejected");
+        }
+        AssertThrows<ArgumentOutOfRangeException>(() => CrimsonSignatureMoves.CurtainTarget(0), "empty crowd");
+        AssertThrows<ArgumentOutOfRangeException>(() => CrimsonSignatureMoves.CurtainTarget(1024), "mask above ten bits");
     }
 
     [DomainTest("Scarlet signature phrases keep their live windows apart, validate every note and reject forged descriptors")]

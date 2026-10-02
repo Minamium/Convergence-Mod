@@ -301,9 +301,13 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('CrimsonSignatureMoves.IsSignaturePhrase(phase, phrase)',(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8'))
         self.assertIn('CrimsonSignatureMoves.LiveTicks(technique)',(CONTENT/'CrimsonEnsemble.cs').read_text(encoding='utf-8'))
         runtime=' '.join((CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8').split())
-        # The curtain's corridor walks from the first note's member for all four notes; the other moves are unaimed.
+        # The curtain observes every eligible member once for all four notes (a column mask in Target); the other moves are unaimed.
         self.assertIn('else if (technique == CrimsonTechnique.CinderCurtain)',runtime)
-        self.assertIn('CrimsonTrackingBeam.TargetIndex(serial, 0, eligible.Length)',runtime)
+        self.assertIn('foreach (var member in eligible)',runtime)
+        self.assertIn('occupied |= 1 << CrimsonSignatureMoves.CurtainColumn(field, Main.player[member.Slot].Center.X);',runtime)
+        self.assertIn('aim = CrimsonSignatureMoves.CurtainTarget(occupied);',runtime)
+        self.assertNotIn('var walker',runtime)
+        self.assertIn('crimson.gesture_curtain_mask',technique)
         self.assertIn('CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands',runtime)
         self.assertIn('techniques[source] = CrimsonTechnique.TrackingBeam',runtime)
         visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text(encoding='utf-8')

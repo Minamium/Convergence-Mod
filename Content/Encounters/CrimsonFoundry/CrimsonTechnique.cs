@@ -72,9 +72,12 @@ internal readonly record struct CrimsonGesturePlan(
             ? TargetSlot is < 0 or >= 255 || TargetConnection == Guid.Empty
             : TargetSlot != -1 || TargetConnection != Guid.Empty)
             throw new InvalidDataException("crimson.gesture_target_identity");
+        // A curtain's Target is not a place: it carries the occupied-column mask.
+        bool mask = Technique == CrimsonTechnique.CinderCurtain;
         if (Stage.X < f.Left + 100 || Stage.X > f.Right - 100 || Stage.Y < f.Top + 100 || Stage.Y > f.Bottom - 100
-            || Target.X < f.Left + 100 || Target.X > f.Right - 100 || Target.Y < f.Top + 100 || Target.Y > f.Bottom - 100)
+            || !mask && (Target.X < f.Left + 100 || Target.X > f.Right - 100 || Target.Y < f.Top + 100 || Target.Y > f.Bottom - 100))
             throw new InvalidDataException("crimson.gesture_outside_field");
+        if (mask && !CrimsonSignatureMoves.ValidMask(Target)) throw new InvalidDataException("crimson.gesture_curtain_mask");
     }
     internal void Write(BinaryWriter w)
     {
