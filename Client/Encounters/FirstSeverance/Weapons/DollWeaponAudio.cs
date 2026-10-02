@@ -47,6 +47,8 @@ internal static class DollWeaponAudio
         ["ChoirSummon"] = 3, ["ChoirNoteHit"] = 3,
         ["ChoirVerseFire0"] = 4, ["ChoirVerseFire1"] = 4, ["ChoirVerseFire2"] = 4, ["ChoirVerseFire3"] = 4, ["ChoirVerseFire4"] = 4,
         ["ChoirVerseFire5"] = 4, ["ChoirVerseFire6"] = 4, ["ChoirVerseFire7"] = 4, ["ChoirVerseFire8"] = 4,
+        // Lacrimosa's Claws: contacts of several claw users can overlap; every other claw cue keeps the default.
+        ["ClawHit"] = 3,
     };
     private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, SoundStyle> styles = new(StringComparer.Ordinal);

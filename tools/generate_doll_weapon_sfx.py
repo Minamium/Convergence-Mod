@@ -22,8 +22,9 @@ Requires numpy, scipy and soundfile (local audio tools, not CI).
 One-shots are Vorbis; a cue registered with loop=True (its name ends in Loop) is a PCM16 WAV loop that repeats
 sample-exactly (no trim, fade or causal filter across its seam), mastered as its loop_master says (Cue).
 
-Run: py -3.12 tools/generate_doll_weapon_sfx.py [--store DIR] [--only CUE,...] [--output DIR]
+Run: py -3.12 tools/generate_doll_weapon_sfx.py [--store DIR] [--only CUE,...] [--group GROUP] [--output DIR]
      [--preview DIR] [--attribution-section FILE] [--previous DIR] [--witness-audition DIR] [--witness-attribution FILE]
+     e.g. --group Claws --preview .local/audition/doll-claws for Lacrimosa's Claws and its audition page.
 """
 import argparse
 import hashlib
@@ -46,6 +47,7 @@ import generate_ebon_sfx as base  # noqa: E402  (shared helpers; its CLI only ru
 from generate_ebon_sfx import RATE, fades, hp, lp, pan, place, seconds, sha256, speed, trim  # noqa: E402
 from generate_ebon_reward_sfx import loudness, master, room, soft, true_peak_db  # noqa: E402
 import doll_sfx_dsp as dsp  # noqa: E402
+import generate_ebon_reward_sfx as reward  # noqa: E402  (sweep, ratchet, sparks, taper: shared helpers, unmodified)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "Assets" / "Sounds" / "Weapons" / "DollWeapons"
@@ -70,6 +72,11 @@ SOURCES = {
     "doll_summon": ("repo:Assets/Sounds/Weapons/DollTheater/DollSummon.wav",
                     "Convergence project asset doll-theater-0253-dollsummon (0.3.7 articulation revision)",
                     "f4be1a0733e06ad0262d6703a44fc00a0a01dd9a17a3fb1a3381831d634e8534", "Convergence"),
+    # Lacrimosa's Claws (2026-10-03): a CC0 recording already in the Ebon Manor reward audio table (the claws also
+    # use air_cut, stick_woosh and chop, the same files and hashes as the Last Witness entries below).
+    "low_impact": ("sfx-sources/cc0/impact-FS541029-AudioPapkin-very_low_impact.mp3",
+                   "AudioPapkin, very low impact (https://freesound.org/s/541029/, HQ preview, CC0 1.0)",
+                   "73c25c4f49baa34cb9ad42290324fc61340124028dc0161299880b78580e335a", "AudioPapkin"),
 }
 
 
@@ -1936,6 +1943,241 @@ def choir_concert(samples, voices, cancel=None, finish=None):
     return mix, [(round(at * CHOIR_TICK, 3), name) for at, name, _ in events]
 
 
+# ---------------------------------------------------------------- Lacrimosa's Claws (2026-10-03)
+# The claw cues follow the gameplay clock (LacrimosaClawMotion, LacrimosaClawVisuals): a firing cue starts `lead`
+# ticks before its event so its main transient lands on it. Rake fires peak 3 ticks in, on the first live tick; the
+# clap, grasp and crush peak 1 tick in. ClawCrushWarn starts at grasp age 18 and carries the four squeezes at their
+# beat ticks, ending just before the crush. Materials: brass pawls and key, porcelain fingertips and knuckles, cut
+# air, the music-box comb on the F minor pentatonic ladder and the flue organ; no runtime transposition except the
+# single-note ClawBead (recorded at F5, played up the ladder for beads 1-6).
+CLAW_RAKE_LEAD = 3 * TICK
+CLAW_STRIKE_LEAD = 1 * TICK
+CLAW_SQUEEZES = (22, 28, 33, 36)    # LacrimosaClawMotion.SqueezeBeats
+CLAW_WARN_FROM, CLAW_CRUSH = 18, 40  # GraspContactEnd (CrushWarn starts), GraspCrush
+
+
+def taper(x, fade_out, fade_in=0.0005):
+    return reward.taper(x, fade_out, fade_in)
+
+
+def rake_warn(rng, rising):
+    """Three brass pawl teeth as the hand coils (rising for the down-rake's lift, falling for the up-rake's dip),
+    a porcelain knuckle tick and a short inhale of air."""
+    mix = seconds(0.26)
+    steps = (1.0, 1.06, 1.12) if rising else (1.12, 1.06, 1.0)
+    side = -0.25 if rising else 0.25
+    for i, at in enumerate((0.0, 0.032, 0.058)):
+        place(mix, pan(dsp.brass_click(rng, 2300 * steps[i], decay=0.004, tick=0.6, thud=0.15), side), at, -3 - i)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7" if rising else "Ab6"), 0.08, rng, decay=0.025, side=-side), 0.085, -9)
+    air = reward.sweep(0.16, rng, 900, 3200 if rising else 2200, shape=lambda t: np.sin(np.pi * np.clip(t / 0.16, 0, 1)) ** 2)
+    place(mix, air, 0.02, -15)
+    place(mix, dsp.shimmer(0.16, rng, count=4, air=0.05), 0.05, -24)
+    return taper(mix[:round(0.2 * RATE)], 0.04)
+
+
+def rake_fire(s, rng, down):
+    """Cut air cresting on the first live tick, a tear swept down (A) or up (B) through the 8-tick live window,
+    three talon tinks stepping C7 Bb6 Ab6 an octave up and the hand's short weight. No delayed second note."""
+    mix = seconds(0.42)
+    peak = CLAW_RAKE_LEAD
+    if down:  # air_cut crests 0.14 s into its file: cut 0.09 s in and sped up, it crests about 0.045 s into the cue
+        lay(mix, s, "air_cut", 0.09, 0.40, 0.0, -3, rate=1.12, hp_=500, side=0.25, fade_in=0.004, fade_out=0.08)
+    else:  # stick_woosh crests 0.14 s in
+        lay(mix, s, "stick_woosh", 0.095, 0.44, 0.0, -3, rate=1.08, hp_=450, side=-0.25, fade_in=0.004, fade_out=0.08)
+    tear = reward.sweep(0.17, rng, 6200 if down else 1400, 1400 if down else 6200,
+                        shape=lambda t: np.clip(t / 0.012, 0, 1) * np.exp(-t / 0.07))
+    place(mix, tear, peak - 0.012, -7)
+    notes = ("C7", "Bb6", "Ab6") if down else ("Ab6", "Bb6", "C7")
+    for i, note in enumerate(notes):
+        place(mix, dsp.porcelain_ring(dsp.hz(note) * 2, 0.06, rng, decay=0.012, side=(0.4 - 0.3 * i) * (1 if down else -1)),
+              peak + 0.004 + 0.009 * i, -12 - i)
+    place(mix, dsp.thump(140, 62, 0.16, rng), peak, -13)
+    place(mix, pan(dsp.brass_click(rng, 1700, decay=0.006, thud=0.4), 0.0), peak + 0.002, -14)
+    return mix
+
+
+@cue("ClawRakeDownWarn", -17, "Claws", 0.25, 0.6,
+     "A（右手の振り下ろし）の予備動作。手が背中側へ巻き上がるあいだに真鍮の爪車が3回、上がっていく音程で鳴り、"
+     "磁器の指関節のコツッと短い吸気が続く。")
+def claw_rake_down_warn(s, rng):
+    return rake_warn(rng, True)
+
+
+@cue("ClawRakeDownFire", -11.5, "Claws", 0.4, 0.7,
+     "A の振り下ろし。最初の有効フレームに頂点が来る鋭い風切り（旧爪の受け入れられた切れ味を継承）に、"
+     "上から下へ掃く裂ける音、指先の磁器が C7→B♭6→A♭6 と3つ、手の重さの短い低音。後から鳴る二音目はない。", glue=3.2)
+def claw_rake_down_fire(s, rng):
+    return rake_fire(s, rng, True)
+
+
+@cue("ClawRakeUpWarn", -17, "Claws", 0.25, 0.6,
+     "B（左手の振り上げ）の予備動作。手が低く背後へ沈むあいだに爪車が下がっていく音程で3回、指関節と吸気。")
+def claw_rake_up_warn(s, rng):
+    return rake_warn(rng, False)
+
+
+@cue("ClawRakeUpFire", -11.5, "Claws", 0.4, 0.7,
+     "B の振り上げ。別の風切り素材に、下から上へ掃く裂ける音、指先が A♭6→B♭6→C7 と上がる。A と対になる鏡写しの音。", glue=3.2)
+def claw_rake_up_fire(s, rng):
+    return rake_fire(s, rng, False)
+
+
+@cue("ClawClapWarn", -13, "Claws", 0.38, 0.8,
+     "C（両手の打ち合わせ）の予備動作。両手が大きく開いて構えるあいだ、オルガンの鞴が息を吸い込むように"
+     "空気と F の5度が膨らみ、真鍮の蝶番が軋む。打ち合わせの直前で切れる。")
+def claw_clap_warn(s, rng):
+    length = 0.34
+    mix = seconds(length + 0.05)
+    place(mix, reward.sweep(length, rng, 380, 2600, shape=lambda t: (np.clip(t, 0, length) / length) ** 1.6), 0.0, -6)
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F3", "C4", "F4")], length, rng, attack=length * 0.95, release=0.02, harmonics=7,
+                        rolloff=1.6, chiff=0.0, breath=0.3)
+    place(mix, pad, 0.0, -9)
+    place(mix, dsp.ratchet((0.04, 0.09, 0.13, 0.16, 0.185), rng, freq=1500, gains_db=(-6, -5, -4, -3, -2), decay=0.006, thud=0.3), 0.0, -10)
+    return taper(mix[:round(length * RATE)], 0.02)
+
+
+@cue("ClawClapFire", -11.5, "Claws", 0.65, 0.95,
+     "C の打ち合わせ。両掌が噛み合う瞬間に磁器の平手打ちと高い磁器の響き、オルガンの短い F の和音（F3 C4 F4 C5）の一撃、"
+     "低い胴鳴りと真鍮の余韻。", glue=3.2)
+def claw_clap_fire(s, rng):
+    mix = seconds(0.7)
+    hit = CLAW_STRIKE_LEAD
+    place(mix, dsp.porcelain_crack(0.12, rng, count=5, spread=0.012, low=2600, high=5200, decay=(0.01, 0.03)), hit, -4)
+    place(mix, dsp.porcelain_ring(3100, 0.25, rng, decay=0.05, side=-0.3), hit, -8)
+    place(mix, dsp.porcelain_ring(4200, 0.2, rng, decay=0.04, side=0.3), hit + 0.002, -9)
+    lay(mix, s, "chop", 0.035, 0.2, hit - 0.012, -7, hp_=300, fade_in=0.001)  # chop's body peaks 0.05 s in
+    stab = dsp.organ_pad([dsp.hz(n) for n in ("F3", "C4", "F4", "C5")], 0.3, rng, attack=0.012, release=0.16, harmonics=9,
+                         rolloff=1.3, chiff=0.06, breath=0.1)
+    place(mix, stab, hit, -7)
+    place(mix, dsp.thump(120, 48, 0.3, rng), hit, -6)
+    place(mix, pan(dsp.brass_click(rng, 1250, decay=0.03, dur=0.25, thud=0.2), 0.0), hit + 0.004, -12)
+    return room(mix, 0.12, 0.6, 0.12)
+
+
+@cue("ClawHit", -20, "Claws", 0.18, 0.9,
+     "爪が当たったとき（その一撃で最初の接触）。磁器の小さな欠けるチッという音と、こもった低い当たり。強い一撃の音より控えめ。")
+def claw_hit(s, rng):
+    mix = seconds(0.2)
+    place(mix, dsp.porcelain_crack(0.1, rng, count=3, spread=0.006, low=3000, high=6500, decay=(0.006, 0.018)), 0.0, -3)
+    place(mix, lp(dsp.thump(180, 80, 0.1, rng), 900), 0.0, -6)
+    return mix
+
+
+@cue("ClawBead", -20, "Claws", 0.75, 0.85,
+     "手の甲の心臓玉がひとつ灯る（持ち主にだけ聞こえる）。F5 で録ったオルゴールの一音で、ゲームでは1つ目から6つ目まで "
+     "F5 A♭5 B♭5 C6 E♭6 F6 と梯子を上る。ここでは F5 のまま。")
+def claw_bead(s, rng):
+    mix = seconds(0.7)
+    place(mix, dsp.box_tine(dsp.hz("F5"), 0.65, rng), 0.0, 0)
+    place(mix, pan(dsp.brass_click(rng, 3100, decay=0.002, dur=0.03, tick=0.4, thud=0.05), 0.2), 0.0, -14)
+    return mix
+
+
+@cue("ClawBeadsFull", -13, "Claws", 0.95, 0.8,
+     "6つの玉がすべて灯った（持ち主のみ、6つ目の音の少し後）。ぜんまいの鍵が2回巻かれ、オルゴールが C6→F6 と終止し、"
+     "A♭6 と C7 がかすかに重なる。下で F マイナーのオルガンが柔らかく膨らむ。右クリックが使える合図。")
+def claw_beads_full(s, rng):
+    mix = seconds(1.0)
+    place(mix, dsp.ratchet((0.0, 0.07), rng, freq=2300, gains_db=(-2, 0), side=-0.2), 0.0, -8)
+    lay(mix, s, "metal_click", 0.2705, 0.34, 0.0, -11, hp_=1400, side=-0.2, fade_in=0.0005, fade_out=0.03)
+    place(mix, pan(dsp.box_tine(dsp.hz("C6"), 0.7, rng), -0.1), 0.12, -5)
+    place(mix, pan(dsp.box_tine(dsp.hz("F6"), 0.8, rng), 0.15), 0.24, -2)
+    place(mix, pan(dsp.box_tine(dsp.hz("Ab6"), 0.6, rng), -0.3), 0.244, -11)
+    place(mix, pan(dsp.box_tine(dsp.hz("C7"), 0.5, rng), 0.35), 0.248, -12)
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F3", "C4", "Ab4")], 0.75, rng, attack=0.3, release=0.35, harmonics=7, rolloff=1.5,
+                        chiff=0.02, breath=0.2)
+    place(mix, pad, 0.1, -16)
+    place(mix, dsp.shimmer(0.4, rng, count=6), 0.3, -20)
+    return room(mix, 0.12, 0.9, 0.25)
+
+
+@cue("ClawBeadDry", -20, "Claws", 0.15, 0.8,
+     "玉が6つそろう前に右クリックしたとき（持ち主のみ）。くぐもった真鍮のコトッと、こもった短い一音。何も起きないことが分かる音。")
+def claw_bead_dry(s, rng):
+    mix = seconds(0.16)
+    place(mix, pan(dsp.brass_click(rng, 900, decay=0.003, dur=0.05, tick=0.3, thud=0.6), 0.0), 0.0, -2)
+    place(mix, lp(dsp.box_tine(dsp.hz("F5"), 0.12, rng, decay=0.025, body=0.8), 1200), 0.004, -7)
+    return mix
+
+
+@cue("ClawGraspWarn", -13, "Claws", 0.32, 0.9,
+     "右クリックで掴みに行く（予告）。6つの玉が放電するようにオルゴールが F6 E♭6 C6 B♭5 A♭5 F5 と一気に駆け下り、"
+     "ぜんまいがほどける加速するカラカラと、両手が飛ぶ風が到着の瞬間まで上がっていく。")
+def claw_grasp_warn(s, rng):
+    mix = seconds(0.36)
+    for i, note in enumerate(("F6", "Eb6", "C6", "Bb5", "Ab5", "F5")):
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 0.3, rng, decay=0.12, body=0.2), 0.3 - 0.12 * i), 0.012 * i, -6 - 0.4 * i)
+    whirr = reward.ratchet(0.2, rng, 35, 140, low=1800, high=6500)
+    place(mix, whirr * np.linspace(0.3, 1, len(whirr))[:, None], 0.06, -12)
+    place(mix, reward.sweep(0.2, rng, 700, 4200, shape=lambda t: np.sin(np.pi * np.clip(t / 0.2, 0, 1)) ** 1.5), 0.04, -10)
+    return taper(mix[:round(0.3 * RATE)], 0.05)
+
+
+@cue("ClawGraspFire", -11.5, "Claws", 0.45, 0.95,
+     "両手が敵を掴んだ（発動）。磁器の指が5つ重なって当たるカカカッと、重い真鍮の掛け金のガチャン、低い当たり。", glue=3.2)
+def claw_grasp_fire(s, rng):
+    mix = seconds(0.45)
+    hit = CLAW_STRIKE_LEAD
+    for i in range(5):
+        place(mix, dsp.porcelain_ring(rng.uniform(2400, 4200), 0.08, rng, decay=0.018, side=rng.uniform(-0.5, 0.5)), hit + 0.0035 * i, -6 - i)
+    lay(mix, s, "metal_latch", 0.035, 0.24, hit - 0.005, -3, rate=0.92, hp_=250, fade_in=0.0005, fade_out=0.08)  # catch 0.04 s in
+    place(mix, pan(dsp.brass_click(rng, 1400, decay=0.01, dur=0.12, thud=0.9), 0.0), hit, -7)
+    place(mix, dsp.thump(110, 45, 0.28, rng), hit, -5)
+    return room(mix, 0.1, 0.42, 0.1)
+
+
+@cue("ClawGraspMiss", -13, "Claws", 0.4, 0.9,
+     "何もない所を掴んだ（失敗）。掛け金のないうつろな磁器の打ち合わせと空気の破裂、くぐもったオルゴールが A♭5→F5 と落ちる。"
+     "成功の音とははっきり別物。")
+def claw_grasp_miss(s, rng):
+    mix = seconds(0.4)
+    hit = CLAW_STRIKE_LEAD
+    n = round(0.06 * RATE)
+    puff = base.bp(base.noise(n, rng), 500, 1800) * np.exp(-np.arange(n) / (0.012 * RATE))[:, None]
+    place(mix, puff / max(1e-9, np.abs(puff).max()), hit, -8)
+    place(mix, dsp.porcelain_ring(1250, 0.2, rng, decay=0.05, side=-0.2), hit, -6)
+    place(mix, dsp.porcelain_ring(1660, 0.18, rng, decay=0.04, side=0.2), hit + 0.006, -8)
+    place(mix, lp(dsp.box_tine(dsp.hz("Ab5"), 0.25, rng, decay=0.08), 2500), hit + 0.05, -12)
+    place(mix, lp(dsp.box_tine(dsp.hz("F5"), 0.3, rng, decay=0.1), 2200), hit + 0.11, -11)
+    return room(mix, 0.16, 0.38, 0.12)
+
+
+@cue("ClawCrushWarn", -13, "Claws", 0.38, 0.9,
+     "掴んだまま締め上げる（握り潰しの予告）。4回の締め付けに合わせて真鍮の爪車と磁器の軋みが少しずつ高くなり、"
+     "オルガンのペダル（F2 と C3）が膨らみ、細かなひびが増えていく。握り潰しの直前で切れる。")
+def claw_crush_warn(s, rng):
+    length = (CLAW_CRUSH - CLAW_WARN_FROM) * TICK - 0.008
+    mix = seconds(length + 0.05)
+    for k, beat in enumerate(CLAW_SQUEEZES):
+        at = (beat - CLAW_WARN_FROM) * TICK
+        place(mix, pan(dsp.brass_click(rng, 1900 * 2 ** (k * 1.5 / 12), decay=0.005, dur=0.06, thud=0.5), -0.15 + 0.1 * k), at, -6 + k)
+        place(mix, dsp.porcelain_crack(0.08, rng, count=3 + k, spread=0.01, low=2200, high=5000, decay=(0.005, 0.015)), at + 0.004, -14 + k)
+    pedal = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3")], length, rng, attack=length * 0.9, release=0.015, harmonics=8,
+                          rolloff=1.2, chiff=0.0, breath=0.25)
+    place(mix, pedal, 0.0, -6)
+    crackle = reward.sparks(length, rng, 18, low=2500, high=7000, decay=(0.002, 0.006), fall=0.5)
+    place(mix, crackle * np.linspace(0.2, 1, len(crackle))[:, None], 0.0, -16)
+    return taper(mix[:round(length * RATE)], 0.015)
+
+
+@cue("ClawCrushFire", -10, "Claws", 1.2, 1.0,
+     "握り潰し（最大の一撃）。たくさんの磁器が砕ける連鎖、とても低い衝撃、オルガンの F マイナーの和音（F2 C3 F3 A♭3 C4）を短く切った一撃、"
+     "オルゴールの F6 と真鍮のばねの余韻。長い残響はない。")
+def claw_crush_fire(s, rng):
+    mix = seconds(1.3)
+    hit = CLAW_STRIKE_LEAD
+    place(mix, dsp.porcelain_crack(0.3, rng, count=11, spread=0.045, low=1800, high=7000, decay=(0.01, 0.04)), hit, -2)
+    lay(mix, s, "low_impact", 0.62, 1.4, hit - 0.01, -4, lp_=600, fade_in=0.004, fade_out=0.3)
+    stab = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "F3", "Ab3", "C4")], 0.5, rng, attack=0.01, release=0.3, harmonics=10,
+                         rolloff=1.15, chiff=0.08, breath=0.12)
+    place(mix, stab, hit, -5)
+    place(mix, dsp.thump(95, 36, 0.5, rng), hit, -2)
+    place(mix, pan(dsp.box_tine(dsp.hz("F6"), 0.8, rng), 0.2), hit + 0.05, -12)
+    place(mix, dsp.ratchet((0.12, 0.16, 0.19, 0.215, 0.235), rng, freq=2000, gains_db=(-4, -6, -8, -10, -12), side=0.3), hit, -14)
+    lay(mix, s, "chop", 0.035, 0.2, hit - 0.012, -8, hp_=200, fade_in=0.001)
+    return room(mix, 0.12, 1.15, 0.35)
+
+
 # ---------------------------------------------------------------- render
 def seed(name):
     return int.from_bytes(hashlib.sha256((SEED_PREFIX + name).encode("utf-8")).digest()[:8], "little")
@@ -2704,6 +2946,138 @@ h1,h2,h3{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}h3{{color:#d9c7f5
 </html>""", encoding="utf-8", newline="\n")
 
 
+# ---------------------------------------------------------------- Lacrimosa's Claws audition
+def claw_timeline(ticks=500, grasp_delay=30):
+    """The claws' build-up to release at attack speed 1, mirroring LacrimosaClawScore (LacrimosaClawHeart.cs): the kata
+    A B C from a cold press with every stroke landing, the beads filling (hits with tempo plus the passive trickle),
+    the full-meter cadence, the grasp `grasp_delay` ticks after the beads fill (so the cadence is heard alone), the
+    crush, and the kata resuming. Returns (tick, cue,
+    step) events at the client's cue ticks (LacrimosaClawVisuals); step is the ladder step of a bead note."""
+    base_ticks, live, units = (26, 24, 34), (9, 7, 18), (12, 12, 24)
+    events, stroke, age, combo, grasp, readyat = [], -1, 0, 0, -1, -1
+    meter, passive, streak, last_land, landed, lit = 0, 0, 0, -10 ** 6, False, 0
+    for tick in range(ticks):
+        busy = 0 <= grasp < 54
+        if meter >= 360 and readyat < 0:
+            readyat = tick
+        if not busy and meter >= 360 and tick >= readyat + grasp_delay:
+            grasp, readyat, meter, passive, streak, landed, stroke, combo = 0, -1, 0, 0, 0, False, -1, 0
+            busy = True
+            events.append((tick, "ClawGraspWarn", None))
+            events.append((tick + 14, "ClawGraspFire", None))
+            events.append((tick + 17, "ClawCrushWarn", None))
+            events.append((tick + 38, "ClawCrushFire", None))
+        elif not busy and (stroke < 0 or age >= base_ticks[stroke]):
+            stroke, age, hit = combo % 3, 0, False
+            combo += 1
+            name = ("ClawRakeDown", "ClawRakeUp", "ClawClap")[stroke]
+            events.append((tick, name + "Warn", None))
+            events.append((tick + (20 if stroke == 2 else live[stroke] - 4), name + "Fire", None))
+        if not busy and meter < 360:
+            passive += 1
+            if passive >= 4:
+                passive, meter = 0, min(360, meter + 1)
+        if stroke >= 0 and age < base_ticks[stroke]:
+            age += 1
+            if age == live[stroke]:
+                events.append((tick + (2 if stroke == 2 else 0), "ClawHit", None))
+                if landed and tick - last_land > 75:
+                    streak = 0
+                quarters = 4 if streak < 2 else 5 if streak < 5 else 6
+                streak, last_land, landed = streak + 1, tick, True
+                meter = min(360, meter + units[stroke] * quarters // 4)
+        if grasp >= 0:
+            grasp += 1
+            if grasp >= 64:
+                grasp = -2
+        beads = meter // 60
+        if beads > lit:
+            events.append((tick + 1, "ClawBead", beads - 1))
+            if beads == 6:
+                events.append((tick + 9, "ClawBeadsFull", None))
+        lit = beads
+    return events
+
+
+WEAPON_PAGES = {
+    "Claws": {"title": "ラクリモーサの双爪 — 効果音", "folder": "doll-claws", "combo": claw_timeline,
+              "intro": "左クリックの三段の型（A 右手の振り下ろし、B 左手の振り上げ、C 両手の打ち合わせ）と、6つの心臓玉、右クリックの掴み・握り潰しの音です。"
+                       "すべて新規の音で、F マイナー・ペンタトニック（F A♭ B♭ C E♭）の上にあります。各音はゲーム内の音量（下に表示）で書き出しています。"},
+}
+
+
+def claw_preview(directory, group, samples, report):
+    """Owner audition page for one weapon group: every cue alone at its in-game volume, the full build-up-to-release
+    combo at the client's cue ticks, and that combo over beat-aligned Doll BGM excerpts (resampled to 44.1 kHz and
+    cross-checked by load_bgm). Relative links only; the folder is git-ignored."""
+    spec = WEAPON_PAGES[group]
+    directory.mkdir(parents=True, exist_ok=True)
+
+    def wav(name, x):
+        peak = np.abs(x).max()
+        if peak > 0.999:
+            raise RuntimeError(f"audition clip {name} clips ({peak:.3f})")
+        sf.write(str(directory / f"{name}.wav"), x.astype(np.float32), RATE, subtype="PCM_16")
+        return f"{name}.wav"
+
+    clips = {name: wav(name, x * CUES[name].volume) for name, x in samples.items()}
+    events = spec["combo"]()
+    end = max(t for t, _, _ in events) * TICK + 1.4
+    combo = seconds(end)
+    for tick, name, step in events:
+        x = samples[name]
+        if step:  # single-note bead cue moved up the ladder, as SoundStyle.Pitch does (time and pitch together)
+            x = speed(x, dsp.ladder(step) / dsp.ladder(0))
+        place(combo, x * CUES[name].volume, tick * TICK)
+    combo_trim = min(0.0, 20 * np.log10(0.97 / np.abs(combo).max()))
+    extra = {"combo": {"seconds": round(end, 3), "events": len(events), "trim_db": round(combo_trim, 2)}}
+    combo_clip = wav(f"{group}Combo", combo * 10 ** (combo_trim / 20))
+    beds = []
+    for bgm, bpm, origin, first, beats, _, label in BGM:
+        beat = 60 / bpm
+        start, length = origin + first * beat, max(beats * beat, np.ceil((end + 2 * beat) / beat) * beat)
+        bed, check = load_bgm(bgm, start, length)
+        mix = bed.copy()
+        place(mix, combo, 2 * beat)  # the press on the bed's third beat
+        trim_db = min(0.0, 20 * np.log10(0.97 / max(np.abs(mix).max(), np.abs(bed).max())))
+        g = 10 ** (trim_db / 20)
+        beds.append((bgm, label, wav(f"{group}Combo-{bgm}", mix * g), wav(f"bgm-{bgm}", bed * g)))
+        extra[bgm] = check | {"start": round(start, 4), "length": round(length, 4), "bpm": bpm, "press_at": round(2 * beat, 4),
+                              "mix_trim_db": round(trim_db, 2)}
+
+    def audio(src, loop=False):
+        return f"<audio controls preload='none' {'loop ' if loop else ''}src='{html.escape(src)}'></audio>"
+
+    rows = []
+    for name in samples:
+        r = report[name]
+        rows.append(f"<tr><td><b>{html.escape(name)}</b><br><small>{r['seconds']:.2f} 秒 ・ 音量 {r['volume']} ・ 実効 {r['effective_lufs']:.1f} LUFS"
+                    f" ・ ピーク {r['true_peak_dbfs']:.1f} dBTP</small></td><td>{audio(clips[name])}</td>"
+                    f"<td>{html.escape(CUES[name].description)}</td></tr>")
+    bed_rows = "".join(
+        f"<tr><td>{html.escape(label)}<br><small>{extra[bgm]['bpm']:g} BPM、3拍目で押し始め。クリップしないよう両方 {-extra[bgm]['mix_trim_db']:.1f} dB 下げています。</small></td>"
+        f"<td>コンボ＋BGM {audio(src)}</td><td>BGM だけ（ループ） {audio(bed_src, loop=True)}</td></tr>"
+        for bgm, label, src, bed_src in beds)
+    (directory / "index.html").write_text(f"""<!doctype html><html lang='ja'><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'><title>{html.escape(spec['title'])}</title>
+<style>body{{font:15px system-ui,'Yu Gothic UI',sans-serif;background:#15121a;color:#ece4dc;margin:24px;max-width:1150px}}
+td{{padding:8px 12px;vertical-align:top;border-bottom:1px solid #2c2633}}small{{color:#a99fb0}}table{{border-collapse:collapse;width:100%}}
+h1,h2{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}audio{{height:32px;width:260px}}p{{line-height:1.6}}</style>
+<h1>{html.escape(spec['title'])}</h1>
+<p>{html.escape(spec['intro'])}</p>
+<h2>通しで聴く（溜めから解放まで）</h2>
+<p>押した瞬間から、型を繰り返しながら玉が灯り、6つそろった合図、掴み、締め上げ、握り潰し、型の再開までを、ゲームと同じタイミング（60 tick/秒）と音量で並べています
+（全 {extra['combo']['events']} 音、{extra['combo']['seconds']:.1f} 秒。クリップしないよう {-extra['combo']['trim_db']:.1f} dB 下げています）。
+玉の音は持ち主にだけ聞こえる音で、1つ目から6つ目まで F5 から F6 へ上がります。</p>
+<table><tr><td>コンボ（効果音だけ）</td><td>{audio(combo_clip)}</td><td></td></tr>{bed_rows}</table>
+<p><small>BGM は実際の Doll の曲を 44.1 kHz に変換したもの（元の速さと音程のまま、変換の前後を相関で確認済み）。効果音と音楽の音量設定はどちらも 100% の想定です。
+調は F マイナー・ペンタトニックで、BGM に合わせた音程の補正はしていません（0 セント）。</small></p>
+<h2>ひとつずつ</h2>
+<table>{''.join(rows)}</table>
+</html>""", encoding="utf-8", newline="\n")
+    return extra
+
+
 # ---------------------------------------------------------------- attribution
 # Per group: the records' date stamp and date, their review line and the section's introduction (heading included).
 LACUNA_ATTRIBUTION = """### Lacuna Testament cues — 2026-10-03
@@ -2739,7 +3113,54 @@ RECORDS = {
 }
 
 
+# Lacrimosa's Claws: header, dates and review line of its generated section (group_attribution_section).
+ATTRIBUTION_GROUPS = {
+    "Claws": {
+        "title": "### Lacrimosa's Claws cues — 2026-10-03",
+        "date": "20261003", "made": "2026-10-03",
+        "about": "The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, the contact, the six bead notes from one F5 master, the full-meter cadence, the early-click tick, the grasp's warning, success and miss, the squeeze warning and the crush).",
+        "review": "Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run",
+    },
+}
+
+
+def group_attribution_section(report, hashes, info):
+    table = "\n".join(f"| {k} | {SOURCES[k][0].replace('repo:', '')} | {SOURCES[k][1]} | `{hashes[k]}` |" for k in sorted(hashes))
+    head = f"""{info['title']}
+
+{info['about']} [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass pawls, porcelain rings and cracks, additive flue organ, shimmer, low thump), with the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. The recordings below are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. Loudness follows the Doll weapon tiers (BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after the Vorbis round trip). The audition page stays in the git-ignored `.local`.
+
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+{table}
+"""
+    blocks = []
+    for name, r in report.items():
+        used = r["sources"]
+        external = [k for k in used if not SOURCES[k][0].startswith("repo:")]
+        authors = sorted({SOURCES[k][3] for k in external}, key=str.lower)
+        creators = (f"recordings by {' and '.join(authors)}; " if authors else "") + \
+            "synthesis and layering by Convergence with owner-directed Claude assistance"
+        blocks.append(f"""- Runtime file: `Assets/Sounds/Weapons/DollWeapons/{name}.ogg`
+- Asset ID: doll-weapon-sfx-{name.lower()}-{info['date']}
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue ({r['seconds']:.2f} s)
+- Creator: {creators}
+- Creation/acquisition date: {info['made']}
+- Source type: {'public-domain' if external else 'original'}
+- Source work and URL: {', '.join(used) + ' in the table above as selected by the cue recipe; remaining layers original synthesis' if used else 'none; original NumPy synthesis'}
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy {np.__version__}, SciPy {__import__('scipy').__version__}, soundfile {sf.__version__}/libsndfile {sf.__libsndfile_version__} Vorbis at compression level 0.4
+- Human modifications: {'trimmed, filtered and layered recordings plus original synthesis' if external else 'original synthesis'}; short-term loudness {r['short_term_lufs']:.1f} LUFS (played at volume {r['volume']}: {r['effective_lufs']:.1f} LUFS effective), true peak {r['true_peak_dbfs']:.1f} dBFS; pinned Ogg serial
+- License and redistribution terms: {'CC0 1.0 recordings; the layered cue follows the existing project asset terms' if external else 'original project asset under the existing project terms'}
+- Required attribution: {'none required by CC0; retain the table above as courtesy credit' if external else 'none; retain this provenance'}
+- Reviewer and review date: {info['review']}
+- SHA256: `{r['ogg_sha256']}`
+""")
+    return head + "\n" + "\n".join(blocks)
+
+
 def attribution_section(report, hashes, group="Companion"):
+    if group in ATTRIBUTION_GROUPS:
+        return group_attribution_section(report, hashes, ATTRIBUTION_GROUPS[group])
     if report and all(CUES[name].group.startswith("Meridian") for name in report):
         return meridian_attribution_section(report, hashes)
     groups = {CUES[name].group for name in report}
@@ -3060,7 +3481,7 @@ def main():
     parser.add_argument("--only", help="comma-separated cue names; each cue is seeded by its own name, so the bytes "
                                        "equal a full run")
     parser.add_argument("--group", help="render one weapon's cues (Companion, Lacuna, Meridian: every 'Meridian ...' "
-                                        "group, Witness: Last Witness and its Triangle Judgement, Choir); --preview and "
+                                        "group, Witness: Last Witness and its Triangle Judgement, Choir, Claws); --preview and "
                                         "--attribution-section describe one weapon")
     args = parser.parse_args()
     names = ([n.strip() for n in args.only.split(",")] if args.only
@@ -3085,7 +3506,8 @@ def main():
               "cues": report}
     group = next(iter(groups))
     if args.preview:
-        record["audition"] = (weapon_preview(args.preview, group, samples, report) if group in COMBOS
+        record["audition"] = (claw_preview(args.preview, group, samples, report) if group in WEAPON_PAGES
+                              else weapon_preview(args.preview, group, samples, report) if group in COMBOS
                               else witness_audition(args.preview, samples, report) if group == "Witness"
                               else preview(args.preview, samples, report, store, args.previous))
         (args.preview / "doll-weapon-sfx-report.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n")
