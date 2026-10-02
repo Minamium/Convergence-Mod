@@ -123,7 +123,7 @@ internal sealed class RigGates
                 for (int i = 0; i < body.Length; i++)
                 {
                     if (safe[i] && !body[i]) zonePixels++;
-                    if (safe[i] && !body[i] && npc[i].A > 2) npcInZone++;
+                    if (safe[i] && !body[i] && Lit(npc[i], 2)) npcInZone++;
                     if (!diff[i]) continue;
                     diffPixels++;
                     if (!body[i]) diffOutside++;
@@ -237,7 +237,7 @@ internal sealed class RigGates
                 for (int tick = p.Fire - 2; tick <= p.Fire + 3 && first == int.MinValue; tick++)
                 {
                     var view = WorldView(tick, out var target);
-                    if (InkOnly(s, view, p, target).Any(c => c.A > 3)) first = tick;
+                    if (InkOnly(s, view, p, target).Any(c => Lit(c, 3))) first = tick;
                 }
                 bool ok = first >= p.Fire - 1 && first <= p.Fire + 1;
                 inkOk &= ok;
@@ -553,6 +553,9 @@ internal sealed class RigGates
 
     // ---- helpers -------------------------------------------------------------------------------------------------
     internal static bool BodyOnly(string shader, string pass) => shader is "ScarletApparitions" or "ScarletChoir" && pass == "AutoloadPass";
+
+    // Premultiplied output: an additive glow leaves alpha at 0 and still lights the pixel.
+    private static bool Lit(Color c, int threshold) => Math.Max(Math.Max(c.R, c.G), Math.Max(c.B, c.A)) > threshold;
 
     private Color[] Pixels(RigScene s, in ScarletView view, in RigVariant v, RigLayers layers, Color clear)
     {
