@@ -17,6 +17,10 @@ related_docs:
 
 # Playtest feedback ledger
 
+## Cathedral sound effects v2 — 2026-10-02 / 0.3.63 → 0.3.65
+
+Owner: Cathedral looks good but everything else is ordinary; start with the sound effects and keep the White Night BGM (a loop/fade-in fix comes later). On a listening page (game-cadence sequences at the owner's sliders, current sound alongside) the owner judged the new set good overall, called the first lattice ticks plain, asked to build on the old "ba-ba-ba" Doll ChargeRush staccato and chose candidate A of three; the owner also caught that the page's BGM was slowed (a 48 kHz file mixed as 44.1 kHz in the audition only, fixed). Decision: ship all 53 cues with one event table and cue clock and fix the six known sound defects. [Evidence](../evidence/2026-10-02-azure-sfx-v2.json); in-game listening remains not_run.
+
 ## Ghost Samurai field and music — 2026-10-02 / 0.3.59 → 0.3.62
 
 Owner chose the v2 original theme by ear ("新しいやつ") for the boss, then called the raid's background garbage, especially the outside and the edge, and asked for something cool that accounts for this raid's different operation (summoned anywhere, no preparation, field at the summoner's feet). Reported dissatisfaction, not new footage. Code reading found half of a grounded 1080p view black under the floor line, a cyan UI-like ruler edge half hidden by the mask, a near-black backdrop with its painted ground above the real floor, and instant appear/vanish. Rebuild the field as the seal the mourning bell raises (indigo still edge, spirit fire, abyss and mirrored lake, parallax night, deploy/victory/fallen/onlooker behaviour, daylight cap); bounds, hazards and protocol unchanged. [Evidence](../evidence/2026-10-02-samurai-sealed-field.json) separates offline GPU frames and the luminance gate from user-owned native readability, locations, FPS and peers.

@@ -1785,107 +1785,872 @@ Original Convergence images and procedural materials; existing VioletRig, Oboro 
 - Required attribution: retain project provenance and generation disclosure
 - Reviewer and review date: Codex compiled-material/production-mesh frame inspection2026-09-27; native playtest not_run
 
-### Azure material and ice/glass audio revision — 2026-09-26
+### Cathedral recorded audio (SFX v2) — 2026-10-02
 
-Original code-authored materials and synthesized audio; no external samples or texture extraction. Original Vitrion/Liora PNGs and music remain unchanged. The latest project-owned Scarlet renderer supplies techniques (masked emission, attached lagging ribbons), not copied red anatomy. Audio listening/in-game mix acceptance remains pending.
+Replaces the seven 2026-09-26 NumPy-only Azure cues and the borrowed Doll pressure/beam/chorus layers with one cue per event. The owner auditioned the full set and the lattice candidate on a listening page on2026-10-02 ("効果音全体的にいい"; lattice candidate A chosen). [`tools/remix_azure_sfx.py`](../tools/remix_azure_sfx.py) owns exact windows, filters, gains, loudness targets and the original support synthesis, using the shared [`tools/sfx_layers.py`](../tools/sfx_layers.py); its report lists every source path and hash. The recordings stay in a local source store and are not committed. The Freesound and OpenGameArt files are the same CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/) uploads recorded and page-checked for Ghost Samurai and Soboro on2026-10-01; Freesound files are the public HQ preview renders. VSCO 2 Community Edition 1.1.0 is distributed under CC0 1.0 (its bundled LICENSE). The lattice core reuses the project-owned Doll `ChargeRush` beam cue.
 
-- Runtime file: `Assets/Sounds/AzureCathedral/IceBreak.wav`
-- Asset ID: azure-icebreak-20260926
-- Asset type: stereo PCM16 44100Hz 0.88s low ice-sheet split and falling glass grains
-- Creator: project-owner-directed original synthesis with OpenAI
-- Creation/acquisition date: 2026-09-26
-- Source type: original
-- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
-- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
-- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
-- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
-- Required attribution: preserve project provenance and generation disclosure
-- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
-- SHA256: `363094ef71aa2e7050d0b6727cb8566ffe976bbacb006c324e094eb30a3257ff`
+| Key | Recording | Author | Source | Source SHA256 |
+|---|---|---|---|---|
+| cc0:bell-FS131348-nahmandub-daitokuji_bell | Bell at Daitokuji temple,kyoto.wav | nahmandub | https://freesound.org/s/131348/ | `c111ac138f867e07ea2a62ce0b75e9bf27ed9cd17fcaa6cfe0803f8252418bf2` |
+| cc0:bell-FS271370-inoshirodesign-singing_bowl | singing bowl strike sound | inoshirodesign | https://freesound.org/s/271370/ | `5841d9a2a3ad026c69ec9c72f0a604a540e48235a0bc9aaf5c1c900986f780bc` |
+| cc0:bell-FS405665-Anthousai-metal_bowl_hit | metal bowl - hit - with wooden spoon 01.wav | Anthousai | https://freesound.org/s/405665/ | `d5814c36039e2d231a324468afd12ffd98bec2d5fabf9e0142d6bf83f0357290` |
+| cc0:drawKnife2 | drawKnife2.ogg, 50 RPG Sound Effects | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `d5df6a4130cbb016f97b4883769a418917b9629cb4c21717030b186e0c73281a` |
+| cc0:drawKnife3 | drawKnife3.ogg, 50 RPG Sound Effects | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `a11ae62fb1a628425769d11a9de394980ad8909c31f4c9a4316f226963e21caf` |
+| cc0:impact-FS389618-_stubb-rock_tumble_2 | Rock Tumble 2.wav | _stubb | https://freesound.org/s/389618/ | `199521191be552261d6e604c8d34e40cfeac4b3d7f3075906dd27182c73adb4a` |
+| cc0:impact-FS522099-magnuswaker-concrete_smash_2 | Concrete SMASH 2 | magnuswaker | https://freesound.org/s/522099/ | `b182dec5699903068a509113e09e0b4c02a78f42b7aa73f875b23fc24ce34c6e` |
+| cc0:impact-FS541029-AudioPapkin-very_low_impact | very low impact | AudioPapkin | https://freesound.org/s/541029/ | `73c25c4f49baa34cb9ad42290324fc61340124028dc0161299880b78580e335a` |
+| cc0:impact-FS711657-discofield-stone_crash | Stone crash | discofield | https://freesound.org/s/711657/ | `91cca28a4c4a9eae31cdad60b8e73414b2b3fe261a9779aa719060a2c57a1503` |
+| cc0:knifeSlice | knifeSlice.ogg, 50 RPG Sound Effects | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `4cd96dc630bed9840c15f1dd2306da2cc56a4da26a5d3f1a03c5a7265ac5e54f` |
+| cc0:knifeSlice2 | knifeSlice2.ogg, 50 RPG Sound Effects | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def` |
+| cc0:metal-FS442769-qubodup-sword_hit | Sword Hit | qubodup | https://freesound.org/s/442769/ | `93d72e63bb8d9b8a60d2c0ac665c153171515645fbb85f4ec028e4a253e7b167` |
+| cc0:metalPot1 | metalPot1.ogg, 50 RPG Sound Effects | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `159def979e8e386c2c539f5e99cc30a080eb2dcb6c911fa2e4ccc0785b2522fd` |
+| cc0:metalPot3 | metalPot3.ogg, 50 RPG Sound Effects | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `d306e5b848f6843332d0ca19f8f7dfe5796aeb56d8273902b085df463273f1dc` |
+| cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2 | Anime_drama_shing_sword_2.wav | Euphrosyyn | https://freesound.org/s/529019/ | `a8278823afb4c25a06d55ec2adfdeb7993bb738b1077310555be1e592063d02f` |
+| cc0:ring-FS706204-xkeril-nice_anime_sword_hit | Nice anime sword hit | xkeril | https://freesound.org/s/706204/ | `2a28c06b3674240e46bbf79516f87e5fbbe9522a1d272b55448f0af2c8599137` |
+| cc0:roar-FS257635-Bananaboatman33-demon_giant_howl | Demon Giant Howl.wav | Bananaboatman33 | https://freesound.org/s/257635/ | `2a6487786a58fabe2f20ce051408e5caf04b552a83663f0bf377711646ffe58b` |
+| cc0:roar-FS521830-joelcarrsound-war_cry | Middle Ages War Cry.wav | joelcarrsound | https://freesound.org/s/521830/ | `380347fb94625c279ce05e29bab2ec94a2d4df6282b07aba4c075061ec929a84` |
+| cc0:swing-FS263595-PorkMuncher-swoosh | swoosh.wav | PorkMuncher | https://freesound.org/s/263595/ | `5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058` |
+| cc0:swing-FS370204-nekoninja-samurai_slash | samurai slash | nekoninja | https://freesound.org/s/370204/ | `283b188b2f04f6676ae23be36e58a536bb78d5e7cf4bf5ab8cc95ca13b0065c2` |
+| cc0:swing-FS724716-greyfeather-sword_slash_energy_wave | sword slash energy wave | greyfeather | https://freesound.org/s/724716/ | `5b9fbd1c8b78cd2e69c0ebfd178e229308b37058fe71da1cd4311c7f70a94b59` |
+| cc0:swish-10 | swish-10.wav, Swishes Sound Pack | artisticdude | https://opengameart.org/content/swishes-sound-pack | `4f7381a76f280d3f36f962ac3f44f16f77eec44797f30715d063c81ea3859024` |
+| cc0:swish-11 | swish-11.wav, Swishes Sound Pack | artisticdude | https://opengameart.org/content/swishes-sound-pack | `9e81d548d8215fbb36f7a41b5771d4b52c2fd02fbb9b5ff9a4c65118fd88ee4d` |
+| cc0:swish-12 | swish-12.wav, Swishes Sound Pack | artisticdude | https://opengameart.org/content/swishes-sound-pack | `0513a86d428d9ed8601e93b8554580a5932c6c1a82d39d81a8f48883f1807a67` |
+| cc0:swish-13 | swish-13.wav, Swishes Sound Pack | artisticdude | https://opengameart.org/content/swishes-sound-pack | `698230ba3fe05a68c18d68cd6b3a07fb98e6c1198bb1a4238592ee9912c02c77` |
+| cc0:wind-FS60030-qubodup-air_cut | Swosh / Whoosh / Air Cut | qubodup | https://freesound.org/s/60030/ | `0301adf448c60b80c09b89df57510fd09949d6b15bb457ef7c9e70999b8a2ad0` |
+| cc0:wind-FS683096-florianreichelt-woosh | woosh | florianreichelt | https://freesound.org/s/683096/ | `3c641d4d6ea0c6b65423d8fe1a7d72bf7bfb08a91c1640f9e9a0ab9d5d23b265` |
+| cc0:wind-FS719560-DARTEKZ_GAMEZ-wind_whirl | Wind Whirl (Small Air Blow) | DARTEKZ_GAMEZ | https://freesound.org/s/719560/ | `5b41e14eaa752d4715ee7c706b99581f3adf5b02630c1d6c565b445a4e725c75` |
+| repo:FirstSeverance/Beams/ChargeRush | `Assets/Sounds/FirstSeverance/Beams/ChargeRush.wav` | Convergence | project asset, recorded above as doll-beam-0273-chargerush | `57adc7042b6ba34074f5c02f455e78471e37bcc13a5b7d404bec08b398378c31` |
+| vsco:BDrumNewhit_v7_rr1_Sum | Percussion/BDrumNewhit_v7_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `7024054e68261d2cca0ee58fdf9d6f23b54370792d04aa2c1ccf41acc090bd2b` |
+| vsco:BellTree_Stroke1_v1_Sum | Percussion/BellTree_Stroke1_v1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `2597516c86677708c0696ab303e81158ab1d69baa109635ceef204aa68d753e3` |
+| vsco:BellTree_Stroke2_v1_Sum | Percussion/BellTree_Stroke2_v1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `a9a25b98a0e055b8fe72275e9ee944d5a16df4bc3f86a4ba542387b3025807d6` |
+| vsco:BellTree_Stroke3_v1_Sum | Percussion/BellTree_Stroke3_v1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `2414c9adfdb93e87fc3cb77907667b1b9b291a7ca08579761fb311e7b3612541` |
+| vsco:BellTree_Stroke4_v1_Sum | Percussion/BellTree_Stroke4_v1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `1ae8a741782fb466185ab23cb6919e1d13c23e4e41d02f9673290cf569131ef5` |
+| vsco:Claves1_Hit_v2_rr1_Sum | Percussion/Claves1_Hit_v2_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `ae0493fa57d0d1dd57693e8639dfe5fd9675b520a1c0c0eb45cf992f2a23ca9c` |
+| vsco:Claves1_Hit_v2_rr2_Sum | Percussion/Claves1_Hit_v2_rr2_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `129ef8187b4c06ba995794039d01cddfcd9daad19cee6b7b950c6b7492ff6def` |
+| vsco:Claves1_Hit_v3_rr1_Sum | Percussion/Claves1_Hit_v3_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `5561306630b21fd9c0bfaf843c36bff29c90ea1bf84ee03c95b8996af24c0a4b` |
+| vsco:Marimba_hit_Outrigger_G4_loud_01 | Percussion/Marimba/Marimba_hit_Outrigger_G4_loud_01.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `36f39f9f24789001add2b4c440defb7641178b0e8449c5cb7f1960bccaf0aaaf` |
+| vsco:TB_hit_C4_v4_rr1 | Percussion/TB_hit_C4_v4_rr1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `d11d52910e0fc03c348bec0b0969960d737a6fdd3fa7380804f5751959e422c2` |
+| vsco:TB_hit_C5_v4_rr1 | Percussion/TB_hit_C5_v4_rr1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `aba6ebfb36eed049d211ab86c8caa6e8dbaf292db57a2d269306c6aecb2a3ab2` |
+| vsco:TB_hit_F5_v3_rr1 | Percussion/TB_hit_F5_v3_rr1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `34736a3a68fad88dde3ff7d04613bdbc1ba7be0804b039fc07312089e5cb1c44` |
+| vsco:TB_hit_G4_v4_rr1 | Percussion/TB_hit_G4_v4_rr1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `de3df68f1dd86e71819de9c3a8284d5b5b11650e6f1c37483f505f86aa07cf68` |
+| vsco:Triangle3-Hit_v2_rr1_Sum | Percussion/temp/Triangle3-Hit_v2_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `c25a33345123c6fa0d0b7ccf725c62445df7713b0085abd8e016051ae20a09bb` |
+| vsco:Triangle3-Hit_v2_rr2_Sum | Percussion/temp/Triangle3-Hit_v2_rr2_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `e5f73f0bceab31eafc85fd3bedb763c0579cbb4377bd573175af797d6833ca62` |
+| vsco:Triangle3-Roll_v2_rr1_Sum | Percussion/temp/Triangle3-Roll_v2_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `e9d913e472aaf4319f780e2943e033d25a9cffc2c6239380ef164b03dc6dab17` |
+| vsco:Triangle6-HitFM_v1_rr1_Sum | Percussion/temp/Triangle6-HitFM_v1_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `91beeeb7011c030f586022845f8511d86ad512abf8f530def31c84cd6b038886` |
+| vsco:Triangle6-HitFM_v2_rr1_Sum | Percussion/temp/Triangle6-HitFM_v2_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `021bdb7d8995b9ad3e5b1d993b49a298c7b0bd0ca1e4572926571b922868db4c` |
+| vsco:Triangle6-HitM_v1_rr2_Sum | Percussion/temp/Triangle6-HitM_v1_rr2_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `d5e94804e6cc8a1415274435087f16d15de2f4236109ffb2a6d414d58d4b9ec1` |
+| vsco:Triangle6-Hit_v1_rr2_Sum | Percussion/temp/Triangle6-Hit_v1_rr2_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `f41e3914720c1bdea0a846e67de1de943612d785db866fb126868140f7e1c380` |
+| vsco:Triangle6-Hit_v2_rr1_Sum | Percussion/temp/Triangle6-Hit_v2_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `6777424db5e9f6955489dbcfb5d91695d40c97764c67051f182aaecd17c61468` |
+| vsco:Triangle6-Roll_v2_rr1_Sum | Percussion/temp/Triangle6-Roll_v2_rr1_Sum.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `bba2e233c97d4c6f0841be5cfbf11ae8fc77191313af86c2d855b497dc954423` |
+| vsco:Xylo_Medium_C7_ff_01_far | Percussion/Xylo/Xylo_Medium_C7_ff_01_far.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `f922a9ca996341c3cd6d54d3f3c569812e5c4c3325b1bb19de503b113b9a9197` |
+| vsco:Xylo_Medium_G4_ff_01_far | Percussion/Xylo/Xylo_Medium_G4_ff_01_far.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `f7e72d629db9b1f7d37b050cc1abf18bbde9629d616c91647d7abe5d7fb249b8` |
+| vsco:ambience1 | Miscellania Raw/Misc 1/ambience1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `92cedeb576de685b9788630780a64b40ab13e06a3a8e91747264fe7725ee56aa` |
+| vsco:bassdrum_rub1_v1 | Percussion/bassdrum_rub1_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `e906d63ab502971dfaefab6e2032332db327ba4b0cfe75101aef6d099fcb7df1` |
+| vsco:bassdrum_rub2_v1 | Percussion/bassdrum_rub2_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `5dad744e5a88783194e4c410a3e37e797ff3ef1922bf2ecd5f9ec16e84eebb96` |
+| vsco:bassdrum_rub3_v1 | Percussion/bassdrum_rub3_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `58071336becb66bf5782dea73e9db53ed46de2a537f47964c7df9b758617aa4a` |
+| vsco:bassdrum_rub4_v1 | Percussion/bassdrum_rub4_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `159d47035e86d76a70a8d3c472fca77289cf01a879a1cd7f7f2316b0035faa4c` |
+| vsco:brick_scrape | Miscellania Raw/Misc 1/brick_scrape.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `3cd736cd915a0dd1767022513b3f4074ec63948c4c2f7f6ddddacadd09376356` |
+| vsco:brick_scrape2 | Miscellania Raw/Misc 1/brick_scrape2.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `398bf1d53c7bc7544d8b9b0585b78dff536011cdbf7567191957f3f93ebba204` |
+| vsco:bubbles | Miscellania Raw/Misc 1/bubbles.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `f119e6f7be7e1a754ed6d1f2e196cbf78e67aa8ae97efe6fb4252997823408eb` |
+| vsco:bubbles2 | Miscellania Raw/Misc 1/bubbles2.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `99fc88599996e388856c4b73c18dc64bd73e3120b1e0b66657d22f49e4c86b4b` |
+| vsco:bubbles4 | Miscellania Raw/Misc 1/bubbles4.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `80dbaf61e5eb910674496439f71cfd64c5ae80eaed7ba9505c66a20457f17c5d` |
+| vsco:chain_grind | Miscellania Raw/Misc 1/chain_grind.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `dfc9a7ec579f91d080460a4a617f0b5cd28518bc849f05f0a459841c2aececf4` |
+| vsco:chaingrindLoop | Miscellania Raw/Misc 1/chaingrindLoop.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `9f97699cc87f2589461182ad200658a43cd9e84616f365492d5f254c970db813` |
+| vsco:cymb_gong | Miscellania Raw/Misc 1/cymb_gong.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `8f549e5ada5acf07b139762e0c1191062e21777c8a672e732729f0f197259f0d` |
+| vsco:cymbal-crash1_mf_rr2 | Percussion/cymbal-crash1_mf_rr2.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `88534fac7b69522738fa6ae39f305c424a26418c274a18ca5a08a1302e4c60a2` |
+| vsco:cymbal-crashshort_v1 | Percussion/cymbal-crashshort_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `af0d5f0eb7f2226a1c592e5cda8e2dc0588cadbc851999ed39e3f36276acc7c9` |
+| vsco:glass_break | Miscellania Raw/Misc 1/glass_break.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `5cf1b08875add0fa7598b09488c23a1208dccd03523cf7e5aa0b7bc0c1c31f69` |
+| vsco:glass_break2 | Miscellania Raw/Misc 1/glass_break2.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `aeae215382299c4ae623c3dcbd7213394351d5e5fae138ee6cb9cf1f7d6fd423` |
+| vsco:glass_break3 | Miscellania Raw/Misc 1/glass_break3.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `924a2cb9e993fc7471a3066eed23f4c360a9c1cb6a658e30aa4cf6c145cece07` |
+| vsco:glass_break4 | Miscellania Raw/Misc 1/glass_break4.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `26ee8c33335bc8f45a9936195be393423d93157bc92b8a4ac06e9027e07613f5` |
+| vsco:glass_break5 | Miscellania Raw/Misc 1/glass_break5.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `4bf674412e2e0daab66d024fd506a20839900bf36af57fc26794e4c18de75bc9` |
+| vsco:glass_break6 | Miscellania Raw/Misc 1/glass_break6.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `6ce16ff3fcdc65b5e93366ff133d444714b56728bbd99430efaa024d51d9f763` |
+| vsco:glass_break7 | Miscellania Raw/Misc 1/glass_break7.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `07871e4cf5bf549fbd439666b2a23e7e916994066f72d3a57f33e939118cca0e` |
+| vsco:glass_break8 | Miscellania Raw/Misc 1/glass_break8.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `2f52ee0dcd4240bbcb84d135eb40e2be39ddf054744cdc585e3459a4651d32af` |
+| vsco:glock_fx_down_chromatic_fast_01 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_down_chromatic_fast_01.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `5b554b1db3eff1047c4e013e9dc30230a4399eb997436848b069ccca1fcaf156` |
+| vsco:glock_fx_down_chromatic_fast_02 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_down_chromatic_fast_02.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `4382b0d3b737f480ada1e1e3fddc80ff97d122f8230add4e692dd2435c50603a` |
+| vsco:glock_fx_down_chromatic_fast_03 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_down_chromatic_fast_03.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `0dcca09b69dd63b2e7bafb2ef4e300a69afb14625454ddf2b71491d0064334f8` |
+| vsco:glock_fx_down_chromatic_fast_04 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_down_chromatic_fast_04.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `c020adb36f99cf64824bcb251d622b97cc5943029d1fc26aa50220701dc78d6f` |
+| vsco:glock_fx_down_pentatonic_med_01 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_down_pentatonic_med_01.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `c7f97a55ee8b4325dc06d7aa025a48781db71e2e848b69b5089842d5c9d2e719` |
+| vsco:glock_fx_up_chromatic_fast_01 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_up_chromatic_fast_01.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `6b6cb6ee0fc804fa69f49a848098056ba9b8488b75d890aaa684f46a34f1023d` |
+| vsco:glock_fx_up_chromatic_fast_02 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_up_chromatic_fast_02.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `d186612818930426b6fb58c107abb8858b58fa48234fab0ca7104bb2276c11e5` |
+| vsco:glock_fx_up_chromatic_med_01 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_up_chromatic_med_01.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `36b7c91663eabc6593222dcc960e7e6bd08e5846001555295181bbbeafd17be4` |
+| vsco:glock_fx_up_pentatonic_med_02 | Miscellania Raw/Misc 2/glock_glisses/glock_fx_up_pentatonic_med_02.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `146b16006d6e5665a46b47f864790c1f24596357e898e53db68edfa82aca740d` |
+| vsco:glock_medium_C5 | Percussion/Glock/glock_medium_C5.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `635f898e0bcb6975b96b18efd9c896f6f1b97ff12174a339ada4814e49675660` |
+| vsco:glock_medium_C6 | Percussion/Glock/glock_medium_C6.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `e942cbf502cf6731df2925945fe3234c876cb63f047d91007b6929887f9e4904` |
+| vsco:glock_medium_C7 | Percussion/Glock/glock_medium_C7.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `b2ecbe0e60c983bbfaa49a1f45f8a11559f7dba27b8c8a032eb2cb7366a36910` |
+| vsco:glock_medium_G4 | Percussion/Glock/glock_medium_G4.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `6c4649b13e24fa01e4634edad8fe8edf18aef33facc5d49fe53097b376bac4da` |
+| vsco:glock_medium_G5 | Percussion/Glock/glock_medium_G5.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `7045c0ef7260e2f1ad11a64406cf7575ed898d1207a91104d33d78caefac63e4` |
+| vsco:glock_medium_G6 | Percussion/Glock/glock_medium_G6.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `a2ba94e59119cd5272c1161fc8b8fbfb94c7b44de45a9a6cc5973b1c332103af` |
+| vsco:gongHit_p | Percussion/gongHit_p.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `3d103e1a7af12eeb17e0c5488f11933ca92b9fbdefa39b8020b64238da2db0d0` |
+| vsco:gongscrape_mf | Percussion/gongscrape_mf.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `3e30f51d3667cde89d3fd3424e878a554ab26ff4ea882686cfbe887aaf2267b0` |
+| vsco:gongscrape_pp | Percussion/gongscrape_pp.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `0166526b453fa54a2d978796f2c4e696a213ac947c9cf2ec105f6af16667bd9e` |
+| vsco:metal_hit11 | Miscellania Raw/Misc 1/metal_hit11.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `37573de7526c8dfc3893db67eb0d8b7ca746a2c53f507887c293044f43b44481` |
+| vsco:metal_hit7 | Miscellania Raw/Misc 1/metal_hit7.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `674358f27b2d3a4dabf742137e039d2299ea28cf9eabdcea62a7b85fdd599b13` |
+| vsco:metal_hit9 | Miscellania Raw/Misc 1/metal_hit9.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `896fdcca7cccc913fbf6391b9aca237e6210aa486ca86bf08c2693791a32fa3d` |
+| vsco:sleighbell1_hit_3 | Miscellania Raw/Misc 2/sleighbell1_hit_3.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `71047c87f6799d4cc1f7d691c2d8d976dafc0a78568a89d688df4453626c79b1` |
+| vsco:sleighbell1_hit_quiet | Miscellania Raw/Misc 2/sleighbell1_hit_quiet.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `1fe715f4eba2701c4391037a8f34bdfd66f2033159864e62217441ff989f7e6f` |
+| vsco:susCymb1-bow-1 | Percussion/susCymb1-bow-1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `181f906018e2cc53a82eb73f209894fa07a4b1fb8718aa5b38ad0e15610489d3` |
+| vsco:susCymb1-bow-2 | Percussion/susCymb1-bow-2.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `2bf2f6bc8a60eadcdc4a93b52b2f6f56954707063c14c4a8556359ca08e66042` |
+| vsco:susCymb1-bow-3 | Percussion/susCymb1-bow-3.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `c0fc09c2a43f6a0a9d6b6616738b999beaf9290c2de5a111fe527f211f6890a2` |
+| vsco:susCymb1-cresc-Median_v1 | Percussion/susCymb1-cresc-Median_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `bb3b6b251b0b9dac23b7b0fae47aab84a70abbefa4a110b05c9f4ad733e70741` |
+| vsco:susCymb1-cresc-Short_v1 | Percussion/susCymb1-cresc-Short_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `69be3ba323fffc6d012602274f61dfd40519ca9b908a1bfe0926bbd0dd526983` |
+| vsco:susCymb1-hit-bell_fff | Percussion/susCymb1-hit-bell_fff.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `6be90461233ba1900c1c02118cc0d00b50d0d534596ec0ae2fe5bc1e0ce0e715` |
+| vsco:susCymb1-scrape1_v1 | Percussion/susCymb1-scrape1_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `c75699ffbca27b4d24b7b4a06e13e2d250805b8e5c5efae41114333a6ee9afb7` |
+| vsco:susCymb1-scrape2_v1 | Percussion/susCymb1-scrape2_v1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `8e8f2287d479acc0f8620c3a1708ab112c170cdb0d5d009eb0d96255767f7921` |
+| vsco:tamb2_rollSlow | Miscellania Raw/Misc 2/tamb2_rollSlow.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `ec1ad587afa44b4485e0eaba585414568abe7c85883a1adb6bc2bc21f68ceefc` |
+| vsco:vibraring1 | Miscellania Raw/Misc 1/vibraring1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `ccc78653850d959fb7f5769622331a73a92d4de0d46cf1e1e4cc8cf2b8f3de61` |
+| vsco:vibraring3 | Miscellania Raw/Misc 1/vibraring3.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `3f09cad46a5d1e0a5182dae7e654a6261bf9a5c18e71d67086c36005e1cf93e5` |
+| vsco:vibraring_v1_rr1 | Percussion/temp/vibraring_v1_rr1.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `61debad8cacf593b09c2d00e44e468b5170975300b80ff89ccfce3327e946205` |
+| vsco:vibraring_v1_rr2 | Percussion/temp/vibraring_v1_rr2.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `0b80f5a636adcb1acf5271cc95fadaeae59b24cc8ca7c68738e349c0391e3763` |
+| vsco:zap11 | Miscellania Raw/Misc 1/zap11.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `57d259c340e2f9c9319cd39df0f9ebecc8286bee8314a7ff2a7e8a1400c43460` |
+| vsco:zap12 | Miscellania Raw/Misc 1/zap12.wav | Versilian Studios | VSCO 2 Community Edition 1.1.0 (https://versilian-studios.com/vsco-community/) | `93a17b3f9d5679eb6b44993f175e9624cfff8f57b6368705f6fa3f51e5af6bd3` |
 
-- Runtime file: `Assets/Sounds/AzureCathedral/GlassArrival.wav`
-- Asset ID: azure-glassarrival-20260926
-- Asset type: stereo PCM16 44100Hz 0.86s refractive rift fracture and cold pressure
-- Creator: project-owner-directed original synthesis with OpenAI
-- Creation/acquisition date: 2026-09-26
-- Source type: original
-- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
-- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
-- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
-- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
-- Required attribution: preserve project provenance and generation disclosure
-- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
-- SHA256: `dd7380ef352c6aeee86c3b8577e717d2f84b4be558fb371d4b7e41586a27a656`
+- Runtime file: `Assets/Sounds/AzureCathedral/PrisonBreak.ogg`
+- Asset ID: azure-sfx2-prison-break-20261002
+- Asset type: stereo44.1kHz Vorbis 2.21s Cathedral cue: Liora's ice prison cracking and shattering (opening)
+- Creator: recordings by discofield, magnuswaker and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:impact-FS711657-discofield-stone_crash, vsco:brick_scrape2, vsco:chain_grind, vsco:glass_break, vsco:glass_break2, vsco:glass_break3, vsco:glass_break4, vsco:glass_break5, vsco:glass_break6, vsco:glass_break7, vsco:glass_break8, vsco:sleighbell1_hit_3, vsco:sleighbell1_hit_quiet, vsco:vibraring_v1_rr2 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `785ae77edebcba73a7509fb27996782b209796ad4cad123f496ccfa1c3c5708e`
 
-- Runtime file: `Assets/Sounds/AzureCathedral/CrystalCharge.wav`
-- Asset ID: azure-crystalcharge-20260926
-- Asset type: stereo PCM16 44100Hz 0.38s short gathering crystal resonance
-- Creator: project-owner-directed original synthesis with OpenAI
-- Creation/acquisition date: 2026-09-26
-- Source type: original
-- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
-- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
-- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
-- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
-- Required attribution: preserve project provenance and generation disclosure
-- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
-- SHA256: `8c1091dfa8ddf6a9f6bee3b86422091b860bd6be7b89a7bc494c65db39c02091`
+- Runtime file: `Assets/Sounds/AzureCathedral/SwordLight.ogg`
+- Asset ID: azure-sfx2-sword-light-20261002
+- Asset type: stereo44.1kHz Vorbis 2.51s Cathedral cue: Liora raising the sword and the light pillar blooming (opening)
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:BellTree_Stroke4_v1_Sum, vsco:TB_hit_C4_v4_rr1, vsco:Triangle6-HitM_v1_rr2_Sum, vsco:glock_fx_up_chromatic_fast_01, vsco:susCymb1-cresc-Short_v1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `6f626464e159bfb856193dd54d15400f0819e68b8ec1668ec22384f4cdc398f3`
 
-- Runtime file: `Assets/Sounds/AzureCathedral/CrystalCut.wav`
-- Asset ID: azure-crystalcut-20260926
-- Asset type: stereo PCM16 44100Hz 0.48s glass edge fracture over a short air release
-- Creator: project-owner-directed original synthesis with OpenAI
-- Creation/acquisition date: 2026-09-26
-- Source type: original
-- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
-- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
-- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
-- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
-- Required attribution: preserve project provenance and generation disclosure
-- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
-- SHA256: `ac382ead56cda5c663470b29e8d005655d9f12f5b3ad39a77b1d45bcf75ce8d1`
+- Runtime file: `Assets/Sounds/AzureCathedral/RiftOpen.ogg`
+- Asset ID: azure-sfx2-rift-open-20261002
+- Asset type: stereo44.1kHz Vorbis 2.01s Cathedral cue: the dimensional rift tearing open (opening)
+- Creator: recordings by AudioPapkin, DARTEKZ_GAMEZ, Kenney and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:drawKnife3, cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:knifeSlice, cc0:wind-FS719560-DARTEKZ_GAMEZ-wind_whirl, vsco:bassdrum_rub3_v1, vsco:chain_grind, vsco:cymbal-crash1_mf_rr2, vsco:glass_break5, vsco:glass_break7, vsco:metal_hit9, vsco:zap11, vsco:zap12 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `46c98be571eae8487267074824347393ffbb0c6193fb69264a8f35544465aa89`
 
-- Runtime file: `Assets/Sounds/AzureCathedral/WormRush.wav`
-- Asset ID: azure-wormrush-20260926
-- Asset type: stereo PCM16 44100Hz 0.64s heavy icy rush with sparse crystal grains
-- Creator: project-owner-directed original synthesis with OpenAI
-- Creation/acquisition date: 2026-09-26
-- Source type: original
-- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
-- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
-- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
-- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
-- Required attribution: preserve project provenance and generation disclosure
-- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
-- SHA256: `d9e269074b7c2b5644d6d881e246bf366bd102cc9f090213facef5626a1aa855`
+- Runtime file: `Assets/Sounds/AzureCathedral/WormArrival.ogg`
+- Asset ID: azure-sfx2-worm-arrival-20261002
+- Asset type: stereo44.1kHz Vorbis 3.01s Cathedral cue: Vitrion emerging head first with a low roar and grinding glass plates (opening)
+- Creator: recordings by AudioPapkin, Bananaboatman33, discofield, joelcarrsound and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:impact-FS711657-discofield-stone_crash, cc0:roar-FS257635-Bananaboatman33-demon_giant_howl, cc0:roar-FS521830-joelcarrsound-war_cry, vsco:brick_scrape, vsco:chain_grind, vsco:glass_break8, vsco:gongHit_p, vsco:gongscrape_mf in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `da4fe9bd0e804b113ec5676f40ee04978b0b8c9e8f225d2be8505ebcdbfb5301`
 
-- Runtime file: `Assets/Sounds/AzureCathedral/DevourFracture.wav`
-- Asset ID: azure-devourfracture-20260926
-- Asset type: stereo PCM16 44100Hz 1.02s low crushing ice and inharmonic shard burst
-- Creator: project-owner-directed original synthesis with OpenAI
-- Creation/acquisition date: 2026-09-26
-- Source type: original
-- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
-- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
-- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
-- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
-- Required attribution: preserve project provenance and generation disclosure
-- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
-- SHA256: `a566f9bf8cc3392ac3409b33b7aff6fcb44efd9a902a81cc35649c7bc9f56965`
+- Runtime file: `Assets/Sounds/AzureCathedral/LioraFall.ogg`
+- Asset ID: azure-sfx2-liora-fall-20261002
+- Asset type: stereo44.1kHz Vorbis 2.01s Cathedral cue: Liora's defeat: cracking glass sword and falling shards
+- Creator: recordings by florianreichelt, inoshirodesign, magnuswaker and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:bell-FS271370-inoshirodesign-singing_bowl, cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:wind-FS683096-florianreichelt-woosh, vsco:glass_break2, vsco:glass_break4, vsco:glass_break6, vsco:glass_break7, vsco:glock_fx_down_chromatic_fast_01, vsco:metal_hit11, vsco:sleighbell1_hit_quiet in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `a592173a05480f39f99406e1f0ffaa8749be4f6363fbde3654358a26b0bd8325`
 
-- Runtime file: `Assets/Sounds/AzureCathedral/ChainMelt.wav`
-- Asset ID: azure-chainmelt-20260926
-- Asset type: stereo PCM16 44100Hz 2.64s descending whole-chain fractures and dissolving glass
-- Creator: project-owner-directed original synthesis with OpenAI
-- Creation/acquisition date: 2026-09-26
-- Source type: original
-- Source work and URL: Repository-owned `tools/generate_azure_sfx.py`; no sampled recording
-- Tool/model/version: Python3/NumPy deterministic modal/noise synthesis, PCM16 export
-- Human modifications: Defined event envelope, inharmonic glass grains, low ice pressure, short stereo reflections and bounded mastering; generator owns exact recipe
-- License and redistribution terms: existing project original-asset terms; no third-party sample license implied
-- Required attribution: preserve project provenance and generation disclosure
-- Reviewer and review date: Codex waveform/format/headroom checks2026-09-26; subjective listening not_run
-- SHA256: `4db89927823956f4516777eab084be7593c6c5af678d1c601eb9b0e848819495`
+- Runtime file: `Assets/Sounds/AzureCathedral/WormRetreat.ogg`
+- Asset ID: azure-sfx2-worm-retreat-20261002
+- Asset type: stereo44.1kHz Vorbis 2.01s Cathedral cue: Vitrion withdrawing at its 20% floor
+- Creator: recordings by AudioPapkin, Bananaboatman33 and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:roar-FS257635-Bananaboatman33-demon_giant_howl, vsco:bassdrum_rub1_v1, vsco:brick_scrape, vsco:chain_grind, vsco:gongscrape_pp in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `9400d50973dcece03c2116de9456b337f3348ffba2226ee4943496870217c41d`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/DevourRush.ogg`
+- Asset ID: azure-sfx2-devour-rush-20261002
+- Asset type: stereo44.1kHz Vorbis 2.01s Cathedral cue: the devouring rush building toward the bite
+- Creator: recordings by DARTEKZ_GAMEZ, florianreichelt and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:wind-FS683096-florianreichelt-woosh, cc0:wind-FS719560-DARTEKZ_GAMEZ-wind_whirl, vsco:ambience1, vsco:bassdrum_rub2_v1, vsco:bassdrum_rub3_v1, vsco:chaingrindLoop, vsco:gongscrape_mf, vsco:susCymb1-bow-1, vsco:susCymb1-bow-3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `412a8f9f46417d7b7263c31c0aabd43e0b7e4f1f44f08401edd348fe06841802`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/DevourBite.ogg`
+- Asset ID: azure-sfx2-devour-bite-20261002
+- Asset type: stereo44.1kHz Vorbis 2.51s Cathedral cue: the devouring bite: crushing glass, sub impact and silence
+- Creator: recordings by _stubb, AudioPapkin, Bananaboatman33, discofield, magnuswaker and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS389618-_stubb-rock_tumble_2, cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:impact-FS711657-discofield-stone_crash, cc0:roar-FS257635-Bananaboatman33-demon_giant_howl, vsco:BDrumNewhit_v7_rr1_Sum, vsco:glass_break3, vsco:glass_break4, vsco:glass_break5, vsco:glass_break7, vsco:metal_hit7, vsco:vibraring_v1_rr1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `812851fddf3ce647917f4e63fd6db4b0d0afb07d3fc561499025a41e4f52b9e6`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/FuryAwaken.ogg`
+- Asset ID: azure-sfx2-fury-awaken-20261002
+- Asset type: stereo44.1kHz Vorbis 3.01s Cathedral cue: Vitrion's Fury awakening: roar, rising crystal glitter and bass
+- Creator: recordings by AudioPapkin, Bananaboatman33, joelcarrsound and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:roar-FS257635-Bananaboatman33-demon_giant_howl, cc0:roar-FS521830-joelcarrsound-war_cry, vsco:BellTree_Stroke1_v1_Sum, vsco:TB_hit_C4_v4_rr1, vsco:glass_break6, vsco:glock_fx_up_chromatic_med_01, vsco:gongHit_p in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `393d6e4222f9bacfa42958b91ae80eeb25803876c55ad9fcea6afe434c48765b`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/FinalBlow.ogg`
+- Asset ID: azure-sfx2-final-blow-20261002
+- Asset type: stereo44.1kHz Vorbis 2.51s Cathedral cue: the final blow on the enraged worm: impact and chained cracks
+- Creator: recordings by AudioPapkin, Bananaboatman33, discofield, inoshirodesign, magnuswaker and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:bell-FS271370-inoshirodesign-singing_bowl, cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:impact-FS711657-discofield-stone_crash, cc0:roar-FS257635-Bananaboatman33-demon_giant_howl, vsco:glass_break2, vsco:glass_break3, vsco:glass_break4, vsco:glass_break6, vsco:glass_break7, vsco:glass_break8 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `fe1e32457fee5d4473d98655de75fed8389ebdcdfaa3df9e2994cb9041b0c7c4`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/MeltRush.ogg`
+- Asset ID: azure-sfx2-melt-rush-20261002
+- Asset type: stereo44.1kHz Vorbis 1.61s Cathedral cue: the harmless melting rush after Victory
+- Creator: recordings by DARTEKZ_GAMEZ, PorkMuncher and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:swing-FS263595-PorkMuncher-swoosh, cc0:wind-FS719560-DARTEKZ_GAMEZ-wind_whirl, vsco:Triangle6-HitFM_v1_rr1_Sum, vsco:bassdrum_rub4_v1, vsco:bubbles4, vsco:vibraring_v1_rr1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `fff42c1dffa3fdeb25bd6734dfa351c5733a3828a275a6a61432c1ed79167570`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/MeltContact.ogg`
+- Asset ID: azure-sfx2-melt-contact-20261002
+- Asset type: stereo44.1kHz Vorbis 3.01s Cathedral cue: glass softening at melt contact: frost creak and water
+- Creator: recordings by DARTEKZ_GAMEZ, inoshirodesign, nahmandub and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:bell-FS131348-nahmandub-daitokuji_bell, cc0:bell-FS271370-inoshirodesign-singing_bowl, cc0:wind-FS719560-DARTEKZ_GAMEZ-wind_whirl, vsco:brick_scrape2, vsco:bubbles2, vsco:chain_grind, vsco:glass_break4, vsco:glass_break7 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `20d9ac760550d90275bb7a210a04ef1afb34f4f299b64f1bbe49aab48c409f99`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/ChainMelt.ogg`
+- Asset ID: azure-sfx2-chain-melt-20261002
+- Asset type: stereo44.1kHz Vorbis 3.01s Cathedral cue: the whole chain melting: drips and creaks
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:bassdrum_rub4_v1, vsco:brick_scrape2, vsco:bubbles, vsco:bubbles4, vsco:chain_grind, vsco:glass_break7 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `afe8db328d4e91428e36856fb95e26b777ef6cdf936c567ef1d486fb98af6824`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/Victory.ogg`
+- Asset ID: azure-sfx2-victory-20261002
+- Asset type: stereo44.1kHz Vorbis 5.01s Cathedral cue: victory: descending tuned tubular bells and a long glitter tail
+- Creator: recordings by inoshirodesign and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:bell-FS271370-inoshirodesign-singing_bowl, vsco:BellTree_Stroke2_v1_Sum, vsco:TB_hit_C4_v4_rr1, vsco:Triangle6-Hit_v1_rr2_Sum, vsco:glock_fx_down_chromatic_fast_01, vsco:glock_medium_C6, vsco:glock_medium_G5, vsco:sleighbell1_hit_3, vsco:sleighbell1_hit_quiet in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `bb8a36200544d47d2cd7d20a2dbc0ebbe3963d4fbd18fe493db1760baf193553`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/FanCharge.ogg`
+- Asset ID: azure-sfx2-fan-charge-20261002
+- Asset type: stereo44.1kHz Vorbis 1.01s Cathedral cue: icicle fan forecast swell
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:glock_fx_down_chromatic_fast_03, vsco:susCymb1-bow-2, vsco:susCymb1-cresc-Short_v1, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `deece4a5b0b89ce80b6eecf14f9d681b668456f566c807f32090680ddd2f3de4`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/FanRelease1.ogg`
+- Asset ID: azure-sfx2-fan-release1-20261002
+- Asset type: stereo44.1kHz Vorbis 0.61s Cathedral cue: icicle fan release: crystal shing, air cut and small body
+- Creator: recordings by Euphrosyyn, Kenney, qubodup and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:drawKnife3, cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, cc0:wind-FS60030-qubodup-air_cut, vsco:Marimba_hit_Outrigger_G4_loud_01, vsco:glass_break5, vsco:glock_fx_up_chromatic_fast_01 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `226e15b729ecf47944bff80fc684b5927ca0aca3431d77c63c9c39ba9e741977`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/FanRelease2.ogg`
+- Asset ID: azure-sfx2-fan-release2-20261002
+- Asset type: stereo44.1kHz Vorbis 0.61s Cathedral cue: icicle fan release: crystal shing, air cut and small body
+- Creator: recordings by Euphrosyyn, greyfeather, Kenney, Versilian Studios and xkeril; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:drawKnife3, cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, cc0:ring-FS706204-xkeril-nice_anime_sword_hit, cc0:swing-FS724716-greyfeather-sword_slash_energy_wave, vsco:Xylo_Medium_G4_ff_01_far, vsco:glass_break3, vsco:glock_fx_up_chromatic_fast_02 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `7a66846783dd98f15de1cb2641caa81af6c073245f3330d560fa3e0a0947f3b6`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/FanRelease3.ogg`
+- Asset ID: azure-sfx2-fan-release3-20261002
+- Asset type: stereo44.1kHz Vorbis 0.61s Cathedral cue: icicle fan release: crystal shing, air cut and small body
+- Creator: recordings by Euphrosyyn, Kenney, qubodup and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:drawKnife3, cc0:knifeSlice2, cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, cc0:wind-FS60030-qubodup-air_cut, vsco:Marimba_hit_Outrigger_G4_loud_01, vsco:glass_break2, vsco:glock_fx_up_pentatonic_med_02 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `3121de946e76a8059f4e3dedb33bf60f5192eda9495751e7593358bf13b753d9`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/RainCharge.ogg`
+- Asset ID: azure-sfx2-rain-charge-20261002
+- Asset type: stereo44.1kHz Vorbis 1.08s Cathedral cue: glass rain forecast glitter
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:BellTree_Stroke3_v1_Sum, vsco:Triangle6-Roll_v2_rr1_Sum, vsco:Xylo_Medium_C7_ff_01_far, vsco:glock_medium_C7, vsco:glock_medium_G6, vsco:susCymb1-bow-2, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `ab26e32240f3ee312966e7a2633cf5781129b575869fac598ef118d168894d3c`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/RainRelease1.ogg`
+- Asset ID: azure-sfx2-rain-release1-20261002
+- Asset type: stereo44.1kHz Vorbis 0.91s Cathedral cue: glass rain release: descending crystal cascade
+- Creator: recordings by artisticdude and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:swish-10, vsco:Marimba_hit_Outrigger_G4_loud_01, vsco:TB_hit_C5_v4_rr1, vsco:Triangle3-Hit_v2_rr1_Sum, vsco:glass_break7, vsco:glock_fx_down_chromatic_fast_02 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `0d60fabb030633bf7bcb5751768e54aa6cf23283a62296e2b88a003bd200b911`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/RainRelease2.ogg`
+- Asset ID: azure-sfx2-rain-release2-20261002
+- Asset type: stereo44.1kHz Vorbis 0.91s Cathedral cue: glass rain release: descending crystal cascade
+- Creator: recordings by artisticdude and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:swish-12, vsco:TB_hit_G4_v4_rr1, vsco:Triangle6-Hit_v2_rr1_Sum, vsco:Xylo_Medium_G4_ff_01_far, vsco:glass_break3, vsco:glock_fx_down_pentatonic_med_01 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `eedbb759a0f474fd2bf443ab90e29c06cdd412274bead903ef66ff82ff77ab9f`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/RainRelease3.ogg`
+- Asset ID: azure-sfx2-rain-release3-20261002
+- Asset type: stereo44.1kHz Vorbis 0.91s Cathedral cue: glass rain release: descending crystal cascade
+- Creator: recordings by artisticdude and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:swish-11, vsco:Marimba_hit_Outrigger_G4_loud_01, vsco:TB_hit_F5_v3_rr1, vsco:Triangle3-Hit_v2_rr2_Sum, vsco:glass_break6, vsco:glock_fx_down_chromatic_fast_04 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `60f4020ddd3d4c3ef44115a40b402ab2fee24c5b4adad105f7193e370e70db06`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/BeamCharge.ogg`
+- Asset ID: azure-sfx2-beam-charge-20261002
+- Asset type: stereo44.1kHz Vorbis 1.61s Cathedral cue: sword beam charge swell
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:glock_fx_down_chromatic_fast_03, vsco:susCymb1-bow-2, vsco:susCymb1-cresc-Median_v1, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `7a763b4f427432e69059f9802cc5216669514b7bc37298804486963e04632302`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/BeamFire.ogg`
+- Asset ID: azure-sfx2-beam-fire-20261002
+- Asset type: stereo44.1kHz Vorbis 1.01s Cathedral cue: sword beam ignition
+- Creator: recordings by greyfeather, Versilian Studios and xkeril; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:ring-FS706204-xkeril-nice_anime_sword_hit, cc0:swing-FS724716-greyfeather-sword_slash_energy_wave, vsco:TB_hit_C5_v4_rr1, vsco:cymbal-crashshort_v1, vsco:glass_break5, vsco:glock_fx_up_chromatic_fast_02, vsco:susCymb1-hit-bell_fff in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `aefb37b04198482d61adec0b2bf2a0f7237e8d4e3258da7a5e719d526ae76387`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/BeamSweep.ogg`
+- Asset ID: azure-sfx2-beam-sweep-20261002
+- Asset type: stereo44.1kHz Vorbis 3.01s Cathedral cue: sword beam three-second sweep bed
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:Triangle3-Roll_v2_rr1_Sum, vsco:glock_medium_C6, vsco:glock_medium_G6, vsco:susCymb1-bow-3, vsco:susCymb1-scrape2_v1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `af53b0251baef348fdd310b5071e3b0493fbd898abccdf5de8af2a3d213b56c8`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/CutCharge.ogg`
+- Asset ID: azure-sfx2-cut-charge-20261002
+- Asset type: stereo44.1kHz Vorbis 1.01s Cathedral cue: spatial cut forecast tension
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:Triangle6-Roll_v2_rr1_Sum, vsco:glock_fx_down_chromatic_fast_03, vsco:susCymb1-bow-2, vsco:susCymb1-scrape1_v1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `8dde7eae770c41104a0c0d529fcea51d0668d7d505d5a0bc628e60d0985f91fd`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/CutRelease1.ogg`
+- Asset ID: azure-sfx2-cut-release1-20261002
+- Asset type: stereo44.1kHz Vorbis 0.51s Cathedral cue: spatial cut: thin tear, blade shing and light body
+- Creator: recordings by Euphrosyyn, Kenney, qubodup and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:drawKnife3, cc0:knifeSlice, cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, cc0:wind-FS60030-qubodup-air_cut, vsco:Xylo_Medium_G4_ff_01_far, vsco:glass_break6 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `f530009c292b8e45de6dec05bb62cf345c07a5de5276df68d0ee10d64af2a66d`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/CutRelease2.ogg`
+- Asset ID: azure-sfx2-cut-release2-20261002
+- Asset type: stereo44.1kHz Vorbis 0.51s Cathedral cue: spatial cut: thin tear, blade shing and light body
+- Creator: recordings by Kenney, qubodup and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:drawKnife2, cc0:drawKnife3, cc0:metal-FS442769-qubodup-sword_hit, cc0:wind-FS60030-qubodup-air_cut, vsco:Marimba_hit_Outrigger_G4_loud_01, vsco:glass_break2 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `ccf3e646d446873dedf7a2a06d5eec16553c80690593abb377bf48377d9ac490`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LioraHit1.ogg`
+- Asset ID: azure-sfx2-liora-hit1-20261002
+- Asset type: stereo44.1kHz Vorbis 0.21s Cathedral cue: small crystal tick when Liora is hit
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:Marimba_hit_Outrigger_G4_loud_01, vsco:glass_break6, vsco:glock_medium_G5 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `a172cd80df9212768d1d749e5c4f34f8b73df4a4f4c85aa4abaf784bbb7dd735`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LioraHit2.ogg`
+- Asset ID: azure-sfx2-liora-hit2-20261002
+- Asset type: stereo44.1kHz Vorbis 0.21s Cathedral cue: small crystal tick when Liora is hit
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:Xylo_Medium_G4_ff_01_far, vsco:glass_break4, vsco:glock_medium_C6 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `33d814ffe91c4e7cee050932213406340d0a877e6d4ea6808138b9f2412997d6`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/RushWarn.ogg`
+- Asset ID: azure-sfx2-rush-warn-20261002
+- Asset type: stereo44.1kHz Vorbis 1.68s Cathedral cue: worm rush forecast: rising growl and grinding
+- Creator: recordings by AudioPapkin, Bananaboatman33 and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:roar-FS257635-Bananaboatman33-demon_giant_howl, vsco:brick_scrape, vsco:brick_scrape2, vsco:chain_grind, vsco:gongscrape_mf in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `7c70f8b5b0d0b1040ae05d9b2d7ae16449d0391b7d2be936ae7535557bccb64c`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/RushPass.ogg`
+- Asset ID: azure-sfx2-rush-pass-20261002
+- Asset type: stereo44.1kHz Vorbis 1.41s Cathedral cue: worm rush pass: mass whoosh, glass grind and roar burst
+- Creator: recordings by AudioPapkin, Bananaboatman33, florianreichelt, magnuswaker, PorkMuncher and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:roar-FS257635-Bananaboatman33-demon_giant_howl, cc0:swing-FS263595-PorkMuncher-swoosh, cc0:wind-FS683096-florianreichelt-woosh, vsco:brick_scrape2, vsco:chain_grind, vsco:glass_break5, vsco:gongscrape_mf in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `68f25399bde0c0bf3107a257d4286d35494b6ce58592b6fd60c9c04e3c1f16bc`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/MissileVolley.ogg`
+- Asset ID: azure-sfx2-missile-volley-20261002
+- Asset type: stereo44.1kHz Vorbis 1.51s Cathedral cue: Fury segment volley launch
+- Creator: recordings by artisticdude, DARTEKZ_GAMEZ, florianreichelt, PorkMuncher and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:swing-FS263595-PorkMuncher-swoosh, cc0:swish-10, cc0:swish-11, cc0:swish-12, cc0:swish-13, cc0:wind-FS683096-florianreichelt-woosh, cc0:wind-FS719560-DARTEKZ_GAMEZ-wind_whirl, vsco:Triangle6-HitFM_v2_rr1_Sum, vsco:glass_break7, vsco:glass_break8, vsco:glock_fx_up_chromatic_fast_02, vsco:tamb2_rollSlow in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `b3448d49c3e23ecf2e2034840e5ea4cbbd21434d5336c0c79ac5695e80c9bf1b`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/WormHit1.ogg`
+- Asset ID: azure-sfx2-worm-hit1-20261002
+- Asset type: stereo44.1kHz Vorbis 0.26s Cathedral cue: glass armor clink when a worm segment is hit
+- Creator: recordings by Anthousai, Kenney and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:bell-FS405665-Anthousai-metal_bowl_hit, cc0:metalPot1, vsco:glass_break2 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `b65c81262425d785c81dad8d5996b6e220da7641214fedf4ea13744f35f1ff58`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/WormHit2.ogg`
+- Asset ID: azure-sfx2-worm-hit2-20261002
+- Asset type: stereo44.1kHz Vorbis 0.26s Cathedral cue: glass armor clink when a worm segment is hit
+- Creator: recordings by Anthousai, Kenney and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:bell-FS405665-Anthousai-metal_bowl_hit, cc0:metalPot3, vsco:glass_break4 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `997a49c69caf0798c0f7a9eedaa3f2d0d0b23e8efac9286d2afb71f024539c30`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/WormHit3.ogg`
+- Asset ID: azure-sfx2-worm-hit3-20261002
+- Asset type: stereo44.1kHz Vorbis 0.26s Cathedral cue: glass armor clink when a worm segment is hit
+- Creator: recordings by Anthousai, Kenney and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:bell-FS405665-Anthousai-metal_bowl_hit, cc0:metalPot1, vsco:glass_break6 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `4befb3c0508fdd04b29f61ed434cf54776db7b7ead469df887f8d1d7548b03d0`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/StackCall.ogg`
+- Asset ID: azure-sfx2-stack-call-20261002
+- Asset type: stereo44.1kHz Vorbis 2.01s Cathedral cue: Stack call: descending figure into a low bell
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:TB_hit_C4_v4_rr1, vsco:cymb_gong, vsco:glock_medium_C5, vsco:glock_medium_G4, vsco:vibraring1, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `520c5d89c5ae62c000eb158768114302ed16f203128bdc8c726dbb329b5900b3`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/SpreadCall.ogg`
+- Asset ID: azure-sfx2-spread-call-20261002
+- Asset type: stereo44.1kHz Vorbis 2.01s Cathedral cue: Spread call: rising, dispersing figure
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:BellTree_Stroke3_v1_Sum, vsco:glock_medium_C5, vsco:glock_medium_G4, vsco:glock_medium_G5, vsco:susCymb1-bow-2, vsco:vibraring1, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `8eae5b686356dd6b5d3c4875b9b5f573e0345478e80e7e3b66abb5d027c595bd`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/ChorusTick1.ogg`
+- Asset ID: azure-sfx2-chorus-tick1-20261002
+- Asset type: stereo44.1kHz Vorbis 0.51s Cathedral cue: chorus countdown crystal tick
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:Claves1_Hit_v2_rr1_Sum, vsco:glock_medium_G4, vsco:vibraring1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `2252894450ebf3a01a48e2034a5a3baa7eaeb1766ba5c161ef3f25ac2f097166`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/ChorusTick2.ogg`
+- Asset ID: azure-sfx2-chorus-tick2-20261002
+- Asset type: stereo44.1kHz Vorbis 0.51s Cathedral cue: chorus countdown crystal tick
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:Claves1_Hit_v2_rr2_Sum, vsco:glock_medium_C5, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `86626d57ddb2152280af9d69b2eb14b8cbc31c89329fda94dcb6af6d4fafcd3d`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/ChorusTick3.ogg`
+- Asset ID: azure-sfx2-chorus-tick3-20261002
+- Asset type: stereo44.1kHz Vorbis 0.51s Cathedral cue: chorus countdown crystal tick
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:Claves1_Hit_v3_rr1_Sum, vsco:glock_medium_G5, vsco:vibraring1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `c1d785a49543f5f18c20adf7769172aee1b7e6b074266ff0d8611da5f3daddf7`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/StackHold.ogg`
+- Asset ID: azure-sfx2-stack-hold-20261002
+- Asset type: stereo44.1kHz Vorbis 1.51s Cathedral cue: Stack success: resolving chime and released ice
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:TB_hit_G4_v4_rr1, vsco:glass_break5, vsco:glock_medium_C5, vsco:glock_medium_G4, vsco:vibraring1, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `5097f952893984b318d36dee5d19a637c21647b70bb6bee00f0101fd5198ab7a`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/StackShatter.ogg`
+- Asset ID: azure-sfx2-stack-shatter-20261002
+- Asset type: stereo44.1kHz Vorbis 1.51s Cathedral cue: Stack failure: crushing ice jaws
+- Creator: recordings by AudioPapkin, discofield, magnuswaker and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:impact-FS541029-AudioPapkin-very_low_impact, cc0:impact-FS711657-discofield-stone_crash, vsco:glass_break3, vsco:glass_break7, vsco:metal_hit9, vsco:vibraring1, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `97ecac3e226b998b48b7c2dc00918233c4a5c3cec49a1573ae09f53de5b8ffb3`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/SpreadFade.ogg`
+- Asset ID: azure-sfx2-spread-fade-20261002
+- Asset type: stereo44.1kHz Vorbis 1.21s Cathedral cue: Spread success: fading shimmer
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:BellTree_Stroke3_v1_Sum, vsco:glock_medium_C5, vsco:glock_medium_G5, vsco:susCymb1-bow-2, vsco:vibraring1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `f7ddf08eafcf408831766a2f82afbb3226e6db8ddb973d50705e5bdf0bcdefd9`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/SpreadPierce.ogg`
+- Asset ID: azure-sfx2-spread-pierce-20261002
+- Asset type: stereo44.1kHz Vorbis 1.21s Cathedral cue: Spread failure: light sword piercing
+- Creator: recordings by Euphrosyyn, greyfeather, magnuswaker, nekoninja and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, cc0:swing-FS370204-nekoninja-samurai_slash, cc0:swing-FS724716-greyfeather-sword_slash_energy_wave, vsco:glass_break6, vsco:glock_medium_C5, vsco:vibraring1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `a91bda03c8818e8ad8cf5e66f7b2799151a75a6c65cb1ec699d86daeeea7359b`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/Downed.ogg`
+- Asset ID: azure-sfx2-downed-20261002
+- Asset type: stereo44.1kHz Vorbis 1.51s Cathedral cue: a member Downed: freezing crackle and low hit
+- Creator: recordings by AudioPapkin, magnuswaker and Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:impact-FS522099-magnuswaker-concrete_smash_2, cc0:impact-FS541029-AudioPapkin-very_low_impact, vsco:chain_grind, vsco:glass_break4, vsco:glock_fx_down_chromatic_fast_02, vsco:susCymb1-scrape1_v1, vsco:vibraring1 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `cc84d4758ecfe201bef82adaa3bf769c21741529a95a3e13fcbaf5a845a5c833`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/Revived.ogg`
+- Asset ID: azure-sfx2-revived-20261002
+- Asset type: stereo44.1kHz Vorbis 2.01s Cathedral cue: a member revived: thaw and rising bells
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: vsco:bubbles2, vsco:glass_break2, vsco:glock_medium_C5, vsco:glock_medium_G4, vsco:glock_medium_G5, vsco:susCymb1-bow-2, vsco:vibraring1, vsco:vibraring3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `6504931ee1fd12f4b9ea84e4e6eb7db4e4317407aba7889d98c087ed4b8fca0c`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LatticeVolley.ogg`
+- Asset ID: azure-sfx2-lattice-volley-20261002
+- Asset type: stereo44.1kHz Vorbis 1.11s Cathedral cue: slash lattice head hit (Doll ChargeRush core with glass and shing)
+- Creator: recordings by Euphrosyyn and Versilian Studios; the project-owned Doll ChargeRush cue; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, repo:FirstSeverance/Beams/ChargeRush, vsco:glass_break5, vsco:glass_break7 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `94d59383d48be213c9df6669e52c7216411272bd739f4194a490ddbf26a6292a`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LatticeSlice1.ogg`
+- Asset ID: azure-sfx2-lattice-slice1-20261002
+- Asset type: stereo44.1kHz Vorbis 0.21s Cathedral cue: one slash-lattice line (ChargeRush staccato core with a glass crack)
+- Creator: recordings by Euphrosyyn and Versilian Studios; the project-owned Doll ChargeRush cue; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, repo:FirstSeverance/Beams/ChargeRush, vsco:glass_break5 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `8dca81eded9cc4e1a8e987cab3e6c6377ca4c90c6e8c87b766373dc1d166264e`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LatticeSlice2.ogg`
+- Asset ID: azure-sfx2-lattice-slice2-20261002
+- Asset type: stereo44.1kHz Vorbis 0.21s Cathedral cue: one slash-lattice line (ChargeRush staccato core with a glass crack)
+- Creator: recordings by Euphrosyyn and Versilian Studios; the project-owned Doll ChargeRush cue; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, repo:FirstSeverance/Beams/ChargeRush, vsco:glass_break3 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `bad48f2b38006a2cc599bee0d2bfdf33fc8b85040c1955046abe1257c31e898c`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LatticeSlice3.ogg`
+- Asset ID: azure-sfx2-lattice-slice3-20261002
+- Asset type: stereo44.1kHz Vorbis 0.21s Cathedral cue: one slash-lattice line (ChargeRush staccato core with a glass crack)
+- Creator: recordings by Euphrosyyn and Versilian Studios; the project-owned Doll ChargeRush cue; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, repo:FirstSeverance/Beams/ChargeRush, vsco:glass_break in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `4ec5876126e27ba7182da351e5c0ef9d9c844ad489db9533d889f833575401d6`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LatticeSlice4.ogg`
+- Asset ID: azure-sfx2-lattice-slice4-20261002
+- Asset type: stereo44.1kHz Vorbis 0.21s Cathedral cue: one slash-lattice line (ChargeRush staccato core with a glass crack)
+- Creator: recordings by Euphrosyyn and Versilian Studios; the project-owned Doll ChargeRush cue; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, repo:FirstSeverance/Beams/ChargeRush, vsco:glass_break8 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `c87ecb2fc9d051d61ec1047b6205978bf4b22f7ea3fb2597ed749573bd613023`
+
+- Runtime file: `Assets/Sounds/AzureCathedral/LatticeEnd.ogg`
+- Asset ID: azure-sfx2-lattice-end-20261002
+- Asset type: stereo44.1kHz Vorbis 1.01s Cathedral cue: slash lattice closing hit and falling shards
+- Creator: recordings by Euphrosyyn and Versilian Studios; the project-owned Doll ChargeRush cue; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cc0:ring-FS529019-Euphrosyyn-anime_shing_sword_2, repo:FirstSeverance/Beams/ChargeRush, vsco:glass_break2, vsco:glass_break7, vsco:glass_break8 in the table above
+- Tool/model/version: `tools/remix_azure_sfx.py` with `tools/sfx_layers.py`; NumPy2.4.4, SciPy1.16.1, soundfile0.14.0/libsndfile1.2.2 Vorbis at compression level0.4, pinned Ogg serial
+- Human modifications: Recordings resampled to44.1kHz, trimmed, filtered, pitch-shifted by resampling, reversed where noted, layered on the accepted Cathedral event clocks and loudness-matched; risers, shimmer, drips and low bodies are original deterministic synthesis. Recordings and WAV previews stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and project-owned material; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude,2026-10-02; source licenses, timing, loudness, true peak and boundaries checked numerically; owner approved the set by listening page2026-10-02; in-game mix remains owner-owned
+- SHA256: `bcec9f0068065f2379dbe1f5f398e1627ba7c2e5ea1855c3a59f457ec2e0be67`
+
+### Azure material revision — 2026-09-26
+
+Original code-authored materials; no external samples or texture extraction. Original Vitrion/Liora PNGs and music remain unchanged. The latest project-owned Scarlet renderer supplies techniques (masked emission, attached lagging ribbons), not copied red anatomy. Its seven synthesized ice/glass cues were retired by the [recorded audio (SFX v2)](#cathedral-recorded-audio-sfx-v2--2026-10-02) above.
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/AzureLiora.fxc`
 - Asset ID: azure-liora-refraction-20260926

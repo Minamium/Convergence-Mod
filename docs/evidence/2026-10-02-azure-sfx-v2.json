@@ -1,0 +1,22 @@
+{
+  "scope": "Cathedral of the White Night SFX v2: 53 recorded-layer cues (40 cue kinds) replace the seven 2026-09-26 NumPy-only cues and the borrowed Doll pressure/beam/chorus layers; one event table (AzureAudio) and a once-per-identity cue clock (AzureCueClock) replace the per-frame tick crossing and shared spacing; new forecast, chorus countdown/verdict, Down/revive, phase and hit cues; positioned sources with a near-listener anchor; BGM unchanged",
+  "target_build": "0.3.65 / protocol77",
+  "integration_base": "48192f1 (main after PR100)",
+  "owner_direction": "2026-10-02: the owner said the Cathedral visuals are good but sound and staging are ordinary and asked to start with the sound effects, keeping the White Night BGM. After a listening page with game-cadence sequences mixed at the owner's sliders the owner said the set is good overall (\"効果音全体的にいい\"), called the first lattice tick set plain, asked for it to be based on the old \"ba-ba-ba\" (Doll ChargeRush staccato) and chose candidate A of three, then asked for integration",
+  "checks": {
+    "export": "passed: tools/remix_azure_sfx.py renders 53 cues from 114 local CC0/project sources; every pre-encode master is sample-identical to the auditioned render (max difference 0) and two runs write byte-identical OGG files (pinned serial); 1.7 MB total; K100 targets met, no boundary discontinuity",
+    "rights": "passed by record: Freesound/OpenGameArt sources are the CC0 uploads already recorded for Ghost Samurai/Soboro, VSCO 2 CE 1.1.0 is CC0 1.0, the lattice core is the project-owned Doll ChargeRush; Assets/ATTRIBUTION.md lists every source with its SHA256 and one record per OGG",
+    "python": "passed: py -3 -B -m unittest discover -s tools/tests, 66 tests; test_azure_audio checks 53 stereo 44.1 kHz Vorbis files of 0.15-5.2 s and that the AzureAudio table plays exactly those files",
+    "domain": "passed: dotnet run Tests/Convergence.DomainTests -c Release -- --filter Azure, 33 tests, failures 0; new: cue clock never replays on a regressing age and drops cues observed too late, latch/baseline, rush activity during staging/Devouring/Fury and its serial/side, sound leads against picture events, lattice line index",
+    "review": "an adversarial diff review found 1 bug (the Python route check) and 7 risks/nits (update-counter reset after a world change, terminal tails released without tracking, a replication gap fading Victory/Defeat tails, ramp restart level, natural beam end, late Liora-fall after a gap, clock pruning allocation); all were fixed before the final build",
+    "native_build": "passed: tools/dev.py build --native into an isolated profile, 0 errors and the 4 existing FirstSeverance CS8632 warnings; package 0.3.65"
+  },
+  "not_run": [
+    "in-game listening of every cue against the White Night BGM at the owner's sliders (offline sequences only)",
+    "lattice slices at 3-tick spacing through tModLoader's voice limits (MaxInstances 8, IgnoreNew): no dropped or clicking slices",
+    "positioned worm/rift/rush cues and the near-listener anchor at 1080p and zoom; Reduced Effects lowering only staging",
+    "chorus countdown and the four verdict sounds for failed and successful Stack/Spread with two or more players",
+    "Down/revive sounds for self and allies; hit clicks with fast and piercing weapons",
+    "multiplayer replication gaps: no doubled or late cue, Victory/Defeat tails surviving a gap, sounds stopping on world exit"
+  ]
+}

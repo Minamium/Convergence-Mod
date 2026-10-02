@@ -1,6 +1,6 @@
 {
   "scope": "Scarlet Invocation: the live strike and residue of field beams (TrackingBeam in Act I and Final, SideBeams in every Act) are drawn by the original ScarletInk material (black blood river) through Vfx/ScarletInkStroke; forecasts (CrimsonEnergy portal forecast, dust, mouth) and the crossflow seals/vapor are unchanged. Client presentation only: no gameplay, hitbox, timing, packet or protocol change",
-  "target_build": "0.3.67 / protocol76 unchanged (client-only)",
+  "target_build": "0.3.68 / protocol77 unchanged (client-only; renumbered from 0.3.67 after main took 0.3.65)",
   "integration_base": "51b0fea (main after PR98); the branch carries the offline preview tooling d297436",
   "owner_direction": "2026-10-02: adopt the dark blood-river look for live strikes only; keep the forecast as is; keep the two seals and vapor around the crossflow and replace only the stream between them; do not touch SpatialRift/Grid, ChoirRakes or ClusterVolley",
   "checks": {
