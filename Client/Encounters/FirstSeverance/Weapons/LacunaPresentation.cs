@@ -119,7 +119,7 @@ internal static class LacunaPresentation
         Vector2 bookHole = X(LacunaArtFit.BookHoleAt(N(bookCentre), bookFlip));
         if (art.Book is { } book)
         {
-            float flash = live && age >= Score.Fire && age < Score.Fire + 6 ? .7f * (1 - (age - Score.Fire) / 6) : 0;
+            float flash = live && age >= Score.Fire && age < Score.Fire + 4 ? .45f * (1 - (age - Score.Fire) / 4) : 0;
             canvas.Sprite(new DollSprite(book, book.Bounds, X(LacunaArtFit.BookPivot)), bookCentre, 0, bookFlip, DollStratum.Front, BookDepth,
                 new DollSpriteFx { Flash = flash, Fade = fading ? Score.Clamp01(fade / Score.FadeTicks) : 0, Dissolve = collapseT, Seed = s.Seed });
         }
@@ -161,10 +161,12 @@ internal static class LacunaPresentation
                 {
                     // The tell half-closes the petals; a shot flashes the hole pearl.
                     bool tell = live && frame == 2 && local >= Score.ShotDelay;
-                    float shot = live ? ShotFlash(age, i) : 0;
-                    Mouth(canvas, material, X(LacunaArtFit.IrisHoleAt(N(at))), LacunaArtFit.IrisApertureRadius(frame), tell ? .8f : .2f,
+                    int shotTick = -1;
+                    float shot = live ? ShotFlash(age, i, out shotTick) : 0;
+                    Vector2 hole = X(LacunaArtFit.IrisHoleAt(N(at)));
+                    Mouth(canvas, material, hole, LacunaArtFit.IrisApertureRadius(frame), tell ? .8f : .2f,
                         .45f, shot, lightA * (1 - fx.Fade), voidA * (1 - fx.Fade), tell ? 1 : 0, i * 1.7f);
-                    if (shot > 0) canvas.Burst(X(LacunaArtFit.IrisHoleAt(N(at))), s.Seed * 31 + i * 7 + (int)age, 4, (1 - shot) * 3, 9, 2.4f, .02f, DollShardKind.Spark);
+                    if (shot > 0) canvas.Burst(hole, s.Seed * 31 + i * 7 + shotTick, 4, age - shotTick, 9, 2.4f, .02f, DollShardKind.Spark);
                 }
                 // Each dock lights a pearl notch ring round the arriving iris.
                 if (live && age >= Score.Docked(i) && age < Score.Docked(i) + 6)
@@ -396,11 +398,15 @@ internal static class LacunaPresentation
     private static float FadeShare(float fade, bool fading) => fading ? Score.Clamp01(fade / Score.FadeTicks) : 0;
 
     // The flash on an iris's hole as it shoots (3 ticks).
-    private static float ShotFlash(float age, int iris)
+    private static float ShotFlash(float age, int iris, out int shotTick)
     {
         int tick = (int)MathF.Floor(age);
         for (int back = 0; back < 3; back++)
-            if (Score.ShotAt(tick - back, iris)) return 1 - (age - (tick - back)) / 3;
+        {
+            shotTick = tick - back;
+            if (Score.ShotAt(shotTick, iris)) return 1 - (age - shotTick) / 3;
+        }
+        shotTick = -1;
         return 0;
     }
 

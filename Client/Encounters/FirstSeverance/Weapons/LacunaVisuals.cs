@@ -228,7 +228,7 @@ internal sealed class LacunaVisuals : GlobalProjectile
         // A pellet bites only when it really hit: the owner knows; a peer sees the owner's kill arrive early, near an
         // NPC, while its own AI did not end it. A timeout or an unusable owner only puffs out.
         bool mine = projectile.owner == Main.myPlayer;
-        bool hit = pellet.Struck || !mine && !pellet.Quiet && timeLeft > 4 && NearNpc(projectile.Center);
+        bool hit = pellet.Struck || !mine && !pellet.Quiet && timeLeft > 4 && NearNpc(projectile.Center, Trail, TrailCount);
         bool peer = !mine;
         if (hit)
         {
@@ -238,13 +238,16 @@ internal sealed class LacunaVisuals : GlobalProjectile
         else LacunaPelletSource.Puff(projectile.Center, peer);
     }
 
-    private static bool NearNpc(Vector2 at)
+    // The replica's head or its recent path (the owner's kill arrives a little late) touched an NPC.
+    private static bool NearNpc(Vector2 at, Vector2[]? trail, int count)
     {
         foreach (NPC npc in Main.ActiveNPCs)
         {
             Rectangle box = npc.Hitbox;
             box.Inflate(32, 32);
             if (box.Contains((int)at.X, (int)at.Y)) return true;
+            for (int k = 0; trail is not null && k < count && k < trail.Length; k++)
+                if (box.Contains((int)trail[k].X, (int)trail[k].Y)) return true;
         }
         return false;
     }
