@@ -49,7 +49,7 @@ internal static partial class CrimsonRig
     internal static bool Draw(CrimsonBoss boss, SpriteBatch batch, Vector2 screen)
     {
         float age = CrimsonVisuals.RenderAge(boss);
-        var signal = Signal(boss, -1, age);
+        var frame = ScarletCueFrame.Of(boss);
         float ending = boss.State.Stage == CrimsonStage.Defeat ? .35f : 1;
         Vector2 at = boss.NPC.Center;
         float opening=CrimsonChoreography.OpeningAge(age,boss.State.MusicStart);
@@ -59,17 +59,10 @@ internal static partial class CrimsonRig
         { ScarletInvocationScene.Victory(batch, boss.State, age, CrimsonVisuals.EndingElapsed(boss)); return false; }
         ScarletInvocationScene.Draw(batch, boss.State, age, ending);
         float consumed = boss.State.Phase == 3 ? CrimsonEnsemble.ConductorAbsorption(age - boss.State.PhaseStart) : 0;
-        DrawPerformer(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection,
-            true, signal.Charge, signal.Recoil, ending*reveal*(1-consumed), false, reveal*(1-consumed));
-        {
-            Vector2 waiting = new(MathF.Sin(age*.022f)*8,-20+MathF.Sin(age*.031f)*11);
-            Vector2 held = new(boss.NPC.spriteDirection*(94+signal.Charge*12),-25);
-            Vector2 orb=at+Vector2.Lerp(waiting,held,reveal);
-            if(boss.State.Phase==3) orb=Vector2.Lerp(orb,at+new Vector2(0,-20),CrimsonInvocation.Ease((age-boss.State.PhaseStart)/48));
-            float radius=MathHelper.Lerp(64+MathF.Sin(age*.038f)*5,53+signal.Charge*24+signal.Recoil*18,reveal);
-            CrimsonEnergy.Begin();CrimsonEnergy.AddCore(orb,radius,age,Math.Max(signal.Charge,reveal*(1-reveal)*3),signal.Recoil,ending*(1-consumed),CrimsonVisuals.Reduced);
-            CrimsonEnergy.Draw(batch);
-        }
+        // Vespera commands her Act's body (source = phase) for a local participant; Final absorbs her, so no command.
+        DrawConductor(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection, frame.Gestures, frame.Choruses,
+            frame.Participant && boss.State.Phase < 3 ? boss.State.Phase : -1, ending, reveal, consumed,
+            boss.State.Phase == 3 ? CrimsonInvocation.Ease((age - boss.State.PhaseStart) / 48) : 0);
         return false;
     }
     private static void DrawInvocation(SpriteBatch batch,CrimsonBoss boss,float age,float opening,float alpha)
