@@ -1282,7 +1282,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 69c0e28c739ed66313292c0d8d5a07ad153d14cad9182564c68f6271faecad51
+  content_sha256: ed9128d9d3031c0c4c64098d545f577a0d32394f18ee6288fab8618cb3a7a3d2
   document_type: spec
   status: provisional
   owners:
