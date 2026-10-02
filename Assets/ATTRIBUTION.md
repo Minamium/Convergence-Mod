@@ -225,6 +225,23 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
 - SHA256: `e0a4ebfa4efeefcfa7af6cdee758c7017d1b1b03cb55f34843cdd9ad4b0a43ce`
 
+### Lacrimosa's Claws energy material — 2026-10-03
+
+The claws' own light material on the shared Doll weapon layer (the other Doll weapons keep their own materials).
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollClawEnergy.fxc`
+- Asset ID: dollclawenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollClawEnergy.fx with the Doll palette block, drawn per art dot into the layer's half-resolution Light target and quantized to the plum-to-white ramp with a world-stable Bayer dither, written branchless: the rakes' claw-scratch ribbons (tapered tail, torn plum rim, flowing value noise, sparkle, brass glints at the head, white-hot spine, cooling to plum), a middle-hot flare band for the clap slit, its pipe bars and the crush flare, a torn ring with a white inner lip, and the crush's opaque black lacuna with a one-dot pearl lip. Noise is computed in the shader; no texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-claws.ps1` (the exported claw art, real Emit sequence, pixel checks) 2026-10-03; native playtest not_run
+
 ### Choir of the Unmade cues — 2026-10-03
 
 The refreshed Choir of the Unmade's 29 cues (summon, count-in and nine sung verse notes, organ rise and six pipes, the chorus warning, six chorus renders by voice count, the success close and the failure, two hit accents). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns every pitch, time, gain and loudness target; it adds the Choir's own original synthesis (a faceless doll voice: harmonics through soprano formants with vibrato and breath, its inhale, a failing-wind organ, a soft gong of beating inharmonic modes) to the blocks of [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) and the unmodified helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py). No recording is used. Every pitch is F minor pentatonic except the fifth chorus line's Fm9 colour G. Loudness follows the Doll weapon tiers (BS.1770 K-weighted maximum 400 ms short-term LUFS), true peak at most -1 dBTP after the Vorbis round trip. The audition page and report stay in the git-ignored `.local`.
