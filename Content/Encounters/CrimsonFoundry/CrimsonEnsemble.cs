@@ -4,10 +4,13 @@ using Convergence.Common.Raids.Arena;
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
 // One accepted phase clock drives gates, bindings, native roots and presentation.
+// Transitions are whole bars: an Act change is the old music's last bar plus the
+// stop (ActRelease lands on its downbeat); Final adds a two-bar riser and the
+// pre-drop (FinalRelease) before the climax unlocks combat.
 internal static class CrimsonEnsemble
 {
-    internal const int GateOpen = 42, ActRelease = 132, FinalRelease = 420, SacrificeComplete = 390, FinalTransition = 540;
-    internal const int SacrificeStart = 270;
+    internal const int GateOpen = 42, ActRelease = 113, FinalRelease = 450, SacrificeComplete = 420, FinalTransition = 562;
+    internal const int SacrificeStart = 280;
     internal const int BodyWidth = 420, BodyHeight = 360;
     internal static CrimsonPoint Binding(RaidFieldGeometry field, int index)
     {
@@ -17,7 +20,7 @@ internal static class CrimsonEnsemble
     internal static int Transition(int phase) => phase == 3 ? FinalTransition : CrimsonPhaseRules.TransitionTicks;
     internal static float Emergence(float elapsed, bool final) => CrimsonInvocation.Ease((elapsed - (final ? FinalRelease : ActRelease)) / (final ? 90 : 80));
     internal static float Absorption(float elapsed) => CrimsonInvocation.Ease((elapsed - SacrificeStart) / (SacrificeComplete - SacrificeStart));
-    internal static float RetreatDissolve(float elapsed) => CrimsonInvocation.Ease((elapsed - 62) / 48);
+    internal static float RetreatDissolve(float elapsed) => CrimsonInvocation.Ease((elapsed - 50) / 62);
     internal static float ConductorAbsorption(float elapsed) => CrimsonInvocation.Ease((elapsed - 65) / 90);
     internal static float ChildReveal(float elapsed, int index) => CrimsonInvocation.Ease((elapsed - 18 - index * 16) / 56);
     internal static float BloodPressure(float elapsed) => CrimsonInvocation.Ease((elapsed - 155) / 100)

@@ -81,7 +81,7 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                 float progress = Math.Clamp((age - plan.Born) / (plan.Fire - plan.Born), 0, 1);
                 float alpha = age < plan.Fire ? Math.Min(1, (age - plan.Born + 1) / 8)
                     : 1 - CrimsonInvocation.Ease((age - plan.Fire) / 22);
-                float pulse = CrimsonRegistration.Score.Pulse(Math.Max(0, age - boss!.State.MusicStart));
+                float pulse = CrimsonMeter.Pulse(Math.Max(0, age - boss!.State.MusicStart));
                 if (plan.Kind == CrimsonChorusKind.Stack) DrawMarker(plan.Center, CrimsonChorusRules.StackRadius, true);
                 else for (int i = 0; i < boss!.State.Members.Length; i++)
                 {

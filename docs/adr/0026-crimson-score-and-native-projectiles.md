@@ -21,7 +21,7 @@ related_docs:
 
 # ADR-0026: Crimson score clock and native projectiles
 
-Current amendments: [native chorus publication](#native-chorus-publication--2026-09-28), [Down/recovery](#2026-09-27-scarlet-downrecovery-and-debug-damage-protocol70) and [single sacrificial Final](#single-sacrificial-final-and-verdict-tail--2026-09-22). Earlier amendments retain historical decisions, not current visual/phase instructions; the owning spec supplies current tuning.
+Current amendments: [128 BPM grid and client arrangement](#2026-10-02-scarlet-128-bpm-grid-and-client-arrangement-protocol78), [native chorus publication](#native-chorus-publication--2026-09-28), [Down/recovery](#2026-09-27-scarlet-downrecovery-and-debug-damage-protocol70) and [single sacrificial Final](#single-sacrificial-final-and-verdict-tail--2026-09-22). Earlier amendments retain historical decisions, not current visual/phase instructions; the owning spec supplies current tuning.
 
 The owner requests a separate music-led Raid without a fixed arena, then a50% armored→fast-machine transformation. Reuse the definition-routed coordinator/transport, not either prior encounter's runtime. `crimson_foundry` owns a runtime, preparation roster, native NPC projection, immutable hazard projectiles and terminal cleanup; no global encounter switch, extra assembly or persisted session is added. Feature termination schema3/version1 and protocol42 distinguish matching peers without renumbering prior packet IDs.
 
@@ -33,7 +33,13 @@ The immutable score is derived from an authorized local recording. A client audi
 
 API evidence: same pinned tML2026.07.3.0/666f69962d3bdffde54fc14025f02634965b4e7c Projectile/Player hooks as [ADR-0023](0023-ghost-samurai-native-wave-damage.md). The [OGGAudioTrack patch](https://github.com/tModLoader/tModLoader/blob/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/Audio/OGGAudioTrack.cs.patch) confirms parsed LOOPSTART/LOOPEND tags. [FNA SoundEffect](https://github.com/FNA-XNA/FNA/blob/cf6b3664866faaa9237a763fe61e01bfcd473a10/src/Audio/SoundEffect.cs) documents PCM offset/count and loopStart/loopLength; compiled against installedFNA1.0.0. No FNA source is copied. `PostUpdateInput` handles pause/focus audio independent of world simulation. Inspected2026-09-15; hardware playback remains owner-tested.
 
-The first implementation withheld the recording from Git pending a distribution decision. Later on2026-09-15, the owner approved the game-facing loop edit for the Mod and its public source tree, with author credit and exclusion from the project license. [Feature music policy](../encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-and-musical-presentation) owns that current packaging decision. The missing-audio guard remains an incomplete-package safeguard; this ADR does not grant standalone music rights.
+The first implementation withheld the recording from Git pending a distribution decision. Later on2026-09-15, the owner approved the game-facing loop edit for the Mod and its public source tree, with author credit and exclusion from the project license. [Feature music policy](../encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-graceful-ordeal-on-a-128-bpm-grid) owns that current packaging decision. The missing-audio guard remains an incomplete-package safeguard; this ADR does not grant standalone music rights.
+
+## 2026-10-02 Scarlet 128 BPM grid and client arrangement (protocol78)
+
+This supersedes the detected-beat score clock, not the authority split. Measurement showed Graceful Ordeal is a strict 128 BPM recording, while the shipped beat map drifted and its loop shifted the meter. The server/SP now schedules from a closed-form integer grid (`CrimsonMeter`: beat k at musicStart + round(28.125k)); phrases, act unlocks and chorus ends sit on bar heads, and a latched act changes on the next bar head. No beat array or audio data enters authority, and the wire format is unchanged: bar-aligned `PhaseStart`/`UnlockAt` already carry every stage boundary.
+
+Clients alone map stages to song bars (`CrimsonArrangement`) and stream them through one dynamic voice (`CrimsonMusicMixer`). Each later stage's first bar keeps the previous music, so a replica hears of a change a bar before it is audible; endings start on the next beat after the replica sees Victory/Defeat. The stream follows, and only re-anchors to, the authority clock. Protocol78 marks the shared grid/transition tuning (two-bar acts, five-bar Final, eight-bar opening); mixed peers must update together.
 
 ## 2026-09-27 Scarlet Down/recovery and debug damage (protocol70)
 

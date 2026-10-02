@@ -38,7 +38,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
     private CrimsonRecoveryController? recovery;
     private CrimsonMember[] members = Array.Empty<CrimsonMember>();
     private int age, musicStart = -1, finalStart = -1, ending = -1;
-    private int phaseStart, unlockAt = -1, target = -1, nextPhrase, phraseSerial;
+    private int phaseStart, unlockAt = -1, target = -1, nextPhrase, phraseSerial, pendingAdvance = -1;
     private int phraseStart = -1, phraseEnd = -1, targetLife, previousDamage, previousLogAge;
     private CrimsonRhythmKind phraseKind;
     private byte phase, defeated;
@@ -105,7 +105,8 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         if (actor is null || !actor.NPC.active || actor.NPC.ModNPC != actor) return End(EncounterEndReason.EncounterActorMissing);
         if (!pedestal.IsOwned(fight)) return End(EncounterEndReason.Invalidated);
         age++;
-        if (cancelled || age > 60 * 60 * 15) return End(EncounterEndReason.Cancelled);
+        // The safety cap never overrides an already committed Victory/Defeat ending.
+        if (cancelled || ending < 0 && age > 60 * 60 * 15) return End(EncounterEndReason.Cancelled);
         if (context.Lifecycle == EncounterLifecycle.Preparing)
         {
             if (!RefreshRoster()) return End(EncounterEndReason.Invalidated);
@@ -113,7 +114,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             if (stage == CrimsonStage.Ready && Array.TrueForAll(members, m => m.Ready && !Main.player[m.Slot].dead))
             {
                 musicStart = age + CrimsonInvocation.MusicLeadTicks;
-                unlockAt = musicStart + Math.Max(CrimsonRegistration.Score.IntroTicks, CrimsonChoreography.OpeningTicks);
+                unlockAt = musicStart + CrimsonChoreography.OpeningTicks;
                 nextPhrase = unlockAt - CrimsonRhythm.LookAheadTicks;
                 stage = CrimsonStage.Countdown;
                 targetLife = CrimsonInvocation.TargetLife(members.Length);
@@ -171,13 +172,19 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                     CrimsonPackets.Log($"event=HpGateHeld fight={fight.Value} phase={phase} age={age} issued={cycle.Issued}");
                 }
             }
-            if (cycle.TryComplete(age, chorus is not null))
+            if (pendingAdvance < 0 && cycle.TryComplete(age, chorus is not null))
             {
                 CrimsonPackets.Log($"event=PhaseCycleCompleted fight={fight.Value} phase={phase} age={age} cycles={cycle.Completed}");
-                if (phase < 3 && thresholdLatched && summons[phase] is { } retired) AdvancePhase(retired);
+                // The held apparition retreats on the next bar head, so the music's stop
+                // and the next act's downbeat land on the shared 128 BPM grid.
+                if (phase < 3 && thresholdLatched)
+                    pendingAdvance = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAtOrAfter(age - musicStart));
                 else { nextPhrase = age; Project(true); }
             }
-            if (!cycle.Full && age >= nextPhrase && stage is CrimsonStage.Countdown or CrimsonStage.Performance)
+            if (pendingAdvance >= 0 && age >= pendingAdvance && summons[phase] is { } retired)
+            { pendingAdvance = -1; AdvancePhase(retired); }
+            if (pendingAdvance < 0 && !cycle.Full && age >= nextPhrase && stage is CrimsonStage.Countdown or CrimsonStage.Performance
+                && HasStandingMember())
                 if (!TryScheduleChorus()) SchedulePhrase();
         }
         if (age % 300 == 0)
@@ -194,7 +201,8 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         previous.NPC.dontTakeDamage = true; previous.NPC.netUpdate = true;
         ClearHazards(); Array.Clear(poseUntil); Array.Clear(techniqueCursor);
         cycle.Reset(); thresholdLatched = false;
-        phase++; phaseStart = age; unlockAt = age + CrimsonEnsemble.Transition(phase);
+        phase++; phaseStart = age;
+        unlockAt = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAt(age - musicStart) + CrimsonArrangement.TransitionBars(phase));
         phraseStart = phraseEnd = -1; phraseKind = CrimsonRhythmKind.Groove;
         nextPhrase = unlockAt - CrimsonRhythm.LookAheadTicks;
         if (phase < 3) SpawnSummon(phase);
@@ -311,11 +319,14 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             if (Math.Abs(npc.velocity.X) > .5f) npc.spriteDirection = npc.velocity.X < 0 ? -1 : 1;
         }
     }
+    // While everyone is Down or inside the disconnect grace, admission waits for a revive or the
+    // recovery service's all-Down verdict instead of failing the fight for want of a target.
+    private bool HasStandingMember()
+        => Array.Exists(members, m => !m.Out && !m.Recovery.Downed && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
     private void SchedulePhrase()
     {
         if (actor is null || cycle.Full) return;
-        var score = CrimsonRegistration.Score;
-        var rhythm = CrimsonChoreography.Create(score, Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks) - musicStart,
+        var rhythm = CrimsonChoreography.Create(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks) - musicStart,
             phraseSerial, phase == 3);
         phraseStart = musicStart + rhythm.Start; phraseEnd = musicStart + rhythm.End; phraseKind = rhythm.Kind;
         int serial = ++phraseSerial, count = rhythm.Hits.Count + (phase == 3 ? CrimsonChoreography.BasicNotes : 0), free = 0;

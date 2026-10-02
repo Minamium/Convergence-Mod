@@ -33,6 +33,13 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('boss.State.BarLife',bar)
         self.assertIn('boss.State.BarMax',bar)
         self.assertNotIn('override bool PreDraw',bar)
+    def test_terminal_endings_survive_the_cap_and_downed_rosters_wait(self):
+        text=(CONTENT/'CrimsonRuntime.cs').read_text()
+        flat=' '.join(text.split())
+        self.assertIn('cancelled || ending < 0 && age > 60 * 60 * 15',text)
+        self.assertIn('stage is CrimsonStage.Countdown or CrimsonStage.Performance && HasStandingMember()',flat)
+        helper=text[text.index('private bool HasStandingMember()'):text.index('private void SchedulePhrase()')]
+        self.assertIn('!m.Out && !m.Recovery.Downed',helper)
     def test_runtime_owns_full_cycle_and_resolves_chorus_before_advancement(self):
         text=(CONTENT/'CrimsonRuntime.cs').read_text()
         self.assertIn('CrimsonChoreography.Create',text)
@@ -47,6 +54,68 @@ class ScarletContracts(unittest.TestCase):
         self.assertLess(text.index('TickChorus();'),text.index('cycle.TryComplete('))
         self.assertIn('if (phase < 3 && thresholdLatched',text)
         self.assertIn('phraseEnd - CrimsonRhythm.LookAheadTicks',text)
+    def test_gameplay_clock_is_the_shared_128_bpm_grid_not_a_recorded_score(self):
+        self.assertFalse((ROOT/'Assets/Music/CrimsonFoundry/Score.json').exists())
+        self.assertFalse((CONTENT/'CrimsonScore.cs').exists())
+        self.assertTrue((ROOT/'Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg').exists())
+        for folder in (CONTENT,CLIENT):
+            for path in folder.rglob('*.cs'):
+                text=path.read_text(encoding='utf-8')
+                for stale in ('CrimsonScore','Score.json','CrimsonRegistration.Score','score.Events(','NextBeats(score'):
+                    self.assertNotIn(stale,text,f'{path.name} still reads the retired recorded beat map')
+        meter=(CONTENT/'CrimsonMeter.cs').read_text(encoding='utf-8')
+        self.assertIn('BeatSamples = 22500',meter)
+        self.assertIn('(beat * 225 + 4) / 8',meter)
+        self.assertIn('internal static class CrimsonArrangement',meter)
+        for portable in ('CrimsonMeter.cs','CrimsonRhythm.cs','CrimsonChorusRules.cs'):
+            self.assertNotIn('using Terraria',(CONTENT/portable).read_text(encoding='utf-8'))
+        mixer=(CLIENT/'CrimsonMusicMixer.cs').read_text(encoding='utf-8')
+        for dependency in ('using Terraria','Microsoft.Xna','NVorbis'):
+            self.assertNotIn(dependency,mixer)
+        project=(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj').read_text(encoding='utf-8')
+        self.assertIn('Content/Encounters/CrimsonFoundry/CrimsonMeter.cs',project)
+        self.assertIn('Client/Encounters/CrimsonFoundry/CrimsonMusicMixer.cs',project)
+        self.assertNotIn('CrimsonScore',project)
+        self.assertNotIn('Score.json',project)
+        choreography=(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8')
+        self.assertIn('internal static CrimsonRhythmPhrase Create(int earliest, int serial, bool final)',choreography)
+        self.assertIn('CrimsonMeter.BarTick(CrimsonMeter.OpeningBars)',choreography)
+        runtime=(CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8')
+        self.assertIn('unlockAt = musicStart + CrimsonChoreography.OpeningTicks',runtime)
+        rules=(CONTENT/'CrimsonChorusRules.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonMeter.BeatAtOrAfter(earliest)',rules)
+        chorus=(CONTENT/'CrimsonChorus.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonChorusRules.Schedule(earliest)',chorus)
+        self.assertIn('nextPhrase = plan.End - CrimsonRhythm.LookAheadTicks',chorus)
+
+    def test_act_changes_are_booked_for_a_bar_head_and_unlock_on_the_arrangement_grid(self):
+        text=(CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8')
+        flat=' '.join(text.split())
+        self.assertIn('pendingAdvance = -1;',flat)
+        # An Act change waits for a bar head; nothing else completes or schedules meanwhile.
+        self.assertIn('if (pendingAdvance < 0 && cycle.TryComplete(age, chorus is not null))',flat)
+        self.assertIn('pendingAdvance = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAtOrAfter(age - musicStart));',flat)
+        self.assertIn('if (pendingAdvance >= 0 && age >= pendingAdvance && summons[phase] is { } retired)',flat)
+        self.assertIn('{ pendingAdvance = -1; AdvancePhase(retired); }',flat)
+        self.assertIn('if (pendingAdvance < 0 && !cycle.Full && age >= nextPhrase',flat)
+        self.assertLess(flat.index('pendingAdvance = musicStart + CrimsonMeter.BarTick'),flat.index('AdvancePhase(retired)'))
+        advance=flat[flat.index('private void AdvancePhase('):]
+        self.assertLess(advance.index('phase++; phaseStart = age;'),advance.index('CrimsonArrangement.TransitionBars(phase)'))
+        self.assertIn('unlockAt = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAt(age - musicStart) + CrimsonArrangement.TransitionBars(phase));',advance)
+        self.assertNotIn('CrimsonEnsemble.Transition(phase)',advance[:advance.index('SpawnSummon')])
+        self.assertIn('nextPhrase = unlockAt - CrimsonRhythm.LookAheadTicks;',advance)
+
+    def test_music_is_one_dynamic_voice_fed_by_the_mixer_and_never_reads_a_score_file(self):
+        audio=(CLIENT/'CrimsonAudio.cs').read_text(encoding='utf-8')
+        for rule in ('DynamicSoundEffectInstance','CrimsonMusicMixer','Assets/Music/CrimsonFoundry/GracefulOrdeal.ogg',
+                     'mixer.Render(','voice.SubmitBuffer(','mixer.SetStage(','mixer.End(',
+                     'CrimsonMeter.BarAt(state.PhaseStart - state.MusicStart)'):
+            self.assertIn(rule,audio)
+        for retired in ('Score.json','CrimsonScore','CrimsonRegistration','SoundEffectInstance voice','LoopStart'):
+            self.assertNotIn(retired,audio)
+        # The dedicated server must never create an audio device.
+        self.assertRegex(audio,r'\[Autoload\(Side = ModSide\.Client\)\]\s*internal sealed class CrimsonAudio : ModSystem')
+
     def test_damage_one_is_hostile_only_and_keeps_native_hooks(self):
         # All hostile sources, including failed chorus, now share the owner-gated
         # mapping. Numeric/success-zero behavior is checked by the domain suite.

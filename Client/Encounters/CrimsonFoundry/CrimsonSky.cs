@@ -32,7 +32,7 @@ internal sealed class CrimsonSky : CustomSky
         age = CrimsonVisuals.RenderAge(boss);
         requested = CrimsonChoreography.Backdrop(CrimsonChoreography.OpeningAge(age,boss.State.MusicStart)) > 0;
         phase = boss.State.Phase;
-        beat = boss.State.MusicStart >= 0 ? CrimsonRegistration.Score.Pulse(Math.Max(0, age - boss.State.MusicStart)) : 0;
+        beat = boss.State.MusicStart >= 0 ? CrimsonMeter.Pulse(Math.Max(0, age - boss.State.MusicStart)) : 0;
     }
     public override void Activate(Vector2 position, params object[] args) => requested = Available;
     public override void Deactivate(params object[] args) => requested = false;

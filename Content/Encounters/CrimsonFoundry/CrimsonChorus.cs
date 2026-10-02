@@ -153,15 +153,14 @@ internal sealed partial class CrimsonRuntime
     {
         if (actor is null || phase == 0 || performerDefeated || phrasesSinceChorus < CrimsonChorusRules.PhrasesBetween)
             return false;
-        var score = CrimsonRegistration.Score;
         int earliest = Math.Max(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks), cycle.FinishAt) - musicStart;
-        var beats = CrimsonRhythm.NextBeats(score, earliest, 11);
+        var (born, fire, end) = CrimsonChorusRules.Schedule(earliest);
         byte mask = 0;
         for (int i = 0; i < members.Length; i++) if (!members[i].Out && !members[i].Recovery.Downed) mask |= (byte)(1 << i);
         var field = State.Field;
         var plan = new CrimsonChorusPlan(fight.Value, (short)actor.NPC.whoAmI, phaseStart, ++chorusOrdinal,
             3, chorusOrdinal % 2 == 1 ? CrimsonChorusKind.Stack : CrimsonChorusKind.Spread, mask,
-            musicStart + (int)Math.Round(beats[0]), musicStart + (int)Math.Round(beats[8]), musicStart + (int)Math.Round(beats[10]),
+            musicStart + born, musicStart + fire, musicStart + end,
             (int)ground.X, (int)ground.Y, new(field.CenterX + (chorusOrdinal % 2 == 0 ? -160 : 160), field.CenterY + 80));
         plan.Validate();
         int slot = Projectile.NewProjectile(new CrimsonChorusSource(plan), new(plan.Center.X, plan.Center.Y),
@@ -170,7 +169,8 @@ internal sealed partial class CrimsonRuntime
         chorus = plan; chorusSlot = slot; chorusResolved = false; phrasesSinceChorus = 0;
         Main.projectile[slot].timeLeft = CrimsonChorusImpactPositions.LeaseEnd(plan) - age;
         ((CrimsonChorus)Main.projectile[slot].ModProjectile).Synchronize();
-        nextPhrase = plan.End;
+        // The call ends on a bar head; the next phrase begins exactly there.
+        nextPhrase = plan.End - CrimsonRhythm.LookAheadTicks;
         CrimsonPackets.Log($"event=ChorusCalled fight={fight.Value} epoch={phaseStart} serial={plan.Serial} kind={plan.Kind} born={plan.Born} fire={plan.Fire} members={mask}");
         return true;
     }
