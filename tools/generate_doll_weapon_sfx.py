@@ -911,8 +911,10 @@ def weapon_page(directory, group, clips, report, extra):
                     f"<td>{audio(clips[name])}</td><td><small>{metrics(r)}</small></td></tr>")
     combo_rows = []
     for key, info in extra["combos"].items():
-        combo_rows.append(f"<tr><td><b>{html.escape(info['label'])}</b><br><small>{info['seconds']:.1f} 秒。クリップしないよう "
-                          f"{-info['trim_db']:.1f} dB 下げています（各音の比率はゲーム内の音量のまま）。</small></td><td>{audio(clips[key])}</td></tr>")
+        level = (f"クリップしないよう全体を {-info['trim_db']:.1f} dB 下げています（各音の比率はゲーム内の音量のまま）" if info["trim_db"] < -0.05
+                 else "ゲーム内の音量のまま")
+        combo_rows.append(f"<tr><td><b>{html.escape(info['label'])}</b><br><small>{info['seconds']:.1f} 秒。{level}。</small></td>"
+                          f"<td>{audio(clips[key])}</td></tr>")
     bgm_rows = []
     for bgm, e in extra["bgm"].items():
         bgm_rows.append(f"<tr><td>{html.escape(e['label'])}<br><small>{e['start']:.1f} 秒から {e['beats']} 拍（{e['bpm']:g} BPM、"
