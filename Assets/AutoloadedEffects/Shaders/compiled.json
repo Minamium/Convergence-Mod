@@ -38,6 +38,10 @@
       "source_sha256": "7f878ae1ab8ddbd17f2fd9e7c7bf310c23dea6eeb459c8a9b591654738b59dd0",
       "output_sha256": "ed2c4a823d79a38ec5692123126a3d2be4170e90d053967a33ca8a951aad2eba"
     },
+    "DollWitnessEnergy.fx": {
+      "source_sha256": "6d8ffcb8961784c5a862b7ab017ef777522a7f3fb675f388a6ced9625f5c17f7",
+      "output_sha256": "fb63e73eac684e1fbaf0c97118dc900f350cd0bcbd1d25ed8eb4af38044fd22b"
+    },
     "EbonManor.fx": {
       "source_sha256": "2eb1165b0f4180b6ed4e345a7a25d80c59ace41a66a4f8b90a6f1d3e72dd24b4",
       "output_sha256": "3660bd3244eb5ed247925db6a686b38f9bf96572314b50d486ac0aa9c49cd81a"

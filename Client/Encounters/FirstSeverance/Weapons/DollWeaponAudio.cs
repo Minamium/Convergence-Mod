@@ -40,6 +40,8 @@ internal static class DollWeaponAudio
         ["MeridianNote0"] = 3, ["MeridianNote1"] = 3, ["MeridianNote2"] = 3, ["MeridianNote3"] = 3, ["MeridianNote4"] = 3,
         ["MeridianNote5"] = 3, ["MeridianNote6"] = 3, ["MeridianNote7"] = 3, ["MeridianNote8"] = 3,
         ["MeridianHit"] = 3, ["MeridianHitHeavy"] = 3,
+        // Last Witness: a testimony shot or a shard hit of one owner may overlap another owner's.
+        ["WitnessTestimonyFire"] = 3, ["WitnessShardHit"] = 4,
     };
     private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, SoundStyle> styles = new(StringComparer.Ordinal);

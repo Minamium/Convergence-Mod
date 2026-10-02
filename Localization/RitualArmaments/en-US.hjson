@@ -54,13 +54,21 @@ Mods: {
 				Name: Last Witness
 				Tooltip:
 					'''
-					Hold to load one execution relic, releasing seeking shards as pressure builds.
-					The relic locks and releases a devastating returning blade.
-					Stealth empowers the final blade and its converging execution seal.
-					Release early to cancel; the full ritual lasts about 4.7 seconds.
+					Hold: an execution blade hangs before you; six testimonies break from its edge as seeking porcelain shards
+					After the sixth the sentence is sealed: the blade is swung back and hurled, spinning
+					It bites its target, turns in it twice and returns to hang again
+					Stealth strike: three judgement swords fall around the target as stakes and close into a triangle of light
+					About 4.7 seconds per sentence; releasing before the seal cancels, after it the throw completes
 					One of five equally likely rewards from the Curtainfall Treasure Box.
 					'''
 			}
+		}
+
+		Projectiles: {
+			WitnessHang.DisplayName: Last Witness
+			WitnessThrownBlade.DisplayName: Last Witness
+			WitnessShard.DisplayName: Testimony Shard
+			WitnessJudgement.DisplayName: Triangle Judgement
 		}
 
 		Buffs: {
