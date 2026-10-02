@@ -385,21 +385,30 @@ internal sealed class LacunaPelletSource : IDollWeaponSource
     {
         bool any = false;
         int pelletType = ModContent.ProjectileType<LacunaPellet>();
-        foreach (Projectile projectile in Main.ActiveProjectiles)
+        // Every wake first, then every head: all pellets share two energy batches.
+        for (int part = 0; part < 2; part++)
         {
-            if (projectile.type != pelletType || projectile.ModProjectile is not LacunaPellet pellet
-                || !projectile.TryGetGlobalProjectile(out LacunaVisuals? v) || v is null || !v.Sampled) continue;
-            any = true;
-            float fraction = canvas.Fraction;
-            Vector2 head = Vector2.Lerp(v.PreviousHead, v.CurrentHead, fraction);
-            // The wake: recorded heads older than the interpolated head, then the head.
-            int count = 0;
-            int keep = v.Trail is null ? 0 : Math.Max(0, v.TrailCount - 2);
-            for (int k = 0; k < keep && count < spine.Length - 1; k++) spine[count++] = v.Trail![k];
-            Vector2 direction = projectile.velocity.LengthSquared() > .01f ? Vector2.Normalize(projectile.velocity) : Vector2.UnitX;
-            var state = new LacunaPelletState(head, direction, v.PreviousAge + (v.CurrentAge - v.PreviousAge) * fraction, pellet.Iris,
-                projectile.owner != Main.myPlayer, projectile.identity);
-            LacunaPresentation.EmitPellet(canvas, state, spine.AsSpan(0, count), LacunaVisuals.Material);
+            foreach (Projectile projectile in Main.ActiveProjectiles)
+            {
+                if (projectile.type != pelletType || projectile.ModProjectile is not LacunaPellet pellet
+                    || !projectile.TryGetGlobalProjectile(out LacunaVisuals? v) || v is null || !v.Sampled) continue;
+                any = true;
+                float fraction = canvas.Fraction;
+                Vector2 head = Vector2.Lerp(v.PreviousHead, v.CurrentHead, fraction);
+                Vector2 direction = projectile.velocity.LengthSquared() > .01f ? Vector2.Normalize(projectile.velocity) : Vector2.UnitX;
+                var state = new LacunaPelletState(head, direction, v.PreviousAge + (v.CurrentAge - v.PreviousAge) * fraction, pellet.Iris,
+                    projectile.owner != Main.myPlayer, projectile.identity);
+                if (part == 1)
+                {
+                    LacunaPresentation.EmitPelletHead(canvas, state, LacunaVisuals.Material);
+                    continue;
+                }
+                // The wake: recorded heads older than the interpolated head, then the head.
+                int count = 0;
+                int keep = v.Trail is null ? 0 : Math.Max(0, v.TrailCount - 2);
+                for (int k = 0; k < keep && count < spine.Length - 1; k++) spine[count++] = v.Trail![k];
+                LacunaPresentation.EmitPelletWake(canvas, state, spine.AsSpan(0, count), LacunaVisuals.Material);
+            }
         }
         int alive = 0;
         for (int k = 0; k < live; k++)

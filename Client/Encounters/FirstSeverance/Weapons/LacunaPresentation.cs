@@ -81,8 +81,8 @@ internal static class LacunaPresentation
     // The owner's void lets a little of the world through, so forecasts under the beam's black core stay readable.
     // Another player's damaging light draws at DollWeaponCanvas.PeerLightAlpha and their void at PeerVoidAlpha.
     internal const float OwnerVoid = .92f;
-    // Energy draw order inside the Light target: holes, then the beam over them, then pellet wakes.
-    private const sbyte MouthDepth = 0, BeamDepth = 1, WakeDepth = 2;
+    // Energy draw order inside the Light target: holes, then the beam over them, then pellet wakes and heads.
+    private const sbyte MouthDepth = 0, BeamDepth = 1, WakeDepth = 2, HeadDepth = 3;
     // Sprite order: book, irises, great aperture.
     private const sbyte BookDepth = 0, IrisDepth = 2, GreatDepth = 3;
     // The pellet head and wake (world px), and how far back the wake reaches.
@@ -267,7 +267,18 @@ internal static class LacunaPresentation
 
     // A pellet: a small void head with a pearl lip, its wake trailing back along `trail` (world points, oldest first,
     // ending just behind the head).
+    // Recording every pellet's wake first and every head after keeps all pellets in two energy batches.
     internal static void EmitPellet(DollWeaponCanvas canvas, in LacunaPelletState p, ReadOnlySpan<Vector2> trail, IDollEnergyMaterial material)
+    {
+        EmitPelletWake(canvas, p, trail, material);
+        EmitPelletHead(canvas, p, material);
+    }
+
+    internal static void EmitPelletHead(DollWeaponCanvas canvas, in LacunaPelletState p, IDollEnergyMaterial material)
+        => Mouth(canvas, material, p.Head, PelletHeadRadius, .55f, .4f, Score.Clamp01(1 - p.Age / 4), LightAlpha(p.Peer), VoidAlpha(p.Peer), 1,
+            p.Seed * .91f, HeadDepth);
+
+    internal static void EmitPelletWake(DollWeaponCanvas canvas, in LacunaPelletState p, ReadOnlySpan<Vector2> trail, IDollEnergyMaterial material)
     {
         float lightA = LightAlpha(p.Peer), voidA = VoidAlpha(p.Peer);
         float hot = Score.Clamp01(1 - p.Age / 4);
@@ -282,7 +293,6 @@ internal static class LacunaPresentation
         if (count == 0 || Vector2.DistanceSquared(spine[count - 1], p.Head) >= 4) spine[count++] = p.Head;
         if (count >= 2)
             canvas.EnergyStrip(material, LacunaEnergy.WakePass, spine[..count], WakeWidth, new Vector4(hot, lightA, voidA, (p.Seed & 63) * .13f), WakeDepth);
-        Mouth(canvas, material, p.Head, PelletHeadRadius, .55f, .4f, hot, lightA, voidA, 1, p.Seed * .91f, WakeDepth);
     }
 
     // A pellet or beam contact: a closing pearl ring and pearl motes (debris halves under Reduced Effects).
