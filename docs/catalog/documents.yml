@@ -653,7 +653,7 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: e654609c253a68f29c887fb18359713d310f39c8abd667be436c880703e0a1e8
+  content_sha256: a6507304be086c9090eb25528154d3522886772c1d3dce47c7b1951f14d52be3
   document_type: spec
   status: accepted
   owners:
@@ -1095,13 +1095,13 @@ documents:
 - doc_id: policy.ip-provenance
   path: docs/IP_PROVENANCE.md
   title: IP and Asset Provenance Policy
-  content_sha256: 29dd84949cbaab3088e40b9bd9d6dea9eb29375f3946032794f8288bfb856aee
+  content_sha256: c3779676d141fa133f5e3f6c71a63fc41a163b9f020edb63e14b19397bdbbb32
   document_type: policy
   status: accepted
   owners:
   - project
   - art
-  last_reviewed: '2026-10-01'
+  last_reviewed: '2026-10-02'
   source_of_truth_for:
   - policy.ip_provenance
   aliases:
@@ -1414,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 41a4286385633fcbbfa5b9583b54a6361a63fc98593451e9006d28408a92f4e2
+  content_sha256: 1afbbce0aa65598df235e144b09b1081900f0937c210722faa7e32cf0e46d277
   document_type: status
   status: accepted
   owners:

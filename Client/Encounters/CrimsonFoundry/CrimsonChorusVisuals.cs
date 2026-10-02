@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using Convergence.Content.Encounters.CrimsonFoundry;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Utilities;
 using Terraria;
-using Terraria.Audio;
 using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry;
@@ -18,13 +16,15 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     private Guid fight;
     private int previous = -1;
     private readonly HashSet<(int Serial, bool Impact)> heard = new();
-    private readonly List<(SlotId Id, int End)> voices = new();
+    // Summon and verdict cues ring for their whole length; a Fight end fades them.
+    private readonly ScarletVoices voices = new(8);
     private readonly List<Vector2> ring = new(65);
     private readonly Vector2[] arrow = new Vector2[3];
     private static bool Audience(CrimsonBoss? boss) => !Main.dedServ && !Main.gameMenu && boss is not null && boss.Fresh
         && Array.Exists(boss.State.Members, m => m.Slot == Main.myPlayer);
     public override void PostUpdateEverything()
     {
+        voices.Update();
         var boss = CrimsonPackets.Boss;
         if (!Audience(boss)) { Reset(); return; }
         int age = (int)boss!.VisualAge;
@@ -39,25 +39,16 @@ internal sealed class CrimsonChorusVisuals : ModSystem
                 if (impact ? !marker.Resolved || age < tick || age - tick > CrimsonChorusImpactPositions.TailTicks
                     : previous >= tick || age < tick || age - tick > 3) return;
                 if (!heard.Add((p.Serial, impact))) return;
-                string asset = p.Kind == CrimsonChorusKind.Stack ? impact ? "StackRelease" : "StackSummon"
-                    : impact ? marker.FailedMask != 0 ? "SpreadExecution" : "SpreadDissolve" : "SpreadSummon";
-                var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
-                {
-                    Volume = impact ? .48f : .25f, MaxInstances = 1, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
-                    PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
-                });
-                voices.Add((id, age + 100));
+                // Summon on the call; the verdict cue follows the committed failure mask.
+                bool failed = impact && marker.FailedMask != 0;
+                voices.Play(p.Kind == CrimsonChorusKind.Stack
+                    ? impact ? failed ? ScarletCue.StackFail : ScarletCue.StackSuccess : ScarletCue.StackSummon
+                    : impact ? failed ? ScarletCue.SpreadFail : ScarletCue.SpreadSuccess : ScarletCue.SpreadSummon);
                 if (impact)
                     CrimsonPackets.Log($"event=ChorusPresentation fight={p.Fight} serial={p.Serial} kind={p.Kind} failed_mask={marker.FailedMask} verdict_delay_ticks={age - p.Fire} result_positions={marker.ImpactPositions.Length} observer={Main.myPlayer}");
                 if (impact && marker.Resolved && marker.FailedMask != 0) ScarletArticulation.Impact(3,2,boss.NPC.Center);
             }
             if (heard.Count > 32) heard.RemoveWhere(x => x.Serial < p.Serial - 2);
-        }
-        for (int i = voices.Count - 1; i >= 0; i--)
-        {
-            var v = voices[i];
-            if (!SoundEngine.TryGetActiveSound(v.Id, out var sound)) { voices.RemoveAt(i); continue; }
-            if (age >= v.End) { sound.Stop(); voices.RemoveAt(i); }
         }
         previous = age;
     }
@@ -168,10 +159,10 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     }
     private void Reset()
     {
-        foreach (var v in voices) if (SoundEngine.TryGetActiveSound(v.Id, out var sound)) sound.Stop();
-        voices.Clear(); heard.Clear(); drawnResults.Clear(); fight = Guid.Empty; previous = -1;
+        voices.Release(); heard.Clear(); drawnResults.Clear(); fight = Guid.Empty; previous = -1;
     }
-    public override void OnWorldUnload() => Reset();
-    public override void ClearWorld() => Reset();
-    public override void Unload() => Reset();
+    private void Teardown() { voices.Stop(); Reset(); }
+    public override void OnWorldUnload() => Teardown();
+    public override void ClearWorld() => Teardown();
+    public override void Unload() => Teardown();
 }
