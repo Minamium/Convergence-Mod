@@ -1,7 +1,8 @@
 // Engine shim for the Scarlet rig harness (tools/preview-scarlet-rigs.ps1). The production rig, forecast and
 // seal files are linked UNCHANGED; this file replaces only the Terraria / tModLoader / ReLogic / Luminance
 // surface they touch, over a hidden FNA D3D11 device, plus two tiny stubs (CrimsonVisuals.Reduced and
-// ScarletMaterials.WorldMatrix / Palette, the latter verbatim from ScarletMaterials.cs). Promoted from the
+// ScarletMaterials.WorldMatrix / Palette, the latter verbatim from ScarletMaterials.cs) and a one-line partial of
+// CrimsonRig that calls the production LoadPerformer of the linked CrimsonRig.Performer.cs. Promoted from the
 // 2026-10-02 spike that proved the real rigs render offline with zero compile errors.
 //
 // Self-checks the harness relies on (reported in gates.json, "self"):
@@ -193,6 +194,14 @@ namespace Luminance.Core.Graphics
 
 namespace Convergence.Client.Encounters.CrimsonFoundry
 {
+    // The harness's part of CrimsonRig: CrimsonRig.Performer.cs (Vespera, the free apparitions, the plan-list Signal)
+    // is linked unchanged; the boss half (CrimsonRig.cs, whose Load calls LoadPerformer) is not. This calls the
+    // production loader (ModContent.Request through the shim above) and adds nothing else to the class.
+    internal static partial class CrimsonRig
+    {
+        internal static void LoadPreviewPerformer() => LoadPerformer();
+    }
+
     // CrimsonVisuals.cs is a ModSystem; the rigs only read this one static.
     internal static class CrimsonVisuals { internal static bool Reduced; }
 

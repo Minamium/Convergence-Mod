@@ -1,4 +1,4 @@
-// Scarlet rig harness: the REAL Vespera (CrimsonRig.DrawPerformer, extracted verbatim at build time), the REAL
+// Scarlet rig harness: the REAL Vespera (CrimsonRig.DrawPerformer, CrimsonRig.Performer.cs linked unchanged), the REAL
 // apparition rigs (ScarletApparitionRig, CrimsonChoirRig), the REAL forecasts (CrimsonEnergy), seals
 // (ScarletSorcery) and strikes (ScarletInkStroke) over the real backdrop shader, composited in the in-game layer
 // order and filmed through the in-game cameras. Driven by real phrases from the production rhythm (the S0
@@ -17,8 +17,11 @@
 // basic Act I/III strikes (Luminance metaball RTs), the ChoirRakes ribbon (Luminance trail tessellator; drawn
 // here as the hit-shape overlay), camera shake, cinematic camera, frame pacing (RenderAge sub-tick blend).
 //
-// The proposed motion (--motion proposed) and the body material (--material on) need the S1/S2/S3 code; until it
-// exists those variants are reported not_run and nothing is rendered under their names (RigDriver).
+// The signal, the Choir cues and the notes are the production plan-list functions (CrimsonRig.Signal,
+// ScarletNotes) over the gestures alive at the tick, as CrimsonRig.DrawEffigy reads ScarletCueFrame. The proposed
+// motion (--motion proposed) and the body material (--material on) are computed by S1's ScarletGestureMotion /
+// ScarletBodyMaterial and passed to the rigs exactly as DrawEffigy does; until the rigs draw them (S2 Crown/Mantle,
+// S3 Choir) those variants are reported not_run and nothing is rendered under their names (RigDriver).
 #nullable enable
 using System;
 using System.Collections.Generic;
@@ -87,10 +90,10 @@ internal static class ScarletRigPreview
             RigHost.Wrapped = new PreviewDevice(device);
             using var assets = new PreviewAssets(device, root, luminance);
             RigHost.Assets = assets;
-            // The production loaders (ImmediateLoad through the ModContent shim) and the extracted performer's texture.
+            // The production loaders (ImmediateLoad through the ModContent shim), Vespera's through CrimsonRig.LoadPerformer.
             ScarletApparitionRig.Load();
             CrimsonChoirRig.Load();
-            CrimsonRigPerformerExtract.performer = assets.GetTexture("CrimsonFoundry/ScarletConjurer");
+            CrimsonRig.LoadPreviewPerformer();
             Directory.CreateDirectory(output);
             using var renderer = new RigRenderer(device, assets, options);
             return new RigRun(renderer, options, root, output).Execute();
@@ -261,42 +264,34 @@ internal sealed class RigScene
     }
 }
 
-// Mirrors of the Terraria-bound call sites, over the scene's plan list instead of Main.ActiveProjectiles. They are
-// short and line-for-line; the plan-list versions of Signal/ChoirCues (E2) belong to S1, after which the harness
-// calls those instead (see the report of slice H).
+// The Terraria-bound call sites over the scene's plan list instead of Main.ActiveProjectiles. The signal, the Choir
+// cues and the notes call the production plan-list functions (CrimsonRig.Signal in CrimsonRig.Performer.cs and
+// ScarletNotes, linked unchanged) over the gestures alive at the tick, which is what ScarletCueFrame hands
+// CrimsonRig.DrawEffigy / Draw in game. Acts I-III have no chorus plans.
 internal static class RigMirror
 {
     // A CrimsonGesture lives until LastEnd + CrimsonRhythm.LeaseTicks (CrimsonGesture.AI); it is spawned at scheduling.
     internal static bool Alive(in CrimsonGesturePlan p, float age) => age >= p.Begin && age < p.LastEnd + CrimsonRhythm.LeaseTicks;
 
-    // CrimsonRig.Signal(boss, source, age) (CrimsonRig.cs: until/since over the boss's gestures, source -1 = all).
-    internal static (float Charge, float Recoil) Signal(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age)
+    // ScarletCueFrame.Of(boss).Gestures at this tick: the plans of the boss's live gestures.
+    internal static CrimsonGesturePlan[] Live(IReadOnlyList<CrimsonGesturePlan> plans, float age)
     {
-        float until = 60, since = 100;
-        foreach (var p in plans)
-            if (Alive(p, age) && age >= p.Born && (source < 0 || p.Source == source))
-            {
-                float delta = p.Fire - age;
-                if (delta >= 0) until = Math.Min(until, delta); else since = Math.Min(since, -delta);
-            }
-        return (CrimsonRigMotion.Charge(until), CrimsonRigMotion.Recoil(since));
+        var live = new List<CrimsonGesturePlan>(plans.Count);
+        foreach (var p in plans) if (Alive(p, age)) live.Add(p);
+        return live.ToArray();
     }
 
-    // CrimsonRig.ChoirCues(boss, age, cues): source 2 notes in [Born, End), arm = Step % 4, Broad for the crossflow.
-    internal static int ChoirCues(IReadOnlyList<CrimsonGesturePlan> plans, float age, Span<CrimsonChoirCue> cues)
-    {
-        int count = 0;
-        foreach (var p in plans)
-        {
-            if (!Alive(p, age) || p.Source != 2 || age < p.Born || age >= p.End) continue;
-            var cue = new CrimsonChoirCue(p.Born, p.Fire, p.End, p.Step % 4,
-                p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialGrid);
-            bool duplicate = false;
-            for (int i = 0; i < count; i++) if (cues[i] == cue) { duplicate = true; break; }
-            if (!duplicate && count < cues.Length) cues[count++] = cue;
-        }
-        return count;
-    }
+    // CrimsonRig.Signal(boss, source, age) = the production plan-list Signal over the frame (source -1 = all).
+    internal static (float Charge, float Recoil) Signal(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age)
+        => CrimsonRig.Signal(Live(plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, source, age);
+
+    // CrimsonRig.DrawEffigy's Choir cues: ScarletNotes.ChoirCues (the arms owning the struck ground, flip applied).
+    internal static int ChoirCues(IReadOnlyList<CrimsonGesturePlan> plans, float age, bool flipped, Span<CrimsonChoirCue> cues)
+        => ScarletNotes.ChoirCues(Live(plans, age), age, flipped, cues);
+
+    // CrimsonRig.DrawEffigy's notes for a local participant (the filmed player is in the fight), aimed from Vespera.
+    internal static int Notes(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age, bool flipped, Span<ScarletNote> notes)
+        => ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes);
 
     // CrimsonGestureVisuals.PostUpdateEverything's Cue: a foretell on every Born and an impact on every Fire (the
     // crossflow: charge / release); a curtain note with nothing to burn has no cue. One voice per (phrase, tick, cue).
@@ -333,14 +328,18 @@ internal static class RigMirror
     }
 }
 
-// The S1/S2/S3/S4 seam. "current" draws exactly what the game draws today; the proposed motion and the body
-// material arrive with ScarletGestureMotion / ScarletBodyMaterial and the new optional rig arguments, and are wired
-// here by the integration slice. Until then their variants are not rendered (reported not_run).
+// The S1/S2/S3/S4 seam: CrimsonRig.DrawEffigy's wiring (notes -> motion / heave / material) with the comparison
+// switches. "current" passes the rigs' defaults (today's picture); --motion proposed passes ScarletGestureMotion
+// (Crown / Mantle motion, the Choir heave) and --material on passes ScarletBodyMaterial, both computed exactly as
+// DrawEffigy computes them. The Choir cues are the production ones (S1's arm assignment is live in game) in every
+// variant. The rigs still ignore the new arguments until S2 (Crown, Mantle) and S3 (Choir) draw them, so the
+// proposed / material variants would be today's picture under another name: they stay not_run until those slices
+// set MotionAvailable / MaterialAvailable. Vespera's command (ScarletGestureMotion.Command) needs S4's arguments.
 internal static class RigDriver
 {
     internal static bool MotionAvailable => false;
     internal static bool MaterialAvailable => false;
-    internal const string Pending = "needs S1 (ScarletNote / ScarletEnvelope / ScarletGestureMotion) and S2/S3 (rig material) to be wired into RigDriver";
+    internal const string Pending = "S1's notes, motion, heave and material are wired into RigDriver; the rigs draw them only after S2 (Crown/Mantle) and S3 (Choir), which set MotionAvailable / MaterialAvailable";
 
     // CrimsonRig.DrawEffigy for the Act's apparition (phase < 3): appear 1, presence 1, dissolve 0, pose at the stage.
     internal static void Apparition(SpriteBatch batch, RigScene s, float age, in RigVariant v)
@@ -349,16 +348,26 @@ internal static class RigDriver
         var signal = RigMirror.Signal(s.Plans, index, age);
         float size = RigScene.Heights[index];
         Vector2 at = s.Stage; // TryPose holds the whole window: consecutive phrases keep the pose (Begin = previous LastEnd + 6)
+        bool reduced = CrimsonVisuals.Reduced;
+        Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
+        int noted = RigMirror.Notes(s.Plans, index, age, s.Flipped, notes);
         RigHost.Tag = index switch { 0 => "crown", 1 => "mantle", _ => "choir" };
         if (index == 2)
         {
             Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
-            int count = RigMirror.ChoirCues(s.Plans, age, cues);
+            int count = RigMirror.ChoirCues(s.Plans, age, s.Flipped, cues);
+            var choir = v.Material ? ScarletBodyMaterial.Choir(age, notes[..noted], reduced) : default;
             CrimsonChoirRig.Draw(batch, at, size, age, signal.Charge, signal.Recoil, 1, s.Flipped,
-                0 + signal.Recoil * .045f, 0, cues: cues[..count]);
+                0 + signal.Recoil * .045f, 0, cues: cues[..count],
+                heave: v.Proposed ? ScarletGestureMotion.Heave : 0, material: choir);
         }
         else
-            ScarletApparitionRig.Draw(batch, index, at, size, age, signal.Charge, signal.Recoil, 1, s.Flipped, 0, 0);
+        {
+            var motion = index == 0 ? ScarletGestureMotion.Crown(age, notes[..noted]) : ScarletGestureMotion.Mantle(age, notes[..noted]);
+            var body = v.Material ? ScarletBodyMaterial.Apparition(age, notes[..noted], motion, s.Flipped, reduced) : default;
+            ScarletApparitionRig.Draw(batch, index, at, size, age, signal.Charge, signal.Recoil, 1, s.Flipped, 0, 0,
+                motion: v.Proposed ? motion : default, material: body);
+        }
         RigHost.Tag = "";
     }
 
@@ -368,7 +377,7 @@ internal static class RigDriver
         var signal = RigMirror.Signal(s.Plans, -1, age);
         Vector2 at = RigScene.Conductor;
         RigHost.Tag = "vespera";
-        CrimsonRigPerformerExtract.DrawPerformer(batch, Terraria.Main.screenPosition, at, age, Vector2.Zero, RigScene.VesperaFacing,
+        CrimsonRig.DrawPerformer(batch, Terraria.Main.screenPosition, at, age, Vector2.Zero, RigScene.VesperaFacing,
             true, signal.Charge, signal.Recoil, 1, false, 1);
         Vector2 held = new(RigScene.VesperaFacing * (94 + signal.Charge * 12), -25);
         float radius = 53 + signal.Charge * 24 + signal.Recoil * 18;
@@ -804,8 +813,8 @@ internal sealed class RigRun
         {
             note = "Offline render; not a playtest. One frame = one tick at 60 fps; fraction is always 0.",
             scene = s.Def.Name, camera = s.Camera.Name, cameraNote = s.Camera.Note, zoom = s.Camera.Zoom, variant = v.Suffix,
-            motion = new { requested = v.Proposed ? "proposed" : "current", rendered = "current" },
-            material = new { requested = v.Material, rendered = false },
+            motion = new { requested = v.Proposed ? "proposed" : "current", rendered = v.Proposed && RigDriver.MotionAvailable ? "proposed" : "current" },
+            material = new { requested = v.Material, rendered = v.Material && RigDriver.MaterialAvailable },
             residueYield = v.Yield,
             musicStart = RigScene.MusicStart, phraseBar = s.PhraseBar, firstTick = s.First, lastTick = s.Last,
             player = new[] { s.Player.Center.X, s.Player.Center.Y }, boxes = s.Boxes.Select(b => new[] { b.X, b.Y }),
@@ -823,7 +832,8 @@ internal sealed class RigRun
             bgm,
             ticks = state,
             draws = counts,
-            envelopes = "Heat / Ignite / Front / Drain / Send / Return / Snap: " + RigDriver.Pending,
+            envelopes = "ticks[].attack: S1's notes, motion [offsetX, offsetY, turn] and body envelopes (Crown/Mantle: Heat, Ignite, Front, Drain, Send, Return, Snap, Engaged; "
+                + "Choir: Heat, Ignite, Drain, Surge, Engaged and per arm [Lift, Send, Return, Tear, Burst]) computed as DrawEffigy computes them. " + RigDriver.Pending,
         }, RigRun.Json));
         if (video is not null) videos++;
         index.Add(new { scene = s.Def.Name, camera = s.Camera.Name, variant = v.Suffix, dir = Path.GetRelativePath(output, dir).Replace('\\', '/'),
@@ -862,14 +872,35 @@ internal sealed class RigRun
     {
         var apparition = RigMirror.Signal(s.Plans, s.Phase, tick);
         var vespera = RigMirror.Signal(s.Plans, -1, tick);
-        object? arms = null;
+        // S1's attack clock for the Act's body, computed as CrimsonRig.DrawEffigy computes it (whether or not the
+        // rigs draw it yet): the notes, the approved motion and the named envelopes of the body material.
+        Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
+        int noted = RigMirror.Notes(s.Plans, s.Phase, tick, s.Flipped, notes);
+        object? arms = null, motion = null, body;
         if (s.Phase == 2)
         {
             Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
-            int count = RigMirror.ChoirCues(s.Plans, tick, cues);
+            int count = RigMirror.ChoirCues(s.Plans, tick, s.Flipped, cues);
             var list = new List<object>();
             for (int i = 0; i < 4; i++) { var arm = CrimsonChoirMotion.Arm(i, tick, apparition.Charge, apparition.Recoil, cues[..count]); list.Add(new[] { Round(arm.Power), Round(arm.Burst) }); }
             arms = list;
+            var c = ScarletBodyMaterial.Choir(tick, notes[..noted], v.Reduced);
+            body = new
+            {
+                heat = Round(c.Heat), ignite = Round(c.Ignite), drain = Round(c.Drain), surge = Round(c.Surge), engaged = Round(c.Engaged),
+                limbs = Enumerable.Range(0, 4).Select(i => { var l = c.Limb(i); return new[] { Round(l.Lift), Round(l.Send), Round(l.Return), Round(l.Tear), Round(l.Burst) }; }).ToArray(),
+            };
+        }
+        else
+        {
+            var m = s.Phase == 0 ? ScarletGestureMotion.Crown(tick, notes[..noted]) : ScarletGestureMotion.Mantle(tick, notes[..noted]);
+            motion = new[] { Round(m.OffsetX), Round(m.OffsetY), Round(m.Turn) };
+            var b = ScarletBodyMaterial.Apparition(tick, notes[..noted], m, s.Flipped, v.Reduced);
+            body = new
+            {
+                heat = Round(b.Heat), ignite = Round(b.Ignite), front = Round(b.Front), drain = Round(b.Drain), send = Round(b.Send),
+                @return = Round(b.Return), snap = Round(b.Snap), engaged = Round(b.Engaged),
+            };
         }
         return new
         {
@@ -877,6 +908,7 @@ internal sealed class RigRun
             apparition = new[] { Round(apparition.Charge), Round(apparition.Recoil) },
             vespera = new[] { Round(vespera.Charge), Round(vespera.Recoil) },
             arms,
+            attack = new { notes = noted, motion, body },
             backdrop = new[] { Round(v.Reduced ? 0 : CrimsonMeter.Pulse(Math.Max(0, tick - RigScene.MusicStart))), Round(v.Reduced ? 0 : RigMirror.Impulse(s.Plans, tick)) },
             notes = s.Showing(tick).ToArray(),
             // What this frame lacks against the game (labelled on the frame).

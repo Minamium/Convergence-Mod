@@ -97,8 +97,8 @@ class SoundTableTests(unittest.TestCase):
 class HarnessContractTests(unittest.TestCase):
     def test_production_files_are_linked_not_copied(self):
         script = read(TOOLS / 'preview-scarlet-rigs.ps1')
-        for name in ('ScarletApparitionRig', 'CrimsonChoirRig', 'CrimsonChoirMotion', 'CrimsonEnergy', 'ScarletSorcery',
-                     'CrimsonRigMotion', 'CrimsonMusicMixer', 'CrimsonMeter', 'CrimsonSignatureMoves'):
+        for name in ('ScarletApparitionRig', 'CrimsonChoirRig', 'CrimsonChoirMotion', 'CrimsonRig.Performer', 'CrimsonEnergy',
+                     'ScarletSorcery', 'CrimsonRigMotion', 'CrimsonMusicMixer', 'CrimsonMeter', 'CrimsonSignatureMoves'):
             self.assertIn(f"'{name}'", script)
         self.assertIn("'Client/Graphics/WorldGraphicsScope.cs'", script)
         self.assertIn("Client/Encounters/CrimsonFoundry/Vfx", script)
@@ -107,14 +107,49 @@ class HarnessContractTests(unittest.TestCase):
             self.assertNotIn('class ScarletApparitionRig', text)
             self.assertNotIn('class CrimsonChoirRig', text)
             self.assertNotIn('class CrimsonEnergy', text)
+            self.assertNotIn('void DrawPerformer(', text)
 
-    def test_vespera_performer_is_still_extractable(self):
-        # preview-scarlet-rigs.ps1 extracts DrawPerformer verbatim (with poses / pivots) from the first of these files that has it.
-        sources = [CLIENT / 'CrimsonRig.Performer.cs', CLIENT / 'CrimsonRig.cs']
-        text = next(read(p) for p in sources if p.exists() and 'internal static void DrawPerformer(' in read(p))
-        self.assertRegex(text, r'static readonly Rectangle\[\] poses\b')
-        self.assertRegex(text, r'static readonly Vector2\[\] pivots\b')
-        self.assertIn('\nnamespace ', text)
+    def test_vespera_performer_is_linked_unchanged(self):
+        # CrimsonRig.Performer.cs (DrawPerformer with poses / pivots, the plan-list Signal) is linked, never extracted;
+        # the harness's part of the partial class only calls the production loader. The boss half stays unlinked.
+        script = read(TOOLS / 'preview-scarlet-rigs.ps1')
+        self.assertIn("'CrimsonRig.Performer'", script)
+        self.assertIn("'Client/Encounters/CrimsonFoundry/CrimsonRig.Performer.cs'", script)
+        self.assertNotIn("'CrimsonRig',", script)
+        self.assertNotIn('CrimsonRigPerformerExtract.g.cs" />', script)
+        performer = read(CLIENT / 'CrimsonRig.Performer.cs')
+        for member in ('internal static void DrawPerformer(', 'static readonly Rectangle[] poses', 'static readonly Vector2[] pivots',
+                       'private static void LoadPerformer()'):
+            self.assertIn(member, performer)
+            self.assertIn(member, script)  # the build refuses a performer file without them
+        self.assertIn('ReadOnlySpan<CrimsonGesturePlan> gestures', performer)
+        host = read(FIXTURES / 'ScarletPreviewHost.cs')
+        part = host[host.index('internal static partial class CrimsonRig'):host.index('internal static class CrimsonVisuals')]
+        self.assertEqual(1, part.count('=>'))
+        self.assertIn('internal static void LoadPreviewPerformer() => LoadPerformer();', part)
+        for fixture in ('ScarletRigScene.cs', 'ScarletRigGates.cs', 'ScarletPreviewHost.cs'):
+            self.assertNotIn('CrimsonRigPerformerExtract', read(FIXTURES / fixture))
+
+    def test_driver_calls_the_production_plan_list_functions(self):
+        # The signal, the Choir cues and the notes are S1's plan-list functions over the live gestures, wired as
+        # CrimsonRig.DrawEffigy wires them; no harness copy of their derivation remains.
+        scene = read(FIXTURES / 'ScarletRigScene.cs')
+        mirror = scene[scene.index('internal static class RigMirror'):scene.index('internal static class RigDriver')]
+        self.assertIn('=> CrimsonRig.Signal(Live(plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, source, age);', mirror)
+        self.assertIn('=> ScarletNotes.ChoirCues(Live(plans, age), age, flipped, cues);', mirror)
+        self.assertIn('=> ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes);', mirror)
+        for copied in ('CrimsonRigMotion.Charge(', 'CrimsonRigMotion.Recoil(', 'new CrimsonChoirCue(', 'Step % 4'):
+            self.assertNotIn(copied, mirror)
+        driver = scene[scene.index('internal static class RigDriver'):scene.index('internal enum RigLayers')]
+        rig = read(CLIENT / 'CrimsonRig.cs')
+        effigy = rig[rig.index('internal static bool DrawEffigy('):rig.index('internal static int ChoirCues(')]
+        for call in ('ScarletGestureMotion.Crown(age, notes[..noted]) : ScarletGestureMotion.Mantle(age, notes[..noted])',
+                     'ScarletBodyMaterial.Choir(age, notes[..noted], reduced)', 'ScarletGestureMotion.Heave'):
+            self.assertIn(call, effigy)
+            self.assertIn(call, driver)
+        self.assertIn('ScarletBodyMaterial.Apparition(age, notes[..noted], motion, flipped, reduced)', effigy)
+        self.assertIn('ScarletBodyMaterial.Apparition(age, notes[..noted], motion, s.Flipped, reduced)', driver)
+        self.assertIn('CrimsonRig.DrawPerformer(', driver)
 
     def test_no_beat_figure_and_no_thread_language_in_the_harness(self):
         for name in ('ScarletRigScene.cs', 'ScarletRigGates.cs', 'ScarletPreviewHost.cs'):

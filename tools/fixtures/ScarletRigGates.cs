@@ -257,8 +257,9 @@ internal sealed class RigGates
             }
             glowRows.Add(new { scene = name, todayBodyGlowPeak = at - third.Fire, window = "[Fire, Fire+2] for the new material" });
         }
-        Add("G6", "timing: sounds on Born/Fire, first ink pixel = Fire +/- 1 (Ignite/Heat/Send/body peak need S1/S2)", Status(soundOk && inkOk),
-            new { sounds = soundRows, ink = inkRows, bodyGlow = glowRows, envelopes = "not_run: " + RigDriver.Pending },
+        Add("G6", "timing: sounds on Born/Fire, first ink pixel = Fire +/- 1 (the body glow peak needs S2/S3)", Status(soundOk && inkOk),
+            new { sounds = soundRows, ink = inkRows, bodyGlow = glowRows,
+                envelopes = "Ignite/Heat/Send are S1's ScarletEnvelope, pinned by the domain tests (ScarletGestureMotionTests) and dumped per tick in state.json (ticks[].attack); the drawn body peak is not_run: " + RigDriver.Pending },
             "Sound ticks mirror CrimsonGestureVisuals.Cue (one voice per phrase/tick/cue, no cue for a curtain with nothing to burn). The body glow peak is TODAY's (Signal recoil), reported for comparison only.");
     }
 
@@ -351,20 +352,21 @@ internal sealed class RigGates
             {
                 var a = RigMirror.Signal(s.Plans, s.Phase, t); var b = RigMirror.Signal(shifted, s.Phase, t + 7);
                 worst = Math.Max(worst, Math.Max(Math.Abs(a.Charge - b.Charge), Math.Abs(a.Recoil - b.Recoil)));
-                if (s.Phase == 2) worst = Math.Max(worst, ArmGap(s.Plans, shifted, t, a));
+                if (s.Phase == 2) worst = Math.Max(worst, ArmGap(s.Plans, shifted, t, a, s.Flipped));
+                worst = Math.Max(worst, AttackGap(s, shifted, t));
             }
             bool soundsShift = RigMirror.Sounds(s.Plans).Select(e => e.Tick + 7).SequenceEqual(RigMirror.Sounds(shifted).Select(e => e.Tick));
             ok &= same && worst <= 1e-5f && soundsShift;
             rows.Add(new { scene = name, frames = ticks.Length, sequentialEqualsJump = same, shiftWorstInputDelta = worst, soundsShift });
         }
         Add("G9", "determinism: sequential = jump render; plans +7 ticks shift every attack input by 7", Status(ok), rows,
-            "Pixels compared by SHA-256 of the full frame (labels off). The idle oscillations read the absolute clock by design (today's rigs); the attack inputs read only the plans.");
+            "Pixels compared by SHA-256 of the full frame (labels off). The idle oscillations read the absolute clock by design (today's rigs); the attack inputs (Signal, the Choir cues, S1's notes, motion and body material) read only the plans.");
 
-        float ArmGap(CrimsonGesturePlan[] plans, CrimsonGesturePlan[] shifted, int t, (float Charge, float Recoil) signal)
+        float ArmGap(CrimsonGesturePlan[] plans, CrimsonGesturePlan[] shifted, int t, (float Charge, float Recoil) signal, bool flipped)
         {
             Span<CrimsonChoirCue> a = stackalloc CrimsonChoirCue[16];
             Span<CrimsonChoirCue> b = stackalloc CrimsonChoirCue[16];
-            int na = RigMirror.ChoirCues(plans, t, a), nb = RigMirror.ChoirCues(shifted, t + 7, b);
+            int na = RigMirror.ChoirCues(plans, t, flipped, a), nb = RigMirror.ChoirCues(shifted, t + 7, flipped, b);
             float gap = 0;
             for (int arm = 0; arm < 4; arm++)
             {
@@ -376,6 +378,44 @@ internal sealed class RigGates
                 gap = Math.Max(gap, Math.Max(Math.Abs(x.Power - y.Power), Math.Abs(x.Burst - y.Burst)));
             }
             return gap;
+        }
+
+        // S1's attack clock (CrimsonRig.DrawEffigy's notes -> ScarletGestureMotion / ScarletBodyMaterial): every channel
+        // at t over the plans equals the same channel at t + 7 over the shifted plans.
+        static float AttackGap(RigScene s, CrimsonGesturePlan[] shifted, int t)
+        {
+            Span<ScarletNote> a = stackalloc ScarletNote[ScarletNotes.Capacity];
+            Span<ScarletNote> b = stackalloc ScarletNote[ScarletNotes.Capacity];
+            int na = RigMirror.Notes(s.Plans, s.Phase, t, s.Flipped, a), nb = RigMirror.Notes(shifted, s.Phase, t + 7, s.Flipped, b);
+            if (na != nb) return float.PositiveInfinity;
+            float[] x, y;
+            if (s.Phase == 2)
+            {
+                x = Choir(ScarletBodyMaterial.Choir(t, a[..na], false));
+                y = Choir(ScarletBodyMaterial.Choir(t + 7, b[..nb], false));
+            }
+            else
+            {
+                var ma = s.Phase == 0 ? ScarletGestureMotion.Crown(t, a[..na]) : ScarletGestureMotion.Mantle(t, a[..na]);
+                var mb = s.Phase == 0 ? ScarletGestureMotion.Crown(t + 7, b[..nb]) : ScarletGestureMotion.Mantle(t + 7, b[..nb]);
+                x = Body(ma, ScarletBodyMaterial.Apparition(t, a[..na], ma, s.Flipped, false));
+                y = Body(mb, ScarletBodyMaterial.Apparition(t + 7, b[..nb], mb, s.Flipped, false));
+            }
+            float gap = 0;
+            for (int i = 0; i < x.Length; i++) gap = Math.Max(gap, Math.Abs(x[i] - y[i]));
+            return gap;
+
+            static float[] Body(in ScarletApparitionMotion m, in ScarletBodyState c) => new[]
+            {
+                m.OffsetX, m.OffsetY, m.Turn, m.Flare, m.Kick, m.Sweep, m.Row,
+                c.Heat, c.Ignite, c.Front, c.Drain, c.Lean, c.PourLimit, c.Run, c.Row, c.Swing, c.Wind, c.Send, c.Return, c.Snap, c.Engaged
+            };
+            static float[] Choir(in ScarletChoirState c)
+            {
+                var list = new List<float> { c.Heat, c.Ignite, c.Drain, c.Surge, c.Engaged };
+                for (int arm = 0; arm < 4; arm++) { var l = c.Limb(arm); list.AddRange(new[] { l.Lift, l.Send, l.Return, l.Tear, l.Burst }); }
+                return list.ToArray();
+            }
         }
     }
 
@@ -546,7 +586,7 @@ internal sealed class RigGates
         list.Add(new("shader-parameters", "every TrySetParameter name/width the production files set matches the compiled .fxc", Status(mismatched.Count == 0), false,
             new { set = RigHost.Parameters.Count, mismatched, missingDroppedByCompiler = missing, passes = RigHost.Passes.Select(p => p.Shader + "." + p.Pass).OrderBy(x => x) },
             "A missing name is a uniform the compiler removed (unused); TrySetParameter ignores it in game exactly as here."));
-        list.Add(new("performer", "Vespera's DrawPerformer is a verbatim build-time extraction of the production method", "pass", false, RigProvenance.Performer, ""));
+        list.Add(new("performer", "Vespera (DrawPerformer, poses, pivots, the plan-list Signal) is CrimsonRig.Performer.cs linked unchanged", "pass", false, RigProvenance.Performer, ""));
         foreach (var g in list) Console.WriteLine($"self  {g.Status,-17} {g.Title}");
         return list;
     }
@@ -686,7 +726,7 @@ internal sealed class RigGates
         using (var batch = new SpriteBatch(r.Device))
         {
             batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, Terraria.Main.Rasterizer, null, view.GameView);
-            CrimsonRigPerformerExtract.DrawPerformer(batch, view.ScreenPosition, RigScene.Conductor, tick, Vector2.Zero, 1, false, 0, 0);
+            CrimsonRig.DrawPerformer(batch, view.ScreenPosition, RigScene.Conductor, tick, Vector2.Zero, 1, false, 0, 0);
             batch.End();
         }
         r.Device.SetRenderTarget(null);

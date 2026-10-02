@@ -331,7 +331,7 @@ def page(out: pathlib.Path, index: dict, gates: dict | None, videos: list, pairs
     if curve_sets:
         parts.append('<h2>Attack inputs per tick (state.json)</h2>'
                      '<p class="cap">What today\'s rigs read from the plans: the apparition\'s Signal charge and recoil, and the backdrop strike impulse. '
-                     'Dashed lines: warnings (Born); solid lines: strikes (Fire); triangles: sound cues. The S1 envelopes (Heat, Ignite, Front, Drain, Send, Return, Snap) are not_run until S1 is wired.</p>')
+                     'Dashed lines: warnings (Born); solid lines: strikes (Fire); triangles: sound cues. The S1 notes, motion and body envelopes (Heat, Ignite, Front, Drain, Send, Return, Snap) are recorded per tick in state.json (ticks[].attack); the rigs draw them only after S2/S3.</p>')
         legend = ''.join(f'<span><i style="background:var({c})"></i>{e(n)}</span>' for n, c in
                          [('apparition charge', '--s1'), ('apparition recoil', '--s2'), ('backdrop impulse', '--s3')])
         for c in curve_sets:
