@@ -3,10 +3,12 @@ using Convergence.Common.Raids.Arena;
 
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
-// Musical composition only. The old four-beat pulse stays reusable and tested.
+// Musical composition only: every phrase is two whole bars of the 128 BPM grid.
 internal static class CrimsonChoreography
 {
-    internal const int OpeningTicks = 900, SummonAt = 460;
+    // The intro's eight bars before Act I unlocks; Ember Crown emerges on bar four.
+    internal static readonly int OpeningTicks = CrimsonMeter.BarTick(CrimsonMeter.OpeningBars);
+    internal static readonly int SummonAt = CrimsonMeter.BarTick(CrimsonMeter.SummonBar);
     internal const float SideHalfWidth = 140, SealOffset = 470;
     internal const int BasicNotes = 4;
     internal static CrimsonPoint Conductor(RaidFieldGeometry field) => new(field.CenterX, field.CenterY);
@@ -17,17 +19,16 @@ internal static class CrimsonChoreography
     internal static float Backdrop(float opening) => CrimsonInvocation.Ease((opening - 300) / 180);
     internal static float Seal(float opening) => CrimsonInvocation.Ease((opening - 230) / 170)
         * (1 - CrimsonInvocation.Ease((opening - 720) / 180));
-    internal static CrimsonRhythmPhrase Create(CrimsonScore score, int earliest, int serial, bool final)
+    // A phrase begins on the first bar head at or after earliest (a tick that rounds to
+    // a bar head belongs to that bar), so music sections and phrases share boundaries.
+    internal static CrimsonRhythmPhrase Create(int earliest, int serial, bool final)
     {
         if (earliest < 0 || serial < 0) throw new ArgumentOutOfRangeException();
-        var beats = CrimsonRhythm.NextBeats(score, Math.Max(0, earliest - .499999d), 9);
-        int At(int i) => (int)Math.Round(beats[i]);
+        int first = CrimsonMeter.BarAtOrAfter(Math.Max(0, earliest - .499999d)) * CrimsonMeter.BeatsPerBar;
+        int At(int i) => CrimsonMeter.BeatTick(first + i);
         var hits = new CrimsonRhythmHit[BasicNotes + 1];
-        for (int i = 0; i < BasicNotes; i++) {
-            if (At(i+1)-At(i) is < CrimsonRhythm.MinimumWarningTicks or > CrimsonRhythm.MaximumWarningTicks)
-                throw new InvalidOperationException("crimson.rhythm_unreadable_score");
+        for (int i = 0; i < BasicNotes; i++)
             hits[i] = new(At(i), At(i + 1), At(i + 1) + CrimsonRhythm.LiveTicks, 1);
-        }
         hits[BasicNotes] = new(At(4), At(6), At(8), 2);
         return new(At(0), At(8), CrimsonRhythmKind.Groove, Array.AsReadOnly(hits));
     }

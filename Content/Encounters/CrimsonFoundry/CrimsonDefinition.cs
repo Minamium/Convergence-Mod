@@ -62,12 +62,9 @@ internal sealed class CrimsonFactory : IEncounterRuntimeFactory
 
 internal sealed class CrimsonRegistration : ModSystem
 {
-    internal static CrimsonScore Score { get; private set; } = null!;
     public override void PostSetupContent()
     {
-        Score = CrimsonScore.Read(Mod.GetFileBytes("Assets/Music/CrimsonFoundry/Score.json"));
         EncounterCatalogSystem.Registry.Register(CrimsonDefinition.Instance);
         EncounterPacketRouter.Routes.Register(CrimsonDefinition.EncounterKey, ModContent.GetInstance<CrimsonPackets>());
     }
-    public override void Unload() => Score = null!;
 }

@@ -9,20 +9,22 @@ internal static partial class Program
     [DomainTest("Scarlet eight beat composition preserves four basic beats then two warning and two broad beam beats")]
     private static void ScarletEightBeatComposition()
     {
-        var score=ScarletRecordedScore();
-        for(int age=score.IntroTicks;age<54000;age+=137) {
-            var p=CrimsonChoreography.Create(score,age,1,false);
-            var b=CrimsonRhythm.NextBeats(score,Math.Max(0,age-.499999d),9);
+        for(int age=CrimsonChoreography.OpeningTicks;age<54000;age+=137) {
+            var p=CrimsonChoreography.Create(age,1,false);
+            int first=ScarletFirstBarAtOrAfter(age)*CrimsonMeter.BeatsPerBar;
+            int[] b=new int[9];
+            for(int i=0;i<b.Length;i++) b[i]=CrimsonMeter.BeatTick(first+i);
+            AssertEqual(b[0],p.Start,"phrase begins on its bar head");
             AssertEqual(5,p.Hits.Count,"four consecutive releases and one crossflow");
             for(int i=0;i<4;i++) {
-                AssertEqual((int)Math.Round(b[i]),p.Hits[i].Warning,"forecast starts on beat including bar start");
-                AssertEqual((int)Math.Round(b[i+1]),p.Hits[i].Fire,"one beat later strike");
-                AssertEqual(true,p.Hits[i].Fire-p.Hits[i].Warning>=CrimsonRhythm.MinimumWarningTicks,"minimum warning at all score/loop positions");
+                AssertEqual(b[i],p.Hits[i].Warning,"forecast starts on beat including bar start");
+                AssertEqual(b[i+1],p.Hits[i].Fire,"one beat later strike");
+                AssertEqual(true,p.Hits[i].Fire-p.Hits[i].Warning>=CrimsonRhythm.MinimumWarningTicks,"minimum warning at every grid position");
             }
-            AssertEqual((int)Math.Round(b[4]),p.Hits[4].Warning,"four beats complete");
-            AssertEqual((int)Math.Round(b[6]),p.Hits[4].Fire,"two beat charge");
-            AssertEqual((int)Math.Round(b[8]),p.Hits[4].End,"two beat amplification and collapse");
-            var next=CrimsonChoreography.Create(score,p.End,2,false);
+            AssertEqual(b[4],p.Hits[4].Warning,"four beats complete");
+            AssertEqual(b[6],p.Hits[4].Fire,"two beat charge");
+            AssertEqual(b[8],p.Hits[4].End,"two beat amplification and collapse");
+            var next=CrimsonChoreography.Create(p.End,2,false);
             AssertEqual(p.End,next.Hits[0].Warning,"no blank beat after beam tail");
             AssertEqual(p.End,p.Hits[4].End,"next bar starts without extra dead time");
         }
@@ -40,8 +42,41 @@ internal static partial class Program
             }
             AssertEqual(CrimsonTechnique.ClusterVolley,CrimsonEnsemble.Technique(3,phrase,4,false),"Final closes with clusters");
         }
-        var hit=CrimsonChoreography.Create(score,score.IntroTicks,1,false).Hits[0];
+        var hit=CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks,1,false).Hits[0];
         AssertEqual(hit.Fire+CrimsonSpatialCuts.LiveTicks,CrimsonEnsemble.NoteEnd(CrimsonTechnique.ChoirRakes,hit),"rakes keep the cut live window");
+    }
+    [DomainTest("Scarlet every phrase opens on a bar head, spans two bars and warns for one measured beat")]
+    private static void ScarletPhrasesOnBarHeads()
+    {
+        for(int earliest=0;earliest<=3000;earliest++) {
+            var p=CrimsonChoreography.Create(earliest,earliest%7,earliest%2==1);
+            int bar=ScarletFirstBarAtOrAfter(earliest);
+            AssertEqual(CrimsonMeter.BarTick(bar),p.Start,"start is the first bar head at or after earliest");
+            AssertEqual(true,p.Start>=earliest&&p.Start-earliest<=112,"never earlier than asked, at most one bar later");
+            AssertEqual(CrimsonMeter.BarTick(bar+2),p.End,"end is two bars later");
+            AssertEqual(225,p.End-p.Start,"two bars are exactly 225 ticks, whatever the bar");
+            AssertEqual(CrimsonRhythmKind.Groove,p.Kind,"groove only");
+            AssertEqual(5,p.Hits.Count,"four basic notes and one crossflow");
+            for(int i=0;i<4;i++) {
+                int warning=p.Hits[i].Fire-p.Hits[i].Warning;
+                AssertEqual(true,warning is 28 or 29,"warning is one beat: 28 or 29 ticks");
+                AssertEqual(CrimsonMeter.BeatTick(bar*4+i),p.Hits[i].Warning,"forecast on its own beat");
+            }
+            AssertEqual(true,p.Hits[4].Fire-p.Hits[4].Warning is 56 or 57,"crossflow charges for two beats");
+            AssertEqual(true,p.Hits[4].End-p.Hits[4].Fire is 56 or 57,"crossflow collapses over two beats");
+        }
+        AssertThrows<ArgumentOutOfRangeException>(()=>CrimsonChoreography.Create(-1,0,false),"negative earliest");
+        AssertThrows<ArgumentOutOfRangeException>(()=>CrimsonChoreography.Create(0,-1,false),"negative serial");
+    }
+    [DomainTest("Scarlet opening and summon land on bar heads of the grid")]
+    private static void ScarletOpeningBars()
+    {
+        AssertEqual(900,CrimsonChoreography.OpeningTicks,"eight bars before Act I unlocks");
+        AssertEqual(450,CrimsonChoreography.SummonAt,"Ember Crown emerges on bar four");
+        AssertEqual(CrimsonMeter.BarTick(CrimsonMeter.OpeningBars),CrimsonChoreography.OpeningTicks,"opening is a whole number of bars");
+        AssertEqual(CrimsonMeter.BarTick(CrimsonMeter.SummonBar),CrimsonChoreography.SummonAt,"summon is a whole number of bars");
+        AssertEqual(CrimsonChoreography.OpeningTicks,CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks,0,false).Start,"first phrase starts the moment Act I unlocks");
+        AssertEqual(CrimsonChoreography.OpeningTicks,CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks-30,0,false).Start,"the look-ahead reservation lands on the same bar head");
     }
     [DomainTest("Scarlet presentation opens from orb to girl before backdrop and summons")]
     private static void ScarletOpeningOrder()

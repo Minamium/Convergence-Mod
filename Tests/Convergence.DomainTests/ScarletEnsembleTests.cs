@@ -38,6 +38,30 @@ internal static partial class Program
         AssertEqual(1f, CrimsonEnsemble.RetreatDissolve(CrimsonEnsemble.ActRelease), "old apparition dissolved before next reveal");
         AssertEqual(1f, CrimsonEnsemble.VictoryMelt(150), "melt finishes within unchanged cleanup lease");
     }
+    [DomainTest("Scarlet act transitions and releases are whole bars of the 128 BPM grid")]
+    private static void ScarletEnsembleTransitionBars()
+    {
+        AssertEqual(113, CrimsonEnsemble.ActRelease, "Act release lands on the downbeat one bar after the retreat");
+        AssertEqual(CrimsonMeter.BarTick(1), CrimsonEnsemble.ActRelease, "Act release is one bar");
+        AssertEqual(225, CrimsonPhaseRules.TransitionTicks, "Act transitions are two bars");
+        AssertEqual(CrimsonMeter.BarTick(CrimsonArrangement.TransitionBars(1)), CrimsonPhaseRules.TransitionTicks, "arrangement and rules agree for Act II");
+        AssertEqual(CrimsonMeter.BarTick(CrimsonArrangement.TransitionBars(2)), CrimsonPhaseRules.TransitionTicks, "arrangement and rules agree for Act III");
+        AssertEqual(CrimsonPhaseRules.TransitionTicks, CrimsonEnsemble.Transition(1), "Act II transition");
+        AssertEqual(CrimsonPhaseRules.TransitionTicks, CrimsonEnsemble.Transition(2), "Act III transition");
+        AssertEqual(450, CrimsonEnsemble.FinalRelease, "pre-drop lands four bars after the retreat");
+        AssertEqual(CrimsonMeter.BarTick(4), CrimsonEnsemble.FinalRelease, "Final release is four bars");
+        AssertEqual(562, CrimsonEnsemble.FinalTransition, "Final transition is five bars");
+        AssertEqual(562, CrimsonEnsemble.Transition(3), "Final transition lookup");
+        AssertEqual(true, Math.Abs(CrimsonEnsemble.FinalTransition - CrimsonMeter.BarTick(CrimsonArrangement.TransitionBars(3))) <= 1, "five bars up to the half-tick rounding of the start bar");
+        AssertEqual(280, CrimsonEnsemble.SacrificeStart, "sacrifice start");
+        AssertEqual(420, CrimsonEnsemble.SacrificeComplete, "sacrifice completes before the pre-drop");
+        AssertEqual(true, CrimsonEnsemble.GateOpen < CrimsonEnsemble.ActRelease && CrimsonEnsemble.ActRelease < CrimsonEnsemble.Transition(1), "gate, release, unlock in order");
+        AssertEqual(true, CrimsonEnsemble.SacrificeStart < CrimsonEnsemble.SacrificeComplete
+            && CrimsonEnsemble.SacrificeComplete < CrimsonEnsemble.FinalRelease && CrimsonEnsemble.FinalRelease < CrimsonEnsemble.FinalTransition, "Final steps in order");
+        AssertEqual(0f, CrimsonEnsemble.RetreatDissolve(50), "dissolve starts after the retreat begins");
+        AssertEqual(1f, CrimsonEnsemble.RetreatDissolve(CrimsonEnsemble.ActRelease - 1), "old apparition is gone one tick before the next reveal");
+        AssertEqual(0f, CrimsonEnsemble.Emergence(CrimsonEnsemble.FinalRelease, true), "giant waits for the pre-drop");
+    }
     [DomainTest("Scarlet covenant concentrates smoothly and starts another cast before its previous live tail ends")]
     private static void ScarletCovenantConcentration()
     {
@@ -70,12 +94,11 @@ internal static partial class Program
     [DomainTest("Scarlet final cycles three two-family overlaps without removing warning beats")]
     private static void ScarletEnsembleComposition()
     {
-        var score = ScarletRecordedScore();
         for (int phrase = 1; phrase <= 12; phrase++)
         {
             var pair = CrimsonEnsemble.Pair(phrase);
             AssertEqual(true, pair.First != pair.Second, "distinct simultaneous families");
-            var rhythm = CrimsonChoreography.Create(score, 4000 + phrase * 233, phrase, true);
+            var rhythm = CrimsonChoreography.Create(4000 + phrase * 233, phrase, true);
             AssertEqual(9, rhythm.Hits.Count + CrimsonChoreography.BasicNotes, "bounded final notes");
             for (int i=0;i<4;i++)
             {

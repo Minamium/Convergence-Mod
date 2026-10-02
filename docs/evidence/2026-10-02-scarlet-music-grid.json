@@ -1,0 +1,22 @@
+{
+  "scope": "Scarlet Invocation music foundation: strict 128 BPM authority grid (CrimsonMeter), bar-aligned phrases/chorus ends/act changes, two-bar act and five-bar Final transitions, client stage re-sequencing of the unchanged Graceful Ordeal OGG (CrimsonArrangement) streamed by CrimsonMusicMixer with Victory/Defeat endings. Score.json removed. Gameplay geometry, damage and wire layouts unchanged",
+  "target_build": "0.3.67 / protocol78 (feat/scarlet-music-grid, on top of the 0.3.66 ending guards and main's 0.3.65)",
+  "owner_direction": "2026-10-02: the owner asked to redo all Scarlet SFX, the music handling and every non-character effect; approved the plan of a measured beat grid, per-stage sections switched on bar heads, the song's own stop for Victory, and later said 'OK, proceed' after the whole-fight audition page was opened",
+  "measurements": {
+    "tempo": "passed: onset comb fit 22499.8 samples/beat, peak regression 128.0004 BPM with 1.6 ms residual MAD; every 8-bar window from the intro (bars 1-12, medium confidence) to the end sits within -1.5..+2.0 ms of beat k = 22500k samples",
+    "downbeat": "passed: 20 of the 24 strongest structural changes fall on k mod 4 = 0; song bar n starts at sample 90000n, bar 0 is a silent lead-in",
+    "retired_map": "Score.json had 87/298 entries more than 3 ticks off the grid, 35 half-beat entries and 11 duplicated beats in the intro/build/interlude, and its 174-beat (43.5-bar) loop shifted the meter by two beats per lap",
+    "seams": "intra-stage jumps use measured bar seams (spectral/chroma/level): Act I 0.817-0.935, Act II 0.81, Act III 0.74-0.84, Final 0.70-0.72; stage entries are deliberate musical cuts (full stop bar 26, interlude sweep, riser swell, pre-drop to peak)"
+  },
+  "checks": {
+    "native_build": "passed: tools/dev.py build --native into an isolated profile, tML 2026.08.3.0, 0 errors / 4 existing warnings",
+    "parity_render": "passed: an offline console linking the production CrimsonMeter.cs and CrimsonMusicMixer.cs rendered the nominal fight (advances at bars 33/66/99, Victory at bar 134.4) to 257.56 s; peak 0.93, no NaN; the largest bar-head high-band spikes are the song's own 26->27 drop and the Final swell entry; Victory tail -50.9 dB at 1.9 s versus -47.7 dB in the approved Python prototype",
+    "audition": "local page .local/audition/scarlet-music (not committed) holds the prototype, the in-game render and the shipped behaviour for A/B; numeric checks do not certify musical continuity"
+  },
+  "not_run": [
+    "owner listening in game: Act I build, both act-change stops, Act III entry, sacrifice swell into the peak, Victory/Defeat endings, volume against SFX",
+    "Host & Play feel of attacks on the corrected beat, with one and more peers",
+    "re-anchor after alt-tab/stall in game (AudioReanchor log)",
+    "late join during a transition bar"
+  ]
+}

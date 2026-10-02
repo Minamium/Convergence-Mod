@@ -50,14 +50,13 @@ internal static partial class Program
     [DomainTest("Scarlet cluster codec bounds its long flight and cycle waits for it while next bar overlaps")]
     private static void ScarletClusterTiming()
     {
-        var score=ScarletRecordedScore();
         var cycle=new CrimsonActCycle();int finish=0;
         for(int serial=1;serial<=12;serial++)
         {
-            var rhythm=CrimsonChoreography.Create(score,8000+serial*250,serial,true);
+            var rhythm=CrimsonChoreography.Create(8000+serial*250,serial,true);
             var hit=rhythm.Hits[4];
             int end=CrimsonEnsemble.NoteEnd(CrimsonTechnique.ClusterVolley,hit);
-            var next=CrimsonChoreography.Create(score,rhythm.End,serial+1,true);
+            var next=CrimsonChoreography.Create(rhythm.End,serial+1,true);
             AssertEqual(true,end>next.Hits[0].Warning,"flight can cross next warning");
             AssertEqual(CrimsonClusters.FlightTicks,end-hit.Fire,"fixed complete flight");
             AssertEqual(true,hit.Fire-hit.Warning>=CrimsonRhythm.MinimumWarningTicks,"two measured warning beats");
