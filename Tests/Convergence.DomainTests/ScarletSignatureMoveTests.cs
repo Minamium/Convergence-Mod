@@ -86,7 +86,56 @@ internal static partial class Program
         AssertEqual(true, CrimsonSignatureMoves.MaximumStrokes <= CrimsonTechniqueGeometry.MaximumStrokes, "fits the shared stroke buffer");
     }
 
-    [DomainTest("Scarlet cinder curtain leaves an exact 768 px corridor with every other point burning")]
+    // ---------------------------------------------------------------- mobility profiles
+    // BASE: Terraria's run, 0.08 px/tick^2 up to 3 px/tick. ENDGAME: typical hardmode wings, 0.2 up to 6.
+    // Flight is unlimited in the field (wings never run out): gravity 0.4 (fall at most 10), and holding
+    // jump lifts with Lerp(vy, -12, .18). Players react only to forecasts that are already visible.
+    private readonly record struct ScarletMobility(float Acceleration, float MaxSpeed);
+    private static readonly ScarletMobility ScarletBaseRun = new(.08f, 3f), ScarletEndgameRun = new(.2f, 6f);
+
+    // Direction -1, 0 or +1 is the player's input this tick; 0 brakes at the same rate.
+    private static void ScarletRunStep(ScarletMobility mobility, ref float x, ref float speed, int input)
+    {
+        if (input != 0) speed = Math.Clamp(speed + input * mobility.Acceleration, -mobility.MaxSpeed, mobility.MaxSpeed);
+        else speed = Math.Abs(speed) <= mobility.Acceleration ? 0 : speed - Math.Sign(speed) * mobility.Acceleration;
+        x += speed;
+    }
+    // Horizontal clearance between a standing body at x and the nearest vertical stroke edge (negative = overlap).
+    private static float ScarletClearance(ReadOnlySpan<CrimsonStroke> strokes, float x)
+    {
+        float clearance = float.MaxValue;
+        foreach (var stroke in strokes)
+            clearance = Math.Min(clearance, Math.Max(stroke.A.X - stroke.Radius - (x + ScarletPlayerWidth), x - (stroke.A.X + stroke.Radius)));
+        return clearance;
+    }
+
+    // The statement of the curtain walk, written without the production helpers: first corridor and
+    // direction for a member in `column`, then the corridor of a note (four columns wide, 0..6).
+    private static (int Start, int Direction) ScarletOracleWalk(int column, int phrase)
+    {
+        int preferred = phrase / 3 % 2 == 0 ? 1 : -1;
+        foreach (int direction in new[] { preferred, -preferred })
+        {
+            int start = direction > 0 ? column - 2 : column - 1, end = start + 3 * direction;
+            if (start >= 0 && start <= 6 && end >= 0 && end <= 6) return (start, direction);
+        }
+        int toward = column <= 4 ? -1 : 1; // the nearer wall; the per-note clamp does the rest
+        return (toward > 0 ? column - 2 : column - 1, toward);
+    }
+    private static int ScarletOracleCorridor(int column, int phrase, int note)
+    {
+        var (start, direction) = ScarletOracleWalk(column, phrase);
+        return Math.Clamp(start + note * direction, 0, 6);
+    }
+    private static int ScarletOracleSafe(int mask, int phrase, int note)
+    {
+        int safe = 0;
+        for (int column = 0; column < 10; column++)
+            if ((mask & 1 << column) != 0) safe |= 15 << ScarletOracleCorridor(column, phrase, note);
+        return safe;
+    }
+
+    [DomainTest("Scarlet cinder curtain leaves an exact 1024 px corridor with every other point burning")]
     private static void ScarletCinderCurtainCorridor()
     {
         Span<CrimsonStroke> forecast = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
@@ -100,12 +149,13 @@ internal static partial class Program
             {
                 var plan = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * observed + 128, groundX, groundY);
                 plan.Validate();
-                int corridor = CrimsonSignatureMoves.CurtainCorridor(observed, plan.Phrase, note);
-                AssertEqual(true, corridor is >= 0 and <= 7, "corridor stays inside the field");
-                float gapLeft = f.Left + 256 * corridor, gapRight = gapLeft + 768;
+                int corridor = ScarletOracleCorridor(observed, phrase, note);
+                AssertEqual(corridor, CrimsonSignatureMoves.CurtainCorridor(observed, plan.Phrase, note), "production corridor equals the stated rule");
+                float gapLeft = f.Left + 256 * corridor, gapRight = gapLeft + 1024;
                 int nf = CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true);
                 int nl = CrimsonTechniqueGeometry.Write(plan, plan.Fire + 10, live);
-                AssertEqual(7, nf, "seven burning columns");
+                AssertEqual(6, nf, "six burning columns");
+                AssertEqual(true, nf <= CrimsonSignatureMoves.MaximumStrokes, "stroke budget");
                 AssertEqual(nf, nl, "live curtain has the same columns");
                 for (int i = 0; i < nf; i++)
                 {
@@ -116,7 +166,7 @@ internal static partial class Program
                     AssertEqual(true, forecast[i].Radius is >= 128 and <= 130, "column capsule width");
                 }
                 if (!scanned.Add(corridor)) continue;
-                // Exactly 768 px free at three heights, edges on column bounds, nothing else free.
+                // Exactly 1024 px free at three heights, edges on column bounds, nothing else free.
                 foreach (float y in new[] { f.Top + 1, f.CenterY, f.Bottom - 1 })
                     for (float x = f.Left; x <= f.Right; x += .25f)
                     {
@@ -128,27 +178,13 @@ internal static partial class Program
                     foreach (float y in new[] { f.Top, f.CenterY, f.Bottom - ScarletPlayerHeight })
                         AssertEqual(false, ScarletHits(forecast[..nf], x, y), "a full player body fits anywhere in the corridor");
                 if (corridor > 0) AssertEqual(true, ScarletHits(forecast[..nf], gapLeft - 19, f.Bottom - ScarletPlayerHeight), "one pixel into the left wall burns");
-                if (corridor < 7) AssertEqual(true, ScarletHits(forecast[..nf], gapRight - 1, f.Bottom - ScarletPlayerHeight), "one pixel into the right wall burns");
+                if (corridor < 6) AssertEqual(true, ScarletHits(forecast[..nf], gapRight - 1, f.Bottom - ScarletPlayerHeight), "one pixel into the right wall burns");
             }
-            AssertEqual(8, scanned.Count, "all eight corridor positions are reached and scanned");
+            AssertEqual(7, scanned.Count, "all seven corridor positions are reached and scanned");
         }
     }
 
-    // Independent statement of the walk: the observed column leads the first corridor; the preferred
-    // direction (right on even serial/3) when it fits, else the other, else away from the nearer wall.
-    private static (int Start, int Direction) ScarletCurtainExpectedWalk(int column, int phrase)
-    {
-        int preferred = phrase / 3 % 2 == 0 ? 1 : -1;
-        foreach (int direction in new[] { preferred, -preferred })
-        {
-            int start = direction > 0 ? column - 2 : column, end = start + 3 * direction;
-            if (start >= 0 && start <= 7 && end >= 0 && end <= 7) return (start, direction);
-        }
-        int away = column <= 4 ? 1 : -1;
-        return (Math.Clamp(away > 0 ? column - 2 : column, 0, 7), away);
-    }
-
-    [DomainTest("Scarlet cinder curtain walks away from the observed column, which stays safe for three notes, and shares two columns between beats")]
+    [DomainTest("Scarlet cinder curtain walks away from the member's column, keeps it safe, and slides into a wall and stays")]
     private static void ScarletCinderCurtainWalk()
     {
         Span<CrimsonStroke> now = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
@@ -161,7 +197,8 @@ internal static partial class Program
                 {
                     float observed = Math.Clamp(f.Left + 256 * target + offset, f.Left + 100, f.Right - 100);
                     int column = ScarletColumnOf(f, observed);
-                    var (start, direction) = ScarletCurtainExpectedWalk(column, phrase);
+                    var (start, direction) = ScarletOracleWalk(column, phrase);
+                    bool interior = column is >= 2 and <= 7;
                     var plans = new CrimsonGesturePlan[4];
                     var corridors = new int[4];
                     for (int note = 0; note < 4; note++)
@@ -170,30 +207,38 @@ internal static partial class Program
                         plans[note].Validate();
                         AssertEqual(CrimsonTechnique.CinderCurtain, plans[note].Technique, "Act I signature");
                         corridors[note] = CrimsonSignatureMoves.CurtainCorridor(column, plans[note].Phrase, note);
-                        AssertEqual(start + note * direction, corridors[note], $"one column per beat in the stated direction phrase={phrase} column={column}");
-                        AssertEqual(true, corridors[note] is >= 0 and <= 7, "corridor stays inside the field");
+                        AssertEqual(ScarletOracleCorridor(column, phrase, note), corridors[note], $"stated rule phrase={phrase} column={column}");
+                        AssertEqual(true, corridors[note] is >= 0 and <= 6, "corridor stays inside the field");
                     }
-                    bool interior = column is >= 2 and <= 7;
-                    if (interior) AssertEqual(column, direction > 0 ? corridors[0] + 2 : corridors[0], "the observed column is the leading end of the first corridor");
-                    // The player's own column: free for 3 notes inside the field, 2 at columns 1 and 8, 1 at the walls.
-                    int safeNotes = interior ? 3 : column is 1 or 8 ? 2 : 1;
+                    if (interior)
+                    {
+                        for (int note = 0; note < 4; note++) AssertEqual(start + note * direction, corridors[note], "one column per beat in one direction");
+                        // One column of forward margin: the member stands one column short of the corridor's leading end.
+                        AssertEqual(column + (direction > 0 ? 1 : -1), direction > 0 ? corridors[0] + 3 : corridors[0], "first corridor leads one column past the member");
+                    }
+                    else for (int note = 0; note < 4; note++)
+                        AssertEqual(column <= 4 ? 0 : 6, corridors[note], "wall members get a corridor that slides into the wall and stays");
+                    // The member's own column: safe for 3 notes inside the field, all 4 against a wall.
+                    int safeNotes = interior ? 3 : 4;
                     float columnLeft = f.Left + 256 * column;
                     for (int note = 0; note < 4; note++)
                     {
                         int count = CrimsonTechniqueGeometry.Write(plans[note], plans[note].Fire, now, true);
+                        AssertEqual(true, count <= 6, "at most six columns burn");
                         for (float x = columnLeft + .5f; x <= columnLeft + 256 - ScarletPlayerWidth - .5f; x += 9)
                             AssertEqual(note >= safeNotes, ScarletHits(now[..count], x, f.Bottom - ScarletPlayerHeight),
-                                $"observed column {column} is safe exactly for its first {safeNotes} notes (phrase={phrase} note={note} x={x - columnLeft})");
+                                $"member column {column} is safe exactly for its first {safeNotes} notes (phrase={phrase} note={note} x={x - columnLeft})");
                     }
                     for (int note = 0; note < 3; note++)
                     {
                         var a = plans[note]; var b = plans[note + 1];
-                        int shared = Math.Max(corridors[note], corridors[note + 1]);
-                        AssertEqual(1, Math.Abs(corridors[note] - corridors[note + 1]), "consecutive corridors are one column apart and overlap by two");
+                        int sharedLeft = Math.Max(corridors[note], corridors[note + 1]), sharedRight = Math.Min(corridors[note], corridors[note + 1]) + 4;
+                        AssertEqual(true, Math.Abs(corridors[note] - corridors[note + 1]) <= 1, "consecutive corridors are at most one column apart");
+                        AssertEqual(true, sharedRight - sharedLeft >= 3, "consecutive corridors overlap by at least three columns");
                         AssertEqual(true, a.End <= b.Fire, "a curtain is gone before the next one falls");
                         int na = CrimsonTechniqueGeometry.Write(a, a.Fire, now, true), nb = CrimsonTechniqueGeometry.Write(b, b.Fire, next, true);
-                        float sharedLeft = f.Left + 256 * shared;
-                        for (float x = sharedLeft + .5f; x <= sharedLeft + 512 - ScarletPlayerWidth - .5f; x += 9)
+                        float left = f.Left + 256 * sharedLeft;
+                        for (float x = left + .5f; x <= f.Left + 256 * sharedRight - ScarletPlayerWidth - .5f; x += 9)
                         {
                             AssertEqual(false, ScarletHits(now[..na], x, f.Bottom - ScarletPlayerHeight), "shared columns are free in this note");
                             AssertEqual(false, ScarletHits(next[..nb], x, f.Bottom - ScarletPlayerHeight), "shared columns are free in the next note");
@@ -203,62 +248,138 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Scarlet cinder curtain can be followed at base run speed from the player's own column")]
-    private static void ScarletCinderCurtainFollow()
-    {
-        var f = RaidFieldGeometry.FromGround(8000, 6000);
-        float worstInterior = 0, worstNear = 0, worstWall = 0;
-        for (int column = 0; column <= 9; column++) foreach (int phrase in new[] { 3, 6 })
-        {
-            var plans = new CrimsonGesturePlan[4];
-            for (int note = 0; note < 4; note++) plans[note] = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * column + 128);
-            var (_, direction) = ScarletCurtainExpectedWalk(column, phrase);
-            bool wall = column is 0 or 1 or 8 or 9;
-            // Inside the field the walk's direction shows with note 1's warning; at the walls it is forced from note 0.
-            float begin = wall ? plans[0].Born : plans[1].Born;
-            float needed = ScarletCurtainSlowestRunner(f, plans, column, direction, begin);
-            if (!wall) worstInterior = Math.Max(worstInterior, needed);
-            else if (column is 1 or 8) worstNear = Math.Max(worstNear, needed);
-            else worstWall = Math.Max(worstWall, needed);
-            if (!wall) AssertEqual(true, ScarletCurtainRuns(f, plans, f.Left + 256 * column + 118, direction, 3.0f, begin), $"a 3.0 px/tick runner follows column {column} phrase={phrase}");
-        }
-        AssertEqual(true, worstInterior <= 3.0f, $"interior columns need at most 3 px/tick when moving from note 1's warning ({worstInterior:F2})");
-        // Measured, not a fairness target: the walls force the walk away from a player standing against them
-        // (about 3.45 px/tick at columns 1/8 and 5.65 at columns 0/9 when moving from note 0's warning).
-        AssertEqual(true, worstNear is > 3.0f and <= 3.5f, $"columns 1 and 8 need {worstNear:F2} px/tick from note 0's warning");
-        AssertEqual(true, worstWall is > 5.0f and <= 5.7f, $"columns 0 and 9 need {worstWall:F2} px/tick from note 0's warning");
-    }
-    // Stands at the centre of the column until begin, then runs toward the walk at a constant speed.
-    private static bool ScarletCurtainRuns(RaidFieldGeometry f, CrimsonGesturePlan[] plans, float x0, int direction, float speed, float begin)
+    // Runs a member of the curtain: at rest at x0 until `begin`, then running in `direction` under `mobility`.
+    // Returns whether any live stroke ever touches the body, and the smallest horizontal clearance seen.
+    private static bool ScarletCurtainRun(RaidFieldGeometry f, CrimsonGesturePlan[] plans, float x0, int direction, ScarletMobility mobility, int begin, out float clearance)
     {
         Span<CrimsonStroke> now = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
-        for (float tick = plans[0].Born; tick < plans[3].End; tick += .25f)
+        float x = x0, speed = 0;
+        clearance = float.MaxValue;
+        bool survived = true;
+        for (int tick = plans[0].Born; tick < plans[3].End; tick++)
         {
-            float x = Math.Clamp(x0 + direction * speed * Math.Max(0, tick - begin), f.Left + 1, f.Right - ScarletPlayerWidth - 1);
+            ScarletRunStep(mobility, ref x, ref speed, tick >= begin ? direction : 0);
+            float clamped = Math.Clamp(x, f.Left, f.Right - ScarletPlayerWidth);
+            if (clamped != x) { x = clamped; speed = 0; }
             for (int note = 0; note < 4; note++)
             {
                 int count = CrimsonTechniqueGeometry.Write(plans[note], tick, now);
-                if (ScarletHits(now[..count], x, f.Bottom - ScarletPlayerHeight)) return false;
+                if (count == 0) continue;
+                if (ScarletHits(now[..count], x, f.Bottom - ScarletPlayerHeight)) survived = false;
+                if (tick >= plans[note].Fire + 3) clearance = Math.Min(clearance, ScarletClearance(now[..count], x)); // once fully fallen
             }
+        }
+        return survived;
+    }
+
+    [DomainTest("Scarlet cinder curtain is survivable from rest under base mobility: interior walks from note 1's warning, walls standing still")]
+    private static void ScarletCinderCurtainBaseMobility()
+    {
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        float worstInterior = float.MaxValue, worstDriftBack = float.MaxValue, worstWall = float.MaxValue;
+        Span<CrimsonStroke> now = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        for (int column = 0; column < 10; column++) foreach (int phrase in new[] { 3, 6, 9, 12 })
+        {
+            var plans = new CrimsonGesturePlan[4];
+            for (int note = 0; note < 4; note++) plans[note] = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * column + 128);
+            var (_, direction) = ScarletOracleWalk(column, phrase);
+            float centre = f.Left + 256 * column + 128 - ScarletPlayerWidth * .5f;
+            bool interior = column is >= 2 and <= 7;
+            if (interior)
+            {
+                // The direction is first shown with note 1's warning; the runner starts moving then.
+                AssertEqual(true, ScarletCurtainRun(f, plans, centre, direction, ScarletBaseRun, plans[1].Born, out float clearance), $"a base-mobility runner follows column {column} phrase={phrase}");
+                worstInterior = Math.Min(worstInterior, clearance);
+                // How far behind (against the walk) the runner may have drifted during the look-ahead and still make it.
+                int back = 0;
+                while (back < 300 && ScarletCurtainRun(f, plans, centre - direction * (back + 1), direction, ScarletBaseRun, plans[1].Born, out _)) back++;
+                worstDriftBack = Math.Min(worstDriftBack, back);
+            }
+            else
+            {
+                AssertEqual(true, ScarletCurtainRun(f, plans, centre, direction, ScarletBaseRun, int.MaxValue, out float clearance), $"a runner standing still at wall column {column} survives phrase={phrase}");
+                worstWall = Math.Min(worstWall, clearance);
+            }
+            // Forward or backward drift of up to 90 px during the 30-tick look-ahead still survives note 0.
+            foreach (int drift in new[] { -90, 90 })
+            {
+                float x = Math.Clamp(centre + drift, f.Left, f.Right - ScarletPlayerWidth);
+                for (int tick = plans[0].Fire; tick < plans[0].End; tick++)
+                {
+                    int count = CrimsonTechniqueGeometry.Write(plans[0], tick, now);
+                    AssertEqual(false, ScarletHits(now[..count], x, f.Bottom - ScarletPlayerHeight), $"drift {drift} px survives note 0 (column {column} phrase={phrase})");
+                }
+            }
+        }
+        // Reported numbers: the smallest clearance (px) a base runner keeps, and the least backward drift tolerated.
+        AssertEqual(true, worstInterior > 0 && worstWall > 0, $"clearances stay positive (interior {worstInterior:F1}, wall {worstWall:F1})");
+        AssertEqual(true, worstDriftBack >= 50, $"an interior runner can be at least 50 px behind the column centre at note 1's warning ({worstDriftBack})");
+    }
+
+    // ---------------------------------------------------------------- rope staff
+    // Vertical flight under BASE: gravity 0.4 (fall at most 10), Lerp(vy, -12, .18) while jump is held.
+    private static (float Height, float Rise) ScarletFlightStep(float height, float rise, bool jump)
+    {
+        rise = Math.Max(rise - .4f, -10f);
+        if (jump) rise += (12f - rise) * .18f;
+        height += rise;
+        if (height <= 0) return (0, 0);
+        if (height >= 1078) return (1078, 0); // the ceiling: the body is 42 tall in a 1120 px field
+        return (height, rise);
+    }
+    private const int ScarletStaffCells = 2157; // feet heights 0..1078 in half pixels
+    private static bool[] ScarletStaffSafe(ReadOnlySpan<CrimsonStroke> strokes, RaidFieldGeometry f)
+    {
+        var safe = new bool[ScarletStaffCells];
+        for (int i = 0; i < safe.Length; i++) safe[i] = !ScarletHits(strokes, f.CenterX, f.Bottom - i * .5f - ScarletPlayerHeight);
+        return safe;
+    }
+    private static bool ScarletStaffSafeAt(bool[] safe, float height)
+        => safe[Math.Clamp((int)MathF.Floor(height * 2), 0, safe.Length - 1)] && safe[Math.Clamp((int)MathF.Ceiling(height * 2), 0, safe.Length - 1)];
+    // Can a body that is at `start` (at rest) when a note's lines strike stay safe through its 12 live ticks
+    // and be safe from the next note's strike (28 ticks later) through its live ticks? Exhaustive over jump held / released.
+    private static bool ScarletStaffTransition(bool[] now, bool[] next, float start, int gap = 28)
+    {
+        const int live = 12, speeds = 49;
+        int total = gap + live;
+        var heights = new float[ScarletStaffCells * speeds];
+        var rises = new float[heights.Length];
+        var stamp = new int[heights.Length];
+        var active = new System.Collections.Generic.List<int>();
+        var following = new System.Collections.Generic.List<int>();
+        void Add(float h, float v, int tick)
+        {
+            int cell = Math.Clamp((int)MathF.Round(h * 2), 0, ScarletStaffCells - 1) * speeds + Math.Clamp((int)MathF.Round((v + 12) * 2), 0, speeds - 1);
+            if (stamp[cell] == tick) return;
+            stamp[cell] = tick; heights[cell] = h; rises[cell] = v; following.Add(cell);
+        }
+        Add(start, 0, 1);
+        (active, following) = (following, active);
+        for (int tick = 1; tick < total; tick++)
+        {
+            following.Clear();
+            foreach (int cell in active)
+                for (int jump = 0; jump < 2; jump++)
+                {
+                    var (h, v) = ScarletFlightStep(heights[cell], rises[cell], jump == 1);
+                    bool ok = tick < live ? ScarletStaffSafeAt(now, h) : tick >= gap ? ScarletStaffSafeAt(next, h) : true;
+                    if (ok) Add(h, v, tick + 1);
+                }
+            if (following.Count == 0) return false;
+            (active, following) = (following, active);
         }
         return true;
     }
-    private static float ScarletCurtainSlowestRunner(RaidFieldGeometry f, CrimsonGesturePlan[] plans, int column, int direction, float begin)
-    {
-        float x0 = f.Left + 256 * column + 128 - ScarletPlayerWidth * .5f;
-        for (float speed = 0; speed <= 12; speed += .05f)
-            if (ScarletCurtainRuns(f, plans, x0, direction, speed, begin)) return speed;
-        return float.PositiveInfinity;
-    }
 
-    [DomainTest("Scarlet shroud rope low cut hits a standing body while an ordinary jump clears both cuts")]
-    private static void ScarletShroudRopeHeights()
+    [DomainTest("Scarlet shroud rope draws a five-line staff of two combs inside the field with a grounded jump-rope rhythm")]
+    private static void ScarletShroudRopeStaff()
     {
         Span<CrimsonStroke> forecast = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         Span<CrimsonStroke> live = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         foreach (var (groundX, groundY) in new[] { (8000, 6000), (2000, 1500) })
         {
             var f = RaidFieldGeometry.FromGround(groundX, groundY);
+            AssertEqual(1120f, f.Bottom - f.Top, "field height");
             for (int note = 0; note < 4; note++)
             {
                 var plan = ScarletSignaturePlan(1, 9, note, 0, groundX, groundY);
@@ -266,39 +387,82 @@ internal static partial class Program
                 AssertEqual(CrimsonTechnique.ShroudRope, plan.Technique, "Act II signature");
                 AssertEqual(12, plan.End - plan.Fire, "rift-like live window");
                 bool low = note % 2 == 0;
-                AssertEqual(1, CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true), "one full-width cut");
+                AssertEqual(5, CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true), "five lines per note");
                 AssertEqual(0, CrimsonTechniqueGeometry.Write(plan, plan.Fire, live), "zero-width ignition is harmless");
-                var cut = forecast[0];
-                AssertEqual(low ? f.Bottom - 26 : f.Bottom - 170, cut.A.Y, "low / high / low / high");
-                AssertEqual(cut.A.Y, cut.B.Y, "horizontal");
-                AssertEqual(10f, cut.Radius, "rope radius");
-                AssertEqual(note % 2 == 0 ? f.Left : f.Right, cut.A.X, "alternating travel direction starts at the entering side");
-                AssertEqual(note % 2 == 0 ? f.Right : f.Left, cut.B.X, "and crosses the whole field");
+                for (int line = 0; line < 5; line++)
+                {
+                    var cut = forecast[line];
+                    float height = (low ? 36 : 148) + 224 * line;
+                    AssertEqual(f.Bottom - height, cut.A.Y, $"line {line} of note {note} sits {height} px above the floor");
+                    AssertEqual(cut.A.Y, cut.B.Y, "horizontal");
+                    AssertEqual(36f, cut.Radius, "line radius");
+                    AssertEqual(true, height - cut.Radius >= 0 && height + cut.Radius <= f.Bottom - f.Top, "the line lies inside the field");
+                    AssertEqual(note % 2 == 0 ? f.Left : f.Right, cut.A.X, "alternating travel direction starts at the entering side");
+                    AssertEqual(note % 2 == 0 ? f.Right : f.Left, cut.B.X, "and crosses the whole field");
+                }
                 for (float age = plan.Fire + .25f; age < plan.End; age += .25f)
                 {
                     int count = CrimsonTechniqueGeometry.Write(plan, age, live);
-                    AssertEqual(1, count, "one live cut");
-                    AssertEqual(cut.A, live[0].A, "enters from the announced side");
-                    AssertEqual(cut.A.Y, live[0].B.Y, "stays on the announced height");
-                    AssertEqual(cut.Radius, live[0].Radius, "same width as announced");
-                    if (age >= plan.Fire + 2) AssertEqual(cut, live[0], "full width after two ticks");
+                    AssertEqual(5, count, "five live lines");
+                    for (int line = 0; line < 5; line++)
+                    {
+                        AssertEqual(forecast[line].A, live[line].A, "enters from the announced side");
+                        AssertEqual(forecast[line].A.Y, live[line].B.Y, "stays on the announced height");
+                        AssertEqual(forecast[line].Radius, live[line].Radius, "same width as announced");
+                        if (age >= plan.Fire + 2) AssertEqual(forecast[line], live[line], "full width after two ticks");
+                    }
                 }
                 AssertEqual(0, CrimsonTechniqueGeometry.Write(plan, plan.End, live), "exclusive end");
+                // Grounded players keep the jump-rope rhythm: hit on even beats, safe on odd beats.
                 foreach (float x in new[] { f.Left + 5, f.CenterX - 30, f.CenterX, f.Right - 25 })
                 {
-                    var rope = forecast[..1];
-                    AssertEqual(low, ScarletBodyHit(rope, f, x, 0), "a standing player is hit by the low cut only");
-                    AssertEqual(low, ScarletBodyHit(rope, f, x, 35.5f), "just under a 36 px rise the low cut still hits");
-                    for (float h = 36.5f; h <= 117.5f; h += .5f) AssertEqual(false, ScarletBodyHit(rope, f, x, h), $"a 37-117 px rise clears both cuts h={h}");
-                    AssertEqual(!low, ScarletBodyHit(rope, f, x, 118.5f), "from a 118 px rise the high cut hits");
-                    for (float h = 119; h <= 180; h += 1) AssertEqual(!low, ScarletBodyHit(rope, f, x, h), "a boosted jump meets the high cut only");
-                    AssertEqual(false, ScarletBodyHit(rope, f, x, 181), "above both cuts");
-                    AssertEqual(false, ScarletBodyHit(rope, f, x, 106), "an ordinary full jump (feet up to about 106 px) clears both cuts");
+                    AssertEqual(low, ScarletBodyHit(forecast[..5], f, x, 0), "a standing player is hit on even beats and safe on odd beats");
+                    AssertEqual(low, ScarletBodyHit(forecast[..5], f, x, 60), "anything under 70 px is the floor band of the odd beat");
+                    AssertEqual(false, ScarletBodyHit(forecast[..5], f, x, low ? 127 : 239), "the middle of this beat's lowest airborne band is safe");
+                    AssertEqual(true, ScarletBodyHit(forecast[..5], f, x, low ? 239 : 127), "and the other beat's band is hit");
+                    AssertEqual(true, ScarletBodyHit(forecast[..5], f, x, low ? 36 : 148), "heights inside a line are hit");
                 }
             }
-            AssertEqual(118f, f.Bottom - ScarletPlayerHeight - (f.Bottom - CrimsonSignatureMoves.RopeHighHeight + CrimsonSignatureMoves.RopeRadius),
-                "a grounded head clears the high cut by 118 px");
         }
+    }
+
+    [DomainTest("Scarlet shroud rope: no height is safe on both beats and every safe height reaches the other beat's safe height within the beat")]
+    private static void ScarletShroudRopeReach()
+    {
+        Span<CrimsonStroke> a = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        Span<CrimsonStroke> b = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        var even = ScarletSignaturePlan(1, 9, 0, 0);
+        var odd = ScarletSignaturePlan(1, 9, 1, 0);
+        var safeEven = ScarletStaffSafe(a[..CrimsonTechniqueGeometry.Write(even, even.Fire, a, true)], f);
+        var safeOdd = ScarletStaffSafe(b[..CrimsonTechniqueGeometry.Write(odd, odd.Fire, b, true)], f);
+        float widest = 0, farthest = 0, farthestAt = 0;
+        for (int i = 0; i < ScarletStaffCells; i++)
+        {
+            AssertEqual(false, safeEven[i] && safeOdd[i], $"no height stays safe on both beats ({i * .5f} px)");
+            // Distance to the nearest height that is safe on the other beat.
+            foreach (var (source, to) in new[] { (safeEven, safeOdd), (safeOdd, safeEven) })
+            {
+                if (!source[i]) continue;
+                int d = 0;
+                while ((i - d < 0 || !to[i - d]) && (i + d >= to.Length || !to[i + d])) d++;
+                if (d * .5f > farthest) { farthest = d * .5f; farthestAt = i * .5f; }
+            }
+        }
+        AssertEqual(true, farthest >= 50 && farthest <= 115, $"the farthest a body has to move to change beat is {farthest} px (from {farthestAt} px up)");
+        // Exhaustive over jump held or released each tick (base flight), from rest at every 4th safe height.
+        int cases = 0;
+        for (int i = 0; i < ScarletStaffCells; i += 12)
+        {
+            if (safeEven[i]) { cases++; AssertEqual(true, ScarletStaffTransition(safeEven, safeOdd, i * .5f), $"even to odd from {i * .5f} px up is reachable within the beat"); }
+            if (safeOdd[i]) { cases++; AssertEqual(true, ScarletStaffTransition(safeOdd, safeEven, i * .5f), $"odd to even from {i * .5f} px up is reachable within the beat"); }
+        }
+        AssertEqual(true, cases > 100, $"enough starting heights were tried ({cases})");
+        // The hardest start is the ceiling on an even beat (112 px to fall): it needs about 24 of the 28 ticks, and half a beat is not enough.
+        int shortest = 12;
+        while (shortest < 28 && !ScarletStaffTransition(safeEven, safeOdd, 1078, shortest)) shortest++;
+        AssertEqual(true, shortest is >= 20 and <= 26, $"from the ceiling the transition needs {shortest} of the 28 ticks");
+        AssertEqual(false, ScarletStaffTransition(safeEven, safeOdd, 1078, 14), "control: half a beat from the ceiling is not enough");
     }
 
     [DomainTest("Scarlet four hands slam two of four 640 px quarters per beat and always leave a shared safe quarter")]
@@ -345,13 +509,13 @@ internal static partial class Program
                         AssertEqual(640f, right - left, "quarter width");
                         if (isStruck[q])
                         {
-                            // Three fingers 213 px apart: solid across their width, open between them.
+                            // Three fingers 213 px apart: solid across their 120 px width, open between them.
                             for (int finger = -1; finger <= 1; finger++)
                                 foreach (float y in new[] { f.Top, f.CenterY, f.Bottom - 1 })
                                 {
                                     float axis = left + 320 + finger * 213;
-                                    AssertEqual(true, ScarletHits(forecast[..count], axis - 74, y, .001f, .001f), $"finger {finger} of quarter {q} is solid left");
-                                    AssertEqual(true, ScarletHits(forecast[..count], axis + 74, y, .001f, .001f), $"finger {finger} of quarter {q} is solid right");
+                                    AssertEqual(true, ScarletHits(forecast[..count], axis - 59, y, .001f, .001f), $"finger {finger} of quarter {q} is solid left");
+                                    AssertEqual(true, ScarletHits(forecast[..count], axis + 59, y, .001f, .001f), $"finger {finger} of quarter {q} is solid right");
                                     AssertEqual(false, ScarletHits(forecast[..count], axis + 106.5f, y, .001f, .001f), $"gap after finger {finger} of quarter {q} is open");
                                 }
                         }
@@ -369,7 +533,7 @@ internal static partial class Program
                         int q = (int)MathF.Floor(((forecast[i].A.X + forecast[i].B.X) * .5f - f.Left) / 640);
                         var (left, right) = CrimsonSignatureMoves.HandsQuarter(f, q);
                         AssertEqual(true, lo >= left - 8 && hi <= right + 8, "claw union stays inside its quarter within 8 px");
-                        AssertEqual(75f, forecast[i].Radius, "finger radius");
+                        AssertEqual(60f, forecast[i].Radius, "finger radius");
                     }
                 }
                 for (int q = 0; q < 4; q++) AssertEqual(2, struckCount[q], "every quarter is slammed twice and spared twice per phrase");
@@ -381,7 +545,7 @@ internal static partial class Program
         }
     }
 
-    [DomainTest("Scarlet four hands fingers leave body-sized gaps and a clear spot within a beat's run")]
+    [DomainTest("Scarlet four hands fingers leave body-sized gaps and a clear spot within 71 px of anywhere on the floor")]
     private static void ScarletFourHandsFingers()
     {
         Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
@@ -403,29 +567,100 @@ internal static partial class Program
                     if (++distance > positions) throw new InvalidOperationException("no clear spot at all");
                 worst = Math.Max(worst, distance);
             }
-            // Every gap between neighbouring fingers admits the body with at least 10 px on each side.
+            // Every gap between neighbouring fingers admits the body with at least 30 px on each side.
             var axes = new System.Collections.Generic.List<float>();
             foreach (var finger in fingers) axes.Add(finger.A.X);
             axes.Sort();
             for (int i = 0; i + 1 < axes.Count; i++)
             {
-                float gapLeft = axes[i] + 75, gapRight = axes[i + 1] - 75;
-                if (gapRight - gapLeft > 100) continue; // a whole spared quarter, not a finger gap
+                float gapLeft = axes[i] + 60, gapRight = axes[i + 1] - 60;
+                if (gapRight - gapLeft > 150) continue; // a whole spared quarter, not a finger gap
                 narrowest = Math.Min(narrowest, gapRight - gapLeft);
-                AssertEqual(true, gapRight - gapLeft - ScarletPlayerWidth >= 20, $"a body fits a finger gap with 10 px each side ({gapRight - gapLeft})");
+                AssertEqual(true, gapRight - gapLeft - ScarletPlayerWidth >= 60, $"a body fits a finger gap with 30 px each side ({gapRight - gapLeft})");
                 foreach (float y in new[] { f.Top, f.CenterY, f.Bottom - ScarletPlayerHeight })
                     for (float x = gapLeft + 10; x <= gapRight - 10 - ScarletPlayerWidth; x += 1)
                         AssertEqual(false, ScarletHits(fingers, x, y), $"finger gap admits a body x={x - f.Left} y={y - f.Top}");
             }
             // A slammed quarter against a field wall leaves a strip the body fits in.
-            foreach (float strip in new[] { axes[0] - 75 - f.Left, f.Right - (axes[^1] + 75) })
-                if (strip < 100) wallStrip = Math.Min(wallStrip, strip);
+            foreach (float strip in new[] { axes[0] - 60 - f.Left, f.Right - (axes[^1] + 60) })
+                if (strip < 150) wallStrip = Math.Min(wallStrip, strip);
         }
-        AssertEqual(true, narrowest >= 63f - .01f, $"finger gaps are at least 63 px ({narrowest})");
-        AssertEqual(true, wallStrip >= 32f - .01f && wallStrip - ScarletPlayerWidth >= 10, $"the strip against a wall takes a body ({wallStrip})");
-        // On the 1 px grid the farthest is 86 px (from the middle of a finger); the touching limit is 85 px,
-        // 3.0 px per tick over the 28 ticks of one beat.
-        AssertEqual(true, worst >= 80 && worst <= 86, $"the worst standing spot is within 86 px of a clear one ({worst})");
+        AssertEqual(true, narrowest >= 93f - .01f, $"finger gaps are at least 93 px ({narrowest})");
+        AssertEqual(true, wallStrip >= 47f - .01f && wallStrip - ScarletPlayerWidth >= 25, $"the strip against a wall takes a body ({wallStrip})");
+        // On the 1 px grid the farthest is 71 px (from the middle of a finger); the touching limit is 70 px.
+        AssertEqual(true, worst >= 60 && worst <= 71, $"the worst standing spot is within 71 px of a clear one ({worst})");
+    }
+
+    // Hands mobility: a body at rest at x0 when a note's forecast first shows (its Born) heads for a gap with the
+    // given mobility, braking to a stop there. Real strokes are checked every tick from the strike on.
+    // Returns the best (over candidate gaps) smallest horizontal clearance from the landing on; negative = hit.
+    private static float ScarletHandsDodge(RaidFieldGeometry f, CrimsonGesturePlan plan, CrimsonStroke[] fingers, CrimsonStroke[][] byTick, float x0, ScarletMobility mobility)
+    {
+        var spans = new System.Collections.Generic.List<(float Low, float High)>();
+        var edges = new System.Collections.Generic.List<(float Low, float High)>();
+        foreach (var finger in fingers) edges.Add((finger.A.X - finger.Radius, finger.A.X + finger.Radius));
+        edges.Sort();
+        float cursor = f.Left;
+        foreach (var (low, high) in edges) { if (low > cursor) spans.Add((cursor, low)); cursor = Math.Max(cursor, high); }
+        if (cursor < f.Right) spans.Add((cursor, f.Right));
+        float best = float.NegativeInfinity;
+        foreach (var (low, high) in spans)
+        {
+            float margin = Math.Min(30, (high - low - ScarletPlayerWidth) * .5f);
+            if (margin < 0) continue;
+            foreach (float target in new[] { low + margin, high - ScarletPlayerWidth - margin })
+            {
+                float x = x0, speed = 0, clearance = float.MaxValue;
+                bool hit = false;
+                for (int tick = plan.Born; tick < plan.End; tick++)
+                {
+                    // Predicted rest position decides between accelerating and braking.
+                    float rest = x + speed * Math.Abs(speed) / (2 * mobility.Acceleration);
+                    int input = Math.Abs(target - rest) <= mobility.Acceleration * 2 ? 0 : Math.Sign(target - rest);
+                    ScarletRunStep(mobility, ref x, ref speed, input);
+                    float clamped = Math.Clamp(x, f.Left, f.Right - ScarletPlayerWidth);
+                    if (clamped != x) { x = clamped; speed = 0; }
+                    if (tick < plan.Fire) continue;
+                    var live = byTick[tick - plan.Fire];
+                    if (ScarletHits(live, x, f.Bottom - ScarletPlayerHeight)) hit = true;
+                    if (tick >= plan.Fire + CrimsonSignatureMoves.HandsReachTicks) clearance = Math.Min(clearance, ScarletClearance(live, x));
+                }
+                best = Math.Max(best, hit ? Math.Min(clearance, -1) : clearance);
+            }
+        }
+        return best;
+    }
+
+    [DomainTest("Scarlet four hands can be dodged from rest under endgame mobility but not under base mobility")]
+    private static void ScarletFourHandsMobility()
+    {
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        float worstEndgame = float.MaxValue, worstBase = float.MaxValue, worstEndgameAt = 0, worstBaseAt = 0;
+        Span<CrimsonStroke> buffer = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        foreach (int phrase in new[] { 3, 6 }) for (int note = 0; note < 4; note++)
+        {
+            var plan = ScarletSignaturePlan(2, phrase, note, 0);
+            var byTick = new CrimsonStroke[plan.End - plan.Fire][];
+            for (int tick = plan.Fire; tick < plan.End; tick++) byTick[tick - plan.Fire] = buffer[..CrimsonTechniqueGeometry.Write(plan, tick, buffer)].ToArray();
+            // The landed fingers decide the candidates; they stand still once down.
+            var landed = new CrimsonStroke[6];
+            buffer[..CrimsonTechniqueGeometry.Write(plan, plan.Fire, buffer, true)].CopyTo(landed);
+            // Worst-case starts: every 5 px plus the middle of every finger.
+            var starts = new System.Collections.Generic.List<float>();
+            for (float x = f.Left; x <= f.Right - ScarletPlayerWidth; x += 5) starts.Add(x);
+            foreach (var finger in landed) starts.Add(finger.A.X - ScarletPlayerWidth * .5f);
+            foreach (float x0 in starts)
+            {
+                float endgame = ScarletHandsDodge(f, plan, landed, byTick, x0, ScarletEndgameRun);
+                float baseline = ScarletHandsDodge(f, plan, landed, byTick, x0, ScarletBaseRun);
+                if (endgame < worstEndgame) { worstEndgame = endgame; worstEndgameAt = x0 - f.Left; }
+                if (baseline < worstBase) { worstBase = baseline; worstBaseAt = x0 - f.Left; }
+            }
+        }
+        // Reported numbers: the smallest clearance (px) between the dodging body and a finger over the live window.
+        AssertEqual(true, worstEndgame > 0, $"under endgame mobility every start can clear the fingers (smallest clearance {worstEndgame:F1} px, worst start x={worstEndgameAt})");
+        // Documentation of the model, not a target: base mobility cannot cover the ~70 px in one beat from the middle of a finger.
+        AssertEqual(true, worstBase < 0, $"four hands assumes endgame horizontal mobility like the basic beams (base worst {worstBase:F1} px, start x={worstBaseAt})");
     }
 
     [DomainTest("Scarlet cinder curtain gives every observed member a corridor and burns only the rest")]
@@ -434,18 +669,20 @@ internal static partial class Program
         Span<CrimsonStroke> forecast = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         Span<CrimsonStroke> live = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         var f = RaidFieldGeometry.FromGround(8000, 6000);
-        // Pure walk over every mask: a member's whole corridor is safe, so their column is safe for the promised notes.
+        // Every mask: the production union equals an independently written one, and each member's whole corridor is safe.
         for (int mask = 1; mask <= CrimsonSignatureMoves.MaximumCurtainMask; mask++) foreach (int phrase in new[] { 3, 6, 9, 12 }) for (int note = 0; note < 4; note++)
         {
             int safe = CrimsonSignatureMoves.CurtainSafe(mask, phrase, note);
+            AssertEqual(ScarletOracleSafe(mask, phrase, note), safe, $"union equals the oracle mask={mask} phrase={phrase} note={note}");
             for (int column = 0; column < 10; column++)
             {
                 if ((mask >> column & 1) == 0) continue;
-                int promised = column is >= 2 and <= 7 ? 3 : column is 1 or 8 ? 2 : 1;
+                int promised = column is >= 2 and <= 7 ? 3 : 4;
                 if (note < promised) AssertEqual(true, (safe >> column & 1) != 0, $"member in column {column} is safe on note {note} mask={mask} phrase={phrase}");
-                int corridor = CrimsonSignatureMoves.CurtainCorridor(column, phrase, note);
-                for (int k = 0; k < 3; k++) AssertEqual(true, (safe >> (corridor + k) & 1) != 0, "a member's whole corridor is safe");
+                int corridor = ScarletOracleCorridor(column, phrase, note);
+                for (int k = 0; k < 4; k++) AssertEqual(true, (safe >> (corridor + k) & 1) != 0, "a member's whole corridor is safe");
             }
+            AssertEqual(true, 10 - System.Numerics.BitOperations.PopCount((uint)safe) <= 6, "at most six columns burn");
         }
         // Geometry for every single column, the full mask and pseudo-random crowds.
         var masks = new System.Collections.Generic.List<int>();
@@ -458,9 +695,11 @@ internal static partial class Program
             var plan = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: mask);
             plan.Validate();
             AssertEqual(mask, CrimsonSignatureMoves.CurtainMask(plan), "the mask travels in Target");
-            int safe = CrimsonSignatureMoves.CurtainSafe(mask, phrase, note);
+            int safe = ScarletOracleSafe(mask, phrase, note);
             int count = CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true);
             AssertEqual(10 - System.Numerics.BitOperations.PopCount((uint)safe), count, "every column outside every corridor burns");
+            AssertEqual(true, count <= 6 && count <= CrimsonSignatureMoves.MaximumStrokes, "strokes stay within the budget");
+            AssertEqual(count, CrimsonSignatureMoves.CurtainBurning(plan), "burning column count helper");
             AssertEqual(count, CrimsonTechniqueGeometry.Write(plan, plan.Fire + 10, live), "live curtain has the announced columns");
             for (int i = 0; i < count; i++) AssertEqual(forecast[i], live[i], "fallen strokes are the announced strokes");
             for (int column = 0; column < 10; column++)
@@ -480,18 +719,24 @@ internal static partial class Program
                 bool touchesSafe = column > 0 && (safe >> (column - 1) & 1) != 0 || column < 9 && (safe >> (column + 1) & 1) != 0;
                 AssertEqual(touchesSafe ? 128f : 130f, forecast[i].Radius, "half-column wall beside a safe column, overlap between burning neighbours");
             }
+            // The impact point is a burning column nearest to the reference.
+            if (count > 0)
+            {
+                var at = CrimsonSignatureMoves.CurtainImpact(plan, f.Left + 5);
+                int impactColumn = ScarletColumnOf(f, at.X);
+                AssertEqual(false, (safe >> impactColumn & 1) != 0, "the impact lands on a burning column");
+            }
         }
         // A solo mask is exactly the single-corridor curtain.
         foreach (int phrase in new[] { 3, 6, 9, 12 }) for (int column = 0; column < 10; column++) for (int note = 0; note < 4; note++)
         {
             var plan = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * column + 128);
-            var (start, direction) = ScarletCurtainExpectedWalk(column, phrase);
-            int corridor = Math.Clamp(start + note * direction, 0, 7);
+            int corridor = ScarletOracleCorridor(column, phrase, note);
             int count = CrimsonTechniqueGeometry.Write(plan, plan.Fire, forecast, true), expected = 0;
             for (int burning = 0; burning < 10; burning++)
             {
-                if (burning >= corridor && burning < corridor + 3) continue;
-                bool touches = burning == corridor - 1 || burning == corridor + 3;
+                if (burning >= corridor && burning < corridor + 4) continue;
+                bool touches = burning == corridor - 1 || burning == corridor + 4;
                 float x = f.Left + 256 * (burning + .5f);
                 AssertEqual(new CrimsonStroke(new(x, f.Top), new(x, f.Bottom), touches ? 128f : 130f), forecast[expected++], "solo geometry is the single-corridor curtain");
             }
@@ -500,30 +745,26 @@ internal static partial class Program
         // The full crowd is accepted even where nothing is left to burn.
         var full = ScarletSignaturePlan(0, 3, 0, 0, curtainMask: CrimsonSignatureMoves.MaximumCurtainMask);
         full.Validate();
-        AssertEqual(true, CrimsonTechniqueGeometry.Write(full, full.Fire, forecast, true) <= 7, "bounded strokes");
+        AssertEqual(true, CrimsonTechniqueGeometry.Write(full, full.Fire, forecast, true) <= 6, "bounded strokes");
     }
 
-    [DomainTest("Scarlet cinder curtain follow speeds are unchanged by the other members in the field")]
-    private static void ScarletCinderCurtainCrowdFollow()
+    [DomainTest("Scarlet cinder curtain members stay survivable under base mobility with other members in the field")]
+    private static void ScarletCinderCurtainCrowdBaseMobility()
     {
         var f = RaidFieldGeometry.FromGround(8000, 6000);
         var random = new Random(0xC40D);
         for (int column = 0; column < 10; column++) foreach (int phrase in new[] { 3, 6 })
         {
-            var (_, direction) = ScarletCurtainExpectedWalk(column, phrase);
-            bool wall = column is 0 or 1 or 8 or 9;
-            var solo = new CrimsonGesturePlan[4];
-            for (int note = 0; note < 4; note++) solo[note] = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: 1 << column);
-            float begin = wall ? solo[0].Born : solo[1].Born;
-            float soloSpeed = ScarletCurtainSlowestRunner(f, solo, column, direction, begin);
-            for (int trial = 0; trial < 4; trial++)
+            var (_, direction) = ScarletOracleWalk(column, phrase);
+            bool interior = column is >= 2 and <= 7;
+            float centre = f.Left + 256 * column + 128 - ScarletPlayerWidth * .5f;
+            for (int trial = 0; trial < 6; trial++)
             {
                 int mask = trial == 0 ? CrimsonSignatureMoves.MaximumCurtainMask : random.Next(1, 1024) | 1 << column;
                 var crowd = new CrimsonGesturePlan[4];
                 for (int note = 0; note < 4; note++) crowd[note] = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: mask);
-                AssertEqual(true, ScarletCurtainRuns(f, crowd, f.Left + 256 * column + 118, direction, soloSpeed, begin), $"the solo speed still follows with mask={mask}");
-                float crowdSpeed = ScarletCurtainSlowestRunner(f, crowd, column, direction, begin);
-                AssertEqual(true, crowdSpeed <= soloSpeed + .0001f, $"other members never slow a member down column={column} mask={mask} ({crowdSpeed} vs {soloSpeed})");
+                AssertEqual(true, ScarletCurtainRun(f, crowd, centre, direction, ScarletBaseRun, interior ? crowd[1].Born : int.MaxValue, out _),
+                    $"member in column {column} still survives with mask={mask} phrase={phrase}");
             }
         }
     }

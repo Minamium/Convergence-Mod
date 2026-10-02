@@ -314,6 +314,10 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('!p.Aimed && !p.IsRift && !p.IsSignature',visual)
         self.assertIn('CrimsonSignatureMoves.ResidueTicks(p.Technique)',visual)
         self.assertIn('fieldBeam: true',visual)
+        # A full crowd mask can leave a curtain note nothing to burn: no cue, shake or embers; the strike is felt at a burning column.
+        self.assertIn('CrimsonSignatureMoves.CurtainBurning(p) == 0) return;',visual)
+        self.assertIn('CrimsonSignatureMoves.CurtainImpact(p, Main.LocalPlayer.Center.X)',visual)
+        self.assertIn('strokes[i * count / budget].B',(CLIENT/'ScarletAtmosphere.cs').read_text(encoding='utf-8'))
         self.assertIn('Content/Encounters/CrimsonFoundry/CrimsonSignatureMoves.cs',(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj').read_text(encoding='utf-8'))
         self.assertIn('public const ushort CurrentVersion = 79;',(ROOT/'Common/Networking/Protocol/EncounterProtocol.cs').read_text(encoding='utf-8'))
 

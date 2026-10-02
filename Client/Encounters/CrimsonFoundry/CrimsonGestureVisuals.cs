@@ -38,6 +38,8 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             Cue(p.Born, false); Cue(p.Fire, true);
             void Cue(int tick, bool impact)
             {
+                // A curtain note a full crowd leaves nothing to burn on has no cue, shake or embers.
+                if (p.Technique == CrimsonTechnique.CinderCurtain && CrimsonSignatureMoves.CurtainBurning(p) == 0) return;
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
                 string asset = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley ? impact ? "WideFire" : "WideCharge"
                     : p.IsRift || p.Technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope ? impact ? "ChargeRush" : "ChargeLock"
@@ -58,7 +60,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 {
                     Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field)
                         : p.MovesBody ? p.Body(age)
-                        : p.Technique == CrimsonTechnique.CinderCurtain ? new CrimsonPoint(p.Field.CenterX, p.Field.CenterY) // Target is the column mask
+                        : p.Technique == CrimsonTechnique.CinderCurtain ? CrimsonSignatureMoves.CurtainImpact(p, Main.LocalPlayer.Center.X) // Target is the column mask
                         : p.Target);
                     ScarletArticulation.Impact(p.Source, p.Accent, at);
                     ScarletAtmosphere.Emit(p, at);
