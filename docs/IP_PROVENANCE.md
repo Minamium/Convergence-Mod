@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-02
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -117,6 +117,10 @@ The 0.2.8 continuous-emission/ground-containment pass is materially informed by 
 ## Azure Cathedral — 2026-09-20
 
 Azure Cathedral uses original generated girl/worm/cathedral/chime art and independently authored segmented motion/materials. DoG is the owner's scale/archetype reference, not copied art or AI code. Existing project-owned Luminance beam techniques are reused; no new third-party shader/texture/source is vendored. The exact EigHt recording and contextual game-use conditions are recorded in [Azure attribution](../Assets/ATTRIBUTION.md#azure-cathedral--2026-09-20) and the [feature music review](encounters/azure-cathedral/ENCOUNTER_SPEC.md#music).
+
+## Scarlet Invocation sound set — 2026-10-02
+
+Scarlet's sixteen cues layer CC0 recordings from the VSCO 2 CE and VCSL sample libraries and from Freesound/OpenGameArt; no synthesized tone is used, and the owner chose these exact masters (variant A of every scene) on 2026-10-02. The recordings, libraries and the external recipe stay outside the repository; no raw sample is distributed. [Attribution](../Assets/ATTRIBUTION.md#scarlet-invocation-recorded-audio--2026-10-02) owns authors, pages, hashes and processing. Graceful Ordeal and its terms are unchanged.
 
 ## Ebon Manor rewards — 2026-10-02
 

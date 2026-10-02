@@ -159,8 +159,9 @@ class ScarletContracts(unittest.TestCase):
         runtime=(CONTENT/'CrimsonRuntime.cs').read_text()
         self.assertIn('techniques[source] = CrimsonTechnique.TrackingBeam',runtime)
         self.assertNotIn('CrimsonTechniqueGeometry.Select(source',runtime)
-        self.assertIn('FirstSeverance/Beams/',visual)
-        self.assertNotIn('Sounds/CrimsonFoundry/',visual)
+        # Notes use the owner-approved Scarlet set (test_scarlet_audio owns the details).
+        self.assertNotIn('FirstSeverance/Beams/',visual)
+        self.assertIn('ScarletCue.Impact',visual)
         self.assertIn('gesture.EffectivePlan(age, true)',visual)
         self.assertIn('fieldBeam: true',visual)
         energy=(CLIENT/'CrimsonEnergy.cs').read_text()

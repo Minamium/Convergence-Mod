@@ -2,6 +2,290 @@
 
 ## Records
 
+### Scarlet Invocation recorded audio — 2026-10-02
+
+Sixteen cues for every Scarlet Invocation sound moment ([Scarlet spec](../docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md#sound-effects)). The owner auditioned 16 scenes x 3 variants on 2026-10-02 and chose variant A for every scene; these files are those auditioned masters, byte for byte. They replace the borrowed Doll cues in Scarlet's gesture, chorus and ceremony code and the retired 2026-09-18 Scarlet WAVs (Foretell, CrownRupture, SilkCleave, ThornRend, ScarletRelease), which are removed with their records. Each cue layers CC0 recordings from the VSCO 2 CE and VCSL sample libraries and from Freesound/OpenGameArt; no synthesized tone is used. The recordings, libraries and recipe stay outside the repository.
+
+Every Freesound/OpenGameArt source below showed Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/) on its page when it was surveyed on 2026-10-01 (local survey records; the six sources already recorded for Ghost Samurai, Soboro and Ebon Manor carry the same hashes there). Freesound files are the public HQ preview renders of those CC0 uploads. Kenney's pack carries its CC0 `license.txt`. VSCO 2 CE 1.1.0 ships a CC0 1.0 `LICENSE`; its organ folder credits Simon Dalzell (Ivy Audio) and states that Versilian Studios grants redistribution. Beside CC0, its `Readme.txt` terms ask that the samples not be sold directly (none are distributed), encourage keeping improvements to the sample set open (the set itself is not modified or redistributed), and ask for credit to Versilian Studios / Sam Gossner and/or Ivy Audio / Simon Dalzell where applicable, with a link to the VSCO: CE homepage (https://versilian-studios.com/vsco-community/); a public credit for these cues carries both names and that link. VCSL is CC0 1.0 per its repository README, which asks for no credit. BMacZero's OpenGameArt page offers an optional credit to Brian MacIntosh (page rechecked 2026-10-02).
+
+| Library | Version and URL | SHA256 or commit | Terms |
+|---|---|---|---|
+| VSCO 2 Community Edition (Versilian Studios / Sam Gossner; organ by Ivy Audio / Simon Dalzell) | 1.1.0 release archive, https://github.com/sgossner/VSCO-2-CE/archive/refs/tags/1.1.0.zip; homepage https://versilian-studios.com/vsco-community/ | `4a4446628df0e1a12aaee58e9f65f8fa7cde51971e961abb1b43083a6d3a8ab7` | CC0 1.0 (bundled `LICENSE`); `Readme.txt` requests credit and the homepage link, and no direct sale of the samples |
+| Versilian Community Sample Library (VCSL) | https://github.com/sgossner/VCSL | commit `b6e6ac82d22248edee98a0bde185eb9ef6d439ad` | CC0 1.0 (repository README) |
+
+| Key | Recording / sample | Creator | Source | Local source SHA256 |
+|---|---|---|---|---|
+| bass_drum | Bass Drum 1 `BDrumNew_hit_v3_rr1_Sum.wav` | Versilian Studios | VCSL `b6e6ac8` | `a2d8829e8b2b59e8afb12fa396b01758827059339c2a84ad066d17b36c82d1ff` |
+| gong_f | Gong 1 `gong_2_f.wav` | Versilian Studios | VCSL `b6e6ac8` | `0f7538cccc7673f953fc66db0e4449d4902f2ff2ef01dc4962c748b011813942` |
+| gong_p | Gong 1 `gong_p.wav` | Versilian Studios | VCSL `b6e6ac8` | `3d103e1a7af12eeb17e0c5488f11933ca92b9fbdefa39b8020b64238da2db0d0` |
+| gong_full | Gong 2 `hit_full2_loudest_ST.mp3` | Versilian Studios | VCSL `b6e6ac8` | `8a65dabf483886d7609136eff6c7b1be7939b0d610824a5625b8bde558f23a6f` |
+| chime_As3 | Hand Chimes `sus_A#3_r01_main.wav` | Versilian Studios | VCSL `b6e6ac8` | `2eb505e93627247114582d8e103d77ff427ab2e882bb73e30925d265c09210a4` |
+| chime_As5 | Hand Chimes `sus_A#5_r01_main.wav` | Versilian Studios | VCSL `b6e6ac8` | `3713c13b8c17f63d482ec9f997aba7f61175cb9e884afe5a6c14beb93a42fb25` |
+| chime_E4 | Hand Chimes `sus_E4_r01_main.wav` | Versilian Studios | VCSL `b6e6ac8` | `7196b23009e1acc8e03591c35e54144487991c75cfe22413e84e0bbfeb478caf` |
+| chime_Fs4 | Hand Chimes `sus_F#4_r01_main.wav` | Versilian Studios | VCSL `b6e6ac8` | `858c506fc9c6c35bcb9e0c08850892cab77c1496a83ccff493377df6e6fb1bd4` |
+| mark_trees | Mark Trees `Legacy/windchimes_asc1.wav` | Versilian Studios | VCSL `b6e6ac8` | `4da1f0ec4ed2d94902a35995faef9ce2bd747a525761c0db7ace093359939693` |
+| slit_drum | Slit Drum `LogDrumHi_MedM_v3_rr1_Sum.wav` | Versilian Studios | VCSL `b6e6ac8` | `e56b10659b821bbf4eeb3cc371f42ea60414adcbd66ad0ead9e7a62cdd11fe3f` |
+| cymbal_cresc | Suspended Cymbal 1 `susCymb1_cresc_2s.wav` | Versilian Studios | VCSL `b6e6ac8` | `a5507bf116b33ee220f4eff54506be56fd455e908c8d53903f217590341e5008` |
+| cymbal_hit | Suspended Cymbal 1 `susCymb1_hit_fff1.wav` | Versilian Studios | VCSL `b6e6ac8` | `993ceb041adaad19c88042e9d6e66707c30eda6e44a5a263d68bb4a3cdb2ca02` |
+| timpani1 | Timpani 1 `Hit/Timpani1_Hit_v4_rr1_Sum.wav` | Versilian Studios | VCSL `b6e6ac8` | `b51d81444425e1ba0c09d94dbdc384a8cd4b4681c42959cc8676ccaf6d6ea793` |
+| timpani5 | Timpani 1 `Hit/Timpani5_Hit_v4_rr1_Sum.wav` | Versilian Studios | VCSL `b6e6ac8` | `520bcf3b2f5d974076d0eb0eb3ba5201de0be5098860e9d752c6deaa295ae3ba` |
+| bell_As3 | Tubular Bells 1 `chimes_A#3_ff_rr1.wav` | Versilian Studios | VCSL `b6e6ac8` | `55fcfdb825026629670e3486f47762e6a3c4a89e138990fbd0e65c3f0a1d6a79` |
+| bell_D3 | Tubular Bells 1 `chimes_D3_ff_rr1.wav` | Versilian Studios | VCSL `b6e6ac8` | `ca1c64961ce8e96f6ea3ed3bf67bde09c0beb723b0fe346881b317695b1ce84f` |
+| bell_D4 | Tubular Bells 1 `chimes_D4_ff_rr2.wav` | Versilian Studios | VCSL `b6e6ac8` | `2657add471fc1804a29c1261df45af13c700803cfa29bd11c134400a3fbc8700` |
+| woodblock | Woodblock `wood_click_mp.wav` | Versilian Studios | VCSL `b6e6ac8` | `00b76f9fe96c118f29dfc69866c12ec11f2e1264f6cb9c0b36912c2210b015fe` |
+| organ_04 | Organ `Loud/Rode_Man3Open_04.wav` | Simon Dalzell (Ivy Audio) for Versilian Studios | VSCO 2 CE 1.1.0 | `7ce6ac35c8f951d36a1ebe66043f5a3e1ae3ca6bb3c45c1e74d1a3f64834fa5c` |
+| organ_28 | Organ `Loud/Rode_Man3Open_28.wav` | Simon Dalzell (Ivy Audio) for Versilian Studios | VSCO 2 CE 1.1.0 | `c8eb1bff00e0261bb403d6a245f54087808c3cb77c03914e97d0f606205895c7` |
+| organ_pedal_04 | Organ `Loud/Rode_Pedal_04.wav` | Simon Dalzell (Ivy Audio) for Versilian Studios | VSCO 2 CE 1.1.0 | `ac8ed166f7b56056a5d87811ed7a178f6f796ee7e2405fcadaaef990b68f7025` |
+| organ_pedal_16 | Organ `Loud/Rode_Pedal_16.wav` | Simon Dalzell (Ivy Audio) for Versilian Studios | VSCO 2 CE 1.1.0 | `415d11b52d0c16d05617c91ab05c55122196e1f9df163f9ea5ce8eefc440e9d0` |
+| bubbles | Misc 1 `bubbles4.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `80dbaf61e5eb910674496439f71cfd64c5ae80eaed7ba9505c66a20457f17c5d` |
+| chain_loop | Misc 1 `chaingrindLoop.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `9f97699cc87f2589461182ad200658a43cd9e84616f365492d5f254c970db813` |
+| glass | Misc 1 `glass_break.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `5cf1b08875add0fa7598b09488c23a1208dccd03523cf7e5aa0b7bc0c1c31f69` |
+| glass3 | Misc 1 `glass_break3.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `924a2cb9e993fc7471a3066eed23f4c360a9c1cb6a658e30aa4cf6c145cece07` |
+| glass8 | Misc 1 `glass_break8.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `2f52ee0dcd4240bbcb84d135eb40e2be39ddf054744cdc585e3459a4651d32af` |
+| siren | Misc 1 `siren3.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `9ed2c04ef4e4081ae4dcbaa8eb4e0302feadffd10a23a47869e39355351c14a0` |
+| nepal_bells | Misc 2 `NepaleseBells/fx2_short_r01_main.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `3f4d3f8f115199bdd132f6bd147b9e3aea5c719749dea55313047b6fa3d6ee41` |
+| anvil | Percussion `Anvil_Hit1_v3_Sum.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `ac62de051bfb948a022bb2b06e785f0f62dadd8ef39a11a8d5304869a013945a` |
+| glock_G4 | Percussion `Glock/glock_medium_G4.wav` | Versilian Studios | VSCO 2 CE 1.1.0 | `6c4649b13e24fa01e4634edad8fe8edf18aef33facc5d49fe53097b376bac4da` |
+| zap | ELECTRIC_ZAP_001.wav | JoelAudio | https://freesound.org/s/136542/ | `5efa941ecead3f4d6efe8b034a36554eae3001c27d1cd06c6f6e99d300975737` |
+| spark_klein | Spark | elliott.klein | https://freesound.org/s/189630/ | `73081928ac0a508c07d1dfd984ebc9e6418e516b8401f377bdc93174a77c1ac7` |
+| spark_oga | spark.wav, Electricity Sound Effects | BMacZero (Brian MacIntosh) | https://opengameart.org/content/electricity-sound-effects-0 | `9a3d987bdf7f405570aa015f6da42596ce84c5073c18c0561be7cd3ae401bc97` |
+| slicing_flesh | Slicing through flesh | NeoSpica | https://freesound.org/s/504615/ | `f8e3d47aa24053707ac879fbb1c2760d577ee56ba8b9869ddf09eadafcdc4bed` |
+| stone_heavy | impact-stone-heavy.wav | kasparsj | https://freesound.org/s/513694/ | `adcb2d60ec1d36174e3580927c73b0118a73939c0f6883ed33e524ac0ebffb19` |
+| concrete_smash | Concrete SMASH 2 | magnuswaker | https://freesound.org/s/522099/ | `b182dec5699903068a509113e09e0b4c02a78f42b7aa73f875b23fc24ce34c6e` |
+| low_impact | Very low frequency impact.wav | AudioPapkin | https://freesound.org/s/541029/ | `73c25c4f49baa34cb9ad42290324fc61340124028dc0161299880b78580e335a` |
+| knife_slice | knifeSlice.ogg, RPG Audio (RPGsounds_Kenney.zip) | Kenney | https://opengameart.org/content/50-rpg-sound-effects | `4cd96dc630bed9840c15f1dd2306da2cc56a4da26a5d3f1a03c5a7265ac5e54f` |
+| sword_hit | Sword Hit | qubodup | https://freesound.org/s/442769/ | `93d72e63bb8d9b8a60d2c0ac665c153171515645fbb85f4ec028e4a253e7b167` |
+| draw_sword | Draw sword#1.wav | fielastro | https://freesound.org/s/423935/ | `a703c6e1b8e22e7cd537a72ac1c107bb234ce6cde145886a56825f724976885d` |
+| sword_ring | sword-01.wav | audione | https://freesound.org/s/52458/ | `7081d72afa9eaec0367c327b467e679919f1ab19ae1e2a494fef91348ba52378` |
+| demon_howl | Demon Giant Howl.wav | Bananaboatman33 | https://freesound.org/s/257635/ | `2a6487786a58fabe2f20ce051408e5caf04b552a83663f0bf377711646ffe58b` |
+| swoosh | swoosh.wav | PorkMuncher | https://freesound.org/s/263595/ | `5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058` |
+| wind_whirl | Wind Whirl (Small Air Blow) | DARTEKZ_GAMEZ | https://freesound.org/s/719560/ | `5b41e14eaa752d4715ee7c706b99581f3adf5b02630c1d6c565b445a4e725c75` |
+
+Common processing (external `sfx-scarlet` recipe; SHA256 `common.py` `49a69026af39748179426af464a4158fec0645ecb2511d81212f5cdf1bfbdf63`, `kit.py` `91fce8bd9cf17b0a4703628a3caf7b88a6070c0f7ceddb212b0fa37dac092e31`, `cues_a.py` `884aaa253de59b59d3aa6a16e79e4f63da1bf5243606762799f40e0081a8512e`, `cues_b.py` `66b0e8ff5b62879c9cbf33b11296fbd23959ebf54cd1cac69e61025c30e731ce`, `cues_c.py` `80b961429f2b642f886988b0a3cee3df119df2f87980282130f3dd4d9a771258`, `cues_d.py` `8fbecbbf079f6eca00a770c16dd1b1f5e10d545d86f5d417a3edae8f602bca4b`, `render.py` `fe75d89668d7214f88b07a623f3069ccc0de369a10d989520f94a785465a03e7`, studio `engine.py` `36de9045f74bff3cf599c097b1ef07143744bffeb905f809d0b6d82536a3b5d3`, and the source catalog `catalog.json` `2faed1e050be83dc2023ebeeddb8694c4ce94c26d987bb49058631bb76d0af60` that `kit.py` reads beside it: the frozen 2026-10-02 source analysis that resolves the VCSL/VSCO short names to files and supplies each sample's measured nominal pitch and the shift table behind every semitone shift named below): sources are decoded and resampled to 48 kHz stereo; pitch shifts are sampler-style polyphase resampling (speed follows pitch) onto the E-flat family of Graceful Ordeal (Eb, Bb, Gb, Db) from each sample's measured nominal pitch; filters are second-order Butterworth high/low/band-pass and RBJ shelves; envelopes are dB breakpoints; each layer is level-matched on its K-weighted 100 ms peak, placed on a timeline and partly sent to a convolution reverb whose impulse response is the studio's synthetic hall (seeded filtered noise with sparse early reflections; a processing kernel, not a recording). The master removes DC, fades the head (1.5 ms) and tail (a quarter of the length, 40-300 ms, unless noted), sets the cue's K-weighted 100 ms peak target, applies a level-matched tanh soft limit and a -1.8 dBTP true-peak ceiling, and encodes 48 kHz stereo Vorbis at compression level 0.5 with a pinned Ogg serial. A fresh render from the hashed recipe and catalog reproduces all sixteen files byte for byte (rechecked 2026-10-02 after the catalog moved beside the recipe).
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletForetell.ogg`
+- Asset ID: scarlet-sfx-foretell-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet warning (foretell) cue (0.62 s), layered from CC0 recordings
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chime_As3, chime_As5, woodblock in the table above
+- Tool/model/version: external recipe cues_a.py `foretell_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Hand Chimes A#3 (sounding Bb4, unshifted, 0.6 s) and A#5 (Bb, -9 dB, 0.5 s) with fast dB decays, plus the Woodblock click high-passed at 900 Hz (-12 dB) as the beat-head attack; chimes sent to the hall at -6 dB, wet -11 dB (0.8 s IR, RT 0.7/0.35 s). Target K-weighted 100 ms peak -18 dB; measured -18.0 dB, true peak -16.27 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `394270e8af7176d21843836fe5b5cec6d095efb62f9f3adf76a9504d226739e9`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletCrossflowCharge.ogg`
+- Asset ID: scarlet-sfx-charge-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet crossflow two-beat charge cue (1.25 s), layered from CC0 recordings
+- Creator: recordings by Simon Dalzell (Ivy Audio), Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: cymbal_cresc, bell_D3, organ_04, organ_28 in the table above
+- Tool/model/version: external recipe cues_b.py `charge_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Organ Man3Open_04 (Eb2), Man3Open_28 (Eb3) and Man3Open_28 pitched +7 semitones (Bb3), low-passed at 2.5 kHz, each swelled from -40 dB to a peak at exactly two beats (0.9375 s) and folded away by 1.2 s; Tubular Bells D3 pitched +1 (Eb3, -14 dB); the Suspended Cymbal 2 s crescendo (0.3-1.55 s) high-passed at 1.2 kHz (-17 dB) rising to the same peak; hall wet -9 dB (1.2 s IR). Target K-weighted 100 ms peak -15 dB; measured -15.0 dB, true peak -12.3 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `e1f37e0093ce31352ffb8aec3603208d6aa9e343f5176f9bd6fa8940675f7cbe`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletCrossflowRelease.ogg`
+- Asset ID: scarlet-sfx-release-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet crossflow release cue (1.60 s), layered from CC0 recordings
+- Creator: recordings by PorkMuncher, Simon Dalzell (Ivy Audio), Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: bass_drum, timpani1, bell_D3, organ_04, organ_28, organ_pedal_04, glass, anvil, swoosh in the table above
+- Tool/model/version: external recipe cues_b.py `release_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Timpani 1 hit (Gb2) faded over 0.5 s; Bass Drum 1 low-passed at 160 Hz (-3 dB); the organ Eb2/Eb3/Bb3 chord (Man3Open_04, Man3Open_28, Man3Open_28 +7) low-passed at 2 kHz, struck within 12 ms and folded by 1.45 s; Tubular Bells D3 +1 (Eb3, -8 dB); Anvil high-passed at 2.2 kHz (-12 dB); glass_break high-passed at 3 kHz and widened 1.6x (-14 dB, +30 ms); the swoosh band-passed 180 Hz-4.2 kHz and panned left to right (-9 dB); organ Pedal_04 (Eb1) low-passed at 140 Hz (-9 dB); hall wet -9 dB (1.3 s IR). Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.2 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `ebba33703bb0f8cd5168e2e08154a800f3919815c5771ac9956de21e2b76601d`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletImpact.ogg`
+- Asset ID: scarlet-sfx-impact-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet thin-beam impact cue (0.50 s), layered from CC0 recordings
+- Creator: recordings by Kenney, Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chime_As5, slit_drum, glass3, knife_slice in the table above
+- Tool/model/version: external recipe cues_a.py `impact_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Kenney knifeSlice high-passed at 1.8 kHz (-2 dB); the first 0.14 s of glass_break3 high-passed at 3.5 kHz (-9 dB); Hand Chimes A#5 (Bb) low-passed at 8 kHz (-6 dB); the Slit Drum (Eb3) low-passed at 600 Hz (-8 dB); every layer is silent by 0.45 s; hall wet -10 dB (0.6 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.3 dB, true peak -5.96 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `0d0be61da34644546938ea2fb2e410beac43c37748fe7e2996e446ba1ebc0aac`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletStackSummon.ogg`
+- Asset ID: scarlet-sfx-stack-summon-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Stack call (black seal) cue (1.55 s), layered from CC0 recordings
+- Creator: recordings by Simon Dalzell (Ivy Audio), Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: gong_f, timpani1, organ_04, chain_loop in the table above
+- Tool/model/version: external recipe cues_c.py `stack_summon_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Gong 1 gong_2_f pitched -0.12 semitone (Eb): its first 1.0 s reversed, low-passed at 3 kHz and swelled to a 1.0 s peak, then the same gong forward (low-passed at 1.5 kHz, -8 dB) with the Timpani 1 hit (Gb2, -7 dB) at 0.988 s; organ Man3Open_04 (Eb2) low-passed at 500 Hz swelling into the hit (-4 dB); chaingrindLoop high-passed at 700 Hz (-16 dB); hall wet -8 dB (1.1 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.0 dB, true peak -12.64 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `c26a8f4c19bdb2d27ebb5121a76c228409edcb3281c14c0fecb81c1f55b82bb2`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletStackSuccess.ogg`
+- Asset ID: scarlet-sfx-stack-success-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Stack success (release) cue (1.60 s), layered from CC0 recordings
+- Creator: recordings by Simon Dalzell (Ivy Audio), Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: bass_drum, chime_As5, chime_E4, chime_Fs4, bell_As3, bell_D3, organ_04 in the table above
+- Tool/model/version: external recipe cues_c.py `stack_success_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Tubular Bells D3 +1 (Eb3) and A#3 (Bb3, -4 dB, +12 ms); Hand Chimes F#4 (Gb, -9 dB), A#5 (Bb, -11 dB) and E4 pitched -1 then +12 (Eb, -10 dB) entering at 20/45/70 ms; organ Man3Open_04 (Eb2) low-passed at 600 Hz (-9 dB); Bass Drum 1 low-passed at 150 Hz (-9 dB); hall wet -8 dB (1.3 s IR). Target K-weighted 100 ms peak -13 dB; measured -13.1 dB, true peak -8.37 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `020bfbaedb1bce1f9a2d4654d4bbdd1a53562821802dfa7a93e8f4049f4b1e4e`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletStackFail.ogg`
+- Asset ID: scarlet-sfx-stack-fail-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Stack failure (black flame) cue (1.60 s), layered from CC0 recordings
+- Creator: recordings by AudioPapkin, Bananaboatman33, BMacZero (Brian MacIntosh), DARTEKZ_GAMEZ, elliott.klein, JoelAudio, magnuswaker, Simon Dalzell (Ivy Audio), Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: organ_pedal_16, bubbles, zap, spark_klein, spark_oga, concrete_smash, low_impact, demon_howl, wind_whirl in the table above
+- Tool/model/version: external recipe cues_c.py `stack_fail_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. The very low impact; the demon howl pitched -5 semitones and low-passed at 1.8 kHz (-3 dB); the concrete smash low-passed at 350 Hz (-6 dB); the wind whirl (0.1-1.4 s) low-passed at 700 Hz (-7 dB); a 1.2 s bed of forty 70 ms spark grains cut from the BMacZero spark, the elliott.klein spark and the JoelAudio zap (high-passed at 2.5 kHz, seeded random times, levels -14 to -2 dB and pans; bed at -16 dB); organ Pedal_16 (Eb2) low-passed at 450 Hz (-9 dB); bubbles4 low-passed at 900 Hz (-10 dB); hall wet -9 dB (1.1 s IR); the whole mix decays to silence at 1.58 s. Target K-weighted 100 ms peak -9 dB; measured -9.0 dB, true peak -7.68 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `f49997a6f9eed7f4ad5dd684da0df33dec5d376f789748fa981a787f08901bba`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSpreadSummon.ogg`
+- Asset ID: scarlet-sfx-spread-summon-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Spread call (red seal) cue (1.50 s), layered from CC0 recordings
+- Creator: recordings by fielastro, Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chime_As3, chime_As5, cymbal_hit, draw_sword in the table above
+- Tool/model/version: external recipe cues_c.py `spread_summon_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. The draw-sword ring trimmed, high-passed at 1.8 kHz and widened 1.5x (-2 dB); the Suspended Cymbal fff hit high-passed at 1.5 kHz and reversed into a 0.95 s peak (-6 dB); Hand Chimes A#5 (Bb, -4 dB) and A#3 low-passed at 3 kHz (-12 dB) entering at 0.95 s; hall wet -8 dB (1.0 s IR). Target K-weighted 100 ms peak -14 dB; measured -14.3 dB, true peak -7.56 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `4bd5daf64d9cef3cdd3141239b41528f166248ea6b1ccebd9ba31d63d1985182`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSpreadSuccess.ogg`
+- Asset ID: scarlet-sfx-spread-success-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Spread success cue (1.60 s), layered from CC0 recordings
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chime_As5, chime_E4, chime_Fs4, mark_trees, timpani5, nepal_bells, glock_G4 in the table above
+- Tool/model/version: external recipe cues_c.py `spread_success_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Hand Chimes F#4 (Gb, -2 dB), A#5 (Bb, -5 dB, +25 ms) and E4 pitched -1 then +12 (Eb, -4 dB, +50 ms); Nepalese bells fx2_short low-passed at 8 kHz (-5 dB); Glockenspiel G4 pitched -1 (Gb, -8 dB); Mark Trees ascending (0.05-1.2 s) high-passed at 3 kHz (-14 dB); Timpani 5 hit (Gb3) low-passed at 350 Hz (-12 dB); hall wet -8 dB (1.2 s IR). Target K-weighted 100 ms peak -13 dB; measured -13.1 dB, true peak -6.85 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `0229687c330399e71210e1a417ec9c0ae993844802dddc3e5dbda6c90a452e14`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSpreadFail.ogg`
+- Asset ID: scarlet-sfx-spread-fail-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Spread failure (red cut) cue (0.45 s), layered from CC0 recordings
+- Creator: recordings by audione, JoelAudio, NeoSpica, qubodup, Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: timpani5, zap, slicing_flesh, sword_hit, sword_ring in the table above
+- Tool/model/version: external recipe cues_c.py `spread_fail_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Slicing through flesh, onset-trimmed and high-passed at 400 Hz; the sword hit high-passed at 900 Hz (-4 dB); the sword ring pitched -0.71 semitone (Eb) and filtered 1.2-9 kHz (-6 dB, +20 ms); Timpani 5 hit (Gb3) low-passed at 380 Hz (-7 dB); the JoelAudio zap high-passed at 2.5 kHz (-14 dB); hall wet -12 dB (0.5 s IR); the mix is shaped down 15 dB over 0.45 s and cut there with a 12 ms fade. Target K-weighted 100 ms peak -10 dB; measured -10.3 dB, true peak -4.19 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `e3ffccf84e83ef94210cf0d97c9bb637eb7917fad260e8fc50b6c2a164838c04`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletActChange.ogg`
+- Asset ID: scarlet-sfx-act-change-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet act change hit cue (2.40 s), layered from CC0 recordings
+- Creator: recordings by kasparsj, Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: bass_drum, gong_full, cymbal_hit, timpani1, bell_D3, stone_heavy in the table above
+- Tool/model/version: external recipe cues_d.py `act_change_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. The Gong 2 full hit (unshifted) with an explicit decay to -38 dB at 1.67 s; Tubular Bells D3 pitched -11 semitones (Eb2, -4 dB); Timpani 1 hit (Gb2, -3 dB); Bass Drum 1 low-passed at 170 Hz (-4 dB); the Suspended Cymbal fff hit high-passed at 1.5 kHz (-12 dB); the heavy stone impact low-passed at 1.8 kHz (-12 dB); hall wet -8 dB (1.6 s IR); -46.8 dB re peak at 1.67 s. Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.27 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `04f8169597bdc6e00fd820a76bc69e01a18dcc337435e37e917174ae7dc2259b`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletSacrifice.ogg`
+- Asset ID: scarlet-sfx-sacrifice-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Final sacrifice swell and flash cue (2.20 s), layered from CC0 recordings
+- Creator: recordings by Bananaboatman33, DARTEKZ_GAMEZ, JoelAudio, Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: gong_f, timpani1, bell_D4, glass8, siren, zap, demon_howl, wind_whirl in the table above
+- Tool/model/version: external recipe cues_d.py `sacrifice_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Gong 1 gong_2_f (-0.12 semitone, Eb) and the demon howl (-3 semitones, low-passed at 3 kHz) reversed into a flash at 0.95 s, with an accelerating auto-pan (1.5 to 6 Hz) and undulation (2 to 9 Hz); the wind whirl reversed, low-passed at 1.5 kHz and auto-panned (2 to 7 Hz); siren3 (0.6-2.2 s) filtered 300 Hz-3 kHz rising into the flash; at 0.95 s glass_break8 high-passed at 2.5 kHz and widened 1.6x, Tubular Bells D4 +1 (Eb4), the JoelAudio zap high-passed at 2.5 kHz and the Timpani 1 hit (Gb2); hall wet -9 dB (0.9 s IR); -45.1 dB re peak at 1.67 s. Target K-weighted 100 ms peak -9 dB; measured -9.9 dB, true peak -2.05 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `5465b94ef5916520b6add40c723000175371ee6fb896e69fbdfd6b31d8c71dde`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletVictory.ogg`
+- Asset ID: scarlet-sfx-victory-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Victory bells cue (2.40 s), layered from CC0 recordings
+- Creator: recordings by Simon Dalzell (Ivy Audio), Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: gong_f, timpani1, bell_As3, bell_D3, bell_D4, organ_04, organ_28 in the table above
+- Tool/model/version: external recipe cues_d.py `victory_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Tubular Bells D3 +1 (Eb3), A#3 (Bb3, -3 dB) and D4 +1 (Eb4, -5 dB) staggered by 35 ms; Gong 1 gong_2_f (-0.12 semitone, Eb, -6 dB); the organ Eb2/Eb3/Bb3 chord (Man3Open_04, Man3Open_28, Man3Open_28 +7) low-passed at 2.2 kHz swelling to 0.45 s (-3 dB); Timpani 1 hit (Gb2, -5 dB); a shared decay to -36 dB at 1.67 s and silence at 2.4 s; hall wet -8 dB (1.6 s IR). Target K-weighted 100 ms peak -8 dB; measured -8.1 dB, true peak -4.88 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `ad457a4247f8dab3495edb983e15935bf110eb6638e06ab70fb6f2984e4d7abe`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletDown.ogg`
+- Asset ID: scarlet-sfx-down-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet member Down cue (1.30 s), layered from CC0 recordings
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: bass_drum, gong_p, timpani1 in the table above
+- Tool/model/version: external recipe cues_d.py `down_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Timpani 1 hit (Gb2) low-passed at 900 Hz; Bass Drum 1 low-passed at 160 Hz (-3 dB); Gong 1 gong_p pitched -0.61 semitone (Db) and low-passed at 1.2 kHz (-6 dB); all decay by 1.2 s; hall wet -9 dB (1.0 s IR). Target K-weighted 100 ms peak -13 dB; measured -12.9 dB, true peak -9.94 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `1301e1ce6010db7348850bca0cc1bb08dab73c179f6f2b6ecbd67f8d757bcd15`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletRevive.ogg`
+- Asset ID: scarlet-sfx-revive-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet member revive cue (1.60 s), layered from CC0 recordings
+- Creator: recordings by Simon Dalzell (Ivy Audio), Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chime_As5, chime_E4, chime_Fs4, timpani1, organ_04 in the table above
+- Tool/model/version: external recipe cues_d.py `revive_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Hand Chimes F#4 (Gb, -3 dB), E4 pitched -1 then +12 (Eb, -4 dB) and A#5 (Bb, -5 dB) entering at 0/70/140 ms and held 1.4 s so they blend into a chord; organ Man3Open_04 (Eb2) low-passed at 600 Hz swelling to 0.7 s (-6 dB); Timpani 1 hit low-passed at 500 Hz (-12 dB); hall wet -8 dB (1.2 s IR). Target K-weighted 100 ms peak -15 dB; measured -15.1 dB, true peak -10.4 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `414575544777fe04cde073fe1acbb5a40311baba9fe59df81ea42c5dc4ff05c1`
+
+- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletReady.ogg`
+- Asset ID: scarlet-sfx-ready-20261002
+- Asset type: stereo 48 kHz Vorbis Scarlet Ready vote cue (1.10 s), layered from CC0 recordings
+- Creator: recordings by Versilian Studios; layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: public-domain
+- Source work and URL: chime_As5, chime_E4 in the table above
+- Tool/model/version: external recipe cues_a.py `ready_A` with common.py, kit.py, render.py and the studio hall IR (hashes above); Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2 Vorbis at compression level 0.5, pinned Ogg serial
+- Human modifications: owner selection of variant A. Hand Chimes E4 pitched -1 (Eb) and A#5 (Bb, -6 dB, +30 ms) with 0.9-1.0 s decays; hall wet -6 dB (1.1 s IR). Target K-weighted 100 ms peak -21 dB; measured -21.0 dB, true peak -14.75 dBTP. Recordings stay in the local source store and are excluded from distribution.
+- License and redistribution terms: CC0 1.0 recordings and samples; the layered cue follows the existing project asset terms; no raw sample is distributed
+- Required attribution: none required by CC0; retain the tables above as courtesy credit to Versilian Studios / Sam Gossner (VSCO 2 CE, VCSL), Simon Dalzell / Ivy Audio (VSCO organ) and the recording authors; a public credit also links the VSCO: CE homepage as its readme asks
+- Reviewer and review date: owner audition and selection of variant A, 2026-10-02; Claude review 2026-10-02 (source licenses, hashes, loudness, true peak, decay, boundaries, byte-identical re-render); in-game mix not_run
+- SHA256: `2dfbe2901e738cad63d4fb8120341cce2ab5871e6e1d804dde6185aa2e66c6b7`
 ### Doll weapon pixel art — 2026-10-02
 
 Original pixel art for the five refreshed Doll weapons (the Null Refrain claw, Pale Meridian, Lacuna Testament, Choir of the Unmade and Last Witness) and the buff, generated by Codex from Claude's owner-directed brief; no artist, work or franchise imitation was requested and no third-party image was used as input (the reference images the brief names were inspected only; every edit's only image input is a candidate Codex had itself generated). The delivery stays outside the repository: `asset-deliveries/doll-weapons/2026-10-02/BRIEF.md` SHA256 `ad6d3459a20b35345cfeac5e87ab8bc07e8a43e9dcac6316f7293bc62d83a352` and `asset-deliveries/doll-weapons/2026-10-02/manifest.json` (full prompts per candidate) SHA256 `077fda374114822a095e6aa53398a4584b59e471e011441d95a893af3c3ae375`. The owner approved all 21 delivered picks on 2026-10-03. [`tools/export_doll_weapon_art.py`](../tools/export_doll_weapon_art.py) owns the mechanical export (dot pitch, palette snap, integer reduction, frame strips, gun parts) and the anchors in `Client/Encounters/FirstSeverance/Weapons/DollArtAnchors.g.cs`; it pins each of the 21 inputs by SHA-256. The art map is in [WEAPONS.md](../docs/encounters/first-severance/WEAPONS.md#reward-refresh-2026-10--shared-rules).
@@ -3387,82 +3671,6 @@ New original images use the built-in generator, exact model unknown. Full briefs
 - Required attribution: retain this provenance and the owner reference origin; dependency assets remain externally distributed
 - Reviewer and review date: Codex,2026-09-19; native compilation and offline layout checked, in-game GPU acceptance remains user-owned
 - SHA256: `fb54d35c3be4b9faf8321d9cba68facb4b7db17f3a05da009b297fc0f22d0065`
-
-### Scarlet Foretell — 2026-09-18
-
-- Runtime file: `Assets/Sounds/CrimsonFoundry/Foretell.wav`
-- Asset ID: scarlet-physical-foretell-20260918
-- Asset type: original PCM16 stereo44.1kHz sound
-- Creator: original project-directed synthesis by OpenAI for Minamium
-- Creation/acquisition date: 2026-09-18
-- Source type: original
-- Source work and URL: project-authored generator; no external recording or Mod asset sampled
-- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
-- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
-- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
-- Required attribution: retain this provenance and generator
-- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
-
-### Scarlet CrownRupture — 2026-09-18
-
-- Runtime file: `Assets/Sounds/CrimsonFoundry/CrownRupture.wav`
-- Asset ID: scarlet-physical-crownrupture-20260918
-- Asset type: original PCM16 stereo44.1kHz sound
-- Creator: original project-directed synthesis by OpenAI for Minamium
-- Creation/acquisition date: 2026-09-18
-- Source type: original
-- Source work and URL: project-authored generator; no external recording or Mod asset sampled
-- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
-- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
-- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
-- Required attribution: retain this provenance and generator
-- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
-
-### Scarlet SilkCleave — 2026-09-18
-
-- Runtime file: `Assets/Sounds/CrimsonFoundry/SilkCleave.wav`
-- Asset ID: scarlet-physical-silkcleave-20260918
-- Asset type: original PCM16 stereo44.1kHz sound
-- Creator: original project-directed synthesis by OpenAI for Minamium
-- Creation/acquisition date: 2026-09-18
-- Source type: original
-- Source work and URL: project-authored generator; no external recording or Mod asset sampled
-- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
-- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
-- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
-- Required attribution: retain this provenance and generator
-- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
-
-### Scarlet ThornRend — 2026-09-18
-
-- Runtime file: `Assets/Sounds/CrimsonFoundry/ThornRend.wav`
-- Asset ID: scarlet-physical-thornrend-20260918
-- Asset type: original PCM16 stereo44.1kHz sound
-- Creator: original project-directed synthesis by OpenAI for Minamium
-- Creation/acquisition date: 2026-09-18
-- Source type: original
-- Source work and URL: project-authored generator; no external recording or Mod asset sampled
-- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
-- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
-- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
-- Required attribution: retain this provenance and generator
-- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
-
-### Scarlet ScarletRelease — 2026-09-18
-
-- Runtime file: `Assets/Sounds/CrimsonFoundry/ScarletRelease.wav`
-- Asset ID: scarlet-physical-scarletrelease-20260918
-- Asset type: original PCM16 stereo44.1kHz sound
-- Creator: original project-directed synthesis by OpenAI for Minamium
-- Creation/acquisition date: 2026-09-18
-- Source type: original
-- Source work and URL: project-authored generator; no external recording or Mod asset sampled
-- Tool/model/version: Python/NumPy, `tools/generate_scarlet_sfx.py`; shared `tools/generate_beam_sfx.py` synthesis functions
-- Human modifications: shaped pressure, air-cut/resonator, soft saturation, short reflections and bounded fades; see physical-phrase sounds below
-- License and redistribution terms: original project asset under existing project asset terms; not a license for unrelated third-party music
-- Required attribution: retain this provenance and generator
-- Reviewer and review date: peak/DC/overlap audit2026-09-18; subjective listening not_run
-
 
 ### Scarlet Sanctum owner-supplied background — 2026-09-17
 
@@ -6912,16 +7120,6 @@ Creator: Codex under the repository owner's direction; original Convergence DSP 
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollSummon.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollThread.wav`.
 - Runtime asset: `Assets/Sounds/Weapons/DollTheater/DollCharge.wav`.
-
-### Scarlet physical-phrase sounds — 2026-09-18
-
-- Original Convergence synthesis, not sampled from a recording or another Mod. Generated by `tools/generate_scarlet_sfx.py`, reusing project-authored `generate_beam_sfx.py` pressure/noise/resonator functions. No new third-party license; these original derivatives follow the project's asset terms. Existing licensed BGM and chorus audio are unchanged.
-- PCM16 stereo44.1kHz. Species-specific transients, air-cut pressure, inharmonic midrange resonance, soft saturation, decorrelated short reflections, DC correction and bounded fades. Reproduce with explicit output/preview paths; masters0.32–0.48s, peak−1.72dBFS. Audition/evidence are local, not standalone music distribution.
-- Runtime asset: `Assets/Sounds/CrimsonFoundry/Foretell.wav`.
-- Runtime asset: `Assets/Sounds/CrimsonFoundry/CrownRupture.wav`.
-- Runtime asset: `Assets/Sounds/CrimsonFoundry/SilkCleave.wav`.
-- Runtime asset: `Assets/Sounds/CrimsonFoundry/ThornRend.wav`.
-- Runtime asset: `Assets/Sounds/CrimsonFoundry/ScarletRelease.wav`.
 
 ### Scarlet presentation v2 — 2026-09-17 / 0.3.15
 

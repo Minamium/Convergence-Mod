@@ -1,0 +1,57 @@
+{
+  "scope": "Scarlet Invocation's owner-approved sound set: sixteen layered CC0 cues (variant A of every audition scene) replace the borrowed Doll beam, chorus and ceremony cues in the Raid's client presentation and the retired 2026-09-18 Scarlet WAVs. Adds Down, revive and Ready cues through Scarlet's own presentation system, fades voices instead of cutting them, and keeps gameplay, timings and protocol unchanged",
+  "target_build": "0.3.77 / protocol79 (feat/scarlet-sfx on main 0.3.76 after #103; client presentation only; renumbered from 0.3.69/0.3.70)",
+  "owner_direction": "2026-10-02: the owner listened to the audition page (16 scenes x 3 variants, plus a 128 BPM phrase demo) and chose variant A for every scene ('効果音はAがいいね')",
+  "assets": {
+    "files": "Assets/Sounds/CrimsonFoundry/Scarlet{Foretell,CrossflowCharge,CrossflowRelease,Impact,StackSummon,StackSuccess,StackFail,SpreadSummon,SpreadSuccess,SpreadFail,ActChange,Sacrifice,Victory,Down,Revive,Ready}.ogg: 48 kHz stereo Vorbis, 0.45-2.4 s",
+    "identity": "each file's SHA256 equals the auditioned master's in the audition report, and a fresh render from the hashed external recipe reproduced all sixteen byte for byte",
+    "format": "kept as OGG like the shipped Ebon Manor and Ghost Samurai SoundStyle cues; no conversion or re-encode",
+    "retired": "Foretell.wav, CrownRupture.wav, SilkCleave.wav, ThornRend.wav and ScarletRelease.wav were referenced by no code (only their attribution, the explicit-output tools/generate_scarlet_sfx.py and a negative test); the new warning/impact/release cues cover their roles, so the files and their records were removed"
+  },
+  "mapping": {
+    "ScarletForetell": "CrimsonGestureVisuals: every non-crossflow note's warning tick (Born): basic tracking beams, Act II rifts, Act III rakes, Final pairs and the CinderCurtain/ShroudRope/FourHands signature notes",
+    "ScarletImpact": "CrimsonGestureVisuals: the same notes' strike tick (Fire)",
+    "ScarletCrossflowCharge": "CrimsonGestureVisuals: SideBeams and Final's ClusterVolley warning on beat 4; the swell peaks at 0.9375 s, two beats later",
+    "ScarletCrossflowRelease": "CrimsonGestureVisuals: the same notes' Fire on beat 6",
+    "ScarletStackSummon / ScarletSpreadSummon": "CrimsonChorusVisuals: the chorus marker's Born",
+    "ScarletStackSuccess / ScarletStackFail, ScarletSpreadSuccess / ScarletSpreadFail": "CrimsonChorusVisuals: the replicated verdict (Resolved, at most TailTicks after Fire), chosen by FailedMask",
+    "ScarletActChange": "CrimsonVisuals: PhaseStart + ActRelease (113) of Act II, Act III and Final, the downbeat after the old music's last bar (song bar 26, the full stop, for Act II and Final); replaces PhaseRupture there and is new on Final's stop",
+    "ScarletSacrifice": "CrimsonVisuals: PhaseStart + FinalRelease - 57 in Final, so the 0.95 s flash lands on FinalRelease with the visual flash, the pre-drop and the existing shake",
+    "ScarletVictory": "CrimsonVisuals: the update on which CrimsonAudio reports the score's Victory cut into the song's full stop as audible (mixer.EndAt, chosen as NextBeat of the write head, reached by the playing chunk's middle); without a streaming score, the first grid beat at or after the observed Victory (MusicStart + BeatTick(BeatAtOrAfter)); a pending cut stops being awaited 60 ticks after Victory; replaces RaidVictory",
+    "ScarletDown / ScarletRevive": "CrimsonVisuals.Announce: any member's replicated Recovery.Downed turning on / off (not Out) during Countdown or Performance, compared by connection with the previous snapshot",
+    "ScarletReady": "CrimsonVisuals.Announce: any member's Ready flag turning on",
+    "removed_without_replacement": "the apparition-birth Beams/PortalFire (its shake stays; the act-change hit carries the sound) and Final's absorb Beams/WideCharge at +155 (superseded by the act-change hit on Final's stop and the sacrifice swell)",
+    "unchanged": "Doll RaidDesignation (music start, Final start), PhaseRupture (opening summoning gate, victory flash at +92) and RaidDefeat have no approved replacement scene; the reward companion keeps its Doll beam cues"
+  },
+  "implementation_decisions": {
+    "ownership": "ScarletVoices (one per presentation system) holds every voice with a lease on the game update clock; Fight end or a non-member view releases voices with an 8-tick fade, and only OnWorldUnload/ClearWorld/Unload stop them outright. A phase-epoch change keeps ringing notes",
+    "leases": "each lease is the file length (ceil(seconds x 60)) plus 10 ticks, longer than the fade, so a natural ending is never shortened; this replaces the chorus voices' 100-tick hard stop and the gesture voices' 50/100-tick leases",
+    "dedupe": "gesture sound is keyed by (phrase, tick, cue): notes released on the same tick, such as Final's paired families, share one voice; per-gesture visuals still fire once each",
+    "gain": "one gain (1.0) for the whole set keeps the designed relative levels; SoundStyle volume cannot exceed 1. Effective K-weighted 100 ms peaks (file level plus gain): the loudest new cues (crossflow release, act change, victory) reach -8.1 dB, at least 2 dB under the loudest retired Scarlet uses (StackRelease at .48 -5.8, WideFire at .72 -6.0, ChargeRush at .72 -6.5, PortalFire at .72 -6.7). The repeated notes become quieter than the cues they replace (impact -14.3 vs -6.7, foretell -18.0 vs ChargeLock at .48 -13.8); some moments that used soft Doll cues become louder by design of the set (victory -8.1 vs RaidVictory at .40 -13.1, act change -8.1 vs PhaseRupture at .48 -10.6, Spread success -13.1 vs SpreadDissolve at .48 -16.5, Stack call -14.0 vs StackSummon at .25 -16.4, Spread failure -10.3 vs SpreadExecution at .48 -10.9)",
+    "pitch": "no runtime pitch offset (the Final cluster's -0.12 octave was dropped) so the cues stay in the E-flat family",
+    "limits": "foretell/impact 3 instances, crossflow and chorus cues 2 (ReplaceOldest, above the normal overlap); act change, sacrifice and victory 1, Down/revive 3, Ready 2 (IgnoreNew)",
+    "playback": "non-positional, PlayOnlyIfFocused and StopWhenGamePaused like the replaced cues; systems are client-side autoloads and ScarletVoices.Play returns on Main.dedServ",
+    "victory_alignment": "review fix: the bell no longer recomputes the cut beat from VisualAge. The mixer picks NextBeat(cursor) from a write head 2-3 chunks (about 2.6-3.8 ticks) ahead of the speakers, and in single player one update after the visuals see Victory, so a beat inside that window put the bell one beat before the full stop; CrimsonAudio.VictoryCut now reports Absent/Pending/Heard for the Fight and the bell rings on Heard"
+  },
+  "license_verification": {
+    "libraries": "VSCO 2 CE 1.1.0 archive SHA256 4a4446628df0e1a12aaee58e9f65f8fa7cde51971e961abb1b43083a6d3a8ab7 with its bundled CC0 1.0 LICENSE (organ folder note: Simon Dalzell/Ivy Audio, redistribution granted by Versilian Studios); VCSL at commit b6e6ac82d22248edee98a0bde185eb9ef6d439ad, CC0 1.0 per README",
+    "recorded_before": "concrete smash 522099, very low impact 541029, sword hit 442769, demon howl 257635, swoosh 263595 and wind whirl 719560 already appear in ATTRIBUTION with the same SHA256; Kenney knifeSlice.ogg is byte-identical to the recorded RPG Audio pack member, whose license.txt is CC0",
+    "newly_recorded": "JoelAudio 136542, elliott.klein 189630, BMacZero OGA spark, NeoSpica 504615, kasparsj 513694, fielastro 423935 and audione 52458: local records of the 2026-10-01 source survey read 'Creative Commons 0' (OGA: 'CC0') on each page",
+    "unconfirmed": "none; all sixteen cues ship",
+    "vsco_readme": "VSCO 2 CE Readme.txt terms beside CC0: no direct sale of the samples, keep improvements open, credit Versilian Studios/Sam Gossner and/or Ivy Audio/Simon Dalzell where applicable and link the VSCO: CE homepage (https://versilian-studios.com/vsco-community/); the record carries both credits and the link for public credits",
+    "optional_credit": "BMacZero's OpenGameArt page (rechecked 2026-10-02): CC0, 'Optionally credit Brian MacIntosh'; the record names him"
+  },
+  "checks": {
+    "static": "passed (again after the review fixes): verify_repo --write-catalog --with-domain (catalog, repository policy incl. the attribution manifest, YAML, 480 domain tests)",
+    "python": "passed (again after the review fixes): tools/tests (77), including the new test_scarlet_audio (cue table vs files and Ogg lengths, retained Doll cue files, no borrowed beam/chorus sounds outside the companion, moment wiring incl. the Victory bell following the score's cut, voice ownership/fade/dedicated-server guard, attribution entries, hashes, source rows, the recipe catalog hash and the VSCO homepage link)",
+    "native_build": "passed: tools/dev.py build --native into the isolated profile on the final tree after merging main 0.3.76 (0.3.77 / protocol79), tML 2026.08.3.0, 0 errors / 4 existing warnings; package sha256 b838a1e0a60e1eb20408ce34db274cc5189a95191ee3bb1c3d0b13cd297ba7c0",
+    "diff_check": "passed: git diff --check",
+    "rerender": "passed: the external recipe re-rendered all sixteen cues to byte-identical OGGs, again after review moved the source catalog (catalog.json, SHA256 2faed1e050be83dc2023ebeeddb8694c4ce94c26d987bb49058631bb76d0af60: short-name paths, measured pitch and shift table) from another worktree's .local to sit beside the recipe; kit.py now reads it there (kit.py SHA256 91fce8bd9cf17b0a4703628a3caf7b88a6070c0f7ceddb212b0fa37dac092e31)"
+  },
+  "not_run": [
+    "in-game hearing of every cue on its moment, the mix against Graceful Ordeal and fatigue from repeated foretell/impact notes",
+    "the crossflow release sweeps left to right while the stream flows right to left; a mirrored export would need a new render and owner approval",
+    "Host & Play with a matching peer: Down/revive/Ready announcements for remote members, late join",
+    "victory bell alignment with the mixer's cut on a real audio device (now driven by the score's reported cut; hearing not_run)"
+  ]
+}

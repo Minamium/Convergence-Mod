@@ -30,10 +30,17 @@ public sealed class CrimsonVisualConfig : ModConfig
 internal sealed class CrimsonVisuals : ModSystem
 {
     private Guid fight;
-    private int previousAge = -1, lastFire = -100, endingAt = -1;
+    private int previousAge = -1, lastFire = -100, endingAt = -1, victoryAt = -1;
     private float shake;
-    private readonly List<(ReLogic.Utilities.SlotId Id, int Stop)> voices = new();
+    // Ceremony, party and legacy-hazard voices for this Fight's members.
+    private readonly ScarletVoices voices = new(32);
+    // The last observed roster (copied: single player shares the runtime's array), for
+    // Ready/Down/revive transitions. Empty until the Fight has been seen once.
+    private readonly List<CrimsonMember> roster = new(CrimsonState.MaxMembers);
     private int lastCharge = -100;
+    // The score's cut comes within a beat plus its queued chunks and its 15-tick drift
+    // tolerance; past this the bell rings without it.
+    private const int VictoryWaitTicks = 60;
     private static int lastClock;
     private static long clockReceived;
     internal static float RenderAge(CrimsonBoss boss)
@@ -48,7 +55,7 @@ internal sealed class CrimsonVisuals : ModSystem
         var self = ModContent.GetInstance<CrimsonVisuals>();
         return self.fight == boss.State.Fight && self.endingAt >= 0 ? Math.Max(0, RenderAge(boss)-self.endingAt) : 0;
     }
-    public override void Unload() { Reset(); CrimsonRig.Unload(); }
+    public override void Unload() { Teardown(); CrimsonRig.Unload(); }
     private static readonly Rectangle Pixel = new(0, 0, 1, 1);
     internal static bool Reduced => ModContent.GetInstance<CrimsonVisualConfig>().ReducedEffects;
     internal static bool Local(CrimsonBoss b) => Array.Exists(b.State.Members, m => m.Slot == Main.myPlayer);
@@ -56,79 +63,111 @@ internal sealed class CrimsonVisuals : ModSystem
 
     public override void PostUpdateEverything()
     {
+        voices.Update();
         var boss = CrimsonPackets.Boss;
         if (boss is null || !Local(boss)) { Reset(); return; }
         int age = (int)boss.VisualAge;
         if (fight != boss.State.Fight) { Reset(); fight = boss.State.Fight; previousAge = age - 1; }
+        bool Crossed(int tick) => previousAge < tick && age >= tick && age - tick < 8;
         shake *= .80f;
-        if (boss.State.FinalStart >= 0 && previousAge < boss.State.FinalStart && age >= boss.State.FinalStart && age - boss.State.FinalStart < 8)
-        { Cue("RaidDesignation", .28f, age + 90); shake = 8; }
+        if (boss.State.FinalStart >= 0 && Crossed(boss.State.FinalStart))
+        { Cue("RaidDesignation", .28f, 90); shake = 8; }
+        // An apparition's birth keeps its shake; the act change below carries the sound.
         foreach (NPC n in Main.ActiveNPCs)
             if (n.ModNPC is CrimsonEffigy e && e.State.Fight == fight && previousAge < e.State.Born + 12
                 && age >= e.State.Born + 12 && age - e.State.Born < 18)
-            { Cue("Beams/PortalFire", .30f, age + 55); shake = 6; }
-        if (boss.State.MusicStart >= 0 && previousAge < boss.State.MusicStart && age >= boss.State.MusicStart && age - boss.State.MusicStart < 8)
-        { Cue("RaidDesignation", .24f, age + 120); shake = 5; }
-        if(boss.State.MusicStart>=0) {
-            int gate=boss.State.MusicStart+CrimsonChoreography.SummonAt;
-            if(previousAge<gate && age>=gate && age-gate<8) { Cue("PhaseRupture",.48f,age+150);shake=11; }
-        }
+                shake = 6;
+        if (boss.State.MusicStart >= 0 && Crossed(boss.State.MusicStart))
+        { Cue("RaidDesignation", .24f, 120); shake = 5; }
+        if (boss.State.MusicStart >= 0 && Crossed(boss.State.MusicStart + CrimsonChoreography.SummonAt))
+        { Cue("PhaseRupture", .48f, 150); shake = 11; }
         if (boss.State.Phase > 0)
         {
-            int release = boss.State.PhaseStart + (boss.State.Phase == 3 ? CrimsonEnsemble.FinalRelease : CrimsonEnsemble.ActRelease);
-            if (previousAge < release && age >= release && age - release < 8)
-            { Cue("PhaseRupture", .48f, age + 150); shake = boss.State.Phase == 3 ? 15 : 7; }
+            // Every change lands one hit on the downbeat after the old music's last bar:
+            // the song's full stop for Act II and Final, the interlude for Act III.
+            if (Crossed(boss.State.PhaseStart + CrimsonEnsemble.ActRelease))
+            { voices.Play(ScarletCue.ActChange); if (boss.State.Phase < 3) shake = 7; }
             if (boss.State.Phase == 3)
             {
                 float t=age-boss.State.PhaseStart;
                 shake=Math.Max(shake,CrimsonEnsemble.BloodPressure(t)*4.5f);
-                int absorb=boss.State.PhaseStart+155;
-                if(previousAge<absorb && age>=absorb && age-absorb<8) Cue("Beams/WideCharge",.44f,age+160);
+                // The sacrifice swell starts early so its flash meets the visual flash and the pre-drop.
+                int flash = boss.State.PhaseStart + CrimsonEnsemble.FinalRelease;
+                if (Crossed(flash - ScarletSounds.SacrificeFlashTicks)) voices.Play(ScarletCue.Sacrifice);
+                if (Crossed(flash)) shake = 15;
             }
         }
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat && endingAt < 0)
         {
-            endingAt = age;
-            Cue(boss.State.Stage == CrimsonStage.Victory ? "RaidVictory" : "RaidDefeat", .40f, age + 150); shake = 8;
+            endingAt = age; shake = 8;
+            if (boss.State.Stage == CrimsonStage.Defeat) Cue("RaidDefeat", .40f, 150);
+            // Without a running score the bell takes the first grid beat at or after Victory.
+            else victoryAt = boss.State.MusicStart < 0 ? age
+                : boss.State.MusicStart + CrimsonMeter.BeatTick(CrimsonMeter.BeatAtOrAfter(age - boss.State.MusicStart));
         }
+        // The bell meets the music's cut into the song's full stop. The score picks that beat
+        // ahead of what is audible, so a running score is followed rather than predicted.
+        if (victoryAt >= 0 && CrimsonAudio.VictoryCut(fight) switch
+            {
+                ScoreCut.Heard => true,
+                ScoreCut.Absent => age >= victoryAt,
+                _ => age - endingAt >= VictoryWaitTicks,
+            })
+        { voices.Play(ScarletCue.Victory); victoryAt = -1; }
         if (boss.State.Stage == CrimsonStage.Victory && endingAt >= 0)
         {
             float t=age-endingAt;
             shake=Math.Max(shake,8*Ease(t/14)*(1-Ease((t-90)/52)));
-            if(previousAge<endingAt+92 && age>=endingAt+92 && age-endingAt-92<8) { Cue("PhaseRupture",.44f,age+58);shake=13; }
+            if(previousAge<endingAt+92 && age>=endingAt+92 && age-endingAt-92<8) { Cue("PhaseRupture",.44f,58);shake=13; }
         }
+        Announce(boss.State);
+        // Retired physical-deck hazards (no longer spawned) share the note cues.
         foreach (Projectile p in Main.ActiveProjectiles)
         {
             if (p.ModProjectile is not CrimsonAttack a || a.Hazard.Fight != fight) continue;
             int chargeTick = a.Hazard.Born;
             if (previousAge < chargeTick && age >= chargeTick && age - chargeTick < 5 && lastCharge != chargeTick)
-            { lastCharge = chargeTick; Cue("Beams/PortalCharge", .20f + a.Hazard.Accent * .035f, chargeTick + 10); }
+            { lastCharge = chargeTick; voices.Play(ScarletCue.Foretell); }
             if (previousAge < a.Hazard.Fire && age >= a.Hazard.Fire && age - a.Hazard.Fire < 5 && lastFire != a.Hazard.Fire)
-            { lastFire = a.Hazard.Fire; Cue("Beams/PortalFire", .28f + a.Hazard.Accent * .05f, a.Hazard.End + 8); shake = Math.Max(shake, 2.5f + a.Hazard.Accent * 1.5f); }
-        }
-        for (int i = voices.Count - 1; i >= 0; i--)
-        {
-            var voice = voices[i];
-            if (!SoundEngine.TryGetActiveSound(voice.Id, out var sound)) { voices.RemoveAt(i); continue; }
-            if (age >= voice.Stop) { sound.Stop(); voices.RemoveAt(i); }
-            else sound.Volume = Math.Min(sound.Volume, Math.Clamp((voice.Stop - age) / 14f, 0, 1));
+            { lastFire = a.Hazard.Fire; voices.Play(ScarletCue.Impact); shake = Math.Max(shake, 2.5f + a.Hazard.Accent * 1.5f); }
         }
         previousAge = age;
     }
-    private void Cue(string asset, float gain, int stop)
+    // Party feedback like Doll's: one voice per kind per update for any member's Ready
+    // vote, Down or revive. Nothing is announced for a roster seen for the first time.
+    private void Announce(in CrimsonState state)
     {
-        if (voices.Count >= 32) return;
-        voices.Add((SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
-        { Volume = gain, MaxInstances = 3, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
-            PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused }), stop));
+        bool known = roster.Count > 0, ready = false, down = false, revive = false;
+        bool live = state.Stage is CrimsonStage.Countdown or CrimsonStage.Performance;
+        if (known)
+            foreach (var m in state.Members)
+                foreach (var old in roster)
+                {
+                    if (old.Connection != m.Connection) continue;
+                    ready |= m.Ready && !old.Ready;
+                    down |= live && !m.Out && m.Recovery.Downed && !old.Recovery.Downed;
+                    revive |= live && !m.Out && old.Recovery.Downed && !m.Recovery.Downed;
+                    break;
+                }
+        if (ready) voices.Play(ScarletCue.Ready);
+        if (down) voices.Play(ScarletCue.Down);
+        if (revive) voices.Play(ScarletCue.Revive);
+        roster.Clear(); roster.AddRange(state.Members);
     }
+    // Retained Doll cues (opening, Final title, victory flash, defeat) keep their bounded
+    // leases with a 14-tick fade.
+    private void Cue(string asset, float gain, int lease)
+        => voices.Play(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/" + asset)
+        { Volume = gain, MaxInstances = 3, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
+            PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused }, lease, 14);
     private void Reset()
     {
-        foreach (var voice in voices) if (SoundEngine.TryGetActiveSound(voice.Id, out var sound)) sound.Stop();
-        voices.Clear(); fight = Guid.Empty; previousAge = -1; lastFire = lastCharge = -100; endingAt = -1; shake = 0;
+        voices.Release(); roster.Clear();
+        fight = Guid.Empty; previousAge = -1; lastFire = lastCharge = -100; endingAt = victoryAt = -1; shake = 0;
     }
-    public override void OnWorldUnload() => Reset();
-    public override void ClearWorld() => Reset();
+    private void Teardown() { voices.Stop(); Reset(); }
+    public override void OnWorldUnload() => Teardown();
+    public override void ClearWorld() => Teardown();
     public override void ModifyScreenPosition()
     {
         var boss=CrimsonPackets.Boss;

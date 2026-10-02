@@ -31,6 +31,19 @@ internal sealed class CrimsonAudio : ModSystem
     // Keeps the vanilla music suppressed until the Victory/Defeat tail has rung out.
     internal static bool TailPlaying => tailPlaying;
 
+    // Where the score stands on this Fight's Victory cut into the song's full stop. The
+    // mixer picks that beat from the write head, up to QueuedChunks ahead of the speakers
+    // (and on the update after the stage changes), so presentation that must land on the
+    // cut asks here instead of recomputing the beat from VisualAge.
+    internal static ScoreCut VictoryCut(Guid fight)
+    {
+        var self = ModContent.GetInstance<CrimsonAudio>();
+        if (self.failed || self.mixer is null || self.voice is null || self.fight != fight) return ScoreCut.Absent;
+        if (!self.ending || self.mixer.EndAt < 0) return ScoreCut.Pending;
+        // The playing chunk is the oldest pending one; the cut counts as heard from its middle.
+        return self.Audible() + ChunkFrames / 2 >= self.mixer.EndAt ? ScoreCut.Heard : ScoreCut.Pending;
+    }
+
     public override void PostSetupContent()
     {
         try
@@ -169,6 +182,9 @@ internal sealed class CrimsonAudio : ModSystem
     public override void ClearWorld() => Stop();
     public override void Unload() { Stop(); mixer = null; failed = false; }
 }
+
+// Absent: no score streams for that Fight (failed, not started or another Fight).
+internal enum ScoreCut : byte { Absent, Pending, Heard }
 
 [Autoload(Side = ModSide.Client)]
 internal sealed class CrimsonMusicScene : ModSceneEffect
