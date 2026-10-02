@@ -26,6 +26,7 @@ param(
     [string]$Players = 'center,edge',
     [ValidateSet('off', 'on', 'both')][string]$Reduced = 'off',
     [ValidateSet('black', 'dim', 'none')][string]$Mask = 'dim',
+    [string]$Look = 'overlay',                 # overlay | ink | portal | ink+overlay | proposal (portal forecast, then ScarletInk live strike)
     [switch]$NoSequences,
     [switch]$NoMatrix,
     [switch]$NoSmoke,
@@ -91,7 +92,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $options = @('--step', $Step, '--phrase-start', $PhraseStart, '--bg', $Backgrounds, '--zoom', $Zooms,
     '--seq-bg', $SequenceBackground, '--seq-zoom', $SequenceZoom, '--size', $Size, '--players', $Players,
-    '--reduced', $Reduced, '--mask', $Mask, '--beats', $(if ($Beats -eq 'score') { 'score' } else { $Beats }))
+    '--reduced', $Reduced, '--mask', $Mask, '--look', $Look, '--beats', $(if ($Beats -eq 'score') { 'score' } else { $Beats }))
 if ($Only) { $options += @('--only', $Only) }
 if ($NoSequences) { $options += '--no-sequences' }
 if ($NoMatrix) { $options += '--no-matrix' }

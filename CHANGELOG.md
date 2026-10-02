@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Redraw Scarlet Invocation's field-beam strikes as a river of black blood: the tracking beam (Act I and Final) and the crossflow stream between the two seals now burn at the rim and melt, with red threads streaming along a black body, a twisting hot core, a blaze for the first ticks and a narrow dried scar afterwards. Forecasts and the two seals look as before; hitboxes, timings and protocol are unchanged.
+
 - Stage Ghost Samurai's big moments for those fighting it: the summoning (the samurai gathers itself out of spirit fire, takes its stance and shouts; it holds for 5 s, cannot be hit and attacks after), each change of form (now 3 s: it rises to the middle of the seal, raises both blades and shouts), the victory (its two blades fall from the dissolving hands and plant in the floor before the seal burns away) and a wipe (it lowers its blades and returns to mist). The HUD steps aside behind letterbox bars with a title, and the camera eases onto the samurai and back; controls are never taken. Forecasts now read over the field with hatching and a two-pixel edge; the field's night loses its violet, its graves become planted weapons and its ruled edge line becomes the roots of the spirit fire. Protocol 77: all players need this version.
 
 - Polish Waltz of the Ebon Manor: AutoMatador now loops long stretches of the song with natural joins at its own repeats; attack warnings are quieter (a soft silk veil or a single strung thread instead of crisp lines and nets); damaging threads glow as razor silk with a white-hot core, bloom, flowing glints, an ignition and a fray. Hitboxes and timings are unchanged.

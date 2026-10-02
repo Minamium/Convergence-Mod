@@ -33,6 +33,9 @@ internal sealed class PreviewOptions
     internal string[] Players = { "center", "edge" };
     internal bool[] ReducedModes = { false };
     internal MaskMode Mask = MaskMode.Dim;
+    // overlay = authoritative hit shapes, ink = ScarletInk live/residue on field beams only, portal = the PortalBeam stand-in for every plan,
+    // ink+overlay = both, proposal = what production draws (portal forecast, then ScarletInk) with the overlay left out.
+    internal string Look = "overlay";
 }
 
 internal sealed record SceneDef(string Name, int Phase, int Serial);
@@ -99,6 +102,7 @@ internal static class ScarletPreview
                 case "players": o.Players = value.Split(','); break;
                 case "reduced": o.ReducedModes = value switch { "on" => new[] { true }, "both" => new[] { false, true }, _ => new[] { false } }; break;
                 case "mask": o.Mask = Enum.Parse<MaskMode>(value, true); break;
+                case "look": o.Look = value; break;
                 case "no-sequences": o.Sequences = false; break;
                 case "no-matrix": o.Matrix = false; break;
                 case "no-smoke": o.Smoke = false; break;
@@ -314,6 +318,7 @@ internal sealed class PreviewRenderer : IDisposable
     private readonly PreviewAssets assets;
     private readonly PreviewOptions options;
     private readonly ScarletGeometryOverlay overlay;
+    private readonly ScarletInkStroke ink = new();
     private readonly SpriteBatch batch;
     private readonly Texture2D disc;
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
@@ -377,7 +382,23 @@ internal sealed class PreviewRenderer : IDisposable
         DrawBackdrop(view, backdrop, phrase);
         DrawCharacters(view, phrase);
         underlay?.Invoke(view);
-        overlay.Draw(view, phrase.Plans);
+        if (options.Look == "proposal")
+            // The shipped decision, made per plan exactly as CrimsonGestureVisuals.DrawTrackingBeams does: a field beam
+            // (TrackingBeam, SideBeams) shows the original portal forecast until Fire, then ScarletInk for the live strike and
+            // its residue. Every other technique has its own production material (ScarletMaterials / ScarletSorcery /
+            // ScarletClusters) that the preview does not reproduce; PortalBeam is only a stand-in silhouette for those.
+            // The seal crossflow's two seals and vapor (Terraria-bound ScarletSorcery) are not drawn either.
+            foreach (var plan in phrase.Plans)
+            {
+                if (ScarletInkStroke.Owns(plan, view.Clock)) ink.Draw(view, assets, plan);
+                else DrawPortalBeam(view, plan);
+            }
+        else
+        {
+            if (options.Look.Contains("portal")) foreach (var plan in phrase.Plans) DrawPortalBeam(view, plan);
+            if (options.Look.Contains("ink")) foreach (var plan in phrase.Plans) ink.Draw(view, assets, plan);
+        }
+        if (options.Look.Contains("overlay")) overlay.Draw(view, phrase.Plans);
         DrawHud(view, phrase, caption);
         Device.SetRenderTarget(null);
         return rt;

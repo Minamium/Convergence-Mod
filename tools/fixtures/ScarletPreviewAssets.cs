@@ -14,6 +14,7 @@ internal sealed class PreviewAssets : IScarletAssets, IDisposable
     private readonly GraphicsDevice device;
     private readonly string root, luminance;
     private readonly Dictionary<string, Effect> effects = new();
+    private readonly Dictionary<string, IScarletShader> shaders = new();
     private readonly Dictionary<string, Texture2D> textures = new();
 
     internal PreviewAssets(GraphicsDevice device, string root, string luminance)
@@ -21,7 +22,15 @@ internal sealed class PreviewAssets : IScarletAssets, IDisposable
         this.device = device; this.root = root; this.luminance = luminance;
     }
 
+    // The Vfx seam: an Effect wrapped so a Vfx class only sets parameters and applies a pass, like Luminance's ManagedShader.
+    public IScarletShader GetShader(string name)
+    {
+        if (!shaders.TryGetValue(name, out var found)) shaders.Add(name, found = new PreviewShader(GetEffect(name)));
+        return found;
+    }
+
     // "PortalBeam" -> Assets/AutoloadedEffects/Shaders/PortalBeam.fxc, loaded straight from the exported bytecode.
+    // Preview-only (the old portal stand-in and the backdrop use the raw Effect); Vfx classes go through GetShader.
     public Effect GetEffect(string name)
     {
         if (effects.TryGetValue(name, out var found)) return found;
@@ -88,4 +97,15 @@ internal sealed class PreviewAssets : IScarletAssets, IDisposable
         foreach (var texture in textures.Values) texture.Dispose();
         effects.Clear(); textures.Clear();
     }
+}
+
+// IScarletShader over a loose Effect: unknown parameters are ignored, exactly like ManagedShader.TrySetParameter.
+internal sealed class PreviewShader : IScarletShader
+{
+    private readonly Effect effect;
+    internal PreviewShader(Effect effect) => this.effect = effect;
+    public void Set(string name, float value) => effect.Parameters[name]?.SetValue(value);
+    public void Set(string name, Vector4 value) => effect.Parameters[name]?.SetValue(value);
+    public void Set(string name, Matrix value) => effect.Parameters[name]?.SetValue(value);
+    public void Apply(string pass) => effect.CurrentTechnique.Passes[pass].Apply();
 }
