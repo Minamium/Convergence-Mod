@@ -92,6 +92,9 @@
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/DollWeaponTuning.cs" Link="Domain/DollWeaponTuning.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/LacunaTestamentScore.cs" Link="Domain/LacunaTestamentScore.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/LacunaArtFit.cs" Link="Presentation/LacunaArtFit.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/LacrimosaClawMotion.cs" Link="Domain/LacrimosaClawMotion.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/LacrimosaClawHeart.cs" Link="Domain/LacrimosaClawHeart.cs" />
+    <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/LacrimosaClawArt.cs" Link="Presentation/LacrimosaClawArt.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/DollArtAnchors.g.cs" Link="Presentation/DollArtAnchors.g.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollPose.cs" Link="Presentation/FirstSeveranceDollPose.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceDollFrames.cs" Link="Presentation/FirstSeveranceDollFrames.cs" />
