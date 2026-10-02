@@ -930,7 +930,7 @@ documents:
 - doc_id: encounter.first-severance.visual
   path: docs/encounters/first-severance/VISUAL_SPEC.md
   title: First Severance — Current Presentation Direction
-  content_sha256: 2d46e1a9625417ac4f7f77ddd45b1909cadd8ad30c2d066ed81f3a7602254602
+  content_sha256: fe9a8f5d8cba5d8f275a58d3454902d68189bc1ec9e017d5d0d1e395a09c2ae5
   document_type: spec
   status: provisional
   owners:
@@ -950,13 +950,13 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: f8be1b509eed78217a533d35c8f0d9064bb9edf8e8fa717163379448fd86ad0d
+  content_sha256: 22f0fa7b84916920b4df61f02ac40b8c8a941af85a55994a68a18d80b12cc929
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - art
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-10-02'
   source_of_truth_for:
   - first_severance.reward_weapons
   aliases:
@@ -1266,12 +1266,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 99be7ba627ce70ce7040dbf9ae7c06b882fa7a1024714a7c10aa752743cfcbb8
+  content_sha256: a9fd098c5b1b70a6b91ec6f5cb94202eb24f0b75e3c877bf57df4b6f95a428b6
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-10-03'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -1448,12 +1448,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 6d2283387b8239e0ef1c252117be4715c70cbd37a0fdfe5cacc30be8e2c34426
+  content_sha256: 6fa3ca0f978788959d9249228109c62e167a74a8cf71d81633dd0b58e3a4a711
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-10-02'
+  last_reviewed: '2026-10-03'
   source_of_truth_for:
   - project.implementation_status
   aliases:
@@ -1812,7 +1812,7 @@ documents:
 - doc_id: verification.test-plan
   path: docs/TEST_PLAN.md
   title: Test Plan
-  content_sha256: d24fc30b218510fed0f23fcc6e1804ede5639458453b6d42572fc39523332a21
+  content_sha256: 740657079474dc58fef78c7ade5329603c1a763995e3954e53b799e368574271
   document_type: plan
   status: accepted
   owners:

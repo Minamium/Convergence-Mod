@@ -5,7 +5,7 @@ status: provisional
 owners:
   - gameplay
   - art
-last_reviewed: 2026-09-14
+last_reviewed: 2026-10-02
 source_of_truth_for:
   - first_severance.reward_weapons
 aliases:
@@ -23,6 +23,43 @@ related_docs:
 # Requiem of the Hollow Doll — Ritual Armaments
 
 Current mechanics are below; [Audio](../../AUDIO_CUE_SHEET.md) owns the active sound masters and removal of the claw's overlapping swipe after-sound. Versioned labels identify when a design arrived, not the current package/protocol: those belong to [Status](../../STATUS.md).
+
+## Reward refresh (2026-10) — shared rules
+
+The owner approved a full refresh of the five box weapons on 2026-10-02: keep each weapon's concept, class and internal ID (`NullRefrain`, `PaleMeridian`, `LacunaTestament`, `ChoirOfTheUnmade`, `LastWitness`), and redo the art, drawing, motion, effects and sound. The [Curtainfall Treasure Box](#curtainfall-treasure-box) and the [Unbroken Promise](#doll-companion--the-unbroken-promise) recipe are unchanged, and owned copies keep working without migration. The weapon sections further down stay current until each weapon's refresh lands; that change replaces its section, moves the old one to history and lists what changes for players (old → new numbers). This section owns only what all five share.
+
+- **Signature:** each weapon turns one of Lacrimosa's techniques into the player's — Remote Clasp and Central Crush → the claws; the lattice beams → Pale Meridian; the core cannon → Lacuna Testament; the organ chorus → Choir of the Unmade; the Axiom Blade and Iron Interdict → Last Witness. Every weapon builds something visible over seconds and releases it at once, and each step of the build-up has its own sound and light. Thread, string, lace, chain and sewing motifs are Ebon Manor's and are not used; parts fly, seat and lock on their own.
+- **Power:** the same budget as the 0.2.x forms. Base damages stay (claws 7700, Meridian 2002, Lacuna 2024, Choir 968 per voice, Witness 9680; `RitualArmamentRules.Damage` is frozen because the companion's 9680 depends on it). Each refreshed weapon's pure score must reproduce the baseline within ±3% per cycle, sustained, and over the best 600-tick window from a cold press, so player-timed releases (the claw grasp, the Meridian finisher) come out of the budget rather than on top of it. Numbers are raw: before defense, no crit, one target, every hit landing. Area growth (a wider beam, a spinning disc, a lattice) is declared in the weapon's change list; it is outside the single-target budget. Boss HP never changes to hide weapon balance.
+
+| Weapon | Baseline per cycle | Sustained |
+|---|---|---|
+| Lacrimosa's Claws | 12.857 swipes ×1.0 + crush ×4.2 = 17.057× per 402 ticks | 19,603/s |
+| Pale Meridian | build 0–348: 15 needles ×0.95 = 14.25× | overdrive 7.97× per 36 ticks = 26,593/s, plus ammo |
+| Lacuna Testament | build 0–410: 26 bolts × 1113 = 28,938 | beam 4,048 per 10 ticks = 24,288/s |
+| Choir of the Unmade (per voice) | 660-tick concert, about 20.4× | 5,080/s during the chorus; about 1,800/s averaged |
+| Last Witness | 6 shards ×0.28 + blade ×5.4 = 7.08× per 282 ticks | 14,581/s; the stealth verdict adds ×3.24 |
+
+- **Usability and ownership:** unchanged usability (no use while dead, Down or eliminated in the Doll Raid). One held controller projectile per weapon carries every count peers must see (lit beads, seated parts, open irises, voices, testimonies). Only the owner reads input and spends mana (native `CheckMana`) or ammo (one `PickAmmo` per real shot) and spawns children through native projectile replication. An item change, death, Down, crowd control or leaving the world ends the controller; launched projectiles stop once their owner is unusable. No Encounter packet, `ModPacket` or protocol change.
+- **Presentation:**
+  - Pixel art at the 2-pixel dot: one texel is one dot, drawn at 2 world px with point sampling. Pixel sprites are never scaled at draw time; a weapon that needs two sizes uses two integer export rungs and swaps them on its fastest frames.
+  - One shared Doll weapon layer draws weapons **in front of players**; only large set pieces that stand behind something (the Choir's organ) draw behind players. Effects get a one-dot ink outline (#121017).
+  - Palette: ink #121017; black iron #1d1a22, #302a29, #49404a; porcelain #9c8070, #d0b69e, #f4e3ce, #fcf4e6; pearl #c9c4c9, #e1dce0; dull brass #684828, #a07b48, #d5b279; light ramp plum #301840 → #5a2c9c → violet #9458ff → #b99cff → pearl-violet #ddd8f8 → bone #fcf4e6 → white; ruby #8c141c as a 1–2 dot accent only.
+  - Forecasts are a one-dot pearl-violet hairline or outline with travelling dots. Live damage is an original Luminance material per weapon, never a flat colour: at least four ramp tones, flowing noise, sparkle and a white-hot spine, with pearl, bone and white at least 40% of lit dots so the violet never reads as Ghost Samurai's fire. A void material (Lacuna's black beam) replaces the spine with a one-dot pearl lip. Residue cools to plum within 24 ticks. Other players' damaging light draws at 65% opacity and their void at 60%; bodies stay opaque.
+  - Hit shapes are the constants in Content; the art is fitted to them, never the reverse, and an art-fit test keeps drawn anchors (talon tip, muzzle, hole, mouth, blade tip) within one dot of their design anchors.
+  - Swings flow through their ends without hard braking. Reduced Effects (the Doll client config) keeps bodies, forecasts, live bodies and counts, halves debris and residue time and removes glow; screen shake follows the config. No fullscreen flash, hit-stop, zoom, slow motion or input lock.
+- **Audio:** every cue is new and lives in `Assets/Sounds/Weapons/DollWeapons/`: music-box tines, brass gears and key ratchets, porcelain clinks and cracks, pipe organ, and low weight for impacts. Tonal cues use one home, F minor pentatonic (F A♭ B♭ C E♭; build-up ladder F5 A♭5 B♭5 C6 E♭6 F6 A♭6 B♭6 C7), measured against the four Doll tracks. Every release pairs a warning cue with a firing cue, and a set piece that can fail has its own, different failure cue. Composite cues and loops are never transposed at runtime. Reduced Effects never lowers weapon audio. The 0.2.x masters in `Weapons/DollTheater` stay because the companion and the Raid still play some of them; [Audio](../../AUDIO_CUE_SHEET.md) owns masters and levels.
+- **Art:** Codex pixel art from Claude's brief (DW01–DW05, delivered 2026-10-02 outside the repository under `asset-deliveries/doll-weapons/2026-10-02/`). `tools/export_doll_weapon_art.py` measures each sheet's dot pitch, snaps to the palette, reduces by whole factors and records anchors; runtime PNGs live in `Assets/Textures/Items/DollWeapons/` with exact [Attribution](../../../Assets/ATTRIBUTION.md) records.
+
+| Asset | Use |
+|---|---|
+| DW01 / DW01B / DW01I | Claw right hand: open, raking, clenched, thrusting (the left hand is the mirror) with the six-bead plate; icon |
+| DW02 / DW02E / DW02K / DW02I | Assembled siege gun; bare gun (the four brass parts are cut from the difference); wind-up key, 4 frames; icon |
+| DW03 / DW03I / DW03A / DW03B | Testament with a see-through hole; icon; porcelain iris, 4 frames; great iris |
+| DW04 / DW04V2 / DW04V3 / DW04P / DW04S / DW04B | Three faceless choristers × 3 singing frames; pipe organ with a see-through mouth; baton; buff icon |
+| DW05 / DW05V / DW05S / DW05I | Execution blade with the witness hole; judgement sword; three porcelain shards; icon |
+
+- **Companion:** The Unbroken Promise is unchanged except its summon sound, which plays on the same trigger.
+- **Acceptance (owner; `not_run` until played):** each weapon's build-up, release and paired cues; readability on bright and dark ground at zoom 1; weapons in front of the player without hiding the character, and the organ behind; a second peer seeing the same build-up counts; Reduced Effects; FPS with eight players' weapons.
 
 ## Claw swipe cleanup — 0.2.38
 
