@@ -275,7 +275,6 @@ internal static class ChoirClient
             ChoirDrawState s = o.Draw;
             s.Peer = owner != Main.myPlayer;
             s.Seed = owner;
-            if (s.VoiceTotal > 0 && s.Clock <= 0 && o.LeadTick + 1 < Main.GameUpdateCount) s.Clock = 0;
             if (o.Cancelled)
             {
                 float age = (float)(now - o.CancelTick);

@@ -452,20 +452,43 @@ internal static class DollChoirPreview
         Run(4, new[] { 470 }, "v4reduced", reduced: true);
         Run(4, new[] { 400, 404, 410 }, "v4cancel", cancelAt: 398);
         Run(1, new[] { 1 }, "summon", summon: new[] { 0, 6, 12, 18 });
-        Sheet(shots);
+        Run(20, new[] { 470 }, "v20");
+        // The mouth inset: Chorister0/1/2 at frame 0 (closed, with the code-drawn mouth on 0 and 2), 1 and 2.
+        var insets = new List<Color[]>();
+        foreach (float clock in new[] { 0f, ChoirConcertRules.NoteTick(0, 0) - 3, ChoirConcertRules.NoteTick(0, 0) + 2 })
+        {
+            var mouths = new ChoirDrawState();
+            mouths.Clear();
+            mouths.Seed = 3;
+            mouths.Clock = clock;
+            mouths.VoiceTotal = 3;
+            mouths.Stage = Owner + new Vector2(0, -210);
+            for (int v = 0; v < 3; v++)
+                mouths.Voices[mouths.VoiceCount++] = new ChoirVoiceDraw { Center = Camera + new Vector2(240 + v * 90, 190), Facing = 1, Variant = v, Life = 400 };
+            insets.Add(Frame(c => ChoirPresentation.Emit(c, mouths, sprites, hymn), Dark, false, $"choir-mouths-{(int)clock:D3}", clock, false));
+            frames++;
+        }
+        Sheet(shots, insets);
         return frames;
     }
 
     // A contact sheet of 1:1 crops (dark | bright side by side, two moments per row), written as a PNG on the CPU
     // (it is larger than a texture may be).
-    private static void Sheet(List<(string Label, Color[] Pixels, Color Backdrop)> shots)
+    private static void Sheet(List<(string Label, Color[] Pixels, Color Backdrop)> shots, List<Color[]> insets)
     {
         const int cropX = 190, cropY = 50, cropW = 980, cropH = 610, columns = 4;
-        int rows = (shots.Count + columns - 1) / columns, width = columns * cropW, height = rows * cropH;
+        // First row: the mouth insets at 4x (frames 0, 1, 2 of the three choristers, crop 300 x 140 px each).
+        const int insetX = 200, insetY = 130, insetW = 300, insetH = 140, zoom = 4;
+        int insetRow = insetH * zoom + 10;
+        int rows = (shots.Count + columns - 1) / columns, width = columns * cropW, height = insetRow + rows * cropH;
         var sheet = new Color[width * height];
+        for (int i = 0; i < insets.Count; i++)
+            for (int y = 0; y < insetH * zoom; y++)
+            for (int x = 0; x < insetW * zoom; x++)
+                sheet[y * width + i * (insetW * zoom + 10) + x] = insets[i][(insetY + y / zoom) * Width + insetX + x / zoom];
         for (int i = 0; i < shots.Count; i++)
         {
-            int ox = i % columns * cropW, oy = i / columns * cropH;
+            int ox = i % columns * cropW, oy = insetRow + i / columns * cropH;
             Color[] pixels = shots[i].Pixels;
             for (int y = 0; y < cropH; y++)
             for (int x = 0; x < cropW; x++)
