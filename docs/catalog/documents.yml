@@ -950,7 +950,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: ae717b10f5ee0b74dc49d0176a0e7f0d581012a8c7b077564c9bee09cd08c2bc
+  content_sha256: 194c2369b959dc9442b11dc7137d0f5b36fc3e2c5504e28ac295150fe5ec10e5
   document_type: spec
   status: provisional
   owners:
@@ -1282,7 +1282,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: ed9128d9d3031c0c4c64098d545f577a0d32394f18ee6288fab8618cb3a7a3d2
+  content_sha256: 04b6d67771fd2e085ab2097a106eba30c93e7f3cb5763fdd3ffaaf1ffaf67ac5
   document_type: spec
   status: provisional
   owners:
@@ -1464,7 +1464,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 814c3094f430693c1cef3fa435b87c81a2adabdccc00a5819465b668d25928ca
+  content_sha256: 06d0e9b8ac4dd5f194e101c4f1346f3bf1c33b9165613b19eeaa34f7f1516b7e
   document_type: status
   status: accepted
   owners:
