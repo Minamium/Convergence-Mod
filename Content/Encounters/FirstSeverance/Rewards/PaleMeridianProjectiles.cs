@@ -156,7 +156,8 @@ public sealed class MeridianHoldout : ModProjectile
 //  ai[0] = age in ticks, ai[1] = homing target (-1 none), ai[2] = MeridianShot.
 public sealed class MeridianRound : ModProjectile
 {
-    // Logical NPC roots (realLife or whoAmI) already hit; null in the type's template.
+    // Logical NPC roots (realLife or whoAmI) a heavy round (pierce 3) already hit; null in the type's template and for
+    // the pierce-1 notes and rounds, which end on their first hit and never allocate it.
     private HashSet<int>? hitRoots;
 
     internal MeridianShot Kind => (MeridianShot)(int)Projectile.ai[2];
@@ -188,7 +189,10 @@ public sealed class MeridianRound : ModProjectile
     public override bool CanHitPvp(Player target) => false;
     public override bool? CanCutTiles() => false;
     public override bool? CanHitNPC(NPC target) => hitRoots?.Contains(RitualTargeting.Root(target)) == true ? false : null;
-    public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) => (hitRoots ??= new HashSet<int>()).Add(RitualTargeting.Root(target));
+    public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+    {
+        if (Kind == MeridianShot.Heavy) (hitRoots ??= new HashSet<int>(PaleMeridianScore.HeavyPierce)).Add(RitualTargeting.Root(target));
+    }
 
     public override void AI()
     {
@@ -260,7 +264,7 @@ public sealed class MeridianLine : ModProjectile
 
     private bool Sane() => Projectile.owner >= 0 && Projectile.owner < Main.maxPlayers && float.IsFinite(Projectile.ai[0])
         && Projectile.ai[2] == MathF.Floor(Projectile.ai[2]) && Projectile.ai[2] >= 0 && Projectile.ai[2] < 2 * LatticeFlag
-        && PaleMeridianLattice.Valid(Origin, Direction, Node, Tier, Lattice) && Age > -64;
+        && PaleMeridianLattice.Valid(Origin, Direction, Node, Tier, Lattice) && Age > PaleMeridianLattice.EarliestAge;
 
     public override void AI()
     {

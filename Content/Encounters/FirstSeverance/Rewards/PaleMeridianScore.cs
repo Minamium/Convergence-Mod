@@ -162,13 +162,20 @@ internal static class PaleMeridianScore
     // 0..1 as the key rises out of the housing.
     internal static float KeyRiseAmount(float age) => Arrive((age - KeyRise) / KeyRiseTicks);
 
-    // Where a flying part is, relative to its seat in the gun frame (px; +x along the aim, +y toward the gun's top):
-    // it starts 64 px behind and 48 + 12 i px above, arrives with an ease-out over 12 ticks onto a point 3 px past
-    // the seat, then settles onto it over 4 ticks. Zero once seated; position and velocity are continuous.
+    // Where each part appears, relative to its seat in the gun frame (px; +x along the aim, +y toward the gun's top):
+    // ahead of and above its seat, in front of the owner, so it flies in over open ground and never across the face
+    // (domain-tested at a level aim). The spring housing, seated over the owner's shoulder, comes in flat.
+    private static readonly Vector2[] partStart = { new(48, 44), new(44, 40), new(46, 52), new(64, 14) };
+
+    internal static Vector2 PartStart(int part) => partStart[Math.Clamp(part, 0, PartCount - 1)];
+
+    // Where a flying part is, relative to its seat in the gun frame: it starts at PartStart, arrives with an ease-out
+    // over 12 ticks onto a point 3 px past the seat, then settles onto it over 4 ticks. Zero once seated; position
+    // and velocity are continuous.
     internal static Vector2 PartOffset(float age, int part)
     {
         part = Math.Clamp(part, 0, PartCount - 1);
-        Vector2 start = new(-64, 48 + 12 * part);
+        Vector2 start = partStart[part];
         float t = age - Launch(part);
         if (!(t > 0)) return start;
         Vector2 through = -Vector2.Normalize(start) * 3;

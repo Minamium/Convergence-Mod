@@ -254,6 +254,20 @@ class DollWeaponPlaybackContract(unittest.TestCase):
         self.assertIn("IsLooped = true, MaxInstances = 1", sustain)
         self.assertIn("RitualAudioDiagnostics.Track(cue, voice, gain)", self.source)
 
+    def test_owner_priority_keeps_voices_and_instances_for_the_local_player(self):
+        self.assertIn("OwnerReserve = 8, PeerInstances = 1", self.source)
+        play_for = body(self.source, "internal static SlotId PlayFor(")
+        self.assertIn("if (owner == Main.myPlayer) return Play(cue, at, volume);", play_for, "the local player's cue plays as Play")
+        self.assertLess(play_for.index("Audible"), play_for.index("PeerStyle(cue)"))
+        self.assertIn("voices.Count >= VoiceCap - OwnerReserve", play_for, "a peer never takes the last voices")
+        self.assertIn("style.Volume = Math.Clamp(volume, 0f, 1f)", play_for)
+        peer = body(self.source, "private static SoundStyle PeerStyle(")
+        self.assertIn('style.Identifier = "Convergence:DollWeapon:Peer:" + cue;', peer, "peers draw on their own instance pool")
+        self.assertIn("style.MaxInstances = PeerInstances;", peer)
+        sustain = body(self.source, "internal static void Sustain(")
+        self.assertIn("owner != Main.myPlayer && voices.Count >= VoiceCap - OwnerReserve", sustain, "a peer's loop keeps the reserve too")
+        self.assertIn("peerStyles.Clear()", body(self.source, "internal static void Reset("))
+
     def test_sustain_gain_lives_on_the_lease_so_a_loop_can_fade_in_from_zero(self):
         sustain = body(self.source, "internal static void Sustain(")
         self.assertIn("IsLooped = true, MaxInstances = 1, Volume = 1f", sustain, "the loop style is built at full volume")
@@ -293,7 +307,8 @@ class DollWeaponPlaybackContract(unittest.TestCase):
     def test_every_routed_cue_is_exported(self):
         routed = set()
         for path in (ROOT / "Client").rglob("*.cs"):
-            routed |= set(re.findall(r'DollWeaponAudio\.(?:Play|Note|Sustain)\((?:ref \w+, )?"(\w+)"', path.read_text(encoding="utf-8")))
+            routed |= set(re.findall(r'DollWeaponAudio\.(?:Play|PlayFor|Note|Sustain)\((?:ref \w+, |[\w.]+, )?"(\w+)"',
+                                     path.read_text(encoding="utf-8")))
         self.assertTrue(routed)
         self.assertLessEqual(routed, set(exports()))
         # A loop is only ever sustained, and only a loop is.
@@ -363,12 +378,37 @@ class PaleMeridianCues(unittest.TestCase):
 
     def test_call_site_volumes_match_the_audition(self):
         cues = registry()
-        calls = re.findall(r'DollWeaponAudio\.Play\("(Meridian\w+)", [^;]*?, (\d*\.?\d+)f\);', self.visuals)
+        calls = re.findall(r'DollWeaponAudio\.(?:Play|PlayFor)\((?:p\.owner, )?"(Meridian\w+)", [^;]*?, (\d*\.?\d+)f\);', self.visuals)
         self.assertTrue(calls)
         for name, volume in calls:
             with self.subTest(cue=name):
                 self.assertAlmostEqual(cues[name][2], float(volume), msg="the audition plays the call-site volume")
         self.assertAlmostEqual(cues["MeridianLoop"][2], float(re.search(r"LoopVolume = (\d*\.?\d+)f", self.visuals).group(1)))
+
+    def test_peers_cues_never_starve_the_owner(self):
+        held = body(self.visuals, "private void Holdout(") + body(self.visuals, "private void Line(")
+        self.assertNotRegex(held, r"DollWeaponAudio\.Play\(", "every held and release cue is owner-aware")
+        self.assertGreaterEqual(held.count("DollWeaponAudio.PlayFor(p.owner, "), 12)
+        self.assertIn("(p.owner == Main.myPlayer || PeerNote(a, muzzle))", held, "peer notes thin out")
+        start = self.visuals.index("private static bool PeerNote(")
+        thin = self.visuals[start:self.visuals.index(";", start)]
+        self.assertIn("% PaleMeridianScore.HeavyPeriod == 0", thin, "in overcharge a peer's note only on each bar's downbeat")
+        self.assertIn("PeerNoteRange * PeerNoteRange", thin)
+        hits = body(self.visuals, "public override void OnHitNPC(")
+        self.assertNotIn("PlayFor", hits, "hit ticks are the owner's own (the owner computes its hits)")
+
+    def test_closing_strikes_are_restrained(self):
+        cues = registry()
+        for name in ("MeridianStrikeFire", "MeridianLatticeFire"):
+            with self.subTest(cue=name):
+                self.assertLessEqual(cues[name][0], -11.5, "the closing strikes sit at T3 or below, never T4")
+        for fn in ("def meridian_strike_fire(", "def meridian_lattice_fire("):
+            start = self.generator.index(fn)
+            recipe = self.generator[start:self.generator.index("\n@cue(", start)]
+            self.assertIn("soft_gong(", recipe, "a resonant low strike carries the tail")
+            organ = re.search(r"organ_pad\(.*?\n\s*place\(mix, \w+, [\d.]+, (-\d+)\)", recipe, re.S)
+            self.assertIsNotNone(organ)
+            self.assertLessEqual(int(organ.group(1)), -16, "the organ stays quiet under the strike")
 
     def test_loop_is_pcm16_stereo_on_whole_ticks(self):
         import wave

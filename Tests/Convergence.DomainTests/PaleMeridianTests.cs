@@ -165,6 +165,9 @@ internal static partial class Program
             double average = PaleMeridianScore.CycleRaw(release, ranged) / (release + PaleMeridianScore.StowTicks);
             worst = Math.Max(worst, average / sustained);
             AssertEqual(true, average < sustained, $"release at {release} averages {average:F1}/tick against {sustained:F1}");
+            // An item swap removes the gun at once (no pack-away): still below holding with a new press one tick later.
+            double swapped = PaleMeridianScore.CycleRaw(release, ranged) / (release + 1);
+            AssertEqual(true, swapped < sustained, $"release at {release} then a swap averages {swapped:F1}/tick against {sustained:F1}");
         }
         AssertEqual(true, worst < .94, $"the best release cycle stays well under holding ({worst:F3})");
         AssertDollNear(21.45, PaleMeridianScore.CycleRaw(PaleMeridianScore.Ignite, ranged) / ranged, .01,
@@ -266,6 +269,11 @@ internal static partial class Program
             for (int i = 0; i < n; i++) AssertEqual(10f, live[i].HalfWidth, "lattice lines are 20 px wide");
         }
         AssertEqual(0, PaleMeridianLattice.Live(origin, axis, node, 1, true, 3, live), "no lattice at tier 1");
+        // Every real spawn age passes the line's state check (Age > EarliestAge), across the whole node range.
+        for (float n = PaleMeridianLattice.NodeMin; n <= PaleMeridianLattice.NodeMax; n += 1)
+            AssertEqual(true, PaleMeridianLattice.LatticeStart(n) > PaleMeridianLattice.EarliestAge, $"lattice start at node {n} is accepted");
+        AssertEqual(true, PaleMeridianLattice.LatticeStart(PaleMeridianLattice.NodeMax) > PaleMeridianLattice.EarliestAge,
+            "the farthest node's lattice is accepted");
         // The split begins as the meridian's head passes the node.
         foreach (float n in new[] { PaleMeridianLattice.NodeMin, 640f, PaleMeridianLattice.NodeMax })
         {
@@ -366,19 +374,30 @@ internal static partial class Program
         AssertEqual(false, PaleMeridianLattice.Valid(origin, axis, 640, 7, false), "an unknown tier is rejected");
     }
 
-    [DomainTest("Pale Meridian parts fly continuously onto their seats")]
+    [DomainTest("Pale Meridian parts fly continuously onto their seats from in front of the owner, clear of the face")]
     private static void PaleMeridianPartFlight()
     {
+        // Level aim to the right, both facings' frames being mirror images: the gun frame is the world with +y up.
+        Vector2 pivot = new(2000, 1500), axis = Vector2.UnitX;
+        Vector2 muzzle = PaleMeridianRig.World(pivot, axis, false, PaleMeridianRig.Muzzle);
+        Vector2 Frame(Vector2 world) => new(world.X - pivot.X, pivot.Y - world.Y);
         for (int part = 0; part < PaleMeridianScore.PartCount; part++)
         {
             int launch = PaleMeridianScore.Launch(part), seat = PaleMeridianScore.Seats[part];
             Vector2 previous = PaleMeridianScore.PartOffset(launch, part);
-            AssertEqual(new Vector2(-64, 48 + 12 * part), previous, "each part starts behind and above its seat");
+            AssertEqual(PaleMeridianScore.PartStart(part), previous, "each part starts at its start point");
+            Vector2 centre = Frame(DollSpritePlacement.World(DollArtAnchors.MeridianParts.Seats[part] + PaleMeridianRig.PartSize[part] * .5f,
+                DollArtAnchors.MeridianGun.Muzzle, muzzle, 0, DollFlip.None));
+            Vector2 start = centre + previous;
+            AssertEqual(true, start.X >= 40 && start.Y >= centre.Y + 10, $"part {part} appears ahead of the owner and above its seat");
             for (float age = launch; age <= seat + 4; age += .0625f)
             {
                 Vector2 offset = PaleMeridianScore.PartOffset(age, part);
                 AssertEqual(true, Vector2.Distance(offset, previous) <= 3.5f, $"part {part} moves continuously at age {age}");
                 previous = offset;
+                // The owner's eyes and brow: within 10 px of the centre line, 9-21 px above the centre.
+                Vector2 at = centre + offset;
+                AssertEqual(false, MathF.Abs(at.X) <= 10 && at.Y >= 9 && at.Y <= 21, $"part {part} flies clear of the face at age {age}");
             }
             AssertEqual(Vector2.Zero, PaleMeridianScore.PartOffset(seat, part), "seated exactly on its tick");
             AssertEqual(Vector2.Zero, PaleMeridianScore.PartOffset(seat + 100, part), "and stays seated");
@@ -395,7 +414,8 @@ internal static partial class Program
         AssertEqual(DollArtAnchors.MeridianGun.KeySeat, DollArtAnchors.MeridianBare.KeySeat, "bare gun shares the key seat");
         AssertEqual(3, DollArtAnchors.MeridianGun.K, "the gun is the k = 3 rung");
         AssertEqual(174f, DollArtAnchors.MeridianGun.Width * DollSpritePlacement.WorldPerTexel, "174 px long, never rescaled");
-        float tolerance = DollSpritePlacement.WorldPerTexel * DollArtAnchors.MeridianGun.K;
+        // The shared rule: within one dot, and a dot is 2 world px whatever the export rung k.
+        float tolerance = DollSpritePlacement.WorldPerTexel;
         Vector2 pivot = new(2000, 1500);
         for (int turn = 0; turn < 16; turn++)
         {
@@ -424,6 +444,10 @@ internal static partial class Program
             AssertEqual(true, seat.X >= 0 && seat.Y >= 0 && seat.X < DollArtAnchors.MeridianGun.Width && seat.Y < DollArtAnchors.MeridianGun.Height,
                 "part seats are on the gun canvas");
         AssertEqual(PaleMeridianScore.PartCount, DollArtAnchors.MeridianParts.Seats.Length, "one seat per part");
+        AssertEqual(PaleMeridianScore.PartCount, PaleMeridianRig.PartSize.Length, "one size per part");
+        foreach (Vector2 size in PaleMeridianRig.PartSize)
+            AssertEqual(true, size.X >= 1 && size.Y >= 1 && size.X <= DollArtAnchors.MeridianParts.FrameWidth
+                && size.Y <= DollArtAnchors.MeridianParts.FrameHeight, "each part fits its cell");
         AssertEqual(4 * DollArtAnchors.MeridianParts.FrameWidth, DollArtAnchors.MeridianParts.Width, "four part cells");
         AssertEqual(4 * DollArtAnchors.MeridianKey.FrameWidth, DollArtAnchors.MeridianKey.Width, "four key frames");
         AssertEqual(new Vector2(DollArtAnchors.MeridianKey.FrameWidth / 2f, DollArtAnchors.MeridianKey.FrameHeight),

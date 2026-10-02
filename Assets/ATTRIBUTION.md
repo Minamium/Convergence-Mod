@@ -4,7 +4,7 @@
 
 ### Pale Meridian weapon cues — 2026-10-03
 
-Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
+Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air, a soft-mallet gong resonance for the two closing strikes); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
 
 | Key | Store or repository file | Source | Source SHA256 |
 |---|---|---|---|
@@ -252,17 +252,17 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeFire.ogg`
 - Asset ID: doll-weapon-sfx-meridianstrikefire-20261003
-- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.11 s)
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.95 s)
 - Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
 - Creation/acquisition date: 2026-10-03
 - Source type: public-domain
 - Source work and URL: metal_pot in the table above as selected by the cue recipe; remaining layers original synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.0 LUFS (played at volume 0.85: -11.4 LUFS effective), true peak -1.2 dBFS; pinned Ogg serial
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.85: -12.9 LUFS effective), true peak -4.8 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
-- SHA256: `d4cc0fb82e159d9552abb82b21be5ab753d7fd30da31c6edc3337bac136d9bb7`
+- SHA256: `6e2d5b324a24c62d4af04db40555a3338a289ab7e920cf771388ae0f4bb03b1f`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeMiss.ogg`
 - Asset ID: doll-weapon-sfx-meridianstrikemiss-20261003
@@ -294,17 +294,17 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLatticeFire.ogg`
 - Asset ID: doll-weapon-sfx-meridianlatticefire-20261003
-- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.40 s)
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.68 s)
 - Creator: synthesis and layering by Convergence with owner-directed Claude assistance
 - Creation/acquisition date: 2026-10-03
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -2.3 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -5.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
-- SHA256: `5b52985f2957c0fdbeb6504cf4e2a3548769db15c091b96adfa34ea65a91cb30`
+- SHA256: `36adbab1447815725626b7d71c4f4812df2278795a615b0e22bebe717551f01b`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHit.ogg`
 - Asset ID: doll-weapon-sfx-meridianhit-20261003

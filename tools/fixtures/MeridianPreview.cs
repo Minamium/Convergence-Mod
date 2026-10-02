@@ -2,14 +2,17 @@
 // production code) with the real compiled DollPixel.fxc and DollMeridianEnergy.fxc, the exported DollWeapons PNGs and
 // the Luminance noise textures read from the installed Luminance package. Each frame follows the in-game order of the
 // shared Doll weapon layer: commands are recorded, Front sprites render into the half-resolution Art target and light
-// into the Light target; then the backdrop, a 20x42 stand-in player and the two composites in front of it. Zoom 1.
+// into the Light target; then the backdrop, the Back stratum (the wind-up key), a stand-in player in Terraria's
+// 20x42 hitbox and the two composites in front of it. Zoom 1.
 // Frames walk the build-up (arrival, notes, part flights and seats, the key, the wind, the overcharge with heavy
 // rounds), a tier-3 and a tier-2 release (forecast, meridian, split, lattice, residue), a failed release, a peer's
 // view and Reduced Effects, on dark #121017 and bright #bac6d6 ground, and are composed into contact sheets.
 // Checks: nothing over budget and no material error; every light dot is an exact palette tone (own light) and is
 // ringed by ink or light; the live meridian body shows 4+ ramp tones with a pale (pearl-violet, bone, white) share of
-// at least 40%; the gun's art stays readable (little of it under light) and is drawn every held frame; a peer's
-// light is drawn at 65%. Offline only: no Terraria, no game launch, no peer, FPS or in-game readability claim.
+// at least 40%; the gun's art stays readable (little of it under light) and is drawn every held frame; the wind-up
+// key is on the Back stratum and no front art covers the stand-in's face; a peer's light is drawn at 65%; Reduced
+// Effects applies no glow pass; eight players' weapons fit the budget in a handful of light batches. Offline only:
+// no Terraria, no game launch, no peer, FPS or in-game readability claim.
 #nullable disable
 using System;
 using System.Collections.Generic;
@@ -43,7 +46,8 @@ internal static class MeridianPreview
     private static readonly List<string> failures = new();
     private static readonly List<string> notes = new();
     private static string output;
-    private static bool artDrawn, lightDrawn;
+    private static bool artDrawn, lightDrawn, backDrawn;
+    private static CountingMaterial energy;
     private static int frames;
 
     private static Vector2 Player => Camera + PlayerScreen;
@@ -83,7 +87,8 @@ internal static class MeridianPreview
             meridian.Bare = Load(Path.Combine(textures, "MeridianBare.png"));
             meridian.Parts = Load(Path.Combine(textures, "MeridianParts.png"));
             meridian.Key = Load(Path.Combine(textures, "MeridianKey.png"));
-            meridian.Energy = new MeridianEnergyMaterial(() => meridianEffect, () => noiseA, () => noiseB);
+            energy = new CountingMaterial(new MeridianEnergyMaterial(() => meridianEffect, () => noiseA, () => noiseB));
+            meridian.Energy = energy;
             pixel = new Texture2D(device, 1, 1);
             pixel.SetData(new[] { Color.White });
             batch = new SpriteBatch(device);
@@ -109,6 +114,22 @@ internal static class MeridianPreview
             ? $"PASS {frames} offline Pale Meridian frames in {output}. Offline only; no native game, peer, FPS or in-game readability acceptance."
             : $"{failures.Count} check(s) failed; {frames} frames rendered into {output}.");
         return failures.Count == 0 ? 0 : 1;
+    }
+
+    // The real material, counting how often each of its passes is applied in a frame.
+    private sealed class CountingMaterial : IDollEnergyMaterial
+    {
+        private readonly IDollEnergyMaterial inner;
+        internal readonly int[] Applied = new int[4];
+
+        internal CountingMaterial(IDollEnergyMaterial inner) => this.inner = inner;
+        internal void Reset() => Array.Clear(Applied);
+
+        public bool Apply(GraphicsDevice device, in DollEnergyContext context, int pass)
+        {
+            if ((uint)pass < (uint)Applied.Length) Applied[pass]++;
+            return inner.Apply(device, in context, pass);
+        }
     }
 
     private static Texture2D Load(string path)
@@ -146,54 +167,84 @@ internal static class MeridianPreview
 
     // ---- Scenes --------------------------------------------------------------------------------
 
-    // One frame of the weapon: the held gun (or its pack-away), its rounds and its release lines.
+    // One frame of the weapon: the held gun (or its pack-away), its rounds and its release lines. Scene.Lobby draws
+    // eight players' weapons at once (the first is the local player's, the rest are peers): half overcharging, half
+    // releasing tier 3, to load the shared budget the way a full lobby does.
     private sealed record Scene(string Label, float Age, float Aim, bool Released = false, float Stowed = 0, int Fired = 0, int Tier = 0,
-        float Node = 360, bool Peer = false, bool Reduced = false, float Gravity = 1, bool Lines = true, bool Gun = true, bool Rounds = true);
+        float Node = 360, bool Peer = false, bool Reduced = false, float Gravity = 1, bool Lines = true, bool Gun = true, bool Rounds = true,
+        bool Lobby = false);
 
     private static Vector2 Unit(float angle) => new(MathF.Cos(angle), MathF.Sin(angle));
 
+    internal const int LobbySize = 8;
+
+    private static Vector2 LobbyOffset(int i) => new(250 * (i % 4), -280 * (i / 4));
+
+    private static Scene LobbyMember(Scene scene, int i)
+        => i % 2 == 0 ? scene with { Lobby = false, Peer = i > 0, Age = 384.5f, Released = false, Stowed = 0, Fired = 0, Tier = 0 }
+            : scene with { Lobby = false, Peer = true, Age = 420, Released = true, Stowed = 12 + i, Fired = 3, Tier = 3, Node = 300 + 40 * i };
+
+    // Every weapon of the frame, pass by pass in MeridianPass order, as MeridianLayerSource records them in game.
     private static void Draw(DollWeaponCanvas c, Scene scene)
     {
-        int seed = 4217;
-        float age = scene.Age;
-        Vector2 aim = Unit(scene.Aim);
-        var view = new MeridianGunView(Player, scene.Aim, age, scene.Released, scene.Stowed, scene.Fired, scene.Gravity, scene.Peer, seed);
-        // Rounds already fired fly straight on along the aim (no homing offline).
-        if (scene.Rounds)
+        int members = scene.Lobby ? LobbySize : 1;
+        Span<Vector2> trail = stackalloc Vector2[6];
+        for (int pass = 0; pass < MeridianPresentation.PassCount; pass++)
         {
-            float now = scene.Released ? age + scene.Stowed : age;
-            Span<Vector2> trail = stackalloc Vector2[6];
-            for (int pass = 0; pass < 2; pass++)
-            for (int shotAge = Math.Max(1, (int)now - 40); shotAge <= (int)MathF.Min(now, age); shotAge++)
+            var stage = (MeridianPass)pass;
+            for (int member = 0; member < members; member++)
             {
-                MeridianShot kind = PaleMeridianScore.Shot(shotAge);
-                if (kind == MeridianShot.None) continue;
-                float flight = now - shotAge;
-                float speed = kind == MeridianShot.Heavy ? PaleMeridianScore.HeavyLaunch : PaleMeridianScore.NoteSpeed;
-                Vector2 muzzle = Player + aim * PaleMeridianRig.MuzzleReach;
-                Vector2 head = muzzle + aim * speed * flight;
-                if (Vector2.Distance(head, Player) > 1500) continue;
-                int points = MeridianPresentation.TrailPoints(kind), n = 0;
-                for (int k = points; k >= 1; k--)
+                Scene weapon = scene.Lobby ? LobbyMember(scene, member) : scene;
+                Vector2 at = Player + (scene.Lobby ? LobbyOffset(member) : Vector2.Zero);
+                int seed = 4217 + 977 * member;
+                float age = weapon.Age;
+                Vector2 aim = Unit(weapon.Aim);
+                if (stage <= MeridianPass.LineLight)
                 {
-                    float back = flight - k * .5f;
-                    if (back < 0) continue;
-                    trail[n++] = muzzle + aim * speed * back;
+                    if (!weapon.Released || weapon.Fired <= 0 || !weapon.Lines) continue;
+                    Vector2 origin = at + aim * PaleMeridianRig.MuzzleReach;
+                    MeridianPresentation.EmitLine(c, meridian, new MeridianLineView(origin, aim, weapon.Node, weapon.Fired, false, weapon.Stowed,
+                        weapon.Peer, seed), stage);
+                    if (PaleMeridianScore.HasLattice(weapon.Fired))
+                        MeridianPresentation.EmitLine(c, meridian, new MeridianLineView(origin, aim, weapon.Node, weapon.Fired, true,
+                            PaleMeridianLattice.LatticeStart(weapon.Node) + weapon.Stowed, weapon.Peer, seed), stage);
                 }
-                var round = new MeridianRoundView(head, aim * speed, kind, flight, scene.Peer, seed + shotAge);
-                if (pass == 0) MeridianPresentation.EmitRoundWake(c, meridian, round, trail[..n]);
-                else MeridianPresentation.EmitRoundHead(c, meridian, round);
+                else if (stage == MeridianPass.Gun)
+                {
+                    if (weapon.Gun)
+                        MeridianPresentation.EmitGun(c, meridian, new MeridianGunView(at, weapon.Aim, age, weapon.Released, weapon.Stowed, weapon.Fired,
+                            weapon.Gravity, weapon.Peer, seed));
+                }
+                else if (weapon.Rounds)
+                {
+                    // Rounds already fired fly straight on along the aim (no homing offline).
+                    float now = weapon.Released ? age + weapon.Stowed : age;
+                    for (int shotAge = Math.Max(1, (int)now - 40); shotAge <= (int)MathF.Min(now, age); shotAge++)
+                    {
+                        MeridianShot kind = PaleMeridianScore.Shot(shotAge);
+                        if (kind == MeridianShot.None) continue;
+                        float flight = now - shotAge;
+                        float speed = kind == MeridianShot.Heavy ? PaleMeridianScore.HeavyLaunch : PaleMeridianScore.NoteSpeed;
+                        Vector2 muzzle = at + aim * PaleMeridianRig.MuzzleReach;
+                        Vector2 head = muzzle + aim * speed * flight;
+                        if (Vector2.Distance(head, at) > 1500) continue;
+                        var round = new MeridianRoundView(head, aim * speed, kind, flight, weapon.Peer, seed + shotAge);
+                        if (stage == MeridianPass.RoundHead)
+                        {
+                            MeridianPresentation.EmitRoundHead(c, meridian, round);
+                            continue;
+                        }
+                        int points = MeridianPresentation.TrailPoints(kind), n = 0;
+                        for (int k = points; k >= 1; k--)
+                        {
+                            float back = flight - k * .5f;
+                            if (back < 0) continue;
+                            trail[n++] = muzzle + aim * speed * back;
+                        }
+                        MeridianPresentation.EmitRoundWake(c, meridian, round, trail[..n]);
+                    }
+                }
             }
-        }
-        if (scene.Gun) MeridianPresentation.EmitGun(c, meridian, view);
-        if (scene.Released && scene.Fired > 0 && scene.Lines)
-        {
-            Vector2 origin = Player + aim * PaleMeridianRig.MuzzleReach;
-            float lineAge = scene.Stowed;
-            MeridianPresentation.EmitLine(c, meridian, new MeridianLineView(origin, aim, scene.Node, scene.Fired, false, lineAge, scene.Peer, seed));
-            if (PaleMeridianScore.HasLattice(scene.Fired))
-                MeridianPresentation.EmitLine(c, meridian, new MeridianLineView(origin, aim, scene.Node, scene.Fired, true,
-                    PaleMeridianLattice.LatticeStart(scene.Node) + lineAge, scene.Peer, seed));
         }
     }
 
@@ -265,13 +316,26 @@ internal static class MeridianPreview
 
     private static Layers Render(Scene scene, Color backdrop, bool players = true)
     {
+        energy.Reset();
         Record(c => Draw(c, scene), scene.Reduced, 1000 + scene.Age + scene.Stowed);
         if (canvas.Dropped > 0) failures.Add($"{scene.Label}: {canvas.Dropped} command(s) over budget");
+        backDrawn = canvas.HasBack;
         device.SetRenderTarget(frame);
         RenderLayers();
         device.Clear(backdrop);
         if (players) Backdrop(backdrop == Bright);
-        if (players) Players();
+        // The Back stratum (the wind-up key) between the ground and the players, as DollWeaponLayer draws it after
+        // DrawProjectiles; then the players; then the Front composites.
+        if (players && canvas.HasBack)
+        {
+            DollDeviceState back = DollDeviceState.Capture(device, false);
+            device.BlendState = BlendState.AlphaBlend;
+            device.DepthStencilState = DepthStencilState.None;
+            device.RasterizerState = RasterizerState.CullNone;
+            canvas.DrawBack(device, pixelEffect, Camera, Matrix.Identity);
+            back.Restore(device);
+        }
+        if (players) Players(scene.Lobby ? LobbySize : 1);
         if (artDrawn || lightDrawn)
         {
             DollDeviceState state = DollDeviceState.Capture(device, false);
@@ -301,13 +365,22 @@ internal static class MeridianPreview
         batch.End();
     }
 
-    // The 20 x 42 px stand-in player, drawn between the strata as in game.
-    private static void Players()
+    // The stand-in player inside Terraria's 20 x 42 px hitbox (centred on the rotated centre): a 16 x 16 head over the
+    // top and the body below, drawn between the strata as in game. Face: the head's top 8 px (brow and eyes, which the
+    // art must never hide; a level gun's stock and spring-housing outline reach the lower head, as a shouldered rifle
+    // does; the whole-head overlap is reported and the real sprite is an in-game check).
+    private static readonly Rectangle Head = new(-8, -21, 16, 16), Face = new(-8, -21, 16, 8);
+
+    private static void Players(int count)
     {
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
-        Point at = new((int)PlayerScreen.X, (int)PlayerScreen.Y);
-        batch.Draw(pixel, new Rectangle(at.X - 10, at.Y - 21, 20, 42), new Color(52, 60, 84));
-        batch.Draw(pixel, new Rectangle(at.X - 8, at.Y - 37, 16, 16), new Color(214, 184, 160));
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 offset = count > 1 ? LobbyOffset(i) : Vector2.Zero;
+            Point at = new((int)(PlayerScreen.X + offset.X), (int)(PlayerScreen.Y + offset.Y));
+            batch.Draw(pixel, new Rectangle(at.X - 10, at.Y - 5, 20, 26), new Color(52, 60, 84));
+            batch.Draw(pixel, new Rectangle(at.X + Head.X, at.Y + Head.Y, Head.Width, Head.Height), new Color(214, 184, 160));
+        }
         batch.End();
     }
 
@@ -323,10 +396,18 @@ internal static class MeridianPreview
         scenes.AddRange(Release(-.08f, 3, 420, 360));
         scenes.AddRange(Release(MathF.PI - .2f, 2, 300, 300));
         scenes.Add(new Scene("miss", 260, -.1f, true, 6, 0));
-        int gunFrames = 0, coveredWorst = 0, offPalette = 0, bare = 0;
+        int gunFrames = 0, coveredWorst = 0, offPalette = 0, bare = 0, faceWorst = 0, headWorst = 0, keyFrames = 0;
+        string coveredAt = "-", faceAt = "-";
+        int tiltedWorst = 0;
         foreach (Scene scene in scenes)
         {
             Layers layers = Render(scene, Probe, false);
+            // The key stands behind the players (Back) from its rise until it has sunk back after a release.
+            if (!scene.Released && scene.Age >= PaleMeridianScore.KeyRise + 2)
+            {
+                if (!backDrawn) failures.Add($"{scene.Label}: the wind-up key is not on the Back stratum");
+                else keyFrames++;
+            }
             // Every own light dot is an exact palette tone (premultiplied at alpha 1).
             for (int i = 0; i < layers.Light.Length; i++)
             {
@@ -349,12 +430,61 @@ internal static class MeridianPreview
                 if (artDots < 400 && scene.Age >= 4) failures.Add($"{scene.Label}: the gun drew only {artDots} art dots");
                 else gunFrames++;
                 // The gun's art stays readable: light may cross it only as pins and flashes.
-                if (!scene.Released && scene.Age > 20) coveredWorst = Math.Max(coveredWorst, covered * 100 / artDots);
+                if (!scene.Released && scene.Age > 20 && covered * 100 / artDots > coveredWorst)
+                {
+                    coveredWorst = covered * 100 / artDots;
+                    coveredAt = scene.Label;
+                }
             }
+            // Front art never hides the owner's face (Face) at a level aim (within 0.15 rad); a tilted aim swings the
+            // receiver toward the head as any held gun does, which is reported. The rest of the head is reported too.
+            int face = ArtDots(layers, Face);
+            if (MathF.Abs(MathF.Sin(scene.Aim)) > MathF.Sin(.15f)) tiltedWorst = Math.Max(tiltedWorst, face);
+            else if (face > faceWorst)
+            {
+                faceWorst = face;
+                faceAt = $"{scene.Label} (aim {scene.Aim:0.##})";
+            }
+            headWorst = Math.Max(headWorst, ArtDots(layers, Head));
         }
+        if (faceWorst > 0) failures.Add($"the weapon's front art covers up to {faceWorst} dot(s) of the owner's face ({faceAt})");
+        if (keyFrames == 0) failures.Add("no frame drew the wind-up key");
+        notes.Add($"front art over the stand-in head: face 0 dots at level aims ({tiltedWorst} of {Face.Width * Face.Height / 4} at most "
+            + $"with the aim 0.3 rad up), whole head at most {headWorst} of {Head.Width * Head.Height / 4} dots; key on Back in {keyFrames} frames");
+        // A steep aim swings the gun's receiver across the head, as any held gun does (informational).
+        var steep = new List<string>();
+        foreach (float aim in new[] { -MathF.PI / 2, -MathF.PI / 3, -MathF.PI / 4, MathF.PI / 4 })
+        {
+            Layers layers = Render(new Scene("steep", 330, aim, Rounds: false), Probe, false);
+            steep.Add($"{aim * 180 / MathF.PI:0} deg: face {ArtDots(layers, Face)} of {Face.Width * Face.Height / 4}");
+        }
+        notes.Add("front art over the face at steep aims (informational): " + string.Join(", ", steep));
+
+        // Reduced Effects removes the glow discs (no DollMeridianEnergy glow pass at all) and keeps the rest.
+        foreach (Scene scene in new[]
+                 {
+                     new Scene("glow-held", 384.5f, -.12f), new Scene("glow-release", 420, -.08f, true, 12, 3, 3, 360),
+                 })
+        {
+            Render(scene, Probe, false);
+            int fullGlow = energy.Applied[MeridianEnergyMaterial.GlowPass];
+            Layers reduced = Render(scene with { Reduced = true }, Probe, false);
+            int glow = energy.Applied[MeridianEnergyMaterial.GlowPass], reducedLit = 0;
+            foreach (Color c in reduced.Light) if (c.A > 0) reducedLit++;
+            if (fullGlow == 0) failures.Add($"{scene.Label}: no glow drawn at full effects (check is vacuous)");
+            if (glow > 0) failures.Add($"{scene.Label}: Reduced Effects still drew {glow} glow batch(es)");
+            if (reducedLit == 0) failures.Add($"{scene.Label}: Reduced Effects drew no light at all");
+        }
+
+        // A full lobby: eight players (four overcharging, four releasing tier 3) fit the shared budget, and the line
+        // passes stay one batch each however many lines are alive.
+        Render(new Scene("lobby", 384.5f, -.08f, Lobby: true), Probe, false);
+        int batches = canvas.Mark().Batches;
+        if (batches > 6) failures.Add($"eight players' weapons take {batches} light batches (> 6)");
+        notes.Add($"eight players' weapons: {batches} light batches of {DollWeaponCanvas.MaxEnergyBatches}, nothing over budget");
         if (offPalette > 0) failures.Add($"{offPalette} light dot(s) off the Doll palette");
         if (bare > 0) failures.Add($"{bare} light dot(s) border the backdrop without an ink outline");
-        if (coveredWorst > 12) failures.Add($"light covers up to {coveredWorst}% of the gun's art while it is held");
+        if (coveredWorst > 12) failures.Add($"light covers up to {coveredWorst}% of the gun's art while it is held ({coveredAt})");
         notes.Add($"held gun drawn in {gunFrames} frames; at most {coveredWorst}% of its art dots under light");
 
         // The live meridian body: 4+ ramp tones and a pale share of at least 40% of its lit dots.
@@ -409,6 +539,21 @@ internal static class MeridianPreview
 
     private static Color Tone(DollTone tone) => DollPixelArt.Palette[(int)tone];
 
+    // Front art dots over a rectangle in the local player's frame (world px from the rotated centre).
+    private static int ArtDots(Layers layers, Rectangle area)
+    {
+        int count = 0;
+        for (int y = area.Top; y < area.Bottom; y += 2)
+        for (int x = area.Left; x < area.Right; x += 2)
+        {
+            Vector2 dot = (Player + new Vector2(x, y) - canvas.Origin) * DollWeaponCanvas.DotScale;
+            int dx = (int)MathF.Floor(dot.X), dy = (int)MathF.Floor(dot.Y);
+            if (dx < 0 || dy < 0 || dx >= art.Width || dy >= art.Height) continue;
+            if (layers.Art[dy * art.Width + dx].A > 0) count++;
+        }
+        return count;
+    }
+
     private static int BareLight(Layers layers)
     {
         Color[] pixels = layers.Frame;
@@ -452,6 +597,7 @@ internal static class MeridianPreview
         tier2.Add(new Scene("M8", 260, -.1f, true, 8, 0));
         tier2.Add(new Scene("RT3S14", 420, -.08f, true, 14, 3, 3, 360, Reduced: true));
         tier2.Add(new Scene("PT3S14", 420, -.08f, true, 14, 3, 3, 360, Peer: true));
+        tier2.Add(new Scene("8P", 384.5f, -.08f, Lobby: true));
 
         var gunCrop = new Rectangle((int)PlayerScreen.X - 110, (int)PlayerScreen.Y - 150, 460, 230);
         var wideCrop = new Rectangle((int)PlayerScreen.X - 110, (int)PlayerScreen.Y - 420, 1180, 640);

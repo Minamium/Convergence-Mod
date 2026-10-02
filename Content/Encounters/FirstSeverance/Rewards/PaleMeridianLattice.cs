@@ -34,8 +34,9 @@ internal static class PaleMeridianLattice
     internal const int RippleStep = 2, LatticeTransit = 6, LatticeTail = 4;
     internal const int LatticeLive = LatticeTransit + LatticeTail - 1;
     internal const int Rings = 3;
-    // The projectiles stay (harmless) while their residue cools.
-    internal const int MeridianEnd = 40, LatticeEnd = 36;
+    // The projectiles stay (harmless) while their residue cools. A replicated line age at or below EarliestAge is
+    // rejected as corrupt; every real LatticeStart lies above it (domain-tested over the whole node range).
+    internal const int MeridianEnd = 40, LatticeEnd = 36, EarliestAge = -64;
     internal const float Tier3Spacing = 120, Tier3HalfSpan = 240, Tier2Spacing = 100, Tier2HalfSpan = 160;
     internal const int MaxLines = 5, MaxSegments = 2 * MaxLines;
 

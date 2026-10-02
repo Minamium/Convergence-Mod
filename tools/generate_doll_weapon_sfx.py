@@ -18,7 +18,7 @@ from the file stem (generate_ebon_sfx.write_ogg), so a rerun, or --only, is byte
 Requires numpy, scipy and soundfile (local audio tools, not CI).
 
 Run: py -3.12 tools/generate_doll_weapon_sfx.py [--store DIR] [--only CUE,...] [--output DIR]
-     [--preview DIR] [--attribution-section FILE]
+     [--preview DIR] [--attribution-section FILE] [--previous DIR]
 """
 import argparse
 import hashlib
@@ -617,6 +617,33 @@ def spring_twang(freq, dur, rng, side=0.0):
     return pan(y * np.clip(t / 0.0008, 0, 1), side)
 
 
+def soft_gong(freq, dur, rng, decay=1.2, bloom=0.08, side=0.0):
+    """A soft-mallet gong resonance for the closing strikes (the owner's pick for big finishing sounds: a quiet organ
+    under a soft gong-like ring with a long tail, never an organ played out loud). Not a tuned bell: a strong low
+    fundamental with a beating twin mode, an inharmonic upper cluster (no octave or fifth partials) that blooms in over
+    the first ~0.1 s and dies faster, a slight downward sag in pitch, a felt-mallet attack with no click, and the
+    whole ring low-passed so it hums rather than chimes."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    sag = 1 - 0.004 * (1 - np.exp(-t / 0.4))
+    y = np.zeros(n)
+    for ratio, amp, life in ((1.0, 1.0, 1.0), (1.007, 0.6, 0.9), (1.43, 0.42, 0.6), (1.89, 0.32, 0.5), (2.36, 0.24, 0.42),
+                             (2.95, 0.17, 0.35), (3.61, 0.11, 0.3), (4.43, 0.06, 0.25)):
+        f = freq * ratio * (1 + rng.uniform(-0.002, 0.002))
+        if f >= dsp.CEILING_HZ:
+            continue
+        env = np.exp(-t / (decay * life))
+        if ratio > 1.2:
+            env = env * (1 - np.exp(-t / (bloom * ratio ** 0.5)))
+        y += amp * np.sin(2 * np.pi * np.cumsum(f * sag) / RATE + rng.uniform(0, 6.28)) * env
+    y *= np.clip(t / 0.014, 0, 1) ** 2
+    k = round(0.07 * RATE)
+    felt = lp(noise(k, rng), 380).mean(axis=1) * np.exp(-np.arange(k) / RATE / 0.018)
+    y[:k] += felt / max(1e-9, np.abs(felt).max()) * 0.25
+    out = lp(pan(y / max(1e-9, np.abs(y).max()), side), 2200)
+    return out
+
+
 def whoosh(dur, rng, low=700, high=4200, rise=True):
     """Band-swept air: a filter sweeping up (or down) across filtered noise, swelling and fading."""
     n = round(dur * RATE)
@@ -850,24 +877,28 @@ def meridian_strike_warn(s, rng):
     return room(mix, 0.1, 0.42, 0.12)
 
 
-@cue("MeridianStrikeFire", -10.0, "Meridian release", 1.2, 0.85,
-     "子午線が撃ち出される（放してから10tick）。櫛の歯を全部いっせいに弾いた明るい F マイナーの和音（F5 A♭5 C6 E♭6 F6 A♭6 C7）、"
-     "真鍮のハンマー、鋭い空気の裂ける音、減衰するオルガンの一撃と低い胴鳴り。段階が高いほど大きく鳴らす（.85 / .72 / .60）。")
+@cue("MeridianStrikeFire", -11.5, "Meridian release", 2.0, 0.85,
+     "子午線が撃ち出される（放してから10tick）。櫛の歯を全部いっせいに弾いた F マイナーの和音（F5 A♭5 C6 E♭6 F6 A♭6 C7）と"
+     "短い真鍮のハンマーで打ち出し、その下で柔らかな銅鑼のような低い響き（C3）が長く尾を引き、静かなオルガン（Fm7）が"
+     "息を吸うように重なって消える。大きく鳴らさず余韻で締める。段階が高いほど大きく鳴らす（.85 / .72 / .60）。")
 def meridian_strike_fire(s, rng):
-    mix = seconds(1.25)
+    mix = seconds(2.1)
     for i, note in enumerate(("F5", "Ab5", "C6", "Eb6", "F6", "Ab6", "C7")):
-        place(mix, pan(dsp.box_tine(dsp.hz(note), 1.0, rng), -0.6 + 0.2 * i), 0.002 * i, -6 + 0.3 * i)
-    lay(mix, s, "metal_pot", 0.088, 0.42, 0.0, -6, rate=1.05, hp_=900, fade_out=0.1)
-    place(mix, pan(dsp.brass_click(rng, 1200, decay=0.012, thud=1.0), 0.0), 0.0, -4)
-    k = round(0.09 * RATE)
-    crack = hp(noise(k, rng), 2400) * np.exp(-np.arange(k) / RATE / 0.018)[:, None]
-    place(mix, crack, 0.0, -6)
-    accent = dsp.organ_pad([dsp.hz(n) for n in ("F2", "F3", "C4", "Eb4", "Ab4")], 0.9, rng, attack=0.02, release=0.7,
-                           harmonics=10, rolloff=1.3, chiff=0.05, breath=0.1)
-    place(mix, accent, 0.01, -9)
-    place(mix, dsp.thump(120, 45, 0.5, rng), 0.0, -4)
-    place(mix, dsp.shimmer(0.7, rng, count=10), 0.08, -18)
-    return room(mix, 0.18, 1.2, 0.35)
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 1.3, rng), -0.6 + 0.2 * i), 0.002 * i, -7 + 0.3 * i)
+    # The brass hammer gives the strike its edge; it is short so the resonance carries the rest.
+    place(mix, pan(dsp.brass_click(rng, 1200, decay=0.012, thud=0.8), 0.0), 0.0, -7)
+    lay(mix, s, "metal_pot", 0.088, 0.42, 0.0, -13, rate=1.05, hp_=900, lp_=5000, fade_out=0.1)
+    k = round(0.12 * RATE)
+    air = bp(noise(k, rng), 1800, 7000) * np.exp(-np.arange(k) / RATE / 0.03)[:, None]
+    place(mix, air, 0.0, -15)
+    # The resonant low strike and its long tail, then a quiet Fm7 organ breathing in under it and dying away.
+    place(mix, soft_gong(dsp.hz("C3"), 1.95, rng, decay=0.95, side=0.05), 0.004, -3)
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F3", "C4", "Eb4", "Ab4")], 1.6, rng, attack=0.12, release=1.1,
+                        harmonics=8, rolloff=1.6, chiff=0.0, breath=0.12)
+    place(mix, pad, 0.02, -18)
+    place(mix, dsp.thump(110, 48, 0.5, rng), 0.0, -13)
+    place(mix, dsp.shimmer(0.8, rng, count=10), 0.08, -22)
+    return room(mix, 0.22, 2.0, 0.6)
 
 
 @cue("MeridianStrikeMiss", -17.0, "Meridian release", 0.6, 0.55,
@@ -898,23 +929,26 @@ def meridian_lattice_warn(s, rng):
     return room(mix, 0.12, 0.42, 0.12)
 
 
-@cue("MeridianLatticeFire", -10.0, "Meridian release", 1.5, 0.9,
-     "格子が光る。F のペダルの上に F マイナーのオルガンの和音が鳴り、格子の波紋（2tick ずつ）に合わせて櫛の滝が 0・33・67ms に"
-     "3回こぼれ、低い胴鳴りが支える。3段階 .9、2段階 .75。")
+@cue("MeridianLatticeFire", -11.5, "Meridian release", 2.8, 0.9,
+     "格子が光る（締めの音）。格子の波紋（2tick ずつ）に合わせて櫛の滝が 0・33・67ms に3回こぼれ、柔らかな銅鑼のような"
+     "低い響き（主音の F2）がゆっくり広がって長く減衰し、その下で静かな F マイナーのオルガンが膨らんで一緒に消える。"
+     "オルガンを鳴り響かせず、余韻で締める。3段階 .9、2段階 .75。")
 def meridian_lattice_fire(s, rng):
-    mix = seconds(1.55)
-    chord = dsp.organ_pad([dsp.hz(n) for n in ("F2", "F3", "C4", "F4", "Ab4", "C5")], 1.4, rng, attack=0.03, release=0.9,
-                          harmonics=10, rolloff=1.25, chiff=0.06, breath=0.14)
-    place(mix, chord, 0.0, -7)
+    mix = seconds(2.9)
     cascades = (("F6", "C6", "Ab5"), ("Ab6", "Eb6", "Bb5"), ("C7", "F6", "C6"))
     for ring, notes in enumerate(cascades):
         for j, note in enumerate(notes):
-            place(mix, pan(dsp.box_tine(dsp.hz(note), 0.8, rng), (-0.5 + 0.5 * ring) * (1 if j % 2 else -1)),
+            place(mix, pan(dsp.box_tine(dsp.hz(note), 1.0, rng), (-0.5 + 0.5 * ring) * (1 if j % 2 else -1)),
                   ring * MERIDIAN_RIPPLE / 60 + 0.012 * j, -8 - 1.5 * j - ring)
-    place(mix, dsp.thump(100, 42, 0.6, rng), 0.0, -4)
-    place(mix, brass_ring(1750, 0.6, rng, decay=0.2, side=0.2), 0.0, -14)
-    place(mix, dsp.shimmer(0.9, rng, count=14), 0.07, -16)
-    return room(mix, 0.2, 1.5, 0.4)
+    # The closing resonance on the home note, and a quiet F minor organ swelling under it and fading with it.
+    place(mix, soft_gong(dsp.hz("F2"), 2.75, rng, decay=1.35, side=-0.05), 0.0, -2)
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F3", "C4", "F4", "Ab4")], 2.4, rng, attack=0.2, release=1.7,
+                        harmonics=8, rolloff=1.6, chiff=0.0, breath=0.14)
+    place(mix, pad, 0.03, -17)
+    place(mix, brass_ring(1750, 0.9, rng, decay=0.3, side=0.2), 0.0, -18)
+    place(mix, dsp.thump(95, 42, 0.6, rng), 0.0, -13)
+    place(mix, dsp.shimmer(1.2, rng, count=14), 0.07, -20)
+    return room(mix, 0.26, 2.8, 0.9)
 
 
 @cue("MeridianHit", -20.0, "Meridian hits", 0.2, 0.35,
@@ -1137,10 +1171,10 @@ def overlay(bed, cue_x, times, gain):
     return mix
 
 
-def preview(directory, samples, report, store):
+def preview(directory, samples, report, store, previous=None):
     directory.mkdir(parents=True, exist_ok=True)
     if samples and all(CUES[name].group.startswith("Meridian") for name in samples):
-        return meridian_preview(directory, samples, report)
+        return meridian_preview(directory, samples, report, previous)
 
     def wav(name, x):
         peak = np.abs(x).max()
@@ -1436,7 +1470,7 @@ def meridian_combo(samples, release, fired=True, node=360.0, hits=True):
     owner's throttled hit ticks."""
     tick = 1 / 60
     tier = 0 if release < 108 else 1 if release < 228 else 2 if release < 348 else 3
-    mix = seconds(release * tick + 2.0)
+    mix = seconds(release * tick + 3.4)  # room for the lattice's 2.7 s closing tail
     events = []
 
     def at(cue_name, age_tick, volume):
@@ -1495,11 +1529,11 @@ def meridian_combo(samples, release, fired=True, node=360.0, hits=True):
 
 
 # BGM beds for the combo: (file, BPM, beat-grid origin s, first beat, beats, label), as BGM above.
-MERIDIAN_BGM = (("ObsidianLiturgy", 168.0, -0.008, 268, 34, "第1相（ObsidianLiturgy）"),
-                ("DistantLiturgy", 218.0, 0.068, 28, 44, "第3相（DistantLiturgy、全武器の調 F の基準）"))
+MERIDIAN_BGM = (("ObsidianLiturgy", 168.0, -0.008, 268, 38, "第1相（ObsidianLiturgy）"),
+                ("DistantLiturgy", 218.0, 0.068, 28, 50, "第3相（DistantLiturgy、全武器の調 F の基準）"))
 
 
-def meridian_preview(directory, samples, report):
+def meridian_preview(directory, samples, report, previous=None):
     def wav(name, x):
         peak = np.abs(x).max()
         if peak > 0.999:
@@ -1536,6 +1570,18 @@ def meridian_preview(directory, samples, report):
                                      "press_at": round(lead, 4), "mix_trim_db": round(20 * np.log10(g), 2), "label": label}
     for name, x in samples.items():
         clips[name] = wav(name, x * CUES[name].volume)
+    # Cues that differ from an earlier export (--previous): the earlier file at the same game volume, for A/B.
+    extra["changed"] = []
+    if previous:
+        for name in samples:
+            old = previous / cue_path(name, Path(".")).name
+            if not old.is_file() or sha256(old.read_bytes()) == report[name]["ogg_sha256"]:
+                continue
+            y, rate = sf.read(str(old), always_2d=True, dtype="float64")
+            if rate != RATE:
+                raise RuntimeError(f"{old}: {rate} Hz")
+            clips[f"{name}-previous"] = wav(f"{name}-previous", y * CUES[name].volume)
+            extra["changed"].append({"cue": name, "previous_sha256": sha256(old.read_bytes()), "previous": measure(y)})
     meridian_page(directory, clips, report, extra)
     return extra
 
@@ -1559,6 +1605,14 @@ def meridian_page(directory, clips, report, extra):
                        f"BGM と効果音を同じだけ {-info['mix_trim_db']:.1f} dB 下げています。</small></td>"
                        f"<td>通し＋BGM {audio(clips['bgm-' + bgm])}<br>BGM だけ（ループ） {audio(clips['bed-' + bgm], loop=True)}</td></tr>"
                        for bgm, info in extra["bgm"].items())
+    changed = "".join(f"<tr><td><b>{html.escape(c['cue'])}</b><br><small>前の版: {c['previous']['seconds']:.2f} 秒・短時間 "
+                      f"{c['previous']['short_term_lufs']:.1f} LUFS → 今の版: {report[c['cue']]['seconds']:.2f} 秒・短時間 "
+                      f"{report[c['cue']]['short_term_lufs']:.1f} LUFS</small></td>"
+                      f"<td>前 {audio(clips[c['cue'] + '-previous'])}<br>今 {audio(clips[c['cue']])}</td></tr>"
+                      for c in extra.get("changed", []))
+    changed_section = (f"<h2>変えた音（前の版と聴き比べ）</h2><p><small>大きな締めの音は「オルガンを大きく鳴らす」より「静かなオルガン＋"
+                       f"柔らかな銅鑼のような響きと長い余韻」が好み、という別のレイドでの A/B の結果に合わせて作り直した音です。"
+                       f"どちらもゲーム内の音量です。</small></p><table>{changed}</table>") if changed else ""
     sections = []
     for group, title in groups:
         rows = "".join(f"<tr><td><b>{html.escape(name)}</b><br><small>{html.escape(CUES[name].description)}</small></td>"
@@ -1576,6 +1630,7 @@ h1,h2,h3{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}h3{{color:#d9c7f5
 <p><small>調は全武器共通の F マイナー・ペンタトニック（F A♭ B♭ C E♭）で、音程の補正はしていません（0 セント）。音符は音高ごとに別のファイルで、
 ゲーム内で音程を変えて鳴らすことはしません。どの行もゲーム内の音量（効果音の音量設定 100%）で鳴らしています。
 「通し」はゲームと同じ tick（1/60 秒）の上に、各音をゲーム内の音量で並べたものです（命中音は約 8tick 後に当たったとして入れています）。</small></p>
+{changed_section}
 <h2>通しで聴く</h2><table>{combo_rows}</table>
 <h2>BGM の中で</h2><p><small>実際の Doll の BGM に「通し」を重ねています。効果音と音楽の音量設定はどちらも 100% の想定です。</small></p>
 <table>{bgm_rows}</table>
@@ -1653,7 +1708,7 @@ def meridian_attribution_section(report, hashes):
     table = "\n".join(f"| {k} | {SOURCES[k][0].replace('repo:', '')} | {SOURCES[k][1]} | `{hashes[k]}` |" for k in sorted(hashes))
     head = f"""### Pale Meridian weapon cues — 2026-10-03
 
-Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
+Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air, a soft-mallet gong resonance for the two closing strikes); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
 
 | Key | Store or repository file | Source | Source SHA256 |
 |---|---|---|---|
@@ -1699,6 +1754,8 @@ def main():
     parser.add_argument("--output", type=Path, default=OUTPUT_DIR, help="Ogg output folder")
     parser.add_argument("--preview", type=Path, help="write the owner audition page, WAVs and report here (.local)")
     parser.add_argument("--attribution-section", type=Path, help="write the Assets/ATTRIBUTION.md section here")
+    parser.add_argument("--previous", type=Path, help="folder of an earlier export (.local); cues that changed get an A/B "
+                                                      "row with it on the audition page")
     parser.add_argument("--only", help="comma-separated cue names; each cue is seeded by its own name, so the bytes "
                                        "equal a full run")
     parser.add_argument("--group", help="render one weapon's cues (Companion, Lacuna, Meridian: every 'Meridian ...' "
@@ -1727,7 +1784,7 @@ def main():
     group = next(iter(groups))
     if args.preview:
         record["audition"] = (weapon_preview(args.preview, group, samples, report) if group in COMBOS
-                              else preview(args.preview, samples, report, store))
+                              else preview(args.preview, samples, report, store, args.previous))
         (args.preview / "doll-weapon-sfx-report.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n")
     if args.attribution_section:
         args.attribution_section.write_text(attribution_section(report, store.hashes, group), encoding="utf-8", newline="\n")

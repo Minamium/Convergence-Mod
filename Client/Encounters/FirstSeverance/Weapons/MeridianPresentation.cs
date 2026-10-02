@@ -29,8 +29,15 @@ internal readonly record struct MeridianRoundView(Vector2 Head, Vector2 Velocity
 internal readonly record struct MeridianLineView(Vector2 Origin, Vector2 Direction, float Node, int Tier, bool Lattice, float Age,
     bool Peer, int Seed);
 
+// The order one frame is recorded in; the game's layer source and the offline preview both walk it. The release lines
+// and the guns come first and the rounds' wakes last, so when a full lobby fills the shared light budget the trails
+// are what drops. Each line pass is one material batch however many lines are alive (every residue, then every body,
+// then the glows), because the layer merges consecutive energy quads of one material, pass and depth.
+internal enum MeridianPass : byte { LineResidue, LineBody, LineLight, Gun, RoundHead, RoundWake }
+
 // Pale Meridian presentation (docs/encounters/first-severance/WEAPONS.md "Pale Meridian"), recorded into the shared
-// Doll weapon layer. The exported pixel art (k = 3 gun, 1 texel = 2 world px, never scaled) is placed by its muzzle
+// Doll weapon layer: the gun, parts and light on the Front stratum, the wind-up key on Back (behind the players, so it
+// never covers a face). The exported pixel art (k = 3 gun, 1 texel = 2 world px, never scaled) is placed by its muzzle
 // anchor on the design muzzle (PaleMeridianRig), so the art follows the hit shapes. Light goes through the original
 // DollMeridianEnergy material and the layer's lines, rings and debris. Every input is a view of replicated or owner
 // state; nothing here touches hits, input, ammo or packets. Depends only on FNA and the pure Pale Meridian rules, so
@@ -40,15 +47,17 @@ internal static class MeridianPresentation
     internal const int PartCellWidth = DollArtAnchors.MeridianParts.FrameWidth, PartCellHeight = DollArtAnchors.MeridianParts.FrameHeight;
     internal const int KeyFrameWidth = DollArtAnchors.MeridianKey.FrameWidth, KeyFrameHeight = DollArtAnchors.MeridianKey.FrameHeight;
     // Recoil (px back along the aim) and muzzle climb (rad) per shot, eased in and out.
-    internal const float NoteKick = 3, RoundKick = 1.5f, HeavyKick = 5, HeavyClimb = .05f, StrikeKick = 14, StrikeClimb = .10f;
+    internal const float NoteKick = 3, RoundKick = 1.5f, HeavyKick = 5, HeavyClimb = .05f, StrikeKick = 8, StrikeClimb = .10f;
     // Pack-away beats (ticks after the release): parts pop off, the key sinks, the bare gun fades by StowTicks.
     internal const int EjectAfterStrike = PaleMeridianLattice.MeridianFire + 1, EjectAfterMiss = 2, FadeStart = 16;
     internal const float ResidueLife = 18;
+    internal const int PassCount = (int)MeridianPass.RoundWake + 1;
     internal const sbyte KeyDepth = -1, GunDepth = 0, PartDepth = 1, FlightDepth = 2;
-    internal const sbyte ResidueLight = -1, BodyLight = 0, GlowLight = 1;
+    // Light depths: residue and the rounds' wakes under the live bodies, the glows over them.
+    internal const sbyte ResidueLight = -1, WakeLight = -1, BodyLight = 0, GlowLight = 1;
 
-    // Part sizes in texels inside their 47x6 cells, from the export (cylinder, shroud, ring sight, spring housing).
-    private static readonly Point[] partSize = { new(5, 5), new(47, 2), new(4, 6), new(3, 6) };
+    // A part's half size in texels (PaleMeridianRig.PartSize, from the export).
+    private static Vector2 Half(int part) => X(PaleMeridianRig.PartSize[part]) * .5f;
 
     private static Vector2 X(NVector2 v) => new(v.X, v.Y);
     private static NVector2 N(Vector2 v) => new(v.X, v.Y);
@@ -154,7 +163,13 @@ internal static class MeridianPresentation
     private static float GunFlash(in MeridianGunView view, int ejectAt)
     {
         float age = view.Age, flash = 0;
-        // The fourth seat completes the gun under a flash (the bare gun and parts swap to the assembled art there).
+        // Every seat clicks the whole gun pale for a moment; the fourth completes it under a longer flash (the bare
+        // gun and parts swap to the assembled art there).
+        for (int i = 0; i < PaleMeridianScore.PartCount - 1; i++)
+        {
+            float click = age - PaleMeridianScore.Seats[i];
+            if (click >= 0 && click < 4) flash = Math.Max(flash, .3f * (1 - click / 4));
+        }
         float seat = age - PaleMeridianScore.Seats[PaleMeridianScore.PartCount - 1];
         if (seat >= 0 && seat < 6) flash = Math.Max(flash, .45f * (1 - seat / 6));
         float ignite = age - PaleMeridianScore.Ignite;
@@ -188,40 +203,75 @@ internal static class MeridianPresentation
                 if (complete) continue;
                 if (!ejected)
                 {
-                    // Seated: flashes on its seat, then pulses on every note while the gun is still being built.
-                    float flash = Math.Max(0, 1 - (age - seatTick) / 6);
+                    // Seated: flashes white on its seat (held for 1.5 ticks), then pulses on every note while the gun is
+                    // still being built.
+                    float flash = Math.Clamp(1 - (age - seatTick - 1.5f) / 6, 0, 1);
                     if (lastNote >= 0 && !view.Released) flash = Math.Max(flash, .45f * (1 - (age - lastNote) / 3));
                     canvas.Sprite(sprite, pose.Muzzle, pose.Rotation, pose.Flip, DollStratum.Front, PartDepth,
                         new DollSpriteFx { Flash = flash, Fade = fade });
                     continue;
                 }
-                // Popped off after the release: a short ballistic arc, spinning, fading out.
+                // Popped off after the release: a short ballistic arc forward, away from the owner's face (the spring
+                // housing, seated at the shoulder, drops off forward), spinning and fading out.
                 float t = view.Stowed - ejectAt;
-                Vector2 centre = Texel(pose, seat + new Vector2(partSize[i].X, partSize[i].Y) * .5f);
-                Vector2 velocity = pose.Top * (3.2f + .6f * i) + pose.Axis * (.9f * (i - 1.5f) - 1.2f);
+                Vector2 centre = Texel(pose, seat + Half(i));
+                Vector2 velocity = i == PaleMeridianScore.PartCount - 1 ? pose.Axis * 2.4f - pose.Top * .6f
+                    : pose.Top * (2.2f + .5f * i) + pose.Axis * (1.4f + .5f * i);
                 Vector2 at = centre + velocity * t + new Vector2(0, .16f * MathF.Sign(view.Gravity) * t * t);
                 float spin = pose.Rotation + t * (.22f + .05f * i) * (i % 2 == 0 ? 1 : -1);
-                var loose = new DollSprite(strip, source, new Vector2(partSize[i].X, partSize[i].Y) * .5f);
+                var loose = new DollSprite(strip, source, Half(i));
                 canvas.Sprite(loose, at, spin, pose.Flip, DollStratum.Front, FlightDepth,
                     new DollSpriteFx { Fade = Math.Clamp((t - 4) / 9, 0, 1), Flash = Math.Max(0, .6f - t / 4) });
                 continue;
             }
             if (age < launch || view.Released) continue;
-            // In flight: violet afterimages trail the part; it spins to rest about its own centre as it arrives.
-            Vector2 half = new Vector2(partSize[i].X, partSize[i].Y) * .5f;
-            Vector2 seated = Texel(pose, seat + half);
-            var flying = new DollSprite(strip, source, half);
-            for (int echo = 2; echo >= 0; echo--)
+            // In flight: it appears ahead of the owner in a pearl flash and spins to rest about its own centre as it
+            // arrives (its launch glint and pixel trail are light: EmitFlights).
+            float pop = Math.Max(0, 1 - (age - launch) / 3);
+            canvas.Sprite(new DollSprite(strip, source, Half(i)), PartCentre(pose, i, age), pose.Rotation + PartSpin(age, i), pose.Flip,
+                DollStratum.Front, FlightDepth, new DollSpriteFx { Fade = fade, Flash = .7f * pop });
+        }
+    }
+
+    // A part's drawn centre at a score age: its seat on the posed gun plus its flight offset (PaleMeridianScore).
+    private static Vector2 PartCentre(in GunPose pose, int part, float age)
+    {
+        Vector2 offset = X(PaleMeridianScore.PartOffset(age, part));
+        return Texel(pose, X(DollArtAnchors.MeridianParts.Seats[part]) + Half(part)) + pose.Axis * offset.X + pose.Top * offset.Y;
+    }
+
+    // The part's turn relative to the gun while it flies: spinning to rest as it arrives.
+    private static float PartSpin(float age, int part)
+    {
+        float progress = PaleMeridianScore.Arrive((age - PaleMeridianScore.Launch(part)) / PaleMeridianScore.FlightApproach);
+        return (1 - progress) * (part % 2 == 0 ? 1.6f : -1.3f);
+    }
+
+    // Each flying part: a pearl glint where it appears, then a short pixel trail along the path it flew (pearl-violet,
+    // two dots wide at first, thinning to violet), starting just past its trailing edge so the trail never covers it.
+    private static void EmitFlights(DollWeaponCanvas canvas, in MeridianGunView view, in GunPose pose, float alpha)
+    {
+        float age = view.Age;
+        for (int i = 0; i < PaleMeridianScore.PartCount; i++)
+        {
+            int launch = PaleMeridianScore.Launch(i);
+            float t = age - launch;
+            if (t < 0 || age >= PaleMeridianScore.Seats[i]) continue;
+            if (t < 4) Star(canvas, PartCentre(pose, i, launch), 2 + (4 - t) * 3, t < 1.5f ? DollTone.White : DollTone.PearlViolet, alpha, MathF.PI / 8);
+            Vector2 head = PartCentre(pose, i, age), motion = head - PartCentre(pose, i, MathF.Max(launch, age - .5f));
+            if (motion.LengthSquared() < 1) continue;
+            Vector2 d = Vector2.Normalize(motion), size = X(PaleMeridianRig.PartSize[i]) * DollSpritePlacement.WorldPerTexel;
+            Vector2 along = Unit(pose.Rotation + PartSpin(age, i)), across = new(-along.Y, along.X);
+            float clear = (MathF.Abs(Vector2.Dot(d, along)) * size.X + MathF.Abs(Vector2.Dot(d, across)) * size.Y) * .5f + 3;
+            Vector2 previous = head - d * clear;
+            for (int k = 1; k <= 8; k++)
             {
-                float a = age - echo * 1.5f;
-                if (a < launch || echo > 0 && a - launch > PaleMeridianScore.FlightApproach - 1) continue;
-                Vector2 offset = X(PaleMeridianScore.PartOffset(a, i));
-                float progress = PaleMeridianScore.Arrive((a - launch) / PaleMeridianScore.FlightApproach);
-                float spin = (1 - progress) * (i % 2 == 0 ? 1.6f : -1.3f);
-                Vector2 at = seated + pose.Axis * offset.X + pose.Top * offset.Y;
-                var fx = echo == 0 ? new DollSpriteFx { Fade = fade }
-                    : new DollSpriteFx { Silhouette = echo == 1 ? DollTone.Lilac : DollTone.Violet, Fade = echo == 1 ? .35f : .6f };
-                canvas.Sprite(flying, at, pose.Rotation + spin, pose.Flip, DollStratum.Front, (sbyte)(FlightDepth - echo), fx);
+                float a = age - k * .5f;
+                if (a < launch) break;
+                Vector2 p = PartCentre(pose, i, a);
+                if (Vector2.Dot(p - head, d) > -clear) continue;
+                canvas.Line(previous, p, k <= 3 ? DollTone.PearlViolet : k <= 5 ? DollTone.Lilac : DollTone.Violet, k <= 2 ? 2 : 1, alpha);
+                previous = p;
             }
         }
     }
@@ -242,6 +292,9 @@ internal static class MeridianPresentation
         return rise;
     }
 
+    // The key (k = 1, 72x60 px) stands on the spring housing right over the owner's head, so it is the one held piece
+    // on the Back stratum, behind every player: the head and face always draw over it, and the gun (Front) covers its
+    // foot as it rises out of the housing.
     private static void EmitKey(DollWeaponCanvas canvas, MeridianArt art, in MeridianGunView view, in GunPose pose, float fade)
     {
         Texture2D? key = art.Key;
@@ -252,7 +305,7 @@ internal static class MeridianPresentation
         float sunk = (1 - rise) * KeyFrameHeight;
         Vector2 foot = seat - pose.Top * sunk * DollSpritePlacement.WorldPerTexel;
         canvas.Sprite(new DollSprite(key, new Rectangle(frame * KeyFrameWidth, 0, KeyFrameWidth, KeyFrameHeight), X(DollArtAnchors.MeridianKey.ShaftBottom)),
-            foot, pose.Rotation, pose.Flip, DollStratum.Front, KeyDepth,
+            foot, pose.Rotation, pose.Flip, DollStratum.Back, KeyDepth,
             new DollSpriteFx { Hide = sunk / KeyFrameHeight, HideFromBottom = true, Fade = fade });
     }
 
@@ -290,6 +343,7 @@ internal static class MeridianPresentation
                 if (t < .8f) canvas.Line(Vector2.Lerp(rear, front, PaleMeridianScore.Arrive(t - .25f)), pin, DollTone.PearlViolet, 1, alpha);
                 canvas.Dot(pin, DollTone.White, 1, alpha);
             }
+            EmitFlights(canvas, view, pose, alpha);
             EmitSeatStars(canvas, view, pose, alpha);
             EmitWind(canvas, art, view, pose, muzzle, alpha);
             if (age >= PaleMeridianScore.Ignite) EmitOvercharge(canvas, art, view, pose, muzzle, alpha);
@@ -311,14 +365,14 @@ internal static class MeridianPresentation
             canvas.Burst(Texel(pose, new Vector2(30, 6)), seed * 17 + 3, 7, s, 18, 1.8f, .16f, DollShardKind.Brass, MathF.PI, MathF.Atan2(pose.Top.Y, pose.Top.X));
     }
 
+    // A part seating: a pearl star on the seat (the part and the whole gun flash in the art: EmitParts, GunFlash).
     private static void EmitSeatStars(DollWeaponCanvas canvas, in MeridianGunView view, in GunPose pose, float alpha)
     {
         for (int i = 0; i < PaleMeridianScore.PartCount; i++)
         {
             float t = view.Age - PaleMeridianScore.Seats[i];
             if (t < 0 || t >= 10) continue;
-            Vector2 seat = X(DollArtAnchors.MeridianParts.Seats[i]);
-            Vector2 centre = Texel(pose, seat + new Vector2(partSize[i].X, partSize[i].Y) * .5f);
+            Vector2 centre = Texel(pose, X(DollArtAnchors.MeridianParts.Seats[i]) + Half(i));
             Star(canvas, centre, (10 - t) * 1.9f, t < 3 ? DollTone.White : DollTone.PearlViolet, alpha, t * .05f);
             if (t < 3) canvas.Dot(centre, DollTone.White, 2, alpha);
         }
@@ -399,7 +453,7 @@ internal static class MeridianPresentation
         float width = view.Kind switch { MeridianShot.Note => 6, MeridianShot.Heavy => 10, _ => 4 };
         float alpha = view.Peer ? DollWeaponCanvas.PeerLightAlpha : 1;
         canvas.EnergyStrip(art.Energy ?? DollPixelArt.Ramp, MeridianEnergyMaterial.WakePass, spine[..n], width,
-            new Vector4(1, alpha, 0, (view.Seed & 255) / 255f), BodyLight);
+            new Vector4(1, alpha, 0, (view.Seed & 255) / 255f), WakeLight);
     }
 
     internal static void EmitRoundHead(DollWeaponCanvas canvas, MeridianArt art, in MeridianRoundView view)
@@ -427,15 +481,18 @@ internal static class MeridianPresentation
 
     // ---- Release lines -------------------------------------------------------------------------
 
-    internal static void EmitLine(DollWeaponCanvas canvas, MeridianArt art, in MeridianLineView view)
+    // One pass of a release line (LineResidue, LineBody or LineLight; see MeridianPass): the cooling residue, the live
+    // packet bodies, or everything else (forecasts, glints, stars and glows).
+    internal static void EmitLine(DollWeaponCanvas canvas, MeridianArt art, in MeridianLineView view, MeridianPass pass)
     {
         NVector2 origin = N(view.Origin), direction = N(view.Direction);
-        if (!PaleMeridianLattice.Valid(origin, direction, view.Node, view.Tier, view.Lattice) || !float.IsFinite(view.Age)) return;
-        if (view.Lattice) EmitLattice(canvas, art, view);
-        else EmitMeridian(canvas, art, view);
+        if (pass > MeridianPass.LineLight || !PaleMeridianLattice.Valid(origin, direction, view.Node, view.Tier, view.Lattice)
+            || !float.IsFinite(view.Age)) return;
+        if (view.Lattice) EmitLattice(canvas, art, view, pass);
+        else EmitMeridian(canvas, art, view, pass);
     }
 
-    private static void EmitMeridian(DollWeaponCanvas canvas, MeridianArt art, in MeridianLineView view)
+    private static void EmitMeridian(DollWeaponCanvas canvas, MeridianArt art, in MeridianLineView view, MeridianPass pass)
     {
         float alpha = view.Peer ? DollWeaponCanvas.PeerLightAlpha : 1;
         float length = PaleMeridianLattice.Length(view.Node), age = view.Age;
@@ -443,6 +500,7 @@ internal static class MeridianPresentation
         int seed = view.Seed;
         if (age < PaleMeridianLattice.MeridianFire)
         {
+            if (pass != MeridianPass.LineLight) return;
             // The forecast: a one-dot pearl-violet hairline drawn out through the cursor, with sparse pearl glints.
             float progress = Math.Clamp((age + 1) / 4, 0, 1);
             canvas.Forecast(origin, end, progress, alpha);
@@ -459,21 +517,30 @@ internal static class MeridianPresentation
         }
         float s = age - PaleMeridianLattice.MeridianFire;
         PaleMeridianLattice.Packet(s, PaleMeridianLattice.MeridianTransit, PaleMeridianLattice.MeridianTail, out float head, out float passed);
-        Residue(canvas, art, origin, axis, 0, length * passed, length, age, PaleMeridianLattice.MeridianFire - 1 + PaleMeridianLattice.MeridianTail,
-            PaleMeridianLattice.MeridianTransit, alpha, seed);
-        if (head > passed)
+        if (pass == MeridianPass.LineResidue)
+        {
+            Residue(canvas, art, origin, axis, 0, length * passed, length, age, PaleMeridianLattice.MeridianFire - 1 + PaleMeridianLattice.MeridianTail,
+                PaleMeridianLattice.MeridianTransit, alpha, seed);
+            return;
+        }
+        if (pass == MeridianPass.LineBody)
         {
             // The packet: white head over a flowing pearl-violet body, cooling toward a plum tail.
-            Band(canvas, art, MeridianEnergyMaterial.BodyPass, origin + axis * (length * passed), origin + axis * (length * head),
-                PaleMeridianLattice.MeridianWidth, length * passed, new Vector4(.62f, alpha, 0, (seed & 255) / 255f),
-                new Vector4(1, alpha, 0, (seed & 255) / 255f), BodyLight);
+            if (head > passed)
+                Band(canvas, art, MeridianEnergyMaterial.BodyPass, origin + axis * (length * passed), origin + axis * (length * head),
+                    PaleMeridianLattice.MeridianWidth, length * passed, new Vector4(.62f, alpha, 0, (seed & 255) / 255f),
+                    new Vector4(1, alpha, 0, (seed & 255) / 255f), BodyLight);
+            return;
+        }
+        if (head > passed)
+        {
             if (head < 1) Glow(canvas, art, origin + axis * (length * head), 13, 1, 0, alpha, seed, GlowLight);
             else Glow(canvas, art, end, 13 * (1 - passed), 1 - passed, passed, alpha, seed, GlowLight);
         }
         if (s >= 0 && s < 5) Glow(canvas, art, origin + axis * 4, 17 - s, 1 - s / 5, s / 5, alpha, seed, GlowLight);
     }
 
-    private static void EmitLattice(DollWeaponCanvas canvas, MeridianArt art, in MeridianLineView view)
+    private static void EmitLattice(DollWeaponCanvas canvas, MeridianArt art, in MeridianLineView view, MeridianPass pass)
     {
         float alpha = view.Peer ? DollWeaponCanvas.PeerLightAlpha : 1;
         float age = view.Age;
@@ -491,6 +558,7 @@ internal static class MeridianPresentation
             float s = age - PaleMeridianLattice.RippleStep * line.Ring;
             if (s < 0)
             {
+                if (pass != MeridianPass.LineLight) continue;
                 // The split: parallels slide out of the meridian, perpendiculars unfold through the node (harmless).
                 Vector2 middle = node + axis * (line.Along * opening) + across * (line.Across * opening);
                 float reach = half * (line.Perpendicular ? opening : .4f + .6f * opening);
@@ -498,20 +566,22 @@ internal static class MeridianPresentation
                 canvas.Forecast(middle, middle - direction * reach, 1, alpha);
                 continue;
             }
+            if (pass == MeridianPass.LineLight) continue;
             Vector2 centre = node + axis * line.Along + across * line.Across;
             PaleMeridianLattice.Packet(s, PaleMeridianLattice.LatticeTransit, PaleMeridianLattice.LatticeTail, out float head, out float passed);
             float firstPass = PaleMeridianLattice.RippleStep * line.Ring + PaleMeridianLattice.LatticeTail - 1;
             for (int side = -1; side <= 1; side += 2)
             {
                 Vector2 outward = direction * side;
-                Residue(canvas, art, centre, outward, 0, half * passed, half, age, firstPass, PaleMeridianLattice.LatticeTransit, alpha, seed + side);
-                if (head > passed)
+                if (pass == MeridianPass.LineResidue)
+                    Residue(canvas, art, centre, outward, 0, half * passed, half, age, firstPass, PaleMeridianLattice.LatticeTransit, alpha, seed + side);
+                else if (head > passed)
                     Band(canvas, art, MeridianEnergyMaterial.BodyPass, centre + outward * (half * passed), centre + outward * (half * head),
                         PaleMeridianLattice.LatticeWidth, half * passed, new Vector4(.6f, alpha, 0, ((seed + 7 * side) & 255) / 255f),
                         new Vector4(1, alpha, 0, ((seed + 7 * side) & 255) / 255f), BodyLight);
             }
         }
-        if (age < 0) return;
+        if (age < 0 || pass != MeridianPass.LineLight) return;
         // Brass glints where the lines cross (the meridian counts as a parallel), and a star at the node.
         float spacing = PaleMeridianLattice.Spacing(view.Tier);
         int index = 0;
@@ -583,11 +653,13 @@ internal static class MeridianPresentation
         Vertex(ref quad[5], front + normal * grown, new Vector4(along1, across, length, half), z, head);
     }
 
-    // A round glow of `radius` world px (DollMeridianEnergy only; skipped without the material).
+    // A round glow of `radius` world px (DollMeridianEnergy only; skipped without the material). Reduced Effects removes
+    // glow (shared rules): every glow disc is dropped there, as the layer drops its own bounded glow; the bodies,
+    // rings, pins and forecasts that carry the timing stay.
     private static void Glow(DollWeaponCanvas canvas, MeridianArt art, Vector2 centre, float radius, float intensity, float ring, float alpha,
         int seed, sbyte depth)
     {
-        if (art.Energy is null || !(radius > 1) || !(intensity > .01f) || !(alpha > .004f) || !float.IsFinite(centre.X) || !float.IsFinite(centre.Y)) return;
+        if (canvas.Reduced || art.Energy is null || !(radius > 1) || !(intensity > .01f) || !(alpha > .004f) || !float.IsFinite(centre.X) || !float.IsFinite(centre.Y)) return;
         Span<DollPixelVertex> quad = canvas.Energy(art.Energy, MeridianEnergyMaterial.GlowPass, 2, depth);
         if (quad.IsEmpty) return;
         Vector2 c = canvas.ToDot(centre);

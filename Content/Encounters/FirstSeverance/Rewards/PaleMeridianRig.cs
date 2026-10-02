@@ -15,6 +15,9 @@ internal static class PaleMeridianRig
     internal static readonly Vector2 Muzzle = new(MuzzleReach, 0);
     internal static readonly Vector2 Grip = new(6, -12.5f);
     internal static readonly Vector2 KeySeat = new(-1, 10);
+    // The four exported brass parts' sizes in texels inside their 47x6 cells (MeridianParts at k = 3: cylinder, barrel
+    // shroud, ring sight, spring housing), for their centres in flight.
+    internal static readonly Vector2[] PartSize = { new(5, 5), new(47, 2), new(4, 6), new(3, 6) };
 
     // Gun frame -> world for an aim direction (unit) and a facing: the gun's top side is toward -Y of the world when
     // aiming right and is mirrored about the aim axis when aiming left (the gun is never drawn upside down).

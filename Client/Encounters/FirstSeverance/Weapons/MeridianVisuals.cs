@@ -28,6 +28,10 @@ internal sealed class MeridianVisuals : GlobalProjectile, IDollArmPose
         "MeridianNote5", "MeridianNote6", "MeridianNote7", "MeridianNote8",
     };
     internal const float LoopVolume = .5f;
+    // Owner priority: every cue of another player's gun goes through DollWeaponAudio.PlayFor (its own small instance
+    // pool, never the last voices), and their notes thin out: none from farther than PeerNoteRange px from the local
+    // player, and in overcharge only each bar's downbeat (one every 36 ticks instead of 9).
+    internal const float PeerNoteRange = 1600;
     private const int RoundHitGap = 4, HeavyHitGap = 6;
     private static readonly uint[] lastRoundHit = new uint[Main.maxPlayers + 1];
 
@@ -128,30 +132,30 @@ internal sealed class MeridianVisuals : GlobalProjectile, IDollArmPose
         Vector2 muzzle = pose.Muzzle;
         if (!released)
         {
-            if (DollCueClock.Take(ref assembleCue, prev, age, 1)) DollWeaponAudio.Play("MeridianAssemble", p.Center, .55f);
+            if (DollCueClock.Take(ref assembleCue, prev, age, 1)) DollWeaponAudio.PlayFor(p.owner, "MeridianAssemble", p.Center, .55f);
             int from = float.IsFinite(prev) ? Math.Max((int)prev + 1, (int)age - 6) : (int)age;
             for (int a = Math.Max(1, from); a <= (int)age; a++)
             {
                 int note = PaleMeridianScore.Note(a);
-                if (note >= 0 && DollCueClock.Take(ref noteCue, prev, age, a))
-                    DollWeaponAudio.Play(NoteCues[note], muzzle, a >= PaleMeridianScore.Ignite ? .42f : .5f + .03f * PaleMeridianScore.Parts(a));
+                if (note >= 0 && DollCueClock.Take(ref noteCue, prev, age, a) && (p.owner == Main.myPlayer || PeerNote(a, muzzle)))
+                    DollWeaponAudio.PlayFor(p.owner, NoteCues[note], muzzle, a >= PaleMeridianScore.Ignite ? .42f : .5f + .03f * PaleMeridianScore.Parts(a));
                 if (a > PaleMeridianScore.Ignite && PaleMeridianScore.Shot(a) == MeridianShot.Heavy && DollCueClock.Take(ref heavyCue, prev, age, a))
                 {
-                    DollWeaponAudio.Play("MeridianHeavy", muzzle, .5f);
+                    DollWeaponAudio.PlayFor(p.owner, "MeridianHeavy", muzzle, .5f);
                     ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 1.5f);
                 }
                 for (int part = 0; part < PaleMeridianScore.PartCount; part++)
                 {
                     if (a == PaleMeridianScore.Launch(part) && DollCueClock.Take(ref partWarnCue, prev, age, a))
-                        DollWeaponAudio.Play("MeridianPartWarn", p.Center, .45f);
+                        DollWeaponAudio.PlayFor(p.owner, "MeridianPartWarn", p.Center, .45f);
                     if (a == PaleMeridianScore.Seats[part] && DollCueClock.Take(ref partFireCue, prev, age, a))
-                        DollWeaponAudio.Play("MeridianPartFire", p.Center, .5f + .06f * part);
+                        DollWeaponAudio.PlayFor(p.owner, "MeridianPartFire", p.Center, .5f + .06f * part);
                 }
             }
-            if (DollCueClock.Take(ref igniteWarnCue, prev, age, PaleMeridianScore.KeyRise)) DollWeaponAudio.Play("MeridianIgniteWarn", p.Center, .6f);
+            if (DollCueClock.Take(ref igniteWarnCue, prev, age, PaleMeridianScore.KeyRise)) DollWeaponAudio.PlayFor(p.owner, "MeridianIgniteWarn", p.Center, .6f);
             if (DollCueClock.Take(ref igniteFireCue, prev, age, PaleMeridianScore.Ignite))
             {
-                DollWeaponAudio.Play("MeridianIgniteFire", muzzle, .75f);
+                DollWeaponAudio.PlayFor(p.owner, "MeridianIgniteFire", muzzle, .75f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, 4);
             }
             loopGain = age >= PaleMeridianScore.Ignite + 2 ? Math.Min(1, loopGain + .25f) : 0;
@@ -160,7 +164,7 @@ internal sealed class MeridianVisuals : GlobalProjectile, IDollArmPose
         {
             float stowed = -p.ai[2];
             if (gun.Fired == 0 && PaleMeridianScore.Tier((int)age) >= 1 && DollCueClock.Take(ref missCue, lastStowed, stowed, 1))
-                DollWeaponAudio.Play("MeridianStrikeMiss", p.Center, .55f);
+                DollWeaponAudio.PlayFor(p.owner, "MeridianStrikeMiss", p.Center, .55f);
             lastStowed = stowed;
             loopGain = Math.Max(0, loopGain - 1f / 6);
         }
@@ -168,6 +172,11 @@ internal sealed class MeridianVisuals : GlobalProjectile, IDollArmPose
         else if (loop.IsValid) DollWeaponAudio.Stop(ref loop);
         lastAge = age;
     }
+
+    // Whether another player's note at this score age is heard here (see PeerNoteRange).
+    private static bool PeerNote(int age, Vector2 at)
+        => (age < PaleMeridianScore.Ignite || (age - PaleMeridianScore.Ignite) % PaleMeridianScore.HeavyPeriod == 0)
+            && Vector2.DistanceSquared(at, Main.LocalPlayer.Center) <= PeerNoteRange * PeerNoteRange;
 
     // ---- Release lines -----------------------------------------------------------------------------------------
 
@@ -177,20 +186,20 @@ internal sealed class MeridianVisuals : GlobalProjectile, IDollArmPose
         int tier = line.Tier;
         if (!line.Lattice)
         {
-            if (DollCueClock.Take(ref warnCue, prev, age, 1)) DollWeaponAudio.Play("MeridianStrikeWarn", p.Center, .6f);
+            if (DollCueClock.Take(ref warnCue, prev, age, 1)) DollWeaponAudio.PlayFor(p.owner, "MeridianStrikeWarn", p.Center, .6f);
             if (DollCueClock.Take(ref fireCue, prev, age, PaleMeridianLattice.MeridianFire))
             {
-                DollWeaponAudio.Play("MeridianStrikeFire", p.Center, tier >= 3 ? .85f : tier == 2 ? .72f : .6f);
+                DollWeaponAudio.PlayFor(p.owner, "MeridianStrikeFire", p.Center, tier >= 3 ? .85f : tier == 2 ? .72f : .6f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, tier >= 3 ? 4 : tier == 2 ? 3 : 2);
             }
         }
         else
         {
             Vector2 node = p.Center + p.velocity * line.Node;
-            if (DollCueClock.Take(ref warnCue, prev, age, -PaleMeridianLattice.SplitLead)) DollWeaponAudio.Play("MeridianLatticeWarn", node, .6f);
+            if (DollCueClock.Take(ref warnCue, prev, age, -PaleMeridianLattice.SplitLead)) DollWeaponAudio.PlayFor(p.owner, "MeridianLatticeWarn", node, .6f);
             if (DollCueClock.Take(ref fireCue, prev, age, 0))
             {
-                DollWeaponAudio.Play("MeridianLatticeFire", node, tier >= 3 ? .9f : .75f);
+                DollWeaponAudio.PlayFor(p.owner, "MeridianLatticeFire", node, tier >= 3 ? .9f : .75f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(p.owner, tier >= 3 ? 5 : 3.5f);
             }
         }
@@ -228,9 +237,10 @@ internal sealed class MeridianVisuals : GlobalProjectile, IDollArmPose
     internal static void ClearHits() => Array.Clear(lastRoundHit);
 }
 
-// The one layer source for every Pale Meridian projectile. Rounds' wakes first (one material batch), then their
-// heads, the release lines and the held guns. Removed by the layer when no Meridian projectile is left; registered
-// again by the next one.
+// The one layer source for every Pale Meridian projectile, recorded in MeridianPass order: the release lines (one
+// batch each for all residue, all bodies and all glows), the held guns, then the rounds' heads and, last, their wakes,
+// so a full lobby over the shared budget drops trails first. Removed by the layer when no Meridian projectile is
+// left; registered again by the next one.
 internal sealed class MeridianLayerSource : IDollWeaponSource
 {
     private static readonly MeridianLayerSource instance = new();
@@ -276,29 +286,32 @@ internal sealed class MeridianLayerSource : IDollWeaponSource
         int holdout = ModContent.ProjectileType<MeridianHoldout>(), round = ModContent.ProjectileType<MeridianRound>(),
             line = ModContent.ProjectileType<MeridianLine>();
         bool any = false;
-        for (int pass = 0; pass < 4; pass++)
+        // MeridianPass order: the release lines (residue, bodies, light), the guns, the rounds' heads, their wakes last.
+        for (int pass = 0; pass < MeridianPresentation.PassCount; pass++)
         {
+            var stage = (MeridianPass)pass;
             foreach (Projectile p in Main.ActiveProjectiles)
             {
                 if (p.type != holdout && p.type != round && p.type != line) continue;
                 any = true;
                 if (!p.TryGetGlobalProjectile(out MeridianVisuals visuals) || !visuals.Initialized) continue;
                 if (p.owner < 0 || p.owner >= Main.maxPlayers) continue;
-                if (p.type == round && pass <= 1)
+                if (p.type == line && stage <= MeridianPass.LineLight && p.ModProjectile is MeridianLine meridian)
+                    MeridianPresentation.EmitLine(canvas, art, new MeridianLineView(p.Center, p.velocity, meridian.Node, meridian.Tier,
+                        meridian.Lattice, p.ai[0] - 1 + fraction, p.owner != Main.myPlayer, p.identity), stage);
+                else if (p.type == holdout && stage == MeridianPass.Gun)
+                    MeridianPresentation.EmitGun(canvas, art, MeridianVisuals.GunView(p, visuals, fraction));
+                else if (p.type == round && stage >= MeridianPass.RoundHead)
                 {
                     var view = new MeridianRoundView(visuals.DrawCenter(fraction), p.velocity * p.MaxUpdates,
                         (MeridianShot)(int)p.ai[2], p.ai[0], p.owner != Main.myPlayer, p.identity);
-                    if (pass == 0) MeridianPresentation.EmitRoundWake(canvas, art, view, Trail(p, view));
-                    else MeridianPresentation.EmitRoundHead(canvas, art, view);
+                    if (stage == MeridianPass.RoundHead) MeridianPresentation.EmitRoundHead(canvas, art, view);
+                    else MeridianPresentation.EmitRoundWake(canvas, art, view, Trail(p, view));
                 }
-                else if (p.type == line && pass == 2 && p.ModProjectile is MeridianLine meridian)
-                    MeridianPresentation.EmitLine(canvas, art, new MeridianLineView(p.Center, p.velocity, meridian.Node, meridian.Tier,
-                        meridian.Lattice, p.ai[0] - 1 + fraction, p.owner != Main.myPlayer, p.identity));
-                else if (p.type == holdout && pass == 3)
-                    MeridianPresentation.EmitGun(canvas, art, MeridianVisuals.GunView(p, visuals, fraction));
             }
+            if (!any) return false;
         }
-        return any;
+        return true;
     }
 
     // The round's recent path, oldest first, only points behind the drawn head.
