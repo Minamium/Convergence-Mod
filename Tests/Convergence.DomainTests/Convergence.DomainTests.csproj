@@ -250,5 +250,13 @@
   <ItemGroup>
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonPhaseRules.cs" Link="Domain/CrimsonPhaseRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonRhythm.cs" Link="Domain/CrimsonRhythm.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CrimsonRewardRules.cs" Link="Domain/CrimsonRewardRules.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CrimsonStrokeState.cs" Link="Domain/CrimsonStrokeState.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/SableScytheMotion.cs" Link="Domain/SableScytheMotion.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CanticleRules.cs" Link="Domain/CanticleRules.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/BatonRules.cs" Link="Domain/BatonRules.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CenserRules.cs" Link="Domain/CenserRules.cs" />
+    <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/QuillRules.cs" Link="Domain/QuillRules.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Rewards/ScarletRewardCues.cs" Link="Presentation/ScarletRewardCues.cs" />
   </ItemGroup>
 </Project>

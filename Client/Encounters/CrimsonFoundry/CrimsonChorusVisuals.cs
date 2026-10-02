@@ -2,6 +2,7 @@ using ScarletGraphicsScope = Convergence.Client.Graphics.WorldGraphicsScope;
 #nullable enable
 using System;
 using System.Collections.Generic;
+using Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 using Convergence.Content.Encounters.CrimsonFoundry;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -54,6 +55,8 @@ internal sealed class CrimsonChorusVisuals : ModSystem
     }
     public override void PostDrawTiles()
     {
+        // Reward black blood lies beneath the Raid's chorus markers (frame-stamped: drawn once, by whoever is first).
+        ScarletRewardInk.DrawWorld();
         var boss = CrimsonPackets.Boss;
         if (!Audience(boss)) return;
         float age = CrimsonVisuals.RenderAge(boss!);

@@ -20,6 +20,7 @@ related_code:
 related_docs:
   - project.status
   - adr.0026
+  - encounter.crimson-foundry.rewards
 ---
 
 # Scarlet Invocation
@@ -176,6 +177,8 @@ Spread circles use the280px radius in `CrimsonChorusRules` (previously200): rend
 The10-slot companion keeps its ordinary owner-replicated summon lifetime, walking/floating and native Summon damage. Within the existing1600px/line-of-sight search, choose up to20 chaseable NPCs by **current HP descending**, ties by NPC slot. No manual target overrides priority. Every60ticks a new cast opens all selected opposing pairs while the prior90-tick cast remains active. Pairs follow the same NPC throughout charge and live beam, adapting span to its current width. The incarnation guard cancels a dead/despawned/reused target. Other peers receive owner-selected centers/spans and bounded batch count, never choose replacement targets.
 
 `CrimsonCovenantRules` owns inverse-square-root concentration:20 targets have0.82× prior size/1× per-hit damage; one target has2.6× size/4× damage, with monotonic values between. Count is frozen per cast and re-evaluated next cast, so a kill cannot silently enlarge an existing hit. Enemy width affects separation; concentration affects seal size and the exact beam width. Preserve38 charge/52 live ticks, harmless charge/closure, native Summon hooks and collateral beam hits. No PvP/contact damage or Raid-member substitution. Parent identity/buff/lifetime and remote-parent grace remain; at most two20-ray batches overlap per companion, with one sound per batch event. Protocol66 adds the bounded count to the native child payload and supports the longer protected ceremony; match peers.
+
+While her owner is dead or Down in any Raid (Scarlet, Azure Cathedral, Ebon, or Down/eliminated in Doll), or stunned or item-locked, Vespera keeps attending but opens no new cast, and her live rays stop, as The Last Waltz does. Acquisition (the five Scarlet reward weapons at a Bookcase) and item stats are owned by [Scarlet Invocation rewards](REWARDS.md#scarlet-covenant--緋の契約).
 
 ## Luminance presentation v2
 

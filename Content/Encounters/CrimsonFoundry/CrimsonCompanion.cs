@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.IO;
+using Convergence.Content.Encounters.CrimsonFoundry.Rewards;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -9,18 +10,21 @@ using Terraria.ModLoader;
 
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
+// Scarlet Covenant: item stats and acquisition are owned by docs/encounters/crimson-foundry/REWARDS.md ("Scarlet Covenant");
+// behaviour by the encounter spec. Crafted from the five Scarlet reward weapons; Down or death suspends Vespera's casts.
 public sealed class CrimsonPact : ModItem
 {
-    public override string Texture => "Convergence/Assets/Textures/CrimsonFoundry/CrimsonPact";
+    public override string Texture => CrimsonRewardItems.Icon(CrimsonRewardSprites.Covenant);
     public override void SetDefaults()
     {
-        Item.width = Item.height = 30; Item.damage = 900; Item.DamageType = DamageClass.Summon;
-        Item.mana = 20; Item.knockBack = 2; Item.noMelee = true; Item.noUseGraphic = true;
+        Item.width = Item.height = 30; Item.damage = CrimsonRewardRules.CovenantDamage; Item.DamageType = DamageClass.Summon;
+        Item.mana = CrimsonRewardRules.CovenantMana; Item.knockBack = 2; Item.noMelee = true; Item.noUseGraphic = true;
         Item.useStyle = ItemUseStyleID.HoldUp; Item.useTime = Item.useAnimation = 30;
         Item.rare = ItemRarityID.Red; Item.UseSound = SoundID.Item44;
         Item.shoot = ModContent.ProjectileType<CrimsonCompanion>(); Item.buffType = ModContent.BuffType<CrimsonPactBuff>();
     }
-    public override bool CanUseItem(Player player) => player.maxMinions >= 10 && player.ownedProjectileCounts[Item.shoot] == 0;
+    public override bool CanUseItem(Player player) => CrimsonRewardItems.Usable(player)
+        && player.maxMinions >= CrimsonRewardRules.CovenantSlots && player.ownedProjectileCounts[Item.shoot] == 0;
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
     {
         player.AddBuff(Item.buffType, 18000);
@@ -29,13 +33,22 @@ public sealed class CrimsonPact : ModItem
         if (id < Main.maxProjectiles) Main.projectile[id].originalDamage = Item.damage;
         return false;
     }
-    public override void AddRecipes() => CreateRecipe().AddIngredient<CrimsonConductor>()
-        .AddIngredient(ItemID.Silk, 10).AddIngredient(ItemID.SoulofNight, 5).AddTile(TileID.Bookcases).Register();
+    // One of each Scarlet reward weapon (consumed) at a Bookcase: no other source. The Grimoire is only the Raid key.
+    // Never decrafted: Shimmer would otherwise turn a Covenant (including one made with the retired Grimoire recipe)
+    // into all five weapons without a Victory, and REWARDS.md allows no reverse recipe.
+    public override void AddRecipes()
+    {
+        var recipe = CreateRecipe();
+        foreach (int weapon in CrimsonRewardItems.RewardTypes()) recipe.AddIngredient(weapon);
+        recipe.AddTile(TileID.Bookcases);
+        recipe.DisableDecraft();
+        recipe.Register();
+    }
 }
 
 public sealed class CrimsonPactBuff : ModBuff
 {
-    public override string Texture => "Terraria/Images/Buff_" + BuffID.Pygmies;
+    public override string Texture => CrimsonRewardItems.Icon(CrimsonRewardSprites.CovenantBuff);
     public override void SetStaticDefaults() { Main.buffNoTimeDisplay[Type] = true; Main.buffNoSave[Type] = true; }
     public override void Update(Player player, ref int buffIndex)
     {
@@ -75,7 +88,8 @@ public sealed class CrimsonCompanion : ModProjectile
         if (!owner.active || owner.dead || authority && !owner.HasBuff(ModContent.BuffType<CrimsonPactBuff>()))
         { Projectile.Kill(); return; } // Remote player buffs are not a lifetime authority.
         Projectile.timeLeft = 2;
-        int count = authority && !owner.noItems && !owner.CCed ? Targets() : 0;
+        // Down in any Raid (or death, stun, item lock) suspends the casts; Vespera keeps attending her owner.
+        int count = authority && CrimsonRewardItems.CanAct(owner) ? Targets() : 0;
         NPC? target = count > 0 ? Main.npc[targetSlots[0]] : null;
         if (authority)
         {
@@ -152,7 +166,7 @@ public sealed class CrimsonCompanion : ModProjectile
         parent = null!;
         if (child.owner < 0 || child.owner >= Main.maxPlayers || child.ai[2] < 0 || child.ai[2] != (int)child.ai[2]) return false;
         var owner = Main.player[child.owner];
-        if (!owner.active || owner.dead || owner.noItems || owner.CCed
+        if (!CrimsonRewardItems.CanAct(owner)
             || child.owner == Main.myPlayer && !owner.HasBuff(ModContent.BuffType<CrimsonPactBuff>())) return false;
         foreach (Projectile p in Main.ActiveProjectiles)
             if (p.owner == child.owner && p.identity == (int)child.ai[2] && p.ModProjectile is CrimsonCompanion)
@@ -171,8 +185,11 @@ internal sealed class CrimsonCovenantIncarnation : GlobalNPC
 {
     public override bool InstancePerEntity => true;
     private static ulong sequence;
-    internal ulong Value;
-    public override void OnSpawn(NPC npc, IEntitySource source) => Value = ++sequence;
+    private ulong value;
+    // OnSpawn never runs on a multiplayer client, but an NPC that arrives in a slot gets fresh globals (SetDefaults),
+    // so the first read numbers it there. A client owner can then tell a reused slot from the NPC it recorded.
+    internal ulong Value => value != 0 ? value : value = ++sequence;
+    public override void OnSpawn(NPC npc, IEntitySource source) => value = ++sequence;
 }
 
 public sealed class CrimsonCompanionRay : ModProjectile
@@ -192,7 +209,7 @@ public sealed class CrimsonCompanionRay : ModProjectile
         Projectile.width = Projectile.height = 14; Projectile.friendly = true; Projectile.DamageType = DamageClass.Summon;
         Projectile.penetrate = -1; Projectile.tileCollide = false; Projectile.ignoreWater = true;
         Projectile.timeLeft = CrimsonCovenantRules.Duration; Projectile.netImportant = true;
-        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 12;
+        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = CrimsonCovenantRules.HitCooldown;
     }
     public override bool ShouldUpdatePosition() => false;
     public override bool CanHitPvp(Player target) => false;
@@ -240,6 +257,6 @@ public sealed class CrimsonCompanionRay : ModProjectile
         float point = 0;
         Vector2 start = Projectile.Center + new Vector2(Projectile.ai[1], 0);
         return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), start,
-            start - new Vector2(Reach * CrimsonInvocation.Ease((Projectile.ai[0] - CrimsonCovenantRules.ChargeTicks) / 7), 0), 48 * Size * Opening, ref point);
+            start - new Vector2(Reach * CrimsonInvocation.Ease((Projectile.ai[0] - CrimsonCovenantRules.ChargeTicks) / CrimsonCovenantRules.OpenTicks), 0), 48 * Size * Opening, ref point);
     }
 }

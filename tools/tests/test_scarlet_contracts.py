@@ -1,6 +1,7 @@
 """Source wiring guards, not visual-quality or native gameplay approval."""
 from pathlib import Path
 import hashlib
+import re
 import unittest
 ROOT = Path(__file__).resolve().parents[2]
 CONTENT = ROOT/'Content/Encounters/CrimsonFoundry'
@@ -61,7 +62,9 @@ class ScarletContracts(unittest.TestCase):
         for folder in (CONTENT,CLIENT):
             for path in folder.rglob('*.cs'):
                 text=path.read_text(encoding='utf-8')
-                for stale in ('CrimsonScore','Score.json','CrimsonRegistration.Score','score.Events(','NextBeats(score'):
+                # Whole word: the reward box CrimsonScoreReliquary is not the retired CrimsonScore beat map.
+                self.assertIsNone(re.search(r'\bCrimsonScore\b',text),f'{path.name} still reads the retired recorded beat map')
+                for stale in ('Score.json','CrimsonRegistration.Score','score.Events(','NextBeats(score'):
                     self.assertNotIn(stale,text,f'{path.name} still reads the retired recorded beat map')
         meter=(CONTENT/'CrimsonMeter.cs').read_text(encoding='utf-8')
         self.assertIn('BeatSamples = 22500',meter)

@@ -1,0 +1,87 @@
+Mods: {
+	Convergence: {
+		Items: {
+			CrimsonScoreReliquary: {
+				DisplayName: Scarlet Score Reliquary
+				Tooltip:
+					'''
+					Right click to open
+					Contains one of the five Scarlet Invocation weapons, each with an equal 20% chance
+					Collect all five weapons to craft the Scarlet Covenant at a Bookcase
+					A black-lacquered casket sealed in blood-red wax, holding the conjurer's score
+					'''
+			}
+			CrimsonSableScythe: {
+				DisplayName: Sable Scythe
+				Tooltip:
+					'''
+					Hold to swing a bone-hooked scythe in an unbroken figure eight
+					Every stroke that connects engraves one line of a five-line staff behind you
+					Right click for Staff Reap: the staff closes on your target and its lines cut across it
+					A full staff ends on the Final Barline
+					'''
+			}
+			CrimsonCanticleOrgan: {
+				DisplayName: Canticle Organ
+				Tooltip:
+					'''
+					Uses bullets as ammo
+					Fires bone shards from four organ pipes; each hit marks the enemy, up to eight marks
+					Right click for the Hymn of Hands: a bone hand slams onto a marked enemy for every mark
+					An enemy carrying eight marks is crushed by the Clasp
+					'''
+			}
+			CrimsonBaton: {
+				DisplayName: Scarlet Baton
+				Tooltip:
+					'''
+					Hold to conduct, writing black-blood strokes where you point
+					Sweep the cursor to steer each stroke; up to eight wait as a score
+					Right click for the Tutti: every stroke ignites in the order it was written
+					A full score of eight runs together into the Black-Blood River
+					'''
+			}
+			CrimsonEmberCenser: {
+				DisplayName: Ember Censer
+				Tooltip:
+					'''
+					Summons a small crown censer that swings above your foes
+					At the end of each swing it pours a column of burning black blood
+					Every fourth pour is a Grand Pour
+					'''
+			}
+			CrimsonBloodinkQuill: {
+				DisplayName: Bloodink Quill
+				Tooltip:
+					'''
+					Throws quills that write black-blood ink as they fly and stick where they land
+					Up to eight quills and their ink stay written
+					Stealth strikes throw the Sealed Score: the ink catches fire and the quills play back their melody
+					'''
+			}
+		}
+
+		Buffs: {
+			CrimsonEmberCenserBuff: {
+				DisplayName: Ember Censer
+				Description: A crown censer swings above you
+			}
+		}
+
+		Projectiles: {
+			SableStroke.DisplayName: Sable Scythe
+			SableStaff.DisplayName: Engraved Staff
+			SableRelease.DisplayName: Sable Scythe
+			StaffCut.DisplayName: Staff Reap
+			CanticleShard.DisplayName: Bone Shard
+			BoneHand.DisplayName: Bone Hand
+			BatonSwing.DisplayName: Scarlet Baton
+			BatonStroke.DisplayName: Black-Blood Stroke
+			BatonRiver.DisplayName: Black-Blood River
+			EmberCenserMinion.DisplayName: Ember Censer
+			BloodinkQuill.DisplayName: Bloodink Quill
+			BloodinkTrail.DisplayName: Bloodink
+			SealedScore.DisplayName: Sealed Score
+		}
+	}
+}

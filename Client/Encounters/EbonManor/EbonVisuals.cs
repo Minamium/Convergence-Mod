@@ -262,6 +262,7 @@ internal sealed class EbonVisuals : ModSystem
 
     public override void PostDrawTiles()
     {
+        Convergence.Client.Graphics.FriendlyWorldInk.BeneathForecasts(); // friendly weapon ink lies under every forecast
         var boss = EbonPackets.Boss;
         if (Main.gameMenu || boss is null || !boss.Fresh) return;
         // Capture in the world pass; UI layers may change screen metrics.

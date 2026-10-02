@@ -13,6 +13,8 @@ SOUNDS = ROOT / 'Assets/Sounds/CrimsonFoundry'
 RECORD = '### Scarlet Invocation recorded audio — 2026-10-02'
 # The reward companion keeps its own Doll beam sounds; it is outside the Raid's sound set.
 COMPANION = 'CrimsonCompanionVisuals.cs'
+# The Scarlet reward weapons play their own cues, outside the Raid's sound set (docs/encounters/crimson-foundry/REWARDS.md).
+REWARD_AUDIO = 'ScarletRewardAudio.cs'
 
 
 def read(path):
@@ -70,9 +72,10 @@ class ScarletAudioContracts(unittest.TestCase):
         companion = read(CLIENT / COMPANION)
         for name in re.findall(r'Play\("(\w+)",', companion):
             self.assertTrue((ROOT / f'Assets/Sounds/FirstSeverance/Beams/{name}.wav').is_file(), name)
-        # No other Scarlet file builds its own sound path.
+        # No other Scarlet file builds its own sound path. The reward weapons' player is a set of its own
+        # (Assets/Sounds/Weapons/ScarletRewards, guarded by test_scarlet_rewards.py, which forbids it this folder).
         builders = {p.name for p in scarlet_sources() if 'new SoundStyle(' in read(p)}
-        self.assertEqual({'ScarletSounds.cs', 'CrimsonVisuals.cs', COMPANION}, builders)
+        self.assertEqual({'ScarletSounds.cs', 'CrimsonVisuals.cs', COMPANION, REWARD_AUDIO}, builders)
 
     def test_scarlet_code_no_longer_borrows_doll_beam_sounds(self):
         for path in scarlet_sources():

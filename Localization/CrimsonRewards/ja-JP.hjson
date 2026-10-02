@@ -1,0 +1,87 @@
+Mods: {
+	Convergence: {
+		Items: {
+			CrimsonScoreReliquary: {
+				DisplayName: 緋の聖譜櫃
+				Tooltip:
+					'''
+					右クリックで開封
+					Scarlet Invocationの5種類の武器から1種類が出る（各20％）
+					全5種類を集め、本棚で「緋の契約」を作れる
+					召喚師の楽譜を収めた、血の色の封蝋の黒漆の櫃
+					'''
+			}
+			CrimsonSableScythe: {
+				DisplayName: 帷の大鎌
+				Tooltip:
+					'''
+					押し続けると、骨の鉤の大鎌を8の字に振り続ける
+					当たった一振りごとに、背後の五線に線を1本ずつ刻む（最大5本）
+					右クリック：五線刈り。五線が狙った敵に寄り、線が横切って斬る
+					5本そろうと終止線で締めくくる
+					'''
+			}
+			CrimsonCanticleOrgan: {
+				DisplayName: 聖歌のオルガン銃
+				Tooltip:
+					'''
+					弾丸を消費する
+					4本のパイプから骨の欠片を撃ち、当てた敵に印をつける（1体につき最大8つ）
+					右クリック：手の聖歌。印の数だけ骨の手が敵に叩きつけられる
+					印が8つそろった敵は合掌で押しつぶす
+					'''
+			}
+			CrimsonBaton: {
+				DisplayName: 緋の指揮棒
+				Tooltip:
+					'''
+					押し続けると指揮をとり、指した場所に黒血の筆跡を書く
+					カーソルの振りで筆跡の向きと曲がりが変わる。最大8本が楽譜として残る
+					右クリック：総奏。書いた順に筆跡が燃え上がる
+					8本そろうと黒血の奔流になる
+					'''
+			}
+			CrimsonEmberCenser: {
+				DisplayName: 灰燼の香炉
+				Tooltip:
+					'''
+					敵の頭上で振れる、小さな冠の香炉を召喚する
+					振れきるたびに、燃える黒血を注ぐ
+					4回に1回は大注ぎになる
+					'''
+			}
+			CrimsonBloodinkQuill: {
+				DisplayName: 血墨の羽根筆
+				Tooltip:
+					'''
+					投げた羽根筆は飛びながら黒血の墨を書き、当たった場所に刺さる
+					羽根筆と墨は最大8つまで残る
+					ステルス攻撃：封緘の楽譜を投げる。墨が燃え上がり、刺さった羽根筆が旋律を奏で直す
+					'''
+			}
+		}
+
+		Buffs: {
+			CrimsonEmberCenserBuff: {
+				DisplayName: 灰燼の香炉
+				Description: 冠の香炉が頭上で振れている
+			}
+		}
+
+		Projectiles: {
+			SableStroke.DisplayName: 帷の大鎌
+			SableStaff.DisplayName: 刻まれた五線
+			SableRelease.DisplayName: 帷の大鎌
+			StaffCut.DisplayName: 五線刈り
+			CanticleShard.DisplayName: 骨の欠片
+			BoneHand.DisplayName: 骨の手
+			BatonSwing.DisplayName: 緋の指揮棒
+			BatonStroke.DisplayName: 黒血の筆跡
+			BatonRiver.DisplayName: 黒血の奔流
+			EmberCenserMinion.DisplayName: 灰燼の香炉
+			BloodinkQuill.DisplayName: 血墨の羽根筆
+			BloodinkTrail.DisplayName: 血墨の筆跡
+			SealedScore.DisplayName: 封緘の楽譜
+		}
+	}
+}

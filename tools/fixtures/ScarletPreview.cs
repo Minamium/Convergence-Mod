@@ -24,7 +24,7 @@ internal sealed class PreviewOptions
 {
     internal string Only = "";
     internal int Step = 8, PhraseStart = 1000, Width = 1920, Height = 1080;
-    internal bool ConstantBeats, Sequences = true, Matrix = true, Smoke = true, Files = true, Contract = true;
+    internal bool ConstantBeats, Sequences = true, Matrix = true, Smoke = true, Files = true, Contract = true, Rewards;
     internal double Bpm = 128;
     internal Backdrop[] Backdrops = { Backdrop.Sanctum, Backdrop.Night, Backdrop.Day };
     internal float[] Zooms = { .65f, 1f, 2f };
@@ -108,6 +108,7 @@ internal static class ScarletPreview
                 case "no-smoke": o.Smoke = false; break;
                 case "no-contract": o.Contract = false; break;
                 case "sheets-only": o.Files = false; break;
+                case "rewards": o.Rewards = true; break;
                 default: throw new ArgumentException("unknown option --" + key);
             }
         }
@@ -140,9 +141,11 @@ internal sealed class PreviewRun
 
     internal int Execute()
     {
-        var score = options.ConstantBeats ? PreviewPlanner.ConstantScore(options.Bpm) : PreviewPlanner.LoadScore(renderer.Root);
+        if (options.Rewards) return RewardsPreview.Run(renderer, options, output);
+        // Gameplay has one fixed 128 BPM grid since #101 (CrimsonMeter); --beats no longer selects a score.
+        var score = PreviewPlanner.Grid;
         renderer.Score = score;
-        string beats = options.ConstantBeats ? $"constant {options.Bpm.ToString(CultureInfo.InvariantCulture)} BPM (integer ticks)" : "Assets/Music/CrimsonFoundry/Score.json";
+        string beats = "CrimsonMeter 128 BPM grid (28.125 ticks per beat)";
         Console.WriteLine($"beats: {beats}; phrase start (score tick): {options.PhraseStart}");
         var players = PreviewPlanner.Players().Where(p => options.Players.Contains(p.Name)).ToArray();
         var phrases = new List<PreviewPhrase>();
@@ -252,7 +255,7 @@ internal sealed class PreviewRun
 
     // Loads PortalBeam.fxc exactly like production and draws its real passes for a TrackingBeam
     // through the Vfx foundation, with the authoritative overlay on top.
-    private void ShaderSmoke(CrimsonScore score, PreviewPlayer player)
+    private void ShaderSmoke(PreviewGrid score, PreviewPlayer player)
     {
         var phrase = PreviewPlanner.Build("shader-smoke", score, 0, 1, player, options.PhraseStart);
         var plan = phrase.Plans[1];
@@ -314,12 +317,14 @@ internal sealed class PreviewRenderer : IDisposable
     internal readonly GraphicsDevice Device;
     internal readonly Texture2D Pixel;
     internal string Root = "";
-    internal CrimsonScore? Score;
+    internal PreviewGrid? Score;
     private readonly PreviewAssets assets;
     private readonly PreviewOptions options;
     private readonly ScarletGeometryOverlay overlay;
     private readonly ScarletInkStroke ink = new();
     private readonly SpriteBatch batch;
+    internal SpriteBatch Batch => batch;
+    internal PreviewAssets Assets => assets;
     private readonly Texture2D disc;
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private RenderTarget2D? target;
@@ -355,7 +360,7 @@ internal sealed class PreviewRenderer : IDisposable
         overlay.Dispose(); batch.Dispose(); Pixel.Dispose(); disc.Dispose(); target?.Dispose();
     }
 
-    private RenderTarget2D Target(int width, int height)
+    internal RenderTarget2D Target(int width, int height)
     {
         if (target is null || target.Width != width || target.Height != height)
         {
@@ -404,7 +409,7 @@ internal sealed class PreviewRenderer : IDisposable
         return rt;
     }
 
-    private void DrawBackdrop(in ScarletView view, Backdrop kind, PreviewPhrase phrase)
+    internal void DrawBackdrop(in ScarletView view, Backdrop kind, PreviewPhrase phrase)
     {
         int w = view.Width, h = view.Height;
         if (kind == Backdrop.Sanctum)

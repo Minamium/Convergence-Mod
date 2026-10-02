@@ -15,8 +15,8 @@ Mods: {
 				DisplayName: Scarlet Covenant
 				Tooltip: '''
 					Summons a human-sized scarlet conjurer to accompany you
-					Follows on foot or floats; opposing seals clamp up to 10 enemies with beams, prioritizing highest current HP
-					Requires 10 minion slots. Does not count as a Raid participant
+					Follows on foot or floats; opposing seals clamp up to 20 enemies with beams, prioritizing highest current HP
+					Requires 10 minion slots. Does not count as a Raid participant. Pauses while you are Down
 					'''
 			}
 		}
