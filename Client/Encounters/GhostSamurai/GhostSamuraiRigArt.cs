@@ -241,10 +241,12 @@ internal sealed class GhostSamuraiRigArt : ModSystem
         }
     }
 
-    internal static void DrawDeath(SpriteBatch batch, SamuraiRigPose p, Vector2 screen, float age)
+    // swords: false when the blades are drawn falling by DrawFallenBlades. departing: the
+    // samurai leaves a lost fight whole, without the crack or the scattering ornaments.
+    internal static void DrawDeath(SpriteBatch batch, SamuraiRigPose p, Vector2 screen, float age, bool swords = true, bool departing = false)
     {
         if (Main.dedServ) return;
-        float lower = SamuraiRigMotion.Smooth(age / 24), scatter = SamuraiRigMotion.Smooth((age - 26) / 38);
+        float lower = SamuraiRigMotion.Smooth(age / 24), scatter = departing ? 0 : SamuraiRigMotion.Smooth((age - 26) / 38);
         p = p with { Left = p.Left with { Angle = SamuraiRigMotion.Angle(p.Left.Angle, 2.16f, lower), Charge = 0 },
             Right = p.Right with { Angle = SamuraiRigMotion.Angle(p.Right.Angle, .98f, lower), Charge = 0 }, Hit = 0, Speed = 0 };
         float armor = 1 - SamuraiRigMotion.Smooth((age - 34) / 35);
@@ -262,12 +264,13 @@ internal sealed class GhostSamuraiRigArt : ModSystem
                 Ornaments(batch, smokePose, screen, Color.White * (1 - SamuraiRigMotion.Smooth((age - 48) / 22)), scatter);
                 Hem(batch, smokePose, screen, Color.White * armor, 1 - SamuraiRigMotion.Smooth((age - 32) / 29));
                 Part(batch, 0, Root(p, screen), new(.5f, .40f), new Vector2(130, 132) * p.Scale, p.Lean, Color.White * armor);
-                Arms(batch, p, screen, Color.White * armor); Swords(batch, p, screen, Color.White * armor, false);
+                Arms(batch, p, screen, Color.White * armor);
+                if (swords) Swords(batch, p, screen, Color.White * armor, false);
                 Head(batch, p, screen, Color.White * head);
             }
             finally { surfaceParts = endingParts = false; }
         }
-        float crack = SamuraiRigMotion.Smooth((age - 18) / 12) * (1 - SamuraiRigMotion.Smooth((age - 60) / 20));
+        float crack = departing ? 0 : SamuraiRigMotion.Smooth((age - 18) / 12) * (1 - SamuraiRigMotion.Smooth((age - 60) / 20));
         Vector2 root = Root(p, screen);
         GhostSamuraiVisuals.Stroke(batch, root + new Vector2(-11, -60), root + new Vector2(7, -26), 3, new Color(223, 185, 255) * crack);
         GhostSamuraiVisuals.Stroke(batch, root + new Vector2(7, -26), root + new Vector2(-6, 3), 2, new Color(237, 216, 255) * crack);
@@ -276,6 +279,48 @@ internal sealed class GhostSamuraiRigArt : ModSystem
                 Color.White * SamuraiRigMotion.Smooth((age - 52) / 20) * end);
         Wisps(batch, smokePose, screen, end * (1 - scatter * .8f));
         GhostSamuraiEnergy.Body(batch, smokePose, screen, true, end);
+    }
+
+    // Victory: the blades leave the dissolving hands and plant in the floor of the seal,
+    // joining the weapons of the old battle; they melt with the seal.
+    internal static void DrawFallenBlades(SpriteBatch batch, SamuraiRigPose p, Vector2 screen, float age,
+        float floorY, float left, float right)
+    {
+        if (Main.dedServ) return;
+        float lower = SamuraiRigMotion.Smooth(Math.Min(age, SamuraiCinematics.BladeRelease) / 24f);
+        p = p with { Left = p.Left with { Angle = SamuraiRigMotion.Angle(p.Left.Angle, 2.16f, lower), Charge = 0 },
+            Right = p.Right with { Angle = SamuraiRigMotion.Angle(p.Right.Angle, .98f, lower), Charge = 0 }, Hit = 0, Speed = 0 };
+        float melt = SamuraiRigMotion.Smooth((age - SamuraiCinematics.BladeFade) / 40);
+        if (melt >= 1) return;
+        Span<Vector4> blades = stackalloc Vector4[2];
+        for (int side = -1; side <= 1; side += 2)
+        {
+            var blade = side < 0 ? p.Left : p.Right;
+            Vector2 hand = Hand(p, side);
+            float length = 145 * blade.Size * p.Scale;
+            var (x, y, angle) = SamuraiCinematics.FallenBlade(age, hand.X, hand.Y, blade.Angle + p.Lean, length,
+                side, p.X, floorY, left, right);
+            blades[(side + 1) / 2] = new(x, y, angle, blade.Size * p.Scale);
+        }
+        using (var scope = new WorldGraphicsScope(batch))
+        {
+            GhostSamuraiMaterials.Prepare(p.Age + age, 0, 0, melt);
+            surfaceParts = endingParts = true;
+            try
+            {
+                foreach (var b in blades)
+                    Part(batch, 4, new Vector2(b.X, b.Y) - screen, new(.40f, .85f), new Vector2(38, 172) * b.W, b.Z + MathHelper.PiOver2, Color.White);
+            }
+            finally { surfaceParts = endingParts = false; }
+        }
+        // the moment of planting flashes down each blade
+        float flash = age >= SamuraiCinematics.BladeLand ? MathF.Exp(-(age - SamuraiCinematics.BladeLand) / 6) * (1 - melt) : 0;
+        if (flash > .02f)
+            foreach (var b in blades)
+            {
+                Vector2 hilt = new(b.X, b.Y), tip = hilt + b.Z.ToRotationVector2() * 145 * b.W;
+                GhostSamuraiVisuals.Stroke(batch, hilt - screen, tip - screen, 3, new Color(239, 228, 255) * flash);
+            }
     }
 
     private static void Part(SpriteBatch batch, int index, Vector2 position, Vector2 pivot, Vector2 size,

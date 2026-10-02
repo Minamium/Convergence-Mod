@@ -1,6 +1,6 @@
 {
   "scope": "Scarlet Invocation music foundation: strict 128 BPM authority grid (CrimsonMeter), bar-aligned phrases/chorus ends/act changes, two-bar act and five-bar Final transitions, client stage re-sequencing of the unchanged Graceful Ordeal OGG (CrimsonArrangement) streamed by CrimsonMusicMixer with Victory/Defeat endings. Score.json removed. Gameplay geometry, damage and wire layouts unchanged",
-  "target_build": "0.3.65 / protocol77 (feat/scarlet-music-grid, on top of the 0.3.64 ending guards)",
+  "target_build": "0.3.66 / protocol78 (feat/scarlet-music-grid, on top of the 0.3.65 ending guards and main's 0.3.64)",
   "owner_direction": "2026-10-02: the owner asked to redo all Scarlet SFX, the music handling and every non-character effect; approved the plan of a measured beat grid, per-stage sections switched on bar heads, the song's own stop for Victory, and later said 'OK, proceed' after the whole-fight audition page was opened",
   "measurements": {
     "tempo": "passed: onset comb fit 22499.8 samples/beat, peak regression 128.0004 BPM with 1.6 ms residual MAD; every 8-bar window from the intro (bars 1-12, medium confidence) to the end sits within -1.5..+2.0 ms of beat k = 22500k samples",

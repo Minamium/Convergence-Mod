@@ -358,6 +358,6 @@ This branch increments the global handshake to48. All peers must use the same br
 
 No Verlet positions, particles, material noise, screen shakes or camera state are network authority. They derive from the accepted timeline and reset by Fight/epoch. This revision does not claim to solve existing one-way-delay clock offset or validate late-packet fairness.
 
-## Scarlet grid protocol77 — 2026-10-02
+## Scarlet grid protocol78 — 2026-10-02
 
-Protocol77 changes no Scarlet wire layout. Peers derive the shared 128 BPM beat grid, two-bar act and five-bar Final transitions, eight-bar opening and bar-aligned chorus ends from code ([ADR-0026 amendment](adr/0026-crimson-score-and-native-projectiles.md#2026-10-02-scarlet-128-bpm-grid-and-client-arrangement-protocol77)); `PhaseStart`/`UnlockAt` keep their meaning and bounds. Clients derive music sections from those replicated ticks only. Mixed76/77 peers must update together.
+Protocol78 changes no Scarlet wire layout. Peers derive the shared 128 BPM beat grid, two-bar act and five-bar Final transitions, eight-bar opening and bar-aligned chorus ends from code ([ADR-0026 amendment](adr/0026-crimson-score-and-native-projectiles.md#2026-10-02-scarlet-128-bpm-grid-and-client-arrangement-protocol78)); `PhaseStart`/`UnlockAt` keep their meaning and bounds. Clients derive music sections from those replicated ticks only. Mixed77/78 peers must update together.

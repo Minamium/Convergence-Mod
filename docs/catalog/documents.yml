@@ -65,7 +65,7 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: 62aeaf822534933865259f762c1c445cb3ee1cc0fec1a2bdbee8020cc48c0710
+  content_sha256: b7b08d92a8d0d7a0c7373b461f8236e1048c61a30b9890a35d971ea663cea9ac
   document_type: adr
   status: accepted
   owners:
@@ -938,7 +938,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: f6d91180948a8cbde6904dd920a00a5ca3d20f5a53315e0c86f530f28d9917a1
+  content_sha256: 578fcab0011bec07209a59976dcf4645978a5fd3137ef001beeacb5b787af20d
   document_type: spec
   status: provisional
   owners:
@@ -1369,7 +1369,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: ee4bc314cf40299ed0154a1ecdaf5c9cb868fd330d9f60715ac14341e63cbbe2
+  content_sha256: 1e630a918a29a9b06148359d2dc62c0f6be801a71b810f05486910475334b932
   document_type: governance
   status: accepted
   owners:
@@ -1414,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: a893e8227ba3812571a9cb7c8b7689e359e9b1985536de1c3320ccc72d3fad34
+  content_sha256: a4e8b55e1490b990e5ff12c56504e3035da6b2b29c99a6ea7999a1564ec93160
   document_type: status
   status: accepted
   owners:
@@ -1590,7 +1590,7 @@ documents:
 - doc_id: research.ghost-samurai-luminance-20260918
   path: docs/research/2026-09-18-ghost-samurai-luminance.md
   title: 'Ghost Samurai: Luminance capability survey and independent rig'
-  content_sha256: 5dcf5a49afa471268713368591c858a5b1e704d8031b4e31e103e235993a14c8
+  content_sha256: a2dfbdb21e38baef7c1e07a5cc8eda147f2f70998a103edb2e701a598c978e23
   document_type: research
   status: provisional
   owners:

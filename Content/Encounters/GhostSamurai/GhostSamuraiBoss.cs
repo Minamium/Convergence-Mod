@@ -78,6 +78,9 @@ public sealed class GhostSamuraiBoss : ModNPC
             NPC.Center = PredictedCenter();
             NPC.velocity = Vector2.Zero; // Do not integrate the received velocity a second time.
         }
+        // Local strikes are resolved here; the summoning and a change of form cannot be hit.
+        if (Main.netMode == NetmodeID.MultiplayerClient)
+            NPC.dontTakeDamage = GhostSamuraiRules.Untouchable(Age, TransitionRemaining);
         if (Main.netMode != NetmodeID.MultiplayerClient && (Runtime is null || !Runtime.Matches(this)))
         {
             // Unregistered/debug-spawned actors cannot run an unmanaged second fight.

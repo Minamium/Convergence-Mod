@@ -15,6 +15,19 @@ Mods: {
 		}
 
 		Projectiles.GhostSamuraiAttackProjectile.DisplayName: Ghost Samurai's Blade
-		GhostSamurai.SummonRejected: The Ghost Samurai could not be summoned. Hold the bell and finish the current encounter first.
+		GhostSamurai: {
+			SummonRejected: The Ghost Samurai could not be summoned. Hold the bell and finish the current encounter first.
+			Cinema: {
+				SummonEpithet: Violet Phantom Blade
+				PhaseTwoTitle: Violet Lightning
+				PhaseTwoEpithet: The Second Blade
+				PhaseThreeTitle: Totality
+				PhaseThreeEpithet: The Final Blade
+				VictoryTitle: Requiem
+				VictoryEpithet: The Ghost Samurai is laid to rest
+				DefeatTitle: Fallen
+				DefeatEpithet: Every blade that stood was cut down
+			}
+		}
 	}
 }
