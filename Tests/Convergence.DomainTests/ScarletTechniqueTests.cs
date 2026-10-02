@@ -49,7 +49,7 @@ internal static partial class Program
             for (float age = p.Fire; age < p.End; age += .25f)
             {
                 int count = CrimsonTechniqueGeometry.Write(p, age, strokes);
-                if ((p.Aimed || p.IsRift || p.Technique is CrimsonTechnique.ClusterVolley or CrimsonTechnique.ChoirRakes) && age == p.Fire) { AssertEqual(0, count, "zero-width ignition is harmless"); continue; }
+                if ((p.Aimed || p.IsRift || p.IsSignature || p.Technique is CrimsonTechnique.ClusterVolley or CrimsonTechnique.ChoirRakes) && age == p.Fire) { AssertEqual(0, count, "zero-width ignition is harmless"); continue; }
                 AssertEqual(true, count is > 0 and <= CrimsonTechniqueGeometry.MaximumStrokes, "bounded strokes");
                 foreach (var stroke in strokes[..count])
                 {
@@ -94,19 +94,25 @@ internal static partial class Program
         Span<CrimsonStroke> strokes = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         foreach (var technique in Enum.GetValues<CrimsonTechnique>())
         {
-            bool found = false;
-            for (int x = 7000; x <= 9000 && !found; x += 100) for (int y = 5050; y <= 5800 && !found; y += 75)
+            // A walking safe place (corridor, quarters) moves every beat: judge each pair of
+            // consecutive notes there; the signature tests prove the walk itself.
+            int window = CrimsonSignatureMoves.IsSignatureMove(technique) ? 2 : 3;
+            for (int first = 0; first + window <= 3; first++)
             {
-                bool safe = true;
-                for (int step = 0; step < 3; step++)
+                bool found = false;
+                for (int x = 7000; x <= 9000 && !found; x += 100) for (int y = 5050; y <= 5800 && !found; y += 75)
                 {
-                    var p = TechniqueExample(technique, step);
-                    int count = CrimsonTechniqueGeometry.Write(p, p.Fire, strokes, true);
-                    for (int i = 0; i < count; i++) if (CrimsonTechniqueGeometry.Intersects(strokes[i], x, y, 20, 42)) safe = false;
+                    bool safe = true;
+                    for (int step = first; step < first + window; step++)
+                    {
+                        var p = TechniqueExample(technique, step);
+                        int count = CrimsonTechniqueGeometry.Write(p, p.Fire, strokes, true);
+                        for (int i = 0; i < count; i++) if (CrimsonTechniqueGeometry.Intersects(strokes[i], x, y, 20, 42)) safe = false;
+                    }
+                    found = safe;
                 }
-                found = safe;
+                AssertEqual(true, found, $"complete body can avoid {technique} example phrase");
             }
-            AssertEqual(true, found, $"complete body can avoid {technique} example phrase");
         }
     }
     [DomainTest("Scarlet rush and crash body paths join every musical note without position resets")]
@@ -148,7 +154,7 @@ internal static partial class Program
             CheckRejected(p with { Fire = int.MinValue });
             CheckRejected(p with { Steps = 0 });
             CheckRejected(p with { Technique = (CrimsonTechnique)255 });
-            if (technique == CrimsonTechnique.ChoirRakes) {
+            if (technique == CrimsonTechnique.ChoirRakes || CrimsonSignatureMoves.IsSignatureMove(technique)) {
                 CheckRejected(p with { TargetSlot = 0 });
                 CheckRejected(p with { TargetConnection = Guid.NewGuid() });
             }

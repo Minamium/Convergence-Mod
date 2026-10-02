@@ -40,7 +40,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
                 string asset = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley ? impact ? "WideFire" : "WideCharge"
-                    : p.IsRift || p.Technique == CrimsonTechnique.ChoirRakes ? impact ? "ChargeRush" : "ChargeLock"
+                    : p.IsRift || p.Technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope ? impact ? "ChargeRush" : "ChargeLock"
                     : impact ? "PortalFire" : "ChargeLock";
                 if (voices.Count < 24)
                 {
@@ -107,7 +107,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
                 var p = gesture.EffectivePlan(age, true);
-                if (p.Aimed || p.IsRift || p.Technique == CrimsonTechnique.ClusterVolley) continue;
+                if (p.Aimed || p.IsRift || p.IsSignature || p.Technique == CrimsonTechnique.ClusterVolley) continue;
                 if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
                 if (warning && DuplicateForecast(p, age)) continue;
@@ -157,10 +157,11 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         {
             if (projectile.ModProjectile is not CrimsonGesture g || !g.TryBoss(out var owner) || owner != boss) continue;
             var p = g.EffectivePlan(age, true);
-            if ((!p.Aimed && !p.IsRift) || !g.ForecastReady || age < p.Born
-                || age >= p.End + (p.IsRift ? CrimsonSpatialCuts.ResidueTicks : 0)) continue;
+            if ((!p.Aimed && !p.IsRift && !p.IsSignature) || !g.ForecastReady || age < p.Born
+                || age >= p.End + (p.IsRift ? CrimsonSpatialCuts.ResidueTicks : p.IsSignature ? CrimsonSignatureMoves.ResidueTicks(p.Technique) : 0)) continue;
             bool warning = age < p.Fire;
-            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift);
+            // A signature move keeps its whole footprint through the residue; the beam shader fades it.
+            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift || p.IsSignature && age >= p.End);
             if (p.Technique == CrimsonTechnique.SideBeams) ScarletSorcery.CrossflowSeals(batch,p,age);
             for(int i=0;i<count;i++) {
             var s = strokes[i];

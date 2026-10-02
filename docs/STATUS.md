@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.65 / protocol77** on `feat/scarlet-music-grid` (not yet on main): Scarlet's music foundation on top of the 0.3.64 ending guards.
+Current source: **0.3.68 / protocol79** on `feat/scarlet-signature-moves` (stacked on `feat/scarlet-music-grid`, not yet on main): each Scarlet Act gains a signature move on every third phrase, replacing that phrase's four basic notes (the seal crossflow stays). Act I's **Cinder Curtain** burns ten 256 px columns except an exactly 768 px (three-column) corridor that walks away from the targeted player's column, one column per beat; Act II's **Shroud Rope** alternates a low cut (jump) and a high cut 170 px up (an ordinary jump clears it); Act III's **Four Hands** slams two of four 640 px quarters per beat, always sharing a safe quarter between beats. They are unaimed, share forecast/strike/collision geometry (`CrimsonSignatureMoves`), draw through the existing field-beam path and sounds, and keep the rehearsal damage of 1. The [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md#signature-moves-protocol79) owns the shapes; [network architecture](NETWORK_ARCHITECTURE.md#scarlet-signature-moves-protocol79--2026-10-02) owns the appended IDs. Hand-feel, fairness at real speeds, motions and art remain user-owned / not_run.
+
+Retained 0.3.65 / protocol77 (the music-grid branch this stacks on): Scarlet's music foundation on top of the 0.3.64 ending guards.
 
 Scarlet schedules everything on Graceful Ordeal's measured strict 128 BPM grid (`CrimsonMeter`): phrases and unlocks on bar heads, chorus ends on bar heads, act changes on the next bar head after a latched cycle, two-bar act transitions and a five-bar Final ceremony. Clients re-sequence the unchanged OGG per stage (`CrimsonArrangement`, `CrimsonMusicMixer`) into one streamed voice, with the song's full stop for Victory. The retired detected beat map (`Score.json`) is removed. The [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-graceful-ordeal-on-a-128-bpm-grid) owns the stage table; [ADR-0026](adr/0026-crimson-score-and-native-projectiles.md#2026-10-02-scarlet-128-bpm-grid-and-client-arrangement-protocol77) owns the authority split.
 
@@ -91,6 +93,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.68 Scarlet signature moves:** [evidence](evidence/2026-10-02-scarlet-signature-moves.json) records the new domain cases (selection cadence, exact corridor and walk, rope heights against a 20x42 body, quarter slabs and shared safe quarters, descriptor codec and rejections), the checks run, the offline geometry plots and the isolated native build. No in-game play, hand-feel, readability at real run speeds, FPS or peer acceptance is claimed.
 
 - **0.3.62 Ebon Manor music and warning polish:** [evidence](evidence/2026-10-02-ebon-polish.json) records the loop analysis and seam checks, the before/after offline material frames with an independent critique, compiled shader identity and the native package. No in-game hearing, readability or FPS acceptance is claimed.
 
@@ -195,6 +199,8 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 - **0.3.5:** native Release package passes compilation (0 errors/4 existing warnings), solo1–4 admission, installed HurtModifiers calibration and exact-Fight loader/teardown checks. The domain suite's affected timing expectations are updated; compiled protocol39 passes330 round-trips/54 malformed cases. [Evidence](evidence/2026-09-15-doll-damage-tuning.json) records hashes and remaining owner checks. New diagnostics distinguish immediate native damage from a Chalice buffer; no equipment mechanic is disabled. Post-change gameplay remains user-owned / not_run.
 
 ## Next change
+
+Scarlet signature moves (0.3.68, matching peers): play to Act I's 3rd phrase and walk the Cinder Curtain corridor with and without movement accessories, then Act II's Shroud Rope (jump the low cut, check an ordinary full jump clears the high one) and Act III's Four Hands (stand still in the shared quarter, then step across a quarter edge). Report whether the corridor speed (especially against a wall), the rope heights and the quarter edges feel fair, whether the forecast bands read over the sanctum, and whether the live look should wait for the new strike material. User-owned / not_run.
 
 Ebon polish: on the installed 0.3.62 package, play Act One through the Finale and listen across each loop join (Act One at about 1:47 into the act, Act II and the Finale after their first pass). Check that warnings read cleanly without clutter over the hall and bright windows, that live strands look dangerous and beautiful, the fray after a cut, Reduced Effects, zoom and FPS.
 

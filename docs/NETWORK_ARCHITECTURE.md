@@ -361,3 +361,7 @@ No Verlet positions, particles, material noise, screen shakes or camera state ar
 ## Scarlet grid protocol77 — 2026-10-02
 
 Protocol77 changes no Scarlet wire layout. Peers derive the shared 128 BPM beat grid, two-bar act and five-bar Final transitions, eight-bar opening and bar-aligned chorus ends from code ([ADR-0026 amendment](adr/0026-crimson-score-and-native-projectiles.md#2026-10-02-scarlet-128-bpm-grid-and-client-arrangement-protocol77)); `PhaseStart`/`UnlockAt` keep their meaning and bounds. Clients derive music sections from those replicated ticks only. Mixed76/77 peers must update together.
+
+## Scarlet signature moves protocol79 — 2026-10-02
+
+Protocol79 appends `CinderCurtain=17`, `ShroudRope=18` and `FourHands=19` to `CrimsonTechnique`; no existing ID, packet type or field layout changes, and the gesture descriptor keeps its bytes. Reading validates the new values like any other (owner source, basic notes only so `Pulse < 4`, no target identity, live window at most 20/12/16 ticks) before replacing replica state, and peers on 78 or older reject the unknown technique byte. `CinderCurtain` carries its single schedule-time observation in the existing `Target` field, and every geometric choice (corridor column and direction, rope heights, struck quarters) derives from the accepted plan, so no extra synchronization exists. Mixed 78/79 peers must update together. Protocol 78 belongs to the music-grid integration.

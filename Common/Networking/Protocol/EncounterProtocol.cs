@@ -2,6 +2,6 @@ namespace Convergence.Common.Networking.Protocol;
 
 internal static class EncounterProtocol
 {
-    // Waltz of the Ebon Manor adds a definition, hazards and a Snapshot schema; matching peers only.
-    public const ushort CurrentVersion = 77;
+    // Scarlet signature moves append technique IDs 17-19 (protocol 78 is the music-grid branch); matching peers only.
+    public const ushort CurrentVersion = 79;
 }

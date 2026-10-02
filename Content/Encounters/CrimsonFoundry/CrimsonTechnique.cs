@@ -12,7 +12,8 @@ internal enum CrimsonTechnique : byte
     ChoirThrust, ChoirHook, ChoirRend,
     VesperaOrbit, VesperaPetals,
     TrackingBeam, SideBeams, SpatialRift, SpatialGrid,
-    ClusterVolley, ChoirRakes // Append only; never renumber old IDs.
+    ClusterVolley, ChoirRakes,
+    CinderCurtain, ShroudRope, FourHands // Act signature moves (protocol79). Append only; never renumber old IDs.
 }
 
 internal readonly record struct CrimsonPoint(float X, float Y)
@@ -41,6 +42,7 @@ internal readonly record struct CrimsonGesturePlan(
     internal static bool NeedsTargetIdentity(CrimsonTechnique technique)
         => technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialRift;
     internal bool IsRift => Technique is CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid;
+    internal bool IsSignature => CrimsonSignatureMoves.IsSignatureMove(Technique);
     internal bool Live(float age) => age >= Fire && age < End;
     internal bool MovesBody => Technique is CrimsonTechnique.CrownCrash or CrimsonTechnique.MantleRush;
     internal float Progress(float age) => Math.Clamp((age - Fire) / Math.Max(1, End - Fire - 1f), 0, 1);
@@ -55,10 +57,12 @@ internal readonly record struct CrimsonGesturePlan(
     {
         if (Fight == Guid.Empty || Boss is < 0 or >= 200 || Epoch < 0 || Phrase is < 1 or > 100000 || Pulse >= CrimsonRhythm.MaximumHits
             || Source > 3 || !Enum.IsDefined(Technique) || !Aimed && !IsRift && CrimsonTechniqueGeometry.Owner(Technique) != Source
+            || IsSignature && Pulse >= CrimsonChoreography.BasicNotes
             || Steps is < 1 or > CrimsonRhythm.MaximumHits || Step >= Steps || Accent > 2
             || Begin < Epoch || Begin > FirstFire || Born < Epoch || Born > 73000
             || (long)Fire - Born is < CrimsonRhythm.MinimumWarningTicks or > 180 || (long)End - Fire < 2
-            || (long)End - Fire > (Technique == CrimsonTechnique.SideBeams ? 180 : Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.FlightTicks : CrimsonRhythm.LiveTicks) || Fire > 73500
+            || (long)End - Fire > (Technique == CrimsonTechnique.SideBeams ? 180 : Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.FlightTicks
+                : IsSignature ? CrimsonSignatureMoves.LiveTicks(Technique) : CrimsonRhythm.LiveTicks) || Fire > 73500
             || FirstFire > Fire || LastEnd < End || LastEnd > 73500 || (long)LastEnd - FirstFire > 600
             || !From.Finite || !Stage.Finite || !Target.Finite || From.X is < 0 or > 400000 || From.Y is < 0 or > 150000
             || GroundX is < 1600 or > 400000 || GroundY is < 1440 or > 150000 || Damage is < 1 or > 2000)
@@ -102,7 +106,8 @@ internal readonly record struct CrimsonGesturePlan(
 internal static class CrimsonTechniqueGeometry
 {
     internal const int MaximumStrokes = 192;
-    internal static int Owner(CrimsonTechnique t) => t is CrimsonTechnique.SpatialGrid or CrimsonTechnique.ChoirRakes ? 2 : (int)t < 9 ? (int)t / 3 : 3;
+    internal static int Owner(CrimsonTechnique t) => CrimsonSignatureMoves.IsSignatureMove(t) ? CrimsonSignatureMoves.Owner(t)
+        : t is CrimsonTechnique.SpatialGrid or CrimsonTechnique.ChoirRakes ? 2 : (int)t < 9 ? (int)t / 3 : 3;
     internal static CrimsonTechnique Select(int source, int serial)
     {
         if (source is < 0 or > 3 || serial < 0) throw new ArgumentOutOfRangeException();
@@ -183,6 +188,10 @@ internal static class CrimsonTechniqueGeometry
                 return CrimsonChoirRakes.Write(p, age, destination, forecast);
             case CrimsonTechnique.ClusterVolley:
                 return CrimsonClusters.Write(p, age, destination, forecast);
+            case CrimsonTechnique.CinderCurtain:
+            case CrimsonTechnique.ShroudRope:
+            case CrimsonTechnique.FourHands:
+                return CrimsonSignatureMoves.Write(p, age, destination, forecast);
             case CrimsonTechnique.CrownRain:
                 int gap = p.Phrase % 18 + 2;
                 for (int i = 0; i < 26; i++)

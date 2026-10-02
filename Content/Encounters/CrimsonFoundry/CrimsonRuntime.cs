@@ -379,7 +379,15 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             var playerCenter = Main.player[aimed.Slot].Center;
             var aim = CrimsonTechniqueGeometry.Clamp(field, new(playerCenter.X, playerCenter.Y), 100);
             var technique = CrimsonEnsemble.Technique(phase, serial, note, i >= rhythm.Hits.Count);
-            if (technique == CrimsonTechnique.ChoirRakes) aim = new(field.CenterX, field.CenterY);
+            if (technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands)
+                aim = new(field.CenterX, field.CenterY);
+            else if (technique == CrimsonTechnique.CinderCurtain)
+            {
+                // One observation for the whole walk: every note of the phrase carries the first note's member.
+                var walker = eligible[CrimsonTrackingBeam.TargetIndex(serial, 0, eligible.Length)];
+                var walkerCenter = Main.player[walker.Slot].Center;
+                aim = CrimsonTechniqueGeometry.Clamp(field, new(walkerCenter.X, walkerCenter.Y), 100);
+            }
             bool needsTargetIdentity = CrimsonGesturePlan.NeedsTargetIdentity(technique);
             int end = CrimsonEnsemble.NoteEnd(technique, hit);
             plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, (byte)i, (byte)source,
