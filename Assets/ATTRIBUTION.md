@@ -3125,6 +3125,24 @@ September22 transmutation adds original directional red-energy streams in `Trans
 - Reviewer and review date: Codex, 2026-09-25; linked-production FNA material sequences inspected; native visual acceptance remains owner-tested
 - Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md` Luminance presentation section
 
+### ScarletInk original shader export — 2026-10-02
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletInk.fxc`
+- Asset ID: scarlet-ink-black-blood-river-20261002
+- Asset type: compiled original HLSL effect
+- Creator: project-directed independent implementation by Claude (Anthropic) for Minamium
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: repository source `Assets/AutoloadedEffects/Shaders/ScarletInk.fx`; no third-party shader or artwork copied
+- Tool/model/version: FXC compiler, options and hashes pinned in `Assets/AutoloadedEffects/Shaders/compiled.json`
+- Human modifications: the owner chose this look (black body, burning and melting rim, flowing red threads, twisting core, blaze after impact) from offline prototype frames on 2026-10-02; runtime composition in `Client/Encounters/CrimsonFoundry/Vfx/ScarletInkStroke.cs`, drawn from `CrimsonGestureVisuals`; no bitmap modification. Its `ForecastPass` is kept in the source but not used by the game
+- License and redistribution terms: original project asset under existing project terms; Luminance supplies the noise at runtime, not vendored
+- Required attribution: retain this provenance and source/export manifest
+- Reviewer and review date: Claude, 2026-10-02; compiled-shader FNA/D3D11 frames inspected and pixel-identical to the owner-approved frames; game/MP acceptance not_run
+- Prompt or brief location: `docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md`, Luminance presentation v2
+- SHA256: `689a5d7bd1136d8104d8a094c3f317be4578498b2b882c60c44c51a87b1020f2`
+- Source SHA256: `e801511955804f740b45cb1472f3005f4ab48e12ce19fc2aa1f8e180bc64a227`
+
 ### ScarletSurface original shader export — 2026-09-17
 
 - Runtime file: `Assets/AutoloadedEffects/Shaders/ScarletSurface.fxc`

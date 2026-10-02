@@ -23,9 +23,11 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.67 / protocol78** on `feat/scarlet-music-grid` (not yet on main): Scarlet's music foundation on top of the 0.3.66 ending guards and main's 0.3.65.
+Current source: **0.3.68 / protocol78**: Scarlet's strike material (0.3.68, client-only) on top of the 0.3.67 music foundation and the 0.3.66 ending guards.
 
-Scarlet schedules everything on Graceful Ordeal's measured strict 128 BPM grid (`CrimsonMeter`): phrases and unlocks on bar heads, chorus ends on bar heads, act changes on the next bar head after a latched cycle, two-bar act transitions and a five-bar Final ceremony. Clients re-sequence the unchanged OGG per stage (`CrimsonArrangement`, `CrimsonMusicMixer`) into one streamed voice, with the song's full stop for Victory. The retired detected beat map (`Score.json`) is removed. The [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-graceful-ordeal-on-a-128-bpm-grid) owns the stage table; [ADR-0026](adr/0026-crimson-score-and-native-projectiles.md#2026-10-02-scarlet-128-bpm-grid-and-client-arrangement-protocol78) owns the authority split.
+Scarlet Invocation's field-beam strikes (tracking beam in Act I and Final, the crossflow stream between the seals) are drawn as a river of black blood by the original `ScarletInk` material; forecasts and the two seals are unchanged. Client presentation only: shapes, timings, damage and protocol are untouched, and the [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md) owns the look.
+
+Retained 0.3.67: Scarlet schedules everything on Graceful Ordeal's measured strict 128 BPM grid (`CrimsonMeter`): phrases and unlocks on bar heads, chorus ends on bar heads, act changes on the next bar head after a latched cycle, two-bar act transitions and a five-bar Final ceremony. Clients re-sequence the unchanged OGG per stage (`CrimsonArrangement`, `CrimsonMusicMixer`) into one streamed voice, with the song's full stop for Victory. The retired detected beat map (`Score.json`) is removed. The [Scarlet spec](encounters/crimson-foundry/ENCOUNTER_SPEC.md#music-graceful-ordeal-on-a-128-bpm-grid) owns the stage table; [ADR-0026](adr/0026-crimson-score-and-native-projectiles.md#2026-10-02-scarlet-128-bpm-grid-and-client-arrangement-protocol78) owns the authority split.
 
 Retained 0.3.66 (`fix/scarlet-terminal-guards`): Scarlet's 15-minute safety cap no longer overrides a committed Victory/Defeat, and an all-Down roster (or one inside the disconnect grace) makes admission wait instead of ending the raid as an internal failure.
 
@@ -96,6 +98,7 @@ Use the owning specs for details: [combat and public names](encounters/first-sev
 
 ## Verification state
 
+- **0.3.68 Scarlet strike material:** [evidence](evidence/2026-10-02-scarlet-ink-strikes.json) records the compiled shader, the offline FNA/D3D11 frames (identical to the owner-approved frames), the checks and the native package. No in-game look, readability or FPS check is claimed.
 - **0.3.65 Cathedral sound effects v2:** [evidence](evidence/2026-10-02-azure-sfx-v2.json) records the sample-identical, byte-reproducible export of 53 cues, per-source rights records, 66 Python and 33 Azure domain tests, the adversarial diff review and its fixes, and the isolated native build. User-owned / not_run: in-game listening and mix, lattice voice limits, positioned/anchored worm cues, chorus verdict sounds with two or more players, Down/revive and multiplayer replication gaps.
 - **0.3.64 Ghost Samurai cinematics and field readability:** [evidence](evidence/2026-10-02-samurai-cinema.json) records the domain tests (62 Samurai, including the cut windows and planted blades), 22 offline cinema frames, 84 forecast-over-field frames and 1008 cut frames, 16 field frames, the scenery luminance gate, compiled shader identity and the native package. No in-game camera, HUD, title, sound, readability, FPS or peer acceptance is claimed.
 

@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Redraw Scarlet Invocation's field-beam strikes as a river of black blood: the tracking beam (Act I and Final) and the crossflow stream between the two seals now burn at the rim and melt, with red threads streaming along a black body, a twisting hot core, a blaze for the first ticks and a narrow dried scar afterwards. Forecasts and the two seals look as before; hitboxes, timings and protocol are unchanged.
+
 - Rebuild Scarlet Invocation's music handling: Graceful Ordeal turned out to be a strict 128 BPM recording, so every attack, chorus and act change now sits on its real beat and bar instead of a detected map that drifted by up to half a beat (and slipped two beats every loop). The song is re-sequenced per stage instead of looping: Act I rises from the intro into the first drop, Act II rides the bass-led main section, Act III enters on the interlude's hush, and the sacrifice stops the music, swells the riser and drops the song's peak exactly when the giant becomes hittable. Victory ends on the song's own full stop with a hall tail; Defeat closes behind a falling filter. Act changes now wait for the next bar head; acts take two protected bars and the Final ceremony five. Requires matching protocol78 peers.
 
 - Fix two Scarlet Invocation endings: the 15-minute safety cap no longer turns an already won or lost fight into a cancellation, and when every member is Down (or one is still inside the disconnect grace) new attacks wait for a revive instead of ending the raid with an internal error. Gameplay, timings and protocol are unchanged.
