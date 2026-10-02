@@ -172,7 +172,8 @@ All reward ink uses the owner-approved black-blood river of `ScarletInk.fx`: a d
   - Libraries: VSCO 2 CE (including its organ and blower recordings) and VCSL (tubular bells, hand chimes, woodblock, slit drum, gong, timpani), both already in [Attribution](../../../Assets/ATTRIBUTION.md).
   - Foley: the Freesound and OpenGameArt CC0 foley already listed there.
   - Processing: trimming, envelopes, filters, resampling to pitch, layering and short reflections. Every pitched layer sits on E♭, F or B♭.
-- **Voices** are bounded (`MaxInstances`, replace oldest), stop when the game is paused or loses focus, are never built on a dedicated server, and are skipped when a cue is not packaged yet.
+- **Voices** are bounded (`MaxInstances`, replace oldest), stop when the game is paused or loses focus, are never built on a dedicated server, and a cue whose file is missing from the package is skipped.
+- **Shipped:** the owner's 2026-10-03 picks (see [Art and audio](#art-and-audio)) are in the package, and every cue plays at its moment below.
 
 ## Nominal parity
 
@@ -647,6 +648,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 
 - `ScarletRewardInk` sits on the Terraria-free Vfx seam (`IScarletAssets`, `ScarletView`), so the offline preview renders it.
 - Per-weapon visuals and the reliquary show.
+- `ScarletRewardCues`: the Terraria-free cue table (files, the picked take, audience, voices, the lead from trigger to the moment a file was built to meet, and the gains), linked by the domain tests.
 - `ScarletRewardAudio`: built only off a dedicated server; skips a cue whose file is missing.
 - `ScarletRewardArt`: `ImmediateLoad` or `Asset<T>`, never a cached AsyncLoad `.Value`.
 
@@ -655,7 +657,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 **Tools:**
 
 - `tools/export_scarlet_reward_art.py`;
-- `tools/generate_scarlet_reward_sfx.py`;
+- the cue recipe stays outside the repository, as the Raid's recorded audio does; its file hashes, sources and processing are in [Attribution](../../../Assets/ATTRIBUTION.md);
 - the offline fixture `tools/fixtures/ScarletRewardsPreview.cs`, as `EbonRewardsPreview`, run by `tools/preview-scarlet.ps1 -Rewards`.
 
 **Localization:** `Localization/CrimsonRewards/{en-US,ja-JP}.hjson`, plus the Covenant's entries in `Localization/CrimsonFoundry`.
@@ -727,23 +729,28 @@ Exports go to `Assets/Textures/Items/ScarletRewards/`. Selections and exports ar
 
 As the brief requires, the images contain no light, flame, black blood, strokes, staff lines, magic circles, sparks, trails, flashes or debris. The only such elements drawn into the art are the reliquary's wax seal, the ink on the quill's nib and the faint staff lines printed on the rolled score. Everything else is drawn in code.
 
-**Cues** (35), in `Assets/Sounds/Weapons/ScarletRewards/`:
+**Cues** (35, in 38 files), in `Assets/Sounds/Weapons/ScarletRewards/`:
 
 - shared: `ReliquaryOpen`; `Toll0`–`Toll7`; `Cadence`;
 - scythe: `ScytheSwingHigh`, `ScytheSwingLow`, `ScytheWhipBrace`, `ScytheWhip`, `StaffWindup`, `StaffCut`, `StaffBarline`;
-- organ: `OrganShot`, `HymnInhale`, `HandSlam`, `ChoirClasp`;
+- organ: `OrganShot` (one file per pipe, `OrganShot1`–`OrganShot4`), `HymnInhale`, `HandSlam`, `ChoirClasp`;
 - baton: `BatonStroke`, `BatonLift`, `InkIgnite`, `RiverRelease`;
 - censer: `CenserSummon`, `CenserSwing`, `CenserPour`, `CenserBrace`, `CenserGrandPour`;
 - quill: `QuillThrow`, `QuillStick`, `ScoreUnseal`, `InkBlaze`, `ScoreChord`.
 
 **Sources and rendering.**
 
-- `tools/generate_scarlet_reward_sfx.py` reads already-attributed CC0 recordings from the local source store, checks their SHA-256 and never commits raw recordings.
-- Tolls are a woodblock or slit-drum knock over tubular bell and hand chime, resampled to pitch. Organ cues use the VSCO 2 CE organ and its blower recording.
-- Fire, liquid, paper and wax layers are likely missing from the attributed set. Any new recording needs the same CC0 survey record and owner approval of that exact recording on the audition page before use, and Attribution records it.
-- Rendering is deterministic, with pinned Ogg serials.
-- Loudness follows the Ebon script (BS.1770): releases peak about 2 dB under the Raid's loudest strike cue; build and per-shot cues sit at least 8 dB under it; true peak is at most −1 dBTP after the Vorbis round trip.
-- The owner auditions variants on a local page before anything is committed.
+- The recipe (outside the repository, like the Raid's recorded audio) reads already-attributed CC0 recordings from the local source store and the VSCO 2 CE and VCSL libraries, refuses any whose SHA-256 differs from its lock, and never commits raw recordings.
+- Tolls are a slit-drum knock over tubular bell and hand chime, resampled to pitch. Organ cues use the VSCO 2 CE organ and its blower recording.
+- No local recording of fire, pouring liquid, wax, bone or paper exists, so those layers are stand-ins from the attributed set (wind and the organ blower for flame, bubbles for liquid, wood chops and stone grains for bone and wax, book pages for paper). Any new recording needs the same CC0 survey record and owner approval of that exact recording on the audition page before use, and Attribution records it.
+- Rendering is deterministic, with pinned Ogg serials; a fresh render reproduces the shipped files byte for byte.
+- Loudness follows the Ebon script (BS.1770, maximum 400 ms momentary loudness) against the Raid's loudest strike as played (−7.6 LUFS): finales −9.6, the cadence −11, windups −15, cascade parts about −15.5, per-shot cues −17 and tolls −19; true peak is at most −1 dBTP after the Vorbis round trip.
+
+**Selections (2026-10-03).** The owner auditioned an A and a B take of each of 28 cue blocks on the local page and chose B for `Cadence`, `ReliquaryOpen`, `ScytheWhip`, `StaffWindup`, `StaffBarline` and `RiverRelease`, and A for every other block (the whole toll ladder is one block, and `OrganShot` is all four pipe files of take A). The shipped files are those masters byte for byte; [Attribution](../../../Assets/ATTRIBUTION.md) records each file's sources and processing.
+
+- **Gain:** the files carry the designed levels, so every cue plays at one gain (1), as auditioned. The only offsets are the multiplayer rule (other players' per-swing and per-shot cues −8 dB), the rolled score's throw (−2 dB) and a score burst without the Full Melody (−2 dB).
+- **Voices** per cue file: tolls 8 (eight quills at one height ring one toll eight times), `CenserPour` 5 and `CenserGrandPour` 4 (one owner's sound budget), `ReliquaryOpen` 4 (the four shows), `StaffCut`, `HandSlam` and `InkIgnite` 4 (a cascade part still rings when the next starts), `CenserSwing` and `QuillThrow`/`QuillStick` 3, every other cue 2. Other players' per-shot cues share one voice per file.
+- **Moments:** each file was built to meet a moment `Lead` ticks after its trigger, and the domain tests hold those moments to the rules: a swing's breath fires at the stroke's start and peaks on its first live tick (5); the Whip's brace fires with the draw-back (6) and peaks just before the lash (13), the lash fires as the blade goes live (14); `StaffWindup` peaks on the forward whip (16), `HymnInhale` on the first slam (10), `BatonLift` on the downbeat (8), `InkIgnite` as a stroke has swollen (3), `CenserSwing` on the pour 10 ticks later, `CenserBrace` on the Grand Pour (6), `ScoreUnseal` as the ink catches (8), and `ReliquaryOpen`'s cadence as the show's ink ignites (20).
 
 ## Differences from Ebon
 
@@ -817,6 +824,14 @@ The first implementation fixed these points, which the sections above left open 
 - After its flight the score glides to a halt over 4 ticks. A claimed quill or trail waits at most 58 ticks for its score to unroll, then gives up.
 - The seal's "two halves" fall as wax flakes, because SR06 has no separate seal part.
 
+**Audio.**
+
+- The Whip's brace and lash are per-swing cues like the Over and Under, because they belong to the left-click measure: the owner hears them at full level, other players 8 dB lower with one voice.
+- `BatonStroke` fires on the gesture's first tick, so its swish peaks while the pen writes (ticks 5–11), not at the ictus.
+- A censer's brace sounds only when the Grand Pour it leads to will be heard within the owner's budget, so no windup is left without its release.
+- Every score burst plays `ScoreChord` (the score bursting on the cadence voicing); without the Full Melody it is 2 dB softer.
+- Tuned cues keep their recorded pitch: no cue has pitch variance.
+
 **Open for the owner.**
 
 - **Censer spread:** with the spacing above (`min(72, (w + 96) / n)`) and a ±23 px swing (27.66 px at 55°), the outer censers of three or more over a target about 80 px wide miss it with their outward pours (half of their pours). Large bosses are hit by every pour. Tightening the spread is a balance decision.
@@ -838,7 +853,7 @@ The first implementation fixed these points, which the sections above left open 
 - Reduced Effects and the shake switch.
 - FPS with eight players' full builds and with ten censers.
 - Balance against current Calamity endgame gear, including the staff's crowd cuts and the Covenant at 1500 against crowds.
-- The mix against the Raid's cues and Graceful Ordeal, auditioned on the local page.
+- The shipped cues in play: each cue's moment, the mix against the Raid's cues and Graceful Ordeal, and what other players hear (the takes themselves were chosen on the local page).
 
 **Automated evidence** (does not replace the checks above):
 

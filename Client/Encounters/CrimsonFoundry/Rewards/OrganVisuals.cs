@@ -126,12 +126,13 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
             ScarletRewardFx.Particle(ScarletParticleKind.Ember, owner.whoAmI, head, new Vector2((i - .5f) * .8f, -.9f), 14, 4, npc.whoAmI * 7 + result.Count * 3 + i);
     }
 
-    // A shard's first tick: that pipe kicks, a breath of crimson-black vapour leaves its mouth, the pipe chiffs.
+    // A shard's first tick: that pipe kicks, a breath of crimson-black vapour leaves its mouth, the pipe chiffs (its own
+    // OrganShot recording; the owner at full level, other players 8 dB lower with one voice).
     internal static void Fired(Projectile p, int pipe)
     {
         if (p.owner < 0 || p.owner >= Main.maxPlayers) return;
         Main.player[p.owner].GetModPlayer<OrganPosePlayer>().Shot(pipe);
-        ScarletRewardAudio.Shot(ScarletRewardCues.OrganShot, p.owner, p.Center, .55f, .06f);
+        ScarletRewardAudio.OrganShot(pipe, p.owner, p.Center);
         Vector2 along = p.velocity.LengthSquared() > .01f ? Vector2.Normalize(p.velocity) : Vector2.UnitX;
         float seed = p.identity * .71f;
         ScarletRewardFx.Particle(ScarletParticleKind.Smoke, p.owner, p.Center, along * 1.1f + new Vector2(0, -.25f), 22, 9, seed);
@@ -145,7 +146,7 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
         if (p.owner < 0 || p.owner >= Main.maxPlayers) return;
         Player owner = Main.player[p.owner];
         owner.GetModPlayer<OrganPosePlayer>().Hymn();
-        ScarletRewardAudio.Play(ScarletRewardCues.HymnInhale, owner.Center, .7f, 0, 0, 2);
+        ScarletRewardAudio.Play(ScarletRewardCues.HymnInhale, owner.Center);
     }
 
     internal static void Slam(Projectile p, BoneHand hand)
@@ -154,13 +155,13 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
         bool clasp = hand.Clasp;
         if (clasp)
         {
-            ScarletRewardAudio.Play(ScarletRewardCues.ChoirClasp, at, .85f, 0, 0, 2);
+            ScarletRewardAudio.Play(ScarletRewardCues.ChoirClasp, at);
             ScarletRewardFx.Shake(p.owner, at, CrimsonRewardRules.ClaspShake);
         }
         else
         {
-            ScarletRewardAudio.Play(ScarletRewardCues.HandSlam, at, .7f, 0, .05f, 4);
-            if (hand.Role == CanticleRules.HandRole.Cadence) ScarletRewardAudio.Play(ScarletRewardCues.Cadence, at, .7f, 0, 0, 2);
+            ScarletRewardAudio.Play(ScarletRewardCues.HandSlam, at);
+            if (hand.Role == CanticleRules.HandRole.Cadence) ScarletRewardAudio.Play(ScarletRewardCues.Cadence, at);
         }
         float seed = p.identity * .37f;
         int chips = clasp ? 10 : 5;

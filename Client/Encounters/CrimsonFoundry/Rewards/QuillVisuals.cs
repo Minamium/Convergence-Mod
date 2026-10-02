@@ -17,12 +17,13 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // only: it reads the carriers' replicated state on every client and never decides a hit. Each accent fires once from
 // the named event that the carrier exposes (the throw, the stick, the unseal, the unroll, a burst), so sound, droplets,
 // embers and shake stay together and never repeat on catch-up.
-//   QuillThrow  each throw (the owner full, others -8 dB, one voice)
+//   QuillThrow  each throw (the owner full, others -8 dB, one voice); the rolled score 2 dB softer
 //   QuillStick  the nib enters flesh or stone; Toll(n - 1) for the n-th quill standing, owner only
 //   ScoreUnseal the windup: crimson cracks over the seal, wax flakes as it splits, the score turns and unrolls
 //   InkBlaze    the unroll: the claimed ink catches
 //   Toll(k)     each quill's burst, by its height against the halted score (positional for everyone)
-//   ScoreChord  the score's burst; with a Full Melody also the owner's local shake 3.5
+//   ScoreChord  the score's burst on the cadence voicing (2 dB softer without the Full Melody); with a Full Melody also
+//               the owner's local shake 3.5
 // Bodies use QuillArt (SR06 or the vanilla placeholder) and draw in the projectile layer, above the ink.
 [Autoload(Side = ModSide.Client)]
 internal sealed class QuillVisuals : GlobalProjectile
@@ -83,7 +84,7 @@ internal sealed class QuillVisuals : GlobalProjectile
         int owner = p.owner;
         Vector2 nib = p.Center, back = -p.velocity.SafeNormalize(Vector2.UnitX);
         float seed = QuillInk.Seed(owner, q.Serial);
-        ScarletRewardAudio.Shot(ScarletRewardCues.QuillStick, owner, nib, .55f);
+        ScarletRewardAudio.Shot(ScarletRewardCues.QuillStick, owner, nib);
         if (owner == Main.myPlayer && q.Stuck != QuillRules.Flying)
         {
             // The n-th quill standing rings Toll(n - 1); the owner's trail for this quill already stands.
@@ -106,7 +107,7 @@ internal sealed class QuillVisuals : GlobalProjectile
         Vector2 nib = p.Center;
         float seed = QuillInk.Seed(owner, q.Serial);
         // The melody plays back: the higher the quill against the halted score, the higher the toll.
-        ScarletRewardAudio.Play(ScarletRewardCues.Toll(QuillRules.TollForHeight(nib.Y, q.ScoreAt.Y)), nib, .6f, 0, 0, 4);
+        ScarletRewardAudio.Toll(QuillRules.TollForHeight(nib.Y, q.ScoreAt.Y), nib);
         QuillInk.AddSplash(owner, nib + new Vector2(0, -6), -MathHelper.PiOver2, MathHelper.TwoPi * .8f, 3.6f, ScarletRewardFx.Reduced ? 4 : 8, 2.6f, true, seed);
         for (int i = 0; i < 6; i++)
         {
@@ -157,12 +158,12 @@ internal sealed class QuillVisuals : GlobalProjectile
         if (!seen)
         {
             seen = true;
-            if (s.Age <= 2) ScarletRewardAudio.Shot(ScarletRewardCues.QuillThrow, owner, at);
+            if (s.Age <= 2) ScarletRewardAudio.Shot(ScarletRewardCues.QuillThrow, owner, at, ScarletRewardCues.ScoreThrowDecibels);
         }
         if (!windup && s.Age > s.Flight)
         {
             windup = true;
-            ScarletRewardAudio.Play(ScarletRewardCues.ScoreUnseal, at, .75f);
+            ScarletRewardAudio.Play(ScarletRewardCues.ScoreUnseal, at);
         }
         if (!split && s.Age > s.Flight + SealSplit)
         {
@@ -180,13 +181,13 @@ internal sealed class QuillVisuals : GlobalProjectile
         if (!unrolled && s.Unrolled)
         {
             unrolled = true;
-            ScarletRewardAudio.Play(ScarletRewardCues.InkBlaze, at, .85f);
+            ScarletRewardAudio.Play(ScarletRewardCues.InkBlaze, at);
         }
         if (!scoreBurst && s.BurstSince >= 0)
         {
             scoreBurst = true;
             bool full = QuillRules.FullMelody(s.Quills);
-            ScarletRewardAudio.Play(ScarletRewardCues.ScoreChord, at, full ? .95f : .75f, 0, 0, 2);
+            ScarletRewardAudio.Play(ScarletRewardCues.ScoreChord, at, full ? 0 : ScarletRewardCues.PartialScoreDecibels);
             if (full) ScarletRewardFx.Shake(owner, at, R.MelodyShake);
             int droplets = (full ? 14 : 10) / (ScarletRewardFx.Reduced ? 2 : 1);
             QuillInk.AddSplash(owner, at, -MathHelper.PiOver2, MathHelper.TwoPi * .9f, full ? 5.4f : 4.4f, droplets, 3f, true, seed);

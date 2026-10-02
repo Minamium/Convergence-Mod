@@ -113,7 +113,7 @@ internal sealed class BatonSwingVisuals : GlobalProjectile
         lastClock = clock;
         bool fresh = previous == int.MinValue;
         if (swing.Gesture == BatonRules.Tutti && (fresh ? clock <= 1 : previous < 0 && clock >= 0))
-            ScarletRewardAudio.Play(ScarletRewardCues.BatonLift, owner.Center, .7f, 0, 0, 2);
+            ScarletRewardAudio.Play(ScarletRewardCues.BatonLift, owner.Center);
         int ictus = BatonRules.IctusTick(swing.Gesture);
         if (!fresh && previous < ictus && clock >= ictus) Flare(projectile, pose.Gem, swing.Gesture == BatonRules.Tutti);
     }
@@ -198,10 +198,11 @@ internal sealed class BatonStrokeVisuals : GlobalProjectile
             // The pen's ink leaves the gem for the first ticks of the stroke.
             if (clock < Rules.WriteTicks && clock % 2 == 0 && (fresh || clock != previous))
                 BatonInkSystem.Drop(owner, BatonPoses.GemOf(owner), start, projectile.identity * 3 + clock);
-            if (Crossed(fresh, previous, clock, BatonRules.WriteStart))
-                ScarletRewardAudio.Shot(ScarletRewardCues.BatonStroke, owner, start, .55f);
+            // The swish fires on the gesture's first tick and peaks while the pen writes (ScarletRewardCues).
+            if (Crossed(previous, clock, ScarletRewardCues.BatonStrokeAt))
+                ScarletRewardAudio.Shot(ScarletRewardCues.BatonStroke, owner, start);
             // The stroke is written at the ictus: the next toll of the ladder, for its owner only.
-            if (Crossed(fresh, previous, clock, BatonRules.WriteEnd))
+            if (Crossed(previous, clock, BatonRules.WriteEnd))
                 ScarletRewardAudio.BuildToll(Math.Clamp(BatonScore.Count(owner) - 1, 0, ScarletRewardCues.Tolls - 1), owner, end);
             return;
         }
@@ -212,14 +213,14 @@ internal sealed class BatonStrokeVisuals : GlobalProjectile
             Lighting.AddLight(Xna(points[points.Length / 2]), .55f, .06f, .04f);
     }
 
-    private static bool Crossed(bool fresh, int previous, int clock, int tick)
-        => fresh ? clock == tick : previous < tick && clock >= tick && clock - tick <= 2;
+    // A peer may first see a stroke a tick or two late; a cue more than two ticks late is dropped, never caught up.
+    private static bool Crossed(int previous, int clock, int tick) => previous < tick && clock >= tick && clock - tick <= 2;
 
     private static void Ignited(Projectile p, BatonStroke stroke)
     {
         var points = stroke.Points;
         Vector2 center = p.Center;
-        ScarletRewardAudio.Play(ScarletRewardCues.InkIgnite, center, .62f, 0, .03f, 3);
+        ScarletRewardAudio.Play(ScarletRewardCues.InkIgnite, center);
         for (int i = 0; i < 6; i++)
         {
             float seed = p.identity * 5.17f + i * 1.3f;
@@ -232,7 +233,7 @@ internal sealed class BatonStrokeVisuals : GlobalProjectile
         if (cast < 0 || BatonScore.River(owner, cast, ref slot) is not null) return;
         foreach (Projectile other in Main.ActiveProjectiles)
             if (other.owner == owner && other.ModProjectile is BatonStroke { Kind: CrimsonStrokeKind.Scheduled } waiting && waiting.State.Cast == cast) return;
-        ScarletRewardAudio.Play(ScarletRewardCues.Cadence, center, .8f, 0, 0, 2);
+        ScarletRewardAudio.Play(ScarletRewardCues.Cadence, center);
     }
 
     private static void Dried(Projectile p, BatonStroke stroke)
@@ -265,7 +266,7 @@ internal sealed class BatonRiverVisuals : GlobalProjectile
         if (previous != int.MinValue && previous < 0 && age >= 0)
         {
             Vector2 start = projectile.Center;
-            ScarletRewardAudio.Play(ScarletRewardCues.RiverRelease, start, .9f, 0, 0, 2);
+            ScarletRewardAudio.Play(ScarletRewardCues.RiverRelease, start);
             ScarletRewardFx.Shake(projectile.owner, start, Rules.RiverShake);
         }
         if (age < 0 || age >= BatonRules.RiverDryStart) return;

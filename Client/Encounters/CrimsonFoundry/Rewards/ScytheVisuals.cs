@@ -22,8 +22,11 @@ internal static class ScytheLook
     internal const float WakeRadius = 14, StaffInkRadius = 2.5f, DropletRadius = 2.6f;
     internal const int WakeTicks = 9, WakeSamplesPerTick = 4, WakeLiveTicks = 3, Droplets = 6, DropletLife = 20;
     internal const int WriteTicks = 6, DrainFade = 20, GlintLife = 7;
-    // Cue timing: the swing breath starts four ticks before the first live tick so it peaks on it (Moonshear's lead).
-    internal const int SwingCueLead = 4, WhipBraceCue = CrimsonRewardRules.WhipDrawStart, WhipCue = CrimsonRewardRules.WhipLiveStart - SwingCueLead;
+    // Cue timing (ScarletRewardCues): a stroke's age runs one ahead of its time (the first update ages it to 1; DrawAge is
+    // age - 1), so a cue due at stroke time t fires when the age reaches t + 1. The swing breath fires at time 0 and peaks
+    // on the first live tick; the Whip's brace starts with the draw-back and its lash fires as the blade goes live.
+    internal const int SwingCue = ScarletRewardCues.ScytheSwingAt + 1, WhipBraceCue = ScarletRewardCues.ScytheWhipBraceAt + 1,
+        WhipCue = ScarletRewardCues.ScytheWhipAt + 1;
 
     internal static float Seed(int owner, int salt) => (owner * 977 + salt * 131) % 997 * .01f;
 
@@ -88,16 +91,16 @@ internal sealed class ScytheStrokeVisuals : GlobalProjectile
         }
         lastSide = side;
 
-        // Cues: a drawn breath into each Over (high) and Under (low); the Whip's brace, then the lash.
+        // Cues: a drawn breath into each Over (high) and Under (low); the Whip's brace, then the lash. All are per-swing
+        // cues of the left-click measure: the owner at full level, other players 8 dB lower with one voice.
         int kind = SableScytheMotion.Kind(stroke.Stroke);
         Vector2 tip = ScytheLook.World(shoulder, tipLocal, stroke.Aim, stroke.Facing);
-        int swing = SableScytheMotion.LiveStart(stroke.Stroke) - ScytheLook.SwingCueLead;
-        if (kind != SableScytheMotion.Whip && Crossed(previous, age, swing))
+        if (kind != SableScytheMotion.Whip && Crossed(previous, age, ScytheLook.SwingCue))
             ScarletRewardAudio.Shot(kind == SableScytheMotion.Over ? ScarletRewardCues.ScytheSwingHigh : ScarletRewardCues.ScytheSwingLow, projectile.owner, tip);
         if (kind == SableScytheMotion.Whip && Crossed(previous, age, ScytheLook.WhipBraceCue))
-            ScarletRewardAudio.Play(ScarletRewardCues.ScytheWhipBrace, player.Center, .6f);
+            ScarletRewardAudio.Shot(ScarletRewardCues.ScytheWhipBrace, projectile.owner, player.Center);
         if (kind == SableScytheMotion.Whip && Crossed(previous, age, ScytheLook.WhipCue))
-            ScarletRewardAudio.Play(ScarletRewardCues.ScytheWhip, tip, .75f);
+            ScarletRewardAudio.Shot(ScarletRewardCues.ScytheWhip, projectile.owner, tip);
     }
 
     private static bool Crossed(int previous, int age, int at) => previous < at && age >= at && age <= at + 2;
@@ -171,7 +174,7 @@ internal sealed class ScytheReleaseVisuals : GlobalProjectile
         Vector2 shoulder = ScytheLook.Shoulder(player, release.Facing);
         ScytheLook.PoseArm(player, shoulder, ScytheLook.World(shoulder, release.PoseAt(release.Age).Hand, release.Aim, release.Facing), release.Facing);
         // The windup cue on the first tick any client sees: positional for everyone.
-        if (previous < 0 && release.Age <= 3) ScarletRewardAudio.Play(ScarletRewardCues.StaffWindup, player.Center, .7f);
+        if (previous < 0 && release.Age <= 3) ScarletRewardAudio.Play(ScarletRewardCues.StaffWindup, player.Center);
     }
 
     public override bool PreDraw(Projectile projectile, ref Color lightColor)
@@ -229,13 +232,13 @@ internal sealed class StaffCutVisuals : GlobalProjectile
         if (cut.Barline)
         {
             Vector2 middle = new(plan.Start.X, plan.Start.Y + plan.Length * .5f);
-            ScarletRewardAudio.Play(ScarletRewardCues.StaffBarline, middle, .85f);
+            ScarletRewardAudio.Play(ScarletRewardCues.StaffBarline, middle);
             ScarletRewardFx.Shake(projectile.owner, middle, CrimsonRewardRules.BarlineShake, Vector2.UnitY);
             return;
         }
         Vector2 start = new(plan.Start.X, plan.Start.Y);
-        ScarletRewardAudio.Play(ScarletRewardCues.StaffCut, start, .65f, 0, .03f, 4);
-        if (!cut.FullStaff && cut.Index == cut.Lines - 1) ScarletRewardAudio.Play(ScarletRewardCues.Cadence, start, .7f);
+        ScarletRewardAudio.Play(ScarletRewardCues.StaffCut, start);
+        if (!cut.FullStaff && cut.Index == cut.Lines - 1) ScarletRewardAudio.Play(ScarletRewardCues.Cadence, start);
     }
 
     // The whole staff ignites together as the barline lands: embers lift off every scar of a full staff.
