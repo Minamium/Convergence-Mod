@@ -10,8 +10,8 @@ namespace Convergence.Client.Encounters.GhostSamurai;
 // LOOPSTART/LOOPEND) for the players fighting inside the seal, including a
 // fallen player still watching from inside it. Only this track's fade is shaped:
 // a short entry ramp so the opening temple bell is heard, and a fade under the
-// victory dissolve. Music never drives authority; a late joiner starts the track
-// from its top.
+// victory or defeat stage. Music never drives authority; a late joiner starts the
+// track from its top.
 [Autoload(Side = ModSide.Client)]
 internal sealed class GhostSamuraiMusicScene : ModSceneEffect
 {
@@ -38,9 +38,9 @@ internal sealed class GhostSamuraiMusicScene : ModSceneEffect
             if (player.whoAmI == Main.myPlayer) heardAt = Main.GameUpdateCount;
             return true;
         }
-        // Hold the track under the victory dissolve, only for whoever was hearing it.
-        return GhostSamuraiPresentation.EndingSince is { } since && heardAt + 2 >= since
-            && Main.GameUpdateCount - since < SamuraiRigMotion.DeathDuration;
+        // Hold the track under the ending's stage, only for whoever was hearing it.
+        return GhostSamuraiPresentation.Ending is { } ending && heardAt + 2 >= ending.Since
+            && Main.GameUpdateCount - ending.Since < (ulong)ending.Duration;
     }
 }
 
@@ -54,9 +54,9 @@ internal sealed class GhostSamuraiMusicFade : ModSystem
         if (Main.dedServ || Main.gameMenu || Main.gamePaused) return;
         int slot = MusicLoader.GetMusicSlot(Mod, GhostSamuraiMusicScene.Track);
         if (slot <= 0 || slot >= Main.musicFade.Length) return;
-        if (GhostSamuraiPresentation.EndingSince is { } since)
+        if (GhostSamuraiPresentation.Ending is { } ending)
         {
-            float t = (Main.GameUpdateCount - since) / (float)SamuraiRigMotion.DeathDuration;
+            float t = (Main.GameUpdateCount - ending.Since) / (float)ending.Duration;
             Main.musicFade[slot] = Math.Min(Main.musicFade[slot], 1 - Ease(t));
             return;
         }

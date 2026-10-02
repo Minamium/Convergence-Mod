@@ -83,6 +83,20 @@ internal static class SamuraiSpectralPreview
                 foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();
                 return;
             }
+            if(args.Length>7 && bool.Parse(args[7]))
+            {
+                CinemaSequences(device,target,batch,output);
+                GhostSamuraiCuts.Reset();Luminance.Core.Graphics.ShaderManager.Clear();
+                foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();
+                return;
+            }
+            if(args.Length>6 && bool.Parse(args[6]))
+            {
+                FieldCutSequences(device,target,batch,output);
+                GhostSamuraiCuts.Reset();Luminance.Core.Graphics.ShaderManager.Clear();
+                foreach(var texture in Textures.Values)texture.Dispose();Textures.Clear();
+                return;
+            }
             if(args.Length>5 && bool.Parse(args[5]))
             {
                 BossMotion(device,target,batch,output);
@@ -379,6 +393,147 @@ internal static class SamuraiSpectralPreview
         }
         Console.WriteLine($"PASS {frames} production-cut frames: exact grid30 descriptors, slash/vertical/wave/annulus/cleave, forecast-amplify-cut-contract, zoom/full/reduced/light/dark; safe cells/holes/sides, expiry and batch state. Offline only.");
     }
+    // The production forecasts and cuts over the production sealed field (backdrop and rim
+    // behind, seal above), for readability review rather than flat light/dark plates.
+    // The cinematics' world pieces over the production field: the summoning (the death run
+    // backwards, then the stance), the victory's falling and planted blades, and the
+    // departure after a wipe. Camera, letterbox and titles need the game and are not drawn.
+    static void CinemaSequences(GraphicsDevice device,RenderTarget2D target,SpriteBatch batch,string output)
+    {
+        var field=new SamuraiArenaBounds(560,600-SamuraiArenaBounds.Height/2,SamuraiArenaBounds.Width/2,SamuraiArenaBounds.Height/2);
+        new GhostSamuraiComposite().Load();
+        Terraria.Main.GameViewMatrix.Scale=1;
+        Matrix view=Terraria.Main.GameViewMatrix.TransformationMatrix;
+        Vector2 a=Vector2.Transform(new Vector2(field.Left,field.Top),view),b=Vector2.Transform(new Vector2(field.Right,field.Bottom),view);
+        var rect=new Vector4(a.X,a.Y,b.X,b.Y);
+        SamuraiRigPose Idle(float age)=>new(360,330,age,0,1,new(2.16f,1,0,0),new(.98f,1,0,0),0,0,0);
+        int frames=0;
+        void Frame(string name,float clock,Action<SpriteBatch> draw)
+        {
+            var look=new SamuraiFieldLook{Clock=clock,Presence=1,Deploy=1,Phase=0,Camera=new Vector2(360,360)-new Vector2(field.CenterX,field.CenterY)};
+            device.SetRenderTarget(target);device.Clear(Color.Black);
+            device.BlendState=BlendState.AlphaBlend;device.DepthStencilState=DepthStencilState.None;device.RasterizerState=RasterizerState.CullNone;
+            SamuraiFieldRenderer.DrawBackdrop(device,view,new Vector2(field.Left,field.Top),look);
+            SamuraiFieldRenderer.DrawRim(device,rect,false,look);
+            batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,DepthStencilState.None,RasterizerState.CullNone,null,view);
+            var state=WorldBatchParameters.Capture(batch);
+            draw(batch);
+            if(state!=WorldBatchParameters.Capture(batch))throw new Exception($"{name} changed caller SpriteBatch state");
+            batch.End();
+            device.BlendState=BlendState.AlphaBlend;
+            SamuraiFieldRenderer.DrawSeal(device,rect,false,look);
+            device.SetRenderTarget(null);
+            Save(target,output,name);frames++;
+        }
+        var summon=new List<string>();
+        foreach(float age in new[]{30f,50f,70f,90f,110f,124f,140f,170f})
+        {
+            string name=$"cinema-summon-{age:000}.png";summon.Add(name);
+            Frame(name,4+age/60,batch2=>
+            {
+                bool stance=SamuraiCinematics.Stance(age);
+                var left=SamuraiRigMotion.Blade(SamuraiAttack.Idle,SamuraiPhase.Phase1,age-SamuraiCinematics.StanceStart,age,-1,1,default,stance);
+                var right=SamuraiRigMotion.Blade(SamuraiAttack.Idle,SamuraiPhase.Phase1,age-SamuraiCinematics.StanceStart,age,1,1,default,stance);
+                var pose=new SamuraiRigPose(360,330,age,0,1,left,right,0,0,0);
+                GhostSamuraiPresentation.Pose=pose;
+                if(SamuraiCinematics.Manifesting(age))
+                {
+                    float undone=SamuraiCinematics.ManifestAge(age);
+                    if(undone<SamuraiRigMotion.DeathDuration)GhostSamuraiRigArt.DrawDeath(batch2,pose,Vector2.Zero,undone);
+                }
+                else GhostSamuraiRigArt.Draw(batch2,pose,Vector2.Zero,null,age);
+            });
+        }
+        Sheet(device,batch,output,"contact-cinema-summon.png",summon,4,2);
+        var victory=new List<string>();
+        foreach(float age in new[]{10f,26f,38f,50f,62f,70f,110f,190f})
+        {
+            string name=$"cinema-victory-{age:000}.png";victory.Add(name);
+            Frame(name,9+age/60,batch2=>
+            {
+                var pose=Idle(400);GhostSamuraiPresentation.Pose=pose;
+                if(age<SamuraiRigMotion.DeathDuration)GhostSamuraiRigArt.DrawDeath(batch2,pose,Vector2.Zero,age,swords:false);
+                GhostSamuraiRigArt.DrawFallenBlades(batch2,pose,Vector2.Zero,age,field.Bottom,field.Left,field.Right);
+            });
+        }
+        Sheet(device,batch,output,"contact-cinema-victory.png",victory,4,2);
+        var defeat=new List<string>();
+        foreach(float t in new[]{20f,60f,90f,120f,150f,190f})
+        {
+            string name=$"cinema-defeat-{t:000}.png";defeat.Add(name);
+            Frame(name,12+t/60,batch2=>
+            {
+                var pose=Idle(600);GhostSamuraiPresentation.Pose=pose;
+                float leaving=SamuraiCinematics.DepartAge(t);
+                if(leaving<SamuraiRigMotion.DeathDuration)GhostSamuraiRigArt.DrawDeath(batch2,pose,Vector2.Zero,leaving,departing:true);
+            });
+        }
+        Sheet(device,batch,output,"contact-cinema-defeat.png",defeat,3,2);
+        Console.WriteLine($"PASS {frames} cinematic world frames (summoning, planted blades, departure) over the production field. Offline only; camera, letterbox and titles not drawn.");
+    }
+
+    static void FieldCutSequences(GraphicsDevice device,RenderTarget2D target,SpriteBatch batch,string output)
+    {
+        float[] offsets={-24,-8,-2,0,1.5f,5};
+        var field=new SamuraiArenaBounds(560,600-SamuraiArenaBounds.Height/2,SamuraiArenaBounds.Width/2,SamuraiArenaBounds.Height/2);
+        int frames=0;
+        foreach(float phase in new[]{0f,2f})foreach(string kind in new[]{"slash","vertical","grid","wave","annulus","wind","cleave"})
+        {
+            var images=new List<string>();
+            for(int step=0;step<offsets.Length;step++)
+            {
+                float fire=54,age=fire+offsets[step];
+                Terraria.Main.GameViewMatrix.Scale=1;
+                Matrix view=Terraria.Main.GameViewMatrix.TransformationMatrix;
+                var look=new SamuraiFieldLook{Clock=7.3f+phase*5.6f+step*.05f,Presence=1,Deploy=1,Phase=phase,
+                    Camera=new Vector2(360,360)-new Vector2(field.CenterX,field.CenterY)};
+                Vector2 a=Vector2.Transform(new Vector2(field.Left,field.Top),view),b=Vector2.Transform(new Vector2(field.Right,field.Bottom),view);
+                var rect=new Vector4(a.X,a.Y,b.X,b.Y);
+                device.SetRenderTarget(target);device.Clear(Color.Black);
+                device.BlendState=BlendState.AlphaBlend;device.DepthStencilState=DepthStencilState.None;device.RasterizerState=RasterizerState.CullNone;
+                SamuraiFieldRenderer.DrawBackdrop(device,view,new Vector2(field.Left,field.Top),look);
+                SamuraiFieldRenderer.DrawRim(device,rect,false,look);
+                batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,
+                    DepthStencilState.None,RasterizerState.CullNone,null,view);
+                if(kind=="grid")
+                    for(int axis=0;axis<2;axis++)for(int line=0;line<GhostSamuraiRules.GridVerticalLineCount;line++)
+                    {
+                        var h=GhostSamuraiRules.GridLine(axis==0,line,360,360,0);
+                        GhostSamuraiCuts.Slash(batch,h,new(h.X,h.Y),h.Fire+offsets[step],false);
+                    }
+                else if(kind=="annulus"||kind=="cleave"||kind=="wind")
+                {
+                    var shape=kind=="annulus"?SamuraiShape.OuterSlash:kind=="wind"?SamuraiShape.InnerKamaitachi:SamuraiShape.FrontalCleave;
+                    var h=new SamuraiHazard(shape,360,360,1,0,kind=="annulus"?145:0,315,0,54,
+                        kind=="wind"?54+GhostSamuraiRules.Phase3KamaitachiDuration:66,1);
+                    GhostSamuraiCuts.Field(batch,h,new(360,360),age,new Rectangle(0,0,720,720),false);
+                }
+                else if(kind=="wave")
+                {
+                    var h=new SamuraiHazard(SamuraiShape.SlashWave,180,360,1,0,SamuraiWaveRules.ChargedSlashWaveWidth,
+                        SamuraiWaveRules.ChargedSlashWaveHeight/2,0,54,66,1);
+                    GhostSamuraiCuts.Wave(batch,h,new(270+Math.Max(0,offsets[step])*8,360),age,false);
+                }
+                else
+                {
+                    bool vertical=kind=="vertical";
+                    var h=new SamuraiHazard(vertical?SamuraiShape.VerticalSlash:SamuraiShape.Slash,
+                        vertical?360:-340,vertical?-200:360,vertical?0:1,vertical?1:0,
+                        vertical?1120:GhostSamuraiRules.SlashLength,vertical?SamuraiComboRules.VerticalHalfWidth:GhostSamuraiRules.SlashHalfWidth,
+                        0,54,vertical?54+SamuraiComboRules.VerticalLive:54+GhostSamuraiRules.SlashLive,1);
+                    GhostSamuraiCuts.Slash(batch,h,new(h.X,h.Y),age,false);
+                }
+                batch.End();
+                device.BlendState=BlendState.AlphaBlend;
+                SamuraiFieldRenderer.DrawSeal(device,rect,false,look);
+                device.SetRenderTarget(null);
+                string name=$"field-cut-{kind}-p{phase:0}-{step:00}.png";
+                Save(target,output,name);images.Add(name);frames++;
+            }
+            Sheet(device,batch,output,$"contact-field-cut-{kind}-p{phase:0}.png",images,6,1);
+        }
+        Console.WriteLine($"PASS {frames} production forecast/cut frames over the production sealed field (backdrop+rim behind, seal above). Offline only.");
+    }
     static void AssertBackground(RenderTarget2D target,int x,int y,Color expected,string description)
     {
         var pixel=new Color[1];target.GetData(0,new Rectangle(x,y,1,1),pixel,0,1);
@@ -446,7 +601,14 @@ namespace Convergence.Client.Encounters.GhostSamurai
     internal static class GhostSamuraiPresentation
     {internal static SamuraiRigPose Pose;internal static readonly Guid Fight=Guid.NewGuid();internal static float Fraction=1;internal static bool TryPose(out SamuraiRigPose pose,out Guid fight){pose=Pose;fight=Fight;return true;}internal static bool Talisman(int i,out Vector2 tether,out float angle){tether=default;angle=0;return false;}}
     internal static class GhostSamuraiVisuals
-    {internal static void Stroke(SpriteBatch b,Vector2 a,Vector2 c,float width,Color color){}
+    {
+        static Texture2D? pixel;
+        internal static void Stroke(SpriteBatch b,Vector2 a,Vector2 c,float width,Color color)
+        {
+            Vector2 d=c-a;if(d.LengthSquared()<.001f||width<=0)return;
+            if(pixel is null){pixel=new Texture2D(b.GraphicsDevice,1,1);pixel.SetData(new[]{Color.White});}
+            b.Draw(pixel,a,null,color,MathF.Atan2(d.Y,d.X),new Vector2(0,.5f),new Vector2(d.Length(),width),SpriteEffects.None,0);
+        }
     }
 }
 namespace Luminance.Assets

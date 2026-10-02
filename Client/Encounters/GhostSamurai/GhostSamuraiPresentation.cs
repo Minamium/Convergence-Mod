@@ -17,6 +17,11 @@ using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.GhostSamurai;
 
+// A retained client-only ending: where the samurai stood, the floor of its seal, how
+// long the stage is held and how long the seal stays before it melts.
+internal readonly record struct SamuraiEnding(Guid Fight, bool Victory, ulong Since, int Duration, int SealHold,
+    float X, float Y, float Floor, bool Participant);
+
 // One exact-Fight client rig (the encounter contract allows one active fight).
 // Nothing lives on shared GlobalNPC instances, and no gameplay state is written.
 [Autoload(Side = ModSide.Client)]
@@ -27,7 +32,8 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     private static SamuraiRigPose current, previous, deathPose;
     private static Guid fight, retiredFight;
     private static ulong updated, missingSince, hitAt, deathAt;
-    private static bool hitSeen, death;
+    private static bool hitSeen, death, departing, participant, endingParticipant;
+    private static SamuraiArenaBounds endingField;
     private static long stamp;
     private static Vector2 lastCenter, momentum, lunge;
     private static float lean, lag, entryLeft, entryRight;
@@ -50,8 +56,14 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     public override void Load() => SamuraiRigMotion.BindEasing(
         x => EasingCurves.Cubic.Evaluate(EasingType.InOut, x), x => EasingCurves.Cubic.Evaluate(EasingType.Out, x));
     internal static bool Talisman(int index, out Vector2 anchor, out float angle) => secondary.Sample(index, Fraction, out anchor, out angle);
-    // The client-only victory dissolve outlives the native NPC; music holds under it.
-    internal static ulong? EndingSince => death ? deathAt : null;
+    // The client-only victory dissolve and defeat departure outlive the native NPC;
+    // the music, the seal and the cinematic camera hold under them.
+    internal static SamuraiEnding? Ending => death || departing
+        ? new SamuraiEnding(retiredFight, death, deathAt,
+            death ? SamuraiCinematics.VictoryDuration : SamuraiCinematics.DefeatDuration,
+            death ? SamuraiCinematics.VictorySealHold : SamuraiCinematics.DefeatSealHold,
+            deathPose.X, deathPose.Y, endingField.Bottom, endingParticipant)
+        : null;
     internal static float Fraction => Main.gamePaused || stamp == 0 ? 1 : (float)Math.Clamp((Stopwatch.GetTimestamp() - stamp) * 60d / Stopwatch.Frequency, 0, 1);
 
     public override void PostUpdateEverything()
@@ -69,12 +81,18 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         var terminal = Main.netMode == NetmodeID.MultiplayerClient
             ? ModContent.GetInstance<EncounterReplicaSystem>().LastTerminalSnapshot
             : ModContent.GetInstance<EncounterCoordinatorSystem>().LastTerminalSnapshot;
-        // A lethal HitEffect can precede a phase interception. Only an accepted
-        // victory starts the harmless ending; timeout/wipe/disconnect do not.
+        // A lethal HitEffect can precede a phase interception. Only an accepted victory
+        // starts the dissolve, and only an accepted wipe the departure (for those who
+        // fought); a timeout, disconnect or unload ends without a stage.
         if (owner is not null && terminal is { } ended && ended.IsTerminal && ended.FightId.Value == fight)
         {
-            if (ended.EndReason == EncounterEndReason.Victory && retiredFight != fight)
-            { deathPose = current; deathAt = now; death = true; retiredFight = fight; }
+            bool victory = ended.EndReason == EncounterEndReason.Victory;
+            if (retiredFight != fight && (victory || ended.EndReason == EncounterEndReason.Defeat && participant))
+            {
+                deathPose = current; deathAt = now; retiredFight = fight;
+                death = victory; departing = !victory;
+                endingParticipant = participant; endingField = owner.Arena;
+            }
             DropOwner();
             if (death)
                 for (int i = 0; i < 24; i++)
@@ -83,7 +101,7 @@ internal sealed class GhostSamuraiPresentation : ModSystem
                     mist.Emit(retiredFight, new Vector2(deathPose.X, deathPose.Y) + d * (18 + i % 5 * 8), d * 1.4f, 28 + i % 4 * 4, 60);
                 }
         }
-        if (death && now - deathAt >= SamuraiRigMotion.DeathDuration) { death = false; mist.ClearOwned(); }
+        if (Ending is { } staged && now - staged.Since >= (ulong)staged.Duration) { death = departing = false; mist.ClearOwned(); }
         GhostSamuraiBoss? active = null;
         foreach (NPC npc in Main.ActiveNPCs)
             if (npc.ModNPC is GhostSamuraiBoss boss && GhostSamuraiContainmentPlayer.FightActive(boss)) { active = boss; break; }
@@ -100,11 +118,12 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         }
         if (!ReferenceEquals(owner, active) || fight != active.Fight)
         {
-            DropOwner(); owner = active; fight = active.Fight; death = false;
+            DropOwner(); owner = active; fight = active.Fight; death = departing = participant = false;
             lastCenter = active.PresentationCenter; current = previous = Neutral(active);
             lastAttack = active.Attack; lastPhase = active.Phase; lastFacing = active.NPC.direction; lastTransition = active.TransitionRemaining > 0;
         }
         missingSince = 0;
+        participant |= ReferenceEquals(GhostSamuraiMusicScene.Listening(Main.LocalPlayer), active);
         if (updated == now && history.Count > 0) return;
         Vector2 center = active.PresentationCenter, velocity = center - lastCenter;
         bool teleported = velocity.LengthSquared() > 320 * 320;
@@ -113,8 +132,10 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         momentum = Vector2.Lerp(momentum, velocity, .2f);
         lean = MathHelper.Lerp(lean, MathHelper.Clamp(velocity.X * .004f, -.22f, .22f), .2f);
         lag = MathHelper.Lerp(lag, lean, .12f);
-        bool transition = active.TransitionRemaining > 0;
-        float timer = transition ? GhostSamuraiRules.TransitionTime - active.TransitionRemaining : active.VisualAttackTimer;
+        // A change of form, and the summoning's stance, raise both blades overhead.
+        bool transition = active.TransitionRemaining > 0 || SamuraiCinematics.Stance(active.VisualAge);
+        float timer = active.TransitionRemaining > 0 ? GhostSamuraiRules.TransitionTime - active.TransitionRemaining
+            : transition ? active.VisualAge - SamuraiCinematics.StanceStart : active.VisualAttackTimer;
         float age = active.VisualAge;
         var left = SamuraiRigMotion.Blade(active.Attack, active.Phase, timer, age, -1, active.NPC.direction, active.Combo, transition);
         var right = SamuraiRigMotion.Blade(active.Attack, active.Phase, timer, age, 1, active.NPC.direction, active.Combo, transition);
@@ -204,6 +225,13 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         { pose = prepared; renderTick = preparedTick; }
         // Fallback remains visible even before the first accepted replica/tick.
         if (owns) mist?.Draw(batch);
+        // The summoning runs the death backwards: the samurai gathers itself out of the mist.
+        if (owns && SamuraiCinematics.Manifesting(boss.VisualAge))
+        {
+            float undone = SamuraiCinematics.ManifestAge(boss.VisualAge - 1 + fraction);
+            if (undone < SamuraiRigMotion.DeathDuration) GhostSamuraiRigArt.DrawDeath(batch, pose, screen, undone);
+            return;
+        }
         GhostSamuraiRigArt.Draw(batch, pose, screen, owns ? history : null, renderTick);
     }
     // Evaluate accepted action clocks at render frequency. The tick history
@@ -229,17 +257,32 @@ internal sealed class GhostSamuraiPresentation : ModSystem
     {
         pose = SamplePose(Fraction);
         ownerFight = fight;
-        return !Main.dedServ && !Main.gameMenu && !death && owner is { ProjectionFresh: true }
-            && owner.NPC.active && fight != Guid.Empty && owner.Fight == fight;
+        return !Main.dedServ && !Main.gameMenu && !death && !departing && owner is { ProjectionFresh: true }
+            && owner.NPC.active && fight != Guid.Empty && owner.Fight == fight && !SamuraiCinematics.Manifesting(owner.VisualAge);
     }
     public override void PostDrawTiles()
     {
-        if (Main.dedServ || Main.gameMenu || !death) return;
+        if (Main.dedServ || Main.gameMenu || !death && !departing) return;
         float age = Math.Max(0, Main.GameUpdateCount - deathAt - 1f + Fraction);
         var batch = Main.spriteBatch;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
             DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-        try { mist?.Draw(batch); GhostSamuraiRigArt.DrawDeath(batch, deathPose, Main.screenPosition, age); }
+        try
+        {
+            mist?.Draw(batch);
+            if (departing)
+            {
+                float leaving = SamuraiCinematics.DepartAge(age);
+                if (leaving < SamuraiRigMotion.DeathDuration)
+                    GhostSamuraiRigArt.DrawDeath(batch, deathPose, Main.screenPosition, leaving, departing: true);
+            }
+            else
+            {
+                if (age < SamuraiRigMotion.DeathDuration) GhostSamuraiRigArt.DrawDeath(batch, deathPose, Main.screenPosition, age, swords: false);
+                GhostSamuraiRigArt.DrawFallenBlades(batch, deathPose, Main.screenPosition, age,
+                    endingField.Bottom, endingField.Left, endingField.Right);
+            }
+        }
         finally { batch.End(); }
     }
     private static void DropOwner()
@@ -252,7 +295,10 @@ internal sealed class GhostSamuraiPresentation : ModSystem
         sampleReady = sampleSmooth = false; sampleTimer = 0; sampleCombo = default;
     }
     private static void Clear()
-    { DropOwner(); retiredFight = Guid.Empty; death = false; deathAt = 0; stamp = 0; systemTick = ulong.MaxValue; current = previous = deathPose = default; }
+    {
+        DropOwner(); retiredFight = Guid.Empty; death = departing = participant = endingParticipant = false; deathAt = 0; stamp = 0;
+        systemTick = ulong.MaxValue; current = previous = deathPose = default; endingField = default;
+    }
     public override void ClearWorld() => Clear();
     public override void OnWorldUnload() => Clear();
     public override void Unload() { Clear(); mist = null; SamuraiRigMotion.ClearEasing(); GhostSamuraiMaterials.Reset(); GhostSamuraiEnergy.Reset(); }

@@ -14,6 +14,17 @@ Mods: {
     }
     GhostSamurai: {
       SummonRejected: "幽鬼武者を呼び出せませんでした。戦闘を終え、弔い鈴を手に持って使用してください。"
+      Cinema: {
+        SummonEpithet: "紫電の亡霊武者"
+        PhaseTwoTitle: "紫電"
+        PhaseTwoEpithet: "弐之太刀"
+        PhaseThreeTitle: "皆既"
+        PhaseThreeEpithet: "終之太刀"
+        VictoryTitle: "鎮魂"
+        VictoryEpithet: "幽鬼武者、ここに眠る"
+        DefeatTitle: "無念"
+        DefeatEpithet: "立つ者は、みな斬り伏せられた"
+      }
     }
   }
 }
