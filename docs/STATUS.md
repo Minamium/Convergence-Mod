@@ -209,6 +209,8 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 
 ## Next change
 
+Doll weapon refresh (owner-approved 2026-10-02): the [shared rules](encounters/first-severance/WEAPONS.md#reward-refresh-2026-10--shared-rules) are set and the Codex pixel art (DW01–DW05) is delivered outside the repository, pending the owner's look. Next land, one PR each: the Doll weapon layer, the audio foundation with the companion's new summon sound (after an audition), the art exporter with the exported sprites, then one weapon at a time (each replacing its section with a list of changes for players). The current 0.2.x weapons stay in place until their own refresh merges.
+
 Cathedral sound: on the installed 0.3.65 package, play the Raid from the opening through Victory (and one Defeat). Listen to the prison break, light pillar, rift and arrival; each attack's forecast and release; the lattice "ba-ba-ba" (no missing or clicking slices); the worm rush from off-screen; the chorus countdown and failed/successful Stack/Spread; Liora's defeat, the worm's retreat, the bite, Fury, the final blow, the melt and Victory. Report any cue that is too loud, too quiet, late or missing, and the Reduced Effects mix.
 
 Ebon polish: on the installed 0.3.62 package, play Act One through the Finale and listen across each loop join (Act One at about 1:47 into the act, Act II and the Finale after their first pass). Check that warnings read cleanly without clutter over the hall and bright windows, that live strands look dangerous and beautiful, the fray after a cut, Reduced Effects, zoom and FPS.
