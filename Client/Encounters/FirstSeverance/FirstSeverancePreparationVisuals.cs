@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.Localization;
 
 namespace Convergence.Client.Encounters.FirstSeverance;
 
@@ -53,7 +54,7 @@ internal sealed class FirstSeverancePreparationVisuals
         {
             Player player = Main.player[member.ServerWhoAmI];
             if (!member.IsReady || !player.active || player.dead) continue;
-            Utils.DrawBorderString(batch, "Ready!", player.Top - Main.screenPosition - new Vector2(0, 24),
+            Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.ReadyMarker"), player.Top - Main.screenPosition - new Vector2(0, 24),
                 new Color(155, 244, 220), .70f, .5f);
         }
     }
@@ -83,7 +84,7 @@ internal sealed class FirstSeverancePreparationVisuals
         Fill(button, (hover ? new Color(28, 40, 45) : new Color(10, 15, 20)) * .92f);
         Fill(new Rectangle(button.X + 12, button.Bottom - 1, (button.Width - 24) * ready / prep.Members.Count, 1), accent * .75f);
         Fill(new Rectangle(button.X + 14, button.Y + 13, 6, 6), accent * (local.IsReady ? 1f : .25f));
-        Utils.DrawBorderString(batch, "READY", new(button.X + 30, button.Y + 8), accent, .7f);
+        Utils.DrawBorderString(batch, Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.ReadyButton"), new(button.X + 30, button.Y + 8), accent, .7f);
         Utils.DrawBorderString(batch, $"{ready}/{prep.Members.Count}", new(button.Right - 13, button.Y + 8), Color.Silver, .7f, 1f);
         if (hover)
         {

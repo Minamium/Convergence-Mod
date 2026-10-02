@@ -194,7 +194,7 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
             bool hadPrevious = previous is not null
                 && previous.TryGetParticipantByServerSlot(participant.ServerWhoAmI, out before);
             if (participant.DebugAssistProtected && (!hadPrevious || !before.DebugAssistProtected))
-                Main.NewText("[Convergence DEV] Auxiliary protection active: " + player.name, 190, 170, 110);
+                Main.NewText("[Convergence DEV] " + Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.AuxiliaryProtection", player.name), 190, 170, 110);
             if (participant.CombatState == RaidParticipantCombatState.Downed
                 && (!hadPrevious || before.CombatState != RaidParticipantCombatState.Downed))
                 Say("ParticipantDowned", player.name);
@@ -284,6 +284,17 @@ internal sealed class FirstSeveranceClientStateSystem : ModSystem
         {
             EncounterCoordinatorSystem authority =
                 ModContent.GetInstance<EncounterCoordinatorSystem>();
+            // Multiplayer receives a Cleanup snapshot; here the retained terminal stands in for it,
+            // once, before the Idle snapshot would end the held Fight with no reason.
+            if (authority.LastTerminalSnapshot is { } ended && combat is { } held
+                && FirstSeveranceCombatRules.ShouldApplyRetainedTerminal(held.EncounterSequence, held.FightId,
+                    ended.EncounterSequence, ended.FightId, ended.IsTerminal))
+            {
+                FirstSeveranceCombatAuthority.TryGetTerminalPresentation(ended.EncounterSequence, ended.FightId,
+                    ended.AuthorityTick, out FirstSeveranceCombatProjection? terminalCombat);
+                ApplySnapshot(ended, null, terminalCombat);
+                return;
+            }
             FirstSeverancePreparationAuthority.TryCreateProjection(
                 authority.Snapshot.EncounterSequence,
                 authority.Snapshot.FightId,

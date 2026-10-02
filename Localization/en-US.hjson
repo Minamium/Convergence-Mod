@@ -162,6 +162,14 @@ Mods: {
 				PhaseFinalSlicer: Slicing comb — step between the predicted lanes.
 				PhaseRemoteTransition: Presence receding — the hands remain inside the field.
 				PhaseFinalTransition: Vital signal zero — survive the final score to finish the Raid!
+				PhaseRemoteCrush: Central Crush — both hands drive toward the center. Leave the forecast before they meet!
+				PhaseFinalCoreCheck: LAST CORE — destroy the exposed sphere within {2} seconds while dodging its cannon!
+				PreparationNotReady: Preparation status has not arrived yet.
+				RequestInProgress: The current Raid request is still being processed.
+				NothingToCancel: There is no active Raid to cancel.
+				AuxiliaryProtection: "Auxiliary protection active: {0}"
+				ReadyMarker: Ready!
+				ReadyButton: READY
 				PhasePhaseTransition: Seal rupture — attacks suspended. The true form emerges.
 				PhaseLattice: PHASE II — move between the predicted grid lines and attack the Core!
 				GridInstruction: LATTICE — move into the cells between the luminous lines

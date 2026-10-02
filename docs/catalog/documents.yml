@@ -866,13 +866,13 @@ documents:
 - doc_id: encounter.first-severance.spec
   path: docs/encounters/first-severance/ENCOUNTER_SPEC.md
   title: Requiem of the Hollow Doll — Encounter Specification
-  content_sha256: 33a65ae4da4c162e17b51cdec9402baa9c1491c31a3bc7f30a65a978c95b75ea
+  content_sha256: 526cd4842d030915a351485f6e33a35c4565e64977cda6ace47efeb82fb42390
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - networking
-  last_reviewed: '2026-09-15'
+  last_reviewed: '2026-10-02'
   source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -1414,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 67f88bf19d6635101778a268b5b2cfd1a4dc5111c265f08375e5e038c7d66011
+  content_sha256: e6d3e592ba027aaf6bc7c99476ae96ef14f7ecb09f84b4f9d2bb65ee02384303
   document_type: status
   status: accepted
   owners:

@@ -210,7 +210,8 @@ internal sealed class FirstSeverancePrototypeCombatRuntime
                 return End(FirstSeveranceTerminalCause.AdministrativeAbort);
         }
         recovery.ApplyPendingIntents(context.AuthorityTick);
-        if (recovery.CancelRequested)
+        // Victory outranks Cancelled: a cancel queued while a completed score settles must not erase it.
+        if (recovery.CancelRequested && !loop.State.IsTerminal)
             return End(FirstSeveranceTerminalCause.UserCancelled);
 
         if (loop.State.IsTerminal)

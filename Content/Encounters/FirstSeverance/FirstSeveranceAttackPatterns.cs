@@ -113,4 +113,11 @@ internal static class FirstSeveranceCombatRules
         ulong terminalSequence, FightId terminalFight, EncounterEndReason reason, bool connectedParticipant)
         => connectedParticipant && previousSequence != 0 && previousSequence == terminalSequence
             && !previousFight.IsNone && previousFight == terminalFight && reason == EncounterEndReason.Defeat;
+
+    // Single Player reads the coordinator directly, and it is already Idle on the terminal tick.
+    // Its retained terminal snapshot applies only to the exact Fight the client still holds.
+    internal static bool ShouldApplyRetainedTerminal(ulong heldSequence, FightId heldFight,
+        ulong terminalSequence, FightId terminalFight, bool isTerminal)
+        => isTerminal && heldSequence != 0 && heldSequence == terminalSequence
+            && !heldFight.IsNone && heldFight == terminalFight;
 }
