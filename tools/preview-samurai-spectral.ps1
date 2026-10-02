@@ -3,7 +3,9 @@ param([Parameter(Mandatory=$true)][string]$TModLoaderPath,
       [Parameter(Mandatory=$true)][string]$LuminancePackage,
       [string]$OutputDirectory='.local/samurai-spectral-preview',
       [switch]$CutsOnly,
-      [switch]$BossMotionOnly)
+      [switch]$BossMotionOnly,
+      [switch]$FieldCuts,
+      [switch]$Cinema)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $tml=(Resolve-Path -LiteralPath $TModLoaderPath).Path
@@ -17,13 +19,15 @@ $files=@('tools/fixtures/SamuraiSpectralPreview.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiComposite.cs',
     'Client/Encounters/GhostSamurai/GhostSamuraiMaterials.cs',
     'Client/Encounters/GhostSamurai/SamuraiRigMotion.cs',
+    'Client/Encounters/GhostSamurai/SamuraiCinematics.cs',
     'Client/Graphics/SwordLightning.cs',
     'Client/Encounters/GhostSamurai/SamuraiSpriteFrames.cs',
     'Content/Encounters/GhostSamurai/GhostSamuraiRules.cs',
     'Content/Encounters/GhostSamurai/SamuraiArenaBounds.cs',
     'Content/Encounters/GhostSamurai/SamuraiComboRules.cs',
     'Content/Encounters/GhostSamurai/SamuraiWaveRules.cs',
-    'Client/Graphics/WorldGraphicsScope.cs')
+    'Client/Graphics/WorldGraphicsScope.cs',
+    'Client/Encounters/GhostSamurai/SamuraiFieldRenderer.cs')
 $includes=($files | ForEach-Object { '<Compile Include="'+[Security.SecurityElement]::Escape((Join-Path $root $_))+'" />' }) -join ''
 $fna=[Security.SecurityElement]::Escape((Join-Path $tml 'Libraries/FNA/1.0.0/FNA.dll'))
 $project='<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework><OutputType>Exe</OutputType><EnableDefaultCompileItems>false</EnableDefaultCompileItems><UseAppHost>false</UseAppHost><Nullable>enable</Nullable></PropertyGroup><ItemGroup><Reference Include="FNA"><HintPath>'+$fna+'</HintPath></Reference>'+$includes+'</ItemGroup></Project>'
@@ -31,5 +35,5 @@ $project='<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.
 dotnet build (Join-Path $work 'SamuraiSpectralPreview.csproj') -c Release --nologo
 if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}
 $env:FNA3D_FORCE_DRIVER='D3D11'
-dotnet (Join-Path $work 'bin/Release/net8.0/SamuraiSpectralPreview.dll') $root $lumi (Join-Path $tml 'Libraries/Native/Windows') $work $CutsOnly.IsPresent $BossMotionOnly.IsPresent
+dotnet (Join-Path $work 'bin/Release/net8.0/SamuraiSpectralPreview.dll') $root $lumi (Join-Path $tml 'Libraries/Native/Windows') $work $CutsOnly.IsPresent $BossMotionOnly.IsPresent $FieldCuts.IsPresent $Cinema.IsPresent
 exit $LASTEXITCODE

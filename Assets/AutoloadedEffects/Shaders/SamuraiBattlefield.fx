@@ -1,11 +1,14 @@
 // The sealed battlefield the mourning bell raises around its summoner.
 // AutoloadPass: the in-field backdrop, a world quad behind terrain: an eclipse,
-//   stars, far and near ridges, layered mist and a field of graves and leaning
-//   spears, each layer with its own parallax so the camera reveals depth.
+//   stars, far and near ridges, layered mist and the weapons of a lost battle
+//   driven into the ground, each layer with its own parallax so the camera
+//   reveals depth. The night is a cool slate so violet belongs to the hazards.
 // SealPass: one quad over the physical viewport, drawn above the world: the
 //   opaque abyss outside the seal (a dark lake under the floor that mirrors it),
-//   violet spirit fire on the seal's outer face, talismans and corner seals, and
-//   a thin in-field light. Players and hazards stay inside and brighter than this.
+//   violet spirit fire rooted along the seal's outer face, talismans and corner
+//   seals. No line is drawn: the edge is where the fire takes root on the walls
+//   and roof, and a mist seam over the lake at the floor.
+// RimPass: the uneven light the seal throws inward, behind players and hazards.
 matrix uWorldViewProjection;
 sampler turbulence : register(s1);
 sampler veins : register(s2);
@@ -62,48 +65,114 @@ float Dissolve(float2 w, float amount, float bias, out float ember)
 
 float3 Sky(float v)
 {
-    return lerp(float3(.026,.024,.068),float3(.082,.064,.165),smoothstep(.05,.8,v));
+    return lerp(float3(.022,.027,.044),float3(.068,.078,.116),smoothstep(.05,.8,v));
 }
 
 // ---------------------------------------------------------------- backdrop
-float Spear(float2 p, float ground, float cellX)
+// The weapons left where they fell, driven into the field on the 2x2 art-pixel grid
+// of the cuts. Each returns x = silhouette, y = moonlight on its right edge (steel
+// catches it fully, wood and cord faintly). rel is (sideways, height) from where the
+// weapon enters the ground; the moon stands to the upper right.
+float2 Along(float2 rel, float lean)
 {
-    // One lance per 96 px cell, leaning; neighbours are checked so a lean never clips.
-    float s=0;
+    float2 dir=normalize(float2(lean,1));
+    return float2(dot(rel,dir),rel.x*dir.y-rel.y*dir.x);    // along the weapon, across it
+}
+
+float2 Part(float a, float c, float a0, float a1, float halfWidth)
+{
+    float m=step(a0,a)*step(a,a1)*step(abs(c),halfWidth);
+    return float2(m,m*step(halfWidth-1.8,c));
+}
+
+float2 Katana(float2 rel, float lean, float h, float sg, float t, float id)
+{
+    // driven in point first: a curved blade widening to a round tsuba, a wrapped grip,
+    // and on some a sageo cord hanging from the guard and stirring in the wind
+    float2 f=Along(rel,lean);
+    float blade=h*.6, u=saturate(f.x/blade);
+    float2 steel=Part(f.x,f.y-sg*4*u*u,0,blade,2.2+1.4*u);
+    float g=f.y-sg*4;
+    float2 guard=Part(f.x,g,blade,blade+4,7.5);
+    float tilt=(f.x-blade)*.06*sg;
+    float2 grip=Part(f.x,g-tilt,blade+4,h-3,2.8);
+    float2 cap=Part(f.x,g-(h-blade)*.06*sg,h-3,h+1,3.4);
+    float wrap=grip.x*step(abs(g-tilt),1.2)*step(frac((f.x-blade)/6),.4);
+    float2 dir=normalize(float2(lean,1)), side=float2(dir.y,-dir.x);
+    float2 knot=dir*(blade+2)+side*sg*11;
+    float drop=knot.y-rel.y;
+    float sway=sin(t*1.4+id*3.1)*6+sin(t*2.3+id)*2;
+    float hang=step(.55,frac(id*.37))*step(0,drop)*step(drop,32)
+              *step(abs(rel.x-knot.x-sway*.7*pow(drop/32,1.5)-sg*drop*.12),1.1);
+    float sil=max(max(max(steel.x,guard.x),max(grip.x,cap.x)),hang);
+    float light=max(steel.y,max(max(guard.y,grip.y),max(cap.y,wrap))*.4);
+    return float2(sil,light);
+}
+
+float2 Naginata(float2 rel, float lean, float h, float sg)
+{
+    // a long haft, a metal collar, and a curved blade sweeping back from the head
+    float2 f=Along(rel,lean);
+    float2 haft=Part(f.x,f.y,0,h,2.0);
+    float u=saturate((f.x-h)/40);
+    float2 steel=Part(f.x,f.y-sg*(1.5+8*u*u),h,h+40,lerp(4.4,1.2,u*u));
+    float2 collar=Part(f.x,f.y,h-5,h+1,3.2);
+    return float2(max(max(haft.x,steel.x),collar.x),max(steel.y,max(haft.y,collar.y)*.4));
+}
+
+float2 Yari(float2 rel, float lean, float h, float jumonji)
+{
+    // a straight spear with a leaf head; some carry the crossed blades of a jumonji
+    float2 f=Along(rel,lean);
+    float2 haft=Part(f.x,f.y,0,h,1.8);
+    float k=saturate((f.x-h)/26);
+    float width=4.0*pow(saturate(sin(3.1416*k)),.6)*(1-.35*k)+.6;
+    float2 head=Part(f.x,f.y,h,h+26,width);
+    float arms=step(abs(f.x-h-3-abs(f.y)*.4),1.6)*step(abs(f.y),11)*jumonji;
+    return float2(max(max(haft.x,head.x),arms),max(head.y,haft.y*.4));
+}
+
+float2 Arrows(float2 rel, float lean, float h, float seed)
+{
+    // a few arrows that fell together, fletching ragged
+    float2 m=0;
+    [unroll] for(int j=0;j<3;j++)
+    {
+        float o=(j-1)*8+(hash1(seed*17+j)-.5)*6;
+        float l=lean+(j-1)*.3+(hash1(seed*31+j)-.5)*.2;
+        float hh=h*(.72+.36*hash1(seed*7+j));
+        float2 f=Along(rel-float2(o,0),l);
+        float2 shaft=Part(f.x,f.y,0,hh,1.1);
+        float k=saturate((f.x-hh+14)/14);
+        float vane=step(hh-14,f.x)*step(f.x,hh)*step(abs(f.y),1.2+2.8*k)*step(.25,frac(f.x/4.5+j*.37));
+        float here=step(hash1(seed*3.7+j),.8);
+        m=max(m,float2(max(shaft.x,vane),shaft.y*.4)*here);
+    }
+    return m;
+}
+
+float2 Planted(float2 p, float x, float ground, float scale, float salt, float t)
+{
+    // one weapon per cell, chosen by hash; neighbours are checked so a lean never clips
+    float2 r=0;
+    float span=92*scale;
     [unroll] for(int k=-1;k<=1;k++)
     {
-        float cell=floor(cellX/96)+k;
-        float present=step(hash1(cell*9.17),.6);
-        float baseX=cell*96+12+70*hash1(cell*1.91);
-        float lean=(hash1(cell*2.77)-.5)*.62;
-        float len=120+170*hash1(cell*3.33);
-        float up=ground-p.y;
-        float x=baseX+up*lean;
-        float shaft=step(abs(cellX-x),1.6)*step(0,up)*step(up,len);
-        float tip=saturate((len+18-up)/18);
-        float head=step(abs(cellX-x),3.6*tip)*step(len,up)*step(up,len+18);
-        s=max(s,max(shaft,head)*present);
+        float cell=floor(x/span)+k;
+        float id=cell+salt;
+        float kind=hash1(id*4.71);
+        float s=hash1(id*6.07);
+        float sg=s<.5?-1:1;
+        float lean=(hash1(id*2.29)-.5)*.8;
+        float2 rel=float2(x-(cell+.15+.7*hash1(id*1.37))*span,ground-p.y+4*scale)/scale;
+        float2 w=0;
+        [branch] if(kind<.40) w=Katana(rel,lean*.55,64+28*s,sg,t,id);
+        else if(kind<.54) w=Naginata(rel,lean*.8,110+40*s,sg);
+        else if(kind<.76) w=Yari(rel,lean*.8,120+50*s,step(.62,s));
+        else if(kind<.90) w=Arrows(rel,lean*.7,40+20*s,id);
+        r=max(r,w);
     }
-    return s;
-}
-
-float Grave(float2 p, float ground, float cellX)
-{
-    float cell=floor(cellX/150), local=cellX-cell*150;
-    float width=26+24*hash1(cell*2.11), height=50+76*hash1(cell*3.07);
-    float x0=30+80*hash1(cell*4.13), lean=(hash1(cell*5.71)-.5)*.22;
-    float up=ground-p.y;
-    float2 g=float2(local-x0-up*lean,up);
-    float body=step(0,g.x)*step(g.x,width)*step(-4,g.y)*step(g.y,height);
-    float2 capUv=float2((g.x-width*.5)/(width*.5),(g.y-height)/(width*.38));
-    float cap=step(dot(capUv,capUv),1)*step(height,g.y)*step(hash1(cell*6.3),.7);
-    return max(body,cap)*step(hash1(cell*1.37),.78);
-}
-
-float Field(float2 pq, float nearX)
-{
-    float ground=arenaSize.y-16-7*sin(nearX/170)-5*sin(nearX/53+1);
-    return max(max(Grave(pq,ground,nearX),Spear(pq,ground,nearX)),step(ground,pq.y));
+    return r;
 }
 
 float4 Backdrop(VO i):COLOR0
@@ -119,11 +188,11 @@ float4 Backdrop(VO i):COLOR0
     float2 qs=p-camera*.85;
     float2 sc=floor(qs/70), sl=qs-sc*70-35;
     float star=step(hash2(sc),.07)*exp(-dot(sl,sl)/1.4)*(.55+.45*sin(t*2.3+hash2(sc+5)*30))*(1-smoothstep(.15,.55,uv.y));
-    col+=float3(.50,.44,.72)*star*.5;
+    col+=float3(.46,.50,.62)*star*.5;
     float c1=tex2D(turbulence,qs/float2(1400,520)+float2(t*.006,0)).r;
     float c2=tex2D(veins,qs/float2(900,700)-float2(t*.004,t*.001)).r;
     float cloud=smoothstep(.40,.86,c1*.75+c2*.45)*(1-smoothstep(.42,.72,uv.y));
-    col=lerp(col,float3(.052,.042,.115)+storm*float3(.016,.004,.026),cloud*.8);
+    col=lerp(col,float3(.040,.045,.068)+storm*float3(.010,.008,.020),cloud*.8);
     float2 qm=p-camera*.8;
     float2 moon=float2(arenaSize.x*.70,arenaSize.y*.21);
     float md=length(qm-moon);
@@ -133,11 +202,11 @@ float4 Backdrop(VO i):COLOR0
     float2 shade=moon+normalize(float2(-1,-.55))*R*1.15*(1-storm);
     float lit=smoothstep(R+1,R-1,md)*smoothstep(R*1.02-1,R*1.02+1,length(qm-shade));
     col=lerp(col,float3(.006,.004,.014),smoothstep(R+1,R-1,md));
-    col+=float3(.13,.11,.24)*lit;
+    col+=float3(.12,.125,.17)*lit;
     col+=float3(.20,.11,.38)*corona*.6;
-    col+=float3(.07,.035,.12)*cloud*exp(-md/380);
+    col+=float3(.050,.045,.085)*cloud*exp(-md/380);
 
-    // distant violet lightning from Phase 2: a local glow behind the ridges, never a screen flash
+    // distant lightning from Phase 2: a local glow behind the ridges, never a screen flash
     float window=floor(t/3.1), lt=t-window*3.1;
     float strike=step(hash1(window*7.3),.25+.3*storm)*step(.5,phase)*(1-reduced);
     float2 qb=p-camera*.7;
@@ -149,43 +218,58 @@ float4 Backdrop(VO i):COLOR0
     float jag=(tex2D(veins,float2(boltX*.001+window*.37,qb.y/420)).r-.5)*150+kink*46;
     float dx=abs(qb.x-boltX-jag);
     float bolt=(exp(-dx/1.8)+exp(-dx/10)*.3)*step(arenaSize.y*.05,qb.y);
-    col+=float3(.45,.36,.80)*bolt*flick*.5;
-    col+=float3(.07,.04,.13)*flick*exp(-abs(qb.x-boltX)/520)*(1-uv.y*.6);
+    col+=float3(.40,.44,.62)*bolt*flick*.5;
+    col+=float3(.055,.050,.095)*flick*exp(-abs(qb.x-boltX)/520)*(1-uv.y*.6);
 
     // far ridge, its mist, near ridge, its mist
     float2 qf=p-camera*.62;
     float far=smoothstep(-1.5,1.5,qf.y-Ridge(qf.x,arenaSize.y*.57,38,22,0));
-    col=lerp(col,float3(.040,.034,.090),far);
+    col=lerp(col,float3(.030,.034,.052),far);
     float fogA=exp(-pow((p.y-(arenaSize.y*.64+14*sin(qf.x/230+t*.05)))/46,2))
               *(.5+.5*tex2D(turbulence,qf/float2(700,160)+float2(t*.010,0)).r);
-    col+=float3(.105,.060,.180)*fogA*(.8+storm*.5);
+    col+=float3(.060,.071,.102)*fogA*(.8+storm*.5);
     float2 qn=p-camera*.38;
     float mid=smoothstep(-1.5,1.5,qn.y-Ridge(qn.x,arenaSize.y*.71,30,16,2.1));
-    col=lerp(col,float3(.024,.020,.058),mid);
+    col=lerp(col,float3(.017,.019,.031),mid);
+    // a far rank of smaller weapons on the plain, veiled by the mist that follows
+    float farX=pq.x-camera.x*.30;
+    float farGround=arenaSize.y*.86+6*sin(farX/240);
+    [branch] if(abs(pq.y-farGround+50)<70)
+    {
+        float2 farW=Planted(pq,farX,farGround,.6,71,t);
+        col=lerp(col,float3(.011,.013,.021),farW.x);
+        col+=float3(.040,.046,.064)*farW.y;
+    }
     float fogB=exp(-pow((p.y-(arenaSize.y*.80+10*sin(qn.x/180-t*.07)))/40,2))
               *(.45+.55*tex2D(veins,qn/float2(600,140)-float2(t*.012,0)).r);
-    col+=float3(.115,.062,.195)*fogB*(.75+storm*.5)*(1-reduced*.4);
+    col+=float3(.064,.075,.108)*fogB*(.75+storm*.5)*(1-reduced*.4);
 
-    // the field of the dead, standing on the real floor line, rimmed by the eclipse
+    // the weapons of the lost battle, driven into the real floor line; blades catch the moon
     float nearX=pq.x-camera.x*.18;
-    float sil=Field(pq,nearX);
-    float rim=sil*(1-Field(pq-float2(0,2),nearX));
-    col=lerp(col,float3(.007,.006,.016),sil);
-    col+=float3(.075,.060,.15)*rim*.8;
+    float ground=arenaSize.y-16-7*sin(nearX/170)-5*sin(nearX/53+1);
+    float earth=step(ground,pq.y);
+    col+=float3(.030,.034,.050)*exp(-max(ground-p.y,0)/110);    // low haze the silhouettes stand against
+    float2 near=0;
+    [branch] if(ground-pq.y<210) near=Planted(pq,nearX,ground,1,0,t);
+    float sil=max(earth,near.x);
+    float rim=earth*(1-step(ground,pq.y-2));
+    col=lerp(col,float3(.006,.007,.012),sil);
+    col+=float3(.060,.066,.092)*rim*.8;
+    col+=float3(.12,.13,.18)*near.y*(.75+.25*sin(t*.9+pq.x*.013));
 
     // mist pooling on the floor and spirit motes drifting up
     float gm=tex2D(turbulence,p/float2(520,120)+float2(t*.02,0)).r*tex2D(blotch,p/float2(900,300)-float2(t*.008,0)).r;
-    col+=float3(.10,.052,.17)*gm*exp(-(arenaSize.y-p.y)/70)*1.2*(1-reduced*.4);
+    col+=float3(.056,.064,.092)*gm*exp(-(arenaSize.y-p.y)/70)*1.2*(1-reduced*.4);
     float2 mq=float2(p.x-camera.x*.1,p.y+t*26);
     float2 mc=floor(mq/110), ml=mq-mc*110;
     float2 mp=float2(20+70*hash2(mc+3.1),20+70*hash2(mc+7.7));
     float mote=exp(-dot(ml-mp,ml-mp)/3.5)*step(hash2(mc),.22)*(.5+.5*sin(t*3+hash2(mc)*40));
-    col+=float3(.42,.30,.75)*mote*.5*(1-reduced)*smoothstep(.15,.6,uv.y);
+    col+=float3(.30,.36,.46)*mote*.4*(1-reduced)*smoothstep(.15,.6,uv.y);
 
     // darken toward the seal so its fire reads, and lift slightly at a phase change
     float edge=min(min(p.x,arenaSize.x-p.x),p.y);
     col*=lerp(.62,1,smoothstep(0,220,edge))*(1+surge*.15);
-    col=min(col,float3(.17,.15,.32));          // Y <= ~.025, below the Tone2 forecast fill (.032)
+    col=min(col,float3(.15,.16,.22));          // Y <= ~.023, below the Tone2 forecast fill (.032)
     // The seal opens from the summoner's feet; once open it stays opaque, because
     // fading this quad would expose the vanilla sky inside the field.
     float fromFeet=length(p-float2(arenaSize.x*.5,arenaSize.y));
@@ -198,9 +282,9 @@ float4 Backdrop(VO i):COLOR0
 }
 
 // ---------------------------------------------------------------- seal
-// Indigo for the standing seal so it never reads as a forecast; violet only for
-// fire tips and the moments the seal is traced, touched or shaken by a phase.
-static const float3 SealLine=float3(.28,.27,.64);   // Y ~.08
+// Indigo for the seal's ink and inward light so it never reads as a forecast; violet
+// only for the fire and the moments the seal is traced, touched or shaken by a phase.
+static const float3 SealInk=float3(.28,.27,.64);    // Y ~.08
 static const float3 SealGlow=float3(.10,.10,.26);
 
 float Talisman(float2 l)
@@ -217,12 +301,14 @@ float Talisman(float2 l)
 
 float Flame(float along, float outward, float t, float climb)
 {
-    // violet spirit fire licking off the seal's outer face: it climbs the walls and rises off the roof
+    // violet spirit fire licking off the seal's outer face: it climbs the walls and rises off the roof.
+    // Its roots smoulder unevenly along the edge, so the boundary is never a ruled line.
     float2 a=floor(float2(along,outward)/2)*2;
     float n=Fetch(turbulence,float2((a.x-t*90*climb)/70,(a.y-t*60*(1-climb))/60)).r*.65
            +Fetch(veins,float2((a.x-t*140*climb)/38,(a.y-t*95*(1-climb))/34)).r*.45;
     float height=40+80*Fetch(blotch,float2(a.x/420+t*.03,.5)).r;
-    return max(saturate(n*1.5-a.y/height),exp(-a.y/9)*.45);
+    float root=smoothstep(.25,.85,Fetch(veins,float2((a.x-t*55*climb)/96,.37+t*.02)).r);
+    return max(saturate(n*1.5-a.y/height),exp(-a.y/(4+6*root))*(.12+.5*root));
 }
 
 // rim=0: the opaque abyss and everything on the seal's outer face (drawn above the world).
@@ -260,29 +346,27 @@ float4 SealCore(float2 px, float rim)
     float burn=smoothstep(0,.8,ending);
     float pour=saturate(smoothstep(0,500,reveal-perim-max(d,0)*.9)+smoothstep(.85,1,deploy));
 
-    // the line: a still indigo core that only brightens when traced, touched or shaken
+    // no ruled line: touch ripples, the deploy trace and a phase surge brighten the fire and the inward light
     float ringSum=0;
     float2 rp=ripple0.xy-w; float ra=ripple0.z;
     ringSum+=exp(-pow((length(rp)-(14+ra*260))/7,2))*saturate(1-ra/.55)*ripple0.w;
     rp=ripple1.xy-w; ra=ripple1.z;
     ringSum+=exp(-pow((length(rp)-(14+ra*260))/7,2))*saturate(1-ra/.55)*ripple1.w;
     ringSum*=exp(-abs(d)/40);
-    float breathe=1+.06*sin(t*1.7)*(1-reduced);
-    float core=1-smoothstep(1.6,2.6,abs(dq));
     float lift=saturate(surge*.8+tracer+ringSum*.8);
-    float3 lineRgb=lerp(SealLine*breathe,Tone(3.6),lift);
     float n1=Fetch(turbulence,(w+float2(t*9,-t*4))/float2(760,520)).r;
     float n2=Fetch(veins,(w-float2(t*9,-t*4)*.6)/1150).r;
     float mist=smoothstep(.38,.9,n1*.65+n2*.55);
 
-    // ---- inside: only thin light at the seal, never a fill over the fight
-    float glow=exp(min(d,0)/12)*drawn;
+    // ---- inside: only uneven light thrown in by the seal, never a fill or a line over the fight
+    float wash=Fetch(veins,float2(perim/150-t*.03,.61)).r;
+    float glow=exp(min(d,0)/(9+9*wash))*(.35+.65*wash)*(1-floorEdge)*drawn;
     float streak=Fetch(turbulence,float2(perim/46,abs(d)/260-t*.06)).r;
     float curtain=exp(min(d,0)/34)*smoothstep(.45,.9,streak)*.18*(1-floorEdge)*(1-reduced*.5)*drawn;
-    float floorMist=exp(min(d,0)/10)*floorEdge*.16*n1*drawn;
-    float insideA=saturate(core*drawn*.9+glow*.28+curtain+floorMist+ringSum*.6+tracer*.4*step(abs(d),24));
-    float3 insideRgb=lineRgb*core*drawn*.9+SealGlow*glow*.28*(1+lift*2)+SealGlow*1.6*curtain
-                    +float3(.10,.08,.20)*floorMist+Tone(3.4)*ringSum*.6+Tone(4.6)*tracer*.4*step(abs(d),24);
+    float floorMist=exp(min(d,0)/14)*floorEdge*.20*smoothstep(.3,.8,n1)*drawn;
+    float insideA=saturate(glow*.34+curtain+floorMist+ringSum*.6+tracer*.4*step(abs(d),24));
+    float3 insideRgb=SealGlow*glow*.34*(1+lift*2)+SealGlow*1.6*curtain
+                    +float3(.055,.062,.090)*floorMist+Tone(3.4)*ringSum*.6+Tone(4.6)*tracer*.4*step(abs(d),24);
     float4 inner=float4(insideRgb,insideA)*presence*(1-outside);
 
     // ---- the abyss outside, and the dark lake under the floor that mirrors the field
@@ -300,7 +384,9 @@ float4 SealCore(float2 px, float rim)
     mirror+=float3(.20,.11,.38)*exp(-pow((length(mm)-58)/6,2))*.4*(.3+.7*saturate(phase*.5));
     float shimmer=.78+.22*Fetch(blotch,float2(w.x/260+t*.02,dy/55-t*.12)).r;
     abyss=lerp(abyss,mirror*shimmer*.7+abyss*.4,below*exp(-dy/300)*(1-outsider));
-    abyss+=SealLine*.6*exp(-dy/22)*(.4+.6*(sin(w.x*.045+t*1.6+n1*6)*.5+.5))*below*.30*drawn;
+    // a cold mist seam rolls along the lake's surface where the floor meets it
+    float bank=smoothstep(.3,.85,Fetch(turbulence,float2(w.x/380+t*.025,dy/46-t*.04)).r);
+    abyss+=float3(.050,.056,.086)*exp(-dy/24)*(.3+.7*bank)*below*drawn*(1-reduced*.3);
     float rise=Fetch(blotch,float2(w.x/420,(w.y+t*22)/260)).r;
     abyss+=float3(.04,.025,.08)*smoothstep(.55,.95,rise)*below*exp(-dy/420)*(1-reduced*.5);
 
@@ -320,7 +406,7 @@ float4 SealCore(float2 px, float rim)
     float vanish=hash1(stripId*1.9)*.85+.12;
     float stripSeen=step(.5,traced)*step(burn,vanish);
     float smoulder=step(.001,burn)*step(vanish-.18,burn);
-    float3 stripRgb=strip>2.5?lerp(SealLine,Tone(3.4),smoulder):strip>1.5?float3(.05,.04,.10)
+    float3 stripRgb=strip>2.5?lerp(SealInk,Tone(3.4),smoulder):strip>1.5?float3(.05,.04,.10)
                    :lerp(float3(.40,.38,.50),Tone(4.6),smoulder);
     float stripMask=step(.5,strip)*stripSeen;
 
@@ -341,13 +427,13 @@ float4 SealCore(float2 px, float rim)
 
     float3 outer=abyss+fireRgb+SealGlow*sealGlow;
     outer=lerp(outer,stripRgb,stripMask);
-    outer+=SealLine*.9*sealMark*(1+surge);
-    outer=lerp(outer,lineRgb,core*drawn)+Tone(4.6)*tracer*.5;
+    outer+=SealInk*.9*sealMark*(1+surge);
+    outer+=Tone(4.6)*tracer*.5;
     outer+=Tone(3.4)*ringSum*.5;
     // The field melts away like the samurai: far dark first, the seal last.
     float ember;
     float melt=Dissolve(w,presence,.25-min(max(d,0),1500)/3000,ember);
-    float decor=saturate(stripMask+sealMark+sealGlow+core*drawn+tracer*.5+fire);
+    float decor=saturate(stripMask+sealMark+sealGlow+tracer*.5+fire);
     float exteriorA=lerp(pour*melt,decor*presence,outsider);
     float4 outerPx=float4(outer*exteriorA+Tone(3.4)*ember*(1-outsider),saturate(exteriorA+ember*(1-outsider)))*outside;
     return lerp(outerPx,inner,rim);

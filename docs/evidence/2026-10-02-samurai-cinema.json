@@ -1,0 +1,24 @@
+{
+  "scope": "Ghost Samurai cinematics for participants (summon hold IntroTime 300 with a reversed-dissolve assembly, stance, shout and title; change of form TransitionTime 90 -> 180 with a hover to the middle of the seal, shout, burst and title; victory blades that fall and plant in the floor under a held seal; a wipe departure), frame-local HUD step-aside with letterbox and titles, a manual camera ease, client projection of the untouchable windows, forecast readability (two-pixel contour, hatching, denser fill) and a second field pass (cool slate night, planted weapons instead of graves, the ruled edge line removed)",
+  "target_build": "0.3.64 / protocol77",
+  "integration_base": "51b0fea (main after PR98)",
+  "owner_direction": "2026-10-02: after the 0.3.63 fight the owner asked for the logs, said the forecasts were hard to read over the new field and asked whether they had been checked by eye, called the edge's solid line lame, asked for much richer staging of the summon, phase changes, victory and the all-fallen defeat (hiding the UI, moving the camera and returning it explicitly allowed), and asked for the samurai-like background shapes to become weapons stuck in the battlefield",
+  "checks": {
+    "domain": "passed: dotnet run Tests/Convergence.DomainTests --filter Samurai, 62 tests, failures 0; new: cut windows (summon == IntroTime, phase == TransitionTime, bars/camera/title at rest at both ends and bounded, first attack after the summon cut, manifest/stance inside the intro) and planted blades (held until release, continuous fall, tip buried in the floor inside the seal, point down); the actor wire bound now follows TransitionTime + 1",
+    "shader": "passed: SamuraiBattlefield and SamuraiCut recompiled by the pinned FXC fx_2_0 /O3 through tools/compile_shaders.py; SamuraiBattlefield.fxc 50356e4d00cef77fca7943516fa53563489d16e6efa283c3e95ff3649a73e522, SamuraiCut.fxc 9e0e045a3361482462cc093cbdd5c5717e891f5f579a4332c42a04c9100d566e; other exports unchanged",
+    "forecast_over_field": "passed: preview-samurai-spectral.ps1 -FieldCuts rendered 84 production forecast/cut frames over the production backdrop, rim and seal (slash, vertical, grid, wave, annulus, wind, cleave; Phase 1 and 3; -24 to +5 ticks around Fire). Before the change only the thin dashed contours read and the fill dissolved into the violet mist; after it the hatched zones and two-pixel edges read on the slate night. Frames reviewed; images kept local",
+    "cuts": "passed: preview-samurai-spectral.ps1 -CutsOnly, 1008 production-cut frames with the existing safe-cell, hole, side, expiry and batch-state assertions (normal/reduced, light/dark, two zooms)",
+    "cinema_frames": "passed: preview-samurai-spectral.ps1 -Cinema rendered 22 frames over the production field: the summoning at ages 30-170 (reversed dissolve to whole body, then the raised stance), the victory at 10-190 (dissolve without swords, blades flung, turning, planted at the floor with the tips under the abyss, melting with the seal) and the wipe departure at 20-190. Camera, letterbox, titles and sound need the game and were not drawn",
+    "field_preview": "passed: preview-samurai-field.ps1, 16 frames; the edge reads as uneven fire roots on walls and roof and as the lake's mist seam at the floor, with no ruled line; weapons stand at the player's scale on the real floor",
+    "luminance_gate": "passed: scenery-only frames mean Y 0.0036 / p99.9 0.0160 (Phase 1) and 0.0051 / 0.0226 (Phase 3 storm); 0.000% of pixels above the Tone2 forecast fill (Y 0.0323) and above Tone3; median scenery hue 228-230 degrees against the forecast violet near 264",
+    "native_build": "passed: python tools/dev.py build --native into the isolated automated profile, 0 errors and the existing 4 nullable warnings; package 0.3.64 sha256 b2a1987ec54e654f79dd351891ad0c3972f1bb60d5efd4af2c80b3934bd2a1b2; admission check solo enabled, 1-4 players"
+  },
+  "not_run": [
+    "in-game camera ease, letterbox, titles (including Japanese glyphs in the DeathText and MouseText fonts) and the HUD returning after each cut",
+    "cue timing and mix of the bell, shout, shock and planting sounds against the music",
+    "the summon hold and 3 s change of form in real play: no hits land during them, the first attack comes after the camera is home",
+    "defeat staging for a dead local player in single player and for the last of 2-4 players; victory staging with some participants dead",
+    "forecast readability with real terrain, lighting, effects and many simultaneous hazards; weapons and edge on surface, caves, underworld and sky",
+    "frame time on lower-end GPUs; multiplayer peers on protocol77"
+  ]
+}

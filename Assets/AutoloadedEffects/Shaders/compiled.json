@@ -59,16 +59,16 @@
       "output_sha256": "299821ce56aca68b658a20ec7fd126d575d13022b74bf932db5968156062e9c7"
     },
     "SamuraiBattlefield.fx": {
-      "source_sha256": "5716b81c451307668febceb7d272dcd63556892f6656c0757ff2c9954dff80e6",
-      "output_sha256": "29b5e83f1eedc70fb7c8ea0fe3b3024914e0035c6de9d2b7a199b11f150f1ba0"
+      "source_sha256": "a76712018bcccc752ed91145dc9ae715360a9df367f3da6e74d598249202a3a0",
+      "output_sha256": "50356e4d00cef77fca7943516fa53563489d16e6efa283c3e95ff3649a73e522"
     },
     "SamuraiComposite.fx": {
       "source_sha256": "da4a7acd90030227e79cfa69a1b2f2650621d1bca048c80dda615e89c704983a",
       "output_sha256": "98e41b6f607b6c73ea314a01651b8a565922cd419d42d5fc5619c454fe7fea9b"
     },
     "SamuraiCut.fx": {
-      "source_sha256": "a364123e93376651f98a137e954aa1c55c35ed87bb21d44aa214de7d52cf6fae",
-      "output_sha256": "4d1e422939ffe89df22cce65248273de4f3499190c349c703244c61899cf92c4"
+      "source_sha256": "9b410ccdc07b112a22f28d93d65b644b3b22769a5e948583e7a1ac8fc9a7d004",
+      "output_sha256": "9e0e045a3361482462cc093cbdd5c5717e891f5f579a4332c42a04c9100d566e"
     },
     "SamuraiEnergy.fx": {
       "source_sha256": "296cb199bbbdfd04f0b46428eca747c84d287ed969aae29689ce0316390c4a61",
