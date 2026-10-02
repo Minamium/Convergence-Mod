@@ -118,6 +118,49 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
 - Look: the painted gun behind the player and upside down when aiming left → the approved pixel gun (174×34 px) in front of the player, mirrored when aiming left, with its wind-up key standing behind the player; new inventory icon.
 - Sound: the 0.2.x Ranged and MeridianSustain sounds → 23 new music-box, brass, porcelain and organ cues.
 
+## Rogue — Last Witness
+
+Refreshed 2026-10 under the [shared rules](#reward-refresh-2026-10--shared-rules); the 0.2.34 score is kept in [history](../../history/2026-10-03-last-witness-v1.md). The Doll's **Axiom Blade** (two accelerating revolutions) and **Iron Interdict** (forecasts held in place, then swords driven home) become the player's: a heavy execution blade hangs before you and six testimonies break off its edge as seeking porcelain shards; when the sixth has spoken the sentence is sealed, the blade swings back overhead and is hurled spinning, bites its target, turns in it twice, tears free and returns to hang again. A stealth throw also calls the **Triangle Judgement**. `WitnessRules` owns every number below; the projectiles are `WitnessHang` (held), `WitnessShard`, `WitnessThrownBlade` and `WitnessJudgement`.
+
+Unchanged: item `LastWitness`, Calamity's rogue class and stealth through `CalamityRogueArmament`, base damage 9680, crit 8, use 40, channel and auto-reuse, the [box](#curtainfall-treasure-box) and the [Promise](#doll-companion--the-unbroken-promise) recipe.
+
+**Score.** One use is one 282-tick score (4.70 s) on the `RitualGrandScore` milestones: seal 174, throw 218, end 282; attack speed never compresses it. A held trigger re-uses the item about two ticks after the end, and Calamity reads stealth once per score. Aim turns at most 0.08 rad/tick before the seal and 0.025 after.
+
+- **Hang (0–174):** the blade's tip points toward the cursor, raised 21° above the line of fire, its balance point 94 px from the hand. A freshly drawn blade settles in over 12 ticks (24 px); it breathes ±0.05 rad and ±2 px.
+- **Testimonies:** six fire at 16, 45, 74, 103, 132 and 161 (every 29 ticks), each warned 10 ticks earlier. Their seats lie along the cutting edge, 16 px apart from −24 to +56 px of the balance point, filling from the centre outward (3-4-2-5-1-6). Warning: a thread of light runs from the blade's eye along the edge to the seat, the edge cracks and a porcelain shard slides 16 px out, pulling back 4 px before it fires. Fire: the shard leaves along the aim at 22 px/tick, then seeks at 36 (native targeting); pierce 1, 18 px swept head, once per logical root, ×0.28. The blade kicks back 5 px and 0.05 rad, a pearl notch stays lit where the shard left and the eye glows a sixth brighter.
+- **Seal (174):** the six notches run along the edge into the eye, which flares. From here **releasing no longer cancels**: the throw completes on its own.
+- **Swing and throw:** the blade lifts over the shoulder to 137° behind the aim (radius 94 → 76 px, heavy quintic ease, 174–202), holds and trembles (202–210), then whips forward on an accelerating curve with no brake and leaves at 218, 92 px out along the aim, already spinning at the whip's speed (0.45 rad/tick). The arm rides the same curve, follows through 0.6 rad past the aim and is back on the hang by 268.
+
+**Thrown blade.**
+
+- **Outbound:** 34 px/tick, homing on the native target at 0.24 rad/tick, spinning 0.45 rad/tick. The hit shape is a **disc of radius 56 px** around the balance point, swept between ticks. Outbound ends at the first contact; without one, after the cursor distance at 34 px/tick (4–27 ticks, at most 918 px).
+- **Strike:** the first contact deals ×0.25 of the blade, once per root.
+- **Axiom turns:** the blade brakes onto the struck target and follows its centre (0.35 response, at most 34 px/tick), or holds where it stopped. Exactly two revolutions in 21 ticks, the spin rising from 0.45 to 0.747 rad/tick; a bite on each half turn at turn ticks 6, 12, 17 and 21, ×0.125 each, once per root per bite, no knockback.
+- **Return:** at turn tick 22 the blade tears free (×0.25, once per root, the struck target included) and flies home at 46 px/tick to the catch point: the hang's rest point if this owner holds a score (the blade hangs again; a new score's hanging blade stays hidden while the thrown one is out) or the hand. Caught within 28 px with a ring and its own sound; withdrawn beyond 3000 px.
+- **Blade per root:** ×5.4 = 0.25 + 4 × 0.125 + 0.25.
+
+**Stealth — Triangle Judgement.** A stealth throw marks the blade; the shards never execute. As the stealth blade's turns begin, the judgement is called on the struck target (or where the blade stopped). Damage timing, footprint and ledger are the 0.2.x verdict's, read from `RitualArmamentChoreography`: it follows the target until the lock at 16, then executes once per root inside the **185 px triangle** (SAT against the NPC box) during 28–31, ×0.60 of the blade; it ends at 56. On screen: the 185 px footprint as a forecast hairline from the call; wavering auras rising 300 px above the 265 px corners (0–10); three `WitnessSword` stakes fading in at the top (4–10), falling point first (10–16) and staking the corners at the lock; light written from stake to stake (17–22); the stakes closing inward 265 → 185 px (23–28); the execution as pearl craquelure collapsing into a black eye with a pearl lip (28–31), cooling away to 56 while the swords withdraw upward into light (36–46).
+
+**Release, item change, death and Down.** Releasing before 174 cancels: shards already fired fly on and the hanging blade crumbles. Item change, death, Raid Down or elimination, crowd control or `noItems` end the score at any time before the throw. After the throw the blade and the judgement survive an item change and end at once on death, Down or elimination. The owner alone reads input and spawns the shards, blade and judgement through native projectile replication; the score age and the testimonies spoken ride `ai`, the blade's phase, phase start, anchor and spin ride 14 bytes of `ExtraAI`. No packet; protocol 78.
+
+**Presentation.** Front stratum of the shared layer, one texel = 2 world px. `WitnessBlade` (k = 2, 130 × 24 px) hangs; the thrown blade swaps to `WitnessBlade_L` (k = 1, 260 × 46 px) once it is more than 150 px from its owner, and back as it comes home, each swap under a 4-tick pearl flash. `WitnessShards` (three frames) are the testimonies; `WitnessSword` stands on the corners with a one-dot light outline that keeps its dark steel readable; the inventory shows `LastWitnessIcon` (the V3 art no longer draws). The eye hole emits the testimony light (ruby-accented under stealth). Live light is the original `DollWitnessEnergy` material: a narrow wake that starts behind the spin so the blade stays clear, a trailing spin arc at most 2 dots wide, 120° long and alpha .7 near the drawn tip (never inside 0.8 of its reach), shard tails, testimony threads, the whip arc, the judgement's edges and the execution fill; each has at least four ramp tones, flowing noise, sparkle and a white-hot spine (the void eye takes a one-dot pearl lip), with pearl, bone and white at least 40% of the lit dots. Another player's light draws at 65%. Reduced Effects shortens the arc to 80° at ×0.65, the wakes to 60% at ×0.7, halves residue and debris and drops the glow; bodies, forecasts, counts and sound stay. The owner's screen kicks on the throw (4.5), the bite (2.5), the stakes (2) and the execution (5.5) through `RitualWeaponFeedback`, following the shake setting.
+
+**Sound.** New cues in `Assets/Sounds/Weapons/DollWeapons/`, owned by the [cue sheet](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10): every release pairs a warning with a firing (testimonies, throw, Axiom turns, return, stakes, execution), the throw that bites nothing and the execution that finds no one have their own miss cues, and the flight hums on two fixed-pitch loops (cruise and Axiom) crossfaded per stage. No bell; porcelain, brass and organ in F minor pentatonic.
+
+**Nominal output** (raw, before defense, one target, every hit landing): six shards 6 × 2,710 plus the blade 52,272 (13,068 strike, 4 × 6,534 bites, 13,068 return) = **68,532 per score (7.08×)**, 14,581/s over 282 ticks and 14,479/s with the re-use gap (−0.7%); the best 600 ticks from a cold press land 139,774, the same as 0.2.x. A stealth score adds the judgement, 31,363 (3.24×), before Calamity's own stealth bonuses. **Area growth (outside the single-target budget):** the spinning disc reaches every enemy within 56 px of the turning blade, so crowds take up to four bites each; the per-root cap is unchanged.
+
+**What changes for players** (0.2.34 → refresh):
+
+- The relic becomes an execution blade: it hangs 94 px from the hand at 130 px long and is thrown at 260 px long.
+- Testimony shards: still six at ×0.28 on the same ticks; they now leave from six seats along the blade's edge (before: alternately 12 px either side of a point 128 px out).
+- Releasing after the seal (ticks 174–217): cancelled the throw → the throw completes.
+- Blade hit shape: a 32 px wide swept line → a 56 px radius swept disc (more crowd hits; per-root cap unchanged).
+- Blade split: 0.70 outbound / 0.30 return → 0.25 strike / 4 × 0.125 Axiom bites / 0.25 return; 5.4× per root unchanged.
+- Flight: launch 30 → 34 px/tick; spin 0.22 → 0.45 rad/tick (0.747 in the turns); turns home 42 ticks after the throw or 8 after a hit → bites, turns 21 ticks in the target and tears free at turn tick 22; caught at the player within 32 px → caught back into the hang within 28 px.
+- Stealth: the verdict was cast 14–30 ticks into the flight on the nearest enemy → cast on the struck target as the turns begin (or where the blade stopped); its 185 px footprint, 16/28–31/56 timing and ×0.60 are unchanged.
+- Per score 68,532 (7.08×) and the best cold 600 ticks 139,774: unchanged.
+- New pixel art, icon, light and sound; the DollTheater cues are no longer played by this weapon.
+
 ## Claw swipe cleanup — 0.2.38
 
 Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. Normal swipes no longer emit radial line/shard sprays, including their normal-hit aftermath; their ribbon omits its dark opaque underlay. The palm's existing aperture and the entire right-click crush remain unchanged. The shared ribbon helper defaults to its old behavior for other weapons. Motion, hitboxes, damage, resources and audio are untouched.
@@ -206,9 +249,7 @@ An11-second concert: independent seeking notes and progressive organ tiers for27
 
 The beam turns toward the native selected target at0.045rad/tick, reaches2000px, has92px full width and12-tick root immunity. The crown is physical moving art; all ornamental seal/pipe counts remain bounded independently of minion count.
 
-### Rogue — Last Witness
-
-Hold to load one suspended execution relic with six small pressure/cut beats at29-tick intervals. Each still emits one small seeking shard from the real central apparatus, rather than another full weapon on an orbit. At174–194 its edge loads inward;24 ticks of braking/compression precede a single amplified returning blade at218. Flight keeps the physical blade legible with a narrow textured wake instead of a broad spinning light sheet. Recovery completes at282 (4.7s total). Releasing before commitment cancels; holding can begin another full score after recovery. Native Calamity RogueWeapon hooks determine initial damage/stealth once; the final blade inherits the stored stealth flag. A stealth final blade retains the target-locking triangular verdict. The early fragments do not each receive another stealth execution.
+Last Witness's 0.2.34 score is replaced by its [2026-10 refresh](#rogue--last-witness); the old text is kept in [history](../../history/2026-10-03-last-witness-v1.md).
 
 ## Presentation and native ownership
 
@@ -228,7 +269,7 @@ The [2026-09-14 recording/source analysis](../../research/2026-09-14-doll-playte
 
 ## Initial power budget — not measured DPS
 
-The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Pale Meridian's current numbers are in [its section](#pale-meridian--refreshed-ranged-2026-10). Choir ordinary notes carry0.85x; shared chorus hits carry1.05x the sum of living voices every12 ticks (5082 raw/sec per968-damage voice **during the chorus**, not averaged over rest). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; that blade splits0.70/0.30 outbound/return.
+The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Pale Meridian's current numbers are in [its section](#pale-meridian--refreshed-ranged-2026-10). Choir ordinary notes carry0.85x; shared chorus hits carry1.05x the sum of living voices every12 ticks (5082 raw/sec per968-damage voice **during the chorus**, not averaged over rest). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; since the 2026-10 refresh that blade splits 0.25 strike / 4 × 0.125 Axiom bites / 0.25 return ([Last Witness](#rogue--last-witness)).
 
 These are arithmetic bounds before defense, crits, armor/accessories, misses, movement and class hooks—not claims of endgame balance or measured DPS. The goal of a modest improvement over selected same-class final equipment needs matched in-game measurements. Do not change Boss HP to hide weapon imbalance.
 
