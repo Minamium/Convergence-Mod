@@ -239,7 +239,7 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
                 float x = hand.Clasp ? CanticleRules.ClaspHandOffset(b, Math.Min(age, 0), npc.width) : 0;
                 Vector2 palm = landing + new Vector2(x, -CanticleRules.FallHeight(age));
                 bool mirror = hand.Clasp ? CrimsonRewardRules.ArmSide(b) < 0 : CrimsonRewardRules.ArmSide(hand.Ordinal) < 0;
-                OrganArt.Draw(art.Sprite, palm, art.Rotation, art.Palm, scale, color, mirror ? art.Mirror : SpriteEffects.None);
+                OrganArt.Draw(art.Sprite, palm, art.Rotation, art.Origin(mirror), scale, color, mirror ? art.Mirror : SpriteEffects.None);
             }
         }
         catch (Exception e) { Disable(e); }

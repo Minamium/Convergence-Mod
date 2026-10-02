@@ -187,6 +187,30 @@ class ScarletRewardWiring(unittest.TestCase):
                 continue
             self.assertNotIn('Terraria/Images/', read(path), f'{path.name}: placeholders resolve through CrimsonRewardSprites')
 
+    def test_every_sprite_has_its_exported_art_at_the_recorded_size(self):
+        # CrimsonRewardSprites records each export's logical size; icons are TexelScale (2) texels per logical pixel,
+        # buff icons are centred on 16 x 16 logical (32 x 32 texels), world bodies one texel per logical pixel.
+        sprites = read(REWARDS / 'CrimsonRewardSprites.cs')
+        attribution = read(ROOT / 'Assets/ATTRIBUTION.md')
+        entries = re.findall(r'new\((?:nameof\((\w+)\)|"(\w+)"), "[^"]*", (\d+), (\d+), (\d+), (\d+),[^;]*?(Icon: true)?\);', sprites)
+        self.assertEqual(20, len(entries))
+        for named, literal, width, height, max_width, max_height, icon in entries:
+            name = named or literal
+            path = ROOT / 'Assets/Textures/Items/ScarletRewards' / f'{name}.png'
+            self.assertTrue(path.is_file(), name)
+            header = path.read_bytes()[:24]
+            self.assertEqual(b'\x89PNG\r\n\x1a\n', header[:8], name)
+            size = (int.from_bytes(header[16:20], 'big'), int.from_bytes(header[20:24], 'big'))
+            width, height = int(width), int(height)
+            self.assertLessEqual(width, int(max_width), f'{name}: within its limit')
+            self.assertLessEqual(height, int(max_height), f'{name}: within its limit')
+            expected = (32, 32) if name.endswith('Buff') else (width * 2, height * 2) if icon else (width, height)
+            self.assertEqual(expected, size, name)
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            record = f'- Runtime file: `Assets/Textures/Items/ScarletRewards/{name}.png`'
+            self.assertIn(record, attribution, name)
+            self.assertIn(f'- SHA256: `{digest}`', attribution.split(record, 1)[1].split('- Runtime file:', 1)[0], f'{name}: attribution hash')
+
     def test_localization_covers_every_reward_item_buff_and_projectile(self):
         # Exact keys inside their own blocks: a substring check would let 'BloodinkQuill' pass on 'CrimsonBloodinkQuill'.
         items = ['CrimsonScoreReliquary', *WEAPONS.values()]

@@ -104,10 +104,10 @@ internal static class SableScytheMotion
 
     // ---- Geometry ---------------------------------------------------------------------------------------------
     // The hook in the tip frame (x along grip -> hook tip, y toward the side the tip leads; unit = Reach). Measured from
-    // the placeholder (the Death Sickle sprite, grip at texel (7, 57), hook tip at (55, 53.5)); the exporter re-measures
-    // them from SR02 when the art is delivered. The blade is three capsules 26 px wide from the root at the head of the
-    // haft to the hook tip; the haft does not hurt.
-    internal static readonly Vector2[] BladeKnots = { new(1.10f, -.72f), new(1.22f, -.45f), new(1.17f, -.18f), new(1f, 0) };
+    // SableScythe.png (SR02_c) by tools/export_scarlet_reward_art.py: the blade's bone and crimson edge cut into
+    // geodesic thirds from the heel at the head of the haft to the hook tip (grip texel (5.8, 50.67), tip (61.5, 31.5)).
+    // The blade is three capsules 26 px wide along those knots; the haft does not hurt.
+    internal static readonly Vector2[] BladeKnots = { new(.967f, -.492f), new(.972f, -.404f), new(1.058f, -.198f), new(1f, 0) };
     internal static float Reach => CrimsonRewardRules.ScytheReach;
     internal static float BladeRadius => CrimsonRewardRules.BladeWidth * .5f;
 

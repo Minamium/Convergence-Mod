@@ -52,7 +52,8 @@ internal static partial class Program
             AssertEqual(true, MathF.Abs(CenserRules.Angle(apex + .25f) - CenserRules.Angle(apex - .25f)) < .002f, $"rest at the apex {apex}");
         AssertNear(CenserRules.Angle(48.3f), CenserRules.Angle(182.3f), 1e-5f, "the wrap is seamless");
         // The mouth hangs BowlDrop below the ring along the pendulum line.
-        AssertEqual(true, Vector2.Distance(CenserRules.Mouth(80), Vector2.Zero) is > 59.99f and < 60.01f, "bowl 60 px below the ring");
+        AssertNear(CrimsonRewardRules.BowlDrop, Vector2.Distance(CenserRules.Mouth(80), Vector2.Zero), .01f, "bowl BowlDrop below the ring");
+        AssertNear(27.66f, CrimsonRewardRules.BowlDrop, 0, "the measured ring-to-mouth distance of EmberCenser.png at the 2 px dot");
         AssertEqual(true, CenserRules.Mouth(48).X > 0 && CenserRules.Mouth(80).X < 0, "pours alternate sides");
     }
 

@@ -151,10 +151,11 @@ internal sealed record CenserBody(Texture2D Texture, Rectangle Source, float Sca
 {
     internal SamplerState Sampler => Pixel ? SamplerState.PointClamp : SamplerState.LinearClamp;
 
-    // Planned anchors of the delivered art as fractions of its cell (brief: ~28 x 30 logical px, a ring and short chain
-    // on top, a crown of thorns over the bowl, ragged drapes from the rim); tools/export_scarlet_reward_art.py measures
-    // the real ones on delivery and they replace these.
-    private static readonly Vector2 FinalRing = new(.5f, .03f), FinalMouth = new(.5f, .43f), FinalDrapeLeft = new(.2f, .9f), FinalDrapeRight = new(.8f, .9f);
+    // Anchors of EmberCenser.png (SR05_d, 30 x 36 logical) in texels, measured by tools/export_scarlet_reward_art.py:
+    // the hole of the top ring, the bowl mouth on top of the gold rim straight under it (CrimsonRewardRules.BowlDrop is
+    // their distance at the 2 px dot, so the drawn ring hangs on the pendulum's pivot) and the lowest texels of the two
+    // outer drapes, where the Verlet tails continue them.
+    private static readonly Vector2 FinalRing = new(14.83f, 3.17f), FinalMouth = new(14.83f, 17f), FinalDrapeLeft = new(3.5f, 30f), FinalDrapeRight = new(26.5f, 32f);
 
     private static CenserBody? body;
     private static bool failed;
@@ -167,10 +168,8 @@ internal sealed record CenserBody(Texture2D Texture, Rectangle Source, float Sca
         {
             var sprite = ScarletRewardArt.Get(CrimsonRewardSprites.CenserMinion);
             Rectangle src = sprite.Source;
-            Vector2 size = new(src.Width, src.Height);
             if (sprite.Pixel)
-                return body = new CenserBody(sprite.Texture, src, sprite.Scale, true, FinalRing * size, FinalMouth * size,
-                    FinalDrapeLeft * size, FinalDrapeRight * size, 0);
+                return body = new CenserBody(sprite.Texture, src, sprite.Scale, true, FinalRing, FinalMouth, FinalDrapeLeft, FinalDrapeRight, 0);
             // Placeholder (the Imp Staff item, a staff from lower left to a head at upper right): hang it head down,
             // ring at the handle, the bowl mouth BowlDrop along it so the ring sits on the pendulum's pivot.
             Rectangle opaque = OpaqueBounds(sprite.Texture, src);

@@ -10,24 +10,28 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // The Canticle Organ's sprites and anchors (REWARDS.md, "Presentation"; SR03 in
 // asset-deliveries/scarlet-rewards/2026-10-02/BRIEF.md). Textures resolve through CrimsonRewardSprites (the delivered
 // art or the vanilla Onyx Blaster stand-in); this file is the one place that knows where the grip, the heart-gem and
-// the pipe mouths sit inside them. When SR03 is exported, replace the Final* anchors with the exporter's measured
-// values (texture pixels from the top-left, texel centre +0.5); nothing else changes.
-//   OrganHeld   "CanticleOrgan"  planned 40 x 18 logical (never more than 44 x 22), facing right; grip, four pipe mouths
-//   OrganShard  "CanticleShard"  planned 10 x 4 (12 x 6), pointing right
-//   BoneHand    "BoneHand"       planned 20 x 28 (24 x 32), palm down, fingers down; palm anchor
-//   Organ       "CrimsonCanticleOrgan" icon, 28 x 28
+// the palm sit inside them, and CanticleRules holds the pipe mouths. Anchors were measured by
+// tools/export_scarlet_reward_art.py (texture pixels from the top-left, texel centre +0.5):
+//   OrganHeld   "CanticleOrgan"  43 x 22 logical, facing right; grip (5.83, 16.83), heart-gem (17.73, 7.96),
+//                                mouths (43, 3) (42, 6.5) (42, 10) (42, 13.5) -> CanticleRules.MouthForward/MouthAcross
+//   OrganShard  "CanticleShard"  11 x 6, pointing right
+//   BoneHand    "BoneHand"       20 x 32, palm down, fingers down; palm (11.59, 12.37) under the cuff
+//   Organ       "CrimsonCanticleOrgan" icon, 27 x 28 logical at 2 texels each
 internal static class OrganArt
 {
-    // Planned SR03 anchors (not yet measured): the grip under the rear, the heart-gem in the frame, the mouths' column.
-    private static readonly Vector2 FinalGrip = new(11.5f, 13.5f), FinalGem = new(21.5f, 8.5f), FinalPalm = new(10f, 17f);
-    private const float FinalMouthX = 39.5f;
+    private static readonly Vector2 FinalGrip = new(5.83f, 16.83f), FinalGem = new(17.73f, 7.96f), FinalPalm = new(11.59f, 12.37f);
     // Stand-in anchors as fractions of the Onyx Blaster's texture: grip under the stock, muzzle at the right edge.
     private static readonly Vector2 PlaceholderGrip = new(.27f, .72f), PlaceholderGem = new(.48f, .42f);
     private const float PlaceholderMouthX = .97f;
+    // The held organ is drawn in the player's draw set, which cannot switch to point sampling, so the delivered art is
+    // enlarged this many times by nearest neighbour and drawn at PixelScale / Sub (the Moonloom Harp's method): the
+    // linear sampler then only blends within a quarter pixel of a texel edge.
+    private const int Sub = 4;
 
-    // The held organ. Origin is the grip (turned over with the gun when it is aimed left); Scale puts the mouths
-    // CanticleRules.MouthForward px ahead of the grip, so shards leave the drawn mouths.
-    internal sealed record Held(Texture2D Texture, Rectangle Source, float Scale, bool Pixel, Vector2 Grip, Vector2 Gem)
+    // The held organ. Origin is the grip (turned over with the gun when it is aimed left), in the drawn texture's
+    // pixels; Scale is screen px per drawn-texture pixel and puts the mouths CanticleRules.MouthForward px ahead of the
+    // grip, so shards leave the drawn mouths. Owned is true for an enlarged copy this class must dispose.
+    internal sealed record Held(Texture2D Texture, Rectangle Source, float Scale, bool Pixel, Vector2 Grip, Vector2 Gem, bool Owned = false)
     {
         internal Vector2 Origin(bool flip) => new(Grip.X, flip ? Source.Height - Grip.Y : Grip.Y);
         // World offset of the heart-gem from the grip at this aim.
@@ -41,7 +45,14 @@ internal static class OrganArt
 
     // A falling hand: Rotation turns the stand-in (a gun, muzzle right) so it points down like the hand's fingers, and
     // Mirror is the flip that mirrors it left-right on screen after that turn.
-    internal readonly record struct Hand(ScarletRewardArt.Sprite Sprite, Vector2 Palm, float Rotation, SpriteEffects Mirror);
+    internal readonly record struct Hand(ScarletRewardArt.Sprite Sprite, Vector2 Palm, float Rotation, SpriteEffects Mirror)
+    {
+        // The draw origin: SpriteBatch keeps the origin in drawn space and mirrors the texture inside the quad, so a
+        // mirrored hand needs the palm mirrored too to land on its point.
+        internal Vector2 Origin(bool mirrored) => !mirrored ? Palm
+            : Mirror == SpriteEffects.FlipHorizontally ? new Vector2(Sprite.Source.Width - Palm.X, Palm.Y)
+            : new Vector2(Palm.X, Sprite.Source.Height - Palm.Y);
+    }
 
     private static Held? held;
     private static bool heldFailed;
@@ -56,7 +67,8 @@ internal static class OrganArt
                 var sprite = ScarletRewardArt.Get(CrimsonRewardSprites.OrganHeld);
                 Rectangle src = sprite.Source;
                 if (sprite.Pixel)
-                    held = new Held(sprite.Texture, src, CrimsonRewardSprites.PixelScale, true, FinalGrip, FinalGem);
+                    held = new Held(Enlarge(sprite.Texture, src), new Rectangle(0, 0, src.Width * Sub, src.Height * Sub),
+                        CrimsonRewardSprites.PixelScale / Sub, true, FinalGrip * Sub, FinalGem * Sub, true);
                 else
                 {
                     Vector2 size = new(src.Width, src.Height);
@@ -72,6 +84,21 @@ internal static class OrganArt
             }
             return held;
         }
+    }
+
+    // `source` of the texture enlarged Sub times by nearest neighbour.
+    private static Texture2D Enlarge(Texture2D texture, Rectangle source)
+    {
+        var data = new Color[texture.Width * texture.Height];
+        texture.GetData(data);
+        int width = source.Width * Sub, height = source.Height * Sub;
+        var big = new Color[width * height];
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                big[y * width + x] = data[(source.Y + y / Sub) * texture.Width + source.X + x / Sub];
+        var result = new Texture2D(texture.GraphicsDevice, width, height);
+        result.SetData(big);
+        return result;
     }
 
     internal static ScarletRewardArt.Sprite Shard => ScarletRewardArt.Get(CrimsonRewardSprites.OrganShard);
@@ -110,9 +137,12 @@ internal static class OrganArt
         return new Color(Math.Max(c.X, floor), Math.Max(c.Y, floor * .95f), Math.Max(c.Z, floor * .9f));
     }
 
+    // The enlarged copy is ours; the delivered and vanilla textures are not.
     internal static void Reset()
     {
+        Texture2D? owned = held is { Owned: true } h ? h.Texture : null;
         held = null;
         heldFailed = false;
+        if (owned is not null) Main.QueueMainThreadAction(() => owned.Dispose());
     }
 }

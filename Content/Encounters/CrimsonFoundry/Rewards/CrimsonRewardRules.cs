@@ -80,8 +80,12 @@ internal static class CrimsonRewardRules
     internal const int WhipDrawStart = 6, WhipDrawEnd = 12, WhipLiveStart = 14, WhipLiveEnd = 20, CrescentLiveEnd = 26;
     internal const float StrokeMultiplier = 1, WhipMultiplier = 1.8f, CrescentMultiplier = .6f, CrescentRadius = 16, WhipThrust = 24;
     internal const int CrescentScar = 20, ComboIdleReset = 60, MeasureStrokes = 5;
-    internal const float MinTipSpeed = 3, MinTurnRadius = 24, RollSpeedFloor = .25f, DrawBackSpeedFloor = .2f, MaxAngularAcceleration = .3f;
-    internal const float ScytheReach = 136, BladeWidth = 26; internal const int BladeCapsules = 3, SweepSubsamples = 9;
+    internal const float MinTipSpeed = 3, RollSpeedFloor = .25f, DrawBackSpeedFloor = .2f, MaxAngularAcceleration = .3f;
+    // The tightest turn of the hook tip scales with the blade: the figure eight was fitted with 24 px at a 136 px reach,
+    // which is 20.79 px at the measured 117.82 px (the motion's shape is unchanged; only the blade is shorter).
+    internal const float MinTurnRadius = 24f / 136f * ScytheReach;
+    // Grip to hook tip of SableScythe.png at the 2 px dot (58.91 texels; tools/export_scarlet_reward_art.py).
+    internal const float ScytheReach = 117.82f, BladeWidth = 26; internal const int BladeCapsules = 3, SweepSubsamples = 9;
     internal const int StaffLines = 5, StaffLineLife = 360, StaffDrainTicks = 30;
     internal const float StaffBehind = 40, StaffLineLength = 56, StaffLineGap = 8;
     internal const int StaffInputGrace = 8, StaffWindup = 16, StaffHeadTicks = 4, StaffLineLive = 10, StaffScar = 20;
@@ -145,7 +149,8 @@ internal static class CrimsonRewardRules
     internal const int CenserMana = 10, CenserSlots = 1, CenserPerRow = 6;
     internal const float CenserBehind = 40, CenserStep = 34, CenserLift = 70, CenserOddLift = 8, CenserRowLift = 40;
     internal const float CenserSeek = 1200, CenserKeep = 1600, CenserStation = 200, CenserSpreadMax = 72, CenserSpreadPad = 96;
-    internal const float BowlDrop = 60, SwingFrom = 25, SwingTo = 55, GrandSwing = 75, PourTip = 35;
+    // BowlDrop: ring to bowl mouth of EmberCenser.png at the 2 px dot (13.83 texels; tools/export_scarlet_reward_art.py).
+    internal const float BowlDrop = 27.66f, SwingFrom = 25, SwingTo = 55, GrandSwing = 75, PourTip = 35;
     internal const int SwingPeriod = 64, ApexInterval = 32, PourTipTicks = 4, PourLive = 16, PourScar = 24, GrandBrace = 6, GrandLive = 20, GrandEvery = 4;
     internal const float PourFall = 40, PourSample = 8, PourMaxDepth = 600, PourRadius = 24, PourMultiplier = 1;
     internal const float GrandRadius = 56, GrandFall = 60, GrandMultiplier = 2.2f, GrandShake = 1.5f;

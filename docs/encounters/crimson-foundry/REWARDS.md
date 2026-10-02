@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-10-02
+last_reviewed: 2026-10-03
 source_of_truth_for:
   - encounter.crimson_foundry.rewards
 aliases:
@@ -250,10 +250,10 @@ Sable Mantle's bone hook on a black lacquered haft, swung in figure eights.
     - The Whip ends in the Over's starting pose.
 - **No hard stops** (Moonshear's rule, extended):
   - Strokes join with matched angle and angular speed (Hermite knots).
-  - The hook tip never moves slower than 3 px/tick, and its turns keep a radius of at least 24 px.
+  - The hook tip never moves slower than 3 px/tick, and its turns keep a radius of at least 24/136 of the reach (20.8 px at the measured 117.82 px; the figure eight was fitted with 24 px at 136 px, and a shorter blade draws the same motion with proportionally tighter turns).
   - Through a roll, angular speed stays at least 25% of the stroke's peak; through the Whip's draw-back, at least 20%.
   - Peak angular acceleration stays under 0.3 rad/tick².
-- **Reach** is measured from the exported art: grip anchor to hook tip at the 2 px dot (about 120–150 px at the briefed size). Placeholder tuning uses 136 px. The Whip adds the 24 px thrust.
+- **Reach** is measured from the exported art: grip anchor to hook tip at the 2 px dot, 117.82 px for `SableScythe.png` (see [Art and audio](#art-and-audio)). The Whip adds the 24 px thrust.
 - **Collision:** the curved bone edge as three capsules 26 px wide along the measured blade curve; the haft does not hurt. Collision is swept with 9 sub-samples per tick (Soboro's method). Each part of a stroke (the blade, the Whip's crescent) hits each root once per stroke through its own root ledger; native local immunity is only 1 tick, so the Whip's blade and its crescent can both land on the same NPC.
 
 **Staff (the build).**
@@ -467,7 +467,7 @@ Each use calls one small crown censer, the Ember Crown in miniature.
 
 **Swing (the build).**
 
-- The pendulum pivots on the ring with the bowl about 60 px below it and a period of 64 ticks, chosen to have no simple relation to the 28.125-tick beat. Apexes come every 32 ticks.
+- The pendulum pivots on the ring with the bowl's mouth 27.66 px below it (measured on the art, see [Art and audio](#art-and-audio)) and a period of 64 ticks, chosen to have no simple relation to the 28.125-tick beat. Apexes come every 32 ticks.
 - The first swing winds the amplitude from 25° to 55°: embers thicken and the bone crown warms.
 - **Phase:** when a censer arrives, the owner starts its clock so its apexes fall in the middle of the largest gap between the apexes of censers already swinging over the same target. A censer is never re-phased afterwards. The pours therefore step from censer to censer across the target, and adding or losing a censer never makes the others jump.
 
@@ -639,7 +639,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
   - `CrimsonStrokeState`: the shared codec.
 - **Independence from Ebon:** these files do not reference `EbonRewardRules`. Any helper worth sharing moves to `Common` in its own change.
 - **`CrimsonRewardItems`:** `Icon` (with a `HasAsset` fallback), `Usable`, `DamageClassFor`, `TypeFor`, `RewardTypes`, `Defaults`, `Hit`. `RewardTypes` is the one pool for both the reliquary and the Covenant recipe.
-- **`CrimsonRewardSprites`:** the one table of final sprite names, planned sizes, anchors and vanilla placeholders.
+- **`CrimsonRewardSprites`:** the one table of final sprite names, exported sizes and limits, anchor names and vanilla fallbacks.
 - **Items and projectiles:** the six items and the projectiles named in each section.
 - **Runtime:** `CrimsonRuntime.DropRewards`, guarded by `rewardsAttempted`. The rewards add no Encounter policy, coordinator or packet-router code.
 
@@ -684,24 +684,36 @@ Final pixel art comes from Claude's brief for Codex, `asset-deliveries/scarlet-r
 **Export.** `tools/export_scarlet_reward_art.py` is mechanical, as Ebon's is:
 
 - it checks each input's hash;
-- it measures the dot pitch per sheet and takes the majority colour of each logical cell;
-- it lists the measured anchors in the tool header.
+- it measures the dot pitch per sheet and takes the majority colour of each logical cell; a drawing larger than its brief limit ("never more than") is fitted to that limit by the same resample;
+- it lists the measured anchors in the tool header, and writes its report, a contact sheet and real-size mock-ups to `.local/scarlet-reward-art/`.
 
-Exports go to `Assets/Textures/Items/ScarletRewards/`. Selections and exports are recorded here on delivery, and [Attribution](../../../Assets/ATTRIBUTION.md) owns rights and exact identities.
+Exports go to `Assets/Textures/Items/ScarletRewards/`. Selections and exports are recorded here, and [Attribution](../../../Assets/ATTRIBUTION.md) owns rights and exact identities.
 
-- **World bodies** (held weapons, shard, hands, censer, quill, score, reliquary parts): one texel per logical pixel, drawn at 2× with point sampling.
-- **Item and buff icons** (the reliquary's, the five weapons' and the Covenant's icons, and the censer and Covenant buffs): tML draws `ModItem.Texture` and `ModBuff.Texture` at 1×, so they are exported at 2 texels per logical pixel, as Ebon's exporter writes "icon 2x". `CrimsonRewardSprites` records this per entry (`Icon`, `TexelScale`).
+- **World bodies** (held weapons, shard, hands, censer, quill, score, reliquary parts): one texel per logical pixel, drawn at 2× with point sampling. The held organ is drawn in the player's draw set, which cannot switch to point sampling, so it is enlarged 4× by nearest neighbour and drawn at ½ (the Moonloom Harp's method).
+- **Item and buff icons** (the reliquary's, the five weapons' and the Covenant's icons, and the censer and Covenant buffs): tML draws `ModItem.Texture` and `ModBuff.Texture` at 1×, so they are exported at 2 texels per logical pixel, as Ebon's exporter writes "icon 2x". Buff icons are centred on 16 × 16 logical (32 × 32 texels, like vanilla buffs). `CrimsonRewardSprites` records this per entry (`Icon`, `TexelScale`).
 
-**Placeholders.** Until delivery, items use vanilla textures by reference, so the mechanics can be played first: the reliquary `CrimsonFishingCrate`, the scythe `DeathSickle`, the organ `OnyxBlaster`, the baton `CrimsonRod`, the censer `ImpStaff`, the quill `BoneJavelin`. In-world bodies draw the item's placeholder texture (so the organ's shard and bone hand are the Onyx Blaster too).
+**Selections (2026-10-03).** Codex delivered 40 candidates and 10 recommended copies, all `accepted_by_codex=false` for the strict 8 px grid and size limits only. The recommended candidates are used. Sizes are logical pixels; anchors are texels from the top-left corner (texel centre +0.5).
 
-- `CrimsonRewardSprites` is the one table of final names, planned sizes and placeholders; a delivered PNG under its root replaces the placeholder with no code change.
-- Anchors to replace with the exporter's measured values on delivery (until then they are proportional stand-ins):
-  - scythe: `ScytheArt` grip and hook tip, and `SableScytheMotion.BladeKnots` (the three blade capsules' knots; the placeholder values were measured on the Death Sickle);
-  - organ: `OrganArt` grip, heart-gem, pipe mouths and palm;
-  - baton: `BatonArt` grip and gem;
-  - censer: `CenserBody` ring and bowl mouth in `CenserInk`, and the pendulum's 60 px `BowlDrop`, which the briefed 28 × 30 art (about 24 px from ring to mouth) does not reach;
-  - quill: `QuillArt` nib and the score's seal.
-- The held organ needs Ebon harp's enlargement with point sampling once real art arrives; the shard and hands already switch to it.
+| ID | Candidate | Exported | At the measured pitch | Measured anchors |
+|---|---|---|---|---|
+| SR01 | `SR01_a`, complete casket | `CrimsonScoreReliquary` icon 32 × 25 | 50 × 39 at 7.82 px | — |
+| SR01P | `SR01P_c`, body, lid, seal | `ReliquaryBody` 31 × 18, `ReliquaryLid` 29 × 13, `ReliquarySeal` 10 × 10 | one lattice of 10.91 px | on the body: lid at (−1, −7), seal at (8, 5), mouth (velvet centre) row 3.14; lid's rear hinge (0, 13) |
+| SR02 | `SR02_c` | `SableScythe` 64 × 56 | 84 × 73 at 5.84 px | grip (5.8, 50.67), hook tip (61.5, 31.5): reach 117.82 px; blade knots (tip frame) (0.967, −0.492), (0.972, −0.404), (1.058, −0.198), (1, 0) |
+| SR02I | `SR02I_c` | icon 32 × 28 | 32 × 28 at 8.92 px | — |
+| SR03 | `SR03_d` | `CanticleOrgan` 43 × 22, `CanticleShard` 11 × 6, `BoneHand` 20 × 32, icon 27 × 28 | 80 × 41, 25 × 13, 36 × 56, 39 × 40 at 5.76 px | grip (5.83, 16.83), heart-gem (17.73, 7.96), pipe mouths (43, 3), (42, 6.5), (42, 10), (42, 13.5); palm (11.59, 12.37) |
+| SR04 | `SR04_c` | `ScarletBaton` 37 × 38 | the same, at 7.82 px | grip (3.9, 32.35), gem (34.03, 3.17) |
+| SR04I | `SR04I_b` | icon 26 × 26 | the same, at 7.64 px | — |
+| SR05 | `SR05_d` | icon 18 × 32, `EmberCenser` 30 × 36, buff 14 × 13 | 23 × 39, 37 × 45, 14 × 13 at 9.16 px | ring (14.83, 3.17), bowl mouth (14.83, 17) on the rim under it, drape ends (3.5, 30) and (26.5, 32) |
+| SR06 | `SR06_d` | `BloodinkQuill` 25 × 7, icon 20 × 32, `SealedScore` 24 × 11 | 51 × 13, 33 × 53, 42 × 20 at 6.74 px | nib (25, 4); seal (13.43, 3.57) |
+| SR07 | `SR07_b` | icon 29 × 32, buff 14 × 14 | 35 × 38, 15 × 15 at 10.84 px | — |
+
+**Export choices.**
+
+- **Reliquary parts:** SR01P_c, not SR01_a's own parts. SR01P_c was regenerated from SR01_a so the lid fits the body (its outer width is the body's top plus about 2 dots); SR01_a's lid overhangs its body and is drawn at a flatter angle. The lid is placed where it leaves the fewest velvet pixels open plus front pixels covered, centred on the velvet. The three parts are resampled on one lattice whose cell makes the closed casket as wide as the icon (32), so the lid's offset is a whole number of texels and the closed show matches the icon. The seal sits on the body's ring recess.
+- **Quill:** Codex drew the ink bead detached ahead of the nib, which reads as flying ink; the exporter keeps the quill's largest piece (3 texels cut), so the nib tip is the anchor.
+- **Code constants measured from the art:** `ScytheReach` 136 → 117.82 px and `SableScytheMotion.BladeKnots`; `CanticleRules.MouthForward` 56 → 72.84 px and `MouthAcross` −27.66 + 7k px; `BowlDrop` 60 → 27.66 px (the art's ring to its rim, so the drawn ring hangs on the pivot); `OrganArt`, `BatonArt`, `CenserBody`, `QuillArt` and the reliquary show's anchors. The figure eight's knots are unchanged; its turn-radius bound is now a fraction of the reach (see the Sable Scythe's no-hard-stops rule), because the shorter measured blade draws the same motion with proportionally tighter turns (21.99 px at the tightest).
+- **Size against the 20 × 42 player** (the mock-ups): the scythe reaches 118 px, the held organ is 86 × 44 px, the baton reaches 84 px (SR04_c's diagonal is longer than the briefed 36 but inside 40 × 40), the censer is 60 × 72 px and a bone hand 40 × 64 px. These follow the brief; the owner judges them in play.
+- **Stand-ins:** a missing PNG still falls back to the vanilla texture by reference (`HasAsset`), as before delivery: the reliquary `CrimsonFishingCrate`, the scythe `DeathSickle`, the organ `OnyxBlaster`, the baton `CrimsonRod`, the censer `ImpStaff`, the quill `BoneJavelin`, the Covenant its old icon and the Pygmies buff.
 
 | ID | Use |
 |---|---|
@@ -713,7 +725,7 @@ Exports go to `Assets/Textures/Items/ScarletRewards/`. Selections and exports ar
 | SR06 | Quill (nib anchor), icon, rolled score |
 | SR07 | Covenant item icon and buff icon |
 
-As the brief requires, the images contain no light, flame, black blood, strokes, staff lines, magic circles, sparks, trails, flashes or debris. The only such elements drawn into the art are the reliquary's wax seal, the ink bead on the quill's nib and the faint staff lines printed on the rolled score. Everything else is drawn in code.
+As the brief requires, the images contain no light, flame, black blood, strokes, staff lines, magic circles, sparks, trails, flashes or debris. The only such elements drawn into the art are the reliquary's wax seal, the ink on the quill's nib and the faint staff lines printed on the rolled score. Everything else is drawn in code.
 
 **Cues** (35), in `Assets/Sounds/Weapons/ScarletRewards/`:
 
@@ -807,7 +819,7 @@ The first implementation fixed these points, which the sections above left open 
 
 **Open for the owner.**
 
-- **Censer spread:** with the spacing above (`min(72, (w + 96) / n)`) and a ±49 px swing, the outer censers of three or more over a target about 80 px wide miss it with their outward pours (half of their pours). Large bosses are hit by every pour. Tightening the spread is a balance decision.
+- **Censer spread:** with the spacing above (`min(72, (w + 96) / n)`) and a ±23 px swing (27.66 px at 55°), the outer censers of three or more over a target about 80 px wide miss it with their outward pours (half of their pours). Large bosses are hit by every pour. Tightening the spread is a balance decision.
 
 ## Acceptance (owner, not_run until played)
 

@@ -21,15 +21,15 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // placeholder, through CrimsonRewardSprites) drawn about its grip over the player.
 internal static class BatonArt
 {
-    // Grip and gem as fractions of the texture. The SR04 brief puts the grip at the lower left and the gem at the upper
-    // right of the held sprite (36 logical px across the diagonal, never more than 40x40); these are its briefed
-    // positions until the exporter records the measured anchors. The Crimson Rod placeholder has the same diagonal.
-    private static readonly Vector2 GripFinal = new(.14f, .86f), GemFinal = new(.86f, .14f);
+    // Grip and gem in texels of ScarletBaton.png (SR04_c, 37 x 38 logical), measured by
+    // tools/export_scarlet_reward_art.py: the centre of the gold teardrop grip at the lower left and of the blood-red gem
+    // at the upper right (texel centre +0.5). The Crimson Rod placeholder uses fractions of its texture (same diagonal).
+    private static readonly Vector2 GripFinal = new(3.9f, 32.35f), GemFinal = new(34.03f, 3.17f);
     private static readonly Vector2 GripPlaceholder = new(.2f, .8f), GemPlaceholder = new(.8f, .2f);
 
     internal static ScarletRewardArt.Sprite Sprite => ScarletRewardArt.Get(CrimsonRewardSprites.BatonHeld);
-    internal static Vector2 Grip(in ScarletRewardArt.Sprite s) => (s.Pixel ? GripFinal : GripPlaceholder) * new Vector2(s.Source.Width, s.Source.Height);
-    internal static Vector2 Gem(in ScarletRewardArt.Sprite s) => (s.Pixel ? GemFinal : GemPlaceholder) * new Vector2(s.Source.Width, s.Source.Height);
+    internal static Vector2 Grip(in ScarletRewardArt.Sprite s) => s.Pixel ? GripFinal : GripPlaceholder * new Vector2(s.Source.Width, s.Source.Height);
+    internal static Vector2 Gem(in ScarletRewardArt.Sprite s) => s.Pixel ? GemFinal : GemPlaceholder * new Vector2(s.Source.Width, s.Source.Height);
     // Drawn grip-to-gem length in world px, and the texture's own grip-to-gem direction.
     internal static float Reach(in ScarletRewardArt.Sprite s) => (Gem(s) - Grip(s)).Length() * s.Scale;
     internal static float Axis(in ScarletRewardArt.Sprite s) => (Gem(s) - Grip(s)).ToRotation();

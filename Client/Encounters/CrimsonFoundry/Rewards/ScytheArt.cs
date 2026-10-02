@@ -16,10 +16,12 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // art (point sampled at the 2 px dot) or the placeholder Death Sickle (linear). Client only.
 internal static class ScytheArt
 {
-    // Anchors in texel space (origin top-left). The placeholder (Death Sickle, 70 x 64) was measured from its alpha:
-    // the grip just above the butt cap, the hook tip at the bottom of the blade. SR02 is planned at 60 x 60 logical
-    // pixels (never more than 64 x 64), haft from the lower left to the blade at the upper right; until the exporter
-    // records its measured grip and hook tip, the delivered sprite is placed by the placeholder's relative anchors.
+    // Anchors in texel space (origin top-left, texel centre +0.5). SableScythe.png (SR02_c, 64 x 56 logical, haft from
+    // the lower left to the blade at the upper right) as tools/export_scarlet_reward_art.py measured it: the grip on the
+    // haft line 1.5 texels past the gold butt cap, the hook tip at the end of the downswept blade. Grip to tip is 58.91
+    // texels, so CrimsonRewardRules.ScytheReach (117.82 px) draws it at exactly the 2 px dot. The placeholder (Death
+    // Sickle, 70 x 64) was measured from its alpha the same way.
+    private static readonly Vector2 FinalGrip = new(5.8f, 50.67f), FinalTip = new(61.5f, 31.5f);
     private static readonly Vector2 PlaceholderGrip = new(7f, 57f), PlaceholderTip = new(55f, 53.5f);
     private static readonly Vector2 PlaceholderSize = new(70, 64);
 
@@ -27,8 +29,7 @@ internal static class ScytheArt
 
     internal static Anchors AnchorsFor(in ScarletRewardArt.Sprite sprite)
     {
-        if (!sprite.Pixel && sprite.Source.Width == (int)PlaceholderSize.X && sprite.Source.Height == (int)PlaceholderSize.Y)
-            return new Anchors(PlaceholderGrip, PlaceholderTip);
+        if (sprite.Pixel) return new Anchors(FinalGrip, FinalTip);
         var scale = new Vector2(sprite.Source.Width / PlaceholderSize.X, sprite.Source.Height / PlaceholderSize.Y);
         return new Anchors(PlaceholderGrip * scale, PlaceholderTip * scale);
     }

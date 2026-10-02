@@ -40,19 +40,28 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
     private static bool failed;
     private static int opened;
 
-    // Resolved parts. Local layout (px, y down, origin at the closed box's centre): the lid sits on the body; the
-    // hinge is the lid's rear (left) bottom corner; the mouth is the body's top edge; the seal sits on the body front.
+    // Delivered parts (SR01P_c, one lattice; tools/export_scarlet_reward_art.py), in texels from the body's top-left:
+    // the lid's top-left where it closes over the velvet, its rear hinge (bottom-left corner) in lid texels, the seal's
+    // top-left on the ring recess, and the mouth (the velvet's centre row).
+    private static readonly Vector2 FinalLidAt = new(-1, -7), FinalHinge = new(0, 13), FinalSealAt = new(8, 5);
+    private const float FinalMouth = 3.14f;
+
+    // Resolved parts. LidAt, SealAt and MouthAt are in texels from the body's top-left, HingeAt in lid texels. Local
+    // layout (px, y down, origin at the closed box's centre): the lid closes on the body; it turns about its rear (left)
+    // bottom corner; the mouth is where the velvet lies; the seal sits on the body front.
     private sealed record BoxArt(Texture2D Body, Rectangle BodySrc, Texture2D Lid, Rectangle LidSrc, Texture2D? Seal, Rectangle SealSrc,
-        float Scale, bool Pixel)
+        float Scale, bool Pixel, Vector2 LidAt, Vector2 HingeAt, Vector2 SealAt, float MouthAt)
     {
-        internal float BodyHeight => BodySrc.Height * Scale;
-        internal float LidHeight => LidSrc.Height * Scale;
-        internal float Width => Math.Max(BodySrc.Width, LidSrc.Width) * Scale;
-        internal float Height => BodyHeight + LidHeight;
-        internal float Mouth => -Height * .5f + LidHeight;
-        internal Vector2 BodyCenter => new(0, Height * .5f - BodyHeight * .5f);
-        internal Vector2 Hinge => new(-LidSrc.Width * Scale * .5f, Mouth);
-        internal Vector2 SealCenter => new(0, Mouth + BodyHeight * .42f);
+        private Vector2 BodySize => new(BodySrc.Width, BodySrc.Height);
+        private Vector2 Min => Vector2.Min(Vector2.Zero, LidAt);
+        private Vector2 Max => Vector2.Max(BodySize, LidAt + new Vector2(LidSrc.Width, LidSrc.Height));
+        private Vector2 Centre => (Min + Max) * .5f;
+        internal float Width => (Max.X - Min.X) * Scale;
+        internal float Height => (Max.Y - Min.Y) * Scale;
+        internal float Mouth => (MouthAt - Centre.Y) * Scale;
+        internal Vector2 BodyCenter => (BodySize * .5f - Centre) * Scale;
+        internal Vector2 Hinge => (LidAt + HingeAt - Centre) * Scale;
+        internal Vector2 SealCenter => (SealAt + new Vector2(SealSrc.Width, SealSrc.Height) * .5f - Centre) * Scale;
         internal float Dot => Pixel ? CrimsonRewardSprites.PixelScale : 2;
     }
 
@@ -286,7 +295,7 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
             0, new Vector2(scale), color, burn, seed, box.Pixel);
         // Lid: swings back on its rear hinge to about 110 degrees in 8 ticks, a small overshoot, no spin.
         float swing = a < Release ? 0 : -MathHelper.ToRadians(CrimsonRewardRules.ShowLidDegrees) * OutBack((a - Release) / CrimsonRewardRules.ShowLidTicks, .9f);
-        burner.Draw(view, ScarletVfxHost.Assets, box.Lid, box.LidSrc, at + box.Hinge * pop, new Vector2(0, box.LidSrc.Height),
+        burner.Draw(view, ScarletVfxHost.Assets, box.Lid, box.LidSrc, at + box.Hinge * pop, box.HingeAt,
             swing, new Vector2(scale), color, burn, seed + .37f, box.Pixel);
         if (box.Seal is null) return;
         Rectangle src = box.SealSrc;
@@ -376,13 +385,15 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
                 var lid = ScarletRewardArt.Get(CrimsonRewardSprites.ReliquaryLid);
                 var seal = ScarletRewardArt.Get(CrimsonRewardSprites.ReliquarySeal);
                 return art = new BoxArt(body.Texture, body.Source, lid.Texture, lid.Source, seal.Pixel ? seal.Texture : null, seal.Source,
-                    CrimsonRewardSprites.PixelScale, true);
+                    CrimsonRewardSprites.PixelScale, true, FinalLidAt, FinalHinge, FinalSealAt, FinalMouth);
             }
-            // Placeholder: the vanilla crate, its top 35% standing in for the lid; no separate seal.
+            // Placeholder: the vanilla crate, its top 35% standing in for the lid (hinged at its bottom-left corner);
+            // no separate seal, so the cracks and flakes sit 42% down the body front.
             Rectangle all = OpaqueBounds(body.Texture);
             int cut = Math.Clamp((int)MathF.Round(all.Height * .35f), 1, Math.Max(1, all.Height - 1));
             return art = new BoxArt(body.Texture, new Rectangle(all.X, all.Y + cut, all.Width, all.Height - cut), body.Texture,
-                new Rectangle(all.X, all.Y, all.Width, cut), null, default, body.Scale, false);
+                new Rectangle(all.X, all.Y, all.Width, cut), null, default, body.Scale, false,
+                new Vector2(0, -cut), new Vector2(0, cut), new Vector2(all.Width * .5f, (all.Height - cut) * .42f), 0);
         }
         catch (Exception e)
         {
