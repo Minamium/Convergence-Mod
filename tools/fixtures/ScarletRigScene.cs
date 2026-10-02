@@ -20,8 +20,9 @@
 // The signal, the Choir cues and the notes are the production plan-list functions (CrimsonRig.Signal,
 // ScarletNotes) over the gestures alive at the tick, as CrimsonRig.DrawEffigy reads ScarletCueFrame. The proposed
 // motion (--motion proposed) and the body material (--material on) are computed by S1's ScarletGestureMotion /
-// ScarletBodyMaterial and passed to the rigs exactly as DrawEffigy does; until the rigs draw them (S2 Crown/Mantle,
-// S3 Choir) those variants are reported not_run and nothing is rendered under their names (RigDriver).
+// ScarletBodyMaterial and passed to the rigs exactly as DrawEffigy does (S2 draws them for Crown/Mantle, S3 for the
+// Choir); Vespera is CrimsonRig.DrawConductor, which commands her Act's body under --motion proposed (S4). The game
+// always draws "proposed" + "material on"; "current" / "off" are today's picture for comparison (RigDriver).
 #nullable enable
 using System;
 using System.Collections.Generic;
@@ -329,17 +330,19 @@ internal static class RigMirror
 }
 
 // The S1/S2/S3/S4 seam: CrimsonRig.DrawEffigy's wiring (notes -> motion / heave / material) with the comparison
-// switches. "current" passes the rigs' defaults (today's picture); --motion proposed passes ScarletGestureMotion
-// (Crown / Mantle motion, the Choir heave) and --material on passes ScarletBodyMaterial, both computed exactly as
-// DrawEffigy computes them. The Choir cues are the production ones (S1's arm assignment is live in game) in every
-// variant. The rigs still ignore the new arguments until S2 (Crown, Mantle) and S3 (Choir) draw them, so the
-// proposed / material variants would be today's picture under another name: they stay not_run until those slices
-// set MotionAvailable / MaterialAvailable. Vespera's command (ScarletGestureMotion.Command) needs S4's arguments.
+// switches. "current" passes the rigs' default motion (today's root, tilt, skin and heave) and --material off the
+// default material (today's shading); --motion proposed passes ScarletGestureMotion (Crown / Mantle motion, the Choir
+// heave) and --material on passes ScarletBodyMaterial, both computed exactly as DrawEffigy computes them. The notes
+// (the apparitions' analytic particles and past poses) and the Choir cues (the arms owning the struck ground) are the
+// production ones in every variant, as in game. Vespera is the boss path's CrimsonRig.DrawConductor: "proposed"
+// passes her Act's body as DrawEffigy's local participant does (her command, S4); "current" passes -1 (today).
 internal static class RigDriver
 {
-    internal static bool MotionAvailable => false;
-    internal static bool MaterialAvailable => false;
-    internal const string Pending = "S1's notes, motion, heave and material are wired into RigDriver; the rigs draw them only after S2 (Crown/Mantle) and S3 (Choir), which set MotionAvailable / MaterialAvailable";
+    // S2 (Crown / Mantle), S3 (Choir) and S4 (Vespera) draw what S1 computes; kept as switches so a slice that stops
+    // drawing them reports its variants not_run instead of rendering today's picture under another name.
+    internal static bool MotionAvailable => true;
+    internal static bool MaterialAvailable => true;
+    internal const string Pending = "S1's notes, motion, heave and material are drawn by the rigs (S2 Crown/Mantle, S3 Choir) and Vespera's command by DrawConductor (S4)";
 
     // CrimsonRig.DrawEffigy for the Act's apparition (phase < 3): appear 1, presence 1, dissolve 0, pose at the stage.
     internal static void Apparition(SpriteBatch batch, RigScene s, float age, in RigVariant v)
@@ -366,24 +369,19 @@ internal static class RigDriver
             var motion = index == 0 ? ScarletGestureMotion.Crown(age, notes[..noted]) : ScarletGestureMotion.Mantle(age, notes[..noted]);
             var body = v.Material ? ScarletBodyMaterial.Apparition(age, notes[..noted], motion, s.Flipped, reduced) : default;
             ScarletApparitionRig.Draw(batch, index, at, size, age, signal.Charge, signal.Recoil, 1, s.Flipped, 0, 0,
-                motion: v.Proposed ? motion : default, material: body);
+                notes: notes[..noted], motion: v.Proposed ? motion : default, material: body);
         }
         RigHost.Tag = "";
     }
 
-    // CrimsonRig.Draw for the boss after the opening (reveal 1, consumed 0, ending 1): the performer and the held orb.
+    // CrimsonRig.Draw for the boss after the opening (reveal 1, consumed 0, ending 1): the production DrawConductor
+    // (performer and held orb). --motion proposed passes the notes of her Act's body as the boss path does for a local
+    // participant (Vespera's command, S4); "current" passes none, which is today's picture exactly (G8v).
     internal static void Vespera(SpriteBatch batch, RigScene s, float age, in RigVariant v)
     {
-        var signal = RigMirror.Signal(s.Plans, -1, age);
-        Vector2 at = RigScene.Conductor;
         RigHost.Tag = "vespera";
-        CrimsonRig.DrawPerformer(batch, Terraria.Main.screenPosition, at, age, Vector2.Zero, RigScene.VesperaFacing,
-            true, signal.Charge, signal.Recoil, 1, false, 1);
-        Vector2 held = new(RigScene.VesperaFacing * (94 + signal.Charge * 12), -25);
-        float radius = 53 + signal.Charge * 24 + signal.Recoil * 18;
-        CrimsonEnergy.Begin();
-        CrimsonEnergy.AddCore(at + held, radius, age, Math.Max(signal.Charge, 0), signal.Recoil, 1, CrimsonVisuals.Reduced);
-        CrimsonEnergy.Draw(batch);
+        CrimsonRig.DrawConductor(batch, Terraria.Main.screenPosition, RigScene.Conductor, age, Vector2.Zero, RigScene.VesperaFacing,
+            RigMirror.Live(s.Plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, v.Proposed ? s.Phase : -1, 1, 1, 0, 0);
         RigHost.Tag = "";
     }
 }
@@ -833,7 +831,8 @@ internal sealed class RigRun
             ticks = state,
             draws = counts,
             envelopes = "ticks[].attack: S1's notes, motion [offsetX, offsetY, turn] and body envelopes (Crown/Mantle: Heat, Ignite, Front, Drain, Send, Return, Snap, Engaged; "
-                + "Choir: Heat, Ignite, Drain, Surge, Engaged and per arm [Lift, Send, Return, Tear, Burst]) computed as DrawEffigy computes them. " + RigDriver.Pending,
+                + "Choir: Heat, Ignite, Drain, Surge, Engaged and per arm [Lift, Send, Return, Tear, Burst]) computed as DrawEffigy computes them; "
+                + "the rigs draw them when the variant has the material on (and the motion when proposed). " + RigDriver.Pending,
         }, RigRun.Json));
         if (video is not null) videos++;
         index.Add(new { scene = s.Def.Name, camera = s.Camera.Name, variant = v.Suffix, dir = Path.GetRelativePath(output, dir).Replace('\\', '/'),

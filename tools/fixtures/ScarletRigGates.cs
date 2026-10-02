@@ -1,7 +1,10 @@
 // Gates of the Scarlet attack-expression design (§4.3) over the rig harness, plus the harness's own self-checks.
-// A gate whose input does not exist yet (the body material of S2/S3, the motion of S1) is still computed as far as
-// it can be and reported "not_run" with its measurements and the reason; "vacuous" marks a pass that cannot fail
-// before the material exists. Status values: pass | fail | not_run | baseline_written. Offline review only.
+// "Game" is the in-game picture (body material on, proposed motion, Vespera's command); "Plain" is the same motion
+// with the material off, so Game - Plain is exactly the material's decoration. Decoration is light the material ADDS
+// (any channel up by more than 2/255); light it takes away (the free sparks and the free heartbeat handed to the
+// attack clock, Drain) is reported beside it, never counted as decoration. A gate whose input does not exist is
+// reported "not_run" with the reason; "vacuous" marks a pass that cannot fail. Status values: pass | fail | not_run |
+// baseline_written. Offline review only.
 #nullable enable
 using System;
 using System.Collections.Generic;
@@ -28,10 +31,18 @@ internal sealed class RigGates
     private readonly Dictionary<string, RigScene> scenes = new();
     private RenderTarget2D? world;
 
-    // Design §2.7: draws per frame of the NEW rigs (Normal / Reduced). Today's counts are the design's "今の draw".
-    private static readonly Dictionary<string, (int Normal, int Reduced, int TodayNormalMin, int TodayNormalMax, int TodayReduced)> Budget = new()
+    // Design §2.7: draws per frame of the new rigs (Normal / Reduced) and the vertices they may add per frame over
+    // today's. Today's vertices per frame (Normal / Reduced) were measured through this shim on the rigs before S2/S3
+    // (feat/scarlet-attack-expression 0499a91: Crown 32/11 draws, Mantle 31/11, Choir 65-69/23, as the design counts).
+    private static readonly Dictionary<string, (int Normal, int Reduced, int Added, int TodayVertices, int TodayVerticesReduced)> Budget = new()
     {
-        ["crown"] = (18, 11, 32, 32, 11), ["mantle"] = (9, 8, 31, 31, 11), ["choir"] = (52, 23, 65, 69, 23),
+        ["crown"] = (18, 11, 228, 30558, 29382), ["mantle"] = (9, 8, 252, 30342, 29382), ["choir"] = (52, 23, 120, 40434, 35622),
+    };
+    // The design's per-element vertex numbers (§2.1-2.3), reported beside the per-frame total.
+    private static readonly Dictionary<string, (string Pass, int Vertices)[]> Elements = new()
+    {
+        ["crown"] = new[] { ("SparkPass", 192), ("DripPass", 36) }, ["mantle"] = new[] { ("WispPass", 168), ("SparkPass", 84) },
+        ["choir"] = new[] { ("SparkPass", 120) },
     };
     // Shaders the attack expression must not change (design §2.0.6, G11). .fx hashed with LF line ends.
     private static readonly Dictionary<string, string> Pinned = new()
@@ -51,7 +62,12 @@ internal sealed class RigGates
         ["ScarletRibbon.fx"] = "55250e8e4894fb4d12bee34e6d546914606d71cca0e75c1c556d5f45188d83a6",
         ["ScarletRibbon.fxc"] = "53a2fff40e35b5da56550eec515cacf234d83def0822524d61663d5bac018d4b",
     };
-    private static readonly int[] Lags = { 0, 4, 8, 12, 16, 21 };
+    // The body range is the union of the true past silhouettes over the last 21 ticks, dilated 12 px. The design
+    // samples it at lags {0,4,8,12,16,21}; a whip moves a hook ~20 px per tick, so those six samples leave gaps in the
+    // swept surface wider than the 12 px dilation. G1 gates on every tick of the same 21-tick window and reports the
+    // six-sample count beside it.
+    private static readonly int[] Lags = Enumerable.Range(0, 22).ToArray();
+    private static readonly int[] DesignLags = { 0, 4, 8, 12, 16, 21 };
     private const float RangeDilate = 12;
 
     internal RigGates(RigRenderer renderer, RigOptions options, string root, string output)
@@ -69,7 +85,9 @@ internal sealed class RigGates
     }
     private static readonly string[] Signatures = { "act1-signature", "act2-signature", "act3-signature" };
     private static readonly string[] Basics = { "act1-basic", "act2-basic", "act3-basic" };
-    private static readonly RigVariant Normal = new(false, false, false, true);
+    private static readonly RigVariant Normal = new(false, false, false, true);   // today's picture
+    private static readonly RigVariant Plain = new(false, false, true, true);    // proposed motion, material off
+    private static readonly RigVariant Game = new(false, true, true, true);      // the in-game picture
 
     internal object Run()
     {
@@ -77,6 +95,7 @@ internal sealed class RigGates
         Step("G0", () => G0()); Step("G1+G2", () => G1G2()); Step("G3", () => G3()); Step("G4", () => G4()); Step("G5", () => G5());
         Step("G6", () => G6()); Step("G7", () => G7()); Step("G8", () => G8()); Step("G9", () => G9()); Step("G10", () => G10());
         Step("G11", () => G11()); Step("G12", () => G12()); Step("G13", () => G13()); Step("G14", () => G14());
+        Step("S4", () => gates.AddRange(new ConductorGates(r, o, output).Run()));
         var self = Self();
         world?.Dispose();
         foreach (var g in gates) Console.WriteLine($"{g.Id,-5} {g.Status,-17}{(g.Vacuous ? " (vacuous)" : "")} {g.Title}");
@@ -84,7 +103,8 @@ internal sealed class RigGates
         return new
         {
             note = "Gates of the Scarlet attack-expression design over the offline rig harness. Not a playtest; in-game acceptance is not_run.",
-            material = RigDriver.MaterialAvailable, motion = RigDriver.MotionAvailable, pending = RigDriver.MaterialAvailable && RigDriver.MotionAvailable ? null : RigDriver.Pending,
+            material = RigDriver.MaterialAvailable, motion = RigDriver.MotionAvailable,
+            variants = new { game = "material on, proposed motion, Vespera's command (the in-game picture)", plain = "proposed motion, material off", today = "material off, current motion (today's picture)" },
             gates, self, seconds = Math.Round(watch.Elapsed.TotalSeconds, 1)
         };
         void Step(string id, Action run)
@@ -107,61 +127,172 @@ internal sealed class RigGates
     private void G1G2()
     {
         var range = new List<object>(); var zones = new List<object>();
-        int outside = 0, inZones = 0;
-        foreach (string name in Signatures)
+        int outside = 0, inZones = 0, outsideDesignLags = 0, dimmedOutside = 0, dimmedInZones = 0;
+        foreach (string name in Signatures.Concat(Basics))
         {
             var s = Scene(name, "C");
-            var third = s.Phrase.Plans[2];
-            foreach (int tick in new[] { third.Born + 14, third.Fire, third.Fire + 2, third.Fire + 10 })
+            var third = s.Phrase.Plans[2]; var flow = s.Phrase.Plans[4];
+            var ticks = new SortedDictionary<int, string>();
+            foreach (int rel in new[] { -14, -3, 0, 1, 2, 4, 6, 10, 16 }) ticks.TryAdd(third.Fire + rel, $"n3{rel:+0;-0;+0}");
+            if (name.EndsWith("signature")) foreach (int rel in new[] { -28, 0, 2, 7 }) ticks.TryAdd(flow.Fire + rel, $"xf{rel:+0;-0;+0}");
+            foreach (var (tick, label) in ticks)
             {
                 var view = s.View(r.Device, o.Width, o.Height, tick, false);
-                var body = BodyRange(s, view, Normal);
-                var diff = Diff(s, view, RigLayers.Npc, Normal, Normal with { Material = true }, 2);
+                var (body, designBody) = BodyRanges(s, view, Plain);
+                var (added, dimmed) = Change(s, view, RigLayers.Npc, Plain, Game, 2);
                 var safe = SafeZones(s, view, tick);
-                int bodyPixels = body.Count(b => b), diffPixels = 0, diffOutside = 0, diffInZone = 0, zonePixels = 0, npcInZone = 0;
-                var npc = Pixels(s, view, Normal, RigLayers.Npc, Color.Transparent);
+                int bodyPixels = body.Count(b => b), addedPixels = 0, addedOutside = 0, addedOutsideDesign = 0, addedInZone = 0, dimOut = 0, dimZone = 0, zonePixels = 0;
                 for (int i = 0; i < body.Length; i++)
                 {
                     if (safe[i] && !body[i]) zonePixels++;
-                    if (safe[i] && !body[i] && Lit(npc[i], 2)) npcInZone++;
-                    if (!diff[i]) continue;
-                    diffPixels++;
-                    if (!body[i]) diffOutside++;
-                    if (safe[i] && !body[i]) diffInZone++;
+                    if (dimmed[i] && !body[i]) { dimOut++; if (safe[i]) dimZone++; }
+                    if (!added[i]) continue;
+                    addedPixels++;
+                    if (!designBody[i]) addedOutsideDesign++;
+                    if (!body[i]) { addedOutside++; if (safe[i]) addedInZone++; }
                 }
-                outside += diffOutside; inZones += diffInZone;
-                range.Add(new { scene = name, tick, rel = tick - third.Fire, bodyRangePixels = bodyPixels, diffPixels, diffOutsideRange = diffOutside });
-                zones.Add(new { scene = name, tick, rel = tick - third.Fire, safeOutsideBody = zonePixels, diffInSafeZones = diffInZone,
-                    todayNpcPixelsInSafeZones = npcInZone });
+                outside += addedOutside; inZones += addedInZone; outsideDesignLags += addedOutsideDesign; dimmedOutside += dimOut; dimmedInZones += dimZone;
+                if (Dumps is not null && addedOutside > 0)
+                {
+                    // Review aid (SCARLET_GATE_DUMPS=<dir>): the in-game NPC layer over black, the body range tinted blue,
+                    // decoration outside it magenta.
+                    var px = Pixels(s, view, Game, RigLayers.Npc, Color.Black);
+                    for (int i = 0; i < px.Length; i++)
+                        if (added[i] && !body[i]) px[i] = new Color(255, 0, 255);
+                        else if (body[i]) px[i] = new Color(px[i].R, px[i].G, (byte)Math.Min(255, px[i].B + 40));
+                    Dump($"g1-{name}-{label}.png", px, view.Width, view.Height);
+                }
+                // Which pass draws decoration outside the range (each pass alone, the same comparison).
+                Dictionary<string, int>? byPass = null;
+                if (addedOutside > 0)
+                {
+                    byPass = new();
+                    foreach (string pass in new[] { "AutoloadPass", "AuraPass", "RibbonPass", "HeartPass", "SparkPass", "DripPass", "WispPass" })
+                    {
+                        RigHost.PassFilter = (_, applied) => applied == pass;
+                        try
+                        {
+                            var (one, _) = Change(s, view, RigLayers.Apparition, Plain, Game, 2);
+                            int count = 0;
+                            for (int i = 0; i < one.Length; i++) if (one[i] && !body[i]) count++;
+                            if (count > 0) byPass[pass] = count;
+                        }
+                        finally { RigHost.PassFilter = null; }
+                    }
+                }
+                range.Add(new { scene = name, tick = label, bodyRangePixels = bodyPixels, addedPixels, addedOutsideRange = addedOutside,
+                    addedOutsideSixLagRange = addedOutsideDesign, dimmedOutsideRange = dimOut, outsideByPass = byPass });
+                zones.Add(new { scene = name, tick = label, safeOutsideBody = zonePixels, addedInSafeZones = addedInZone, dimmedInSafeZones = dimZone });
             }
         }
-        bool vacuous = !RigDriver.MaterialAvailable;
-        Add("G1", "decoration (material on - off > 2/255) inside the body range (lags 0..21, +12 px)", vacuous ? "not_run" : Status(outside == 0), range,
-            vacuous ? "No body material yet (S2/S3): on and off are the same frame. The body range (skinned mesh alpha > .05 over six past poses, dilated 12 px at zoom 1) is measured so the mask is exercised." : "", vacuous);
-        Add("G2", "no decoration in safe zones outside the body (curtain corridors, hands gaps, staff gaps, central 94 px)", vacuous ? "not_run" : Status(inZones == 0), zones,
-            "Safe = inside the field, outside every displayed signature footprint, plus the central 94 px band. todayNpcPixelsInSafeZones is the CURRENT rigs' aura/ribbon coverage there (baseline, not a gate)." + (vacuous ? " No body material yet." : ""), vacuous);
+        var hands = HandsParticles();
+        Add("G1", "decoration (material on adds > 2/255) inside the body range (every lag 0..21, +12 px)", Status(outside == 0),
+            new { addedOutsideRange = outside, addedOutsideSixLagRange = outsideDesignLags, dimmedOutsideRange = dimmedOutside, frames = range },
+            "Camera C (zoom 2), Game vs Plain (the same proposed motion, material off), the NPC layer, Act I-III signature and basic phrases. "
+            + "addedOutsideSixLagRange counts the same against the design's six lag samples {0,4,8,12,16,21} (not gated, see Lags). "
+            + "dimmedOutsideRange is light the material removes (free sparks / heartbeat handed to the attack clock): reported, not decoration.");
+        Add("G2", "no decoration in safe zones outside the body (curtain corridors, hands gaps, staff gaps, central 94 px); no Choir particles outside the body in FourHands windows",
+            Status(inZones == 0 && hands.Outside == 0),
+            new { addedInSafeZones = inZones, dimmedInSafeZones = dimmedInZones, frames = zones, fourHands = hands.Measured },
+            "Safe = inside the field, outside every displayed signature footprint (warning to residue), plus the central 94 px band. "
+            + "fourHands: every tick of every FourHands window (Born .. Fire+Span) of the Act III signature phrase, the Choir's SparkPass drawn alone: "
+            + "pixels outside the body's own silhouette (lag 0, +12 px) gate; spark pixels inside it are the free sparks fading out (handed to the attack clock).");
+    }
+
+    // The Choir's sparks during the FourHands windows (design §2.0.3-6: no particle outside the body there).
+    private (int Outside, object Measured) HandsParticles()
+    {
+        var s = Scene("act3-signature", "C");
+        int outside = 0, inside = 0, ticksWithSparks = 0, lastRel = int.MinValue;
+        var rows = new List<object>();
+        foreach (var p in s.Plans)
+        {
+            if (p.Technique != CrimsonTechnique.FourHands || !ScarletNotes.TryFrom(p, s.Flipped, RigScene.Conductor.X, RigScene.Conductor.Y, out var note)) continue;
+            for (int tick = (int)note.Born; tick < note.Close; tick++)
+            {
+                var view = s.View(r.Device, o.Width, o.Height, tick, false);
+                var body = BodyMask(s, view, Game, 12);
+                Color[] px;
+                RigHost.PassFilter = (shader, pass) => shader == "ScarletChoir" && pass == "SparkPass";
+                try { px = Pixels(s, view, Game, RigLayers.Apparition, Color.Transparent); }
+                finally { RigHost.PassFilter = null; }
+                int o0 = 0, i0 = 0;
+                for (int i = 0; i < px.Length; i++) if (Lit(px[i], 2)) { if (body[i]) i0++; else o0++; }
+                outside += o0; inside += i0;
+                if (o0 + i0 > 0) { ticksWithSparks++; lastRel = Math.Max(lastRel, tick - (int)note.Born); }
+            }
+            rows.Add(new { phrase = p.Phrase, pulse = p.Pulse, born = note.Born, fire = note.Fire, close = note.Close });
+        }
+        return (outside, new { windows = rows, sparkPixelsOutsideBody = outside, sparkPixelsInsideBody = inside, ticksWithSparks,
+            lastSparkTickAfterBorn = lastRel == int.MinValue ? (int?)null : lastRel });
     }
 
     // ---- G3: brightness of the decoration against the forecast band and the live ink --------------------------
     private void G3()
     {
-        var rows = new List<object>();
+        var rows = new List<object>(); bool ok = true;
         foreach (string name in Signatures)
         {
             var s = Scene(name, "A2");
             var third = s.Phrase.Plans[2];
             var warnView = s.View(r.Device, o.Width, o.Height, third.Fire - 8, false);
-            var warn = Pixels(s, warnView, Normal, RigLayers.Backdrop | RigLayers.Field, Color.Black);
+            var warn = Pixels(s, warnView, Game, RigLayers.Backdrop | RigLayers.Field, Color.Black);
             var band = Capsules(s, warnView, third, third.Fire, true);
             var liveView = s.View(r.Device, o.Width, o.Height, third.Fire + 4, false);
-            var live = Pixels(s, liveView, Normal, RigLayers.Backdrop | RigLayers.Field, Color.Black);
+            var live = Pixels(s, liveView, Game, RigLayers.Backdrop | RigLayers.Field, Color.Black);
             var strike = Capsules(s, liveView, third, third.Fire + 4, false);
             float bandMedian = Percentile(Luma(warn, band), 50), inkP995 = Percentile(Luma(live, strike), 99.5f);
-            rows.Add(new { scene = name, forecastBandMedian = bandMedian, inkLiveP995 = inkP995,
-                limitOutsideBody = Math.Min(bandMedian, inkP995 * .5f), limitInsideBody = inkP995 * .8f, decorationP995 = (float?)null });
+            float limitOutside = Math.Min(bandMedian, inkP995 * .5f), limitInside = inkP995 * .8f;
+            // The decoration itself: Game - Plain on the apparition layer over black, camera C, around the third note and the crossflow.
+            var c = Scene(name, "C");
+            var n3 = c.Phrase.Plans[2]; var flow = c.Phrase.Plans[4];
+            var sets = new Dictionary<string, (List<float> Outside, List<float> Inside)> { ["all"] = (new(), new()), ["heartExcluded"] = (new(), new()) };
+            var filters = new List<(string, Func<string, string, bool>?)> { ("all", null), ("heartExcluded", (_, pass) => pass != "HeartPass") };
+            foreach (string only in new[] { "AutoloadPass", "AuraPass", "RibbonPass", "HeartPass", "SparkPass", "DripPass", "WispPass" })
+            {
+                sets[only] = (new(), new());
+                filters.Add((only, (_, pass) => pass == only));
+            }
+            foreach (int tick in new[] { n3.Born + 14, n3.Fire - 3, n3.Fire, n3.Fire + 1, n3.Fire + 2, n3.Fire + 4, n3.Fire + 10, flow.Fire, flow.Fire + 2, flow.Fire + 7 })
+            {
+                var view = c.View(r.Device, o.Width, o.Height, tick, false);
+                var body = BodyMask(c, view, Plain, 0);
+                foreach (var (key, filter) in filters)
+                {
+                    Color[] off, on;
+                    RigHost.PassFilter = filter;
+                    try { off = Pixels(c, view, Plain, RigLayers.Apparition, Color.Transparent); on = Pixels(c, view, Game, RigLayers.Apparition, Color.Transparent); }
+                    finally { RigHost.PassFilter = null; }
+                    bool marked = false;
+                    var mark = Dumps is not null && key == "all" ? (Color[])on.Clone() : null;
+                    for (int i = 0; i < on.Length; i++)
+                    {
+                        if (Added(on[i], off[i]) <= 2) continue;
+                        float d = MathF.Max(0, Y(on[i]) - Y(off[i]));
+                        (body[i] ? sets[key].Inside : sets[key].Outside).Add(d);
+                        if (mark is not null && !body[i] && d > limitOutside) { mark[i] = new Color(0, 255, 255); marked = true; }
+                    }
+                    // Review aid: decoration outside the body brighter than the outside limit in cyan.
+                    if (mark is not null && marked) Dump($"g3-{name}-{tick - n3.Fire:+0;-0;+0}.png", mark, view.Width, view.Height);
+                }
+            }
+            float outAll = Percentile(sets["all"].Outside.ToArray(), 99.5f), inAll = Percentile(sets["all"].Inside.ToArray(), 99.5f);
+            float outBody = Percentile(sets["heartExcluded"].Outside.ToArray(), 99.5f), inBody = Percentile(sets["heartExcluded"].Inside.ToArray(), 99.5f);
+            bool pass = outAll <= limitOutside && inAll <= limitInside;
+            ok &= pass;
+            rows.Add(new { scene = name, forecastBandMedian = bandMedian, inkLiveP995 = inkP995, limitOutsideBody = limitOutside, limitInsideBody = limitInside,
+                decorationOutsideP995 = outAll, decorationInsideP995 = inAll, decorationPixels = new[] { sets["all"].Outside.Count, sets["all"].Inside.Count },
+                heartExcluded = new { outsideP995 = outBody, insideP995 = inBody, pixels = new[] { sets["heartExcluded"].Outside.Count, sets["heartExcluded"].Inside.Count } },
+                byPass = sets.Where(x => x.Key.EndsWith("Pass") && x.Value.Outside.Count + x.Value.Inside.Count > 0).ToDictionary(x => x.Key, x => new
+                {
+                    outsideP995 = Percentile(x.Value.Outside.ToArray(), 99.5f), insideP995 = Percentile(x.Value.Inside.ToArray(), 99.5f),
+                    pixels = new[] { x.Value.Outside.Count, x.Value.Inside.Count }
+                }), pass });
         }
-        Add("G3", "decoration luminance: outside body <= forecast band median and <= .5 x ink live p99.5; inside <= .8 x", "not_run", rows,
-            "Reference luminances measured on today's frames (camera A2, third note: forecast at Fire-8, live at Fire+4); the decoration they bound arrives with S2/S3.", true);
+        Add("G3", "decoration luminance: outside body <= forecast band median and <= .5 x ink live p99.5; inside <= .8 x", Status(ok), rows,
+            "References on the composited frame at camera A2 (third note: forecast band at Fire-8, live ink at Fire+4). Decoration = luma(Game) - luma(Plain) "
+            + "where the material adds light, apparition layer over black, camera C, at Born+14, Fire-3..Fire+10 of the third note and Fire, +2, +7 of the crossflow; "
+            + "body = the skinned mesh's own alpha (lag 0). heartExcluded repeats it without the HeartPass (the heart keeps its peak and only moves it to Fire).");
     }
 
     // ---- G4: the PostDrawTiles layer is byte-identical with the material on or off -----------------------------
@@ -176,13 +307,13 @@ internal sealed class RigGates
                 {
                     var view = s.View(r.Device, o.Width, o.Height, tick, false);
                     var off = Pixels(s, view, Normal, RigLayers.Field, Color.Transparent);
-                    var on = Pixels(s, view, Normal with { Material = true }, RigLayers.Field, Color.Transparent);
+                    var on = Pixels(s, view, Game, RigLayers.Field, Color.Transparent);
                     frames++;
                     if (!off.AsSpan().SequenceEqual(on)) different++;
                 }
         }
         Add("G4", "forecasts, seals and ink (PostDrawTiles) byte-identical with the material on / off", Status(different == 0),
-            new { frames, different }, RigDriver.MaterialAvailable ? "" : "The material switch does not exist yet; this proves the comparison path.", !RigDriver.MaterialAvailable);
+            new { frames, different }, "Today's picture (material off, current motion) against the in-game one (material on, proposed motion), Field layer only, Act I-III signature and basic.");
     }
 
     // ---- G5: local contrast of the forecast band keeps >= 90% -------------------------------------------------
@@ -201,14 +332,14 @@ internal sealed class RigGates
                 var px = Pixels(s, view, v, RigLayers.Frame & ~RigLayers.Labels, Color.Black);
                 return MathF.Abs(Mean(Luma(px, band)) - Mean(Luma(px, ring)));
             }
-            float off = Contrast(Normal), on = Contrast(Normal with { Material = true });
+            float off = Contrast(Plain), on = Contrast(Game), today = Contrast(Normal);
             float ratio = off > 1e-3f ? on / off : 1;
             ok &= ratio >= .9f;
-            rows.Add(new { scene = name, tick = third.Fire - 8, contrastOff = off, contrastOn = on, ratio });
+            rows.Add(new { scene = name, tick = third.Fire - 8, contrastOff = off, contrastOn = on, ratio, contrastToday = today, ratioOverToday = today > 1e-3f ? on / today : 1 });
         }
-        Add("G5", "forecast band local contrast with decoration >= 90% of without", RigDriver.MaterialAvailable ? Status(ok) : "not_run", rows,
-            "Contrast = |mean luma inside the next note's forecast capsules - mean luma of a 24 px ring around them| on the full frame." +
-            (RigDriver.MaterialAvailable ? "" : " No decoration yet: the ratio is 1 by construction."), !RigDriver.MaterialAvailable);
+        Add("G5", "forecast band local contrast with decoration >= 90% of without", Status(ok), rows,
+            "Contrast = |mean luma inside the third note's forecast capsules - mean luma of a 24 px ring around them| on the full frame, camera A2, Fire-8. "
+            + "Gate: Game over Plain (the material). ratioOverToday also includes the proposed motion (reported).");
     }
 
     // ---- G6: timing ------------------------------------------------------------------------------------------
@@ -244,45 +375,108 @@ internal sealed class RigGates
                 inkRows.Add(new { scene = name, technique = p.Technique.ToString(), pulse = p.Pulse, firstInkPixel = first == int.MinValue ? (int?)null : first - p.Fire, ok });
             }
         }
-        foreach (string name in Signatures)
+        bool glowOk = true, envelopeOk = true;
+        var envelopeRows = new List<object>();
+        foreach (string name in Signatures.Concat(Basics))
         {
             var s = Scene(name, "C");
-            var third = s.Phrase.Plans[2];
-            float best = -1; int at = 0;
-            for (int tick = third.Born; tick < third.End; tick++)
+            foreach (var (p, label) in new[] { (s.Phrase.Plans[2], "n3"), (s.Phrase.Plans[4], "crossflow") })
             {
-                var view = s.View(r.Device, o.Width, o.Height, tick, false);
-                float glow = Mean(Luma(Pixels(s, view, Normal, RigLayers.Apparition, Color.Black), null));
-                if (glow > best) { best = glow; at = tick; }
+                // The drawn body glow the material adds (sum of luma(Game) - luma(Plain) where positive) around this
+                // note's strike, Fire-10 .. Fire+12 (the previous note fires on this one's Born, 28 ticks earlier).
+                float best = -1; int at = 0;
+                for (int tick = p.Fire - 10; tick <= p.Fire + 12; tick++)
+                {
+                    var view = s.View(r.Device, o.Width, o.Height, tick, false);
+                    var off = Pixels(s, view, Plain, RigLayers.Apparition, Color.Transparent);
+                    var on = Pixels(s, view, Game, RigLayers.Apparition, Color.Transparent);
+                    float glow = 0;
+                    for (int i = 0; i < on.Length; i++) glow += MathF.Max(0, Y(on[i]) - Y(off[i]));
+                    if (glow > best) { best = glow; at = tick; }
+                }
+                bool ok = at - p.Fire is >= 0 and <= 2;
+                glowOk &= ok;
+                glowRows.Add(new { scene = name, note = label, bodyGlowPeak = at - p.Fire, ok });
+                // S1's envelopes for the body (as DrawEffigy computes them): Ignite rises on Fire, Send is 1 on Fire, Heat peaks in [Fire-3, Fire].
+                var e = Envelopes(s, p.Fire - 10, p.Fire + 8);
+                int rise = 0; float riseBest = float.MinValue, heatBest = float.MinValue; int heatAt = 0;
+                for (int k = 1; k < e.Count; k++) if (e[k].Ignite - e[k - 1].Ignite > riseBest) { riseBest = e[k].Ignite - e[k - 1].Ignite; rise = e[k].Tick; }
+                foreach (var x in e) if (x.Heat > heatBest + 1e-6f) { heatBest = x.Heat; heatAt = x.Tick; }
+                // Send: the Choir's struck limbs as drawn; an apparition draws the warning's Send as Run up to Fire,
+                // then the whip, so its own note's Send(p) is read at p = 1.
+                float send = s.Phase == 2 ? e.Find(x => x.Tick == p.Fire).Send : ScarletEnvelope.Send(ScarletEnvelope.Progress(p.Fire, p.Born, p.Fire));
+                bool envOk = rise == p.Fire && send >= .999f && heatAt - p.Fire is >= -3 and <= 0;
+                envelopeOk &= envOk;
+                envelopeRows.Add(new { scene = name, note = label, igniteRise = rise - p.Fire, sendAtFire = send, heatPeak = heatAt - p.Fire, ok = envOk });
             }
-            glowRows.Add(new { scene = name, todayBodyGlowPeak = at - third.Fire, window = "[Fire, Fire+2] for the new material" });
         }
-        Add("G6", "timing: sounds on Born/Fire, first ink pixel = Fire +/- 1 (the body glow peak needs S2/S3)", Status(soundOk && inkOk),
-            new { sounds = soundRows, ink = inkRows, bodyGlow = glowRows,
-                envelopes = "Ignite/Heat/Send are S1's ScarletEnvelope, pinned by the domain tests (ScarletGestureMotionTests) and dumped per tick in state.json (ticks[].attack); the drawn body peak is not_run: " + RigDriver.Pending },
-            "Sound ticks mirror CrimsonGestureVisuals.Cue (one voice per phrase/tick/cue, no cue for a curtain with nothing to burn). The body glow peak is TODAY's (Signal recoil), reported for comparison only.");
+        Add("G6", "timing: sounds on Born/Fire, first ink pixel = Fire +/- 1, body glow peak in [Fire, Fire+2], Ignite rises on Fire, Send 1 on Fire, Heat peaks in [Fire-3, Fire]",
+            Status(soundOk && inkOk && glowOk && envelopeOk),
+            new { sounds = soundRows, ink = inkRows, bodyGlow = glowRows, envelopes = envelopeRows },
+            "Sound ticks mirror CrimsonGestureVisuals.Cue (one voice per phrase/tick/cue, no cue for a curtain with nothing to burn). Body glow: camera C, the light the material adds, "
+            + "third note and crossflow of every Act I-III phrase. Envelopes: the aggregated body state (Crown/Mantle; the Choir's struck limbs for Send).");
     }
 
     // ---- G7: Reduced Effects keeps every vertex -----------------------------------------------------------------
     private void G7()
     {
         var rows = new List<object>(); bool ok = true;
+        var energyRows = new List<object>(); bool energyOk = true;
+        var particleRows = new List<object>(); bool particleOk = true;
+        var reducedGame = Game with { Reduced = true }; var reducedPlain = Plain with { Reduced = true };
         foreach (string name in Signatures.Concat(Basics))
         {
             var s = Scene(name, "C");
             var third = s.Phrase.Plans[2];
-            foreach (int tick in new[] { third.Born + 6, third.Fire, third.Fire + 3, third.End })
+            double normalEnergy = 0, reducedEnergy = 0;
+            foreach (int tick in new[] { third.Born + 6, third.Born + 14, third.Fire, third.Fire + 2, third.Fire + 3, third.Fire + 10, third.End })
             {
                 var view = s.View(r.Device, o.Width, o.Height, tick, false);
-                var normal = Mesh(s, view, Normal); var reduced = Mesh(s, view.At(tick) with { Reduced = true }, Normal with { Reduced = true });
+                var normal = Mesh(s, view, Game); var reduced = Mesh(s, view.At(tick) with { Reduced = true }, reducedGame);
                 float max = normal.Count == reduced.Count && normal.Count > 0 ? normal.Zip(reduced, (a, b) => Vector2.Distance(a, b)).Max() : float.PositiveInfinity;
                 ok &= max <= 1e-3f;
                 rows.Add(new { scene = name, rel = tick - third.Fire, vertices = normal.Count, reducedVertices = reduced.Count, maxShift = float.IsFinite(max) ? max : -1 });
+                normalEnergy += Energy(s, view, Plain, Game);
+                reducedEnergy += Energy(s, view.At(tick) with { Reduced = true }, reducedPlain, reducedGame);
             }
+            float ratio = normalEnergy > 0 ? (float)(reducedEnergy / normalEnergy) : 0;
+            energyOk &= ratio <= .40f;
+            // Where the energy is: the same sums with one pass drawn at a time (third note, Fire and Fire+2).
+            var split = new Dictionary<string, double[]>();
+            foreach (string pass in new[] { "AutoloadPass", "AuraPass", "RibbonPass", "HeartPass", "SparkPass", "DripPass", "WispPass" })
+            {
+                double n0 = 0, r0 = 0;
+                RigHost.PassFilter = (_, applied) => applied == pass;
+                try
+                {
+                    foreach (int tick in new[] { third.Fire, third.Fire + 2 })
+                    {
+                        var view = s.View(r.Device, o.Width, o.Height, tick, false);
+                        n0 += Energy(s, view, Plain, Game);
+                        r0 += Energy(s, view.At(tick) with { Reduced = true }, reducedPlain, reducedGame);
+                    }
+                }
+                finally { RigHost.PassFilter = null; }
+                if (n0 + r0 > 0) split[pass] = new[] { Math.Round(n0), Math.Round(r0) };
+            }
+            energyRows.Add(new { scene = name, normalEnergy, reducedEnergy, ratio, byPassAtFire = split });
+            // No particle born on Fire under Reduced (sparks, embers, intake, drips): every tick of the third note's strike.
+            int particles = 0;
+            for (int tick = third.Fire; tick <= third.Fire + 20; tick++)
+            {
+                var view = s.View(r.Device, o.Width, o.Height, tick, true);
+                RigHost.ResetCounts();
+                r.Render(s, view, reducedGame, RigLayers.Apparition, r.Frame(view.Width, view.Height), Color.Transparent);
+                foreach (var (key, c) in RigHost.PassCounts) if (key.EndsWith(".SparkPass") || key.EndsWith(".DripPass")) particles += c.Vertices;
+            }
+            particleOk &= particles == 0;
+            particleRows.Add(new { scene = name, particleVertices = particles });
         }
-        Add("G7", "Reduced: skinned body vertices identical to Normal (diff energy <= 40% and no Fire-born particles need S2/S3)", Status(ok),
-            new { vertices = rows, energy = "not_run: " + RigDriver.Pending, particles = "not_run: " + RigDriver.Pending },
-            "Captured from every AutoloadPass draw of ScarletApparitions / ScarletChoir (the skinned mesh) through the device shim.");
+        Add("G7", "Reduced: skinned body vertices identical to Normal, decoration energy <= 40% of Normal, no Fire-born particles", Status(ok && energyOk && particleOk),
+            new { vertices = rows, energy = energyRows, particles = particleRows },
+            "In-game variant (material on, proposed motion). Vertices from every AutoloadPass draw of ScarletApparitions / ScarletChoir (the skinned mesh) through the device shim. "
+            + "Energy = sum over pixels of |luma(on) - luma(off)| of the material on the apparition layer, camera C, at Born+6..End of the third note. "
+            + "Particles = SparkPass / DripPass vertices under Reduced over Fire..Fire+20.");
     }
 
     // ---- G8: with no notes the bodies are today's picture --------------------------------------------------------
@@ -299,7 +493,7 @@ internal sealed class RigGates
             {
                 int tick = s.Phrase.FirstBorn - 400 + offset; // the rest a phrase leaves: no gesture alive
                 var view = empty.View(r.Device, o.Width, o.Height, tick, false);
-                var px = Pixels(empty, view, Normal, RigLayers.Apparition, Color.Transparent);
+                var px = Pixels(empty, view, Game, RigLayers.Apparition, Color.Transparent);
                 rows.Add(Check($"{name}-apparition-{offset}", px, view.Width, view.Height, name.StartsWith("act2") ? -1 : 1));
             }
         }
@@ -309,12 +503,13 @@ internal sealed class RigGates
             {
                 int tick = s.Phrase.FirstBorn - 400 + offset;
                 var view = s.View(r.Device, o.Width, o.Height, tick, false);
-                rows.Add(Check($"vespera-{offset}", Pixels(s, view, Normal, RigLayers.Vespera, Color.Transparent), view.Width, view.Height, 0));
+                rows.Add(Check($"vespera-{offset}", Pixels(s, view, Game, RigLayers.Vespera, Color.Transparent), view.Width, view.Height, 0));
                 rows.Add(Check($"companion-{offset}", Companion(view, tick), view.Width, view.Height, 0));
             }
         }
         Add("G8", "no notes: Crown/Choir within 1/255, Vespera and companion identical, Mantle by eye", compare ? Status(ok) : "baseline_written", rows,
-            compare ? "Compared with the baseline in " + Path.GetRelativePath(output, dir) : "Today's idle frames written to " + dir + "; later slices compare against them.");
+            compare ? "The in-game variant (material on, proposed motion, Vespera's command) with no gesture alive, compared with today's idle frames in " + Path.GetRelativePath(output, dir) + " (written before S2/S3/S4)."
+                : "Today's idle frames written to " + dir + "; later slices compare against them.");
 
         object Check(string label, Color[] px, int w, int h, int tolerance)
         {
@@ -434,7 +629,7 @@ internal sealed class RigGates
                 var view = WorldView(tick, out var world);
                 int w = view.Width, h = view.Height;
                 RigHost.PassFilter = BodyOnly;
-                try { r.Render(ground, view, Normal, RigLayers.Apparition, world, Color.Transparent); }
+                try { r.Render(ground, view, Game, RigLayers.Apparition, world, Color.Transparent); }
                 finally { RigHost.PassFilter = null; }
                 var px = RigRenderer.Read(world);
                 foreach (var (camera, scene) in new[] { ("A", ground), ("A2", air) })
@@ -500,34 +695,48 @@ internal sealed class RigGates
     // ---- G12: draw / vertex budget -----------------------------------------------------------------------------
     private void G12()
     {
-        var rows = new List<object>(); bool matchesDesign = true;
-        foreach (string name in Signatures)
+        var rows = new List<object>(); bool ok = true;
+        foreach (string name in Signatures.Concat(Basics))
         {
             var s = Scene(name, "C");
-            var third = s.Phrase.Plans[2];
             string tag = s.Phase switch { 0 => "crown", 1 => "mantle", _ => "choir" };
             var budget = Budget[tag];
             foreach (bool reduced in new[] { false, true })
             {
-                int draws = 0, vertices = 0, minDraws = int.MaxValue, maxDraws = 0;
-                foreach (int tick in new[] { third.Born + 6, third.Fire + 2, third.End + 4, s.Phrase.FirstBorn - 40 })
+                int minDraws = int.MaxValue, maxDraws = 0, maxVertices = 0, worstTick = 0, frames = 0;
+                var passMax = new Dictionary<string, int>();
+                var target = r.Frame(o.Width, o.Height);
+                for (int tick = s.First; tick <= s.Last; tick++, frames++)
                 {
                     var view = s.View(r.Device, o.Width, o.Height, tick, reduced);
                     RigHost.ResetCounts();
-                    Pixels(s, view, Normal with { Reduced = reduced }, RigLayers.Apparition, Color.Transparent);
+                    r.Render(s, view, Game with { Reduced = reduced }, RigLayers.Apparition, target, Color.Transparent);
                     var c = RigHost.Counts.TryGetValue(tag, out var found) ? found : default;
-                    draws = Math.Max(draws, c.Draws); vertices = Math.Max(vertices, c.Vertices);
-                    minDraws = Math.Min(minDraws, c.Draws); maxDraws = Math.Max(maxDraws, c.Draws);
+                    minDraws = Math.Min(minDraws, c.Draws);
+                    if (c.Draws > maxDraws) { maxDraws = c.Draws; worstTick = tick; }
+                    maxVertices = Math.Max(maxVertices, c.Vertices);
+                    foreach (var (key, pc) in RigHost.PassCounts)
+                    {
+                        if (!key.StartsWith(tag + "/")) continue;
+                        string passName = key[(key.IndexOf('.') + 1)..];
+                        passMax[passName] = Math.Max(passMax.TryGetValue(passName, out var m) ? m : 0, pc.Vertices);
+                    }
                 }
-                bool today = reduced ? maxDraws == budget.TodayReduced : minDraws >= budget.TodayNormalMin && maxDraws <= budget.TodayNormalMax;
-                matchesDesign &= today;
-                rows.Add(new { body = tag, reduced, todayDraws = new[] { minDraws, maxDraws }, todayVertices = vertices,
-                    budgetDraws = reduced ? budget.Reduced : budget.Normal, todayMatchesDesignCount = today });
+                int budgetDraws = reduced ? budget.Reduced : budget.Normal, today = reduced ? budget.TodayVerticesReduced : budget.TodayVertices;
+                bool pass = maxDraws <= budgetDraws && maxVertices - today <= budget.Added;
+                ok &= pass;
+                rows.Add(new
+                {
+                    body = tag, scene = name, reduced, frames, draws = new[] { minDraws, maxDraws }, budgetDraws, worstDrawTick = worstTick - s.Phrase.FirstBorn,
+                    vertices = maxVertices, todayVertices = today, addedVertices = maxVertices - today, budgetAdded = budget.Added,
+                    elements = Elements[tag].Select(x => new { x.Pass, max = passMax.TryGetValue(x.Pass, out var v) ? v : 0, design = x.Vertices }).ToArray(),
+                    passes = passMax, pass
+                });
             }
         }
-        Add("G12", "draws / vertices per body within §2.7", "not_run", rows,
-            "The §2.7 budget applies to the S2/S3 rigs. Today's counts (through the device shim) " + (matchesDesign ? "match" : "DO NOT match") + " the design's '今の draw' (Crown 32/11, Mantle 31/11, Choir 65-69/23).");
-        if (!matchesDesign) gates[^1] = gates[^1] with { Status = "fail", Note = gates[^1].Note + " The counter disagrees with the design's numbers: check the shim before trusting G12." };
+        Add("G12", "draws / vertices per body within §2.7 (every tick of every phrase, Normal and Reduced)", Status(ok), rows,
+            "In-game variant through the device shim, camera C. Gate: max draws <= §2.7 and per-frame vertices - today's <= §2.7's added vertices. "
+            + "elements lists the design's per-element numbers beside the measured maxima (not gated: the Mantle's 84 spark vertices cannot hold today's 16 free sparks, 96 vertices, which it now draws in the same batch).");
     }
 
     // ---- G13 / G14: the existing preview contracts on the new moves --------------------------------------------
@@ -607,35 +816,90 @@ internal sealed class RigGates
     private string Hash(RigScene s, int tick)
     {
         var view = s.View(r.Device, o.Width, o.Height, tick, false);
-        var px = Pixels(s, view, Normal, RigLayers.Frame & ~RigLayers.Labels, Color.Black);
+        var px = Pixels(s, view, Game, RigLayers.Frame & ~RigLayers.Labels, Color.Black);
         return Convert.ToHexString(SHA256.HashData(System.Runtime.InteropServices.MemoryMarshal.AsBytes(px.AsSpan())));
     }
 
-    // Skinned-mesh alpha > .05 at lags 0..21 (true past poses), dilated by 12 px at zoom 1.
-    private bool[] BodyRange(RigScene s, in ScarletView view, in RigVariant v)
+    // Skinned-mesh alpha > .05 at every lag 0..21 (true past poses) and at the design's six lags, each dilated by
+    // 12 px at zoom 1.
+    private (bool[] Range, bool[] DesignRange) BodyRanges(RigScene s, in ScarletView view, in RigVariant v)
     {
-        var union = new bool[view.Width * view.Height];
+        var union = new bool[view.Width * view.Height]; var design = new bool[view.Width * view.Height];
         RigHost.PassFilter = BodyOnly;
         try
         {
             foreach (int lag in Lags)
             {
                 var px = Pixels(s, view.At(view.Tick - lag), v, RigLayers.Apparition, Color.Transparent);
-                for (int i = 0; i < px.Length; i++) union[i] |= px[i].A > 12;
+                bool sampled = Array.IndexOf(DesignLags, lag) >= 0;
+                for (int i = 0; i < px.Length; i++) { bool a = px[i].A > 12; union[i] |= a; if (sampled) design[i] |= a; }
             }
         }
         finally { RigHost.PassFilter = null; }
-        return Dilate(union, view.Width, view.Height, RangeDilate * view.Zoom);
+        return (Dilate(union, view.Width, view.Height, RangeDilate * view.Zoom), Dilate(design, view.Width, view.Height, RangeDilate * view.Zoom));
     }
 
-    private bool[] Diff(RigScene s, in ScarletView view, RigLayers layers, in RigVariant a, in RigVariant b, int threshold)
+    // The body's own silhouette at this tick (skinned mesh alpha > .05), dilated by `dilate` px at zoom 1.
+    private bool[] BodyMask(RigScene s, in ScarletView view, in RigVariant v, float dilate)
+    {
+        Color[] px;
+        RigHost.PassFilter = BodyOnly;
+        try { px = Pixels(s, view, v, RigLayers.Apparition, Color.Transparent); }
+        finally { RigHost.PassFilter = null; }
+        var mask = new bool[px.Length];
+        for (int i = 0; i < px.Length; i++) mask[i] = px[i].A > 12;
+        return dilate > 0 ? Dilate(mask, view.Width, view.Height, dilate * view.Zoom) : mask;
+    }
+
+    // Light `b` adds over `a` (any channel up by more than `threshold`) and light it only takes away.
+    private (bool[] Added, bool[] Dimmed) Change(RigScene s, in ScarletView view, RigLayers layers, in RigVariant a, in RigVariant b, int threshold)
     {
         var x = Pixels(s, view, a, layers, Color.Transparent); var y = Pixels(s, view, b, layers, Color.Transparent);
-        var d = new bool[x.Length];
+        var added = new bool[x.Length]; var dimmed = new bool[x.Length];
         for (int i = 0; i < x.Length; i++)
-            d[i] = Math.Abs(x[i].R - y[i].R) > threshold || Math.Abs(x[i].G - y[i].G) > threshold || Math.Abs(x[i].B - y[i].B) > threshold || Math.Abs(x[i].A - y[i].A) > threshold;
-        return d;
+        {
+            added[i] = Added(y[i], x[i]) > threshold;
+            dimmed[i] = !added[i] && Added(x[i], y[i]) > threshold;
+        }
+        return (added, dimmed);
     }
+    private static int Added(Color on, Color off) => Math.Max(Math.Max(on.R - off.R, on.G - off.G), Math.Max(on.B - off.B, on.A - off.A));
+    private static float Y(Color c) => .2126f * c.R + .7152f * c.G + .0722f * c.B;
+
+    // Sum of |luma(b) - luma(a)| on the apparition layer (the material's decoration energy).
+    private double Energy(RigScene s, in ScarletView view, in RigVariant a, in RigVariant b)
+    {
+        var x = Pixels(s, view, a, RigLayers.Apparition, Color.Transparent); var y = Pixels(s, view, b, RigLayers.Apparition, Color.Transparent);
+        double sum = 0;
+        for (int i = 0; i < x.Length; i++) sum += MathF.Abs(Y(y[i]) - Y(x[i]));
+        return sum;
+    }
+
+    // S1's body envelopes per tick, as CrimsonRig.DrawEffigy computes them (the Choir: Send of its most advanced limb).
+    private static List<(int Tick, float Heat, float Ignite, float Send)> Envelopes(RigScene s, int from, int to)
+    {
+        var list = new List<(int, float, float, float)>();
+        Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
+        for (int t = from; t <= to; t++)
+        {
+            int n = RigMirror.Notes(s.Plans, s.Phase, t, s.Flipped, notes);
+            if (s.Phase == 2)
+            {
+                var c = ScarletBodyMaterial.Choir(t, notes[..n], false);
+                float send = 0;
+                for (int arm = 0; arm < 4; arm++) send = Math.Max(send, c.Limb(arm).Send);
+                list.Add((t, c.Heat, c.Ignite, send));
+            }
+            else
+            {
+                var m = s.Phase == 0 ? ScarletGestureMotion.Crown(t, notes[..n]) : ScarletGestureMotion.Mantle(t, notes[..n]);
+                var b = ScarletBodyMaterial.Apparition(t, notes[..n], m, s.Flipped, false);
+                list.Add((t, b.Heat, b.Ignite, b.Send));
+            }
+        }
+        return list;
+    }
+
 
     // Inside the field, outside every displayed signature footprint (warning to residue), plus the central 94 px band.
     private bool[] SafeZones(RigScene s, in ScarletView view, int tick)
@@ -731,6 +995,17 @@ internal sealed class RigGates
         }
         r.Device.SetRenderTarget(null);
         return RigRenderer.Read(target);
+    }
+
+    // SCARLET_GATE_DUMPS=<dir>: frames behind a gate's count, for looking (G1 outside-range decoration, G3 over-limit pixels).
+    private static readonly string? Dumps = Environment.GetEnvironmentVariable("SCARLET_GATE_DUMPS") is { Length: > 0 } d ? d : null;
+    private void Dump(string name, Color[] px, int w, int h)
+    {
+        Directory.CreateDirectory(Dumps!);
+        using var texture = new Texture2D(r.Device, w, h);
+        texture.SetData(px);
+        using var file = File.Create(Path.Combine(Dumps!, name));
+        texture.SaveAsPng(file, w, h);
     }
 
     private string BaselineDir(string gate) => Path.Combine(o.Baseline.Length > 0 ? o.Baseline : Path.Combine(output, "baseline"), gate);

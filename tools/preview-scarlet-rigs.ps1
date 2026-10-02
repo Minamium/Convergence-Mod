@@ -7,6 +7,10 @@
 #
 #   pwsh tools/preview-scarlet-rigs.ps1                                         # Act I-III signature, camera A2, gates
 #   pwsh tools/preview-scarlet-rigs.ps1 -Acts 1,2,3 -Phrases signature,basic -Cameras A,A2,C,V -Reduced both
+#   pwsh tools/preview-scarlet-rigs.ps1 -Cameras C -Material both -Gates off    # today's shading next to the material
+#
+# The defaults are the in-game picture: the body material on and the proposed motion (S2/S3) with Vespera's command
+# (S4). -Material off / -Motion current render today's picture for comparison.
 #   pwsh tools/preview-scarlet-rigs.ps1 -Scenes act1-signature -Cameras C -Frames png -Limit 30 -Gates off
 #   pwsh tools/preview-scarlet-rigs.ps1 -Gates only                             # gates.json only
 #
@@ -24,8 +28,8 @@ param(
     [switch]$Trio,                                     # add act1-signature-trio (columns 1, 5, 8)
     [string[]]$Cameras = @('A2'),                      # A (ground), A2 (air), C (apparition x2), V (Vespera x2), B (review x0.65)
     [ValidateSet('off', 'on', 'both')][string]$Reduced = 'off',
-    [ValidateSet('off', 'on', 'both')][string]$Material = 'off',
-    [ValidateSet('current', 'proposed')][string]$Motion = 'current',
+    [ValidateSet('off', 'on', 'both')][string]$Material = 'on',
+    [ValidateSet('current', 'proposed')][string]$Motion = 'proposed',
     [ValidateSet('on', 'off', 'both')][string]$Yield = 'on',
     [ValidateSet('stream', 'png', 'none')][string]$Frames = 'stream',
     [ValidateSet('auto', 'all', 'off')][string]$Stills = 'auto',
@@ -116,7 +120,7 @@ if (Test-Path -LiteralPath $stale) { Remove-Item -LiteralPath $stale }
 
 # ---- project ----------------------------------------------------------------------------------------------------
 $files = @(
-    'tools/fixtures/ScarletRigScene.cs', 'tools/fixtures/ScarletRigGates.cs', 'tools/fixtures/ScarletPreviewHost.cs',
+    'tools/fixtures/ScarletRigScene.cs', 'tools/fixtures/ScarletRigGates.cs', 'tools/fixtures/ScarletConductorGates.cs', 'tools/fixtures/ScarletPreviewHost.cs',
     'tools/fixtures/ScarletPreviewAssets.cs', 'tools/fixtures/ScarletPreviewPlanner.cs', 'tools/fixtures/ScarletPreviewContract.cs',
     'tools/fixtures/ScarletPreviewSheet.cs', 'Common/Raids/Arena/RaidFieldGeometry.cs', 'Client/Graphics/WorldGraphicsScope.cs')
 # The production presentation linked unchanged: rigs, Vespera, forecast/orb energy, seals, the shared motion clock, the music mixer.

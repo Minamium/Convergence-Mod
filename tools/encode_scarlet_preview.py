@@ -13,7 +13,8 @@
   DynamicSoundEffectInstance at MusicGain * Main.musicVolume; sound effects scale linearly) or "unity". One fixed
   make-up gain (+12 dB) for every video, lowered only when a mix would pass -1 dBFS; the gain is recorded.
 * --pairs: side-by-side videos (left off, right on) for the material and the residue-yield switches when both
-  renders exist.
+  renders exist (<scene>-<camera>-<variant without -material>-offon.webm, <scene>-<camera>-<variant>-yield-offon.webm).
+* The page opens with the design's owner list (§4.4 videos 1-20) mapped to the files that exist.
 * --page: review/index.html with the videos, stills, state curves, gates, G10 visibility and skipped renders. Serve
   the output directory with a local HTTP server that answers Range requests (videos seek), then open /review/.
 
@@ -194,6 +195,59 @@ class Mixer:
 VP9 = ['-c:v', 'libvpx-vp9', '-crf', '32', '-b:v', '0', '-pix_fmt', 'yuv420p', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '4']
 
 
+def parse_variant(variant: str) -> dict:
+    """The harness's RigVariant.Suffix: normal|reduced, then -material, -proposed, -yieldoff in that order."""
+    parts = variant.split('-')
+    flags = set(parts[1:])
+    if parts[0] not in ('normal', 'reduced') or not flags <= {'material', 'proposed', 'yieldoff'}:
+        raise ValueError(f'unknown variant {variant}')
+    return {'reduced': parts[0] == 'reduced', 'material': 'material' in flags, 'proposed': 'proposed' in flags, 'yieldoff': 'yieldoff' in flags}
+
+
+def variant_name(reduced: bool, material: bool, proposed: bool, yieldoff: bool) -> str:
+    return ('reduced' if reduced else 'normal') + ('-material' if material else '') + ('-proposed' if proposed else '') + ('-yieldoff' if yieldoff else '')
+
+
+def pair_plan(keys: set) -> list:
+    """(scene, camera, off variant, on variant, target stem) for every material and residue-yield pair both renders of
+    which exist. keys: {(scene, camera, variant)}."""
+    plan = []
+    for scene, camera, variant in sorted(keys):
+        v = parse_variant(variant)
+        if not v['material']:
+            on = variant_name(v['reduced'], True, v['proposed'], v['yieldoff'])
+            if (scene, camera, on) in keys:
+                plan.append((scene, camera, variant, on, f'{scene}-{camera}-{variant}-offon'))
+        if not v['yieldoff']:
+            off = variant_name(v['reduced'], v['material'], v['proposed'], True)
+            if (scene, camera, off) in keys:
+                plan.append((scene, camera, off, variant, f'{scene}-{camera}-{variant}-yield-offon'))
+    return plan
+
+
+# The design's owner outputs (§4.4 table): number, design name, the harness file it is, what it is for.
+def owner_videos() -> list:
+    game = variant_name(False, True, True, False)
+    rows = []
+    for act in (1, 2, 3):
+        rows.append((act, f'act{act}-signature-A2-normal.webm', f'act{act}-signature-A2-{game}.webm', 'the main call: in the air, real size, sound A'))
+    for act in (1, 2, 3):
+        rows.append((3 + act, f'act{act}-signature-C-normal-offon.webm', f'act{act}-signature-C-{variant_name(False, False, True, False)}-offon.webm',
+                     'body material off (left) and on (right), proposed motion in both'))
+    for act in (1, 2, 3):
+        rows.append((6 + act, f'act{act}-signature-A-normal.webm', f'act{act}-signature-A-{game}.webm', 'visible from the ground? (design §6 Q1)'))
+    for act in (1, 2, 3):
+        rows.append((9 + act, f'act{act}-basic-A2-normal.webm', f'act{act}-basic-A2-{game}.webm', 'carried over to the basic phrase (Register .6)'))
+    for act in (1, 2, 3):
+        rows.append((12 + act, f'act{act}-signature-A2-reduced.webm', f'act{act}-signature-A2-{variant_name(True, True, True, False)}.webm', 'Reduced Effects'))
+    for act in (1, 2, 3):
+        rows.append((15 + act, f'act{act}-signature-V-normal.webm', f'act{act}-signature-V-{game}.webm', "Vespera's command"))
+    for act in (1, 2):
+        rows.append((18 + act, f'act{act}-signature-A2-yield-offon.webm', f'act{act}-signature-A2-{game}-yield-offon.webm',
+                     'signature residue: yield off (left) and on (right) (design §6 Q2)'))
+    return rows
+
+
 def run(cmd: list) -> None:
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
@@ -227,6 +281,17 @@ def pair(ff: str, left: pathlib.Path, right: pathlib.Path, target: pathlib.Path)
 
 # ---- page ----------------------------------------------------------------------------------------------------------
 
+SERIES = ['apparition charge', 'heat', 'ignite', 'drain', 'send']
+
+
+def body_value(tick: dict, name: str) -> float:
+    """S1's body envelopes as the rigs draw them (ticks[].attack.body); the Choir's Send is its most advanced limb."""
+    body = ((tick.get('attack') or {}).get('body')) or {}
+    if name == 'send' and 'limbs' in body:
+        return max((limb[1] for limb in body['limbs']), default=0.0)
+    return float(body.get(name, 0.0))
+
+
 def curves(state: dict) -> dict:
     """Compact per-tick series for the page (relative ticks)."""
     ticks = state['ticks']
@@ -235,8 +300,7 @@ def curves(state: dict) -> dict:
         'rel': [t['rel'] for t in ticks],
         'series': {
             'apparition charge': [t['apparition'][0] for t in ticks],
-            'apparition recoil': [t['apparition'][1] for t in ticks],
-            'backdrop impulse': [t['backdrop'][1] for t in ticks],
+            **{name: [body_value(t, name) for t in ticks] for name in SERIES[1:]},
         },
         'origin': ticks[0]['tick'] - ticks[0]['rel'] if ticks else 0,
         'plans': [{'technique': p['technique'], 'pulse': p['pulse'], 'role': p['role'], 'born': p['born'], 'fire': p['fire'], 'end': p['end']}
@@ -247,9 +311,9 @@ def curves(state: dict) -> dict:
 
 PAGE_CSS = """
 :root{color-scheme:dark;--bg:#121011;--panel:#1b1819;--line:#3a3436;--text:#f2eef0;--muted:#b9b0b4;--faint:#857c80;
---accent:#e66767;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--pass:#199e70;--fail:#e66767;--warn:#c98500}
+--accent:#e66767;--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#b07be8;--s5:#c9a400;--pass:#199e70;--fail:#e66767;--warn:#c98500}
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#f6f4f2;--panel:#fcfcfb;--line:#ddd7d3;
---text:#0b0b0b;--muted:#52514e;--faint:#77736e;--accent:#b8323a;--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--pass:#147a55;--fail:#b8323a;--warn:#8a5d00}}
+--text:#0b0b0b;--muted:#52514e;--faint:#77736e;--accent:#b8323a;--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#7a45c2;--s5:#8f7400;--pass:#147a55;--fail:#b8323a;--warn:#8a5d00}}
 :root[data-theme="dark"]{color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,"Segoe UI","Yu Gothic UI",sans-serif}
 main{max-width:1240px;margin:0 auto;padding:24px 16px 64px}h1{font-size:22px;margin:0 0 4px}h2{font-size:18px;margin:36px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
@@ -265,7 +329,7 @@ details{margin:6px 0}summary{cursor:pointer;color:var(--muted)}
 
 PAGE_JS = """
 const DATA = JSON.parse(document.getElementById('data').textContent);
-const SERIES = [['apparition charge','--s1'],['apparition recoil','--s2'],['backdrop impulse','--s3']];
+const SERIES = [['apparition charge','--s1'],['heat','--s2'],['ignite','--s3'],['drain','--s4'],['send','--s5']];
 for (const c of DATA.curves) {
   const host = document.getElementById('curve-' + c.scene); if (!host) continue;
   const W = 960, H = 220, L = 40, R = 10, T = 18, B = 26, x0 = c.rel[0], x1 = c.rel[c.rel.length - 1];
@@ -309,6 +373,17 @@ def page(out: pathlib.Path, index: dict, gates: dict | None, videos: list, pairs
     if audio_meta:
         parts.append(f'<p class="cap">Sound: set A from ScarletSounds.cs on the recorded Born/Fire ticks; sliders {e(audio_meta["sliders"])}; '
                      f'BGM = arranged Graceful Ordeal at MusicGain x music slider; one +12 dB make-up for all videos (lowered only to stay under -1 dBFS).</p>')
+    existing = {v['file'] for v in videos + pairs}
+    parts.append('<h2>Owner outputs (design §4.4)</h2><p class="cap">The in-game picture is "material on, proposed motion" '
+                 '(the body material, the approved motion and Vespera\'s command). Each video carries sound set A; the "-bgm" twin adds the arranged score.</p>'
+                 '<table><tr><th>#</th><th>design name</th><th>file</th><th>for</th></tr>')
+    for number, design, file, purpose in owner_videos():
+        bgm = file.replace('.webm', '-bgm.webm')
+        cell = (f'<a href="../videos/{e(file)}">{e(file)}</a>' if file in existing else f'<span class="fail">missing: {e(file)}</span>')
+        if bgm in existing:
+            cell += f' (<a href="../videos/{e(bgm)}">+BGM</a>)'
+        parts.append(f'<tr><td>{number}</td><td><code>{e(design)}</code></td><td>{cell}</td><td>{e(purpose)}</td></tr>')
+    parts.append('</table>')
     parts.append('<h2>Videos</h2>')
     by_scene: dict = {}
     for v in videos + pairs:
@@ -329,11 +404,13 @@ def page(out: pathlib.Path, index: dict, gates: dict | None, videos: list, pairs
                 parts.append(f'<div class="card"><a href="{e(src)}"><img loading="lazy" src="{e(src)}" alt="{e(label)}"></a><div class="cap">{e(label)}</div></div>')
             parts.append('</div>')
     if curve_sets:
-        parts.append('<h2>Attack inputs per tick (state.json)</h2>'
-                     '<p class="cap">What today\'s rigs read from the plans: the apparition\'s Signal charge and recoil, and the backdrop strike impulse. '
-                     'Dashed lines: warnings (Born); solid lines: strikes (Fire); triangles: sound cues. The S1 notes, motion and body envelopes (Heat, Ignite, Front, Drain, Send, Return, Snap) are recorded per tick in state.json (ticks[].attack); the rigs draw them only after S2/S3.</p>')
+        parts.append('<h2>Attack clock per tick (state.json)</h2>'
+                     '<p class="cap">What the rigs draw from the plans: the apparition\'s Signal charge (today\'s input) and S1\'s body envelopes the material draws '
+                     '(Heat: the warning\'s draw-in, Ignite: the strike, Drain: the body sinking with the river, Send: the blood front reaching the hooks / fingertips, 1 on Fire; '
+                     'the Choir\'s Send is its most advanced limb). Dashed lines: warnings (Born); solid lines: strikes (Fire); triangles: sound cues. '
+                     'Every channel (Front, Return, Snap, motion, per-arm values) is in state.json ticks[].attack.</p>')
         legend = ''.join(f'<span><i style="background:var({c})"></i>{e(n)}</span>' for n, c in
-                         [('apparition charge', '--s1'), ('apparition recoil', '--s2'), ('backdrop impulse', '--s3')])
+                         [('apparition charge', '--s1'), ('heat', '--s2'), ('ignite', '--s3'), ('drain', '--s4'), ('send', '--s5')])
         for c in curve_sets:
             parts.append(f'<h3>{e(c["scene"])} ({e(c["camera"])}-{e(c["variant"])})</h3><div class="legend">{legend}</div>'
                          f'<div class="chart"><div id="curve-{e(c["scene"])}"></div><div class="tip"></div></div>'
@@ -389,7 +466,8 @@ def main(argv: list | None = None) -> int:
     mixer = Mixer(ff, args.sliders) if args.sfx_a or args.bgm else None
     videos, pairs, curve_sets, report = [], [], [], {}
     seen_curves = set()
-    for r in index.get('renders', []):
+    renders = sorted(index.get('renders', []), key=lambda r: (r['scene'], r['variant'].startswith('reduced'), r['camera'] != 'A2'))
+    for r in renders:
         folder = out / r['dir']
         state = json.loads((folder / 'state.json').read_text(encoding='utf-8'))
         if r['scene'] not in seen_curves and r['camera'] in ('A2', 'A', 'C', 'V', 'B'):
@@ -421,21 +499,15 @@ def main(argv: list | None = None) -> int:
             report[f'{name}-bgm.webm'] = meta
         print(f'{name}: {"sound A " if args.sfx_a else ""}{"+ BGM" if args.bgm else ""}')
     if args.pairs:
-        names = {f'{r["scene"]}|{r["camera"]}|{r["variant"]}': r for r in index.get('renders', [])}
-        for key, r in names.items():
-            scene, camera, variant = key.split('|')
-            for off_variant, on_variant, label in (
-                    (variant, variant + '-material', 'offon'),
-                    (variant + '-yieldoff', variant, 'yield-offon')):
-                if variant.endswith(('-material', '-yieldoff')) or f'{scene}|{camera}|{on_variant}' not in names or f'{scene}|{camera}|{off_variant}' not in names:
-                    continue
-                left, right = videos_dir / f'{scene}-{camera}-{off_variant}.webm', videos_dir / f'{scene}-{camera}-{on_variant}.webm'
-                if not left.exists() or not right.exists():
-                    continue
-                target = videos_dir / (f'{scene}-{camera}-{variant}-offon.webm' if label == 'offon' else f'{scene}-{camera}-yield-offon.webm')
-                pair(ff, left, right, target)
-                pairs.append({'scene': scene, 'file': target.name, 'note': 'left off, right on'})
-                print(f'{target.name}: side by side')
+        keys = {(r['scene'], r['camera'], r['variant']) for r in index.get('renders', [])}
+        for scene, camera, off_variant, on_variant, stem in pair_plan(keys):
+            left, right = videos_dir / f'{scene}-{camera}-{off_variant}.webm', videos_dir / f'{scene}-{camera}-{on_variant}.webm'
+            if not left.exists() or not right.exists():
+                continue
+            target = videos_dir / f'{stem}.webm'
+            pair(ff, left, right, target)
+            pairs.append({'scene': scene, 'file': target.name, 'note': 'left off, right on'})
+            print(f'{target.name}: side by side')
     if not args.pairs:
         for path in sorted(videos_dir.glob('*offon.webm')):
             pairs.append({'scene': path.name.split('-')[0] + '-' + path.name.split('-')[1], 'file': path.name, 'note': 'left off, right on'})

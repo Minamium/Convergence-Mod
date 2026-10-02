@@ -28,7 +28,10 @@ internal static class RigHost
     // G12 accounting: draws / vertices per tag ("crown", "mantle", "choir", "vespera", "field").
     internal static string Tag = "";
     internal static readonly Dictionary<string, (int Draws, int Vertices)> Counts = new();
-    internal static void ResetCounts() => Counts.Clear();
+    // The same per tag and pass ("crown/ScarletApparitions.SparkPass"): G7 (no Fire-born particles under Reduced) and
+    // the G12 vertex breakdown.
+    internal static readonly Dictionary<string, (int Draws, int Vertices)> PassCounts = new();
+    internal static void ResetCounts() { Counts.Clear(); PassCounts.Clear(); }
 
     // The last pass a ManagedShader applied (every production draw applies its pass right before drawing).
     internal static string LastShader = "", LastPass = "";
@@ -85,6 +88,9 @@ internal sealed class PreviewDevice
         int count = type == PrimitiveType.TriangleList ? primitives * 3 : primitives + 2;
         var tally = RigHost.Counts.TryGetValue(RigHost.Tag, out var found) ? found : default;
         RigHost.Counts[RigHost.Tag] = (tally.Draws + 1, tally.Vertices + count);
+        string key = RigHost.Tag + "/" + RigHost.LastShader + "." + RigHost.LastPass;
+        var passTally = RigHost.PassCounts.TryGetValue(key, out var seen) ? seen : default;
+        RigHost.PassCounts[key] = (passTally.Draws + 1, passTally.Vertices + count);
         if (RigHost.MeshCapture is { } capture && RigHost.LastPass == "AutoloadPass"
             && RigHost.LastShader is "ScarletApparitions" or "ScarletChoir" && vertices is VertexPositionColorTexture[] mesh)
             for (int i = offset; i < offset + count; i++) capture.Add(new Vector2(mesh[i].Position.X, mesh[i].Position.Y));

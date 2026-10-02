@@ -149,7 +149,7 @@ class HarnessContractTests(unittest.TestCase):
             self.assertIn(call, driver)
         self.assertIn('ScarletBodyMaterial.Apparition(age, notes[..noted], motion, flipped, reduced)', effigy)
         self.assertIn('ScarletBodyMaterial.Apparition(age, notes[..noted], motion, s.Flipped, reduced)', driver)
-        self.assertIn('CrimsonRig.DrawPerformer(', driver)
+        self.assertIn('CrimsonRig.DrawConductor(', driver)
 
     def test_no_beat_figure_and_no_thread_language_in_the_harness(self):
         for name in ('ScarletRigScene.cs', 'ScarletRigGates.cs', 'ScarletPreviewHost.cs'):
