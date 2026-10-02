@@ -18,11 +18,11 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -17.1 LUFS (played at volume 0.7: -20.2 LUFS effective), true peak -1.9 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -17.1 LUFS (played at volume 0.7: -20.2 LUFS effective), true peak -2.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `8c4b2a100dabff66d881b79a98c9f206e801cb724ab385bde4edea1ffbefc44b`
+- SHA256: `52bb1e6166664656d2ed8fe7662c1fe74be8588122997d9e232986083bb0b078`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisFire.ogg`
 - Asset ID: doll-weapon-sfx-lacunairisfire-20261003
@@ -32,11 +32,11 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -9.7 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -10.5 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `0afe9dda65f1529a70984a566c8991165e0904777a17649b3f1a523192f40f76`
+- SHA256: `c01c885d6196bb74368de60dfee80592502d9b97295a2aa6cb01c3a613f55e99`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletWarn.ogg`
 - Asset ID: doll-weapon-sfx-lacunapelletwarn-20261003
@@ -46,11 +46,11 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -21.1 LUFS (played at volume 0.55: -26.3 LUFS effective), true peak -1.2 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -20.9 LUFS (played at volume 0.55: -26.1 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `99c90e4c7e8ea2ac62ad6086ba21ea6ff466eca8e2fbecf3e63121a57b0225bf`
+- SHA256: `1f40b840738368eca55260f568ee094ddeb06bb8aa0c07244ab4bab4600d70a6`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletFire.ogg`
 - Asset ID: doll-weapon-sfx-lacunapelletfire-20261003
@@ -74,11 +74,11 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -4.4 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -4.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `979a926762cbe2c7862da3484b09a46153c50a1e9fac11fcae0cff06e72af177`
+- SHA256: `6b0f021392c23d55c118bb081d7789534688d513a651a523f026356550275d27`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaMergeWarn.ogg`
 - Asset ID: doll-weapon-sfx-lacunamergewarn-20261003
@@ -200,11 +200,11 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -5.9 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -6.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `0ed64cbd7f8c4dc791a481eaa5c2d3aa56330a08e29cbda0a4750b6f644244b5`
+- SHA256: `34eaec84cba0afb3adc23b8dd6514b6493d3196536b610706319a9d06af7feb9`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamEnd.ogg`
 - Asset ID: doll-weapon-sfx-lacunabeamend-20261003
@@ -232,7 +232,7 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `9f354bf63f482556bb22a5c6df38ccc7e8f80af6a78e0818e2925b3e903e4555`
+- SHA256: `27222a3dd45eeb4e32a0b03467a3cbc0f33bd7b56911c4c72c0821c0ab38e30f`
 
 ### Lacuna Testament void material — 2026-10-03
 

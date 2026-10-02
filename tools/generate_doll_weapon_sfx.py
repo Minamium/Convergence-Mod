@@ -269,10 +269,10 @@ def _puff(dur, rng, cutoff=520):
 def lacuna_iris_warn(s, rng):
     mix = seconds(0.5)
     place(mix, pan(_sweep(0.12, 2200, 5200, rng, bands=8) * np.linspace(0.3, 1, round(0.12 * RATE))[:, None], -0.15), 0.0, -14)
-    for k, at in enumerate((0.012, 0.05, 0.088)):
-        place(mix, dsp.porcelain_ring(3900 + 520 * k, 0.05, rng, decay=0.008, side=-0.3 + 0.25 * k), at, -16 - 2 * k)
+    for k, (at, note) in enumerate(((0.012, "Bb7"), (0.05, "C8"), (0.088, "Eb8"))):
+        place(mix, dsp.porcelain_ring(dsp.hz(note), 0.05, rng, decay=0.008, side=-0.3 + 0.25 * k), at, -16 - 2 * k)
     place(mix, pan(dsp.brass_click(rng, 2350, decay=0.005, thud=0.45), -0.1), _ticks(LACUNA["frame_parting"]), -4)
-    place(mix, dsp.porcelain_ring(4400, 0.06, rng, decay=0.01, side=0.1), _ticks(LACUNA["frame_parting"]) + 0.002, -13)
+    place(mix, dsp.porcelain_ring(dsp.hz("C8"), 0.06, rng, decay=0.01, side=0.1), _ticks(LACUNA["frame_parting"]) + 0.002, -13)
     place(mix, pan(dsp.brass_click(rng, 2600, decay=0.004, thud=0.25), 0.05), _ticks(LACUNA["frame_half"]), -9)
     return room(mix, 0.1, 0.42, 0.08)
 
@@ -282,8 +282,8 @@ def lacuna_iris_warn(s, rng):
      "ゲームでは虹彩の順に F5 A♭5 B♭5 C6 E♭6 F6 A♭6 と一段ずつ上げて鳴らす）、下に虚無の小さな「ぽっ」。")
 def lacuna_iris_fire(s, rng):
     mix = seconds(0.75)
-    place(mix, dsp.porcelain_ring(3150, 0.12, rng, decay=0.018, side=-0.1), 0.0, -6)
-    place(mix, dsp.porcelain_ring(4380, 0.1, rng, decay=0.012, side=0.15), 0.003, -10)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.12, rng, decay=0.018, side=-0.1), 0.0, -6)
+    place(mix, dsp.porcelain_ring(dsp.hz("F7"), 0.1, rng, decay=0.012, side=0.15), 0.003, -10)
     place(mix, pan(dsp.brass_click(rng, 1900, decay=0.006, thud=0.7), 0.0), 0.0, -9)
     place(mix, pan(dsp.box_tine(dsp.hz("C6"), 0.7, rng), 0.05), 0.006, -2)
     place(mix, _puff(0.14, rng, 420), 0.004, -15)
@@ -295,7 +295,7 @@ def lacuna_iris_fire(s, rng):
 def lacuna_pellet_warn(s, rng):
     mix = seconds(0.2)
     place(mix, pan(dsp.brass_click(rng, 2950, decay=0.0032, thud=0.2, tick=0.7), 0.1), 0.0, -2)
-    place(mix, dsp.porcelain_ring(5200, 0.04, rng, decay=0.006, side=-0.1), 0.004, -14)
+    place(mix, dsp.porcelain_ring(dsp.hz("Eb8"), 0.04, rng, decay=0.006, side=-0.1), 0.004, -14)
     return room(mix, 0.06, 0.16, 0.05)
 
 
@@ -315,8 +315,8 @@ def lacuna_pellet_fire(s, rng):
      "弾が実際に当たったときだけ鳴る（時間切れや持ち主の行動不能で消えた弾は鳴らない）。くぐもった磁器の「トッ」と暗い空気の吐息。")
 def lacuna_pellet_hit(s, rng):
     mix = seconds(0.26)
-    place(mix, dsp.porcelain_ring(930, 0.12, rng, decay=0.02, side=0.0), 0.0, -3)
-    place(mix, dsp.porcelain_ring(2150, 0.06, rng, decay=0.008, side=0.2), 0.001, -12)
+    place(mix, dsp.porcelain_ring(dsp.hz("Bb5"), 0.12, rng, decay=0.02, side=0.0), 0.0, -3)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.06, rng, decay=0.008, side=0.2), 0.001, -12)
     place(mix, _puff(0.07, rng, 650), 0.0, -8)
     place(mix, dsp.porcelain_crack(0.06, rng, count=3, spread=0.012, low=2600, high=4800), 0.004, -20)
     return room(mix, 0.06, 0.22, 0.06)
@@ -474,8 +474,8 @@ def lacuna_widen_3(s, rng):
      "光線が敵に当たっている間、20tickに1回まで。低い磁器の共鳴と、虚無のやわらかなパチパチ。")
 def lacuna_beam_hit(s, rng):
     mix = seconds(0.3)
-    place(mix, dsp.porcelain_ring(430, 0.2, rng, decay=0.05, side=0.0), 0.0, -3)
-    place(mix, dsp.porcelain_ring(1290, 0.1, rng, decay=0.02, side=0.15), 0.002, -11)
+    place(mix, dsp.porcelain_ring(dsp.hz("Ab4"), 0.2, rng, decay=0.05, side=0.0), 0.0, -3)
+    place(mix, dsp.porcelain_ring(dsp.hz("Eb6"), 0.1, rng, decay=0.02, side=0.15), 0.002, -11)
     place(mix, lp(dsp.porcelain_crack(0.1, rng, count=4, spread=0.04, low=1800, high=4200), 3500), 0.006, -12)
     place(mix, _puff(0.08, rng, 300), 0.0, -12)
     return room(mix, 0.08, 0.26, 0.07)
@@ -498,12 +498,12 @@ def lacuna_beam_end(s, rng):
 
 
 @cue("LacunaBeamMiss", -13, "Lacuna", 0.9, 0.8,
-     "マナが尽きて儀式が崩れる（失敗）。オルガンが途切れ途切れに3回つまずき、磁器がひび割れ、音程が F3 から C3 へ"
+     "マナが尽きて儀式が崩れる（失敗）。オルガンが F・E♭・C と下がりながら途切れ途切れに3回つまずき、磁器がひび割れ、音程が F3 から C3 へ"
      "沈みながら消える。放したときの LacunaBeamEnd より低く暗い。")
 def lacuna_beam_miss(s, rng):
     mix = seconds(0.95)
-    for k, (at, dur) in enumerate(((0.0, 0.07), (0.1, 0.06), (0.19, 0.09))):
-        blip = dsp.organ_pad([dsp.hz("F3") * 2 ** (-k * 1.5 / 12), dsp.hz("C4") * 2 ** (-k * 1.5 / 12)], dur, rng, attack=0.006,
+    for k, (at, dur, low, high) in enumerate(((0.0, 0.07, "F3", "C4"), (0.1, 0.06, "Eb3", "Bb3"), (0.19, 0.09, "C3", "F3"))):
+        blip = dsp.organ_pad([dsp.hz(low), dsp.hz(high)], dur, rng, attack=0.006,
                              release=0.02, harmonics=10, rolloff=1.2, chiff=0.0, breath=0.4)
         place(mix, blip, at, -6 - 2 * k)
         place(mix, pan(_puff(0.05, rng, 700), 0.2 * (k - 1)), at, -14)
