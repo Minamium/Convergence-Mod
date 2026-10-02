@@ -1,6 +1,6 @@
 {
   "scope": "Scarlet Invocation Act signature moves: CinderCurtain (17, Act I), ShroudRope (18, Act II) and FourHands (19, Act III) replace the four basic notes of every third phrase (serial % 3 == 0) of Acts I-III; the seal crossflow stays the fifth note and Final is unchanged. Geometry lives in the Terraria-free CrimsonSignatureMoves and is shared by forecast, drawing and native collision. Damage stays at the rehearsal 1. No motions or new art",
-  "target_build": "0.3.68 / protocol79 (feat/scarlet-signature-moves, stacked on feat/scarlet-music-grid; protocol 78 is the music-grid integration)",
+  "target_build": "0.3.69 / protocol79 (feat/scarlet-signature-moves, stacked on feat/scarlet-music-grid; protocol 78 is the music-grid integration)",
   "design": "lead design .local/design/signature-moves.md (2026-10-02), revised three times after review",
   "fairness_model": {
     "forecast": "one beat (28 ticks); the player reacts only to forecasts that are already visible (Born <= t) and may plan ahead only from what is shown",
