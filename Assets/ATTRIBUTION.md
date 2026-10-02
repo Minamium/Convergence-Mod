@@ -23,7 +23,7 @@ The shared audio basis of the Doll reward weapon refresh and the companion's new
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.5 LUFS (played at volume 0.9: -11.4 LUFS effective), true peak -5.4 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings and project-owned masters; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, length, loudness and true-peak checks; subjective listening and in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-02 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the A/B audition page over the Phase I and Phase III music); in-game mix not_run
 - SHA256: `f821d725a0991b879337b1d17b414c0bfe247eece20b9ca50a8824b3733d0b66`
 
 ### Waltz of the Ebon Manor reward pixel art — 2026-10-02

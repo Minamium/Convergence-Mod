@@ -447,7 +447,7 @@ The shared audio basis of the Doll reward weapon refresh and the companion's new
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness {r['short_term_lufs']:.1f} LUFS (played at volume {r['volume']}: {r['effective_lufs']:.1f} LUFS effective), true peak {r['true_peak_dbfs']:.1f} dBFS; pinned Ogg serial
 - License and redistribution terms: {'CC0 1.0 recordings and project-owned masters; the layered cue follows the existing project asset terms' if external else 'original project asset under the existing project terms'}
 - Required attribution: {'none required by CC0; retain the table above as courtesy credit' if external else 'none; retain this provenance'}
-- Reviewer and review date: Claude, 2026-10-02; deterministic regeneration, length, loudness and true-peak checks; subjective listening and in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-02 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the A/B audition page over the Phase I and Phase III music); in-game mix not_run
 - SHA256: `{r['ogg_sha256']}`
 """)
     return head + "\n" + "\n".join(blocks)
