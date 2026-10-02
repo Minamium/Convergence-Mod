@@ -78,7 +78,7 @@ public sealed class DollCompanionVisuals : GlobalProjectile
         float age = p.ai[0];
         if (age < previousAge) { previousAge = -1; RitualWeaponFeedback.Stop(ref charge); }
         bool Crossed(int beat) => previousAge < beat && age >= beat && age < beat + 3;
-        if (first) RitualWeaponFeedback.Sound("DollSummon", p.Center, .325f);
+        if (first) Weapons.DollWeaponAudio.Play("CompanionSummon", p.Center, .9f);
         for (int i = 0; i < 3; i++)
             if (Crossed(DollCompanionRules.NeedleTick(i))) RitualWeaponFeedback.Sound("DollThread", p.Center, .34f);
         if (Crossed(DollCompanionRules.Charge)) charge = RitualWeaponFeedback.Sound("DollCharge", p.Center, .36f);

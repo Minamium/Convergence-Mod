@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Give the Hollow Doll's companion a new arrival sound: a brass key turns and clicks, a short music-box phrase climbs and lands on a high chime over a soft organ breath, replacing the old noise bloom at the same loudness. It plays at the same moment as before; gameplay and protocol are unchanged.
+
 - Fix Requiem of the Hollow Doll endings: in Single Player the raid now reports whether it was won or lost and why (it used to say the end was unknown), and a Defeat ends in the normal death as in multiplayer. A cancel sent while a won score is still settling no longer throws the Victory away. The Central Crush and the final Core check now announce themselves, and the remaining English-only preparation and request messages are translated.
 
 - Redraw Scarlet Invocation's field-beam strikes as a river of black blood: the tracking beam (Act I and Final) and the crossflow stream between the two seals now burn at the rim and melt, with red threads streaming along a black body, a twisting hot core, a blaze for the first ticks and a narrow dried scar afterwards. Forecasts and the two seals look as before; hitboxes, timings and protocol are unchanged.
