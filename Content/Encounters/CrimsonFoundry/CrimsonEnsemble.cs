@@ -43,6 +43,8 @@ internal static class CrimsonEnsemble
     {
         CrimsonTechnique.ClusterVolley => hit.Fire + CrimsonClusters.FlightTicks,
         CrimsonTechnique.SpatialRift or CrimsonTechnique.SpatialGrid or CrimsonTechnique.ChoirRakes => hit.Fire + CrimsonSpatialCuts.LiveTicks,
+        CrimsonTechnique.CinderCurtain or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands
+            => hit.Fire + CrimsonSignatureMoves.LiveTicks(technique),
         _ => hit.End
     };
 }

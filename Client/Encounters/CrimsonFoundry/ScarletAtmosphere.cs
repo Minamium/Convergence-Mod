@@ -92,7 +92,8 @@ internal sealed class ScarletAtmosphere : ModSystem
         for (int i = 0; i < budget; i++)
         {
             float angle = plan.Phrase * .71f + plan.Pulse + i * 2.399963f;
-            Vector2 at = count > 0 ? CrimsonGestureVisuals.V(strokes[(i * 7) % count].B) : center;
+            // Spread the embers over every stroke (a fixed stride collapsed onto a few when 6-7 columns burn).
+            Vector2 at = count > 0 ? CrimsonGestureVisuals.V(strokes[i * count / budget].B) : center;
             Vector2 velocity = angle.ToRotationVector2() * (1.4f + i % 3);
             particles.CreateParticle(at + velocity * 3, velocity,
                 plan.Source == 0 ? 27 + i % 3 * 9 : 21 + i % 4 * 7, extraInfo1: 45 + i % 3 * 7);

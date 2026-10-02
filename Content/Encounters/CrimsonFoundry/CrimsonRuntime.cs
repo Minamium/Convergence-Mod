@@ -379,7 +379,16 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             var playerCenter = Main.player[aimed.Slot].Center;
             var aim = CrimsonTechniqueGeometry.Clamp(field, new(playerCenter.X, playerCenter.Y), 100);
             var technique = CrimsonEnsemble.Technique(phase, serial, note, i >= rhythm.Hits.Count);
-            if (technique == CrimsonTechnique.ChoirRakes) aim = new(field.CenterX, field.CenterY);
+            if (technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands)
+                aim = new(field.CenterX, field.CenterY);
+            else if (technique == CrimsonTechnique.CinderCurtain)
+            {
+                // One observation of every eligible member for all four notes: each occupied column opens its own corridor.
+                int occupied = 0;
+                foreach (var member in eligible)
+                    occupied |= 1 << CrimsonSignatureMoves.CurtainColumn(field, Main.player[member.Slot].Center.X);
+                aim = CrimsonSignatureMoves.CurtainTarget(occupied);
+            }
             bool needsTargetIdentity = CrimsonGesturePlan.NeedsTargetIdentity(technique);
             int end = CrimsonEnsemble.NoteEnd(technique, hit);
             plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, (byte)i, (byte)source,

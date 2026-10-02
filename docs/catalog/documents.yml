@@ -653,7 +653,7 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 6853fd3089fcd53b2366afcdbb96d2baf1cf7c54edea864204fe02bfe07e866a
+  content_sha256: cf2b450f801826183cb6263f25d0215d3ed22947ad4f5d60bcf63ee34e388419
   document_type: spec
   status: accepted
   owners:
@@ -1369,7 +1369,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 1e630a918a29a9b06148359d2dc62c0f6be801a71b810f05486910475334b932
+  content_sha256: 72b87ceb0633ba64f87b44ccc3b7d874fe9ddb6ce3b722316be67941e86fd49c
   document_type: governance
   status: accepted
   owners:
@@ -1414,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: f604166be12bb105516bebd171933cc26b5e0d218e4579df57751061e1e16aaa
+  content_sha256: 355beb92dd1f6991455e1da7396b46980e0cf4cf5a13f371c1f331c597a458c2
   document_type: status
   status: accepted
   owners:

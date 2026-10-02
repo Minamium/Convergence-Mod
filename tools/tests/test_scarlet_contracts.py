@@ -289,6 +289,38 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('cluster.TryBoss(out var parent) && parent == boss',visual)
         self.assertIn('ScarletClusters.Draw(batch, cluster.Plan, age)',visual)
 
+    def test_signature_moves_share_one_terraria_free_geometry_and_one_curtain_observation(self):
+        moves=(CONTENT/'CrimsonSignatureMoves.cs').read_text(encoding='utf-8')
+        for dependency in ('using Terraria','Microsoft.Xna'):
+            self.assertNotIn(dependency,moves)
+        technique=(CONTENT/'CrimsonTechnique.cs').read_text(encoding='utf-8')
+        self.assertIn('ClusterVolley, ChoirRakes,',technique)
+        self.assertIn('CinderCurtain, ShroudRope, FourHands',technique)
+        self.assertIn('CrimsonSignatureMoves.Write(p, age, destination, forecast)',technique)
+        self.assertIn('IsSignature && Pulse >= CrimsonChoreography.BasicNotes',technique)
+        self.assertIn('CrimsonSignatureMoves.IsSignaturePhrase(phase, phrase)',(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8'))
+        self.assertIn('CrimsonSignatureMoves.LiveTicks(technique)',(CONTENT/'CrimsonEnsemble.cs').read_text(encoding='utf-8'))
+        runtime=' '.join((CONTENT/'CrimsonRuntime.cs').read_text(encoding='utf-8').split())
+        # The curtain observes every eligible member once for all four notes (a column mask in Target); the other moves are unaimed.
+        self.assertIn('else if (technique == CrimsonTechnique.CinderCurtain)',runtime)
+        self.assertIn('foreach (var member in eligible)',runtime)
+        self.assertIn('occupied |= 1 << CrimsonSignatureMoves.CurtainColumn(field, Main.player[member.Slot].Center.X);',runtime)
+        self.assertIn('aim = CrimsonSignatureMoves.CurtainTarget(occupied);',runtime)
+        self.assertNotIn('var walker',runtime)
+        self.assertIn('crimson.gesture_curtain_mask',technique)
+        self.assertIn('CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands',runtime)
+        self.assertIn('techniques[source] = CrimsonTechnique.TrackingBeam',runtime)
+        visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text(encoding='utf-8')
+        self.assertIn('!p.Aimed && !p.IsRift && !p.IsSignature',visual)
+        self.assertIn('CrimsonSignatureMoves.ResidueTicks(p.Technique)',visual)
+        self.assertIn('fieldBeam: true',visual)
+        # A full crowd mask can leave a curtain note nothing to burn: no cue, shake or embers; the strike is felt at a burning column.
+        self.assertIn('CrimsonSignatureMoves.CurtainBurning(p) == 0) return;',visual)
+        self.assertIn('CrimsonSignatureMoves.CurtainImpact(p, Main.LocalPlayer.Center.X)',visual)
+        self.assertIn('strokes[i * count / budget].B',(CLIENT/'ScarletAtmosphere.cs').read_text(encoding='utf-8'))
+        self.assertIn('Content/Encounters/CrimsonFoundry/CrimsonSignatureMoves.cs',(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj').read_text(encoding='utf-8'))
+        self.assertIn('public const ushort CurrentVersion = 79;',(ROOT/'Common/Networking/Protocol/EncounterProtocol.cs').read_text(encoding='utf-8'))
+
     def test_covenant_follows_live_target_width_and_uses_the_same_scale_for_damage_geometry(self):
         text=(CONTENT/'CrimsonCompanion.cs').read_text()
         ray=text.split('public sealed class CrimsonCompanionRay')[1]

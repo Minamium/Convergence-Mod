@@ -39,9 +39,11 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             Cue(p.Born, false); Cue(p.Fire, true);
             void Cue(int tick, bool impact)
             {
+                // A curtain note a full crowd leaves nothing to burn on has no cue, shake or embers.
+                if (p.Technique == CrimsonTechnique.CinderCurtain && CrimsonSignatureMoves.CurtainBurning(p) == 0) return;
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
                 string asset = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley ? impact ? "WideFire" : "WideCharge"
-                    : p.IsRift || p.Technique == CrimsonTechnique.ChoirRakes ? impact ? "ChargeRush" : "ChargeLock"
+                    : p.IsRift || p.Technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope ? impact ? "ChargeRush" : "ChargeLock"
                     : impact ? "PortalFire" : "ChargeLock";
                 if (voices.Count < 24)
                 {
@@ -57,7 +59,10 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 }
                 if (impact)
                 {
-                    Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field) : p.MovesBody ? p.Body(age) : p.Target);
+                    Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field)
+                        : p.MovesBody ? p.Body(age)
+                        : p.Technique == CrimsonTechnique.CinderCurtain ? CrimsonSignatureMoves.CurtainImpact(p, Main.LocalPlayer.Center.X) // Target is the column mask
+                        : p.Target);
                     ScarletArticulation.Impact(p.Source, p.Accent, at);
                     ScarletAtmosphere.Emit(p, at);
                 }
@@ -108,7 +113,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
                 var p = gesture.EffectivePlan(age, true);
-                if (p.Aimed || p.IsRift || p.Technique == CrimsonTechnique.ClusterVolley) continue;
+                if (p.Aimed || p.IsRift || p.IsSignature || p.Technique == CrimsonTechnique.ClusterVolley) continue;
                 if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
                 if (warning && DuplicateForecast(p, age)) continue;
@@ -164,13 +169,16 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         {
             if (projectile.ModProjectile is not CrimsonGesture g || !g.TryBoss(out var owner) || owner != boss) continue;
             var p = g.EffectivePlan(age, true);
-            // The ink residue outlives End by ScarletInkStroke.ResidueTicks (24), inside the projectile lease (LastEnd + 28).
-            int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicks : 0;
-            if ((!p.Aimed && !p.IsRift) || !g.ForecastReady || age < p.Born || age >= p.End + tail) continue;
+            // The ink residue outlives End by ScarletInkStroke.ResidueTicks (24), inside the projectile lease (LastEnd + 28);
+            // a signature move keeps its own residue window on the field-beam path.
+            int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : p.IsSignature ? CrimsonSignatureMoves.ResidueTicks(p.Technique)
+                : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicks : 0;
+            if ((!p.Aimed && !p.IsRift && !p.IsSignature) || !g.ForecastReady || age < p.Born || age >= p.End + tail) continue;
             if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch,p,age);
             if (ScarletInkStroke.Owns(p, age)) { strikes.Add(p); continue; }
             bool warning = age < p.Fire;
-            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift);
+            // A signature move keeps its whole footprint through the residue; the beam shader fades it.
+            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift || p.IsSignature && age >= p.End);
             for(int i=0;i<count;i++) {
             var s = strokes[i];
             Vector2 delta = V(s.B - s.A); float length = delta.Length();
