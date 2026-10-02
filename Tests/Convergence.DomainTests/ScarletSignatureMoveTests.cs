@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Convergence.Common.Networking.Protocol;
 using Convergence.Common.Raids.Arena;
 using Convergence.Content.Encounters.CrimsonFoundry;
@@ -110,17 +111,15 @@ internal static partial class Program
     }
 
     // The statement of the curtain walk, written without the production helpers: first corridor and
-    // direction for a member in `column`, then the corridor of a note (four columns wide, 0..6).
+    // direction for a member in `column` (heading away from the nearer wall: columns 0-4 right, 5-9 left,
+    // independent of the phrase), then the corridor of a note (four columns wide, 0..6).
     private static (int Start, int Direction) ScarletOracleWalk(int column, int phrase)
     {
-        int preferred = phrase / 3 % 2 == 0 ? 1 : -1;
-        foreach (int direction in new[] { preferred, -preferred })
-        {
-            int start = direction > 0 ? column - 2 : column - 1, end = start + 3 * direction;
-            if (start >= 0 && start <= 6 && end >= 0 && end <= 6) return (start, direction);
-        }
-        int toward = column <= 4 ? -1 : 1; // the nearer wall; the per-note clamp does the rest
-        return (toward > 0 ? column - 2 : column - 1, toward);
+        int away = column <= 4 ? 1 : -1;
+        int start = away > 0 ? column - 2 : column - 1, end = start + 3 * away;
+        if (start >= 0 && start <= 6 && end >= 0 && end <= 6) return (start, away);
+        // Next to a wall: turn toward it; the per-note clamp slides the corridor in and it stays.
+        return (-away > 0 ? column - 2 : column - 1, -away);
     }
     private static int ScarletOracleCorridor(int column, int phrase, int note)
     {
@@ -208,10 +207,12 @@ internal static partial class Program
                         AssertEqual(CrimsonTechnique.CinderCurtain, plans[note].Technique, "Act I signature");
                         corridors[note] = CrimsonSignatureMoves.CurtainCorridor(column, plans[note].Phrase, note);
                         AssertEqual(ScarletOracleCorridor(column, phrase, note), corridors[note], $"stated rule phrase={phrase} column={column}");
+                        AssertEqual(ScarletOracleCorridor(column, 3, note), corridors[note], "the walk does not depend on the signature ordinal");
                         AssertEqual(true, corridors[note] is >= 0 and <= 6, "corridor stays inside the field");
                     }
                     if (interior)
                     {
+                        AssertEqual(column <= 4 ? 1 : -1, CrimsonSignatureMoves.CurtainWalk(column, phrase).Direction, "the walk heads away from the nearer wall");
                         for (int note = 0; note < 4; note++) AssertEqual(start + note * direction, corridors[note], "one column per beat in one direction");
                         // One column of forward margin: the member stands one column short of the corridor's leading end.
                         AssertEqual(column + (direction > 0 ? 1 : -1), direction > 0 ? corridors[0] + 3 : corridors[0], "first corridor leads one column past the member");
@@ -272,48 +273,47 @@ internal static partial class Program
         return survived;
     }
 
-    [DomainTest("Scarlet cinder curtain is survivable from rest under base mobility: interior walks from note 1's warning, walls standing still")]
+    [DomainTest("Scarlet cinder curtain is survivable under base mobility from anywhere in the member's column, moving toward the open side")]
     private static void ScarletCinderCurtainBaseMobility()
     {
         var f = RaidFieldGeometry.FromGround(8000, 6000);
-        float worstInterior = float.MaxValue, worstDriftBack = float.MaxValue, worstWall = float.MaxValue;
         Span<CrimsonStroke> now = stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
-        for (int column = 0; column < 10; column++) foreach (int phrase in new[] { 3, 6, 9, 12 })
+        float tightest = float.MaxValue, tightestAt = 0, worstCentre = float.MaxValue;
+        int backward = int.MaxValue, forward = int.MaxValue;
+        for (int column = 0; column < 10; column++)
         {
-            var plans = new CrimsonGesturePlan[4];
-            for (int note = 0; note < 4; note++) plans[note] = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * column + 128);
-            var (_, direction) = ScarletOracleWalk(column, phrase);
-            float centre = f.Left + 256 * column + 128 - ScarletPlayerWidth * .5f;
+            int open = column <= 4 ? 1 : -1; // away from the nearer wall: the walk's direction inside the field
             bool interior = column is >= 2 and <= 7;
-            if (interior)
+            foreach (int phrase in new[] { 3, 6 })
             {
-                // The direction is first shown with note 1's warning; the runner starts moving then.
-                AssertEqual(true, ScarletCurtainRun(f, plans, centre, direction, ScarletBaseRun, plans[1].Born, out float clearance), $"a base-mobility runner follows column {column} phrase={phrase}");
-                worstInterior = Math.Min(worstInterior, clearance);
-                // How far behind (against the walk) the runner may have drifted during the look-ahead and still make it.
-                int back = 0;
-                while (back < 300 && ScarletCurtainRun(f, plans, centre - direction * (back + 1), direction, ScarletBaseRun, plans[1].Born, out _)) back++;
-                worstDriftBack = Math.Min(worstDriftBack, back);
-            }
-            else
-            {
-                AssertEqual(true, ScarletCurtainRun(f, plans, centre, direction, ScarletBaseRun, int.MaxValue, out float clearance), $"a runner standing still at wall column {column} survives phrase={phrase}");
-                worstWall = Math.Min(worstWall, clearance);
-            }
-            // Forward or backward drift of up to 90 px during the 30-tick look-ahead still survives note 0.
-            foreach (int drift in new[] { -90, 90 })
-            {
-                float x = Math.Clamp(centre + drift, f.Left, f.Right - ScarletPlayerWidth);
-                for (int tick = plans[0].Fire; tick < plans[0].End; tick++)
+                var plans = new CrimsonGesturePlan[4];
+                for (int note = 0; note < 4; note++) plans[note] = ScarletSignaturePlan(0, phrase, note, f.Left + 256 * column + 128);
+                float columnLeft = f.Left + 256 * column, centre = columnLeft + 128 - ScarletPlayerWidth * .5f;
+                // From ANY x inside the observed column, moving toward the open side from note 0's warning.
+                for (float x = columnLeft; x <= columnLeft + 256 - ScarletPlayerWidth; x += phrase == 3 ? 1 : 7)
                 {
-                    int count = CrimsonTechniqueGeometry.Write(plans[0], tick, now);
-                    AssertEqual(false, ScarletHits(now[..count], x, f.Bottom - ScarletPlayerHeight), $"drift {drift} px survives note 0 (column {column} phrase={phrase})");
+                    AssertEqual(true, ScarletCurtainRun(f, plans, x, open, ScarletBaseRun, plans[0].Born, out float clearance), $"column {column} from x={x - columnLeft} phrase={phrase}");
+                    if (clearance < tightest) { tightest = clearance; tightestAt = x - columnLeft + column * 1000; }
+                }
+                // From the column centre, starting only when note 1's forecast shows.
+                AssertEqual(true, ScarletCurtainRun(f, plans, centre, open, ScarletBaseRun, plans[1].Born, out float late), $"column {column} from the centre at note 1 phrase={phrase}");
+                worstCentre = Math.Min(worstCentre, late);
+                if (!interior) AssertEqual(true, ScarletCurtainRun(f, plans, centre, open, ScarletBaseRun, int.MaxValue, out _), $"a wall member standing still survives column {column}");
+                if (interior && phrase == 3)
+                {
+                    // How far from the column centre the look-ahead may have carried the member (against / along the walk) and still survive
+                    // the whole phrase when they start moving at note 0's warning.
+                    int back = 0, ahead = 0;
+                    while (back < 400 && ScarletCurtainRun(f, plans, centre - open * (back + 1), open, ScarletBaseRun, plans[0].Born, out _)) back++;
+                    while (ahead < 400 && ScarletCurtainRun(f, plans, centre + open * (ahead + 1), open, ScarletBaseRun, plans[0].Born, out _)) ahead++;
+                    backward = Math.Min(backward, back); forward = Math.Min(forward, ahead);
                 }
             }
         }
-        // Reported numbers: the smallest clearance (px) a base runner keeps, and the least backward drift tolerated.
-        AssertEqual(true, worstInterior > 0 && worstWall > 0, $"clearances stay positive (interior {worstInterior:F1}, wall {worstWall:F1})");
-        AssertEqual(true, worstDriftBack >= 50, $"an interior runner can be at least 50 px behind the column centre at note 1's warning ({worstDriftBack})");
+        // Reported numbers (px): the smallest clearance from any start in the column, and the tolerated look-ahead drift.
+        AssertEqual(true, tightest >= 40, $"every start in the column keeps at least 40 px of clearance (smallest {tightest:F1} px at {tightestAt})");
+        AssertEqual(true, worstCentre > 0, $"the centre start at note 1 keeps a positive clearance ({worstCentre:F1} px)");
+        AssertEqual(true, backward >= 150 && forward >= 280, $"look-ahead drift tolerated when moving from note 0's warning: {backward} px against the walk, {forward} px along it");
     }
 
     // ---------------------------------------------------------------- rope staff
@@ -763,10 +763,40 @@ internal static partial class Program
                 int mask = trial == 0 ? CrimsonSignatureMoves.MaximumCurtainMask : random.Next(1, 1024) | 1 << column;
                 var crowd = new CrimsonGesturePlan[4];
                 for (int note = 0; note < 4; note++) crowd[note] = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: mask);
-                AssertEqual(true, ScarletCurtainRun(f, crowd, centre, direction, ScarletBaseRun, interior ? crowd[1].Born : int.MaxValue, out _),
+                AssertEqual(true, ScarletCurtainRun(f, crowd, centre, direction, ScarletBaseRun, interior ? crowd[0].Born : int.MaxValue, out _),
                     $"member in column {column} still survives with mask={mask} phrase={phrase}");
             }
         }
+    }
+
+    [DomainTest("Scarlet cinder curtain strikes at the burning column nearest the given x")]
+    private static void ScarletCinderCurtainImpact()
+    {
+        var f = RaidFieldGeometry.FromGround(8000, 6000);
+        int checks = 0;
+        foreach (int mask in new[] { 1 << 4, 1 << 2 | 1 << 7, 1 << 0 | 1 << 9, 1 << 5, 0b0100010010, 1 << 3 | 1 << 6 })
+            foreach (int phrase in new[] { 3, 6 }) for (int note = 0; note < 4; note++)
+            {
+                var plan = ScarletSignaturePlan(0, phrase, note, 0, curtainMask: mask);
+                int safe = ScarletOracleSafe(mask, phrase, note);
+                var burning = new System.Collections.Generic.List<float>();
+                for (int column = 0; column < 10; column++) if ((safe >> column & 1) == 0) burning.Add(f.Left + 256 * column + 128);
+                if (burning.Count == 0) continue; // a crowd can leave nothing to burn; the fallback is checked below
+                for (float x = f.Left - 300; x <= f.Right + 300; x += 37)
+                {
+                    // Skip a reference that is within a pixel of the middle between two burning columns.
+                    var byDistance = burning.OrderBy(c => MathF.Abs(c - x)).ToArray();
+                    if (byDistance.Length > 1 && MathF.Abs(MathF.Abs(byDistance[0] - x) - MathF.Abs(byDistance[1] - x)) < 1) continue;
+                    var impact = CrimsonSignatureMoves.CurtainImpact(plan, x);
+                    AssertEqual(byDistance[0], impact.X, $"nearest burning column to x={x - f.Left} (mask={mask} phrase={phrase} note={note})");
+                    AssertEqual(f.CenterY, impact.Y, "mid-height");
+                    checks++;
+                }
+            }
+        AssertEqual(true, checks > 500, $"enough references were checked ({checks})");
+        // With nothing burning the strike falls back to the field centre.
+        var full = ScarletSignaturePlan(0, 3, 3, 0, curtainMask: CrimsonSignatureMoves.MaximumCurtainMask);
+        if (CrimsonSignatureMoves.CurtainBurning(full) == 0) AssertEqual(f.CenterX, CrimsonSignatureMoves.CurtainImpact(full, f.Left).X, "field centre when nothing burns");
     }
 
     [DomainTest("Scarlet cinder curtain column mask round trips and every malformed mask is rejected")]
