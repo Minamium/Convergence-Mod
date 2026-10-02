@@ -302,15 +302,15 @@ internal sealed class CenserLook
         // Pour it leads to will (so no windup is left without its release).
         if (state != CenserState.Swing || !consecutive) return;
         if (CenserRules.SwingCue(clock) && Budget(swingCue, CrimsonRewardRules.SwingCueInterval))
-            ScarletRewardAudio.Play(ScarletRewardCues.CenserSwing, mouth);
+            ScarletRewardAudio.Play(ScarletRewardCues.CenserSwing, p.owner, mouth);
         if (CenserRules.BraceStarts(clock) && Admits(grandCue, CrimsonRewardRules.GrandCueInterval, CrimsonRewardRules.GrandBrace)
             && Budget(braceCue, CrimsonRewardRules.SwingCueInterval))
-            ScarletRewardAudio.Play(ScarletRewardCues.CenserBrace, mouth);
+            ScarletRewardAudio.Play(ScarletRewardCues.CenserBrace, p.owner, mouth);
         if (!CenserRules.PourStarts(clock, out int index)) return;
         if (index == CrimsonRewardRules.GrandEvery - 1)
         {
             if (Budget(grandCue, CrimsonRewardRules.GrandCueInterval))
-                ScarletRewardAudio.Play(ScarletRewardCues.CenserGrandPour, mouth);
+                ScarletRewardAudio.Play(ScarletRewardCues.CenserGrandPour, p.owner, mouth);
             if (p.owner == Main.myPlayer && Main.GameUpdateCount + 1 - lastShake > CrimsonRewardRules.GrandShakeInterval)
             {
                 lastShake = Main.GameUpdateCount + 1;
@@ -318,7 +318,7 @@ internal sealed class CenserLook
             }
         }
         else if (Budget(pourCue, CrimsonRewardRules.PourCueInterval))
-            ScarletRewardAudio.Play(ScarletRewardCues.CenserPour, mouth);
+            ScarletRewardAudio.Play(ScarletRewardCues.CenserPour, p.owner, mouth);
     }
 
     private bool Budget(ulong[] stamps, int interval)

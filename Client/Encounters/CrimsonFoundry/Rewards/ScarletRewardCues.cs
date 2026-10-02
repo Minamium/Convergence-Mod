@@ -20,6 +20,13 @@ internal readonly record struct ScarletCue(string Name, char Take, ScarletCueAud
 {
     internal string File(int variant = 0) => Files == 1 ? Name : Name + (Math.Clamp(variant, 0, Files - 1) + 1);
     internal int Ticks => (int)MathF.Ceiling(Seconds * 60);
+
+    // Other players' voices of this file, all of them together, in a pool apart from the local player's (Voices), so
+    // another player's cue never cuts the local player's: one voice of a per-shot file (replace oldest, the multiplayer
+    // rule); one owner's Voices of any other file, where a cue beyond the limit is dropped (ignore new) rather than
+    // cutting a windup, release or finale that is ringing.
+    internal int PeerVoices => Audience == ScarletCueAudience.Shot ? 1 : Voices;
+    internal bool PeerReplacesOldest => Audience == ScarletCueAudience.Shot;
 }
 
 // The 35 cues and when they fire. Pure (no Terraria references): linked into the domain tests, which check every Lead
@@ -29,9 +36,11 @@ internal static class ScarletRewardCues
 {
     internal const string Root = "Convergence/Assets/Sounds/Weapons/ScarletRewards/";
 
-    // The files carry the designed levels (BS.1770 maximum momentary loudness against the Raid's loudest strike, about
-    // -7.6 LUFS as played: finales -9.6, cadence -11, windups -15, cascade parts -15.5, per-shot -17, tolls -19), so every
-    // cue plays at one gain, exactly as auditioned. The only offsets are below.
+    // The files carry the designed levels (BS.1770 maximum momentary loudness against the Raid's loudest strike, -7.6
+    // LUFS measured on CrownRupture.wav, -7.7 to -8.4 for the Doll strikes this Raid plays: finales -9.6, cadence -11,
+    // windups -15, cascade parts -15.5, per-shot -17, tolls -19), so every cue plays at one gain, exactly as auditioned.
+    // The only offsets are below. Scarlet's own Raid sound set (feat/scarlet-sfx) plays its notes far softer: its merge
+    // re-derives these levels role by role (REWARDS.md#art-and-audio; a tool test pins the Raid set they were set against).
     internal const float Gain = 1f;
     internal const float ScoreThrowDecibels = -2;   // the rolled score leaves the hand a little softer than a quill
     internal const float PartialScoreDecibels = -2; // a score burst without the Full Melody: the smaller burst

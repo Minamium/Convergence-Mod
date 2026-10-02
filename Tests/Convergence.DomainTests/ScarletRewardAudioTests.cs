@@ -48,6 +48,11 @@ internal static partial class Program
             var expected = cue.Name.StartsWith("Toll", StringComparison.Ordinal) ? ScarletCueAudience.Owner
                 : shots.Contains(cue.Name) ? ScarletCueAudience.Shot : ScarletCueAudience.Everyone;
             AssertEqual(expected, cue.Audience, $"{cue.Name} audience");
+            // Other players' voices are a pool of their own: one voice of a per-shot file (replace oldest), one owner's
+            // voices of any other file (ignore new), so another player's cue never cuts the local player's.
+            bool shot = expected == ScarletCueAudience.Shot;
+            AssertEqual(shot ? 1 : cue.Voices, cue.PeerVoices, $"{cue.Name} other players' voices");
+            AssertEqual(shot, cue.PeerReplacesOldest, $"{cue.Name} other players' limit");
         }
     }
 

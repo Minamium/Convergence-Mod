@@ -14,8 +14,11 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // - Voices are bounded per cue file (MaxInstances, replace oldest), stop while the game is paused and start only with
 //   focus, like the Ebon reward audio. Tuned files play at their recorded pitch (no pitch variance).
 // - Build tolls are heard by their owner only. A per-swing or per-shot cue plays for its owner at full level and for
-//   other players RemoteShotDecibels lower, all of them sharing one voice (a separate Identifier). Everything else is
-//   positional for everyone.
+//   other players RemoteShotDecibels lower. Everything else is positional for everyone at full level.
+// - Every call names the cue's owner, and other players' voices are a pool of their own (a ":peer" Identifier), so
+//   another player's cue never cuts one of the local player's: the local player holds the table's Voices (one owner's
+//   budget, replace oldest); other players together share ScarletCue.PeerVoices (one voice of a per-shot file, replace
+//   oldest; one owner's Voices of any other file, ignore new, so a ringing windup or finale is never cut).
 // - A cue whose file is missing from the package is skipped (HasAsset, cached), never thrown.
 internal static class ScarletRewardAudio
 {
@@ -27,16 +30,16 @@ internal static class ScarletRewardAudio
     private static bool Audible => !Main.dedServ && !Main.gameMenu && !Main.gamePaused && Main.hasFocus;
 
     // Positional for everyone: windups, releases, finales and the reliquary.
-    internal static void Play(string cue, Vector2 at, float decibels = 0) => Emit(table[cue], 0, at, decibels, false);
+    internal static void Play(string cue, int owner, Vector2 at, float decibels = 0) => Emit(table[cue], 0, at, decibels, Remote(owner));
 
     // Build tolls: Toll(step) for the owner only.
     internal static void BuildToll(int step, int owner, Vector2 at)
     {
-        if (owner == Main.myPlayer) Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, false);
+        if (!Remote(owner)) Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, false);
     }
 
     // The Sealed Score's playback: the toll chosen by height, positional for everyone because it is part of the release.
-    internal static void Toll(int step, Vector2 at) => Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, false);
+    internal static void Toll(int step, int owner, Vector2 at) => Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, Remote(owner));
 
     // Per-swing and per-shot cues: the owner at full level, other players RemoteShotDecibels lower with one voice.
     internal static void Shot(string cue, int owner, Vector2 at, float decibels = 0) => Shot(table[cue], 0, owner, at, decibels);
@@ -46,9 +49,11 @@ internal static class ScarletRewardAudio
 
     private static void Shot(in ScarletCue cue, int variant, int owner, Vector2 at, float decibels)
     {
-        bool remote = owner != Main.myPlayer;
+        bool remote = Remote(owner);
         Emit(cue, variant, at, remote ? decibels + CrimsonRewardRules.RemoteShotDecibels : decibels, remote);
     }
+
+    private static bool Remote(int owner) => owner != Main.myPlayer;
 
     private static void Emit(in ScarletCue cue, int variant, Vector2 at, float decibels, bool remote)
     {
@@ -67,8 +72,8 @@ internal static class ScarletRewardAudio
             styles[file] = style = new SoundStyle(ScarletRewardCues.Root + file)
             {
                 Identifier = Identity + file + (remote ? ":peer" : ""),
-                MaxInstances = remote ? 1 : cue.Voices,
-                SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
+                MaxInstances = remote ? cue.PeerVoices : cue.Voices,
+                SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,
                 PauseBehavior = PauseBehavior.StopWhenGamePaused,
                 PlayOnlyIfFocused = true,
             };

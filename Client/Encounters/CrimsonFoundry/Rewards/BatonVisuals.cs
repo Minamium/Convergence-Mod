@@ -113,7 +113,7 @@ internal sealed class BatonSwingVisuals : GlobalProjectile
         lastClock = clock;
         bool fresh = previous == int.MinValue;
         if (swing.Gesture == BatonRules.Tutti && (fresh ? clock <= 1 : previous < 0 && clock >= 0))
-            ScarletRewardAudio.Play(ScarletRewardCues.BatonLift, owner.Center);
+            ScarletRewardAudio.Play(ScarletRewardCues.BatonLift, projectile.owner, owner.Center);
         int ictus = BatonRules.IctusTick(swing.Gesture);
         if (!fresh && previous < ictus && clock >= ictus) Flare(projectile, pose.Gem, swing.Gesture == BatonRules.Tutti);
     }
@@ -220,7 +220,7 @@ internal sealed class BatonStrokeVisuals : GlobalProjectile
     {
         var points = stroke.Points;
         Vector2 center = p.Center;
-        ScarletRewardAudio.Play(ScarletRewardCues.InkIgnite, center);
+        ScarletRewardAudio.Play(ScarletRewardCues.InkIgnite, p.owner, center);
         for (int i = 0; i < 6; i++)
         {
             float seed = p.identity * 5.17f + i * 1.3f;
@@ -233,7 +233,7 @@ internal sealed class BatonStrokeVisuals : GlobalProjectile
         if (cast < 0 || BatonScore.River(owner, cast, ref slot) is not null) return;
         foreach (Projectile other in Main.ActiveProjectiles)
             if (other.owner == owner && other.ModProjectile is BatonStroke { Kind: CrimsonStrokeKind.Scheduled } waiting && waiting.State.Cast == cast) return;
-        ScarletRewardAudio.Play(ScarletRewardCues.Cadence, center);
+        ScarletRewardAudio.Play(ScarletRewardCues.Cadence, owner, center);
     }
 
     private static void Dried(Projectile p, BatonStroke stroke)
@@ -266,7 +266,7 @@ internal sealed class BatonRiverVisuals : GlobalProjectile
         if (previous != int.MinValue && previous < 0 && age >= 0)
         {
             Vector2 start = projectile.Center;
-            ScarletRewardAudio.Play(ScarletRewardCues.RiverRelease, start);
+            ScarletRewardAudio.Play(ScarletRewardCues.RiverRelease, projectile.owner, start);
             ScarletRewardFx.Shake(projectile.owner, start, Rules.RiverShake);
         }
         if (age < 0 || age >= BatonRules.RiverDryStart) return;

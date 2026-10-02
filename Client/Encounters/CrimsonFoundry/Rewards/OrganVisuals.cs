@@ -146,7 +146,7 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
         if (p.owner < 0 || p.owner >= Main.maxPlayers) return;
         Player owner = Main.player[p.owner];
         owner.GetModPlayer<OrganPosePlayer>().Hymn();
-        ScarletRewardAudio.Play(ScarletRewardCues.HymnInhale, owner.Center);
+        ScarletRewardAudio.Play(ScarletRewardCues.HymnInhale, p.owner, owner.Center);
     }
 
     internal static void Slam(Projectile p, BoneHand hand)
@@ -155,13 +155,13 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
         bool clasp = hand.Clasp;
         if (clasp)
         {
-            ScarletRewardAudio.Play(ScarletRewardCues.ChoirClasp, at);
+            ScarletRewardAudio.Play(ScarletRewardCues.ChoirClasp, p.owner, at);
             ScarletRewardFx.Shake(p.owner, at, CrimsonRewardRules.ClaspShake);
         }
         else
         {
-            ScarletRewardAudio.Play(ScarletRewardCues.HandSlam, at);
-            if (hand.Role == CanticleRules.HandRole.Cadence) ScarletRewardAudio.Play(ScarletRewardCues.Cadence, at);
+            ScarletRewardAudio.Play(ScarletRewardCues.HandSlam, p.owner, at);
+            if (hand.Role == CanticleRules.HandRole.Cadence) ScarletRewardAudio.Play(ScarletRewardCues.Cadence, p.owner, at);
         }
         float seed = p.identity * .37f;
         int chips = clasp ? 10 : 5;

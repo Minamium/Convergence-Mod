@@ -160,7 +160,7 @@ All reward ink uses the owner-approved black-blood river of `ScarletInk.fx`: a d
 - **Opacity:** the local player's builds and releases draw at full opacity. Other players' dormant builds draw at 0.5 and their live releases at 0.85.
 - **Shape:** friendly black blood is short, curved or local. It never spans the field and never follows a forecast band, and its writing heads are ember-gold.
 - **Shake** comes only from the local player's own weapon.
-- **Sound:** build tolls play only for their owner. Per-swing and per-shot cues play for the owner at full level and for other players 8 dB lower with one voice. Windups and releases are positional for everyone.
+- **Sound:** build tolls play only for their owner. Per-swing and per-shot cues play for the owner at full level and for other players 8 dB lower with one voice. Windups and releases are positional for everyone. Another player's cue never cuts one of the local player's.
 
 ### Audio
 
@@ -169,10 +169,10 @@ All reward ink uses the owner-approved black-blood river of `ScarletInk.fx`: a d
 - **Cadence:** releases end on `Cadence`, the same E♭–F–B♭ voicing on organ and tubular bell over a low timpani or gong stroke, or on a weapon's own finale cue built on that voicing.
 - **Restraint:** tolls are short and soft. Per-shot cues are unpitched, so firing never becomes a music box.
 - **Recordings only:** cues are layered CC0 recordings, with no synthesized tone or noise layer.
-  - Libraries: VSCO 2 CE (including its organ and blower recordings) and VCSL (tubular bells, hand chimes, woodblock, slit drum, gong, timpani), both already in [Attribution](../../../Assets/ATTRIBUTION.md).
+  - Libraries: VSCO 2 CE (its organ and blower recordings, and the bubbles and chains of Miscellania Misc 1) and VCSL (tubular bells, hand chimes, woodblock, slit drum, gong, timpani, bass drum, suspended cymbal), recorded in [Attribution](../../../Assets/ATTRIBUTION.md#scarlet-invocation-reward-weapon-audio--2026-10-03).
   - Foley: the Freesound and OpenGameArt CC0 foley already listed there.
   - Processing: trimming, envelopes, filters, resampling to pitch, layering and short reflections. Every pitched layer sits on E♭, F or B♭.
-- **Voices** are bounded (`MaxInstances`, replace oldest), stop when the game is paused or loses focus, are never built on a dedicated server, and a cue whose file is missing from the package is skipped.
+- **Voices** are bounded per cue file (`MaxInstances`, replace oldest), with other players' voices in a pool of their own (see [Art and audio](#art-and-audio)). They stop when the game is paused or loses focus, are never built on a dedicated server, and a cue whose file is missing from the package is skipped.
 - **Shipped:** the owner's 2026-10-03 picks (see [Art and audio](#art-and-audio)) are in the package, and every cue plays at its moment below.
 
 ## Nominal parity
@@ -744,12 +744,14 @@ As the brief requires, the images contain no light, flame, black blood, strokes,
 - Tolls are a slit-drum knock over tubular bell and hand chime, resampled to pitch. Organ cues use the VSCO 2 CE organ and its blower recording.
 - No local recording of fire, pouring liquid, wax, bone or paper exists, so those layers are stand-ins from the attributed set (wind and the organ blower for flame, bubbles for liquid, wood chops and stone grains for bone and wax, book pages for paper). Any new recording needs the same CC0 survey record and owner approval of that exact recording on the audition page before use, and Attribution records it.
 - Rendering is deterministic, with pinned Ogg serials; a fresh render reproduces the shipped files byte for byte.
-- Loudness follows the Ebon script (BS.1770, maximum 400 ms momentary loudness) against the Raid's loudest strike as played (−7.6 LUFS): finales −9.6, the cadence −11, windups −15, cascade parts about −15.5, per-shot cues −17 and tolls −19; true peak is at most −1 dBTP after the Vorbis round trip.
+- Loudness follows the Ebon script (BS.1770, maximum 400 ms momentary loudness) against the Raid's loudest strike (−7.6 LUFS, measured on `CrownRupture.wav`): finales −9.6, the cadence −11, windups −15, cascade parts about −15.5, per-shot cues −17 and tolls −19; true peak is at most −1 dBTP after the Vorbis round trip. The Raid on this branch no longer plays `CrownRupture.wav`. The strikes it does play (the Doll beam and chorus cues at their call volumes: `WideFire` and `ChargeRush` at .72, `StackRelease` at .48, `PortalFire` at .72) reach −7.7 to −8.4 LUFS, and its foretell (`ChargeLock` at .48) −19.0.
+- **Scarlet's own sound set** (`feat/scarlet-sfx`, owner-approved, not on this branch) moves that reference. It retires `CrownRupture.wav` and the Doll strike cues. Each note's impact then plays at −20.0 LUFS and its foretell at −22.8, and the loudest cues at −9.6 to −10.4. Against it the per-shot cues would sound 3 dB over every Raid impact and about 6 dB over its foretells, and the finales as loud as the Raid's loudest cue. So the merge of that set re-derives these levels role by role against the Raid's played cues (per-role gains in `ScarletRewardCues` or a re-render), and the owner listens again. A tool test pins the Raid sound set these levels were set against, so that merge cannot pass unnoticed.
 
 **Selections (2026-10-03).** The owner auditioned an A and a B take of each of 28 cue blocks on the local page and chose B for `Cadence`, `ReliquaryOpen`, `ScytheWhip`, `StaffWindup`, `StaffBarline` and `RiverRelease`, and A for every other block (the whole toll ladder is one block, and `OrganShot` is all four pipe files of take A). The shipped files are those masters byte for byte; [Attribution](../../../Assets/ATTRIBUTION.md) records each file's sources and processing.
 
 - **Gain:** the files carry the designed levels, so every cue plays at one gain (1), as auditioned. The only offsets are the multiplayer rule (other players' per-swing and per-shot cues −8 dB), the rolled score's throw (−2 dB) and a score burst without the Full Melody (−2 dB).
-- **Voices** per cue file: tolls 8 (eight quills at one height ring one toll eight times), `CenserPour` 5 and `CenserGrandPour` 4 (one owner's sound budget), `ReliquaryOpen` 4 (the four shows), `StaffCut`, `HandSlam` and `InkIgnite` 4 (a cascade part still rings when the next starts), `CenserSwing` and `QuillThrow`/`QuillStick` 3, every other cue 2. Other players' per-shot cues share one voice per file.
+- **Voices** per cue file, for the local player: tolls 8 (eight quills at one height ring one toll eight times), `CenserPour` 5 and `CenserGrandPour` 4 (one owner's sound budget), `ReliquaryOpen` 4 (the four shows), `StaffCut`, `HandSlam` and `InkIgnite` 4 (a cascade part still rings when the next starts), `CenserSwing` and `QuillThrow`/`QuillStick` 3, every other cue 2.
+- **Other players' voices** are a pool of their own (a separate `Identifier`), so another player's cue never cuts the local player's. All other players together share one voice per per-shot file (replace oldest) and one owner's voices of every other file. Past that limit another player's windup, release, finale or playback toll is dropped (ignore new) instead of cutting one that is ringing.
 - **Moments:** each file was built to meet a moment `Lead` ticks after its trigger, and the domain tests hold those moments to the rules: a swing's breath fires at the stroke's start and peaks on its first live tick (5); the Whip's brace fires with the draw-back (6) and peaks just before the lash (13), the lash fires as the blade goes live (14); `StaffWindup` peaks on the forward whip (16), `HymnInhale` on the first slam (10), `BatonLift` on the downbeat (8), `InkIgnite` as a stroke has swollen (3), `CenserSwing` on the pour 10 ticks later, `CenserBrace` on the Grand Pour (6), `ScoreUnseal` as the ink catches (8), and `ReliquaryOpen`'s cadence as the show's ink ignites (20).
 
 ## Differences from Ebon
@@ -831,6 +833,8 @@ The first implementation fixed these points, which the sections above left open 
 - A censer's brace sounds only when the Grand Pour it leads to will be heard within the owner's budget, so no windup is left without its release.
 - Every score burst plays `ScoreChord` (the score bursting on the cadence voicing); without the Full Melody it is 2 dB softer.
 - Tuned cues keep their recorded pitch: no cue has pitch variance.
+- Every cue call names the cue's owner, so other players' voices stay apart from the local player's (see Voices in [Art and audio](#art-and-audio)). Otherwise everyone's windups and finales would share one pool: four players with censers, or three with a finale, would cut each other's cues mid-sound, the local player's included.
+- The scythe's cues cross from the furthest stroke age a client has seen, not the previous one. A late sync can set a peer's stroke back a few ticks (the Whip's lash at 15 after the sync at 12), and the lash must not ring a second time.
 
 **Open for the owner.**
 

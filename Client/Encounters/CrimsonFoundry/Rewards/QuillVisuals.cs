@@ -107,7 +107,7 @@ internal sealed class QuillVisuals : GlobalProjectile
         Vector2 nib = p.Center;
         float seed = QuillInk.Seed(owner, q.Serial);
         // The melody plays back: the higher the quill against the halted score, the higher the toll.
-        ScarletRewardAudio.Toll(QuillRules.TollForHeight(nib.Y, q.ScoreAt.Y), nib);
+        ScarletRewardAudio.Toll(QuillRules.TollForHeight(nib.Y, q.ScoreAt.Y), owner, nib);
         QuillInk.AddSplash(owner, nib + new Vector2(0, -6), -MathHelper.PiOver2, MathHelper.TwoPi * .8f, 3.6f, ScarletRewardFx.Reduced ? 4 : 8, 2.6f, true, seed);
         for (int i = 0; i < 6; i++)
         {
@@ -163,7 +163,7 @@ internal sealed class QuillVisuals : GlobalProjectile
         if (!windup && s.Age > s.Flight)
         {
             windup = true;
-            ScarletRewardAudio.Play(ScarletRewardCues.ScoreUnseal, at);
+            ScarletRewardAudio.Play(ScarletRewardCues.ScoreUnseal, owner, at);
         }
         if (!split && s.Age > s.Flight + SealSplit)
         {
@@ -181,13 +181,13 @@ internal sealed class QuillVisuals : GlobalProjectile
         if (!unrolled && s.Unrolled)
         {
             unrolled = true;
-            ScarletRewardAudio.Play(ScarletRewardCues.InkBlaze, at);
+            ScarletRewardAudio.Play(ScarletRewardCues.InkBlaze, owner, at);
         }
         if (!scoreBurst && s.BurstSince >= 0)
         {
             scoreBurst = true;
             bool full = QuillRules.FullMelody(s.Quills);
-            ScarletRewardAudio.Play(ScarletRewardCues.ScoreChord, at, full ? 0 : ScarletRewardCues.PartialScoreDecibels);
+            ScarletRewardAudio.Play(ScarletRewardCues.ScoreChord, owner, at, full ? 0 : ScarletRewardCues.PartialScoreDecibels);
             if (full) ScarletRewardFx.Shake(owner, at, R.MelodyShake);
             int droplets = (full ? 14 : 10) / (ScarletRewardFx.Reduced ? 2 : 1);
             QuillInk.AddSplash(owner, at, -MathHelper.PiOver2, MathHelper.TwoPi * .9f, full ? 5.4f : 4.4f, droplets, 3f, true, seed);

@@ -286,6 +286,14 @@ class ScarletRewardWiring(unittest.TestCase):
 SOUNDS = ROOT / 'Assets/Sounds/Weapons/ScarletRewards'
 CUES = CLIENT / 'Rewards/ScarletRewardCues.cs'
 AUDIO_RECORD = '### Scarlet Invocation reward weapon audio — 2026-10-03'
+# The Raid sound set the reward files' levels were set against (REWARDS.md#art-and-audio): the folder as it stands, the
+# measured reference CrownRupture.wav, and the Doll strike and chorus cues at their call volumes, which the Raid plays.
+RAID_SOUNDS = ['CrownRupture.wav', 'Foretell.wav', 'ScarletRelease.wav', 'SilkCleave.wav', 'ThornRend.wav']
+RAID_REFERENCE_SHA256 = '4d6c7a4e513f462ea66d2ce4e68b4f16206c7a3c3c6961d905dc66976742db9a'
+RAID_CALLS = {
+    'CrimsonGestureVisuals.cs': ('"Convergence/Assets/Sounds/FirstSeverance/Beams/" + asset', 'Volume = impact ? .72f : .48f,'),
+    'CrimsonChorusVisuals.cs': ('"Convergence/Assets/Sounds/FirstSeverance/" + asset', 'Volume = impact ? .48f : .25f,'),
+}
 
 
 def cue_table():
@@ -318,6 +326,17 @@ def ogg_pages(data):
         size = sum(data[position + 27:position + 27 + count])
         yield granule, serial, data[position + 27 + count:position + 27 + count + size]
         position += 27 + count + size
+
+
+def arguments(text):
+    """Top-level arguments of a call's argument text."""
+    out, depth, start = [], 0, 0
+    for i, c in enumerate(text):
+        depth += {'(': 1, '[': 1, ')': -1, ']': -1}.get(c, 0)
+        if c == ',' and depth == 0:
+            out.append(text[start:i].strip())
+            start = i + 1
+    return out + [text[start:].strip()]
 
 
 def reward_call_sites():
@@ -408,12 +427,48 @@ class ScarletRewardAudioContract(unittest.TestCase):
                 expected = {'Shot': 'Shot', 'Everyone': 'Play'}.get(audience)
                 self.assertEqual(expected, method, f'{path}: {name} is a {audience} cue')
         audio = read(CLIENT / 'Rewards/ScarletRewardAudio.cs')
-        self.assertIn('MaxInstances = remote ? 1 : cue.Voices,', audio, 'other players share one voice')
-        self.assertIn('SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,', audio)
+        # Other players' voices are a pool of their own, so another player's cue never cuts the local player's.
+        self.assertIn('Identifier = Identity + file + (remote ? ":peer" : ""),', audio)
+        self.assertIn('MaxInstances = remote ? cue.PeerVoices : cue.Voices,', audio)
+        self.assertIn('SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,', audio)
+        self.assertIn('internal int PeerVoices => Audience == ScarletCueAudience.Shot ? 1 : Voices;', read(CUES), 'other players share one voice of a per-shot file')
+        self.assertIn('internal bool PeerReplacesOldest => Audience == ScarletCueAudience.Shot;', read(CUES))
+        self.assertIn('internal static void Play(string cue, int owner, Vector2 at, float decibels = 0) => Emit(table[cue], 0, at, decibels, Remote(owner));', audio)
+        self.assertIn('internal static void Toll(int step, int owner, Vector2 at) => Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, Remote(owner));', audio)
+        self.assertIn('private static bool Remote(int owner) => owner != Main.myPlayer;', audio)
+        self.assertEqual(1, audio.count('Main.myPlayer'), 'one test of who owns a cue')
+        for method, args, path in reward_call_sites():
+            if method in ('Play', 'Toll', 'Shot', 'OrganShot', 'BuildToll'):
+                owner = arguments(args)[1]
+                self.assertRegex(owner, r'^(owner|p\.owner|projectile\.owner|owner\.whoAmI|player\.whoAmI)$', f'{path}: {method}({args}) names the owner second')
         self.assertIn('PauseBehavior = PauseBehavior.StopWhenGamePaused,', audio)
         self.assertIn('PlayOnlyIfFocused = true,', audio)
         self.assertIn('remote ? decibels + CrimsonRewardRules.RemoteShotDecibels : decibels', audio)
         self.assertIn('internal const float Gain = 1f;', read(CUES))
+
+    def test_the_scythe_rings_each_cue_once_through_a_late_sync(self):
+        # A peer's stroke age can step back on a late netUpdate (the sync at 12 arriving after the lash at 15): cues cross
+        # from the furthest age seen, so the lash never rings twice.
+        scythe = read(CLIENT / 'Rewards/ScytheVisuals.cs')
+        stroke = scythe[scythe.index('class ScytheStrokeVisuals'):scythe.index('class ScytheReleaseVisuals')]
+        self.assertIn('int reached = heard;\n        heard = Math.Max(heard, age);', stroke)
+        cues = re.findall(r'Crossed\((\w+), age, ScytheLook\.(\w+)\)', stroke)
+        self.assertEqual({'SwingCue', 'WhipBraceCue', 'WhipCue'}, {cue for _, cue in cues})
+        self.assertEqual({'reached'}, {start for start, _ in cues})
+
+    def test_reward_levels_are_pinned_to_the_raid_sound_set_they_were_set_against(self):
+        # REWARDS.md#art-and-audio: the files' levels were set against these Raid sounds. Scarlet's own sound set
+        # (feat/scarlet-sfx) retires CrownRupture.wav and the Doll strike cues and plays its notes far softer, so when the
+        # Raid's set changes, re-derive the reward levels role by role against its played cues, have the owner listen
+        # again, and then move this pin.
+        message = 'the Raid sound set changed: re-derive the Scarlet reward levels (REWARDS.md#art-and-audio)'
+        self.assertEqual(RAID_SOUNDS, sorted(p.name for p in (ROOT / 'Assets/Sounds/CrimsonFoundry').iterdir()), message)
+        reference = hashlib.sha256((ROOT / 'Assets/Sounds/CrimsonFoundry/CrownRupture.wav').read_bytes()).hexdigest()
+        self.assertEqual(RAID_REFERENCE_SHA256, reference, message)
+        for name, needles in RAID_CALLS.items():
+            for needle in needles:
+                self.assertIn(needle, read(CLIENT / name), f'{name}: {message}')
+        self.assertIn('measured on `CrownRupture.wav`', read(ROOT / 'docs/encounters/crimson-foundry/REWARDS.md'))
 
     def test_reward_audio_reuses_no_other_sound_set(self):
         # The spec gives the rewards their own cues; only the Covenant keeps the companion's existing sounds, and its
