@@ -13,6 +13,7 @@ aliases:
   - raid reward weapons
 related_code:
   - Content/Encounters/FirstSeverance/Rewards
+  - Client/Encounters/FirstSeverance/Weapons
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
   - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
@@ -61,6 +62,62 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
 
 - **Companion:** The Unbroken Promise is unchanged except its summon sound, which plays on the same trigger.
 - **Acceptance (owner; `not_run` until played):** each weapon's build-up, release and paired cues; readability on bright and dark ground at zoom 1; weapons in front of the player without hiding the character, and the organ behind; a second peer seeing the same build-up counts; Reduced Effects; FPS with eight players' weapons.
+
+## Pale Meridian — refreshed ranged (2026-10)
+
+*The boss's lattice beams, made the player's.* Hold the trigger to build a music-box siege rifle in front of you. Four brass parts fly in and click into the bare gun one at a time; every shot rings the next note of a music-box tune, and each part makes the gun fire faster. When the gun is complete its wind-up key rises and is wound, then the spring drives an overcharged stream of homing rounds. Letting go fires one white **meridian** through the cursor, which splits into a small lattice of light. Item `PaleMeridian` (ranged, bullets, channel; base 2002, crit 8, knockback 6); acquisition is the [treasure box](#curtainfall-treasure-box). Projectiles `MeridianHoldout` (the held gun), `MeridianRound`, `MeridianLine`; the 0.2.34 `MeridianBastion`/`MeridianNeedle` types stay in the code, unused. `PaleMeridianScore` owns the clock and factors, `PaleMeridianLattice` the release geometry and live windows, `PaleMeridianRig` the held-gun anchors; ticks are real game ticks from the press and use speed never compresses them.
+
+| Score age | Beat | Firing |
+|---|---|---|
+| 0–12 | The bare gun (its four recesses empty) slides into the hand | — |
+| 12 | First note | every 24 ticks: 12, 36, 60, 84 |
+| 92 → 108 | Part 1, the music-box cylinder, flies 16 ticks and seats with a click | every 18: 108 … 162 |
+| 164 → 180 | Part 2, the barrel shroud | every 12: 180 … 216 |
+| 212 → 228 | Part 3, the ring sight | every 9: 228 … 255 |
+| 248 → 264 | Part 4, the spring housing; the gun is complete | every 6: 264 … 294 |
+| 300 | The wind-up key rises out of the housing in 6 ticks; firing stops | — |
+| 300–348 | Winding: 18 held ticks, then 12 ratchet steps of 45° at 318, 324, 328, 331, 334, 337, 339, 341, 343, 345, 347, 348 (`floor(12·((t−300)/48)^2.5)`) | — |
+| 348 (5.8 s) | **Overcharge**: the spring lets go and the key spins 45° every 2 ticks | every 3 |
+
+- **Rounds:** one native `PickAmmo` per real round (ammo damage, knockback and conservation stay native; the item keeps its 75% chance not to consume); none during the arrival or the wind. Every round leaves the one muzzle, 150 px along the aim from the player's rotated centre, aimed at the point 1300 px along the aim. Each hits a logical NPC root once (18 px swept box, 150-tick life). Aim turns at most 0.085 rad/tick before overcharge and 0.055 during it.
+  - Build notes (22): ×0.65, straight at 52 px/tick, pierce 1.
+  - Overcharge rounds: ×0.62, homing at 44 px/tick (acquire 1800 px, keep 2100, 0.24 rad/tick).
+  - Heavy rounds: every 36 ticks from 348 one replaces the ordinary round: ×1.15, homing at 52 px/tick, pierce 3.
+- **Notes** (F minor pentatonic ladder of the [shared rules](#reward-refresh-2026-10--shared-rules), one file per step, never transposed): the build plays one bar per stage over Fm7, B♭7sus, A♭maj7 and E♭sus (F5 A♭5 C6 E♭6 · F6 E♭6 B♭5 A♭5 · A♭5 C6 E♭6 A♭6 · B♭6 A♭6 E♭6 B♭5), then a run C6 E♭6 F6 A♭6 B♭6 C7 into the wind; each part seats on a bar's first note. In overcharge a four-bar loop restarts at 348 with one note every 9 ticks (every third round); the heavy rounds fall on its downbeats.
+- **Release — Meridian.** Letting go while the weapon is usable fires the finisher for one more `PickAmmo`; without ammo, unfocused or over the fullscreen map it packs away with no finisher (its own failure sound). The direction locks from the player's centre through the cursor; the line starts at the muzzle on that line, and the **node** is the cursor's distance from the muzzle clamped to 160–1200 px.
+
+| Held age | Tier | Finisher (×weapon damage per root) |
+|---|---|---|
+| under 108 | 0 | none (the gun just packs away) |
+| 108–227 | 1 | meridian ×1.5 |
+| 228–347 | 2 | meridian ×2.5, lattice ×1.5 |
+| 348 and later | 3 | meridian ×4, lattice ×2 (6× at the node) |
+
+  - Meridian (ages from the release): a harmless one-dot forecast through the node for 10 ticks while the gun swings onto it; then a packet whose white head runs the whole line (node + 640 px, at most 1840 px) in 8 ticks with its tail 5 ticks behind, 28 px wide; live ages 10–21.
+  - Lattice (tiers 2–3): as the packet's head passes the node the lattice splits from it (6 ticks, harmless), holds 4 ticks, then fires ring by ring 2 ticks apart, each line lighting from its middle to both ends in 6 ticks with its tail 4 ticks behind, 20 px wide. Tier 3 is a '#': parallels at ±120 px (480 px long) crossed by perpendiculars at 0 and ±120 px along (480 px); with the meridian that is three lines each way. Tier 2 is parallels at ±100 px and one perpendicular through the node, 320 px. The lattice never has four or more evenly spaced parallel lines (a staff is Scarlet Invocation's motif).
+  - Each NPC root takes at most one meridian hit and one lattice hit per release; lines pass through tiles; nothing damages before its packet arrives or after its tail has passed.
+  - Afterwards the gun recoils, the key unwinds and sinks, the parts pop off and the bare gun fades within 24 ticks; a new press is accepted after that.
+- **Cancel:** item change, death, Raid Down or elimination, `noItems` or crowd control removes the gun at once, with no finisher and no further ammo; running out of ammo while holding packs it away. Rounds and a released finisher keep going through an item change and end at once if the owner dies, is Downed or is eliminated.
+- **Presentation** (shared [Doll weapon layer](#reward-refresh-2026-10--shared-rules), Front stratum, in front of every player):
+  - Art: the owner-approved DW02 family at k = 3, one texel per 2 px dot, point-sampled and never scaled: `MeridianBare` plus the four `MeridianParts` flying to their seats, `MeridianGun` (the assembled reference) from the fourth seat until the parts pop off, the 4-frame `MeridianKey` (k = 1) on the key seat, and the `PaleMeridianIcon` inventory icon. The art's muzzle anchor sits on the 150 px design muzzle; its grip and key seat land within one dot of the design anchors (domain-tested). Aiming left mirrors the gun about its aim (never upside down). The front arm reaches the grip, the back arm the fore-end.
+  - Light: the original `DollMeridianEnergy` material (white-hot spine and head over a flowing pearl-violet body that thins to a plum rim, drifting sparkles, Luminance noise) plus the layer's lines, rings and debris. Per note an iris closes on the muzzle and a pin of light runs along the shroud; parts trail violet afterimages and seat under a pearl star; each ratchet step throws brass sparks while a violet iris tightens on the muzzle; ignition bursts a ring; overcharge keeps a pulsing violet muzzle glow; rounds are pearl pins with violet wakes and heavy rounds a 3-dot lance with a halo; the lattice adds brass glints where its lines cross and a star at the node; residue cools to plum within 18 ticks.
+  - Recoil (eased): 3 px per note, 1.5 px per overcharge round, 5 px and 0.05 rad climb per heavy round, 14 px and 0.10 rad at the strike.
+  - Other players' light draws at 65%; bodies stay opaque. Reduced Effects halves sparks, sparkles and residue time, uses 4-ray stars and drops the glow; screen shake goes through the shared feedback (owner only, respects the config). Geometry, timing, damage and sound are unchanged.
+- **Audio:** 23 new cues in `Assets/Sounds/Weapons/DollWeapons/` (music box, brass, porcelain, organ): `MeridianAssemble`; `MeridianNote0`–`8`; the pairs `MeridianPartWarn` → `MeridianPartFire`, `MeridianIgniteWarn` → `MeridianIgniteFire`, `MeridianStrikeWarn` → `MeridianStrikeFire` (or `MeridianStrikeMiss` when the release fails), `MeridianLatticeWarn` → `MeridianLatticeFire`; the overcharge loop `MeridianLoop` (2.4 s = 144 ticks, sample-exact WAV); `MeridianHeavy`; `MeridianHit`/`MeridianHitHeavy` on the owner's hits. Every peer plays them once per projectile from the accepted age. [Audio](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10) owns the files and levels.
+- **Ownership:** the owner client reads the trigger and cursor, spends ammo and spawns rounds and the two release lines through native projectile replication; peers draw from replicated position, velocity and `ai`. Holdout: `ai[0]` age (frozen at the release), `ai[1]` −1 while held then the finisher tier that fired (0 none), `ai[2]` 0 while held then −1 … −24 while packing away; velocity is the aim, locked at the release. Line: position = muzzle at the release, velocity = unit direction, `ai[0]` age (the lattice starts negative), `ai[1]` node, `ai[2]` tier (+4 for the lattice). No packet; protocol unchanged.
+- **Budget** (raw, one target, per-hit rounding; [baseline](#reward-refresh-2026-10--shared-rules)): build 22 × 1301 = 28,622 (baseline 28,530, +0.3%); overcharge 15,953 per 36 ticks = 26,588/s (unchanged); best 600-tick window from a cold press 144,859 (release at 579 so both finisher hits land; baseline 141,442, +2.4%); holding alone 142,595 (+0.8%). Releasing and pressing again never beats holding: the best cycle averages 93% of the overcharge rate (release at 348: 21.45× per 6.2 s). The lattice's area is outside the single-target budget.
+
+**What changes for players**
+
+- Build-up: one receiver plus four docking components firing 15 homing needles ×0.95 (14.25×) → a bare gun that gains four brass parts at 108/180/228/264 ticks and fires 22 straight music-box notes ×0.65 (14.30×) on a 24/18/12/9/6-tick ladder.
+- Muzzle: 122 px → 150 px from the player's centre.
+- Overcharge: unchanged (348 ticks, a round every 3 ticks ×0.62, a heavy ×1.15 every 36, 26,588 raw/s), now with the wind-up key turning.
+- Letting go: stopped firing → fires the meridian (×1.5/×2.5/×4 by tier) and from tier 2 a lattice (×1.5/×2) through the cursor for one more ammo; 6× at the tier-3 node.
+- Area: new lattice damage in a 480 px '#' (tier 3) or a 320 px cross (tier 2) around the cursor.
+- Burst: best 10 s from a cold press 141,442 → 144,859 raw (+2.4%); sustained damage unchanged.
+- After letting go: 20-tick fade → 24 ticks before the next press.
+- Look: the painted gun behind the player and upside down when aiming left → the approved pixel gun (174×34 px) in front of the player, mirrored when aiming left; new inventory icon.
+- Sound: the 0.2.x Ranged and MeridianSustain sounds → 23 new music-box, brass, porcelain and organ cues.
 
 ## Claw swipe cleanup — 0.2.38
 
@@ -138,11 +195,9 @@ Refreshed 2026-10 under the [shared rules](#reward-refresh-2026-10--shared-rules
 - Other players' Lacuna: full-strength energy → light at 65% and void at 60%. Your own: light at 80% and void at 75%, so boss forecasts show through your beam.
 - Look and sound: painted V3 relic, sigils and the shared purple beam → the approved pixel book, irises and great aperture with the black-cored void beam; every cue new; new pixel inventory icon.
 
-### Ranged — Pale Meridian
+### Ranged — Pale Meridian (history)
 
-Hold to assemble **one siege gun**, not an array of complete guns. One physical receiver arrives first; four small breech/rail components dock at90/162/213/246 ticks with rapid approach and a braked seating beat. The initial gun shoots during construction; cadence accelerates as components lock. At282–300 the mechanism compresses, then a48-tick pressure charge precedes overdrive at348 (5.8s). One barrel/muzzle remains attached through recoil; no full-gun duplication or large player-centered crown.
-
-Overdrive maintains physical homing needles at one every3 real ticks, using the single assembled muzzle; every36 ticks a heavier penetrating needle replaces an ordinary shot. This is physical needle fire, not the Magic beam recolored. Release/item change/incapacitation/out-of-ammo ends it. One native `PickAmmo` call per actual shot retains ammunition damage, knockback and conservation hooks. The initial harmless holdout consumes no bullet.75% conservation remains. Aim cap0.055rad/tick in overdrive.
+Superseded by [Pale Meridian — refreshed ranged (2026-10)](#pale-meridian--refreshed-ranged-2026-10). The 0.2.34 form assembled one receiver plus four docking components (90/162/213/246 ticks) firing 15 homing needles ×0.95, compressed at 282–300, charged 48 ticks and overdrove from 348 (a needle every 3 ticks ×0.62, a heavy ×1.15 every 36) until release, which only stopped it; its `MeridianBastion`/`MeridianNeedle` types remain in the code, unused, until the set's legacy cleanup. The full text is in Git history.
 
 ### Summon — Choir of the Unmade
 
@@ -174,7 +229,7 @@ The [2026-09-14 recording/source analysis](../../research/2026-09-14-doll-playte
 
 ## Initial power budget — not measured DPS
 
-The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Ranged warmup needles carry0.95x; overdrive carries0.62x, replacing one in12 with1.15x (about26593 raw/sec at2002 base, excluding ammo). Choir ordinary notes carry0.85x; shared chorus hits carry1.05x the sum of living voices every12 ticks (5082 raw/sec per968-damage voice **during the chorus**, not averaged over rest). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; that blade splits0.70/0.30 outbound/return.
+The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Pale Meridian's current numbers are in [its section](#pale-meridian--refreshed-ranged-2026-10). Choir ordinary notes carry0.85x; shared chorus hits carry1.05x the sum of living voices every12 ticks (5082 raw/sec per968-damage voice **during the chorus**, not averaged over rest). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; that blade splits0.70/0.30 outbound/return.
 
 These are arithmetic bounds before defense, crits, armor/accessories, misses, movement and class hooks—not claims of endgame balance or measured DPS. The goal of a modest improvement over selected same-class final equipment needs matched in-game measurements. Do not change Boss HP to hide weapon imbalance.
 
