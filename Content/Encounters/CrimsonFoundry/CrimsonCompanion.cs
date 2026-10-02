@@ -34,11 +34,15 @@ public sealed class CrimsonPact : ModItem
         return false;
     }
     // One of each Scarlet reward weapon (consumed) at a Bookcase: no other source. The Grimoire is only the Raid key.
+    // Never decrafted: Shimmer would otherwise turn a Covenant (including one made with the retired Grimoire recipe)
+    // into all five weapons without a Victory, and REWARDS.md allows no reverse recipe.
     public override void AddRecipes()
     {
         var recipe = CreateRecipe();
         foreach (int weapon in CrimsonRewardItems.RewardTypes()) recipe.AddIngredient(weapon);
-        recipe.AddTile(TileID.Bookcases).Register();
+        recipe.AddTile(TileID.Bookcases);
+        recipe.DisableDecraft();
+        recipe.Register();
     }
 }
 
@@ -205,7 +209,7 @@ public sealed class CrimsonCompanionRay : ModProjectile
         Projectile.width = Projectile.height = 14; Projectile.friendly = true; Projectile.DamageType = DamageClass.Summon;
         Projectile.penetrate = -1; Projectile.tileCollide = false; Projectile.ignoreWater = true;
         Projectile.timeLeft = CrimsonCovenantRules.Duration; Projectile.netImportant = true;
-        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = 12;
+        Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = CrimsonCovenantRules.HitCooldown;
     }
     public override bool ShouldUpdatePosition() => false;
     public override bool CanHitPvp(Player target) => false;
@@ -253,6 +257,6 @@ public sealed class CrimsonCompanionRay : ModProjectile
         float point = 0;
         Vector2 start = Projectile.Center + new Vector2(Projectile.ai[1], 0);
         return Collision.CheckAABBvLineCollision(targetHitbox.TopLeft(), targetHitbox.Size(), start,
-            start - new Vector2(Reach * CrimsonInvocation.Ease((Projectile.ai[0] - CrimsonCovenantRules.ChargeTicks) / 7), 0), 48 * Size * Opening, ref point);
+            start - new Vector2(Reach * CrimsonInvocation.Ease((Projectile.ai[0] - CrimsonCovenantRules.ChargeTicks) / CrimsonCovenantRules.OpenTicks), 0), 48 * Size * Opening, ref point);
     }
 }

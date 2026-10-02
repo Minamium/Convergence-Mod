@@ -94,7 +94,8 @@ internal sealed class ScytheMeasureScene : IRewardsPreviewScene
         if (whip > CrimsonRewardRules.WhipLiveStart && whip <= CrimsonRewardRules.WhipLiveEnd + CrimsonRewardRules.CrescentScar + 6)
         {
             bool live = whip <= CrimsonRewardRules.CrescentLiveEnd;
-            if (canvas.Begin(new ScarletInkStyle(live ? ScarletInkLook.Live : ScarletInkLook.Residue, true, 2.1f)))
+            if (canvas.Begin(new ScarletInkStyle(live ? ScarletInkLook.Live : ScarletInkLook.Residue, true, 2.1f,
+                    Remaining: CrimsonRewardRules.CrescentLiveEnd - whip)))
             {
                 float fade = 1 - (whip - CrimsonRewardRules.CrescentLiveEnd) / CrimsonRewardRules.CrescentScar;
                 for (int i = 0; i <= 24; i++)
@@ -221,7 +222,8 @@ internal sealed class ScytheReapScene : IRewardsPreviewScene
                 float head = SableScytheMotion.BarlineHead(t), fade = 1 - (t - 15) / CrimsonRewardRules.StaffScar;
                 for (int side = -1; side <= 1; side += 2)
                 {
-                    if (!canvas.Begin(new ScarletInkStyle(live ? ScarletInkLook.Live : ScarletInkLook.Residue, true, 5 + side))) return;
+                    if (!canvas.Begin(new ScarletInkStyle(live ? ScarletInkLook.Live : ScarletInkLook.Residue, true, 5 + side,
+                            Remaining: CrimsonRewardRules.BarlineFall + CrimsonRewardRules.BarlineLive - t))) return;
                     for (int i = 0; i <= 16; i++)
                     {
                         float f = head * i / 16;
@@ -243,7 +245,8 @@ internal sealed class ScytheReapScene : IRewardsPreviewScene
                 }
                 canvas.End();
             }
-            if (lineHead > tail && SableScytheMotion.LineLive(t) && canvas.Begin(new ScarletInkStyle(ScarletInkLook.Live, true, k * 1.1f)))
+            if (lineHead > tail && SableScytheMotion.LineLive(t)
+                && canvas.Begin(new ScarletInkStyle(ScarletInkLook.Live, true, k * 1.1f, Window: CrimsonRewardRules.StaffLineLive)))
             {
                 int samples = (int)(840 * (lineHead - tail) / 10) + 2;
                 for (int i = 0; i < samples; i++)

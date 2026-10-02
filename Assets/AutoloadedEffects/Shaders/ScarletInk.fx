@@ -103,13 +103,30 @@ float4 Residue(VO i):COLOR0 {
 // noise runs on through joints without seams, doubled alpha or lip rings, and round caps come from u outside [0, L].
 // path:  u, v, L (path length), head (u of the writing bead, < 0 none)
 // ink:   radius px, time (live: ticks since this point ignited; residue: remaining fade 1..0; dormant: unused), seed, opacity
-// style: fire, reduced, warmth (a full build's steady lip heat 0..1), unused
+// style: fire, reduced, warmth (dormant: a full build's steady lip heat 0..1; live: which caps are drying joints,
+//        1 the start, 2 the end, 3 both), close (live: 1 the river .. 0 dried into its scar)
 struct PI { float4 p:POSITION0; float4 path:TEXCOORD0; float4 ink:TEXCOORD1; float4 style:TEXCOORD2; };
 struct PO { float4 p:SV_POSITION; float4 path:TEXCOORD0; float4 ink:TEXCOORD1; float4 style:TEXCOORD2; };
 PO PathVS(PI v) { PO o; o.p=mul(v.p,uWorldViewProjection); o.path=v.path; o.ink=v.ink; o.style=v.style; return o; }
 
 float PathD(float4 path) { return length(float2(path.x-clamp(path.x,0,path.z),path.y)); }
 float PathAA(float4 path) { return max(.6,abs(ddx(path.y))+abs(ddy(path.y))); }
+// The ResiduePass scar over a path at `fade` (premultiplied): PathResiduePass, and what closing live ink dries into.
+// On a path with length (L > 0) the drying lip runs along the sides only, not round the caps, so where a scar meets the
+// next stretch of the same stroke (a live river drying behind its head) no lip ring marks the joint. A disc keeps it.
+float4 Scar(float2 p,float d,float r,float L,float fade,float seed,float fire,float reduced) {
+ float q=saturate(d/r);
+ float n=tex2D(grain,p*.0058+seed).r;
+ float scar=(1-smoothstep(.1,.38+.3*n,q+(1-fade)*.3))*(.5+.5*n);
+ float e=tex2D(flow,float2(p.x*.011+seed,p.y*.05-clock*.7)).r;
+ float ember=fire*pow(saturate(e*1.9-1.05),3)*(1-q)*(1-reduced*.7);
+ float rim=exp2(-pow((q-.36-.25*n)/.06,2))*.35;
+ rim*=L>0 ? saturate(1-max(-p.x,p.x-L)/max(1,.2*r)) : 1;
+ float alpha=scar*.62*fade;
+ float3 emit=float3(1,.2,.06)*ember*1.3*fade+float3(.7,.05,.05)*rim*fade*fade;
+ return float4(float3(.04,.003,.007)*alpha+emit,alpha);
+}
+
 // The writing head: a small ember-gold bead marks ink that is still being written. The Raid's ink never has one.
 float Bead(float4 path,float r,float aa) {
  float b=max(2.2*aa,min(6.5,r*.5));
@@ -117,7 +134,12 @@ float Bead(float4 path,float r,float aa) {
 }
 
 // The AutoloadPass river over a path. It opens over 3 ticks without the strike's overshoot, so the drawn body
-// never leaves the capsule that collides (radius x saturate(t/3)) beyond its anti-aliased rim.
+// never leaves the capsule that collides (radius x saturate(t/3)) beyond its anti-aliased rim. Like AutoloadPass's
+// close envelope, a point near the end of its live window (style.w < 1) crossfades into exactly the scar
+// PathResiduePass starts from (fade 1), so the river dries instead of snapping and a moving tail leaves no burning cap.
+// At a drying joint (style.z), where the scar path behind a moving tail already ends in its own round cap, the dried
+// part draws no cap of its own and fades in over half a radius, so the two scars do not double up. Collision is
+// unchanged, as with the Raid's close.
 float4 PathLive(PO i):COLOR0 {
  float2 p=i.path.xy; float L=i.path.z,d=PathD(i.path),r=i.ink.x,t=i.ink.y,seed=i.ink.z,aa=PathAA(i.path);
  float fire=i.style.x,reduced=i.style.y;
@@ -145,11 +167,17 @@ float4 PathLive(PO i):COLOR0 {
  float3 emit=scarlet*(lip*1.15+halo*.3+threads*edge*(.42+.3*q)+edge*flash*.22)
   +lerp(scarlet,hotc,flash*.8+.25)*core*(.75+flash*1.4)+ember*tongue*1.3
   +lerp(scarlet,hotc,ignite*.85)*edge*ignite*(1.6-q*.7)+gold*bead*1.6;
- return float4(ink*body+emit,max(body*.93,bead*.8))*i.ink.w;
+ float4 river=float4(ink*body+emit,max(body*.93,bead*.8));
+ float joints=i.style.z,rs=max(r,1);
+ float joined=step(.5,joints-2*floor(joints*.5))*(1-smoothstep(0,.5*rs,p.x))+step(1.5,joints)*(1-smoothstep(0,.5*rs,L-p.x));
+ float4 dried=Scar(p,d,rs,L,1,seed,fire,reduced)*saturate(1-joined);
+ return lerp(dried,river,saturate(i.style.w))*i.ink.w;
 }
 
 // The build look: the residue scar held at fade .6, a narrow dried scar with a faint warm lip. Embers breathe
-// along it from noise alone (no periodic term); a full build warms the lip steadily, without pulsing.
+// along it from noise alone (no periodic term); a full build warms the lip steadily, without pulsing. The lip lies
+// inside the dried body on the scar's own edge and is scaled as ResiduePass's rim is at fade .6 (x.35 x.36), so a
+// build is never a pair of hairlines around an empty core (the forecast look the owner rejected).
 float4 PathDormant(PO i):COLOR0 {
  float2 p=i.path.xy; float d=PathD(i.path),r=max(i.ink.x,1),seed=i.ink.z,aa=PathAA(i.path);
  float reduced=i.style.y,warm=saturate(i.style.z);
@@ -160,28 +188,19 @@ float4 PathDormant(PO i):COLOR0 {
  float e=tex2D(flow,float2(p.x*.011+seed-clock*.13,p.y*.05-clock*.7)).r;
  float breath=tex2D(grain,float2(p.x*.0031+seed*1.7,clock*.21+seed)).r;
  float ember=pow(saturate(e*1.9-1.05),3)*(1-q)*(.45+.9*breath)*(1-reduced*.7);
- float rim=exp2(-pow((q-.36-.25*n)/.06,2));
+ float lip=exp2(-pow((q-.2-.15*n)/max(.08,1.5*aa/r),2))*saturate(scar*2);
  float bead=Bead(i.path,r,aa);
- // Denser than a residue scar so a build reads on bright and dark ground; the lip stays faint until the build is full.
+ // Denser than a residue scar so a build reads on bright and dark ground; the lip stays faint until the build is full,
+ // and a full build's warmth tints the dried body itself rather than adding light around it.
  float alpha=scar*.86;
- float3 emit=float3(1,.2,.06)*ember*1.3*fade+float3(.7,.05,.05)*rim*(.3+.12*breath)
-  +float3(1,.3,.09)*rim*warm*.5+float3(1,.74,.32)*bead*1.6;
+ float3 emit=float3(1,.2,.06)*ember*1.3*fade+float3(.7,.05,.05)*lip*(.35*.36)*(.8+.4*breath)
+  +float3(1,.3,.09)*warm*(lip*.3+scar*.1)+float3(1,.74,.32)*bead*1.6;
  return float4(float3(.04,.003,.007)*alpha+emit,max(alpha,bead*.8))*i.ink.w;
 }
 
 // ResiduePass over a path: after a release the ink dries into a harmless scar for 20-24 ticks.
 float4 PathResidue(PO i):COLOR0 {
- float2 p=i.path.xy; float d=PathD(i.path),r=max(i.ink.x,1),fade=saturate(i.ink.y),seed=i.ink.z;
- float fire=i.style.x,reduced=i.style.y;
- float q=saturate(d/r);
- float n=tex2D(grain,p*.0058+seed).r;
- float scar=(1-smoothstep(.1,.38+.3*n,q+(1-fade)*.3))*(.5+.5*n);
- float e=tex2D(flow,float2(p.x*.011+seed,p.y*.05-clock*.7)).r;
- float ember=fire*pow(saturate(e*1.9-1.05),3)*(1-q)*(1-reduced*.7);
- float rim=exp2(-pow((q-.36-.25*n)/.06,2))*.35;
- float alpha=scar*.62*fade;
- float3 emit=float3(1,.2,.06)*ember*1.3*fade+float3(.7,.05,.05)*rim*fade*fade;
- return float4(float3(.04,.003,.007)*alpha+emit,alpha)*i.ink.w;
+ return Scar(i.path.xy,PathD(i.path),max(i.ink.x,1),i.path.z,saturate(i.ink.y),i.ink.z,i.style.x,i.style.y)*i.ink.w;
 }
 
 // ---- Reward sprite burn: SpriteBurnPass ----------------------------------------------------------------------

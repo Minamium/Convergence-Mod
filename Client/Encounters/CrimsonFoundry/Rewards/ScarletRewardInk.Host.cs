@@ -11,10 +11,12 @@ using Terraria.ModLoader;
 namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 
 // Terraria side of ScarletRewardInk (REWARDS.md#layering): reward ink draws once per frame through DrawWorld, which
-// is frame-stamped and idempotent. Scarlet's PostDrawTiles drawers (CrimsonGestureVisuals, CrimsonChorusVisuals) call
-// it before they draw forecasts and chorus markers, and ScarletRewardInkSystem calls it otherwise; whichever runs
-// first draws. Reward ink therefore always lies beneath the Raid's forecasts and chorus markers, in the Raid strikes'
-// world layer (beneath NPCs and players). A rendering exception disables reward ink for the session, with one warning.
+// is frame-stamped and idempotent. Scarlet's PostDrawTiles drawers (CrimsonGestureVisuals, CrimsonChorusVisuals,
+// CrimsonVisuals) call it before they draw forecasts, portals and chorus markers; the other Raids' forecast drawers
+// (Azure, Ebon, Doll, Ghost Samurai) call it through Client/Graphics/FriendlyWorldInk; ScarletRewardInkSystem calls it
+// otherwise. Whichever runs first draws, whatever the systems' load order. Reward ink therefore always lies beneath
+// every Raid's forecasts and chorus markers, in the Raid strikes' world layer (beneath NPCs and players). A rendering
+// exception disables reward ink for the session, with one warning.
 // Client only: nothing here exists or runs on a Dedicated Server.
 internal sealed partial class ScarletRewardInk
 {
@@ -124,11 +126,16 @@ internal sealed partial class ScarletRewardInk
 [Autoload(Side = ModSide.Client)]
 internal sealed class ScarletRewardInkSystem : ModSystem
 {
+    public override void Load() => Convergence.Client.Graphics.FriendlyWorldInk.Draw = ScarletRewardInk.DrawWorld;
     // tML calls this once at the start of every DoDraw: one stamp per rendered frame.
     public override void ModifyScreenPosition() => ScarletRewardInk.BeginFrame();
     public override void PostDrawTiles() => ScarletRewardInk.DrawWorld();
     public override void PostUpdateEverything() => ScarletRewardInk.Tick();
     public override void ClearWorld() => ScarletRewardInk.ClearWorld();
     public override void OnWorldUnload() => ScarletRewardInk.ClearWorld();
-    public override void Unload() => ScarletRewardInk.Unload();
+    public override void Unload()
+    {
+        Convergence.Client.Graphics.FriendlyWorldInk.Draw = null;
+        ScarletRewardInk.Unload();
+    }
 }

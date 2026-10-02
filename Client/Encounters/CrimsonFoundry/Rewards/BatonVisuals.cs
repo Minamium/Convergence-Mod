@@ -414,10 +414,13 @@ internal sealed class BatonInkSystem : ModSystem, IScarletInkEmitter
                 n = 1;
                 break;
         }
+        // An ignited stroke's river closes into its scar over the end of its live window (the writing ink does not).
+        float window = state.Kind == CrimsonStrokeKind.Live ? BatonRules.IgniteEnd : 0;
         for (int i = 0; i < n; i++)
         {
             ref readonly var span = ref spans[i];
-            var style = ScarletRewardFx.Ink(owner, (ScarletInkLook)span.Look, seed, span.Opacity, false, span.Warmth);
+            var style = ScarletRewardFx.Ink(owner, (ScarletInkLook)span.Look, seed, span.Opacity, false, span.Warmth)
+                with { Window = span.Look == BatonLook.Live ? window : 0 };
             EmitSpan(canvas, style, stroke.Points, stroke.Along, ReadOnlySpan<bool>.Empty, count, span);
         }
     }
@@ -430,7 +433,7 @@ internal sealed class BatonInkSystem : ModSystem, IScarletInkEmitter
         for (int i = 0; i < n; i++)
         {
             ref readonly var span = ref spans[i];
-            var style = ScarletRewardFx.Ink(p.owner, (ScarletInkLook)span.Look, seed, span.Opacity);
+            var style = ScarletRewardFx.Ink(p.owner, (ScarletInkLook)span.Look, seed, span.Opacity) with { Window = Rules.RiverLive };
             EmitSpan(canvas, style, river.Points, river.Along, river.Breaks, river.SampleCount, span);
         }
     }

@@ -40,8 +40,10 @@ public sealed class CrimsonSableScythe : ModItem
 
     public override bool CanUseItem(Player player)
     {
-        if (!CrimsonRewardItems.CanAct(player) || SableRelease.Any(player)) return false;
         var state = player.GetModPlayer<SableScythePlayer>();
+        // A cast release holds the scythe for its whole follow-through, through item swaps too (the lock lives on the
+        // player, not on the held pose, which an item swap kills).
+        if (!CrimsonRewardItems.CanAct(player) || state.Releasing || SableRelease.Any(player)) return false;
         if (player.altFunctionUse == 2)
         {
             if (SableStaff.Lines(player) <= 0) return false;
@@ -188,8 +190,8 @@ public sealed class SableStroke : ModProjectile
         Projectile.tileCollide = false;
         Projectile.ignoreWater = true;
         Projectile.penetrate = -1;
-        // The root ledgers make each part hit a root once per stroke (the spec's 24-tick immunity, as a stroke lasts
-        // at most 28 ticks); native immunity is kept to one tick so the Whip's blade and crescent can both land.
+        // One tick of native immunity plus one root ledger per part (REWARDS.md, Melee, "Collision"): each part hits a
+        // root once per stroke, and the Whip's blade and crescent can both land on the same NPC.
         Projectile.usesLocalNPCImmunity = true;
         Projectile.localNPCHitCooldown = 1;
         Projectile.netImportant = true;
@@ -342,6 +344,9 @@ public sealed class SableStroke : ModProjectile
 // Down (it only cannot be released then); death clears it. The owner sends netUpdate on each change of the line count.
 public sealed class SableStaff : ModProjectile
 {
+    // Engrave runs inside a stroke's update, and Projectile.Update clears netUpdate before this carrier's own AI, so
+    // the owner republishes the engraving from the carrier's next AI instead (BatonStroke and BloodinkTrail do the same).
+    private bool resync;
     public override string Texture => CrimsonRewardItems.Icon(CrimsonRewardSprites.Scythe);
     internal int Engraved => Math.Clamp((int)Projectile.ai[0], 0, CrimsonRewardRules.StaffLines);
     internal float Since => Projectile.ai[1];
@@ -383,6 +388,7 @@ public sealed class SableStaff : ModProjectile
         Player owner = Main.player[Projectile.owner];
         // Death clears the build; Down and item swaps do not.
         if (!SableScytheMotion.StaffSurvives(owner.active, owner.dead)) { Projectile.Kill(); return; }
+        if (resync && Projectile.owner == Main.myPlayer) { resync = false; Projectile.netUpdate = true; }
         int before = Current;
         Projectile.ai[1]++;
         Projectile.Center = owner.MountedCenter;
@@ -402,7 +408,7 @@ public sealed class SableStaff : ModProjectile
             found.ai[0] = Math.Min(CrimsonRewardRules.StaffLines, staff.Current + 1);
             found.ai[1] = 0;
             found.timeLeft = 2 + SableScytheMotion.StaffLife(staff.Engraved);
-            found.netUpdate = true;
+            found.netUpdate = staff.resync = true;
             return;
         }
         int index = Projectile.NewProjectile(source, owner.MountedCenter, Vector2.Zero,
@@ -480,7 +486,7 @@ public sealed class SableRelease : ModProjectile
             if (child >= 0 && child < Main.maxProjectiles) Main.projectile[child].netUpdate = true;
         }
         staffCarrier!.Kill();
-        owner.GetModPlayer<SableScythePlayer>().Released();
+        owner.GetModPlayer<SableScythePlayer>().Released(SableScytheMotion.ReleaseTicks(lines));
         return true;
     }
 
@@ -594,13 +600,13 @@ public sealed class StaffCut : ModProjectile
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) => roots.TryAdd(CrimsonRewardItems.Root(target));
 }
 
-// Owner bookkeeping: the measure counter, a queued release and what the next stroke eases in from. Nothing here is
-// replicated; peers rebuild everything from the projectiles.
+// Owner bookkeeping: the measure counter, a queued release, the release lock and what the next stroke eases in from.
+// Nothing here is replicated; peers rebuild everything from the projectiles.
 public sealed class SableScythePlayer : ModPlayer
 {
     private readonly SableCombo combo = new();
     private bool queued;
-    private ulong lastEnd = ulong.MaxValue;
+    private ulong lastEnd = ulong.MaxValue, releaseUntil;
     private float lastAim;
     private int lastLines;
 
@@ -608,8 +614,10 @@ public sealed class SableScythePlayer : ModPlayer
     internal void QueueRelease() => queued = true;
     internal void ClearQueue() => queued = false;
     internal int TakeStroke() { queued = false; return combo.Take(Main.GameUpdateCount); }
-    // After Staff Reap the measure restarts on the Over, which starts from the release's held pose.
-    internal void Released() { combo.Reset(); queued = false; }
+    // After Staff Reap the measure restarts on the Over, which starts from the release's held pose. The scythe stays
+    // locked until the follow-through ends (`ticks` from the cast), even if the held pose dies with an item swap.
+    internal void Released(int ticks) { combo.Reset(); queued = false; releaseUntil = Main.GameUpdateCount + (ulong)Math.Max(0, ticks); }
+    internal bool Releasing => Main.GameUpdateCount < releaseUntil;
 
     // A stroke or a release reached its last tick; the stroke spawned on the next tick eases in from it.
     internal void Ended(float aim, int lines) { lastEnd = Main.GameUpdateCount; lastAim = aim; lastLines = lines; }
@@ -620,12 +628,13 @@ public sealed class SableScythePlayer : ModPlayer
         return chained ? new Vector2(lastLines, lastAim) : new Vector2(-1, aim);
     }
 
+    // An item change resets the measure but never the release lock.
     public override void PostUpdate()
     {
         if (Player.HeldItem.type != ModContent.ItemType<CrimsonSableScythe>()) { combo.Reset(); queued = false; lastEnd = ulong.MaxValue; }
     }
 
     // Death clears the owner's bookkeeping (the staff carrier kills itself on every client).
-    public override void UpdateDead() { combo.Reset(); queued = false; lastEnd = ulong.MaxValue; }
-    public override void OnEnterWorld() { combo.Reset(); queued = false; lastEnd = ulong.MaxValue; }
+    public override void UpdateDead() { combo.Reset(); queued = false; lastEnd = ulong.MaxValue; releaseUntil = 0; }
+    public override void OnEnterWorld() { combo.Reset(); queued = false; lastEnd = ulong.MaxValue; releaseUntil = 0; }
 }

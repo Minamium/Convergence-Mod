@@ -46,8 +46,7 @@ internal static class CrimsonRewardRules
 
     // ---- Shared projectile contract ----------------------------------------------------------------------------
     internal const int HeldLagTicks = 6;       // a remote held projectile tolerates this much held-item lag
-    internal const int ReliquaryShareChance = 20; // percent per weapon, independent of Luck
-    internal const int RootLedgerCapacity = 64; // distinct roots one release part may hit
+    internal const int MaxRoots = 200;         // NPC slots (Main.maxNPCs): every realLife root a ledger may record
     internal static bool Valid(float value, float min, float max) => float.IsFinite(value) && value >= min && value <= max;
     internal static bool ValidInteger(float value, int min, int max) => Valid(value, min, max) && value == MathF.Floor(value);
 
@@ -82,7 +81,7 @@ internal static class CrimsonRewardRules
     internal const float StrokeMultiplier = 1, WhipMultiplier = 1.8f, CrescentMultiplier = .6f, CrescentRadius = 16, WhipThrust = 24;
     internal const int CrescentScar = 20, ComboIdleReset = 60, MeasureStrokes = 5;
     internal const float MinTipSpeed = 3, MinTurnRadius = 24, RollSpeedFloor = .25f, DrawBackSpeedFloor = .2f, MaxAngularAcceleration = .3f;
-    internal const float ScytheReach = 136, BladeWidth = 26; internal const int BladeCapsules = 3, SweepSubsamples = 9, StrokeImmunity = 24;
+    internal const float ScytheReach = 136, BladeWidth = 26; internal const int BladeCapsules = 3, SweepSubsamples = 9;
     internal const int StaffLines = 5, StaffLineLife = 360, StaffDrainTicks = 30;
     internal const float StaffBehind = 40, StaffLineLength = 56, StaffLineGap = 8;
     internal const int StaffInputGrace = 8, StaffWindup = 16, StaffHeadTicks = 4, StaffLineLive = 10, StaffScar = 20;
@@ -267,24 +266,23 @@ internal static class CrimsonRewardRules
     }
 }
 
-// One release part's hit ledger: each realLife root counts once, however many segments it has.
+// One release part's hit ledger: each realLife root counts once, however many segments it has. It has a bit for every
+// NPC slot, so it can never fill up: a part that sweeps a crowd of any size still hits each root exactly once. A root
+// outside the slots is treated as already hit (fails closed).
 internal sealed class CrimsonRootLedger
 {
-    private readonly int[] roots;
+    private readonly ulong[] bits = new ulong[(CrimsonRewardRules.MaxRoots + 63) / 64];
     private int count;
-    internal CrimsonRootLedger(int capacity = CrimsonRewardRules.RootLedgerCapacity) => roots = new int[Math.Clamp(capacity, 1, 1024)];
     internal int Count => count;
-    internal bool Contains(int root)
-    {
-        for (int i = 0; i < count; i++) if (roots[i] == root) return true;
-        return false;
-    }
-    // True when the root is new (and is now recorded); false when it already took this part's hit or the ledger is full.
+    internal static bool ValidRoot(int root) => root >= 0 && root < CrimsonRewardRules.MaxRoots;
+    internal bool Contains(int root) => !ValidRoot(root) || (bits[root >> 6] & 1UL << (root & 63)) != 0;
+    // True when the root is new (and is now recorded); false when it already took this part's hit or is not a slot.
     internal bool TryAdd(int root)
     {
-        if (root < 0 || Contains(root) || count >= roots.Length) return false;
-        roots[count++] = root;
+        if (Contains(root)) return false;
+        bits[root >> 6] |= 1UL << (root & 63);
+        count++;
         return true;
     }
-    internal void Clear() => count = 0;
+    internal void Clear() { Array.Clear(bits); count = 0; }
 }

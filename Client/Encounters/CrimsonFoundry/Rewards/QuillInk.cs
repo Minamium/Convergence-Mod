@@ -180,7 +180,7 @@ internal sealed class QuillInk : ModSystem, IScarletInkEmitter
                 canvas.Point(X(s[i].At), R.BurnRadius, Math.Clamp(1 - (QuillRules.BurnAge(tau, s[i].FromNib) - R.BurnLive) / QuillRules.Residue, 0, 1));
             canvas.End();
         }
-        if (b > a && canvas.Begin(ScarletRewardFx.Ink(owner, ScarletInkLook.Live, seed)))
+        if (b > a && canvas.Begin(ScarletRewardFx.Ink(owner, ScarletInkLook.Live, seed) with { Window = R.BurnLive }))
         {
             // Exactly the samples that collide: radius 18, opened by the shader over 3 ticks since each ignited.
             for (int i = a; i < b; i++) canvas.Point(X(s[i].At), R.BurnRadius, Math.Max(0, QuillRules.BurnAge(tau, s[i].FromNib)));
@@ -230,7 +230,7 @@ internal sealed class QuillInk : ModSystem, IScarletInkEmitter
     private static void Burst(ScarletInkCanvas canvas, int owner, float seed, Vector2 at, float radius, float since, int live)
     {
         if (since < 0) return;
-        if (since < live) canvas.Disc(ScarletRewardFx.Ink(owner, ScarletInkLook.Live, seed), at, radius, since);
+        if (since < live) canvas.Disc(ScarletRewardFx.Ink(owner, ScarletInkLook.Live, seed) with { Window = live }, at, radius, since);
         else if (since < live + QuillRules.Residue)
             canvas.Disc(ScarletRewardFx.Ink(owner, ScarletInkLook.Residue, seed), at, radius, 1 - (since - live) / QuillRules.Residue);
     }

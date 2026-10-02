@@ -128,7 +128,7 @@ internal sealed class QuillVisuals : GlobalProjectile
         if (s.Length == 0) return;
         int owner = p.owner, tick = (int)(Now & 0xFFFFFF);
         float seed = QuillInk.Seed(owner, t.Serial);
-        int embers = ScarletRewardFx.Reduced ? 1 : 2;
+        const int embers = 2; // Reduced Effects halves particles where they are spawned (ScarletRewardParticles)
         for (int k = 0; k < 3; k++)
         {
             int i = (int)(ScarletRewardParticles.Hash(seed, tick * 5 + k) * s.Length) % s.Length;
@@ -269,9 +269,14 @@ internal sealed class QuillVisuals : GlobalProjectile
             color = Color.Lerp(color, new Color(255, 128, 96), .6f * heat);
         }
         var art = QuillArt.Quill();
-        var saved = Swap(art.Sampler, BlendState.AlphaBlend);
-        try { Draw(Main.spriteBatch, art, at - Main.screenPosition, rotation, color, Vector2.One); }
-        finally { Restore(saved); }
+        var saved = WorldBatchParameters.Capture(Main.spriteBatch);
+        bool restarted = false;
+        try
+        {
+            restarted = ScarletRewardFx.EnsureBatch(art.Pixel ? art.Sampler : null, saved);
+            Draw(Main.spriteBatch, art, at - Main.screenPosition, rotation, color, Vector2.One);
+        }
+        finally { ScarletRewardFx.RestoreBatch(restarted, saved); }
     }
 
     private static void DrawScore(Projectile p, SealedScore s, Color light)
@@ -291,27 +296,29 @@ internal sealed class QuillVisuals : GlobalProjectile
         var art = QuillArt.Score();
         Color color = Color.Lerp(light, Color.White, .5f);
         var batch = Main.spriteBatch;
-        var saved = Swap(art.Sampler, BlendState.AlphaBlend);
-        try { Draw(batch, art, at - Main.screenPosition, rotation, color, stretch); }
-        finally { Restore(saved); }
         // Crimson cracks run over the wax seal through the first ticks of the windup, until it splits.
         float seed = QuillInk.Seed(p.owner, 700 + Math.Max(0, s.Cast));
         float swell = R.Smooth((s.BurstSince - 1 + f + R.S(1)) / R.S(1));
         bool cracks = windup >= 0 && windup < SealSplit;
-        if (!cracks && swell <= .01f) return;
-        saved = Swap(SamplerState.LinearClamp, BlendState.Additive);
+        // One AlphaBlend batch for the body and its additive accents (alpha-0 colours); restarted only for a sampler the
+        // layer's batch lacks (delivered pixel art, then linear for the soft glow).
+        var saved = WorldBatchParameters.Capture(batch);
+        bool restarted = false;
         try
         {
+            restarted |= ScarletRewardFx.EnsureBatch(art.Pixel ? art.Sampler : null, saved);
+            Draw(batch, art, at - Main.screenPosition, rotation, color, stretch);
             if (cracks) Cracks(batch, art.Point(at, rotation, QuillArt.Seal, stretch) - Main.screenPosition, R.Smooth((windup + .5f) / SealSplit), seed);
             // A faint ember glow welling in the open score through the sixteenth before it bursts.
             if (swell > .01f)
             {
+                restarted |= ScarletRewardFx.EnsureBatch(SamplerState.LinearClamp, saved);
                 Texture2D soft = ScarletVfxHost.Assets.GetTexture("Luminance/BloomCircleSmall");
-                batch.Draw(soft, at - Main.screenPosition, null, new Color(1f, .16f, .08f) * (.55f * swell), 0, soft.Size() * .5f,
+                batch.Draw(soft, at - Main.screenPosition, null, ScarletRewardFx.Additive(new Color(1f, .16f, .08f) * (.55f * swell)), 0, soft.Size() * .5f,
                     70f / soft.Width * (1 + .3f * swell), SpriteEffects.None, 0);
             }
         }
-        finally { Restore(saved); }
+        finally { ScarletRewardFx.RestoreBatch(restarted, saved); }
     }
 
     // Ticks of travel at cruise speed covered by drawn age `age` (the glide counts for less).
@@ -336,7 +343,7 @@ internal sealed class QuillVisuals : GlobalProjectile
                 float bend = angle + (ScarletRewardParticles.Hash(seed, k * 7 + seg + 81) - .5f) * .9f;
                 Vector2 to = from + new Vector2(MathF.Cos(bend), MathF.Sin(bend)) * 3.4f * run;
                 Vector2 d = to - from;
-                batch.Draw(pixel, from, new Rectangle(0, 0, 1, 1), new Color(1f, .22f, .1f) * .95f, MathF.Atan2(d.Y, d.X), new Vector2(0, .5f),
+                batch.Draw(pixel, from, new Rectangle(0, 0, 1, 1), ScarletRewardFx.Additive(new Color(1f, .22f, .1f) * .95f), MathF.Atan2(d.Y, d.X), new Vector2(0, .5f),
                     new Vector2(d.Length(), 1.4f), SpriteEffects.None, 0);
                 from = to;
             }
@@ -357,19 +364,4 @@ internal sealed class QuillVisuals : GlobalProjectile
         batch.Draw(art.Texture, position, art.Source, color, rotation + art.Turn, origin, art.Scale * stretch, effects, 0);
     }
 
-    // Swap the projectile layer's batch to this sampler/blend and put it back exactly afterwards (no closures: per frame).
-    private static WorldBatchParameters Swap(SamplerState sampler, BlendState blend)
-    {
-        SpriteBatch batch = Main.spriteBatch;
-        WorldBatchParameters saved = WorldBatchParameters.Capture(batch);
-        batch.End();
-        batch.Begin(SpriteSortMode.Deferred, blend, sampler, DepthStencilState.None, saved.Raster, null, saved.Transform);
-        return saved;
-    }
-
-    private static void Restore(in WorldBatchParameters saved)
-    {
-        Main.spriteBatch.End();
-        saved.Restore(Main.spriteBatch);
-    }
 }

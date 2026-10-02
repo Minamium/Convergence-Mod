@@ -61,6 +61,7 @@ internal sealed class OrganRewardsScene : IRewardsPreviewScene
             Vector2 head = Center(c, 2) + new Vector2(-520 + 40 * tick, -6);
             Span<NVector2> trail = stackalloc NVector2[4];
             for (int i = 0; i < 4; i++) trail[i] = N(head - new Vector2(20 * (3 - i), 0));
+            sink.Window = 0;
             CanticleRules.ShardInk(sink, trail, 3.3f);
         }
         for (int i = 0; i < handCount; i++)
@@ -68,6 +69,7 @@ internal sealed class OrganRewardsScene : IRewardsPreviewScene
             CanticleHand hand = hands[i];
             float age = tick - Cast - CrimsonRewardRules.HandSlamTick(hand.Ordinal);
             Vector2 landing = Center(c, hand.Root) + new Vector2(CanticleRules.LandingOffset(hand.Ordinal, hand.Role, Targets[hand.Root].Width), 0);
+            sink.Window = CrimsonRewardRules.HandLive; // as OrganVisuals: the slam closes into its scar
             CanticleRules.HandInk(sink, N(landing), hand.Ordinal, hand.Role, Targets[hand.Root].Width, age, i * .53f + .1f, canvas.Reduced);
         }
         sink.Canvas = null;
@@ -171,6 +173,7 @@ internal sealed class OrganRewardsScene : IRewardsPreviewScene
     private sealed class Sink : ICanticleInk
     {
         internal ScarletInkCanvas? Canvas;
+        internal float Window;
         private static ScarletInkLook Look(CanticleInkLook look) => look switch
         {
             CanticleInkLook.Live => ScarletInkLook.Live,
@@ -178,7 +181,8 @@ internal sealed class OrganRewardsScene : IRewardsPreviewScene
             _ => ScarletInkLook.Residue,
         };
         public bool Begin(CanticleInkLook look, float seed, float opacity = 1, float warmth = 0)
-            => Canvas is not null && Canvas.Begin(new ScarletInkStyle(Look(look), true, seed, opacity, false, warmth, 0));
+            => Canvas is not null && Canvas.Begin(new ScarletInkStyle(Look(look), true, seed, opacity, false, warmth, 0,
+                look == CanticleInkLook.Live ? Window : 0));
         public void Point(NVector2 at, float radius, float time) => Canvas?.Point(new Vector2(at.X, at.Y), radius, time);
         public void End(bool bead = false) => Canvas?.End(bead);
         public void Droplet(NVector2 from, NVector2 to, float radius, float time, float seed)

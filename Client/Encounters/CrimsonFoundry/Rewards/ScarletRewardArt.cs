@@ -10,10 +10,10 @@ using Terraria.ModLoader;
 namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 
 // Client textures for the Scarlet rewards, resolved through the one table in CrimsonRewardSprites: the delivered
-// pixel art (one texel per logical pixel, drawn at PixelScale with point sampling) or the vanilla placeholder
-// (painted, drawn with linear sampling, scaled to about the planned on-screen size). Every texture is requested with
-// ImmediateLoad before it is cached: a cached AsyncLoad .Value is an empty placeholder until the load finishes, and
-// that once left every Ebon reward sprite invisible. Client only; Reset() on Mod unload.
+// pixel art (TexelScale texels per logical pixel, drawn so one logical pixel is PixelScale px, with point sampling) or
+// the vanilla placeholder (painted, drawn with linear sampling, scaled to about the planned on-screen size). Every
+// texture is requested with ImmediateLoad before it is cached: a cached AsyncLoad .Value is an empty placeholder until
+// the load finishes, and that once left every Ebon reward sprite invisible. Client only; Reset() on Mod unload.
 internal static class ScarletRewardArt
 {
     internal readonly record struct Sprite(Texture2D Texture, Rectangle Source, float Scale, bool Pixel)
@@ -31,7 +31,7 @@ internal static class ScarletRewardArt
         if (sprites.TryGetValue(sprite.Name, out var found) && !found.Texture.IsDisposed) return found;
         bool final = sprite.HasFinal;
         var texture = ModContent.Request<Texture2D>(final ? sprite.FinalPath : sprite.PlaceholderTexture, AssetRequestMode.ImmediateLoad).Value;
-        float scale = final ? CrimsonRewardSprites.PixelScale
+        float scale = final ? CrimsonRewardSprites.PixelScale / sprite.TexelScale
             : Math.Clamp(Math.Max(sprite.Width, sprite.Height) * CrimsonRewardSprites.PixelScale / Math.Max(1f, Math.Max(texture.Width, texture.Height)), .5f, 3f);
         return sprites[sprite.Name] = new Sprite(texture, texture.Bounds, scale, final);
     }

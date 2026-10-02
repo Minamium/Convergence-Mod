@@ -382,6 +382,7 @@ internal sealed class AzureVisuals : ModSystem
     }
     public override void PostDrawTiles()
     {
+        Convergence.Client.Graphics.FriendlyWorldInk.BeneathForecasts(); // friendly weapon ink lies under every forecast
         var girl=AzurePackets.Boss;if(Main.gameMenu || girl is null || !girl.Fresh) return;
         // Capture in the world pass. UI layers may temporarily change screen metrics;
         // neither their UI scale nor a second camera conversion belongs in this mask.

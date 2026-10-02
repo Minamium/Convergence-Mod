@@ -76,7 +76,7 @@ English names and technique names are proposals. Japanese item names follow the 
 - An accepted Victory drops one **Scarlet Score Reliquary** per frozen Raid member at the field's ground centre. The reliquaries are shared world items, like the Doll and Ebon boxes (see [Owner decisions](#owner-decisions)).
 - Right-clicking a reliquary opens it and gives exactly one of the five weapons, 20% each, independent of Luck.
 - Five different weapons craft the **Scarlet Covenant** at a Bookcase. The Covenant's old Grimoire recipe is removed.
-- There is no other drop, exchange or reverse recipe.
+- There is no other drop, exchange or reverse recipe. The Covenant's recipe is not decraftable, so Shimmer cannot turn a Covenant (including one made with the old recipe) into the five weapons.
 
 ### Power
 
@@ -134,21 +134,25 @@ All reward ink uses the owner-approved black-blood river of `ScarletInk.fx`: a d
   - They evaluate the body over a triangle strip, with u in world pixels along the whole path and v across it. Noise therefore runs continuously along a curve, with no seams, doubled alpha or lip rings at joints. Round caps come from u outside [0, L].
   - Per-vertex data carries the radius, the time since that point ignited (or its fade), the path seed, opacity, and flags (fire, reduced). Every path of one pass therefore draws in a single call.
 - **Live** (`PathLivePass`): the `AutoloadPass` body. With the fire flag (censer only) flame tongues lift off the lips, as on the Raid's Ember Crown strikes.
+  - Like `AutoloadPass`'s close envelope, a point crossfades over the last 6 ticks of its live window (half the window when it is shorter) into exactly the scar `PathResiduePass` starts from. The river dries instead of snapping, and a moving tail leaves no burning round cap behind it. Collision is unchanged, as with the Raid's close.
+  - Where a moving tail meets the scar path behind it (the end that has closed further), the dried part draws no cap of its own and fades in over half a radius, so the two scars do not double up at the joint. Emitters make the two spans meet at one point.
 - **Dormant** (`PathDormantPass`): the build look. It is the residue scar held at fade 0.6: a narrow dried scar with a faint warm lip. An aperiodic, noise-driven ember breath animates it in every flavour; there is no periodic term. A full build warms its lips steadily, without pulsing.
-- **Residue** (`PathResiduePass`): after a release, the `ResiduePass` scar for 20–24 ticks, harmless.
+  - The lip lies inside the dried body, on the scar's own edge, at `ResiduePass`'s rim strength for fade 0.6. A build is never a pair of hairlines around an empty core, which is the forecast look the owner rejected. A full build's warmth tints the dried body instead of adding light around it.
+- **Residue** (`PathResiduePass`): after a release, the `ResiduePass` scar for 20–24 ticks, harmless. On a path with length the drying lip runs along the sides only, not round the caps, so no lip ring marks a joint; a disc keeps its ring.
 - **Sprite burn** (`SpriteBurnPass`): a fourth additive pass erodes a sprite from its edges by noise behind a burning crimson lip. Only the reliquary's exit uses it.
 - **Writing head:** a path that is still being written, live or dormant, carries a small ember-gold bead at its head. The Raid's ink has no such bead, so it marks friendly black blood.
 - **Flavour:** the only material difference is fire (`flavor.x`). The `y` channel is the Raid's legacy "silk" channel and stays 0. The scythe, organ, baton and quill are told apart by shape, motion and code-drawn accents (bone chips, wax flakes, the writing bead), not by flavour values.
 - **Not used:** `ScarletRibbon` (`ScarletMaterials`) is an older Scarlet path material, not the approved black blood.
 - **Droplets** are tiny live paths (two-point strips) in the same batch, so no Metaball render target is needed.
-- **Particles** come from one fixed pool: embers (soft additive sparks), smoke (alpha, broken by noise), bone chips and wax flakes.
+- **Particles** come from one fixed pool: embers (soft additive sparks), smoke (alpha, broken by noise), bone chips and wax flakes. Reduced Effects halves them where they are spawned: the pool keeps about half of all spawns, and no emitter halves its own count.
 
 ### Layering
 
 - Reward ink draws once per frame through `ScarletRewardInk.DrawWorld`, which is frame-stamped and idempotent.
-  - Scarlet's `PostDrawTiles` drawers, `CrimsonGestureVisuals` and `CrimsonChorusVisuals`, call it before they draw forecasts and chorus markers.
+  - Scarlet's `PostDrawTiles` drawers, `CrimsonGestureVisuals`, `CrimsonChorusVisuals` and `CrimsonVisuals`, call it before they draw forecasts, portals and chorus markers.
+  - The weapons work in every Raid, and tML runs `PostDrawTiles` in load order (by type name, so Azure Cathedral's drawer runs before Scarlet's). Every other Raid's forecast drawer (`AzureVisuals`, `EbonVisuals`, `FirstSeverancePrototypePresentation`, `GhostSamuraiBattlefield`) therefore calls it first, through the neutral `Client/Graphics/FriendlyWorldInk` seam.
   - A reward ModSystem's `PostDrawTiles` calls it otherwise.
-  - Whichever runs first draws. Reward ink therefore always lies beneath the Raid's forecasts and chorus markers, in the same world layer as the Raid's strikes (beneath NPCs and players).
+  - Whichever runs first draws, whatever the load order. Reward ink therefore always lies beneath every Raid's forecasts and chorus markers, in the same world layer as the Raid's strikes (beneath NPCs and players).
 - Pixel bodies (held weapons, hands, quills, censers, the score, the reliquary) draw as ordinary items and projectiles, above that layer.
 
 ### Multiplayer readability
@@ -419,7 +423,7 @@ Vespera's baton. Conducting writes black-blood strokes where you point, and the 
 
 **State and replication.**
 
-- **`BatonSwing`:** the held gesture, `ai = (gesture, aim, age)`.
+- **`BatonSwing`:** the held gesture, `ai = (gesture + 5 × (previous + 1), aim, age)`. `previous` is −1 for the first gesture from rest, otherwise the gesture it continues. Velocity is data (`ShouldUpdatePosition` false): the previous gesture's aim as a unit vector, or zero from rest.
 - **`BatonStroke`:**
   - Its position is the chord's midpoint and its velocity holds the half-chord (`ShouldUpdatePosition` false, as the Moonshear, Moonloom Harp and Last Waltz projectiles already use velocity as data).
   - `ai = (shape, age, state)`. Shape packs bend and skew as an exact integer.
@@ -622,7 +626,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 - **Draw calls:** each pass draws all of its paths in one call, so reward ink costs at most three draws per frame. A rendering exception disables reward ink for the session, with one warning.
 - **Droplets:** at most 48 per owner and 160 in total, outside the path cap.
 - **Particles:** at most 200 per owner and 600 in total.
-- **Reduced Effects** halves droplets and particles.
+- **Reduced Effects** halves droplets and particles (particles where they are spawned, see [Material](#black-blood-material)).
 - The renderer uses fixed arrays, allocates nothing per frame, restores the SpriteBatch and device state, and owns no render target.
 
 ## Implementation shape
@@ -683,7 +687,10 @@ Final pixel art comes from Claude's brief for Codex, `asset-deliveries/scarlet-r
 - it measures the dot pitch per sheet and takes the majority colour of each logical cell;
 - it lists the measured anchors in the tool header.
 
-Exports go to `Assets/Textures/Items/ScarletRewards/`: one texel per logical pixel, drawn at 2×. Selections and exports are recorded here on delivery, and [Attribution](../../../Assets/ATTRIBUTION.md) owns rights and exact identities.
+Exports go to `Assets/Textures/Items/ScarletRewards/`. Selections and exports are recorded here on delivery, and [Attribution](../../../Assets/ATTRIBUTION.md) owns rights and exact identities.
+
+- **World bodies** (held weapons, shard, hands, censer, quill, score, reliquary parts): one texel per logical pixel, drawn at 2× with point sampling.
+- **Item and buff icons** (the reliquary's, the five weapons' and the Covenant's icons, and the censer and Covenant buffs): tML draws `ModItem.Texture` and `ModBuff.Texture` at 1×, so they are exported at 2 texels per logical pixel, as Ebon's exporter writes "icon 2x". `CrimsonRewardSprites` records this per entry (`Icon`, `TexelScale`).
 
 **Placeholders.** Until delivery, items use vanilla textures by reference, so the mechanics can be played first: the reliquary `CrimsonFishingCrate`, the scythe `DeathSickle`, the organ `OnyxBlaster`, the baton `CrimsonRod`, the censer `ImpStaff`, the quill `BoneJavelin`. In-world bodies draw the item's placeholder texture (so the organ's shard and bone hand are the Onyx Blaster too).
 
@@ -761,13 +768,16 @@ The first implementation fixed these points, which the sections above left open 
 
 **Shared.**
 
-- `CrimsonCovenantIncarnation` numbers an NPC on its first read when `OnSpawn` did not run (always on a multiplayer client), so a client owner also retires marks, hands and quills when a slot is reused. The Covenant's own guard benefits too.
+- `CrimsonCovenantIncarnation` numbers an NPC on its first read when `OnSpawn` did not run (always on a multiplayer client), so a client owner can also retire marks, hands and quills when a slot is reused, and the Covenant's own guard benefits too. This rests on an unverified assumption: that tML builds fresh per-entity globals (`SetDefaults`) when a new NPC arrives in a client's slot. If it does not, a reused slot keeps the old number, which is the behaviour before this change. [Status](../../STATUS.md) tracks it as not checked.
+- Every root ledger has a bit for each of the 200 NPC slots, so a part that sweeps a crowd of any size still hits each root once; a root outside the slots counts as already hit.
+- The reliquary's casket follows the opener's head until the release (tick 10) and then stays where it opened, so its glow, the glow's light, the droplets, the rising staff and the burn share one place.
 
 **Sable Scythe.**
 
 - **Figure eight:** the scythe keeps turning, and every half the swing plane flips about the aim axis, so the hook tip traces the ∞. "Angular speed" in the no-stop rules is the 3D angular speed (rotation and roll together).
 - **Whip draw-back:** the rotation reverses for an instant while the blade rolls; the 3D angular speed stays at least 20% of the peak.
 - **Release during the Whip:** Staff Reap starts when the crescent stops being live (tick 26), not at the end of the blade's live window.
+- **Release lock:** the scythe cannot swing until the release's follow-through ends, counted from the cast. The lock is kept on the player, so swapping items away and back does not cut the release short (the held pose dies with the swap; the cuts already cast run on).
 - **Full staff:** a connecting stroke on a full staff engraves nothing but restarts the 360-tick clock.
 - **Final Barline:** the staff's lines keep their scars until the barline has dried, so the staff dries together. The "whole staff ignites" moment is ember particles along the lines, not live ink, because live ink without collision would break draw equals collide.
 

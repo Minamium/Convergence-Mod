@@ -113,7 +113,7 @@ internal sealed class QuillRewardsScene : IRewardsPreviewScene
                 canvas.Point(X(s[i].At), R.BurnRadius, Math.Clamp(1 - (QuillRules.BurnAge(tau, s[i].FromNib) - R.BurnLive) / QuillRules.Residue, 0, 1));
             canvas.End();
         }
-        if (b > a && canvas.Begin(new ScarletInkStyle(ScarletInkLook.Live, true, seed)))
+        if (b > a && canvas.Begin(new ScarletInkStyle(ScarletInkLook.Live, true, seed, Window: CrimsonRewardRules.BurnLive)))
         {
             for (int i = a; i < b; i++) canvas.Point(X(s[i].At), R.BurnRadius, Math.Max(0, QuillRules.BurnAge(tau, s[i].FromNib)));
             canvas.End();
@@ -123,7 +123,7 @@ internal sealed class QuillRewardsScene : IRewardsPreviewScene
     private static void Burst(ScarletInkCanvas canvas, float seed, Vector2 at, float radius, float since, int live)
     {
         if (since < 0) return;
-        if (since < live) canvas.Disc(new ScarletInkStyle(ScarletInkLook.Live, true, seed), at, radius, since);
+        if (since < live) canvas.Disc(new ScarletInkStyle(ScarletInkLook.Live, true, seed, Window: live), at, radius, since);
         else if (since < live + QuillRules.Residue)
             canvas.Disc(new ScarletInkStyle(ScarletInkLook.Residue, true, seed), at, radius, 1 - (since - live) / QuillRules.Residue);
     }

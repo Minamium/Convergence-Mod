@@ -1,6 +1,9 @@
 using System;
+using System.Linq;
 using System.Numerics;
+using Convergence.Content.Encounters.CrimsonFoundry;
 using Convergence.Content.Encounters.CrimsonFoundry.Rewards;
+using Convergence.Content.Encounters.EbonManor.Rewards;
 
 namespace Convergence.DomainTests;
 
@@ -42,7 +45,6 @@ internal static partial class Program
         AssertEqual(4320, CrimsonRewardRules.Scaled(2400, 1.8f), "scaled from the live damage");
         AssertEqual(1500, CrimsonRewardRules.CovenantDamage, "Covenant item damage");
         AssertEqual(10, CrimsonRewardRules.CovenantMana, "Covenant mana");
-        AssertEqual(100, Enum.GetValues<CrimsonRewardKind>().Length * CrimsonRewardRules.ReliquaryShareChance, "five equal 20% shares");
     }
 
     [DomainTest("Scarlet reward nominal budgets match the parity table")]
@@ -80,16 +82,60 @@ internal static partial class Program
         AssertEqual(170, CrimsonRewardRules.QuillBuildTicks(8) + unroll, "about 170 ticks");
         AssertNear(392, CrimsonRewardRules.PerTick(1800, 37, 170), .5f, "quill");
 
-        AssertNear(400, CrimsonRewardRules.PerTick(CrimsonRewardRules.CovenantDamage, 16, 60), .01f, "Covenant low");
-        AssertNear(500, CrimsonRewardRules.PerTick(CrimsonRewardRules.CovenantDamage, 20, 60), .01f, "Covenant high");
+        // The Covenant on one target, from its own rules: x4 per hit (one target's concentration), the first hit while the
+        // ray eases open (from just after the charge to fully open), then one per hit cooldown until the ray dies.
+        float perHit = CrimsonCovenantRules.DamageFactor(1);
+        AssertNear(4, perHit, 1e-4f, "one target takes x4 per hit");
+        int[] hits = Enumerable.Range(CrimsonCovenantRules.ChargeTicks + 1, CrimsonCovenantRules.OpenTicks)
+            .Select(CrimsonCovenantRules.HitsOnOneTarget).ToArray();
+        AssertEqual(4, hits.Min(), "fewest hits per cast");
+        AssertEqual(5, hits.Max(), "most hits per cast");
+        AssertEqual(52, CrimsonCovenantRules.LiveTicks, "52 live ticks");
+        AssertNear(400, CrimsonRewardRules.PerTick(CrimsonRewardRules.CovenantDamage, perHit * hits.Min(), CrimsonCovenantRules.Cycle), .01f, "Covenant low");
+        AssertNear(500, CrimsonRewardRules.PerTick(CrimsonRewardRules.CovenantDamage, perHit * hits.Max(), CrimsonCovenantRules.Cycle), .01f, "Covenant high");
 
-        // Ebon restated in the same unit (REWARDS.md#nominal-parity).
-        AssertNear(281, CrimsonRewardRules.PerTick(3600, 15.9f, 204), .5f, "Moonshear");
-        AssertNear(400, CrimsonRewardRules.PerTick(1900, 32, 152), .5f, "Moonloom Harp");
-        AssertNear(333, CrimsonRewardRules.PerTick(2400, 40, 288), .5f, "Ebon Thimble");
-        AssertNear(39, CrimsonRewardRules.PerTick(1000, 4.5f, 115), .5f, "Ballroom Chandelier");
-        AssertNear(380, CrimsonRewardRules.PerTick(1800, 32, 152), 1.5f, "Severing Silk");
-        AssertNear(470, CrimsonRewardRules.PerTick(10000, 10.8f, 230), .5f, "The Last Waltz");
+        // Ebon restated in the same unit (REWARDS.md#nominal-parity), derived from the Ebon rules linked into these tests.
+        int kataTicks = Enumerable.Range(0, MoonshearMotion.Strokes).Sum(MoonshearMotion.Duration);
+        float kata = (MoonshearMotion.Strokes - 1) * 1f + EbonRewardRules.SnipMultiplier;
+        float cut = EbonRewardRules.CutMultiplier + EbonRewardRules.MaxMarks * EbonRewardRules.PopMultiplier;
+        int cutTicks = EbonRewardRules.CutForecast + EbonRewardRules.CutTravel + EbonRewardRules.CutLive;
+        AssertEqual(82, kataTicks, "a kata is 82 ticks");
+        AssertNear(15.9f, 2 * kata + cut, 1e-4f, "two katas and a cut");
+        AssertEqual(204, 2 * kataTicks + cutTicks, "in 204 ticks");
+        AssertNear(281, CrimsonRewardRules.PerTick(EbonRewardRules.Damage(EbonRewardKind.Melee), 2 * kata + cut, 2 * kataTicks + cutTicks), .5f, "Moonshear");
+
+        float harp = EbonRewardRules.MaxStrings * (1 + EbonRewardRules.PluckMultiplier);
+        int harpTicks = EbonRewardRules.MaxStrings * EbonRewardRules.UseTicks(EbonRewardKind.Ranged) + EbonLoomHarpRules.GlissandoUse;
+        AssertNear(32, harp, 1e-4f, "eight arrows and their glissando");
+        AssertEqual(152, harpTicks, "in 152 ticks");
+        AssertNear(400, CrimsonRewardRules.PerTick(EbonRewardRules.Damage(EbonRewardKind.Ranged), harp, harpTicks), .5f, "Moonloom Harp");
+
+        // The Ebon spec's full score: eight lifted beats and the release, about 4.8 s (ten beats).
+        float thimble = EbonRewardRules.Pieces * EbonRewardRules.PieceMultiplier + EbonRewardRules.PianoMultiplier;
+        float thimbleTicks = (EbonRewardRules.Pieces + 2) * EbonRewardRules.BeatTicks;
+        AssertNear(40, thimble, 1e-4f, "eight pieces and the piano");
+        AssertNear(288, thimbleTicks, 1e-3f, "in 288 ticks");
+        AssertNear(333, CrimsonRewardRules.PerTick(EbonRewardRules.Damage(EbonRewardKind.Magic), thimble, thimbleTicks), .5f, "Ebon Thimble");
+
+        float chandelierTicks = EbonRewardRules.CycleBeats * EbonRewardRules.BeatTicks;
+        AssertEqual(115, (int)chandelierTicks, "a drop every 115 ticks");
+        AssertNear(39, CrimsonRewardRules.PerTick(EbonRewardRules.Damage(EbonRewardKind.Summon), EbonRewardRules.ShatterMultiplier, chandelierTicks), .5f, "Ballroom Chandelier");
+
+        // Six throws, then the stealth sever cuts their six strands and snips: the sever lands after seven uses plus the
+        // scissors' flight (up to its life) and the tightening. "About 152" lies inside that span.
+        const int throws = 6;
+        float silk = throws * 1f + throws * EbonRewardRules.SeverMultiplier + EbonRewardRules.ScissorsMultiplier;
+        int silkEarliest = (throws + 1) * EbonRewardRules.UseTicks(EbonRewardKind.Rogue) + EbonRewardRules.TightenTicks;
+        int silkLatest = silkEarliest + EbonRewardRules.ScissorsLife;
+        AssertNear(32, silk, 1e-4f, "six throws and a sever");
+        AssertEqual(true, silkEarliest <= 152 && 152 <= silkLatest, $"about 152 ticks ({silkEarliest}-{silkLatest})");
+        AssertNear(380, CrimsonRewardRules.PerTick(EbonRewardRules.Damage(EbonRewardKind.Rogue), silk, 152), 1.5f, "Severing Silk");
+
+        int waltzDamage = EbonRewardRules.CompanionDamageScale * EbonRewardRules.Damage(EbonRewardKind.Summon);
+        float waltz = 6 * EbonRewardRules.FlingMultiplier + EbonRewardRules.Spokes * 2 * EbonRewardRules.SpokeMultiplier;
+        AssertEqual(10000, waltzDamage, "The Last Waltz damage");
+        AssertNear(10.8f, waltz, 1e-4f, "six flings and twelve spoke contacts");
+        AssertNear(470, CrimsonRewardRules.PerTick(waltzDamage, waltz, EbonRewardRules.ScoreTicks), .5f, "The Last Waltz");
     }
 
     [DomainTest("Scarlet partial builds are always worth less per tick than full ones")]
@@ -243,14 +289,20 @@ internal static partial class Program
     [DomainTest("Scarlet root ledger counts each segmented root once per part")]
     private static void ScarletRootLedger()
     {
-        var ledger = new CrimsonRootLedger(4);
+        var ledger = new CrimsonRootLedger();
         AssertEqual(true, ledger.TryAdd(10), "first hit");
         AssertEqual(false, ledger.TryAdd(10), "a second segment of the same root");
         AssertEqual(true, ledger.TryAdd(11) && ledger.TryAdd(12) && ledger.TryAdd(13), "other roots");
-        AssertEqual(false, ledger.TryAdd(14), "bounded");
         AssertEqual(false, ledger.TryAdd(-1), "invalid root");
+        AssertEqual(true, ledger.Contains(-1) && ledger.Contains(CrimsonRewardRules.MaxRoots), "a root outside the slots counts as hit");
         ledger.Clear();
         AssertEqual(true, ledger.TryAdd(10) && ledger.Count == 1, "cleared for the next part");
+        // Every NPC slot fits: a crowd of any size takes exactly one hit per root (the old 64-root cap failed open).
+        ledger.Clear();
+        for (int root = 0; root < CrimsonRewardRules.MaxRoots; root++) AssertEqual(true, ledger.TryAdd(root), $"root {root} is new");
+        for (int root = 0; root < CrimsonRewardRules.MaxRoots; root++) AssertEqual(true, ledger.Contains(root), $"root {root} is recorded");
+        AssertEqual(CrimsonRewardRules.MaxRoots, ledger.Count, "all two hundred slots");
+        AssertEqual(false, ledger.TryAdd(150), "a full ledger still refuses a repeat");
     }
 
     [DomainTest("Scarlet reward effect bounds and readability constants follow the spec")]

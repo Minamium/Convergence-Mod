@@ -85,8 +85,11 @@ internal sealed class BatonRewardsScene : IRewardsPreviewScene
                     n = 1;
                 }
             }
+            // As BatonVisuals: an ignited stroke's river closes into its scar (the writing ink does not).
+            float window = tick >= Cast + CrimsonRewardRules.IgniteTick(k) ? BatonRules.IgniteEnd : 0;
             for (int i = 0; i < n; i++)
-                EmitSpan(canvas, new ScarletInkStyle((ScarletInkLook)spans[i].Look, true, seed, spans[i].Opacity, false, spans[i].Warmth, 0),
+                EmitSpan(canvas, new ScarletInkStyle((ScarletInkLook)spans[i].Look, true, seed, spans[i].Opacity, false, spans[i].Warmth, 0,
+                        spans[i].Look == BatonLook.Live ? window : 0),
                     points[k], along[k], ReadOnlySpan<bool>.Empty, counts[k], spans[i]);
             // The pen's droplets leave the gem (a stand-in point by the conductor) for the stroke's first ticks.
             if (tick < Cast && clock < CrimsonRewardRules.WriteTicks)
@@ -107,7 +110,7 @@ internal sealed class BatonRewardsScene : IRewardsPreviewScene
         int age0 = tick - Cast - CrimsonRewardRules.RiverTick;
         int m = BatonRules.RiverSpans(age0, riverLength, spans);
         for (int i = 0; i < m; i++)
-            EmitSpan(canvas, new ScarletInkStyle((ScarletInkLook)spans[i].Look, true, 9.1f, spans[i].Opacity, false, 0, 0),
+            EmitSpan(canvas, new ScarletInkStyle((ScarletInkLook)spans[i].Look, true, 9.1f, spans[i].Opacity, false, 0, 0, CrimsonRewardRules.RiverLive),
                 riverPoints, riverAlong, riverBreaks, riverCount, spans[i]);
     }
 

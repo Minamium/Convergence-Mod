@@ -275,7 +275,7 @@ internal static class QuillRules
             && (state == Standing || TryClaim(state, out _, out _));
 
     // SealedScore ai = (age, flight ticks, tag): the tag names the cast its parts were claimed by and how many quills it
-    // took, so every client knows the timeline without a packet. (REWARDS.md writes "-" for the third slot.)
+    // took, so every client knows the timeline without a packet: tag = cast x 9 + n, as REWARDS.md's SealedScore row.
     internal static float ScoreTag(int cast, int quills)
     {
         if (cast < 0 || cast >= R.QuillSerials || quills < 0 || quills > R.MaxQuills) throw new ArgumentOutOfRangeException();

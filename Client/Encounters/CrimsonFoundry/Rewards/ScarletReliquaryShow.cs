@@ -21,8 +21,11 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 //          dormant ink lines rise ~120 px and curl apart like a staff, ignite as live black blood at 20, then dry and
 //          break into embers; a few black-blood droplets leap and fall back
 //   44-60  the reliquary burns away from its edges (ScarletInk SpriteBurnPass), not an alpha fade
-// The ink goes through ScarletRewardInk (this system is an emitter); the parts draw after it in PostDrawTiles. Time is
-// the per-tick sample count plus WeaponDrawClock.Fraction. No hit, packet or world state is involved.
+// The casket follows the opener's head until the release, then stays where it opened (Free): the body, lid, glow, its
+// light, droplets, rising staff and burn all share that one place, so a moving opener never leaves the glow behind an
+// open casket. The ink goes through ScarletRewardInk (this system is an emitter); the parts draw after it in
+// PostDrawTiles. Time is the per-tick sample count plus WeaponDrawClock.Fraction. No hit, packet or world state is
+// involved.
 [Autoload(Side = ModSide.Client)]
 internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
 {
@@ -67,6 +70,8 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
 
         internal float Age(float fraction) => Math.Max(0, Ticks - 1 + fraction);
         internal Vector2 Live(float fraction) => Vector2.Lerp(Previous, Anchor, fraction);
+        // Where the casket is drawn: on the opener until the release, then where it opened.
+        internal Vector2 Casket(float fraction) => Age(fraction) < Release ? Live(fraction) : Free;
     }
 
     public override void Load()
@@ -127,7 +132,9 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
             if (Vector2.DistanceSquared(s.Anchor, want) > 400f * 400f) s.Previous = s.Anchor = want;
             else s.Anchor = Vector2.Lerp(s.Anchor, want, .35f);
         }
-        if (s.Ticks < Release) s.Free = s.Anchor; // everything that leaves the box at the release stays in the world
+        // Free is the casket's place at the release (age 10, where Live arrives); from then on the casket and everything
+        // that leaves it stay there.
+        if (s.Ticks <= Release) s.Free = s.Anchor;
         var box = art;
         if (box is null) return;
         float t = s.Ticks;
@@ -135,7 +142,7 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
         float glow = Glow(s, t);
         if (glow > .01f) Lighting.AddLight(mouth, .9f * glow, .1f * glow, .08f * glow);
         // The dried staff breaks into embers.
-        if (t >= LiveEnd && t < BurnStart && (!ScarletRewardFx.Reduced || s.Ticks % 2 == 0))
+        if (t >= LiveEnd && t < BurnStart) // Reduced Effects halves particles where they are spawned
         {
             int line = (int)(Hash(s.Seed, s.Ticks) * CrimsonRewardRules.ShowInkLines);
             float along = .2f + .8f * Hash(s.Seed, s.Ticks + 101);
@@ -147,7 +154,7 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
         if (t >= BurnStart && t < Life - 2)
         {
             float edge = Hash(s.Seed, s.Ticks + 211) - .5f;
-            Vector2 at = s.Anchor + new Vector2(edge * box.Width, (Hash(s.Seed, s.Ticks + 223) - .5f) * box.Height);
+            Vector2 at = s.Free + new Vector2(edge * box.Width, (Hash(s.Seed, s.Ticks + 223) - .5f) * box.Height);
             ScarletRewardFx.Particle(ScarletParticleKind.Ember, s.Owner, at, new Vector2(edge * .6f, -.6f), 16, 4, s.Seed * 3 + s.Ticks);
             if (Hash(s.Seed, s.Ticks + 227) > .6f)
                 ScarletRewardFx.Particle(ScarletParticleKind.Smoke, s.Owner, at, new Vector2(0, -.5f), 26, 9, s.Seed * 5 + s.Ticks);
@@ -189,7 +196,8 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
                 float seed = (s.Seed % 997) * .01f + line * 1.7f;
                 ScarletInkLook look = a < Ignite ? ScarletInkLook.Dormant : a < LiveEnd ? ScarletInkLook.Live : ScarletInkLook.Residue;
                 float fade = 1 - Math.Clamp((a - LiveEnd) / (ResidueEnd - LiveEnd), 0, 1);
-                var style = ScarletRewardFx.Ink(s.Owner, look, seed);
+                // The whole staff stops burning together at LiveEnd, so it closes into its scar as a whole.
+                var style = ScarletRewardFx.Ink(s.Owner, look, seed) with { Remaining = LiveEnd - a };
                 if (!canvas.Begin(style)) return;
                 const int samples = 14;
                 for (int i = 0; i <= samples; i++)
@@ -270,7 +278,7 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
         float a = s.Age(view.Fraction);
         if (a > Life) return;
         float pop = a < Settle ? .6f + .4f * OutBack(a / Settle, 1.4f) : 1;
-        Vector2 at = s.Live(view.Fraction) + BoxOffset(s, box, a);
+        Vector2 at = s.Casket(view.Fraction) + BoxOffset(s, box, a);
         float scale = box.Scale * pop, burn = Burn(a), seed = (s.Seed % 89) * .113f;
         Color color = Color.White * Ease(a / 2);
         // Body
@@ -329,7 +337,7 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
                 if (box.Seal is null || a < Settle || a >= Release) continue;
                 // Three fine cracks run across the seal from inside.
                 float run = Ease((a - Settle - 1) / (Release - Settle - 1));
-                Vector2 c = s.Live(view.Fraction) + BoxOffset(s, box, a) + box.SealCenter;
+                Vector2 c = s.Casket(view.Fraction) + BoxOffset(s, box, a) + box.SealCenter;
                 float reach = box.SealSrc.Width * box.Scale * .5f;
                 for (int k = 0; k < CrimsonRewardRules.ShowSealCracks; k++)
                 {

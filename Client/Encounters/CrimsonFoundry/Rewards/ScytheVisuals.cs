@@ -245,7 +245,7 @@ internal sealed class StaffCutVisuals : GlobalProjectile
         float land = CrimsonRewardRules.BarlineTick + CrimsonRewardRules.BarlineFall - CrimsonRewardRules.StaffLineTick(cut.Index);
         if (!(previous < land && t >= land)) return;
         SableCutPlan plan = cut.Plan;
-        int count = CrimsonRewardRules.ReducedCount(10, ScarletRewardFx.Reduced);
+        const int count = 10; // Reduced Effects halves particles where they are spawned (ScarletRewardParticles)
         for (int i = 0; i < count; i++)
         {
             float f = (i + .5f) / count, seed = projectile.identity * 13 + i;
@@ -398,7 +398,9 @@ internal sealed class ScytheInk : ModSystem, IScarletInkEmitter
         var crescent = stroke.Crescent;
         if (crescent.Length < 2) return;
         bool live = age <= CrimsonRewardRules.CrescentLiveEnd;
-        var style = ScarletRewardFx.Ink(p.owner, live ? ScarletInkLook.Live : ScarletInkLook.Residue, seed + .5f);
+        // Every point of the crescent stops at 26 together, so it closes as a whole.
+        var style = ScarletRewardFx.Ink(p.owner, live ? ScarletInkLook.Live : ScarletInkLook.Residue, seed + .5f)
+            with { Remaining = CrimsonRewardRules.CrescentLiveEnd - age };
         if (!canvas.Begin(style)) return;
         float fade = 1 - (age - CrimsonRewardRules.CrescentLiveEnd) / CrimsonRewardRules.CrescentScar;
         for (int i = 0; i < crescent.Length; i++)
@@ -459,7 +461,8 @@ internal sealed class ScytheInk : ModSystem, IScarletInkEmitter
             for (int side = -1; side <= 1; side += 2)
             {
                 Vector2 top = start + new Vector2(side * CrimsonRewardRules.BarlineGap * .5f, 0);
-                if (!canvas.Begin(ScarletRewardFx.Ink(p.owner, live ? ScarletInkLook.Live : ScarletInkLook.Residue, seed + side))) return;
+                if (!canvas.Begin(ScarletRewardFx.Ink(p.owner, live ? ScarletInkLook.Live : ScarletInkLook.Residue, seed + side)
+                        with { Remaining = CrimsonRewardRules.BarlineFall + CrimsonRewardRules.BarlineLive - t })) return;
                 int samples = Math.Clamp((int)(plan.Length * head / 10) + 2, 2, 40);
                 for (int i = 0; i < samples; i++)
                 {
@@ -484,7 +487,8 @@ internal sealed class ScytheInk : ModSystem, IScarletInkEmitter
             }
             canvas.End();
         }
-        if (lineHead > tail && SableScytheMotion.LineLive(t) && canvas.Begin(ScarletRewardFx.Ink(p.owner, ScarletInkLook.Live, seed)))
+        if (lineHead > tail && SableScytheMotion.LineLive(t)
+            && canvas.Begin(ScarletRewardFx.Ink(p.owner, ScarletInkLook.Live, seed) with { Window = CrimsonRewardRules.StaffLineLive }))
         {
             int samples = Math.Clamp((int)(MathF.Abs(plan.Length) * (lineHead - tail) / 10) + 2, 2, 90);
             for (int i = 0; i < samples; i++)

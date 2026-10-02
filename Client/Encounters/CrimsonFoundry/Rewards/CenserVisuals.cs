@@ -402,7 +402,8 @@ internal sealed class CenserLook
         Span<NVector2> column = stackalloc NVector2[CenserRules.MaxColumnPoints];
         Span<float> radii = stackalloc float[CenserRules.MaxColumnPoints], times = stackalloc float[CenserRules.MaxColumnPoints];
         int n = CenserRules.Column(pour, c, m.Floors(pour), column, radii, times, out _);
-        if (n == 0 || !canvas.Begin(ScarletRewardFx.Ink(Owner, ScarletInkLook.Live, InkSeed(pour), 1, fire: true))) return;
+        // The whole column stops pouring together, so it closes into its scar as a whole.
+        if (n == 0 || !canvas.Begin(ScarletRewardFx.Ink(Owner, ScarletInkLook.Live, InkSeed(pour), 1, fire: true) with { Remaining = pour.Live - pour.Age })) return;
         Vector2 previous = default;
         for (int i = 0; i < n; i++)
         {
@@ -447,24 +448,23 @@ internal sealed class CenserLook
         Color tint = Color.Lerp(light, Color.White, .55f);
         bool pixel = body.Pixel;
         float warm = Math.Clamp(heat, 0, 1.4f);
+        // One AlphaBlend batch for the body, its crown and its glow (additive accents as alpha-0 colours): the projectile
+        // layer's batch is restarted only for a sampler it lacks, which means delivered pixel art (point, then linear for
+        // the soft glow). Placeholders draw as they are.
         var saved = WorldBatchParameters.Capture(batch);
-        batch.End();
-        bool begun = false;
+        bool restarted = false;
         try
         {
-            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, body.Sampler, saved.Depth, saved.Raster, null, saved.Transform);
-            begun = true;
+            restarted |= ScarletRewardFx.EnsureBatch(pixel ? body.Sampler : null, saved);
             if (drapesReady && !ScarletRewardFx.Reduced) DrawDrapes(batch, fraction, tint, pixel);
             batch.Draw(body.Texture, Screen(mouth, pixel), body.Source, tint, rotation, body.Mouth, body.Scale, SpriteEffects.None, 0);
-            batch.End();
-            begun = false;
-            batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, saved.Depth, saved.Raster, null, saved.Transform);
-            begun = true;
             // The crown warms with the build and spikes ember-gold through the brace.
             bool brace = state == CenserState.Swing && CenserRules.Bracing(DrawClock(fraction));
             Color crown = brace ? new Color(1f, .74f, .32f) * .55f : new Color(1f, .4f, .14f) * (.28f * Math.Clamp(warm - .15f, 0, 1));
-            if (crown.A > 2 || crown.R > 2) batch.Draw(body.Texture, Screen(mouth, pixel), body.Source, crown, rotation, body.Mouth, body.Scale, SpriteEffects.None, 0);
+            if (crown.A > 2 || crown.R > 2)
+                batch.Draw(body.Texture, Screen(mouth, pixel), body.Source, ScarletRewardFx.Additive(crown), rotation, body.Mouth, body.Scale, SpriteEffects.None, 0);
             // The ember glow at the bowl mouth (no period: value noise drifts it).
+            restarted |= ScarletRewardFx.EnsureBatch(SamplerState.LinearClamp, saved);
             Texture2D soft = ScarletVfxHost.Assets.GetTexture("Luminance/BloomCircleSmall");
             Vector2 up = new(-MathF.Sin(angle + turn), -MathF.Cos(angle + turn));
             float flicker = .8f + .2f * Noise(seed, (Main.GameUpdateCount + fraction) * .11f);
@@ -472,16 +472,12 @@ internal sealed class CenserLook
             Vector2 origin = new(soft.Width * .5f, soft.Height * .5f);
             Vector2 lip = mouth - up * 2;
             float size = 26f / soft.Width;
-            batch.Draw(soft, lip - Main.screenPosition, null, new Color(1f, .14f, .07f) * (.65f * glow), MathF.Atan2(up.Y, up.X),
+            batch.Draw(soft, lip - Main.screenPosition, null, ScarletRewardFx.Additive(new Color(1f, .14f, .07f) * (.65f * glow)), MathF.Atan2(up.Y, up.X),
                 origin, new Vector2(size * .65f, size), SpriteEffects.None, 0);
-            batch.Draw(soft, lip - Main.screenPosition, null, new Color(1f, .62f, .3f) * (.45f * glow * Math.Clamp(warm, 0, 1)), 0,
+            batch.Draw(soft, lip - Main.screenPosition, null, ScarletRewardFx.Additive(new Color(1f, .62f, .3f) * (.45f * glow * Math.Clamp(warm, 0, 1))), 0,
                 origin, size * .35f, SpriteEffects.None, 0);
         }
-        finally
-        {
-            if (begun) batch.End();
-            saved.Restore(batch);
-        }
+        finally { ScarletRewardFx.RestoreBatch(restarted, saved); }
     }
 
     private void DrawDrapes(SpriteBatch batch, float fraction, Color tint, bool pixel)

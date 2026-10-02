@@ -131,7 +131,7 @@ internal sealed class SharedRewardsScene : IRewardsPreviewScene
         const int samples = 64;
         float head = Math.Clamp(tick / 24f, 0, 1);
         bool live = false;
-        canvas.Begin(new ScarletInkStyle(ScarletInkLook.Live, true, 3.7f));
+        canvas.Begin(new ScarletInkStyle(ScarletInkLook.Live, true, 3.7f, Window: 14));
         for (int i = 0; i <= samples; i++)
         {
             float s = i / (float)samples, ignited = tick - 24 * s;
@@ -139,26 +139,34 @@ internal sealed class SharedRewardsScene : IRewardsPreviewScene
             canvas.Point(River(s), 28, ignited); live = true;
         }
         canvas.End(bead: head < 1 && live);
+        // The scar behind the moving tail ends on the live river's first point, as the game's spans meet (no gap).
         canvas.Begin(new ScarletInkStyle(ScarletInkLook.Residue, true, 3.7f));
+        bool dried = false;
         for (int i = 0; i <= samples; i++)
         {
             float s = i / (float)samples, ignited = tick - 24 * s;
-            if (ignited < 14 || ignited >= 14 + 24) continue;
+            if (ignited >= 14 + 24) continue;
+            if (ignited < 14)
+            {
+                if (dried && s <= head) canvas.Point(River(s), 28, 1);
+                break;
+            }
             canvas.Point(River(s), 28, 1 - (ignited - 14) / 24f);
+            dried = true;
         }
         canvas.End();
         // A censer pour: a falling column with flame tongues (radius 24), its head falling 40 px/tick.
         float fall = Math.Min(260, tick * 40f);
         if (tick < 20)
-            canvas.Line(new ScarletInkStyle(ScarletInkLook.Live, true, 5.1f, 1, true), c + new Vector2(420, -220), c + new Vector2(430, -220 + fall), 24, 24, tick, Math.Max(0, tick - fall / 40));
+            canvas.Line(new ScarletInkStyle(ScarletInkLook.Live, true, 5.1f, 1, true, Remaining: 20 - tick), c + new Vector2(420, -220), c + new Vector2(430, -220 + fall), 24, 24, tick, Math.Max(0, tick - fall / 40));
         else if (tick < 44)
             canvas.Line(new ScarletInkStyle(ScarletInkLook.Residue, true, 5.1f, 1, true), c + new Vector2(420, -220), c + new Vector2(430, 40), 24, 24, 1 - (tick - 20) / 24f, 1 - (tick - 20) / 24f);
         // Bursts: a hand slam (48) and another player's (0.85), live 3 ticks then scars.
         float slam = tick % 28;
         var burstLook = slam < 6 ? ScarletInkLook.Live : ScarletInkLook.Residue;
         float burstTime = burstLook == ScarletInkLook.Live ? slam : 1 - (slam - 6) / 22f;
-        canvas.Disc(new ScarletInkStyle(burstLook, true, 7.3f), c + new Vector2(140, 120), 48, burstTime);
-        canvas.Disc(new ScarletInkStyle(burstLook, false, 8.9f), c + new Vector2(280, 120), 48, burstTime);
+        canvas.Disc(new ScarletInkStyle(burstLook, true, 7.3f, Window: 6), c + new Vector2(140, 120), 48, burstTime);
+        canvas.Disc(new ScarletInkStyle(burstLook, false, 8.9f, Window: 6), c + new Vector2(280, 120), 48, burstTime);
         // Droplets from the slam.
         for (int i = 0; i < 8; i++)
         {

@@ -74,6 +74,7 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
             if (p.oldPos[i] != Vector2.Zero) trail[n++] = N(p.oldPos[i] + half);
         trail[n++] = N(p.Center);
         sink.Owner = p.owner;
+        sink.Window = 0; // the wake never dries into a scar
         CanticleRules.ShardInk(sink, trail[..n], (p.identity % 97) * .37f);
     }
 
@@ -88,6 +89,7 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
         else if (npc.active) landing = npc.Center + new Vector2(CanticleRules.LandingOffset(hand.Ordinal, hand.Role, npc.width), 0);
         else return;
         sink.Owner = p.owner;
+        sink.Window = CrimsonRewardRules.HandLive; // the slam (and the Clasp's crown) closes into its scar
         CanticleRules.HandInk(sink, N(landing), hand.Ordinal, hand.Role, npc.width, age, (p.identity % 89) * .53f + hand.Ordinal * .11f, reduced);
     }
 
@@ -99,6 +101,7 @@ internal sealed class OrganVisuals : ModSystem, IScarletInkEmitter
         CanticleMarks marks = me.GetModPlayer<CanticleOrganPlayer>().Marks;
         ulong now = Main.GameUpdateCount;
         sink.Owner = me.whoAmI;
+        sink.Window = 0;
         for (int i = 0; i < marks.Count; i++)
         {
             CanticleMark mark = marks[i];
@@ -256,6 +259,7 @@ internal sealed class OrganInkSink : ICanticleInk
 {
     internal ScarletInkCanvas? Canvas;
     internal int Owner = -1;
+    internal float Window; // live window of the ink being emitted (ScarletInkStyle.Window), 0 for none
 
     private static ScarletInkLook Look(CanticleInkLook look) => look switch
     {
@@ -265,7 +269,8 @@ internal sealed class OrganInkSink : ICanticleInk
     };
 
     public bool Begin(CanticleInkLook look, float seed, float opacity = 1, float warmth = 0)
-        => Canvas is not null && Canvas.Begin(ScarletRewardFx.Ink(Owner, Look(look), seed, opacity, false, warmth));
+        => Canvas is not null && Canvas.Begin(ScarletRewardFx.Ink(Owner, Look(look), seed, opacity, false, warmth)
+            with { Window = look == CanticleInkLook.Live ? Window : 0 });
     public void Point(NVector2 at, float radius, float time) => Canvas?.Point(new Vector2(at.X, at.Y), radius, time);
     public void End(bool bead = false) => Canvas?.End(bead);
     public void Droplet(NVector2 from, NVector2 to, float radius, float time, float seed)

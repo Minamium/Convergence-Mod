@@ -16,8 +16,12 @@ internal enum ScarletInkLook : byte { Live, Dormant, Residue }
 // One path's style. Local marks the local player's own ink (full opacity, last to be dropped); other players' dormant
 // ink draws at 0.5 and their live ink and residue at 0.85. Owner is the player slot (droplet budgets); Fire adds flame
 // tongues on live lips (the censer only); Warmth (0..1) is a full build's steady lip heat on dormant ink.
+// Live ink that dries into a scar closes like AutoloadPass: Window is each point's live window in its own time (ticks
+// since it ignited), Remaining the live ticks left for the whole path (a path whose points all stop together). Over the
+// last CloseTicks the river crossfades into the scar PathResiduePass starts from, so it never snaps or leaves a burning
+// cap behind a moving tail. Neither changes collision (as with the Raid's close envelope). Both unset: no close.
 internal readonly record struct ScarletInkStyle(ScarletInkLook Look, bool Local, float Seed, float Opacity = 1,
-    bool Fire = false, float Warmth = 0, int Owner = -1)
+    bool Fire = false, float Warmth = 0, int Owner = -1, float Window = 0, float Remaining = float.PositiveInfinity)
 {
     internal ScarletInkStyle As(ScarletInkLook look) => this with { Look = look };
 }
@@ -35,7 +39,7 @@ internal struct ScarletInkVertex : IVertexType
     internal Vector3 Position;
     internal Vector4 Path;  // u, v, L, head
     internal Vector4 Ink;   // radius, time, seed, opacity
-    internal Vector4 Style; // fire, reduced, warmth, 0
+    internal Vector4 Style; // fire, reduced, warmth (live: drying-joint caps, 1 start 2 end), close (1 river .. 0 scar)
     internal static readonly VertexDeclaration Declaration = new(
         new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
         new VertexElement(12, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 0),
@@ -60,7 +64,7 @@ internal sealed class ScarletInkCanvas
 
     internal readonly PathRecord[] Paths = new PathRecord[MaxCandidates + CrimsonRewardRules.MaxDroplets];
     internal readonly Vector2[] At = new Vector2[MaxSamples];
-    internal readonly float[] Radius = new float[MaxSamples], Time = new float[MaxSamples];
+    internal readonly float[] Radius = new float[MaxSamples], Time = new float[MaxSamples], Close = new float[MaxSamples];
     private readonly int[] dropletsByOwner = new int[256];
     internal int PathCount, SampleCount;
     private int open = -1, candidates, droplets;
@@ -91,6 +95,7 @@ internal sealed class ScarletInkCanvas
         if (SampleCount >= MaxSamples || SampleCount - open >= MaxPathSamples) return;
         if (!float.IsFinite(at.X) || !float.IsFinite(at.Y) || !float.IsFinite(radius) || !float.IsFinite(time)) { valid = false; return; }
         At[SampleCount] = at; Radius[SampleCount] = Math.Max(0, radius); Time[SampleCount] = time;
+        Close[SampleCount] = ScarletRewardInk.CloseAt(style, time);
         SampleCount++;
     }
 
@@ -152,6 +157,7 @@ internal sealed class ScarletInkCanvas
         if (!float.IsFinite(from.X + from.Y + to.X + to.Y + radius + time)) return false;
         int first = SampleCount;
         At[first] = from; At[first + 1] = to; Radius[first] = Radius[first + 1] = Math.Max(0, radius); Time[first] = Time[first + 1] = time;
+        Close[first] = Close[first + 1] = 1;
         SampleCount += 2;
         Paths[PathCount++] = new PathRecord(first, 2, pathStyle, false, true);
         droplets++; dropletsByOwner[owner]++;
@@ -167,9 +173,24 @@ internal sealed class ScarletInkCanvas
 // render target is owned. The caller saves and restores device state (the Terraria host does).
 internal sealed partial class ScarletRewardInk
 {
+    // Live ink closes over its last CloseTicks (AutoloadPass's envelope; half the window when the window is shorter).
+    internal const float CloseTicks = 6;
+    internal static float CloseAt(in ScarletInkStyle style, float time)
+    {
+        if (style.Look != ScarletInkLook.Live) return 1;
+        float remaining = style.Remaining, span = CloseTicks;
+        if (style.Window > 0) { remaining = Math.Min(remaining, style.Window - time); span = Math.Min(span, style.Window * .5f); }
+        if (!(remaining < span)) return 1;
+        float x = Math.Clamp(remaining / span, 0, 1);
+        return x * x * (3 - 2 * x);
+    }
+
     // Strip half-width beyond the radius: the anti-aliased rim and the lip halo; fire adds room for flame tongues.
     internal static float HalfWidth(float radius, bool fire) => radius * 1.12f + 10 + (fire ? radius * .6f + 8 : 0);
     internal static int StripVertices(int samples) => 2 * (samples + 2) + 2;
+    // Which caps of a live path are drying joints (1 the start, 2 the end): the end that has closed further.
+    internal static float DryingJoints(float closeFirst, float closeLast)
+        => (closeFirst < closeLast - .05f ? 1 : 0) + (closeLast < closeFirst - .05f ? 2 : 0);
     internal static string PassName(ScarletInkLook look) => look switch
     {
         ScarletInkLook.Live => "PathLivePass", ScarletInkLook.Dormant => "PathDormantPass", _ => "PathResiduePass",
@@ -287,7 +308,11 @@ internal sealed partial class ScarletRewardInk
         var s = p.Style;
         float opacity = s.Opacity * (s.Local ? CrimsonRewardRules.LocalOpacity : RemoteOpacity(s.Look));
         float head = p.Bead ? length : -1;
-        var style = new Vector4(s.Fire ? 1 : 0, reduced ? 1 : 0, Math.Clamp(s.Warmth, 0, 1), 0);
+        // Live ink has no warmth; its third channel marks a drying joint: an end that has dried further than the other is
+        // where a moving tail meets the scar behind it, which already has a round cap there.
+        float third = Math.Clamp(s.Warmth, 0, 1);
+        if (s.Look == ScarletInkLook.Live) third = DryingJoints(c.Close[first], c.Close[last]);
+        var style = new Vector4(s.Fire ? 1 : 0, reduced ? 1 : 0, third, 0);
         // Paths share one strip per pass: the previous path ended on a repeated last vertex, and this one starts on a
         // repeated first vertex, so the triangles between them are degenerate.
         int leading = join ? cursor++ : -1;
@@ -325,6 +350,7 @@ internal sealed partial class ScarletRewardInk
         float w = HalfWidth(radius, style.X > .5f);
         Vector2 normal = new(-direction.Y, direction.X);
         var ink = new Vector4(radius, c.Time[sample], seed, opacity);
+        style.W = c.Close[sample];
         vertices[cursor] = new ScarletInkVertex { Position = new Vector3(at + normal * w, 0), Path = new Vector4(u, w, length, head), Ink = ink, Style = style };
         vertices[cursor + 1] = new ScarletInkVertex { Position = new Vector3(at - normal * w, 0), Path = new Vector4(u, -w, length, head), Ink = ink, Style = style };
         return cursor + 2;

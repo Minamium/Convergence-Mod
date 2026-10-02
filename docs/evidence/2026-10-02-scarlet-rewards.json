@@ -1,0 +1,43 @@
+{
+  "scope": "Scarlet Invocation reward set (docs/encounters/crimson-foundry/REWARDS.md): the Scarlet Score Reliquary Victory drop and opening show, Sable Scythe, Canticle Organ, Scarlet Baton, Ember Censer and Bloodink Quill, and the Scarlet Covenant re-crafted from the five weapons (1500 damage, mana 10, 緋の契約, stops while its owner is dead or Down). Owner-client weapons with native projectile replication; reward ink through new ScarletInk.fx path passes and one shared renderer drawn beneath every Raid's forecasts. No packet, protocol, persistence or Raid behaviour change",
+  "target_build": "0.3.73 / protocol78 (on main's 0.3.70 / protocol78; 0.3.71 and 0.3.72 are taken by the open feat/scarlet-signature-moves and feat/scarlet-sfx; the rewards add no wire change)",
+  "integration_base": "b575f13 (main after PR105); five weapon slices merged with --no-ff (679368f scythe, 7b5a7a4 organ, 06d200c baton, 1c94492 censer, 4e8bd2a quill), shared integration 61aed69, then the review fixes on top",
+  "owner_direction": "2026-10-02: a reward set built like Waltz of the Ebon Manor's (box, one weapon per class, companion from all five). Owner defaults for the open decisions: the reliquary is a shared world item, one per frozen member at the field's ground centre; quill ink stays where it was written; the Covenant stops while its owner is dead or Down; keep the spec's damage and mana numbers. Art from Codex is used as vanilla placeholders until delivered and chosen",
+  "review_fixes": [
+    "Staff Reap's lock lives on the player (released until the follow-through ends), so an item swap no longer cuts a release short",
+    "the Covenant recipe is not decraftable, so Shimmer cannot turn an old Grimoire-recipe Covenant into the five weapons",
+    "every staff engraving after the first republishes from the carrier's own AI (netUpdate was cleared before it), so peers see the whole staff",
+    "root ledgers have a bit for each of the 200 NPC slots (the old 64-root cap failed open)",
+    "the dormant build's lip lies inside the dried scar at ResiduePass's fade-0.6 strength instead of two hairlines outside it",
+    "reward ink is drawn first by every Raid's forecast drawer (Azure, Scarlet, Ebon, Doll, Ghost Samurai) through Client/Graphics/FriendlyWorldInk, independent of ModSystem order",
+    "live reward ink closes over its last 6 ticks into the scar it dries into (style.w), with no burning cap behind a moving tail and no doubled cap or lip ring at the joint",
+    "Reduced Effects halves particles once, where they are spawned",
+    "the opened reliquary stays where it opened, so the glow, its light, droplets, staff and burn share one place",
+    "censer and quill bodies restart the projectile batch only for a sampler it lacks; additive accents are alpha-0 colours in the AlphaBlend batch",
+    "the sprite table records icon texel scale (item and buff icons exported at 2 texels per logical pixel)",
+    "tests derive the Covenant's 16-20x and the Ebon comparison from their rules, check the nominal table, the one reward pool, exact localization keys and the Raid shader prefix hash",
+    "docs: CHANGELOG, BatonSwing state row, stale constants and comments, unverified assumptions"
+  ],
+  "checks": {
+    "static": "passed: verify_repo.py . --write-catalog --with-domain (catalog, repository checks, YAML) and git diff --check",
+    "domain": "passed: 541 deterministic domain tests, 0 failures (the shared rules, every weapon's motion, schedules, codecs, commitment and ai validation, the root ledger over all 200 slots, and the nominal parity derived from the Scarlet, Covenant and Ebon rules)",
+    "tools": "passed: unittest discover -s tools/tests, 87 tests, including 16 Scarlet reward source-wiring tests",
+    "shader": "passed: ScarletInk.fx compiled by the pinned FXC fx_2_0 /O3 and the manifest refreshed by tools/compile_shaders.py; only ScarletInk.fxc changed. The part of ScarletInk.fx before the reward section (the Raid's Live/Forecast/Residue and Local/Segment/Pixel) hashes to main's (sha256 1c3e259c35cb0fc5ecdcd07df7dbb2e1f1c43df8283800864465c9004d1c1773), and the rewards never use ForecastPass",
+    "raid_frames": "passed: tools/preview-scarlet.ps1 -Only act1-center -Look proposal -Beats 128 -Step 3 (sanctum, zoom 1, hidden FNA D3D11) rendered with this branch's ScarletInk.fxc and with main's: all 87 PNGs pixel-identical (max channel difference 0)",
+    "reward_frames": "reviewed: tools/preview-scarlet.ps1 -Rewards (sanctum and day, zoom 1 and 2, every weapon scene and the shared scene) through the production ScarletRewardInk and ScarletInk.fxc. The live river now dries into its scar without a burning cap, ring or gap; dormant builds read as a dark dried stroke on bright ground and as a faint stroke with a soft crimson lip on the dark sanctum. Placeholder bodies are not composited (the preview cannot load vanilla textures)",
+    "native_build": "passed: python tools/dev.py build --native into the isolated profile, 0 errors and the existing 4 CS8632 warnings; package 0.3.73 sha256 a1911ab8ff082061e66a277f90304c94caee4cdb7a7d5f0e73618d9329d5b090; the build rewrote no Localization file",
+    "game_not_started": "the game was not started in this work"
+  },
+  "not_run": [
+    "in-game play of every weapon's build, release and finale, the reliquary drop and opening show, and crafting and using the Scarlet Covenant at 1500",
+    "a second player seeing the builds and releases, dimming, and the native replication of the staff, strokes, quills and hands",
+    "Reduced Effects and screen shake in the game; FPS with eight players' full builds and ten censers",
+    "readability of friendly black blood against the Raid's strikes and forecasts in a real fight, especially the faint dormant builds on the dark sanctum",
+    "balance against current Calamity endgame gear, including the staff's crowd cuts, the Covenant against crowds and the censer spread (open for the owner)",
+    "Codex art pending: the first delivery (asset-deliveries/scarlet-rewards/2026-10-02: 40 raw candidates and 10 recommended copies, all accepted_by_codex=false) is not selected or exported; bodies and icons stay vanilla placeholders behind CrimsonRewardSprites",
+    "audio audition pending: none of the 35 cues is rendered; every cue is skipped until tools/generate_scarlet_reward_sfx.py renders them and the owner auditions them on the local page",
+    "unverified assumptions: the Hymn with zero bullets (CanUseItem before the ammo check), the Bone Javelin placeholder's nib orientation, the placeholder scythe's size, fresh per-entity globals for a new NPC in a client's slot (CrimsonCovenantIncarnation), and vanilla syncing the quill's itemRotation for its Shoot use style",
+    "the expected small conflict with feat/scarlet-signature-moves in CrimsonRuntime and the encounter spec is not resolved"
+  ],
+  "delegation": "Claude: five weapon slices by delegated agents, integration and review fixes by the lead agent"
+}

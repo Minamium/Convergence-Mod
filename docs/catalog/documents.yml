@@ -653,7 +653,7 @@ documents:
 - doc_id: encounter.crimson-foundry.rewards
   path: docs/encounters/crimson-foundry/REWARDS.md
   title: Scarlet Invocation — rewards
-  content_sha256: 39e57568c767593ae1d248c27563602336dfaeab2dc74d7e75392b4dbde9da7d
+  content_sha256: 96fb0c9e25c54b8989861bf75ec7e81809a1ce7954d19cbcaa3ffeae57a119e7
   document_type: spec
   status: provisional
   owners:
@@ -1448,7 +1448,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: a648e8b232cd5e636530d423bf40721c1574ecd35465554e581e90f9b574aeab
+  content_sha256: 6d2283387b8239e0ef1c252117be4715c70cbd37a0fdfe5cacc30be8e2c34426
   document_type: status
   status: accepted
   owners:

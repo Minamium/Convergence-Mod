@@ -79,7 +79,7 @@ internal sealed class CenserRewardsScene : IRewardsPreviewScene
         Span<System.Numerics.Vector2> column = stackalloc System.Numerics.Vector2[CenserRules.MaxColumnPoints];
         Span<float> radii = stackalloc float[CenserRules.MaxColumnPoints], times = stackalloc float[CenserRules.MaxColumnPoints];
         int n = CenserRules.Column(pour, clock, depths[..all], column, radii, times, out _);
-        canvas.Begin(new ScarletInkStyle(look, true, seed, 1, true, 0, 0));
+        canvas.Begin(new ScarletInkStyle(look, true, seed, 1, true, 0, 0, Remaining: pour.Live - pour.Age)); // as CenserVisuals
         Vector2 previous = default; float previousTime = 0;
         for (int i = 0; i < n; i++)
         {

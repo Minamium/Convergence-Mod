@@ -11,8 +11,11 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 internal enum ScarletParticleKind : byte { Ember, Smoke, BoneChip, WaxFlake }
 
 // One fixed pool for every reward weapon: at most 200 particles per owner and 600 in total, halved by Reduced
-// Effects. Update once per game tick; Draw once per frame in the reward ink layer. Terraria-free, so the offline
-// preview draws the same particles; allocates nothing per frame (the 1x1 white texture is created once).
+// Effects. Reduced Effects also halves what is spawned, here at the one choke point every emitter goes through: each
+// spawn is kept with probability one half (hashed from its seed and a running ticket, so emitters spawning in lockstep
+// are not starved), and emitters never halve their own counts. Update once per game tick; Draw once per frame in the
+// reward ink layer. Terraria-free, so the offline preview draws the same particles; allocates nothing per frame (the
+// 1x1 white texture is created once).
 internal sealed class ScarletRewardParticles : IDisposable
 {
     private struct Particle
@@ -35,12 +38,15 @@ internal sealed class ScarletRewardParticles : IDisposable
     private readonly int[] byOwner = new int[256];
     private Texture2D? pixel;
     private int count;
+    private uint ticket;
 
     internal int Count => count;
 
-    // False when a budget is full. owner: player slot (anything else shares one bucket). life in ticks; size in px.
+    // False when a budget is full or Reduced Effects skipped it. owner: player slot (anything else shares one bucket).
+    // life in ticks; size in px.
     internal bool Spawn(ScarletParticleKind kind, int owner, bool local, Vector2 at, Vector2 velocity, float life, float size, bool reduced, float seed = 0)
     {
+        if (reduced && !Keep(seed, ticket++)) return false;
         int bucket = owner is >= 0 and < 255 ? owner : 255;
         if (count >= CrimsonRewardRules.ReducedCount(CrimsonRewardRules.MaxParticles, reduced)
             || byOwner[bucket] >= CrimsonRewardRules.ReducedCount(CrimsonRewardRules.MaxParticlesPerOwner, reduced)
@@ -152,6 +158,9 @@ internal sealed class ScarletRewardParticles : IDisposable
         }
         batch.End();
     }
+
+    // Reduced Effects keeps about half of all spawns.
+    internal static bool Keep(float seed, uint ticket) => Hash(seed, unchecked(97 + (int)ticket)) < .5f;
 
     internal static float Hash(float seed, int salt)
     {
