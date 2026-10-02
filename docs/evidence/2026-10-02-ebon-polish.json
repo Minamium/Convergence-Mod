@@ -1,0 +1,20 @@
+{
+  "scope": "Ebon Manor polish after the owner's 2026-10-02 play: long natural music loops; quieter warnings; Luminance razor-silk live strands. No gameplay, hitbox, timing, packet or protocol change",
+  "target_build": "0.3.62 / protocol76",
+  "integration_base": "6cc4532 (main after PR95)",
+  "owner_direction": {
+    "music": "2026-10-02: Ghost Samurai's loop was very clean; make Ebon's loops more natural, but looping the same part too much kills the BGM — keep the song's development; implement it",
+    "warnings": "2026-10-02: the warning lines are too crisp and cluttered overall; make them more stylish and clean",
+    "live": "2026-10-02: the pinkish damage-active thread is plain; use Luminance and express it more beautifully"
+  },
+  "checks": {
+    "music_analysis": "beat-synchronous chroma/timbre/energy bar similarity over the whole recording (no sample-identical repeats exist: best lag-searched waveform match 0.84); chosen jumps follow the song's own repeats: Act One A' (bar 54) -> A (14) 0.99/0.96 after/before, Act II gap (61) -> breakdown (32) 0.81/0.85, Finale climax second phrase (67) -> A (16) 0.80/0.80 (previous loops 0.89/0.88, 0.64/0.75, 0.77/0.78)",
+    "music_seams": "loop lengths 40/29/51 bars (76.8/55.7/97.9 s, previously 24/8/12 bars); one-beat correlation-compensated crossfades landing on the downbeat; spectral-flux peak at each join 3.2/1.75/2.45 x median, inside the range of the song's ordinary downbeats (1.55-3.2); sample step 1.5-2.7 x the typical sample difference (no click); beat-grid drift at most 27 samples per loop; Curtain re-rendered byte-identical",
+    "visuals": "implementer, independent critic and refiner over the offline FNA frames of the compiled materials on the real textures (59 frames incl. strung/last-beat/ignite/snap/fray/overlap/Reduced/zoom 0.67x and 2x); before/after sheets reviewed by Claude; an if-branch in EbonSilk's pixel shader that FNA mis-handled was replaced by a branchless select",
+    "shader": "EbonManor and EbonSilk recompiled by the pinned FXC fx_2_0; other shaders byte-identical",
+    "static": "passed: catalog, repository checks, YAML",
+    "native_build": "passed: 0 errors / 4 existing CS8632 warnings",
+    "native_player_and_remote": "not_run: listening across each join in play, warning readability over the hall and windows, live-strand look, fray, Reduced Effects, zoom, FPS, peers"
+  },
+  "delegation": "Claude analysed and re-cut the music and integrated; three Claude subagents (implementer, critic, refiner) restyled the warnings and live strands against offline frames"
+}

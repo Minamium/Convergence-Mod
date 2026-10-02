@@ -14,8 +14,10 @@ internal enum EbonAftermathKind : byte { PropCrash, ChandelierWreck, LoomSnap, S
 internal readonly record struct EbonAftermath(bool Valid, EbonAftermathKind Kind, Vector2 At, Vector2 To, float Value, int Start, int Seed, int Variant);
 
 // The world pass. Every danger is drawn from the accepted plan geometry at the
-// render age: chalk lanes before Fire, lit bands while live, and art (props,
-// chandeliers, shears) where the collision actually is.
+// render age: quiet silk veils and hairlines before Fire, razor silk on the
+// honest band while live, and art (props, chandeliers, shears) where the
+// collision actually is. Only damaging strands are razor silk; every harmless
+// strand (hanging, flung, recoiling, frayed) stays cool classic silk.
 internal static class EbonScene
 {
     internal const float PropScale = .75f;
@@ -110,6 +112,9 @@ internal static class EbonScene
         EbonCeremony.Front(shader, boss, pose, age);
     }
 
+    // Warnings are quiet silk: one element per hazard, exactly on its accepted
+    // footprint. Broad bands get a feathered veil; thread-width hazards get one
+    // hairline strung anchor to anchor over a faint film of the honest band.
     private static void Forecast(ManagedShader shader, in EbonState s, in EbonAttackPlan p, float age)
     {
         if (age < p.Born) return;
@@ -120,12 +125,11 @@ internal static class EbonScene
             {
                 if (age >= CrashTick(p)) return;
                 var d = EbonGeometry.Direction(p);
-                Vector2 to = CrashPoint(p), from = age < p.Fire ? new Vector2(p.X, p.Y) : EbonGeometry.Prop(p, age);
+                bool live = age >= p.Fire;
+                Vector2 to = CrashPoint(p), from = live ? EbonGeometry.Prop(p, age) : new Vector2(p.X, p.Y);
                 // Only the route still ahead of the furniture is drawn: that is the danger.
                 if (Vector2.Dot(to - from, d) > 8)
-                    EbonMaterials.Lane(shader, from, to, p.Width, progress, 0, EbonMaterials.Chalk, appear * (age < p.Fire ? .95f : .55f), 1, seed);
-                if (age < p.Fire)
-                    EbonMaterials.Glow(shader, to, 70 + 30 * progress, EbonMaterials.Silk, .35f * appear * (.6f + .4f * MathF.Sin(age * .3f)));
+                    EbonMaterials.Veil(shader, from, to, p.Width, live ? 1 : progress, appear * (live ? .85f : 1), seed, live ? 1 : 0);
                 break;
             }
             case EbonAttackKind.Chandelier:
@@ -135,29 +139,36 @@ internal static class EbonScene
                 if (age < impact)
                 {
                     var body = age < p.Fire ? EbonGeometry.Chandelier(p, p.Fire) : EbonGeometry.Chandelier(p, age);
-                    EbonMaterials.Lane(shader, body, burst, EbonRules.ChandelierBodyRadius, progress, 0, EbonMaterials.Rose, appear * .75f, 1, seed);
-                    Dome(shader, burst, EbonRules.BurstRadius, appear * (age < p.Fire ? .55f + .35f * progress : .95f), progress, 0, age);
+                    float hold = age < p.Fire ? progress : 1;
+                    // The fall corridor runs to the burst centre but fades out across the
+                    // disc's edge, so the two veils meet without stacking a denser band.
+                    if (burst.Y - body.Y > 8)
+                        EbonMaterials.Veil(shader, body, burst, EbonRules.ChandelierBodyRadius, hold, appear, seed, 0, EbonRules.BurstRadius);
+                    EbonMaterials.VeilDisc(shader, burst, EbonRules.BurstRadius, hold, appear, seed + .5f);
                 }
-                else if (age < p.End) Dome(shader, burst, EbonRules.BurstRadius, 1, 1, 1 - (age - impact) / EbonRules.BurstTicks, age);
+                else if (age < p.End) Dome(shader, burst, EbonRules.BurstRadius, 1 - (age - impact) / EbonRules.BurstTicks);
                 break;
             }
             case EbonAttackKind.Loom:
+            {
+                if (age >= p.Fire || !Segment(s, p, out var a, out var b)) return;
+                float strung = EbonVisualsMath.OutExpo((age - p.Born) / 14);
+                EbonMaterials.Hairline(shader, a, Vector2.Lerp(a, b, strung), p.Width, progress, appear, seed, strung, 3.5f * (1 - progress) + .3f);
+                break;
+            }
             case EbonAttackKind.Shears:
             {
-                if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
-                bool live = age >= p.Fire;
-                var tint = p.Kind == EbonAttackKind.Loom ? EbonMaterials.Silk : EbonMaterials.Chalk;
-                if (!live) EbonMaterials.Lane(shader, a, b, p.Width, progress, 0, tint, appear * (p.Kind == EbonAttackKind.Loom ? .8f : .95f), 1, seed);
-                else if (p.Kind == EbonAttackKind.Loom)
-                    EbonMaterials.Lane(shader, a, b, p.Width, 1, 1, tint, 1 - EbonVisualsMath.Ease((age - p.End + 3) / 3), 1, seed);
+                if (age >= p.Fire || !Segment(s, p, out var a, out var b)) return;
+                // The veil is the band; one fine thread marks the line the blades will run.
+                EbonMaterials.Veil(shader, a, b, p.Width, progress, appear, seed);
+                EbonMaterials.Hairline(shader, a, b, 3, progress, .7f * appear, seed + .3f);
                 break;
             }
             case EbonAttackKind.Web:
             {
-                if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
+                if (age >= p.Fire || !Segment(s, p, out var a, out var b)) return;
                 float extend = EbonVisualsMath.OutExpo((age - p.Born) / 8);
-                if (age < p.Fire) EbonMaterials.Lane(shader, a, Vector2.Lerp(a, b, extend), p.Width, progress, 0, EbonMaterials.Silk, appear * .85f, 1, seed);
-                else EbonMaterials.Lane(shader, a, b, p.Width, 1, 1, EbonMaterials.Silk, 1 - EbonVisualsMath.Ease((age - p.End + 3) / 3), 1, seed);
+                EbonMaterials.Hairline(shader, a, Vector2.Lerp(a, b, extend), p.Width, progress, appear, seed, extend, 2.5f * (1 - progress) + .3f);
                 break;
             }
             case EbonAttackKind.Waltz:
@@ -168,9 +179,6 @@ internal static class EbonScene
                 float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6);
                 float extend = EbonVisualsMath.OutExpo((age - p.Born) / 24), sign = p.Spin >= 0 ? 1 : -1;
                 float within = (age - p.Born) / EbonRules.BeatTicks % 1, liveT = age - p.Fire;
-                // The lace hub opens with the parasol and turns with the spokes.
-                EbonMaterials.Lace(shader, c, 58, p.Variant, EbonGeometry.SpokeAngle(p, 0, age),
-                    EbonVisualsMath.Ease((age - p.Born) / 30), .8f * fade, p.Born * .01f);
                 for (int k = 0; k < p.Variant; k++)
                 {
                     float angle = EbonGeometry.SpokeAngle(p, k, age);
@@ -179,18 +187,17 @@ internal static class EbonScene
                     float reach = Math.Min(last, p.Length);
                     if (!live)
                     {
-                        // Threads are drawn out to the walls, then each beat swings a faint
-                        // preview the way the spokes will turn.
-                        EbonMaterials.Sweep(shader, s.Field, c, angle, angle + sign * .30f * EbonVisualsMath.OutExpo(within / .7f), 40, reach,
-                            EbonMaterials.Silk, .22f * (1 - within) * (1 - within) * extend, seed + k);
-                        EbonMaterials.Lane(shader, c + d * 40, c + d * (40 + (reach - 40) * extend), p.Width, progress, 0, EbonMaterials.Silk, appear * .85f, 1, seed + k);
+                        // Each beat a faint fan near the walls leans the way the spokes will turn.
+                        EbonMaterials.Sweep(shader, s.Field, c, angle, angle + sign * .24f * EbonVisualsMath.OutExpo(within / .6f), 40, reach,
+                            EbonMaterials.Silk, .18f * (1 - within) * (1 - within) * extend, seed + k, .6f);
+                        EbonMaterials.Hairline(shader, c + d * 40, c + d * (40 + (reach - 40) * extend), p.Width, progress, appear, seed + k,
+                            extend, 1.5f * (1 - progress));
                     }
                     else
                     {
-                        // Afterglow behind each spoke, as long as the arc it just swept.
+                        // A soft afterglow behind each spoke, as long as the arc it just swept.
                         float trail = Math.Abs(p.Spin) * EbonRules.WaltzRate(liveT) * 16;
-                        EbonMaterials.Sweep(shader, s.Field, c, angle, angle - sign * trail, 40, reach, EbonMaterials.Rose, .17f * fade, seed + k);
-                        EbonMaterials.Lane(shader, c + d * 40, c + d * reach, p.Width, 1, 1, EbonMaterials.Silk, fade, 1, seed + k);
+                        EbonMaterials.Sweep(shader, s.Field, c, angle, angle - sign * trail, 40, reach, EbonMaterials.Dusty, .12f * fade, seed + k);
                     }
                 }
                 break;
@@ -198,24 +205,29 @@ internal static class EbonScene
         }
     }
 
-    // The chandelier burst: a floor dome with a thin rim at the true radius.
-    private static void Dome(ManagedShader shader, Vector2 center, float radius, float opacity, float progress, float live, float age)
+    // The chandelier burst while live: a white flash in moon-silver with a soft
+    // dusty-rose front at the true radius.
+    private static void Dome(ManagedShader shader, Vector2 center, float radius, float live)
     {
         float diameter = radius * 2 / .96f;
-        EbonMaterials.Glow(shader, center, diameter, EbonMaterials.Rose, opacity * (.10f + .10f * progress) * (1 - live) , 0, .1f, .2f);
-        EbonMaterials.Glow(shader, center, diameter, EbonMaterials.Rose, opacity * (.55f + .35f * progress), .96f, .012f, .4f);
-        if (live > 0)
+        EbonMaterials.Glow(shader, center, diameter, EbonMaterials.Pale, live * .8f, 0, .1f, .35f);
+        EbonMaterials.Glow(shader, center, diameter, EbonMaterials.Dusty, live, .96f, .025f, .25f);
+    }
+
+    // A standing wave sampled between two points (warning silk trembling as it tightens).
+    private static void Wave(List<Vector2> into, Vector2 a, Vector2 b, float amplitude, float rate, float age, int steps)
+    {
+        var n = (b - a).SafeNormalize(Vector2.UnitY).RotatedBy(MathHelper.PiOver2);
+        for (int i = 1; i <= steps; i++)
         {
-            EbonMaterials.Glow(shader, center, diameter, EbonMaterials.Hot, live * .85f, 0, .1f, .35f);
-            EbonMaterials.Glow(shader, center, diameter, EbonMaterials.Hot, live, .96f, .02f, .2f);
-        }
-        else if (!EbonVisuals.Reduced)
-        {
-            float pulse = (age * .025f) % 1;
-            EbonMaterials.Glow(shader, center, diameter * (.2f + .76f * pulse), EbonMaterials.Rose, opacity * .25f * (1 - pulse) * progress, .96f, .02f, .5f);
+            float u = i / (float)steps;
+            into.Add(Vector2.Lerp(a, b, u) + n * MathF.Sin(u * MathF.PI) * MathF.Sin(u * MathF.PI * 3 + age * rate) * amplitude);
         }
     }
 
+    // Silk ribbons through Luminance's primitive renderer. Warnings keep only the
+    // silk that is physically there (hanging, pulling); every live, damaging
+    // strand is razor silk on its honest band, and harmless silk stays classic.
     private static void Silk(in EbonState s, in EbonAttackPlan p, in NoirettePose pose, float age)
     {
         if (age < p.Born) return;
@@ -230,17 +242,21 @@ internal static class EbonScene
                 var to = CrashPoint(p);
                 // The pull silk is tied to the top ring and runs down the lane's spine to the far anchor.
                 var spine = EbonGeometry.Prop(p, age) + EbonGeometry.Direction(p) * 90;
-                path.Clear(); path.Add(hook); path.Add(Vector2.Lerp(hook, spine, .5f)); path.Add(spine); path.Add(to);
+                path.Clear(); path.Add(hook); path.Add(Vector2.Lerp(hook, spine, .5f)); path.Add(spine);
                 if (age < p.Fire)
                 {
-                    EbonMaterials.Thread(path, 2.2f, EbonMaterials.Silk, .35f * appear, progress, 0, seed, age);
-                    EbonMaterials.Straight(spine, to, 2.4f, EbonMaterials.Silk, .45f * appear, progress, 0, seed, age, 5 * (1 - progress) + .6f, .12f + .4f * progress);
+                    Wave(path, spine, to, (3 * (1 - progress) + .3f) * (EbonVisuals.Reduced ? .4f : 1), .12f + .4f * progress, age, 12);
+                    var tone = Vector3.Lerp(EbonMaterials.Silk, EbonMaterials.Dusty, EbonVisualsMath.Ease((progress - .66f) / .34f));
+                    EbonMaterials.Thread(path, 2.2f, tone, (.42f + .2f * progress) * appear, progress, 0, seed, age);
                 }
                 else
                 {
                     float t = age - p.Fire;
-                    EbonMaterials.Thread(path, 3f, EbonMaterials.Hot, .6f, 1, .5f, seed, age);
-                    EbonMaterials.Straight(spine, to, 3.4f, EbonMaterials.Hot, .8f, 1, .7f, seed, age, 2.5f * MathF.Exp(-t / 5), 1.4f);
+                    // The hook's silk is harmless classic silk; the route still ahead of
+                    // the furniture is yanked taut into razor silk, the snap racing in.
+                    EbonMaterials.Thread(path, 2.2f, EbonMaterials.Silk, .55f, 1, .3f, seed, age);
+                    if (Vector2.Dot(to - spine, EbonGeometry.Direction(p)) > 8)
+                        EbonMaterials.Razor(spine, to, 2.5f, 1, t, seed, age, 2.2f * MathF.Exp(-t / 5), 1.4f, 1, openStart: true);
                     // The released control silk whips back into her hand.
                     if (t < 12)
                     {
@@ -251,7 +267,7 @@ internal static class EbonScene
                     // Motion ribbon sampled from the same trajectory as the collision.
                     path.Clear();
                     for (int k = 8; k >= 0; k--) path.Add(EbonGeometry.Prop(p, Math.Max(p.Fire, age - k * 1.4f)));
-                    EbonMaterials.Thread(path, 26, EbonMaterials.Silk, .32f, 1, .5f, seed + 5, age, true);
+                    EbonMaterials.Thread(path, 26, EbonMaterials.Silk, .26f, 1, .5f, seed + 5, age, true);
                 }
                 break;
             }
@@ -265,40 +281,37 @@ internal static class EbonScene
                     EbonMaterials.Straight(new(ring.X, top), ring, 2.6f, EbonMaterials.Silk, .75f * appear, progress, 0, seed, age, progress > .7f ? 1.2f : 0, 1.1f);
                 else
                 {
-                    // Cut at the hook: the upper silk recoils into the ceiling.
+                    // Cut at the hook: the harmless upper silk recoils into the ceiling.
                     float t = age - p.Fire, recoil = EbonVisualsMath.OutExpo(t / 10);
                     var cut = ChandelierRing(p, p.Fire);
-                    if (t < 14) EbonMaterials.Straight(new(cut.X, top), Vector2.Lerp(cut, new(cut.X, top), recoil), 2.8f, EbonMaterials.Hot, 1 - t / 14, 1, .8f, seed, age);
+                    if (t < 14)
+                        EbonMaterials.Straight(new(cut.X, top), Vector2.Lerp(cut, new(cut.X, top), recoil), 2.2f, EbonMaterials.Silk, .6f * (1 - t / 14), 1, .3f, seed, age);
                     if (t < 18) EbonMaterials.Straight(ring - new Vector2(0, 50 * (1 - t / 18)), ring, 2.2f, EbonMaterials.Silk, .8f * (1 - t / 18), .5f, 0, seed + 1, age);
                 }
                 break;
             }
             case EbonAttackKind.Loom:
             {
-                if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
-                if (age < p.Fire)
-                    EbonMaterials.Straight(a, b, 3f, EbonMaterials.Silk, .65f * appear, progress, 0, seed, age, 7 * (1 - progress) + .8f, .08f + .45f * progress);
-                else
-                {
-                    float t = age - p.Fire;
-                    EbonMaterials.Straight(a, b, 6f, EbonMaterials.Hot, 1, 1, 1, seed, age, 4.5f * MathF.Exp(-t / 3.5f), 1.9f);
-                }
+                if (age >= p.End || age < p.Fire || !Segment(s, p, out var a, out var b)) return;
+                float t = age - p.Fire;
+                EbonMaterials.Razor(a, b, p.Width, 1, t, seed, age, 4.5f * MathF.Exp(-t / 3.5f), 1.9f);
                 break;
             }
             case EbonAttackKind.Web:
             {
                 if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
-                float t0 = age - p.Born, extend = EbonVisualsMath.OutExpo(t0 / 8);
-                // Each strand is flung from her hand to its first anchor, then drawn across.
+                float t0 = age - p.Born;
+                // Each strand is flung from her hand to its first anchor (harmless silk), then drawn across.
                 if (t0 < 10)
                 {
                     var hand = EbonNoirette.Hand(pose, p.Variant % 2);
-                    EbonMaterials.Straight(hand, Vector2.Lerp(hand, a, EbonVisualsMath.OutExpo(t0 / 6)), 2.4f, EbonMaterials.Hot, 1 - t0 / 10, 1, .5f, seed, age);
+                    EbonMaterials.Straight(hand, Vector2.Lerp(hand, a, EbonVisualsMath.OutExpo(t0 / 6)), 2.2f, EbonMaterials.Silk, .55f * (1 - t0 / 10), 1, .2f, seed, age);
                 }
-                if (age < p.Fire)
-                    EbonMaterials.Straight(a, Vector2.Lerp(a, b, extend), 2.6f, EbonMaterials.Silk, .7f * appear, progress, 0, seed, age, 4 * (1 - progress) + .5f, .15f + .5f * progress);
-                else
-                    EbonMaterials.Straight(a, b, 4.5f, EbonMaterials.Hot, 1, 1, 1, seed, age, 3.5f * EbonVisualsMath.Pulse(age - p.Fire, 3), 2.2f);
+                if (age >= p.Fire)
+                {
+                    float t = age - p.Fire;
+                    EbonMaterials.Razor(a, b, p.Width, 1, t, seed, age, 3.5f * EbonVisualsMath.Pulse(t, 3), 2.2f);
+                }
                 break;
             }
             case EbonAttackKind.Shears:
@@ -311,24 +324,19 @@ internal static class EbonScene
             }
             case EbonAttackKind.Waltz:
             {
-                if (age >= p.End) return;
+                if (age >= p.End || age < p.Fire) return;
                 var c = EbonGeometry.Center(s, age);
-                bool live = age >= p.Fire;
-                float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6), extend = EbonVisualsMath.OutExpo((age - p.Born) / 24);
-                // Every beat the taut threads twang and brighten with the step.
-                float step = live ? EbonVisualsMath.Pulse((age - p.Fire) % EbonRules.BeatTicks, 7) : 0;
+                float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6);
+                // Every beat the taut spokes snap brighter and twang with the step; the
+                // snap is full at fire and softer on the eleven beats that follow.
+                float liveT = age - p.Fire, beat = liveT % EbonRules.BeatTicks, step = EbonVisualsMath.Pulse(beat, 7);
+                float flash = liveT < EbonRules.BeatTicks ? 1 : EbonVisuals.Reduced ? .25f : .5f;
                 for (int k = 0; k < p.Variant; k++)
                 {
                     float angle = EbonGeometry.SpokeAngle(p, k, age);
                     var d = angle.ToRotationVector2();
                     if (!s.Field.ClipAxis(c.X, c.Y, d.X, d.Y, out _, out float last) || last <= 40) continue;
-                    float reach = Math.Min(last, p.Length);
-                    if (live)
-                        EbonMaterials.Straight(c + d * 40, c + d * reach, 3.4f + 1.6f * step, EbonMaterials.Hot, fade * (.82f + .18f * step), 1,
-                            .75f + .25f * step, seed + k, age, 1.6f * step, 2.6f);
-                    else
-                        EbonMaterials.Straight(c + d * 40, c + d * (40 + (reach - 40) * extend), 2.2f, EbonMaterials.Silk, .5f * appear, progress, 0,
-                            seed + k, age, 1.5f * (1 - progress), .3f);
+                    EbonMaterials.Razor(c + d * 40, c + d * Math.Min(last, p.Length), p.Width, fade, beat, seed + k, age, 1.6f * step, 2.6f, flash, openStart: true);
                 }
                 break;
             }
@@ -350,6 +358,9 @@ internal static class EbonScene
                 bool flip = MathF.Cos(p.Angle) < 0;
                 EbonMaterials.Sprite(shader, "AutoloadPass", art, new Rectangle(p.Variant * 176, 0, 176, 176), EbonGeometry.Prop(p, age),
                     PropCentroid, PropScale, PropRotation(p, age), flip, SamplerState.LinearClamp);
+                // The pull silk's far anchor: a small pin of light where the furniture will land.
+                float pin = t >= 0 ? 1 : (.45f + .3f * progress) * EbonVisualsMath.Ease((age - p.Born) / 8);
+                EbonMaterials.Glint(shader, CrashPoint(p), 20 + 8 * progress, EbonMaterials.Pale, pin * (.8f + .2f * MathF.Sin(age * .3f)), .8f, p.Angle);
                 break;
             }
             case EbonAttackKind.Chandelier:
@@ -371,17 +382,21 @@ internal static class EbonScene
             case EbonAttackKind.Web:
             {
                 if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
-                float glint = age >= p.Fire ? 1 - (age - p.Fire) / EbonRules.WebLive : .3f + .45f * progress;
-                EbonMaterials.Glow(shader, a, 40, EbonMaterials.Silk, glint);
-                if (age >= p.Born + 8) EbonMaterials.Glow(shader, b, 40, EbonMaterials.Silk, glint);
+                // Anchor pins where the strand is tied to the walls.
+                bool live = age >= p.Fire;
+                float glint = live ? 1 - (age - p.Fire) / EbonRules.WebLive : .3f + .4f * progress, rotation = (b - a).ToRotation();
+                EbonMaterials.Glint(shader, a, live ? 30 : 18, live ? EbonMaterials.Bloom : EbonMaterials.Silk, glint, .8f, rotation);
+                if (age >= p.Born + 8) EbonMaterials.Glint(shader, b, live ? 30 : 18, live ? EbonMaterials.Bloom : EbonMaterials.Silk, glint, .8f, rotation);
                 break;
             }
             case EbonAttackKind.Loom:
             {
                 if (age >= p.End || !Segment(s, p, out var a, out var b)) return;
-                float glint = age >= p.Fire ? 1 - (age - p.Fire) / EbonRules.LoomLive : .35f + .4f * progress;
-                EbonMaterials.Glow(shader, a, 46, EbonMaterials.Silk, glint);
-                EbonMaterials.Glow(shader, b, 46, EbonMaterials.Silk, glint);
+                bool live = age >= p.Fire;
+                float glint = live ? 1 - (age - p.Fire) / EbonRules.LoomLive : (.3f + .4f * progress) * EbonVisualsMath.Ease((age - p.Born) / 8),
+                    rotation = (b - a).ToRotation();
+                EbonMaterials.Glint(shader, a, live ? 34 : 20, live ? EbonMaterials.Bloom : EbonMaterials.Silk, glint, .8f, rotation);
+                if (live || age >= p.Born + 14) EbonMaterials.Glint(shader, b, live ? 34 : 20, live ? EbonMaterials.Bloom : EbonMaterials.Silk, glint, .8f, rotation);
                 break;
             }
             case EbonAttackKind.Shears:
@@ -402,7 +417,7 @@ internal static class EbonScene
                     float run = EbonVisualsMath.OutExpo(t / EbonRules.ShearsLive);
                     pivot = Vector2.Lerp(a + d * 190, b - d * 60, run);
                     open = .55f * MathF.Abs(MathF.Cos(t * .75f));
-                    EbonMaterials.Tear(shader, a, b, p.Width, t, EbonRules.ShearsLive, 1, p.Born * .017f);
+                    EbonMaterials.Tear(shader, a, b, p.Width, t, EbonRules.ShearsLive, 1, p.Born * .017f, Vector2.Dot(pivot - a, d));
                     opacity = 1 - EbonVisualsMath.Ease((t - EbonRules.ShearsLive + 4) / 4);
                 }
                 var art = EbonMaterials.Texture("Shears");
@@ -418,7 +433,21 @@ internal static class EbonScene
                 bool live = age >= p.Fire;
                 float fade = 1 - EbonVisualsMath.Ease((age - p.End + 6) / 6);
                 EbonMaterials.Glow(shader, c, 150, EbonMaterials.Moon, (.22f + .18f * progress) * fade);
-                if (!live) return;
+                if (!live)
+                {
+                    // Each beat a small glint slides along the wall the way the spokes will turn.
+                    float within = (age - p.Born) / EbonRules.BeatTicks % 1;
+                    float lean = (p.Spin >= 0 ? 1 : -1) * .24f * EbonVisualsMath.OutExpo(within / .6f);
+                    float show = (1 - within) * (1 - within) * EbonVisualsMath.OutExpo((age - p.Born) / 24);
+                    for (int k = 0; k < p.Variant; k++)
+                    {
+                        float angle = EbonGeometry.SpokeAngle(p, k, age) + lean;
+                        var d = angle.ToRotationVector2();
+                        if (!s.Field.ClipAxis(c.X, c.Y, d.X, d.Y, out _, out float last) || last <= 40) continue;
+                        EbonMaterials.Glint(shader, c + d * Math.Min(last, p.Length), 44, EbonMaterials.Pale, show, 1, angle);
+                    }
+                    return;
+                }
                 float t = age - p.Fire;
                 for (int k = 0; k < p.Variant; k++)
                 {
@@ -426,7 +455,7 @@ internal static class EbonScene
                     var d = angle.ToRotationVector2();
                     if (!s.Field.ClipAxis(c.X, c.Y, d.X, d.Y, out _, out float last) || last <= 40) continue;
                     var end = c + d * Math.Min(last, p.Length);
-                    EbonMaterials.Glow(shader, end, 64, EbonMaterials.Hot, .75f * fade);
+                    EbonMaterials.Glint(shader, end, 34, EbonMaterials.Bloom, .85f * fade, .8f, angle);
                     // Silk sparks where each spoke scrapes along the wall.
                     if (!EbonVisuals.Reduced)
                         EbonMaterials.Burst(shader, end, p.Born + k * 31 + (int)(t / 18) * 7, 4, t % 18, 18, 2, 3.5f, .03f, 12, 1.4f, angle + MathHelper.Pi);
@@ -460,8 +489,9 @@ internal static class EbonScene
                     var c = Chandeliers[Math.Clamp(e.Variant, 0, 1)];
                     var art = EbonMaterials.Texture(c.Name);
                     float settle = EbonVisualsMath.Ease(t / 8);
-                    EbonMaterials.Glow(shader, e.At, 620, EbonMaterials.Hot, .9f * EbonVisualsMath.Pulse(t, 6));
-                    EbonMaterials.Glow(shader, e.At, 200 + t * 14, EbonMaterials.Candle, .5f * (1 - t / 46), .93f, .03f, .6f);
+                    EbonMaterials.Glow(shader, e.At, 620, EbonMaterials.Pale, (EbonVisuals.Reduced ? .35f : .65f) * EbonVisualsMath.Pulse(t, 6));
+                    // A soft gold shock ring (no second hard ring beside the rose front).
+                    EbonMaterials.Glow(shader, e.At, 200 + t * 14, EbonMaterials.Gold, .3f * (1 - t / 46), .93f, .06f, .6f);
                     shader.TrySetParameter("signal", new Vector4(1 - EbonVisualsMath.Ease((t - 70) / 26), 1 - EbonVisualsMath.Ease((t - 30) / 60), .5f * EbonVisualsMath.Pulse(t, 4), e.Seed * .01f));
                     EbonMaterials.Sprite(shader, "AutoloadPass", art, new Rectangle(0, 0, art.Width, art.Height),
                         e.At + new Vector2(0, -40 * c.Scale + 10 * settle), c.Centroid, c.Scale * (1 - .12f * settle), e.Value * settle, false, SamplerState.LinearClamp, .45f);
@@ -476,15 +506,21 @@ internal static class EbonScene
                     break;
                 }
                 case EbonAftermathKind.ShearsHeal:
-                    if (t >= 24) break;
-                    EbonMaterials.Lane(shader, e.At, e.To, e.Value * (.25f + .2f * (1 - t / 24)), 1, 0, EbonMaterials.Hot, .6f * (1 - t / 24), 1, e.Seed * .01f);
+                {
+                    if (t >= 16) break;
+                    // The cut closes into one faint dusty seam that dissolves; harmless, so no razor.
+                    float close = EbonVisualsMath.OutExpo(t / 8);
+                    EbonMaterials.Veil(shader, e.At, e.To, MathHelper.Lerp(e.Value * .3f, 5, close), 1, 1.1f * (1 - EbonVisualsMath.Ease(t / 16)),
+                        e.Seed * .013f, 1);
                     break;
+                }
             }
         }
     }
 
-    // Where web strands cross, the silk knots: small lights that make the web
-    // read as one woven trap. Purely decorative; each strand owns its footprint.
+    // Where web strands cross, the silk catches the light: small crisp glints
+    // along the bisectors that make the web read as one woven trap. Purely
+    // decorative; each strand owns its footprint.
     private static readonly List<(Vector2 A, Vector2 B, float Show, int Fire)> strands = new(16);
     private static void WebKnots(ManagedShader shader, in EbonState s, float age)
     {
@@ -502,7 +538,9 @@ internal static class EbonScene
                 int fire = strands[i].Fire;
                 float live = age >= fire ? 1 - (age - fire) / EbonRules.WebLive : 0;
                 float show = Math.Min(strands[i].Show, strands[j].Show);
-                EbonMaterials.Glow(shader, knot, 34 + 26 * live, live > 0 ? EbonMaterials.Hot : EbonMaterials.Silk, show * (.45f + .55f * live));
+                float bisector = ((strands[i].B - strands[i].A).ToRotation() + (strands[j].B - strands[j].A).ToRotation()) * .5f;
+                if (live > 0) EbonMaterials.Glint(shader, knot, 26 + 12 * live, EbonMaterials.Bloom, show * live, 1, bisector);
+                else EbonMaterials.Glint(shader, knot, 14, EbonMaterials.Silk, show * .3f, .5f, bisector);
             }
     }
     private static bool Cross(Vector2 a, Vector2 b, Vector2 c, Vector2 d, out Vector2 at)
@@ -517,7 +555,9 @@ internal static class EbonScene
         return true;
     }
 
-    // Primitive-only residue (snapping silk) drawn with the silk layer.
+    // Primitive-only residue drawn with the silk layer. Once a strand stops
+    // dealing damage it loses its band and white heat at once: still tied to its
+    // wall, it slackens back, droops and frays into fading motes.
     internal static void AftermathSilk(in EbonState s, float age)
     {
         if (owner != s.Fight) return;
@@ -526,16 +566,38 @@ internal static class EbonScene
             var e = aftermath[i];
             if (!e.Valid) continue;
             float t = age - e.Start;
-            if (t < 0 || t >= 14) continue;
-            float recoil = EbonVisualsMath.OutExpo(t / 12), fade = 1 - t / 14;
-            if (e.Kind == EbonAftermathKind.LoomSnap)
+            if (t < 0 || t >= 18) continue;
+            float fray = EbonVisualsMath.Ease(t / 18), recoil = .35f * EbonVisualsMath.OutExpo(t / 10), sag = 24 * EbonVisualsMath.Ease(t / 18);
+            switch (e.Kind)
             {
-                var mid = Vector2.Lerp(e.At, e.To, .5f + (EbonMaterials.Hash(e.Seed, 0, 1) - .5f) * .3f);
-                EbonMaterials.Straight(e.At, Vector2.Lerp(mid, e.At, recoil), 3, EbonMaterials.Silk, fade, 1, .4f, e.Seed, age);
-                EbonMaterials.Straight(Vector2.Lerp(mid, e.To, recoil), e.To, 3, EbonMaterials.Silk, fade, 1, .4f, e.Seed + 1, age);
+                case EbonAftermathKind.LoomSnap:
+                {
+                    // Parted mid-strand: each half hangs from its own wall.
+                    var mid = Vector2.Lerp(e.At, e.To, .5f + (EbonMaterials.Hash(e.Seed, 0, 1) - .5f) * .3f);
+                    Droop(path, e.At, Vector2.Lerp(mid, e.At, recoil), sag);
+                    EbonMaterials.Frayed(path, 3, fray, e.Seed, age, false, true);
+                    Droop(path, e.To, Vector2.Lerp(mid, e.To, recoil), sag);
+                    EbonMaterials.Frayed(path, 3, fray, e.Seed + 1, age, false, true);
+                    break;
+                }
+                case EbonAftermathKind.SpokeRelease:
+                    // Let go at the hub: the spoke hangs from its wall end.
+                    Droop(path, e.To, Vector2.Lerp(e.At, e.To, recoil), sag);
+                    EbonMaterials.Frayed(path, 3, fray, e.Seed, age, false, true);
+                    break;
             }
-            else if (e.Kind == EbonAftermathKind.SpokeRelease)
-                EbonMaterials.Straight(Vector2.Lerp(e.At, e.To, recoil), e.To, 3.5f, EbonMaterials.Hot, fade, 1, .6f, e.Seed, age);
+        }
+    }
+
+    // A strand tied at anchor whose other end has let go, sampled anchor to free
+    // end and drooping more toward the free end.
+    private static void Droop(List<Vector2> into, Vector2 anchor, Vector2 free, float sag)
+    {
+        into.Clear();
+        for (int i = 0; i <= 13; i++)
+        {
+            float u = i / 13f;
+            into.Add(Vector2.Lerp(anchor, free, u) + new Vector2(0, sag * u * u));
         }
     }
 }
