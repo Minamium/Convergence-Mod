@@ -1232,12 +1232,12 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 99be7ba627ce70ce7040dbf9ae7c06b882fa7a1024714a7c10aa752743cfcbb8
+  content_sha256: a9fd098c5b1b70a6b91ec6f5cb94202eb24f0b75e3c877bf57df4b6f95a428b6
   document_type: spec
   status: provisional
   owners:
   - audio
-  last_reviewed: '2026-09-14'
+  last_reviewed: '2026-10-03'
   source_of_truth_for:
   - first_severance.audio_cues
   aliases:
@@ -1414,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 387f8cd478635ac133f5d0f2c46de649c3da394acba3fa5738af4035bb40f55f
+  content_sha256: f43e7444fc5ad6c2365a8c7dfda8a9a5d9246eed16d43af9ae63e773447fbc96
   document_type: status
   status: accepted
   owners:

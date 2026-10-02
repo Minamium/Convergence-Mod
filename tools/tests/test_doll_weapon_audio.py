@@ -142,9 +142,28 @@ class DollWeaponPlaybackContract(unittest.TestCase):
         self.assertIn("ModContent.HasAsset(Root + cue)", body(self.source, "private static bool Exists("))
         self.assertIn('Identifier = "Convergence:DollWeapon:" + cue, MaxInstances = Instances(cue)', self.source)
         sustain = body(self.source, "internal static void Sustain(")
-        self.assertIn('string id = $"Convergence:DollWeapon:Sustain:{owner}:{identity}:{cue}";', sustain)
-        self.assertIn("Identifier = id, IsLooped = true, MaxInstances = 1", sustain)
+        self.assertIn('Identifier = $"Convergence:DollWeapon:Sustain:{owner}:{identity}:{cue}"', sustain)
+        self.assertIn("IsLooped = true, MaxInstances = 1", sustain)
         self.assertIn("RitualAudioDiagnostics.Track(cue, voice, gain)", self.source)
+
+    def test_sustain_gain_lives_on_the_lease_so_a_loop_can_fade_in_from_zero(self):
+        sustain = body(self.source, "internal static void Sustain(")
+        self.assertIn("IsLooped = true, MaxInstances = 1, Volume = 1f", sustain, "the loop style is built at full volume")
+        self.assertIn("sound.Volume = started.Gain;", sustain, "the update callback applies the lease gain")
+        self.assertIn("active.Volume = gain;", sustain, "a refresh applies the new gain directly")
+        self.assertNotIn("Style.Volume", sustain, "no division by the style volume (a loop that starts at 0 would stay silent)")
+        self.assertNotIn("Math.Max(.0001f", sustain)
+
+    def test_sustain_builds_no_string_on_a_call_that_finds_its_lease(self):
+        self.assertIn("Dictionary<LeaseKey, Lease> sustains", self.source)
+        self.assertIn("private readonly record struct LeaseKey(int Owner, int Identity, string Cue);", self.source)
+        sustain = body(self.source, "internal static void Sustain(")
+        self.assertIn("LeaseKey key = new(owner, identity, cue);", sustain)
+        self.assertIn("sustains.TryGetValue(key, out var lease)", sustain)
+        self.assertIn("sustains[key] = started;", sustain)
+        self.assertEqual(1, sustain.count('$"'), "the identifier is the only interpolated string")
+        self.assertLess(sustain.index("Admit()"), sustain.index('$"'), "built only when a voice starts")
+        self.assertLess(sustain.index("slot = lease.Voice;"), sustain.index('$"'), "the refresh path returns before it")
 
     def test_cleanup_is_owned_and_idempotent(self):
         self.assertIn("public override void OnWorldUnload() => DollWeaponAudio.StopAll();", self.source)

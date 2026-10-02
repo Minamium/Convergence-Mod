@@ -23,6 +23,9 @@ internal static class DollWeaponAudio
     internal const string Root = "Convergence/Assets/Sounds/Weapons/DollWeapons/";
     internal const int VoiceCap = 32, DefaultInstances = 2;
     // Voices one cue may hold at once; a weapon adds its cues here. Unlisted cues allow DefaultInstances.
+    // The limit is per cue file (one SoundStyle.Identifier), and IgnoreNew drops the voice that would exceed it.
+    // A cue played as an arpeggio, a fast ratchet or any overlapping tail therefore needs a larger entry than
+    // DefaultInstances, or its later notes are silently dropped while the earlier ones still ring.
     private static readonly Dictionary<string, int> instances = new(StringComparer.Ordinal)
     {
         ["CompanionSummon"] = 2,
@@ -30,13 +33,17 @@ internal static class DollWeaponAudio
     private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, SoundStyle> styles = new(StringComparer.Ordinal);
     private static readonly List<SlotId> voices = new(VoiceCap);
-    private static readonly Dictionary<string, Lease> sustains = new(StringComparer.Ordinal);
-    private static readonly List<string> ended = new();
+    private static readonly Dictionary<LeaseKey, Lease> sustains = new();
+    private static readonly List<LeaseKey> ended = new();
+
+    // Which loop a Sustain call belongs to. A struct key, so the per-tick lookup allocates nothing.
+    private readonly record struct LeaseKey(int Owner, int Identity, string Cue);
 
     private sealed class Lease
     {
         internal SlotId Voice;
         internal Vector2 Position;
+        internal float Gain;
         internal ulong Touched;
     }
 
@@ -58,42 +65,50 @@ internal static class DollWeaponAudio
     }
 
     // A single-note cue recorded at ladder step `root`, played at ladder step `step` (DollWeaponTuning, 0 cents).
+    // Every note of one cue shares that cue's `instances` limit (default 2, IgnoreNew): a weapon that plays this
+    // cue as an arpeggio must first give the cue a larger entry there, or the third overlapping note is dropped.
     internal static SlotId Note(string cue, int root, int step, Vector2 at, float volume)
         => DollWeaponTuning.Reachable(step, root) ? Play(cue, at, volume, DollWeaponTuning.Pitch(step, root)) : SlotId.Invalid;
 
     // A looped voice owned by (owner, identity, cue). Call it every tick while the loop should sound: the voice
     // follows `at` and takes the new volume, and it stops by itself two ticks after the last call (a killed
     // projectile, a lost owner, a world change), so a missed Stop never leaves it ringing.
+    // The loop's SoundStyle.Volume is fixed at 1 and the gain lives on the lease and ActiveSound.Volume (which
+    // multiplies it), so a loop may start at 0 and fade in; no call divides by the style volume. A call that
+    // finds a live lease builds no string; the identifier is built only when a voice starts.
     internal static void Sustain(ref SlotId slot, string cue, int owner, int identity, Vector2 at, float volume)
     {
         if (!Audible || !Exists(cue)) { Stop(ref slot); return; }
-        string id = $"Convergence:DollWeapon:Sustain:{owner}:{identity}:{cue}";
+        LeaseKey key = new(owner, identity, cue);
         float gain = Math.Clamp(volume, 0f, 1f);
-        if (sustains.TryGetValue(id, out var lease) && SoundEngine.TryGetActiveSound(lease.Voice, out var active) && active.IsPlaying)
+        if (sustains.TryGetValue(key, out var lease) && SoundEngine.TryGetActiveSound(lease.Voice, out var active) && active.IsPlaying)
         {
             lease.Position = at;
+            lease.Gain = gain;
             lease.Touched = Main.GameUpdateCount;
-            active.Volume = gain / Math.Max(.0001f, active.Style.Volume);
+            active.Volume = gain;
             slot = lease.Voice;
             return;
         }
-        sustains.Remove(id);
+        sustains.Remove(key);
         slot = SlotId.Invalid;
         if (!Admit()) return;
-        var started = new Lease { Position = at, Touched = Main.GameUpdateCount };
+        var started = new Lease { Position = at, Gain = gain, Touched = Main.GameUpdateCount };
         SoundStyle style = new(Root + cue)
         {
-            Identifier = id, IsLooped = true, MaxInstances = 1, Volume = gain,
+            Identifier = $"Convergence:DollWeapon:Sustain:{owner}:{identity}:{cue}",
+            IsLooped = true, MaxInstances = 1, Volume = 1f,
             SoundLimitBehavior = SoundLimitBehavior.IgnoreNew,
             PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
         };
         started.Voice = SoundEngine.PlaySound(style, at, sound =>
         {
             sound.Position = started.Position;
+            sound.Volume = started.Gain;
             return Main.GameUpdateCount - started.Touched <= 2;
         });
         if (!started.Voice.IsValid) return;
-        sustains[id] = started;
+        sustains[key] = started;
         slot = started.Voice;
         Track(cue, started.Voice, gain);
     }
@@ -143,8 +158,8 @@ internal static class DollWeaponAudio
     private static bool Admit()
     {
         voices.RemoveAll(id => !Playing(id));
-        foreach (var (id, lease) in sustains) if (!Playing(lease.Voice)) ended.Add(id);
-        foreach (var id in ended) sustains.Remove(id);
+        foreach (var (key, lease) in sustains) if (!Playing(lease.Voice)) ended.Add(key);
+        foreach (var key in ended) sustains.Remove(key);
         ended.Clear();
         return voices.Count < VoiceCap;
     }
