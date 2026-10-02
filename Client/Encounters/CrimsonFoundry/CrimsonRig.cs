@@ -134,7 +134,7 @@ internal static partial class CrimsonRig
         var body = ScarletBodyMaterial.Apparition(age, notes[..noted], motion, flipped, reduced);
         ScarletApparitionRig.Draw(batch, effigy.State.Index, at, size * (.90f + appear * .1f), age,
             signal.Charge, signal.Recoil, appear * alpha, flipped,
-            effigy.NPC.rotation, dissolving, motion: motion, material: body);
+            effigy.NPC.rotation, dissolving, notes: notes[..noted], motion: motion, material: body);
         return false;
     }
     internal static int ChoirCues(CrimsonBoss boss, float age, Span<CrimsonChoirCue> cues, bool final = false, bool flipped = false)
