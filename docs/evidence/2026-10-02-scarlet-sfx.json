@@ -1,6 +1,6 @@
 {
   "scope": "Scarlet Invocation's owner-approved sound set: sixteen layered CC0 cues (variant A of every audition scene) replace the borrowed Doll beam, chorus and ceremony cues in the Raid's client presentation and the retired 2026-09-18 Scarlet WAVs. Adds Down, revive and Ready cues through Scarlet's own presentation system, fades voices instead of cutting them, and keeps gameplay, timings and protocol unchanged",
-  "target_build": "0.3.69 / protocol79 (feat/scarlet-sfx, stacked on feat/scarlet-signature-moves c7111c1 at 0.3.68; client presentation only)",
+  "target_build": "0.3.70 / protocol79 (feat/scarlet-sfx, stacked on feat/scarlet-signature-moves at 0.3.69; client presentation only; checks below were run at 0.3.69 on c7111c1 and re-run after the merge)",
   "owner_direction": "2026-10-02: the owner listened to the audition page (16 scenes x 3 variants, plus a 128 BPM phrase demo) and chose variant A for every scene ('効果音はAがいいね')",
   "assets": {
     "files": "Assets/Sounds/CrimsonFoundry/Scarlet{Foretell,CrossflowCharge,CrossflowRelease,Impact,StackSummon,StackSuccess,StackFail,SpreadSummon,SpreadSuccess,SpreadFail,ActChange,Sacrifice,Victory,Down,Revive,Ready}.ogg: 48 kHz stereo Vorbis, 0.45-2.4 s",

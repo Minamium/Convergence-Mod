@@ -27,7 +27,7 @@ public sealed class AzureBoss : ModNPC
         NPC.damage = 0; NPC.knockBackResist = 0; NPC.aiStyle = -1;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.netAlways = true;
         NPC.dontTakeDamage = true; NPC.boss = true; NPC.BossBar = ModContent.GetInstance<AzureBossBar>();
-        if (!Main.dedServ) { NPC.HitSound = SoundID.NPCHit5; Music = 0; }
+        if (!Main.dedServ) Music = 0; // hit sounds: Client AzureActorVisuals.HitEffect
     }
     public override void OnSpawn(IEntitySource source)
     { if (source is AzureActorSource a) { Runtime = a.Runtime; State = a.State; } }
@@ -77,7 +77,6 @@ public sealed class AzureWorm : ModNPC
         NPC.damage = AzureRules.NativeSourceDamage(360); NPC.knockBackResist = 0; NPC.aiStyle = -1;
         NPC.noGravity = NPC.noTileCollide = NPC.lavaImmune = NPC.netAlways = true;
         NPC.dontTakeDamage = true; NPC.BossBar = ModContent.GetInstance<AzureBossBar>();
-        if (!Main.dedServ) NPC.HitSound = SoundID.NPCHit4;
     }
     public override void OnSpawn(IEntitySource source)
     {

@@ -96,8 +96,9 @@ internal static partial class Program
         foreach (var technique in Enum.GetValues<CrimsonTechnique>())
         {
             // A walking safe place (corridor, quarters) moves every beat: judge each pair of
-            // consecutive notes there; the signature tests prove the walk itself.
-            int window = CrimsonSignatureMoves.IsSignatureMove(technique) ? 2 : 3;
+            // consecutive notes there; the rope's two combs never share a safe height, so each note
+            // alone. The signature tests prove the walk itself.
+            int window = technique == CrimsonTechnique.ShroudRope ? 1 : CrimsonSignatureMoves.IsSignatureMove(technique) ? 2 : 3;
             for (int first = 0; first + window <= 3; first++)
             {
                 bool found = false;

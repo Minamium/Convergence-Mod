@@ -7,18 +7,26 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 // replaces the four basic notes with the Act's own physical trick and keeps the seal crossflow
 // as its fifth note. Terraria-free: the server collides these exact capsules, clients draw them.
 //
+// Fairness model (the tests simulate it): a forecast is visible for one beat (28 ticks) and the player
+// reacts only to what is shown. BASE mobility is Terraria's run (0.08 px/tick^2 up to 3 px/tick) with
+// the field's flight (gravity 0.4, and Lerp(vy, -12, .18) while jump is held; wings never run out).
+// ENDGAME mobility is 0.2 px/tick^2 up to 6 px/tick. Curtain and rope are meant for BASE; the hands
+// (like the basic beams) assume ENDGAME horizontal mobility.
+//
 //   Act I   CinderCurtain  a 2,560 px curtain of fire in ten columns; every eligible member gets a
-//                           768 px (three column) corridor that walks one column per beat away from
-//                           the column they stood in (its leading end), so that column is safe for
-//                           three notes. The columns occupied at scheduling travel as a bit mask in
-//                           Target; the safe columns of a note are the union of the corridors, so a
-//                           crowd may leave little or nothing burning. Consecutive corridors share 512 px.
-//   Act II  ShroudRope     a full-width cut that alternates a low (jump it) and a high (170 px up,
-//                           an ordinary jump clears it) height on every beat.
+//                           1,024 px (four column) corridor that walks one column per beat away from
+//                           the column they stood in. That column keeps one column of margin on the
+//                           side the walk heads for and is safe for three notes (all four against a
+//                           wall, where the corridor stays put). The columns occupied at scheduling
+//                           travel as a bit mask in Target; the safe columns of a note are the union
+//                           of the corridors, so a crowd leaves less burning. At most six columns burn.
+//   Act II  ShroudRope     a five-line staff crossing the whole field from alternating sides: even
+//                           notes and odd notes are two combs 112 px apart. Grounded players are hit
+//                           on even beats and safe on odd beats; flying higher is never permanently
+//                           safe, because the other comb covers every height the first one spares.
 //   Act III FourHands      the field is four 640 px quarters; two are slammed per beat and two are
 //                           left safe. Consecutive beats always share a safe quarter. A slammed
-//                           quarter is three upright fingers with 63 px gaps, so a body caught in
-//                           one can step into a gap (at most 85 px) within the one-beat forecast.
+//                           quarter is three upright fingers with 93 px gaps.
 internal static class CrimsonSignatureMoves
 {
     internal const int Cadence = 3, MaximumStrokes = 10;
@@ -26,23 +34,25 @@ internal static class CrimsonSignatureMoves
     internal const int RopeLiveTicks = CrimsonSpatialCuts.LiveTicks, RopeResidueTicks = CrimsonSpatialCuts.ResidueTicks;
     internal const int HandsLiveTicks = 16, HandsResidueTicks = 24, HandsReachTicks = 3;
 
-    // Curtain: columns are exactly 256 px so the corridor edges sit on column bounds. Blocked columns
-    // overlap their blocked neighbour by Join px (no hidden sliver); the two columns that touch the
-    // corridor stay at exactly half a column so the corridor is never narrowed. Seven columns burn.
-    internal const int CurtainColumns = 10, CurtainCorridorColumns = 3;
+    // Curtain: columns are exactly 256 px so the corridor edges sit on column bounds. Burning columns
+    // overlap their burning neighbour by Join px (no hidden sliver); a burning column that touches a safe
+    // column stays at exactly half a column so a corridor is never narrowed. At most six columns burn.
+    internal const int CurtainColumns = 10, CurtainCorridorColumns = 4;
     internal const float ColumnWidth = 256, CurtainJoin = 2;
 
-    // Rope: heights above the support surface (field Bottom). A standing player (42 tall) is hit by
-    // the low cut and clears the high one by 118 px; feet risen 37..117 px (an ordinary full jump
-    // reaches about 106) clear both, and only a rise of 118..180 px meets the high cut.
-    internal const float RopeRadius = 10, RopeLowHeight = 26, RopeHighHeight = 170;
+    // Rope: two combs of five horizontal lines, 224 px apart within a comb and 112 px apart between
+    // combs, radius 36. The first (even) line spans the floor surface upward (centre 36, edge at 0);
+    // the odd comb sits 112 px higher and its top line reaches the field ceiling (1008..1080 against a
+    // body that can rise to 1078), so no height is ever safe on both beats: the free gap between a line
+    // of one comb and its neighbour in the other is 40 px, less than the 42 px body.
+    internal const int RopeLines = 5;
+    internal const float RopeRadius = 36, RopeBase = 36, RopeLineSpacing = 224, RopeCombShift = 112;
 
-    // Hands: three upright fingers (radius 75, spacing 213) per slammed quarter. The 63 px gaps between
-    // them (64 px across a quarter boundary, 32 px against a field wall) admit a 20 px body, and the
-    // farthest a body has to move from the middle of a finger to a clear spot is 85 px. The fingers span
-    // +/-288 px about the quarter centre, 32 px inside its edges.
+    // Hands: three upright fingers (radius 60, spacing 213) per slammed quarter. The 93 px gaps between
+    // them (94 px across a quarter boundary, 47 px against a field wall) admit a 20 px body. The fingers
+    // span +/-273 px about the quarter centre, 47 px inside its edges.
     internal const int HandsQuarters = 4, HandsClaws = 3;
-    internal const float QuarterWidth = 640, ClawRadius = 75, ClawSpacing = 213;
+    internal const float QuarterWidth = 640, ClawRadius = 60, ClawSpacing = 213;
     // Strike pairs per note, ordered so that the two safe quarters of one beat and the next always
     // share a quarter: safe {1,3} {1,2} {0,2} {0,3}.
     private static readonly byte[][] Pairs = { new byte[] { 0, 2 }, new byte[] { 0, 3 }, new byte[] { 1, 3 }, new byte[] { 1, 2 } };
@@ -92,10 +102,13 @@ internal static class CrimsonSignatureMoves
         => target.Y == 0 && target.X >= 1 && target.X <= MaximumCurtainMask && target.X == MathF.Floor(target.X);
     internal static int CurtainMask(in CrimsonGesturePlan p) => (int)p.Target.X;
     // The walk of a phrase for a member standing in `column`: first corridor's left column and direction
-    // (+1 right, -1 left). The member's column is the corridor's LEADING end, so the walk heads away
-    // from it and the column stays safe for the first three notes. Right on even signature ordinals
-    // (serial / 3), left on odd ones; the other way when the preferred walk does not fit the field. Near
-    // a wall neither fits: walk away from the nearer wall with the first corridor clamped against it.
+    // (+1 right, -1 left). The walk heads away from the member's column and the corridor keeps one column
+    // of margin on that side, so the column stays safe for the first three notes: a right walk is
+    // [o-2..o+1] [o-1..o+2] [o..o+3] [o+1..o+4], a left walk [o-1..o+2] [o-2..o+1] [o-3..o] [o-4..o-1].
+    // Right on even signature ordinals (serial / 3), left on odd ones; the other way when the preferred
+    // walk does not fit the field. Near a wall neither fits: the walk turns toward the NEARER wall and
+    // every note's corridor is clamped against it, so it slides in and stays (columns 0 and 1 get
+    // [0..3] on all four notes, columns 8 and 9 get [6..9]).
     internal static (int Start, int Direction) CurtainWalk(int column, int phrase)
     {
         int last = CurtainColumns - CurtainCorridorColumns, steps = CrimsonChoreography.BasicNotes - 1;
@@ -103,10 +116,10 @@ internal static class CrimsonSignatureMoves
         int preferred = phrase / Cadence % 2 == 0 ? 1 : -1;
         if (Fits(preferred)) return (Start(preferred), preferred);
         if (Fits(-preferred)) return (Start(-preferred), -preferred);
-        int away = column < CurtainColumns / 2 ? 1 : -1;
-        return (Math.Clamp(Start(away), 0, last), away);
+        int toward = column < CurtainColumns / 2 ? -1 : 1;
+        return (Start(toward), toward); // the per-note clamp in CurtainCorridor slides it against the wall
 
-        int Start(int direction) => direction > 0 ? column - (CurtainCorridorColumns - 1) : column;
+        int Start(int direction) => direction > 0 ? column - (CurtainCorridorColumns - 2) : column - 1;
         bool Fits(int direction)
         {
             int start = Start(direction), end = start + steps * direction;
@@ -128,9 +141,30 @@ internal static class CrimsonSignatureMoves
             if ((mask >> column & 1) != 0) safe |= corridor << CurtainCorridor(column, phrase, note);
         return safe;
     }
+    // Columns that burn on this note (a full crowd may leave none).
+    internal static int CurtainBurning(in CrimsonGesturePlan p)
+        => CurtainColumns - System.Numerics.BitOperations.PopCount((uint)CurtainSafe(CurtainMask(p), p.Phrase, p.Pulse));
+    // Where the strike is felt and heard: the burning column nearest to referenceX (the local player),
+    // at mid-height; the field centre when nothing burns.
+    internal static CrimsonPoint CurtainImpact(in CrimsonGesturePlan p, float referenceX)
+    {
+        var f = p.Field;
+        int safe = CurtainSafe(CurtainMask(p), p.Phrase, p.Pulse);
+        float best = float.MaxValue, bestX = f.CenterX;
+        for (int column = 0; column < CurtainColumns; column++)
+        {
+            if ((safe >> column & 1) != 0) continue;
+            float x = f.Left + ColumnWidth * (column + .5f), distance = MathF.Abs(x - referenceX);
+            if (distance < best) { best = distance; bestX = x; }
+        }
+        return new(bestX, f.CenterY);
+    }
 
-    internal static float RopeY(RaidFieldGeometry field, int note)
-        => field.Bottom - (RopeIsLow(note) ? RopeLowHeight : RopeHighHeight);
+    // Height above the support surface of line `line` (0..4, bottom to top) of a note: even notes use
+    // the lower comb, odd notes the comb 112 px higher.
+    internal static float RopeHeight(int note, int line)
+        => RopeBase + line * RopeLineSpacing + (RopeIsLow(note) ? 0 : RopeCombShift);
+    internal static float RopeY(RaidFieldGeometry field, int note, int line) => field.Bottom - RopeHeight(note, line);
     internal static bool RopeIsLow(int note) => (note & 1) == 0;
 
     // The two quarters (0 = leftmost) a note slams. The labels rotate with the signature ordinal so
@@ -174,9 +208,12 @@ internal static class CrimsonSignatureMoves
             {
                 float reach = forecast ? 1 : CrimsonSpatialCuts.Reach(age - p.Fire);
                 if (reach <= 0) return 0;
-                float y = RopeY(f, p.Pulse);
                 bool rightward = (p.Pulse & 1) == 0;
-                Add(output, ref count, new(rightward ? f.Left : f.Right, y), new(rightward ? f.Right : f.Left, y), reach, RopeRadius);
+                for (int line = 0; line < RopeLines; line++)
+                {
+                    float y = RopeY(f, p.Pulse, line);
+                    Add(output, ref count, new(rightward ? f.Left : f.Right, y), new(rightward ? f.Right : f.Left, y), reach, RopeRadius);
+                }
                 break;
             }
             case CrimsonTechnique.FourHands:
