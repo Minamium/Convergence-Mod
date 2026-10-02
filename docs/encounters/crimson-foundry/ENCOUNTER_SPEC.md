@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-09-28
+last_reviewed: 2026-10-02
 source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -30,7 +30,7 @@ This specification supersedes the simultaneous-three-apparition prototype and th
 
 ## Party, preparation and authority
 
-Use Scarlet Grimoire on the existing Foundation Core. Theater Doll still selects the separate Doll Raid. Server-held-item/range/world/lease validation, server-wide 1–8-player preparation, manual Ready and a frozen roster with connection tokens remain. A roster change resets Ready. No fake participants, autonomous companion substitution, new world generation or automatic rejoin is added. Scarlet uses ordinary player death; no Doll Down/revival pipeline is introduced. The 160×70-tile grounded field, containment/lift and natural-spawn suppression remain.
+Use Scarlet Grimoire on the existing Foundation Core. Theater Doll still selects the separate Doll Raid. Server-held-item/range/world/lease validation, server-wide 1–8-player preparation, manual Ready and a frozen roster with connection tokens remain. A roster change resets Ready. No fake participants, autonomous companion substitution, new world generation or automatic rejoin is added. Falling in combat uses [Down and instant recovery](#down-and-instant-recovery), not ordinary death. The 160×70-tile grounded field, containment/lift and natural-spawn suppression remain.
 
 The Doll attendant is only visible when the exact Doll Encounter/Fight/preparation and pedestal position match. A generic protected pedestal does not summon her. Scarlet spawn, AI and draw do not acquire ownership of the Doll preparation actor.
 
@@ -60,7 +60,7 @@ Final uses540 protected ticks. Three child seals at top/lower-right/lower-left v
 
 The giant retains a1HP lethal floor until the **first Final action cycle** is finished. The floor then releases; no automatic death is invented. Attack-source activity remains distinct from `dontTakeDamage`, so the held giant keeps performing and the boss bar stays present.
 
-Victory requires completed sacrifice plus the giant's defeat; the sacrifice itself is not Victory. An observed all-player wipe wins over a simultaneous clear. Unexpected missing actors invalidate the encounter, whereas the explicit sacrifice is an owned retirement. Phase changes/source deaths/teardown retire exact-Fight hazards and chorus markers; a resolved failure marker may retain its harmless48-tick visual tail through Defeat. Phase, epoch, health and completed-cycle projections reject rollback; gameplay decisions remain server/SP-owned.
+Victory requires completed sacrifice plus the giant's defeat; the sacrifice itself is not Victory. An observed all-player wipe wins over a simultaneous clear. Unexpected missing actors invalidate the encounter, whereas the explicit sacrifice is an owned retirement. A 15-minute safety cap cancels a stalled encounter but never overrides an already committed Victory/Defeat ending. Phase changes/source deaths/teardown retire exact-Fight hazards and chorus markers; a resolved failure marker may retain its harmless48-tick visual tail through Defeat. Phase, epoch, health and completed-cycle projections reject rollback; gameplay decisions remain server/SP-owned.
 
 ### Temporary rehearsal tuning
 
@@ -72,7 +72,7 @@ Victory requires completed sacrifice plus the giant's defeat; the sacrifice itse
 
 Scarlet uses the same `Common/Raids/Revive/RaidReviveService` instant-unlimited policy as Doll, with its own exact-Fight native adapter. An accepted native lethal/floor hit makes a participant Down at1HP, held at their in-field position even in midair; Down cannot move, attack, be targeted or satisfy a chorus assignment. Merely starting at1HP does not Down. Ordinary damage still goes through Terraria; the receiving player's bounded generation-tagged floor receipt is committed by the server, never a client-authored heal or target.
 
-Ready acceptance supplies the reusable **Resuscitation Kit** if missing. A standing ally can use it within8tiles for instant35%HP recovery and3seconds of immunity. No consumption or shared tokens. The recipient cannot be revived again for60seconds; a subsequent Down waits without an Eliminated state or timeout. All retained connected participants Down/disconnected means Defeat (also in solo). Success/cancel/invalidated/world exit clear the binding, locks and controls; Defeat clears the interceptor before ordinary death. God Mode is not bypassed.
+Ready acceptance supplies the reusable **Resuscitation Kit** if missing. A standing ally can use it within8tiles for instant35%HP recovery and3seconds of immunity. No consumption or shared tokens. The recipient cannot be revived again for60seconds; a subsequent Down waits without an Eliminated state or timeout. All retained connected participants Down/disconnected means Defeat (also in solo). While every retained member is Down or still inside the disconnect grace, new phrases and choruses simply wait; a missing standing target never fails the fight. Success/cancel/invalidated/world exit clear the binding, locks and controls; Defeat clears the interceptor before ordinary death. God Mode is not bypassed.
 
 Clients share the frozen slot/connection roster and monotone recovery generations. Phase changes do not reset recovery. The common feature route sends Ready/recovery and retains a full actor projection for terminal/far-player delivery. [ADR amendment](../../adr/0026-crimson-score-and-native-projectiles.md#2026-09-27-scarlet-downrecovery-and-debug-damage-protocol70) owns the native authority boundary.
 

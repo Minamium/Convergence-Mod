@@ -105,7 +105,8 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         if (actor is null || !actor.NPC.active || actor.NPC.ModNPC != actor) return End(EncounterEndReason.EncounterActorMissing);
         if (!pedestal.IsOwned(fight)) return End(EncounterEndReason.Invalidated);
         age++;
-        if (cancelled || age > 60 * 60 * 15) return End(EncounterEndReason.Cancelled);
+        // The safety cap never overrides an already committed Victory/Defeat ending.
+        if (cancelled || ending < 0 && age > 60 * 60 * 15) return End(EncounterEndReason.Cancelled);
         if (context.Lifecycle == EncounterLifecycle.Preparing)
         {
             if (!RefreshRoster()) return End(EncounterEndReason.Invalidated);
@@ -177,7 +178,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                 if (phase < 3 && thresholdLatched && summons[phase] is { } retired) AdvancePhase(retired);
                 else { nextPhrase = age; Project(true); }
             }
-            if (!cycle.Full && age >= nextPhrase && stage is CrimsonStage.Countdown or CrimsonStage.Performance)
+            if (!cycle.Full && age >= nextPhrase && stage is CrimsonStage.Countdown or CrimsonStage.Performance && HasStandingMember())
                 if (!TryScheduleChorus()) SchedulePhrase();
         }
         if (age % 300 == 0)
@@ -311,6 +312,10 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             if (Math.Abs(npc.velocity.X) > .5f) npc.spriteDirection = npc.velocity.X < 0 ? -1 : 1;
         }
     }
+    // While everyone is Down or inside the disconnect grace, admission waits for a revive or the
+    // recovery service's all-Down verdict instead of failing the fight for want of a target.
+    private bool HasStandingMember()
+        => Array.Exists(members, m => !m.Out && !m.Recovery.Downed && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
     private void SchedulePhrase()
     {
         if (actor is null || cycle.Full) return;

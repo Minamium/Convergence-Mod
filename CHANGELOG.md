@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+- Fix two Scarlet Invocation endings: the 15-minute safety cap no longer turns an already won or lost fight into a cancellation, and when every member is Down (or one is still inside the disconnect grace) new attacks wait for a revive instead of ending the raid with an internal error. Gameplay, timings and protocol are unchanged.
+
 - Polish Waltz of the Ebon Manor: AutoMatador now loops long stretches of the song with natural joins at its own repeats; attack warnings are quieter (a soft silk veil or a single strung thread instead of crisp lines and nets); damaging threads glow as razor silk with a white-hot core, bloom, flowing glints, an ignition and a fray. Hitboxes and timings are unchanged.
 
 - Rebuild Ghost Samurai's field as the seal its mourning bell raises: the edge is a still indigo line with violet spirit fire climbing its outer face, pasted talismans and turning corner seals; outside is an opaque abyss instead of flat black, with a dark lake under the floor that mirrors the field; inside is a parallax night with a phase-linked eclipse, ridges, graves and spears planted on the real floor and distant lightning from Phase 2. The seal traces itself from the summoner's feet, ripples where you press against it, stays through the victory dissolve and then burns and melts away; fallen players keep watching inside it and onlookers see the seal from outside. Daylight inside is capped to moonlight. Bounds, hazards and protocol are unchanged.

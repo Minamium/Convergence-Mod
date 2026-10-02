@@ -33,6 +33,12 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('boss.State.BarLife',bar)
         self.assertIn('boss.State.BarMax',bar)
         self.assertNotIn('override bool PreDraw',bar)
+    def test_terminal_endings_survive_the_cap_and_downed_rosters_wait(self):
+        text=(CONTENT/'CrimsonRuntime.cs').read_text()
+        self.assertIn('cancelled || ending < 0 && age > 60 * 60 * 15',text)
+        self.assertIn('stage is CrimsonStage.Countdown or CrimsonStage.Performance && HasStandingMember()',text)
+        helper=text[text.index('private bool HasStandingMember()'):text.index('private void SchedulePhrase()')]
+        self.assertIn('!m.Out && !m.Recovery.Downed',helper)
     def test_runtime_owns_full_cycle_and_resolves_chorus_before_advancement(self):
         text=(CONTENT/'CrimsonRuntime.cs').read_text()
         self.assertIn('CrimsonChoreography.Create',text)
