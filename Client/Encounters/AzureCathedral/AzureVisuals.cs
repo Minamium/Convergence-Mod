@@ -7,6 +7,7 @@ using Convergence.Content.Encounters.AzureCathedral;
 using Luminance.Assets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Utilities;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -26,12 +27,22 @@ public sealed class AzureVisualConfig : ModConfig
 [Autoload(Side = ModSide.Client)]
 internal sealed class AzureVisuals : ModSystem
 {
-    private Guid fight;
-    private int previous = -1, lastCharge = -1, lastFire = -1, lastDash = -1, lastChorus=-1, lastVerdict=-1, lastAzureSound=-10000;
+    // Clock keys beyond the AzureCue values: screen shakes (at the picture event, not the sound), voice stops, verdicts.
+    private const int ShakeKey = 100, StopKey = 160, VerdictKey = 170;
+    private const int StopStaging = 0, StopDevour = 1, StopEnd = 2;
+    private static readonly float[] ChorusPitch = { 0f, .25f, .583f };
     private float shake;
     private Matrix worldToViewport;
     private Guid projectedFight;
-    private readonly List<ReLogic.Utilities.SlotId> voices = new();
+    private readonly AzureCueClock clock = new();
+    private readonly AzureVoices voices = new();
+    private readonly int[] lastPlayed = new int[(int)AzureCue.Count];
+    private readonly Dictionary<byte, (uint Revision, bool Downed)> recovery = new();
+    private readonly Dictionary<int, int> latticeEnd = new();
+    private bool lastTerminal, beamLive;
+    private int beamKey = -1, beamEnd, girlAliveAt;
+    private SlotId beam = SlotId.Invalid;
+    private Vector2 beamCenter;
     private static int lastTick;
     private static long received;
     internal static bool Reduced => ModContent.GetInstance<AzureVisualConfig>().ReducedEffects;
@@ -42,101 +53,313 @@ internal sealed class AzureVisuals : ModSystem
         if (lastTick != tick) { lastTick = tick; received = Stopwatch.GetTimestamp(); }
         return tick + (Main.gamePaused ? 0 : (float)Math.Clamp((Stopwatch.GetTimestamp()-received)/(double)Stopwatch.Frequency*60,0,1));
     }
+    public AzureVisuals() => Array.Fill(lastPlayed, int.MinValue / 2);
     public override void PostUpdateEverything()
     {
+        if (Main.dedServ) return;
+        // Followers and fades keep running when there is no Boss, so a natural end can release its tails.
+        voices.Tick();
         var girl = AzurePackets.Boss;
-        if (girl is null || !girl.Fresh || !Local(girl)) { Reset(); return; }
+        // No Boss after a terminal state is the natural end: Victory/Defeat tails play out. Anything else is unexpected.
+        if (girl is null) { Withdraw(lastTerminal ? 0 : 10); return; }
+        // A stale or non-roster view keeps the clock (no replay when it returns); only the voices are lowered,
+        // except after the result, whose Victory/Defeat tails are left to play out.
+        if (!girl.Fresh || !Local(girl)) { Withdraw(lastTerminal ? 0 : 10); return; }
+        var s = girl.State;
         int age = (int)girl.VisualAge;
         ModContent.GetInstance<AzureMusicScene>().UpdateFade(girl);
-        if (fight != girl.State.Fight) { Reset(); fight = girl.State.Fight; previous = age - 1; }
+        bool first = clock.Advance(s.Fight, age);
+        if (first) BeginFight();
+        lastTerminal = s.EndAt >= 0;
         shake *= .85f;
-        if(girl.State.MusicStart>=0)
-        {
-            CueAt(girl.State.MusicStart+AzureRules.IceBreak,"PhaseRupture",.44f,9);
-            if(Crossed(girl.State.MusicStart+AzureRules.IceBreak)) PlayAzure("IceBreak",.56f,age,0);
-            CueAt(girl.State.MusicStart+AzureRules.SwordLight,"Beams/PortalFire",.50f,5);
-            CueAt(girl.State.MusicStart+AzureRules.WormArrival,"PhaseRupture",.45f,8);
-            if(Crossed(girl.State.MusicStart+AzureRules.WormArrival)) PlayAzure("GlassArrival",.48f,age,0);
-        }
-        if (girl.State.EndAt >= 0)
-        {
-            if(girl.State.Stage==AzureStage.Victory)
-            {
-                CueAt(girl.State.EndAt+AzureRules.MeltRush,"Beams/PortalCharge",.38f,3);
-                CueAt(girl.State.EndAt+AzureRules.MeltContact,"PhaseRupture",.48f,8);
-                if(Crossed(girl.State.EndAt+AzureRules.MeltContact)) PlayAzure("ChainMelt",.43f,age,0);
-                CueAt(girl.State.EndAt+AzureRules.VictoryCue,"RaidVictory",.45f,4);
-            }
-            else CueAt(girl.State.EndAt,"RaidDefeat",.45f,9);
-        }
-        if(girl.State.Phase==AzurePhase.Devouring)
-        {
-            CueAt(girl.State.PhaseAt,"StackSummon",.45f,3);
-            CueAt(girl.State.PhaseAt+AzureRules.DevourRush,"Beams/PortalFire",.56f,5);
-            CueAt(girl.State.PhaseAt+AzureRules.DevourContact,"PhaseRupture",.53f,10);
-            if(Crossed(girl.State.PhaseAt+AzureRules.DevourContact)) PlayAzure("DevourFracture",.56f,age,0);
-        }
-        if(girl.State.Phase==AzurePhase.Fury)CueAt(girl.State.PhaseAt,"Beams/PortalFire",.57f,8);
+        Ceremony(girl, s, first);
+        Recovery(s);
+        beamLive = false;
+        latticeEnd.Clear();
         foreach (Projectile p in Main.ActiveProjectiles)
         {
-            if(p.ModProjectile is AzureChorus m && m.Plan.Fight==fight)
-            {
-                if(lastChorus!=m.Plan.Born && Crossed(m.Plan.Born))
-                {lastChorus=m.Plan.Born;Play(m.Plan.Kind==AzureChorusKind.Stack?"StackSummon":"SpreadSummon",.44f,.14f);}
-                // Verdict can arrive after its scheduled fire tick on a client.
-                // Play once on receipt inside the visual recovery, not only at a
-                // tick crossing that may have preceded the authoritative packet.
-                if(m.Resolved && lastVerdict!=m.Plan.Fire && age>=m.Plan.Fire && age<m.Plan.End)
-                {lastVerdict=m.Plan.Fire;Play(m.Plan.Kind==AzureChorusKind.Stack?"StackRelease":"SpreadRelease",.48f,.10f);shake=Math.Max(shake,m.FailedMask==0?3:8);}
-            }
-            if (p.ModProjectile is not AzureAttack a || a.Plan.Fight != fight) continue;
-            if (a.Plan.Born != lastCharge && Crossed(a.Plan.Born))
-            {
-                lastCharge=a.Plan.Born;
-                Play(a.Plan.Kind==AzureAttackKind.GlacialCut?"Beams/ChargeLock":"Beams/PortalCharge",.36f,.22f);
-                if(a.Plan.Kind!=AzureAttackKind.FrostBolt) PlayAzure("CrystalCharge",.35f,age,14);
-            }
-            if (a.Plan.Fire != lastFire && Crossed(a.Plan.Fire))
-            {
-                lastFire=a.Plan.Fire;
-                bool cut=a.Plan.Kind==AzureAttackKind.GlacialCut,energy=a.Plan.Kind is AzureAttackKind.MouthBeam or AzureAttackKind.FrostBolt;
-                Play(cut?"Beams/ChargeRush":energy?"Beams/PortalFire":"CoreHit",cut?.60f:energy?.62f:.50f,.20f);
-                if(a.Plan.Kind!=AzureAttackKind.FrostBolt) PlayAzure("CrystalCut",.43f,age,10);
-                shake=Math.Max(shake,a.Plan.Kind==AzureAttackKind.MouthBeam?7:cut?4.8f:2.2f);
-            }
+            if (p.ModProjectile is AzureChorus marker) { if (marker.Plan.Fight == s.Fight) Chorus(s, marker, age); continue; }
+            if (p.ModProjectile is AzureAttack attack && attack.Plan.Fight == s.Fight) Attack(girl, s, p, attack, age);
         }
-        if (girl.State.Live && girl.State.WormLife>0 && (AzureRules.ChargePhrase(AzureRules.Phrase(age,girl.State.AttackEpoch)) || girl.State.Enraged && AzureRules.ChorusPhrase(AzureRules.Phrase(age,girl.State.AttackEpoch))))
+        foreach (var line in latticeEnd) Cue(AzureCue.LatticeEnd, line.Key, line.Value + AzureCueRules.LatticeEndDelay);
+        // The beam ending on its own (End) lets the 3s sweep finish; a beam removed early (Liora fell) fades it.
+        if (beam.IsValid && !beamLive) { if (age < beamEnd) voices.Fade(beam, 8); beam = SlotId.Invalid; }
+        Rush(girl, s, age);
+    }
+
+    private void Withdraw(int ticks)
+    {
+        voices.Leave(ticks);
+        projectedFight = Guid.Empty;
+        shake = 0;
+    }
+
+    private void BeginFight()
+    {
+        recovery.Clear(); latticeEnd.Clear();
+        beamKey = -1; beam = SlotId.Invalid; beamLive = false;
+        lastTerminal = false; shake = 0;
+        girlAliveAt = clock.High;
+    }
+
+    // Intro, phases and ending. Sound ticks lead their picture event so the peak of each sound lands on it;
+    // the screen shake stays on the picture event.
+    private void Ceremony(AzureBoss girl, AzureState s, bool first)
+    {
+        Vector2 liora = girl.NPC.Center;
+        if (s.MusicStart >= 0)
         {
-            int t = AzureRules.Clock(age,girl.State.AttackEpoch);
-            int serial = (age-girl.State.AttackEpoch)/AzureRules.ChargeTicks;
-            if (t%AzureRules.ChargeTicks>=AzureRules.ChargeWarning && t%AzureRules.ChargeTicks<AzureRules.ChargeWarning+5 && serial!=lastDash)
-            { lastDash=serial;Play("Beams/PortalFire",.52f,-.14f);PlayAzure("WormRush",.44f,age,12);shake=6; }
+            int m = s.MusicStart;
+            Vector2 rift = Rift(s);
+            Cue(AzureCue.PrisonBreak, m, m + AzureCueRules.PrisonBreak, liora);
+            Cue(AzureCue.SwordLight, m, m + AzureCueRules.SwordLight, liora);
+            Cue(AzureCue.RiftOpen, m, m + AzureCueRules.RiftOpen, rift);
+            Cue(AzureCue.WormArrival, m, m + AzureCueRules.WormArrival, rift);
+            Shake(0, m, m + AzureRules.IceBreak, 9);
+            Shake(1, m, m + AzureRules.SwordLight, 5);
+            Shake(2, m, m + AzureRules.WormArrival, 8);
         }
-        for (int i=voices.Count-1;i>=0;i--) if (!SoundEngine.TryGetActiveSound(voices[i],out _)) voices.RemoveAt(i);
-        previous=age;
-        bool Crossed(int tick)=>tick>=0 && previous<tick && age>=tick && age-tick<8;
-        void CueAt(int tick,string sound,float volume,float intensity) { if(Crossed(tick)){Play(sound,volume,0);shake=Math.Max(shake,intensity);} }
+        // Liora's HP reaching 0 has no tick of its own: it sounds on the frame it is first received.
+        // Already 0 on the first frame of a Fight (late join, reconnect), or first seen more than a second
+        // after she was last seen alive (a replication gap), is only remembered.
+        if (s.GirlLife > 0) girlAliveAt = clock.High;
+        else
+        {
+            if (first || clock.High - girlAliveAt > 60) clock.Baseline((int)AzureCue.LioraFall, 0);
+            else if (clock.Latch((int)AzureCue.LioraFall, 0))
+            {
+                Play(AzureCue.LioraFall, liora);
+                voices.FadeOwned(AzureOwner.Liora, 6); // ClearHazards removed her attacks and the chorus
+            }
+        }
+        if (s.Phase == AzurePhase.Duet && s.StagingAt >= 0 && s.EndAt < 0)
+        {
+            var id = Cue(AzureCue.WormRetreat, s.StagingAt, s.StagingAt, Head(girl) ?? liora);
+            if (id.IsValid) FollowHead(id, AzureCue.WormRetreat, girl, AzureRules.StagingTicks);
+            if (clock.Latch(StopKey + StopStaging, s.StagingAt)) voices.FadeOwned(AzureOwner.Worm, 6); // ClearHazards(FrostBolt)
+        }
+        if (s.Phase == AzurePhase.Devouring)
+        {
+            int p = s.PhaseAt;
+            var rush = Cue(AzureCue.DevourRush, p, p + AzureCueRules.DevourRush, Head(girl) ?? liora);
+            if (rush.IsValid) FollowHead(rush, AzureCue.DevourRush, girl, AzureCueRules.DevourRushLead);
+            Cue(AzureCue.DevourBite, p, p + AzureRules.DevourContact, liora);
+            Shake(7, p, p, 3);
+            Shake(8, p, p + AzureRules.DevourRush, 5);
+            Shake(9, p, p + AzureRules.DevourContact, 10);
+            if (clock.Latch(StopKey + StopDevour, p)) voices.FadeOwned(AzureOwner.Liora | AzureOwner.Worm, 6); // ClearHazards()
+        }
+        if (s.Phase == AzurePhase.Fury)
+        {
+            Cue(AzureCue.FuryAwaken, s.PhaseAt, s.PhaseAt, Head(girl) ?? liora);
+            Shake(10, s.PhaseAt, s.PhaseAt, 8);
+        }
+        if (s.EndAt < 0) return;
+        int e = s.EndAt;
+        if (s.Stage == AzureStage.Victory)
+        {
+            Cue(AzureCue.FinalBlow, e, e, Head(girl) ?? liora);
+            var melt = Cue(AzureCue.MeltRush, e, e + AzureRules.MeltRush, Head(girl) ?? liora);
+            if (melt.IsValid) FollowHead(melt, AzureCue.MeltRush, girl, AzureRules.MeltContact - AzureRules.MeltRush);
+            Cue(AzureCue.MeltContact, e, e + AzureRules.MeltContact, liora);
+            Cue(AzureCue.ChainMelt, e, e + AzureRules.MeltContact);
+            Cue(AzureCue.Victory, e, e + AzureRules.VictoryCue);
+            Shake(3, e, e + AzureRules.MeltRush, 3);
+            Shake(4, e, e + AzureRules.MeltContact, 8);
+            Shake(5, e, e + AzureRules.VictoryCue, 4);
+        }
+        else
+        {
+            Cue(AzureCue.Defeat, e, e);
+            Shake(6, e, e, 9);
+        }
+        if (clock.Latch(StopKey + StopEnd, e)) voices.FadeOwned(AzureOwner.Liora | AzureOwner.Worm, 6); // ClearHazards()
     }
-    private void Play(string cue,float volume,float pitch)
+
+    private void Attack(AzureBoss girl, AzureState s, Projectile projectile, AzureAttack attack, int age)
     {
-        if(voices.Count>=24) return;
-        voices.Add(SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/"+cue){Volume=volume*(Reduced?.75f:1),Pitch=pitch,MaxInstances=3}));
+        var plan = attack.Plan;
+        Vector2 at = new(plan.X, plan.Y);
+        Shake(20 + (int)plan.Kind, plan.Fire, plan.Fire,
+            plan.Kind == AzureAttackKind.MouthBeam ? 7f : plan.Kind == AzureAttackKind.GlacialCut ? 4.8f : 2.2f);
+        // An attack the authority has already cleared (Liora fell, phase ended) no longer announces itself.
+        if (!attack.TryGirl(out _)) return;
+        switch (plan.Kind)
+        {
+            case AzureAttackKind.Icicle:
+                Cue(AzureCue.FanCharge, plan.Born, plan.Born, at);
+                Cue(AzureCue.FanRelease, plan.Fire, plan.Fire, at);
+                break;
+            case AzureAttackKind.GlassRain:
+                Vector2 top = new(s.Field.CenterX, s.Field.Top + 300);
+                Cue(AzureCue.RainCharge, plan.Born, plan.Born, top);
+                Cue(AzureCue.RainRelease, plan.Fire, plan.Fire, top);
+                break;
+            case AzureAttackKind.MouthBeam:
+                Cue(AzureCue.BeamCharge, plan.Born, plan.Born, at);
+                Cue(AzureCue.BeamFire, plan.Born, plan.Fire, at);
+                var sweep = Cue(AzureCue.BeamSweep, plan.Born, plan.Fire, projectile.Center);
+                if (sweep.IsValid)
+                {
+                    beam = sweep; beamKey = plan.Born; beamEnd = plan.End; beamCenter = projectile.Center;
+                    voices.Follow(sweep, () => beamCenter, AzureAudio.Specs[(int)AzureCue.BeamSweep].Reach, plan.End - plan.Fire);
+                }
+                // The sweep lives exactly as long as the beam: if the beam goes away first, the sound is faded out.
+                if (plan.Born == beamKey && age < plan.End) { beamLive = true; beamCenter = projectile.Center; }
+                break;
+            case AzureAttackKind.FrostBolt:
+                // Born is 24 ticks before Fire: the peak of the sound lands on the volley.
+                Cue(AzureCue.MissileVolley, plan.Born, plan.Born);
+                break;
+            case AzureAttackKind.GlacialCut:
+                if (AzureCueRules.IsLatticeLine(plan.Born, plan.Fire))
+                {
+                    // One volley for the whole lattice, one slice per line at its own position, one closing note.
+                    Cue(AzureCue.LatticeVolley, plan.Born, plan.Born + AzureLattice.Warning);
+                    Cue(AzureCue.LatticeSlice, plan.Fire, plan.Fire, at);
+                    latticeEnd[plan.Born] = Math.Max(latticeEnd.TryGetValue(plan.Born, out int last) ? last : 0, plan.Fire);
+                }
+                else
+                {
+                    Cue(AzureCue.CutCharge, plan.Born, plan.Born, at);
+                    Cue(AzureCue.CutRelease, plan.Fire, plan.Fire, at);
+                }
+                break;
+        }
     }
-    private void PlayAzure(string cue,float volume,int age,int minSpacing)
+
+    private void Chorus(AzureState s, AzureChorus marker, int age)
     {
-        if(Main.dedServ || voices.Count>=22 || age-lastAzureSound<minSpacing) return;
-        voices.Add(SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/AzureCathedral/"+cue)
-        {Volume=volume*(Reduced?.65f:1),MaxInstances=1}));
-        lastAzureSound=age;
+        var plan = marker.Plan;
+        bool stack = plan.Kind == AzureChorusKind.Stack;
+        Vector2 center = new(plan.Center.X, plan.Center.Y);
+        if (AzureChorus.TryGirl(plan, out _))
+        {
+            Cue(stack ? AzureCue.StackCall : AzureCue.SpreadCall, plan.Born, plan.Born, center);
+            // Three rising notes before the verdict, each from its own sound file.
+            for (int n = 0; n < AzureCueRules.ChorusTickCount; n++)
+                Cue(AzureCue.ChorusTick, plan.Born * 4 + n, AzureCueRules.ChorusTickAt(plan.Fire, n), null, ChorusPitch[n], 1, n);
+        }
+        // The verdict is replicated and may arrive after its scheduled tick: it sounds once, on receipt.
+        // One that arrives with less than a second left only has the picture's tail, so no sound.
+        if (!marker.Resolved || age < plan.Fire || age >= plan.End - 24 || !clock.Latch(VerdictKey, plan.Born)) return;
+        bool held = marker.FailedMask == 0;
+        AzureCue cue = stack ? held ? AzureCue.StackHold : AzureCue.StackShatter : held ? AzureCue.SpreadFade : AzureCue.SpreadPierce;
+        Vector2? at = center;
+        if (!stack && !held)
+        {
+            int self = Array.FindIndex(s.Members, m => m.Slot == Main.myPlayer);
+            if (self >= 0 && (marker.FailedMask >> self & 1) != 0) at = null; // the piercing is at the listener's own feet
+            else
+                for (int i = 0; i < marker.Positions.Length && i < 8; i++)
+                    if ((marker.FailedMask >> i & 1) != 0) { at = new Vector2(marker.Positions[i].X, marker.Positions[i].Y); break; }
+        }
+        Play(cue, at);
+        shake = Math.Max(shake, held ? 3 : 8);
+        AzurePackets.Log($"event=ChorusHeard fight={plan.Fight} born={plan.Born} kind={plan.Kind} cue={cue} failed_mask={marker.FailedMask} verdict_delay_ticks={age - plan.Fire} observer={Main.myPlayer}");
     }
-    private void Reset()
+
+    // The worm's dash: a warning that comes in from the entrance side, and a pass that follows the head.
+    private void Rush(AzureBoss girl, AzureState s, int age)
     {
-        foreach(var id in voices) if(SoundEngine.TryGetActiveSound(id,out var voice)) voice.Stop();
-        voices.Clear();fight=projectedFight=Guid.Empty;previous=lastCharge=lastFire=lastDash=lastChorus=lastVerdict=-1;lastAzureSound=-10000;shake=0;
+        if (!AzureCueRules.RushActive(s, age)) return; // not while Devouring, nor during a Duet staging
+        int serial = AzureCueRules.RushSerial(age, s.AttackEpoch);
+        int warn = AzureCueRules.RushWarnTick(s.AttackEpoch, serial);
+        var f = s.Field;
+        Vector2 entrance = new(f.CenterX + AzureCueRules.RushSide(serial) * AzureCueRules.RushEntranceReach, f.CenterY);
+        Cue(AzureCue.RushWarn, warn, warn, entrance);
+        var pass = Cue(AzureCue.RushPass, warn, warn + AzureRules.ChargeWarning, Head(girl) ?? entrance);
+        if (pass.IsValid) FollowHead(pass, AzureCue.RushPass, girl, AzureCueRules.RushFollow);
+        Shake(30, warn, warn + AzureRules.ChargeWarning, 6);
     }
-    public override void ClearWorld()=>Reset();
-    public override void OnWorldUnload()=>Reset();
-    public override void Unload()=>Reset();
+
+    // Down and revive come from the replicated recovery revision, the same path in single player and multiplayer.
+    private void Recovery(AzureState s)
+    {
+        bool live = s.Stage is AzureStage.Countdown or AzureStage.Performance;
+        for (int pass = 0; pass < 2; pass++) // the local player first: simultaneous Downs collapse into one cue
+            foreach (var m in s.Members)
+            {
+                bool self = m.Slot == Main.myPlayer;
+                if (self != (pass == 0)) continue;
+                var r = m.Recovery;
+                if (r.Revision == 0) continue;
+                if (!recovery.TryGetValue(m.Slot, out var old)) { recovery[m.Slot] = (r.Revision, r.Downed); continue; } // baseline
+                if (r.Revision <= old.Revision) continue;
+                recovery[m.Slot] = (r.Revision, r.Downed);
+                if (m.Out || !live) continue;
+                Vector2? at = self ? null : Main.player[m.Slot].Center;
+                float scale = self ? 1 : .7f;
+                // A Down that was missed (two revisions at once) is neither a Down nor a revive: stay silent.
+                if (!old.Downed && r.Downed && clock.Latch((int)AzureCue.Downed, m.Slot * 100000 + (int)r.Revision))
+                    Play(AzureCue.Downed, at, 0, scale);
+                else if (old.Downed && !r.Downed && clock.Latch((int)AzureCue.Revived, m.Slot * 100000 + (int)r.Revision))
+                    Play(AzureCue.Revived, at, 0, scale);
+            }
+    }
+
+    private static Vector2 Rift(AzureState s) => new(s.Field.CenterX + 1050, s.Field.CenterY - 280);
+
+    private static Vector2? Head(AzureBoss girl)
+    {
+        var s = girl.State;
+        return s.WormSlot >= 0 && s.WormSlot < Main.maxNPCs
+            && Main.npc[s.WormSlot] is { active: true, ModNPC: AzureWorm head } npc && head.Fight == s.Fight ? npc.Center : null;
+    }
+
+    private void FollowHead(SlotId id, AzureCue cue, AzureBoss girl, int ticks)
+        => voices.Follow(id, () => Head(girl), AzureAudio.Specs[(int)cue].Reach, ticks);
+
+    // A cue on its authority tick, once per Fight and identity (see AzureCueClock).
+    private SlotId Cue(AzureCue cue, int id, int tick, Vector2? source = null, float pitch = 0, float scale = 1, int variant = 0)
+        => clock.Due((int)cue, id, tick, AzureAudio.Specs[(int)cue].Late) ? Play(cue, source, pitch, scale, variant) : SlotId.Invalid;
+
+    private void Shake(int key, int id, int tick, float strength)
+    {
+        if (clock.Due(ShakeKey + key, id, tick, 8)) shake = Math.Max(shake, strength);
+    }
+
+    private SlotId Play(AzureCue cue, Vector2? source = null, float pitch = 0, float scale = 1, int variant = 0, bool track = true)
+    {
+        if (Main.dedServ || Main.gameMenu) return SlotId.Invalid;
+        ref readonly var spec = ref AzureAudio.Specs[(int)cue];
+        int now = (int)Main.GameUpdateCount;
+        int since = now - lastPlayed[(int)cue]; // negative after the update counter restarts: treated as long ago
+        if (spec.MinGap > 0 && since >= 0 && since < spec.MinGap) return SlotId.Invalid;
+        // Decoration is dropped first when many voices are alive; a danger cue only at an absurd count.
+        if (voices.Count >= (spec.Weight == AzureWeight.Detail ? 20 : 48)) return SlotId.Invalid;
+        var style = AzureAudio.Style(cue, variant);
+        style.Volume = spec.Volume * scale * AzureAudio.Scale(spec.Weight);
+        if (pitch != 0) style.Pitch = pitch;
+        Vector2? at = spec.Reach > 0 && source is { } p ? AzureAudio.Anchor(p, spec.Reach) : null;
+        var id = SoundEngine.PlaySound(style, at);
+        if (!id.IsValid) return id;
+        lastPlayed[(int)cue] = now;
+        if (track) voices.Add(id, spec.Owner);
+        return id;
+    }
+
+    // Hit sounds come from a client GlobalNPC (not NPC.HitSound) so they are throttled, positioned and not tied to the Fight clock.
+    internal void Hit(AzureCue cue, Vector2 at)
+    {
+        if (Main.dedServ || Main.gameMenu) return;
+        Play(cue, at, track: false); // 0.2s clip: nothing to follow, fade or release
+    }
+
+    // World change / unload is the only hard stop. A Fight that ends keeps its tails (see Withdraw).
+    private void Clear()
+    {
+        voices.StopAll();
+        clock.Clear();
+        Array.Fill(lastPlayed, int.MinValue / 2);
+        recovery.Clear(); latticeEnd.Clear();
+        projectedFight = Guid.Empty;
+        beamKey = -1; beam = SlotId.Invalid; beamLive = lastTerminal = false;
+        shake = 0;
+    }
+    public override void ClearWorld() => Clear();
+    public override void OnWorldUnload() => Clear();
+    public override void Unload() => Clear();
     public override void ModifyScreenPosition()
     {
         var girl=AzurePackets.Boss;
@@ -215,8 +438,9 @@ internal sealed class AzureVisuals : ModSystem
                         batch.Draw(bloom,at-Main.screenPosition,null,new Color(160,231,255,0)*(forecast?.18f:.4f),0,bloom.Size()*.5f,(forecast?5:8)/bloom.Width,SpriteEffects.None,0);
                     }
             }
-            if(girl.State.WormSlot>=0 && Main.npc[girl.State.WormSlot].ModNPC is AzureWorm worm && girl.State.Live && girl.State.WormLife>0
-                && worm.Fight==girl.State.Fight && (AzureRules.ChargePhrase(AzureRules.Phrase((int)age,girl.State.AttackEpoch)) || girl.State.Enraged && AzureRules.ChorusPhrase(AzureRules.Phrase((int)age,girl.State.AttackEpoch))))
+            // The same condition as the rush sound: no forecast while Devouring or during a Duet staging.
+            if(girl.State.WormSlot>=0 && Main.npc[girl.State.WormSlot].ModNPC is AzureWorm worm && worm.Fight==girl.State.Fight
+                && AzureCueRules.RushActive(girl.State,(int)age))
             {
                 int dash=AzureRules.Clock((int)age,girl.State.AttackEpoch)%AzureRules.ChargeTicks;
                 if(dash<AzureRules.ChargeWarning)
@@ -302,6 +526,14 @@ internal sealed class AzureVisuals : ModSystem
 internal sealed class AzureActorVisuals : GlobalNPC
 {
     public override bool AppliesToEntity(NPC n,bool lateInstantiation)=>n.ModNPC is AzureBoss or AzureWorm;
+    // Not NPC.HitSound: the Fury chain has 45 hittable segments, so hit sounds are throttled, positioned and
+    // variant-chosen by AzureVisuals. HitEffect runs on every client for a struck NPC and never on a dedicated server.
+    public override void HitEffect(NPC npc,NPC.HitInfo hit)
+    {
+        if(Main.dedServ || Main.gameMenu)return;
+        if(npc.ModNPC is AzureBoss)ModContent.GetInstance<AzureVisuals>().Hit(AzureCue.LioraHit,npc.Center);
+        else if(npc.ModNPC is AzureWorm)ModContent.GetInstance<AzureVisuals>().Hit(AzureCue.WormHit,npc.Center);
+    }
     public override bool PreDraw(NPC npc,SpriteBatch batch,Vector2 screen,Color drawColor)
     {
         if(npc.ModNPC is AzureWorm)return false;
