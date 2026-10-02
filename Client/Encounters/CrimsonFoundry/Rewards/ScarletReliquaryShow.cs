@@ -41,14 +41,15 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
     private static int opened;
 
     // Delivered parts (SR01P_c, one lattice; tools/export_scarlet_reward_art.py), in texels from the body's top-left:
-    // the lid's top-left where it closes over the velvet, its rear hinge (bottom-left corner) in lid texels, the seal's
-    // top-left on the ring recess, and the mouth (the velvet's centre row).
-    private static readonly Vector2 FinalLidAt = new(-1, -7), FinalHinge = new(0, 13), FinalSealAt = new(8, 5);
+    // the lid's top-left where it closes centred across the body's rim over the velvet, its rear hinge in lid texels
+    // (the left-most corner of its bottom edge that rests on the body's top-left corner, so the opening lid stays on the
+    // body), the seal's top-left on the ring recess, and the mouth (the velvet's centre row).
+    private static readonly Vector2 FinalLidAt = new(1, -7), FinalHinge = new(1, 11), FinalSealAt = new(8, 5);
     private const float FinalMouth = 3.14f;
 
     // Resolved parts. LidAt, SealAt and MouthAt are in texels from the body's top-left, HingeAt in lid texels. Local
     // layout (px, y down, origin at the closed box's centre): the lid closes on the body; it turns about its rear (left)
-    // bottom corner; the mouth is where the velvet lies; the seal sits on the body front.
+    // hinge on the body; the mouth is where the velvet lies; the seal sits on the body front.
     private sealed record BoxArt(Texture2D Body, Rectangle BodySrc, Texture2D Lid, Rectangle LidSrc, Texture2D? Seal, Rectangle SealSrc,
         float Scale, bool Pixel, Vector2 LidAt, Vector2 HingeAt, Vector2 SealAt, float MouthAt)
     {

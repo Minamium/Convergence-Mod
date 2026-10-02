@@ -155,7 +155,7 @@ internal sealed record CenserBody(Texture2D Texture, Rectangle Source, float Sca
     // the hole of the top ring, the bowl mouth on top of the gold rim straight under it (CrimsonRewardRules.BowlDrop is
     // their distance at the 2 px dot, so the drawn ring hangs on the pendulum's pivot) and the lowest texels of the two
     // outer drapes, where the Verlet tails continue them.
-    private static readonly Vector2 FinalRing = new(14.83f, 3.17f), FinalMouth = new(14.83f, 17f), FinalDrapeLeft = new(3.5f, 30f), FinalDrapeRight = new(26.5f, 32f);
+    private static readonly Vector2 FinalRing = new(14.5f, 3f), FinalMouth = new(14.5f, 20f), FinalDrapeLeft = new(3.5f, 30f), FinalDrapeRight = new(26f, 31f);
 
     private static CenserBody? body;
     private static bool failed;

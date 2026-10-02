@@ -9,9 +9,9 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // The Bloodink Quill's bodies, in one place (asset-deliveries/scarlet-rewards/2026-10-02/BRIEF.md, SR06; names and
 // sizes in CrimsonRewardSprites; anchors measured by tools/export_scarlet_reward_art.py, texel centre +0.5):
 //   CrimsonBloodinkQuill.png  icon, three quills in an ink bottle   20x32 logical at 2 texels each
-//   BloodinkQuill.png         thrown quill lying horizontal, nib RIGHT  25x7 logical; nib tip (25, 4) (the ink bead
+//   BloodinkQuill.png         thrown quill lying horizontal, nib RIGHT  25x7 logical; nib tip (25, 3.5) (the ink bead
 //                             Codex drew detached ahead of the nib was cut off by the exporter)
-//   SealedScore.png           rolled score, horizontal, crimson cord and a blood-red wax seal  24x11; seal (13.43, 3.57)
+//   SealedScore.png           rolled score, horizontal, crimson cord and a blood-red wax seal  24x10; seal (12.68, 4.09)
 // Final art is drawn at CrimsonRewardSprites.PixelScale with point sampling. The vanilla placeholder (Bone Javelin) lies
 // diagonally with its tip at the upper right: the tip becomes the nib and the body turns a quarter-pi to lie flat.
 internal static class QuillArt
@@ -19,12 +19,18 @@ internal static class QuillArt
     internal readonly record struct Body(Texture2D Texture, Rectangle Source, Vector2 Origin, float Scale, float Turn, bool Pixel)
     {
         internal SamplerState Sampler => Pixel ? SamplerState.PointClamp : SamplerState.LinearClamp;
-        // Where `local` (texture px relative to the origin, before the turn) lands for a body drawn at `at`, `rotation`.
+        // Final pixel art pointing left is drawn mirrored vertically so it stays right way up (QuillVisuals.Draw).
+        internal bool Flipped(float rotation) => Pixel && MathF.Cos(rotation) < 0;
+        // Where `local` (texture px relative to the origin, before the turn) lands for a body drawn at `at`, `rotation`;
+        // a mirrored body mirrors the point with it.
         internal Vector2 Point(Vector2 at, float rotation, Vector2 local, Vector2 stretch)
-            => at + Vector2.Transform(local * Scale * stretch, Matrix.CreateRotationZ(rotation + Turn));
+        {
+            if (Flipped(rotation)) local.Y = -local.Y;
+            return at + Vector2.Transform(local * Scale * stretch, Matrix.CreateRotationZ(rotation + Turn));
+        }
     }
 
-    private static readonly Vector2 FinalNib = new(25f, 4f), FinalSeal = new(13.43f, 3.57f);
+    private static readonly Vector2 FinalNib = new(25f, 3.5f), FinalSeal = new(12.68f, 4.09f);
     private static Body? quill, score;
 
     internal static Body Quill()

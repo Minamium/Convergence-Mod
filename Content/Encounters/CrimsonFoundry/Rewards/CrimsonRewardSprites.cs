@@ -32,12 +32,13 @@ internal static class CrimsonRewardSprites
     internal const float PixelScale = 2;
 
     // ---- SR01 / SR01P: Scarlet Score Reliquary (placeholder: Crimson Fishing Crate) -------------------------------
-    // The parts share one lattice, so the closed casket is as wide as the icon; the parts keep the complete casket's
-    // limit (the brief: every part keeps its size in the complete casket).
+    // The body and lid share one lattice, so the closed casket is as wide as the icon; they keep the complete casket's
+    // limit (the brief: every part keeps its size in the complete casket). The seal is one cell finer than that lattice
+    // (11 across, not 10), the fewest cells that keep its three bars apart.
     internal static readonly CrimsonRewardSprite Reliquary = new(nameof(CrimsonScoreReliquary), "SR01_a top-left (complete)", 32, 25, 32, 28, ItemID.CrimsonFishingCrate, Icon: true);
-    internal static readonly CrimsonRewardSprite ReliquaryBody = new("ReliquaryBody", "SR01P_c body", 31, 18, 32, 28, ItemID.CrimsonFishingCrate, Anchors: "mouth, seal place, lid place");
-    internal static readonly CrimsonRewardSprite ReliquaryLid = new("ReliquaryLid", "SR01P_c lid", 29, 13, 32, 28, ItemID.CrimsonFishingCrate, Anchors: "rear hinge");
-    internal static readonly CrimsonRewardSprite ReliquarySeal = new("ReliquarySeal", "SR01P_c wax seal", 10, 10, 10, 10, ItemID.CrimsonFishingCrate);
+    internal static readonly CrimsonRewardSprite ReliquaryBody = new("ReliquaryBody", "SR01P_c body", 32, 18, 32, 28, ItemID.CrimsonFishingCrate, Anchors: "mouth, seal place, lid place");
+    internal static readonly CrimsonRewardSprite ReliquaryLid = new("ReliquaryLid", "SR01P_c lid", 30, 13, 32, 28, ItemID.CrimsonFishingCrate, Anchors: "rear hinge");
+    internal static readonly CrimsonRewardSprite ReliquarySeal = new("ReliquarySeal", "SR01P_c wax seal", 11, 11, 11, 11, ItemID.CrimsonFishingCrate);
 
     // ---- SR02 / SR02I: Sable Scythe (placeholder: Death Sickle) --------------------------------------------------
     internal static readonly CrimsonRewardSprite Scythe = new(nameof(CrimsonSableScythe), "SR02I_c icon", 32, 28, 32, 32, ItemID.DeathSickle, Icon: true);
@@ -61,7 +62,7 @@ internal static class CrimsonRewardSprites
     // ---- SR06: Bloodink Quill (placeholder: Bone Javelin) --------------------------------------------------------
     internal static readonly CrimsonRewardSprite Quill = new(nameof(CrimsonBloodinkQuill), "SR06_d middle icon", 20, 32, 28, 32, ItemID.BoneJavelin, Icon: true);
     internal static readonly CrimsonRewardSprite QuillProjectile = new("BloodinkQuill", "SR06_d left quill (nib right)", 25, 7, 28, 8, ItemID.BoneJavelin, Anchors: "nib");
-    internal static readonly CrimsonRewardSprite SealedScore = new("SealedScore", "SR06_d right rolled score", 24, 11, 24, 12, ItemID.BoneJavelin, Anchors: "seal");
+    internal static readonly CrimsonRewardSprite SealedScore = new("SealedScore", "SR06_d right rolled score", 24, 10, 24, 12, ItemID.BoneJavelin, Anchors: "seal");
 
     // ---- SR07: Scarlet Covenant (placeholders: the current Covenant icon and the Pygmies buff) --------------------
     internal static readonly CrimsonRewardSprite Covenant = new(nameof(CrimsonPact), "SR07_b left icon", 29, 32, 32, 32, 0, "Convergence/Assets/Textures/CrimsonFoundry/CrimsonPact", Icon: true);

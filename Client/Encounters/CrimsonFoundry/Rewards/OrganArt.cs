@@ -12,14 +12,14 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // art or the vanilla Onyx Blaster stand-in); this file is the one place that knows where the grip, the heart-gem and
 // the palm sit inside them, and CanticleRules holds the pipe mouths. Anchors were measured by
 // tools/export_scarlet_reward_art.py (texture pixels from the top-left, texel centre +0.5):
-//   OrganHeld   "CanticleOrgan"  43 x 22 logical, facing right; grip (5.83, 16.83), heart-gem (17.73, 7.96),
-//                                mouths (43, 3) (42, 6.5) (42, 10) (42, 13.5) -> CanticleRules.MouthForward/MouthAcross
+//   OrganHeld   "CanticleOrgan"  43 x 22 logical, facing right; grip (5.86, 16.84), heart-gem (17.71, 7.86),
+//                                mouths (43, 3) (42, 6) (42, 10) (42, 13) -> CanticleRules.MouthForward/MouthAcross
 //   OrganShard  "CanticleShard"  11 x 6, pointing right
-//   BoneHand    "BoneHand"       20 x 32, palm down, fingers down; palm (11.59, 12.37) under the cuff
+//   BoneHand    "BoneHand"       20 x 32, palm down, fingers down; palm (11.5, 12.43) under the cuff
 //   Organ       "CrimsonCanticleOrgan" icon, 27 x 28 logical at 2 texels each
 internal static class OrganArt
 {
-    private static readonly Vector2 FinalGrip = new(5.83f, 16.83f), FinalGem = new(17.73f, 7.96f), FinalPalm = new(11.59f, 12.37f);
+    private static readonly Vector2 FinalGrip = new(5.86f, 16.84f), FinalGem = new(17.71f, 7.86f), FinalPalm = new(11.5f, 12.43f);
     // Stand-in anchors as fractions of the Onyx Blaster's texture: grip under the stock, muzzle at the right edge.
     private static readonly Vector2 PlaceholderGrip = new(.27f, .72f), PlaceholderGem = new(.48f, .42f);
     private const float PlaceholderMouthX = .97f;

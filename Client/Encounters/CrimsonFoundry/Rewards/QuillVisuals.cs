@@ -166,10 +166,11 @@ internal sealed class QuillVisuals : GlobalProjectile
         }
         if (!split && s.Age > s.Flight + SealSplit)
         {
-            // The seal splits: its halves fall away as wax flakes in the seal's red.
+            // The seal splits: its halves fall away as wax flakes in the seal's red, from where the seal is drawn now.
             split = true;
             var score = QuillArt.Score();
-            Vector2 seal = score.Point(at, 0, QuillArt.Seal, Vector2.One);
+            ScorePose(s, s.Age, out float rotation, out Vector2 stretch);
+            Vector2 seal = score.Point(at, rotation, QuillArt.Seal, stretch);
             for (int i = 0; i < 8; i++)
             {
                 float h = ScarletRewardParticles.Hash(seed, i + 60);
@@ -285,14 +286,7 @@ internal sealed class QuillVisuals : GlobalProjectile
         if (s.BurstSince - 1 + f >= 0) return; // consumed by its burst
         Vector2 at = p.Center - p.velocity * (1 - f);
         float age = Math.Max(0, s.Age - 1 + f), windup = age - s.Flight;
-        float spin = s.Heading.X >= 0 ? 1 : -1;
-        // Tumbling end over end along its travel, the tumble slowing with the glide; the windup turns it level without
-        // a stop: the remaining offset to level is blended out from zero rate.
-        float tumble = s.Heading.ToRotation() + spin * .3f * Travelled(age, s.Flight);
-        float settled = s.Heading.ToRotation() + spin * .3f * Travelled(s.Flight + QuillRules.ScoreGlide, s.Flight);
-        float rotation = tumble - MathF.IEEERemainder(settled, MathHelper.TwoPi) * R.Smooth(windup / 6);
-        float open = R.Smooth((windup - 3) / 5);
-        Vector2 stretch = new(1 + .45f * open, 1 - .15f * open);
+        ScorePose(s, age, out float rotation, out Vector2 stretch);
         var art = QuillArt.Score();
         Color color = Color.Lerp(light, Color.White, .5f);
         var batch = Main.spriteBatch;
@@ -319,6 +313,20 @@ internal sealed class QuillVisuals : GlobalProjectile
             }
         }
         finally { ScarletRewardFx.RestoreBatch(restarted, saved); }
+    }
+
+    // The score's pose at drawn age `age`: tumbling end over end along its travel, the tumble slowing with the glide; the
+    // windup turns it level without a stop (the remaining offset to level is blended out from zero rate), and from 3
+    // ticks into the windup it opens (stretches along its length).
+    private static void ScorePose(SealedScore s, float age, out float rotation, out Vector2 stretch)
+    {
+        float windup = age - s.Flight;
+        float spin = s.Heading.X >= 0 ? 1 : -1;
+        float tumble = s.Heading.ToRotation() + spin * .3f * Travelled(age, s.Flight);
+        float settled = s.Heading.ToRotation() + spin * .3f * Travelled(s.Flight + QuillRules.ScoreGlide, s.Flight);
+        rotation = tumble - MathF.IEEERemainder(settled, MathHelper.TwoPi) * R.Smooth(windup / 6);
+        float open = R.Smooth((windup - 3) / 5);
+        stretch = new Vector2(1 + .45f * open, 1 - .15f * open);
     }
 
     // Ticks of travel at cruise speed covered by drawn age `age` (the glide counts for less).
@@ -351,12 +359,12 @@ internal sealed class QuillVisuals : GlobalProjectile
     }
 
     // Draws one body into a begun batch. Final pixel art mirrors vertically when it points left, so it stays right way
-    // up (the anchor mirrors with it); the diagonal placeholder is drawn as it is.
+    // up (its origin, and every Body.Point, mirror with it); the diagonal placeholder is drawn as it is.
     internal static void Draw(SpriteBatch batch, in QuillArt.Body art, Vector2 position, float rotation, Color color, Vector2 stretch)
     {
         Vector2 origin = art.Origin;
         var effects = SpriteEffects.None;
-        if (art.Pixel && MathF.Cos(rotation) < 0)
+        if (art.Flipped(rotation))
         {
             effects = SpriteEffects.FlipVertically;
             origin.Y = art.Source.Height - origin.Y;

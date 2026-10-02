@@ -78,6 +78,9 @@ internal sealed class CenserLook
     private const int DrapePoints = 5;
     private const float DrapeLink = 6, Tremble = 2.5f * CenserRules.Degrees;
     private static readonly float Omega2 = MathF.Pow(MathHelper.TwoPi / CrimsonRewardRules.SwingPeriod, 2);
+    // The free pendulum's lever: its drive (the ring's acceleration and the air drag) was tuned on a 60 px ring-to-mouth
+    // distance and keeps that feel; the drawn BowlDrop, measured on the art, only places the mouth and the pour.
+    private const float SwayLever = 60;
     private static readonly VerletSettings drapeSettings = new(TileCollision: false, SlowInWater: false, Gravity: .3f, MaxFallSpeed: 6);
 
     // Per-owner sound budgets and the local shake limiter (game ticks + 1; 0 = never).
@@ -199,8 +202,8 @@ internal sealed class CenserLook
         for (int step = 0; step < 2; step++)
         {
             float sin = MathF.Sin(phys), cos = MathF.Cos(phys);
-            float torque = -Omega2 * sin - .35f * (accel.X * cos - accel.Y * sin) / CrimsonRewardRules.BowlDrop
-                - .02f * moved.X * cos / CrimsonRewardRules.BowlDrop - .05f * physRate;
+            float torque = -Omega2 * sin - .35f * (accel.X * cos - accel.Y * sin) / SwayLever
+                - .02f * moved.X * cos / SwayLever - .05f * physRate;
             physRate = Math.Clamp(physRate + torque * .5f, -.2f, .2f);
             phys = Math.Clamp(phys + physRate * .5f, -1.2f, 1.2f);
         }

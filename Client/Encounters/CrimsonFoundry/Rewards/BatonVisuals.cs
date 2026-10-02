@@ -24,7 +24,7 @@ internal static class BatonArt
     // Grip and gem in texels of ScarletBaton.png (SR04_c, 37 x 38 logical), measured by
     // tools/export_scarlet_reward_art.py: the centre of the gold teardrop grip at the lower left and of the blood-red gem
     // at the upper right (texel centre +0.5). The Crimson Rod placeholder uses fractions of its texture (same diagonal).
-    private static readonly Vector2 GripFinal = new(3.9f, 32.35f), GemFinal = new(34.03f, 3.17f);
+    private static readonly Vector2 GripFinal = new(3.55f, 32.7f), GemFinal = new(33.88f, 3.19f);
     private static readonly Vector2 GripPlaceholder = new(.2f, .8f), GemPlaceholder = new(.8f, .2f);
 
     internal static ScarletRewardArt.Sprite Sprite => ScarletRewardArt.Get(CrimsonRewardSprites.BatonHeld);

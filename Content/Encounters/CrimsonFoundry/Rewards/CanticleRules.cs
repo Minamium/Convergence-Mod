@@ -21,10 +21,11 @@ internal static class CanticleRules
 
     // Pipe mouths relative to the grip in the gun's own frame: x along the aim, y across (negative is the top of a gun
     // aimed right). Measured on CanticleOrgan.png (SR03_d, 43 x 22 logical) at the 2 px dot by
-    // tools/export_scarlet_reward_art.py: grip (5.83, 16.83), mouths at x 43/42/42/42 (their mean is used) and rows 3,
-    // 6.5, 10 and 13.5. The placeholder is scaled so its muzzle lands here too.
-    internal const float MouthForward = 72.84f;
-    internal static float MouthAcross(int pipe) => -27.66f + 7 * Math.Clamp(pipe, 0, Pipes - 1);
+    // tools/export_scarlet_reward_art.py: grip (5.86, 16.84), mouths at x 43/42/42/42 (their mean is used) and rows 3,
+    // 6, 10 and 13 (the pipes are 2 texels tall, 1 or 2 apart). The placeholder is scaled so its muzzle lands here too.
+    internal const float MouthForward = 72.78f;
+    private static readonly float[] MouthRows = { -27.68f, -21.68f, -13.68f, -7.68f };
+    internal static float MouthAcross(int pipe) => MouthRows[Math.Clamp(pipe, 0, Pipes - 1)];
     // World offset of a mouth from the grip. A gun aimed left is drawn flipped vertically, so its pipes stay on top.
     internal static Vector2 MouthOffset(int pipe, float aim)
     {

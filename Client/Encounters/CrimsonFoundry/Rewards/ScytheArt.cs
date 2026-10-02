@@ -18,10 +18,10 @@ internal static class ScytheArt
 {
     // Anchors in texel space (origin top-left, texel centre +0.5). SableScythe.png (SR02_c, 64 x 56 logical, haft from
     // the lower left to the blade at the upper right) as tools/export_scarlet_reward_art.py measured it: the grip on the
-    // haft line 1.5 texels past the gold butt cap, the hook tip at the end of the downswept blade. Grip to tip is 58.91
-    // texels, so CrimsonRewardRules.ScytheReach (117.82 px) draws it at exactly the 2 px dot. The placeholder (Death
+    // haft line 1.5 texels past the gold butt cap, the hook tip at the end of the downswept blade. Grip to tip is 58.95
+    // texels, so CrimsonRewardRules.ScytheReach (117.89 px) draws it at exactly the 2 px dot. The placeholder (Death
     // Sickle, 70 x 64) was measured from its alpha the same way.
-    private static readonly Vector2 FinalGrip = new(5.8f, 50.67f), FinalTip = new(61.5f, 31.5f);
+    private static readonly Vector2 FinalGrip = new(5.74f, 50.61f), FinalTip = new(61.5f, 31.5f);
     private static readonly Vector2 PlaceholderGrip = new(7f, 57f), PlaceholderTip = new(55f, 53.5f);
     private static readonly Vector2 PlaceholderSize = new(70, 64);
 
