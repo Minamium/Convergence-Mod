@@ -95,16 +95,15 @@ internal static partial class Program
     [DomainTest("Scarlet twelve-phrase repertoire keeps all techniques with a stable basic beat")]
     private static void ScarletCompleteRepertoire()
     {
-        var score = ScarletRecordedScore();
         for (int source = 0; source < 3; source++)
         {
             var techniques = new HashSet<CrimsonTechnique>();
-            int earliest = score.IntroTicks; var cycle = new CrimsonActCycle();
+            int earliest = CrimsonChoreography.OpeningTicks; var cycle = new CrimsonActCycle();
             for (int serial = 0; serial < CrimsonActCycle.PhrasesPerCycle; serial++)
             {
                 techniques.Add(CrimsonTechniqueGeometry.Select(source, serial));
-                var phrase = CrimsonRhythm.Create(score, earliest, serial, false);
-                AssertEqual(2, phrase.Hits.Count, "technique changes do not change the basic pulse");
+                var phrase = CrimsonChoreography.Create(earliest, serial, false);
+                AssertEqual(5, phrase.Hits.Count, "technique changes do not change the basic pulse");
                 AssertEqual(CrimsonRhythmKind.Groove, phrase.Kind, "no irregular fill within the repertoire");
                 cycle.Admit(phrase.End, phrase.End + 6); earliest = phrase.End;
                 AssertEqual(false, cycle.TryComplete(phrase.End, false), "cannot skip the current recovery");

@@ -65,7 +65,7 @@ documents:
 - doc_id: adr.0026
   path: docs/adr/0026-crimson-score-and-native-projectiles.md
   title: 'ADR-0026: Crimson score clock and native projectiles'
-  content_sha256: 9bcec9cb4faf64b6ba0791f320fee70c8ba239a7914bf3fb4f2dd0908f6ac88f
+  content_sha256: 62aeaf822534933865259f762c1c445cb3ee1cc0fec1a2bdbee8020cc48c0710
   document_type: adr
   status: accepted
   owners:
@@ -653,7 +653,7 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 46df7acca9c52261129600c277022dbb1fe6f9e352beab12b5df1ae1accc38ce
+  content_sha256: f875fc5596bec69fce1128d6aadbc73d184e74089c3faa39b43cc30290d3fb98
   document_type: spec
   status: accepted
   owners:
@@ -1369,7 +1369,7 @@ documents:
 - doc_id: project.network-architecture
   path: docs/NETWORK_ARCHITECTURE.md
   title: Network Architecture
-  content_sha256: 8bf2d30bc1debfb3b25128a4abd55c12116702bfce3b7f322886ab9ec2cf4341
+  content_sha256: ee4bc314cf40299ed0154a1ecdaf5c9cb868fd330d9f60715ac14341e63cbbe2
   document_type: governance
   status: accepted
   owners:
@@ -1414,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: a4f2471d752875f76465568988fd5a4c702904f6a0136f0692cdef05cc85952e
+  content_sha256: a893e8227ba3812571a9cb7c8b7689e359e9b1985536de1c3320ccc72d3fad34
   document_type: status
   status: accepted
   owners:

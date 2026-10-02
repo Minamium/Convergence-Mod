@@ -6,57 +6,67 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    private static CrimsonScore ScarletRecordedScore() => CrimsonScore.Read(File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "CrimsonScore.json")));
+    // Independent oracle for the grid: the first bar head at or after a tick, found by walking the bars.
+    private static int ScarletFirstBarAtOrAfter(int earliest)
+    {
+        int bar = 0;
+        while (CrimsonMeter.BarTick(bar) < earliest) bar++;
+        return bar;
+    }
 
-    [DomainTest("Scarlet actual score alternates forecast and strike on chorus beats across loops")]
+    [DomainTest("Scarlet phrases alternate forecast and strike on grid beats from bar head to bar head")]
     private static void ScarletActualRhythm()
     {
-        var score = ScarletRecordedScore();
-        int earliest = score.IntroTicks;
-        for (int serial = 0; serial < 1500; serial++)
+        int earliest = CrimsonChoreography.OpeningTicks;
+        for (int serial = 0; serial < 300; serial++)
         {
-            var phrase = CrimsonRhythm.Create(score, earliest, serial, serial % 2 == 1);
+            var phrase = CrimsonChoreography.Create(earliest, serial, serial % 2 == 1);
+            int first = ScarletFirstBarAtOrAfter(earliest) * CrimsonMeter.BeatsPerBar;
             AssertEqual(true, phrase.Start >= earliest, "never start a late warning");
-            var beats = CrimsonRhythm.NextBeats(score, Math.Max(0, earliest - .499999d), 5);
-            AssertEqual(2, phrase.Hits.Count, "two answers per four-beat phrase");
+            AssertEqual(CrimsonMeter.BeatTick(first), phrase.Start, "phrase opens on a bar head");
+            AssertEqual(5, phrase.Hits.Count, "four basic answers and one crossflow per two-bar phrase");
             AssertEqual(CrimsonRhythmKind.Groove, phrase.Kind, "no fills or Final rolls");
-            for (int i = 0; i < phrase.Hits.Count; i++)
+            for (int i = 0; i < 4; i++)
             {
                 var hit = phrase.Hits[i];
-                AssertEqual((int)Math.Round(beats[i * 2 + 1]), hit.Warning, "forecast moved to second/fourth beat");
-                AssertEqual((int)Math.Round(beats[i * 2 + 2]), hit.Fire, "strike moved to third/fifth beat after priming");
+                AssertEqual(CrimsonMeter.BeatTick(first + i), hit.Warning, "forecast on beat i");
+                AssertEqual(CrimsonMeter.BeatTick(first + i + 1), hit.Fire, "strike one beat after its forecast");
                 AssertEqual((byte)1, hit.Accent, "constant attack accent");
                 AssertEqual(true, hit.Fire - hit.Warning >= CrimsonRhythm.MinimumWarningTicks, "fast attacks retain full warning");
                 AssertEqual(32, hit.End - hit.Fire, "flight lifetime does not stop at the following forecast beat");
-                if (i > 0)
-                {
-                    AssertEqual(true, hit.Warning > phrase.Hits[i - 1].Warning, "ordered call");
-                    AssertEqual(true, hit.Fire > phrase.Hits[i - 1].End, "no simultaneous incompatible live fields");
-                }
+                if (i > 0) AssertEqual(true, hit.Warning > phrase.Hits[i - 1].Warning, "ordered call");
             }
-            var next = CrimsonRhythm.Create(score, phrase.End, serial + 1, false);
-            var last = phrase.Hits[^1];
-            AssertEqual(true, last.End + CrimsonRhythm.PoseRecoveryTicks <= next.Hits[0].Fire, "old body reaches its exit before the next strike");
-            AssertEqual(true, last.End + CrimsonRhythm.ResidueTicks > next.Hits[0].Warning, "residue may overlap the next forecast");
-            AssertEqual((int)Math.Round(beats[4]), phrase.End, "next phrase resumes on fifth beat");
+            var closing = phrase.Hits[4];
+            AssertEqual(CrimsonMeter.BeatTick(first + 4), closing.Warning, "crossflow forecast on beat four");
+            AssertEqual(CrimsonMeter.BeatTick(first + 6), closing.Fire, "crossflow strike on beat six");
+            AssertEqual(CrimsonMeter.BeatTick(first + 8), closing.End, "crossflow collapse on beat eight");
+            AssertEqual(phrase.End, closing.End, "the phrase ends where its last note ends");
+            var next = CrimsonChoreography.Create(phrase.End, serial + 1, false);
+            AssertEqual(phrase.End, next.Start, "next phrase resumes on the very bar head the last one ended");
+            AssertEqual(true, closing.End + CrimsonRhythm.PoseRecoveryTicks <= next.Hits[0].Fire, "old body reaches its exit before the next strike");
+            AssertEqual(true, closing.End + CrimsonRhythm.ResidueTicks > next.Hits[0].Warning, "residue may overlap the next forecast");
             earliest = phrase.End;
         }
     }
 
-    [DomainTest("Scarlet basic pulse warns then answers one beat later twice per phrase")]
+    [DomainTest("Scarlet basic pulse warns then answers one beat later on the measured grid")]
     private static void ScarletCallResponse()
     {
-        var score = new CrimsonScore { SampleRate = 48000, LoopStartSample = 480000, LoopEndSample = 1440000,
-            IntroTicks = 120, BeatTicks = new[] { 600, 628, 656, 684, 712, 740, 768, 796 },
-            Energy = new[] { .9f, .9f, .9f, .9f, .9f, .9f, .9f, .9f } };
-        var phrase = CrimsonRhythm.Create(score, 600, 3, false);
-        int[] offsets = { 0, 56 };
-        for (int i = 0; i < offsets.Length; i++)
+        var phrase = CrimsonChoreography.Create(900, 3, false);
+        int[] warnings = { 900, 928, 956, 984 }, fires = { 928, 956, 984, 1013 };
+        AssertEqual(900, phrase.Start, "bar eight opens the phrase");
+        for (int i = 0; i < warnings.Length; i++)
         {
-            AssertEqual(628 + offsets[i], phrase.Hits[i].Warning, "forecast shifted by one beat");
-            AssertEqual(656 + offsets[i], phrase.Hits[i].Fire, "answer exactly one beat later, never unannounced");
+            AssertEqual(warnings[i], phrase.Hits[i].Warning, "forecast on its beat");
+            AssertEqual(fires[i], phrase.Hits[i].Fire, "answer exactly one beat later, never unannounced");
+            AssertEqual(fires[i] + 32, phrase.Hits[i].End, "flight lives 32 ticks");
         }
-        AssertEqual(712, phrase.End, "four-beat phrase");
+        AssertEqual(1013, phrase.Hits[4].Warning, "crossflow forecast on beat four");
+        AssertEqual(1069, phrase.Hits[4].Fire, "crossflow strike on beat six");
+        AssertEqual(1125, phrase.End, "two-bar phrase");
+        AssertEqual(1013, CrimsonChoreography.Create(901, 0, false).Start, "a late tick waits for the next bar head");
+        AssertEqual(1125, CrimsonChoreography.Create(1125, 0, false).Start, "a tick on the bar head belongs to that bar");
+        AssertEqual(1238, CrimsonChoreography.Create(1126, 0, false).Start, "one tick past the bar head waits for the following bar");
     }
 
     [DomainTest("Scarlet shortest one-beat warning survives the codec and rejects a shorter forecast")]
@@ -72,18 +82,17 @@ internal static partial class Program
         AssertEqual(true, rejected, "sub-beat warning below the current bound is rejected");
     }
 
-    [DomainTest("Scarlet phrase times derive from absolute sample loop without cumulative rounding")]
+    [DomainTest("Scarlet phrase times derive from the absolute grid without cumulative rounding")]
     private static void ScarletLoopBoundaries()
     {
-        var score = ScarletRecordedScore();
-        for (int cycle = 1; cycle <= 500; cycle += 7)
+        int earliest = CrimsonChoreography.OpeningTicks;
+        for (int n = 0; n < 300; n++)
         {
-            double origin = score.LoopEnd + (cycle - 1) * score.LoopLength;
-            var times = CrimsonRhythm.NextBeats(score, origin, 5);
-            AssertEqual(true, times[0] >= origin, "no replay before loop edge");
-            for (int i = 1; i < times.Length; i++) AssertEqual(true, times[i] > times[i - 1], "loop ordering");
-            var first = CrimsonRhythm.NextBeats(score, score.LoopEnd, 1)[0];
-            AssertEqual(true, Math.Abs(times[0] - first - (cycle - 1) * score.LoopLength) < .00001, "absolute cycle offset");
+            var phrase = CrimsonChoreography.Create(earliest, n, false);
+            // Eight beats are exactly 225 ticks, so a phrase chain never drifts from musicStart + 900 + 225n.
+            AssertEqual(900 + 225 * n, phrase.Start, "no accumulated rounding across phrases");
+            AssertEqual(900 + 225 * (n + 1), phrase.End, "exact two-bar length");
+            earliest = phrase.End;
         }
     }
 

@@ -7,27 +7,6 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Crimson score preserves sample loop, warning lead and repeated offbeats")]
-    private static void CrimsonScoreClock()
-    {
-        var score = CrimsonScore.Read(Encoding.UTF8.GetBytes("{\"SampleRate\":48000,\"LoopStartSample\":480000,\"LoopEndSample\":1440000,\"IntroTicks\":120,\"BeatTicks\":[300,600,900,1200,1500],\"Energy\":[0.4,0.9,0.95,0.9,0.8]}"));
-        AssertEqual(480000, score.SampleAt(1800), "first loop does not replay intro");
-        AssertEqual(480000, score.SampleAt(1800 + 1200 * 100), "no per-loop rounding drift");
-        var fires = new System.Collections.Generic.HashSet<int>();
-        int offbeats = 0;
-        for (int age = 0; age < 3500; age++)
-        {
-            int now = age;
-            score.Events(age, (id, fire, energy, offbeat) =>
-            {
-                AssertEqual(CrimsonScore.WarningTicks, fire - now, "full warning independent of attack density");
-                AssertEqual(true, fires.Add(id), "cue emitted only once across loop");
-                if (offbeat) offbeats++;
-            });
-        }
-        AssertEqual(true, offbeats > 0 && fires.Count > 5, "strong passages include repeated offbeats");
-    }
-
     [DomainTest("Crimson actor packets bound party size, epochs, clock and truncation")]
     private static void CrimsonActorCodec()
     {
@@ -136,7 +115,7 @@ internal static partial class Program
         AssertEqual(false, (old with { Age = 1100, Phase = 0 }).CanReplace(old), "late prior phase");
         AssertEqual(false, (old with { Fight = Guid.NewGuid() }).CanReplace(old), "foreign fight");
         AssertEqual(true, old.Presence(0, 1000) > 0, "previous dissolves while moving to gate");
-        AssertEqual(0f, old.Presence(0, 1010), "previous withdrawn before next emergence");
+        AssertEqual(0f, old.Presence(0, 900 + CrimsonEnsemble.ActRelease), "previous withdrawn before next emergence");
         AssertEqual(1f, old.Presence(1, 1000), "current visible");
         AssertEqual(0f, old.Presence(2, 1000), "future hidden");
         var ending = old with { Stage = CrimsonStage.Defeat };

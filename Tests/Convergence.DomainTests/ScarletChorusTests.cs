@@ -73,18 +73,39 @@ internal static partial class Program
                 && positions[i].Y - r >= field.Top && positions[i].Y + r <= field.Bottom, "complete markers inside field");
         }
     }
-    [DomainTest("Scarlet chorus eight-beat calls and recovery stay bounded across the actual score loop")]
+    [DomainTest("Scarlet chorus eight-beat calls and recovery stay bounded across the whole grid")]
     private static void ScarletChorusMusicalWindow()
     {
-        var score = ScarletRecordedScore();
-        for (int age = score.IntroTicks; age < 54000; age += 43)
+        for (int age = 0; age < 54000; age += 43)
         {
-            var beats = CrimsonRhythm.NextBeats(score, age, 11);
-            int born = (int)Math.Round(beats[0]), fire = (int)Math.Round(beats[8]), end = (int)Math.Round(beats[10]);
+            var (born, fire, end) = CrimsonChorusRules.Schedule(age);
             var p = ChorusExample() with { Born = born + 1000, Fire = fire + 1000, End = end + 1000 };
             p.Validate();
             AssertEqual(true, fire - born >= 160 && end - fire >= 24, "readable musical call and isolated recovery");
         }
+    }
+    [DomainTest("Scarlet chorus schedule lands on grid beats, calls for eight beats and ends on a bar head")]
+    private static void ScarletChorusScheduleGrid()
+    {
+        AssertEqual((900, 1125, 1238), CrimsonChorusRules.Schedule(900), "chorus asked on bar eight: born on the head, verdict eight beats later");
+        AssertEqual((928, 1153, 1238), CrimsonChorusRules.Schedule(901), "a late tick waits for the next beat but keeps the bar-head end");
+        AssertEqual((0, 225, 338), CrimsonChorusRules.Schedule(0), "the grid starts at tick zero");
+        for (int age = 0; age <= 70000; age += 7)
+        {
+            var (born, fire, end) = CrimsonChorusRules.Schedule(age);
+            int bornBeat = CrimsonMeter.BeatAtOrAfter(born);
+            AssertEqual(born, CrimsonMeter.BeatTick(bornBeat), "born on a grid beat");
+            AssertEqual(true, born >= age && born - age <= 28, "born on the first beat at or after the request");
+            AssertEqual(CrimsonMeter.BeatTick(bornBeat + 8), fire, "verdict eight beats after the call");
+            AssertEqual(225, fire - born, "eight beats are exactly 225 ticks");
+            int endBar = CrimsonMeter.BarAtOrAfter(end);
+            AssertEqual(end, CrimsonMeter.BarTick(endBar), "end on a bar head");
+            AssertEqual(true, endBar * CrimsonMeter.BeatsPerBar >= bornBeat + 8 + CrimsonChorusRules.MinimumRecoveryBeats, "at least two recovery beats");
+            AssertEqual(true, end - fire >= 2 * 28 && end - fire <= 5 * 29, "recovery is two to five beats");
+            AssertEqual(true, fire - born is >= 160 and <= 720 && end - fire is >= 24 and <= 180, "inside the descriptor bounds CrimsonChorusPlan accepts");
+            AssertEqual(end, CrimsonChoreography.Create(end, 0, false).Start, "the next phrase opens exactly where the call ends");
+        }
+        AssertThrows<ArgumentOutOfRangeException>(() => CrimsonChorusRules.Schedule(-1), "negative request");
     }
     [DomainTest("Scarlet chorus and verdict codecs reject all truncated prefixes and malformed fields")]
     private static void ScarletChorusCodec()
