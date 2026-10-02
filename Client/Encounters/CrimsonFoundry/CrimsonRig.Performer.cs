@@ -28,12 +28,19 @@ internal static partial class CrimsonRig
     private static readonly Vector2[] pivots = { new(190, 278), new(223, 278), new(276, 270), new(207, 278) };
     private static void LoadPerformer() => performer = LoadTexture("ScarletConjurer");
     private static Texture2D LoadTexture(string name) => ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/" + name, AssetRequestMode.ImmediateLoad).Value;
+    private static readonly Color RimColor = new(243, 118, 136, 0), HotRim = new(255, 96, 72, 0);
+    // The trailing arguments carry Vespera's command (DrawConductor) and default to today's picture, so the companion
+    // and every positional caller draw exactly as before: `cast` replaces the pose-1 weight Ease(charge * 2), `lean`
+    // adds to the tilt (radians), the nudge is whole pixels (PointClamp), `rimBoost` adds to the rim's .26 alpha and
+    // `rimHeat` warms the rim toward ember red.
     internal static void DrawPerformer(SpriteBatch batch, Vector2 screen, Vector2 center, float age, Vector2 velocity,
-        int facing, bool floating, float charge, float recoil, float alpha = 1, bool showOrb = true, float materialized = 1)
+        int facing, bool floating, float charge, float recoil, float alpha = 1, bool showOrb = true, float materialized = 1,
+        float? cast = null, float lean = 0, int nudgeX = 0, int nudgeY = 0, float rimBoost = 0, float rimHeat = 0)
     {
         if (performer is not { } sprite) return;
         int idle = floating ? 2 : Math.Abs(velocity.X) > .7f && MathF.Sin(age * .22f) > 0 ? 3 : 0;
-        float cast = CrimsonInvocation.Ease(charge * 2);
+        float castWeight = cast ?? CrimsonInvocation.Ease(charge * 2);
+        Color rimColor = rimHeat > 0 ? Color.Lerp(RimColor, HotRim, rimHeat) : RimColor;
         // A tiny character does not benefit from a 24x32 apparition mesh.
         // Keep her authored pixels, a restrained silhouette rim, and no huge orb
         // over her face. Preserve the caller's batch including UI/sky transforms.
@@ -41,7 +48,7 @@ internal static partial class CrimsonRig
         {
             batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
                 DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-            DrawPose(idle, 1 - cast); DrawPose(1, cast);
+            DrawPose(idle, 1 - castWeight); DrawPose(1, castWeight);
             batch.End();
         }
         Vector2 orb = center + new Vector2(facing * (94 + charge * 12), -25).RotatedBy(velocity.X * .009f);
@@ -62,12 +69,12 @@ internal static partial class CrimsonRig
         void DrawPose(int pose, float opacity)
         {
             if (opacity < .001f) return;
-            Vector2 at = center - screen + new Vector2(0, floating ? MathF.Sin(age * .045f) * 1.4f : 0);
-            float tilt = Math.Clamp(velocity.X * .009f, -.13f, .13f) - recoil * .035f;
+            Vector2 at = center - screen + new Vector2(0, floating ? MathF.Sin(age * .045f) * 1.4f : 0) + new Vector2(nudgeX, nudgeY);
+            float tilt = Math.Clamp(velocity.X * .009f, -.13f, .13f) - recoil * .035f + lean;
             var flip = facing < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
             var origin = pivots[pose];
             if (facing < 0) origin.X = poses[pose].Width - origin.X;
-            Color rim = new Color(243, 118, 136, 0) * (alpha * opacity * .26f);
+            Color rim = rimColor * (alpha * opacity * (.26f + rimBoost));
             for (int k = 0; k < 4; k++)
                 batch.Draw(sprite, at + new Vector2(k == 0 ? -1 : k == 1 ? 1 : 0, k == 2 ? -1 : k == 3 ? 1 : 0),
                     poses[pose], rim, tilt, origin, 56f / 540, flip, 0);
@@ -80,6 +87,85 @@ internal static partial class CrimsonRig
                     tilt,origin-new Vector2(0,y),56f/540,flip,0);
             }
         }
+    }
+    // Vespera's held orb. Today's hold: facing * (94 + 12 charge) px beside her and 25 px up, radius
+    // 53 + 24 charge + 18 recoil. Her command moves it at most 24 px and never toward her, and its glow may grow only
+    // as far as the orb has moved away from her, so the orb's near edge never comes closer to her face (or to the
+    // Hands' central gap she stands in) than today's. With no note this is today's hold exactly.
+    internal readonly record struct ConductorHold(Vector2 Offset, float Radius, float Charge, float Impulse, float Alpha);
+    internal static ConductorHold Hold(in ScarletCommand command, float charge, float recoil, int facing)
+    {
+        float today = 53 + charge * 24 + recoil * 18;
+        float away = facing >= 0 ? command.OrbX : -command.OrbX; // >= 0: Command clamps the offset away from her
+        return new(new Vector2(facing * (94 + charge * 12) + command.OrbX, -25 + command.OrbY),
+            Math.Min(command.Radius, today + away), command.ReactorCharge, command.ReactorImpulse, command.AlphaScale);
+    }
+    // She takes the casting pose CastLead ticks before a note is born, over CastBlend ticks, and holds it through the
+    // note's window [Born - 6, Fire + Span). Touching windows are one stretch, so back-to-back phrases (the crossflow
+    // ends where the next phrase's first note is born) keep the pose instead of blinking toward the idle pose.
+    internal const int CastLead = 6, CastBlend = 4;
+    // The notes Vespera answers: her Act's body (source) holding at `age`, plus the ones born within CastLead ticks
+    // (they only lead the pose in; ScarletGestureMotion.Command gives a note nothing before its Born). Output needs
+    // 2 * ScarletNotes.Capacity slots.
+    internal static int ConductorNotes(ReadOnlySpan<CrimsonGesturePlan> gestures, int source, float age, float x, float y, Span<ScarletNote> output)
+    {
+        int count = ScarletNotes.Collect(gestures, source, age, false, x, y, output[..ScarletNotes.Capacity]);
+        Span<ScarletNote> soon = stackalloc ScarletNote[ScarletNotes.Capacity];
+        int coming = ScarletNotes.Collect(gestures, source, age + CastLead, false, x, y, soon);
+        for (int i = 0; i < coming; i++)
+        {
+            bool known = false;
+            for (int j = 0; j < count && !known; j++)
+                known = output[j].Phrase == soon[i].Phrase && output[j].Pulse == soon[i].Pulse && output[j].Source == soon[i].Source;
+            if (!known && count < output.Length) output[count++] = soon[i];
+        }
+        return count;
+    }
+    // The pose-1 weight: today's Ease(charge * 2), held at 1 inside the stretch of cast windows that contains `age`
+    // (eased in at its start and out at its end).
+    internal static float ConductorCast(float age, ReadOnlySpan<ScarletNote> notes, float charge)
+    {
+        float start = float.MaxValue, end = float.MinValue;
+        foreach (var n in notes)
+            if (age >= n.Born - CastLead && age < n.Close) { start = n.Born - CastLead; end = n.Close; break; }
+        for (bool grown = start <= end; grown;)
+        {
+            grown = false;
+            foreach (var n in notes)
+            {
+                float from = n.Born - CastLead, to = n.Close;
+                if (from > end || to < start || from >= start && to <= end) continue;
+                start = Math.Min(start, from); end = Math.Max(end, to); grown = true;
+            }
+        }
+        float window = start > end ? 0 : CrimsonInvocation.Ease((age - start) / CastBlend) * (1 - CrimsonInvocation.Ease((age - (end - CastBlend)) / CastBlend));
+        return 1 - (1 - CrimsonInvocation.Ease(charge * 2)) * (1 - window);
+    }
+    // The boss's Vespera (CrimsonRig.Draw): the performer and the held orb from the frame's plans, commanded by the
+    // notes of her Act's body (`source`; -1 = no command: a non-participant, the opening, Final = today's picture).
+    // She draws the orb back against where a note will strike while it is announced, releases it toward the strike on
+    // Fire and settles when the window closes; the notes' Born / Fire / End are the only clock (no beat grid).
+    // `gather` pulls the orb into her (Final). The offline harness calls this with its plan list.
+    internal static void DrawConductor(SpriteBatch batch, Vector2 screen, Vector2 at, float age, Vector2 velocity, int facing,
+        ReadOnlySpan<CrimsonGesturePlan> gestures, ReadOnlySpan<CrimsonChorusPlan> choruses, int source,
+        float ending, float reveal, float consumed, float gather)
+    {
+        var (charge, recoil) = Signal(gestures, choruses, -1, age);
+        Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity * 2];
+        int noted = source >= 0 ? ConductorNotes(gestures, source, age, at.X, at.Y, notes) : 0;
+        var command = ScarletGestureMotion.Command(age, notes[..noted], charge, recoil, facing, CrimsonVisuals.Reduced);
+        DrawPerformer(batch, screen, at, age, velocity, facing, true, charge, recoil, ending * reveal * (1 - consumed), false,
+            reveal * (1 - consumed), noted == 0 ? (float?)null : ConductorCast(age, notes[..noted], charge), command.Tilt,
+            command.NudgeX, command.NudgeY, command.RimAlpha - .26f, command.RimHeat);
+        var hold = Hold(command, charge, recoil, facing);
+        Vector2 waiting = new(MathF.Sin(age * .022f) * 8, -20 + MathF.Sin(age * .031f) * 11);
+        Vector2 orb = at + Vector2.Lerp(waiting, hold.Offset, reveal);
+        if (gather > 0) orb = Vector2.Lerp(orb, at + new Vector2(0, -20), gather);
+        float radius = MathHelper.Lerp(64 + MathF.Sin(age * .038f) * 5, hold.Radius, reveal);
+        CrimsonEnergy.Begin();
+        CrimsonEnergy.AddCore(orb, radius, age, Math.Max(hold.Charge, reveal * (1 - reveal) * 3), hold.Impulse,
+            ending * (1 - consumed) * hold.Alpha, CrimsonVisuals.Reduced);
+        CrimsonEnergy.Draw(batch);
     }
     internal static void DrawApparition(SpriteBatch batch, int species, Vector2 center, float age, float reveal, float dissolve, float scale = .70f)
     {
