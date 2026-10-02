@@ -15,7 +15,7 @@ namespace Convergence.Client.Encounters.FirstSeverance;
 public sealed class RitualArmamentItemVisuals : GlobalItem
 {
     public override bool AppliesToEntity(Item entity, bool lateInstantiation)
-        => entity.ModItem is IRitualArmament && entity.ModItem is not (NullRefrain or LacunaTestament or PaleMeridian or LastWitness);
+        => entity.ModItem is IRitualArmament && entity.ModItem is not (NullRefrain or LacunaTestament or PaleMeridian or LastWitness or ChoirOfTheUnmade);
     public override bool PreDrawInInventory(Item item, SpriteBatch b, Vector2 position, Rectangle frame,
         Color drawColor, Color itemColor, Vector2 origin, float scale)
     {

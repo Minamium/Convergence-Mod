@@ -10,12 +10,12 @@ namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
 
 public sealed class ChoirOfTheUnmadeBuff : ModBuff
 {
-    public override string Texture => "Convergence/Content/Encounters/FirstSeverance/FoundationCore/FoundationCoreItem";
+    public override string Texture => "Convergence/Assets/Textures/Items/DollWeapons/ChoirOfTheUnmadeBuff";
     public override void SetStaticDefaults()
     { Main.buffNoSave[Type] = true; Main.buffNoTimeDisplay[Type] = true; }
     public override void Update(Player player, ref int buffIndex)
     {
-        if (player.ownedProjectileCounts[ModContent.ProjectileType<ChoirSentinel>()] > 0) player.buffTime[buffIndex] = 18000;
+        if (player.ownedProjectileCounts[ModContent.ProjectileType<ChoirChorister>()] > 0) player.buffTime[buffIndex] = 18000;
         else { player.DelBuff(buffIndex); buffIndex--; }
     }
 }

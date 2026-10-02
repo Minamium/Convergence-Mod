@@ -130,6 +130,8 @@ public sealed class LacunaTestament : RitualArmament
 public sealed class ChoirOfTheUnmade : RitualArmament
 {
     public override RitualArmamentKind Kind => RitualArmamentKind.Summon;
+    // The 2026-10 pixel icon (stored at 2x); the legacy V3 item visuals no longer apply to this item.
+    public override string Texture => "Convergence/Assets/Textures/Items/DollWeapons/ChoirOfTheUnmadeIcon";
     public override void SetStaticDefaults()
     {
         ItemID.Sets.StaffMinionSlotsRequired[Type] = 1;
@@ -141,7 +143,7 @@ public sealed class ChoirOfTheUnmade : RitualArmament
         RitualArmamentItems.Defaults(Item, Kind);
         Item.mana = 10; Item.shootSpeed = 1;
         Item.buffType = ModContent.BuffType<ChoirOfTheUnmadeBuff>();
-        Item.shoot = ModContent.ProjectileType<ChoirSentinel>();
+        Item.shoot = ModContent.ProjectileType<ChoirChorister>();
     }
     public override bool CanUseItem(Player player) => base.CanUseItem(player) && player.maxMinions >= 1;
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
@@ -149,15 +151,15 @@ public sealed class ChoirOfTheUnmade : RitualArmament
     {
         if (player.whoAmI != Main.myPlayer) return false;
         player.AddBuff(Item.buffType, 2);
-        // Spawn near the owner, not at an unchecked distant cursor coordinate.
+        // The new voice appears at the raised baton tip beside the owner (never at a distant cursor) and joins
+        // the running concert clock without restarting it.
         float clock = 0;
         foreach (Projectile existing in Main.ActiveProjectiles)
-            if (existing.owner == player.whoAmI && existing.ModProjectile is ChoirSentinel)
+            if (existing.owner == player.whoAmI && existing.ModProjectile is ChoirChorister)
             { clock = existing.ai[0]; break; }
-        int index = Projectile.NewProjectile(source, player.MountedCenter - new Vector2(0, 80),
-            Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, clock, -1, 0);
+        Vector2 at = player.MountedCenter + new Vector2(ChoirConcertRules.SpawnOffset.X * player.direction, ChoirConcertRules.SpawnOffset.Y);
+        int index = Projectile.NewProjectile(source, at, Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, clock, -1, 0);
         if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].originalDamage = Item.damage;
-        RitualArmamentItems.Pose(player, source, Kind, RitualArmamentItems.Aim(velocity, player.direction), player.itemAnimationMax, 1);
         return false;
     }
 }
