@@ -950,7 +950,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: e7f5635f9891c4a94aa1d38c3675e17b5cfe13ef2b7d3f5975dae975be553c9a
+  content_sha256: 77a3e9bc1e1a3609c590a02aadd8d140974ddf399ef7f35c22c17c96ca30756d
   document_type: spec
   status: provisional
   owners:
@@ -964,6 +964,7 @@ documents:
   - raid reward weapons
   related_code:
   - Content/Encounters/FirstSeverance/Rewards
+  - Client/Encounters/FirstSeverance/Weapons
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
   - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
@@ -1064,6 +1065,24 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.lacrimosa-claws-0229
+  path: docs/history/2026-10-03-lacrimosa-claws-0229.md
+  title: Lacrimosa's Claws before the 2026-10 refresh
+  content_sha256: bcc5b2899d8fbed976c4ed4eda4a56db80d88d62340180a8e412e1168a25767c
+  document_type: evidence
+  status: historical
+  owners:
+  - gameplay
+  - art
+  last_reviewed: '2026-10-03'
+  source_of_truth_for: []
+  aliases:
+  - Lacrimosa's Claws 0.2.29 melee redesign
+  - claw swipe cleanup 0.2.38
+  related_code: []
+  related_docs:
+  - encounter.first-severance.weapons
+  - project.status
 - doc_id: history.lacuna-testament-0234
   path: docs/history/2026-10-03-lacuna-testament-0234.md
   title: Lacuna Testament before the 2026-10 refresh
@@ -1314,7 +1333,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 08764080c9553048c8971999273459e410cc698839e449d7e6108ddffc6b751d
+  content_sha256: 03c33dc1ebc999b0caa7fcbaba3264e26b02c1cb1c682eb1fd3af579809d40b0
   document_type: spec
   status: provisional
   owners:
@@ -1496,7 +1515,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 54165be74c33cde52d1fb57d25ed58a28651287750ebdab4cd1fc25ed2089858
+  content_sha256: 0fa6ae6304406c8ec520fceedc65fed696a84a0d728af9cab05b55eba213828d
   document_type: status
   status: accepted
   owners:
