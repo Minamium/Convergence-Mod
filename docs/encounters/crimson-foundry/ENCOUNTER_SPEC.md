@@ -151,7 +151,7 @@ The owner auditioned sixteen scenes in three variants each on 2026-10-02 and cho
 | Spread call, success, failure | `ScarletSpreadSummon`, `ScarletSpreadSuccess`, `ScarletSpreadFail` | as Stack |
 | Act change (Act II, Act III, Final) | `ScarletActChange` | the downbeat after the old music's last bar (`ActRelease`; the song's full stop for Act II and Final) |
 | Final sacrifice | `ScarletSacrifice` | 57 ticks before `FinalRelease`, so its flash at 0.95 s meets the visual flash and the pre-drop |
-| Victory | `ScarletVictory` | the first beat at or after the accepted Victory, where the music cuts into the song's full stop |
+| Victory | `ScarletVictory` | when the music's cut into the song's full stop becomes audible (the score picks that beat; the bell follows it, giving up after 60 ticks); without the score, the first beat at or after the accepted Victory |
 | A member goes Down / is revived | `ScarletDown`, `ScarletRevive` | a member's replicated recovery state changing during the performance |
 | A member votes Ready | `ScarletReady` | a member's Ready flag turning on |
 

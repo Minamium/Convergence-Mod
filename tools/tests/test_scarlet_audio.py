@@ -103,8 +103,16 @@ class ScarletAudioContracts(unittest.TestCase):
         visuals = ' '.join(read(CLIENT / 'CrimsonVisuals.cs').split())
         self.assertIn('Crossed(boss.State.PhaseStart + CrimsonEnsemble.ActRelease)) { voices.Play(ScarletCue.ActChange);', visuals)
         self.assertIn('if (Crossed(flash - ScarletSounds.SacrificeFlashTicks)) voices.Play(ScarletCue.Sacrifice);', visuals)
+        # The Victory bell follows the score's own cut (picked from its write head, ahead of the
+        # speakers); the grid beat is only the fallback when no score streams for the Fight.
         self.assertIn('CrimsonMeter.BeatTick(CrimsonMeter.BeatAtOrAfter(age - boss.State.MusicStart))', visuals)
-        self.assertIn('voices.Play(ScarletCue.Victory)', visuals)
+        self.assertIn('if (victoryAt >= 0 && CrimsonAudio.VictoryCut(fight) switch { ScoreCut.Heard => true,'
+                      ' ScoreCut.Absent => age >= victoryAt, _ => age - endingAt >= VictoryWaitTicks, })'
+                      ' { voices.Play(ScarletCue.Victory); victoryAt = -1; }', visuals)
+        self.assertEqual(1, visuals.count('voices.Play(ScarletCue.Victory)'))
+        audio = ' '.join(read(CLIENT / 'CrimsonAudio.cs').split())
+        self.assertIn('mixer.End(state.Stage == CrimsonStage.Victory, CrimsonMusicMixer.NextBeat(cursor));', audio)
+        self.assertIn('return self.Audible() + ChunkFrames / 2 >= self.mixer.EndAt ? ScoreCut.Heard : ScoreCut.Pending;', audio)
         for cue in ('Ready', 'Down', 'Revive'):
             self.assertIn(f'if ({cue.lower()}) voices.Play(ScarletCue.{cue});', visuals)
         # Single player shares the runtime's member array, so transitions compare a copy.
@@ -152,6 +160,10 @@ class ScarletAudioContracts(unittest.TestCase):
                 for key in keys:
                     self.assertRegex(record, rf'\n\| {re.escape(key)} \| .+ \| `[0-9a-f]{{64}}` \|')
         self.assertEqual(len(rows), record.count('- Runtime file:'))
+        # The recipe's source catalog (names, measured pitch, shift table) is hashed with it.
+        self.assertRegex(record, r'source catalog `catalog\.json` `[0-9a-f]{64}`')
+        # The VSCO readme's credit request includes its homepage link.
+        self.assertIn('https://versilian-studios.com/vsco-community/', record)
         for retired in ('CrimsonFoundry/Foretell.wav', 'CrownRupture.wav', 'SilkCleave.wav', 'ThornRend.wav', 'CrimsonFoundry/ScarletRelease.wav'):
             self.assertNotIn(retired, text)
 

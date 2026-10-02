@@ -38,6 +38,9 @@ internal sealed class CrimsonVisuals : ModSystem
     // Ready/Down/revive transitions. Empty until the Fight has been seen once.
     private readonly List<CrimsonMember> roster = new(CrimsonState.MaxMembers);
     private int lastCharge = -100;
+    // The score's cut comes within a beat plus its queued chunks and its 15-tick drift
+    // tolerance; past this the bell rings without it.
+    private const int VictoryWaitTicks = 60;
     private static int lastClock;
     private static long clockReceived;
     internal static float RenderAge(CrimsonBoss boss)
@@ -98,11 +101,19 @@ internal sealed class CrimsonVisuals : ModSystem
         {
             endingAt = age; shake = 8;
             if (boss.State.Stage == CrimsonStage.Defeat) Cue("RaidDefeat", .40f, 150);
-            // The bell meets the music's cut into the song's full stop on the next beat.
+            // Without a running score the bell takes the first grid beat at or after Victory.
             else victoryAt = boss.State.MusicStart < 0 ? age
                 : boss.State.MusicStart + CrimsonMeter.BeatTick(CrimsonMeter.BeatAtOrAfter(age - boss.State.MusicStart));
         }
-        if (victoryAt >= 0 && age >= victoryAt) { voices.Play(ScarletCue.Victory); victoryAt = -1; }
+        // The bell meets the music's cut into the song's full stop. The score picks that beat
+        // ahead of what is audible, so a running score is followed rather than predicted.
+        if (victoryAt >= 0 && CrimsonAudio.VictoryCut(fight) switch
+            {
+                ScoreCut.Heard => true,
+                ScoreCut.Absent => age >= victoryAt,
+                _ => age - endingAt >= VictoryWaitTicks,
+            })
+        { voices.Play(ScarletCue.Victory); victoryAt = -1; }
         if (boss.State.Stage == CrimsonStage.Victory && endingAt >= 0)
         {
             float t=age-endingAt;
