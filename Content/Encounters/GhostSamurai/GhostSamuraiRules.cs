@@ -13,7 +13,10 @@ internal static class GhostSamuraiRules
 {
     internal const int Life = 2_400_000, Defense = 160;
     internal const float Phase2Threshold = .66f, Phase3Threshold = .33f;
-    internal const int TransitionTime = 90, AttackIntervalPhase1 = 36, AttackIntervalPhase2 = 24, RecoveryTime = 18;
+    internal const int TransitionTime = 180, AttackIntervalPhase1 = 36, AttackIntervalPhase2 = 24, RecoveryTime = 18;
+    // The bell's summoning: for the first IntroTime Active ticks the samurai assembles
+    // where it was called, holds its stance and cannot be damaged; no hazard exists.
+    internal const int IntroTime = 300;
     internal const int SlashWarning = 54, SlashLive = 10, DirectionalSlashInterval = 12, DirectionalPairInterval = 48;
     internal const int DirectionalPairCount = 4, DirectionalSlashCount = DirectionalPairCount * 2;
     internal const int DirectionalDuration = (DirectionalPairCount - 1) * DirectionalPairInterval + DirectionalSlashInterval + SlashWarning + SlashLive + RecoveryTime;
@@ -50,6 +53,9 @@ internal static class GhostSamuraiRules
     internal const float AbandonDistance = 4000;
 
     internal static int AttackInterval(SamuraiPhase phase) => phase == SamuraiPhase.Phase1 ? AttackIntervalPhase1 : AttackIntervalPhase2;
+    internal static bool IntroActive(int age) => age <= IntroTime;
+    // Clients project the authority's harmless windows so local strikes are not submitted.
+    internal static bool Untouchable(int age, int transitionRemaining) => IntroActive(age) || transitionRemaining > 0;
 
     internal static int DirectionalSpawnTime(int step) => step / 2 * DirectionalPairInterval + step % 2 * DirectionalSlashInterval;
     internal static int DirectionalSpawnStep(int tick)

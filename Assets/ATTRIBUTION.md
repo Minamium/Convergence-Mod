@@ -1662,10 +1662,10 @@ Replaces the 2026-09-28 synthesized Soboro cues at the same runtime paths; the o
 - Source type: original
 - Source work and URL: original SamuraiCut.fx; Soboro's original SoboroPixelSlash palette is the style reference, not a third-party source
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Rewritten to evaluate each accepted hazard per world-aligned 2x2 art pixel with Soboro's six-tone violet palette, lighting only cells wholly inside the footprint: marching-contour/dither forecasts, sweeping white-edged cuts, straight/wind/cleave field cuts, a thick travelling crescent, torn residue and a spirit-fire wisp pass. Installed Luminance noise is referenced, not redistributed.
+- Human modifications: Rewritten to evaluate each accepted hazard per world-aligned 2x2 art pixel with Soboro's six-tone violet palette, lighting only cells wholly inside the footprint: marching-contour/dither forecasts, sweeping white-edged cuts, straight/wind/cleave field cuts, a thick travelling crescent, torn residue and a spirit-fire wisp pass. Installed Luminance noise is referenced, not redistributed. 2026-10-02 (Claude): forecasts gain a two-pixel contour, diagonal hatching from the first tick and a denser fill so they read over the sealed field.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance
-- Reviewer and review date: Claude compiled-material sequence review2026-10-01; native gameplay not_run
+- Reviewer and review date: Claude compiled-material sequence review2026-10-01; Claude forecast-over-field review (84 frames) and cut sequence (1008 frames) 2026-10-02; native gameplay not_run
 
 ### Ghost Samurai battlefield — 2026-09-27
 
@@ -1677,10 +1677,10 @@ Replaces the 2026-09-28 synthesized Soboro cues at the same runtime paths; the o
 - Source type: original
 - Source work and URL: original SamuraiBattlefield.fx in this repository; no external artwork or shader copied
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Original spears, low arched graves and layered violet mist; flags and floating rectangular stones removed. Opaque field edge with a small masked bleed. Luminance noise is referenced from the dependency, not redistributed. 2026-10-02 rework by Claude (Anthropic) at the owner's request: three passes (parallax night with a phase-linked eclipse, ridges, graves and spears planted on the floor line, distant lightning, a luminance ceiling under the forecast fill; the opaque abyss with a mirrored lake, spirit fire, pasted wall talismans and corner seals; the thin in-field rim light), a deploy trace from the summoner's feet and a Bayer-dithered victory melt. Original math only; no external shader or image.
+- Human modifications: Original spears, low arched graves and layered violet mist; flags and floating rectangular stones removed. Opaque field edge with a small masked bleed. Luminance noise is referenced from the dependency, not redistributed. 2026-10-02 rework by Claude (Anthropic) at the owner's request: three passes (parallax night with a phase-linked eclipse, ridges, graves and spears planted on the floor line, distant lightning, a luminance ceiling under the forecast fill; the opaque abyss with a mirrored lake, spirit fire, pasted wall talismans and corner seals; the thin in-field rim light), a deploy trace from the summoner's feet and a Bayer-dithered victory melt. Original math only; no external shader or image. 2026-10-02 second pass by Claude at the owner's request: the graves become planted weapons (katana with tsuba, wrapped grip and a swaying cord, naginata, jumonji and leaf spears, arrow bundles) in a near and a far rank with a moonlit edge; the night is a cool slate so violet belongs to hazards; the ruled edge line is removed in favour of uneven spirit-fire roots, uneven inward light and a mist seam over the lake.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance
-- Reviewer and review date: Codex compiled-material preview 2026-09-27; Claude offline FNA/D3D11 preview of the 2026-10-02 rework (16 frames, luminance gate) 2026-10-02; native gameplay not_run
+- Reviewer and review date: Codex compiled-material preview 2026-09-27; Claude offline FNA/D3D11 preview of the 2026-10-02 rework (16 frames, luminance gate) 2026-10-02; Claude second-pass preview (16 field frames, 84 forecast-over-field frames, 22 cinema frames, luminance gate) 2026-10-02; native gameplay not_run
 
 ### Samurai spectral composite and DXOboro trial — 2026-09-27
 

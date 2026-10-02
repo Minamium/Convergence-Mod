@@ -62,22 +62,29 @@ float3 Tone(float level)
 float Cooling() { return 1 - saturate((phase.x - 2) / max(phase.y - 2, 1)); }
 float Fade() { return saturate((phase.x - phase.y) / Residue); }
 
-// A marching contour one art pixel inside the footprint, a dark inner contour
-// for bright backgrounds and an ordered-dither fill that thickens toward Fire.
-// The last eight ticks blink unless effects are reduced.
+// A two-pixel contour inside the footprint (pale marching dashes over a steady
+// lilac line), a dark inner contour for bright backgrounds, diagonal hatching
+// that marks the whole zone from the first tick and an ordered-dither fill that
+// thickens toward Fire. The last eight ticks blink unless effects are reduced.
 float Forecast(float d, float s, float2 cell, float core)
 {
     float progress = saturate(phase.z);
     float rim = step(d, Inset + 2);
-    float shade = step(d, Inset + 4) * (1 - rim);
+    float band = step(d, Inset + 4) * (1 - rim);
+    float shade = step(d, Inset + 6) * (1 - rim) * (1 - band);
     float march = step(frac((s * .5 + clock * 12) / 6), .62);
     float blink = (1 - phase.w) * step(-8, phase.x) * step(frac(phase.x * .25), .5);
-    float fill = step(Bayer(cell), .04 + .26 * pow(progress, 1.6));
+    // one art pixel in six, creeping slowly; still under Reduced Effects
+    float creep = floor(clock * 3) * (1 - phase.w);
+    float hatch = step(frac((cell.x + cell.y + creep + .5) / 6), .16);
+    float fill = step(Bayer(cell), .12 + .28 * pow(progress, 1.4));
     float incision = step(core, 2 + 2 * progress) * step(.15, progress);
     float level = fill * 2;
+    level = max(level, hatch * 3);
     level = max(level, incision * (progress > .75 ? 5 : 4));
     level = shade > .5 ? 1 : level;
-    level = rim > .5 ? (blink > .5 ? 6 : march > .5 ? 4 : 2) : level;
+    level = band > .5 ? (blink > .5 ? 5 : 4) : level;
+    level = rim > .5 ? (blink > .5 ? 6 : march > .5 ? 5 : 2) : level;
     return level;
 }
 
