@@ -13,8 +13,10 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 // - SoundStyle is built only on a client outside the main menu, so a Dedicated Server never touches audio.
 // - Voices are bounded per cue file (MaxInstances, replace oldest), stop while the game is paused and start only with
 //   focus, like the Ebon reward audio. Tuned files play at their recorded pitch (no pitch variance).
-// - Build tolls are heard by their owner only. A per-swing or per-shot cue plays for its owner at full level and for
-//   other players RemoteShotDecibels lower. Everything else is positional for everyone at full level.
+// - Every cue plays at its role's offset against the Raid's sound set (ScarletRewardCues.RoleDecibels); the files are
+//   never re-rendered for level.
+// - Build tolls are heard by their owner only. A per-swing or per-shot cue plays for its owner at its role's level and
+//   for other players RemoteShotDecibels lower. Everything else is positional for everyone at its role's level.
 // - Every call names the cue's owner, and other players' voices are a pool of their own (a ":peer" Identifier), so
 //   another player's cue never cuts one of the local player's: the local player holds the table's Voices (one owner's
 //   budget, replace oldest); other players together share ScarletCue.PeerVoices (one voice of a per-shot file, replace
@@ -61,7 +63,7 @@ internal static class ScarletRewardAudio
         string file = cue.File(variant);
         if (!Exists(file)) return;
         SoundStyle style = Style(cue, file, remote);
-        style.Volume = Math.Clamp(ScarletRewardCues.Gain * ScarletRewardCues.Decibels(decibels), 0f, 1f);
+        style.Volume = Math.Clamp(ScarletRewardCues.Gain * ScarletRewardCues.Decibels(ScarletRewardCues.RoleDecibels(cue.Role) + decibels), 0f, 1f);
         SoundEngine.PlaySound(style, at);
     }
 

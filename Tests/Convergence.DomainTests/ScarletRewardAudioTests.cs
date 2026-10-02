@@ -11,7 +11,7 @@ internal static partial class Program
 {
     private static ScarletCue RewardCue(string name) => ScarletRewardCues.Get(name);
 
-    [DomainTest("Scarlet reward cues: 35 cues in 38 files, the owner's picks, one gain")]
+    [DomainTest("Scarlet reward cues: 35 cues in 38 files, the owner's picks, one gain and one level offset per role")]
     private static void ScarletRewardCueTable()
     {
         var cues = ScarletRewardCues.All;
@@ -30,6 +30,25 @@ internal static partial class Program
         AssertEqual("Toll7", ScarletRewardCues.Toll(12), "high toll clamps");
         AssertThrows<ArgumentOutOfRangeException>(() => ScarletRewardCues.Get("CrownRupture"), "no Raid cue in the table");
         AssertEqual(1f, ScarletRewardCues.Gain, "files carry the designed levels");
+        // Levels against the Raid (REWARDS.md#art-and-audio): each cue plays at its role's offset, the same for every cue
+        // of the role, and an offset only ever lowers the owner's picked file.
+        var roles = new System.Collections.Generic.Dictionary<string, ScarletCueRole>(StringComparer.Ordinal) { ["ReliquaryOpen"] = ScarletCueRole.Show };
+        foreach (string name in new[] { "ScytheSwingHigh", "ScytheSwingLow", "ScytheWhip", "OrganShot", "BatonStroke", "CenserSummon", "CenserSwing", "QuillThrow", "QuillStick" })
+            roles[name] = ScarletCueRole.Shot;
+        foreach (string name in new[] { "ScytheWhipBrace", "StaffWindup", "HymnInhale", "BatonLift", "CenserBrace", "ScoreUnseal" })
+            roles[name] = ScarletCueRole.Windup;
+        foreach (string name in new[] { "StaffCut", "HandSlam", "InkIgnite", "CenserPour", "InkBlaze" })
+            roles[name] = ScarletCueRole.Release;
+        foreach (string name in new[] { "StaffBarline", "ChoirClasp", "RiverRelease", "CenserGrandPour", "ScoreChord", "Cadence" })
+            roles[name] = ScarletCueRole.Finale;
+        for (int k = 0; k < ScarletRewardCues.Tolls; k++) roles[ScarletRewardCues.Toll(k)] = ScarletCueRole.Build;
+        AssertEqual(cues.Length, roles.Count, "every cue has a role");
+        foreach (var cue in cues)
+        {
+            AssertEqual(roles[cue.Name], cue.Role, $"{cue.Name} role");
+            AssertEqual(true, ScarletRewardCues.RoleDecibels(cue.Role) <= 0, $"{cue.Name} offset only lowers the file");
+        }
+        AssertEqual(ScarletRewardCues.ShotDecibels, ScarletRewardCues.BuildDecibels, "tolls keep their auditioned 2 dB under the one-shots");
         AssertNear(.398f, ScarletRewardCues.Decibels(CrimsonRewardRules.RemoteShotDecibels), .001f, "other players' shots 8 dB lower");
         foreach (var cue in cues)
         {

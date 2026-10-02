@@ -29,8 +29,10 @@ internal static partial class Program
             AssertEqual(p.End,p.Hits[4].End,"next bar starts without extra dead time");
         }
         for(int phrase=1;phrase<=12;phrase++) for(int i=0;i<4;i++) {
-            AssertEqual(CrimsonTechnique.SpatialRift,CrimsonEnsemble.Technique(1,phrase,i,false),"every Act II basic note is a spatial cut");
-            AssertEqual(CrimsonTechnique.ChoirRakes,CrimsonEnsemble.Technique(2,phrase,i,false),"every Act III basic note is a Choir rake volley");
+            bool signature=phrase%3==0;
+            AssertEqual(signature?CrimsonTechnique.CinderCurtain:CrimsonTechnique.TrackingBeam,CrimsonEnsemble.Technique(0,phrase,i,false),"Act I basic notes are tracking beams except the signature curtain");
+            AssertEqual(signature?CrimsonTechnique.ShroudRope:CrimsonTechnique.SpatialRift,CrimsonEnsemble.Technique(1,phrase,i,false),"Act II basic notes are spatial cuts except the signature rope");
+            AssertEqual(signature?CrimsonTechnique.FourHands:CrimsonTechnique.ChoirRakes,CrimsonEnsemble.Technique(2,phrase,i,false),"Act III basic notes are Choir rake volleys except the signature hands");
         }
         for(int phase=0;phase<3;phase++) for(int phrase=1;phrase<=12;phrase++)
             AssertEqual(CrimsonTechnique.SideBeams,CrimsonEnsemble.Technique(phase,phrase,4,false),"all Act I–III phrases retain closing crossflow");

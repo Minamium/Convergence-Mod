@@ -6,9 +6,7 @@ using Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 using Convergence.Content.Encounters.CrimsonFoundry;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Utilities;
 using Terraria;
-using Terraria.Audio;
 using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry;
@@ -22,16 +20,25 @@ internal sealed class CrimsonGestureVisuals : ModSystem
     private int epoch = -1;
     private int previous = -1;
     private readonly HashSet<(int Phrase, byte Pulse, byte Source, bool Fire)> heard = new();
-    private readonly List<(SlotId Id, int Until)> voices = new();
+    // One voice per musical event: notes released on the same tick (Final's paired
+    // families) share it instead of stacking copies of the same recording.
+    private readonly HashSet<(int Phrase, int Tick, ScarletCue Cue)> voiced = new();
+    private readonly ScarletVoices voices = new(24);
     internal static Vector2 V(CrimsonPoint p) => new(p.X, p.Y);
     internal static Color Palette(int source) => ScarletMaterials.Palette(source);
     public override void PostUpdateEverything()
     {
+        voices.Update();
         var boss = CrimsonPackets.Boss;
         if (!ScarletArticulation.Participant(boss)) { Reset(); return; }
         int age = (int)boss!.VisualAge;
         if (fight != boss.State.Fight || epoch != boss.State.PhaseStart)
-        { Reset(); fight = boss.State.Fight; epoch = boss.State.PhaseStart; previous = age - 1; }
+        {
+            // A new phase epoch lets the previous notes ring out; only a new Fight releases them.
+            if (fight != boss.State.Fight) voices.Release();
+            heard.Clear(); voiced.Clear();
+            fight = boss.State.Fight; epoch = boss.State.PhaseStart; previous = age - 1;
+        }
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
             if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
@@ -39,25 +46,22 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             Cue(p.Born, false); Cue(p.Fire, true);
             void Cue(int tick, bool impact)
             {
+                // A curtain note a full crowd leaves nothing to burn on has no cue, shake or embers.
+                if (p.Technique == CrimsonTechnique.CinderCurtain && CrimsonSignatureMoves.CurtainBurning(p) == 0) return;
                 if (previous >= tick || age < tick || age - tick > 3 || !heard.Add((p.Phrase, p.Pulse, p.Source, impact))) return;
-                string asset = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley ? impact ? "WideFire" : "WideCharge"
-                    : p.IsRift || p.Technique == CrimsonTechnique.ChoirRakes ? impact ? "ChargeRush" : "ChargeLock"
-                    : impact ? "PortalFire" : "ChargeLock";
-                if (voices.Count < 24)
-                {
-                    var id = SoundEngine.PlaySound(new SoundStyle("Convergence/Assets/Sounds/FirstSeverance/Beams/" + asset)
-                    {
-                        Volume = impact ? .72f : .48f,
-                        Pitch = p.Technique == CrimsonTechnique.ClusterVolley ? -.12f : 0,
-                        MaxInstances = 6, SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
-                        PlayOnlyIfFocused = true, PauseBehavior = PauseBehavior.StopWhenGamePaused
-                    });
-                    // Masters end naturally; the lease is only a teardown bound.
-                    voices.Add((id, tick + (impact ? 100 : 50)));
-                }
+                // The seal crossflow (and Final's cluster orb in its place) swells for its two
+                // beats and releases; every other note, signature moves included, is a foretell
+                // on its warning and an impact on its strike. No pitch offset: the set is tuned.
+                bool crossflow = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.ClusterVolley;
+                var cue = crossflow ? impact ? ScarletCue.CrossflowRelease : ScarletCue.CrossflowCharge
+                    : impact ? ScarletCue.Impact : ScarletCue.Foretell;
+                if (voiced.Add((p.Phrase, tick, cue))) voices.Play(cue);
                 if (impact)
                 {
-                    Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field) : p.MovesBody ? p.Body(age) : p.Target);
+                    Vector2 at = V(p.Technique == CrimsonTechnique.ClusterVolley ? CrimsonClusters.Emitter(p.Field)
+                        : p.MovesBody ? p.Body(age)
+                        : p.Technique == CrimsonTechnique.CinderCurtain ? CrimsonSignatureMoves.CurtainImpact(p, Main.LocalPlayer.Center.X) // Target is the column mask
+                        : p.Target);
                     ScarletArticulation.Impact(p.Source, p.Accent, at);
                     ScarletAtmosphere.Emit(p, at);
                 }
@@ -67,24 +71,18 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         {
             int latest = 0; foreach (var h in heard) latest = Math.Max(latest, h.Phrase);
             heard.RemoveWhere(x => x.Phrase < latest - 2);
-        }
-        for (int i = voices.Count - 1; i >= 0; i--)
-        {
-            var v = voices[i];
-            if (!SoundEngine.TryGetActiveSound(v.Id, out var sound)) { voices.RemoveAt(i); continue; }
-            if (age >= v.Until) { sound.Stop(); voices.RemoveAt(i); }
-            else sound.Volume = Math.Min(sound.Volume, Math.Clamp((v.Until - age) / 5f, 0, 1));
+            voiced.RemoveWhere(x => x.Phrase < latest - 2);
         }
         previous = age;
     }
     private void Reset()
     {
-        foreach (var v in voices) if (SoundEngine.TryGetActiveSound(v.Id, out var sound)) sound.Stop();
-        voices.Clear(); heard.Clear(); fight = Guid.Empty; epoch = -1; previous = -1;
+        voices.Release(); heard.Clear(); voiced.Clear(); fight = Guid.Empty; epoch = -1; previous = -1;
     }
-    public override void OnWorldUnload() => Reset();
-    public override void ClearWorld() => Reset();
-    public override void Unload() => Reset();
+    private void Teardown() { voices.Stop(); Reset(); }
+    public override void OnWorldUnload() => Teardown();
+    public override void ClearWorld() => Teardown();
+    public override void Unload() => Teardown();
     public override void PostDrawTiles()
     {
         // Reward black blood lies beneath the Raid's forecasts (frame-stamped: drawn once, by whoever is first).
@@ -110,7 +108,7 @@ internal sealed class CrimsonGestureVisuals : ModSystem
             {
                 if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
                 var p = gesture.EffectivePlan(age, true);
-                if (p.Aimed || p.IsRift || p.Technique == CrimsonTechnique.ClusterVolley) continue;
+                if (p.Aimed || p.IsRift || p.IsSignature || p.Technique == CrimsonTechnique.ClusterVolley) continue;
                 if (age < p.Born || age >= p.End + CrimsonRhythm.ResidueTicks) continue;
                 bool warning = age < p.Fire;
                 if (warning && DuplicateForecast(p, age)) continue;
@@ -166,13 +164,16 @@ internal sealed class CrimsonGestureVisuals : ModSystem
         {
             if (projectile.ModProjectile is not CrimsonGesture g || !g.TryBoss(out var owner) || owner != boss) continue;
             var p = g.EffectivePlan(age, true);
-            // The ink residue outlives End by ScarletInkStroke.ResidueTicks (24), inside the projectile lease (LastEnd + 28).
-            int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicks : 0;
-            if ((!p.Aimed && !p.IsRift) || !g.ForecastReady || age < p.Born || age >= p.End + tail) continue;
+            // The ink residue outlives End by ScarletInkStroke.ResidueTicks (24), inside the projectile lease (LastEnd + 28);
+            // a signature move keeps its own residue window on the field-beam path.
+            int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : p.IsSignature ? CrimsonSignatureMoves.ResidueTicks(p.Technique)
+                : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicks : 0;
+            if ((!p.Aimed && !p.IsRift && !p.IsSignature) || !g.ForecastReady || age < p.Born || age >= p.End + tail) continue;
             if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch,p,age);
             if (ScarletInkStroke.Owns(p, age)) { strikes.Add(p); continue; }
             bool warning = age < p.Fire;
-            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift);
+            // A signature move keeps its whole footprint through the residue; the beam shader fades it.
+            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift || p.IsSignature && age >= p.End);
             for(int i=0;i<count;i++) {
             var s = strokes[i];
             Vector2 delta = V(s.B - s.A); float length = delta.Length();

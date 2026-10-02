@@ -32,8 +32,11 @@ internal static class CrimsonChoreography
         hits[BasicNotes] = new(At(4), At(6), At(8), 2);
         return new(At(0), At(8), CrimsonRhythmKind.Groove, Array.AsReadOnly(hits));
     }
+    // Every third phrase of Acts I-III (serial % 3 == 0) trades its four basic notes for the Act's
+    // signature move; the closing crossflow is never replaced. Final has its own pairs.
     internal static CrimsonTechnique Technique(int phase, int phrase, int note)
         => note == BasicNotes ? CrimsonTechnique.SideBeams
+            : CrimsonSignatureMoves.IsSignaturePhrase(phase, phrase) ? CrimsonSignatureMoves.ForAct(phase)
             : phase == 2 ? CrimsonTechnique.ChoirRakes
             : phase == 1 ? CrimsonTechnique.SpatialRift : CrimsonTechnique.TrackingBeam;
     // Same capped eighteen-tick velocity lead as Doll's eight pursuit prisms.
