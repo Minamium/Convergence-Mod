@@ -64,9 +64,11 @@ internal static class ChoirPresentation
     private static void Organ(DollWeaponCanvas canvas, ChoirDrawState s, in ChoirSprites sprites, bool reduced)
     {
         bool cancelled = s.CancelAge >= 0;
-        float clock = cancelled ? s.CancelClock : s.Clock;
+        // The organ's own clock: the concert's, or the closing clock that runs on after a stop (OrganCap > 0: a
+        // chorus whose target died, closing from the state it had).
+        float clock = cancelled ? s.CancelClock : s.OrganClock, cap = cancelled ? 0 : s.OrganCap;
         if (!ChoirConcertRules.Running(clock)) return;
-        float open = ChoirConcertRules.CaseOpen(clock);
+        float open = ChoirConcertRules.CaseOpen(clock, cap);
         if (open <= 0) return;
         Vector2 topLeft = s.Stage + V(ChoirConcertRules.OrganTopLeft);
         float crumble = cancelled ? Math.Clamp(s.CancelAge / CrumbleTicks, 0, 1) : 0;
@@ -84,7 +86,7 @@ internal static class ChoirPresentation
             {
                 int rank = ChoirConcertRules.PipeRank(column);
                 if (rank >= raised) continue;
-                float rise = ChoirConcertRules.PipeRise(clock, rank) * open;
+                float rise = ChoirConcertRules.PipeRise(clock, rank, cap) * open;
                 int length = OrganRail - PipeTop[column], shown = (int)MathF.Round(rise * length);
                 if (shown <= 0) continue;
                 int hidden = length - shown;
@@ -126,9 +128,9 @@ internal static class ChoirPresentation
             for (int column = 0; column < ChoirConcertRules.PipeColumns; column++)
             {
                 if (ChoirConcertRules.PipeRank(column) != rank) continue;
-                Vector2 cap = topLeft + new Vector2((PipeX0[column] + PipeX1[column] + 1), PipeTop[column] * 2 + 3);
-                canvas.Dot(cap, since < 2 ? DollTone.White : DollTone.BrassLight, 1);
-                canvas.Dot(cap + new Vector2(-2, 2), DollTone.BrassLight, 1, 1 - since / 6);
+                Vector2 top = topLeft + new Vector2((PipeX0[column] + PipeX1[column] + 1), PipeTop[column] * 2 + 3);
+                canvas.Dot(top, since < 2 ? DollTone.White : DollTone.BrassLight, 1);
+                canvas.Dot(top + new Vector2(-2, 2), DollTone.BrassLight, 1, 1 - since / 6);
             }
         }
     }
@@ -141,6 +143,8 @@ internal static class ChoirPresentation
         bool running = ChoirConcertRules.Running(clock);
         float seating = running ? ChoirConcertRules.Seating(clock) : 0;
         float nod = running ? ChoirConcertRules.Nod(clock) : 0;
+        Span<Vector2> parted = stackalloc Vector2[s.VoiceCount];
+        Part(s, seating, parted);
         for (int i = 0; i < s.VoiceCount; i++)
         {
             ref ChoirVoiceDraw v = ref s.Voices[i];
@@ -150,7 +154,7 @@ internal static class ChoirPresentation
             bool gallery = seating >= .5f && ChoirConcertRules.ChorusRow(v.Ordinal) == 2;
             DollStratum stratum = gallery ? DollStratum.Back : DollStratum.Front;
             sbyte depth = gallery ? (sbyte)-3 : ChoirConcertRules.ChorusRow(v.Ordinal) == 1 && seating >= .5f ? (sbyte)1 : (sbyte)2;
-            Vector2 centre = v.Center + Parting(s, v.Center, seating);
+            Vector2 centre = parted[i];
             Vector2 pivot = centre + V(ChoirConcertRules.StandTip) - new Vector2(0, nod);
             float summon = Math.Clamp(v.Life / SummonFadeTicks, 0, 1);
             var fx = new DollSpriteFx { Fade = 1 - summon, Flash = .6f * (1 - Math.Clamp(v.Life / 10, 0, 1)) };
@@ -163,7 +167,8 @@ internal static class ChoirPresentation
                     canvas.Sprite(new DollSprite(texture, line, V(StandTipTexel) - new Vector2(line.X, line.Y)), pivot, 0, flip, stratum, depth,
                         fx with { Silhouette = DollTone.Iron, Flash = 0 });
             }
-            Vector2 mouth = centre + new Vector2(ChoirConcertRules.Mouth.X * facing, ChoirConcertRules.Mouth.Y - nod);
+            NVector2 open = ChoirConcertRules.Mouth(variant);
+            Vector2 mouth = centre + new Vector2(open.X * facing, open.Y - nod);
             if (summon < 1) canvas.Burst(v.Center, 601 + i + s.Seed, 8, v.Life, 18, 2.2f, 0, DollShardKind.Pearl);
             if (!running) continue;
             // Count-in: a one-dot pearl ring blinks at every mouth on each tap.
@@ -215,8 +220,9 @@ internal static class ChoirPresentation
                 if (end > 1 && half > .2f)
                 {
                     int chord = ChoirConcertRules.ChorusChord(live), strands = ChoirConcertRules.ChordVoices(s.ChordVoices);
-                    // The quad is the collision body (2 x half wide, mouth to end); the shader narrows its first
-                    // BeamStart px to the organ mouth's throat, so light never leaves the body.
+                    // The quad runs from the mouth to the end at the collision width; collision starts BeamStart px
+                    // out. The shader narrows those first BeamStart px to the organ mouth's throat: the throat glows
+                    // over the organ and never hits, and past it the light stays inside the collision body.
                     canvas.EnergyQuad(hymn, ChoirHymnMaterial.Hymn, s.BeamOrigin, s.BeamOrigin + axis * end, 2 * half,
                         new Vector4(live, lightAlpha, chord * 8 + strands, s.Seed * .61f), 1);
                 }
@@ -305,20 +311,105 @@ internal static class ChoirPresentation
     internal static Vector2 BatonTipWorld(Vector2 grip, float angle)
         => grip + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Vector2.Distance(V(BatonTip), V(BatonGrip)) * DollSpritePlacement.WorldPerTexel);
 
-    // The choir parts for its own beam (draw only; the voices have no hitbox): a seated voice inside the beam's
-    // corridor near the mouth steps out across the axis as the inhale locks it, and back when the beam closes.
-    internal static Vector2 Parting(ChoirDrawState s, Vector2 centre, float seating)
+    // The choir parts for its own beam (draw only; the voices have no hitbox). Each row stays on its riser: the arc of
+    // ChoirConcertRules.ChorusArc, which may stretch to its parting range (rows 0-1: -20 to 200 deg, the gallery 160
+    // to 380) while the beam crosses it. The voices standing in the beam's corridor (past the mouth, within the
+    // drawn half width, the throat's near the mouth, plus PartMargin) slide along the arc to the nearer edge of the
+    // gap, and the voices beside them make room so that no two of a row stand closer than PartGap (or the row's own
+    // spacing if it is tighter); a side that runs out of range crowds rather than stand in the beam. The parting eases
+    // in over the inhale's first 12 ticks and out as the beam closes.
+    internal const float PartGap = 36, PartMargin = 40;
+    private const int PartStretch = 20;
+
+    internal static void Part(ChoirDrawState s, float seating, Span<Vector2> at)
     {
-        if (!s.Beam || seating < .5f) return Vector2.Zero;
-        Vector2 axis = new(MathF.Cos(s.BeamAngle), MathF.Sin(s.BeamAngle)), normal = new(-axis.Y, axis.X), d = centre - s.BeamOrigin;
-        float along = Vector2.Dot(d, axis), across = Vector2.Dot(d, normal);
-        const float clearance = ChoirConcertRules.BeamHalfWidth + 40;
-        if (along <= 0 || MathF.Abs(across) >= clearance) return Vector2.Zero;
-        float ramp = ChoirConcertRules.Smooth(s.BeamAge / 12f) * (1 - s.BeamClose) * (1 - ChoirConcertRules.Smooth((along - 220) / 100));
-        Vector2 push = normal * ((across >= 0 ? clearance : -clearance) - across) * ramp;
-        // Never step down into the player: the front row's lowest seat is S + 110.
-        float limit = s.BeamOrigin.Y + 118 - centre.Y;
-        return new Vector2(push.X, MathF.Min(push.Y, MathF.Max(0, limit)));
+        int count = Math.Min(at.Length, s.VoiceCount);
+        for (int i = 0; i < count; i++) at[i] = s.Voices[i].Center;
+        if (!s.Beam || seating < .5f) return;
+        float ramp = ChoirConcertRules.Smooth(s.BeamAge / 12f) * (1 - s.BeamClose);
+        if (ramp <= 0) return;
+        Vector2 axis = new(MathF.Cos(s.BeamAngle), MathF.Sin(s.BeamAngle)), normal = new(-axis.Y, axis.X);
+        Span<float> angle = stackalloc float[count], target = stackalloc float[count];
+        Span<int> low = stackalloc int[count], high = stackalloc int[count];
+        for (int row = 0; row < 3; row++)
+        {
+            (NVector2 arcCentre, float radius, float seatFrom, float seatTo) = ChoirConcertRules.ChorusArc(row);
+            Vector2 centre = s.BeamOrigin + V(arcCentre);
+            int from = (row == 2 ? 180 : 0) - PartStretch, to = from + 180 + 2 * PartStretch;
+            // The gap: the run of blocked whole degrees around the crossing (the blocked degree nearest the axis).
+            int cross = -1;
+            float nearest = float.MaxValue;
+            for (int d = from; d <= to; d++)
+                if (Blocked(s, centre, radius, d, axis, normal, out float across) && across < nearest) { nearest = across; cross = d; }
+            if (cross < 0) continue;
+            int gapLow = cross, gapHigh = cross;
+            while (gapLow > from && Blocked(s, centre, radius, gapLow - 1, axis, normal, out _)) gapLow--;
+            while (gapHigh < to && Blocked(s, centre, radius, gapHigh + 1, axis, normal, out _)) gapHigh++;
+            int lows = 0, highs = 0, members = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (ChoirConcertRules.ChorusRow(s.Voices[i].Ordinal) != row) continue;
+                members++;
+                Vector2 d = at[i] - centre;
+                float deg = MathF.Atan2(d.Y, d.X) * 180 / MathF.PI;
+                if (deg < from - 90) deg += 360;
+                angle[i] = deg;
+                if (deg < cross) Insert(low, ref lows, i, angle, descending: true);
+                else Insert(high, ref highs, i, angle, descending: false);
+            }
+            if (members == 0) continue;
+            float step = MathF.Min(PartGap / radius * 180 / MathF.PI, (seatTo - seatFrom) / members);
+            // Each side keeps its order, outward from the gap, at least `step` apart; a side that overflows its
+            // parting range slides back in (it then crowds).
+            float edge = gapLow - 1;
+            for (int k = 0; k < lows; k++) { target[low[k]] = MathF.Min(angle[low[k]], edge); edge = target[low[k]] - step; }
+            if (lows > 1 && target[low[lows - 1]] < from)
+                for (int k = 0; k < lows; k++) target[low[k]] = gapLow - 1 - k * (gapLow - 1 - from) / (lows - 1f);
+            edge = gapHigh + 1;
+            for (int k = 0; k < highs; k++) { target[high[k]] = MathF.Max(angle[high[k]], edge); edge = target[high[k]] + step; }
+            if (highs > 1 && target[high[highs - 1]] > to)
+                for (int k = 0; k < highs; k++) target[high[k]] = gapHigh + 1 + k * (to - gapHigh - 1) / (highs - 1f);
+            for (int k = 0; k < lows + highs; k++)
+            {
+                int i = k < lows ? low[k] : high[k - lows];
+                at[i] += (ArcPoint(centre, radius, target[i]) - ArcPoint(centre, radius, angle[i])) * ramp;
+            }
+        }
+    }
+
+    // A whole degree of a row's arc lies in the beam's corridor (the drawn half width: the throat's near the mouth).
+    private static bool Blocked(ChoirDrawState s, Vector2 centre, float radius, int degree, Vector2 axis, Vector2 normal, out float across)
+    {
+        Vector2 d = ArcPoint(centre, radius, degree) - s.BeamOrigin;
+        float along = Vector2.Dot(d, axis);
+        across = MathF.Abs(Vector2.Dot(d, normal));
+        return along > 0 && across < ThroatHalfWidth(along) + PartMargin;
+    }
+
+    // The beam's drawn half width at `along` px from the mouth: the throat widens from the organ mouth to the full
+    // width over BeamStart (as DollChoirEnergy draws it).
+    internal static float ThroatHalfWidth(float along)
+    {
+        float t = ChoirConcertRules.Clamp01(along / ChoirConcertRules.BeamStart);
+        return ChoirConcertRules.OrganMouthRadius + (ChoirConcertRules.BeamHalfWidth - ChoirConcertRules.OrganMouthRadius) * t * t * (3 - 2 * t);
+    }
+
+    private static Vector2 ArcPoint(Vector2 centre, float radius, float degree)
+    {
+        float a = degree * MathF.PI / 180;
+        return centre + new Vector2(MathF.Cos(a), MathF.Sin(a)) * radius;
+    }
+
+    // Insertion into a short index list ordered by angle, nearest the gap first.
+    private static void Insert(Span<int> list, ref int length, int index, Span<float> angle, bool descending)
+    {
+        int k = length++;
+        while (k > 0 && (descending ? angle[list[k - 1]] < angle[index] : angle[list[k - 1]] > angle[index]))
+        {
+            list[k] = list[k - 1];
+            k--;
+        }
+        list[k] = index;
     }
 
     private static Vector2 V(NVector2 v) => new(v.X, v.Y);
@@ -418,6 +509,9 @@ internal sealed class ChoirDrawState
     internal Vector2 Stage;
     internal float Clock;
     internal int VoiceTotal;
+    // The organ's clock: the concert clock, or after a stop the closing clock that runs on to the case vanish
+    // (ChoirConcertRules.ClosingClock); OrganCap > 0 caps its envelopes at the stop of a chorus whose target died.
+    internal float OrganClock, OrganCap;
     // A cancelled concert: the organ crumbles from the clock it had (CancelAge >= 0, ticks since the cancel).
     internal float CancelClock, CancelAge = -1;
     // The beam: origin, aim, age from the inhale (0..35 warning, 36.. live), closing 0..1, chord voices at fire.
@@ -441,7 +535,7 @@ internal sealed class ChoirDrawState
         VoiceCount = NoteCount = SparkCount = BatonTrailCount = 0;
         Array.Clear(Notes);
         Beam = Baton = Peer = false;
-        Clock = 0;
+        Clock = OrganClock = OrganCap = 0;
         VoiceTotal = 0;
         CancelAge = ResidueAge = -1;
         BeamClose = BatonSwing = 0;
@@ -464,12 +558,17 @@ internal sealed class ChoirHymnMaterial : IDollEnergyMaterial
     {
         Effect? effect = Effect;
         if (effect is null || effect.IsDisposed || NoiseA is null || NoiseB is null || (uint)pass >= (uint)passes.Length) return false;
+        // Every uniform-only quantity is computed here, not in the shader (no preshader math).
+        double clock = context.Clock % 3600.0;
+        float third = (float)Math.Floor(clock / 3);
         DollPixelArt.Set(effect, "uWorldViewProjection", context.Projection);
         DollPixelArt.Set(effect, "dotOrigin", context.DotOrigin);
-        DollPixelArt.Set(effect, "clock", (float)(context.Clock % 3600.0));
-        DollPixelArt.Set(effect, "reduced", context.Reduced ? 1f : 0f);
+        DollPixelArt.Set(effect, "tick", new Vector4((float)Math.Floor(clock / 2), (float)Math.Floor(clock / 4),
+            Frac(clock * .09), Frac(clock * .15)));
+        DollPixelArt.Set(effect, "sparkleShift", new Vector2(third * 17.3f, third * 5.1f));
+        DollPixelArt.Set(effect, "detail", context.Reduced ? new Vector4(2, 0, 1, 0) : new Vector4(6, 1, 0, 0));
         DollPixelArt.Set(effect, "throat", ChoirConcertRules.OrganMouthRadius * DollWeaponCanvas.DotScale);
-        DollPixelArt.Set(effect, "throatLength", ChoirConcertRules.BeamStart * DollWeaponCanvas.DotScale);
+        DollPixelArt.Set(effect, "throatInverse", 1f / Math.Max(1f, ChoirConcertRules.BeamStart * DollWeaponCanvas.DotScale));
         device.Textures[1] = NoiseA;
         device.SamplerStates[1] = SamplerState.LinearWrap;
         device.Textures[2] = NoiseB;
@@ -477,4 +576,6 @@ internal sealed class ChoirHymnMaterial : IDollEnergyMaterial
         DollPixelArt.Apply(effect, passes[pass]);
         return true;
     }
+
+    private static float Frac(double value) => (float)(value - Math.Floor(value));
 }

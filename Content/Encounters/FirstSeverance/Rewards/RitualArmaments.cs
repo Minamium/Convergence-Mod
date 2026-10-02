@@ -152,13 +152,14 @@ public sealed class ChoirOfTheUnmade : RitualArmament
         if (player.whoAmI != Main.myPlayer) return false;
         player.AddBuff(Item.buffType, 2);
         // The new voice appears at the raised baton tip beside the owner (never at a distant cursor) and joins
-        // the running concert clock without restarting it.
-        float clock = 0;
+        // the running concert clock and target without restarting them (it may become the lead: a peer must see
+        // its target from the spawn packet on).
+        float clock = 0, target = -1;
         foreach (Projectile existing in Main.ActiveProjectiles)
             if (existing.owner == player.whoAmI && existing.ModProjectile is ChoirChorister)
-            { clock = existing.ai[0]; break; }
+            { clock = existing.ai[0]; target = existing.ai[1]; break; }
         Vector2 at = player.MountedCenter + new Vector2(ChoirConcertRules.SpawnOffset.X * player.direction, ChoirConcertRules.SpawnOffset.Y);
-        int index = Projectile.NewProjectile(source, at, Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, clock, -1, 0);
+        int index = Projectile.NewProjectile(source, at, Vector2.Zero, Item.shoot, damage, knockback, player.whoAmI, clock, target, 0);
         if (index >= 0 && index < Main.maxProjectiles) Main.projectile[index].originalDamage = Item.damage;
         return false;
     }

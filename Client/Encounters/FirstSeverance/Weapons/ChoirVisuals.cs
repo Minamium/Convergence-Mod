@@ -25,6 +25,8 @@ internal static class ChoirClient
     internal const float SummonVolume = .7f, VerseWarnVolume = .8f, VerseVolume = .7f, OrganRiseVolume = .75f, PipeVolume = .6f;
     internal const float ChorusWarnVolume = .85f, ChorusFireVolume = .9f, ChorusEndVolume = .7f, MissVolume = .8f;
     internal const float NoteHitVolume = .6f, ChorusHitVolume = .55f;
+    // A chorus whose target died fades its cue over half a second under the quiet close; a lost one over CloseTicks.
+    internal const int FinishFadeTicks = 30;
     internal static readonly string[] VerseFire =
     {
         "ChoirVerseFire0", "ChoirVerseFire1", "ChoirVerseFire2", "ChoirVerseFire3", "ChoirVerseFire4",
@@ -43,10 +45,12 @@ internal static class ChoirClient
         internal readonly int[] Cues = new int[Slots];
         internal readonly Vector2[] Hits = new Vector2[ChoirDrawState.MaxSparks];
         internal readonly ulong[] HitTicks = new ulong[ChoirDrawState.MaxSparks];
-        internal int HitHead, Voices = 1, ChordVoices = 1, CancelClock;
+        internal int HitHead, Voices = 1, ChordVoices = 1, CancelClock, Target = -1, CloseStop, ChorusFadeTicks = ChoirConcertRules.CloseTicks;
         internal float PreviousClock;
-        internal ulong LeadTick, CancelTick, ResidueTick, ChorusFadeTick, LastNoteHit, LastChorusHit;
-        internal bool Cancelled, Residue;
+        internal ulong LeadTick, CancelTick, ResidueTick, ChorusFadeTick, LastNoteHit, LastChorusHit, CloseTick;
+        // Cancelled: the organ crumbles. Closing: the organ goes on closing after the clock stopped (a stop in the
+        // release, or CloseFinished: the target died and the concert closes quietly).
+        internal bool Cancelled, Residue, Closing, CloseFinished;
         internal Vector2 Stage, ResidueOrigin;
         internal float ResidueAngle;
         internal SlotId Chorus = SlotId.Invalid;
@@ -80,7 +84,7 @@ internal static class ChoirClient
 
     private static float Volume(int owner, float volume) => owner == Main.myPlayer ? volume : volume * PeerVolume;
 
-    // The lead voice's accepted clock, once per real tick: concert cues, a cancel's miss cue and organ crumble.
+    // The lead voice's accepted clock, once per real tick: concert cues and how a stopped concert ends.
     internal static void Concert(Projectile p, ChoirChorister lead)
     {
         OwnerState o = Owner(p.owner);
@@ -92,21 +96,63 @@ internal static class ChoirClient
         // one- or two-tick correction is neither.
         bool wrapped = previous >= ChoirConcertRules.Cycle - 2 && clock >= 1 && clock <= 3;
         bool stopped = clock == 0 && previous > 0;
-        if (stopped && previous >= ChoirConcertRules.Gather && previous < ChoirConcertRules.Release) Cancel(o, p.owner, (int)previous);
+        if (stopped) Stop(o, p.owner, (int)previous, vanished: false);
         if (stopped || wrapped || clock < previous - DollCueClock.FreshScoreDrop) Array.Fill(o.Cues, DollCueClock.Armed);
         if (clock > 0) Cues(o, p, previous, clock);
+        // The target of the running concert (the stop tick already carries -1), to tell a kill from a loss.
+        int target = (int)p.ai[1];
+        if (clock > 0 && target >= 0 && target < Main.maxNPCs) o.Target = target;
         o.PreviousClock = clock;
     }
 
-    // A concert that stopped with its organ open (a lost target, an unusable owner, every voice gone): the failure
-    // cue, the chorus fading out over CloseTicks and the organ crumbling.
+    // How a concert that stopped at `previous` ends. In its release the organ simply finishes closing. Before it, with
+    // the organ out: a target that died (inactive or no life left) closes it quietly with the success cue; a lost
+    // target, an unusable owner or every voice gone (`vanished`) crumbles it with the failure cue.
+    private static void Stop(OwnerState o, int owner, int previous, bool vanished)
+    {
+        if (previous >= ChoirConcertRules.Release) Close(o, previous, finished: false);
+        else if (previous < ChoirConcertRules.Gather) return;
+        else if (!vanished && Died(o.Target)) Finish(o, owner, previous);
+        else Cancel(o, owner, previous);
+    }
+
+    private static bool Died(int target)
+        => target >= 0 && target < Main.maxNPCs && (!Main.npc[target].active || Main.npc[target].life <= 0);
+
+    private static void Close(OwnerState o, int stop, bool finished)
+    {
+        o.Closing = true;
+        o.CloseFinished = finished;
+        o.CloseStop = stop;
+        o.CloseTick = Main.GameUpdateCount;
+    }
+
+    // The target died before the release: the success close at the organ, the chorus fading under it, the organ
+    // closing as a release from where it stood.
+    private static void Finish(OwnerState o, int owner, int clock)
+    {
+        Close(o, clock, finished: true);
+        DollWeaponAudio.Play("ChoirChorusEnd", o.Stage, Volume(owner, ChorusEndVolume));
+        Fade(o, FinishFadeTicks);
+    }
+
+    // A concert that stopped with its organ open and its target not dead: the failure cue, the chorus fading out
+    // over CloseTicks and the organ crumbling.
     private static void Cancel(OwnerState o, int owner, int clock)
     {
         o.Cancelled = true;
+        o.Closing = false;
         o.CancelClock = clock;
         o.CancelTick = Main.GameUpdateCount;
         DollWeaponAudio.Play("ChoirChorusMiss", o.Stage, Volume(owner, MissVolume));
-        if (o.Chorus.IsValid) o.ChorusFadeTick = Main.GameUpdateCount;
+        Fade(o, ChoirConcertRules.CloseTicks);
+    }
+
+    private static void Fade(OwnerState o, int ticks)
+    {
+        if (!o.Chorus.IsValid) return;
+        o.ChorusFadeTick = Main.GameUpdateCount;
+        o.ChorusFadeTicks = ticks;
     }
 
     private static void Cues(OwnerState o, Projectile lead, float previous, float clock)
@@ -146,6 +192,7 @@ internal static class ChoirClient
             o.ChordVoices = ChoirConcertRules.ChordVoices(o.Voices);
             DollWeaponAudio.Stop(ref o.Chorus);
             o.ChorusFadeTick = 0;
+            o.Closing = false;
             o.Chorus = DollWeaponAudio.Play(ChorusFire[o.ChordVoices - 1], stage, Volume(owner, ChorusFireVolume));
             ModContent.GetInstance<RitualWeaponFeedback>().Kick(owner, 3);
         }
@@ -154,7 +201,7 @@ internal static class ChoirClient
     }
 
     // Once per tick after every projectile updated: a concert whose lead vanished (death, dismissal, every voice
-    // sacrificed) is cancelled; a cancelled chorus cue fades out over CloseTicks.
+    // sacrificed) ends as a loss (or finishes closing in its release); a stopped chorus cue fades out.
     internal static void PostUpdate()
     {
         ulong now = Main.GameUpdateCount;
@@ -163,13 +210,13 @@ internal static class ChoirClient
             if (owners[i] is not { } o) continue;
             if (o.LeadTick < now && o.PreviousClock > 0)
             {
-                if (o.PreviousClock >= ChoirConcertRules.Gather && o.PreviousClock < ChoirConcertRules.Release) Cancel(o, i, (int)o.PreviousClock);
+                Stop(o, i, (int)o.PreviousClock, vanished: true);
                 o.PreviousClock = 0;
                 Array.Fill(o.Cues, DollCueClock.Armed);
             }
             if (o.ChorusFadeTick != 0)
             {
-                float t = (now - o.ChorusFadeTick) / (float)ChoirConcertRules.CloseTicks;
+                float t = (now - o.ChorusFadeTick) / (float)Math.Max(1, o.ChorusFadeTicks);
                 if (t >= 1 || !SoundEngine.TryGetActiveSound(o.Chorus, out var sound)) { DollWeaponAudio.Stop(ref o.Chorus); o.ChorusFadeTick = 0; }
                 else sound.Volume = 1 - t;
             }
@@ -228,7 +275,7 @@ internal static class ChoirClient
                     if (voice.IsLead)
                     {
                         s.Stage = visuals.Stage(fraction);
-                        s.Clock = ChoirConcertRules.Running(voice.Clock) ? voice.Clock + fraction : 0;
+                        s.Clock = s.OrganClock = ChoirConcertRules.Running(voice.Clock) ? voice.Clock + fraction : 0;
                     }
                     if (s.VoiceCount >= ChoirDrawState.MaxVoices) break;
                     s.Voices[s.VoiceCount++] = new ChoirVoiceDraw
@@ -258,7 +305,8 @@ internal static class ChoirClient
         // Owners whose organ is still crumbling, whose beam residue is cooling or whose notes just struck, even
         // with no projectile left this frame.
         for (int i = 0; i < Main.maxPlayers; i++)
-            if (owners[i] is { } o && (o.Cancelled || o.Residue || Main.GameUpdateCount - o.HitTicks[(o.HitHead + o.Hits.Length - 1) % o.Hits.Length] <= 16))
+            if (owners[i] is { } o && (o.Cancelled || o.Closing || o.Residue
+                    || Main.GameUpdateCount - o.HitTicks[(o.HitHead + o.Hits.Length - 1) % o.Hits.Length] <= 16))
                 Touch(i);
         for (int i = 0; i < Main.maxPlayers; i++)
         {
@@ -280,6 +328,19 @@ internal static class ChoirClient
                 float age = (float)(now - o.CancelTick);
                 if (age >= ChoirPresentation.CrumbleTicks + 30) o.Cancelled = false;
                 else { s.CancelAge = age; s.CancelClock = o.CancelClock; s.Stage = s.VoiceTotal > 0 ? s.Stage : o.Stage; }
+            }
+            if (o.Closing)
+            {
+                // The organ goes on closing to the case vanish after the clock stopped, until a new concert's organ
+                // would appear.
+                float clock = ChoirConcertRules.ClosingClock(o.CloseStop, (float)(now - o.CloseTick), o.CloseFinished);
+                if (clock >= ChoirConcertRules.OrganGone || s.Clock >= ChoirConcertRules.Gather) o.Closing = false;
+                else
+                {
+                    s.OrganClock = clock;
+                    s.OrganCap = o.CloseFinished ? o.CloseStop : 0;
+                    s.Stage = s.VoiceTotal > 0 ? s.Stage : o.Stage;
+                }
             }
             if (o.Residue)
             {

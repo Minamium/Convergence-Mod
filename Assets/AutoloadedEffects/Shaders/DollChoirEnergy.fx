@@ -10,7 +10,9 @@
 //          spiral inward.
 //   Trail  note and baton trails: brightest at the head, dissolving into empty dots toward the tail.
 // Uniform-dependent choices are written with lerp/step (no uniform-only branch: FNA's MojoShader mistranslates
-// them).
+// them), and every quantity that depends on uniforms alone (clock steps and drifts, the strand cap, the throat
+// length) is computed on the CPU (ChoirHymnMaterial.Apply); the only preshader left is the compiler folding
+// dotOrigin into the dot grid, as in DollPixel.
 //
 // Vertex layout (C# DollPixelVertex): POSITION0 float3, TEXCOORD0 L, TEXCOORD1 S, TEXCOORD2 T (float4).
 //   L = (along 0..1, across -1..1, length, half width) in dots (DollWeaponCanvas.EnergyQuad / EnergyStrip);
@@ -20,10 +22,11 @@
 //   Trail T = (alpha, head heat 0..1, seed, 0)
 matrix uWorldViewProjection;
 float2 dotOrigin;     // absolute world dot of target cell (0, 0)
-float clock;          // game ticks + fraction, wrapped
-float reduced;        // 1 under Reduced Effects, else 0
+float4 tick;          // CPU: floor(clock / 2), floor(clock / 4), frac(clock * .09), frac(clock * .15) (clock in ticks)
+float2 sparkleShift;  // CPU: floor(clock / 3) * (17.3, 5.1)
+float4 detail;        // CPU: strand cap (6, Reduced Effects 2), every-beat wavefront weight (1 / 0), chord-change weight (0 / 1), 0
 float throat;         // organ mouth radius in dots
-float throatLength;   // dots over which the throat widens to the full beam
+float throatInverse;  // CPU: 1 / the dots over which the throat widens to the full beam
 
 sampler noiseA : register(s1);
 sampler noiseB : register(s2);
@@ -116,8 +119,9 @@ float4 HymnPS(PrimOut i) : COLOR0
     float strands = i.T.z - chord * 8;
     float seed = i.T.w;
 
-    // The throat: the organ mouth's radius widening to the beam's half width over the first throatLength dots.
-    float t = saturate(along / max(throatLength, 1));
+    // The throat: the organ mouth's radius widening to the beam's half width over the first throatLength dots
+    // (BeamStart, where collision begins; the throat glows over the organ and never hits).
+    float t = saturate(along * throatInverse);
     float local = lerp(min(throat, halfWidth), halfWidth, t * t * (3 - 2 * t));
     float r = abs(across) / max(local, 0.5);
     clip(min(min(along + 0.5, len + 0.5 - along), 1.0001 - r));
@@ -133,7 +137,7 @@ float4 HymnPS(PrimOut i) : COLOR0
     float beat = live - floor(live / 36) * 36;
     float front = saturate(1 - abs(along - beat * len / 12) / 5) * step(beat, 13);
     float change = saturate(step(abs(live - 78), 6.5) + step(abs(live - 150), 6.5));
-    intensity += front * lerp(1, change, reduced) * 0.5;
+    intensity += front * (detail.y + change * detail.z) * 0.5;
 
     // Chord colour: Fm9 deepens the hem, the closing open fifth blooms toward the core.
     float fm9 = step(0.5, chord) * step(chord, 1.5), fifth = step(1.5, chord);
@@ -150,7 +154,7 @@ float4 HymnPS(PrimOut i) : COLOR0
     colour = lerp(colour, White, step(abs(across), 0.75));
 
     // Brass standing waves, one per chord voice (Reduced Effects: at most two).
-    float strandsOn = min(strands, lerp(6, 2, reduced));
+    float strandsOn = min(strands, detail.x);
     float s = max(max(Strand(along, across, local, live, 0, 1, strandsOn), Strand(along, across, local, live, 1, 1.5, strandsOn)),
                   max(Strand(along, across, local, live, 2, 2, strandsOn), Strand(along, across, local, live, 3, 2.5, strandsOn)));
     s = max(s, max(Strand(along, across, local, live, 4, 3, strandsOn), Strand(along, across, local, live, 5, 4, strandsOn)));
@@ -159,7 +163,7 @@ float4 HymnPS(PrimOut i) : COLOR0
     colour = lerp(colour, Bone, step(1.5, s));
 
     // Sparkle.
-    float sparkle = step(0.988, Hash(cell + floor(clock / 3) * float2(17.3, 5.1) + seed)) * step(r, 0.85);
+    float sparkle = step(0.988, Hash(cell + sparkleShift + seed)) * step(r, 0.85);
     colour = lerp(colour, White, sparkle);
     return float4(colour * alpha, alpha);
 }
@@ -184,9 +188,9 @@ float4 IrisPS(PrimOut i) : COLOR0
     float lip = step(abs(d - mouth * radius), 0.6);
     // Motes spiralling inward on four arms.
     float angle = atan2(p.y, p.x);
-    float s = angle / Tau * 4 + rho * 5 + clock * 0.09 + seed;
+    float s = angle / Tau * 4 + rho * 5 + tick.z + seed;
     float arm = step(0.8, frac(s));
-    float sparse = step(0.5, Hash(floor(cell * 0.5) + floor(clock / 4)));
+    float sparse = step(0.5, Hash(floor(cell * 0.5) + tick.y));
     float mote = arm * sparse * step(mouth + 0.1, rho) * step(rho, 1) * progress;
 
     float a = max(max(inside * progress, lip * (0.45 + 0.55 * progress)), mote) * alpha;
@@ -204,12 +208,12 @@ float4 TrailPS(PrimOut i) : COLOR0
     float alpha = saturate(i.T.x);
     float heat = saturate(i.T.y);
     float seed = i.T.z;
-    float flow = tex2D(noiseA, float2(i.L.x * i.L.z / 18 - clock * 0.15, seed * 0.41)).r;
+    float flow = tex2D(noiseA, float2(i.L.x * i.L.z / 18 - tick.w, seed * 0.41)).r;
     float intensity = heat * pow(along, 1.4) * (1 - across * 0.7) + (flow - 0.5) * 0.3 * along;
     float v = saturate(intensity) * 7 + (Bayer4(cell) - 0.5) * 0.9;
     clip(min(v - 0.6, 1.0001 - across));
     float3 colour = Ramp(clamp(floor(v), 0, 6));
-    float sparkle = step(0.97, Hash(cell + floor(clock / 2) + seed)) * step(0.4, along);
+    float sparkle = step(0.97, Hash(cell + tick.x + seed)) * step(0.4, along);
     colour = lerp(colour, White, sparkle);
     return float4(colour * alpha, alpha);
 }

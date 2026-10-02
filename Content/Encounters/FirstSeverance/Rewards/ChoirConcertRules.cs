@@ -62,9 +62,13 @@ internal static class ChoirConcertRules
     internal const float CloudArc = 140 * MathF.PI / 180, CloudRadius = 96, CloudRingStep = 46;
 
     // ---- Design anchors (the art is fitted to these) ------------------------------------------
-    // Chorister, from the projectile centre: the stand tip (sprite pivot) and the mouth that sings the notes.
+    // Chorister, from the projectile centre (facing right): the stand tip (sprite pivot) and, per variant
+    // (Chorister0/1/2 = identity % 3, the same on every client), the wide-open mouth of singing frame 2, the frame
+    // on screen from the tick a note leaves it (SingFrame). The art-fit test keeps each within one dot of its art.
     internal static readonly Vector2 StandTip = new(0, 38);
-    internal static readonly Vector2 Mouth = new(8, -8);
+    internal static readonly Vector2[] Mouths = { new(10, -12), new(11, -13), new(7, -12) };
+
+    internal static Vector2 Mouth(int variant) => Mouths[Math.Clamp(variant, 0, Mouths.Length - 1)];
     // Organ, from S: the top-left of the 190 x 192 px case, its mouth radius (the beam throat) and the row
     // where the case top rail starts (pipes stand above it).
     internal static readonly Vector2 OrganTopLeft = new(-95, -147);
@@ -100,6 +104,19 @@ internal static class ChoirConcertRules
     internal static float PipeRise(float clock, int rank)
         => Arrive((clock - PipeStart(rank)) / PipeRiseTicks) * (1 - Smooth((clock - PipeSink(rank)) / PipeRiseTicks));
 
+    // ---- The organ after a stop (presentation) ----------------------------------------------------
+    // The case is gone at OrganGone. A concert that stops in its release keeps closing on its own clock; a chorus
+    // whose target died closes quietly as a release from the state it had: the clock restarts at Release and the
+    // stop clock caps every envelope, so nothing opens further. A lost target crumbles the organ instead.
+    internal const int OrganGone = CaseClose + CaseCloseTicks;
+
+    internal static float ClosingClock(int stop, float since, bool finished) => (finished ? Release : stop) + Math.Max(0, since);
+
+    internal static float CaseOpen(float clock, float cap) => cap > 0 ? Math.Min(CaseOpen(clock), CaseOpen(cap)) : CaseOpen(clock);
+
+    internal static float PipeRise(float clock, int rank, float cap)
+        => cap > 0 ? Math.Min(PipeRise(clock, rank), PipeRise(cap, rank)) : PipeRise(clock, rank);
+
     // More voices, richer chord: chord lines (and chorus cue) and raised pipe ranks.
     internal static int ChordVoices(int voices) => Math.Clamp(voices, 1, MaxChordVoices);
     internal static int RaisedRanks(int voices) => Math.Clamp(voices + 1, 2, Ranks);
@@ -117,6 +134,23 @@ internal static class ChoirConcertRules
         if (t < 0 || t % Beat != 0) return -1;
         int beat = t / Beat;
         return beat < VerseBeats ? beat : -1;
+    }
+
+    // A voice sings each verse note once per concert, whatever happens to its place. `lastSung` is the last note it
+    // sang in this concert (-1 none; reset on a wrap or a stop). The due note is the latest whose tick has passed,
+    // sung at most `late` ticks after it: a voice whose part moved earlier (a voice joined with a lower identity,
+    // or one was sacrificed) still sings the note it was about to sing, one whose part moved later never sings a
+    // note twice. NoteCatchUp covers the largest part move (three sixteenths) plus a two-tick clock step. The caller
+    // caps `late` by the voice's own age, so a new voice never sings a note from before it appeared and no 600-tick
+    // window holds more than one concert's notes.
+    internal const int NoteCatchUp = (Parts - 1) * Sixteenth + 2;
+
+    internal static int DueNote(int clock, int ordinal, int lastSung, int late = NoteCatchUp)
+    {
+        int t = clock - Verse - NoteOffset(ordinal);
+        if (t < 0) return -1;
+        int beat = t / Beat;
+        return beat < VerseBeats && beat > lastSung && t - beat * Beat <= Math.Clamp(late, 0, NoteCatchUp) ? beat : -1;
     }
 
     // Sung pitches: F minor pentatonic one octave under the shared ladder (F4 Ab4 Bb4 C5 Eb5 F5 Ab5 Bb5 C6).
@@ -225,16 +259,19 @@ internal static class ChoirConcertRules
         ordinal = Math.Clamp(ordinal, 0, count - 1);
         int row = ChorusRow(ordinal), start = row == 0 ? 0 : row == 1 ? Row0 : Row0 + Row1;
         int members = row == 2 ? count - start : Math.Min(row == 0 ? Row0 : Row1, count - start);
-        (Vector2 centre, float radius, float from, float to) = row switch
-        {
-            0 => (new Vector2(0, -40), 150f, 35f, 145f),
-            1 => (new Vector2(0, -122), 196f, 30f, 150f),
-            _ => (new Vector2(0, -70), 175f, 200f, 340f),
-        };
+        (Vector2 centre, float radius, float from, float to) = ChorusArc(row);
         int seat = CentreOut(ordinal - start, members, rightIsLow: row != 2);
         float angle = (from + (to - from) * (seat + .5f) / members) * MathF.PI / 180;
         return centre + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * radius;
     }
+
+    // A chorus row's arc from S: centre, radius and seat range in degrees (y down, 90 straight below).
+    internal static (Vector2 Centre, float Radius, float From, float To) ChorusArc(int row) => row switch
+    {
+        0 => (new Vector2(0, -40), 150f, 35f, 145f),
+        1 => (new Vector2(0, -122), 196f, 30f, 150f),
+        _ => (new Vector2(0, -70), 175f, 200f, 340f),
+    };
 
     // Idle and verse seats around the owner: ring r holds 5 + 2r voices at radius 96 + 46r over the 140 deg arc
     // above the player, filled from the top centre outward; seats bob +-3 px across and +-5 px up and down.

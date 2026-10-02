@@ -54,12 +54,21 @@ internal static class ChoirTargeting
         => npc.active && npc.CanBeChasedBy(projectile) && Vector2.DistanceSquared(npc.Center, from) <= range * range
             && Collision.CanHitLine(from, 1, 1, npc.position, npc.width, npc.height);
 
+    // The lead's target. Only the owner judges range, sight and CanBeChasedBy; a peer keeps the replicated choice
+    // while that NPC exists, because its copy of the owner's position lags and must never end a concert the owner
+    // is still singing. The owner ends it by netUpdate (ai[1] = -1 with the clock at 0).
     internal static NPC? Current(Projectile projectile, Player owner)
     {
         int index = (int)projectile.ai[1];
-        return index >= 0 && index < Main.maxNPCs && Valid(Main.npc[index], projectile, owner.MountedCenter, ChoirConcertRules.RetainRange)
-            ? Main.npc[index] : null;
+        if (index < 0 || index >= Main.maxNPCs) return null;
+        NPC npc = Main.npc[index];
+        if (projectile.owner != Main.myPlayer) return npc.active ? npc : null;
+        return Valid(npc, projectile, owner.MountedCenter, ChoirConcertRules.RetainRange) ? npc : null;
     }
+
+    // A replicated target index (peers: the concert runs while the owner keeps one, even through an NPC's death
+    // packet arriving before the owner's retarget).
+    internal static bool Chosen(Projectile projectile) => (int)projectile.ai[1] >= 0 && (int)projectile.ai[1] < Main.maxNPCs;
 
     // Owner only: writes ai[1] with netUpdate when the choice changes; a replica keeps the replicated target.
     internal static NPC? Acquire(Projectile lead, Player owner)
@@ -93,7 +102,7 @@ internal static class ChoirTargeting
 public sealed class ChoirChorister : ModProjectile
 {
     private bool stageSet;
-    private int previousClock, lastNoteTick = -1;
+    private int previousClock, lastNoteBeat = -1;
     internal NVector2 Stage { get; private set; }
     internal int Life { get; private set; }
     internal int Ordinal { get; private set; }
@@ -160,17 +169,27 @@ public sealed class ChoirChorister : ModProjectile
         NPC? target;
         if (IsLead)
         {
-            target = usable ? ChoirTargeting.Acquire(Projectile, owner) : null;
-            if (!usable && authority && (int)Projectile.ai[1] != -1) { Projectile.ai[1] = -1; Projectile.netUpdate = true; }
-            int clock = ChoirConcertRules.Advance(before, target is not null);
+            int clock;
+            if (authority)
+            {
+                target = usable ? ChoirTargeting.Acquire(Projectile, owner) : null;
+                if (!usable && (int)Projectile.ai[1] != -1) { Projectile.ai[1] = -1; Projectile.netUpdate = true; }
+                clock = ChoirConcertRules.Advance(before, target is not null);
+                if ((clock == 0) != (before == 0) || clock > 0 && clock % 60 == 0) Projectile.netUpdate = true;
+            }
+            else
+            {
+                // A peer runs the clock while the owner keeps a target and stops it only on the owner's update.
+                target = ChoirTargeting.Current(Projectile, owner);
+                clock = ChoirConcertRules.Advance(before, ChoirTargeting.Chosen(Projectile));
+            }
             Projectile.ai[0] = clock;
-            if (authority && ((clock == 0) != (before == 0) || clock > 0 && clock % 60 == 0)) Projectile.netUpdate = true;
         }
         else
         {
             Projectile.ai[1] = lead.ai[1];
-            Projectile.ai[0] = usable ? lead.ai[0] : 0;
-            target = usable && Projectile.ai[0] > 0 ? ChoirTargeting.Current(lead, owner) : null;
+            Projectile.ai[0] = usable || !authority ? lead.ai[0] : 0;
+            target = Projectile.ai[0] > 0 && (usable || !authority) ? ChoirTargeting.Current(lead, owner) : null;
         }
 
         float concert = Projectile.ai[0];
@@ -193,15 +212,16 @@ public sealed class ChoirChorister : ModProjectile
         if (authority && (Life + Projectile.identity) % 60 == 0) Projectile.netUpdate = true;
 
         int now = (int)concert;
-        if (now < previousClock) lastNoteTick = -1;
+        // A new concert (a stop or the wrap) re-arms the verse.
+        if (now < previousClock || now == 0) lastNoteBeat = -1;
         if (authority && target is not null && usable && now > 0)
         {
-            // Notes: every tick crossed since the last update (a copied clock can step by two).
-            for (int tick = Math.Max(previousClock + 1, now - 2); tick <= now; tick++)
+            // Each verse note once per concert, even if this voice's part moved (a copied clock can also step by
+            // two); never a note from before this voice appeared.
+            int note = ChoirConcertRules.DueNote(now, ordinal, lastNoteBeat, Life - 1);
+            if (note >= 0)
             {
-                int note = ChoirConcertRules.NoteAt(tick, ordinal);
-                if (note < 0 || tick <= lastNoteTick) continue;
-                lastNoteTick = tick;
+                lastNoteBeat = note;
                 Sing(note, target, owner);
             }
             if (IsLead && previousClock < ChoirConcertRules.Inhale && now >= ChoirConcertRules.Inhale && now < ChoirConcertRules.Fire
@@ -214,7 +234,8 @@ public sealed class ChoirChorister : ModProjectile
     private void Sing(int note, NPC target, Player owner)
     {
         int facing = Projectile.spriteDirection >= 0 ? 1 : -1;
-        Vector2 mouth = Projectile.Center + new Vector2(ChoirConcertRules.Mouth.X * facing, ChoirConcertRules.Mouth.Y);
+        NVector2 open = ChoirConcertRules.Mouth(Variant);
+        Vector2 mouth = Projectile.Center + new Vector2(open.X * facing, open.Y);
         Vector2 aim = RitualArmamentItems.Aim(target.Center - mouth, facing);
         // Launch per tick: toward the target plus a lift; the note runs two updates a tick.
         Vector2 velocity = (aim * ChoirConcertRules.NoteLaunch + new Vector2(0, -ChoirConcertRules.NoteLift)) / 2f;
@@ -309,7 +330,8 @@ public sealed class ChoirSungNote : ModProjectile
 // lead's concert clock (ai[0] = clock - Inhale: 0..35 the harmless warning axis, 36..215 live), ai[1] = target,
 // ai[2] = 0 open or -1..-CloseTicks closing (harmless). Damage is ChorusShare x the sum of every living voice's
 // current damage, recomputed each tick; one hit per NPC root every HitCadence ticks. Removing the lead hands the
-// beam to the next voice; a lost target, an unusable owner or no voice closes it.
+// beam to the next voice; a lost target, an unusable owner or no voice closes it (the owner decides and sends
+// ai[2]; peers follow that update and their own replayed clock's end).
 public sealed class ChoirChorus : ModProjectile
 {
     private readonly ulong[] nextRootHit = new ulong[Main.maxNPCs];
@@ -360,8 +382,10 @@ public sealed class ChoirChorus : ModProjectile
         ChoirChorister? lead = ChoirConcert.Lead(Projectile.owner, out _, out double damage);
         int clock = lead is null ? 0 : (int)lead.Clock;
         NPC? target = lead is null ? null : ChoirTargeting.Current(lead.Projectile, owner);
-        if (lead is null || !ChoirConcert.Usable(owner) || target is null
-            || !(ChoirConcertRules.Warning(clock) || ChoirConcertRules.Live(clock)))
+        // The owner closes a beam whose target is lost or whose owner is unusable (and sends it); a peer closes only
+        // on that update, on the natural end of its replayed clock or when no voice is left.
+        bool held = lead is not null && (authority ? target is not null && ChoirConcert.Usable(owner) : ChoirTargeting.Chosen(lead.Projectile));
+        if (lead is null || !held || !(ChoirConcertRules.Warning(clock) || ChoirConcertRules.Live(clock)))
         {
             Projectile.ai[2] = -1;
             Projectile.friendly = false;
@@ -369,10 +393,10 @@ public sealed class ChoirChorus : ModProjectile
             return;
         }
         Projectile.ai[0] = clock - ChoirConcertRules.Inhale;
-        Projectile.ai[1] = target.whoAmI;
+        Projectile.ai[1] = lead.Projectile.ai[1];
         Projectile.Center = ChoirConcert.X(lead.Stage);
         Projectile.damage = ChoirConcertRules.ChorusDamage(damage);
-        if (authority)
+        if (authority && target is not null)
         {
             float current = Projectile.velocity.LengthSquared() > .001f ? Projectile.velocity.ToRotation() : float.NaN;
             float wanted = (target.Center - Projectile.Center).ToRotation();

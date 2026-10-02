@@ -7,8 +7,9 @@ using Convergence.Content.Encounters.FirstSeverance.Rewards;
 
 namespace Convergence.DomainTests;
 
-// Choir of the Unmade, 2026-10 refresh: the concert schedule, verse harmony, budget, beam envelope, formation,
-// envelopes, glide and the art fit, all from the pure ChoirConcertRules.
+// Choir of the Unmade, 2026-10 refresh: the concert schedule, verse harmony, notes once per beat, budget, beam
+// envelope, formation, envelopes and the organ's close after a stop, glide and the art fit, all from the pure
+// ChoirConcertRules.
 internal static partial class Program
 {
     private static readonly int[] ChoirPentatonic = { 5, 8, 10, 0, 3 }; // F Ab Bb C Eb as pitch classes above C
@@ -313,9 +314,15 @@ internal static partial class Program
     [DomainTest("Choir art fits the design anchors within one dot")]
     private static void ChoirArtFit()
     {
-        // Choristers (k = 2): the sprite pivots on the stand tip; the singing mouth (frame 1, the small "o" the
-        // note leaves from) lands within one dot (2 world px x k) of the design mouth.
-        Vector2 designMouth = ChoirConcertRules.Mouth - ChoirConcertRules.StandTip;
+        // Choristers (k = 2 export rung; one texel is one dot, 2 world px): the sprite pivots on the stand tip and
+        // each variant's mouth on the frame on screen when a note leaves it lands within one dot of that variant's
+        // design mouth, where the note spawns.
+        int noteFrame = ChoirConcertRules.SingFrame(ChoirConcertRules.NoteTick(0, 0), 0);
+        for (int beat = 0; beat < ChoirConcertRules.VerseBeats; beat++)
+        for (int ordinal = 0; ordinal < 8; ordinal++)
+            AssertEqual(noteFrame, ChoirConcertRules.SingFrame(ChoirConcertRules.NoteTick(beat, ordinal), ordinal),
+                "every note leaves on the same singing frame");
+        AssertEqual(2, noteFrame, "notes leave the wide-open mouth");
         (string Name, int K, int FrameWidth, int FrameHeight, Vector2 StandTip, Vector2[] Mouths)[] choristers =
         {
             ("Chorister0", DollArtAnchors.Chorister0.K, DollArtAnchors.Chorister0.FrameWidth, DollArtAnchors.Chorister0.FrameHeight,
@@ -325,25 +332,119 @@ internal static partial class Program
             ("Chorister2", DollArtAnchors.Chorister2.K, DollArtAnchors.Chorister2.FrameWidth, DollArtAnchors.Chorister2.FrameHeight,
                 DollArtAnchors.Chorister2.StandTip, DollArtAnchors.Chorister2.Mouths),
         };
-        foreach (var c in choristers)
+        const float dot = DollSpritePlacement.WorldPerTexel;
+        AssertEqual(3, ChoirConcertRules.Mouths.Length, "one design mouth per chorister variant");
+        for (int variant = 0; variant < choristers.Length; variant++)
         {
+            var c = choristers[variant];
             AssertEqual(2, c.K, $"{c.Name} rung");
             AssertEqual(3, c.Mouths.Length, $"{c.Name} has three singing frames");
-            float tolerance = DollSpritePlacement.WorldPerTexel * c.K;
-            Vector2 mouth = (c.Mouths[1] - c.StandTip) * DollSpritePlacement.WorldPerTexel;
-            AssertEqual(true, Vector2.Distance(mouth, designMouth) <= tolerance,
-                $"{c.Name} singing mouth {mouth} vs design {designMouth} (tolerance {tolerance} px)");
-            AssertDollNear(ChoirConcertRules.StandTip.Y * 2, c.FrameHeight * DollSpritePlacement.WorldPerTexel, tolerance,
+            Vector2 designMouth = ChoirConcertRules.Mouth(variant) - ChoirConcertRules.StandTip;
+            Vector2 mouth = (c.Mouths[noteFrame] - c.StandTip) * dot;
+            AssertEqual(true, Vector2.Distance(mouth, designMouth) <= dot,
+                $"{c.Name} mouth on frame {noteFrame} {mouth} vs design {designMouth} ({Vector2.Distance(mouth, designMouth):F2} px, one dot {dot} px)");
+            AssertDollNear(ChoirConcertRules.StandTip.Y * 2, c.FrameHeight * dot, dot,
                 $"{c.Name} stands on its tip: centre to tip is half the drawn height");
         }
         // Organ (k = 1): drawn from the design top-left, its see-through mouth is the beam origin S.
         Vector2 organMouth = ChoirConcertRules.OrganTopLeft + DollArtAnchors.ChoirOrgan.Mouth * DollSpritePlacement.WorldPerTexel;
-        float organTolerance = DollSpritePlacement.WorldPerTexel * DollArtAnchors.ChoirOrgan.K;
+        float organTolerance = dot;
         AssertEqual(true, organMouth.Length() <= organTolerance, $"organ mouth {organMouth} px from the beam origin");
         AssertDollNear(ChoirConcertRules.OrganMouthRadius, DollArtAnchors.ChoirOrgan.MouthRadius * DollSpritePlacement.WorldPerTexel,
             organTolerance, "organ mouth radius is the beam throat");
         AssertEqual(true, ChoirConcertRules.OrganRailRow < DollArtAnchors.ChoirOrgan.Height, "the rail row lies inside the organ");
         AssertDollNear(-ChoirConcertRules.OrganTopLeft.X * 2, DollArtAnchors.ChoirOrgan.Width * DollSpritePlacement.WorldPerTexel, organTolerance,
             "the organ is centred on the mouth");
+    }
+
+    [DomainTest("Choir voices sing each verse note once per concert, whatever happens to their place")]
+    private static void ChoirNotesOncePerBeat()
+    {
+        // Steady: the once-per-concert rule sings exactly the scheduled notes.
+        for (int ordinal = 0; ordinal < 12; ordinal++)
+        {
+            int last = -1;
+            for (int clock = 1; clock <= ChoirConcertRules.Cycle; clock++)
+            {
+                int due = ChoirConcertRules.DueNote(clock, ordinal, last, int.MaxValue);
+                AssertEqual(ChoirConcertRules.NoteAt(clock, ordinal), due, $"ordinal {ordinal} at {clock}");
+                if (due >= 0) last = due;
+            }
+            AssertEqual(ChoirConcertRules.VerseBeats - 1, last, "all six notes");
+        }
+        // A voice's place changes mid-verse (a voice joined with a lower identity, or one was sacrificed); the clock
+        // also steps by two now and then. Every switch, at every tick of the verse: six notes, in order, none twice.
+        int[][] moves = { new[] { 4, 3 }, new[] { 0, 1 }, new[] { 1, 0 }, new[] { 3, 4 }, new[] { 0, 3 }, new[] { 3, 0 }, new[] { 2, 5 } };
+        foreach (int[] move in moves)
+        for (int at = ChoirConcertRules.Verse; at < ChoirConcertRules.Gather; at++)
+        foreach (int step in new[] { 1, 2 })
+        {
+            int last = -1, sung = 0;
+            for (int clock = 1; clock <= ChoirConcertRules.Cycle; clock += clock % 7 == 0 ? step : 1)
+            {
+                int ordinal = clock < at ? move[0] : move[1];
+                int due = ChoirConcertRules.DueNote(clock, ordinal, last, int.MaxValue);
+                if (due < 0) continue;
+                AssertEqual(last + 1, due, $"{move[0]}->{move[1]} at {clock}: in order, none twice or skipped");
+                last = due;
+                sung++;
+            }
+            AssertEqual(ChoirConcertRules.VerseBeats, sung, $"{move[0]}->{move[1]} at {at} (step {step}): six notes");
+        }
+        // A new voice never sings a note from before it appeared (its age caps the lateness).
+        for (int born = 1; born < ChoirConcertRules.Gather; born++)
+        for (int ordinal = 0; ordinal < 4; ordinal++)
+        {
+            int last = -1;
+            for (int clock = born; clock < ChoirConcertRules.Gather; clock++)
+            {
+                int due = ChoirConcertRules.DueNote(clock, ordinal, last, clock - born);
+                if (due < 0) continue;
+                AssertEqual(true, ChoirConcertRules.NoteTick(due, ordinal) >= born, $"voice born at {born} sings note {due}");
+                last = due;
+            }
+        }
+        AssertEqual(29, ChoirConcertRules.NoteCatchUp, "a part moves at most three sixteenths, and a clock steps at most two ticks");
+    }
+
+    [DomainTest("Choir organ keeps closing to the case vanish after a stop and never re-opens")]
+    private static void ChoirOrganClose()
+    {
+        AssertEqual(616, ChoirConcertRules.OrganGone, "the case is gone at 616");
+        // A stop in the release: the organ closes on its own clock, exactly as if the concert had run on.
+        for (int stop = ChoirConcertRules.Release; stop < ChoirConcertRules.OrganGone; stop++)
+        {
+            float previous = float.MaxValue;
+            for (float since = 0; ; since += .5f)
+            {
+                float clock = ChoirConcertRules.ClosingClock(stop, since, finished: false);
+                AssertDollNear(ChoirConcertRules.CaseOpen(stop + since), ChoirConcertRules.CaseOpen(clock, 0), 1e-6, "same release");
+                float open = ChoirConcertRules.CaseOpen(clock, 0);
+                AssertEqual(true, open <= previous + 1e-6f, $"stop {stop}: the case only closes");
+                previous = open;
+                if (clock >= ChoirConcertRules.OrganGone) { AssertDollNear(0, open, 1e-6, "gone"); break; }
+            }
+        }
+        // A target that died before the release: the organ closes from the state it had, never opening further.
+        for (int stop = ChoirConcertRules.Gather; stop < ChoirConcertRules.Release; stop += 3)
+        {
+            AssertDollNear(ChoirConcertRules.CaseOpen(stop), ChoirConcertRules.CaseOpen(ChoirConcertRules.ClosingClock(stop, 0, true), stop), 1e-6,
+                $"stop {stop}: the case continues from where it stood");
+            for (int rank = 0; rank < ChoirConcertRules.Ranks; rank++)
+            {
+                float previous = ChoirConcertRules.PipeRise(stop, rank);
+                AssertDollNear(previous, ChoirConcertRules.PipeRise(ChoirConcertRules.ClosingClock(stop, 0, true), rank, stop), 1e-6,
+                    $"stop {stop} rank {rank}: the pipe continues from where it stood");
+                for (float since = .5f; since <= ChoirConcertRules.OrganGone - ChoirConcertRules.Release; since += .5f)
+                {
+                    float rise = ChoirConcertRules.PipeRise(ChoirConcertRules.ClosingClock(stop, since, true), rank, stop);
+                    AssertEqual(true, rise <= previous + 1e-6f, $"stop {stop} rank {rank}: the pipe only sinks");
+                    previous = rise;
+                }
+                AssertDollNear(0, previous, 1e-6, "every pipe down");
+            }
+            AssertDollNear(0, ChoirConcertRules.CaseOpen(ChoirConcertRules.ClosingClock(stop, ChoirConcertRules.OrganGone - ChoirConcertRules.Release, true), stop),
+                1e-6, $"stop {stop}: the case is gone after the release's 40 ticks");
+        }
     }
 }
