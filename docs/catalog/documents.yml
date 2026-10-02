@@ -650,10 +650,43 @@ documents:
   related_docs:
   - project.status
   - adr.0028
+- doc_id: encounter.crimson-foundry.rewards
+  path: docs/encounters/crimson-foundry/REWARDS.md
+  title: Scarlet Invocation — rewards
+  content_sha256: 39e57568c767593ae1d248c27563602336dfaeab2dc74d7e75392b4dbde9da7d
+  document_type: spec
+  status: provisional
+  owners:
+  - gameplay
+  - art
+  - audio
+  last_reviewed: '2026-10-02'
+  source_of_truth_for:
+  - encounter.crimson_foundry.rewards
+  aliases:
+  - Scarlet Score Reliquary
+  - 緋の聖譜櫃
+  - Scarlet reward weapons
+  - Sable Scythe
+  - Canticle Organ
+  - Scarlet Baton
+  - Ember Censer
+  - Bloodink Quill
+  related_code:
+  - Content/Encounters/CrimsonFoundry
+  - Client/Encounters/CrimsonFoundry
+  - Content/Encounters/EbonManor/Rewards
+  - Client/Encounters/EbonManor/Rewards
+  - Assets/AutoloadedEffects/Shaders/ScarletInk.fx
+  related_docs:
+  - encounter.crimson-foundry.spec
+  - encounter.ebon-manor.rewards
+  - project.art-direction
+  - project.status
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: 6853fd3089fcd53b2366afcdbb96d2baf1cf7c54edea864204fe02bfe07e866a
+  content_sha256: 267752262493d025ba7a8fad4f0631401d5f7bc776b51bff4170ce5766844f94
   document_type: spec
   status: accepted
   owners:
@@ -674,6 +707,7 @@ documents:
   related_docs:
   - project.status
   - adr.0026
+  - encounter.crimson-foundry.rewards
 - doc_id: encounter.ebon-manor.assets
   path: docs/encounters/ebon-manor/ASSET_BRIEF.md
   title: Ebon Manor asset brief
@@ -1414,7 +1448,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 3b1e75c5d77797f7461c6165bf084bafaf6fdfe9d0a16fafe00ef495f502b5e9
+  content_sha256: a648e8b232cd5e636530d423bf40721c1574ecd35465554e581e90f9b574aeab
   document_type: status
   status: accepted
   owners:

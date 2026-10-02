@@ -181,8 +181,11 @@ internal sealed class CrimsonCovenantIncarnation : GlobalNPC
 {
     public override bool InstancePerEntity => true;
     private static ulong sequence;
-    internal ulong Value;
-    public override void OnSpawn(NPC npc, IEntitySource source) => Value = ++sequence;
+    private ulong value;
+    // OnSpawn never runs on a multiplayer client, but an NPC that arrives in a slot gets fresh globals (SetDefaults),
+    // so the first read numbers it there. A client owner can then tell a reused slot from the NPC it recorded.
+    internal ulong Value => value != 0 ? value : value = ++sequence;
+    public override void OnSpawn(NPC npc, IEntitySource source) => value = ++sequence;
 }
 
 public sealed class CrimsonCompanionRay : ModProjectile

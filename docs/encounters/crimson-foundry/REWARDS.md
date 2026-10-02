@@ -250,7 +250,7 @@ Sable Mantle's bone hook on a black lacquered haft, swung in figure eights.
   - Through a roll, angular speed stays at least 25% of the stroke's peak; through the Whip's draw-back, at least 20%.
   - Peak angular acceleration stays under 0.3 rad/tick².
 - **Reach** is measured from the exported art: grip anchor to hook tip at the 2 px dot (about 120–150 px at the briefed size). Placeholder tuning uses 136 px. The Whip adds the 24 px thrust.
-- **Collision:** the curved bone edge as three capsules 26 px wide along the measured blade curve; the haft does not hurt. Collision is swept with 9 sub-samples per tick (Soboro's method), with 24-tick local immunity per stroke and a root ledger.
+- **Collision:** the curved bone edge as three capsules 26 px wide along the measured blade curve; the haft does not hurt. Collision is swept with 9 sub-samples per tick (Soboro's method). Each part of a stroke (the blade, the Whip's crescent) hits each root once per stroke through its own root ledger; native local immunity is only 1 tick, so the Whip's blade and its crescent can both land on the same NPC.
 
 **Staff (the build).**
 
@@ -289,10 +289,10 @@ Sable Mantle's bone hook on a black lacquered haft, swung in figure eights.
 
 | Projectile | Role | Data |
 |---|---|---|
-| `SableStroke` | Held stroke | `ai = (stroke index, aim, age)`; `netUpdate` at age 1, at the live start and every 6 ticks |
+| `SableStroke` | Held stroke | `ai = (stroke index, aim, age)`; `netUpdate` at age 1, at the live start and every 6 ticks. Velocity is data (`ShouldUpdatePosition` false): x = what came before (−1 nothing, 0 the previous stroke, 1–5 a Staff Reap of that many lines), y = the aim it was cast along, so every client eases the windup from the previous pose |
 | `SableStaff` | Harmless carrier while lines > 0, drawn on the owner | `ai = (lines, ticks since last engraving, —)`; `netUpdate` on each change |
-| `SableRelease` | Held release pose, harmless | `ai = (aim, lines, age)` |
-| `StaffCut` | Owner child, spawned at the cast (≤ 6 per cast) | position = the starting end; `ai = (signed length, index (5 = barline), age)`; a negative age is the wait |
+| `SableRelease` | Held release pose, harmless | `ai = (aim, lines, age)`; velocity is data: x = the interrupted stroke as index × 32 + age (−1 when cast from rest), y = that stroke's aim |
+| `StaffCut` | Owner child, spawned at the cast (≤ 6 per cast) | position = the starting end; `ai = (signed length, index (5 = barline) + 8 × lines spent, age)`; a negative age is the wait |
 
 **Presentation.**
 
@@ -357,7 +357,7 @@ Four bone organ pipes bound in a ribcage frame with a crimson heart-gem: the Tho
 **State and replication.**
 
 - `CanticleShard`: ordinary owner projectile.
-- `BoneHand`: owner child, `ai = (NPC slot, ordinal 0–15 plus a Clasp flag, age)`; a negative age is the wait.
+- `BoneHand`: owner child, `ai = (NPC slot, ordinal 0–15 + 16 × role, age)`, where the role is 0 a hand, 1 the Clasp, 2 the cadence hand (the last hand of a hymn without a Clasp, so every client plays the cadence on it); a negative age is the wait.
 - The owner keeps the mark ledger and each hand's target incarnation. Other clients draw a hand at its NPC's replicated position.
 
 **Presentation.**
@@ -566,7 +566,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
   - The offset packs the stick offset from the NPC's centre (x and y within ±512 px, 1 px steps) as an exact integer.
   - In flight, position and velocity are native. The owner sends `netUpdate` on the stick tick, and other clients then place the quill at its NPC's centre plus the offset.
 - **`BloodinkTrail`:** spawned by the owner when a quill sticks. Position is the throw origin, velocity the initial velocity, `ai = (stop tick, serial, state)`. Every client rebuilds the ink from `QuillFlight`.
-- **`SealedScore`:** `ai = (age, flight ticks, —)`. At the throw the owner sets the claimed trails' state, with `netUpdate`.
+- **`SealedScore`:** `ai = (age, flight ticks, tag)`, where tag = cast × 9 + n: the claiming cast id (0–1023) and the n quills it claimed (0–8), so a late-joining client can rebuild the timeline without a packet. At the throw the owner sets the claimed trails' state, with `netUpdate`.
 - **Timeline:** each client runs the ignition timeline from a tick stamp taken when it first sees the unroll (the Severing Silk method). The owner processes damage, as for any player projectile.
 
 **Presentation.**
@@ -607,11 +607,11 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 |---|---|---|---|
 | Sable Scythe | 1 stroke, 1 staff carrier, 1 release pose, ≤ 6 cuts per cast | lines 360 + up to 150 drain; cuts ≤ 90 from the cast | ≤ 20 |
 | Canticle Organ | ≤ 3 shards in flight, ≤ 16 hands per hymn | hand ≤ 145 from the cast | ≤ 56 (8 of them owner-only mark arcs) |
-| Scarlet Baton | 1 swing, ≤ 9 strokes (8 + 1 drying), 1 river | stroke 480; river ≤ 135 from the cast | ≤ 11 (the river ≤ 600 vertices) |
+| Scarlet Baton | 1 swing, ≤ 9 strokes (8 + 1 drying), 1 river; while a tutti burns, the next score's ≤ 9 strokes add to its ≤ 8 | stroke 480; river ≤ 135 from the cast | ≤ 11 outside a tutti (the river ≤ 600 sample points); a tutti overlapping the next score adds that score's strokes |
 | Ember Censer | 1 per slot | minion | 2 per censer |
-| Bloodink Quill | ≤ 4 in flight, ≤ 8 stuck, ≤ 8 trails, 1 score | quill 480 | ≤ 28 |
+| Bloodink Quill | ≤ 4 in flight, ≤ 8 stuck, ≤ 8 trails, 1 score (a stealth throw waits while the owner's score is alive) | quill 480 | ≤ 28; briefly about 34 while a score's claimed ink, a newly stuck quill's ink and the windup flourish overlap |
 
-- **Per frame, all owners together:** at most 256 ink paths and 8,192 strip vertices. Paths are sampled every 8–12 px, more densely on curves.
+- **Per frame, all owners together:** at most 256 ink paths and 8,192 strip vertices. Paths are sampled every 8–12 px, more densely on curves. The per-owner path counts above are design sizes; a brief overshoot is trimmed by this cap and its drop order, never by a weapon.
 - **Over the cap,** drop in this order:
   1. other players' dormant ink;
   2. residue;
@@ -685,7 +685,16 @@ Final pixel art comes from Claude's brief for Codex, `asset-deliveries/scarlet-r
 
 Exports go to `Assets/Textures/Items/ScarletRewards/`: one texel per logical pixel, drawn at 2×. Selections and exports are recorded here on delivery, and [Attribution](../../../Assets/ATTRIBUTION.md) owns rights and exact identities.
 
-**Placeholders.** Until delivery, items use vanilla textures by reference, so the mechanics can be played first: the reliquary `CrimsonFishingCrate`, the scythe `DeathSickle`, the organ `OnyxBlaster`, the baton `CrimsonRod`, the censer `ImpStaff`, the quill `BoneJavelin`. In-world bodies draw the item's placeholder texture.
+**Placeholders.** Until delivery, items use vanilla textures by reference, so the mechanics can be played first: the reliquary `CrimsonFishingCrate`, the scythe `DeathSickle`, the organ `OnyxBlaster`, the baton `CrimsonRod`, the censer `ImpStaff`, the quill `BoneJavelin`. In-world bodies draw the item's placeholder texture (so the organ's shard and bone hand are the Onyx Blaster too).
+
+- `CrimsonRewardSprites` is the one table of final names, planned sizes and placeholders; a delivered PNG under its root replaces the placeholder with no code change.
+- Anchors to replace with the exporter's measured values on delivery (until then they are proportional stand-ins):
+  - scythe: `ScytheArt` grip and hook tip, and `SableScytheMotion.BladeKnots` (the three blade capsules' knots; the placeholder values were measured on the Death Sickle);
+  - organ: `OrganArt` grip, heart-gem, pipe mouths and palm;
+  - baton: `BatonArt` grip and gem;
+  - censer: `CenserBody` ring and bowl mouth in `CenserInk`, and the pendulum's 60 px `BowlDrop`, which the briefed 28 × 30 art (about 24 px from ring to mouth) does not reach;
+  - quill: `QuillArt` nib and the score's seal.
+- The held organ needs Ebon harp's enlargement with point sampling once real art arrives; the shard and hands already switch to it.
 
 | ID | Use |
 |---|---|
@@ -745,6 +754,50 @@ Decided on 2026-10-02 for the first implementation; the damage and mana numbers 
 1. **Reliquary ownership:** shared world items, as the Doll and Ebon boxes are, so any player can pick up another's. One drops per frozen member at the field's ground centre.
 2. **Quill ink against moving targets:** the ink stays where it was written, so it never becomes a line strung between enemies, and it misses a target that has moved away.
 3. **Covenant while its owner is Down:** Vespera stops attacking while her owner is dead or Down in any Raid, as The Last Waltz does. The encounter spec's companion section records it.
+
+## Implementation choices
+
+The first implementation fixed these points, which the sections above left open or ambiguous. They are starting values like the rest of this document.
+
+**Shared.**
+
+- `CrimsonCovenantIncarnation` numbers an NPC on its first read when `OnSpawn` did not run (always on a multiplayer client), so a client owner also retires marks, hands and quills when a slot is reused. The Covenant's own guard benefits too.
+
+**Sable Scythe.**
+
+- **Figure eight:** the scythe keeps turning, and every half the swing plane flips about the aim axis, so the hook tip traces the ∞. "Angular speed" in the no-stop rules is the 3D angular speed (rotation and roll together).
+- **Whip draw-back:** the rotation reverses for an instant while the blade rolls; the 3D angular speed stays at least 20% of the peak.
+- **Release during the Whip:** Staff Reap starts when the crescent stops being live (tick 26), not at the end of the blade's live window.
+- **Full staff:** a connecting stroke on a full staff engraves nothing but restarts the 360-tick clock.
+- **Final Barline:** the staff's lines keep their scars until the barline has dried, so the staff dries together. The "whole staff ignites" moment is ember particles along the lines, not live ink, because live ink without collision would break draw equals collide.
+
+**Canticle Organ.**
+
+- A hit on an NPC that already has 8 marks adds no mark and rings no toll, but restarts its 360-tick expiry (Ebon's marks do the same). The toll plays at the owner.
+- A hand is live on ticks 1–3 after its slam, its disc opening 16 → 32 → 48 px. For death or Down a hand has started once it has slammed.
+- The Clasp hits other roots at ×1.0 if they touch either its 64 px disc or the crown.
+- The whole organ kicks back 2 px per shot; the pipes do not move separately. Shards are `netImportant`, so the owner's kill reaches every client.
+
+**Scarlet Baton.**
+
+- A dormant stroke has radius 10. Skew is limited to ±40 px, which keeps every curve's radius at least 44 px so the river's strip never folds inside a bend.
+- The river's runs between strokes are straight, but their last 32 px at each end bend along the stroke, so the strip never doubles back at a joint. "≤ 600 vertices" is 600 sample points.
+
+**Ember Censer.**
+
+- The top of a pour (about 40 px under the mouth) stays hot and the column below cools early to black blood; drawing and collision use the same column. A finished pour dries into its scar where it fell.
+
+**Bloodink Quill.**
+
+- A quill burst is live for 8 ticks and the score burst for 12; both leave a 22-tick scar.
+- An ink stroke shorter than 48 px is a blot of radius 12.
+- The playback toll rises one step per 32 px of height above the score; a quill level with the score rings `Toll4`.
+- After its flight the score glides to a halt over 4 ticks. A claimed quill or trail waits at most 58 ticks for its score to unroll, then gives up.
+- The seal's "two halves" fall as wax flakes, because SR06 has no separate seal part.
+
+**Open for the owner.**
+
+- **Censer spread:** with the spacing above (`min(72, (w + 96) / n)`) and a ±49 px swing, the outer censers of three or more over a target about 80 px wide miss it with their outward pours (half of their pours). Large bosses are hit by every pour. Tightening the spread is a balance decision.
 
 ## Acceptance (owner, not_run until played)
 
