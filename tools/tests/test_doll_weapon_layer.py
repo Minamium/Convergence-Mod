@@ -189,7 +189,13 @@ class DollWeaponLayerShader(unittest.TestCase):
         for name, record in before["files"].items():
             if name.startswith("Doll") and name not in NOT_WEAPON_SHADERS:
                 continue
-            self.assertEqual(record, after["files"].get(name), f"{name} export changed with the Doll weapon layer")
+            current = after["files"].get(name)
+            self.assertIsNotNone(current, f"{name} export removed")
+            # Another feature's own source edit recompiles its export (exports.verify() pins that pair); an unchanged
+            # source must keep its exact export.
+            if current["source_sha256"] != record["source_sha256"]:
+                continue
+            self.assertEqual(record, current, f"{name} export changed with the Doll weapon layer")
 
     def test_palette_blocks_match_the_tones(self):
         art = palette_block((WEAPONS / "DollPixelArt.cs").read_text(encoding="utf-8"))
