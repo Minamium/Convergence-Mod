@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.63 / protocol76**: the two 0.3.62 branch changes below, integrated on main.
+Current source: **0.3.64 / protocol77**. Ghost Samurai cinematics for its participants: the summoning (a 300-tick hold in which the samurai assembles by running its death backwards, takes a stance and shouts; it cannot be hit and attacks after), a 180-tick change of form (it rises to the middle of the seal, raises both blades and shouts), the victory (its blades plant in the floor before the seal burns away) and a wipe (it returns to mist). The HUD steps aside behind letterbox bars with a title for those frames only and the camera eases onto it and back; input is never taken. Forecasts gain hatching and a two-pixel edge; the field's night is a cool slate, its graves become planted weapons and its ruled edge line becomes the spirit fire's roots. Protocol 77 because the change of form widens the actor snapshot bound. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#演出--2026-10-02) owns the staging; the camera, bars, titles, sound and readability in play remain user-owned.
+
+Retained 0.3.63 / protocol76: the two 0.3.62 branch changes below, integrated on main.
 
 Ghost Samurai's field is rebuilt as the seal its mourning bell raises: a still indigo edge with violet spirit fire, pasted talismans and corner seals; an opaque abyss outside with a mirrored lake under the floor; a parallax night inside (phase-linked eclipse, ridges, graves and spears on the real floor, distant lightning from Phase 2) under a luminance ceiling below the forecast fill; a deploy trace from the summoner's feet, wall ripples, a held and dithered victory melt, fallen-participant viewing, an onlooker view of the seal and a daylight cap. Client presentation only; bounds, hazards and protocol are unchanged. The [Ghost Samurai spec](encounters/ghost-samurai/ENCOUNTER_SPEC.md#表示と素材) owns the look; native readability, locations, FPS and peers remain user-owned.
 
@@ -85,6 +87,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.64 Ghost Samurai cinematics and field readability:** [evidence](evidence/2026-10-02-samurai-cinema.json) records the domain tests (62 Samurai, including the cut windows and planted blades), 22 offline cinema frames, 84 forecast-over-field frames and 1008 cut frames, 16 field frames, the scenery luminance gate, compiled shader identity and the native package. No in-game camera, HUD, title, sound, readability, FPS or peer acceptance is claimed.
 
 - **0.3.62 Ebon Manor music and warning polish:** [evidence](evidence/2026-10-02-ebon-polish.json) records the loop analysis and seam checks, the before/after offline material frames with an independent critique, compiled shader identity and the native package. No in-game hearing, readability or FPS acceptance is claimed.
 

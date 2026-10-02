@@ -938,7 +938,7 @@ documents:
 - doc_id: encounter.ghost-samurai.spec
   path: docs/encounters/ghost-samurai/ENCOUNTER_SPEC.md
   title: 幽鬼武者 / Ghost Samurai
-  content_sha256: f6d91180948a8cbde6904dd920a00a5ca3d20f5a53315e0c86f530f28d9917a1
+  content_sha256: 578fcab0011bec07209a59976dcf4645978a5fd3137ef001beeacb5b787af20d
   document_type: spec
   status: provisional
   owners:
@@ -1414,7 +1414,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: a4f2471d752875f76465568988fd5a4c702904f6a0136f0692cdef05cc85952e
+  content_sha256: a75dee76e706d5d2f320b2a6eae12b4823f85422875647b713e202cf786c4b82
   document_type: status
   status: accepted
   owners:
@@ -1590,7 +1590,7 @@ documents:
 - doc_id: research.ghost-samurai-luminance-20260918
   path: docs/research/2026-09-18-ghost-samurai-luminance.md
   title: 'Ghost Samurai: Luminance capability survey and independent rig'
-  content_sha256: 5dcf5a49afa471268713368591c858a5b1e704d8031b4e31e103e235993a14c8
+  content_sha256: a2dfbdb21e38baef7c1e07a5cc8eda147f2f70998a103edb2e701a598c978e23
   document_type: research
   status: provisional
   owners:

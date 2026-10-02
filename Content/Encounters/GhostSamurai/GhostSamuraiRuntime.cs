@@ -35,6 +35,7 @@ internal sealed partial class GhostSamuraiRuntime : IEncounterRuntime
     private int wispOpportunity, lastWaveEnd;
     private GhostSamuraiAttackProjectile? aimedSlash, firstGridWave;
     private int gridSequenceOffset;
+    private const float TransitionHeight = 380;
 
     internal GhostSamuraiRuntime(FightId fight, int summoner, SamuraiArenaBounds arena)
     { this.fight = fight; this.summoner = summoner; this.arena = arena; }
@@ -52,6 +53,7 @@ internal sealed partial class GhostSamuraiRuntime : IEncounterRuntime
                 ModContent.NPCType<GhostSamuraiBoss>());
             if (slot < 0 || slot >= Main.maxNPCs) return End(EncounterEndReason.EncounterActorMissing);
             actor = (GhostSamuraiBoss)Main.npc[slot].ModNPC;
+            actor.NPC.dontTakeDamage = true; // the summoning begins before the first Active tick
             RefreshField();
             lockedTarget = new(summoner, p.GetModPlayer<GhostSamuraiContainmentPlayer>().Connection);
             ResolveTarget(actor.NPC);
@@ -79,8 +81,9 @@ internal sealed partial class GhostSamuraiRuntime : IEncounterRuntime
         // Do not leave a three-second resurrect/re-entry window after a wipe.
         // The coordinator performs terminal -> exact cleanup -> newer Idle.
         if (target is null) return End(EncounterEndReason.Defeat);
+        bool intro = GhostSamuraiRules.IntroActive(age);
         SamuraiPhase next = GhostSamuraiRules.NextPhase(phase, npc.life, npc.lifeMax);
-        if (transition == 0 && next != phase)
+        if (!intro && transition == 0 && next != phase)
         {
             phase = next;
             transition = GhostSamuraiRules.TransitionTime;
@@ -90,11 +93,18 @@ internal sealed partial class GhostSamuraiRuntime : IEncounterRuntime
             npc.netUpdate = true;
             GhostSamuraiPackets.Log($"event=PhaseChanged fight={fight.Value} age={age} phase={phase} life={npc.life} max_life={npc.lifeMax}");
         }
-        npc.dontTakeDamage = transition > 0;
-        if (transition > 0)
+        npc.dontTakeDamage = GhostSamuraiRules.Untouchable(age, transition);
+        if (intro)
         {
+            // The summoning: the samurai assembles where the bell called it and holds still.
+            beat = SamuraiBeat.Recovery;
+            npc.velocity *= .8f;
+        }
+        else if (transition > 0)
+        {
+            // It rises to the middle of the seal for the change of form; nothing is live.
             beat = SamuraiBeat.Transition;
-            npc.velocity *= .88f;
+            Hover(npc, new Vector2(arena.CenterX, arena.Bottom - TransitionHeight));
             if (--transition == 0) FinishAttack();
         }
         else

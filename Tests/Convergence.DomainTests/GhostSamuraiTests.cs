@@ -25,7 +25,7 @@ internal static partial class Program
             AssertEqual(true, rejected, "truncated actor packet");
         }
         foreach (var malformed in new[] { state with { Fight = Guid.Empty }, state with { Phase = (SamuraiPhase)255 },
-            state with { AttackTimer = -1 }, state with { TransitionRemaining = 91 }, state with { MaximumLife = int.MaxValue },
+            state with { AttackTimer = -1 }, state with { TransitionRemaining = GhostSamuraiRules.TransitionTime + 1 }, state with { MaximumLife = int.MaxValue },
             state with { LockedTarget = 255 }, state with { LockedTarget = -2 } })
         {
             using var packet = new MemoryStream(); malformed.Write(new BinaryWriter(packet)); packet.Position = 0;

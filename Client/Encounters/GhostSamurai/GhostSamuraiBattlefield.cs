@@ -42,12 +42,12 @@ internal sealed class GhostSamuraiBattlefieldSky : CustomSky
 // it reads the accepted fight and the local view, never gameplay state it does not own.
 // A participant (bound, or fallen and watching from inside) sees the trace deploy from
 // the summoner's feet, the backdrop, the abyss outside and a seal they can bump; the
-// seal stays under the victory dissolve, then its talismans burn and it unravels.
+// seal stays under the victory or defeat stage, then its talismans burn and it unravels.
 // Anyone else near an active fight sees the seal and a faint veil from the world.
 [Autoload(Side = ModSide.Client)]
 internal sealed class GhostSamuraiBattlefield : ModSystem
 {
-    private const float TraceTicks = 54, QuickTraceTicks = 16, Grace = 12, ReleaseTicks = 30, BurnStart = 60, BurnTicks = 90;
+    private const float TraceTicks = 54, QuickTraceTicks = 16, Grace = 12, ReleaseTicks = 30, BurnTicks = 90;
     private const float WatchMargin = 900, RippleLife = .55f;
 
     private struct Seal
@@ -55,7 +55,8 @@ internal sealed class GhostSamuraiBattlefield : ModSystem
         internal Guid Fight;
         internal SamuraiArenaBounds Field;
         internal ulong Since, ReleasedAt;
-        internal bool Victory;
+        internal bool Held;          // a victory or defeat stage holds the seal, then it burns and melts
+        internal float Hold;
         internal float Trace, Clock, Phase, Surge, Presence;
     }
 
@@ -116,7 +117,7 @@ internal sealed class GhostSamuraiBattlefield : ModSystem
                 rippleA = rippleB = default;
             }
             seal.ReleasedAt = 0;
-            seal.Victory = false;
+            seal.Held = false;
             seal.Clock = boss.VisualAge / 60f;
             seal.Phase = boss.Phase switch { SamuraiPhase.Phase3 => 2, SamuraiPhase.Phase2 => 1, _ => 0 };
             float pulse = boss.TransitionRemaining > 0
@@ -129,14 +130,14 @@ internal sealed class GhostSamuraiBattlefield : ModSystem
         {
             if (seal.ReleasedAt == 0) seal.ReleasedAt = now;
             // Native NPC removal and the terminal snapshot need not share a tick: hold for a
-            // short grace, and keep the field under the dissolve once Victory is accepted.
-            if (!seal.Victory && GhostSamuraiPresentation.EndingSince is { } since && since + Grace >= seal.ReleasedAt
-                && now - seal.ReleasedAt <= Grace)
-                seal.Victory = true;
+            // short grace, and keep the field under the stage once the ending is accepted.
+            if (!seal.Held && GhostSamuraiPresentation.Ending is { } staged && staged.Fight == seal.Fight
+                && staged.Since + Grace >= seal.ReleasedAt && now - seal.ReleasedAt <= Grace)
+            { seal.Held = true; seal.Hold = staged.SealHold; }
             seal.Clock += 1 / 60f;
             seal.Surge *= .94f;
             float ending = Ending(seal, now);
-            seal.Presence = seal.Victory ? 1 - Smooth((ending - .55f) / .45f) : 1 - ending;
+            seal.Presence = seal.Held ? 1 - Smooth((ending - .55f) / .45f) : 1 - ending;
             if (ending >= 1) seal = default;
         }
 
@@ -201,7 +202,7 @@ internal sealed class GhostSamuraiBattlefield : ModSystem
     {
         if (s.ReleasedAt == 0) return 0;
         float since = now - s.ReleasedAt;
-        return s.Victory ? Math.Clamp((since - BurnStart) / BurnTicks, 0, 1) : Math.Clamp((since - Grace) / ReleaseTicks, 0, 1);
+        return s.Held ? Math.Clamp((since - s.Hold) / BurnTicks, 0, 1) : Math.Clamp((since - Grace) / ReleaseTicks, 0, 1);
     }
 
     private static SamuraiFieldLook Look(in Seal s, bool outsider)
@@ -217,7 +218,7 @@ internal sealed class GhostSamuraiBattlefield : ModSystem
             Phase = s.Phase,
             Surge = s.Surge,
             Deploy = Math.Clamp((now - s.Since) / s.Trace, 0, 1),
-            Ending = s.Victory ? Ending(s, now) : 0,
+            Ending = s.Held ? Ending(s, now) : 0,
             Outsider = outsider,
             Camera = view - new Vector2(s.Field.CenterX, s.Field.CenterY),
             Ripple0 = outsider ? default : Ripple(rippleA, now),
