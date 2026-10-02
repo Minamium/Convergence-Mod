@@ -30,6 +30,10 @@
       "source_sha256": "4bb9f65f785248961e90acf00de7087e95a99df1e90d2f49d4b12c1d7d232666",
       "output_sha256": "ee4fc116394debc76261d66629895f08cf27e219fa9e2ffa902d31a720a8462b"
     },
+    "DollMeridianEnergy.fx": {
+      "source_sha256": "3fb43386b8d2507e50eadf860f336a3b4b39f4f6db76412874dfb7ec52cc641c",
+      "output_sha256": "5d9138cc6a0fabb90e8111fc85b0a84d99b5833d6df0dc0d03d38f450d5ad1b4"
+    },
     "DollPixel.fx": {
       "source_sha256": "7f878ae1ab8ddbd17f2fd9e7c7bf310c23dea6eeb459c8a9b591654738b59dd0",
       "output_sha256": "ed2c4a823d79a38ec5692123126a3d2be4170e90d053967a33ca8a951aad2eba"

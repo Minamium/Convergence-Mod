@@ -32,6 +32,10 @@ internal static class DollWeaponAudio
         // Lacuna Testament: openings and pellets of seven irises overlap near the end of the build (up to ~9 a second).
         ["LacunaIrisWarn"] = 3, ["LacunaIrisFire"] = 4, ["LacunaIrisTine"] = 4, ["LacunaPelletWarn"] = 4, ["LacunaPelletFire"] = 6,
         ["LacunaPelletHit"] = 6, ["LacunaBeamHit"] = 3,
+        // Pale Meridian: one file per ladder step; a pitch can return while its last note still rings.
+        ["MeridianNote0"] = 3, ["MeridianNote1"] = 3, ["MeridianNote2"] = 3, ["MeridianNote3"] = 3, ["MeridianNote4"] = 3,
+        ["MeridianNote5"] = 3, ["MeridianNote6"] = 3, ["MeridianNote7"] = 3, ["MeridianNote8"] = 3,
+        ["MeridianHit"] = 3, ["MeridianHitHeavy"] = 3,
     };
     private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, SoundStyle> styles = new(StringComparer.Ordinal);

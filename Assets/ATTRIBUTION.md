@@ -2,6 +2,355 @@
 
 ## Records
 
+### Pale Meridian weapon cues — 2026-10-03
+
+Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
+
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+| metal_click | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalClick.ogg | Kenney RPG Audio metalClick.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `9851a69d0c613e13bceef08060ecc4148f098ef487927cbebe270d642398a3b3` |
+| metal_latch | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalLatch.ogg | Kenney RPG Audio metalLatch.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708` |
+| metal_pot | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalPot1.ogg | Kenney RPG Audio metalPot1.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `159def979e8e386c2c539f5e99cc30a080eb2dcb6c911fa2e4ccc0785b2522fd` |
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianAssemble.ogg`
+- Asset ID: doll-weapon-sfx-meridianassemble-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.50 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.55: -22.2 LUFS effective), true peak -8.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `194ff024bbb4066a348b5a7eb02abfd7dd3f3701110247d5ea8d996916b1d626`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote0.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote0-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -10.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `5ab7f54645b1674262a1b2ab673b3127cd40e0d967d63b0915bad1652664f30a`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote1.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `cc73bd2e120dacfe403d4b45b6654f2fbfc74530a1947207ac44f7608b172e5e`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote2.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.89 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `739b0148142facf15ff7f6817e17c1dfaf61c6a7ca12ec5816f848b32f833b21`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote3.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.1 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `822a9a408a25bc20da933959328db7dd5b65c0d73e811a0ca9ca730994159702`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote4.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote4-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -12.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `c312b042581788f6fcc73c0de68a82d2d63584301831ef48f3e8eb27a891b503`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote5.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote5-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.90 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -12.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `29215522ee38cefc4277bd10e7afcb89056819d08e61cd1f99d9ccedfc0b6561`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote6.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote6-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.88 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `bc3aad28db1bbeddce18fdb8453183cafc0a25abb9945495405a3d7bab4364ed`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote7.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote7-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.88 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `873c467bde8bee18dfe73fadc88318baa91aac86e72d895b0b0197726f06a01b`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote8.ogg`
+- Asset ID: doll-weapon-sfx-meridiannote8-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.87 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `a220052ab7f6cd9afdc81bc87bcd4cecead4708d5e5cc13d7335a6aba8f6b353`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianPartWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianpartwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.45: -23.9 LUFS effective), true peak -7.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `c061a0e6bf6008dc8ae30812dfdfcbec6482e2b33dc92aeb02d68670bdb2f03f`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianPartFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianpartfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.5: -19.1 LUFS effective), true peak -3.5 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `50600bef59460242026d710457be41cd55d1ab27d46ff944ec6d1917f6bd7c55`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianIgniteWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianignitewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.86 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_click in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.5 LUFS effective), true peak -4.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `7b57dc63e3ced4d280d6f16642e466e437f50240328bc28e8feaf7e36a153fd4`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianIgniteFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianignitefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.01 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_click in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.75: -14.0 LUFS effective), true peak -5.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `f9e6faaa1a065babad00cdfd8178772c4f03a0eb49f6c6eafff7d17c87ab4abc`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLoop.wav`
+- Asset ID: doll-weapon-sfx-meridianloop-20261003
+- Asset type: stereo 44.1 kHz PCM16 WAV seamless loop, 105840 samples = 144 game ticks (2.40 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 PCM16 WAV
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -6.5 dBFS; circular filtering and an equal-power crossfade of the overhang into the head, no trim or fade
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `ddd0a8409346012abf924e9451cf94a0277a12263197f7a170e7be8cf980c02d`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHeavy.ogg`
+- Asset ID: doll-weapon-sfx-meridianheavy-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.55 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_pot in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.5: -19.0 LUFS effective), true peak -6.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `98a0a8804c2c030054294405ddf2407bb7f3c4bde12c5c33a43d281637ee67cd`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianstrikewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.4 LUFS effective), true peak -6.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `3cf62ac96e2ba1df8313e248b2d32b7867c21a859cd919a89ad8dacb7139be32`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianstrikefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.11 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_pot in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.0 LUFS (played at volume 0.85: -11.4 LUFS effective), true peak -1.2 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `d4cc0fb82e159d9552abb82b21be5ab753d7fd30da31c6edc3337bac136d9bb7`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeMiss.ogg`
+- Asset ID: doll-weapon-sfx-meridianstrikemiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.60 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.55: -22.2 LUFS effective), true peak -3.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `2ac293c946a969c8cac35f784f1ea0c6c2279af1aadfc52c0132500138461966`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLatticeWarn.ogg`
+- Asset ID: doll-weapon-sfx-meridianlatticewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.4 LUFS effective), true peak -6.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `1faaa99781cd852677f6d2b5e331d6690d4840f063bc5cb038b16cd7ed56ac91`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLatticeFire.ogg`
+- Asset ID: doll-weapon-sfx-meridianlatticefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.40 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -2.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `5b52985f2957c0fdbeb6504cf4e2a3548769db15c091b96adfa34ea65a91cb30`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHit.ogg`
+- Asset ID: doll-weapon-sfx-meridianhit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.18 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.1 LUFS (played at volume 0.35: -29.2 LUFS effective), true peak -5.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `19bce4a754a54a6eb88392d32826a4c0890c931f01f20da9a595c994d724fe12`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHitHeavy.ogg`
+- Asset ID: doll-weapon-sfx-meridianhitheavy-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.1 LUFS effective), true peak -5.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `1f39873232ef5e9278baea603cbf9153fa1f15336dab8ea122f423eb6158b86f`
+
+### Pale Meridian energy material — 2026-10-03
+
+The light of the refreshed Pale Meridian on the shared Doll weapon layer ([weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)).
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollMeridianEnergy.fxc`
+- Asset ID: dollmeridianenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollMeridianEnergy.fx, evaluated per art dot in the Doll weapon layer's half-resolution Light target and quantized to the Doll light ramp with a world-stable Bayer dither (its palette block is identical to DollPixel.fx): the meridian/lattice packet (a white-hot spine and head over a pearl-violet body thinning to a plum rim, with drifting sparkles), round wakes, round glows with an optional ring, and a cooling residue that crumbles to plum; flowing noise samples Luminance's own TurbulentNoise and WavyBlotchNoise at runtime (not copied); every choice is branch-free (no uniform-only branch). No texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-meridian.ps1` (the real presentation, exported PNGs and Luminance noise; pixel checks) 2026-10-03; native playtest not_run
+
 ### Lacuna Testament cues — 2026-10-03
 
 The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): sixteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump; the generator adds a gong-like plate tuned into the key, also additive synthesis), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-pitch cues (`LacunaIrisTine`, `LacunaPelletFire`, every pitched layer a C, recorded at C6 and played on the ladder step of each iris); every composite cue and the loop play as rendered. The audition page and report stay in the git-ignored `.local`.

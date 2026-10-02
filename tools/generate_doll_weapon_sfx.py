@@ -1,6 +1,6 @@
 """Doll reward weapon cues and the companion summon (shared audio basis of the Doll weapon refresh).
 
-Renders Assets/Sounds/Weapons/DollWeapons/<Cue>.ogg. Every cue is one builder function registered
+Renders Assets/Sounds/Weapons/DollWeapons/<Cue>.ogg (a loop: <Cue>.wav, PCM16, sample-exact). Every cue is one builder function registered
 with @cue in CUES (short-term loudness target, group, maximum length, in-game playback volume and
 the owner audition text); later weapon changes add their cues here and reuse the building blocks
 of tools/doll_sfx_dsp.py (music-box comb tooth on the F minor pentatonic ladder, brass ratchet,
@@ -59,6 +59,9 @@ SOURCES = {
     "metal_latch": (KENNEY + "!OGG/metalLatch.ogg",
                     "Kenney RPG Audio metalLatch.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0)",
                     "ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708", "Kenney"),
+    "metal_pot": (KENNEY + "!OGG/metalPot1.ogg",
+                  "Kenney RPG Audio metalPot1.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0)",
+                  "159def979e8e386c2c539f5e99cc30a080eb2dcb6c911fa2e4ccc0785b2522fd", "Kenney"),
     "doll_summon": ("repo:Assets/Sounds/Weapons/DollTheater/DollSummon.wav",
                     "Convergence project asset doll-theater-0253-dollsummon (0.3.7 articulation revision)",
                     "f4be1a0733e06ad0262d6703a44fc00a0a01dd9a17a3fb1a3381831d634e8534", "Convergence"),
@@ -146,17 +149,20 @@ class Cue:
     volume: float        # SoundStyle volume at the call site (the audition plays it at this level)
     description: str     # owner audition text (Japanese)
     glue: float = 1.6    # tanh bus drive before the loudness match (generate_ebon_reward_sfx.soft)
-    loop: bool = False   # a sample-exact PCM16 WAV loop of exactly max_seconds (render_loop), not an Ogg one-shot
+    loop: bool = False   # a sample-exact PCM16 WAV loop, not an Ogg one-shot (never trimmed or faded; filtered circularly)
+    # How a loop is mastered: "round" (render_loop_cue: exactly max_seconds, loudness and true peak over the loop
+    # played round) or "period" (master() on one period like a one-shot, true peak including the wrap).
+    loop_master: str = "round"
 
 
 CUES = {}
 
 
-def cue(name, target_lufs, group, max_seconds, volume, description, glue=1.6, loop=False):
+def cue(name, target_lufs, group, max_seconds, volume, description, glue=1.6, loop_master="round", loop=False):
     def register(build):
         if name in CUES:
             raise ValueError(f"duplicate cue {name}")
-        CUES[name] = Cue(build, target_lufs, group, max_seconds, volume, description, glue, loop)
+        CUES[name] = Cue(build, target_lufs, group, max_seconds, volume, description, glue, loop, loop_master)
         return build
     return register
 
@@ -564,17 +570,403 @@ def lacuna_beam_miss(s, rng):
     return room(mix, 0.12, 0.9, 0.3)
 
 
+# ---------------------------------------------------------------- Pale Meridian
+# The music-box siege rifle (docs/encounters/first-severance/WEAPONS.md "Pale Meridian"). Every timed layer sits on
+# the weapon's score ticks (Content/Encounters/FirstSeverance/Rewards/PaleMeridianScore.cs and PaleMeridianLattice.cs),
+# so a cue started on its tick lands on the visual beat: the wind's ratchet clicks, the overcharge loop (whole heavy
+# bars) and the lattice's ring ripple. Notes are one file per ladder step: nothing is transposed at runtime.
+from generate_ebon_sfx import bp, mono, noise  # noqa: E402
+
+MERIDIAN_KEY_RISE, MERIDIAN_IGNITE = 300, 348
+MERIDIAN_WIND = (318, 324, 328, 331, 334, 337, 339, 341, 343, 345, 347, 348)  # ratchet steps; the last is the release
+MERIDIAN_LOOP_TICKS = 144   # 2.4 s: four 36-tick heavy bars, nine 16-tick key turns, 48 rounds
+MERIDIAN_MERIDIAN_FIRE = 10  # meridian age of the strike
+MERIDIAN_RIPPLE = 2          # lattice rings fire 2 ticks apart
+MERIDIAN_NOTE_TEXT = ("F5", "A♭5", "B♭5", "C6", "E♭6", "F6", "A♭6", "B♭6", "C7")
+
+
+def meridian_note(step, rng):
+    """One shot of the gun: the next music-box tooth of the tune, a brass 'tk' and an air puff from the muzzle."""
+    mix = seconds(0.95)
+    place(mix, pan(dsp.box_tine(dsp.ladder(step), 0.9, rng), -0.12 + 0.03 * step), 0.0, 0)
+    k = round(0.012 * RATE)
+    puff = bp(noise(k, rng), 1800, 6500) * (np.linspace(1, 0, k) ** 2)[:, None]
+    place(mix, pan(puff, 0.25), 0.0, -15)
+    place(mix, pan(dsp.brass_click(rng, 3400, decay=0.003, thud=0.15), 0.2), 0.0, -18)
+    return room(mix, 0.12, 0.9, 0.18)
+
+
+def brass_ring(freq, dur, rng, decay=0.12, side=0.0):
+    """A small brass part ringing: inharmonic pawl partials with a longer decay than a click."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    y = np.zeros(n)
+    for ratio, amp in ((1.0, 1.0), (2.76, 0.5), (5.40, 0.22), (8.93, 0.1)):
+        if freq * ratio < dsp.CEILING_HZ:
+            y += amp * np.sin(2 * np.pi * freq * ratio * t + rng.uniform(0, 6.28)) * np.exp(-t / (decay / ratio ** 0.4))
+    y *= np.clip(t / 0.0003, 0, 1)
+    return pan(y / max(1e-9, np.abs(y).max()), side)
+
+
+def spring_twang(freq, dur, rng, side=0.0):
+    """A coil spring let go: a fast-decaying wobbling tone that slides down a little."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    f = freq * (1 - 0.18 * (1 - np.exp(-t / 0.05))) * (1 + 0.03 * np.sin(2 * np.pi * 38 * t))
+    y = np.sin(2 * np.pi * np.cumsum(f) / RATE) * np.exp(-t / 0.07) + 0.3 * np.sin(4 * np.pi * np.cumsum(f) / RATE) * np.exp(-t / 0.03)
+    return pan(y * np.clip(t / 0.0008, 0, 1), side)
+
+
+def whoosh(dur, rng, low=700, high=4200, rise=True):
+    """Band-swept air: a filter sweeping up (or down) across filtered noise, swelling and fading."""
+    n = round(dur * RATE)
+    x = noise(n, rng)
+    out = np.zeros((n, 2))
+    steps = 12
+    for i in range(steps):
+        a, b = i * n // steps, (i + 1) * n // steps
+        u = i / (steps - 1)
+        centre = low * (high / low) ** (u if rise else 1 - u)
+        out[a:b] = bp(x, centre * 0.7, min(centre * 1.4, dsp.CEILING_HZ))[a:b]
+    t = np.arange(n) / RATE
+    return out * (np.sin(np.pi * np.clip(t / dur, 0, 1)) ** 1.5)[:, None]
+
+
+@cue("MeridianAssemble", -17.0, "Meridian build", 0.5, 0.55,
+     "押した瞬間、何もない銃身（部品の窪みが空いた素の銃）が手に収まる。磁器の板が3枚カチカチと座り、鉄の留め金が"
+     "ゴトンと閉まり、オルゴールの櫛を指でかすめるような小さな下降音で終わる。")
+def meridian_assemble(s, rng):
+    mix = seconds(0.55)
+    for i, at in enumerate((0.0, 0.055, 0.095)):
+        place(mix, dsp.porcelain_ring(rng.uniform(2300, 3100), 0.12, rng, decay=0.02, side=-0.3 + 0.3 * i), at, -7 - 2 * i)
+    # Kenney metalLatch's catch starts at 0.0418 s: slowed and darkened into an iron latch.
+    lay(mix, s, "metal_latch", 0.041, 0.20, 0.13, -8, rate=0.8, lp_=3600, fade_out=0.06)
+    place(mix, dsp.thump(150, 72, 0.16, rng), 0.13, -12)
+    for i, step in enumerate((8, 6, 4, 3, 1)):
+        place(mix, pan(dsp.box_tine(dsp.ladder(step), 0.35, rng, decay=0.07, body=0), 0.4 - 0.2 * i), 0.18 + 0.018 * i, -19 - i)
+    return room(mix, 0.1, 0.5, 0.1)
+
+
+@cue("MeridianNote0", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（F5）。旋律の一音として順に鳴る。真鍮の「カッ」と銃口の小さな空気音つき。")
+def meridian_note_0(s, rng):
+    return meridian_note(0, rng)
+
+
+@cue("MeridianNote1", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（A♭5）。")
+def meridian_note_1(s, rng):
+    return meridian_note(1, rng)
+
+
+@cue("MeridianNote2", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（B♭5）。")
+def meridian_note_2(s, rng):
+    return meridian_note(2, rng)
+
+
+@cue("MeridianNote3", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（C6）。")
+def meridian_note_3(s, rng):
+    return meridian_note(3, rng)
+
+
+@cue("MeridianNote4", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（E♭6）。")
+def meridian_note_4(s, rng):
+    return meridian_note(4, rng)
+
+
+@cue("MeridianNote5", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（F6）。")
+def meridian_note_5(s, rng):
+    return meridian_note(5, rng)
+
+
+@cue("MeridianNote6", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（A♭6）。")
+def meridian_note_6(s, rng):
+    return meridian_note(6, rng)
+
+
+@cue("MeridianNote7", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（B♭6）。")
+def meridian_note_7(s, rng):
+    return meridian_note(7, rng)
+
+
+@cue("MeridianNote8", -17.0, "Meridian notes", 1.0, 0.5, "1発ごとのオルゴールの音（C7、組み上げの最後の駆け上がりの頂点）。")
+def meridian_note_8(s, rng):
+    return meridian_note(8, rng)
+
+
+@cue("MeridianPartWarn", -17.0, "Meridian build", 0.4, 0.45,
+     "真鍮の部品がばねで弾き出されて飛んでくる（16tick）。ばねの「ビン」、加速するラチェットの回転音、上がっていく風切り音。"
+     "着座（MeridianPartFire）の予告。")
+def meridian_part_warn(s, rng):
+    mix = seconds(0.4)
+    place(mix, spring_twang(820, 0.2, rng, side=-0.35), 0.0, -9)
+    times = [0.02 + 0.22 * (i / 9) ** 0.8 for i in range(10)]
+    place(mix, dsp.ratchet(times, rng, freq=2900, gains_db=[-14 + 1.0 * i for i in range(10)], side=-0.2,
+                           decay=0.0025, thud=0.1), 0.0, -8)
+    place(mix, whoosh(0.26, rng, 900, 5200), 0.0, -16)
+    return room(mix, 0.1, 0.36, 0.08)
+
+
+@cue("MeridianPartFire", -13.0, "Meridian build", 0.4, 0.5,
+     "部品が銃に嵌まる。真鍮の留め金の「カチャン」、磁器の小さな「チン」、短いばねの残響（音程なし）。小節の頭に来るので、"
+     "その小節の最初の音符と重なる。", glue=3.0)
+def meridian_part_fire(s, rng):
+    mix = seconds(0.4)
+    # The latch and pawl are offset by 3 ms so their transients do not stack into one spike.
+    lay(mix, s, "metal_latch", 0.041, 0.18, 0.0, -9, rate=1.08, hp_=600, fade_out=0.05)
+    place(mix, pan(dsp.brass_click(rng, 2100, decay=0.009, thud=0.7), -0.1), 0.003, -11)
+    place(mix, brass_ring(2600, 0.25, rng, decay=0.07, side=-0.2), 0.003, -12)
+    place(mix, dsp.porcelain_ring(4200, 0.15, rng, decay=0.04, side=0.3), 0.006, -11)
+    place(mix, spring_twang(1500, 0.2, rng, side=0.1), 0.008, -15)
+    place(mix, dsp.thump(220, 95, 0.12, rng), 0.0, -12)
+    return room(mix, 0.14, 0.36, 0.08)
+
+
+@cue("MeridianIgniteWarn", -13.0, "Meridian wind", 0.9, 0.6,
+     "巻き鍵が筐体からせり上がって座り、18tick息を止めたあと、ラチェットが11回、詰まりながら巻かれる（318〜347tick に"
+     "ぴったり合わせてある）。下でオルガンの F の空気が膨らみ、オルゴールの櫛が細かく震え始める。過充填（MeridianIgniteFire）の予告。")
+def meridian_ignite_warn(s, rng):
+    length = (MERIDIAN_IGNITE - MERIDIAN_KEY_RISE) / 60
+    mix = seconds(length + 0.06)
+    # The key slides up out of the housing (KeyRiseTicks = 6) and seats with a clink.
+    place(mix, whoosh(0.1, rng, 1600, 6000) * 0.8, 0.0, -14)
+    lay(mix, s, "metal_click", 0.2705, 0.34, 0.1, -9, rate=0.9, hp_=1200, side=-0.15, fade_in=0.0005, fade_out=0.03)
+    place(mix, dsp.porcelain_ring(3800, 0.12, rng, decay=0.025, side=-0.1), 0.1, -15)
+    # Held organ air for 18 ticks, then the F pedal swelling under the wind.
+    breath = dsp.organ_pad([dsp.hz("F2")], 0.3, rng, attack=0.12, release=0.05, harmonics=4, chiff=0.0, breath=0.9)
+    place(mix, breath, 0.0, -22)
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "F3", "Ab3", "C4")], length - 0.25, rng, attack=length - 0.3,
+                        release=0.04, harmonics=9, rolloff=1.4, chiff=0.02, breath=0.25)
+    place(mix, pad, 0.27, -12)
+    # Eleven ratchet clicks on the wind ticks (the twelfth is the release in MeridianIgniteFire).
+    clicks = [(tick - MERIDIAN_KEY_RISE) / 60 for tick in MERIDIAN_WIND[:-1]]
+    place(mix, dsp.ratchet(clicks, rng, freq=2300, gains_db=[-6 + 0.55 * i for i in range(len(clicks))], side=-0.2,
+                           decay=0.005, thud=0.55), 0.0, -3)
+    for at in clicks:
+        lay(mix, s, "metal_click", 0.2705, 0.31, at, -14, rate=1.0 + 0.012 * clicks.index(at), hp_=1500, side=-0.25,
+            fade_in=0.0005, fade_out=0.02)
+    # A comb tremolo that tightens toward the release: Eb7 / F7 alternating, faster and louder.
+    t, i = 0.32, 0
+    while t < length - 0.01:
+        note = "Eb7" if i % 2 == 0 else "F7"
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 0.12, rng, decay=0.04, body=0, modes=dsp.COMB_MODES[:2]), 0.3 if i % 2 else 0.45),
+              t, -26 + 14 * (t - 0.32) / (length - 0.32))
+        t += 0.06 - 0.042 * (t - 0.32) / (length - 0.32)
+        i += 1
+    out = room(mix, 0.12, length + 0.06, 0.05)
+    return out
+
+
+@cue("MeridianIgniteFire", -11.5, "Meridian wind", 1.05, 0.75,
+     "ばねが解き放たれて過充填に入る（348tick）。真鍮のばねが弾ける音、F5 から C7 まで 0.15 秒で駆け上がるオルゴール、"
+     "短い F マイナーのオルガンの和音、空気の破裂と低い胴鳴り。")
+def meridian_ignite_fire(s, rng):
+    mix = seconds(1.1)
+    lay(mix, s, "metal_click", 0.2705, 0.34, 0.0, -4, rate=0.78, hp_=500, fade_in=0.0005, fade_out=0.04)
+    place(mix, pan(dsp.brass_click(rng, 1500, decay=0.01, thud=1.0), 0.0), 0.0, -4)
+    place(mix, spring_twang(620, 0.3, rng, side=-0.2), 0.0, -9)
+    for i, step in enumerate(range(9)):
+        place(mix, pan(dsp.box_tine(dsp.ladder(step), 0.6, rng), -0.5 + 0.12 * i), 0.012 + 0.0175 * i, -9 + 0.4 * i)
+    chord = dsp.organ_pad([dsp.hz(n) for n in ("F3", "C4", "F4", "Ab4", "C5")], 0.75, rng, attack=0.025, release=0.5,
+                          harmonics=10, rolloff=1.25, chiff=0.06, breath=0.12)
+    place(mix, chord, 0.02, -8)
+    k = round(0.3 * RATE)
+    burst = hp(noise(k, rng), 900) * np.exp(-np.arange(k) / RATE / 0.07)[:, None]
+    place(mix, burst, 0.0, -13)
+    place(mix, dsp.thump(130, 52, 0.4, rng), 0.0, -6)
+    place(mix, dsp.shimmer(0.5, rng, count=8), 0.18, -19)
+    return room(mix, 0.16, 1.05, 0.25)
+
+
+@cue("MeridianLoop", -17.0, "Meridian wind", 2.4, 0.5,
+     "過充填中ずっと鳴る継ぎ目なしのループ（2.4 秒 = 144tick、重弾4小節ぶん）。時計仕掛けの歯車列が弾の間隔（3tick）で刻み、"
+     "F のペダルと C のオルガン、ふいごの息、ごく小さな高い櫛のきらめき。放すと6tickで消える。",
+     glue=0.8, loop_master="period", loop=True)
+def meridian_loop(s, rng):
+    n = round(MERIDIAN_LOOP_TICKS / 60 * RATE)
+    cross = round(0.12 * RATE)
+    length = (n + cross) / RATE
+    mix = np.zeros((n + cross, 2))
+    # Gear train: a pawl click on every round (3 ticks), the 4-tooth pattern of a real wheel, and a softer
+    # counter-gear between them.
+    step = 3 / 60
+    clicks = [i * step for i in range(int(length / step) + 1)]
+    gains = [-4 if i % 12 == 0 else -9 - 2 * (i % 4 == 2) for i in range(len(clicks))]
+    place(mix, dsp.ratchet(clicks, rng, freq=3100, gains_db=gains, side=-0.15, decay=0.0022, thud=0.2, tick=0.3), 0.0, -8)
+    place(mix, dsp.ratchet([c + step / 2 for c in clicks], rng, freq=4300, gains_db=[-14] * len(clicks), side=0.25,
+                           decay=0.0015, thud=0.0, tick=0.2), 0.0, -14)
+    # Organ pedal F2 + C3 and the bellows' breath, one slow swell per loop.
+    t = np.arange(n + cross) / RATE
+    pedal = np.zeros(n + cross)
+    for f0, amp in ((dsp.hz("F2"), 1.0), (dsp.hz("C3"), 0.55), (dsp.hz("F3"), 0.3)):
+        for h in range(1, 7):
+            pedal += amp * np.sin(2 * np.pi * f0 * h * t + rng.uniform(0, 6.28)) / h ** 1.4
+    swell = 0.8 + 0.2 * np.sin(2 * np.pi * t / (n / RATE))
+    mix += pan(pedal / np.abs(pedal).max() * swell, 0.0) * 10 ** (-14 / 20)
+    breath = lp(hp(noise(n + cross, rng), 350), 2200) * (0.6 + 0.4 * np.sin(2 * np.pi * t / (n / RATE) + 1.3))[:, None]
+    mix += breath * 10 ** (-30 / 20)
+    # A faint high comb shimmer.
+    at = 0.03
+    while at < length - 0.2:
+        note = ("F7", "Ab7", "C8", "Eb7")[int(rng.integers(0, 4))]
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 0.2, rng, decay=0.05, body=0, modes=dsp.COMB_MODES[:2]), rng.uniform(-0.7, 0.7)),
+              at, -30)
+        at += rng.uniform(0.11, 0.2)
+    # Seamless: the overhang crossfades into the head (equal power), so sample n-1 runs into sample 0.
+    w = np.sin(np.linspace(0, np.pi / 2, cross)) ** 2
+    out = mix[:n].copy()
+    out[:cross] = mix[:cross] * w[:, None] + mix[n:n + cross] * (1 - w)[:, None]
+    return out
+
+
+@cue("MeridianHeavy", -13.0, "Meridian wind", 0.6, 0.5,
+     "36tick ごとの重弾（小節の頭）。低い真鍮の「ゴン」（F3 の櫛の歯と真鍮の胴）とオルガンのパイプの短い一吹き。")
+def meridian_heavy(s, rng):
+    mix = seconds(0.6)
+    place(mix, pan(dsp.box_tine(dsp.hz("F3"), 0.55, rng, decay=0.35), -0.1), 0.0, -3)
+    # Kenney metalPot1: its first strike starts at 0.090 s (a second one follows at 0.7 s and is left out).
+    lay(mix, s, "metal_pot", 0.088, 0.45, 0.0, -9, rate=0.7, lp_=2600, fade_out=0.12)
+    place(mix, brass_ring(dsp.hz("C5"), 0.4, rng, decay=0.16, side=0.15), 0.002, -14)
+    pop = dsp.organ_pad([dsp.hz("F2"), dsp.hz("C3")], 0.18, rng, attack=0.01, release=0.1, harmonics=8, chiff=0.12, breath=0.1)
+    place(mix, pop, 0.0, -10)
+    place(mix, dsp.thump(110, 55, 0.25, rng), 0.0, -9)
+    return room(mix, 0.12, 0.55, 0.15)
+
+
+@cue("MeridianStrikeWarn", -13.0, "Meridian release", 0.45, 0.6,
+     "放した瞬間（子午線の予告線が出る10tick）。ばねが8回の速い下降クリックでほどけ、オルガンが息を吸い込み、"
+     "予告の間だけ高いオルゴールのトレモロが張りつめる。MeridianStrikeFire の予告。")
+def meridian_strike_warn(s, rng):
+    mix = seconds(0.45)
+    times = [0.13 * (i / 7) ** 0.75 for i in range(8)]
+    place(mix, dsp.ratchet(times, rng, freq=3000, pattern=[1.0 - 0.06 * i for i in range(8)],
+                           gains_db=[-4 - 0.8 * i for i in range(8)], side=0.2, decay=0.003, thud=0.25), 0.0, -4)
+    place(mix, whoosh(0.17, rng, 2600, 700, rise=False), 0.0, -14)
+    fire = MERIDIAN_MERIDIAN_FIRE / 60
+    t, i = 0.0, 0
+    while t < fire:
+        place(mix, pan(dsp.box_tine(dsp.hz("C7" if i % 2 else "F7"), 0.1, rng, decay=0.03, body=0, modes=dsp.COMB_MODES[:2]),
+                       -0.2 if i % 2 else 0.2), t, -15 + 6 * t / fire)
+        t += 0.022
+        i += 1
+    return room(mix, 0.1, 0.42, 0.12)
+
+
+@cue("MeridianStrikeFire", -10.0, "Meridian release", 1.2, 0.85,
+     "子午線が撃ち出される（放してから10tick）。櫛の歯を全部いっせいに弾いた明るい F マイナーの和音（F5 A♭5 C6 E♭6 F6 A♭6 C7）、"
+     "真鍮のハンマー、鋭い空気の裂ける音、減衰するオルガンの一撃と低い胴鳴り。段階が高いほど大きく鳴らす（.85 / .72 / .60）。")
+def meridian_strike_fire(s, rng):
+    mix = seconds(1.25)
+    for i, note in enumerate(("F5", "Ab5", "C6", "Eb6", "F6", "Ab6", "C7")):
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 1.0, rng), -0.6 + 0.2 * i), 0.002 * i, -6 + 0.3 * i)
+    lay(mix, s, "metal_pot", 0.088, 0.42, 0.0, -6, rate=1.05, hp_=900, fade_out=0.1)
+    place(mix, pan(dsp.brass_click(rng, 1200, decay=0.012, thud=1.0), 0.0), 0.0, -4)
+    k = round(0.09 * RATE)
+    crack = hp(noise(k, rng), 2400) * np.exp(-np.arange(k) / RATE / 0.018)[:, None]
+    place(mix, crack, 0.0, -6)
+    accent = dsp.organ_pad([dsp.hz(n) for n in ("F2", "F3", "C4", "Eb4", "Ab4")], 0.9, rng, attack=0.02, release=0.7,
+                           harmonics=10, rolloff=1.3, chiff=0.05, breath=0.1)
+    place(mix, accent, 0.01, -9)
+    place(mix, dsp.thump(120, 45, 0.5, rng), 0.0, -4)
+    place(mix, dsp.shimmer(0.7, rng, count=10), 0.08, -18)
+    return room(mix, 0.18, 1.2, 0.35)
+
+
+@cue("MeridianStrikeMiss", -17.0, "Meridian release", 0.6, 0.55,
+     "放したのに子午線が出ないとき（弾切れ、ウィンドウ外、全画面マップ）。オルゴールは鳴らさず、部品が3つ外れ、ばねが空回りして"
+     "止まり、鈍い磁器の「ゴッ」で終わる。成功の音とはっきり違う。")
+def meridian_strike_miss(s, rng):
+    mix = seconds(0.6)
+    for i, (at, f) in enumerate(((0.0, 2000), (0.05, 1700), (0.1, 1400))):
+        place(mix, pan(dsp.brass_click(rng, f, decay=0.005, thud=0.4), -0.3 + 0.3 * i), at, -6 - i)
+    gaps = [0.03 * 1.32 ** i for i in range(8)]
+    times = list(np.cumsum(gaps))
+    place(mix, dsp.ratchet(times, rng, freq=1900, pattern=[1.0 - 0.05 * i for i in range(8)],
+                           gains_db=[-6 - 1.6 * i for i in range(8)], side=0.1, decay=0.004, thud=0.5), 0.12, -6)
+    place(mix, dsp.porcelain_ring(620, 0.25, rng, decay=0.05, side=0.0), 0.43, -10)
+    place(mix, dsp.thump(160, 90, 0.18, rng), 0.43, -12)
+    return room(mix, 0.08, 0.6, 0.12)
+
+
+@cue("MeridianLatticeWarn", -13.0, "Meridian release", 0.45, 0.6,
+     "子午線の先頭が節点を通り、格子が分かれ始める（2〜3段階）。オルゴールを下から上へ5本かき鳴らし（F5 C6 F6 A♭6 C7）、"
+     "真鍮の格子が「チャリ」と鳴る。MeridianLatticeFire の予告。")
+def meridian_lattice_warn(s, rng):
+    mix = seconds(0.45)
+    for i, note in enumerate(("F5", "C6", "F6", "Ab6", "C7")):
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 0.4, rng, decay=0.16), -0.4 + 0.2 * i), 0.025 * i, -6 + 0.4 * i)
+    place(mix, dsp.porcelain_ring(4600, 0.1, rng, decay=0.02, side=0.35), 0.11, -12)
+    place(mix, brass_ring(2900, 0.2, rng, decay=0.05, side=-0.3), 0.115, -12)
+    return room(mix, 0.12, 0.42, 0.12)
+
+
+@cue("MeridianLatticeFire", -10.0, "Meridian release", 1.5, 0.9,
+     "格子が光る。F のペダルの上に F マイナーのオルガンの和音が鳴り、格子の波紋（2tick ずつ）に合わせて櫛の滝が 0・33・67ms に"
+     "3回こぼれ、低い胴鳴りが支える。3段階 .9、2段階 .75。")
+def meridian_lattice_fire(s, rng):
+    mix = seconds(1.55)
+    chord = dsp.organ_pad([dsp.hz(n) for n in ("F2", "F3", "C4", "F4", "Ab4", "C5")], 1.4, rng, attack=0.03, release=0.9,
+                          harmonics=10, rolloff=1.25, chiff=0.06, breath=0.14)
+    place(mix, chord, 0.0, -7)
+    cascades = (("F6", "C6", "Ab5"), ("Ab6", "Eb6", "Bb5"), ("C7", "F6", "C6"))
+    for ring, notes in enumerate(cascades):
+        for j, note in enumerate(notes):
+            place(mix, pan(dsp.box_tine(dsp.hz(note), 0.8, rng), (-0.5 + 0.5 * ring) * (1 if j % 2 else -1)),
+                  ring * MERIDIAN_RIPPLE / 60 + 0.012 * j, -8 - 1.5 * j - ring)
+    place(mix, dsp.thump(100, 42, 0.6, rng), 0.0, -4)
+    place(mix, brass_ring(1750, 0.6, rng, decay=0.2, side=0.2), 0.0, -14)
+    place(mix, dsp.shimmer(0.9, rng, count=14), 0.07, -16)
+    return room(mix, 0.2, 1.5, 0.4)
+
+
+@cue("MeridianHit", -20.0, "Meridian hits", 0.2, 0.35,
+     "弾が当たったとき（持ち主の画面のみ、4tick に1回まで）。小さな磁器の「チッ」と櫛の倍音。")
+def meridian_hit(s, rng):
+    mix = seconds(0.2)
+    place(mix, dsp.porcelain_ring(rng.uniform(3600, 4200), 0.12, rng, decay=0.015, side=0.1), 0.0, -2)
+    place(mix, pan(dsp.box_tine(dsp.hz("F7"), 0.15, rng, decay=0.04, body=0, modes=dsp.COMB_MODES[:2]), -0.1), 0.0, -12)
+    return room(mix, 0.06, 0.18, 0.06)
+
+
+@cue("MeridianHitHeavy", -17.0, "Meridian hits", 0.45, 0.5,
+     "重弾・子午線・格子が当たったとき（弾ごとに6tick に1回まで）。磁器の割れる音と真鍮の響き。")
+def meridian_hit_heavy(s, rng):
+    mix = seconds(0.45)
+    place(mix, dsp.porcelain_crack(0.25, rng, count=7, spread=0.035), 0.0, -3)
+    place(mix, brass_ring(1300, 0.35, rng, decay=0.1, side=0.1), 0.002, -10)
+    place(mix, dsp.thump(140, 70, 0.15, rng), 0.0, -12)
+    return room(mix, 0.1, 0.42, 0.1)
+
+
 # ---------------------------------------------------------------- render
 def seed(name):
     return int.from_bytes(hashlib.sha256((SEED_PREFIX + name).encode("utf-8")).digest()[:8], "little")
 
 
 def render(name, store):
-    x = trim(hp(CUES[name].build(store, np.random.default_rng(seed(name))), 28))
+    raw = CUES[name].build(store, np.random.default_rng(seed(name)))
+    if CUES[name].loop:
+        # A loop is exact: filtered circularly (three copies, the middle kept), never trimmed or faded.
+        n = len(raw)
+        x = hp(np.concatenate((raw, raw, raw)), 28)[n:2 * n]
+    else:
+        x = trim(hp(raw, 28))
     limit = round(CUES[name].max_seconds * RATE)
     if len(x) > limit:
         raise RuntimeError(f"{name}: {len(x) / RATE:.3f} s exceeds its {CUES[name].max_seconds} s budget")
     return x
+
+
+def cue_path(name, output):
+    return output / f"{name}.{'wav' if CUES[name].loop else 'ogg'}"
+
+
+def write_loop(path, x):
+    """PCM16 WAV (sample-exact for a seamless native loop); returns what a reader decodes."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    sf.write(str(path), x.astype(np.float32), RATE, subtype="PCM_16")
+    decoded, rate = sf.read(str(path), always_2d=True, dtype="float64")
+    if rate != RATE or decoded.shape != x.shape:
+        raise ValueError(f"Unexpected WAV decode: {path}")
+    return decoded
 
 
 def render_loop(name, store):
@@ -627,16 +1019,18 @@ def render_loop_cue(name, store, output):
 
 
 def render_cue(name, store, output):
-    """Master to the cue's target, write the Ogg and, if the Vorbis round trip overshoots -1 dBTP, back the gain off."""
-    if CUES[name].loop:
+    """Master to the cue's target, write the Ogg (or the WAV loop) and, if the decoded file overshoots -1 dBTP, back
+    the gain off. A "round" loop is mastered by render_loop_cue."""
+    if CUES[name].loop and CUES[name].loop_master == "round":
         return render_loop_cue(name, store, output)
     store.used = set()
     spec = CUES[name]
-    path = output / f"{name}.ogg"
+    path = cue_path(name, output)
     mastered = master(render(name, store), spec.target_lufs, spec.glue)
     for _ in range(8):
-        decoded = base.write_ogg(path, mastered)
-        peak = true_peak_db(decoded)
+        decoded = write_loop(path, mastered) if spec.loop else base.write_ogg(path, mastered)
+        # A loop's true peak includes the wrap from its last sample to its first.
+        peak = true_peak_db(np.concatenate((decoded[-64:], decoded[:64], decoded))) if spec.loop else true_peak_db(decoded)
         if peak <= -1.0:
             return decoded, sorted(store.used)
         mastered = mastered * 10 ** (-(peak + 1.1) / 20)
@@ -689,10 +1083,11 @@ def measure(x):
 def analyse(name, decoded, path, sources_used):
     data = path.read_bytes()
     spec = CUES[name]
-    looped = np.concatenate((decoded, decoded)) if spec.loop else decoded
+    round_loop = spec.loop and spec.loop_master == "round"
+    looped = np.concatenate((decoded, decoded)) if round_loop else decoded
     info = measure(decoded) | {
         "short_term_lufs": round(loudness(looped), 2),
-        "true_peak_dbfs": round(loop_peak_db(decoded) if spec.loop else true_peak_db(decoded), 2),
+        "true_peak_dbfs": round(loop_peak_db(decoded) if round_loop else true_peak_db(decoded), 2),
         "target_lufs": spec.target_lufs,
         "max_seconds": spec.max_seconds,
         "volume": spec.volume,
@@ -701,7 +1096,10 @@ def analyse(name, decoded, path, sources_used):
         "bytes": len(data),
         "ogg_serial": None if spec.loop else ogg_serial(data),
         "ogg_sha256": sha256(data),
-    } | ({"loop_frames": len(decoded)} | seam(decoded) if spec.loop else {})
+    } | ({"loop_frames": len(decoded)} | seam(decoded) if round_loop else {})
+    if spec.loop and not round_loop:
+        info |= {"loop_samples": len(decoded), "loop_ticks": len(decoded) / (RATE / 60),
+                 "loop_seam": round(float(np.abs(decoded[0] - decoded[-1]).max()), 5)}
     if info["seconds"] > spec.max_seconds + 1e-6:
         raise RuntimeError(f"{name}: encoded length {info['seconds']} s exceeds {spec.max_seconds} s")
     return info
@@ -741,6 +1139,8 @@ def overlay(bed, cue_x, times, gain):
 
 def preview(directory, samples, report, store):
     directory.mkdir(parents=True, exist_ok=True)
+    if samples and all(CUES[name].group.startswith("Meridian") for name in samples):
+        return meridian_preview(directory, samples, report)
 
     def wav(name, x):
         peak = np.abs(x).max()
@@ -987,6 +1387,204 @@ h1,h2{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}audio{{height:32px;w
 </html>""", encoding="utf-8", newline="\n")
 
 
+# ---------------------------------------------------------------- Pale Meridian audition
+# The weapon's score, mirrored from PaleMeridianScore.cs / PaleMeridianLattice.cs (tools/tests pins the two), so the
+# combo plays every cue on its in-game tick at its call-site volume (MeridianVisuals.cs).
+MERIDIAN_SEATS = (108, 180, 228, 264)
+MERIDIAN_CADENCE = (24, 18, 12, 9, 6)
+MERIDIAN_BUILD_PHRASE = (0, 1, 3, 4, 5, 4, 2, 1, 1, 3, 4, 6, 7, 6, 4, 2, 3, 4, 5, 6, 7, 8)
+MERIDIAN_OVERCHARGE_PHRASE = (5, 3, 1, 3, 2, 5, 4, 5, 1, 4, 3, 4, 2, 4, 5, 6)
+MERIDIAN_FLIGHT = 16
+MERIDIAN_LOOP_VOLUME = 0.5
+
+
+def meridian_parts(age):
+    return sum(1 for seat in MERIDIAN_SEATS if age >= seat)
+
+
+def meridian_shot(age):
+    """'note', 'round', 'heavy' or None for the round fired at this score age."""
+    if age < 12 or MERIDIAN_KEY_RISE <= age < MERIDIAN_IGNITE:
+        return None
+    if age >= MERIDIAN_IGNITE:
+        since = age - MERIDIAN_IGNITE
+        return None if since % 3 else "heavy" if since % 36 == 0 else "round"
+    stage = meridian_parts(age)
+    start = 12 if stage == 0 else MERIDIAN_SEATS[stage - 1]
+    return "note" if (age - start) % MERIDIAN_CADENCE[stage] == 0 else None
+
+
+def meridian_note_step(age):
+    if age >= MERIDIAN_IGNITE:
+        since = age - MERIDIAN_IGNITE
+        return MERIDIAN_OVERCHARGE_PHRASE[since // 9 % 16] if since % 9 == 0 else -1
+    if meridian_shot(age) != "note":
+        return -1
+    return MERIDIAN_BUILD_PHRASE[sum(1 for a in range(12, age) if meridian_shot(a) == "note")]
+
+
+def meridian_lattice_start(node):
+    """Ticks from the release to the lattice's split (age -10) and fire (age 0), as PaleMeridianLattice.LatticeStart."""
+    span = int(np.ceil(MERIDIAN_MERIDIAN_FIRE - 1 + 8 * node / (node + 640) - 1e-4)) + 10
+    return span - 11, span - 1
+
+
+def meridian_combo(samples, release, fired=True, node=360.0, hits=True):
+    """One press on the game's own clock (tick 0 = the press; a cue of score age a starts at tick a - 1), each cue
+    at its call-site volume: the build's notes, part flights and seats, the key and the wind, the overcharge loop with
+    heavy bars and every third round's note, then the release (meridian, lattice) or the failed release, plus the
+    owner's throttled hit ticks."""
+    tick = 1 / 60
+    tier = 0 if release < 108 else 1 if release < 228 else 2 if release < 348 else 3
+    mix = seconds(release * tick + 2.0)
+    events = []
+
+    def at(cue_name, age_tick, volume):
+        events.append((cue_name, age_tick * tick, volume))
+
+    at("MeridianAssemble", 0, 0.55)
+    last_hit = -99
+    for age in range(1, release + 1):
+        step = meridian_note_step(age)
+        if step >= 0:
+            at(f"MeridianNote{step}", age - 1, 0.42 if age >= MERIDIAN_IGNITE else 0.5 + 0.03 * meridian_parts(age))
+        shot = meridian_shot(age)
+        if shot == "heavy" and age > MERIDIAN_IGNITE:
+            at("MeridianHeavy", age - 1, 0.5)
+        if hits and shot:
+            land = age - 1 + 8
+            if shot == "heavy":
+                at("MeridianHitHeavy", land, 0.5)
+            elif land - last_hit >= 4:
+                at("MeridianHit", land, 0.35)
+                last_hit = land
+        for part, seat in enumerate(MERIDIAN_SEATS):
+            if age == seat - MERIDIAN_FLIGHT:
+                at("MeridianPartWarn", age - 1, 0.45)
+            if age == seat:
+                at("MeridianPartFire", age - 1, 0.5 + 0.06 * part)
+        if age == MERIDIAN_KEY_RISE:
+            at("MeridianIgniteWarn", age - 1, 0.6)
+        if age == MERIDIAN_IGNITE:
+            at("MeridianIgniteFire", age - 1, 0.75)
+    if fired and tier > 0:
+        at("MeridianStrikeWarn", release, 0.6)
+        at("MeridianStrikeFire", release + MERIDIAN_MERIDIAN_FIRE - 1, (0, 0.6, 0.72, 0.85)[tier])
+        if hits:
+            at("MeridianHitHeavy", release + MERIDIAN_MERIDIAN_FIRE + 1, 0.5)
+        if tier >= 2:
+            split, fire = meridian_lattice_start(node)
+            at("MeridianLatticeWarn", release + split, 0.6)
+            at("MeridianLatticeFire", release + fire, 0.9 if tier >= 3 else 0.75)
+            if hits:
+                at("MeridianHitHeavy", release + fire + 1, 0.5)
+    elif tier > 0:
+        at("MeridianStrikeMiss", release, 0.55)
+    for cue_name, when, volume in events:
+        place(mix, samples[cue_name] * volume, when)
+    # The overcharge loop: from age 350 (gain +.25 per tick), tiled, fading over 6 ticks after the release.
+    if release >= MERIDIAN_IGNITE + 2 and "MeridianLoop" in samples:
+        loop = samples["MeridianLoop"]
+        start, end = round((MERIDIAN_IGNITE + 1) * tick * RATE), round((release + 6) * tick * RATE)
+        n = end - start
+        bed = np.tile(loop, (n // len(loop) + 1, 1))[:n]
+        t = np.arange(n) / RATE
+        ramp = np.clip(t / (4 * tick), 0, 1) * np.clip((n / RATE - t) / (6 * tick), 0, 1)
+        mix[start:end] += bed * (ramp * MERIDIAN_LOOP_VOLUME)[:, None]
+    return mix, events
+
+
+# BGM beds for the combo: (file, BPM, beat-grid origin s, first beat, beats, label), as BGM above.
+MERIDIAN_BGM = (("ObsidianLiturgy", 168.0, -0.008, 268, 34, "第1相（ObsidianLiturgy）"),
+                ("DistantLiturgy", 218.0, 0.068, 28, 44, "第3相（DistantLiturgy、全武器の調 F の基準）"))
+
+
+def meridian_preview(directory, samples, report):
+    def wav(name, x):
+        peak = np.abs(x).max()
+        if peak > 0.999:
+            raise RuntimeError(f"audition clip {name} clips ({peak:.3f})")
+        sf.write(str(directory / f"{name}.wav"), x.astype(np.float32), RATE, subtype="PCM_16")
+        return f"{name}.wav"
+
+    missing = [n for n in CUES if n.startswith("Meridian") and n not in samples]
+    if missing:
+        raise RuntimeError("the Meridian audition needs every Meridian cue; missing " + ", ".join(missing))
+    extra = {"combos": {}, "bgm": {}}
+    combos = (("full", 528, True, "通し：押してから組み上げ（5.8 秒）、3 秒の過充填、放して子午線と格子（3段階）。"),
+              ("tier1", 160, True, "早めに放す（部品1〜2個、1段階）：子午線だけ。"),
+              ("tier2", 300, True, "巻き鍵が出る直前で放す（2段階）：子午線と小さな格子。"),
+              ("miss", 200, False, "弾切れで放す：子午線は出ず、失敗の音（MeridianStrikeMiss）。"))
+    clips = {}
+    for key, release, fired, label in combos:
+        mix, events = meridian_combo(samples, release, fired)
+        trim_db = min(0.0, 20 * np.log10(0.97 / max(np.abs(mix).max(), 1e-9)))
+        clips[key] = wav(f"combo-{key}", mix * 10 ** (trim_db / 20))
+        extra["combos"][key] = {"release_tick": release, "fired": fired, "events": len(events), "mix_trim_db": round(trim_db, 2),
+                                "seconds": round(len(mix) / RATE, 3), "label": label}
+    full, _ = meridian_combo(samples, 528, True)
+    for bgm, bpm, origin, first, beats, label in MERIDIAN_BGM:
+        start, length = origin + first * 60 / bpm, beats * 60 / bpm
+        bed, check = load_bgm(bgm, start, length)
+        lead = 60 / bpm  # the press lands on the second beat of the excerpt
+        mix = bed.copy()
+        place(mix, full, lead)
+        g = 10 ** (min(0.0, 20 * np.log10(0.97 / max(np.abs(mix).max(), np.abs(bed).max()))) / 20)
+        clips[f"bgm-{bgm}"] = wav(f"combo-full-{bgm}", mix * g)
+        clips[f"bed-{bgm}"] = wav(f"bgm-{bgm}", bed * g)
+        extra["bgm"][bgm] = check | {"start": round(start, 4), "length": round(length, 4), "bpm": bpm, "beats": beats,
+                                     "press_at": round(lead, 4), "mix_trim_db": round(20 * np.log10(g), 2), "label": label}
+    for name, x in samples.items():
+        clips[name] = wav(name, x * CUES[name].volume)
+    meridian_page(directory, clips, report, extra)
+    return extra
+
+
+def meridian_page(directory, clips, report, extra):
+    def audio(src, loop=False):
+        return f"<audio controls preload='none' {'loop ' if loop else ''}src='{html.escape(src)}'></audio>"
+
+    def metrics(r):
+        loop = f" ・ ループ {r['loop_samples']} サンプル（{r['loop_ticks']:g} tick）" if "loop_samples" in r else ""
+        return (f"{r['seconds']:.2f} 秒 ・ 短時間 {r['short_term_lufs']:.1f} LUFS ・ ゲーム内の音量 {r['volume']} で実効 "
+                f"{r['effective_lufs']:.1f} LUFS ・ トゥルーピーク {r['true_peak_dbfs']:.1f} dBTP ・ 重心 {r['centroid_hz']} Hz{loop}")
+
+    groups = (("Meridian build", "組み上げ"), ("Meridian notes", "1発ごとの音符（はしご F5〜C7）"),
+              ("Meridian wind", "巻き上げと過充填"), ("Meridian release", "放す（子午線・格子・失敗）"), ("Meridian hits", "命中"))
+    combo_rows = "".join(f"<tr><td>{html.escape(info['label'])}<br><small>{info['seconds']:.1f} 秒、{info['events']} 個の音"
+                         f"{'（クリップしないよう ' + format(-info['mix_trim_db'], '.1f') + ' dB 下げています）' if info['mix_trim_db'] < 0 else ''}</small></td>"
+                         f"<td>{audio(clips[key])}</td></tr>" for key, info in extra["combos"].items())
+    bgm_rows = "".join(f"<tr><td>{html.escape(info['label'])}<br><small>{info['start']:.1f} 秒から {info['beats']} 拍（{info['bpm']:g} BPM）。"
+                       f"2拍目で押す。44.1 kHz に変換し、元の速さと音程のまま（相関 {info['r']}、ずれ {info['lag']} サンプル）。"
+                       f"BGM と効果音を同じだけ {-info['mix_trim_db']:.1f} dB 下げています。</small></td>"
+                       f"<td>通し＋BGM {audio(clips['bgm-' + bgm])}<br>BGM だけ（ループ） {audio(clips['bed-' + bgm], loop=True)}</td></tr>"
+                       for bgm, info in extra["bgm"].items())
+    sections = []
+    for group, title in groups:
+        rows = "".join(f"<tr><td><b>{html.escape(name)}</b><br><small>{html.escape(CUES[name].description)}</small></td>"
+                       f"<td>{audio(clips[name], loop=CUES[name].loop)}</td><td><small>{metrics(report[name])}</small></td></tr>"
+                       for name in CUES if CUES[name].group == group and name in report)
+        sections.append(f"<h3>{html.escape(title)}</h3><table>{rows}</table>")
+    (directory / "index.html").write_text(f"""<!doctype html><html lang='ja'><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'><title>蒼白の子午線 効果音</title>
+<style>body{{font:15px system-ui,'Yu Gothic UI',sans-serif;background:#15121a;color:#ece4dc;margin:24px;max-width:1150px}}
+td{{padding:8px 12px;vertical-align:top;border-bottom:1px solid #2c2633}}small{{color:#a99fb0}}table{{border-collapse:collapse;width:100%}}
+h1,h2,h3{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}h3{{color:#d9c7f5}}audio{{height:32px;width:280px}}p{{line-height:1.6}}</style>
+<h1>蒼白の子午線（Pale Meridian）— 新しい効果音</h1>
+<p>オルゴール仕掛けの攻城銃の音です。1発ごとにオルゴールの次の音が鳴り、真鍮の部品が嵌まるたびに連射が速くなり、
+巻き鍵が回って過充填に入り、放すと白い子午線が撃ち出されて格子に分かれます。音はすべて新しく作ったもので、旧 Ranged* の音は使いません。</p>
+<p><small>調は全武器共通の F マイナー・ペンタトニック（F A♭ B♭ C E♭）で、音程の補正はしていません（0 セント）。音符は音高ごとに別のファイルで、
+ゲーム内で音程を変えて鳴らすことはしません。どの行もゲーム内の音量（効果音の音量設定 100%）で鳴らしています。
+「通し」はゲームと同じ tick（1/60 秒）の上に、各音をゲーム内の音量で並べたものです（命中音は約 8tick 後に当たったとして入れています）。</small></p>
+<h2>通しで聴く</h2><table>{combo_rows}</table>
+<h2>BGM の中で</h2><p><small>実際の Doll の BGM に「通し」を重ねています。効果音と音楽の音量設定はどちらも 100% の想定です。</small></p>
+<table>{bgm_rows}</table>
+<h2>ひとつずつ</h2>
+{''.join(sections)}
+<p><small>過充填のループ（MeridianLoop）は WAV で、2.4 秒 = 144 tick ちょうどで継ぎ目なく回ります。再生ボタンでループ再生されます。</small></p>
+</html>""", encoding="utf-8", newline="\n")
+
+
 # ---------------------------------------------------------------- attribution
 # Per group: the records' date stamp and date, their review line and the section's introduction (heading included).
 LACUNA_ATTRIBUTION = """### Lacuna Testament cues — 2026-10-03
@@ -1000,6 +1598,8 @@ GROUP_ATTRIBUTION = {
 
 
 def attribution_section(report, hashes, group="Companion"):
+    if report and all(CUES[name].group.startswith("Meridian") for name in report):
+        return meridian_attribution_section(report, hashes)
     table = "\n".join(f"| {k} | {SOURCES[k][0].replace('repo:', '')} | {SOURCES[k][1]} | `{hashes[k]}` |" for k in sorted(hashes))
     stamp, date, review, intro = GROUP_ATTRIBUTION.get(group, ("20261002", "2026-10-02", None, None))
     head = intro + f"""
@@ -1049,6 +1649,49 @@ The shared audio basis of the Doll reward weapon refresh and the companion's new
     return head + "\n" + "\n".join(blocks)
 
 
+def meridian_attribution_section(report, hashes):
+    table = "\n".join(f"| {k} | {SOURCES[k][0].replace('repo:', '')} | {SOURCES[k][1]} | `{hashes[k]}` |" for k in sorted(hashes))
+    head = f"""### Pale Meridian weapon cues — 2026-10-03
+
+Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [weapon spec](../docs/encounters/first-severance/WEAPONS.md#pale-meridian--refreshed-ranged-2026-10)): twenty-two Vorbis one-shots and one sample-exact PCM16 WAV loop. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, timings (on the weapon's score ticks), loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), with a few weapon-local blocks in the generator (brass ring, coil-spring twang, band-swept air); the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) are reused unmodified. The three Kenney recordings are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. The nine notes are pure synthesis, one file per ladder step (never transposed at runtime). Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding (for the loop, including its wrap). The audition page and report stay in the git-ignored `.local`.
+
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+{table}
+"""
+    blocks = []
+    for name, r in report.items():
+        used = r["sources"]
+        external = [k for k in used if not SOURCES[k][0].startswith("repo:")]
+        authors = sorted({SOURCES[k][3] for k in external}, key=str.lower)
+        creators = (f"recordings by {' and '.join(authors)}; " if authors else "") + \
+            "synthesis and layering by Convergence with owner-directed Claude assistance"
+        loop = CUES[name].loop
+        kind = (f"stereo 44.1 kHz PCM16 WAV seamless loop, {r['loop_samples']} samples = {r['loop_ticks']:g} game ticks ({r['seconds']:.2f} s)"
+                if loop else f"stereo 44.1 kHz Vorbis Doll weapon cue ({r['seconds']:.2f} s)")
+        codec = "PCM16 WAV" if loop else "Vorbis at compression level 0.4"
+        blocks.append(f"""- Runtime file: `Assets/Sounds/Weapons/DollWeapons/{name}.{'wav' if loop else 'ogg'}`
+- Asset ID: doll-weapon-sfx-{name.lower()}-20261003
+- Asset type: {kind}
+- Creator: {creators}
+- Creation/acquisition date: 2026-10-03
+- Source type: {'public-domain' if external else 'original'}
+- Source work and URL: {', '.join(used) + ' in the table above as selected by the cue recipe; remaining layers original synthesis' if used else 'none; original NumPy synthesis'}
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy {np.__version__}, SciPy {__import__('scipy').__version__}, soundfile {sf.__version__}/libsndfile {sf.__libsndfile_version__} {codec}
+- Human modifications: {'trimmed, filtered and layered recordings plus original synthesis' if external else 'original synthesis'}; short-term loudness {r['short_term_lufs']:.1f} LUFS (played at volume {r['volume']}: {r['effective_lufs']:.1f} LUFS effective), true peak {r['true_peak_dbfs']:.1f} dBFS; {'circular filtering and an equal-power crossfade of the overhang into the head, no trim or fade' if loop else 'pinned Ogg serial'}
+- License and redistribution terms: {'CC0 1.0 recordings; the layered cue follows the existing project asset terms' if external else 'original project asset under the existing project terms'}
+- Required attribution: {'none required by CC0; retain the table above as courtesy credit' if external else 'none; retain this provenance'}
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak{', loop-seam' if loop else ''} and score-tick alignment checks); owner audition pending; in-game mix not_run
+- SHA256: `{r['ogg_sha256']}`
+""")
+    return head + "\n" + "\n".join(blocks)
+
+
+def weapon(group):
+    """The weapon an audition group belongs to: Pale Meridian's groups are "Meridian build", "Meridian notes", ..."""
+    return group.split()[0]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--store", type=Path, help="local recording store (default: $CONVERGENCE_AUDIO_STORE or the "
@@ -1058,23 +1701,23 @@ def main():
     parser.add_argument("--attribution-section", type=Path, help="write the Assets/ATTRIBUTION.md section here")
     parser.add_argument("--only", help="comma-separated cue names; each cue is seeded by its own name, so the bytes "
                                        "equal a full run")
-    parser.add_argument("--group", help="render one group's cues (Companion, Lacuna); --preview and --attribution-section "
-                                        "describe one group")
+    parser.add_argument("--group", help="render one weapon's cues (Companion, Lacuna, Meridian: every 'Meridian ...' "
+                                        "group); --preview and --attribution-section describe one weapon")
     args = parser.parse_args()
     names = ([n.strip() for n in args.only.split(",")] if args.only
-             else [n for n in CUES if not args.group or CUES[n].group == args.group])
+             else [n for n in CUES if not args.group or weapon(CUES[n].group) == args.group])
     unknown = [n for n in names if n not in CUES]
     if unknown or not names:
         parser.error("unknown cue(s): " + ", ".join(unknown) if unknown else "no cue in that group")
-    groups = {CUES[n].group for n in names}
+    groups = {weapon(CUES[n].group) for n in names}
     if (args.preview or args.attribution_section) and len(groups) != 1:
-        parser.error("--preview and --attribution-section describe one group: pass --group")
+        parser.error("--preview and --attribution-section describe one weapon: pass --group")
     store = Store(args.store or find_store(), ATTRIBUTION.read_text(encoding="utf-8"))
     args.output.mkdir(parents=True, exist_ok=True)
     samples, report = {}, {}
     for name in names:
         samples[name], used = render_cue(name, store, args.output)
-        report[name] = analyse(name, samples[name], args.output / f"{name}.{'wav' if CUES[name].loop else 'ogg'}", used)
+        report[name] = analyse(name, samples[name], cue_path(name, args.output), used)
     record = {"recipe": "tools/" + Path(__file__).name, "recipe_sha256": sha256(Path(__file__).read_bytes()),
               "dsp_sha256": sha256(Path(dsp.__file__).read_bytes()),
               "libraries": {"numpy": np.__version__, "scipy": __import__("scipy").__version__,

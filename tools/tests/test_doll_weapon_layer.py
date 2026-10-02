@@ -175,6 +175,10 @@ class DollWeaponLayerShader(unittest.TestCase):
                 self.assertIn(f"pass {name} {{", declared, f"{file}: {name} is declared in {shader.name}")
         self.assertTrue({"SpritePass", "LinePass", "FlatPass", "RampPass", "CompositeArtPass", "CompositeLightPass",
                          "CompositeLightPlainPass"} <= used)
+        # A weapon's own Doll<Weapon>Energy material declares its passes there; DollPixel owns the rest.
+        materials = "".join(path.read_text(encoding="utf-8") for path in weapon_shaders())
+        for name in used:
+            self.assertIn(f"pass {name} {{", materials)
         art = (WEAPONS / "DollPixelArt.cs").read_text(encoding="utf-8")
         self.assertIn('ShaderName = "Convergence.DollPixel"', art)
         exports.verify()
