@@ -19,6 +19,8 @@ PROJECTILES = ROOT / "Content/Encounters/FirstSeverance/Rewards/WitnessProjectil
 ITEMS = ROOT / "Content/Encounters/FirstSeverance/Rewards/RitualArmaments.cs"
 VISUALS = ROOT / "Client/Encounters/FirstSeverance/Weapons/WitnessVisuals.cs"
 PRESENTATION = ROOT / "Client/Encounters/FirstSeverance/Weapons/WitnessPresentation.cs"
+BLADE_ART = ROOT / "Client/Encounters/FirstSeverance/Weapons/WitnessBladeArt.cs"
+WEAPONS = ROOT / "docs/encounters/first-severance/WEAPONS.md"
 LEGACY_VISUALS = ROOT / "Client/Encounters/FirstSeverance/NullRefrainVisuals.cs"
 SHADER = ROOT / "Assets/AutoloadedEffects/Shaders/DollWitnessEnergy.fx"
 
@@ -120,6 +122,20 @@ class WitnessCues(unittest.TestCase):
         exported = {p.stem for p in SOUNDS.glob("*.ogg")} | {p.stem for p in SOUNDS.glob("*.wav")}
         self.assertLessEqual(set(cues), exported)
 
+    def test_the_finishing_execution_is_restrained(self):
+        # Owner preference for big closing sounds (2026-10-03): a quiet organ under a soft gong-like strike with a long
+        # tail, at T3 or below, rather than a loud organ stab.
+        target, _, limit, _ = witness_cues()["VerdictExecuteFire"]
+        self.assertLessEqual(target, -11.5, "T3 or quieter")
+        self.assertGreaterEqual(limit, 2.0, "a long decaying tail")
+        source = GENERATOR.read_text(encoding="utf-8")
+        body = source[source.index("def verdict_execute_fire("):]
+        body = body[:body.index("\n\n\n")]
+        self.assertIn("brass_gong(", body)
+        organ = re.search(r"place\(mix, dsp\.organ_pad\([^\n]*\), [\d.]+, (-?[\d.]+)\)", body)
+        self.assertIsNotNone(organ)
+        self.assertLessEqual(float(organ.group(1)), -12, "the organ stays quiet under the strike")
+
     def test_no_runtime_transposition_and_no_reduced_effects_on_sound(self):
         source = code(VISUALS)
         self.assertNotIn("DollWeaponAudio.Note(", source, "composite cues and loops are never transposed")
@@ -137,6 +153,12 @@ class WitnessMaterial(unittest.TestCase):
         presentation = PRESENTATION.read_text(encoding="utf-8")
         self.assertIn("internal const int RibbonPass = 0, FillPass = 1;", presentation)
         self.assertIsNone(re.search(r"\bif\s*\(", body), "no if statement (FNA/MojoShader mis-translates uniform-only branches)")
+        # Per-frame values (the fill's ground alpha, eye radius and void alpha) come per vertex from the CPU: the only
+        # uniforms are the shared four.
+        uniforms = re.findall(r"^(?:float\d?|matrix)\s+(\w+);", body, re.M)
+        self.assertEqual(["uWorldViewProjection", "dotOrigin", "clock", "reduced"], uniforms)
+        self.assertIn("triangle[i].Local = new Vector4(p.X - middle.X, p.Y - middle.Y, dots, FillGroundAlpha);", presentation)
+        self.assertIn("triangle[i].Shape = new Vector4(p.X, p.Y, eye, voidAlpha);", presentation)
         self.assertIn('ShaderName = "Convergence.DollWitnessEnergy"', presentation)
 
 
@@ -166,18 +188,46 @@ class WitnessOwnership(unittest.TestCase):
         blade = source[source.index("public sealed class WitnessThrownBlade"):source.index("public sealed class WitnessShard")]
         send = blade[blade.index("public override void SendExtraAI"):blade.index("public override void ReceiveExtraAI")]
         sizes = {"(byte)": 1, "(ushort)": 2, "anchor.X": 4, "anchor.Y": 4, "Projectile.rotation": 4}
-        self.assertLessEqual(sum(size for token, size in sizes.items() if token in send), 16, "ExtraAI within 16 bytes")
+        total = sum(size for token, size in sizes.items() if token in send)
+        self.assertLessEqual(total, 16, "ExtraAI within 16 bytes")
+        self.assertIn(f"// {total} bytes", PROJECTILES.read_text(encoding="utf-8"), "the SendExtraAI comment states the size")
+        self.assertIn(f"{total} bytes of `ExtraAI`", WEAPONS.read_text(encoding="utf-8"), "the spec states the size")
+
+    def test_the_thrown_blade_keeps_the_hanging_rung(self):
+        # The shared rules fit the art to the 56 px disc: one k = 2 rung, hanging and thrown; the k = 1 rung is not drawn.
+        art = code(BLADE_ART)
+        self.assertIn('internal const string Name = "WitnessBlade";', art)
+        self.assertIn("internal const float ArcRadius = WitnessRules.SpinRadius;", art)
+        for path in (PRESENTATION, VISUALS, PROJECTILES):
+            self.assertNotIn("WitnessBlade_L", code(path), path.name)
+        self.assertIn('Texture => WitnessArt.Root + "WitnessBlade";', code(PROJECTILES))
+        self.assertIn("DollWeaponTextures.Get(WitnessBladeArt.Name)", code(VISUALS))
+        self.assertIn("float radius = WitnessBladeArt.ArcRadius;", code(PRESENTATION))
+        spec = WEAPONS.read_text(encoding="utf-8")
+        rogue = spec[spec.index("## Rogue — Last Witness"):spec.index("## Claw swipe cleanup")]
+        self.assertNotIn("260", rogue)
+        self.assertNotIn("150 px from its owner", rogue)
+        projectiles = code(PROJECTILES)
+        shard = projectiles[projectiles.index("public sealed class WitnessShard"):]
+        self.assertIn("Projectile.extraUpdates = WitnessRules.ShardUpdates - 1;", shard)
+        self.assertIn("at 44 px/tick", rogue, "ShardLaunch per update times two updates a tick")
 
     def test_presentation_is_terraria_free_and_previewed(self):
         presentation = PRESENTATION.read_text(encoding="utf-8")
         self.assertIsNone(re.search(r"^using\s+(Terraria|ReLogic|Luminance)", presentation, re.M))
-        rules = RULES.read_text(encoding="utf-8")
-        self.assertIsNone(re.search(r"^using\s+(Terraria|Microsoft\.Xna|ReLogic|Luminance)", rules, re.M))
+        for pure in (RULES, BLADE_ART):
+            self.assertIsNone(re.search(r"^using\s+(Terraria|Microsoft\.Xna|ReLogic|Luminance)", pure.read_text(encoding="utf-8"), re.M), pure.name)
         script = (TOOLS / "preview-doll-witness.ps1").read_text(encoding="utf-8")
-        for linked in ("WitnessPresentation.cs", "WitnessRules.cs", "DollArtAnchors.g.cs", "DollWeaponCanvas.cs"):
+        for linked in ("WitnessPresentation.cs", "WitnessBladeArt.cs", "WitnessRules.cs", "DollArtAnchors.g.cs", "DollWeaponCanvas.cs"):
             self.assertIn(linked, script)
         project = (ROOT / "Tests/Convergence.DomainTests/Convergence.DomainTests.csproj").read_text(encoding="utf-8")
         self.assertIn("Content/Encounters/FirstSeverance/Rewards/WitnessRules.cs", project)
+        self.assertIn("Client/Encounters/FirstSeverance/Weapons/WitnessBladeArt.cs", project)
+        # The thrown blade's damage bookkeeping is the pure ledger the domain tests run.
+        blade = code(PROJECTILES)
+        self.assertIn("private readonly WitnessBladeLedger ledger = new();", blade)
+        self.assertIn("ledger.Live((int)Age) ? null : false", blade)
+        self.assertIn("if (ledger.Settle(age)) Array.Clear(Projectile.localNPCImmunity);", blade)
 
 
 def numeric_stack():

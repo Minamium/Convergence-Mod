@@ -8,8 +8,10 @@
 // Axiom turns, return and catch, the stealth judgement and the residues; a contact sheet of them all.
 // Checks: nothing dropped and no material error; every light dot ringed by light or ink on a flat backdrop; the
 // damaging light shows at least four ramp tones with pearl, bone and white at least 40% of its lit dots; the
-// spinning blade's art is never more than a quarter covered by light; the spin arc stays in its band (outside 0.8
-// of the tip's reach, at most 2 dots wide); a peer's light composites at 65%; Reduced Effects halves residue.
+// spinning blade's art (the k = 2 rung, hanging and thrown) is never more than a quarter covered by light; the spin
+// arc stays in its band (on the hit disc's rim, outside 0.8 of the tip's reach, at most 2 dots wide); the execution
+// fill keeps a translucent ground under opaque cracks, its black eye stays small and shuts, and the residue has
+// cooled away within 24 ticks; a peer's light composites at 65% and its void at 60%; Reduced Effects halves residue.
 #nullable disable
 using System;
 using System.Collections.Generic;
@@ -40,7 +42,7 @@ internal static class DollWitnessPreview
     private static GraphicsDevice device;
     private static Effect pixelEffect, witnessEffect;
     private static SpriteBatch batch;
-    private static Texture2D pixel, blade, bladeLarge, sword, shards;
+    private static Texture2D pixel, blade, sword, shards;
     private static RenderTarget2D art, light, frame;
     private static WitnessEnergyMaterial energy;
     private static readonly DollWeaponCanvas canvas = new();
@@ -93,8 +95,7 @@ internal static class DollWitnessPreview
             witnessEffect = witnessMaterial;
             energy = new WitnessEnergyMaterial(() => witnessEffect);
             string textures = Path.Combine(root, "Assets/Textures/Items/DollWeapons");
-            blade = Load(Path.Combine(textures, "WitnessBlade.png"));
-            bladeLarge = Load(Path.Combine(textures, "WitnessBlade_L.png"));
+            blade = Load(Path.Combine(textures, WitnessBladeArt.Name + ".png"));
             sword = Load(Path.Combine(textures, "WitnessSword.png"));
             shards = Load(Path.Combine(textures, "WitnessShards.png"));
             pixel = new Texture2D(device, 1, 1);
@@ -108,7 +109,7 @@ internal static class DollWitnessPreview
             frames += Sequence();
             Checks();
             ContactSheet();
-            foreach (Texture2D texture in new[] { pixel, blade, bladeLarge, sword, shards }) texture.Dispose();
+            foreach (Texture2D texture in new[] { pixel, blade, sword, shards }) texture.Dispose();
             batch.Dispose(); art.Dispose(); light.Dispose(); frame.Dispose();
         }
         finally
@@ -205,10 +206,12 @@ internal static class DollWitnessPreview
         NVector2 balance = WitnessRules.BalancePoint(N(Player), aim, 1, pose);
         Vector2 position = X(WitnessRules.BladeToWorld(balance, WitnessRules.BladeAngle(aim, 1, pose), 1,
             WitnessRules.SeatLocal(birth, WitnessRules.TestimonyFire(birth))));
-        Vector2 velocity = Unit(aim) * WitnessRules.ShardLaunch;
+        // px per tick: ShardLaunch per update, ShardUpdates updates a tick (44 px/tick), easing to ShardSpeed once it seeks.
+        const int updates = WitnessRules.ShardUpdates;
+        Vector2 velocity = Unit(aim) * WitnessRules.ShardLaunch * updates;
         var history = new List<Vector2> { position };
         hitAt = -1;
-        int steps = (int)MathF.Ceiling(t * 2);
+        int steps = (int)MathF.Ceiling(t * updates);
         for (int i = 1; i <= steps; i++)
         {
             float want = MathF.Atan2(Target.Y - position.Y, Target.X - position.X), current = MathF.Atan2(velocity.Y, velocity.X);
@@ -216,10 +219,10 @@ internal static class DollWitnessPreview
             float speed = velocity.Length() + (WitnessRules.ShardSpeed - velocity.Length()) * (1 - MathF.Exp(-.16f));
             velocity = Unit(current + turn) * speed;
             Vector2 from = position;
-            position += velocity * .5f;
-            if (i % 2 == 0) history.Add(position);
+            position += velocity / updates;
+            if (i % updates == 0) history.Add(position);
             Rectangle box = new((int)(Target.X - TargetHalf.X), (int)(Target.Y - TargetHalf.Y), (int)(TargetHalf.X * 2), (int)(TargetHalf.Y * 2));
-            if (box.Contains((int)position.X, (int)position.Y)) { hitAt = i * .5f; break; }
+            if (box.Contains((int)position.X, (int)position.Y)) { hitAt = i / (float)updates; break; }
         }
         center = position;
         heading = MathF.Atan2(velocity.Y, velocity.X);
@@ -234,7 +237,7 @@ internal static class DollWitnessPreview
 
     private static WitnessDrawState Base(WitnessPart part, bool peer) => new()
     {
-        Part = part, Blade = blade, BladeLarge = bladeLarge, Sword = sword, Shards = shards, Energy = energy, Peer = peer,
+        Part = part, Blade = blade, Sword = sword, Shards = shards, Energy = energy, Peer = peer,
         Seed = 1234, Gone = -1, Ghost = -1, Facing = 1, SpinSign = 1,
     };
 
@@ -287,14 +290,6 @@ internal static class DollWitnessPreview
         state.Stealth = stealth;
         state.Age = bladeAge;
         state.Clock = age;
-        float distance = Vector2.Distance(state.Center, Player);
-        state.Large = distance > WitnessPresentation.LargeRungDistance;
-        int crossed = 0;
-        for (int i = 1; i <= tick; i++)
-            if (Vector2.Distance(flight[i].Center, Player) > WitnessPresentation.LargeRungDistance != Vector2.Distance(flight[i - 1].Center, Player) > WitnessPresentation.LargeRungDistance)
-                crossed = i;
-        state.Swap = crossed == 0 || state.Large != Vector2.Distance(flight[crossed].Center, Player) > WitnessPresentation.LargeRungDistance
-            ? 99 : bladeAge - crossed;
         var trail = new Vector2[13];
         trail[0] = state.Center;
         int n = 1;
@@ -515,6 +510,7 @@ internal static class DollWitnessPreview
         CheckDamagingLight();
         CheckBladeReadable();
         CheckSpinArc();
+        CheckExecution();
         CheckPeerAndReduced();
     }
 
@@ -635,7 +631,7 @@ internal static class DollWitnessPreview
             RenderOnly(c => Score(c, age, false));
             Color[] artDots = ReadArt(), lightDots = ReadLight();
             Vector2 center = canvas.ToDot(f.Center);
-            float reach = (Vector2.Distance(f.Center, Player) > WitnessPresentation.LargeRungDistance ? 135 : 70) * DollWeaponCanvas.DotScale;
+            float reach = (WitnessBladeArt.TipReach + 8) * DollWeaponCanvas.DotScale;
             int drawn = 0, covered = 0;
             for (int y = (int)(center.Y - reach); y <= (int)(center.Y + reach); y++)
             for (int x = (int)(center.X - reach); x <= (int)(center.X + reach); x++)
@@ -663,15 +659,13 @@ internal static class DollWitnessPreview
         state.Center = f.Center;
         state.Rotation = f.Rotation;
         state.Phase = WitnessPhase.Outbound;
-        state.Large = true;
-        state.Swap = 99;
         state.Clock = age;
         RenderOnly(c => WitnessPresentation.Emit(c, in state));
         Color[] dots = ReadLight();
         Vector2 center = canvas.ToDot(f.Center);
-        float reach = WitnessRules.ThrownTip.X * DollWeaponCanvas.DotScale;
+        float reach = WitnessBladeArt.TipReach * DollWeaponCanvas.DotScale;
         Vector2 along = Unit(f.Rotation), across = new(-along.Y, along.X);
-        Vector2 eye = canvas.ToDot(f.Center + along * WitnessRules.ThrownEye.X + across * WitnessRules.ThrownEye.Y);
+        Vector2 eye = canvas.ToDot(f.Center + along * WitnessRules.HangEye.X + across * WitnessRules.HangEye.Y);
         int inside = 0, total = 0;
         for (int y = 0; y < light.Height; y++)
         for (int x = 0; x < light.Width; x++)
@@ -703,6 +697,54 @@ internal static class DollWitnessPreview
             if (best > 12) thick++;
         }
         if (thick > 0) failures.Add($"spin arc wider than 2 dots on {thick} ray(s)");
+    }
+
+    // The execution stays restrained: inside the footprint (away from the edge bands) the porcelain ground is
+    // translucent and only the cracks and the pearl lip are opaque; the black eye stays within EyeRadius and is shut
+    // ten ticks after the hit; everything has cooled away 24 ticks after the live window; a peer's void is at 60%.
+    private static void CheckExecution()
+    {
+        Color ink = Tone(DollTone.Ink);
+        (int Lit, int Opaque, int Ground, int Void, float VoidAlpha) Measure(float t, bool peer)
+        {
+            RenderOnly(c => Judgement(c, t, true, peer));
+            Color[] dots = ReadLight();
+            Vector2 center = canvas.ToDot(Target);
+            // Inside the triangle's incircle less 12 dots: clear of the 7-dot edge bands and their sparks.
+            float inner = RitualArmamentChoreography.VerdictRadius * .5f * DollWeaponCanvas.DotScale - 12;
+            int lit = 0, opaque = 0, ground = 0, voids = 0;
+            float voidAlpha = 0;
+            for (int y = 0; y < light.Height; y++)
+            for (int x = 0; x < light.Width; x++)
+            {
+                Color c = dots[y * light.Width + x];
+                if (c.A == 0 || Vector2.Distance(new Vector2(x + .5f, y + .5f), center) > inner) continue;
+                lit++;
+                Color straight = new((int)MathF.Round(c.R * 255f / c.A), (int)MathF.Round(c.G * 255f / c.A), (int)MathF.Round(c.B * 255f / c.A));
+                if (Snap(straight) == ink) { voids++; voidAlpha = MathF.Max(voidAlpha, c.A / 255f); continue; }
+                if (c.A >= 250) opaque++;
+                else ground++;
+            }
+            return (lit, opaque, ground, voids, voidAlpha);
+        }
+        var hit = Measure(29, false);
+        Console.WriteLine($"  execution at 29: {hit.Lit} lit dots inside, {hit.Opaque * 100 / Math.Max(1, hit.Lit)}% opaque, {hit.Void} void");
+        if (hit.Lit == 0) failures.Add("execution: no fill inside the footprint");
+        else if (hit.Opaque * 100 / hit.Lit > 45) failures.Add($"execution: {hit.Opaque * 100 / hit.Lit}% of the fill is opaque (only the cracks should be)");
+        if (hit.Ground == 0) failures.Add("execution: no translucent ground");
+        var open = Measure(31, false);
+        float eyeDots = WitnessRules.EyeRadius * DollWeaponCanvas.DotScale;
+        Console.WriteLine($"  execution at 31: {open.Void} void dots (eye radius {WitnessRules.EyeRadius} px)");
+        if (open.Void == 0) failures.Add("execution: the black eye never opened");
+        if (open.Void > MathF.PI * eyeDots * eyeDots * 1.15f) failures.Add($"execution: the black eye covers {open.Void} dots, more than its {WitnessRules.EyeRadius} px radius");
+        if (open.VoidAlpha < .99f) failures.Add($"execution: the owner's void is at {open.VoidAlpha:F2}, not opaque");
+        var shut = Measure(RitualArmamentChoreography.VerdictHit + 10, false);
+        if (shut.Void > 0) failures.Add($"execution: {shut.Void} void dot(s) ten ticks after the hit");
+        var peer = Measure(31, true);
+        if (peer.Void == 0 || MathF.Abs(peer.VoidAlpha - DollWeaponCanvas.PeerVoidAlpha) > .02f)
+            failures.Add($"execution: a peer's void at {peer.VoidAlpha:F2}, not {DollWeaponCanvas.PeerVoidAlpha:F2}");
+        Record(c => Judgement(c, RitualArmamentChoreography.VerdictEndHit + 24), false, 40);
+        if (canvas.HasLight) failures.Add("execution: light remains 24 ticks after the live window");
     }
 
     // A peer's damaging light composites at 65% while the bodies stay opaque; Reduced Effects halves residue.

@@ -14,9 +14,11 @@ internal enum WitnessPart : byte { Hang, Blade, Shard, Judgement }
 internal struct WitnessDrawState
 {
     internal WitnessPart Part;
-    internal Texture2D? Blade, BladeLarge, Sword, Shards;
+    // The blade is WitnessBladeArt's rung (k = 2), hanging and thrown.
+    internal Texture2D? Blade, Sword, Shards;
     internal IDollEnergyMaterial? Energy;
-    // Another player's weapon: its damaging light draws at DollWeaponCanvas.PeerLightAlpha; bodies stay opaque.
+    // Another player's weapon: its damaging light draws at DollWeaponCanvas.PeerLightAlpha and its void at
+    // DollWeaponCanvas.PeerVoidAlpha; bodies stay opaque.
     internal bool Peer;
     internal int Seed;
     // Ticks since the projectile ended (residue), or negative while it lives.
@@ -44,9 +46,7 @@ internal struct WitnessDrawState
     internal int SpinSign;
     internal WitnessPhase Phase;
     internal float PhaseAge;
-    internal bool Large, Anchored;
-    // Ticks since the rung last changed: the swap hides under a short pearl flash.
-    internal float Swap;
+    internal bool Anchored;
     internal Vector2[]? Trail;
     internal int TrailCount;
 
@@ -59,21 +59,19 @@ internal struct WitnessDrawState
 }
 
 // The drawing of Last Witness v2 through the shared Doll weapon layer (front stratum). Terraria-free: FNA, the pure
-// WitnessRules and the exported anchors only, so the offline preview links it. 1 texel = 1 dot = 2 world px; sizes
-// change only by swapping the two exported rungs of the blade. Live damage is the DollWitnessEnergy material
-// (Ribbon: wake, spin arc, tails, threads, edges; Fill: the execution); forecasts are pearl-violet hairlines.
+// WitnessRules and the exported anchors only, so the offline preview links it. 1 texel = 1 dot = 2 world px; the blade
+// is one exported rung (WitnessBladeArt, k = 2) hanging and thrown, fitted to the 56 px hit disc. Live damage is the
+// DollWitnessEnergy material (Ribbon: wake, spin arc, tails, threads, edges; Fill: the execution); forecasts are
+// pearl-violet hairlines.
 internal static class WitnessPresentation
 {
     internal const int RibbonPass = 0, FillPass = 1;
-    // The thrown blade's large rung (WitnessBlade_L, k = 1). False draws the hanging rung in flight as well.
-    internal const bool ThrownLarge = true;
-    // Beyond this distance from its owner the thrown blade swaps to the large rung (so it never covers the player).
-    internal const float LargeRungDistance = 150, RungHysteresis = 16;
     internal const float SpinArcSpan = 2.09f, ReducedArcSpan = 1.4f, SpinArcAlpha = .7f, SpinArcWidth = 3, WakeWidth = 10;
     internal const float CancelDissolve = 20, BladeDissolve = 16, ShardPuff = 10, JudgementResidue = 12;
+    // The execution fill's porcelain ground between the cracks; only the craquelure and the pearl lip are opaque.
+    internal const float FillGroundAlpha = .55f;
 
-    private static readonly Vector2 BladePivot = X(DollArtAnchors.WitnessBlade.Pivot);
-    private static readonly Vector2 LargePivot = X(DollArtAnchors.WitnessBlade_L.Pivot);
+    private static readonly Vector2 BladePivot = X(WitnessBladeArt.Pivot);
     private static readonly Vector2 ShardPivot = X(DollArtAnchors.WitnessShards.Pivot);
     private static readonly Vector2 SwordPivot = X(DollArtAnchors.WitnessSword.StakePoint);
 
@@ -127,9 +125,8 @@ internal static class WitnessPresentation
         {
             // A peer still waiting for the thrown blade: carry it on from the release instead of a gap.
             float reach = WitnessRules.ReleaseRadius + WitnessRules.OutboundSpeed * s.Ghost;
-            bool large = ThrownLarge && reach > LargeRungDistance + RungHysteresis;
-            if ((large ? s.BladeLarge : s.Blade) is { } ghost)
-                canvas.Sprite(new DollSprite(ghost, ghost.Bounds, large ? LargePivot : BladePivot), s.Root + Unit(s.Aim) * reach,
+            if (s.Blade is { } ghost)
+                canvas.Sprite(new DollSprite(ghost, ghost.Bounds, BladePivot), s.Root + Unit(s.Aim) * reach,
                     s.Aim + f * WitnessRules.CruiseSpin * s.Ghost, flip, DollStratum.Front, 0, new DollSpriteFx { Fade = Clamp01((s.Ghost - 3) / 3) });
         }
 
@@ -167,6 +164,8 @@ internal static class WitnessPresentation
 
     // Each testimony: a thread of light runs from the eye along the edge to its seat, the edge cracks, the shard
     // slides out and pulls back, then leaves (its own projectile draws it from there); a pearl notch stays lit.
+    // Everything on the edge needs the blade in the hang: while this owner's thrown blade is still out (a held trigger
+    // whose catch comes late) the shard just leaves its seat with a few sparks.
     private static void Testimonies(DollWeaponCanvas canvas, in WitnessDrawState s, Vector2 center, float angle, float f, float light)
     {
         float age = s.Age;
@@ -200,7 +199,7 @@ internal static class WitnessPresentation
                     canvas.EnergyQuad(energy, RibbonPass, from, to, 3, new Vector4(.85f, light, Clamp01(t / 5f), 0));
                 }
                 // The edge cracks at the seat: a short zig-zag hairline across the edge.
-                if (t > 3)
+                if (t > 3 && s.Body)
                 {
                     Vector2 c0 = Local(center, angle, f, new NVector2(along - 3, WitnessRules.SeatEdge - 4));
                     Vector2 c1 = Local(center, angle, f, new NVector2(along + 1, WitnessRules.SeatEdge - 1));
@@ -209,7 +208,7 @@ internal static class WitnessPresentation
                     canvas.Line(c1, c2, DollTone.White, 1, light);
                 }
                 // The shard itself, embedded behind the blade's edge, slides out pointing down the line of fire.
-                if (s.Shards is { } shards)
+                if (s.Body && s.Shards is { } shards)
                 {
                     Vector2 seatAt = Local(center, angle, f, WitnessRules.SeatLocal(birth, age));
                     canvas.Sprite(new DollSprite(shards, ShardFrame(birth % 3), ShardPivot), seatAt, s.Aim,
@@ -222,7 +221,7 @@ internal static class WitnessPresentation
                 // The shot: a short white flick down the line of fire and a few sparks off the edge.
                 float t = age - fire;
                 Vector2 seatAt = Local(center, angle, f, WitnessRules.SeatLocal(birth, fire));
-                if (t < 2.5f) canvas.Line(seatAt, seatAt + Unit(s.Aim) * (18 + 14 * t), DollTone.White, t < 1 ? 2 : 1, light);
+                if (t < 2.5f && s.Body) canvas.Line(seatAt, seatAt + Unit(s.Aim) * (18 + 14 * t), DollTone.White, t < 1 ? 2 : 1, light);
                 canvas.Burst(seatAt, s.Seed + birth * 13, 7, t, 9, 2.6f, .05f, DollShardKind.Spark, 2.2f, s.Aim);
             }
         }
@@ -295,9 +294,8 @@ internal static class WitnessPresentation
     {
         float dissolve = s.Gone >= 0 ? s.Gone / Residue(canvas, BladeDissolve) : 0;
         if (dissolve >= 1) return false;
-        bool large = s.Large && ThrownLarge && s.BladeLarge is not null;
-        Texture2D? texture = large ? s.BladeLarge : s.Blade;
-        float reach = large ? WitnessRules.ThrownTip.X : WitnessRules.HangTip.X;
+        Texture2D? texture = s.Blade;
+        float reach = WitnessBladeArt.TipReach;
         float sign = s.SpinSign < 0 ? -1 : 1, light = LightAlpha(in s) * (1 - dissolve);
         DollFlip flip = sign < 0 ? DollFlip.Vertical : DollFlip.None;
         bool turning = s.Phase == WitnessPhase.Turn;
@@ -310,10 +308,10 @@ internal static class WitnessPresentation
         }
         if (texture is not null)
         {
-            float flash = s.Swap < 4 ? 1 - s.Swap / 4f : 0;
-            if (turning && s.Anchored && t < 3) flash = MathF.Max(flash, .6f * (1 - t / 3f));
+            float flash = 0;
+            if (turning && s.Anchored && t < 3) flash = .6f * (1 - t / 3f);
             if (s.Phase == WitnessPhase.Return && t < 3) flash = MathF.Max(flash, .5f * (1 - t / 3f));
-            canvas.Sprite(new DollSprite(texture, texture.Bounds, large ? LargePivot : BladePivot), s.Center, s.Rotation, flip,
+            canvas.Sprite(new DollSprite(texture, texture.Bounds, BladePivot), s.Center, s.Rotation, flip,
                 DollStratum.Front, 0, new DollSpriteFx { Flash = flash, Dissolve = dissolve, Seed = s.Seed });
         }
         if (s.Gone >= 0)
@@ -322,7 +320,7 @@ internal static class WitnessPresentation
             return true;
         }
         // The eye burns in flight; ruby under stealth.
-        Vector2 eye = Local(s.Center, s.Rotation, sign, large ? WitnessRules.ThrownEye : WitnessRules.HangEye);
+        Vector2 eye = Local(s.Center, s.Rotation, sign, WitnessRules.HangEye);
         canvas.Dot(eye, (int)(s.Clock / 2) % 3 == 0 ? DollTone.PearlViolet : DollTone.White, 2);
         if (s.Stealth) canvas.Dot(eye + new Vector2(2, 0), DollTone.Ruby, 1);
 
@@ -401,8 +399,8 @@ internal static class WitnessPresentation
         canvas.EnergyStrip(energy, RibbonPass, spine.Slice(0, count), WakeWidth, new Vector4(intensity, light * (canvas.Reduced ? .7f : 1), 2, .85f));
     }
 
-    // The trailing spin arc: at most 2 dots wide, at most 120 degrees, alpha at most .7, never inside 0.8 of the tip's
-    // reach, so the physical blade stays readable.
+    // The trailing spin arc on the hit disc's rim (0.89 of the drawn tip's reach): at most 2 dots wide, at most 120
+    // degrees, alpha at most .7, never inside 0.8 of the tip's reach, so the physical blade stays readable.
     private static void SpinArc(DollWeaponCanvas canvas, in WitnessDrawState s, IDollEnergyMaterial energy, float reach, float sign, float light)
     {
         float span = canvas.Reduced ? ReducedArcSpan : SpinArcSpan;
@@ -410,7 +408,7 @@ internal static class WitnessPresentation
         span *= Clamp01(spin / WitnessRules.CruiseSpin * .75f);
         if (span <= .05f) return;
         Span<Vector2> spine = stackalloc Vector2[14];
-        float radius = reach * .92f;
+        float radius = WitnessBladeArt.ArcRadius;
         for (int i = 0; i < spine.Length; i++)
         {
             float a = s.Rotation - sign * span * (1 - i / (float)(spine.Length - 1));
@@ -556,22 +554,26 @@ internal static class WitnessPresentation
                 canvas.Burst(corners[k], s.Seed + k * 7, 8, since, 12, 2.6f, .14f, DollShardKind.Porcelain, 2.6f, -MathF.PI / 2);
             }
         }
-        // The edges: light written from stake to stake, closing with the stakes, flaring at the execution.
+        // The execution, under the edges: opaque pearl craquelure over a translucent porcelain ground, drawn toward the
+        // centre, and a small black eye that opens and shuts within ten ticks; the residue cools away by JudgementCool.
+        // Then the edges: light written from stake to stake, closing with the stakes, flaring at the execution.
         if (s.Energy is { } energy && t >= WitnessRules.EdgeWriteStart)
         {
+            if (t >= RitualArmamentChoreography.VerdictHit && fade > 0)
+            {
+                float collapse = s.Struck ? Clamp01((t - RitualArmamentChoreography.VerdictHit) / (RitualArmamentChoreography.VerdictEndHit - RitualArmamentChoreography.VerdictHit + 3)) : 0;
+                float eye = s.Struck ? WitnessRules.ExecutionEye(t) * WitnessRules.EyeRadius : 0;
+                Fill(canvas, energy, s.Center, corners, radius, eye, VoidAlpha(in s) * end,
+                    new Vector4((s.Struck ? 1 : .55f) * (.3f + .7f * fade), light * fade, collapse, (s.Seed & 255) / 255f));
+            }
             float write = WitnessRules.EdgeWrite(t);
             float hot = t > RitualArmamentChoreography.VerdictEndHit ? fade : 1;
             float width = live ? 14 : 6 + 4 * RitualKineticMotion.VerdictClosure(t);
             float intensity = live ? 1 : t > RitualArmamentChoreography.VerdictEndHit ? .25f + .65f * fade : .85f;
-            for (int k = 0; k < 3; k++)
-                canvas.EnergyQuad(energy, RibbonPass, corners[k], corners[(k + 1) % 3], width,
-                    new Vector4(intensity, light * hot, write < 1 ? write : 2, 0));
-            // The execution: pearl craquelure collapsing into a black eye, then cooling away.
-            if (t >= RitualArmamentChoreography.VerdictHit)
-            {
-                float collapse = s.Struck ? Clamp01((t - RitualArmamentChoreography.VerdictHit) / (RitualArmamentChoreography.VerdictEndHit - RitualArmamentChoreography.VerdictHit + 3)) : 0;
-                Fill(canvas, energy, s.Center, corners, radius, new Vector4((s.Struck ? 1 : .55f) * (.3f + .7f * fade), light * fade, collapse, (s.Seed & 255) / 255f));
-            }
+            if (light * hot > .004f)
+                for (int k = 0; k < 3; k++)
+                    canvas.EnergyQuad(energy, RibbonPass, corners[k], corners[(k + 1) % 3], width,
+                        new Vector4(intensity, light * hot, write < 1 ? write : 2, 0));
         }
         if (live && s.Struck)
         {
@@ -582,18 +584,21 @@ internal static class WitnessPresentation
         return true;
     }
 
-    private static void Fill(DollWeaponCanvas canvas, IDollEnergyMaterial energy, Vector2 center, ReadOnlySpan<Vector2> corners, float radius, Vector4 style)
+    // FillPass vertices: L = (x, y from the centre in dots, circumradius in dots, ground alpha), S = (dot position, eye
+    // radius in dots, void alpha), T = style. Every value is per frame on the CPU; the shader only reads them.
+    private static void Fill(DollWeaponCanvas canvas, IDollEnergyMaterial energy, Vector2 center, ReadOnlySpan<Vector2> corners, float radius,
+        float eyeRadius, float voidAlpha, Vector4 style)
     {
         Span<DollPixelVertex> triangle = canvas.Energy(energy, FillPass, 1);
         if (triangle.IsEmpty) return;
         Vector2 middle = canvas.ToDot(center);
-        float dots = radius * DollWeaponCanvas.DotScale;
+        float dots = radius * DollWeaponCanvas.DotScale, eye = eyeRadius * DollWeaponCanvas.DotScale;
         for (int i = 0; i < 3; i++)
         {
             Vector2 p = canvas.ToDot(corners[i]);
             triangle[i].Position = new Vector3(p, 0);
-            triangle[i].Local = new Vector4(p.X - middle.X, p.Y - middle.Y, dots, 0);
-            triangle[i].Shape = new Vector4(p.X, p.Y, 0, 0);
+            triangle[i].Local = new Vector4(p.X - middle.X, p.Y - middle.Y, dots, FillGroundAlpha);
+            triangle[i].Shape = new Vector4(p.X, p.Y, eye, voidAlpha);
             triangle[i].Style = style;
         }
     }
@@ -601,6 +606,7 @@ internal static class WitnessPresentation
     // ---- Helpers --------------------------------------------------------------------------------------
 
     private static float LightAlpha(in WitnessDrawState s) => s.Peer ? DollWeaponCanvas.PeerLightAlpha : 1;
+    private static float VoidAlpha(in WitnessDrawState s) => s.Peer ? DollWeaponCanvas.PeerVoidAlpha : 1;
 
     internal static Rectangle ShardFrame(int shape)
         => new(Math.Clamp(shape, 0, 2) * DollArtAnchors.WitnessShards.FrameWidth, 0, DollArtAnchors.WitnessShards.FrameWidth, DollArtAnchors.WitnessShards.FrameHeight);

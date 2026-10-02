@@ -137,8 +137,7 @@ internal abstract class WitnessSource : IDollWeaponSource
     {
         var state = new WitnessDrawState
         {
-            Blade = DollWeaponTextures.Get("WitnessBlade"),
-            BladeLarge = DollWeaponTextures.Get("WitnessBlade_L"),
+            Blade = DollWeaponTextures.Get(WitnessBladeArt.Name),
             Sword = DollWeaponTextures.Get("WitnessSword"),
             Shards = DollWeaponTextures.Get("WitnessShards"),
             Energy = Energy,
@@ -311,8 +310,7 @@ internal sealed class BladeSource : WitnessSource
     private float previousRotation, rotation, previousPhaseAge, phaseAge;
     private WitnessPhase phase;
     private int phaseStart = -1, spinSign = 1;
-    private bool stealth, anchored, large, started;
-    private ulong swappedAt;
+    private bool stealth, anchored, started;
     private int turnCue = DollCueClock.Armed, biteCue = DollCueClock.Armed, returnCue = DollCueClock.Armed;
     private SlotId cruise = SlotId.Invalid, axiom = SlotId.Invalid;
     private float age, previousAge;
@@ -358,10 +356,6 @@ internal sealed class BladeSource : WitnessSource
         Array.Copy(trail, 0, trail, 1, TrailLength);
         trail[0] = p.Center;
         trailCount = Math.Min(trailCount + 1, TrailLength + 1);
-        float distance = Vector2.Distance(p.Center, Main.player[Owner].MountedCenter);
-        bool wantLarge = large ? distance > WitnessPresentation.LargeRungDistance - WitnessPresentation.RungHysteresis
-            : distance > WitnessPresentation.LargeRungDistance + WitnessPresentation.RungHysteresis;
-        if (wantLarge != large) { large = wantLarge; swappedAt = now; }
         WitnessPresence.Blade(Owner, now);
         Cues(p);
     }
@@ -434,8 +428,6 @@ internal sealed class BladeSource : WitnessSource
         s.Age = Lerp(previousAge, age, fraction);
         s.Stealth = stealth;
         s.Anchored = anchored;
-        s.Large = large;
-        s.Swap = swappedAt == 0 ? 99 : (float)Math.Max(0, canvas.Clock - 1 - swappedAt);
         // The drawn blade sits between the last two samples: the path behind it starts at the previous one.
         frame[0] = s.Center;
         Array.Copy(trail, 1, frame, 1, TrailLength);

@@ -6,7 +6,8 @@ using Convergence.Content.Encounters.FirstSeverance.Rewards;
 namespace Convergence.DomainTests;
 
 // Last Witness v2 (WitnessRules): budget against the 0.2.x baseline, the score's clocks and continuity, the thrown
-// blade's live windows and swept disc, the judgement's clocks, and the exported art against the design anchors.
+// blade's live windows, per-root ledger and swept disc, the judgement's clocks, and the exported art against the design
+// anchors and the hit disc.
 internal static partial class Program
 {
     [DomainTest("Last Witness v2 keeps the 0.2.x budget per score, sustained and over the best cold-press window")]
@@ -202,9 +203,91 @@ internal static partial class Program
         AssertEqual(false, WitnessRules.SweptDiscTouchesBox(new(float.NaN, 0), new(120, 0), r, min, max), "NaN rejected");
         AssertEqual(false, WitnessRules.SweptDiscTouchesBox(new(120, 0), new(120, 0), float.PositiveInfinity, min, max), "infinite radius rejected");
         AssertEqual(false, WitnessRules.SweptDiscTouchesBox(new(120, 0), new(120, 0), r, max, min), "inverted box rejected");
-        // The hit disc stays inside the drawn blade on both rungs.
-        AssertEqual(true, WitnessRules.SpinRadius <= WitnessRules.HangTip.X && WitnessRules.SpinRadius <= WitnessRules.ThrownTip.X,
-            "the disc never reaches past the drawn tip");
+        // A testimony shard updates twice a tick: it leaves at 44 px/tick and seeks at 36.
+        AssertEqual(2, WitnessRules.ShardUpdates, "shard updates per tick (extraUpdates 1, as in 0.2.x)");
+        AssertDollNear(44, WitnessRules.ShardLaunch * WitnessRules.ShardUpdates, 1e-6, "launch px per tick");
+    }
+
+    // The native hit pass of one tick after the blade's AI (Advance, then Settle): every root inside the disc that the
+    // ledger still allows is paid the tick's share and booked.
+    private static void WitnessLedgerTick(WitnessBladeLedger ledger, int age, int limit, int[] inside, double[] paid)
+    {
+        ledger.Advance(age, limit);
+        ledger.Settle(age);
+        if (!ledger.Live(age)) return;
+        foreach (int root in inside)
+        {
+            if (!ledger.CanHit(root)) continue;
+            paid[root] += ledger.StruckShare;
+            ledger.Book(root, age);
+        }
+    }
+
+    [DomainTest("Last Witness v2 per-root ledger: one blade per root over strike, four bites and the return, re-armed per window")]
+    private static void WitnessBladeLedgerWindows()
+    {
+        // Live ticks and re-arms: outbound and return every tick, the turns only on the bites; each bite and the
+        // tear-free return open a new window, nothing else does.
+        for (int t = 0; t <= WitnessRules.ReturnTick; t++)
+        {
+            bool bite = WitnessRules.TurnWindow(t) >= 0;
+            AssertEqual(bite, WitnessBladeLedger.Live(WitnessPhase.Turn, t), $"turn tick {t} live only on a bite");
+            AssertEqual(bite, WitnessBladeLedger.Rearms(WitnessPhase.Turn, t), $"turn tick {t} re-arms only on a bite");
+            AssertEqual(true, WitnessBladeLedger.Live(WitnessPhase.Outbound, t) && WitnessBladeLedger.Live(WitnessPhase.Return, t), "outbound and return live");
+            AssertEqual(false, WitnessBladeLedger.Rearms(WitnessPhase.Outbound, t), "outbound never re-arms");
+            AssertEqual(t == 0, WitnessBladeLedger.Rearms(WitnessPhase.Return, t), "the return re-arms once, as it tears free");
+        }
+
+        const int limit = WitnessRules.OutboundMaxTicks, flight = 80, contact = 9;
+        int[] none = Array.Empty<int>();
+        // One stationary target inside the disc from the contact to the end of the flight: exactly one blade (1.0x).
+        {
+            var ledger = new WitnessBladeLedger();
+            var paid = new double[4];
+            for (int age = 1; age <= flight; age++) WitnessLedgerTick(ledger, age, limit, age >= contact ? new[] { 0 } : none, paid);
+            AssertDollNear(1, paid[0], 1e-6, "strike + four bites + return = the whole blade on a target that never leaves the disc");
+            AssertEqual(WitnessPhase.Return, ledger.Phase, "torn free");
+            AssertEqual(contact + WitnessRules.ReturnTick, ledger.PhaseStart, "tears free 22 ticks after the contact");
+        }
+        // Two roots struck on the same contact tick both take the strike share (not a bite), then every bite and the return.
+        {
+            var ledger = new WitnessBladeLedger();
+            var paid = new double[4];
+            for (int age = 1; age <= contact; age++) WitnessLedgerTick(ledger, age, limit, age == contact ? new[] { 1, 2 } : none, paid);
+            AssertEqual(WitnessPhase.Turn, ledger.Phase, "the first contact starts the turns");
+            AssertDollNear(WitnessRules.StrikeShare, paid[1], 1e-6, "first root: strike");
+            AssertDollNear(WitnessRules.StrikeShare, paid[2], 1e-6, "second root on the contact tick: strike as well");
+            for (int age = contact + 1; age <= flight; age++) WitnessLedgerTick(ledger, age, limit, new[] { 1, 2 }, paid);
+            AssertDollNear(1, paid[1], 1e-6, "first root: one blade");
+            AssertDollNear(1, paid[2], 1e-6, "second root: one blade");
+        }
+        // A root that enters the disc between the second and third bite takes the last two bites and the return (two of
+        // its segments inside together are paid once); a root met on the way home takes the return share once.
+        {
+            var ledger = new WitnessBladeLedger();
+            var paid = new double[4];
+            for (int age = 1; age <= flight; age++)
+            {
+                int turn = age - contact;
+                var inside = new System.Collections.Generic.List<int>();
+                if (age >= contact) inside.Add(0);
+                if (turn >= 14) { inside.Add(1); inside.Add(1); }
+                if (turn >= WitnessRules.ReturnTick + 3 && turn <= WitnessRules.ReturnTick + 6) inside.Add(2);
+                WitnessLedgerTick(ledger, age, limit, inside.ToArray(), paid);
+            }
+            AssertDollNear(1, paid[0], 1e-6, "the struck root");
+            AssertDollNear(2 * WitnessRules.TurnShare + WitnessRules.ReturnShare, paid[1], 1e-6, "a late root with two segments: bites 3 and 4 and the return, once each");
+            AssertDollNear(WitnessRules.ReturnShare, paid[2], 1e-6, "a root met on the way home: the return share once");
+        }
+        // Without any contact the blade stops at its cap and turns in the air: the bites still land on whatever drifts in.
+        {
+            var ledger = new WitnessBladeLedger();
+            var paid = new double[4];
+            for (int age = 1; age <= flight; age++) WitnessLedgerTick(ledger, age, 10, age > 10 ? new[] { 3 } : none, paid);
+            AssertEqual(WitnessPhase.Return, ledger.Phase, "stopped at the cap, turned and tore free");
+            AssertEqual(11 + WitnessRules.ReturnTick, ledger.PhaseStart, "the turns start the tick after the cap");
+            AssertDollNear(4 * WitnessRules.TurnShare + WitnessRules.ReturnShare, paid[3], 1e-6, "no strike without a contact");
+        }
     }
 
     [DomainTest("Last Witness v2 judgement: forecast auras, stakes land on the lock, edges write, corners close onto the live triangle")]
@@ -231,23 +314,48 @@ internal static partial class Program
         AssertEqual(true, RitualArmamentChoreography.VerdictLive(RitualArmamentChoreography.VerdictHit), "live at 28");
         AssertEqual(false, RitualArmamentChoreography.VerdictLive(RitualArmamentChoreography.VerdictEndHit), "harmless from 31");
         AssertDollNear(1, WitnessRules.JudgementFade(RitualArmamentChoreography.VerdictEndHit), 1e-6, "full until the hit ends");
-        AssertDollNear(0, WitnessRules.JudgementFade(RitualArmamentChoreography.VerdictDuration), 1e-6, "gone by 56");
+        AssertEqual(true, WitnessRules.JudgementCool <= 24, "the residue cools within 24 ticks (shared rule)");
+        AssertDollNear(0, WitnessRules.JudgementFade(RitualArmamentChoreography.VerdictEndHit + WitnessRules.JudgementCool), 1e-6, "cooled");
+        AssertEqual(true, RitualArmamentChoreography.VerdictEndHit + WitnessRules.JudgementCool <= RitualArmamentChoreography.VerdictDuration,
+            "cooled before the projectile ends");
+        // The black eye: shut until the hit, at most EyeRadius, shut again ten ticks after the hit.
+        AssertDollNear(0, WitnessRules.ExecutionEye(RitualArmamentChoreography.VerdictHit - .5f), 1e-6, "no eye before the hit");
+        float widest = 0;
+        for (float t = RitualArmamentChoreography.VerdictHit; t <= RitualArmamentChoreography.VerdictDuration; t += .25f)
+            widest = MathF.Max(widest, WitnessRules.ExecutionEye(t));
+        AssertDollNear(1, widest, .02, "opens fully");
+        AssertDollNear(1, WitnessRules.ExecutionEye(RitualArmamentChoreography.VerdictHit + WitnessRules.EyeOpen), 1e-6, "open at the end of the hit");
+        int shut = RitualArmamentChoreography.VerdictHit + WitnessRules.EyeOpen + WitnessRules.EyeHold + WitnessRules.EyeClose;
+        AssertEqual(RitualArmamentChoreography.VerdictHit + 10, shut, "shut ten ticks after the hit");
+        AssertDollNear(0, WitnessRules.ExecutionEye(shut), 1e-6, "shut");
+        AssertEqual(true, WitnessRules.EyeRadius * 2 <= RitualArmamentChoreography.VerdictRadius * .25f, "a small eye: at most a quarter of the footprint across");
+        AssertDollNear(0, WitnessRules.ExecutionEye(float.NaN), 1e-6, "non-finite age");
         AssertDollNear(1, WitnessRules.Withdraw(WitnessRules.WithdrawStart + WitnessRules.WithdrawTicks), 1e-6, "withdrawn by 46");
         AssertEqual(true, WitnessRules.WithdrawStart + WitnessRules.WithdrawTicks <= RitualArmamentChoreography.VerdictDuration,
             "the swords are gone before the projectile ends");
     }
 
-    [DomainTest("Last Witness v2 exported art lands within one dot of its design anchors")]
+    [DomainTest("Last Witness v2 exported art lands within one dot of its design anchors and the thrown blade fits its hit disc")]
     private static void WitnessArtFit()
     {
         const float dot = DollSpritePlacement.WorldPerTexel;
         static Vector2 Local(Vector2 anchor, Vector2 pivot) => (anchor - pivot) * DollSpritePlacement.WorldPerTexel;
-        AssertEqual(2, DollArtAnchors.WitnessBlade.K, "hanging blade rung");
-        AssertEqual(1, DollArtAnchors.WitnessBlade_L.K, "thrown blade rung");
-        AssertDollNear(WitnessRules.HangTip, Local(DollArtAnchors.WitnessBlade.Tip, DollArtAnchors.WitnessBlade.Pivot), dot, "hanging tip");
-        AssertDollNear(WitnessRules.HangEye, Local(DollArtAnchors.WitnessBlade.Eye, DollArtAnchors.WitnessBlade.Pivot), dot, "hanging eye");
-        AssertDollNear(WitnessRules.ThrownTip, Local(DollArtAnchors.WitnessBlade_L.Tip, DollArtAnchors.WitnessBlade_L.Pivot), dot, "thrown tip");
-        AssertDollNear(WitnessRules.ThrownEye, Local(DollArtAnchors.WitnessBlade_L.Eye, DollArtAnchors.WitnessBlade_L.Pivot), dot, "thrown eye");
+        // One rung, hanging and thrown: the k = 2 blade the presentation draws (WitnessBladeArt).
+        AssertEqual(2, WitnessBladeArt.K, "the blade is drawn on the k = 2 rung, hanging and thrown");
+        AssertEqual(DollArtAnchors.WitnessBlade.K, WitnessBladeArt.K, "WitnessBladeArt reads the WitnessBlade anchors");
+        AssertEqual(true, DollArtAnchors.WitnessBlade.Texture.EndsWith("/" + WitnessBladeArt.Name, StringComparison.Ordinal), "and draws that texture");
+        AssertDollNear(WitnessRules.HangTip, WitnessBladeArt.Tip, dot, "drawn tip");
+        AssertDollNear(WitnessRules.HangEye, WitnessBladeArt.Eye, dot, "drawn eye");
+        AssertDollNear(WitnessRules.HangTip, Local(DollArtAnchors.WitnessBlade.Tip, DollArtAnchors.WitnessBlade.Pivot), dot, "exported tip");
+        // The spinning blade against its hit disc: the disc reaches at least 0.8 of the drawn tip and never past it, and
+        // the spin arc is drawn on the disc's rim, inside the shared band.
+        AssertEqual(true, WitnessBladeArt.ArcInBand(WitnessRules.SpinRadius, WitnessBladeArt.TipReach),
+            $"the 56 px disc covers 0.8-1.0 of the drawn tip's {WitnessBladeArt.TipReach:F1} px reach");
+        AssertDollNear(WitnessRules.SpinRadius, WitnessBladeArt.ArcRadius, 1e-6, "the spin arc shows the hit disc");
+        AssertEqual(true, WitnessBladeArt.TipReach - WitnessRules.SpinRadius <= 4 * dot, "the drawn tip overhangs the disc by at most four dots");
+        // The k = 1 rung would draw the tip more than twice the disc out: it fails the band, which is why it is not drawn.
+        float large = Local(DollArtAnchors.WitnessBlade_L.Tip, DollArtAnchors.WitnessBlade_L.Pivot).Length();
+        AssertEqual(false, WitnessBladeArt.ArcInBand(WitnessRules.SpinRadius, large), $"the k = 1 tip at {large:F0} px does not fit the disc");
         AssertDollNear(WitnessRules.ShardPoint, Local(DollArtAnchors.WitnessShards.Points[0], DollArtAnchors.WitnessShards.Pivot), dot, "shard point");
         AssertDollNear(WitnessRules.SwordGuard, Local(DollArtAnchors.WitnessSword.Guard, DollArtAnchors.WitnessSword.StakePoint), dot, "sword guard");
         AssertDollNear(WitnessRules.SwordLength, DollArtAnchors.WitnessSword.Height * dot, dot, "sword length");

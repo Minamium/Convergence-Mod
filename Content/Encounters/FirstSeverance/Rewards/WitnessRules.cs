@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
@@ -52,13 +53,16 @@ internal static class WitnessRules
     // px from the balance point. A testimony slides SlideOut px out of the edge and pulls back PullBack px before
     // it fires.
     internal const float SeatFirst = -24, SeatSpacing = 16, SeatEdge = 6, SlideOut = 16, PullBack = 4;
-    // A shard leaves along the aim, then seeks (native targeting, 0.24 rad/tick).
+    // A shard updates ShardUpdates times a tick (extraUpdates 1, as in 0.2.x): it leaves along the aim at ShardLaunch
+    // px per update (44 px/tick), then seeks with native targeting, easing to ShardSpeed px/tick.
     internal const float ShardLaunch = 22, ShardSpeed = 36;
+    internal const int ShardUpdates = 2;
 
-    // ---- Thrown blade ----------------------------------------------------------------------
+    // ---- Thrown blade (one update a tick) --------------------------------------------------
     internal const float OutboundSpeed = 34, ReturnSpeed = 46;
     internal const int OutboundMinTicks = 4, OutboundMaxTicks = 27;
-    // The hit shape while spinning: a disc swept between ticks. The drawn blade reaches beyond it.
+    // The hit shape while spinning: a disc swept between ticks. The thrown blade keeps the hanging rung (k = 2), whose
+    // drawn tip reaches 63 px, so the disc covers nearly all of the blade the player sees turning.
     internal const float SpinRadius = 56;
     internal const float CatchRadius = 28, Leash = 3000;
     internal const float CruiseSpin = .45f;
@@ -71,12 +75,16 @@ internal static class WitnessRules
     internal const float JudgementCorner = 265, StakeDrop = 300;
     internal const int SwordAppear = 4, StakeFallStart = 10, EdgeWriteStart = 17, EdgeWriteTicks = 5;
     internal const int WithdrawStart = 36, WithdrawTicks = 10;
+    // The execution's residue (fill and edges) cools away within JudgementCool ticks of the live window's end (the
+    // shared rule: within 24). The black eye opens over EyeOpen ticks from the hit to at most EyeRadius px, holds
+    // EyeHold ticks and closes over EyeClose, so it is shut 10 ticks after the hit.
+    internal const int JudgementCool = 20, EyeOpen = 3, EyeHold = 2, EyeClose = 5;
+    internal const float EyeRadius = 22;
 
-    // ---- Art design anchors (px from each sprite's pivot; blade frame for the blades) -------
-    // The exported sprites (DollArtAnchors) must land within one dot of these: the hanging blade (k = 2), the
-    // thrown blade's large rung (k = 1), the shard's point and the judgement sword's guard above its stake point.
+    // ---- Art design anchors (px from each sprite's pivot; blade frame for the blade) --------
+    // The exported sprites (DollArtAnchors) must land within one dot of these: the blade (k = 2, drawn hanging and
+    // thrown), the shard's point and the judgement sword's guard above its stake point.
     internal static readonly Vector2 HangTip = new(63, -1.5f), HangEye = new(-30, .5f);
-    internal static readonly Vector2 ThrownTip = new(125, -3), ThrownEye = new(-61, .7f);
     internal static readonly Vector2 ShardPoint = new(19, 1.5f);
     internal static readonly Vector2 SwordGuard = new(0, -89);
     internal const float SwordLength = 106;
@@ -264,9 +272,18 @@ internal static class WitnessRules
 
     internal static float Withdraw(float t) => RitualArmamentChoreography.Smooth((t - WithdrawStart) / WithdrawTicks);
 
+    // 1 until the live window ends, then cooling to 0 over JudgementCool ticks.
     internal static float JudgementFade(float t)
-        => 1 - RitualArmamentChoreography.Smooth((t - RitualArmamentChoreography.VerdictEndHit)
-            / (RitualArmamentChoreography.VerdictDuration - RitualArmamentChoreography.VerdictEndHit));
+        => 1 - RitualArmamentChoreography.Smooth((t - RitualArmamentChoreography.VerdictEndHit) / JudgementCool);
+
+    // The execution's black eye, 0..1 of EyeRadius: opens from the hit, holds, closes (0 outside).
+    internal static float ExecutionEye(float t)
+    {
+        if (!float.IsFinite(t)) return 0;
+        float since = t - RitualArmamentChoreography.VerdictHit;
+        if (since < 0) return 0;
+        return RitualKineticMotion.Arrive(since / EyeOpen) * (1 - RitualKineticMotion.Settle((since - EyeOpen - EyeHold) / EyeClose));
+    }
 
     // ---- Nominal timeline (for the budget tests) -------------------------------------------------
 
@@ -294,4 +311,83 @@ internal static class WitnessRules
     internal static Vector2 Unit(float angle) => new(MathF.Cos(angle), MathF.Sin(angle));
     internal static float Facing(int facing) => facing < 0 ? -1 : 1;
     internal static bool Finite(Vector2 v) => float.IsFinite(v.X) && float.IsFinite(v.Y);
+}
+
+// The thrown blade's damage bookkeeping, driven by WitnessThrownBlade (pure, so the domain tests run the same code):
+// its phase clock, which ticks are live, the per-root ledger that every window re-arms and the share a hit on this
+// tick is paid at. Each tick the projectile calls Advance (the clock's own phase changes) and Settle at the end of its
+// AI; the native hit pass that follows asks Live and CanHit and books each hit with Book.
+internal sealed class WitnessBladeLedger
+{
+    internal enum Change : byte { None, Stopped, TornFree }
+
+    private readonly HashSet<int> roots = new();
+
+    internal WitnessPhase Phase { get; private set; }
+    internal int PhaseStart { get; private set; }
+    // The phase this tick's hits are paid at (fixed by Settle): every root struck on the contact tick takes the strike
+    // share, even after the first of them has started the turns.
+    internal WitnessPhase StruckAs { get; private set; }
+    internal float StruckShare => WitnessRules.Share(StruckAs);
+
+    internal int PhaseAge(int age) => Math.Max(0, age - PhaseStart);
+
+    // Live on this tick of a phase: outbound and return on every tick, the turns only on their half-turn bites.
+    internal static bool Live(WitnessPhase phase, int phaseAge) => phase != WitnessPhase.Turn || WitnessRules.TurnWindow(phaseAge) >= 0;
+
+    // A new window opens, so every root may be hit once more: each half-turn bite and the tear-free return.
+    internal static bool Rearms(WitnessPhase phase, int phaseAge) => phase switch
+    {
+        WitnessPhase.Turn => WitnessRules.TurnWindow(phaseAge) >= 0,
+        WitnessPhase.Return => phaseAge == 0,
+        _ => false,
+    };
+
+    internal bool Live(int age) => Live(Phase, PhaseAge(age));
+    internal bool CanHit(int root) => !roots.Contains(root);
+
+    // Start of a tick (age already advanced): without a contact the outbound flight stops after `outboundLimit` ticks
+    // and turns in the air; the turns tear free at ReturnTick.
+    internal Change Advance(int age, int outboundLimit)
+    {
+        if (Phase == WitnessPhase.Outbound && age > outboundLimit)
+        {
+            Enter(WitnessPhase.Turn, age);
+            return Change.Stopped;
+        }
+        if (Phase == WitnessPhase.Turn && age - PhaseStart >= WitnessRules.ReturnTick)
+        {
+            Enter(WitnessPhase.Return, age);
+            return Change.TornFree;
+        }
+        return Change.None;
+    }
+
+    // End of a tick's AI: re-arms the ledger when a window opens and fixes the share this tick's hits are paid at.
+    // True when it re-armed (the projectile then also clears its local NPC immunity).
+    internal bool Settle(int age)
+    {
+        bool rearm = Rearms(Phase, PhaseAge(age));
+        if (rearm) roots.Clear();
+        StruckAs = Phase;
+        return rearm;
+    }
+
+    // A hit landed on `root`: booked for this window. True for the first contact, which starts the turns.
+    internal bool Book(int root, int age)
+    {
+        roots.Add(root);
+        if (Phase != WitnessPhase.Outbound) return false;
+        Enter(WitnessPhase.Turn, age);
+        return true;
+    }
+
+    // A replicated copy follows the owner's phase.
+    internal void Receive(WitnessPhase phase, int start) => Enter(phase, start);
+
+    private void Enter(WitnessPhase phase, int age)
+    {
+        Phase = phase;
+        PhaseStart = age;
+    }
 }

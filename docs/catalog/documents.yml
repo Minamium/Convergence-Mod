@@ -950,7 +950,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 811112513d95f23d003b308e30385086f4b075da0123ef6121307b9d99342031
+  content_sha256: 9aa72327863a1761e6b77410e7208213ed7737f964ad201f9602b7469f9293be
   document_type: spec
   status: provisional
   owners:
@@ -1065,7 +1065,7 @@ documents:
 - doc_id: history.last-witness-v1
   path: docs/history/2026-10-03-last-witness-v1.md
   title: Last Witness before the 2026-10 refresh
-  content_sha256: 5285ca90828e9c9e234a77729eaaf56cce3de9de5c907f8de6881ab97ba692a5
+  content_sha256: 332bbd641fd24e94078e2fac7736ced1e28d4d9346ba932e2fdd11ae04abcce1
   document_type: evidence
   status: historical
   owners:
@@ -1297,7 +1297,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 84e35f9a306af5db62705a81398640168c2a238457808c3958df31f426e7eb2a
+  content_sha256: 446bdcf4c867472c1b2448265e249cf7a9009846b6698e6f3f109c02bfaf54d8
   document_type: spec
   status: provisional
   owners:
@@ -1479,7 +1479,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 9551887f052c9120b418706083be11a9355026d8082bf22c684c94f1809942a0
+  content_sha256: 2cee6cb83456cc912edc608522f76f539f3a2e35aa766b425a46b1893140c813
   document_type: status
   status: accepted
   owners:

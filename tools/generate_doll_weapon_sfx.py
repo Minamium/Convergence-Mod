@@ -1065,6 +1065,33 @@ def brass_fitting(freq, dur, rng, decay=0.2, side=0.0):
     return pan(y, side)
 
 
+# A large brass plate under a felt mallet: ratio, amplitude and share of the decay for each partial. The fundamental
+# beats slowly against a near twin; the partials are deliberately off the harmonic series (no tuned or church bell).
+GONG_MODES = ((1.0, 1.0, 1.0), (1.0041, 0.5, 0.92), (1.49, 0.40, 0.62), (2.02, 0.42, 0.5), (2.41, 0.2, 0.4),
+              (2.97, 0.18, 0.3), (3.6, 0.09, 0.24), (4.23, 0.06, 0.2), (5.13, 0.035, 0.15), (6.28, 0.02, 0.12))
+
+
+def brass_gong(freq, dur, rng, decay=1.6, bloom=0.12, side=0.0):
+    """A soft gong-like resonance: a large brass plate struck with a felt mallet. The upper partials die first while two
+    middle ones bloom a moment after the strike, so the tone swells and then decays for seconds instead of clanging;
+    the mallet is a dull low thud with no bright attack."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    y = np.zeros((n, 2))
+    for i, (ratio, amp, share) in enumerate(GONG_MODES):
+        if freq * ratio >= dsp.CEILING_HZ:
+            break
+        env = np.exp(-t / (decay * share))
+        if i in (2, 3):
+            env = env * (1 - np.exp(-t / bloom))
+        tone = amp * np.sin(2 * np.pi * freq * ratio * t + rng.uniform(0, 2 * np.pi)) * env
+        y += pan(tone, float(np.clip(side + rng.uniform(-0.35, 0.35), -1, 1)))
+    y *= (0.5 - 0.5 * np.cos(np.pi * np.clip(t / 0.008, 0, 1)))[:, None]
+    k = round(0.03 * RATE)
+    y[:k] += lp(base.noise(k, rng), 600) * (np.linspace(1, 0, k) ** 2)[:, None] * 0.5
+    return dsp.tail_fade(y / max(1e-9, np.abs(y).max()), 0.05)
+
+
 def air_pulses(dur, rng, period, low=350, high=2600, first=0.0, sharp=6.0):
     """Band-limited air that swells once per `period` s (a blade passing): the whir of a spinning blade."""
     n = round(dur * RATE)
@@ -1368,19 +1395,20 @@ def verdict_execute_warn(s, rng):
     return taper(mix[:round(length * RATE)], 0.008)
 
 
-@cue("VerdictExecuteFire", -10, "Last Witness: Triangle Judgement", 1.45, 0.95,
-     "処刑（28tick、185px の三角の内側に当たる）。F マイナーのオルガンの和音の一撃（F2 F3 C4 F4 A♭4 C5）、明るく砕ける磁器、"
-     "真鍮の鈍い響きと低い重み。鐘は使っていない。")
+@cue("VerdictExecuteFire", -11.5, "Last Witness: Triangle Judgement", 2.7, 0.95,
+     "処刑（28tick、185px の三角の内側に当たる）。磁器が砕けて散り、低い真鍮の板を柔らかく打った銅鑼のような響き（F2）が"
+     "ふくらんでから長く消えていく。その下でオルガンが F マイナーの和音（F2 F3 C4 A♭4）を小さく鳴らす。オルガンを大きく"
+     "鳴らす一撃はやめ、鐘も使っていない。")
 def verdict_execute_fire(s, rng):
-    mix = seconds(1.5)
-    chord = [dsp.hz(n) for n in ("F2", "F3", "C4", "F4", "Ab4", "C5")]
-    place(mix, dsp.organ_pad(chord, 1.2, rng, attack=0.01, release=0.9, harmonics=12, rolloff=1.05, chiff=0.1, breath=0.08), 0.0, -4)
-    place(mix, base.glass(0.5, rng, count=30, spread=0.25, low=2500, high=9000), 0.0, -8)
-    place(mix, dsp.porcelain_crack(0.25, rng, count=16, spread=0.06), 0.0, -5)
-    place(mix, brass_fitting(233, 1.0, rng, decay=0.4), 0.005, -12)
-    place(mix, dsp.thump(110, 40, 0.6, rng), 0.0, -3)
-    lay(mix, s, "rock_tumble", 0.06, 0.6, 0.02, -15, lp_=2500)
-    return room(mix, 0.2, 1.4, 0.6)
+    mix = seconds(2.8)
+    place(mix, dsp.porcelain_crack(0.25, rng, count=14, spread=0.06), 0.0, -3)
+    place(mix, base.glass(0.5, rng, count=18, spread=0.3, low=2500, high=8000), 0.01, -13)
+    place(mix, dsp.thump(100, 38, 0.5, rng), 0.0, -8)
+    place(mix, brass_gong(dsp.hz("F2"), 2.6, rng, decay=1.0), 0.004, -2)
+    chord = [dsp.hz(n) for n in ("F2", "F3", "C4", "Ab4")]
+    place(mix, dsp.organ_pad(chord, 2.3, rng, attack=0.25, release=1.6, harmonics=6, rolloff=1.7, chiff=0.0, breath=0.08), 0.02, -16)
+    lay(mix, s, "rock_tumble", 0.06, 0.6, 0.03, -20, lp_=2200)
+    return room(mix, 0.22, 2.7, 1.0)
 
 
 @cue("VerdictExecuteMiss", -13, "Last Witness: Triangle Judgement", 1.0, 0.85,
@@ -2235,7 +2263,8 @@ def witness_combo(samples, stealth):
     flight with the same gain curves as BladeSource (cruise out and home, the Axiom loop faded in over 4 ticks of the
     turns and out over 6 ticks of the return)."""
     events, hit, catch = witness_schedule(stealth)
-    mix = seconds(max(at for at, _ in events) + 1.6)
+    # Long enough for the last tail (the execution rings on for about 2.5 s) plus a short rest.
+    mix = seconds(max(at + len(samples[name]) / RATE for at, name in events) + 0.3)
     for at, name in events:
         place(mix, samples[name] * CUES[name].volume, at)
     ticks = np.arange(W_THROW, catch + 1, dtype=float)

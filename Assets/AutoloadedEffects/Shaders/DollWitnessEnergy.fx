@@ -8,16 +8,17 @@
 //                      violet to a plum fringe; two octaves of world-locked flowing value noise move the band
 //                      edges; a few dots sparkle white on short beats; an optional write head draws it from its
 //                      tail with a hot flare riding behind the head; the tail narrows and cools.
-//   pass 1 FillPass    the judgement's execution: pearl craquelure (the edges of a world-locked cell field) over a
-//                      violet ground, the cracks drawn toward the centre as it collapses into a black eye with a
-//                      one-dot pearl lip (the void rule).
+//   pass 1 FillPass    the judgement's execution: opaque pearl craquelure (the edges of a world-locked cell field)
+//                      over a translucent porcelain-violet ground, the cracks drawn toward the centre as it
+//                      collapses around a small black eye with a one-dot pearl lip (the void rule).
 //
 // Vertex layout (C# DollPixelVertex): POSITION0 float3 in dots, TEXCOORD0 L, TEXCOORD1 S, TEXCOORD2 T (float4).
 //   RibbonPass L = (along 0..1, across -1..1 at the band edge, length in dots, half width in dots) as written by
 //              DollWeaponCanvas.EnergyQuad/EnergyStrip; S.xy = dot position (floor(S.xy + .25) + dotOrigin is the
 //              absolute world dot); T = (intensity 0..1, alpha, write head 0..1 (above 1: fully written), taper 0..1).
-//   FillPass   L = (x, y from the centre in dots, circumradius in dots, 0); S.xy = dot position;
-//              T = (intensity 0..1, alpha, collapse 0..1, seed 0..1).
+//   FillPass   L = (x, y from the centre in dots, circumradius in dots, ground alpha 0..1); S = (dot position,
+//              eye radius in dots (0: shut), void alpha 0..1); T = (intensity 0..1, alpha, collapse 0..1, seed 0..1).
+//              Every value comes per vertex from the CPU (WitnessPresentation.Fill).
 matrix uWorldViewProjection;
 float2 dotOrigin;   // absolute world dot of target cell (0, 0)
 float clock;        // game ticks plus the draw fraction, wrapped by the caller
@@ -146,7 +147,8 @@ float4 FillPS(PrimOut i) : COLOR0
 {
     float2 cell = floor(i.S.xy + 0.25) + dotOrigin;
     float2 rel = i.L.xy;
-    float radius = max(i.L.z, 1);
+    float radius = max(i.L.z, 1), ground = saturate(i.L.w);
+    float eye = i.S.z, voidAlpha = saturate(i.S.w);
     float intensity = saturate(i.T.x), alpha = saturate(i.T.y), collapse = saturate(i.T.z), seed = i.T.w;
     float distance = length(rel), r = distance / radius;
     // Craquelure: the edges of a world-locked cell field, drawn toward the centre as the fill collapses.
@@ -158,16 +160,18 @@ float4 FillPS(PrimOut i) : COLOR0
     float dither = Bayer4(cell) - 0.5;
     float v = heat * 7 + dither * 0.9;
     float band = clamp(floor(v), 0, 6);
-    // The black eye opens at the centre, ringed by a one-dot pearl lip.
-    float eye = collapse * 0.3 * radius;
+    // The black eye at the centre (its radius comes from the CPU), ringed by a one-dot pearl lip.
     float open = step(0.75, eye);
     float inEye = step(distance, eye) * open;
     float lip = step(eye, distance) * step(distance, eye + 1) * open;
     float3 colour = Ramp(band);
     colour = lip > 0.5 ? Pearl : colour;
     colour = inEye > 0.5 ? Ink : colour;
-    clip(min(max(v - 0.5, max(inEye, lip) - 0.5), alpha - 0.004));
-    return float4(colour * alpha, alpha);
+    // Only the cracks and the lip are opaque; the ground between them shows the world through it, and the void
+    // takes its own alpha (another player's at .60).
+    float a = inEye > 0.5 ? voidAlpha : alpha * max(max(step(0.5, crack), lip), ground);
+    clip(min(max(v - 0.5, max(inEye, lip) - 0.5), a - 0.004));
+    return float4(colour * a, a);
 }
 
 technique DollWitnessEnergy

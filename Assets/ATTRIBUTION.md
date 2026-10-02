@@ -374,17 +374,17 @@ The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-s
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteFire.ogg`
 - Asset ID: doll-weapon-sfx-verdictexecutefire-20261003
-- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.20 s)
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.55 s)
 - Creator: recordings by _stubb; synthesis and layering by Convergence with owner-directed Claude assistance
 - Creation/acquisition date: 2026-10-03
 - Source type: public-domain
 - Source work and URL: rock_tumble in the table above as selected by the cue recipe; remaining layers original synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.0 LUFS (played at volume 0.95: -10.5 LUFS effective), true peak -1.4 dBFS; pinned Ogg serial
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.95: -11.9 LUFS effective), true peak -3.8 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak checks); owner audition pending; in-game mix not_run
-- SHA256: `6ec3626fbe9fafb62e418127694e728dadcb87644e0b25130efe8c886be4376d`
+- SHA256: `d8b10955ba9fb62fe13e23a9f3b2961de41f49d1d6baef132a9ca281470b9ed8`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/VerdictExecuteMiss.ogg`
 - Asset ID: doll-weapon-sfx-verdictexecutemiss-20261003

@@ -14,6 +14,7 @@ $files=@('tools/fixtures/DollWitnessPreview.cs',
     'Client/Encounters/FirstSeverance/Weapons/DollWeaponLayer.cs','Client/Encounters/FirstSeverance/Weapons/DollWeaponCanvas.cs',
     'Client/Encounters/FirstSeverance/Weapons/DollPixelArt.cs','Client/Encounters/FirstSeverance/Weapons/DollSpritePlacement.cs',
     'Client/Encounters/FirstSeverance/Weapons/DollArtAnchors.g.cs','Client/Encounters/FirstSeverance/Weapons/WitnessPresentation.cs',
+    'Client/Encounters/FirstSeverance/Weapons/WitnessBladeArt.cs',
     'Content/Encounters/FirstSeverance/Rewards/WitnessRules.cs','Content/Encounters/FirstSeverance/Rewards/RitualGrandScore.cs',
     'Content/Encounters/FirstSeverance/Rewards/RitualKineticMotion.cs','Content/Encounters/FirstSeverance/Rewards/NullCantorClawMotion.cs',
     'Content/Encounters/FirstSeverance/Rewards/RitualArmamentChoreography.cs','Content/Encounters/FirstSeverance/Rewards/RitualArmamentRules.cs')

@@ -137,15 +137,11 @@ public sealed class WitnessHang : ModProjectile
 // The thrown blade. ai[0] age (real ticks), ai[1] target/anchor NPC (-1 none), ai[2] packed flags (bit 0 stealth,
 // bit 1 spinning counter-clockwise, bit 2 judgement called, bits 3+ the outbound cap). ExtraAI: phase, phase start,
 // the anchor point and the rotation. The hit shape is a SpinRadius disc swept between ticks; once per logical root
-// per window: the strike on the first contact, a bite on each half turn, the tear-free return.
+// per window: the strike on the first contact, a bite on each half turn, the tear-free return. The pure
+// WitnessBladeLedger owns the phase clock, the live ticks, the per-root ledger and the share.
 public sealed class WitnessThrownBlade : ModProjectile
 {
-    private readonly HashSet<int> hitRoots = new();
-    private WitnessPhase phase;
-    // The phase this tick's hits are paid at (set at the end of AI): every enemy struck on the contact tick takes
-    // the strike share, even after the first of them has started the turns.
-    private WitnessPhase struckAs;
-    private int phaseStart;
+    private readonly WitnessBladeLedger ledger = new();
     private Vector2 anchor;
     private bool started, resync;
 
@@ -155,9 +151,9 @@ public sealed class WitnessThrownBlade : ModProjectile
     internal int SpinSign => (Flags & 2) != 0 ? -1 : 1;
     internal bool Judged => (Flags & 4) != 0;
     internal int Cap => Math.Clamp(Flags >> 3, WitnessRules.OutboundMinTicks, WitnessRules.OutboundMaxTicks);
-    internal WitnessPhase Phase => phase;
-    internal int PhaseStart => phaseStart;
-    internal int PhaseAge => Math.Max(0, (int)Age - phaseStart);
+    internal WitnessPhase Phase => ledger.Phase;
+    internal int PhaseStart => ledger.PhaseStart;
+    internal int PhaseAge => ledger.PhaseAge((int)Age);
     internal Vector2 Anchor => anchor;
     // Owner only: the kill was the catch.
     internal bool Caught { get; private set; }
@@ -166,7 +162,8 @@ public sealed class WitnessThrownBlade : ModProjectile
         => (stealth ? 1 : 0) | (facing < 0 ? 2 : 0) | (judged ? 4 : 0)
             | Math.Clamp(cap, WitnessRules.OutboundMinTicks, WitnessRules.OutboundMaxTicks) << 3;
 
-    public override string Texture => WitnessArt.Root + "WitnessBlade_L";
+    // The thrown blade keeps the hanging rung (k = 2): the art is fitted to the 56 px disc.
+    public override string Texture => WitnessArt.Root + "WitnessBlade";
     public override void SetStaticDefaults() => ProjectileID.Sets.DrawScreenCheckFluff[Type] = 1800;
     public override void SetDefaults()
     {
@@ -180,9 +177,9 @@ public sealed class WitnessThrownBlade : ModProjectile
     public override bool? CanCutTiles() => false;
     public override bool CanHitPvp(Player target) => false;
     public override bool PreDraw(ref Color lightColor) => false;
-    // The Axiom turns bite only on their half-turn ticks; outbound and return are live (once per root).
-    public override bool? CanDamage() => phase != WitnessPhase.Turn || WitnessRules.TurnWindow(PhaseAge) >= 0 ? null : false;
-    public override bool? CanHitNPC(NPC target) => hitRoots.Contains(RitualTargeting.Root(target)) ? false : null;
+    // The Axiom turns bite only on their half-turn ticks; outbound and return are live (once per root per window).
+    public override bool? CanDamage() => ledger.Live((int)Age) ? null : false;
+    public override bool? CanHitNPC(NPC target) => ledger.CanHit(RitualTargeting.Root(target)) ? null : false;
     public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
     {
         Vector2 from = Projectile.Center - Projectile.velocity, to = Projectile.Center;
@@ -191,22 +188,21 @@ public sealed class WitnessThrownBlade : ModProjectile
     }
     public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
     {
-        modifiers.SourceDamage *= WitnessRules.Share(struckAs);
-        if (struckAs == WitnessPhase.Turn) modifiers.Knockback *= 0;
+        modifiers.SourceDamage *= ledger.StruckShare;
+        if (ledger.StruckAs == WitnessPhase.Turn) modifiers.Knockback *= 0;
     }
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
-        hitRoots.Add(RitualTargeting.Root(target));
         // The first contact bites: the blade brakes onto that target and turns in it.
-        if (phase == WitnessPhase.Outbound && Projectile.owner == Main.myPlayer) StartTurn(target.whoAmI, (int)Age);
+        if (ledger.Book(RitualTargeting.Root(target), (int)Age) && Projectile.owner == Main.myPlayer) StartTurn(target.whoAmI);
     }
 
-    // 14 bytes. The creation message is sent before the blade's first update, so the anchor and rotation are only
-    // taken once the sender has started its flight.
+    // 15 bytes (1 + 2 + 4 + 4 + 4). The creation message is sent before the blade's first update, so the anchor and
+    // rotation are only taken once the sender has started its flight.
     public override void SendExtraAI(BinaryWriter writer)
     {
-        writer.Write((byte)((byte)phase | (started ? 0x80 : 0)));
-        writer.Write((ushort)Math.Clamp(phaseStart, 0, ushort.MaxValue));
+        writer.Write((byte)((byte)ledger.Phase | (started ? 0x80 : 0)));
+        writer.Write((ushort)Math.Clamp(ledger.PhaseStart, 0, ushort.MaxValue));
         writer.Write(anchor.X); writer.Write(anchor.Y);
         writer.Write(Projectile.rotation);
     }
@@ -217,8 +213,7 @@ public sealed class WitnessThrownBlade : ModProjectile
         Vector2 point = new(reader.ReadSingle(), reader.ReadSingle());
         float rotation = reader.ReadSingle();
         int kind = received & 0x7F;
-        phase = kind <= (int)WitnessPhase.Return ? (WitnessPhase)kind : WitnessPhase.Return;
-        phaseStart = Math.Min(start, 600);
+        ledger.Receive(kind <= (int)WitnessPhase.Return ? (WitnessPhase)kind : WitnessPhase.Return, Math.Min(start, 600));
         if ((received & 0x80) == 0) return;
         if (float.IsFinite(point.X) && float.IsFinite(point.Y)) anchor = point;
         if (float.IsFinite(rotation)) Projectile.rotation = rotation;
@@ -244,11 +239,14 @@ public sealed class WitnessThrownBlade : ModProjectile
         Projectile.ai[0]++;
         int age = (int)Age;
         // Without a contact the blade stops and turns in the air: where the cursor was when nothing is targeted, or
-        // after OutboundMaxTicks while it homes on a target.
-        if (phase == WitnessPhase.Outbound && age > (Projectile.ai[1] >= 0 ? WitnessRules.OutboundMaxTicks : Cap)) StartTurn(-1, age);
-        if (phase == WitnessPhase.Turn && age - phaseStart >= WitnessRules.ReturnTick) StartReturn(age);
-        int t = age - phaseStart;
-        switch (phase)
+        // after OutboundMaxTicks while it homes on a target. The turns tear free at ReturnTick.
+        switch (ledger.Advance(age, Projectile.ai[1] >= 0 ? WitnessRules.OutboundMaxTicks : Cap))
+        {
+            case WitnessBladeLedger.Change.Stopped: StartTurn(-1); break;
+            case WitnessBladeLedger.Change.TornFree: StartReturn(); break;
+        }
+        int t = ledger.PhaseAge(age);
+        switch (ledger.Phase)
         {
             case WitnessPhase.Outbound:
             {
@@ -262,8 +260,6 @@ public sealed class WitnessThrownBlade : ModProjectile
                 if (held is not null) anchor = held.Center;
                 Vector2 pull = (anchor - Projectile.Center) * WitnessRules.TurnFollow;
                 Projectile.velocity = pull.Length() > WitnessRules.TurnMaxSpeed ? Vector2.Normalize(pull) * WitnessRules.TurnMaxSpeed : pull;
-                // Each half-turn bite is its own window: every root may be bitten once in it.
-                if (WitnessRules.TurnWindow(t) >= 0) Rearm();
                 break;
             }
             default:
@@ -285,27 +281,21 @@ public sealed class WitnessThrownBlade : ModProjectile
         Projectile.rotation += SpinSign * Step(t);
         if (!float.IsFinite(Projectile.rotation)) Projectile.rotation = 0;
         else if (MathF.Abs(Projectile.rotation) > 1e4f) Projectile.rotation %= MathF.Tau;
-        struckAs = phase;
+        // Each half-turn bite and the tear-free return open a new window: every root may be hit once in it.
+        if (ledger.Settle(age)) Array.Clear(Projectile.localNPCImmunity);
     }
 
     // Rotation advanced this tick: cruise out, the two Axiom turns closing on exactly 4 pi, then easing back.
-    private float Step(int t) => phase switch
+    private float Step(int t) => ledger.Phase switch
     {
         WitnessPhase.Turn => t >= 1 ? WitnessRules.TurnAngle(t) - WitnessRules.TurnAngle(t - 1) : WitnessRules.CruiseSpin,
         WitnessPhase.Return => WitnessRules.ReturnSpin(t),
         _ => WitnessRules.CruiseSpin,
     };
 
-    private void Rearm()
+    // The turns began (the ledger already changed phase): brake onto the struck NPC, or hold where the blade stopped.
+    private void StartTurn(int npc)
     {
-        hitRoots.Clear();
-        Array.Clear(Projectile.localNPCImmunity);
-    }
-
-    private void StartTurn(int npc, int age)
-    {
-        phase = WitnessPhase.Turn;
-        phaseStart = age;
         Projectile.ai[1] = npc >= 0 && npc < Main.maxNPCs ? npc : -1;
         anchor = npc >= 0 && npc < Main.maxNPCs ? Main.npc[npc].Center : Projectile.Center;
         if (Projectile.owner != Main.myPlayer) return;
@@ -320,12 +310,10 @@ public sealed class WitnessThrownBlade : ModProjectile
         Projectile.netUpdate = resync = true;
     }
 
-    private void StartReturn(int age)
+    // Tearing free is its own window (Settle re-arms it): the struck target and anything on the way home may be hit
+    // once more.
+    private void StartReturn()
     {
-        phase = WitnessPhase.Return;
-        phaseStart = age;
-        // Tearing free is its own pass: the struck target and anything on the way home may be hit once more.
-        Rearm();
         if (Projectile.owner == Main.myPlayer) Projectile.netUpdate = resync = true;
     }
 }
@@ -345,7 +333,7 @@ public sealed class WitnessShard : ModProjectile
         Projectile.friendly = true;
         Projectile.DamageType = RitualArmamentItems.DamageClassFor(RitualArmamentKind.Rogue);
         Projectile.penetrate = 1; Projectile.tileCollide = false; Projectile.ignoreWater = true;
-        Projectile.extraUpdates = 1; Projectile.timeLeft = 300;
+        Projectile.extraUpdates = WitnessRules.ShardUpdates - 1; Projectile.timeLeft = 300;
         Projectile.usesLocalNPCImmunity = true; Projectile.localNPCHitCooldown = -1;
     }
     public override bool? CanCutTiles() => false;
