@@ -12,32 +12,45 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // dries into a narrow scar. Nothing draws outside a capsule except a few pixels of
 // anti-aliased rim.
 //
-// It owns only the live and residue time of a field beam (TrackingBeam, SideBeams). The
-// forecast (CrimsonEnergy's PortalForecastPass + ForecastDustPass + mouth) and the two
-// seals that enclose the crossflow stay with their original renderers, so ScarletInk's
-// ForecastPass is never used here.
+// It owns only the live and residue time of a field beam (TrackingBeam, SideBeams) and of an
+// Act signature move (CinderCurtain, ShroudRope, FourHands). The forecast (CrimsonEnergy's
+// PortalForecastPass + ForecastDustPass + mouth) and the two seals that enclose the crossflow
+// stay with their original renderers, so ScarletInk's ForecastPass is never used here. A
+// signature move keeps its own residue length (CrimsonSignatureMoves.ResidueTicks) and, while
+// ScarletResidueYield is enabled, its residue lies under the forecasts and dries away early
+// wherever the move's next note leaves the ground safe.
 internal sealed class ScarletInkStroke
 {
     internal const float Margin = 10;
     internal const int CloseTicks = 8, ResidueTicks = 24;
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private readonly CrimsonStroke[] buffer = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+    private readonly CrimsonStroke[] successor = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
 
-    // Ember Crown burns, Sable Mantle is silk, Thorn Choir is bone; Final mixes them.
+    // Ember Crown burns, Sable Mantle is shroud, Thorn Choir is bone; Final mixes them.
     internal static Vector4 Flavor(int source) => source switch
     {
         0 => new(1, 0, 0, 0), 1 => new(0, 1, 0, 0), 2 => new(0, 0, 1, 0), _ => new(.5f, .3f, .3f, 1)
     };
 
-    // The techniques drawn as field beams: the thin tracking line and the stream between the crossflow seals.
+    // The field beams (the thin tracking line and the stream between the crossflow seals) and the signature moves.
     internal static bool Applies(in CrimsonGesturePlan plan)
-        => plan.Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams;
+        => plan.Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams || plan.IsSignature;
+
+    // Residue length after End: the signature move's own, otherwise the approved 24 ticks.
+    internal static int ResidueTicksOf(in CrimsonGesturePlan plan)
+        => plan.IsSignature ? CrimsonSignatureMoves.ResidueTicks(plan.Technique) : ResidueTicks;
 
     // Live strike and its residue; the warning before Fire belongs to the owner's original forecast.
     internal static bool Owns(in CrimsonGesturePlan plan, float age)
-        => Applies(plan) && age >= plan.Fire && age < plan.End + ResidueTicks;
+        => Applies(plan) && age >= plan.Fire && age < plan.End + ResidueTicksOf(plan);
 
-    internal void Draw(in ScarletView view, IScarletAssets assets, in CrimsonGesturePlan plan)
+    // A signature residue drawn under the forecasts (ScarletResidueYield); everything else Owns draws over them.
+    internal static bool Underlies(in CrimsonGesturePlan plan, float age)
+        => Owns(plan, age) && age >= plan.End && ScarletResidueYield.Applies(plan);
+
+    // phrase: the boss's other plans, where a yielding signature residue finds its move's next note.
+    internal void Draw(in ScarletView view, IScarletAssets assets, in CrimsonGesturePlan plan, ReadOnlySpan<CrimsonGesturePlan> phrase = default)
     {
         float age = view.Clock;
         if (!Owns(plan, age)) return;
@@ -61,10 +74,14 @@ internal sealed class ScarletInkStroke
         }
         else
         {
-            float fade = 1 - (age - plan.End) / ResidueTicks;
+            float fade = 1 - (age - plan.End) / ResidueTicksOf(plan);
             signal = new(age - plan.End, fade * fade, 1, reduced);
             pass = "ResiduePass"; count = CrimsonTechniqueGeometry.Write(plan, plan.End - 1, buffer, false);
         }
+        // Yield: each stroke the next note's forecast does not cover dries in ScarletResidueYield.YieldTicks.
+        bool yields = age >= plan.End && ScarletResidueYield.Applies(plan);
+        int follower = yields ? ScarletResidueYield.Successor(plan, phrase) : -1;
+        int next = follower >= 0 ? ScarletResidueYield.Forecast(phrase[follower], successor) : 0;
         shader.Set("signal", signal);
         for (int i = 0; i < count; i++)
         {
@@ -72,6 +89,12 @@ internal sealed class ScarletInkStroke
             Vector2 a = new(s.A.X, s.A.Y), delta = new(s.B.X - s.A.X, s.B.Y - s.A.Y);
             float length = delta.Length();
             if (s.Radius < .5f) continue;
+            if (yields)
+            {
+                float strength = signal.Y * ScarletResidueYield.Factor(ScarletResidueYield.Holds(s, successor.AsSpan(0, next)), age - plan.End);
+                if (strength <= .001f) continue;
+                shader.Set("signal", new Vector4(signal.X, strength, signal.Z, signal.W));
+            }
             Vector2 along = length > .01f ? delta / length : Vector2.UnitX, normal = new(-along.Y, along.X);
             float extent = s.Radius + Margin;
             shader.Set("shape", new Vector4(length, s.Radius, (s.A.X * .37f + s.A.Y * .61f + i * 3.1f) % 17f * .1f, Margin));

@@ -65,7 +65,8 @@ internal sealed class ScarletGeometryOverlay : IDisposable
     public void Dispose() => effect.Dispose();
 
     internal static int ResidueTicks(in CrimsonGesturePlan plan)
-        => plan.IsRift ? CrimsonSpatialCuts.ResidueTicks : CrimsonRhythm.ResidueTicks;
+        => plan.IsRift ? CrimsonSpatialCuts.ResidueTicks
+            : plan.IsSignature ? CrimsonSignatureMoves.ResidueTicks(plan.Technique) : CrimsonRhythm.ResidueTicks;
 
     internal static ScarletOverlayPhase Classify(in CrimsonGesturePlan plan, float age)
     {

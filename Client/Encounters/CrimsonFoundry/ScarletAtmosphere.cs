@@ -80,7 +80,9 @@ internal sealed class ScarletAtmosphere : ModSystem
         if (Main.dedServ || CrimsonVisuals.Reduced || !ScarletArticulation.Participant(CrimsonPackets.Boss)) return;
         var self = ModContent.GetInstance<ScarletAtmosphere>();
         self.impactAt = CrimsonPackets.Boss!.VisualAge;
-        if (plan.Source is not (0 or 2)) return;
+        // A signature move leaves no metaball embers: they would drift into its safe corridors, gaps and combs.
+        // The backdrop impulse above still answers its strike.
+        if (plan.IsSignature || plan.Source is not (0 or 2)) return;
         ScarletResidue particles = plan.Source == 0
             ? self.cinders ??= ModContent.GetInstance<ScarletCinderResidue>()
             : self.ink ??= ModContent.GetInstance<ScarletInkResidue>();
@@ -92,7 +94,7 @@ internal sealed class ScarletAtmosphere : ModSystem
         for (int i = 0; i < budget; i++)
         {
             float angle = plan.Phrase * .71f + plan.Pulse + i * 2.399963f;
-            // Spread the embers over every stroke (a fixed stride collapsed onto a few when 6-7 columns burn).
+            // Spread the embers over every stroke (a fixed stride would collapse onto a few of many strokes).
             Vector2 at = count > 0 ? CrimsonGestureVisuals.V(strokes[i * count / budget].B) : center;
             Vector2 velocity = angle.ToRotationVector2() * (1.4f + i % 3);
             particles.CreateParticle(at + velocity * 3, velocity,

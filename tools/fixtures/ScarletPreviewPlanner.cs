@@ -1,11 +1,11 @@
 // Builds one physical phrase the way CrimsonRuntime.SchedulePhrase does, using the
-// production authority (CrimsonChoreography.Create / CrimsonEnsemble.Technique / NoteEnd /
-// CrimsonTechniqueGeometry.Stage / CrimsonGesturePlan.Validate). Only the Terraria-side
-// bookkeeping (projectile slots, NPC poses, network identities) is replaced by constants.
+// production authority (CrimsonChoreography.Create on the 128 BPM CrimsonMeter grid /
+// CrimsonEnsemble.Technique / NoteEnd / CrimsonTechniqueGeometry.Stage / the curtain's
+// occupied-column mask / CrimsonGesturePlan.Validate). Only the Terraria-side bookkeeping
+// (projectile slots, NPC poses, network identities) is replaced by constants.
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Convergence.Common.Raids.Arena;
 using Convergence.Content.Encounters.CrimsonFoundry;
@@ -22,7 +22,7 @@ internal sealed record PreviewPhrase(
     internal int FirstBorn => Array.ConvertAll(Plans, p => p.Born).Min();
     internal int LastEnd => Array.ConvertAll(Plans, p => p.End + ScarletOverlayEnd(p)).Max();
     private static int ScarletOverlayEnd(CrimsonGesturePlan p)
-        => p.IsRift ? CrimsonSpatialCuts.ResidueTicks : CrimsonRhythm.ResidueTicks;
+        => p.IsRift ? CrimsonSpatialCuts.ResidueTicks : p.IsSignature ? CrimsonSignatureMoves.ResidueTicks(p.Technique) : CrimsonRhythm.ResidueTicks;
 }
 
 internal static class PreviewPlanner
@@ -31,25 +31,6 @@ internal static class PreviewPlanner
     internal static readonly Guid Fight = new("5c4a1e00-0000-4000-8000-0000000000a1");
     internal static readonly Guid Connection = new("5c4a1e00-0000-4000-8000-0000000000c1");
     internal static RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
-
-    internal static CrimsonScore LoadScore(string root)
-        => CrimsonScore.Read(File.ReadAllBytes(Path.Combine(root, "Assets/Music/CrimsonFoundry/Score.json")));
-
-    // Constant tempo from musicStart: beat k = k * 3600 / bpm ticks (28.125 at 128 BPM).
-    // CrimsonScore.BeatTicks is int[], so each beat is rounded to a whole tick (28/29 alternating).
-    internal static CrimsonScore ConstantScore(double bpm)
-    {
-        double beat = 3600d / bpm;
-        const int beats = 256; // 32 beats x 8 = 7200 ticks at 128 BPM, far longer than any phrase
-        var ticks = new int[beats];
-        var energy = new float[beats];
-        for (int k = 0; k < beats; k++) { ticks[k] = (int)Math.Round(k * beat); energy[k] = 1f; }
-        return new CrimsonScore
-        {
-            SampleRate = 48000, LoopStartSample = 0, LoopEndSample = (int)Math.Round(beats * beat * 800),
-            IntroTicks = 900, BeatTicks = ticks, Energy = energy
-        };
-    }
 
     internal static PreviewPlayer[] Players()
     {
@@ -62,12 +43,14 @@ internal static class PreviewPlanner
         };
     }
 
-    // phase: 0..2 = Acts I..III, 3 = Final. serial = the 1-based phrase serial CrimsonRuntime hands to the techniques.
-    internal static PreviewPhrase Build(string name, CrimsonScore score, int phase, int serial,
-        PreviewPlayer player, int scoreStart, int musicStart = 3000)
+    // phase: 0..2 = Acts I..III, 3 = Final. serial = the 1-based phrase serial CrimsonRuntime hands to the techniques
+    // (every third one of an Act is its signature move). earliest = ticks after musicStart the phrase may start from
+    // (it starts on the next bar head). curtainMask: the occupied columns a CinderCurtain observes; 0 = the player's column.
+    internal static PreviewPhrase Build(string name, int phase, int serial,
+        PreviewPlayer player, int earliest, int musicStart = 3000, int curtainMask = 0)
     {
         var field = Field;
-        var rhythm = CrimsonChoreography.Create(score, scoreStart, serial - 1, phase == 3);
+        var rhythm = CrimsonChoreography.Create(earliest, serial - 1, phase == 3);
         int count = rhythm.Hits.Count + (phase == 3 ? CrimsonChoreography.BasicNotes : 0);
         var sources = new int[count];
         var counts = new int[4]; var steps = new int[4]; var first = new int[4]; var last = new int[4];
@@ -104,7 +87,11 @@ internal static class PreviewPlanner
             CrimsonPoint aim = CrimsonTechniqueGeometry.Clamp(field, position, 100);
             if (technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SpatialRift)
                 aim = CrimsonChoreography.Predict(field, position, velocity);
-            if (technique == CrimsonTechnique.ChoirRakes) aim = new(field.CenterX, field.CenterY);
+            if (technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands)
+                aim = new(field.CenterX, field.CenterY);
+            else if (technique == CrimsonTechnique.CinderCurtain)
+                aim = CrimsonSignatureMoves.CurtainTarget(curtainMask > 0 ? curtainMask
+                    : 1 << CrimsonSignatureMoves.CurtainColumn(field, player.Center.X));
             int end = CrimsonEnsemble.NoteEnd(technique, hit);
             int begin = Math.Max(epoch, musicStart + rhythm.Start - CrimsonRhythm.LookAheadTicks);
             plans[i] = new CrimsonGesturePlan(Fight, 0, epoch, serial, (byte)i, (byte)source,
@@ -115,7 +102,7 @@ internal static class PreviewPlanner
                 aimedIdentity ? (short)0 : (short)-1, aimedIdentity ? Connection : Guid.Empty);
             plans[i].Validate();
         }
-        var beats = CrimsonRhythm.NextBeats(score, Math.Max(0, scoreStart - .499999d), 9);
+        var beats = CrimsonMeter.NextBeats(rhythm.Start, 9);
         var absolute = new int[beats.Length];
         for (int i = 0; i < beats.Length; i++) absolute[i] = musicStart + (int)Math.Round(beats[i]);
         return new PreviewPhrase(name, phase, serial, player, musicStart, absolute, plans);

@@ -313,7 +313,8 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('techniques[source] = CrimsonTechnique.TrackingBeam',runtime)
         visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text(encoding='utf-8')
         self.assertIn('!p.Aimed && !p.IsRift && !p.IsSignature',visual)
-        self.assertIn('CrimsonSignatureMoves.ResidueTicks(p.Technique)',visual)
+        self.assertIn('ScarletInkStroke.ResidueTicksOf(p)',visual)
+        self.assertIn('CrimsonSignatureMoves.ResidueTicks(plan.Technique)',(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8'))
         self.assertIn('fieldBeam: true',visual)
         # A full crowd mask can leave a curtain note nothing to burn: no cue, shake or embers; the strike is felt at a burning column.
         self.assertIn('CrimsonSignatureMoves.CurtainBurning(p) == 0) return;',visual)
@@ -357,12 +358,12 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('ScarletSorcery.Tear(',beams)
         # Live strike and residue never reach CrimsonEnergy: they are collected before it and drawn after it (over forecasts).
         self.assertLess(beams.index('ScarletInkStroke.Owns(p, age)'),beams.index('CrimsonEnergy.Add('))
-        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike)'))
+        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike'))
         self.assertIn('ScarletInkStroke.ResidueTicks',beams)
         self.assertIn('using var scope = new ScarletGraphicsScope(batch)',beams)
-        # Only the two field-beam techniques; the forecast pass of ScarletInk is not used anywhere in game code.
+        # The two field-beam techniques and the signature moves; the forecast pass of ScarletInk is not used anywhere in game code.
         stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
-        self.assertIn('plan.Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams',stroke)
+        self.assertIn('plan.Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams || plan.IsSignature',stroke)
         self.assertIn('"AutoloadPass"',stroke)
         self.assertIn('"ResiduePass"',stroke)
         self.assertNotIn('"ForecastPass"',stroke)
@@ -391,3 +392,68 @@ class ScarletContracts(unittest.TestCase):
         shader=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx').read_text(encoding='utf-8')
         for pass_name in ('AutoloadPass','ForecastPass','ResiduePass'):
             self.assertIn(f'pass {pass_name}',shader)
+
+    def test_signature_moves_use_scarlet_ink_with_a_yielding_residue_and_no_extra_field_effects(self):
+        stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
+        # F1: signature moves are ScarletInk strikes with their own residue length, shared by Owns and the visual's tail.
+        self.assertIn('|| plan.IsSignature',stroke[stroke.index('internal static bool Applies'):stroke.index('internal static int ResidueTicksOf')])
+        self.assertIn('plan.IsSignature ? CrimsonSignatureMoves.ResidueTicks(plan.Technique) : ResidueTicks',stroke)
+        self.assertIn('age < plan.End + ResidueTicksOf(plan)',stroke)
+        self.assertIn('float fade = 1 - (age - plan.End) / ResidueTicksOf(plan);',stroke)
+        self.assertNotIn('silk',stroke.lower())
+        visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text(encoding='utf-8')
+        beams=visual[visual.index('private static void DrawTrackingBeams'):visual.index('private static void DrawSources')]
+        self.assertIn('ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicksOf(p)',beams)
+        # The residue is ink, not the forecast footprint kept on through the residue.
+        self.assertNotIn('p.IsSignature && age >= p.End',beams)
+        self.assertIn('CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift)',beams)
+        # F2: a yielding signature residue is collected before the live strikes and drawn before the forecasts.
+        self.assertLess(beams.index('ScarletInkStroke.Underlies(p, age)'),beams.index('ScarletInkStroke.Owns(p, age)'))
+        self.assertLess(beams.index('foreach (var residue in residues) ink.Draw('),beams.index('CrimsonEnergy.Draw(batch)'))
+        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('foreach (var strike in strikes) ink.Draw('))
+        self.assertIn('Owns(plan, age) && age >= plan.End && ScarletResidueYield.Applies(plan)',stroke)
+        self.assertIn('bool yields = age >= plan.End && ScarletResidueYield.Applies(plan);',stroke)
+        yielding=(CLIENT/'Vfx/ScarletResidueYield.cs').read_text(encoding='utf-8')
+        self.assertEqual(1,yielding.count('internal static bool Enabled = true;'),'one owner switch, shipped on')
+        self.assertIn('internal const int YieldTicks = 6;',yielding)
+        self.assertIn('Enabled && plan.IsSignature',yielding)
+        self.assertIn('next.Technique == plan.Technique && next.Pulse == plan.Pulse + 1',yielding)
+        for dependency in ('using Terraria','using Luminance','Microsoft.Xna'):
+            self.assertNotIn(dependency,yielding)
+        project=(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj').read_text(encoding='utf-8')
+        self.assertIn('Client/Encounters/CrimsonFoundry/Vfx/ScarletResidueYield.cs',project)
+        self.assertTrue((ROOT/'Tests/Convergence.DomainTests/ScarletResidueYieldTests.cs').exists())
+        # F3: no metaball embers for a signature move; the backdrop impulse still answers it.
+        atmosphere=(CLIENT/'ScarletAtmosphere.cs').read_text(encoding='utf-8')
+        emit=atmosphere[atmosphere.index('internal static void Emit'):atmosphere.index('internal static void Draw')]
+        self.assertLess(emit.index('self.impactAt = CrimsonPackets.Boss!.VisualAge;'),emit.index('if (plan.IsSignature || plan.Source is not (0 or 2)) return;'))
+        self.assertLess(emit.index('if (plan.IsSignature || plan.Source is not (0 or 2)) return;'),emit.index('particles.CreateParticle'))
+        # F4: no pressure bloom for the Act I-III apparitions; the Final conductor (source 3) keeps it.
+        sources=visual[visual.index('private static void DrawSources'):visual.index('private static void DrawCinders')]
+        self.assertIn('const int conductor = 3;',sources)
+        self.assertIn('CrimsonRig.DrawPressure(batch, boss.NPC.Center, conductor,',sources)
+        self.assertNotIn('for (int source',sources)
+        self.assertEqual(1,visual.count('DrawPressure('))
+        # The approved ink shader is untouched (offline: the basic-beam ink frames are byte-identical).
+        shaders=ROOT/'Assets/AutoloadedEffects/Shaders'
+        self.assertEqual('e801511955804f740b45cb1472f3005f4ab48e12ce19fc2aa1f8e180bc64a227',hashlib.sha256((shaders/'ScarletInk.fx').read_bytes()).hexdigest())
+        self.assertEqual('689a5d7bd1136d8104d8a094c3f317be4578498b2b882c60c44c51a87b1020f2',hashlib.sha256((shaders/'ScarletInk.fxc').read_bytes()).hexdigest())
+
+    def test_offline_preview_plans_the_current_meter_and_signature_moves(self):
+        planner=(ROOT/'tools/fixtures/ScarletPreviewPlanner.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonChoreography.Create(earliest, serial - 1, phase == 3)',planner)
+        self.assertIn('CrimsonMeter.NextBeats(rhythm.Start, 9)',planner)
+        self.assertIn('CrimsonSignatureMoves.CurtainTarget(',planner)
+        self.assertIn('CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands',planner)
+        preview=(ROOT/'tools/fixtures/ScarletPreview.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonMeter.Pulse(',preview)
+        for scene in ('act1-signature','act1-signature-trio','act2-signature','act3-signature'):
+            self.assertIn(f'new("{scene}"',preview)
+        self.assertIn('ScarletResidueYield.Enabled = options.Yield;',preview)
+        self.assertIn('PreviewContract.ResidueYield(',preview)
+        script=(ROOT/'tools/preview-scarlet.ps1').read_text(encoding='utf-8')
+        self.assertIn("'CrimsonMeter', 'CrimsonSignatureMoves'",script)
+        self.assertIn("'--yield', $Yield",script)
+        for path in (ROOT/'tools/fixtures').glob('ScarletPreview*.cs'):
+            self.assertNotIn('CrimsonScore',path.read_text(encoding='utf-8'),path.name)
+        self.assertNotIn('CrimsonScore',script)

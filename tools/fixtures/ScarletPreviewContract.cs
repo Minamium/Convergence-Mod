@@ -84,6 +84,97 @@ internal static class PreviewContract
         return new Result(checkedCount, wrong, fills, rings);
     }
 
+    internal readonly record struct YieldResult(int Strokes, int Holding, int LitPixels, int Wrong)
+    {
+        public static YieldResult operator +(YieldResult a, YieldResult b)
+            => new(a.Strokes + b.Strokes, a.Holding + b.Holding, a.LitPixels + b.LitPixels, a.Wrong + b.Wrong);
+    }
+
+    // Residue yield of the signature moves, drawn by the production ScarletInkStroke alone, 1:1 over transparent black.
+    // Yield on: one tick after End every residue stroke still shows (it dries, it does not vanish); YieldTicks after End
+    // every lit pixel lies inside a stroke the move's next note covers (radius + the ink's quad margin), and each such
+    // holding stroke still shows. Yield off: every stroke still shows YieldTicks after End (the full residue).
+    internal static YieldResult ResidueYield(GraphicsDevice device, ScarletInkStroke ink, IScarletAssets assets, PreviewPhrase phrase)
+    {
+        var field = PreviewPlanner.Field;
+        int width = (int)(field.Right - field.Left), height = (int)(field.Bottom - field.Top);
+        using var target = new RenderTarget2D(device, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+        var pixels = new Color[width * height];
+        var result = new YieldResult();
+        var residue = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        var next = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        foreach (var plan in phrase.Plans)
+        {
+            if (!plan.IsSignature) continue;
+            int count = CrimsonTechniqueGeometry.Write(plan, plan.End - 1, residue, false);
+            int follower = ScarletResidueYield.Successor(plan, phrase.Plans);
+            int forecast = follower >= 0 ? ScarletResidueYield.Forecast(phrase.Plans[follower], next) : 0;
+            var holds = new bool[count];
+            for (int i = 0; i < count; i++) holds[i] = !ScarletResidueYield.Enabled || ScarletResidueYield.Holds(residue[i], next.AsSpan(0, forecast));
+            Render(plan, plan.End + 1);
+            for (int i = 0; i < count; i++)
+                if (!Shows(residue[i])) { result += new YieldResult(0, 0, 0, 1); Report(plan, i, "missing one tick after End"); }
+            Render(plan, plan.End + ScarletResidueYield.YieldTicks);
+            int lit = 0, wrong = 0;
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    var c = pixels[y * width + x];
+                    if (c.A <= 3 && c.R <= 3 && c.G <= 3 && c.B <= 3) continue;
+                    lit++;
+                    var p = new Vector2(field.Left + x + .5f, field.Top + y + .5f);
+                    bool inside = false;
+                    for (int i = 0; i < count && !inside; i++)
+                        inside = holds[i] && Distance(p, residue[i]) <= ScarletInkStroke.Margin + 1;
+                    if (!inside) wrong++;
+                }
+            if (wrong > 0) Report(plan, -1, $"{wrong} lit pixels outside the held strokes at End+{ScarletResidueYield.YieldTicks}");
+            int held = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (!holds[i]) continue;
+                held++;
+                if (!Shows(residue[i])) { wrong++; Report(plan, i, "held stroke missing"); }
+            }
+            result += new YieldResult(count, held, lit, wrong);
+        }
+        return result;
+
+        void Render(in CrimsonGesturePlan plan, int tick)
+        {
+            device.SetRenderTarget(target);
+            device.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, Color.Transparent, 1f, 0);
+            ink.Draw(ScarletView.Create(device, width, height, new Vector2(field.Left, field.Top), 1f, tick), assets, plan, phrase.Plans);
+            device.SetRenderTarget(null);
+            target.GetData(pixels);
+        }
+        // Some lit pixel along the stroke's axis band (the dried scar is narrower than the capsule).
+        bool Shows(CrimsonStroke s)
+        {
+            Vector2 a = new(s.A.X - field.Left, s.A.Y - field.Top), b = new(s.B.X - field.Left, s.B.Y - field.Top);
+            int samples = Math.Max(2, (int)(Vector2.Distance(a, b) / 4));
+            for (int k = 0; k <= samples; k++)
+            {
+                var q = Vector2.Lerp(a, b, k / (float)samples);
+                int x = (int)q.X, y = (int)q.Y;
+                if (x < 0 || y < 0 || x >= width || y >= height) continue;
+                if (pixels[y * width + x].A > 3) return true;
+            }
+            return false;
+        }
+        static void Report(in CrimsonGesturePlan plan, int stroke, string what)
+        {
+            if (Diagnose) Console.WriteLine($"    yield {plan.Technique} note {plan.Pulse} stroke {stroke}: {what}");
+        }
+    }
+
+    private static float Distance(Vector2 p, CrimsonStroke s)
+    {
+        Vector2 a = new(s.A.X, s.A.Y), b = new(s.B.X, s.B.Y), v = b - a;
+        float t = v.LengthSquared() < 1e-6f ? 0 : Math.Clamp(Vector2.Dot(p - a, v) / v.LengthSquared(), 0, 1);
+        return Vector2.Distance(p, a + v * t) - s.Radius;
+    }
+
     private static bool Near(Color a, Color b, int tolerance)
         => Math.Abs(a.R - b.R) <= tolerance && Math.Abs(a.G - b.G) <= tolerance && Math.Abs(a.B - b.B) <= tolerance;
 

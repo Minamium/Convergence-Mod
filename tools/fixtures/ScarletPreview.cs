@@ -24,8 +24,7 @@ internal sealed class PreviewOptions
 {
     internal string Only = "";
     internal int Step = 8, PhraseStart = 1000, Width = 1920, Height = 1080;
-    internal bool ConstantBeats, Sequences = true, Matrix = true, Smoke = true, Files = true, Contract = true;
-    internal double Bpm = 128;
+    internal bool Sequences = true, Matrix = true, Smoke = true, Files = true, Contract = true;
     internal Backdrop[] Backdrops = { Backdrop.Sanctum, Backdrop.Night, Backdrop.Day };
     internal float[] Zooms = { .65f, 1f, 2f };
     internal Backdrop SequenceBackdrop = Backdrop.Night;
@@ -33,12 +32,16 @@ internal sealed class PreviewOptions
     internal string[] Players = { "center", "edge" };
     internal bool[] ReducedModes = { false };
     internal MaskMode Mask = MaskMode.Dim;
-    // overlay = authoritative hit shapes, ink = ScarletInk live/residue on field beams only, portal = the PortalBeam stand-in for every plan,
-    // ink+overlay = both, proposal = what production draws (portal forecast, then ScarletInk) with the overlay left out.
+    // overlay = authoritative hit shapes, ink = ScarletInk live/residue (field beams and signature moves), portal = the PortalBeam stand-in for every plan,
+    // ink+overlay = both, proposal = what production draws, in its order (a signature move's yielding residue, then the
+    // portal forecasts, then ScarletInk live strikes and residues) with the overlay left out.
     internal string Look = "overlay";
+    // ScarletResidueYield.Enabled, the owner's switch for a signature move's residue (under the forecast, yielding).
+    internal bool Yield = true;
 }
 
-internal sealed record SceneDef(string Name, int Phase, int Serial);
+// CurtainMask: the occupied columns an Act I signature phrase observes (0 = the player's own column).
+internal sealed record SceneDef(string Name, int Phase, int Serial, int CurtainMask = 0);
 
 internal static class ScarletPreview
 {
@@ -88,10 +91,6 @@ internal static class ScarletPreview
                 case "only": o.Only = value; break;
                 case "step": o.Step = Math.Max(1, int.Parse(value, CultureInfo.InvariantCulture)); break;
                 case "phrase-start": o.PhraseStart = int.Parse(value, CultureInfo.InvariantCulture); break;
-                case "beats":
-                    o.ConstantBeats = value != "score";
-                    if (o.ConstantBeats && double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var bpm)) o.Bpm = bpm;
-                    break;
                 case "bg": o.Backdrops = value.Split(',').Select(v => Enum.Parse<Backdrop>(v, true)).ToArray(); break;
                 case "zoom": o.Zooms = value.Split(',').Select(v => float.Parse(v, CultureInfo.InvariantCulture)).ToArray(); break;
                 case "seq-bg": o.SequenceBackdrop = Enum.Parse<Backdrop>(value, true); break;
@@ -103,6 +102,7 @@ internal static class ScarletPreview
                 case "reduced": o.ReducedModes = value switch { "on" => new[] { true }, "both" => new[] { false, true }, _ => new[] { false } }; break;
                 case "mask": o.Mask = Enum.Parse<MaskMode>(value, true); break;
                 case "look": o.Look = value; break;
+                case "yield": o.Yield = value != "off"; break;
                 case "no-sequences": o.Sequences = false; break;
                 case "no-matrix": o.Matrix = false; break;
                 case "no-smoke": o.Smoke = false; break;
@@ -125,25 +125,29 @@ internal sealed class PreviewRun
     private readonly List<SheetCell> overview = new();
     private int written;
     private PreviewContract.Result contract;
+    private PreviewContract.YieldResult residueYield;
 
     internal PreviewRun(PreviewRenderer renderer, PreviewOptions options, string output)
     {
         this.renderer = renderer; this.options = options; this.output = output;
     }
 
-    // Real phrases: Act I..III (four aimed notes + the crossflow) and the three Final pairs (+ ClusterVolley).
+    // Real phrases: Act I..III basic (four aimed notes + the crossflow), each Act's signature move (serial 3:
+    // CinderCurtain, ShroudRope, FourHands + the crossflow; Act I also with three occupied columns 1, 5 and 8)
+    // and the three Final pairs (+ ClusterVolley).
     private static readonly SceneDef[] Scenes =
     {
         new("act1", 0, 1), new("act2", 1, 1), new("act3", 2, 1),
+        new("act1-signature", 0, 3), new("act1-signature-trio", 0, 3, 1 << 1 | 1 << 5 | 1 << 8),
+        new("act2-signature", 1, 3), new("act3-signature", 2, 3),
         new("final-tracking-rift", 3, 3), new("final-rift-grid", 3, 1), new("final-grid-tracking", 3, 2)
     };
 
     internal int Execute()
     {
-        var score = options.ConstantBeats ? PreviewPlanner.ConstantScore(options.Bpm) : PreviewPlanner.LoadScore(renderer.Root);
-        renderer.Score = score;
-        string beats = options.ConstantBeats ? $"constant {options.Bpm.ToString(CultureInfo.InvariantCulture)} BPM (integer ticks)" : "Assets/Music/CrimsonFoundry/Score.json";
-        Console.WriteLine($"beats: {beats}; phrase start (score tick): {options.PhraseStart}");
+        const string beats = "CrimsonMeter: 128 BPM, beat k at (225k + 4) / 8 ticks after musicStart";
+        ScarletResidueYield.Enabled = options.Yield;
+        Console.WriteLine($"beats: {beats}; phrase start (earliest tick after musicStart): {options.PhraseStart}; signature residue yield {(options.Yield ? "on" : "off")}");
         var players = PreviewPlanner.Players().Where(p => options.Players.Contains(p.Name)).ToArray();
         var phrases = new List<PreviewPhrase>();
         foreach (var scene in Scenes)
@@ -152,7 +156,7 @@ internal sealed class PreviewRun
             {
                 string name = scene.Name + "-" + player.Name;
                 if (options.Only.Length > 0 && !name.Contains(options.Only, StringComparison.OrdinalIgnoreCase)) continue;
-                phrases.Add(PreviewPlanner.Build(name, score, scene.Phase, scene.Serial, player, options.PhraseStart));
+                phrases.Add(PreviewPlanner.Build(name, scene.Phase, scene.Serial, player, options.PhraseStart, curtainMask: scene.CurtainMask));
             }
         }
         foreach (var phrase in phrases)
@@ -166,19 +170,26 @@ internal sealed class PreviewRun
         if (overview.Count > 0)
             PreviewSheet.Save(renderer.Device, renderer.Pixel, overview, 4, 480, 270, "OVERVIEW KEY FRAMES", Path.Combine(output, "contact-overview.png"));
         if (options.Smoke && (options.Only.Length == 0 || "shader-smoke".Contains(options.Only, StringComparison.OrdinalIgnoreCase)))
-            ShaderSmoke(score, players.Length > 0 ? players[0] : PreviewPlanner.Players()[0]);
+            ShaderSmoke(players.Length > 0 ? players[0] : PreviewPlanner.Players()[0]);
         File.WriteAllText(Path.Combine(output, "index.json"), JsonSerializer.Serialize(new
         {
             note = "Offline preview of the production geometry and Vfx foundation. Not a playtest; in-game acceptance is not_run.",
-            beats, options.PhraseStart, options.Step, size = $"{options.Width}x{options.Height}", scenes = index
+            beats, options.PhraseStart, options.Step, size = $"{options.Width}x{options.Height}", residueYield = options.Yield, scenes = index
         }, new JsonSerializerOptions { WriteIndented = true }));
         if (contract.Wrong > 0)
         {
             Console.Error.WriteLine($"FAIL overlay contract: {contract.Wrong} of {contract.Checked} sampled pixels differ from the authoritative capsules.");
             return 1;
         }
+        if (residueYield.Wrong > 0)
+        {
+            Console.Error.WriteLine($"FAIL residue yield: {residueYield.Wrong} wrong of {residueYield.Strokes} signature residue strokes / lit pixels checked.");
+            return 1;
+        }
         if (contract.Checked > 0)
             Console.WriteLine($"overlay contract: {contract.Checked} sampled pixels ({contract.FillSamples} fill, {contract.RingSamples} outline) match the authoritative capsules, {contract.Wrong} wrong.");
+        if (residueYield.Strokes > 0)
+            Console.WriteLine($"residue yield ({(options.Yield ? "on" : "off")}): {residueYield.Strokes} signature residue strokes ({residueYield.Holding} keep the full residue), {residueYield.LitPixels} lit pixels at End+{ScarletResidueYield.YieldTicks}, {residueYield.Wrong} wrong.");
         Console.WriteLine($"PASS {written} PNGs under {output}. Production Vfx foundation + authoritative geometry; stand-in characters; no game launched.");
         return 0;
     }
@@ -191,6 +202,10 @@ internal sealed class PreviewRun
         foreach (int tick in ticks) result += renderer.CheckContract(phrase, tick);
         contract += result;
         Console.WriteLine($"  contract {phrase.Name}: {result.Checked} samples, {result.Wrong} wrong");
+        if (!phrase.Plans.Any(p => p.IsSignature)) return;
+        var yielded = renderer.CheckYield(phrase);
+        residueYield += yielded;
+        Console.WriteLine($"  residue yield {phrase.Name}: {yielded.Strokes} strokes, {yielded.Holding} full, {yielded.Wrong} wrong");
     }
 
     private void Sequence(PreviewPhrase phrase)
@@ -252,9 +267,9 @@ internal sealed class PreviewRun
 
     // Loads PortalBeam.fxc exactly like production and draws its real passes for a TrackingBeam
     // through the Vfx foundation, with the authoritative overlay on top.
-    private void ShaderSmoke(CrimsonScore score, PreviewPlayer player)
+    private void ShaderSmoke(PreviewPlayer player)
     {
-        var phrase = PreviewPlanner.Build("shader-smoke", score, 0, 1, player, options.PhraseStart);
+        var phrase = PreviewPlanner.Build("shader-smoke", 0, 1, player, options.PhraseStart);
         var plan = phrase.Plans[1];
         var cells = new List<SheetCell>();
         var moments = new (int Tick, bool Reduced)[]
@@ -314,7 +329,6 @@ internal sealed class PreviewRenderer : IDisposable
     internal readonly GraphicsDevice Device;
     internal readonly Texture2D Pixel;
     internal string Root = "";
-    internal CrimsonScore? Score;
     private readonly PreviewAssets assets;
     private readonly PreviewOptions options;
     private readonly ScarletGeometryOverlay overlay;
@@ -350,6 +364,9 @@ internal sealed class PreviewRenderer : IDisposable
     internal PreviewContract.Result CheckContract(PreviewPhrase phrase, int tick)
         => PreviewContract.Run(Device, overlay, phrase, tick);
 
+    internal PreviewContract.YieldResult CheckYield(PreviewPhrase phrase)
+        => PreviewContract.ResidueYield(Device, ink, assets, phrase);
+
     public void Dispose()
     {
         overlay.Dispose(); batch.Dispose(); Pixel.Dispose(); disc.Dispose(); target?.Dispose();
@@ -383,20 +400,23 @@ internal sealed class PreviewRenderer : IDisposable
         DrawCharacters(view, phrase);
         underlay?.Invoke(view);
         if (options.Look == "proposal")
-            // The shipped decision, made per plan exactly as CrimsonGestureVisuals.DrawTrackingBeams does: a field beam
-            // (TrackingBeam, SideBeams) shows the original portal forecast until Fire, then ScarletInk for the live strike and
-            // its residue. Every other technique has its own production material (ScarletMaterials / ScarletSorcery /
-            // ScarletClusters) that the preview does not reproduce; PortalBeam is only a stand-in silhouette for those.
-            // The seal crossflow's two seals and vapor (Terraria-bound ScarletSorcery) are not drawn either.
+        {
+            // The shipped decision, in the order CrimsonGestureVisuals.DrawTrackingBeams draws it: a field beam (TrackingBeam,
+            // SideBeams) or signature move (CinderCurtain, ShroudRope, FourHands) shows the original portal forecast until Fire,
+            // then ScarletInk for the live strike and its residue. A signature move's yielding residue goes under every forecast;
+            // the forecasts follow; live strikes and the other residues lie on top. Every other technique has its own production
+            // material (ScarletMaterials / ScarletSorcery / ScarletClusters) that the preview does not reproduce; PortalBeam is
+            // only a stand-in silhouette for those. The crossflow's two seals and vapor (Terraria-bound ScarletSorcery) are not drawn.
+            float clock = view.Clock;
+            foreach (var plan in phrase.Plans) if (ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);
+            foreach (var plan in phrase.Plans) if (!ScarletInkStroke.Owns(plan, clock)) DrawPortalBeam(view, plan);
             foreach (var plan in phrase.Plans)
-            {
-                if (ScarletInkStroke.Owns(plan, view.Clock)) ink.Draw(view, assets, plan);
-                else DrawPortalBeam(view, plan);
-            }
+                if (ScarletInkStroke.Owns(plan, clock) && !ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);
+        }
         else
         {
             if (options.Look.Contains("portal")) foreach (var plan in phrase.Plans) DrawPortalBeam(view, plan);
-            if (options.Look.Contains("ink")) foreach (var plan in phrase.Plans) ink.Draw(view, assets, plan);
+            if (options.Look.Contains("ink")) foreach (var plan in phrase.Plans) ink.Draw(view, assets, plan, phrase.Plans);
         }
         if (options.Look.Contains("overlay")) overlay.Draw(view, phrase.Plans);
         DrawHud(view, phrase, caption);
@@ -418,7 +438,7 @@ internal sealed class PreviewRenderer : IDisposable
                 : new Vector2(MathF.Sin(view.ScreenPosition.X * .00035f + age * .0009f) * .012f, MathF.Sin(view.ScreenPosition.Y * .00040f + age * .0011f) * .008f);
             Vector2 origin = (Vector2.One - size) * .5f + drift;
             Vector4 weights = phrase.Phase switch { 0 => Vector4.UnitX, 1 => Vector4.UnitY, 2 => Vector4.UnitZ, _ => Vector4.UnitW };
-            float beat = Score is null ? 0 : Score.Pulse(Math.Max(0, age - phrase.MusicStart));
+            float beat = CrimsonMeter.Pulse(Math.Max(0, age - phrase.MusicStart));
             var fx = assets.GetEffect("ScarletBackdrop");
             Set(fx, "uWorldViewProjection", Matrix.CreateOrthographicOffCenter(0, w, h, 0, -1, 1));
             Set(fx, "crop", new Vector4(origin, size.X, size.Y));
