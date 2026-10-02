@@ -300,17 +300,20 @@ internal sealed class CenserLook
         bool live = m.LivePour(out var pour);
         if (live) Splash(p, m, pour, mouth, now);
 
-        // Cues fire on a plain one-tick advance only: never replayed by a correction, never caught up.
+        // Cues fire on a plain one-tick advance only: never replayed by a correction, never caught up. The owner's sound
+        // budget keeps one swing per 14 ticks, one pour per 7 and one Grand Pour per 20; a brace sounds only when the Grand
+        // Pour it leads to will (so no windup is left without its release).
         if (state != CenserState.Swing || !consecutive) return;
         if (CenserRules.SwingCue(clock) && Budget(swingCue, CrimsonRewardRules.SwingCueInterval))
-            ScarletRewardAudio.Play(ScarletRewardCues.CenserSwing, mouth, .5f, 0, .03f, 3);
-        if (CenserRules.BraceStarts(clock) && Budget(braceCue, CrimsonRewardRules.SwingCueInterval))
-            ScarletRewardAudio.Play(ScarletRewardCues.CenserBrace, mouth, .55f, 0, .02f, 3);
+            ScarletRewardAudio.Play(ScarletRewardCues.CenserSwing, p.owner, mouth);
+        if (CenserRules.BraceStarts(clock) && Admits(grandCue, CrimsonRewardRules.GrandCueInterval, CrimsonRewardRules.GrandBrace)
+            && Budget(braceCue, CrimsonRewardRules.SwingCueInterval))
+            ScarletRewardAudio.Play(ScarletRewardCues.CenserBrace, p.owner, mouth);
         if (!CenserRules.PourStarts(clock, out int index)) return;
         if (index == CrimsonRewardRules.GrandEvery - 1)
         {
             if (Budget(grandCue, CrimsonRewardRules.GrandCueInterval))
-                ScarletRewardAudio.Play(ScarletRewardCues.CenserGrandPour, mouth, .75f, 0, .02f, 3);
+                ScarletRewardAudio.Play(ScarletRewardCues.CenserGrandPour, p.owner, mouth);
             if (p.owner == Main.myPlayer && Main.GameUpdateCount + 1 - lastShake > CrimsonRewardRules.GrandShakeInterval)
             {
                 lastShake = Main.GameUpdateCount + 1;
@@ -318,16 +321,21 @@ internal sealed class CenserLook
             }
         }
         else if (Budget(pourCue, CrimsonRewardRules.PourCueInterval))
-            ScarletRewardAudio.Play(ScarletRewardCues.CenserPour, mouth, .6f, 0, .03f, 3);
+            ScarletRewardAudio.Play(ScarletRewardCues.CenserPour, p.owner, mouth);
     }
 
     private bool Budget(ulong[] stamps, int interval)
     {
-        int owner = Math.Clamp(Owner, 0, stamps.Length - 1);
-        ulong now = Main.GameUpdateCount + 1;
-        if (stamps[owner] != 0 && now - stamps[owner] < (ulong)interval) return false;
-        stamps[owner] = now;
+        if (!Admits(stamps, interval, 0)) return false;
+        stamps[Math.Clamp(Owner, 0, stamps.Length - 1)] = Main.GameUpdateCount + 1;
         return true;
+    }
+
+    // Would the owner's budget admit a cue `lead` ticks from now? Reads the stamp without taking it.
+    private bool Admits(ulong[] stamps, int interval, int lead)
+    {
+        ulong stamp = stamps[Math.Clamp(Owner, 0, stamps.Length - 1)];
+        return stamp == 0 || Main.GameUpdateCount + 1 + (ulong)lead - stamp >= (ulong)interval;
     }
 
     // Embers and smoke where the pour lands; a spill of sparks at the lip; light down the column.

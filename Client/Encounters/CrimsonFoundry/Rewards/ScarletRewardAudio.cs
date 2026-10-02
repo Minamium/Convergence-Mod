@@ -9,87 +9,95 @@ using Terraria.ModLoader;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 
-// The 35 Scarlet reward cues (REWARDS.md#art-and-audio), under Assets/Sounds/Weapons/ScarletRewards/. Recordings
-// come later (tools/generate_scarlet_reward_sfx.py); until a cue is packaged it is skipped, so nothing plays yet.
-internal static class ScarletRewardCues
-{
-    // Shared
-    internal const string ReliquaryOpen = nameof(ReliquaryOpen), Cadence = nameof(Cadence);
-    internal const int Tolls = 8; // Toll0..Toll7: E-flat sus2 ladder Eb3 F3 Bb3 Eb4 F4 Bb4 Eb5 F5
-    // Scythe
-    internal const string ScytheSwingHigh = nameof(ScytheSwingHigh), ScytheSwingLow = nameof(ScytheSwingLow), ScytheWhipBrace = nameof(ScytheWhipBrace),
-        ScytheWhip = nameof(ScytheWhip), StaffWindup = nameof(StaffWindup), StaffCut = nameof(StaffCut), StaffBarline = nameof(StaffBarline);
-    // Organ
-    internal const string OrganShot = nameof(OrganShot), HymnInhale = nameof(HymnInhale), HandSlam = nameof(HandSlam), ChoirClasp = nameof(ChoirClasp);
-    // Baton
-    internal const string BatonStroke = nameof(BatonStroke), BatonLift = nameof(BatonLift), InkIgnite = nameof(InkIgnite), RiverRelease = nameof(RiverRelease);
-    // Censer
-    internal const string CenserSummon = nameof(CenserSummon), CenserSwing = nameof(CenserSwing), CenserPour = nameof(CenserPour),
-        CenserBrace = nameof(CenserBrace), CenserGrandPour = nameof(CenserGrandPour);
-    // Quill
-    internal const string QuillThrow = nameof(QuillThrow), QuillStick = nameof(QuillStick), ScoreUnseal = nameof(ScoreUnseal),
-        InkBlaze = nameof(InkBlaze), ScoreChord = nameof(ScoreChord);
-
-    internal static string Toll(int step) => "Toll" + Math.Clamp(step, 0, Tolls - 1);
-
-    internal static readonly string[] All =
-    {
-        ReliquaryOpen, "Toll0", "Toll1", "Toll2", "Toll3", "Toll4", "Toll5", "Toll6", "Toll7", Cadence,
-        ScytheSwingHigh, ScytheSwingLow, ScytheWhipBrace, ScytheWhip, StaffWindup, StaffCut, StaffBarline,
-        OrganShot, HymnInhale, HandSlam, ChoirClasp,
-        BatonStroke, BatonLift, InkIgnite, RiverRelease,
-        CenserSummon, CenserSwing, CenserPour, CenserBrace, CenserGrandPour,
-        QuillThrow, QuillStick, ScoreUnseal, InkBlaze, ScoreChord,
-    };
-}
-
-// Plays the reward cues (REWARDS.md#multiplayer-readability, #audio). SoundStyle is built only inside the client
-// guard, so a Dedicated Server never touches audio; voices are bounded (MaxInstances, replace oldest), stop while the
-// game is paused and play only with focus; a cue whose file is not packaged is skipped instead of throwing.
+// Plays the Scarlet reward cues (REWARDS.md#multiplayer-readability, #audio; the cue table is ScarletRewardCues).
+// - SoundStyle is built only on a client outside the main menu, so a Dedicated Server never touches audio.
+// - Voices are bounded per cue file (MaxInstances, replace oldest), stop while the game is paused and start only with
+//   focus, like the Ebon reward audio. Tuned files play at their recorded pitch (no pitch variance).
+// - Build tolls are heard by their owner only. A per-swing or per-shot cue plays for its owner at full level and for
+//   other players RemoteShotDecibels lower. Everything else is positional for everyone at full level.
+// - Every call names the cue's owner, and other players' voices are a pool of their own (a ":peer" Identifier), so
+//   another player's cue never cuts one of the local player's: the local player holds the table's Voices (one owner's
+//   budget, replace oldest); other players together share ScarletCue.PeerVoices (one voice of a per-shot file, replace
+//   oldest; one owner's Voices of any other file, ignore new, so a ringing windup or finale is never cut).
+// - A cue whose file is missing from the package is skipped (HasAsset, cached), never thrown.
 internal static class ScarletRewardAudio
 {
-    private const string Root = "Convergence/Assets/Sounds/Weapons/ScarletRewards/";
-    private static readonly Dictionary<string, bool> present = new();
+    private const string Identity = "Convergence:ScarletReward:";
+    private static readonly Dictionary<string, ScarletCue> table = Index();
+    private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
+    private static readonly Dictionary<string, SoundStyle> own = new(StringComparer.Ordinal), peer = new(StringComparer.Ordinal);
 
-    // Positional for everyone: windups, releases, finales, the reliquary.
-    internal static void Play(string cue, Vector2 at, float volume = .7f, float pitch = 0, float variance = 0, int instances = 3)
-    {
-        if (Main.dedServ || Main.gameMenu || Main.gamePaused || !Main.hasFocus || !Exists(cue)) return;
-        SoundEngine.PlaySound(new SoundStyle(Root + cue)
-        {
-            Volume = volume,
-            Pitch = pitch,
-            PitchVariance = variance,
-            MaxInstances = instances,
-            SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest,
-            PauseBehavior = PauseBehavior.StopWhenGamePaused,
-            PlayOnlyIfFocused = true,
-        }, at);
-    }
+    private static bool Audible => !Main.dedServ && !Main.gameMenu && !Main.gamePaused && Main.hasFocus;
 
-    // Build steps: only the owner hears them.
-    internal static void OwnerOnly(string cue, int owner, Vector2 at, float volume = .5f, int instances = 2)
-    {
-        if (owner == Main.myPlayer) Play(cue, at, volume, 0, 0, instances);
-    }
+    // Positional for everyone: windups, releases, finales and the reliquary.
+    internal static void Play(string cue, int owner, Vector2 at, float decibels = 0) => Emit(table[cue], 0, at, decibels, Remote(owner));
 
     // Build tolls: Toll(step) for the owner only.
-    internal static void BuildToll(int step, int owner, Vector2 at, float volume = .45f)
-        => OwnerOnly(ScarletRewardCues.Toll(step), owner, at, volume, 4);
-
-    // Per-swing and per-shot cues: the owner at full level, other players 8 dB lower with one voice.
-    internal static void Shot(string cue, int owner, Vector2 at, float volume = .6f, float variance = .04f)
+    internal static void BuildToll(int step, int owner, Vector2 at)
     {
-        bool own = owner == Main.myPlayer;
-        Play(cue, at, own ? volume : volume * CrimsonRewardRules.Decibels(CrimsonRewardRules.RemoteShotDecibels), 0, variance, own ? 3 : 1);
+        if (!Remote(owner)) Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, false);
     }
 
-    private static bool Exists(string cue)
+    // The Sealed Score's playback: the toll chosen by height, positional for everyone because it is part of the release.
+    internal static void Toll(int step, int owner, Vector2 at) => Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, Remote(owner));
+
+    // Per-swing and per-shot cues: the owner at full level, other players RemoteShotDecibels lower with one voice.
+    internal static void Shot(string cue, int owner, Vector2 at, float decibels = 0) => Shot(table[cue], 0, owner, at, decibels);
+
+    // Each organ pipe chiffs with its own recording (OrganShot1..OrganShot4).
+    internal static void OrganShot(int pipe, int owner, Vector2 at) => Shot(table[ScarletRewardCues.OrganShot], pipe, owner, at, 0);
+
+    private static void Shot(in ScarletCue cue, int variant, int owner, Vector2 at, float decibels)
     {
-        if (!present.TryGetValue(cue, out bool ok))
-            present[cue] = ok = ModContent.HasAsset(Root + cue);
+        bool remote = Remote(owner);
+        Emit(cue, variant, at, remote ? decibels + CrimsonRewardRules.RemoteShotDecibels : decibels, remote);
+    }
+
+    private static bool Remote(int owner) => owner != Main.myPlayer;
+
+    private static void Emit(in ScarletCue cue, int variant, Vector2 at, float decibels, bool remote)
+    {
+        if (!Audible) return;
+        string file = cue.File(variant);
+        if (!Exists(file)) return;
+        SoundStyle style = Style(cue, file, remote);
+        style.Volume = Math.Clamp(ScarletRewardCues.Gain * ScarletRewardCues.Decibels(decibels), 0f, 1f);
+        SoundEngine.PlaySound(style, at);
+    }
+
+    private static SoundStyle Style(in ScarletCue cue, string file, bool remote)
+    {
+        var styles = remote ? peer : own;
+        if (!styles.TryGetValue(file, out SoundStyle style))
+            styles[file] = style = new SoundStyle(ScarletRewardCues.Root + file)
+            {
+                Identifier = Identity + file + (remote ? ":peer" : ""),
+                MaxInstances = remote ? cue.PeerVoices : cue.Voices,
+                SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,
+                PauseBehavior = PauseBehavior.StopWhenGamePaused,
+                PlayOnlyIfFocused = true,
+            };
+        return style;
+    }
+
+    private static bool Exists(string file)
+    {
+        if (!present.TryGetValue(file, out bool ok))
+            present[file] = ok = ModContent.HasAsset(ScarletRewardCues.Root + file);
         return ok;
     }
 
-    internal static void Reset() => present.Clear();
+    private static Dictionary<string, ScarletCue> Index()
+    {
+        var index = new Dictionary<string, ScarletCue>(StringComparer.Ordinal);
+        foreach (ScarletCue cue in ScarletRewardCues.All) index.Add(cue.Name, cue);
+        return index;
+    }
+
+    internal static void Reset()
+    {
+        present.Clear();
+        own.Clear();
+        peer.Clear();
+    }
 }

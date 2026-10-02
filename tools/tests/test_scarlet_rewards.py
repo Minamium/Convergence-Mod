@@ -171,8 +171,11 @@ class ScarletRewardWiring(unittest.TestCase):
             if ': ModSystem' in text:
                 self.assertIn('[Autoload(Side = ModSide.Client)]', text, f'{path.name} systems are client-only')
         audio = read(CLIENT / 'Rewards/ScarletRewardAudio.cs')
-        self.assertIn('if (Main.dedServ || Main.gameMenu || Main.gamePaused || !Main.hasFocus || !Exists(cue)) return;', audio)
-        self.assertIn('ModContent.HasAsset(Root + cue)', audio)
+        self.assertIn('private static bool Audible => !Main.dedServ && !Main.gameMenu && !Main.gamePaused && Main.hasFocus;', audio)
+        emit = audio[audio.index('private static void Emit('):]
+        self.assertLess(emit.index('if (!Audible) return;'), emit.index('Style(cue, file, remote)'), 'no SoundStyle before the client guard')
+        self.assertLess(emit.index('if (!Exists(file)) return;'), emit.index('SoundEngine.PlaySound'), 'a missing cue is skipped')
+        self.assertIn('ModContent.HasAsset(ScarletRewardCues.Root + file)', audio)
         art = read(CLIENT / 'Rewards/ScarletRewardArt.cs')
         self.assertIn('AssetRequestMode.ImmediateLoad', art)
         self.assertNotIn('AsyncLoad', art.replace('a cached AsyncLoad .Value', '').replace('AsyncLoad request', ''))
@@ -278,6 +281,205 @@ class ScarletRewardWiring(unittest.TestCase):
                     if number in ('per',):
                         continue
                     self.assertRegex(tests, rf'AssertNear\({number}f?,', f'{cells[1]}: {number} is asserted by ScarletRewardTests')
+
+
+SOUNDS = ROOT / 'Assets/Sounds/Weapons/ScarletRewards'
+CUES = CLIENT / 'Rewards/ScarletRewardCues.cs'
+AUDIO_RECORD = '### Scarlet Invocation reward weapon audio — 2026-10-03'
+# The Raid sound set the reward files' levels were set against (REWARDS.md#art-and-audio): the folder as it stands, the
+# measured reference CrownRupture.wav, and the Doll strike and chorus cues at their call volumes, which the Raid plays.
+RAID_SOUNDS = ['CrownRupture.wav', 'Foretell.wav', 'ScarletRelease.wav', 'SilkCleave.wav', 'ThornRend.wav']
+RAID_REFERENCE_SHA256 = '4d6c7a4e513f462ea66d2ce4e68b4f16206c7a3c3c6961d905dc66976742db9a'
+RAID_CALLS = {
+    'CrimsonGestureVisuals.cs': ('"Convergence/Assets/Sounds/FirstSeverance/Beams/" + asset', 'Volume = impact ? .72f : .48f,'),
+    'CrimsonChorusVisuals.cs': ('"Convergence/Assets/Sounds/FirstSeverance/" + asset', 'Volume = impact ? .48f : .25f,'),
+}
+
+
+def cue_table():
+    """ScarletRewardCues.All: name -> (take, audience, voices, lead, seconds, files)."""
+    text = read(CUES)
+    body = text[text.index('internal static readonly ScarletCue[] All'):]
+    body = body[:body.index('};')]
+    rows = re.findall(r"new\((?:\"(\w+)\"|(\w+)), '([AB])', (Owner|Shot|Everyone), (\d+), ([\w.]+), ([\d.]+)f(?:, Files: (\d+))?\)", body)
+    return {(quoted or named): (take, audience, int(voices), lead, float(seconds), int(files or 1))
+            for quoted, named, take, audience, voices, lead, seconds, files in rows}
+
+
+def cue_files(table):
+    """Runtime file stem -> (cue, take)."""
+    out = {}
+    for name, (take, _, _, _, _, files) in table.items():
+        for i in range(files):
+            out[name if files == 1 else f'{name}{i + 1}'] = (name, take)
+    return out
+
+
+def ogg_pages(data):
+    position = 0
+    while position < len(data):
+        if data[position:position + 4] != b'OggS':
+            raise AssertionError('broken Ogg page layout')
+        granule = int.from_bytes(data[position + 6:position + 14], 'little', signed=True)
+        serial = int.from_bytes(data[position + 14:position + 18], 'little')
+        count = data[position + 26]
+        size = sum(data[position + 27:position + 27 + count])
+        yield granule, serial, data[position + 27 + count:position + 27 + count + size]
+        position += 27 + count + size
+
+
+def arguments(text):
+    """Top-level arguments of a call's argument text."""
+    out, depth, start = [], 0, 0
+    for i, c in enumerate(text):
+        depth += {'(': 1, '[': 1, ')': -1, ']': -1}.get(c, 0)
+        if c == ',' and depth == 0:
+            out.append(text[start:i].strip())
+            start = i + 1
+    return out + [text[start:].strip()]
+
+
+def reward_call_sites():
+    """Every ScarletRewardAudio call in the reward presentation: (method, argument text, file)."""
+    calls = []
+    for path in (CLIENT / 'Rewards').glob('*.cs'):
+        if path.name in ('ScarletRewardAudio.cs', 'ScarletRewardCues.cs'):
+            continue
+        calls += [(m.group(1), m.group(2), path.name) for m in re.finditer(r'ScarletRewardAudio\.(\w+)\(([^;]*)\);', read(path))]
+    return calls
+
+
+class ScarletRewardAudioContract(unittest.TestCase):
+    """The shipped cues (REWARDS.md#art-and-audio): the owner's 2026-10-03 picks, wired as the spec says."""
+
+    def test_the_table_holds_the_specs_35_cues_with_the_owners_picks(self):
+        table = cue_table()
+        self.assertEqual(35, len(table))
+        doc = read(ROOT / 'docs/encounters/crimson-foundry/REWARDS.md')
+        cues = doc[doc.index('**Cues** (35'):doc.index('**Sources and rendering.**')]
+        named = set(re.findall(r'`(\w+)`', cues)) - {'Toll0', 'Toll7', 'OrganShot1', 'OrganShot4'}
+        named |= {f'Toll{k}' for k in range(8)}
+        self.assertEqual(named, set(table), "the table names exactly the spec's cues")
+        picks_b = {'Cadence', 'ReliquaryOpen', 'ScytheWhip', 'StaffWindup', 'StaffBarline', 'RiverRelease'}
+        for name, row in table.items():
+            self.assertEqual('B' if name in picks_b else 'A', row[0], name)
+        self.assertEqual(4, table['OrganShot'][5], 'one OrganShot per pipe')
+        self.assertNotIn('using Terraria', read(CUES))
+        self.assertNotIn('Microsoft.Xna', read(CUES))
+        self.assertIn('Client/Encounters/CrimsonFoundry/Rewards/ScarletRewardCues.cs',
+                      read(ROOT / 'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj'), 'the domain tests check the timing')
+
+    def test_every_cue_file_is_the_picked_take_as_rendered(self):
+        table = cue_table()
+        files = cue_files(table)
+        self.assertEqual(38, len(files))
+        self.assertEqual(sorted(f'{stem}.ogg' for stem in files), sorted(p.name for p in SOUNDS.iterdir()), 'exactly the shipped cue files')
+        for stem, (cue, take) in files.items():
+            with self.subTest(file=stem):
+                pages = list(ogg_pages((SOUNDS / f'{stem}.ogg').read_bytes()))
+                head = pages[0][2]
+                self.assertEqual(b'\x01vorbis', head[:7])
+                channels, rate = head[11], int.from_bytes(head[12:16], 'little')
+                self.assertEqual((2, 48000), (channels, rate))
+                self.assertAlmostEqual(table[cue][4], pages[-1][0] / rate, delta=.01, msg='length in the table')
+                # The recipe pins each take's Ogg serial from its audition name, so the serial proves which take shipped.
+                serial = int.from_bytes(hashlib.sha256(f'scarlet-rewards/{stem}_{take}'.encode()).digest()[:4], 'little')
+                self.assertEqual({serial}, {s for _, s, _ in pages}, f'{stem} is take {take}')
+
+    def test_attribution_records_every_file_with_its_hash_and_take(self):
+        attribution = read(ROOT / 'Assets/ATTRIBUTION.md')
+        record = attribution[attribution.index(AUDIO_RECORD):]
+        record = record[:record.index('\n### ', 1)]
+        self.assertIn('no cue is held back', record)
+        for stem, (cue, take) in cue_files(cue_table()).items():
+            entry = record.split(f'- Runtime file: `Assets/Sounds/Weapons/ScarletRewards/{stem}.ogg`', 1)
+            self.assertEqual(2, len(entry), f'{stem} has a record')
+            entry = entry[1].split('- Runtime file:', 1)[0]
+            digest = hashlib.sha256((SOUNDS / f'{stem}.ogg').read_bytes()).hexdigest()
+            self.assertIn(f'- SHA256: `{digest}`', entry, stem)
+            self.assertIn(f'owner selection of take {take}', entry, stem)
+            self.assertIn(f'pinned Ogg serial of take `{stem}_{take}`', entry, stem)
+            for key in re.search(r'- Source work and URL: (.*) in the table above', entry).group(1).split(', '):
+                self.assertRegex(record, rf'\n\| {re.escape(key)} \| .*\| `[0-9a-f]{{64}}` \| CC0 1\.0', f'{stem}: {key} has a CC0 source row')
+
+    def test_every_cue_is_played_by_the_presentation(self):
+        calls = reward_call_sites()
+        text = '\n'.join(args for _, args, _ in calls)
+        for name, row in cue_table().items():
+            if row[1] == 'Owner':
+                continue
+            if name == 'OrganShot':
+                self.assertIn('OrganShot', [method for method, _, _ in calls])
+                continue
+            self.assertIn(f'ScarletRewardCues.{name}', text, f'{name} is played')
+        tolls = {path for method, _, path in calls if method == 'BuildToll'}
+        self.assertEqual({'ScytheVisuals.cs', 'OrganVisuals.cs', 'BatonVisuals.cs', 'QuillVisuals.cs'}, tolls, 'each build rings the ladder')
+        self.assertIn(('Toll', 'QuillVisuals.cs'), {(method, path) for method, _, path in calls}, 'the Sealed Score plays the melody back')
+
+    def test_audiences_and_gains_follow_the_multiplayer_rules(self):
+        table = cue_table()
+        for method, args, path in reward_call_sites():
+            self.assertNotRegex(args, r'\d*\.\d+f', f'{path}: {method}({args}) passes a literal volume; the files carry the designed levels')
+            for name in re.findall(r'ScarletRewardCues\.(\w+)', args):
+                if name not in table:
+                    continue
+                audience = table[name][1]
+                expected = {'Shot': 'Shot', 'Everyone': 'Play'}.get(audience)
+                self.assertEqual(expected, method, f'{path}: {name} is a {audience} cue')
+        audio = read(CLIENT / 'Rewards/ScarletRewardAudio.cs')
+        # Other players' voices are a pool of their own, so another player's cue never cuts the local player's.
+        self.assertIn('Identifier = Identity + file + (remote ? ":peer" : ""),', audio)
+        self.assertIn('MaxInstances = remote ? cue.PeerVoices : cue.Voices,', audio)
+        self.assertIn('SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,', audio)
+        self.assertIn('internal int PeerVoices => Audience == ScarletCueAudience.Shot ? 1 : Voices;', read(CUES), 'other players share one voice of a per-shot file')
+        self.assertIn('internal bool PeerReplacesOldest => Audience == ScarletCueAudience.Shot;', read(CUES))
+        self.assertIn('internal static void Play(string cue, int owner, Vector2 at, float decibels = 0) => Emit(table[cue], 0, at, decibels, Remote(owner));', audio)
+        self.assertIn('internal static void Toll(int step, int owner, Vector2 at) => Emit(table[ScarletRewardCues.Toll(step)], 0, at, 0, Remote(owner));', audio)
+        self.assertIn('private static bool Remote(int owner) => owner != Main.myPlayer;', audio)
+        self.assertEqual(1, audio.count('Main.myPlayer'), 'one test of who owns a cue')
+        for method, args, path in reward_call_sites():
+            if method in ('Play', 'Toll', 'Shot', 'OrganShot', 'BuildToll'):
+                owner = arguments(args)[1]
+                self.assertRegex(owner, r'^(owner|p\.owner|projectile\.owner|owner\.whoAmI|player\.whoAmI)$', f'{path}: {method}({args}) names the owner second')
+        self.assertIn('PauseBehavior = PauseBehavior.StopWhenGamePaused,', audio)
+        self.assertIn('PlayOnlyIfFocused = true,', audio)
+        self.assertIn('remote ? decibels + CrimsonRewardRules.RemoteShotDecibels : decibels', audio)
+        self.assertIn('internal const float Gain = 1f;', read(CUES))
+
+    def test_the_scythe_rings_each_cue_once_through_a_late_sync(self):
+        # A peer's stroke age can step back on a late netUpdate (the sync at 12 arriving after the lash at 15): cues cross
+        # from the furthest age seen, so the lash never rings twice.
+        scythe = read(CLIENT / 'Rewards/ScytheVisuals.cs')
+        stroke = scythe[scythe.index('class ScytheStrokeVisuals'):scythe.index('class ScytheReleaseVisuals')]
+        self.assertIn('int reached = heard;\n        heard = Math.Max(heard, age);', stroke)
+        cues = re.findall(r'Crossed\((\w+), age, ScytheLook\.(\w+)\)', stroke)
+        self.assertEqual({'SwingCue', 'WhipBraceCue', 'WhipCue'}, {cue for _, cue in cues})
+        self.assertEqual({'reached'}, {start for start, _ in cues})
+
+    def test_reward_levels_are_pinned_to_the_raid_sound_set_they_were_set_against(self):
+        # REWARDS.md#art-and-audio: the files' levels were set against these Raid sounds. Scarlet's own sound set
+        # (feat/scarlet-sfx) retires CrownRupture.wav and the Doll strike cues and plays its notes far softer, so when the
+        # Raid's set changes, re-derive the reward levels role by role against its played cues, have the owner listen
+        # again, and then move this pin.
+        message = 'the Raid sound set changed: re-derive the Scarlet reward levels (REWARDS.md#art-and-audio)'
+        self.assertEqual(RAID_SOUNDS, sorted(p.name for p in (ROOT / 'Assets/Sounds/CrimsonFoundry').iterdir()), message)
+        reference = hashlib.sha256((ROOT / 'Assets/Sounds/CrimsonFoundry/CrownRupture.wav').read_bytes()).hexdigest()
+        self.assertEqual(RAID_REFERENCE_SHA256, reference, message)
+        for name, needles in RAID_CALLS.items():
+            for needle in needles:
+                self.assertIn(needle, read(CLIENT / name), f'{name}: {message}')
+        self.assertIn('measured on `CrownRupture.wav`', read(ROOT / 'docs/encounters/crimson-foundry/REWARDS.md'))
+
+    def test_reward_audio_reuses_no_other_sound_set(self):
+        # The spec gives the rewards their own cues; only the Covenant keeps the companion's existing sounds, and its
+        # visuals live outside the Rewards folders.
+        for path in list(REWARDS.glob('*.cs')) + reward_client_files():
+            text = read(path)
+            for borrowed in ('Sounds/FirstSeverance', 'Sounds/Weapons/EbonRewards', 'Sounds/Weapons/DollWeapons', 'Sounds/Weapons/DollTheater',
+                             'Sounds/CrimsonFoundry', 'EbonRewardAudio', 'DollWeaponAudio', 'SoundID.', 'UseSound'):
+                self.assertNotIn(borrowed, text, f'{path.name} borrows {borrowed}')
+            for match in re.findall(r'"Convergence/Assets/Sounds/[^"]*"', text):
+                self.assertEqual('"Convergence/Assets/Sounds/Weapons/ScarletRewards/"', match, path.name)
 
 
 if __name__ == '__main__':

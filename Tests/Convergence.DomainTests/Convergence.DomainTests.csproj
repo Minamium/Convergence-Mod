@@ -256,5 +256,6 @@
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/BatonRules.cs" Link="Domain/BatonRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/CenserRules.cs" Link="Domain/CenserRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/Rewards/QuillRules.cs" Link="Domain/QuillRules.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Rewards/ScarletRewardCues.cs" Link="Presentation/ScarletRewardCues.cs" />
   </ItemGroup>
 </Project>

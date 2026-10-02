@@ -110,7 +110,7 @@ internal sealed class ScarletReliquaryShow : ModSystem, IScarletInkEmitter
     private void Open(Player player)
     {
         if (Main.dedServ || Main.gameMenu || !player.active) return;
-        ScarletRewardAudio.Play(ScarletRewardCues.ReliquaryOpen, player.Center, .8f, 0, .02f, 2);
+        ScarletRewardAudio.Play(ScarletRewardCues.ReliquaryOpen, player.whoAmI, player.Center);
         if (ResolveArt() is null) return;
         uint hash = unchecked((Main.GameUpdateCount + (uint)(++opened) * 977u + (uint)player.whoAmI * 131u) * 2654435761u);
         if (shows.Count >= MaxShows) shows.RemoveAt(0);
