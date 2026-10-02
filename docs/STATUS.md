@@ -4,7 +4,7 @@ document_type: status
 status: accepted
 owners:
   - project
-last_reviewed: 2026-10-02
+last_reviewed: 2026-10-03
 source_of_truth_for:
   - project.implementation_status
 aliases:
@@ -23,7 +23,9 @@ related_docs:
 
 ## Current build
 
-Current source: **0.3.70 / protocol78**: Doll's ending and text fixes (0.3.70) on top of Scarlet's strike material (0.3.68, client-only), the 0.3.67 music foundation and the 0.3.66 ending guards.
+Current source: **0.3.72 / protocol78**: the shared Doll weapon layer foundation (0.3.72, client-only, nothing visible yet) on top of Doll's ending and text fixes (0.3.70), Scarlet's strike material (0.3.68, client-only), the 0.3.67 music foundation and the 0.3.66 ending guards.
+
+Doll weapon layer foundation (`feat/doll-weapon-layer`, 0.3.72): the client-only pixel layer every refreshed Doll reward weapon will draw through, with its DollPixel material, the pure placement/cue-clock helpers and the power-budget baselines the five weapon refreshes must match. No weapon registers a source yet, so nothing changes on screen, in damage or in protocol. The [shared rules](encounters/first-severance/WEAPONS.md#reward-refresh-2026-10--shared-rules) own what the layer must look like.
 
 Requiem of the Hollow Doll endings (`fix/doll-terminal-and-text`): in Single Player the end of a fight now reports its real outcome and cause, and a Defeat performs the same normal death as in multiplayer (the client used to read the already-Idle coordinator and reported an unknown end). A cancel queued while a completed score is still settling no longer replaces its Victory. The Central Crush and the final Core check have their own phase lines, and the preparation/request/DEV chat lines and Ready labels come from localization. Combat, timings, damage and protocol are unchanged.
 
@@ -99,6 +101,8 @@ Oboro retains fading violet blade/edge echoes, base damage, reach, hit cap, rari
 Use the owning specs for details: [combat and public names](encounters/first-severance/ENCOUNTER_SPEC.md), [visuals](encounters/first-severance/VISUAL_SPEC.md), [Doll Theater](encounters/first-severance/DOLL_THEATER_VISUAL_SPEC.md), [weapons](encounters/first-severance/WEAPONS.md), [audio](AUDIO_CUE_SHEET.md), [recovery](encounters/first-severance/REVIVE_SPEC.md), [Ghost Samurai](encounters/ghost-samurai/ENCOUNTER_SPEC.md).
 
 ## Verification state
+
+- **0.3.72 Doll weapon layer foundation:** 481 domain tests (the budget baselines are recomputed from the legacy scores), the layer contract tests, the static/catalog checks and the compiled codec at protocol 78 pass. The offline FNA/D3D11 preview (`tools/preview-doll-weapons.ps1`, the real compiled `DollPixel.fxc`) passes 56 frames on synthetic sprites: texel-exact placement, closed rotated outlines, light with outline and bounded glow, Reduced Effects, over-budget counting, rewind and device-state restore. A compile-only build against the installed tModLoader, Luminance and Calamity references has 0 errors and no warning from the new files. The native package build, an in-game load, the half-resolution alignment against real players and FPS with eight players are `not_run` (the first weapon that registers a source will exercise them), as is any real Doll weapon art.
 
 - **0.3.70 Doll endings and text:** 476 domain tests (adding the retained-terminal rule), the static/catalog checks and the isolated native package (0 errors, the existing 4 nullable warnings). An in-game Single Player Victory, Defeat and cancel-during-settle check is `not_run`.
 - **0.3.68 Scarlet strike material:** [evidence](evidence/2026-10-02-scarlet-ink-strikes.json) records the compiled shader, the offline FNA/D3D11 frames (identical to the owner-approved frames), the checks and the native package. No in-game look, readability or FPS check is claimed.
@@ -209,7 +213,7 @@ Doll0.3.46: native package builds with no errors and the existing4nullable warni
 
 ## Next change
 
-Doll weapon refresh (owner-approved 2026-10-02): the [shared rules](encounters/first-severance/WEAPONS.md#reward-refresh-2026-10--shared-rules) are set and the Codex pixel art (DW01–DW05) is delivered outside the repository, pending the owner's look. Next land, one PR each: the Doll weapon layer, the audio foundation with the companion's new summon sound (after an audition), the art exporter with the exported sprites, then one weapon at a time (each replacing its section with a list of changes for players). The current 0.2.x weapons stay in place until their own refresh merges.
+Doll weapon refresh (owner-approved 2026-10-02): the [shared rules](encounters/first-severance/WEAPONS.md#reward-refresh-2026-10--shared-rules) are set, the shared weapon layer is in (0.3.72, no weapon uses it yet) and the Codex pixel art (DW01–DW05) is delivered outside the repository, pending the owner's look. Next land, one PR each: the audio foundation with the companion's new summon sound (after an audition), the art exporter with the exported sprites, then one weapon at a time (each replacing its section with a list of changes for players). The current 0.2.x weapons stay in place until their own refresh merges.
 
 Cathedral sound: on the installed 0.3.65 package, play the Raid from the opening through Victory (and one Defeat). Listen to the prison break, light pillar, rift and arrival; each attack's forecast and release; the lattice "ba-ba-ba" (no missing or clicking slices); the worm rush from off-screen; the chorus countdown and failed/successful Stack/Spread; Liora's defeat, the worm's retreat, the bite, Fury, the final blow, the melt and Victory. Report any cue that is too loud, too quiet, late or missing, and the Reduced Effects mix.
 

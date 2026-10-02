@@ -97,6 +97,32 @@ class DollWeaponLayerLifetime(unittest.TestCase):
         front = body(render, "private static void CompositeFront(")
         self.assertLess(front.index("CompositeArt"), front.index("CompositeLight"), "art first, then light")
 
+    def test_recordings_are_consumed_once(self):
+        # Main.DrawCapture calls the draw hooks without CheckMonoliths; a stale recording must not draw again.
+        render = (WEAPONS / "DollWeaponLayer.Render.cs").read_text(encoding="utf-8")
+        front = body(render, "private static void CompositeFront(")
+        self.assertRegex(front, r"finally\s*\{[^{}]*recorded = artReady = lightReady = false;[^{}]*\}")
+        back = body(render, "private static void DrawBack(")
+        self.assertLess(back.index("backPending = false;"), back.index("DrawFallback("), "the Back stratum is consumed before it draws")
+        self.assertIn("backPending = canvas.HasBack;", body(render, "private static void Record()"))
+
+    def test_buffers_are_created_on_the_client_only(self):
+        # The canvas holds ~1.7 MB of arrays: no static initializer may allocate it on a dedicated server.
+        render = (WEAPONS / "DollWeaponLayer.Render.cs").read_text(encoding="utf-8")
+        code = re.sub(r"//.*", "", render)
+        self.assertIsNone(re.search(r"static\s+(readonly\s+)?(DollWeaponCanvas|IDollWeaponSource\??)(\[\])?\??\s+\w+\s*=(?!>)", code),
+                          "sources and canvas have no static initializer")
+        self.assertEqual(code.count("new DollWeaponCanvas("), 1)
+        hook = body(render, "internal static void Hook()")
+        self.assertLess(hook.index("if (hooked || Main.dedServ) return;"), hook.index("new DollWeaponCanvas("))
+        self.assertLess(hook.index("new IDollWeaponSource?[MaxSources]"), hook.index("On_Main.CheckMonoliths +="))
+
+    def test_over_budget_input_is_counted_not_silent(self):
+        canvas = (WEAPONS / "DollWeaponCanvas.cs").read_text(encoding="utf-8")
+        for signature in ("internal bool EnergyStrip(", "internal void Burst(", "internal void Sprite("):
+            self.assertIn("Dropped++", body(canvas, signature), f"{signature} counts what it drops")
+        self.assertIn("float.IsFinite(p.X)", body(canvas, "internal void EndRecording()"))
+
     def test_no_async_load_texture_caching(self):
         for name, text in weapon_sources().items():
             code = re.sub(r"//.*", "", text)
@@ -181,13 +207,18 @@ class DollWeaponLayerShader(unittest.TestCase):
             self.assertEqual(art[tones.index(name)], value, name)
 
 
+def tolerant(expression):
+    """Regex for `expression` that ignores formatting: any whitespace (or none, even a line break) between tokens."""
+    return r"\s*".join(re.escape(part) for part in expression.split())
+
+
 class DollWeaponBudgetSources(unittest.TestCase):
     def test_legacy_multipliers_mirrored_by_the_budget_test_are_pinned(self):
         pins = {
             "MeridianBastion.cs": ["ScaledDamage(damage, heavy ? 1.15f : Overdrive ? .62f : .95f)", "(int)Age % 36 == 0"],
             "LacunaConvergence.cs": ["ScaledDamage(owner.GetWeaponDamage(owner.HeldItem), 2.0f)",
                                      "ScaledDamage(owner.GetWeaponDamage(owner.HeldItem), .55f)"],
-            "RitualChoir.cs": ["ScaledDamage(Projectile.damage,\n                .85f)"],
+            "RitualChoir.cs": ["ScaledDamage(Projectile.damage, .85f)"],
             "ChoirRequiem.cs": ["(int)Math.Clamp(total * 1.05, 1, int.MaxValue / 4.0)", "Projectile.localNPCHitCooldown = 12"],
             "WitnessLitany.cs": ["ScaledDamage(Projectile.damage, .28f)", "ScaledDamage(Projectile.damage, 5.4f)", "tick % 29 == 16"],
             "RitualBolts.cs": ["ScaledDamage(Projectile.damage, .60f)", "Age >= 42"],
@@ -195,13 +226,13 @@ class DollWeaponBudgetSources(unittest.TestCase):
         for name, needles in pins.items():
             text = (REWARDS / name).read_text(encoding="utf-8")
             for needle in needles:
-                self.assertIn(needle, text, f"{name} changed; recompute DollWeaponBudget and its test")
+                self.assertRegex(text, tolerant(needle), f"{name} changed; recompute DollWeaponBudget and its test")
         tests = (ROOT / "Tests/Convergence.DomainTests/DollWeaponLayerTests.cs").read_text(encoding="utf-8")
         mirrors = {"MeridianBuild": ".95f", "MeridianOverdrive": ".62f", "MeridianHeavy": "1.15f", "LacunaBolt": ".55f",
                    "LacunaBeam": "2.0f", "ChoirNote": ".85f", "ChoirChorus": "1.05", "ChoirChorusCooldown": "12",
                    "WitnessShard": ".28f", "WitnessBlade": "5.4f", "WitnessVerdict": ".60f", "WitnessReturnTicks": "42"}
         for name, value in mirrors.items():
-            self.assertRegex(tests, rf"\b{name} = {re.escape(value)}[,;]", name)
+            self.assertRegex(tests, rf"\b{name}\s*=\s*{re.escape(value)}\s*[,;]", name)
 
 
 if __name__ == "__main__":

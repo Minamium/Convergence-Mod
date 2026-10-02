@@ -148,12 +148,15 @@ internal sealed class DollWeaponCanvas
         }
     }
 
-    // Grows the Light bounds by every recorded energy vertex; call once after all sources emitted.
+    // Grows the Light bounds by every recorded energy vertex; call once after all sources emitted. The raw
+    // Energy() span is the weapons' to fill, so a NaN or infinite vertex is skipped here rather than letting it
+    // poison the bounds (an empty LightArea would hide every light of the frame).
     internal void EndRecording()
     {
         for (int i = 0; i < energyCount; i++)
         {
             Vector3 p = energy[i].Position;
+            if (!float.IsFinite(p.X) || !float.IsFinite(p.Y)) continue;
             light.Add(p.X, p.Y, p.X, p.Y);
         }
     }
@@ -169,11 +172,15 @@ internal sealed class DollWeaponCanvas
     {
         Texture2D? texture = sprite.Texture;
         Rectangle source = sprite.Source;
+        // Invalid or oversize input is a rejected command and counts as dropped (a bug in the caller, visible
+        // through Dropped); a sprite that is merely fully faded, hidden or dissolved just draws nothing.
         if (texture is null || texture.IsDisposed || source.Width <= 0 || source.Height <= 0
             || source.Width > MaxSpriteTexels || source.Height > MaxSpriteTexels || source.X < 0 || source.Y < 0
             || source.Right > texture.Width || source.Bottom > texture.Height
             || !Finite(pivotWorld) || !Finite(sprite.PivotTexel) || !float.IsFinite(rotation)
-            || !(fx.Fade < 1f) || !(fx.Hide < 1f) || !(fx.Dissolve < 1f)) return;
+            || !float.IsFinite(fx.Fade) || !float.IsFinite(fx.Hide) || !float.IsFinite(fx.Dissolve)
+            || !float.IsFinite(fx.Flash)) { Dropped++; return; }
+        if (fx.Fade >= 1f || fx.Hide >= 1f || fx.Dissolve >= 1f) return;
         if (spriteCount >= MaxSprites) { Dropped++; return; }
         NVector2 pivotTexel = new(sprite.PivotTexel.X, sprite.PivotTexel.Y);
         NVector2 pivot = DollSpritePlacement.Snap(new NVector2(pivotWorld.X, pivotWorld.Y), pivotTexel, rotation, flip);
@@ -455,7 +462,13 @@ internal sealed class DollWeaponCanvas
     {
         if (!(t >= 0f) || !(life > 0f) || t > life || count <= 0 || !Finite(origin) || !float.IsFinite(speed)
             || !float.IsFinite(gravity) || !float.IsFinite(spread) || !float.IsFinite(heading)) return;
-        count = Math.Min(Reduced ? (count + 1) / 2 : count, MaxBurstPieces);
+        count = Reduced ? (count + 1) / 2 : count;
+        if (count > MaxBurstPieces)
+        {
+            // Truncated to the cap: counted once per call.
+            count = MaxBurstPieces;
+            Dropped++;
+        }
         (float drag, float fall) = kind switch
         {
             DollShardKind.Porcelain => (.035f, 1f),
@@ -570,7 +583,8 @@ internal sealed class DollWeaponCanvas
     internal bool EnergyStrip(IDollEnergyMaterial material, int pass, ReadOnlySpan<Vector2> spine, float width, Vector4 style, sbyte depth = 0)
     {
         int points = spine.Length;
-        if (points < 2 || points > MaxStripPoints || !(width > 0f) || !float.IsFinite(width)) return false;
+        if (points > MaxStripPoints) { Dropped++; return false; }
+        if (points < 2 || !(width > 0f) || !float.IsFinite(width)) return false;
         float total = 0f;
         for (int i = 0; i < points; i++)
         {

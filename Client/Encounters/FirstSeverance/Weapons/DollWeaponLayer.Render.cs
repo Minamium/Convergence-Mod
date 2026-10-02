@@ -19,30 +19,38 @@ namespace Convergence.Client.Encounters.FirstSeverance.Weapons;
 // A throwing source is dropped (one warning). A render/composite failure or a missing shader degrades the
 // layer to direct point-sampled sprite draws without light (one warning); a failing fallback disables it.
 // The targets are released after IdleFrames frames without Front content and recreated on demand.
+// Each recording is consumed once: Back by DrawBack, Front by CompositeFront (see there).
 // Client presentation only: nothing here touches hits, input, packets or saved state.
 internal static partial class DollWeaponLayer
 {
     internal const int IdleFrames = 600;
 
-    private static readonly IDollWeaponSource?[] sources = new IDollWeaponSource?[MaxSources];
-    private static readonly DollWeaponCanvas canvas = new();
+    // Deliberately no static initializers: the canvas alone holds about 1.7 MB of command arrays, which a dedicated
+    // server must never allocate (a type initializer would run on the first Add). Hook() creates both on the
+    // client, and every hooked path reads them through Sources and Canvas.
+    private static IDollWeaponSource?[]? sources;
+    private static DollWeaponCanvas? canvas;
     private static ManagedRenderTarget? artTarget, lightTarget;
     private static int count, idle, refused;
-    private static bool hooked, recorded, artReady, lightReady, degraded, disabled, sourceWarned, materialWarned;
+    private static bool hooked, recorded, backPending, artReady, lightReady, degraded, disabled, sourceWarned, materialWarned;
+
+    private static IDollWeaponSource?[] Sources => sources!;
+    private static DollWeaponCanvas Canvas => canvas!;
 
     internal static int Count => count;
     // Sources refused because MaxSources were live (since load).
     internal static int Refused => refused;
     // Commands dropped over budget in the last recorded frame.
-    internal static int Dropped => canvas.Dropped;
+    internal static int Dropped => canvas?.Dropped ?? 0;
     internal static bool Degraded => degraded;
 
     static partial void AddSource(IDollWeaponSource source, ref bool accepted)
     {
         if (Main.dedServ || disabled || !hooked || source is null) return;
+        IDollWeaponSource?[] live = Sources;
         for (int i = 0; i < count; i++)
         {
-            if (ReferenceEquals(sources[i], source))
+            if (ReferenceEquals(live[i], source))
             {
                 accepted = true;
                 return;
@@ -53,22 +61,24 @@ internal static partial class DollWeaponLayer
             refused++;
             return;
         }
-        sources[count++] = source;
+        live[count++] = source;
         accepted = true;
     }
 
     // Drops every source and recorded command (world unload, Mod unload). Idempotent.
     internal static void Clear()
     {
-        Array.Clear(sources, 0, count);
+        if (sources is not null) Array.Clear(sources, 0, count);
         count = 0;
-        canvas.Clear();
-        recorded = artReady = lightReady = false;
+        canvas?.Clear();
+        recorded = backPending = artReady = lightReady = false;
     }
 
     internal static void Hook()
     {
         if (hooked || Main.dedServ) return;
+        sources ??= new IDollWeaponSource?[MaxSources];
+        canvas ??= new DollWeaponCanvas();
         On_Main.CheckMonoliths += RenderLayer;
         On_Main.DrawProjectiles += DrawBack;
         On_Main.DrawPlayers_AfterProjectiles += CompositeFront;
@@ -86,6 +96,8 @@ internal static partial class DollWeaponLayer
         }
         hooked = false;
         Clear();
+        sources = null;
+        canvas = null;
         degraded = disabled = sourceWarned = materialWarned = false;
         idle = refused = 0;
         ManagedRenderTarget? oldArt = artTarget, oldLight = lightTarget;
@@ -96,7 +108,7 @@ internal static partial class DollWeaponLayer
 
     private static void RenderLayer(On_Main.orig_CheckMonoliths orig)
     {
-        recorded = artReady = lightReady = false;
+        recorded = backPending = artReady = lightReady = false;
         if (!disabled && !Main.dedServ && !Main.gameMenu)
         {
             try
@@ -126,18 +138,21 @@ internal static partial class DollWeaponLayer
     {
         float fraction = WeaponDrawClock.Fraction;
         bool reduced = ModContent.GetInstance<FirstSeveranceVisualConfig>().ReducedEffects;
+        DollWeaponCanvas canvas = Canvas;
         canvas.Begin(Main.screenPosition, Main.screenWidth, Main.screenHeight, fraction, reduced,
             Main.GameUpdateCount + (double)fraction);
-        if (count > 0) Emit();
+        if (count > 0) Emit(canvas);
         canvas.EndRecording();
         recorded = true;
+        backPending = canvas.HasBack;
         if (canvas.HasArt || canvas.HasLight) idle = 0;
         else if ((idle = Math.Min(idle + 1, IdleFrames)) >= IdleFrames) ReleaseTargets();
     }
 
     // Compacts in place; a source registered during Emit is appended and emits this frame too.
-    private static void Emit()
+    private static void Emit(DollWeaponCanvas canvas)
     {
+        IDollWeaponSource?[] sources = Sources;
         int kept = 0;
         for (int i = 0; i < count; i++)
         {
@@ -166,6 +181,7 @@ internal static partial class DollWeaponLayer
 
     private static void RenderTargets()
     {
+        DollWeaponCanvas canvas = Canvas;
         if (!canvas.HasArt && !canvas.HasLight) return;
         GraphicsDevice device = Main.instance.GraphicsDevice;
         Effect effect = Shader();
@@ -231,7 +247,12 @@ internal static partial class DollWeaponLayer
     private static void DrawBack(On_Main.orig_DrawProjectiles orig, Main self)
     {
         orig(self);
-        if (!recorded || disabled || !canvas.HasBack) return;
+        // A recording draws its Back stratum once. Main.DrawCapture (camera mode, screenshots) calls this hook
+        // without CheckMonoliths, and must not replay the last frame's sprites at that frame's position and zoom.
+        bool pending = backPending;
+        backPending = false;
+        if (!pending || disabled) return;
+        DollWeaponCanvas canvas = Canvas;
         try
         {
             if (degraded)
@@ -265,6 +286,7 @@ internal static partial class DollWeaponLayer
     {
         orig(self);
         if (!recorded || disabled) return;
+        DollWeaponCanvas canvas = Canvas;
         try
         {
             if (degraded)
@@ -298,11 +320,19 @@ internal static partial class DollWeaponLayer
             if (degraded) Disable("fallback", exception);
             else Degrade("composite", exception);
         }
+        finally
+        {
+            // Consumed: the recording belongs to the frame CheckMonoliths made. Main.DrawCapture (camera mode,
+            // screenshots) calls this hook without CheckMonoliths and would otherwise composite the previous
+            // frame's targets again, framed for the wrong view and zoom.
+            recorded = artReady = lightReady = false;
+        }
     }
 
     // Degraded path: plain point-sampled sprites at 2 px per texel; light is skipped.
     private static void DrawFallback(DollStratum stratum)
     {
+        DollWeaponCanvas canvas = Canvas;
         SpriteBatch batch = Main.spriteBatch;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None,
             RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);

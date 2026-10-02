@@ -194,6 +194,8 @@ internal static partial class Program
         AssertEqual(15, built, "Meridian build needles");
         AssertEqual(DollWeaponBudget.MeridianBuild.BaseDamage, ranged, "Meridian base");
         AssertEqual(DollWeaponBudget.MeridianBuild.CycleTicks, RitualGrandScore.BatteryFire, "Meridian build ticks");
+        AssertEqual(DollWeaponBudget.MeridianOverdrive.BaseDamage, ranged, "Meridian overdrive base");
+        AssertEqual(36, DollWeaponBudget.MeridianOverdrive.CycleTicks, "Meridian overdrive heavy-needle period");
         AssertDollNear(DollWeaponBudget.MeridianBuild.CycleRaw, built * buildNeedle, 1e-6, "Meridian build raw");
         AssertDollNear(DollWeaponBudget.MeridianBuild.CycleMultiplier, built * LegacyDollMultipliers.MeridianBuild, 1e-4, "Meridian build multiplier");
         double overdrive = 0, overdriveMultiplier = 0;
@@ -220,6 +222,9 @@ internal static partial class Program
                 if (RitualGrandScore.MagicBoltAt(age, lane)) bolts++;
         AssertEqual(26, bolts, "Lacuna bolts (9 + 6 + 4 + 3 + 2 + 1 + 1)");
         AssertEqual(DollWeaponBudget.LacunaBuild.CycleTicks, RitualGrandScore.MagicFire, "Lacuna build ticks");
+        AssertEqual(DollWeaponBudget.LacunaBuild.BaseDamage, magic, "Lacuna build base");
+        AssertEqual(DollWeaponBudget.LacunaBeam.BaseDamage, magic, "Lacuna beam base");
+        AssertDollNear(DollWeaponBudget.LacunaBeam.CycleMultiplier, LegacyDollMultipliers.LacunaBeam, 1e-4, "Lacuna beam multiplier");
         AssertDollNear(DollWeaponBudget.LacunaBuild.CycleRaw, bolts * bolt, 1e-6, "Lacuna build raw");
         AssertDollNear(DollWeaponBudget.LacunaBuild.CycleMultiplier, bolts * LegacyDollMultipliers.LacunaBolt, 1e-4, "Lacuna build multiplier");
         AssertEqual(DollWeaponBudget.LacunaBeam.CycleTicks, RitualGrandScore.MagicHitCadence, "Lacuna beam cadence");
@@ -244,6 +249,10 @@ internal static partial class Program
             concertMultipliers += notes * LegacyDollMultipliers.ChoirNote + chorusHits * LegacyDollMultipliers.ChoirChorus;
         }
         AssertEqual(DollWeaponBudget.ChoirConcert.CycleTicks, RitualGrandScore.ChoirCycle, "Choir concert ticks");
+        AssertEqual(DollWeaponBudget.ChoirConcert.BaseDamage, summon, "Choir concert base");
+        AssertEqual(DollWeaponBudget.ChoirChorus.BaseDamage, summon, "Choir chorus base");
+        AssertEqual(DollWeaponBudget.ChoirChorus.CycleTicks, LegacyDollMultipliers.ChoirChorusCooldown, "Choir chorus cadence");
+        AssertDollNear(DollWeaponBudget.ChoirChorus.CycleMultiplier, LegacyDollMultipliers.ChoirChorus, 1e-4, "Choir chorus multiplier");
         AssertDollNear(DollWeaponBudget.ChoirConcert.CycleRaw, concerts / 8, 1e-6, "Choir mean concert raw per voice");
         AssertDollNear(DollWeaponBudget.ChoirConcert.CycleMultiplier, concertMultipliers / 8, 1e-4, "Choir mean concert multiplier");
         AssertEqual(1_797L, (long)Math.Round(DollWeaponBudget.ChoirConcert.PerSecond), "Choir mean per second per voice");
@@ -261,6 +270,7 @@ internal static partial class Program
         double split = RitualArmamentRules.RogueShare(false) + RitualArmamentRules.RogueShare(true);
         AssertDollNear(1, split, 1e-6, "outbound and return shares sum to the blade");
         AssertEqual(DollWeaponBudget.Witness.CycleTicks, RitualGrandScore.WitnessEnd, "Witness cycle ticks");
+        AssertEqual(DollWeaponBudget.Witness.BaseDamage, rogue, "Witness base");
         AssertDollNear(DollWeaponBudget.Witness.CycleRaw, shards * shard + blade * split, .01, "Witness cycle raw");
         AssertDollNear(DollWeaponBudget.Witness.CycleMultiplier,
             shards * LegacyDollMultipliers.WitnessShard + LegacyDollMultipliers.WitnessBlade, 1e-4, "Witness cycle multiplier");

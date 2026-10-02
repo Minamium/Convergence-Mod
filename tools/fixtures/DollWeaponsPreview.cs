@@ -706,6 +706,47 @@ internal static class DollWeaponsPreview
             for (int i = 0; i <= DollWeaponCanvas.MaxLines; i++) c.Line(EvenCamera + new Vector2(10, 10 + i), EvenCamera + new Vector2(40, 10 + i), DollTone.Lilac);
         }, EvenCamera, false, 0);
         if (canvas.Dropped != 2) failures.Add($"budgets dropped {canvas.Dropped} commands, expected 2");
+        // The rest of the overflow contract is counted too: a strip over MaxStripPoints, rejected sprites (invalid
+        // input or over MaxSpriteTexels) and a truncated burst; a sprite that is merely fully faded is not a drop.
+        var longSpine = new Vector2[DollWeaponCanvas.MaxStripPoints + 1];
+        for (int i = 0; i < longSpine.Length; i++) longSpine[i] = EvenCamera + new Vector2(20 + i * 10, 200);
+        Record(c =>
+        {
+            c.EnergyStrip(DollPixelArt.Ramp, 0, longSpine, 10f, new Vector4(.62f, 1f, 0f, 0f));
+            c.EnergyStrip(DollPixelArt.Ramp, 0, longSpine.AsSpan(0, DollWeaponCanvas.MaxStripPoints), 10f, new Vector4(.62f, 1f, 0f, 0f));
+        }, EvenCamera, false, 0);
+        if (canvas.Dropped != 1 || !canvas.HasLight) failures.Add($"strip over {DollWeaponCanvas.MaxStripPoints} points dropped {canvas.Dropped}, expected 1 (and the exact-fit strip drawn)");
+        Record(c =>
+        {
+            Vector2 at = EvenCamera + new Vector2(200, 200);
+            c.Sprite(new DollSprite(diamond, new Rectangle(0, 0, DollWeaponCanvas.MaxSpriteTexels + 1, 1), Vector2.Zero), at, 0, DollFlip.None);
+            c.Sprite(new DollSprite(diamond, diamond.Bounds, Vector2.Zero), new Vector2(float.NaN, 0f), 0, DollFlip.None);
+            c.Sprite(new DollSprite(diamond, diamond.Bounds, Vector2.Zero), at, 0, DollFlip.None, DollStratum.Front, 0, new DollSpriteFx { Fade = .5f });
+            c.Sprite(new DollSprite(diamond, diamond.Bounds, Vector2.Zero), at, 0, DollFlip.None, DollStratum.Front, 0, new DollSpriteFx { Fade = 1f });
+        }, EvenCamera, false, 0);
+        if (canvas.Dropped != 2 || !canvas.HasArt) failures.Add($"rejected sprites dropped {canvas.Dropped}, expected 2 (a faded-out sprite is not a drop)");
+        Record(c =>
+        {
+            c.Burst(EvenCamera + new Vector2(300, 300), 5, DollWeaponCanvas.MaxBurstPieces, 6f, 40f, 3f, .1f, DollShardKind.Pearl);
+            if (canvas.Dropped != 0) failures.Add("a burst within MaxBurstPieces was counted as dropped");
+            c.Burst(EvenCamera + new Vector2(300, 300), 5, DollWeaponCanvas.MaxBurstPieces + 12, 6f, 40f, 3f, .1f, DollShardKind.Pearl);
+        }, EvenCamera, false, 0);
+        if (canvas.Dropped != 1) failures.Add($"truncated burst dropped {canvas.Dropped}, expected 1");
+        // A NaN or infinite energy vertex is skipped, so it cannot empty the frame's Light bounds.
+        Record(c =>
+        {
+            RampBody(c, EvenCamera + new Vector2(300, 300), EvenCamera + new Vector2(600, 300), 24f);
+            Span<DollPixelVertex> bad = c.Energy(DollPixelArt.Ramp, 0, 1);
+            bad[0].Position = new Vector3(float.NaN, 0f, 0f);
+            bad[1].Position = new Vector3(0f, float.PositiveInfinity, 0f);
+        }, EvenCamera, false, 0);
+        if (!canvas.HasLight || canvas.LightArea.IsEmpty) failures.Add("a non-finite energy vertex emptied the Light bounds");
+        else
+        {
+            int lit = 0;
+            foreach (Color c in ReadLight()) if (c.A > 0) lit++;
+            if (lit == 0) failures.Add("a non-finite energy vertex hid the frame's light");
+        }
         // Off-screen commands are culled; a rewind forgets a failed source.
         Record(c =>
         {
