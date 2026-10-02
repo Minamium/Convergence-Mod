@@ -413,6 +413,23 @@ The Ebon reward weapons share one original half-resolution pixel material ([rewa
 - Required attribution: retain project provenance and generation disclosure
 - Reviewer and review date: Claude offline compiled-material sheet/sequence review 2026-10-02; native playtest not_run
 
+### Doll weapon pixel layer — 2026-10-02
+
+The refreshed Doll reward weapons share one original half-resolution pixel material for their sprites and light; weapon-specific materials are recorded with their weapons.
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollPixel.fxc`
+- Asset ID: dollpixel-20261002
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-02
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollPixel.fx for the shared Doll weapon layer, evaluated per art dot in a world-aligned half-resolution target (1 dot = 2 world px) and quantized to the Doll palette (ink, black iron, porcelain, pearl, dull brass, the plum-to-white light ramp, ruby): point-sampled pixel sprites whose rotated ink rings stay closed, with flash, porcelain-crumble dissolve, row reveal, silhouette and dithered fade; dot-exact 1-3 dot lines, rings and arcs; pearl-violet forecast hairlines with travelling heads; a flat pass for CPU-plotted debris and dots; a built-in ramp/void energy material; composites that point-upscale the Art and Light targets with a one-dot ink outline around light and a bounded glow on lilac-and-brighter tones (a glow-free pass serves Reduced Effects). No texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-weapons.ps1` (synthetic sprites, pixel checks) 2026-10-02; native playtest not_run
+
 ### Waltz of the Ebon Manor reward weapon audio — 2026-10-02
 
 Twenty-seven weapon cues for the five Ebon Hatbox weapons, the hatbox and The Last Waltz ([rewards spec](../docs/encounters/ebon-manor/REWARDS.md#art-and-audio)). [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; it reuses the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py). Each cue layers trimmed CC0 recordings with original synthesis (tuned Karplus-Strong silk strings in B minor, a struck-string piano, modal glass and chain partials, fabric rips, band-swept air, thread ratchets, a synthetic hall tail); Note0 to Note7 are pure synthesis. The recordings are the ones already attributed above in the Ebon Manor and Soboro tables (Kenney RPG Audio and the artisticdude Swishes pack on OpenGameArt; Freesound uploads that showed Creative Commons 0 on their pages on 2026-10-01, public HQ preview renders). They stay in the local store, are SHA-256 verified before use and are not committed; the audition WAVs and report stay in the git-ignored `.local`. Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after the Vorbis round trip.

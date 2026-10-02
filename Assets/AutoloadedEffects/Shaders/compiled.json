@@ -26,6 +26,10 @@
       "source_sha256": "0fcd99e26729469836f0810a4f44610ed2363c49b943ca9f00f2d1ef2202dc44",
       "output_sha256": "fe6dfa63f474651f7f213d8230559b61b14459c02254185de478d757f4d83b11"
     },
+    "DollPixel.fx": {
+      "source_sha256": "7f878ae1ab8ddbd17f2fd9e7c7bf310c23dea6eeb459c8a9b591654738b59dd0",
+      "output_sha256": "ed2c4a823d79a38ec5692123126a3d2be4170e90d053967a33ca8a951aad2eba"
+    },
     "EbonManor.fx": {
       "source_sha256": "2eb1165b0f4180b6ed4e345a7a25d80c59ace41a66a4f8b90a6f1d3e72dd24b4",
       "output_sha256": "3660bd3244eb5ed247925db6a686b38f9bf96572314b50d486ac0aa9c49cd81a"
