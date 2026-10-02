@@ -22,10 +22,12 @@ namespace Convergence.Client.Encounters.FirstSeverance.Weapons;
 [Autoload(Side = ModSide.Client)]
 internal sealed class LacunaVisuals : GlobalProjectile
 {
-    // Cue levels at the call site (Assets/Sounds/Weapons/DollWeapons; docs/AUDIO_CUE_SHEET.md). Single-note cues are
-    // recorded at ladder step NoteRoot (C6) and played at the iris's step: F5 Ab5 Bb5 C6 Eb6 F6 Ab6 as the irises join.
+    // Cue levels at the call site (Assets/Sounds/Weapons/DollWeapons; docs/AUDIO_CUE_SHEET.md). Composite cues play as
+    // rendered. The single-pitch cues (LacunaIrisTine, LacunaPelletFire: one pitch class, C) are recorded at ladder
+    // step NoteRoot (C6) and played through Note at the iris's step: F5 Ab5 Bb5 C6 Eb6 F6 Ab6 as the irises join.
     internal const int NoteRoot = 3;
-    internal const float IrisWarnVolume = .7f, IrisFireVolume = .8f, PelletWarnVolume = .55f, PelletFireVolume = .7f, PelletHitVolume = .6f;
+    internal const float IrisWarnVolume = .7f, IrisFireVolume = .8f, IrisTineVolume = .9f, PelletWarnVolume = .55f, PelletFireVolume = .7f;
+    internal const float PelletHitVolume = .6f;
     internal const float MergeWarnVolume = .8f, MergeFireVolume = .85f, BeamWarnVolume = .85f, BeamFireVolume = .9f, LoopVolume = .7f;
     internal const float WidenVolume = .75f, BeamHitVolume = .6f, EndVolume = .8f, CancelVolume = .55f, MissVolume = .8f;
     // The loop fades in over 4 ticks once the beam has opened and out over 6 after it ends.
@@ -49,7 +51,9 @@ internal sealed class LacunaVisuals : GlobalProjectile
     internal Vector2[]? Trail;
     internal int TrailCount;
 
+    // One layer source per controller, made once; registered again each tick only until the layer accepts it.
     private LacunaChannelSource? source;
+    private bool registered;
     private int birthCue = DollCueClock.Armed, openCue = DollCueClock.Armed, tellCue = DollCueClock.Armed, shotCue = DollCueClock.Armed;
     private int mergeWarnCue = DollCueClock.Armed, mergeFireCue = DollCueClock.Armed, beamWarnCue = DollCueClock.Armed;
     private int beamFireCue = DollCueClock.Armed, widenCue = DollCueClock.Armed;
@@ -76,13 +80,13 @@ internal sealed class LacunaVisuals : GlobalProjectile
             case LacunaIrisChannel channel:
                 SampleChannel(projectile, channel);
                 Cues(projectile, channel);
-                if (source is null)
+                if (!registered)
                 {
-                    var created = new LacunaChannelSource(projectile);
-                    if (DollWeaponLayer.Add(created))
+                    source ??= new LacunaChannelSource(projectile);
+                    if (DollWeaponLayer.Add(source))
                     {
-                        source = created;
-                        DollWeaponArmDraw.Set(projectile.owner, created);
+                        registered = true;
+                        DollWeaponArmDraw.Set(projectile.owner, source);
                     }
                 }
                 break;
@@ -145,7 +149,12 @@ internal sealed class LacunaVisuals : GlobalProjectile
                     DollWeaponAudio.Play("LacunaIrisWarn", owner.MountedCenter, IrisWarnVolume);
                 tick = Score.LatestOpening(age, out iris);
                 if (tick >= 0 && DollCueClock.Take(ref openCue, previous, age, tick))
-                    DollWeaponAudio.Note("LacunaIrisFire", NoteRoot, iris, Seat(projectile, channel, iris), IrisFireVolume);
+                {
+                    // The opening clack plays as rendered; its one music-box tooth climbs the ladder separately.
+                    Vector2 seat = Seat(projectile, channel, iris);
+                    DollWeaponAudio.Play("LacunaIrisFire", seat, IrisFireVolume);
+                    DollWeaponAudio.Note("LacunaIrisTine", NoteRoot, iris, seat, IrisTineVolume);
+                }
                 tick = Score.LatestShot(age, true, out iris);
                 if (tick >= 0 && DollCueClock.Take(ref tellCue, previous, age, tick))
                     DollWeaponAudio.Play("LacunaPelletWarn", Seat(projectile, channel, iris), PelletWarnVolume);
@@ -225,31 +234,15 @@ internal sealed class LacunaVisuals : GlobalProjectile
             return;
         }
         if (projectile.ModProjectile is not LacunaPellet pellet) return;
-        // A pellet bites only when it really hit: the owner knows; a peer sees the owner's kill arrive early, near an
-        // NPC, while its own AI did not end it. A timeout or an unusable owner only puffs out.
-        bool mine = projectile.owner == Main.myPlayer;
-        bool hit = pellet.Struck || !mine && !pellet.Quiet && timeLeft > 4 && NearNpc(projectile.Center, Trail, TrailCount);
-        bool peer = !mine;
-        if (hit)
+        // A pellet bites only when it really hit: the owner marks the hit and syncs it before the kill, so every peer
+        // knows too. A timeout or an unusable owner only puffs out.
+        bool peer = projectile.owner != Main.myPlayer;
+        if (pellet.Struck)
         {
             LacunaPelletSource.Bite(projectile.Center, peer, false);
             DollWeaponAudio.Play("LacunaPelletHit", projectile.Center, PelletHitVolume);
         }
         else LacunaPelletSource.Puff(projectile.Center, peer);
-    }
-
-    // The replica's head or its recent path (the owner's kill arrives a little late) touched an NPC.
-    private static bool NearNpc(Vector2 at, Vector2[]? trail, int count)
-    {
-        foreach (NPC npc in Main.ActiveNPCs)
-        {
-            Rectangle box = npc.Hitbox;
-            box.Inflate(32, 32);
-            if (box.Contains((int)at.X, (int)at.Y)) return true;
-            for (int k = 0; trail is not null && k < count && k < trail.Length; k++)
-                if (box.Contains((int)trail[k].X, (int)trail[k].Y)) return true;
-        }
-        return false;
     }
 }
 
@@ -326,11 +319,14 @@ internal sealed class LacunaChannelSource : IDollWeaponSource, IDollArmPose
         bool fading = projectile.ai[2] < 0;
         float age = fading ? v.CurrentAge : v.PreviousAge + (v.CurrentAge - v.PreviousAge) * fraction;
         float fade = fading ? v.PreviousFade + (v.CurrentFade - v.PreviousFade) * fraction : 0;
-        Vector2 centre = player.MountedCenter;
+        // The same origin the controller collides from (RitualChannel.Hold), which carries gfxOffY (stairs, slopes) and
+        // the mount, sitting and sleeping offsets; the hand moves with it, so book, irises, muzzle and hits line up
+        // with the drawn player.
+        Vector2 centre = player.RotatedRelativePoint(player.MountedCenter, true);
         return new LacunaDrawState
         {
             Center = centre,
-            Hand = player.GetFrontHandPosition(Player.CompositeArmStretchAmount.Full, aim - MathHelper.PiOver2),
+            Hand = player.GetFrontHandPosition(Player.CompositeArmStretchAmount.Full, aim - MathHelper.PiOver2) + (centre - player.MountedCenter),
             Aim = aim,
             Age = age,
             Facing = channel.Facing,

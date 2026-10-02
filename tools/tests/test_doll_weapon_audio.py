@@ -180,7 +180,8 @@ class DollWeaponExports(unittest.TestCase):
         cues = registry()
         for name in re.findall(r'DollWeaponAudio\.(?:Play|Note|Sustain)\((?:ref \w+, )?"(\w+)"', visuals):
             self.assertIn(name, cues)
-            constant = {"LacunaIrisWarn": "IrisWarnVolume", "LacunaIrisFire": "IrisFireVolume", "LacunaPelletWarn": "PelletWarnVolume",
+            constant = {"LacunaIrisWarn": "IrisWarnVolume", "LacunaIrisFire": "IrisFireVolume", "LacunaIrisTine": "IrisTineVolume",
+                        "LacunaPelletWarn": "PelletWarnVolume",
                         "LacunaPelletFire": "PelletFireVolume", "LacunaPelletHit": "PelletHitVolume", "LacunaMergeWarn": "MergeWarnVolume",
                         "LacunaMergeFire": "MergeFireVolume", "LacunaBeamWarn": "BeamWarnVolume", "LacunaBeamFire": "BeamFireVolume",
                         "LacunaBeamLoop": "LoopVolume", "LacunaWiden1": "WidenVolume", "LacunaWiden2": "WidenVolume",
@@ -188,6 +189,28 @@ class DollWeaponExports(unittest.TestCase):
                         "LacunaBeamMiss": "MissVolume"}[name]
             value = float(re.search(rf"\b{constant} = ([\d.]+)f", visuals).group(1))
             self.assertEqual(cues[name][2], value, f"{name}: the audition plays the call-site volume")
+
+    def test_only_single_pitch_class_cues_are_transposed(self):
+        # Shared rule: composite cues and loops are never transposed at runtime; only a one-shot whose every pitched
+        # layer is one pitch class may move along the ladder through DollWeaponAudio.Note.
+        py = GENERATOR.read_text(encoding="utf-8")
+        recipes = {name: body for name, body in re.findall(r'@cue\("(\w+)",.*?\)\ndef \w+\(s, rng\):\n(.*?)(?=\n\n\n|\Z)', py, re.S)}
+        noted = set()
+        for path in (ROOT / "Client").rglob("*.cs"):
+            noted |= set(re.findall(r'DollWeaponAudio\.Note\("(\w+)"', path.read_text(encoding="utf-8")))
+        self.assertIn("LacunaIrisTine", noted)
+        self.assertNotIn("LacunaIrisFire", noted, "the iris's composite opening plays as rendered")
+        loops_ = loops()
+        for name in sorted(noted):
+            with self.subTest(cue=name):
+                self.assertNotIn(name, loops_)
+                notes = re.findall(r'hz\("([A-G][b#]?)-?\d"\)', recipes[name])
+                self.assertTrue(notes, "a transposed cue has a pitched layer")
+                classes = {(("C", "D", "E", "F", "G", "A", "B").index(n[0]) * 2 - (n[0] in "FGAB")
+                            + (n[1:] == "#") - (n[1:] == "b")) % 12 for n in notes}
+                self.assertEqual(1, len(classes), f"{name} layers {sorted(set(notes))}: one pitch class only")
+                self.assertNotIn("organ_pad", recipes[name])
+                self.assertNotIn("ratchet(", recipes[name])
 
 
 class DollWeaponPlaybackContract(unittest.TestCase):

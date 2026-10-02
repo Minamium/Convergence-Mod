@@ -222,8 +222,9 @@ LACUNA = {
     "widen": (530, 650, 770),
     "pulse_period": 30,
 }
-# The single-note cues (LacunaIrisFire, LacunaPelletFire) are recorded at ladder step 3 (C6) and played at the
-# iris's step through DollWeaponAudio.Note: F5 Ab5 Bb5 C6 Eb6 F6 Ab6 as the seven irises join.
+# The single-pitch cues (LacunaIrisTine, LacunaPelletFire: every pitched layer is a C) are recorded at ladder step 3
+# (C6) and played at the iris's step through DollWeaponAudio.Note: F5 Ab5 Bb5 C6 Eb6 F6 Ab6 as the seven irises join.
+# Every other Lacuna cue is a composite and plays as rendered (tools tests check both).
 LACUNA_NOTE_ROOT = 3
 # The beam's loop: eight visual pulse periods (8 x 30 ticks = 4.0 s), exactly 176,400 frames.
 LACUNA_LOOP_SECONDS = 8 * LACUNA["pulse_period"] / 60
@@ -263,6 +264,38 @@ def _puff(dur, rng, cutoff=520):
     return x / max(1e-9, np.abs(x).max())
 
 
+# A gong-like plate tuned into the key: inharmonic in spirit (every partial slightly off its ratio, each a pair a
+# fraction of a hertz apart so it beats and shimmers), but its strong partials sit on F minor pentatonic intervals
+# above the root (1 F, 1.5 C, 2 F, 2.38 Ab, 3 C, 3.56 Eb, 4 F) so the long tail never clashes with the music.
+GONG_PARTIALS = ((1.0, 1.0, 1.0), (1.498, 0.55, 0.8), (2.004, 0.45, 0.7), (2.381, 0.28, 0.55), (2.993, 0.22, 0.45),
+                 (3.566, 0.14, 0.35), (4.011, 0.1, 0.3))
+
+
+def _gong(freq, dur, rng, tau=1.5, softness=0.012, beat=0.35, glide_cents=-12):
+    """A soft mallet on a tuned gong: partials (ratio, gain, decay share) with long decays (the root rings for `tau`
+    s, higher partials shorter), a raised-cosine onset of `softness` s (no click), a slow downward pitch settle and a
+    low felt thud. Original additive synthesis; returns stereo, peak 1."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    settle = 2 ** (glide_cents * (1 - np.exp(-t / 0.6)) / 1200)
+    out = np.zeros((n, 2))
+    for k, (ratio, gain, share) in enumerate(GONG_PARTIALS):
+        f = freq * ratio
+        if f * 1.01 >= dsp.CEILING_HZ:
+            break
+        env = np.exp(-t / (tau * share))
+        for side, offset in ((-1, -beat * (1 + 0.3 * k)), (1, beat * (1 + 0.3 * k))):
+            phase = 2 * np.pi * np.cumsum((f + offset) * settle) / RATE + rng.uniform(0, 2 * np.pi)
+            y = np.sin(phase) * env * gain
+            out += pan(y[:, None].repeat(2, axis=1) * 0.5, 0.25 * side * min(1, k / 3))
+    onset = np.clip(t / softness, 0, 1)
+    out *= (0.5 - 0.5 * np.cos(np.pi * onset))[:, None]
+    k = round(0.09 * RATE)
+    felt = lp(base.noise(k, rng), 260) * (np.exp(-np.arange(k) / RATE / 0.025))[:, None]
+    out[:k] += felt / max(1e-9, np.abs(felt).max()) * 0.25
+    return out / max(1e-9, np.abs(out).max())
+
+
 @cue("LacunaIrisWarn", -17, "Lacuna", 0.45, 0.7,
      "虹彩が一つ生まれる（第1〜7の虹彩それぞれの誕生の瞬間）。遺言書の穴から磁器の花弁が滑り出す細いこすれ音に、"
      "+8tick（0.13秒）で真鍮の留め金が一段、+11tickでもう半段かかる。開く準備の予告音で、開く瞬間は LacunaIrisFire。")
@@ -277,17 +310,26 @@ def lacuna_iris_warn(s, rng):
     return room(mix, 0.1, 0.42, 0.08)
 
 
-@cue("LacunaIrisFire", -17, "Lacuna", 0.7, 0.8,
-     "虹彩が開ききって最初の弾を撃つ（誕生から15tick）。磁器の開放音「カッ」とオルゴールの爪一音（C6 で録り、"
-     "ゲームでは虹彩の順に F5 A♭5 B♭5 C6 E♭6 F6 A♭6 と一段ずつ上げて鳴らす）、下に虚無の小さな「ぽっ」。")
+@cue("LacunaIrisFire", -20, "Lacuna", 0.4, 0.8,
+     "虹彩が開ききって最初の弾を撃つ（誕生から15tick）。磁器の開放音「カッ」（C7 と F7 の短い響き）と真鍮の留め金、"
+     "下に虚無の小さな「ぽっ」。どの虹彩でもこの高さのまま鳴らす（複数の音を重ねた音なので移調しない）。"
+     "同じ瞬間に、虹彩ごとに一段ずつ上がるオルゴールの一音 LacunaIrisTine が重なる。")
 def lacuna_iris_fire(s, rng):
+    mix = seconds(0.45)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.12, rng, decay=0.018, side=-0.1), 0.0, -4)
+    place(mix, dsp.porcelain_ring(dsp.hz("F7"), 0.1, rng, decay=0.012, side=0.15), 0.003, -8)
+    place(mix, pan(dsp.brass_click(rng, 1900, decay=0.006, thud=0.7), 0.0), 0.0, -6)
+    place(mix, _puff(0.14, rng, 420), 0.004, -12)
+    return room(mix, 0.1, 0.36, 0.08)
+
+
+@cue("LacunaIrisTine", -20, "Lacuna", 0.75, 0.9,
+     "虹彩が開く瞬間のオルゴールの爪一音（C6 で録った単音）。ゲームでは虹彩の順に F5 A♭5 B♭5 C6 E♭6 F6 A♭6 と"
+     "一段ずつ上げて鳴らす（一つの音だけなので移調してよい）。開放音 LacunaIrisFire と同時に鳴る。")
+def lacuna_iris_tine(s, rng):
     mix = seconds(0.75)
-    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.12, rng, decay=0.018, side=-0.1), 0.0, -6)
-    place(mix, dsp.porcelain_ring(dsp.hz("F7"), 0.1, rng, decay=0.012, side=0.15), 0.003, -10)
-    place(mix, pan(dsp.brass_click(rng, 1900, decay=0.006, thud=0.7), 0.0), 0.0, -9)
-    place(mix, pan(dsp.box_tine(dsp.hz("C6"), 0.7, rng), 0.05), 0.006, -2)
-    place(mix, _puff(0.14, rng, 420), 0.004, -15)
-    return room(mix, 0.12, 0.66, 0.12)
+    place(mix, pan(dsp.box_tine(dsp.hz("C6"), 0.7, rng), 0.05), 0.0, -2)
+    return room(mix, 0.1, 0.7, 0.08)
 
 
 @cue("LacunaPelletWarn", -20, "Lacuna", 0.2, 0.55,
@@ -376,21 +418,25 @@ def lacuna_beam_warn(s, rng):
     return out
 
 
-@cue("LacunaBeamFire", -10, "Lacuna", 1.6, 0.9,
-     "黒い芯の光線が開く（410tick、溜めの静寂のあと）。60ミリ秒の吸い込みから、深いオルガンの和音 Fm7（F2 C3 E♭3 A♭3 C4）"
-     "の一撃、60→35 Hz の沈み込み、磁器のきらめき。最大の山場（T4）。")
+@cue("LacunaBeamFire", -11.5, "Lacuna", 2.8, 0.9,
+     "黒い芯の光線が開く（410tick、溜めの静寂のあと）。60ミリ秒の吸い込みから、F に合わせた銅鑼のような低い一打"
+     "（やわらかい撥、長く減衰する余韻）と、その下で静かにふくらむオルガン Fm7（F2 C3 E♭3 A♭3 C4）、ゆっくり沈む低音、"
+     "かすかな磁器のきらめき。オルガンを強く鳴らすのではなく、控えめなオルガンと響く余韻で締める（T3、約2.6秒）。")
 def lacuna_beam_fire(s, rng):
-    mix = seconds(1.8)
+    mix = seconds(2.9)
     inhale = 0.06
-    place(mix, pan(_inhale(inhale, rng), 0.0), 0.0, -10)
-    stab = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "Eb3", "Ab3", "C4")], 1.25, rng, attack=0.012, release=0.75,
-                         harmonics=14, rolloff=1.05, chiff=0.08, breath=0.18)
-    place(mix, stab, inhale, -1)
-    place(mix, dsp.thump(60, 35, 0.9, rng), inhale, -2)
-    place(mix, dsp.porcelain_crack(0.12, rng, count=7, spread=0.035, low=2400, high=7200), inhale, -12)
-    place(mix, dsp.shimmer(0.8, rng, count=11), inhale + 0.02, -11)
-    place(mix, dsp.porcelain_ring(dsp.hz("F6"), 0.9, rng, decay=0.25, side=0.2), inhale + 0.004, -12)
-    return room(mix, 0.2, 1.55, 0.4)
+    place(mix, pan(_inhale(inhale, rng), 0.0), 0.0, -14)
+    # The strike: a tuned gong-like plate on F2 an octave under F3, soft mallet, long tail.
+    place(mix, _gong(dsp.hz("F2"), 2.6, rng, tau=1.6), inhale, -3)
+    place(mix, _gong(dsp.hz("F3"), 1.9, rng, tau=0.9, beat=0.5), inhale + 0.004, -13)
+    # The organ only breathes under it: a slow swell, never a stab.
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "Eb3", "Ab3", "C4")], 2.3, rng, attack=0.18, release=1.6,
+                        harmonics=10, rolloff=1.4, chiff=0.0, breath=0.12)
+    place(mix, pad, inhale + 0.02, -13)
+    place(mix, dsp.thump(60, 38, 1.1, rng), inhale, -9)
+    place(mix, dsp.porcelain_crack(0.12, rng, count=5, spread=0.035, low=2400, high=6400), inhale, -21)
+    place(mix, dsp.shimmer(0.9, rng, count=8), inhale + 0.05, -20)
+    return room(mix, 0.24, 2.6, 0.6)
 
 
 assert LACUNA_LOOP_SECONDS == 4.0  # the registry line below spells the length out for the export tests
@@ -798,7 +844,8 @@ def lacuna_events(release, starved=False, target_ticks=14):
     for i, birth in enumerate(L["births"]):
         events.append((birth, "LacunaIrisWarn", None))
         first = birth + L["shot_delay"]
-        events.append((first, "LacunaIrisFire", i))
+        events.append((first, "LacunaIrisFire", None))
+        events.append((first, "LacunaIrisTine", i))
         events.append((first + target_ticks, "LacunaPelletHit", None))
         shot = first + L["shot_period"]
         while shot < L["merge"]:
@@ -931,8 +978,9 @@ h1,h2{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}audio{{height:32px;w
 0.8秒の溜めのあと黒い芯の光線を出し続けます。音はすべて新規で、各段階に予告（Warn）と本番（Fire）の組があります。
 マナ切れで失敗したときは別の音（LacunaBeamMiss）です。</p>
 <p><small>音量はすべてゲーム内の値（効果音と音楽の音量設定はどちらも 100%）で並べています。調は全武器共通の F マイナー・ペンタトニック
-（F A♭ B♭ C E♭）で、BGM に合わせた音程補正はしていません（0 セント）。一音だけの LacunaIrisFire と LacunaPelletFire は C6 で録り、
-ゲームでは虹彩の順に F5 A♭5 B♭5 C6 E♭6 F6 A♭6 の高さで鳴ります（コンボではその高さで並べています）。</small></p>
+（F A♭ B♭ C E♭）で、BGM に合わせた音程補正はしていません（0 セント）。単音の LacunaIrisTine と LacunaPelletFire は C6 で録り、
+ゲームでは虹彩の順に F5 A♭5 B♭5 C6 E♭6 F6 A♭6 の高さで鳴ります（コンボではその高さで並べています）。複数の音を重ねたほかの音は、
+どれも録ったままの高さで鳴ります。</small></p>
 <h2>通しで（ゲームと同じタイミング）</h2><table>{''.join(combo_rows)}</table>
 <h2>BGM に重ねて</h2><table>{''.join(bgm_rows)}</table>
 <h2>一つずつ</h2><table>{''.join(rows)}</table>
@@ -943,7 +991,7 @@ h1,h2{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}audio{{height:32px;w
 # Per group: the records' date stamp and date, their review line and the section's introduction (heading included).
 LACUNA_ATTRIBUTION = """### Lacuna Testament cues — 2026-10-03
 
-The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): fifteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-note cues (`LacunaIrisFire`, `LacunaPelletFire`, recorded at C6 and played on the ladder step of each iris). The audition page and report stay in the git-ignored `.local`.
+The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): sixteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump; the generator adds a gong-like plate tuned into the key, also additive synthesis), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-pitch cues (`LacunaIrisTine`, `LacunaPelletFire`, every pitched layer a C, recorded at C6 and played on the ladder step of each iris); every composite cue and the loop play as rendered. The audition page and report stay in the git-ignored `.local`.
 """
 GROUP_ATTRIBUTION = {
     "Lacuna": ("20261003", "2026-10-03", "Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam "

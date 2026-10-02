@@ -4,10 +4,12 @@
 // DollLacunaEnergy.fxc, with Luminance's own noise textures read from its package; no Terraria types.
 // Each frame follows the in-game order: record, Art and Light targets, backdrop, a 20 x 42 stand-in player, then the
 // Art and Light composites in front of it, at zoom 1 on dark #121017 and bright #bac6d6 ground.
-// Writes frames, a contact sheet (build-up, release, residue, collapse), a book-rung comparison and an angle sheet,
-// and exits non-zero on a failed check: nothing dropped, light ringed by ink, at least four ramp tones and 40% pale
-// lit dots in the live beam, a black core with a one-dot pearl lip, the drawn edge on the collision width, the art
-// kept in front of its own light, peers at 65% / 60%, Reduced Effects keeping every body.
+// Writes frames, a contact sheet (build-up, release, residue, running dry, collapse, a boss forecast under the beam),
+// a book-rung comparison and an angle sheet, and exits non-zero on a failed check: nothing dropped, light ringed by
+// ink, at least four ramp tones and 40% pale lit dots in the live beam, a black core with a one-dot pearl lip, the
+// drawn edge on the collision width, the art kept in front of its own light, the owner at 80% / 75% and peers at
+// 65% / 60%, Reduced Effects keeping every body, a forecast under the beam still showing, the book and the light off
+// the head at every aim, and running dry drawn differently from a release (plum-only residue).
 #nullable disable
 using System;
 using System.Collections.Generic;
@@ -30,6 +32,9 @@ internal static class DollLacunaPreview
 
     private const int Width = 1280, Height = 720;
     private static readonly Color Dark = new(0x12, 0x10, 0x17), Bright = new(0xba, 0xc6, 0xd6), Probe = new(40, 160, 90);
+    // A stand-in Doll boss forecast: a thin 2 px telegraph line in the Raid's forecast pink, drawn with the world
+    // (under every player and the weapon layer), crossing the beam and running inside its core.
+    private static readonly Color ForecastPink = new(206, 118, 182);
     private static readonly Vector2 Camera = new(20001, 12001);
     // The stand-in player's centre on screen: left of centre so the beam has room.
     private static readonly Vector2 PlayerScreen = new(400, 430);
@@ -42,7 +47,7 @@ internal static class DollLacunaPreview
     private static readonly DollWeaponCanvas canvas = new();
     private static readonly List<string> failures = new();
     private static string output;
-    private static bool artDrawn, lightDrawn, largeBook, plainComposite;
+    private static bool artDrawn, lightDrawn, largeBook, plainComposite, forecast;
 
     private static int Main(string[] args)
     {
@@ -143,7 +148,7 @@ internal static class DollLacunaPreview
     // ---- Scenes --------------------------------------------------------------------------------------------------
 
     internal readonly record struct Shot(string Label, float Age, LacunaPhase Phase = LacunaPhase.Live, float Fade = 0, float Aim = -.18f,
-        bool Peer = false, bool Reduced = false, int Facing = 1, bool Pellets = true);
+        bool Peer = false, bool Reduced = false, int Facing = 1, bool Pellets = true, LacunaEnd End = LacunaEnd.Release);
 
     private static Vector2 Centre => Camera + PlayerScreen;
 
@@ -157,7 +162,7 @@ internal static class DollLacunaPreview
         return new LacunaDrawState
         {
             Center = Centre, Hand = Hand(s.Aim, direction), Aim = s.Aim, Age = s.Age, Facing = s.Facing, Direction = direction,
-            GravDir = 1, Fade = s.Fade, Phase = s.Phase, End = LacunaEnd.Release, Peer = s.Peer, Seed = 4021,
+            GravDir = 1, Fade = s.Fade, Phase = s.Phase, End = s.End, Peer = s.Peer, Seed = 4021,
         };
     }
 
@@ -210,7 +215,13 @@ internal static class DollLacunaPreview
         new("450", 452), new("530", 531), new("650", 652), new("770", 772),
         new("R2", 772, LacunaPhase.Fading, 2), new("R6", 772, LacunaPhase.Fading, 6), new("R12", 772, LacunaPhase.Fading, 12),
         new("R20", 772, LacunaPhase.Fading, 20), new("R23", 772, LacunaPhase.Fading, 23),
-        new("C200", 200, LacunaPhase.Fading, 5), new("X3", 600, LacunaPhase.Collapse, 3), new("X10", 600, LacunaPhase.Collapse, 10),
+        // Running dry: the beam gutters out where it is (lit, a gap, one weaker flash), the great aperture cracks apart
+        // and the residue is plum; during the build the seated irises crack instead of closing.
+        new("S1", 772, LacunaPhase.Fading, 1, End: LacunaEnd.Starved), new("S3", 772, LacunaPhase.Fading, 3, End: LacunaEnd.Starved),
+        new("S5", 772, LacunaPhase.Fading, 4.5f, End: LacunaEnd.Starved), new("S8", 772, LacunaPhase.Fading, 8, End: LacunaEnd.Starved),
+        new("S14", 772, LacunaPhase.Fading, 14, End: LacunaEnd.Starved), new("S20", 772, LacunaPhase.Fading, 20, End: LacunaEnd.Starved),
+        new("C200", 200, LacunaPhase.Fading, 5), new("S200", 200, LacunaPhase.Fading, 5, End: LacunaEnd.Starved),
+        new("X3", 600, LacunaPhase.Collapse, 3), new("X10", 600, LacunaPhase.Collapse, 10),
     };
 
     private static int Sheets()
@@ -228,6 +239,17 @@ internal static class DollLacunaPreview
                 frames++;
             }
         }
+        // A boss forecast under the owner's beam (and the same without the weapon), dark and bright ground.
+        forecast = true;
+        foreach (bool bright in new[] { false, true })
+        {
+            var s = new Shot("f", 600, Aim: 0, Pellets: false);
+            tiles.Add((Crop(Frame(c => Scene(c, s), bright ? Bright : Dark, false, $"lacuna-forecast-{(bright ? "bright" : "dark")}", true, 1600), crop),
+                "F" + (bright ? "B" : "D")));
+            tiles.Add((Crop(Frame(c => { }, bright ? Bright : Dark, false, null, true, 1600), crop), "F0" + (bright ? "B" : "D")));
+            frames += 2;
+        }
+        forecast = false;
         Sheet(tiles, crop.Width, crop.Height, 4, "lacuna-contact.png");
 
         // Book rung choice: the k=1 and k=2 books at three moments, dark and bright.
@@ -248,7 +270,7 @@ internal static class DollLacunaPreview
         // Aim angles (beam and build), peers and Reduced Effects.
         tiles.Clear();
         Rectangle wide = new((int)PlayerScreen.X - 360, (int)PlayerScreen.Y - 330, 720, Height - ((int)PlayerScreen.Y - 330));
-        foreach (float aim in new[] { -1.4f, -.8f, 0f, .6f, MathF.PI - .3f, MathF.PI + .6f })
+        foreach (float aim in new[] { -MathF.PI / 2, -1.2f, -.8f, 0f, .6f, MathF.PI - .3f, MathF.PI + .6f, -MathF.PI / 2 - .4f })
         {
             var s = new Shot("a", 600, Aim: aim, Facing: MathF.Cos(aim) < 0 ? -1 : 1);
             tiles.Add((Crop(Frame(c => Scene(c, s), Dark, false, null, true, 1600), wide), "A"));
@@ -316,6 +338,7 @@ internal static class DollLacunaPreview
         RenderLayers();
         device.Clear(backdrop);
         if (players) Ground(backdrop == Bright);
+        if (forecast) Telegraph();
         Player();
         if (artDrawn || lightDrawn)
         {
@@ -343,6 +366,24 @@ internal static class DollLacunaPreview
         batch.Draw(pixel, new Rectangle(820, 300, 160, 120), bright ? new Color(236, 238, 242) : new Color(92, 84, 104));
         batch.End();
     }
+
+    // The stand-in boss forecast, drawn with the world: a 2 px line crossing the beam and one running inside its core.
+    private static void Telegraph()
+    {
+        batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Matrix.Identity);
+        foreach ((Vector2 a, Vector2 b) in ForecastLines())
+        {
+            Vector2 d = b - a;
+            batch.Draw(pixel, a, null, ForecastPink, MathF.Atan2(d.Y, d.X), new Vector2(0, .5f), new Vector2(d.Length(), 2), SpriteEffects.None, 0);
+        }
+        batch.End();
+    }
+
+    private static (Vector2, Vector2)[] ForecastLines() => new[]
+    {
+        (PlayerScreen + new Vector2(300, -150), PlayerScreen + new Vector2(560, 150)),
+        (PlayerScreen + new Vector2(280, 8), PlayerScreen + new Vector2(640, 8)),
+    };
 
     // The 20 x 42 stand-in player, between the world and the layer's Front stratum as in game.
     private static void Player()
@@ -384,6 +425,7 @@ internal static class DollLacunaPreview
     // A 3 x 5 bitmap label (digits and a few capitals) drawn 3x, on a dark box.
     private static readonly Dictionary<char, string> glyphs = new()
     {
+        ['S'] = "011100010001110", ['F'] = "111100110100100", ['H'] = "101101111101101",
         ['0'] = "111101101101111", ['1'] = "010110010010111", ['2'] = "111001111100111", ['3'] = "111001111001111",
         ['4'] = "101101111001001", ['5'] = "111100111001111", ['6'] = "111100111101111", ['7'] = "111001010010010",
         ['8'] = "111101111101111", ['9'] = "111101111001111", ['A'] = "010101111101101", ['B'] = "110101110101110",
@@ -437,7 +479,23 @@ internal static class DollLacunaPreview
         CheckOutlineAndBudget();
         CheckArtInFront();
         CheckPeersAndReduced();
+        CheckForecastUnderBeam();
+        CheckHeadClear();
+        CheckStarved();
     }
+
+    // The light target is premultiplied: the palette tone of a dot drawn at `alpha`.
+    private static Color Straight(Color c) => c.A == 0 ? c
+        : new Color((int)MathF.Round(c.R * 255f / c.A), (int)MathF.Round(c.G * 255f / c.A), (int)MathF.Round(c.B * 255f / c.A), 255);
+
+    private static bool Is(Color c, DollTone tone)
+    {
+        Color t = Tone(tone), straight = Straight(c);
+        return c.A > 0 && Math.Abs(straight.R - t.R) <= 3 && Math.Abs(straight.G - t.G) <= 3 && Math.Abs(straight.B - t.B) <= 3;
+    }
+
+    private static byte Alpha255(float alpha) => (byte)MathF.Round(255 * alpha);
+    private static bool AlphaIs(Color c, float alpha) => c.A > 0 && Math.Abs(c.A - Alpha255(alpha)) <= 1;
 
     // The live beam (horizontal aim): >= 4 ramp tones, >= 40% pale lit dots, a black core on the axis, exactly one
     // pearl lip dot between the core and the rim, and the pearl silhouette on the collision edge (+-1 dot).
@@ -450,21 +508,24 @@ internal static class DollLacunaPreview
             Color[] dots = ReadLight();
             Vector2 muzzle = canvas.ToDot(Centre + new Vector2(Score.MuzzleDistance, 0));
             int axisY = (int)MathF.Floor(muzzle.Y);
-            var ramp = new HashSet<Color>();
-            int lit = 0, pale = 0, voidDots = 0;
+            var ramp = new HashSet<DollTone>();
+            int lit = 0, pale = 0, voidDots = 0, stray = 0;
+            float lightA = LacunaPresentation.LightAlpha(false), voidA = LacunaPresentation.VoidAlpha(false);
             DollTone[] rampTones = { DollTone.Plum, DollTone.PlumLight, DollTone.Violet, DollTone.Lilac, DollTone.PearlViolet, DollTone.Bone, DollTone.White };
-            Color[] paleTones = { Tone(DollTone.Pearl), Tone(DollTone.PearlViolet), Tone(DollTone.Bone), Tone(DollTone.White) };
+            DollTone[] paleTones = { DollTone.Pearl, DollTone.PearlViolet, DollTone.Bone, DollTone.White };
             int x0 = (int)muzzle.X + 60, x1 = Math.Min(light.Width - 2, (int)muzzle.X + 520);
             for (int y = 0; y < light.Height; y++)
             for (int x = x0; x < x1; x++)
             {
                 Color c = dots[y * light.Width + x];
                 if (c.A == 0) continue;
-                if (c.A < 250) { voidDots++; continue; }
+                if (AlphaIs(c, voidA)) { voidDots++; continue; }
+                if (!AlphaIs(c, lightA)) { stray++; continue; }
                 lit++;
-                foreach (DollTone t in rampTones) if (c == Tone(t)) ramp.Add(c);
-                if (Array.IndexOf(paleTones, c) >= 0) pale++;
+                foreach (DollTone t in rampTones) if (Is(c, t)) ramp.Add(t);
+                foreach (DollTone t in paleTones) if (Is(c, t)) { pale++; break; }
             }
+            if (stray > 0) failures.Add($"beam at {age}: {stray} dots at neither the owner's light ({Alpha255(lightA)}) nor void ({Alpha255(voidA)}) alpha");
             if (ramp.Count < 4) failures.Add($"beam at {age}: {ramp.Count} ramp tones");
             if (lit == 0 || pale * 100 / lit < 40) failures.Add($"beam at {age}: pale share {(lit == 0 ? 0 : pale * 100 / lit)}% of {lit} lit dots");
             if (voidDots < 200) failures.Add($"beam at {age}: only {voidDots} void dots");
@@ -473,22 +534,22 @@ internal static class DollLacunaPreview
             for (int x = x0; x < x1; x += 7)
             {
                 Color centre = dots[axisY * light.Width + x];
-                if (!(centre.A > 0 && centre.A < 250)) { failures.Add($"beam at {age}: axis dot at x {x} is not void ({centre})"); break; }
+                if (!AlphaIs(centre, voidA)) { failures.Add($"beam at {age}: axis dot at x {x} is not void ({centre})"); break; }
                 foreach (int sign in new[] { -1, 1 })
                 {
                     // Walk out from the axis: void dots, then one pearl or white lip dot, then rim.
                     int y = axisY, steps = 0;
-                    while (steps < 80 && dots[y * light.Width + x].A is > 0 and < 250) { y += sign; steps++; }
+                    while (steps < 80 && AlphaIs(dots[y * light.Width + x], voidA)) { y += sign; steps++; }
                     Color lip = dots[y * light.Width + x], after = dots[(y + sign) * light.Width + x];
                     lipChecks++;
-                    if (!(lip == Tone(DollTone.Pearl) || lip == Tone(DollTone.White)) || after == Tone(DollTone.Pearl) || after.A < 250) lipFailures++;
+                    if (!(Is(lip, DollTone.Pearl) || Is(lip, DollTone.White)) || Is(after, DollTone.Pearl) || !AlphaIs(after, lightA)) lipFailures++;
                     // The silhouette: a pearl-violet (or pulse bone) dot within one dot of the collision edge.
                     bool edge = false;
                     for (int d = -1; d <= 1; d++)
                     {
                         int ey = (int)MathF.Floor(muzzle.Y + sign * (halfEdge - .5f)) + d;
                         Color e = dots[ey * light.Width + x];
-                        if (e == Tone(DollTone.PearlViolet) || e == Tone(DollTone.Bone)) edge = true;
+                        if (Is(e, DollTone.PearlViolet) || Is(e, DollTone.Bone)) edge = true;
                     }
                     if (!edge) edgeMisses++;
                 }
@@ -587,6 +648,128 @@ internal static class DollLacunaPreview
             }
             if (body == 0) failures.Add($"art at {age}: no sprite drawn");
             else if (covered * 100 / body > 12) failures.Add($"art at {age}: light covers {covered * 100 / body}% of the sprites");
+        }
+    }
+
+    // A Doll forecast under the owner's beam stays readable: on the forecast's pixels under the beam, the difference
+    // between the frame with and without it is at least a fifth of the forecast's contrast with the bare ground (the
+    // owner's void .75 lets a quarter through, its light .8 a fifth; at the former .92 void only 8% showed).
+    private static void CheckForecastUnderBeam()
+    {
+        var s = new Shot("f", 600, Aim: 0, Pellets: false);
+        foreach (bool bright in new[] { false, true })
+        {
+            Color backdrop = bright ? Bright : Dark;
+            forecast = false;
+            Color[] bare = Frame(c => { }, backdrop, false, null, true, 1600);
+            Color[] beam = Frame(c => Scene(c, s), backdrop, false, null, true, 1600);
+            Color[] lights = ReadLight();
+            Vector2 offset = canvas.Origin - Camera;
+            forecast = true;
+            Color[] line = Frame(c => { }, backdrop, false, null, true, 1600);
+            Color[] both = Frame(c => Scene(c, s), backdrop, false, null, true, 1600);
+            forecast = false;
+            double coreSum = 0, rimSum = 0;
+            int coreCount = 0, rimCount = 0, coreLow = 0, rimLow = 0;
+            float voidA = LacunaPresentation.VoidAlpha(false), lightA = LacunaPresentation.LightAlpha(false);
+            for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+            {
+                int i = y * Width + x;
+                float ground = Distance(line[i], bare[i]);
+                // (On dark ground the void looks like the ground itself, so the light target says what the beam covers.)
+                if (ground < 24) continue;
+                int dx = (int)MathF.Floor((x - offset.X) / 2), dy = (int)MathF.Floor((y - offset.Y) / 2);
+                if (dx < 0 || dy < 0 || dx >= light.Width || dy >= light.Height) continue;
+                Color dot = lights[dy * light.Width + dx];
+                float ratio = Distance(both[i], beam[i]) / ground;
+                if (AlphaIs(dot, voidA)) { coreSum += ratio; coreCount++; if (ratio < .15f) coreLow++; }
+                else if (AlphaIs(dot, lightA)) { rimSum += ratio; rimCount++; if (ratio < .12f) rimLow++; }
+            }
+            string ground2 = bright ? "bright" : "dark";
+            if (coreCount < 200 || rimCount < 40) failures.Add($"forecast ({ground2}): too few forecast pixels under the beam ({coreCount} core, {rimCount} rim)");
+            else
+            {
+                double core = coreSum / coreCount, rim = rimSum / rimCount;
+                Console.WriteLine($"forecast under the owner's beam ({ground2} ground): {core:P0} of its contrast through the core ({coreCount} px), {rim:P0} through the rims ({rimCount} px)");
+                if (core < .2 || coreLow * 10 > coreCount) failures.Add($"forecast ({ground2}): the core hides it ({core:P0} of its contrast)");
+                if (rim < .16 || rimLow * 10 > rimCount) failures.Add($"forecast ({ground2}): the rims hide it ({rim:P0} of its contrast)");
+            }
+        }
+    }
+
+    private static float Distance(Color a, Color b)
+        => MathF.Sqrt((a.R - b.R) * (a.R - b.R) + (a.G - b.G) * (a.G - b.G) + (a.B - b.B) * (a.B - b.B));
+
+    // The book, irises, aperture and their light never cover the stand-in's head at any aim (every 10 degrees, both
+    // facings), through the build, the charge, the beam and the fire recoil.
+    private static void CheckHeadClear()
+    {
+        Rectangle head = new((int)(Camera.X + PlayerScreen.X) - 8, (int)(Camera.Y + PlayerScreen.Y) - 37, 16, 16);
+        int worst = 0;
+        string where = null;
+        for (int degrees = 0; degrees < 360; degrees += 10)
+        {
+            float aim = degrees * MathF.PI / 180;
+            foreach (float age in new[] { 124.5f, 381f, 412.5f, 600f })
+            {
+                var s = new Shot("h", age, Aim: aim, Facing: MathF.Cos(aim) < 0 ? -1 : 1, Pellets: false);
+                Record(c => LacunaPresentation.EmitChannel(c, State(s), Sprites(), material), false, 1000 + age);
+                Color[] lights = ReadLight(), arts = ReadArt();
+                Vector2 origin = canvas.Origin;
+                int covered = 0;
+                for (int dy = 0; dy < art.Height; dy++)
+                for (int dx = 0; dx < art.Width; dx++)
+                {
+                    float wx = origin.X + 2 * dx, wy = origin.Y + 2 * dy;
+                    if (wx + 2 <= head.Left || wx >= head.Right || wy + 2 <= head.Top || wy >= head.Bottom) continue;
+                    if (arts[dy * art.Width + dx].A > 0 || lights[dy * light.Width + dx].A > 0) covered++;
+                }
+                if (covered > worst) { worst = covered; where = $"{degrees} deg at age {age}"; }
+            }
+        }
+        if (worst > 0) failures.Add($"head: {worst} dot(s) of the weapon over the stand-in's head ({where})");
+    }
+
+    // Running dry is drawn differently from a release: no retraction (the beam gutters where it is), the great
+    // aperture cracks instead of breaking into irises, the residue is plum only; in the build the irises crack.
+    private static void CheckStarved()
+    {
+        int Differ(Shot a, Shot b)
+        {
+            Record(c => LacunaPresentation.EmitChannel(c, State(a), Sprites(), material), false);
+            Color[] la = ReadLight(), aa = ReadArt();
+            Record(c => LacunaPresentation.EmitChannel(c, State(b), Sprites(), material), false);
+            Color[] lb = ReadLight(), ab = ReadArt();
+            int n = 0;
+            for (int i = 0; i < la.Length; i++) if (la[i] != lb[i] || aa[i] != ab[i]) n++;
+            return n;
+        }
+        foreach (float fade in new[] { 1f, 3f, 8f })
+        {
+            var release = new Shot("r", 772, LacunaPhase.Fading, fade, Aim: 0, Pellets: false);
+            int n = Differ(release, release with { End = LacunaEnd.Starved });
+            if (n < 1500) failures.Add($"running dry looks like a release at fade {fade} ({n} dots differ)");
+        }
+        int build = Differ(new Shot("c", 200, LacunaPhase.Fading, 5, Pellets: false), new Shot("c", 200, LacunaPhase.Fading, 5, Pellets: false, End: LacunaEnd.Starved));
+        if (build < 300) failures.Add($"running dry in the build looks like a cancel ({build} dots differ)");
+        // Past the aperture, along the former beam, only plum residue once the beam has guttered out.
+        foreach (float fade in new[] { 8f, 14f })
+        {
+            var s = new Shot("s", 772, LacunaPhase.Fading, fade, Aim: 0, Pellets: false, End: LacunaEnd.Starved);
+            Record(c => LacunaPresentation.EmitChannel(c, State(s), Sprites(), material), false);
+            Color[] dots = ReadLight();
+            Vector2 from = canvas.ToDot(Centre + new Vector2(Score.MuzzleDistance + LacunaArtFit.GreatOuterRadius + 40, 0));
+            int half = (int)MathF.Ceiling(Score.Width(772) * .25f) + 2, other = 0, embers = 0;
+            for (int y = (int)from.Y - half; y <= (int)from.Y + half; y++)
+            for (int x = (int)from.X; x < light.Width; x++)
+            {
+                Color c = dots[y * light.Width + x];
+                if (c.A == 0) continue;
+                if (Is(c, DollTone.Plum) || Is(c, DollTone.PlumLight)) embers++;
+                else other++;
+            }
+            if (other > 0 || embers == 0) failures.Add($"running dry at fade {fade}: {embers} plum embers and {other} other dots along the former beam");
         }
     }
 

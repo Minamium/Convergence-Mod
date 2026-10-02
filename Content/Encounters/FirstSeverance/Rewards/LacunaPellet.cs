@@ -1,6 +1,5 @@
 #nullable enable
-using System;
-using System.Collections.Generic;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -10,20 +9,16 @@ using Score = Convergence.Content.Encounters.FirstSeverance.Rewards.LacunaTestam
 namespace Convergence.Content.Encounters.FirstSeverance.Rewards;
 
 // A Lacuna Testament void pellet: leaves an open iris toward the cursor and seeks (RitualTargeting, 1800 px), one hit
-// per logical NPC root, PelletLife ticks. ai[0] age, ai[1] the replicated target (-1 none), ai[2] the iris (0..6).
-// Spawned by the owner's LacunaIrisChannel through native projectile replication; it stops once its owner is unusable.
-// A standalone type (not a RitualBolt), so no legacy presentation draws it.
+// (penetrate 1), PelletLife ticks. ai[0] age, ai[1] the replicated target (-1 none), ai[2] the iris (0..6), ExtraAI
+// whether it struck. Spawned by the owner's LacunaIrisChannel through native projectile replication; it stops once
+// its owner is unusable. A standalone type (not a RitualBolt), so no legacy presentation draws it.
 public sealed class LacunaPellet : ModProjectile
 {
-    // Roots already struck (owner side). Created on first hit; the template never allocates it.
-    private HashSet<int>? hitRoots;
-
     internal float Age => Projectile.ai[0];
     internal int Iris => (int)Projectile.ai[2];
-    // Owner side: this pellet landed a hit (its death is a bite, not a timeout).
+    // This pellet landed its hit, so its death is a bite and not a timeout. Set by the owner on the hit and sent to
+    // every peer with one native projectile sync just before the kill, so peers never have to guess.
     internal bool Struck { get; private set; }
-    // This client's own AI ended it (an unusable owner, an invalid state): a quiet end, never a bite.
-    internal bool Quiet { get; private set; }
 
     public override string Texture => RitualArmamentItems.TexturePath;
 
@@ -51,31 +46,25 @@ public sealed class LacunaPellet : ModProjectile
     public override bool CanHitPvp(Player target) => false;
     // Drawn by the Doll weapon layer (Client/Encounters/FirstSeverance/Weapons/LacunaVisuals).
     public override bool PreDraw(ref Color lightColor) => false;
-    public override bool? CanHitNPC(NPC target) => hitRoots is not null && hitRoots.Contains(RitualTargeting.Root(target)) ? false : null;
+    public override bool? CanHitNPC(NPC target) => Struck ? false : null;
 
     public override void AI()
     {
         if (!RitualTargeting.ValidState(Projectile) || Projectile.ai[2] < 0 || Projectile.ai[2] >= Score.Irises)
         {
-            End();
+            Projectile.Kill();
             return;
         }
         Player owner = Main.player[Projectile.owner];
         if (!RitualArmamentItems.Usable(owner))
         {
-            End();
+            Projectile.Kill();
             return;
         }
         Projectile.ai[0] += 1f / Projectile.MaxUpdates;
-        NPC? target = RitualTargeting.Acquire(Projectile, owner, excluded: hitRoots);
+        NPC? target = RitualTargeting.Acquire(Projectile, owner);
         if (target is not null) RitualTargeting.Home(Projectile, target.Center, target.velocity, Score.PelletSpeed);
         Projectile.rotation = Projectile.velocity.ToRotation();
-    }
-
-    private void End()
-    {
-        Quiet = true;
-        Projectile.Kill();
     }
 
     // A sweep covers the fast head; the drawn wake is harmless.
@@ -86,9 +75,15 @@ public sealed class LacunaPellet : ModProjectile
             Projectile.Center - Projectile.velocity, Projectile.Center, Projectile.width, ref collision);
     }
 
+    // Owner side (the client that deals the hit): mark the hit and sync it before penetrate 1 kills the pellet, so the
+    // native kill that follows reaches every peer after the flag. Standard SyncProjectile; protocol unchanged.
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
-        (hitRoots ??= new HashSet<int>()).Add(RitualTargeting.Root(target));
         Struck = true;
+        if (Main.netMode != NetmodeID.SinglePlayer) NetMessage.SendData(MessageID.SyncProjectile, number: Projectile.whoAmI);
     }
+
+    public override void SendExtraAI(BinaryWriter writer) => writer.Write(Struck);
+
+    public override void ReceiveExtraAI(BinaryReader reader) => Struck = reader.ReadBoolean();
 }

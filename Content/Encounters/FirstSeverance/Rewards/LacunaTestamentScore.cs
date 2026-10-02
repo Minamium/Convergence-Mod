@@ -243,6 +243,18 @@ internal static class LacunaTestamentScore
         return Math.Max(0, Math.Min(openFrame, 3 - closed));
     }
 
+    // Running dry (LacunaEnd.Starved) looks different from a release: the beam gutters out where it is instead of
+    // retracting (lit, a gap, one weaker flash, gone after StarveTicks; under Reduced Effects a plain fade with no
+    // flicker, at most 1.5 flashes either way), and the irises or the great aperture crack apart over CollapseTicks
+    // instead of snapping shut.
+    internal const int StarveTicks = 6;
+    internal static float StarveFlicker(float fade, bool reduced)
+    {
+        if (!(fade >= 0) || fade >= StarveTicks) return 0;
+        if (reduced) return 1 - fade / StarveTicks;
+        return fade < 2 ? 1 - .1f * fade : fade < 4 ? 0 : .5f;
+    }
+
     // ---- Mana -----------------------------------------------------------------------------------------------------
 
     // The legacy MagicPays cadence: every 30 ticks during construction, then every 8 from the fire tick.

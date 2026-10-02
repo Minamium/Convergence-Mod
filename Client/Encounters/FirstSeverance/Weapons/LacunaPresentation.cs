@@ -61,14 +61,24 @@ internal sealed class LacunaEnergy : IDollEnergyMaterial
         if (shader is null || cloudTexture is null || flowTexture is null || (uint)pass >= passes.Length) return false;
         DollPixelArt.Set(shader, "uWorldViewProjection", context.Projection);
         DollPixelArt.Set(shader, "dotOrigin", context.DotOrigin);
-        DollPixelArt.Set(shader, "clock", (float)(context.Clock / 60.0 % 3600.0));
-        DollPixelArt.Set(shader, "reduced", context.Reduced ? 1f : 0f);
+        DollPixelArt.Set(shader, "timing", Timing(context.Clock, context.Reduced, pass));
         device.Textures[1] = cloudTexture;
         device.SamplerStates[1] = SamplerState.LinearWrap;
         device.Textures[2] = flowTexture;
         device.SamplerStates[2] = SamplerState.LinearWrap;
         DollPixelArt.Apply(shader, passes[pass]);
         return true;
+    }
+
+    // The shader's uniform-only quantities, computed here so the compiled effect carries no preshader: the flow time
+    // (seconds, wrapped hourly, slowed to .45 under Reduced Effects), the void spark threshold (none under Reduced
+    // Effects) and this pass's twinkle threshold (fewer under Reduced Effects).
+    internal static Vector4 Timing(double clock, bool reduced, int pass)
+    {
+        float flow = (float)(clock / 60.0 % 3600.0) * (reduced ? .45f : 1f);
+        float spark = reduced ? 2f : .9965f;
+        float twinkle = pass == WakePass ? (reduced ? .99f : .975f) : (reduced ? .995f : .985f);
+        return new Vector4(flow, spark, twinkle, 0);
     }
 }
 
@@ -78,9 +88,10 @@ internal sealed class LacunaEnergy : IDollEnergyMaterial
 // or sends anything: positions come from LacunaTestamentScore and the art is fitted to them (LacunaArtFit).
 internal static class LacunaPresentation
 {
-    // The owner's void lets a little of the world through, so forecasts under the beam's black core stay readable.
+    // The owner's light draws at 80% and void at 75%, so a boss forecast under the 2600 px beam (core or rims) still
+    // shows through at a fifth to a quarter of its contrast (the offline preview measures it on dark and bright ground).
     // Another player's damaging light draws at DollWeaponCanvas.PeerLightAlpha and their void at PeerVoidAlpha.
-    internal const float OwnerVoid = .92f;
+    internal const float OwnerLight = .8f, OwnerVoid = .75f;
     // Energy draw order inside the Light target: holes, then the beam over them, then pellet wakes and heads.
     private const sbyte MouthDepth = 0, BeamDepth = 1, WakeDepth = 2, HeadDepth = 3;
     // Sprite order: book, irises, great aperture.
@@ -94,7 +105,7 @@ internal static class LacunaPresentation
     private static readonly float GreatMask = MathF.Ceiling(DollArtAnchors.LacunaGreatIris.OuterRadius);
     private static readonly float RosetteMask = MathF.Ceiling((Score.DockRadius + DollArtAnchors.LacunaIris.FrameWidth) * DollWeaponCanvas.DotScale);
 
-    internal static float LightAlpha(bool peer) => peer ? DollWeaponCanvas.PeerLightAlpha : 1f;
+    internal static float LightAlpha(bool peer) => peer ? DollWeaponCanvas.PeerLightAlpha : OwnerLight;
     internal static float VoidAlpha(bool peer) => peer ? DollWeaponCanvas.PeerVoidAlpha : OwnerVoid;
 
     // ---- Channel --------------------------------------------------------------------------------------------------
@@ -107,14 +118,20 @@ internal static class LacunaPresentation
         Vector2 axis = new(MathF.Cos(s.Aim), MathF.Sin(s.Aim)), normal = new(-axis.Y, axis.X);
         Vector2 muzzle = s.Center + axis * Score.MuzzleDistance;
         bool formed = age >= Score.Formed;
+        // Running dry looks different from a release: no white flash, the beam gutters out where it is, the irises (or
+        // the great aperture) crack apart instead of snapping shut, their holes go dark at once and the residue is plum.
+        bool starved = fading && s.End == LacunaEnd.Starved;
         // A release after the aperture formed breaks it back into seven irises on the rosette.
-        bool split = formed && fading;
+        bool split = formed && fading && !starved;
         float collapseT = collapse ? Score.Clamp01(fade / Score.CollapseTicks) : 0;
+        float crackT = starved ? Score.Clamp01(fade / Score.CollapseTicks) : 0;
 
-        // The book: upright at the hand, bobbing by one dot, kicked back by the beam.
+        // The book: upright past the hand, bobbing by one dot, kicked back by the beam, and pushed further out along
+        // the aim when the aim is steep enough that it would cover the owner's head.
         float bob = MathF.Round(MathF.Sin((float)(canvas.Clock % 9600.0) * MathF.Tau / 96f + s.Seed)) * 2f;
         float recoil = live && age >= Score.Fire ? Recoil(age - Score.Fire) : 0;
-        Vector2 bookCentre = s.Hand + axis * Score.BookDistance + new Vector2(0, -2 + bob) - axis * (6 * recoil);
+        Vector2 bookBase = s.Hand + axis * (Score.BookDistance - 6 * recoil) + new Vector2(0, -2);
+        Vector2 bookCentre = X(LacunaArtFit.ClearHead(N(bookBase), N(axis), N(s.Center), s.GravDir)) + new Vector2(0, bob);
         DollFlip bookFlip = s.Direction < 0 ? DollFlip.Horizontal : DollFlip.None;
         Vector2 bookHole = X(LacunaArtFit.BookHoleAt(N(bookCentre), bookFlip));
         if (art.Book is { } book)
@@ -143,7 +160,7 @@ internal static class LacunaPresentation
                 Vector2 at = split
                     ? muzzle + X(Score.Dock(i, s.Facing, s.GravDir))
                     : s.Center + X(Score.IrisOffset(i, age, s.Facing, s.GravDir, N(bookHole - s.Center), N(muzzle - s.Center)));
-                if (!live) frame = Score.ClosingFrame(i, fade, frame);
+                if (!live && !starved) frame = Score.ClosingFrame(i, fade, frame);
                 float local = age - Score.Birth(i);
                 float flash = live ? Score.Clamp01(1 - local / Score.ArriveTicks) : split ? Score.Clamp01(1 - fade / 3) : 0;
                 if (live && age >= Score.Docked(i)) flash = MathF.Max(flash, Score.Clamp01(1 - (age - Score.Docked(i)) / 4));
@@ -151,13 +168,13 @@ internal static class LacunaPresentation
                 var fx = new DollSpriteFx
                 {
                     Flash = flash,
-                    Fade = live ? Score.Clamp01(1 - local / 4) : fading ? Score.Clamp01((fade - 12) / 8) : 0,
-                    Dissolve = collapseT,
+                    Fade = live ? Score.Clamp01(1 - local / 4) : fading && !starved ? Score.Clamp01((fade - 12) / 8) : 0,
+                    Dissolve = starved ? crackT : collapseT,
                     Seed = s.Seed + i,
                 };
                 Rectangle source = new(frame * DollArtAnchors.LacunaIris.FrameWidth, 0, DollArtAnchors.LacunaIris.FrameWidth, DollArtAnchors.LacunaIris.FrameHeight);
                 canvas.Sprite(new DollSprite(iris, source, X(LacunaArtFit.IrisPivot)), at, 0, DollFlip.None, DollStratum.Front, IrisDepth, fx);
-                if (frame >= 1 && !collapse && fx.Fade < 1)
+                if (frame >= 1 && !collapse && !starved && fx.Fade < 1)
                 {
                     // The tell half-closes the petals; a shot flashes the hole pearl.
                     bool tell = live && frame == 2 && local >= Score.ShotDelay;
@@ -167,6 +184,12 @@ internal static class LacunaPresentation
                     Mouth(canvas, material, hole, LacunaArtFit.IrisApertureRadius(frame), tell ? .8f : .2f,
                         .45f, shot, lightA * (1 - fx.Fade), voidA * (1 - fx.Fade), tell ? 1 : 0, i * 1.7f);
                     if (shot > 0) canvas.Burst(hole, s.Seed * 31 + i * 7 + shotTick, 4, age - shotTick, 9, 2.4f, .02f, DollShardKind.Spark);
+                }
+                // Running dry: each seated iris cracks into porcelain and brass that falls away.
+                if (starved && fade < Score.CollapseTicks + 8)
+                {
+                    canvas.Burst(at, s.Seed * 29 + i * 5, 7, fade, 20, 2.2f, .16f, DollShardKind.Porcelain);
+                    canvas.Burst(at, s.Seed * 29 + i * 5 + 1, 3, fade, 18, 1.6f, .18f, DollShardKind.Brass);
                 }
                 // Each dock lights a pearl notch ring round the arriving iris.
                 if (live && age >= Score.Docked(i) && age < Score.Docked(i) + 6)
@@ -178,15 +201,26 @@ internal static class LacunaPresentation
         }
 
         // The great aperture: forms at Formed, ratchets through the charge, holds the beam.
-        if (formed && (live || fading && fade < 2 || collapse) && art.Great is { } great)
+        if (formed && (live || split && fade < 2 || starved && crackT < 1 || collapse) && art.Great is { } great)
         {
             float rotation = LacunaArtFit.GreatRotation(age);
             // The sprite flashes only as it forms, fires and breaks; a ratchet notch lights its hole's lip and sparks.
-            float flash = live ? Score.Clamp01(1 - (age - Score.Formed) / 4) : fading ? 1 : 0;
+            // Running dry it cracks apart without a flash, its hole going dark at once.
+            float flash = live ? Score.Clamp01(1 - (age - Score.Formed) / 4) : split ? 1 : 0;
             if (live && age >= Score.Fire && age < Score.Fire + 2) flash = MathF.Max(flash, .5f * (1 - (age - Score.Fire) / 2));
             canvas.Sprite(new DollSprite(great, great.Bounds, X(LacunaArtFit.GreatPivot)), muzzle, rotation, DollFlip.None, DollStratum.Front, GreatDepth,
-                new DollSpriteFx { Flash = flash, Dissolve = collapseT, Seed = s.Seed + 11 });
-            if (!collapse)
+                new DollSpriteFx { Flash = flash, Dissolve = starved ? crackT : collapseT, Seed = s.Seed + 11 });
+            if (starved)
+            {
+                Mouth(canvas, material, X(LacunaArtFit.GreatHoleAt(N(muzzle), rotation)), LacunaArtFit.GreatHoleRadius * (1 - .5f * crackT), 0, 1, 0,
+                    0, voidA * (1 - Score.Clamp01(2 * crackT)), 0, rotation);
+                if (fade < Score.CollapseTicks + 8)
+                {
+                    canvas.Burst(muzzle, s.Seed * 23 + 7, 18, fade, 22, 2.8f, .16f, DollShardKind.Porcelain);
+                    canvas.Burst(muzzle, s.Seed * 23 + 8, 8, fade, 20, 2f, .2f, DollShardKind.Brass);
+                }
+            }
+            else if (!collapse)
             {
                 float hot = live ? MathF.Max(Score.Hot(age), age >= Score.Fire ? 0 : Score.Clamp01(1 - (age - Score.Formed) / 4)) : 1;
                 Mouth(canvas, material, X(LacunaArtFit.GreatHoleAt(N(muzzle), rotation)), LacunaArtFit.GreatHoleRadius, live ? Score.Spiral(age) : 0,
@@ -217,11 +251,13 @@ internal static class LacunaPresentation
             }
         }
 
-        // The beam: opens from the hole, pulses, widens; on release it retracts into the hole.
-        if (age > Score.Fire && !collapse && (live || fade < Score.RetractTicks))
+        // The beam: opens from the hole, pulses, widens; on release it retracts into the hole; running dry it gutters
+        // out where it is, thinning and dimming with no white flash (a plain fade under Reduced Effects).
+        float gutter = starved ? Score.StarveFlicker(fade, canvas.Reduced) : 1;
+        if (age > Score.Fire && !collapse && (live || !starved && fade < Score.RetractTicks || gutter > 0 && starved))
         {
-            float reach = Score.Reach(age) * (live ? 1 : Score.Retract(fade));
-            float width = Score.Width(age) * (live ? 1 : Score.RetractWidth(fade));
+            float reach = Score.Reach(age) * (live || starved ? 1 : Score.Retract(fade));
+            float width = Score.Width(age) * (live ? 1 : starved ? 1 - .35f * Score.Clamp01(fade / Score.StarveTicks) : Score.RetractWidth(fade));
             float pulseA = -10000, pulseB = -10000;
             if (live)
             {
@@ -229,8 +265,8 @@ internal static class LacunaPresentation
                 if (a >= 0) pulseA = a;
                 if (b >= 0) pulseB = b;
             }
-            Beam(canvas, material, muzzle, axis, reach, width, pulseA, pulseB, live ? Score.Hot(age) : .2f * (1 - fade / Score.RetractTicks),
-                lightA, voidA, split ? RosetteMask : GreatMask);
+            float beamHot = live ? Score.Hot(age) : starved ? 0 : .2f * (1 - fade / Score.RetractTicks);
+            Beam(canvas, material, muzzle, axis, reach, width, pulseA, pulseB, beamHot, lightA * gutter, voidA * gutter, split ? RosetteMask : GreatMask);
             if (live && age < Score.Fire + 14)
             {
                 float t = age - Score.Fire;
@@ -245,11 +281,12 @@ internal static class LacunaPresentation
             }
         }
 
-        // Residue: void embers along the former beam cool from lilac to plum (half as many, half as long, reduced).
+        // Residue: void embers along the former beam cool from lilac to plum (half as many, half as long, reduced);
+        // after running dry they are plum from the start and sink.
         if (!live && age > Score.Fire)
         {
             float life = Score.ResidueTicks * (canvas.Reduced ? .5f : 1);
-            if (fade < life) Residue(canvas, muzzle, axis, Score.Reach(age), Score.Width(age), fade, life, s.Seed, lightA);
+            if (fade < life) Residue(canvas, muzzle, axis, Score.Reach(age), Score.Width(age), fade, life, s.Seed, lightA, starved);
         }
 
         // The collapse of an instant end: porcelain crumbs and one pearl ring.
@@ -372,7 +409,8 @@ internal static class LacunaPresentation
     }
 
     // Void embers scattered along the former beam, drifting outward and cooling to plum over `life` ticks.
-    private static void Residue(DollWeaponCanvas canvas, Vector2 muzzle, Vector2 axis, float reach, float width, float t, float life, int seed, float alpha)
+    private static void Residue(DollWeaponCanvas canvas, Vector2 muzzle, Vector2 axis, float reach, float width, float t, float life, int seed, float alpha,
+        bool starved)
     {
         if (!(reach > 1f)) return;
         Vector2 normal = new(-axis.Y, axis.X);
@@ -385,8 +423,11 @@ internal static class LacunaPresentation
             // Denser near the aperture, where the beam was thickest in view.
             float along = LacunaArtFit.GreatOuterRadius + MathF.Pow(a, 1.7f) * Math.Max(0, reach - LacunaArtFit.GreatOuterRadius);
             float across = (b - .5f) * width * .9f;
-            Vector2 at = muzzle + axis * (along + t * .6f) + normal * (across + MathF.Sign(across) * t * .5f);
-            DollTone tone = share < .25f ? DollTone.Lilac : share < .5f ? DollTone.Violet : share < .75f ? DollTone.PlumLight : DollTone.Plum;
+            Vector2 at = starved
+                ? muzzle + axis * along + normal * across + new Vector2(0, .045f * t * t)
+                : muzzle + axis * (along + t * .6f) + normal * (across + MathF.Sign(across) * t * .5f);
+            DollTone tone = starved ? (share < .4f ? DollTone.PlumLight : DollTone.Plum)
+                : share < .25f ? DollTone.Lilac : share < .5f ? DollTone.Violet : share < .75f ? DollTone.PlumLight : DollTone.Plum;
             canvas.Dot(at, tone, k % 3 == 0 && share < .6f ? 2 : 1, alpha);
         }
     }

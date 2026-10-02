@@ -250,22 +250,83 @@ internal static partial class Program
             Vector2 at = new(2000 + (float)random.NextDouble() * 900, 900 + (float)random.NextDouble() * 600);
             // Mouth: the great aperture's hole on the muzzle (the beam origin), at every ratchet step.
             float rotation = n % (Score.Clicks + Score.WidenBeats + 1) * Score.RatchetStep;
-            AssertDollNear(at, LacunaArtFit.GreatHoleAt(at, rotation), LacunaArtFit.Tolerance(LacunaArtFit.GreatK), $"mouth at step {n % 11}");
+            AssertDollNear(at, LacunaArtFit.GreatHoleAt(at, rotation), LacunaArtFit.Tolerance, $"mouth at step {n % 11}");
             // Hole: each iris's hole on its seat (pellets leave the seat).
-            AssertDollNear(at, LacunaArtFit.IrisHoleAt(at), LacunaArtFit.Tolerance(LacunaArtFit.IrisK), "iris hole");
+            AssertDollNear(at, LacunaArtFit.IrisHoleAt(at), LacunaArtFit.Tolerance, "iris hole");
             // The book's hole stays inside the book (irises are born there).
             Vector2 hole = LacunaArtFit.BookHoleAt(at, n % 2 == 0 ? DollFlip.None : DollFlip.Horizontal);
             AssertTrue(MathF.Abs(hole.X - at.X) < DollArtAnchors.LacunaBook_S.Width && MathF.Abs(hole.Y - at.Y) < DollArtAnchors.LacunaBook_S.Height,
                 "the book's hole is on the book");
         }
         // The rosette sits on the great ring, so the docked irises become its band.
-        AssertDollNear(Score.DockRadius, LacunaArtFit.GreatRingRadius, LacunaArtFit.Tolerance(LacunaArtFit.GreatK), "docks on the great ring");
+        AssertDollNear(Score.DockRadius, LacunaArtFit.GreatRingRadius, LacunaArtFit.Tolerance, "docks on the great ring");
         // The opening throat pours from inside the hole; a pellet leaves through an open iris.
         AssertTrue(Score.ThroatShare * Score.OpenWidth * .5f <= LacunaArtFit.GreatHoleRadius, "opening throat inside the great hole");
         AssertTrue(Score.PelletWidth * .5f <= LacunaArtFit.IrisApertureRadius(3), "a pellet fits the open iris");
         AssertTrue(LacunaArtFit.IrisApertureRadius(0) == 0 && LacunaArtFit.IrisApertureRadius(1) < LacunaArtFit.IrisApertureRadius(2)
             && LacunaArtFit.IrisApertureRadius(2) < LacunaArtFit.IrisApertureRadius(3), "apertures open in order");
         AssertTrue(Score.PelletHoleOffset <= LacunaArtFit.IrisApertureRadius(3), "pellets spawn inside the open hole");
+        AssertDollNear(2, LacunaArtFit.Tolerance, 1e-6, "the art-fit tolerance is one 2-px dot at every rung");
+    }
+
+    [DomainTest("Lacuna Testament book never covers the owner's head at any aim, and glides rather than jumps")]
+    private static void LacunaTestamentBookClearsHead()
+    {
+        Vector2 half = LacunaArtFit.BookHalf;
+        AssertDollNear(new Vector2(21, 28), half, 1e-4f, "the held book is 42 x 56 px");
+        Vector2 centre = new(3000, 1800);
+        foreach (float gravDir in new[] { 1f, -1f })
+        foreach (int direction in new[] { 1, -1 })
+        foreach (float recoil in new[] { 0f, 1f })
+        foreach (float bob in new[] { -2f, 0f, 2f })
+        {
+            Vector2 previous = default;
+            for (int step = 0; step <= 1440; step++)
+            {
+                float aim = step * MathF.Tau / 1440;
+                Vector2 axis = new(MathF.Cos(aim), MathF.Sin(aim));
+                // The front hand at full stretch (Player.GetFrontHandPosition, roughly): a shoulder a little behind and
+                // above the centre, the arm 13 px along the aim.
+                Vector2 hand = centre + new Vector2(-3 * direction, -4 * gravDir) + axis * 13;
+                Vector2 bookBase = hand + axis * (Score.BookDistance - 6 * recoil) + new Vector2(0, -2);
+                Vector2 book = LacunaArtFit.ClearHead(bookBase, axis, centre, gravDir) + new Vector2(0, bob);
+                float minY = gravDir > 0 ? LacunaArtFit.HeadMin.Y : -LacunaArtFit.HeadMax.Y;
+                float maxY = gravDir > 0 ? LacunaArtFit.HeadMax.Y : -LacunaArtFit.HeadMin.Y;
+                // One more px either way for the dot-grid snap.
+                bool apart = book.X + half.X + 1 <= centre.X + LacunaArtFit.HeadMin.X || book.X - half.X - 1 >= centre.X + LacunaArtFit.HeadMax.X
+                    || book.Y + half.Y + 1 <= centre.Y + minY || book.Y - half.Y - 1 >= centre.Y + maxY;
+                AssertTrue(apart, $"the book clears the head at aim {aim * 180 / MathF.PI:0.##} deg (gravity {gravDir}, facing {direction})");
+                AssertTrue(Vector2.Distance(book, bookBase + new Vector2(0, bob)) <= 60, $"the book stays near the hand at {aim:0.###}");
+                if (step > 0) AssertTrue(Vector2.Distance(book, previous) <= 4, $"the book glides at {aim:0.###} rad");
+                previous = book;
+            }
+        }
+        // A level aim leaves the book where it was: only steep upward aims push it out.
+        Vector2 level = centre + new Vector2(16 + Score.BookDistance, -6);
+        AssertDollNear(level, LacunaArtFit.ClearHead(level, Vector2.UnitX, centre, 1), 1e-4f, "a level aim is untouched");
+    }
+
+    [DomainTest("Lacuna Testament running dry gutters out in at most 1.5 flashes, as a plain fade under Reduced Effects")]
+    private static void LacunaTestamentStarveFlicker()
+    {
+        foreach (bool reduced in new[] { false, true })
+        {
+            int changes = 0;
+            bool lit = true;
+            float last = 1;
+            for (float fade = 0; fade <= Score.FadeTicks; fade += .125f)
+            {
+                float v = Score.StarveFlicker(fade, reduced);
+                AssertTrue(v >= 0 && v <= 1, $"flicker bounded at {fade}");
+                if (fade >= Score.StarveTicks) AssertEqual(0f, v, $"the beam is gone by {Score.StarveTicks} ticks ({fade})");
+                if (reduced) AssertTrue(v <= last + 1e-6f, $"Reduced Effects fades without a flicker ({fade})");
+                if (v > 0 != lit) { changes++; lit = v > 0; }
+                last = v;
+            }
+            AssertTrue(changes <= 3, $"at most three on/off changes, 1.5 flashes (reduced {reduced}): {changes}");
+            AssertDollNear(1, Score.StarveFlicker(0, reduced), 1e-6, "lit on the starving tick");
+        }
+        AssertEqual(0f, Score.StarveFlicker(float.NaN, false), "a bad fade draws nothing");
     }
 
     [DomainTest("Lacuna Testament cue schedule finds each event once, in order")]

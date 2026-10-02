@@ -4,7 +4,7 @@
 
 ### Lacuna Testament cues — 2026-10-03
 
-The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): fifteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-note cues (`LacunaIrisFire`, `LacunaPelletFire`, recorded at C6 and played on the ladder step of each iris). The audition page and report stay in the git-ignored `.local`.
+The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): sixteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump; the generator adds a gong-like plate tuned into the key, also additive synthesis), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-pitch cues (`LacunaIrisTine`, `LacunaPelletFire`, every pitched layer a C, recorded at C6 and played on the ladder step of each iris); every composite cue and the loop play as rendered. The audition page and report stay in the git-ignored `.local`.
 
 | Key | Store or repository file | Source | Source SHA256 |
 |---|---|---|---|
@@ -26,17 +26,31 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisFire.ogg`
 - Asset ID: doll-weapon-sfx-lacunairisfire-20261003
-- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.66 s)
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
 - Creator: synthesis and layering by Convergence with owner-directed Claude assistance
 - Creation/acquisition date: 2026-10-03
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -10.5 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.8: -21.9 LUFS effective), true peak -5.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `c01c885d6196bb74368de60dfee80592502d9b97295a2aa6cb01c3a613f55e99`
+- SHA256: `5948e130706efdc3c9283c51cebb718f554e239229563a2a06b3c767acf28399`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisTine.ogg`
+- Asset ID: doll-weapon-sfx-lacunairistine-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.70 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.9: -20.9 LUFS effective), true peak -14.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `c22daeb5d8dd0b912e9904a6f5d4f36c6ede3360426b59cdfe3145bcfc2262ff`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletWarn.ogg`
 - Asset ID: doll-weapon-sfx-lacunapelletwarn-20261003
@@ -124,17 +138,17 @@ The sixteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamFire.ogg`
 - Asset ID: doll-weapon-sfx-lacunabeamfire-20261003
-- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.46 s)
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.57 s)
 - Creator: synthesis and layering by Convergence with owner-directed Claude assistance
 - Creation/acquisition date: 2026-10-03
 - Source type: original
 - Source work and URL: none; original NumPy synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: original synthesis; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -2.8 dBFS; pinned Ogg serial
+- Human modifications: original synthesis; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -4.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
-- SHA256: `831b19915255692f9ffdb376f60d46b2b07d63b55cfceaefd85ec40a2562240b`
+- SHA256: `ebff7a9145a06fca40c9a4116144474e3dc18c93b009cb4cb7e48f517cea3c91`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamLoop.wav`
 - Asset ID: doll-weapon-sfx-lacunabeamloop-20261003
@@ -246,10 +260,10 @@ The Lacuna Testament's own light material for the shared Doll weapon layer ([WEA
 - Source type: original
 - Source work and URL: original Convergence HLSL source alongside runtime export
 - Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
-- Human modifications: Original repository-owned DollLacunaEnergy.fx, evaluated per art dot in the Doll weapon layer's half-resolution Light target and quantized to the Doll palette (its palette block is identical to DollPixel.fx): a void beam (near-black core with plum streaks drifting inward and rare pearl sparks, a one-dot pearl lip, violet/pearl rims whose folds flow outward, a one-dot pearl silhouette on the collision edge, a dithered halo, travelling pulses, a white-hot opening, a far-end cap and a mask that keeps the great aperture in front of its own light), void holes with octant-exact one-dot pearl lips and inward-spiralling violet arms, and pellet wakes; flowing Luminance WavyBlotchNoise and TurbulentNoise sampled at runtime (not copied). Written without uniform-only branches. No texture, Calamity or other third-party art/code/sample imported.
+- Human modifications: Original repository-owned DollLacunaEnergy.fx, evaluated per art dot in the Doll weapon layer's half-resolution Light target and quantized to the Doll palette (its palette block is identical to DollPixel.fx): a void beam (near-black core with plum streaks drifting inward and rare pearl sparks, a one-dot pearl lip, violet/pearl rims whose folds flow outward, a one-dot pearl silhouette on the collision edge, a dithered halo, travelling pulses, a white-hot opening, a far-end cap and a mask that keeps the great aperture in front of its own light), void holes with octant-exact one-dot pearl lips and inward-spiralling violet arms, and pellet wakes; flowing Luminance WavyBlotchNoise and TurbulentNoise sampled at runtime (not copied). Written without uniform-only branches and compiled without any preshader: the flow time and sparkle thresholds are computed on the CPU and reach the pixel shaders through the vertex shader. The drawn hard edge runs at the collision width to the beam's far end, where only the core closes. No texture, Calamity or other third-party art/code/sample imported.
 - License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
 - Required attribution: retain project provenance and generation disclosure
-- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-lacuna.ps1` (real Lacuna sprites and Emit sequence, zoom 1, dark and bright ground, pixel checks) 2026-10-03; native playtest not_run
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-lacuna.ps1` (real Lacuna sprites and Emit sequence, zoom 1, dark and bright ground, pixel checks, a boss forecast under the beam, the running-dry ending) 2026-10-03; native playtest not_run
 
 ### Scarlet Invocation reward weapon audio — 2026-10-03
 

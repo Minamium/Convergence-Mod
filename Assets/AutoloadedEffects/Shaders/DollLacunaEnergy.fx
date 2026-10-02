@@ -5,9 +5,15 @@
 // one-dot pearl lip instead of a white spine, violet/pearl rims whose folds flow outward with flowing Luminance
 // noise, a one-dot pearl silhouette exactly on the collision edge and a dithered violet halo outside it (the halo
 // never hits). Every colour is a Doll palette tone. Presentation only: nothing here decides a hit.
-// Written without uniform-only branches (FNA's MojoShader mistranslates them); selections are arithmetic.
+// Written without uniform-only branches (FNA's MojoShader mistranslates them); selections are arithmetic. No
+// preshader either (the FNA effect runtime mis-evaluates some fx_2_0 preshader code; tools tests check the export has
+// none): every uniform-only quantity (the flow time and the sparkle thresholds, which depend on Reduced Effects) is
+// computed on the CPU by LacunaEnergy.Apply, and the vertex shader folds the uniforms into its outputs with vertex
+// data (the dot origin into S.xy; `timing` times the position's w, which is 1 for the three-component positions the
+// layer writes), so the pixel shaders read them as interpolants and no expression of uniforms alone is left to hoist.
 //
 // Vertex layout (C# DollPixelVertex; LacunaPresentation builds every vertex):
+//   Every pass: S.xy = the vertex's dot in the target (the vertex shader adds the dot origin), K = timing.
 //   BeamPass   L = (along, across, reach, half edge) in dots from the muzzle; S = (dot x, dot y, pulse 1, pulse 2)
 //              with the pulses in dots along the beam (far negative = none); T = (hot 0..1, light alpha, void alpha,
 //              mask): mask = whole dots of the radius about the muzzle inside which the beam is hidden (the great
@@ -19,8 +25,9 @@
 //              dots; S = (dot x, dot y, 0, 0); T = (hot, light alpha, void alpha, seed).
 matrix uWorldViewProjection;
 float2 dotOrigin;     // absolute world dot of target cell (0, 0): world-stable dither and sparks
-float clock;          // seconds, wrapped hourly
-float reduced;        // 1 under Reduced Effects: slower flow, fewer sparks (bodies, widths and counts stay)
+// x: flow time in seconds (wrapped hourly; slowed to .45 under Reduced Effects); y: the void spark threshold (2 = none
+// under Reduced Effects); z: this pass's twinkle threshold (fewer twinkles under Reduced Effects); w: unused.
+float4 timing;
 
 sampler cloudTex : register(s1);   // Luminance WavyBlotchNoise
 sampler flowTex : register(s2);    // Luminance TurbulentNoise
@@ -85,17 +92,17 @@ float Flow(float2 uv)
 
 // One void dot: ink, with plum streaks where `drift` (a noise field moving toward the centre) is high, iron speckle
 // and, rarely, a pearl spark (none under Reduced Effects).
-float3 VoidTone(float2 cell, float drift, float t, float dither)
+float3 VoidTone(float2 cell, float drift, float t, float sparkCut, float dither)
 {
     float streak = step(0.58, drift + 0.08 * dither);
     float vein = step(0.78, drift + 0.05 * dither);
     float speck = step(0.95, Hash(cell + floor(t * 7)));
-    float spark = step(lerp(0.9965, 2, reduced), Hash(cell * 1.37 + floor(t * 9) * 5.1));
+    float spark = step(sparkCut, Hash(cell * 1.37 + floor(t * 9) * 5.1));
     return spark > 0.5 ? PearlViolet : vein > 0.5 ? PlumLight : streak > 0.5 ? Plum : speck > 0.5 ? IronDark : Ink;
 }
 
 struct PrimIn { float4 P : POSITION0; float4 L : TEXCOORD0; float4 S : TEXCOORD1; float4 T : TEXCOORD2; };
-struct PrimOut { float4 P : POSITION0; float4 L : TEXCOORD0; float4 S : TEXCOORD1; float4 T : TEXCOORD2; };
+struct PrimOut { float4 P : POSITION0; float4 L : TEXCOORD0; float4 S : TEXCOORD1; float4 T : TEXCOORD2; float4 K : TEXCOORD3; };
 
 PrimOut PrimVS(PrimIn v)
 {
@@ -103,8 +110,9 @@ PrimOut PrimVS(PrimIn v)
     o.P = mul(v.P, uWorldViewProjection);
     o.P.z = 0;
     o.L = v.L;
-    o.S = v.S;
+    o.S = float4(v.S.xy + dotOrigin, v.S.zw);
     o.T = v.T;
+    o.K = timing * v.P.w;
     return o;
 }
 
@@ -117,21 +125,22 @@ float4 BeamPS(PrimOut i) : COLOR0
     float hot = saturate(i.T.x), lightA = saturate(i.T.y), voidA = saturate(i.T.z);
     float maskRadius = floor(i.T.w);
     float lipHalf = clamp(frac(i.T.w), 0.35, 0.5);
-    float2 cell = floor(i.S.xy + 0.25) + dotOrigin;
+    float2 cell = floor(i.S.xy + 0.25);
     float dither = Bayer4(cell) - 0.5;
-    float t = clock * lerp(1, 0.45, reduced);
+    float t = i.K.x;
 
     // Pulses run down the beam: the core swells and the rims and halo flare inside one.
     float pa = (along - i.S.z) / 18, pb = (along - i.S.w) / 18;
     float pulse = max(exp2(-pa * pa), exp2(-pb * pb));
-    // The throat (first 24 dots) is the narrower collision; the far end closes over its last 36 dots.
+    // The throat (first 24 dots) is the narrower collision. The drawn edge is the collision width all the way to the
+    // far end; only the core closes over the last 36 dots, so the end reads as a capped band of rim.
     float tip = saturate((reach - along) / 36);
-    float edge = halfEdge * (along < 24 ? 0.78 : 1) * sqrt(tip);
+    float edge = halfEdge * (along < 24 ? 0.78 : 1);
     // The core's wobble depends on the distance along the beam (and the side) only, so every cross-section of a
     // straight beam crosses exactly one lip dot per side.
     float n = Cloud(float2(along / 96 - 0.21 * t, signedAcross < 0 ? 0.61 : 0.13));
     float f = Flow(float2(along / 64 - 0.62 * t, x / 22 - 0.35 * t));
-    float core = edge * (0.42 + 0.12 * (n - 0.5) + 0.07 * pulse) * (1 - 0.6 * hot);
+    float core = edge * (0.42 + 0.12 * (n - 0.5) + 0.07 * pulse) * (1 - 0.6 * hot) * sqrt(tip);
 
     float isVoid = step(x, core - lipHalf - 0.001);
     float isLip = step(abs(x - core), lipHalf);
@@ -141,7 +150,7 @@ float4 BeamPS(PrimOut i) : COLOR0
     float isHalo = step(edge + lipHalf, x) * step(x, edge + haloWidth);
 
     float drift = Flow(float2(along / 48 + 0.4 * t, x / 9 + 0.9 * t));
-    float3 voidTone = VoidTone(cell, drift, t, dither);
+    float3 voidTone = VoidTone(cell, drift, t, i.K.y, dither);
 
     float r01 = saturate((x - core) / max(edge - core, 1));
     float fold = pow(saturate(1 - abs(sin((x - core) * 0.62 - 3.1 * t + 5 * n + 2.2 * f)) * 1.6), 2);
@@ -150,7 +159,7 @@ float4 BeamPS(PrimOut i) : COLOR0
     float level = 0.34 + 0.44 * smoothstep(0, 0.3, r01) - 0.18 * smoothstep(0.6, 1, r01)
         + 0.26 * fold + 0.22 * (f - 0.5) + 0.28 * pulse + 0.55 * hot;
     float band = clamp(floor(level * 7 + dither * 0.9), 1, 6);
-    float twinkle = step(lerp(0.985, 0.995, reduced), Hash(cell + floor(t * 12) * 3.1)) * step(r01, 0.6);
+    float twinkle = step(i.K.z, Hash(cell + floor(t * 12) * 3.1)) * step(r01, 0.6);
     float3 rimTone = twinkle > 0.5 ? White : Ramp(band);
     float3 lipTone = hot + pulse > 0.55 ? White : Pearl;
     float3 edgeTone = pulse + hot > 0.5 ? Bone : PearlViolet;
@@ -179,9 +188,9 @@ float4 MouthPS(PrimOut i) : COLOR0
     float2 p = i.L.xy;
     float radius = max(i.L.z, 0.5), spiral = saturate(i.L.w), depth = saturate(i.S.z), spin = i.S.w;
     float hot = saturate(i.T.x), lightA = saturate(i.T.y), voidA = saturate(i.T.z), boost = saturate(i.T.w);
-    float2 cell = floor(i.S.xy + 0.25) + dotOrigin;
+    float2 cell = floor(i.S.xy + 0.25);
     float dither = Bayer4(cell) - 0.5;
-    float t = clock * lerp(1, 0.45, reduced);
+    float t = i.K.x;
     float2 q = abs(p);
     float delta = q.y >= q.x ? q.y - sqrt(max(radius * radius - q.x * q.x, 0)) : q.x - sqrt(max(radius * radius - q.y * q.y, 0));
     float inside = step(delta, 0);
@@ -197,7 +206,7 @@ float4 MouthPS(PrimOut i) : COLOR0
     float isArm = step(0.2, armLevel + 0.15 * dither);
     float band = clamp(floor((0.32 + 0.6 * armLevel) * 7 + dither * 0.9), 1, 6);
     float drift = Flow(float2(r * 0.6 + 0.5 * t, theta / 6.2831853 * 2 + 0.07 * t));
-    float3 voidTone = VoidTone(cell, drift, t, dither);
+    float3 voidTone = VoidTone(cell, drift, t, i.K.y, dither);
     float3 inner = isArm > 0.5 ? Ramp(band) : voidTone;
     float3 lipTone = hot > 0.3 ? White : boost > 0.5 ? PearlViolet : Pearl;
     float3 rgb = isLip > 0.5 ? lipTone : inner;
@@ -213,9 +222,9 @@ float4 WakePS(PrimOut i) : COLOR0
     float u = saturate(i.L.x), halfWidth = max(i.L.w, 0.5), lengthDots = i.L.z;
     float x = abs(i.L.y) * halfWidth;
     float hot = saturate(i.T.x), lightA = saturate(i.T.y), voidA = saturate(i.T.z), seed = i.T.w;
-    float2 cell = floor(i.S.xy + 0.25) + dotOrigin;
+    float2 cell = floor(i.S.xy + 0.25);
     float dither = Bayer4(cell) - 0.5;
-    float t = clock * lerp(1, 0.45, reduced);
+    float t = i.K.x;
     float hw = halfWidth * (0.25 + 0.75 * u * u);
     float f = Flow(float2(u * lengthDots / 20 - 1.4 * t, x / 6 + seed));
     float fold = pow(saturate(1 - abs(sin(u * lengthDots * 0.45 + 4.2 * t + 3 * f)) * 1.5), 2);
@@ -225,9 +234,9 @@ float4 WakePS(PrimOut i) : COLOR0
     float inside = step(x, hw + 0.5);
     float level = 0.14 + 0.56 * u + 0.24 * (f - 0.5) + 0.22 * fold + 0.5 * hot;
     float band = clamp(floor(level * 7 + dither * 0.9), 0, 6);
-    float twinkle = step(lerp(0.975, 0.99, reduced), Hash(cell + floor(t * 14) * 2.3)) * step(0.35, u);
+    float twinkle = step(i.K.z, Hash(cell + floor(t * 14) * 2.3)) * step(0.35, u);
     float3 bodyTone = twinkle > 0.5 ? White : Ramp(band);
-    float3 rgb = isVoid > 0.5 ? VoidTone(cell, f, t, dither) : isEdge > 0.5 ? (u > 0.85 ? White : PearlViolet) : bodyTone;
+    float3 rgb = isVoid > 0.5 ? VoidTone(cell, f, t, i.K.y, dither) : isEdge > 0.5 ? (u > 0.85 ? White : PearlViolet) : bodyTone;
     float alpha = isVoid > 0.5 ? voidA : lightA;
     // The tail dissolves dot by dot.
     float keep = inside * step(Bayer4(cell) * 0.9, saturate(u * 3.2)) * step(0.004, alpha);

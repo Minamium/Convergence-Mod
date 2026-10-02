@@ -7,7 +7,8 @@ namespace Convergence.Client.Encounters.FirstSeverance.Weapons;
 // Which exported Lacuna Testament sprites the presentation draws, at which pivots, and where their anchors land
 // against the design anchors of LacunaTestamentScore (Content owns hit shapes; the art is fitted to them). One texel
 // is one dot (2 world px); no sprite is scaled. Pure (System.Numerics, the generated anchors and the placement):
-// linked into the domain tests, whose art-fit test keeps every drawn anchor within one dot (2 px x k) of its design.
+// linked into the domain tests, whose art-fit test keeps every drawn anchor within one dot (2 world px, whatever the
+// export rung) of its design, and whose head test keeps the book off the owner's head at every aim.
 internal static class LacunaArtFit
 {
     // The held book is the k=2 rung (21x28 dots, 42x56 px), about the player's own height. The k=1 rung (42x55
@@ -32,8 +33,35 @@ internal static class LacunaArtFit
     internal static float GreatRingRadius => DollArtAnchors.LacunaGreatIris.RingRadius * DollSpritePlacement.WorldPerTexel;
     internal static float GreatOuterRadius => DollArtAnchors.LacunaGreatIris.OuterRadius * DollSpritePlacement.WorldPerTexel;
 
-    // Tolerance of the art-fit test: one dot of the export rung.
-    internal static float Tolerance(int k) => DollSpritePlacement.WorldPerTexel * k;
+    // Tolerance of the art-fit test: one dot (one texel at 2 world px; every rung draws at that dot).
+    internal static float Tolerance => DollSpritePlacement.WorldPerTexel;
+
+    // The owner's head in world px from the draw centre, for an upright owner (mirrored under reversed gravity): wide
+    // enough for a real player's head (frame rows about 6-24, -25..-7 px, hair a little higher) and the offline
+    // stand-in's (-37..-21). Shared rule: the weapon's art never hides the character's head.
+    internal static readonly Vector2 HeadMin = new(-10, -37), HeadMax = new(10, -7);
+    // Kept between the book and the head box beyond the book's half size: its one-dot bob plus a dot of grid snap.
+    internal const float HeadMargin = 4;
+    internal static Vector2 BookHalf => new(DollArtAnchors.LacunaBook_S.Width * DollSpritePlacement.WorldPerTexel * .5f,
+        DollArtAnchors.LacunaBook_S.Height * DollSpritePlacement.WorldPerTexel * .5f);
+
+    // The book's centre pushed out along `axis` (away from the hand) just far enough that the upright book clears the
+    // head box, or unchanged when it already does. Continuous in the aim and the hand, so the book glides rather than
+    // jumps as the aim sweeps over the head; only a steep upward aim moves it at all.
+    internal static Vector2 ClearHead(Vector2 book, Vector2 axis, Vector2 centre, float gravDir)
+    {
+        Vector2 half = BookHalf + new Vector2(HeadMargin);
+        bool upright = !(gravDir < 0);
+        float minY = upright ? HeadMin.Y : -HeadMax.Y, maxY = upright ? HeadMax.Y : -HeadMin.Y;
+        Vector2 low = centre + new Vector2(HeadMin.X, minY) - half, high = centre + new Vector2(HeadMax.X, maxY) + half;
+        if (!(book.X > low.X && book.X < high.X && book.Y > low.Y && book.Y < high.Y)) return book;
+        float exit = float.MaxValue;
+        if (axis.X > 1e-4f) exit = System.MathF.Min(exit, (high.X - book.X) / axis.X);
+        else if (axis.X < -1e-4f) exit = System.MathF.Min(exit, (low.X - book.X) / axis.X);
+        if (axis.Y > 1e-4f) exit = System.MathF.Min(exit, (high.Y - book.Y) / axis.Y);
+        else if (axis.Y < -1e-4f) exit = System.MathF.Min(exit, (low.Y - book.Y) / axis.Y);
+        return exit < float.MaxValue ? book + axis * exit : book;
+    }
 
     // Where the book's hole is drawn when its pivot is placed at `pivotWorld` (axis-aligned, so it snaps).
     internal static Vector2 BookHoleAt(Vector2 pivotWorld, DollFlip flip)
