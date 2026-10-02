@@ -4,7 +4,7 @@
 
 ### Lacrimosa's Claws cues — 2026-10-03
 
-The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, the contact, the six bead notes from one F5 master, the full-meter cadence, the early-click tick, the grasp's warning, success and miss, the squeeze warning and the crush). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass pawls, porcelain rings and cracks, additive flue organ, shimmer, low thump), with the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. The recordings below are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. Loudness follows the Doll weapon tiers (BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after the Vorbis round trip). The audition page stays in the git-ignored `.local`.
+The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, the contact, the six bead notes from one F5 master, the full-meter cadence, the early-click tick, the grasp's warning, success and miss, the squeeze warning and the crush). The crush closes on a soft gong tuned to F, original modal synthesis in the generator itself (`claw_gong`), over a quiet organ. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass pawls, porcelain rings and cracks, additive flue organ, shimmer, low thump), with the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. The recordings below are CC0 1.0 files already recorded in the Ebon Manor reward audio table of this register; they stay in the local store, are SHA-256 verified before use and are not committed. Loudness follows the Doll weapon tiers (BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after the Vorbis round trip). The audition page stays in the git-ignored `.local`.
 
 | Key | Store or repository file | Source | Source SHA256 |
 |---|---|---|---|
@@ -213,17 +213,17 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawCrushFire.ogg`
 - Asset ID: doll-weapon-sfx-clawcrushfire-20261003
-- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.07 s)
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (2.14 s)
 - Creator: recordings by AudioPapkin and Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
 - Creation/acquisition date: 2026-10-03
 - Source type: public-domain
 - Source work and URL: chop, low_impact in the table above as selected by the cue recipe; remaining layers original synthesis
 - Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
-- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.1 LUFS (played at volume 1.0: -10.1 LUFS effective), true peak -1.2 dBFS; pinned Ogg serial
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.0 LUFS (played at volume 1.0: -10.0 LUFS effective), true peak -2.1 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
 - Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
-- SHA256: `e0a4ebfa4efeefcfa7af6cdee758c7017d1b1b03cb55f34843cdd9ad4b0a43ce`
+- SHA256: `72dec2ff2b07368be0ec49b438ca741524150ad132448f8ad8cd80b2f4496451`
 
 ### Lacrimosa's Claws energy material — 2026-10-03
 

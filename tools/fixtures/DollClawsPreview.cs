@@ -6,7 +6,8 @@
 // player silhouette on dark #121017 and bright #bac6d6 ground (and a flat probe ground for the checks).
 // Checks: no command dropped and no material error; light is always ringed by ink or light; live damage shows 4+
 // ramp tones with pale (pearl-violet, bone, white) at least 40% of lit dots; the crush void is ink with a pearl
-// lip; the hands' art stays mostly visible under the light; every pose is drawn; Reduced Effects halves debris.
+// lip; the crush residue is plum by the grasp's last tick; the hands' art stays mostly visible under the light;
+// every pose is drawn; Reduced Effects halves debris.
 #nullable disable
 using System;
 using System.Collections.Generic;
@@ -137,7 +138,7 @@ internal static class DollClawsPreview
         (C(30), "C pipe bars"), (C(34) + 8, "return to rest"), (144, "full beads (heartbeat)"), (G(3), "grasp discharge"),
         (G(8), "grasp flight"), (G(13), "grasp flight (braking)"), (G(15), "grasp arrival"), (G(17), "grasp contact"),
         (G(27), "grasp hold"), (G(39), "grasp brace"), (G(41), "crush"), (G(44), "crush (late)"),
-        (G(49), "burst and return"), (G(59), "residue"), (G(76), "rest again"),
+        (G(49), "burst and return"), (G(59), "residue"), (G(63), "residue cooled (last grasp tick)"), (G(76), "rest again"),
     };
 
     // Where a stroke's first live capsule tip is: the contact star's place on a target in reach.
@@ -366,7 +367,7 @@ internal static class DollClawsPreview
     // ---- Checks -------------------------------------------------------------------------------------
 
     private static readonly DollTone[] RampTones = { DollTone.Plum, DollTone.PlumLight, DollTone.Violet, DollTone.Lilac, DollTone.PearlViolet, DollTone.Bone, DollTone.White };
-    private static int damagingFrames, voidFrames, poses;
+    private static int damagingFrames, voidFrames, cooledFrames, poses;
     private static readonly HashSet<string> drawnPoses = new();
 
     // Per kept frame (owner, normal effects): re-render over the flat probe without players and check the light.
@@ -408,6 +409,18 @@ internal static class DollClawsPreview
             if (tones.Count < 4) failures.Add($"{label}: live light shows {tones.Count} ramp tones");
             if (lit == 0 || pale * 100 / lit < 40) failures.Add($"{label}: pale share {(lit == 0 ? 0 : pale * 100 / lit)}% of {lit} lit dots");
         }
+        // Residue cools to plum within 24 ticks: by the grasp's last tick nothing hotter than plum light is left
+        // (a stray late debris dot or two aside).
+        if (label.Contains("cooled"))
+        {
+            int hot = 0;
+            foreach (Color c in dots)
+                if (c.A >= 250)
+                    foreach (DollTone tone in RampTones)
+                        if ((tone >= DollTone.Violet || tone == DollTone.Bone) && c == DollPixelArt.Tone(tone)) hot++;
+            if (hot > 2) failures.Add($"{label}: {hot} dots hotter than plum");
+            cooledFrames++;
+        }
         if (label.StartsWith("burst", StringComparison.Ordinal))
         {
             voidFrames++;
@@ -441,6 +454,7 @@ internal static class DollClawsPreview
             if (!drawnPoses.Contains(pose)) failures.Add($"pose {pose} never drawn");
         if (damagingFrames < 8) failures.Add($"only {damagingFrames} damaging frames checked");
         if (voidFrames < 1) failures.Add("crush void not checked");
+        if (cooledFrames < 1) failures.Add("crush cooling not checked");
 
         // Reduced Effects halves debris: count crush shards in both modes.
         int Pieces(bool reduced)

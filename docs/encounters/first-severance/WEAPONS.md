@@ -283,7 +283,7 @@ Holding the button chains A → B → C → A; the next stroke starts on the tic
 
 - **Rate.** A kata lasts 84 base ticks for 3.0× base: v1's rate of 1× per 28 ticks.
 - **Attack speed.** Native true-melee attack speed shortens each stroke to `round(base / speed)` ticks, bounded A 12–90, B 11–90, C 16–90; the live window scales with it.
-- **What hits.** Only the active hand's capsule (both hands in C), swept at 9 sub-samples across the last tick so high speed cannot tunnel, with `ownerHitCheck`. Each logical NPC root is hit once per stroke; the clapping hands share one ledger. Wind-ups, the idle hand, rebounds and light never damage. Reach is about 305 px for the rakes and 370 px for the clap; nothing reaches beyond 430 px of the owner's centre.
+- **What hits.** Only the active hand's capsule (both hands in C), swept at 9 sub-samples across the last tick so high speed cannot tunnel, with `ownerHitCheck`. A hitbox is hit when the capsule's segment comes within its radius of the box (`LacrimosaClawMotion.CapsuleHitsBox`: round ends, so a body just past the tip or one large enough to contain the whole capsule is hit). Each logical NPC root is hit once per stroke; the clapping hands share one ledger. Wind-ups, the idle hand, rebounds and light never damage. Reach is about 305 px for the rakes and 366 px for the clap; nothing reaches beyond 430 px of the owner's centre.
 - **Motion.** Each hand follows one 84-tick track (cubic Hermite through knots with Catmull-Rom tangents, the rest pose at both ends), so pose and speed carry across every stroke join without braking; the wrist's angular acceleration stays under 0.35 rad/tick² while raking. A stroke that starts away from its track (the first stroke, after a turn or a grasp) is shown blending from where the hand was during its harmless wind-up and is exactly on its track from its first live tick; hits always use the track.
 
 ### Heart beads
@@ -330,15 +330,15 @@ Nominal raw numbers before defense, no crit, one target, every hit landing on it
 
 ### Presentation
 
-- **Pixel art.** One texel is one dot (2 world px), never scaled. Two integer rungs of the DW01 art: k=2 (`ClawOpen`, `ClawRake`, `ClawClench`, `ClawThrust`, the open hand about 94 px) while parked, winding up, returning and flying; k=1 (the `_L` sprites, 146–200 px) while raking, clapping and grasping. Rungs swap only on the fastest frames, under a two-tick pearl flash. The raking and thrusting hands are turned by a fixed offset so their longest (rake) or middle front (thrust) talon lies on the capsule axis; the art-fit test keeps those tips and the fist's front within one dot of `RakeTip` 160, `ClapTip` 196 and `FistReach` 140. The left hand is the right-hand art mirrored about its own axis. The clench and thrust poses show four talon tips, as delivered.
+- **Pixel art.** One texel is one dot (2 world px), never scaled. Two integer rungs of the DW01 art: k=2 (`ClawOpen`, `ClawRake`, `ClawClench`, `ClawThrust`, the open hand about 94 px) while parked, winding up, returning and flying; k=1 (the `_L` sprites, 146–200 px) while raking, clapping and grasping. Rungs swap only on the fastest frames, under a two-tick pearl flash that steps the art's light tones to pearl and its dark ones to pearl grey (a two-tone hand, never a white silhouette); a pose change on the same rung, such as the fists closing at contact, does not flash. The raking and thrusting hands are turned by a fixed offset so their longest (rake) or middle front (thrust) talon lies on the capsule axis; the art-fit test keeps those tips and the fist's front within one dot of `RakeTip` 160, `ClapTip` 196 and `FistReach` 140. The left hand is the right-hand art mirrored about its own axis. The clench and thrust poses show four talon tips, as delivered.
 - **Beads.** The six bead anchors the exporter found on every pose: lit beads are pearl-violet dots over the dark glass, the newest pings, and full beads flash white on each heartbeat.
 - **Damaging phases** use the claw's own Luminance material, `DollClawEnergy.fx`, never a flat colour (four or more ramp tones, flowing noise, sparkle, a white-hot spine; pearl, bone and white at least 40% of lit dots, checked offline):
-  - rakes leave three parallel claw-scratch ribbons beside the longest talon's path (white spine and pearl core, violet body, torn plum rim, brass glints at the head), lingering 10 ticks and cooling to plum;
-  - the clap streaks the palms' approach, then opens a pearl slit, a violet ring growing to about 90 px and three organ-pipe bars;
-  - the crush rings out to about 150 px with a 330 px vertical pearl flare, then opens a black lacuna with a one-dot pearl lip among porcelain, spark and pearl debris;
+  - rakes leave three parallel claw-scratch ribbons beside the longest talon's path, exactly over the path the hits swept (white spine and pearl core, violet body, torn plum rim, brass glints at the head), lingering 10 ticks and cooling to plum;
+  - the clap streaks the palms' approach, then opens a pearl slit, a violet ring growing to about 90 px and three organ-pipe breaths that rise from the slit's upper side, tallest in the middle, leaning a little outward and lifting off as they cool;
+  - the crush rings out to about 150 px with a 330 px vertical pearl flare, then opens a black lacuna with a one-dot pearl lip among porcelain, spark and pearl debris; hot for 6 ticks, it cools to plum and its debris ends by grasp age 64, the grasp's last tick (by 52 with Reduced Effects);
   - hits show a small violet contact star and porcelain chips.
 - **Other players** draw their claws' light at 65% and the lacuna at 60%; the hands stay opaque.
-- **Reduced Effects** keeps the hands, beads, forecasts and live bodies; it halves debris and residue time, shows the clap and crush bursts at 80% without the pipe bars and the heartbeat ring, and drops the glow. Screen shake (owner only, through `RitualWeaponFeedback.Kick`, off with Reduced Effects or Screen Shake off): clap 2.5, grasp contact 2, crush 7.
+- **Reduced Effects** keeps the hands, beads, forecasts and live bodies; it halves debris and residue time, shows the clap and crush bursts at 80% without the pipe breaths and the heartbeat ring, and drops the glow. Screen shake (owner only, through `RitualWeaponFeedback.Kick`, off with Reduced Effects or Screen Shake off): clap 2.5, grasp contact 2, crush 7.
 - **Removed:** the painted 0.2.x atlas hands, the parked-hand loop, the charge pips above the player and the world item's glow. No hit-stop, fullscreen flash, zoom, slow motion or HUD meter.
 - **Icon:** `NullRefrainIcon` (DW01I, stored at 2×), drawn natively in the inventory and the world.
 
@@ -351,11 +351,11 @@ All cues are new and live in `Assets/Sounds/Weapons/DollWeapons/`; [Audio](../..
 - **Ownership.** The owner client reads input, owns the meter and the combo and processes its hits. `LacrimosaClawKata` (one held controller, netImportant) carries the stroke, aim and age in `ai` and the stroke length, lit beads, stroke serial and the stroke's first impact in ExtraAI; `LacrimosaClawGrasp` (a child) carries the grasped NPC slot, its type and age in `ai` and the anchor and approach side in ExtraAI. Peers draw only from these. Raid outcomes stay authoritative on the server or in Single Player.
 - **Ending.** An item change (at once on the owner, after 6 ticks on peers), death, Down, crowd control, `noItems` or leaving the world ends the controller and the grasp; spent beads are not refunded. Releasing the button only lets the current stroke finish.
 - **Cleanup.** World unload drops the layer sources, arm poses and voices; Mod unload drops the material resolver; a Dedicated Server never loads art, shaders or audio.
-- **Legacy.** `NullCantorClawSwipe`, `NullCantorClawCrush`, `NullCantorClawMotion` (and its charge), the swipe/crush presentation and their tests stay as unused legacy until the weapon cleanup; the item no longer reaches them.
+- **Legacy.** `NullCantorClawSwipe`, `NullCantorClawCrush`, `NullCantorClawMotion` (and its charge), the swipe/crush presentation and their tests stay as unused legacy until the weapon cleanup; the item no longer reaches them. Only code keyed on the held claws was detached, as the shared rules allow: the parked-hand and charge-pip drawing, the world item's glow and `NullCantorClawPlayer` (the v1 charge and right-click crush, which fired whenever `NullRefrain` was held and would otherwise still launch the old crush from the old charge). `LacrimosaClawPlayer` owns the beads, the combo and the grasp instead.
 
 ### What changes for players
 
-- **Left click:** alternating swipes (1.0× every 28 ticks, hands growing 0.68 → 2.30×, reach up to about 560 px) → a three-step kata (A 0.85×, B 0.85×, C 1.30× over 26/24/34 ticks: the same 1× per 28 ticks), rake reach about 305 px and clap about 370 px (cap 560 → 430).
+- **Left click:** alternating swipes (1.0× every 28 ticks, hands growing 0.68 → 2.30×, reach up to about 560 px) → a three-step kata (A 0.85×, B 0.85×, C 1.30× over 26/24/34 ticks: the same 1× per 28 ticks), rake reach about 305 px and clap about 366 px (cap 560 → 430).
 - **Charge:** one charge after 360 ticks of holding → six heart beads filled mostly by hits (full after about 5.7 s of continuous hits, or 24 s of holding without hits).
 - **Right click:** a 4.2× crush at the clicked point (impact at tick 16, 42 ticks without strokes) → a grasp of the NPC nearest the cursor (within 160 px): 0.3× contact at tick 16, 4.0× crush at tick 40 on the same 166 × 132 ellipse, the hands following the target; strokes resume at 54.
 - **Holding without attacking:** 4,827/s → 1,330/s.
@@ -364,7 +364,7 @@ All cues are new and live in `Assets/Sounds/Weapons/DollWeapons/`; [Audio](../..
 
 ### Acceptance (owner; not_run until played)
 
-- A → B → C flow at normal and high attack speed, and the reach (305 / 370 px against v1's 460–560).
+- A → B → C flow at normal and high attack speed, and the reach (305 / 366 px against v1's 460–560).
 - The parked hands' size (k=2, about 94 px, over the shoulders) and the k=1 swaps.
 - Bead readability on bright and dark ground at zoom 1, and the full heartbeat.
 - Grasp on a moving target, a boss, a worm and empty air; the aiming brackets.

@@ -72,6 +72,16 @@ internal static class LacrimosaClawMotion
         return float.IsFinite(age) ? Math.Clamp(age, 0, duration) * BaseTicks(stroke) / duration : 0;
     }
 
+    // The base age the hits have swept to by the end of a stroke's last live tick (the swept capsule's last
+    // sample): LiveEnd itself at the base length, a little less when attack speed rounds the window.
+    internal static float LastLiveBaseAge(int stroke, int duration)
+    {
+        stroke = Stroke(stroke);
+        duration = ValidDuration(stroke, duration);
+        int last = (LiveEnd(stroke) * duration + BaseTicks(stroke) - 1) / BaseTicks(stroke) - 1;
+        return BaseAge(stroke, Math.Max(FirstLiveAge(stroke, duration), last), duration);
+    }
+
     // age * base >= liveStart * duration, in integers where possible so the first live tick is exact.
     internal static bool Live(int stroke, float age, int duration)
     {
@@ -192,8 +202,10 @@ internal static class LacrimosaClawMotion
 
     // Rung swaps (base track ticks) per hand: small -> large into each live window and back after it.
     private static readonly int[][] Swaps = { new[] { 9, 17, 68, 73 }, new[] { 33, 40, 68, 73 } };
-    // A rung swap hides under a short pearl flash: two ticks at FlashPeak, then the art as authored.
-    internal const float FlashTicks = 2, FlashPeak = .7f;
+    // A rung swap hides under a short pearl flash: two ticks at FlashPeak, then the art as authored. The peak steps
+    // the art's light tones to pearl and its dark ones to pearl grey, so the hand stays a two-tone shape, never a
+    // white silhouette. Only a rung swap flashes; a pose change on the same rung (open -> fist) does not.
+    internal const float FlashTicks = 2, FlashPeak = .45f;
 
     internal static float Flash(float since) => since >= 0 && since < FlashTicks ? FlashPeak : 0;
 
@@ -372,9 +384,9 @@ internal static class LacrimosaClawMotion
         }
         if (age < GraspCrushEnd)
         {
+            // The arrival swaps to the large rung (flash); clenching at contact stays on it (no flash).
             var pose = fist ? LacrimosaPose.Clench : LacrimosaPose.Open;
-            float flash = MathF.Max(Flash(age - GraspArrive), Flash(age - GraspContact));
-            return new LacrimosaHand(seat, axis, pose, true, flash);
+            return new LacrimosaHand(seat, axis, pose, true, Flash(age - GraspArrive));
         }
         // Burst open, then fly home to the rest pose.
         float home = Smooth((age - GraspCrushEnd - 2) / (GraspRelease - GraspCrushEnd - 2f));
@@ -403,6 +415,57 @@ internal static class LacrimosaClawMotion
     }
 
     internal static bool Finite(Vector2 p) => float.IsFinite(p.X) && float.IsFinite(p.Y);
+
+    // A live capsule (segment ab swept by radius, round ends) against an axis-aligned hitbox [min, max]: true when
+    // the segment comes within radius of the box or crosses it. Unlike a band test it hits a box just beyond the
+    // tip and a box big enough to contain the whole segment, so the reach is |b| + radius and a large body pressed
+    // against the owner is never missed.
+    internal static bool CapsuleHitsBox(Vector2 a, Vector2 b, float radius, Vector2 min, Vector2 max)
+    {
+        if (!Finite(a) || !Finite(b) || !Finite(min) || !Finite(max) || !float.IsFinite(radius) || radius < 0
+            || max.X < min.X || max.Y < min.Y) return false;
+        return SegmentBoxDistanceSquared(a, b, min, max) <= radius * radius;
+    }
+
+    // Squared distance between segment ab and the box [min, max]; 0 when they touch. For two disjoint convex
+    // shapes the nearest pair includes a vertex of one of them: an end of the segment or a corner of the box.
+    internal static float SegmentBoxDistanceSquared(Vector2 a, Vector2 b, Vector2 min, Vector2 max)
+    {
+        if (SegmentTouchesBox(a, b, min, max)) return 0;
+        float best = MathF.Min(Vector2.DistanceSquared(a, Vector2.Clamp(a, min, max)), Vector2.DistanceSquared(b, Vector2.Clamp(b, min, max)));
+        best = MathF.Min(best, Vector2.DistanceSquared(min, Closest(a, b, min)));
+        best = MathF.Min(best, Vector2.DistanceSquared(max, Closest(a, b, max)));
+        Vector2 c = new(min.X, max.Y), d = new(max.X, min.Y);
+        best = MathF.Min(best, Vector2.DistanceSquared(c, Closest(a, b, c)));
+        return MathF.Min(best, Vector2.DistanceSquared(d, Closest(a, b, d)));
+    }
+
+    // Liang-Barsky: does any point of segment ab lie inside the box?
+    private static bool SegmentTouchesBox(Vector2 a, Vector2 b, Vector2 min, Vector2 max)
+    {
+        Vector2 d = b - a;
+        float enter = 0, exit = 1;
+        return Clip(-d.X, a.X - min.X, ref enter, ref exit) && Clip(d.X, max.X - a.X, ref enter, ref exit)
+            && Clip(-d.Y, a.Y - min.Y, ref enter, ref exit) && Clip(d.Y, max.Y - a.Y, ref enter, ref exit);
+    }
+
+    // One slab of Liang-Barsky: keeps the parameters t in [enter, exit] with p * t <= q.
+    private static bool Clip(float p, float q, ref float enter, ref float exit)
+    {
+        if (p == 0) return q >= 0;
+        float t = q / p;
+        if (p < 0)
+        {
+            if (t > exit) return false;
+            if (t > enter) enter = t;
+        }
+        else
+        {
+            if (t < enter) return false;
+            if (t < exit) exit = t;
+        }
+        return true;
+    }
 
     // Closest point to p on segment ab.
     internal static Vector2 Closest(Vector2 a, Vector2 b, Vector2 p)

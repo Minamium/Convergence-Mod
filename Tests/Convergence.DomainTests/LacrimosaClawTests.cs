@@ -153,6 +153,7 @@ internal static partial class Program
     private static void LacrimosaLiveGeometry()
     {
         float reachRake = 0, reachClap = 0;
+        int probes = 0;
         for (int stroke = 0; stroke < LacrimosaClawMotion.Strokes; stroke++)
         {
             for (float baseAge = 0; baseAge <= LacrimosaClawMotion.BaseTicks(stroke); baseAge += .05f)
@@ -170,6 +171,12 @@ internal static partial class Program
                 if (!has) continue;
                 float reach = MathF.Max(a.Length(), b.Length()) + radius;
                 AssertLacrimosa(reach <= LacrimosaClawMotion.MaximumReach, $"reach {reach}");
+                // The hits really reach |b| + radius: a 1 px body just inside the round tip is hit, just outside is not.
+                Vector2 axis = Vector2.Normalize(b - a), half = new(.5f);
+                Vector2 inside = b + axis * (radius - 2), outside = b + axis * (radius + 2);
+                AssertLacrimosa(LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, inside - half, inside + half)
+                    && !LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, outside - half, outside + half), $"capsule tip of stroke {stroke} at {baseAge}");
+                probes++;
                 if (stroke == LacrimosaClawMotion.Clap) reachClap = MathF.Max(reachClap, reach);
                 else
                 {
@@ -178,8 +185,9 @@ internal static partial class Program
                 }
             }
         }
-        AssertLacrimosa(reachRake > 290 && reachRake < 315, $"rake reach about 300 ({reachRake})");
-        AssertLacrimosa(reachClap > 355 && reachClap < 385, $"clap reach about 370 ({reachClap})");
+        AssertLacrimosa(probes > 100, $"capsule probes {probes}");
+        AssertLacrimosa(reachRake > 300 && reachRake < 310, $"rake reach about 305 ({reachRake})");
+        AssertLacrimosa(reachClap > 360 && reachClap < 372, $"clap reach about 366 ({reachClap})");
         // The palms meet on the aim line at C's contact: wrists 50 px either side, both hands flat along the aim.
         LacrimosaHand right = LacrimosaClawMotion.Frame(LacrimosaClawMotion.Clap, 0, LacrimosaClawMotion.ClapContact);
         LacrimosaHand left = LacrimosaClawMotion.Frame(LacrimosaClawMotion.Clap, 1, LacrimosaClawMotion.ClapContact);
@@ -195,6 +203,95 @@ internal static partial class Program
         AssertDollNear(new Vector2(-east.X, east.Y), west, .01f, "left facing mirrors right facing");
         AssertDollNear(new Vector2(east.X, -east.Y), LacrimosaClawMotion.ToWorld(local, 0, 1, -1), .01f, "reversed gravity mirrors vertically");
         AssertDollNear(MathF.PI - .4f, LacrimosaClawMotion.AxisToWorld(.4f, MathF.PI, -1, 1), 1e-5, "axis mirrors with the wrist");
+    }
+
+    [DomainTest("Lacrimosa claw capsules hit a hitbox when the segment comes within the radius, round ends included")]
+    private static void LacrimosaCapsuleBox()
+    {
+        Vector2 a = new(0, 0), b = new(100, 0);
+        const float radius = 44;
+        // A body big enough to contain the whole capsule (a large boss pressed against the owner) is hit.
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(-500, -400), new Vector2(600, 400)), "a box containing the segment");
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(-20, -10), new Vector2(120, 10)), "a box containing the segment exactly");
+        // Beyond the tip within the radius: the round end.
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(140, -5), new Vector2(150, 5)), "40 px past the tip");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(145, -5), new Vector2(150, 5)), "45 px past the tip");
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(130, 30), new Vector2(140, 40)), "the tip's corner 42 px away");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(132, 32), new Vector2(140, 40)), "the tip's corner 45 px away");
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(-40, -5), new Vector2(-30, 5)), "behind the wrist within the radius");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(-60, -5), new Vector2(-50, 5)), "50 px behind the wrist");
+        // Beside the segment, and crossing it.
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(40, 43), new Vector2(60, 80)), "43 px beside");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(a, b, radius, new Vector2(40, 45), new Vector2(60, 80)), "45 px beside");
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(new Vector2(-50, 0), new Vector2(50, 0), 0, new Vector2(-10, -10), new Vector2(10, 10)), "crossing with radius 0");
+        // A diagonal segment whose nearest feature is a box corner, not an end.
+        Vector2 c = new(0, 0), d = new(100, 100);
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(c, d, 15, new Vector2(60, 20), new Vector2(80, 40)), "corner 14.1 px from the diagonal");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(c, d, 14, new Vector2(60, 20), new Vector2(80, 40)), "corner beyond 14 px");
+        AssertDollNear(200, LacrimosaClawMotion.SegmentBoxDistanceSquared(c, d, new Vector2(60, 20), new Vector2(80, 40)), .01, "corner distance squared");
+        // A point capsule (a == b) is a disc; non-finite or inverted input never hits.
+        AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(a, a, 10, new Vector2(8, -2), new Vector2(12, 2)), "point capsule");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(a, new Vector2(float.NaN, 0), 10, new Vector2(-5), new Vector2(5)), "non-finite end");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(a, b, float.PositiveInfinity, new Vector2(-5), new Vector2(5)), "non-finite radius");
+        AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(a, b, 10, new Vector2(5), new Vector2(-5)), "inverted box");
+        // Rotated cases agree.
+        foreach (float angle in new[] { .3f, 1.9f, -2.4f })
+        {
+            Vector2 ra = LacrimosaClawMotion.Rotate(new Vector2(10, 0), angle), rb = LacrimosaClawMotion.Rotate(new Vector2(160, 0), angle);
+            Vector2 tip = LacrimosaClawMotion.Rotate(new Vector2(160 + radius - 3, 0), angle), past = LacrimosaClawMotion.Rotate(new Vector2(160 + radius + 3, 0), angle);
+            AssertEqual(true, LacrimosaClawMotion.CapsuleHitsBox(ra, rb, radius, tip - new Vector2(.5f), tip + new Vector2(.5f)), $"rotated tip {angle}");
+            AssertEqual(false, LacrimosaClawMotion.CapsuleHitsBox(ra, rb, radius, past - new Vector2(.5f), past + new Vector2(.5f)), $"rotated past {angle}");
+        }
+        // The scratch drawn for a rake ends where its hits end.
+        for (int stroke = LacrimosaClawMotion.RakeDown; stroke <= LacrimosaClawMotion.RakeUp; stroke++)
+        {
+            AssertDollNear(LacrimosaClawMotion.LiveEnd(stroke) - 1, LacrimosaClawMotion.LastLiveBaseAge(stroke, LacrimosaClawMotion.BaseTicks(stroke)), 1e-4, "last swept base age");
+            foreach (float speed in new[] { .5f, 1.25f, 1.5f, 4f })
+            {
+                int duration = LacrimosaClawMotion.Duration(stroke, speed);
+                float last = LacrimosaClawMotion.LastLiveBaseAge(stroke, duration);
+                int lastAge = (int)MathF.Round(last * duration / LacrimosaClawMotion.BaseTicks(stroke));
+                AssertLacrimosa(LacrimosaClawMotion.Live(stroke, lastAge, duration) && !LacrimosaClawMotion.Live(stroke, lastAge + 1, duration),
+                    $"stroke {stroke} speed {speed}: the last live tick is {lastAge}");
+            }
+        }
+    }
+
+    [DomainTest("Lacrimosa claw hands flash only on a rung swap, and never white")]
+    private static void LacrimosaFlash()
+    {
+        AssertLacrimosa(LacrimosaClawMotion.FlashPeak <= .5f, "the flash keeps the art two-tone");
+        for (int hand = 0; hand < 2; hand++)
+        {
+            LacrimosaHand last = LacrimosaClawMotion.Hand(hand, 0);
+            float sinceSwap = 99;
+            for (float t = .05f; t <= LacrimosaClawMotion.KataTicks; t += .05f)
+            {
+                LacrimosaHand next = LacrimosaClawMotion.Hand(hand, t);
+                sinceSwap = next.Large != last.Large ? 0 : sinceSwap + .05f;
+                AssertLacrimosa(next.Flash == 0 || sinceSwap < LacrimosaClawMotion.FlashTicks + .06f, $"kata hand {hand} flashes at {t} without a swap");
+                last = next;
+            }
+        }
+        foreach (int side in new[] { 1, -1 })
+        for (int hand = 0; hand < 2; hand++)
+        {
+            LacrimosaHand last = Grasping(hand, 0, side);
+            float sinceSwap = 99;
+            for (float age = .05f; age <= LacrimosaClawMotion.GraspEnd; age += .05f)
+            {
+                LacrimosaHand next = Grasping(hand, age, side);
+                sinceSwap = next.Large != last.Large ? 0 : sinceSwap + .05f;
+                AssertLacrimosa(next.Flash == 0 || sinceSwap < LacrimosaClawMotion.FlashTicks + .06f, $"grasp hand {hand} flashes at {age} without a swap");
+                AssertLacrimosa(next.Flash <= LacrimosaClawMotion.FlashPeak, "flash peak");
+                last = next;
+            }
+            AssertEqual(0f, Grasping(hand, LacrimosaClawMotion.GraspContact + .5f, side).Flash, "clenching at contact does not flash");
+            AssertLacrimosa(Grasping(hand, LacrimosaClawMotion.GraspArrive + .5f, side).Flash > 0, "the arrival's rung swap flashes");
+        }
+
+        static LacrimosaHand Grasping(int hand, float age, int side)
+            => LacrimosaClawMotion.GraspHand(hand, age, new Vector2(800, 400), 40, side, new Vector2(150, 260), -.6f, new Vector2(200, 300), -1f);
     }
 
     [DomainTest("Lacrimosa heart beads fill from hits with tempo, trickle while held, freeze and spend")]

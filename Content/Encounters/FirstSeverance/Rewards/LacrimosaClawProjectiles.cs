@@ -124,6 +124,8 @@ public sealed class LacrimosaClawKata : ModProjectile
         if (Projectile.owner < 0 || Projectile.owner >= Main.maxPlayers) { Projectile.Kill(); return; }
         Player owner = Owner;
         if (!OwnerUsable(owner)) { Projectile.Kill(); return; }
+        // Kept alive tick by tick, before the held-item check, so a peer's grace below really lasts 6 ticks.
+        Projectile.timeLeft = 2;
         if (owner.HeldItem.type != ModContent.ItemType<NullRefrain>())
         {
             // Native held-item sync may trail the projectile on peers; the owner ends it at once.
@@ -139,7 +141,6 @@ public sealed class LacrimosaClawKata : ModProjectile
         { Projectile.Kill(); return; }
         state.KataIndex = Projectile.whoAmI;
 
-        Projectile.timeLeft = 2;
         Projectile.velocity = Vector2.Zero;
         Projectile.Center = owner.MountedCenter;
         if (Projectile.ai[2] < AgeCap) Projectile.ai[2]++;
@@ -147,7 +148,8 @@ public sealed class LacrimosaClawKata : ModProjectile
         {
             int beads = state.Heart.Lit;
             if (beads != Beads) { Beads = beads; Projectile.netUpdate = true; }
-            if (Age % 120 == 0) Projectile.netUpdate = true;
+            // A periodic resync on the world clock (the stroke age stops at AgeCap), staggered per projectile.
+            if ((Main.GameUpdateCount + (uint)Projectile.identity) % 120 == 0) Projectile.netUpdate = true;
         }
         if (!Striking || state.GraspBusy) return;
         // The hands are the weapon: the owner faces the stroke and both arms reach for their hands.
@@ -178,9 +180,9 @@ public sealed class LacrimosaClawKata : ModProjectile
         float gravDir = Owner.gravDir;
         float first = LacrimosaClawMotion.FirstLiveAge(stroke, duration) - 1f;
         float start = (float)LacrimosaClawMotion.LiveStart(stroke) * duration / LacrimosaClawMotion.BaseTicks(stroke);
-        Vector2 topLeft = targetHitbox.TopLeft(), size = targetHitbox.Size();
+        NVector min = new(targetHitbox.Left, targetHitbox.Top), max = new(targetHitbox.Right, targetHitbox.Bottom);
         // Swept capsules: sub-samples across the last tick (from the live start on its first tick), so a fast
-        // stroke cannot tunnel through a target.
+        // stroke cannot tunnel through a target. Each sample is a true capsule against the hitbox (round ends).
         for (int i = 0; i <= LacrimosaClawMotion.SubSamples; i++)
         {
             float age = MathF.Max(MathF.Max(start, first), Age - 1f + i / (float)LacrimosaClawMotion.SubSamples);
@@ -188,8 +190,8 @@ public sealed class LacrimosaClawKata : ModProjectile
             for (int hand = 0; hand < 2; hand++)
             {
                 if (!LacrimosaClawMotion.TryCapsule(stroke, hand, baseAge, out NVector a, out NVector b, out float radius)) continue;
-                float point = 0;
-                if (Collision.CheckAABBvLineCollision(topLeft, size, ToWorld(a, gravDir), ToWorld(b, gravDir), radius * 2, ref point)) return true;
+                Vector2 wa = ToWorld(a, gravDir), wb = ToWorld(b, gravDir);
+                if (LacrimosaClawMotion.CapsuleHitsBox(new NVector(wa.X, wa.Y), new NVector(wb.X, wb.Y), radius, min, max)) return true;
             }
         }
         return false;

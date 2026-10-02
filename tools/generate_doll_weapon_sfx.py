@@ -1949,7 +1949,9 @@ def choir_concert(samples, voices, cancel=None, finish=None):
 # clap, grasp and crush peak 1 tick in. ClawCrushWarn starts at grasp age 18 and carries the four squeezes at their
 # beat ticks, ending just before the crush. Materials: brass pawls and key, porcelain fingertips and knuckles, cut
 # air, the music-box comb on the F minor pentatonic ladder and the flue organ; no runtime transposition except the
-# single-note ClawBead (recorded at F5, played up the ladder for beads 1-6).
+# single-note ClawBead (recorded at F5, played up the ladder for beads 1-6). The crush, the weapon's closing release,
+# is restrained (the owner's choice for finishing sounds, 2026-10-03): the shatter and the low weight land the hit,
+# then a soft F gong and a quiet organ carry a long decaying tail instead of an organ chord played out loud.
 CLAW_RAKE_LEAD = 3 * TICK
 CLAW_STRIKE_LEAD = 1 * TICK
 CLAW_SQUEEZES = (22, 28, 33, 36)    # LacrimosaClawMotion.SqueezeBeats
@@ -2160,22 +2162,58 @@ def claw_crush_warn(s, rng):
     return taper(mix[:round(length * RATE)], 0.015)
 
 
-@cue("ClawCrushFire", -10, "Claws", 1.2, 1.0,
-     "握り潰し（最大の一撃）。たくさんの磁器が砕ける連鎖、とても低い衝撃、オルガンの F マイナーの和音（F2 C3 F3 A♭3 C4）を短く切った一撃、"
-     "オルゴールの F6 と真鍮のばねの余韻。長い残響はない。")
+# The claws' own soft gong (Pale Meridian's soft_gong, Last Witness's brass_gong and the Choir's choir_gong are
+# separate blocks): a soft struck bronze plate tuned to F (original modal synthesis, no recording). Per partial:
+# (ratio to the strike note, level, decay as a fraction of tau, bloom). The partials sit on the F minor pentatonic
+# (F Ab C Eb, a few cents apart so the plate shimmers); the upper ones swell in over the first ~0.1 s as the strike's
+# energy spreads, as a gong's do.
+CLAW_GONG_MODES = ((1.0, 1.0, 1.0, 0.0), (2.0, 0.42, 0.62, 0.35), (2.378, 0.2, 0.5, 0.8), (2.997, 0.26, 0.45, 0.6),
+                   (3.565, 0.12, 0.34, 1.0), (4.762, 0.07, 0.24, 1.0), (5.993, 0.045, 0.18, 1.0))
+
+
+def claw_gong(freq, dur, rng, tau=1.5, bloom=0.11, mallet=0.006):
+    """A felt-mallet strike on a tuned gong: the CLAW_GONG_MODES partials, each beside a quieter twin a fraction of a
+    hertz away (slow beating that drifts across the stereo field), a few-millisecond onset with no click, a low
+    felt thud and a long exponential tail (the strike note's 1/e time is `tau` seconds)."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    out = np.zeros((n, 2))
+    for i, (ratio, amp, life, swell) in enumerate(CLAW_GONG_MODES):
+        f = freq * ratio * 2 ** (rng.uniform(-4, 4) / 1200 if i else 0)
+        if f * 1.01 >= dsp.CEILING_HZ:
+            break
+        env = np.exp(-t / (tau * life)) * (1 - swell * np.exp(-t / bloom))
+        beat = rng.uniform(0.18, 0.55)
+        phase = rng.uniform(0, 2 * np.pi)
+        for ch, sign in ((0, 1), (1, -1)):
+            twin = np.sin(2 * np.pi * (f + sign * beat) * t + phase + ch)
+            out[:, ch] += amp * env * (np.sin(2 * np.pi * f * t + phase) + 0.45 * twin)
+    out *= (0.5 - 0.5 * np.cos(np.pi * np.clip(t / mallet, 0, 1)))[:, None]
+    k = round(0.06 * RATE)
+    felt = lp(base.noise(k, rng), 260) * np.exp(-np.arange(k) / (0.014 * RATE))[:, None]
+    out[:k] += felt / max(1e-9, np.abs(felt).max()) * 0.35 * np.abs(out).max()
+    return out / max(1e-9, np.abs(out).max())
+
+
+@cue("ClawCrushFire", -10, "Claws", 2.3, 1.0,
+     "握り潰し（最大の一撃）。磁器がたくさん砕ける連鎖と、とても低い衝撃・胴鳴りで握り潰した瞬間を出し、"
+     "そのあとは F に調律した柔らかい銅鑼（ゴング）の響きが約2秒かけて消えていき、下で静かなオルガン（F マイナー、F2 C3 F3 A♭3）が"
+     "息をつくように支える。オルガンは鳴らし切らない。オルゴールの F6 がかすかに残る。")
 def claw_crush_fire(s, rng):
-    mix = seconds(1.3)
+    mix = seconds(2.4)
     hit = CLAW_STRIKE_LEAD
     place(mix, dsp.porcelain_crack(0.3, rng, count=11, spread=0.045, low=1800, high=7000, decay=(0.01, 0.04)), hit, -2)
     lay(mix, s, "low_impact", 0.62, 1.4, hit - 0.01, -4, lp_=600, fade_in=0.004, fade_out=0.3)
-    stab = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "F3", "Ab3", "C4")], 0.5, rng, attack=0.01, release=0.3, harmonics=10,
-                         rolloff=1.15, chiff=0.08, breath=0.12)
-    place(mix, stab, hit, -5)
-    place(mix, dsp.thump(95, 36, 0.5, rng), hit, -2)
-    place(mix, pan(dsp.box_tine(dsp.hz("F6"), 0.8, rng), 0.2), hit + 0.05, -12)
-    place(mix, dsp.ratchet((0.12, 0.16, 0.19, 0.215, 0.235), rng, freq=2000, gains_db=(-4, -6, -8, -10, -12), side=0.3), hit, -14)
-    lay(mix, s, "chop", 0.035, 0.2, hit - 0.012, -8, hp_=200, fade_in=0.001)
-    return room(mix, 0.12, 1.15, 0.35)
+    place(mix, dsp.thump(95, 36, 0.5, rng), hit, -3)
+    lay(mix, s, "chop", 0.035, 0.2, hit - 0.012, -10, hp_=200, fade_in=0.001)
+    # The resonance that closes it: a soft low strike on the F gong, its long decaying tail carrying the cue.
+    place(mix, pan(claw_gong(dsp.hz("F2"), 2.3, rng), 0.0), hit + 0.004, -6)
+    # A quiet organ under it: a slow swell, few and soft harmonics, no chiff, a long release.
+    pad = dsp.organ_pad([dsp.hz(n) for n in ("F2", "C3", "F3", "Ab3")], 1.9, rng, attack=0.12, release=1.3, harmonics=6,
+                        rolloff=1.9, chiff=0.0, breath=0.1)
+    place(mix, pad, hit + 0.03, -17)
+    place(mix, pan(dsp.box_tine(dsp.hz("F6"), 0.8, rng), 0.2), hit + 0.09, -19)
+    return room(mix, 0.1, 2.25, 0.7)
 
 
 # ---------------------------------------------------------------- render
@@ -3118,7 +3156,7 @@ ATTRIBUTION_GROUPS = {
     "Claws": {
         "title": "### Lacrimosa's Claws cues — 2026-10-03",
         "date": "20261003", "made": "2026-10-03",
-        "about": "The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, the contact, the six bead notes from one F5 master, the full-meter cadence, the early-click tick, the grasp's warning, success and miss, the squeeze warning and the crush).",
+        "about": "The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, the contact, the six bead notes from one F5 master, the full-meter cadence, the early-click tick, the grasp's warning, success and miss, the squeeze warning and the crush). The crush closes on a soft gong tuned to F, original modal synthesis in the generator itself (`claw_gong`), over a quiet organ.",
         "review": "Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run",
     },
 }

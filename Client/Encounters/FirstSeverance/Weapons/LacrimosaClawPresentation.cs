@@ -88,7 +88,7 @@ internal sealed class LacrimosaClawMemory
     internal int ClapSerial = -1;
     internal double ClapClock = -1000;
     internal Vector2 ClapAt;
-    internal float ClapAxis;
+    internal float ClapAxis, ClapGravDir = 1;
     internal int GraspSeen = -1;
     internal double GraspClock = -1000;
     internal bool Striking, Holding;
@@ -101,7 +101,10 @@ internal sealed class LacrimosaClawMemory
 internal static class LacrimosaClawPresentation
 {
     internal const float PeerLight = DollWeaponCanvas.PeerLightAlpha, PeerVoid = DollWeaponCanvas.PeerVoidAlpha;
-    internal const int RakeResidue = 10, ClapLife = 16, ImpactLife = 10, CrushResidue = 24, ReturnTicks = 14, TurnTicks = 8;
+    internal const int RakeResidue = 10, ClapLife = 16, ImpactLife = 10, ReturnTicks = 14, TurnTicks = 8;
+    // The crush's light and debris cool to plum and end by the grasp's last tick (the grasp projectile's lifetime
+    // after the crush), so nothing is cut off when it despawns; Reduced Effects halves it.
+    internal const int CrushResidue = LacrimosaClawMotion.GraspEnd - LacrimosaClawMotion.GraspCrush, CrushHot = 6;
     internal const int HeartbeatPeriod = 48, PingTicks = 10, DryTicks = 10;
     private const int TrailSamples = 12;
     // Base ticks of a rake's path kept as its scratch.
@@ -299,7 +302,9 @@ internal static class LacrimosaClawPresentation
         float baseAge, float aim, int facing, float mirror, float light, bool reduced)
     {
         int hand = stroke == LacrimosaClawMotion.RakeUp ? LacrimosaClawMotion.Left : LacrimosaClawMotion.Right;
-        float start = LacrimosaClawMotion.LiveStart(stroke), end = LacrimosaClawMotion.LiveEnd(stroke);
+        // The scratch covers exactly the path the hits swept: from the live start to the last live tick's sample.
+        float start = LacrimosaClawMotion.LiveStart(stroke);
+        float end = LacrimosaClawMotion.LastLiveBaseAge(stroke, state.Duration);
         float residue = reduced ? RakeResidue / 2f : RakeResidue;
         if (baseAge < start || baseAge > end + residue) return;
         float head = MathF.Min(baseAge, end), tail = MathF.Max(start - .6f, head - TrailTicks);
@@ -339,6 +344,7 @@ internal static class LacrimosaClawPresentation
             NVector2 local = new(84 + LacrimosaClawMotion.ClapTip * .5f, 0);
             memory.ClapAt = X(N(state.Center) + LacrimosaClawMotion.ToWorld(local, aim, facing, state.GravDir));
             memory.ClapAxis = aim;
+            memory.ClapGravDir = state.GravDir < 0 ? -1 : 1;
         }
         if (baseAge < start - 2 || baseAge > contact + 3) return;
         float head = MathF.Min(baseAge, contact), tail = MathF.Max(start - 3, head - 5);
@@ -359,7 +365,7 @@ internal static class LacrimosaClawPresentation
         }
     }
 
-    // A pearl slit between the palms, a violet ring and the organ-pipe standing-wave bars along it.
+    // A pearl slit between the palms, a violet ring and three organ-pipe breaths rising from it.
     private static void ClapBurst(DollWeaponCanvas canvas, LacrimosaClawMemory memory, IDollEnergyMaterial material, double clock, float light, bool reduced)
     {
         float t = (float)(clock - memory.ClapClock);
@@ -377,15 +383,18 @@ internal static class LacrimosaClawPresentation
         canvas.EnergyQuad(material, LacrimosaClawMaterial.Ring, ringA, ringB, (radius + 8) * 2,
             new Vector4(radius / (radius + 8), 2.5f - fade, fade, light), 2);
         if (reduced) return;
-        // Three pipe bars standing on the slit, the tallest in the middle, rising and settling in turn (never a
-        // ruled set of evenly spaced lines: that is Scarlet's stave).
+        // Three organ-pipe breaths stand on the slit's upper side (the owner's up), the tallest in the middle, each
+        // tapered, leaning a little outward and lifting off the slit as it cools, in turn: pipes speaking, never
+        // marks crossing a line (that read as a ruler) nor a ruled set of even lines (Scarlet's stave).
+        Vector2 up = across.Y * memory.ClapGravDir <= 0 ? across : -across;
         for (int k = -1; k <= 1; k++)
         {
             float delay = MathF.Abs(k) * 1.5f, rise = LacrimosaClawMotion.Smooth((t - delay) / 5f);
             if (rise <= 0) continue;
-            float height = (k == 0 ? 76 : k < 0 ? 52 : 44) * rise * (1 - .6f * fade);
-            Vector2 foot = at + along * (k < 0 ? -34 : k * 40);
-            canvas.EnergyQuad(material, LacrimosaClawMaterial.Flare, foot - across * height * .5f, foot + across * height * .5f, 8,
+            float height = (k == 0 ? 64 : k < 0 ? 46 : 38) * rise * (1 - .5f * fade);
+            Vector2 lean = Vector2.Normalize(up + along * (.24f * k));
+            Vector2 foot = at + along * (k < 0 ? -30 : k * 36) + up * (3 + 16 * fade);
+            canvas.EnergyQuad(material, LacrimosaClawMaterial.Flare, foot, foot + lean * height, 10 - 4 * fade,
                 new Vector4(.8f, Math.Min(1, fade * 1.2f), light, 0), 2);
         }
         canvas.Burst(at, 7019 + (int)memory.ClapClock, 14, t, life, 3.6f, .02f, DollShardKind.Spark, MathF.Tau, 0);
@@ -459,14 +468,16 @@ internal static class LacrimosaClawPresentation
             }
         }
         // Crush: the lacuna opens inside a violet ring, a vertical pearl flare grows to 330 px, porcelain shatters.
+        // Hot for CrushHot ticks, then everything cools to plum and the debris ends by `residue` (the grasp's end).
         float residue = reduced ? CrushResidue / 2f : CrushResidue;
-        if (crush >= 0 && crush < 12 + residue)
+        if (crush >= 0 && crush < residue)
         {
-            float grow = LacrimosaClawMotion.Smooth(crush / 12f), fade = Math.Clamp((crush - 6) / residue, 0, 1);
+            float grow = LacrimosaClawMotion.Smooth(crush / 12f), fade = Math.Clamp((crush - CrushHot) / (residue - CrushHot), 0, 1);
             float scale = reduced ? .8f : 1f;
-            // The fists slam on a small dark core; the lacuna opens as they burst apart, then closes.
-            float lacuna = (14 + 48 * LacrimosaClawMotion.Smooth((crush - 3) / 6f)) * (1 - LacrimosaClawMotion.Smooth((crush - 12) / 14f));
-            if (lacuna > 2) VoidDisc(canvas, material, center, lacuna * scale, .8f, Math.Clamp((crush - 10) / 12f, 0, 1), voidAlpha);
+            // The fists slam on a small dark core; the lacuna opens as they burst apart, then closes by `residue`.
+            float half = residue * .5f;
+            float lacuna = (14 + 48 * LacrimosaClawMotion.Smooth((crush - 3) / 6f)) * (1 - LacrimosaClawMotion.Smooth((crush - half) / half));
+            if (lacuna > 2) VoidDisc(canvas, material, center, lacuna * scale, .8f, Math.Clamp((crush - residue * .4f) / half, 0, 1), voidAlpha);
             float ring = (60 + 90 * grow) * scale;
             canvas.EnergyQuad(material, LacrimosaClawMaterial.Ring, center - Vector2.UnitX * (ring + 10), center + Vector2.UnitX * (ring + 10),
                 (ring + 10) * 2, new Vector4(ring / (ring + 10), 3.5f - 2 * fade, fade, light), 3);
@@ -474,9 +485,9 @@ internal static class LacrimosaClawPresentation
             canvas.EnergyQuad(material, LacrimosaClawMaterial.Flare, center - Vector2.UnitY * flare * .5f, center + Vector2.UnitY * flare * .5f,
                 16 - 6 * grow, new Vector4(1f, fade, light, 0), 3);
             if (crush < 3) Star(canvas, center, 46, crush / 3f, light);
-            canvas.Burst(center, 4093 + state.GraspId, 24, crush, 12 + residue, 5.2f, .16f, DollShardKind.Porcelain);
-            canvas.Burst(center, 4099 + state.GraspId, 16, crush, 10 + residue * .5f, 6.5f, .03f, DollShardKind.Spark);
-            canvas.Burst(center, 4111 + state.GraspId, 10, crush, 12 + residue, 2.4f, -.02f, DollShardKind.Pearl);
+            canvas.Burst(center, 4093 + state.GraspId, 24, crush, residue, 5.2f, .16f, DollShardKind.Porcelain);
+            canvas.Burst(center, 4099 + state.GraspId, 16, crush, residue * .9f, 6.5f, .03f, DollShardKind.Spark);
+            canvas.Burst(center, 4111 + state.GraspId, 10, crush, residue, 2.4f, -.02f, DollShardKind.Pearl);
         }
     }
 

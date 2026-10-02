@@ -85,8 +85,32 @@ class ClawSources(unittest.TestCase):
             self.assertIn(written, kata)
         self.assertIn("RitualArmamentItems.Usable(owner) && !owner.CCed && !owner.noItems", source)
         self.assertIn("++Projectile.localAI[1] > 6", kata, "peers end it after the held-item sync")
+        ai = kata[kata.index("public override void AI()"):kata.index("internal Vector2 ToWorld")]
+        self.assertEqual(1, ai.count("Projectile.timeLeft = 2;"))
+        self.assertLess(ai.index("Projectile.timeLeft = 2;"), ai.index("owner.HeldItem.type !="),
+                        "the controller is kept alive before the held-item check, or a peer's 6-tick grace never runs")
+        self.assertNotIn("Age % ", ai, "the stroke age stops at its cap: a periodic resync must not key on it")
+        self.assertIn("Main.GameUpdateCount", ai, "the periodic resync runs on the world clock")
         self.assertNotIn("ModPacket", source)
         self.assertNotIn("SendData", source)
+
+    def test_strokes_collide_as_true_capsules(self):
+        source = code(REWARDS / "LacrimosaClawProjectiles.cs")
+        kata = source[source.index("class LacrimosaClawKata"):source.index("class LacrimosaClawGrasp")]
+        colliding = kata[kata.index("public override bool? Colliding"):kata.index("public override void OnHitNPC")]
+        self.assertIn("LacrimosaClawMotion.CapsuleHitsBox(", colliding, "segment-to-box distance <= radius (round ends)")
+        self.assertNotIn("CheckAABBvLineCollision", source, "a flat band misses beyond the tip and inside a large hitbox")
+
+    def test_the_crush_residue_ends_with_the_grasp_and_only_rung_swaps_flash(self):
+        presentation = code(WEAPONS / "LacrimosaClawPresentation.cs")
+        self.assertIn("CrushResidue = LacrimosaClawMotion.GraspEnd - LacrimosaClawMotion.GraspCrush", presentation,
+                      "the crush cools and its debris ends by the grasp's last tick")
+        grasp = presentation[presentation.index("private static void Grasp("):presentation.index("private static void VoidDisc(")]
+        self.assertNotRegex(grasp, r"\d+\s*\+\s*residue", "no crush light or debris outlives `residue`")
+        motion = code(REWARDS / "LacrimosaClawMotion.cs")
+        self.assertNotIn("Flash(age - GraspContact)", motion, "clenching at contact is not a rung swap")
+        peak = float(re.search(r"FlashPeak\s*=\s*([\d.]+)f", motion).group(1))
+        self.assertLessEqual(peak, 0.5, "the swap flash keeps the art two-tone, never a white silhouette")
 
     def test_presentation_is_terraria_free_and_material_branchless(self):
         for name in ("LacrimosaClawPresentation.cs", "LacrimosaClawArt.cs"):
