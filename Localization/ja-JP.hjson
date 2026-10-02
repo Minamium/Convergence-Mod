@@ -131,6 +131,14 @@ Mods: {
         PhaseFinalSlicer: 千切りの光 — 予測線の隙間に入ろう。
         PhaseRemoteTransition: 本体が遠方へ離脱 — 両腕がフィールド内に顕現する。
         PhaseFinalTransition: 生命反応ゼロ — 最後の行動リストを避けきれば勝利！
+        PhaseRemoteCrush: 中央圧殺 — 両腕が中心へ押し寄せる。閉じきる前に予測範囲から出よう！
+        PhaseFinalCoreCheck: 最後のコア — 露出した球体を{2}秒以内に破壊！ 砲撃は避けよう。
+        PreparationNotReady: 準備状況をまだ受信していません。
+        RequestInProgress: 現在のRaid要求を処理中です。
+        NothingToCancel: 中止できるRaidはありません。
+        AuxiliaryProtection: "補助保護が有効：{0}"
+        ReadyMarker: Ready!
+        ReadyButton: READY
       }
     }
     Configs.FirstSeveranceVisualConfig: {

@@ -37,7 +37,7 @@ internal static class FirstSeveranceClientActions
                     Main.myPlayer,
                     out FirstSeverancePreparationMemberSnapshot member))
             {
-                Main.NewText("[Convergence] Preparation snapshot is not ready yet.", 235, 180, 90);
+                Main.NewText("[Convergence] " + Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.PreparationNotReady"), 235, 180, 90);
                 RequestSnapshot();
                 return;
             }
@@ -52,7 +52,7 @@ internal static class FirstSeveranceClientActions
             or EncounterLifecycle.Active
             or EncounterLifecycle.Resolving)
         {
-            Main.NewText("[Convergence] The current encounter request is already in progress.", 235, 180, 90);
+            Main.NewText("[Convergence] " + Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.RequestInProgress"), 235, 180, 90);
             return;
         }
 
@@ -75,7 +75,7 @@ internal static class FirstSeveranceClientActions
         if (snapshot.Lifecycle is not (EncounterLifecycle.Preparing or EncounterLifecycle.Active)
             || snapshot.FightId.IsNone)
         {
-            Main.NewText("[Convergence] There is no active Raid to cancel.", 235, 180, 90);
+            Main.NewText("[Convergence] " + Language.GetTextValue("Mods.Convergence.UI.FirstSeverance.NothingToCancel"), 235, 180, 90);
             return;
         }
 

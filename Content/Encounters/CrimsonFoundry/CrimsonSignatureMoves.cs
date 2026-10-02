@@ -14,10 +14,11 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 // (like the basic beams) assume ENDGAME horizontal mobility.
 //
 //   Act I   CinderCurtain  a 2,560 px curtain of fire in ten columns; every eligible member gets a
-//                           1,024 px (four column) corridor that walks one column per beat away from
-//                           the column they stood in. That column keeps one column of margin on the
-//                           side the walk heads for and is safe for three notes (all four against a
-//                           wall, where the corridor stays put). The columns occupied at scheduling
+//                           1,024 px (four column) corridor that walks one column per beat toward the
+//                           open side, away from the nearer wall (columns 0-4 walk right, 5-9 left),
+//                           so the direction is readable from where the member stands. Their column
+//                           keeps one column of margin on the side the walk heads for and is safe
+//                           for three notes (all four against a wall, where the corridor stays put). The columns occupied at scheduling
 //                           travel as a bit mask in Target; the safe columns of a note are the union
 //                           of the corridors, so a crowd leaves less burning. At most six columns burn.
 //   Act II  ShroudRope     a five-line staff crossing the whole field from alternating sides: even
@@ -102,22 +103,23 @@ internal static class CrimsonSignatureMoves
         => target.Y == 0 && target.X >= 1 && target.X <= MaximumCurtainMask && target.X == MathF.Floor(target.X);
     internal static int CurtainMask(in CrimsonGesturePlan p) => (int)p.Target.X;
     // The walk of a phrase for a member standing in `column`: first corridor's left column and direction
-    // (+1 right, -1 left). The walk heads away from the member's column and the corridor keeps one column
-    // of margin on that side, so the column stays safe for the first three notes: a right walk is
+    // (+1 right, -1 left). The walk heads AWAY FROM THE NEARER WALL (columns 0-4 right, 5-9 left), so a
+    // member knows it from where they stand and the direction never has to be learned from a forecast:
+    // under base mobility a member in the trailing edge of their column could not cover the distance if
+    // the direction only showed at note 1. The corridor keeps one column of margin on the side the walk
+    // heads for, so the member's column is safe for the first three notes: a right walk is
     // [o-2..o+1] [o-1..o+2] [o..o+3] [o+1..o+4], a left walk [o-1..o+2] [o-2..o+1] [o-3..o] [o-4..o-1].
-    // Right on even signature ordinals (serial / 3), left on odd ones; the other way when the preferred
-    // walk does not fit the field. Near a wall neither fits: the walk turns toward the NEARER wall and
-    // every note's corridor is clamped against it, so it slides in and stays (columns 0 and 1 get
-    // [0..3] on all four notes, columns 8 and 9 get [6..9]).
+    // Next to a wall the walk does not fit (columns 0, 1, 8, 9): it turns toward that wall and every
+    // note's corridor is clamped against it, so it slides in and stays ([0..3] on all four notes for
+    // columns 0 and 1, [6..9] for 8 and 9). `phrase` is kept so callers do not change; the walk no longer
+    // depends on the signature ordinal.
     internal static (int Start, int Direction) CurtainWalk(int column, int phrase)
     {
         int last = CurtainColumns - CurtainCorridorColumns, steps = CrimsonChoreography.BasicNotes - 1;
         if (column is < 0 or >= CurtainColumns) throw new ArgumentOutOfRangeException(nameof(column));
-        int preferred = phrase / Cadence % 2 == 0 ? 1 : -1;
-        if (Fits(preferred)) return (Start(preferred), preferred);
-        if (Fits(-preferred)) return (Start(-preferred), -preferred);
-        int toward = column < CurtainColumns / 2 ? -1 : 1;
-        return (Start(toward), toward); // the per-note clamp in CurtainCorridor slides it against the wall
+        int away = column < CurtainColumns / 2 ? 1 : -1;
+        if (Fits(away)) return (Start(away), away);
+        return (Start(-away), -away); // toward the nearer wall; the per-note clamp in CurtainCorridor slides it in
 
         int Start(int direction) => direction > 0 ? column - (CurtainCorridorColumns - 2) : column - 1;
         bool Fits(int direction)

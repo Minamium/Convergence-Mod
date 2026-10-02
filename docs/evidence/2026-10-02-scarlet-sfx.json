@@ -1,6 +1,6 @@
 {
   "scope": "Scarlet Invocation's owner-approved sound set: sixteen layered CC0 cues (variant A of every audition scene) replace the borrowed Doll beam, chorus and ceremony cues in the Raid's client presentation and the retired 2026-09-18 Scarlet WAVs. Adds Down, revive and Ready cues through Scarlet's own presentation system, fades voices instead of cutting them, and keeps gameplay, timings and protocol unchanged",
-  "target_build": "0.3.70 / protocol79 (feat/scarlet-sfx, stacked on feat/scarlet-signature-moves at 0.3.69; client presentation only; checks below were run at 0.3.69 on c7111c1 and re-run after the merge)",
+  "target_build": "0.3.77 / protocol79 (feat/scarlet-sfx on main 0.3.76 after #103; client presentation only; renumbered from 0.3.69/0.3.70)",
   "owner_direction": "2026-10-02: the owner listened to the audition page (16 scenes x 3 variants, plus a 128 BPM phrase demo) and chose variant A for every scene ('効果音はAがいいね')",
   "assets": {
     "files": "Assets/Sounds/CrimsonFoundry/Scarlet{Foretell,CrossflowCharge,CrossflowRelease,Impact,StackSummon,StackSuccess,StackFail,SpreadSummon,SpreadSuccess,SpreadFail,ActChange,Sacrifice,Victory,Down,Revive,Ready}.ogg: 48 kHz stereo Vorbis, 0.45-2.4 s",
@@ -44,7 +44,7 @@
   "checks": {
     "static": "passed (again after the review fixes): verify_repo --write-catalog --with-domain (catalog, repository policy incl. the attribution manifest, YAML, 480 domain tests)",
     "python": "passed (again after the review fixes): tools/tests (77), including the new test_scarlet_audio (cue table vs files and Ogg lengths, retained Doll cue files, no borrowed beam/chorus sounds outside the companion, moment wiring incl. the Victory bell following the score's cut, voice ownership/fade/dedicated-server guard, attribution entries, hashes, source rows, the recipe catalog hash and the VSCO homepage link)",
-    "native_build": "passed: tools/dev.py build --native into the isolated claude-profile, tML 2026.08.3.0, 0 errors / 4 existing warnings; the 0.3.69 package contains the sixteen Scarlet OGGs and none of the retired WAVs (first pre-commit tree SHA256 75a8114e627e4da2ca321ccd3ef1333e15ccf16869d8a42b418512ecce1000dc; rebuilt after the review fixes, pre-commit tree SHA256 c32ca6fdc3561788c0f2f3ffa699b2975ef239837fb2ce6a3820e31a61a4c089, solo admission enabled; Localization/ not rewritten)",
+    "native_build": "passed: tools/dev.py build --native into the isolated profile on the final tree after merging main 0.3.76 (0.3.77 / protocol79), tML 2026.08.3.0, 0 errors / 4 existing warnings; package sha256 b838a1e0a60e1eb20408ce34db274cc5189a95191ee3bb1c3d0b13cd297ba7c0",
     "diff_check": "passed: git diff --check",
     "rerender": "passed: the external recipe re-rendered all sixteen cues to byte-identical OGGs, again after review moved the source catalog (catalog.json, SHA256 2faed1e050be83dc2023ebeeddb8694c4ce94c26d987bb49058631bb76d0af60: short-name paths, measured pitch and shift table) from another worktree's .local to sit beside the recipe; kit.py now reads it there (kit.py SHA256 91fce8bd9cf17b0a4703628a3caf7b88a6070c0f7ceddb212b0fa37dac092e31)"
   },

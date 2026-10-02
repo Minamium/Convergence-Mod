@@ -347,3 +347,47 @@ class ScarletContracts(unittest.TestCase):
         runtime=(CONTENT/'CrimsonRuntime.cs').read_text()
         self.assertIn('ending + 150',runtime)
         self.assertIn('CrimsonEnsemble.SacrificeComplete',runtime)
+
+    def test_field_beam_live_uses_scarlet_ink_while_forecast_and_seals_stay_original(self):
+        visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text(encoding='utf-8')
+        beams=visual[visual.index('private static void DrawTrackingBeams'):visual.index('private static void DrawSources')]
+        # Forecasts keep the portal energy; the two crossflow seals and the rift tears keep ScarletSorcery.
+        self.assertIn('CrimsonEnergy.Add(',beams)
+        self.assertIn('ScarletSorcery.CrossflowSeals(batch,p,age)',beams)
+        self.assertIn('ScarletSorcery.Tear(',beams)
+        # Live strike and residue never reach CrimsonEnergy: they are collected before it and drawn after it (over forecasts).
+        self.assertLess(beams.index('ScarletInkStroke.Owns(p, age)'),beams.index('CrimsonEnergy.Add('))
+        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike)'))
+        self.assertIn('ScarletInkStroke.ResidueTicks',beams)
+        self.assertIn('using var scope = new ScarletGraphicsScope(batch)',beams)
+        # Only the two field-beam techniques; the forecast pass of ScarletInk is not used anywhere in game code.
+        stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
+        self.assertIn('plan.Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams',stroke)
+        self.assertIn('"AutoloadPass"',stroke)
+        self.assertIn('"ResiduePass"',stroke)
+        self.assertNotIn('"ForecastPass"',stroke)
+        # Residue stays inside the projectile lease (LastEnd + ResidueTicks + 4).
+        rhythm=(CONTENT/'CrimsonRhythm.cs').read_text(encoding='utf-8')
+        self.assertIn('internal const int ResidueTicks = 24;',rhythm)
+        self.assertIn('const int CloseTicks = 8, ResidueTicks = 24;',stroke)
+        self.assertIn('LeaseTicks = ResidueTicks + 4',rhythm)
+        # Production host: Luminance shader by the autoload name, noise from the registry, CrimsonEnergy's transform.
+        host=(CLIENT/'ScarletVfxHost.cs').read_text(encoding='utf-8')
+        self.assertIn('ShaderManager.GetShader("Convergence." + name)',host)
+        for noise in ('WavyBlotchNoise','TurbulentNoise','DendriticNoiseZoomedOut'):
+            self.assertIn(f'MiscTexturesRegistry.{noise}.Value',host)
+        self.assertIn('Main.GameViewMatrix.TransformationMatrix',host)
+        self.assertIn('device.Viewport.Width, device.Viewport.Height',host)
+        self.assertIn('CrimsonVisuals.Reduced',host)
+        energy=(CLIENT/'CrimsonEnergy.cs').read_text(encoding='utf-8')
+        self.assertIn('Main.GameViewMatrix.TransformationMatrix * Matrix.CreateOrthographicOffCenter(0, device.Viewport.Width, device.Viewport.Height, 0, -1, 1)',energy)
+        self.assertIn('DrawTrackingBeams(boss!, batch, age)',visual) # the fractional RenderAge drives it
+        self.assertIn('ScarletVfxHost.View(age)',beams)
+        # The Vfx foundation is linked into the offline preview: it must not name Terraria, tModLoader or Luminance.
+        for path in (CLIENT/'Vfx').glob('*.cs'):
+            code=path.read_text(encoding='utf-8')
+            for forbidden in ('using Terraria','using Luminance','ModContent.','ShaderManager.','MiscTexturesRegistry.','Main.instance'):
+                self.assertNotIn(forbidden,code,f'{path.name} must stay Terraria-free ({forbidden})')
+        shader=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx').read_text(encoding='utf-8')
+        for pass_name in ('AutoloadPass','ForecastPass','ResiduePass'):
+            self.assertIn(f'pass {pass_name}',shader)

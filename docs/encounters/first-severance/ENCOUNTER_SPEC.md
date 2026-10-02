@@ -5,7 +5,7 @@ status: accepted
 owners:
   - gameplay
   - networking
-last_reviewed: 2026-09-15
+last_reviewed: 2026-10-02
 source_of_truth_for:
   - first_severance.encounter_loop
   - first_severance.mechanics
@@ -188,7 +188,7 @@ EncounterActorMissing
   > nonterminal substate edge
 ```
 
-Safety/validity endings therefore override a coincident gameplay result whose authority can no longer be trusted. The initiator's development cancel is also accepted during Active at the queued-intent boundary, before mechanic resolution.
+Safety/validity endings therefore override a coincident gameplay result whose authority can no longer be trusted. The initiator's development cancel is also accepted during Active at the queued-intent boundary, before mechanic resolution; once the score is complete and settling, a queued cancel is ignored so it cannot replace the Victory.
 
 `WorldUnload`, an unhandled `InternalFailure`, and a fatal `ProtocolFailure` originate outside this reducer and unconditionally preempt an uncommitted feature result in that order. The coordinator synthesizes their generic/cause pair from the immutable mapping registered with the encounter definition; it does not re-enter a failed feature tick. The implemented external-termination bridge publishes the combined terminal projection before cleanup. The authorized development path already publishes feature replication and starts after Core/roster/Ready validation; deferred production hooks do not disable it.
 
