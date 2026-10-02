@@ -29,10 +29,11 @@ Mods: {
 				Name: Lacuna Testament
 				Tooltip:
 					'''
-					Hold to attack from one sigil, then unfold six more at accelerating intervals.
-					The array merges and charges for 0.8 seconds, then sustains one powerful beam.
-					Aim while channeling. Release, switch items, or run out of mana to stop.
-					Builds over 6.8 seconds. Continuous mana drain; no forced automatic mana potions.
+					Hold: porcelain irises open one by one around the testament, each firing small seeking void pellets.
+					After about 5.7 seconds the seven irises merge before your hand into one great aperture.
+					After a 0.8-second charge it pours out a black-cored beam that pulses and slowly widens.
+					The beam can be turned while held. Releasing, switching items or running out of mana ends it.
+					Consumes mana continuously; never triggers automatic mana potions.
 					One of five equally likely rewards from the Curtainfall Treasure Box.
 					'''
 			}
