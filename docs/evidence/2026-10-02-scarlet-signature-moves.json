@@ -1,6 +1,6 @@
 {
   "scope": "Scarlet Invocation Act signature moves: CinderCurtain (17, Act I), ShroudRope (18, Act II) and FourHands (19, Act III) replace the four basic notes of every third phrase (serial % 3 == 0) of Acts I-III; the seal crossflow stays the fifth note and Final is unchanged. Geometry lives in the Terraria-free CrimsonSignatureMoves and is shared by forecast, drawing and native collision. Damage stays at the rehearsal 1. No motions or new art",
-  "target_build": "0.3.71 / protocol79 (renumbered from 0.3.69 after main took 0.3.70; feat/scarlet-signature-moves, stacked on feat/scarlet-music-grid; protocol 78 is the music-grid integration)",
+  "target_build": "0.3.76 / protocol79 (renumbered from 0.3.69 after main took 0.3.70-0.3.74; feat/scarlet-signature-moves, stacked on feat/scarlet-music-grid; protocol 78 is the music-grid integration)",
   "design": "lead design .local/design/signature-moves.md (2026-10-02), revised three times after review",
   "fairness_model": {
     "forecast": "one beat (28 ticks); the player reacts only to forecasts that are already visible (Born <= t) and may plan ahead only from what is shown",
@@ -33,7 +33,7 @@
   "checks": {
     "domain": "passed: every new and changed case (selection cadence 3/6/9/12 and IDs, curtain corridor, walk, BASE-mobility survival, crowd union against an independent oracle, rope staff geometry and reachability, hands quarters, fingers and ENDGAME/BASE mobility, mask and descriptor codecs and rejections); mutating the corridor margin, rope radius, finger radius or crowd union makes the cases fail",
     "python": "passed: tools/tests, including the wiring check for the shared geometry and the single curtain observation of every eligible member",
-    "native_build": "passed: tools/dev.py build --native into an isolated profile on the final tree after merging main 0.3.70 (0.3.71 / protocol79), tML 2026.08.3.0, 0 errors / 4 existing warnings; package sha256 4dcb66d48a65d7614965a492d02d8bbc43edd23201a33d0513146089b2d1630d",
+    "native_build": "passed: tools/dev.py build --native into an isolated profile on the final tree after merging main 0.3.74 (0.3.76 / protocol79), tML 2026.08.3.0, 0 errors / 4 existing warnings; package sha256 3a2033ea7f8a33282a8c90eddf5058c4573e017b471a955212ce438e6550130c",
     "offline_plots": "passed: .local/geometry-preview (not committed) links the production domain sources and rasterises CrimsonTechniqueGeometry.Write through CrimsonTechniqueGeometry.Intersects; inspected the right-walking, left-walking, wall and crowd curtains with four-column corridors, the five-line staff on an even and an odd beat with bodies at seven heights, and all four rotations of the fingered hands. Shapes, corridors, free and hit bodies matched the model. These are geometry plots, not the production materials"
   },
   "not_run": [

@@ -4,7 +4,7 @@ document_type: spec
 status: provisional
 owners:
   - audio
-last_reviewed: 2026-09-14
+last_reviewed: 2026-10-03
 source_of_truth_for:
   - first_severance.audio_cues
 aliases:
@@ -94,7 +94,7 @@ The 27 weapon masters live under `Assets/Sounds/Weapons/DollTheater`. Current re
 | RangedLatch / Shot / Charge / Fire / MeridianSustain | Precise chamber snap, bright compressed discharge and rising pressure; approved launch/bed retained |
 | ChoirNote / Charge / Fire / ChoirSustain | Layered resonant energy notes and rising intake; approved launch/bed retained |
 | WitnessDraw / Lock / Fire | Cutting air, strained energy lock and bright high-pressure execution |
-| DollSummon / Thread / Charge / Verdict | Diffuse spectral arrival, incisive purple threads, held charge; approved verdict/bed retained |
+| DollSummon / Thread / Charge / Verdict | Diffuse spectral arrival (no longer played: the companion's arrival is now [CompanionSummon](#doll-weapons-2026-10); `DollSummon.wav` stays on disk), incisive purple threads, held charge; approved verdict/bed retained |
 | WeaponHit | Short sharp contact below release accents, not a low thud |
 
 One-shots are 0.13–0.80s PCM mono, with exact silent endpoints and bounded attack tails; none plays a full multi-second Raid aftermath. Persistent beds are 4s stereo, combining the accepted bed with a periodic/crossfaded stable beam-body window. Weapon voices remain separate from the Raid ledger: cue IDs have bounded voices; sustain has per-owner/projectile identity, a four-tick entry ramp, and immediate cancellation on unusable owner/Down/dismissal/end. Charge stops at fire and on cancellation; charge pitch is fixed to preserve timing. No global slider or gameplay-clock changes. Export reports decoded sample/4× peaks, RMS and loop steps; these measurements do not certify perceived quality or multi-player mix. Listening at unchanged sliders remains user-owned.
@@ -102,6 +102,26 @@ One-shots are 0.13–0.80s PCM mono, with exact silent endpoints and bounded att
 Default-update weapon and Doll playback uses the installed engine's **final subupdate at -1**, not zero. The previous zero-only guard could skip every cue and sustain start. The [recording/IL analysis](research/2026-09-14-doll-playtest-video.md#audio-diagnosis-before-gain) owns the evidence; bounded `RitualWeapon event=AudioVoice` checks now expose device acceptance two ticks later. Do not compensate for a missed hook by globally raising volume.
 
 Design sources and license/version caveats are in [weapon findings](encounters/first-severance/WEAPONS.md#weapon-sound-and-ten-slot-companion-references). External `Claws/Magic/Ranged/Summon/Rogue/Doll.wav` auditions retain runtime event gains and representative macro timelines (not every concurrent projectile/peer); only a reported safety attenuation prevents preview clipping. The same external manifest preserves input/export hashes, exact recipe hash and previous masters. These are project-original derived SFX, not standalone exports of the approved third-party BGM.
+
+## Doll weapons (2026-10)
+
+The cues of the refreshed Doll reward weapons and of the Doll companion. They are new files and never replace the `DollTheater` masters above; the 0.2.x weapons keep their current cues until their own refresh merges. [Attribution](../Assets/ATTRIBUTION.md) owns exact hashes, source recipes and rights; the [weapon rules](encounters/first-severance/WEAPONS.md#reward-refresh-2026-10--shared-rules) own what each weapon should sound like.
+
+Conventions:
+
+- **Folder and recipe:** `Assets/Sounds/Weapons/DollWeapons/`, rendered by `tools/generate_doll_weapon_sfx.py` (one `@cue` function per cue; fixed seed and pinned Ogg serial, so a re-render is byte-identical; every source hash-checked) with the synthesis blocks in `tools/doll_sfx_dsp.py`. A weapon PR adds its cues there, never hand-edited files.
+- **One player:** every cue plays through `DollWeaponAudio` (client only; a Dedicated Server and the main menu never build a `SoundStyle`; a cue whose file is not packaged is skipped, not thrown).
+- **Volume as given:** the call-site volume is clamped to 0-1 and used as is (no doubling, no `Reduced Effects` reference). Reduced Effects is unchanged: it never changes what is heard. A loop keeps its gain on the lease and `ActiveSound.Volume`, so it can fade in from 0.
+- **IgnoreNew per cue:** each cue file has one identifier and an instance limit (default 2). A new voice beyond the limit is ignored, never swapped in for the oldest, so no playing voice is cut with a click. A cue that is played as an arpeggio or an overlapping ratchet needs a larger entry in `DollWeaponAudio.instances`.
+- **32 voices:** at most 32 voices are tracked across all Doll weapon cues; beyond that a new voice is refused. Looped voices are leased: they stop two ticks after the last `Sustain` call, and every voice stops on world unload.
+- **Tonal home, F minor pentatonic:** the ladder is F5 Ab5 Bb5 C6 Eb6 F6 Ab6 Bb6 C7 (`DollWeaponTuning`, mirrored by the generator), in equal temperament (A4 = 440 Hz) with no extra detune: the default offset is 0 cents. Only a single-note cue may move along the ladder, through `DollWeaponAudio.Note` and its recorded root. **Composite cues and loops are never transposed:** they play as rendered, so their internal intervals and any loop point stay exact.
+- **Loudness tiers** (maximum short-term LUFS of the file, true peak at most -1 dBTP): T0 -20, T1 -17, T2 -13, T3 -11.5, T4 -10. A new cue takes its `@cue` target from these tiers and the tests measure the export; call-site volume then sets the in-game level, so state both. `CompanionSummon` sits between T3 and T4 (-10.5) because it is matched to the old DollSummon's effective level instead.
+
+| Cue | Trigger | Character | Level |
+|---|---|---|---|
+| CompanionSummon | The companion's arrival: the same `first` trigger as before (`DollCompanionVisuals`), position at the companion | Three brass key clicks and a latch, then rising music-box notes F5 Ab5 C6 Eb6, landing on F6 with a soft Ab6 and C7 and a porcelain chime; a soft F minor organ breath underneath ends in a shimmer. The old DollSummon bloom is layered about 9.5 dB down at the very start so the arrival still reads as the companion | 1.25 s stereo, -10.5 LUFS short-term, true peak -5.4 dBTP; played at volume .9 = -11.4 LUFS, equal to the old DollSummon's effective -11.5 LUFS (.325 x 2). Instance limit 2 |
+
+`DollSummon.wav` stays on disk, unused in play (the generator still reads it as a layer of `CompanionSummon`). Key fit with the music: F minor pentatonic fits Phase III clearly, but about 0.43 of Phase I's energy lies in the scale (no better than chance), so the F6 landing may rub against a Phase I chord. Keeping it is a listening decision; the audition and the in-game mix are user-owned and not run.
 
 ## Mix, diagnostics and exports
 
