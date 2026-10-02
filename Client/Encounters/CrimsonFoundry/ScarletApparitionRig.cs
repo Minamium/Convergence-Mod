@@ -33,7 +33,8 @@ internal static class ScarletApparitionRig
 
     internal static void Draw(SpriteBatch batch, int species, Vector2 center, float height, float age,
         float charge, float recoil, float alpha, bool flip = false, float rotation = 0,
-        float dissolve = 0, float melt = 0, Matrix? projection = null, bool local = false, float cut = 0)
+        float dissolve = 0, float melt = 0, Matrix? projection = null, bool local = false, float cut = 0,
+        in Vfx.ScarletApparitionMotion motion = default, in Vfx.ScarletBodyState material = default)
     {
         if (Main.dedServ || species is <0 or >1 || bodies[species] is not { } texture || alpha <= .001f || dissolve >= 1) return;
         bool reduced = CrimsonVisuals.Reduced;

@@ -34,7 +34,7 @@ internal static class CrimsonChoirRig
     internal static void Draw(SpriteBatch batch, Vector2 center, float height, float age, float charge,
         float recoil, float alpha, bool flipped, float rotation = 0, float dissolve = 0,
         float melt = 0, bool armsOnly = false, ReadOnlySpan<CrimsonChoirCue> cues = default,
-        Matrix? projection = null, Vector2? screenOrigin = null)
+        Matrix? projection = null, Vector2? screenOrigin = null, float heave = 0, in Vfx.ScarletChoirState material = default)
     {
         if (Main.dedServ || body is not { } texture || alpha <= .001f || height <= 0 || dissolve >= 1) return;
         bool reduced = CrimsonVisuals.Reduced;

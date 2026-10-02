@@ -252,4 +252,14 @@
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonPhaseRules.cs" Link="Domain/CrimsonPhaseRules.cs" />
     <Compile Include="../../Content/Encounters/CrimsonFoundry/CrimsonRhythm.cs" Link="Domain/CrimsonRhythm.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Scarlet attack expression: FNA-free notes, envelopes, approved motion and body material. -->
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/CrimsonChoirCue.cs" Link="Presentation/CrimsonChoirCue.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletEnvelope.cs" Link="Presentation/ScarletEnvelope.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletNote.cs" Link="Presentation/ScarletNote.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletGestureMotion.cs" Link="Presentation/ScarletGestureMotion.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletBodyMaterial.cs" Link="Presentation/ScarletBodyMaterial.cs" />
+    <!-- G0: sampled once from the approved prototype by tools/scarlet_motion_golden.mjs. -->
+    <EmbeddedResource Include="Data/scarlet-motion-golden.json" LogicalName="scarlet-motion-golden.json" />
+  </ItemGroup>
 </Project>
