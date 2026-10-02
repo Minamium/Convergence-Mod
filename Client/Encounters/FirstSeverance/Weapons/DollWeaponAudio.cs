@@ -29,6 +29,9 @@ internal static class DollWeaponAudio
     private static readonly Dictionary<string, int> instances = new(StringComparer.Ordinal)
     {
         ["CompanionSummon"] = 2,
+        // Lacuna Testament: openings and pellets of seven irises overlap near the end of the build (up to ~9 a second).
+        ["LacunaIrisWarn"] = 3, ["LacunaIrisFire"] = 4, ["LacunaPelletWarn"] = 4, ["LacunaPelletFire"] = 6,
+        ["LacunaPelletHit"] = 6, ["LacunaBeamHit"] = 3,
     };
     private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, SoundStyle> styles = new(StringComparer.Ordinal);

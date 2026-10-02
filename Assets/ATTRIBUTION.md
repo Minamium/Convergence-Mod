@@ -2,6 +2,254 @@
 
 ## Records
 
+### Lacuna Testament cues — 2026-10-03
+
+The fifteen cues of the refreshed Lacuna Testament (the magic Doll reward weapon): fourteen stereo Vorbis one-shots and one sample-exact stereo PCM16 WAV loop of exactly 176,400 frames (4.0 s, eight of the beam's 30-tick visual pulse periods). [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns each cue's recipe, its baked beats against the weapon's tick schedule (mirrored from `LacunaTestamentScore` and pinned by `tools/tests/test_doll_weapon_audio.py`), the loudness tiers and the source hashes; [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py) owns the original synthesis (music-box comb tooth on the F minor pentatonic ladder, brass ratchet, porcelain ring and crack, additive flue organ, shimmer, low thump), and both reuse the helpers of [`tools/generate_ebon_sfx.py`](../tools/generate_ebon_sfx.py) and [`tools/generate_ebon_reward_sfx.py`](../tools/generate_ebon_reward_sfx.py) unmodified. Every layer is original synthesis except one Kenney recording (`metalLatch`, the CC0 1.0 file already recorded in the Ebon Manor reward audio table of this register) under the great aperture's clank; it stays in the local store, is SHA-256 verified before use and is not committed. The loop is periodic by construction (whole cycles on its 0.25 Hz grid, FFT-synthesised noise on its own bins, circularly placed tings, a high-pass over three periods), so its wrap is as smooth as its inside. Loudness follows the Ebon scale (BS.1770 K-weighted maximum 400 ms short-term LUFS; true peak at most -1 dBTP after the Vorbis round trip, or over the loop played round). Nothing is transposed at runtime except the two single-note cues (`LacunaIrisFire`, `LacunaPelletFire`, recorded at C6 and played on the ladder step of each iris). The audition page and report stay in the git-ignored `.local`.
+
+| Key | Store or repository file | Source | Source SHA256 |
+|---|---|---|---|
+| metal_latch | sfx-sources/cc0/pack-OGA-Kenney-RPGsounds.zip!OGG/metalLatch.ogg | Kenney RPG Audio metalLatch.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0) | `ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708` |
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunairiswarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.1 LUFS (played at volume 0.7: -20.2 LUFS effective), true peak -1.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `8c4b2a100dabff66d881b79a98c9f206e801cb724ab385bde4edea1ffbefc44b`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunairisfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.66 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.8: -18.9 LUFS effective), true peak -9.7 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `0afe9dda65f1529a70984a566c8991165e0904777a17649b3f1a523192f40f76`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunapelletwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.16 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -21.1 LUFS (played at volume 0.55: -26.3 LUFS effective), true peak -1.2 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `99c90e4c7e8ea2ac62ad6086ba21ea6ff466eca8e2fbecf3e63121a57b0225bf`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunapelletfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.36 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.7: -23.1 LUFS effective), true peak -10.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `d4500431428fd9e9f18e11898a0f56340cb808ab09a8e54388d3955ad6c1a3a2`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletHit.ogg`
+- Asset ID: doll-weapon-sfx-lacunapellethit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.22 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -4.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `979a926762cbe2c7862da3484b09a46153c50a1e9fac11fcae0cff06e72af177`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaMergeWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunamergewarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.42 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -1.5 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `239230f8fe8d61d76ffb78c26a2f969203c7cc81301b38006275d24593a341e0`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaMergeFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunamergefire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.76 s)
+- Creator: recordings by Kenney; synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: public-domain
+- Source work and URL: metal_latch in the table above as selected by the cue recipe; remaining layers original synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -12.3 LUFS (played at volume 0.85: -13.7 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
+- License and redistribution terms: CC0 1.0 recordings and project-owned masters; the layered cue follows the existing project asset terms
+- Required attribution: none required by CC0; retain the table above as courtesy credit
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `cafd27aff735bdd0298ccd561496626e67d482262defc9d1587c1131b4166589`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamWarn.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamwarn-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.71 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `b1c972b4ee29d3b190f4dc6e609c8ded5fb6a8c7fc62ab050782bffd60460e9d`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamFire.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamfire-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (1.46 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -10.0 LUFS (played at volume 0.9: -10.9 LUFS effective), true peak -2.8 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `831b19915255692f9ffdb376f60d46b2b07d63b55cfceaefd85ec40a2562240b`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamLoop.wav`
+- Asset ID: doll-weapon-sfx-lacunabeamloop-20261003
+- Asset type: stereo 44.1 kHz PCM16 WAV Doll weapon loop (4.00 s, 176400 frames)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 PCM16 WAV (sample-exact loop)
+- Human modifications: periodic original synthesis; short-term loudness -14.0 LUFS (played at volume 0.7: -17.1 LUFS effective), true peak -9.9 dBFS; loop wrap step 0.0008 against 0.0471 inside
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `52f058f643642ce4183a41dddf0f5b0eed32fe5f3b0a2032417c85ba2a297c58`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden1.ogg`
+- Asset ID: doll-weapon-sfx-lacunawiden1-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.58 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.75: -19.4 LUFS effective), true peak -7.3 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `391e8aba1e45d22e50131cb9c358a81b13c95d1687ca6140143f18d218eb5828`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden2.ogg`
+- Asset ID: doll-weapon-sfx-lacunawiden2-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.58 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.75: -19.5 LUFS effective), true peak -7.4 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `6f5f07c09c440df4fcfb603b5278365bb7dc2b07aa546d47c7dedbee0656c8ec`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden3.ogg`
+- Asset ID: doll-weapon-sfx-lacunawiden3-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.93 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.75: -15.5 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `e8019060e7080d0fb3582b96f93ff9a83a2eb58897c7e4528e99a8b6f82fa528`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamHit.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamhit-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.26 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -5.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `0ed64cbd7f8c4dc791a481eaa5c2d3aa56330a08e29cbda0a4750b6f644244b5`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamEnd.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeamend-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.68 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -3.0 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `9141d5eaa3a9e8ca59e9748ba1df4c9fefca407a9a641591102d90097ef7bdc5`
+
+- Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamMiss.ogg`
+- Asset ID: doll-weapon-sfx-lacunabeammiss-20261003
+- Asset type: stereo 44.1 kHz Vorbis Doll weapon cue (0.89 s)
+- Creator: synthesis and layering by Convergence with owner-directed Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: none; original NumPy synthesis
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy 2.4.4, SciPy 1.16.1, soundfile 0.14.0/libsndfile 1.2.2 Vorbis at compression level 0.4
+- Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
+- License and redistribution terms: original project asset under the existing project terms
+- Required attribution: none; retain this provenance
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- SHA256: `9f354bf63f482556bb22a5c6df38ccc7e8f80af6a78e0818e2925b3e903e4555`
+
+### Lacuna Testament void material — 2026-10-03
+
+The Lacuna Testament's own light material for the shared Doll weapon layer ([WEAPONS.md](../docs/encounters/first-severance/WEAPONS.md#magic--lacuna-testament)).
+
+- Runtime file: `Assets/AutoloadedEffects/Shaders/DollLacunaEnergy.fxc`
+- Asset ID: dolllacunaenergy-20261003
+- Asset type: compiled original material
+- Creator: project-owner-directed original work with Anthropic Claude assistance
+- Creation/acquisition date: 2026-10-03
+- Source type: original
+- Source work and URL: original Convergence HLSL source alongside runtime export
+- Tool/model/version: FXC fx_2_0 O3; compiler/source/export hashes in compiled.json
+- Human modifications: Original repository-owned DollLacunaEnergy.fx, evaluated per art dot in the Doll weapon layer's half-resolution Light target and quantized to the Doll palette (its palette block is identical to DollPixel.fx): a void beam (near-black core with plum streaks drifting inward and rare pearl sparks, a one-dot pearl lip, violet/pearl rims whose folds flow outward, a one-dot pearl silhouette on the collision edge, a dithered halo, travelling pulses, a white-hot opening, a far-end cap and a mask that keeps the great aperture in front of its own light), void holes with octant-exact one-dot pearl lips and inward-spiralling violet arms, and pellet wakes; flowing Luminance WavyBlotchNoise and TurbulentNoise sampled at runtime (not copied). Written without uniform-only branches. No texture, Calamity or other third-party art/code/sample imported.
+- License and redistribution terms: existing project original code/asset terms; no new third-party redistribution grant
+- Required attribution: retain project provenance and generation disclosure
+- Reviewer and review date: Claude offline compiled-material review with `tools/preview-doll-lacuna.ps1` (real Lacuna sprites and Emit sequence, zoom 1, dark and bright ground, pixel checks) 2026-10-03; native playtest not_run
 ### Scarlet Invocation reward weapon audio — 2026-10-03
 
 Thirty-five cues in 38 files (`OrganShot` is one file per pipe) for the Scarlet Score Reliquary and the five Scarlet Invocation reward weapons ([rewards spec](../docs/encounters/crimson-foundry/REWARDS.md#art-and-audio)). On 2026-10-03 the owner auditioned two takes (A and B) of each of 28 cue blocks on the local audition page and chose **B** for Cadence, ReliquaryOpen, ScytheWhip, StaffWindup, StaffBarline and RiverRelease and **A** for every other block (the Toll block is the whole Toll0–Toll7 ladder; the OrganShot block is all four pipe files of take A). That choice is the owner's approval of these takes: 37 files are the auditioned masters byte for byte, and ReliquaryOpen is its master with the show's level lift baked in on 2026-10-03 (loudness revision below). Each cue layers CC0 recordings from the VSCO 2 CE and VCSL sample libraries, Freesound and OpenGameArt; no synthesized tone or noise layer is used. No local recording of fire, pouring liquid, wax, bone or paper exists, so the recipe uses the stand-ins named per file (wind and the organ blower for flame, bubbles for liquid, wood chops and stone grains for bone and wax, book pages for paper). The recordings, libraries, recipe and audition page stay outside the repository; no raw sample is distributed.

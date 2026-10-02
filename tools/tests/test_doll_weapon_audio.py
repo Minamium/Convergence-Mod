@@ -60,6 +60,41 @@ def registry():
     return {name: (float(target), float(limit), float(volume)) for name, target, limit, volume in rows}
 
 
+def loops():
+    """Cues registered with loop=True: sample-exact PCM16 WAV loops instead of Ogg one-shots."""
+    text = GENERATOR.read_text(encoding="utf-8")
+    return {name for name, args in re.findall(r'@cue\("(\w+)",(.*?)\)\ndef ', text, re.S) if "loop=True" in args}
+
+
+def exports():
+    """Exported cue files by stem: Ogg one-shots and WAV loops."""
+    return {p.stem: p for p in SOUNDS.iterdir() if p.suffix in (".ogg", ".wav")}
+
+
+def wav_info(path):
+    """(format, channels, rate, bits, frames) of a RIFF WAV file."""
+    data = path.read_bytes()
+    if data[:4] != b"RIFF" or data[8:12] != b"WAVE":
+        raise AssertionError(f"{path.name}: not a RIFF WAVE file")
+    position, fmt, frames = 12, None, None
+    while position + 8 <= len(data):
+        chunk, size = data[position:position + 4], struct.unpack_from("<I", data, position + 4)[0]
+        if chunk == b"fmt ":
+            fmt = struct.unpack_from("<HHIIHH", data, position + 8)
+        elif chunk == b"data":
+            frames = size
+        position += 8 + size + (size & 1)
+    if fmt is None or frames is None:
+        raise AssertionError(f"{path.name}: missing fmt or data chunk")
+    audio_format, channels, rate, _, block, bits = fmt
+    return audio_format, channels, rate, bits, frames // block
+
+
+def csharp_ints(text, name):
+    match = re.search(rf"\b{name}\s*=\s*\{{([^}}]*)\}}", text) or re.search(rf"\b{name}\s*=\s*(-?\d+)\b", text)
+    return [int(v) for v in re.findall(r"-?\d+", match.group(1))]
+
+
 def numeric_stack():
     return all(importlib.util.find_spec(name) for name in ("numpy", "scipy", "soundfile"))
 
@@ -68,8 +103,21 @@ class DollWeaponExports(unittest.TestCase):
     def test_registry_and_exports_match(self):
         cues = registry()
         self.assertIn("CompanionSummon", cues)
-        self.assertEqual(set(cues), {p.stem for p in SOUNDS.glob("*.ogg")})
-        self.assertEqual([], sorted(p.name for p in SOUNDS.iterdir() if p.suffix != ".ogg"), "one-shots are Ogg only")
+        self.assertEqual(set(cues), set(exports()))
+        self.assertEqual(set(cues) - loops(), {p.stem for p in SOUNDS.glob("*.ogg")}, "one-shots are Ogg")
+        self.assertEqual(loops(), {p.stem for p in SOUNDS.glob("*.wav")}, "loops, and only loops, are WAV")
+        self.assertEqual([], sorted(p.name for p in SOUNDS.iterdir() if p.suffix not in (".ogg", ".wav")))
+
+    def test_loops_are_sample_exact_stereo_pcm16(self):
+        cues = registry()
+        self.assertIn("LacunaBeamLoop", loops())
+        for name in sorted(loops()):
+            with self.subTest(cue=name):
+                audio_format, channels, rate, bits, frames = wav_info(SOUNDS / f"{name}.wav")
+                self.assertEqual((1, 2, 44100, 16), (audio_format, channels, rate, bits))
+                self.assertEqual(round(cues[name][1] * 44100), frames, "a loop is exactly its registered length")
+        # The Lacuna beam's loop spans eight of the beam's 30-tick pulse periods.
+        self.assertEqual(8 * 30 / 60, cues["LacunaBeamLoop"][1])
 
     def test_exports_are_stereo_vorbis_within_budget_with_pinned_serial(self):
         cues = registry()
@@ -88,7 +136,7 @@ class DollWeaponExports(unittest.TestCase):
 
     def test_every_export_has_an_exact_attribution_record(self):
         text = (ROOT / "Assets/ATTRIBUTION.md").read_text(encoding="utf-8")
-        for clip in sorted(SOUNDS.glob("*.ogg")):
+        for clip in sorted(exports().values()):
             with self.subTest(cue=clip.stem):
                 rel = clip.relative_to(ROOT).as_posix()
                 start = text.index(f"- Runtime file: `{rel}`")
@@ -105,6 +153,41 @@ class DollWeaponExports(unittest.TestCase):
         self.assertEqual(re.findall(r"\d+", re.search(r"Pentatonic = \{([^}]*)\}", cs).group(1)),
                          re.findall(r"\d+", re.search(r"^PENTATONIC = \(([^)]*)\)", py, re.MULTILINE).group(1)))
         self.assertIn("DefaultCents = 0", cs)
+
+    def test_lacuna_schedule_is_mirrored_by_the_generator(self):
+        # The composite Lacuna cues bake their inner beats against the weapon's ticks: the generator's LACUNA table
+        # must equal LacunaTestamentScore and the call-site constants of LacunaVisuals.
+        score = (ROOT / "Content/Encounters/FirstSeverance/Rewards/LacunaTestamentScore.cs").read_text(encoding="utf-8")
+        visuals = (ROOT / "Client/Encounters/FirstSeverance/Weapons/LacunaVisuals.cs").read_text(encoding="utf-8")
+        py = GENERATOR.read_text(encoding="utf-8")
+        table = re.search(r"^LACUNA = \{(.*?)^\}", py, re.S | re.M).group(1)
+
+        def mirrored(key):
+            return [int(v) for v in re.findall(r"-?\d+", re.search(rf'"{key}":\s*(\([^)]*\)|\d+)', table).group(1))]
+
+        self.assertEqual(csharp_ints(score, "births"), mirrored("births"))
+        self.assertEqual(csharp_ints(score, "clicks"), mirrored("clicks"))
+        fire = csharp_ints(score, "Fire")[0]
+        self.assertEqual([fire + 120, fire + 240, fire + 360], mirrored("widen"))
+        for cs_name, key in (("ShotDelay", "shot_delay"), ("ShotPeriod", "shot_period"), ("ShotTell", "shot_tell"),
+                             ("FrameParting", "frame_parting"), ("FrameHalf", "frame_half"), ("Merge", "merge"),
+                             ("Formed", "formed"), ("Fire", "fire"), ("PulsePeriod", "pulse_period")):
+            self.assertEqual(csharp_ints(score, cs_name), mirrored(key), cs_name)
+        self.assertIn('"docked": tuple(350 + 2 * i for i in range(7))', table)
+        self.assertIn("internal static int Docked(int iris) => 350 + 2 * Math.Clamp(iris, 0, Irises - 1);", score)
+        self.assertEqual(int(re.search(r"^LACUNA_NOTE_ROOT = (\d+)", py, re.M).group(1)),
+                         int(re.search(r"NoteRoot = (\d+);", visuals).group(1)), "single-note cues share their recorded root")
+        cues = registry()
+        for name in re.findall(r'DollWeaponAudio\.(?:Play|Note|Sustain)\((?:ref \w+, )?"(\w+)"', visuals):
+            self.assertIn(name, cues)
+            constant = {"LacunaIrisWarn": "IrisWarnVolume", "LacunaIrisFire": "IrisFireVolume", "LacunaPelletWarn": "PelletWarnVolume",
+                        "LacunaPelletFire": "PelletFireVolume", "LacunaPelletHit": "PelletHitVolume", "LacunaMergeWarn": "MergeWarnVolume",
+                        "LacunaMergeFire": "MergeFireVolume", "LacunaBeamWarn": "BeamWarnVolume", "LacunaBeamFire": "BeamFireVolume",
+                        "LacunaBeamLoop": "LoopVolume", "LacunaWiden1": "WidenVolume", "LacunaWiden2": "WidenVolume",
+                        "LacunaWiden3": "WidenVolume", "LacunaBeamHit": "BeamHitVolume", "LacunaBeamEnd": "EndVolume",
+                        "LacunaBeamMiss": "MissVolume"}[name]
+            value = float(re.search(rf"\b{constant} = ([\d.]+)f", visuals).group(1))
+            self.assertEqual(cues[name][2], value, f"{name}: the audition plays the call-site volume")
 
 
 class DollWeaponPlaybackContract(unittest.TestCase):
@@ -187,7 +270,12 @@ class DollWeaponPlaybackContract(unittest.TestCase):
         for path in (ROOT / "Client").rglob("*.cs"):
             routed |= set(re.findall(r'DollWeaponAudio\.(?:Play|Note|Sustain)\((?:ref \w+, )?"(\w+)"', path.read_text(encoding="utf-8")))
         self.assertTrue(routed)
-        self.assertLessEqual(routed, {p.stem for p in SOUNDS.glob("*.ogg")})
+        self.assertLessEqual(routed, set(exports()))
+        # A loop is only ever sustained, and only a loop is.
+        sustained = set()
+        for path in (ROOT / "Client").rglob("*.cs"):
+            sustained |= set(re.findall(r'DollWeaponAudio\.Sustain\(ref \w+, "(\w+)"', path.read_text(encoding="utf-8")))
+        self.assertEqual(sustained & set(exports()), loops() & routed)
 
 
 @unittest.skipUnless(numeric_stack(), "numpy, scipy and soundfile are local audio tools, not CI")
@@ -215,6 +303,30 @@ class DollWeaponRender(unittest.TestCase):
         effective = lufs + 20 * __import__("math").log10(spec.volume)
         self.assertAlmostEqual(legacy, effective, delta=1.0, msg="the summon keeps the old effective loudness")
 
+    def test_every_cue_sits_on_its_tier_under_the_peak_ceiling(self):
+        import numpy as np
+        import soundfile as sf
+        gen = self.gen
+        for name, path in sorted(exports().items()):
+            with self.subTest(cue=name):
+                x, rate = sf.read(str(path), always_2d=True, dtype="float64")
+                self.assertEqual(44100, rate)
+                spec = gen.CUES[name]
+                looped = np.concatenate((x, x)) if spec.loop else x
+                # The peak ceiling may hold a transient cue a little under its tier, never over it.
+                self.assertLessEqual(gen.loudness(looped), spec.target_lufs + 0.5)
+                self.assertGreaterEqual(gen.loudness(looped), spec.target_lufs - 2.0)
+                self.assertLessEqual(gen.loop_peak_db(x) if spec.loop else gen.true_peak_db(x), -1.0)
+
+    def test_loops_are_seamless(self):
+        import soundfile as sf
+        for name in sorted(loops()):
+            with self.subTest(cue=name):
+                x, _ = sf.read(str(SOUNDS / f"{name}.wav"), always_2d=True, dtype="float64")
+                seam = self.gen.seam(x)
+                self.assertLessEqual(seam["wrap_step"], 0.5 * seam["max_inner_step"], "the wrap is no larger than an inner step")
+                self.assertLessEqual(abs(seam["head_tail_rms_db"]), 1.0, "head and tail sit at the same level")
+
     def test_generation_is_deterministic(self):
         store_root = self.gen.find_store()
         if store_root is None:
@@ -227,6 +339,18 @@ class DollWeaponRender(unittest.TestCase):
             b = (Path(second) / "CompanionSummon.ogg").read_bytes()
         self.assertEqual(a, b, "two renders are byte-identical")
         self.assertEqual(a, (SOUNDS / "CompanionSummon.ogg").read_bytes(), "the committed cue is reproducible")
+
+    def test_lacuna_cues_are_reproducible(self):
+        # Every Lacuna cue except LacunaMergeFire (which reads a store recording) is pure synthesis.
+        store = self.gen.Store(self.gen.find_store(), (ROOT / "Assets/ATTRIBUTION.md").read_text(encoding="utf-8"))
+        names = [n for n, c in self.gen.CUES.items() if c.group == "Lacuna" and (n != "LacunaMergeFire" or store.root)]
+        with tempfile.TemporaryDirectory() as folder:
+            for name in names:
+                with self.subTest(cue=name):
+                    self.gen.render_cue(name, store, Path(folder))
+                    suffix = ".wav" if self.gen.CUES[name].loop else ".ogg"
+                    self.assertEqual((SOUNDS / f"{name}{suffix}").read_bytes(), (Path(folder) / f"{name}{suffix}").read_bytes(),
+                                     "the committed cue is reproducible")
 
 
 if __name__ == "__main__":
