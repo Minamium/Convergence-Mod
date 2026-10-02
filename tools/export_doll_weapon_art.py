@@ -11,10 +11,10 @@ that folder's BRIEF.md). Every step is mechanical and reuses tools/export_ebon_a
    the rest join when their gap is about 12 px or less. The count is checked per sheet
    and objects are sorted row-major by the brief's cell grid.
 4. Dot pitch, per sheet: strong colour or alpha edges inside the objects. The coarse
-   pitch is the period (3.0-16.0 px, 0.02 steps) whose edge phases agree best inside
+   pitch is the period (3.0-24.0 px, 0.02 steps) whose edge phases agree best inside
    64 px tiles; that agreement is the reported coherence. It is lifted to the
    fundamental when a whole multiple is as coherent, then refined over whole lines
-   within +-3 %. Edits use their base sheet's pitch so a family registers
+   within +-3 %. A pitch within 0.02 px of the 24 px ceiling is flagged. Edits use their base sheet's pitch so a family registers
    (DW01B->DW01, DW02E->DW02, DW04V2/V3->DW04); their own pitch is recorded.
 5. Palette: every opaque pixel snaps to the fixed Doll palette by OKLab nearest
    (deltaE = 100 x OKLab distance, reported per object). An object whose mean deltaE
@@ -59,8 +59,16 @@ report.json, contact.png, anchors.png and DollArtAnchors.g.cs.txt (a preview tha
 Mod build cannot pick up). --write-repo also writes the runtime PNGs to
 Assets/Textures/Items/DollWeapons/ and the generated anchors; that belongs to the
 per-weapon art PRs after the owner's art review.
-Requires Pillow, numpy and scipy (local asset tools, not CI):
-  py -3 tools/export_doll_weapon_art.py [--source <delivery folder>]
+Requires Pillow, numpy and scipy (local asset tools, not CI). Run it with the Python 3.12
+that has them (the plain `py -3` may not), pointing PYTHONPATH at a local dependency folder
+when they are not installed:
+  py -3.12 tools/export_doll_weapon_art.py [--source <delivery folder>]
+  py -3.12 tools/export_doll_weapon_art.py --write-repo [--only <output names>]
+--only limits what --write-repo puts into the repository to the named outputs (a bare
+name also takes its _L/_S rungs, e.g. ClawOpen takes ClawOpen_L), so art can land one
+weapon per PR. The generated anchors then cover those outputs plus every runtime output
+whose PNG is already in the repository.
+The delivery folder (asset-deliveries/doll-weapons/2026-10-02) must hold manifest.json.
 """
 import argparse
 import hashlib
@@ -84,8 +92,8 @@ from export_ebon_art import block_mode, clean_alpha, sha256  # noqa: E402  (shar
 
 ROOT = Path(__file__).resolve().parents[1]
 PREVIEW_DIR = ROOT / ".local" / "doll-weapon-art"
-TEXTURE_DIR = ROOT / "Assets" / "Textures" / "Items" / "DollWeapons"
-ANCHORS_CS = ROOT / "Client" / "Encounters" / "FirstSeverance" / "Weapons" / "DollArtAnchors.g.cs"
+TEXTURE_REL = Path("Assets") / "Textures" / "Items" / "DollWeapons"
+ANCHORS_REL = Path("Client") / "Encounters" / "FirstSeverance" / "Weapons" / "DollArtAnchors.g.cs"
 TEXTURE_ASSET_ROOT = "Convergence/Assets/Textures/Items/DollWeapons/"
 DELIVERY = Path("asset-deliveries") / "doll-weapons" / "2026-10-02"
 DELIVERY_ENV = "CONVERGENCE_DOLL_WEAPON_DELIVERY"
@@ -172,16 +180,17 @@ IRON = (1, 2, 3)
 PORCELAIN = (4, 5, 6, 7)
 PEARL = (8, 9)
 BRASS = (10, 11, 12)
-GLASS = 13
 RUBY = (14, 15)
 DARK = (0, 1, 2, 13, 15)
 IVORY = PORCELAIN + PEARL
 
 OPAQUE = 128            # alpha > 128 is opaque
+TALONS = 5              # talon tips of an open hand; a pose with fewer is reported
 SPECK = 64              # px; smaller opaque components are residue
 JOIN = 6                # px dilation radius: parts whose gap is ~12 px or less join
 EDGE = 48               # RGB L1 difference that counts as a drawn edge
-PERIODS = np.round(np.arange(3.0, 16.0001, 0.02), 2)
+PITCH_MIN, PITCH_MAX = 3.0, 24.0   # px; the search range of the dot pitch
+PERIODS = np.round(np.arange(PITCH_MIN, PITCH_MAX + 0.0001, 0.02), 2)
 TILE = 64
 SUBHARMONIC = 0.85      # a multiple this coherent is the fundamental
 REFINE = 0.03           # line refinement window (+-3 %)
@@ -584,7 +593,7 @@ def bbox(mask):
 
 
 def enclosed_holes(opaque, min_area=1):
-    """Transparent regions fully enclosed by opaque pixels, largest first: (area, centre, box)."""
+    """Transparent regions fully enclosed by opaque pixels, largest first: (area, centre, box, mask)."""
     holes = ndimage.binary_fill_holes(opaque) & ~opaque
     found = []
     for part in components(holes, FOUR, min_area):
@@ -652,6 +661,9 @@ def claw_anchors(idx, dot_px):
     if pivot is not None:
         result["pivot"] = pivot
         result["tips"] = talon_tips(in_group(idx, IVORY), pivot, dot_px)
+        if len(result["tips"]) < TALONS:
+            notes.append(f"found {len(result['tips'])} talon tips, expected {TALONS}; tips are ordered by angle, so an "
+                         f"index is not a fixed finger")
     return result, notes
 
 
@@ -669,8 +681,15 @@ def order_rows(points, dot_px):
     return [p for r in rows for p in sorted(r, key=lambda q: q[0])]
 
 
-def talon_tips(ivory, pivot, dot_px, limit=5):
-    """Local maxima of the ivory radius around the pivot (prominence >= 3 dots), farthest first, by angle."""
+def talon_tips(ivory, pivot, dot_px, limit=TALONS):
+    """Talon tips: local maxima of the ivory radius around the pivot (prominence >= 3 dots and
+    >= 55 % of the farthest), at most `limit` of them (the farthest ones), returned sorted by
+    atan2(dy, dx) from the pivot in image coordinates (y down): the topmost tip comes first.
+
+    The index is an angular rank, not a finger identity. A pose that shows fewer tips (a
+    clenched or thrusting hand hides or merges some) shifts every later index, so a check
+    must pair tips with design talons by distance rather than by index.
+    """
     ys, xs = np.nonzero(ivory)
     if not len(xs):
         return []
@@ -960,7 +979,9 @@ ANCHOR_RULES = {
                    ">= 2 dots and >= 35 % of the largest; 2 rows x 3, row-major",
     "Claw*.grab": "source: centroid of the filled bead plate",
     "Claw*.tips": "source: up to 5 local maxima (prominence >= 3 dots, >= 55 % of the farthest) of the ivory "
-                  "radius around the pivot, sorted by angle (top first)",
+                  "radius around the pivot, sorted by atan2(dy, dx) in image coordinates, so the topmost first. The "
+                  "index is an angular rank, not a finger identity: a pose with fewer than 5 tips (warned) shifts the "
+                  "later indices, so pair tips with design talons by distance, not by index",
     "MeridianGun.muzzle": "texel: right edge of the rightmost column; y = mean opaque row of the last 3 columns + 0.5",
     "MeridianGun.grip": "source: centroid of the iron below the body line (median bottom of the rear 40 %) in x 10-40 %",
     "MeridianGun.key_seat": "texel: top edge and centre of the housing's topmost brass row",
@@ -1035,13 +1056,20 @@ class Output:
         return image
 
 
+def is_delivery(path):
+    """A delivery folder holds manifest.json (Exporter.load requires it)."""
+    return (Path(path) / "manifest.json").is_file()
+
+
 def find_delivery():
+    """The delivery folder, or None: $CONVERGENCE_DOLL_WEAPON_DELIVERY when set (it must be a delivery
+    folder; there is no fallback then), else the nearest parent folder of the repository holding one."""
     env = os.environ.get(DELIVERY_ENV)
     if env:
-        return Path(env)
+        return Path(env) if is_delivery(env) else None
     for parent in ROOT.parents:
         candidate = parent / DELIVERY
-        if (candidate / "manifest.json").is_file():
+        if is_delivery(candidate):
             return candidate
     return None
 
@@ -1071,18 +1099,20 @@ class Exporter:
 
     def load(self):
         manifest_path = self.source / "manifest.json"
-        recommendations = {}
-        if manifest_path.is_file():
-            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            recommendations = manifest.get("recommendations", {})
-            self.report["delivery"] = manifest.get("batch", self.report["delivery"])
+        if not manifest_path.is_file():
+            raise FileNotFoundError(f"{manifest_path}: not a delivery folder (manifest.json is required)")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        recommendations = manifest.get("recommendations")
+        if not recommendations:
+            raise ValueError(f"{manifest_path}: no recommendations to check the pinned inputs against")
+        self.report["delivery"] = manifest.get("batch", self.report["delivery"])
         for key, sheet in SHEETS.items():
             path = self.source / sheet.file
             digest = sha256(path)
             if digest != INPUTS[sheet.file]:
                 raise ValueError(f"{sheet.file}: unexpected input {digest[:12]} (pinned {INPUTS[sheet.file][:12]})")
             rec = recommendations.get(key)
-            if recommendations and (rec is None or rec.get("file") != sheet.file):
+            if rec is None or rec.get("file") != sheet.file:
                 self.warnings.append(f"{key}: pinned {sheet.file} is not the manifest recommendation")
             if rec is not None:
                 self.report["manifest"][key] = {"candidate": rec.get("candidate"), "accepted_by_codex": rec.get("accepted_by_codex")}
@@ -1103,7 +1133,7 @@ class Exporter:
                 self.warnings.append(f"{key}: pitch coherence {pitch['coherence']} < {LOW_COHERENCE}; check the 8x contact sheet "
                                      f"(edge-spacing mode {pitch['edge_spacing_mode_px']} px)")
             if pitch["at_search_ceiling"]:
-                self.warnings.append(f"{key}: pitch {pitch['coarse_px']} px sits at the 16 px search ceiling; the true dot may be larger")
+                self.warnings.append(f"{key}: pitch {pitch['coarse_px']} px sits at the {PITCH_MAX:g} px search ceiling; the true dot may be larger")
             mode = pitch["edge_spacing_mode_px"]
             if min(abs(mode - used), abs(mode - 2 * used)) > 1.5 and pitch["coherence"] < 0.5:
                 self.warnings.append(f"{key}: edge-spacing mode {mode} px disagrees with the pitch {r2(used)} px")
@@ -1817,6 +1847,10 @@ def cs_vector(point):
     return f"new({cs_float(point[0])}, {cs_float(point[1])})"
 
 
+ANCHOR_NOTES = {"tips": "Ordered by angle around Pivot (topmost first); an index is not a finger, and a pose can show "
+                        "fewer than 5 tips."}
+
+
 def anchors_cs(outputs, recipe_sha):
     lines = ["// <auto-generated>", f"// {GENERATED_HEADER}", f"// recipe sha256 {recipe_sha}", "// </auto-generated>",
              "using Vector2 = System.Numerics.Vector2;", "",
@@ -1841,6 +1875,8 @@ def anchors_cs(outputs, recipe_sha):
             name = pascal(key)
             if isinstance(value, bool):
                 continue
+            if key in ANCHOR_NOTES:
+                lines.append(f"        // {ANCHOR_NOTES[key]}")
             if isinstance(value, int):
                 lines.append(f"        internal const int {name} = {value};")
             elif isinstance(value, float):
@@ -1863,7 +1899,35 @@ def anchors_cs(outputs, recipe_sha):
 
 # ---------------------------------------------------------------- main
 
-def write_outputs(exporter, preview, write_repo=False):
+def select_outputs(outputs, only=None):
+    """The runtime outputs that --only names (all of them when None). A bare name also takes its
+    _L/_S rungs (ClawOpen takes ClawOpen_L). A name that matches nothing is an error."""
+    runtime = [o for o in outputs if o.runtime]
+    if only is None:
+        return runtime
+    chosen, unknown = [], []
+    for name in only:
+        hits = [o for o in runtime if o.name in (name, name + "_L", name + "_S")]
+        if not hits:
+            unknown.append(name)
+        chosen += [o for o in hits if o not in chosen]
+    if unknown:
+        raise ValueError(f"--only names no runtime output: {', '.join(unknown)}; outputs: "
+                         + ", ".join(o.name for o in runtime))
+    return [o for o in runtime if o in chosen]
+
+
+def write_outputs(exporter, preview, write_repo=False, root=ROOT, only=None):
+    """Write the preview folder; with write_repo also the runtime PNGs and the generated anchors under `root`.
+
+    Nothing outside `preview` is touched unless write_repo is set. `only` (names, see select_outputs)
+    limits the repository PNGs; the generated anchors then cover those plus every runtime output whose
+    PNG is already in the repository, so per-weapon art PRs build on each other.
+    """
+    if only is not None and not write_repo:
+        raise ValueError("only needs write_repo")
+    chosen = {o.name for o in select_outputs(exporter.outputs, only)}  # fails before anything is written
+    texture_dir, anchors_path = root / TEXTURE_REL, root / ANCHORS_REL
     preview.mkdir(parents=True, exist_ok=True)
     report = exporter.report
     for output in exporter.outputs:
@@ -1872,17 +1936,18 @@ def write_outputs(exporter, preview, write_repo=False):
         entry = dict(output.info)
         entry["anchors"] = output.anchors
         entry["runtime"] = output.runtime
-        entry["path"] = (TEXTURE_DIR.relative_to(ROOT) / f"{output.name}.png").as_posix() if output.runtime else None
+        entry["path"] = (TEXTURE_REL / f"{output.name}.png").as_posix() if output.runtime else None
         entry["sha256"] = hashlib.sha256(data).hexdigest()
         report["outputs"][output.name] = entry
-        if write_repo and output.runtime:
-            TEXTURE_DIR.mkdir(parents=True, exist_ok=True)
-            (TEXTURE_DIR / f"{output.name}.png").write_bytes(data)
-    source = anchors_cs(exporter.outputs, report["recipe_sha256"])
-    (preview / "DollArtAnchors.g.cs.txt").write_bytes(source.encode("utf-8"))
+        if write_repo and output.name in chosen:
+            texture_dir.mkdir(parents=True, exist_ok=True)
+            (texture_dir / f"{output.name}.png").write_bytes(data)
+    (preview / "DollArtAnchors.g.cs.txt").write_bytes(anchors_cs(exporter.outputs, report["recipe_sha256"]).encode("utf-8"))
     if write_repo:
-        ANCHORS_CS.parent.mkdir(parents=True, exist_ok=True)
-        ANCHORS_CS.write_bytes(source.encode("utf-8"))
+        landed = [o for o in exporter.outputs
+                  if o.runtime and (o.name in chosen or (texture_dir / f"{o.name}.png").is_file())]
+        anchors_path.parent.mkdir(parents=True, exist_ok=True)
+        anchors_path.write_bytes(anchors_cs(landed, report["recipe_sha256"]).encode("utf-8"))
     contact_sheet(exporter.outputs, preview / "contact.png")
     anchor_sheet(exporter.outputs, preview / "anchors.png")
     text = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
@@ -1912,14 +1977,27 @@ def main(argv=None):
     parser.add_argument("--write-repo", action="store_true",
                         help="also write runtime PNGs to Assets/Textures/Items/DollWeapons and the generated anchors "
                              "(art PRs only, after the owner's review)")
+    parser.add_argument("--only", nargs="+", metavar="NAME",
+                        help="with --write-repo: write only these outputs (a bare name also takes its _L/_S rungs; "
+                             "comma-separated is fine); the generated anchors cover them plus the PNGs already in the "
+                             "repository")
     parser.add_argument("--reink", action="store_true", help="force every outer boundary texel to ink (recorded)")
     args = parser.parse_args(argv)
+    only = [name for part in args.only for name in part.split(",") if name] if args.only else None
+    if only is not None and not args.write_repo:
+        parser.error("--only needs --write-repo")
     source = args.source or find_delivery()
-    if source is None or not Path(source).is_dir():
-        parser.error(f"delivery folder not found; pass --source or set {DELIVERY_ENV}")
+    if source is None or not is_delivery(source):
+        parser.error(f"delivery folder with manifest.json not found; pass --source or set {DELIVERY_ENV}")
     exporter = Exporter(source, reink=args.reink).run()
-    report = write_outputs(exporter, args.preview, args.write_repo)
+    try:
+        report = write_outputs(exporter, args.preview, args.write_repo, only=only)
+    except ValueError as error:
+        parser.error(str(error))
     print(summary(report))
+    if args.write_repo:
+        print(f"\nrepository: {len(select_outputs(exporter.outputs, only))} PNGs in {TEXTURE_REL.as_posix()} "
+              f"and {ANCHORS_REL.as_posix()}")
     return 0
 
 
