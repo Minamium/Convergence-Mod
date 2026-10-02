@@ -1,6 +1,7 @@
 using ScarletGraphicsScope = Convergence.Client.Graphics.WorldGraphicsScope;
 #nullable enable
 using System;
+using Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 using Convergence.Content.Encounters.CrimsonFoundry;
 using Luminance.Assets;
 using Luminance.Core.Graphics;
@@ -13,51 +14,37 @@ using Terraria.ModLoader;
 namespace Convergence.Client.Encounters.CrimsonFoundry;
 
 // Original artwork with species-specific articulation and accepted gesture paths.
-internal static class CrimsonRig
+internal static partial class CrimsonRig
 {
-    private static Texture2D? performer;
     private static readonly Texture2D?[] effigies = new Texture2D?[3];
     private static readonly int[] partOrder = { 3, 4, 0, 1, 2 };
     private static readonly int[] singlePart = { 0 };
     private const int Columns = 24, Rows = 32;
     private static readonly VertexPositionColorTexture[] mesh = new VertexPositionColorTexture[Columns * Rows * 6];
-    private static readonly Rectangle[] poses = { new(20, 202, 335, 540), new(422, 202, 460, 540), new(890, 190, 487, 530), new(1398, 202, 355, 540) };
-    private static readonly Vector2[] pivots = { new(190, 278), new(223, 278), new(276, 270), new(207, 278) };
     internal static void Load()
     {
         if (Main.dedServ) return;
-        performer = LoadTexture("ScarletConjurer");
+        LoadPerformer();
         string[] names = { "EmberCrown", "SableMantle" };
         for (int i = 0; i < names.Length; i++) effigies[i] = LoadTexture(names[i]);
         CrimsonChoirRig.Load();
         ScarletApparitionRig.Load();
         // Direct FNA effect construction belongs to drawing, not this loader hook.
     }
-    private static Texture2D LoadTexture(string name) => ModContent.Request<Texture2D>("Convergence/Assets/Textures/CrimsonFoundry/" + name, AssetRequestMode.ImmediateLoad).Value;
     internal static void Unload()
     {
         performer = null; Array.Clear(effigies);
         CrimsonChoirRig.Unload();
         ScarletApparitionRig.Unload();
         ScarletMaterials.Reset();
+        ScarletCueFrame.Reset();
     }
+    // The plan-list forms (CrimsonRig.Performer.cs, ScarletNotes) are shared with the offline preview; the boss
+    // forms read the frame's one scan instead of scanning Main.ActiveProjectiles per request.
     internal static (float Charge, float Recoil) Signal(CrimsonBoss boss, int source, float age)
     {
-        float until = 60, since = 100;
-        foreach (Projectile p in Main.ActiveProjectiles)
-            if (p.ModProjectile is CrimsonGesture g && g.TryBoss(out var owner) && owner == boss
-                && age >= g.Plan.Born && (source < 0 || g.Plan.Source == source))
-            {
-                float delta = g.Plan.Fire - age;
-                if (delta >= 0) until = Math.Min(until, delta); else since = Math.Min(since, -delta);
-            }
-        if (source is -1 or 3)
-            foreach (Projectile p in Main.ActiveProjectiles)
-                if (p.ModProjectile is CrimsonChorus c && CrimsonChorus.TryBoss(c.Plan,out var owner) && owner==boss && age>=c.Plan.Born && age<c.Plan.End) {
-                    float delta=c.Plan.Fire-age;
-                    if(delta>=0)until=Math.Min(until,delta);else since=Math.Min(since,-delta);
-                }
-        return (CrimsonRigMotion.Charge(until), CrimsonRigMotion.Recoil(since));
+        var frame = ScarletCueFrame.Of(boss);
+        return Signal(frame.Gestures, frame.Choruses, source, age);
     }
     internal static bool Draw(CrimsonBoss boss, SpriteBatch batch, Vector2 screen)
     {
@@ -84,59 +71,6 @@ internal static class CrimsonRig
             CrimsonEnergy.Draw(batch);
         }
         return false;
-    }
-    internal static void DrawPerformer(SpriteBatch batch, Vector2 screen, Vector2 center, float age, Vector2 velocity,
-        int facing, bool floating, float charge, float recoil, float alpha = 1, bool showOrb = true, float materialized = 1)
-    {
-        if (performer is not { } sprite) return;
-        int idle = floating ? 2 : Math.Abs(velocity.X) > .7f && MathF.Sin(age * .22f) > 0 ? 3 : 0;
-        float cast = CrimsonInvocation.Ease(charge * 2);
-        // A tiny character does not benefit from a 24x32 apparition mesh.
-        // Keep her authored pixels, a restrained silhouette rim, and no huge orb
-        // over her face. Preserve the caller's batch including UI/sky transforms.
-        using (var scope = new ScarletGraphicsScope(batch))
-        {
-            batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
-                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-            DrawPose(idle, 1 - cast); DrawPose(1, cast);
-            batch.End();
-        }
-        Vector2 orb = center + new Vector2(facing * (94 + charge * 12), -25).RotatedBy(velocity.X * .009f);
-        CrimsonEnergy.Begin();
-        if(showOrb) CrimsonEnergy.AddCore(orb, 53 + charge * 24 + recoil * 18, age, charge, recoil, alpha, CrimsonVisuals.Reduced);
-        CrimsonEnergy.Draw(batch);
-        if (floating && !CrimsonVisuals.Reduced)
-        {
-            var bloom = MiscTexturesRegistry.BloomCircleSmall.Value;
-            for (int i = 0; i < 7; i++)
-            {
-                float life = (age * .017f + i * .143f) % 1;
-                Vector2 at = center + new Vector2(MathF.Sin(i * 3.1f + life * 5) * 17, 16 + life * 36) - velocity * life * 1.4f;
-                batch.Draw(bloom, at - screen, null, new Color(255, 76, 100, 0) * ((1 - life) * .42f * alpha), 0,
-                    bloom.Size() * .5f, (2 + MathF.Sin(life * MathF.PI) * 3) / bloom.Width, SpriteEffects.None, 0);
-            }
-        }
-        void DrawPose(int pose, float opacity)
-        {
-            if (opacity < .001f) return;
-            Vector2 at = center - screen + new Vector2(0, floating ? MathF.Sin(age * .045f) * 1.4f : 0);
-            float tilt = Math.Clamp(velocity.X * .009f, -.13f, .13f) - recoil * .035f;
-            var flip = facing < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-            var origin = pivots[pose];
-            if (facing < 0) origin.X = poses[pose].Width - origin.X;
-            Color rim = new Color(243, 118, 136, 0) * (alpha * opacity * .26f);
-            for (int k = 0; k < 4; k++)
-                batch.Draw(sprite, at + new Vector2(k == 0 ? -1 : k == 1 ? 1 : 0, k == 2 ? -1 : k == 3 ? 1 : 0),
-                    poses[pose], rim, tilt, origin, 56f / 540, flip, 0);
-            if(materialized>=.999f) batch.Draw(sprite, at, poses[pose], Color.White * (alpha * opacity), tilt, origin, 56f / 540, flip, 0);
-            else for(int strip=0;strip<18;strip++) {
-                var source=poses[pose];int h=source.Height/18;int y=strip*h;source.Y+=y;source.Height=Math.Min(h,poses[pose].Height-y);
-                float settle=CrimsonInvocation.Ease((materialized-strip*.025f)*2.1f);
-                Vector2 drift=new Vector2(MathF.Sin(strip*4.3f)*55*(1-settle),0);
-                batch.Draw(sprite,at+drift,source,Color.Lerp(new Color(255,37,86),Color.White,settle)*(alpha*opacity*settle),
-                    tilt,origin-new Vector2(0,y),56f/540,flip,0);
-            }
-        }
     }
     private static void DrawInvocation(SpriteBatch batch,CrimsonBoss boss,float age,float opening,float alpha)
     {
@@ -170,7 +104,8 @@ internal static class CrimsonRig
         float appear = boss!.State.Phase is 1 or 2 && effigy.State.Index == boss.State.Phase
             ? CrimsonEnsemble.Emergence(age - boss.State.PhaseStart, false) : CrimsonInvocation.Ease(born / 62);
         float snap = MathF.Exp(-Math.Max(0, born - 12) / 14);
-        var signal = Signal(boss!, effigy.State.Index, age);
+        var frame = ScarletCueFrame.Of(boss!);
+        var signal = Signal(frame.Gestures, frame.Choruses, effigy.State.Index, age);
         float size = effigy.State.Index switch { 0 => 350, 1 => 430, _ => 490 };
         float alpha = boss!.State.Presence(effigy.State.Index, age);
         if (boss.State.Stage is CrimsonStage.Victory or CrimsonStage.Defeat) alpha *= .35f;
@@ -186,75 +121,34 @@ internal static class CrimsonRig
                         new Color(142, 98, 159) * (alpha * .09f), effigy.NPC.spriteDirection < 0, effigy.NPC.rotation, true, effigy.State.Index);
         }
         float dissolving = effigy.State.Index == boss.State.Phase - 1 ? CrimsonEnsemble.RetreatDissolve(age - boss.State.PhaseStart) : 0;
+        bool flipped = effigy.NPC.spriteDirection < 0, reduced = CrimsonVisuals.Reduced;
+        // The body's own notes (a local participant only), aimed from Vespera; empty = today's picture.
+        Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
+        int noted = frame.Participant ? ScarletNotes.Collect(frame.Gestures, effigy.State.Index, age, flipped,
+            boss.NPC.Center.X, boss.NPC.Center.Y, notes) : 0;
         if (effigy.State.Index == 2)
         {
             Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
-            int count = ChoirCues(boss, age, cues);
+            int count = ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues);
+            var choir = ScarletBodyMaterial.Choir(age, notes[..noted], reduced);
             CrimsonChoirRig.Draw(batch, at, size * (.90f + appear * .1f), age,
-                signal.Charge, signal.Recoil, appear * alpha, effigy.NPC.spriteDirection < 0,
-                effigy.NPC.rotation + signal.Recoil * .045f, dissolving, cues: cues[..count]);
+                signal.Charge, signal.Recoil, appear * alpha, flipped,
+                effigy.NPC.rotation + signal.Recoil * .045f, dissolving, cues: cues[..count],
+                heave: ScarletGestureMotion.Heave, material: choir);
             return false;
         }
+        var motion = effigy.State.Index == 0 ? ScarletGestureMotion.Crown(age, notes[..noted]) : ScarletGestureMotion.Mantle(age, notes[..noted]);
+        var body = ScarletBodyMaterial.Apparition(age, notes[..noted], motion, flipped, reduced);
         ScarletApparitionRig.Draw(batch, effigy.State.Index, at, size * (.90f + appear * .1f), age,
-            signal.Charge, signal.Recoil, appear * alpha, effigy.NPC.spriteDirection < 0,
-            effigy.NPC.rotation, dissolving);
+            signal.Charge, signal.Recoil, appear * alpha, flipped,
+            effigy.NPC.rotation, dissolving, motion: motion, material: body);
         return false;
     }
-    internal static int ChoirCues(CrimsonBoss boss, float age, Span<CrimsonChoirCue> cues, bool final = false)
-    {
-        int count = 0;
-        foreach (Projectile projectile in Main.ActiveProjectiles)
-        {
-            if (projectile.ModProjectile is not CrimsonGesture gesture || !gesture.TryBoss(out var owner) || owner != boss) continue;
-            var p = gesture.Plan;
-            if ((!final && p.Source != 2) || age < p.Born || age >= p.End) continue;
-            var cue = new CrimsonChoirCue(p.Born, p.Fire, p.End, p.Step % 4,
-                p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialGrid);
-            bool duplicate = false;
-            for (int i = 0; i < count; i++) if (cues[i] == cue) { duplicate = true; break; }
-            if (!duplicate && count < cues.Length) cues[count++] = cue;
-        }
-        return count;
-    }
-    internal static void DrawApparition(SpriteBatch batch, int species, Vector2 center, float age, float reveal, float dissolve, float scale = .70f)
-    {
-        if (reveal <= 0 || dissolve >= 1) return;
-        float height = species == 0 ? 350 : species == 2 ? 490 : 430;
-        if (species == 2)
-        {
-            CrimsonChoirRig.Draw(batch, center, height * scale, age + species * 37,
-                .7f, 0, reveal, false, dissolve: dissolve);
-            return;
-        }
-        ScarletApparitionRig.Draw(batch,species,center,height*scale,age,.7f,0,reveal,dissolve:dissolve);
-    }
+    internal static int ChoirCues(CrimsonBoss boss, float age, Span<CrimsonChoirCue> cues, bool final = false, bool flipped = false)
+        => ScarletNotes.ChoirCues(ScarletCueFrame.Of(boss).Gestures, age, flipped, cues, final);
     internal static void DrawEnsemble(SpriteBatch batch, Vector2 center, float age, float emergence, float alpha, float dissolve = 0, float melt = 0)
     {
         ScarletAvatarTarget.Draw(batch,center,age,emergence,alpha,dissolve,melt);
-    }
-    internal static void DrawPressure(SpriteBatch batch, Vector2 center, int source, float age, float charge, float recoil)
-    {
-        // Broken converging filaments, not a UI target circle or opaque halo.
-        var bloom = MiscTexturesRegistry.BloomCircleSmall.Value;
-        Color hue = ScarletMaterials.Palette(source); hue.A = 0;
-        float pulse = .78f + .22f * MathF.Pow(Math.Max(0, MathF.Sin(age * .36f)), 3);
-        int count = CrimsonVisuals.Reduced ? 4 : 11;
-        for (int i = 0; i < count; i++)
-        {
-            float drift = (age * .022f + i * .618034f) % 1;
-            float angle = i * 2.399963f + MathF.Sin(i * 2.1f) * .2f;
-            float reach = (source == 3 ? 65 : 210) * (1 - drift * charge) + recoil * 85;
-            Vector2 offset = new Vector2(reach, 0).RotatedBy(angle);
-            float brightness = MathF.Sin(drift * MathF.PI) * charge * .52f;
-            batch.Draw(bloom, center + offset - Main.screenPosition, null, hue * brightness, angle,
-                bloom.Size() * .5f, new Vector2(17 + charge * 22, 2.8f) / bloom.Width, SpriteEffects.None, 0);
-        }
-        float radius = source == 3 ? 35 : 82;
-        batch.Draw(bloom, center - Main.screenPosition, null, hue * (charge * pulse * .36f + recoil * .25f), 0,
-            bloom.Size() * .5f, (radius + charge * 25 + recoil * 42) * 2 / bloom.Width, SpriteEffects.None, 0);
-        if (recoil > .02f)
-            batch.Draw(bloom, center - Main.screenPosition, null, new Color(255, 222, 214, 0) * (recoil * .58f), -.35f,
-                bloom.Size() * .5f, new Vector2(150, 7) * (CrimsonVisuals.Reduced ? .45f : 1) / bloom.Width, SpriteEffects.None, 0);
     }
     private static void Mesh(SpriteBatch batch, Texture2D texture, Rectangle source, Vector2 center, Vector2 pivot,
         float scale, float time, float motion, float charge, float recoil, Color tint, bool flip, float rotation, bool apparition, int species = -1, int[]? selectedParts = null, float dissolve = 0, float melt = 0)
