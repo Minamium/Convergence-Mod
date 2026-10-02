@@ -243,8 +243,9 @@ public sealed class WitnessThrownBlade : ModProjectile
         }
         Projectile.ai[0]++;
         int age = (int)Age;
-        // Without a contact the blade stops where the cursor was (at most OutboundMaxTicks) and turns in the air.
-        if (phase == WitnessPhase.Outbound && age > Cap) StartTurn(-1, age);
+        // Without a contact the blade stops and turns in the air: where the cursor was when nothing is targeted, or
+        // after OutboundMaxTicks while it homes on a target.
+        if (phase == WitnessPhase.Outbound && age > (Projectile.ai[1] >= 0 ? WitnessRules.OutboundMaxTicks : Cap)) StartTurn(-1, age);
         if (phase == WitnessPhase.Turn && age - phaseStart >= WitnessRules.ReturnTick) StartReturn(age);
         int t = age - phaseStart;
         switch (phase)

@@ -123,12 +123,14 @@ internal static class WitnessPresentation
             if (!s.Caught && s.BodyAge < 10 && s.Gone < 0)
                 canvas.Burst(center + new Vector2(0, 10), s.Seed, 6, s.BodyAge, 10, 1.6f, .08f, DollShardKind.Porcelain, 2.4f, MathF.PI / 2);
         }
-        else if (s.Ghost >= 0 && s.Ghost < 6 && s.BladeLarge is { } ghost)
+        else if (s.Ghost >= 0 && s.Ghost < 6)
         {
             // A peer still waiting for the thrown blade: carry it on from the release instead of a gap.
-            Vector2 axis = Unit(s.Aim);
-            canvas.Sprite(new DollSprite(ghost, ghost.Bounds, LargePivot), s.Root + axis * (WitnessRules.ReleaseRadius + WitnessRules.OutboundSpeed * s.Ghost),
-                s.Aim + f * WitnessRules.CruiseSpin * s.Ghost, flip, DollStratum.Front, 0, new DollSpriteFx { Fade = Clamp01((s.Ghost - 3) / 3) });
+            float reach = WitnessRules.ReleaseRadius + WitnessRules.OutboundSpeed * s.Ghost;
+            bool large = ThrownLarge && reach > LargeRungDistance + RungHysteresis;
+            if ((large ? s.BladeLarge : s.Blade) is { } ghost)
+                canvas.Sprite(new DollSprite(ghost, ghost.Bounds, large ? LargePivot : BladePivot), s.Root + Unit(s.Aim) * reach,
+                    s.Aim + f * WitnessRules.CruiseSpin * s.Ghost, flip, DollStratum.Front, 0, new DollSpriteFx { Fade = Clamp01((s.Ghost - 3) / 3) });
         }
 
         if (s.Gone < 0)

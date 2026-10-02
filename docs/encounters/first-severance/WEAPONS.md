@@ -133,7 +133,7 @@ Unchanged: item `LastWitness`, Calamity's rogue class and stealth through `Calam
 
 **Thrown blade.**
 
-- **Outbound:** 34 px/tick, homing on the native target at 0.24 rad/tick, spinning 0.45 rad/tick. The hit shape is a **disc of radius 56 px** around the balance point, swept between ticks. Outbound ends at the first contact; without one, after the cursor distance at 34 px/tick (4–27 ticks, at most 918 px).
+- **Outbound:** 34 px/tick, homing on the native target at 0.24 rad/tick, spinning 0.45 rad/tick. The hit shape is a **disc of radius 56 px** around the balance point, swept between ticks. Outbound ends at the first contact; without one the blade stops and turns in the air after the cursor distance at 34 px/tick (4–27 ticks) when nothing is targeted, or after 27 ticks (918 px) while it homes on a target.
 - **Strike:** the first contact deals ×0.25 of the blade, once per root.
 - **Axiom turns:** the blade brakes onto the struck target and follows its centre (0.35 response, at most 34 px/tick), or holds where it stopped. Exactly two revolutions in 21 ticks, the spin rising from 0.45 to 0.747 rad/tick; a bite on each half turn at turn ticks 6, 12, 17 and 21, ×0.125 each, once per root per bite, no knockback.
 - **Return:** at turn tick 22 the blade tears free (×0.25, once per root, the struck target included) and flies home at 46 px/tick to the catch point: the hang's rest point if this owner holds a score (the blade hangs again; a new score's hanging blade stays hidden while the thrown one is out) or the hand. Caught within 28 px with a ring and its own sound; withdrawn beyond 3000 px.

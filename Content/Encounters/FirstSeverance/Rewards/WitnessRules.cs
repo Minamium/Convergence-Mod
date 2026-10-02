@@ -183,7 +183,8 @@ internal static class WitnessRules
 
     // ---- Thrown blade --------------------------------------------------------------------------
 
-    // Outbound ticks without a contact: to the cursor distance, at least OutboundMinTicks, at most OutboundMaxTicks.
+    // Outbound ticks without a contact when nothing is targeted: to the cursor distance, at least OutboundMinTicks, at
+    // most OutboundMaxTicks (a blade homing on a target flies the full OutboundMaxTicks).
     internal static int OutboundCap(float distance)
         => !float.IsFinite(distance) ? OutboundMaxTicks
             : Math.Clamp((int)MathF.Ceiling(Math.Max(0, distance) / OutboundSpeed), OutboundMinTicks, OutboundMaxTicks);
