@@ -48,6 +48,18 @@ def reward_client_files():
 
 
 class ScarletRewardWiring(unittest.TestCase):
+    def test_no_inventory_override_crops_a_reward_icon(self):
+        # The old Covenant painting was cropped by a fixed source rectangle in CrimsonItemVisuals; with the exported
+        # 58x64 icon that rectangle lay outside the texture and the Covenant drew nothing in the inventory (2026-10-03).
+        rewards = set(WEAPONS.values()) | {'CrimsonScoreReliquary', 'CrimsonPact'}
+        for path in ROOT.joinpath('Client').rglob('*.cs'):
+            text = read(path)
+            if 'PreDrawInInventory' not in text and 'PreDrawInWorld' not in text:
+                continue
+            for match in re.finditer(r'AppliesToEntity\([^)]*\)\s*=>\s*([^;]+);', text):
+                named = {name for name in rewards if re.search(rf'\b{name}\b', match.group(1))}
+                self.assertFalse(named, f'{path.name} overrides how {sorted(named)} draw; reward icons must draw as exported')
+
     def test_content_never_references_client_code(self):
         for path in REWARDS.glob('*.cs'):
             self.assertNotIn('Convergence.Client', read(path), f'{path.name} must not reference Client code')

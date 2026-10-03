@@ -49,11 +49,14 @@ internal sealed class CrimsonCompanionVisuals : GlobalProjectile
     }
 }
 
+// Only the Raid key still uses the 1254 px painting, so only it is cropped to that painting's figure. The Scarlet
+// Covenant's icon is the exported pixel art (CrimsonRewardSprites.Covenant) and draws like any item: cropping it with
+// the old painting's rectangle drew nothing at all in the inventory, the hotbar and on the ground.
 [Autoload(Side = ModSide.Client)]
 internal sealed class CrimsonItemVisuals : GlobalItem
 {
-    public override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.ModItem is CrimsonConductor or CrimsonPact;
-    private static Rectangle Source(Item item) => item.ModItem is CrimsonConductor ? new(285, 195, 675, 865) : new(235, 84, 772, 1095);
+    public override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.ModItem is CrimsonConductor;
+    private static Rectangle Source(Item item) => new(285, 195, 675, 865);
     public override bool PreDrawInInventory(Item item, SpriteBatch batch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
     {
         Rectangle source = Source(item);
