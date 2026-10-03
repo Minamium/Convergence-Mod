@@ -49,15 +49,15 @@ RAID_LEVELS = {
 RAID_LEVELS_SHA256 = '6e4c8c4591496530bda25a004f1e49a4bf6cecb662e8789716cd70a9bdeaf882'
 REWARD_LEVELS = {
     'BatonLift': -18.49, 'BatonStroke': -20.35, 'Cadence': -14.36, 'CenserBrace': -15.35, 'CenserGrandPour': -14.17,
-    'CenserPour': -21.02, 'CenserSummon': -19.36, 'CenserSwing': -16.87, 'ChoirClasp': -12.24, 'HandSlam': -17.84,
-    'HymnInhale': -16.81, 'InkBlaze': -15.78, 'InkIgnite': -19.09, 'OrganShot1': -17.25, 'OrganShot2': -17.51,
-    'OrganShot3': -17.05, 'OrganShot4': -16.98, 'QuillStick': -17.44, 'QuillThrow': -19.97, 'ReliquaryOpen': -12.30,
-    'RiverRelease': -13.33, 'ScoreChord': -12.68, 'ScoreUnseal': -18.55, 'ScytheSwingHigh': -20.27,
-    'ScytheSwingLow': -20.35, 'ScytheWhip': -18.87, 'ScytheWhipBrace': -18.02, 'StaffBarline': -11.94,
-    'StaffCut': -17.11, 'StaffWindup': -17.57, 'Toll0': -22.25, 'Toll1': -22.16, 'Toll2': -22.30, 'Toll3': -21.68,
-    'Toll4': -21.05, 'Toll5': -21.84, 'Toll6': -21.65, 'Toll7': -21.60,
+    'CenserPour': -21.02, 'CenserSummon': -19.36, 'CenserSwing': -16.87, 'ChoirClasp': -12.24, 'CrescentBreak': -20.31,
+    'HandSlam': -17.84, 'HymnInhale': -16.81, 'InkBlaze': -15.78, 'InkIgnite': -19.09, 'OrganShot1': -17.25,
+    'OrganShot2': -17.51, 'OrganShot3': -17.05, 'OrganShot4': -16.98, 'QuillStick': -17.44, 'QuillThrow': -19.97,
+    'ReliquaryOpen': -12.30, 'RiverRelease': -13.33, 'ScoreChord': -12.68, 'ScoreUnseal': -18.55,
+    'ScytheSwingHigh': -20.27, 'ScytheSwingLow': -20.35, 'ScytheVolley': -18.50, 'ScytheWhip': -18.87,
+    'ScytheWhipBrace': -18.02, 'StaffBarline': -11.94, 'StaffCut': -17.11, 'StaffWindup': -17.57, 'Toll0': -22.25,
+    'Toll1': -22.16, 'Toll2': -22.30, 'Toll3': -21.68, 'Toll4': -21.05, 'Toll5': -21.84, 'Toll6': -21.65, 'Toll7': -21.60,
 }
-REWARD_LEVELS_SHA256 = '8e1c00e478c7201332565add8dc8c220d1a8ff26ba9b3da74dc3fea4cd1cef49'
+REWARD_LEVELS_SHA256 = 'c75948110d3fafd12178586f782c0cfaf7aa3ebe4eeb848de00fdd1dd7edcb2d'
 # The same meter on the files the owner auditioned and picked (0.3.77 / 0.3.78), before the 2026-10-03 lift: the
 # balance inside each group is held against these.
 AUDITIONED = {
@@ -67,13 +67,13 @@ AUDITIONED = {
     'ScarletSpreadSummon': -17.49, 'ScarletStackFail': -15.55, 'ScarletStackSuccess': -18.22,
     'ScarletStackSummon': -19.27, 'ScarletVictory': -11.82,
     'BatonLift': -18.49, 'BatonStroke': -20.35, 'Cadence': -14.36, 'CenserBrace': -15.35, 'CenserGrandPour': -14.17,
-    'CenserPour': -21.02, 'CenserSummon': -19.36, 'CenserSwing': -16.87, 'ChoirClasp': -12.24, 'HandSlam': -17.84,
-    'HymnInhale': -16.81, 'InkBlaze': -15.78, 'InkIgnite': -19.09, 'OrganShot1': -17.25, 'OrganShot2': -17.51,
-    'OrganShot3': -17.05, 'OrganShot4': -16.98, 'QuillStick': -17.44, 'QuillThrow': -19.97, 'ReliquaryOpen': -16.15,
-    'RiverRelease': -13.33, 'ScoreChord': -12.68, 'ScoreUnseal': -18.55, 'ScytheSwingHigh': -20.27,
-    'ScytheSwingLow': -20.35, 'ScytheWhip': -18.87, 'ScytheWhipBrace': -18.02, 'StaffBarline': -11.94,
-    'StaffCut': -17.11, 'StaffWindup': -17.57, 'Toll0': -22.25, 'Toll1': -22.16, 'Toll2': -22.30, 'Toll3': -21.68,
-    'Toll4': -21.05, 'Toll5': -21.84, 'Toll6': -21.65, 'Toll7': -21.60,
+    'CenserPour': -21.02, 'CenserSummon': -19.36, 'CenserSwing': -16.87, 'ChoirClasp': -12.24, 'CrescentBreak': -20.31,
+    'HandSlam': -17.84, 'HymnInhale': -16.81, 'InkBlaze': -15.78, 'InkIgnite': -19.09, 'OrganShot1': -17.25,
+    'OrganShot2': -17.51, 'OrganShot3': -17.05, 'OrganShot4': -16.98, 'QuillStick': -17.44, 'QuillThrow': -19.97,
+    'ReliquaryOpen': -16.15, 'RiverRelease': -13.33, 'ScoreChord': -12.68, 'ScoreUnseal': -18.55,
+    'ScytheSwingHigh': -20.27, 'ScytheSwingLow': -20.35, 'ScytheVolley': -18.50, 'ScytheWhip': -18.87,
+    'ScytheWhipBrace': -18.02, 'StaffBarline': -11.94, 'StaffCut': -17.11, 'StaffWindup': -17.57, 'Toll0': -22.25,
+    'Toll1': -22.16, 'Toll2': -22.30, 'Toll3': -21.68, 'Toll4': -21.05, 'Toll5': -21.84, 'Toll6': -21.65, 'Toll7': -21.60,
 }
 # Raid groups (ENCOUNTER_SPEC.md#sound-effects) and where each sits against the score at the owner's sliders, dB
 # (the group's median, as played): (low, high).
@@ -90,8 +90,8 @@ RAID_GROUPS = {
 IN_PLAY = ('Build', 'Shot', 'Windup', 'Release')
 ROLES = {
     'Build': {f'Toll{k}' for k in range(8)},
-    'Shot': {'ScytheSwingHigh', 'ScytheSwingLow', 'ScytheWhip', 'OrganShot', 'BatonStroke', 'CenserSummon', 'CenserSwing',
-             'QuillThrow', 'QuillStick'},
+    'Shot': {'ScytheSwingHigh', 'ScytheSwingLow', 'ScytheWhip', 'ScytheVolley', 'CrescentBreak', 'OrganShot', 'BatonStroke',
+             'CenserSummon', 'CenserSwing', 'QuillThrow', 'QuillStick'},
     'Windup': {'ScytheWhipBrace', 'StaffWindup', 'HymnInhale', 'BatonLift', 'CenserBrace', 'ScoreUnseal'},
     'Release': {'StaffCut', 'HandSlam', 'InkIgnite', 'CenserPour', 'InkBlaze'},
     'Finale': {'StaffBarline', 'ChoirClasp', 'RiverRelease', 'CenserGrandPour', 'ScoreChord', 'Cadence'},
@@ -110,6 +110,14 @@ DENSE = {
     'censers2': {'ScarletForetell': 10.88, 'ScarletStackSummon': 8.15, 'ScarletSpreadSummon': 3.75, 'ScarletCrossflowCharge': 4.07},
     'censers4': {'ScarletForetell': 10.75, 'ScarletStackSummon': 7.30, 'ScarletSpreadSummon': 3.60, 'ScarletCrossflowCharge': 3.56},
 }
+# The same four scenarios with the crescent cues in the other player's scythe (CRESCENT_BREAKS): no warning loses more than
+# 0.2 dB against DENSE (the most it lost is 0.09) and every one keeps DENSE_FLOOR.
+DENSE_CRESCENTS = {
+    'mixed2': {'ScarletForetell': 11.86, 'ScarletStackSummon': 9.01, 'ScarletSpreadSummon': 3.88, 'ScarletCrossflowCharge': 4.15},
+    'mixed4': {'ScarletForetell': 11.75, 'ScarletStackSummon': 8.47, 'ScarletSpreadSummon': 3.79, 'ScarletCrossflowCharge': 3.84},
+    'censers2': {'ScarletForetell': 10.83, 'ScarletStackSummon': 8.07, 'ScarletSpreadSummon': 3.68, 'ScarletCrossflowCharge': 4.14},
+    'censers4': {'ScarletForetell': 10.68, 'ScarletStackSummon': 7.36, 'ScarletSpreadSummon': 3.58, 'ScarletCrossflowCharge': 3.54},
+}
 DENSE_0380 = {
     'mixed2': {'ScarletForetell': 0.13, 'ScarletStackSummon': 5.68, 'ScarletSpreadSummon': 3.34, 'ScarletCrossflowCharge': 0.30},
     'mixed4': {'ScarletForetell': 0.03, 'ScarletStackSummon': 4.45, 'ScarletSpreadSummon': 3.31, 'ScarletCrossflowCharge': 0.14},
@@ -117,6 +125,12 @@ DENSE_0380 = {
     'censers4': {'ScarletForetell': -0.51, 'ScarletStackSummon': 3.30, 'ScarletSpreadSummon': 3.16, 'ScarletCrossflowCharge': -0.30},
 }
 DENSE_FLOOR = 3.0
+# The crescent cues (2026-10-04) in the same fight: the other player's scythe also sheds its volley once a measure (the
+# Whip's tick 20, four strokes in) and rings CrescentBreak at the offsets below, in ticks from the measure's start: each
+# of the measure's four single crescents breaks 30 ticks after its throw (age 9, at 18-tick strokes), and the five of the
+# volley break 30 ticks after it is shed, ringing once or twice because a break rings at most once per 6 ticks. Six breaks
+# and a volley in 100 ticks is the most the throttle and the 8-crescent cap let a held loop ring.
+CRESCENT_BREAKS = (9 + 30, 27 + 30, 45 + 30, 63 + 30, 4 * 18 + 20 + 30, 4 * 18 + 20 + 36)
 
 
 def read(path):
@@ -207,7 +221,7 @@ def played():
 # the owner's sound budget the way CenserVisuals does.
 WARNINGS = ('ScarletForetell', 'ScarletStackSummon', 'ScarletSpreadSummon', 'ScarletCrossflowCharge')
 # scenario: (censer owners, censers each). Every scenario has the local organ (owner 0), another player's scythe
-# (owner 1) and another's quill (owner 3).
+# (owner 1) and another's quill (owner 3). The scythe's two crescent cues (2026-10-04) join it in a second run of each.
 DENSE_SCENARIOS = {'mixed2': ((2,), 2), 'mixed4': ((2,), 4), 'censers2': ((1, 2, 3), 2), 'censers4': ((1, 2, 3), 4)}
 
 
@@ -226,8 +240,9 @@ def remote_decibels():
     return float(re.search(r'RemoteCueDecibels = (-?[\d.]+)f?;', read(RULES)).group(1))
 
 
-def dense_events(scenario, end, tick):
-    """(owner, cue, file, start sample) for one scenario; owner 0 is the local player."""
+def dense_events(scenario, end, tick, crescents=False):
+    """(owner, cue, file, start sample) for one scenario; owner 0 is the local player. With crescents, the other
+    player's scythe also rings its two crescent cues at their real rates (see CRESCENT_BREAKS)."""
     rules = read(RULES)
     const = lambda name: int(re.search(rf'\b{name} = (\d+)', rules).group(1))  # noqa: E731
     uses = rules[rules.index('internal static int UseTicks('):]
@@ -243,6 +258,12 @@ def dense_events(scenario, end, tick):
 
     every(0, 'OrganShot', use('Ranged'), 1, lambda k: f'OrganShot{k % 4 + 1}')
     every(1, 'ScytheSwingHigh', const('StrokeTicks'), 4, lambda k: 'ScytheSwingHigh' if k % 2 == 0 else 'ScytheSwingLow')
+    if crescents:
+        measure = 4 * const('StrokeTicks') + const('WhipTicks')
+        start = 4 + 4 * const('StrokeTicks')  # the scythe's first stroke above is at 4; the Whip follows four strokes
+        every(1, 'ScytheVolley', measure, start + const('VolleyAge'), lambda k: 'ScytheVolley')
+        for offset in CRESCENT_BREAKS:
+            every(1, 'CrescentBreak', measure, 4 + offset, lambda k: 'CrescentBreak')
     every(3, 'QuillThrow', use('Rogue'), 10, lambda k: 'QuillThrow')
     every(3, 'QuillStick', use('Rogue'), 16, lambda k: 'QuillStick')
     owners, n = DENSE_SCENARIOS[scenario]
@@ -273,7 +294,7 @@ def dense_events(scenario, end, tick):
     return sorted(events, key=lambda e: e[3])
 
 
-def dense_mix(scenario, raid=RAID, sounds=SOUNDS, role_db=None, remote_db=None, every_remote=True, slider=None):
+def dense_mix(scenario, raid=RAID, sounds=SOUNDS, role_db=None, remote_db=None, every_remote=True, slider=None, crescents=False):
     """Each warning's median best-band margin (dB) over the score and the weapons in one scenario. The defaults are the
     shipped files and code; the arguments let the evidence render 0.3.80 the same way."""
     import numpy as np
@@ -298,7 +319,7 @@ def dense_mix(scenario, raid=RAID, sounds=SOUNDS, role_db=None, remote_db=None, 
     n = len(music)
     table = cue_table()
     voices, active = [], {}
-    for owner, cue, stem, start in dense_events(scenario, n, tick):
+    for owner, cue, stem, start in dense_events(scenario, n, tick, crescents):
         audience, role, own = table[cue]
         remote = owner != 0
         db = role_db[role] + (remote_db if remote and (every_remote or audience == 'Shot') else 0)
@@ -526,6 +547,20 @@ class ScarletLevels(unittest.TestCase):
                 with self.subTest(scenario=scenario, warning=warning):
                     self.assertAlmostEqual(DENSE[scenario][warning], margins[warning], delta=.02)
                     self.assertGreaterEqual(margins[warning], DENSE_FLOOR)
+                    self.assertGreaterEqual(margins[warning], DENSE_0380[scenario][warning])
+
+    @unittest.skipUnless(numeric_audio_stack(), 'numpy, scipy and soundfile are local audio tools, not CI')
+    def test_the_crescent_cues_leave_the_four_player_fight_clear(self):
+        # ScytheVolley and CrescentBreak, rung by the other player's scythe at the most a held loop allows (a volley and six
+        # breaks in each 100-tick measure, other players 8 dB lower with one voice each), take no more than 0.2 dB from any
+        # warning and leave every one at least DENSE_FLOOR.
+        for scenario in DENSE_SCENARIOS:
+            margins = dense_mix(scenario, crescents=True)
+            for warning in WARNINGS:
+                with self.subTest(scenario=scenario, warning=warning):
+                    self.assertAlmostEqual(DENSE_CRESCENTS[scenario][warning], margins[warning], delta=.02)
+                    self.assertGreaterEqual(margins[warning], DENSE_FLOOR)
+                    self.assertGreaterEqual(margins[warning], DENSE[scenario][warning] - .2)
                     self.assertGreaterEqual(margins[warning], DENSE_0380[scenario][warning])
 
 

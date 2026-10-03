@@ -5,7 +5,7 @@ status: accepted
 owners:
   - project
   - art
-last_reviewed: 2026-10-03
+last_reviewed: 2026-10-04
 source_of_truth_for:
   - policy.ip_provenance
 aliases:
@@ -128,7 +128,7 @@ The reward items, weapon parts, props and extra companion poses are original pix
 
 ## Scarlet Invocation reward audio — 2026-10-03
 
-The Scarlet reward weapons' 35 cues (38 files) layer CC0 recordings from the VSCO 2 CE and VCSL sample libraries and from Freesound and OpenGameArt (including Kenney's RPG Audio pack); no synthesized tone or noise layer is used. The owner chose these exact masters (one of two takes of each of 28 cue blocks) on 2026-10-03. The recordings, libraries and the external recipe stay outside the repository; no raw sample is distributed. VSCO 2 CE's readme asks for credit to Versilian Studios / Sam Gossner and Ivy Audio / Simon Dalzell with a link to the VSCO: CE homepage, so a public credit for these cues carries both. [Attribution](../Assets/ATTRIBUTION.md#scarlet-invocation-reward-weapon-audio--2026-10-03) owns authors, pages, hashes and processing.
+The Scarlet reward weapons' 37 cues (40 files) layer CC0 recordings from the VSCO 2 CE and VCSL sample libraries and from Freesound and OpenGameArt (including Kenney's RPG Audio pack); no synthesized tone or noise layer is used. The owner chose these exact masters (one of two takes of each of 28 cue blocks) on 2026-10-03, and the two Sable Scythe crescent cues (`ScytheVolley`, `CrescentBreak`) on 2026-10-04, from recordings already itemised in the same record. The recordings, libraries and the external recipe stay outside the repository; no raw sample is distributed. VSCO 2 CE's readme asks for credit to Versilian Studios / Sam Gossner and Ivy Audio / Simon Dalzell with a link to the VSCO: CE homepage, so a public credit for these cues carries both. [Attribution](../Assets/ATTRIBUTION.md#scarlet-invocation-reward-weapon-audio--2026-10-03) owns authors, pages, hashes and processing.
 
 ## Ebon Manor — 2026-10-01
 

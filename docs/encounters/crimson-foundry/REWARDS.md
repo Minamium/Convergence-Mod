@@ -6,7 +6,7 @@ owners:
   - gameplay
   - art
   - audio
-last_reviewed: 2026-10-03
+last_reviewed: 2026-10-04
 source_of_truth_for:
   - encounter.crimson_foundry.rewards
 aliases:
@@ -417,17 +417,16 @@ The rules are unchanged:
 | `ScytheSwingHigh`, `ScytheSwingLow` | Each Over and Under: a drawn breath into the cut, peaking on the first live tick. The crescent leaves at age 9 inside this breath, so it has no cue of its own |
 | `Toll(k)` | Line k engraved, by a blade or a crescent (owner only) |
 | `ScytheWhipBrace` → `ScytheWhip` | The Whip's draw-back → the lash |
-| `ScytheVolley` → `StaffCut` (per-swing) | The volley sheds (Whip 20), at the arc's middle |
-| `CrescentBreak` → `StaffCut` −6 dB (per-swing) | A crescent breaks; at most one per 6 ticks per owner, so a volley landing together rings once or twice, not five times |
+| `ScytheVolley` (per-swing) | The volley sheds (Whip 20), at the arc's middle |
+| `CrescentBreak` (per-swing) | A crescent breaks; at most one per 6 ticks per owner, so a volley landing together rings once or twice, not five times |
 | `StaffWindup` → `StaffCut` | Release windup → each line |
 | `StaffBarline` | Final Barline: a heavy double cut on the cadence voicing |
 | `Cadence` | A partial staff: with the last `StaffCut` |
 
 - **Per-swing cues** follow the multiplayer rule: the owner hears them at their role's level, other players 8 dB lower with one voice.
-- **Stand-ins:** the two wanted cues are in `ScarletRewardCues.Wanted`, outside the 35 shipped: each plays its stand-in's file (`StaffCut`, the break 6 dB lower) at its own role's level in a voice pool of its own name, so a stand-in never takes the voices of a Staff Reap cut. Recording one replaces its stand-in with its own file and moves it into the shipped table.
-- **New cues wanted:** two cues, recorded under the same rules (CC0 recordings only, unpitched, `Lead` 0) and auditioned by the owner as A/B takes before they replace their stand-ins:
-  - `ScytheVolley`: a one-shot with 2 voices, about 0.5 s. The arc tears into five: a wet tear, then five quick close whisks within 0.15 s.
-  - `CrescentBreak`: a one-shot with 3 voices, about 0.3 s. A short wet splash with a dry bone tick.
+- **Crescent cues (shipped 2026-10-04):** `ScytheVolley` and `CrescentBreak` are unpitched, CC0-only one-shots in the shot role with `Lead` 0. The owner auditioned an A and a B take of each on the local page, heard them in context at the level they ship at, and chose **B** for both. Each plays at the one-shots' in-play offset (−3.5 dB), other players' at 8 dB lower with one voice, in the voice pool of its own file. They replace the Staff Reap cut that the 0.3.87 build borrowed, and no cue borrows another's file any more.
+  - `ScytheVolley`: 2 voices, 0.503 s. The arc tears into five, dry and thin: a knife slice and the head of a samurai slash for the cut, five short air whisks that rise from +2.5 to +6.5 semitones and fan across the stereo field (±0.46) within 0.16 s, a thin breath of air under them and a small wet tail of bloody blade.
+  - `CrescentBreak`: 3 voices, 0.303 s. Dry grains: the knife's bite, a low impact sinking under it (70–380 Hz), a concrete-smash head as the bone click, then seven short rock-tumble grains from 0.032 to 0.240 s, each quieter and a little further from the last. Three voices at the 6-tick spacing ring through all of the file but its last tick.
 
 ## Ranged — Canticle Organ / 聖歌のオルガン銃
 
@@ -780,7 +779,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 - Every nominal figure in this document.
 - The figure eight: continuity at the joins, minimum tip speed, turn radius and angular-acceleration bounds.
 - Staff placement and spacing, the cut schedule and the barline only at five lines.
-- The crescents: throw ages and headings, the volley's birth points and fan (no two paths cross as they leave), the body samples and capsules, the turn and speed bounds (the turn never exceeds ω, the tightest curve is at least 75 px, the throw's heading is held), reaching every still target in a 150° cone from 150 to 700 px without orbiting, target choice and chaining over hitboxes, the natural maximum of 8 live crescents in a held loop, the 18-tick throw spacing, the engraving of one line per stroke, the lifetime and break, the `ai` codec, and the Melee split of the measure. The wanted cues play their stand-in in their own voice pool.
+- The crescents: throw ages and headings, the volley's birth points and fan (no two paths cross as they leave), the body samples and capsules, the turn and speed bounds (the turn never exceeds ω, the tightest curve is at least 75 px, the throw's heading is held), reaching every still target in a 150° cone from 150 to 700 px without orbiting, target choice and chaining over hitboxes, the natural maximum of 8 live crescents in a held loop, the 18-tick throw spacing, the engraving of one line per stroke, the lifetime and break, the `ai` codec, and the Melee split of the measure. The volley and the break are shipped one-shots with files and voices of their own.
 - The mark ledger: caps, expiry, eviction and incarnation; hymn round-robin order, the 16-hand cap, the range skip and the Clasp only at eight marks.
 - Stroke geometry, the codec round trip and its bounds; the river only at exactly eight strokes, and its run-skipping.
 - Pendulum apex times, the grand-pour cycle and the largest-gap phase choice.
@@ -845,10 +844,10 @@ Exports go to `Assets/Textures/Items/ScarletRewards/`. Selections and exports ar
 
 As the brief requires, the images contain no light, flame, black blood, strokes, staff lines, magic circles, sparks, trails, flashes or debris. The only such elements drawn into the art are the reliquary's wax seal, the ink on the quill's nib and the faint staff lines printed on the rolled score. Everything else is drawn in code.
 
-**Cues** (35, in 38 files), in `Assets/Sounds/Weapons/ScarletRewards/`:
+**Cues** (37, in 40 files), in `Assets/Sounds/Weapons/ScarletRewards/`:
 
 - shared: `ReliquaryOpen`; `Toll0`–`Toll7`; `Cadence`;
-- scythe: `ScytheSwingHigh`, `ScytheSwingLow`, `ScytheWhipBrace`, `ScytheWhip`, `StaffWindup`, `StaffCut`, `StaffBarline`;
+- scythe: `ScytheSwingHigh`, `ScytheSwingLow`, `ScytheWhipBrace`, `ScytheWhip`, `ScytheVolley`, `CrescentBreak`, `StaffWindup`, `StaffCut`, `StaffBarline`;
 - organ: `OrganShot` (one file per pipe, `OrganShot1`–`OrganShot4`), `HymnInhale`, `HandSlam`, `ChoirClasp`;
 - baton: `BatonStroke`, `BatonLift`, `InkIgnite`, `RiverRelease`;
 - censer: `CenserSummon`, `CenserSwing`, `CenserPour`, `CenserBrace`, `CenserGrandPour`;
@@ -865,13 +864,15 @@ As the brief requires, the images contain no light, flame, black blood, strokes,
 **Selections (2026-10-03).** The owner auditioned an A and a B take of each of 28 cue blocks on the local page and chose B for `Cadence`, `ReliquaryOpen`, `ScytheWhip`, `StaffWindup`, `StaffBarline` and `RiverRelease`, and A for every other block (the whole toll ladder is one block, and `OrganShot` is all four pipe files of take A). Every file but `ReliquaryOpen` is its master byte for byte; `ReliquaryOpen` is its master with the show's level lift baked in ([Levels against the Raid](#levels-against-the-raid)). Each file keeps its take's pinned Ogg serial, and [Attribution](../../../Assets/ATTRIBUTION.md) records each file's sources and processing.
 
 - **Gain:** each cue plays at gain 1 times its role's offset ([Levels against the Raid](#levels-against-the-raid)); the only further offsets are the multiplayer rule (every cue another player causes −8 dB), the rolled score's throw (−2 dB) and a score burst without the Full Melody (−2 dB).
-- **Voices** per cue file, for the local player: tolls 8 (eight quills at one height ring one toll eight times), `CenserPour` 5 and `CenserGrandPour` 4 (one owner's sound budget), `ReliquaryOpen` 4 (the four shows), `StaffCut`, `HandSlam` and `InkIgnite` 4 (a cascade part still rings when the next starts), `CenserSwing` and `QuillThrow`/`QuillStick` 3, every other cue 2.
+- **Voices** per cue file, for the local player: tolls 8 (eight quills at one height ring one toll eight times), `CenserPour` 5 and `CenserGrandPour` 4 (one owner's sound budget), `ReliquaryOpen` 4 (the four shows), `StaffCut`, `HandSlam` and `InkIgnite` 4 (a cascade part still rings when the next starts), `CenserSwing`, `CrescentBreak` and `QuillThrow`/`QuillStick` 3, every other cue 2.
 - **Other players' voices** are a pool of their own (a separate `Identifier`), so another player's cue never cuts the local player's. All other players together share one voice per per-shot file (replace oldest) and one owner's voices of every other file. Past that limit another player's windup, release, finale or playback toll is dropped (ignore new) instead of cutting one that is ringing.
-- **Moments:** each file was built to meet a moment `Lead` ticks after its trigger, and the domain tests hold those moments to the rules: a swing's breath fires at the stroke's start and peaks on its first live tick (5); the Whip's brace fires with the draw-back (6) and peaks just before the lash (13), the lash fires as the blade goes live (14); `StaffWindup` peaks on the forward whip (16), `HymnInhale` on the first slam (10), `BatonLift` on the downbeat (8), `InkIgnite` as a stroke has swollen (3), `CenserSwing` on the pour 10 ticks later, `CenserBrace` on the Grand Pour (6), `ScoreUnseal` as the ink catches (8), and `ReliquaryOpen`'s cadence as the show's ink ignites (20).
+- **Moments:** each file was built to meet a moment `Lead` ticks after its trigger, and the domain tests hold those moments to the rules: a swing's breath fires at the stroke's start and peaks on its first live tick (5); the Whip's brace fires with the draw-back (6) and peaks just before the lash (13), the lash fires as the blade goes live (14); `StaffWindup` peaks on the forward whip (16), `HymnInhale` on the first slam (10), `BatonLift` on the downbeat (8), `InkIgnite` as a stroke has swollen (3), `CenserSwing` on the pour 10 ticks later, `CenserBrace` on the Grand Pour (6), `ScoreUnseal` as the ink catches (8), and `ReliquaryOpen`'s cadence as the show's ink ignites (20). `ScytheVolley` and `CrescentBreak` sit at the head of their files (`Lead` 0): the volley fires as the lash arc sheds its crescents (Whip 20, at the arc's middle), a break as a crescent breaks (on its last target, or the oldest when a ninth would fly), at most once per 6 ticks per owner.
+
+**Selections (2026-10-04).** The two Sable Scythe cues wanted since 0.3.87 were rendered by the same recipe as an A and a B take each and auditioned on the local page. The owner chose B for `ScytheVolley` and `CrescentBreak`, after hearing them in context at the level they ship at (as played, the break sits 2.8 dB over the Staff Reap stand-in it replaces and the volley 1.4 dB under it). Both files are the audition masters byte for byte, a fresh render reproduces them byte for byte, and [Attribution](../../../Assets/ATTRIBUTION.md) records their sources and processing.
 
 ### Levels against the Raid
 
-The Raid plays its own owner-approved sound set (`ScarletSounds`: every cue at gain 1, not positional) over Graceful Ordeal, which follows tModLoader's music-slider curve like every other track ([Scarlet spec](ENCOUNTER_SPEC.md#sound-effects)). Levels are ITU-R BS.1770-4: a cue's maximum 400 ms momentary loudness (padded 0.2 s before and 0.5 s after the file, stepped 10 ms), and the score's median 3 s short-term loudness over its four stages (−12.26 LUFS at gain 1). The reference is the owner's sliders (music 0.685, sound 0.161), where that median sits at −14.32 LUFS on the cue files' scale. Each reward role plays at one offset (`ScarletRewardCues.RoleDecibels`), so the balance the owner auditioned inside a role is kept, and the four roles that sound in play (tolls, one-shots, windups, cascade parts) share one offset, so their auditioned balance is kept too. Measured on 2026-10-03 on the shipped files ([evidence](../../evidence/2026-10-03-scarlet-loudness.json)); a tool test pins the files and the score by hash and holds every rule below, and local-only tests re-measure them and render a four-player fight.
+The Raid plays its own owner-approved sound set (`ScarletSounds`: every cue at gain 1, not positional) over Graceful Ordeal, which follows tModLoader's music-slider curve like every other track ([Scarlet spec](ENCOUNTER_SPEC.md#sound-effects)). Levels are ITU-R BS.1770-4: a cue's maximum 400 ms momentary loudness (padded 0.2 s before and 0.5 s after the file, stepped 10 ms), and the score's median 3 s short-term loudness over its four stages (−12.26 LUFS at gain 1). The reference is the owner's sliders (music 0.685, sound 0.161), where that median sits at −14.32 LUFS on the cue files' scale. Each reward role plays at one offset (`ScarletRewardCues.RoleDecibels`), so the balance the owner auditioned inside a role is kept, and the four roles that sound in play (tolls, one-shots, windups, cascade parts) share one offset, so their auditioned balance is kept too. Measured on 2026-10-03 on the shipped files ([evidence](../../evidence/2026-10-03-scarlet-loudness.json)); a tool test pins the files and the score by hash and holds every rule below, and local-only tests re-measure them and render a four-player fight. The two crescent cues were measured the same way on 2026-10-04 ([evidence](../../evidence/2026-10-04-scarlet-crescent-sfx.json)).
 
 | Raid cue (gain 1) | File, BS.1770 | Against the score at the owner's sliders |
 |---|---|---|
@@ -889,7 +890,7 @@ The Raid plays its own owner-approved sound set (`ScarletSounds`: every cue at g
 | Reward role | Offset | Lift baked into the files | Played, BS.1770 | Against the score (0.3.78 → now) | Rule (role median, as played) |
 |---|---|---|---|---|---|
 | Tolls (Toll0–Toll7) | −3.5 dB | none | −25.8…−24.6 | −22.9…−21.7 → −11.5…−10.2 | every toll under every one-shot |
-| One-shots (ScytheSwingHigh/Low, ScytheWhip, OrganShot1–4, BatonStroke, QuillThrow, QuillStick, CenserSummon, CenserSwing) | −3.5 dB | none | −23.9…−20.4 | −21.0…−17.5 → −9.5…−6.0 | about 6 dB under ScarletImpact, every one under ScarletForetell |
+| One-shots (ScytheSwingHigh/Low, ScytheWhip, ScytheVolley, CrescentBreak, OrganShot1–4, BatonStroke, QuillThrow, QuillStick, CenserSummon, CenserSwing) | −3.5 dB | none | −23.9…−20.4 | −21.0…−17.5 → −9.5…−6.0 | about 6 dB under ScarletImpact, every one under ScarletForetell |
 | Windups and braces (StaffWindup, ScytheWhipBrace, HymnInhale, BatonLift, CenserBrace, ScoreUnseal) | −3.5 dB | none | −22.1…−18.9 | −19.2…−16.0 → −7.7…−4.5 | about 2 dB under ScarletForetell |
 | Cascade parts (StaffCut, HandSlam, InkIgnite, CenserPour, InkBlaze) | −3.5 dB | none | −24.5…−19.3 | −21.7…−16.4 → −10.2…−5.0 | about 6 dB under ScarletImpact |
 | Finales (StaffBarline, ChoirClasp, RiverRelease, CenserGrandPour, ScoreChord) and Cadence | −0.45 dB | none | −14.8…−12.4 | −9.5…−7.1 → −0.5…+1.9 | about 1 dB under ScarletCrossflowRelease, none more than 0.5 dB over it |
@@ -898,6 +899,8 @@ The Raid plays its own owner-approved sound set (`ScarletSounds`: every cue at g
 - **The four-player fight.** A file's level does not show a fight: one-shots and cascade parts fire several times a second, and other players' weapons add up. A local-only tool test renders Graceful Ordeal (song bars 19–23) at the owner's sliders under the local player's organ and three other players' scythe, quill and censers (two or four censers on one player, or on each of the three) at their real rates, sound budgets and voice limits, and lays each Raid warning over it at ten places. Each warning must keep a 1/3-octave band at least 3 dB over the score and the weapons together, in the 400 ms where it is loudest, and no less than 0.3.80 gave it. A first staging that set the one-shots about 2 dB and the cascade parts about 1 dB under the impact (their files lifted 9.4 and 10 dB) and left other players' windups, releases and finales at full level buried `ScarletSpreadSummon` and `ScarletCrossflowCharge` there (−1.1…−0.7 and −2.5…−0.7 dB). With the in-play cues at −3.5 dB and every cue of another player 8 dB lower, the medians are: Foretell 10.8…11.9 dB, StackSummon 7.3…9.1, SpreadSummon 3.6…3.9 and CrossflowCharge 3.6…4.1 (0.3.80: −0.5…0.1, 3.3…5.7, 3.2…3.3 and −0.3…0.3).
 - **How the lift was made.** Only the reliquary's show had to rise above its file (an offset cannot raise a file past gain 1). It was re-rendered from its picked take with +3.83 dB of gain on the same pinned serial and needed no limiting (true peak −3.3 dBTP after Vorbis); [Attribution](../../../Assets/ATTRIBUTION.md) gives the processing. Every other reward file is the auditioned file byte for byte, and the windups, cascade parts and finales sit below their files with a runtime offset.
 - **Where the balance moved.** Inside every role, and among the four in-play roles, nothing moved: they keep the audition page's balance. Against them, the finales and the Cadence sit 3.05 dB higher than on the audition page and the show 7.3 dB higher (0.3.78 had both 5.5 dB higher).
+- **The crescent cues (2026-10-04):** the owner heard `ScytheVolley` and `CrescentBreak` in context at the level they ship at, so the offset stays −3.5 dB and both files are the audition masters (no lift). `ScytheVolley` is −18.50 BS.1770 (−22.0 as played, 7.7 dB under the score at the owner's sliders) and `CrescentBreak` −20.31 (−23.8 as played, 9.5 dB under it). Both fall inside the one-shot range above, so none of the role's extremes moved. The role's median went from 6.3 to 6.8 dB under ScarletImpact, 0.2 dB inside the 7 dB edge of its window. The 0.3.78 range in the table is for the twelve one-shot files that existed then.
+- **The four-player fight with the crescent cues.** The same local-only render with the other player's scythe also shedding a volley and ringing six breaks in every 100-tick measure (the most a held loop allows: four single crescents and the volley's five, a break at most once per 6 ticks) takes no more than 0.09 dB from any warning, and every warning keeps at least 3.5 dB: Foretell 10.7…11.9 dB, StackSummon 7.4…9.0, SpreadSummon 3.6…3.9 and CrossflowCharge 3.5…4.2.
 - **Closest margins and exceptions:** the loudest one-shot (`CenserSwing`) sits 1.05 dB under ScarletForetell; the loudest windup (`CenserBrace`) 0.47 dB and the loudest cascade part (`InkBlaze`) 0.04 dB over it; the loudest toll 0.7 dB under the quietest one-shot; `StaffBarline` 0.06 dB over ScarletCrossflowRelease.
 - **Ordinary notes since 0.3.83:** the Raid's ordinary notes now sound only `ScarletImpact` (three a phrase), and `ScarletForetell` announces a signature move's first and final steps. The files and every role's offset are unchanged, so each relation above holds as written; the four-player model keeps `ScarletForetell` among the warnings it lays over the weapons, now as a rarer worst case. An ordinary note's strike plays at the impact's full level, so the one-shots and cascade parts sit 6 dB under every ordinary strike as well as under a signature move's last one; a softer ordinary strike would narrow that to its own gap.
 - **Other sliders:** with the music slider at 1 the score plays exactly as in 0.3.78, so each cue sits higher against it by its whole change (the in-play cues 5.0 dB, the finales 2.55, the show 6.8, the Raid's own cues 1.4–6.4); a sound slider set higher against the music than the owner's puts every cue further over the score.
@@ -934,6 +937,7 @@ Decided on 2026-10-02 for the first implementation; the damage and mana numbers 
 2. **Quill ink against moving targets:** the ink stays where it was written, so it never becomes a line strung between enemies, and it misses a target that has moved away.
 3. **Covenant while its owner is Down:** Vespera stops attacking while her owner is dead or Down in any Raid, as The Last Waltz does. The encounter spec's companion section records it.
 4. **Sable Scythe class (2026-10-03, after playing 0.3.78):** ordinary Melee instead of true melee, with much flashier effects and homing projectiles. The [Sable Scythe](#melee--sable-scythe--帷の大鎌) section records the design and keeps the measure's nominal budget.
+5. **Crescent cue takes (2026-10-04):** take B of both `ScytheVolley` (dry and thin) and `CrescentBreak` (dry grains), heard in context at the level they ship at. [Art and audio](#art-and-audio) records the cues, [Attribution](../../../Assets/ATTRIBUTION.md) their sources.
 
 ## Implementation choices
 
@@ -991,7 +995,6 @@ The first implementation fixed these points, which the sections above left open 
 **Open for the owner.**
 
 - **Crescent feel:** the turn rate (0.16 rad/tick), cruise speed (20 px/tick), the 3-root limit and the 41% crescent share are starting values for play. So is the body size (R 16 and 14), chosen for the material; draw equals collide, so the hit footprint grew with it.
-- **Crescent cues:** `ScytheVolley` and `CrescentBreak` need recordings and an A/B audition; `StaffCut` stands in for both until then.
 - **Censer spread:** with the spacing above (`min(72, (w + 96) / n)`) and a ±28 px swing (34 px at 55°), the outer censers of three or more over a target about 80 px wide miss it with their outward pours (half of their pours). Large bosses are hit by every pour. Tightening the spread is a balance decision.
 
 ## Acceptance (owner, not_run until played)
@@ -1002,6 +1005,7 @@ The first implementation fixed these points, which the sections above left open 
 - Each weapon's build, release, finale and paired cues.
 - The scythe's figure eight flowing without stops, with its rise and sink; the staff closing on targets of different sizes; the Final Barline.
 - The scythe's crescents: leaving the blade before they turn, the Over and Under crescents crossing, the volley's fan converging, chaining through a crowd and breaking on a boss; how four players' crescents read in the Raid.
+- The crescents' own sounds: the volley's tear as the lash arc sheds its five, a break ringing on a boss and through a crowd (at most once per 6 ticks), and how both sit with the swing and lash cues and against the Raid's warnings.
 - The organ's marks and the hand cascade; the Clasp.
 - Writing with the baton, steering strokes, the tutti and the river.
 - Censer pendulum and pour timing; the stepping pours with three or four censers; the grand pour.
