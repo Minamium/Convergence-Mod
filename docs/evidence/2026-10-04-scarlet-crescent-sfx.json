@@ -1,0 +1,195 @@
+{
+  "scope": "Sable Scythe crescent sounds (docs/encounters/crimson-foundry/REWARDS.md, Melee - Sable Scythe, Audio; Art and audio; Levels against the Raid): the two cues wanted since 0.3.87, ScytheVolley and CrescentBreak, ship as the owner's picked takes (B) in place of the Staff Reap cut they borrowed. Client audio only; no gameplay, packet, protocol, persistence or Raid behaviour change",
+  "target_build": "0.3.91 / protocol80 (main is 0.3.90 / protocol80 at 5c53351 after #122; the next free number above origin/main and the open PR #112's placeholder 0.3.88; the merger re-checks the number before merging)",
+  "integration_base": "5c53351 (origin/main after #122, Lacrimosa's Claws refresh)",
+  "owner_decision": {
+    "date": "2026-10-04 02:39 (saved by the audition page)",
+    "choices": {
+      "ScytheVolley": "B",
+      "CrescentBreak": "B"
+    },
+    "page": "scarlet-scythe-sfx (local A/B page: two takes of each cue, played in context)",
+    "heard_in_context_at_the_shipped_level": "yes: the break plays 2.80 dB over the StaffCut stand-in it replaces as played (-23.81 against -26.61), the volley 1.39 dB under it (-22.00 against -20.61); the owner heard these levels and the cues ship at them",
+    "what_B_is": {
+      "ScytheVolley": "dry and thin: Kenney knifeSlice2 with a nekoninja samurai_slash head, five artisticdude swish-4 whisks rising +2.5 to +6.5 semitones panned +-0.46, a thin qubodup air_cut breath and a small Kreastricon62 bloody_blade wet tail",
+      "CrescentBreak": "dry grains: knifeSlice2 bite, AudioPapkin very_low_impact 70-380 Hz sink, a magnuswaker concrete_smash head as the bone click, seven _stubb rock_tumble grains from 0.032 to 0.240 s, each quieter and a little further apart"
+    }
+  },
+  "files": {
+    "Assets/Sounds/Weapons/ScarletRewards/ScytheVolley.ogg": {
+      "sha256": "11a206d8bf3d9c9f8476222affdeb7ef0b34122e79362aa33c78679511872466",
+      "bytes": 12110,
+      "seconds": 0.503,
+      "bs1770_m_max_lufs": -18.5,
+      "bs1770_m_max_lufs_unrounded": -18.4991,
+      "true_peak_dbtp": -7.35,
+      "ogg_serial": 1756900717,
+      "take": "ScytheVolley_B",
+      "voices": 2,
+      "role": "Shot (one-shot), per-swing audience, Lead 0",
+      "played_lufs": -22.0,
+      "against_the_score_at_the_owners_sliders_db": -7.68
+    },
+    "Assets/Sounds/Weapons/ScarletRewards/CrescentBreak.ogg": {
+      "sha256": "f438b68b58d73da31b1cc524c5dcc2eacd3fbad49565874a94d210e58a2d931a",
+      "bytes": 10306,
+      "seconds": 0.303,
+      "bs1770_m_max_lufs": -20.31,
+      "bs1770_m_max_lufs_unrounded": -20.3141,
+      "true_peak_dbtp": -1.7,
+      "ogg_serial": 3960356299,
+      "take": "CrescentBreak_B",
+      "voices": 3,
+      "role": "Shot (one-shot), per-swing audience, Lead 0",
+      "played_lufs": -23.81,
+      "against_the_score_at_the_owners_sliders_db": -9.49
+    }
+  },
+  "files_note": "both are byte copies of the audition masters (sfx/ScytheVolley_B.ogg and sfx/CrescentBreak_B.ogg on the audition page; the page's report.json ogg_sha256 equals the shipped files'). Measured with the repository meter (tools/tests/test_scarlet_levels.py m_max: ITU-R BS.1770-4, K-weighting along time, both channels summed, maximum 400 ms momentary loudness padded 0.2 s before and 0.5 s after, 10 ms steps), which agrees with the recipe's kit.bs1770_m_max to 0.01 dB",
+  "reproduction": {
+    "new_cues": "render.py --new ScytheVolley_B CrescentBreak_B (audio venv, Python 3.12.10, NumPy 2.5.3, SciPy 1.18.1, pyloudnorm 0.2.0, soundfile 0.14.0 / libsndfile 1.2.2) wrote files with the shipped SHA-256 and the pinned serials, byte for byte",
+    "earlier_table": "render.py without --new, same recipe files: 37 of the 38 earlier files identical to the shipped ones; the 38th, ReliquaryOpen, is the 0.3.82 lift of its master (lift.py), so the earlier Attribution entries stand",
+    "recipe_files_changed_since_the_2026_10_03_record": {
+      "common.py": "a0a4e1a0ea488aa24112b3ebdf0d364023b109ee978764104355f1a0619d72db",
+      "kit.py": "e0dac99f5798b041f924260588334a12fc54591a06d477ead64730e01efc14b5",
+      "cues_scythe.py": "528a66864992d282c6000793fc5747f1ea70810cd68a7c81e50a4942a0afb5d8",
+      "render.py": "2f134bc98433db891e2411ccd667ddd07be73bc06d564b6ce0de4f25ea814b14"
+    },
+    "recipe_files_unchanged": "parts.py, cues_shared.py, cues_organ.py, cues_baton.py, cues_censer.py, cues_quill.py, probe.py, sources.lock.json",
+    "sources": "all eight recordings (air_cut, bloody_blade, concrete_smash, knife_slice, low_impact, rock_tumble, samurai_slash, swish) are rows of the 2026-10-03 Attribution table with the same SHA-256 as the audition run's sources.json; none is new"
+  },
+  "code": {
+    "ScarletRewardCues": "ScytheVolley (B, Shot, OneShot, 2 voices, Lead 0, .503f) and CrescentBreak (B, Shot, OneShot, 3 voices, Lead 0, .303f) move from Wanted into All (37 cues, 40 files); Wanted, StandIn, StandInDecibels, Voice() and CrescentBreakStandInDecibels are removed; CrescentBreakSpacing (6) stays",
+    "ScarletRewardAudio": "back to one file name per voice pool (Identifier = Identity + file); no stand-in offset; the client guard, HasAsset skip and dedicated-server behaviour are unchanged",
+    "ScytheVisuals": "no behaviour change: the volley still rings at the lash arc's middle on Whip tick 20 (ScytheLook.VolleyCue) and BreakCue still limits a break to one per 6 ticks per owner; only a comment changed"
+  },
+  "relations_as_played": {
+    "score_reference_at_owner_sliders_cue_units": -14.324,
+    "one_shot_role": {
+      "files": 14,
+      "played_range": "-23.85 (BatonStroke) ... -20.37 (CenserSwing)",
+      "median": -22.185,
+      "median_vs_ScarletImpact_db": -6.795,
+      "window": "-7 ... -5",
+      "margin_to_the_edge_db": 0.205,
+      "before_with_12_files": -6.3
+    },
+    "loudest_one_shot_under_ScarletForetell_db": 1.05,
+    "loudest_toll_under_quietest_one_shot_db": 0.7,
+    "loudest_in_play_cue_over_ScarletForetell_db": 0.47,
+    "windup_median_vs_foretell_db": -1.975,
+    "release_median_vs_impact_db": -5.95,
+    "finale_median_vs_crossflow_release_db": -1.005,
+    "balance_inside_the_one_shot_role": "unchanged: the two files are their audition masters, so no file moved against its role's common change",
+    "result": "every existing relation holds; only the one-shot median moved (0.5 dB, inside its window)"
+  },
+  "four_player_fight": {
+    "model": "tools/tests/test_scarlet_levels.py dense_mix: Graceful Ordeal bars 19-23 at the owner's sliders under the local organ and three other players' scythe, quill and censers at their real rates, sound budgets and voice limits; each Raid warning laid over it at ten places; the measure is the best 1/3-octave band against everything else in the warning's loudest 400 ms (median of ten). With the crescent cues the other player's scythe also sheds a volley once per 100-tick measure and rings a break at +39, +57, +75, +93, +122, +128, +134, +140 and +146 ticks: nine breaks, one per crescent a held loop throws (four singles 30 ticks after their throws, the volley's five one by one 6 ticks apart, the closest a break rings, 30 ticks after it is shed), the most a held loop rings (the 8-crescent cap bounds how many fly at once, not how many break, and the 6-tick throttle would allow sixteen). The same nine spread evenly (+39, +50, +61, +72, +83, +95, +106, +117, +128) are a second layout, bounded but not pinned by the test",
+    "floor_db": 3.0,
+    "without_crescent_cues": {
+      "mixed2": {
+        "ScarletForetell": 11.86,
+        "ScarletStackSummon": 9.1,
+        "ScarletSpreadSummon": 3.86,
+        "ScarletCrossflowCharge": 4.1
+      },
+      "mixed4": {
+        "ScarletForetell": 11.76,
+        "ScarletStackSummon": 8.56,
+        "ScarletSpreadSummon": 3.8,
+        "ScarletCrossflowCharge": 3.78
+      },
+      "censers2": {
+        "ScarletForetell": 10.88,
+        "ScarletStackSummon": 8.15,
+        "ScarletSpreadSummon": 3.75,
+        "ScarletCrossflowCharge": 4.07
+      },
+      "censers4": {
+        "ScarletForetell": 10.75,
+        "ScarletStackSummon": 7.3,
+        "ScarletSpreadSummon": 3.6,
+        "ScarletCrossflowCharge": 3.56
+      }
+    },
+    "with_crescent_cues": {
+      "mixed2": {
+        "ScarletForetell": 11.86,
+        "ScarletStackSummon": 9.01,
+        "ScarletSpreadSummon": 3.85,
+        "ScarletCrossflowCharge": 4.17
+      },
+      "mixed4": {
+        "ScarletForetell": 11.63,
+        "ScarletStackSummon": 8.48,
+        "ScarletSpreadSummon": 3.75,
+        "ScarletCrossflowCharge": 3.86
+      },
+      "censers2": {
+        "ScarletForetell": 10.71,
+        "ScarletStackSummon": 8.07,
+        "ScarletSpreadSummon": 3.68,
+        "ScarletCrossflowCharge": 4.11
+      },
+      "censers4": {
+        "ScarletForetell": 10.56,
+        "ScarletStackSummon": 7.37,
+        "ScarletSpreadSummon": 3.58,
+        "ScarletCrossflowCharge": 3.42
+      }
+    },
+    "with_crescent_cues_even_spread": {
+      "mixed2": {
+        "ScarletForetell": 11.88,
+        "ScarletStackSummon": 9.01,
+        "ScarletSpreadSummon": 3.76,
+        "ScarletCrossflowCharge": 4.15
+      },
+      "mixed4": {
+        "ScarletForetell": 11.68,
+        "ScarletStackSummon": 8.43,
+        "ScarletSpreadSummon": 3.76,
+        "ScarletCrossflowCharge": 3.86
+      },
+      "censers2": {
+        "ScarletForetell": 10.9,
+        "ScarletStackSummon": 7.92,
+        "ScarletSpreadSummon": 3.6,
+        "ScarletCrossflowCharge": 3.97
+      },
+      "censers4": {
+        "ScarletForetell": 10.61,
+        "ScarletStackSummon": 7.21,
+        "ScarletSpreadSummon": 3.54,
+        "ScarletCrossflowCharge": 3.58
+      }
+    },
+    "largest_loss_db": {
+      "densest": 0.2,
+      "even_spread": 0.23
+    },
+    "smallest_margin_db": {
+      "densest": 3.42,
+      "even_spread": 3.54
+    },
+    "loss_bound_db": 0.25,
+    "correction": "An earlier draft of this change modelled six breaks (the volley's five ringing once or twice) and called that the most a held loop allows, which it is not: a swarm breaks the volley's five one by one. The nine-break model replaces it (smallest margin 3.54 to 3.42 dB, largest loss 0.09 to 0.2 dB in the densest layout, 0.23 dB spread evenly); the files, offsets and every other relation are unchanged",
+    "result": "every warning keeps at least 3.42 dB in every scenario and layout (the floor is 3.0) and at least 0.3.80's margin, and loses at most 0.23 dB against the shipped build without the crescent cues (bound 0.25); the existing test's model (without the crescent cues) is unchanged and its numbers hold"
+  },
+  "checks": {
+    "static": "passed: verify_repo.py --write-catalog --with-domain (catalog, repository policy including the attribution manifest, YAML, domain harness); git diff --check clean",
+    "domain": "passed: 633 deterministic domain tests, 0 failures (dotnet run Release): the wanted-cue test became ScarletRewardCrescentCues (shipped in All, take B, Shot audience and role, in-play offset, 1 peer voice replacing oldest, Lead 0, one file each, 2 and 3 voices, 0.503 / 0.303 s = 31 / 19 ticks, spacing 6, three voices covering the break's file at that spacing, 40 distinct files); the cue table, audience and moment tests count 37 cues in 40 files and add the two names and the volley's tick",
+    "tools": "passed: py -3.12 -B -m unittest discover -s tools/tests, 223 tests OK (13 skipped: the audio stack and other local-only tools); the same under the audio venv, 223 OK (24 skipped); new and changed contracts: the table holds 37 cues with the owner's picks, 40 files with pinned serials and lengths, each file's hash and take in Attribution, the two files pinned to the audition masters' hashes, the volley and break call sites and the 6-tick throttle, StaffCut rung only by the Staff Reap cascade, and no Wanted, StandIn or Voice( left in the cue table or the audio player",
+    "levels": "passed: audio venv python -B -m unittest -v tools.tests.test_scarlet_levels, 8 tests OK: the tables pin the 40 reward files by digest (c75948110d3fafd12178586f782c0cfaf7aa3ebe4eeb848de00fdd1dd7edcb2d), a fresh BS.1770 measurement agrees with every table entry within 0.02 dB, the Raid groups, reward roles, auditioned balance, and the four-player fights without and with the crescent cues (nine breaks a measure, densest and evenly spread)",
+    "native_build": "passed: tools/dev.py build --native into the isolated .local/profile, 0 errors and the existing 4 CS8632 warnings, localization validation and shader hashes passed, solo admission check OK; package 0.3.91 sha256 5822d2b4177639b40b6cafbdf73d74fdcf48548f5c9b255398d0558d330869c2 (rebuilt from the working tree before the commit that corrected the four-player model, which changed only tests and documents; the first build of the same code gave 93456c4bec052c9f80ad8ac0f536a0fe1c7c03e15b55f82b84ce8c88f40cc72b and a second 2b3793af6c89867b3cc8c635a2575cb9ad9050188a5b2907b9072c7389f0fa85, so the package hash varies per build and the build record's commit and dirty state identify the source); no tModLoader process was running",
+    "game_not_started": "the game was not started in this work"
+  },
+  "not_run": [
+    "the two cues in play: the volley's tear after the lash, the break on a boss and through a crowd, and their balance with the swing and lash cues",
+    "four players' scythes against the Raid's warnings in a real fight (the rendered model is a model, not a capture)",
+    "multiplayer peers: another player's cues at 8 dB lower with one voice",
+    "Dedicated Server (no audio path changed; ScarletRewardAudio keeps its client guard and builds no SoundStyle outside a client)",
+    "Host & Play"
+  ],
+  "delegation": "Claude (a workflow subagent, Sonnet 5.5) implemented and checked this change; no other agent"
+}

@@ -524,8 +524,8 @@ internal sealed class ScytheInk : ModSystem, IScarletInkEmitter
         };
     }
 
-    // A crescent broke: the stand-in for CrescentBreak (StaffCut, 6 dB lower), at most once per 6 ticks per owner, so a
-    // volley breaking together rings once or twice.
+    // A crescent broke: CrescentBreak rings at most once per 6 ticks per owner, so a volley breaking together rings once
+    // or twice.
     internal static void BreakCue(int owner, Vector2 at)
     {
         int slot = owner is >= 0 and < 255 ? owner : 255;

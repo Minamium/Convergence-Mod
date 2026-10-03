@@ -23,7 +23,6 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 //   budget, replace oldest); other players together share ScarletCue.PeerVoices (one voice of a per-shot file, replace
 //   oldest; one owner's Voices of any other file, ignore new, so a ringing windup or finale is never cut).
 // - A cue whose file is missing from the package is skipped (HasAsset, cached), never thrown.
-// - A wanted cue (ScarletRewardCues.Wanted) plays its stand-in's file, StandInDecibels lower, in its own voice pool.
 internal static class ScarletRewardAudio
 {
     private const string Identity = "Convergence:ScarletReward:";
@@ -56,21 +55,21 @@ internal static class ScarletRewardAudio
     private static void Emit(in ScarletCue cue, int variant, Vector2 at, float decibels, bool remote)
     {
         if (!Audible) return;
-        string file = cue.File(variant), voice = cue.Voice(variant);
+        string file = cue.File(variant);
         if (!Exists(file)) return;
-        SoundStyle style = Style(cue, voice, file, remote);
-        float db = ScarletRewardCues.RoleDecibels(cue.Role) + cue.StandInDecibels + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);
+        SoundStyle style = Style(cue, file, remote);
+        float db = ScarletRewardCues.RoleDecibels(cue.Role) + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);
         style.Volume = Math.Clamp(ScarletRewardCues.Gain * ScarletRewardCues.Decibels(db), 0f, 1f);
         SoundEngine.PlaySound(style, at);
     }
 
-    private static SoundStyle Style(in ScarletCue cue, string voice, string file, bool remote)
+    private static SoundStyle Style(in ScarletCue cue, string file, bool remote)
     {
         var styles = remote ? peer : own;
-        if (!styles.TryGetValue(voice, out SoundStyle style))
-            styles[voice] = style = new SoundStyle(ScarletRewardCues.Root + file)
+        if (!styles.TryGetValue(file, out SoundStyle style))
+            styles[file] = style = new SoundStyle(ScarletRewardCues.Root + file)
             {
-                Identifier = Identity + voice + (remote ? ":peer" : ""),
+                Identifier = Identity + file + (remote ? ":peer" : ""),
                 MaxInstances = remote ? cue.PeerVoices : cue.Voices,
                 SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,
                 PauseBehavior = PauseBehavior.StopWhenGamePaused,
@@ -90,7 +89,6 @@ internal static class ScarletRewardAudio
     {
         var index = new Dictionary<string, ScarletCue>(StringComparer.Ordinal);
         foreach (ScarletCue cue in ScarletRewardCues.All) index.Add(cue.Name, cue);
-        foreach (ScarletCue cue in ScarletRewardCues.Wanted) index.Add(cue.Name, cue);
         return index;
     }
 

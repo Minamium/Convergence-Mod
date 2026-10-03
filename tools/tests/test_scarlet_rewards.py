@@ -254,7 +254,7 @@ class ScarletRewardWiring(unittest.TestCase):
         audio = read(CLIENT / 'Rewards/ScarletRewardAudio.cs')
         self.assertIn('private static bool Audible => !Main.dedServ && !Main.gameMenu && !Main.gamePaused && Main.hasFocus;', audio)
         emit = audio[audio.index('private static void Emit('):]
-        self.assertLess(emit.index('if (!Audible) return;'), emit.index('Style(cue, voice, file, remote)'), 'no SoundStyle before the client guard')
+        self.assertLess(emit.index('if (!Audible) return;'), emit.index('Style(cue, file, remote)'), 'no SoundStyle before the client guard')
         self.assertLess(emit.index('if (!Exists(file)) return;'), emit.index('SoundEngine.PlaySound'), 'a missing cue is skipped')
         self.assertIn('ModContent.HasAsset(ScarletRewardCues.Root + file)', audio)
         art = read(CLIENT / 'Rewards/ScarletRewardArt.cs')
@@ -425,17 +425,18 @@ def reward_call_sites():
 
 
 class ScarletRewardAudioContract(unittest.TestCase):
-    """The shipped cues (REWARDS.md#art-and-audio): the owner's 2026-10-03 picks, wired as the spec says."""
+    """The shipped cues (REWARDS.md#art-and-audio): the owner's 2026-10-03 and 2026-10-04 picks, wired as the spec says."""
 
-    def test_the_table_holds_the_specs_35_cues_with_the_owners_picks(self):
+    def test_the_table_holds_the_specs_37_cues_with_the_owners_picks(self):
         table = cue_table()
-        self.assertEqual(35, len(table))
+        self.assertEqual(37, len(table))
         doc = read(ROOT / 'docs/encounters/crimson-foundry/REWARDS.md')
-        cues = doc[doc.index('**Cues** (35'):doc.index('**Sources and rendering.**')]
+        cues = doc[doc.index('**Cues** (37'):doc.index('**Sources and rendering.**')]
         named = set(re.findall(r'`(\w+)`', cues)) - {'Toll0', 'Toll7', 'OrganShot1', 'OrganShot4'}
         named |= {f'Toll{k}' for k in range(8)}
         self.assertEqual(named, set(table), "the table names exactly the spec's cues")
-        picks_b = {'Cadence', 'ReliquaryOpen', 'ScytheWhip', 'StaffWindup', 'StaffBarline', 'RiverRelease'}
+        # 2026-10-03: B for these six blocks, A for every other; 2026-10-04: B for the two crescent cues.
+        picks_b = {'Cadence', 'ReliquaryOpen', 'ScytheWhip', 'StaffWindup', 'StaffBarline', 'RiverRelease', 'ScytheVolley', 'CrescentBreak'}
         for name, row in table.items():
             self.assertEqual('B' if name in picks_b else 'A', row[0], name)
         self.assertEqual(4, table['OrganShot'][5], 'one OrganShot per pipe')
@@ -447,7 +448,7 @@ class ScarletRewardAudioContract(unittest.TestCase):
     def test_every_cue_file_is_the_picked_take_as_rendered(self):
         table = cue_table()
         files = cue_files(table)
-        self.assertEqual(38, len(files))
+        self.assertEqual(40, len(files))
         self.assertEqual(sorted(f'{stem}.ogg' for stem in files), sorted(p.name for p in SOUNDS.iterdir()), 'exactly the shipped cue files')
         for stem, (cue, take) in files.items():
             with self.subTest(file=stem):
@@ -491,6 +492,32 @@ class ScarletRewardAudioContract(unittest.TestCase):
         self.assertEqual({'ScytheVisuals.cs', 'OrganVisuals.cs', 'BatonVisuals.cs', 'QuillVisuals.cs'}, tolls, 'each build rings the ladder')
         self.assertIn(('Toll', 'QuillVisuals.cs'), {(method, path) for method, _, path in calls}, 'the Sealed Score plays the melody back')
 
+    def test_the_crescent_cues_are_the_owners_2026_10_04_picks_and_ring_where_the_scythe_always_fired_them(self):
+        # The owner chose take B of both on the 2026-10-04 audition page. The shipped files are those audition masters byte
+        # for byte (the audition report's ogg_sha256 of ScytheVolley_B and CrescentBreak_B), re-rendered from the recipe
+        # with the pinned serials to the same bytes; their Attribution record is checked above.
+        picks = {'ScytheVolley': '11a206d8bf3d9c9f8476222affdeb7ef0b34122e79362aa33c78679511872466',
+                 'CrescentBreak': 'f438b68b58d73da31b1cc524c5dcc2eacd3fbad49565874a94d210e58a2d931a'}
+        for stem, digest in picks.items():
+            self.assertEqual(digest, hashlib.sha256((SOUNDS / f'{stem}.ogg').read_bytes()).hexdigest(), stem)
+        table = cue_table()
+        self.assertEqual(('B', 'Shot', 2, '0', .503, 1, 'Shot'), table['ScytheVolley'], 'a per-swing one-shot, 2 voices, 0.503 s')
+        self.assertEqual(('B', 'Shot', 3, '0', .303, 1, 'Shot'), table['CrescentBreak'], 'a per-swing one-shot, 3 voices, 0.303 s')
+        # The trigger points are the ones the stand-ins used: the volley as the Whip's lash arc sheds its crescents (tick 20,
+        # at the arc's middle), a break at most once per 6 ticks per owner.
+        scythe = read(CLIENT / 'Rewards/ScytheVisuals.cs')
+        volley = scythe[scythe.index('if (kind == SableScytheMotion.Whip && Crossed(reached, age, ScytheLook.VolleyCue))'):]
+        self.assertIn('ScarletRewardAudio.Shot(ScarletRewardCues.ScytheVolley, projectile.owner, middle);', volley[:600])
+        self.assertIn('ScytheVolleyAt = CrimsonRewardRules.VolleyAge', read(CUES))
+        rung = scythe[scythe.index('internal static void BreakCue('):]
+        rung = rung[:rung.index('public void Emit(')]
+        self.assertIn('now - lastBreakCue[slot] < ScarletRewardCues.CrescentBreakSpacing) return;', rung)
+        self.assertLess(rung.index('CrescentBreakSpacing) return;'), rung.index('ScarletRewardAudio.Shot(ScarletRewardCues.CrescentBreak, owner, at);'))
+        self.assertIn('internal const int CrescentBreakSpacing = 6;', read(CUES))
+        # No stand-in is left: StaffCut is rung only by the Staff Reap cascade.
+        staff_cut = [(method, path) for method, args, path in reward_call_sites() if 'ScarletRewardCues.StaffCut' in args]
+        self.assertEqual([('Play', 'ScytheVisuals.cs')], staff_cut)
+
     def test_audiences_and_gains_follow_the_multiplayer_rules(self):
         table = cue_table()
         for method, args, path in reward_call_sites():
@@ -503,16 +530,14 @@ class ScarletRewardAudioContract(unittest.TestCase):
                 self.assertEqual(expected, method, f'{path}: {name} is a {audience} cue')
         audio = read(CLIENT / 'Rewards/ScarletRewardAudio.cs')
         # Other players' voices are a pool of their own, so another player's cue never cuts the local player's.
-        self.assertIn('Identifier = Identity + voice + (remote ? ":peer" : ""),', audio)
-        # A wanted cue plays its shipped stand-in's file in a voice pool of its own (REWARDS.md, Sable Scythe audio).
-        self.assertIn('internal string File(int variant = 0) => StandIn ?? Voice(variant);', read(CUES))
-        wanted = read(CUES)[read(CUES).index('internal static readonly ScarletCue[] Wanted'):]
-        wanted = wanted[:wanted.index('};')]
-        table = cue_table()
-        for name, stand_in in re.findall(r'new\((\w+), .*StandIn: (\w+)', wanted):
-            self.assertNotIn(name, table, f'{name} is not one of the shipped 35 until it is recorded')
-            self.assertIn(stand_in, table, f'{name} stands in with a shipped cue')
-            self.assertIn(f'ScarletRewardCues.{name}', '\n'.join(args for _, args, _ in reward_call_sites()), f'{name} is played')
+        self.assertIn('Identifier = Identity + file + (remote ? ":peer" : ""),', audio)
+        # Every cue plays its own file in its own voice pool: no wanted list, no stand-in and no borrowed file remains
+        # (REWARDS.md, Sable Scythe audio; the volley and the break shipped on 2026-10-04).
+        cues_source = read(CUES)
+        self.assertIn('internal string File(int variant = 0) => Files == 1 ? Name : Name + (Math.Clamp(variant, 0, Files - 1) + 1);', cues_source)
+        for gone in ('Wanted', 'StandIn', 'Voice('):
+            self.assertNotIn(gone, cues_source, f'ScarletRewardCues no longer has {gone}')
+            self.assertNotIn(gone, audio, f'ScarletRewardAudio no longer has {gone}')
         self.assertIn('MaxInstances = remote ? cue.PeerVoices : cue.Voices,', audio)
         self.assertIn('SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,', audio)
         self.assertIn('internal int PeerVoices => Audience == ScarletCueAudience.Shot ? 1 : Voices;', read(CUES), 'other players share one voice of a per-shot file')
@@ -527,9 +552,8 @@ class ScarletRewardAudioContract(unittest.TestCase):
                 self.assertRegex(owner, r'^(owner|p\.owner|projectile\.owner|owner\.whoAmI|player\.whoAmI)$', f'{path}: {method}({args}) names the owner second')
         self.assertIn('PauseBehavior = PauseBehavior.StopWhenGamePaused,', audio)
         self.assertIn('PlayOnlyIfFocused = true,', audio)
-        # Every cue another player causes plays RemoteCueDecibels under its owner's level (REWARDS.md#multiplayer-readability);
-        # a wanted cue's stand-in plays StandInDecibels under its own role's level (0 for every shipped cue).
-        self.assertIn('float db = ScarletRewardCues.RoleDecibels(cue.Role) + cue.StandInDecibels + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);', audio)
+        # Every cue another player causes plays RemoteCueDecibels under its owner's level (REWARDS.md#multiplayer-readability).
+        self.assertIn('float db = ScarletRewardCues.RoleDecibels(cue.Role) + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);', audio)
         self.assertEqual(1, audio.count('? CrimsonRewardRules.RemoteCueDecibels'), 'one place applies the remote offset')
         self.assertIn('internal const float Gain = 1f;', read(CUES))
 
