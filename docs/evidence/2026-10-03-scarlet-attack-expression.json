@@ -50,7 +50,7 @@
     },
     "production_path": "the rigs, shaders, ScarletNotes, ScarletBodyMaterial, ScarletChoirBlood and ScarletGestureMotion are the production files; CrimsonRig.DrawEffigy's wiring (notes with lookback, membership, the Choir's cues and heave) is mirrored by RigDriver and pinned by source checks",
     "static_and_domain": "passed: verify_repo.py --with-domain --write-catalog (585 deterministic domain tests, including the Choir blood values, the lookback, the shift and edge checks over the blood), tools/tests (208, 3 skipped), git diff --check",
-    "native_build": "see the PR: tools/dev.py build --native into the isolated profile",
+    "native_build": "passed: tools/dev.py build --native into the isolated profile from clean d5c831a (0.3.79 / protocol79, tML at D:/SteamLibrary install), 0 errors / the 4 existing FirstSeverance nullable warnings, localization and shader hashes verified; package sha256 df09d8ab86dda16f91462665b23829d6b234630a434c30f2532d7f6a4cb9fea1 (the package is not committed)",
     "game_not_started": "no game, server or tModLoader was started for these checks"
   },
   "not_run": [
