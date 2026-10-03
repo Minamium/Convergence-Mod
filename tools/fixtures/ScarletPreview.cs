@@ -463,18 +463,24 @@ internal sealed class PreviewRenderer : IDisposable
             // The shipped decision, in the order CrimsonGestureVisuals.DrawTrackingBeams draws it: a field beam (TrackingBeam,
             // SideBeams) or signature move (CinderCurtain, ShroudRope, FourHands) shows the original portal forecast until Fire,
             // then ScarletInk for the live strike and its residue. The crossflow's seals (ScarletSorcery.fxc, drawn like
-            // ScarletSorcery.CrossflowSeals) lie under everything, from their bloom to their fade; its live stream is the band
-            // between the stream ends cut square on both (ScarletInkStroke), covering the inner half of each seal. A signature
-            // move's yielding residue goes under every forecast; the forecasts follow; live strikes and the other residues lie
-            // on top. Every other technique has its own production material (ScarletMaterials / ScarletSorcery / ScarletClusters)
-            // that the preview does not reproduce; PortalBeam is only a stand-in silhouette for those.
+            // ScarletSorcery.CrossflowSeals) lie under the forecast veil while they charge and, from Fire until they fade, over
+            // the live stream, which is the band between the stream ends cut square on both (ScarletInkStroke), each cut sinking
+            // into its seal's ring. A signature move's yielding residue goes under every forecast; the forecasts follow; live
+            // strikes and the other residues lie on top, the live seals last. Every other technique has its own production
+            // material (ScarletMaterials / ScarletSorcery / ScarletClusters) that the preview does not reproduce; PortalBeam is
+            // only a stand-in silhouette for those.
             float clock = view.Clock;
+            var sealsOver = new List<CrimsonGesturePlan>();
             foreach (var plan in phrase.Plans)
-                if (plan.Technique == CrimsonTechnique.SideBeams && clock >= plan.Born && clock < plan.End) DrawSeals(view, plan);
+            {
+                if (plan.Technique != CrimsonTechnique.SideBeams || clock < plan.Born || clock >= plan.End) continue;
+                if (clock < plan.Fire) DrawSeals(view, plan); else sealsOver.Add(plan);
+            }
             foreach (var plan in phrase.Plans) if (ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);
             foreach (var plan in phrase.Plans) if (!ScarletInkStroke.Owns(plan, clock)) DrawPortalBeam(view, plan);
             foreach (var plan in phrase.Plans)
                 if (ScarletInkStroke.Owns(plan, clock) && !ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);
+            foreach (var plan in sealsOver) DrawSeals(view, plan);
         }
         else
         {

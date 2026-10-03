@@ -371,12 +371,13 @@ class ScarletContracts(unittest.TestCase):
         # Forecasts keep the portal energy; the two crossflow seals and the rift tears keep ScarletSorcery.
         self.assertIn('CrimsonEnergy.Add(',beams)
         self.assertIn('ScarletSorcery.Tear(',beams)
-        # The crossflow's seals lie under the forecast and the ink for their whole life, as in the original (owner 2026-10-04):
-        # the live stream is cut square on the two stream ends and covers each seal's inner half; none are drawn over the ink.
-        self.assertIn('if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch, p, age);',beams)
-        self.assertNotIn('sealsOver',beams)
+        # The crossflow's seals charge under the forecast and, from Fire until they fade, lie over the live stream (protocol80;
+        # owner 2026-10-04): the stream is cut square on its two ends and each cut sinks into its seal's ring.
+        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);',beams)
+        self.assertIn('else sealsOver.Add(p);',beams)
         self.assertLess(beams.index('ScarletSorcery.CrossflowSeals(batch, p, age)'),beams.index('CrimsonEnergy.Draw(batch)'))
         self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike,'))
+        self.assertLess(beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike,'),beams.index('foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);'))
         sorcery=(CLIENT/'ScarletSorcery.cs').read_text(encoding='utf-8')
         self.assertIn('var (right, left) = CrimsonChoreography.Seals(p);',sorcery)
         # Live strike and residue never reach CrimsonEnergy: they are collected before it and drawn after it (over forecasts).

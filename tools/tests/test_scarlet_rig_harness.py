@@ -232,11 +232,12 @@ class HarnessContractTests(unittest.TestCase):
                                                    'TrackingBeams(s, view, age)', 'Players(s, view)', 'Mask(view)')]
         self.assertEqual(sorted(order), order)
         beams = scene[scene.index('private void TrackingBeams('):scene.index('private void Standins(')]
-        order = [beams.index(token) for token in ('CrossflowSeals(', 'residues.Add(', 'CrimsonEnergy.Draw(batch)', 'foreach (var strike in strikes)')]
+        order = [beams.index(token) for token in ('CrossflowSeals(', 'residues.Add(', 'CrimsonEnergy.Draw(batch)', 'foreach (var strike in strikes)',
+                                                  'foreach (var p in sealsOver)')]
         self.assertEqual(sorted(order), order)
-        # The crossflow's seals lie under the forecast and the ink for their whole life (owner 2026-10-04), as in the game.
-        self.assertIn('if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch, p, age);', beams)
-        self.assertNotIn('sealsOver', beams)
+        # protocol80: the crossflow's seals charge under the forecast veil and, from Fire, are drawn after the ink, over the stream's cut ends.
+        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);', beams)
+        self.assertIn('else sealsOver.Add(p);', beams)
 
     def test_g11_compares_the_tracking_beams_and_measures_the_crossflow_band(self):
         gates = read(FIXTURES / 'ScarletRigGates.cs')

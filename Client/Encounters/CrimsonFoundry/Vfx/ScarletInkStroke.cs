@@ -15,7 +15,9 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // stream, because the capsule's round ends stuck out past the seals' narrow ellipses. The
 // band covers the capsule's whole span and its half-width is the capsule's radius, so it lies
 // inside the forecast band, and the capsule (the collision) is not touched; only the four
-// corners the round ends cut off are inked without hurting.
+// corners the round ends cut off are inked without hurting. The seals are drawn over a live
+// stream (CrimsonGestureVisuals.DrawTrackingBeams), so each flat cut, which falls inside its seal's
+// ring, sinks into it; at a wall the held seal lies over the stream, which runs on under it to the wall.
 //
 // It owns only the live and residue time of a field beam (TrackingBeam, SideBeams) and of an
 // Act signature move (CinderCurtain, ShroudRope, FourHands). The forecast (CrimsonEnergy's

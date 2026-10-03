@@ -443,7 +443,7 @@ internal sealed class RigRenderer : IDisposable
     private readonly SpriteBatch batch;
     private readonly ScarletInkStroke ink = new();
     private readonly ScarletGeometryOverlay overlay;
-    private readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), stand = new();
+    private readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), sealsOver = new(), stand = new();
     private readonly CrimsonStroke[] strokes = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private RenderTarget2D? frame;
@@ -552,14 +552,18 @@ internal sealed class RigRenderer : IDisposable
     private void TrackingBeams(RigScene s, in ScarletView view, float age)
     {
         CrimsonEnergy.Begin();
-        strikes.Clear(); residues.Clear(); signatures.Clear();
+        strikes.Clear(); residues.Clear(); signatures.Clear(); sealsOver.Clear();
         foreach (var p in s.Plans)
         {
             if (!RigMirror.Alive(p, age)) continue;
             if (p.IsSignature) signatures.Add(p);
             int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicksOf(p) : 0;
             if ((!p.Aimed && !p.IsRift && !p.IsSignature) || age < p.Born || age >= p.End + tail) continue;
-            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch, p, age);
+            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End)
+            {
+                if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);
+                else sealsOver.Add(p);
+            }
             if (ScarletInkStroke.Underlies(p, age)) { residues.Add(p); continue; }
             if (ScarletInkStroke.Owns(p, age)) { strikes.Add(p); continue; }
             bool warning = age < p.Fire;
@@ -591,6 +595,7 @@ internal sealed class RigRenderer : IDisposable
             using var scope = new Convergence.Client.Graphics.WorldGraphicsScope(batch);
             foreach (var strike in strikes) ink.Draw(view, Assets, strike, CollectionsMarshal.AsSpan(signatures));
         }
+        foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);
     }
 
     // The ChoirRakes ribbon (ScarletMaterials.Strokes over Luminance's trail tessellator) is not reproduced offline: its

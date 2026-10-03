@@ -119,7 +119,7 @@ internal static class CrimsonChoreography
     // The drawn seals (ScarletSorcery.CrossflowSeals): at the stream's ends, except that a seal is held SealInset inside a
     // wall, so the whole seal (radius 185 at full charge, flattened to .28, 51.8 px either side of its centre) stays inside
     // the field mask instead of being cut in half by it. The stream, drawn as a band cut square on its end, then still
-    // reaches the wall, over the seal.
+    // reaches the wall, under the seal (the seals are drawn over a live stream).
     internal const float SealInset = 52;
     internal static (CrimsonPoint Right, CrimsonPoint Left) Seals(in CrimsonGesturePlan p)
     {
@@ -130,8 +130,8 @@ internal static class CrimsonChoreography
     // Forecast: the band from one stream end to the other, the seal centres in the open (CrimsonEnergy draws it as a capless
     // veil). Live: one capsule that leaves the right end and grows leftward, its round ends stopping at the two ends, so it
     // never runs past either. Collision uses this capsule. The picture (ScarletInkStroke) is the band over the capsule's whole
-    // span, half-width the capsule's radius, cut square on the two ends and on the growing front, as the original stream was:
-    // the capsule lies inside it, and both lie inside the forecast band.
+    // span, half-width the capsule's radius, cut square on the two ends and on the growing front, as the original stream was,
+    // with a seal drawn over each cut: the capsule lies inside it, and both lie inside the forecast band.
     internal static CrimsonStroke Side(in CrimsonGesturePlan p, float age, bool forecast)
     {
         var (right, left) = Reach(p);
