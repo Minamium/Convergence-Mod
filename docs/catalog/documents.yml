@@ -686,14 +686,14 @@ documents:
 - doc_id: encounter.crimson-foundry.spec
   path: docs/encounters/crimson-foundry/ENCOUNTER_SPEC.md
   title: Scarlet Invocation
-  content_sha256: f1c6ad324347df9fa6b7241c145e13dd0c9a9befb37f25b09d8537bc4cccbc9d
+  content_sha256: bfce478df5abb0aa48a6c1ee6136fd4ad6ec430ad23e40fe45728c502872ab5c
   document_type: spec
   status: accepted
   owners:
   - gameplay
   - art
   - audio
-  last_reviewed: '2026-10-03'
+  last_reviewed: '2026-10-04'
   source_of_truth_for:
   - encounter.crimson_foundry.experience
   - encounter.crimson_foundry.music
@@ -1515,12 +1515,12 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 02fe65dbfd802a5083404d50a12234d13b304be3b5d62b33005672ea78b4105e
+  content_sha256: cbf680b7a598076570be3144a591ab653aaf915203723e84fcec014f276f5bdf
   document_type: status
   status: accepted
   owners:
   - project
-  last_reviewed: '2026-10-03'
+  last_reviewed: '2026-10-04'
   source_of_truth_for:
   - project.implementation_status
   aliases:
