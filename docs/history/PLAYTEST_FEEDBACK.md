@@ -17,7 +17,7 @@ related_docs:
 
 # Playtest feedback ledger
 
-## Sable Scythe as ordinary Melee with homing crescents — 2026-10-03 / 0.3.78 → 0.3.81
+## Sable Scythe as ordinary Melee with homing crescents — 2026-10-03 / 0.3.78 → 0.3.84
 
 Owner, after playing 0.3.78: make the scythe ordinary Melee instead of true melee, with much flashier effects and homing projectiles. Reported direction, not footage. Decision: keep the figure eight, the bone hook and the black blood; every Over and Under throws a crescent and the Whip's lash arc sheds a volley of five, all seeking the enemy nearest the cursor, chaining up to three, at the measure's unchanged 6.4×; Staff Reap stays as the release and crescent hits engrave it. Offline, a residue smear behind the crescents read as thread and became a cinder wake, and the bodies took the lash arc's radius so the black core shows instead of a flat red tube. [Evidence](../evidence/2026-10-03-scarlet-scythe.json); feel and balance in play remain not_run.
 

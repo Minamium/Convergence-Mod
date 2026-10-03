@@ -527,8 +527,9 @@ class ScarletRewardAudioContract(unittest.TestCase):
                 self.assertRegex(owner, r'^(owner|p\.owner|projectile\.owner|owner\.whoAmI|player\.whoAmI)$', f'{path}: {method}({args}) names the owner second')
         self.assertIn('PauseBehavior = PauseBehavior.StopWhenGamePaused,', audio)
         self.assertIn('PlayOnlyIfFocused = true,', audio)
-        # Every cue another player causes plays RemoteCueDecibels under its owner's level (REWARDS.md#multiplayer-readability).
-        self.assertIn('float db = ScarletRewardCues.RoleDecibels(cue.Role) + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);', audio)
+        # Every cue another player causes plays RemoteCueDecibels under its owner's level (REWARDS.md#multiplayer-readability);
+        # a wanted cue's stand-in plays StandInDecibels under its own role's level (0 for every shipped cue).
+        self.assertIn('float db = ScarletRewardCues.RoleDecibels(cue.Role) + cue.StandInDecibels + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);', audio)
         self.assertEqual(1, audio.count('? CrimsonRewardRules.RemoteCueDecibels'), 'one place applies the remote offset')
         self.assertIn('internal const float Gain = 1f;', read(CUES))
 
