@@ -53,13 +53,15 @@ internal static class PreviewPlanner
         };
     }
 
-    // phase: 0..2 = Acts I..III, 3 = Final. serial = the 1-based phrase serial CrimsonRuntime hands to the techniques.
+    // phase: 0..2 = Acts I..III, 3 = Final. serial = the 1-based phrase serial CrimsonRuntime hands to Create and the
+    // techniques (serial % 3 == 0 is a signature phrase in Acts I-III). pickup = the phrase opens an Act or follows a gap.
     internal static PreviewPhrase Build(string name, PreviewGrid grid, int phase, int serial,
-        PreviewPlayer player, int scoreStart, int musicStart = 3000)
+        PreviewPlayer player, int scoreStart, int musicStart = 3000, bool pickup = false)
     {
         var field = Field;
-        var rhythm = CrimsonChoreography.Create(scoreStart, serial - 1, phase == 3);
-        int count = rhythm.Hits.Count + (phase == 3 ? CrimsonChoreography.BasicNotes : 0);
+        var rhythm = CrimsonChoreography.Create(scoreStart, serial, phase, pickup);
+        var notes = CrimsonEnsemble.Notes(rhythm, phase);
+        int count = notes.Count;
         var sources = new int[count];
         var counts = new int[4]; var steps = new int[4]; var first = new int[4]; var last = new int[4];
         Array.Fill(first, int.MaxValue);
@@ -67,8 +69,8 @@ internal static class PreviewPlanner
         {
             int source = phase < 3 ? phase : 3; // Final: ActiveSource only admits source 3
             sources[i] = source; counts[source]++;
-            var note = rhythm.Hits[i % rhythm.Hits.Count];
-            var technique = CrimsonEnsemble.Technique(phase, serial, i % rhythm.Hits.Count, i >= rhythm.Hits.Count);
+            var (note, second) = notes[i];
+            var technique = CrimsonEnsemble.Technique(phase, serial, note.Pulse, second);
             first[source] = Math.Min(first[source], musicStart + note.Fire);
             last[source] = Math.Max(last[source], musicStart + CrimsonEnsemble.NoteEnd(technique, note));
         }
@@ -84,9 +86,9 @@ internal static class PreviewPlanner
         var plans = new CrimsonGesturePlan[count];
         for (int i = 0; i < count; i++)
         {
-            int source = sources[i], note = i % rhythm.Hits.Count;
-            var hit = rhythm.Hits[note];
-            var technique = CrimsonEnsemble.Technique(phase, serial, note, i >= rhythm.Hits.Count);
+            int source = sources[i];
+            var (hit, second) = notes[i];
+            var technique = CrimsonEnsemble.Technique(phase, serial, hit.Pulse, second);
             bool aimedIdentity = CrimsonGesturePlan.NeedsTargetIdentity(technique);
             // The EFFECTIVE aim: what the server locks at Born (CrimsonGesture.AI), not the
             // coarse clamp stored when the phrase is scheduled.
@@ -95,10 +97,14 @@ internal static class PreviewPlanner
             CrimsonPoint aim = CrimsonTechniqueGeometry.Clamp(field, position, 100);
             if (technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SpatialRift)
                 aim = CrimsonChoreography.Predict(field, position, velocity);
-            if (technique == CrimsonTechnique.ChoirRakes) aim = new(field.CenterX, field.CenterY);
+            if (technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands)
+                aim = new(field.CenterX, field.CenterY);
+            if (technique == CrimsonTechnique.CinderCurtain)
+                aim = CrimsonSignatureMoves.CurtainTarget(1 << CrimsonSignatureMoves.CurtainColumn(field, player.Center.X));
             int end = CrimsonEnsemble.NoteEnd(technique, hit);
-            int begin = Math.Max(epoch, musicStart + rhythm.Start - CrimsonRhythm.LookAheadTicks);
-            plans[i] = new CrimsonGesturePlan(Fight, 0, epoch, serial, (byte)i, (byte)source,
+            // CrimsonRuntime issues a phrase LookAheadTicks before its first forecast.
+            int begin = Math.Max(epoch, musicStart + rhythm.FirstWarning - CrimsonRhythm.LookAheadTicks);
+            plans[i] = new CrimsonGesturePlan(Fight, 0, epoch, serial, CrimsonEnsemble.PlanPulse(hit, second), (byte)source,
                 technique, (byte)steps[source]++, (byte)counts[source], hit.Accent,
                 begin, musicStart + hit.Warning, musicStart + hit.Fire, musicStart + end,
                 first[source], last[source], staging[source], staging[source], aim,
@@ -106,7 +112,7 @@ internal static class PreviewPlanner
                 aimedIdentity ? (short)0 : (short)-1, aimedIdentity ? Connection : Guid.Empty);
             plans[i].Validate();
         }
-        var beats = CrimsonMeter.NextBeats(Math.Max(0, scoreStart - .499999d), 9);
+        var beats = CrimsonMeter.NextBeats(rhythm.Start, 9);
         var absolute = new int[beats.Length];
         for (int i = 0; i < beats.Length; i++) absolute[i] = musicStart + (int)Math.Round(beats[i]);
         return new PreviewPhrase(name, phase, serial, player, musicStart, absolute, plans);

@@ -6,79 +6,96 @@ namespace Convergence.DomainTests;
 
 internal static partial class Program
 {
-    [DomainTest("Scarlet eight beat composition preserves four basic beats then two warning and two broad beam beats")]
+    [DomainTest("Scarlet two-bar composition keeps sparse notes between bar-head crossflows and selects each Act's techniques")]
     private static void ScarletEightBeatComposition()
     {
-        for(int age=CrimsonChoreography.OpeningTicks;age<54000;age+=137) {
-            var p=CrimsonChoreography.Create(age,1,false);
+        for(int age=CrimsonChoreography.OpeningTicks;age<54000;age+=137) for(int serial=1;serial<=3;serial++) {
+            var p=CrimsonChoreography.Create(age,serial,0,false);
             int first=ScarletFirstBarAtOrAfter(age)*CrimsonMeter.BeatsPerBar;
-            int[] b=new int[9];
-            for(int i=0;i<b.Length;i++) b[i]=CrimsonMeter.BeatTick(first+i);
-            AssertEqual(b[0],p.Start,"phrase begins on its bar head");
-            AssertEqual(5,p.Hits.Count,"four consecutive releases and one crossflow");
-            for(int i=0;i<4;i++) {
-                AssertEqual(b[i],p.Hits[i].Warning,"forecast starts on beat including bar start");
-                AssertEqual(b[i+1],p.Hits[i].Fire,"one beat later strike");
-                AssertEqual(true,p.Hits[i].Fire-p.Hits[i].Warning>=CrimsonRhythm.MinimumWarningTicks,"minimum warning at every grid position");
-            }
-            AssertEqual(b[4],p.Hits[4].Warning,"four beats complete");
-            AssertEqual(b[6],p.Hits[4].Fire,"two beat charge");
-            AssertEqual(b[8],p.Hits[4].End,"two beat amplification and collapse");
-            var next=CrimsonChoreography.Create(p.End,2,false);
-            AssertEqual(p.End,next.Hits[0].Warning,"no blank beat after beam tail");
-            AssertEqual(p.End,p.Hits[4].End,"next bar starts without extra dead time");
+            AssertEqual(CrimsonMeter.BeatTick(first),p.Start,"phrase begins on its bar head");
+            AssertEqual(CrimsonMeter.BeatTick(first+8),p.End,"two bars");
+            AssertEqual(4,p.Hits.Count,serial==3?"four signature steps":"three notes and the closing crossflow");
+            int strikes=0;
+            foreach(var hit in p.Hits) if(hit.Fire<p.End) strikes++;
+            AssertEqual(3,strikes,"three strikes inside the phrase; the fourth release belongs to the next downbeat");
+            AssertEqual(p.End,p.Hits[^1].Fire,"the closer or the final step lands on the next downbeat");
+            var next=CrimsonChoreography.Create(p.End,serial+1,0,false);
+            AssertEqual(p.End,next.Start,"the next phrase starts on that downbeat");
+            AssertEqual(true,next.FirstWarning>=p.Hits[^1].Fire+20,"after a beat of release, no forecast stacks on it");
         }
         for(int phrase=1;phrase<=12;phrase++) for(int i=0;i<4;i++) {
             bool signature=phrase%3==0;
-            AssertEqual(signature?CrimsonTechnique.CinderCurtain:CrimsonTechnique.TrackingBeam,CrimsonEnsemble.Technique(0,phrase,i,false),"Act I basic notes are tracking beams except the signature curtain");
-            AssertEqual(signature?CrimsonTechnique.ShroudRope:CrimsonTechnique.SpatialRift,CrimsonEnsemble.Technique(1,phrase,i,false),"Act II basic notes are spatial cuts except the signature rope");
-            AssertEqual(signature?CrimsonTechnique.FourHands:CrimsonTechnique.ChoirRakes,CrimsonEnsemble.Technique(2,phrase,i,false),"Act III basic notes are Choir rake volleys except the signature hands");
+            AssertEqual(signature?CrimsonTechnique.CinderCurtain:CrimsonTechnique.TrackingBeam,CrimsonEnsemble.Technique(0,phrase,i,false),"Act I notes are tracking beams except the signature curtain");
+            AssertEqual(signature?CrimsonTechnique.ShroudRope:CrimsonTechnique.SpatialRift,CrimsonEnsemble.Technique(1,phrase,i,false),"Act II notes are spatial cuts except the signature rope");
+            AssertEqual(signature?CrimsonTechnique.FourHands:CrimsonTechnique.ChoirRakes,CrimsonEnsemble.Technique(2,phrase,i,false),"Act III notes are Choir rake volleys except the signature hands");
         }
-        for(int phase=0;phase<3;phase++) for(int phrase=1;phrase<=12;phrase++)
-            AssertEqual(CrimsonTechnique.SideBeams,CrimsonEnsemble.Technique(phase,phrase,4,false),"all Act I–III phrases retain closing crossflow");
+        for(int phase=0;phase<3;phase++) for(int phrase=1;phrase<=12;phrase++) {
+            AssertEqual(CrimsonTechnique.SideBeams,CrimsonEnsemble.Technique(phase,phrase,CrimsonChoreography.Closer,false),"closers are the seal crossflow");
+            AssertEqual(CrimsonTechnique.SideBeams,CrimsonEnsemble.Technique(phase,phrase,CrimsonChoreography.Pickup,false),"pickups are the seal crossflow");
+            bool closes=false;
+            foreach(var hit in CrimsonChoreography.Create(900,phrase,phase,false).Hits) closes|=hit.Pulse==CrimsonChoreography.Closer;
+            AssertEqual(phrase%3!=0,closes,"every ordinary Act I-III phrase closes with the crossflow; a signature move's final step takes its place");
+        }
         for(int phrase=1;phrase<=12;phrase++) {
             var pair=CrimsonEnsemble.Pair(phrase);
             for(int i=0;i<4;i++) {
                 AssertEqual(pair.First,CrimsonEnsemble.Technique(3,phrase,i,false),"Final first family unchanged");
                 AssertEqual(pair.Second,CrimsonEnsemble.Technique(3,phrase,i,true),"Final second family unchanged");
             }
-            AssertEqual(CrimsonTechnique.ClusterVolley,CrimsonEnsemble.Technique(3,phrase,4,false),"Final closes with clusters");
+            AssertEqual(CrimsonTechnique.ClusterVolley,CrimsonEnsemble.Technique(3,phrase,CrimsonChoreography.Closer,false),"Final closes with clusters");
+            AssertEqual(CrimsonTechnique.ClusterVolley,CrimsonEnsemble.Technique(3,phrase,CrimsonChoreography.Pickup,false),"the Final drop's pickup is the cluster orb");
         }
-        var hit=CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks,1,false).Hits[0];
-        AssertEqual(hit.Fire+CrimsonSpatialCuts.LiveTicks,CrimsonEnsemble.NoteEnd(CrimsonTechnique.ChoirRakes,hit),"rakes keep the cut live window");
+        var hit0=CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks,1,2,false).Hits[0];
+        AssertEqual(hit0.Fire+CrimsonSpatialCuts.LiveTicks,CrimsonEnsemble.NoteEnd(CrimsonTechnique.ChoirRakes,hit0),"rakes keep the cut live window");
     }
     [DomainTest("Scarlet every phrase opens on a bar head, spans two bars and warns for one measured beat")]
     private static void ScarletPhrasesOnBarHeads()
     {
         for(int earliest=0;earliest<=3000;earliest++) {
-            var p=CrimsonChoreography.Create(earliest,earliest%7,earliest%2==1);
-            int bar=ScarletFirstBarAtOrAfter(earliest);
+            int phase=earliest%4, serial=earliest%7+1; bool pickup=earliest%2==1;
+            var p=CrimsonChoreography.Create(earliest,serial,phase,pickup);
+            bool takesPickup=pickup&&!CrimsonSignatureMoves.IsSignaturePhrase(phase,serial);
+            int bar=Math.Max(ScarletFirstBarAtOrAfter(earliest),takesPickup?1:0);
             AssertEqual(CrimsonMeter.BarTick(bar),p.Start,"start is the first bar head at or after earliest");
-            AssertEqual(true,p.Start>=earliest&&p.Start-earliest<=112,"never earlier than asked, at most one bar later");
+            AssertEqual(true,p.Start>=earliest&&p.Start-earliest<=113,"never earlier than asked, at most one bar later");
             AssertEqual(CrimsonMeter.BarTick(bar+2),p.End,"end is two bars later");
             AssertEqual(225,p.End-p.Start,"two bars are exactly 225 ticks, whatever the bar");
             AssertEqual(CrimsonRhythmKind.Groove,p.Kind,"groove only");
-            AssertEqual(5,p.Hits.Count,"four basic notes and one crossflow");
-            for(int i=0;i<4;i++) {
-                int warning=p.Hits[i].Fire-p.Hits[i].Warning;
-                AssertEqual(true,warning is 28 or 29,"warning is one beat: 28 or 29 ticks");
-                AssertEqual(CrimsonMeter.BeatTick(bar*4+i),p.Hits[i].Warning,"forecast on its own beat");
+            AssertEqual(takesPickup?5:4,p.Hits.Count,"notes per phrase");
+            AssertEqual(takesPickup,p.Hits[0].Pulse==CrimsonChoreography.Pickup,"a pickup leads the phrase");
+            AssertEqual(takesPickup?p.Start-p.Hits[0].Fire+p.Hits[0].Warning:p.Hits[0].Warning,p.FirstWarning,"first forecast");
+            foreach(var hit in p.Hits) {
+                int warning=hit.Fire-hit.Warning;
+                if(CrimsonChoreography.IsCrossflow(hit.Pulse)) {
+                    AssertEqual(true,warning is 56 or 57,"crossflow charges for two beats");
+                    AssertEqual(true,hit.End-hit.Fire is 56 or 57,"crossflow collapses over two beats");
+                }
+                else AssertEqual(true,warning is 28 or 29,"a note's warning is one beat: 28 or 29 ticks");
             }
-            AssertEqual(true,p.Hits[4].Fire-p.Hits[4].Warning is 56 or 57,"crossflow charges for two beats");
-            AssertEqual(true,p.Hits[4].End-p.Hits[4].Fire is 56 or 57,"crossflow collapses over two beats");
         }
-        AssertThrows<ArgumentOutOfRangeException>(()=>CrimsonChoreography.Create(-1,0,false),"negative earliest");
-        AssertThrows<ArgumentOutOfRangeException>(()=>CrimsonChoreography.Create(0,-1,false),"negative serial");
+        AssertThrows<ArgumentOutOfRangeException>(()=>CrimsonChoreography.Create(-1,1,0,false),"negative earliest");
+        AssertThrows<ArgumentOutOfRangeException>(()=>CrimsonChoreography.Create(0,-1,0,false),"negative serial");
     }
-    [DomainTest("Scarlet opening and summon land on bar heads of the grid")]
+    [DomainTest("Scarlet opening and summon land on bar heads, and Act I's first crossflow releases on the unlock downbeat")]
     private static void ScarletOpeningBars()
     {
         AssertEqual(900,CrimsonChoreography.OpeningTicks,"eight bars before Act I unlocks");
         AssertEqual(450,CrimsonChoreography.SummonAt,"Ember Crown emerges on bar four");
         AssertEqual(CrimsonMeter.BarTick(CrimsonMeter.OpeningBars),CrimsonChoreography.OpeningTicks,"opening is a whole number of bars");
         AssertEqual(CrimsonMeter.BarTick(CrimsonMeter.SummonBar),CrimsonChoreography.SummonAt,"summon is a whole number of bars");
-        AssertEqual(CrimsonChoreography.OpeningTicks,CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks,0,false).Start,"first phrase starts the moment Act I unlocks");
-        AssertEqual(CrimsonChoreography.OpeningTicks,CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks-30,0,false).Start,"the look-ahead reservation lands on the same bar head");
+        var open=CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks,1,0,true);
+        AssertEqual(CrimsonChoreography.OpeningTicks,open.Start,"first phrase starts the moment Act I unlocks");
+        AssertEqual(CrimsonChoreography.OpeningTicks,open.Hits[0].Fire,"its pickup crossflow releases on that downbeat");
+        AssertEqual(true,open.FirstWarning>CrimsonChoreography.SummonAt,"the seals bloom after Ember Crown has emerged");
+        AssertEqual(CrimsonChoreography.OpeningTicks,CrimsonChoreography.Create(CrimsonChoreography.OpeningTicks-30,1,0,true).Start,"an earlier request lands on the same bar head");
+        // Acts II/III unlock two bars after the change and Final five: the pickup's charge stays inside the protected transition.
+        foreach(int bars in new[]{CrimsonArrangement.TransitionBars(1),CrimsonArrangement.TransitionBars(3)}) {
+            int change=CrimsonMeter.BarTick(40), unlock=CrimsonMeter.BarTick(40+bars);
+            var first=CrimsonChoreography.Create(unlock,13,bars==5?3:1,true);
+            AssertEqual(unlock,first.Hits[0].Fire,"the new Act's first release is its combat downbeat");
+            AssertEqual(true,first.FirstWarning-CrimsonRhythm.LookAheadTicks>=change,"issued after the change, inside its epoch");
+            AssertEqual(true,first.FirstWarning>change+CrimsonEnsemble.ActRelease,"the seals bloom after the stop");
+        }
     }
     [DomainTest("Scarlet presentation opens from orb to girl before backdrop and summons")]
     private static void ScarletOpeningOrder()
@@ -99,22 +116,89 @@ internal static partial class Program
             var axis=CrimsonChoreography.Direction(i,0);
             AssertEqual(true,Math.Abs(axis.LengthSquared-1)<.0001f,"normalized four axes");
         }
-        foreach(float x in new[]{f.Left+100,f.CenterX,f.Right-100}) {
+        foreach(float x in new[]{f.Left+100,f.Left+470,f.CenterX,f.Right-300,f.Right-100}) {
             p=p with {Target=new(x,f.CenterY)};
-            var full=CrimsonChoreography.Side(p,p.Fire,true);
-            AssertEqual(p.Target.Y,full.A.Y,"seals beside locked player position");
-            AssertEqual(full.A.Y,full.B.Y,"horizontal stream");
-            AssertEqual(true,full.A.X>full.B.X,"right emitter into left receiver");
-            AssertEqual(true,full.B.X>=f.Left&&full.A.X<=f.Right,"both seals inside field");
-            for(float t=p.Fire;t<p.End;t+=.5f) {
+            var (right,left)=CrimsonChoreography.Reach(p);
+            var (sealRight,sealLeft)=CrimsonChoreography.Seals(p);
+            var band=CrimsonChoreography.Side(p,p.Fire,true);
+            AssertEqual(right,band.A,"the forecast band starts at the right stream end");
+            AssertEqual(left,band.B,"and ends at the left stream end");
+            AssertEqual(p.Target.Y,right.Y,"seals beside the locked player position");
+            AssertEqual(right.Y,left.Y,"horizontal stream");
+            AssertEqual(940f,right.X-left.X,"stream ends 940 px apart");
+            AssertEqual(true,left.X>=f.Left&&right.X<=f.Right,"both stream ends inside the field, at most on a wall");
+            AssertEqual(true,p.Target.X>=left.X&&p.Target.X<=right.X,"the captured position lies between the seals");
+            // The drawn seals sit on the stream ends, except that a seal is held whole inside a wall (51.8 px half-width).
+            AssertEqual(right.Y,sealRight.Y,"drawn seals on the stream's line");AssertEqual(left.Y,sealLeft.Y,"both of them");
+            AssertEqual(Math.Min(right.X,f.Right-CrimsonChoreography.SealInset),sealRight.X,"right seal on its end unless a wall holds it in");
+            AssertEqual(Math.Max(left.X,f.Left+CrimsonChoreography.SealInset),sealLeft.X,"left seal on its end unless a wall holds it in");
+            AssertEqual(true,sealLeft.X-.28f*185>=f.Left&&sealRight.X+.28f*185<=f.Right,"each drawn seal is whole inside the field mask");
+            float previousFront=right.X;
+            for(float t=p.Fire;t<p.End;t+=.25f) {
                 var live=CrimsonChoreography.Side(p,t,false);
-                AssertEqual(full.A,live.A,"fixed right emitter");
-                AssertEqual(true,live.B.X<=full.A.X&&live.B.X>=full.B.X,"front grows leftward");
-                AssertEqual(true,live.Radius<=full.Radius&&live.Radius>=0,"shared visible collision envelope");
+                if(live.Radius<=0) continue;
+                AssertEqual(true,live.Radius<=CrimsonChoreography.SideHalfWidth,"no wider than the band");
+                AssertEqual(true,live.A.X+live.Radius<=right.X+.01f,"the round end stops at the right seal centre");
+                AssertEqual(true,live.B.X-live.Radius>=left.X-.01f,"and never passes the left seal centre");
+                AssertEqual(true,live.B.X<=live.A.X,"flows right to left");
+                AssertEqual(true,live.B.X-live.Radius<=previousFront+.01f,"the front only advances leftward");
+                previousFront=live.B.X-live.Radius;
             }
+            var full=CrimsonChoreography.Side(p,p.Fire+30,false);
+            AssertEqual(CrimsonChoreography.SideHalfWidth,full.Radius,"full width between the seals");
+            AssertEqual(right.X,full.A.X+full.Radius,"full stream ends exactly at the right seal centre");
+            AssertEqual(left.X,full.B.X-full.Radius,"and exactly at the left seal centre");
         }
         var resting=CrimsonChoreography.ClampParticipant(f,f.CenterX,f.Bottom-42,20,42);
         AssertEqual((f.CenterX,f.Bottom-42),resting,"ordinary support floor is not displaced upward");
+    }
+    [DomainTest("Scarlet crossflow collision is the drawn stream: inside its forecast band, ends sunk in the seals, wall bodies reached")]
+    private static void ScarletCrossflowContainment()
+    {
+        var f=Convergence.Common.Raids.Arena.RaidFieldGeometry.FromGround(8000,6000);
+        var p=TechniqueExample(CrimsonTechnique.SideBeams) with {End=656,LastEnd=656};
+        Span<CrimsonStroke> strokes=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        foreach(float x in new[]{f.Left+100,f.Left+300,f.CenterX,f.Right-250,f.Right-100}) foreach(float y in new[]{f.Top+100,f.CenterY,f.Bottom-100}) {
+            var plan=p with {Target=new(x,y)};
+            var (right,left)=CrimsonChoreography.Reach(plan);
+            var (sealRight,sealLeft)=CrimsonChoreography.Seals(plan);
+            // Collision (CrimsonTechniqueGeometry.Write, what CrimsonGesture collides and ScarletInk draws) at every live tick.
+            for(int tick=plan.Fire;tick<plan.End;tick++) {
+                int count=CrimsonTechniqueGeometry.Write(plan,tick,strokes);
+                for(int i=0;i<count;i++) {
+                    var s=strokes[i];
+                    // A 1 px probe just outside the band (beyond a seal centre, above or below) is never hit.
+                    foreach(var (px,py) in new[]{(right.X+.6f,right.Y),(left.X-1.6f,left.Y),(s.A.X,right.Y-CrimsonChoreography.SideHalfWidth-1.6f),(s.B.X,right.Y+CrimsonChoreography.SideHalfWidth+.6f)})
+                        AssertEqual(false,CrimsonTechniqueGeometry.Intersects(s,px,py,1,1),$"nothing collides outside the forecast band tick={tick-plan.Fire}");
+                    // The capsule's extent is inside the end-to-end band: the drawn ink (radius + its anti-aliased margin)
+                    // ends inside the drawn seals, whose ellipse is 52 px wide either side of the centre at full charge;
+                    // against a wall the rest of the margin lies beyond the wall, under the field mask (the seal's rim sits
+                    // 0.2 px inside the wall there).
+                    AssertEqual(true,s.A.X+s.Radius<=right.X+.01f&&s.B.X-s.Radius>=left.X-.01f,"capsule between the stream ends");
+                    AssertEqual(true,Math.Min(s.A.X+s.Radius+10,f.Right)<=sealRight.X+.28f*185+.5f&&Math.Max(s.B.X-s.Radius-10,f.Left)>=sealLeft.X-.28f*185-.5f,"ink margin stays inside the seal ellipses or the wall");
+                }
+            }
+        }
+        // Against a wall the pair slides until a stream end sits on the wall, so a body pressed into it is still in the
+        // stream; the drawn seal stays whole just inside the wall, over the stream's round end.
+        foreach(bool atLeft in new[]{true,false}) {
+            var plan=p with {Target=new(atLeft?f.Left+100:f.Right-100,f.CenterY)};
+            var (right,left)=CrimsonChoreography.Reach(plan);
+            var (sealRight,sealLeft)=CrimsonChoreography.Seals(plan);
+            AssertEqual(atLeft?f.Left:f.Right,atLeft?left.X:right.X,"the wall-side stream end is on the wall");
+            AssertEqual(atLeft?f.Left+CrimsonChoreography.SealInset:f.Right-CrimsonChoreography.SealInset,atLeft?sealLeft.X:sealRight.X,"its seal is held whole inside the wall");
+            AssertEqual(atLeft?right.X:left.X,atLeft?sealRight.X:sealLeft.X,"the open-side seal stays on its end");
+            int count=CrimsonTechniqueGeometry.Write(plan,plan.Fire+30,strokes);
+            float bodyX=atLeft?f.Left:f.Right-20;
+            float reach=0;
+            for(float dy=0;dy<=200;dy+=.5f)
+                if(ScarletHits(strokes[..count],bodyX,right.Y-21+dy)||ScarletHits(strokes[..count],bodyX,right.Y-21-dy)) reach=dy;
+            AssertEqual(true,ScarletHits(strokes[..count],bodyX,right.Y-21),"a body against the wall on the stream's line is hit");
+            AssertEqual(true,reach>=92,$"a wall body has to leave the line by {reach} px (161 px in the open)");
+            float open=0, middle=(left.X+right.X)*.5f-10;
+            for(float dy=0;dy<=200;dy+=.5f) if(ScarletHits(strokes[..count],middle,right.Y-21+dy)) open=dy;
+            AssertEqual(true,open>=160,$"in the open the stream is 280 px tall plus the body ({open})");
+        }
     }
     [DomainTest("Scarlet successive full-field lattices shift predictably and leave complete player corridors")]
     private static void ScarletShiftedLattice()

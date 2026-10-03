@@ -22,7 +22,13 @@ internal readonly record struct CrimsonState(Guid Fight, int Age, int MusicStart
     internal bool Contains(int slot) => Array.Exists(Members ?? Array.Empty<CrimsonMember>(), m => m.Slot == slot && !m.Out);
     internal bool CanFight(int slot) => Array.Exists(Members ?? Array.Empty<CrimsonMember>(),
         m => m.Slot == slot && !m.Out && !m.Recovery.Downed);
-    internal bool SourceActive(int source, float now) => source == 3 ? Vulnerable(now) : SummonVulnerable(source);
+    // Whether a source's attacks may hurt at `now`, the plan clock every peer extrapolates. An apparition attacks from the
+    // unlock tick on that clock, as Final's avatar does, so the Act's pickup crossflow released on the unlock downbeat hurts
+    // on every peer when it is drawn, not only once a later snapshot reports Age >= UnlockAt (protocol80). Whether the
+    // apparition can be hit stays SummonVulnerable's snapshot gate.
+    internal bool SourceActive(int source, float now) => source == 3 ? Vulnerable(now)
+        : Fight != Guid.Empty && Stage is CrimsonStage.Countdown or CrimsonStage.Performance && UnlockAt >= 0 && now >= UnlockAt
+            && source is >= 0 and < CrimsonInvocation.SummonCount && CrimsonPhaseRules.ActiveSource(Phase, DefeatedMask, PerformerDefeated, source);
     internal int LifeFor(int index) => index switch { 0 => Life0, 1 => Life1, 2 => Life2, _ => Life3 };
     internal int DamageFloor(int source) => Phase < 3 ? CrimsonPhaseRules.RetreatLife(TargetLife) : CompletedCycles == 0 ? 1 : 0;
     internal bool HeldAtFloor(int source) => LifeFor(source) <= DamageFloor(source);

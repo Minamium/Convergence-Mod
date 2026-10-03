@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using Convergence.Content.Encounters.CrimsonFoundry;
 using Convergence.Common.Raids.Arena;
@@ -98,15 +99,24 @@ internal static partial class Program
         {
             var pair = CrimsonEnsemble.Pair(phrase);
             AssertEqual(true, pair.First != pair.Second, "distinct simultaneous families");
-            var rhythm = CrimsonChoreography.Create(4000 + phrase * 233, phrase, true);
-            AssertEqual(9, rhythm.Hits.Count + CrimsonChoreography.BasicNotes, "bounded final notes");
-            for (int i=0;i<4;i++)
+            foreach (bool pickup in new[] { false, true })
             {
-                AssertEqual(pair.First, CrimsonEnsemble.Technique(3, phrase, i, false), "primary");
-                AssertEqual(pair.Second, CrimsonEnsemble.Technique(3, phrase, i, true), "simultaneous secondary");
-                AssertEqual(true, rhythm.Hits[i].Fire - rhythm.Hits[i].Warning >= CrimsonRhythm.MinimumWarningTicks, "both use full beat");
+                var rhythm = CrimsonChoreography.Create(4000 + phrase * 233, phrase, 3, pickup);
+                var notes = CrimsonEnsemble.Notes(rhythm, 3);
+                AssertEqual(pickup ? 8 : 7, notes.Count, "three pairs, the closing cluster and (after a gap) the pickup cluster");
+                AssertEqual(true, notes.Count <= CrimsonRhythm.MaximumHits, "bounded final notes");
+                var pulses = new HashSet<int>();
+                foreach (var (hit, second) in notes)
+                {
+                    int pulse = CrimsonEnsemble.PlanPulse(hit, second);
+                    AssertEqual(true, pulses.Add(pulse) && pulse < CrimsonRhythm.MaximumHits, "distinct bounded pulses");
+                    var technique = CrimsonEnsemble.Technique(3, phrase, hit.Pulse, second);
+                    if (CrimsonChoreography.IsCrossflow(hit.Pulse)) { AssertEqual(CrimsonTechnique.ClusterVolley, technique, "Final pickup and closing volley"); continue; }
+                    AssertEqual(second ? pair.Second : pair.First, technique, "pairs fire both families on the same note");
+                    AssertEqual(true, hit.Fire - hit.Warning >= CrimsonRhythm.MinimumWarningTicks, "both use full beat");
+                    AssertEqual(true, hit.Fire >= rhythm.Start + CrimsonClusters.FlightTicks - 12, "a pair overlaps the pickup's carriers by at most 12 ticks");
+                }
             }
-            AssertEqual(CrimsonTechnique.ClusterVolley, CrimsonEnsemble.Technique(3,phrase,4,false), "Final closing volley");
         }
     }
     [DomainTest("Scarlet failed chorus preserves bounded immutable world positions")]

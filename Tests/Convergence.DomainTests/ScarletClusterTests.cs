@@ -53,21 +53,24 @@ internal static partial class Program
         var cycle=new CrimsonActCycle();int finish=0;
         for(int serial=1;serial<=12;serial++)
         {
-            var rhythm=CrimsonChoreography.Create(8000+serial*250,serial,true);
-            var hit=rhythm.Hits[4];
+            var rhythm=CrimsonChoreography.Create(8000+serial*250,serial,3,serial==1);
+            var hit=rhythm.Hits[^1];
+            AssertEqual((byte)CrimsonChoreography.Closer,hit.Pulse,"the cluster closes the phrase");
             int end=CrimsonEnsemble.NoteEnd(CrimsonTechnique.ClusterVolley,hit);
-            var next=CrimsonChoreography.Create(rhythm.End,serial+1,true);
-            AssertEqual(true,end>next.Hits[0].Warning,"flight can cross next warning");
+            var next=CrimsonChoreography.Create(rhythm.End,serial+1,3,false);
+            AssertEqual(true,end>next.FirstWarning,"flight can cross next warning");
+            AssertEqual(true,end-12<=next.Hits[0].Fire,"and overlaps the next pair's strike by at most 12 ticks");
             AssertEqual(CrimsonClusters.FlightTicks,end-hit.Fire,"fixed complete flight");
             AssertEqual(true,hit.Fire-hit.Warning>=CrimsonRhythm.MinimumWarningTicks,"two measured warning beats");
-            for(int note=0;note<9;note++)
+            var notes=CrimsonEnsemble.Notes(rhythm,3);
+            int step=0;
+            foreach(var (h,second) in notes)
             {
-                var h=rhythm.Hits[note%5];
-                var technique=CrimsonEnsemble.Technique(3,serial,note%5,note>=5);
+                var technique=CrimsonEnsemble.Technique(3,serial,h.Pulse,second);
                 bool aimed=technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SpatialRift;
                 var plan=TechniqueExample(technique) with {
-                    Source=3,Step=(byte)note,Steps=9,Pulse=(byte)note,Phrase=serial,
-                    Begin=rhythm.Start-30,Born=h.Warning,Fire=h.Fire,End=CrimsonEnsemble.NoteEnd(technique,h),
+                    Source=3,Step=(byte)step++,Steps=(byte)notes.Count,Pulse=CrimsonEnsemble.PlanPulse(h,second),Phrase=serial,
+                    Begin=rhythm.FirstWarning-30,Born=h.Warning,Fire=h.Fire,End=CrimsonEnsemble.NoteEnd(technique,h),
                     FirstFire=rhythm.Hits[0].Fire,LastEnd=end,
                     TargetSlot=aimed?(short)0:(short)-1,TargetConnection=aimed?Guid.NewGuid():Guid.Empty
                 };

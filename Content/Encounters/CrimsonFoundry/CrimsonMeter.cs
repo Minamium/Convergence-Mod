@@ -17,6 +17,9 @@ internal static class CrimsonMeter
     internal static int BeatTick(int beat)
         => beat is >= 0 and <= MaximumBeat ? (beat * 225 + 4) / 8 : throw new ArgumentOutOfRangeException(nameof(beat));
     internal static int BarTick(int bar) => BeatTick(bar * BeatsPerBar);
+    // Eighth note e after musicStart (14.0625e), rounded half up; EighthTick(2k) == BeatTick(k).
+    internal static int EighthTick(int eighth)
+        => eighth is >= 0 and <= MaximumBeat * 2 ? (eighth * 225 + 8) / 16 : throw new ArgumentOutOfRangeException(nameof(eighth));
     internal static int BeatAtOrAfter(double tick)
     {
         if (!double.IsFinite(tick)) throw new ArgumentOutOfRangeException(nameof(tick));
