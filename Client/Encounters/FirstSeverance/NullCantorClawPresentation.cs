@@ -105,32 +105,6 @@ public sealed class NullCantorClawPresentation : ModSystem
                 if (claw is NullCantorClawSwipe swipe) NullCantorClawArt.DrawSwipe(b, swipe, age);
                 else NullCantorClawArt.DrawCrush(b, (NullCantorClawCrush)claw, age);
             }
-            for (int slot = 0; slot < Main.maxPlayers; slot++)
-            {
-                Player player = Main.player[slot];
-                if (!RitualArmamentItems.Usable(player) || player.HeldItem.type != ModContent.ItemType<NullRefrain>()) continue;
-                if (!attacking[slot])
-                    for (int hand = 0; hand < 2; hand++)
-                    {
-                        var pose = RitualArmamentChoreography.ParkedHand(hand, RitualRenderClock.Time, player.direction);
-                        NullCantorClawArt.Hand(b, pose, player.MountedCenter, 0, 1, 1, false);
-                    }
-                if (slot == Main.myPlayer)
-                {
-                    float charge = player.GetModPlayer<NullCantorClawPlayer>().Charge.Ticks / (float)NullCantorClawMotion.ChargeTicks;
-                    Vector2 center = player.MountedCenter + new Vector2(0, -52);
-                    for (int i = 0; i < 6; i++)
-                    {
-                        float a = -MathHelper.PiOver2 + i * MathHelper.TwoPi / 6;
-                        float lit = Math.Clamp(charge * 6 - i, 0, 1);
-                        Vector2 point = center + a.ToRotationVector2() * 11;
-                        NullCantorClawArt.Beam(b, point, point + a.ToRotationVector2() * 5, 3,
-                            NullCantorClawArt.Light(lit >= 1 ? NullCantorClawArt.Pale : NullCantorClawArt.Gold, .2f + lit * .8f));
-                    }
-                    if (charge >= 1) NullCantorClawArt.Glow(b, center, new(23), NullCantorClawArt.Light(NullCantorClawArt.Violet,
-                        .7f + .2f * MathF.Sin(Main.GlobalTimeWrappedHourly * 3)));
-                }
-            }
         }
         finally { b.End(); }
     }
@@ -141,20 +115,4 @@ public sealed class NullCantorClawPresentation : ModSystem
         voices.Clear(); Array.Clear(attacking);
     }
     public override void Unload() { OnWorldUnload(); NullCantorClawArt.Dispose(); RitualSurfacePass.Dispose(); }
-}
-
-[Autoload(Side = ModSide.Client)]
-public sealed class NullCantorClawItemVisuals : GlobalItem
-{
-    public override bool AppliesToEntity(Item item, bool lateInstantiation) => item.ModItem is NullRefrain;
-    public override bool PreDrawInWorld(Item item, SpriteBatch b, Color lightColor, Color alphaColor,
-        ref float rotation, ref float scale, int whoAmI)
-    {
-        var texture = NullCantorClawArt.Icon;
-        Vector2 center = item.Center + new Vector2(0, MathF.Sin(Main.GlobalTimeWrappedHourly * 2) * 5);
-        NullCantorClawArt.Glow(b, center, new(82), NullCantorClawArt.Light(NullCantorClawArt.Violet, .8f));
-        b.Draw(texture, center - Main.screenPosition, null, Color.White,
-            MathF.Sin(Main.GlobalTimeWrappedHourly) * .07f, texture.Size() * .5f, 90f / texture.Width, SpriteEffects.None, 0);
-        return false;
-    }
 }

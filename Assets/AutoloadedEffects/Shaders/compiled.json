@@ -26,6 +26,10 @@
       "source_sha256": "c2d9b0dcc72057168f1d69e44e4cf9642b4e877a9d519fd0341b886864256847",
       "output_sha256": "b5b3e025efed52673314b6c2cdc68630a15dd27090605c570e7a06357470aef9"
     },
+    "DollClawEnergy.fx": {
+      "source_sha256": "e01078e3c38fd0e0fa4599ea9b1da25ac46aca8a414984ba8f41f01ab3d811ae",
+      "output_sha256": "3c46269f4928bcfc4f563d9d672026670c56eb5e55505ae09c13df6aa48790ed"
+    },
     "DollCoreEnergy.fx": {
       "source_sha256": "0fcd99e26729469836f0810a4f44610ed2363c49b943ca9f00f2d1ef2202dc44",
       "output_sha256": "fe6dfa63f474651f7f213d8230559b61b14459c02254185de478d757f4d83b11"

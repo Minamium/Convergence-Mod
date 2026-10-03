@@ -5,11 +5,11 @@ Mods: {
 				Name: Null Refrain — Lacrimosa's Claws
 				Tooltip:
 					'''
-					Manifest the distant arms of Lacrimosa
-					Left click: alternate enormous expanding true-melee claws
-					Hold this weapon for 6 seconds to charge one execution
-					Right click: both hands crush the clicked location after a short windup
-					The charge pauses while unequipped or incapacitated; death clears it
+					Manifest the distant hands of Lacrimosa
+					Left click: a three-step true-melee kata: the right hand rakes down, the left rakes up, both hands clap
+					Landing strokes lights the six heart beads on the hands, faster while the hits keep coming; holding fills them slowly
+					Right click with six beads lit: both hands fly to the cursor, seize the enemy there and crush it
+					The beads pause while unequipped or incapacitated; death empties them
 					One of five equally likely rewards from the Curtainfall Treasure Box
 					'''
 			}

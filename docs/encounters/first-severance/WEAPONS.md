@@ -13,6 +13,7 @@ aliases:
   - raid reward weapons
 related_code:
   - Content/Encounters/FirstSeverance/Rewards
+  - Client/Encounters/FirstSeverance/Weapons
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
   - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
@@ -256,33 +257,119 @@ Unchanged: item `LastWitness`, Calamity's rogue class and stealth through `Calam
 - Per score 68,532 (7.08×) and the best cold 600 ticks 139,774: unchanged.
 - New pixel art, icon, light and sound; the DollTheater cues are no longer played by this weapon.
 
-## Claw swipe cleanup — 0.2.38
-
-Keep the accepted hands, finger highlights, luminous sweep and hit flash/rings. Normal swipes no longer emit radial line/shard sprays, including their normal-hit aftermath; their ribbon omits its dark opaque underlay. The palm's existing aperture and the entire right-click crush remain unchanged. The shared ribbon helper defaults to its old behavior for other weapons. Motion, hitboxes, damage, resources and audio are untouched.
-
 ## Curtainfall Treasure Box
 
 **閉幕の宝箱 / Curtainfall Treasure Box** (`DollTreasureBox`) replaces the direct weapon drop in every difficulty. Accepted Victory creates the same frozen-party-count number of shared world drops at the Core. Right-click consumes one box and draws **one weapon**, uniformly from `NullRefrain`, `PaleMeridian`, `LacunaTestament`, `ChoirOfTheUnmade`, `LastWitness`: **20% each**, independent of Luck. Duplicate draws are possible; there is no guaranteed collection cycle. No weapon-to-weapon exchange recipes remain. The Doll is excluded from the box. There is no additional NPC death reward or private inventory grant.
 
 Uniform selection uses `ItemDropRule.OneFromOptionsNotScalingWithLuck(1, options)` ([v2026.07 API](https://docs.tmodloader.net/docs/stable/class_item_drop_rule.html), checked 2026-09-12; package compilation checks the installed signature). The native `CanRightClick`/`ModifyItemLoot` container path owns consumption and contents; do not also spawn a weapon in `RightClick`. No `ItemID.Sets.BossBag` flag, since this is an all-difficulty treasure box without injected vanilla developer-armour drops. API checked 2026-09-12 against pinned tML [ModItem](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/patches/tModLoader/Terraria/ModLoader/ModItem.cs) and [ExampleMod bag](https://raw.githubusercontent.com/tModLoader/tModLoader/666f69962d3bdffde54fc14025f02634965b4e7c/ExampleMod/Content/Items/Consumables/MinionBossBag.cs); independently implemented, no copied art/code.
 
-## Lacrimosa's Claws — accepted melee redesign, 0.2.29
+## Lacrimosa's Claws — refresh (2026-10)
 
-This section replaces the original sword/echo prototype. Internal item identity `NullRefrain` is unchanged; current acquisition is owned by [Curtainfall Treasure Box](#curtainfall-treasure-box). The other four forms follow the long-form ritual specification below. The old sword projectile remains only as an unused legacy type; the item cannot fire it. Weapon-only changes do not authorize Raid tuning.
+The owner-approved refresh of the melee box weapon (look, motion and all fifteen cues approved on the audition and review page on 2026-10-03): the boss's remote hands (Remote Clasp) and its Central Crush become the player's own technique. It replaced the 0.2.29 melee redesign and the 0.2.38 swipe cleanup on 2026-10-03; their text is [kept in history](../../history/2026-10-03-lacrimosa-claws-0229.md). The [shared rules](#reward-refresh-2026-10--shared-rules) apply.
 
-**Left click:** alternate independently articulated left/right five-finger claws using the actual P3 rig material. The hand expands from0.68x to2.30x during the stroke, then retracts; the whole attack stays inside560 world pixels of the player. Base duration28ticks, bounded10–90 after native true-melee speed. Only the palm and swept finger capsules damage, once per logical NPC root per swipe. No homing echo projectiles: this is the user's replacement true-melee design. Calamity's registered `TrueMeleeDamageClass` is resolved through the compatibility adapter, without using its internal singleton.
+What stays: the internal item `NullRefrain` and its names (断唱・虚掌 / Null Refrain — Lacrimosa's Claws), Calamity true melee through the compatibility adapter, base damage 7700 (`LacrimosaClawMotion.BaseDamage`), crit 8, Red rarity, 40 gold, its place in the [Curtainfall Treasure Box](#curtainfall-treasure-box) and as an ingredient of [The Unbroken Promise](#doll-companion--the-unbroken-promise). No packet, no protocol change (79), no Raid tuning and no Boss HP change.
 
-**Right click (0.2.31):** one charge after360 real game ticks while holding a usable claw. Holding an attack also recharges; unequipping/incapacitation pauses it, execution pauses it, death/world entry clears it. The charge belongs to the player, so extra item copies cannot duplicate it. A click spends it once and fixes a world coordinate within1120px. A fresh right click while left-clicking prioritizes execution and cancels only the owner's current swipe. Gameplay-only input ignores UI/fullscreen map/unfocused/Downed use; the ordinary alternate-use path shares the same one-charge spend. Both hands emerge diagonally in5 ticks, decelerate/brace until11, then accelerate to impact at16; one4.2x ordinary-melee strike is active during16–20 and recovery ends at42. The166x132px axis-aligned damage ellipse is unchanged and forecast; the oblique hands are its presentation, not an enlarged rotated hitbox. No forced NPC/player movement, literal instant kill, invulnerability bypass, homing after target lock, or attack-speed reduction of the six-second charge. Native NPC defenses and damage hooks remain in effect.
+**The hands.** The DW01 pixel art: a floating right porcelain hand and its mirror image, with ball-jointed fingers, long ivory talons, a black-iron cuff with a brass band and, on the back of each hand, a brass plate holding six dark glass **heart beads**. No arm, sleeve, thread or ribbon. While the claws are held and usable, one held controller keeps the hands beside the owner: the right hand floats above the front shoulder and the left above the back one, both pointing up and out, with a 2 px breathing bob. Hands and their light draw **in front of players** on the shared Doll weapon layer.
 
-The presentation uses native-resolution P3 palm/bone/talon regions, independently moving finger joints and layered violet/white crescents with negative-space interiors. The remote strike closes on a dark center before a vertical flare and ring release. Bright remnants never increase hit range. Both hands and major crescents remain under Reduced Effects; secondary shards and shake are reduced/disabled. Weapon sounds now use independent weapon masters and bounded voices; [Audio](../../AUDIO_CUE_SHEET.md#weapon-only-foley) owns current choices. No global pause, forced zoom or white-screen fill.
+### Left click — three-step kata
 
-`NullCantorClawMotion` owns the current melee budget and timing; the previous72-tick execution calculation predates the faster right-click score and is not current DPS. Measure actual contact with native armor/crit/gear/hooks before comparing endgame output. Do not change Boss HP to disguise a weapon balance problem.
+Holding the button chains A → B → C → A; the next stroke starts on the tick after the last one ends. If no stroke starts within 45 ticks of a stroke's end, and after every grasp, the next one is A.
 
-The native128x128 RGBA inventory icon is composed from the existing original P3 hand and palm atlas, not cropped from the concept board and not32-color quantized. The original atlas remains unchanged; runtime limbs keep the native source detail. Its exact derivative record is in `Assets/ATTRIBUTION.md`.
+| Step | Motion | Base ticks | Live (base ticks) | Hit shape | × base |
+|---|---|---|---|---|---|
+| A · Down-rake | The right hand coils up and back (0–8), then rakes down through the aim | 26 | 9–16 | Right-hand capsule from 12 to 160 px along the hand axis, radius 44; the wrist rides a 104 px orbit, −1.76 → +1.27 rad about the aim | 0.85 |
+| B · Up-rake | The left hand coils low behind during A, then rakes up through the aim | 24 | 7–13 | Left-hand capsule, same size; +1.80 → −0.86 rad | 0.85 |
+| C · Clap | Both hands fling out wide (0–14), drive together flat along the aim and meet on the aim line at 22, then rebound to rest | 34 | 18–22 | One capsule per hand from the wrist to 196 px, radius 52; the wrists close from (80, ±150) to (84, ±50) px | 1.30 |
 
-Design references: the user's annotated P3-arm sketch and approved dual-claw board; Calamity [Earth's growing true-melee silhouette](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/Projectiles/Melee/EarthHoldout.cs), [Ark's staged release](https://github.com/CalamityTeam/CalamityModPublic/blob/1a8cebd27ec5615316b78f71973446b5528d2b78/Projectiles/Melee/ArkOfTheCosmos_BlastAttack.cs), HotOG [Parasanguine's articulated cadence](https://github.com/TohruKobayashi/CalamityHunt/blob/5c2825e64c660384500decafa7702793dc4b48dc/Content/Projectiles/Weapons/Melee/ParasanguineHeld.cs), and WotG [Avatar's finger-chain rendering](https://github.com/TheFifthCircle/WrathOfTheGodsPublic/blob/7cb5b86c770e73d6853749b2b688d478ba3326a7/Content/NPCs/Bosses/Avatar/SecondPhaseForm/Rendering/AvatarOfEmptiness.Rendering.RightArm.cs). These are fixed source design references, not video/playback verification or permission to import their materials. The implementation and all art used are project-authored; no foreign shader, texture, audio or code is copied.
+- **Rate.** A kata lasts 84 base ticks for 3.0× base: v1's rate of 1× per 28 ticks.
+- **Attack speed.** Native true-melee attack speed shortens each stroke to `round(base / speed)` ticks, bounded A 12–90, B 11–90, C 16–90; the live window scales with it.
+- **What hits.** Only the active hand's capsule (both hands in C), swept at 9 sub-samples across the last tick so high speed cannot tunnel, with `ownerHitCheck`. A hitbox is hit when the capsule's segment comes within its radius of the box (`LacrimosaClawMotion.CapsuleHitsBox`: round ends, so a body just past the tip or one large enough to contain the whole capsule is hit). Each logical NPC root is hit once per stroke; the clapping hands share one ledger. Wind-ups, the idle hand, rebounds and light never damage. Reach is about 305 px for the rakes and 366 px for the clap; nothing reaches beyond 430 px of the owner's centre.
+- **Motion.** Each hand follows one 84-tick track (cubic Hermite through knots with Catmull-Rom tangents, the rest pose at both ends), so pose and speed carry across every stroke join without braking; the wrist's angular acceleration stays under 0.35 rad/tick² while raking. A stroke that starts away from its track (the first stroke, after a turn or a grasp) is shown blending from where the hand was during its harmless wind-up and is exactly on its track from its first live tick; hits always use the track.
 
-Native projectile ownership is unchanged. Shared pure geometry covers both fractional rendering and collision; one root ledger prevents five fingers multiplying damage on the same enemy. Draw/audio lifetime is client-only. On death, Down, item change or world unload the attack or its client resources are released. No new Encounter packet or authority rule is introduced.
+### Heart beads
+
+One meter per player, shown on both hands: 360 units, 60 per bead. Extra copies of the item cannot duplicate it.
+
+- **Hits.** A stroke that connects adds 12 units (a rake) or 24 (the clap), once per stroke however many NPCs it hits; critters and town NPCs do not count, target dummies do. The amount is multiplied by the streak's tempo (×1 for its first two connecting strokes, ×1.25 for the 3rd–5th, ×1.5 from the 6th) and by (stroke ticks / base ticks), so attack speed does not change the fill per second. A streak ends 75 ticks after its last connecting stroke and restarts after every grasp.
+- **Trickle.** While the claws are held and usable and no grasp is active, the meter also gains 1 unit every 4 ticks: empty to full in 24 s without a hit.
+- **Pace.** With every stroke landing from a cold press at attack speed 1 the meter is full at tick 344 (v1 charged in 360 ticks of holding).
+- **Freezing and loss.** Frozen while unequipped, Down, crowd-controlled or grasping; death and entering a world empty it.
+- **Feedback.** Each bead lights with a ping and its own music-box note; the sixth adds a cadence and full beads beat like a heart (lub-dub every 48 ticks). Peers see the lit count: the controller carries it.
+
+### Right click — Grasp
+
+Grasping needs all six beads and spends them; a fresh right click during a stroke cancels only the owner's own stroke. Ages are real ticks from the click (age 1); attack speed never compresses them.
+
+| Age | Beat |
+|---|---|
+| 1–2 | The beads go dark, the hands snap flat and draw back 20 px. The target point is the cursor, clamped to 1120 px. The nearest hostile NPC (one that can be chased, or a target dummy) whose hitbox lies within 160 px of that point is grasped, ties going to the lower slot; if there is none, the grasp is empty and stays at the point. The crush ellipse is forecast as a one-dot pearl-violet hairline with travelling heads until the crush. |
+| 3–13 | Both hands fly to the target on mirrored bowed curves, fast start and braked arrival, leaving violet-pearl wakes. Harmless. |
+| 14–15 | The hands open on either side of the target along a −0.30 rad diagonal and clench into fists. |
+| 16–17 | **Contact: 0.3× to the grasped NPC root only**, no knockback. An empty grasp has no contact hit. |
+| 18–37 | Hold: the fists press on both sides and follow the grasped NPC, which is never moved, slowed or stunned. Squeezes at 22, 28, 33 and 36 jolt the fists inward and relight the beads two by two; a dark core grows between the fists. |
+| 38–39 | Brace: the fists part 14 px and the core swells. |
+| 40–43 | **Crush: 4.0× to every NPC whose hitbox touches the axis-aligned ellipse of radii 166 × 132 px at the grasp centre** (v1's ellipse), once per logical root, knockback 1.4 × the item's. |
+| 44–53 | The fists burst open, a black lacuna opens inside a violet ring with a vertical pearl flare and porcelain shatters; the hands fly home. |
+| 54 | Strokes and the meter resume; the residue cools to plum by 64. |
+
+- **Damage class.** Contact and crush are ordinary melee; only the raking and clapping hands take true-melee bonuses. Native defenses, immunities and hooks apply. No instant kill, invulnerability bypass or forced movement.
+- **Lost target.** If the grasped NPC dies, despawns, changes type or jumps more than 64 px (plus its own speed) in one tick, the hands keep its last centre and still crush there.
+- **Too early.** A right click with fewer than six beads only plays a dull brass tick and flickers the dark beads (owner only).
+- **Aiming aid.** While all six beads are lit, brass corner brackets mark the NPC a grasp would take (owner only, harmless).
+
+### Budget
+
+Nominal raw numbers before defense, no crit, one target, every hit landing on its first live tick (`LacrimosaClawScore`, checked by the domain tests against the [shared baseline](#reward-refresh-2026-10--shared-rules)). Not measured DPS.
+
+- **Per hit at 7700:** rake 6,545; clap 10,010; grasp contact 2,310; crush 30,800.
+- **Kata:** 3.0× per 84 ticks = 16,500/s, as v1's swipes.
+- **Steady cycle:** the 345-tick fill (13 strokes, 12.85×) plus contact 0.3× and crush 4.0× = 17.15× = 132,055 per 399 ticks against v1's 131,340 per 402 (+0.5%); **19,858/s against 19,603/s (+1.3%)**.
+- **Best 600-tick window from a cold press** (grasping when full is best): 191,345 against 194,040 (−1.4%).
+- **Attack speed:** 23,390/s at 1.25 and 27,008/s at 1.5 (v1 at the same speeds: 23,633 and 26,602).
+- **Holding without hitting:** a grasp every 1,494 ticks = 1,330/s (v1: 4,827/s).
+
+### Presentation
+
+- **Pixel art.** One texel is one dot (2 world px), never scaled. Two integer rungs of the DW01 art: k=2 (`ClawOpen`, `ClawRake`, `ClawClench`, `ClawThrust`, the open hand about 94 px) while parked, winding up, returning and flying; k=1 (the `_L` sprites, 146–200 px) while raking, clapping and grasping. Rungs swap only on the fastest frames, under a two-tick pearl flash that steps the art's light tones to pearl and its dark ones to pearl grey (a two-tone hand, never a white silhouette); a pose change on the same rung, such as the fists closing at contact, does not flash. The raking and thrusting hands are turned by a fixed offset so their longest (rake) or middle front (thrust) talon lies on the capsule axis; the art-fit test keeps those tips and the fist's front within one dot of `RakeTip` 160, `ClapTip` 196 and `FistReach` 140. The left hand is the right-hand art mirrored about its own axis. The clench and thrust poses show four talon tips, as delivered.
+- **Beads.** The six bead anchors the exporter found on every pose: lit beads are pearl-violet dots over the dark glass, the newest pings, and full beads flash white on each heartbeat.
+- **Damaging phases** use the claw's own Luminance material, `DollClawEnergy.fx`, never a flat colour (four or more ramp tones, flowing noise, sparkle, a white-hot spine; pearl, bone and white at least 40% of lit dots, checked offline):
+  - rakes leave three parallel claw-scratch ribbons beside the longest talon's path, exactly over the path the hits swept (white spine and pearl core, violet body, torn plum rim, brass glints at the head), lingering 10 ticks and cooling to plum;
+  - the clap streaks the palms' approach, then opens a pearl slit, a violet ring growing to about 90 px and three organ-pipe breaths that rise from the slit's upper side, tallest in the middle, leaning a little outward and lifting off as they cool;
+  - the crush rings out to about 150 px with a 330 px vertical pearl flare, then opens a black lacuna with a one-dot pearl lip among porcelain, spark and pearl debris; hot for 6 ticks, it cools to plum and its debris ends by grasp age 64, the grasp's last tick (by 52 with Reduced Effects);
+  - hits show a small violet contact star and porcelain chips.
+- **Other players** draw their claws' light at 65% and the lacuna at 60%; the hands stay opaque.
+- **Reduced Effects** keeps the hands, beads, forecasts and live bodies; it halves debris and residue time, shows the clap and crush bursts at 80% without the pipe breaths and the heartbeat ring, and drops the glow. Screen shake (owner only, through `RitualWeaponFeedback.Kick`, off with Reduced Effects or Screen Shake off): clap 2.5, grasp contact 2, crush 7.
+- **Removed:** the painted 0.2.x atlas hands, the parked-hand loop, the charge pips above the player and the world item's glow. No hit-stop, fullscreen flash, zoom, slow motion or HUD meter.
+- **Icon:** `NullRefrainIcon` (DW01I, stored at 2×), drawn natively in the inventory and the world.
+
+### Audio
+
+All cues are new and live in `Assets/Sounds/Weapons/DollWeapons/`; [Audio](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10) owns their levels. Warning → firing pairs: `ClawRakeDownWarn` → `ClawRakeDownFire` (A), `ClawRakeUpWarn` → `ClawRakeUpFire` (B), `ClawClapWarn` → `ClawClapFire` (C), `ClawGraspWarn` → `ClawGraspFire`, or `ClawGraspMiss` on air, and `ClawCrushWarn` (which carries the four squeezes) → `ClawCrushFire`. `ClawHit` sounds on contact. The owner alone hears `ClawBead` (one F5 note moved up the ladder for beads 1–6), `ClawBeadsFull` and `ClawBeadDry`. Firing cues start a fixed lead before their event so the transient lands on it. Another player's claw cues go through `DollWeaponAudio.PlayFor` (the shared owner priority).
+
+### Ownership and lifecycle
+
+- **Ownership.** The owner client reads input, owns the meter and the combo and processes its hits. `LacrimosaClawKata` (one held controller, netImportant) carries the stroke, aim and age in `ai` and the stroke length, lit beads, stroke serial and the stroke's first impact in ExtraAI; `LacrimosaClawGrasp` (a child) carries the grasped NPC slot, its type and age in `ai` and the anchor and approach side in ExtraAI. Peers draw only from these. Raid outcomes stay authoritative on the server or in Single Player.
+- **Ending.** An item change (at once on the owner, after 6 ticks on peers), death, Down, crowd control, `noItems` or leaving the world ends the controller and the grasp; spent beads are not refunded. Releasing the button only lets the current stroke finish.
+- **Cleanup.** World unload drops the layer sources, arm poses and voices; Mod unload drops the material resolver; a Dedicated Server never loads art, shaders or audio.
+- **Legacy.** `NullCantorClawSwipe`, `NullCantorClawCrush`, `NullCantorClawMotion` (and its charge), the swipe/crush presentation and their tests stay as unused legacy until the weapon cleanup; the item no longer reaches them. Only code keyed on the held claws was detached, as the shared rules allow: the parked-hand and charge-pip drawing, the world item's glow and `NullCantorClawPlayer` (the v1 charge and right-click crush, which fired whenever `NullRefrain` was held and would otherwise still launch the old crush from the old charge). `LacrimosaClawPlayer` owns the beads, the combo and the grasp instead.
+
+### What changes for players
+
+- **Left click:** alternating swipes (1.0× every 28 ticks, hands growing 0.68 → 2.30×, reach up to about 560 px) → a three-step kata (A 0.85×, B 0.85×, C 1.30× over 26/24/34 ticks: the same 1× per 28 ticks), rake reach about 305 px and clap about 366 px (cap 560 → 430).
+- **Charge:** one charge after 360 ticks of holding → six heart beads filled mostly by hits (full after about 5.7 s of continuous hits, or 24 s of holding without hits).
+- **Right click:** a 4.2× crush at the clicked point (impact at tick 16, 42 ticks without strokes) → a grasp of the NPC nearest the cursor (within 160 px): 0.3× contact at tick 16, 4.0× crush at tick 40 on the same 166 × 132 ellipse, the hands following the target; strokes resume at 54.
+- **Holding without attacking:** 4,827/s → 1,330/s.
+- **Totals:** sustained 19,603 → 19,858/s (+1.3%); best cold 10 s 194,040 → 191,345 (−1.4%).
+- **Look and sound:** the painted P3 atlas hands and crescent sheets → the DW01 pixel hands with beads and the claw's own material, in front of the player; the charge pips are gone; a new inventory icon; 15 new cues replace ClawSwipe, ClawGrip, ClawCrush and ClawHit.
+
+### Acceptance (owner; not_run until played)
+
+- A → B → C flow at normal and high attack speed, and the reach (305 / 366 px against v1's 460–560).
+- The parked hands' size (k=2, about 94 px, over the shoulders) and the k=1 swaps.
+- Bead readability on bright and dark ground at zoom 1, and the full heartbeat.
+- Grasp on a moving target, a boss, a worm and empty air; the aiming brackets.
+- Reduced Effects; a second peer seeing the hands, beads and grasp; FPS with eight players.
+- The cue pairs at unchanged sliders over each phase's music in game (the owner approved all fifteen cues on the audition page on 2026-10-03).
 
 ## Scope and acquisition
 
@@ -344,7 +431,7 @@ Last Witness's 0.2.34 score is replaced by its [2026-10 refresh](#rogue--last-wi
 
 ## Presentation and native ownership
 
-This section describes the 0.2.x set; a refreshed weapon's own section (so far the [Lacuna Testament](#magic--lacuna-testament)) supersedes it for that weapon.
+This section describes the 0.2.x set; a refreshed weapon's own section (so far the [Lacuna Testament](#magic--lacuna-testament) and [Lacrimosa's Claws](#lacrimosas-claws--refresh-2026-10), which no longer use the shared legacy materials) supersedes it for that weapon.
 
 Four new **text-only image generations** replace the non-melee icons and supply512px runtime apparatus artwork; no previous image was passed as input. The owner approved the built-in generator despite its unexposed backend model: do not label the results GPT Image2.5.128px inventory exports fit a116px maximum opaque envelope, inspected at40px as well. Original generated PNGs and all predecessor assets are preserved. Exact prompts, export procedure and provenance are in [Attribution](../../../Assets/ATTRIBUTION.md#ritual-grand-apparatus-v3--2026-09-09).
 
