@@ -3157,7 +3157,7 @@ ATTRIBUTION_GROUPS = {
         "title": "### Lacrimosa's Claws cues — 2026-10-03",
         "date": "20261003", "made": "2026-10-03",
         "about": "The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, the contact, the six bead notes from one F5 master, the full-meter cadence, the early-click tick, the grasp's warning, success and miss, the squeeze warning and the crush). The crush closes on a soft gong tuned to F, original modal synthesis in the generator itself (`claw_gong`), over a quiet organ.",
-        "review": "Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run",
+        "review": "Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run",
     },
 }
 

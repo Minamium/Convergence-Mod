@@ -159,9 +159,9 @@ internal sealed class LacrimosaClawVisuals : GlobalProjectile
             Vector2 at = player.MountedCenter;
             if (DollCueClock.Take(ref warnSlot, previousAge, age, 1))
             {
-                if (stroke == LacrimosaClawMotion.Clap) DollWeaponAudio.Play("ClawClapWarn", at, .8f);
-                else if (stroke == LacrimosaClawMotion.RakeUp) DollWeaponAudio.Play("ClawRakeUpWarn", at, .6f);
-                else DollWeaponAudio.Play("ClawRakeDownWarn", at, .6f);
+                if (stroke == LacrimosaClawMotion.Clap) DollWeaponAudio.PlayFor(projectile.owner, "ClawClapWarn", at, .8f);
+                else if (stroke == LacrimosaClawMotion.RakeUp) DollWeaponAudio.PlayFor(projectile.owner, "ClawRakeUpWarn", at, .6f);
+                else DollWeaponAudio.PlayFor(projectile.owner, "ClawRakeDownWarn", at, .6f);
             }
             int fire = stroke == LacrimosaClawMotion.Clap
                 ? Math.Max(1, ContactAge(duration) - ClapFireLead)
@@ -170,18 +170,18 @@ internal sealed class LacrimosaClawVisuals : GlobalProjectile
             {
                 if (stroke == LacrimosaClawMotion.Clap)
                 {
-                    DollWeaponAudio.Play("ClawClapFire", at, .95f);
+                    DollWeaponAudio.PlayFor(projectile.owner, "ClawClapFire", at, .95f);
                     ModContent.GetInstance<RitualWeaponFeedback>().Kick(projectile.owner, 2.5f);
                 }
-                else if (stroke == LacrimosaClawMotion.RakeUp) DollWeaponAudio.Play("ClawRakeUpFire", at, .7f);
-                else DollWeaponAudio.Play("ClawRakeDownFire", at, .7f);
+                else if (stroke == LacrimosaClawMotion.RakeUp) DollWeaponAudio.PlayFor(projectile.owner, "ClawRakeUpFire", at, .7f);
+                else DollWeaponAudio.PlayFor(projectile.owner, "ClawRakeDownFire", at, .7f);
             }
             previousAge = age;
         }
         if (kata.HasImpact && kata.ImpactSerial != impactSeen)
         {
             impactSeen = kata.ImpactSerial;
-            DollWeaponAudio.Play("ClawHit", kata.Impact, .9f);
+            DollWeaponAudio.PlayFor(projectile.owner, "ClawHit", kata.Impact, .9f);
         }
 
         if (projectile.owner != Main.myPlayer) return;
@@ -217,21 +217,21 @@ internal sealed class LacrimosaClawVisuals : GlobalProjectile
         float age = grasp.Age;
         Vector2 at = projectile.Center;
         if (DollCueClock.Take(ref graspWarn, previousGraspAge, age, 1))
-            DollWeaponAudio.Play("ClawGraspWarn", Main.player[projectile.owner].MountedCenter, .9f);
+            DollWeaponAudio.PlayFor(projectile.owner, "ClawGraspWarn", Main.player[projectile.owner].MountedCenter, .9f);
         if (DollCueClock.Take(ref graspFire, previousGraspAge, age, LacrimosaClawMotion.GraspContact - GraspFireLead))
         {
             if (grasp.HasTarget && !grasp.Lost)
             {
-                DollWeaponAudio.Play("ClawGraspFire", at, .95f);
+                DollWeaponAudio.PlayFor(projectile.owner, "ClawGraspFire", at, .95f);
                 ModContent.GetInstance<RitualWeaponFeedback>().Kick(projectile.owner, 2f);
             }
-            else DollWeaponAudio.Play("ClawGraspMiss", at, .9f);
+            else DollWeaponAudio.PlayFor(projectile.owner, "ClawGraspMiss", at, .9f);
         }
         if (DollCueClock.Take(ref crushWarn, previousGraspAge, age, LacrimosaClawMotion.GraspContactEnd))
-            DollWeaponAudio.Play("ClawCrushWarn", at, .9f);
+            DollWeaponAudio.PlayFor(projectile.owner, "ClawCrushWarn", at, .9f);
         if (DollCueClock.Take(ref crushFire, previousGraspAge, age, LacrimosaClawMotion.GraspCrush - CrushFireLead))
         {
-            DollWeaponAudio.Play("ClawCrushFire", at, 1f);
+            DollWeaponAudio.PlayFor(projectile.owner, "ClawCrushFire", at, 1f);
             ModContent.GetInstance<RitualWeaponFeedback>().Kick(projectile.owner, 7f);
         }
         previousGraspAge = age;

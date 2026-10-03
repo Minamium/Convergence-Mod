@@ -45,7 +45,7 @@ class ClawCues(unittest.TestCase):
 
     def test_the_client_routes_every_claw_cue_through_the_doll_player(self):
         visuals = code(WEAPONS / "LacrimosaClawVisuals.cs")
-        routed = set(re.findall(r'DollWeaponAudio\.(?:Play|Note)\("(Claw\w+)"', visuals))
+        routed = set(re.findall(r'DollWeaponAudio\.(?:Play|PlayFor|Note)\((?:projectile\.owner, )?"(Claw\w+)"', visuals))
         self.assertEqual(set(claw_cues()), routed)
         self.assertIn('DollWeaponAudio.Note("ClawBead", 0, beads - 1', visuals, "only the single-note bead moves up the ladder")
         self.assertEqual(1, visuals.count("DollWeaponAudio.Note("), "composite cues are never transposed")

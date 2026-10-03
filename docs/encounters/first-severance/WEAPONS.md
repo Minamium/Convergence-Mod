@@ -265,9 +265,9 @@ Uniform selection uses `ItemDropRule.OneFromOptionsNotScalingWithLuck(1, options
 
 ## Lacrimosa's Claws — refresh (2026-10)
 
-The owner-approved refresh of the melee box weapon: the boss's remote hands (Remote Clasp) and its Central Crush become the player's own technique. It replaced the 0.2.29 melee redesign and the 0.2.38 swipe cleanup on 2026-10-03; their text is [kept in history](../../history/2026-10-03-lacrimosa-claws-0229.md). The [shared rules](#reward-refresh-2026-10--shared-rules) apply.
+The owner-approved refresh of the melee box weapon (look, motion and all fifteen cues approved on the audition and review page on 2026-10-03): the boss's remote hands (Remote Clasp) and its Central Crush become the player's own technique. It replaced the 0.2.29 melee redesign and the 0.2.38 swipe cleanup on 2026-10-03; their text is [kept in history](../../history/2026-10-03-lacrimosa-claws-0229.md). The [shared rules](#reward-refresh-2026-10--shared-rules) apply.
 
-What stays: the internal item `NullRefrain` and its names (断唱・虚掌 / Null Refrain — Lacrimosa's Claws), Calamity true melee through the compatibility adapter, base damage 7700 (`LacrimosaClawMotion.BaseDamage`), crit 8, Red rarity, 40 gold, its place in the [Curtainfall Treasure Box](#curtainfall-treasure-box) and as an ingredient of [The Unbroken Promise](#doll-companion--the-unbroken-promise). No packet, no protocol change (78), no Raid tuning and no Boss HP change.
+What stays: the internal item `NullRefrain` and its names (断唱・虚掌 / Null Refrain — Lacrimosa's Claws), Calamity true melee through the compatibility adapter, base damage 7700 (`LacrimosaClawMotion.BaseDamage`), crit 8, Red rarity, 40 gold, its place in the [Curtainfall Treasure Box](#curtainfall-treasure-box) and as an ingredient of [The Unbroken Promise](#doll-companion--the-unbroken-promise). No packet, no protocol change (79), no Raid tuning and no Boss HP change.
 
 **The hands.** The DW01 pixel art: a floating right porcelain hand and its mirror image, with ball-jointed fingers, long ivory talons, a black-iron cuff with a brass band and, on the back of each hand, a brass plate holding six dark glass **heart beads**. No arm, sleeve, thread or ribbon. While the claws are held and usable, one held controller keeps the hands beside the owner: the right hand floats above the front shoulder and the left above the back one, both pointing up and out, with a 2 px breathing bob. Hands and their light draw **in front of players** on the shared Doll weapon layer.
 
@@ -344,7 +344,7 @@ Nominal raw numbers before defense, no crit, one target, every hit landing on it
 
 ### Audio
 
-All cues are new and live in `Assets/Sounds/Weapons/DollWeapons/`; [Audio](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10) owns their levels. Warning → firing pairs: `ClawRakeDownWarn` → `ClawRakeDownFire` (A), `ClawRakeUpWarn` → `ClawRakeUpFire` (B), `ClawClapWarn` → `ClawClapFire` (C), `ClawGraspWarn` → `ClawGraspFire`, or `ClawGraspMiss` on air, and `ClawCrushWarn` (which carries the four squeezes) → `ClawCrushFire`. `ClawHit` sounds on contact. The owner alone hears `ClawBead` (one F5 note moved up the ladder for beads 1–6), `ClawBeadsFull` and `ClawBeadDry`. Firing cues start a fixed lead before their event so the transient lands on it.
+All cues are new and live in `Assets/Sounds/Weapons/DollWeapons/`; [Audio](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10) owns their levels. Warning → firing pairs: `ClawRakeDownWarn` → `ClawRakeDownFire` (A), `ClawRakeUpWarn` → `ClawRakeUpFire` (B), `ClawClapWarn` → `ClawClapFire` (C), `ClawGraspWarn` → `ClawGraspFire`, or `ClawGraspMiss` on air, and `ClawCrushWarn` (which carries the four squeezes) → `ClawCrushFire`. `ClawHit` sounds on contact. The owner alone hears `ClawBead` (one F5 note moved up the ladder for beads 1–6), `ClawBeadsFull` and `ClawBeadDry`. Firing cues start a fixed lead before their event so the transient lands on it. Another player's claw cues go through `DollWeaponAudio.PlayFor` (the shared owner priority).
 
 ### Ownership and lifecycle
 
@@ -369,7 +369,7 @@ All cues are new and live in `Assets/Sounds/Weapons/DollWeapons/`; [Audio](../..
 - Bead readability on bright and dark ground at zoom 1, and the full heartbeat.
 - Grasp on a moving target, a boss, a worm and empty air; the aiming brackets.
 - Reduced Effects; a second peer seeing the hands, beads and grasp; FPS with eight players.
-- The cue pairs at unchanged sliders over each phase's music (audition page pending the owner).
+- The cue pairs at unchanged sliders over each phase's music in game (the owner approved all fifteen cues on the audition page on 2026-10-03).
 
 ## Scope and acquisition
 

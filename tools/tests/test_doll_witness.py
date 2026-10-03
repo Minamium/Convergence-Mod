@@ -204,7 +204,8 @@ class WitnessOwnership(unittest.TestCase):
         self.assertIn("DollWeaponTextures.Get(WitnessBladeArt.Name)", code(VISUALS))
         self.assertIn("float radius = WitnessBladeArt.ArcRadius;", code(PRESENTATION))
         spec = WEAPONS.read_text(encoding="utf-8")
-        rogue = spec[spec.index("## Rogue — Last Witness"):spec.index("## Claw swipe cleanup")]
+        start = spec.index("## Rogue — Last Witness")
+        rogue = spec[start:spec.index("\n## ", start)]  # the section, up to the next top-level heading
         self.assertNotIn("260", rogue)
         self.assertNotIn("150 px from its owner", rogue)
         projectiles = code(PROJECTILES)

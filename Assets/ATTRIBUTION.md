@@ -26,7 +26,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.6: -21.4 LUFS effective), true peak -2.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `4df6f5d362f769081d436129c791cfab40aeac2dfc1866dbb7c112f5e5b11729`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawRakeDownFire.ogg`
@@ -40,7 +40,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.6 LUFS (played at volume 0.7: -14.7 LUFS effective), true peak -1.5 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `6841f9493ee8ba0f6a66dd039e9a7c4f78bf03b0640bbaa489759630430bd401`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawRakeUpWarn.ogg`
@@ -54,7 +54,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.6: -21.5 LUFS effective), true peak -3.2 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `8db622800be50090075d95413054ad32ad0e09df6d41c2791509be91d7a18501`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawRakeUpFire.ogg`
@@ -68,7 +68,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.6 LUFS (played at volume 0.7: -14.7 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `82b324d7ca89233f9c84e7279283b93faaaace9bdf3602140bea119a0898072e`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawClapWarn.ogg`
@@ -82,7 +82,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -13.1 LUFS (played at volume 0.8: -15.1 LUFS effective), true peak -3.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `e8af00369cebaa7bc0060a2d864594dcc1fdb79b45419fc6a79c9950bdda434c`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawClapFire.ogg`
@@ -96,7 +96,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.95: -12.0 LUFS effective), true peak -1.9 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `088aed1109b37453b03d4dcff8b419fd89bd8d83a0c1eb6bfa7a240531fd61e0`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawHit.ogg`
@@ -110,7 +110,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.9: -20.9 LUFS effective), true peak -4.7 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `f8ce3054e960ac39580df85364885a65964613ad54e4c0d3b711f792851dd1d3`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawBead.ogg`
@@ -124,7 +124,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -19.9 LUFS (played at volume 0.85: -21.4 LUFS effective), true peak -14.8 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `0cae1f86d0400f61eb02d1faeb8c33c4673654fcf8dd8f397e387dd87db01cec`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawBeadsFull.ogg`
@@ -138,7 +138,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -7.1 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `d5e56e54a50a381e71187db4fda0b3be6a23dfdfaf356a4443ab9ef8b25d726b`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawBeadDry.ogg`
@@ -152,7 +152,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.8: -21.9 LUFS effective), true peak -2.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `1b0f17a1bea13244cca7b64c5d549db60700d4d4669b9923fd5675de9022f6b5`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawGraspWarn.ogg`
@@ -166,7 +166,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.9: -13.9 LUFS effective), true peak -4.5 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `3876bec42955eee641b5d9b54f6de163443e092055382aae3eaf6d038e80bbf3`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawGraspFire.ogg`
@@ -180,7 +180,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.9 LUFS (played at volume 0.95: -12.3 LUFS effective), true peak -1.1 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `45dadbc556bf0a0ceeba2d674dadd1d4ab78ed35b8b56beac1eb505a6ac798de`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawGraspMiss.ogg`
@@ -194,7 +194,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.9: -13.9 LUFS effective), true peak -2.6 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `2574fd71e1afcd583434961c84d9e75fb4f236146f95b933a0b0678f9f3dd326`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawCrushWarn.ogg`
@@ -208,7 +208,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.9: -13.9 LUFS effective), true peak -3.7 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `6ea7b36df95773b3b931502de2d1f3a20fd565b75d2faf5b69e2aa491c136eb2`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/ClawCrushFire.ogg`
@@ -222,7 +222,7 @@ The fifteen cues of the refreshed claws (the kata's three warning/firing pairs, 
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -10.0 LUFS (played at volume 1.0: -10.0 LUFS effective), true peak -2.1 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness and true-peak checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `72dec2ff2b07368be0ec49b438ca741524150ad132448f8ad8cd80b2f4496451`
 
 ### Lacrimosa's Claws energy material — 2026-10-03
