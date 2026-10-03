@@ -42,6 +42,11 @@ internal static class DollWeaponAudio
         ["MeridianHit"] = 3, ["MeridianHitHeavy"] = 3,
         // Last Witness: a testimony shot or a shard hit of one owner may overlap another owner's.
         ["WitnessTestimonyFire"] = 3, ["WitnessShardHit"] = 4,
+        // Choir of the Unmade: a quick re-summon overlaps the summon tail; four rolling verse parts can repeat a
+        // pitch within one note's ring; pipes and chorus are one per owner, two owners at once.
+        ["ChoirSummon"] = 3, ["ChoirNoteHit"] = 3,
+        ["ChoirVerseFire0"] = 4, ["ChoirVerseFire1"] = 4, ["ChoirVerseFire2"] = 4, ["ChoirVerseFire3"] = 4, ["ChoirVerseFire4"] = 4,
+        ["ChoirVerseFire5"] = 4, ["ChoirVerseFire6"] = 4, ["ChoirVerseFire7"] = 4, ["ChoirVerseFire8"] = 4,
     };
     private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, SoundStyle> styles = new(StringComparer.Ordinal);

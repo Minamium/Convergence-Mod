@@ -950,7 +950,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 926d25f5330dcf944b48d198c07a93eb075e40be23a8c1a171a7ddec66972f71
+  content_sha256: e7f5635f9891c4a94aa1d38c3675e17b5cfe13ef2b7d3f5975dae975be553c9a
   document_type: spec
   status: provisional
   owners:
@@ -1031,6 +1031,23 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.choir-of-the-unmade-0234
+  path: docs/history/2026-10-03-choir-of-the-unmade-0234.md
+  title: Choir of the Unmade — the 0.2.34 form
+  content_sha256: 2b369f9a25c1aed668fa11471e5127e7bcaebc20fea211c0f20bb5fff62d9234
+  document_type: evidence
+  status: historical
+  owners:
+  - gameplay
+  last_reviewed: '2026-10-03'
+  source_of_truth_for: []
+  aliases:
+  - Choir of the Unmade 0.2.34
+  - legacy choir concert
+  related_code: []
+  related_docs:
+  - encounter.first-severance.weapons
+  - project.status
 - doc_id: history.encounter-evolution-0246
   path: docs/history/2026-09-11-encounter-evolution.md
   title: Encounter evolution through 0.2.46
@@ -1297,7 +1314,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: 145deee983591462fd5155e1076b37e7920b81aaa79af7eaa8c73ca1aa41d36e
+  content_sha256: 08764080c9553048c8971999273459e410cc698839e449d7e6108ddffc6b751d
   document_type: spec
   status: provisional
   owners:
@@ -1479,7 +1496,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 2b181153803fc93592cb53a20d4766271df274b7b4d43f84f647dce40c901aac
+  content_sha256: 54165be74c33cde52d1fb57d25ed58a28651287750ebdab4cd1fc25ed2089858
   document_type: status
   status: accepted
   owners:

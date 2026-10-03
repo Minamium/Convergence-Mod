@@ -41,6 +41,7 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
 | Last Witness | 6 shards ×0.28 + blade ×5.4 = 7.08× per 282 ticks | 14,581/s; the stealth verdict adds ×3.24 |
 
 - **Usability and ownership:** unchanged usability (no use while dead, Down or eliminated in the Doll Raid). One held controller projectile per weapon carries every count peers must see (lit beads, seated parts, open irises, voices, testimonies). Only the owner reads input and spends mana (native `CheckMana`) or ammo (one `PickAmmo` per real shot) and spawns children through native projectile replication. An item change, death, Down, crowd control or leaving the world ends the controller; launched projectiles stop once their owner is unusable. No Encounter packet, `ModPacket` or protocol change.
+  - **Exception, summon weapons** (Choir of the Unmade; owner-approved 2026-10-03): the minions are native minions and, as native summons do, stay summoned through an item change and a Down. Down, crowd control and item restrictions halt what they do (no new shots, launched ones turn harmless); death, removing the buff or leaving the world ends them. The weapon's section lists the exact cases.
 - **Presentation:**
   - Pixel art at the 2-pixel dot: one texel is one dot, drawn at 2 world px with point sampling. Pixel sprites are never scaled at draw time; a weapon that needs two sizes uses two integer export rungs and swaps them on its fastest frames.
   - One shared Doll weapon layer draws weapons **in front of players**; only the Choir's organ (and its gallery row) and Pale Meridian's wind-up key draw behind players (the key is a Meridian addition, owner-approved 2026-10-03). Effects get a one-dot ink outline (#121017).
@@ -49,6 +50,7 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
   - Hit shapes are the constants in Content; the art is fitted to them, never the reverse, and an art-fit test keeps drawn anchors (talon tip, muzzle, hole, mouth, blade tip) within one dot of their design anchors.
   - Swings flow through their ends without hard braking. Reduced Effects (the Doll client config) keeps bodies, forecasts, live bodies and counts, halves debris and residue time and removes glow; screen shake follows the config. No fullscreen flash, hit-stop, zoom, slow motion or input lock.
 - **Audio:** every cue is new and lives in `Assets/Sounds/Weapons/DollWeapons/`: music-box tines, brass gears and key ratchets, porcelain clinks and cracks, pipe organ, and low weight for impacts. Tonal cues use one home, F minor pentatonic (F A♭ B♭ C E♭; build-up ladder F5 A♭5 B♭5 C6 E♭6 F6 A♭6 B♭6 C7), measured against the four Doll tracks. Every release pairs a warning cue with a firing cue, and a set piece that can fail has its own, different failure cue. Composite cues and loops are never transposed at runtime. Reduced Effects never lowers weapon audio. The 0.2.x masters in `Weapons/DollTheater` stay because the companion and the Raid still play some of them; [Audio](../../AUDIO_CUE_SHEET.md) owns masters and levels.
+  - **Exception, a killed target** (Choir of the Unmade; owner-approved 2026-10-03): a chorus whose target is killed with the organ out is not a failure; it closes quietly with the success cue `ChoirChorusEnd`, and every other stop with the organ open keeps the failure cue `ChoirChorusMiss`. The weapon's section lists the exact cases.
 - **Art:** Codex pixel art from Claude's brief (DW01–DW05, delivered 2026-10-02 outside the repository under `asset-deliveries/doll-weapons/2026-10-02/`). `tools/export_doll_weapon_art.py` measures each sheet's dot pitch, snaps to the palette, reduces by whole factors and records anchors; runtime PNGs live in `Assets/Textures/Items/DollWeapons/` with exact [Attribution](../../../Assets/ATTRIBUTION.md) records.
 
 | Asset | Use |
@@ -61,6 +63,99 @@ The owner approved a full refresh of the five box weapons on 2026-10-02: keep ea
 
 - **Companion:** The Unbroken Promise is unchanged except its summon sound, which plays on the same trigger.
 - **Acceptance (owner; `not_run` until played):** each weapon's build-up, release and paired cues; readability on bright and dark ground at zoom 1; weapons in front of the player without hiding the character, and the organ and the Meridian key behind; a second peer seeing the same build-up counts; Reduced Effects; FPS with eight players' weapons.
+
+## Choir of the Unmade (2026-10)
+
+The Raid sings its beams at you: a thin locked axis, then a pilot line that swells to full width. This weapon makes that technique yours. Unfinished porcelain dolls gather around you, you conduct them with a porcelain baton, and on the chorus a pipe organ rises over your head and sings one beam for the whole choir.
+
+The item `ChoirOfTheUnmade` and the buff `ChoirOfTheUnmadeBuff` keep their IDs; the [treasure box](#curtainfall-treasure-box) (20%) and the [Unbroken Promise](#doll-companion--the-unbroken-promise) recipe are unchanged. The item now summons the native types `ChoirChorister` (one voice), `ChoirSungNote` and `ChoirChorus`; the 0.2.34 types stay registered but unused until one cleanup change, and the 0.2.34 form is kept in [history](../../history/2026-10-03-choir-of-the-unmade-0234.md). `ChoirConcertRules` owns every number below; the art is fitted to it.
+
+**Item.** Summon staff, 1 minion slot per use. Base damage 968 (`RitualArmamentRules.Damage(Summon)`, unchanged; the Promise's 9680 stays tied to it), mana 10, use 24 ticks, knockback 6, crit 0. Normal minion target commands, sacrifice and switching weapons all work; the concert never needs the item held. Each use flicks the baton (`ChoirBaton`, held in the front hand) in one continuous downbeat: up behind the head, forward-down, a short follow-through and back, periodic so auto-reuse never stops dead. The new voice appears at the raised baton tip, `MountedCenter + (20·facing, −72)`, fading in from pearl, and glides to its seat.
+
+**Choristers.** Faceless porcelain busts on brass stands (`Chorister0/1/2` by `identity % 3`, 2 world px per dot, 44 × 76 px), each with three singing frames: closed, a small "o", and wide open with the head up. The export lost the closed mouth line of `Chorister0` and `Chorister2`, so frame 0 draws it in code as a two-dot Iron line. Each variant has its own design mouth, the wide-open mouth of frame 2 (on screen from the tick a note leaves it): `(10, −12)`, `(11, −13)` and `(7, −12)` px from the centre facing right for `Chorister0/1/2`, each within one dot (2 px) of its art (domain art-fit test). They never deal contact damage. The lead voice (the owner's lowest native identity) keeps the concert clock in `ai[0]` (0 idle, 1–648 running) and the target in `ai[1]`; every voice copies them, and a new voice joins the running clock. Targets are measured from the owner, not from the dolls: the manual minion target first, otherwise the nearest valid NPC, acquired within 1800 px and kept within 2100 px with line of sight from `owner.MountedCenter`.
+
+**Cloud seats** (idle and verse), around `owner.MountedCenter + (0, −80)`: ring r holds 5 + 2r voices at radius 96 + 46r px over the 140° arc above the player, filled from the top centre outward, bobbing ±3 px across and ±5 px up and down; every stand tip stays at least 40 px above the player's head. Dolls face the target. Movement is velocity steering, `desired = clamp((seat − pos)·0.14, 30 px/tick)`, `v += (desired − v)·0.30`: a 240 px move settles within 4 px in 17 ticks with under 4 px overshoot.
+
+**The concert: 18 beats at 100 BPM (beat 36 ticks, sixteenth 9), 648 ticks = 10.8 s,** looping while the lead has a target.
+
+| Beats | Ticks | Section | What happens | Light | Sound |
+|---|---|---|---|---|---|
+| 0–1 | 1, 36 | Count-in (verse warning) | Every head lifts one dot on each tap | A one-dot pearl ring blinks at every mouth | `ChoirVerseWarn` (two taps, then an inhale) |
+| 2–7 | 72–287 | Verse | Each voice sings one note a beat, a sixteenth × (ordinal mod 4) late. Harmony Fm7 Fm7 B♭7sus B♭7sus A♭maj7 E♭sus | Mouth "o" 6 ticks before each note, wide 8 after; one-dot sound arcs | `ChoirVerseFire0–8`: voices sharing a part sing one cue, a little louder |
+| 8 | 288–323 | Gather | Dolls glide from the cloud to the chorus seats; the organ case assembles from its mouth outward in 14 ticks | Pearl-violet reveal rings, pearl motes, motes behind the gliding dolls | `ChoirOrganRise` |
+| 9 | 324–359 | Pipes | Raised ranks rise centre-out, rank k from 324 + 5k over 8 ticks, sliding up behind the rail in whole dots | A brass glint as each rank seats | `ChoirPipe0–5` (F3 C4 F4 A♭4 C5 E♭5), raised ranks only |
+| 10 | 360–395 | Inhale (chorus warning) | The beam exists but is harmless: a locked one-dot axis from the mouth, turning toward the target | Forecast hairline with pulses running into the mouth; the mouth darkens to a void with a pearl lip as motes spiral in | `ChoirChorusWarn` |
+| 11–15 | 396–575 | Chorus | One beam from the organ mouth. B♭7sus (11–12) → Fm9 (13–14) → an open F5 fifth (15) | A wavefront runs down the beam on every beat; Fm9 deepens the hem; the open fifth turns the pearl band brass | `ChoirChorusFire1–6` by chord voices |
+| 16–17 | 576–647 | Release | Pipes sink outer-first (576 + 4·(5 − k)); the case fades 604–616; dolls return to the cloud over 36 ticks | The beam's axis cools from lilac to plum in 24 ticks | `ChoirChorusEnd` |
+
+**Notes.** The owner spawns each note at the singer's open mouth (its variant's design mouth, mirrored by facing), launched at 8 px/tick toward the target plus 5 px/tick upward; after 6 ticks it homes, accelerating to 30 px/tick (turn cap 0.24 rad/tick). 16 × 16 swept head, one extra update, pierce 1, one hit per NPC root, life 240 ticks, damage 0.78 × the voice's current damage. Drawn as code pixel glyphs (a quarter, an eighth, a beamed pair) with a short comet tail; never with staves. Each voice sings each verse note once per concert: when its place changes mid-verse (a new voice with a lower identity, a sacrifice) it never repeats a note and still sings the one it was about to sing, at most 29 ticks late; a new voice never sings a note whose tick came before it appeared. Sung pitches are F minor pentatonic, F4 to C6:
+
+| Part | Line (one note per verse beat) |
+|---|---|
+| 0 (melody, the lead) | A♭5 C6 B♭5 A♭5 C6 B♭5 |
+| 1 | F5 E♭5 E♭5 F5 E♭5 E♭5 |
+| 2 | C5 A♭4 B♭4 F5 C5 A♭4 |
+| 3 | F4 C5 B♭4 E♭5 A♭4 E♭5 |
+
+**Chorus formation**, around the stage anchor S (the organ mouth and beam origin), `S = owner.MountedCenter + (0, −210)`, eased at 0.25 a tick and snapped beyond 1200 px:
+
+| Row | Holds | Arc (y down, 90° straight below) | Stratum |
+|---|---|---|---|
+| 0 (front) | ordinals 0–6 | centre S + (0, −40), radius 150, 35°–145° (a cup under the mouth) | front |
+| 1 | ordinals 7–15 | centre S + (0, −122), radius 196, 30°–150° | front, behind row 0 |
+| 2 (gallery) | ordinals 16+ | centre S + (0, −70), radius 175, 200°–340° (an arch over the pipes) | back, behind the organ |
+
+A row's members share its arc evenly; the first voices of a row take the seats nearest its centre (ties go right), so the lead stands centre front under the mouth. Rows 0–1 keep at least 40 px between seats up to 16 voices, the gallery at least 24 px up to 33. During the inhale and the chorus the rows part for the beam (drawing only; the voices have no hitbox): each row stays on its arc, which may stretch (rows 0–1 to −20°…200°, the gallery to 160°…380°); the voices in the beam's corridor (its drawn half width, the throat's near the mouth, plus 40 px) slide along the arc to the nearer side of the gap and their neighbours make room, so no two of a row stand closer than 36 px (or the row's own spacing where that is tighter). The parting eases in over 12 ticks and out as the beam closes.
+
+**Organ** (`ChoirOrgan`, k = 1: one texel is one dot, 190 × 192 px), one per owner, on the back stratum behind every player. Drawn from `S + (−95, −147)`, its see-through mouth sits on S (within one dot) and its 18 px radius is the beam's throat. Voices raise ranks: `clamp(voices + 1, 2, 6)` ranks, so 1 voice raises 3 pipes, 2 → 5, 3 → 7, 4 → 9, 5 or more → all 11. A completed chorus sinks the pipes and fades the case out by tick 616. A concert that stops in its release still closes to that vanish; a target that dies with the organ out closes it quietly as a release from where it stood (pipes sink, the case is gone 40 ticks later); only a lost target crumbles it into porcelain and brass.
+
+**Chorus beam** (`ChoirChorus`, one per owner):
+- The lead spawns it at concert tick 360; its age follows the lead's clock (`ai[0]` = clock − 360): ticks 0–35 are the harmless warning, 36–215 are live.
+- It turns toward the target at 0.045 rad/tick; the first warning tick snaps.
+- Collision runs from 48 px past the mouth to 2000 px × `LengthFactor` (full length in 3 ticks). The half-width starts as the 1.5 px pilot, swells (quintic) to 46 px (92 px full width) by live tick 7 and closes back to the pilot over live ticks 168–180, the Raid's `FirstSeveranceBeamIgnition`; the first live tick cannot hit.
+- Damage is `(int)(1.05 × the sum of every living voice's current damage)`, recomputed every tick. One hit per NPC root per 12 ticks, so 15 per chorus. Never one beam per voice.
+- If the lead is removed, the next voice carries the clock, the organ and the beam on. A lost or killed target, an unusable owner or no voice left closes it harmlessly in 6 ticks (the owner decides; peers follow its update).
+- Drawn by the original `DollChoirEnergy` material. The throat widens from the organ mouth's 18 px to the full half width over the first 48 px, where collision starts: the throat glows over the organ and never hits. Past it the light stays inside the collision body.
+
+**More voices, richer chord.** Chord voices = min(voices, 6) choose `ChoirChorusFire1…6` (more sung lines; the fifth line adds Fm9's ninth) and the number of brass standing waves in the beam (at most 2 under Reduced Effects). Raised pipes grow as above, and the verse fills its four rolling parts; voices beyond four double a part. Per owner the draw is bounded: 40 voices, 64 notes (24 with trails), one beam, one organ.
+
+**Interruptions.** The minions staying through an item change and a Down, and the quiet close on a killed target, are the owner-approved (2026-10-03) exceptions in the [shared rules](#reward-refresh-2026-10--shared-rules).
+- **Target lost, or owner unusable** (dead, Doll Raid Down or eliminated, `noItems`, crowd control): the clock returns to 0 and the dolls go back to the cloud; a warning or live beam closes harmlessly in 6 ticks; an open organ crumbles over 18 ticks with `ChoirChorusMiss`, and a sounding chorus fades out over 6 ticks. The next valid target starts again from the count-in.
+- **Target killed** (inactive or no life left) with the organ out and no other target in reach: the same stop, but a quiet close instead of a failure: `ChoirChorusEnd` plays, a sounding chorus fades out over 30 ticks and the organ closes as a release from where it stood. Another target in reach is simply taken and the concert goes on.
+- **Any stop in the release** (576–647): the pipes keep sinking and the case keeps fading until it is gone at 616.
+- **Owner Down:** the choristers stay summoned (slots kept); notes in flight turn harmless and fade in 8 ticks.
+- **New voice mid-concert:** it joins the current clock and flies to its seat; its damage joins the beam on the next tick; a chorus already sounding does not change.
+- **Death or buff removed:** every chorister ends; notes and the beam stop with their owner.
+- **Item change:** nothing happens to the minions; only the baton needs the item.
+
+**Presentation.** Everything draws through the shared Doll weapon layer at one dot = 2 world px, point-sampled and snapped: the gallery row, pipes and case on the back stratum; rows 0–1, the cloud, the baton, the beam, notes and sparks in front. While the owner holds the Choir during a running concert the baton beats time, rising through the inhale and the chorus; the arm follows the baton. Another player's beam, notes and trails draw at 65% and the inhale's void at 60%; bodies stay opaque. Reduced Effects keeps the bodies, forecast, live beam and counts, uses two standing waves and wavefronts only on the chord changes, drops the motes, halves trail length and residue time and removes the glow; the screen shake (3, owner only, through `RitualWeaponFeedback.Kick`) follows the config.
+
+**Audio.** 29 original cues in `Assets/Sounds/Weapons/DollWeapons/` (no recordings): a faceless formant doll voice, porcelain taps, brass gears and pipe organ, all F minor pentatonic. Pairs: `ChoirVerseWarn` → `ChoirVerseFire0–8`, `ChoirChorusWarn` → `ChoirChorusFire1–6`; the success close `ChoirChorusEnd` and the failure `ChoirChorusMiss` sound different. The close is restrained, as the owner chose for big finishers on 2026-10-03: the chorus's open fifth falls away into its cut and `ChoirChorusEnd` (a soft gong on low F and a quiet organ fifth with a long tail) carries the ending. The owner approved all 29 cues on the audition page on 2026-10-03. Cues play on the lead's accepted clock through `DollWeaponAudio`, once per owner and concert tick; peers hear other choirs at 70%; beam contact is an owner-local accent at most every 24 ticks. [Audio](../../AUDIO_CUE_SHEET.md#doll-weapons-2026-10) owns the levels.
+
+**Power** (raw, one target, every hit landing; per voice at 968):
+
+| | Notes | Chorus | Per concert | Per second |
+|---|---|---|---|---|
+| 0.3.70 baseline | 5–6 × 0.85 (823) by ordinal | 15 × 1016 | 19,766.5 per 660 ticks (mean) | 1,797 |
+| 2026-10 | 6 × 0.78 (755), every voice | 15 × 1016 | 19,770 per 648 ticks | 1,831 |
+
+Per cycle +0.02%, sustained +1.86%, best 600-tick window from a cold summon 19,770 against 20,178 (−2.02%): within the shared ±3%. The chorus window stays 5,080/s per voice; ten voices hit for 10,164 per chorus hit. The beam is still one 92 px line per owner.
+
+**Ownership.** The owner client targets, advances the lead's clock and spawns the notes and the beam through native minion and projectile replication; the lead syncs on clock resets and every 60 ticks, every voice every 60 ticks, the beam every 6 ticks (always, turning or not). Only the owner judges the target (range, sight), aims the beam and closes it. Peers advance the replicated clock while the owner keeps a target and stop it only on the owner's update, smooth the beam's angle toward its 6-tick corrections, and play the same cues on that clock. A new voice is spawned with the lead's clock and target, so it can take over as lead at once. No packet; protocol unchanged. Client resources are dropped on world unload; a Dedicated Server never touches graphics or audio.
+
+**What changes for players** (old → new):
+- Concert: 11.0 s (660 ticks) → 10.8 s (648 ticks, 18 beats at 100 BPM), with a two-beat count-in and a one-beat chorus warning you can see and hear.
+- Notes: 5 or 6 per voice depending on its place (×0.85, every 46 ticks) → 6 for every voice (×0.78, one per beat).
+- Notes leave the doll's mouth at 8 px/tick (plus a lift) and home after 6 ticks to 30 px/tick → was 16 px/tick from the doll, homing at once to 36 px/tick.
+- Chorus starts at concert tick 372 → 396; still 180 ticks and 15 hits × 1.05 the summed voices.
+- Beam origin: 260 px above the target, pointing down → the organ mouth 210 px above you; collision now starts 48 px past the mouth; 2000 px and 92 px unchanged; opens with the Raid's pilot-and-swell (full width by tick 7) instead of a 7-tick ease, and narrows over its last 12 ticks.
+- Choristers: orbit the target → stay over you, then line up in rows before the organ; targets are measured from you.
+- Removing the lead voice now hands the beam to the next voice instead of cancelling it.
+- Sustained output per voice 1,797 → 1,831 raw/s (+1.9%); the best cold window 20,178 → 19,770 (−2.0%); chorus window 5,080/s unchanged.
+- New pixel art (choristers, organ, baton, item and buff icons), a new beam material and 29 new cues; the 0.2.x apparatus, pose and Choir sounds no longer appear for this weapon.
+- The new voice appears at the baton tip, `(20·facing, −72)`, instead of `(0, −80)`.
+
+**Acceptance** (owner; `not_run` until played): 1, 4 and 10+ voices (formation, chord growth, pipe count); the verse rhythm, organ rise and the warning → chorus pairing; beam readability on bright and dark ground; the closed-mouth line; the parting at 10+ voices; Down, death, sacrifice, retarget and kill-closing cleanup; a second peer seeing the same concert; Reduced Effects; FPS with 10+ voices; the cues over the Raid music.
 
 ## Pale Meridian — refreshed ranged (2026-10)
 
@@ -243,11 +338,7 @@ Superseded by [Pale Meridian — refreshed ranged (2026-10)](#pale-meridian--ref
 
 ### Summon — Choir of the Unmade
 
-Each use summons one persistent,1-slot chorister. The oldest stable native identity conducts one shared target/score; adding voices does not restart it. Normal minion targeting, sacrifice and changing held weapons remain supported.
-
-An11-second concert: independent seeking notes and progressive organ tiers for276 ticks;48-tick assembly;48-tick pressure/charge; **one shared three-second chorus beam** during372–552; disassembly/rest to660. Every living voice contributes its current damage to that one beam; individual notes stop during the chorus. No extra beam per slot. The chorus binds to its conductor's owner+identity, not a reusable projectile slot. Removing the conductor cancels that beam; a remaining voice takes over the next concert. Losing a valid target or becoming Downed/incapacitated cancels the score. Down does not delete the summoned slots.
-
-The beam turns toward the native selected target at0.045rad/tick, reaches2000px, has92px full width and12-tick root immunity. The crown is physical moving art; all ornamental seal/pipe counts remain bounded independently of minion count.
+Replaced by the [2026-10 refresh](#choir-of-the-unmade-2026-10); the 0.2.34 concert is kept in [history](../../history/2026-10-03-choir-of-the-unmade-0234.md).
 
 Last Witness's 0.2.34 score is replaced by its [2026-10 refresh](#rogue--last-witness); the old text is kept in [history](../../history/2026-10-03-last-witness-v1.md).
 
@@ -269,7 +360,7 @@ The [2026-09-14 recording/source analysis](../../research/2026-09-14-doll-playte
 
 ## Initial power budget — not measured DPS
 
-The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Pale Meridian's current numbers are in [its section](#pale-meridian--refreshed-ranged-2026-10). Choir ordinary notes carry0.85x; shared chorus hits carry1.05x the sum of living voices every12 ticks (5082 raw/sec per968-damage voice **during the chorus**, not averaged over rest). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; since the 2026-10 refresh that blade splits 0.25 strike / 4 × 0.125 Axiom bites / 0.25 return ([Last Witness](#rogue--last-witness)).
+The unchanged seeds in `RitualArmamentRules` are provisional, not measured Calamity baselines. Magic construction bolts carry0.55x base damage; sustain hits carry2x every10 ticks (24288 nominal raw damage/sec at2024 base). Pale Meridian's current numbers are in [its section](#pale-meridian--refreshed-ranged-2026-10). The Choir's numbers moved to [its 2026-10 section](#choir-of-the-unmade-2026-10). Rogue pays six0.28x early shards plus one5.4x final returning-blade budget over4.7s, before native stealth; since the 2026-10 refresh that blade splits 0.25 strike / 4 × 0.125 Axiom bites / 0.25 return ([Last Witness](#rogue--last-witness)).
 
 These are arithmetic bounds before defense, crits, armor/accessories, misses, movement and class hooks—not claims of endgame balance or measured DPS. The goal of a modest improvement over selected same-class final equipment needs matched in-game measurements. Do not change Boss HP to hide weapon imbalance.
 
