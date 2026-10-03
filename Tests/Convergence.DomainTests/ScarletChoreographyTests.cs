@@ -152,7 +152,7 @@ internal static partial class Program
         var resting=CrimsonChoreography.ClampParticipant(f,f.CenterX,f.Bottom-42,20,42);
         AssertEqual((f.CenterX,f.Bottom-42),resting,"ordinary support floor is not displaced upward");
     }
-    [DomainTest("Scarlet crossflow collision is the drawn stream: inside its forecast band, ends sunk in the seals, wall bodies reached")]
+    [DomainTest("Scarlet crossflow collision lies inside its forecast band, ends on the stream ends under the seals, wall bodies reached (the picture covers it: ScarletCrossflowCutCoversCollision)")]
     private static void ScarletCrossflowContainment()
     {
         var f=Convergence.Common.Raids.Arena.RaidFieldGeometry.FromGround(8000,6000);
@@ -162,7 +162,7 @@ internal static partial class Program
             var plan=p with {Target=new(x,y)};
             var (right,left)=CrimsonChoreography.Reach(plan);
             var (sealRight,sealLeft)=CrimsonChoreography.Seals(plan);
-            // Collision (CrimsonTechniqueGeometry.Write, what CrimsonGesture collides and ScarletInk draws) at every live tick.
+            // Collision (CrimsonTechniqueGeometry.Write, what CrimsonGesture collides; ScarletInkStroke draws the band over its span) at every live tick.
             for(int tick=plan.Fire;tick<plan.End;tick++) {
                 int count=CrimsonTechniqueGeometry.Write(plan,tick,strokes);
                 for(int i=0;i<count;i++) {

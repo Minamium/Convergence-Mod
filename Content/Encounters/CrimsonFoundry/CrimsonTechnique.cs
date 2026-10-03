@@ -163,7 +163,8 @@ internal static class CrimsonTechniqueGeometry
         => new(p.Field.Left + 200 + column * (p.Field.Right - p.Field.Left - 400) / 5,
             p.Field.Top + 230 + row * 560 + (p.Pulse % 2 == 0 ? -35 : 35));
 
-    // The same solid capsules are drawn and collided. Forecast is a conservative
+    // The same solid capsules are drawn and collided (the crossflow is drawn as the band over its
+    // capsule's span, CrimsonChoreography.Side: the picture covers the hit). Forecast is a conservative
     // full swept footprint; only Live(age) can generate damaging geometry.
     internal static int Write(in CrimsonGesturePlan p, float age, Span<CrimsonStroke> destination, bool forecast = false)
     {
