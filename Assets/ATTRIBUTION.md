@@ -23,7 +23,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -17.0 LUFS (played at volume 0.55: -22.2 LUFS effective), true peak -8.2 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `194ff024bbb4066a348b5a7eb02abfd7dd3f3701110247d5ea8d996916b1d626`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote0.ogg`
@@ -37,7 +37,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -10.7 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `5ab7f54645b1674262a1b2ab673b3127cd40e0d967d63b0915bad1652664f30a`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote1.ogg`
@@ -51,7 +51,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `cc73bd2e120dacfe403d4b45b6654f2fbfc74530a1947207ac44f7608b172e5e`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote2.ogg`
@@ -65,7 +65,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `739b0148142facf15ff7f6817e17c1dfaf61c6a7ca12ec5816f848b32f833b21`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote3.ogg`
@@ -79,7 +79,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `822a9a408a25bc20da933959328db7dd5b65c0d73e811a0ca9ca730994159702`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote4.ogg`
@@ -93,7 +93,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -12.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `c312b042581788f6fcc73c0de68a82d2d63584301831ef48f3e8eb27a891b503`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote5.ogg`
@@ -107,7 +107,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -12.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `29215522ee38cefc4277bd10e7afcb89056819d08e61cd1f99d9ccedfc0b6561`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote6.ogg`
@@ -121,7 +121,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -16.9 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.7 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `bc3aad28db1bbeddce18fdb8453183cafc0a25abb9945495405a3d7bab4364ed`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote7.ogg`
@@ -135,7 +135,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.9 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `873c467bde8bee18dfe73fadc88318baa91aac86e72d895b0b0197726f06a01b`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianNote8.ogg`
@@ -149,7 +149,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -11.2 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `a220052ab7f6cd9afdc81bc87bcd4cecead4708d5e5cc13d7335a6aba8f6b353`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianPartWarn.ogg`
@@ -163,7 +163,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.45: -23.9 LUFS effective), true peak -7.8 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `c061a0e6bf6008dc8ae30812dfdfcbec6482e2b33dc92aeb02d68670bdb2f03f`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianPartFire.ogg`
@@ -177,7 +177,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.5: -19.1 LUFS effective), true peak -3.5 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `50600bef59460242026d710457be41cd55d1ab27d46ff944ec6d1917f6bd7c55`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianIgniteWarn.ogg`
@@ -191,7 +191,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.5 LUFS effective), true peak -4.2 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `7b57dc63e3ced4d280d6f16642e466e437f50240328bc28e8feaf7e36a153fd4`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianIgniteFire.ogg`
@@ -205,7 +205,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.75: -14.0 LUFS effective), true peak -5.2 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `f9e6faaa1a065babad00cdfd8178772c4f03a0eb49f6c6eafff7d17c87ab4abc`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLoop.wav`
@@ -219,7 +219,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.0 LUFS effective), true peak -6.5 dBFS; circular filtering and an equal-power crossfade of the overhang into the head, no trim or fade
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, loop-seam and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `ddd0a8409346012abf924e9451cf94a0277a12263197f7a170e7be8cf980c02d`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHeavy.ogg`
@@ -233,7 +233,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -13.0 LUFS (played at volume 0.5: -19.0 LUFS effective), true peak -6.2 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `98a0a8804c2c030054294405ddf2407bb7f3c4bde12c5c33a43d281637ee67cd`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeWarn.ogg`
@@ -247,7 +247,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.4 LUFS effective), true peak -6.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `3cf62ac96e2ba1df8313e248b2d32b7867c21a859cd919a89ad8dacb7139be32`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeFire.ogg`
@@ -261,7 +261,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -11.5 LUFS (played at volume 0.85: -12.9 LUFS effective), true peak -4.8 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `6e2d5b324a24c62d4af04db40555a3338a289ab7e920cf771388ae0f4bb03b1f`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianStrikeMiss.ogg`
@@ -275,7 +275,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.55: -22.2 LUFS effective), true peak -3.7 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `2ac293c946a969c8cac35f784f1ea0c6c2279af1aadfc52c0132500138461966`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLatticeWarn.ogg`
@@ -289,7 +289,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.6: -17.4 LUFS effective), true peak -6.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `1faaa99781cd852677f6d2b5e331d6690d4840f063bc5cb038b16cd7ed56ac91`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianLatticeFire.ogg`
@@ -303,7 +303,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -5.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `36adbab1447815725626b7d71c4f4812df2278795a615b0e22bebe717551f01b`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHit.ogg`
@@ -317,7 +317,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -20.1 LUFS (played at volume 0.35: -29.2 LUFS effective), true peak -5.5 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `19bce4a754a54a6eb88392d32826a4c0890c931f01f20da9a595c994d724fe12`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/MeridianHitHeavy.ogg`
@@ -331,7 +331,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.5: -23.1 LUFS effective), true peak -5.2 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `1f39873232ef5e9278baea603cbf9153fa1f15336dab8ea122f423eb6158b86f`
 
 ### Pale Meridian energy material — 2026-10-03

@@ -950,7 +950,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 1726884457ccd7b6364ef432e66fa4e93ebd8284958e04aca94ef08889b2b657
+  content_sha256: 63b7e97fd0224fd147e647cfcbb28affb8ea63c488caf425ab60790155ed08a2
   document_type: spec
   status: provisional
   owners:
@@ -964,7 +964,6 @@ documents:
   - raid reward weapons
   related_code:
   - Content/Encounters/FirstSeverance/Rewards
-  - Client/Encounters/FirstSeverance/Weapons
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
   - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
@@ -1283,7 +1282,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: e50c05ad57b4bb3834d5e1e2347f839253489ade131e6e465ac969ed7016a505
+  content_sha256: b9c04fa754894d3ec977b066732740cde859a881b90c42d22c5feb50bce3486e
   document_type: spec
   status: provisional
   owners:
@@ -1465,7 +1464,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: fc02d21460a70dc35470ec912e47bf0e64ff43e4a53570c24c24e7088a582899
+  content_sha256: 3bd1d2518d29a48462c394db9cebaf3a2468789c9efd96f3830c4313bd6ad0fb
   document_type: status
   status: accepted
   owners:

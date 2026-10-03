@@ -1736,7 +1736,7 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
 - Human modifications: {'trimmed, filtered and layered recordings plus original synthesis' if external else 'original synthesis'}; short-term loudness {r['short_term_lufs']:.1f} LUFS (played at volume {r['volume']}: {r['effective_lufs']:.1f} LUFS effective), true peak {r['true_peak_dbfs']:.1f} dBFS; {'circular filtering and an equal-power crossfade of the overhang into the head, no trim or fade' if loop else 'pinned Ogg serial'}
 - License and redistribution terms: {'CC0 1.0 recordings; the layered cue follows the existing project asset terms' if external else 'original project asset under the existing project terms'}
 - Required attribution: {'none required by CC0; retain the table above as courtesy credit' if external else 'none; retain this provenance'}
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak{', loop-seam' if loop else ''} and score-tick alignment checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak{', loop-seam' if loop else ''} and score-tick alignment checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `{r['ogg_sha256']}`
 """)
     return head + "\n" + "\n".join(blocks)
