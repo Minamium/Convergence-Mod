@@ -63,7 +63,7 @@ class ScarletRewardWiring(unittest.TestCase):
             self.assertNotIn('Convergence.Client', read(path), f'{path.name} must not reference Client code')
 
     def test_rule_files_stay_terraria_free_and_independent_of_ebon(self):
-        rules = ['CrimsonRewardRules.cs', 'CrimsonStrokeState.cs', 'SableScytheMotion.cs', 'CanticleRules.cs',
+        rules = ['CrimsonRewardRules.cs', 'CrimsonStrokeState.cs', 'SableScytheMotion.cs', 'SableCrescentFlight.cs', 'CanticleRules.cs',
                  'BatonRules.cs', 'CenserRules.cs', 'QuillRules.cs']
         project = read(ROOT / 'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj')
         for name in rules:
@@ -87,11 +87,80 @@ class ScarletRewardWiring(unittest.TestCase):
 
     def test_damage_classes_go_through_the_calamity_adapters(self):
         items = read(REWARDS / 'CrimsonRewardItems.cs')
-        self.assertIn('CrimsonRewardKind.Melee => CalamityTrueMelee.Damage', items)
+        self.assertIn('CrimsonRewardKind.Melee => DamageClass.Melee', items)
         self.assertIn('_ => CalamityRogueArmamentDamage.Class', items)
         self.assertIn(': CalamityRogueArmament', read(REWARDS / 'ScarletQuill.cs'))
         for path in list(REWARDS.glob('*.cs')) + reward_client_files():
             self.assertNotIn('using CalamityMod', read(path), f'{path.name}: Calamity access stays in Common/Compatibility/Calamity')
+
+    def test_the_scythe_never_uses_the_true_melee_class(self):
+        # Owner decision 4 (2026-10-03): the Sable Scythe is ordinary Melee in every part, with no class switch on use.
+        for path in REWARDS.glob('*.cs'):
+            self.assertNotIn('CalamityTrueMelee', read(path), f'{path.name}: the Scarlet rewards never use true melee')
+        scythe = read(REWARDS / 'ScarletScythe.cs')
+        use = scythe[scythe.index('public override bool CanUseItem'):scythe.index('public override bool Shoot')]
+        self.assertNotIn('DamageType', use, 'no class switch on use')
+        for cls in ('SableStroke', 'SableCrescent', 'StaffCut'):
+            body = scythe[scythe.index(f'public sealed class {cls}'):]
+            body = body[:body.index('public override void SetDefaults()') + 900]
+            self.assertRegex(body, r'Projectile\.DamageType = (DamageClass\.Melee|CrimsonRewardItems\.DamageClassFor\(CrimsonRewardKind\.Melee\));', cls)
+
+    def test_scythe_crescents_are_owner_thrown_replicated_and_bounded(self):
+        scythe = read(REWARDS / 'ScarletScythe.cs')
+        crescent = scythe[scythe.index('public sealed class SableCrescent'):scythe.index('public sealed class SableStaff')]
+        defaults = crescent[crescent.index('public override void SetDefaults()'):crescent.index('public override bool? CanDamage()')]
+        for line in ('Projectile.netImportant = true;', 'Projectile.usesLocalNPCImmunity = true;', 'Projectile.localNPCHitCooldown = -1;',
+                     'Projectile.extraUpdates = CrimsonRewardRules.CrescentExtraUpdates;', 'Projectile.tileCollide = false;'):
+            self.assertIn(line, defaults)
+        self.assertNotIn('idStaticNPCHitCooldown', crescent, 'no ID-static immunity')
+        ai = crescent[crescent.index('public override void AI()'):]
+        self.assertLess(ai.index('SableCrescentFlight.Valid('), ai.index('Projectile.ai[2] = '), 'invalid ai kills it before anything runs')
+        self.assertIn('if (!owner.active) { Projectile.Kill(); return; }', ai)
+        throw = crescent[crescent.index('internal static void Throw('):]
+        self.assertIn('if (owner.whoAmI != Main.myPlayer) return;', throw[:200], 'only the owner throws')
+        self.assertIn('SableCrescentFlight.MustBreakOldest(flying)', throw)
+        # Throw (its target) and the cap's Break run inside the stroke's update, where Projectile.Update clears netUpdate
+        # before the crescent's own AI: every change is republished from the crescent's next AI instead.
+        throw_body = throw[:throw.index('private void Body()')]
+        self.assertNotIn('netUpdate', throw_body, 'a flag set from the stroke would be cleared before it is sent')
+        set_target = crescent[crescent.index('private void SetTarget('):crescent.index('internal void Break()')]
+        brk = crescent[crescent.index('internal void Break()'):crescent.index('internal static void Throw(')]
+        for name, body in (('SetTarget', set_target), ('Break', brk)):
+            self.assertIn('resync = true;', body, f"{name} republishes from the crescent's own AI")
+            self.assertNotIn('netUpdate', body, f"{name} leaves the send to the crescent's own AI")
+        self.assertIn('resync = false; Projectile.netUpdate = true;', ai, "the crescent's AI sends what changed")
+        hit = crescent[crescent.index('public override void OnHitNPC'):]
+        self.assertLess(hit.index('if (Projectile.owner != Main.myPlayer) return;'), hit.index('TryEngrave(stroke)'))
+        stroke = scythe[scythe.index('public sealed class SableStroke'):scythe.index('public sealed class SableCrescent')]
+        # Throws come only from a live stroke on its owner (Usable/CanAct already gate the stroke), spaced on the player.
+        self.assertLess(stroke.index('if (Projectile.owner != Main.myPlayer) return;'), stroke.index('Throw(owner, state, shoulder, age);'))
+        self.assertIn('if (!whip && !state.TryThrow(Main.GameUpdateCount)) return;', stroke)
+        self.assertIn('TryEngrave(Serial)', stroke, 'the blade and the lash arc engrave through the per-stroke ledger')
+        player = scythe[scythe.index('public sealed class SableScythePlayer'):]
+        post = player[player.index('public override void PostUpdate()'):player.index('public override void UpdateDead()')]
+        self.assertNotIn('crescents.Reset()', post, 'an item change keeps the throw spacing')
+        visuals = read(CLIENT / 'Rewards/ScytheVisuals.cs')
+        self.assertIn('ScarletCrescentInk.Body(', visuals)
+        ink = read(CLIENT / 'Vfx/ScarletCrescentInk.cs')
+        for name in ('Spatter',):
+            body = ink[ink.index(f'internal static void {name}('):]
+            self.assertIn('if (canvas.Reduced', body[:300], f'Reduced Effects removes the {name.lower()}')
+        self.assertNotIn('Smear', ink, 'no ink trails a crescent (a residue smear read as a hairline)')
+        # Nothing a crescent leaves is a line: the spatter is blots, drops keep a tail of at most one radius, and its
+        # wake is cinders (they cover rather than add, so they stay crimson on bright ground instead of turning white).
+        spatter = ink[ink.index('internal static void Spatter('):ink.index('internal static void Scar(')]
+        self.assertIn('canvas.Disc(', spatter)
+        self.assertNotIn('Quadratic', spatter)
+        drop = ink[ink.index('internal static bool Drop('):]
+        self.assertIn('if (length > most) tail = head - along * (most / length);', drop)
+        drops = visuals[visuals.index('private static void EmitDrops('):visuals.index('private static void EmitStroke(')]
+        self.assertIn('ScarletCrescentInk.Drop(canvas,', drops)
+        self.assertNotIn('canvas.Droplet(', drops, 'crescent drops draw through ScarletCrescentInk.Drop')
+        crescent_visuals = visuals[visuals.index('internal sealed class ScytheCrescentVisuals'):visuals.index('internal sealed class ScytheReleaseVisuals')]
+        wake = crescent_visuals[crescent_visuals.index('if (whole % ScarletCrescentInk.WakeEvery == 0)'):crescent_visuals.index('ScarletCrescentInk.WakeVelocity(')]
+        self.assertIn('ScarletParticleKind.Cinder', wake)
+        for forbidden in ('using Terraria', 'Luminance'):
+            self.assertNotIn(forbidden, ink)
 
     def test_victory_drop_is_victory_only_counted_before_each_grant(self):
         runtime = read(CONTENT / 'CrimsonRuntime.cs')
@@ -185,7 +254,7 @@ class ScarletRewardWiring(unittest.TestCase):
         audio = read(CLIENT / 'Rewards/ScarletRewardAudio.cs')
         self.assertIn('private static bool Audible => !Main.dedServ && !Main.gameMenu && !Main.gamePaused && Main.hasFocus;', audio)
         emit = audio[audio.index('private static void Emit('):]
-        self.assertLess(emit.index('if (!Audible) return;'), emit.index('Style(cue, file, remote)'), 'no SoundStyle before the client guard')
+        self.assertLess(emit.index('if (!Audible) return;'), emit.index('Style(cue, voice, file, remote)'), 'no SoundStyle before the client guard')
         self.assertLess(emit.index('if (!Exists(file)) return;'), emit.index('SoundEngine.PlaySound'), 'a missing cue is skipped')
         self.assertIn('ModContent.HasAsset(ScarletRewardCues.Root + file)', audio)
         art = read(CLIENT / 'Rewards/ScarletRewardArt.cs')
@@ -230,7 +299,7 @@ class ScarletRewardWiring(unittest.TestCase):
         # Exact keys inside their own blocks: a substring check would let 'BloodinkQuill' pass on 'CrimsonBloodinkQuill'.
         items = ['CrimsonScoreReliquary', *WEAPONS.values()]
         buffs = ['CrimsonEmberCenserBuff']
-        projectiles = ['SableStroke', 'SableStaff', 'SableRelease', 'StaffCut', 'CanticleShard', 'BoneHand', 'BatonSwing',
+        projectiles = ['SableStroke', 'SableCrescent', 'SableStaff', 'SableRelease', 'StaffCut', 'CanticleShard', 'BoneHand', 'BatonSwing',
                        'BatonStroke', 'BatonRiver', 'EmberCenserMinion', 'BloodinkQuill', 'BloodinkTrail', 'SealedScore']
         for culture in ('en-US', 'ja-JP'):
             text = read(ROOT / f'Localization/CrimsonRewards/{culture}.hjson')
@@ -434,7 +503,16 @@ class ScarletRewardAudioContract(unittest.TestCase):
                 self.assertEqual(expected, method, f'{path}: {name} is a {audience} cue')
         audio = read(CLIENT / 'Rewards/ScarletRewardAudio.cs')
         # Other players' voices are a pool of their own, so another player's cue never cuts the local player's.
-        self.assertIn('Identifier = Identity + file + (remote ? ":peer" : ""),', audio)
+        self.assertIn('Identifier = Identity + voice + (remote ? ":peer" : ""),', audio)
+        # A wanted cue plays its shipped stand-in's file in a voice pool of its own (REWARDS.md, Sable Scythe audio).
+        self.assertIn('internal string File(int variant = 0) => StandIn ?? Voice(variant);', read(CUES))
+        wanted = read(CUES)[read(CUES).index('internal static readonly ScarletCue[] Wanted'):]
+        wanted = wanted[:wanted.index('};')]
+        table = cue_table()
+        for name, stand_in in re.findall(r'new\((\w+), .*StandIn: (\w+)', wanted):
+            self.assertNotIn(name, table, f'{name} is not one of the shipped 35 until it is recorded')
+            self.assertIn(stand_in, table, f'{name} stands in with a shipped cue')
+            self.assertIn(f'ScarletRewardCues.{name}', '\n'.join(args for _, args, _ in reward_call_sites()), f'{name} is played')
         self.assertIn('MaxInstances = remote ? cue.PeerVoices : cue.Voices,', audio)
         self.assertIn('SoundLimitBehavior = !remote || cue.PeerReplacesOldest ? SoundLimitBehavior.ReplaceOldest : SoundLimitBehavior.IgnoreNew,', audio)
         self.assertIn('internal int PeerVoices => Audience == ScarletCueAudience.Shot ? 1 : Voices;', read(CUES), 'other players share one voice of a per-shot file')
@@ -449,8 +527,9 @@ class ScarletRewardAudioContract(unittest.TestCase):
                 self.assertRegex(owner, r'^(owner|p\.owner|projectile\.owner|owner\.whoAmI|player\.whoAmI)$', f'{path}: {method}({args}) names the owner second')
         self.assertIn('PauseBehavior = PauseBehavior.StopWhenGamePaused,', audio)
         self.assertIn('PlayOnlyIfFocused = true,', audio)
-        # Every cue another player causes plays RemoteCueDecibels under its owner's level (REWARDS.md#multiplayer-readability).
-        self.assertIn('float db = ScarletRewardCues.RoleDecibels(cue.Role) + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);', audio)
+        # Every cue another player causes plays RemoteCueDecibels under its owner's level (REWARDS.md#multiplayer-readability);
+        # a wanted cue's stand-in plays StandInDecibels under its own role's level (0 for every shipped cue).
+        self.assertIn('float db = ScarletRewardCues.RoleDecibels(cue.Role) + cue.StandInDecibels + decibels + (remote ? CrimsonRewardRules.RemoteCueDecibels : 0);', audio)
         self.assertEqual(1, audio.count('? CrimsonRewardRules.RemoteCueDecibels'), 'one place applies the remote offset')
         self.assertIn('internal const float Gain = 1f;', read(CUES))
 
@@ -461,7 +540,7 @@ class ScarletRewardAudioContract(unittest.TestCase):
         stroke = scythe[scythe.index('class ScytheStrokeVisuals'):scythe.index('class ScytheReleaseVisuals')]
         self.assertIn('int reached = heard;\n        heard = Math.Max(heard, age);', stroke)
         cues = re.findall(r'Crossed\((\w+), age, ScytheLook\.(\w+)\)', stroke)
-        self.assertEqual({'SwingCue', 'WhipBraceCue', 'WhipCue'}, {cue for _, cue in cues})
+        self.assertEqual({'SwingCue', 'WhipBraceCue', 'WhipCue', 'VolleyCue'}, {cue for _, cue in cues})
         self.assertEqual({'reached'}, {start for start, _ in cues})
 
     def test_reward_audio_reuses_no_other_sound_set(self):
