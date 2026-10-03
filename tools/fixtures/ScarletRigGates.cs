@@ -700,6 +700,13 @@ internal sealed class RigGates
             if (o.WriteBaseline) { Directory.CreateDirectory(dir); SaveRaw(px, w, h, file); return new { label, written = true }; }
             if (!File.Exists(file)) { ok = false; return new { label, missing = true }; }
             var basePx = LoadRaw(file, w, h);
+            // Review aid (the Mantle is judged by eye): baseline | now, side by side.
+            if (Dumps is not null)
+            {
+                var pair = new Color[w * 2 * h];
+                for (int y = 0; y < h; y++) { Array.Copy(basePx, y * w, pair, y * w * 2, w); Array.Copy(px, y * w, pair, y * w * 2 + w, w); }
+                Dump($"g8-{label}.png", pair, w * 2, h);
+            }
             int max = 0;
             for (int i = 0; i < px.Length; i++)
                 max = Math.Max(max, Math.Max(Math.Max(Math.Abs(px[i].R - basePx[i].R), Math.Abs(px[i].G - basePx[i].G)), Math.Max(Math.Abs(px[i].B - basePx[i].B), Math.Abs(px[i].A - basePx[i].A))));

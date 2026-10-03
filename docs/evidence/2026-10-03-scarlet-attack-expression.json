@@ -1,0 +1,64 @@
+{
+  "scope": "Scarlet Invocation attack expression: the Act I-III apparitions (Ember Crown, Sable Mantle, Thorn Choir) and Vespera perform each attack from its plan's Born/Fire/End (approved motion, body material inside the painted bodies, Vespera's command of the held orb), the signature moves strike in ScarletInk with a yielding residue, and the review fixes of the merged slices. Client presentation only; forecasts, seals, collision, timings and protocol are unchanged",
+  "target_build": "0.3.79 / protocol79 (feat/scarlet-attack-expression on main 0.3.78; client presentation only, protocol is main's 79)",
+  "integration_base": {
+    "branch": "feat/scarlet-attack-expression, started from feat/scarlet-sfx 63c191c (the tree of main's #111 squash bcb5433) with the signature moves of #103 (5ec7b2b; the moves branch's fairness revision cfc425e and c7111c1 inside it)",
+    "slices": "S0 field changes d8ead49, S1 math and wiring 3c7eeed, harness 5229921 / 0499a91, S2 Crown/Mantle 442c892, S3 Choir eb0b3b6, S4 Vespera 5b1a390, integration 284d15b / 628ecdd / 69a37d8; S5 sound set A came with feat/scarlet-sfx",
+    "main_merge": "e20d582 merges origin/main 99c82cd (0.3.78: #111 squashed, #110 Scarlet rewards); #110 only added ScarletInk's reward Path* passes, so the Raid's ink pins moved to its hashes and the Act I basic ink frames stay byte-identical (G11)",
+    "review_fixes": "add8578 body material, c3d1cd3 membership and past-pose notes, 3410ca3 tests, ff46f0a harness"
+  },
+  "owner_direction": {
+    "design": "the final attack-expression design (owner-approved prototype motions: Crown censer swing and pour jolt, Mantle wind/whip with low/high rows, Choir quarter-to-arm mapping; the 4/4 baton figure was rejected and is not ported)",
+    "taste": "keep the character art (deform/animate only); forecasts unchanged; live strikes are the approved black-blood ScarletInk; seals stay; no silk/thread/fibre language; no beat-driven motion; refined, red/magical, painterly, never a flat fill, restrained rather than loud; decoration never looks like extra danger, never covers forecasts; Reduced Effects keeps timing readability",
+    "sound": "sound set A for every scene (2026-10-02), already merged as 0.3.77"
+  },
+  "review_fixes": {
+    "crown_and_mantle_rims": "only the art's red paint emits (Paint from its redness), so the Crown's black leg thorns and the Mantle's dark cloth no longer get red outlines (Crown legs, frames 126/136: black-to-red pixels 708/1641 -> 0/54; Mantle at Fire 2615 -> 176); the lip is a soft gradient against the mean of four neighbours",
+    "crown_front": "light on the painted cloth (its own folds and embroidery), not a peach wash; fades with Ignite",
+    "darkening": "only Drain darkens, by .25; the warning's Heat no longer darkens the cloth under forecasts",
+    "hearts": "the attack changes a heart only over the painted body (eroded alpha mask of the patch): beat on the attack clock, the Mantle's tightened spiral and a capped swell of its own red instead of a lilac-white spike (Mantle heart box at Fire: near-white 131 -> 773 before, 124 -> 198 after the first fix); the Choir's core is masked by its torso and its outer glow and patch keep the accepted values",
+    "choir_blood": "no knot on the thin heart-to-hand flow; the sent blood stays inside the painted limb below the white-hot threshold (.7 < .75), only the struck fingertips ignite; sent and returning blood scale with Gain so the arm never steps on Fire; Reduced writes the same front and vertices and the shader quiets only the new light (Calm)",
+    "vespera": "the reactor keeps today's recoil impulse: no four-point flare on every Fire (orb crop, frame 134: near-white 1361 -> 459 px)",
+    "mantle_light": "seams .65, bone heat run .4 and blanch .35 (quieter, and the forecast's local contrast over the Mantle holds 0.91)",
+    "membership": "the expression follows roster membership (alive or Down), so death and revival no longer snap a swinging body back to rest; viewers outside the fight see today's picture, the Choir's accepted cues included",
+    "past_poses": "the Crown and Mantle keep notes closed within 21 ticks so the wake replays the motion the body really made; current-tick consumers read only notes that hold the tick (domain-tested)"
+  },
+  "checks": {
+    "shader": "passed: ScarletApparitions.fx and ScarletChoir.fx recompiled with fxc (fx_2_0 /O3) and the manifest regenerated with tools/compile_shaders.py; every other .fxc is byte-identical and the ink, beam, energy, reactor, backdrop, sorcery and ribbon shaders keep their pinned hashes (G11)",
+    "offline_frames": "passed and inspected: tools/preview-scarlet-rigs.ps1 rendered Act I-III signature and basic phrases through cameras A, A2, C and V, Normal and Reduced, material off/on, residue yield off/on, with the production rigs, shaders and Vespera linked unchanged; real-size A2 stills (born+14, Fire, Fire+2, crossflow Fire) and C/V video frames were inspected against the Merge2 render and today's picture; the Mantle's idle frame was compared with today's by eye (G8: 51 pixels differ by more than 8/255)",
+    "offline_contract": {
+      "G0": "not_run in the harness: the motion golden is the domain test ScarletGestureMotionTests (passed)",
+      "G1": "pass: 0 pixels of decoration outside the body range (every lag 0..21, +12 px)",
+      "G2": "pass: 0 decoration outside the body range in safe zones (now including basic phrases' ground); light added over safe ground off the current silhouette p99.5 0-27.0 (limits 16.2-41.0) and on it 23.4-98.9 (limits 159-204); no Choir particle outside the body in FourHands windows",
+      "G3": "pass, pooled and for every pass alone: outside p99.5 26.4 / 22.4 / 14.3 against 36.5 / 25.5 / 24.4 (Act I/II/III), worst pass 31.9 / 22.4 / 14.3; inside worst pass 39.1 / 44.1 / 118.7 against about 160",
+      "G4": "pass: the PostDrawTiles layer is byte-identical with the material on and off",
+      "G5": "pass: the forecast's Weber contrast in 100 px tiles near the bodies on every warning tick keeps >= 0.907 (Act II signature), 0.956-1 elsewhere; Act I signature had no qualifying tile (vacuous). The composited band-against-ring ratio (reported) falls to 0.54 over the Mantle where its own light changes in the ring",
+      "G6": "pass: sounds on Born/Fire, first ink pixel Fire+-1, the body's glow peak in [Fire, Fire+2] for every third note and crossflow, Ignite rises on Fire, Send 1 on Fire, Heat peaks by Fire",
+      "G7": "pass: skinned vertices identical to Normal (max shift 0), decoration energy 0.19-0.40 of Normal, no Fire-born particle",
+      "G8": "pass: with no notes the Crown is within 0/255, the Choir within 1/255, Vespera and the companion identical; the Mantle by eye (above)",
+      "G9": "pass: sequential = jump render; plans +7 ticks shift every attack input by 7",
+      "G10": "measured: camera A (ground) shows 0% of the bodies, A2 (air) 100%",
+      "G11": "pass: pinned hashes; Act I basic ink frames identical",
+      "G12": "pass: draws Crown 18/11, Mantle 9/8, Choir 51/23 (Normal/Reduced); added vertices within the budget",
+      "G13": "pass: signature residues yield by End+6 where the next note is safe and keep the full residue elsewhere",
+      "G14": "pass: overlay contract on every scene",
+      "G8v": "pass: with no note Vespera's boss path draws today's frame on all 4160 checked crops and the companion is byte-identical",
+      "V94_G2v_G7v": "pass",
+      "G6v": "pass: the orb ignites on Fire, its light starts rising on Fire and rises most within the 3-tick release, peaking by Fire+8 (today's recoil bloom peaks about Fire+7)",
+      "baselines": "G8, G11 and G8v compare against baselines with a provenance manifest: re-rendered from 0499a91 (before S2/S3/S4) in a temporary worktree with that commit's own harness (G8v through a reference-only fixture reproducing ScarletConductorGates.Identity's keys, crop and hash) and byte-identical to the ones the slices used (28 frames, 4160 hashes)",
+      "harness_self_checks": "pass: viewport and scissor, shader parameter names and widths against the compiled .fxc, the linked performer file"
+    },
+    "production_path": "the rigs, shaders, ScarletNotes, ScarletBodyMaterial, ScarletChoirBlood and ScarletGestureMotion are the production files; CrimsonRig.DrawEffigy's wiring (notes with lookback, membership, the Choir's cues and heave) is mirrored by RigDriver and pinned by source checks",
+    "static_and_domain": "passed: verify_repo.py --with-domain --write-catalog (585 deterministic domain tests, including the Choir blood values, the lookback, the shift and edge checks over the blood), tools/tests (208, 3 skipped), git diff --check",
+    "native_build": "see the PR: tools/dev.py build --native into the isolated profile",
+    "game_not_started": "no game, server or tModLoader was started for these checks"
+  },
+  "not_run": [
+    "in game (Reload, not Build + Reload) Act I-III signature and basic phrases, Normal and Reduced Effects, ScreenShake off: the bodies' motion and light against the live forecasts and ink at zoom 1 and 2, on the ground and in the air",
+    "a second member's view, a non-member's view (today's picture) and a member who goes Down mid-phrase (the bodies keep moving)",
+    "frame time in Final with overlapping beams and with the full body material",
+    "sound set A against Graceful Ordeal with the new motion",
+    "owner choices: ground-camera visibility of the bodies (camera A shows none of them), the signature residue yield, and the restrained level of the body material (the material's difference at zoom 1 is subtle)"
+  ],
+  "delegation": "Implemented and reviewed by Claude subagents in per-slice worktrees, merged and fixed in the integration worktree; the owner's review is the offline page and the in-game checks above"
+}
