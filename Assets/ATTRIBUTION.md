@@ -21,7 +21,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -17.1 LUFS (played at volume 0.7: -20.2 LUFS effective), true peak -2.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `52bb1e6166664656d2ed8fe7662c1fe74be8588122997d9e232986083bb0b078`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisFire.ogg`
@@ -35,7 +35,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.8: -21.9 LUFS effective), true peak -5.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `5948e130706efdc3c9283c51cebb718f554e239229563a2a06b3c767acf28399`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaIrisTine.ogg`
@@ -49,7 +49,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.9: -20.9 LUFS effective), true peak -14.4 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `c22daeb5d8dd0b912e9904a6f5d4f36c6ede3360426b59cdfe3145bcfc2262ff`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletWarn.ogg`
@@ -63,7 +63,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -20.9 LUFS (played at volume 0.55: -26.1 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `1f40b840738368eca55260f568ee094ddeb06bb8aa0c07244ab4bab4600d70a6`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletFire.ogg`
@@ -77,7 +77,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.7: -23.1 LUFS effective), true peak -10.5 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `d4500431428fd9e9f18e11898a0f56340cb808ab09a8e54388d3955ad6c1a3a2`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaPelletHit.ogg`
@@ -91,7 +91,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -4.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `6b0f021392c23d55c118bb081d7789534688d513a651a523f026356550275d27`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaMergeWarn.ogg`
@@ -105,7 +105,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -1.5 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `239230f8fe8d61d76ffb78c26a2f969203c7cc81301b38006275d24593a341e0`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaMergeFire.ogg`
@@ -119,7 +119,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: trimmed, filtered and layered recordings plus original synthesis; short-term loudness -12.3 LUFS (played at volume 0.85: -13.7 LUFS effective), true peak -1.3 dBFS; pinned Ogg serial
 - License and redistribution terms: CC0 1.0 recordings and project-owned masters; the layered cue follows the existing project asset terms
 - Required attribution: none required by CC0; retain the table above as courtesy credit
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `cafd27aff735bdd0298ccd561496626e67d482262defc9d1587c1131b4166589`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamWarn.ogg`
@@ -133,7 +133,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.85: -14.4 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `b1c972b4ee29d3b190f4dc6e609c8ded5fb6a8c7fc62ab050782bffd60460e9d`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamFire.ogg`
@@ -147,7 +147,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -11.5 LUFS (played at volume 0.9: -12.4 LUFS effective), true peak -4.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `ebff7a9145a06fca40c9a4116144474e3dc18c93b009cb4cb7e48f517cea3c91`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamLoop.wav`
@@ -161,7 +161,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: periodic original synthesis; short-term loudness -14.0 LUFS (played at volume 0.7: -17.1 LUFS effective), true peak -9.9 dBFS; loop wrap step 0.0008 against 0.0471 inside
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `52f058f643642ce4183a41dddf0f5b0eed32fe5f3b0a2032417c85ba2a297c58`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden1.ogg`
@@ -175,7 +175,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.75: -19.4 LUFS effective), true peak -7.3 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `391e8aba1e45d22e50131cb9c358a81b13c95d1687ca6140143f18d218eb5828`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden2.ogg`
@@ -189,7 +189,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -17.0 LUFS (played at volume 0.75: -19.5 LUFS effective), true peak -7.4 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `6f5f07c09c440df4fcfb603b5278365bb7dc2b07aa546d47c7dedbee0656c8ec`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaWiden3.ogg`
@@ -203,7 +203,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.75: -15.5 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `e8019060e7080d0fb3582b96f93ff9a83a2eb58897c7e4528e99a8b6f82fa528`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamHit.ogg`
@@ -217,7 +217,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -20.0 LUFS (played at volume 0.6: -24.4 LUFS effective), true peak -6.1 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `34eaec84cba0afb3adc23b8dd6514b6493d3196536b610706319a9d06af7feb9`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamEnd.ogg`
@@ -231,7 +231,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -15.0 LUFS effective), true peak -3.0 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `9141d5eaa3a9e8ca59e9748ba1df4c9fefca407a9a641591102d90097ef7bdc5`
 
 - Runtime file: `Assets/Sounds/Weapons/DollWeapons/LacunaBeamMiss.ogg`
@@ -245,7 +245,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 - Human modifications: original synthesis; short-term loudness -13.0 LUFS (played at volume 0.8: -14.9 LUFS effective), true peak -4.9 dBFS; pinned Ogg serial
 - License and redistribution terms: original project asset under the existing project terms
 - Required attribution: none; retain this provenance
-- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner audition pending; in-game mix not_run
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
 - SHA256: `27222a3dd45eeb4e32a0b03467a3cbc0f33bd7b56911c4c72c0821c0ab38e30f`
 
 ### Lacuna Testament void material — 2026-10-03

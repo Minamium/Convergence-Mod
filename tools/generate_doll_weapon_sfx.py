@@ -995,7 +995,7 @@ The seventeen cues of the refreshed Lacuna Testament (the magic Doll reward weap
 """
 GROUP_ATTRIBUTION = {
     "Lacuna": ("20261003", "2026-10-03", "Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak and loop-seam "
-               "checks); owner audition pending; in-game mix not_run", LACUNA_ATTRIBUTION),
+               "checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run", LACUNA_ATTRIBUTION),
 }
 
 
