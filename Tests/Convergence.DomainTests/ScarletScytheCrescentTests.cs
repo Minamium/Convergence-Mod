@@ -84,10 +84,10 @@ internal static partial class Program
         Vector2 center = new(500, 300), heading = Vector2.UnitX;
         F.Body(center, heading, F.Over, 1, at, radius);
         AssertNear(0, Vector2.Distance(at[F.ApexSample], F.Apex(center, heading, F.Over)), 1e-4f, "the middle sample is the apex");
-        AssertNear(0, Vector2.Distance(at[0], center + new Vector2(-13, -36)), 1e-4f, "a tip lies h/2 behind the centre, w/2 across");
-        AssertNear(0, Vector2.Distance(at[^1], center + new Vector2(-13, 36)), 1e-4f, "the other tip");
+        AssertNear(0, Vector2.Distance(at[0], center + new Vector2(-16, -36)), 1e-4f, "a tip lies h/2 behind the centre, w/2 across");
+        AssertNear(0, Vector2.Distance(at[^1], center + new Vector2(-16, 36)), 1e-4f, "the other tip");
         AssertNear(16, radius[F.ApexSample], 1e-5f, "R at the apex: the lash arc's radius, so the black core shows");
-        AssertNear(16 * .45f, radius[0], 1e-5f, "R (1 - 0.55) at the tips");
+        AssertNear(16 * .15f, radius[0], 1e-5f, "R (1 - 0.85) at the tips: horns, not round ends");
         F.Body(center, heading, F.FirstVolley, 1, at, radius);
         AssertNear(27, MathF.Abs(at[0].Y - center.Y), 1e-4f, "a volley crescent is 54 px wide");
         AssertNear(14, radius[F.ApexSample], 1e-5f, "and R 14");

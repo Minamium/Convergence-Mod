@@ -82,7 +82,7 @@ internal static class SableCrescentFlight
 
     // ---- Body (draw equals collide) -------------------------------------------------------------------------------
     // An arc of live black blood, convex side forward. In the crescent's frame (f along its heading, n across it) sample
-    // i = 0-6 at s = -1 + i/3 lies at Center + f (h(1 - s^2) - h/2) + n s w/2, with radius R (1 - 0.65 s^2) x open.
+    // i = 0-6 at s = -1 + i/3 lies at Center + f (h(1 - s^2) - h/2) + n s w/2, with radius R (1 - 0.85 s^2) x open.
     internal static int ApexSample => R.CrescentSamples / 2;
     internal static float SampleS(int i) => -1 + i * 2f / (R.CrescentSamples - 1);
     internal static void Body(Vector2 center, Vector2 heading, int kind, float open, Span<Vector2> at, Span<float> radius)

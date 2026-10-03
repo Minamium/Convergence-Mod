@@ -275,10 +275,11 @@ On 2026-10-03, after playing 0.3.78, the owner asked for ordinary Melee instead 
 
 **Crescent body** (draw equals collide).
 
-- The body is an arc of live black blood, convex side forward. In the crescent's frame (f along its heading, n across it), sample i = 0–6 at s = −1 + i/3 lies at Center + f × (h(1 − s²) − h/2) + n × s·w/2, with radius R(1 − 0.55s²) × InkOpen(age). Center sits halfway between the apex and the chord.
-- **Sizes:** an Over or Under crescent has w = 72, h = 26 and R = 16; a volley crescent has w = 54, h = 20 and R = 14.
+- The body is an arc of live black blood, convex side forward. In the crescent's frame (f along its heading, n across it), sample i = 0–6 at s = −1 + i/3 lies at Center + f × (h(1 − s²) − h/2) + n × s·w/2, with radius R(1 − 0.85s²) × InkOpen(age), so the middle carries the black core and the ends taper to horns. Center sits halfway between the apex and the chord.
+- **Sizes:** an Over or Under crescent has w = 72, h = 32 and R = 16; a volley crescent has w = 54, h = 25 and R = 14. The tips are 0.15 R (2.4 and 2.1 px).
   - R 16 is the lash arc's radius: a crescent is a piece of the same river. The material's lips and halo have a fixed anti-aliased width, so at R 9 they covered the whole body and a crescent read as a flat red neon tube (pink-fringed on bright ground). From about R 14 the dark core and its filaments show between the lips once the ignition blaze has sunk, as they do on the lash arc.
   - The depth grows with R so the arc keeps its bite (the inner edge stays concave) instead of thickening into a bean.
+  - Tips at 0.45 R left round ends, and the crescent read as a boomerang. At 0.15 R the ends taper to horns like a sickle moon; the thin horns burn red with no core, while the middle keeps its dark core.
 - **Collision:** the six capsules between consecutive samples, each with its smaller end's radius (the rule of the staff lines). The drawn body is exactly this list plus the material's rim, and the crescent has no other damaging part.
 
 **Crescent flight.** `SableCrescentFlight` is a pure rule file, Terraria-free like `QuillFlight`. Its constants are per game tick; the crescent has one extra update and applies them with dt = ½, as Doll's `RitualArmamentRules.Steer` does.
