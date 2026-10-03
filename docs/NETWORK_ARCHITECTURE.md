@@ -4,7 +4,7 @@ document_type: governance
 status: accepted
 owners:
   - networking
-last_reviewed: 2026-09-27
+last_reviewed: 2026-10-03
 source_of_truth_for:
   - architecture.network_authority
   - architecture.packet_policy
@@ -365,3 +365,7 @@ Protocol78 changes no Scarlet wire layout. Peers derive the shared 128 BPM beat 
 ## Scarlet signature moves protocol79 — 2026-10-02
 
 Protocol79 appends `CinderCurtain=17`, `ShroudRope=18` and `FourHands=19` to `CrimsonTechnique`; no existing ID, packet type or field layout changes, and the gesture descriptor keeps its bytes. Reading validates the new values like any other (owner source, basic notes only so `Pulse < 4`, no target identity, live window at most 20/12/16 ticks) before replacing replica state, and peers on 78 or older reject the unknown technique byte. `CinderCurtain` carries one schedule-time observation of every eligible member in the existing `Target` field as `(mask, 0)`: bit `c` is set when a member stood in column `c`, the mask is an exact integer 1..1023 and is validated strictly (a position there is rejected); every geometric choice (each member's four-column corridor and direction, the rope's two combs of lines, struck quarters) derives from the accepted plan, so no extra synchronization exists. Mixed 78/79 peers must update together. Protocol 78 belongs to the music-grid integration.
+
+## Scarlet phrase timing and crossflow geometry protocol80 — 2026-10-03
+
+Protocol80 changes no packet type, field or byte layout and no technique ID. It changes what peers derive from shared code, so mixed 79/80 peers must not play together: phrase layouts on the eighth-note grid (`CrimsonChoreography.Create`: three ordinary notes, the closing crossflow released on the next phrase's downbeat, an optional pickup crossflow that releases on the phrase's own downbeat, signature steps a dotted quarter apart), bar-head chorus calls (`CrimsonChorusRules.Schedule`) and the seal crossflow's collision capsule (`CrimsonChoreography.Seals`/`Side`: the stream's round ends stop at the seal centres and the pair may reach a field wall). A client collides its own player against `Side`, so a 79 peer would be hit by a stream 140 px longer at each end than an 80 server draws. The gesture descriptor keeps its bounds: a pickup carries `Pulse = 9` and Final's second family `Pulse` 5-8, both inside the existing `Pulse < 10`; a phrase still has at most eight descriptors. The server still issues a phrase one 30-tick look-ahead before its first forecast (a pickup's charge two beats before its bar head), so replication lead and the Cinder Curtain's single column observation keep their timing relative to the first forecast. Aim rotation is server-only (separate crossflow and note ordinals). Protocol 79 belongs to the signature moves; `feat/scarlet-attack-expression` (0.3.79 on protocol79) must take 80 when it integrates.

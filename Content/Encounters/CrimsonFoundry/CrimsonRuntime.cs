@@ -40,6 +40,12 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
     private int age, musicStart = -1, finalStart = -1, ending = -1;
     private int phaseStart, unlockAt = -1, target = -1, nextPhrase, phraseSerial, pendingAdvance = -1;
     private int phraseStart = -1, phraseEnd = -1, targetLife, previousDamage, previousLogAge;
+    // The bar head (relative to musicStart) booked for the next phrase, -1 for the first one that can still be issued in
+    // time, and whether it opens with a pickup crossflow (nothing else releases on its downbeat).
+    private int nextStart = -1;
+    private bool nextPickup = true;
+    // Round robin of aimed notes: crossflows and the other aimed notes rotate through the living roster separately.
+    private int crossflowOrdinal, noteOrdinal;
     private CrimsonRhythmKind phraseKind;
     private byte phase, defeated;
     private CrimsonStage stage;
@@ -115,7 +121,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             {
                 musicStart = age + CrimsonInvocation.MusicLeadTicks;
                 unlockAt = musicStart + CrimsonChoreography.OpeningTicks;
-                nextPhrase = unlockAt - CrimsonRhythm.LookAheadTicks;
+                BookPhrase(unlockAt - musicStart, true);
                 stage = CrimsonStage.Countdown;
                 targetLife = CrimsonInvocation.TargetLife(members.Length);
                 actor.NPC.life = actor.NPC.lifeMax = targetLife;
@@ -179,7 +185,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
                 // and the next act's downbeat land on the shared 128 BPM grid.
                 if (phase < 3 && thresholdLatched)
                     pendingAdvance = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAtOrAfter(age - musicStart));
-                else { nextPhrase = age; Project(true); }
+                else { nextStart = -1; nextPickup = true; nextPhrase = age; Project(true); }
             }
             if (pendingAdvance >= 0 && age >= pendingAdvance && summons[phase] is { } retired)
             { pendingAdvance = -1; AdvancePhase(retired); }
@@ -204,7 +210,9 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         phase++; phaseStart = age;
         unlockAt = musicStart + CrimsonMeter.BarTick(CrimsonMeter.BarAt(age - musicStart) + CrimsonArrangement.TransitionBars(phase));
         phraseStart = phraseEnd = -1; phraseKind = CrimsonRhythmKind.Groove;
-        nextPhrase = unlockAt - CrimsonRhythm.LookAheadTicks;
+        // The new Act's first phrase opens with a pickup: its seals bloom in the transition's last two beats and the
+        // stream (Final: the cluster orb) releases on the downbeat that unlocks combat.
+        BookPhrase(unlockAt - musicStart, true);
         if (phase < 3) SpawnSummon(phase);
         else
         {
@@ -323,13 +331,26 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
     // recovery service's all-Down verdict instead of failing the fight for want of a target.
     private bool HasStandingMember()
         => Array.Exists(members, m => !m.Out && !m.Recovery.Downed && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
+    // Books the next phrase on a bar head and issues it LookAheadTicks before its first forecast (a pickup charges two
+    // beats before the bar head), so the Cinder Curtain still observes the field one look-ahead before its first step.
+    private void BookPhrase(int start, bool pickup)
+    {
+        nextStart = start; nextPickup = pickup;
+        nextPhrase = musicStart + CrimsonChoreography.Create(start, phraseSerial + 1, phase, pickup).FirstWarning - CrimsonRhythm.LookAheadTicks;
+    }
     private void SchedulePhrase()
     {
         if (actor is null || cycle.Full) return;
-        var rhythm = CrimsonChoreography.Create(Math.Max(unlockAt, age + CrimsonRhythm.LookAheadTicks) - musicStart,
-            phraseSerial, phase == 3);
+        int serial = phraseSerial + 1;
+        // The booked bar head, or the first one whose forecasts can still reach every peer in time. A phrase that had to
+        // move takes a pickup, because no closer releases on its new downbeat.
+        var rhythm = CrimsonChoreography.Create(Math.Max(Math.Max(unlockAt, age) - musicStart, nextStart), serial, phase, nextPickup);
+        while (musicStart + rhythm.FirstWarning < age + CrimsonRhythm.LookAheadTicks)
+            rhythm = CrimsonChoreography.Create(rhythm.Start + 1, serial, phase, true);
         phraseStart = musicStart + rhythm.Start; phraseEnd = musicStart + rhythm.End; phraseKind = rhythm.Kind;
-        int serial = ++phraseSerial, count = rhythm.Hits.Count + (phase == 3 ? CrimsonChoreography.BasicNotes : 0), free = 0;
+        phraseSerial = serial;
+        var notes = CrimsonEnsemble.Notes(rhythm, phase);
+        int count = notes.Count, free = 0;
         foreach (Projectile p in Main.projectile) if (!p.active) free++;
         if (free < count) throw new InvalidOperationException("crimson.phrase_capacity");
         var sources = new int[count]; var counts = new int[4]; var steps = new int[4];
@@ -340,9 +361,9 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             int source = phase < 3 ? phase : SelectFinalSource(i + serial);
             if (source < 0) throw new InvalidOperationException("crimson.no_phrase_source");
             sources[i] = source; counts[source]++;
-            var note = rhythm.Hits[i % rhythm.Hits.Count];
+            var (note, second) = notes[i];
             first[source] = Math.Min(first[source], musicStart + note.Fire);
-            var technique = CrimsonEnsemble.Technique(phase, serial, i % rhythm.Hits.Count, i >= rhythm.Hits.Count);
+            var technique = CrimsonEnsemble.Technique(phase, serial, note.Pulse, second);
             last[source] = Math.Max(last[source], musicStart + CrimsonEnsemble.NoteEnd(technique, note));
             minimum[source] = Math.Min(minimum[source], note.End - note.Fire - 1);
         }
@@ -370,15 +391,25 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
         }
         // Validate the entire phrase before allocating any native resources.
         var plans = new CrimsonGesturePlan[count];
+        var eligible = Array.FindAll(members, m => !m.Out && !m.Recovery.Downed && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
+        if (eligible.Length == 0) throw new InvalidOperationException("crimson.no_phrase_target");
+        // One member per aimed note, shared by Final's two families of that note. Crossflows and the other aimed notes
+        // rotate through the living roster separately, so everyone takes both in turn; unaimed notes keep the focus.
+        var aimedBy = new Dictionary<int, CrimsonMember>();
+        foreach (var (hit, second) in notes)
+        {
+            if (aimedBy.ContainsKey(hit.Pulse) || !CrimsonGesturePlan.NeedsTargetIdentity(CrimsonEnsemble.Technique(phase, serial, hit.Pulse, second))) continue;
+            int ordinal = CrimsonChoreography.IsCrossflow(hit.Pulse) ? crossflowOrdinal++ : noteOrdinal++;
+            aimedBy[hit.Pulse] = eligible[CrimsonTrackingBeam.TargetIndex(ordinal, eligible.Length)];
+        }
+        var reference = eligible[Math.Max(0, Array.FindIndex(eligible, m => m.Slot == target))];
         for (int i = 0; i < count; i++)
         {
-            int source = sources[i], note = i % rhythm.Hits.Count; var hit = rhythm.Hits[note];
-            var eligible = Array.FindAll(members, m => !m.Out && !m.Recovery.Downed && Main.player[m.Slot].active && !Main.player[m.Slot].dead);
-            if (eligible.Length == 0) throw new InvalidOperationException("crimson.no_phrase_target");
-            var aimed = eligible[CrimsonTrackingBeam.TargetIndex(serial, note, eligible.Length)];
+            int source = sources[i]; var (hit, second) = notes[i];
+            var aimed = aimedBy.TryGetValue(hit.Pulse, out var chosen) ? chosen : reference;
             var playerCenter = Main.player[aimed.Slot].Center;
             var aim = CrimsonTechniqueGeometry.Clamp(field, new(playerCenter.X, playerCenter.Y), 100);
-            var technique = CrimsonEnsemble.Technique(phase, serial, note, i >= rhythm.Hits.Count);
+            var technique = CrimsonEnsemble.Technique(phase, serial, hit.Pulse, second);
             if (technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands)
                 aim = new(field.CenterX, field.CenterY);
             else if (technique == CrimsonTechnique.CinderCurtain)
@@ -391,7 +422,7 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             }
             bool needsTargetIdentity = CrimsonGesturePlan.NeedsTargetIdentity(technique);
             int end = CrimsonEnsemble.NoteEnd(technique, hit);
-            plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, (byte)i, (byte)source,
+            plans[i] = new(fight.Value, (short)actor.NPC.whoAmI, phaseStart, serial, CrimsonEnsemble.PlanPulse(hit, second), (byte)source,
                 technique, (byte)steps[source]++, (byte)counts[source], hit.Accent,
                 begins[source], musicStart + hit.Warning, musicStart + hit.Fire, musicStart + end,
                 first[source], last[source], from[source], staging[source], aim,
@@ -416,9 +447,11 @@ internal sealed partial class CrimsonRuntime : IEncounterRuntime
             recoveryEnd = Math.Max(recoveryEnd, plan.LastEnd + CrimsonRhythm.LeaseTicks);
         }
         cycle.Admit(phraseEnd, recoveryEnd); phrasesSinceChorus++;
-        nextPhrase = cycle.Full ? cycle.FinishAt : phraseEnd - CrimsonRhythm.LookAheadTicks;
+        // The closer (or a signature move's final step) releases on the next bar head, so the next phrase needs no pickup.
+        if (cycle.Full) nextPhrase = cycle.FinishAt;
+        else BookPhrase(phraseEnd - musicStart, false);
         Project(true);
-        CrimsonPackets.Log($"event=PhysicalPhrase fight={fight.Value} phase={phase} epoch={phaseStart} serial={serial} rhythm={rhythm.Kind} notes={count} start={phraseStart} end={phraseEnd} issued={age} score_start={rhythm.Start} first_fire={plans[0].Fire} warning_ticks={plans[0].Fire - plans[0].Born} last_end={lastEmissionEnd} skills={string.Join(",", Array.ConvertAll(plans, p => p.Technique.ToString()))}");
+        CrimsonPackets.Log($"event=PhysicalPhrase fight={fight.Value} phase={phase} epoch={phaseStart} serial={serial} rhythm={rhythm.Kind} notes={count} start={phraseStart} end={phraseEnd} issued={age} score_start={rhythm.Start} first_warning={musicStart + rhythm.FirstWarning} pickup={rhythm.Hits[0].Pulse == CrimsonChoreography.Pickup} fires={string.Join(",", Array.ConvertAll(plans, p => p.Fire - phraseStart))} last_end={lastEmissionEnd} skills={string.Join(",", Array.ConvertAll(plans, p => p.Technique.ToString()))}");
     }
     private int SelectFinalSource(int start)
     {

@@ -4,8 +4,10 @@ using Convergence.Common.Raids.Arena;
 namespace Convergence.Content.Encounters.CrimsonFoundry;
 
 // One signature move per Act (protocol79): every third phrase (serial % 3 == 0) of Acts I-III
-// replaces the four basic notes with the Act's own physical trick and keeps the seal crossflow
-// as its fifth note. Terraria-free: the server collides these exact capsules, clients draw them.
+// replaces its ordinary notes and closing crossflow with the Act's own physical trick, played as four
+// steps a dotted quarter apart (beats 3.5, 5 and 6.5) whose fourth, the final hit, lands on the next
+// phrase's downbeat where the crossflow would have released (protocol80). Terraria-free: the server
+// collides these exact capsules, clients draw them.
 //
 // Fairness model (the tests simulate it): a forecast is visible for one beat (28 ticks) and the player
 // reacts only to what is shown. BASE mobility is Terraria's run (0.08 px/tick^2 up to 3 px/tick) with
@@ -14,7 +16,7 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 // (like the basic beams) assume ENDGAME horizontal mobility.
 //
 //   Act I   CinderCurtain  a 2,560 px curtain of fire in ten columns; every eligible member gets a
-//                           1,024 px (four column) corridor that walks one column per beat toward the
+//                           1,024 px (four column) corridor that walks one column per step toward the
 //                           open side, away from the nearer wall (columns 0-4 walk right, 5-9 left),
 //                           so the direction is readable from where the member stands. Their column
 //                           keeps one column of margin on the side the walk heads for and is safe
@@ -22,11 +24,12 @@ namespace Convergence.Content.Encounters.CrimsonFoundry;
 //                           travel as a bit mask in Target; the safe columns of a note are the union
 //                           of the corridors, so a crowd leaves less burning. At most six columns burn.
 //   Act II  ShroudRope     a five-line staff crossing the whole field from alternating sides: even
-//                           notes and odd notes are two combs 112 px apart. Grounded players are hit
-//                           on even beats and safe on odd beats; flying higher is never permanently
-//                           safe, because the other comb covers every height the first one spares.
-//   Act III FourHands      the field is four 640 px quarters; two are slammed per beat and two are
-//                           left safe. Consecutive beats always share a safe quarter. A slammed
+//                           steps and odd steps are two combs 112 px apart. Grounded players are safe
+//                           on even steps and hit on odd ones, so the final step on the downbeat makes
+//                           them jump; flying higher is never permanently safe, because the other comb
+//                           covers every height the first one spares.
+//   Act III FourHands      the field is four 640 px quarters; two are slammed per step and two are
+//                           left safe. Consecutive steps always share a safe quarter. A slammed
 //                           quarter is three upright fingers with 93 px gaps.
 internal static class CrimsonSignatureMoves
 {
@@ -54,7 +57,7 @@ internal static class CrimsonSignatureMoves
     // span +/-273 px about the quarter centre, 47 px inside its edges.
     internal const int HandsQuarters = 4, HandsClaws = 3;
     internal const float QuarterWidth = 640, ClawRadius = 60, ClawSpacing = 213;
-    // Strike pairs per note, ordered so that the two safe quarters of one beat and the next always
+    // Strike pairs per note, ordered so that the two safe quarters of one step and the next always
     // share a quarter: safe {1,3} {1,2} {0,2} {0,3}.
     private static readonly byte[][] Pairs = { new byte[] { 0, 2 }, new byte[] { 0, 3 }, new byte[] { 1, 3 }, new byte[] { 1, 2 } };
 
@@ -162,12 +165,13 @@ internal static class CrimsonSignatureMoves
         return new(bestX, f.CenterY);
     }
 
-    // Height above the support surface of line `line` (0..4, bottom to top) of a note: even notes use
-    // the lower comb, odd notes the comb 112 px higher.
+    // Height above the support surface of line `line` (0..4, bottom to top) of a step: odd steps (the
+    // final one on the downbeat among them) use the lower comb that sweeps the floor, even steps the comb
+    // 112 px higher.
     internal static float RopeHeight(int note, int line)
         => RopeBase + line * RopeLineSpacing + (RopeIsLow(note) ? 0 : RopeCombShift);
     internal static float RopeY(RaidFieldGeometry field, int note, int line) => field.Bottom - RopeHeight(note, line);
-    internal static bool RopeIsLow(int note) => (note & 1) == 0;
+    internal static bool RopeIsLow(int note) => (note & 1) == 1;
 
     // The two quarters (0 = leftmost) a note slams. The labels rotate with the signature ordinal so
     // phrases differ; rotation is a bijection, so the two-safe-quarters and shared-safe rules hold.

@@ -32,15 +32,15 @@ internal static class ScarletSorcery
     }
     internal static void CrossflowSeals(SpriteBatch batch, in CrimsonGesturePlan p, float age)
     {
-        var span = CrimsonChoreography.Side(p, age, true);
+        var (right, left) = CrimsonChoreography.Seals(p);
         float charge = Math.Clamp((age-p.Born)/(p.Fire-p.Born),0,1);
         float alpha = CrimsonInvocation.Ease((age-p.Born)/7) * (1-CrimsonInvocation.Ease((age-(p.End-15))/15));
         float radius = 80 + charge*105;
-        Seal(batch,new(span.A.X,span.A.Y),radius,.28f,MathF.PI/2,age,charge,alpha,false,p.Phrase);
-        Seal(batch,new(span.B.X,span.B.Y),radius,.28f,MathF.PI/2,age,charge,alpha,false,p.Phrase+.5f);
+        Seal(batch,new(right.X,right.Y),radius,.28f,MathF.PI/2,age,charge,alpha,false,p.Phrase);
+        Seal(batch,new(left.X,left.Y),radius,.28f,MathF.PI/2,age,charge,alpha,false,p.Phrase+.5f);
         float smoke = CrimsonInvocation.Ease((age-p.Fire-7)/12)*alpha;
         if (smoke>.001f)
-            Draw(batch,new(span.B.X-170,span.B.Y-200),new(240,0),new(0,400),age,
+            Draw(batch,new(left.X-170,left.Y-200),new(240,0),new(0,400),age,
                 new(charge,1,smoke,CrimsonVisuals.Reduced?1:0),new(240,200,p.Phrase,0),"VaporPass");
     }
     internal static void Flame(SpriteBatch batch, Vector2 from, Vector2 to, float width, float age, float alpha)

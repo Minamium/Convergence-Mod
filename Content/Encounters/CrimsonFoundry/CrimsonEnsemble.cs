@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Convergence.Common.Raids.Arena;
 
 namespace Convergence.Content.Encounters.CrimsonFoundry;
@@ -35,10 +36,21 @@ internal static class CrimsonEnsemble
     internal static CrimsonTechnique Technique(int phase, int phrase, int note, bool second)
     {
         if (phase != 3) return CrimsonChoreography.Technique(phase, phrase, note);
-        if (note == CrimsonChoreography.BasicNotes) return CrimsonTechnique.ClusterVolley;
+        if (CrimsonChoreography.IsCrossflow(note)) return CrimsonTechnique.ClusterVolley;
         var pair = Pair(phrase);
         return second ? pair.Second : pair.First;
     }
+    // The notes of a phrase in issue order: every hit, then in Final each ordinary hit again as the second family
+    // (plan Pulse + PairOffset). Pickups and closers stay single.
+    internal static List<(CrimsonRhythmHit Hit, bool Second)> Notes(CrimsonRhythmPhrase rhythm, int phase)
+    {
+        var notes = new List<(CrimsonRhythmHit Hit, bool Second)>(rhythm.Hits.Count * 2);
+        foreach (var hit in rhythm.Hits) notes.Add((hit, false));
+        if (phase == CrimsonPhaseRules.FinalPhase)
+            foreach (var hit in rhythm.Hits) if (hit.Pulse < CrimsonChoreography.BasicNotes) notes.Add((hit, true));
+        return notes;
+    }
+    internal static byte PlanPulse(CrimsonRhythmHit hit, bool second) => (byte)(second ? hit.Pulse + CrimsonChoreography.PairOffset : hit.Pulse);
     internal static int NoteEnd(CrimsonTechnique technique, CrimsonRhythmHit hit) => technique switch
     {
         CrimsonTechnique.ClusterVolley => hit.Fire + CrimsonClusters.FlightTicks,
