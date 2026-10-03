@@ -33,6 +33,9 @@ internal readonly record struct ScarletNote(float Born, float Fire, float End, f
 internal static class ScarletNotes
 {
     internal const int Capacity = 8;
+    // The longest true past pose a body re-creates from its notes: the Mantle's wake (16 ticks) and its lower
+    // tendrils' four-tick lag, rounded up to the body range's 21 ticks.
+    internal const int PastTicks = 21;
     internal const float MaximumSpan = 44, BasicRegister = .6f, CrossflowRegister = 1.25f;
     private const float CloseAim = 48;
 
@@ -146,15 +149,17 @@ internal static class ScarletNotes
         return true;
     }
 
-    // The source's notes whose window holds age, at most Capacity, deduplicated by (Phrase, Pulse, Source) and
-    // ordered by Fire (then Pulse) so a body's response never depends on projectile order.
+    // The source's notes whose window holds age (or closed less than `lookback` ticks ago, for past poses), at most
+    // Capacity, deduplicated by (Phrase, Pulse, Source) and ordered by Fire (then Pulse) so a body's response never
+    // depends on projectile order. Every consumer of the current tick reads only notes that hold it (Holds / Phase),
+    // so a closed note changes nothing now; it only lets a past pose replay the motion the body really made.
     internal static int Collect(ReadOnlySpan<CrimsonGesturePlan> plans, int source, float age, bool flipped,
-        float vesperaX, float vesperaY, Span<ScarletNote> output)
+        float vesperaX, float vesperaY, Span<ScarletNote> output, float lookback = 0)
     {
         int count = 0;
         foreach (var plan in plans)
         {
-            if (plan.Source != source || age < plan.Born || age >= plan.Fire + SpanOf(plan)) continue;
+            if (plan.Source != source || age < plan.Born || age >= plan.Fire + SpanOf(plan) + lookback) continue;
             if (!TryFrom(plan, flipped, vesperaX, vesperaY, out var note)) continue;
             bool duplicate = false;
             for (int i = 0; i < count && !duplicate; i++)
@@ -164,8 +169,18 @@ internal static class ScarletNotes
             while (at > 0 && (output[at - 1].Fire > note.Fire || output[at - 1].Fire == note.Fire && output[at - 1].Pulse > note.Pulse)) at--;
             if (count == output.Length)
             {
-                if (at == count) continue; // the latest note of a full list is dropped, never an earlier one
-                count--;
+                // A closed note (kept only for past poses) gives way to one that holds the tick; otherwise the latest
+                // note of a full list is dropped, never an earlier one.
+                int stale = -1;
+                if (note.Holds(age)) for (int i = 0; i < count && stale < 0; i++) if (!output[i].Holds(age)) stale = i;
+                if (stale >= 0)
+                {
+                    for (int i = stale; i < count - 1; i++) output[i] = output[i + 1];
+                    count--;
+                    if (at > stale) at--;
+                }
+                else if (at == count) continue;
+                else count--;
             }
             for (int i = count; i > at; i--) output[i] = output[i - 1];
             output[at] = note; count++;
@@ -198,16 +213,18 @@ internal static class ScarletNotes
 
     // Choir arm cues. Acts: the arm that owns the struck ground (FourHands: the two slammed quarters; Rakes: the two
     // arms on the edge the claws enter from), each held through the note's whole window [Born, Fire + Span) so the
-    // recovery ends with the residue. Final (`final`) keeps its accepted single-arm cues unchanged.
+    // recovery ends with the residue. Final (`final`, every source) and a viewer outside the fight (`accepted`, the
+    // Choir's own plans) keep the accepted single-arm cues unchanged.
     internal static int ChoirCues(ReadOnlySpan<CrimsonGesturePlan> plans, float age, bool flipped,
-        Span<CrimsonChoirCue> cues, bool final = false)
+        Span<CrimsonChoirCue> cues, bool final = false, bool accepted = false)
     {
         int count = 0;
         foreach (var p in plans)
         {
             bool broad = p.Technique is CrimsonTechnique.SideBeams or CrimsonTechnique.SpatialGrid;
-            if (final)
+            if (final || accepted)
             {
+                if (!final && p.Source != 2) continue;
                 if (age < p.Born || age >= p.End) continue;
                 Add(cues, ref count, new(p.Born, p.Fire, p.End, p.Step % 4, broad));
                 continue;

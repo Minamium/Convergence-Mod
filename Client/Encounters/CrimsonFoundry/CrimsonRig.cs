@@ -59,9 +59,9 @@ internal static partial class CrimsonRig
         { ScarletInvocationScene.Victory(batch, boss.State, age, CrimsonVisuals.EndingElapsed(boss)); return false; }
         ScarletInvocationScene.Draw(batch, boss.State, age, ending);
         float consumed = boss.State.Phase == 3 ? CrimsonEnsemble.ConductorAbsorption(age - boss.State.PhaseStart) : 0;
-        // Vespera commands her Act's body (source = phase) for a local participant; Final absorbs her, so no command.
+        // Vespera commands her Act's body (source = phase) for a member of the fight; Final absorbs her, so no command.
         DrawConductor(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection, frame.Gestures, frame.Choruses,
-            frame.Participant && boss.State.Phase < 3 ? boss.State.Phase : -1, ending, reveal, consumed,
+            frame.Member && boss.State.Phase < 3 ? boss.State.Phase : -1, ending, reveal, consumed,
             boss.State.Phase == 3 ? CrimsonInvocation.Ease((age - boss.State.PhaseStart) / 48) : 0);
         return false;
     }
@@ -115,19 +115,21 @@ internal static partial class CrimsonRig
         }
         float dissolving = effigy.State.Index == boss.State.Phase - 1 ? CrimsonEnsemble.RetreatDissolve(age - boss.State.PhaseStart) : 0;
         bool flipped = effigy.NPC.spriteDirection < 0, reduced = CrimsonVisuals.Reduced;
-        // The body's own notes (a local participant only), aimed from Vespera; empty = today's picture.
+        // The body's own notes for a member of the fight, aimed from Vespera; anyone else sees today's picture (no
+        // notes, the accepted Choir cues, no heave). The Crown and Mantle also keep notes whose window closed within
+        // the last PastTicks, so their true past poses (the Mantle's wake) still hold them.
         Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
-        int noted = frame.Participant ? ScarletNotes.Collect(frame.Gestures, effigy.State.Index, age, flipped,
-            boss.NPC.Center.X, boss.NPC.Center.Y, notes) : 0;
+        int noted = frame.Member ? ScarletNotes.Collect(frame.Gestures, effigy.State.Index, age, flipped,
+            boss.NPC.Center.X, boss.NPC.Center.Y, notes, effigy.State.Index == 2 ? 0 : ScarletNotes.PastTicks) : 0;
         if (effigy.State.Index == 2)
         {
             Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
-            int count = ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues);
+            int count = ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues, accepted: !frame.Member);
             var choir = ScarletBodyMaterial.Choir(age, notes[..noted], reduced);
             CrimsonChoirRig.Draw(batch, at, size * (.90f + appear * .1f), age,
                 signal.Charge, signal.Recoil, appear * alpha, flipped,
                 effigy.NPC.rotation + signal.Recoil * .045f, dissolving, cues: cues[..count],
-                heave: ScarletGestureMotion.Heave, material: choir);
+                heave: frame.Member ? ScarletGestureMotion.Heave : 0, material: choir);
             return false;
         }
         var motion = effigy.State.Index == 0 ? ScarletGestureMotion.Crown(age, notes[..noted]) : ScarletGestureMotion.Mantle(age, notes[..noted]);

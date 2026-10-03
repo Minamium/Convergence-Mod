@@ -54,7 +54,8 @@ internal sealed class RigOptions
     internal bool Labels = true;
     internal bool Context = true;        // the neighbouring phrases (serial -1 / +1) a real fight has on screen
     internal string Flip = "auto";       // auto | on | off (the apparition's spriteDirection < 0)
-    internal string Baseline = "";       // G8 / G11 baseline directory (compared when present, written when empty)
+    internal string Baseline = "";       // G8 / G11 / G8v baseline directory (compared when its manifest allows, see RigBaseline)
+    internal bool WriteBaseline;         // --write-baseline on: (re)write the baselines from the code under the harness now
     internal int Width = 1920, Height = 1080, Limit;
     internal int? From;                  // first frame relative to the phrase's first warning (default -50)
     internal bool Audio = true;
@@ -129,6 +130,7 @@ internal static class ScarletRigPreview
                 case "context": o.Context = value != "off"; break;
                 case "flip": o.Flip = value; break;
                 case "baseline": o.Baseline = value; break;
+                case "write-baseline": o.WriteBaseline = value != "off"; break;
                 case "audio": o.Audio = value != "off"; break;
                 case "limit": o.Limit = int.Parse(value, CultureInfo.InvariantCulture); break;
                 case "from": o.From = int.Parse(value, CultureInfo.InvariantCulture); break;
@@ -290,9 +292,10 @@ internal static class RigMirror
     internal static int ChoirCues(IReadOnlyList<CrimsonGesturePlan> plans, float age, bool flipped, Span<CrimsonChoirCue> cues)
         => ScarletNotes.ChoirCues(Live(plans, age), age, flipped, cues);
 
-    // CrimsonRig.DrawEffigy's notes for a local participant (the filmed player is in the fight), aimed from Vespera.
-    internal static int Notes(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age, bool flipped, Span<ScarletNote> notes)
-        => ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes);
+    // CrimsonRig.DrawEffigy's notes for a member of the fight (the filmed player is in it), aimed from Vespera; the
+    // Crown and Mantle pass lookback = ScarletNotes.PastTicks for their past poses.
+    internal static int Notes(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age, bool flipped, Span<ScarletNote> notes, float lookback = 0)
+        => ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes, lookback);
 
     // CrimsonGestureVisuals.PostUpdateEverything's Cue: a foretell on every Born and an impact on every Fire (the
     // crossflow: charge / release); a curtain note with nothing to burn has no cue. One voice per (phrase, tick, cue).
@@ -353,13 +356,16 @@ internal static class RigDriver
         Vector2 at = s.Stage; // TryPose holds the whole window: consecutive phrases keep the pose (Begin = previous LastEnd + 6)
         bool reduced = CrimsonVisuals.Reduced;
         Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
-        int noted = RigMirror.Notes(s.Plans, index, age, s.Flipped, notes);
+        int noted = RigMirror.Notes(s.Plans, index, age, s.Flipped, notes, index == 2 ? 0 : ScarletNotes.PastTicks);
         RigHost.Tag = index switch { 0 => "crown", 1 => "mantle", _ => "choir" };
         if (index == 2)
         {
             Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
             int count = RigMirror.ChoirCues(s.Plans, age, s.Flipped, cues);
-            var choir = v.Material ? ScarletBodyMaterial.Choir(age, notes[..noted], reduced) : default;
+            // Material off keeps the proposed motion's attack clock (the heart's throb) and drops only the light
+            // (Active); today's picture (current motion) has neither.
+            var choir = v.Material || v.Proposed ? ScarletBodyMaterial.Choir(age, notes[..noted], reduced) : default;
+            if (!v.Material) choir = choir with { Active = false };
             CrimsonChoirRig.Draw(batch, at, size, age, signal.Charge, signal.Recoil, 1, s.Flipped,
                 0 + signal.Recoil * .045f, 0, cues: cues[..count],
                 heave: v.Proposed ? ScarletGestureMotion.Heave : 0, material: choir);

@@ -21,18 +21,19 @@ internal static class ScarletCueFrame
 
     internal readonly ref struct View
     {
-        internal View(ReadOnlySpan<CrimsonGesturePlan> gestures, ReadOnlySpan<CrimsonChorusPlan> choruses, bool participant)
-        { Gestures = gestures; Choruses = choruses; Participant = participant; }
+        internal View(ReadOnlySpan<CrimsonGesturePlan> gestures, ReadOnlySpan<CrimsonChorusPlan> choruses, bool member)
+        { Gestures = gestures; Choruses = choruses; Member = member; }
         internal ReadOnlySpan<CrimsonGesturePlan> Gestures { get; }
         internal ReadOnlySpan<CrimsonChorusPlan> Choruses { get; }
-        // Only a local participant's view drives the new attack expression; the existing signal is unconditional.
-        internal bool Participant { get; }
+        // Only a member of this fight (alive or Down: ScarletArticulation.Member) sees the new attack expression;
+        // anyone else sees today's picture. The existing signal is unconditional.
+        internal bool Member { get; }
     }
 
     internal static View Of(CrimsonBoss owner)
     {
         if (!filled || fight != owner.State.Fight || boss != owner.NPC.whoAmI || tick != Main.GameUpdateCount) Fill(owner);
-        return new(gestures.AsSpan(0, gestureCount), choruses.AsSpan(0, chorusCount), ScarletArticulation.Participant(owner));
+        return new(gestures.AsSpan(0, gestureCount), choruses.AsSpan(0, chorusCount), ScarletArticulation.Member(owner));
     }
 
     internal static void Reset()

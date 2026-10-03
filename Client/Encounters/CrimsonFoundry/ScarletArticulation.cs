@@ -108,8 +108,11 @@ internal sealed class ScarletArticulation : ModSystem
     private static readonly PiecewiseCurve recoil = new PiecewiseCurve()
         .Add(EasingCurves.Exp, EasingType.Out, 1, .12f).Add(EasingCurves.Sine, EasingType.InOut, -.10f, .55f)
         .Add(EasingCurves.Sine, EasingType.Out, 0, 1);
-    internal static bool Participant(CrimsonBoss? boss) => !Main.dedServ && !Main.gameMenu && boss is not null
-        && boss.Fresh && boss.State.Contains(Main.myPlayer) && !Main.LocalPlayer.dead && !Main.LocalPlayer.ghost;
+    internal static bool Participant(CrimsonBoss? boss) => Member(boss) && !Main.LocalPlayer.dead && !Main.LocalPlayer.ghost;
+    // The local player is in this fight's roster, alive or not: the bodies' attack expression follows membership, so a
+    // member's death or revival never snaps a swinging body back to rest (shakes and sounds keep Participant).
+    internal static bool Member(CrimsonBoss? boss) => !Main.dedServ && !Main.gameMenu && boss is not null
+        && boss.Fresh && boss.State.Contains(Main.myPlayer);
     public override void PostUpdateEverything()
     {
         var boss = CrimsonPackets.Boss;
