@@ -180,7 +180,7 @@ internal static partial class Program
             }
         }
         // Against a wall the pair slides until a stream end sits on the wall, so a body pressed into it is still in the
-        // stream; the drawn seal stays whole just inside the wall, over the stream's round end.
+        // stream; the drawn seal stays whole just inside the wall, over the stream's cut end.
         foreach(bool atLeft in new[]{true,false}) {
             var plan=p with {Target=new(atLeft?f.Left+100:f.Right-100,f.CenterY)};
             var (right,left)=CrimsonChoreography.Reach(plan);
@@ -199,6 +199,85 @@ internal static partial class Program
             for(float dy=0;dy<=200;dy+=.5f) if(ScarletHits(strokes[..count],middle,right.Y-21+dy)) open=dy;
             AssertEqual(true,open>=160,$"in the open the stream is 280 px tall plus the body ({open})");
         }
+    }
+    // The crossflow's picture (ScarletInkStroke.Draw, SideBeams): the band over the capsule's whole span, half-width the capsule's
+    // radius, cut square on the two ends and on the growing front. hi/lo/half below are that class's own formulas
+    // (tools/tests/test_scarlet_contracts.py pins them in the source); the capsule (CrimsonTechniqueGeometry.Write) is the collision.
+    [DomainTest("Scarlet crossflow picture covers its collision, stops on the stream ends under the seals' rings and inside the forecast band")]
+    private static void ScarletCrossflowCutCoversCollision()
+    {
+        var f=Convergence.Common.Raids.Arena.RaidFieldGeometry.FromGround(8000,6000);
+        var p=TechniqueExample(CrimsonTechnique.SideBeams) with {End=656,LastEnd=656};
+        Span<CrimsonStroke> strokes=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        float ring=(80+105)*.28f; // a seal's half-width across its flattened ellipse at full charge (ScarletSorcery.CrossflowSeals)
+        int samples=0, corners=0;
+        foreach(float x in new[]{f.Left+100,f.Left+300,f.CenterX,f.Right-250,f.Right-100}) foreach(float y in new[]{f.Top+100,f.CenterY,f.Bottom-100}) {
+            var plan=p with {Target=new(x,y)};
+            var (right,left)=CrimsonChoreography.Reach(plan);
+            var (sealRight,sealLeft)=CrimsonChoreography.Seals(plan);
+            var forecast=CrimsonChoreography.Side(plan,plan.Fire,true);
+            float previousFront=right.X;
+            for(float t=plan.Fire;t<plan.End;t+=.5f) {
+                int count=CrimsonTechniqueGeometry.Write(plan,t,strokes);
+                if(count==0) continue; // before the first sliver opens
+                AssertEqual(1,count,"the crossflow is one stroke");
+                var s=strokes[0];
+                float hi=MathF.Max(s.A.X,s.B.X)+s.Radius, lo=MathF.Min(s.A.X,s.B.X)-s.Radius, half=s.Radius, centre=s.A.Y;
+                string at=$"target=({x},{y}) t={t-plan.Fire}";
+                // The picture lies inside the forecast band: it never runs past a stream end, its front only advances leftward,
+                // and it stays inside the field (a stream end on a wall is cut by the field mask there).
+                AssertEqual(true,MathF.Abs(hi-right.X)<=.01f,$"the right cut stays on the right stream end {at}");
+                AssertEqual(true,lo>=left.X-.01f&&lo<=previousFront+.01f,$"the front advances leftward and stops on the left end {at}");
+                previousFront=lo;
+                AssertEqual(true,half<=forecast.Radius+.01f&&centre==forecast.A.Y&&centre==right.Y,$"no taller than the forecast band, on its line {at}");
+                AssertEqual(true,hi<=f.Right+.01f&&lo>=f.Left-.01f,$"inside the field {at}");
+                // Each cut sinks into its seal: on the outer half of the seal's ring (a seal held inside a wall puts the cut
+                // SealInset beyond its centre, on the wall), never past the ring's rim.
+                float rightOver=hi-sealRight.X;
+                AssertEqual(true,rightOver>=-.01f&&rightOver<=CrimsonChoreography.SealInset+.01f&&hi<=sealRight.X+ring+.25f,$"the right cut sits on its seal {at} ({rightOver})");
+                if(lo<=left.X+.01f) {
+                    float leftOver=sealLeft.X-lo;
+                    AssertEqual(true,leftOver>=-.01f&&leftOver<=CrimsonChoreography.SealInset+.01f&&lo>=sealLeft.X-ring-.25f,$"the left cut sits on its seal {at} ({leftOver})");
+                }
+                // The capsule (what hurts) lies inside the picture: no probe the capsule hits falls outside the band.
+                for(float px=lo-4;px<=hi+4;px+=9) for(float py=centre-half-4;py<=centre+half+4;py+=9) {
+                    samples++;
+                    if(!CrimsonTechniqueGeometry.Intersects(s,px,py,1,1)) continue;
+                    AssertEqual(true,px>=lo-1&&px<=hi+1&&MathF.Abs(py-centre)<=half+1,$"the capsule never leaves the picture {at}");
+                }
+                // The four corners the capsule's round ends cut off are inked but harmless.
+                if(half>=14) {
+                    corners++;
+                    foreach(float cx in new[]{hi-3,lo+2}) foreach(float cy in new[]{centre-half+2,centre+half-3})
+                        AssertEqual(false,CrimsonTechniqueGeometry.Intersects(s,cx,cy,1,1),$"a corner of the picture does not hurt {at}");
+                }
+                // Full width: the picture is the forecast band exactly.
+                if(t>=plan.Fire+10&&t<plan.End-15) {
+                    AssertEqual(true,MathF.Abs(half-forecast.Radius)<=.01f&&MathF.Abs(lo-left.X)<=.01f,$"the full stream is the forecast band {at}");
+                    if(left.X==f.Left) AssertEqual(true,MathF.Abs(lo-f.Left)<=.01f,$"a stream end on the left wall is cut on the wall {at}");
+                    if(right.X==f.Right) AssertEqual(true,MathF.Abs(hi-f.Right)<=.01f,$"a stream end on the right wall is cut on the wall {at}");
+                }
+            }
+            // The seal held inside a wall keeps its whole ring in the field while the band reaches the wall under it.
+            AssertEqual(true,sealLeft.X-ring>=f.Left-.25f&&sealRight.X+ring<=f.Right+.25f,"each seal's ring is whole inside the field");
+        }
+        AssertEqual(true,samples>100000&&corners>500,$"the sweep covered the stream ({samples} probes, {corners} corner checks)");
+        // The picture's growth and closing: the numbers read off the frames (the front and half-width Side gives per tick).
+        var centreOpen=p with {Target=new(f.CenterX,f.CenterY)};
+        foreach(var (tick,length,half) in new[]{(1,52f,3.9f),(2,186f,14.6f),(3,370f,30.2f),(5,754f,70f),(7,940f,109.8f),(10,940f,140f)}) {
+            int count=CrimsonTechniqueGeometry.Write(centreOpen,centreOpen.Fire+tick,strokes);
+            AssertEqual(1,count,$"stroke at F+{tick}");
+            var s=strokes[0];
+            float span=MathF.Max(s.A.X,s.B.X)+s.Radius-(MathF.Min(s.A.X,s.B.X)-s.Radius);
+            AssertEqual(true,MathF.Abs(span-length)<=.6f&&MathF.Abs(s.Radius-half)<=.15f,$"F+{tick}: {span} px long, half-width {s.Radius}");
+        }
+        float lastHalf=140;
+        for(int tick=centreOpen.End-15;tick<centreOpen.End;tick++) {
+            CrimsonTechniqueGeometry.Write(centreOpen,tick,strokes);
+            AssertEqual(true,strokes[0].Radius<=lastHalf+.001f,"the closing only narrows");
+            lastHalf=strokes[0].Radius;
+        }
+        AssertEqual(true,MathF.Abs(lastHalf-1.78f)<=.05f,$"the scar is drawn from the last live tick's {lastHalf} px half-width");
     }
     [DomainTest("Scarlet successive full-field lattices shift predictably and leave complete player corridors")]
     private static void ScarletShiftedLattice()

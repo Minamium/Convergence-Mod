@@ -438,6 +438,32 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('return new(new(right.X - radius, right.Y), new(front + radius, right.Y), radius);',side)
         self.assertIn('if (forecast) return new(right, left, SideHalfWidth);',side)
 
+    def test_crossflow_seals_lie_over_the_cut_ends_everywhere_the_stream_is_drawn_and_the_picture_covers_the_collision(self):
+        # Owner 2026-10-04 (flat cut, this material) and the review of the cut: the seals charge under the forecast and, from Fire,
+        # lie over the stream, so each flat cut sinks into its seal's ring and a wall seal is not half-covered by the black band.
+        # The game, the field preview and the rig harness draw them in the same order.
+        preview=read_text(ROOT/'tools/fixtures/ScarletPreview.cs')
+        proposal=preview[preview.index('if (options.Look == "proposal")'):preview.index('if (options.Look.Contains("overlay")) overlay.Draw')]
+        self.assertIn('if (clock < plan.Fire) DrawSeals(view, plan); else sealsOver.Add(plan);',proposal)
+        self.assertLess(proposal.index('if (ScarletInkStroke.Owns(plan, clock) && !ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);'),proposal.index('foreach (var plan in sealsOver) DrawSeals(view, plan);'))
+        self.assertNotIn('--seals',read_text(ROOT/'tools/preview-scarlet.ps1'))
+        # The comments that describe the order say the same (the stream runs on under a held seal to the wall).
+        choreography=read_text(CONTENT/'CrimsonChoreography.cs')
+        self.assertIn('reaches the wall, under the seal (the seals are drawn over a live stream).',choreography)
+        self.assertNotIn('reaches the wall, over the seal',choreography)
+        # The collision itself is untouched: protocol80, the same capsule, the same constants.
+        self.assertIn('internal const float SealInset = 52;',choreography)
+        self.assertIn('SideHalfWidth',choreography)
+        # The picture covers what hurts, in the domain suite (every tick, open and on both walls) and on rendered pixels (G11).
+        domain=read_text(ROOT/'Tests/Convergence.DomainTests/ScarletChoreographyTests.cs')
+        self.assertIn("Scarlet crossflow picture covers its collision, stops on the stream ends under the seals' rings and inside the forecast band",domain)
+        for token in ('the capsule never leaves the picture','a corner of the picture does not hurt','the full stream is the forecast band','the right cut sits on its seal'):
+            self.assertIn(token,domain)
+        gates=read_text(ROOT/'tools/fixtures/ScarletRigGates.cs')
+        g11=gates[gates.index('private List<object> Crossflow('):gates.index('// ---- G12')]
+        for token in ('collisionPixelsWithoutInk','bare == 0','CrimsonTechniqueGeometry.Write(p, live ? tick : p.End - 1, strokes, false)'):
+            self.assertIn(token,g11)
+
     def test_peer_bodies_answer_a_note_only_once_its_aim_is_known(self):
         # A peer holds an aimed plan's issue-time Target until the lock sample (tick >= Born) arrives; a note built from it turns the
         # Crown and aims Vespera's orb at a stale point, then jumps. Bodies and the orb answer ScarletCueFrame's Known list (the

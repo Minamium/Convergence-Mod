@@ -908,7 +908,8 @@ internal sealed class RigGates
             + "the signature moves) must be pixel for pixel identical, so the signature moves' changes to the class cannot reach a basic strike. "
             + "The seal crossflow (the pickup's and the closing one, in the open and with a stream end on each wall) is drawn as a band cut square on its two "
             + "ends and on its growing front, not as main's capsule with round ends: no ink beyond the capsule's span along the stream or beyond its radius + the quad's margin across it, "
-            + "and a live column 2.5 px inside either cut as full as the middle of the stream (a round end would be a sliver). sha256 is recorded per frame, not gated.");
+            + "and a live column 2.5 px inside either cut as full as the middle of the stream (a round end would be a sliver); and every pixel more than 1 px inside the collision "
+            + "capsule (CrimsonTechniqueGeometry.Write at that tick) carries ink, so the picture covers what hurts. sha256 is recorded per frame, not gated.");
     }
 
     // The seal crossflow's ink at real size (zoom 1, centred on the stream), 1:1 over transparent black.
@@ -931,7 +932,7 @@ internal sealed class RigGates
                 {
                     var (right, left) = CrimsonChoreography.Reach(p);
                     var centre = new Vector2((right.X + left.X) * .5f, right.Y);
-                    foreach (int rel in new[] { 3, 7, 12, 30, 50, p.End - p.Fire + 5 })
+                    foreach (int rel in new[] { 1, 2, 3, 7, 12, 30, 44, 48, 50, 53, p.End - p.Fire + 5 })
                     {
                         int tick = p.Fire + rel;
                         bool live = tick < p.End;
@@ -942,11 +943,25 @@ internal sealed class RigGates
                         float hi = MathF.Max(stroke.A.X, stroke.B.X) + stroke.Radius, lo = MathF.Min(stroke.A.X, stroke.B.X) - stroke.Radius;
                         float y = stroke.A.Y, reach = stroke.Radius + ScarletInkStroke.Margin + 2;
                         var pixels = InkOnly(s, view, p, r.Frame(width, height));
-                        int lit = 0, outsideAlong = 0, outsideAcross = 0;
+                        int lit = 0, outsideAlong = 0, outsideAcross = 0, hurts = 0, bare = 0;
+                        float bareDepth = 0;
                         var column = new Dictionary<int, int>();
                         for (int py = 0; py < height; py++)
                             for (int px = 0; px < width; px++)
                             {
+                                // The picture covers the collision: a pixel centre more than 1 px inside the capsule (what hurts, the
+                                // authority's own Write at this tick) must carry ink. bareDepth is how deep inside the worst bare pixel is.
+                                if (live)
+                                {
+                                    float cx = view.ScreenPosition.X + px + .5f, cy = view.ScreenPosition.Y + py + .5f;
+                                    float vx = stroke.B.X - stroke.A.X, along = vx == 0 ? 0 : Math.Clamp((cx - stroke.A.X) / vx, 0, 1);
+                                    float dist = MathF.Sqrt((cx - (stroke.A.X + vx * along)) * (cx - (stroke.A.X + vx * along)) + (cy - stroke.A.Y) * (cy - stroke.A.Y));
+                                    if (dist <= stroke.Radius - 1)
+                                    {
+                                        hurts++;
+                                        if (!Lit(pixels[py * width + px], 3)) { bare++; bareDepth = MathF.Max(bareDepth, stroke.Radius - dist); }
+                                    }
+                                }
                                 if (!Lit(pixels[py * width + px], 3)) continue;
                                 lit++;
                                 float wx = view.ScreenPosition.X + px + .5f, wy = view.ScreenPosition.Y + py + .5f;
@@ -958,13 +973,14 @@ internal sealed class RigGates
                         // Square ends: the columns 2.5 px inside the cuts are as full as the middle of the stream (live only: a scar is uneven).
                         float middle = Math.Max(1, Column((hi + lo) * .5f));
                         float atRight = Column(hi - 2.5f) / middle, atLeft = hi - lo > 12 ? Column(lo + 2.5f) / middle : 1;
-                        bool square = !live || atRight >= .85f && atLeft >= .85f;
-                        bool good = lit > 0 && outsideAlong == 0 && outsideAcross == 0 && square;
+                        // (A sliver under 10 px of half-width, the first tick of the opening, has too few lit pixels per column for the ratio.)
+                        bool square = !live || stroke.Radius < 10 || atRight >= .85f && atLeft >= .85f;
+                        bool good = lit > 0 && outsideAlong == 0 && outsideAcross == 0 && square && bare == 0;
                         ok &= good;
                         using var sha = SHA256.Create();
                         var bytes = new byte[pixels.Length * 4];
                         for (int i = 0; i < pixels.Length; i++) { bytes[i * 4] = pixels[i].R; bytes[i * 4 + 1] = pixels[i].G; bytes[i * 4 + 2] = pixels[i].B; bytes[i * 4 + 3] = pixels[i].A; }
-                        rows.Add(new { scene = name, where, pulse = p.Pulse, rel, live, span = new[] { lo, hi }, radius = stroke.Radius, lit, outsideAlong, outsideAcross,
+                        rows.Add(new { scene = name, where, pulse = p.Pulse, rel, live, span = new[] { lo, hi }, radius = stroke.Radius, lit, outsideAlong, outsideAcross, collisionPixels = hurts, collisionPixelsWithoutInk = bare, bareDepth,
                             columnAtRightCut = atRight, columnAtLeftCut = atLeft, ok = good, sha256 = Convert.ToHexString(sha.ComputeHash(bytes))[..16].ToLowerInvariant() });
                     }
                 }
