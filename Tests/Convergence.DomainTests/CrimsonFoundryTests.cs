@@ -165,6 +165,17 @@ internal static partial class Program
         AssertEqual(1750000, CrimsonInvocation.TargetLife(3), "three-player target budget");
         AssertEqual(0f, CrimsonInvocation.MusicGain(0), "music begins silent");
         AssertEqual(.39f, CrimsonInvocation.MusicGain(150), "fade reaches same calibrated ceiling");
+        // tML's music curve (ReMapVolumeToMatchXact: 31 v - 36.94 dB), normalised at a full slider.
+        AssertEqual(1f, CrimsonInvocation.MusicSlider(1), "a full music slider keeps the calibrated level");
+        AssertEqual(1f, CrimsonInvocation.MusicSlider(1.5f), "the slider never boosts past full");
+        AssertEqual(0f, CrimsonInvocation.MusicSlider(0), "a muted music slider silences the score");
+        AssertEqual(0f, CrimsonInvocation.MusicSlider(-.1f), "a negative slider stays silent");
+        foreach (float v in new[] { .05f, .25f, .5f, .68503934f, .9f })
+        {
+            double xact = 31.0 * v - 25.0 - 11.94, full = 31.0 - 25.0 - 11.94;
+            AssertEqual(true, Math.Abs(20 * Math.Log10(CrimsonInvocation.MusicSlider(v)) - (xact - full)) < 1e-3, $"slider {v} follows tML's music curve");
+        }
+        AssertEqual(true, Math.Abs(20 * Math.Log10(CrimsonInvocation.MusicSlider(.68503934f)) + 9.764) < .01, "the owner's 0.685 sits 9.76 dB under full");
         AssertEqual(1f, CrimsonInvocation.OpeningBars(CrimsonStage.Countdown, 299, 300, 480), "lead has no HUD gap");
         AssertEqual(1f, CrimsonInvocation.OpeningBars(CrimsonStage.Countdown, 300, 300, 480), "music boundary continuous");
     }

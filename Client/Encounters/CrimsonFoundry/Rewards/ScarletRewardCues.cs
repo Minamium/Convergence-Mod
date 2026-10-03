@@ -4,24 +4,26 @@ using Convergence.Content.Encounters.CrimsonFoundry.Rewards;
 
 namespace Convergence.Client.Encounters.CrimsonFoundry.Rewards;
 
-// Who hears a cue (REWARDS.md#multiplayer-readability).
+// Who hears a cue (REWARDS.md#multiplayer-readability). A cue that reaches other players plays for them
+// CrimsonRewardRules.RemoteCueDecibels under its owner's level.
 internal enum ScarletCueAudience : byte
 {
     Owner,    // build tolls: the owner only
-    Shot,     // per-swing and per-shot cues: the owner at full level, other players RemoteShotDecibels lower with one voice
+    Shot,     // per-swing and per-shot cues: positional for everyone, other players sharing one voice of the file
     Everyone, // windups, releases, finales, the quill's playback tolls and the reliquary: positional for everyone
 }
 
-// How loud a cue plays against the Raid's own sound set (REWARDS.md#art-and-audio, "Levels against the Raid"). Every cue
-// of one role plays at that role's offset, so the balance the owner auditioned inside a role is kept.
+// How loud a cue plays against the Raid's own sound set (REWARDS.md#levels-against-the-raid; medians of BS.1770 maximum
+// momentary loudness, as played). Every cue of one role plays at that role's offset, so the balance the owner auditioned
+// inside a role is kept. The four roles that sound in play share one offset, so their auditioned balance is kept too.
 internal enum ScarletCueRole : byte
 {
-    Build,   // the build tolls: under every one-shot
-    Shot,    // one-shot weapon cues (swings, shots, sticks, strokes, the censer's summon and swing): at least 3 dB under ScarletImpact
-    Windup,  // windups and braces: no louder than ScarletForetell + 2 dB
-    Release, // the parts of a release cascade: under ScarletImpact
-    Finale,  // the finales and the shared Cadence: no louder than ScarletCrossflowRelease
-    Show,    // the reliquary's opening show: no louder than ScarletVictory
+    Build,   // the build tolls: in play, under every one-shot
+    Shot,    // one-shot weapon cues (swings, shots, sticks, strokes, the censer's summon and swing): in play, about 6 dB under ScarletImpact
+    Windup,  // windups and braces: in play, about 2 dB under ScarletForetell
+    Release, // the parts of a release cascade: in play, about 6 dB under ScarletImpact
+    Finale,  // the finales and the shared Cadence: about 1 dB under ScarletCrossflowRelease
+    Show,    // the reliquary's opening show: about 2 dB under ScarletVictory
 }
 
 // One shipped cue (REWARDS.md#art-and-audio): its files in Assets/Sounds/Weapons/ScarletRewards/, the take the owner
@@ -48,15 +50,18 @@ internal static class ScarletRewardCues
 {
     internal const string Root = "Convergence/Assets/Sounds/Weapons/ScarletRewards/";
 
-    // The files are the owner's picks byte for byte and are never re-rendered for level. They play at Gain times their
-    // role's offset (RoleDecibels), staged against the Raid's own sound set as the Raid plays it (ScarletSounds, gain 1),
-    // by maximum 400 ms momentary loudness on the recipe's meter and on BS.1770 (REWARDS.md#art-and-audio has both
-    // tables; a tool test holds the relations on both): every cue that sounds in play (tolls, one-shots, windups,
-    // cascade parts) plays 8.5 dB under its file, so their auditioned balance is kept, and the finales, the Cadence and
-    // the reliquary's show 3 dB under theirs.
+    // The files are the owner's picks. Each role plays at Gain times its offset (RoleDecibels), staged against Graceful
+    // Ordeal and the Raid's own sound set (ScarletSounds, gain 1) by BS.1770 maximum 400 ms momentary loudness
+    // (REWARDS.md#levels-against-the-raid; a tool test holds the relations and renders a four-player fight). The cues
+    // that sound in play (tolls, one-shots, windups, cascade parts) share InPlayDecibels: 5 dB over 0.3.78, and no louder,
+    // because their streams from four players would otherwise bury the Raid's chorus calls and crossflow charge. The
+    // finales and the Cadence play a little under their files; the reliquary's show had to rise above its file and was
+    // re-rendered from its picked take with that lift baked in (2026-10-03), so it plays at 0 dB. Every other file is the
+    // auditioned file byte for byte.
     internal const float Gain = 1f;
-    internal const float BuildDecibels = -8.5f, ShotDecibels = -8.5f, WindupDecibels = -8.5f, ReleaseDecibels = -8.5f;
-    internal const float FinaleDecibels = -3f, ShowDecibels = -3f;
+    internal const float InPlayDecibels = -3.5f;
+    internal const float BuildDecibels = InPlayDecibels, ShotDecibels = InPlayDecibels, WindupDecibels = InPlayDecibels, ReleaseDecibels = InPlayDecibels;
+    internal const float FinaleDecibels = -.45f, ShowDecibels = 0f;
     internal const float ScoreThrowDecibels = -2;   // the rolled score leaves the hand a little softer than a quill
     internal const float PartialScoreDecibels = -2; // a score burst without the Full Melody: the smaller burst
 

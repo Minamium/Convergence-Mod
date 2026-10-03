@@ -160,7 +160,7 @@ All reward ink uses the owner-approved black-blood river of `ScarletInk.fx`: a d
 - **Opacity:** the local player's builds and releases draw at full opacity. Other players' dormant builds draw at 0.5 and their live releases at 0.85.
 - **Shape:** friendly black blood is short, curved or local. It never spans the field and never follows a forecast band, and its writing heads are ember-gold.
 - **Shake** comes only from the local player's own weapon.
-- **Sound:** build tolls play only for their owner. Per-swing and per-shot cues play for the owner at their role's level (see [Art and audio](#art-and-audio)) and for other players 8 dB lower with one voice. Windups and releases are positional for everyone. Another player's cue never cuts one of the local player's.
+- **Sound:** build tolls play only for their owner. Every other cue plays for its owner at its role's level (see [Levels against the Raid](#levels-against-the-raid)) and for other players 8 dB lower, positional: per-swing and per-shot cues with one voice, windups, releases and finales with one owner's voices. Another player's cue never cuts one of the local player's.
 
 ### Audio
 
@@ -746,44 +746,48 @@ As the brief requires, the images contain no light, flame, black blood, strokes,
 - The recipe (outside the repository, like the Raid's recorded audio) reads already-attributed CC0 recordings from the local source store and the VSCO 2 CE and VCSL libraries, refuses any whose SHA-256 differs from its lock, and never commits raw recordings.
 - Tolls are a slit-drum knock over tubular bell and hand chime, resampled to pitch. Organ cues use the VSCO 2 CE organ and its blower recording.
 - No local recording of fire, pouring liquid, wax, bone or paper exists, so those layers are stand-ins from the attributed set (wind and the organ blower for flame, bubbles for liquid, wood chops and stone grains for bone and wax, book pages for paper). Any new recording needs the same CC0 survey record and owner approval of that exact recording on the audition page before use, and Attribution records it.
-- Rendering is deterministic, with pinned Ogg serials; a fresh render reproduces the shipped files byte for byte.
-- The files keep the levels they were rendered and auditioned at: the recipe set each file's maximum 400 ms momentary loudness against the Raid's loudest strike of the time (−7.6 LUFS on the recipe's meter, the 2026-09-18 `CrownRupture` strike, since retired): finales −9.6, the cadence −11, the show −13, windups −15, cascade parts about −15.5, per-shot cues −17 and tolls −19; true peak is at most −1 dBTP after the Vorbis round trip. The recipe's meter (`kit.loudness_stats`) runs its K-weighting biquads across the two channels instead of along time, so in effect it weights no frequency; [Levels against the Raid](#levels-against-the-raid) gives it and BS.1770 side by side.
+- Rendering is deterministic, with pinned Ogg serials; a fresh render reproduces the picked takes byte for byte, and the 2026-10-03 level lift reproduces the lifted show file from its take byte for byte.
+- The recipe rendered the takes the owner auditioned at levels set against the Raid's loudest strike of the time (−7.6 LUFS on the recipe's meter, the 2026-09-18 `CrownRupture` strike, since retired): finales −9.6, the cadence −11, the show −13, windups −15, cascade parts about −15.5, per-shot cues −17 and tolls −19; true peak is at most −1 dBTP after the Vorbis round trip. The recipe's meter (`kit.loudness_stats`) runs its K-weighting biquads across the two channels instead of along time, so in effect it weights no frequency; those numbers are kept only as that legacy record, and every level since is BS.1770 ([Levels against the Raid](#levels-against-the-raid)).
 
-**Selections (2026-10-03).** The owner auditioned an A and a B take of each of 28 cue blocks on the local page and chose B for `Cadence`, `ReliquaryOpen`, `ScytheWhip`, `StaffWindup`, `StaffBarline` and `RiverRelease`, and A for every other block (the whole toll ladder is one block, and `OrganShot` is all four pipe files of take A). The shipped files are those masters byte for byte; [Attribution](../../../Assets/ATTRIBUTION.md) records each file's sources and processing.
+**Selections (2026-10-03).** The owner auditioned an A and a B take of each of 28 cue blocks on the local page and chose B for `Cadence`, `ReliquaryOpen`, `ScytheWhip`, `StaffWindup`, `StaffBarline` and `RiverRelease`, and A for every other block (the whole toll ladder is one block, and `OrganShot` is all four pipe files of take A). Every file but `ReliquaryOpen` is its master byte for byte; `ReliquaryOpen` is its master with the show's level lift baked in ([Levels against the Raid](#levels-against-the-raid)). Each file keeps its take's pinned Ogg serial, and [Attribution](../../../Assets/ATTRIBUTION.md) records each file's sources and processing.
 
-- **Gain:** the files are never re-rendered for level. Each cue plays at gain 1 times its role's offset ([Levels against the Raid](#levels-against-the-raid)); the only further offsets are the multiplayer rule (other players' per-swing and per-shot cues −8 dB), the rolled score's throw (−2 dB) and a score burst without the Full Melody (−2 dB).
+- **Gain:** each cue plays at gain 1 times its role's offset ([Levels against the Raid](#levels-against-the-raid)); the only further offsets are the multiplayer rule (every cue another player causes −8 dB), the rolled score's throw (−2 dB) and a score burst without the Full Melody (−2 dB).
 - **Voices** per cue file, for the local player: tolls 8 (eight quills at one height ring one toll eight times), `CenserPour` 5 and `CenserGrandPour` 4 (one owner's sound budget), `ReliquaryOpen` 4 (the four shows), `StaffCut`, `HandSlam` and `InkIgnite` 4 (a cascade part still rings when the next starts), `CenserSwing` and `QuillThrow`/`QuillStick` 3, every other cue 2.
 - **Other players' voices** are a pool of their own (a separate `Identifier`), so another player's cue never cuts the local player's. All other players together share one voice per per-shot file (replace oldest) and one owner's voices of every other file. Past that limit another player's windup, release, finale or playback toll is dropped (ignore new) instead of cutting one that is ringing.
 - **Moments:** each file was built to meet a moment `Lead` ticks after its trigger, and the domain tests hold those moments to the rules: a swing's breath fires at the stroke's start and peaks on its first live tick (5); the Whip's brace fires with the draw-back (6) and peaks just before the lash (13), the lash fires as the blade goes live (14); `StaffWindup` peaks on the forward whip (16), `HymnInhale` on the first slam (10), `BatonLift` on the downbeat (8), `InkIgnite` as a stroke has swollen (3), `CenserSwing` on the pour 10 ticks later, `CenserBrace` on the Grand Pour (6), `ScoreUnseal` as the ink catches (8), and `ReliquaryOpen`'s cadence as the show's ink ignites (20).
 
 ### Levels against the Raid
 
-The Raid plays its own owner-approved sound set (`ScarletSounds`: every cue at gain 1, not positional). Each reward role plays at one offset (`ScarletRewardCues.RoleDecibels`), so the balance the owner auditioned inside a role is kept; the offsets only lower the owner-picked files, which are never re-rendered. Measured on 2026-10-03 as each file's maximum 400 ms momentary loudness in LUFS, on the recipe's meter and on BS.1770 K-weighting (both padded 0.2 s before and 0.5 s after the file, stepped 10 ms). A tool test pins the measured files by hash and holds every rule below on both meters.
+The Raid plays its own owner-approved sound set (`ScarletSounds`: every cue at gain 1, not positional) over Graceful Ordeal, which follows tModLoader's music-slider curve like every other track ([Scarlet spec](ENCOUNTER_SPEC.md#sound-effects)). Levels are ITU-R BS.1770-4: a cue's maximum 400 ms momentary loudness (padded 0.2 s before and 0.5 s after the file, stepped 10 ms), and the score's median 3 s short-term loudness over its four stages (−12.26 LUFS at gain 1). The reference is the owner's sliders (music 0.685, sound 0.161), where that median sits at −14.32 LUFS on the cue files' scale. Each reward role plays at one offset (`ScarletRewardCues.RoleDecibels`), so the balance the owner auditioned inside a role is kept, and the four roles that sound in play (tolls, one-shots, windups, cascade parts) share one offset, so their auditioned balance is kept too. Measured on 2026-10-03 on the shipped files ([evidence](../../evidence/2026-10-03-scarlet-loudness.json)); a tool test pins the files and the score by hash and holds every rule below, and local-only tests re-measure them and render a four-player fight.
 
-| Raid cue (gain 1) | Recipe meter | BS.1770 |
+| Raid cue (gain 1) | File, BS.1770 | Against the score at the owner's sliders |
 |---|---|---|
-| ScarletVictory | −9.6 | −11.9 |
-| ScarletActChange | −10.2 | −13.7 |
-| ScarletCrossflowRelease | −10.4 | −14.0 |
-| ScarletStackFail, StackSummon, StackSuccess | −9.9, −15.7, −16.4 | −15.6, −19.3, −18.3 |
-| ScarletSpreadFail, SpreadSummon, SpreadSuccess | −13.9, −16.8, −17.2 | −14.3, −17.5, −18.7 |
-| ScarletCrossflowCharge | −18.4 | −21.7 |
-| ScarletImpact | −20.0 | −20.4 |
-| ScarletForetell | −22.8 | −25.7 |
+| ScarletVictory | −10.3 | +4.0 |
+| ScarletActChange | −12.2 | +2.1 |
+| ScarletCrossflowRelease | −12.5 | +1.9 |
+| ScarletSacrifice | −14.5 | −0.1 |
+| ScarletStackFail, StackSuccess, StackSummon | −14.0, −16.7, −17.7 | +0.3, −2.4, −3.4 |
+| ScarletSpreadFail, SpreadSummon, SpreadSuccess | −12.7, −16.0, −17.1 | +1.7, −1.6, −2.8 |
+| ScarletImpact | −15.4 | −1.1 |
+| ScarletDown, Revive, Ready | −18.3, −16.8, −24.9 | −4.0, −2.5, −10.6 |
+| ScarletForetell | −19.3 | −5.0 |
+| ScarletCrossflowCharge | −20.2 | −5.9 |
 
-| Reward role | Offset | Recipe meter: file → played | BS.1770: file → played | Rule |
-|---|---|---|---|---|
-| Tolls (Toll0–Toll7) | −8.5 dB | −19.0…−18.9 → −27.5…−27.4 | −22.3…−21.1 → −30.8…−29.6 | under every one-shot |
-| One-shots (ScytheSwingHigh/Low, ScytheWhip, OrganShot1–4, BatonStroke, QuillThrow, QuillStick, CenserSummon, CenserSwing) | −8.5 dB | −17.3…−15.1 → −25.8…−23.6 | −20.4…−16.9 → −28.9…−25.4 | at least 3 dB under ScarletImpact |
-| Windups and braces (StaffWindup, ScytheWhipBrace, HymnInhale, BatonLift, CenserBrace, ScoreUnseal) | −8.5 dB | −18.5…−15.0 → −27.0…−23.5 | −18.6…−15.4 → −27.1…−23.9 | at most ScarletForetell + 2 dB |
-| Cascade parts (StaffCut, HandSlam, InkIgnite, CenserPour, InkBlaze) | −8.5 dB | −16.1…−12.1 → −24.6…−20.6 | −21.1…−15.8 → −29.6…−24.3 | under ScarletImpact |
-| Finales (StaffBarline, ChoirClasp, RiverRelease, CenserGrandPour, ScoreChord) and Cadence | −3 dB | −11.0…−9.6 → −14.0…−12.6 | −14.4…−12.0 → −17.4…−15.0 | at most ScarletCrossflowRelease |
-| ReliquaryOpen | −3 dB | −13.0 → −16.0 | −16.2 → −19.2 | at most ScarletVictory |
+| Reward role | Offset | Lift baked into the files | Played, BS.1770 | Against the score (0.3.78 → now) | Rule (role median, as played) |
+|---|---|---|---|---|---|
+| Tolls (Toll0–Toll7) | −3.5 dB | none | −25.8…−24.6 | −22.9…−21.7 → −11.5…−10.2 | every toll under every one-shot |
+| One-shots (ScytheSwingHigh/Low, ScytheWhip, OrganShot1–4, BatonStroke, QuillThrow, QuillStick, CenserSummon, CenserSwing) | −3.5 dB | none | −23.9…−20.4 | −21.0…−17.5 → −9.5…−6.0 | about 6 dB under ScarletImpact, every one under ScarletForetell |
+| Windups and braces (StaffWindup, ScytheWhipBrace, HymnInhale, BatonLift, CenserBrace, ScoreUnseal) | −3.5 dB | none | −22.1…−18.9 | −19.2…−16.0 → −7.7…−4.5 | about 2 dB under ScarletForetell |
+| Cascade parts (StaffCut, HandSlam, InkIgnite, CenserPour, InkBlaze) | −3.5 dB | none | −24.5…−19.3 | −21.7…−16.4 → −10.2…−5.0 | about 6 dB under ScarletImpact |
+| Finales (StaffBarline, ChoirClasp, RiverRelease, CenserGrandPour, ScoreChord) and Cadence | −0.45 dB | none | −14.8…−12.4 | −9.5…−7.1 → −0.5…+1.9 | about 1 dB under ScarletCrossflowRelease, none more than 0.5 dB over it |
+| ReliquaryOpen | 0 dB | +3.83 dB | −12.3 | −11.3 → +2.0 | about 2 dB under ScarletVictory |
 
-- **Why these offsets.** The one-shot rule for `CenserSwing` (designed 2 dB over the other one-shots) and the impact rule for `InkBlaze` (the loudest cascade part) each need about −8 dB on their role. So every role that sounds in play takes −8.5 dB and keeps its auditioned balance with the others: tolls stay 2 dB under the one-shots, a brace stays over its lash. The finales and the Cadence take −3 dB, about 2 dB under ScarletCrossflowRelease on the recipe's meter (the spec's earlier rule: releases about 2 dB under the Raid's loudest strike), and the show keeps its auditioned 3.4 dB under the finales.
-- **Closest margins:** on the recipe's meter the loudest one-shot (`CenserSwing`) sits 3.6 dB under ScarletImpact and `InkBlaze` 0.5 dB under it; on BS.1770 `CenserBrace` sits 0.2 dB under ScarletForetell + 2 dB and the tolls 0.7 dB under the quietest one-shot.
-- **What changes for the ear:** the in-play cues now sit 5.5 dB further under the finales than on the audition page (one-shots at about −25.5 and finales at about −12.7 on the recipe's meter, against −17 and −9.6 auditioned).
-- Other players' per-swing and per-shot cues stay 8 dB lower still, and the rolled score's throw and a partial score burst 2 dB lower.
+- **The four-player fight.** A file's level does not show a fight: one-shots and cascade parts fire several times a second, and other players' weapons add up. A local-only tool test renders Graceful Ordeal (song bars 19–23) at the owner's sliders under the local player's organ and three other players' scythe, quill and censers (two or four censers on one player, or on each of the three) at their real rates, sound budgets and voice limits, and lays each Raid warning over it at ten places. Each warning must keep a 1/3-octave band at least 3 dB over the score and the weapons together, in the 400 ms where it is loudest, and no less than 0.3.80 gave it. A first staging that set the one-shots about 2 dB and the cascade parts about 1 dB under the impact (their files lifted 9.4 and 10 dB) and left other players' windups, releases and finales at full level buried `ScarletSpreadSummon` and `ScarletCrossflowCharge` there (−1.1…−0.7 and −2.5…−0.7 dB). With the in-play cues at −3.5 dB and every cue of another player 8 dB lower, the medians are: Foretell 10.8…11.9 dB, StackSummon 7.3…9.1, SpreadSummon 3.6…3.9 and CrossflowCharge 3.6…4.1 (0.3.80: −0.5…0.1, 3.3…5.7, 3.2…3.3 and −0.3…0.3).
+- **How the lift was made.** Only the reliquary's show had to rise above its file (an offset cannot raise a file past gain 1). It was re-rendered from its picked take with +3.83 dB of gain on the same pinned serial and needed no limiting (true peak −3.3 dBTP after Vorbis); [Attribution](../../../Assets/ATTRIBUTION.md) gives the processing. Every other reward file is the auditioned file byte for byte, and the windups, cascade parts and finales sit below their files with a runtime offset.
+- **Where the balance moved.** Inside every role, and among the four in-play roles, nothing moved: they keep the audition page's balance. Against them, the finales and the Cadence sit 3.05 dB higher than on the audition page and the show 7.3 dB higher (0.3.78 had both 5.5 dB higher).
+- **Closest margins and exceptions:** the loudest one-shot (`CenserSwing`) sits 1.05 dB under ScarletForetell; the loudest windup (`CenserBrace`) 0.47 dB and the loudest cascade part (`InkBlaze`) 0.04 dB over it; the loudest toll 0.7 dB under the quietest one-shot; `StaffBarline` 0.06 dB over ScarletCrossflowRelease.
+- **Other sliders:** with the music slider at 1 the score plays exactly as in 0.3.78, so each cue sits higher against it by its whole change (the in-play cues 5.0 dB, the finales 2.55, the show 6.8, the Raid's own cues 1.4–6.4); a sound slider set higher against the music than the owner's puts every cue further over the score.
+- Every cue another player causes plays 8 dB under its owner's level ([Multiplayer readability](#multiplayer-readability)), and the rolled score's throw and a partial score burst 2 dB lower.
 - This is a staging, not an approval: the owner's in-game listening (each role against the Raid's cues and Graceful Ordeal, and outside the Raid) is the acceptance and is `not_run`.
 
 ## Differences from Ebon
@@ -897,5 +901,5 @@ The first implementation fixed these points, which the sections above left open 
 - Static, catalog and source-wiring checks.
 - Offline frames of the Raid's strikes matching the approved frames after the shader change.
 - Offline frames that composite the real sprites with the real reward ink at actual size, over the Scarlet background and a bright surface.
-- Loudness and peak checks, and the reward levels held against the Raid's files on two meters.
+- BS.1770 level relations (`tools/tests/test_scarlet_levels.py`): each Raid group against Graceful Ordeal at the owner's sliders, each reward role against the Raid cue it answers, the auditioned balance inside every group, and a rendered four-player fight in which every Raid warning keeps a clear band; plus loudness and true-peak checks.
 - A native package build.
