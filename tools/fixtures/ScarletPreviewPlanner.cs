@@ -1,11 +1,11 @@
 // Builds one physical phrase the way CrimsonRuntime.SchedulePhrase does, using the
-// production authority (CrimsonChoreography.Create / CrimsonEnsemble.Technique / NoteEnd /
-// CrimsonTechniqueGeometry.Stage / CrimsonGesturePlan.Validate). Only the Terraria-side
-// bookkeeping (projectile slots, NPC poses, network identities) is replaced by constants.
+// production authority (CrimsonChoreography.Create on the 128 BPM CrimsonMeter grid /
+// CrimsonEnsemble.Technique / NoteEnd / CrimsonTechniqueGeometry.Stage / the curtain's
+// occupied-column mask / CrimsonGesturePlan.Validate). Only the Terraria-side bookkeeping
+// (projectile slots, NPC poses, network identities) is replaced by constants.
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Convergence.Common.Raids.Arena;
 using Convergence.Content.Encounters.CrimsonFoundry;
@@ -22,13 +22,7 @@ internal sealed record PreviewPhrase(
     internal int FirstBorn => Array.ConvertAll(Plans, p => p.Born).Min();
     internal int LastEnd => Array.ConvertAll(Plans, p => p.End + ScarletOverlayEnd(p)).Max();
     private static int ScarletOverlayEnd(CrimsonGesturePlan p)
-        => p.IsRift ? CrimsonSpatialCuts.ResidueTicks : CrimsonRhythm.ResidueTicks;
-}
-
-// The production beat grid (CrimsonMeter), the only one gameplay uses since #101.
-internal sealed class PreviewGrid
-{
-    internal float Pulse(double tick) => CrimsonMeter.Pulse(tick);
+        => p.IsRift ? CrimsonSpatialCuts.ResidueTicks : p.IsSignature ? CrimsonSignatureMoves.ResidueTicks(p.Technique) : CrimsonRhythm.ResidueTicks;
 }
 
 internal static class PreviewPlanner
@@ -37,10 +31,6 @@ internal static class PreviewPlanner
     internal static readonly Guid Fight = new("5c4a1e00-0000-4000-8000-0000000000a1");
     internal static readonly Guid Connection = new("5c4a1e00-0000-4000-8000-0000000000c1");
     internal static RaidFieldGeometry Field => RaidFieldGeometry.FromGround(GroundX, GroundY);
-
-    // Graceful Ordeal's fixed 128 BPM grid (CrimsonMeter) replaced the beat-tracked Score.json in #101; the preview
-    // keeps one handle so the backdrop pulse and the phrase builder read the same grid production uses.
-    internal static readonly PreviewGrid Grid = new();
 
     internal static PreviewPlayer[] Players()
     {
@@ -54,9 +44,11 @@ internal static class PreviewPlanner
     }
 
     // phase: 0..2 = Acts I..III, 3 = Final. serial = the 1-based phrase serial CrimsonRuntime hands to Create and the
-    // techniques (serial % 3 == 0 is a signature phrase in Acts I-III). pickup = the phrase opens an Act or follows a gap.
-    internal static PreviewPhrase Build(string name, PreviewGrid grid, int phase, int serial,
-        PreviewPlayer player, int scoreStart, int musicStart = 3000, bool pickup = false)
+    // techniques (serial % 3 == 0 is a signature phrase in Acts I-III). scoreStart = ticks after musicStart the phrase may
+    // start from (it starts on the first bar head at or after it). curtainMask: the occupied columns a CinderCurtain
+    // observes; 0 = the player's column. pickup = the phrase opens an Act or follows a gap.
+    internal static PreviewPhrase Build(string name, int phase, int serial,
+        PreviewPlayer player, int scoreStart, int musicStart = 3000, int curtainMask = 0, bool pickup = false)
     {
         var field = Field;
         var rhythm = CrimsonChoreography.Create(scoreStart, serial, phase, pickup);
@@ -100,7 +92,8 @@ internal static class PreviewPlanner
             if (technique is CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands)
                 aim = new(field.CenterX, field.CenterY);
             if (technique == CrimsonTechnique.CinderCurtain)
-                aim = CrimsonSignatureMoves.CurtainTarget(1 << CrimsonSignatureMoves.CurtainColumn(field, player.Center.X));
+                aim = CrimsonSignatureMoves.CurtainTarget(curtainMask > 0 ? curtainMask
+                    : 1 << CrimsonSignatureMoves.CurtainColumn(field, player.Center.X));
             int end = CrimsonEnsemble.NoteEnd(technique, hit);
             // CrimsonRuntime issues a phrase LookAheadTicks before its first forecast.
             int begin = Math.Max(epoch, musicStart + rhythm.FirstWarning - CrimsonRhythm.LookAheadTicks);

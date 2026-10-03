@@ -49,7 +49,7 @@ internal static class RewardsPreview
         var assets = renderer.Assets;
         var ink = new ScarletRewardInk();
         using var particles = new ScarletRewardParticles();
-        var phrase = PreviewPlanner.Build("rewards", PreviewPlanner.Grid, 0, 1, PreviewPlanner.Players()[0], options.PhraseStart);
+        var phrase = PreviewPlanner.Build("rewards", 0, 1, PreviewPlanner.Players()[0], options.PhraseStart);
         var field = PreviewPlanner.Field;
         Vector2 center = new(field.CenterX - 200, field.Bottom - 260);
         int written = 0;

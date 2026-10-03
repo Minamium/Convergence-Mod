@@ -2,6 +2,7 @@ using ScarletGraphicsScope = Convergence.Client.Graphics.WorldGraphicsScope;
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 using Convergence.Content.Encounters.CrimsonFoundry;
 using Microsoft.Xna.Framework;
@@ -154,36 +155,38 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 && g.Plan.Born <= age && g.Plan.Fire > age && g.Plan.Fire < plan.Fire) return true;
         return false;
     }
-    // Field beams: the forecast (CrimsonEnergy portal veil, thread, dust and mouth) is drawn first and unchanged, over
-    // the crossflow seals while they charge; the live strike and its residue (ScarletInkStroke.Owns) are drawn after it
-    // with the ScarletInk "black blood river" material, so a live stroke always lies over any forecast. A live
-    // crossflow's seals are drawn last, over the stream, whose round ends stop at their centres and sink into them.
+    // Field beams and the Act signature moves: the forecast (CrimsonEnergy portal veil, thread, dust and mouth) is drawn
+    // unchanged; the live strike and its residue (ScarletInkStroke.Owns) use the ScarletInk "black blood river" material and
+    // are drawn after it, so a live stroke always lies over any forecast. The crossflow's seals lie under the forecast while
+    // they charge and, from Fire until they fade at End, over the live stream (and carry their vapor over it): the stream is
+    // cut square on the two stream ends (the seal centres, except at a wall) and each cut sinks into its seal's ring. A
+    // signature move's residue (ScarletResidueYield, the owner's switch) is drawn before the forecasts instead, under them,
+    // and dries early wherever the move's next note leaves the ground safe.
     private static readonly ScarletInkStroke ink = new();
-    private static readonly List<CrimsonGesturePlan> strikes = new();
-    private static readonly List<CrimsonGesturePlan> sealsOver = new();
+    private static readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), sealsOver = new();
     private static void DrawTrackingBeams(CrimsonBoss boss, SpriteBatch batch, float age)
     {
         CrimsonEnergy.Begin();
-        strikes.Clear(); sealsOver.Clear();
+        strikes.Clear(); residues.Clear(); signatures.Clear(); sealsOver.Clear();
         Span<CrimsonStroke> strokes=stackalloc CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
             if (projectile.ModProjectile is not CrimsonGesture g || !g.TryBoss(out var owner) || owner != boss) continue;
             var p = g.EffectivePlan(age, true);
-            // The ink residue outlives End by ScarletInkStroke.ResidueTicks (24), inside the projectile lease (LastEnd + 28);
-            // a signature move keeps its own residue window on the field-beam path.
-            int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : p.IsSignature ? CrimsonSignatureMoves.ResidueTicks(p.Technique)
-                : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicks : 0;
+            if (p.IsSignature) signatures.Add(p); // a yielding residue looks up its move's next note here
+            // The ink residue outlives End by ScarletInkStroke.ResidueTicksOf (24; a signature move's own 24/20/24),
+            // inside the projectile lease (LastEnd + 28).
+            int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicksOf(p) : 0;
             if ((!p.Aimed && !p.IsRift && !p.IsSignature) || !g.ForecastReady || age < p.Born || age >= p.End + tail) continue;
             if (p.Technique == CrimsonTechnique.SideBeams && age < p.End)
             {
                 if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);
                 else sealsOver.Add(p);
             }
+            if (ScarletInkStroke.Underlies(p, age)) { residues.Add(p); continue; }
             if (ScarletInkStroke.Owns(p, age)) { strikes.Add(p); continue; }
             bool warning = age < p.Fire;
-            // A signature move keeps its whole footprint through the residue; the beam shader fades it.
-            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift || p.IsSignature && age >= p.End);
+            int count=CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift);
             for(int i=0;i<count;i++) {
             var s = strokes[i];
             Vector2 delta = V(s.B - s.A); float length = delta.Length();
@@ -197,33 +200,30 @@ internal sealed class CrimsonGestureVisuals : ModSystem
                 opacity, CrimsonVisuals.Reduced, p.Born, fieldBeam: true);
             }
         }
+        if (residues.Count > 0)
+        {
+            using var under = new ScarletGraphicsScope(batch);
+            var below = ScarletVfxHost.View(age);
+            foreach (var residue in residues) ink.Draw(below, ScarletVfxHost.Assets, residue, CollectionsMarshal.AsSpan(signatures));
+        }
         CrimsonEnergy.Draw(batch);
         if (strikes.Count > 0)
         {
             using var scope = new ScarletGraphicsScope(batch);
             var view = ScarletVfxHost.View(age);
-            foreach (var strike in strikes) ink.Draw(view, ScarletVfxHost.Assets, strike);
+            foreach (var strike in strikes) ink.Draw(view, ScarletVfxHost.Assets, strike, CollectionsMarshal.AsSpan(signatures));
         }
         foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);
     }
     private static void DrawSources(CrimsonBoss boss, SpriteBatch batch, float age)
     {
-        // At most one anticipation/release per actor, not one giant flash per
-        // ribbon segment. Read-only source positions; no client target selection.
-        for (int source = 0; source < 4; source++)
-        {
-            var signal = CrimsonRig.Signal(boss, source, age);
-            if (signal.Charge < .01f && signal.Recoil < .01f) continue;
-            Vector2 at = boss.NPC.Center;
-            bool present = source == 3;
-            if (source < 3)
-                foreach (NPC n in Main.ActiveNPCs)
-                    if (n.ModNPC is CrimsonEffigy e && e.State.Fight == boss.State.Fight && e.State.Index == source)
-                    { at = n.Center; present = boss.State.Presence(source, age) > .1f; break; }
-            if (!present) continue;
-            if (source!=3 && CrimsonGesture.TryPose(boss, source, age, out var pose)) at = V(pose.Body(age));
-            CrimsonRig.DrawPressure(batch, at, source, age, signal.Charge, signal.Recoil);
-        }
+        // One anticipation/release for the Final conductor only (source 3, at the boss). Acts I-III (sources 0-2)
+        // draw no pressure bloom: its converging streaks read as threads and its release flash as extra danger
+        // beside the apparition. Read-only position; no client target selection.
+        const int conductor = 3;
+        var signal = CrimsonRig.Signal(boss, conductor, age);
+        if (signal.Charge < .01f && signal.Recoil < .01f) return;
+        CrimsonRig.DrawPressure(batch, boss.NPC.Center, conductor, age, signal.Charge, signal.Recoil);
     }
     private static void DrawCinders(in CrimsonGesturePlan p, float age)
     {

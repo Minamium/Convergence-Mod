@@ -1,11 +1,15 @@
 """Source wiring guards, not visual-quality or native gameplay approval."""
 from pathlib import Path
 import hashlib
+import math
 import re
 import unittest
 ROOT = Path(__file__).resolve().parents[2]
 CONTENT = ROOT/'Content/Encounters/CrimsonFoundry'
 CLIENT = ROOT/'Client/Encounters/CrimsonFoundry'
+
+def read_text(path):
+    return path.read_text(encoding='utf-8')
 
 class ScarletContracts(unittest.TestCase):
     def test_chorus_publishes_the_committed_verdict_not_an_out_of_tick_flag(self):
@@ -326,7 +330,8 @@ class ScarletContracts(unittest.TestCase):
         self.assertIn('techniques[source] = CrimsonTechnique.TrackingBeam',runtime)
         visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text(encoding='utf-8')
         self.assertIn('!p.Aimed && !p.IsRift && !p.IsSignature',visual)
-        self.assertIn('CrimsonSignatureMoves.ResidueTicks(p.Technique)',visual)
+        self.assertIn('ScarletInkStroke.ResidueTicksOf(p)',visual)
+        self.assertIn('CrimsonSignatureMoves.ResidueTicks(plan.Technique)',(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8'))
         self.assertIn('fieldBeam: true',visual)
         # A full crowd mask can leave a curtain note nothing to burn: no cue, shake or embers; the strike is felt at a burning column.
         self.assertIn('CrimsonSignatureMoves.CurtainBurning(p) == 0) return;',visual)
@@ -366,21 +371,24 @@ class ScarletContracts(unittest.TestCase):
         beams=visual[visual.index('private static void DrawTrackingBeams'):visual.index('private static void DrawSources')]
         # Forecasts keep the portal energy; the two crossflow seals and the rift tears keep ScarletSorcery.
         self.assertIn('CrimsonEnergy.Add(',beams)
-        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);',beams)
         self.assertIn('ScarletSorcery.Tear(',beams)
-        # A live crossflow's seals are drawn after the ink, over the stream's ends (protocol80).
+        # The crossflow's seals charge under the forecast and, from Fire until they fade, lie over the live stream (protocol80;
+        # owner 2026-10-04): the stream is cut square on its two ends and each cut sinks into its seal's ring.
+        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);',beams)
         self.assertIn('else sealsOver.Add(p);',beams)
-        self.assertLess(beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike)'),beams.index('foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);'))
+        self.assertLess(beams.index('ScarletSorcery.CrossflowSeals(batch, p, age)'),beams.index('CrimsonEnergy.Draw(batch)'))
+        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike,'))
+        self.assertLess(beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike,'),beams.index('foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);'))
         sorcery=(CLIENT/'ScarletSorcery.cs').read_text(encoding='utf-8')
         self.assertIn('var (right, left) = CrimsonChoreography.Seals(p);',sorcery)
         # Live strike and residue never reach CrimsonEnergy: they are collected before it and drawn after it (over forecasts).
         self.assertLess(beams.index('ScarletInkStroke.Owns(p, age)'),beams.index('CrimsonEnergy.Add('))
-        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike)'))
+        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike'))
         self.assertIn('ScarletInkStroke.ResidueTicks',beams)
         self.assertIn('using var scope = new ScarletGraphicsScope(batch)',beams)
-        # Only the two field-beam techniques; the forecast pass of ScarletInk is not used anywhere in game code.
+        # The two field-beam techniques and the signature moves; the forecast pass of ScarletInk is not used anywhere in game code.
         stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
-        self.assertIn('plan.Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams',stroke)
+        self.assertIn('plan.Technique is CrimsonTechnique.TrackingBeam or CrimsonTechnique.SideBeams || plan.IsSignature',stroke)
         self.assertIn('"AutoloadPass"',stroke)
         self.assertIn('"ResiduePass"',stroke)
         self.assertNotIn('"ForecastPass"',stroke)
@@ -409,3 +417,295 @@ class ScarletContracts(unittest.TestCase):
         shader=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx').read_text(encoding='utf-8')
         for pass_name in ('AutoloadPass','ForecastPass','ResiduePass'):
             self.assertIn(f'pass {pass_name}',shader)
+
+    def test_crossflow_stream_is_a_band_cut_square_on_its_ends_while_collision_keeps_the_capsule(self):
+        # Owner 2026-10-04: the round ends of the 0.3.83 stream stick out past the seals' narrow ellipses; the original cut was
+        # better. Only the picture changes: ScarletInk draws the band over the capsule's whole span and the capsule (Side,
+        # CrimsonTechniqueGeometry) is the collision, untouched.
+        stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
+        draw=stroke[stroke.index('internal void Draw('):stroke.index('private void Band(')]
+        self.assertIn('bool band = plan.Technique == CrimsonTechnique.SideBeams;',draw)
+        self.assertIn('CrimsonPoint? anchor = band ? CrimsonChoreography.Reach(plan).Right : null;',draw)
+        self.assertIn('float hi = MathF.Max(s.A.X, s.B.X) + s.Radius, lo = MathF.Min(s.A.X, s.B.X) - s.Radius, cut = hi - lo;',draw)
+        # The shader's own segment is the whole band and the quad stops at its two ends: no round end is drawn.
+        self.assertIn('shader.Set("shape", new Vector4(cut, s.Radius,',draw)
+        self.assertIn('Band(hi, lo, s.A.Y, s.Radius, extent, age < plan.End ? age - plan.Fire : 99, out int vertices, out int indices);',draw)
+        self.assertIn('device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, bandMesh, 0, vertices, bandIndices, 0, indices / 3);',draw)
+        # Every other stroke (tracking beams, signature moves) is drawn exactly as before.
+        self.assertIn('Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));',draw)
+        self.assertIn('private void Quad(Vector2 start, Vector2 across, Vector2 along, float u0 = 0, float u1 = 1)',stroke)
+        # The shader and its pinned hashes are untouched (G11 pins them).
+        choreography=(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8')
+        side=choreography[choreography.index('internal static CrimsonStroke Side('):choreography.index('internal static (float X, float Y) ClampParticipant')]
+        self.assertIn('return new(new(right.X - radius, right.Y), new(front + radius, right.Y), radius);',side)
+        self.assertIn('if (forecast) return new(right, left, SideHalfWidth);',side)
+
+    def test_crossflow_seals_lie_over_the_cut_ends_everywhere_the_stream_is_drawn_and_the_picture_covers_the_collision(self):
+        # Owner 2026-10-04 (flat cut, this material) and the review of the cut: the seals charge under the forecast and, from Fire,
+        # lie over the stream, so each flat cut sinks into its seal's ring and a wall seal is not half-covered by the black band.
+        # The game, the field preview and the rig harness draw them in the same order.
+        preview=read_text(ROOT/'tools/fixtures/ScarletPreview.cs')
+        proposal=preview[preview.index('if (options.Look == "proposal")'):preview.index('if (options.Look.Contains("overlay")) overlay.Draw')]
+        self.assertIn('if (clock < plan.Fire) DrawSeals(view, plan); else sealsOver.Add(plan);',proposal)
+        self.assertLess(proposal.index('if (ScarletInkStroke.Owns(plan, clock) && !ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);'),proposal.index('foreach (var plan in sealsOver) DrawSeals(view, plan);'))
+        self.assertNotIn('--seals',read_text(ROOT/'tools/preview-scarlet.ps1'))
+        # The comments that describe the order say the same (the stream runs on under a held seal to the wall).
+        choreography=read_text(CONTENT/'CrimsonChoreography.cs')
+        self.assertIn('reaches the wall, under the seal (the seals are drawn over a live stream).',choreography)
+        self.assertNotIn('reaches the wall, over the seal',choreography)
+        # The collision itself is untouched: protocol80, the same capsule, the same constants.
+        self.assertIn('internal const float SealInset = 52;',choreography)
+        self.assertIn('SideHalfWidth',choreography)
+        # The picture covers what hurts, in the domain suite (every tick, open and on both walls) and on rendered pixels (G11).
+        domain=read_text(ROOT/'Tests/Convergence.DomainTests/ScarletChoreographyTests.cs')
+        self.assertIn("Scarlet crossflow picture covers its collision, stops on the stream ends under the seals' rings and inside the forecast band",domain)
+        for token in ('the capsule never leaves the picture','a corner of the picture does not hurt','the full stream is the forecast band','the right cut sits on its seal'):
+            self.assertIn(token,domain)
+        gates=read_text(ROOT/'tools/fixtures/ScarletRigGates.cs')
+        g11=gates[gates.index('private List<object> Crossflow('):gates.index('// ---- G12')]
+        for token in ('collisionPixelsWithoutInk','bare == 0','CrimsonTechniqueGeometry.Write(p, live ? tick : p.End - 1, strokes, false)'):
+            self.assertIn(token,g11)
+
+    def test_ink_quad_margin_lets_the_halo_fade_before_the_quad_edge_everywhere(self):
+        # Presentation lead, 2026-10-04: the crossflow showed a faint hard-edged lighter box 10 px beyond its band, because ScarletInk.fx's halo
+        # (a function of the radius) is still ~75% at R + 10 for R = 140 while the quad stopped there. The quad's margin is now a function of the
+        # radius, derived from the shader's halo term; the shader is not touched (G11 pins its hashes).
+        shader = read_text(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx')
+        live = shader[shader.index('float4 Live(VO i)'):shader.index('float4 Residue(VO i)')]
+        found = re.search(r'float halo=exp2\(-pow\(max\(0,d-R\*([0-9.]+)\)/\(R\*([0-9.]+)\+([0-9.]+)\*aa\),2\)\)', live)
+        self.assertIsNotNone(found, 'the halo term the margin rule is derived from has changed; re-derive ScarletInkMargin')
+        offset, scale, per_pixel = (float(v) for v in found.groups())
+        self.assertEqual((.9, .24, 4.0), (offset, scale, per_pixel))
+        self.assertIn('float e=shape.y+shape.w;', shader)  # the quad's half-height is the radius + the margin passed in shape.w
+        # The shader's body radius overshoots the capsule's by at most 14% while it snaps open (R0 = r*open*over, R <= R0); the rule covers that peak.
+        self.assertIn('over=1+.14*exp2(-pow((t-3.2)/2.4,2))', live)
+        self.assertIn('float R0=max(.5,r*open*over);', live)
+        self.assertIn('float R=R0*(.9+.1*rimN);', live)
+        margin = read_text(CLIENT/'Vfx/ScarletInkMargin.cs')
+        # The C# model of the term is the shader's, constant for constant.
+        self.assertIn('MathF.Max(0, distance - .9f * shaderRadius) / (.24f * shaderRadius + 4 * aa)', margin)
+        rule = re.search(r'Of\(float radius\) => MathF\.Max\(Floor, MathF\.Ceiling\(([0-9.]+)f \* radius \+ ([0-9.]+)\)\);', margin)
+        self.assertIsNotNone(rule)
+        slope, intercept = float(rule.group(1)), float(rule.group(2))
+        floor = float(re.search(r'internal const float Floor = ([0-9.]+);', margin).group(1))
+        limit = float(re.search(r'HaloAtEdgeLimit = ([0-9.]+)f;', margin).group(1))
+        peak = float(re.search(r'PeakRadius = ([0-9.]+)f;', margin).group(1))
+        self.assertEqual(1.14, peak)
+        self.assertEqual(10, floor)
+        def halo(distance, radius, aa):
+            return 2 ** (-((max(0, distance - offset*radius))/(scale*radius + per_pixel*aa)) ** 2)
+        def margin_of(radius):
+            return max(floor, math.ceil(slope*radius + intercept))
+        worst = 0
+        for half_px in range(1, 501):
+            radius = half_px/2
+            edge = halo(radius + margin_of(radius), radius*peak, 1)  # at the opening overshoot's peak
+            worst = max(worst, edge)
+            self.assertLessEqual(edge, limit + 1e-6, f'the quad cuts {edge:.1%} of the halo at R={radius}')
+            self.assertLessEqual(halo(radius + margin_of(radius), radius*peak, .6), edge + 1e-9)  # zoom 2 fades further
+            self.assertLessEqual(halo(radius + margin_of(radius), radius, 1), .03)  # and afterwards, at R = r, far further
+        self.assertLess(worst, .05)
+        # The test has teeth: the original flat 10 px cut the crossflow's halo at ~75% and a tracking beam's at ~45%, and the first
+        # 0.4 r + 9 rule (set for R = r, not for the overshoot) still left an eighth of the halo at the opening of a 30 px stream.
+        self.assertGreater(halo(140 + 10, 140, 1), .7)
+        self.assertGreater(halo(36 + 10, 36, 1), .4)
+        self.assertGreater(halo(30.2 + math.ceil(.4*30.2 + 9), 30.2*peak, 1), .1)
+        self.assertEqual(93, margin_of(140))
+        # ScarletInkStroke applies the rule to every stroke, in the quad and in the shader's own margin uniform; the flat 10 px constant is gone.
+        stroke = read_text(CLIENT/'Vfx/ScarletInkStroke.cs')
+        self.assertNotIn('internal const float Margin', stroke)
+        self.assertIn('float margin = ScarletInkMargin.Of(s.Radius), extent = s.Radius + margin;', stroke)
+        self.assertEqual(2, stroke.count(', margin));'), 'both draws pass the same margin to the shader')
+        self.assertNotIn(' Margin)', stroke)
+        # The flat cut's horizontal extent stays exactly on the cut lines: the margin only grows the band's height (extent = radius + margin
+        # across; along the band the mesh spans [lo, hi] and u runs (hi - x + extent) / (cut + 2 extent), so x = 0 stays on the right end).
+        band = stroke[stroke.index('private void Band('):stroke.index('private void Quad(')]
+        self.assertIn('float cut = hi - lo, span = cut + extent * 2,', band)
+        self.assertIn('new((hi - x + extent) / span, (1 - asked / extent) * .5f)', band)
+        self.assertIn('Vertex(lo, -solid, 1); bandMesh[v++] = Vertex(hi, -solid, 1); bandMesh[v++] = Vertex(lo, solid, 1); bandMesh[v++] = Vertex(hi, solid, 1);', band)
+        self.assertIn('columns[columnCount++] = lo + reach * k / PinchColumns', band)
+        self.assertIn('columns[columnCount++] = hi - reach * k / PinchColumns', band)
+        # G11's reference carries the same rule on purpose (a copy, not a shared call), so production drifting from it fails the gate.
+        reference = read_text(ROOT/'tools/fixtures/ScarletInkReference.cs')
+        self.assertIn(f'MathF.Max(10, MathF.Ceiling({rule.group(1)}f * radius + {rule.group(2)}))', reference)
+        self.assertIn('float margin = MarginOf(s.Radius), extent = s.Radius + margin;', reference)
+        self.assertEqual(1, reference.count(', margin));'))
+        self.assertNotIn('const float Margin', reference)
+        self.assertNotIn('ScarletInkMargin.Of(', reference.replace('production: ScarletInkMargin.Of', ''))
+        # The tools that bounded lit pixels by the old constant use the rule, and G11 measures the glow at the quad's edge on rendered pixels.
+        gates = read_text(ROOT/'tools/fixtures/ScarletRigGates.cs')
+        g11 = gates[gates.index('private List<object> Crossflow('):gates.index('// ---- G12')]
+        self.assertIn('extent = stroke.Radius + ScarletInkMargin.Of(stroke.Radius)', g11)
+        for token in ('quadEdgeMax', 'edgeMax <= EdgeLimit', 'bool softEdge'):
+            self.assertIn(token, g11)
+        self.assertIn('private const int EdgeLimit = 10;', gates)
+        contract = read_text(ROOT/'tools/fixtures/ScarletPreviewContract.cs')
+        # The residue pass draws nothing beyond its radius (scar, ember and rim are all 0 at q = 1), so the contract keeps the original 10 px + 1
+        # tolerance and does not loosen with the live pass's wider quad margin.
+        self.assertIn('Distance(p, residue[i]) <= ScarletInkMargin.Floor + 1', contract)
+        self.assertNotIn('ScarletInkMargin.Of(', contract)
+        residue = shader[shader.index('float4 Residue(VO i)'):shader.index('// ---- Reward paths')]
+        self.assertIn('float q=saturate(d/max(r,1));', residue)
+        self.assertIn('float scar=(1-smoothstep(.1,.38+.3*n,q+(1-fade)*.3))*(.5+.5*n);', residue)
+        self.assertIn('float ember=flavor.x*pow(saturate(e*1.9-1.05),3)*(1-q)*(1-signal.w*.7);', residue)
+        self.assertIn('float rim=exp2(-pow((q-.36-.25*n)/.06,2))*.35;', residue)
+        # The domain suite links the rule and pins it.
+        project = read_text(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj')
+        self.assertIn('Client/Encounters/CrimsonFoundry/Vfx/ScarletInkMargin.cs', project)
+        domain = read_text(ROOT/'Tests/Convergence.DomainTests/ScarletInkMarginTests.cs')
+        self.assertIn('ScarletInkMarginFadesTheHalo', domain)
+        self.assertIn('ScarletInkMarginOfTheRealStrokes', domain)
+        # Nothing here touches the compiled shader.
+        self.assertIn('Vfx/*.cs', read_text(ROOT/'tools/preview-scarlet-rigs.ps1'))
+
+    def test_crossflow_glow_is_pinched_toward_its_cuts_so_no_vertical_step_stands_above_the_seals(self):
+        # Reviewer, 2026-10-04: with the margin rule the band's quad reaches 233 px above the axis, 65 px beyond a seal's ring, and the glow ScarletInk.fx
+        # keeps there ended at the cut in a vertical line (17-22/255 on the night ground). The shader cannot change (G11 pins it); ScarletInkStroke.Band
+        # asks the shader about a position pushed away from the axis near each cut (ScarletInkCutGlow), which fades the glow over a fraction of its distance.
+        shader = read_text(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx')
+        live = shader[shader.index('float4 Live(VO i)'):shader.index('float4 Residue(VO i)')]
+        offset, scale, per_pixel = (float(v) for v in re.search(r'float halo=exp2\(-pow\(max\(0,d-R\*([0-9.]+)\)/\(R\*([0-9.]+)\+([0-9.]+)\*aa\),2\)\)', live).groups())
+        self.assertIn('float2 Local(float2 u) { float e=shape.y+shape.w; return float2(u.x*(shape.x+2*e)-e,(u.y*2-1)*e); }', shader)  # u, v are the only inputs the mesh varies
+        self.assertIn('float Pixel(float2 p) { return max(.6,abs(ddx(p.y))+abs(ddy(p.y))); }', shader)  # the pinch widens aa by its slope (modelled below)
+        self.assertIn('float edge=1-smoothstep(R*.78,R*1.04+aa,d);', live)  # the body feathers out to 1.04 R (+ aa): ScarletInkCutGlow.Solid keeps it 1:1
+        glow = read_text(CLIENT/'Vfx/ScarletInkCutGlow.cs')
+        def const(name):
+            return float(re.search(r'internal const float ' + name + r' = ([0-9.]+);', glow).group(1))
+        reach, pinch, ramp = const('Reach'), const('Pinch'), const('Ramp')
+        self.assertIn('private const float FeatherScale = 1.04f;', glow)
+        self.assertIn('return 1 + .14f * MathF.Pow(2, -x * x);', glow)
+        self.assertIn('float x = (ticks - 3.2f) / 2.4f;', glow)
+        self.assertIn('MathF.Max(radius + ScarletInkMargin.Floor, FeatherScale * radius * Overshoot(ticks) + 2)', glow)
+        self.assertEqual((160, 4, 10), (reach, pinch, ramp))
+        # The grid is fine enough that the shader's derivatives (aa, texture filtering) agree on both triangles of a cell (a coarser grid ripples).
+        stroke = read_text(CLIENT/'Vfx/ScarletInkStroke.cs')
+        columns, rows = (int(v) for v in re.search(r'private const int PinchColumns = ([0-9]+), PinchRows = ([0-9]+);', stroke).groups())
+        self.assertGreaterEqual(columns, 20)
+        self.assertGreaterEqual(rows, 10)
+        self.assertIn('side * (solid + (extent - solid) * row * row / (PinchRows * PinchRows))', stroke)  # rows closest together at the body, where the ramp is
+        self.assertIn('ScarletInkCutGlow.Solid(radius, ticks)', stroke)
+        self.assertIn('ScarletInkCutGlow.Factor(MathF.Min(columns[c] - lo, hi - columns[c]))', stroke)
+        self.assertIn('ScarletInkCutGlow.Sampled(MathF.Abs(offset), solid, factor)', stroke)
+        # The model, in Python, against the shader's own halo term: the unpinched glow above the seal's apex (165 px from the axis) and the pinched one.
+        def halo(distance, radius, aa):
+            return 2 ** (-((max(0, distance - offset*radius))/(scale*radius + per_pixel*aa)) ** 2)
+        def factor(d):
+            t = min(max(d/reach, 0), 1)
+            return 1 + (pinch - 1)*(1 - t*t*(3 - 2*t))
+        def slope(a, solid, f):
+            u = min(max((a - solid)/ramp, 0), 1)
+            return 1 + (f - 1)*u*u*(3 - 2*u)
+        def sampled(a, solid, f):
+            if a <= solid: return a
+            x = a - solid; u = x/ramp
+            g = u - .5 if u >= 1 else u**3 - u**4/2
+            return solid + x + (f - 1)*ramp*g
+        radius = 140; solid = radius + 10; extent = radius + math.ceil(.6*radius + 9)
+        unpinched = halo(170, radius, 1)
+        self.assertGreater(unpinched, .3)  # the vertical line this fixes: 39% of the halo's peak at the seal's apex
+        for across in range(170, extent + 1):
+            pinched = halo(sampled(across, solid, pinch), radius, slope(across, solid, pinch))
+            self.assertLessEqual(pinched, .12, f'the cut keeps {pinched:.1%} of the halo at {across} px')
+        self.assertEqual(1, factor(reach)); self.assertEqual(pinch, factor(0))
+        # The model is the closed form's integral (a hand check of the domain test's finite difference).
+        self.assertAlmostEqual(sampled(solid + 25, solid, pinch) - sampled(solid + 24, solid, pinch), slope(solid + 24.5, solid, pinch), places=2)
+        # G11 measures the rendered pixels at the cut above the seals' rings and gates them; the body's square ends are counted on alpha, not on the glow.
+        gates = read_text(ROOT/'tools/fixtures/ScarletRigGates.cs')
+        g11 = gates[gates.index('private List<object> Crossflow('):gates.index('// ---- G12')]
+        for token in ('cutGlowMax', 'bool softCut = cutGlowMax <= CutGlowLimit;', 'MathF.Abs(wy - y) > SealTop', 'pixels[py * width + px].A > 3', 'bodyColumn.TryGetValue'):
+            self.assertIn(token, g11)
+        self.assertIn('private const float SealTop = 170;', gates)
+        self.assertIn('private const int CutGlowLimit = 6;', gates)
+        self.assertIn('max(10, ceil(.6 R + 9))', gates)
+        self.assertNotIn('.4 R + 9))', gates)  # the description names the shipped rule
+        project = read_text(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj')
+        self.assertIn('Client/Encounters/CrimsonFoundry/Vfx/ScarletInkCutGlow.cs', project)
+        domain = read_text(ROOT/'Tests/Convergence.DomainTests/ScarletInkCutGlowTests.cs')
+        self.assertIn('ScarletInkCutGlowIsSmoothAndLeavesTheBodyAlone', domain)
+        self.assertIn('ScarletInkCutGlowPinchesOnlyTheGlow', domain)
+        # Nothing here touches the compiled shader, and the Vfx foundation stays XNA-free for the domain suite.
+        self.assertNotIn('Microsoft.Xna', glow)
+
+    def test_peer_bodies_answer_a_note_only_once_its_aim_is_known(self):
+        # A peer holds an aimed plan's issue-time Target until the lock sample (tick >= Born) arrives; a note built from it turns the
+        # Crown and aims Vespera's orb at a stale point, then jumps. Bodies and the orb answer ScarletCueFrame's Known list (the
+        # forecast is drawn from the same moment); the signal, the Choir cues and the casting pose's timing keep every plan.
+        frame=read_text(CLIENT/'ScarletCueFrame.cs')
+        self.assertIn('if (!ScarletNotes.AimKnown(plan, gesture.ForecastReady)) continue;',frame)
+        self.assertIn('known[knownCount++] = plan;',frame)
+        self.assertIn('gestures[gestureCount++] = plan;',frame)
+        notes=read_text(CLIENT/'Vfx/ScarletNote.cs')
+        self.assertIn('internal static bool AimKnown(in CrimsonGesturePlan plan, bool locked) => !plan.Aimed || locked;',notes)
+        rig=read_text(CLIENT/'CrimsonRig.cs')
+        self.assertIn('frame.Gestures, frame.Known, frame.Choruses,',rig)
+        self.assertIn('ScarletNotes.Collect(frame.Known, effigy.State.Index, age, flipped,',rig)
+        self.assertIn('Signal(frame.Gestures, frame.Choruses, effigy.State.Index, age)',rig)
+        self.assertIn('ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues, accepted: !frame.Member)',rig)
+        gesture=read_text(CONTENT/'CrimsonGesture.cs')
+        self.assertIn('internal bool ForecastReady => AimLocked;',gesture)
+
+    def test_signature_moves_use_scarlet_ink_with_a_yielding_residue_and_no_extra_field_effects(self):
+        stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
+        # F1: signature moves are ScarletInk strikes with their own residue length, shared by Owns and the visual's tail.
+        self.assertIn('|| plan.IsSignature',stroke[stroke.index('internal static bool Applies'):stroke.index('internal static int ResidueTicksOf')])
+        self.assertIn('plan.IsSignature ? CrimsonSignatureMoves.ResidueTicks(plan.Technique) : ResidueTicks',stroke)
+        self.assertIn('age < plan.End + ResidueTicksOf(plan)',stroke)
+        self.assertIn('float fade = 1 - (age - plan.End) / ResidueTicksOf(plan);',stroke)
+        self.assertNotIn('silk',stroke.lower())
+        visual=(CLIENT/'CrimsonGestureVisuals.cs').read_text(encoding='utf-8')
+        beams=visual[visual.index('private static void DrawTrackingBeams'):visual.index('private static void DrawSources')]
+        self.assertIn('ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicksOf(p)',beams)
+        # The residue is ink, not the forecast footprint kept on through the residue.
+        self.assertNotIn('p.IsSignature && age >= p.End',beams)
+        self.assertIn('CrimsonTechniqueGeometry.Write(p,age,strokes,warning || p.IsRift)',beams)
+        # F2: a yielding signature residue is collected before the live strikes and drawn before the forecasts.
+        self.assertLess(beams.index('ScarletInkStroke.Underlies(p, age)'),beams.index('ScarletInkStroke.Owns(p, age)'))
+        self.assertLess(beams.index('foreach (var residue in residues) ink.Draw('),beams.index('CrimsonEnergy.Draw(batch)'))
+        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('foreach (var strike in strikes) ink.Draw('))
+        self.assertIn('Owns(plan, age) && age >= plan.End && ScarletResidueYield.Applies(plan)',stroke)
+        self.assertIn('bool yields = age >= plan.End && ScarletResidueYield.Applies(plan);',stroke)
+        yielding=(CLIENT/'Vfx/ScarletResidueYield.cs').read_text(encoding='utf-8')
+        self.assertEqual(1,yielding.count('internal static bool Enabled = true;'),'one owner switch, shipped on')
+        self.assertIn('internal const int YieldTicks = 6;',yielding)
+        self.assertIn('Enabled && plan.IsSignature',yielding)
+        self.assertIn('next.Technique == plan.Technique && next.Pulse == plan.Pulse + 1',yielding)
+        for dependency in ('using Terraria','using Luminance','Microsoft.Xna'):
+            self.assertNotIn(dependency,yielding)
+        project=(ROOT/'Tests/Convergence.DomainTests/Convergence.DomainTests.csproj').read_text(encoding='utf-8')
+        self.assertIn('Client/Encounters/CrimsonFoundry/Vfx/ScarletResidueYield.cs',project)
+        self.assertTrue((ROOT/'Tests/Convergence.DomainTests/ScarletResidueYieldTests.cs').exists())
+        # F3: no metaball embers for a signature move; the backdrop impulse still answers it.
+        atmosphere=(CLIENT/'ScarletAtmosphere.cs').read_text(encoding='utf-8')
+        emit=atmosphere[atmosphere.index('internal static void Emit'):atmosphere.index('internal static void Draw')]
+        self.assertLess(emit.index('self.impactAt = CrimsonPackets.Boss!.VisualAge;'),emit.index('if (plan.IsSignature || plan.Source is not (0 or 2)) return;'))
+        self.assertLess(emit.index('if (plan.IsSignature || plan.Source is not (0 or 2)) return;'),emit.index('particles.CreateParticle'))
+        # F4: no pressure bloom for the Act I-III apparitions; the Final conductor (source 3) keeps it.
+        sources=visual[visual.index('private static void DrawSources'):visual.index('private static void DrawCinders')]
+        self.assertIn('const int conductor = 3;',sources)
+        self.assertIn('CrimsonRig.DrawPressure(batch, boss.NPC.Center, conductor,',sources)
+        self.assertNotIn('for (int source',sources)
+        self.assertEqual(1,visual.count('DrawPressure('))
+        # The approved ink shader is untouched by the Raid (main #110 only added the reward Path* passes; offline the
+        # basic-beam ink frames stay byte-identical).
+        shaders=ROOT/'Assets/AutoloadedEffects/Shaders'
+        self.assertEqual('79d27870a6977e089e3dd02f677e39e93a8620c3f1d3644330eccb7986d34ee8',hashlib.sha256((shaders/'ScarletInk.fx').read_bytes()).hexdigest())
+        self.assertEqual('9d8a2cfe1d321915ef50c799fc22e1949e0c1f8fa41fec822b7225d459b15468',hashlib.sha256((shaders/'ScarletInk.fxc').read_bytes()).hexdigest())
+
+    def test_offline_preview_plans_the_current_meter_and_signature_moves(self):
+        planner=(ROOT/'tools/fixtures/ScarletPreviewPlanner.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonChoreography.Create(scoreStart, serial, phase, pickup)',planner)
+        self.assertIn('CrimsonMeter.NextBeats(rhythm.Start, 9)',planner)
+        self.assertIn('CrimsonSignatureMoves.CurtainTarget(',planner)
+        self.assertIn('CrimsonTechnique.ChoirRakes or CrimsonTechnique.ShroudRope or CrimsonTechnique.FourHands',planner)
+        preview=(ROOT/'tools/fixtures/ScarletPreview.cs').read_text(encoding='utf-8')
+        self.assertIn('CrimsonMeter.Pulse(',preview)
+        for scene in ('act1-sig','act1-sig-trio','act2-sig','act3-sig'):
+            self.assertIn(f'new("{scene}"',preview)
+        self.assertIn('ScarletResidueYield.Enabled = options.Yield;',preview)
+        self.assertIn('PreviewContract.ResidueYield(',preview)
+        script=(ROOT/'tools/preview-scarlet.ps1').read_text(encoding='utf-8')
+        self.assertIn("'CrimsonMeter', 'CrimsonSignatureMoves'",script)
+        self.assertIn("'--yield', $Yield",script)
+        for path in (ROOT/'tools/fixtures').glob('ScarletPreview*.cs'):
+            self.assertNotIn('CrimsonScore',path.read_text(encoding='utf-8'),path.name)
+        self.assertNotIn('CrimsonScore',script)

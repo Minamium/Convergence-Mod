@@ -1,11 +1,12 @@
 # Hidden FNA device rendering the Scarlet Invocation field: real phrases built by the
-# production rhythm/choreography, the authoritative hit shapes drawn through the Vfx/
+# production rhythm/choreography on the 128 BPM CrimsonMeter grid (basic phrases, each Act's
+# signature move and the Final pairs), the authoritative hit shapes drawn through the Vfx/
 # foundation (ScarletGeometryOverlay), stand-in characters and three backdrops.
 # Offline review only; no game, Terraria or server is started. Not a playtest.
 #
-#   pwsh tools/preview-scarlet.ps1                       # everything, defaults
-#   pwsh tools/preview-scarlet.ps1 -Only act1 -Step 4    # one scene family, denser frames
-#   pwsh tools/preview-scarlet.ps1 -Beats 128            # constant 128 BPM (28.125 ticks per beat)
+#   pwsh tools/preview-scarlet.ps1                               # everything, defaults
+#   pwsh tools/preview-scarlet.ps1 -Only act1 -Step 4            # one scene family, denser frames
+#   pwsh tools/preview-scarlet.ps1 -Only sig -Look proposal      # the signature phrases as production draws them
 #
 # TModLoaderPath / LuminancePackage are discovered when omitted: parameter, then
 # $env:TML_PATH / $env:LUMINANCE_PACKAGE, Convergence.local.props, then the usual Steam,
@@ -16,8 +17,7 @@ param(
     [string]$OutputDirectory = '.local/scarlet-preview',
     [string]$Only = '',                         # substring of "<scene>-<player>", e.g. act1, final-rift, -edge
     [int]$Step = 8,                             # ticks between sequence frames
-    [string]$Beats = 'score',                   # score = Assets/Music/CrimsonFoundry/Score.json, or a BPM such as 128
-    [int]$PhraseStart = 1000,                   # score tick the phrase is scheduled from
+    [int]$PhraseStart = 1000,                   # earliest tick after musicStart; the phrase starts on the next bar head
     [string]$Backgrounds = 'sanctum,night,day', # variants sheet rows
     [string]$Zooms = '0.65,1,2',                # variants sheet columns
     [string]$SequenceBackground = 'night',     # sanctum is ~2 MB per frame; the variants sheets always cover all backgrounds
@@ -26,8 +26,8 @@ param(
     [string]$Players = 'center,edge',
     [ValidateSet('off', 'on', 'both')][string]$Reduced = 'off',
     [ValidateSet('black', 'dim', 'none')][string]$Mask = 'dim',
-    [string]$Look = 'overlay',                 # overlay | ink | portal | ink+overlay | proposal (portal forecast, then ScarletInk live strike, crossflow seals)
-    [ValidateSet('over', 'under')][string]$Seals = 'over', # proposal: crossflow seals over the live stream (production since 0.3.83) or under it (before)
+    [string]$Look = 'overlay',                 # overlay | ink | portal | ink+overlay | proposal (portal forecast, then ScarletInk live strike and residue, crossflow seals)
+    [ValidateSet('on', 'off')][string]$Yield = 'on', # ScarletResidueYield.Enabled: a signature residue under the forecast, drying early on safe ground
     [switch]$NoSequences,
     [switch]$NoMatrix,
     [switch]$NoSmoke,
@@ -74,7 +74,8 @@ $work = Join-Path $root '.local/scarlet-preview-gpu'
 $out = Join-Path $root $OutputDirectory
 New-Item -ItemType Directory -Force -Path $work, $out | Out-Null
 
-# The preview links the production Vfx foundation and the Terraria-independent authority.
+# The preview links the production Vfx foundation and the Terraria-independent authority
+# (the CrimsonMeter grid and CrimsonSignatureMoves included).
 $files = @(
     'tools/fixtures/ScarletPreview.cs', 'tools/fixtures/ScarletPreviewAssets.cs',
     'tools/fixtures/ScarletPreviewPlanner.cs', 'tools/fixtures/ScarletPreviewSheet.cs', 'tools/fixtures/ScarletPreviewContract.cs',
@@ -98,7 +99,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $options = @('--step', $Step, '--phrase-start', $PhraseStart, '--bg', $Backgrounds, '--zoom', $Zooms,
     '--seq-bg', $SequenceBackground, '--seq-zoom', $SequenceZoom, '--size', $Size, '--players', $Players,
-    '--reduced', $Reduced, '--mask', $Mask, '--look', $Look, '--seals', $Seals, '--beats', $(if ($Beats -eq 'score') { 'score' } else { $Beats }))
+    '--reduced', $Reduced, '--mask', $Mask, '--look', $Look, '--yield', $Yield)
 if ($Only) { $options += @('--only', $Only) }
 if ($NoSequences) { $options += '--no-sequences' }
 if ($NoMatrix) { $options += '--no-matrix' }
