@@ -2722,7 +2722,7 @@ RECORDS = {
               "Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak, pitch and chord checks; the concert "
               "combo rendered in sequence over the Phase I and Phase III music; numerical only, not listened; the chorus close "
               "re-voiced restrained, a quiet organ and a soft gong, after the owner's 2026-10-03 A/B on another raid's "
-              "finishers); owner audition pending; in-game mix not_run",
+              "finishers); owner, 2026-10-03 (approved on the audition page); in-game mix not_run",
               "Choir of the Unmade cues — 2026-10-03",
               "The refreshed Choir of the Unmade's 29 cues (summon, count-in and nine sung verse notes, organ rise and six pipes, "
               "the chorus warning, six chorus renders by voice count, the success close and the failure, two hit accents). "

@@ -190,7 +190,9 @@ class ChoirMaterialAndWiring(unittest.TestCase):
         buff = code(BUFF)
         self.assertIn("ownedProjectileCounts[ModContent.ProjectileType<ChoirChorister>()]", buff)
         self.assertIn('Texture => "Convergence/Assets/Textures/Items/DollWeapons/ChoirOfTheUnmadeBuff"', buff)
-        self.assertIn("entity.ModItem is not (NullRefrain or ChoirOfTheUnmade)", code(LEGACY_VISUALS))
+        excluded = re.search(r"entity\.ModItem is not \(([^)]*)\)", code(LEGACY_VISUALS)).group(1).split(" or ")
+        self.assertIn("NullRefrain", excluded)
+        self.assertIn("ChoirOfTheUnmade", excluded, "no V3 art for the refreshed item")
         concert = code(CONCERT)
         for name in ("ChoirChorister", "ChoirSungNote", "ChoirChorus"):
             self.assertIn(f"public sealed class {name} : ModProjectile", concert)
