@@ -30,11 +30,11 @@ internal static class CrimsonRewardItems
     // Usable and free to act this tick (not stunned, not item-locked): the gate for starting builds and releases.
     internal static bool CanAct(Player player) => Usable(player) && !player.noItems && !player.CCed;
 
-    // The swung scythe is true melee and the rogue quill uses Calamity's rogue class, both through the compatibility
-    // adapters. The scythe's release cuts switch to plain Melee in CanUseItem (Moonshear's rule).
+    // The scythe is ordinary Melee in every part (owner decision 4, 2026-10-03: not Calamity's true melee); the rogue
+    // quill uses Calamity's rogue class through its compatibility adapter.
     internal static DamageClass DamageClassFor(CrimsonRewardKind kind) => kind switch
     {
-        CrimsonRewardKind.Melee => CalamityTrueMelee.Damage,
+        CrimsonRewardKind.Melee => DamageClass.Melee,
         CrimsonRewardKind.Ranged => DamageClass.Ranged,
         CrimsonRewardKind.Magic => DamageClass.Magic,
         CrimsonRewardKind.Summon => DamageClass.Summon,

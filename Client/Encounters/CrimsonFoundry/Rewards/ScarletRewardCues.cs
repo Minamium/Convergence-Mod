@@ -29,10 +29,15 @@ internal enum ScarletCueRole : byte
 // One shipped cue (REWARDS.md#art-and-audio): its files in Assets/Sounds/Weapons/ScarletRewards/, the take the owner
 // chose on the 2026-10-03 audition, who hears it, its level role, how many voices it may hold (MaxInstances, replace
 // oldest), the file's length, and Lead: the ticks from the trigger to the moment the file was built to meet (the first
-// live tick of a swing, the downbeat of a windup); 0 when the attack sits at the head of the file.
-internal readonly record struct ScarletCue(string Name, char Take, ScarletCueAudience Audience, ScarletCueRole Role, int Voices, int Lead, float Seconds, int Files = 1)
+// live tick of a swing, the downbeat of a windup); 0 when the attack sits at the head of the file. A wanted cue that has
+// no recording yet names the shipped cue standing in for it (StandIn) and how much lower it plays (StandInDecibels).
+internal readonly record struct ScarletCue(string Name, char Take, ScarletCueAudience Audience, ScarletCueRole Role, int Voices, int Lead, float Seconds,
+    int Files = 1, string? StandIn = null, float StandInDecibels = 0)
 {
-    internal string File(int variant = 0) => Files == 1 ? Name : Name + (Math.Clamp(variant, 0, Files - 1) + 1);
+    // The file the cue plays: its own, or the stand-in's while its own recording is wanted.
+    internal string File(int variant = 0) => StandIn ?? Voice(variant);
+    // Its voice pool (MaxInstances) is its own name, so a stand-in never takes the voices of the cue whose file it borrows.
+    internal string Voice(int variant = 0) => Files == 1 ? Name : Name + (Math.Clamp(variant, 0, Files - 1) + 1);
     internal int Ticks => (int)MathF.Ceiling(Seconds * 60);
 
     // Other players' voices of this file, all of them together, in a pool apart from the local player's (Voices), so
@@ -90,6 +95,7 @@ internal static class ScarletRewardCues
     internal const int ScytheWhipBraceAt = CrimsonRewardRules.WhipDrawStart;
     internal const int ScytheWhipAt = CrimsonRewardRules.WhipLiveStart;
     internal const int BatonStrokeAt = 0; // the gesture's first tick, so the swish peaks while the pen writes
+    internal const int ScytheVolleyAt = CrimsonRewardRules.VolleyAge; // the lash arc sheds its five crescents
 
     private const ScarletCueAudience Owner = ScarletCueAudience.Owner, Shot = ScarletCueAudience.Shot, Everyone = ScarletCueAudience.Everyone;
     private const ScarletCueRole Build = ScarletCueRole.Build, OneShot = ScarletCueRole.Shot, Windup = ScarletCueRole.Windup, Release = ScarletCueRole.Release,
@@ -134,9 +140,24 @@ internal static class ScarletRewardCues
         new(ScoreChord, 'A', Everyone, Finale, 2, 0, 2.303f),
     };
 
+    // Wanted cues (REWARDS.md, "Melee - Sable Scythe", Audio: "New cues wanted"), not part of the 35 shipped above: they
+    // have no recording yet, so each plays a shipped file in a voice pool of its own until the owner auditions its A/B
+    // takes. ScytheVolley: the lash arc tearing into five (2 voices, about 0.5 s). CrescentBreak: a crescent breaking on
+    // its last target (3 voices, about 0.3 s); the presentation rings it at most once per CrescentBreakSpacing per owner.
+    internal const string ScytheVolley = nameof(ScytheVolley), CrescentBreak = nameof(CrescentBreak);
+    internal const float CrescentBreakStandInDecibels = -6;
+    internal const int CrescentBreakSpacing = 6;
+    internal static readonly ScarletCue[] Wanted =
+    {
+        new(ScytheVolley, '-', Shot, OneShot, 2, 0, .5f, StandIn: StaffCut),
+        new(CrescentBreak, '-', Shot, OneShot, 3, 0, .3f, StandIn: StaffCut, StandInDecibels: CrescentBreakStandInDecibels),
+    };
+
     internal static ScarletCue Get(string name)
     {
         foreach (ScarletCue cue in All)
+            if (cue.Name == name) return cue;
+        foreach (ScarletCue cue in Wanted)
             if (cue.Name == name) return cue;
         throw new ArgumentOutOfRangeException(nameof(name), name, "not a Scarlet reward cue");
     }

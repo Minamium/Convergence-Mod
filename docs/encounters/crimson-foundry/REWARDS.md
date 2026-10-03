@@ -42,7 +42,7 @@ On 2026-10-02 the owner asked for a reward set for this Raid built like the one 
 
 | Class | Item | Code ID | Build | Release | Full-build finale |
 |---|---|---|---|---|---|
-| Melee | Sable Scythe / 帷の大鎌 | `CrimsonSableScythe` | staff lines engraved by connecting strokes (≤ 5) | Staff Reap / 五線刈り | Final Barline / 終止線 |
+| Melee | Sable Scythe / 帷の大鎌 | `CrimsonSableScythe` | staff lines engraved by strokes whose blade or crescents connect (≤ 5) | Staff Reap / 五線刈り | Final Barline / 終止線 |
 | Ranged | Canticle Organ / 聖歌のオルガン銃 | `CrimsonCanticleOrgan` | marks from shard hits (≤ 8 per enemy) | Hymn of Hands / 手の聖歌 | Clasp / 合掌 |
 | Magic | Scarlet Baton / 緋の指揮棒 | `CrimsonBaton` | conducted black-blood strokes (≤ 8) | Tutti / 総奏 | Black-Blood River / 黒血の奔流 |
 | Summon | Ember Censer / 灰燼の香炉 | `CrimsonEmberCenser` | each censer's widening pendulum swing | a pour at every apex | Grand Pour / 大注ぎ (every fourth pour) |
@@ -114,7 +114,7 @@ The weapons work anywhere. None is restricted to the Raid.
 - **Visible builds:** a build other players should see rides a harmless carrier projectile: the scythe's staff, the baton's strokes, and the quills with their ink. The organ's marks stay owner-only, following Ebon's mark precedent, because four players' marks over shared targets would clutter the Raid; other players see the hymn.
 - **Pure motion:** motion is a pure function of the replicated `ai`, position and velocity, so other clients rebuild it without a stream of updates.
 - **Validation:** each projectile checks its `ai` (finite and in range) and kills itself on invalid data, as `CrimsonCompanionRay` does. A remote held projectile tolerates 6 ticks of held-item lag.
-- **NPC identity:** a projectile that refers to an NPC carries its slot. The owner also keeps that NPC's `CrimsonCovenantIncarnation` value and retires the projectile when the slot is reused, as the companion does.
+- **NPC identity:** a projectile that refers to an NPC carries its slot. The owner also keeps that NPC's `CrimsonCovenantIncarnation` value and retires the projectile when the slot is reused, as the companion does. The scythe's crescents acquire a new target instead, because a crescent is not bound to one NPC.
 - **Boundaries:** Content never references Client code; presentation enters through static hooks, as `EbonHatbox.Opened` does. A dedicated server loads no texture, shader or sound. World unload clears client state; Mod unload releases cached assets.
 
 ### Presentation
@@ -231,23 +231,25 @@ Each weapon's section derives its figure. Partial builds are always worth less p
 
 ## Melee — Sable Scythe / 帷の大鎌
 
-Sable Mantle's bone hook on a black lacquered haft, swung in figure eights.
+Sable Mantle's bone hook on a black lacquered haft, swung in figure eights. Every stroke tears a black-blood crescent off the hook, and the crescent seeks the enemy nearest the cursor.
 
-- The swinging blade is true melee (Calamity `TrueMeleeDamageClass` through the compatibility adapter).
-- The release's cuts are plain Melee damage, as Moonshear's Cut Line is. `Item.DamageType` switches in `CanUseItem`, as in Moonshear.
-- Base damage 3600, crit 8. `useTime = useAnimation = 2`: each stroke owns its own clock.
+On 2026-10-03, after playing 0.3.78, the owner asked for ordinary Melee instead of true melee, much flashier effects and homing projectiles. This section is that revision. The art, the figure eight, the material and the staff are kept.
+
+- **Class:** everything the scythe deals is plain Melee (`DamageClass.Melee`): the blade, the lash arc, the crescents and Staff Reap. `CrimsonRewardItems.DamageClassFor(Melee)` returns it, `CanUseItem` no longer switches classes, and Calamity's true-melee bonuses no longer apply.
+- **Stats:** base damage 3600, crit 8, knockback 6 (crescents carry half). `useTime = useAnimation = 2`: each stroke owns its own clock. Melee attack speed does not change the clocks, because the figure eight's knots are fitted to the no-stop bounds below at these durations (unchanged).
 
 **Left click — the figure eight.** Hold to keep swinging.
 
 - One held stroke projectile exists at a time; the next stroke starts the tick after the previous one ends. The cycle returns to the first stroke after 60 idle ticks or an item change.
 - The cycle is **Over, Under, Over, Under, Whip**:
-  - **Over** (18 ticks, live 5–13, ×1.0): the hook comes over the shoulder and cuts down and forward through the aim. The hand rises with it: the Mantle's high slash floats.
-  - **Under** (18 ticks, live 5–13, ×1.0): the hook comes from low behind and rises up through the aim. The hand sinks with it: the low slash sinks.
+  - **Over** (18 ticks, live 5–13, blade ×0.6, one crescent): the hook comes over the shoulder and cuts down and forward through the aim. The hand rises with it: the Mantle's high slash floats.
+  - **Under** (18 ticks, live 5–13, blade ×0.6, one crescent): the hook comes from low behind and rises up through the aim. The hand sinks with it: the low slash sinks.
   - **Between halves the blade never stops.** The hand loops the haft behind the hip or shoulder and the hook rolls over the wrist into the next half, so the hook tip traces an ∞ along the aim.
-  - **Whip** (28 ticks, ×1.8 plus a crescent at ×0.6):
+  - **Whip** (28 ticks, blade ×1.0, lash arc ×0.4, a volley of five crescents):
     - After the second Under, the hook keeps rising behind the head and draws back on ticks 6–12: the Mantle's brace.
     - It then lashes forward flat through the aim, live on ticks 14–20, while the arm thrusts 24 px forward.
-    - The hook tip's path over ticks 14–20 stays in the air as a black-blood crescent: radius 16, live until tick 26, ×0.6 once per root, then a 20-tick scar.
+    - The hook tip's path over ticks 14–20 stays in the air as the **lash arc**: black blood of radius 16, live until tick 26, ×0.4 once per root, then a 20-tick scar. (Earlier revisions called it the crescent; that word now names only the thrown projectile.)
+    - At tick 20 the lash arc sheds the volley (see Crescents below).
     - The Whip ends in the Over's starting pose.
 - **No hard stops** (Moonshear's rule, extended):
   - Strokes join with matched angle and angular speed (Hermite knots).
@@ -255,17 +257,79 @@ Sable Mantle's bone hook on a black lacquered haft, swung in figure eights.
   - Through a roll, angular speed stays at least 25% of the stroke's peak; through the Whip's draw-back, at least 20%.
   - Peak angular acceleration stays under 0.3 rad/tick².
 - **Reach** is measured from the exported art: grip anchor to hook tip at the 2 px dot, 117.89 px for `SableScythe.png` (see [Art and audio](#art-and-audio)). The Whip adds the 24 px thrust.
-- **Collision:** the curved bone edge as three capsules 26 px wide along the measured blade curve; the haft does not hurt. Collision is swept with 9 sub-samples per tick (Soboro's method). Each part of a stroke (the blade, the Whip's crescent) hits each root once per stroke through its own root ledger; native local immunity is only 1 tick, so the Whip's blade and its crescent can both land on the same NPC.
+- **Collision:** the curved bone edge as three capsules 26 px wide along the measured blade curve; the haft does not hurt. Collision is swept with 9 sub-samples per tick (Soboro's method). Each part of a stroke (the blade, the Whip's lash arc) hits each root once per stroke through its own root ledger; native local immunity is only 1 tick, so the Whip's blade and its lash arc can both land on the same NPC.
+
+**Crescents / 刈り月.** The homing projectiles. Each is a short arc of live black blood that leaves the blade, turns smoothly and lands on one enemy at a time.
+
+**Crescent throws** (owner only, from a live stroke).
+
+- **Over and Under:** one crescent each, at stroke age 9, when the hook tip crosses the aim at the cut's peak speed.
+  - It is born with its apex on the hook tip, heading along the aim turned 14° toward the side the cut travels (down for the Over, up for the Under, mirrored by facing), at 14 px/tick.
+  - The Over's and Under's crescents therefore leave on opposite sides of the aim and cross as they close on the target, so the measure's ∞ carries on in the air.
+- **Whip volley:** at Whip age 20, when the lash has finished writing its arc, the arc sheds five smaller crescents.
+  - Crescent k (k = 0–4) is born at the arc point written at 14 + 6 × (0.1 + 0.2k): ticks 14.6, 15.8, 17, 18.2 and 19.4, interpolated between the arc's written samples.
+  - It heads along the aim turned (2 − k) × 16° toward the side of the aim where the arc began (its first written point against its last), so the fan opens the way the arc was written and no two paths cross as they leave. It leaves at 10 px/tick.
+  - The lash arc curls back toward the reaper, so the five are born round a loop and leave as a ring of blades opening forward.
+- **Spacing:** Over and Under throws are at least 18 ticks apart, counted on the player, so swapping items cannot throw faster than the figure eight. The volley needs the whole measure.
+- **Gate:** a throw needs a live stroke, so nothing is thrown while the owner is dead, Down, stunned or not holding the scythe (`Usable`, `CanAct`).
+
+**Crescent body** (draw equals collide).
+
+- The body is an arc of live black blood, convex side forward. In the crescent's frame (f along its heading, n across it), sample i = 0–6 at s = −1 + i/3 lies at Center + f × (h(1 − s²) − h/2) + n × s·w/2, with radius R(1 − 0.65s²) × InkOpen(age). Center sits halfway between the apex and the chord.
+- **Sizes:** an Over or Under crescent has w = 60, h = 16 and R = 9; a volley crescent has w = 44, h = 12 and R = 7.
+- **Collision:** the six capsules between consecutive samples, each with its smaller end's radius (the rule of the staff lines). The drawn body is exactly this list plus the material's rim, and the crescent has no other damaging part.
+
+**Crescent flight.** `SableCrescentFlight` is a pure rule file, Terraria-free like `QuillFlight`. Its constants are per game tick; the crescent has one extra update and applies them with dt = ½, as Doll's `RitualArmamentRules.Steer` does.
+
+- **Free flight:** the heading is held for the first 6 ticks; volley crescent k holds it for 6 + 2|k − 2| (10, 8, 6, 8, 10). A crescent therefore visibly leaves the blade, or the volley fans out, before anything turns.
+- **Turn:** each tick the heading changes by clamp(0.3 × err, −ω, ω), where err is the wrapped angle to the aim point and ω = 0.16 × Smooth((age − free) / 10) rad/tick. The proportional term keeps the curve smooth near the target; ω bounds it.
+- **Aim point:** the target's centre plus its velocity × clamp(distance / speed, 0, 8).
+- **Speed:** it eases toward 20 × (0.6 + 0.4 × max(0, cos err)) px/tick, as v += (v* − v)(1 − e^(−0.25·dt)). It slows to 12 px/tick in a hard turn, so its tightest curve has a radius of 12 / 0.16 = 75 px and a crescent never snaps round.
+- **Turning circle:** an aim point behind the crescent's beam (|err| > 90°) and inside the tightest circle it can turn on toward it (75 px, on the side of the turn) cannot be reached by turning. The crescent then holds its heading, still slowing as for a hard turn, until the point leaves that circle, and only then turns. One that overshoots a small target therefore loops out and comes back instead of orbiting it at 75 px for the rest of its life. Ahead of the beam it always turns, so holding and turning never alternate into an orbit.
+- **No target:** it flies straight, easing to 20 px/tick.
+- **Tiles:** crescents pass through tiles like the rest of the reward ink, but acquire only targets in line of sight.
+
+**Crescent targets** (owner only; `ai[0]` carries the slot).
+
+- C is the cursor clamped within 960 px of the player. An NPC is eligible when it `CanBeChasedBy`, is in line of sight from the crescent and its root has not been hit by this crescent.
+- **Acquisition** runs at the throw and every 4 ticks while the crescent has no target. It takes the first match of:
+  1. the eligible NPC whose hitbox is nearest C, within 240 px of C;
+  2. the eligible NPC nearest the crescent within 400 px whose centre lies within 75° of its heading;
+  3. none.
+- **Keeping:** a target is kept until it is hit, dies, stops being chaseable, moves beyond 1,400 px, or its slot's incarnation changes. Moving the cursor does not redirect a crescent in flight, so its curve stays readable.
+- **NPC identity:** the owner records each target's `CrimsonCovenantIncarnation`. When the slot is reused, the crescent acquires again, instead of retiring as other reward projectiles do.
+
+**Crescent hits.**
+
+- **Damage:** ×0.4 (Over and Under) or ×0.2 (volley) of the live weapon damage at the throw, once per root per crescent, through its own root ledger (native local immunity −1). One crescent hits at most 3 roots.
+- **No ID-static immunity:** every crescent of a volley lands on a boss, so the nominal figure below is exact, and one crescent never wastes another. Stacking is bounded by the fixed throw schedule and the live cap instead.
+- **Chain:** after a hit on its target (or on anything while it has none), a crescent that has hit fewer than 3 roots turns to the nearest eligible NPC within 320 px of itself, in any direction. Otherwise it breaks there. A hit on a bystander on the way keeps its target (Keeping), and its third root breaks it wherever it is.
+- **Break:** the crescent's live window ends 6 ticks later, through the material's close crossfade, while it slows to 30% of its speed. Collision is unchanged through the close, as with the Raid's close, under the same ledger and 3-root limit.
+- **Lifetime:** 70 ticks. A crescent that never breaks closes over its last 6 (ticks 64–70).
+- **Cap:** at most 8 live crescents per owner. A held loop's natural maximum is exactly 8: in each 100-tick measure the Over and Under crescents leave on ticks 9, 27, 45 and 63 and the volley on tick 92, so any 70 ticks that hold a volley hold at most three Over or Under crescents, and any 70 ticks without one hold at most four. A ninth throw breaks the oldest crescent in flight.
+
+**Engraving and commitment.**
+
+- A stroke engraves one line of the staff when any of its parts (the blade, the lash arc or a crescent it threw) first damages an NPC; a stroke engraves at most one line. A crescent that lands after a Staff Reap was cast engraves the first line of the next staff.
+- Crescents are live from the throw, so they finish their flight through the owner's death, Down and item swaps ([Commitment](#commitment)). Nothing is refunded.
 
 **Staff (the build).**
 
-- Every stroke that damages at least one NPC engraves one line of a five-line staff, up to 5 lines. A full measure that connects therefore fills the staff.
+- Every stroke that connects, by its blade, lash arc or crescents, engraves one line of a five-line staff, up to 5 lines. A full measure that connects therefore fills the staff, from close in or from crescent range.
 - The staff hangs 40 px behind the shoulder: five 56 px dormant lines, 8 px apart. Each new line is written in with its ember-gold head and the next toll; a full staff warms its lips.
 - Lines last 360 ticks after the last engraving, then drain one per 30 ticks.
 - Other players see the staff through its carrier, at half opacity.
 
-**Right click — Staff Reap / 五線刈り.** Needs at least one line; with none, nothing happens.
+**Right click — Staff Reap / 五線刈り.** It stays as it was; the crescents do not subsume it:
 
+- **Signature:** every weapon in the set builds something visible and releases it at a moment the player chooses ([Signature](#signature)). Without Staff Reap the scythe would have no release and no finale, and the owner-picked `StaffBarline` (take B) would lose its moment.
+- **Role:** crescents are single-target seekers that land one at a time. Staff Reap is a placed, simultaneous cut that closes on one target and crosses a crowd at once. Making homing do that job would mean a screen-filling swarm, which is gaudy rather than refined.
+- **Link:** crescent hits engrave the staff, so a player fighting from range still builds it, and the release stays the burst.
+- **Cost:** it was already plain Melee, so the class change does not touch it, and its approved geometry, cues and tests stay.
+
+The rules are unchanged:
+
+- **Condition:** needs at least one line; with none, nothing happens.
 - **Input:** pressed during a stroke, the release begins when that stroke's live window ends (at most 8 ticks later); the pose blends from wherever the blade is.
 - **Windup (ticks 0–16):** the reaper draws the scythe high behind and whips it forward at tick 16.
 - **Placement:**
@@ -283,39 +347,81 @@ Sable Mantle's bone hook on a black lacquered haft, swung in figure eights.
   - The scythe holds its follow-through until tick 56, and the next Over starts from that pose.
 - **Partial staff:** the scythe is released 8 ticks after the last line fires.
 - **Scale:** the Raid's Shroud Rope lines have radius 36, lie 224 px apart and span the whole field. This staff is a small, aimed cut around one target. Its 840 px lines still cut crowds; that is an acceptance check.
+- Crescents already in flight keep flying through a release.
 
-**Nominal:**
+**Nominal:** the measure keeps its 6.4× and is split between the blade and the crescents:
 
-- A measure (Over, Under, Over, Under, Whip) is 100 ticks for 6.4× base. Moonshear's kata is 82 ticks for 5.2×.
+| Part | Each | Per measure |
+|---|---|---|
+| Over and Under blade | ×0.6 | 4 × 0.6 = 2.4 |
+| Over and Under crescent | ×0.4 | 4 × 0.4 = 1.6 |
+| Whip blade | ×1.0 | 1.0 |
+| Lash arc | ×0.4 | 0.4 |
+| Volley | 5 × 0.2 | 1.0 |
+| **Measure (100 ticks)** | | **6.4** |
+
+- That is 53% blade, 41% crescents and 6% lash arc. The true-melee version was 4 × 1.0 + 1.8 + 0.6 = 6.4, all of it close in.
 - A full staff on a target every line crosses adds 5 × 0.8 + 2.0 = 6.0× in a 56-tick release, during which the scythe cannot swing.
-- Together that is 12.4× in 156 ticks. A one-line release (0.8× in 24 ticks) is worth less than swinging, so the staff is worth filling.
+- Together that is 12.4× in 156 ticks: 3600 × 12.4 / 156 = 286 raw per tick, the same as before (Ebon 281).
+- **From range** (the blade and lash arc miss, the crescents land and engrave): 2.6× per measure plus the 6.0× release is 8.6× in 156 ticks, 198 raw per tick, or 69% of the close figure. Stepping in still pays, and that is the melee identity.
+- **Partial release:** one line is 0.8× in 24 ticks, against 1.54× from swinging those 24 ticks, so the staff is still worth filling.
+- **Crowds:** each crescent can hit 3 roots, so a measure's nine crescents can land up to 27 hits, besides the staff's crowd cuts.
+- The nominal assumes every part lands. Homing makes the crescents' share land more often than a blade does, so measured damage will sit above the true-melee version's; the owner's balance check judges it.
 
 **State and replication.**
 
 | Projectile | Role | Data |
 |---|---|---|
-| `SableStroke` | Held stroke | `ai = (stroke index, aim, age)`; `netUpdate` at age 1, at the live start and every 6 ticks. Velocity is data (`ShouldUpdatePosition` false): x = what came before (−1 nothing, 0 the previous stroke, 1–5 a Staff Reap of that many lines), y = the aim it was cast along, so every client eases the windup from the previous pose |
+| `SableStroke` | Held stroke | `ai = (stroke index, aim, age)`; `netUpdate` at age 1, at the live start and every 6 ticks. Velocity is data (`ShouldUpdatePosition` false): x = what came before (−1 nothing, 0 the previous stroke, 1–5 a Staff Reap of that many lines), y = the aim it was cast along, so every client eases the windup from the previous pose. It writes the lash arc, and the owner spawns its crescents from it |
+| `SableCrescent` | Owner projectile, thrown by a stroke (≤ 8 per owner) | `ai = (target slot or −1, kind + 8 × break age, age)`: kind 0 Over, 1 Under, 2–6 volley crescent 0–4; break age 0 while flying. Position and velocity are native, with one extra update. `netImportant`; `netUpdate` at the throw, on each target change, at the break and every 12 ticks |
 | `SableStaff` | Harmless carrier while lines > 0, drawn on the owner | `ai = (lines, ticks since last engraving, —)`; `netUpdate` on each change |
 | `SableRelease` | Held release pose, harmless | `ai = (aim, lines, age)`; velocity is data: x = the interrupted stroke as index × 32 + age (−1 when cast from rest), y = that stroke's aim |
 | `StaffCut` | Owner child, spawned at the cast (≤ 6 per cast) | position = the starting end; `ai = (signed length, index (5 = barline) + 8 × lines spent, age)`; a negative age is the wait |
 
+- **Crescent peers:** other clients steer with the same `SableCrescentFlight` toward the replicated target slot, so the owner's periodic update only corrects drift. A slot that is empty on a peer flies straight until the next update.
+- **Crescent owner state:** the hit ledger, hit count, target incarnation and the throwing stroke's serial stay on the owner (`localAI` and `SableScythePlayer`). The owner keeps the last 16 stroke serials with an engraved bit, so a late crescent engraves once for its stroke.
+- **Crescent cost:** steering is constant work per update. Acquisition scans the NPCs at most once per 4 ticks while untargeted, and once per chain; line of sight is tested only on the best candidate left, until one passes. Collision tests the six capsules only after a disc broadphase of radius w/2 + R + 8. The body adds 7 ink samples.
+- **Crescent validation:** `ai[0]` is an integer in −1–199; `ai[1]` is an integer in 0–566 whose kind (`ai[1] % 8`) is at most 6 and whose break age is at most 70; `ai[2]` lies in 0–71; velocity is finite and at most 16 px per update. Anything else kills it.
+
 **Presentation.**
 
-- SR02 rotated about its measured grip anchor; SR02I icon.
+- **Pixel art:** SR02 rotated about its measured grip anchor; SR02I icon. The crescents need no new art: they are ink.
 - **Swing wake:** a `PathLivePass` strip sampled from the real hook-tip positions of the last 9 ticks. It tapers from 14 px to 0, is hot only in the live window and cools to residue as it trails. It lies inside the area the blade swept, so it never shows harm where there was none.
-- A short white-red glint marks each crossing of the aim. On a hit, up to 6 droplets spray along the swing.
-- The crescent, lines and barline are live paths with their ignition blaze, then scars.
+- **Edge embers:** during a live window one ember per tick lifts off the hook tip and drifts back along the swing (life 10, 6 px).
+- **Glint:** a short white-red glint marks each crossing of the aim. On a blade hit, up to 6 droplets spray along the swing, with a bone chip.
+- **Throw:** an Over or Under crescent ignites at the hook tip with the material's ignition blaze, and three embers flare there (8 ticks; 16, 9 and 6 px).
+- **Crescent in flight:**
+  - The live body burns with crimson lips and red filaments streaming along it.
+  - The ember-gold writing bead sits on the body's apex (the canvas places a path's bead on a chosen sample), marking friendly black blood at the crescent's leading point.
+  - Its **wake** is embers, not ink: each tick one ember is left at a hashed point across the arc's back edge, 3 px behind it, nearly still (life 12, 3–5 px). They never join into a line. A residue smear (a path through the apex's or the centre's last ticks, R or ¾ of the arc wide) was rendered and rejected: on bright ground it read as a grey comet line and on dark ground as a pair of faint rim lines, both of them thread.
+  - It sheds a droplet every 4 ticks from alternating tips (carrying 6% of its speed, so it drips and falls under gravity) and an ember every 3 ticks from the apex lip. It lights its apex crimson (0.7, 0.1, 0.06), as other reward ink does.
+- **Volley:** the lash arc gives up its fire. It cools from live to scar over ticks 20–26 (its close) while the five crescents fan out of it, each born with one ember.
+- **Hits:** every crescent hit throws 3 droplets along the travel (±0.6 rad, 4–7 px/tick) and 2 embers.
+- **Break:** the body slows into the wound as it closes, then leaves its scar there for 20 ticks, drawn by the client after the projectile ends. One spatter stroke (a residue curve 28 px along the travel, radius 6 to 1) dries beside it, and a crimson light fades over 6 ticks.
+- **Staff Reap:** the staff, lines and barline are live paths with their ignition blaze, then scars, as before.
+- **Opacity:** other players' crescents draw at 0.85, like all their live ink.
+- **Restraint:** there are no glyphs, rings, script, translucent bands, bloom halos or flat fills (the rejected red-sorcery look), and nothing moves on a beat. The red-magic feel comes only from the material: its burning lips, its ignition blaze and the ember-gold bead.
+- **Layering:** all of the scythe's ink, crescents included, draws once per frame through `ScarletRewardInk.DrawWorld`, beneath NPCs, players and every Raid's forecasts. The held scythe draws above, as an ordinary projectile.
+- **Reduced Effects:** particles and droplets are halved as everywhere (the ember wake through the particle pool; drips every 8 ticks instead of 4; one hit droplet instead of three). The crescents' spatter strokes are removed, because they are decorative. The bodies, scars and the swing wake stay, because a body is a damage footprint. The only shake is the barline's, which Reduced Effects turns off.
 
 **Audio.**
 
 | Cue | When |
 |---|---|
-| `ScytheSwingHigh`, `ScytheSwingLow` | Each Over and Under: a drawn breath into the cut, peaking on the first live tick |
-| `Toll(k)` | Line k engraved (owner only) |
+| `ScytheSwingHigh`, `ScytheSwingLow` | Each Over and Under: a drawn breath into the cut, peaking on the first live tick. The crescent leaves at age 9 inside this breath, so it has no cue of its own |
+| `Toll(k)` | Line k engraved, by a blade or a crescent (owner only) |
 | `ScytheWhipBrace` → `ScytheWhip` | The Whip's draw-back → the lash |
+| `ScytheVolley` → `StaffCut` (per-swing) | The volley sheds (Whip 20), at the arc's middle |
+| `CrescentBreak` → `StaffCut` −6 dB (per-swing) | A crescent breaks; at most one per 6 ticks per owner, so a volley landing together rings once or twice, not five times |
 | `StaffWindup` → `StaffCut` | Release windup → each line |
 | `StaffBarline` | Final Barline: a heavy double cut on the cadence voicing |
 | `Cadence` | A partial staff: with the last `StaffCut` |
+
+- **Per-swing cues** follow the multiplayer rule: the owner hears them at their role's level, other players 8 dB lower with one voice.
+- **Stand-ins:** the two wanted cues are in `ScarletRewardCues.Wanted`, outside the 35 shipped: each plays its stand-in's file (`StaffCut`, the break 6 dB lower) at its own role's level in a voice pool of its own name, so a stand-in never takes the voices of a Staff Reap cut. Recording one replaces its stand-in with its own file and moves it into the shipped table.
+- **New cues wanted:** two cues, recorded under the same rules (CC0 recordings only, unpitched, `Lead` 0) and auditioned by the owner as A/B takes before they replace their stand-ins:
+  - `ScytheVolley`: a one-shot with 2 voices, about 0.5 s. The arc tears into five: a wet tear, then five quick close whisks within 0.15 s.
+  - `CrescentBreak`: a one-shot with 3 voices, about 0.3 s. A short wet splash with a dry bone tick.
 
 ## Ranged — Canticle Organ / 聖歌のオルガン銃
 
@@ -610,7 +716,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 
 | Weapon | Carrier projectiles per owner | Longest life | Ink paths per owner |
 |---|---|---|---|
-| Sable Scythe | 1 stroke, 1 staff carrier, 1 release pose, ≤ 6 cuts per cast | lines 360 + up to 150 drain; cuts ≤ 90 from the cast | ≤ 20 |
+| Sable Scythe | 1 stroke, 1 staff carrier, 1 release pose, ≤ 6 cuts per cast, ≤ 8 crescents in flight (a breaking one closes within 6 ticks) | lines 360 + up to 150 drain; cuts ≤ 90 from the cast; crescent 70, its scar 20 more (drawn by the client) | ≤ 44: 20 for the swing, the staff and the cuts, 8 for live crescent bodies, 16 for breaking and ended crescents (scar and spatter); the crescents' ember wake is ≤ 96 particles of the owner's 200 |
 | Canticle Organ | ≤ 3 shards in flight, ≤ 16 hands per hymn | hand ≤ 145 from the cast | ≤ 56 (8 of them owner-only mark arcs) |
 | Scarlet Baton | 1 swing, ≤ 9 strokes (8 + 1 drying), 1 river; while a tutti burns, the next score's ≤ 9 strokes add to its ≤ 8 | stroke 480; river ≤ 135 from the cast | ≤ 11 outside a tutti (the river ≤ 600 sample points); a tutti overlapping the next score adds that score's strokes |
 | Ember Censer | 1 per slot | minion | 2 per censer |
@@ -636,7 +742,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 
 - **Pure rule files** with no Terraria or XNA references, linked by the domain tests the way `EbonRewardRules` is:
   - `CrimsonRewardRules`: S(k), the damage and use-time tables, every constant in this document, and capsule, disc and box tests.
-  - Per-weapon rules: `SableScytheMotion`, `CanticleRules`, `BatonRules`, `CenserRules`, `QuillRules` (including `QuillFlight`).
+  - Per-weapon rules: `SableScytheMotion`, `SableCrescentFlight`, `CanticleRules`, `BatonRules`, `CenserRules`, `QuillRules` (including `QuillFlight`).
   - `CrimsonStrokeState`: the shared codec.
 - **Independence from Ebon:** these files do not reference `EbonRewardRules`. Any helper worth sharing moves to `Common` in its own change.
 - **`CrimsonRewardItems`:** `Icon` (with a `HasAsset` fallback), `Usable`, `DamageClassFor`, `TypeFor`, `RewardTypes`, `Defaults`, `Hit`. `RewardTypes` is the one pool for both the reliquary and the Covenant recipe.
@@ -658,7 +764,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 
 - `tools/export_scarlet_reward_art.py`;
 - the cue recipe stays outside the repository, as the Raid's recorded audio does; its file hashes, sources and processing are in [Attribution](../../../Assets/ATTRIBUTION.md);
-- the offline fixture `tools/fixtures/ScarletRewardsPreview.cs`, as `EbonRewardsPreview`, run by `tools/preview-scarlet.ps1 -Rewards`.
+- the offline fixture `tools/fixtures/ScarletRewardsPreview.cs`, as `EbonRewardsPreview`, run by `tools/preview-scarlet.ps1 -Rewards`. The scythe's crescents have three scenes (`-Only scythe-crescents`): a measure thrown at a boss with a crowd below the aim, a lone drifting boss, and the crowd scene with every crescent's collision capsules outlined. They run the owner logic on `SableCrescentFlight` and draw through the production `ScarletCrescentInk`.
 
 **Localization:** `Localization/CrimsonRewards/{en-US,ja-JP}.hjson`, plus the Covenant's entries in `Localization/CrimsonFoundry`.
 
@@ -668,6 +774,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 - Every nominal figure in this document.
 - The figure eight: continuity at the joins, minimum tip speed, turn radius and angular-acceleration bounds.
 - Staff placement and spacing, the cut schedule and the barline only at five lines.
+- The crescents: throw ages and headings, the volley's birth points and fan (no two paths cross as they leave), the body samples and capsules, the turn and speed bounds (the turn never exceeds ω, the tightest curve is at least 75 px, the throw's heading is held), reaching every still target in a 150° cone from 150 to 700 px without orbiting, target choice and chaining over hitboxes, the natural maximum of 8 live crescents in a held loop, the 18-tick throw spacing, the engraving of one line per stroke, the lifetime and break, the `ai` codec, and the Melee split of the measure. The wanted cues play their stand-in in their own voice pool.
 - The mark ledger: caps, expiry, eviction and incarnation; hymn round-robin order, the 16-hand cap, the range skip and the Clasp only at eight marks.
 - Stroke geometry, the codec round trip and its bounds; the river only at exactly eight strokes, and its run-skipping.
 - Pendulum apex times, the grand-pour cycle and the largest-gap phase choice.
@@ -675,7 +782,7 @@ Quills of black feather edged in crimson. They use Calamity's `RogueDamageClass`
 - Commitment: unstarted parts die on Down or death; builds survive Down and item swaps.
 - Every projectile rejects invalid `ai`.
 
-**Source-wiring checks.** No Client reference from Content; `Usable` gating on every weapon; the drop is Victory-only and counted before each grant; the rewards never call `ForecastPass`.
+**Source-wiring checks.** No Client reference from Content; `Usable` gating on every weapon; the drop is Victory-only and counted before each grant; the rewards never call `ForecastPass`; the scythe never uses the true-melee class.
 
 **Merge note.** `feat/scarlet-signature-moves` also edits `CrimsonRuntime` and the encounter spec. Expect a small conflict and rebase after it lands.
 
@@ -798,6 +905,7 @@ The Raid plays its own owner-approved sound set (`ScarletSounds`: every cue at g
 - **Audio:** recordings only, an E♭ sus2 toll ladder and a windup/release pair per attack, instead of synthesized B-minor silk plucks.
 - **Companion:** the existing Scarlet Covenant is re-crafted with new item stats, not a new body or pattern. It is crafted at a Bookcase, matching the Grimoire, instead of a Work Bench.
 - **New rules:** a committed-release rule; other players' dormant builds draw dimmed; build tolls are owner-only; reward ink always lies beneath the Raid's forecasts.
+- **Melee:** the Sable Scythe is ordinary Melee with homing crescents ([owner decision 4](#owner-decisions)). Moonshear stays true melee with no projectiles.
 - **Vocabulary:** no silk, thread, lace or sewing, no puppets and no furniture.
 
 **Not in scope.**
@@ -818,6 +926,7 @@ Decided on 2026-10-02 for the first implementation; the damage and mana numbers 
 1. **Reliquary ownership:** shared world items, as the Doll and Ebon boxes are, so any player can pick up another's. One drops per frozen member at the field's ground centre.
 2. **Quill ink against moving targets:** the ink stays where it was written, so it never becomes a line strung between enemies, and it misses a target that has moved away.
 3. **Covenant while its owner is Down:** Vespera stops attacking while her owner is dead or Down in any Raid, as The Last Waltz does. The encounter spec's companion section records it.
+4. **Sable Scythe class (2026-10-03, after playing 0.3.78):** ordinary Melee instead of true melee, with much flashier effects and homing projectiles. The [Sable Scythe](#melee--sable-scythe--帷の大鎌) section records the design and keeps the measure's nominal budget.
 
 ## Implementation choices
 
@@ -833,7 +942,7 @@ The first implementation fixed these points, which the sections above left open 
 
 - **Figure eight:** the scythe keeps turning, and every half the swing plane flips about the aim axis, so the hook tip traces the ∞. "Angular speed" in the no-stop rules is the 3D angular speed (rotation and roll together).
 - **Whip draw-back:** the rotation reverses for an instant while the blade rolls; the 3D angular speed stays at least 20% of the peak.
-- **Release during the Whip:** Staff Reap starts when the crescent stops being live (tick 26), not at the end of the blade's live window.
+- **Release during the Whip:** Staff Reap starts when the lash arc stops being live (tick 26), not at the end of the blade's live window. The volley (tick 20) has already been thrown by then.
 - **Release lock:** the scythe cannot swing until the release's follow-through ends, counted from the cast. The lock is kept on the player, so swapping items away and back does not cut the release short (the held pose dies with the swap; the cuts already cast run on).
 - **Full staff:** a connecting stroke on a full staff engraves nothing but restarts the 360-tick clock.
 - **Final Barline:** the staff's lines keep their scars until the barline has dried, so the staff dries together. The "whole staff ignites" moment is ember particles along the lines, not live ink, because live ink without collision would break draw equals collide.
@@ -874,6 +983,8 @@ The first implementation fixed these points, which the sections above left open 
 
 **Open for the owner.**
 
+- **Crescent feel:** the turn rate (0.16 rad/tick), cruise speed (20 px/tick), the 3-root limit and the 41% crescent share are starting values for play.
+- **Crescent cues:** `ScytheVolley` and `CrescentBreak` need recordings and an A/B audition; `StaffCut` stands in for both until then.
 - **Censer spread:** with the spacing above (`min(72, (w + 96) / n)`) and a ±28 px swing (34 px at 55°), the outer censers of three or more over a target about 80 px wide miss it with their outward pours (half of their pours). Large bosses are hit by every pour. Tightening the spread is a balance decision.
 
 ## Acceptance (owner, not_run until played)
@@ -883,6 +994,7 @@ The first implementation fixed these points, which the sections above left open 
 - Opening reliquaries.
 - Each weapon's build, release, finale and paired cues.
 - The scythe's figure eight flowing without stops, with its rise and sink; the staff closing on targets of different sizes; the Final Barline.
+- The scythe's crescents: leaving the blade before they turn, the Over and Under crescents crossing, the volley's fan converging, chaining through a crowd and breaking on a boss; how four players' crescents read in the Raid.
 - The organ's marks and the hand cascade; the Clasp.
 - Writing with the baton, steering strokes, the tutti and the river.
 - Censer pendulum and pour timing; the stepping pours with three or four censers; the grand pour.
@@ -892,7 +1004,7 @@ The first implementation fixed these points, which the sections above left open 
 - A second player seeing the builds and releases, with dormant builds dimmed.
 - Reduced Effects and the shake switch.
 - FPS with eight players' full builds and with ten censers.
-- Balance against current Calamity endgame gear, including the staff's crowd cuts and the Covenant at 1500 against crowds.
+- Balance against current Calamity endgame gear, including the scythe as ordinary Melee with melee gear, its crescents' crowd hits, the staff's crowd cuts and the Covenant at 1500 against crowds.
 - The shipped cues in play: each cue's moment, the staged levels against the Raid's cues and Graceful Ordeal and outside the Raid ([Levels against the Raid](#levels-against-the-raid); this listening is their acceptance), and what other players hear (the takes themselves were chosen on the local page).
 
 **Automated evidence** (does not replace the checks above):

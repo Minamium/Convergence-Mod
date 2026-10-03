@@ -115,6 +115,30 @@ internal static partial class Program
         AssertEqual(CrimsonRewardRules.ShowIgnite, RewardCue("ReliquaryOpen").Lead, "reliquary cadence");
     }
 
+    [DomainTest("Scarlet reward wanted cues play a shipped stand-in in their own voice pool until recorded")]
+    private static void ScarletRewardWantedCues()
+    {
+        var wanted = ScarletRewardCues.Wanted;
+        AssertEqual(2, wanted.Length, "ScytheVolley and CrescentBreak are wanted");
+        foreach (var cue in wanted)
+        {
+            AssertEqual(ScarletRewardCues.StaffCut, cue.StandIn, $"{cue.Name} borrows StaffCut for now");
+            AssertEqual("StaffCut", cue.File(), $"{cue.Name} plays StaffCut's file");
+            AssertEqual(cue.Name, cue.Voice(), $"{cue.Name} keeps its own voices, never StaffCut's");
+            AssertEqual(ScarletCueAudience.Shot, cue.Audience, $"{cue.Name} is a per-swing cue");
+            AssertEqual(1, cue.PeerVoices, $"{cue.Name}: other players share one voice");
+            AssertEqual(0, cue.Lead, $"{cue.Name} sits at the head of its file");
+            AssertEqual(false, ScarletRewardCues.All.Any(c => c.Name == cue.Name), $"{cue.Name} is not one of the 35 shipped");
+            AssertEqual(cue, RewardCue(cue.Name), $"{cue.Name} is found by name");
+        }
+        AssertEqual(2, RewardCue(ScarletRewardCues.ScytheVolley).Voices, "ScytheVolley: 2 voices");
+        AssertEqual(3, RewardCue(ScarletRewardCues.CrescentBreak).Voices, "CrescentBreak: 3 voices");
+        AssertEqual(0f, RewardCue(ScarletRewardCues.ScytheVolley).StandInDecibels, "the volley's stand-in at its role's level");
+        AssertEqual(-6f, RewardCue(ScarletRewardCues.CrescentBreak).StandInDecibels, "a break's stand-in 6 dB lower");
+        AssertEqual(CrimsonRewardRules.VolleyAge, ScarletRewardCues.ScytheVolleyAt, "the volley's tear as the lash arc sheds it");
+        foreach (var cue in ScarletRewardCues.All) AssertEqual(cue.File(), cue.Voice(), $"{cue.Name}: a shipped cue's voices are its file's");
+    }
+
     [DomainTest("Scarlet reward cue voices cover each cascade, the censer budget and a melody of one toll")]
     private static void ScarletRewardCueVoices()
     {

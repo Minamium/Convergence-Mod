@@ -81,9 +81,9 @@ $files = @(
 $authority = 'CrimsonTechnique', 'CrimsonTrackingBeam', 'CrimsonChoirRakes', 'CrimsonClusters', 'CrimsonSpatialCuts',
     'CrimsonChoreography', 'CrimsonEnsemble', 'CrimsonInvocation', 'CrimsonRhythm', 'CrimsonPhaseRules',
     'CrimsonCovenantRules', 'CrimsonChorusRules', 'CrimsonChorusImpactPositions', 'CrimsonState',
-    'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonMeter',
+    'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonMeter', 'CrimsonSignatureMoves',
     # The reward rule files are pure; the reward scenes (tools/fixtures/ScarletRewardsPreview*.cs) may use any of them.
-    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/CanticleRules',
+    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/SableCrescentFlight', 'Rewards/CanticleRules',
     'Rewards/BatonRules', 'Rewards/CenserRules', 'Rewards/QuillRules'
 $files += $authority | ForEach-Object { "Content/Encounters/CrimsonFoundry/$_.cs" }
 $files += Get-ChildItem -LiteralPath (Join-Path $root 'tools/fixtures') -Filter 'ScarletRewardsPreview*.cs' | ForEach-Object { "tools/fixtures/$($_.Name)" }

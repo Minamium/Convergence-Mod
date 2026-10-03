@@ -27,20 +27,25 @@ internal static partial class Program
             AssertEqual(true, SableScytheMotion.Live(i, end[i]), "live through the end of the window");
             AssertEqual(false, SableScytheMotion.Live(i, end[i] + 1), "half-open after the window");
             AssertEqual((i + 1) % 5, SableScytheMotion.Next(i), "Over, Under, Over, Under, Whip, then the Over again");
-            measure += SableScytheMotion.Multiplier(i) + (kind[i] == SableScytheMotion.Whip ? CrimsonRewardRules.CrescentMultiplier : 0);
+            // Each Over and Under throws one crescent; the Whip's lash arc lands once and sheds the volley of five.
+            measure += SableScytheMotion.Multiplier(i) + (kind[i] == SableScytheMotion.Whip
+                ? CrimsonRewardRules.LashMultiplier + CrimsonRewardRules.VolleyCrescents * CrimsonRewardRules.VolleyMultiplier
+                : CrimsonRewardRules.CrescentMultiplier);
             ticks += duration[i];
         }
-        AssertNear(1.8f, SableScytheMotion.Multiplier(4), 1e-6f, "the Whip");
+        AssertNear(.6f, SableScytheMotion.Multiplier(0), 1e-6f, "the Over's and Under's blade");
+        AssertNear(1f, SableScytheMotion.Multiplier(4), 1e-6f, "the Whip's blade");
         AssertNear(6.4f, measure, 1e-5f, "a measure is 6.4x");
+        AssertNear(CrimsonRewardRules.MeasureMultiplier, measure, 1e-5f, "the rules' measure is the sum of its parts");
         AssertEqual(100, ticks, "a measure is 100 ticks");
-        AssertEqual(true, SableScytheMotion.CrescentLive(4, 15) && SableScytheMotion.CrescentLive(4, 26) && !SableScytheMotion.CrescentLive(4, 27),
-            "the crescent is live from the lash until 26");
-        AssertEqual(false, SableScytheMotion.CrescentLive(0, 10), "only the Whip writes a crescent");
+        AssertEqual(true, SableScytheMotion.LashLive(4, 15) && SableScytheMotion.LashLive(4, 26) && !SableScytheMotion.LashLive(4, 27),
+            "the lash arc is live from the lash until 26");
+        AssertEqual(false, SableScytheMotion.LashLive(0, 10), "only the Whip writes a lash arc");
         AssertEqual(5f, SableScytheMotion.DrawAge(0, 6, 0), "the first live tick draws from the live start, never the windup");
         AssertEqual(13f, SableScytheMotion.DrawAge(0, 14, 0), "the first recovery tick draws from the live end");
         AssertNear(2.5f, SableScytheMotion.DrawAge(0, 3, .5f), 1e-6f, "fractional between ticks");
         AssertEqual(13, SableScytheMotion.LastDamage(0), "a release waits for the stroke's live window");
-        AssertEqual(26, SableScytheMotion.LastDamage(4), "the Whip's release waits for its crescent");
+        AssertEqual(26, SableScytheMotion.LastDamage(4), "the Whip's release waits for its lash arc");
     }
 
     // Projected hook tip in the aim frame (shoulder at the origin), facing right.
@@ -125,7 +130,7 @@ internal static partial class Program
         {
             int kind = SableScytheMotion.Kind(stroke);
             int start = SableScytheMotion.LiveStart(stroke), end = SableScytheMotion.LiveEnd(stroke);
-            // The cut through the aim is the crossing farthest in front (the Whip's crescent curls back near the reaper).
+            // The cut through the aim is the crossing farthest in front (the Whip's lash arc curls back near the reaper).
             float farthest = 0, direction = 0;
             for (float t = start; t < end; t += .05f)
             {
