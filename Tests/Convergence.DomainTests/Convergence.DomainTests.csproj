@@ -267,6 +267,7 @@
     <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletNote.cs" Link="Presentation/ScarletNote.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletGestureMotion.cs" Link="Presentation/ScarletGestureMotion.cs" />
     <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletBodyMaterial.cs" Link="Presentation/ScarletBodyMaterial.cs" />
+    <Compile Include="../../Client/Encounters/CrimsonFoundry/Vfx/ScarletChoirBlood.cs" Link="Presentation/ScarletChoirBlood.cs" />
     <!-- G0: sampled once from the approved prototype by tools/scarlet_motion_golden.mjs. -->
     <EmbeddedResource Include="Data/scarlet-motion-golden.json" LogicalName="scarlet-motion-golden.json" />
   </ItemGroup>

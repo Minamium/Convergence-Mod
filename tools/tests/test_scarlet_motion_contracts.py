@@ -12,6 +12,8 @@ TESTS = ROOT/'Tests/Convergence.DomainTests'
 MOTION = [VFX/'ScarletNote.cs', VFX/'ScarletEnvelope.cs', VFX/'ScarletGestureMotion.cs', VFX/'ScarletBodyMaterial.cs',
           VFX/'CrimsonChoirCue.cs', CLIENT/'ScarletCueFrame.cs', CLIENT/'CrimsonChoirMotion.cs']
 PURE = [path for path in MOTION if path.parent == VFX]
+# The rigs that draw the motion: guarded on their code (comments may name what they must not do).
+RIGS = [CLIENT/'ScarletApparitionRig.cs', CLIENT/'CrimsonChoirRig.cs', VFX/'ScarletChoirBlood.cs']
 
 
 def read(path):
@@ -29,6 +31,8 @@ class ScarletMotionContracts(unittest.TestCase):
         banned = re.compile(r'CrimsonMeter|Score\.Pulse|BeatTick|baton|engagement|Transfusion\(|DrawSecondary\(')
         for path in MOTION:
             self.assertIsNone(banned.search(read(path)), f'{path.name} must not follow the beat grid')
+        for path in RIGS:
+            self.assertIsNone(banned.search(code(path)), f'{path.name} must not follow the beat grid')
         for path in PURE:
             text = code(path)
             for clock in ('GameUpdateCount', 'GlobalTimeWrappedHourly', 'timeForVisualEffects', 'DateTime', 'Stopwatch', 'new Random'):
@@ -77,7 +81,7 @@ class ScarletMotionContracts(unittest.TestCase):
         self.assertEqual(1, frame.count('Main.ActiveProjectiles'))
         self.assertIn('tick != Main.GameUpdateCount', frame)
         self.assertIn('fight != owner.State.Fight', frame)
-        self.assertIn('ScarletArticulation.Participant(owner)', frame)
+        self.assertIn('ScarletArticulation.Member(owner)', frame)
         rig = read(CLIENT/'CrimsonRig.cs')
         self.assertIn('internal static partial class CrimsonRig', rig)
         self.assertNotIn('Main.ActiveProjectiles', code(CLIENT/'CrimsonRig.cs'))
@@ -100,9 +104,9 @@ class ScarletMotionContracts(unittest.TestCase):
     def test_effigy_passes_notes_motion_material_and_heave(self):
         rig = read(CLIENT/'CrimsonRig.cs')
         effigy = rig[rig.index('internal static bool DrawEffigy('):rig.index('internal static int ChoirCues(')]
-        self.assertIn('frame.Participant ? ScarletNotes.Collect(frame.Gestures, effigy.State.Index, age, flipped,', effigy)
-        self.assertIn('ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues)', effigy)
-        self.assertIn('heave: ScarletGestureMotion.Heave, material: choir', effigy)
+        self.assertIn('frame.Member ? ScarletNotes.Collect(frame.Gestures, effigy.State.Index, age, flipped,', effigy)
+        self.assertIn('ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues, accepted: !frame.Member)', effigy)
+        self.assertIn('heave: frame.Member ? ScarletGestureMotion.Heave : 0, material: choir', effigy)
         self.assertIn('ScarletGestureMotion.Crown(age, notes[..noted]) : ScarletGestureMotion.Mantle(age, notes[..noted])', effigy)
         self.assertIn('motion: motion, material: body', effigy)
         # Final and the free-standing apparitions keep the defaults (no notes, no heave).
@@ -115,11 +119,39 @@ class ScarletMotionContracts(unittest.TestCase):
     def test_final_choir_cues_keep_the_accepted_derivation(self):
         notes = read(VFX/'ScarletNote.cs')
         cues = notes[notes.index('internal static int ChoirCues('):notes.index('internal static bool ChoirArms(')]
-        final = cues[cues.index('if (final)'):cues.index('if (p.Source != 2) continue;')]
+        final = cues[cues.index('if (final || accepted)'):cues.index('            if (p.Source != 2) continue;')]
+        self.assertIn('if (!final && p.Source != 2) continue;', final)
         self.assertIn('if (age < p.Born || age >= p.End) continue;', final)
         self.assertIn('new(p.Born, p.Fire, p.End, p.Step % 4, broad)', final)
         self.assertIn('ScarletNotes.ChoirCues', read(CLIENT/'CrimsonRig.cs'))
         self.assertIn('CrimsonRig.ChoirCues(boss,age,cues,true)', read(CLIENT/'ScarletAvatarArt.cs'))
+
+    def test_membership_drives_the_expression_and_never_reads_life(self):
+        # A member's death or revival never snaps a swinging body back to rest; shakes and sounds keep Participant.
+        articulation = code(CLIENT/'ScarletArticulation.cs')
+        member = articulation[articulation.index('internal static bool Member('):]
+        member = member[:member.index(';') + 1]
+        self.assertIn('boss.State.Contains(Main.myPlayer)', member)
+        for life in ('dead', 'ghost'):
+            self.assertNotIn(life, member)
+        self.assertIn('internal static bool Participant(CrimsonBoss? boss) => Member(boss) && !Main.LocalPlayer.dead && !Main.LocalPlayer.ghost;', articulation)
+        rig = code(CLIENT/'CrimsonRig.cs')
+        self.assertNotIn('frame.Participant', rig)
+        self.assertEqual(4, rig.count('frame.Member'))  # Vespera's command, the notes, the Choir's cues and its heave
+
+    def test_past_poses_keep_closed_notes(self):
+        notes = read(VFX/'ScarletNote.cs')
+        collect = notes[notes.index('internal static int Collect('):notes.index('internal static (float Until, float Since) SignalTimes(')]
+        self.assertIn('Span<ScarletNote> output, float lookback = 0)', collect)
+        self.assertIn('age >= plan.Fire + SpanOf(plan) + lookback) continue;', collect)
+        self.assertIn('if (note.Holds(age)) for (int i = 0; i < count && stale < 0; i++) if (!output[i].Holds(age)) stale = i;', collect)
+        self.assertIn('internal const int PastTicks = 21;', notes)
+        rig = read(CLIENT/'CrimsonRig.cs')
+        self.assertIn('boss.NPC.Center.X, boss.NPC.Center.Y, notes, effigy.State.Index == 2 ? 0 : ScarletNotes.PastTicks) : 0;', rig)
+        # The wake replays the notes at its lags; ScarletApparitionRig's lags fit inside PastTicks (16 + the 4-tick lag).
+        apparition = read(CLIENT/'ScarletApparitionRig.cs')
+        self.assertIn('WakeLags = { 0, 2, 4, 6, 8, 10, 13, 16 };', apparition)
+        self.assertIn('var before = Motion(species, t - 4, notes);', apparition)
 
 
 if __name__ == '__main__':

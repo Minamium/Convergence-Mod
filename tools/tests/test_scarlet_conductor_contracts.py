@@ -53,8 +53,8 @@ class ScarletConductorContracts(unittest.TestCase):
         rig = code(CLIENT/'CrimsonRig.cs')
         draw = member(rig, 'internal static bool Draw(CrimsonBoss boss')
         self.assertIn('var frame = ScarletCueFrame.Of(boss);', draw)
-        # Her Act's body only, a local participant only, and nothing in Final (she is absorbed).
-        self.assertIn('frame.Participant && boss.State.Phase < 3 ? boss.State.Phase : -1', draw)
+        # Her Act's body only, a member of the fight only, and nothing in Final (she is absorbed).
+        self.assertIn('frame.Member && boss.State.Phase < 3 ? boss.State.Phase : -1', draw)
         self.assertIn('DrawConductor(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection, frame.Gestures, frame.Choruses,', draw)
         for moved in ('CrimsonEnergy.AddCore', 'DrawPerformer(', 'Vector2 held'):
             self.assertNotIn(moved, draw)
@@ -96,6 +96,13 @@ class ScarletConductorContracts(unittest.TestCase):
         self.assertIn('CrimsonRig.ConductorNotes(live, phase, tick', gates)
         for banned in ('baton(', 'engagement(', 'Transfusion(', 'DrawSecondary(', 'BeatTick('):
             self.assertNotIn(banned, gates)
+
+    def test_release_adds_no_reactor_flare(self):
+        # The reactor's cross scales with its impulse (CrimsonReactor.fx): the command keeps today's recoil there, so
+        # the release shows only in the push, the radius and the rim heat.
+        motion = read(CLIENT/'Vfx/ScarletGestureMotion.cs')
+        self.assertIn('return new(x, y, radius, core, recoil, 1 - .30f * spend,', motion)
+        self.assertNotIn('.6f * ignite', motion)
 
 
 if __name__ == '__main__':

@@ -82,18 +82,49 @@ class ScarletChoirContracts(unittest.TestCase):
 
     def test_shader_attack_terms_vanish_at_rest(self):
         fx = read(SHADER)
-        for uniform in ('float4 attack;', 'float4 heart;'):
+        for uniform in ('float4 attack;', 'float4 heart;', 'float4 heartArea;'):
             self.assertIn(uniform, fx)
         self.assertIn('float front=i.C.a;', fx)
         self.assertIn('float tear=(shape.w>0&&shape.z<.5)', fx)
-        self.assertIn('float knot=(shape.w>0&&shape.z>.5)', fx)
-        self.assertIn('float core=heart.x*(1-smoothstep(.30,.55,radius));', fx)
+        # No bead on the thin flow line (it read as beads on a thread): the sent blood stays inside the painted limb.
+        self.assertNotIn('knot', fx)
+        # The strike in the heart's core only over the painted torso; the outer glow is the accepted one.
+        self.assertIn('float core=heart.x*(1-smoothstep(.30,.55,radius))*smoothstep(.05,.35,tex2D(art,heartArea.xy+q*heartArea.zw).a);', fx)
+        self.assertIn('c+=(HeartGlow(q/(1-heart.w),n,v,struck,heart.z)-c)*core*Calm();', fx)
         self.assertIn('shape.x*i.C.a*signal.z', fx)
         # The Ribbon adds no light for the tear (it only parts the smoke) and has no silk/thread branch.
         ribbon = body(fx, 'float4 Ribbon(VO i)', 'float4 Heart(VO i)')
         self.assertNotIn('lip', ribbon)
         self.assertIsNone(re.search(r'silk|thread|fibre|fiber', fx, re.IGNORECASE))
         self.assertTrue((SHADER.with_suffix('.fxc')).exists())
+
+    def test_reduced_keeps_the_shape_and_quiets_the_light(self):
+        # Reduced Effects: every vertex where Normal has it (the throb takes the full strike), the same blood front
+        # (no halving in vertex alpha), and the shader quiets only the attack's light with Calm().
+        rig = code(RIG)
+        self.assertIn('throb = Math.Max(free * (1 - material.Engaged), material.Ignite / (reduced ? ScarletBodyMaterial.ReducedIgnite : 1));', rig)
+        # The outer heart glow and its patch keep their accepted values; only the masked core answers the strike.
+        self.assertIn('shader.TrySetParameter("shape", new Vector4(free, power, burst, 0));', rig)
+        self.assertIn('Vector2 halfSize = new(235 + power * 60 + burst * 90, 260 + power * 70);', rig)
+        self.assertIn('deform += (p - CrimsonChoirMotion.Heart) * heartWeight * (.09f * throb + .13f * power);', rig)
+        self.assertIn('blood[i] = lit ? ScarletChoirBlood.Of(cues, i, age, material.Heat) : default;', rig)
+        self.assertIn('shader.TrySetParameter("heartArea", ', rig)
+        blood = code(BLOOD)
+        self.assertNotIn('reduced', blood)
+        self.assertIn('internal const float SendPeak = .7f;', blood)
+        self.assertIn('Gain * Math.Max(SendPeak * Bead(u - Send, 9),', blood)
+        fx = read(SHADER)
+        self.assertIn('float Calm(){return signal.w*signal.w*.9+.1;}', fx)
+        self.assertIn('float glow=saturate((front-.75)/.25);', fx)
+        body = fx[fx.index('float4 Body(VO i)'):fx.index('float4 Aura(VO i)')]
+        for term in ('flush=saturate(front*1.6)*(1-glow)*limb*bone*Calm()', 'front*1.4*Calm()', 'glow*.7*Calm()'):
+            self.assertIn(term, body)
+
+    def test_flow_ribbons_carry_no_knot(self):
+        rig = code(RIG)
+        self.assertIn('arm * 2.31f, (.30f + pose.Power * .48f + pose.Burst * .45f) * exposure * (1 - dissolve), 1);', rig)
+        self.assertNotIn('knot', rig)
+        self.assertNotIn('wristAlong', rig)
 
 
 if __name__ == '__main__':

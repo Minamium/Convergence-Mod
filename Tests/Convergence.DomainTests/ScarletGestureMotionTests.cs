@@ -16,7 +16,9 @@ namespace Convergence.DomainTests;
 //    it records both files' sha256. The rejected 4/4 figure is not part of it.
 //  - CrimsonChoirMotion.Arm through ScarletEnvelope is bit-identical to the accepted arm (verbatim oracle below).
 //  - Notes come from plans only; shifting every plan by +7 ticks shifts every response by +7 (no beat follows);
-//    no note is the rest picture; window edges never pop.
+//    no note is the rest picture; window edges never pop; closed notes kept for past poses change nothing now.
+//  - The Choir's blood (ScarletChoirBlood) reaches the struck fingertips exactly on Fire, stays below the white-hot
+//    threshold through the warning, ignites only on Fire and has returned when the window closes.
 internal static partial class Program
 {
     private const float ScarletShift = 7;
@@ -399,6 +401,8 @@ internal static partial class Program
         {
             var drive = ScarletGestureMotion.ChoirDrive(arm, age, cues[..c]);
             output.AddRange(new[] { drive.Lift, drive.Strike, drive.Energy, drive.Burst });
+            var blood = ScarletChoirBlood.Of(cues[..c], arm, age, choir.Heat);
+            output.AddRange(new[] { blood.Send, blood.Return, blood.Flash, blood.Fill, blood.Gain, blood.At(.3f), blood.At(.9f), blood.At(1) });
         }
         for (int i = 0; i < n; i++)
         {
@@ -498,10 +502,15 @@ internal static partial class Program
                     int c = ScarletNotes.ChoirCues(plans, age, false, cues);
                     var drive = ScarletGestureMotion.ChoirDrive(0, age, cues[..c]);
                     var drive3 = ScarletGestureMotion.ChoirDrive(3, age, cues[..c]);
+                    var blood = ScarletChoirBlood.Of(cues[..c], 0, age, choir.Heat);
+                    var blood3 = ScarletChoirBlood.Of(cues[..c], 3, age, choir.Heat);
                     return new[] { crown.OffsetX, crown.OffsetY, crown.Turn * 100, mantle.OffsetX, mantle.OffsetY, mantle.Turn * 100,
                         mantle.Sweep * 10, mantle.Row * 10, body.Heat, body.Drain, body.Engaged, body.Wind, body.Snap,
                         choir.Heat, choir.Drain, choir.Engaged, drive.Lift, drive.Strike, drive.Energy, drive.Burst,
-                        drive3.Lift, drive3.Strike, drive3.Energy, drive3.Burst };
+                        drive3.Lift, drive3.Strike, drive3.Energy, drive3.Burst,
+                        // The arm's blood (below the hand: a lead note's Born is the previous note's Fire, where
+                        // only the fingertips' ignition may step).
+                        blood.At(.5f), blood.At(.75f), blood3.At(.5f), blood3.At(.75f) };
                 }
             }
         // Velocity bounds (per tick): offsets in px, turns in centi-radians, normalised rows x10, material 0..1.
@@ -576,6 +585,95 @@ internal static partial class Program
                     }
                 }
                 AssertEqual(true, moved, $"act {phase + 1} serial {serial}: she commands her notes");
+            }
+    }
+
+    [DomainTest("Scarlet notes: closed notes kept for past poses change nothing now and let a past pose replay its motion")]
+    private static void ScarletNoteLookback()
+    {
+        Span<ScarletNote> now = stackalloc ScarletNote[ScarletNotes.Capacity];
+        Span<ScarletNote> kept = stackalloc ScarletNote[ScarletNotes.Capacity];
+        Span<ScarletNote> then = stackalloc ScarletNote[ScarletNotes.Capacity];
+        for (int phase = 0; phase < 2; phase++)
+            foreach (int serial in new[] { 1, 3 })
+            {
+                var plans = ScarletMotionPhrase(phase, serial);
+                var v = ScarletVespera(plans[0]);
+                for (float age = plans[0].Born; age < plans[4].End + 70; age += .5f)
+                {
+                    int a = ScarletNotes.Collect(plans, phase, age, false, v.X, v.Y, now);
+                    int b = ScarletNotes.Collect(plans, phase, age, false, v.X, v.Y, kept, ScarletNotes.PastTicks);
+                    int expected = 0;
+                    foreach (var p in plans) if (p.Source == phase && age >= p.Born && age < p.Fire + ScarletNotes.SpanOf(p) + ScarletNotes.PastTicks) expected++;
+                    AssertEqual(Math.Min(expected, ScarletNotes.Capacity), b, $"act {phase + 1} serial {serial} age {age}: closed notes within PastTicks");
+                    string at = $"act {phase + 1} serial {serial} age {age}";
+                    // Each body's own motion (Crown: Act I, Mantle: Act II), as CrimsonRig.DrawEffigy draws it.
+                    ScarletApparitionMotion Motion(float t, ReadOnlySpan<ScarletNote> notes)
+                        => phase == 0 ? ScarletGestureMotion.Crown(t, notes) : ScarletGestureMotion.Mantle(t, notes);
+                    var motion = Motion(age, now[..a]);
+                    AssertEqual(motion, Motion(age, kept[..b]), at + ": motion now");
+                    AssertEqual(ScarletBodyMaterial.Apparition(age, now[..a], motion, false, false),
+                        ScarletBodyMaterial.Apparition(age, kept[..b], motion, false, false), at + ": material now");
+                    // The Crown's pour jolt ends inside every Crown note's window, so a closed note adds no drop.
+                    if (phase == 0) for (int i = 0; i < b; i++) AssertEqual(true, kept[i].Broad || kept[i].Span >= ScarletGestureMotion.CrownDropTicks, at + ": jolt inside the window");
+                    // The wake's oldest pose (16 ticks, its tendrils 4 more) replays the motion the body really made.
+                    foreach (int lag in new[] { 4, 10, 16, 20 })
+                    {
+                        float t = age - lag;
+                        int c = ScarletNotes.Collect(plans, phase, t, false, v.X, v.Y, then);
+                        AssertEqual(Motion(t, then[..c]), Motion(t, kept[..b]), $"{at} lag {lag}: past pose");
+                    }
+                }
+            }
+    }
+
+    [DomainTest("Scarlet Choir blood: 1 at the struck fingertips on Fire, below white-hot through the warning, returned by the close")]
+    private static void ScarletChoirBloodValues()
+    {
+        Span<CrimsonChoirCue> cues = stackalloc CrimsonChoirCue[16];
+        foreach (int serial in new[] { 1, 3 }) // ChoirRakes, FourHands
+            foreach (bool flipped in new[] { false, true })
+            {
+                var plans = ScarletMotionPhrase(2, serial);
+                for (int i = 0; i < plans.Length; i++)
+                {
+                    var p = plans[i];
+                    if (!ScarletNotes.ChoirArms(p, flipped, out int first, out int second)) continue;
+                    var one = plans.AsSpan(i, 1);
+                    string at = $"serial {serial} pulse {p.Pulse} flip {flipped}";
+                    float close = p.Fire + ScarletNotes.SpanOf(p);
+                    for (float age = p.Born; age < close; age += .25f)
+                    {
+                        int c = ScarletNotes.ChoirCues(one, age, flipped, cues);
+                        for (int arm = 0; arm < 4; arm++)
+                        {
+                            var blood = ScarletChoirBlood.Of(cues[..c], arm, age, 1);
+                            bool struck = arm == first || arm == second;
+                            for (float u = 0; u <= 1.0001f; u += .025f)
+                            {
+                                float front = blood.At(u);
+                                if (!struck) AssertEqual(0f, front, $"{at} age {age}: arm {arm} is not struck");
+                                else if (age < p.Fire) AssertEqual(true, front <= ScarletChoirBlood.SendPeak + 1e-6f, $"{at} age {age} u {u}: the warning stays below white-hot");
+                                AssertEqual(true, front is >= 0 and <= 1, $"{at}: front in 0..1");
+                            }
+                        }
+                    }
+                    foreach (int arm in new[] { first, second })
+                    {
+                        int c = ScarletNotes.ChoirCues(one, p.Fire - .001f, flipped, cues);
+                        ScarletNear(1, ScarletChoirBlood.Of(cues[..c], arm, p.Fire - .001f, 1).Send, 1e-3, at + ": Send is 1 on Fire");
+                        c = ScarletNotes.ChoirCues(one, p.Fire, flipped, cues);
+                        var fire = ScarletChoirBlood.Of(cues[..c], arm, p.Fire, 1);
+                        ScarletNear(1, fire.Flash, 1e-6, at + ": the fingertips ignite on Fire");
+                        ScarletNear(1, fire.At(1), 1e-6, at + ": the fingertips are the brightest on Fire");
+                        AssertEqual(true, fire.At(ScarletChoirBlood.HandFrom - .05f) < .75f, at + ": only the hand runs white-hot");
+                        c = ScarletNotes.ChoirCues(one, close - .25f, flipped, cues);
+                        var late = ScarletChoirBlood.Of(cues[..c], arm, close - .25f, 1);
+                        AssertEqual(true, late.Return < .01f && late.At(.5f) < .02f, at + ": the blood has returned by the close");
+                        c = ScarletNotes.ChoirCues(one, close, flipped, cues);
+                        AssertEqual(0, c, at + ": no cue after the close");
+                    }
+                }
             }
     }
 }
