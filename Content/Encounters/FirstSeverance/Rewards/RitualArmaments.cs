@@ -162,17 +162,19 @@ public sealed class ChoirOfTheUnmade : RitualArmament
     }
 }
 
+// Last Witness v2: one use is one held WitnessHang score (WEAPONS.md "Rogue — Last Witness"); Calamity's stealth is
+// read once per score and inherited by the thrown blade.
 public sealed class LastWitness : CalamityRogueArmament, IRitualArmament
 {
     public RitualArmamentKind Kind => RitualArmamentKind.Rogue;
-    public override string Texture => "Convergence/Assets/Textures/Items/RitualArmaments/V3/" + Name;
+    public override string Texture => WitnessArt.Root + "LastWitnessIcon";
     public override LocalizedText DisplayName => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Name");
     public override LocalizedText Tooltip => Language.GetText("Mods.Convergence.RitualArmaments.LastWitness.Tooltip");
     public override void SetDefaults()
     {
         RitualArmamentItems.Defaults(Item, Kind);
         Item.DamageType = RogueClass;
-        Item.shootSpeed = 14; Item.shoot = ModContent.ProjectileType<WitnessLitany>();
+        Item.shootSpeed = 14; Item.shoot = ModContent.ProjectileType<WitnessHang>();
         Item.channel = true; Item.autoReuse = true;
     }
     public override bool CanUseItem(Player player) => RitualArmamentItems.Usable(player) && player.ownedProjectileCounts[Item.shoot] == 0;
@@ -183,7 +185,7 @@ public sealed class LastWitness : CalamityRogueArmament, IRitualArmament
         bool stealth = HasStealthStrike(player);
         Vector2 aim = RitualArmamentItems.Aim(velocity, player.direction);
         int index = Projectile.NewProjectile(source, player.MountedCenter, aim * 14, Item.shoot,
-            damage, knockback, player.whoAmI, 0, -1, stealth ? 1 : 0);
+            damage, knockback, player.whoAmI, 0, 0, stealth ? 1 : 0);
         MarkStealthStrike(index, stealth);
         return false;
     }

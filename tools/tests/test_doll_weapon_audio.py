@@ -11,6 +11,7 @@ import struct
 import sys
 import tempfile
 import unittest
+import wave
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "tools"
@@ -66,6 +67,21 @@ def loops():
     return {name for name, args in re.findall(r'@cue\("(\w+)",(.*?)\)\ndef ', text, re.S) if "loop=True" in args}
 
 
+def builder_loops():
+    """Loops mastered as their builder returns them (loop_master="builder": a whole number of turns, under the budget)."""
+    text = GENERATOR.read_text(encoding="utf-8")
+    return {name for name, args in re.findall(r'@cue\("(\w+)",(.*?)\)\ndef ', text, re.S)
+            if "loop=True" in args and 'loop_master="builder"' in args}
+
+
+def wav_frames(path):
+    """Channels, sample width, rate and the interleaved 16-bit samples of a PCM WAV (standard library only)."""
+    with wave.open(str(path), "rb") as w:
+        channels, width, rate, count = w.getnchannels(), w.getsampwidth(), w.getframerate(), w.getnframes()
+        data = w.readframes(count)
+    return channels, width, rate, count, struct.unpack(f"<{len(data) // 2}h", data) if width == 2 else ()
+
+
 def exports():
     """Exported cue files by stem: Ogg one-shots and WAV loops."""
     return {p.stem: p for p in SOUNDS.iterdir() if p.suffix in (".ogg", ".wav")}
@@ -109,6 +125,9 @@ class DollWeaponExports(unittest.TestCase):
         self.assertEqual([], sorted(p.name for p in SOUNDS.iterdir() if p.suffix not in (".ogg", ".wav")))
         self.assertEqual(set(), {p.stem for p in SOUNDS.glob("*.ogg")} & {p.stem for p in SOUNDS.glob("*.wav")},
                          "one-shots are Ogg only, loops WAV only")
+        self.assertEqual([], sorted(p.name for p in SOUNDS.iterdir() if p.suffix != ".ogg" and not (p.suffix == ".wav" and p.stem.endswith("Loop"))),
+                         "one-shots are Ogg only; only a ...Loop cue is a WAV")
+        self.assertEqual([], sorted(p.name for p in SOUNDS.glob("*Loop.ogg")), "loops are sample-exact WAV, never Vorbis")
 
     def test_loops_are_sample_exact_stereo_pcm16(self):
         cues = registry()
@@ -117,9 +136,28 @@ class DollWeaponExports(unittest.TestCase):
             with self.subTest(cue=name):
                 audio_format, channels, rate, bits, frames = wav_info(SOUNDS / f"{name}.wav")
                 self.assertEqual((1, 2, 44100, 16), (audio_format, channels, rate, bits))
-                self.assertEqual(round(cues[name][1] * 44100), frames, "a loop is exactly its registered length")
+                if name in builder_loops():
+                    # Last Witness's spin loops: a whole number of blade turns, within the registered budget.
+                    self.assertLessEqual(frames, round(cues[name][1] * 44100), "a builder loop stays within its budget")
+                else:
+                    self.assertEqual(round(cues[name][1] * 44100), frames, "a loop is exactly its registered length")
         # The Lacuna beam's loop spans eight of the beam's 30-tick pulse periods.
         self.assertEqual(8 * 30 / 60, cues["LacunaBeamLoop"][1])
+
+    def test_loops_are_seamless_pcm16_within_budget(self):
+        cues = registry()
+        loops = sorted(SOUNDS.glob("*.wav"))
+        for clip in loops:
+            with self.subTest(cue=clip.stem):
+                channels, width, rate, count, samples = wav_frames(clip)
+                self.assertEqual((2, 2, 44100), (channels, width, rate), "stereo PCM16 at 44.1 kHz")
+                self.assertGreater(count, 0.5 * rate)
+                self.assertLessEqual(count / rate, cues[clip.stem][1])
+                # The step across the loop point is no larger than half the largest step inside the file.
+                left, right = samples[0::2], samples[1::2]
+                inner = max(max(abs(a - b) for a, b in zip(ch, ch[1:])) for ch in (left, right))
+                wrap = max(abs(ch[0] - ch[-1]) for ch in (left, right))
+                self.assertLessEqual(wrap, 0.5 * inner, "seamless loop point")
 
     def test_exports_are_stereo_vorbis_within_budget_with_pinned_serial(self):
         cues = registry()

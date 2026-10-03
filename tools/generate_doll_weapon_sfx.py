@@ -17,8 +17,11 @@ Deterministic: a cue's random stream is seeded from its name and the Ogg stream 
 from the file stem (generate_ebon_sfx.write_ogg), so a rerun, or --only, is byte-identical.
 Requires numpy, scipy and soundfile (local audio tools, not CI).
 
+One-shots are Vorbis; a cue registered with loop=True (its name ends in Loop) is a PCM16 WAV loop that repeats
+sample-exactly (no trim, fade or causal filter across its seam), mastered as its loop_master says (Cue).
+
 Run: py -3.12 tools/generate_doll_weapon_sfx.py [--store DIR] [--only CUE,...] [--output DIR]
-     [--preview DIR] [--attribution-section FILE] [--previous DIR]
+     [--preview DIR] [--attribution-section FILE] [--previous DIR] [--witness-audition DIR] [--witness-attribution FILE]
 """
 import argparse
 import hashlib
@@ -151,7 +154,8 @@ class Cue:
     glue: float = 1.6    # tanh bus drive before the loudness match (generate_ebon_reward_sfx.soft)
     loop: bool = False   # a sample-exact PCM16 WAV loop, not an Ogg one-shot (never trimmed or faded; filtered circularly)
     # How a loop is mastered: "round" (render_loop_cue: exactly max_seconds, loudness and true peak over the loop
-    # played round) or "period" (master() on one period like a one-shot, true peak including the wrap).
+    # played round), "period" (master() on one period like a one-shot, true peak including the wrap) or "builder"
+    # (render_builder_loop: exactly the builder's samples, within max_seconds, by gain and the memoryless bus only).
     loop_master: str = "round"
 
 
@@ -162,6 +166,8 @@ def cue(name, target_lufs, group, max_seconds, volume, description, glue=1.6, lo
     def register(build):
         if name in CUES:
             raise ValueError(f"duplicate cue {name}")
+        if loop != name.endswith("Loop"):
+            raise ValueError(f"{name}: loops (and only loops) end in Loop")
         CUES[name] = Cue(build, target_lufs, group, max_seconds, volume, description, glue, loop, loop_master)
         return build
     return register
@@ -970,6 +976,463 @@ def meridian_hit_heavy(s, rng):
     return room(mix, 0.1, 0.42, 0.1)
 
 
+# ---------------------------------------------------------------- Last Witness (v2)
+# Clocks of Content/Encounters/FirstSeverance/Rewards/WitnessRules.cs (real ticks, 1/60 s). Each cue fires once through
+# DollCueClock on its tick (Client/Encounters/FirstSeverance/Weapons/WitnessVisuals.cs), so time baked into a file is
+# measured from its trigger: a Warn ends where its Fire begins. Pitches stay on the F minor pentatonic; no bells
+# (porcelain, brass and organ instead); the two spin loops are fixed-pitch PCM16 WAV loops, one per spin stage,
+# crossfaded by the client (no live pitch bend).
+from generate_ebon_reward_sfx import glide, reverse, sweep, taper  # noqa: E402  (shared helpers, imported unmodified)
+
+W_TICK = 1 / 60
+W_TESTIMONIES = tuple(16 + 29 * i for i in range(6))
+W_TESTIMONY_LEAD, W_SEAL, W_THROW_WARN, W_THROW = 10, 174, 196, 218
+W_BITES, W_RETURN = (6, 12, 17, 21), 22
+W_LOCK, W_EXECUTE_WARN, W_EXECUTE, W_WITHDRAW = 16, 17, 28, 36
+W_CRUISE_SPIN = 0.45                                   # rad/tick
+W_TURN_PEAK = 2 * (4 * np.pi / 21) - W_CRUISE_SPIN     # 0.7468 rad/tick at the end of the Axiom turns
+# Loops: a whole number of blade revolutions, so the whums land on the same blade angle every pass.
+W_SPIN_REVOLUTIONS, W_SPIN_SAMPLES = 8, 82100           # 2 pi / 0.45 rad per tick = 13.963 ticks = 10262.5 samples
+W_AXIOM_REVOLUTIONS, W_AXIOM_SAMPLES = 16, 98942        # 2 pi / 0.7468 = 8.414 ticks = 6183.9 samples
+WITNESS = "Last Witness"
+VERDICT = "Last Witness: Triangle Judgement"
+SOURCES.update({
+    "air_cut": ("sfx-sources/cc0/wind-FS60030-qubodup-air_cut.mp3",
+                "qubodup, Air Cut (https://freesound.org/s/60030/, CC0 1.0, HQ preview)",
+                "0301adf448c60b80c09b89df57510fd09949d6b15bb457ef7c9e70999b8a2ad0", "qubodup"),
+    "stick_woosh": ("sfx-sources/cc0/swing-FS352719-Dalesome-woosh_stick.mp3",
+                    "Dalesome, woosh stick (https://freesound.org/s/352719/, CC0 1.0, HQ preview)",
+                    "5dc0966b3f689fde08955ab18a3b8dc636cc3db96d105e90b427af54184c3016", "Dalesome"),
+    "swoosh": ("sfx-sources/cc0/swing-FS263595-PorkMuncher-swoosh.mp3",
+               "PorkMuncher, swoosh (https://freesound.org/s/263595/, CC0 1.0, HQ preview)",
+               "5d11ca0d7ad2ad4bc3108c0b017cccd9ae3e002277e1550fa78693841ea85058", "PorkMuncher"),
+    "woosh": ("sfx-sources/cc0/wind-FS683096-florianreichelt-woosh.mp3",
+              "florianreichelt, woosh (https://freesound.org/s/683096/, CC0 1.0, HQ preview)",
+              "3c641d4d6ea0c6b65423d8fe1a7d72bf7bfb08a91c1640f9e9a0ab9d5d23b265", "florianreichelt"),
+    "sword_hit": ("sfx-sources/cc0/metal-FS442769-qubodup-sword_hit.mp3",
+                  "qubodup, Sword Hit (https://freesound.org/s/442769/, CC0 1.0, HQ preview)",
+                  "93d72e63bb8d9b8a60d2c0ac665c153171515645fbb85f4ec028e4a253e7b167", "qubodup"),
+    "armor_strike": ("sfx-sources/cc0/metal-FS568170-Merrick079-sword_sound_1.mp3",
+                     "Merrick079, sword sound 1 (https://freesound.org/s/568170/, CC0 1.0, HQ preview)",
+                     "5f9ab16b7a74a205b1490001d4c913d0d55f561df796cb2d43c1a30b97c351b1", "Merrick079"),
+    "rock_tumble": ("sfx-sources/cc0/impact-FS389618-_stubb-rock_tumble_2.mp3",
+                    "_stubb, rock tumble 2 (https://freesound.org/s/389618/, CC0 1.0, HQ preview)",
+                    "199521191be552261d6e604c8d34e40cfeac4b3d7f3075906dd27182c73adb4a", "_stubb"),
+    "knife_slice": (KENNEY + "!OGG/knifeSlice2.ogg",
+                    "Kenney RPG Audio knifeSlice2.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0)",
+                    "6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def", "Kenney"),
+    "draw_knife": (KENNEY + "!OGG/drawKnife3.ogg",
+                   "Kenney RPG Audio drawKnife3.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0)",
+                   "a11ae62fb1a628425769d11a9de394980ad8909c31f4c9a4316f226963e21caf", "Kenney"),
+    "chop": (KENNEY + "!OGG/chop.ogg",
+             "Kenney RPG Audio chop.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0)",
+             "d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486", "Kenney"),
+    "creak1": (KENNEY + "!OGG/creak1.ogg",
+               "Kenney RPG Audio creak1.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0)",
+               "8a346186fd297254248cab8e8117060a52a5cf2a84f603153a762108550ea95e", "Kenney"),
+    "creak2": (KENNEY + "!OGG/creak2.ogg",
+               "Kenney RPG Audio creak2.ogg (https://opengameart.org/content/50-rpg-sound-effects, CC0 1.0)",
+               "8a990afdc03aebb91d528f5385e2f95582dbfa8e2c12c71098ab01be9142294a", "Kenney"),
+})
+
+
+def window(s, key, start, end, rate=1.0, hp_=None, lp_=None, fade_in=0.002, fade_out=0.02):
+    """A trimmed, filtered window of a store recording (stereo), for reversing or shaping before it is placed."""
+    x = s.get(key)[round(start * RATE):round(end * RATE)].copy()
+    if rate != 1.0:
+        x = speed(x, rate)
+    if hp_:
+        x = hp(x, hp_)
+    if lp_:
+        x = lp(x, lp_)
+    return fades(x, fade_in, fade_out)
+
+
+def brass_fitting(freq, dur, rng, decay=0.2, side=0.0):
+    """A struck brass fitting: inharmonic partials 1 / 1.47 / 2.09 / 2.76 / 3.53 with a short metallic tick. Dull and
+    damped (the upper partials die first and nothing hums on), so it never reads as a tuned or church bell."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    y = np.zeros(n)
+    for ratio, amp in ((1.0, 1.0), (1.47, 0.62), (2.09, 0.45), (2.76, 0.28), (3.53, 0.16)):
+        if freq * ratio >= dsp.CEILING_HZ:
+            break
+        y += amp * np.sin(2 * np.pi * freq * ratio * t + rng.uniform(0, 2 * np.pi)) * np.exp(-t / (decay / ratio ** 0.8))
+    y *= np.clip(t / 0.0004, 0, 1)
+    k = round(0.0015 * RATE)
+    y[:k] += hp(base.noise(k, rng), 2800)[:, 0] * np.linspace(1, 0, k) * 0.4
+    y = dsp.tail_fade(y / max(1e-9, np.abs(y).max()), 0.02)
+    return pan(y, side)
+
+
+# A large brass plate under a felt mallet: ratio, amplitude and share of the decay for each partial. The fundamental
+# beats slowly against a near twin; the partials are deliberately off the harmonic series (no tuned or church bell).
+GONG_MODES = ((1.0, 1.0, 1.0), (1.0041, 0.5, 0.92), (1.49, 0.40, 0.62), (2.02, 0.42, 0.5), (2.41, 0.2, 0.4),
+              (2.97, 0.18, 0.3), (3.6, 0.09, 0.24), (4.23, 0.06, 0.2), (5.13, 0.035, 0.15), (6.28, 0.02, 0.12))
+
+
+def brass_gong(freq, dur, rng, decay=1.6, bloom=0.12, side=0.0):
+    """A soft gong-like resonance: a large brass plate struck with a felt mallet. The upper partials die first while two
+    middle ones bloom a moment after the strike, so the tone swells and then decays for seconds instead of clanging;
+    the mallet is a dull low thud with no bright attack."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    y = np.zeros((n, 2))
+    for i, (ratio, amp, share) in enumerate(GONG_MODES):
+        if freq * ratio >= dsp.CEILING_HZ:
+            break
+        env = np.exp(-t / (decay * share))
+        if i in (2, 3):
+            env = env * (1 - np.exp(-t / bloom))
+        tone = amp * np.sin(2 * np.pi * freq * ratio * t + rng.uniform(0, 2 * np.pi)) * env
+        y += pan(tone, float(np.clip(side + rng.uniform(-0.35, 0.35), -1, 1)))
+    y *= (0.5 - 0.5 * np.cos(np.pi * np.clip(t / 0.008, 0, 1)))[:, None]
+    k = round(0.03 * RATE)
+    y[:k] += lp(base.noise(k, rng), 600) * (np.linspace(1, 0, k) ** 2)[:, None] * 0.5
+    return dsp.tail_fade(y / max(1e-9, np.abs(y).max()), 0.05)
+
+
+def air_pulses(dur, rng, period, low=350, high=2600, first=0.0, sharp=6.0):
+    """Band-limited air that swells once per `period` s (a blade passing): the whir of a spinning blade."""
+    n = round(dur * RATE)
+    t = np.arange(n) / RATE
+    phase = 2 * np.pi * (t - first) / period
+    gate = (0.5 + 0.5 * np.cos(phase)) ** sharp
+    air = signal.sosfilt(signal.butter(2, (low, high), "bandpass", fs=RATE, output="sos"), base.noise(n, rng), axis=0)
+    return air / max(1e-9, np.abs(air).max()) * gate[:, None]
+
+
+def testimony_warn(s, rng, note):
+    """A testimony speaks: one music-box tooth on the ladder, the edge cracking a moment later as the shard slides out."""
+    mix = seconds(0.6)
+    place(mix, pan(dsp.box_tine(dsp.hz(note), 0.56, rng), 0.05), 0.0, -3)
+    place(mix, dsp.porcelain_crack(0.08, rng, count=4, spread=0.012, low=4200, high=9000, decay=(0.004, 0.012)), 0.055, -15)
+    place(mix, pan(dsp.brass_click(rng, 4200, decay=0.002, thud=0.0, tick=0.3), 0.3), 0.06, -24)
+    return room(mix, 0.1, 0.5, 0.16)
+
+
+@cue("WitnessSettle", -17, "Last Witness", 0.6, 0.7,
+     "刃が手元に現れて吊られる（押し始め、12tick で 24px 下りて止まる）。空気が上がり、真鍮の軸受けが2回小さく鳴って、"
+     "低めの磁器の響き（F5 と C6）で止まる。")
+def witness_settle(s, rng):
+    mix = seconds(0.75)
+    place(mix, sweep(0.22, rng, 900, 3200, shape=lambda t: np.sin(np.pi * np.clip(t / 0.22, 0, 1)) ** 2), 0.0, -16)
+    place(mix, pan(dsp.brass_click(rng, 1800, decay=0.006, thud=0.5), -0.2), 0.02, -12)
+    place(mix, pan(dsp.brass_click(rng, 3100, decay=0.005, thud=0.2), 0.15), 0.19, -10)
+    place(mix, dsp.porcelain_ring(dsp.hz("F5"), 0.5, rng, decay=0.09, side=0.1), 0.19, -8)
+    place(mix, dsp.porcelain_ring(dsp.hz("C6"), 0.4, rng, decay=0.06, side=-0.2), 0.195, -15)
+    place(mix, dsp.thump(220, 90, 0.18, rng), 0.19, -16)
+    return room(mix, 0.12, 0.6, 0.2)
+
+
+@cue("WitnessTestimonyWarn1", -20, "Last Witness", 0.55, 0.75,
+     "1つ目の証言の予兆（発射の10tick前）。オルゴールの歯 F5 が1音鳴り、刃の縁に細いひびが入る磁器の音が続く。証言ごとに音が上がる。")
+def witness_testimony_warn1(s, rng):
+    return testimony_warn(s, rng, "F5")
+
+
+@cue("WitnessTestimonyWarn2", -20, "Last Witness", 0.55, 0.75, "2つ目の証言の予兆。A♭5。")
+def witness_testimony_warn2(s, rng):
+    return testimony_warn(s, rng, "Ab5")
+
+
+@cue("WitnessTestimonyWarn3", -20, "Last Witness", 0.55, 0.75, "3つ目の証言の予兆。B♭5。")
+def witness_testimony_warn3(s, rng):
+    return testimony_warn(s, rng, "Bb5")
+
+
+@cue("WitnessTestimonyWarn4", -20, "Last Witness", 0.55, 0.75, "4つ目の証言の予兆。C6。")
+def witness_testimony_warn4(s, rng):
+    return testimony_warn(s, rng, "C6")
+
+
+@cue("WitnessTestimonyWarn5", -20, "Last Witness", 0.55, 0.75, "5つ目の証言の予兆。E♭6。")
+def witness_testimony_warn5(s, rng):
+    return testimony_warn(s, rng, "Eb6")
+
+
+@cue("WitnessTestimonyWarn6", -20, "Last Witness", 0.55, 0.75, "6つ目（最後）の証言の予兆。F6 で1オクターブ上がり切る。")
+def witness_testimony_warn6(s, rng):
+    return testimony_warn(s, rng, "F6")
+
+
+@cue("WitnessTestimonyFire", -17, "Last Witness", 0.4, 0.8,
+     "証言の発射（6回とも同じ音）。磁器の破片がはじけ、小さな真鍮のクリックと、短く高い風切りが追尾の破片を送り出す。")
+def witness_testimony_fire(s, rng):
+    mix = seconds(0.45)
+    place(mix, dsp.porcelain_crack(0.12, rng, count=6, spread=0.018, low=3000, high=8500), 0.0, -4)
+    place(mix, pan(dsp.brass_click(rng, 2900, decay=0.004, thud=0.15), 0.1), 0.004, -10)
+    lay(mix, s, "air_cut", 0.05, 0.30, 0.01, -9, rate=1.25, hp_=1800, side=0.2)
+    place(mix, sweep(0.2, rng, 7000, 2200, shape=lambda t: np.exp(-t / 0.06)), 0.01, -17)
+    return room(mix, 0.08, 0.38, 0.12)
+
+
+@cue("WitnessShardHit", -20, "Last Witness", 0.3, 0.7,
+     "破片が当たった音（自分の攻撃だけ）。磁器の小さな打音と、鈍く短い手応え。")
+def witness_shard_hit(s, rng):
+    mix = seconds(0.3)
+    place(mix, dsp.porcelain_ring(dsp.hz("C7"), 0.12, rng, decay=0.02), 0.0, -6)
+    place(mix, dsp.porcelain_crack(0.06, rng, count=3, spread=0.01), 0.0, -10)
+    place(mix, dsp.thump(320, 120, 0.12, rng), 0.0, -8)
+    return room(mix, 0.06, 0.26, 0.1)
+
+
+@cue("WitnessSeal", -13, "Last Witness", 0.85, 0.8,
+     "判決の封印（174tick、ここから放しても投擲は止まらない）。真鍮のラチェットが3回かかり、6つの切れ込みの光が目へ走るのに合わせて"
+     "オルゴールが C7 から C6 へ駆け下り、目が光る瞬間に磁器の F6 と柔らかなオルガン（F と C）。")
+def witness_seal(s, rng):
+    mix = seconds(0.9)
+    place(mix, dsp.ratchet((0.0, 0.03, 0.06), rng, freq=2300, gains_db=(-4, -3, -1), side=-0.1), 0.0, -6)
+    for i, note in enumerate(("C7", "Bb6", "Ab6", "F6", "Eb6", "C6")):
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 0.5, rng, decay=0.16), 0.3 - 0.12 * i), 0.02 + 0.02 * i, -9 - 0.4 * i)
+    place(mix, dsp.porcelain_ring(dsp.hz("F6"), 0.5, rng, decay=0.1), 0.13, -7)
+    place(mix, dsp.shimmer(0.4, rng, count=6), 0.14, -17)
+    place(mix, dsp.organ_pad([dsp.hz("F3"), dsp.hz("C4")], 0.5, rng, attack=0.04, release=0.35, harmonics=8, chiff=0.04,
+                             breath=0.1), 0.12, -18)
+    return room(mix, 0.14, 0.8, 0.25)
+
+
+@cue("WitnessThrowWarn", -13, "Last Witness", 0.4, 0.85,
+     "投擲の予兆（196tick から投擲の 218tick まで、ちょうど 22tick）。5度のパイプ2本（F3 と C4）がふくらみ、ばねの張る軋みと"
+     "低く上がる刃のうなりの上で、最後の 8tick（振り抜き）に風が駆け上がって投擲の音へ渡す。")
+def witness_throw_warn(s, rng):
+    length = (W_THROW - W_THROW_WARN) * W_TICK
+    mix = seconds(length + 0.05)
+    place(mix, dsp.organ_pad([dsp.hz("F3"), dsp.hz("C4")], length, rng, attack=length * 0.9, release=0.012, harmonics=10,
+                             rolloff=1.2, chiff=0.0, breath=0.12), 0.0, -6)
+    lay(mix, s, "creak1", 0.17, 0.5, 0.0, -13, rate=0.8, hp_=500, side=-0.2, fade_out=0.05)
+    place(mix, glide(70, 150, length, harmonics=(1.0, 0.5, 0.25), curve=1.6, attack=0.08), 0.0, -12)
+    whip = (W_THROW - 210) * W_TICK
+    place(mix, sweep(whip, rng, 600, 5000, shape=lambda t: (t / whip) ** 2), length - whip, -8)
+    return taper(mix[:round(length * RATE)], 0.012)
+
+
+@cue("WitnessThrowFire", -11.5, "Last Witness", 0.95, 0.95,
+     "投擲（218tick）。真鍮の留め金が外れる音、重い振り抜きの風、低い F2 のオルガンの一撃（息の頭つき）と、"
+     "回り始めた刃のうなり（刃の回転 4.3 回転/秒に合わせた風の脈）。")
+def witness_throw_fire(s, rng):
+    mix = seconds(1.0)
+    lay(mix, s, "metal_latch", 0.03, 0.2, 0.0, -6, rate=0.85, hp_=600)
+    place(mix, pan(dsp.brass_click(rng, 1500, decay=0.012, thud=0.8), 0.0), 0.0, -6)
+    lay(mix, s, "stick_woosh", 0.09, 0.45, 0.0, -2, rate=1.1, hp_=250)
+    lay(mix, s, "swoosh", 1.0, 1.35, 0.02, -8, hp_=300)
+    place(mix, dsp.organ_pad([dsp.hz("F2"), dsp.hz("C3"), dsp.hz("F3")], 0.4, rng, attack=0.008, release=0.3, harmonics=10,
+                             rolloff=1.1, chiff=0.08, breath=0.05), 0.0, -7)
+    place(mix, dsp.thump(140, 55, 0.35, rng), 0.0, -6)
+    half_turn = np.pi / W_CRUISE_SPIN * W_TICK
+    whir = air_pulses(0.7, rng, half_turn) * np.clip(np.arange(round(0.7 * RATE)) / RATE / 0.25, 0, 1)[:, None]
+    place(mix, whir, 0.08, -13)
+    return room(mix, 0.16, 0.95, 0.4)
+
+
+@cue("WitnessAxiomWarn", -11.5, "Last Witness", 0.75, 0.9,
+     "刃が標的に食い込む（最初の接触、アクシオムの2回転の始まり）。鋼が磁器に食い込む砕ける音、低い手応え、真鍮の鈍い響きの尾。")
+def witness_axiom_warn(s, rng):
+    mix = seconds(0.8)
+    place(mix, dsp.porcelain_crack(0.2, rng, count=12, spread=0.04, low=1800, high=7500), 0.0, -3)
+    lay(mix, s, "sword_hit", 0.0, 0.35, 0.0, -8, hp_=1200)
+    lay(mix, s, "armor_strike", 0.05, 0.4, 0.0, -10, hp_=500, side=0.15)
+    place(mix, dsp.thump(160, 60, 0.4, rng), 0.0, -4)
+    place(mix, brass_fitting(380, 0.6, rng, decay=0.22, side=-0.1), 0.01, -13)
+    return room(mix, 0.14, 0.75, 0.3)
+
+
+def axiom_bite(s, rng, note, step):
+    """One half-turn bite of the Axiom turns: a brass gear tooth, a steel shing and a dry porcelain tone on the ladder."""
+    mix = seconds(0.35)
+    place(mix, pan(dsp.brass_click(rng, 2400 * (1 + 0.06 * step), decay=0.005, thud=0.3), 0.0), 0.0, -6)
+    lay(mix, s, "knife_slice", 0.26, 0.5, 0.0, -11, rate=1.0 + 0.05 * step, hp_=2500, side=(-0.3, 0.3, -0.2, 0.2)[step])
+    place(mix, dsp.porcelain_ring(dsp.hz(note), 0.3, rng, decay=0.07 + 0.01 * step), 0.003, -6)
+    place(mix, dsp.thump(200, 90, 0.12, rng), 0.0, -12)
+    return room(mix, 0.08, 0.32, 0.1)
+
+
+@cue("WitnessAxiomFire1", -17, "Last Witness", 0.35, 0.8,
+     "1回目の半回転の噛みつき（接触から6tick）。真鍮の歯車が1歯進み、鋼のシャリンと磁器の F5。回転が速まるほど4つの音が上がる。")
+def witness_axiom_fire1(s, rng):
+    return axiom_bite(s, rng, "F5", 0)
+
+
+@cue("WitnessAxiomFire2", -16, "Last Witness", 0.35, 0.8, "2回目の噛みつき（12tick）。A♭5。")
+def witness_axiom_fire2(s, rng):
+    return axiom_bite(s, rng, "Ab5", 1)
+
+
+@cue("WitnessAxiomFire3", -15, "Last Witness", 0.35, 0.8, "3回目の噛みつき（17tick）。C6。")
+def witness_axiom_fire3(s, rng):
+    return axiom_bite(s, rng, "C6", 2)
+
+
+@cue("WitnessAxiomFire4", -13, "Last Witness", 0.35, 0.8, "4回目、最後の噛みつき（21tick、2回転の終わり）。F6 で1オクターブ上がり切る。")
+def witness_axiom_fire4(s, rng):
+    return axiom_bite(s, rng, "F6", 3)
+
+
+@cue("WitnessAxiomMiss", -17, "Last Witness", 0.6, 0.8,
+     "何にも当たらなかった（カーソル位置で止まって空中で回る）。中空の風切りと、下がるオルゴール2音（C6→A♭5）、砕ける音はない。"
+     "このあとの噛みつき4音も小さく鳴る。")
+def witness_axiom_miss(s, rng):
+    mix = seconds(0.6)
+    lay(mix, s, "air_cut", 0.04, 0.32, 0.0, -4, rate=0.85, hp_=200)
+    place(mix, pan(dsp.box_tine(dsp.hz("C6"), 0.3, rng, decay=0.1), -0.2), 0.03, -16)
+    place(mix, pan(dsp.box_tine(dsp.hz("Ab5"), 0.3, rng, decay=0.1), 0.2), 0.11, -17)
+    place(mix, dsp.thump(260, 150, 0.12, rng), 0.0, -18)
+    return room(mix, 0.12, 0.55, 0.2)
+
+
+@cue("WitnessReturnWarn", -17, "Last Witness", 0.55, 0.8,
+     "刃が引き抜けて戻り始める（22tick）。逆回しの風が吸い込まれ、真鍮のばねが引かれて上がる音。")
+def witness_return_warn(s, rng):
+    mix = seconds(0.6)
+    place(mix, reverse(window(s, "woosh", 0.35, 0.95, rate=1.4, hp_=300)), 0.0, -6)
+    lay(mix, s, "creak2", 0.03, 0.3, 0.05, -14, rate=1.3, hp_=700, side=0.2)
+    place(mix, glide(300, 900, 0.3, harmonics=(1.0, 0.4, 0.2), curve=1.5), 0.08, -20)
+    place(mix, pan(dsp.brass_click(rng, 2100, decay=0.006, thud=0.2), 0.0), 0.36, -12)
+    return room(mix, 0.1, 0.55, 0.15)
+
+
+@cue("WitnessReturnFire", -13, "Last Witness", 0.55, 0.8,
+     "受け止め（戻った刃が吊りの位置か手に収まる。光の輪が開く）。真鍮の留め金が閉まり、磁器の F5 と C6 が柔らかく鳴る。")
+def witness_return_fire(s, rng):
+    mix = seconds(0.6)
+    lay(mix, s, "metal_latch", 0.035, 0.2, 0.0, -5, rate=0.9)
+    place(mix, pan(dsp.brass_click(rng, 1600, decay=0.01, thud=0.7), 0.0), 0.0, -7)
+    place(mix, dsp.porcelain_ring(dsp.hz("F5"), 0.5, rng, decay=0.12, side=-0.1), 0.006, -7)
+    place(mix, dsp.porcelain_ring(dsp.hz("C6"), 0.45, rng, decay=0.1, side=0.15), 0.012, -11)
+    place(mix, dsp.shimmer(0.35, rng, count=5), 0.03, -18)
+    return room(mix, 0.12, 0.55, 0.25)
+
+
+def periodic_band(n, rng, low, high, tilt=0.0):
+    """Stereo band noise that repeats exactly every n samples (a random-phase spectrum on the loop's own harmonics)."""
+    f = np.fft.rfftfreq(n, 1 / RATE)
+    magnitude = ((f >= low) & (f <= high)) * (np.maximum(f, 1.0) / low) ** tilt
+    x = np.column_stack([np.fft.irfft(magnitude * np.exp(1j * rng.uniform(0, 2 * np.pi, len(f))), n) for _ in range(2)])
+    return x / max(1e-9, np.abs(x).max())
+
+
+def wrap(loop, x, at):
+    """Add x into a loop buffer circularly from sample `at`."""
+    index = (at + np.arange(len(x))) % len(loop)
+    np.add.at(loop, index, x)
+
+
+def spin_loop(rng, samples, revolutions, band, tick_hz, rotor):
+    """A blade turning in place, exactly periodic: band air swelling twice per turn (the long tip pass, then the
+    shorter pommel pass), a faint brass tick once per turn and a low rotor hum on whole harmonics of the turn rate."""
+    t = np.arange(samples)
+    turn = 2 * np.pi * revolutions * t / samples
+    whum = (0.5 + 0.5 * np.cos(turn)) ** 6 + 0.5 * (0.5 + 0.5 * np.cos(turn - np.pi)) ** 8
+    out = periodic_band(samples, rng, *band) * whum[:, None]
+    hum = sum(a * np.sin(k * revolutions * 2 * np.pi * t / samples + rng.uniform(0, 2 * np.pi)) for k, a in rotor)
+    out += np.column_stack((hum, hum)) / max(1e-9, np.abs(hum).max()) * 0.22 * (0.7 + 0.3 * whum)[:, None]
+    period = samples / revolutions
+    for r in range(revolutions):
+        click = pan(dsp.brass_click(rng, tick_hz * (1 + 0.03 * (r % 4)), decay=0.003, thud=0.1, dur=0.03), 0.0)
+        wrap(out, click * 0.18, round(r * period + period * 0.42))
+    return out
+
+
+@cue("WitnessSpinLoop", -15, "Last Witness", 1.9, 0.5,
+     "飛んでいる刃のうなり（往路と帰路、巡航の回転 0.45 rad/tick）。8回転ちょうどの継ぎ目のないループで、1回転に2回の風の脈"
+     "（切っ先と柄頭）、かすかな真鍮の刻み、低い回転音。ゲームではアクシオムのループと数tickで入れ替わる（音程は動かさない）。",
+     loop_master="builder", loop=True)
+def witness_spin_loop(s, rng):
+    return spin_loop(rng, W_SPIN_SAMPLES, W_SPIN_REVOLUTIONS, (320, 2400), 2600, ((10, 1.0), (14, 0.6), (21, 0.35)))
+
+
+@cue("WitnessAxiomLoop", -15, "Last Witness", 2.3, 0.55,
+     "アクシオムの2回転中のうなり（最高速 0.747 rad/tick に合わせた速い風の脈、より明るい帯域）。16回転ちょうどのループ。",
+     loop_master="builder", loop=True)
+def witness_axiom_loop(s, rng):
+    return spin_loop(rng, W_AXIOM_SAMPLES, W_AXIOM_REVOLUTIONS, (520, 4200), 3300, ((6, 1.0), (9, 0.6), (13, 0.3)))
+
+
+@cue("VerdictStakeWarn", -13, "Last Witness: Triangle Judgement", 0.35, 0.85,
+     "ステルスの三角の審判、杭の予兆（審判の 1tick から杭が刺さる 16tick まで）。オルガンのペダル F1・F2 がふくらみ、"
+     "剣3本ぶんのガラスのような高い倍音（C6・F6・A♭6）が順に現れ、落ちてくる剣の口笛が下がって杭の音へ渡す。")
+def verdict_stake_warn(s, rng):
+    length = (W_LOCK - 1) * W_TICK
+    mix = seconds(length + 0.05)
+    place(mix, dsp.organ_pad([dsp.hz("F1"), dsp.hz("F2"), dsp.hz("C3")], length, rng, attack=length * 0.85, release=0.012,
+                             harmonics=12, rolloff=1.0, chiff=0.0, breath=0.15), 0.0, -5)
+    n = round(length * RATE)
+    t = np.arange(n) / RATE
+    for i, note in enumerate(("C6", "F6", "Ab6")):
+        start = 0.03 * i
+        tone = np.sin(2 * np.pi * dsp.hz(note) * t) * np.clip((t - start) / (length - start), 0, 1) ** 2
+        place(mix, pan(tone, -0.5 + 0.5 * i), 0.0, -17)
+        fall = (W_LOCK - 10) * W_TICK
+        place(mix, pan(glide(2600 - 200 * i, 900, fall - 0.01 * i, harmonics=(1.0, 0.2), curve=0.7, attack=0.01), -0.6 + 0.6 * i),
+              length - fall + 0.01 * i, -19)
+    return taper(mix[:round(length * RATE)], 0.01)
+
+
+@cue("VerdictStakeFire", -11.5, "Last Witness: Triangle Judgement", 0.85, 0.95,
+     "剣3本が三角の角に刺さる（16tick、ここで三角が止まる）。30ミリ秒の間に鉄が磁器へ刺さる重い音が3つ、砕ける音と真鍮の鈍い響き。")
+def verdict_stake_fire(s, rng):
+    mix = seconds(0.9)
+    for i, at in enumerate((0.0, 0.012, 0.027)):
+        place(mix, dsp.thump(130 - 10 * i, 50, 0.35, rng), at, -5)
+        place(mix, dsp.porcelain_crack(0.12, rng, count=6, spread=0.02, low=1500, high=6000), at, -8)
+        lay(mix, s, "chop", 0.03, 0.2, at, -8, rate=0.8 + 0.06 * i, side=(-0.6, 0.0, 0.6)[i])
+    place(mix, brass_fitting(310, 0.7, rng, decay=0.25), 0.02, -13)
+    lay(mix, s, "rock_tumble", 0.06, 0.4, 0.03, -17, lp_=2500)
+    return room(mix, 0.16, 0.85, 0.35)
+
+
+@cue("VerdictExecuteWarn", -13, "Last Witness: Triangle Judgement", 0.25, 0.85,
+     "処刑の予兆（光が杭から杭へ書かれる 17tick から処刑の 28tick まで）。オルゴールの速いトレモロが F6 から F7 へ駆け上がり、"
+     "下でオルガンの和音（F・C・E♭・F）がふくらむ。")
+def verdict_execute_warn(s, rng):
+    length = (W_EXECUTE - W_EXECUTE_WARN) * W_TICK
+    mix = seconds(length + 0.05)
+    notes = ("F6", "Ab6", "Bb6", "C7", "Eb7", "F7", "Ab6", "C7", "F7")
+    for i, note in enumerate(notes):
+        place(mix, pan(dsp.box_tine(dsp.hz(note), 0.2, rng, decay=0.06, body=0.2), -0.4 + 0.1 * i), length * i / len(notes), -12 + 0.5 * i)
+    place(mix, dsp.organ_pad([dsp.hz("F3"), dsp.hz("C4"), dsp.hz("Eb4"), dsp.hz("F4")], length, rng, attack=length * 0.9,
+                             release=0.01, harmonics=9, rolloff=1.2, chiff=0.0, breath=0.1), 0.0, -8)
+    return taper(mix[:round(length * RATE)], 0.008)
+
+
+@cue("VerdictExecuteFire", -11.5, "Last Witness: Triangle Judgement", 2.7, 0.95,
+     "処刑（28tick、185px の三角の内側に当たる）。磁器が砕けて散り、低い真鍮の板を柔らかく打った銅鑼のような響き（F2）が"
+     "ふくらんでから長く消えていく。その下でオルガンが F マイナーの和音（F2 F3 C4 A♭4）を小さく鳴らす。オルガンを大きく"
+     "鳴らす一撃はやめ、鐘も使っていない。")
+def verdict_execute_fire(s, rng):
+    mix = seconds(2.8)
+    place(mix, dsp.porcelain_crack(0.25, rng, count=14, spread=0.06), 0.0, -3)
+    place(mix, base.glass(0.5, rng, count=18, spread=0.3, low=2500, high=8000), 0.01, -13)
+    place(mix, dsp.thump(100, 38, 0.5, rng), 0.0, -8)
+    place(mix, brass_gong(dsp.hz("F2"), 2.6, rng, decay=1.0), 0.004, -2)
+    chord = [dsp.hz(n) for n in ("F2", "F3", "C4", "Ab4")]
+    place(mix, dsp.organ_pad(chord, 2.3, rng, attack=0.25, release=1.6, harmonics=6, rolloff=1.7, chiff=0.0, breath=0.08), 0.02, -16)
+    lay(mix, s, "rock_tumble", 0.06, 0.6, 0.03, -20, lp_=2200)
+    return room(mix, 0.22, 2.7, 1.0)
+
+
+@cue("VerdictExecuteMiss", -13, "Last Witness: Triangle Judgement", 1.0, 0.85,
+     "処刑が空振りした（三角の中に誰もいない）。オルガンが和音を打たずに5度（F3 と C4）を息だけでかすかに鳴らし、磁器の粉がまばらに落ちる。")
+def verdict_execute_miss(s, rng):
+    mix = seconds(1.0)
+    place(mix, dsp.organ_pad([dsp.hz("F3"), dsp.hz("C4")], 0.8, rng, attack=0.12, release=0.6, harmonics=6, rolloff=1.6, chiff=0.0,
+                             breath=0.35), 0.0, -8)
+    place(mix, base.glass(0.6, rng, count=10, spread=0.5, low=3000, high=8000, decay=(0.01, 0.05)), 0.05, -17)
+    place(mix, dsp.thump(200, 120, 0.2, rng), 0.0, -18)
+    return room(mix, 0.18, 0.95, 0.4)
+
+
+@cue("VerdictWithdraw", -20, "Last Witness: Triangle Judgement", 0.6, 0.7,
+     "剣が光の中へ上へ引き上げられる（36tick）。金属が上へ滑る音と、高い磁器のきらめき（C7 と F7）。")
+def verdict_withdraw(s, rng):
+    mix = seconds(0.6)
+    place(mix, glide(900, 2600, 0.35, harmonics=(1.0, 0.3, 0.12), curve=1.3), 0.0, -15)
+    lay(mix, s, "draw_knife", 0.08, 0.4, 0.0, -10, rate=1.15, hp_=1500)
+    place(mix, pan(dsp.box_tine(dsp.hz("C7"), 0.3, rng, decay=0.08, body=0), 0.3), 0.12, -14)
+    place(mix, pan(dsp.box_tine(dsp.hz("F7"), 0.3, rng, decay=0.06, body=0), -0.3), 0.2, -16)
+    return room(mix, 0.12, 0.55, 0.2)
+
+
 # ---------------------------------------------------------------- render
 def seed(name):
     return int.from_bytes(hashlib.sha256((SEED_PREFIX + name).encode("utf-8")).digest()[:8], "little")
@@ -991,6 +1454,10 @@ def render(name, store):
 
 def cue_path(name, output):
     return output / f"{name}.{'wav' if CUES[name].loop else 'ogg'}"
+
+
+def export_path(name, output):
+    return cue_path(name, output)
 
 
 def write_loop(path, x):
@@ -1052,13 +1519,34 @@ def render_loop_cue(name, store, output):
     raise RuntimeError(f"{name}: true peak {peak:.2f} dBTP after retries")
 
 
+def render_builder_loop(name, store, output):
+    """A loop: exactly the builder's samples (a whole number of periods), mastered by gain and the memoryless bus only,
+    true peak checked across the seam, written as PCM16 WAV and read back sample for sample."""
+    spec = CUES[name]
+    x = spec.build(store, np.random.default_rng(seed(name)))
+    if len(x) > round(spec.max_seconds * RATE):
+        raise RuntimeError(f"{name}: {len(x) / RATE:.3f} s exceeds its {spec.max_seconds} s budget")
+    mastered = master(x, spec.target_lufs, spec.glue)
+    peak = true_peak_db(np.vstack((mastered, mastered)))
+    if peak > -1.0:
+        mastered = mastered * 10 ** (-(peak + 1.1) / 20)
+    path = export_path(name, output)
+    sf.write(str(path), mastered.astype(np.float32), RATE, subtype="PCM_16")
+    decoded, rate = sf.read(str(path), always_2d=True, dtype="float64")
+    if rate != RATE or decoded.shape != x.shape:
+        raise RuntimeError(f"{name}: the loop did not round-trip sample-exactly")
+    return decoded, sorted(store.used)
+
+
 def render_cue(name, store, output):
     """Master to the cue's target, write the Ogg (or the WAV loop) and, if the decoded file overshoots -1 dBTP, back
-    the gain off. A "round" loop is mastered by render_loop_cue."""
+    the gain off. A "round" loop is mastered by render_loop_cue, a "builder" loop by render_builder_loop."""
     if CUES[name].loop and CUES[name].loop_master == "round":
         return render_loop_cue(name, store, output)
     store.used = set()
     spec = CUES[name]
+    if spec.loop and spec.loop_master == "builder":
+        return render_builder_loop(name, store, output)
     path = cue_path(name, output)
     mastered = master(render(name, store), spec.target_lufs, spec.glue)
     for _ in range(8):
@@ -1130,6 +1618,7 @@ def analyse(name, decoded, path, sources_used):
         "bytes": len(data),
         "ogg_serial": None if spec.loop else ogg_serial(data),
         "ogg_sha256": sha256(data),
+        "sha256": sha256(data),
     } | ({"loop_frames": len(decoded)} | seam(decoded) if round_loop else {})
     if spec.loop and not round_loop:
         info |= {"loop_samples": len(decoded), "loop_ticks": len(decoded) / (RATE / 60),
@@ -1185,6 +1674,8 @@ def preview(directory, samples, report, store, previous=None):
 
     rows, extra = [], {}
     for name, x in samples.items():
+        if CUES[name].group != "Companion":
+            continue  # the weapons have their own audition pages (e.g. --witness-audition)
         spec = CUES[name]
         clips = {"new": wav(name, x * spec.volume)}
         if name in LEGACY:
@@ -1742,9 +2233,196 @@ Twenty-three cues of the refreshed Pale Meridian (the music-box siege rifle; [we
     return head + "\n" + "\n".join(blocks)
 
 
+# ---------------------------------------------------------------- Last Witness audition (owner listening page, git-ignored)
+def witness_settle_curve(x):
+    x = np.clip(x, 0, 1)
+    return x ** 3 * (10 + x * (-15 + 6 * x))
+
+
+def witness_schedule(stealth, contact=12, homeward=14):
+    """One held score from a cold press to the catch on the WitnessRules ticks: (seconds, cue) events, the contact tick
+    and the catch tick. The blade strikes `contact` ticks into its flight and is caught `homeward` ticks after it tears
+    free; a stealth score adds the judgement on the struck target."""
+    events = [(1, "WitnessSettle")]
+    for i, fire in enumerate(W_TESTIMONIES):
+        events += [(fire - W_TESTIMONY_LEAD, f"WitnessTestimonyWarn{i + 1}"), (fire, "WitnessTestimonyFire"), (fire + 9, "WitnessShardHit")]
+    events += [(W_SEAL, "WitnessSeal"), (W_THROW_WARN, "WitnessThrowWarn"), (W_THROW, "WitnessThrowFire")]
+    hit = W_THROW + contact
+    catch = hit + W_RETURN + homeward
+    events.append((hit, "WitnessAxiomWarn"))
+    events += [(hit + bite, f"WitnessAxiomFire{i + 1}") for i, bite in enumerate(W_BITES)]
+    events += [(hit + W_RETURN, "WitnessReturnWarn"), (catch, "WitnessReturnFire")]
+    if stealth:
+        events += [(hit + 1, "VerdictStakeWarn"), (hit + W_LOCK, "VerdictStakeFire"), (hit + W_EXECUTE_WARN, "VerdictExecuteWarn"),
+                   (hit + W_EXECUTE, "VerdictExecuteFire"), (hit + W_WITHDRAW, "VerdictWithdraw")]
+    return [(tick * W_TICK, name) for tick, name in sorted(events)], hit, catch
+
+
+def witness_combo(samples, stealth):
+    """The score as the client plays it: every cue at its call-site volume on its tick, and the two spin loops under the
+    flight with the same gain curves as BladeSource (cruise out and home, the Axiom loop faded in over 4 ticks of the
+    turns and out over 6 ticks of the return)."""
+    events, hit, catch = witness_schedule(stealth)
+    # Long enough for the last tail (the execution rings on for about 2.5 s) plus a short rest.
+    mix = seconds(max(at + len(samples[name]) / RATE for at, name in events) + 0.3)
+    for at, name in events:
+        place(mix, samples[name] * CUES[name].volume, at)
+    ticks = np.arange(W_THROW, catch + 1, dtype=float)
+    age = ticks - W_THROW
+    axiom = np.where(ticks < hit, 0.0, np.where(ticks < hit + W_RETURN, witness_settle_curve((ticks - hit) / 4),
+                                                1 - witness_settle_curve((ticks - hit - W_RETURN) / 6)))
+    cruise = (1 - axiom) * witness_settle_curve(age / 3)
+    start, n = round(W_THROW * W_TICK * RATE), round((catch - W_THROW) * W_TICK * RATE)
+    for name, gain in (("WitnessSpinLoop", cruise), ("WitnessAxiomLoop", axiom)):
+        loop = samples[name]
+        tiled = np.tile(loop, (n // len(loop) + 1, 1))[:n]
+        g = np.interp(np.arange(n) / RATE, age * W_TICK, gain) * CUES[name].volume
+        mix[start:start + n] += tiled * g[:, None]
+    return mix
+
+
+def witness_audition(directory, samples, report):
+    """The owner audition page for Last Witness: every cue alone at its in-game volume (loops looping), the whole score
+    from the press to the catch (normal and stealth), and both over a beat-aligned Doll BGM excerpt resampled to 44.1 kHz
+    and cross-checked against the original (one common gain, so the relative levels stay the in-game ones)."""
+    directory.mkdir(parents=True, exist_ok=True)
+
+    def wav(name, x):
+        peak = np.abs(x).max()
+        if peak > 0.999:
+            raise RuntimeError(f"audition clip {name} clips ({peak:.3f})")
+        sf.write(str(directory / f"{name}.wav"), x.astype(np.float32), RATE, subtype="PCM_16")
+        return f"{name}.wav"
+
+    names = [n for n in CUES if CUES[n].group in (WITNESS, VERDICT)]
+    clips = {n: wav(n, samples[n] * CUES[n].volume) for n in names}
+    combos = {key: witness_combo(samples, key == "stealth") for key in ("normal", "stealth")}
+    # Overlapping cues sum past full scale at the in-game volumes: both scores share one trim, so they compare as in game.
+    combo_trim = min(0.0, 20 * np.log10(0.97 / max(np.abs(x).max() for x in combos.values())))
+    combo_clips = {key: wav(f"combo-{key}", x * 10 ** (combo_trim / 20)) for key, x in combos.items()}
+    beds, extra = {}, {}
+    for bgm, bpm, origin, first, _, _, label in BGM:
+        beat = 60 / bpm
+        length = combos["stealth"].shape[0] / RATE
+        beats = int(np.ceil(length / beat)) + 2
+        start = origin + first * beat
+        bed, check = load_bgm(bgm, start, beats * beat)
+        outs = {key: overlay(bed, x, (beat,), 1.0) for key, x in combos.items()}
+        trim_db = min(0.0, 20 * np.log10(0.97 / max(max(np.abs(o).max() for o in outs.values()), np.abs(bed).max())))
+        g = 10 ** (trim_db / 20)
+        beds[bgm] = {"label": label, "bed": wav(f"bgm-{bgm}", bed * g),
+                     **{key: wav(f"combo-{key}-{bgm}", o * g) for key, o in outs.items()}}
+        extra[bgm] = check | {"start": round(start, 4), "beats": beats, "bpm": bpm, "combo_at": round(beat, 4), "mix_trim_db": round(trim_db, 2)}
+    extra["combo_trim_db"] = round(combo_trim, 2)
+    witness_page(directory, names, clips, combo_clips, beds, report, extra)
+    return extra
+
+
+def witness_page(directory, names, clips, combo_clips, beds, report, extra):
+    def audio(src, loop=False):
+        return f"<audio controls preload='none' {'loop ' if loop else ''}src='{html.escape(src)}'></audio>"
+
+    def metrics(r):
+        return (f"{r['seconds']:.2f} 秒 ・ 短時間 {r['short_term_lufs']:.1f} LUFS ・ 実効 {r['effective_lufs']:.1f} LUFS（音量 {r['volume']}）"
+                f" ・ トゥルーピーク {r['true_peak_dbfs']:.1f} dBTP ・ 重心 {r['centroid_hz']} Hz")
+
+    warns = [f"WitnessTestimonyWarn{i}" for i in range(1, 7)]
+    bites = [f"WitnessAxiomFire{i}" for i in range(1, 5)]
+    sections = (("吊りと6つの証言", ["WitnessSettle", *warns, "WitnessTestimonyFire", "WitnessShardHit"]),
+                ("封印と投擲", ["WitnessSeal", "WitnessThrowWarn", "WitnessThrowFire"]),
+                ("アクシオムの2回転と帰還", ["WitnessAxiomWarn", *bites, "WitnessAxiomMiss", "WitnessReturnWarn", "WitnessReturnFire",
+                                         "WitnessSpinLoop", "WitnessAxiomLoop"]),
+                ("ステルスの三角の審判", ["VerdictStakeWarn", "VerdictStakeFire", "VerdictExecuteWarn", "VerdictExecuteFire",
+                                    "VerdictExecuteMiss", "VerdictWithdraw"]))
+    blocks = []
+    for title, members in sections:
+        body = [f"<h2>{html.escape(title)}</h2><table>"]
+        for n in members:
+            if n not in names:
+                continue
+            loop = CUES[n].loop
+            body.append(f"<tr><td><b>{html.escape(n)}</b>{'<br><small>ループ（継ぎ目の確認用に繰り返し再生）</small>' if loop else ''}</td>"
+                        f"<td>{audio(clips[n], loop)}</td><td>{html.escape(CUES[n].description)}<br><small>{metrics(report[n])}</small></td></tr>")
+        body.append("</table>")
+        blocks.append("\n".join(body))
+    _, hit, catch = witness_schedule(False)
+    combo = (f"<h2>一巡の通し（押してから受け止めまで、ゲーム内の音量）</h2><p>押し始めから {catch / 60:.2f} 秒。"
+             f"証言6回（16tick から 29tick ごと）、174tick の封印、196tick からの予兆と 218tick の投擲、"
+             f"投擲から {hit - W_THROW}tick で接触、6・12・17・21tick の噛みつき、22tick で引き抜けて {catch - hit - W_RETURN}tick 後に受け止め。"
+             f"回転のループは往路・帰路とアクシオムの間で、ゲームと同じ数tickのクロスフェードで入れ替わります。"
+             f"重なった音がクリップしないよう、通常とステルスの2本を同じだけ {-extra['combo_trim_db']:.1f} dB 下げています。</p><table>"
+             f"<tr><td>通常</td><td>{audio(combo_clips['normal'])}</td></tr>"
+             f"<tr><td>ステルス（三角の審判つき）</td><td>{audio(combo_clips['stealth'])}</td></tr></table>")
+    bgm_rows = ["<h2>BGM の中で</h2><p>実際の Doll の BGM（48 kHz を 44.1 kHz に変換し、元と相互相関で速さと音程が変わっていないことを確認）に、"
+                "拍の頭から一巡を重ねています。効果音と音楽の音量設定はどちらも 100% の想定で、クリップしないよう3本とも同じだけ下げています。</p><table>"]
+    for bgm, row in beds.items():
+        e = extra[bgm]
+        if not isinstance(e, dict):
+            continue
+        bgm_rows.append(f"<tr><td>{html.escape(row['label'])}<br><small>{e['start']:.1f} 秒から {e['beats']} 拍（{e['bpm']:g} BPM）、"
+                        f"{e['combo_at']:.3f} 秒（1拍目）から一巡。{-e['mix_trim_db']:.1f} dB 下げ。</small></td>"
+                        f"<td>通常 {audio(row['normal'])}<br>ステルス {audio(row['stealth'])}</td>"
+                        f"<td>BGM だけ（ループ） {audio(row['bed'], loop=True)}</td></tr>")
+    bgm_rows.append("</table>")
+    (directory / "index.html").write_text(f"""<!doctype html><html lang='ja'><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'><title>最後の証人 効果音</title>
+<style>body{{font:15px system-ui,'Yu Gothic UI',sans-serif;background:#15121a;color:#ece4dc;margin:24px;max-width:1200px}}
+td{{padding:8px 12px;vertical-align:top;border-bottom:1px solid #2c2633}}small{{color:#a99fb0}}table{{border-collapse:collapse;width:100%}}
+h1,h2{{font-weight:600}}h2{{margin-top:1.6em;color:#eed9c4}}audio{{height:32px;width:280px}}p{{line-height:1.6}}</style>
+<h1>最後の証人（Last Witness）— 新しい効果音</h1>
+<p>刷新した最後の証人の全キューです。どれもゲーム内の再生音量（呼び出し側の音量）で書き出しています。予兆（Warn）は発動（Fire）の
+直前でちょうど終わる長さで、放つものにはすべて予兆と発動の組があり、外れることのある投擲と処刑には別の外れ音（Miss）があります。</p>
+<p><small>調は全武器共通の F マイナー・ペンタトニック（F A♭ B♭ C E♭）で、実行時の移調はしていません（0 セント）。鐘の音色は使わず、
+磁器・真鍮・オルガンで組んでいます。飛んでいる刃のうなりは回転の段ごとの固定ピッチのループ2本（PCM16 WAV、回転数ちょうどで継ぎ目なし）で、
+ゲームでは数tickで入れ替えます。</small></p>
+{combo}
+{''.join(bgm_rows)}
+{''.join(blocks)}
+</html>""", encoding="utf-8", newline="\n")
+
+
+# ---------------------------------------------------------------- Last Witness attribution
+def witness_attribution_section(report, hashes):
+    used = sorted({k for r in report.values() for k in r["sources"]})
+    table = "\n".join(f"| {k} | {SOURCES[k][0]} | {SOURCES[k][1]} | `{hashes[k]}` |" for k in used)
+    head = f"""### Last Witness v2 audio — 2026-10-03
+
+The cues of the refreshed Last Witness ([weapon spec](../docs/encounters/first-severance/WEAPONS.md#rogue--last-witness)): the hang, six testimonies, the seal, the throw, the Axiom turns, the return and catch, two fixed-pitch spin loops and the stealth Triangle Judgement. [`tools/generate_doll_weapon_sfx.py`](../tools/generate_doll_weapon_sfx.py) owns the windows, filters, pitches, gains, loudness targets and source hashes; the music-box teeth, porcelain, brass, organ and shimmer are the original synthesis of [`tools/doll_sfx_dsp.py`](../tools/doll_sfx_dsp.py), with the Ebon helpers imported unmodified. The recordings are CC0 files already recorded in the Ebon Manor and Ebon reward tables of this register (Kenney RPG Audio on OpenGameArt; Freesound uploads that showed Creative Commons 0 on 2026-10-01, public HQ preview renders); they stay in the local store, are SHA-256 verified before use and are not committed. One-shots are Vorbis; the two loops are PCM16 WAV of a whole number of blade revolutions (`WitnessSpinLoop` 82,100 samples = 8 turns at 0.45 rad/tick, `WitnessAxiomLoop` 98,942 samples = 16 turns at 0.747 rad/tick), built circularly so they repeat sample-exactly. Loudness follows the Ebon scale: BS.1770 K-weighted maximum 400 ms short-term LUFS, true peak at most -1 dBTP after encoding. The audition page and report stay in the git-ignored `.local`.
+
+| Key | Store file | Source | Source SHA256 |
+|---|---|---|---|
+{table}
+"""
+    blocks = []
+    for name, r in report.items():
+        loop = CUES[name].loop
+        used = r["sources"]
+        authors = sorted({SOURCES[k][3] for k in used}, key=str.lower)
+        creators = (f"recordings by {', '.join(authors)}; " if authors else "") + "synthesis and layering by Convergence with owner-directed Claude assistance"
+        kind = (f"stereo 44.1 kHz PCM16 WAV Doll weapon loop ({r['seconds']:.3f} s, {round(r['seconds'] * RATE)} samples)" if loop
+                else f"stereo 44.1 kHz Vorbis Doll weapon cue ({r['seconds']:.2f} s)")
+        encoding = "PCM16 WAV" if loop else "Vorbis at compression level 0.4"
+        blocks.append(f"""- Runtime file: `Assets/Sounds/Weapons/DollWeapons/{name}.{'wav' if loop else 'ogg'}`
+- Asset ID: doll-weapon-sfx-{name.lower()}-20261003
+- Asset type: {kind}
+- Creator: {creators}
+- Creation/acquisition date: 2026-10-03
+- Source type: {'public-domain' if used else 'original'}
+- Source work and URL: {', '.join(used) + ' in the table above as selected by the cue recipe; remaining layers original synthesis' if used else 'none; original NumPy synthesis'}
+- Tool/model/version: `tools/generate_doll_weapon_sfx.py` with `tools/doll_sfx_dsp.py`; NumPy {np.__version__}, SciPy {__import__('scipy').__version__}, soundfile {sf.__version__}/libsndfile {sf.__libsndfile_version__} {encoding}
+- Human modifications: {'trimmed, filtered and layered recordings plus original synthesis' if used else 'original synthesis'}; short-term loudness {r['short_term_lufs']:.1f} LUFS (played at volume {r['volume']}: {r['effective_lufs']:.1f} LUFS effective), true peak {r['true_peak_dbfs']:.1f} dBFS{'; built circularly, so the file repeats sample-exactly' if loop else '; pinned Ogg serial'}
+- License and redistribution terms: {'CC0 1.0 recordings; the layered cue follows the existing project asset terms' if used else 'original project asset under the existing project terms'}
+- Required attribution: {'none required by CC0; retain the table above as courtesy credit' if used else 'none; retain this provenance'}
+- Reviewer and review date: Claude, 2026-10-03 (deterministic regeneration, length, loudness, true-peak{', loop-seam' if loop else ''} checks); owner, 2026-10-03 (approved on the audition page); in-game mix not_run
+- SHA256: `{r['sha256']}`
+""")
+    return head + "\n" + "\n".join(blocks)
+
+
 def weapon(group):
-    """The weapon an audition group belongs to: Pale Meridian's groups are "Meridian build", "Meridian notes", ..."""
-    return group.split()[0]
+    """The weapon an audition group belongs to: Pale Meridian's groups are "Meridian build", "Meridian notes", ...;
+    Last Witness's are "Last Witness" and its "Last Witness: Triangle Judgement"."""
+    return "Witness" if group in (WITNESS, VERDICT) else group.split()[0]
 
 
 def main():
@@ -1754,12 +2432,15 @@ def main():
     parser.add_argument("--output", type=Path, default=OUTPUT_DIR, help="Ogg output folder")
     parser.add_argument("--preview", type=Path, help="write the owner audition page, WAVs and report here (.local)")
     parser.add_argument("--attribution-section", type=Path, help="write the Assets/ATTRIBUTION.md section here")
+    parser.add_argument("--witness-audition", type=Path, help="write the Last Witness owner audition page and WAVs here (.local)")
+    parser.add_argument("--witness-attribution", type=Path, help="write the Last Witness Assets/ATTRIBUTION.md section here")
     parser.add_argument("--previous", type=Path, help="folder of an earlier export (.local); cues that changed get an A/B "
                                                       "row with it on the audition page")
     parser.add_argument("--only", help="comma-separated cue names; each cue is seeded by its own name, so the bytes "
                                        "equal a full run")
     parser.add_argument("--group", help="render one weapon's cues (Companion, Lacuna, Meridian: every 'Meridian ...' "
-                                        "group); --preview and --attribution-section describe one weapon")
+                                        "group, Witness: Last Witness and its Triangle Judgement); --preview and "
+                                        "--attribution-section describe one weapon")
     args = parser.parse_args()
     names = ([n.strip() for n in args.only.split(",")] if args.only
              else [n for n in CUES if not args.group or weapon(CUES[n].group) == args.group])
@@ -1784,10 +2465,19 @@ def main():
     group = next(iter(groups))
     if args.preview:
         record["audition"] = (weapon_preview(args.preview, group, samples, report) if group in COMBOS
+                              else witness_audition(args.preview, samples, report) if group == "Witness"
                               else preview(args.preview, samples, report, store, args.previous))
         (args.preview / "doll-weapon-sfx-report.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n")
     if args.attribution_section:
-        args.attribution_section.write_text(attribution_section(report, store.hashes, group), encoding="utf-8", newline="\n")
+        section = (witness_attribution_section(report, store.hashes) if group == "Witness"
+                   else attribution_section(report, store.hashes, group))
+        args.attribution_section.write_text(section, encoding="utf-8", newline="\n")
+    witness = {k: v for k, v in report.items() if CUES[k].group in (WITNESS, VERDICT)}
+    if args.witness_audition and witness:
+        record["witness_audition"] = witness_audition(args.witness_audition, samples, witness)
+        (args.witness_audition / "witness-sfx-report.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n")
+    if args.witness_attribution and witness:
+        args.witness_attribution.write_text(witness_attribution_section(witness, store.hashes), encoding="utf-8", newline="\n")
     print(json.dumps({k: {kk: v[kk] for kk in ("seconds", "short_term_lufs", "effective_lufs", "true_peak_dbfs", "peak_ms",
                                               "centroid_hz", "bytes")} for k, v in report.items()}, indent=1))
 
