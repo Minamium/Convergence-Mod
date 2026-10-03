@@ -84,7 +84,7 @@
     "result": "every existing relation holds; only the one-shot median moved (0.5 dB, inside its window)"
   },
   "four_player_fight": {
-    "model": "tools/tests/test_scarlet_levels.py dense_mix: Graceful Ordeal bars 19-23 at the owner's sliders under the local organ and three other players' scythe, quill and censers at their real rates, sound budgets and voice limits; each Raid warning laid over it at ten places; the measure is the best 1/3-octave band against everything else in the warning's loudest 400 ms (median of ten). With the crescent cues the other player's scythe also sheds a volley once per 100-tick measure and rings a break at +39, +57, +75, +93, +122 and +128 ticks (four singles 30 ticks after their throws, the volley's five 30 ticks after it is shed, ringing once or twice under the 6-tick spacing): the most a held loop allows",
+    "model": "tools/tests/test_scarlet_levels.py dense_mix: Graceful Ordeal bars 19-23 at the owner's sliders under the local organ and three other players' scythe, quill and censers at their real rates, sound budgets and voice limits; each Raid warning laid over it at ten places; the measure is the best 1/3-octave band against everything else in the warning's loudest 400 ms (median of ten). With the crescent cues the other player's scythe also sheds a volley once per 100-tick measure and rings a break at +39, +57, +75, +93, +122, +128, +134, +140 and +146 ticks: nine breaks, one per crescent a held loop throws (four singles 30 ticks after their throws, the volley's five one by one 6 ticks apart, the closest a break rings, 30 ticks after it is shed), the most a held loop rings (the 8-crescent cap bounds how many fly at once, not how many break, and the 6-tick throttle would allow sixteen). The same nine spread evenly (+39, +50, +61, +72, +83, +95, +106, +117, +128) are a second layout, bounded but not pinned by the test",
     "floor_db": 3.0,
     "without_crescent_cues": {
       "mixed2": {
@@ -116,38 +116,72 @@
       "mixed2": {
         "ScarletForetell": 11.86,
         "ScarletStackSummon": 9.01,
-        "ScarletSpreadSummon": 3.88,
+        "ScarletSpreadSummon": 3.85,
+        "ScarletCrossflowCharge": 4.17
+      },
+      "mixed4": {
+        "ScarletForetell": 11.63,
+        "ScarletStackSummon": 8.48,
+        "ScarletSpreadSummon": 3.75,
+        "ScarletCrossflowCharge": 3.86
+      },
+      "censers2": {
+        "ScarletForetell": 10.71,
+        "ScarletStackSummon": 8.07,
+        "ScarletSpreadSummon": 3.68,
+        "ScarletCrossflowCharge": 4.11
+      },
+      "censers4": {
+        "ScarletForetell": 10.56,
+        "ScarletStackSummon": 7.37,
+        "ScarletSpreadSummon": 3.58,
+        "ScarletCrossflowCharge": 3.42
+      }
+    },
+    "with_crescent_cues_even_spread": {
+      "mixed2": {
+        "ScarletForetell": 11.88,
+        "ScarletStackSummon": 9.01,
+        "ScarletSpreadSummon": 3.76,
         "ScarletCrossflowCharge": 4.15
       },
       "mixed4": {
-        "ScarletForetell": 11.75,
-        "ScarletStackSummon": 8.47,
-        "ScarletSpreadSummon": 3.79,
-        "ScarletCrossflowCharge": 3.84
+        "ScarletForetell": 11.68,
+        "ScarletStackSummon": 8.43,
+        "ScarletSpreadSummon": 3.76,
+        "ScarletCrossflowCharge": 3.86
       },
       "censers2": {
-        "ScarletForetell": 10.83,
-        "ScarletStackSummon": 8.07,
-        "ScarletSpreadSummon": 3.68,
-        "ScarletCrossflowCharge": 4.14
+        "ScarletForetell": 10.9,
+        "ScarletStackSummon": 7.92,
+        "ScarletSpreadSummon": 3.6,
+        "ScarletCrossflowCharge": 3.97
       },
       "censers4": {
-        "ScarletForetell": 10.68,
-        "ScarletStackSummon": 7.36,
-        "ScarletSpreadSummon": 3.58,
-        "ScarletCrossflowCharge": 3.54
+        "ScarletForetell": 10.61,
+        "ScarletStackSummon": 7.21,
+        "ScarletSpreadSummon": 3.54,
+        "ScarletCrossflowCharge": 3.58
       }
     },
-    "largest_loss_db": 0.09,
-    "smallest_margin_db": 3.54,
-    "result": "every warning keeps at least 3.54 dB in every scenario (the floor is 3.0) and at least 0.3.80's margin; the existing test's model (without the crescent cues) is unchanged and its numbers hold"
+    "largest_loss_db": {
+      "densest": 0.2,
+      "even_spread": 0.23
+    },
+    "smallest_margin_db": {
+      "densest": 3.42,
+      "even_spread": 3.54
+    },
+    "loss_bound_db": 0.25,
+    "correction": "An earlier draft of this change modelled six breaks (the volley's five ringing once or twice) and called that the most a held loop allows, which it is not: a swarm breaks the volley's five one by one. The nine-break model replaces it (smallest margin 3.54 to 3.42 dB, largest loss 0.09 to 0.2 dB in the densest layout, 0.23 dB spread evenly); the files, offsets and every other relation are unchanged",
+    "result": "every warning keeps at least 3.42 dB in every scenario and layout (the floor is 3.0) and at least 0.3.80's margin, and loses at most 0.23 dB against the shipped build without the crescent cues (bound 0.25); the existing test's model (without the crescent cues) is unchanged and its numbers hold"
   },
   "checks": {
     "static": "passed: verify_repo.py --write-catalog --with-domain (catalog, repository policy including the attribution manifest, YAML, domain harness); git diff --check clean",
     "domain": "passed: 633 deterministic domain tests, 0 failures (dotnet run Release): the wanted-cue test became ScarletRewardCrescentCues (shipped in All, take B, Shot audience and role, in-play offset, 1 peer voice replacing oldest, Lead 0, one file each, 2 and 3 voices, 0.503 / 0.303 s = 31 / 19 ticks, spacing 6, three voices covering the break's file at that spacing, 40 distinct files); the cue table, audience and moment tests count 37 cues in 40 files and add the two names and the volley's tick",
     "tools": "passed: py -3.12 -B -m unittest discover -s tools/tests, 223 tests OK (13 skipped: the audio stack and other local-only tools); the same under the audio venv, 223 OK (24 skipped); new and changed contracts: the table holds 37 cues with the owner's picks, 40 files with pinned serials and lengths, each file's hash and take in Attribution, the two files pinned to the audition masters' hashes, the volley and break call sites and the 6-tick throttle, StaffCut rung only by the Staff Reap cascade, and no Wanted, StandIn or Voice( left in the cue table or the audio player",
-    "levels": "passed: audio venv python -B -m unittest -v tools.tests.test_scarlet_levels, 8 tests OK: the tables pin the 40 reward files by digest (c75948110d3fafd12178586f782c0cfaf7aa3ebe4eeb848de00fdd1dd7edcb2d), a fresh BS.1770 measurement agrees with every table entry within 0.02 dB, the Raid groups, reward roles, auditioned balance, and the four-player fights without and with the crescent cues",
-    "native_build": "passed: tools/dev.py build --native into the isolated .local/profile, 0 errors and the existing 4 CS8632 warnings, localization validation and shader hashes passed, solo admission check OK; package 0.3.91 sha256 93456c4bec052c9f80ad8ac0f536a0fe1c7c03e15b55f82b84ce8c88f40cc72b (built from the working tree before commit; a second build of the same tree gave 2b3793af6c89867b3cc8c635a2575cb9ad9050188a5b2907b9072c7389f0fa85, so the package hash varies per build and the build record's commit and dirty state identify the source); no tModLoader process was running",
+    "levels": "passed: audio venv python -B -m unittest -v tools.tests.test_scarlet_levels, 8 tests OK: the tables pin the 40 reward files by digest (c75948110d3fafd12178586f782c0cfaf7aa3ebe4eeb848de00fdd1dd7edcb2d), a fresh BS.1770 measurement agrees with every table entry within 0.02 dB, the Raid groups, reward roles, auditioned balance, and the four-player fights without and with the crescent cues (nine breaks a measure, densest and evenly spread)",
+    "native_build": "passed: tools/dev.py build --native into the isolated .local/profile, 0 errors and the existing 4 CS8632 warnings, localization validation and shader hashes passed, solo admission check OK; package 0.3.91 sha256 5822d2b4177639b40b6cafbdf73d74fdcf48548f5c9b255398d0558d330869c2 (rebuilt from the working tree before the commit that corrected the four-player model, which changed only tests and documents; the first build of the same code gave 93456c4bec052c9f80ad8ac0f536a0fe1c7c03e15b55f82b84ce8c88f40cc72b and a second 2b3793af6c89867b3cc8c635a2575cb9ad9050188a5b2907b9072c7389f0fa85, so the package hash varies per build and the build record's commit and dirty state identify the source); no tModLoader process was running",
     "game_not_started": "the game was not started in this work"
   },
   "not_run": [

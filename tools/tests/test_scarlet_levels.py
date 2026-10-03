@@ -111,13 +111,15 @@ DENSE = {
     'censers4': {'ScarletForetell': 10.75, 'ScarletStackSummon': 7.30, 'ScarletSpreadSummon': 3.60, 'ScarletCrossflowCharge': 3.56},
 }
 # The same four scenarios with the crescent cues in the other player's scythe (CRESCENT_BREAKS): no warning loses more than
-# 0.2 dB against DENSE (the most it lost is 0.09) and every one keeps DENSE_FLOOR.
+# DENSE_CRESCENT_LOSS against DENSE (the most it lost is 0.20 dB in these margins, 0.23 dB with the breaks spread evenly)
+# and every one keeps DENSE_FLOOR.
 DENSE_CRESCENTS = {
-    'mixed2': {'ScarletForetell': 11.86, 'ScarletStackSummon': 9.01, 'ScarletSpreadSummon': 3.88, 'ScarletCrossflowCharge': 4.15},
-    'mixed4': {'ScarletForetell': 11.75, 'ScarletStackSummon': 8.47, 'ScarletSpreadSummon': 3.79, 'ScarletCrossflowCharge': 3.84},
-    'censers2': {'ScarletForetell': 10.83, 'ScarletStackSummon': 8.07, 'ScarletSpreadSummon': 3.68, 'ScarletCrossflowCharge': 4.14},
-    'censers4': {'ScarletForetell': 10.68, 'ScarletStackSummon': 7.36, 'ScarletSpreadSummon': 3.58, 'ScarletCrossflowCharge': 3.54},
+    'mixed2': {'ScarletForetell': 11.86, 'ScarletStackSummon': 9.01, 'ScarletSpreadSummon': 3.85, 'ScarletCrossflowCharge': 4.17},
+    'mixed4': {'ScarletForetell': 11.63, 'ScarletStackSummon': 8.48, 'ScarletSpreadSummon': 3.75, 'ScarletCrossflowCharge': 3.86},
+    'censers2': {'ScarletForetell': 10.71, 'ScarletStackSummon': 8.07, 'ScarletSpreadSummon': 3.68, 'ScarletCrossflowCharge': 4.11},
+    'censers4': {'ScarletForetell': 10.56, 'ScarletStackSummon': 7.37, 'ScarletSpreadSummon': 3.58, 'ScarletCrossflowCharge': 3.42},
 }
+DENSE_CRESCENT_LOSS = .25
 DENSE_0380 = {
     'mixed2': {'ScarletForetell': 0.13, 'ScarletStackSummon': 5.68, 'ScarletSpreadSummon': 3.34, 'ScarletCrossflowCharge': 0.30},
     'mixed4': {'ScarletForetell': 0.03, 'ScarletStackSummon': 4.45, 'ScarletSpreadSummon': 3.31, 'ScarletCrossflowCharge': 0.14},
@@ -126,11 +128,15 @@ DENSE_0380 = {
 }
 DENSE_FLOOR = 3.0
 # The crescent cues (2026-10-04) in the same fight: the other player's scythe also sheds its volley once a measure (the
-# Whip's tick 20, four strokes in) and rings CrescentBreak at the offsets below, in ticks from the measure's start: each
-# of the measure's four single crescents breaks 30 ticks after its throw (age 9, at 18-tick strokes), and the five of the
-# volley break 30 ticks after it is shed, ringing once or twice because a break rings at most once per 6 ticks. Six breaks
-# and a volley in 100 ticks is the most the throttle and the 8-crescent cap let a held loop ring.
-CRESCENT_BREAKS = (9 + 30, 27 + 30, 45 + 30, 63 + 30, 4 * 18 + 20 + 30, 4 * 18 + 20 + 36)
+# Whip's tick 20, four strokes in) and rings CrescentBreak at the offsets below, in ticks from the measure's start. A held
+# loop throws nine crescents a measure (the four single ones, one per Over and Under, and the volley's five) and each breaks
+# once, so nine breaks and a volley in 100 ticks is the most it can ring: the 8-crescent cap bounds how many fly at once,
+# not how many break, and the 6-tick throttle (ScytheInk.BreakCue) would allow sixteen. The first layout is the densest:
+# each single breaks 30 ticks after its throw (age 9, at 18-tick strokes) and the volley's five break one by one, 6 ticks
+# apart (the closest a break rings), 30 ticks after it is shed, as they do when a swarm takes each to its own target. The
+# second spreads the same nine evenly through the measure, a different phase against the warnings.
+CRESCENT_BREAKS = (9 + 30, 27 + 30, 45 + 30, 63 + 30) + tuple(4 * 18 + 20 + 30 + 6 * k for k in range(5))
+CRESCENT_BREAKS_EVEN = tuple(39 + round(k * 100 / 9) for k in range(9))
 
 
 def read(path):
@@ -240,9 +246,9 @@ def remote_decibels():
     return float(re.search(r'RemoteCueDecibels = (-?[\d.]+)f?;', read(RULES)).group(1))
 
 
-def dense_events(scenario, end, tick, crescents=False):
-    """(owner, cue, file, start sample) for one scenario; owner 0 is the local player. With crescents, the other
-    player's scythe also rings its two crescent cues at their real rates (see CRESCENT_BREAKS)."""
+def dense_events(scenario, end, tick, crescents=None):
+    """(owner, cue, file, start sample) for one scenario; owner 0 is the local player. With crescents (a layout of break
+    offsets, see CRESCENT_BREAKS), the other player's scythe also rings its two crescent cues at their real rates."""
     rules = read(RULES)
     const = lambda name: int(re.search(rf'\b{name} = (\d+)', rules).group(1))  # noqa: E731
     uses = rules[rules.index('internal static int UseTicks('):]
@@ -258,11 +264,11 @@ def dense_events(scenario, end, tick, crescents=False):
 
     every(0, 'OrganShot', use('Ranged'), 1, lambda k: f'OrganShot{k % 4 + 1}')
     every(1, 'ScytheSwingHigh', const('StrokeTicks'), 4, lambda k: 'ScytheSwingHigh' if k % 2 == 0 else 'ScytheSwingLow')
-    if crescents:
+    if crescents is not None:
         measure = 4 * const('StrokeTicks') + const('WhipTicks')
         start = 4 + 4 * const('StrokeTicks')  # the scythe's first stroke above is at 4; the Whip follows four strokes
         every(1, 'ScytheVolley', measure, start + const('VolleyAge'), lambda k: 'ScytheVolley')
-        for offset in CRESCENT_BREAKS:
+        for offset in crescents:
             every(1, 'CrescentBreak', measure, 4 + offset, lambda k: 'CrescentBreak')
     every(3, 'QuillThrow', use('Rogue'), 10, lambda k: 'QuillThrow')
     every(3, 'QuillStick', use('Rogue'), 16, lambda k: 'QuillStick')
@@ -294,7 +300,7 @@ def dense_events(scenario, end, tick, crescents=False):
     return sorted(events, key=lambda e: e[3])
 
 
-def dense_mix(scenario, raid=RAID, sounds=SOUNDS, role_db=None, remote_db=None, every_remote=True, slider=None, crescents=False):
+def dense_mix(scenario, raid=RAID, sounds=SOUNDS, role_db=None, remote_db=None, every_remote=True, slider=None, crescents=None):
     """Each warning's median best-band margin (dB) over the score and the weapons in one scenario. The defaults are the
     shipped files and code; the arguments let the evidence render 0.3.80 the same way."""
     import numpy as np
@@ -551,17 +557,20 @@ class ScarletLevels(unittest.TestCase):
 
     @unittest.skipUnless(numeric_audio_stack(), 'numpy, scipy and soundfile are local audio tools, not CI')
     def test_the_crescent_cues_leave_the_four_player_fight_clear(self):
-        # ScytheVolley and CrescentBreak, rung by the other player's scythe at the most a held loop allows (a volley and six
-        # breaks in each 100-tick measure, other players 8 dB lower with one voice each), take no more than 0.2 dB from any
-        # warning and leave every one at least DENSE_FLOOR.
+        # ScytheVolley and CrescentBreak, rung by the other player's scythe at the most a held loop allows (a volley and nine
+        # breaks in each 100-tick measure, the volley's five 6 ticks apart; other players 8 dB lower with one voice each),
+        # take no more than DENSE_CRESCENT_LOSS from any warning and leave every one at least DENSE_FLOOR. The same nine
+        # breaks spread evenly through the measure meet the same bounds (their margins are not pinned, only bounded).
         for scenario in DENSE_SCENARIOS:
-            margins = dense_mix(scenario, crescents=True)
-            for warning in WARNINGS:
-                with self.subTest(scenario=scenario, warning=warning):
-                    self.assertAlmostEqual(DENSE_CRESCENTS[scenario][warning], margins[warning], delta=.02)
-                    self.assertGreaterEqual(margins[warning], DENSE_FLOOR)
-                    self.assertGreaterEqual(margins[warning], DENSE[scenario][warning] - .2)
-                    self.assertGreaterEqual(margins[warning], DENSE_0380[scenario][warning])
+            for layout, breaks in (('densest', CRESCENT_BREAKS), ('even', CRESCENT_BREAKS_EVEN)):
+                margins = dense_mix(scenario, crescents=breaks)
+                for warning in WARNINGS:
+                    with self.subTest(scenario=scenario, layout=layout, warning=warning):
+                        if layout == 'densest':
+                            self.assertAlmostEqual(DENSE_CRESCENTS[scenario][warning], margins[warning], delta=.02)
+                        self.assertGreaterEqual(margins[warning], DENSE_FLOOR)
+                        self.assertGreaterEqual(margins[warning], DENSE[scenario][warning] - DENSE_CRESCENT_LOSS)
+                        self.assertGreaterEqual(margins[warning], DENSE_0380[scenario][warning])
 
 
 if __name__ == '__main__':
