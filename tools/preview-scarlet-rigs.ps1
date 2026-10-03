@@ -36,7 +36,8 @@ param(
     [ValidateSet('on', 'off', 'only')][string]$Gates = 'on',
     [ValidateSet('black', 'dim', 'none')][string]$Mask = 'black',
     [ValidateSet('auto', 'on', 'off')][string]$Flip = 'auto',
-    [string]$Baseline = '.local/scarlet-rigs-baseline', # G8 / G11 reference frames: compared when present, written when absent
+    [string]$Baseline = '.local/scarlet-rigs-baseline', # G8 / G11 / G8v reference frames with their provenance manifest (baseline.json)
+    [switch]$WriteBaseline,                            # write them from the code linked now (run from the reference commit); never implicit
     [string]$Size = '1920x1080',
     [int]$Limit = 0,                                   # frames per scene (0 = the whole phrase window)
     [string]$From = '',                                # first frame relative to the phrase's first warning (default -50)
@@ -129,7 +130,10 @@ $files += $client | ForEach-Object { "Client/Encounters/CrimsonFoundry/$_.cs" }
 $authority = 'CrimsonTechnique', 'CrimsonTrackingBeam', 'CrimsonChoirRakes', 'CrimsonClusters', 'CrimsonSpatialCuts',
     'CrimsonChoreography', 'CrimsonEnsemble', 'CrimsonInvocation', 'CrimsonRhythm', 'CrimsonPhaseRules',
     'CrimsonCovenantRules', 'CrimsonChorusRules', 'CrimsonChorusImpactPositions', 'CrimsonState',
-    'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonMeter', 'CrimsonSignatureMoves'
+    'CrimsonRecoveryState', 'CrimsonPlaytestTuning', 'CrimsonMeter', 'CrimsonSignatureMoves',
+    # Vfx/*.cs includes the reward ink and particles (main #110), which read these pure reward rule files.
+    'Rewards/CrimsonRewardRules', 'Rewards/CrimsonStrokeState', 'Rewards/SableScytheMotion', 'Rewards/CanticleRules',
+    'Rewards/BatonRules', 'Rewards/CenserRules', 'Rewards/QuillRules'
 $files += $authority | ForEach-Object { "Content/Encounters/CrimsonFoundry/$_.cs" }
 foreach ($file in $files) { if (-not (Test-Path -LiteralPath (Join-Path $root $file))) { throw "missing $file" } }
 $includes = ($files | ForEach-Object { '<Compile Include="' + [Security.SecurityElement]::Escape((Join-Path $root $_)) + '" />' }) -join ''
@@ -166,6 +170,7 @@ $options = @('--scenes', ($Scenes -join ','), '--cameras', ($Cameras -join ','),
     '--motion', $Motion, '--yield', $Yield, '--frames', $Frames, '--stills', $Stills, '--gates', $Gates, '--mask', $Mask,
     '--flip', $Flip, '--baseline', $baselinePath, '--size', $Size, '--limit', $Limit)
 if ($ff) { $options += @('--ffmpeg', $ff) }
+if ($WriteBaseline) { $options += @('--write-baseline', 'on') }
 if ($From) { $options += @('--from', $From) }
 if ($NoLabels) { $options += @('--labels', 'off') }
 if ($NoContext) { $options += @('--context', 'off') }

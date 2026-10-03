@@ -15,8 +15,9 @@
 * --pairs: side-by-side videos (left off, right on) for the material and the residue-yield switches when both
   renders exist (<scene>-<camera>-<variant without -material>-offon.webm, <scene>-<camera>-<variant>-yield-offon.webm).
 * The page opens with the design's owner list (§4.4 videos 1-20) mapped to the files that exist.
-* --page: review/index.html with the videos, stills, state curves, gates, G10 visibility and skipped renders. Serve
-  the output directory with a local HTTP server that answers Range requests (videos seek), then open /review/.
+* --page: review/index.html (and the same page as index.html at the output root) with the videos, stills, state
+  curves, gates, G10 visibility and skipped renders. Serve the output directory with a local HTTP server that answers
+  Range requests (videos seek), then open / or /review/.
 
 Offline review only: not a playtest; in-game acceptance stays not_run. Needs numpy and imageio-ffmpeg (py -3.12).
 """
@@ -370,6 +371,11 @@ def page(out: pathlib.Path, index: dict, gates: dict | None, videos: list, pairs
              '<h1>Scarlet Invocation: attack expression, offline rig review</h1>',
              f'<div class="notice"><b>オフライン描画・プレイテストではない・実機の受け入れは not_run。</b><br>{e(NOTICE)}<br>'
              f'Not reproduced: {e(", ".join(index.get("notReproduced", [])))}.</div>']
+    notes = out / 'review-notes.json'
+    if notes.exists():
+        # Optional reviewer notes for this render (a JSON list of plain strings), e.g. what changed since the last one.
+        items = json.loads(notes.read_text(encoding='utf-8'))
+        parts.append('<h2>Changes in this render</h2><ul>' + ''.join(f'<li>{e(str(item))}</li>' for item in items) + '</ul>')
     if audio_meta:
         parts.append(f'<p class="cap">Sound: set A from ScarletSounds.cs on the recorded Born/Fire ticks; sliders {e(audio_meta["sliders"])}; '
                      f'BGM = arranged Graceful Ordeal at MusicGain x music slider; one +12 dB make-up for all videos (lowered only to stay under -1 dBFS).</p>')
@@ -440,7 +446,10 @@ def page(out: pathlib.Path, index: dict, gates: dict | None, videos: list, pairs
     data = json.dumps({'curves': curve_sets}, ensure_ascii=False).replace('</', '<\\/')
     parts.append(f'<script id="data" type="application/json">{data}</script><script>{PAGE_JS}</script></main></body></html>')
     target = review / 'index.html'
-    target.write_text(''.join(parts), encoding='utf-8')
+    html = ''.join(parts)
+    target.write_text(html, encoding='utf-8')
+    # The same page at the output root (/index.html), its links one level up.
+    (out / 'index.html').write_text(html.replace('src="../', 'src="').replace('href="../', 'href="'), encoding='utf-8')
     return target
 
 

@@ -137,7 +137,7 @@ class HarnessContractTests(unittest.TestCase):
         mirror = scene[scene.index('internal static class RigMirror'):scene.index('internal static class RigDriver')]
         self.assertIn('=> CrimsonRig.Signal(Live(plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, source, age);', mirror)
         self.assertIn('=> ScarletNotes.ChoirCues(Live(plans, age), age, flipped, cues);', mirror)
-        self.assertIn('=> ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes);', mirror)
+        self.assertIn('=> ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes, lookback);', mirror)
         for copied in ('CrimsonRigMotion.Charge(', 'CrimsonRigMotion.Recoil(', 'new CrimsonChoirCue(', 'Step % 4'):
             self.assertNotIn(copied, mirror)
         driver = scene[scene.index('internal static class RigDriver'):scene.index('internal enum RigLayers')]
@@ -150,6 +150,39 @@ class HarnessContractTests(unittest.TestCase):
         self.assertIn('ScarletBodyMaterial.Apparition(age, notes[..noted], motion, flipped, reduced)', effigy)
         self.assertIn('ScarletBodyMaterial.Apparition(age, notes[..noted], motion, s.Flipped, reduced)', driver)
         self.assertIn('CrimsonRig.DrawConductor(', driver)
+        self.assertIn('index == 2 ? 0 : ScarletNotes.PastTicks', driver)
+        self.assertIn('effigy.State.Index == 2 ? 0 : ScarletNotes.PastTicks', effigy)
+
+    def test_gates_cannot_hide_behind_each_other(self):
+        gates = read(FIXTURES / 'ScarletRigGates.cs')
+        # G2's safe zones include every displayed footprint (basic phrases too), and its second part reads the
+        # composited light over safe ground against the current silhouette, independent of G1's range.
+        zones = gates[gates.index('private bool[] SafeZones('):gates.index('private bool[] Capsules(')]
+        self.assertNotIn('IsSignature', zones)
+        self.assertIn('var silhouette = BodyMask(s, view, Plain, 4);', gates)
+        self.assertIn('Status(inZones == 0 && hands.Outside == 0 && seenOk)', gates)
+        # G3 gates every pass alone as well as the pooled percentile.
+        self.assertIn('outPass <= limitOutside && inPass <= limitInside', gates)
+        # G5 is local: 100 px tiles near the body on every warning tick, against the plain picture.
+        g5 = gates[gates.index('private void G5()'):gates.index('private void G6()')]
+        self.assertIn('const int Tile = 100, MinimumPixels = 150;', g5)
+        self.assertIn('for (int tick = third.Born; tick < third.Fire; tick++)', g5)
+        self.assertIn('worst >= .9f', g5)
+
+    def test_baselines_are_explicit_and_carry_provenance(self):
+        gates = read(FIXTURES / 'ScarletRigGates.cs')
+        conductor = read(FIXTURES / 'ScarletConductorGates.cs')
+        script = read(TOOLS / 'preview-scarlet-rigs.ps1')
+        self.assertIn('[switch]$WriteBaseline', script)
+        self.assertIn("if ($WriteBaseline) { $options += @('--write-baseline', 'on') }", script)
+        self.assertIn('internal static class RigBaseline', gates)
+        self.assertIn('rev-parse HEAD', gates)
+        for text, gate in ((gates, '"g8"'), (gates, '"g11"'), (conductor, '"s4"')):
+            self.assertIn(f'RigBaseline.Refuse(root, dir, {gate}, out manifest)', text)
+            self.assertIn(f'RigBaseline.Write(root, dir, {gate},', text)
+        # Nothing is written just because a baseline is missing.
+        self.assertNotIn('Directory.EnumerateFiles(dir, "*.rgba.gz").Any()', gates)
+        self.assertNotIn('bool compare = File.Exists(file);', conductor)
 
     def test_no_beat_figure_and_no_thread_language_in_the_harness(self):
         for name in ('ScarletRigScene.cs', 'ScarletRigGates.cs', 'ScarletPreviewHost.cs'):

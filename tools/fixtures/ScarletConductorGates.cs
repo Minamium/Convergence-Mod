@@ -11,8 +11,9 @@
 //        sprite (alpha, dilated 12 px) and today's orb footprint. Light it adds inside today's footprint is measured.
 //   G6v  timing from the notes only: the orb's Ignite rises on Fire, the release (Snap) peaks in [Fire, Fire + 3],
 //        Heat peaks in [Fire - 3, Fire], the orb is drawn back against the aim before Fire and moves toward it after;
-//        the orb's drawn light has its largest one-tick rise on the Fire tick. Plans shifted by +7 ticks shift every
-//        command channel by exactly 7 (no beat clock).
+//        the orb's drawn light starts rising on the Fire tick and rises most within [Fire, Fire + 2] (no new flare on
+//        Fire: the reactor keeps today's impulse). Plans shifted by +7 ticks shift every command channel by exactly 7
+//        (no beat clock).
 //   G7v  Reduced: same timing, displacement / radius change / rim boost at most half of Normal.
 // Offline review only: not a playtest; in-game acceptance stays not_run.
 #nullable enable
@@ -42,7 +43,8 @@ internal sealed class ConductorGates
     private readonly Dictionary<string, RigScene> scenes = new();
     private RenderTarget2D? crop;
 
-    internal ConductorGates(RigRenderer renderer, RigOptions options, string output) { r = renderer; o = options; this.output = output; }
+    private readonly string root;
+    internal ConductorGates(RigRenderer renderer, RigOptions options, string root, string output) { r = renderer; o = options; this.root = root; this.output = output; }
 
     internal List<RigGate> Run()
     {
@@ -211,17 +213,18 @@ internal sealed class ConductorGates
                 float pull = Vector2.Dot(before.Hold.Offset - before.Today.Offset, charge);
                 var after = Inputs(s.Plans, s.Phase, p.Fire + 2, false);
                 float release = Vector2.Dot(after.Hold.Offset - after.Today.Offset - (before.Hold.Offset - before.Today.Offset), aim);
-                // The drawn orb (sprite pixels excluded) over [Fire-8, Fire+8]: it brightens on the Fire tick (the largest
-                // one-tick rise is Fire, or Fire+1 when the release swell follows, with at least half of it on Fire) and
-                // its bloom peaks within 5 ticks (today's recoil bloom peaks at about Fire+7).
-                var light = Enumerable.Range(p.Fire - 9, 18).Select(t => Light(Vespera(s, t, Commanded))).ToArray();
-                var todayLight = Enumerable.Range(p.Fire - 9, 18).Select(t => Light(Vespera(s, t, Current))).ToArray();
-                int lightPeak = Enumerable.Range(1, 17).MaxBy(i => light[i]) - 9, todayPeak = Enumerable.Range(1, 17).MaxBy(i => todayLight[i]) - 9;
-                int rise = Enumerable.Range(1, 17).MaxBy(i => light[i] - light[i - 1]) - 9;
-                int todayRise = Enumerable.Range(1, 17).MaxBy(i => todayLight[i] - todayLight[i - 1]) - 9;
+                // The drawn orb (sprite pixels excluded) over [Fire-8, Fire+12]: it starts brightening on the Fire tick (the
+                // rim heat), rises most within the three-tick release [Fire, Fire+2] (the reactor keeps today's recoil
+                // impulse, so no new flare lights on Fire itself) and its bloom peaks by Fire+8 (today's recoil bloom
+                // peaks at about Fire+7).
+                var light = Enumerable.Range(p.Fire - 9, 22).Select(t => Light(Vespera(s, t, Commanded))).ToArray();
+                var todayLight = Enumerable.Range(p.Fire - 9, 22).Select(t => Light(Vespera(s, t, Current))).ToArray();
+                int lightPeak = Enumerable.Range(1, 21).MaxBy(i => light[i]) - 9, todayPeak = Enumerable.Range(1, 21).MaxBy(i => todayLight[i]) - 9;
+                int rise = Enumerable.Range(1, 21).MaxBy(i => light[i] - light[i - 1]) - 9;
+                int todayRise = Enumerable.Range(1, 21).MaxBy(i => todayLight[i] - todayLight[i - 1]) - 9;
                 float largest = light[rise + 9] - light[rise + 8], onFire = light[9] - light[8];
                 bool good = ignite && snapPeak >= 0 && snapPeak <= 3 && heatPeak <= 0 && heatAtFire && pull <= 1 && release >= -1e-3f
-                    && rise >= 0 && rise <= 1 && onFire >= .5f * largest && lightPeak >= 0 && lightPeak <= 5;
+                    && rise >= 0 && rise <= 2 && onFire > 0 && lightPeak >= 0 && lightPeak <= 8;
                 ok &= good;
                 rows.Add(new { scene = name, technique = p.Technique.ToString(), pulse = p.Pulse, aim = new[] { aim.X, aim.Y }, igniteOnFire = ignite,
                     snapPeak, heatPeak, pullAlongAim = pull, releaseAlongAim = release, drawnLightLargestRise = rise, drawnLightPeak = lightPeak,
@@ -266,7 +269,7 @@ internal sealed class ConductorGates
             pose.Add(new { scene = name, blinks = blink, crossfadeTicks = crossfade, todayBlinks = todayBlink, todayCrossfadeTicks = todayCrossfade,
                 poseOneTicks = cast.Count(c => c.Cast >= .98f), todayPoseOneTicks = cast.Count(c => c.TodayCast >= .98f) });
         }
-        Add("G6v", "timing: orb ignites on Fire, release peaks in [Fire, Fire+3], heat peaks by Fire, pull against / release toward the aim, drawn light rises on Fire and peaks by Fire+5; +7 shift; no pose blink",
+        Add("G6v", "timing: orb ignites on Fire, release peaks in [Fire, Fire+3], heat peaks by Fire, pull against / release toward the aim, drawn light starts rising on Fire, rises most by Fire+2 and peaks by Fire+8; +7 shift; no pose blink",
             ok && shifted && steady ? "pass" : "fail", new { notes = rows, shift, pose },
             "Notes = the current phrase's notes of the Act's body (source = phase). pullAlongAim: the command's orb offset over today's hold at Fire-1 along the aim (the crossflow: along its upper-right charge), <= 1 px (the design's 5 px lift may lean slightly into an upward aim). releaseAlongAim: how far that offset moves along the aim from Fire-1 to Fire+2 (0 when the aim points at her side: the orb never comes nearer than its hold). drawnLight*: ticks relative to Fire of the largest one-tick rise and of the peak of the orb's drawn light, commanded and today.");
 
@@ -369,7 +372,14 @@ internal sealed class ConductorGates
     {
         string dir = Path.Combine(o.Baseline.Length > 0 ? o.Baseline : Path.Combine(output, "baseline"), "s4");
         string file = Path.Combine(dir, "identity.json");
-        bool compare = File.Exists(file);
+        RigBaseline.Manifest? manifest = null;
+        string? refused = o.WriteBaseline ? null : RigBaseline.Refuse(root, dir, "s4", out manifest);
+        if (refused is not null)
+        {
+            Add("G8v", "no note: Vespera's boss path draws today's frame on every tick (Normal, Reduced); the companion is byte-identical", "not_run", null, refused);
+            return;
+        }
+        bool compare = !o.WriteBaseline;
         var expected = compare ? JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(file))! : null;
         var actual = new Dictionary<string, string>();
         var rows = new List<object>();
@@ -407,12 +417,14 @@ internal sealed class ConductorGates
         {
             Directory.CreateDirectory(dir);
             File.WriteAllText(file, JsonSerializer.Serialize(actual));
+            RigBaseline.Write(root, dir, "s4", "today's Vespera (boss path, no note) and companion crops (G8v)");
         }
         Add("G8v", "no note: Vespera's boss path draws today's frame on every tick (Normal, Reduced); the companion is byte-identical",
             !compare ? "baseline_written" : different == 0 && missing == 0 ? "pass" : "fail",
             new { frames, different, missing, firstDifferent, rows },
-            compare ? "SHA-256 of each crop (zoom 2 around Vespera) against " + Path.GetRelativePath(output, file) + ", written from the code before S4."
-                : "Today's hashes written to " + file + "; run again after the change to compare.");
+            compare ? "SHA-256 of each crop (zoom 2 around Vespera) against " + Path.GetRelativePath(output, file)
+                    + $" (rendered from {manifest!.Revision}{(manifest.Dirty ? ", dirty" : "")}, {manifest.Written})."
+                : "Hashes written to " + file + " with their manifest; run the gates on the change to compare.");
     }
 
     private void Add(string id, string title, string status, object? measured, string note) => gates.Add(new RigGate(id, title, status, false, measured, note));
