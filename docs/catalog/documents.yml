@@ -950,13 +950,13 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 22f0fa7b84916920b4df61f02ac40b8c8a941af85a55994a68a18d80b12cc929
+  content_sha256: 85a86841e5a40a58806c47ca279e98981f9abc3c50c4e4e4d1cdd5ddc8f51140
   document_type: spec
   status: provisional
   owners:
   - gameplay
   - art
-  last_reviewed: '2026-10-02'
+  last_reviewed: '2026-10-03'
   source_of_truth_for:
   - first_severance.reward_weapons
   aliases:
@@ -965,6 +965,7 @@ documents:
   related_code:
   - Content/Encounters/FirstSeverance/Rewards
   - Client/Encounters/FirstSeverance/NullRefrainVisuals.cs
+  - Client/Encounters/FirstSeverance/Weapons
   - Common/Compatibility/Calamity/CalamityRogueArmament.cs
   related_docs:
   - project.status
@@ -1046,6 +1047,21 @@ documents:
   related_docs:
   - project.status
   - handoff.windows
+- doc_id: history.lacuna-testament-0234
+  path: docs/history/2026-10-03-lacuna-testament-0234.md
+  title: Lacuna Testament before the 2026-10 refresh
+  content_sha256: d25d554b7963af800b9c210f1dffb11ecfab5aa91b53d624bffbc393cf295ab3
+  document_type: evidence
+  status: historical
+  owners:
+  - gameplay
+  last_reviewed: '2026-10-03'
+  source_of_truth_for: []
+  aliases:
+  - Lacuna Testament 0.2.34 sigil array
+  related_code: []
+  related_docs:
+  - encounter.first-severance.weapons
 - doc_id: history.playtest-feedback
   path: docs/history/PLAYTEST_FEEDBACK.md
   title: Playtest feedback ledger
@@ -1266,7 +1282,7 @@ documents:
 - doc_id: project.audio-cues
   path: docs/AUDIO_CUE_SHEET.md
   title: 不幸な人形劇 Audio Cue Sheet
-  content_sha256: a9fd098c5b1b70a6b91ec6f5cb94202eb24f0b75e3c877bf57df4b6f95a428b6
+  content_sha256: 5e6ab772207d1af497beb742e40c5e5527180b30ca4bc12c236acbd55857794b
   document_type: spec
   status: provisional
   owners:
@@ -1448,7 +1464,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: b3c352874ad49abc31e2ae7286489e31c046a8a4684797844ff7b5c34c47c750
+  content_sha256: e47fd778bec7a6c95dd4fa9dbd53a3a525aefa2ccbe80f828c37fe06429dcb46
   document_type: status
   status: accepted
   owners:

@@ -102,12 +102,15 @@ public sealed class PaleMeridian : RitualArmament
 public sealed class LacunaTestament : RitualArmament
 {
     public override RitualArmamentKind Kind => RitualArmamentKind.Magic;
+    // The 2026-10 pixel icon (17x23 dots stored at 2x); held art, irises and beam are drawn by the Doll weapon layer.
+    public override string Texture => "Convergence/Assets/Textures/Items/DollWeapons/LacunaTestamentIcon";
     public override void SetDefaults()
     {
         RitualArmamentItems.Defaults(Item, Kind);
+        Item.width = 34; Item.height = 46;
         Item.mana = 8; Item.shootSpeed = 13;
         Item.channel = true; Item.autoReuse = false;
-        Item.shoot = ModContent.ProjectileType<LacunaConvergence>();
+        Item.shoot = ModContent.ProjectileType<LacunaIrisChannel>();
     }
     public override bool CanUseItem(Player player) => base.CanUseItem(player) && player.ownedProjectileCounts[Item.shoot] == 0;
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position,
