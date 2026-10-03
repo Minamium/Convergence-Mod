@@ -68,6 +68,9 @@
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/DollSpritePlacement.cs" Link="Presentation/DollSpritePlacement.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/Weapons/DollCueClock.cs" Link="Presentation/DollCueClock.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/DollWeaponBudget.cs" Link="Domain/DollWeaponBudget.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianScore.cs" Link="Domain/PaleMeridianScore.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianLattice.cs" Link="Domain/PaleMeridianLattice.cs" />
+    <Compile Include="../../Content/Encounters/FirstSeverance/Rewards/PaleMeridianRig.cs" Link="Domain/PaleMeridianRig.cs" />
     <Compile Include="../../Content/Encounters/FirstSeverance/FirstSeveranceBeamIgnition.cs" Link="Domain/FirstSeveranceBeamIgnition.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceCoreCrater.cs" Link="Presentation/FirstSeveranceCoreCrater.cs" />
     <Compile Include="../../Client/Encounters/FirstSeverance/FirstSeveranceEnergyPulse.cs" Link="Presentation/FirstSeveranceEnergyPulse.cs" />

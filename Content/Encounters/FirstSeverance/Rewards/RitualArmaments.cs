@@ -79,10 +79,13 @@ public abstract class RitualArmament : ModItem, IRitualArmament
 public sealed class PaleMeridian : RitualArmament
 {
     public override RitualArmamentKind Kind => RitualArmamentKind.Ranged;
+    // The 2026-10 pixel icon (28x20 dots stored at 2x); the item is drawn natively, not by RitualArmamentItemVisuals.
+    public override string Texture => "Convergence/Assets/Textures/Items/DollWeapons/PaleMeridianIcon";
     public override void SetDefaults()
     {
         RitualArmamentItems.Defaults(Item, Kind);
-        Item.shoot = ModContent.ProjectileType<MeridianBastion>();
+        Item.width = 56; Item.height = 40;
+        Item.shoot = ModContent.ProjectileType<MeridianHoldout>();
         Item.shootSpeed = 19; Item.useAmmo = AmmoID.Bullet;
         Item.channel = true; Item.autoReuse = false;
     }

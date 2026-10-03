@@ -18,10 +18,14 @@ namespace Convergence.Client.Encounters.FirstSeverance.Weapons;
 // - IgnoreNew with a per-cue instance limit: a playing voice is never cut without a ramp
 //   (ReplaceOldest stops matching voices abruptly, which clicks; see AzureAudio).
 // - At most VoiceCap voices are tracked; beyond that a new voice is refused, not swapped in.
+// - Owner priority: another player's weapon cues (PlayFor with a peer owner; Sustain for a peer) never take the last
+//   OwnerReserve voices, and a peer one-shot uses its own per-cue pool (PeerInstances under a separate identifier), so
+//   a full lobby cannot starve the local player's own cues of voices or instances.
 internal static class DollWeaponAudio
 {
     internal const string Root = "Convergence/Assets/Sounds/Weapons/DollWeapons/";
     internal const int VoiceCap = 32, DefaultInstances = 2;
+    internal const int OwnerReserve = 8, PeerInstances = 1;
     // Voices one cue may hold at once; a weapon adds its cues here. Unlisted cues allow DefaultInstances.
     // The limit is per cue file (one SoundStyle.Identifier), and IgnoreNew drops the voice that would exceed it.
     // A cue played as an arpeggio, a fast ratchet or any overlapping tail therefore needs a larger entry than
@@ -32,9 +36,14 @@ internal static class DollWeaponAudio
         // Lacuna Testament: openings and pellets of seven irises overlap near the end of the build (up to ~9 a second).
         ["LacunaIrisWarn"] = 3, ["LacunaIrisFire"] = 4, ["LacunaIrisTine"] = 4, ["LacunaPelletWarn"] = 4, ["LacunaPelletFire"] = 6,
         ["LacunaPelletHit"] = 6, ["LacunaBeamHit"] = 3,
+        // Pale Meridian: one file per ladder step; a pitch can return while its last note still rings.
+        ["MeridianNote0"] = 3, ["MeridianNote1"] = 3, ["MeridianNote2"] = 3, ["MeridianNote3"] = 3, ["MeridianNote4"] = 3,
+        ["MeridianNote5"] = 3, ["MeridianNote6"] = 3, ["MeridianNote7"] = 3, ["MeridianNote8"] = 3,
+        ["MeridianHit"] = 3, ["MeridianHitHeavy"] = 3,
     };
     private static readonly Dictionary<string, bool> present = new(StringComparer.Ordinal);
     private static readonly Dictionary<string, SoundStyle> styles = new(StringComparer.Ordinal);
+    private static readonly Dictionary<string, SoundStyle> peerStyles = new(StringComparer.Ordinal);
     private static readonly List<SlotId> voices = new(VoiceCap);
     private static readonly Dictionary<LeaseKey, Lease> sustains = new();
     private static readonly List<LeaseKey> ended = new();
@@ -62,6 +71,20 @@ internal static class DollWeaponAudio
         style.Volume = Math.Clamp(volume, 0f, 1f);
         style.Pitch = Math.Clamp(pitch, -1f, 1f);
         style.PitchVariance = Math.Max(0f, variance);
+        SlotId voice = SoundEngine.PlaySound(style, at);
+        Track(cue, voice, style.Volume);
+        return voice;
+    }
+
+    // A one-shot of player `owner`'s weapon: the local player's own cue plays as Play does; another player's cue is
+    // admitted only while OwnerReserve voices stay free and draws on its own pool (PeerInstances per cue, identifier
+    // "...:Peer:<cue>"), so it never uses up the voices or per-cue instances the local player's cues need.
+    internal static SlotId PlayFor(int owner, string cue, Vector2 at, float volume)
+    {
+        if (owner == Main.myPlayer) return Play(cue, at, volume);
+        if (!Audible || !Exists(cue) || !Admit() || voices.Count >= VoiceCap - OwnerReserve) return SlotId.Invalid;
+        SoundStyle style = PeerStyle(cue);
+        style.Volume = Math.Clamp(volume, 0f, 1f);
         SlotId voice = SoundEngine.PlaySound(style, at);
         Track(cue, voice, style.Volume);
         return voice;
@@ -95,7 +118,7 @@ internal static class DollWeaponAudio
         }
         sustains.Remove(key);
         slot = SlotId.Invalid;
-        if (!Admit()) return;
+        if (!Admit() || owner != Main.myPlayer && voices.Count >= VoiceCap - OwnerReserve) return;
         var started = new Lease { Position = at, Gain = gain, Touched = Main.GameUpdateCount };
         SoundStyle style = new(Root + cue)
         {
@@ -135,6 +158,7 @@ internal static class DollWeaponAudio
     {
         StopAll();
         styles.Clear();
+        peerStyles.Clear();
         present.Clear();
     }
 
@@ -147,6 +171,19 @@ internal static class DollWeaponAudio
                 SoundLimitBehavior = SoundLimitBehavior.IgnoreNew,
                 PauseBehavior = PauseBehavior.StopWhenGamePaused, PlayOnlyIfFocused = true,
             };
+        return style;
+    }
+
+    // The cached one-shot style under the peer identifier and limit (IgnoreNew and the rest unchanged).
+    private static SoundStyle PeerStyle(string cue)
+    {
+        if (!peerStyles.TryGetValue(cue, out var style))
+        {
+            style = Style(cue);
+            style.Identifier = "Convergence:DollWeapon:Peer:" + cue;
+            style.MaxInstances = PeerInstances;
+            peerStyles[cue] = style;
+        }
         return style;
     }
 
