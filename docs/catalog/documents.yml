@@ -950,7 +950,7 @@ documents:
 - doc_id: encounter.first-severance.weapons
   path: docs/encounters/first-severance/WEAPONS.md
   title: Requiem of the Hollow Doll — Ritual Armaments
-  content_sha256: 45431b566adf8245f1f414dbc0155219aec47b879da440e3b696e36081d55788
+  content_sha256: 85a86841e5a40a58806c47ca279e98981f9abc3c50c4e4e4d1cdd5ddc8f51140
   document_type: spec
   status: provisional
   owners:
@@ -1464,7 +1464,7 @@ documents:
 - doc_id: project.status
   path: docs/STATUS.md
   title: Project Status
-  content_sha256: 049e92280c64a87b754a235f9cd6683e96d54ccd0758e00fe82ed3bfc0545d42
+  content_sha256: e47fd778bec7a6c95dd4fa9dbd53a3a525aefa2ccbe80f828c37fe06429dcb46
   document_type: status
   status: accepted
   owners:
