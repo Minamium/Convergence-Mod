@@ -328,6 +328,48 @@ internal static partial class Program
         AssertEqual(false, ScarletNotes.TryFrom(beam[0] with { Technique = CrimsonTechnique.ClusterVolley }, false, 0, 0, out _), "cluster has no note");
     }
 
+    [DomainTest("Scarlet notes: a body answers an aimed plan only once its lock is known (a peer's issue-time Target would turn it the other way)")]
+    private static void ScarletAimKnown()
+    {
+        // An aimed plan (tracking beam, rift, crossflow) carries its issue-time Target until the authority's lock (tick >= Born)
+        // reaches a peer; CrimsonGesture.ForecastReady is that moment and the forecast is drawn from it.
+        var phrase = ScarletMotionPhrase(0, 1);
+        var beam = phrase[0]; var crossflow = phrase[^1];
+        AssertEqual(true, beam.Aimed && crossflow.Aimed, "a tracking beam and a crossflow are aimed");
+        foreach (var aimed in new[] { beam, crossflow })
+        {
+            AssertEqual(false, ScarletNotes.AimKnown(aimed, false), "an aimed plan is unknown before its lock");
+            AssertEqual(true, ScarletNotes.AimKnown(aimed, true), "an aimed plan is known once locked");
+        }
+        foreach (var plan in ScarletMotionPhrase(1, 1))
+            if (plan.Technique == CrimsonTechnique.SpatialRift)
+            {
+                AssertEqual(true, plan.Aimed, "a rift is aimed");
+                AssertEqual(false, ScarletNotes.AimKnown(plan, false), "a rift waits for its lock");
+            }
+        foreach (var signature in new[] { ScarletMotionPhrase(0, 3), ScarletMotionPhrase(1, 3), ScarletMotionPhrase(2, 3) })
+            foreach (var plan in signature)
+                AssertEqual(true, ScarletNotes.AimKnown(plan, false), "a signature step has no aim to wait for");
+        foreach (var plan in ScarletMotionPhrase(2, 1))
+            if (!plan.Aimed) AssertEqual(true, ScarletNotes.AimKnown(plan, false), "the Choir's rakes have no aim to wait for");
+        // Why: the Target a peer holds before the lock (the player's position when the phrase was issued) and the locked one can
+        // send the Crown's swing and Vespera's orb opposite ways (a diagonal note's stroke, and so its side and aim, follows the Target).
+        int differ = 0, beams = 0;
+        foreach (int serial in new[] { 1, 2 })
+            foreach (var plan in ScarletMotionPhrase(0, serial))
+            {
+                if (plan.Technique != CrimsonTechnique.TrackingBeam) continue;
+                beams++;
+                var (vx, vy) = ScarletVespera(plan);
+                var stale = plan with { Target = new(plan.Field.CenterX - 500, plan.Field.CenterY + 80) };
+                var locked = plan with { Target = new(plan.Field.CenterX + 500, plan.Field.CenterY - 80) };
+                AssertEqual(true, ScarletNotes.TryFrom(stale, false, vx, vy, out var before), "the stale beam note");
+                AssertEqual(true, ScarletNotes.TryFrom(locked, false, vx, vy, out var after), "the locked beam note");
+                if (before.Side != after.Side || MathF.Abs(before.AimX - after.AimX) > .1f || MathF.Abs(before.AimY - after.AimY) > .1f) differ++;
+            }
+        AssertEqual(true, beams >= 4 && differ > 0, "the stale and the locked Target answer differently for some beam note");
+    }
+
     [DomainTest("Scarlet notes: only a note whose warning opens as another strikes takes the swing over (protocol80 phrases)")]
     private static void ScarletNoteHandover()
     {

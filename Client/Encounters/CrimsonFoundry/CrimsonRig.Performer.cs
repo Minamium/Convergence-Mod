@@ -101,12 +101,17 @@ internal static partial class CrimsonRig
             Math.Min(command.Radius, today + away), command.ReactorCharge, command.ReactorImpulse, command.AlphaScale);
     }
     // She takes the casting pose CastLead ticks before a note is born, over CastBlend ticks, and holds it through the
-    // note's window [Born - 6, Fire + Span). Touching windows are one stretch, so back-to-back phrases (the crossflow
-    // ends where the next phrase's first note is born) keep the pose instead of blinking toward the idle pose.
+    // note's window [Born - CastLead, Close). Windows that touch or overlap are one stretch: a pickup's window closes where
+    // cell A's first note is born, so that pair keeps the pose. The closing crossflow's window closes on the next phrase's
+    // fourth eighth, but the note after it is cell B's first or a signature move's first step, born one eighth (14 ticks)
+    // later: her next window opens 8-9 ticks after it closed and she eases toward the idle pose in between (15 ticks below
+    // full pose, 9 of them fully idle; 13-25 after a signature move's final step, whose window is longer). That is a breath
+    // between two phrases, not a blink: the offline gate (G6v) forbids a dip of at most 8 ticks and reports every rest.
     internal const int CastLead = 6, CastBlend = 4;
     // The notes Vespera answers: her Act's body (source) holding at `age`, plus the ones born within CastLead ticks
     // (they only lead the pose in; ScarletGestureMotion.Command gives a note nothing before its Born). Output needs
-    // 2 * ScarletNotes.Capacity slots.
+    // 2 * ScarletNotes.Capacity slots. DrawConductor calls it twice: over every plan for the casting pose (timing only) and
+    // over the plans whose aim is known for the orb (the Command turns toward the aim).
     internal static int ConductorNotes(ReadOnlySpan<CrimsonGesturePlan> gestures, int source, float age, float x, float y, Span<ScarletNote> output)
     {
         int count = ScarletNotes.Collect(gestures, source, age, false, x, y, output[..ScarletNotes.Capacity]);
@@ -149,13 +154,20 @@ internal static partial class CrimsonRig
     internal static void DrawConductor(SpriteBatch batch, Vector2 screen, Vector2 at, float age, Vector2 velocity, int facing,
         ReadOnlySpan<CrimsonGesturePlan> gestures, ReadOnlySpan<CrimsonChorusPlan> choruses, int source,
         float ending, float reveal, float consumed, float gather)
+        => DrawConductor(batch, screen, at, age, velocity, facing, gestures, gestures, choruses, source, ending, reveal, consumed, gather);
+    // `known` are the plans whose aim is known (the boss form passes ScarletCueFrame's Known: an aimed plan only once its
+    // lock arrived, so a peer's orb never turns toward a stale Target); the casting pose reads every plan's timing.
+    internal static void DrawConductor(SpriteBatch batch, Vector2 screen, Vector2 at, float age, Vector2 velocity, int facing,
+        ReadOnlySpan<CrimsonGesturePlan> gestures, ReadOnlySpan<CrimsonGesturePlan> known, ReadOnlySpan<CrimsonChorusPlan> choruses,
+        int source, float ending, float reveal, float consumed, float gather)
     {
         var (charge, recoil) = Signal(gestures, choruses, -1, age);
-        Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity * 2];
-        int noted = source >= 0 ? ConductorNotes(gestures, source, age, at.X, at.Y, notes) : 0;
+        Span<ScarletNote> casting = stackalloc ScarletNote[ScarletNotes.Capacity * 2], notes = stackalloc ScarletNote[ScarletNotes.Capacity * 2];
+        int cast = source >= 0 ? ConductorNotes(gestures, source, age, at.X, at.Y, casting) : 0;
+        int noted = source >= 0 ? ConductorNotes(known, source, age, at.X, at.Y, notes) : 0;
         var command = ScarletGestureMotion.Command(age, notes[..noted], charge, recoil, facing, CrimsonVisuals.Reduced);
         DrawPerformer(batch, screen, at, age, velocity, facing, true, charge, recoil, ending * reveal * (1 - consumed), false,
-            reveal * (1 - consumed), noted == 0 ? (float?)null : ConductorCast(age, notes[..noted], charge), command.Tilt,
+            reveal * (1 - consumed), cast == 0 ? (float?)null : ConductorCast(age, casting[..cast], charge), command.Tilt,
             command.NudgeX, command.NudgeY, command.RimAlpha - .26f, command.RimHeat);
         var hold = Hold(command, charge, recoil, facing);
         Vector2 waiting = new(MathF.Sin(age * .022f) * 8, -20 + MathF.Sin(age * .031f) * 11);

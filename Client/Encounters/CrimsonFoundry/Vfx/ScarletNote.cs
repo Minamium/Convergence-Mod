@@ -40,6 +40,13 @@ internal static class ScarletNotes
     internal const float MaximumSpan = 44, BasicRegister = .6f, CrossflowRegister = 1.25f;
     private const float CloseAim = 48;
 
+    // Whether a body may answer the plan's aim. An aimed plan carries its issue-time Target until the authority's lock
+    // (CrimsonTrackingBeam.LockAt, the plan's Born) reaches the client: a note built from it earlier turns the Crown and aims
+    // Vespera's orb at a stale point, then jumps when the lock lands. The forecast is drawn from the same moment
+    // (CrimsonGesture.ForecastReady), so a body answers a note exactly when its forecast shows. Timing alone (the casting
+    // pose, which reads only Born and Close) never needs the aim.
+    internal static bool AimKnown(in CrimsonGesturePlan plan, bool locked) => !plan.Aimed || locked;
+
     internal static bool KindOf(CrimsonTechnique technique, out ScarletNoteKind kind)
     {
         switch (technique)

@@ -28,7 +28,6 @@ param(
     [ValidateSet('black', 'dim', 'none')][string]$Mask = 'dim',
     [string]$Look = 'overlay',                 # overlay | ink | portal | ink+overlay | proposal (portal forecast, then ScarletInk live strike and residue, crossflow seals)
     [ValidateSet('on', 'off')][string]$Yield = 'on', # ScarletResidueYield.Enabled: a signature residue under the forecast, drying early on safe ground
-    [ValidateSet('over', 'under')][string]$Seals = 'over', # proposal: crossflow seals over the live stream (production since 0.3.83) or under it (before)
     [switch]$NoSequences,
     [switch]$NoMatrix,
     [switch]$NoSmoke,
@@ -100,7 +99,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $options = @('--step', $Step, '--phrase-start', $PhraseStart, '--bg', $Backgrounds, '--zoom', $Zooms,
     '--seq-bg', $SequenceBackground, '--seq-zoom', $SequenceZoom, '--size', $Size, '--players', $Players,
-    '--reduced', $Reduced, '--mask', $Mask, '--look', $Look, '--yield', $Yield, '--seals', $Seals)
+    '--reduced', $Reduced, '--mask', $Mask, '--look', $Look, '--yield', $Yield)
 if ($Only) { $options += @('--only', $Only) }
 if ($NoSequences) { $options += '--no-sequences' }
 if ($NoMatrix) { $options += '--no-matrix' }

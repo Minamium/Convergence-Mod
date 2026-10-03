@@ -880,13 +880,14 @@ internal sealed class RigGates
             hashOk &= actual == expected;
             hashes.Add(new { file, ok = actual == expected });
         }
-        // The field beams of the Act I phrases (the tracking beams, the crossflows with the pickup's), the production ink against the
-        // reference class (main's ScarletInkStroke before the signature moves): live at Fire+2 and +10, residue 5 ticks after End.
+        // The tracking beams of the Act I phrases, the production ink against the reference class (main's ScarletInkStroke before
+        // the signature moves): live at Fire+2 and +10, residue 5 ticks after End. The crossflow's stream is no longer main's
+        // capsule (it is cut square on its ends, owner 2026-10-04), so it has its own check below.
         var frames = new List<object>(); bool frameOk = true; int checkedFrames = 0;
         foreach (string name in new[] { "act1-basic", "act1-basic2" })
         {
             var s = Scene(name, "A2");
-            foreach (var p in s.Phrase.Plans.Where(q => ScarletInkStroke.Applies(q)))
+            foreach (var p in s.Phrase.Plans.Where(q => q.Technique == CrimsonTechnique.TrackingBeam))
                 foreach (int rel in new[] { 2, 10, p.End - p.Fire + 5 })
                 {
                     int tick = p.Fire + rel;
@@ -898,11 +899,77 @@ internal sealed class RigGates
                     frames.Add(new { label = $"{name}-{p.Technique}-p{p.Pulse}-fire+{rel}", identical = same, lit = production.Count(c => Lit(c, 3)) });
                 }
         }
-        Add("G11", "ink regression: ScarletInk (and the other approved field shaders) unchanged; the field beams' ink identical to main's ScarletInkStroke", Status(hashOk && frameOk),
-            new { hashes, framesChecked = checkedFrames, frames },
-            "Pinned shader hashes, and every live-strike and residue frame of the Act I basic phrases (the pickup and closing crossflows, the tracking beams of cells A and B) "
+        var crossflow = Crossflow(out bool crossflowOk);
+        Add("G11", "ink regression: ScarletInk (and the other approved field shaders) unchanged; the tracking beams' ink identical to main's ScarletInkStroke; the crossflow stream cut square on its ends",
+            Status(hashOk && frameOk && crossflowOk),
+            new { hashes, framesChecked = checkedFrames, frames, crossflow },
+            "Pinned shader hashes, and every live-strike and residue frame of the Act I basic phrases' tracking beams (cells A and B) "
             + "drawn by the production ScarletInkStroke and by ScarletInkStrokeReference (tools/fixtures/ScarletInkReference.cs, a verbatim copy of main's class before "
-            + "the signature moves) must be pixel for pixel identical, so the signature moves' changes to the class cannot reach a basic strike.");
+            + "the signature moves) must be pixel for pixel identical, so the signature moves' changes to the class cannot reach a basic strike. "
+            + "The seal crossflow (the pickup's and the closing one, in the open and with a stream end on each wall) is drawn as a band cut square on its two "
+            + "ends and on its growing front, not as main's capsule with round ends: no ink beyond the capsule's span along the stream or beyond its radius + the quad's margin across it, "
+            + "and a live column 2.5 px inside either cut as full as the middle of the stream (a round end would be a sliver). sha256 is recorded per frame, not gated.");
+    }
+
+    // The seal crossflow's ink at real size (zoom 1, centred on the stream), 1:1 over transparent black.
+    private List<object> Crossflow(out bool ok)
+    {
+        ok = true;
+        var rows = new List<object>();
+        const int width = 1500, height = 560;
+        var strokes = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
+        foreach (string name in new[] { "act1-basic", "act1-basic2" })
+        {
+            var s = Scene(name, "A2");
+            foreach (var plan in s.Phrase.Plans.Where(q => q.Technique == CrimsonTechnique.SideBeams))
+                foreach (var (where, p) in new[]
+                {
+                    ("scene", plan),
+                    ("wallL", plan with { Target = new(plan.Field.Left + 120, plan.Target.Y) }),
+                    ("wallR", plan with { Target = new(plan.Field.Right - 120, plan.Target.Y) })
+                })
+                {
+                    var (right, left) = CrimsonChoreography.Reach(p);
+                    var centre = new Vector2((right.X + left.X) * .5f, right.Y);
+                    foreach (int rel in new[] { 3, 7, 12, 30, 50, p.End - p.Fire + 5 })
+                    {
+                        int tick = p.Fire + rel;
+                        bool live = tick < p.End;
+                        var view = ScarletView.Create(r.Device, width, height, centre - new Vector2(width, height) * .5f, 1f, tick);
+                        int count = CrimsonTechniqueGeometry.Write(p, live ? tick : p.End - 1, strokes, false);
+                        if (count != 1) { ok = false; rows.Add(new { scene = name, where, rel, error = "strokes " + count }); continue; }
+                        var stroke = strokes[0];
+                        float hi = MathF.Max(stroke.A.X, stroke.B.X) + stroke.Radius, lo = MathF.Min(stroke.A.X, stroke.B.X) - stroke.Radius;
+                        float y = stroke.A.Y, reach = stroke.Radius + ScarletInkStroke.Margin + 2;
+                        var pixels = InkOnly(s, view, p, r.Frame(width, height));
+                        int lit = 0, outsideAlong = 0, outsideAcross = 0;
+                        var column = new Dictionary<int, int>();
+                        for (int py = 0; py < height; py++)
+                            for (int px = 0; px < width; px++)
+                            {
+                                if (!Lit(pixels[py * width + px], 3)) continue;
+                                lit++;
+                                float wx = view.ScreenPosition.X + px + .5f, wy = view.ScreenPosition.Y + py + .5f;
+                                if (wx < lo - 1.5f || wx > hi + 1.5f) outsideAlong++;
+                                if (MathF.Abs(wy - y) > reach) outsideAcross++;
+                                int c = (int)MathF.Floor(wx); column[c] = column.TryGetValue(c, out var n) ? n + 1 : 1;
+                            }
+                        int Column(float wx) => column.TryGetValue((int)MathF.Floor(wx), out var n) ? n : 0;
+                        // Square ends: the columns 2.5 px inside the cuts are as full as the middle of the stream (live only: a scar is uneven).
+                        float middle = Math.Max(1, Column((hi + lo) * .5f));
+                        float atRight = Column(hi - 2.5f) / middle, atLeft = hi - lo > 12 ? Column(lo + 2.5f) / middle : 1;
+                        bool square = !live || atRight >= .85f && atLeft >= .85f;
+                        bool good = lit > 0 && outsideAlong == 0 && outsideAcross == 0 && square;
+                        ok &= good;
+                        using var sha = SHA256.Create();
+                        var bytes = new byte[pixels.Length * 4];
+                        for (int i = 0; i < pixels.Length; i++) { bytes[i * 4] = pixels[i].R; bytes[i * 4 + 1] = pixels[i].G; bytes[i * 4 + 2] = pixels[i].B; bytes[i * 4 + 3] = pixels[i].A; }
+                        rows.Add(new { scene = name, where, pulse = p.Pulse, rel, live, span = new[] { lo, hi }, radius = stroke.Radius, lit, outsideAlong, outsideAcross,
+                            columnAtRightCut = atRight, columnAtLeftCut = atLeft, ok = good, sha256 = Convert.ToHexString(sha.ComputeHash(bytes))[..16].ToLowerInvariant() });
+                    }
+                }
+        }
+        return rows;
     }
 
     // ---- G12: draw / vertex budget -----------------------------------------------------------------------------

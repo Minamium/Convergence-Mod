@@ -10,7 +10,12 @@ namespace Convergence.Client.Encounters.CrimsonFoundry.Vfx;
 // river of black blood. Live: a black body whose rim burns and melts, red threads streaming
 // along it, a twisting core, and a blaze in the first ticks after impact. Residue: the ink
 // dries into a narrow scar. Nothing draws outside a capsule except a few pixels of
-// anti-aliased rim.
+// anti-aliased rim, with one exception: the seal crossflow's stream (SideBeams) is drawn as the
+// band between its two ends, cut square at both (and at its growing front) like the original
+// stream, because the capsule's round ends stuck out past the seals' narrow ellipses. The
+// band covers the capsule's whole span and its half-width is the capsule's radius, so it lies
+// inside the forecast band, and the capsule (the collision) is not touched; only the four
+// corners the round ends cut off are inked without hurting.
 //
 // It owns only the live and residue time of a field beam (TrackingBeam, SideBeams) and of an
 // Act signature move (CinderCurtain, ShroudRope, FourHands). The forecast (CrimsonEnergy's
@@ -86,7 +91,8 @@ internal sealed class ScarletInkStroke
         // The noise seed comes from a point that holds still for the whole strike. The crossflow's capsule start moves
         // with its width while the stream opens and closes (its round end stays on the right stream end), so it seeds
         // from that fixed end instead; seeding from the moving start would re-roll the black blood every tick.
-        CrimsonPoint? anchor = plan.Technique == CrimsonTechnique.SideBeams ? CrimsonChoreography.Reach(plan).Right : null;
+        bool band = plan.Technique == CrimsonTechnique.SideBeams;
+        CrimsonPoint? anchor = band ? CrimsonChoreography.Reach(plan).Right : null;
         for (int i = 0; i < count; i++)
         {
             var s = buffer[i];
@@ -102,6 +108,22 @@ internal sealed class ScarletInkStroke
             Vector2 along = length > .01f ? delta / length : Vector2.UnitX, normal = new(-along.Y, along.X);
             float extent = s.Radius + Margin;
             var seed = anchor ?? s.A;
+            if (band)
+            {
+                // The stream is horizontal: its band runs from the right end (hi) leftward to its front (lo), the extent of the
+                // capsule with its round ends. The shader's own segment is the whole band (its x = 0 on the right end, which
+                // holds still, so the flow does not slide while the stream opens), the quad stops at both ends and no round
+                // end is drawn: the ink is cut square exactly on the two stream ends, where the seals are.
+                float hi = MathF.Max(s.A.X, s.B.X) + s.Radius, lo = MathF.Min(s.A.X, s.B.X) - s.Radius, cut = hi - lo;
+                if (cut < .5f) continue;
+                along = -Vector2.UnitX; normal = new(0, -1);
+                shader.Set("shape", new Vector4(cut, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, Margin));
+                shader.Apply(pass);
+                float span = cut + extent * 2;
+                Quad(new Vector2(hi, s.A.Y) - normal * extent, normal * extent * 2, along * cut, extent / span, (cut + extent) / span);
+                device.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
+                continue;
+            }
             shader.Set("shape", new Vector4(length, s.Radius, (seed.X * .37f + seed.Y * .61f + i * 3.1f) % 17f * .1f, Margin));
             shader.Apply(pass);
             Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));
@@ -109,12 +131,13 @@ internal sealed class ScarletInkStroke
         }
     }
 
-    private void Quad(Vector2 start, Vector2 across, Vector2 along)
+    // The shader reads its position along the quad from the u coordinate: [u0, u1] of the whole span (margins included).
+    private void Quad(Vector2 start, Vector2 across, Vector2 along, float u0 = 0, float u1 = 1)
     {
-        quad[0] = new(new Vector3(start, 0), Color.White, new(0, 0));
-        quad[1] = new(new Vector3(start + across, 0), Color.White, new(0, 1));
-        quad[2] = new(new Vector3(start + along, 0), Color.White, new(1, 0));
+        quad[0] = new(new Vector3(start, 0), Color.White, new(u0, 0));
+        quad[1] = new(new Vector3(start + across, 0), Color.White, new(u0, 1));
+        quad[2] = new(new Vector3(start + along, 0), Color.White, new(u1, 0));
         quad[3] = quad[2]; quad[4] = quad[1];
-        quad[5] = new(new Vector3(start + across + along, 0), Color.White, new(1, 1));
+        quad[5] = new(new Vector3(start + across + along, 0), Color.White, new(u1, 1));
     }
 }

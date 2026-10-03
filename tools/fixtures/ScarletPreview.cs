@@ -38,8 +38,6 @@ internal sealed class PreviewOptions
     internal string Look = "overlay";
     // ScarletResidueYield.Enabled, the owner's switch for a signature move's residue (under the forecast, yielding).
     internal bool Yield = true;
-    // proposal only: the crossflow seals lie over the live stream (production since 0.3.83) or under it (before).
-    internal bool SealsOver = true;
 }
 
 // CurtainMask: the occupied columns an Act I signature phrase observes (0 = the player's own column).
@@ -105,7 +103,6 @@ internal static class ScarletPreview
                 case "mask": o.Mask = Enum.Parse<MaskMode>(value, true); break;
                 case "look": o.Look = value; break;
                 case "yield": o.Yield = value != "off"; break;
-                case "seals": o.SealsOver = value != "under"; break;
                 case "no-sequences": o.Sequences = false; break;
                 case "no-matrix": o.Matrix = false; break;
                 case "no-smoke": o.Smoke = false; break;
@@ -466,25 +463,18 @@ internal sealed class PreviewRenderer : IDisposable
             // The shipped decision, in the order CrimsonGestureVisuals.DrawTrackingBeams draws it: a field beam (TrackingBeam,
             // SideBeams) or signature move (CinderCurtain, ShroudRope, FourHands) shows the original portal forecast until Fire,
             // then ScarletInk for the live strike and its residue. The crossflow's seals (ScarletSorcery.fxc, drawn like
-            // ScarletSorcery.CrossflowSeals) lie under the forecast veil while they charge and over the live stream (unless
-            // --seals under), whose round ends sink into them. A signature move's yielding residue goes under every forecast;
-            // the forecasts follow; live strikes and the other residues lie on top, the live seals last. Every other technique
-            // has its own production material (ScarletMaterials / ScarletSorcery / ScarletClusters) that the preview does not
-            // reproduce; PortalBeam is only a stand-in silhouette for those.
+            // ScarletSorcery.CrossflowSeals) lie under everything, from their bloom to their fade; its live stream is the band
+            // between the stream ends cut square on both (ScarletInkStroke), covering the inner half of each seal. A signature
+            // move's yielding residue goes under every forecast; the forecasts follow; live strikes and the other residues lie
+            // on top. Every other technique has its own production material (ScarletMaterials / ScarletSorcery / ScarletClusters)
+            // that the preview does not reproduce; PortalBeam is only a stand-in silhouette for those.
             float clock = view.Clock;
-            var sealsOver = new List<CrimsonGesturePlan>();
             foreach (var plan in phrase.Plans)
-            {
-                bool seals = plan.Technique == CrimsonTechnique.SideBeams && clock >= plan.Born && clock < plan.End;
-                bool over = seals && options.SealsOver && clock >= plan.Fire;
-                if (seals && !over) DrawSeals(view, plan);
-                if (over) sealsOver.Add(plan);
-            }
+                if (plan.Technique == CrimsonTechnique.SideBeams && clock >= plan.Born && clock < plan.End) DrawSeals(view, plan);
             foreach (var plan in phrase.Plans) if (ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);
             foreach (var plan in phrase.Plans) if (!ScarletInkStroke.Owns(plan, clock)) DrawPortalBeam(view, plan);
             foreach (var plan in phrase.Plans)
                 if (ScarletInkStroke.Owns(plan, clock) && !ScarletInkStroke.Underlies(plan, clock)) ink.Draw(view, assets, plan, phrase.Plans);
-            foreach (var plan in sealsOver) DrawSeals(view, plan);
         }
         else
         {

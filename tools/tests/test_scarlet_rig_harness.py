@@ -137,7 +137,9 @@ class HarnessContractTests(unittest.TestCase):
         mirror = scene[scene.index('internal static class RigMirror'):scene.index('internal static class RigDriver')]
         self.assertIn('=> CrimsonRig.Signal(Live(plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, source, age);', mirror)
         self.assertIn('=> ScarletNotes.ChoirCues(Live(plans, age), age, flipped, cues);', mirror)
-        self.assertIn('=> ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes, lookback);', mirror)
+        # The body's notes read ScarletCueFrame.Known (the plans whose aim is known), as DrawEffigy does; the signal and the cues read every plan.
+        self.assertIn('=> ScarletNotes.Collect(Known(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes, lookback);', mirror)
+        self.assertIn('if (Alive(p, age) && ScarletNotes.AimKnown(p, age >= p.Born)) known.Add(p);', mirror)
         for copied in ('CrimsonRigMotion.Charge(', 'CrimsonRigMotion.Recoil(', 'new CrimsonChoirCue(', 'Step % 4'):
             self.assertNotIn(copied, mirror)
         driver = scene[scene.index('internal static class RigDriver'):scene.index('internal enum RigLayers')]
@@ -230,12 +232,28 @@ class HarnessContractTests(unittest.TestCase):
                                                    'TrackingBeams(s, view, age)', 'Players(s, view)', 'Mask(view)')]
         self.assertEqual(sorted(order), order)
         beams = scene[scene.index('private void TrackingBeams('):scene.index('private void Standins(')]
-        order = [beams.index(token) for token in ('CrossflowSeals(', 'residues.Add(', 'CrimsonEnergy.Draw(batch)', 'foreach (var strike in strikes)',
-                                                  'foreach (var p in sealsOver)')]
+        order = [beams.index(token) for token in ('CrossflowSeals(', 'residues.Add(', 'CrimsonEnergy.Draw(batch)', 'foreach (var strike in strikes)')]
         self.assertEqual(sorted(order), order)
-        # protocol80: a live crossflow's seals are drawn after the ink, over the stream; they charge under the forecast veil.
-        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);', beams)
-        self.assertIn('else sealsOver.Add(p);', beams)
+        # The crossflow's seals lie under the forecast and the ink for their whole life (owner 2026-10-04), as in the game.
+        self.assertIn('if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch, p, age);', beams)
+        self.assertNotIn('sealsOver', beams)
+
+    def test_g11_compares_the_tracking_beams_and_measures_the_crossflow_band(self):
+        gates = read(FIXTURES / 'ScarletRigGates.cs')
+        g11 = gates[gates.index('private void G11()'):gates.index('// ---- G12')]
+        self.assertIn('q.Technique == CrimsonTechnique.TrackingBeam', g11)
+        self.assertIn('new ScarletInkStrokeReference().Draw(view, r.Assets, p);', gates)
+        crossflow = g11[g11.index('private List<object> Crossflow('):]
+        for token in ('"wallL"', '"wallR"', 'outsideAlong', 'outsideAcross', 'columnAtRightCut', 'columnAtLeftCut', 'atRight >= .85f && atLeft >= .85f', 'sha256'):
+            self.assertIn(token, crossflow)
+        self.assertIn('Status(hashOk && frameOk && crossflowOk)', g11)
+
+    def test_g6v_reports_the_rests_between_phrases_and_gates_only_blinks(self):
+        gates = read(FIXTURES / 'ScarletConductorGates.cs')
+        self.assertIn('int blink = dipsNow.Count(d => d.Length <= 8)', gates)
+        self.assertIn('steady &= blink == 0;', gates)
+        for token in ('rests = rests.Count', 'restTicks', 'restIdleTicks', 'longerDips'):
+            self.assertIn(token, gates)
 
 
 if __name__ == '__main__':

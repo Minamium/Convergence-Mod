@@ -55,7 +55,8 @@ class ScarletConductorContracts(unittest.TestCase):
         self.assertIn('var frame = ScarletCueFrame.Of(boss);', draw)
         # Her Act's body only, a member of the fight only, and nothing in Final (she is absorbed).
         self.assertIn('frame.Member && boss.State.Phase < 3 ? boss.State.Phase : -1', draw)
-        self.assertIn('DrawConductor(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection, frame.Gestures, frame.Choruses,', draw)
+        # Her orb answers the plans whose aim is known (a peer's stale Target is never aimed at); the casting pose reads every plan.
+        self.assertIn('DrawConductor(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection, frame.Gestures, frame.Known, frame.Choruses,', draw)
         for moved in ('CrimsonEnergy.AddCore', 'DrawPerformer(', 'Vector2 held'):
             self.assertNotIn(moved, draw)
 
@@ -65,10 +66,14 @@ class ScarletConductorContracts(unittest.TestCase):
         self.assertIn('float today = 53 + charge * 24 + recoil * 18;', hold)
         self.assertIn('new Vector2(facing * (94 + charge * 12) + command.OrbX, -25 + command.OrbY)', hold)
         self.assertIn('Math.Min(command.Radius, today + away)', hold)
-        conductor = member(performer, 'internal static void DrawConductor(')
+        # The plan-list form (the offline harness calls it) hands the same plans to both; the boss form passes the known ones.
+        self.assertIn('=> DrawConductor(batch, screen, at, age, velocity, facing, gestures, gestures, choruses, source, ending, reveal, consumed, gather);', performer)
+        conductor = member(performer, 'ReadOnlySpan<CrimsonGesturePlan> gestures, ReadOnlySpan<CrimsonGesturePlan> known, ReadOnlySpan<CrimsonChorusPlan> choruses,')
         self.assertIn('ScarletGestureMotion.Command(age, notes[..noted], charge, recoil, facing, CrimsonVisuals.Reduced)', conductor)
         self.assertIn('var hold = Hold(command, charge, recoil, facing);', conductor)
-        self.assertIn('noted == 0 ? (float?)null : ConductorCast(age, notes[..noted], charge)', conductor)
+        self.assertIn('int cast = source >= 0 ? ConductorNotes(gestures, source, age, at.X, at.Y, casting) : 0;', conductor)
+        self.assertIn('int noted = source >= 0 ? ConductorNotes(known, source, age, at.X, at.Y, notes) : 0;', conductor)
+        self.assertIn('cast == 0 ? (float?)null : ConductorCast(age, casting[..cast], charge)', conductor)
         self.assertIn('ending * (1 - consumed) * hold.Alpha', conductor)
         # The reactor and its entry point stay as they are (design §2.5): no new draw, no shader change.
         self.assertIn('internal static void AddCore(Vector2 position, float radius, float age, float charge, float impulse, float alpha, bool reduced)',
@@ -94,6 +99,12 @@ class ScarletConductorContracts(unittest.TestCase):
             self.assertIn(gate, gates)
         self.assertIn('CrimsonRig.Hold(command', gates)
         self.assertIn('CrimsonRig.ConductorNotes(live, phase, tick', gates)
+        # The harness mirrors ScarletCueFrame's split: the casting pose over every plan, the command over the known ones.
+        self.assertIn('CrimsonRig.ConductorNotes(known, phase, tick', gates)
+        self.assertIn('cast == 0 ? idle : CrimsonRig.ConductorCast(tick, casting[..cast], signal.Charge)', gates)
+        scene = read(FIXTURES/'ScarletRigScene.cs')
+        self.assertIn('RigMirror.Live(s.Plans, age), RigMirror.Known(s.Plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty', scene)
+        self.assertIn('ScarletNotes.Collect(Known(plans, age), source, age, flipped,', scene)
         for banned in ('baton(', 'engagement(', 'Transfusion(', 'DrawSecondary(', 'BeatTick('):
             self.assertNotIn(banned, gates)
 

@@ -60,7 +60,8 @@ internal static partial class CrimsonRig
         ScarletInvocationScene.Draw(batch, boss.State, age, ending);
         float consumed = boss.State.Phase == 3 ? CrimsonEnsemble.ConductorAbsorption(age - boss.State.PhaseStart) : 0;
         // Vespera commands her Act's body (source = phase) for a member of the fight; Final absorbs her, so no command.
-        DrawConductor(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection, frame.Gestures, frame.Choruses,
+        // Her orb answers the plans whose aim is known; her casting pose reads every plan's timing.
+        DrawConductor(batch, screen, at, age, boss.NPC.velocity, boss.NPC.spriteDirection, frame.Gestures, frame.Known, frame.Choruses,
             frame.Member && boss.State.Phase < 3 ? boss.State.Phase : -1, ending, reveal, consumed,
             boss.State.Phase == 3 ? CrimsonInvocation.Ease((age - boss.State.PhaseStart) / 48) : 0);
         return false;
@@ -117,9 +118,10 @@ internal static partial class CrimsonRig
         bool flipped = effigy.NPC.spriteDirection < 0, reduced = CrimsonVisuals.Reduced;
         // The body's own notes for a member of the fight, aimed from Vespera; anyone else sees today's picture (no
         // notes, the accepted Choir cues, no heave). The Crown and Mantle also keep notes whose window closed within
-        // the last PastTicks, so their true past poses (the Mantle's wake) still hold them.
+        // the last PastTicks, so their true past poses (the Mantle's wake) still hold them. A body answers a note once its
+        // aim is known (frame.Known: the forecast shows from the same moment), never a stale Target a peer holds before the lock.
         Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity];
-        int noted = frame.Member ? ScarletNotes.Collect(frame.Gestures, effigy.State.Index, age, flipped,
+        int noted = frame.Member ? ScarletNotes.Collect(frame.Known, effigy.State.Index, age, flipped,
             boss.NPC.Center.X, boss.NPC.Center.Y, notes, effigy.State.Index == 2 ? 0 : ScarletNotes.PastTicks) : 0;
         if (effigy.State.Index == 2)
         {

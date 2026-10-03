@@ -92,15 +92,17 @@ internal sealed class ConductorGates
     internal static (float Charge, float Recoil, ScarletCommand Command, CrimsonRig.ConductorHold Hold, CrimsonRig.ConductorHold Today, int Notes,
         float Cast, float TodayCast) Inputs(CrimsonGesturePlan[] plans, int phase, float tick, bool reduced)
     {
-        var live = RigMirror.Live(plans, tick);
+        var live = RigMirror.Live(plans, tick); var known = RigMirror.Known(plans, tick);
         var signal = CrimsonRig.Signal(live, ReadOnlySpan<CrimsonChorusPlan>.Empty, -1, tick);
-        Span<ScarletNote> notes = stackalloc ScarletNote[ScarletNotes.Capacity * 2];
-        int n = CrimsonRig.ConductorNotes(live, phase, tick, RigScene.Conductor.X, RigScene.Conductor.Y, notes);
+        // The casting pose reads every plan's timing, the orb's command the plans whose aim is known (DrawConductor).
+        Span<ScarletNote> casting = stackalloc ScarletNote[ScarletNotes.Capacity * 2], notes = stackalloc ScarletNote[ScarletNotes.Capacity * 2];
+        int cast = CrimsonRig.ConductorNotes(live, phase, tick, RigScene.Conductor.X, RigScene.Conductor.Y, casting);
+        int n = CrimsonRig.ConductorNotes(known, phase, tick, RigScene.Conductor.X, RigScene.Conductor.Y, notes);
         var command = ScarletGestureMotion.Command(tick, notes[..n], signal.Charge, signal.Recoil, Facing, reduced);
         var today = ScarletGestureMotion.Command(tick, ReadOnlySpan<ScarletNote>.Empty, signal.Charge, signal.Recoil, Facing, reduced);
         float idle = CrimsonInvocation.Ease(signal.Charge * 2);
         return (signal.Charge, signal.Recoil, command, CrimsonRig.Hold(command, signal.Charge, signal.Recoil, Facing),
-            CrimsonRig.Hold(today, signal.Charge, signal.Recoil, Facing), n, n == 0 ? idle : CrimsonRig.ConductorCast(tick, notes[..n], signal.Charge), idle);
+            CrimsonRig.Hold(today, signal.Charge, signal.Recoil, Facing), n, cast == 0 ? idle : CrimsonRig.ConductorCast(tick, casting[..cast], signal.Charge), idle);
     }
 
     // The current phrase's notes of the Act's body (the ones Vespera commands).
@@ -254,29 +256,40 @@ internal sealed class ConductorGates
             shifted &= worst <= 1e-4f;
             shift.Add(new { scene = name, worstDelta = worst });
         }
-        // The casting pose: no blink (a dip out of pose 1 that returns within 8 ticks) and the crossfades (both poses
-        // half-drawn) only on the lead-in / lead-out.
+        // The casting pose. A dip is a run of ticks below full pose 1 (.98) between two ticks at full pose 1. A blink is a dip of at
+        // most 8 ticks: the pose leaves and returns at once, which the gate forbids. A rest is a longer dip, up to 32 ticks: she
+        // relaxes toward the idle pose between two phrases whose cast windows do not touch (CastLead ticks before a note's Born
+        // is later than the previous window's close). Rests are reported, not gated: their start (ticks after the scene's first
+        // tick), length and the ticks spent fully idle. The crossfades (both poses half-drawn) are counted as well.
         var pose = new List<object>(); bool steady = true;
         foreach (string name in Scenes)
         {
             var s = Scene(name);
             var cast = Enumerable.Range(s.First, s.Last - s.First + 1).Select(t => Inputs(s.Plans, s.Phase, t, false)).ToArray();
-            int Blinks(Func<int, float> c)
+            // Every dip as (start index, length, idle ticks: pose 1 below .02 inside it).
+            List<(int Start, int Length, int Idle)> Dips(Func<int, float> c)
             {
-                int blinks = 0;
-                for (int i = 1; i < cast.Length - 1; i++)
-                    if (c(i) < .98f && c(i) <= c(i - 1) && c(i) < c(i + 1)
-                        && Enumerable.Range(Math.Max(0, i - 8), Math.Min(8, i)).Any(j => c(j) >= .98f)
-                        && Enumerable.Range(i + 1, Math.Min(8, cast.Length - i - 1)).Any(j => c(j) >= .98f)) blinks++;
-                return blinks;
+                var dips = new List<(int, int, int)>();
+                int last = -1;                                    // the latest tick at full pose 1
+                for (int i = 0; i < cast.Length; i++)
+                {
+                    if (c(i) < .98f) continue;
+                    if (last >= 0 && i - last > 1) dips.Add((last + 1, i - last - 1, Enumerable.Range(last + 1, i - last - 1).Count(j => c(j) < .02f)));
+                    last = i;
+                }
+                return dips;
             }
-            int blink = Blinks(i => cast[i].Cast), todayBlink = Blinks(i => cast[i].TodayCast);
+            var dipsNow = Dips(i => cast[i].Cast); var dipsToday = Dips(i => cast[i].TodayCast);
+            int blink = dipsNow.Count(d => d.Length <= 8), todayBlink = dipsToday.Count(d => d.Length <= 8);
+            var rests = dipsNow.Where(d => d.Length is > 8 and <= 32).ToList();
             int crossfade = cast.Count(c => c.Cast > .02f && c.Cast < .98f), todayCrossfade = cast.Count(c => c.TodayCast > .02f && c.TodayCast < .98f);
             steady &= blink == 0;
-            pose.Add(new { scene = name, blinks = blink, crossfadeTicks = crossfade, todayBlinks = todayBlink, todayCrossfadeTicks = todayCrossfade,
+            pose.Add(new { scene = name, blinks = blink, rests = rests.Count, restTicks = rests.Select(d => d.Length).ToArray(),
+                restIdleTicks = rests.Select(d => d.Idle).ToArray(), restStartsAfterFirstTick = rests.Select(d => d.Start).ToArray(),
+                longerDips = dipsNow.Count(d => d.Length > 32), crossfadeTicks = crossfade, todayBlinks = todayBlink, todayCrossfadeTicks = todayCrossfade,
                 poseOneTicks = cast.Count(c => c.Cast >= .98f), todayPoseOneTicks = cast.Count(c => c.TodayCast >= .98f) });
         }
-        Add("G6v", "timing: orb ignites on Fire, release peaks in [Fire, Fire+3], heat peaks by Fire, pull against / release toward the aim, drawn light starts rising on Fire, rises most by Fire+2 and peaks by Fire+8; +7 shift; no pose blink",
+        Add("G6v", "timing: orb ignites on Fire, release peaks in [Fire, Fire+3], heat peaks by Fire, pull against / release toward the aim, drawn light starts rising on Fire, rises most by Fire+2 and peaks by Fire+8; +7 shift; no pose blink (the rests between phrases are reported)",
             ok && shifted && steady ? "pass" : "fail", new { notes = rows, shift, pose },
             "Notes = the current phrase's notes of the Act's body (source = phase). pullAlongAim: the command's orb offset over today's hold at Fire-1 along the aim (the crossflow: along its upper-right charge), <= 1 px (the design's 5 px lift may lean slightly into an upward aim). releaseAlongAim: how far that offset moves along the aim from Fire-1 to Fire+2 (0 when the aim points at her side: the orb never comes nearer than its hold). drawnLight*: ticks relative to Fire of the largest one-tick rise and of the peak of the orb's drawn light, commanded and today.");
 

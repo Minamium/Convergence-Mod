@@ -7,6 +7,9 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTENT = ROOT/'Content/Encounters/CrimsonFoundry'
 CLIENT = ROOT/'Client/Encounters/CrimsonFoundry'
 
+def read_text(path):
+    return path.read_text(encoding='utf-8')
+
 class ScarletContracts(unittest.TestCase):
     def test_chorus_publishes_the_committed_verdict_not_an_out_of_tick_flag(self):
         text=(CONTENT/'CrimsonChorus.cs').read_text()
@@ -367,11 +370,13 @@ class ScarletContracts(unittest.TestCase):
         beams=visual[visual.index('private static void DrawTrackingBeams'):visual.index('private static void DrawSources')]
         # Forecasts keep the portal energy; the two crossflow seals and the rift tears keep ScarletSorcery.
         self.assertIn('CrimsonEnergy.Add(',beams)
-        self.assertIn('if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);',beams)
         self.assertIn('ScarletSorcery.Tear(',beams)
-        # A live crossflow's seals are drawn after the ink, over the stream's ends (protocol80).
-        self.assertIn('else sealsOver.Add(p);',beams)
-        self.assertLess(beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike,'),beams.index('foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);'))
+        # The crossflow's seals lie under the forecast and the ink for their whole life, as in the original (owner 2026-10-04):
+        # the live stream is cut square on the two stream ends and covers each seal's inner half; none are drawn over the ink.
+        self.assertIn('if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch, p, age);',beams)
+        self.assertNotIn('sealsOver',beams)
+        self.assertLess(beams.index('ScarletSorcery.CrossflowSeals(batch, p, age)'),beams.index('CrimsonEnergy.Draw(batch)'))
+        self.assertLess(beams.index('CrimsonEnergy.Draw(batch)'),beams.index('ink.Draw(view, ScarletVfxHost.Assets, strike,'))
         sorcery=(CLIENT/'ScarletSorcery.cs').read_text(encoding='utf-8')
         self.assertIn('var (right, left) = CrimsonChoreography.Seals(p);',sorcery)
         # Live strike and residue never reach CrimsonEnergy: they are collected before it and drawn after it (over forecasts).
@@ -410,6 +415,45 @@ class ScarletContracts(unittest.TestCase):
         shader=(ROOT/'Assets/AutoloadedEffects/Shaders/ScarletInk.fx').read_text(encoding='utf-8')
         for pass_name in ('AutoloadPass','ForecastPass','ResiduePass'):
             self.assertIn(f'pass {pass_name}',shader)
+
+    def test_crossflow_stream_is_a_band_cut_square_on_its_ends_while_collision_keeps_the_capsule(self):
+        # Owner 2026-10-04: the round ends of the 0.3.83 stream stick out past the seals' narrow ellipses; the original cut was
+        # better. Only the picture changes: ScarletInk draws the band over the capsule's whole span and the capsule (Side,
+        # CrimsonTechniqueGeometry) is the collision, untouched.
+        stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')
+        draw=stroke[stroke.index('internal void Draw('):stroke.index('private void Quad(')]
+        self.assertIn('bool band = plan.Technique == CrimsonTechnique.SideBeams;',draw)
+        self.assertIn('CrimsonPoint? anchor = band ? CrimsonChoreography.Reach(plan).Right : null;',draw)
+        self.assertIn('float hi = MathF.Max(s.A.X, s.B.X) + s.Radius, lo = MathF.Min(s.A.X, s.B.X) - s.Radius, cut = hi - lo;',draw)
+        # The shader's own segment is the whole band and the quad stops at its two ends: no round end is drawn.
+        self.assertIn('shader.Set("shape", new Vector4(cut, s.Radius,',draw)
+        self.assertIn('Quad(new Vector2(hi, s.A.Y) - normal * extent, normal * extent * 2, along * cut, extent / span, (cut + extent) / span);',draw)
+        # Every other stroke (tracking beams, signature moves) is drawn exactly as before.
+        self.assertIn('Quad(a - along * extent - normal * extent, normal * extent * 2, along * (length + extent * 2));',draw)
+        self.assertIn('private void Quad(Vector2 start, Vector2 across, Vector2 along, float u0 = 0, float u1 = 1)',stroke)
+        # The shader and its pinned hashes are untouched (G11 pins them).
+        choreography=(CONTENT/'CrimsonChoreography.cs').read_text(encoding='utf-8')
+        side=choreography[choreography.index('internal static CrimsonStroke Side('):choreography.index('internal static (float X, float Y) ClampParticipant')]
+        self.assertIn('return new(new(right.X - radius, right.Y), new(front + radius, right.Y), radius);',side)
+        self.assertIn('if (forecast) return new(right, left, SideHalfWidth);',side)
+
+    def test_peer_bodies_answer_a_note_only_once_its_aim_is_known(self):
+        # A peer holds an aimed plan's issue-time Target until the lock sample (tick >= Born) arrives; a note built from it turns the
+        # Crown and aims Vespera's orb at a stale point, then jumps. Bodies and the orb answer ScarletCueFrame's Known list (the
+        # forecast is drawn from the same moment); the signal, the Choir cues and the casting pose's timing keep every plan.
+        frame=read_text(CLIENT/'ScarletCueFrame.cs')
+        self.assertIn('if (!ScarletNotes.AimKnown(plan, gesture.ForecastReady)) continue;',frame)
+        self.assertIn('known[knownCount++] = plan;',frame)
+        self.assertIn('gestures[gestureCount++] = plan;',frame)
+        notes=read_text(CLIENT/'Vfx/ScarletNote.cs')
+        self.assertIn('internal static bool AimKnown(in CrimsonGesturePlan plan, bool locked) => !plan.Aimed || locked;',notes)
+        rig=read_text(CLIENT/'CrimsonRig.cs')
+        self.assertIn('frame.Gestures, frame.Known, frame.Choruses,',rig)
+        self.assertIn('ScarletNotes.Collect(frame.Known, effigy.State.Index, age, flipped,',rig)
+        self.assertIn('Signal(frame.Gestures, frame.Choruses, effigy.State.Index, age)',rig)
+        self.assertIn('ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues, accepted: !frame.Member)',rig)
+        gesture=read_text(CONTENT/'CrimsonGesture.cs')
+        self.assertIn('internal bool ForecastReady => AimLocked;',gesture)
 
     def test_signature_moves_use_scarlet_ink_with_a_yielding_residue_and_no_extra_field_effects(self):
         stroke=(CLIENT/'Vfx/ScarletInkStroke.cs').read_text(encoding='utf-8')

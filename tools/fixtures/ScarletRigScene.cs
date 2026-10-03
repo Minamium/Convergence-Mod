@@ -307,6 +307,15 @@ internal static class RigMirror
         return live.ToArray();
     }
 
+    // ScarletCueFrame.Of(boss).Known at this tick: Live without an aimed plan whose lock has not arrived. The harness's plans
+    // lock on Born (CrimsonTrackingBeam.LockAt, as on the server and in single player), so an aimed plan is known from Born on.
+    internal static CrimsonGesturePlan[] Known(IReadOnlyList<CrimsonGesturePlan> plans, float age)
+    {
+        var known = new List<CrimsonGesturePlan>(plans.Count);
+        foreach (var p in plans) if (Alive(p, age) && ScarletNotes.AimKnown(p, age >= p.Born)) known.Add(p);
+        return known.ToArray();
+    }
+
     // CrimsonRig.Signal(boss, source, age) = the production plan-list Signal over the frame (source -1 = all).
     internal static (float Charge, float Recoil) Signal(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age)
         => CrimsonRig.Signal(Live(plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, source, age);
@@ -318,7 +327,7 @@ internal static class RigMirror
     // CrimsonRig.DrawEffigy's notes for a member of the fight (the filmed player is in it), aimed from Vespera; the
     // Crown and Mantle pass lookback = ScarletNotes.PastTicks for their past poses.
     internal static int Notes(IReadOnlyList<CrimsonGesturePlan> plans, int source, float age, bool flipped, Span<ScarletNote> notes, float lookback = 0)
-        => ScarletNotes.Collect(Live(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes, lookback);
+        => ScarletNotes.Collect(Known(plans, age), source, age, flipped, RigScene.Conductor.X, RigScene.Conductor.Y, notes, lookback);
 
     // CrimsonGestureVisuals.PostUpdateEverything's Cue (protocol80): an impact on every Fire; a foretell only where a
     // note is announced (the crossflow's charge on its Born, a signature move's first and final step); a curtain note
@@ -413,7 +422,7 @@ internal static class RigDriver
     {
         RigHost.Tag = "vespera";
         CrimsonRig.DrawConductor(batch, Terraria.Main.screenPosition, RigScene.Conductor, age, Vector2.Zero, RigScene.VesperaFacing,
-            RigMirror.Live(s.Plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, v.Proposed ? s.Phase : -1, 1, 1, 0, 0);
+            RigMirror.Live(s.Plans, age), RigMirror.Known(s.Plans, age), ReadOnlySpan<CrimsonChorusPlan>.Empty, v.Proposed ? s.Phase : -1, 1, 1, 0, 0);
         RigHost.Tag = "";
     }
 }
@@ -434,7 +443,7 @@ internal sealed class RigRenderer : IDisposable
     private readonly SpriteBatch batch;
     private readonly ScarletInkStroke ink = new();
     private readonly ScarletGeometryOverlay overlay;
-    private readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), sealsOver = new(), stand = new();
+    private readonly List<CrimsonGesturePlan> strikes = new(), residues = new(), signatures = new(), stand = new();
     private readonly CrimsonStroke[] strokes = new CrimsonStroke[CrimsonTechniqueGeometry.MaximumStrokes];
     private readonly VertexPositionColorTexture[] quad = new VertexPositionColorTexture[6];
     private RenderTarget2D? frame;
@@ -543,18 +552,14 @@ internal sealed class RigRenderer : IDisposable
     private void TrackingBeams(RigScene s, in ScarletView view, float age)
     {
         CrimsonEnergy.Begin();
-        strikes.Clear(); residues.Clear(); signatures.Clear(); sealsOver.Clear();
+        strikes.Clear(); residues.Clear(); signatures.Clear();
         foreach (var p in s.Plans)
         {
             if (!RigMirror.Alive(p, age)) continue;
             if (p.IsSignature) signatures.Add(p);
             int tail = p.IsRift ? CrimsonSpatialCuts.ResidueTicks : ScarletInkStroke.Applies(p) ? ScarletInkStroke.ResidueTicksOf(p) : 0;
             if ((!p.Aimed && !p.IsRift && !p.IsSignature) || age < p.Born || age >= p.End + tail) continue;
-            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End)
-            {
-                if (age < p.Fire) ScarletSorcery.CrossflowSeals(batch, p, age);
-                else sealsOver.Add(p);
-            }
+            if (p.Technique == CrimsonTechnique.SideBeams && age < p.End) ScarletSorcery.CrossflowSeals(batch, p, age);
             if (ScarletInkStroke.Underlies(p, age)) { residues.Add(p); continue; }
             if (ScarletInkStroke.Owns(p, age)) { strikes.Add(p); continue; }
             bool warning = age < p.Fire;
@@ -586,7 +591,6 @@ internal sealed class RigRenderer : IDisposable
             using var scope = new Convergence.Client.Graphics.WorldGraphicsScope(batch);
             foreach (var strike in strikes) ink.Draw(view, Assets, strike, CollectionsMarshal.AsSpan(signatures));
         }
-        foreach (var p in sealsOver) ScarletSorcery.CrossflowSeals(batch, p, age);
     }
 
     // The ChoirRakes ribbon (ScarletMaterials.Strokes over Luminance's trail tessellator) is not reproduced offline: its

@@ -123,7 +123,8 @@ class ScarletMotionContracts(unittest.TestCase):
     def test_effigy_passes_notes_motion_material_and_heave(self):
         rig = read(CLIENT/'CrimsonRig.cs')
         effigy = rig[rig.index('internal static bool DrawEffigy('):rig.index('internal static int ChoirCues(')]
-        self.assertIn('frame.Member ? ScarletNotes.Collect(frame.Gestures, effigy.State.Index, age, flipped,', effigy)
+        # The body answers the plans whose aim is known (a peer's stale Target never turns it); the Choir's accepted cues keep every plan.
+        self.assertIn('frame.Member ? ScarletNotes.Collect(frame.Known, effigy.State.Index, age, flipped,', effigy)
         self.assertIn('ScarletNotes.ChoirCues(frame.Gestures, age, flipped, cues, accepted: !frame.Member)', effigy)
         self.assertIn('heave: frame.Member ? ScarletGestureMotion.Heave : 0, material: choir', effigy)
         self.assertIn('ScarletGestureMotion.Crown(age, notes[..noted]) : ScarletGestureMotion.Mantle(age, notes[..noted])', effigy)
